@@ -200,6 +200,11 @@
                                         <option value="Étapes numérotées">{{ __('Étapes numérotées') }}</option>
                                         <option value="Format JSON">{{ __('Format JSON') }}</option>
                                         <option value="Diagramme Mermaid">{{ __('Diagramme Mermaid') }}</option>
+                                        <option value="Questionnaire / QCM avec corrigé">{{ __('Questionnaire / QCM avec corrigé') }}</option>
+                                        <option value="Grille d'évaluation (rubrique)">{{ __('Grille d\'évaluation (rubrique)') }}</option>
+                                        <option value="Fiche pratique (1 page)">{{ __('Fiche pratique (1 page)') }}</option>
+                                        <option value="Modèle réutilisable (gabarit)">{{ __('Modèle réutilisable (gabarit)') }}</option>
+                                        <option value="FAQ structurée">{{ __('FAQ structurée') }}</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-2">
@@ -226,6 +231,9 @@
                                         <option value="Créatif et dynamique">{{ __('Créatif et dynamique') }}</option>
                                         <option value="Conversationnel">{{ __('Conversationnel') }}</option>
                                         <option value="Persuasif">{{ __('Persuasif') }}</option>
+                                        <option value="Neutre et factuel">{{ __('Neutre et factuel') }}</option>
+                                        <option value="Empathique et bienveillant">{{ __('Empathique et bienveillant') }}</option>
+                                        <option value="Motivant et inspirant">{{ __('Motivant et inspirant') }}</option>
                                     </select>
                                 </div>
                             </div>
@@ -489,7 +497,7 @@
 {{-- Pont spécifique au constructeur : toggle du panneau + insertion du texte anonymisé dans la tâche --}}
 <script src="{{ asset('assets/tools/constructeur-prompts/prompt-anon-panel.js') }}?v={{ config('version.semver') }}" defer></script>
 @php
-$defaultPersonas = [['value'=>'expert_marketing','label'=>'Expert en marketing digital'],['value'=>'redacteur_web','label'=>'Rédacteur web professionnel'],['value'=>'enseignant','label'=>'Enseignant pédagogue'],['value'=>'developpeur','label'=>'Développeur senior'],['value'=>'consultant','label'=>'Consultant en stratégie'],['value'=>'graphiste','label'=>'Graphiste créatif'],['value'=>'analyste','label'=>'Analyste de données'],['value'=>'gestionnaire','label'=>'Gestionnaire de projet'],['value'=>'coach','label'=>'Coach professionnel'],['value'=>'journaliste','label'=>'Journaliste d\'investigation'],['value'=>'chercheur','label'=>'Chercheur scientifique'],['value'=>'rh','label'=>'Spécialiste en ressources humaines']];
+$defaultPersonas = [['value'=>'expert_marketing','label'=>'Expert en marketing digital'],['value'=>'redacteur_web','label'=>'Rédacteur web professionnel'],['value'=>'enseignant','label'=>'Enseignant pédagogue'],['value'=>'developpeur','label'=>'Développeur senior'],['value'=>'consultant','label'=>'Consultant en stratégie'],['value'=>'graphiste','label'=>'Graphiste créatif'],['value'=>'analyste','label'=>'Analyste de données'],['value'=>'gestionnaire','label'=>'Gestionnaire de projet'],['value'=>'coach','label'=>'Coach professionnel'],['value'=>'journaliste','label'=>'Journaliste d\'investigation'],['value'=>'chercheur','label'=>'Chercheur scientifique'],['value'=>'rh','label'=>'Spécialiste en ressources humaines'],['value'=>'concepteur_pedagogique','label'=>'Concepteur pédagogique'],['value'=>'community_manager','label'=>'Gestionnaire de médias sociaux'],['value'=>'copywriter','label'=>'Rédacteur publicitaire (copywriter)'],['value'=>'formateur','label'=>'Formateur en entreprise'],['value'=>'adjoint_admin','label'=>'Adjoint administratif']];
 $defaultVerbs = ['Rédige','Analyse','Crée','Génère','Explique','Compare','Résume','Traduis','Optimise','Évalue','Développe','Conçois','Planifie','Diagnostique'];
 $defaultAudiences = [['value'=>'pro','label'=>'Professionnels du secteur'],['value'=>'debutants','label'=>'Débutants'],['value'=>'entrepreneurs','label'=>'Entrepreneurs et dirigeants'],['value'=>'etudiants','label'=>'Étudiants universitaires'],['value'=>'grand_public','label'=>'Grand public'],['value'=>'techniques','label'=>'Collègues techniques'],['value'=>'direction','label'=>'Direction générale']];
 $pbPersonas = class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('tools.prompt_builder.personas', $defaultPersonas) : $defaultPersonas;

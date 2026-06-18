@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.260] - 2026-06-18
+
+### Added
+- **Constructeur de prompts — plus de choix utiles** : nouveaux formats de sortie (questionnaire/QCM avec corrigé, grille d'évaluation, fiche pratique, gabarit réutilisable, FAQ), tons (neutre et factuel, empathique, motivant) et personas (concepteur pédagogique, gestionnaire de médias sociaux, rédacteur publicitaire, formateur, adjoint administratif), particulièrement utiles pour les enseignants et les PME.
+
 ## [1.65.259] - 2026-06-18
 
 ### Fixed
