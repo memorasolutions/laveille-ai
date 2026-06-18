@@ -43,6 +43,7 @@ $spJsonLd = ['@context'=>'https://schema.org','@type'=>'FAQPage','mainEntity'=>a
 <p>Découvrez des outils d'IA pertinents pour le contexte public québécois. Vérifiez toujours où les données sont traitées avant de les adopter dans un cadre officiel.</p>
 <p style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;">
     <x-core::button :href="route('directory.index')" variant="primary">Explorer l'annuaire d'outils IA</x-core::button>
+    <x-core::button :href="route('collections.show', 'top-outils-ia-secteur-public')" variant="secondary" size="sm">Top outils IA pour le secteur public</x-core::button>
     <x-core::button :href="url('/outils/constructeur-prompts')" variant="secondary" size="sm">Constructeur de prompts</x-core::button>
 </p>
 

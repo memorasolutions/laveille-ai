@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.258] - 2026-06-18
+
+### Added
+- **Collection « Top outils IA pour le secteur public »** : une sélection curée de 7 outils (ChatGPT, Claude, Perplexity, NotebookLM, Copilot, Gemini, DeepL), accessible à `/collections/top-outils-ia-secteur-public` et reliée au dossier secteur public.
+
 ## [1.65.257] - 2026-06-18
 
 ### Added
