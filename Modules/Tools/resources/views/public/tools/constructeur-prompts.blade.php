@@ -164,13 +164,24 @@
                                     <input type="radio" name="audienceType" value="custom" x-model="audienceType"> {{ __('Personnalisée') }}
                                 </label>
                             </div>
-                            <div x-show="audienceType === 'preset'" class="form-group mb-3">
-                                <select class="form-control" x-model="audiencePreset" aria-label="{{ __('Choisir une audience') }}">
-                                    <option value="">{{ __('-- Sélectionnez une audience --') }}</option>
+                            <style>
+                            .ct-pill{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0.5rem 1rem;border:2px solid #d1d5db;border-radius:9999px;background:#fff;color:#374151;font-size:0.875rem;font-weight:500;cursor:pointer;transition:all .15s ease;position:relative;}
+                            .ct-pill:hover{border-color:var(--c-primary);color:var(--c-primary);}
+                            .ct-pill--on{background:var(--c-primary);border-color:var(--c-primary);color:#fff;}
+                            .ct-pill--on:hover{color:#fff;}
+                            .ct-pill__input{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+                            .ct-pill:focus-within{outline:2px solid var(--c-primary);outline-offset:2px;z-index:1;}
+                            </style>
+                            <div x-show="audienceType === 'preset'" class="form-group mb-3" role="group" aria-label="{{ __('Choisir une ou plusieurs audiences') }}">
+                                <p class="text-muted small mb-2">{{ __('Tu peux en choisir plusieurs.') }}</p>
+                                <div class="d-flex flex-wrap gap-2" style="gap:0.5rem;">
                                     <template x-for="a in audiences" :key="a.value">
-                                        <option :value="a.value" x-text="a.label"></option>
+                                        <label class="ct-pill" :class="{ 'ct-pill--on': audiencePresets.includes(a.value) }">
+                                            <input type="checkbox" class="ct-pill__input" :value="a.value" x-model="audiencePresets">
+                                            <span x-text="a.label"></span>
+                                        </label>
                                     </template>
-                                </select>
+                                </div>
                             </div>
                             <div x-show="audienceType === 'custom'" class="form-group mb-3">
                                 <input type="text" class="form-control" x-model="audienceCustom" placeholder="{{ __('Ex: enseignants du secondaire au Québec') }}" aria-label="{{ __('Audience personnalisée') }}">
@@ -531,6 +542,7 @@ document.addEventListener('alpine:init', function() {
             taskObject: '',
             audienceType: 'preset',
             audiencePreset: '',
+            audiencePresets: [],
             audienceCustom: '',
             audiences: @json($pbAudiences),
             format: '',
@@ -602,10 +614,14 @@ document.addEventListener('alpine:init', function() {
             get audienceText() {
                 if (this.audienceType === 'none') return '';
                 if (this.audienceType === 'custom' && this.audienceCustom) return this.audienceCustom;
-                if (this.audienceType === 'preset' && this.audiencePreset) {
+                if (this.audienceType === 'preset' && this.audiencePresets.length > 0) {
+                    var selectedLabels = [];
                     for (var i = 0; i < this.audiences.length; i++) {
-                        if (this.audiences[i].value === this.audiencePreset) return this.audiences[i].label;
+                        if (this.audiencePresets.includes(this.audiences[i].value)) selectedLabels.push(this.audiences[i].label);
                     }
+                    if (selectedLabels.length === 1) return selectedLabels[0];
+                    if (selectedLabels.length === 2) return selectedLabels.join(' et ');
+                    if (selectedLabels.length >= 3) { var last = selectedLabels.pop(); return selectedLabels.join(', ') + ' et ' + last; }
                 }
                 return '';
             },
@@ -696,7 +712,7 @@ document.addEventListener('alpine:init', function() {
             },
 
             get wizardParams() {
-                return { personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, audienceType: this.audienceType, audiencePreset: this.audiencePreset, audienceCustom: this.audienceCustom, format: this.format, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat };
+                return { personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, audienceType: this.audienceType, audiencePreset: this.audiencePreset, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, format: this.format, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat };
             },
             _headers: function() {
                 return { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json', 'Content-Type': 'application/json' };
@@ -732,6 +748,7 @@ document.addEventListener('alpine:init', function() {
                                     if (p.verbCustom) { self.verbCustom = p.verbCustom; self.verbType = 'custom'; }
                                     if (p.taskObject) self.taskObject = p.taskObject;
                                     if (p.audienceType) self.audienceType = p.audienceType;
+                                    if (Array.isArray(p.audiencePresets)) { self.audiencePresets = p.audiencePresets; } else if (p.audiencePreset) { self.audiencePresets = [p.audiencePreset]; }
                                     if (p.audiencePreset) self.audiencePreset = p.audiencePreset;
                                     if (p.audienceCustom) { self.audienceCustom = p.audienceCustom; self.audienceType = 'custom'; }
                                     if (p.format) self.format = p.format;
