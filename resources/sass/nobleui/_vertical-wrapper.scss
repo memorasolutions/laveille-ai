@@ -4,7 +4,8 @@
   display: flex;
   // overflow: hidden; // commented for fixing content-nav sticky position
   .page-wrapper {
-    min-height: 100vh;
+    // fix #37 : .page-content a margin-top:$navbar-height → 100vh + 60px = barre de défilement perpétuelle (« scroll infini »). Soustraire la hauteur du navbar fixe.
+    min-height: calc(100vh - #{$navbar-height});
     width: calc(100% - #{$sidebar-width-lg});
     margin-left: $sidebar-width-lg;
     display: flex;
@@ -22,6 +23,7 @@
     &.full-page {
       width: 100%;
       margin-left: 0;
+      min-height: 100vh; // fix #37 : pas de navbar ici (.page-content margin-top:0) → garder la pleine hauteur
       .page-content {
         margin-top: 0;
       }
