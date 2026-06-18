@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Modules\Directory\Models\Tool;
 use Modules\Directory\Models\ToolResource;
+use Modules\Directory\Services\YouTubeService;
 
 class EnrichTutorialsSonarCommand extends Command
 {
@@ -172,7 +173,7 @@ class EnrichTutorialsSonarCommand extends Command
             'url' => "https://www.youtube.com/watch?v={$videoId}",
             'title' => $oembed['title'],
             'type' => 'youtube',
-            'language' => 'fr',
+            'language' => YouTubeService::detectLanguage($oembed['title']),
             'level' => ToolResource::detectLevel($oembed['title']),
             'thumbnail' => $oembed['thumbnail_url'],
             'video_id' => $videoId,

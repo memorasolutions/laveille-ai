@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.263] - 2026-06-18
+
+### Fixed
+- **Annuaire — détection de langue des tutoriels** : correction de la cause des tutoriels marqués « FR » mais en anglais. La langue provient maintenant de la vraie langue audio de la vidéo (et non plus du titre, que YouTube traduit parfois), et l'enrichissement « Sonar » ne force plus « FR ». Les nouveaux tutoriels seront correctement étiquetés ; les anciens sont reclassés par un traitement de correction.
+
 ## [1.65.262] - 2026-06-18
 
 ### Added

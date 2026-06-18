@@ -223,8 +223,15 @@ class YouTubeService
         return array_slice($scored, 0, 10);
     }
 
-    public function detectLanguage(string $title): string
+    public static function detectLanguage(string $title, ?string $apiLang = null): string
     {
+        // Langue audio réelle (defaultAudioLanguage) prioritaire si disponible — fiable,
+        // contrairement au titre que YouTube auto-traduit parfois selon la locale.
+        if ($apiLang) {
+            $al = mb_strtolower($apiLang);
+            if (str_starts_with($al, 'fr')) { return 'fr'; }
+            if (str_starts_with($al, 'en')) { return 'en'; }
+        }
         $lower = mb_strtolower($title);
         if (preg_match('/tutoriel|comment\s|utiliser|français|apprendre|débutant|formation/u', $lower)) {
             return 'fr';
@@ -287,7 +294,7 @@ class YouTubeService
             $frResults = $this->scoreAndFilter($frVideos, $toolName, 1000);
 
             foreach ($frResults as &$v) {
-                $v['language'] = $this->detectLanguage($v['title']);
+                $v['language'] = self::detectLanguage($v['title'], $v['api_lang'] ?? null);
             }
             unset($v);
 
@@ -304,7 +311,7 @@ class YouTubeService
             $enResults = $this->scoreAndFilter($enVideos, $toolName, 5000);
 
             foreach ($enResults as &$v) {
-                $v['language'] = $this->detectLanguage($v['title']);
+                $v['language'] = self::detectLanguage($v['title'], $v['api_lang'] ?? null);
             }
             unset($v);
 
