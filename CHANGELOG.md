@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.259] - 2026-06-18
+
+### Fixed
+- **Constructeur de prompts — « Ouvrir dans » réparé** : les boutons « Ouvrir dans ChatGPT/Claude/Perplexity » transmettent maintenant le prompt (le seuil de longueur était trop bas et le bloquait dans la plupart des cas) ; un message confirme que le prompt est copié.
+- **Constructeur de prompts — formulation** : correction du double article (« Tu es un(e) un… ») quand la persona personnalisée commence par un article.
+- **Constructeur de prompts — confirmation de copie** : un message « Prompt copié ! » s'affiche clairement au clic.
+
+### Added
+- **Encadré « ✦ En bref » repliable** : l'encadré résumé en haut des pages d'outils peut maintenant être replié/déplié (accordéon accessible), tout en restant lisible par les IA.
+
 ## [1.65.258] - 2026-06-18
 
 ### Added

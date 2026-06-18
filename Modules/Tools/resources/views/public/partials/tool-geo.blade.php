@@ -47,5 +47,5 @@ if (isset($tool) && filled($tool->name ?? null) && filled($tool->slug ?? null)) 
 @endif
 
 @if(isset($tool) && (filled($tool->answer_summary ?? null) || !empty($tool->answer_points ?? [])))
-    <x-core::answer-box :summary="$tool->answer_summary" :points="$tool->answer_points ?? []" />
+    <x-core::answer-box :summary="$tool->answer_summary" :points="$tool->answer_points ?? []" :collapsible="true" />
 @endif

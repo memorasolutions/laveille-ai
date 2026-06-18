@@ -597,7 +597,8 @@ document.addEventListener('alpine:init', function() {
 
                 // === RÔLE (enrichi) ===
                 if (this.personaText) {
-                    sections.push('Tu es un(e) ' + this.personaText + ' avec une expertise approfondie dans ton domaine. Tu communiques de manière claire et efficace, en adaptant ton niveau de langage à ton audience.');
+                    var roleArticle = /^\s*(un |une |des |le |la |l'|d'|du |de )/i.test(this.personaText) ? '' : 'un(e) ';
+                    sections.push('Tu es ' + roleArticle + this.personaText + ' avec une expertise approfondie dans ton domaine. Tu communiques de manière claire et efficace, en adaptant ton niveau de langage à ton audience.');
                 }
 
                 // === TÂCHE ===
@@ -765,6 +766,7 @@ document.addEventListener('alpine:init', function() {
                 navigator.clipboard.writeText(this.prompt);
                 this.track('prompt_copy', { tool: 'constructeur-prompts' });
                 this.copied = true;
+                try { window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Prompt copié !', variant: 'success', duration: 2000 } })); } catch (e) {}
                 setTimeout(function() { self.copied = false; }, 2000);
             },
 
@@ -797,9 +799,13 @@ document.addEventListener('alpine:init', function() {
                 }
                 var encodedPrompt = encodeURIComponent(this.prompt);
                 var url = baseUrl;
-                if (encodedPrompt.length <= 1800) {
+                var msg = 'Prompt copié — ouverture de la conversation…';
+                if (encodedPrompt.length <= 4000) {
                     url += encodedPrompt;
+                } else {
+                    msg = 'Prompt trop long pour le lien : il est copié, colle-le (Ctrl/Cmd + V).';
                 }
+                try { window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: msg, variant: 'info', duration: 3500 } })); } catch (e) {}
                 this.track('prompt_open_in', { tool: 'constructeur-prompts', target: target });
                 window.open(url, '_blank', 'noopener');
             },
