@@ -378,6 +378,7 @@
                             <button class="ct-btn ct-btn-accent flex-fill" @click="copy()" :disabled="!isValid" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'"
                                     x-text="copied ? '{{ __('Copié !') }}' : '{{ __('Copier le prompt') }}'"></button>
                             <button class="ct-btn ct-btn-outline" @click="exportPrompt()" :disabled="!isValid">{{ __('Exporter .txt') }}</button>
+                            <button class="ct-btn ct-btn-outline-danger" @click="armReset()" x-text="resetArmed ? '{{ __('⚠️ Confirmer la réinitialisation') }}' : '{{ __('🔄 Recommencer') }}'"></button>
                         </div>
                         {{-- #166 GEO/UX : ouvrir le prompt directement dans une IA (le prompt est aussi copié) --}}
                         <div class="d-flex gap-2 mb-4 flex-wrap align-items-center">
@@ -385,6 +386,7 @@
                             <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'" @click="openIn('chatgpt')">ChatGPT</button>
                             <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'" @click="openIn('claude')">Claude</button>
                             <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'" @click="openIn('perplexity')">Perplexity</button>
+                            <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'" @click="openIn('gemini')">Gemini</button>
                         </div>
 
                         {{-- Historique (visible seulement pour les non-connectes, les connectes ont "Mes prompts") --}}
@@ -517,6 +519,7 @@ document.addEventListener('alpine:init', function() {
     Alpine.data('promptBuilder', function() {
         return {
             step: 1,
+            resetArmed: false,
             personaType: 'preset',
             personaPreset: '',
             personaCustom: '',
@@ -810,13 +813,19 @@ document.addEventListener('alpine:init', function() {
                     case 'perplexity':
                         baseUrl = 'https://www.perplexity.ai/search?q=';
                         break;
+                    case 'gemini':
+                        baseUrl = 'https://gemini.google.com/app';
+                        break;
                     default:
                         return;
                 }
                 var encodedPrompt = encodeURIComponent(this.prompt);
                 var url = baseUrl;
                 var msg = 'Prompt copié — ouverture de la conversation…';
-                if (encodedPrompt.length <= 4000) {
+                if (target === 'gemini') {
+                    // Gemini ne pré-remplit pas via URL → on ouvre l'app, le prompt est copié.
+                    msg = 'Prompt copié — colle-le dans Gemini (Ctrl/Cmd + V).';
+                } else if (encodedPrompt.length <= 4000) {
                     url += encodedPrompt;
                 } else {
                     msg = 'Prompt trop long pour le lien : il est copié, colle-le (Ctrl/Cmd + V).';
@@ -827,6 +836,14 @@ document.addEventListener('alpine:init', function() {
             },
 
             copyText: function(text) { navigator.clipboard.writeText(text); },
+
+            armReset: function() {
+                if (this.resetArmed) { this.resetAll(); return; }
+                this.resetArmed = true;
+                var self = this;
+                setTimeout(function() { self.resetArmed = false; }, 4000);
+            },
+            resetAll: function() { window.location.href = window.location.pathname; },
 
             addToHistory: function() {
                 if (this.saving) return;

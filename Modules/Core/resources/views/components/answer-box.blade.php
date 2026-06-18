@@ -17,7 +17,7 @@
 @if(filled($summary) || ! empty($points))
     @if($collapsible)
         <section class="lv-answer-box" aria-label="Réponse rapide" itemprop="abstract">
-            <details open>
+            <details>
                 <summary class="lv-answer-box__title">
                     <span><span aria-hidden="true">✦</span> {{ $title }}</span>
                     <span class="lv-answer-box__chevron" aria-hidden="true">▼</span>
@@ -128,5 +128,25 @@
 
             @media (max-width: 639px) { .lv-answer-box { padding: 14px 16px; } }
         </style>
+        {{-- Persistance de l'état ouvert/fermé de l'accordéon (mode collapsible) : survit au rafraîchissement. No-op sur les answer-box non repliables (articles). --}}
+        <script>
+        (function () {
+            function lvAboxPersist() {
+                document.querySelectorAll('.lv-answer-box details').forEach(function (d) {
+                    if (d.__lvAbox) { return; }
+                    d.__lvAbox = true;
+                    var key = 'lv-abox:' + location.pathname;
+                    try {
+                        var s = localStorage.getItem(key);
+                        if (s === 'open') { d.open = true; } else if (s === 'closed') { d.open = false; }
+                    } catch (e) {}
+                    d.addEventListener('toggle', function () {
+                        try { localStorage.setItem(key, d.open ? 'open' : 'closed'); } catch (e) {}
+                    });
+                });
+            }
+            if (document.readyState !== 'loading') { lvAboxPersist(); } else { document.addEventListener('DOMContentLoaded', lvAboxPersist); }
+        })();
+        </script>
     @endonce
 @endif

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.262] - 2026-06-18
+
+### Added
+- **Constructeur de prompts — bouton « Ouvrir dans Gemini »** (copie le prompt et ouvre Gemini ; Gemini ne permet pas le pré-remplissage par lien, le prompt est donc copié à coller).
+- **Constructeur de prompts — bouton « Recommencer »** pour réinitialiser l'outil à zéro (confirmation en deux temps).
+- **Encadré « ✦ En bref » — fermé par défaut + mémoire d'état** : l'encadré est replié par défaut et se souvient ensuite de votre choix (ouvert/fermé) au rafraîchissement.
+
 ## [1.65.261] - 2026-06-18
 
 ### Fixed
