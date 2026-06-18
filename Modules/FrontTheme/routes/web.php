@@ -66,6 +66,12 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
     Route::view('/adoption-ia-generative-quebec', 'fronttheme::adoption-ia-generative-quebec')
         ->name('guide.veille-adoption')
         ->middleware('cacheResponse:3600');
+    Route::view('/rediger-avec-ia-secteur-public', 'fronttheme::rediger-avec-ia-secteur-public')
+        ->name('guide.sp-rediger')
+        ->middleware('cacheResponse:3600');
+    Route::view('/ia-loi-25-secteur-public', 'fronttheme::ia-loi-25-secteur-public')
+        ->name('guide.sp-loi25')
+        ->middleware('cacheResponse:3600');
 
     // Flux RSS (S90 #43 — distribution multi-canal + AI agents/chatbots)
     Route::get('/rss/concentres.xml', [\Modules\FrontTheme\Http\Controllers\RssFeedController::class, 'concentres'])

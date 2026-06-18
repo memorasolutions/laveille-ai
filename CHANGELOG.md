@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.257] - 2026-06-18
+
+### Added
+- **Dossier secteur public — 2 nouveaux guides** : « Rédiger avec l'IA dans le secteur public : bonnes pratiques » et « IA et Loi 25 : protéger les renseignements personnels », reliés à la page pilier et à l'anonymiseur. Le dossier « IA pour le secteur public » devient une véritable grappe de contenu.
+
 ## [1.65.256] - 2026-06-18
 
 ### Added
