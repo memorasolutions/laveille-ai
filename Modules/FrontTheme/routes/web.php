@@ -46,6 +46,9 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
     Route::view('/ia-generative-quebec', 'fronttheme::ia-generative-quebec')
         ->name('pillar.ia-generative')
         ->middleware('cacheResponse:3600');
+    Route::view('/ia-secteur-public-quebec', 'fronttheme::ia-secteur-public-quebec')
+        ->name('pillar.ia-secteur-public')
+        ->middleware('cacheResponse:3600');
 
     // Sous-articles factuels rattachés aux piliers (faits sourcés via Perplexity, evergreen)
     Route::view('/adopter-ia-pme-quebec', 'fronttheme::adopter-ia-pme-quebec')

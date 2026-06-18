@@ -6,6 +6,7 @@
         ['route' => 'pillar.ia-dev', 'label' => __('IA pour les développeurs (Claude, MCP)')],
         ['route' => 'pillar.veille-ia', 'label' => __('Faire sa veille IA au Québec')],
         ['route' => 'pillar.ia-generative', 'label' => __('IA générative (texte, image, vidéo)')],
+        ['route' => 'pillar.ia-secteur-public', 'label' => __('IA dans le secteur public québécois')],
     ];
     $lvCurrent = $current ?? null;
     $lvList = array_values(array_filter($lvPillars, fn ($p) => $p['route'] !== $lvCurrent && \Illuminate\Support\Facades\Route::has($p['route'])));

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.256] - 2026-06-18
+
+### Added
+- **Dossier « IA pour le secteur public québécois »** : nouvelle page pilier (`/ia-secteur-public-quebec`) qui explique comment les organismes publics et parapublics peuvent utiliser l'IA de façon encadrée (principes du ministère de la Cybersécurité et du Numérique, Loi 25), avec un encadré réponse-rapide, une FAQ et des liens vers l'anonymiseur, l'annuaire et le glossaire. Premier dossier d'une série par métier pour élargir l'audience au-delà des enseignants.
+
 ## [1.65.255] - 2026-06-17
 
 ### Added
