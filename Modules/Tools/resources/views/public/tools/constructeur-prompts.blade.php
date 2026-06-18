@@ -503,6 +503,14 @@ $defaultAudiences = [['value'=>'pro','label'=>'Professionnels du secteur'],['val
 $pbPersonas = class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('tools.prompt_builder.personas', $defaultPersonas) : $defaultPersonas;
 $pbVerbs = class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('tools.prompt_builder.verbs', $defaultVerbs) : $defaultVerbs;
 $pbAudiences = class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('tools.prompt_builder.audiences', $defaultAudiences) : $defaultAudiences;
+// Garde-fou : Settings peut renvoyer une chaîne JSON (ou une valeur invalide) → on normalise en tableau, sinon défaut.
+$pbNormalize = function ($v, $default) {
+    if (is_string($v)) { $decoded = json_decode($v, true); $v = is_array($decoded) ? $decoded : null; }
+    return (is_array($v) && ! empty($v)) ? $v : $default;
+};
+$pbPersonas = $pbNormalize($pbPersonas, $defaultPersonas);
+$pbVerbs = $pbNormalize($pbVerbs, $defaultVerbs);
+$pbAudiences = $pbNormalize($pbAudiences, $defaultAudiences);
 @endphp
 <script>
 document.addEventListener('alpine:init', function() {

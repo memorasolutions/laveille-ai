@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.261] - 2026-06-18
+
+### Fixed
+- **Constructeur de prompts — menu « Définir la persona » réparé** : correction d'une régression (le menu des personas s'affichait vide) en rendant la lecture des listes robuste, quel que soit leur format de stockage. Les personas (dont les nouveaux) réapparaissent.
+
 ## [1.65.260] - 2026-06-18
 
 ### Added
