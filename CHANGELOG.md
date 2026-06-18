@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.264] - 2026-06-18
+
+### Fixed
+- **Annuaire — étiquettes de langue des tutoriels fiabilisées** : la détection privilégie désormais les indices clairement français du titre (la langue audio déclarée par les créateurs étant souvent erronée), et les tutoriels existants ont été reclassés. Les vidéos anglaises ne sont plus marquées « FR ».
+
 ## [1.65.263] - 2026-06-18
 
 ### Fixed

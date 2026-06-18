@@ -225,18 +225,24 @@ class YouTubeService
 
     public static function detectLanguage(string $title, ?string $apiLang = null): string
     {
-        // Langue audio réelle (defaultAudioLanguage) prioritaire si disponible — fiable,
-        // contrairement au titre que YouTube auto-traduit parfois selon la locale.
+        // HAUTE PRÉCISION FR : un titre clairement français = vidéo française, même si
+        // defaultAudioLanguage (api_lang) est mal réglé par le créateur (cas fréquent).
+        // 1) Mots/fonctions FR SANS cognat anglais (évite « complete », « formation », « creation »…).
+        $frWords = '/\b(comment|pourquoi|tutoriel|tutoriels|utiliser|utilise|d[ée]butant|d[ée]butants|fran[çc]ais|votre|vos|vous|avec|sans|chez|gratuit|gratuite|astuces|apprendre|facile|depuis|voici|d[ée]couvrir|am[ée]liorer|ma[îi]trise|ma[îi]triser|meilleur|meilleure|aujourd|[ée]tapes|cr[ée]er|cr[ée]ez|notre|nos|mes|tes|ses|leur|leurs|ceci|cela|quoi|toutes|tous)\b/iu';
+        // 2) Élisions françaises (j', qu', l', c'est, d', n', s', m', t').
+        $frElision = '/(^|[\s"(\x{2018}\x{201C}])(j|qu|l|c|d|n|s|m|t)[\x{2019}\x27]/iu';
+        // 3) Accents purement français (exclut á í ó ú ñ partagés ES/PT, et é/à partagés).
+        $frAccent = '/[çœèêëîïûù]/u';
+        if (preg_match($frWords, $title) || preg_match($frElision, $title) || preg_match($frAccent, $title)) {
+            return 'fr';
+        }
+        // 4) Sinon : langue audio réelle si disponible.
         if ($apiLang) {
             $al = mb_strtolower($apiLang);
             if (str_starts_with($al, 'fr')) { return 'fr'; }
             if (str_starts_with($al, 'en')) { return 'en'; }
         }
-        $lower = mb_strtolower($title);
-        if (preg_match('/tutoriel|comment\s|utiliser|français|apprendre|débutant|formation/u', $lower)) {
-            return 'fr';
-        }
-
+        // 5) Défaut : anglais (titre sans marqueur français).
         return 'en';
     }
 
