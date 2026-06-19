@@ -36,6 +36,8 @@ class RouteServiceProvider extends ServiceProvider
     protected function mapWebRoutes(): void
     {
         Route::middleware('web')->group(module_path($this->name, '/routes/web.php'));
+        // Routes admin (gating dans le fichier : EnsureIsAdmin + can:academy.manage)
+        Route::group([], module_path($this->name, '/routes/admin.php'));
     }
 
     /**
