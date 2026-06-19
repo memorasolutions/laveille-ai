@@ -18,9 +18,17 @@
  *   5. JSON-LD — présence et validité dans les vues
  *   6. Intégration ProgressService (hook 100%)
  *   7. Lien certificat dans lesson.blade
+ *
+ * Garde-fou M8 : si le module Academy est désactivé dans modules_statuses.json,
+ * tous les tests de ce fichier sont marqués SKIPPED (suite toujours verte).
  */
 
 declare(strict_types=1);
+
+uses(\Modules\Academy\Tests\Concerns\SkipsWhenAcademyDisabled::class);
+
+// Garde-fou M8 : passer tous les tests si le module Academy est désactivé.
+beforeEach(fn () => test()->skipIfAcademyDisabled());
 
 use Modules\Academy\Services\CertificateService;
 use Modules\Academy\Models\CertificateIssued;

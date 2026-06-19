@@ -82,7 +82,8 @@
                 @if($currentFilter)
                     <input type="hidden" name="filter" value="{{ $currentFilter }}">
                 @endif
-                <select name="level" onchange="this.form.submit()" class="form-select form-select-sm"
+                <label for="academy-level-filter" class="visually-hidden">Filtrer par niveau</label>
+                <select id="academy-level-filter" name="level" onchange="this.form.submit()" class="form-select form-select-sm"
                         style="min-width: 180px; border-radius: 50rem;">
                     <option value="">Tous les niveaux</option>
                     <option value="intro"         {{ $currentLevel === 'intro'         ? 'selected' : '' }}>Débutant</option>

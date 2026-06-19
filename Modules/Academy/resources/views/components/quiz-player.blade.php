@@ -158,13 +158,16 @@
                     @elseif($type === 'appariement')
                         <div class="mt-2">
                             @foreach($terms as $j => $term)
+                                @php $selectId = "q{$item->id}_{$i}_match_{$j}"; @endphp
                                 <div class="d-flex align-items-center gap-3 mb-2">
-                                    <span style="min-width: 160px; font-size: 0.9rem; font-weight: 500;">
+                                    <label for="{{ $selectId }}" style="min-width: 160px; font-size: 0.9rem; font-weight: 500; margin-bottom: 0;">
                                         {{ $term }}
-                                    </span>
-                                    <select name="answers[{{ $i }}][]"
+                                    </label>
+                                    <select id="{{ $selectId }}"
+                                            name="answers[{{ $i }}][]"
                                             class="form-select form-select-sm"
                                             style="max-width: 320px;"
+                                            aria-label="Définition pour : {{ $term }}"
                                             required>
                                         <option value="">— Choisir une définition —</option>
                                         @foreach($defs as $k => $def)

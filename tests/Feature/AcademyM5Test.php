@@ -20,9 +20,17 @@
  *   6. EventServiceProvider — listener enregistré pour WebhookHandled
  *   7. Routes M5 déclarées
  *   8. Vues — CTA « Acheter » câblé dans show et lesson
+ *
+ * Garde-fou M8 : si le module Academy est désactivé dans modules_statuses.json,
+ * tous les tests de ce fichier sont marqués SKIPPED (suite toujours verte).
  */
 
 declare(strict_types=1);
+
+uses(\Modules\Academy\Tests\Concerns\SkipsWhenAcademyDisabled::class);
+
+// Garde-fou M8 : passer tous les tests si le module Academy est désactivé.
+beforeEach(fn () => test()->skipIfAcademyDisabled());
 
 use Illuminate\Support\Facades\Route;
 use Laravel\Cashier\Events\WebhookHandled;

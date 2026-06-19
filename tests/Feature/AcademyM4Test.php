@@ -17,9 +17,17 @@
  *   4. Routes M4 déclarées
  *   5. Vues — quiz-player.blade, progress-bar.blade, lesson.blade
  *   6. Gating — non inscrit bloqué
+ *
+ * Garde-fou M8 : si le module Academy est désactivé dans modules_statuses.json,
+ * tous les tests de ce fichier sont marqués SKIPPED (suite toujours verte).
  */
 
 declare(strict_types=1);
+
+uses(\Modules\Academy\Tests\Concerns\SkipsWhenAcademyDisabled::class);
+
+// Garde-fou M8 : passer tous les tests si le module Academy est désactivé.
+beforeEach(fn () => test()->skipIfAcademyDisabled());
 
 use Modules\Academy\Services\QuizService;
 

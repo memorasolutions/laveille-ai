@@ -12,9 +12,17 @@
  * Ces tests vérifient que le code implémente correctement le gating.
  *
  * Pour des tests HTTP end-to-end, utiliser la suite Browser/Playwright.
+ *
+ * Garde-fou M8 : si le module Academy est désactivé dans modules_statuses.json,
+ * tous les tests de ce fichier sont marqués SKIPPED (suite toujours verte).
  */
 
 declare(strict_types=1);
+
+uses(\Modules\Academy\Tests\Concerns\SkipsWhenAcademyDisabled::class);
+
+// Garde-fou M8 : passer tous les tests si le module Academy est désactivé.
+beforeEach(fn () => test()->skipIfAcademyDisabled());
 
 // ══ Groupe 1 : LessonController — structure et sécurité ═══════════════════
 

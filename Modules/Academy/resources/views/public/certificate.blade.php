@@ -228,7 +228,8 @@
 
         {{-- Actions (masquées à l'impression) --}}
         <div class="mt-4 d-flex justify-content-center gap-3 no-print">
-            <button onclick="window.print()"
+            <button type="button"
+                    onclick="window.print()"
                     class="btn ct-btn ct-btn-primary"
                     style="min-height:44px; padding: 0 1.5rem;">
                 🖨️ Imprimer / Exporter en PDF
