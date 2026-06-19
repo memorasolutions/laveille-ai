@@ -128,4 +128,43 @@ class Course extends Model
     {
         return $query->where('status', 'published')->where('visibility', 'public');
     }
+
+    // -------------------------------------------------------------------------
+    // CourseRole helpers (M1)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Retourne vrai si l'utilisateur a l'un des rôles donnés sur ce cours.
+     *
+     * @param  \App\Models\User  $user
+     * @param  string|string[]   $roles  ex. ['owner','instructor']
+     */
+    public function hasRole(\App\Models\User $user, string|array $roles = ['owner', 'instructor', 'assistant', 'editor']): bool
+    {
+        return $this->courseRoles()
+            ->where('user_id', $user->id)
+            ->whereIn('role', (array) $roles)
+            ->exists();
+    }
+
+    /**
+     * Alias sémantique : l'utilisateur est-il instructeur (ou owner) de ce cours ?
+     */
+    public function hasInstructor(\App\Models\User $user): bool
+    {
+        return $this->hasRole($user, ['owner', 'instructor']);
+    }
+
+    /**
+     * L'utilisateur peut-il effectuer l'action donnée sur ce cours ?
+     * Actuellement 'manage' ↔ owner|instructor|assistant.
+     */
+    public function userCan(\App\Models\User $user, string $action): bool
+    {
+        return match ($action) {
+            'manage' => $this->hasRole($user, ['owner', 'instructor', 'assistant']),
+            'edit'   => $this->hasRole($user, ['owner', 'instructor', 'assistant', 'editor']),
+            default  => false,
+        };
+    }
 }
