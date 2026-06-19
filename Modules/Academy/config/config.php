@@ -11,6 +11,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Mode « EN CONSTRUCTION » (go-live progressif)
+    |--------------------------------------------------------------------------
+    | Quand true (défaut), les pages publiques /academie/* affichent une page
+    | sobre « bientôt disponible » à tout visiteur NON-superadmin ; le
+    | superadmin voit le contenu réel (validation en prod avant lancement).
+    | Mettre ACADEMY_UNDER_CONSTRUCTION=false dans le .env pour ouvrir au public.
+    */
+    'under_construction' => env('ACADEMY_UNDER_CONSTRUCTION', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Hébergeur vidéo autorisé (embed ScreenPal)
     |--------------------------------------------------------------------------
     | Domaine ajouté à la CSP frame-src des routes Academy.

@@ -49,5 +49,5 @@
     "CloudflareCache": true,
     "Sudoku": true,
     "Authors": true,
-    "Academy": false
+    "Academy": true
 }

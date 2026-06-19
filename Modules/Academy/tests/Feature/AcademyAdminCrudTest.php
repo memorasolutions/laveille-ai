@@ -266,6 +266,9 @@ test('admin peut assigner un instructeur à un cours', function (): void {
 // ── 12. Non-régression : routes publiques Academy non cassées ─────────────────
 
 test('la route publique academy.index répond sans erreur 500', function (): void {
-    $this->get(route('academy.index'))
-        ->assertStatus(200);
+    // Mode « en construction » par défaut → un guest reçoit la page 503 (gate volontaire),
+    // jamais une 500 (erreur applicative). On vérifie l'absence d'erreur serveur réelle.
+    $response = $this->get(route('academy.index'));
+    expect($response->status())->not->toBe(500);
+    expect(in_array($response->status(), [200, 503], true))->toBeTrue();
 });

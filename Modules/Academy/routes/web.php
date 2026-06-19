@@ -17,11 +17,18 @@ use Modules\Academy\Http\Controllers\LessonController;
 use Modules\Academy\Http\Controllers\PurchaseController;
 use Modules\Academy\Http\Controllers\QuizController;
 use Modules\Academy\Http\Middleware\AcademyCsp;
+use Modules\Academy\Http\Middleware\AcademyUnderConstruction;
 
 Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->group(function () {
-    // M2 — Pages publiques
-    Route::get('/', [AcademyController::class, 'index'])->name('index');
-    Route::get('courses/{course:slug}', [CourseController::class, 'show'])->name('courses.show');
+    // M2 — Pages publiques (gâtées « en construction » : superadmin uniquement tant que le flag est actif)
+    Route::middleware(AcademyUnderConstruction::class)->group(function () {
+        Route::get('/', [AcademyController::class, 'index'])->name('index');
+        Route::get('courses/{course:slug}', [CourseController::class, 'show'])->name('courses.show');
+
+        // M3 — Lecteur de leçon (auth requis pour les vidéos protégées, mais la route est publique)
+        Route::get('courses/{course:slug}/lessons/{lesson}', [LessonController::class, 'show'])
+            ->name('lessons.show');
+    });
 
     // M6 — Certificats publics vérifiables (pas d'auth requise)
     Route::get('certificats/{public_url_slug}', [CertificateController::class, 'show'])->name('certificates.show');
@@ -35,10 +42,6 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
     Route::get('courses/{course:slug}/purchase', PurchaseController::class)
         ->middleware('auth')
         ->name('courses.purchase');
-
-    // M3 — Lecteur de leçon (auth requis pour les vidéos protégées, mais la route est publique)
-    Route::get('courses/{course:slug}/lessons/{lesson}', [LessonController::class, 'show'])
-        ->name('lessons.show');
 
     // M7 — Exports CSV admin (gâtés par permission academy.reports.view)
     Route::middleware(['auth', 'can:academy.reports.view'])
