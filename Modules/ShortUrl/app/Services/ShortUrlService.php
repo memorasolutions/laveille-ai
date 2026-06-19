@@ -105,10 +105,15 @@ class ShortUrlService
 
         $shortUrl->incrementClicks();
 
-        $shortUrl->forceFill([
-            'last_visited_at' => now(),
-            'expires_at' => now()->addMonthsNoOverflow(12),
-        ])->saveQuietly();
+        $update = ['last_visited_at' => now()];
+
+        // Ne prolonge expires_at que si auto_extend est vrai (comportement par défaut).
+        // Les liens QR avec expiration fixe (auto_extend=false) gardent leur date d'origine.
+        if ($shortUrl->auto_extend) {
+            $update['expires_at'] = now()->addMonthsNoOverflow(12);
+        }
+
+        $shortUrl->forceFill($update)->saveQuietly();
 
         Cache::forget("short_url:{$shortUrl->slug}");
     }

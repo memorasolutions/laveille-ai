@@ -118,6 +118,14 @@ Route::middleware('web')->group(function () {
     Route::get('/outils/qt', [PublicQtController::class, 'play'])->name('tools.qt');
     Route::post('/outils/qt/attempt', [PublicQtController::class, 'attempt'])->name('tools.qt.attempt')->middleware('throttle:20,1');
 
+    // QR code avec expiration — endpoint AJAX (POST). Déclaré AVANT /outils/{slug}.
+    Route::post('/outils/code-qr/lien-dynamique', [\Modules\Tools\Http\Controllers\QrDynamicLinkController::class, 'store'])
+        ->middleware('throttle:20,1')
+        ->name('tools.qr.dynamic-link');
+    // Domaines disponibles pour le sélecteur QR (GET, lecture seule)
+    Route::get('/outils/code-qr/domaines', [\Modules\Tools\Http\Controllers\QrDynamicLinkController::class, 'domains'])
+        ->name('tools.qr.domains');
+
     // #163 : exclure 'sudoku' + #177 'avatar' + 'motdle' + 'qt' (routes fournies par modules/contrôleurs dédiés).
     Route::get('/outils/{slug}', [PublicToolController::class, 'show'])
         ->where('slug', '^(?!sudoku$|sudoku/|avatar$|avatar/|motdle$|motdle/|qt$|qt/).+')
