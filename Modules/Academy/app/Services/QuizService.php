@@ -1,0 +1,132 @@
+<?php
+
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
+declare(strict_types=1);
+
+namespace Modules\Academy\Services;
+
+/**
+ * Adaptateur minimal autour de QtService (Modules/Tools).
+ *
+ * Choix d'architecture : QtService est couplé à des fichiers de données PHP
+ * codés en dur (qt-questions.php, qt-truefalse.php, qt-shortanswer.php) et ne
+ * peut pas servir une banque arbitraire par clé. On l'utilise donc tel quel
+ * via newRound() en passant $bankKey uniquement à titre documentaire. Si une
+ * banque dédiée par cours est nécessaire à l'avenir, QtService devra être
+ * refactorisé pour accepter un chemin de fichier dynamique.
+ */
+final class QuizService
+{
+    /**
+     * Construit un round de questions pour un item quiz Academy.
+     *
+     * @param  string $bankKey  Clé de banque (payload['qt_bank_key']) — ignorée par QtService,
+     *                          conservée pour extension future.
+     * @return array<int, array<string, mixed>>
+     */
+    public static function buildRound(string $bankKey): array
+    {
+        if (! class_exists(\Modules\Tools\Services\QtService::class)) {
+            return [];
+        }
+
+        try {
+            return \Modules\Tools\Services\QtService::newRound();
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * Calcule le score d'une soumission de quiz.
+     *
+     * @param  array<int, array<string, mixed>> $questions  Questions du round (telles que retournées par buildRound)
+     * @param  array<string, mixed>             $answers    Réponses indexées par numéro de question (clés string "0","1",…)
+     * @return array{score: int, total: int, percent: int, correct: int, wrong: int, details: array<int, array{correct: bool, expected: mixed, given: mixed}>}
+     */
+    public static function score(array $questions, array $answers): array
+    {
+        $total = count($questions);
+
+        if ($total === 0) {
+            return [
+                'score'   => 0,
+                'total'   => 0,
+                'percent' => 0,
+                'correct' => 0,
+                'wrong'   => 0,
+                'details' => [],
+            ];
+        }
+
+        $correct = 0;
+        $details = [];
+
+        foreach ($questions as $index => $question) {
+            $type      = $question['type'] ?? null;
+            $given     = $answers[(string) $index] ?? null;
+            $expected  = null;
+            $isCorrect = false;
+
+            switch ($type) {
+                case 'qcm':
+                case 'vraifaux':
+                    $expected  = (int) ($question['correct'] ?? -1);
+                    $givenInt  = is_numeric($given) ? (int) $given : -1;
+                    $isCorrect = $givenInt === $expected;
+                    $given     = $givenInt;
+                    break;
+
+                case 'court':
+                    $expected         = $question['accepted'] ?? [];
+                    $givenStr         = is_string($given) ? trim(mb_strtolower($given, 'UTF-8')) : '';
+                    $normalizedAccepted = array_map(
+                        fn ($s) => trim(mb_strtolower((string) $s, 'UTF-8')),
+                        (array) $expected
+                    );
+                    $isCorrect = in_array($givenStr, $normalizedAccepted, true);
+                    break;
+
+                case 'appariement':
+                    $expected    = $question['answer'] ?? [];
+                    $givenArr    = is_array($given) ? array_values(array_map('intval', $given)) : [];
+                    $expectedArr = is_array($expected) ? array_values(array_map('intval', $expected)) : [];
+                    $isCorrect   = $givenArr === $expectedArr;
+                    $given       = $givenArr;
+                    $expected    = $expectedArr;
+                    break;
+
+                default:
+                    $isCorrect = false;
+                    break;
+            }
+
+            if ($isCorrect) {
+                $correct++;
+            }
+
+            $details[$index] = [
+                'correct'  => $isCorrect,
+                'expected' => $expected,
+                'given'    => $given,
+            ];
+        }
+
+        $wrong   = $total - $correct;
+        $percent = (int) round(($correct / $total) * 100);
+
+        return [
+            'score'   => $correct,
+            'total'   => $total,
+            'percent' => $percent,
+            'correct' => $correct,
+            'wrong'   => $wrong,
+            'details' => $details,
+        ];
+    }
+}

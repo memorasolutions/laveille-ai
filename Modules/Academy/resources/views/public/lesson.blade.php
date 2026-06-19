@@ -5,6 +5,27 @@
     $isFree      = $course->access_type === 'free';
     $canWatch    = auth()->check() && $isEnrolled;
     $canPreview  = false; // sera true si l'item a payload['preview'] = true
+
+    // M4 — Progression de l'utilisateur
+    $userProgress = null;
+    $resumeLesson = null;
+    $firstLesson  = null;
+    if (auth()->check() && $isEnrolled && class_exists(\Modules\Academy\Models\Progress::class)) {
+        try {
+            $userProgress = \Modules\Academy\Models\Progress::where('user_id', auth()->id())
+                ->where('course_id', $course->id)
+                ->first();
+            if ($userProgress !== null && class_exists(\Modules\Academy\Services\ProgressService::class)) {
+                $resumeLesson = \Modules\Academy\Services\ProgressService::resumeLesson(auth()->user(), $course);
+            }
+        } catch (\Throwable) {}
+    }
+    if ($userProgress === null) {
+        // Première leçon pour CTA "Commencer"
+        try {
+            $firstLesson = $course->chapters->first()?->lessons->first();
+        } catch (\Throwable) {}
+    }
 @endphp
 
 @section('title', $lesson->title . ' – ' . $course->title . ' - Académie - ' . config('app.name'))
@@ -139,6 +160,14 @@
             {{-- ══ Zone contenu principal ══ --}}
             <div class="academy-lesson-content">
 
+                {{-- M4 — Barre de progression --}}
+                @include('academy::public.partials.progress-bar', [
+                    'progress'     => $userProgress,
+                    'course'       => $course,
+                    'resumeLesson' => $resumeLesson,
+                    'firstLesson'  => $firstLesson,
+                ])
+
                 {{-- Titre + meta --}}
                 <h1 style="font-family: var(--f-heading); font-weight: 800; font-size: 1.6rem; color: var(--c-dark, #1A1D23); margin-bottom: 0.5rem;">
                     {{ $lesson->title }}
@@ -227,16 +256,17 @@
 
                         {{-- ── TYPE QUIZ ── --}}
                         @elseif($item->type === 'quiz')
-                            {{-- M4 : intégration réelle du quiz --}}
-                            <div class="p-4 rounded" style="background: #F0F9FF; border: 1px solid #BAE6FD;">
-                                <h3 class="h6 mb-2" style="color: #0369A1;">✏️ Quiz interactif</h3>
-                                <p class="text-muted mb-0" style="font-size: 0.9rem;">
-                                    L'intégration du quiz sera disponible dans la prochaine mise à jour (M4).
-                                    @if(isset($item->payload['passing_score']))
-                                        Score de passage : {{ $item->payload['passing_score'] }}%.
-                                    @endif
-                                </p>
-                            </div>
+                            @php
+                                $qr         = session('academy.quiz_result');
+                                $quizResult = ($qr && ($qr['item_id'] ?? null) === $item->id) ? $qr : null;
+                            @endphp
+                            <x-academy::quiz-player
+                                :item="$item"
+                                :isEnrolled="$isEnrolled"
+                                :course="$course"
+                                :lesson="$lesson"
+                                :quizResult="$quizResult"
+                            />
 
                         {{-- ── TYPE DOC ── --}}
                         @elseif($item->type === 'doc')
@@ -264,6 +294,35 @@
                             <div class="text-muted p-3 rounded" style="background: #F3F4F6; font-size: 0.9rem;">
                                 <em>Type de contenu « {{ $item->type }} » non reconnu.</em>
                             </div>
+                        @endif
+
+                        {{-- M4 — Bouton « Marquer comme terminé » (video + doc uniquement, inscrit) --}}
+                        @if($isEnrolled && in_array($item->type, ['video', 'doc']))
+                            @php
+                                $isItemCompleted = false;
+                                try {
+                                    $isItemCompleted = \Modules\Academy\Models\Completion::where('user_id', auth()->id())
+                                        ->where('lesson_item_id', $item->id)
+                                        ->where('status', 'completed')
+                                        ->exists();
+                                } catch (\Throwable) {}
+                            @endphp
+                            @if($isItemCompleted)
+                                <p class="mt-3" style="font-size: 0.9rem; color: #166534;">
+                                    ✅ Terminé
+                                </p>
+                            @else
+                                <form method="POST"
+                                      action="{{ route('academy.lessons.complete', [$course, $lesson, $item->id]) }}"
+                                      class="mt-3">
+                                    @csrf
+                                    <button type="submit"
+                                            class="btn btn-sm"
+                                            style="border: 1px solid var(--c-primary, #064E5A); color: var(--c-primary, #064E5A); background: #fff; font-size: 0.85rem;">
+                                        ✓ Marquer comme terminé
+                                    </button>
+                                </form>
+                            @endif
                         @endif
 
                     </div>

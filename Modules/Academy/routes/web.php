@@ -8,9 +8,11 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Academy\Http\Controllers\AcademyController;
+use Modules\Academy\Http\Controllers\CompletionController;
 use Modules\Academy\Http\Controllers\CourseController;
 use Modules\Academy\Http\Controllers\EnrollmentController;
 use Modules\Academy\Http\Controllers\LessonController;
+use Modules\Academy\Http\Controllers\QuizController;
 use Modules\Academy\Http\Middleware\AcademyCsp;
 
 Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->group(function () {
@@ -26,4 +28,25 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
     // M3 — Lecteur de leçon (auth requis pour les vidéos protégées, mais la route est publique)
     Route::get('courses/{course:slug}/lessons/{lesson}', [LessonController::class, 'show'])
         ->name('lessons.show');
+
+    // M4 — Complétion, quiz
+    Route::middleware('auth')->group(function () {
+        // Bouton « Marquer comme terminé » (video / doc)
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/complete',
+            [CompletionController::class, 'store']
+        )->name('lessons.complete');
+
+        // Démarrer un quiz
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/quiz/start',
+            [QuizController::class, 'startQuiz']
+        )->name('quiz.start');
+
+        // Soumettre les réponses d'un quiz
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/quiz/submit',
+            [QuizController::class, 'submitQuiz']
+        )->name('quiz.submit');
+    });
 });
