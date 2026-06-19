@@ -12,6 +12,7 @@ namespace Modules\Academy\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
+use Modules\Academy\Console\CourseReindexCommand;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Policies\CoursePolicy;
@@ -36,6 +37,11 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // Enregistrement des policies du module Academy (M1)
         Gate::policy(Course::class, CoursePolicy::class);
         Gate::policy(Lesson::class, LessonPolicy::class);
+
+        // M7 — Commande Artisan de réindexation Scout
+        if ($this->app->runningInConsole()) {
+            $this->commands([CourseReindexCommand::class]);
+        }
     }
 
     public function register(): void

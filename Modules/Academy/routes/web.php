@@ -12,6 +12,7 @@ use Modules\Academy\Http\Controllers\CertificateController;
 use Modules\Academy\Http\Controllers\CompletionController;
 use Modules\Academy\Http\Controllers\CourseController;
 use Modules\Academy\Http\Controllers\EnrollmentController;
+use Modules\Academy\Http\Controllers\ExportController;
 use Modules\Academy\Http\Controllers\LessonController;
 use Modules\Academy\Http\Controllers\PurchaseController;
 use Modules\Academy\Http\Controllers\QuizController;
@@ -38,6 +39,16 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
     // M3 — Lecteur de leçon (auth requis pour les vidéos protégées, mais la route est publique)
     Route::get('courses/{course:slug}/lessons/{lesson}', [LessonController::class, 'show'])
         ->name('lessons.show');
+
+    // M7 — Exports CSV admin (gâtés par permission academy.reports.view)
+    Route::middleware(['auth', 'can:academy.reports.view'])
+        ->prefix('admin/export')
+        ->name('admin.export.')
+        ->group(function () {
+            Route::get('/enrollments', [ExportController::class, 'exportEnrollments'])->name('enrollments');
+            Route::get('/completions', [ExportController::class, 'exportCompletions'])->name('completions');
+            Route::get('/progress', [ExportController::class, 'exportProgress'])->name('progress');
+        });
 
     // M4 — Complétion, quiz
     Route::middleware('auth')->group(function () {

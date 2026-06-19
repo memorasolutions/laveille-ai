@@ -47,6 +47,28 @@
     </div>
 
     <div class="container">
+        {{-- M7 — Recherche --}}
+        <form method="GET" action="{{ route('academy.index') }}" class="mb-3" role="search">
+            @if($currentFilter)
+                <input type="hidden" name="filter" value="{{ $currentFilter }}">
+            @endif
+            @if($currentLevel)
+                <input type="hidden" name="level" value="{{ $currentLevel }}">
+            @endif
+            <div class="input-group" style="max-width: 480px;">
+                <input type="search" name="q" value="{{ $currentSearch ?? '' }}"
+                       class="form-control" placeholder="Rechercher une formation…"
+                       aria-label="Rechercher une formation">
+                <button class="btn btn-primary" type="submit" style="background: var(--c-primary); border-color: var(--c-primary);">
+                    Rechercher
+                </button>
+                @if(!empty($currentSearch))
+                    <a href="{{ route('academy.index', array_filter(['filter' => $currentFilter, 'level' => $currentLevel])) }}"
+                       class="btn btn-outline-secondary" title="Effacer la recherche">×</a>
+                @endif
+            </div>
+        </form>
+
         {{-- Filtres --}}
         <div class="d-flex flex-wrap gap-2 align-items-center mb-4">
             <a href="{{ route('academy.index', array_filter(['level' => $currentLevel])) }}"

@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable as ScoutSearchable;
+use Modules\Academy\Models\Concerns\CourseSearchable;
 use Modules\Core\Traits\LogsActivityStandard;
 
 /**
@@ -46,8 +48,15 @@ use Modules\Core\Traits\LogsActivityStandard;
  */
 class Course extends Model
 {
-    use SoftDeletes;
+    use CourseSearchable;  // toSearchableArray / shouldBeSearchable / searchableAs
     use LogsActivityStandard;
+    use ScoutSearchable {
+        // CourseSearchable gagne la résolution des conflits
+        CourseSearchable::shouldBeSearchable insteadof ScoutSearchable;
+        CourseSearchable::toSearchableArray  insteadof ScoutSearchable;
+        CourseSearchable::searchableAs       insteadof ScoutSearchable;
+    }
+    use SoftDeletes;
 
     protected array $activitylogFields = ['title', 'status', 'visibility', 'access_type'];
 

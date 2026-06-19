@@ -16,6 +16,17 @@ class EventServiceProvider extends ServiceProvider
         \Laravel\Cashier\Events\WebhookHandled::class => [
             \Modules\Academy\Listeners\StripeWebhookListener::class,
         ],
+
+        // M7 — Déclencheurs Newsletter (défensifs — no-op si module Newsletter absent)
+        \Modules\Academy\Events\AcademyEnrollmentCreated::class => [
+            \Modules\Academy\Listeners\AcademyNewsletterTriggerListener::class . '@handleEnrollment',
+        ],
+        \Modules\Academy\Events\AcademyItemCompleted::class => [
+            \Modules\Academy\Listeners\AcademyNewsletterTriggerListener::class . '@handleCompletion',
+        ],
+        \Modules\Academy\Events\AcademyCertificateIssued::class => [
+            \Modules\Academy\Listeners\AcademyNewsletterTriggerListener::class . '@handleCertificate',
+        ],
     ];
 
     /**
