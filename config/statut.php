@@ -99,7 +99,7 @@ return [
     */
     'brand' => [
         'name' => env('STATUT_BRAND_NAME', 'MEMORA solutions'),
-        'url'  => env('STATUT_BRAND_URL', 'https://memora.solutions'),
+        'url'  => env('STATUT_BRAND_URL', env('APP_URL', 'https://laveille.ai')),
         'logo' => env('STATUT_BRAND_LOGO'),
     ],
 

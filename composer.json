@@ -81,6 +81,7 @@
             "app/Helpers/dates.php",
             "app/Helpers/version.php",
             "app/Helpers/typo.php",
+            "app/Helpers/domain.php",
             "app/Helpers/jsonld.php"
         ],
         "psr-4": {

@@ -45,7 +45,7 @@ final class AuthorsSitemapService
 
         foreach ($authors as $author) {
             $xmlWriter->startElement('url');
-            $xmlWriter->writeElement('loc', "https://laveille.ai/@{$author->slug}");
+            $xmlWriter->writeElement('loc', url("/@{$author->slug}"));
             $xmlWriter->writeElement('lastmod', $author->updated_at->toIso8601String());
             $xmlWriter->writeElement('changefreq', 'weekly');
             $xmlWriter->writeElement('priority', '0.8');
@@ -66,7 +66,7 @@ final class AuthorsSitemapService
                 continue;
             }
             $xmlWriter->startElement('url');
-            $xmlWriter->writeElement('loc', "https://laveille.ai/@{$post->authorProfile->slug}/{$post->slug}");
+            $xmlWriter->writeElement('loc', url("/@{$post->authorProfile->slug}/{$post->slug}"));
             $xmlWriter->writeElement('lastmod', $post->updated_at->toIso8601String());
             $xmlWriter->writeElement('changefreq', 'monthly');
             $xmlWriter->writeElement('priority', '0.6');
