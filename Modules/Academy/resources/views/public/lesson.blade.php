@@ -278,24 +278,78 @@
 
                         {{-- ── TYPE DOC ── --}}
                         @elseif($item->type === 'doc')
-                            <div class="prose" style="line-height: 1.75; color: #374151; max-width: 72ch;">
-                                @if(isset($item->payload['rich_text']))
-                                    {!! nl2br(e($item->payload['rich_text'])) !!}
-                                @else
-                                    <p class="text-muted">Contenu du document à venir.</p>
-                                @endif
+                            @if($hasAccess)
+                                {{--
+                                    GATING DOC (identique au gating vidéo) :
+                                    Le contenu textuel n'est injecté dans le DOM QUE si $hasAccess === true.
+                                    Un visiteur non inscrit ne voit PAS le rich_text dans le HTML rendu.
+                                --}}
+                                <div class="prose" style="line-height: 1.75; color: #374151; max-width: 72ch;">
+                                    @if(isset($item->payload['rich_text']))
+                                        {!! nl2br(e($item->payload['rich_text'])) !!}
+                                    @else
+                                        <p class="text-muted">Contenu du document à venir.</p>
+                                    @endif
 
-                                @if(!empty($item->payload['attachments']))
-                                    <div class="mt-3">
-                                        <strong style="font-size: 0.9rem;">Pièces jointes :</strong>
-                                        <ul class="mt-1">
-                                            @foreach($item->payload['attachments'] as $attachment)
-                                                <li><a href="{{ $attachment['url'] ?? '#' }}" target="_blank" rel="noopener">{{ $attachment['name'] ?? 'Télécharger' }}</a></li>
-                                            @endforeach
-                                        </ul>
+                                    @if(!empty($item->payload['attachments']))
+                                        <div class="mt-3">
+                                            <strong style="font-size: 0.9rem;">Pièces jointes :</strong>
+                                            <ul class="mt-1">
+                                                @foreach($item->payload['attachments'] as $attachment)
+                                                    <li><a href="{{ $attachment['url'] ?? '#' }}" target="_blank" rel="noopener">{{ $attachment['name'] ?? 'Télécharger' }}</a></li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+                                </div>
+                            @else
+                                {{-- Panneau d'accès refusé — même logique que le type video (pas de contenu dans le DOM) --}}
+                                <div class="academy-gated-panel">
+                                    <div class="gated-icon">🔐</div>
+                                    <div class="gated-title">
+                                        @if(!auth()->check())
+                                            Connexion requise pour lire ce document
+                                        @elseif(!$isEnrolled)
+                                            Inscrivez-vous pour accéder à ce document
+                                        @else
+                                            Contenu en cours de préparation
+                                        @endif
                                     </div>
-                                @endif
-                            </div>
+                                    <p class="gated-sub">
+                                        @if(!auth()->check())
+                                            Créez un compte gratuit ou connectez-vous pour accéder aux documents de ce cours.
+                                        @elseif(!$isEnrolled && $isFree)
+                                            Ce cours est gratuit — inscrivez-vous pour lire tous les documents.
+                                        @elseif(!$isEnrolled && !$isFree)
+                                            Ce cours est payant — achetez-le pour accéder à l'ensemble du contenu.
+                                        @else
+                                            Votre inscription vous donne accès à l'ensemble du contenu.
+                                        @endif
+                                    </p>
+                                    @if(!auth()->check())
+                                        <a href="{{ Route::has('login') ? route('login') : '#' }}"
+                                           class="btn ct-btn ct-btn-primary me-2">
+                                            Se connecter
+                                        </a>
+                                        <a href="{{ Route::has('register') ? route('register') : '#' }}"
+                                           class="btn btn-outline-secondary">
+                                            Créer un compte
+                                        </a>
+                                    @elseif(!$isEnrolled && $isFree)
+                                        <form action="{{ route('academy.courses.enroll', $course) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn ct-btn ct-btn-primary">
+                                                S'inscrire gratuitement
+                                            </button>
+                                        </form>
+                                    @elseif(!$isEnrolled && !$isFree)
+                                        <a href="{{ route('academy.courses.purchase', $course) }}"
+                                           class="btn ct-btn ct-btn-primary">
+                                            Acheter ce cours
+                                        </a>
+                                    @endif
+                                </div>
+                            @endif
 
                         @else
                             {{-- Type inconnu : rendu défensif --}}

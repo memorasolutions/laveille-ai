@@ -275,6 +275,13 @@
                                     @if(Route::has('shop.index') && ! config('shop.maintenance', false))<li><a href="{{ route('shop.index') }}">🛍️ {{ __('Boutique') }}</a></li>@endif
                                 </ul>
                             </li>
+                            {{-- Académie — défensif GAP-01 : visible UNIQUEMENT si le module est activé (route enregistrée).
+                                 Quand Academy est désactivé (modules_statuses.json), la route n'existe pas → @if = false → lien absent.
+                                 Aucune dépendance directe sur le module ; portabilité totale. --}}
+                            @if(Route::has('academy.index'))
+                            <li><a href="{{ route('academy.index') }}">{{ __('Académie') }}</a></li>
+                            @endif
+
                             {{-- #200 Anciens blocs Ressources + Jouer retirés — remplacés par les 3 nouveaux mega Outils/Annuaire/Apprendre ci-dessus. Old code ci-dessous gardé en @if(false) zone --}}
                             @if(false)
                             <li class="menu-item-has-children has-mega-menu" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">

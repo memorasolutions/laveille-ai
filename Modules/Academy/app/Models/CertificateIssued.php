@@ -29,6 +29,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class CertificateIssued extends Model
 {
+    // La convention Laravel générerait « certificate_issueds » ; on force le vrai nom.
+    protected $table = 'certificates_issued';
+
     protected $fillable = [
         'user_id',
         'course_id',

@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Modules\Academy\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Modules\Academy\Models\CertificateIssued;
 
 class CertificateController extends Controller
@@ -21,9 +22,16 @@ class CertificateController extends Controller
      */
     public function show(string $public_url_slug): \Illuminate\View\View
     {
-        $certificate = CertificateIssued::where('public_url_slug', $public_url_slug)
-            ->with(['user', 'course'])
-            ->firstOrFail();
+        // Garde-fou : firstOrFail → ModelNotFoundException → 404.
+        // Le try-catch explicite protège contre toute exception inattendue
+        // (ex. mauvais nom de table, migration absente) qui produirait un 500.
+        try {
+            $certificate = CertificateIssued::where('public_url_slug', $public_url_slug)
+                ->with(['user', 'course'])
+                ->firstOrFail();
+        } catch (ModelNotFoundException) {
+            abort(404);
+        }
 
         return view('academy::public.certificate', compact('certificate'));
     }
