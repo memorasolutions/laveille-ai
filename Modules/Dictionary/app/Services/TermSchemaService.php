@@ -23,12 +23,22 @@ use Modules\Dictionary\Models\Term;
 final class TermSchemaService
 {
     private const AUTHOR_NAME = 'Stéphane Lapointe';
-    private const AUTHOR_URL = 'https://laveille.ai/auteur/stephane';
     private const AUTHOR_LINKEDIN = 'https://www.linkedin.com/in/lapointestephane/';
     private const AUTHOR_JOB_TITLE = 'Fondateur de MEMORA solutions, formateur IA';
-    private const SET_URL = 'https://laveille.ai/glossaire';
     private const SET_NAME = 'Glossaire IA — La veille';
     private const SET_DESCRIPTION = "Glossaire vulgarisé de l'intelligence artificielle, contexte québécois, exemples concrets pour PME francophones.";
+
+    /** URL canonique de l'auteur (env-aware via app_domain). */
+    private static function authorUrl(): string
+    {
+        return app_domain('/auteur/stephane');
+    }
+
+    /** URL canonique du DefinedTermSet (env-aware via app_domain). */
+    private static function setUrl(): string
+    {
+        return app_domain('/glossaire');
+    }
 
     public static function buildGraph(Term $term): string
     {
@@ -43,7 +53,7 @@ final class TermSchemaService
 
         $graph[] = [
             '@type' => 'DefinedTermSet',
-            '@id' => self::SET_URL,
+            '@id' => self::setUrl(),
             'name' => self::SET_NAME,
             'description' => self::SET_DESCRIPTION,
             'inLanguage' => 'fr-CA',
@@ -55,7 +65,7 @@ final class TermSchemaService
             'name' => $term->name,
             'description' => $description,
             'url' => $url,
-            'inDefinedTermSet' => self::SET_URL,
+            'inDefinedTermSet' => self::setUrl(),
             'identifier' => $term->slug,
             'inLanguage' => 'fr-CA',
         ];
@@ -127,10 +137,10 @@ final class TermSchemaService
 
         $graph[] = [
             '@type' => 'Person',
-            '@id' => self::AUTHOR_URL,
+            '@id' => self::authorUrl(),
             'name' => self::AUTHOR_NAME,
             'jobTitle' => self::AUTHOR_JOB_TITLE,
-            'url' => self::AUTHOR_URL,
+            'url' => self::authorUrl(),
             'sameAs' => [self::AUTHOR_LINKEDIN],
         ];
 
@@ -140,11 +150,11 @@ final class TermSchemaService
             'headline' => $term->name.' — Glossaire IA',
             'description' => $description,
             'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => $url],
-            'author' => ['@id' => self::AUTHOR_URL],
+            'author' => ['@id' => self::authorUrl()],
             'publisher' => [
                 '@type' => 'Organization',
                 'name' => 'La veille',
-                'url' => 'https://laveille.ai',
+                'url' => app_domain(),
                 'logo' => ['@type' => 'ImageObject', 'url' => asset('images/logo-email-white.png')],
             ],
             'inLanguage' => 'fr-CA',
@@ -163,8 +173,8 @@ final class TermSchemaService
         $graph[] = [
             '@type' => 'BreadcrumbList',
             'itemListElement' => [
-                ['@type' => 'ListItem', 'position' => 1, 'name' => 'Accueil', 'item' => 'https://laveille.ai'],
-                ['@type' => 'ListItem', 'position' => 2, 'name' => 'Glossaire IA', 'item' => self::SET_URL],
+                ['@type' => 'ListItem', 'position' => 1, 'name' => 'Accueil', 'item' => app_domain()],
+                ['@type' => 'ListItem', 'position' => 2, 'name' => 'Glossaire IA', 'item' => self::setUrl()],
                 ['@type' => 'ListItem', 'position' => 3, 'name' => $term->name, 'item' => $url],
             ],
         ];
