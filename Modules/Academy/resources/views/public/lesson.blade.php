@@ -230,6 +230,8 @@
                                             Créez un compte gratuit ou connectez-vous pour accéder aux leçons vidéo.
                                         @elseif(!$isEnrolled && $isFree)
                                             Ce cours est gratuit — inscrivez-vous pour regarder toutes les leçons.
+                                        @elseif(!$isEnrolled && !$isFree)
+                                            Ce cours est payant — achetez-le pour accéder à l'ensemble du contenu.
                                         @else
                                             Votre inscription vous donne accès à l'ensemble du contenu.
                                         @endif
@@ -250,6 +252,12 @@
                                                 S'inscrire gratuitement
                                             </button>
                                         </form>
+                                    @elseif(!$isEnrolled && !$isFree)
+                                        {{-- M5 : CTA Acheter depuis la leçon (cours payant) --}}
+                                        <a href="{{ route('academy.courses.purchase', $course) }}"
+                                           class="btn ct-btn ct-btn-primary">
+                                            Acheter ce cours
+                                        </a>
                                     @endif
                                 </div>
                             @endif

@@ -177,16 +177,19 @@ class AcademyDatabaseSeeder extends Seeder
 
     private function seedCourse2(): void
     {
+        // M5 : cours payant démo — status 'published' pour permettre les tests locaux
         $this->firstOrCreateCourse('ia-avancee-pedagogie', [
-            'title'       => "IA avancée pour la pédagogie",
-            'subtitle'    => "Stratégies approfondies pour intégrer l'IA dans votre enseignement",
-            'language'    => 'fr-CA',
-            'level'       => 'avance',
-            'visibility'  => 'public',
-            'access_type' => 'paid_one_time',
-            'price_cents' => 4900,
-            'currency'    => 'CAD',
-            'status'      => 'draft',
+            'title'        => "IA avancée pour la pédagogie",
+            'subtitle'     => "Stratégies approfondies pour intégrer l'IA dans votre enseignement",
+            'summary'      => "Formation payante démo pour tester le flux Stripe Checkout (paiement unique, prix dynamique).",
+            'language'     => 'fr-CA',
+            'level'        => 'avance',
+            'visibility'   => 'public',
+            'access_type'  => 'paid_one_time',
+            'price_cents'  => 4900,
+            'currency'     => 'CAD',
+            'status'       => 'published',
+            'published_at' => now(),
         ]);
     }
 

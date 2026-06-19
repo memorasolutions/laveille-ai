@@ -171,9 +171,13 @@
                                     </button>
                                 </form>
                             @elseif(!$isEnrolled && !$isFree)
-                                <a href="#" class="btn ct-btn ct-btn-primary w-100 mb-3">
+                                <a href="{{ route('academy.courses.purchase', $course) }}"
+                                   class="btn ct-btn ct-btn-primary w-100 mb-3">
                                     Acheter ce cours
                                 </a>
+                                @if(session('error'))
+                                    <p class="text-danger small mt-1 mb-0">{{ session('error') }}</p>
+                                @endif
                             @else
                                 <a href="#" class="btn w-100 mb-3 d-flex align-items-center justify-content-center"
                                    style="background: #D1FAE5; color: #065F46; font-weight: 700; border-radius: var(--r-btn, 8px); min-height: 44px;">

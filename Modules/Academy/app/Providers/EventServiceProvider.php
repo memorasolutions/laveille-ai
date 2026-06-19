@@ -11,7 +11,12 @@ class EventServiceProvider extends ServiceProvider
      *
      * @var array<string, array<int, string>>
      */
-    protected $listen = [];
+    protected $listen = [
+        // M5 — Paiement Stripe : inscription automatique sur checkout.session.completed
+        \Laravel\Cashier\Events\WebhookHandled::class => [
+            \Modules\Academy\Listeners\StripeWebhookListener::class,
+        ],
+    ];
 
     /**
      * Indicates if events should be discovered.
