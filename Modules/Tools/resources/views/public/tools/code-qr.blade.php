@@ -10,6 +10,12 @@
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $tool->name, 'breadcrumbItems' => [__('Outils'), $tool->name]])
 @endsection
 @section('content')
+@php
+$lvDefaultDomain = class_exists(\Modules\ShortUrl\Models\ShortUrlDomain::class)
+    ? \Modules\ShortUrl\Models\ShortUrlDomain::where('is_default', true)->where('is_active', true)->first()
+    : null;
+$lvDefaultDomainName = $lvDefaultDomain ? $lvDefaultDomain->domain : 'lurl.ca';
+@endphp
                     @include('tools::public.partials.tool-geo')
 <section class="wpo-blog-single-section section-padding">
     <div class="container">
@@ -79,6 +85,119 @@
                         <div x-show="type === 'url' || type === 'text'" class="form-group mb-3">
                             <label class="form-label fw-medium" x-text="type === 'url' ? '{{ __('URL') }}' : '{{ __('Texte') }}'"></label>
                             <input type="text" class="form-control form-control-lg" x-model="input" @input="renderQR()" :placeholder="type === 'url' ? 'https://...' : '{{ __('Votre texte...') }}'" aria-label="{{ __('Contenu du QR') }}">
+                            {{-- Note informative : raccourcir = QR moins dense --}}
+                            <div x-show="type === 'url' && input && input.length > 60" x-cloak style="margin-top:6px;padding:8px 12px;background:rgba(11,114,133,0.06);border-left:3px solid var(--c-primary,#0B7285);border-radius:0 6px 6px 0;font-size:0.8rem;color:var(--c-dark,#1A1D23);line-height:1.45;">
+                                💡 {{ __('Astuce : raccourcir ton lien rend ton QR moins dense et plus facile à scanner (surtout imprimé petit ou avec un logo).') }}
+                                <a href="{{ route('shorturl.create') }}" target="_blank" rel="noopener" style="color:var(--c-primary,#0B7285);font-weight:600;white-space:nowrap;">{{ __('Raccourcir ce lien →') }}</a>
+                            </div>
+                        </div>
+
+                        {{-- Option expiration QR (type URL uniquement) --}}
+                        <div x-show="type === 'url'" class="mb-3">
+                            <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:0.9rem;margin-bottom:0;">
+                                <input type="checkbox" x-model="enableExpiry" style="display:inline-block !important;width:18px;height:18px;accent-color:var(--c-primary);margin:0;flex-shrink:0;" aria-label="{{ __('Faire expirer ce QR code') }}">
+                                ⏳ {{ __('Faire expirer ce QR code') }} (QR dynamique)
+                                <span title="{{ __('Un QR dynamique encode un lien court qui redirige. Tu peux le désactiver ou le faire expirer à une date choisie.') }}" style="cursor:help;color:var(--c-primary);font-weight:700;font-size:1rem;">?</span>
+                            </label>
+
+                            <div x-show="enableExpiry" x-cloak class="mt-3 p-3 rounded" style="border-left:4px solid var(--c-primary);background:rgba(11,114,133,0.06);">
+                                {{-- Encadré explicatif --}}
+                                <div class="mb-3 p-2 rounded" style="background:rgba(11,114,133,0.10);font-size:0.85rem;color:var(--c-dark);">
+                                    ℹ️ {{ __('Pour pouvoir expirer, ton QR pointera vers un lien court') }}
+                                    <strong>{{ $lvDefaultDomainName }}/xxx</strong>
+                                    {{ __('(et non ton adresse directe). Scanner le QR = redirection automatique vers ton URL d\'origine.') }}
+                                </div>
+
+                                {{-- Date d'expiration --}}
+                                <div class="form-group mb-3">
+                                    <label class="form-label fw-medium" style="font-size:0.9rem;">{{ __('Date et heure d\'expiration') }}</label>
+                                    <input type="datetime-local" class="form-control" x-model="expiryAt"
+                                           :min="new Date(Date.now() + 60000).toISOString().slice(0,16)"
+                                           aria-label="{{ __('Date d\'expiration du QR') }}">
+                                    <small class="text-muted" style="font-size:0.78rem;">{{ __('Le QR sera désactivé automatiquement après cette date.') }}</small>
+                                </div>
+
+                                {{-- Slug personnalisé (utilisateurs connectés seulement) --}}
+                                <div x-show="isAuthenticated" class="form-group mb-2">
+                                    <label class="form-label fw-medium" style="font-size:0.9rem;">{{ __('Lien personnalisé (optionnel)') }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-addon" style="line-height:34px;padding:0 10px;background:#f8f9fa;font-size:0.85rem;">{{ $lvDefaultDomainName }}/</span>
+                                        <input type="text" class="form-control" x-model="dynamicSlug"
+                                               placeholder="mon-lien"
+                                               aria-label="{{ __('Slug personnalisé') }}"
+                                               style="font-size:0.85rem;">
+                                    </div>
+                                    <small class="text-muted" style="font-size:0.78rem;">{{ __('Laisse vide pour un lien généré automatiquement.') }}</small>
+                                </div>
+                                <div x-show="!isAuthenticated" class="mb-2">
+                                    <small style="color:var(--c-text-muted,#52586a);font-size:0.8rem;">
+                                        <a href="{{ route('login') }}" style="color:var(--c-primary);">{{ __('Connecte-toi') }}</a> {{ __('pour personnaliser ton lien court.') }}
+                                    </small>
+                                </div>
+
+                                {{-- Options avancées connectés : domaine, mot de passe, max clics --}}
+                                <div x-show="isAuthenticated" class="mt-2">
+                                    {{-- Sélecteur de domaine (si plusieurs domaines disponibles) --}}
+                                    <template x-if="allQrDomains.length > 1">
+                                        <div class="form-group mb-2">
+                                            <label class="form-label fw-medium" style="font-size:0.9rem;">{{ __('Domaine du lien court') }}</label>
+                                            <select class="form-control" x-model="dynamicDomainId" aria-label="{{ __('Domaine') }}" style="font-size:0.85rem;">
+                                                <template x-for="d in allQrDomains" :key="d.id">
+                                                    <option :value="d.id" x-text="(d.display_label || d.domain) + '/'"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </template>
+                                    {{-- Mot de passe --}}
+                                    <div class="form-group mb-2">
+                                        <label class="form-label fw-medium" style="font-size:0.9rem;">{{ __('Mot de passe (optionnel)') }}</label>
+                                        <input type="password" class="form-control" x-model="dynamicPassword"
+                                               placeholder="{{ __('Protéger le lien par un mot de passe') }}"
+                                               aria-label="{{ __('Mot de passe') }}"
+                                               autocomplete="new-password"
+                                               style="font-size:0.85rem;">
+                                        <small class="text-muted" style="font-size:0.78rem;">{{ __('Les scaneurs devront saisir ce mot de passe pour accéder à la destination.') }}</small>
+                                    </div>
+                                    {{-- Max clics --}}
+                                    <div class="form-group mb-2">
+                                        <label class="form-label fw-medium" style="font-size:0.9rem;">{{ __('Limite de clics (optionnel)') }}</label>
+                                        <input type="number" class="form-control" x-model.number="dynamicMaxClicks"
+                                               min="1" placeholder="{{ __('Ex : 100') }}"
+                                               aria-label="{{ __('Nombre maximum de clics') }}"
+                                               style="font-size:0.85rem;">
+                                        <small class="text-muted" style="font-size:0.78rem;">{{ __('Le QR sera désactivé après ce nombre de scans.') }}</small>
+                                    </div>
+                                </div>
+
+                                {{-- Résultat : lien court créé --}}
+                                <div x-show="dynamicShortUrl" class="mb-3 p-2 rounded" style="background:rgba(21,128,61,0.08);border:1px solid rgba(21,128,61,0.25);">
+                                    <div class="d-flex justify-content-between align-items-center gap-2" style="flex-wrap:wrap;">
+                                        <div>
+                                            <div style="font-size:0.75rem;color:#166534;font-weight:600;margin-bottom:2px;">{{ __('Lien court créé') }} ✓</div>
+                                            <a :href="dynamicShortUrl" target="_blank" rel="noopener" x-text="dynamicShortUrl" style="font-size:0.85rem;color:#166534;word-break:break-all;"></a>
+                                        </div>
+                                        <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" style="white-space:nowrap;flex-shrink:0;"
+                                                @click="navigator.clipboard.writeText(dynamicShortUrl).then(function(){ window.dispatchEvent(new CustomEvent('toast-show',{detail:{message:'{{ __('Lien copié !') }}',variant:'success',duration:2000}})) })">
+                                            {{ __('Copier') }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {{-- Erreur --}}
+                                <div x-show="dynamicError" class="mb-3">
+                                    <small style="color:#B91C1C;font-size:0.85rem;" x-text="dynamicError"></small>
+                                </div>
+
+                                {{-- Bouton Générer le QR dynamique --}}
+                                <button type="button"
+                                        class="ct-btn ct-btn-primary w-100"
+                                        style="border-radius:var(--r-btn);font-weight:700;"
+                                        @click="createDynamicLink()"
+                                        :disabled="!input || !expiryAt || dynamicLoading">
+                                    <span x-show="!dynamicLoading">⏳ {{ __('Générer le QR dynamique') }}</span>
+                                    <span x-show="dynamicLoading">{{ __('Création en cours…') }}</span>
+                                </button>
+                            </div>
                         </div>
 
                         {{-- #13 S84 Option C : Données brutes (mode Byte QR pur, hex toggle) --}}
@@ -536,6 +655,15 @@
                     <li><strong>H ({{ __('maximale') }})</strong> — {{ __('recommandé si vous ajoutez un logo au centre') }}</li>
                 </ul>
 
+                <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">{{ __('QR dynamique avec expiration') }}</h4>
+                <p>{{ __('Pour les URLs uniquement. Coche « Faire expirer ce QR code » pour :') }}</p>
+                <ul>
+                    <li>{{ __('Définir une date/heure d\'expiration — après laquelle le QR affiche une page « lien expiré »') }}</li>
+                    <li>{{ __('Le QR encode un lien court') }} (ex. {{ $lvDefaultDomainName }}/xxx) {{ __('qui redirige vers ton URL') }}</li>
+                    <li>{{ __('Les utilisateurs connectés peuvent choisir un slug personnalisé') }}</li>
+                    <li>{{ __('Le QR statique (sans expiration) fonctionne exactement comme avant') }}</li>
+                </ul>
+
                 <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">{{ __('Téléchargement') }}</h4>
                 <ul>
                     <li><strong>PNG</strong> — {{ __('image standard, idéale pour le web et les courriels') }}</li>
@@ -575,6 +703,17 @@ document.addEventListener('alpine:init', function() {
             paypalUser: '', paypalAmount: '', paypalCurrency: 'CAD',
             btcAddress: '', btcAmount: '',
             socialUser: '',
+            // ── QR dynamique avec expiration ──
+            enableExpiry: false,
+            expiryAt: '',
+            dynamicShortUrl: '',
+            dynamicSlug: '',
+            dynamicDomainId: '',
+            dynamicPassword: '',
+            dynamicMaxClicks: '',
+            allQrDomains: [],
+            dynamicLoading: false,
+            dynamicError: '',
             copied: false,
             isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
             saveName: '',
@@ -664,6 +803,43 @@ document.addEventListener('alpine:init', function() {
                     return result;
                 }
                 return this.rawText || '';
+            },
+
+            createDynamicLink: async function() {
+                var self = this;
+                self.dynamicLoading = true;
+                self.dynamicError = '';
+                self.dynamicShortUrl = '';
+                try {
+                    var body = { original_url: self.input, expires_at: self.expiryAt };
+                    if (self.dynamicSlug && self.dynamicSlug.trim()) {
+                        body.slug = self.dynamicSlug.trim();
+                    }
+                    if (self.isAuthenticated) {
+                        if (self.dynamicDomainId) body.domain_id = self.dynamicDomainId;
+                        if (self.dynamicPassword && self.dynamicPassword.trim()) body.password = self.dynamicPassword.trim();
+                        if (self.dynamicMaxClicks && parseInt(self.dynamicMaxClicks) > 0) body.max_clicks = parseInt(self.dynamicMaxClicks);
+                    }
+                    var response = await fetch('/outils/code-qr/lien-dynamique', {
+                        method: 'POST',
+                        headers: self._headers(),
+                        body: JSON.stringify(body)
+                    });
+                    var data = await response.json();
+                    if (response.ok) {
+                        self.dynamicShortUrl = data.short_url;
+                        self.dynamicSlug = data.slug;
+                        self.input = data.short_url;
+                        self.renderQR();
+                        window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: '{{ __("Lien dynamique créé ! Le QR pointe maintenant vers ton lien court.") }}', variant: 'success', duration: 5000 } }));
+                    } else {
+                        self.dynamicError = data.message || '{{ __("Erreur lors de la création du lien.") }}';
+                    }
+                } catch (e) {
+                    self.dynamicError = '{{ __("Erreur réseau. Vérifie ta connexion et réessaie.") }}';
+                } finally {
+                    self.dynamicLoading = false;
+                }
             },
 
             renderQR: function() {
@@ -815,8 +991,22 @@ document.addEventListener('alpine:init', function() {
                 .then(function() { self._editingId = null; self.saveName = ''; self.saving = false; window.dispatchEvent(new CustomEvent('toast', { detail: { message: '{{ __("Configuration sauvegardée") }}' } })); })
                 .catch(function(e) { self.saveError = e.message; self.saving = false; setTimeout(function() { self.saveError = ''; }, 4000); });
             },
+            loadQrDomains: function() {
+                // Charge les domaines disponibles pour le sélecteur QR (connectés seulement)
+                if (!this.isAuthenticated) return;
+                var self = this;
+                fetch('{{ route('tools.qr.domains') }}', { headers: this._headers() })
+                    .then(function(r) { return r.ok ? r.json() : []; })
+                    .then(function(data) {
+                        self.allQrDomains = Array.isArray(data) ? data : [];
+                        var def = self.allQrDomains.find(function(d) { return d.is_default; });
+                        if (def && !self.dynamicDomainId) self.dynamicDomainId = def.id;
+                    })
+                    .catch(function() { self.allQrDomains = []; });
+            },
             initEditMode: function() {
                 if (!this.isAuthenticated) return;
+                this.loadQrDomains();
                 var self = this;
                 var editId = new URLSearchParams(window.location.search).get('edit');
                 if (!editId) return;

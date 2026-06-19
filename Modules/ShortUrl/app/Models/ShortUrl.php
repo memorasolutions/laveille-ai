@@ -56,6 +56,7 @@ class ShortUrl extends Model
         'is_anonymous',
         'last_visited_at',
         'expiry_notified_at',
+        'auto_extend',
     ];
 
     protected $hidden = [
@@ -81,6 +82,7 @@ class ShortUrl extends Model
             'redirect_type' => 'integer',
             'max_clicks' => 'integer',
             'is_anonymous' => 'boolean',
+            'auto_extend' => 'boolean',
         ];
     }
 

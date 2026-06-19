@@ -19,6 +19,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // JSON_UNQUOTE/JSON_SET sont MySQL-only ; SQLite (tests) → skip silencieux.
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         $corrections = [
             // slug (inchangé)    => name corrigé (fr_CA)
             'ecriture-ia'         => 'Écriture IA',
