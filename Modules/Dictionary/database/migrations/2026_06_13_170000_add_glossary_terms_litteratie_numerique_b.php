@@ -29,6 +29,9 @@ return new class extends Migration
 
     public function up(): void
     {
+        if (\Illuminate\Support\Facades\DB::getDriverName() !== 'mysql') {
+            return;
+        }
         if (! class_exists(Term::class)) {
             echo "[glossaire] modèle Term absent — ignoré\n";
 
