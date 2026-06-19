@@ -338,6 +338,33 @@
                     <p class="text-muted">Cette leçon ne contient pas encore de contenu.</p>
                 @endforelse
 
+                {{-- M6 — Certificat : affiché quand 100% complété --}}
+                @if(auth()->check() && $isEnrolled && ($userProgress?->percent ?? 0) >= 100)
+                    @php
+                        $__certificate = null;
+                        try {
+                            if (class_exists(\Modules\Academy\Services\CertificateService::class)) {
+                                $__certSvc   = new \Modules\Academy\Services\CertificateService();
+                                $__certificate = $__certSvc->issueFor(auth()->user(), $course);
+                            }
+                        } catch (\Throwable) {}
+                    @endphp
+                    @if($__certificate)
+                        <div class="mt-4 mb-2 p-4 text-center"
+                             style="background: #ECFDF5; border: 1px solid #6EE7B7; border-radius: 12px;">
+                            <div style="font-size: 1.5rem; margin-bottom: 0.4rem;">🎓</div>
+                            <p class="mb-2 fw-bold" style="color: #065F46;">
+                                Félicitations ! Tu as complété ce cours à 100 %.
+                            </p>
+                            <a href="{{ route('academy.certificates.show', $__certificate->public_url_slug) }}"
+                               class="btn ct-btn ct-btn-primary"
+                               style="min-height: 44px; padding: 0 1.5rem;">
+                                Obtenir mon certificat →
+                            </a>
+                        </div>
+                    @endif
+                @endif
+
                 {{-- ══ Navigation préc/suiv ══ --}}
                 <div class="academy-lesson-nav">
                     <div>

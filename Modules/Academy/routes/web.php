@@ -8,6 +8,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Academy\Http\Controllers\AcademyController;
+use Modules\Academy\Http\Controllers\CertificateController;
 use Modules\Academy\Http\Controllers\CompletionController;
 use Modules\Academy\Http\Controllers\CourseController;
 use Modules\Academy\Http\Controllers\EnrollmentController;
@@ -20,6 +21,9 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
     // M2 — Pages publiques
     Route::get('/', [AcademyController::class, 'index'])->name('index');
     Route::get('courses/{course:slug}', [CourseController::class, 'show'])->name('courses.show');
+
+    // M6 — Certificats publics vérifiables (pas d'auth requise)
+    Route::get('certificats/{public_url_slug}', [CertificateController::class, 'show'])->name('certificates.show');
 
     // M1 — Inscription à un cours (auth requis)
     Route::post('courses/{course}/enroll', [EnrollmentController::class, 'store'])

@@ -15,6 +15,7 @@ use Modules\Academy\Models\Completion;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Models\Progress;
+use Modules\Academy\Services\CertificateService;
 
 final class ProgressService
 {
@@ -80,6 +81,17 @@ final class ProgressService
             event('academy.progress.updated', [$user, $course, $progress]);
         } catch (\Throwable) {
             // Silencieux
+        }
+
+        // 6. M6 — Si 100% atteint, émettre le certificat (défensif, idempotent)
+        if ($percent === 100) {
+            try {
+                if (class_exists(CertificateService::class)) {
+                    (new CertificateService())->issueFor($user, $course);
+                }
+            } catch (\Throwable) {
+                // Silencieux : ne jamais bloquer la progression pour un cert raté
+            }
         }
 
         return $progress;

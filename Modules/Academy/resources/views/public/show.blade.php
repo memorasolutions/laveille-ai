@@ -19,6 +19,35 @@
     ])
 @endsection
 
+@php
+    // M6 — JSON-LD Course (tableau PHP, jamais package spatie/schema-org)
+    $__courseJsonLd = [
+        '@context'    => 'https://schema.org',
+        '@type'       => 'Course',
+        'name'        => $course->title,
+        'inLanguage'  => 'fr-CA',
+        'provider'    => [
+            '@type' => 'Organization',
+            'name'  => config('app.name'),
+            'url'   => url('/'),
+        ],
+    ];
+    if (filled($course->summary ?? $course->description)) {
+        $__courseJsonLd['description'] = \Illuminate\Support\Str::limit(
+            strip_tags((string) ($course->summary ?? $course->description)),
+            300,
+            ''
+        );
+    }
+    if (filled($course->slug)) {
+        $__courseJsonLd['url'] = route('academy.courses.show', $course->slug);
+    }
+    $__courseJsonLdEncoded = json_encode($__courseJsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+@endphp
+@push('head')
+<script type="application/ld+json">{!! $__courseJsonLdEncoded !!}</script>
+@endpush
+
 @push('styles')
 <style>
     .syllabus-lessons { list-style: none; padding-left: 0; margin-bottom: 0; }
