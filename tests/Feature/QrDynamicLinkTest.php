@@ -289,4 +289,127 @@ class QrDynamicLinkTest extends TestCase
 
         $response->assertStatus(200)->assertJsonStructure([['id', 'domain', 'is_default']]);
     }
+
+    // =========================================================================
+    // Tests — Délai de grâce 90 jours (QR_GRACE_DAYS)
+    // =========================================================================
+
+    /**
+     * Lien QR expiré depuis <90j → toujours en base après cleanup,
+     * et un scan retourne la page « expiré ».
+     */
+    public function test_qr_link_in_grace_period_stays_in_db_and_returns_expired_page(): void
+    {
+        $shortUrl = ShortUrl::create([
+            'slug'          => 'grace-qr-1',
+            'original_url'  => 'https://example.com',
+            'domain_id'     => $this->domain->id,
+            'auto_extend'   => false,
+            'expires_at'    => Carbon::now()->subDay(), // expiré hier, dans la grâce
+            'is_active'     => true,
+            'redirect_type' => 302,
+        ]);
+
+        $this->artisan('shorturl:cleanup-expired')->assertSuccessful();
+
+        // Le lien doit toujours exister (non supprimé, non soft-deleted)
+        $this->assertDatabaseHas('short_urls', ['id' => $shortUrl->id, 'deleted_at' => null]);
+
+        // Un scan doit rediriger vers /lien-expire (le lien est expiré mais en base)
+        $response = $this->get('/s/grace-qr-1');
+        $this->assertStringContainsString('/lien-expire', $response->headers->get('Location'));
+    }
+
+    /**
+     * Lien QR expiré depuis >90j → soft-deleted par le cleanup.
+     */
+    public function test_qr_link_after_grace_period_is_deleted_by_cleanup(): void
+    {
+        $shortUrl = ShortUrl::create([
+            'slug'          => 'grace-qr-2',
+            'original_url'  => 'https://example.com',
+            'domain_id'     => $this->domain->id,
+            'auto_extend'   => false,
+            'expires_at'    => Carbon::now()->subDays(91), // au-delà de la grâce
+            'is_active'     => true,
+            'redirect_type' => 302,
+        ]);
+
+        $this->artisan('shorturl:cleanup-expired')->assertSuccessful();
+
+        // Le lien doit être soft-deleted
+        $this->assertSoftDeleted('short_urls', ['id' => $shortUrl->id]);
+    }
+
+    /**
+     * Lien normal (auto_extend=true) expiré → soft-deleted immédiatement, sans délai de grâce.
+     */
+    public function test_normal_link_expired_is_deleted_immediately_by_cleanup(): void
+    {
+        $shortUrl = ShortUrl::create([
+            'slug'          => 'normal-expired-1',
+            'original_url'  => 'https://example.com',
+            'domain_id'     => $this->domain->id,
+            'auto_extend'   => true,
+            'expires_at'    => Carbon::now()->subDay(), // expiré hier
+            'is_active'     => true,
+            'redirect_type' => 302,
+        ]);
+
+        $this->artisan('shorturl:cleanup-expired')->assertSuccessful();
+
+        // Suppression immédiate : pas de grâce pour les liens normaux
+        $this->assertSoftDeleted('short_urls', ['id' => $shortUrl->id]);
+    }
+
+    /**
+     * La notif « expire bientôt » n'est PAS envoyée aux liens QR fixes (auto_extend=false).
+     * expiry_notified_at doit rester NULL après le cleanup.
+     */
+    public function test_cleanup_does_not_notify_qr_fixed_links(): void
+    {
+        $user = \App\Models\User::factory()->create();
+
+        $shortUrl = ShortUrl::create([
+            'slug'                 => 'notif-qr-1',
+            'original_url'         => 'https://example.com',
+            'domain_id'            => $this->domain->id,
+            'user_id'              => $user->id,
+            'auto_extend'          => false,
+            'expires_at'           => Carbon::now()->addDays(15), // dans 15j = normalement éligible à notif
+            'expiry_notified_at'   => null,
+            'is_active'            => true,
+            'redirect_type'        => 302,
+        ]);
+
+        $this->artisan('shorturl:cleanup-expired')->assertSuccessful();
+
+        // expiry_notified_at doit rester NULL : les QR fixes sont exclus de la notif
+        $shortUrl->refresh();
+        $this->assertNull($shortUrl->expiry_notified_at, 'Un lien QR fixe ne doit jamais recevoir la notif « expire bientôt »');
+    }
+
+    /**
+     * Le cleanup ne plante pas sur un lien QR anonyme (user_id=NULL)
+     * expiré au-delà de la grâce.
+     */
+    public function test_cleanup_does_not_crash_on_anonymous_link(): void
+    {
+        $shortUrl = ShortUrl::create([
+            'slug'          => 'anon-qr-1',
+            'original_url'  => 'https://example.com',
+            'domain_id'     => $this->domain->id,
+            'user_id'       => null, // lien anonyme, pas de propriétaire
+            'auto_extend'   => false,
+            'expires_at'    => Carbon::now()->subDays(91), // au-delà de la grâce
+            'is_active'     => true,
+            'redirect_type' => 302,
+        ]);
+
+        // La commande doit réussir sans exception malgré user_id=null
+        $this->artisan('shorturl:cleanup-expired')->assertSuccessful();
+
+        // Et le lien doit être soft-deleted
+        $this->assertSoftDeleted('short_urls', ['id' => $shortUrl->id]);
+    }
 }
