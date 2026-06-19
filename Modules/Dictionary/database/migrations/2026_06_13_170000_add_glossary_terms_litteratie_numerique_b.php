@@ -35,6 +35,12 @@ return new class extends Migration
             return;
         }
 
+        // Cette migration insère des données avec des FK vers dictionary_categories
+        // qui n'existent que sur MySQL (seedées en prod). SQLite en tests = skip.
+        if (\Illuminate\Support\Facades\DB::connection()->getDriverName() !== 'mysql') {
+            return;
+        }
+
         foreach ($this->terms() as $t) {
             if (Term::where('slug->fr_CA', $t['slug'])->exists()) {
                 echo "[glossaire] slug déjà présent, skip : {$t['slug']}\n";
