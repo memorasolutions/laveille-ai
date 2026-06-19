@@ -25,7 +25,9 @@ class SecurityHeaders
         $response->headers->set('X-XSS-Protection', '1; mode=block');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(), display-capture=(self)');
-        $response->headers->set('Content-Security-Policy', "frame-src 'self' https://lookerstudio.google.com https://www.youtube-nocookie.com https://www.youtube.com https://js.stripe.com https://hooks.stripe.com https://googleads.g.doubleclick.net https://ep2.adtrafficquality.google https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://www.google.com");
+        // ACTION: screenpal.com au frame-src GLOBAL (fix BUG-01 — Academy : iframe vidéo non répertoriée)
+        // SELF: édition 1 ligne. RAISON: SecurityHeaders est la CSP globale active qui écrase AcademyCsp sur /academie.
+        $response->headers->set('Content-Security-Policy', "frame-src 'self' https://screenpal.com https://*.screenpal.com https://lookerstudio.google.com https://www.youtube-nocookie.com https://www.youtube.com https://js.stripe.com https://hooks.stripe.com https://googleads.g.doubleclick.net https://ep2.adtrafficquality.google https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://www.google.com");
 
         if (app()->environment('production')) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
