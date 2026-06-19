@@ -102,6 +102,12 @@
         anonBtn.style.padding = '.35rem .7rem';
         anonBtn.style.fontSize = '.8rem';
         anonBtn.style.display = 'block';
+        // A11y WCAG 2.2 AAA fix : ce bouton est hors de .anon-wrap donc --anon-primary est indéfini →
+        // background transparent + color:#fff = 1.11:1 (échec AA). On fixe les couleurs en dur.
+        // #5b4a1f sur #ffffff = 8.59:1 (AAA ✅) ; focus ring #9A2A06 sur #ffffff = 7.76:1 (AAA ✅).
+        anonBtn.style.color = '#5b4a1f';
+        anonBtn.style.backgroundColor = '#ffffff';
+        anonBtn.style.border = '1px solid #B7791F';
 
         const dismissBtn = document.createElement('button');
         dismissBtn.type = 'button';
