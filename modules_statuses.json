@@ -48,5 +48,6 @@
     "Shop": true,
     "CloudflareCache": true,
     "Sudoku": true,
-    "Authors": true
+    "Authors": true,
+    "Academy": false
 }
