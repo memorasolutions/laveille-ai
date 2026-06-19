@@ -1,56 +1,42 @@
 <?php
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
+declare(strict_types=1);
+
 namespace Modules\Academy\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Modules\Academy\Models\Course;
 
 class AcademyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        return view('academy::index');
+        $query = Course::published();
+
+        $currentFilter = $request->input('filter');
+        $currentLevel  = $request->input('level');
+
+        if ($currentFilter === 'free') {
+            $query->where('access_type', 'free');
+        } elseif ($currentFilter === 'paid') {
+            $query->where('access_type', '!=', 'free');
+        }
+
+        if ($currentLevel) {
+            $query->where('level', $currentLevel);
+        }
+
+        $courses = $query->orderBy('published_at', 'desc')
+            ->paginate(12)
+            ->withQueryString();
+
+        return view('academy::public.index', compact('courses', 'currentFilter', 'currentLevel'));
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('academy::create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('academy::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('academy::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
 }
