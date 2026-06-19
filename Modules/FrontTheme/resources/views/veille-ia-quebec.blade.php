@@ -32,6 +32,7 @@
             <p style="margin:16px 0;"><x-core::button :href="route('news.index')" variant="primary">Voir les actualités IA</x-core::button></p>
             <ul>
                 <li><a href="{{ route('guide.veille-adoption') }}" style="color: var(--sys-text-link, #064E5A);">L'adoption de l'IA générative au Québec : les chiffres</a></li>
+                <li><a href="{{ url('/etat-ia-quebec-2026') }}" style="color: var(--sys-text-link, #064E5A);">État de l'IA au Québec en 2026 : adoption, encadrement et perception</a></li>
             </ul>
 
             <h2 style="font-family: var(--f-heading); margin-top: 36px;">Outils de veille</h2>

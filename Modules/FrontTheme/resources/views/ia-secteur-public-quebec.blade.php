@@ -56,6 +56,7 @@ $spJsonLd = ['@context'=>'https://schema.org','@type'=>'FAQPage','mainEntity'=>a
 <ul>
     <li><a href="{{ route('guide.sp-rediger') }}" style="color: var(--sys-text-link, #064E5A);">Rédiger avec l'IA dans le secteur public : bonnes pratiques</a></li>
     <li><a href="{{ route('guide.sp-loi25') }}" style="color: var(--sys-text-link, #064E5A);">IA et Loi 25 : protéger les renseignements personnels</a></li>
+    <li><a href="{{ url('/etat-ia-quebec-2026') }}" style="color: var(--sys-text-link, #064E5A);">État de l'IA au Québec en 2026</a></li>
     <li><a href="{{ route('blog.index') }}" style="color: var(--sys-text-link, #064E5A);">Tous les guides et analyses du blogue</a></li>
     <li><a href="{{ route('pillar.ia-education') }}" style="color: var(--sys-text-link, #064E5A);">L'IA pour l'éducation au Québec</a></li>
 </ul>

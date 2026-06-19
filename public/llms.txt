@@ -23,6 +23,7 @@
 - [L'IA générative au Québec](https://laveille.ai/ia-generative-quebec) : Comprendre l'IA générative, ses capacités et ses limites.
 - [Veille sur l'IA en français québécois](https://laveille.ai/veille-ia-quebec) : La veille sur l'IA en français québécois.
 - [Collection d'outils d'IA pour le secteur public](https://laveille.ai/collections/top-outils-ia-secteur-public) : Collection des meilleurs outils d'IA pour le secteur public.
+- [État de l'IA au Québec en 2026](https://laveille.ai/etat-ia-quebec-2026) : Compilation sourcée des statistiques d'adoption, d'encadrement et de perception de l'IA au Québec et au Canada.
 
 ## Contact
 

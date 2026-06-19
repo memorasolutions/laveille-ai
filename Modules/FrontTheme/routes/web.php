@@ -49,6 +49,9 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
     Route::view('/ia-secteur-public-quebec', 'fronttheme::ia-secteur-public-quebec')
         ->name('pillar.ia-secteur-public')
         ->middleware('cacheResponse:3600');
+    Route::view('/etat-ia-quebec-2026', 'fronttheme::etat-ia-quebec-2026')
+        ->name('pillar.etat-ia-2026')
+        ->middleware('cacheResponse:3600');
 
     // Sous-articles factuels rattachés aux piliers (faits sourcés via Perplexity, evergreen)
     Route::view('/adopter-ia-pme-quebec', 'fronttheme::adopter-ia-pme-quebec')
