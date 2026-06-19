@@ -28,6 +28,7 @@ $spJsonLd = ['@context'=>'https://schema.org','@type'=>'FAQPage','mainEntity'=>a
 <section class="wpo-blog-single-section section-padding"><div class="container"><div class="row justify-content-center"><div class="col-lg-9"><article style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
 
 <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 20px;">L'intelligence artificielle dans le secteur public et parapublic québécois</h1>
+<x-fronttheme::page-freshness updated="2026-06-19" />
 
 <p>L'intelligence artificielle (IA) offre des possibilités concrètes aux organismes publics et parapublics québécois — ministères, réseaux de la santé, établissements d'enseignement, sociétés d'État — pour améliorer leurs services aux citoyens. Elle permet notamment de rédiger plus efficacement, de résumer de grandes quantités d'information, d'analyser des données ou d'automatiser certaines tâches répétitives.</p>
 

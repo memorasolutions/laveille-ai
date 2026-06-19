@@ -22,6 +22,7 @@
     <div class="container"><div class="row justify-content-center"><div class="col-lg-9">
         <article style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
             <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 20px;">IA générative : créer du texte, des images et des vidéos</h1>
+            <x-fronttheme::page-freshness updated="2026-06-19" />
 
             <p><strong>L'IA générative permet de créer du texte, des images, de l'audio et des vidéos à partir d'instructions simples, appelées « prompts ».</strong> Elle sert à rédiger des courriels, générer des visuels originaux, prototyper des idées ou produire du contenu multimédia. Ces outils, accessibles à tous, transforment la façon de concevoir et de produire, dans les sphères éducatives, professionnelles et créatives.</p>
             <p>Ces systèmes ne sont toutefois pas infaillibles : ils peuvent produire des contenus inexacts (les « hallucinations »), de qualité inégale ou biaisés. Il est essentiel de vérifier les informations, de conserver un regard critique et humain, et de respecter les droits d'auteur et les conditions d'utilisation des plateformes. L'IA est un outil d'assistance, non une source d'autorité.</p>

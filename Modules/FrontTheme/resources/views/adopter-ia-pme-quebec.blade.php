@@ -35,6 +35,7 @@ $jsonLd = [
             <div class="col-lg-9">
                 <article style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
                     <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 20px;">Adopter l'IA dans une PME au Québec : chiffres, freins et aides financières</h1>
+                    <x-fronttheme::page-freshness updated="2026-06-19" />
 
                     <p><strong>L'intelligence artificielle est désormais accessible aux PME québécoises, même sans équipe technique dédiée.</strong> L'enjeu n'est plus tant d'avoir accès à la technologie que de cibler des tâches précises où l'IA apporte une réelle valeur, tout en protégeant ses données sensibles.</p>
                     <p>Des aides financières existent au Québec et au Canada pour accompagner cette transition — à condition de bien cerner ses besoins et de choisir les bons programmes.</p>

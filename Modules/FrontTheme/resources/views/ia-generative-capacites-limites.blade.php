@@ -32,6 +32,7 @@ $jsonLd = [
             <div class="col-lg-9">
                 <article style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
                     <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 20px;">IA générative : capacités, limites et bonnes pratiques</h1>
+                    <x-fronttheme::page-freshness updated="2026-06-19" />
 
                     <p><strong>L'IA générative crée du contenu nouveau — texte, image, son, vidéo ou code — à partir d'instructions appelées « prompts ».</strong> Ces outils sont devenus largement accessibles, mais en tirer parti suppose d'en comprendre le fonctionnement et les limites. Bien utilisée, l'IA générative fait gagner du temps ; mal comprise, elle peut induire en erreur.</p>
                     <p>Ce dossier fait le tour de l'essentiel : les grands types d'outils, le principe de fonctionnement, les limites à connaître et les bonnes pratiques d'un usage responsable.</p>

@@ -36,6 +36,7 @@ $jsonLd = [
                 <article style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
 
                     <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 20px;">Rédiger avec l'IA dans le secteur public : bonnes pratiques</h1>
+                    <x-fronttheme::page-freshness updated="2026-06-19" />
 
                     <p>L'intelligence artificielle accélère la rédaction administrative : notes, courriels, comptes rendus ou communications internes. Toutefois, son usage dans le secteur public québécois est encadré. Le ministère de la Cybersécurité et du Numérique a publié un énoncé de principes pour une utilisation responsable de l'IA, et la Loi 25 impose des obligations rigoureuses en matière de protection des renseignements personnels.</p>
 

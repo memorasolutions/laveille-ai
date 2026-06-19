@@ -14,6 +14,16 @@
 - [Glossaire](https://laveille.ai/glossaire) : Lexique simple des termes liés à l'IA et au numérique, en français québécois.
 - [Blog](https://laveille.ai/blog) : Actualités et analyses sur l'IA, expliquées de façon accessible.
 
+## Cas d'usage de l'IA par secteur
+
+- [L'IA dans le secteur public québécois](https://laveille.ai/ia-secteur-public-quebec) : L'IA dans le secteur public et parapublic québécois, avec encadrement MCN et Loi 25.
+- [L'IA pour les PME québécoises](https://laveille.ai/ia-pme-quebec) : Adopter l'IA dans une PME québécoise.
+- [L'IA pour l'éducation au Québec](https://laveille.ai/ia-education-quebec) : L'IA pour l'éducation au Québec.
+- [L'IA pour les développeurs québécois](https://laveille.ai/ia-developpeurs-quebec) : L'IA pour les développeurs et le développement web.
+- [L'IA générative au Québec](https://laveille.ai/ia-generative-quebec) : Comprendre l'IA générative, ses capacités et ses limites.
+- [Veille sur l'IA en français québécois](https://laveille.ai/veille-ia-quebec) : La veille sur l'IA en français québécois.
+- [Collection d'outils d'IA pour le secteur public](https://laveille.ai/collections/top-outils-ia-secteur-public) : Collection des meilleurs outils d'IA pour le secteur public.
+
 ## Contact
 
 - [Contactez-nous](https://laveille.ai/contact) pour toute question, suggestion ou collaboration.

@@ -22,6 +22,7 @@
     <div class="container"><div class="row justify-content-center"><div class="col-lg-9">
         <article style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
             <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 20px;">Faire sa veille IA au Québec : méthode, outils et sources</h1>
+            <x-fronttheme::page-freshness updated="2026-06-19" />
 
             <p><strong>Faire une veille IA efficace au Québec consiste à repérer les signaux pertinents dans un flux d'information dense, sans se laisser submerger par le bruit ou la surenchère médiatique.</strong> Cela commence par définir clairement ses besoins : quels sujets, secteurs ou types d'innovations vous concernent directement ? Ensuite, choisir des sources fiables et diversifiées, en privilégiant celles qui décryptent plutôt que celles qui amplifient.</p>
             <p>Une bonne veille repose sur une méthode simple mais régulière : fixer une fréquence réaliste, utiliser des outils pour automatiser la collecte et le tri, et distinguer une avancée concrète d'un simple effet de mode. Les agrégateurs et les assistants capables de résumer du contenu allègent la charge, à condition de les configurer avec précision.</p>

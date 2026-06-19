@@ -32,6 +32,7 @@ $jsonLd = [
             <div class="col-lg-9">
                 <article style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
                     <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 20px;">L'IA locale : faire tourner un modèle de langage sur son ordinateur</h1>
+                    <x-fronttheme::page-freshness updated="2026-06-19" />
 
                     <p><strong>On peut aujourd'hui exécuter des modèles de langage (LLM) directement sur son propre ordinateur, sans passer par le cloud.</strong> Un bon portable suffit pour des modèles de 7 à 14 milliards de paramètres ; les très gros modèles exigent une machine de bureau puissante. L'IA locale séduit par la confidentialité, le coût et le fonctionnement hors-ligne — au prix de quelques compromis.</p>
                     <p>Pour les développeurs et les PME sensibles à la protection des données, exécuter un modèle localement permet de garder l'information sur place. Le choix dépend de vos besoins, de votre matériel et du niveau de performance attendu.</p>

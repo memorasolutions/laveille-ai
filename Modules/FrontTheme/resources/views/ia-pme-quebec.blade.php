@@ -33,6 +33,7 @@
                 <article style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
 
                     <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 20px;">L'intelligence artificielle pour les PME québécoises</h1>
+                    <x-fronttheme::page-freshness updated="2026-06-19" />
 
                     <p><strong>L'IA aide les PME québécoises à gagner du temps, améliorer leurs processus internes et mieux servir leurs clients</strong> — sans nécessiter une expertise technique poussée. Il n'est pas nécessaire d'avoir une équipe dédiée pour tirer parti des outils d'IA accessibles aujourd'hui. L'enjeu n'est pas de tout automatiser, mais de cibler des tâches précises où l'IA apporte une réelle valeur : rédaction, analyse de données, service à la clientèle ou veille concurrentielle.</p>
 

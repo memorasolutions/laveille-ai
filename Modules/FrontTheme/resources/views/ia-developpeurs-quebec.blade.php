@@ -22,6 +22,7 @@
     <div class="container"><div class="row justify-content-center"><div class="col-lg-9">
         <article style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
             <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 20px;">IA pour développeurs et stratèges techniques au Québec : Claude, IA locale et MCP</h1>
+            <x-fronttheme::page-freshness updated="2026-06-19" />
 
             <p><strong>Les développeurs et stratèges techniques peuvent exploiter les grands modèles de langage (comme Claude), l'IA exécutée localement et le protocole MCP pour améliorer leur productivité, renforcer la confidentialité des données et intégrer l'IA dans leurs outils métier.</strong> Ces approches permettent d'automatiser des tâches de codage, de générer ou documenter du code, ou d'interroger des données internes sans les exposer à des services externes.</p>
             <p>L'exécution locale de modèles offre un meilleur contrôle sur les données sensibles et peut réduire les coûts à long terme. Le protocole MCP (Model Context Protocol) facilite la connexion sécurisée entre un modèle et des outils ou sources externes. Maîtriser la consommation de tokens, en optimisant les requêtes et le contexte, devient alors essentiel, en local comme dans le cloud.</p>

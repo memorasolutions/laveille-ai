@@ -36,6 +36,7 @@ $jsonLd = [
                 <article style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
 
                     <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 20px;">IA et Loi 25 : protéger les renseignements personnels dans le secteur public</h1>
+                    <x-fronttheme::page-freshness updated="2026-06-19" />
 
                     <p>La Loi 25 (Loi modernisant des dispositions législatives en matière de protection des renseignements personnels) impose aux organismes publics québécois de protéger rigoureusement les renseignements personnels qu'ils détiennent. Cela inclut l'obligation de ne jamais transmettre de tels renseignements à des outils d'intelligence artificielle externes sans précautions strictes.</p>
 

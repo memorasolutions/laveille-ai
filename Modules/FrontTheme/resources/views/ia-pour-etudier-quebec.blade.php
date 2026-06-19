@@ -32,6 +32,7 @@ $jsonLd = [
             <div class="col-lg-9">
                 <article style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
                     <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 20px;">L'IA pour étudier au Québec : usages, bénéfices et règles</h1>
+                    <x-fronttheme::page-freshness updated="2026-06-19" />
 
                     <p><strong>De plus en plus d'étudiants québécois utilisent l'IA pour étudier.</strong> Bien utilisée, elle soutient l'apprentissage, mais comporte des risques et est encadrée par des règles. Vérifiez toujours la politique de votre établissement.</p>
                     <p>L'intelligence artificielle transforme les pratiques d'apprentissage au Québec. Si elle offre des atouts concrets — notamment pour des tâches exigeantes comme l'organisation ou la reformulation —, elle exige aussi vigilance, esprit critique et respect des cadres institutionnels et légaux.</p>

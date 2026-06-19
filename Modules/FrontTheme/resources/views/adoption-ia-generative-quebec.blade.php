@@ -32,6 +32,7 @@ $jsonLd = [
             <div class="col-lg-9">
                 <article style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
                     <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 20px;">L'adoption de l'IA générative au Québec : les chiffres</h1>
+                    <x-fronttheme::page-freshness updated="2026-06-19" />
 
                     <p><strong>En 2025, 52 % des adultes québécois déclaraient avoir utilisé l'IA générative, contre 33 % un an plus tôt (Académie de la transformation numérique, Université Laval).</strong> Cette progression rapide témoigne d'une appropriation croissante de ces outils dans la vie quotidienne, professionnelle et scolaire. Comprendre qui les utilise, avec quels outils et dans quels buts permet de mieux saisir les transformations en cours.</p>
                     <p>Ce dossier présente l'évolution de l'adoption de l'IA générative au Québec, les outils les plus populaires, les profils d'utilisateurs et les usages les plus fréquents — et ce que cela implique pour une veille éclairée.</p>
