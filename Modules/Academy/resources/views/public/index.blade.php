@@ -4,9 +4,29 @@
 @section('title', 'Académie IA - ' . config('app.name'))
 @section('meta_description', "Formations pratiques sur l'intelligence artificielle pour apprendre à intégrer l'IA dans votre quotidien professionnel au Québec.")
 
-@section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Académie'])
-@endsection
+@push('head')
+@php
+    $academyBreadcrumbJsonLd = [
+        '@context' => 'https://schema.org',
+        '@type' => 'BreadcrumbList',
+        'itemListElement' => [
+            [
+                '@type' => 'ListItem',
+                'position' => 1,
+                'name' => 'Accueil',
+                'item' => route('home'),
+            ],
+            [
+                '@type' => 'ListItem',
+                'position' => 2,
+                'name' => 'Académie',
+                'item' => url()->current(),
+            ],
+        ],
+    ];
+@endphp
+<script type="application/ld+json">{!! json_encode($academyBreadcrumbJsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+@endpush
 
 @push('styles')
 <style>
@@ -17,6 +37,19 @@
         margin-bottom: 2rem;
     }
     .academy-hero h1 { font-family: var(--f-heading); font-weight: 800; margin-bottom: 0.5rem; }
+    .academy-breadcrumb {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.85);
+        margin-bottom: 0.75rem;
+    }
+    .academy-breadcrumb a {
+        color: rgba(255, 255, 255, 0.85);
+        text-decoration: none;
+    }
+    .academy-breadcrumb a:hover,
+    .academy-breadcrumb a:focus { color: #fff; text-decoration: underline; }
+    .academy-breadcrumb .sep { margin: 0 0.4rem; opacity: 0.7; }
+    .academy-breadcrumb [aria-current="page"] { color: #fff; font-weight: 600; }
     .academy-pill {
         display: inline-flex;
         align-items: center;
@@ -41,13 +74,18 @@
     {{-- Hero --}}
     <div class="academy-hero">
         <div class="container text-center">
+            <nav class="academy-breadcrumb" aria-label="Fil d'Ariane">
+                <a href="{{ route('home') }}">Accueil</a>
+                <span class="sep" aria-hidden="true">/</span>
+                <span aria-current="page">Académie</span>
+            </nav>
             <h1>Académie</h1>
             <p class="lead mb-0">Des formations pratiques pour maîtriser l'IA au Québec.</p>
         </div>
     </div>
 
     <div class="container">
-        {{-- M7 — Recherche --}}
+        {{-- M7 - Recherche --}}
         <form method="GET" action="{{ route('academy.index') }}" class="mb-3" role="search">
             @if($currentFilter)
                 <input type="hidden" name="filter" value="{{ $currentFilter }}">
