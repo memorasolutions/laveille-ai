@@ -9,6 +9,9 @@
      à la méthode Livewire de réordonnancement. La SÉCURITÉ reste serveur : l'ordre client n'est
      qu'une suggestion ; reorder*() ré-autorise et valide l'appartenance des ids (anti-IDOR). --}}
 @once
+    @push('styles')
+        <style>[x-cloak]{display:none !important;}</style>
+    @endpush
     @push('scripts')
         <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/sort@3.x.x/dist/cdn.min.js"></script>
         <script>
@@ -24,6 +27,28 @@
 @endonce
 
 <div style="display: flex; flex-direction: column; gap: 28px;">
+
+    {{-- ───────────────────────── Indicateur « enregistré » (signal global discret) ─────────────────────────
+         Piloté par Alpine : « Enregistrement… » pendant une requête Livewire en cours
+         (wire:loading), puis « ✓ Enregistré » ~2,5 s à la réception de l'évènement
+         Livewire academy-saved (émis par flashSaved côté serveur), puis fondu de sortie.
+         a11y : role=status + aria-live=polite (annonce non intrusive). --}}
+    <div
+        x-data="{ saved: false, timer: null, show(){ this.saved = true; clearTimeout(this.timer); this.timer = setTimeout(() => this.saved = false, 2500); } }"
+        x-on:academy-saved.window="show()"
+        role="status" aria-live="polite"
+        style="position: sticky; top: 8px; z-index: 5; display: flex; justify-content: flex-end; min-height: 0; pointer-events: none;">
+        {{-- Pendant la requête Livewire (autosave / clic Enregistrer) --}}
+        <span wire:loading
+              style="font-size: 0.78rem; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #F1F5F9; color: var(--sys-text-muted, #475569); box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+            Enregistrement…
+        </span>
+        {{-- Une fois la requête terminée et l'évènement reçu --}}
+        <span wire:loading.remove x-show="saved" x-transition.opacity.duration.400ms x-cloak
+              style="font-size: 0.78rem; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #E0F2F1; color: var(--sys-action-primary, #064E5A); box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+            ✓ Enregistré
+        </span>
+    </div>
 
     {{-- ───────────────────────── Message de succès ───────────────────────── --}}
     @if (session('academy_editor_status'))
@@ -50,21 +75,21 @@
         <form wire:submit="save" style="display: flex; flex-direction: column; gap: 16px;">
             <div>
                 <label for="meta-title" style="display: block; font-weight: 600; margin-bottom: 6px;">Titre</label>
-                <input id="meta-title" type="text" wire:model="title"
+                <input id="meta-title" type="text" wire:model.blur="title"
                        style="width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                 @error('title') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
             </div>
 
             <div>
                 <label for="meta-subtitle" style="display: block; font-weight: 600; margin-bottom: 6px;">Sous-titre</label>
-                <input id="meta-subtitle" type="text" wire:model="subtitle"
+                <input id="meta-subtitle" type="text" wire:model.blur="subtitle"
                        style="width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                 @error('subtitle') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
             </div>
 
             <div>
                 <label for="meta-summary" style="display: block; font-weight: 600; margin-bottom: 6px;">Résumé</label>
-                <textarea id="meta-summary" wire:model="summary" rows="3"
+                <textarea id="meta-summary" wire:model.blur="summary" rows="3"
                           style="width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);"></textarea>
                 @error('summary') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
             </div>
@@ -124,7 +149,7 @@
             <div class="d-flex flex-wrap gap-3">
                 <div style="flex: 1 1 200px;">
                     <label for="meta-level" style="display: block; font-weight: 600; margin-bottom: 6px;">Niveau</label>
-                    <select id="meta-level" wire:model="level"
+                    <select id="meta-level" wire:model.blur="level"
                             style="width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                         <option value="intro">Débutant</option>
                         <option value="inter">Intermédiaire</option>
@@ -135,7 +160,7 @@
 
                 <div style="flex: 1 1 200px;">
                     <label for="meta-language" style="display: block; font-weight: 600; margin-bottom: 6px;">Langue</label>
-                    <input id="meta-language" type="text" wire:model="language" maxlength="10"
+                    <input id="meta-language" type="text" wire:model.blur="language" maxlength="10"
                            style="width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                     @error('language') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
                 </div>
@@ -144,7 +169,7 @@
             <div class="d-flex flex-wrap gap-3">
                 <div style="flex: 1 1 200px;">
                     <label for="meta-visibility" style="display: block; font-weight: 600; margin-bottom: 6px;">Visibilité</label>
-                    <select id="meta-visibility" wire:model="visibility"
+                    <select id="meta-visibility" wire:model.blur="visibility"
                             style="width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                         <option value="public">Publique</option>
                         <option value="unlisted">Non répertoriée</option>
@@ -168,11 +193,15 @@
             @if (in_array($access_type, ['paid_one_time', 'paid_subscription'], true))
                 <div style="flex: 1 1 200px;">
                     <label for="meta-price" style="display: block; font-weight: 600; margin-bottom: 6px;">Prix (en cents)</label>
-                    <input id="meta-price" type="number" min="0" wire:model="price_cents"
+                    <input id="meta-price" type="number" min="0" wire:model.blur="price_cents"
                            style="width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                     @error('price_cents') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
                 </div>
             @endif
+
+            <p style="font-size: 0.74rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">
+                Les modifications sont enregistrées automatiquement dès que vous quittez un champ.
+            </p>
 
             <div class="d-flex flex-wrap align-items-center gap-2" style="margin-top: 6px;">
                 @can('update', $course)
@@ -234,14 +263,43 @@
                               title="Glisser pour réordonner le chapitre"
                               style="cursor: grab; user-select: none; color: var(--sys-text-muted, #9CA3AF); font-size: 1.1rem; line-height: 1; padding: 4px 2px; align-self: center;">⠿</span>
                     @endcan
-                    <div style="flex: 1 1 240px;">
-                        <h3 style="font-family: var(--f-heading); font-size: 1.05rem; color: var(--sys-text-default, #1A1D23); margin: 0 0 4px;">
-                            {{ $chapter->title }}
-                        </h3>
-                        @if ($chapter->summary)
-                            <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 0;">{{ $chapter->summary }}</p>
-                        @endif
-                    </div>
+                    {{-- Titre du chapitre : clic-pour-éditer (Alpine). Enregistre sur blur ET sur Entrée
+                         (appelle la méthode Livewire updateChapter, gardes serveur inchangées) ; Échap annule.
+                         Le résumé reste éditable via le panneau « Modifier » plus bas. --}}
+                    @can('manageStructure', $course)
+                        <div style="flex: 1 1 240px;"
+                             x-data="{ editing: false, value: @js($chapter->title), original: @js($chapter->title),
+                                       commit() { this.editing = false; const v = this.value.trim();
+                                                  if (v !== '' && v !== this.original) { $wire.updateChapter({{ $chapter->id }}, v, @js($chapter->summary)); this.original = v; }
+                                                  else { this.value = this.original; } },
+                                       cancel() { this.value = this.original; this.editing = false; } }">
+                            <div x-show="!editing" class="d-flex align-items-center gap-2">
+                                <h3 @click="editing = true" style="font-family: var(--f-heading); font-size: 1.05rem; color: var(--sys-text-default, #1A1D23); margin: 0; cursor: text;">
+                                    <span x-text="value"></span>
+                                </h3>
+                                <button type="button" @click="editing = true" aria-label="Renommer le chapitre « {{ $chapter->title }} »" title="Renommer le chapitre"
+                                        style="border: none; background: none; cursor: pointer; color: var(--sys-action-primary, #064E5A); font-size: 0.85rem; min-width: 24px; min-height: 24px; line-height: 1; padding: 4px;">✏️</button>
+                            </div>
+                            <input x-show="editing" x-cloak type="text" x-model="value"
+                                   x-ref="chapterTitleInput"
+                                   x-init="$watch('editing', v => { if (v) $nextTick(() => $refs.chapterTitleInput.focus()) })"
+                                   @blur="commit()" @keydown.enter.prevent="commit()" @keydown.escape.prevent="cancel()"
+                                   aria-label="Titre du chapitre"
+                                   style="width: 100%; padding: 8px 12px; min-height: 24px; border: 1px solid var(--sys-action-primary, #064E5A); border-radius: var(--sys-radius-md, 0.5rem); font-family: var(--f-heading); font-size: 1.05rem;">
+                            @if ($chapter->summary)
+                                <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">{{ $chapter->summary }}</p>
+                            @endif
+                        </div>
+                    @else
+                        <div style="flex: 1 1 240px;">
+                            <h3 style="font-family: var(--f-heading); font-size: 1.05rem; color: var(--sys-text-default, #1A1D23); margin: 0 0 4px;">
+                                {{ $chapter->title }}
+                            </h3>
+                            @if ($chapter->summary)
+                                <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 0;">{{ $chapter->summary }}</p>
+                            @endif
+                        </div>
+                    @endcan
 
                     @can('manageStructure', $course)
                         <div class="d-flex flex-wrap align-items-center gap-1">
@@ -261,7 +319,7 @@
                 {{-- Édition inline du titre/résumé du chapitre --}}
                 @can('manageStructure', $course)
                     <details style="margin-bottom: 12px;">
-                        <summary style="cursor: pointer; font-size: 0.85rem; color: var(--sys-action-primary, #064E5A); font-weight: 600;">Renommer ce chapitre</summary>
+                        <summary style="cursor: pointer; font-size: 0.85rem; color: var(--sys-action-primary, #064E5A); font-weight: 600;">Modifier le titre ou le résumé</summary>
                         <form wire:submit="updateChapter({{ $chapter->id }}, $event.target.title.value, $event.target.summary.value)"
                               style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
                             <input type="text" name="title" value="{{ $chapter->title }}" aria-label="Titre du chapitre"
@@ -293,13 +351,40 @@
                                               title="Glisser pour réordonner la leçon"
                                               style="cursor: grab; user-select: none; color: var(--sys-text-muted, #9CA3AF); font-size: 1rem; line-height: 1; padding: 2px; align-self: center;">⠿</span>
                                     @endcan
-                                    <div style="flex: 1 1 220px;">
-                                        <strong style="color: var(--sys-text-default, #1A1D23);">{{ $lesson->title }}</strong>
-                                        <p style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">
-                                            {{ $lesson->lesson_items_count }} {{ $lesson->lesson_items_count > 1 ? 'éléments' : 'élément' }}
-                                            @if ($lesson->estimated_minutes) · {{ $lesson->estimated_minutes }} min @endif
-                                        </p>
-                                    </div>
+                                    {{-- Titre de la leçon : clic-pour-éditer (Alpine). Enregistre sur blur ET
+                                         sur Entrée (méthode Livewire updateLesson, gardes serveur inchangées) ; Échap annule. --}}
+                                    @can('manageStructure', $course)
+                                        <div style="flex: 1 1 220px;"
+                                             x-data="{ editing: false, value: @js($lesson->title), original: @js($lesson->title),
+                                                       commit() { this.editing = false; const v = this.value.trim();
+                                                                  if (v !== '' && v !== this.original) { $wire.updateLesson({{ $lesson->id }}, v, @js($lesson->summary), @js($lesson->estimated_minutes)); this.original = v; }
+                                                                  else { this.value = this.original; } },
+                                                       cancel() { this.value = this.original; this.editing = false; } }">
+                                            <div x-show="!editing" class="d-flex align-items-center gap-2">
+                                                <strong @click="editing = true" style="color: var(--sys-text-default, #1A1D23); cursor: text;" x-text="value"></strong>
+                                                <button type="button" @click="editing = true" aria-label="Renommer la leçon « {{ $lesson->title }} »" title="Renommer la leçon"
+                                                        style="border: none; background: none; cursor: pointer; color: var(--sys-action-primary, #064E5A); font-size: 0.8rem; min-width: 24px; min-height: 24px; line-height: 1; padding: 4px;">✏️</button>
+                                            </div>
+                                            <input x-show="editing" x-cloak type="text" x-model="value"
+                                                   x-ref="lessonTitleInput"
+                                                   x-init="$watch('editing', v => { if (v) $nextTick(() => $refs.lessonTitleInput.focus()) })"
+                                                   @blur="commit()" @keydown.enter.prevent="commit()" @keydown.escape.prevent="cancel()"
+                                                   aria-label="Titre de la leçon"
+                                                   style="width: 100%; padding: 7px 12px; min-height: 24px; border: 1px solid var(--sys-action-primary, #064E5A); border-radius: var(--sys-radius-md, 0.5rem); font-weight: 700;">
+                                            <p style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">
+                                                {{ $lesson->lesson_items_count }} {{ $lesson->lesson_items_count > 1 ? 'éléments' : 'élément' }}
+                                                @if ($lesson->estimated_minutes) · {{ $lesson->estimated_minutes }} min @endif
+                                            </p>
+                                        </div>
+                                    @else
+                                        <div style="flex: 1 1 220px;">
+                                            <strong style="color: var(--sys-text-default, #1A1D23);">{{ $lesson->title }}</strong>
+                                            <p style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">
+                                                {{ $lesson->lesson_items_count }} {{ $lesson->lesson_items_count > 1 ? 'éléments' : 'élément' }}
+                                                @if ($lesson->estimated_minutes) · {{ $lesson->estimated_minutes }} min @endif
+                                            </p>
+                                        </div>
+                                    @endcan
 
                                     @can('manageStructure', $course)
                                         <div class="d-flex flex-wrap align-items-center gap-1">

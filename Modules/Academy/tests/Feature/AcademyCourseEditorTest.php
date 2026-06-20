@@ -206,11 +206,12 @@ test('ANTI-ESCALADE : formateur de A ne peut pas muter B même en forgeant le co
         ->test(CourseEditor::class, ['course' => $this->courseA]);
 
     // Forge l'identifiant côté navigateur vers le cours B (non autorisé) puis
-    // tente une mutation. save() re-résout B et appelle authorize('update', B)
-    // → Livewire rend un 403 (l'autorisation serveur bloque l'écriture).
+    // tente une mutation. Modifier un champ de métadonnées déclenche l'autosave
+    // (updated()), qui appelle save() : ce dernier re-résout B et appelle
+    // authorize('update', B) → Livewire rend un 403 (l'autorisation serveur
+    // bloque l'écriture, autosave inclus). Le set('title') porte déjà la garde.
     $component->set('courseId', $this->courseB->id)
         ->set('title', 'Pirate')
-        ->call('save')
         ->assertForbidden();
 
     // Le cours B n'a pas changé.

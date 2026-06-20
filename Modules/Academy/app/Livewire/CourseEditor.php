@@ -103,6 +103,12 @@ class CourseEditor extends Component
     public ?int $confirmingItemDeletion = null;
     public bool $confirmingCourseDeletion = false;
 
+    /** Liste blanche des métadonnées du cours en autosave (wire:model.blur → updated()). */
+    private const METADATA_FIELDS = [
+        'title', 'subtitle', 'summary', 'level',
+        'language', 'visibility', 'access_type', 'price_cents',
+    ];
+
     /**
      * Entrée dans l'éditeur. Autorisation SERVEUR obligatoire : seul un gérant de
      * CE cours (admin OU owner/instructor/editor) peut ouvrir l'éditeur.
@@ -113,6 +119,29 @@ class CourseEditor extends Component
 
         $this->courseId = $course->id;
         $this->fillMetadataFrom($course);
+    }
+
+    /**
+     * Signal global « enregistré » (DRY). Flash session pour la persistance d'un
+     * rechargement + évènement Livewire pour l'indicateur Alpine discret en haut.
+     */
+    private function flashSaved(string $msg): void
+    {
+        session()->flash('academy_editor_status', $msg);
+        $this->dispatch('academy-saved', message: $msg);
+    }
+
+    /**
+     * Autosave des métadonnées du cours. Déclenché par wire:model.blur sur la liste
+     * blanche des 8 champs de métadonnées UNIQUEMENT (jamais les saisies de nouveaux
+     * chapitres/leçons/items ni les uploads). La validation/sécurité de save() reste
+     * la seule garde : resolveCourse() → authorize('update') → validate → écrire.
+     */
+    public function updated(string $name): void
+    {
+        if (in_array($name, self::METADATA_FIELDS, true)) {
+            $this->save();
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -202,7 +231,7 @@ class CourseEditor extends Component
 
         $course->update($validated);
 
-        session()->flash('academy_editor_status', 'Métadonnées du cours enregistrées.');
+        $this->flashSaved('Métadonnées du cours enregistrées.');
     }
 
     public function togglePublish(): void
@@ -251,7 +280,7 @@ class CourseEditor extends Component
         $course->forceFill(['image_media_id' => $media->id, 'updated_by' => Auth::id()])->save();
 
         $this->reset('cover');
-        session()->flash('academy_editor_status', 'Image de couverture mise à jour.');
+        $this->flashSaved('Image de couverture mise à jour.');
     }
 
     public function removeCover(): void
@@ -263,7 +292,7 @@ class CourseEditor extends Component
         $course->forceFill(['image_media_id' => null, 'updated_by' => Auth::id()])->save();
 
         $this->reset('cover');
-        session()->flash('academy_editor_status', 'Image de couverture retirée.');
+        $this->flashSaved('Image de couverture retirée.');
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -290,7 +319,7 @@ class CourseEditor extends Component
         ]);
 
         $this->reset(['newChapterTitle', 'newChapterSummary']);
-        session()->flash('academy_editor_status', 'Chapitre ajouté.');
+        $this->flashSaved('Chapitre ajouté.');
     }
 
     public function updateChapter(int $chapterId, string $title, ?string $summary = null): void
@@ -310,7 +339,7 @@ class CourseEditor extends Component
 
         $chapter->update($data);
 
-        session()->flash('academy_editor_status', 'Chapitre mis à jour.');
+        $this->flashSaved('Chapitre mis à jour.');
     }
 
     public function deleteChapter(int $chapterId): void
@@ -322,7 +351,7 @@ class CourseEditor extends Component
         $chapter->delete(); // suppression en cascade des leçons gérée par la FK (onDelete cascade)
 
         $this->confirmingChapterDeletion = null;
-        session()->flash('academy_editor_status', 'Chapitre supprimé.');
+        $this->flashSaved('Chapitre supprimé.');
     }
 
     public function moveChapterUp(int $chapterId): void
@@ -391,7 +420,7 @@ class CourseEditor extends Component
             }
         });
 
-        session()->flash('academy_editor_status', 'Ordre des chapitres enregistré.');
+        $this->flashSaved('Ordre des chapitres enregistré.');
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -426,7 +455,7 @@ class CourseEditor extends Component
         ]);
 
         unset($this->newLesson[$chapterId]);
-        session()->flash('academy_editor_status', 'Leçon ajoutée.');
+        $this->flashSaved('Leçon ajoutée.');
     }
 
     public function updateLesson(int $lessonId, string $title, ?string $summary = null, ?int $estimatedMinutes = null): void
@@ -453,7 +482,7 @@ class CourseEditor extends Component
             'estimated_minutes' => $data['estimated_minutes'] ?? null,
         ]);
 
-        session()->flash('academy_editor_status', 'Leçon mise à jour.');
+        $this->flashSaved('Leçon mise à jour.');
     }
 
     public function deleteLesson(int $lessonId): void
@@ -465,7 +494,7 @@ class CourseEditor extends Component
         $lesson->delete();
 
         $this->confirmingLessonDeletion = null;
-        session()->flash('academy_editor_status', 'Leçon supprimée.');
+        $this->flashSaved('Leçon supprimée.');
     }
 
     public function moveLessonUp(int $lessonId): void
@@ -536,7 +565,7 @@ class CourseEditor extends Component
             }
         });
 
-        session()->flash('academy_editor_status', 'Ordre des leçons enregistré.');
+        $this->flashSaved('Ordre des leçons enregistré.');
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -575,7 +604,7 @@ class CourseEditor extends Component
         ]);
 
         unset($this->newItem[$lessonId]);
-        session()->flash('academy_editor_status', 'Élément ajouté.');
+        $this->flashSaved('Élément ajouté.');
     }
 
     /**
@@ -625,7 +654,7 @@ class CourseEditor extends Component
             'external_ref'      => $data['external_ref'] ?? null,
         ]);
 
-        session()->flash('academy_editor_status', 'Élément mis à jour.');
+        $this->flashSaved('Élément mis à jour.');
     }
 
     public function deleteItem(int $itemId): void
@@ -637,7 +666,7 @@ class CourseEditor extends Component
         $item->delete();
 
         $this->confirmingItemDeletion = null;
-        session()->flash('academy_editor_status', 'Élément supprimé.');
+        $this->flashSaved('Élément supprimé.');
     }
 
     public function toggleRequired(int $itemId): void
@@ -648,7 +677,7 @@ class CourseEditor extends Component
         $item = $this->resolveItemFor($course, $itemId);
         $item->update(['is_required' => ! $item->is_required]);
 
-        session()->flash('academy_editor_status', 'Élément mis à jour.');
+        $this->flashSaved('Élément mis à jour.');
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -682,7 +711,7 @@ class CourseEditor extends Component
         $item->forceFill(['poster_media_id' => $media->id, 'payload' => $payload])->save();
 
         unset($this->itemPoster[$itemId]);
-        session()->flash('academy_editor_status', 'Affiche de la vidéo mise à jour.');
+        $this->flashSaved('Affiche de la vidéo mise à jour.');
     }
 
     public function removeItemPoster(int $itemId): void
@@ -698,7 +727,7 @@ class CourseEditor extends Component
         $item->forceFill(['poster_media_id' => null, 'payload' => $payload])->save();
 
         unset($this->itemPoster[$itemId]);
-        session()->flash('academy_editor_status', 'Affiche de la vidéo retirée.');
+        $this->flashSaved('Affiche de la vidéo retirée.');
     }
 
     public function uploadItemAttachment(int $itemId): void
@@ -738,7 +767,7 @@ class CourseEditor extends Component
         $item->forceFill(['payload' => $payload])->save();
 
         unset($this->itemAttachment[$itemId]);
-        session()->flash('academy_editor_status', 'Pièce jointe ajoutée.');
+        $this->flashSaved('Pièce jointe ajoutée.');
     }
 
     public function removeItemAttachment(int $itemId, int $mediaId): void
@@ -761,7 +790,7 @@ class CourseEditor extends Component
         ));
         $item->forceFill(['payload' => $payload])->save();
 
-        session()->flash('academy_editor_status', 'Pièce jointe retirée.');
+        $this->flashSaved('Pièce jointe retirée.');
     }
 
     /**
@@ -846,7 +875,7 @@ class CourseEditor extends Component
             }
         });
 
-        session()->flash('academy_editor_status', 'Ordre des éléments enregistré.');
+        $this->flashSaved('Ordre des éléments enregistré.');
     }
 
     /**
