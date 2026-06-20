@@ -21,8 +21,10 @@
  *  - @can(...) en Blade ne sert qu'à CACHER des boutons (jamais l'unique garde).
  *
  * Portée FE-3 : métadonnées + chapitres + leçons (CRUD + réordonnancement).
- * Les ITEMS de leçon (vidéo/quiz/doc) = phase suivante (FE-3b) : on n'affiche
- * ici que leur nombre + un placeholder « Gérer le contenu (à venir) ».
+ * Portée FE-3b (cette phase) : ITEMS de leçon (vidéo ScreenPal / document / quiz).
+ * Mêmes gardes serveur : resolveCourse() → authorize('manageStructure') →
+ * resolveItemFor(course, lessonId, itemId) (anti-IDOR remontant
+ * item->lesson->chapter->course) → validate → écrire.
  */
 
 declare(strict_types=1);
@@ -37,9 +39,13 @@ use Livewire\Component;
 use Modules\Academy\Models\Chapter;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Lesson;
+use Modules\Academy\Models\LessonItem;
 
 class CourseEditor extends Component
 {
+    /** Types d'items autorisés (liste blanche, alignée sur l'admin Backoffice). */
+    private const ITEM_TYPES = ['video', 'document', 'quiz'];
+
     /** Identifiant du cours géré (figé au montage, source de vérité serveur). */
     public int $courseId;
 
@@ -61,9 +67,19 @@ class CourseEditor extends Component
     /** @var array<int, array{title: string, summary: ?string, estimated_minutes: ?int}> */
     public array $newLesson = [];
 
+    // ── Saisie d'un nouvel item (par leçon, indexé par lesson_id) ────────────────
+    /**
+     * @var array<int, array{
+     *   type: string, title: string, estimated_minutes: ?int, is_required: bool,
+     *   external_ref: ?string, rich_text: ?string, qt_bank_key: ?string
+     * }>
+     */
+    public array $newItem = [];
+
     // ── Confirmations de suppression inline à 2 temps (jamais confirm() natif) ───
     public ?int $confirmingChapterDeletion = null;
     public ?int $confirmingLessonDeletion = null;
+    public ?int $confirmingItemDeletion = null;
     public bool $confirmingCourseDeletion = false;
 
     /**
@@ -108,6 +124,18 @@ class CourseEditor extends Component
     {
         return Lesson::where('lessons.id', $lessonId)
             ->whereHas('chapter', fn ($q) => $q->where('course_id', $course->id))
+            ->firstOrFail();
+    }
+
+    /**
+     * Re-résout un item ET vérifie qu'il appartient bien à une leçon d'un chapitre
+     * de CE cours (anti-IDOR), en remontant item->lesson->chapter->course_id.
+     * Un item étranger (autre cours) → ModelNotFound, aucune écriture possible.
+     */
+    private function resolveItemFor(Course $course, int $itemId): LessonItem
+    {
+        return LessonItem::where('lesson_items.id', $itemId)
+            ->whereHas('lesson.chapter', fn ($q) => $q->where('course_id', $course->id))
             ->firstOrFail();
     }
 
@@ -381,6 +409,180 @@ class CourseEditor extends Component
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
+    // ITEMS DE LEÇON (vidéo ScreenPal / document / quiz) - FE-3b
+    //
+    // Chaque mutation : resolveCourse() → authorize('manageStructure') →
+    // resolveLessonFor / resolveItemFor (anti-IDOR) → validate → écrire.
+    // Le `type` est toujours validé contre la liste blanche ITEM_TYPES.
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    public function addItem(int $lessonId, string $type): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        // Anti-IDOR : la leçon doit appartenir à un chapitre de CE cours.
+        $lesson = $this->resolveLessonFor($course, $lessonId);
+
+        $input          = $this->newItem[$lessonId] ?? [];
+        $input['type']  = $type;
+
+        $data    = $this->validateItem($input);
+        $payload = $this->buildItemPayload($data['type'], $input);
+
+        $position = (int) LessonItem::where('lesson_id', $lesson->id)->max('position') + 1;
+
+        LessonItem::create([
+            'lesson_id'         => $lesson->id,
+            'type'              => $data['type'],
+            'title'             => $data['title'],
+            'position'          => $position,
+            'payload'           => $payload,
+            'estimated_minutes' => $data['estimated_minutes'] ?? null,
+            'is_required'       => (bool) ($input['is_required'] ?? false),
+            'external_ref'      => $data['external_ref'] ?? null,
+        ]);
+
+        unset($this->newItem[$lessonId]);
+        session()->flash('academy_editor_status', 'Élément ajouté.');
+    }
+
+    public function updateItem(
+        int $itemId,
+        string $type,
+        string $title,
+        ?int $estimatedMinutes = null,
+        ?string $externalRef = null,
+        ?string $richText = null,
+        ?string $qtBankKey = null
+    ): void {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        // Anti-IDOR : l'item doit appartenir à une leçon d'un chapitre de CE cours.
+        $item = $this->resolveItemFor($course, $itemId);
+
+        $input = [
+            'type'              => $type,
+            'title'             => $title,
+            'estimated_minutes' => $estimatedMinutes,
+            'external_ref'      => $externalRef,
+            'rich_text'         => $richText,
+            'qt_bank_key'       => $qtBankKey,
+        ];
+
+        $data    = $this->validateItem($input);
+        $payload = $this->buildItemPayload($data['type'], $input);
+
+        $item->update([
+            'type'              => $data['type'],
+            'title'             => $data['title'],
+            'payload'           => $payload,
+            'estimated_minutes' => $data['estimated_minutes'] ?? null,
+            'external_ref'      => $data['external_ref'] ?? null,
+        ]);
+
+        session()->flash('academy_editor_status', 'Élément mis à jour.');
+    }
+
+    public function deleteItem(int $itemId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $item = $this->resolveItemFor($course, $itemId);
+        $item->delete();
+
+        $this->confirmingItemDeletion = null;
+        session()->flash('academy_editor_status', 'Élément supprimé.');
+    }
+
+    public function toggleRequired(int $itemId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $item = $this->resolveItemFor($course, $itemId);
+        $item->update(['is_required' => ! $item->is_required]);
+
+        session()->flash('academy_editor_status', 'Élément mis à jour.');
+    }
+
+    public function moveItemUp(int $itemId): void
+    {
+        $this->swapItem($itemId, 'up');
+    }
+
+    public function moveItemDown(int $itemId): void
+    {
+        $this->swapItem($itemId, 'down');
+    }
+
+    private function swapItem(int $itemId, string $direction): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $item = $this->resolveItemFor($course, $itemId);
+
+        $neighbor = LessonItem::where('lesson_id', $item->lesson_id)
+            ->when(
+                $direction === 'up',
+                fn ($q) => $q->where('position', '<', $item->position)->orderByDesc('position'),
+                fn ($q) => $q->where('position', '>', $item->position)->orderBy('position')
+            )
+            ->first();
+
+        if (! $neighbor) {
+            return; // déjà en bout de liste
+        }
+
+        $tmp                = $item->position;
+        $item->position     = $neighbor->position;
+        $neighbor->position = $tmp;
+        $item->save();
+        $neighbor->save();
+    }
+
+    /**
+     * Validation commune d'un item. Le `type` est contraint à la liste blanche
+     * ITEM_TYPES (un type forgé hors liste est rejeté avant toute écriture).
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    private function validateItem(array $input): array
+    {
+        return validator($input, [
+            'type'              => ['required', Rule::in(self::ITEM_TYPES)],
+            'title'             => 'required|string|max:255',
+            'estimated_minutes' => 'nullable|integer|min:1',
+            'external_ref'      => 'nullable|string|max:500',
+            'rich_text'         => 'nullable|string|max:20000',
+            'qt_bank_key'       => 'nullable|string|max:120',
+        ])->validate();
+    }
+
+    /**
+     * Construit le payload (array casté) propre à chaque type, de façon défensive :
+     *  - video    : référence d'intégration ScreenPal (external_ref OU payload.embed).
+     *  - document : texte riche / markdown simple (payload.rich_text).
+     *  - quiz     : clé de banque QT réutilisée par QtService (payload.qt_bank_key).
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    private function buildItemPayload(string $type, array $input): array
+    {
+        return match ($type) {
+            'video'    => ['embed' => trim((string) ($input['external_ref'] ?? '')) ?: null],
+            'document' => ['rich_text' => (string) ($input['rich_text'] ?? '')],
+            'quiz'     => ['qt_bank_key' => trim((string) ($input['qt_bank_key'] ?? '')) ?: null],
+            default    => [],
+        };
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
     // SUPPRESSION DU COURS (action la plus sensible : admin OU owner uniquement)
     // ─────────────────────────────────────────────────────────────────────────────
 
@@ -418,6 +620,16 @@ class CourseEditor extends Component
         $this->confirmingLessonDeletion = null;
     }
 
+    public function confirmItemDeletion(int $itemId): void
+    {
+        $this->confirmingItemDeletion = $itemId;
+    }
+
+    public function cancelItemDeletion(): void
+    {
+        $this->confirmingItemDeletion = null;
+    }
+
     public function confirmCourseDeletion(): void
     {
         $this->confirmingCourseDeletion = true;
@@ -439,6 +651,7 @@ class CourseEditor extends Component
         return Course::with([
             'chapters' => fn ($q) => $q->orderBy('position'),
             'chapters.lessons' => fn ($q) => $q->orderBy('position')->withCount('lessonItems'),
+            'chapters.lessons.lessonItems' => fn ($q) => $q->orderBy('position'),
         ])->findOrFail($this->courseId);
     }
 

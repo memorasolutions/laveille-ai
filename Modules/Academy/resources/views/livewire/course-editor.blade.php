@@ -190,7 +190,6 @@
                                         <p style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">
                                             {{ $lesson->lesson_items_count }} {{ $lesson->lesson_items_count > 1 ? 'éléments' : 'élément' }}
                                             @if ($lesson->estimated_minutes) · {{ $lesson->estimated_minutes }} min @endif
-                                            · <span style="font-style: italic;" title="Disponible en phase FE-3b">Gérer le contenu (à venir)</span>
                                         </p>
                                     </div>
 
@@ -223,6 +222,143 @@
                                             <div><x-core::button type="submit" variant="secondary" size="sm">Enregistrer la leçon</x-core::button></div>
                                         </form>
                                     </details>
+                                @endcan
+
+                                {{-- ───────── Contenu de la leçon : éléments (vidéo / document / quiz) ───────── --}}
+                                @can('manageStructure', $course)
+                                    <div style="margin-top: 12px; border-top: 1px solid #F1F5F9; padding-top: 12px;">
+                                        <p style="font-weight: 600; font-size: 0.82rem; color: var(--sys-text-default, #1A1D23); margin: 0 0 8px;">
+                                            Contenu de la leçon
+                                        </p>
+
+                                        @if ($lesson->lessonItems->isNotEmpty())
+                                            <ul class="list-unstyled" style="margin: 0 0 10px; display: flex; flex-direction: column; gap: 8px;">
+                                                @foreach ($lesson->lessonItems as $item)
+                                                    @php($typeLabel = ['video' => 'Vidéo', 'document' => 'Document', 'quiz' => 'Quiz'][$item->type] ?? $item->type)
+                                                    <li style="border: 1px solid #F1F5F9; border-radius: var(--sys-radius-md, 0.5rem); padding: 10px 12px;">
+                                                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                                                            <div style="flex: 1 1 200px;">
+                                                                <span style="display: inline-block; font-size: 0.68rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #E0F2F1; color: #064E5A; margin-bottom: 4px;">
+                                                                    {{ $typeLabel }}
+                                                                </span>
+                                                                @if ($item->is_required)
+                                                                    <span style="display: inline-block; font-size: 0.68rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #FEF3C7; color: #92400E; margin-bottom: 4px;">Obligatoire</span>
+                                                                @endif
+                                                                <strong style="display: block; color: var(--sys-text-default, #1A1D23); font-size: 0.9rem;">{{ $item->title }}</strong>
+                                                                @if ($item->estimated_minutes)
+                                                                    <span style="font-size: 0.75rem; color: var(--sys-text-muted, #6B7280);">{{ $item->estimated_minutes }} min</span>
+                                                                @endif
+                                                            </div>
+
+                                                            <div class="d-flex flex-wrap align-items-center gap-1">
+                                                                <x-core::button type="button" wire:click="moveItemUp({{ $item->id }})" variant="ghost" size="sm" title="Monter l'élément" aria-label="Monter l'élément">↑</x-core::button>
+                                                                <x-core::button type="button" wire:click="moveItemDown({{ $item->id }})" variant="ghost" size="sm" title="Descendre l'élément" aria-label="Descendre l'élément">↓</x-core::button>
+                                                                <x-core::button type="button" wire:click="toggleRequired({{ $item->id }})" variant="ghost" size="sm" title="Basculer « obligatoire »">
+                                                                    {{ $item->is_required ? 'Rendre facultatif' : 'Rendre obligatoire' }}
+                                                                </x-core::button>
+                                                                @if ($confirmingItemDeletion === $item->id)
+                                                                    <span style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280);">Supprimer ?</span>
+                                                                    <x-core::button type="button" wire:click="deleteItem({{ $item->id }})" variant="danger" size="sm">Confirmer</x-core::button>
+                                                                    <x-core::button type="button" wire:click="cancelItemDeletion" variant="ghost" size="sm">Annuler</x-core::button>
+                                                                @else
+                                                                    <x-core::button type="button" wire:click="confirmItemDeletion({{ $item->id }})" variant="ghost" size="sm" title="Supprimer l'élément">Supprimer</x-core::button>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- Modifier cet élément (formulaire par type) --}}
+                                                        <details style="margin-top: 8px;">
+                                                            <summary style="cursor: pointer; font-size: 0.78rem; color: var(--sys-action-primary, #064E5A); font-weight: 600;">Modifier cet élément</summary>
+                                                            <form wire:submit="updateItem(
+                                                                    {{ $item->id }},
+                                                                    '{{ $item->type }}',
+                                                                    $event.target.title.value,
+                                                                    $event.target.estimated_minutes.value,
+                                                                    $event.target.external_ref ? $event.target.external_ref.value : null,
+                                                                    $event.target.rich_text ? $event.target.rich_text.value : null,
+                                                                    $event.target.qt_bank_key ? $event.target.qt_bank_key.value : null
+                                                                  )"
+                                                                  style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                                                                <label style="font-size: 0.78rem; font-weight: 600;" for="item-title-{{ $item->id }}">Titre</label>
+                                                                <input id="item-title-{{ $item->id }}" type="text" name="title" value="{{ $item->title }}" aria-label="Titre de l'élément"
+                                                                       style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                                @if ($item->type === 'video')
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-ref-{{ $item->id }}">Référence d'intégration ScreenPal</label>
+                                                                    <input id="item-ref-{{ $item->id }}" type="text" name="external_ref" value="{{ $item->external_ref ?? ($item->payload['embed'] ?? '') }}" placeholder="Identifiant ou URL d'intégration ScreenPal" aria-label="Référence ScreenPal"
+                                                                           style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                    <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+                                                                        La vidéo doit être non répertoriée, avec verrou de domaine activé sur ScreenPal.
+                                                                    </p>
+                                                                @elseif ($item->type === 'document')
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-doc-{{ $item->id }}">Contenu (texte riche / markdown simple)</label>
+                                                                    <textarea id="item-doc-{{ $item->id }}" name="rich_text" rows="4" aria-label="Contenu du document"
+                                                                              style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">{{ $item->payload['rich_text'] ?? '' }}</textarea>
+                                                                @elseif ($item->type === 'quiz')
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-qt-{{ $item->id }}">Clé de banque QT</label>
+                                                                    <input id="item-qt-{{ $item->id }}" type="text" name="qt_bank_key" value="{{ $item->payload['qt_bank_key'] ?? '' }}" placeholder="Clé de banque QT" aria-label="Clé de banque QT"
+                                                                           style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                    <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+                                                                        Le quiz réutilise QtService à partir de cette clé.
+                                                                    </p>
+                                                                @endif
+
+                                                                <label style="font-size: 0.78rem; font-weight: 600;" for="item-min-{{ $item->id }}">Durée estimée (min, facultatif)</label>
+                                                                <input id="item-min-{{ $item->id }}" type="number" min="1" name="estimated_minutes" value="{{ $item->estimated_minutes }}" aria-label="Durée estimée en minutes"
+                                                                       style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                                <div><x-core::button type="submit" variant="secondary" size="sm">Enregistrer l'élément</x-core::button></div>
+                                                            </form>
+                                                        </details>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <p style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 10px;">Aucun élément dans cette leçon.</p>
+                                        @endif
+
+                                        {{-- Ajouter un élément (formulaire par type) --}}
+                                        <details style="border-top: 1px dashed #E5E7EB; padding-top: 10px;">
+                                            <summary style="cursor: pointer; font-size: 0.8rem; color: var(--sys-action-primary, #064E5A); font-weight: 600;">Ajouter un élément</summary>
+
+                                            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-title-{{ $lesson->id }}">Titre de l'élément</label>
+                                                <input id="newitem-title-{{ $lesson->id }}" type="text" wire:model="newItem.{{ $lesson->id }}.title" placeholder="Titre de l'élément"
+                                                       style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                @error('title') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
+
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-ref-{{ $lesson->id }}">Référence ScreenPal (pour une vidéo)</label>
+                                                <input id="newitem-ref-{{ $lesson->id }}" type="text" wire:model="newItem.{{ $lesson->id }}.external_ref" placeholder="Identifiant ou URL d'intégration ScreenPal"
+                                                       style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+                                                    Vidéo : utilisez une vidéo non répertoriée avec verrou de domaine sur ScreenPal.
+                                                </p>
+
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-doc-{{ $lesson->id }}">Contenu (pour un document)</label>
+                                                <textarea id="newitem-doc-{{ $lesson->id }}" wire:model="newItem.{{ $lesson->id }}.rich_text" rows="3" placeholder="Texte riche / markdown simple"
+                                                          style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);"></textarea>
+
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-qt-{{ $lesson->id }}">Clé de banque QT (pour un quiz)</label>
+                                                <input id="newitem-qt-{{ $lesson->id }}" type="text" wire:model="newItem.{{ $lesson->id }}.qt_bank_key" placeholder="Clé de banque QT (réutilise QtService)"
+                                                       style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-min-{{ $lesson->id }}">Durée estimée (min, facultatif)</label>
+                                                <input id="newitem-min-{{ $lesson->id }}" type="number" min="1" wire:model="newItem.{{ $lesson->id }}.estimated_minutes" placeholder="Durée estimée"
+                                                       style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;">
+                                                    <input type="checkbox" wire:model="newItem.{{ $lesson->id }}.is_required" style="width: 18px; height: 18px;">
+                                                    Élément obligatoire
+                                                </label>
+
+                                                <div class="d-flex flex-wrap gap-2" style="margin-top: 4px;">
+                                                    <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'video')" variant="primary" size="sm">Ajouter une vidéo</x-core::button>
+                                                    <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'document')" variant="primary" size="sm">Ajouter un document</x-core::button>
+                                                    <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'quiz')" variant="primary" size="sm">Ajouter un quiz</x-core::button>
+                                                </div>
+                                            </div>
+                                        </details>
+                                    </div>
                                 @endcan
                             </li>
                         @endforeach
