@@ -139,7 +139,7 @@ class Dashboard extends Component
         return (bool) Auth::user()?->can('viewAny', Course::class);
     }
 
-    /** Peut-il créer un cours ? (placeholder phase 3) */
+    /** Peut-il créer un cours ? (admin OU formateur, via CoursePolicy::create) */
     #[Computed]
     public function canCreateCourse(): bool
     {

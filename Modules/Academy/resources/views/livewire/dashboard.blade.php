@@ -79,17 +79,11 @@
                 </h2>
 
                 @if($this->canCreateCourse)
-                    <x-core::button href="#" variant="secondary" size="sm" title="La création de cours arrive en phase 3.">
+                    <x-core::button :href="route('academy.courses.create')" variant="secondary" size="sm">
                         Créer un cours
                     </x-core::button>
                 @endif
             </div>
-
-            @if($this->canCreateCourse)
-                <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin-bottom: 16px;">
-                    La création de cours directement ici arrive en phase 3.
-                </p>
-            @endif
 
             @if($this->managedCourses->isNotEmpty())
                 <ul class="list-unstyled d-flex flex-column gap-3" style="margin: 0;">
@@ -113,7 +107,7 @@
 
                                 <div class="d-flex align-items-center gap-2">
                                     <x-core::button
-                                        :href="route('academy.courses.show', $course->slug)"
+                                        :href="route('academy.courses.manage', $course->slug)"
                                         variant="primary" size="sm">
                                         Gérer
                                     </x-core::button>
@@ -141,7 +135,7 @@
                 Administration
             </h2>
             <p style="font-size: 0.9rem; color: var(--sys-text-muted, #6B7280); margin-bottom: 14px;">
-                La gestion front-end complète arrive en phase 3. En attendant, le filet d'administration reste disponible.
+                La gestion front-end (création et édition des cours) est disponible ci-dessus. Le filet d'administration complet reste accessible ici au besoin.
             </p>
             <x-core::button href="/admin/academy/courses" variant="secondary" size="sm">
                 Ouvrir l'administration des cours

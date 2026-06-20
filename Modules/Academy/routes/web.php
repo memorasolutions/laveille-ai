@@ -36,6 +36,16 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             ->middleware('auth')
             ->name('dashboard');
 
+        // PHASE 5 (FE-5) - Création de cours front-end.
+        // Connexion requise ; l'autorisation d'entrée (create) vit dans
+        // CourseCreate::mount() via $this->authorize('create', Course::class)
+        // et est RÉ-AUTORISÉE à la création (jamais de confiance au navigateur).
+        // Déclarée AVANT les routes wildcard courses/{course:slug} pour que
+        // « creer » ne soit jamais capté comme un slug de cours.
+        Route::get('creer', fn () => view('academy::public.course-create'))
+            ->middleware('auth')
+            ->name('courses.create');
+
         // PHASE 3 (FE-3) - Éditeur de cours front-end (« mode édition »).
         // Connexion requise ; le cours est re-résolu côté serveur (binding par slug)
         // puis ré-autorisé À CHAQUE action par le composant Livewire (jamais de

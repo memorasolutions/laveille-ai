@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use Modules\Academy\Console\CourseReindexCommand;
+use Modules\Academy\Livewire\CourseCreate;
 use Modules\Academy\Livewire\CourseEditor;
 use Modules\Academy\Livewire\CourseRoster;
 use Modules\Academy\Livewire\Dashboard;
@@ -71,6 +72,11 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         }
 
         Livewire::component('academy.dashboard', Dashboard::class);
+
+        // PHASE 5 (FE-5) - Création de cours front-end (gâtée create()).
+        // Crée le Course (status='draft') + le CourseRole 'owner' du créateur en
+        // transaction, puis redirige vers l'éditeur. Voir CourseCreate.
+        Livewire::component('academy.course-create', CourseCreate::class);
 
         // PHASE 3 (FE-3) - Éditeur de cours front-end (métadonnées + structure).
         // Chaque mutation est gardée serveur par $this->authorize(...) (voir CourseEditor).
