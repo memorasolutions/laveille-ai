@@ -46,6 +46,58 @@
                 @error('summary') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
             </div>
 
+            {{-- ── Image de couverture (téléversement Spatie, collection « cover ») ── --}}
+            @can('update', $course)
+                <div style="border: 1px dashed #CBD5E1; border-radius: var(--sys-radius-md, 0.75rem); padding: 14px 16px;">
+                    <span style="display: block; font-weight: 600; margin-bottom: 8px;">Image de couverture</span>
+
+                    @php($coverUrl = $course->coverUrl())
+                    @if ($coverUrl)
+                        <div style="margin-bottom: 10px;">
+                            <img src="{{ $coverUrl }}" alt="Aperçu de l'image de couverture du cours « {{ $course->title }} »"
+                                 style="max-width: 240px; width: 100%; height: auto; border-radius: var(--sys-radius-md, 0.5rem); border: 1px solid #E5E7EB;">
+                        </div>
+                    @endif
+
+                    {{-- Aperçu instantané du fichier choisi (avant enregistrement). isPreviewable() évite
+                         l'exception sur un fichier non image (sécurité : on ne prévisualise que des images). --}}
+                    @if ($cover && method_exists($cover, 'isPreviewable') && $cover->isPreviewable())
+                        <div style="margin-bottom: 10px;">
+                            <img src="{{ $cover->temporaryUrl() }}" alt="Aperçu de la nouvelle image de couverture"
+                                 style="max-width: 240px; width: 100%; height: auto; border-radius: var(--sys-radius-md, 0.5rem); border: 1px solid var(--sys-action-primary, #064E5A);">
+                        </div>
+                    @endif
+
+                    <label for="meta-cover" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px;">
+                        Choisir une image (JPG, PNG ou WebP, 4 Mo max)
+                    </label>
+                    <input id="meta-cover" type="file" wire:model="cover" accept="image/jpeg,image/png,image/webp"
+                           aria-describedby="meta-cover-help"
+                           style="width: 100%; padding: 8px 0;">
+                    <p id="meta-cover-help" style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">
+                        L'image s'affiche sur la fiche du cours et dans le catalogue.
+                    </p>
+                    @error('cover') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+
+                    <div wire:loading wire:target="cover" role="status" aria-live="polite"
+                         style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280); margin-top: 6px;">
+                        Téléversement de l'image en cours…
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2" style="margin-top: 10px;">
+                        <x-core::button type="button" wire:click="saveCover" wire:loading.attr="disabled" wire:target="saveCover,cover" variant="secondary" size="sm">
+                            <span wire:loading.remove wire:target="saveCover">Enregistrer l'image</span>
+                            <span wire:loading wire:target="saveCover">Enregistrement…</span>
+                        </x-core::button>
+                        @if ($coverUrl)
+                            <x-core::button type="button" wire:click="removeCover" wire:loading.attr="disabled" wire:target="removeCover" variant="ghost" size="sm">
+                                Retirer l'image
+                            </x-core::button>
+                        @endif
+                    </div>
+                </div>
+            @endcan
+
             <div class="d-flex flex-wrap gap-3">
                 <div style="flex: 1 1 200px;">
                     <label for="meta-level" style="display: block; font-weight: 600; margin-bottom: 6px;">Niveau</label>
@@ -287,8 +339,8 @@
                                                                         La vidéo doit être non répertoriée, avec verrou de domaine activé sur ScreenPal. Utilisez l'URL d'intégration (player/…), pas le lien de partage (watch/…).
                                                                     </p>
 
-                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-poster-{{ $item->id }}">Affiche / vignette (URL, facultatif)</label>
-                                                                    <input id="item-poster-{{ $item->id }}" type="url" name="poster_url" value="{{ $posterValue }}" placeholder="https://… (téléversement à venir)" aria-label="URL de l'affiche de la vidéo"
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-poster-{{ $item->id }}">Affiche / vignette (URL externe, facultatif)</label>
+                                                                    <input id="item-poster-{{ $item->id }}" type="url" name="poster_url" value="{{ $posterValue }}" placeholder="https://…" aria-label="URL de l'affiche de la vidéo"
                                                                            style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
 
                                                                     <label style="font-size: 0.78rem; font-weight: 600;" for="item-dur-{{ $item->id }}">Durée de la vidéo (min, facultatif)</label>
@@ -321,6 +373,59 @@
 
                                                                 <div><x-core::button type="submit" variant="secondary" size="sm">Enregistrer l'élément</x-core::button></div>
                                                             </form>
+
+                                                            {{-- ── Téléversement de l'affiche (item vidéo) - hors du formulaire principal ── --}}
+                                                            @if ($item->type === 'video')
+                                                                @php($posterUploaded = $item->posterUrl())
+                                                                <div style="margin-top: 12px; border-top: 1px dashed #E5E7EB; padding-top: 10px;">
+                                                                    <span style="display: block; font-size: 0.78rem; font-weight: 600; margin-bottom: 6px;">Téléverser une affiche (JPG, PNG ou WebP, 4 Mo max)</span>
+                                                                    @if ($posterUploaded)
+                                                                        <img src="{{ $posterUploaded }}" alt="Aperçu de l'affiche de la vidéo « {{ $item->title }} »"
+                                                                             style="max-width: 200px; width: 100%; height: auto; border-radius: var(--sys-radius-md, 0.5rem); border: 1px solid #E5E7EB; margin-bottom: 8px;">
+                                                                    @endif
+                                                                    @if (isset($itemPoster[$item->id]) && $itemPoster[$item->id] && method_exists($itemPoster[$item->id], 'isPreviewable') && $itemPoster[$item->id]->isPreviewable())
+                                                                        <img src="{{ $itemPoster[$item->id]->temporaryUrl() }}" alt="Aperçu de la nouvelle affiche"
+                                                                             style="max-width: 200px; width: 100%; height: auto; border-radius: var(--sys-radius-md, 0.5rem); border: 1px solid var(--sys-action-primary, #064E5A); margin-bottom: 8px;">
+                                                                    @endif
+                                                                    <label class="visually-hidden" for="item-poster-file-{{ $item->id }}">Fichier de l'affiche de la vidéo</label>
+                                                                    <input id="item-poster-file-{{ $item->id }}" type="file" wire:model="itemPoster.{{ $item->id }}" accept="image/jpeg,image/png,image/webp" style="width: 100%;">
+                                                                    @error("itemPoster.{$item->id}") <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
+                                                                    <div wire:loading wire:target="itemPoster.{{ $item->id }}" role="status" aria-live="polite" style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin-top: 4px;">Téléversement…</div>
+                                                                    <div class="d-flex flex-wrap gap-2" style="margin-top: 8px;">
+                                                                        <x-core::button type="button" wire:click="uploadItemPoster({{ $item->id }})" wire:loading.attr="disabled" wire:target="uploadItemPoster({{ $item->id }}),itemPoster.{{ $item->id }}" variant="secondary" size="sm">Téléverser l'affiche</x-core::button>
+                                                                        @if ($posterUploaded)
+                                                                            <x-core::button type="button" wire:click="removeItemPoster({{ $item->id }})" wire:loading.attr="disabled" wire:target="removeItemPoster({{ $item->id }})" variant="ghost" size="sm">Retirer l'affiche</x-core::button>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                            @endif
+
+                                                            {{-- ── Pièces jointes (item document) - hors du formulaire principal ── --}}
+                                                            @if ($item->type === 'document')
+                                                                <div style="margin-top: 12px; border-top: 1px dashed #E5E7EB; padding-top: 10px;">
+                                                                    <span style="display: block; font-size: 0.78rem; font-weight: 600; margin-bottom: 6px;">Pièces jointes</span>
+                                                                    @if (!empty($item->payload['attachments']))
+                                                                        <ul style="margin: 0 0 10px; padding-left: 18px; font-size: 0.82rem;">
+                                                                            @foreach ($item->payload['attachments'] as $attachment)
+                                                                                <li style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                                                                    <a href="{{ $attachment['url'] ?? '#' }}" target="_blank" rel="noopener">{{ $attachment['name'] ?? 'Document' }}</a>
+                                                                                    @if (isset($attachment['media_id']))
+                                                                                        <x-core::button type="button" wire:click="removeItemAttachment({{ $item->id }}, {{ (int) $attachment['media_id'] }})" wire:loading.attr="disabled" wire:target="removeItemAttachment({{ $item->id }}, {{ (int) $attachment['media_id'] }})" variant="ghost" size="sm" title="Retirer la pièce jointe" aria-label="Retirer la pièce jointe « {{ $attachment['name'] ?? 'document' }} »">Retirer</x-core::button>
+                                                                                    @endif
+                                                                                </li>
+                                                                            @endforeach
+                                                                        </ul>
+                                                                    @endif
+                                                                    <label class="visually-hidden" for="item-attach-file-{{ $item->id }}">Fichier de la pièce jointe</label>
+                                                                    <input id="item-attach-file-{{ $item->id }}" type="file" wire:model="itemAttachment.{{ $item->id }}" accept=".pdf,.doc,.docx,image/jpeg,image/png,image/webp" style="width: 100%;">
+                                                                    <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">PDF, Word ou image, 10 Mo max.</p>
+                                                                    @error("itemAttachment.{$item->id}") <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
+                                                                    <div wire:loading wire:target="itemAttachment.{{ $item->id }}" role="status" aria-live="polite" style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin-top: 4px;">Téléversement…</div>
+                                                                    <div style="margin-top: 8px;">
+                                                                        <x-core::button type="button" wire:click="uploadItemAttachment({{ $item->id }})" wire:loading.attr="disabled" wire:target="uploadItemAttachment({{ $item->id }}),itemAttachment.{{ $item->id }}" variant="secondary" size="sm">Ajouter la pièce jointe</x-core::button>
+                                                                    </div>
+                                                                </div>
+                                                            @endif
                                                         </details>
                                                     </li>
                                                 @endforeach

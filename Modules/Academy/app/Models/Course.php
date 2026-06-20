@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Scout\Searchable as ScoutSearchable;
 use Modules\Academy\Models\Concerns\CourseSearchable;
 use Modules\Core\Traits\LogsActivityStandard;
+use Modules\Media\Traits\HasMediaAttachments;
+use Spatie\MediaLibrary\HasMedia;
 
 /**
  * @property int         $id
@@ -46,9 +48,10 @@ use Modules\Core\Traits\LogsActivityStandard;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  */
-class Course extends Model
+class Course extends Model implements HasMedia
 {
     use CourseSearchable;  // toSearchableArray / shouldBeSearchable / searchableAs
+    use HasMediaAttachments;  // upload/stockage Spatie (collection « cover », disque public)
     use LogsActivityStandard;
     use ScoutSearchable {
         // CourseSearchable gagne la résolution des conflits
@@ -175,5 +178,33 @@ class Course extends Model
             'edit'   => $this->hasRole($user, ['owner', 'instructor', 'assistant', 'editor']),
             default  => false,
         };
+    }
+
+    // -------------------------------------------------------------------------
+    // Média : image de couverture (Spatie, collection « cover », disque public)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Collection unique « cover » : une seule image de couverture par cours,
+     * restreinte aux formats web sûrs. `singleFile()` remplace automatiquement
+     * l'ancienne lors d'un nouveau téléversement (pas d'accumulation).
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('cover')
+            ->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+    }
+
+    /**
+     * URL de l'image de couverture du cours (conversion optionnelle), ou null si
+     * aucune image n'a été téléversée. On lit la collection Spatie « cover »
+     * (source de vérité) ; `image_media_id` n'est qu'une référence numérique.
+     */
+    public function coverUrl(string $conversion = ''): ?string
+    {
+        $media = $this->getFirstMedia('cover');
+
+        return $media ? $media->getUrl($conversion) : null;
     }
 }

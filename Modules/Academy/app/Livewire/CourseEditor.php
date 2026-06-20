@@ -36,6 +36,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Modules\Academy\Models\Chapter;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Lesson;
@@ -43,8 +44,15 @@ use Modules\Academy\Models\LessonItem;
 
 class CourseEditor extends Component
 {
+    use WithFileUploads;
+
     /** Types d'items autorisés (liste blanche, alignée sur l'admin Backoffice). */
     private const ITEM_TYPES = ['video', 'document', 'quiz'];
+
+    /** Tailles maximales (Ko) des téléversements - validées côté SERVEUR. */
+    private const COVER_MAX_KB = 4096;       // ~4 Mo (image de couverture)
+    private const POSTER_MAX_KB = 4096;      // ~4 Mo (affiche vidéo)
+    private const ATTACHMENT_MAX_KB = 10240; // ~10 Mo (pièce jointe document)
 
     /** Identifiant du cours géré (figé au montage, source de vérité serveur). */
     public int $courseId;
@@ -77,6 +85,16 @@ class CourseEditor extends Component
      * }>
      */
     public array $newItem = [];
+
+    // ── Téléversements (Livewire WithFileUploads) ───────────────────────────────
+    /** Fichier image de couverture en attente de traitement (TemporaryUploadedFile). */
+    public $cover = null;
+
+    /** Affiche vidéo en attente, indexée par item_id (TemporaryUploadedFile). */
+    public array $itemPoster = [];
+
+    /** Pièce jointe document en attente, indexée par item_id (TemporaryUploadedFile). */
+    public array $itemAttachment = [];
 
     // ── Confirmations de suppression inline à 2 temps (jamais confirm() natif) ───
     public ?int $confirmingChapterDeletion = null;
@@ -203,6 +221,48 @@ class CourseEditor extends Component
             'academy_editor_status',
             $newStatus === 'published' ? 'Cours publié.' : 'Cours repassé en brouillon.'
         );
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // IMAGE DE COUVERTURE (média Spatie, collection « cover »)
+    //
+    // SÉCURITÉ : re-résout le cours + authorize('update') AVANT toute écriture ;
+    // valide le mime (image jpg/png/webp) ET la taille côté SERVEUR ; le fichier
+    // reçoit un nom non devinable (uniqid Spatie) sur le disque public.
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    public function saveCover(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('update', $course);
+
+        $this->validate([
+            'cover' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.self::COVER_MAX_KB],
+        ]);
+
+        // singleFile() remplace automatiquement l'ancienne couverture.
+        // addMedia($UploadedFile) : Spatie lit le mime réel du fichier téléversé.
+        $media = $course->addMedia($this->cover)
+            ->usingFileName($this->safeFileName($this->cover, 'couverture'))
+            ->toMediaCollection('cover');
+
+        // Référence numérique cohérente avec le nom de colonne *_media_id.
+        $course->forceFill(['image_media_id' => $media->id, 'updated_by' => Auth::id()])->save();
+
+        $this->reset('cover');
+        session()->flash('academy_editor_status', 'Image de couverture mise à jour.');
+    }
+
+    public function removeCover(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('update', $course);
+
+        $course->clearMediaCollection('cover');
+        $course->forceFill(['image_media_id' => null, 'updated_by' => Auth::id()])->save();
+
+        $this->reset('cover');
+        session()->flash('academy_editor_status', 'Image de couverture retirée.');
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -520,6 +580,133 @@ class CourseEditor extends Component
         $item->update(['is_required' => ! $item->is_required]);
 
         session()->flash('academy_editor_status', 'Élément mis à jour.');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // MÉDIA DES ITEMS : affiche vidéo (poster) + pièces jointes document
+    //
+    // SÉCURITÉ : chaque action re-résout le cours + authorize('manageStructure'),
+    // puis resolveItemFor() (anti-IDOR : l'item doit appartenir à CE cours) AVANT
+    // toute écriture ; mime + taille validés côté SERVEUR ; noms non devinables.
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    public function uploadItemPoster(int $itemId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $item = $this->resolveItemFor($course, $itemId);
+
+        $this->validate([
+            "itemPoster.$itemId" => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.self::POSTER_MAX_KB],
+        ]);
+
+        $file  = $this->itemPoster[$itemId];
+        $media = $item->addMedia($file)
+            ->usingFileName($this->safeFileName($file, 'affiche'))
+            ->toMediaCollection('poster');
+
+        // Le lecteur lit posterUrl() (média en priorité) ; on garde aussi payload['poster']
+        // synchronisé pour la rétrocompatibilité de l'affichage existant.
+        $payload           = $item->payload ?? [];
+        $payload['poster'] = $media->getUrl();
+        $item->forceFill(['poster_media_id' => $media->id, 'payload' => $payload])->save();
+
+        unset($this->itemPoster[$itemId]);
+        session()->flash('academy_editor_status', 'Affiche de la vidéo mise à jour.');
+    }
+
+    public function removeItemPoster(int $itemId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $item = $this->resolveItemFor($course, $itemId);
+        $item->clearMediaCollection('poster');
+
+        $payload = $item->payload ?? [];
+        unset($payload['poster']);
+        $item->forceFill(['poster_media_id' => null, 'payload' => $payload])->save();
+
+        unset($this->itemPoster[$itemId]);
+        session()->flash('academy_editor_status', 'Affiche de la vidéo retirée.');
+    }
+
+    public function uploadItemAttachment(int $itemId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $item = $this->resolveItemFor($course, $itemId);
+
+        $this->validate([
+            "itemAttachment.$itemId" => [
+                'required', 'file',
+                'mimes:pdf,doc,docx,jpg,jpeg,png,webp',
+                'max:'.self::ATTACHMENT_MAX_KB,
+            ],
+        ]);
+
+        $file = $this->itemAttachment[$itemId];
+
+        // Lire le nom client AVANT addMedia() (qui déplace le fichier temporaire).
+        // Ce nom ne sert que de LIBELLÉ d'affichage, jamais de nom de stockage.
+        $displayName = $file->getClientOriginalName();
+
+        $media = $item->addMedia($file)
+            ->usingFileName($this->safeFileName($file, 'document'))
+            ->toMediaCollection('attachments');
+
+        // Le lecteur (lesson.blade) lit payload['attachments'] = [{name, url}].
+        $payload                = $item->payload ?? [];
+        $attachments            = $payload['attachments'] ?? [];
+        $attachments[]          = [
+            'name'     => $displayName,
+            'url'      => $media->getUrl(),
+            'media_id' => $media->id,
+        ];
+        $payload['attachments'] = array_values($attachments);
+        $item->forceFill(['payload' => $payload])->save();
+
+        unset($this->itemAttachment[$itemId]);
+        session()->flash('academy_editor_status', 'Pièce jointe ajoutée.');
+    }
+
+    public function removeItemAttachment(int $itemId, int $mediaId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $item = $this->resolveItemFor($course, $itemId);
+
+        // Le média doit appartenir à CET item (anti-IDOR) avant suppression.
+        $media = $item->getMedia('attachments')->firstWhere('id', $mediaId);
+        if ($media) {
+            $media->delete();
+        }
+
+        $payload                = $item->payload ?? [];
+        $payload['attachments'] = array_values(array_filter(
+            $payload['attachments'] ?? [],
+            fn ($a) => ($a['media_id'] ?? null) !== $mediaId
+        ));
+        $item->forceFill(['payload' => $payload])->save();
+
+        session()->flash('academy_editor_status', 'Pièce jointe retirée.');
+    }
+
+    /**
+     * Nom de fichier non devinable et sûr : slug du préfixe + identifiant unique +
+     * extension d'origine en liste blanche (jamais .php/.phtml, etc.). On ne se fie
+     * jamais au nom client pour le stockage (le nom client n'est conservé que comme
+     * libellé d'affichage des pièces jointes).
+     */
+    private function safeFileName($file, string $prefix): string
+    {
+        $ext  = strtolower((string) $file->getClientOriginalExtension());
+        $safe = in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'doc', 'docx'], true) ? $ext : 'bin';
+
+        return Str::slug($prefix).'-'.Str::random(16).'.'.$safe;
     }
 
     public function moveItemUp(int $itemId): void

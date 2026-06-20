@@ -13,6 +13,8 @@ namespace Modules\Academy\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Media\Traits\HasMediaAttachments;
+use Spatie\MediaLibrary\HasMedia;
 
 /**
  * @property int         $id
@@ -28,8 +30,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
-class LessonItem extends Model
+class LessonItem extends Model implements HasMedia
 {
+    use HasMediaAttachments;  // upload/stockage Spatie (collections « poster » + « attachments »)
+
     protected $fillable = [
         'lesson_id',
         'type',
@@ -57,5 +61,46 @@ class LessonItem extends Model
     public function completions(): HasMany
     {
         return $this->hasMany(Completion::class, 'lesson_item_id');
+    }
+
+    // -------------------------------------------------------------------------
+    // Média : affiche vidéo (collection « poster ») + pièces jointes document
+    // (collection « attachments »). Stockage Spatie, disque public.
+    // -------------------------------------------------------------------------
+
+    /**
+     * « poster »     : une seule affiche/vignette par item vidéo (formats web sûrs).
+     * « attachments » : plusieurs documents (pdf / word / images) pour un item document.
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('poster')
+            ->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+
+        $this->addMediaCollection('attachments')
+            ->acceptsMimeTypes([
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+            ]);
+    }
+
+    /**
+     * URL de l'affiche de la vidéo (collection « poster »), ou null si absente.
+     * Source de vérité = collection Spatie ; on retombe sur payload['poster']
+     * (URL externe saisie à la main) pour la rétrocompatibilité des anciens items.
+     */
+    public function posterUrl(string $conversion = ''): ?string
+    {
+        $media = $this->getFirstMedia('poster');
+        if ($media) {
+            return $media->getUrl($conversion);
+        }
+
+        return $this->payload['poster'] ?? null;
     }
 }

@@ -73,6 +73,13 @@
 
             {{-- Colonne principale --}}
             <div class="col-lg-8">
+                {{-- Image de couverture (média Spatie, conversion « large ») --}}
+                @php($showCover = $course->coverUrl('large'))
+                @if ($showCover)
+                    <img src="{{ $showCover }}" alt="Image de couverture du cours « {{ $course->title }} »" loading="eager"
+                         style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: var(--sys-radius-md, 0.75rem); margin-bottom: 1.25rem;">
+                @endif
+
                 <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 0.75rem;">
                     {{ $course->title }}
                 </h1>

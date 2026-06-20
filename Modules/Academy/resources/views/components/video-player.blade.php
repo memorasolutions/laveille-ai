@@ -28,7 +28,7 @@
     5. Le payload seeder contient domain_lock: true comme rappel de cette exigence.
     ─────────────────────────────────────────────────
 --}}
-@props(['playerUrl', 'title' => 'Vidéo de leçon'])
+@props(['playerUrl', 'title' => 'Vidéo de leçon', 'poster' => null])
 
 @php
     // Identifiant de l'utilisateur connecté (email ou nom, avec fallback)
@@ -42,7 +42,7 @@
 
 <div
     class="academy-video-wrapper"
-    style="position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 8px; overflow: hidden;"
+    style="position: relative; width: 100%; aspect-ratio: 16/9; background: #000 @if($poster) center / cover no-repeat url('{{ $poster }}') @endif; border-radius: 8px; overflow: hidden;"
 >
     {{-- ── Iframe ScreenPal ── --}}
     <iframe

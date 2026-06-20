@@ -6,7 +6,17 @@
 @endphp
 
 <div class="card h-100 shadow-sm"
-     style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem);">
+     style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); overflow: hidden;">
+
+    {{-- Image de couverture (média Spatie, conversion « medium ») --}}
+    @php($cardCover = $course->coverUrl('medium'))
+    @if ($cardCover)
+        <a href="{{ route('academy.courses.show', $course->slug) }}" tabindex="-1" aria-hidden="true">
+            <img src="{{ $cardCover }}" alt="" loading="lazy"
+                 style="width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block;">
+        </a>
+    @endif
+
     <div class="card-body d-flex flex-column p-4">
 
         {{-- Badges --}}

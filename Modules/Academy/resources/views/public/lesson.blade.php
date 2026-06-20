@@ -207,6 +207,7 @@
                                 --}}
                                 <x-academy::video-player
                                     :playerUrl="$videoUrl"
+                                    :poster="$item->posterUrl()"
                                     :title="$item->title ?? $lesson->title"
                                 />
 
