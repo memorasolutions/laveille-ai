@@ -47,6 +47,10 @@ final class JsonLdService
             'inLanguage' => 'fr-CA',
             'sameAs' => array_values(array_filter([
                 lv_social('facebook'),
+                lv_social('twitter'),
+                lv_social('instagram'),
+                lv_social('youtube'),
+                lv_social('github'),
                 'https://www.linkedin.com/in/lapointestephane/',
                 'https://memora.solutions',
             ])),
@@ -287,10 +291,13 @@ final class JsonLdService
                 '@type' => 'ImageObject',
                 'url' => asset('images/favicon.png'),
             ],
-            'sameAs' => [
+            'sameAs' => array_values(array_filter([
                 lv_social('facebook'),
+                lv_social('twitter'),
+                lv_social('instagram'),
+                lv_social('youtube'),
                 'https://www.linkedin.com/in/lapointestephane/',
-            ],
+            ])),
             'foundingDate' => '2026',
             'founder' => [
                 '@type' => 'Person',
