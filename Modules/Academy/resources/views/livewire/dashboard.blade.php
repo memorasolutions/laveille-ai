@@ -134,12 +134,9 @@
                 style="font-family: var(--f-heading); font-size: 1rem; color: var(--sys-text-default, #1A1D23); margin-bottom: 6px;">
                 Administration
             </h2>
-            <p style="font-size: 0.9rem; color: var(--sys-text-muted, #6B7280); margin-bottom: 14px;">
-                La gestion front-end (création et édition des cours) est disponible ci-dessus. Le filet d'administration complet reste accessible ici au besoin.
+            <p style="font-size: 0.9rem; color: var(--sys-text-muted, #6B7280); margin-bottom: 0;">
+                En tant qu'administrateur, vous gérez tous les cours directement ci-dessus : création, édition du contenu, inscriptions et rôles.
             </p>
-            <x-core::button href="/admin/academy/courses" variant="secondary" size="sm">
-                Ouvrir l'administration des cours
-            </x-core::button>
         </section>
     @endif
 </div>

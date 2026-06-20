@@ -30,10 +30,7 @@
                 ['route' => 'admin.tenants.index', 'label' => 'Tenants', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
                 ['route' => 'admin.backups.index', 'label' => 'Sauvegardes', 'icon' => 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4'],
             ];
-            // Académie — ajouté défensivement (module désactivable)
-            if (\Nwidart\Modules\Facades\Module::find('Academy')?->isEnabled() && \Illuminate\Support\Facades\Route::has('admin.academy.courses.index')) {
-                $links[] = ['route' => 'admin.academy.courses.index', 'label' => 'Académie', 'icon' => 'M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222'];
-            }
+            // Académie : gérée 100 % en frontend (/academie/espace), plus de lien vers l'ancien admin.
         @endphp
 
         @foreach($links as $link)
