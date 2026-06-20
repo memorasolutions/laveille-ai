@@ -107,12 +107,15 @@
     font-weight: 700 !important;
 }
 
-/* Sidebar: tous les sous-menus ouverts */
-.sidebar .collapse {
-    display: block !important;
-}
-.sidebar .nav-link .link-arrow {
+/* Sidebar: ACCORDÉON Bootstrap (replié par défaut, déplié au clic, mono-ouvert via data-bs-parent).
+   Neutralise (a) l'ancien forçage « tout ouvert » et (b) la collision avec l'utilitaire .collapse
+   de Tailwind (visibility:collapse) qui rendrait les sous-menus ouverts invisibles. */
+.sidebar .collapse:not(.show) {
     display: none !important;
+}
+.sidebar .collapse.show,
+.sidebar .collapsing {
+    visibility: visible !important;
 }
 /* Fix: sous-menu imbriqué dans "Plus..." — même niveau que le parent */
 .sidebar .nav.sub-menu .nav.sub-menu {
