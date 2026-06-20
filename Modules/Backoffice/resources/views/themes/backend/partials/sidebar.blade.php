@@ -51,7 +51,7 @@
                     <span class="link-title">{{ __('Contenu') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*', 'admin.newsletter.*', 'admin.concentre.*', 'admin.formbuilder.*') ? 'show' : '' }}" id="contentMenu">
+                <div class="collapse {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*', 'admin.newsletter.*', 'admin.concentre.*', 'admin.formbuilder.*') ? 'show' : '' }}" id="contentMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         @if(Route::has('admin.blog.articles.index'))
                         @can('view_articles')
@@ -68,7 +68,7 @@
                         <li class="nav-item"><a href="{{ route('admin.news.sources.index') }}" class="nav-link {{ request()->routeIs('admin.news.sources.*') ? 'active' : '' }}" {{ request()->routeIs('admin.news.sources.*') ? 'aria-current=page' : '' }}>{{ __('Sources RSS') }}</a></li>
                         @endif
                         @if(Route::has('admin.concentre.index'))
-                        <li class="nav-item"><a href="{{ route('admin.concentre.index') }}" class="nav-link {{ request()->routeIs('admin.concentre.*') ? 'active' : '' }}" {{ request()->routeIs('admin.concentre.*') ? 'aria-current=page' : '' }}>{{ __('Concentré IA — builder') }}</a></li>
+                        <li class="nav-item"><a href="{{ route('admin.concentre.index') }}" class="nav-link {{ request()->routeIs('admin.concentre.*') ? 'active' : '' }}" {{ request()->routeIs('admin.concentre.*') ? 'aria-current=page' : '' }}>{{ __('Concentré IA - builder') }}</a></li>
                         @endif
                         @if(Route::has('admin.pages.index'))
                         @can('view_pages')
@@ -198,7 +198,7 @@
                     <span class="link-title">{{ __('Ressources') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.dictionary.*', 'admin.directory.*', 'admin.acronyms.*', 'admin.moderation.*') ? 'show' : '' }}" id="resourcesMenu">
+                <div class="collapse {{ request()->routeIs('admin.dictionary.*', 'admin.directory.*', 'admin.acronyms.*', 'admin.moderation.*') ? 'show' : '' }}" id="resourcesMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         @if(Route::has('admin.dictionary.index'))
                         <li class="nav-item"><a href="{{ route('admin.dictionary.index') }}" class="nav-link {{ request()->routeIs('admin.dictionary.*') ? 'active' : '' }}">{{ __('Glossaire IA') }}</a></li>
@@ -256,7 +256,7 @@
                     <span class="link-title">{{ __('Ventes') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.shop.*', 'admin.ecommerce.*', 'admin.plans.*', 'admin.revenue', 'admin.tenants.*', 'admin.onboarding-steps.*', 'admin.booking.*') ? 'show' : '' }}" id="salesMenu">
+                <div class="collapse {{ request()->routeIs('admin.shop.*', 'admin.ecommerce.*', 'admin.plans.*', 'admin.revenue', 'admin.tenants.*', 'admin.onboarding-steps.*', 'admin.booking.*') ? 'show' : '' }}" id="salesMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         {{-- Shop (Gelato POD) --}}
                         @if(Route::has('admin.shop.products.index'))
@@ -421,7 +421,7 @@
                     <span class="link-title">{{ __('Utilisateurs') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.teams.*', 'admin.contact-messages.*') ? 'show' : '' }}" id="usersMenu">
+                <div class="collapse {{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.teams.*', 'admin.contact-messages.*') ? 'show' : '' }}" id="usersMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         @can('view_users')
                         <li class="nav-item"><a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" {{ request()->routeIs('admin.users.*') ? 'aria-current=page' : '' }}>{{ __('Membres') }}</a></li>
@@ -464,7 +464,7 @@
                     <span class="link-title">{{ __('Configuration') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.branding.*', 'admin.seo.*', 'admin.translations.*', 'admin.feature-flags.*', 'admin.email-templates.*', 'admin.announcements.*', 'admin.themes.*', 'admin.cookie-categories.*', 'admin.redirects.*', 'admin.settings.*') ? 'show' : '' }}" id="configMenu">
+                <div class="collapse {{ request()->routeIs('admin.branding.*', 'admin.seo.*', 'admin.translations.*', 'admin.feature-flags.*', 'admin.email-templates.*', 'admin.announcements.*', 'admin.themes.*', 'admin.cookie-categories.*', 'admin.redirects.*', 'admin.settings.*') ? 'show' : '' }}" id="configMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         @if(Route::has('admin.branding.edit'))
                         @can('view_branding')
@@ -536,7 +536,7 @@
                     <span class="link-title">{{ __('Système') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.health', 'admin.health.*', 'admin.security', 'admin.backups.*', 'admin.logs', 'admin.cache', 'admin.push-notifications.*', 'admin.scheduler', 'admin.scheduler.*', 'admin.failed-jobs.*', 'admin.login-history', 'admin.mail-log', 'admin.blocked-ips.*', 'admin.activity-logs.*', 'admin.trash.*', 'admin.data-retention', 'admin.system-info', 'admin.search', 'admin.documentation') ? 'show' : '' }}" id="systemMenu">
+                <div class="collapse {{ request()->routeIs('admin.health', 'admin.health.*', 'admin.security', 'admin.backups.*', 'admin.logs', 'admin.cache', 'admin.push-notifications.*', 'admin.scheduler', 'admin.scheduler.*', 'admin.failed-jobs.*', 'admin.login-history', 'admin.mail-log', 'admin.blocked-ips.*', 'admin.activity-logs.*', 'admin.trash.*', 'admin.data-retention', 'admin.system-info', 'admin.search', 'admin.documentation') ? 'show' : '' }}" id="systemMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         @can('view_health')
                         <li class="nav-item"><a href="{{ route('admin.health') }}" class="nav-link {{ request()->routeIs('admin.health') ? 'active' : '' }}" {{ request()->routeIs('admin.health') ? 'aria-current=page' : '' }}>{{ __('Santé système') }}</a></li>
@@ -628,7 +628,7 @@
                     <span class="link-title">{{ __('Outils') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.ai.*', 'admin.roadmap.*') ? 'show' : '' }}" id="toolsMenu">
+                <div class="collapse {{ request()->routeIs('admin.ai.*', 'admin.roadmap.*') ? 'show' : '' }}" id="toolsMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         {{-- Support IA --}}
                         @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('AI') && \Nwidart\Modules\Facades\Module::isEnabled('AI'))
@@ -718,3 +718,67 @@
         </ul>
     </div>
 </nav>
+
+{{-- ===== Accordéon mono-ouvert + persistance légère (vanilla JS, défensif) ===== --}}
+<script>
+(function () {
+    'use strict';
+    var STORAGE_KEY = 'lv-admin-sidebar-open';
+    var nav = document.getElementById('sidebarNav');
+    if (!nav) { return; }
+
+    // Les groupes repliables du menu (collapse avec data-bs-parent).
+    var groups = nav.querySelectorAll('.collapse[data-bs-parent="#sidebarNav"]');
+    if (!groups.length) { return; }
+
+    // La route prime : un groupe déjà ouvert (classe « show ») = catégorie active.
+    var hasActive = false;
+    groups.forEach(function (group) {
+        if (group.classList.contains('show')) { hasActive = true; }
+    });
+
+    function storeOpen(id) {
+        try { window.localStorage.setItem(STORAGE_KEY, id); } catch (e) {}
+    }
+    function clearStored() {
+        try { window.localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    }
+    function readStored() {
+        try { return window.localStorage.getItem(STORAGE_KEY); } catch (e) { return null; }
+    }
+
+    // (a) Mémoriser le dernier groupe ouvert / effacer à la fermeture.
+    groups.forEach(function (group) {
+        group.addEventListener('shown.bs.collapse', function () {
+            storeOpen(group.id);
+        });
+        group.addEventListener('hidden.bs.collapse', function () {
+            // On n'efface que si c'est bien ce groupe qui était mémorisé.
+            if (readStored() === group.id) { clearStored(); }
+        });
+    });
+
+    // (b) Au chargement : si AUCUNE catégorie active (route hors catégories)
+    //     et qu'un id est mémorisé, rouvrir ce groupe. La route prime toujours.
+    if (!hasActive) {
+        var savedId = readStored();
+        if (savedId) {
+            var target = document.getElementById(savedId);
+            if (target && target.getAttribute('data-bs-parent') === '#sidebarNav'
+                && !target.classList.contains('show')) {
+                try {
+                    var Collapse = (window.bootstrap && window.bootstrap.Collapse) ? window.bootstrap.Collapse : null;
+                    if (Collapse) {
+                        Collapse.getOrCreateInstance(target, { toggle: false }).show();
+                    } else {
+                        target.classList.add('show');
+                    }
+                    // Refléter l'état sur le bouton de bascule associé.
+                    var toggler = nav.querySelector('[href="#' + savedId + '"], [data-bs-target="#' + savedId + '"]');
+                    if (toggler) { toggler.setAttribute('aria-expanded', 'true'); }
+                } catch (e) {}
+            }
+        }
+    }
+})();
+</script>
