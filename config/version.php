@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.294 · 2026-06-20 · feat(Backoffice/UX) Raccourci « Académie » dans le menu admin (sous la section Contenu) → ouvre la gestion FRONTEND (/academie/espace = academy.dashboard) dans un NOUVEL onglet (l'Académie se gère hors du panneau /admin, façon Moodle ; simple lien de découvrabilité, pas de gestion backend). Gaté @can('academy.manage') + @if(Route::has). Icône graduation-cap + indicateur lien externe. Blade seul = aucun rebuild Vite. Réversible (git revert). Codename seo-piliers-veille-generative.
  *   1.65.293 · 2026-06-20 · feat(FrontTheme/UX) Menu COMPTE (avatar) : accès Académie pour l'utilisateur connecté (demande user : connecté au site public mais aucun accès visible à l'Académie ; capture). Dans le partial DRY auth::components.user-menu-links (source unique du dropdown header + sidebar) : ajout de « 🎓 Académie - mon espace » (→ academy.dashboard, gaté : module public OU rôle Académie super_admin/admin/instructor/student pendant le mode construction, sinon caché car /academie renvoie 503) + « ➕ Créer un cours » (→ academy.courses.create, gaté can('academy.manage') OU rôle instructor). Le @foreach respecte désormais une clé 'show' (défaut true). Diagnostic : le dropdown avatar (Alpine) s'ouvrait déjà mais ne contenait AUCUN lien Académie. VÉRIFIÉ VISUELLEMENT (Playwright local connecté) : dropdown s'ouvre, les 2 liens présents, « mon espace » → tableau de bord 200 (pas 503), Alpine OK. Blade seul = aucun rebuild Vite. Réversible (git revert). Codename seo-piliers-veille-generative.
  *   1.65.292 · 2026-06-20 · fix(Backoffice/UX) Menu admin : « Infolettres » repositionnée SOUS la grande section CONTENU (retrait de son titre de catégorie propre) → le groupe repliable Infolettres devient frère du sous-menu « Contenu » (et non dedans, et non une section séparée), comme demandé. Blade seul.
  *   1.65.291 · 2026-06-20 · feat(Backoffice/UX) Menu admin : « Infolettres » SORTIE de la catégorie « Contenu » → catégorie de premier niveau dédiée (demande user). Nouveau groupe repliable #newsletterMenu (data-bs-parent="#sidebarNav" = mono-ouvert ; auto-ouvert sur les routes admin.newsletter.*) avec les 7 entrées (Vue d'ensemble, Statistiques, Campagnes, Workflows, Templates, Abonnés, Générateur de prompt). admin.newsletter.* retiré des 3 conditions routeIs de Contenu (active/aria-expanded/show). Permissions (@canany view_newsletter/campaigns/workflows + @can par lien) et tous les liens conservés à l'identique. Blade compile, directives équilibrées (@if 104, @can 94, @canany 7). Blade seul = AUCUN rebuild Vite. Réversible (git revert). Confirmation visuelle = user. Codename seo-piliers-veille-generative.
@@ -441,7 +442,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 293;
+$lvPatch = 294;
 
 return [
     'major' => $lvMajor,

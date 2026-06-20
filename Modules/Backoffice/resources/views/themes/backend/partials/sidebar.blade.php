@@ -188,6 +188,19 @@
             </li>
             @endcanany
 
+            {{-- Académie : raccourci vers la gestion FRONTEND (l'Académie se gère hors du panneau admin). --}}
+            @can('academy.manage')
+            @if(Route::has('academy.dashboard'))
+            <li class="nav-item {{ request()->routeIs('academy.*') ? 'active' : '' }}">
+                <a href="{{ route('academy.dashboard') }}" class="nav-link" target="_blank" rel="noopener">
+                    <i class="link-icon" data-lucide="graduation-cap"></i>
+                    <span class="link-title">{{ __('Académie') }}</span>
+                    <i class="link-arrow" data-lucide="external-link" style="width:13px;height:13px;"></i>
+                </a>
+            </li>
+            @endif
+            @endcan
+
             {{-- ===== RESSOURCES (Glossaire, Répertoire, Acronymes, Modération) ===== --}}
             @php
                 $resourcesActive = Route::has('admin.dictionary.index') || Route::has('admin.directory.index') || Route::has('admin.acronyms.index') || Route::has('admin.moderation.reviews');
