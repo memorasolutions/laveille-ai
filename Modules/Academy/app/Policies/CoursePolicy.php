@@ -119,10 +119,8 @@ class CoursePolicy
      */
     public function enroll(User $user, Course $course): bool
     {
-        if ($user->can('academy.enroll')) {
-            return true;
-        }
-
+        // SECURITY: l'inscription gratuite suppose un cours GRATUIT et PUBLIÉ, quel que soit
+        // le rôle. Un cours payant passe par PurchaseController (paiement), jamais par enroll().
         return $course->access_type === 'free' && $course->status === 'published';
     }
 }

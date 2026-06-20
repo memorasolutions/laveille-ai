@@ -276,7 +276,7 @@
                             />
 
                         {{-- ── TYPE DOC ── --}}
-                        @elseif($item->type === 'doc')
+                        @elseif(in_array($item->type, ['doc', 'document'], true))
                             @if($hasAccess)
                                 {{--
                                     GATING DOC (identique au gating vidéo) :
@@ -285,6 +285,7 @@
                                 --}}
                                 <div class="prose" style="line-height: 1.75; color: #374151; max-width: 72ch;">
                                     @if(isset($item->payload['rich_text']))
+                                        {{-- SECURITY: ne JAMAIS retirer e() ici (XSS stocke). nl2br n'ajoute que des <br>. Pour du HTML riche un jour : sanitizer/liste blanche, jamais {!! brut !!}. --}}
                                         {!! nl2br(e($item->payload['rich_text'])) !!}
                                     @else
                                         <p class="text-muted">Contenu du document à venir.</p>
@@ -357,7 +358,7 @@
                         @endif
 
                         {{-- M4 - Bouton « Marquer comme terminé » (video + doc uniquement, inscrit) --}}
-                        @if($isEnrolled && in_array($item->type, ['video', 'doc']))
+                        @if($isEnrolled && in_array($item->type, ['video', 'doc', 'document']))
                             @php
                                 $isItemCompleted = false;
                                 try {
