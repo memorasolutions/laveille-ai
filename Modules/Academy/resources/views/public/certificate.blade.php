@@ -5,7 +5,7 @@
 @section('meta_description', 'Certificat de complétion du cours « ' . $certificate->course->title . ' » délivré par ' . config('app.name') . '.')
 
 @php
-    // JSON-LD EducationalOccupationalCredential — tableau PHP, jamais de package spatie/schema-org
+    // JSON-LD EducationalOccupationalCredential - tableau PHP, jamais de package spatie/schema-org
     $__certJsonLd = [
         '@context'            => 'https://schema.org',
         '@type'               => 'EducationalOccupationalCredential',
@@ -201,7 +201,7 @@
                 <span class="certificate-meta-value">
                     {{ $certificate->issued_at
                         ? $certificate->issued_at->locale('fr_CA')->translatedFormat('j F Y')
-                        : '—' }}
+                        : '-' }}
                 </span>
             </div>
             @if($certificate->hours_earned)
@@ -227,18 +227,13 @@
         </div>
 
         {{-- Actions (masquées à l'impression) --}}
-        <div class="mt-4 d-flex justify-content-center gap-3 no-print">
-            <button type="button"
-                    onclick="window.print()"
-                    class="btn ct-btn ct-btn-primary"
-                    style="min-height:44px; padding: 0 1.5rem;">
-                🖨️ Imprimer / Exporter en PDF
-            </button>
-            <a href="{{ route('academy.courses.show', $certificate->course->slug) }}"
-               class="btn btn-outline-secondary"
-               style="min-height:44px; padding: 0 1.5rem;">
-                ← Retour au cours
-            </a>
+        <div class="mt-4 d-flex flex-wrap justify-content-center gap-3 no-print">
+            <x-core::button type="button" variant="primary" icon="🖨️" onclick="window.print()">
+                Imprimer / Exporter en PDF
+            </x-core::button>
+            <x-core::button :href="route('academy.courses.show', $certificate->course->slug)" variant="secondary">
+                Retour au cours
+            </x-core::button>
         </div>
 
     </div>

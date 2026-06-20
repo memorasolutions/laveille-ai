@@ -6,7 +6,7 @@
     $canWatch    = auth()->check() && $isEnrolled;
     $canPreview  = false; // sera true si l'item a payload['preview'] = true
 
-    // M4 — Progression de l'utilisateur
+    // M4 - Progression de l'utilisateur
     $userProgress = null;
     $resumeLesson = null;
     $firstLesson  = null;
@@ -100,8 +100,8 @@
         text-align: center;
     }
     .academy-gated-panel .gated-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
-    .academy-gated-panel .gated-title { font-family: var(--f-heading); font-weight: 700; font-size: 1.3rem; color: var(--c-dark, #1A1D23); margin-bottom: 0.5rem; }
-    .academy-gated-panel .gated-sub { color: #6B7280; margin-bottom: 1.5rem; font-size: 0.95rem; }
+    .academy-gated-panel .gated-title { font-family: var(--f-heading); font-weight: 700; font-size: 1.3rem; color: var(--sys-text-default, #1A1D23); margin-bottom: 0.5rem; }
+    .academy-gated-panel .gated-sub { color: var(--sys-text-muted, #6B7280); margin-bottom: 1.5rem; font-size: 0.95rem; }
 
     /* Navigation préc/suiv */
     .academy-lesson-nav { display: flex; justify-content: space-between; gap: 1rem; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #E5E7EB; }
@@ -160,7 +160,7 @@
             {{-- ══ Zone contenu principal ══ --}}
             <div class="academy-lesson-content">
 
-                {{-- M4 — Barre de progression --}}
+                {{-- M4 - Barre de progression --}}
                 @include('academy::public.partials.progress-bar', [
                     'progress'     => $userProgress,
                     'course'       => $course,
@@ -169,12 +169,12 @@
                 ])
 
                 {{-- Titre + meta --}}
-                <h1 style="font-family: var(--f-heading); font-weight: 800; font-size: 1.6rem; color: var(--c-dark, #1A1D23); margin-bottom: 0.5rem;">
+                <h1 style="font-family: var(--f-heading); font-size: 1.6rem; color: var(--sys-text-default, #1A1D23); margin-bottom: 0.5rem;">
                     {{ $lesson->title }}
                 </h1>
 
                 @if($lesson->summary)
-                    <p class="text-muted mb-4" style="font-size: 1rem; line-height: 1.6;">{{ $lesson->summary }}</p>
+                    <p class="mb-4" style="color: var(--sys-text-muted, #6B7280); font-size: 1rem; line-height: 1.6;">{{ $lesson->summary }}</p>
                 @endif
 
                 {{-- Items de la leçon --}}
@@ -187,7 +187,7 @@
                     <div class="mb-5" id="item-{{ $item->id }}">
 
                         @if($item->title)
-                            <h2 class="h5 mb-3" style="font-family: var(--f-heading); color: #1A1D23;">
+                            <h2 class="h5 mb-3" style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23);">
                                 {{ $item->title }}
                             </h2>
                         @endif
@@ -229,35 +229,34 @@
                                         @if(!auth()->check())
                                             Créez un compte gratuit ou connectez-vous pour accéder aux leçons vidéo.
                                         @elseif(!$isEnrolled && $isFree)
-                                            Ce cours est gratuit — inscrivez-vous pour regarder toutes les leçons.
+                                            Ce cours est gratuit - inscrivez-vous pour regarder toutes les leçons.
                                         @elseif(!$isEnrolled && !$isFree)
-                                            Ce cours est payant — achetez-le pour accéder à l'ensemble du contenu.
+                                            Ce cours est payant - achetez-le pour accéder à l'ensemble du contenu.
                                         @else
                                             Votre inscription vous donne accès à l'ensemble du contenu.
                                         @endif
                                     </p>
                                     @if(!auth()->check())
-                                        <a href="{{ Route::has('login') ? route('login') : '#' }}"
-                                           class="btn ct-btn ct-btn-primary me-2">
-                                            Se connecter
-                                        </a>
-                                        <a href="{{ Route::has('register') ? route('register') : '#' }}"
-                                           class="btn btn-outline-secondary">
-                                            Créer un compte
-                                        </a>
+                                        <span class="d-inline-flex flex-wrap gap-2 justify-content-center">
+                                            <x-core::button :href="Route::has('login') ? route('login') : '#'" variant="primary" size="sm">
+                                                Se connecter
+                                            </x-core::button>
+                                            <x-core::button :href="Route::has('register') ? route('register') : '#'" variant="secondary" size="sm">
+                                                Créer un compte
+                                            </x-core::button>
+                                        </span>
                                     @elseif(!$isEnrolled && $isFree)
                                         <form action="{{ route('academy.courses.enroll', $course) }}" method="POST" class="d-inline">
                                             @csrf
-                                            <button type="submit" class="btn ct-btn ct-btn-primary">
+                                            <x-core::button type="submit" variant="primary" size="sm">
                                                 S'inscrire gratuitement
-                                            </button>
+                                            </x-core::button>
                                         </form>
                                     @elseif(!$isEnrolled && !$isFree)
                                         {{-- M5 : CTA Acheter depuis la leçon (cours payant) --}}
-                                        <a href="{{ route('academy.courses.purchase', $course) }}"
-                                           class="btn ct-btn ct-btn-primary">
+                                        <x-core::button :href="route('academy.courses.purchase', $course)" variant="primary" size="sm">
                                             Acheter ce cours
-                                        </a>
+                                        </x-core::button>
                                     @endif
                                 </div>
                             @endif
@@ -303,7 +302,7 @@
                                     @endif
                                 </div>
                             @else
-                                {{-- Panneau d'accès refusé — même logique que le type video (pas de contenu dans le DOM) --}}
+                                {{-- Panneau d'accès refusé - même logique que le type video (pas de contenu dans le DOM) --}}
                                 <div class="academy-gated-panel">
                                     <div class="gated-icon">🔐</div>
                                     <div class="gated-title">
@@ -319,34 +318,33 @@
                                         @if(!auth()->check())
                                             Créez un compte gratuit ou connectez-vous pour accéder aux documents de ce cours.
                                         @elseif(!$isEnrolled && $isFree)
-                                            Ce cours est gratuit — inscrivez-vous pour lire tous les documents.
+                                            Ce cours est gratuit - inscrivez-vous pour lire tous les documents.
                                         @elseif(!$isEnrolled && !$isFree)
-                                            Ce cours est payant — achetez-le pour accéder à l'ensemble du contenu.
+                                            Ce cours est payant - achetez-le pour accéder à l'ensemble du contenu.
                                         @else
                                             Votre inscription vous donne accès à l'ensemble du contenu.
                                         @endif
                                     </p>
                                     @if(!auth()->check())
-                                        <a href="{{ Route::has('login') ? route('login') : '#' }}"
-                                           class="btn ct-btn ct-btn-primary me-2">
-                                            Se connecter
-                                        </a>
-                                        <a href="{{ Route::has('register') ? route('register') : '#' }}"
-                                           class="btn btn-outline-secondary">
-                                            Créer un compte
-                                        </a>
+                                        <span class="d-inline-flex flex-wrap gap-2 justify-content-center">
+                                            <x-core::button :href="Route::has('login') ? route('login') : '#'" variant="primary" size="sm">
+                                                Se connecter
+                                            </x-core::button>
+                                            <x-core::button :href="Route::has('register') ? route('register') : '#'" variant="secondary" size="sm">
+                                                Créer un compte
+                                            </x-core::button>
+                                        </span>
                                     @elseif(!$isEnrolled && $isFree)
                                         <form action="{{ route('academy.courses.enroll', $course) }}" method="POST" class="d-inline">
                                             @csrf
-                                            <button type="submit" class="btn ct-btn ct-btn-primary">
+                                            <x-core::button type="submit" variant="primary" size="sm">
                                                 S'inscrire gratuitement
-                                            </button>
+                                            </x-core::button>
                                         </form>
                                     @elseif(!$isEnrolled && !$isFree)
-                                        <a href="{{ route('academy.courses.purchase', $course) }}"
-                                           class="btn ct-btn ct-btn-primary">
+                                        <x-core::button :href="route('academy.courses.purchase', $course)" variant="primary" size="sm">
                                             Acheter ce cours
-                                        </a>
+                                        </x-core::button>
                                     @endif
                                 </div>
                             @endif
@@ -358,7 +356,7 @@
                             </div>
                         @endif
 
-                        {{-- M4 — Bouton « Marquer comme terminé » (video + doc uniquement, inscrit) --}}
+                        {{-- M4 - Bouton « Marquer comme terminé » (video + doc uniquement, inscrit) --}}
                         @if($isEnrolled && in_array($item->type, ['video', 'doc']))
                             @php
                                 $isItemCompleted = false;
@@ -378,11 +376,9 @@
                                       action="{{ route('academy.lessons.complete', [$course, $lesson, $item->id]) }}"
                                       class="mt-3">
                                     @csrf
-                                    <button type="submit"
-                                            class="btn btn-sm"
-                                            style="border: 1px solid var(--c-primary, #064E5A); color: var(--c-primary, #064E5A); background: #fff; font-size: 0.85rem;">
-                                        ✓ Marquer comme terminé
-                                    </button>
+                                    <x-core::button type="submit" variant="secondary" size="sm" icon="✓">
+                                        Marquer comme terminé
+                                    </x-core::button>
                                 </form>
                             @endif
                         @endif
@@ -392,7 +388,7 @@
                     <p class="text-muted">Cette leçon ne contient pas encore de contenu.</p>
                 @endforelse
 
-                {{-- M6 — Certificat : affiché quand 100% complété --}}
+                {{-- M6 - Certificat : affiché quand 100% complété --}}
                 @if(auth()->check() && $isEnrolled && ($userProgress?->percent ?? 0) >= 100)
                     @php
                         $__certificate = null;
@@ -407,14 +403,12 @@
                         <div class="mt-4 mb-2 p-4 text-center"
                              style="background: #ECFDF5; border: 1px solid #6EE7B7; border-radius: 12px;">
                             <div style="font-size: 1.5rem; margin-bottom: 0.4rem;">🎓</div>
-                            <p class="mb-2 fw-bold" style="color: #065F46;">
+                            <p class="mb-3 fw-bold" style="color: #065F46;">
                                 Félicitations ! Tu as complété ce cours à 100 %.
                             </p>
-                            <a href="{{ route('academy.certificates.show', $__certificate->public_url_slug) }}"
-                               class="btn ct-btn ct-btn-primary"
-                               style="min-height: 44px; padding: 0 1.5rem;">
-                                Obtenir mon certificat →
-                            </a>
+                            <x-core::button :href="route('academy.certificates.show', $__certificate->public_url_slug)" variant="primary">
+                                Obtenir mon certificat
+                            </x-core::button>
                         </div>
                     @endif
                 @endif
