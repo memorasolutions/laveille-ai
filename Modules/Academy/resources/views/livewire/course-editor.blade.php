@@ -1,5 +1,28 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @php($course = $this->course)
+
+{{-- ─────────────────────────── Glisser-déposer (Alpine « sort ») ───────────────────────────
+     Plugin officiel @alpinejs/sort chargé en CDN, comme le plugin « intersect » du thème : il
+     s'attache à l'instance Alpine fournie par Livewire 4 via l'évènement alpine:init (pas de
+     double-chargement d'Alpine, pas de rebuild Vite). Le helper academyDomOrder lit l'ordre
+     COURANT du DOM (attributs data-sort-id) au moment du drop et renvoie la liste d'ids ordonnée
+     à la méthode Livewire de réordonnancement. La SÉCURITÉ reste serveur : l'ordre client n'est
+     qu'une suggestion ; reorder*() ré-autorise et valide l'appartenance des ids (anti-IDOR). --}}
+@once
+    @push('scripts')
+        <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/sort@3.x.x/dist/cdn.min.js"></script>
+        <script>
+            // Lit l'ordre courant des éléments triables d'un conteneur (par leur data-sort-id)
+            // et renvoie un tableau d'identifiants entiers, dans l'ordre d'affichage du DOM.
+            window.academyDomOrder = function (container) {
+                return Array.from(container.querySelectorAll(':scope > [data-sort-id]'))
+                    .map(function (el) { return parseInt(el.getAttribute('data-sort-id'), 10); })
+                    .filter(function (id) { return Number.isInteger(id) && id > 0; });
+            };
+        </script>
+    @endpush
+@endonce
+
 <div style="display: flex; flex-direction: column; gap: 28px;">
 
     {{-- ───────────────────────── Message de succès ───────────────────────── --}}
@@ -188,10 +211,29 @@
             </form>
         @endcan
 
+        {{-- Conteneur glisser-déposer des CHAPITRES. Le drag est un PLUS : les boutons
+             ↑/↓ restent le mécanisme accessible au clavier. Au drop, on lit l'ordre du
+             DOM et on le persiste instantanément côté serveur (reorderChapters), qui
+             RÉ-AUTORISE et VALIDE l'appartenance des ids (anti-IDOR). --}}
+        @can('manageStructure', $course)
+            <div
+                x-data
+                x-sort="$wire.reorderChapters(window.academyDomOrder($el))"
+                x-sort:config="{ handle: '[data-sort-handle]', animation: 150 }"
+            >
+        @endcan
         @forelse ($course->chapters as $chapter)
-            <article style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 16px 18px; margin-bottom: 16px;">
+            <article
+                @can('manageStructure', $course) x-sort:item="{{ $chapter->id }}" data-sort-id="{{ $chapter->id }}" @endcan
+                wire:key="chapter-{{ $chapter->id }}"
+                style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 16px 18px; margin-bottom: 16px;">
                 {{-- En-tête de chapitre --}}
                 <div class="d-flex flex-wrap justify-content-between align-items-start gap-2" style="margin-bottom: 12px;">
+                    @can('manageStructure', $course)
+                        <span data-sort-handle role="button" tabindex="-1" aria-hidden="true"
+                              title="Glisser pour réordonner le chapitre"
+                              style="cursor: grab; user-select: none; color: var(--sys-text-muted, #9CA3AF); font-size: 1.1rem; line-height: 1; padding: 4px 2px; align-self: center;">⠿</span>
+                    @endcan
                     <div style="flex: 1 1 240px;">
                         <h3 style="font-family: var(--f-heading); font-size: 1.05rem; color: var(--sys-text-default, #1A1D23); margin: 0 0 4px;">
                             {{ $chapter->title }}
@@ -233,10 +275,24 @@
 
                 {{-- Leçons du chapitre --}}
                 @if ($chapter->lessons->isNotEmpty())
-                    <ul class="list-unstyled" style="margin: 0 0 12px; display: flex; flex-direction: column; gap: 8px;">
+                    <ul class="list-unstyled"
+                        @can('manageStructure', $course)
+                            x-data
+                            x-sort="$wire.reorderLessons({{ $chapter->id }}, window.academyDomOrder($el))"
+                            x-sort:config="{ handle: '[data-sort-handle]', animation: 150 }"
+                        @endcan
+                        style="margin: 0 0 12px; display: flex; flex-direction: column; gap: 8px;">
                         @foreach ($chapter->lessons as $lesson)
-                            <li style="border: 1px solid #F1F5F9; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px 14px;">
+                            <li
+                                @can('manageStructure', $course) x-sort:item="{{ $lesson->id }}" data-sort-id="{{ $lesson->id }}" @endcan
+                                wire:key="lesson-{{ $lesson->id }}"
+                                style="border: 1px solid #F1F5F9; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px 14px;">
                                 <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                                    @can('manageStructure', $course)
+                                        <span data-sort-handle role="button" tabindex="-1" aria-hidden="true"
+                                              title="Glisser pour réordonner la leçon"
+                                              style="cursor: grab; user-select: none; color: var(--sys-text-muted, #9CA3AF); font-size: 1rem; line-height: 1; padding: 2px; align-self: center;">⠿</span>
+                                    @endcan
                                     <div style="flex: 1 1 220px;">
                                         <strong style="color: var(--sys-text-default, #1A1D23);">{{ $lesson->title }}</strong>
                                         <p style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">
@@ -284,11 +340,20 @@
                                         </p>
 
                                         @if ($lesson->lessonItems->isNotEmpty())
-                                            <ul class="list-unstyled" style="margin: 0 0 10px; display: flex; flex-direction: column; gap: 8px;">
+                                            <ul class="list-unstyled"
+                                                x-data
+                                                x-sort="$wire.reorderItems({{ $lesson->id }}, window.academyDomOrder($el))"
+                                                x-sort:config="{ handle: '[data-sort-handle]', animation: 150 }"
+                                                style="margin: 0 0 10px; display: flex; flex-direction: column; gap: 8px;">
                                                 @foreach ($lesson->lessonItems as $item)
                                                     @php($typeLabel = ['video' => 'Vidéo', 'document' => 'Document', 'quiz' => 'Quiz'][$item->type] ?? $item->type)
-                                                    <li style="border: 1px solid #F1F5F9; border-radius: var(--sys-radius-md, 0.5rem); padding: 10px 12px;">
+                                                    <li x-sort:item="{{ $item->id }}" data-sort-id="{{ $item->id }}"
+                                                        wire:key="item-{{ $item->id }}"
+                                                        style="border: 1px solid #F1F5F9; border-radius: var(--sys-radius-md, 0.5rem); padding: 10px 12px;">
                                                         <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                                                            <span data-sort-handle role="button" tabindex="-1" aria-hidden="true"
+                                                                  title="Glisser pour réordonner l'élément"
+                                                                  style="cursor: grab; user-select: none; color: var(--sys-text-muted, #9CA3AF); font-size: 0.95rem; line-height: 1; padding: 2px; align-self: center;">⠿</span>
                                                             <div style="flex: 1 1 200px;">
                                                                 <span style="display: inline-block; font-size: 0.68rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #E0F2F1; color: #064E5A; margin-bottom: 4px;">
                                                                     {{ $typeLabel }}
@@ -520,6 +585,9 @@
         @empty
             <p style="color: var(--sys-text-muted, #6B7280);">Aucun chapitre pour l'instant. Commencez par en ajouter un.</p>
         @endforelse
+        @can('manageStructure', $course)
+            </div>
+        @endcan
     </section>
 
     {{-- ───────────────────────── Zone sensible : suppression du cours ───────────────────────── --}}
