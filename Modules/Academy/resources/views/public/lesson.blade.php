@@ -194,15 +194,19 @@
 
                         {{-- ── TYPE VIDEO ── --}}
                         @if($item->type === 'video')
-                            @if($hasAccess && isset($item->payload['player_url']))
+                            @php
+                                // Champ canonique : player_url. Repli rétrocompat : ancien payload['embed'].
+                                $videoUrl = $item->payload['player_url'] ?? ($item->payload['embed'] ?? null);
+                            @endphp
+                            @if($hasAccess && !empty($videoUrl))
                                 {{--
                                     GATING CRITIQUE :
-                                    player_url n'est injectée dans le DOM QUE si $hasAccess === true.
+                                    L'URL vidéo n'est injectée dans le DOM QUE si $hasAccess === true.
                                     Côté serveur, Blade ne rend pas le composant si la condition est fausse.
                                     Aucune URL vidéo ne fuite dans le HTML rendu au visiteur non-inscrit.
                                 --}}
                                 <x-academy::video-player
-                                    :playerUrl="$item->payload['player_url']"
+                                    :playerUrl="$videoUrl"
                                     :title="$item->title ?? $lesson->title"
                                 />
 

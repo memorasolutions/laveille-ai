@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.295 · 2026-06-20 · feat(Academy/refonte) PHASE A socle (A1+A2) : COHÉRENCE éditeur↔lecteur + champs d'item exposés (début refonte admin Académie). VIDÉO : l'éditeur écrivait payload['embed'] alors que le lecteur lit payload['player_url'] → vidéo invisible ; corrigé (CourseEditor écrit player_url + poster + duration_seconds ; lecteur lit player_url ?? embed = rétrocompat anciens items). QUIZ : l'éditeur expose enfin qt_bank_key + passing_score (0-100, SEUIL de réussite déjà appliqué serveur dans QuizController) + attempts_allowed (LIMITE de tentatives, vide=illimité). Validation bornes/listes blanches ; sécurité intacte (resolveCourse + authorize('manageStructure') + anti-IDOR conservés). 91 tests Académie verts (278 assertions) vs 62 avant (+29 réparés/ajoutés). NB : QtService est FIGÉ sur la banque GLOBALE (newRound sans paramètre) → un vrai quiz-banque-par-cours = TODO RD-A2 (refactor QtService::newRound(?bankKey) OU questions dans payload['questions'] + moteur local). Académie gatée « en construction » → zéro impact public. Réversible (git revert). Codename seo-piliers-veille-generative.
  *   1.65.294 · 2026-06-20 · feat(Backoffice/UX) Raccourci « Académie » dans le menu admin (sous la section Contenu) → ouvre la gestion FRONTEND (/academie/espace = academy.dashboard) dans un NOUVEL onglet (l'Académie se gère hors du panneau /admin, façon Moodle ; simple lien de découvrabilité, pas de gestion backend). Gaté @can('academy.manage') + @if(Route::has). Icône graduation-cap + indicateur lien externe. Blade seul = aucun rebuild Vite. Réversible (git revert). Codename seo-piliers-veille-generative.
  *   1.65.293 · 2026-06-20 · feat(FrontTheme/UX) Menu COMPTE (avatar) : accès Académie pour l'utilisateur connecté (demande user : connecté au site public mais aucun accès visible à l'Académie ; capture). Dans le partial DRY auth::components.user-menu-links (source unique du dropdown header + sidebar) : ajout de « 🎓 Académie - mon espace » (→ academy.dashboard, gaté : module public OU rôle Académie super_admin/admin/instructor/student pendant le mode construction, sinon caché car /academie renvoie 503) + « ➕ Créer un cours » (→ academy.courses.create, gaté can('academy.manage') OU rôle instructor). Le @foreach respecte désormais une clé 'show' (défaut true). Diagnostic : le dropdown avatar (Alpine) s'ouvrait déjà mais ne contenait AUCUN lien Académie. VÉRIFIÉ VISUELLEMENT (Playwright local connecté) : dropdown s'ouvre, les 2 liens présents, « mon espace » → tableau de bord 200 (pas 503), Alpine OK. Blade seul = aucun rebuild Vite. Réversible (git revert). Codename seo-piliers-veille-generative.
  *   1.65.292 · 2026-06-20 · fix(Backoffice/UX) Menu admin : « Infolettres » repositionnée SOUS la grande section CONTENU (retrait de son titre de catégorie propre) → le groupe repliable Infolettres devient frère du sous-menu « Contenu » (et non dedans, et non une section séparée), comme demandé. Blade seul.
@@ -442,7 +443,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 294;
+$lvPatch = 295;
 
 return [
     'major' => $lvMajor,

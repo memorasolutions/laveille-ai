@@ -132,15 +132,52 @@ test('formateur owner peut ajouter une vidéo (ScreenPal) à sa leçon', functio
     Livewire::actingAs($owner)
         ->test(CourseEditor::class, ['course' => $this->courseA])
         ->set("newItem.{$this->lessonA->id}.title", 'Vidéo intro')
-        ->set("newItem.{$this->lessonA->id}.external_ref", 'screenpal-abc123')
+        ->set("newItem.{$this->lessonA->id}.player_url", 'https://share.screenpal.com/player/abc123')
+        ->set("newItem.{$this->lessonA->id}.duration_minutes", 5)
         ->call('addItem', $this->lessonA->id, 'video')
         ->assertHasNoErrors();
 
     $item = LessonItem::where('lesson_id', $this->lessonA->id)->first();
     expect($item)->not->toBeNull();
     expect($item->type)->toBe('video');
-    expect($item->payload['embed'] ?? null)->toBe('screenpal-abc123');
-    expect($item->external_ref)->toBe('screenpal-abc123');
+    // Champ CANONIQUE lu par le lecteur public (public/lesson.blade.php) : player_url.
+    expect($item->payload['player_url'] ?? null)->toBe('https://share.screenpal.com/player/abc123');
+    // La durée est stockée en secondes (5 min → 300 s).
+    expect($item->payload['duration_seconds'] ?? null)->toBe(300);
+});
+
+test('l\'URL vidéo écrite par l\'éditeur est lue par le lecteur (champ player_url aligné)', function (): void {
+    $owner = makeItemsOwner($this->courseA);
+
+    Livewire::actingAs($owner)
+        ->test(CourseEditor::class, ['course' => $this->courseA])
+        ->set("newItem.{$this->lessonA->id}.title", 'Vidéo lue')
+        ->set("newItem.{$this->lessonA->id}.player_url", 'https://share.screenpal.com/player/xyz789')
+        ->call('addItem', $this->lessonA->id, 'video')
+        ->assertHasNoErrors();
+
+    $item = LessonItem::where('lesson_id', $this->lessonA->id)->where('type', 'video')->first();
+
+    // Reproduit la résolution exacte du lecteur : player_url, repli sur l'ancien embed.
+    $videoUrl = $item->payload['player_url'] ?? ($item->payload['embed'] ?? null);
+
+    expect($videoUrl)->toBe('https://share.screenpal.com/player/xyz789');
+});
+
+test('rétrocompat : un ancien item avec payload[embed] reste lisible par le lecteur', function (): void {
+    // Simule un item historique créé AVANT l'alignement (player_url absent, embed présent).
+    $legacy = LessonItem::create([
+        'lesson_id'   => $this->lessonA->id,
+        'type'        => 'video',
+        'title'       => 'Vidéo héritée',
+        'position'    => 1,
+        'payload'     => ['embed' => 'https://share.screenpal.com/player/legacy'],
+        'is_required' => false,
+    ]);
+
+    $videoUrl = $legacy->payload['player_url'] ?? ($legacy->payload['embed'] ?? null);
+
+    expect($videoUrl)->toBe('https://share.screenpal.com/player/legacy');
 });
 
 test('formateur owner peut ajouter un document avec texte riche', function (): void {
@@ -158,19 +195,55 @@ test('formateur owner peut ajouter un document avec texte riche', function (): v
     expect($item->payload['rich_text'] ?? null)->toContain('Contenu du document');
 });
 
-test('formateur owner peut ajouter un quiz lié à une banque QT', function (): void {
+test('formateur owner peut ajouter un quiz avec clé de banque, seuil et tentatives', function (): void {
     $owner = makeItemsOwner($this->courseA);
 
     Livewire::actingAs($owner)
         ->test(CourseEditor::class, ['course' => $this->courseA])
         ->set("newItem.{$this->lessonA->id}.title", 'Quiz du module')
         ->set("newItem.{$this->lessonA->id}.qt_bank_key", 'qt.module.1')
+        ->set("newItem.{$this->lessonA->id}.passing_score", 75)
+        ->set("newItem.{$this->lessonA->id}.attempts_allowed", 3)
         ->call('addItem', $this->lessonA->id, 'quiz')
         ->assertHasNoErrors();
 
     $item = LessonItem::where('lesson_id', $this->lessonA->id)->where('type', 'quiz')->first();
     expect($item)->not->toBeNull();
     expect($item->payload['qt_bank_key'] ?? null)->toBe('qt.module.1');
+    // Champs consommés côté serveur par QuizController (seuil + limite de tentatives).
+    expect($item->payload['passing_score'] ?? null)->toBe(75);
+    expect($item->payload['attempts_allowed'] ?? null)->toBe(3);
+});
+
+test('quiz : tentatives vides = illimité (clé absente du payload)', function (): void {
+    $owner = makeItemsOwner($this->courseA);
+
+    Livewire::actingAs($owner)
+        ->test(CourseEditor::class, ['course' => $this->courseA])
+        ->set("newItem.{$this->lessonA->id}.title", 'Quiz illimité')
+        ->set("newItem.{$this->lessonA->id}.qt_bank_key", 'qt.module.2')
+        ->set("newItem.{$this->lessonA->id}.passing_score", 50)
+        ->call('addItem', $this->lessonA->id, 'quiz')
+        ->assertHasNoErrors();
+
+    $item = LessonItem::where('lesson_id', $this->lessonA->id)->where('type', 'quiz')->first();
+    expect($item->payload['passing_score'] ?? null)->toBe(50);
+    expect(array_key_exists('attempts_allowed', $item->payload))->toBeFalse();
+});
+
+test('quiz : seuil hors bornes est ramené dans [0,100]', function (): void {
+    $owner = makeItemsOwner($this->courseA);
+
+    Livewire::actingAs($owner)
+        ->test(CourseEditor::class, ['course' => $this->courseA])
+        ->set("newItem.{$this->lessonA->id}.title", 'Quiz borne')
+        ->set("newItem.{$this->lessonA->id}.qt_bank_key", 'qt.module.3')
+        ->set("newItem.{$this->lessonA->id}.passing_score", 150)
+        ->call('addItem', $this->lessonA->id, 'quiz')
+        // 150 est rejeté par la validation (max:100) : on prouve l'absence d'écriture hors borne.
+        ->assertHasErrors('passing_score');
+
+    expect(LessonItem::where('lesson_id', $this->lessonA->id)->where('type', 'quiz')->count())->toBe(0);
 });
 
 test('formateur owner peut mettre à jour un item de sa leçon', function (): void {
@@ -179,13 +252,15 @@ test('formateur owner peut mettre à jour un item de sa leçon', function (): vo
 
     Livewire::actingAs($owner)
         ->test(CourseEditor::class, ['course' => $this->courseA])
-        ->call('updateItem', $item->id, 'video', 'Titre révisé', 12, 'screenpal-xyz', null, null)
+        ->call('updateItem', $item->id, 'video', 'Titre révisé', 12, [
+            'player_url' => 'https://share.screenpal.com/player/revise',
+        ])
         ->assertHasNoErrors();
 
     $item->refresh();
     expect($item->title)->toBe('Titre révisé');
     expect($item->estimated_minutes)->toBe(12);
-    expect($item->payload['embed'] ?? null)->toBe('screenpal-xyz');
+    expect($item->payload['player_url'] ?? null)->toBe('https://share.screenpal.com/player/revise');
 });
 
 test('formateur owner peut supprimer un item de sa leçon', function (): void {
@@ -253,7 +328,9 @@ test('ANTI-IDOR : mettre à jour un item d\'un autre cours est refusé, rien éc
     $component = Livewire::actingAs($owner)
         ->test(CourseEditor::class, ['course' => $this->courseA]);
 
-    expect(fn () => $component->call('updateItem', $foreignItem->id, 'video', 'Piraté', null, 'hack', null, null))
+    expect(fn () => $component->call('updateItem', $foreignItem->id, 'video', 'Piraté', null, [
+        'player_url' => 'https://share.screenpal.com/player/hack',
+    ]))
         ->toThrow(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
 
     expect($foreignItem->fresh()->title)->toBe($foreignItem->title);

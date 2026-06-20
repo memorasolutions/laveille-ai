@@ -13,20 +13,32 @@ namespace Modules\Academy\Services;
 /**
  * Adaptateur minimal autour de QtService (Modules/Tools).
  *
- * Choix d'architecture : QtService est couplé à des fichiers de données PHP
- * codés en dur (qt-questions.php, qt-truefalse.php, qt-shortanswer.php) et ne
- * peut pas servir une banque arbitraire par clé. On l'utilise donc tel quel
- * via newRound() en passant $bankKey uniquement à titre documentaire. Si une
- * banque dédiée par cours est nécessaire à l'avenir, QtService devra être
- * refactorisé pour accepter un chemin de fichier dynamique.
+ * VERDICT (audité 2026-06-20) : QtService est FIGÉ sur la banque GLOBALE. Ses
+ * méthodes publiques (newRound, dailyRound) n'acceptent aucun paramètre et lisent
+ * des fichiers de données PHP codés en dur (qt-questions.php, qt-truefalse.php,
+ * qt-shortanswer.php) via loadData() privé. Il n'expose donc PAS de banque
+ * arbitraire par clé. On l'utilise tel quel via newRound() ; $bankKey est conservé
+ * (signature + payload) mais N'EST PAS encore honoré pour le choix des questions.
+ *
+ * Ce qui FONCTIONNE déjà côté serveur, indépendamment de la banque :
+ *  - passing_score   → QuizController::submitQuiz applique le seuil de réussite.
+ *  - attempts_allowed → QuizController::startQuiz applique la limite de tentatives.
+ *
+ * TODO RD-A2 (« quiz propre au cours ») : pour une vraie banque par cours, deux
+ * pistes sûres, sans casser l'existant :
+ *   1. Refactorer QtService pour accepter un chemin/clé de fichier dynamique
+ *      (newRound(?string $bankKey)), avec repli sur la banque globale.
+ *   2. OU stocker les questions directement dans payload['questions'] et bâtir un
+ *      petit moteur local ici (score() sait déjà noter qcm/vraifaux/court/appariement).
+ * Tant que ce n'est pas fait, buildRound() retombe TOUJOURS sur la banque globale.
  */
 final class QuizService
 {
     /**
      * Construit un round de questions pour un item quiz Academy.
      *
-     * @param  string $bankKey  Clé de banque (payload['qt_bank_key']) — ignorée par QtService,
-     *                          conservée pour extension future.
+     * @param  string $bankKey  Clé de banque (payload['qt_bank_key']) : ignorée par QtService
+     *                          (banque globale figée), conservée pour extension future (RD-A2).
      * @return array<int, array<string, mixed>>
      */
     public static function buildRound(string $bankKey): array

@@ -269,27 +269,31 @@
                                                         {{-- Modifier cet élément (formulaire par type) --}}
                                                         <details style="margin-top: 8px;">
                                                             <summary style="cursor: pointer; font-size: 0.78rem; color: var(--sys-action-primary, #064E5A); font-weight: 600;">Modifier cet élément</summary>
-                                                            <form wire:submit="updateItem(
-                                                                    {{ $item->id }},
-                                                                    '{{ $item->type }}',
-                                                                    $event.target.title.value,
-                                                                    $event.target.estimated_minutes.value,
-                                                                    $event.target.external_ref ? $event.target.external_ref.value : null,
-                                                                    $event.target.rich_text ? $event.target.rich_text.value : null,
-                                                                    $event.target.qt_bank_key ? $event.target.qt_bank_key.value : null
-                                                                  )"
+                                                            {{-- Valeur affichée pour l'URL vidéo : champ canonique player_url, repli sur l'ancien payload['embed']. --}}
+                                                            @php($videoUrlValue = $item->payload['player_url'] ?? ($item->payload['embed'] ?? ''))
+                                                            @php($posterValue = $item->payload['poster'] ?? '')
+                                                            @php($durationMin = isset($item->payload['duration_seconds']) ? (int) ceil(((int) $item->payload['duration_seconds']) / 60) : '')
+                                                            <form wire:submit="updateItem({{ $item->id }}, '{{ $item->type }}', $event.target.title.value, $event.target.estimated_minutes.value, { player_url: $event.target.player_url ? $event.target.player_url.value : null, poster_url: $event.target.poster_url ? $event.target.poster_url.value : null, duration_minutes: $event.target.duration_minutes ? $event.target.duration_minutes.value : null, rich_text: $event.target.rich_text ? $event.target.rich_text.value : null, qt_bank_key: $event.target.qt_bank_key ? $event.target.qt_bank_key.value : null, passing_score: $event.target.passing_score ? $event.target.passing_score.value : null, attempts_allowed: $event.target.attempts_allowed ? $event.target.attempts_allowed.value : null })"
                                                                   style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
                                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="item-title-{{ $item->id }}">Titre</label>
                                                                 <input id="item-title-{{ $item->id }}" type="text" name="title" value="{{ $item->title }}" aria-label="Titre de l'élément"
                                                                        style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
 
                                                                 @if ($item->type === 'video')
-                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-ref-{{ $item->id }}">Référence d'intégration ScreenPal</label>
-                                                                    <input id="item-ref-{{ $item->id }}" type="text" name="external_ref" value="{{ $item->external_ref ?? ($item->payload['embed'] ?? '') }}" placeholder="Identifiant ou URL d'intégration ScreenPal" aria-label="Référence ScreenPal"
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-url-{{ $item->id }}">URL d'intégration ScreenPal</label>
+                                                                    <input id="item-url-{{ $item->id }}" type="url" name="player_url" value="{{ $videoUrlValue }}" placeholder="https://share.screenpal.com/player/…" aria-label="URL d'intégration ScreenPal"
                                                                            style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                                                                     <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
-                                                                        La vidéo doit être non répertoriée, avec verrou de domaine activé sur ScreenPal.
+                                                                        La vidéo doit être non répertoriée, avec verrou de domaine activé sur ScreenPal. Utilisez l'URL d'intégration (player/…), pas le lien de partage (watch/…).
                                                                     </p>
+
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-poster-{{ $item->id }}">Affiche / vignette (URL, facultatif)</label>
+                                                                    <input id="item-poster-{{ $item->id }}" type="url" name="poster_url" value="{{ $posterValue }}" placeholder="https://… (téléversement à venir)" aria-label="URL de l'affiche de la vidéo"
+                                                                           style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-dur-{{ $item->id }}">Durée de la vidéo (min, facultatif)</label>
+                                                                    <input id="item-dur-{{ $item->id }}" type="number" min="1" max="1440" name="duration_minutes" value="{{ $durationMin }}" placeholder="Durée de la vidéo en minutes" aria-label="Durée de la vidéo en minutes"
+                                                                           style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                                                                 @elseif ($item->type === 'document')
                                                                     <label style="font-size: 0.78rem; font-weight: 600;" for="item-doc-{{ $item->id }}">Contenu (texte riche / markdown simple)</label>
                                                                     <textarea id="item-doc-{{ $item->id }}" name="rich_text" rows="4" aria-label="Contenu du document"
@@ -299,11 +303,19 @@
                                                                     <input id="item-qt-{{ $item->id }}" type="text" name="qt_bank_key" value="{{ $item->payload['qt_bank_key'] ?? '' }}" placeholder="Clé de banque QT" aria-label="Clé de banque QT"
                                                                            style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                                                                     <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
-                                                                        Le quiz réutilise QtService à partir de cette clé.
+                                                                        La clé identifie la banque de questions. Une banque propre au cours arrive dans une prochaine étape ; pour l'instant, le quiz puise dans la banque générale.
                                                                     </p>
+
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-pass-{{ $item->id }}">Score de réussite (%)</label>
+                                                                    <input id="item-pass-{{ $item->id }}" type="number" min="0" max="100" name="passing_score" value="{{ $item->payload['passing_score'] ?? 60 }}" aria-label="Score de réussite en pourcentage"
+                                                                           style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-att-{{ $item->id }}">Tentatives autorisées (laisser vide = illimité)</label>
+                                                                    <input id="item-att-{{ $item->id }}" type="number" min="1" max="99" name="attempts_allowed" value="{{ $item->payload['attempts_allowed'] ?? '' }}" placeholder="Illimité" aria-label="Nombre de tentatives autorisées"
+                                                                           style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                                                                 @endif
 
-                                                                <label style="font-size: 0.78rem; font-weight: 600;" for="item-min-{{ $item->id }}">Durée estimée (min, facultatif)</label>
+                                                                <label style="font-size: 0.78rem; font-weight: 600;" for="item-min-{{ $item->id }}">Durée estimée de l'élément (min, facultatif)</label>
                                                                 <input id="item-min-{{ $item->id }}" type="number" min="1" name="estimated_minutes" value="{{ $item->estimated_minutes }}" aria-label="Durée estimée en minutes"
                                                                        style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
 
@@ -327,19 +339,38 @@
                                                        style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                                                 @error('title') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
 
-                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-ref-{{ $lesson->id }}">Référence ScreenPal (pour une vidéo)</label>
-                                                <input id="newitem-ref-{{ $lesson->id }}" type="text" wire:model="newItem.{{ $lesson->id }}.external_ref" placeholder="Identifiant ou URL d'intégration ScreenPal"
+                                                <p style="font-size: 0.74rem; font-weight: 700; color: var(--sys-text-default, #1A1D23); margin: 4px 0 0;">Champs pour une vidéo</p>
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-url-{{ $lesson->id }}">URL d'intégration ScreenPal</label>
+                                                <input id="newitem-url-{{ $lesson->id }}" type="url" wire:model="newItem.{{ $lesson->id }}.player_url" placeholder="https://share.screenpal.com/player/…"
                                                        style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                                                 <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
-                                                    Vidéo : utilisez une vidéo non répertoriée avec verrou de domaine sur ScreenPal.
+                                                    Utilisez une vidéo non répertoriée avec verrou de domaine sur ScreenPal, et l'URL d'intégration (player/…), pas le lien de partage (watch/…).
                                                 </p>
 
-                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-doc-{{ $lesson->id }}">Contenu (pour un document)</label>
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-poster-{{ $lesson->id }}">Affiche / vignette (URL, facultatif)</label>
+                                                <input id="newitem-poster-{{ $lesson->id }}" type="url" wire:model="newItem.{{ $lesson->id }}.poster_url" placeholder="https://… (téléversement à venir)"
+                                                       style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-dur-{{ $lesson->id }}">Durée de la vidéo (min, facultatif)</label>
+                                                <input id="newitem-dur-{{ $lesson->id }}" type="number" min="1" max="1440" wire:model="newItem.{{ $lesson->id }}.duration_minutes" placeholder="Durée de la vidéo en minutes"
+                                                       style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                <p style="font-size: 0.74rem; font-weight: 700; color: var(--sys-text-default, #1A1D23); margin: 8px 0 0;">Champs pour un document</p>
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-doc-{{ $lesson->id }}">Contenu</label>
                                                 <textarea id="newitem-doc-{{ $lesson->id }}" wire:model="newItem.{{ $lesson->id }}.rich_text" rows="3" placeholder="Texte riche / markdown simple"
                                                           style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);"></textarea>
 
-                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-qt-{{ $lesson->id }}">Clé de banque QT (pour un quiz)</label>
+                                                <p style="font-size: 0.74rem; font-weight: 700; color: var(--sys-text-default, #1A1D23); margin: 8px 0 0;">Champs pour un quiz</p>
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-qt-{{ $lesson->id }}">Clé de banque QT</label>
                                                 <input id="newitem-qt-{{ $lesson->id }}" type="text" wire:model="newItem.{{ $lesson->id }}.qt_bank_key" placeholder="Clé de banque QT (réutilise QtService)"
+                                                       style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-pass-{{ $lesson->id }}">Score de réussite (%)</label>
+                                                <input id="newitem-pass-{{ $lesson->id }}" type="number" min="0" max="100" wire:model="newItem.{{ $lesson->id }}.passing_score" placeholder="60"
+                                                       style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-att-{{ $lesson->id }}">Tentatives autorisées (laisser vide = illimité)</label>
+                                                <input id="newitem-att-{{ $lesson->id }}" type="number" min="1" max="99" wire:model="newItem.{{ $lesson->id }}.attempts_allowed" placeholder="Illimité"
                                                        style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
 
                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-min-{{ $lesson->id }}">Durée estimée (min, facultatif)</label>

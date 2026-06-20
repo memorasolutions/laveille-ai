@@ -71,7 +71,9 @@ class CourseEditor extends Component
     /**
      * @var array<int, array{
      *   type: string, title: string, estimated_minutes: ?int, is_required: bool,
-     *   external_ref: ?string, rich_text: ?string, qt_bank_key: ?string
+     *   external_ref: ?string, player_url: ?string, poster_url: ?string,
+     *   duration_minutes: ?int, rich_text: ?string, qt_bank_key: ?string,
+     *   passing_score: ?int, attempts_allowed: ?int
      * }>
      */
     public array $newItem = [];
@@ -447,14 +449,21 @@ class CourseEditor extends Component
         session()->flash('academy_editor_status', 'Élément ajouté.');
     }
 
+    /**
+     * Met à jour un item. Les champs facultatifs propres à un type (vidéo / quiz)
+     * sont passés en tableau associatif $extra pour éviter une signature trop longue
+     * et rester rétrocompatible : un champ absent vaut null (ignoré au build).
+     *
+     * @param  array<string, mixed>  $extra  player_url, poster_url, duration_minutes,
+     *                                        external_ref, rich_text, qt_bank_key,
+     *                                        passing_score, attempts_allowed
+     */
     public function updateItem(
         int $itemId,
         string $type,
         string $title,
         ?int $estimatedMinutes = null,
-        ?string $externalRef = null,
-        ?string $richText = null,
-        ?string $qtBankKey = null
+        array $extra = []
     ): void {
         $course = $this->resolveCourse();
         $this->authorize('manageStructure', $course);
@@ -466,9 +475,14 @@ class CourseEditor extends Component
             'type'              => $type,
             'title'             => $title,
             'estimated_minutes' => $estimatedMinutes,
-            'external_ref'      => $externalRef,
-            'rich_text'         => $richText,
-            'qt_bank_key'       => $qtBankKey,
+            'external_ref'      => $extra['external_ref']     ?? null,
+            'player_url'        => $extra['player_url']       ?? null,
+            'poster_url'        => $extra['poster_url']       ?? null,
+            'duration_minutes'  => $extra['duration_minutes'] ?? null,
+            'rich_text'         => $extra['rich_text']        ?? null,
+            'qt_bank_key'       => $extra['qt_bank_key']      ?? null,
+            'passing_score'     => $extra['passing_score']    ?? null,
+            'attempts_allowed'  => $extra['attempts_allowed'] ?? null,
         ];
 
         $data    = $this->validateItem($input);
@@ -558,16 +572,30 @@ class CourseEditor extends Component
             'title'             => 'required|string|max:255',
             'estimated_minutes' => 'nullable|integer|min:1',
             'external_ref'      => 'nullable|string|max:500',
+            // Vidéo : URL d'intégration ScreenPal (champ canonique lu par le lecteur),
+            // affiche (URL pour l'instant), durée estimée en minutes.
+            'player_url'        => 'nullable|url|max:2000',
+            'poster_url'        => 'nullable|url|max:2000',
+            'duration_minutes'  => 'nullable|integer|min:1|max:1440',
             'rich_text'         => 'nullable|string|max:20000',
+            // Quiz : clé de banque + seuil de réussite (0-100) + tentatives (>= 1, vide = illimité).
             'qt_bank_key'       => 'nullable|string|max:120',
+            'passing_score'     => 'nullable|integer|min:0|max:100',
+            'attempts_allowed'  => 'nullable|integer|min:1|max:99',
         ])->validate();
     }
 
     /**
-     * Construit le payload (array casté) propre à chaque type, de façon défensive :
-     *  - video    : référence d'intégration ScreenPal (external_ref OU payload.embed).
+     * Construit le payload (array casté) propre à chaque type, de façon défensive.
+     *
+     *  - video    : champ CANONIQUE « player_url » (l'URL d'intégration ScreenPal lue
+     *               par le lecteur public, cf. public/lesson.blade.php). On conserve
+     *               external_ref (colonne) et on accepte un repli historique payload.embed
+     *               si player_url est absent (rétrocompatibilité des anciens items).
+     *               Ajoute « poster » (URL) et « duration_seconds » (dérivé des minutes).
      *  - document : texte riche / markdown simple (payload.rich_text).
-     *  - quiz     : clé de banque QT réutilisée par QtService (payload.qt_bank_key).
+     *  - quiz     : clé de banque QT (qt_bank_key) + passing_score + attempts_allowed,
+     *               consommés côté serveur par QuizController (seuil + limite de tentatives).
      *
      * @param  array<string, mixed>  $input
      * @return array<string, mixed>
@@ -575,11 +603,64 @@ class CourseEditor extends Component
     private function buildItemPayload(string $type, array $input): array
     {
         return match ($type) {
-            'video'    => ['embed' => trim((string) ($input['external_ref'] ?? '')) ?: null],
+            'video'    => $this->buildVideoPayload($input),
             'document' => ['rich_text' => (string) ($input['rich_text'] ?? '')],
-            'quiz'     => ['qt_bank_key' => trim((string) ($input['qt_bank_key'] ?? '')) ?: null],
+            'quiz'     => $this->buildQuizPayload($input),
             default    => [],
         };
+    }
+
+    /**
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    private function buildVideoPayload(array $input): array
+    {
+        // Champ canonique : player_url. Repli historique : external_ref puis payload.embed.
+        $playerUrl = trim((string) ($input['player_url'] ?? ''));
+        if ($playerUrl === '') {
+            $playerUrl = trim((string) ($input['external_ref'] ?? ''));
+        }
+        if ($playerUrl === '') {
+            $playerUrl = trim((string) ($input['embed'] ?? ''));
+        }
+
+        $poster   = trim((string) ($input['poster_url'] ?? ''));
+        $minutes  = $input['duration_minutes'] ?? null;
+        $duration = ($minutes !== null && $minutes !== '' && (int) $minutes > 0)
+            ? (int) $minutes * 60
+            : null;
+
+        $payload = ['player_url' => $playerUrl !== '' ? $playerUrl : null];
+        if ($poster !== '') {
+            $payload['poster'] = $poster;
+        }
+        if ($duration !== null) {
+            $payload['duration_seconds'] = $duration;
+        }
+
+        return $payload;
+    }
+
+    /**
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    private function buildQuizPayload(array $input): array
+    {
+        $payload = ['qt_bank_key' => trim((string) ($input['qt_bank_key'] ?? '')) ?: null];
+
+        $passing = $input['passing_score'] ?? null;
+        if ($passing !== null && $passing !== '') {
+            $payload['passing_score'] = max(0, min(100, (int) $passing));
+        }
+
+        $attempts = $input['attempts_allowed'] ?? null;
+        if ($attempts !== null && $attempts !== '') {
+            $payload['attempts_allowed'] = max(1, (int) $attempts);
+        }
+
+        return $payload;
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
