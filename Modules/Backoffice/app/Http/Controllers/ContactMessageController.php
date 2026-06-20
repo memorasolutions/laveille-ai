@@ -23,8 +23,16 @@ class ContactMessageController extends Controller
     {
         $query = ContactMessage::query()->latest();
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        // Filtre de statut. Valeurs : 'new', 'read', 'spam' ou vide.
+        // Par défaut (vide) on affiche la boîte légitime (new + read) et JAMAIS le spam :
+        // le spam n'apparait que via l'onglet dédié « Spam ».
+        $status = (string) $request->input('status', '');
+        if ($status === 'spam') {
+            $query->where('status', 'spam');
+        } elseif (in_array($status, ['new', 'read'], true)) {
+            $query->where('status', $status);
+        } else {
+            $query->whereIn('status', ['new', 'read']);
         }
 
         if ($request->filled('search')) {
@@ -38,8 +46,9 @@ class ContactMessageController extends Controller
 
         $messages = $query->paginate((int) Settings::get('backoffice.contact_messages_per_page', 20));
         $unreadCount = ContactMessage::unread()->count();
+        $spamCount = ContactMessage::spam()->count();
 
-        return view('backoffice::themes.backend.contact-messages.index', compact('messages', 'unreadCount'));
+        return view('backoffice::themes.backend.contact-messages.index', compact('messages', 'unreadCount', 'spamCount'));
     }
 
     public function show(ContactMessage $contactMessage): View
@@ -55,5 +64,19 @@ class ContactMessageController extends Controller
 
         return redirect()->route('admin.contact-messages.index')
             ->with('success', 'Message supprimé.');
+    }
+
+    /**
+     * Réhabilite un message marqué spam (faux positif) : status 'spam' -> 'new'.
+     * On vide la raison et on le ramène dans la boîte légitime.
+     */
+    public function markLegit(ContactMessage $contactMessage): RedirectResponse
+    {
+        if ($contactMessage->isSpam()) {
+            $contactMessage->update(['status' => 'new', 'spam_reason' => null]);
+        }
+
+        return redirect()->route('admin.contact-messages.index', ['status' => 'spam'])
+            ->with('success', 'Message marqué comme légitime.');
     }
 }

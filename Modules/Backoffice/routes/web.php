@@ -143,6 +143,7 @@ Route::prefix('admin')
         // ── Messages contact ──
         Route::middleware('permission:view_contacts')->group(function () {
             Route::get('contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
+            Route::post('contact-messages/{contactMessage}/legit', [ContactMessageController::class, 'markLegit'])->name('contact-messages.legit');
             Route::get('contact-messages/{contactMessage}', [ContactMessageController::class, 'show'])->name('contact-messages.show');
         });
         Route::delete('contact-messages/{contactMessage}', [ContactMessageController::class, 'destroy'])->name('contact-messages.destroy')->middleware('permission:delete_contacts');

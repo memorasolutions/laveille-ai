@@ -80,6 +80,19 @@ Schedule::command('privacy:purge-expired')->dailyAt('02:30');
 // Short URLs - nettoyage liens expires + avertissements 30j
 Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
 
+// Messages de contact - purge de la quarantaine spam de plus de 60 jours (hebdo).
+// Passe par le schedule:run deja en place (pas un nouveau cron serveur). Defensif :
+// table possiblement absente en contexte de portabilite/migration.
+Schedule::call(function () {
+    try {
+        \App\Models\ContactMessage::where('status', 'spam')
+            ->where('created_at', '<', now()->subDays(60))
+            ->delete();
+    } catch (\Throwable) {
+        // Best-effort : ne jamais faire echouer le scheduler.
+    }
+})->weekly();
+
 // News - resolution URLs Google News non resolues (fallback periodique pour articles avec resolved_url=null)
 Schedule::command('news:reprocess --unresolved-only --limit=50')->dailyAt('04:30')->withoutOverlapping();
 

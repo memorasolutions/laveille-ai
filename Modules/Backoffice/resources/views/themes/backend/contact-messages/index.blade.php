@@ -21,6 +21,35 @@
         </x-backoffice::help-modal>
     </div>
 
+    {{-- Onglets de filtre rapide : boîte légitime / non lus / spam (quarantaine) --}}
+    @php($currentStatus = request('status', ''))
+    <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link {{ $currentStatus === '' ? 'active' : '' }}" href="{{ route('admin.contact-messages.index') }}">
+                <i data-lucide="inbox" class="icon-sm"></i> {{ __('Boîte') }}
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ $currentStatus === 'new' ? 'active' : '' }}" href="{{ route('admin.contact-messages.index', ['status' => 'new']) }}">
+                <i data-lucide="mail" class="icon-sm"></i> {{ __('Non lus') }}
+                @if(($unreadCount ?? 0) > 0)<span class="badge bg-danger ms-1">{{ $unreadCount }}</span>@endif
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ $currentStatus === 'spam' ? 'active' : '' }}" href="{{ route('admin.contact-messages.index', ['status' => 'spam']) }}">
+                <i data-lucide="shield-alert" class="icon-sm"></i> {{ __('Spam') }}
+                @if(($spamCount ?? 0) > 0)<span class="badge bg-warning text-dark ms-1">{{ $spamCount }}</span>@endif
+            </a>
+        </li>
+    </ul>
+
+    @if($currentStatus === 'spam')
+    <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
+        <i data-lucide="info" class="icon-sm"></i>
+        <span>{{ __('Messages mis en quarantaine par le filtre anti-pourriel. Vérifiez l\'absence de faux positif : si un message est légitime, cliquez « Marquer comme légitime » pour le replacer dans la boîte.') }}</span>
+    </div>
+    @endif
+
     {{-- Filtres --}}
     <div class="card mb-3">
         <div class="card-body py-2">
@@ -28,9 +57,10 @@
                 <div class="d-flex align-items-center gap-2">
                     <label class="form-label mb-0 small text-nowrap">{{ __('Statut :') }}</label>
                     <select name="status" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
-                        <option value="">{{ __('Tous') }}</option>
-                        <option value="new" {{ request('status') === 'new' ? 'selected' : '' }}>{{ __('Non lus') }}</option>
-                        <option value="read" {{ request('status') === 'read' ? 'selected' : '' }}>{{ __('Lus') }}</option>
+                        <option value="" {{ $currentStatus === '' ? 'selected' : '' }}>{{ __('Boîte (légitimes)') }}</option>
+                        <option value="new" {{ $currentStatus === 'new' ? 'selected' : '' }}>{{ __('Non lus') }}</option>
+                        <option value="read" {{ $currentStatus === 'read' ? 'selected' : '' }}>{{ __('Lus') }}</option>
+                        <option value="spam" {{ $currentStatus === 'spam' ? 'selected' : '' }}>{{ __('Spam') }}</option>
                     </select>
                 </div>
                 <div class="d-flex align-items-center gap-2 flex-grow-1">
@@ -59,6 +89,9 @@
                             <th style="width:30px"></th>
                             <th>{{ __('De') }}</th>
                             <th>{{ __('Sujet') }}</th>
+                            @if($currentStatus === 'spam')
+                            <th>{{ __('Raison') }}</th>
+                            @endif
                             <th>{{ __('Date') }}</th>
                             <th class="text-end">{{ __('Actions') }}</th>
                         </tr>
@@ -76,6 +109,15 @@
                                 <small class="text-muted">{{ $msg->email }}</small>
                             </td>
                             <td>{{ Str::limit($msg->subject, 60) }}</td>
+                            @if($currentStatus === 'spam')
+                            <td>
+                                @if($msg->spam_reason)
+                                    <span class="badge bg-warning text-dark" title="{{ __('Signaux anti-pourriel déclenchés') }}">{{ $msg->spam_reason }}</span>
+                                @else
+                                    <span class="text-muted small">{{ __('non précisée') }}</span>
+                                @endif
+                            </td>
+                            @endif
                             <td>
                                 <span title="{{ $msg->created_at->format('d/m/Y H:i') }}">
                                     {{ $msg->created_at->diffForHumans() }}
@@ -85,6 +127,14 @@
                                 <a href="{{ route('admin.contact-messages.show', $msg) }}" class="btn btn-sm btn-outline-primary" title="{{ __('Voir') }}">
                                     <i data-lucide="eye"></i>
                                 </a>
+                                @if($msg->isSpam())
+                                <form action="{{ route('admin.contact-messages.legit', $msg) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="{{ __('Marquer comme légitime') }}">
+                                        <i data-lucide="shield-check"></i>
+                                    </button>
+                                </form>
+                                @endif
                                 <form action="{{ route('admin.contact-messages.destroy', $msg) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer ce message ?') }}">
                                     @csrf
                                     @method('DELETE')

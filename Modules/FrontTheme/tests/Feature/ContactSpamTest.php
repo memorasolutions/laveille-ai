@@ -20,13 +20,17 @@ declare(strict_types=1);
  * un signal faible isolé passe mais le sujet est préfixé « [Spam probable] ».
  */
 
+use App\Models\ContactMessage;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 use Modules\FrontTheme\Http\Controllers\ContactController;
 
-uses(Tests\TestCase::class);
+// RefreshDatabase : on a désormais besoin de la table contact_messages pour vérifier
+// la persistance (quarantaine spam / boîte légitime) en plus du comportement mail.
+uses(Tests\TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
     // On neutralise l'écouteur de journalisation des courriels (Notifications\LogSentEmail
@@ -83,7 +87,7 @@ function sentSubjects(): array
     return $subjects;
 }
 
-it('envoie le courriel pour un message légitime', function () {
+it('envoie le courriel et persiste en « new » sans raison pour un message légitime', function () {
     $response = submitContact(contactPayload());
 
     expect($response->getSession()->get('success'))->not->toBeNull();
@@ -91,29 +95,61 @@ it('envoie le courriel pour un message légitime', function () {
     $subjects = sentSubjects();
     expect($subjects)->toHaveCount(1);
     expect(str_starts_with($subjects[0], '[Spam probable]'))->toBeFalse();
+
+    // Persistance : un message en boîte légitime, aucune raison de spam.
+    $msg = ContactMessage::query()->latest('id')->first();
+    expect($msg)->not->toBeNull();
+    expect($msg->status)->toBe('new');
+    expect($msg->spam_reason)->toBeNull();
 });
 
-it('rejette silencieusement un spam clair (jackpot, MAJUSCULES, raccourcisseur)', function () {
+it('met en quarantaine (status spam) un spam clair, avec raison et sans courriel', function () {
     $response = submitContact(contactPayload([
         'subject' => 'THE $27,000,000 JACKPOT IS A CROWN FOR CASH',
         'message' => 'YOU ARE THE LUCKY WINNER OF THE GRAND PRIZE CLAIM IT NOW AT url.in.th/FqcAS',
     ]));
 
-    // Rejet silencieux : succès renvoyé, mais aucun courriel envoyé.
+    // Rejet silencieux côté mail : succès renvoyé, AUCUN courriel envoyé.
     expect($response->getSession()->get('success'))->not->toBeNull();
     expect(sentSubjects())->toBeEmpty();
+
+    // Mais le message est consultable en quarantaine, avec la raison.
+    $msg = ContactMessage::query()->latest('id')->first();
+    expect($msg)->not->toBeNull();
+    expect($msg->status)->toBe('spam');
+    expect($msg->spam_reason)->not->toBeEmpty();
 });
 
-it('rejette silencieusement quand le honeypot est rempli', function () {
+it('met en quarantaine (status spam) quand le honeypot est rempli, sans courriel', function () {
     $response = submitContact(contactPayload([
         'hp_url' => 'http://bot.example/spam',
     ]));
 
     expect($response->getSession()->get('success'))->not->toBeNull();
     expect(sentSubjects())->toBeEmpty();
+
+    // On persiste aussi le honeypot pour visibilité (vérification des faux positifs).
+    $msg = ContactMessage::query()->latest('id')->first();
+    expect($msg)->not->toBeNull();
+    expect($msg->status)->toBe('spam');
+    expect($msg->spam_reason)->toBe('honeypot');
 });
 
-it('envoie mais préfixe « [Spam probable] » pour un seul signal faible (raccourcisseur seul)', function () {
+it('met en quarantaine (status spam) une soumission trop rapide (time-trap), sans courriel', function () {
+    $response = submitContact(contactPayload([
+        'form_ts' => time(),
+    ]));
+
+    expect($response->getSession()->get('success'))->not->toBeNull();
+    expect(sentSubjects())->toBeEmpty();
+
+    $msg = ContactMessage::query()->latest('id')->first();
+    expect($msg)->not->toBeNull();
+    expect($msg->status)->toBe('spam');
+    expect($msg->spam_reason)->toContain('timetrap');
+});
+
+it('envoie en « new », trace la raison et préfixe « [Spam probable] » pour un seul signal faible', function () {
     $response = submitContact(contactPayload([
         'subject' => 'Une ressource à partager',
         'message' => 'Bonjour, voici un lien que je trouve pertinent : bit.ly/abcdef. Au plaisir.',
@@ -124,13 +160,10 @@ it('envoie mais préfixe « [Spam probable] » pour un seul signal faible (racco
     $subjects = sentSubjects();
     expect($subjects)->toHaveCount(1);
     expect(str_starts_with($subjects[0], '[Spam probable] '))->toBeTrue();
-});
 
-it('rejette silencieusement une soumission trop rapide (time-trap)', function () {
-    $response = submitContact(contactPayload([
-        'form_ts' => time(),
-    ]));
-
-    expect($response->getSession()->get('success'))->not->toBeNull();
-    expect(sentSubjects())->toBeEmpty();
+    // Persisté en boîte légitime mais la raison faible est tracée.
+    $msg = ContactMessage::query()->latest('id')->first();
+    expect($msg)->not->toBeNull();
+    expect($msg->status)->toBe('new');
+    expect($msg->spam_reason)->toBe('shortener');
 });

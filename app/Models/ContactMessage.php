@@ -18,7 +18,7 @@ class ContactMessage extends Model
 {
     use BelongsToTenant;
 
-    protected $fillable = ['name', 'email', 'subject', 'message', 'status', 'ip_address', 'read_at', 'tenant_id'];
+    protected $fillable = ['name', 'email', 'subject', 'message', 'status', 'spam_reason', 'ip_address', 'read_at', 'tenant_id'];
 
     protected $casts = [
         'read_at' => 'datetime',
@@ -32,6 +32,16 @@ class ContactMessage extends Model
     public function scopeRead(Builder $query): void
     {
         $query->where('status', 'read');
+    }
+
+    public function scopeSpam(Builder $query): void
+    {
+        $query->where('status', 'spam');
+    }
+
+    public function isSpam(): bool
+    {
+        return $this->status === 'spam';
     }
 
     public function markAsRead(): void

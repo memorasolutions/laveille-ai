@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Modules\FrontTheme\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\ContactMessage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,8 +36,18 @@ class ContactController extends Controller
         };
 
         // Anti-bot - honeypot maison : champ caché 'hp_url' qu'un humain ne remplit jamais.
-        // Rejet SILENCIEUX (on renvoie le succès, le bot n'apprend rien) sans envoyer le courriel.
+        // On NE renvoie PLUS sans trace : on met en QUARANTAINE (status='spam') pour que
+        // l'humain puisse vérifier l'absence de faux positif, puis on renvoie le succès
+        // (silencieux, le bot n'apprend rien) sans envoyer le courriel.
         if ($request->filled('hp_url')) {
+            $this->quarantine([
+                'name' => mb_substr((string) $request->input('name', ''), 0, 255),
+                'email' => mb_substr((string) $request->input('email', ''), 0, 255),
+                'subject' => mb_substr((string) $request->input('subject', ''), 0, 255),
+                'message' => (string) $request->input('message', ''),
+                'ip_address' => $request->ip(),
+            ], 'honeypot');
+
             return $success();
         }
 
@@ -47,33 +58,59 @@ class ContactController extends Controller
             'message' => ['required', 'string', 'min:10'],
         ]);
 
+        // Tronc commun de l'enregistrement, quelle que soit l'issue (toujours persisté).
+        $base = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'subject' => $validated['subject'],
+            'message' => $validated['message'],
+            'ip_address' => $request->ip(),
+        ];
+
+        // On collecte TOUS les signaux (sans court-circuit) pour pouvoir tracer la raison.
+        $reasons = [];
+
         // Anti-pourriel de liens SEO : compte les URL (http(s)://, www. ou domaine.tld/chemin).
-        // 4 liens ou plus dans le message → rejet silencieux (cas typique du spam de backlinks).
+        // 4 liens ou plus dans le message → signal fort (cas typique du spam de backlinks).
         $urlCount = preg_match_all('~(?:https?://|www\.|\b[a-z0-9][a-z0-9.-]*\.[a-z]{2,}/)\S*~i', (string) $validated['message']);
         if ($urlCount >= 4) {
-            return $success();
+            $reasons[] = 'liens>=4';
         }
 
         // Anti-spam en couches (volontairement conservateur : on ne veut bloquer AUCUNE vraie personne).
         $signals = $this->spamSignals($validated, $request);
-
-        // Signaux à très haute confiance (un humain ne les déclenche jamais) → rejet SILENCIEUX.
-        // 'timetrap' = soumission quasi instantanée = robot.
-        if (in_array('timetrap', $signals, true)) {
-            return $success();
+        foreach ($signals as $signal) {
+            $reasons[] = $signal;
         }
 
         // Signaux « contenu » faillibles : shortener, keyword, allcaps.
-        // Au moins 2 sur 3 → haute confiance combinée → rejet silencieux.
-        // Exactement 1 → on N'EN PERD PAS : on envoie quand même mais on préfixe « [Spam probable] »
-        // pour que l'humain tranche. 0 → envoi normal.
         $weakSignals = array_intersect(['shortener', 'keyword', 'allcaps'], $signals);
         $weakCount = count($weakSignals);
-        if ($weakCount >= 2) {
+
+        // Spam à haute confiance : honeypot (déjà traité), >=4 liens, time-trap (soumission
+        // quasi instantanée = robot), OU au moins 2 signaux « contenu » combinés.
+        $hardSpam = $urlCount >= 4
+            || in_array('timetrap', $signals, true)
+            || $weakCount >= 2;
+
+        // Signal faible isolé : exactement 1 des 3 signaux « contenu ».
+        $weak = $weakCount === 1 && ! $hardSpam;
+
+        // Raison lisible (ordre stable) : honeypot et signaux confondus, dédupliqués.
+        $reason = implode(',', array_values(array_unique($reasons)));
+
+        // Spam fort → QUARANTAINE consultable, AUCUN courriel, succès silencieux.
+        if ($hardSpam) {
+            $this->quarantine($base, $reason !== '' ? $reason : 'spam');
+
             return $success();
         }
 
-        $subjectPrefix = $weakCount === 1 ? '[Spam probable] ' : '';
+        // Sinon : on persiste en 'new' (visible dans la boîte) puis on envoie le courriel.
+        // Un signal faible isolé est tracé dans spam_reason et préfixe le sujet « [Spam probable] ».
+        $this->quarantine($base, $weak ? $reason : null, 'new');
+
+        $subjectPrefix = $weak ? '[Spam probable] ' : '';
 
         // Corps enrichi : qui a écrit + comment répondre (l'expéditeur reste l'adresse du site
         // pour la délivrabilité ; le Reply-To pointe vers le visiteur → « Répondre » lui écrit).
@@ -96,6 +133,33 @@ class ContactController extends Controller
         });
 
         return $success();
+    }
+
+    /**
+     * Persiste une soumission de contact en base.
+     *
+     * Défensif : le modèle/la table peuvent être absents dans un contexte de portabilité
+     * (module retiré, base non migrée) → on garde le flux fonctionnel sans jamais casser
+     * l'envoi du formulaire. tenant_id est nullable : on ne le fournit pas.
+     *
+     * @param  array<string, mixed>  $base  name, email, subject, message, ip_address.
+     * @param  string|null  $reason  Raison lisible des signaux (null si aucun).
+     * @param  string  $status  'spam' (quarantaine) ou 'new' (boîte normale).
+     */
+    private function quarantine(array $base, ?string $reason, string $status = 'spam'): void
+    {
+        if (! class_exists(ContactMessage::class)) {
+            return;
+        }
+
+        try {
+            ContactMessage::create($base + [
+                'status' => $status,
+                'spam_reason' => $reason,
+            ]);
+        } catch (\Throwable) {
+            // Persistance best-effort : ne jamais bloquer la réponse au visiteur.
+        }
     }
 
     /**
