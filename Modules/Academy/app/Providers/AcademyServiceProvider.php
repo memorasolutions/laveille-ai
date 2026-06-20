@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use Modules\Academy\Console\CourseReindexCommand;
 use Modules\Academy\Livewire\CourseEditor;
+use Modules\Academy\Livewire\CourseRoster;
 use Modules\Academy\Livewire\Dashboard;
 use Modules\Academy\Models\Chapter;
 use Modules\Academy\Models\Course;
@@ -74,6 +75,11 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // PHASE 3 (FE-3) - Éditeur de cours front-end (métadonnées + structure).
         // Chaque mutation est gardée serveur par $this->authorize(...) (voir CourseEditor).
         Livewire::component('academy.course-editor', CourseEditor::class);
+
+        // PHASE 4 (FE-4) - Roster (inscriptions) + rôles de cours (équipe).
+        // Gardes serveur : manageEnrollments (roster) / manageRoles (équipe),
+        // objets re-résolus et scopés au cours (anti-IDOR). Voir CourseRoster.
+        Livewire::component('academy.course-roster', CourseRoster::class);
     }
 
     public function register(): void

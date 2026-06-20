@@ -32,6 +32,19 @@
 
                     @livewire('academy.course-editor', ['course' => $course])
 
+                    {{-- PHASE 4 (FE-4) - Inscriptions + équipe. Rendu seulement si la
+                         personne peut gérer les inscriptions (admin OU owner/instructor) ;
+                         la section « équipe » à l'intérieur est en plus gâtée par
+                         manageRoles (owner/admin). Vraie garde = authorize() serveur. --}}
+                    @can('manageEnrollments', $course)
+                        <div style="margin-top: 28px;">
+                            <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin: 0 0 8px;">
+                                Inscriptions et équipe
+                            </h2>
+                            @livewire('academy.course-roster', ['course' => $course])
+                        </div>
+                    @endcan
+
                 </div>
             </div>
         </div>
