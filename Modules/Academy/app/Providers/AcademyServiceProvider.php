@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use Modules\Academy\Console\CourseReindexCommand;
+use Modules\Academy\Livewire\CourseEditor;
 use Modules\Academy\Livewire\Dashboard;
 use Modules\Academy\Models\Chapter;
 use Modules\Academy\Models\Course;
@@ -69,6 +70,10 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         }
 
         Livewire::component('academy.dashboard', Dashboard::class);
+
+        // PHASE 3 (FE-3) - Éditeur de cours front-end (métadonnées + structure).
+        // Chaque mutation est gardée serveur par $this->authorize(...) (voir CourseEditor).
+        Livewire::component('academy.course-editor', CourseEditor::class);
     }
 
     public function register(): void

@@ -35,6 +35,17 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
         Route::get('espace', fn () => view('academy::public.dashboard'))
             ->middleware('auth')
             ->name('dashboard');
+
+        // PHASE 3 (FE-3) - Éditeur de cours front-end (« mode édition »).
+        // Connexion requise ; le cours est re-résolu côté serveur (binding par slug)
+        // puis ré-autorisé À CHAQUE action par le composant Livewire (jamais de
+        // confiance à un ID/état du navigateur). L'autorisation d'entrée vit dans
+        // CourseEditor::mount() via $this->authorize('update', $course).
+        Route::get('courses/{course:slug}/gerer', function (\Modules\Academy\Models\Course $course) {
+            return view('academy::public.course-editor', ['course' => $course]);
+        })
+            ->middleware('auth')
+            ->name('courses.manage');
     });
 
     // M6 — Certificats publics vérifiables (pas d'auth requise)
