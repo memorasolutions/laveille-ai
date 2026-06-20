@@ -439,7 +439,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 291;
+$lvPatch = 292;
 
 return [
     'major' => $lvMajor,

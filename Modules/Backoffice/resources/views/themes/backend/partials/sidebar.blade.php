@@ -137,9 +137,8 @@
             </li>
             @endcanany
 
-            {{-- ===== INFOLETTRES (sortie de Contenu) ===== --}}
+            {{-- Infolettres : sous la grande section CONTENU, mais HORS du sous-menu repliable « Contenu ». --}}
             @canany(['view_newsletter', 'view_campaigns', 'view_workflows'])
-            <li class="nav-item nav-category">{{ __('Infolettres') }}</li>
             <li class="nav-item {{ request()->routeIs('admin.newsletter.*') ? 'active' : '' }}">
                 <a class="nav-link" data-bs-toggle="collapse" href="#newsletterMenu" role="button"
                    aria-expanded="{{ request()->routeIs('admin.newsletter.*') ? 'true' : 'false' }}" aria-controls="newsletterMenu">
