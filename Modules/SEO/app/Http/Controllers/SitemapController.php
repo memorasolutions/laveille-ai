@@ -34,7 +34,7 @@ class SitemapController
         }
 
         // Sous-articles factuels rattachés aux piliers (faits sourcés, evergreen)
-        foreach (['guide.adopter-ia-pme', 'guide.ia-etudier', 'guide.ia-locale', 'guide.ia-generative', 'guide.veille-adoption', 'guide.sp-rediger', 'guide.sp-loi25'] as $guideRoute) {
+        foreach (['guide.adopter-ia-pme', 'guide.ia-etudier', 'guide.ia-locale', 'guide.ia-generative', 'guide.veille-adoption', 'guide.sp-rediger', 'guide.sp-loi25', 'guide.pme-loi25', 'guide.pme-cas-usage'] as $guideRoute) {
             if (Route::has($guideRoute)) {
                 $sitemap->add(Url::create(route($guideRoute))->setPriority(0.7)->setChangeFrequency('monthly'));
             }

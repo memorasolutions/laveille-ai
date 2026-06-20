@@ -75,6 +75,12 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
     Route::view('/ia-loi-25-secteur-public', 'fronttheme::ia-loi-25-secteur-public')
         ->name('guide.sp-loi25')
         ->middleware('cacheResponse:3600');
+    Route::view('/ia-loi-25-pme-quebec', 'fronttheme::ia-loi-25-pme-quebec')
+        ->name('guide.pme-loi25')
+        ->middleware('cacheResponse:3600');
+    Route::view('/ia-cas-usage-pme-quebec', 'fronttheme::ia-cas-usage-pme-quebec')
+        ->name('guide.pme-cas-usage')
+        ->middleware('cacheResponse:3600');
 
     // Flux RSS (S90 #43 — distribution multi-canal + AI agents/chatbots)
     Route::get('/rss/concentres.xml', [\Modules\FrontTheme\Http\Controllers\RssFeedController::class, 'concentres'])

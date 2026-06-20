@@ -56,6 +56,8 @@
                     <p>Des articles concrets pour les décideurs de PME : cas d'usage, comparaisons, erreurs à éviter et réflexions stratégiques, sans jargon inutile.</p>
                     <ul>
                         <li><a href="{{ route('guide.adopter-ia-pme') }}" style="color: var(--sys-text-link, #064E5A);">Adopter l'IA dans une PME au Québec : chiffres, freins et aides financières</a></li>
+                        <li><a href="{{ route('guide.pme-cas-usage') }}" style="color: var(--sys-text-link, #064E5A);">Cas d'usage concrets de l'IA pour les PME</a></li>
+                        <li><a href="{{ route('guide.pme-loi25') }}" style="color: var(--sys-text-link, #064E5A);">IA et Loi 25 pour les PME</a></li>
                         <li><a href="{{ route('blog.show', 'cest-quoi-le-mcp-le-guide-simplifie-de-la-revolution-ia-au-quebec') }}" style="color: var(--sys-text-link, #064E5A);">C'est quoi le MCP ? Le guide simplifié de la révolution IA au Québec</a></li>
                         <li><a href="{{ route('blog.show', 'declaration-montreal-ia-responsable') }}" style="color: var(--sys-text-link, #064E5A);">La Déclaration de Montréal pour une IA responsable</a></li>
                         <li><a href="{{ route('blog.index') }}" style="color: var(--sys-text-link, #064E5A);">Tous les guides et analyses du blogue</a></li>

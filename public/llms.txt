@@ -18,6 +18,8 @@
 
 - [L'IA dans le secteur public québécois](https://laveille.ai/ia-secteur-public-quebec) : L'IA dans le secteur public et parapublic québécois, avec encadrement MCN et Loi 25.
 - [L'IA pour les PME québécoises](https://laveille.ai/ia-pme-quebec) : Adopter l'IA dans une PME québécoise.
+- [IA et Loi 25 pour les PME québécoises](https://laveille.ai/ia-loi-25-pme-quebec) : Rester conforme à la Loi 25 quand une PME utilise l'IA; obligations concrètes et anonymisation avant toute IA publique.
+- [Cas d'usage concrets de l'IA pour les PME québécoises](https://laveille.ai/ia-cas-usage-pme-quebec) : Usages de l'IA par fonction (productivité, marketing, comptabilité, service client) et méthode « quick wins ».
 - [L'IA pour l'éducation au Québec](https://laveille.ai/ia-education-quebec) : L'IA pour l'éducation au Québec.
 - [L'IA pour les développeurs québécois](https://laveille.ai/ia-developpeurs-quebec) : L'IA pour les développeurs et le développement web.
 - [L'IA générative au Québec](https://laveille.ai/ia-generative-quebec) : Comprendre l'IA générative, ses capacités et ses limites.
