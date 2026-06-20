@@ -28,6 +28,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Progress extends Model
 {
+    // Le pluriel Laravel de « Progress » est « progress » (mot indénombrable),
+    // alors que la migration crée « progresses ». On force le vrai nom de table
+    // pour aligner le modèle sur sa migration et la relation Course::progresses().
+    protected $table = 'progresses';
+
     protected $fillable = [
         'user_id',
         'course_id',

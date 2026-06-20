@@ -28,6 +28,13 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
         // M3 — Lecteur de leçon (auth requis pour les vidéos protégées, mais la route est publique)
         Route::get('courses/{course:slug}/lessons/{lesson}', [LessonController::class, 'show'])
             ->name('lessons.show');
+
+        // PHASE 2 - Espace personnel front-end UNIQUE et role-aware (connexion requise).
+        // Gâté comme le reste (AcademyUnderConstruction) + `auth`. Le contenu est
+        // adapté au rôle par le composant Livewire (requêtes scopées au user).
+        Route::get('espace', fn () => view('academy::public.dashboard'))
+            ->middleware('auth')
+            ->name('dashboard');
     });
 
     // M6 — Certificats publics vérifiables (pas d'auth requise)

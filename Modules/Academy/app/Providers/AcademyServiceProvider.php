@@ -12,7 +12,9 @@ namespace Modules\Academy\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Livewire;
 use Modules\Academy\Console\CourseReindexCommand;
+use Modules\Academy\Livewire\Dashboard;
 use Modules\Academy\Models\Chapter;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Lesson;
@@ -46,10 +48,27 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         Gate::policy(Lesson::class, LessonPolicy::class);
         Gate::policy(LessonItem::class, LessonItemPolicy::class);
 
+        // PHASE 2 - Espace personnel front-end (composant Livewire role-aware).
+        // Même pattern que Authors/Backoffice : Livewire::component('namespace.kebab', Class).
+        // Rendu via @livewire('academy.dashboard') dans la vue page public/dashboard.blade.php.
+        $this->registerLivewireComponents();
+
         // M7 — Commande Artisan de réindexation Scout
         if ($this->app->runningInConsole()) {
             $this->commands([CourseReindexCommand::class]);
         }
+    }
+
+    /**
+     * Enregistre les composants Livewire du module (pattern Authors/Backoffice).
+     */
+    protected function registerLivewireComponents(): void
+    {
+        if (! class_exists(Livewire::class)) {
+            return;
+        }
+
+        Livewire::component('academy.dashboard', Dashboard::class);
     }
 
     public function register(): void
