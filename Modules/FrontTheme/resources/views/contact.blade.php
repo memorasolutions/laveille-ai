@@ -9,7 +9,7 @@
 @endsection
 
 @section('content')
-    <h1 class="sr-only">{{ __('Contact') }} — {{ config('app.name') }}</h1>
+    <h1 class="sr-only">{{ __('Contact') }} - {{ config('app.name') }}</h1>
 
     <section style="padding: 50px 0 60px; background: #fff;">
         <div class="container">
@@ -44,6 +44,9 @@
                             <label for="hp_url">{{ __('Ne pas remplir ce champ') }}</label>
                             <input type="text" id="hp_url" name="hp_url" value="" tabindex="-1" autocomplete="off">
                         </div>
+                        {{-- Anti-bot : horodatage de génération du formulaire (time-trap). Une soumission en moins de 3 s = robot. --}}
+                        <input type="hidden" name="form_ts" value="{{ time() }}">
+                        {{-- /Anti-bot --}}
 
                         <div class="row" style="margin-left: -8px; margin-right: -8px;">
                             <div class="col-sm-6" style="padding-left: 8px; padding-right: 8px;">
