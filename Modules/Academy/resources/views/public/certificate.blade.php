@@ -96,7 +96,7 @@
     font-weight: 700;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: #9CA3AF;
+    color: #6B7280;
     margin-bottom: 2rem;
 }
 .certificate-certifie {
@@ -144,7 +144,7 @@
     font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: #9CA3AF;
+    color: #6B7280;
     display: block;
     margin-bottom: 0.25rem;
 }
@@ -155,14 +155,14 @@
 }
 .certificate-serial {
     font-size: 0.78rem;
-    color: #9CA3AF;
+    color: #6B7280;
     font-family: 'Courier New', monospace;
     margin-top: 1.5rem;
     margin-bottom: 0.5rem;
 }
 .certificate-verify-url {
     font-size: 0.72rem;
-    color: #9CA3AF;
+    color: #6B7280;
     word-break: break-all;
     font-family: 'Courier New', monospace;
 }

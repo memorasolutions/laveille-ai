@@ -16,7 +16,7 @@
                 <div style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
 
                     <nav aria-label="Fil d'Ariane" style="margin-bottom: 14px; font-size: 0.85rem; color: var(--sys-text-muted, #6B7280);">
-                        <a href="{{ route('academy.dashboard') }}" style="color: var(--sys-action-primary, #064E5A);">Académie</a>
+                        <a href="{{ route('academy.dashboard') }}" style="color: var(--sys-action-primary, #064E5A); text-decoration: underline;">Académie</a>
                         <span aria-hidden="true"> / </span>
                         <span aria-current="page">Créer un cours</span>
                     </nav>

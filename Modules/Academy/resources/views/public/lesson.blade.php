@@ -109,7 +109,7 @@
     .academy-lesson-nav a:hover { border-color: var(--c-primary, #064E5A); color: var(--c-primary, #064E5A); }
     .academy-lesson-nav .nav-prev { text-align: left; }
     .academy-lesson-nav .nav-next { text-align: right; }
-    .academy-lesson-nav .nav-label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #9CA3AF; margin-bottom: 3px; }
+    .academy-lesson-nav .nav-label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6B7280; margin-bottom: 3px; }
 
     @media (max-width: 768px) {
         .academy-lesson-layout { flex-direction: column; }
