@@ -26,9 +26,21 @@
                     <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 12px;">
                         Gérer la formation
                     </h1>
-                    <p style="margin-bottom: 28px; color: var(--sys-text-muted, #6B7280);">
+                    <p style="margin-bottom: 18px; color: var(--sys-text-muted, #6B7280);">
                         Modifiez les métadonnées, organisez les chapitres et les leçons. Chaque modification est enregistrée et sécurisée côté serveur.
                     </p>
+
+                    {{-- D1 — Accès au tableau de bord d'analytics du cours. Gâté
+                         manageEnrollments ; la vraie garde reste authorize() serveur. --}}
+                    @can('manageEnrollments', $course)
+                        <p style="margin-bottom: 28px;">
+                            <x-core::button
+                                :href="route('academy.courses.analytics', $course->slug)"
+                                variant="secondary" size="sm">
+                                <span aria-hidden="true">📊</span> Voir les statistiques
+                            </x-core::button>
+                        </p>
+                    @endcan
 
                     @livewire('academy.course-editor', ['course' => $course])
 

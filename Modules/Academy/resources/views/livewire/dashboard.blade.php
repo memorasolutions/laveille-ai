@@ -118,6 +118,17 @@
                                         Gérer
                                     </x-core::button>
 
+                                    {{-- D1 — Statistiques par cours. Gâté manageEnrollments
+                                         (admin OU owner/instructor) : la vraie garde reste
+                                         authorize() serveur dans CourseAnalytics::mount(). --}}
+                                    @can('manageEnrollments', $course)
+                                        <x-core::button
+                                            :href="route('academy.courses.analytics', $course->slug)"
+                                            variant="secondary" size="sm">
+                                            <span aria-hidden="true">📊</span> Statistiques
+                                        </x-core::button>
+                                    @endcan
+
                                     @if($confirmingDuplicationId === $course->id)
                                         <span style="font-size: 0.82rem; color: var(--sys-text-muted, #6B7280);">Dupliquer ce cours ?</span>
                                         <x-core::button

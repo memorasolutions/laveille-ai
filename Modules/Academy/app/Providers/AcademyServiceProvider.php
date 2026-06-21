@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use Modules\Academy\Console\CourseReindexCommand;
+use Modules\Academy\Livewire\CourseAnalytics;
 use Modules\Academy\Livewire\CourseCreate;
 use Modules\Academy\Livewire\CourseEditor;
 use Modules\Academy\Livewire\CourseRoster;
@@ -86,6 +87,11 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // Gardes serveur : manageEnrollments (roster) / manageRoles (équipe),
         // objets re-résolus et scopés au cours (anti-IDOR). Voir CourseRoster.
         Livewire::component('academy.course-roster', CourseRoster::class);
+
+        // PHASE D (D1) - Analytics par cours (pilotage), LECTURE SEULE.
+        // Gate serveur manageEnrollments + métriques scopées au cours (anti-IDOR).
+        // Voir CourseAnalytics + AnalyticsService.
+        Livewire::component('academy.course-analytics', CourseAnalytics::class);
     }
 
     public function register(): void

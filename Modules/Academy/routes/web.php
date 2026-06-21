@@ -56,6 +56,17 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
         })
             ->middleware('auth')
             ->name('courses.manage');
+
+        // PHASE D (D1) - Tableau de bord d'analytics PAR COURS (pilotage).
+        // Connexion requise ; le cours est re-résolu côté serveur (binding par slug)
+        // puis ré-autorisé par le composant Livewire (authorize('manageEnrollments',
+        // $course) = admin OU owner/instructor) à chaque rendu. Lecture seule, scopé
+        // au cours (anti-IDOR) : aucune donnée d'un autre cours ne fuit.
+        Route::get('courses/{course:slug}/analytics', function (\Modules\Academy\Models\Course $course) {
+            return view('academy::public.course-analytics', ['course' => $course]);
+        })
+            ->middleware('auth')
+            ->name('courses.analytics');
     });
 
     // M6 — Certificats publics vérifiables (pas d'auth requise)
