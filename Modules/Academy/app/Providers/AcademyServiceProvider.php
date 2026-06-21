@@ -15,10 +15,12 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use Modules\Academy\Console\CourseReindexCommand;
 use Modules\Academy\Livewire\CourseAnalytics;
+use Modules\Academy\Livewire\CourseAssignments;
 use Modules\Academy\Livewire\CourseCreate;
 use Modules\Academy\Livewire\CourseEditor;
 use Modules\Academy\Livewire\CourseRoster;
 use Modules\Academy\Livewire\Dashboard;
+use Modules\Academy\Livewire\StudentAssignments;
 use Modules\Academy\Models\Chapter;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Lesson;
@@ -92,6 +94,16 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // Gate serveur manageEnrollments + métriques scopées au cours (anti-IDOR).
         // Voir CourseAnalytics + AnalyticsService.
         Livewire::component('academy.course-analytics', CourseAnalytics::class);
+
+        // PHASE E (E2) - Devoirs : GÉRANT (créer/éditer/publier/supprimer gâté
+        // manageStructure ; corriger + gradebook gâté manageEnrollments), objets
+        // re-résolus et scopés au cours (anti-IDOR). Voir CourseAssignments.
+        Livewire::component('academy.course-assignments', CourseAssignments::class);
+
+        // PHASE E (E2) - Devoirs : ÉTUDIANT (voir les devoirs publiés de ses cours
+        // suivis, soumettre/éditer SA remise, voir sa note). user_id forcé = auth,
+        // inscription active re-vérifiée serveur. Voir StudentAssignments.
+        Livewire::component('academy.student-assignments', StudentAssignments::class);
     }
 
     public function register(): void

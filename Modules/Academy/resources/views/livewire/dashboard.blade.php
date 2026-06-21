@@ -75,6 +75,11 @@
         @endif
     </section>
 
+    {{-- ───────────────────────── Mes devoirs (E2) ─────────────────────────
+         Composant role-aware : requêtes scopées à auth()->id() et aux cours où
+         l'utilisateur est inscrit ACTIF. Ne s'affiche que s'il y a des devoirs. --}}
+    @livewire('academy.student-assignments')
+
     {{-- ───────────────────────── Vos badges (E1) ───────────────────────── --}}
     <section aria-labelledby="academy-mes-badges" class="mb-5">
         <h2 id="academy-mes-badges"

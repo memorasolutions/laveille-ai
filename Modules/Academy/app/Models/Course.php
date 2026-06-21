@@ -135,6 +135,16 @@ class Course extends Model implements HasMedia
         return $this->hasMany(Cohort::class);
     }
 
+    /**
+     * Devoirs (assignments) du cours (E2), triés par position puis création.
+     */
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(Assignment::class)
+            ->orderBy('position')
+            ->orderBy('id');
+    }
+
     public function certificatesIssued(): HasMany
     {
         return $this->hasMany(CertificateIssued::class);

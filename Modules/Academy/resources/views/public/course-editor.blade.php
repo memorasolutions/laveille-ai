@@ -44,6 +44,19 @@
 
                     @livewire('academy.course-editor', ['course' => $course])
 
+                    {{-- PHASE E (E2) - Devoirs (assignments) du cours. Rendu si la
+                         personne peut gérer la structure (admin OU owner/instructor/editor) ;
+                         la correction + le carnet de notes à l'intérieur sont en plus
+                         gâtés manageEnrollments. Vraie garde = authorize() serveur. --}}
+                    @can('manageStructure', $course)
+                        <div style="margin-top: 28px;">
+                            <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin: 0 0 8px;">
+                                Devoirs et carnet de notes
+                            </h2>
+                            @livewire('academy.course-assignments', ['course' => $course])
+                        </div>
+                    @endcan
+
                     {{-- PHASE 4 (FE-4) - Inscriptions + équipe. Rendu seulement si la
                          personne peut gérer les inscriptions (admin OU owner/instructor) ;
                          la section « équipe » à l'intérieur est en plus gâtée par
