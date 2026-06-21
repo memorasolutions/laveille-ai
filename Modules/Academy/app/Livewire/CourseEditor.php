@@ -38,6 +38,7 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Modules\Academy\Models\CertificateIssued;
 use Modules\Academy\Models\Chapter;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Lesson;
@@ -70,6 +71,13 @@ class CourseEditor extends Component
 
     /** Modèle réutilisable (C3) : ce cours peut être proposé dans la section « Modèles ». */
     public bool $is_template = false;
+
+    // ── Personnalisation du certificat (E3) ─────────────────────────────────────
+    // Tous facultatifs : vide ('') → null → on retombe sur les défauts du gabarit.
+    public ?string $certificate_title = null;
+    public ?string $certificate_message = null;
+    public ?string $certificate_signature_name = null;
+    public ?string $certificate_accent_color = null;
 
     /**
      * Prérequis du cours (C4) : ids des AUTRES cours à compléter avant celui-ci.
@@ -121,6 +129,12 @@ class CourseEditor extends Component
         'language', 'visibility', 'access_type', 'price_cents', 'is_template',
     ];
 
+    /** Champs de personnalisation du certificat (E3) en autosave (wire:model.live.blur). */
+    private const CERTIFICATE_FIELDS = [
+        'certificate_title', 'certificate_message',
+        'certificate_signature_name', 'certificate_accent_color',
+    ];
+
     /**
      * Entrée dans l'éditeur. Autorisation SERVEUR obligatoire : seul un gérant de
      * CE cours (admin OU owner/instructor/editor) peut ouvrir l'éditeur.
@@ -155,6 +169,12 @@ class CourseEditor extends Component
     {
         if (in_array($name, self::METADATA_FIELDS, true)) {
             $this->save();
+
+            return;
+        }
+
+        if (in_array($name, self::CERTIFICATE_FIELDS, true)) {
+            $this->saveCertificate();
         }
     }
 
@@ -327,6 +347,50 @@ class CourseEditor extends Component
 
         $this->prerequisiteIds = $clean;
         $this->flashSaved('Prérequis du cours enregistrés.');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // PERSONNALISATION DU CERTIFICAT (E3) - gâtée manageStructure
+    //
+    // SÉCURITÉ : resolveCourse() → authorize('manageStructure') → validate → écrire.
+    // Un gérant ne personnalise que SES cours (le cours est re-résolu serveur). Les
+    // valeurs vides ('') sont normalisées en null → le gabarit retombe sur ses défauts
+    // (rétrocompatibilité totale). La couleur d'accent est validée comme hex #RGB/#RRGGBB ;
+    // l'anti-XSS final est assuré au RENDU (e() pour titre/signature, markdown nettoyé
+    // pour le message), cf. public/certificate.blade.php.
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    public function saveCertificate(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        // Normalisation '' → null AVANT validation : un champ vidé efface la personnalisation
+        // (retour au défaut), il ne doit jamais déclencher une règle sur chaîne vide.
+        foreach (['certificate_title', 'certificate_message', 'certificate_signature_name', 'certificate_accent_color'] as $field) {
+            $value = $this->{$field};
+            $this->{$field} = (is_string($value) && trim($value) === '') ? null : (is_string($value) ? trim($value) : $value);
+        }
+
+        $validated = $this->validate([
+            'certificate_title'          => 'nullable|string|max:120',
+            'certificate_message'        => 'nullable|string|max:2000',
+            'certificate_signature_name' => 'nullable|string|max:120',
+            // Couleur d'accent : hexadécimal #RGB ou #RRGGBB uniquement (sinon rejet).
+            'certificate_accent_color'   => ['nullable', 'string', 'regex:/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/'],
+        ], [
+            'certificate_accent_color.regex' => 'La couleur doit être un code hexadécimal valide (ex. #064E5A).',
+        ]);
+
+        $course->update([
+            'certificate_title'          => $validated['certificate_title'] ?? null,
+            'certificate_message'        => $validated['certificate_message'] ?? null,
+            'certificate_signature_name' => $validated['certificate_signature_name'] ?? null,
+            'certificate_accent_color'   => $validated['certificate_accent_color'] ?? null,
+            'updated_by'                 => Auth::id(),
+        ]);
+
+        $this->flashSaved('Certificat du cours enregistré.');
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -1198,6 +1262,23 @@ class CourseEditor extends Component
     }
 
     /**
+     * Slug public d'un certificat DÉJÀ ÉMIS pour ce cours (s'il en existe un), pour
+     * offrir un lien « Prévisualiser le certificat » qui montre le rendu réel avec la
+     * personnalisation appliquée. Null si aucun certificat n'a encore été décerné :
+     * dans ce cas le lien d'aperçu n'est tout simplement pas affiché (la prévisu se
+     * fait alors via les valeurs saisies, déjà reflétées au prochain certificat émis).
+     * Lecture seule, scopée au cours courant (aucune fuite : on n'expose qu'un slug
+     * déjà public et vérifiable).
+     */
+    #[Computed]
+    public function sampleCertificateSlug(): ?string
+    {
+        return CertificateIssued::where('course_id', $this->courseId)
+            ->latest('id')
+            ->value('public_url_slug');
+    }
+
+    /**
      * Id de la 1re leçon du cours (chapitres puis leçons triés par position),
      * ou null si le cours n'a encore aucune leçon. Sert au bouton « Prévisualiser
      * en tant qu'étudiant » : si une leçon existe, on ouvre le lecteur en preview ;
@@ -1238,6 +1319,12 @@ class CourseEditor extends Component
         $this->access_type = (string) ($course->access_type ?? 'free');
         $this->price_cents = $course->price_cents;
         $this->is_template = (bool) $course->is_template;
+
+        // Personnalisation du certificat (E3) : valeurs courantes ou null (défaut gabarit).
+        $this->certificate_title          = $course->certificate_title;
+        $this->certificate_message        = $course->certificate_message;
+        $this->certificate_signature_name = $course->certificate_signature_name;
+        $this->certificate_accent_color   = $course->certificate_accent_color;
     }
 
     public function render()

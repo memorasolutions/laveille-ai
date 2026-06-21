@@ -44,6 +44,10 @@ use Spatie\MediaLibrary\HasMedia;
  * @property array|null  $seo_jsonld
  * @property array|null  $faq_dictionary_ids
  * @property int|null    $tools_collection_id
+ * @property string|null $certificate_title
+ * @property string|null $certificate_message
+ * @property string|null $certificate_signature_name
+ * @property string|null $certificate_accent_color
  * @property int|null    $created_by
  * @property int|null    $updated_by
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -88,6 +92,10 @@ class Course extends Model implements HasMedia
         'seo_jsonld',
         'faq_dictionary_ids',
         'tools_collection_id',
+        'certificate_title',
+        'certificate_message',
+        'certificate_signature_name',
+        'certificate_accent_color',
         'created_by',
         'updated_by',
     ];

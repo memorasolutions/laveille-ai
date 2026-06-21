@@ -5,11 +5,33 @@
 @section('meta_description', 'Certificat de complétion du cours « ' . $certificate->course->title . ' » délivré par ' . config('app.name') . '.')
 
 @php
+    // ── Personnalisation au niveau du COURS (E3) ────────────────────────────────
+    // Chaque champ NULL retombe sur le défaut actuel → rétrocompatibilité totale
+    // (un certificat émis avant E3, sur un cours non personnalisé, est rendu à
+    // l'identique). Anti-XSS : titre/signature échappés via e() au rendu ; le
+    // message est rendu via LessonItem::renderRichText (markdown nettoyé,
+    // html_input=strip → aucune injection possible).
+    $__course = $certificate->course;
+
+    // Couleur d'accent : on n'accepte QU'un hexadécimal #RGB ou #RRGGBB ; toute
+    // valeur non conforme (forgée, vide) → on garde le défaut de charte #064E5A.
+    $__defaultAccent = '#064E5A';
+    $__accent = $__course->certificate_accent_color ?? '';
+    $__accent = (is_string($__accent) && preg_match('/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $__accent) === 1)
+        ? $__accent
+        : $__defaultAccent;
+
+    $__certTitle     = $__course->certificate_title ?: 'Certificat de complétion';
+    $__certSignature = $__course->certificate_signature_name ?: null;
+    $__certMessageHtml = filled($__course->certificate_message)
+        ? \Modules\Academy\Models\LessonItem::renderRichText($__course->certificate_message)
+        : null;
+
     // JSON-LD EducationalOccupationalCredential - tableau PHP, jamais de package spatie/schema-org
     $__certJsonLd = [
         '@context'            => 'https://schema.org',
         '@type'               => 'EducationalOccupationalCredential',
-        'name'                => 'Certificat – ' . $certificate->course->title,
+        'name'                => $__certTitle . ' – ' . $certificate->course->title,
         'description'         => 'Certificat de complétion du cours « ' . $certificate->course->title . ' » décerné par ' . config('app.name') . '.',
         'url'                 => url(route('academy.certificates.show', $certificate->public_url_slug)),
         'dateCreated'         => $certificate->issued_at?->toIso8601String(),
@@ -18,7 +40,10 @@
         'about'               => ['@type' => 'Course', 'name' => $certificate->course->title],
         'holder'              => ['@type' => 'Person', 'name' => $certificate->user->name],
     ];
-    $__certJsonLdEncoded = json_encode($__certJsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    // JSON_HEX_TAG échappe < et > (→ < / >) : empêche tout « </script> »
+    // injecté via un champ texte (titre, nom de cours, message) de fermer la balise
+    // <script type="ld+json"> et d'exécuter du code (anti-XSS dans le JSON-LD).
+    $__certJsonLdEncoded = json_encode($__certJsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG);
 @endphp
 
 @push('head')
@@ -151,6 +176,36 @@
     font-weight: 700;
     margin-bottom: 1.5rem;
 }
+/* ── Personnalisation E3 : accent + message + signature ── */
+.certificate-card::before { border-color: var(--cert-accent, rgba(6,78,90,0.15)); opacity: 0.25; }
+.certificate-badge {
+    background: color-mix(in srgb, var(--cert-accent, #064E5A) 8%, transparent);
+    color: var(--cert-accent, #064E5A);
+}
+.certificate-message {
+    font-size: 0.98rem;
+    color: #6B7280;
+    max-width: 600px;
+    margin: -1rem auto 1.5rem;
+}
+.certificate-message > :first-child { margin-top: 0; }
+.certificate-message > :last-child { margin-bottom: 0; }
+.certificate-signature {
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+}
+.certificate-signature-line {
+    display: block;
+    width: 220px;
+    max-width: 80%;
+    margin: 0 auto 0.4rem;
+    border-top: 1px solid var(--cert-accent, #064E5A);
+}
+.certificate-signature-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #374151;
+}
 /* ── Impression ── */
 @media print {
     header, footer, nav,
@@ -176,12 +231,19 @@
 @endpush
 
 @section('content')
+@php
+    // La couleur d'accent (déjà validée hex plus haut) pilote l'identité visuelle :
+    // logo + nom (via --c-primary), bordure de carte, badge. On la passe en variables
+    // CSS inline sur la carte : aucune injection possible (preg_match strict #hex).
+    $__cardStyle = '--c-primary: ' . $__accent . '; --cert-accent: ' . $__accent
+        . '; border-color: ' . $__accent . ';';
+@endphp
 <div class="certificate-wrapper">
-    <div class="certificate-card">
+    <div class="certificate-card" style="{{ $__cardStyle }}">
 
         {{-- En-tête organisateur --}}
         <div class="certificate-logo">{{ config('app.name') }}</div>
-        <div class="certificate-label">Certificat de complétion</div>
+        <div class="certificate-label">{{ $__certTitle }}</div>
 
         <span class="certificate-badge">✓ Formation complétée</span>
 
@@ -191,6 +253,12 @@
 
         <p class="certificate-completed">pour avoir complété avec succès le cours</p>
         <div class="certificate-course-title">{{ $certificate->course->title }}</div>
+
+        {{-- Message / mention personnalisé(e) du cours (E3), sous le nom du cours.
+             Markdown nettoyé (html_input=strip) → rendu {!! !!} sûr (anti-XSS). --}}
+        @if($__certMessageHtml)
+            <div class="certificate-message academy-richtext">{!! $__certMessageHtml !!}</div>
+        @endif
 
         <hr class="certificate-divider">
 
@@ -219,6 +287,14 @@
                 </div>
             @endif
         </div>
+
+        {{-- Signature personnalisée du cours (E3). Échappée par Blade (anti-XSS). --}}
+        @if($__certSignature)
+            <div class="certificate-signature">
+                <span class="certificate-signature-line"></span>
+                <span class="certificate-signature-name">{{ $__certSignature }}</span>
+            </div>
+        @endif
 
         {{-- Numéro de série & vérification --}}
         <div class="certificate-serial">N° {{ $certificate->serial }}</div>

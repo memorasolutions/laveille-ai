@@ -326,6 +326,69 @@
                 </div>
             @endcan
 
+            {{-- Certificat du cours (E3) : gâté manageStructure. Personnalise le certificat
+                 remis à l'apprenant qui termine le cours (titre, message, signature, couleur
+                 d'accent). Tout champ vide → on retombe sur les défauts (aucune régression).
+                 La sécurité reste 100 % serveur (saveCertificate : resolveCourse + authorize). --}}
+            @can('manageStructure', $course)
+                <div style="flex: 1 1 100%; border-top: 1px solid #F1F5F9; padding-top: 12px;">
+                    <p style="font-weight: 600; margin: 0 0 4px;">Certificat de réussite</p>
+                    <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 10px;">
+                        Personnalisez le certificat remis aux apprenants qui terminent ce cours. Laissez un champ vide pour utiliser la valeur par défaut.
+                    </p>
+
+                    <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                        <div style="flex: 1 1 240px;">
+                            <label for="cert-title" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem;">Titre du certificat</label>
+                            <input id="cert-title" type="text" wire:model.live.blur="certificate_title" maxlength="120"
+                                   placeholder="Certificat de complétion"
+                                   style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 8px;">
+                            @error('certificate_title') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div style="flex: 0 1 200px;">
+                            <label for="cert-accent" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem;">Couleur d'accent</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input id="cert-accent" type="text" wire:model.live.blur="certificate_accent_color" maxlength="7"
+                                       placeholder="#064E5A" aria-describedby="cert-accent-help"
+                                       style="flex: 1; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 8px; font-family: ui-monospace, monospace;">
+                            </div>
+                            <span id="cert-accent-help" style="display: block; font-size: 0.74rem; color: var(--sys-text-muted, #6B7280); margin-top: 4px;">Code hexadécimal (ex. #064E5A).</span>
+                            @error('certificate_accent_color') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div style="flex: 1 1 100%;">
+                            <label for="cert-signature" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem;">Signature (nom affiché)</label>
+                            <input id="cert-signature" type="text" wire:model.live.blur="certificate_signature_name" maxlength="120"
+                                   placeholder="Stéphane Lapointe, La veille"
+                                   style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 8px;">
+                            @error('certificate_signature_name') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div style="flex: 1 1 100%;">
+                            <label for="cert-message" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem;">Message / mention (sous le nom du cours)</label>
+                            <textarea id="cert-message" wire:model.live.blur="certificate_message" rows="3" maxlength="2000"
+                                      placeholder="Décerné en reconnaissance de la réussite complète du parcours. (markdown simple accepté)"
+                                      style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 8px;"></textarea>
+                            @error('certificate_message') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap align-items-center gap-2" style="margin-top: 10px;">
+                        <x-core::button type="button" wire:click="saveCertificate" wire:loading.attr="disabled" wire:target="saveCertificate" variant="secondary" size="sm">
+                            <span wire:loading.remove wire:target="saveCertificate">Enregistrer le certificat</span>
+                            <span wire:loading wire:target="saveCertificate">Enregistrement…</span>
+                        </x-core::button>
+
+                        @if($this->sampleCertificateSlug)
+                            <x-core::button :href="route('academy.certificates.show', $this->sampleCertificateSlug)" target="_blank" rel="noopener" variant="ghost" size="sm">
+                                👁️ Prévisualiser un certificat d'exemple
+                            </x-core::button>
+                        @endif
+                    </div>
+                </div>
+            @endcan
+
             <p style="font-size: 0.74rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">
                 Les modifications sont enregistrées automatiquement dès que vous quittez un champ.
             </p>
