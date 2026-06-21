@@ -86,6 +86,7 @@ class CourseAnalytics extends Component
             'dropoffPoint' => $service->dropoffPoint($course, $dropoff),
             'activity' => $service->recentActivity($course),
             'certificates' => $service->certificatesCount($course),
+            'atRisk' => $service->atRiskLearners($course),
         ];
     }
 

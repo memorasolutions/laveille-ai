@@ -7,6 +7,14 @@
     $dropoffPoint = $m['dropoffPoint'];
     $activity = $m['activity'];
     $certificates = $m['certificates'];
+    $atRisk = $m['atRisk'];
+
+    // Styles de badge par raison (contraste AA sur fond clair).
+    $riskBadgeStyles = [
+        'never_started' => 'background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5;',
+        'inactive'      => 'background: #FFEDD5; color: #9A3412; border: 1px solid #FDBA74;',
+        'stuck'         => 'background: #FEF9C3; color: #854D0E; border: 1px solid #FDE68A;',
+    ];
 @endphp
 <div style="display: flex; flex-direction: column; gap: 28px; font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23);">
 
@@ -53,6 +61,63 @@
                 <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 8px 0 0;">parcours terminés certifiés</p>
             </div>
         </div>
+    </section>
+
+    {{-- ───────────────────────── Apprenants à accompagner (D2) ───────────────────────── --}}
+    <section aria-labelledby="analytics-atrisk"
+             style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 22px 24px;">
+        <h2 id="analytics-atrisk" style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin: 0 0 6px; font-size: 1.25rem;">
+            🚩 Apprenants à accompagner
+        </h2>
+        <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 18px;">
+            Inscrits actifs qui ont besoin d'un coup de pouce, classés par priorité. Ces informations sont réservées au gérant du cours.
+        </p>
+
+        @if ($atRisk->isNotEmpty())
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+                    <caption class="visually-hidden" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">
+                        Liste des apprenants à accompagner, avec la raison, le délai d'inactivité, la progression et l'action suggérée.
+                    </caption>
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 2px solid #E5E7EB;">
+                            <th scope="col" style="padding: 8px 10px; font-weight: 600;">Apprenant</th>
+                            <th scope="col" style="padding: 8px 10px; font-weight: 600;">Situation</th>
+                            <th scope="col" style="padding: 8px 10px; font-weight: 600;">Depuis</th>
+                            <th scope="col" style="padding: 8px 10px; font-weight: 600;">Progression</th>
+                            <th scope="col" style="padding: 8px 10px; font-weight: 600;">Action suggérée</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($atRisk as $learner)
+                            <tr style="border-bottom: 1px solid #F3F4F6;">
+                                <td style="padding: 10px;">
+                                    <span style="font-weight: 600;">{{ $learner['name'] }}</span>
+                                    @if ($learner['email'] !== '')
+                                        <span style="display: block; color: var(--sys-text-muted, #6B7280); font-size: 0.8rem;">{{ $learner['email'] }}</span>
+                                    @endif
+                                </td>
+                                <td style="padding: 10px;">
+                                    <span style="display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; {{ $riskBadgeStyles[$learner['reason_key']] ?? 'background: #F3F4F6; color: #374151; border: 1px solid #E5E7EB;' }}">
+                                        {{ $learner['reason'] }}
+                                    </span>
+                                </td>
+                                <td style="padding: 10px; color: var(--sys-text-muted, #6B7280); white-space: nowrap;">
+                                    {{ $learner['since']?->timezone('America/Toronto')->diffForHumans() }}
+                                </td>
+                                <td style="padding: 10px; white-space: nowrap;">{{ $learner['percent'] }}&nbsp;%</td>
+                                <td style="padding: 10px;">{{ $learner['action'] }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div style="border: 1px dashed #BBF7D0; background: #F0FDF4; border-radius: var(--sys-radius-md, 0.75rem); padding: 24px; text-align: center;">
+                <p style="color: #166534; margin: 0; font-weight: 600;">👍 Aucun apprenant à risque pour l'instant.</p>
+                <p style="color: var(--sys-text-muted, #6B7280); margin: 6px 0 0; font-size: 0.85rem;">Tout le monde avance bien.</p>
+            </div>
+        @endif
     </section>
 
     {{-- ───────────────────────── Décrochage par leçon ───────────────────────── --}}

@@ -35,6 +35,21 @@ use Modules\Academy\Models\Progress;
 final class AnalyticsService
 {
     /**
+     * Seuils de détection « apprenant à risque » (D2). Centralisés ici pour être
+     * faciles à ajuster sans toucher à la logique.
+     *
+     * - NEVER_STARTED_DAYS : inscrit depuis plus de N jours sans aucune progression.
+     * - STUCK_DAYS         : a commencé mais aucune activité depuis plus de N jours
+     *                        (et moins que INACTIVE_DAYS) → « bloqué ».
+     * - INACTIVE_DAYS      : aucune activité depuis plus de N jours → « inactif ».
+     */
+    public const NEVER_STARTED_DAYS = 7;
+
+    public const STUCK_DAYS = 7;
+
+    public const INACTIVE_DAYS = 14;
+
+    /**
      * KPIs d'inscription : total actifs + nouveaux sur 7 / 30 jours.
      *
      * @return array{total:int, last7:int, last30:int}
@@ -266,6 +281,146 @@ final class AnalyticsService
             'completions' => $completions,
             'enrollments' => $enrollments,
         ];
+    }
+
+    /**
+     * D2 — Apprenants « à risque » de CE cours (qui a besoin d'attention).
+     *
+     * Ne considère QUE les inscrits ACTIFS de ce cours (anti-IDOR : scopé course_id
+     * + users inscrits actifs). Un apprenant à 100 % n'est JAMAIS à risque.
+     *
+     * Trois catégories, par gravité décroissante (1 = plus grave) :
+     *  1. « Jamais commencé » : inscrit depuis > NEVER_STARTED_DAYS jours, progression 0 %.
+     *     Source de « dernière activité » = date d'inscription (aucune progression).
+     *  2. « Inactif »         : progression 1-99 %, aucune activité depuis > INACTIVE_DAYS jours.
+     *  3. « Bloqué »          : progression 1-99 %, a commencé mais n'avance plus
+     *     (aucune activité depuis > STUCK_DAYS et <= INACTIVE_DAYS jours).
+     *
+     * « Dernière activité » = Progress.last_activity_at (horodatage canonique posé à
+     * chaque recalcul de progression). Repli sur Enrollment.enrolled_at si aucune
+     * ligne de progression (cas « jamais commencé »).
+     *
+     * Note données quiz : un échec de quiz NE crée PAS de ligne d'historique dédiée
+     * (la table `completions` est clé (user_id, lesson_item_id) en upsert, donc une
+     * seule ligne par item, réutilisée à chaque tentative) — il n'existe pas de
+     * « quiz_attempts ». On ne peut donc PAS compter d'« échecs répétés au même
+     * quiz » de façon fiable ; la détection « bloqué » se base uniquement sur la
+     * stagnation de la progression (inactivité avec progression 1-99 %).
+     *
+     * Tri : gravité (jamais commencé > inactif > bloqué), puis ancienneté
+     * (le plus de jours « depuis » en premier).
+     *
+     * @return \Illuminate\Support\Collection<int, array{
+     *   user_id:int, name:string, email:string,
+     *   reason:string, reason_key:string, severity:int,
+     *   percent:int, since:\Illuminate\Support\Carbon, days_since:int,
+     *   action:string
+     * }>
+     */
+    public function atRiskLearners(Course $course): \Illuminate\Support\Collection
+    {
+        // Inscrits actifs de CE cours, avec leurs infos nominatives (réservées au gérant).
+        $enrollments = Enrollment::query()
+            ->where('course_id', $course->id)
+            ->where('status', 'active')
+            ->whereNotNull('enrolled_at')
+            ->with(['user:id,name,email'])
+            ->get();
+
+        if ($enrollments->isEmpty()) {
+            return collect();
+        }
+
+        $userIds = $enrollments->pluck('user_id')->unique()->all();
+
+        // Progression persistée scopée à CE cours et à SES inscrits actifs.
+        $progressByUser = Progress::query()
+            ->where('course_id', $course->id)
+            ->whereIn('user_id', $userIds)
+            ->get()
+            ->keyBy('user_id');
+
+        $now = now();
+        $atRisk = collect();
+
+        foreach ($enrollments as $enrollment) {
+            $user = $enrollment->user;
+            if ($user === null) {
+                continue; // utilisateur supprimé : rien à signaler
+            }
+
+            $progress = $progressByUser->get($enrollment->user_id);
+            $percent = (int) ($progress->percent ?? 0);
+
+            // Un apprenant à 100 % (ou plus) n'est jamais à risque.
+            if ($percent >= 100) {
+                continue;
+            }
+
+            // Dernière activité : progression si disponible, sinon date d'inscription.
+            $lastActivity = $progress?->last_activity_at ?? $enrollment->enrolled_at;
+            $daysSince = (int) $lastActivity->copy()->startOfDay()->diffInDays($now->copy()->startOfDay());
+
+            $reasonKey = null;
+            $reason = null;
+            $severity = null;
+            $action = null;
+            $since = null;
+
+            if ($percent === 0) {
+                // « Jamais commencé » : ancré sur la date d'inscription.
+                $daysSinceEnrolled = (int) $enrollment->enrolled_at->copy()->startOfDay()->diffInDays($now->copy()->startOfDay());
+
+                if ($daysSinceEnrolled > self::NEVER_STARTED_DAYS) {
+                    $reasonKey = 'never_started';
+                    $reason = 'Jamais commencé';
+                    $severity = 1;
+                    $action = 'Relancer / souhaiter la bienvenue';
+                    $since = $enrollment->enrolled_at;
+                    $daysSince = $daysSinceEnrolled;
+                }
+            } else {
+                // Progression 1-99 % : inactif (gravité 2) ou bloqué (gravité 3).
+                if ($daysSince > self::INACTIVE_DAYS) {
+                    $reasonKey = 'inactive';
+                    $reason = 'Inactif';
+                    $severity = 2;
+                    $action = 'Relancer';
+                    $since = $lastActivity;
+                } elseif ($daysSince > self::STUCK_DAYS) {
+                    $reasonKey = 'stuck';
+                    $reason = 'Bloqué';
+                    $severity = 3;
+                    $action = 'Proposer de l\'aide';
+                    $since = $lastActivity;
+                }
+            }
+
+            if ($reasonKey === null) {
+                continue; // pas à risque
+            }
+
+            $atRisk->push([
+                'user_id'    => (int) $user->id,
+                'name'       => (string) ($user->name ?? 'Apprenant'),
+                'email'      => (string) ($user->email ?? ''),
+                'reason'     => $reason,
+                'reason_key' => $reasonKey,
+                'severity'   => $severity,
+                'percent'    => $percent,
+                'since'      => $since,
+                'days_since' => $daysSince,
+                'action'     => $action,
+            ]);
+        }
+
+        // Tri : gravité croissante (1 = plus grave en tête), puis ancienneté décroissante.
+        return $atRisk
+            ->sortBy([
+                ['severity', 'asc'],
+                ['days_since', 'desc'],
+            ])
+            ->values();
     }
 
     /** Nombre de certificats émis pour CE cours (M6). */
