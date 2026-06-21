@@ -116,6 +116,47 @@
         .academy-lesson-sidebar { width: 100%; position: static; max-height: none; border-right: none; border-bottom: 1px solid #E5E7EB; }
         .academy-lesson-content { padding: 1.25rem 1rem; }
     }
+
+    /* ── Contenu « document » : markdown rendu SÛR (.academy-richtext) ── */
+    .academy-richtext { line-height: 1.75; color: #374151; max-width: 72ch; }
+    .academy-richtext > :first-child { margin-top: 0; }
+    .academy-richtext h1,
+    .academy-richtext h2,
+    .academy-richtext h3,
+    .academy-richtext h4 {
+        font-family: var(--f-heading);
+        color: var(--sys-text-default, #1A1D23);
+        line-height: 1.3;
+        margin: 1.4em 0 0.5em;
+    }
+    .academy-richtext h1 { font-size: 1.5rem; }
+    .academy-richtext h2 { font-size: 1.25rem; }
+    .academy-richtext h3 { font-size: 1.1rem; }
+    .academy-richtext h4 { font-size: 1rem; }
+    .academy-richtext p { margin: 0 0 1em; }
+    .academy-richtext ul,
+    .academy-richtext ol { margin: 0 0 1em; padding-left: 1.5rem; }
+    .academy-richtext li { margin-bottom: 0.35em; }
+    .academy-richtext a {
+        color: var(--sys-action-primary, #064E5A);
+        text-decoration: underline;
+    }
+    .academy-richtext a:hover { text-decoration: none; }
+    .academy-richtext strong { font-weight: 700; color: var(--sys-text-default, #1A1D23); }
+    .academy-richtext em { font-style: italic; }
+    .academy-richtext code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.9em;
+        background: #F3F4F6;
+        padding: 0.1em 0.35em;
+        border-radius: 4px;
+    }
+    .academy-richtext blockquote {
+        margin: 0 0 1em;
+        padding: 0.25rem 0 0.25rem 1rem;
+        border-left: 3px solid var(--sys-action-primary, #064E5A);
+        color: var(--sys-text-muted, #6B7280);
+    }
 </style>
 @endpush
 
@@ -312,10 +353,14 @@
                                     Le contenu textuel n'est injecté dans le DOM QUE si $hasAccess === true.
                                     Un visiteur non inscrit ne voit PAS le rich_text dans le HTML rendu.
                                 --}}
-                                <div class="prose" style="line-height: 1.75; color: #374151; max-width: 72ch;">
-                                    @if(isset($item->payload['rich_text']))
-                                        {{-- SECURITY: ne JAMAIS retirer e() ici (XSS stocke). nl2br n'ajoute que des <br>. Pour du HTML riche un jour : sanitizer/liste blanche, jamais {!! brut !!}. --}}
-                                        {!! nl2br(e($item->payload['rich_text'])) !!}
+                                <div class="prose academy-richtext">
+                                    @php
+                                        $renderedDoc = \Modules\Academy\Models\LessonItem::renderRichText($item->payload['rich_text'] ?? null);
+                                    @endphp
+                                    @if($renderedDoc !== '')
+                                        {{-- SÉCURITÉ : renderRichText() interprète le markdown avec html_input=strip
+                                             (tout HTML brut est retiré) → liste blanche, aucune XSS stockée possible. --}}
+                                        {!! $renderedDoc !!}
                                     @else
                                         <p class="text-muted">Contenu du document à venir.</p>
                                     @endif

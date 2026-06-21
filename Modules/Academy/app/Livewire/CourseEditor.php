@@ -1114,6 +1114,17 @@ class CourseEditor extends Component
         return null;
     }
 
+    /**
+     * Rendu d'aperçu SÛR d'un contenu document (markdown) DANS l'éditeur, via le
+     * MÊME helper que le lecteur public (LessonItem::renderRichText) : l'aperçu ne
+     * diverge donc JAMAIS du rendu final (pas de markdown JS côté client). Le HTML
+     * retourné est déjà nettoyé (html_input=strip) → aucune XSS possible.
+     */
+    public function previewRichText(string $raw): string
+    {
+        return LessonItem::renderRichText($raw);
+    }
+
     private function fillMetadataFrom(Course $course): void
     {
         $this->title       = (string) $course->title;

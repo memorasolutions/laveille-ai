@@ -10,7 +10,25 @@
      qu'une suggestion ; reorder*() ré-autorise et valide l'appartenance des ids (anti-IDOR). --}}
 @once
     @push('styles')
-        <style>[x-cloak]{display:none !important;}</style>
+        <style>
+            [x-cloak]{display:none !important;}
+            /* Aperçu markdown dans l'éditeur (mêmes bases que le lecteur public). */
+            .academy-richtext { line-height: 1.7; color: #374151; }
+            .academy-richtext > :first-child { margin-top: 0; }
+            .academy-richtext h1, .academy-richtext h2, .academy-richtext h3, .academy-richtext h4 {
+                font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); line-height: 1.3; margin: 1.2em 0 0.5em;
+            }
+            .academy-richtext h1 { font-size: 1.4rem; }
+            .academy-richtext h2 { font-size: 1.2rem; }
+            .academy-richtext h3 { font-size: 1.05rem; }
+            .academy-richtext p { margin: 0 0 0.9em; }
+            .academy-richtext ul, .academy-richtext ol { margin: 0 0 0.9em; padding-left: 1.4rem; }
+            .academy-richtext li { margin-bottom: 0.3em; }
+            .academy-richtext a { color: var(--sys-action-primary, #064E5A); text-decoration: underline; }
+            .academy-richtext strong { font-weight: 700; color: var(--sys-text-default, #1A1D23); }
+            .academy-richtext em { font-style: italic; }
+            .academy-richtext code { font-family: ui-monospace, Menlo, monospace; font-size: 0.9em; background: #F3F4F6; padding: 0.1em 0.35em; border-radius: 4px; }
+        </style>
     @endpush
     @push('scripts')
         <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/sort@3.x.x/dist/cdn.min.js"></script>
@@ -22,6 +40,60 @@
                     .map(function (el) { return parseInt(el.getAttribute('data-sort-id'), 10); })
                     .filter(function (id) { return Number.isInteger(id) && id > 0; });
             };
+
+            // Mini-éditeur markdown (aide de saisie). La <textarea> ciblée par son id
+            // reste la SOURCE DE VÉRITÉ : on n'insère que de la syntaxe markdown et on
+            // émet un évènement « input » pour que Livewire (wire:model) capte la valeur.
+            // L'aperçu est rendu CÔTÉ SERVEUR (previewRichText) → jamais de divergence.
+            document.addEventListener('alpine:init', function () {
+                window.Alpine.data('academyMarkdownEditor', function (textareaId) {
+                    return {
+                        showPreview: false,
+                        loading: false,
+                        previewHtml: '',
+                        ta() { return document.getElementById(textareaId); },
+                        // Notifie Livewire de la nouvelle valeur (déclenche wire:model).
+                        notify(el) { el.dispatchEvent(new Event('input', { bubbles: true })); },
+                        wrap(before, after, placeholder) {
+                            const el = this.ta(); if (!el) return;
+                            const s = el.selectionStart, e = el.selectionEnd;
+                            const sel = el.value.slice(s, e) || placeholder;
+                            el.value = el.value.slice(0, s) + before + sel + after + el.value.slice(e);
+                            const pos = s + before.length;
+                            el.focus(); el.setSelectionRange(pos, pos + sel.length);
+                            this.notify(el);
+                        },
+                        prefixLine(prefix) {
+                            const el = this.ta(); if (!el) return;
+                            const s = el.selectionStart;
+                            const lineStart = el.value.lastIndexOf('\n', s - 1) + 1;
+                            el.value = el.value.slice(0, lineStart) + prefix + el.value.slice(lineStart);
+                            const pos = s + prefix.length;
+                            el.focus(); el.setSelectionRange(pos, pos);
+                            this.notify(el);
+                        },
+                        insertLink() {
+                            const el = this.ta(); if (!el) return;
+                            const s = el.selectionStart, e = el.selectionEnd;
+                            const sel = el.value.slice(s, e) || 'texte du lien';
+                            const md = '[' + sel + '](https://)';
+                            el.value = el.value.slice(0, s) + md + el.value.slice(e);
+                            // Place le curseur dans l'URL (entre les parenthèses).
+                            const pos = s + sel.length + 3;
+                            el.focus(); el.setSelectionRange(pos + 8, pos + 8);
+                            this.notify(el);
+                        },
+                        async togglePreview() {
+                            if (this.showPreview) { this.showPreview = false; return; }
+                            const el = this.ta();
+                            this.showPreview = true; this.loading = true;
+                            try { this.previewHtml = await this.$wire.previewRichText(el ? el.value : ''); }
+                            catch (err) { this.previewHtml = ''; }
+                            this.loading = false;
+                        },
+                    };
+                });
+            });
         </script>
     @endpush
 @endonce
@@ -248,6 +320,38 @@
         <h2 id="editor-structure" style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin: 0 0 18px; font-size: 1.25rem;">
             Contenu de la formation
         </h2>
+
+        {{-- ── Onboarding 1er cours (cours sans aucun chapitre) ──
+             Encart d'accueil RÉDUCTIBLE, mémorisé par cours via localStorage : une fois
+             fermé, il ne réapparaît pas pour ce cours. Ne bloque jamais l'usage (le
+             formulaire d'ajout reste juste en dessous). a11y : role=region + aria-label. --}}
+        @if ($course->chapters->isEmpty())
+            <div
+                x-data="{
+                    key: 'academy_onboarding_{{ $course->id }}',
+                    open: true,
+                    init() { this.open = localStorage.getItem(this.key) !== 'dismissed'; },
+                    dismiss() { this.open = false; localStorage.setItem(this.key, 'dismissed'); }
+                }"
+                x-show="open" x-cloak
+                role="region" aria-label="Premiers pas pour bâtir votre formation"
+                style="border: 1px solid #BAE6FD; background: #F0F9FF; border-radius: var(--sys-radius-md, 0.75rem); padding: 16px 18px; margin-bottom: 20px;">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div>
+                        <p style="font-weight: 700; color: #0C4A6E; margin: 0 0 8px; font-size: 0.95rem;">
+                            🚀 Bienvenue ! Voici comment bâtir votre formation en 3 étapes.
+                        </p>
+                        <ol style="margin: 0; padding-left: 1.25rem; font-size: 0.86rem; color: #0C4A6E; line-height: 1.7;">
+                            <li><strong>Ajoutez un chapitre</strong> pour regrouper vos leçons.</li>
+                            <li><strong>Ajoutez des leçons</strong> dans chaque chapitre.</li>
+                            <li><strong>Ajoutez du contenu</strong> (vidéo, document ou quiz), puis publiez.</li>
+                        </ol>
+                    </div>
+                    <button type="button" @click="dismiss()" aria-label="Fermer l'aide de démarrage" title="Fermer"
+                            style="flex-shrink: 0; border: none; background: none; cursor: pointer; color: #0C4A6E; font-size: 1.1rem; line-height: 1; min-width: 28px; min-height: 28px; padding: 4px;">✕</button>
+                </div>
+            </div>
+        @endif
 
         {{-- Ajouter un chapitre --}}
         @can('manageStructure', $course)
@@ -522,9 +626,11 @@
                                                                     <input id="item-dur-{{ $item->id }}" type="number" min="1" max="1440" name="duration_minutes" value="{{ $durationMin }}" placeholder="Durée de la vidéo en minutes" aria-label="Durée de la vidéo en minutes"
                                                                            style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                                                                 @elseif ($item->type === 'document')
-                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-doc-{{ $item->id }}">Contenu (texte riche / markdown simple)</label>
-                                                                    <textarea id="item-doc-{{ $item->id }}" name="rich_text" rows="4" aria-label="Contenu du document"
-                                                                              style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">{{ $item->payload['rich_text'] ?? '' }}</textarea>
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-doc-{{ $item->id }}">Contenu (markdown)</label>
+                                                                    <x-academy::markdown-editor :textareaId="'item-doc-'.$item->id" :uid="$item->id" wire:key="md-edit-{{ $item->id }}">
+                                                                        <textarea id="item-doc-{{ $item->id }}" name="rich_text" rows="5" aria-label="Contenu du document"
+                                                                                  style="width: 100%; padding: 8px 12px; border: none; border-radius: 0; outline: none; resize: vertical;">{{ $item->payload['rich_text'] ?? '' }}</textarea>
+                                                                    </x-academy::markdown-editor>
                                                                 @elseif ($item->type === 'quiz')
                                                                     <label style="font-size: 0.78rem; font-weight: 600;" for="item-qt-{{ $item->id }}">Clé de banque QT</label>
                                                                     <input id="item-qt-{{ $item->id }}" type="text" name="qt_bank_key" value="{{ $item->payload['qt_bank_key'] ?? '' }}" placeholder="Clé de banque QT" aria-label="Clé de banque QT"
@@ -606,7 +712,8 @@
                                                 @endforeach
                                             </ul>
                                         @else
-                                            <p style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 10px;">Aucun élément dans cette leçon.</p>
+                                            <x-academy::empty-state icon="🎬" :compact="true"
+                                                message="Cette leçon est vide. Ajoutez une vidéo, un document ou un quiz." />
                                         @endif
 
                                         {{-- Ajouter un élément (formulaire par type) --}}
@@ -636,9 +743,11 @@
                                                        style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
 
                                                 <p style="font-size: 0.74rem; font-weight: 700; color: var(--sys-text-default, #1A1D23); margin: 8px 0 0;">Champs pour un document</p>
-                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-doc-{{ $lesson->id }}">Contenu</label>
-                                                <textarea id="newitem-doc-{{ $lesson->id }}" wire:model="newItem.{{ $lesson->id }}.rich_text" rows="3" placeholder="Texte riche / markdown simple"
-                                                          style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);"></textarea>
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-doc-{{ $lesson->id }}">Contenu (markdown)</label>
+                                                <x-academy::markdown-editor :textareaId="'newitem-doc-'.$lesson->id" :uid="'new-'.$lesson->id" wire:key="md-new-{{ $lesson->id }}">
+                                                    <textarea id="newitem-doc-{{ $lesson->id }}" wire:model="newItem.{{ $lesson->id }}.rich_text" rows="4" placeholder="Rédigez le contenu en markdown…"
+                                                              style="width: 100%; padding: 8px 12px; border: none; border-radius: 0; outline: none; resize: vertical;"></textarea>
+                                                </x-academy::markdown-editor>
 
                                                 <p style="font-size: 0.74rem; font-weight: 700; color: var(--sys-text-default, #1A1D23); margin: 8px 0 0;">Champs pour un quiz</p>
                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-qt-{{ $lesson->id }}">Clé de banque QT</label>
@@ -675,7 +784,12 @@
                         @endforeach
                     </ul>
                 @else
-                    <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 12px;">Aucune leçon dans ce chapitre.</p>
+                    @can('manageStructure', $course)
+                        <x-academy::empty-state icon="📝" :compact="true"
+                            message="Ce chapitre n'a pas encore de leçon. Ajoutez-en une pour structurer le contenu." />
+                    @else
+                        <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 12px;">Aucune leçon dans ce chapitre.</p>
+                    @endcan
                 @endif
 
                 {{-- Ajouter une leçon à CE chapitre --}}
@@ -693,7 +807,8 @@
                 @endcan
             </article>
         @empty
-            <p style="color: var(--sys-text-muted, #6B7280);">Aucun chapitre pour l'instant. Commencez par en ajouter un.</p>
+            <x-academy::empty-state icon="📚"
+                message="Votre formation est vide. Commencez par ajouter un premier chapitre ci-dessus." />
         @endforelse
         @can('manageStructure', $course)
             </div>

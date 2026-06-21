@@ -13,6 +13,7 @@ namespace Modules\Academy\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 use Modules\Media\Traits\HasMediaAttachments;
 use Spatie\MediaLibrary\HasMedia;
 
@@ -102,5 +103,30 @@ class LessonItem extends Model implements HasMedia
         }
 
         return $this->payload['poster'] ?? null;
+    }
+
+    // -------------------------------------------------------------------------
+    // Rendu SÛR du document (markdown → HTML), DRY : utilisé par le lecteur
+    // public ET l'aperçu de l'éditeur. UNE SEULE source de vérité du rendu.
+    // -------------------------------------------------------------------------
+
+    /**
+     * Convertit le texte d'un item « document » (markdown) en HTML SÛR.
+     *
+     * SÉCURITÉ (anti-XSS stockée) : « html_input » = strip retire TOUT HTML brut
+     * embarqué dans le contenu (ex. <script>, <img onerror=…>). Seule la syntaxe
+     * markdown est interprétée → c'est la « liste blanche » que le commentaire de
+     * sécurité du lecteur anticipait. « allow_unsafe_links » = false neutralise
+     * les schémas dangereux (javascript:, data:) dans les liens markdown.
+     *
+     * Le résultat peut être rendu via {!! … !!} EN TOUTE SÛRETÉ : il ne contient
+     * jamais de HTML brut venu de l'utilisateur, uniquement le balisage généré
+     * par CommonMark à partir du markdown.
+     */
+    public static function renderRichText(?string $raw): string
+    {
+        return $raw
+            ? Str::markdown($raw, ['html_input' => 'strip', 'allow_unsafe_links' => false])
+            : '';
     }
 }
