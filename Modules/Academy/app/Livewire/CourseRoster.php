@@ -29,17 +29,34 @@ declare(strict_types=1);
 namespace Modules\Academy\Livewire;
 
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\CourseRole;
 use Modules\Academy\Models\Enrollment;
 
 class CourseRoster extends Component
 {
+    use WithFileUploads;
+
     /** Rôles de cours attribuables (liste blanche, alignée sur l'admin Backoffice). 'owner' EXCLU. */
     private const ASSIGNABLE_ROLES = ['instructor', 'assistant', 'editor'];
+
+    /**
+     * Rôle d'inscription accepté dans le CSV (liste blanche). Pour l'instant, le
+     * roster ne gère qu'un statut d'inscription « étudiant » ; toute autre valeur
+     * (ou valeur absente) retombe sur 'student'. La colonne « rôle » du CSV est
+     * tolérée pour la lisibilité humaine ; elle ne sert PAS à attribuer un rôle
+     * d'équipe (instructor/assistant/editor) - ça reste un acte manuel gâté
+     * 'manageRoles'. Importer en masse ne crée donc QUE des inscriptions.
+     */
+    private const CSV_ENROLL_ROLES = ['student'];
+
+    /** Nombre maximum de lignes traitées par import (au-delà : refus, pas de troncature silencieuse). */
+    private const CSV_MAX_ROWS = 1000;
 
     /** Identifiant du cours géré (figé au montage, source de vérité serveur). */
     public int $courseId;
@@ -50,6 +67,13 @@ class CourseRoster extends Component
     // ── Saisie : ajouter un rôle d'équipe par courriel ───────────────────────────
     public string $roleEmail = '';
     public string $roleName = 'instructor';
+
+    // ── Import CSV d'inscriptions en masse (WithFileUploads) ──────────────────────
+    /** Fichier CSV en attente de traitement (TemporaryUploadedFile). */
+    public $csvFile = null;
+
+    /** Rapport du dernier import, rendu en role=status (null = aucun import). */
+    public ?array $importReport = null;
 
     // ── Confirmations inline à 2 temps (jamais confirm() natif) ──────────────────
     public ?int $confirmingEnrollmentRemoval = null;
@@ -166,6 +190,156 @@ class CourseRoster extends Component
 
         $this->confirmingEnrollmentRemoval = null;
         session()->flash('academy_roster_status', 'Inscription annulée.');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // IMPORT CSV EN MASSE (roster) - gâté manageEnrollments (même gate que l'ajout manuel)
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Importe des inscriptions en masse depuis un fichier CSV (une colonne courriel
+     * obligatoire, en-tête email/courriel toléré + colonne rôle optionnelle).
+     *
+     * SÉCURITÉ : le cours est RE-RÉSOLU côté serveur puis RÉ-AUTORISÉ par la MÊME
+     * gate que l'ajout manuel ('manageEnrollments' = admin OU owner/instructor du
+     * cours). Toutes les écritures sont enveloppées dans UNE transaction.
+     *
+     * CONFORMITÉ LCAP / Loi 25 : un courriel SANS compte n'est JAMAIS provisionné -
+     * aucun compte n'est créé. Il est listé dans le rapport « inconnus » et ignoré.
+     */
+    public function importCsv(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageEnrollments', $course);
+
+        $this->validate([
+            'csvFile' => ['required', 'file', 'mimes:csv,txt', 'max:2048'],
+        ]);
+
+        $rows = $this->parseCsvRows($this->csvFile->getRealPath());
+
+        if (count($rows) > self::CSV_MAX_ROWS) {
+            $this->reset('csvFile');
+            $this->addError('csvFile', 'Le fichier dépasse '.self::CSV_MAX_ROWS.' lignes. Divisez-le en plusieurs fichiers (aucune ligne n\'a été traitée).');
+
+            return;
+        }
+
+        $report = [
+            'enrolled'         => 0,
+            'already'          => 0,
+            'invalid'          => 0,
+            'unknown_emails'   => [],
+            'enrolled_emails'  => [],
+        ];
+
+        DB::transaction(function () use ($course, $rows, &$report): void {
+            foreach ($rows as $row) {
+                $email = $row['email'];
+
+                if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $report['invalid']++;
+
+                    continue;
+                }
+
+                $user = User::where('email', $email)->first();
+
+                if (! $user) {
+                    // Conformité LCAP/Loi 25 : aucun compte n'est créé pour un courriel inconnu.
+                    if (! in_array($email, $report['unknown_emails'], true)) {
+                        $report['unknown_emails'][] = $email;
+                    }
+
+                    continue;
+                }
+
+                // Même logique idempotente que l'inscription manuelle (enrollByEmail),
+                // scopée à CE cours (anti-IDOR).
+                $enrollment = Enrollment::firstOrNew([
+                    'course_id' => $course->id,
+                    'user_id'   => $user->id,
+                ]);
+
+                if ($enrollment->exists && $enrollment->status === 'active') {
+                    $report['already']++;
+
+                    continue;
+                }
+
+                $enrollment->fill([
+                    'status'       => 'active',
+                    'source'       => 'admin',
+                    'enrolled_at'  => now(),
+                    'cancelled_at' => null,
+                ])->save();
+
+                $report['enrolled']++;
+                $report['enrolled_emails'][] = $email;
+            }
+        });
+
+        $this->reset('csvFile');
+        $this->importReport = $report;
+        session()->flash('academy_roster_status', "Import terminé : {$report['enrolled']} inscrit(s), {$report['already']} déjà inscrit(s), ".count($report['unknown_emails']).' inconnu(s), '.$report['invalid'].' ligne(s) invalide(s).');
+    }
+
+    /**
+     * Lit et normalise les lignes d'un CSV. Robuste : BOM UTF-8, séparateur ';' ou
+     * ',', espaces, casse e-mail en minuscule. Détecte un en-tête optionnel
+     * (email/courriel) pour ne pas le traiter comme une donnée. Renvoie un tableau
+     * de ['email' => string] (le rôle CSV éventuel est lu mais non utilisé pour
+     * attribuer un rôle d'équipe - import = inscriptions seulement).
+     *
+     * @return array<int, array{email: string}>
+     */
+    private function parseCsvRows(string $path): array
+    {
+        $raw = file_get_contents($path);
+
+        if ($raw === false || $raw === '') {
+            return [];
+        }
+
+        // Retire le BOM UTF-8 s'il est présent.
+        $raw = preg_replace('/^\xEF\xBB\xBF/', '', $raw);
+
+        $lines = preg_split('/\r\n|\r|\n/', $raw) ?: [];
+
+        $rows         = [];
+        $headerParsed = false;
+
+        foreach ($lines as $line) {
+            if (trim($line) === '') {
+                continue;
+            }
+
+            // Détecte le séparateur ligne par ligne (',' ou ';').
+            $delimiter = (substr_count($line, ';') > substr_count($line, ',')) ? ';' : ',';
+            $cells     = str_getcsv($line, $delimiter);
+
+            $email = strtolower(trim((string) ($cells[0] ?? '')));
+
+            // En-tête optionnel (1re ligne « email » / « courriel ») : on l'ignore.
+            if (! $headerParsed) {
+                $headerParsed = true;
+                if (in_array($email, ['email', 'courriel', 'e-mail'], true)) {
+                    continue;
+                }
+            }
+
+            $rows[] = ['email' => $email];
+        }
+
+        return $rows;
+    }
+
+    /** Réinitialise le rapport et le fichier (bouton « fermer le rapport »). */
+    public function clearImportReport(): void
+    {
+        $this->importReport = null;
+        $this->reset('csvFile');
+        $this->resetErrorBag('csvFile');
     }
 
     // ─────────────────────────────────────────────────────────────────────────────

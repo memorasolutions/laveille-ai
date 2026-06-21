@@ -33,6 +33,63 @@
                 <div><x-core::button type="submit" variant="primary" size="sm">Inscrire</x-core::button></div>
             </form>
 
+            {{-- ─────────── Importer des inscriptions (CSV) ─────────── --}}
+            <div style="border-top: 1px dashed #E5E7EB; padding-top: 18px; margin-bottom: 22px;">
+                <h3 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin: 0 0 6px; font-size: 1.02rem;">
+                    Importer des inscriptions (CSV)
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 6px;">
+                    Une ligne par courriel (colonne <code>email</code>, en-tête facultatif). Seuls les comptes déjà existants sont inscrits ; un courriel sans compte est listé sans qu'aucun compte soit créé. Maximum 1000 lignes.
+                </p>
+                <p style="font-size: 0.82rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 12px;">
+                    Format attendu :
+                    <a download="modele-inscriptions.csv"
+                       href="data:text/csv;charset=utf-8,email%2Crole%0Apersonne1%40exemple.ca%2Cstudent%0Apersonne2%40exemple.ca%2Cstudent"
+                       style="color: var(--sys-action-primary, #0F766E); font-weight: 600;">
+                        télécharger un modèle CSV
+                    </a>
+                </p>
+
+                <form wire:submit="importCsv"
+                      style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px;">
+                    <div style="flex: 1 1 280px; display: flex; flex-direction: column; gap: 6px;">
+                        <label for="roster-csv-file" style="font-weight: 600; font-size: 0.85rem;">Fichier CSV (max 2 Mo)</label>
+                        <input id="roster-csv-file" type="file" accept=".csv,text/csv,text/plain" wire:model="csvFile"
+                               style="width: 100%; padding: 7px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); background: #FFFFFF;">
+                        <div wire:loading wire:target="csvFile" style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280);">Téléversement en cours…</div>
+                        @error('csvFile') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                    </div>
+                    <div><x-core::button type="submit" variant="primary" size="sm" wire:loading.attr="disabled" wire:target="importCsv">Importer</x-core::button></div>
+                </form>
+
+                {{-- Rapport d'import (a11y : role=status) --}}
+                @if ($importReport !== null)
+                    <div role="status" aria-live="polite"
+                         style="margin-top: 14px; border: 1px solid #BFDBFE; background: #EFF6FF; color: #1E3A8A; border-radius: var(--sys-radius-md, 0.75rem); padding: 14px 16px; font-size: 0.88rem;">
+                        <strong>Résultat de l'import</strong>
+                        <ul style="margin: 8px 0 0; padding-left: 20px;">
+                            <li>{{ $importReport['enrolled'] }} inscription(s) créée(s)</li>
+                            <li>{{ $importReport['already'] }} déjà inscrit(s) (aucune modification)</li>
+                            <li>{{ count($importReport['unknown_emails']) }} courriel(s) inconnu(s) — aucun compte créé</li>
+                            <li>{{ $importReport['invalid'] }} ligne(s) ignorée(s) (courriel invalide)</li>
+                        </ul>
+                        @if (! empty($importReport['unknown_emails']))
+                            <details style="margin-top: 10px;">
+                                <summary style="cursor: pointer; font-weight: 600;">Voir les courriels inconnus ({{ count($importReport['unknown_emails']) }})</summary>
+                                <ul style="margin: 8px 0 0; padding-left: 20px;">
+                                    @foreach ($importReport['unknown_emails'] as $unknown)
+                                        <li>{{ $unknown }}</li>
+                                    @endforeach
+                                </ul>
+                            </details>
+                        @endif
+                        <div style="margin-top: 12px;">
+                            <x-core::button type="button" wire:click="clearImportReport" variant="ghost" size="sm">Fermer le rapport</x-core::button>
+                        </div>
+                    </div>
+                @endif
+            </div>
+
             {{-- Liste des inscrits --}}
             @if ($this->enrollments->isNotEmpty())
                 <div style="overflow-x: auto;">
