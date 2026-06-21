@@ -75,6 +75,76 @@
         @endif
     </section>
 
+    {{-- ───────────────────────── Vos badges (E1) ───────────────────────── --}}
+    <section aria-labelledby="academy-mes-badges" class="mb-5">
+        <h2 id="academy-mes-badges"
+            style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 16px;">
+            <span aria-hidden="true">🏅</span> Vos badges
+        </h2>
+
+        @if($this->earnedBadges->isNotEmpty())
+            <ul class="list-unstyled d-flex flex-wrap gap-3" role="list" style="margin: 0;">
+                @foreach($this->earnedBadges as $earned)
+                    @php($badge = $earned->badge)
+                    @if($badge)
+                        <li role="listitem"
+                            aria-label="Badge obtenu : {{ $badge->name }}{{ $earned->awarded_at ? ', le '.$earned->awarded_at->timezone('America/Toronto')->format('Y-m-d') : '' }}"
+                            style="flex: 0 1 220px; border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 16px 18px; display: flex; gap: 12px; align-items: flex-start; background: #FFFFFF;">
+                            <span aria-hidden="true" style="font-size: 1.8rem; line-height: 1;">{{ $badge->icon ?: '🏅' }}</span>
+                            <div>
+                                <p style="font-family: var(--f-heading); font-size: 0.98rem; font-weight: 600; color: var(--sys-text-default, #1A1D23); margin: 0 0 2px;">
+                                    {{ $badge->name }}
+                                </p>
+                                @if($badge->description)
+                                    <p style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 4px;">
+                                        {{ $badge->description }}
+                                    </p>
+                                @endif
+                                @if($earned->awarded_at)
+                                    <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+                                        Obtenu le {{ $earned->awarded_at->timezone('America/Toronto')->format('Y-m-d') }}
+                                    </p>
+                                @endif
+                            </div>
+                        </li>
+                    @endif
+                @endforeach
+            </ul>
+        @else
+            <div style="border: 1px dashed #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 24px; text-align: center;">
+                <p style="color: var(--sys-text-default, #1A1D23); margin: 0;">
+                    <span aria-hidden="true">🏅</span> Complétez votre première formation pour décrocher un badge&nbsp;!
+                </p>
+            </div>
+        @endif
+
+        {{-- Badges à débloquer (grisés) pour motiver la progression. --}}
+        @if($this->lockedBadges->isNotEmpty())
+            <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 18px 0 10px;">
+                À débloquer
+            </p>
+            <ul class="list-unstyled d-flex flex-wrap gap-3" role="list" style="margin: 0;">
+                @foreach($this->lockedBadges as $badge)
+                    <li role="listitem"
+                        aria-label="Badge à débloquer : {{ $badge->name }}"
+                        style="flex: 0 1 220px; border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 16px 18px; display: flex; gap: 12px; align-items: flex-start; background: #F9FAFB; opacity: 0.75;">
+                        <span aria-hidden="true" style="font-size: 1.8rem; line-height: 1; filter: grayscale(1);">{{ $badge->icon ?: '🔒' }}</span>
+                        <div>
+                            <p style="font-family: var(--f-heading); font-size: 0.98rem; font-weight: 600; color: var(--sys-text-default, #1A1D23); margin: 0 0 2px;">
+                                {{ $badge->name }}
+                            </p>
+                            @if($badge->description)
+                                <p style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+                                    {{ $badge->description }}
+                                </p>
+                            @endif
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </section>
+
     {{-- ───────────────────── Annonces de vos formations (D3) ───────────────────── --}}
     @if($this->announcements->isNotEmpty())
         <section aria-labelledby="academy-annonces" class="mb-5">

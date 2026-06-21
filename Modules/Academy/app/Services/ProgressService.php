@@ -15,6 +15,7 @@ use Modules\Academy\Models\Completion;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Models\Progress;
+use Modules\Academy\Services\BadgeService;
 use Modules\Academy\Services\CertificateService;
 
 final class ProgressService
@@ -92,6 +93,20 @@ final class ProgressService
             } catch (\Throwable) {
                 // Silencieux : ne jamais bloquer la progression pour un cert raté
             }
+        }
+
+        // 7. E1 — Évaluer les badges/jalons d'engagement (défensif, idempotent).
+        // Branché ICI car recalculate() est le point de passage UNIQUE après chaque
+        // complétion (CompletionService l'appelle). L'évaluation est serveur et
+        // firstOrCreate garantit l'absence de doublon ; un échec ne bloque JAMAIS
+        // la progression. On évalue à chaque recalcul (pas seulement à 100 %) pour
+        // capter aussi les jalons cumulatifs (ex. 10 leçons complétées).
+        try {
+            if (class_exists(BadgeService::class)) {
+                (new BadgeService())->evaluateForUser($user, $course);
+            }
+        } catch (\Throwable) {
+            // Silencieux : un badge raté ne casse jamais la progression.
         }
 
         return $progress;

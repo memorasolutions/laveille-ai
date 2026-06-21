@@ -230,6 +230,50 @@ class Dashboard extends Component
         $this->confirmingDuplicationId = null;
     }
 
+    /**
+     * Badges GAGNÉS par l'utilisateur courant (E1). Strictement scopé à son
+     * user_id par BadgeService::earnedFor (anti-IDOR) : un utilisateur ne voit
+     * QUE ses propres badges. Lecture seule, aucune attribution ici.
+     *
+     * @return Collection<int, \Modules\Academy\Models\UserBadge>
+     */
+    #[Computed]
+    public function earnedBadges(): Collection
+    {
+        $user = Auth::user();
+
+        if ($user === null) {
+            return collect();
+        }
+
+        return (new \Modules\Academy\Services\BadgeService())->earnedFor($user);
+    }
+
+    /**
+     * Badges encore À DÉBLOQUER (catalogue actif moins ceux déjà gagnés), pour
+     * motiver l'étudiant. Lecture seule, aucune donnée d'autres utilisateurs.
+     *
+     * @return Collection<int, \Modules\Academy\Models\Badge>
+     */
+    #[Computed]
+    public function lockedBadges(): Collection
+    {
+        $earnedKeys = $this->earnedBadges
+            ->map(fn ($ub) => $ub->badge?->key)
+            ->filter()
+            ->unique();
+
+        try {
+            return \Modules\Academy\Models\Badge::query()
+                ->active()
+                ->whereNotIn('key', $earnedKeys->all())
+                ->orderBy('id')
+                ->get();
+        } catch (\Throwable) {
+            return collect();
+        }
+    }
+
     /** L'utilisateur courant est-il administrateur de l'Académie ? */
     #[Computed]
     public function isAcademyAdmin(): bool
