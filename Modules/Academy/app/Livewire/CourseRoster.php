@@ -34,6 +34,7 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Modules\Academy\Models\Announcement;
 use Modules\Academy\Models\Cohort;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\CourseRole;
@@ -91,10 +92,19 @@ class CourseRoster extends Component
     /** Filtre d'affichage des inscrits par cohorte (null = « Tous »). */
     public ?int $cohortFilter = null;
 
+    // ── Annonces aux inscrits (D3) - gâté manageEnrollments ──────────────────────
+    /** Brouillon de saisie d'une annonce (compose / édite). */
+    public string $announcementTitle = '';
+    public string $announcementBody = '';
+
+    /** Annonce en cours d'édition (id), null = composition d'une nouvelle. */
+    public ?int $editingAnnouncement = null;
+
     // ── Confirmations inline à 2 temps (jamais confirm() natif) ──────────────────
     public ?int $confirmingEnrollmentRemoval = null;
     public ?int $confirmingRoleRemoval = null;
     public ?int $confirmingCohortRemoval = null;
+    public ?int $confirmingAnnouncementRemoval = null;
 
     /**
      * Entrée. Autorisation SERVEUR d'affichage : pour voir CET espace il faut au
@@ -147,6 +157,17 @@ class CourseRoster extends Component
     private function resolveCohortFor(Course $course, int $cohortId): Cohort
     {
         return Cohort::where('id', $cohortId)
+            ->where('course_id', $course->id)
+            ->firstOrFail();
+    }
+
+    /**
+     * Re-résout une Annonce ET vérifie qu'elle appartient bien à CE cours (anti-IDOR).
+     * Une annonce d'un autre cours → ModelNotFound, aucune écriture possible.
+     */
+    private function resolveAnnouncementFor(Course $course, int $announcementId): Announcement
+    {
+        return Announcement::where('id', $announcementId)
             ->where('course_id', $course->id)
             ->firstOrFail();
     }
@@ -590,8 +611,141 @@ class CourseRoster extends Component
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
+    // ANNONCES AUX INSCRITS (D3) - gâté manageEnrollments (admin OU owner/instructor)
+    // ─────────────────────────────────────────────────────────────────────────────
+    //
+    // Une annonce appartient à UN cours. Chaque mutation RE-RÉSOUT le cours,
+    // ré-autorise 'manageEnrollments', puis (édition/suppression) RE-RÉSOUT
+    // l'annonce scopée à CE cours (anti-IDOR). published_at non null = publiée
+    // (visible des inscrits actifs) ; null = brouillon. author_id = auth()->id().
+    // TODO option courriel : un envoi Brevo aux inscrits est hors scope D3
+    // (on reste sur l'affichage on-site).
+
+    /**
+     * Enregistre une annonce (création ou édition selon $editingAnnouncement).
+     * $publish=true → published_at = now() (visible des inscrits) ; false = brouillon.
+     * L'auteur est TOUJOURS l'utilisateur connecté, jamais une valeur du navigateur.
+     */
+    public function saveAnnouncement(bool $publish = false): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageEnrollments', $course);
+
+        $data = $this->validate([
+            'announcementTitle' => 'required|string|max:160',
+            'announcementBody'  => 'required|string|max:5000',
+        ]);
+
+        if ($this->editingAnnouncement !== null) {
+            // ÉDITION : annonce re-résolue et scopée à CE cours (anti-IDOR).
+            $announcement = $this->resolveAnnouncementFor($course, (int) $this->editingAnnouncement);
+
+            $announcement->title = trim($data['announcementTitle']);
+            $announcement->body  = $data['announcementBody'];
+
+            // Publier explicitement : pose published_at si absent (sans réécraser
+            // une date de publication existante). On ne dé-publie jamais ici.
+            if ($publish && $announcement->published_at === null) {
+                $announcement->published_at = now();
+            }
+
+            $announcement->save();
+            $message = $publish ? 'Annonce publiée.' : 'Annonce enregistrée.';
+        } else {
+            // CRÉATION : author_id = utilisateur connecté (jamais le client).
+            Announcement::create([
+                'course_id'    => $course->id,
+                'author_id'    => auth()->id(),
+                'title'        => trim($data['announcementTitle']),
+                'body'         => $data['announcementBody'],
+                'published_at' => $publish ? now() : null,
+            ]);
+            $message = $publish ? 'Annonce publiée.' : 'Brouillon d\'annonce enregistré.';
+        }
+
+        $this->resetAnnouncementForm();
+        session()->flash('academy_roster_status', $message);
+    }
+
+    /** Charge une annonce de CE cours dans le formulaire (édition, anti-IDOR). */
+    public function editAnnouncement(int $announcementId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageEnrollments', $course);
+
+        $announcement = $this->resolveAnnouncementFor($course, $announcementId);
+
+        $this->editingAnnouncement = $announcement->id;
+        $this->announcementTitle   = $announcement->title;
+        $this->announcementBody    = $announcement->body;
+        $this->resetErrorBag(['announcementTitle', 'announcementBody']);
+    }
+
+    /** Publie une annonce existante (brouillon → publiée) de CE cours (anti-IDOR). */
+    public function publishAnnouncement(int $announcementId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageEnrollments', $course);
+
+        $announcement = $this->resolveAnnouncementFor($course, $announcementId);
+
+        if ($announcement->published_at === null) {
+            $announcement->update(['published_at' => now()]);
+        }
+
+        session()->flash('academy_roster_status', 'Annonce publiée.');
+    }
+
+    /** Repasse une annonce publiée en brouillon (retire des inscrits), anti-IDOR. */
+    public function unpublishAnnouncement(int $announcementId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageEnrollments', $course);
+
+        $announcement = $this->resolveAnnouncementFor($course, $announcementId);
+
+        $announcement->update(['published_at' => null]);
+
+        session()->flash('academy_roster_status', 'Annonce repassée en brouillon.');
+    }
+
+    /** Supprime une annonce de CE cours (re-résolue, anti-IDOR). */
+    public function deleteAnnouncement(int $announcementId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageEnrollments', $course);
+
+        $announcement = $this->resolveAnnouncementFor($course, $announcementId);
+
+        $announcement->delete();
+
+        if ($this->editingAnnouncement === $announcementId) {
+            $this->resetAnnouncementForm();
+        }
+        $this->confirmingAnnouncementRemoval = null;
+        session()->flash('academy_roster_status', 'Annonce supprimée.');
+    }
+
+    /** Réinitialise le formulaire d'annonce (annule l'édition en cours). */
+    public function resetAnnouncementForm(): void
+    {
+        $this->reset('announcementTitle', 'announcementBody', 'editingAnnouncement');
+        $this->resetErrorBag(['announcementTitle', 'announcementBody']);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
     // Confirmations inline à 2 temps (jamais de popup native)
     // ─────────────────────────────────────────────────────────────────────────────
+
+    public function confirmAnnouncementRemoval(int $announcementId): void
+    {
+        $this->confirmingAnnouncementRemoval = $announcementId;
+    }
+
+    public function cancelAnnouncementRemoval(): void
+    {
+        $this->confirmingAnnouncementRemoval = null;
+    }
 
     public function confirmCohortRemoval(int $cohortId): void
     {
@@ -681,6 +835,18 @@ class CourseRoster extends Component
             ->get()
             ->sortBy(fn ($e) => $e->user?->name ?? '')
             ->values();
+    }
+
+    /** Annonces de CE cours (publiées d'abord, brouillons ensuite), avec l'auteur. */
+    #[Computed]
+    public function announcements()
+    {
+        return Announcement::where('course_id', $this->courseId)
+            ->with('author:id,name')
+            ->orderByRaw('published_at IS NULL')
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->get();
     }
 
     /** Membres de l'équipe (rôles) de CE cours, avec l'utilisateur. */

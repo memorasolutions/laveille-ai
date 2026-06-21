@@ -93,6 +93,39 @@ class Dashboard extends Component
     }
 
     /**
+     * Annonces de vos formations (D3) : les annonces PUBLIÉES des cours où
+     * l'utilisateur courant est inscrit ACTIF. Strictement scopé serveur :
+     *  - on calcule d'abord les course_id des inscriptions actives du user ;
+     *  - on ne renvoie QUE les annonces de ces cours ET publiées (scopePublished).
+     * Un étudiant ne voit JAMAIS un brouillon, ni l'annonce d'un cours où il n'est
+     * pas inscrit. Aucune donnée venue du navigateur n'intervient.
+     *
+     * @return Collection<int, \Modules\Academy\Models\Announcement>
+     */
+    #[Computed]
+    public function announcements(): Collection
+    {
+        $user = Auth::user();
+
+        $enrolledCourseIds = \Modules\Academy\Models\Enrollment::query()
+            ->where('user_id', $user->id)
+            ->where('status', 'active')
+            ->pluck('course_id');
+
+        if ($enrolledCourseIds->isEmpty()) {
+            return collect();
+        }
+
+        return \Modules\Academy\Models\Announcement::query()
+            ->whereIn('course_id', $enrolledCourseIds)
+            ->published()
+            ->with(['course:id,slug,title', 'author:id,name'])
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->get();
+    }
+
+    /**
      * Mes cours (gestion) : visible uniquement pour admin/formateur.
      * Requête SCOPÉE obligatoire (anti-fuite) :
      *  - admin (academy.manage)  → tous les cours ;

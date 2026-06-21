@@ -10,6 +10,94 @@
         </div>
     @endif
 
+    {{-- ───────────────────────── Annonces aux inscrits (D3) ───────────────────────── --}}
+    @can('manageEnrollments', $course)
+        <section aria-labelledby="roster-announcements"
+                 style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 22px 24px;">
+            <h2 id="roster-announcements" style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin: 0 0 6px; font-size: 1.25rem;">
+                Annonces aux inscrits
+            </h2>
+            <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 18px;">
+                Les annonces publiées s'affichent dans l'espace des personnes inscrites à ce cours. Mise en forme markdown acceptée (HTML brut retiré par sécurité).
+            </p>
+
+            {{-- Composer / éditer une annonce --}}
+            <form wire:submit="saveAnnouncement(false)" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label for="announcement-title" style="font-weight: 600; font-size: 0.85rem;">Titre</label>
+                    <input id="announcement-title" type="text" wire:model="announcementTitle" maxlength="160" autocomplete="off" placeholder="Ex. : nouvelle leçon disponible"
+                           style="width: 100%; padding: 9px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                    @error('announcementTitle') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label for="announcement-body" style="font-weight: 600; font-size: 0.85rem;">Message</label>
+                    <textarea id="announcement-body" wire:model="announcementBody" rows="4" maxlength="5000" placeholder="Votre message aux personnes inscrites…"
+                              style="width: 100%; padding: 9px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); font-family: inherit;"></textarea>
+                    @error('announcementBody') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <x-core::button type="submit" variant="secondary" size="sm">
+                        {{ $editingAnnouncement ? 'Enregistrer' : 'Enregistrer comme brouillon' }}
+                    </x-core::button>
+                    <x-core::button type="button" wire:click="saveAnnouncement(true)" variant="primary" size="sm">
+                        Publier maintenant
+                    </x-core::button>
+                    @if ($editingAnnouncement)
+                        <x-core::button type="button" wire:click="resetAnnouncementForm" variant="ghost" size="sm">Annuler l'édition</x-core::button>
+                    @endif
+                </div>
+            </form>
+
+            {{-- Liste des annonces existantes --}}
+            @if ($this->announcements->isNotEmpty())
+                <ul class="list-unstyled d-flex flex-column gap-3" style="margin: 0;">
+                    @foreach ($this->announcements as $announcement)
+                        <li wire:key="announcement-{{ $announcement->id }}"
+                            style="border: 1px solid #F3F4F6; border-radius: var(--sys-radius-md, 0.5rem); padding: 14px 16px;">
+                            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                                <div style="flex: 1 1 260px; min-width: 200px;">
+                                    <h3 style="font-family: var(--f-heading); font-size: 1rem; color: var(--sys-text-default, #1A1D23); margin: 0 0 4px;">
+                                        {{ $announcement->title }}
+                                    </h3>
+                                    @if ($announcement->published_at)
+                                        <span style="display: inline-block; font-size: 0.72rem; font-weight: 700; color: #166534; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 999px; padding: 2px 10px;">
+                                            Publiée le {{ $announcement->published_at->timezone('America/Toronto')->format('Y-m-d H\hi') }}
+                                        </span>
+                                    @else
+                                        <span style="display: inline-block; font-size: 0.72rem; font-weight: 700; color: #92400E; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 999px; padding: 2px 10px;">
+                                            Brouillon
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <x-core::button type="button" wire:click="editAnnouncement({{ $announcement->id }})" variant="ghost" size="sm">Modifier</x-core::button>
+                                    @if ($announcement->published_at)
+                                        <x-core::button type="button" wire:click="unpublishAnnouncement({{ $announcement->id }})" variant="ghost" size="sm">Repasser en brouillon</x-core::button>
+                                    @else
+                                        <x-core::button type="button" wire:click="publishAnnouncement({{ $announcement->id }})" variant="secondary" size="sm">Publier</x-core::button>
+                                    @endif
+                                    @if ($confirmingAnnouncementRemoval === $announcement->id)
+                                        <span style="font-size: 0.82rem; font-weight: 600;">Supprimer ?</span>
+                                        <x-core::button type="button" wire:click="deleteAnnouncement({{ $announcement->id }})" variant="danger" size="sm">Confirmer</x-core::button>
+                                        <x-core::button type="button" wire:click="cancelAnnouncementRemoval" variant="ghost" size="sm">Annuler</x-core::button>
+                                    @else
+                                        <x-core::button type="button" wire:click="confirmAnnouncementRemoval({{ $announcement->id }})" variant="ghost" size="sm"
+                                                        aria-label="Supprimer l'annonce « {{ $announcement->title }} »">Supprimer</x-core::button>
+                                    @endif
+                                </div>
+                            </div>
+                            <div style="font-size: 0.9rem; color: var(--sys-text-default, #1A1D23); margin-top: 8px;">
+                                {!! $announcement->renderedBody() !!}
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 0;">Aucune annonce pour l'instant.</p>
+            @endif
+        </section>
+    @endcan
+
     {{-- ───────────────────────── Inscriptions (roster) ───────────────────────── --}}
     @can('manageEnrollments', $course)
         <section aria-labelledby="roster-enrollments"

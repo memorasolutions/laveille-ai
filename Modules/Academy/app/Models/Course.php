@@ -118,6 +118,18 @@ class Course extends Model implements HasMedia
         return $this->hasMany(CourseRole::class);
     }
 
+    /**
+     * Annonces du cours (D3), les plus récemment publiées d'abord (puis création).
+     * Le tri met les brouillons - published_at null - après les publiées.
+     */
+    public function announcements(): HasMany
+    {
+        return $this->hasMany(Announcement::class)
+            ->orderByRaw('published_at IS NULL')
+            ->orderByDesc('published_at')
+            ->orderByDesc('id');
+    }
+
     public function cohorts(): HasMany
     {
         return $this->hasMany(Cohort::class);

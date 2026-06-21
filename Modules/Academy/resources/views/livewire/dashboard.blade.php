@@ -75,6 +75,38 @@
         @endif
     </section>
 
+    {{-- ───────────────────── Annonces de vos formations (D3) ───────────────────── --}}
+    @if($this->announcements->isNotEmpty())
+        <section aria-labelledby="academy-annonces" class="mb-5">
+            <h2 id="academy-annonces"
+                style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 16px;">
+                Annonces de vos formations
+            </h2>
+            <ul class="list-unstyled d-flex flex-column gap-3" style="margin: 0;">
+                @foreach($this->announcements as $announcement)
+                    <li wire:key="dash-announcement-{{ $announcement->id }}"
+                        style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 18px 20px;">
+                        <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2">
+                            <h3 style="font-family: var(--f-heading); font-size: 1.05rem; color: var(--sys-text-default, #1A1D23); margin: 0;">
+                                {{ $announcement->title }}
+                            </h3>
+                            <span style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280);">
+                                {{ $announcement->course?->title }}
+                            </span>
+                        </div>
+                        <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 10px;">
+                            Publiée le {{ $announcement->published_at->timezone('America/Toronto')->format('Y-m-d H\hi') }}
+                            @if($announcement->author?->name) · par {{ $announcement->author->name }} @endif
+                        </p>
+                        <div style="font-size: 0.92rem; color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
+                            {!! $announcement->renderedBody() !!}
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
+
     {{-- ───────────────────── Mes cours (formateur / admin) ───────────────────── --}}
     @if($this->canManageCourses)
         <section aria-labelledby="academy-mes-cours" class="mb-5">
