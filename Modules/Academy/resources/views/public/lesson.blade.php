@@ -120,6 +120,22 @@
 @endpush
 
 @section('content')
+{{-- Bandeau de prévisualisation : visible UNIQUEMENT à un gérant du cours (gate serveur
+     dans LessonController@show). a11y : role=status, contraste AA, cible de retour ≥24px. --}}
+@if ($isPreview ?? false)
+    <div role="status"
+         style="background: var(--sys-action-primary, #064E5A); color: #FFFFFF; padding: 12px 16px;">
+        <div class="container d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <span style="font-weight: 600; font-size: 0.95rem;">
+                👁️ Mode prévisualisation — vous voyez ce cours comme un étudiant.
+            </span>
+            <a href="{{ route('academy.courses.manage', $course->slug) }}"
+               style="display: inline-flex; align-items: center; min-height: 24px; padding: 5px 14px; border-radius: 999px; background: #FFFFFF; color: var(--sys-action-primary, #064E5A); font-weight: 700; font-size: 0.85rem; text-decoration: none;">
+                Quitter la prévisualisation
+            </a>
+        </div>
+    </div>
+@endif
 <section class="section-padding">
     <div class="container-fluid" style="max-width: 1280px;">
 
@@ -268,17 +284,25 @@
 
                         {{-- ── TYPE QUIZ ── --}}
                         @elseif($item->type === 'quiz')
-                            @php
-                                $qr         = session('academy.quiz_result');
-                                $quizResult = ($qr && ($qr['item_id'] ?? null) === $item->id) ? $qr : null;
-                            @endphp
-                            <x-academy::quiz-player
-                                :item="$item"
-                                :isEnrolled="$isEnrolled"
-                                :course="$course"
-                                :lesson="$lesson"
-                                :quizResult="$quizResult"
-                            />
+                            @if($isPreview ?? false)
+                                {{-- En prévisualisation : le quiz n'est PAS proposé (aucune progression
+                                     enregistrée pour le gérant). Note discrète à la place. --}}
+                                <p class="text-muted p-3 rounded" style="background: #F3F4F6; font-size: 0.9rem;">
+                                    Les actions (progression, quiz) sont désactivées en prévisualisation.
+                                </p>
+                            @else
+                                @php
+                                    $qr         = session('academy.quiz_result');
+                                    $quizResult = ($qr && ($qr['item_id'] ?? null) === $item->id) ? $qr : null;
+                                @endphp
+                                <x-academy::quiz-player
+                                    :item="$item"
+                                    :isEnrolled="$isEnrolled"
+                                    :course="$course"
+                                    :lesson="$lesson"
+                                    :quizResult="$quizResult"
+                                />
+                            @endif
 
                         {{-- ── TYPE DOC ── --}}
                         @elseif(in_array($item->type, ['doc', 'document'], true))
@@ -362,8 +386,9 @@
                             </div>
                         @endif
 
-                        {{-- M4 - Bouton « Marquer comme terminé » (video + doc uniquement, inscrit) --}}
-                        @if($isEnrolled && in_array($item->type, ['video', 'doc', 'document']))
+                        {{-- M4 - Bouton « Marquer comme terminé » (video + doc uniquement, inscrit).
+                             Masqué en prévisualisation : un gérant n'enregistre pas sa propre progression. --}}
+                        @if($isEnrolled && !($isPreview ?? false) && in_array($item->type, ['video', 'doc', 'document']))
                             @php
                                 $isItemCompleted = false;
                                 try {
@@ -389,13 +414,21 @@
                             @endif
                         @endif
 
+                        {{-- Note discrète : en prévisualisation, les actions de progression sont désactivées
+                             (video/doc). Le quiz affiche déjà sa propre note plus haut. --}}
+                        @if(($isPreview ?? false) && in_array($item->type, ['video', 'doc', 'document']))
+                            <p class="text-muted mt-3" style="font-size: 0.85rem;">
+                                Les actions (progression, quiz) sont désactivées en prévisualisation.
+                            </p>
+                        @endif
+
                     </div>
                 @empty
                     <p class="text-muted">Cette leçon ne contient pas encore de contenu.</p>
                 @endforelse
 
-                {{-- M6 - Certificat : affiché quand 100% complété --}}
-                @if(auth()->check() && $isEnrolled && ($userProgress?->percent ?? 0) >= 100)
+                {{-- M6 - Certificat : affiché quand 100% complété (jamais en prévisualisation) --}}
+                @if(auth()->check() && $isEnrolled && !($isPreview ?? false) && ($userProgress?->percent ?? 0) >= 100)
                     @php
                         $__certificate = null;
                         try {

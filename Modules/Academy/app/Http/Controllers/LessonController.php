@@ -28,8 +28,15 @@ class LessonController extends Controller
      */
     public function show(Request $request, Course $course, Lesson $lesson): \Illuminate\View\View
     {
-        // 1. Vérifier que le cours est publié et public
-        if ($course->status !== 'published' || $course->visibility !== 'public') {
+        // 1. Prévisualisation « en tant qu'étudiant » : réservée à un gérant de CE cours
+        //    (can('update') = admin OU owner/instructor/editor). Le query param ?preview=1
+        //    seul ne suffit JAMAIS : un non-gérant échoue le can('update') et retombe sur
+        //    le 404 public. On ne fait jamais confiance au seul paramètre du navigateur.
+        $isPreview = $request->boolean('preview')
+            && auth()->check()
+            && auth()->user()->can('update', $course);
+
+        if (! $isPreview && ($course->status !== 'published' || $course->visibility !== 'public')) {
             abort(404);
         }
 
@@ -57,6 +64,12 @@ class LessonController extends Controller
                 ->exists();
         }
 
+        // En prévisualisation, le gérant voit le contenu comme un étudiant inscrit
+        // (aucune inscription n'est créée : c'est purement un affichage).
+        if ($isPreview) {
+            $isEnrolled = true;
+        }
+
         // 6. Navigation préc/suiv
         $allLessons = $course->chapters->flatMap(fn ($ch) => $ch->lessons);
         $currentIndex = $allLessons->search(fn ($l) => $l->id === $lesson->id);
@@ -75,6 +88,7 @@ class LessonController extends Controller
             'prevLesson',
             'nextLesson',
             'currentChapter',
+            'isPreview',
         ));
     }
 }

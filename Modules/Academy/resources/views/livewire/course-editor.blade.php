@@ -65,10 +65,12 @@
             <h2 id="editor-meta" style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin: 0; font-size: 1.25rem;">
                 Métadonnées du cours
             </h2>
-            <span style="font-size: 0.72rem; font-weight: 600; padding: 3px 12px; border-radius: 999px;
-                         background: {{ $course->status === 'published' ? '#DCFCE7' : '#F1F5F9' }};
-                         color: {{ $course->status === 'published' ? '#166534' : '#475569' }};">
-                {{ $course->status === 'published' ? 'Publié' : 'Brouillon' }}
+            @php($isPublished = $course->status === 'published')
+            <span role="status"
+                  style="font-size: 0.78rem; font-weight: 700; padding: 4px 14px; border-radius: 999px;
+                         background: {{ $isPublished ? '#DCFCE7' : '#FEF3C7' }};
+                         color: {{ $isPublished ? '#166534' : '#92400E' }};">
+                <span aria-hidden="true">●</span> {{ $isPublished ? 'Publié' : 'Brouillon' }}
             </span>
         </div>
 
@@ -208,12 +210,35 @@
                     <x-core::button type="submit" variant="primary" size="sm">Enregistrer</x-core::button>
                 @endcan
 
+                {{-- Prévisualiser « en tant qu'étudiant » : ouvre la 1re leçon (si elle existe)
+                     sinon la fiche du cours, en mode preview, dans un NOUVEL onglet. La gate
+                     serveur (CourseController/LessonController) exige can('update') : l'URL
+                     ?preview=1 seule ne donne jamais accès à un cours brouillon. --}}
+                @can('update', $course)
+                    @php($previewUrl = $this->firstLessonId
+                        ? route('academy.lessons.show', ['course' => $course->slug, 'lesson' => $this->firstLessonId]) . '?preview=1'
+                        : route('academy.courses.show', $course->slug) . '?preview=1')
+                    <x-core::button :href="$previewUrl" target="_blank" rel="noopener" variant="ghost" size="sm">
+                        👁️ Prévisualiser en tant qu'étudiant
+                    </x-core::button>
+                @endcan
+
                 @can('publish', $course)
                     <x-core::button type="button" wire:click="togglePublish" variant="secondary" size="sm">
-                        {{ $course->status === 'published' ? 'Dépublier' : 'Publier' }}
+                        {{ $isPublished ? 'Dépublier le cours' : 'Publier le cours' }}
                     </x-core::button>
                 @endcan
             </div>
+
+            @can('publish', $course)
+                <p style="font-size: 0.74rem; color: var(--sys-text-muted, #6B7280); margin: 6px 0 0;">
+                    @if ($isPublished)
+                        Ce cours est publié et visible du public. Dépubliez-le pour le repasser en brouillon.
+                    @else
+                        Un cours en brouillon n'est pas visible du public. Publiez-le quand il est prêt.
+                    @endif
+                </p>
+            @endcan
         </form>
     </section>
 

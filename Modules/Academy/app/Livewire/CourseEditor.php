@@ -1095,6 +1095,25 @@ class CourseEditor extends Component
         ])->findOrFail($this->courseId);
     }
 
+    /**
+     * Id de la 1re leçon du cours (chapitres puis leçons triés par position),
+     * ou null si le cours n'a encore aucune leçon. Sert au bouton « Prévisualiser
+     * en tant qu'étudiant » : si une leçon existe, on ouvre le lecteur en preview ;
+     * sinon, on retombe sur la fiche du cours en preview (géré côté vue).
+     */
+    #[Computed]
+    public function firstLessonId(): ?int
+    {
+        foreach ($this->course->chapters as $chapter) {
+            $lesson = $chapter->lessons->first();
+            if ($lesson !== null) {
+                return (int) $lesson->id;
+            }
+        }
+
+        return null;
+    }
+
     private function fillMetadataFrom(Course $course): void
     {
         $this->title       = (string) $course->title;
