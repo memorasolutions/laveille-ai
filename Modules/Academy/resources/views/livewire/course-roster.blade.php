@@ -90,6 +90,131 @@
                 @endif
             </div>
 
+            {{-- ─────────── Cohortes / groupes d'apprenants ─────────── --}}
+            <div style="border-top: 1px dashed #E5E7EB; padding-top: 18px; margin-bottom: 22px;">
+                <h3 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin: 0 0 6px; font-size: 1.02rem;">
+                    Cohortes / groupes
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 12px;">
+                    Regroupez des inscrits en cohortes (ex. : un groupe, une session). Un membre doit être inscrit à ce cours. Supprimer une cohorte ne désinscrit personne.
+                </p>
+
+                {{-- Créer une cohorte --}}
+                <form wire:submit="createCohort"
+                      style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin-bottom: 18px;">
+                    <div style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 6px;">
+                        <label for="cohort-name" style="font-weight: 600; font-size: 0.85rem;">Nom de la nouvelle cohorte</label>
+                        <input id="cohort-name" type="text" wire:model="cohortName" autocomplete="off" placeholder="Groupe A — automne 2026"
+                               style="width: 100%; padding: 9px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                        @error('cohortName') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                    </div>
+                    <div><x-core::button type="submit" variant="primary" size="sm">Créer la cohorte</x-core::button></div>
+                </form>
+
+                {{-- Affecter un inscrit à une cohorte --}}
+                @if ($this->cohorts->isNotEmpty() && $this->activeEnrollees->isNotEmpty())
+                    <form wire:submit="assignToCohort"
+                          style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin-bottom: 18px;">
+                        <div style="flex: 1 1 220px; display: flex; flex-direction: column; gap: 6px;">
+                            <label for="assign-cohort" style="font-weight: 600; font-size: 0.85rem;">Cohorte</label>
+                            <select id="assign-cohort" wire:model="assignCohortId"
+                                    style="width: 100%; padding: 9px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); background: #FFFFFF;">
+                                <option value="">— Choisir —</option>
+                                @foreach ($this->cohorts as $cohort)
+                                    <option value="{{ $cohort->id }}">{{ $cohort->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('assignCohortId') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                        </div>
+                        <div style="flex: 1 1 220px; display: flex; flex-direction: column; gap: 6px;">
+                            <label for="assign-enrollee" style="font-weight: 600; font-size: 0.85rem;">Personne inscrite</label>
+                            <select id="assign-enrollee" wire:model="assignEnrollmentUserId"
+                                    style="width: 100%; padding: 9px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); background: #FFFFFF;">
+                                <option value="">— Choisir —</option>
+                                @foreach ($this->activeEnrollees as $enrollee)
+                                    <option value="{{ $enrollee->user_id }}">{{ $enrollee->user?->name ?? $enrollee->user?->email ?? '-' }}</option>
+                                @endforeach
+                            </select>
+                            @error('assignEnrollmentUserId') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                        </div>
+                        <div><x-core::button type="submit" variant="primary" size="sm">Affecter</x-core::button></div>
+                    </form>
+                @endif
+
+                {{-- Liste des cohortes + leurs membres --}}
+                @if ($this->cohorts->isNotEmpty())
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        @foreach ($this->cohorts as $cohort)
+                            <div wire:key="cohort-{{ $cohort->id }}"
+                                 style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 14px 16px;">
+                                <div class="d-flex flex-wrap align-items-center" style="gap: 10px; justify-content: space-between;">
+                                    @if ($renamingCohort === $cohort->id)
+                                        <form wire:submit="renameCohort" class="d-flex flex-wrap align-items-end" style="gap: 8px; flex: 1 1 280px;">
+                                            <div style="flex: 1 1 200px; display: flex; flex-direction: column; gap: 4px;">
+                                                <label for="rename-cohort-{{ $cohort->id }}" style="font-weight: 600; font-size: 0.82rem;">Nouveau nom</label>
+                                                <input id="rename-cohort-{{ $cohort->id }}" type="text" wire:model="renameCohortName" autocomplete="off"
+                                                       style="width: 100%; padding: 7px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                @error('renameCohortName') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
+                                            </div>
+                                            <x-core::button type="submit" variant="primary" size="sm">Enregistrer</x-core::button>
+                                            <x-core::button type="button" wire:click="cancelRenameCohort" variant="ghost" size="sm">Annuler</x-core::button>
+                                        </form>
+                                    @else
+                                        <strong style="font-size: 0.95rem;">{{ $cohort->name }}
+                                            <span style="font-weight: 400; color: var(--sys-text-muted, #6B7280); font-size: 0.82rem;">({{ $cohort->members->count() }} membre(s))</span>
+                                        </strong>
+                                        <div class="d-flex flex-wrap align-items-center" style="gap: 8px;">
+                                            @if ($confirmingCohortRemoval === $cohort->id)
+                                                <span style="font-size: 0.82rem; font-weight: 600;">Supprimer cette cohorte ?</span>
+                                                <x-core::button type="button" wire:click="deleteCohort({{ $cohort->id }})" variant="danger" size="sm">Confirmer</x-core::button>
+                                                <x-core::button type="button" wire:click="cancelCohortRemoval" variant="ghost" size="sm">Annuler</x-core::button>
+                                            @else
+                                                <x-core::button type="button" wire:click="startRenameCohort({{ $cohort->id }})" variant="ghost" size="sm">Renommer</x-core::button>
+                                                <x-core::button type="button" wire:click="confirmCohortRemoval({{ $cohort->id }})" variant="ghost" size="sm"
+                                                                aria-label="Supprimer la cohorte {{ $cohort->name }}">Supprimer</x-core::button>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+
+                                @if ($cohort->members->isNotEmpty())
+                                    <ul style="margin: 10px 0 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 4px;">
+                                        @foreach ($cohort->members as $member)
+                                            <li wire:key="cohort-{{ $cohort->id }}-member-{{ $member->id }}"
+                                                class="d-flex flex-wrap align-items-center" style="gap: 8px; font-size: 0.86rem;">
+                                                <span>{{ $member->name ?? $member->email }}</span>
+                                                <x-core::button type="button" wire:click="removeFromCohort({{ $cohort->id }}, {{ $member->id }})" variant="ghost" size="sm"
+                                                                aria-label="Retirer {{ $member->name ?? $member->email }} de la cohorte {{ $cohort->name }}">Retirer</x-core::button>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <p style="margin: 8px 0 0; font-size: 0.82rem; color: var(--sys-text-muted, #6B7280);">Aucun membre.</p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 0;">Aucune cohorte pour l'instant.</p>
+                @endif
+            </div>
+
+            {{-- Filtre des inscrits par cohorte --}}
+            @if ($this->cohorts->isNotEmpty())
+                <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; margin-bottom: 14px;">
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <label for="cohort-filter" style="font-weight: 600; font-size: 0.85rem;">Filtrer les inscrits par cohorte</label>
+                        <select id="cohort-filter" wire:model.live="cohortFilter"
+                                style="padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); background: #FFFFFF;">
+                            <option value="">Tous les inscrits</option>
+                            @foreach ($this->cohorts as $cohort)
+                                <option value="{{ $cohort->id }}">{{ $cohort->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            @endif
+
             {{-- Liste des inscrits --}}
             @if ($this->enrollments->isNotEmpty())
                 <div style="overflow-x: auto;">

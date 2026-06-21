@@ -114,6 +114,11 @@ class Course extends Model implements HasMedia
         return $this->hasMany(CourseRole::class);
     }
 
+    public function cohorts(): HasMany
+    {
+        return $this->hasMany(Cohort::class);
+    }
+
     public function certificatesIssued(): HasMany
     {
         return $this->hasMany(CertificateIssued::class);

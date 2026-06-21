@@ -34,6 +34,7 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Modules\Academy\Models\Cohort;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\CourseRole;
 use Modules\Academy\Models\Enrollment;
@@ -75,9 +76,25 @@ class CourseRoster extends Component
     /** Rapport du dernier import, rendu en role=status (null = aucun import). */
     public ?array $importReport = null;
 
+    // ── Cohortes / groupes d'apprenants (Phase C) ───────────────────────────────
+    /** Saisie : nom d'une nouvelle cohorte. */
+    public string $cohortName = '';
+
+    /** Cohorte en cours de renommage (id) + nouveau nom saisi. */
+    public ?int $renamingCohort = null;
+    public string $renameCohortName = '';
+
+    /** Cohorte sélectionnée pour affecter un inscrit + l'inscrit choisi. */
+    public ?int $assignCohortId = null;
+    public ?int $assignEnrollmentUserId = null;
+
+    /** Filtre d'affichage des inscrits par cohorte (null = « Tous »). */
+    public ?int $cohortFilter = null;
+
     // ── Confirmations inline à 2 temps (jamais confirm() natif) ──────────────────
     public ?int $confirmingEnrollmentRemoval = null;
     public ?int $confirmingRoleRemoval = null;
+    public ?int $confirmingCohortRemoval = null;
 
     /**
      * Entrée. Autorisation SERVEUR d'affichage : pour voir CET espace il faut au
@@ -120,6 +137,30 @@ class CourseRoster extends Component
     {
         return CourseRole::where('id', $roleId)
             ->where('course_id', $course->id)
+            ->firstOrFail();
+    }
+
+    /**
+     * Re-résout une Cohorte ET vérifie qu'elle appartient bien à CE cours (anti-IDOR).
+     * Une cohorte d'un autre cours → ModelNotFound, aucune écriture possible.
+     */
+    private function resolveCohortFor(Course $course, int $cohortId): Cohort
+    {
+        return Cohort::where('id', $cohortId)
+            ->where('course_id', $course->id)
+            ->firstOrFail();
+    }
+
+    /**
+     * Re-résout un inscrit ACTIF de CE cours par son user_id (anti-IDOR).
+     * Un utilisateur non inscrit (ou inscription annulée) → ModelNotFound :
+     * impossible d'affecter quelqu'un d'étranger au cours à une cohorte.
+     */
+    private function resolveActiveEnrolleeFor(Course $course, int $userId): Enrollment
+    {
+        return Enrollment::where('course_id', $course->id)
+            ->where('user_id', $userId)
+            ->where('status', 'active')
             ->firstOrFail();
     }
 
@@ -415,8 +456,152 @@ class CourseRoster extends Component
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
+    // COHORTES / GROUPES D'APPRENANTS (Phase C) - gâté manageEnrollments
+    // ─────────────────────────────────────────────────────────────────────────────
+    //
+    // Une cohorte appartient à UN cours (course_id). Chaque mutation RE-RÉSOUT le
+    // cours, ré-autorise 'manageEnrollments', puis RE-RÉSOUT la cohorte/le membre
+    // scopés à CE cours (anti-IDOR) : jamais de confiance à un id du navigateur.
+
+    /** Crée une cohorte (nom requis) rattachée à CE cours. */
+    public function createCohort(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageEnrollments', $course);
+
+        $data = $this->validate([
+            'cohortName' => 'required|string|max:120',
+        ]);
+
+        Cohort::create([
+            'course_id' => $course->id,
+            'name'      => trim($data['cohortName']),
+        ]);
+
+        $this->reset('cohortName');
+        session()->flash('academy_roster_status', 'Cohorte créée.');
+    }
+
+    /** Passe une cohorte en mode renommage (pré-remplit le champ). */
+    public function startRenameCohort(int $cohortId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageEnrollments', $course);
+
+        $cohort = $this->resolveCohortFor($course, $cohortId);
+
+        $this->renamingCohort   = $cohort->id;
+        $this->renameCohortName = $cohort->name;
+        $this->resetErrorBag('renameCohortName');
+    }
+
+    public function cancelRenameCohort(): void
+    {
+        $this->renamingCohort = null;
+        $this->reset('renameCohortName');
+        $this->resetErrorBag('renameCohortName');
+    }
+
+    /** Renomme une cohorte de CE cours (re-résolue, anti-IDOR). */
+    public function renameCohort(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageEnrollments', $course);
+
+        if ($this->renamingCohort === null) {
+            return;
+        }
+
+        $cohort = $this->resolveCohortFor($course, (int) $this->renamingCohort);
+
+        $data = $this->validate([
+            'renameCohortName' => 'required|string|max:120',
+        ]);
+
+        $cohort->update(['name' => trim($data['renameCohortName'])]);
+
+        $this->renamingCohort = null;
+        $this->reset('renameCohortName');
+        session()->flash('academy_roster_status', 'Cohorte renommée.');
+    }
+
+    /**
+     * Supprime une cohorte de CE cours (re-résolue, anti-IDOR). Les liens pivot
+     * partent en cascade ; les INSCRIPTIONS au cours ne sont jamais touchées.
+     */
+    public function deleteCohort(int $cohortId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageEnrollments', $course);
+
+        $cohort = $this->resolveCohortFor($course, $cohortId);
+
+        DB::transaction(function () use ($cohort): void {
+            $cohort->members()->detach();
+            $cohort->delete();
+        });
+
+        if ($this->cohortFilter === $cohortId) {
+            $this->cohortFilter = null;
+        }
+        $this->confirmingCohortRemoval = null;
+        session()->flash('academy_roster_status', 'Cohorte supprimée.');
+    }
+
+    /**
+     * Affecte un inscrit ACTIF de CE cours à une cohorte de CE cours.
+     * La cohorte ET l'inscription sont re-résolues et scopées au cours (anti-IDOR) :
+     * impossible d'affecter une cohorte étrangère ou un user non inscrit.
+     */
+    public function assignToCohort(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageEnrollments', $course);
+
+        $data = $this->validate([
+            'assignCohortId'         => 'required|integer',
+            'assignEnrollmentUserId' => 'required|integer',
+        ]);
+
+        $cohort = $this->resolveCohortFor($course, (int) $data['assignCohortId']);
+        $enrollment = $this->resolveActiveEnrolleeFor($course, (int) $data['assignEnrollmentUserId']);
+
+        // syncWithoutDetaching = idempotent (pas de doublon, contrainte unique respectée).
+        $cohort->members()->syncWithoutDetaching([$enrollment->user_id]);
+
+        $this->reset('assignCohortId', 'assignEnrollmentUserId');
+        session()->flash('academy_roster_status', 'Personne affectée à la cohorte.');
+    }
+
+    /**
+     * Retire un membre d'une cohorte de CE cours (re-résolus, anti-IDOR).
+     * Ne touche jamais l'inscription au cours, seulement le lien à la cohorte.
+     */
+    public function removeFromCohort(int $cohortId, int $userId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageEnrollments', $course);
+
+        $cohort = $this->resolveCohortFor($course, $cohortId);
+
+        $cohort->members()->detach($userId);
+
+        session()->flash('academy_roster_status', 'Personne retirée de la cohorte.');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
     // Confirmations inline à 2 temps (jamais de popup native)
     // ─────────────────────────────────────────────────────────────────────────────
+
+    public function confirmCohortRemoval(int $cohortId): void
+    {
+        $this->confirmingCohortRemoval = $cohortId;
+    }
+
+    public function cancelCohortRemoval(): void
+    {
+        $this->confirmingCohortRemoval = null;
+    }
 
     public function confirmEnrollmentRemoval(int $enrollmentId): void
     {
@@ -449,15 +634,53 @@ class CourseRoster extends Component
         return Course::findOrFail($this->courseId);
     }
 
-    /** Inscriptions de CE cours, avec l'utilisateur, les plus récentes d'abord. */
+    /**
+     * Inscriptions de CE cours, avec l'utilisateur, les plus récentes d'abord.
+     * Si un filtre cohorte est actif (et valide pour CE cours), ne renvoie que les
+     * inscrits membres de cette cohorte.
+     */
     #[Computed]
     public function enrollments()
     {
-        return Enrollment::where('course_id', $this->courseId)
+        $query = Enrollment::where('course_id', $this->courseId)
             ->with('user')
             ->orderByDesc('enrolled_at')
-            ->orderByDesc('id')
+            ->orderByDesc('id');
+
+        if ($this->cohortFilter !== null) {
+            // La cohorte du filtre est re-validée contre CE cours (anti-IDOR d'affichage).
+            $cohort = Cohort::where('id', $this->cohortFilter)
+                ->where('course_id', $this->courseId)
+                ->first();
+
+            $memberIds = $cohort ? $cohort->members()->pluck('users.id')->all() : [];
+            $query->whereIn('user_id', $memberIds);
+        }
+
+        return $query->get();
+    }
+
+    /** Cohortes de CE cours, avec leurs membres, alphabétiques. */
+    #[Computed]
+    public function cohorts()
+    {
+        return Cohort::where('course_id', $this->courseId)
+            ->with('members')
+            ->orderBy('name')
+            ->orderBy('id')
             ->get();
+    }
+
+    /** Inscrits ACTIFS de CE cours (pour le sélecteur d'affectation), triés par nom. */
+    #[Computed]
+    public function activeEnrollees()
+    {
+        return Enrollment::where('course_id', $this->courseId)
+            ->where('status', 'active')
+            ->with('user')
+            ->get()
+            ->sortBy(fn ($e) => $e->user?->name ?? '')
+            ->values();
     }
 
     /** Membres de l'équipe (rôles) de CE cours, avec l'utilisateur. */
