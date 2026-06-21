@@ -41,6 +41,8 @@
             'url' => route('dictionary.show', $term->slug),
             'heroImage' => dictionary_hero_image_url($term->hero_image, false),
             'heroImageWebp' => dictionary_hero_image_webp_url($term->hero_image),
+            // Standard « visionneur de BD » : true si public/bd/{slug}/manifest.json existe.
+            'hasBd' => \Modules\Dictionary\Support\ComicLibrary::hasComic($term->slug),
         ];
     })->values();
 
@@ -171,6 +173,24 @@
     .border-acronym { border-left-color: #F59E0B; }
     .border-ai_term { border-left-color: var(--c-primary); }
     .border-explainer { border-left-color: #8E44AD; }
+
+    /* Indicateur « BD disponible » (standard visionneur de BD) */
+    .gl-bd-flag {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        z-index: 3;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);
+        border: 1px solid color-mix(in srgb, var(--c-primary) 30%, transparent);
+        box-shadow: 0 2px 8px rgba(11, 114, 133, .18);
+        pointer-events: none;
+    }
 
     .gl-card-top {
         display: flex;
@@ -618,7 +638,13 @@
         <div class="row row-flex">
             <template x-for="term in visibleTerms" :key="term.id">
                 <div class="col-lg-4 col-md-6 col-xs-12">
-                    <article class="gl-card" :class="'border-' + term.type">
+                    <article class="gl-card" :class="'border-' + term.type" style="position: relative;">
+                        {{-- Indicateur BD (standard « visionneur de BD ») : picto Octopus discret en coin --}}
+                        <template x-if="term.hasBd">
+                            <span class="gl-bd-flag" aria-label="{{ __('Bande dessinée disponible') }}" title="{{ __('Bande dessinée disponible') }}">
+                                <x-tools::octopus variant="happy" :size="26" :animate="false" />
+                            </span>
+                        </template>
                         {{-- Hero image or icon --}}
                         <template x-if="term.heroImage">
                             <a :href="term.url" style="display: block; margin: -16px -18px 12px; overflow: hidden; border-radius: 8px 8px 0 0;">

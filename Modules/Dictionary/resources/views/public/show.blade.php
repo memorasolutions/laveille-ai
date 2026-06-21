@@ -344,6 +344,14 @@
                         </div>
                     @endif
 
+                    {{-- Bande dessinée pédagogique (standard « visionneur de BD ») — apparaît si public/bd/{slug}/manifest.json existe --}}
+                    @php
+                        $comic = \Modules\Dictionary\Support\ComicLibrary::forSlug($term->getTranslation('slug', 'fr_CA', false) ?: (string) $term->slug);
+                    @endphp
+                    @if($comic)
+                        <x-dictionary::comic-viewer :comic="$comic" />
+                    @endif
+
                     @php
                         // 2026-05-26 #300 : sur les pages glossaire, limiter à 1 occurrence par terme + 25 liens max (vs 10/120 par défaut sur blog) pour éviter saturation visuelle (audit a montré 30+ liens vers même cible).
                         $_glossSkip = ['skip_slug' => (string) $term->slug, 'max_occ' => 1, 'max_links' => 25];
