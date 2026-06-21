@@ -30,7 +30,13 @@
             .academy-richtext code { font-family: ui-monospace, Menlo, monospace; font-size: 0.9em; background: #F3F4F6; padding: 0.1em 0.35em; border-radius: 4px; }
         </style>
     @endpush
-    @push('scripts')
+@endonce
+
+{{-- Scripts via @assets (Livewire v4) : injectés tôt (avant le boot d'Alpine par Livewire),
+     ce qui garantit que le listener alpine:init est enregistré À TEMPS — contrairement à
+     @push('scripts') rendu en bas (alpine:init déjà émis → plugin sort + Alpine.data jamais
+     enregistrés). @assets est dédupliqué automatiquement par Livewire (une seule injection). --}}
+@assets
         <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/sort@3.x.x/dist/cdn.min.js"></script>
         <script>
             // Lit l'ordre courant des éléments triables d'un conteneur (par leur data-sort-id)
@@ -95,8 +101,7 @@
                 });
             });
         </script>
-    @endpush
-@endonce
+@endassets
 
 <div style="display: flex; flex-direction: column; gap: 28px;">
 
@@ -149,21 +154,21 @@
         <form wire:submit="save" style="display: flex; flex-direction: column; gap: 16px;">
             <div>
                 <label for="meta-title" style="display: block; font-weight: 600; margin-bottom: 6px;">Titre</label>
-                <input id="meta-title" type="text" wire:model.blur="title"
+                <input id="meta-title" type="text" wire:model.live.blur="title"
                        style="width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                 @error('title') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
             </div>
 
             <div>
                 <label for="meta-subtitle" style="display: block; font-weight: 600; margin-bottom: 6px;">Sous-titre</label>
-                <input id="meta-subtitle" type="text" wire:model.blur="subtitle"
+                <input id="meta-subtitle" type="text" wire:model.live.blur="subtitle"
                        style="width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                 @error('subtitle') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
             </div>
 
             <div>
                 <label for="meta-summary" style="display: block; font-weight: 600; margin-bottom: 6px;">Résumé</label>
-                <textarea id="meta-summary" wire:model.blur="summary" rows="3"
+                <textarea id="meta-summary" wire:model.live.blur="summary" rows="3"
                           style="width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);"></textarea>
                 @error('summary') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
             </div>
@@ -223,7 +228,7 @@
             <div class="d-flex flex-wrap gap-3">
                 <div style="flex: 1 1 200px;">
                     <label for="meta-level" style="display: block; font-weight: 600; margin-bottom: 6px;">Niveau</label>
-                    <select id="meta-level" wire:model.blur="level"
+                    <select id="meta-level" wire:model.live.blur="level"
                             style="width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                         <option value="intro">Débutant</option>
                         <option value="inter">Intermédiaire</option>
@@ -234,7 +239,7 @@
 
                 <div style="flex: 1 1 200px;">
                     <label for="meta-language" style="display: block; font-weight: 600; margin-bottom: 6px;">Langue</label>
-                    <input id="meta-language" type="text" wire:model.blur="language" maxlength="10"
+                    <input id="meta-language" type="text" wire:model.live.blur="language" maxlength="10"
                            style="width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                     @error('language') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
                 </div>
@@ -243,7 +248,7 @@
             <div class="d-flex flex-wrap gap-3">
                 <div style="flex: 1 1 200px;">
                     <label for="meta-visibility" style="display: block; font-weight: 600; margin-bottom: 6px;">Visibilité</label>
-                    <select id="meta-visibility" wire:model.blur="visibility"
+                    <select id="meta-visibility" wire:model.live.blur="visibility"
                             style="width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                         <option value="public">Publique</option>
                         <option value="unlisted">Non répertoriée</option>
@@ -267,7 +272,7 @@
             @if (in_array($access_type, ['paid_one_time', 'paid_subscription'], true))
                 <div style="flex: 1 1 200px;">
                     <label for="meta-price" style="display: block; font-weight: 600; margin-bottom: 6px;">Prix (en cents)</label>
-                    <input id="meta-price" type="number" min="0" wire:model.blur="price_cents"
+                    <input id="meta-price" type="number" min="0" wire:model.live.blur="price_cents"
                            style="width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                     @error('price_cents') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
                 </div>

@@ -237,8 +237,8 @@
                 {{-- Items de la leçon --}}
                 @forelse($lesson->lessonItems as $item)
                     @php
-                        $isPreview = (bool) ($item->payload['preview'] ?? false);
-                        $hasAccess = $canWatch || $isPreview;
+                        $itemPreview = (bool) ($item->payload['preview'] ?? false);
+                        $hasAccess = $canWatch || $itemPreview;
                     @endphp
 
                     <div class="mb-5" id="item-{{ $item->id }}">
