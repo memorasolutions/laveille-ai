@@ -294,6 +294,38 @@
                 </div>
             @endcan
 
+            {{-- Prérequis du cours (C4) : gâté manageStructure. L'apprenant devra avoir
+                 complété ces cours (100 %) avant de pouvoir s'inscrire / y accéder.
+                 Le cours courant est exclu de la liste (pas d'auto-référence possible). --}}
+            @can('manageStructure', $course)
+                <div style="flex: 1 1 100%; border-top: 1px solid #F1F5F9; padding-top: 12px;">
+                    <p style="font-weight: 600; margin: 0 0 4px;">Prérequis (cours à compléter d'abord)</p>
+                    <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 8px;">
+                        Les apprenants devront avoir terminé les cours cochés avant de pouvoir s'inscrire à celui-ci.
+                    </p>
+                    @if ($this->availableCourses->isEmpty())
+                        <p style="font-size: 0.82rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+                            Aucun autre cours disponible comme prérequis pour le moment.
+                        </p>
+                    @else
+                        <div style="display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto;">
+                            @foreach ($this->availableCourses as $candidate)
+                                <label class="d-flex align-items-center gap-2"
+                                       style="font-size: 0.88rem; cursor: pointer;">
+                                    <input type="checkbox"
+                                           wire:model.live="prerequisiteIds"
+                                           wire:change="savePrerequisites"
+                                           value="{{ $candidate->id }}"
+                                           style="width: 18px; height: 18px;">
+                                    {{ $candidate->title }}
+                                </label>
+                            @endforeach
+                        </div>
+                    @endif
+                    @error('prerequisiteIds') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                </div>
+            @endcan
+
             <p style="font-size: 0.74rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">
                 Les modifications sont enregistrées automatiquement dès que vous quittez un champ.
             </p>
@@ -554,13 +586,19 @@
                                 @can('manageStructure', $course)
                                     <details style="margin-top: 8px;">
                                         <summary style="cursor: pointer; font-size: 0.8rem; color: var(--sys-action-primary, #064E5A); font-weight: 600;">Modifier cette leçon</summary>
-                                        <form wire:submit="updateLesson({{ $lesson->id }}, $event.target.title.value, $event.target.summary.value, $event.target.estimated_minutes.value)"
+                                        <form wire:submit="updateLesson({{ $lesson->id }}, $event.target.title.value, $event.target.summary.value, $event.target.estimated_minutes.value, $event.target.drip_days.value)"
                                               style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
                                             <input type="text" name="title" value="{{ $lesson->title }}" aria-label="Titre de la leçon"
                                                    style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                                             <input type="text" name="summary" value="{{ $lesson->summary }}" aria-label="Résumé de la leçon"
                                                    style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                                             <input type="number" min="1" name="estimated_minutes" value="{{ $lesson->estimated_minutes }}" aria-label="Durée estimée en minutes"
+                                                   style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                            {{-- C4 : libération progressive. 0 ou vide = disponible dès l'inscription. --}}
+                                            <label for="drip-{{ $lesson->id }}" style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 2px 0 -4px;">
+                                                Disponible N jours après l'inscription (0 ou vide = immédiat)
+                                            </label>
+                                            <input id="drip-{{ $lesson->id }}" type="number" min="0" max="365" name="drip_days" value="{{ $lesson->drip_days }}" aria-label="Jours avant disponibilité de la leçon"
                                                    style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                                             <div><x-core::button type="submit" variant="secondary" size="sm">Enregistrer la leçon</x-core::button></div>
                                         </form>

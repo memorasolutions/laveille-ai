@@ -71,6 +71,15 @@ class CourseEditor extends Component
     /** Modèle réutilisable (C3) : ce cours peut être proposé dans la section « Modèles ». */
     public bool $is_template = false;
 
+    /**
+     * Prérequis du cours (C4) : ids des AUTRES cours à compléter avant celui-ci.
+     * Piloté par des cases à cocher dans l'éditeur ; toute écriture re-valide
+     * l'appartenance des ids à l'ensemble des cours visibles (anti-IDOR).
+     *
+     * @var array<int, int>
+     */
+    public array $prerequisiteIds = [];
+
     // ── Saisie d'un nouveau chapitre ─────────────────────────────────────────────
     public string $newChapterTitle = '';
     public ?string $newChapterSummary = null;
@@ -122,6 +131,8 @@ class CourseEditor extends Component
 
         $this->courseId = $course->id;
         $this->fillMetadataFrom($course);
+        $this->prerequisiteIds = $course->prerequisites()->pluck('courses.id')->map(fn ($id) => (int) $id)->values()->all();
+        // Note: pluck('courses.id') qualifie la colonne du modèle lié (table courses).
     }
 
     /**
@@ -255,6 +266,67 @@ class CourseEditor extends Component
             'academy_editor_status',
             $newStatus === 'published' ? 'Cours publié.' : 'Cours repassé en brouillon.'
         );
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // PRÉREQUIS DE COURS (C4) - gâtés manageStructure
+    //
+    // SÉCURITÉ : resolveCourse() → authorize('manageStructure') → on RE-RÉSOUT côté
+    // serveur l'ensemble des cours candidats (visibles par l'utilisateur, hors cours
+    // courant) et on n'écrit QUE l'intersection avec les ids reçus (anti-IDOR : un id
+    // forgé d'un cours non visible / du cours lui-même est ignoré). Auto-référence et
+    // doublons impossibles par construction.
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Cours candidats aux prérequis : ceux que l'utilisateur peut VOIR (la même
+     * requête scoped que le tableau de bord), EXCLUANT le cours courant. Sert à la
+     * fois à l'affichage (cases à cocher) et de liste blanche serveur (anti-IDOR).
+     *
+     * @return \Illuminate\Support\Collection<int, Course>
+     */
+    #[Computed]
+    public function availableCourses(): \Illuminate\Support\Collection
+    {
+        $user = Auth::user();
+
+        $query = Course::query()
+            ->where('id', '!=', $this->courseId)
+            ->orderBy('title');
+
+        // Admin (academy.manage) voit tout ; sinon, uniquement les cours dont il est
+        // gérant (course_roles), via la même logique d'ownership que la Policy.
+        if (! ($user?->can('academy.manage'))) {
+            $query->whereHas('courseRoles', fn ($q) => $q->where('user_id', $user?->id));
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * Synchronise les prérequis du cours avec la sélection de cases à cocher.
+     * Seuls les ids appartenant à availableCourses() (cours visibles, hors courant)
+     * sont conservés : un id forgé (cours non visible ou auto-référence) est écarté.
+     */
+    public function savePrerequisites(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        // Liste blanche serveur : ids des cours réellement visibles par l'utilisateur.
+        $allowed = $this->availableCourses->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        // Intersection : on n'attache QUE des prérequis légitimes (anti-IDOR + anti
+        // auto-référence, le cours courant étant déjà exclu de availableCourses()).
+        $clean = array_values(array_unique(array_intersect(
+            array_map(static fn ($id) => (int) $id, $this->prerequisiteIds),
+            $allowed
+        )));
+
+        $course->prerequisites()->sync($clean);
+
+        $this->prerequisiteIds = $clean;
+        $this->flashSaved('Prérequis du cours enregistrés.');
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -462,28 +534,54 @@ class CourseEditor extends Component
         $this->flashSaved('Leçon ajoutée.');
     }
 
-    public function updateLesson(int $lessonId, string $title, ?string $summary = null, ?int $estimatedMinutes = null): void
-    {
+    public function updateLesson(
+        int $lessonId,
+        string $title,
+        ?string $summary = null,
+        $estimatedMinutes = null,
+        $dripDays = null
+    ): void {
         $course = $this->resolveCourse();
         $this->authorize('manageStructure', $course);
 
         // Anti-IDOR : la leçon doit appartenir à un chapitre de CE cours.
         $lesson = $this->resolveLessonFor($course, $lessonId);
 
+        // Les champs numériques arrivent du DOM en CHAÎNE (value d'un <input>). Un champ
+        // vidé ('') doit valoir null, jamais provoquer un TypeError (strict_types) sur un
+        // paramètre typé ?int. On normalise donc ici avant validation : '' / null → null,
+        // sinon entier.
+        $estimatedMinutes = ($estimatedMinutes === '' || $estimatedMinutes === null) ? null : (int) $estimatedMinutes;
+        $dripDays = ($dripDays === '' || $dripDays === null) ? null : (int) $dripDays;
+
         $data = validator(
-            ['title' => $title, 'summary' => $summary, 'estimated_minutes' => $estimatedMinutes],
+            [
+                'title'             => $title,
+                'summary'           => $summary,
+                'estimated_minutes' => $estimatedMinutes,
+                'drip_days'         => $dripDays,
+            ],
             [
                 'title'             => 'required|string|max:255',
                 'summary'           => 'nullable|string|max:1000',
                 'estimated_minutes' => 'nullable|integer|min:1',
+                // C4 : 0 ou vide = disponible immédiatement (null). Max 365 jours.
+                'drip_days'         => 'nullable|integer|min:0|max:365',
             ]
         )->validate();
+
+        // 0 (« immédiat ») est normalisé en null pour rester cohérent avec « pas de drip ».
+        $drip = $data['drip_days'] ?? null;
+        if ($drip !== null && (int) $drip === 0) {
+            $drip = null;
+        }
 
         // Slug : ne PAS casser un slug existant (le slug suit le cycle de vie de la leçon).
         $lesson->update([
             'title'             => $data['title'],
             'summary'           => $data['summary'] ?? null,
             'estimated_minutes' => $data['estimated_minutes'] ?? null,
+            'drip_days'         => $drip,
         ]);
 
         $this->flashSaved('Leçon mise à jour.');

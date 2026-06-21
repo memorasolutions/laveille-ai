@@ -14,6 +14,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Modules\Academy\Exceptions\CourseNotFreeException;
+use Modules\Academy\Exceptions\PrerequisitesNotMetException;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Services\EnrollmentService;
 
@@ -25,7 +26,7 @@ class EnrollmentController extends Controller
 
         try {
             app(EnrollmentService::class)->enrollFree($user, $course);
-        } catch (CourseNotFreeException $e) {
+        } catch (CourseNotFreeException|PrerequisitesNotMetException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
 

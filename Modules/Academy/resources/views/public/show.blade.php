@@ -209,7 +209,29 @@
                             @endif
 
                             {{-- CTA --}}
-                            @if(!auth()->check())
+                            @php($__prereqUnmet = ($prerequisitesUnmet ?? collect()))
+                            @if(auth()->check() && $__prereqUnmet->isNotEmpty())
+                                {{-- C4 : prérequis non satisfaits → on REMPLACE le bouton d'inscription
+                                     par la liste des cours à compléter d'abord (liens vers ces cours).
+                                     Gating SERVEUR : l'inscription est de toute façon refusée par
+                                     EnrollmentController, ce panneau n'est qu'informatif. --}}
+                                <div class="mb-3 p-3" role="status"
+                                     style="background: #FFF7ED; border: 1px solid #FED7AA; border-radius: 10px;">
+                                    <p class="mb-2 fw-bold" style="color: #9A3412; font-size: 0.95rem;">
+                                        🔒 Prérequis à compléter d'abord
+                                    </p>
+                                    <ul class="mb-0" style="padding-left: 1.1rem; font-size: 0.9rem;">
+                                        @foreach($__prereqUnmet as $__prereq)
+                                            <li>
+                                                <a href="{{ route('academy.courses.show', $__prereq->slug) }}"
+                                                   style="color: #9A3412; font-weight: 600;">
+                                                    {{ $__prereq->title }}
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @elseif(!auth()->check())
                                 <div class="mb-3">
                                     <x-core::button :href="Route::has('login') ? route('login') : '#'" variant="primary" :block="true">
                                         Se connecter pour s'inscrire

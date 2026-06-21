@@ -13,6 +13,7 @@ namespace Modules\Academy\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Scout\Searchable as ScoutSearchable;
@@ -130,6 +131,62 @@ class Course extends Model implements HasMedia
     public function progresses(): HasMany
     {
         return $this->hasMany(Progress::class);
+    }
+
+    /**
+     * Cours prérequis (C4) : les AUTRES cours qu'un apprenant doit avoir complétés
+     * (100 %) avant de pouvoir s'inscrire / accéder à CE cours. Relation many-to-many
+     * réflexive via la table de liaison academy_course_prerequisites
+     * (course_id → prerequisite_course_id).
+     */
+    public function prerequisites(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            self::class,
+            'academy_course_prerequisites',
+            'course_id',
+            'prerequisite_course_id'
+        )->withTimestamps();
+    }
+
+    /**
+     * Liste des cours prérequis NON ENCORE complétés (à 100 %) par l'utilisateur.
+     * Réutilise le mécanisme de progression existant (Progress.percent) : un cours
+     * est « complété » si l'utilisateur a une ligne progresses à percent = 100.
+     *
+     * Calcul SERVEUR : ne se base que sur les données persistées, jamais sur le
+     * client. Retourne une collection (vide = tous les prérequis sont satisfaits).
+     *
+     * @return \Illuminate\Support\Collection<int, \Modules\Academy\Models\Course>
+     */
+    public function prerequisitesUnmetFor(User $user): \Illuminate\Support\Collection
+    {
+        $prerequisites = $this->prerequisites()->get();
+
+        if ($prerequisites->isEmpty()) {
+            return collect();
+        }
+
+        // IDs des cours complétés (100 %) par cet utilisateur, parmi les prérequis.
+        $completedCourseIds = Progress::query()
+            ->where('user_id', $user->id)
+            ->whereIn('course_id', $prerequisites->pluck('id'))
+            ->where('percent', '>=', 100)
+            ->pluck('course_id')
+            ->all();
+
+        return $prerequisites->reject(
+            fn (Course $prereq) => in_array($prereq->id, $completedCourseIds, true)
+        )->values();
+    }
+
+    /**
+     * Vrai si l'utilisateur a satisfait TOUS les prérequis de ce cours (ou s'il n'y
+     * en a aucun). Garde serveur réutilisée par l'inscription et l'accès au contenu.
+     */
+    public function prerequisitesMetFor(User $user): bool
+    {
+        return $this->prerequisitesUnmetFor($user)->isEmpty();
     }
 
     public function createdBy(): BelongsTo

@@ -52,12 +52,22 @@ class CompletionController extends Controller
         }
 
         // Inscription active obligatoire
-        $isEnrolled = Enrollment::where('user_id', Auth::id())
+        $enrollment = Enrollment::where('user_id', Auth::id())
             ->where('course_id', $course->id)
             ->where('status', 'active')
-            ->exists();
+            ->first();
 
-        if (! $isEnrolled) {
+        if ($enrollment === null) {
+            abort(403);
+        }
+
+        // C4 - Garde SERVEUR : on ne peut pas valider une leçon dont les prérequis du
+        // cours ne sont pas satisfaits, ni une leçon encore verrouillée par le drip
+        // (enrolled_at + drip_days dans le futur). Empêche le contournement par POST.
+        if (! $course->prerequisitesMetFor(Auth::user())) {
+            abort(403);
+        }
+        if ($lesson->isDripLockedFor($enrollment->enrolled_at)) {
             abort(403);
         }
 

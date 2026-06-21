@@ -204,11 +204,22 @@
                                 default => '📄',
                             };
                         @endphp
+                        @php
+                            // C4 : cadenas drip dans la sidebar (calcul SERVEUR transmis par le
+                            // contrôleur via $dripLockedLessonIds : id => date de disponibilité).
+                            $chLessonDripDate = ($dripLockedLessonIds ?? [])[$chLesson->id] ?? null;
+                        @endphp
                         <a href="{{ route('academy.lessons.show', [$course, $chLesson]) }}"
                            class="sidebar-lesson-link {{ $isCurrentLesson ? 'is-active' : '' }}"
                            @if($isCurrentLesson) aria-current="page" @endif>
-                            <span class="sidebar-lesson-icon">{{ $icon }}</span>
+                            <span class="sidebar-lesson-icon">{{ $chLessonDripDate ? '🔒' : $icon }}</span>
                             <span>{{ $chLesson->title }}</span>
+                            @if($chLessonDripDate)
+                                <span class="text-muted ms-auto" style="font-size: 0.72rem; white-space: nowrap;"
+                                      title="Disponible le {{ $chLessonDripDate->locale('fr')->isoFormat('D MMM YYYY') }}">
+                                    {{ $chLessonDripDate->locale('fr')->isoFormat('D MMM') }}
+                                </span>
+                            @endif
                         </a>
                     @endforeach
                 @endforeach
@@ -234,7 +245,52 @@
                     <p class="mb-4" style="color: var(--sys-text-muted, #6B7280); font-size: 1rem; line-height: 1.6;">{{ $lesson->summary }}</p>
                 @endif
 
+                {{-- C4 : prérequis non satisfaits → bandeau + liens, AUCUN contenu rendu
+                     (le contrôleur a coupé l'accès : $isEnrolled=false → gating $hasAccess). --}}
+                @if(!($isPreview ?? false) && ($prerequisitesUnmet ?? collect())->isNotEmpty())
+                    <div class="mb-4 p-4" role="status"
+                         style="background: #FFF7ED; border: 1px solid #FED7AA; border-radius: 12px;">
+                        <p class="mb-2 fw-bold" style="color: #9A3412;">🔒 Prérequis à compléter d'abord</p>
+                        <ul class="mb-0" style="padding-left: 1.1rem; font-size: 0.92rem;">
+                            @foreach($prerequisitesUnmet as $__prereq)
+                                <li>
+                                    <a href="{{ route('academy.courses.show', $__prereq->slug) }}"
+                                       style="color: #9A3412; font-weight: 600;">{{ $__prereq->title }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                {{-- C4 : leçon verrouillée par la libération progressive (drip). Le contenu
+                     n'est PAS injecté dans le DOM (le contrôleur a mis $isEnrolled=false) ;
+                     on affiche uniquement la date de disponibilité. Calcul 100 % serveur. --}}
+                @if(!($isPreview ?? false) && ($isDripLocked ?? false) && ($dripAvailableAt ?? null))
+                    @php
+                        $__dripDaysLeft = max(0, (int) ceil(now()->floatDiffInDays($dripAvailableAt, false)));
+                    @endphp
+                    <div class="academy-gated-panel mb-4" role="status">
+                        <div class="gated-icon">🔒</div>
+                        <div class="gated-title">Cette leçon n'est pas encore disponible</div>
+                        <p class="gated-sub mb-0">
+                            Disponible le {{ $dripAvailableAt->locale('fr')->isoFormat('D MMMM YYYY') }}
+                            @if($__dripDaysLeft > 0)
+                                (dans {{ $__dripDaysLeft }} jour{{ $__dripDaysLeft > 1 ? 's' : '' }})
+                            @endif.
+                        </p>
+                    </div>
+                @endif
+
+                {{-- C4 : si la leçon est verrouillée (prérequis non satisfaits OU drip),
+                     on n'affiche PAS la liste des items (le bandeau ci-dessus explique
+                     pourquoi). Le contenu reste de toute façon hors du DOM via le gating
+                     $hasAccess ; ce garde-fou évite seulement des panneaux trompeurs. --}}
+                @php
+                    $__lessonLocked = !($isPreview ?? false)
+                        && ((($prerequisitesUnmet ?? collect())->isNotEmpty()) || ($isDripLocked ?? false));
+                @endphp
                 {{-- Items de la leçon --}}
+                @if(!$__lessonLocked)
                 @forelse($lesson->lessonItems as $item)
                     @php
                         $itemPreview = (bool) ($item->payload['preview'] ?? false);
@@ -471,6 +527,7 @@
                 @empty
                     <p class="text-muted">Cette leçon ne contient pas encore de contenu.</p>
                 @endforelse
+                @endif {{-- /!$__lessonLocked --}}
 
                 {{-- M6 - Certificat : affiché quand 100% complété (jamais en prévisualisation) --}}
                 @if(auth()->check() && $isEnrolled && !($isPreview ?? false) && ($userProgress?->percent ?? 0) >= 100)

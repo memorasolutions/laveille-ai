@@ -12,6 +12,7 @@ namespace Modules\Academy\Services;
 
 use App\Models\User;
 use Modules\Academy\Exceptions\CourseNotFreeException;
+use Modules\Academy\Exceptions\PrerequisitesNotMetException;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Enrollment;
 
@@ -21,6 +22,14 @@ class EnrollmentService
     {
         if ($course->access_type !== 'free') {
             throw new CourseNotFreeException("Le cours [{$course->slug}] n'est pas gratuit.");
+        }
+
+        // C4 - Garde prérequis (SERVEUR) : on bloque l'inscription tant que tous les
+        // cours prérequis ne sont pas complétés à 100 % par cet utilisateur.
+        if (! $course->prerequisitesMetFor($user)) {
+            throw new PrerequisitesNotMetException(
+                'Vous devez d\'abord compléter les cours prérequis avant de vous inscrire.'
+            );
         }
 
         $enrollment = Enrollment::firstOrCreate(

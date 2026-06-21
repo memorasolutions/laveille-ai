@@ -57,17 +57,45 @@ class LessonController extends Controller
 
         // 5. Vérifier l'accès : inscrit actif OU cours gratuit (accès contrôlé par item)
         $isEnrolled = false;
+        $enrollment = null;
         if (auth()->check()) {
-            $isEnrolled = Enrollment::where('user_id', auth()->id())
+            $enrollment = Enrollment::where('user_id', auth()->id())
                 ->where('course_id', $course->id)
                 ->where('status', 'active')
-                ->exists();
+                ->first();
+            $isEnrolled = $enrollment !== null;
         }
 
         // En prévisualisation, le gérant voit le contenu comme un étudiant inscrit
         // (aucune inscription n'est créée : c'est purement un affichage).
         if ($isPreview) {
             $isEnrolled = true;
+        }
+
+        // 5b. C4 - Garde PRÉREQUIS (SERVEUR). Si l'utilisateur n'a pas complété tous
+        //     les prérequis, on coupe l'accès comme un non-inscrit : le contenu
+        //     verrouillé n'est JAMAIS injecté dans le DOM (gating $hasAccess existant).
+        //     Jamais imposé en prévisualisation (le gérant voit tout).
+        $prerequisitesUnmet = collect();
+        if (! $isPreview && auth()->check()) {
+            $prerequisitesUnmet = $course->prerequisitesUnmetFor(auth()->user());
+            if ($prerequisitesUnmet->isNotEmpty()) {
+                $isEnrolled = false;
+            }
+        }
+
+        // 5c. C4 - Garde DRIP (SERVEUR). La leçon courante est-elle encore verrouillée
+        //     par la libération progressive (enrolled_at + drip_days dans le futur) ?
+        //     Calcul serveur ; jamais imposé en preview ni à un gérant. Si verrouillée,
+        //     on coupe l'accès au contenu (gating $hasAccess) + on expose la date.
+        $isDripLocked    = false;
+        $dripAvailableAt = null;
+        if (! $isPreview && $isEnrolled && $enrollment !== null) {
+            if ($lesson->isDripLockedFor($enrollment->enrolled_at)) {
+                $isDripLocked    = true;
+                $dripAvailableAt = $lesson->dripAvailableAt($enrollment->enrolled_at);
+                $isEnrolled      = false; // coupe l'accès au contenu de CETTE leçon
+            }
         }
 
         // 6. Navigation préc/suiv
@@ -81,6 +109,18 @@ class LessonController extends Controller
             fn ($ch) => $ch->lessons->contains('id', $lesson->id)
         );
 
+        // 7b. C4 - Map des dates de disponibilité (drip) par leçon, pour le cadenas
+        //     de la sidebar. Calcul SERVEUR à partir de enrolled_at. Vide si non inscrit
+        //     ou en preview (le gérant ne voit aucun cadenas drip).
+        $dripLockedLessonIds = [];
+        if (! $isPreview && $enrollment !== null) {
+            foreach ($allLessons as $navLesson) {
+                if ($navLesson->isDripLockedFor($enrollment->enrolled_at)) {
+                    $dripLockedLessonIds[$navLesson->id] = $navLesson->dripAvailableAt($enrollment->enrolled_at);
+                }
+            }
+        }
+
         return view('academy::public.lesson', compact(
             'course',
             'lesson',
@@ -89,6 +129,10 @@ class LessonController extends Controller
             'nextLesson',
             'currentChapter',
             'isPreview',
+            'prerequisitesUnmet',
+            'isDripLocked',
+            'dripAvailableAt',
+            'dripLockedLessonIds',
         ));
     }
 }

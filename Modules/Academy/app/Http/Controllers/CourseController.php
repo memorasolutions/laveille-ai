@@ -35,6 +35,7 @@ class CourseController extends Controller
             'chapters'         => fn ($q) => $q->orderBy('position'),
             'chapters.lessons' => fn ($q) => $q->orderBy('position'),
             'courseRoles',
+            'prerequisites',
         ]);
 
         $isEnrolled = false;
@@ -57,6 +58,21 @@ class CourseController extends Controller
 
         $isFree = $course->access_type === 'free';
 
-        return view('academy::public.show', compact('course', 'isEnrolled', 'isFree', 'enrollment', 'isPreview'));
+        // C4 - Prérequis NON satisfaits (collection). Calcul SERVEUR. En preview, on
+        // n'impose aucun prérequis (le gérant voit tout). Le panneau « Prérequis à
+        // compléter d'abord » s'affiche à la place du bouton d'inscription.
+        $prerequisitesUnmet = collect();
+        if (! $isPreview && auth()->check()) {
+            $prerequisitesUnmet = $course->prerequisitesUnmetFor(auth()->user());
+        }
+
+        return view('academy::public.show', compact(
+            'course',
+            'isEnrolled',
+            'isFree',
+            'enrollment',
+            'isPreview',
+            'prerequisitesUnmet'
+        ));
     }
 }
