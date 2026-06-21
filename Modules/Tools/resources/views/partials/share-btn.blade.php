@@ -1,5 +1,6 @@
 <!-- Partiel de bouton de partage avec Alpine.js, Bootstrap inline, SVG Lucide et gestion clipboard/share API -->
 @php $shareData = $tool->getShareData(); @endphp
+<div style="display:inline-flex; align-items:center; gap:.5rem; vertical-align:middle;">
 <div style="position:relative; display:inline-block;" x-data="{
     feedback: null,
     busy: false,
@@ -73,4 +74,9 @@
         x-bind:style="'position:fixed; bottom:20px; right:20px; z-index:9999; padding:12px 16px; border-radius:8px; color:#ffffff; font-size:0.9rem; font-weight:500; box-shadow:0 4px 12px rgba(0,0,0,0.2); background-color:' + (feedback === 'error' ? '#991b1b' : '#065f46')">
         <span x-text="feedback === 'shared' ? 'Partage' : feedback === 'copied' ? 'Copie dans le presse-papier' : 'Erreur de partage'"></span>
     </div>
+</div>
+
+@if(auth()->check() && auth()->user()->isSuperAdmin())
+    <x-core::admin-copy-menu :items="$tool->adminShareContents()" label="Admin" />
+@endif
 </div>
