@@ -27,9 +27,16 @@ use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Modules\Academy\Models\Course;
+use Modules\Academy\Services\CourseDuplicator;
 
 class Dashboard extends Component
 {
+    /**
+     * Id du cours dont la duplication est en attente de confirmation (inline à 2
+     * temps, jamais de popup native). null = aucune confirmation en cours.
+     */
+    public ?int $confirmingDuplicationId = null;
+
     /**
      * Sécurité : la route exige déjà le middleware `auth`. On ne fait PAS
      * $this->authorize('viewAny', ...) ici car tout utilisateur connecté a le
@@ -123,6 +130,71 @@ class Dashboard extends Component
 
                 return $course;
             });
+    }
+
+    /**
+     * Modèles réutilisables (is_template = true) VISIBLES par l'utilisateur, pour la
+     * section « Modèles ». Requête SCOPÉE (même logique anti-fuite que managedCourses) :
+     *  - admin (academy.manage)  → tous les modèles ;
+     *  - formateur               → uniquement ses modèles (course_roles).
+     * Un duplicateur n'utilise que des modèles qu'il a déjà le droit de gérer.
+     *
+     * @return Collection<int, Course>
+     */
+    #[Computed]
+    public function managedTemplates(): Collection
+    {
+        $user = Auth::user();
+
+        if (! $user->can('viewAny', Course::class)) {
+            return collect();
+        }
+
+        $query = Course::query()->where('is_template', true);
+
+        if (! $user->can('academy.manage')) {
+            $query->whereHas('courseRoles', fn ($q) => $q->where('user_id', $user->id));
+        }
+
+        return $query->orderByDesc('updated_at')->get();
+    }
+
+    /**
+     * Duplique un cours (action « Dupliquer » ou « Utiliser ce modèle »).
+     *
+     * SÉCURITÉ (OWASP A01) : l'id vient du navigateur → on NE lui fait jamais
+     * confiance. On RE-RÉSOUT le cours source côté serveur, on VÉRIFIE que l'utilisateur
+     * a le droit de le voir/gérer (authorize('update') = admin OU rôle de cours) ET
+     * qu'il peut créer un cours (authorize('create')). Le nouvel owner est TOUJOURS
+     * l'utilisateur connecté, jamais une valeur venue du client.
+     */
+    public function duplicate(int $courseId, CourseDuplicator $duplicator)
+    {
+        $user   = Auth::user();
+        $source = Course::findOrFail($courseId); // re-résolution serveur (jamais le client)
+
+        // Peut-il gérer CE cours source ? (admin OU owner/instructor/editor du cours)
+        $this->authorize('update', $source);
+        // Peut-il créer un cours ? (admin OU formateur)
+        $this->authorize('create', Course::class);
+
+        $copy = $duplicator->duplicate($source, $user);
+
+        $this->confirmingDuplicationId = null;
+        session()->flash('academy_dashboard_status', 'Cours dupliqué : « '.$copy->title.' ».');
+
+        return redirect()->route('academy.courses.manage', $copy->slug);
+    }
+
+    /** Demande de confirmation inline de duplication (à 2 temps, jamais confirm() natif). */
+    public function confirmDuplication(int $courseId): void
+    {
+        $this->confirmingDuplicationId = $courseId;
+    }
+
+    public function cancelDuplication(): void
+    {
+        $this->confirmingDuplicationId = null;
     }
 
     /** L'utilisateur courant est-il administrateur de l'Académie ? */

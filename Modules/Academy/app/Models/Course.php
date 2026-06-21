@@ -38,6 +38,7 @@ use Spatie\MediaLibrary\HasMedia;
  * @property string      $currency
  * @property string|null $stripe_price_id
  * @property string      $status
+ * @property bool        $is_template
  * @property \Illuminate\Support\Carbon|null $published_at
  * @property array|null  $seo_jsonld
  * @property array|null  $faq_dictionary_ids
@@ -81,6 +82,7 @@ class Course extends Model implements HasMedia
         'currency',
         'stripe_price_id',
         'status',
+        'is_template',
         'published_at',
         'seo_jsonld',
         'faq_dictionary_ids',
@@ -95,6 +97,7 @@ class Course extends Model implements HasMedia
         'faq_dictionary_ids' => 'array',
         'duration_minutes'   => 'integer',
         'price_cents'        => 'integer',
+        'is_template'        => 'boolean',
     ];
 
     // Relations

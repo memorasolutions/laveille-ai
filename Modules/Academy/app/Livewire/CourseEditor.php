@@ -68,6 +68,9 @@ class CourseEditor extends Component
     public string $access_type = 'free';
     public ?int $price_cents = null;
 
+    /** Modèle réutilisable (C3) : ce cours peut être proposé dans la section « Modèles ». */
+    public bool $is_template = false;
+
     // ── Saisie d'un nouveau chapitre ─────────────────────────────────────────────
     public string $newChapterTitle = '';
     public ?string $newChapterSummary = null;
@@ -106,7 +109,7 @@ class CourseEditor extends Component
     /** Liste blanche des métadonnées du cours en autosave (wire:model.blur → updated()). */
     private const METADATA_FIELDS = [
         'title', 'subtitle', 'summary', 'level',
-        'language', 'visibility', 'access_type', 'price_cents',
+        'language', 'visibility', 'access_type', 'price_cents', 'is_template',
     ];
 
     /**
@@ -207,6 +210,7 @@ class CourseEditor extends Component
             'visibility'  => ['required', Rule::in(['public', 'unlisted', 'private'])],
             'access_type' => ['required', Rule::in(['free', 'paid_one_time', 'paid_subscription'])],
             'price_cents' => 'nullable|integer|min:0',
+            'is_template' => 'boolean',
         ]);
 
         // Prix obligatoire pour un cours payant (règle reprise de l'admin).
@@ -1135,6 +1139,7 @@ class CourseEditor extends Component
         $this->visibility  = (string) ($course->visibility ?? 'public');
         $this->access_type = (string) ($course->access_type ?? 'free');
         $this->price_cents = $course->price_cents;
+        $this->is_template = (bool) $course->is_template;
     }
 
     public function render()

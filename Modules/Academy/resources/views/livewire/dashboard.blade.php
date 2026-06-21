@@ -1,5 +1,11 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div>
+    @if(session('academy_dashboard_status'))
+        <div role="status" aria-live="polite"
+             style="border: 1px solid #BBF7D0; background: #F0FDF4; color: #166534; border-radius: var(--sys-radius-md, 0.75rem); padding: 12px 16px; margin-bottom: 18px; font-size: 0.9rem;">
+            {{ session('academy_dashboard_status') }}
+        </div>
+    @endif
     {{-- ───────────────────────── Mes formations (tous rôles) ───────────────────────── --}}
     <section aria-labelledby="academy-mes-formations" class="mb-5">
         <h2 id="academy-mes-formations"
@@ -105,12 +111,33 @@
                                     </p>
                                 </div>
 
-                                <div class="d-flex align-items-center gap-2">
+                                <div class="d-flex flex-wrap align-items-center gap-2">
                                     <x-core::button
                                         :href="route('academy.courses.manage', $course->slug)"
                                         variant="primary" size="sm">
                                         Gérer
                                     </x-core::button>
+
+                                    @if($confirmingDuplicationId === $course->id)
+                                        <span style="font-size: 0.82rem; color: var(--sys-text-muted, #6B7280);">Dupliquer ce cours ?</span>
+                                        <x-core::button
+                                            type="button" variant="primary" size="sm"
+                                            wire:click="duplicate({{ $course->id }})"
+                                            wire:loading.attr="disabled" wire:target="duplicate">
+                                            Oui, dupliquer
+                                        </x-core::button>
+                                        <x-core::button
+                                            type="button" variant="ghost" size="sm"
+                                            wire:click="cancelDuplication">
+                                            Annuler
+                                        </x-core::button>
+                                    @else
+                                        <x-core::button
+                                            type="button" variant="secondary" size="sm"
+                                            wire:click="confirmDuplication({{ $course->id }})">
+                                            Dupliquer
+                                        </x-core::button>
+                                    @endif
                                 </div>
                             </div>
                         </li>
@@ -124,6 +151,56 @@
                 </div>
             @endif
         </section>
+
+        {{-- ───────────────────── Modèles réutilisables (C3) ───────────────────── --}}
+        @if($this->managedTemplates->isNotEmpty())
+            <section aria-labelledby="academy-modeles" class="mb-5">
+                <h2 id="academy-modeles"
+                    style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 6px;">
+                    Modèles
+                </h2>
+                <p style="font-size: 0.9rem; color: var(--sys-text-muted, #6B7280); margin-bottom: 16px;">
+                    Partez d'un modèle réutilisable : « Utiliser ce modèle » crée une copie modifiable en brouillon.
+                </p>
+
+                <ul class="list-unstyled d-flex flex-column gap-3" style="margin: 0;">
+                    @foreach($this->managedTemplates as $template)
+                        <li style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 18px 20px;">
+                            <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                                <div style="flex: 1 1 280px; min-width: 220px;">
+                                    <h3 style="font-family: var(--f-heading); font-size: 1.1rem; color: var(--sys-text-default, #1A1D23); margin: 0;">
+                                        {{ $template->title }}
+                                    </h3>
+                                </div>
+
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    @if($confirmingDuplicationId === $template->id)
+                                        <span style="font-size: 0.82rem; color: var(--sys-text-muted, #6B7280);">Créer une copie ?</span>
+                                        <x-core::button
+                                            type="button" variant="primary" size="sm"
+                                            wire:click="duplicate({{ $template->id }})"
+                                            wire:loading.attr="disabled" wire:target="duplicate">
+                                            Oui, créer
+                                        </x-core::button>
+                                        <x-core::button
+                                            type="button" variant="ghost" size="sm"
+                                            wire:click="cancelDuplication">
+                                            Annuler
+                                        </x-core::button>
+                                    @else
+                                        <x-core::button
+                                            type="button" variant="primary" size="sm"
+                                            wire:click="confirmDuplication({{ $template->id }})">
+                                            Utiliser ce modèle
+                                        </x-core::button>
+                                    @endif
+                                </div>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
     @endif
 
     {{-- ───────────────────── Vue admin (academy.manage) ───────────────────── --}}

@@ -278,6 +278,22 @@
                 </div>
             @endif
 
+            {{-- Modèle réutilisable (C3) : gâté update. Une fois coché, le cours apparaît
+                 dans la section « Modèles » du tableau de bord et peut servir de base à
+                 une duplication (« Utiliser ce modèle »). --}}
+            @can('update', $course)
+                <div style="flex: 1 1 100%;">
+                    <label for="meta-template" class="d-flex align-items-center gap-2" style="font-weight: 600; cursor: pointer;">
+                        <input id="meta-template" type="checkbox" wire:model.live="is_template" style="width: 18px; height: 18px;">
+                        Utiliser ce cours comme modèle réutilisable
+                    </label>
+                    <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">
+                        Les formateurs pourront créer une copie de ce cours d'un seul clic depuis leur espace.
+                    </p>
+                    @error('is_template') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                </div>
+            @endcan
+
             <p style="font-size: 0.74rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">
                 Les modifications sont enregistrées automatiquement dès que vous quittez un champ.
             </p>
