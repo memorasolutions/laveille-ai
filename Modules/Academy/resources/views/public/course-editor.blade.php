@@ -9,6 +9,7 @@
 @endsection
 
 @section('content')
+<x-academy::nav />
 <section class="wpo-blog-single-section section-padding">
     <div class="container">
         <div class="row justify-content-center">

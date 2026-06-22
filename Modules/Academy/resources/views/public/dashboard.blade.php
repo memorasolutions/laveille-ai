@@ -9,13 +9,14 @@
 @endsection
 
 @section('content')
+<x-academy::nav />
 <section class="wpo-blog-single-section section-padding">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-9">
                 <div style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
 
-                    <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 12px;">Mon espace</h1>
+                    <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 12px;">Mon espace Académie</h1>
                     <p style="margin-bottom: 28px; color: var(--sys-text-muted, #6B7280);">
                         Retrouvez ici vos formations, votre progression et, si vous en gérez, vos cours.
                     </p>

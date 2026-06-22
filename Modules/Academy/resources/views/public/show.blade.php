@@ -67,6 +67,7 @@
 @endpush
 
 @section('content')
+<x-academy::nav />
 {{-- Bandeau de prévisualisation : visible UNIQUEMENT à un gérant du cours (gate serveur
      dans CourseController@show). a11y : role=status, contraste AA, cible de retour ≥24px. --}}
 @if ($isPreview ?? false)
