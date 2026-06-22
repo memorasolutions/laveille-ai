@@ -341,7 +341,7 @@
     <script src="/js/ga4-events.js" defer></script>
 
     {{-- Floating share bar (sidebar desktop + bottom bar mobile) — masqué sur pages protégées --}}
-    @if(!request()->is('user/*', 'dashboard*', 'login*', 'register*', 'magic-link*', 'admin*', 'privacy-policy*', 'terms-of-use*', 'cookie-policy*', 'rights-request*', 'boutique/panier*', 'boutique/paiement*', 'boutique/commander*', 'boutique/confirmation*', 'boutique/suivi*', 'boutique/mes-commandes*'))
+    @if(!request()->is('user/*', 'dashboard*', 'login*', 'register*', 'magic-link*', 'admin*', 'academie', 'academie/*', 'privacy-policy*', 'terms-of-use*', 'cookie-policy*', 'rights-request*', 'boutique/panier*', 'boutique/paiement*', 'boutique/commander*', 'boutique/confirmation*', 'boutique/suivi*', 'boutique/mes-commandes*'))
     @php
         $shareUrl = urlencode(request()->url());
         $shareTitle = urlencode(config('app.name') . ' - ' . ($__env->yieldContent('title') ?: ''));
