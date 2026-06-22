@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property array       $payload
  * @property string|null $explanation
  * @property string|null $difficulty
+ * @property int         $points
  * @property bool        $is_active
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -47,6 +48,7 @@ class Question extends Model
         'payload',
         'explanation',
         'difficulty',
+        'points',
         'is_active',
     ];
 
@@ -54,6 +56,7 @@ class Question extends Model
         'category_id' => 'integer',
         'owner_id'    => 'integer',
         'payload'     => 'array',
+        'points'      => 'integer',
         'is_active'   => 'boolean',
     ];
 

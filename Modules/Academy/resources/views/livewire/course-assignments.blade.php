@@ -236,7 +236,7 @@
                                         <th scope="col" style="padding: 8px 10px; white-space: nowrap;">{{ $a->title }} <span style="color: var(--sys-text-muted, #6B7280);">/ {{ $a->max_points }}</span></th>
                                     @endforeach
                                     @if ($gb['quizTotal'] > 0)
-                                        <th scope="col" style="padding: 8px 10px; white-space: nowrap;">Quiz</th>
+                                        <th scope="col" style="padding: 8px 10px; white-space: nowrap;">Quiz <span style="color: var(--sys-text-muted, #6B7280);">/ 100</span></th>
                                     @endif
                                 </tr>
                             </thead>
@@ -254,7 +254,7 @@
                                             </td>
                                         @endforeach
                                         @if ($gb['quizTotal'] > 0)
-                                            <td style="padding: 8px 10px;">{{ $student['quizScore'] }}</td>
+                                            <td style="padding: 8px 10px;">{{ $student['quizScore'] }}%</td>
                                         @endif
                                     </tr>
                                 @endforeach

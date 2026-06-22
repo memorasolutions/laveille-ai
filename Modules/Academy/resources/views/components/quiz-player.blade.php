@@ -55,10 +55,13 @@
     {{-- ── Panneau résultat (après soumission) ── --}}
     @if($quizResult !== null)
         @php
-            $passed  = (bool) ($quizResult['passed'] ?? false);
-            $percent = (int)  ($quizResult['percent'] ?? 0);
-            $correct = (int)  ($quizResult['correct'] ?? 0);
-            $total   = (int)  ($quizResult['total'] ?? 0);
+            $passed         = (bool) ($quizResult['passed'] ?? false);
+            $percent        = (int)  ($quizResult['percent'] ?? 0);
+            $correct        = (int)  ($quizResult['correct'] ?? 0);
+            $total          = (int)  ($quizResult['total'] ?? 0);
+            // V1-c : points pondérés (défaut = nb correct/total si absent, rétrocompat).
+            $pointsEarned   = (int)  ($quizResult['points_earned']   ?? $correct);
+            $pointsPossible = (int)  ($quizResult['points_possible'] ?? $total);
         @endphp
         <div class="p-4 rounded mb-4" style="
             background: {{ $passed ? '#DCFCE7' : '#FEF9C3' }};
@@ -71,9 +74,16 @@
                 <h5 style="color: #92400E; font-weight: 700;">⚠️ Score : {{ $percent }}% — Non réussi</h5>
                 <p class="mb-1">Score requis : <strong>{{ $item->payload['passing_score'] ?? 60 }}%</strong></p>
             @endif
-            <p class="mb-3 text-muted" style="font-size: 0.9rem;">
+            <p class="mb-1 text-muted" style="font-size: 0.9rem;">
                 {{ $correct }} / {{ $total }} bonnes réponses
             </p>
+            @if($pointsPossible > 0)
+                <p class="mb-3 text-muted" style="font-size: 0.9rem;">
+                    <strong>{{ $pointsEarned }}</strong> / <strong>{{ $pointsPossible }}</strong> points
+                </p>
+            @else
+                <span class="mb-3 d-block"></span>
+            @endif
             @if($passed)
                 <a href="{{ route('academy.lessons.show', [$course, $lesson]) }}"
                    class="btn ct-btn ct-btn-primary">

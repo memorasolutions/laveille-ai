@@ -164,11 +164,14 @@ class QuizController extends Controller
         // (toujours appelée si réussi) ; la table d'historique démarre vide
         // (rétrocompat des Completion existantes).
         DB::transaction(function () use ($user, $item, $scoreResult, $passed, $answers, $questions, $startedAt): void {
+            // V1-c : l'historique conserve le PERCENT pondéré (champ déterminant pour
+            // la méthode de notation). max_score reste le NB de questions ; on ne
+            // change PAS la sémantique des colonnes existantes (rétrocompat V1-b).
             QuizAttempt::create([
                 'user_id'            => $user->id,
                 'lesson_item_id'     => $item->id,
                 'course_id'          => $this->resolveCourseId($item),
-                'score'              => $scoreResult['score'],
+                'score'              => $scoreResult['correct'],
                 'max_score'          => $scoreResult['total'],
                 'percent'            => $scoreResult['percent'],
                 'passed'             => $passed,
@@ -179,17 +182,24 @@ class QuizController extends Controller
             ]);
 
             if ($passed) {
-                CompletionService::markComplete($user, $item, $scoreResult['score']);
+                // SECURITY/RÉTROCOMPAT : Completion.score = NB de bonnes réponses
+                // (= 'correct'), JAMAIS les points pondérés. Le badge « sans faute »
+                // (BadgeService::hasPerfectQuiz) compare score === nb de questions :
+                // il doit rester correct quel que soit le barème en points.
+                CompletionService::markComplete($user, $item, $scoreResult['correct']);
             }
         });
 
         // Flasher le résultat (item_id inclus pour affichage ciblé en vue)
         $request->session()->flash('academy.quiz_result', [
-            'item_id' => $item->id,
-            'passed'  => $passed,
-            'percent' => $scoreResult['percent'],
-            'correct' => $scoreResult['correct'],
-            'total'   => $scoreResult['total'],
+            'item_id'         => $item->id,
+            'passed'          => $passed,
+            'percent'         => $scoreResult['percent'],
+            'correct'         => $scoreResult['correct'],
+            'total'           => $scoreResult['total'],
+            // V1-c : points pondérés pour l'affichage « X / Y points ».
+            'points_earned'   => $scoreResult['points_earned'],
+            'points_possible' => $scoreResult['points_possible'],
         ]);
 
         return redirect()

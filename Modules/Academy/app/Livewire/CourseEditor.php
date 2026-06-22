@@ -808,6 +808,8 @@ class CourseEditor extends Component
             'qt_bank_key'       => $extra['qt_bank_key']      ?? null,
             'passing_score'     => $extra['passing_score']    ?? null,
             'attempts_allowed'  => $extra['attempts_allowed'] ?? null,
+            // V1-c : méthode de notation sur tentatives (highest/average/first/last).
+            'grading_method'    => $extra['grading_method']   ?? null,
             // QB2 : lien optionnel vers une catégorie de MA banque + nb à tirer.
             'bank_category_id'  => $extra['bank_category_id'] ?? null,
             'bank_draw_count'   => $extra['bank_draw_count']  ?? null,
@@ -1113,6 +1115,8 @@ class CourseEditor extends Component
             'qt_bank_key'       => 'nullable|string|max:120',
             'passing_score'     => 'nullable|integer|min:0|max:100',
             'attempts_allowed'  => 'nullable|integer|min:1|max:99',
+            // V1-c : méthode de notation (liste blanche stricte ; vide = défaut au build).
+            'grading_method'    => ['nullable', Rule::in(\Modules\Academy\Services\QuizGradeService::METHODS)],
             // QB2 : catégorie de banque (validée comme MIENNE au build) + nb à tirer (1..50).
             'bank_category_id'  => 'nullable|integer',
             'bank_draw_count'   => 'nullable|integer|min:1|max:50',
@@ -1194,6 +1198,16 @@ class CourseEditor extends Component
         $attempts = $input['attempts_allowed'] ?? null;
         if ($attempts !== null && $attempts !== '') {
             $payload['attempts_allowed'] = max(1, (int) $attempts);
+        }
+
+        // V1-c : méthode de notation sur tentatives. Liste blanche stricte ; toute
+        // valeur absente/inconnue retombe sur le défaut Moodle 'highest' (jamais en
+        // dur dans le payload si vide → QuizGradeService::methodFor applique le défaut).
+        $method = $input['grading_method'] ?? null;
+        if (is_string($method)
+            && in_array($method, \Modules\Academy\Services\QuizGradeService::METHODS, true)
+        ) {
+            $payload['grading_method'] = $method;
         }
 
         // QB2 : si une catégorie de banque VALIDE (m'appartenant) est choisie, on

@@ -726,7 +726,7 @@
                                                             @php($videoUrlValue = $item->payload['player_url'] ?? ($item->payload['embed'] ?? ''))
                                                             @php($posterValue = $item->payload['poster'] ?? '')
                                                             @php($durationMin = isset($item->payload['duration_seconds']) ? (int) ceil(((int) $item->payload['duration_seconds']) / 60) : '')
-                                                            <form wire:submit="updateItem({{ $item->id }}, '{{ $item->type }}', $event.target.title.value, $event.target.estimated_minutes.value, { player_url: $event.target.player_url ? $event.target.player_url.value : null, poster_url: $event.target.poster_url ? $event.target.poster_url.value : null, duration_minutes: $event.target.duration_minutes ? $event.target.duration_minutes.value : null, rich_text: $event.target.rich_text ? $event.target.rich_text.value : null, qt_bank_key: $event.target.qt_bank_key ? $event.target.qt_bank_key.value : null, passing_score: $event.target.passing_score ? $event.target.passing_score.value : null, attempts_allowed: $event.target.attempts_allowed ? $event.target.attempts_allowed.value : null, bank_category_id: $event.target.bank_category_id ? $event.target.bank_category_id.value : null, bank_draw_count: $event.target.bank_draw_count ? $event.target.bank_draw_count.value : null, bank_include_subcategories: $event.target.bank_include_subcategories ? $event.target.bank_include_subcategories.checked : null })"
+                                                            <form wire:submit="updateItem({{ $item->id }}, '{{ $item->type }}', $event.target.title.value, $event.target.estimated_minutes.value, { player_url: $event.target.player_url ? $event.target.player_url.value : null, poster_url: $event.target.poster_url ? $event.target.poster_url.value : null, duration_minutes: $event.target.duration_minutes ? $event.target.duration_minutes.value : null, rich_text: $event.target.rich_text ? $event.target.rich_text.value : null, qt_bank_key: $event.target.qt_bank_key ? $event.target.qt_bank_key.value : null, passing_score: $event.target.passing_score ? $event.target.passing_score.value : null, attempts_allowed: $event.target.attempts_allowed ? $event.target.attempts_allowed.value : null, bank_category_id: $event.target.bank_category_id ? $event.target.bank_category_id.value : null, bank_draw_count: $event.target.bank_draw_count ? $event.target.bank_draw_count.value : null, bank_include_subcategories: $event.target.bank_include_subcategories ? $event.target.bank_include_subcategories.checked : null, grading_method: $event.target.grading_method ? $event.target.grading_method.value : null })"
                                                                   style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
                                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="item-title-{{ $item->id }}">Titre</label>
                                                                 <input id="item-title-{{ $item->id }}" type="text" name="title" value="{{ $item->title }}" aria-label="Titre de l'élément"
@@ -796,6 +796,17 @@
                                                                     <label style="font-size: 0.78rem; font-weight: 600;" for="item-att-{{ $item->id }}">Tentatives autorisées (laisser vide = illimité)</label>
                                                                     <input id="item-att-{{ $item->id }}" type="number" min="1" max="99" name="attempts_allowed" value="{{ $item->payload['attempts_allowed'] ?? '' }}" placeholder="Illimité" aria-label="Nombre de tentatives autorisées"
                                                                            style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                                    {{-- V1-c : méthode de notation sur tentatives (parité Moodle, défaut « meilleure »). --}}
+                                                                    @php($gradingMethod = $item->payload['grading_method'] ?? 'highest')
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-grade-{{ $item->id }}">Note retenue (plusieurs tentatives)</label>
+                                                                    <select id="item-grade-{{ $item->id }}" name="grading_method" aria-label="Méthode de notation sur les tentatives"
+                                                                            style="width: 100%; padding: 8px 12px; min-height: 38px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                        <option value="highest" @selected($gradingMethod === 'highest')>Meilleure note</option>
+                                                                        <option value="average" @selected($gradingMethod === 'average')>Moyenne des tentatives</option>
+                                                                        <option value="first" @selected($gradingMethod === 'first')>Première tentative</option>
+                                                                        <option value="last" @selected($gradingMethod === 'last')>Dernière tentative</option>
+                                                                    </select>
                                                                 @endif
 
                                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="item-min-{{ $item->id }}">Durée estimée de l'élément (min, facultatif)</label>
@@ -911,6 +922,16 @@
                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-att-{{ $lesson->id }}">Tentatives autorisées (laisser vide = illimité)</label>
                                                 <input id="newitem-att-{{ $lesson->id }}" type="number" min="1" max="99" wire:model="newItem.{{ $lesson->id }}.attempts_allowed" placeholder="Illimité"
                                                        style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                {{-- V1-c : méthode de notation sur tentatives (défaut « meilleure », parité Moodle). --}}
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-grade-{{ $lesson->id }}">Note retenue (plusieurs tentatives)</label>
+                                                <select id="newitem-grade-{{ $lesson->id }}" wire:model="newItem.{{ $lesson->id }}.grading_method" aria-label="Méthode de notation sur les tentatives"
+                                                        style="width: 100%; padding: 8px 12px; min-height: 38px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                    <option value="highest">Meilleure note</option>
+                                                    <option value="average">Moyenne des tentatives</option>
+                                                    <option value="first">Première tentative</option>
+                                                    <option value="last">Dernière tentative</option>
+                                                </select>
 
                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-min-{{ $lesson->id }}">Durée estimée (min, facultatif)</label>
                                                 <input id="newitem-min-{{ $lesson->id }}" type="number" min="1" wire:model="newItem.{{ $lesson->id }}.estimated_minutes" placeholder="Durée estimée"

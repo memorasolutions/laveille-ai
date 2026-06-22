@@ -35,7 +35,6 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Modules\Academy\Models\Assignment;
-use Modules\Academy\Models\Completion;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Models\Lesson;
@@ -466,7 +465,15 @@ class CourseAssignments extends Component
     /**
      * Données du carnet de notes (gradebook) : inscrits actifs × devoirs, scopés à
      * CE cours. Pour chaque inscrit : sa note par devoir (ou null = non remis/non
-     * corrigé) + sa note de quiz agrégée (somme des Completion.score du cours).
+     * corrigé) + sa note de quiz agrégée.
+     *
+     * V1-c - la colonne quiz reflète désormais la NOTE EFFECTIVE de chaque item quiz
+     * via QuizGradeService::effectiveGrade (qui applique la méthode de notation de
+     * l'item : highest/average/first/last sur l'historique des tentatives), au lieu
+     * d'une simple somme de Completion.score. AGRÉGATION choisie quand un cours a
+     * PLUSIEURS items quiz : MOYENNE des percent effectifs des items où l'étudiant a
+     * au moins une tentative (cohérent, borné 0..100, indépendant du barème en points
+     * et du nombre de quiz). Lecture seule, gâté manageEnrollments (anti-IDOR inchangé).
      *
      * @return array{students: array<int, array<string, mixed>>, assignments: \Illuminate\Support\Collection, quizTotal: int}
      */
@@ -493,17 +500,13 @@ class CourseAssignments extends Component
             ->get(['user_id', 'assignment_id', 'score'])
             ->groupBy('user_id');
 
-        // Note de quiz agrégée par étudiant (somme des Completion.score sur CE cours).
-        // Completion.score (E1) = nb de bonnes réponses ; null compté 0.
-        $quizByUser = Completion::where('course_id', $this->courseId)
-            ->whereNotNull('score')
-            ->get(['user_id', 'score'])
-            ->groupBy('user_id')
-            ->map(fn ($rows) => (int) $rows->sum('score'));
+        // V1-c : items quiz de CE cours (via item→lesson→chapter), re-résolus serveur.
+        $quizItems = LessonItem::query()
+            ->where('type', 'quiz')
+            ->whereHas('lesson.chapter', fn ($q) => $q->where('course_id', $this->courseId))
+            ->get();
 
-        $quizTotal = (int) $quizByUser->sum();
-
-        $students = $enrollments->map(function ($enrollment) use ($assignments, $scores, $quizByUser): array {
+        $students = $enrollments->map(function ($enrollment) use ($assignments, $scores, $quizItems): array {
             $userId      = $enrollment->user_id;
             $userScores  = $scores->get($userId, collect())->keyBy('assignment_id');
 
@@ -513,12 +516,27 @@ class CourseAssignments extends Component
                 return $row?->score;
             });
 
+            // Note de quiz effective de l'étudiant = moyenne des percent effectifs des
+            // items quiz où il a tenté (méthode de notation de chaque item appliquée).
+            $effective = [];
+            foreach ($quizItems as $quizItem) {
+                $grade = \Modules\Academy\Services\QuizGradeService::effectiveGrade($userId, $quizItem);
+                if ($grade['attempts'] > 0) {
+                    $effective[] = $grade['percent'];
+                }
+            }
+            $quizScore = $effective === [] ? 0 : (int) round(array_sum($effective) / count($effective));
+
             return [
                 'user'      => $enrollment->user,
                 'cells'     => $cells,           // alignées sur l'ordre de $assignments
-                'quizScore' => (int) ($quizByUser->get($userId) ?? 0),
+                'quizScore' => $quizScore,       // percent effectif moyen (0..100)
             ];
         })->all();
+
+        // quizTotal sert d'en-tête de colonne : 100 si au moins un item quiz existe
+        // (les notes sont des pourcentages effectifs), 0 sinon.
+        $quizTotal = $quizItems->isNotEmpty() ? 100 : 0;
 
         return [
             'students'    => $students,

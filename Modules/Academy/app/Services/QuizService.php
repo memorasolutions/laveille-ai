@@ -57,9 +57,20 @@ final class QuizService
     /**
      * Calcule le score d'une soumission de quiz.
      *
+     * V1-c - SCORING PONDÉRÉ : chaque question porte un champ `points` (défaut 1 si
+     * absent → comportement strictement identique au comptage simple historique).
+     *   - points_earned   = somme des points des questions correctes ;
+     *   - points_possible = somme des points de toutes les questions ;
+     *   - percent         = round(points_earned / points_possible * 100).
+     * Les clés existantes sont CONSERVÉES :
+     *   - score   = points obtenus (= points_earned) ;
+     *   - correct = NB de bonnes réponses (inchangé, sert le badge « sans faute ») ;
+     *   - total   = NB de questions (inchangé) ;
+     *   - percent = désormais pondéré (identique au simple si tous les points valent 1).
+     *
      * @param  array<int, array<string, mixed>> $questions  Questions du round (telles que retournées par buildRound)
      * @param  array<string, mixed>             $answers    Réponses indexées par numéro de question (clés string "0","1",…)
-     * @return array{score: int, total: int, percent: int, correct: int, wrong: int, details: array<int, array{correct: bool, expected: mixed, given: mixed}>}
+     * @return array{score: int, total: int, percent: int, correct: int, wrong: int, points_earned: int, points_possible: int, details: array<int, array{correct: bool, expected: mixed, given: mixed}>}
      */
     public static function score(array $questions, array $answers): array
     {
@@ -67,23 +78,33 @@ final class QuizService
 
         if ($total === 0) {
             return [
-                'score'   => 0,
-                'total'   => 0,
-                'percent' => 0,
-                'correct' => 0,
-                'wrong'   => 0,
-                'details' => [],
+                'score'           => 0,
+                'total'           => 0,
+                'percent'         => 0,
+                'correct'         => 0,
+                'wrong'           => 0,
+                'points_earned'   => 0,
+                'points_possible' => 0,
+                'details'         => [],
             ];
         }
 
-        $correct = 0;
-        $details = [];
+        $correct        = 0;
+        $pointsEarned   = 0;
+        $pointsPossible = 0;
+        $details        = [];
 
         foreach ($questions as $index => $question) {
             $type      = $question['type'] ?? null;
             $given     = $answers[(string) $index] ?? null;
             $expected  = null;
             $isCorrect = false;
+
+            // Pondération : `points` explicite (>= 1) sinon 1 (rétrocompat stricte).
+            $points = isset($question['points']) && (int) $question['points'] >= 1
+                ? (int) $question['points']
+                : 1;
+            $pointsPossible += $points;
 
             switch ($type) {
                 case 'qcm':
@@ -120,6 +141,7 @@ final class QuizService
 
             if ($isCorrect) {
                 $correct++;
+                $pointsEarned += $points;
             }
 
             $details[$index] = [
@@ -129,16 +151,22 @@ final class QuizService
             ];
         }
 
-        $wrong   = $total - $correct;
-        $percent = (int) round(($correct / $total) * 100);
+        $wrong = $total - $correct;
+        // Percent PONDÉRÉ. Garde-fou : si possible vaut 0 (ne devrait pas arriver,
+        // chaque question pèse >= 1), on évite la division par zéro.
+        $percent = $pointsPossible > 0
+            ? (int) round(($pointsEarned / $pointsPossible) * 100)
+            : 0;
 
         return [
-            'score'   => $correct,
-            'total'   => $total,
-            'percent' => $percent,
-            'correct' => $correct,
-            'wrong'   => $wrong,
-            'details' => $details,
+            'score'           => $pointsEarned, // points obtenus (= points_earned)
+            'total'           => $total,        // NB de questions (inchangé)
+            'percent'         => $percent,      // pondéré
+            'correct'         => $correct,      // NB de bonnes réponses (badge « sans faute »)
+            'wrong'           => $wrong,
+            'points_earned'   => $pointsEarned,
+            'points_possible' => $pointsPossible,
+            'details'         => $details,
         ];
     }
 }

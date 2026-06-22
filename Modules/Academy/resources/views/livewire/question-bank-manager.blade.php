@@ -244,6 +244,16 @@
                         <option value="difficile">Difficile</option>
                     </select>
 
+                    {{-- V1-c : pondération de la question (barème). 1 = barème neutre. --}}
+                    <label for="qPoints" style="font-size: 0.8rem; font-weight: 600;">Points (barème, 1 à 100)</label>
+                    <input id="qPoints" type="number" min="1" max="100" wire:model="qPoints"
+                           aria-label="Points attribués à cette question"
+                           style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                    <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+                        Pondération de la question dans le score du quiz. Laissez 1 pour un barème égal entre toutes les questions.
+                    </p>
+                    @error('qPoints') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.8rem;">{{ $message }}</span> @enderror
+
                     <label for="qExplanation" style="font-size: 0.8rem; font-weight: 600;">Explication (facultatif)</label>
                     <textarea id="qExplanation" wire:model="qExplanation" rows="2" maxlength="2000"
                               style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>

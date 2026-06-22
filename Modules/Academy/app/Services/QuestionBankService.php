@@ -97,6 +97,14 @@ final class QuestionBankService
         $explanation = (string) ($question->explanation ?? '');
         $difficulty  = (string) ($question->difficulty ?? 'moyen');
 
+        // V1-c : pondération. On utilise le `points` EXPLICITE de la question (1..100)
+        // s'il est défini et valide ; sinon repli sur le calcul historique par
+        // difficulté (rétrocompat des banques antérieures à la colonne points).
+        $explicitPoints = is_numeric($question->points ?? null) ? (int) $question->points : 0;
+        $points         = $explicitPoints >= 1
+            ? min(100, $explicitPoints)
+            : self::pointsFromDifficulty($difficulty);
+
         $base = [
             'theme'       => 'banque',
             'difficulty'  => $difficulty,
@@ -120,7 +128,7 @@ final class QuestionBankService
                     'type'    => 'qcm',
                     'choices' => $choices,
                     'correct' => $correct,
-                    'points'  => self::pointsFromDifficulty($difficulty),
+                    'points'  => $points,
                 ];
 
             case 'truefalse':
@@ -132,7 +140,7 @@ final class QuestionBankService
                     'type'    => 'vraifaux',
                     'choices' => $choices,
                     'correct' => $isTrue ? 0 : 1,
-                    'points'  => 1,
+                    'points'  => $points,
                 ];
 
             case 'short':
@@ -148,7 +156,7 @@ final class QuestionBankService
                     'type'     => 'court',
                     'accepted' => $accepted,
                     'display'  => (string) ($payload['display'] ?? ''),
-                    'points'   => 2,
+                    'points'   => $points,
                 ];
 
             case 'matching':
@@ -184,7 +192,7 @@ final class QuestionBankService
                     'terms'   => $terms,
                     'defs'    => $defsShuffled,
                     'answer'  => $answer,
-                    'points'  => 3,
+                    'points'  => $points,
                 ];
 
             default:

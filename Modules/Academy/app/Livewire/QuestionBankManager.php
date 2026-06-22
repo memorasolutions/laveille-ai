@@ -61,6 +61,8 @@ class QuestionBankManager extends Component
     public string $qPrompt = '';
     public ?string $qExplanation = null;
     public string $qDifficulty = 'moyen';
+    /** V1-c : pondération explicite de la question (1..100, défaut 1). */
+    public int $qPoints = 1;
     public bool $qIsActive = true;
 
     // Sous-formulaires de payload par type (toujours initialisés, jamais null).
@@ -326,6 +328,8 @@ class QuestionBankManager extends Component
             'qPrompt'      => 'required|string|max:2000',
             'qExplanation' => 'nullable|string|max:2000',
             'qDifficulty'  => ['required', Rule::in(self::DIFFICULTIES)],
+            // V1-c : pondération bornée serveur 1..100 (défaut 1).
+            'qPoints'      => 'required|integer|min:1|max:100',
         ]);
 
         // Construit + valide le payload selon le type (mêmes invariants que mapToRoundItem).
@@ -339,6 +343,7 @@ class QuestionBankManager extends Component
                 ? trim($this->qExplanation)
                 : null,
             'difficulty'  => $this->qDifficulty,
+            'points'      => max(1, min(100, (int) $this->qPoints)),
             'is_active'   => $this->qIsActive,
             'payload'     => $payload,
         ];
@@ -371,6 +376,7 @@ class QuestionBankManager extends Component
         $this->qPrompt           = (string) $question->prompt;
         $this->qExplanation      = $question->explanation;
         $this->qDifficulty       = in_array($question->difficulty, self::DIFFICULTIES, true) ? (string) $question->difficulty : 'moyen';
+        $this->qPoints           = max(1, min(100, (int) ($question->points ?? 1)));
         $this->qIsActive         = (bool) $question->is_active;
 
         $payload = is_array($question->payload) ? $question->payload : [];
@@ -549,6 +555,7 @@ class QuestionBankManager extends Component
         $this->qPrompt           = '';
         $this->qExplanation      = null;
         $this->qDifficulty       = 'moyen';
+        $this->qPoints           = 1;
         $this->qIsActive         = true;
         $this->resetPayloadFields();
         $this->resetErrorBag();
