@@ -1,0 +1,8 @@
+{
+  "term_slug": "read-this-before-you-vibe-code-another-app",
+  "title": "Vibe coding : l'angle mort",
+  "alt": "Bande dessinée : Octopus vulgarise les risques du « vibe coding » - générer une application en enchaînant des prompts IA sans comprendre les fondations crée de vraies failles de sécurité ; la vitesse ne remplace pas la compréhension. Le bon réflexe : relire, tester et sécuriser son code avant de le déployer.",
+  "planches": [
+    { "avif": "bd-vibe-coding-angle-mort-2026-06-site.avif", "webp": "bd-vibe-coding-angle-mort-2026-06-site.webp", "jpg": "bd-vibe-coding-angle-mort-2026-06-site.jpg", "avif_1024": "bd-vibe-coding-angle-mort-2026-06-site-1024.avif", "webp_1024": "bd-vibe-coding-angle-mort-2026-06-site-1024.webp", "thumb": "bd-vibe-coding-angle-mort-2026-06-thumb.jpg", "width": 1600, "height": 2448 }
+  ]
+}

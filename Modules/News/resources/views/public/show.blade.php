@@ -251,6 +251,11 @@
                         <img src="{{ $article->image_url }}{{ str_contains($article->image_url, 'http') ? '' : '?v='.($article->updated_at?->timestamp ?? time()) }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-hero" loading="lazy">
                     @endif
 
+                    {{-- Bande dessinée pédagogique (standard « visionneur de BD ») — apparaît si public/bd/{slug}/manifest.json existe. 100 % réutilisé du glossaire (ComicLibrary + comic-viewer), zéro logique dupliquée. --}}
+                    @if(class_exists(\Modules\Dictionary\Support\ComicLibrary::class) && \Modules\Dictionary\Support\ComicLibrary::hasComic((string) $article->slug))
+                        <x-dictionary::comic-viewer :comic="\Modules\Dictionary\Support\ComicLibrary::forSlug((string) $article->slug)" />
+                    @endif
+
                     {{-- R4 — TL;DR aside Speakable (AEO 2026 : answer-first 30-40 mots) --}}
                     @if($ss && !empty($ss['tldr']))
                         <aside class="nw-tldr" aria-label="{{ __('Résumé en bref') }}">

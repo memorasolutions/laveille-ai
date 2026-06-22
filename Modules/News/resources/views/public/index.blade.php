@@ -74,6 +74,13 @@
     .nw-card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
     .nw-card:hover .nw-card-img { transform: scale(1.03); }
     .nw-card-placeholder { color: rgba(255,255,255,0.3); font-size: 2.5rem; font-weight: 700; font-family: var(--f-heading); }
+    /* Indicateur « BD disponible » (standard visionneur de BD) : picto Octopus discret en coin */
+    .nw-bd-flag {
+        position: absolute; top: 8px; right: 8px; z-index: 2;
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 34px; height: 34px; border-radius: 50%;
+        background: rgba(255,255,255,0.92); box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    }
     .nw-card-body { padding: 1rem; flex: 1; display: flex; flex-direction: column; }
     .nw-card-title {
         font-family: var(--f-heading); font-size: 1.05rem; font-weight: 700;
@@ -211,6 +218,12 @@
                                     <img src="{{ $article->image_url }}{{ str_contains($article->image_url, 'http') ? '' : '?v='.($article->updated_at?->timestamp ?? time()) }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-card-img" loading="lazy">
                                 @else
                                     <span class="nw-card-placeholder">{{ mb_strtoupper(mb_substr($article->category_tag ?? 'N', 0, 2)) }}</span>
+                                @endif
+                                {{-- Indicateur BD (standard « visionneur de BD ») : picto Octopus si public/bd/{slug}/manifest.json existe --}}
+                                @if(class_exists(\Modules\Dictionary\Support\ComicLibrary::class) && \Modules\Dictionary\Support\ComicLibrary::hasComic((string) $article->slug))
+                                    <span class="nw-bd-flag" aria-label="{{ __('Bande dessinée disponible') }}" title="{{ __('Bande dessinée disponible') }}">
+                                        <x-tools::octopus variant="happy" :size="24" :animate="false" />
+                                    </span>
                                 @endif
                             </div>
                             <div class="nw-card-body">
