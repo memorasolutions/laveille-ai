@@ -20,6 +20,7 @@ use Modules\Academy\Livewire\CourseCreate;
 use Modules\Academy\Livewire\CourseEditor;
 use Modules\Academy\Livewire\CourseRoster;
 use Modules\Academy\Livewire\Dashboard;
+use Modules\Academy\Livewire\QuestionBankManager;
 use Modules\Academy\Livewire\StudentAssignments;
 use Modules\Academy\Models\Chapter;
 use Modules\Academy\Models\Course;
@@ -104,6 +105,12 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // suivis, soumettre/éditer SA remise, voir sa note). user_id forcé = auth,
         // inscription active re-vérifiée serveur. Voir StudentAssignments.
         Livewire::component('academy.student-assignments', StudentAssignments::class);
+
+        // QB2 - Banque de questions réutilisable (catégories + questions des 4 types).
+        // OWNER-SCOPED : un formateur ne gère QUE ses propres catégories/questions
+        // (owner_id = auth) ; l'admin (academy.manage) voit tout. Chaque mutation est
+        // gardée serveur (entité re-résolue scopée owner = anti-IDOR). Voir QuestionBankManager.
+        Livewire::component('academy.question-bank-manager', QuestionBankManager::class);
     }
 
     public function register(): void

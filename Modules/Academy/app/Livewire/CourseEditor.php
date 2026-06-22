@@ -43,6 +43,7 @@ use Modules\Academy\Models\Chapter;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
+use Modules\Academy\Models\QuestionCategory;
 
 class CourseEditor extends Component
 {
@@ -807,6 +808,9 @@ class CourseEditor extends Component
             'qt_bank_key'       => $extra['qt_bank_key']      ?? null,
             'passing_score'     => $extra['passing_score']    ?? null,
             'attempts_allowed'  => $extra['attempts_allowed'] ?? null,
+            // QB2 : lien optionnel vers une catégorie de MA banque + nb à tirer.
+            'bank_category_id'  => $extra['bank_category_id'] ?? null,
+            'bank_draw_count'   => $extra['bank_draw_count']  ?? null,
         ];
 
         $data    = $this->validateItem($input);
@@ -1107,6 +1111,9 @@ class CourseEditor extends Component
             'qt_bank_key'       => 'nullable|string|max:120',
             'passing_score'     => 'nullable|integer|min:0|max:100',
             'attempts_allowed'  => 'nullable|integer|min:1|max:99',
+            // QB2 : catégorie de banque (validée comme MIENNE au build) + nb à tirer (1..50).
+            'bank_category_id'  => 'nullable|integer',
+            'bank_draw_count'   => 'nullable|integer|min:1|max:50',
         ])->validate();
     }
 
@@ -1185,7 +1192,72 @@ class CourseEditor extends Component
             $payload['attempts_allowed'] = max(1, (int) $attempts);
         }
 
+        // QB2 : si une catégorie de banque VALIDE (m'appartenant) est choisie, on
+        // l'enregistre dans payload['question_bank']. ANTI-IDOR : la catégorie doit
+        // figurer dans la liste blanche de MES catégories (re-résolue serveur) ;
+        // un id forgé (catégorie d'un autre formateur) est simplement ignoré → on
+        // retombe sur le comportement qt_bank_key existant. Aucune nouvelle table.
+        $bankCategoryId = $input['bank_category_id'] ?? null;
+        if ($bankCategoryId !== null && $bankCategoryId !== '') {
+            $bankCategoryId = (int) $bankCategoryId;
+
+            if ($bankCategoryId > 0 && in_array($bankCategoryId, $this->ownedCategoryIds(), true)) {
+                $draw = $input['bank_draw_count'] ?? null;
+                $drawCount = ($draw !== null && $draw !== '') ? max(1, min(50, (int) $draw)) : 5;
+
+                $payload['question_bank'] = [
+                    'category_id' => $bankCategoryId,
+                    'draw_count'  => $drawCount,
+                ];
+            }
+        }
+
         return $payload;
+    }
+
+    /**
+     * Liste blanche des ids de catégories de banque que l'utilisateur courant peut
+     * lier (anti-IDOR). Un admin (academy.manage) peut lier n'importe quelle
+     * catégorie ; un formateur UNIQUEMENT les siennes (owner_id = auth). Re-résolu
+     * serveur à chaque build, jamais une valeur du navigateur.
+     *
+     * @return array<int, int>
+     */
+    private function ownedCategoryIds(): array
+    {
+        $user = Auth::user();
+
+        $query = QuestionCategory::query();
+        if (! ($user?->can('academy.manage'))) {
+            $query->where('owner_id', $user?->id);
+        }
+
+        return $query->pluck('id')->map(static fn ($id): int => (int) $id)->all();
+    }
+
+    /**
+     * Catégories de banque liables par l'utilisateur (affichage du sélecteur dans le
+     * formulaire d'item quiz). Même périmètre owner-scopé que ownedCategoryIds()
+     * (sert l'AFFICHAGE ; l'autorisation reste serveur au build du payload).
+     *
+     * @return \Illuminate\Support\Collection<int, QuestionCategory>
+     */
+    #[Computed]
+    public function bankCategories(): \Illuminate\Support\Collection
+    {
+        $user = Auth::user();
+
+        $query = QuestionCategory::query()
+            ->withCount('questions')
+            ->orderBy('parent_id')
+            ->orderBy('position')
+            ->orderBy('name');
+
+        if (! ($user?->can('academy.manage'))) {
+            $query->where('owner_id', $user?->id);
+        }
+
+        return $query->get();
     }
 
     // ─────────────────────────────────────────────────────────────────────────────

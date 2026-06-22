@@ -726,7 +726,7 @@
                                                             @php($videoUrlValue = $item->payload['player_url'] ?? ($item->payload['embed'] ?? ''))
                                                             @php($posterValue = $item->payload['poster'] ?? '')
                                                             @php($durationMin = isset($item->payload['duration_seconds']) ? (int) ceil(((int) $item->payload['duration_seconds']) / 60) : '')
-                                                            <form wire:submit="updateItem({{ $item->id }}, '{{ $item->type }}', $event.target.title.value, $event.target.estimated_minutes.value, { player_url: $event.target.player_url ? $event.target.player_url.value : null, poster_url: $event.target.poster_url ? $event.target.poster_url.value : null, duration_minutes: $event.target.duration_minutes ? $event.target.duration_minutes.value : null, rich_text: $event.target.rich_text ? $event.target.rich_text.value : null, qt_bank_key: $event.target.qt_bank_key ? $event.target.qt_bank_key.value : null, passing_score: $event.target.passing_score ? $event.target.passing_score.value : null, attempts_allowed: $event.target.attempts_allowed ? $event.target.attempts_allowed.value : null })"
+                                                            <form wire:submit="updateItem({{ $item->id }}, '{{ $item->type }}', $event.target.title.value, $event.target.estimated_minutes.value, { player_url: $event.target.player_url ? $event.target.player_url.value : null, poster_url: $event.target.poster_url ? $event.target.poster_url.value : null, duration_minutes: $event.target.duration_minutes ? $event.target.duration_minutes.value : null, rich_text: $event.target.rich_text ? $event.target.rich_text.value : null, qt_bank_key: $event.target.qt_bank_key ? $event.target.qt_bank_key.value : null, passing_score: $event.target.passing_score ? $event.target.passing_score.value : null, attempts_allowed: $event.target.attempts_allowed ? $event.target.attempts_allowed.value : null, bank_category_id: $event.target.bank_category_id ? $event.target.bank_category_id.value : null, bank_draw_count: $event.target.bank_draw_count ? $event.target.bank_draw_count.value : null })"
                                                                   style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
                                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="item-title-{{ $item->id }}">Titre</label>
                                                                 <input id="item-title-{{ $item->id }}" type="text" name="title" value="{{ $item->title }}" aria-label="Titre de l'élément"
@@ -758,8 +758,23 @@
                                                                     <input id="item-qt-{{ $item->id }}" type="text" name="qt_bank_key" value="{{ $item->payload['qt_bank_key'] ?? '' }}" placeholder="Clé de banque QT" aria-label="Clé de banque QT"
                                                                            style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                                                                     <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
-                                                                        La clé identifie la banque de questions. Une banque propre au cours arrive dans une prochaine étape ; pour l'instant, le quiz puise dans la banque générale.
+                                                                        La clé identifie la banque générale (repli). Pour tirer dans VOTRE banque de questions, choisissez plutôt une catégorie ci-dessous.
                                                                     </p>
+
+                                                                    {{-- QB2 : tirage depuis MA banque de questions (prioritaire sur la clé QT) --}}
+                                                                    @php($qb = $item->payload['question_bank'] ?? null)
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-bankcat-{{ $item->id }}">Catégorie de ma banque (facultatif)</label>
+                                                                    <select id="item-bankcat-{{ $item->id }}" name="bank_category_id" aria-label="Catégorie de la banque de questions"
+                                                                            style="width: 100%; padding: 8px 12px; min-height: 38px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                        <option value="">- Aucune (utiliser la clé QT ci-dessus) -</option>
+                                                                        @foreach ($this->bankCategories as $cat)
+                                                                            <option value="{{ $cat->id }}" @selected(($qb['category_id'] ?? null) === $cat->id)>{{ $cat->name }} ({{ $cat->questions_count }} q.)</option>
+                                                                        @endforeach
+                                                                    </select>
+
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-bankdraw-{{ $item->id }}">Nombre de questions à tirer (1 à 50)</label>
+                                                                    <input id="item-bankdraw-{{ $item->id }}" type="number" min="1" max="50" name="bank_draw_count" value="{{ $qb['draw_count'] ?? 5 }}" aria-label="Nombre de questions à tirer de la banque"
+                                                                           style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
 
                                                                     <label style="font-size: 0.78rem; font-weight: 600;" for="item-pass-{{ $item->id }}">Score de réussite (%)</label>
                                                                     <input id="item-pass-{{ $item->id }}" type="number" min="0" max="100" name="passing_score" value="{{ $item->payload['passing_score'] ?? 60 }}" aria-label="Score de réussite en pourcentage"

@@ -19,7 +19,9 @@ use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
+use Modules\Academy\Models\QuestionCategory;
 use Modules\Academy\Services\CompletionService;
+use Modules\Academy\Services\QuestionBankService;
 use Modules\Academy\Services\QuizService;
 
 class QuizController extends Controller
@@ -62,9 +64,29 @@ class QuizController extends Controller
             }
         }
 
-        // Construire le round via l'adaptateur QuizService
-        $bankKey = (string) ($item->payload['qt_bank_key'] ?? 'qt-questions');
-        $round   = QuizService::buildRound($bankKey);
+        // Construire le round.
+        // QB2 : si l'item est lié à une catégorie de banque (payload['question_bank']),
+        // on tire N questions de CETTE catégorie (+ sous-catégories). La catégorie est
+        // RE-RÉSOLUE serveur (findOrFail) ; un round vide (catégorie supprimée/vidée)
+        // déclenche le REPLI sur qt_bank_key, puis « Quiz indisponible » si toujours vide.
+        // Sans lien de banque → comportement existant qt_bank_key INCHANGÉ.
+        $round    = [];
+        $bankLink = $item->payload['question_bank'] ?? null;
+
+        if (is_array($bankLink) && ! empty($bankLink['category_id'])) {
+            $category = QuestionCategory::find((int) $bankLink['category_id']);
+
+            if ($category !== null) {
+                $drawCount = max(1, min(50, (int) ($bankLink['draw_count'] ?? 5)));
+                $round     = QuestionBankService::drawFromCategory($category, $drawCount);
+            }
+        }
+
+        // Repli (pas de lien de banque OU round vide) : clé QT existante (inchangé).
+        if (empty($round)) {
+            $bankKey = (string) ($item->payload['qt_bank_key'] ?? 'qt-questions');
+            $round   = QuizService::buildRound($bankKey);
+        }
 
         if (empty($round)) {
             return back()->with('error', 'Quiz indisponible pour le moment.');

@@ -36,6 +36,11 @@
             'label' => '➕ Créer un cours',
             'show'  => $canManage,
         ],
+        [
+            'route' => 'academy.questions.bank',
+            'label' => '🏛️ Banque de questions',
+            'show'  => $canManage,
+        ],
     ];
 @endphp
 
