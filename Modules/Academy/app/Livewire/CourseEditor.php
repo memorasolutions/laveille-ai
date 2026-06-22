@@ -830,6 +830,8 @@ class CourseEditor extends Component
             'shuffle_answers'     => $extra['shuffle_answers']     ?? null,
             'time_limit_minutes'  => $extra['time_limit_minutes']  ?? null,
             'review_options'      => $extra['review_options']      ?? null,
+            // V2-c : critère d'achèvement configurable (manual / view / min_grade).
+            'completion'          => $extra['completion']          ?? null,
         ];
 
         $data    = $this->validateItem($input);
@@ -1115,6 +1117,13 @@ class CourseEditor extends Component
      */
     private function validateItem(array $input): array
     {
+        // V2-c : un critère d'achèvement vide ('' venu du <select> « Défaut ») signifie
+        // « absent » → null, pour ne pas échouer la règle Rule::in (et laisser le défaut
+        // du type s'appliquer via ActivityCompletionService au build).
+        if (($input['completion'] ?? null) === '') {
+            $input['completion'] = null;
+        }
+
         return validator($input, [
             'type'              => ['required', Rule::in(self::ITEM_TYPES)],
             'title'             => 'required|string|max:255',
@@ -1142,6 +1151,9 @@ class CourseEditor extends Component
             'shuffle_answers'    => 'nullable|boolean',
             'time_limit_minutes' => 'nullable|integer|min:1|max:240',
             'review_options'     => 'nullable|array',
+            // V2-c : critère d'achèvement (liste blanche globale ; l'autorisation par
+            // TYPE est appliquée au build, où min_grade sur un non-quiz est ignoré).
+            'completion'         => ['nullable', Rule::in(\Modules\Academy\Services\ActivityCompletionService::CRITERIA)],
         ])->validate();
     }
 
@@ -1162,12 +1174,26 @@ class CourseEditor extends Component
      */
     private function buildItemPayload(string $type, array $input): array
     {
-        return match ($type) {
+        $payload = match ($type) {
             'video'    => $this->buildVideoPayload($input),
             'document' => ['rich_text' => (string) ($input['rich_text'] ?? '')],
             'quiz'     => $this->buildQuizPayload($input),
             default    => [],
         };
+
+        // V2-c : CRITÈRE D'ACHÈVEMENT. On n'écrit la clé QUE si le critère choisi est
+        // VALIDE pour le type ET DIFFÉRENT du défaut du type (rétrocompat : un item sans
+        // clé → ActivityCompletionService::criterionFor applique le défaut historique).
+        // min_grade posé sur un non-quiz est ignoré (normalizeForStorage → null).
+        $completion = \Modules\Academy\Services\ActivityCompletionService::normalizeForStorage(
+            $type,
+            $input['completion'] ?? null
+        );
+        if ($completion !== null) {
+            $payload['completion'] = $completion;
+        }
+
+        return $payload;
     }
 
     /**

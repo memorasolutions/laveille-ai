@@ -488,9 +488,14 @@
                             </div>
                         @endif
 
-                        {{-- M4 - Bouton « Marquer comme terminé » (video + doc uniquement, inscrit).
-                             Masqué en prévisualisation : un gérant n'enregistre pas sa propre progression. --}}
-                        @if($isEnrolled && !($isPreview ?? false) && in_array($item->type, ['video', 'doc', 'document']))
+                        {{-- M4 / V2-c - État d'achèvement par item (inscrit, hors prévisualisation).
+                             Le critère (manual / view / min_grade) détermine l'affichage :
+                               • manual  → bouton « Marquer comme terminé » (vidéo/document) ;
+                               • view    → achèvement automatique à la consultation (déjà posé
+                                           par le LessonController) → état seul, pas de bouton ;
+                               • min_grade → achèvement en réussissant le quiz → état seul.
+                             Masqué en prévisualisation : un gérant n'enregistre pas sa progression. --}}
+                        @if($isEnrolled && !($isPreview ?? false))
                             @php
                                 $isItemCompleted = false;
                                 try {
@@ -499,12 +504,18 @@
                                         ->where('status', 'completed')
                                         ->exists();
                                 } catch (\Throwable) {}
+                                $itemCriterion = class_exists(\Modules\Academy\Services\ActivityCompletionService::class)
+                                    ? \Modules\Academy\Services\ActivityCompletionService::criterionFor($item)
+                                    : 'manual';
+                                $itemModeLabel = class_exists(\Modules\Academy\Services\ActivityCompletionService::class)
+                                    ? \Modules\Academy\Services\ActivityCompletionService::modeLabel($itemCriterion)
+                                    : 'à marquer comme terminé';
                             @endphp
                             @if($isItemCompleted)
-                                <p class="mt-3" style="font-size: 0.9rem; color: #166534;">
+                                <p class="mt-3" style="font-size: 0.9rem; color: #166534;" role="status">
                                     ✅ Terminé
                                 </p>
-                            @else
+                            @elseif($itemCriterion === 'manual' && in_array($item->type, ['video', 'doc', 'document']))
                                 <form method="POST"
                                       action="{{ route('academy.lessons.complete', [$course, $lesson, $item->id]) }}"
                                       class="mt-3">
@@ -513,6 +524,10 @@
                                         Marquer comme terminé
                                     </x-core::button>
                                 </form>
+                            @else
+                                <p class="mt-3" style="font-size: 0.9rem; color: var(--sys-text-muted, #6B7280);" role="status">
+                                    ◯ À faire <span style="font-size: 0.82rem;">({{ $itemModeLabel }})</span>
+                                </p>
                             @endif
                         @endif
 

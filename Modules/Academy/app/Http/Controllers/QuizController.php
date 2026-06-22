@@ -21,6 +21,7 @@ use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Models\QuestionCategory;
 use Modules\Academy\Models\QuizAttempt;
+use Modules\Academy\Services\ActivityCompletionService;
 use Modules\Academy\Services\CompletionService;
 use Modules\Academy\Services\QuestionBankService;
 use Modules\Academy\Services\QuizService;
@@ -218,7 +219,14 @@ class QuizController extends Controller
 
             QuizAttempt::create($attributes);
 
-            if ($passed) {
+            // V2-c : la complétion à la SOUMISSION ne s'applique qu'au critère
+            // « min_grade » (= défaut historique d'un quiz : réussi → complété). Un
+            // quiz dont le gérant a explicitement choisi « view » est complété à la
+            // consultation (LessonController), pas ici ; « manual » exigerait un clic.
+            // Un quiz SANS critère retombe sur min_grade → comportement INCHANGÉ.
+            $criterion = ActivityCompletionService::criterionFor($item);
+
+            if ($passed && $criterion === 'min_grade') {
                 // SECURITY/RÉTROCOMPAT : Completion.score = NB de bonnes réponses
                 // (= 'correct'), JAMAIS les points pondérés. Le badge « sans faute »
                 // (BadgeService::hasPerfectQuiz) compare score === nb de questions :

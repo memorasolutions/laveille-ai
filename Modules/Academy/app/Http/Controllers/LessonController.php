@@ -98,6 +98,21 @@ class LessonController extends Controller
             }
         }
 
+        // 5d. V2-c - ACHÈVEMENT « view » : auto-marquer les items dont le critère est
+        //     « view » dès que la leçon est consultée par un INSCRIT RÉEL avec accès.
+        //     Gardes (anti-contournement) : jamais en prévisualisation, inscription
+        //     active réelle ($enrollment), prérequis satisfaits et leçon non verrouillée
+        //     par le drip. Idempotent (une seule complétion par user/item). Aucune
+        //     complétion pour un non-inscrit, un gérant en preview ou un contenu gaté.
+        if (! $isPreview
+            && auth()->check()
+            && $enrollment !== null
+            && ! $isDripLocked
+            && $prerequisitesUnmet->isEmpty()
+            && class_exists(\Modules\Academy\Services\ActivityCompletionService::class)) {
+            \Modules\Academy\Services\ActivityCompletionService::autoMarkViewItems(auth()->user(), $lesson);
+        }
+
         // 6. Navigation préc/suiv
         $allLessons = $course->chapters->flatMap(fn ($ch) => $ch->lessons);
         $currentIndex = $allLessons->search(fn ($l) => $l->id === $lesson->id);

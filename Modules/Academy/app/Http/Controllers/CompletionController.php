@@ -18,6 +18,7 @@ use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
+use Modules\Academy\Services\ActivityCompletionService;
 use Modules\Academy\Services\CompletionService;
 
 class CompletionController extends Controller
@@ -74,6 +75,14 @@ class CompletionController extends Controller
         // Les quiz sont complétés via QuizController (soumission du formulaire)
         if ($item->type === 'quiz') {
             return back()->with('error', 'Les quiz doivent être complétés via le formulaire de quiz.');
+        }
+
+        // V2-c : le bouton manuel ne complète QUE les items dont le critère est « manual »
+        // (défaut historique vidéo/document). Pour un item « view », l'achèvement est
+        // automatique à la consultation (LessonController) : on rejette le POST manuel
+        // (défensif ; le bouton n'est de toute façon pas affiché pour ces items).
+        if (ActivityCompletionService::criterionFor($item) !== 'manual') {
+            return back()->with('error', "L'achèvement de cet élément est automatique.");
         }
 
         CompletionService::markComplete(Auth::user(), $item);
