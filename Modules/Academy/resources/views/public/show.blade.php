@@ -63,6 +63,24 @@
     .syllabus-lock { color: var(--sys-text-muted, #9CA3AF); font-size: 0.85rem; }
     .accordion-button:not(.collapsed) { background: rgba(6,78,90,0.05); color: var(--c-primary, #064E5A); box-shadow: none; }
     .accordion-button:focus { box-shadow: none; }
+
+    /* Bloc de partage du cours (marketing) - charte teal, cibles >=44px, WCAG 2.2 AA */
+    .ac-share { margin-top: 0; }
+    .ac-share-title { font-size: 0.95rem; font-weight: 700; color: var(--c-primary, #064E5A); margin: 0 0 10px; }
+    .ac-share-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .ac-share-btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        min-height: 44px; min-width: 44px; padding: 8px 14px;
+        background: transparent; color: var(--c-primary, #064E5A);
+        border: 2px solid var(--c-primary, #064E5A); border-radius: 999px;
+        text-decoration: none; cursor: pointer; font-size: 0.85rem; font-weight: 600;
+        transition: background 200ms, color 200ms, transform 100ms;
+    }
+    @media (prefers-reduced-motion: reduce) { .ac-share-btn { transition: none; } }
+    .ac-share-btn:hover { background: var(--c-primary, #064E5A); color: #FFFFFF; }
+    .ac-share-btn:focus-visible { outline: 3px solid var(--c-accent, #9A2A06); outline-offset: 2px; }
+    .ac-share-btn:active { transform: scale(0.97); }
+    .ac-share-btn svg { flex-shrink: 0; }
 </style>
 @endpush
 
@@ -279,6 +297,62 @@
                                     <strong>Français (CA)</strong>
                                 </li>
                             </ul>
+
+                            {{-- Partage marketing : visible UNIQUEMENT sur un cours réellement
+                                 publié + public (jamais sur un brouillon en prévisualisation).
+                                 Pur affichage (liens sortants + copie côté client) : aucune route,
+                                 aucune écriture, aucune fuite (URL publique seulement). --}}
+                            {{-- N.B. : assignations Blade en ligne (forme parenthésée), jamais
+                                 la forme bloc, pour ne PAS introduire de jeton de fermeture en
+                                 aval : sinon la regex de bloc PHP brut de Blade engloberait par
+                                 erreur les assignations en ligne situées plus haut dans la vue. --}}
+                            @php($__shareUrl = filled($course->slug) ? route('academy.courses.show', $course->slug) : null)
+                            @php($__isPublic = ($course->status ?? null) === 'published' && ($course->visibility ?? null) === 'public')
+                            @if($__isPublic && $__shareUrl)
+                                @php($__shareTitle = (string) ($course->title ?? ''))
+                                @php($__fbUrl = 'https://www.facebook.com/sharer/sharer.php?u=' . urlencode($__shareUrl))
+                                @php($__liUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' . urlencode($__shareUrl))
+                                @php($__xUrl = 'https://twitter.com/intent/tweet?text=' . urlencode($__shareTitle) . '&url=' . urlencode($__shareUrl))
+                                <hr class="my-3">
+                                <section class="ac-share" aria-labelledby="ac-share-h">
+                                    <h2 id="ac-share-h" class="ac-share-title">Partager ce cours</h2>
+                                    <div class="ac-share-row"
+                                         x-data="{ copied: false, url: @js($__shareUrl), copy() { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(this.url).then(() => { this.copied = true; setTimeout(() => this.copied = false, 2500); }).catch(() => {}); } } }">
+                                        <a href="{{ $__fbUrl }}" target="_blank" rel="noopener noreferrer"
+                                           class="ac-share-btn" aria-label="Partager ce cours sur Facebook">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                            </svg>
+                                            <span>Facebook</span>
+                                        </a>
+                                        <a href="{{ $__liUrl }}" target="_blank" rel="noopener noreferrer"
+                                           class="ac-share-btn" aria-label="Partager ce cours sur LinkedIn">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124zm1.782 13.019H3.555V9h3.564v11.452z"/>
+                                            </svg>
+                                            <span>LinkedIn</span>
+                                        </a>
+                                        <a href="{{ $__xUrl }}" target="_blank" rel="noopener noreferrer"
+                                           class="ac-share-btn" aria-label="Partager ce cours sur X (Twitter)">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                            </svg>
+                                            <span>X</span>
+                                        </a>
+                                        <button type="button" class="ac-share-btn"
+                                                @click="copy()"
+                                                :aria-pressed="copied"
+                                                aria-label="Copier le lien de ce cours">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                                                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                                            </svg>
+                                            <span x-text="copied ? '✓ Copié' : 'Copier le lien'">Copier le lien</span>
+                                        </button>
+                                        <span role="status" aria-live="polite" aria-atomic="true" class="visually-hidden"
+                                              x-text="copied ? 'Lien copié dans le presse-papiers' : ''"></span>
+                                    </div>
+                                </section>
+                            @endif
 
                             <hr class="my-3">
 

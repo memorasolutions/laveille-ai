@@ -228,3 +228,28 @@ test('une leçon d\'un cours publié reste accessible sans preview', function ()
     $this->get(route('academy.lessons.show', ['course' => $course->slug, 'lesson' => $lesson]))
         ->assertOk();
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. PARTAGE MARKETING — bloc « Partager ce cours » visible seulement si publié
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('un cours publié affiche le bloc « Partager ce cours » + liens FB/LinkedIn/X', function (): void {
+    $course = makePreviewCourse('preview-share-published', 'published');
+
+    $response = $this->get(route('academy.courses.show', $course->slug))->assertOk();
+
+    $response->assertSee('Partager ce cours', false);
+    $response->assertSee('facebook.com/sharer', false);
+    $response->assertSee('linkedin.com/sharing', false);
+    $response->assertSee('twitter.com/intent/tweet', false);
+});
+
+test('un cours brouillon en prévisualisation n\'affiche PAS le bloc de partage', function (): void {
+    $course = makePreviewCourse('preview-share-draft');
+    $owner  = makePreviewOwner($course);
+
+    $this->actingAs($owner)
+        ->get(route('academy.courses.show', $course->slug).'?preview=1')
+        ->assertOk()
+        ->assertDontSee('Partager ce cours', false);
+});
