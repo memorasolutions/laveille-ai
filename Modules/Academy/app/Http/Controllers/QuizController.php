@@ -14,12 +14,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Modules\Academy\Models\Completion;
+use Illuminate\Support\Facades\DB;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Models\QuestionCategory;
+use Modules\Academy\Models\QuizAttempt;
 use Modules\Academy\Services\CompletionService;
 use Modules\Academy\Services\QuestionBankService;
 use Modules\Academy\Services\QuizService;
@@ -55,9 +56,11 @@ class QuizController extends Controller
             : null;
 
         if ($attemptsAllowed !== null) {
-            $existingAttempts = Completion::where('user_id', $user->id)
-                ->where('lesson_item_id', $item->id)
-                ->count();
+            // V1-b : la limite s'appuie désormais sur l'HISTORIQUE RÉEL des tentatives
+            // (1 ligne QuizAttempt par soumission), et non plus sur le comptage des
+            // Completion (upsertées/idempotentes sur (user_id, lesson_item_id), donc
+            // approximatif). Comportement identique pour un nouvel item (0 tentative).
+            $existingAttempts = QuizAttempt::attemptCount($user->id, $item->id);
 
             if ($existingAttempts >= $attemptsAllowed) {
                 return back()->with('error', 'Nombre de tentatives maximum atteint.');
@@ -143,13 +146,42 @@ class QuizController extends Controller
 
         $passed = $scoreResult['percent'] >= $passingScore;
 
+        // V1-b : horodatage de début du round (posé par startQuiz en session).
+        $startedAt = null;
+        if (! empty($quizData['started_at'])) {
+            try {
+                $startedAt = \Illuminate\Support\Carbon::parse($quizData['started_at']);
+            } catch (\Throwable) {
+                $startedAt = null;
+            }
+        }
+
         // Supprimer la session (une tentative = une soumission)
         $request->session()->forget($sessionKey);
 
-        // Marquer complété si réussi
-        if ($passed) {
-            CompletionService::markComplete($user, $item, $scoreResult['score']);
-        }
+        // V1-b : enregistrer l'historique de la tentative ET marquer la complétion
+        // (si réussi) dans une SEULE transaction. La complétion reste INCHANGÉE
+        // (toujours appelée si réussi) ; la table d'historique démarre vide
+        // (rétrocompat des Completion existantes).
+        DB::transaction(function () use ($user, $item, $scoreResult, $passed, $answers, $questions, $startedAt): void {
+            QuizAttempt::create([
+                'user_id'            => $user->id,
+                'lesson_item_id'     => $item->id,
+                'course_id'          => $this->resolveCourseId($item),
+                'score'              => $scoreResult['score'],
+                'max_score'          => $scoreResult['total'],
+                'percent'            => $scoreResult['percent'],
+                'passed'             => $passed,
+                'answers'            => $answers,
+                'questions_snapshot' => $questions,
+                'started_at'         => $startedAt,
+                'submitted_at'       => now(),
+            ]);
+
+            if ($passed) {
+                CompletionService::markComplete($user, $item, $scoreResult['score']);
+            }
+        });
 
         // Flasher le résultat (item_id inclus pour affichage ciblé en vue)
         $request->session()->flash('academy.quiz_result', [
@@ -194,6 +226,21 @@ class QuizController extends Controller
 
         if (! $isEnrolled) {
             abort(403);
+        }
+    }
+
+    /**
+     * V1-b : résout l'ID du cours d'un item (via item→lesson→chapter), dénormalisé
+     * dans academy_quiz_attempts pour scoper l'analytics. Retombe sur 0 si introuvable.
+     */
+    private function resolveCourseId(LessonItem $item): int
+    {
+        try {
+            $item->loadMissing('lesson.chapter');
+
+            return (int) ($item->lesson->chapter->course_id ?? 0);
+        } catch (\Throwable) {
+            return 0;
         }
     }
 }

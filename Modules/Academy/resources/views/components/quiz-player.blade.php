@@ -213,12 +213,34 @@
             <p class="text-muted mb-1" style="font-size: 0.9rem;">
                 Score requis pour réussir : <strong>{{ $passingScore }}%</strong>
             </p>
+            @php
+                // V1-b : indicateur « Tentative N / M » basé sur l'historique réel.
+                // Lecture seule, défensif (si la table n'existe pas, on n'affiche rien).
+                $attemptsUsed = 0;
+                if (auth()->check() && class_exists(\Modules\Academy\Models\QuizAttempt::class)) {
+                    try {
+                        $attemptsUsed = \Modules\Academy\Models\QuizAttempt::attemptCount(
+                            (int) auth()->id(),
+                            (int) $item->id
+                        );
+                    } catch (\Throwable) {
+                        $attemptsUsed = 0;
+                    }
+                }
+                $nextAttempt = $attemptsUsed + 1;
+            @endphp
             @if($attemptsAllowed !== null)
+                @php $remaining = max(0, $attemptsAllowed - $attemptsUsed); @endphp
                 <p class="text-muted mb-3" style="font-size: 0.9rem;">
-                    Tentatives autorisées : <strong>{{ $attemptsAllowed }}</strong>
+                    Tentative <strong>{{ min($nextAttempt, $attemptsAllowed) }}</strong> / <strong>{{ $attemptsAllowed }}</strong>
+                    <span aria-hidden="true">·</span>
+                    {{ $remaining }} {{ $remaining > 1 ? 'restantes' : 'restante' }}
                 </p>
             @else
-                <p class="mb-3"></p>
+                <p class="text-muted mb-3" style="font-size: 0.9rem;">
+                    Tentative <strong>{{ $nextAttempt }}</strong>
+                    <span class="visually-hidden">(tentatives illimitées)</span>
+                </p>
             @endif
             <form method="POST"
                   action="{{ route('academy.quiz.start', [$course, $lesson, $item->id]) }}">
