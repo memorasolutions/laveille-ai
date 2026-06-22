@@ -797,9 +797,14 @@ class CourseEditor extends Component
         int $itemId,
         string $type,
         string $title,
-        ?int $estimatedMinutes = null,
+        $estimatedMinutes = null,
         array $extra = []
     ): void {
+        // Livewire v4 : un champ number vide arrive en chaine '' depuis le DOM.
+        // Normaliser ''/null -> null, sinon caster en int (evite TypeError sur ?int).
+        $estimatedMinutes = ($estimatedMinutes === '' || $estimatedMinutes === null)
+            ? null
+            : (int) $estimatedMinutes;
         $course = $this->resolveCourse();
         $this->authorize('manageStructure', $course);
 
