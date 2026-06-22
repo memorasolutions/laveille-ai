@@ -39,6 +39,8 @@ use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
+use Modules\Academy\Models\RubricCriterion;
+use Modules\Academy\Models\RubricLevel;
 use Modules\Academy\Models\Submission;
 
 class CourseAssignments extends Component
@@ -72,6 +74,29 @@ class CourseAssignments extends Component
 
     // ── Confirmations inline à 2 temps (jamais de popup native) ─────────────────
     public ?int $confirmingAssignmentRemoval = null;
+
+    // ── V2-a : construction de la grille d'évaluation (rubric) ──────────────────
+    /** Devoir dont le panneau « Grille » est ouvert (id), null = aucun. */
+    public ?int $rubricAssignment = null;
+    /** Saisie d'un NOUVEAU critère. */
+    public string $newCriterion = '';
+    /** Critère en cours d'édition (id) + son libellé. */
+    public ?int $editingCriterion = null;
+    public string $criterionDescription = '';
+    /** Critère auquel on AJOUTE un niveau (id), null = aucun. */
+    public ?int $addingLevelTo = null;
+    /** Niveau en cours d'édition (id), null = aucun. */
+    public ?int $editingLevel = null;
+    /** Saisie d'un niveau (ajout ou édition) : libellé + points (chaîne du DOM). */
+    public string $levelDescription = '';
+    public string $levelPoints = '';
+    /** Confirmations inline de suppression (jamais de popup native). */
+    public ?int $confirmingCriterionRemoval = null;
+    public ?int $confirmingLevelRemoval = null;
+
+    // ── V2-a : correction PAR GRILLE (niveau retenu par critère) ────────────────
+    /** Sélection {criterion_id: level_id} de la correction en cours (chaînes du DOM). */
+    public array $rubricSelection = [];
 
     /**
      * Entrée. Autorisation SERVEUR d'affichage : pour voir CET espace il faut au
@@ -125,6 +150,28 @@ class CourseAssignments extends Component
     {
         return Lesson::where('lessons.id', $lessonId)
             ->whereHas('chapter', fn ($q) => $q->where('course_id', $course->id))
+            ->firstOrFail();
+    }
+
+    /**
+     * V2-a - Re-résout un critère de grille ET vérifie qu'il appartient à un devoir
+     * de CE cours (anti-IDOR), en remontant criterion->assignment->course_id.
+     */
+    private function resolveCriterionFor(Course $course, int $criterionId): RubricCriterion
+    {
+        return RubricCriterion::where('id', $criterionId)
+            ->whereHas('assignment', fn ($q) => $q->where('course_id', $course->id))
+            ->firstOrFail();
+    }
+
+    /**
+     * V2-a - Re-résout un niveau ET vérifie qu'il appartient à un critère d'un devoir
+     * de CE cours (anti-IDOR), en remontant level->criterion->assignment->course_id.
+     */
+    private function resolveLevelFor(Course $course, int $levelId): RubricLevel
+    {
+        return RubricLevel::where('id', $levelId)
+            ->whereHas('criterion.assignment', fn ($q) => $q->where('course_id', $course->id))
             ->firstOrFail();
     }
 
@@ -303,13 +350,21 @@ class CourseAssignments extends Component
         $this->gradingSubmission = $submission->id;
         $this->gradeScore        = $submission->score !== null ? (string) $submission->score : '';
         $this->gradeFeedback     = (string) $submission->feedback;
-        $this->resetErrorBag(['gradeScore', 'gradeFeedback']);
+
+        // V2-a : si une grille existe, pré-remplir la sélection {criterion_id: level_id}
+        // depuis la correction antérieure (chaînes, pour des radios HTML).
+        $this->rubricSelection = [];
+        foreach ((array) ($submission->rubric_scores ?? []) as $criterionId => $levelId) {
+            $this->rubricSelection[(int) $criterionId] = (string) $levelId;
+        }
+
+        $this->resetErrorBag(['gradeScore', 'gradeFeedback', 'rubricSelection']);
     }
 
     public function cancelGrading(): void
     {
-        $this->reset('gradingSubmission', 'gradeScore', 'gradeFeedback');
-        $this->resetErrorBag(['gradeScore', 'gradeFeedback']);
+        $this->reset('gradingSubmission', 'gradeScore', 'gradeFeedback', 'rubricSelection');
+        $this->resetErrorBag(['gradeScore', 'gradeFeedback', 'rubricSelection']);
     }
 
     /**
@@ -327,7 +382,18 @@ class CourseAssignments extends Component
         }
 
         $submission = $this->resolveSubmissionFor($course, (int) $this->gradingSubmission);
-        $maxPoints  = $submission->assignment->max_points;
+        $assignment = $submission->assignment;
+
+        // V2-a : DEUX chemins selon que le devoir a une grille ACTIVE ou non.
+        //  - SANS grille  → correction manuelle (note libre bornée) : INCHANGÉ.
+        //  - AVEC grille  → un niveau par critère, note AUTO-calculée (mise à l'échelle).
+        if ($assignment->hasRubric()) {
+            $this->gradeWithRubric($assignment, $submission);
+
+            return;
+        }
+
+        $maxPoints = $assignment->max_points;
 
         // Borne dynamique = max_points du devoir (re-résolu serveur, jamais le client).
         $data = $this->validate([
@@ -347,6 +413,39 @@ class CourseAssignments extends Component
 
         $this->cancelGrading();
         $this->flashSaved('Remise corrigée.');
+    }
+
+    /**
+     * V2-a - Correction PAR GRILLE : exige un niveau retenu par critère notable.
+     * La note est AUTO-calculée (somme des points → mise à l'échelle sur max_points,
+     * bornée) ; les niveaux sont re-résolus côté modèle (anti-IDOR : un niveau
+     * étranger est ignoré). rubric_scores ({criterion_id: level_id}) + score +
+     * graded_at/by écrits ensemble. graded_by = utilisateur connecté.
+     */
+    private function gradeWithRubric(Assignment $assignment, Submission $submission): void
+    {
+        $this->validate(
+            ['gradeFeedback' => 'nullable|string|max:20000'],
+        );
+
+        $result = $assignment->gradeFromRubricSelection($this->rubricSelection);
+
+        if (! $result['complete']) {
+            $this->addError('rubricSelection', 'Choisissez un niveau pour chaque critère de la grille.');
+
+            return;
+        }
+
+        $submission->update([
+            'score'         => $result['scaled'],
+            'feedback'      => trim($this->gradeFeedback) !== '' ? $this->gradeFeedback : null,
+            'rubric_scores' => $result['normalized'],
+            'graded_at'     => now(),
+            'graded_by'     => auth()->id(),
+        ]);
+
+        $this->cancelGrading();
+        $this->flashSaved('Remise corrigée selon la grille.');
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -373,6 +472,266 @@ class CourseAssignments extends Component
     public function cancelAssignmentRemoval(): void
     {
         $this->confirmingAssignmentRemoval = null;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // V2-a : CONSTRUIRE la grille d'évaluation (rubric) - gâté manageStructure
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    /** Ouvre le panneau « Grille » d'un devoir de CE cours (anti-IDOR). */
+    public function openRubric(int $assignmentId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $assignment = $this->resolveAssignmentFor($course, $assignmentId);
+
+        $this->rubricAssignment = $assignment->id;
+        $this->resetRubricForms();
+    }
+
+    public function closeRubric(): void
+    {
+        $this->rubricAssignment = null;
+        $this->resetRubricForms();
+    }
+
+    /** Réinitialise tous les sous-formulaires de la grille (sans fermer le panneau). */
+    private function resetRubricForms(): void
+    {
+        $this->reset(
+            'newCriterion', 'editingCriterion', 'criterionDescription',
+            'addingLevelTo', 'editingLevel', 'levelDescription', 'levelPoints',
+            'confirmingCriterionRemoval', 'confirmingLevelRemoval',
+        );
+        $this->resetErrorBag(['newCriterion', 'criterionDescription', 'levelDescription', 'levelPoints']);
+    }
+
+    /** Ajoute un critère au devoir dont le panneau est ouvert (anti-IDOR). */
+    public function addCriterion(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        if ($this->rubricAssignment === null) {
+            return;
+        }
+        $assignment = $this->resolveAssignmentFor($course, (int) $this->rubricAssignment);
+
+        $this->validate(
+            ['newCriterion' => 'required|string|max:500'],
+            [],
+            ['newCriterion' => 'critère'],
+        );
+
+        $position = (int) RubricCriterion::where('assignment_id', $assignment->id)->max('position') + 1;
+
+        RubricCriterion::create([
+            'assignment_id' => $assignment->id,
+            'description'   => trim($this->newCriterion),
+            'position'      => $position,
+        ]);
+
+        $this->newCriterion = '';
+        $this->resetErrorBag('newCriterion');
+        $this->flashSaved('Critère ajouté.');
+    }
+
+    /** Charge un critère de CE cours en édition (anti-IDOR). */
+    public function editCriterion(int $criterionId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $criterion = $this->resolveCriterionFor($course, $criterionId);
+
+        $this->editingCriterion     = $criterion->id;
+        $this->criterionDescription = $criterion->description;
+        $this->resetErrorBag('criterionDescription');
+    }
+
+    public function saveCriterion(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        if ($this->editingCriterion === null) {
+            return;
+        }
+        $criterion = $this->resolveCriterionFor($course, (int) $this->editingCriterion);
+
+        $this->validate(
+            ['criterionDescription' => 'required|string|max:500'],
+            [],
+            ['criterionDescription' => 'critère'],
+        );
+
+        $criterion->update(['description' => trim($this->criterionDescription)]);
+
+        $this->reset('editingCriterion', 'criterionDescription');
+        $this->flashSaved('Critère modifié.');
+    }
+
+    public function cancelCriterionEdit(): void
+    {
+        $this->reset('editingCriterion', 'criterionDescription');
+        $this->resetErrorBag('criterionDescription');
+    }
+
+    public function confirmCriterionRemoval(int $criterionId): void
+    {
+        $this->confirmingCriterionRemoval = $criterionId;
+    }
+
+    public function cancelCriterionRemoval(): void
+    {
+        $this->confirmingCriterionRemoval = null;
+    }
+
+    /** Supprime un critère de CE cours (niveaux en cascade), anti-IDOR. */
+    public function deleteCriterion(int $criterionId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $criterion = $this->resolveCriterionFor($course, $criterionId);
+        $criterion->delete();
+
+        $this->confirmingCriterionRemoval = null;
+        if ($this->editingCriterion === $criterionId) {
+            $this->reset('editingCriterion', 'criterionDescription');
+        }
+        if ($this->addingLevelTo === $criterionId) {
+            $this->reset('addingLevelTo', 'levelDescription', 'levelPoints');
+        }
+        $this->flashSaved('Critère supprimé.');
+    }
+
+    /** Ouvre le formulaire d'ajout d'un niveau à un critère de CE cours (anti-IDOR). */
+    public function startAddLevel(int $criterionId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $criterion = $this->resolveCriterionFor($course, $criterionId);
+
+        $this->addingLevelTo    = $criterion->id;
+        $this->editingLevel     = null;
+        $this->levelDescription = '';
+        $this->levelPoints      = '';
+        $this->resetErrorBag(['levelDescription', 'levelPoints']);
+    }
+
+    public function cancelAddLevel(): void
+    {
+        $this->reset('addingLevelTo', 'levelDescription', 'levelPoints');
+        $this->resetErrorBag(['levelDescription', 'levelPoints']);
+    }
+
+    /** Ajoute un niveau au critère ciblé (re-résolu scopé au cours, anti-IDOR). */
+    public function addLevel(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        if ($this->addingLevelTo === null) {
+            return;
+        }
+        $criterion = $this->resolveCriterionFor($course, (int) $this->addingLevelTo);
+
+        $data = $this->validate([
+            'levelDescription' => 'required|string|max:500',
+            'levelPoints'      => 'required|integer|min:0|max:100000',
+        ], [], [
+            'levelDescription' => 'libellé du niveau',
+            'levelPoints'      => 'points',
+        ]);
+
+        $position = (int) RubricLevel::where('criterion_id', $criterion->id)->max('position') + 1;
+
+        RubricLevel::create([
+            'criterion_id' => $criterion->id,
+            'description'  => trim($data['levelDescription']),
+            'points'       => (int) $data['levelPoints'],
+            'position'     => $position,
+        ]);
+
+        $this->reset('addingLevelTo', 'levelDescription', 'levelPoints');
+        $this->flashSaved('Niveau ajouté.');
+    }
+
+    /** Charge un niveau de CE cours en édition (anti-IDOR). */
+    public function editLevel(int $levelId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $level = $this->resolveLevelFor($course, $levelId);
+
+        $this->editingLevel     = $level->id;
+        $this->addingLevelTo    = null;
+        $this->levelDescription = $level->description;
+        $this->levelPoints      = (string) $level->points;
+        $this->resetErrorBag(['levelDescription', 'levelPoints']);
+    }
+
+    public function saveLevel(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        if ($this->editingLevel === null) {
+            return;
+        }
+        $level = $this->resolveLevelFor($course, (int) $this->editingLevel);
+
+        $data = $this->validate([
+            'levelDescription' => 'required|string|max:500',
+            'levelPoints'      => 'required|integer|min:0|max:100000',
+        ], [], [
+            'levelDescription' => 'libellé du niveau',
+            'levelPoints'      => 'points',
+        ]);
+
+        $level->update([
+            'description' => trim($data['levelDescription']),
+            'points'      => (int) $data['levelPoints'],
+        ]);
+
+        $this->reset('editingLevel', 'levelDescription', 'levelPoints');
+        $this->flashSaved('Niveau modifié.');
+    }
+
+    public function cancelLevelEdit(): void
+    {
+        $this->reset('editingLevel', 'levelDescription', 'levelPoints');
+        $this->resetErrorBag(['levelDescription', 'levelPoints']);
+    }
+
+    public function confirmLevelRemoval(int $levelId): void
+    {
+        $this->confirmingLevelRemoval = $levelId;
+    }
+
+    public function cancelLevelRemoval(): void
+    {
+        $this->confirmingLevelRemoval = null;
+    }
+
+    /** Supprime un niveau de CE cours (re-résolu scopé), anti-IDOR. */
+    public function deleteLevel(int $levelId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $level = $this->resolveLevelFor($course, $levelId);
+        $level->delete();
+
+        $this->confirmingLevelRemoval = null;
+        if ($this->editingLevel === $levelId) {
+            $this->reset('editingLevel', 'levelDescription', 'levelPoints');
+        }
+        $this->flashSaved('Niveau supprimé.');
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -460,6 +819,59 @@ class CourseAssignments extends Component
         return Assignment::where('id', $this->reviewingAssignment)
             ->where('course_id', $this->courseId)
             ->first();
+    }
+
+    /**
+     * V2-a - Critères + niveaux du devoir dont le panneau « Grille » est ouvert,
+     * scopés à CE cours (anti-IDOR d'affichage). Collection vide si aucun panneau.
+     */
+    #[Computed]
+    public function rubricCriteria(): EloquentCollection
+    {
+        if ($this->rubricAssignment === null) {
+            return new EloquentCollection();
+        }
+
+        $assignment = Assignment::where('id', $this->rubricAssignment)
+            ->where('course_id', $this->courseId)
+            ->first();
+
+        if ($assignment === null) {
+            return new EloquentCollection();
+        }
+
+        return RubricCriterion::where('assignment_id', $assignment->id)
+            ->with('levels')
+            ->orderBy('position')
+            ->orderBy('id')
+            ->get();
+    }
+
+    /**
+     * V2-a - Critères + niveaux du devoir de la remise EN COURS de correction,
+     * scopés à CE cours (anti-IDOR). Sert à afficher les radios de la grille.
+     * Collection vide si aucune correction ouverte ou si le devoir n'a pas de grille.
+     */
+    #[Computed]
+    public function gradingCriteria(): EloquentCollection
+    {
+        if ($this->gradingSubmission === null) {
+            return new EloquentCollection();
+        }
+
+        $submission = Submission::where('id', $this->gradingSubmission)
+            ->whereHas('assignment', fn ($q) => $q->where('course_id', $this->courseId))
+            ->first();
+
+        if ($submission === null) {
+            return new EloquentCollection();
+        }
+
+        return RubricCriterion::where('assignment_id', $submission->assignment_id)
+            ->with('levels')
+            ->orderBy('position')
+            ->orderBy('id')
+            ->get();
     }
 
     /**

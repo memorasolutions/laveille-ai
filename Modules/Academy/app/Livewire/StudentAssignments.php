@@ -206,7 +206,7 @@ class StudentAssignments extends Component
 
         $assignments = Assignment::whereIn('course_id', $courseIds)
             ->where('is_published', true)
-            ->with(['course:id,slug,title', 'lesson:id,title'])
+            ->with(['course:id,slug,title', 'lesson:id,title', 'rubricCriteria.levels'])
             ->orderBy('course_id')
             ->orderBy('position')
             ->orderBy('id')

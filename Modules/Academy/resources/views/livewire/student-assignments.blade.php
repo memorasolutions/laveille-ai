@@ -50,6 +50,42 @@
                             </div>
                         @endif
 
+                        {{-- V2-a : grille d'évaluation retenue (si corrigé par grille) --}}
+                        @if ($submission && $submission->gradedWithRubric() && $assignment->rubricCriteria->isNotEmpty())
+                            @php($retained = (array) $submission->rubric_scores)
+                            <div style="margin-top: 12px; overflow-x: auto;">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                                    <caption style="text-align: left; font-weight: 600; color: var(--sys-text-default, #1A1D23); margin-bottom: 6px;">
+                                        Grille d'évaluation · note totale {{ $submission->score }} / {{ $assignment->max_points }}
+                                    </caption>
+                                    <thead>
+                                        <tr style="text-align: left; border-bottom: 2px solid #E5E7EB;">
+                                            <th scope="col" style="padding: 6px 8px;">Critère</th>
+                                            <th scope="col" style="padding: 6px 8px;">Niveau retenu</th>
+                                            <th scope="col" style="padding: 6px 8px; white-space: nowrap;">Points</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($assignment->rubricCriteria as $criterion)
+                                            @php($chosenId = $retained[$criterion->id] ?? null)
+                                            @php($chosen = $chosenId !== null ? $criterion->levels->firstWhere('id', (int) $chosenId) : null)
+                                            <tr style="border-bottom: 1px solid #F3F4F6;">
+                                                <th scope="row" style="padding: 6px 8px; font-weight: 600; text-align: left;">{!! $criterion->renderedDescription() !!}</th>
+                                                <td style="padding: 6px 8px;">
+                                                    @if ($chosen)
+                                                        {!! $chosen->renderedDescription() !!}
+                                                    @else
+                                                        <span style="color: var(--sys-text-muted, #9CA3AF);">–</span>
+                                                    @endif
+                                                </td>
+                                                <td style="padding: 6px 8px;">{{ $chosen?->points ?? '–' }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+
                         {{-- Note + rétroaction (si corrigé) --}}
                         @if ($submission && $submission->isGraded() && $submission->feedback)
                             <div style="margin-top: 12px; border: 1px solid #BBF7D0; background: #F0FDF4; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px 14px;">

@@ -48,14 +48,16 @@ class Submission extends Model implements HasMedia
         'submitted_at',
         'score',
         'feedback',
+        'rubric_scores',
         'graded_at',
         'graded_by',
     ];
 
     protected $casts = [
-        'score'        => 'integer',
-        'submitted_at' => 'datetime',
-        'graded_at'    => 'datetime',
+        'score'         => 'integer',
+        'submitted_at'  => 'datetime',
+        'graded_at'     => 'datetime',
+        'rubric_scores' => 'array',
     ];
 
     public function assignment(): BelongsTo
@@ -77,6 +79,15 @@ class Submission extends Model implements HasMedia
     public function isGraded(): bool
     {
         return $this->graded_at !== null && $this->score !== null;
+    }
+
+    /**
+     * V2-a - Vrai si la remise a été corrigée AU MOYEN d'une grille (rubric_scores
+     * renseigné). Faux = correction manuelle libre (rétrocompat) ou non corrigée.
+     */
+    public function gradedWithRubric(): bool
+    {
+        return $this->isGraded() && ! empty($this->rubric_scores);
     }
 
     /**
