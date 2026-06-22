@@ -68,3 +68,25 @@ it('ne rend aucun viewer quand il n’y a pas de BD', function () {
     expect(trim($html))->not->toContain('Lire la BD')
         ->and(trim($html))->not->toContain('role="dialog"');
 });
+
+it('expose hasBd dans le JSON des termes et intègre le filtre « Avec BD » à l’index', function () {
+    $view = file_get_contents(
+        module_path('Dictionary', 'resources/views/public/index.blade.php')
+    );
+
+    // hasBd exposé pour chaque terme (badge + filtre client).
+    expect($view)->toContain("'hasBd' => \\Modules\\Dictionary\\Support\\ComicLibrary::hasComic");
+
+    // Compteur serveur des termes possédant une BD.
+    expect($view)->toContain('$bdCount = $termsJson->where(\'hasBd\', true)->count();');
+
+    // État Alpine + intégration à la logique de filtrage existante (pas un 2e système).
+    expect($view)->toContain('bdOnly: false')
+        ->and($view)->toContain('const matchBd = !this.bdOnly || t.hasBd === true;')
+        ->and($view)->toContain('matchSearch && matchType && matchLetter && matchCat && matchBd');
+
+    // Contrôle de bascule rendu + accessibilité (aria-pressed) + chip d’état.
+    expect($view)->toContain('@click="bdOnly = !bdOnly"')
+        ->and($view)->toContain(':aria-pressed="bdOnly')
+        ->and($view)->toContain('{{ __(\'Avec BD\') }}');
+});

@@ -46,6 +46,9 @@
         ];
     })->values();
 
+    // Standard « visionneur de BD » : nombre de termes possédant une planche (pour le libellé du filtre).
+    $bdCount = $termsJson->where('hasBd', true)->count();
+
     $categoriesForFilter = $categories->unique(fn($c) => (string) $c->name)->map(fn($c) => [
         'id' => $c->id, // requis par :key="cat.id" du x-for (sinon clés undefined → « Duplicate key on x-for »)
         // ->unique(name) : garde-fou anti-doublons d'affichage même si la table en contenait encore
@@ -384,12 +387,13 @@
             activeType: '',
             activeLetter: '',
             activeCategory: '',
+            bdOnly: false,
             displayCount: 30,
             _lastFilterKey: '',
             terms: {{ $termsJson->toJson() }},
             categories: {{ $categoriesForFilter->toJson() }},
 
-            get filterKey() { return this.search + '|' + this.activeType + '|' + this.activeLetter + '|' + this.activeCategory; },
+            get filterKey() { return this.search + '|' + this.activeType + '|' + this.activeLetter + '|' + this.activeCategory + '|' + this.bdOnly; },
 
             get filteredTerms() {
                 const key = this.filterKey;
@@ -400,7 +404,8 @@
                     const matchType = !this.activeType || t.type === this.activeType;
                     const matchLetter = !this.activeLetter || t.firstLetter === this.activeLetter;
                     const matchCat = !this.activeCategory || t.categorySlug === this.activeCategory;
-                    return matchSearch && matchType && matchLetter && matchCat;
+                    const matchBd = !this.bdOnly || t.hasBd === true;
+                    return matchSearch && matchType && matchLetter && matchCat && matchBd;
                 });
             },
 
@@ -411,11 +416,11 @@
             toggleType(type) { this.activeType = this.activeType === type ? '' : type; },
             toggleLetter(l) { this.activeLetter = this.activeLetter === l ? '' : l; },
             toggleCategory(c) { this.activeCategory = this.activeCategory === c ? '' : c; },
-            resetAll() { this.search = ''; this.activeType = ''; this.activeLetter = ''; this.activeCategory = ''; },
+            resetAll() { this.search = ''; this.activeType = ''; this.activeLetter = ''; this.activeCategory = ''; this.bdOnly = false; },
 
             filtersOpen: false,
-            get hasActiveFilters() { return !!(this.search || this.activeType || this.activeLetter || this.activeCategory); },
-            get activeFilterCount() { return [this.search, this.activeType, this.activeLetter, this.activeCategory].filter(Boolean).length; },
+            get hasActiveFilters() { return !!(this.search || this.activeType || this.activeLetter || this.activeCategory || this.bdOnly); },
+            get activeFilterCount() { return [this.search, this.activeType, this.activeLetter, this.activeCategory, this.bdOnly].filter(Boolean).length; },
             typeLabels: { acronym: '🔤 Acronymes', ai_term: '🤖 Termes IA', explainer: '📖 Vulgarisations' },
             get activeCategoryLabel() { const c = this.categories.find(x => x.slug === this.activeCategory); return c ? c.icon + ' ' + c.name : ''; }
          }"
@@ -589,6 +594,11 @@
                             <span x-text="activeCategoryLabel"></span><span class="x">×</span>
                         </button>
                     </template>
+                    <template x-if="bdOnly">
+                        <button type="button" class="gl-chip" @click="bdOnly = false" aria-label="{{ __('Supprimer le filtre Avec BD') }}">
+                            <span>🐙&nbsp;{{ __('Avec BD') }}</span><span class="x">×</span>
+                        </button>
+                    </template>
                 </div>
 
                 {{-- Panneau de filtres (dropdown overlay) --}}
@@ -607,6 +617,15 @@
                         <button type="button" class="gl-pill" :class="{ active: activeType === 'ai_term' }" @click="toggleType('ai_term')">🤖 {{ __('Termes IA') }}</button>
                         <button type="button" class="gl-pill" :class="{ active: activeType === 'explainer' }" @click="toggleType('explainer')">📖 {{ __('Vulgarisations') }}</button>
                     </div>
+                    @if($bdCount > 0)
+                        {{-- Standard « visionneur de BD » : restreindre la grille aux termes possédant une planche. --}}
+                        <div class="gl-filters">
+                            <button type="button" class="gl-pill" :class="{ active: bdOnly }"
+                                    @click="bdOnly = !bdOnly" :aria-pressed="bdOnly ? 'true' : 'false'">
+                                🐙 {{ __('Avec BD') }} ({{ $bdCount }})
+                            </button>
+                        </div>
+                    @endif
                     <nav class="gl-az-nav" aria-label="{{ __('Navigation alphabétique') }}">
                         <button type="button" class="gl-az-btn gl-az-tous" :class="{ active: activeLetter === '' }" @click="activeLetter = ''">{{ __('Tous') }}</button>
                         @foreach(range('A','Z') as $char)
