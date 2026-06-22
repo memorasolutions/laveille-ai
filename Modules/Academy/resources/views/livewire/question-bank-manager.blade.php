@@ -151,6 +151,7 @@
                         <option value="truefalse">Vrai ou faux</option>
                         <option value="short">Réponse courte</option>
                         <option value="matching">Appariement</option>
+                        <option value="ordering">Ordonnancement</option>
                     </select>
                     @error('qType') <span role="alert" style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
 
@@ -266,6 +267,28 @@
                             @endforeach
                             <x-core::button type="button" wire:click="addPair" variant="secondary" size="sm">+ Ajouter une paire</x-core::button>
                             @error('qPairs') <span role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 6px;">{{ $message }}</span> @enderror
+                        </fieldset>
+                    @elseif ($qType === 'ordering')
+                        <fieldset style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px; margin: 0;">
+                            <legend style="font-size: 0.8rem; font-weight: 700; padding: 0 6px;">Éléments dans le BON ordre (au moins deux)</legend>
+                            <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 8px;">
+                                Saisissez les éléments dans l'ordre attendu (1 = premier). À l'examen, ils sont présentés mélangés et l'apprenant doit retrouver l'ordre.
+                            </p>
+                            @foreach ($qOrderingItems as $i => $element)
+                                <div wire:key="order-{{ $i }}" style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                    <span aria-hidden="true" style="flex: 0 0 auto; min-width: 22px; font-weight: 700; color: var(--sys-action-primary, #064E5A);">{{ $i + 1 }}.</span>
+                                    <label class="visually-hidden" for="qOrderingItems-{{ $i }}">Élément en position {{ $i + 1 }}</label>
+                                    <input type="text" id="qOrderingItems-{{ $i }}" wire:model="qOrderingItems.{{ $i }}" placeholder="Élément en position {{ $i + 1 }}"
+                                           style="flex: 1; padding: 7px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                    <x-core::button type="button" wire:click="moveOrderingItem({{ $i }}, 'up')" variant="ghost" size="sm" aria-label="Monter l'élément {{ $i + 1 }}" :disabled="$i === 0">↑</x-core::button>
+                                    <x-core::button type="button" wire:click="moveOrderingItem({{ $i }}, 'down')" variant="ghost" size="sm" aria-label="Descendre l'élément {{ $i + 1 }}" :disabled="$i === count($qOrderingItems) - 1">↓</x-core::button>
+                                    @if (count($qOrderingItems) > 2)
+                                        <x-core::button type="button" wire:click="removeOrderingItem({{ $i }})" variant="ghost" size="sm" aria-label="Retirer l'élément {{ $i + 1 }}">✕</x-core::button>
+                                    @endif
+                                </div>
+                            @endforeach
+                            <x-core::button type="button" wire:click="addOrderingItem" variant="secondary" size="sm">+ Ajouter un élément</x-core::button>
+                            @error('qOrderingItems') <span role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 6px;">{{ $message }}</span> @enderror
                         </fieldset>
                     @endif
 

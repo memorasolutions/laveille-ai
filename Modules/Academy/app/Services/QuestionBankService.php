@@ -231,6 +231,61 @@ final class QuestionBankService
                     'points'  => $points,
                 ];
 
+            case 'ordering':
+                // ORDONNANCEMENT (« mettre dans le bon ordre », type Moodle « Ordering »).
+                // Représentation banque : payload['items'] = TABLEAU des éléments dans le
+                // BON ordre (index 0 = position 1, index 1 = position 2, …). On présente
+                // à l'étudiant les éléments dans un ordre MÉLANGÉ (comme l'appariement
+                // mélange les définitions), tout en gardant la correspondance vers l'ordre
+                // correct via `answer` :
+                //   - `elements` = libellés dans l'ordre AFFICHÉ (mélangé) ;
+                //   - `answer`   = pour chaque élément AFFICHÉ, sa position absolue
+                //                  correcte (0-based) dans l'ordre attendu.
+                // Le scoring compare la position absolue choisie pour chaque élément à
+                // `answer` (crédit partiel). Les bonnes réponses (ordre correct) ne sont
+                // jamais exposées au client : seul `elements` est rendu ; `answer` reste
+                // serveur (session) et n'est lu qu'au scoring/à la révision.
+                $items = array_values(array_map(
+                    fn ($v): string => (string) $v,
+                    array_filter(
+                        (array) ($payload['items'] ?? []),
+                        fn ($v): bool => is_string($v) && trim($v) !== ''
+                    )
+                ));
+                if (count($items) < 2) {
+                    return null;
+                }
+
+                $n = count($items);
+
+                // Permutation d'affichage (indices d'origine = positions absolues correctes).
+                $order = range(0, $n - 1);
+                if ($n > 1) {
+                    shuffle($order);
+                    // Garde-fou anti-trivial : si le mélange retombe sur l'ordre correct
+                    // (l'ordre serait alors visuellement révélé), on applique une rotation
+                    // d'un cran (dérangement complet, aucun élément à sa place). Ne touche
+                    // pas la correspondance `answer` (calculée à partir de $order ensuite).
+                    if ($order === range(0, $n - 1)) {
+                        $first = array_shift($order);
+                        $order[] = $first;
+                    }
+                }
+
+                $elements = [];
+                $answer   = [];
+                foreach ($order as $originalIndex) {
+                    $elements[] = $items[$originalIndex];
+                    $answer[]   = (int) $originalIndex; // position absolue correcte (0-based)
+                }
+
+                return $base + [
+                    'type'     => 'ordonnancement',
+                    'elements' => $elements,
+                    'answer'   => $answer,
+                    'points'   => $points,
+                ];
+
             default:
                 return null;
         }

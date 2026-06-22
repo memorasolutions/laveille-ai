@@ -199,6 +199,22 @@
                             $expectedArr = array_map('intval', (array) ($q['answer'] ?? []));
                             $givenArr    = is_array($userAns) ? array_map('intval', array_values($userAns)) : [];
                             $isCorrect   = $givenArr === $expectedArr;
+                        } elseif ($qType === 'ordonnancement') {
+                            // `answer` = position absolue correcte (0-based) de chaque élément affiché.
+                            $orderElements = is_array($q['elements'] ?? null) ? $q['elements'] : [];
+                            $expectedArr   = array_map('intval', (array) ($q['answer'] ?? []));
+                            $givenArr      = is_array($userAns) ? array_map('intval', array_values($userAns)) : [];
+                            $isCorrect     = $givenArr === $expectedArr;
+
+                            // Ordre correct reconstruit (élément à sa position absolue).
+                            $correctSequence = [];
+                            foreach ($expectedArr as $j => $pos) {
+                                if (isset($orderElements[$j])) {
+                                    $correctSequence[$pos] = $orderElements[$j];
+                                }
+                            }
+                            ksort($correctSequence);
+                            $correctSequence = array_values($correctSequence);
                         }
 
                         // Couche 1 : feedback du CHOIX SÉLECTIONNÉ (mcq / vraifaux).
@@ -234,6 +250,30 @@
                                 <p class="mb-1 text-muted" style="font-size: 0.85rem;">
                                     {{ $isCorrect ? 'Toutes les associations sont correctes.' : 'Certaines associations sont à revoir.' }}
                                 </p>
+                            @endif
+                        @elseif($qType === 'ordonnancement')
+                            @if($reviewOpts['show_correctness'])
+                                <p class="mb-1 text-muted" style="font-size: 0.85rem;">
+                                    {{ $isCorrect ? 'L\'ordre est exact.' : 'L\'ordre est à revoir.' }}
+                                </p>
+                            @endif
+                            {{-- Votre ordre : chaque élément → la position que vous lui avez donnée. --}}
+                            <p class="mb-1 text-muted" style="font-size: 0.85rem;">Votre ordre :</p>
+                            <ul class="mb-1 text-muted" style="font-size: 0.85rem; padding-left: 1.1rem;">
+                                @foreach(($orderElements ?? []) as $j => $el)
+                                    @php $chosen = $givenArr[$j] ?? null; @endphp
+                                    <li>{{ $el }} <span aria-hidden="true">→</span> position {{ is_int($chosen) && $chosen >= 0 ? $chosen + 1 : '—' }}</li>
+                                @endforeach
+                            </ul>
+                            @if($reviewOpts['show_right_answer'])
+                                @unless($isCorrect)
+                                    <p class="mb-1 text-muted" style="font-size: 0.85rem;">Ordre correct :</p>
+                                    <ol class="mb-1 text-muted" style="font-size: 0.85rem; padding-left: 1.3rem;">
+                                        @foreach(($correctSequence ?? []) as $el)
+                                            <li>{{ $el }}</li>
+                                        @endforeach
+                                    </ol>
+                                @endunless
                             @endif
                         @else
                             <p class="mb-1 text-muted" style="font-size: 0.85rem;">
@@ -349,10 +389,11 @@
 
             @foreach($questions as $i => $question)
                 @php
-                    $type    = $question['type']     ?? 'qcm';
-                    $choices = $question['choices']   ?? [];
-                    $terms   = $question['terms']     ?? [];
-                    $defs    = $question['defs']      ?? [];
+                    $type     = $question['type']     ?? 'qcm';
+                    $choices  = $question['choices']   ?? [];
+                    $terms    = $question['terms']     ?? [];
+                    $defs     = $question['defs']      ?? [];
+                    $elements = $question['elements']  ?? [];
                 @endphp
 
                 <div class="mb-4 p-3 rounded" style="background: #F8FAFC; border: 1px solid #E2E8F0;">
@@ -430,6 +471,33 @@
                             @endforeach
                         </div>
 
+                    {{-- Ordonnancement (alternative clavier WCAG : un select de position
+                         par élément, comme l'appariement). « Choisissez la position de
+                         chaque élément ». Les bonnes réponses restent serveur. --}}
+                    @elseif($type === 'ordonnancement')
+                        <p class="text-muted mb-2" style="font-size: 0.85rem;">Choisissez la position de chaque élément (1 = premier).</p>
+                        <div class="mt-2">
+                            @foreach($elements as $j => $element)
+                                @php $selectId = "q{$item->id}_{$i}_order_{$j}"; @endphp
+                                <div class="d-flex align-items-center gap-3 mb-2">
+                                    <label for="{{ $selectId }}" style="min-width: 220px; font-size: 0.9rem; font-weight: 500; margin-bottom: 0;">
+                                        {{ $element }}
+                                    </label>
+                                    <select id="{{ $selectId }}"
+                                            name="answers[{{ $i }}][]"
+                                            class="form-select form-select-sm"
+                                            style="max-width: 160px;"
+                                            aria-label="Position de : {{ $element }}"
+                                            required>
+                                        <option value="">— Position —</option>
+                                        @foreach($elements as $p => $ignored)
+                                            <option value="{{ $p }}">{{ $p + 1 }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endforeach
+                        </div>
+
                     @else
                         <p class="text-muted small">Type de question non pris en charge.</p>
                     @endif
@@ -486,10 +554,11 @@
 
             @foreach($questions as $i => $question)
                 @php
-                    $type    = $question['type']   ?? 'qcm';
-                    $choices = $question['choices'] ?? [];
-                    $terms   = $question['terms']   ?? [];
-                    $defs    = $question['defs']    ?? [];
+                    $type     = $question['type']     ?? 'qcm';
+                    $choices  = $question['choices']   ?? [];
+                    $terms    = $question['terms']     ?? [];
+                    $defs     = $question['defs']      ?? [];
+                    $elements = $question['elements']  ?? [];
 
                     $v        = $validatedAll[$i] ?? ($validatedAll[(string) $i] ?? null);
                     $locked   = is_array($v);
@@ -552,6 +621,26 @@
                                         </div>
                                     @endforeach
                                 </div>
+                            @elseif($type === 'ordonnancement')
+                                <p class="text-muted mb-2" style="font-size: 0.85rem;">Choisissez la position de chaque élément (1 = premier).</p>
+                                <div class="mt-2">
+                                    @foreach($elements as $j => $element)
+                                        @php $selectId = "iq{$item->id}_{$i}_order_{$j}"; @endphp
+                                        <div class="d-flex align-items-center gap-3 mb-2">
+                                            <label for="{{ $selectId }}" style="min-width: 220px; font-size: 0.9rem; font-weight: 500; margin-bottom: 0;">
+                                                {{ $element }}
+                                            </label>
+                                            <select id="{{ $selectId }}" name="answer[]"
+                                                    class="form-select form-select-sm" style="max-width: 160px;"
+                                                    aria-label="Position de : {{ $element }}" required>
+                                                <option value="">— Position —</option>
+                                                @foreach($elements as $p => $ignored)
+                                                    <option value="{{ $p }}">{{ $p + 1 }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    @endforeach
+                                </div>
                             @else
                                 <p class="text-muted small">Type de question non pris en charge.</p>
                             @endif
@@ -608,6 +697,10 @@
                         @if($type === 'appariement')
                             <p class="mb-1 text-muted" style="font-size: 0.85rem;">
                                 {{ $isCorrect ? 'Toutes les associations sont correctes.' : 'Certaines associations sont à revoir.' }}
+                            </p>
+                        @elseif($type === 'ordonnancement')
+                            <p class="mb-1 text-muted" style="font-size: 0.85rem;">
+                                {{ $isCorrect ? 'L\'ordre est exact.' : 'L\'ordre est à revoir.' }}
                             </p>
                         @else
                             <p class="mb-1 text-muted" style="font-size: 0.85rem;">

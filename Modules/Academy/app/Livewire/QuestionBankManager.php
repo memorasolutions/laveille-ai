@@ -105,6 +105,15 @@ class QuestionBankManager extends Component
     /** @var array<int, array{term: string, def: string}> */
     public array $qPairs = [['term' => '', 'def' => ''], ['term' => '', 'def' => '']];
 
+    /**
+     * ORDONNANCEMENT : éléments saisis dans le BON ordre (index 0 = position 1, …).
+     * C'est l'ORDRE qui compte ; au tirage, QuestionBankService mélange l'affichage en
+     * conservant la correspondance vers l'ordre correct. Au moins 2 éléments.
+     *
+     * @var array<int, string>
+     */
+    public array $qOrderingItems = ['', '', ''];
+
     // ── Confirmations inline à 2 temps (jamais de popup native) ───────────────────
     public ?int $confirmingCategoryDeletion = null;
     public ?int $confirmingQuestionDeletion = null;
@@ -351,6 +360,40 @@ class QuestionBankManager extends Component
         $this->qPairs = array_values($this->qPairs);
     }
 
+    /** Ajoute un élément d'ordonnancement (à la fin de l'ordre attendu). */
+    public function addOrderingItem(): void
+    {
+        $this->qOrderingItems[] = '';
+    }
+
+    public function removeOrderingItem(int $index): void
+    {
+        if (count($this->qOrderingItems) <= 2) {
+            return; // minimum 2 éléments.
+        }
+
+        unset($this->qOrderingItems[$index]);
+        $this->qOrderingItems = array_values($this->qOrderingItems);
+    }
+
+    /**
+     * Réordonne un élément d'ordonnancement (l'ordre saisi EST la bonne réponse).
+     * $direction : 'up' (remonter) ou 'down' (descendre). Bornes respectées (no-op
+     * en dehors). Échange simple avec l'élément voisin.
+     */
+    public function moveOrderingItem(int $index, string $direction): void
+    {
+        $items  = array_values($this->qOrderingItems);
+        $target = $direction === 'up' ? $index - 1 : $index + 1;
+
+        if ($index < 0 || $index >= count($items) || $target < 0 || $target >= count($items)) {
+            return;
+        }
+
+        [$items[$index], $items[$target]] = [$items[$target], $items[$index]];
+        $this->qOrderingItems = $items;
+    }
+
     /**
      * Enregistre une question (création OU édition selon $editingQuestionId).
      * La catégorie est re-résolue scopée owner (anti-IDOR) ; le type est en liste
@@ -460,6 +503,7 @@ class QuestionBankManager extends Component
             'truefalse' => $this->buildTrueFalsePayload(),
             'short'     => $this->buildShortPayload(),
             'matching'  => $this->buildMatchingPayload(),
+            'ordering'  => $this->buildOrderingPayload(),
             default     => [],
         };
     }
@@ -610,6 +654,28 @@ class QuestionBankManager extends Component
     }
 
     /**
+     * @return array<string, mixed>
+     *
+     * payload['items'] = TABLEAU ORDONNÉ des éléments dans le BON ordre (>= 2 non vides).
+     * Même invariant que QuestionBankService::mapToRoundItem (cas ordering).
+     */
+    private function buildOrderingPayload(): array
+    {
+        $items = array_values(array_filter(
+            array_map(fn ($v) => is_string($v) ? trim($v) : '', $this->qOrderingItems),
+            fn (string $v): bool => $v !== ''
+        ));
+
+        if (count($items) < 2) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'qOrderingItems' => 'Un ordonnancement exige au moins 2 éléments non vides.',
+            ]);
+        }
+
+        return ['items' => $items];
+    }
+
+    /**
      * Pré-remplit les champs du sous-formulaire à partir d'un payload existant.
      *
      * @param  array<string, mixed>  $payload
@@ -674,6 +740,14 @@ class QuestionBankManager extends Component
                     ? $pairs
                     : [['term' => '', 'def' => ''], ['term' => '', 'def' => '']];
                 break;
+
+            case 'ordering':
+                $items = array_values(array_map(
+                    fn ($v) => (string) $v,
+                    (array) ($payload['items'] ?? [])
+                ));
+                $this->qOrderingItems = count($items) >= 2 ? $items : ['', '', ''];
+                break;
         }
     }
 
@@ -689,6 +763,7 @@ class QuestionBankManager extends Component
         $this->qAccepted       = [''];
         $this->qDisplay        = null;
         $this->qPairs          = [['term' => '', 'def' => ''], ['term' => '', 'def' => '']];
+        $this->qOrderingItems  = ['', '', ''];
     }
 
     /**
@@ -861,6 +936,7 @@ class QuestionBankManager extends Component
             'truefalse' => 'Vrai ou faux',
             'short'     => 'Réponse courte',
             'matching'  => 'Appariement',
+            'ordering'  => 'Ordonnancement',
             default     => $type,
         };
     }

@@ -67,8 +67,10 @@ final class QuizService
      *                        `choice_feedback` et remappe `correct` (int en QCM simple,
      *                        TABLEAU d'indices en QCM MULTI V1-e). Les vraifaux
      *                        gardent l'ordre Vrai/Faux fixe (sémantique). court (pas
-     *                        de choix) et appariement (défs déjà mélangées par le
-     *                        mapping) sont laissés tels quels → mapping `answer` intact.
+     *                        de choix), appariement (défs déjà mélangées par le mapping)
+     *                        et ordonnancement (éléments déjà mélangés + `answer` apparié
+     *                        par le mapping) sont laissés tels quels → mapping `answer`
+     *                        intact, donc scoring inaltéré par le mélange.
      *
      * @param  array<int, array<string, mixed>> $round
      * @return array<int, array<string, mixed>>
@@ -94,8 +96,8 @@ final class QuizService
     /**
      * Permute les choix d'UNE question qcm en remappant l'index correct (et le
      * feedback par choix) pour que le scoring reste exact. Toute autre forme de
-     * question est renvoyée inchangée (vraifaux/court/appariement : ordre signifiant
-     * ou mapping déjà mélangé en amont).
+     * question est renvoyée inchangée (vraifaux/court/appariement/ordonnancement :
+     * ordre signifiant ou mapping déjà mélangé en amont).
      *
      * @param  array<string, mixed> $q
      * @return array<string, mixed>
@@ -299,6 +301,45 @@ final class QuizService
                     $given       = $givenArr;
                     $expected    = $expectedArr;
                     break;
+
+                case 'ordonnancement':
+                    // ORDONNANCEMENT - CRÉDIT PARTIEL par POSITION ABSOLUE (parité Moodle
+                    // « Ordering », notation par position absolue). `answer` = pour chaque
+                    // élément AFFICHÉ (ordre mélangé), sa position absolue correcte (0-based) ;
+                    // `given` = position absolue choisie par l'étudiant pour CE même élément.
+                    // Formule (bornée [0,1]) :
+                    //   fraction = (#éléments à leur position absolue correcte) / N
+                    //   points obtenus = round(fraction * points)   (cohérent V1-c)
+                    // Ordre exact → fraction 1 → points pleins. La question n'est comptée
+                    // « correcte » (badge sans-faute) QUE si fraction == 1 (ordre exact).
+                    $expectedArr = array_map('intval', (array) ($question['answer'] ?? []));
+                    $givenArr    = is_array($given) ? array_values(array_map('intval', $given)) : [];
+                    $n           = count($expectedArr);
+
+                    $hits = 0;
+                    foreach ($expectedArr as $pos => $correctPos) {
+                        if (array_key_exists($pos, $givenArr) && $givenArr[$pos] === $correctPos) {
+                            $hits++;
+                        }
+                    }
+
+                    $fraction  = $n > 0 ? $hits / $n : 0.0;
+                    $isCorrect = ($fraction >= 1.0);
+
+                    // On note ICI (points fractionnaires) puis on SAUTE le bloc commun.
+                    // pointsPossible a déjà reçu le poids plein de la question avant le switch.
+                    $pointsEarned += (int) round($fraction * $points);
+                    if ($isCorrect) {
+                        $correct++;
+                    }
+
+                    $details[$index] = [
+                        'correct'  => $isCorrect,
+                        'expected' => $expectedArr,
+                        'given'    => $givenArr,
+                    ];
+
+                    continue 2; // question suivante (bypass du bloc commun)
 
                 default:
                     $isCorrect = false;
