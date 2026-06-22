@@ -80,6 +80,12 @@
          l'utilisateur est inscrit ACTIF. Ne s'affiche que s'il y a des devoirs. --}}
     @livewire('academy.student-assignments')
 
+    {{-- ───────────────────────── Mes notes (V2-b carnet pondéré) ─────────────────────────
+         Composant LECTURE SEULE, scopé à auth()->id() : note finale pondérée + lettre +
+         détail par catégorie pour chaque cours pondéré suivi. Ne s'affiche que s'il y a
+         au moins un cours pondéré. --}}
+    @livewire('academy.student-grades')
+
     {{-- ───────────────────────── Vos badges (E1) ───────────────────────── --}}
     <section aria-labelledby="academy-mes-badges" class="mb-5">
         <h2 id="academy-mes-badges"

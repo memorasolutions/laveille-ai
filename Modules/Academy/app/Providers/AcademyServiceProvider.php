@@ -22,6 +22,7 @@ use Modules\Academy\Livewire\CourseRoster;
 use Modules\Academy\Livewire\Dashboard;
 use Modules\Academy\Livewire\QuestionBankManager;
 use Modules\Academy\Livewire\StudentAssignments;
+use Modules\Academy\Livewire\StudentGrades;
 use Modules\Academy\Models\Chapter;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Lesson;
@@ -105,6 +106,11 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // suivis, soumettre/éditer SA remise, voir sa note). user_id forcé = auth,
         // inscription active re-vérifiée serveur. Voir StudentAssignments.
         Livewire::component('academy.student-assignments', StudentAssignments::class);
+
+        // PHASE V2-b - Carnet PONDÉRÉ : ÉTUDIANT (SA note finale pondérée + lettre +
+        // détail par catégorie, LECTURE SEULE). Scopé à auth()->id() (anti-IDOR).
+        // Voir StudentGrades + GradebookService.
+        Livewire::component('academy.student-grades', StudentGrades::class);
 
         // QB2 - Banque de questions réutilisable (catégories + questions des 4 types).
         // OWNER-SCOPED : un formateur ne gère QUE ses propres catégories/questions

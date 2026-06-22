@@ -371,6 +371,170 @@
         @endif
     </section>
 
+    {{-- ───────────────────────── V2-b : pondération du carnet ───────────────────────── --}}
+    <section aria-labelledby="grade-structure"
+             style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 22px 24px;">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2" style="margin-bottom: 8px;">
+            <h3 id="grade-structure" style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin: 0; font-size: 1.1rem;">
+                Pondération et lettres
+            </h3>
+            <x-core::button type="button" wire:click="toggleGradeStructure" variant="ghost" size="sm">
+                {{ $showGradeStructure ? 'Masquer' : 'Configurer' }}
+            </x-core::button>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+            Créez des catégories pondérées (ex. Quiz 40 %, Devoirs 60 %), classez-y chaque évaluation, puis personnalisez le barème de lettres. Sans aucune catégorie, le carnet reste en agrégation simple (inchangé).
+        </p>
+
+        @if ($showGradeStructure)
+            {{-- Catégories de notes --}}
+            <div style="margin-top: 18px; border-top: 1px dashed #E5E7EB; padding-top: 16px;">
+                <strong style="font-size: 0.95rem;">Catégories de notes</strong>
+
+                @if ($this->gradeCategories->isNotEmpty())
+                    <ul class="list-unstyled d-flex flex-column gap-2" style="margin: 10px 0 14px;">
+                        @foreach ($this->gradeCategories as $cat)
+                            <li wire:key="cat-{{ $cat->id }}"
+                                style="border: 1px solid #F3F4F6; border-radius: var(--sys-radius-md, 0.5rem); padding: 10px 12px; background: #FAFAFA;">
+                                @if ($editingCategory === $cat->id)
+                                    <form wire:submit="saveCategory" class="d-flex flex-wrap align-items-end gap-2">
+                                        <div style="flex: 1 1 200px; display: flex; flex-direction: column; gap: 4px;">
+                                            <label for="cat-edit-name-{{ $cat->id }}" style="font-size: 0.78rem; font-weight: 600;">Nom</label>
+                                            <input id="cat-edit-name-{{ $cat->id }}" type="text" wire:model="editCategoryName" maxlength="120"
+                                                   style="width: 100%; padding: 7px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                            @error('editCategoryName') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.78rem;">{{ $message }}</span> @enderror
+                                        </div>
+                                        <div style="flex: 0 0 110px; display: flex; flex-direction: column; gap: 4px;">
+                                            <label for="cat-edit-weight-{{ $cat->id }}" style="font-size: 0.78rem; font-weight: 600;">Poids (%)</label>
+                                            <input id="cat-edit-weight-{{ $cat->id }}" type="number" min="0" max="100" step="0.01" wire:model="editCategoryWeight"
+                                                   style="width: 100%; padding: 7px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                            @error('editCategoryWeight') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.78rem;">{{ $message }}</span> @enderror
+                                        </div>
+                                        <x-core::button type="submit" variant="primary" size="sm">Enregistrer</x-core::button>
+                                        <x-core::button type="button" wire:click="cancelCategoryEdit" variant="ghost" size="sm">Annuler</x-core::button>
+                                    </form>
+                                @else
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                        <span style="font-size: 0.9rem;"><strong>{{ $cat->name }}</strong> <span style="color: var(--sys-text-muted, #6B7280);">· {{ rtrim(rtrim(number_format($cat->weight, 2, '.', ''), '0'), '.') }} %</span></span>
+                                        <span class="d-flex flex-wrap align-items-center gap-2">
+                                            <x-core::button type="button" wire:click="editCategory({{ $cat->id }})" variant="ghost" size="sm">Modifier</x-core::button>
+                                            @if ($confirmingCategoryRemoval === $cat->id)
+                                                <span style="font-size: 0.8rem; font-weight: 600;">Supprimer ?</span>
+                                                <x-core::button type="button" wire:click="deleteCategory({{ $cat->id }})" variant="danger" size="sm">Confirmer</x-core::button>
+                                                <x-core::button type="button" wire:click="cancelCategoryRemoval" variant="ghost" size="sm">Annuler</x-core::button>
+                                            @else
+                                                <x-core::button type="button" wire:click="confirmCategoryRemoval({{ $cat->id }})" variant="ghost" size="sm"
+                                                                aria-label="Supprimer la catégorie « {{ $cat->name }} »">Supprimer</x-core::button>
+                                            @endif
+                                        </span>
+                                    </div>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 10px 0 14px;">Aucune catégorie : le carnet reste en agrégation simple.</p>
+                @endif
+
+                <form wire:submit="addCategory" class="d-flex flex-wrap align-items-end gap-2">
+                    <div style="flex: 1 1 200px; display: flex; flex-direction: column; gap: 4px;">
+                        <label for="cat-new-name" style="font-size: 0.8rem; font-weight: 600;">Nouvelle catégorie</label>
+                        <input id="cat-new-name" type="text" wire:model="newCategoryName" maxlength="120" placeholder="Ex. : Quiz"
+                               style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                        @error('newCategoryName') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.8rem;">{{ $message }}</span> @enderror
+                    </div>
+                    <div style="flex: 0 0 110px; display: flex; flex-direction: column; gap: 4px;">
+                        <label for="cat-new-weight" style="font-size: 0.8rem; font-weight: 600;">Poids (%)</label>
+                        <input id="cat-new-weight" type="number" min="0" max="100" step="0.01" wire:model="newCategoryWeight" placeholder="40"
+                               style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                        @error('newCategoryWeight') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.8rem;">{{ $message }}</span> @enderror
+                    </div>
+                    <x-core::button type="submit" variant="secondary" size="sm">Ajouter la catégorie</x-core::button>
+                </form>
+            </div>
+
+            {{-- Affectation des items à une catégorie + poids --}}
+            @if ($this->gradeCategories->isNotEmpty() && count($this->gradableItems) > 0)
+                <div style="margin-top: 18px; border-top: 1px dashed #E5E7EB; padding-top: 16px;">
+                    <strong style="font-size: 0.95rem;">Classer les évaluations</strong>
+                    <p style="font-size: 0.82rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 12px;">
+                        Choisissez la catégorie et le poids relatif de chaque évaluation au sein de sa catégorie. « Aucune » retire l'évaluation de la pondération.
+                    </p>
+                    <form wire:submit="saveItemAssignments">
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                                <thead>
+                                    <tr style="text-align: left; border-bottom: 2px solid #E5E7EB;">
+                                        <th scope="col" style="padding: 8px 10px;">Évaluation</th>
+                                        <th scope="col" style="padding: 8px 10px;">Type</th>
+                                        <th scope="col" style="padding: 8px 10px;">Catégorie</th>
+                                        <th scope="col" style="padding: 8px 10px;">Poids</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($this->gradableItems as $item)
+                                        @php($key = $item['type'].'_'.$item['id'])
+                                        <tr wire:key="gi-{{ $key }}" style="border-bottom: 1px solid #F3F4F6;">
+                                            <td style="padding: 8px 10px;">{{ $item['title'] }}</td>
+                                            <td style="padding: 8px 10px; color: var(--sys-text-muted, #6B7280);">{{ $item['type'] === 'quiz' ? 'Quiz' : 'Devoir' }}</td>
+                                            <td style="padding: 8px 10px;">
+                                                <label for="gi-cat-{{ $key }}" class="visually-hidden">Catégorie de « {{ $item['title'] }} »</label>
+                                                <select id="gi-cat-{{ $key }}" wire:model="itemCategoryMap.{{ $key }}"
+                                                        style="padding: 6px 8px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                    <option value="">Aucune</option>
+                                                    @foreach ($this->gradeCategories as $cat)
+                                                        <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td style="padding: 8px 10px;">
+                                                <label for="gi-w-{{ $key }}" class="visually-hidden">Poids de « {{ $item['title'] }} »</label>
+                                                <input id="gi-w-{{ $key }}" type="number" min="0" step="0.01" wire:model="itemWeightMap.{{ $key }}"
+                                                       style="width: 90px; padding: 6px 8px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="margin-top: 12px;">
+                            <x-core::button type="submit" variant="primary" size="sm">Enregistrer les affectations</x-core::button>
+                        </div>
+                    </form>
+                </div>
+            @endif
+
+            {{-- Barème de lettres --}}
+            <div style="margin-top: 18px; border-top: 1px dashed #E5E7EB; padding-top: 16px;">
+                <strong style="font-size: 0.95rem;">Barème de lettres</strong>
+                <p style="font-size: 0.82rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 12px;">
+                    Chaque bande attribue une lettre à partir d'un seuil minimal (en %). Laissez vide pour revenir au barème par défaut.
+                </p>
+                <form wire:submit="saveLetterScheme" style="display: flex; flex-direction: column; gap: 8px;">
+                    @foreach ($letterBands as $i => $band)
+                        <div wire:key="band-{{ $i }}" class="d-flex flex-wrap align-items-end gap-2">
+                            <div style="flex: 0 0 120px; display: flex; flex-direction: column; gap: 4px;">
+                                <label for="band-letter-{{ $i }}" style="font-size: 0.78rem; font-weight: 600;">Lettre</label>
+                                <input id="band-letter-{{ $i }}" type="text" wire:model="letterBands.{{ $i }}.letter" maxlength="4"
+                                       style="width: 100%; padding: 6px 8px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                            </div>
+                            <div style="flex: 0 0 120px; display: flex; flex-direction: column; gap: 4px;">
+                                <label for="band-min-{{ $i }}" style="font-size: 0.78rem; font-weight: 600;">Seuil min (%)</label>
+                                <input id="band-min-{{ $i }}" type="number" min="0" max="100" step="0.1" wire:model="letterBands.{{ $i }}.min"
+                                       style="width: 100%; padding: 6px 8px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                            </div>
+                            <x-core::button type="button" wire:click="removeLetterBand({{ $i }})" variant="ghost" size="sm">Retirer</x-core::button>
+                        </div>
+                    @endforeach
+                    <div class="d-flex flex-wrap gap-2" style="margin-top: 4px;">
+                        <x-core::button type="button" wire:click="addLetterBand" variant="ghost" size="sm">Ajouter une bande</x-core::button>
+                        <x-core::button type="submit" variant="secondary" size="sm">Enregistrer le barème</x-core::button>
+                    </div>
+                </form>
+            </div>
+        @endif
+    </section>
+
     {{-- ───────────────────────── Carnet de notes (gradebook) ───────────────────────── --}}
     @if ($this->canGrade)
         <section aria-labelledby="assignments-gradebook"
@@ -379,9 +543,14 @@
                 <h3 id="assignments-gradebook" style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin: 0; font-size: 1.1rem;">
                     Carnet de notes
                 </h3>
-                <x-core::button type="button" wire:click="toggleGradebook" variant="ghost" size="sm">
-                    {{ $showGradebook ? 'Masquer' : 'Afficher' }}
-                </x-core::button>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <x-core::button type="button" wire:click="exportGradebookCsv" variant="secondary" size="sm">
+                        Exporter en CSV
+                    </x-core::button>
+                    <x-core::button type="button" wire:click="toggleGradebook" variant="ghost" size="sm">
+                        {{ $showGradebook ? 'Masquer' : 'Afficher' }}
+                    </x-core::button>
+                </div>
             </div>
 
             @if ($showGradebook)
@@ -398,6 +567,13 @@
                                     @if ($gb['quizTotal'] > 0)
                                         <th scope="col" style="padding: 8px 10px; white-space: nowrap;">Quiz <span style="color: var(--sys-text-muted, #6B7280);">/ 100</span></th>
                                     @endif
+                                    @if ($gb['weighted'])
+                                        @foreach ($gb['categories'] as $cat)
+                                            <th scope="col" style="padding: 8px 10px; white-space: nowrap;">{{ $cat->name }} <span style="color: var(--sys-text-muted, #6B7280);">(pond.)</span></th>
+                                        @endforeach
+                                        <th scope="col" style="padding: 8px 10px; white-space: nowrap;">Note finale</th>
+                                        <th scope="col" style="padding: 8px 10px; white-space: nowrap;">Lettre</th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -409,12 +585,27 @@
                                                 @if ($cell !== null)
                                                     {{ $cell }}
                                                 @else
-                                                    <span style="color: var(--sys-text-muted, #9CA3AF);">—</span>
+                                                    <span style="color: var(--sys-text-muted, #9CA3AF);">–</span>
                                                 @endif
                                             </td>
                                         @endforeach
                                         @if ($gb['quizTotal'] > 0)
                                             <td style="padding: 8px 10px;">{{ $student['quizScore'] }}%</td>
+                                        @endif
+                                        @if ($gb['weighted'])
+                                            @php($catById = collect($student['catScores'])->keyBy('id'))
+                                            @foreach ($gb['categories'] as $cat)
+                                                @php($cs = $catById->get($cat->id))
+                                                <td style="padding: 8px 10px;">
+                                                    @if ($cs && $cs['hasData'])
+                                                        {{ round($cs['score'], 1) }}%
+                                                    @else
+                                                        <span style="color: var(--sys-text-muted, #9CA3AF);">–</span>
+                                                    @endif
+                                                </td>
+                                            @endforeach
+                                            <td style="padding: 8px 10px; font-weight: 700;">{{ $student['final'] }}%</td>
+                                            <td style="padding: 8px 10px; font-weight: 700;">{{ $student['letter'] }}</td>
                                         @endif
                                     </tr>
                                 @endforeach

@@ -96,17 +96,19 @@ class Course extends Model implements HasMedia
         'certificate_message',
         'certificate_signature_name',
         'certificate_accent_color',
+        'grade_letter_scheme',
         'created_by',
         'updated_by',
     ];
 
     protected $casts = [
-        'published_at'       => 'datetime',
-        'seo_jsonld'         => 'array',
-        'faq_dictionary_ids' => 'array',
-        'duration_minutes'   => 'integer',
-        'price_cents'        => 'integer',
-        'is_template'        => 'boolean',
+        'published_at'        => 'datetime',
+        'seo_jsonld'          => 'array',
+        'faq_dictionary_ids'  => 'array',
+        'duration_minutes'    => 'integer',
+        'price_cents'         => 'integer',
+        'is_template'         => 'boolean',
+        'grade_letter_scheme' => 'array',
     ];
 
     // Relations
@@ -156,6 +158,23 @@ class Course extends Model implements HasMedia
     public function certificatesIssued(): HasMany
     {
         return $this->hasMany(CertificateIssued::class);
+    }
+
+    /**
+     * V2-b - Catégories de notes pondérées du cours (gradebook), ordonnées.
+     * Aucune catégorie = carnet en agrégation simple (rétrocompat).
+     */
+    public function gradeCategories(): HasMany
+    {
+        return $this->hasMany(GradeCategory::class)
+            ->orderBy('position')
+            ->orderBy('id');
+    }
+
+    /** V2-b - Affectations item↔catégorie (poids) du cours. */
+    public function gradeItems(): HasMany
+    {
+        return $this->hasMany(GradeItem::class);
     }
 
     public function progresses(): HasMany
