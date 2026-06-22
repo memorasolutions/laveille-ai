@@ -168,7 +168,22 @@
                         $expectedLabel = '';
                         $givenLabel    = '';
 
-                        if ($qType === 'qcm' || $qType === 'vraifaux') {
+                        // V1-e : QCM à réponses multiples → `correct` est un TABLEAU.
+                        $isMultiReview = ($qType === 'qcm') && is_array($q['correct'] ?? null);
+
+                        if ($isMultiReview) {
+                            $correctSet = array_values(array_unique(array_map('intval', (array) $q['correct'])));
+                            sort($correctSet);
+                            $givenSet = is_array($userAns)
+                                ? array_values(array_unique(array_map('intval', $userAns)))
+                                : (is_numeric($userAns) ? [(int) $userAns] : []);
+                            sort($givenSet);
+                            // Correct (badge) seulement si fraction == 1 (exactement les bonnes).
+                            $isCorrect     = $givenSet === $correctSet;
+                            $expectedLabel = implode(', ', array_map(fn ($k) => $choices[$k] ?? '', $correctSet)) ?: '—';
+                            $givenLabels   = array_filter(array_map(fn ($k) => $choices[$k] ?? null, $givenSet), fn ($v) => $v !== null);
+                            $givenLabel    = $givenLabels !== [] ? implode(', ', $givenLabels) : 'Aucune réponse';
+                        } elseif ($qType === 'qcm' || $qType === 'vraifaux') {
                             $correctIdx = (int) ($q['correct'] ?? -1);
                             $givenIdx   = is_numeric($userAns) ? (int) $userAns : -1;
                             $isCorrect  = $givenIdx === $correctIdx;
@@ -341,14 +356,30 @@
 
                     {{-- QCM ou Vrai/Faux --}}
                     @if($type === 'qcm' || $type === 'vraifaux')
+                        @php
+                            // V1-e : QCM à réponses multiples → cases à cocher (le scoring
+                            // relit answers[i][] en TABLEAU). QCM simple / vraifaux = radio.
+                            $isMulti = ($type === 'qcm') && ! empty($question['multiple']);
+                        @endphp
+                        @if($isMulti)
+                            <p class="text-muted mb-2" style="font-size: 0.85rem;">Plusieurs réponses possibles.</p>
+                        @endif
                         @foreach($choices as $j => $choice)
                             <div class="form-check">
-                                <input class="form-check-input"
-                                       type="radio"
-                                       name="answers[{{ $i }}]"
-                                       id="q{{ $item->id }}_{{ $i }}_{{ $j }}"
-                                       value="{{ $j }}"
-                                       required>
+                                @if($isMulti)
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="answers[{{ $i }}][]"
+                                           id="q{{ $item->id }}_{{ $i }}_{{ $j }}"
+                                           value="{{ $j }}">
+                                @else
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           name="answers[{{ $i }}]"
+                                           id="q{{ $item->id }}_{{ $i }}_{{ $j }}"
+                                           value="{{ $j }}"
+                                           required>
+                                @endif
                                 <label class="form-check-label"
                                        for="q{{ $item->id }}_{{ $i }}_{{ $j }}">
                                     {{ $choice }}

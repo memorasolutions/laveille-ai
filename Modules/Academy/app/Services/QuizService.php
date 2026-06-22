@@ -64,7 +64,8 @@ final class QuizService
      *
      *  - $shuffleQuestions : mélange l'ORDRE des questions (aucun champ touché).
      *  - $shuffleAnswers   : pour les qcm uniquement, permute `choices` +
-     *                        `choice_feedback` et remappe `correct`. Les vraifaux
+     *                        `choice_feedback` et remappe `correct` (int en QCM simple,
+     *                        TABLEAU d'indices en QCM MULTI V1-e). Les vraifaux
      *                        gardent l'ordre Vrai/Faux fixe (sémantique). court (pas
      *                        de choix) et appariement (défs déjà mélangées par le
      *                        mapping) sont laissés tels quels → mapping `answer` intact.
@@ -114,21 +115,31 @@ final class QuizService
             return $q;
         }
 
-        $oldCorrect = (int) ($q['correct'] ?? -1);
+        // V1-e - QCM MULTI : `correct` est un TABLEAU d'indices (sinon int simple).
+        // On remappe en conséquence pour que le scoring reste exact après mélange.
+        $multiple   = ! empty($q['multiple']);
+        $oldCorrect = $multiple
+            ? array_map('intval', is_array($q['correct'] ?? null) ? $q['correct'] : [])
+            : (int) ($q['correct'] ?? -1);
 
         // Permutation des positions 0..n-1.
         $order = range(0, $n - 1);
         shuffle($order);
 
         $newChoices  = [];
-        $newCorrect  = $oldCorrect;
+        $newCorrect  = $multiple ? [] : $oldCorrect;
         $oldFeedback = is_array($q['choice_feedback'] ?? null) ? $q['choice_feedback'] : null;
         $newFeedback = $oldFeedback !== null ? [] : null;
 
         foreach ($order as $newIndex => $oldIndex) {
             $newChoices[$newIndex] = $choices[$oldIndex];
 
-            if ($oldIndex === $oldCorrect) {
+            if ($multiple) {
+                // Le TABLEAU d'indices corrects suit la permutation (V1-e).
+                if (in_array($oldIndex, $oldCorrect, true)) {
+                    $newCorrect[] = $newIndex;
+                }
+            } elseif ($oldIndex === $oldCorrect) {
                 $newCorrect = $newIndex;
             }
 
@@ -142,6 +153,9 @@ final class QuizService
         }
 
         $q['choices'] = $newChoices;
+        if ($multiple) {
+            sort($newCorrect);
+        }
         $q['correct'] = $newCorrect;
         if ($newFeedback !== null) {
             $q['choice_feedback'] = $newFeedback;
@@ -204,6 +218,62 @@ final class QuizService
 
             switch ($type) {
                 case 'qcm':
+                    // V1-e - QCM À RÉPONSES MULTIPLES (crédit partiel borné). Quand
+                    // l'item porte `multiple` = true, `correct` est un TABLEAU d'indices
+                    // de bonnes réponses et la réponse soumise (`given`) est un TABLEAU
+                    // d'indices cochés. Formule (parité Moodle « multiple answers »,
+                    // bornée >= 0) :
+                    //   gagne    = (#bonnes cochées) - (#mauvaises cochées)
+                    //   fraction = max(0, gagne / #bonnes)         (jamais négatif)
+                    //   points obtenus = round(fraction * points)  (cohérent V1-c)
+                    // Tout-correct exact → fraction 1 → points pleins ; tout-faux ou rien
+                    // → 0. La question n'est comptée « correcte » (badge sans-faute) QUE
+                    // si fraction == 1 (toutes les bonnes, aucune mauvaise).
+                    if (! empty($question['multiple'])) {
+                        $correctSet = array_values(array_unique(array_map(
+                            'intval',
+                            is_array($question['correct'] ?? null) ? $question['correct'] : []
+                        )));
+                        $givenSet = is_array($given)
+                            ? array_values(array_unique(array_map('intval', $given)))
+                            : (is_numeric($given) ? [(int) $given] : []);
+
+                        $nbGood  = count($correctSet);
+                        $goodHit = count(array_intersect($givenSet, $correctSet));
+                        $badHit  = count(array_diff($givenSet, $correctSet));
+
+                        // Division par zéro impossible en pratique (>= 1 bonne réponse
+                        // garantie à l'enregistrement) ; garde-fou défensif quand même.
+                        $fraction = $nbGood > 0
+                            ? max(0.0, ($goodHit - $badHit) / $nbGood)
+                            : 0.0;
+
+                        $isCorrect = ($fraction >= 1.0);
+
+                        // On note ICI (points fractionnaires) puis on SAUTE le bloc commun
+                        // (qui ajouterait les points pleins). pointsPossible a déjà reçu
+                        // le poids plein de la question avant le switch.
+                        $pointsEarned += (int) round($fraction * $points);
+                        if ($isCorrect) {
+                            $correct++;
+                        }
+
+                        $details[$index] = [
+                            'correct'  => $isCorrect,
+                            'expected' => $correctSet,
+                            'given'    => $givenSet,
+                        ];
+
+                        continue 2; // question suivante (bypass du bloc commun)
+                    }
+
+                    // QCM simple (1 bonne réponse) — comportement historique inchangé.
+                    $expected  = (int) ($question['correct'] ?? -1);
+                    $givenInt  = is_numeric($given) ? (int) $given : -1;
+                    $isCorrect = $givenInt === $expected;
+                    $given     = $givenInt;
+                    break;
+
                 case 'vraifaux':
                     $expected  = (int) ($question['correct'] ?? -1);
                     $givenInt  = is_numeric($given) ? (int) $given : -1;

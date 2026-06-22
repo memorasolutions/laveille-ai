@@ -71,6 +71,16 @@ class QuestionBankManager extends Component
     public int $qCorrect = 0;
 
     /**
+     * V1-e - QCM À RÉPONSES MULTIPLES. Quand $qMultiple est vrai, la désignation des
+     * bonnes réponses passe de radio (un seul $qCorrect) à cases à cocher : $qCorrectSet
+     * collecte les index cochés (>= 1 exigé). Défaut false = QCM simple inchangé.
+     *
+     * @var array<int, int|string>
+     */
+    public bool $qMultiple = false;
+    public array $qCorrectSet = [];
+
+    /**
      * V1-a : rétroaction par choix (mcq) - optionnelle, indexée comme $qChoices
      * (« si l'apprenant choisit ce choix, on affiche ce texte »). Vide = aucune.
      *
@@ -296,6 +306,19 @@ class QuestionBankManager extends Component
         if ($this->qCorrect >= count($this->qChoices)) {
             $this->qCorrect = 0;
         }
+
+        // V1-e : garder $qCorrectSet cohérent après ré-indexation (retire l'index
+        // supprimé, décale les index supérieurs d'un cran).
+        if ($this->qMultiple) {
+            $newSet = [];
+            foreach (array_map('intval', $this->qCorrectSet) as $sel) {
+                if ($sel === $index) {
+                    continue;
+                }
+                $newSet[] = $sel > $index ? $sel - 1 : $sel;
+            }
+            $this->qCorrectSet = array_values(array_unique($newSet));
+        }
     }
 
     public function addAccepted(): void
@@ -462,14 +485,36 @@ class QuestionBankManager extends Component
             ]);
         }
 
-        $correct = (int) $this->qCorrect;
-        if ($correct < 0 || $correct >= count($choices)) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'qCorrect' => 'Désignez une bonne réponse valide parmi les choix.',
-            ]);
-        }
+        $payload = ['choices' => $choices];
 
-        $payload = ['choices' => $choices, 'correct' => $correct];
+        // V1-e - désignation des bonnes réponses. Les index saisis référent les choix
+        // d'ORIGINE ; on les remappe vers les index FINAUX (post-filtrage des vides),
+        // exactement comme la rétroaction par choix.
+        if ($this->qMultiple) {
+            $checkedOriginal = array_map('intval', array_values($this->qCorrectSet));
+            $correctSet      = [];
+            foreach ($keptOriginalIndexes as $finalIndex => $originalIndex) {
+                if (in_array($originalIndex, $checkedOriginal, true)) {
+                    $correctSet[] = $finalIndex;
+                }
+            }
+            if ($correctSet === []) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'qCorrectSet' => 'Cochez au moins une bonne réponse.',
+                ]);
+            }
+            $payload['multiple']    = true;
+            $payload['correct_set'] = $correctSet;
+        } else {
+            // QCM simple : remap de l'index unique vers la liste filtrée.
+            $finalCorrect = array_search((int) $this->qCorrect, $keptOriginalIndexes, true);
+            if ($finalCorrect === false) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'qCorrect' => 'Désignez une bonne réponse valide parmi les choix.',
+                ]);
+            }
+            $payload['correct'] = (int) $finalCorrect;
+        }
 
         // V1-a : rétroaction par choix (optionnelle), ré-alignée sur les choix retenus.
         $feedback = $this->collectChoiceFeedback($this->qChoiceFeedback, $keptOriginalIndexes);
@@ -581,7 +626,18 @@ class QuestionBankManager extends Component
                     (array) ($payload['choices'] ?? [])
                 ));
                 $this->qChoices = count($choices) >= 2 ? $choices : ['', ''];
-                $this->qCorrect = (int) ($payload['correct'] ?? 0);
+                // V1-e : sous-cas multi (correct_set tableau) vs simple (correct int).
+                $this->qMultiple = ! empty($payload['multiple']);
+                if ($this->qMultiple) {
+                    $this->qCorrectSet = array_values(array_unique(array_map(
+                        'intval',
+                        (array) ($payload['correct_set'] ?? [])
+                    )));
+                    $this->qCorrect = 0;
+                } else {
+                    $this->qCorrect    = (int) ($payload['correct'] ?? 0);
+                    $this->qCorrectSet = [];
+                }
                 // V1-a : rétroaction par choix, ré-alignée sur le nombre de choix.
                 $this->qChoiceFeedback = $this->feedbackForCount(
                     $payload['choice_feedback'] ?? [],
@@ -625,6 +681,8 @@ class QuestionBankManager extends Component
     {
         $this->qChoices        = ['', ''];
         $this->qCorrect        = 0;
+        $this->qMultiple       = false;
+        $this->qCorrectSet     = [];
         $this->qChoiceFeedback = ['', ''];
         $this->qAnswerTrue     = true;
         $this->qTfFeedback     = ['', ''];

@@ -163,13 +163,31 @@
                     {{-- ── Sous-formulaire par type ── --}}
                     @if ($qType === 'mcq')
                         <fieldset style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px; margin: 0;">
-                            <legend style="font-size: 0.8rem; font-weight: 700; padding: 0 6px;">Choix (sélectionnez la bonne réponse)</legend>
+                            <legend style="font-size: 0.8rem; font-weight: 700; padding: 0 6px;">{{ $qMultiple ? 'Choix (cochez toutes les bonnes réponses)' : 'Choix (sélectionnez la bonne réponse)' }}</legend>
+
+                            {{-- V1-e : bascule QCM simple (radio) ↔ QCM à réponses multiples (cases à cocher). --}}
+                            <label style="display: inline-flex; align-items: center; gap: 8px; min-height: 36px; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600;">
+                                <input type="checkbox" wire:model.live="qMultiple" style="width: 20px; height: 20px;">
+                                Autoriser plusieurs bonnes réponses
+                            </label>
+                            @if ($qMultiple)
+                                <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 8px;">
+                                    Cochez toutes les bonnes réponses (au moins une). Le crédit partiel est appliqué automatiquement.
+                                </p>
+                            @endif
+
                             @foreach ($qChoices as $i => $choice)
                                 <div wire:key="choice-{{ $i }}" style="margin-bottom: 10px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <input type="radio" id="qCorrect-{{ $i }}" name="qCorrect" wire:model="qCorrect" value="{{ $i }}"
-                                               aria-label="Désigner le choix {{ $i + 1 }} comme bonne réponse"
-                                               style="width: 20px; height: 20px; flex: 0 0 auto;">
+                                        @if ($qMultiple)
+                                            <input type="checkbox" id="qCorrect-{{ $i }}" wire:model="qCorrectSet" value="{{ $i }}"
+                                                   aria-label="Désigner le choix {{ $i + 1 }} comme bonne réponse"
+                                                   style="width: 20px; height: 20px; flex: 0 0 auto;">
+                                        @else
+                                            <input type="radio" id="qCorrect-{{ $i }}" name="qCorrect" wire:model="qCorrect" value="{{ $i }}"
+                                                   aria-label="Désigner le choix {{ $i + 1 }} comme bonne réponse"
+                                                   style="width: 20px; height: 20px; flex: 0 0 auto;">
+                                        @endif
                                         <label class="visually-hidden" for="qChoice-{{ $i }}">Choix {{ $i + 1 }}</label>
                                         <input type="text" id="qChoice-{{ $i }}" wire:model="qChoices.{{ $i }}" placeholder="Choix {{ $i + 1 }}"
                                                style="flex: 1; padding: 7px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
@@ -187,6 +205,7 @@
                             <x-core::button type="button" wire:click="addChoice" variant="secondary" size="sm">+ Ajouter un choix</x-core::button>
                             @error('qChoices') <span role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 6px;">{{ $message }}</span> @enderror
                             @error('qCorrect') <span role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 6px;">{{ $message }}</span> @enderror
+                            @error('qCorrectSet') <span role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 6px;">{{ $message }}</span> @enderror
                         </fieldset>
                     @elseif ($qType === 'truefalse')
                         <fieldset style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px; margin: 0;">

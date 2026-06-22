@@ -126,6 +126,32 @@ final class QuestionBankService
                 if (count($choices) < 2) {
                     return null;
                 }
+
+                // V1-e - QCM À RÉPONSES MULTIPLES. Représentation banque :
+                //   simple : payload['correct']      = int (1 bonne réponse) ;
+                //   multi  : payload['multiple']     = true
+                //            payload['correct_set']  = TABLEAU d'indices (>= 1 bonne).
+                // L'item de round reflète ce sous-cas : `multiple` = true + `correct`
+                // = TABLEAU d'indices (le scoring lit le drapeau pour le crédit partiel).
+                if (! empty($payload['multiple'])) {
+                    $correctSet = array_values(array_unique(array_filter(
+                        array_map('intval', (array) ($payload['correct_set'] ?? [])),
+                        fn (int $idx): bool => $idx >= 0 && $idx < count($choices)
+                    )));
+                    if ($correctSet === []) {
+                        return null; // au moins une bonne réponse exigée.
+                    }
+
+                    return $base + [
+                        'type'            => 'qcm',
+                        'multiple'        => true,
+                        'choices'         => $choices,
+                        'correct'         => $correctSet,
+                        'choice_feedback' => self::normalizeChoiceFeedback($payload['choice_feedback'] ?? [], count($choices)),
+                        'points'          => $points,
+                    ];
+                }
+
                 $correct = (int) ($payload['correct'] ?? 0);
                 if ($correct < 0 || $correct >= count($choices)) {
                     return null;
