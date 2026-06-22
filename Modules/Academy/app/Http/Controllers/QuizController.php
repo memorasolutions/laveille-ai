@@ -24,6 +24,7 @@ use Modules\Academy\Models\QuizAttempt;
 use Modules\Academy\Services\ActivityCompletionService;
 use Modules\Academy\Services\CompletionService;
 use Modules\Academy\Services\QuestionBankService;
+use Modules\Academy\Services\QuizBehaviour;
 use Modules\Academy\Services\QuizService;
 
 class QuizController extends Controller
@@ -149,8 +150,25 @@ class QuizController extends Controller
             return back()->with('error', 'Session de quiz expirée. Recommencez le quiz.');
         }
 
-        $questions   = $quizData['questions'] ?? [];
-        $answers     = $request->input('answers', []);
+        $questions = $quizData['questions'] ?? [];
+
+        // V1-f — En mode IMMÉDIAT, les réponses ont été VERROUILLÉES côté serveur
+        // (session) au fil des validations par question : on les reconstruit ici (le
+        // client n'en soumet aucune au « Terminer »). En mode différé (défaut), on lit
+        // les réponses du formulaire comme aujourd'hui (comportement INCHANGÉ).
+        if (QuizBehaviour::isImmediate($item->payload)) {
+            $validated = is_array($quizData['validated'] ?? null) ? $quizData['validated'] : [];
+            $answers   = [];
+            foreach ($validated as $i => $v) {
+                $answers[(string) $i] = is_array($v) ? ($v['answer'] ?? null) : null;
+            }
+        } else {
+            $answers = $request->input('answers', []);
+        }
+
+        // SCORING SERVEUR : même chemin que le mode différé sur les MÊMES réponses →
+        // le score final du mode immédiat est, par construction, identique à celui
+        // qu'aurait donné une soumission différée des mêmes réponses.
         $scoreResult = QuizService::score($questions, $answers);
 
         $passingScore = isset($item->payload['passing_score'])
@@ -248,6 +266,81 @@ class QuizController extends Controller
             'points_earned'   => $scoreResult['points_earned'],
             'points_possible' => $scoreResult['points_possible'],
         ]);
+
+        return redirect()
+            ->route('academy.lessons.show', [$course, $lesson])
+            ->withFragment("item-{$item->id}");
+    }
+
+    /**
+     * POST academy.quiz.verify  (V1-f — rétroaction IMMÉDIATE uniquement)
+     *
+     * Valide UNE question du round actif en session :
+     *  - le scoring de la question est calculé SERVEUR (QuizService::score sur une
+     *    tranche d'une question lue dans le round serveur) → le client ne décide
+     *    JAMAIS de la justesse, et les bonnes réponses ne sont pas exposées avant ;
+     *  - la réponse validée est VERROUILLÉE en session (idempotent : une question
+     *    déjà validée ne peut plus changer) ;
+     *  - le résultat (justesse + points) est relu par le lecteur pour afficher la
+     *    rétroaction immédiate puis verrouiller la question.
+     *
+     * Sécurité : auth + inscription (authorizeAccess), anti-IDOR (item re-résolu et
+     * rattaché à la leçon/cours), round + bonnes réponses jamais côté client. Le mode
+     * différé n'expose PAS cette route (abort 404) → comportement actuel intact.
+     */
+    public function verifyQuestion(
+        Request $request,
+        Course $course,
+        Lesson $lesson,
+        int $itemId
+    ): RedirectResponse {
+        $item = LessonItem::findOrFail($itemId);
+        $this->authorizeAccess($course, $lesson, $item);
+
+        if ($item->type !== 'quiz' || ! QuizBehaviour::isImmediate($item->payload)) {
+            abort(404);
+        }
+
+        $sessionKey = "academy.quiz.{$item->id}";
+        $quizData   = $request->session()->get($sessionKey);
+
+        if (! $quizData) {
+            return back()->with('error', 'Session de quiz expirée. Recommencez le quiz.');
+        }
+
+        $questions = $quizData['questions'] ?? [];
+        $index     = (int) $request->input('index', -1);
+
+        // L'index doit exister DANS le round serveur (jamais une question forgée).
+        if ($index < 0 || ! array_key_exists($index, $questions)) {
+            abort(404);
+        }
+
+        $validated = is_array($quizData['validated'] ?? null) ? $quizData['validated'] : [];
+
+        // Idempotent / anti-triche : une question déjà verrouillée ne peut plus changer.
+        if (array_key_exists($index, $validated)) {
+            return redirect()
+                ->route('academy.lessons.show', [$course, $lesson])
+                ->withFragment("item-{$item->id}");
+        }
+
+        // SCORING SERVEUR de CETTE question : on score une tranche d'UNE question. La
+        // bonne réponse est lue dans le round serveur (le client envoie seulement SA
+        // réponse). `score` indexe answers par numéro de question → clé '0' ici.
+        $given  = $request->input('answer', null);
+        $single = QuizService::score([$questions[$index]], ['0' => $given]);
+        $detail = $single['details'][0] ?? ['correct' => false];
+
+        $validated[$index] = [
+            'answer'          => $given,
+            'correct'         => (bool) ($detail['correct'] ?? false),
+            'points_earned'   => (int) ($single['points_earned'] ?? 0),
+            'points_possible' => (int) ($single['points_possible'] ?? 0),
+        ];
+
+        $quizData['validated'] = $validated;
+        $request->session()->put($sessionKey, $quizData);
 
         return redirect()
             ->route('academy.lessons.show', [$course, $lesson])

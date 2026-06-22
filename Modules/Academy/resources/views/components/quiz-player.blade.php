@@ -281,6 +281,10 @@
         @php
             $quizData  = session("academy.quiz.{$item->id}");
             $questions = $quizData['questions'] ?? [];
+            // V1-f : comportement de rétroaction (différé = défaut, immédiat = par question).
+            $behaviour    = \Modules\Academy\Services\QuizBehaviour::for($item->payload);
+            $isImmediate  = ($behaviour === \Modules\Academy\Services\QuizBehaviour::IMMEDIATE);
+            $validatedAll = ($isImmediate && is_array($quizData['validated'] ?? null)) ? $quizData['validated'] : [];
             // V1-d : limite de temps (minutes) + horodatage de début posé SERVEUR.
             // Le compte à rebours est dérivé d'un instant de fin calculé serveur
             // (started_at + limite) ; le client n'a qu'à afficher/auto-soumettre.
@@ -300,6 +304,11 @@
             }
         @endphp
 
+        {{-- ════════════ V1-f : MODE DIFFÉRÉ (défaut) — un seul formulaire ════════════
+             Comportement HISTORIQUE strictement inchangé : toutes les questions, une
+             seule soumission, révision affichée à la fin. Le mode immédiat (par
+             question) est rendu dans la branche @else ci-dessous. --}}
+        @if(! $isImmediate)
         <form method="POST"
               action="{{ route('academy.quiz.submit', [$course, $lesson, $item->id]) }}"
               id="academy-quiz-form-{{ $item->id }}">
@@ -442,6 +451,208 @@
                 Soumettre le quiz
             </button>
         </form>
+
+        @else
+        {{-- ════════════ V1-f : MODE IMMÉDIAT — validation par question ════════════
+             Chaque question non encore validée porte SON PROPRE formulaire « Vérifier »
+             (POST quiz.verify) : le scoring se fait SERVEUR puis la question est
+             verrouillée (relue depuis la session). Les questions déjà validées sont
+             affichées en lecture seule avec leur rétroaction. Aucune bonne réponse
+             n'est exposée avant validation (le round + les corrigés restent serveur). --}}
+
+            {{-- Compte à rebours informatif (la garde réelle reste serveur au « Terminer »). --}}
+            @if($deadlineTs !== null)
+                <div x-data="{
+                        deadline: {{ $deadlineTs }} * 1000,
+                        remaining: 0,
+                        tick() { this.remaining = Math.max(0, Math.round((this.deadline - Date.now()) / 1000)); },
+                        get label() {
+                            const m = Math.floor(this.remaining / 60);
+                            const s = this.remaining % 60;
+                            return m + ' min ' + (s < 10 ? '0' : '') + s + ' s';
+                        }
+                     }"
+                     x-init="tick(); setInterval(() => tick(), 1000)"
+                     role="timer"
+                     aria-live="polite"
+                     class="mb-3 p-2 rounded d-inline-block"
+                     :style="remaining <= 30
+                        ? 'background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;font-weight:600;'
+                        : 'background:#ECFEFF;border:1px solid #A5F3FC;color:#155E63;font-weight:600;'"
+                     style="font-size:0.9rem;">
+                    Temps restant : <span x-text="label">{{ $timeLimitMinutes }} min 00 s</span>
+                </div>
+            @endif
+
+            @foreach($questions as $i => $question)
+                @php
+                    $type    = $question['type']   ?? 'qcm';
+                    $choices = $question['choices'] ?? [];
+                    $terms   = $question['terms']   ?? [];
+                    $defs    = $question['defs']    ?? [];
+
+                    $v        = $validatedAll[$i] ?? ($validatedAll[(string) $i] ?? null);
+                    $locked   = is_array($v);
+                    $isCorrect = $locked ? (bool) ($v['correct'] ?? false) : false;
+                    $isMulti  = ($type === 'qcm') && ! empty($question['multiple']);
+                @endphp
+
+                <div class="mb-4 p-3 rounded" style="background: #F8FAFC; border: 1px solid #E2E8F0;
+                     border-left: 4px solid {{ $locked ? ($isCorrect ? '#16A34A' : '#DC2626') : '#CBD5E1' }};">
+                    <p class="mb-2" style="font-weight: 600; font-size: 0.95rem; color: #1A1D23;">
+                        <span class="badge me-2" style="background: var(--c-primary, #064E5A); color: #fff;">{{ $i + 1 }}</span>
+                        {{ $question['question'] ?? '' }}
+                    </p>
+
+                    @if(! $locked)
+                        {{-- Formulaire de validation de CETTE question (scoring serveur). --}}
+                        <form method="POST" action="{{ route('academy.quiz.verify', [$course, $lesson, $item->id]) }}">
+                            @csrf
+                            <input type="hidden" name="index" value="{{ $i }}">
+
+                            @if($type === 'qcm' || $type === 'vraifaux')
+                                @if($isMulti)
+                                    <p class="text-muted mb-2" style="font-size: 0.85rem;">Plusieurs réponses possibles.</p>
+                                @endif
+                                @foreach($choices as $j => $choice)
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="{{ $isMulti ? 'checkbox' : 'radio' }}"
+                                               name="answer{{ $isMulti ? '[]' : '' }}"
+                                               id="iq{{ $item->id }}_{{ $i }}_{{ $j }}"
+                                               value="{{ $j }}"
+                                               @if(! $isMulti) required @endif>
+                                        <label class="form-check-label" for="iq{{ $item->id }}_{{ $i }}_{{ $j }}">
+                                            {{ $choice }}
+                                        </label>
+                                    </div>
+                                @endforeach
+
+                            @elseif($type === 'court')
+                                <input type="text" name="answer" class="form-control mt-2"
+                                       placeholder="Votre réponse…" autocomplete="off" required
+                                       style="max-width: 320px;">
+
+                            @elseif($type === 'appariement')
+                                <div class="mt-2">
+                                    @foreach($terms as $j => $term)
+                                        @php $selectId = "iq{$item->id}_{$i}_match_{$j}"; @endphp
+                                        <div class="d-flex align-items-center gap-3 mb-2">
+                                            <label for="{{ $selectId }}" style="min-width: 160px; font-size: 0.9rem; font-weight: 500; margin-bottom: 0;">
+                                                {{ $term }}
+                                            </label>
+                                            <select id="{{ $selectId }}" name="answer[]"
+                                                    class="form-select form-select-sm" style="max-width: 320px;"
+                                                    aria-label="Définition pour : {{ $term }}" required>
+                                                <option value="">— Choisir une définition —</option>
+                                                @foreach($defs as $k => $def)
+                                                    <option value="{{ $k }}">{{ $def }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="text-muted small">Type de question non pris en charge.</p>
+                            @endif
+
+                            @if(! empty($question['fiche']))
+                                <a href="{{ $question['fiche'] }}" target="_blank" rel="noopener"
+                                   class="small text-muted d-inline-block mt-1">📖 Fiche de référence →</a>
+                            @endif
+
+                            <div class="mt-2">
+                                <button type="submit" class="btn ct-btn ct-btn-primary btn-sm">Vérifier</button>
+                            </div>
+                        </form>
+                    @else
+                        {{-- ── Question VERROUILLÉE : rétroaction immédiate (relue serveur) ── --}}
+                        @php
+                            $userAns = $v['answer'] ?? null;
+                            $givenLabel = 'Aucune réponse';
+                            $expectedLabel = '';
+                            $choiceFb = null;
+                            $generalFb = $question['general_feedback'] ?? ($question['explanation'] ?? null);
+                            $generalFb = (is_string($generalFb) && trim($generalFb) !== '') ? $generalFb : null;
+
+                            if ($isMulti) {
+                                $correctSet = array_values(array_unique(array_map('intval', (array) ($question['correct'] ?? []))));
+                                sort($correctSet);
+                                $givenSet = is_array($userAns)
+                                    ? array_values(array_unique(array_map('intval', $userAns)))
+                                    : (is_numeric($userAns) ? [(int) $userAns] : []);
+                                $expectedLabel = implode(', ', array_map(fn ($k) => $choices[$k] ?? '', $correctSet)) ?: '—';
+                                $givenLabels = array_filter(array_map(fn ($k) => $choices[$k] ?? null, $givenSet), fn ($x) => $x !== null);
+                                $givenLabel = $givenLabels !== [] ? implode(', ', $givenLabels) : 'Aucune réponse';
+                            } elseif ($type === 'qcm' || $type === 'vraifaux') {
+                                $correctIdx = (int) ($question['correct'] ?? -1);
+                                $givenIdx   = is_numeric($userAns) ? (int) $userAns : -1;
+                                $expectedLabel = $choices[$correctIdx] ?? '';
+                                $givenLabel = ($givenIdx >= 0 && isset($choices[$givenIdx])) ? $choices[$givenIdx] : 'Aucune réponse';
+                                if (isset($question['choice_feedback']) && is_array($question['choice_feedback'])) {
+                                    $fb = $question['choice_feedback'][$givenIdx] ?? ($question['choice_feedback'][(string) $givenIdx] ?? null);
+                                    if (is_string($fb) && trim($fb) !== '') {
+                                        $choiceFb = $fb;
+                                    }
+                                }
+                            } elseif ($type === 'court') {
+                                $expectedLabel = implode(', ', (array) ($question['accepted'] ?? []));
+                                $givenLabel = (is_string($userAns) && trim($userAns) !== '') ? trim($userAns) : 'Aucune réponse';
+                            }
+                        @endphp
+
+                        <p class="mb-1" style="font-size: 0.88rem; font-weight: 600; color: {{ $isCorrect ? '#166534' : '#991B1B' }};">
+                            {{ $isCorrect ? '✔ Bonne réponse' : '✗ À revoir' }}
+                        </p>
+
+                        @if($type === 'appariement')
+                            <p class="mb-1 text-muted" style="font-size: 0.85rem;">
+                                {{ $isCorrect ? 'Toutes les associations sont correctes.' : 'Certaines associations sont à revoir.' }}
+                            </p>
+                        @else
+                            <p class="mb-1 text-muted" style="font-size: 0.85rem;">
+                                Votre réponse : <strong>{{ $givenLabel }}</strong>
+                            </p>
+                            @unless($isCorrect)
+                                <p class="mb-1 text-muted" style="font-size: 0.85rem;">
+                                    Bonne réponse : <strong>{{ $expectedLabel }}</strong>
+                                </p>
+                            @endunless
+                        @endif
+
+                        @if($choiceFb !== null)
+                            <div class="mt-2 p-2 rounded" style="background: #F8FAFC; border: 1px dashed #CBD5E1; font-size: 0.85rem;">
+                                <span style="font-weight: 600;">À propos de votre choix :</span>
+                                {!! \Modules\Academy\Models\LessonItem::renderRichText($choiceFb) !!}
+                            </div>
+                        @endif
+
+                        @if($generalFb !== null)
+                            <div class="mt-2 p-2 rounded" style="background: #F0F9FF; border: 1px solid #BAE6FD; font-size: 0.85rem;">
+                                <span style="font-weight: 600;">Explication :</span>
+                                {!! \Modules\Academy\Models\LessonItem::renderRichText($generalFb) !!}
+                            </div>
+                        @endif
+                    @endif
+                </div>
+            @endforeach
+
+            {{-- Terminer : disponible quand TOUTES les questions sont validées. Le
+                 « Terminer » ne porte AUCUNE réponse (elles sont verrouillées serveur). --}}
+            @php $allValidated = count($questions) > 0 && count($validatedAll) >= count($questions); @endphp
+            @if($allValidated)
+                <form method="POST" action="{{ route('academy.quiz.submit', [$course, $lesson, $item->id]) }}">
+                    @csrf
+                    <button type="submit" class="btn ct-btn ct-btn-primary" style="margin-top: 0.5rem;">
+                        Terminer le quiz
+                    </button>
+                </form>
+            @else
+                <p class="text-muted" style="font-size: 0.9rem;">
+                    Validez chaque question pour terminer le quiz.
+                </p>
+            @endif
+        @endif
 
     @else
         {{-- ── Bouton « Commencer le quiz » ── --}}

@@ -121,5 +121,13 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             'courses/{course:slug}/lessons/{lesson}/items/{itemId}/quiz/submit',
             [QuizController::class, 'submitQuiz']
         )->name('quiz.submit');
+
+        // V1-f — Valider UNE question (mode rétroaction immédiate uniquement). Le
+        // scoring de la question est fait SERVEUR (jamais la décision client) ; la
+        // réponse validée est verrouillée en session.
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/quiz/verify',
+            [QuizController::class, 'verifyQuestion']
+        )->name('quiz.verify');
     });
 });

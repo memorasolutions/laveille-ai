@@ -830,6 +830,8 @@ class CourseEditor extends Component
             'shuffle_answers'     => $extra['shuffle_answers']     ?? null,
             'time_limit_minutes'  => $extra['time_limit_minutes']  ?? null,
             'review_options'      => $extra['review_options']      ?? null,
+            // V1-f : comportement de question (deferred par défaut / immediate).
+            'question_behaviour'  => $extra['question_behaviour']  ?? null,
             // V2-c : critère d'achèvement configurable (manual / view / min_grade).
             'completion'          => $extra['completion']          ?? null,
         ];
@@ -1151,6 +1153,9 @@ class CourseEditor extends Component
             'shuffle_answers'    => 'nullable|boolean',
             'time_limit_minutes' => 'nullable|integer|min:1|max:240',
             'review_options'     => 'nullable|array',
+            // V1-f : comportement de question (liste blanche stricte ; vide/inconnu =
+            // défaut « deferred » appliqué au build → rétrocompat stricte).
+            'question_behaviour' => ['nullable', Rule::in(\Modules\Academy\Services\QuizBehaviour::BEHAVIOURS)],
             // V2-c : critère d'achèvement (liste blanche globale ; l'autorisation par
             // TYPE est appliquée au build, où min_grade sur un non-quiz est ignoré).
             'completion'         => ['nullable', Rule::in(\Modules\Academy\Services\ActivityCompletionService::CRITERIA)],
@@ -1318,6 +1323,17 @@ class CourseEditor extends Component
             if ($review !== []) {
                 $payload['review_options'] = $review;
             }
+        }
+
+        // V1-f — COMPORTEMENT DE QUESTION : on n'écrit la clé QUE si un mode VALIDE et
+        // NON DÉFAUT est choisi (= 'immediate'). Un item sans la clé → 'deferred' via
+        // QuizBehaviour (rétrocompat stricte : mode différé actuel inchangé).
+        $behaviour = $input['question_behaviour'] ?? null;
+        if (is_string($behaviour)
+            && in_array($behaviour, \Modules\Academy\Services\QuizBehaviour::BEHAVIOURS, true)
+            && $behaviour !== \Modules\Academy\Services\QuizBehaviour::DEFAULT_BEHAVIOUR
+        ) {
+            $payload['question_behaviour'] = $behaviour;
         }
 
         return $payload;
