@@ -100,6 +100,140 @@
                 </form>
             @endif
         </div>
+
+        {{-- ════════════════════ V1-a : RÉVISION DES RÉPONSES ════════════════════
+             Bâtie depuis la DERNIÈRE QuizAttempt de l'UTILISATEUR COURANT pour CET
+             item (re-résolue serveur, scope user_id + item → jamais celle d'autrui).
+             Source = questions_snapshot (round joué, avec bonnes réponses + feedback)
+             + answers (réponses soumises). Tous les textes passent par renderRichText
+             (anti-XSS : html_input=strip). On n'affiche la révision QU'au résultat
+             (après soumission) = comportement « deferred feedback » par défaut. --}}
+        @php
+            $review = null;
+            if (auth()->check() && class_exists(\Modules\Academy\Models\QuizAttempt::class)) {
+                try {
+                    $review = \Modules\Academy\Models\QuizAttempt::query()
+                        ->forUser((int) auth()->id())
+                        ->forItem((int) $item->id)
+                        ->latest('submitted_at')
+                        ->latest('id')
+                        ->first();
+                } catch (\Throwable) {
+                    $review = null;
+                }
+            }
+        @endphp
+
+        @if($review !== null && is_array($review->questions_snapshot) && $review->questions_snapshot !== [])
+            @php
+                $snapshot       = $review->questions_snapshot;
+                $given          = is_array($review->answers) ? $review->answers : [];
+                $overallMessage = \Modules\Academy\Services\QuizFeedbackService::messageForPercent(
+                    (array) ($item->payload['overall_feedback'] ?? []),
+                    (int) $review->percent
+                );
+            @endphp
+
+            <section aria-label="Révision de vos réponses" class="mb-4">
+                <h5 style="font-weight: 700; color: #1A1D23;">Révision de vos réponses</h5>
+
+                {{-- Couche 3 : feedback global par tranche de score (en tête). --}}
+                @if($overallMessage !== null && trim($overallMessage) !== '')
+                    <div role="note" class="p-3 rounded mb-3"
+                         style="background: #ECFEFF; border: 1px solid #A5F3FC; color: #155E63;">
+                        {!! \Modules\Academy\Models\LessonItem::renderRichText($overallMessage) !!}
+                    </div>
+                @endif
+
+                @foreach($snapshot as $i => $q)
+                    @php
+                        $qType    = $q['type'] ?? 'qcm';
+                        $choices  = is_array($q['choices'] ?? null) ? $q['choices'] : [];
+                        $userAns  = $given[(string) $i] ?? ($given[$i] ?? null);
+
+                        // Correct ? (recalculé localement à l'affichage, défensif).
+                        $isCorrect = false;
+                        $expectedLabel = '';
+                        $givenLabel    = '';
+
+                        if ($qType === 'qcm' || $qType === 'vraifaux') {
+                            $correctIdx = (int) ($q['correct'] ?? -1);
+                            $givenIdx   = is_numeric($userAns) ? (int) $userAns : -1;
+                            $isCorrect  = $givenIdx === $correctIdx;
+                            $expectedLabel = $choices[$correctIdx] ?? '';
+                            $givenLabel    = ($givenIdx >= 0 && isset($choices[$givenIdx])) ? $choices[$givenIdx] : 'Aucune réponse';
+                        } elseif ($qType === 'court') {
+                            $accepted   = array_map(fn ($s) => mb_strtolower(trim((string) $s)), (array) ($q['accepted'] ?? []));
+                            $givenStr   = is_string($userAns) ? trim($userAns) : '';
+                            $isCorrect  = in_array(mb_strtolower($givenStr), $accepted, true);
+                            $expectedLabel = implode(', ', (array) ($q['accepted'] ?? []));
+                            $givenLabel    = $givenStr !== '' ? $givenStr : 'Aucune réponse';
+                        } elseif ($qType === 'appariement') {
+                            $expectedArr = array_map('intval', (array) ($q['answer'] ?? []));
+                            $givenArr    = is_array($userAns) ? array_map('intval', array_values($userAns)) : [];
+                            $isCorrect   = $givenArr === $expectedArr;
+                        }
+
+                        // Couche 1 : feedback du CHOIX SÉLECTIONNÉ (mcq / vraifaux).
+                        $choiceFb = null;
+                        if (($qType === 'qcm' || $qType === 'vraifaux') && isset($q['choice_feedback']) && is_array($q['choice_feedback'])) {
+                            $givenIdx2 = is_numeric($userAns) ? (int) $userAns : -1;
+                            $fb        = $q['choice_feedback'][$givenIdx2] ?? ($q['choice_feedback'][(string) $givenIdx2] ?? null);
+                            if (is_string($fb) && trim($fb) !== '') {
+                                $choiceFb = $fb;
+                            }
+                        }
+
+                        // Couche 2 : feedback GÉNÉRAL de la question (= explanation).
+                        $generalFb = $q['general_feedback'] ?? ($q['explanation'] ?? null);
+                        $generalFb = (is_string($generalFb) && trim($generalFb) !== '') ? $generalFb : null;
+                    @endphp
+
+                    <div wire:key="review-{{ $review->id }}-{{ $i }}" class="mb-3 p-3 rounded"
+                         style="background: #fff; border: 1px solid #E2E8F0; border-left: 4px solid {{ $isCorrect ? '#16A34A' : '#DC2626' }};">
+                        <p class="mb-2" style="font-weight: 600; color: #1A1D23;">
+                            <span class="badge me-2" style="background: var(--c-primary, #064E5A); color: #fff;">{{ $i + 1 }}</span>
+                            {{ $q['question'] ?? '' }}
+                        </p>
+
+                        <p class="mb-1" style="font-size: 0.88rem; color: {{ $isCorrect ? '#166534' : '#991B1B' }};">
+                            {{ $isCorrect ? '✔ Bonne réponse' : '✗ À revoir' }}
+                        </p>
+
+                        @if($qType === 'appariement')
+                            <p class="mb-1 text-muted" style="font-size: 0.85rem;">
+                                {{ $isCorrect ? 'Toutes les associations sont correctes.' : 'Certaines associations sont à revoir.' }}
+                            </p>
+                        @else
+                            <p class="mb-1 text-muted" style="font-size: 0.85rem;">
+                                Votre réponse : <strong>{{ $givenLabel }}</strong>
+                            </p>
+                            @unless($isCorrect)
+                                <p class="mb-1 text-muted" style="font-size: 0.85rem;">
+                                    Bonne réponse : <strong>{{ $expectedLabel }}</strong>
+                                </p>
+                            @endunless
+                        @endif
+
+                        {{-- Couche 1 : rétroaction spécifique du choix sélectionné. --}}
+                        @if($choiceFb !== null)
+                            <div class="mt-2 p-2 rounded" style="background: #F8FAFC; border: 1px dashed #CBD5E1; font-size: 0.85rem;">
+                                <span style="font-weight: 600;">À propos de votre choix :</span>
+                                {!! \Modules\Academy\Models\LessonItem::renderRichText($choiceFb) !!}
+                            </div>
+                        @endif
+
+                        {{-- Couche 2 : rétroaction générale de la question. --}}
+                        @if($generalFb !== null)
+                            <div class="mt-2 p-2 rounded" style="background: #F0F9FF; border: 1px solid #BAE6FD; font-size: 0.85rem;">
+                                <span style="font-weight: 600;">Explication :</span>
+                                {!! \Modules\Academy\Models\LessonItem::renderRichText($generalFb) !!}
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </section>
+        @endif
     @endif
 
     {{-- ── Erreur éventuelle ── --}}

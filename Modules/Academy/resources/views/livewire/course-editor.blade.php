@@ -816,6 +816,46 @@
                                                                 <div><x-core::button type="submit" variant="secondary" size="sm">Enregistrer l'élément</x-core::button></div>
                                                             </form>
 
+                                                            {{-- ── V1-a : Rétroaction globale par tranche de score (item quiz) - hors du formulaire principal ── --}}
+                                                            @if ($item->type === 'quiz')
+                                                                <div style="margin-top: 12px; border-top: 1px dashed #E5E7EB; padding-top: 10px;">
+                                                                    <span style="display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px;">Rétroaction globale par tranche de score</span>
+                                                                    <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 8px;">
+                                                                        Message affiché selon le pourcentage obtenu (ex. à partir de 80 %, à partir de 50 %…). Le message de la borne la plus haute atteinte est retenu.
+                                                                    </p>
+
+                                                                    @php($rows = $overallFeedback[$item->id] ?? null)
+                                                                    @if ($rows === null)
+                                                                        <x-core::button type="button" wire:click="loadOverallFeedback({{ $item->id }})" variant="secondary" size="sm">
+                                                                            @if (!empty($item->payload['overall_feedback'])) Modifier la rétroaction globale @else Ajouter une rétroaction globale @endif
+                                                                        </x-core::button>
+                                                                    @else
+                                                                        @foreach ($rows as $ri => $row)
+                                                                            <div wire:key="ofb-{{ $item->id }}-{{ $ri }}" style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px;">
+                                                                                <div style="flex: 0 0 auto;">
+                                                                                    <label class="visually-hidden" for="ofb-min-{{ $item->id }}-{{ $ri }}">Seuil minimum en pourcentage</label>
+                                                                                    <input id="ofb-min-{{ $item->id }}-{{ $ri }}" type="number" min="0" max="100"
+                                                                                           wire:model="overallFeedback.{{ $item->id }}.{{ $ri }}.min_percent"
+                                                                                           aria-label="Seuil minimum (%)"
+                                                                                           style="width: 84px; padding: 6px 8px; min-height: 34px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                                </div>
+                                                                                <span aria-hidden="true" style="line-height: 34px; font-size: 0.8rem; color: var(--sys-text-muted, #6B7280);">% →</span>
+                                                                                <label class="visually-hidden" for="ofb-msg-{{ $item->id }}-{{ $ri }}">Message de rétroaction</label>
+                                                                                <input id="ofb-msg-{{ $item->id }}-{{ $ri }}" type="text" maxlength="2000"
+                                                                                       wire:model="overallFeedback.{{ $item->id }}.{{ $ri }}.message"
+                                                                                       placeholder="Message affiché à ce score (ex. Excellent !)"
+                                                                                       style="flex: 1; padding: 6px 10px; min-height: 34px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); font-size: 0.85rem;">
+                                                                                <x-core::button type="button" wire:click="removeOverallBoundary({{ $item->id }}, {{ $ri }})" variant="ghost" size="sm" aria-label="Retirer cette tranche">✕</x-core::button>
+                                                                            </div>
+                                                                        @endforeach
+                                                                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
+                                                                            <x-core::button type="button" wire:click="addOverallBoundary({{ $item->id }})" variant="secondary" size="sm">+ Ajouter une tranche</x-core::button>
+                                                                            <x-core::button type="button" wire:click="saveOverallFeedback({{ $item->id }})" variant="primary" size="sm">Enregistrer la rétroaction globale</x-core::button>
+                                                                        </div>
+                                                                    @endif
+                                                                </div>
+                                                            @endif
+
                                                             {{-- ── Téléversement de l'affiche (item vidéo) - hors du formulaire principal ── --}}
                                                             @if ($item->type === 'video')
                                                                 @php($posterUploaded = $item->posterUrl())

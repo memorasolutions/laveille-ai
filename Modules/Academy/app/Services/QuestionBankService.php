@@ -105,12 +105,19 @@ final class QuestionBankService
             ? min(100, $explicitPoints)
             : self::pointsFromDifficulty($difficulty);
 
+        // V1-a (rétroactions multi-couches) : on RECOPIE dans l'item du round :
+        //  - general_feedback = explanation de la question (« feedback général » Moodle,
+        //    affiché quel que soit juste/faux) - on RÉUTILISE le champ existant, sans le
+        //    dupliquer côté banque ;
+        //  - choice_feedback (mcq/vraifaux) = textes de rétroaction par choix, normalisés.
+        // Ces clés sont ainsi SNAPSHOTÉES dans QuizAttempt → disponibles à la révision.
         $base = [
-            'theme'       => 'banque',
-            'difficulty'  => $difficulty,
-            'question'    => $prompt,
-            'explanation' => $explanation,
-            'fiche'       => null,
+            'theme'            => 'banque',
+            'difficulty'       => $difficulty,
+            'question'         => $prompt,
+            'explanation'      => $explanation,
+            'general_feedback' => $explanation,
+            'fiche'            => null,
         ];
 
         switch ($question->type) {
@@ -125,10 +132,11 @@ final class QuestionBankService
                 }
 
                 return $base + [
-                    'type'    => 'qcm',
-                    'choices' => $choices,
-                    'correct' => $correct,
-                    'points'  => $points,
+                    'type'            => 'qcm',
+                    'choices'         => $choices,
+                    'correct'         => $correct,
+                    'choice_feedback' => self::normalizeChoiceFeedback($payload['choice_feedback'] ?? [], count($choices)),
+                    'points'          => $points,
                 ];
 
             case 'truefalse':
@@ -137,10 +145,12 @@ final class QuestionBankService
                 $choices = ['Vrai', 'Faux'];
 
                 return $base + [
-                    'type'    => 'vraifaux',
-                    'choices' => $choices,
-                    'correct' => $isTrue ? 0 : 1,
-                    'points'  => $points,
+                    'type'            => 'vraifaux',
+                    'choices'         => $choices,
+                    'correct'         => $isTrue ? 0 : 1,
+                    // 2 entrées : index 0 = Vrai, index 1 = Faux (alignées sur $choices).
+                    'choice_feedback' => self::normalizeChoiceFeedback($payload['choice_feedback'] ?? [], 2),
+                    'points'          => $points,
                 ];
 
             case 'short':
@@ -205,5 +215,38 @@ final class QuestionBankService
         $d = strtolower($difficulty);
 
         return $d === 'facile' ? 1 : ($d === 'difficile' ? 3 : 2);
+    }
+
+    /**
+     * V1-a : normalise le tableau de rétroaction par choix vers un tableau indexé
+     * 0..($count-1) de chaînes (un texte par choix, '' si aucun). Tolère un tableau
+     * partiel / désordonné / surnuméraire (on ne conserve QUE les index valides).
+     * Si tous les textes sont vides → []  (rétrocompat : aucune clé parasite).
+     *
+     * @param  mixed  $raw  Valeur brute du payload (attendu : array index => texte).
+     * @return array<int, string>
+     */
+    private static function normalizeChoiceFeedback(mixed $raw, int $count): array
+    {
+        if (! is_array($raw) || $count <= 0) {
+            return [];
+        }
+
+        $out      = array_fill(0, $count, '');
+        $hasAny   = false;
+
+        foreach ($raw as $index => $text) {
+            $i = (int) $index;
+            if ($i < 0 || $i >= $count) {
+                continue;
+            }
+            $value = is_string($text) ? trim($text) : '';
+            if ($value !== '') {
+                $out[$i] = $value;
+                $hasAny  = true;
+            }
+        }
+
+        return $hasAny ? $out : [];
     }
 }

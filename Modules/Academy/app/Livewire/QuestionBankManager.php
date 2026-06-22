@@ -70,7 +70,23 @@ class QuestionBankManager extends Component
     public array $qChoices = ['', ''];
     public int $qCorrect = 0;
 
+    /**
+     * V1-a : rétroaction par choix (mcq) - optionnelle, indexée comme $qChoices
+     * (« si l'apprenant choisit ce choix, on affiche ce texte »). Vide = aucune.
+     *
+     * @var array<int, string>
+     */
+    public array $qChoiceFeedback = ['', ''];
+
     public bool $qAnswerTrue = true;
+
+    /**
+     * V1-a : rétroaction par choix pour Vrai/Faux - 2 entrées (0 = Vrai, 1 = Faux),
+     * optionnelles. Vide = aucune.
+     *
+     * @var array<int, string>
+     */
+    public array $qTfFeedback = ['', ''];
 
     /** @var array<int, string> */
     public array $qAccepted = [''];
@@ -259,7 +275,9 @@ class QuestionBankManager extends Component
     /** Ajoute un choix (mcq) - borné côté serveur au build du payload. */
     public function addChoice(): void
     {
-        $this->qChoices[] = '';
+        $this->qChoices[]         = '';
+        // V1-a : garder la rétroaction par choix alignée sur les choix (même cardinalité).
+        $this->qChoiceFeedback[]  = '';
     }
 
     public function removeChoice(int $index): void
@@ -270,6 +288,10 @@ class QuestionBankManager extends Component
 
         unset($this->qChoices[$index]);
         $this->qChoices = array_values($this->qChoices);
+
+        // V1-a : retirer la rétroaction du même index et ré-indexer.
+        unset($this->qChoiceFeedback[$index]);
+        $this->qChoiceFeedback = array_values($this->qChoiceFeedback);
 
         if ($this->qCorrect >= count($this->qChoices)) {
             $this->qCorrect = 0;
@@ -412,7 +434,7 @@ class QuestionBankManager extends Component
     {
         return match ($type) {
             'mcq'       => $this->buildMcqPayload(),
-            'truefalse' => ['answer' => (bool) $this->qAnswerTrue],
+            'truefalse' => $this->buildTrueFalsePayload(),
             'short'     => $this->buildShortPayload(),
             'matching'  => $this->buildMatchingPayload(),
             default     => [],
@@ -422,10 +444,17 @@ class QuestionBankManager extends Component
     /** @return array<string, mixed> */
     private function buildMcqPayload(): array
     {
-        $choices = array_values(array_filter(
-            array_map(fn ($c) => is_string($c) ? trim($c) : '', $this->qChoices),
-            fn (string $c): bool => $c !== ''
-        ));
+        // On filtre les choix vides MAIS on conserve l'index d'origine pour ré-aligner
+        // la rétroaction par choix (V1-a) APRÈS ré-indexation des choix retenus.
+        $keptOriginalIndexes = [];
+        $choices             = [];
+        foreach ($this->qChoices as $i => $c) {
+            $value = is_string($c) ? trim($c) : '';
+            if ($value !== '') {
+                $choices[]             = $value;
+                $keptOriginalIndexes[] = (int) $i;
+            }
+        }
 
         if (count($choices) < 2) {
             throw \Illuminate\Validation\ValidationException::withMessages([
@@ -440,7 +469,55 @@ class QuestionBankManager extends Component
             ]);
         }
 
-        return ['choices' => $choices, 'correct' => $correct];
+        $payload = ['choices' => $choices, 'correct' => $correct];
+
+        // V1-a : rétroaction par choix (optionnelle), ré-alignée sur les choix retenus.
+        $feedback = $this->collectChoiceFeedback($this->qChoiceFeedback, $keptOriginalIndexes);
+        if ($feedback !== []) {
+            $payload['choice_feedback'] = $feedback;
+        }
+
+        return $payload;
+    }
+
+    /** @return array<string, mixed> */
+    private function buildTrueFalsePayload(): array
+    {
+        $payload = ['answer' => (bool) $this->qAnswerTrue];
+
+        // V1-a : rétroaction par choix (0 = Vrai, 1 = Faux), index inchangé (2 choix fixes).
+        $feedback = $this->collectChoiceFeedback($this->qTfFeedback, [0, 1]);
+        if ($feedback !== []) {
+            $payload['choice_feedback'] = $feedback;
+        }
+
+        return $payload;
+    }
+
+    /**
+     * V1-a : construit le tableau choice_feedback (index final => texte) à partir
+     * des textes saisis et de la liste des index d'origine RETENUS (post-filtrage).
+     * Le résultat est indexé 0..N-1 dans l'ordre des choix finaux. Tout vide → [].
+     *
+     * @param  array<int, string>  $source              Textes saisis (indexés comme à la saisie).
+     * @param  array<int, int>     $keptOriginalIndexes Index d'origine des choix retenus, dans l'ordre.
+     * @return array<int, string>
+     */
+    private function collectChoiceFeedback(array $source, array $keptOriginalIndexes): array
+    {
+        $out    = [];
+        $hasAny = false;
+
+        foreach ($keptOriginalIndexes as $finalIndex => $originalIndex) {
+            $raw   = $source[$originalIndex] ?? '';
+            $value = is_string($raw) ? trim($raw) : '';
+            $out[$finalIndex] = $value;
+            if ($value !== '') {
+                $hasAny = true;
+            }
+        }
+
+        return $hasAny ? $out : [];
     }
 
     /** @return array<string, mixed> */
@@ -505,10 +582,17 @@ class QuestionBankManager extends Component
                 ));
                 $this->qChoices = count($choices) >= 2 ? $choices : ['', ''];
                 $this->qCorrect = (int) ($payload['correct'] ?? 0);
+                // V1-a : rétroaction par choix, ré-alignée sur le nombre de choix.
+                $this->qChoiceFeedback = $this->feedbackForCount(
+                    $payload['choice_feedback'] ?? [],
+                    count($this->qChoices)
+                );
                 break;
 
             case 'truefalse':
                 $this->qAnswerTrue = (bool) ($payload['answer'] ?? true);
+                // V1-a : 2 entrées (0 = Vrai, 1 = Faux).
+                $this->qTfFeedback = $this->feedbackForCount($payload['choice_feedback'] ?? [], 2);
                 break;
 
             case 'short':
@@ -539,12 +623,37 @@ class QuestionBankManager extends Component
 
     private function resetPayloadFields(): void
     {
-        $this->qChoices    = ['', ''];
-        $this->qCorrect    = 0;
-        $this->qAnswerTrue = true;
-        $this->qAccepted   = [''];
-        $this->qDisplay    = null;
-        $this->qPairs      = [['term' => '', 'def' => ''], ['term' => '', 'def' => '']];
+        $this->qChoices        = ['', ''];
+        $this->qCorrect        = 0;
+        $this->qChoiceFeedback = ['', ''];
+        $this->qAnswerTrue     = true;
+        $this->qTfFeedback     = ['', ''];
+        $this->qAccepted       = [''];
+        $this->qDisplay        = null;
+        $this->qPairs          = [['term' => '', 'def' => ''], ['term' => '', 'def' => '']];
+    }
+
+    /**
+     * V1-a : produit un tableau de feedback de longueur EXACTE $count (indexé 0..N-1)
+     * à partir d'un payload['choice_feedback'] potentiellement partiel/désordonné, pour
+     * pré-remplir le formulaire d'édition (toujours aligné sur le nombre de choix).
+     *
+     * @param  mixed  $raw
+     * @return array<int, string>
+     */
+    private function feedbackForCount(mixed $raw, int $count): array
+    {
+        $out = array_fill(0, max(0, $count), '');
+        if (is_array($raw)) {
+            foreach ($raw as $index => $text) {
+                $i = (int) $index;
+                if ($i >= 0 && $i < $count && is_string($text)) {
+                    $out[$i] = $text;
+                }
+            }
+        }
+
+        return $out;
     }
 
     /** Réinitialise tout le formulaire de question (annule l'édition en cours). */

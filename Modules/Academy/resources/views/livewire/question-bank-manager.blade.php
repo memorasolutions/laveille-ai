@@ -165,16 +165,23 @@
                         <fieldset style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px; margin: 0;">
                             <legend style="font-size: 0.8rem; font-weight: 700; padding: 0 6px;">Choix (sélectionnez la bonne réponse)</legend>
                             @foreach ($qChoices as $i => $choice)
-                                <div wire:key="choice-{{ $i }}" style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                                    <input type="radio" id="qCorrect-{{ $i }}" name="qCorrect" wire:model="qCorrect" value="{{ $i }}"
-                                           aria-label="Désigner le choix {{ $i + 1 }} comme bonne réponse"
-                                           style="width: 20px; height: 20px; flex: 0 0 auto;">
-                                    <label class="visually-hidden" for="qChoice-{{ $i }}">Choix {{ $i + 1 }}</label>
-                                    <input type="text" id="qChoice-{{ $i }}" wire:model="qChoices.{{ $i }}" placeholder="Choix {{ $i + 1 }}"
-                                           style="flex: 1; padding: 7px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
-                                    @if (count($qChoices) > 2)
-                                        <x-core::button type="button" wire:click="removeChoice({{ $i }})" variant="ghost" size="sm" aria-label="Retirer le choix {{ $i + 1 }}">✕</x-core::button>
-                                    @endif
+                                <div wire:key="choice-{{ $i }}" style="margin-bottom: 10px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="radio" id="qCorrect-{{ $i }}" name="qCorrect" wire:model="qCorrect" value="{{ $i }}"
+                                               aria-label="Désigner le choix {{ $i + 1 }} comme bonne réponse"
+                                               style="width: 20px; height: 20px; flex: 0 0 auto;">
+                                        <label class="visually-hidden" for="qChoice-{{ $i }}">Choix {{ $i + 1 }}</label>
+                                        <input type="text" id="qChoice-{{ $i }}" wire:model="qChoices.{{ $i }}" placeholder="Choix {{ $i + 1 }}"
+                                               style="flex: 1; padding: 7px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                        @if (count($qChoices) > 2)
+                                            <x-core::button type="button" wire:click="removeChoice({{ $i }})" variant="ghost" size="sm" aria-label="Retirer le choix {{ $i + 1 }}">✕</x-core::button>
+                                        @endif
+                                    </div>
+                                    {{-- V1-a : rétroaction par choix (optionnelle). --}}
+                                    <label class="visually-hidden" for="qChoiceFeedback-{{ $i }}">Rétroaction si le choix {{ $i + 1 }} est sélectionné</label>
+                                    <input type="text" id="qChoiceFeedback-{{ $i }}" wire:model="qChoiceFeedback.{{ $i }}" maxlength="2000"
+                                           placeholder="Rétroaction si ce choix est sélectionné (facultatif)"
+                                           style="width: 100%; margin-top: 4px; padding: 6px 10px; min-height: 34px; border: 1px dashed #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); font-size: 0.82rem;">
                                 </div>
                             @endforeach
                             <x-core::button type="button" wire:click="addChoice" variant="secondary" size="sm">+ Ajouter un choix</x-core::button>
@@ -192,6 +199,14 @@
                                     <input type="radio" name="qAnswerTrue" wire:model="qAnswerTrue" value="0" style="width: 20px; height: 20px;"> Faux
                                 </label>
                             </div>
+
+                            {{-- V1-a : rétroaction par choix (Vrai / Faux), optionnelle. --}}
+                            <label for="qTfFeedback-0" style="display: block; font-size: 0.78rem; font-weight: 600; margin-top: 10px;">Rétroaction si « Vrai » est sélectionné (facultatif)</label>
+                            <input type="text" id="qTfFeedback-0" wire:model="qTfFeedback.0" maxlength="2000"
+                                   style="width: 100%; margin-top: 4px; padding: 6px 10px; min-height: 34px; border: 1px dashed #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); font-size: 0.82rem;">
+                            <label for="qTfFeedback-1" style="display: block; font-size: 0.78rem; font-weight: 600; margin-top: 8px;">Rétroaction si « Faux » est sélectionné (facultatif)</label>
+                            <input type="text" id="qTfFeedback-1" wire:model="qTfFeedback.1" maxlength="2000"
+                                   style="width: 100%; margin-top: 4px; padding: 6px 10px; min-height: 34px; border: 1px dashed #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); font-size: 0.82rem;">
                         </fieldset>
                     @elseif ($qType === 'short')
                         <fieldset style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px; margin: 0;">
@@ -254,9 +269,12 @@
                     </p>
                     @error('qPoints') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.8rem;">{{ $message }}</span> @enderror
 
-                    <label for="qExplanation" style="font-size: 0.8rem; font-weight: 600;">Explication (facultatif)</label>
+                    <label for="qExplanation" style="font-size: 0.8rem; font-weight: 600;">Rétroaction générale / explication (facultatif)</label>
                     <textarea id="qExplanation" wire:model="qExplanation" rows="2" maxlength="2000"
                               style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+                    <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+                        Affichée à la révision quelle que soit la réponse (comme la « rétroaction générale » de Moodle).
+                    </p>
 
                     <label style="display: inline-flex; align-items: center; gap: 8px; min-height: 36px; font-size: 0.85rem;">
                         <input type="checkbox" wire:model="qIsActive" style="width: 20px; height: 20px;"> Question active (tirable dans les quiz)
