@@ -64,7 +64,11 @@ export default defineConfig({
             registerType: 'prompt',
             manifest: false,
             injectManifest: {
-                globPatterns: ['**/*.{js,css,ico,png,svg,woff2}'],
+                // Précache LÉGER : js/css/woff2 + icônes PWA (png/ico) seulement.
+                // Les 271 SVG de drapeaux (~2,7 Mo) sont EXCLUS (install lourde = crash renderer au 1er login).
+                globPatterns: ['**/*.{js,css,ico,png,woff2}'],
+                globIgnores: ['**/flag-icons/**', '**/*.map'],
+                maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
             },
             devOptions: {
                 enabled: false,

@@ -5,21 +5,29 @@ import { registerSW } from 'virtual:pwa-register';
 // Variable globale pour le prompt d'installation
 window.deferredPwaPrompt = null;
 
-// Enregistrement du SW avec gestion des mises à jour
-const updateSW = registerSW({
-    onNeedRefresh() {
-        window.dispatchEvent(new CustomEvent('pwa-update-available'));
-    },
-    onOfflineReady() {
-        window.dispatchEvent(new CustomEvent('pwa-offline-ready'));
-    },
-    onRegisteredSW(swUrl, registration) {
-        // Vérifier les mises à jour toutes les heures
-        if (registration) {
-            setInterval(() => registration.update(), 60 * 60 * 1000);
-        }
-    },
-});
+// Le back-office (/admin) n'a pas besoin du précache PWA : on N'ENREGISTRE PAS
+// le SW sur ces routes (évite la tempête SW + précache + tour Driver.js au 1er login).
+const isAdminRoute = /^\/admin(\/|$)/.test(window.location.pathname);
+
+// Enregistrement du SW avec gestion des mises à jour.
+// registerType:'prompt' => AUCUN rechargement automatique ; onNeedRefresh ne fait
+// qu'émettre un événement, le reload n'a lieu que via window.pwaUpdate() (action user).
+const updateSW = isAdminRoute
+    ? () => {}
+    : registerSW({
+        onNeedRefresh() {
+            window.dispatchEvent(new CustomEvent('pwa-update-available'));
+        },
+        onOfflineReady() {
+            window.dispatchEvent(new CustomEvent('pwa-offline-ready'));
+        },
+        onRegisteredSW(swUrl, registration) {
+            // Vérifier les mises à jour toutes les heures
+            if (registration) {
+                setInterval(() => registration.update(), 60 * 60 * 1000);
+            }
+        },
+    });
 
 // Capture du prompt d'installation natif
 window.addEventListener('beforeinstallprompt', (e) => {

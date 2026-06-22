@@ -335,7 +335,8 @@
     </script>
     @endif
     <script src="/js/infinite-scroll.js?v={{ filemtime(public_path('js/infinite-scroll.js')) }}" defer></script>
-    <script src="/js/sw-register.js" defer></script>
+    {{-- /js/sw-register.js retiré : il enregistrait l'ancien SW de nettoyage /sw.js (conflit de scope « / »
+         avec le SW vite-pwa = rechargements forcés + crash renderer). Seul le SW vite-pwa subsiste. --}}
     <script src="/js/newsletter-scroll-trigger.js?v={{ filemtime(public_path('js/newsletter-scroll-trigger.js')) }}" defer></script>
     <script src="/js/ga4-events.js" defer></script>
 

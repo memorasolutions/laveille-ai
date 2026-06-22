@@ -41,9 +41,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!tourSteps.length) return;
 
+    var firstRun = !localStorage.getItem(storageKey);
+
     var driverObj = window.driver.js.driver({
         showProgress: true,
-        animate: true,
+        // Pas d'animation d'overlay au TOUT PREMIER rendu : évite la surcharge de la frame
+        // (précache SW + AdSense + login concurrents = crash renderer au 1er login).
+        animate: !firstRun,
         overlayOpacity: 0.5,
         stagePadding: 8,
         nextBtnText: '{{ __("Suivant") }}',
@@ -56,8 +60,19 @@ document.addEventListener('DOMContentLoaded', function() {
         steps: tourSteps
     });
 
-    if (!localStorage.getItem(storageKey)) {
-        setTimeout(function() { driverObj.drive(); }, 800);
+    // Lancement NON BLOQUANT : attendre que la page soit complètement chargée
+    // (readyState 'complete') puis un temps d'inactivité avant d'afficher le tour.
+    function launchTour() {
+        var idle = window.requestIdleCallback || function(cb) { return setTimeout(cb, 800); };
+        idle(function() { driverObj.drive(); });
+    }
+
+    if (firstRun) {
+        if (document.readyState === 'complete') {
+            launchTour();
+        } else {
+            window.addEventListener('load', launchTour, { once: true });
+        }
     }
 
     document.querySelectorAll('#restartTour, .restart-tour').forEach(function(btn) {
