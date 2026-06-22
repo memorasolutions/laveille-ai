@@ -811,6 +811,8 @@ class CourseEditor extends Component
             // QB2 : lien optionnel vers une catégorie de MA banque + nb à tirer.
             'bank_category_id'  => $extra['bank_category_id'] ?? null,
             'bank_draw_count'   => $extra['bank_draw_count']  ?? null,
+            // QB3 : toggle « inclure les sous-catégories » (défaut true si absent).
+            'bank_include_subcategories' => $extra['bank_include_subcategories'] ?? null,
         ];
 
         $data    = $this->validateItem($input);
@@ -1114,6 +1116,8 @@ class CourseEditor extends Component
             // QB2 : catégorie de banque (validée comme MIENNE au build) + nb à tirer (1..50).
             'bank_category_id'  => 'nullable|integer',
             'bank_draw_count'   => 'nullable|integer|min:1|max:50',
+            // QB3 : inclure les sous-catégories au tirage (parité Moodle, défaut true).
+            'bank_include_subcategories' => 'nullable|boolean',
         ])->validate();
     }
 
@@ -1205,9 +1209,18 @@ class CourseEditor extends Component
                 $draw = $input['bank_draw_count'] ?? null;
                 $drawCount = ($draw !== null && $draw !== '') ? max(1, min(50, (int) $draw)) : 5;
 
+                // QB3 : inclure les sous-catégories (parité Moodle). Défaut true si le
+                // champ est absent (rétrocompat des items QB2 déjà liés). Normalise
+                // toute valeur du DOM ('1'/'0'/true/false/'on'/'') en booléen.
+                $rawInclude   = $input['bank_include_subcategories'] ?? null;
+                $includeSubs  = $rawInclude === null
+                    ? true
+                    : filter_var($rawInclude, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true;
+
                 $payload['question_bank'] = [
-                    'category_id' => $bankCategoryId,
-                    'draw_count'  => $drawCount,
+                    'category_id'          => $bankCategoryId,
+                    'draw_count'           => $drawCount,
+                    'include_subcategories' => $includeSubs,
                 ];
             }
         }
@@ -1248,7 +1261,7 @@ class CourseEditor extends Component
         $user = Auth::user();
 
         $query = QuestionCategory::query()
-            ->withCount('questions')
+            ->withCount('children')
             ->orderBy('parent_id')
             ->orderBy('position')
             ->orderBy('name');
@@ -1257,7 +1270,14 @@ class CourseEditor extends Component
             $query->where('owner_id', $user?->id);
         }
 
-        return $query->get();
+        $categories = $query->get();
+
+        // QB3 : compteur RÉEL de questions ACTIVES incluant la descendance (parité
+        // Moodle). Affiché « (N questions, sous-catégories incluses) » si la catégorie
+        // a des enfants, « (N questions) » sinon. Reste owner-scopé via descendantIds().
+        return $categories->each(function (QuestionCategory $cat): void {
+            $cat->deep_active_count = $cat->activeQuestionCountDeep();
+        });
     }
 
     // ─────────────────────────────────────────────────────────────────────────────

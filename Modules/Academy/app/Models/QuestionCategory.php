@@ -116,4 +116,18 @@ class QuestionCategory extends Model
 
         return array_values(array_unique($ids));
     }
+
+    /**
+     * QB3 : nombre de questions ACTIVES disponibles dans cette catégorie EN INCLUANT
+     * toute sa descendance (parité Moodle : un parent tire aussi ses sous-catégories).
+     * Borné à l'arbre du même propriétaire via descendantIds(). Pour une catégorie
+     * feuille, le résultat est identique au compte direct.
+     */
+    public function activeQuestionCountDeep(): int
+    {
+        return (int) Question::query()
+            ->active()
+            ->whereIn('category_id', $this->descendantIds())
+            ->count();
+    }
 }

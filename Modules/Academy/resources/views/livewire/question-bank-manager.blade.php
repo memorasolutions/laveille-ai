@@ -33,6 +33,11 @@
                  style="background: #fff; border: 1px solid #E5E7EB; border-radius: var(--sys-radius-lg, 0.75rem); padding: 18px;">
             <h2 id="bank-cats-title" style="font-family: var(--f-heading); font-size: 1.05rem; margin: 0 0 12px;">Catégories</h2>
 
+            {{-- QB3 : note d'héritage (parité Moodle). Discret, charte, a11y. --}}
+            <p role="note" style="font-size: 0.74rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 12px; padding: 8px 10px; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem);">
+                Astuce : dans un quiz, choisir une catégorie parente tire aussi les questions de ses sous-catégories (comme Moodle). Cette option reste désactivable au cas par cas dans le formulaire du quiz.
+            </p>
+
             {{-- Liste / arbre des catégories --}}
             @if ($this->rootCategories->isEmpty())
                 <x-academy::empty-state icon="🗂️" :compact="true"

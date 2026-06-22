@@ -78,7 +78,10 @@ class QuizController extends Controller
 
             if ($category !== null) {
                 $drawCount = max(1, min(50, (int) ($bankLink['draw_count'] ?? 5)));
-                $round     = QuestionBankService::drawFromCategory($category, $drawCount);
+                // QB3 : inclure les sous-catégories par défaut (parité Moodle). Si la
+                // clé est absente (item QB2 déjà lié), on considère true (rétrocompat).
+                $includeSub = (bool) ($bankLink['include_subcategories'] ?? true);
+                $round      = QuestionBankService::drawFromCategory($category, $drawCount, $includeSub);
             }
         }
 

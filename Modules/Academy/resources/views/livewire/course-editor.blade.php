@@ -726,7 +726,7 @@
                                                             @php($videoUrlValue = $item->payload['player_url'] ?? ($item->payload['embed'] ?? ''))
                                                             @php($posterValue = $item->payload['poster'] ?? '')
                                                             @php($durationMin = isset($item->payload['duration_seconds']) ? (int) ceil(((int) $item->payload['duration_seconds']) / 60) : '')
-                                                            <form wire:submit="updateItem({{ $item->id }}, '{{ $item->type }}', $event.target.title.value, $event.target.estimated_minutes.value, { player_url: $event.target.player_url ? $event.target.player_url.value : null, poster_url: $event.target.poster_url ? $event.target.poster_url.value : null, duration_minutes: $event.target.duration_minutes ? $event.target.duration_minutes.value : null, rich_text: $event.target.rich_text ? $event.target.rich_text.value : null, qt_bank_key: $event.target.qt_bank_key ? $event.target.qt_bank_key.value : null, passing_score: $event.target.passing_score ? $event.target.passing_score.value : null, attempts_allowed: $event.target.attempts_allowed ? $event.target.attempts_allowed.value : null, bank_category_id: $event.target.bank_category_id ? $event.target.bank_category_id.value : null, bank_draw_count: $event.target.bank_draw_count ? $event.target.bank_draw_count.value : null })"
+                                                            <form wire:submit="updateItem({{ $item->id }}, '{{ $item->type }}', $event.target.title.value, $event.target.estimated_minutes.value, { player_url: $event.target.player_url ? $event.target.player_url.value : null, poster_url: $event.target.poster_url ? $event.target.poster_url.value : null, duration_minutes: $event.target.duration_minutes ? $event.target.duration_minutes.value : null, rich_text: $event.target.rich_text ? $event.target.rich_text.value : null, qt_bank_key: $event.target.qt_bank_key ? $event.target.qt_bank_key.value : null, passing_score: $event.target.passing_score ? $event.target.passing_score.value : null, attempts_allowed: $event.target.attempts_allowed ? $event.target.attempts_allowed.value : null, bank_category_id: $event.target.bank_category_id ? $event.target.bank_category_id.value : null, bank_draw_count: $event.target.bank_draw_count ? $event.target.bank_draw_count.value : null, bank_include_subcategories: $event.target.bank_include_subcategories ? $event.target.bank_include_subcategories.checked : null })"
                                                                   style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
                                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="item-title-{{ $item->id }}">Titre</label>
                                                                 <input id="item-title-{{ $item->id }}" type="text" name="title" value="{{ $item->title }}" aria-label="Titre de l'élément"
@@ -768,9 +768,22 @@
                                                                             style="width: 100%; padding: 8px 12px; min-height: 38px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                                                                         <option value="">- Aucune (utiliser la clé QT ci-dessus) -</option>
                                                                         @foreach ($this->bankCategories as $cat)
-                                                                            <option value="{{ $cat->id }}" @selected(($qb['category_id'] ?? null) === $cat->id)>{{ $cat->name }} ({{ $cat->questions_count }} q.)</option>
+                                                                            @php($deepCount = (int) ($cat->deep_active_count ?? 0))
+                                                                            @php($catLabel = $cat->name.' ('.$deepCount.' question'.($deepCount > 1 ? 's' : '').((int) ($cat->children_count ?? 0) > 0 ? ', sous-catégories incluses' : '').')')
+                                                                            <option value="{{ $cat->id }}" @selected(($qb['category_id'] ?? null) === $cat->id)>{{ $catLabel }}</option>
                                                                         @endforeach
                                                                     </select>
+
+                                                                    {{-- QB3 : toggle « inclure les sous-catégories » (parité Moodle, coché par défaut). --}}
+                                                                    @php($includeSubs = $qb['include_subcategories'] ?? true)
+                                                                    <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="item-banksub-{{ $item->id }}">
+                                                                        <input id="item-banksub-{{ $item->id }}" type="checkbox" name="bank_include_subcategories" value="1" @checked($includeSubs)
+                                                                               style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                        <span>Inclure les sous-catégories</span>
+                                                                    </label>
+                                                                    <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+                                                                        Les questions des sous-catégories sont aussi tirées (comme Moodle). Décochez pour limiter à cette seule catégorie.
+                                                                    </p>
 
                                                                     <label style="font-size: 0.78rem; font-weight: 600;" for="item-bankdraw-{{ $item->id }}">Nombre de questions à tirer (1 à 50)</label>
                                                                     <input id="item-bankdraw-{{ $item->id }}" type="number" min="1" max="50" name="bank_draw_count" value="{{ $qb['draw_count'] ?? 5 }}" aria-label="Nombre de questions à tirer de la banque"
