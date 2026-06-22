@@ -1,0 +1,91 @@
+<?php
+
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ *
+ * Question réutilisable de la banque (QB1). Le payload (cast array) porte la
+ * structure propre au type ; QuestionBankService la traduit au format scoré par
+ * QuizService::score(). Ici : relations, scopes, accessors purs (aucune logique UI).
+ */
+
+declare(strict_types=1);
+
+namespace Modules\Academy\Models;
+
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+/**
+ * @property int         $id
+ * @property int         $category_id
+ * @property int|null    $owner_id
+ * @property string      $type
+ * @property string      $prompt
+ * @property array       $payload
+ * @property string|null $explanation
+ * @property string|null $difficulty
+ * @property bool        $is_active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
+class Question extends Model
+{
+    protected $table = 'academy_questions';
+
+    /** Types de questions supportés (reproduisent QtService / QuizService::score). */
+    public const TYPES = ['mcq', 'truefalse', 'short', 'matching'];
+
+    protected $fillable = [
+        'category_id',
+        'owner_id',
+        'type',
+        'prompt',
+        'payload',
+        'explanation',
+        'difficulty',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'category_id' => 'integer',
+        'owner_id'    => 'integer',
+        'payload'     => 'array',
+        'is_active'   => 'boolean',
+    ];
+
+    /** Catégorie de rattachement. */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(QuestionCategory::class, 'category_id');
+    }
+
+    /** Formateur propriétaire. */
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    /** Scope : questions actives uniquement. */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('is_active', true);
+    }
+
+    /** Scope : questions d'un propriétaire donné. */
+    public function scopeOwned(Builder $query, $user): Builder
+    {
+        $ownerId = $user instanceof User ? $user->getKey() : (int) $user;
+
+        return $query->where('owner_id', $ownerId);
+    }
+
+    /** Le type est-il reconnu par le moteur de scoring ? */
+    public function hasSupportedType(): bool
+    {
+        return in_array($this->type, self::TYPES, true);
+    }
+}
