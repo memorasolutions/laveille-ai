@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int                              $max_score
  * @property int                              $percent
  * @property bool                             $passed
+ * @property bool                             $timed_out
  * @property array                            $answers
  * @property array|null                       $questions_snapshot
  * @property \Illuminate\Support\Carbon|null  $started_at
@@ -46,6 +47,8 @@ class QuizAttempt extends Model
         'max_score',
         'percent',
         'passed',
+        // V1-d : true si la soumission est arrivée hors-temps (garde serveur).
+        'timed_out',
         'answers',
         'questions_snapshot',
         'started_at',
@@ -57,6 +60,7 @@ class QuizAttempt extends Model
         'max_score'          => 'integer',
         'percent'            => 'integer',
         'passed'             => 'boolean',
+        'timed_out'          => 'boolean',
         'answers'            => 'array',
         'questions_snapshot' => 'array',
         'started_at'         => 'datetime',

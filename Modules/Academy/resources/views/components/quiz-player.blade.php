@@ -62,7 +62,15 @@
             // V1-c : points pondérés (défaut = nb correct/total si absent, rétrocompat).
             $pointsEarned   = (int)  ($quizResult['points_earned']   ?? $correct);
             $pointsPossible = (int)  ($quizResult['points_possible'] ?? $total);
+            // V1-d : soumission hors-temps (garde serveur).
+            $timedOut       = (bool) ($quizResult['timed_out'] ?? false);
         @endphp
+        @if($timedOut)
+            <div role="alert" class="p-3 rounded mb-3"
+                 style="background: #FEF3C7; border: 1px solid #FCD34D; color: #92400E; font-size: 0.9rem;">
+                ⏱️ Temps écoulé : votre quiz a été soumis automatiquement à l'expiration de la limite.
+            </div>
+        @endif
         <div class="p-4 rounded mb-4" style="
             background: {{ $passed ? '#DCFCE7' : '#FEF9C3' }};
             border: 2px solid {{ $passed ? '#86EFAC' : '#FDE047' }};
@@ -132,13 +140,17 @@
                     (array) ($item->payload['overall_feedback'] ?? []),
                     (int) $review->percent
                 );
+                // V1-d : options de révision (défaut « tout vrai » = V1-a inchangé).
+                $reviewOpts = \Modules\Academy\Services\QuizReviewOptions::normalize(
+                    $item->payload['review_options'] ?? null
+                );
             @endphp
 
             <section aria-label="Révision de vos réponses" class="mb-4">
                 <h5 style="font-weight: 700; color: #1A1D23;">Révision de vos réponses</h5>
 
                 {{-- Couche 3 : feedback global par tranche de score (en tête). --}}
-                @if($overallMessage !== null && trim($overallMessage) !== '')
+                @if($reviewOpts['show_overall_feedback'] && $overallMessage !== null && trim($overallMessage) !== '')
                     <div role="note" class="p-3 rounded mb-3"
                          style="background: #ECFEFF; border: 1px solid #A5F3FC; color: #155E63;">
                         {!! \Modules\Academy\Models\LessonItem::renderRichText($overallMessage) !!}
@@ -190,33 +202,39 @@
                     @endphp
 
                     <div wire:key="review-{{ $review->id }}-{{ $i }}" class="mb-3 p-3 rounded"
-                         style="background: #fff; border: 1px solid #E2E8F0; border-left: 4px solid {{ $isCorrect ? '#16A34A' : '#DC2626' }};">
+                         style="background: #fff; border: 1px solid #E2E8F0; border-left: 4px solid {{ $reviewOpts['show_correctness'] ? ($isCorrect ? '#16A34A' : '#DC2626') : '#94A3B8' }};">
                         <p class="mb-2" style="font-weight: 600; color: #1A1D23;">
                             <span class="badge me-2" style="background: var(--c-primary, #064E5A); color: #fff;">{{ $i + 1 }}</span>
                             {{ $q['question'] ?? '' }}
                         </p>
 
-                        <p class="mb-1" style="font-size: 0.88rem; color: {{ $isCorrect ? '#166534' : '#991B1B' }};">
-                            {{ $isCorrect ? '✔ Bonne réponse' : '✗ À revoir' }}
-                        </p>
+                        @if($reviewOpts['show_correctness'])
+                            <p class="mb-1" style="font-size: 0.88rem; color: {{ $isCorrect ? '#166534' : '#991B1B' }};">
+                                {{ $isCorrect ? '✔ Bonne réponse' : '✗ À revoir' }}
+                            </p>
+                        @endif
 
                         @if($qType === 'appariement')
-                            <p class="mb-1 text-muted" style="font-size: 0.85rem;">
-                                {{ $isCorrect ? 'Toutes les associations sont correctes.' : 'Certaines associations sont à revoir.' }}
-                            </p>
+                            @if($reviewOpts['show_correctness'])
+                                <p class="mb-1 text-muted" style="font-size: 0.85rem;">
+                                    {{ $isCorrect ? 'Toutes les associations sont correctes.' : 'Certaines associations sont à revoir.' }}
+                                </p>
+                            @endif
                         @else
                             <p class="mb-1 text-muted" style="font-size: 0.85rem;">
                                 Votre réponse : <strong>{{ $givenLabel }}</strong>
                             </p>
-                            @unless($isCorrect)
-                                <p class="mb-1 text-muted" style="font-size: 0.85rem;">
-                                    Bonne réponse : <strong>{{ $expectedLabel }}</strong>
-                                </p>
-                            @endunless
+                            @if($reviewOpts['show_right_answer'])
+                                @unless($isCorrect)
+                                    <p class="mb-1 text-muted" style="font-size: 0.85rem;">
+                                        Bonne réponse : <strong>{{ $expectedLabel }}</strong>
+                                    </p>
+                                @endunless
+                            @endif
                         @endif
 
                         {{-- Couche 1 : rétroaction spécifique du choix sélectionné. --}}
-                        @if($choiceFb !== null)
+                        @if($reviewOpts['show_specific_feedback'] && $choiceFb !== null)
                             <div class="mt-2 p-2 rounded" style="background: #F8FAFC; border: 1px dashed #CBD5E1; font-size: 0.85rem;">
                                 <span style="font-weight: 600;">À propos de votre choix :</span>
                                 {!! \Modules\Academy\Models\LessonItem::renderRichText($choiceFb) !!}
@@ -224,7 +242,7 @@
                         @endif
 
                         {{-- Couche 2 : rétroaction générale de la question. --}}
-                        @if($generalFb !== null)
+                        @if($reviewOpts['show_general_feedback'] && $generalFb !== null)
                             <div class="mt-2 p-2 rounded" style="background: #F0F9FF; border: 1px solid #BAE6FD; font-size: 0.85rem;">
                                 <span style="font-weight: 600;">Explication :</span>
                                 {!! \Modules\Academy\Models\LessonItem::renderRichText($generalFb) !!}
@@ -248,12 +266,62 @@
         @php
             $quizData  = session("academy.quiz.{$item->id}");
             $questions = $quizData['questions'] ?? [];
+            // V1-d : limite de temps (minutes) + horodatage de début posé SERVEUR.
+            // Le compte à rebours est dérivé d'un instant de fin calculé serveur
+            // (started_at + limite) ; le client n'a qu'à afficher/auto-soumettre.
+            // La garde réelle (anti-triche) est appliquée serveur dans submitQuiz.
+            $timeLimitMinutes = isset($item->payload['time_limit_minutes'])
+                ? (int) $item->payload['time_limit_minutes']
+                : null;
+            $deadlineTs = null;
+            if ($timeLimitMinutes !== null && $timeLimitMinutes > 0 && ! empty($quizData['started_at'])) {
+                try {
+                    $deadlineTs = \Illuminate\Support\Carbon::parse($quizData['started_at'])
+                        ->addMinutes($timeLimitMinutes)
+                        ->timestamp;
+                } catch (\Throwable) {
+                    $deadlineTs = null;
+                }
+            }
         @endphp
 
         <form method="POST"
               action="{{ route('academy.quiz.submit', [$course, $lesson, $item->id]) }}"
               id="academy-quiz-form-{{ $item->id }}">
             @csrf
+
+            {{-- V1-d : compte à rebours (limite de temps). Échéance serveur ;
+                 à 0 → soumission automatique du formulaire. role=timer + texte
+                 (pas seulement la couleur) pour l'accessibilité. --}}
+            @if($deadlineTs !== null)
+                <div x-data="{
+                        deadline: {{ $deadlineTs }} * 1000,
+                        remaining: 0,
+                        submitted: false,
+                        tick() {
+                            this.remaining = Math.max(0, Math.round((this.deadline - Date.now()) / 1000));
+                            if (this.remaining <= 0 && ! this.submitted) {
+                                this.submitted = true;
+                                document.getElementById('academy-quiz-form-{{ $item->id }}').requestSubmit();
+                            }
+                        },
+                        get label() {
+                            const m = Math.floor(this.remaining / 60);
+                            const s = this.remaining % 60;
+                            return m + ' min ' + (s < 10 ? '0' : '') + s + ' s';
+                        }
+                     }"
+                     x-init="tick(); setInterval(() => tick(), 1000)"
+                     role="timer"
+                     aria-live="polite"
+                     class="mb-3 p-2 rounded d-inline-block"
+                     :style="remaining <= 30
+                        ? 'background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;font-weight:600;'
+                        : 'background:#ECFEFF;border:1px solid #A5F3FC;color:#155E63;font-weight:600;'"
+                     style="font-size:0.9rem;">
+                    Temps restant : <span x-text="label">{{ $timeLimitMinutes }} min 00 s</span>
+                </div>
+            @endif
 
             @foreach($questions as $i => $question)
                 @php

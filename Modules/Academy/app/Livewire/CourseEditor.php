@@ -825,6 +825,11 @@ class CourseEditor extends Component
             'bank_draw_count'   => $extra['bank_draw_count']  ?? null,
             // QB3 : toggle « inclure les sous-catégories » (défaut true si absent).
             'bank_include_subcategories' => $extra['bank_include_subcategories'] ?? null,
+            // V1-d : mélange (questions / réponses), limite de temps, options de révision.
+            'shuffle_questions'   => $extra['shuffle_questions']   ?? null,
+            'shuffle_answers'     => $extra['shuffle_answers']     ?? null,
+            'time_limit_minutes'  => $extra['time_limit_minutes']  ?? null,
+            'review_options'      => $extra['review_options']      ?? null,
         ];
 
         $data    = $this->validateItem($input);
@@ -1132,6 +1137,11 @@ class CourseEditor extends Component
             'bank_draw_count'   => 'nullable|integer|min:1|max:50',
             // QB3 : inclure les sous-catégories au tirage (parité Moodle, défaut true).
             'bank_include_subcategories' => 'nullable|boolean',
+            // V1-d : mélange + limite de temps + options de révision (toutes facultatives).
+            'shuffle_questions'  => 'nullable|boolean',
+            'shuffle_answers'    => 'nullable|boolean',
+            'time_limit_minutes' => 'nullable|integer|min:1|max:240',
+            'review_options'     => 'nullable|array',
         ])->validate();
     }
 
@@ -1249,7 +1259,54 @@ class CourseEditor extends Component
             }
         }
 
+        // V1-d — MÉLANGE : 2 booléens. N'écrits QUE si true (un item sans ces clés
+        // → pas de mélange = comportement actuel inchangé, rétrocompat stricte).
+        if ($this->truthy($input['shuffle_questions'] ?? null)) {
+            $payload['shuffle_questions'] = true;
+        }
+        if ($this->truthy($input['shuffle_answers'] ?? null)) {
+            $payload['shuffle_answers'] = true;
+        }
+
+        // V1-d — LIMITE DE TEMPS : minutes (1..240). Vide → aucune limite (clé absente).
+        $limit = $input['time_limit_minutes'] ?? null;
+        if ($limit !== null && $limit !== '') {
+            $payload['time_limit_minutes'] = max(1, min(240, (int) $limit));
+        }
+
+        // V1-d — OPTIONS DE RÉVISION : on persiste UNIQUEMENT les toggles désactivés
+        // (false). Défaut = tout vrai (QuizReviewOptions). Donc un item sans choix
+        // explicite → aucune clé → révision complète V1-a (rétrocompat stricte).
+        $rawReview = $input['review_options'] ?? null;
+        if (is_array($rawReview)) {
+            $review = [];
+            foreach (\Modules\Academy\Services\QuizReviewOptions::KEYS as $key) {
+                if (array_key_exists($key, $rawReview)) {
+                    $review[$key] = (bool) (filter_var(
+                        $rawReview[$key],
+                        FILTER_VALIDATE_BOOLEAN,
+                        FILTER_NULL_ON_FAILURE
+                    ) ?? true);
+                }
+            }
+            if ($review !== []) {
+                $payload['review_options'] = $review;
+            }
+        }
+
         return $payload;
+    }
+
+    /**
+     * V1-d : normalise une valeur du DOM ('1'/'0'/true/false/'on'/'' / null) en booléen.
+     */
+    private function truthy(mixed $value): bool
+    {
+        if ($value === null || $value === '') {
+            return false;
+        }
+
+        return (bool) (filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false);
     }
 
     /**

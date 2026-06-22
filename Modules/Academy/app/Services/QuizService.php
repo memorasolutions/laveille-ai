@@ -55,6 +55,102 @@ final class QuizService
     }
 
     /**
+     * V1-d — MÉLANGE (questions et/ou réponses).
+     *
+     * Le round mélangé est ce qui sera STOCKÉ EN SESSION puis snapshoté dans
+     * QuizAttempt. Comme score() et la révision (V1-a) lisent CE round, le scoring
+     * reste EXACT : pour chaque question dont on permute les choix, on recalcule
+     * l'index `correct` (et on permute `choice_feedback` à l'identique).
+     *
+     *  - $shuffleQuestions : mélange l'ORDRE des questions (aucun champ touché).
+     *  - $shuffleAnswers   : pour les qcm uniquement, permute `choices` +
+     *                        `choice_feedback` et remappe `correct`. Les vraifaux
+     *                        gardent l'ordre Vrai/Faux fixe (sémantique). court (pas
+     *                        de choix) et appariement (défs déjà mélangées par le
+     *                        mapping) sont laissés tels quels → mapping `answer` intact.
+     *
+     * @param  array<int, array<string, mixed>> $round
+     * @return array<int, array<string, mixed>>
+     */
+    public static function shuffleRound(array $round, bool $shuffleQuestions, bool $shuffleAnswers): array
+    {
+        if ($shuffleAnswers) {
+            foreach ($round as $i => $q) {
+                $round[$i] = self::shuffleQuestionChoices($q);
+            }
+        }
+
+        if ($shuffleQuestions && count($round) > 1) {
+            // array_values garde des index 0..N-1 séquentiels (les réponses sont
+            // indexées par numéro de question côté formulaire/scoring).
+            shuffle($round);
+            $round = array_values($round);
+        }
+
+        return $round;
+    }
+
+    /**
+     * Permute les choix d'UNE question qcm en remappant l'index correct (et le
+     * feedback par choix) pour que le scoring reste exact. Toute autre forme de
+     * question est renvoyée inchangée (vraifaux/court/appariement : ordre signifiant
+     * ou mapping déjà mélangé en amont).
+     *
+     * @param  array<string, mixed> $q
+     * @return array<string, mixed>
+     */
+    private static function shuffleQuestionChoices(array $q): array
+    {
+        $type = $q['type'] ?? null;
+
+        if ($type !== 'qcm') {
+            return $q;
+        }
+
+        $choices = is_array($q['choices'] ?? null) ? array_values($q['choices']) : [];
+        $n       = count($choices);
+
+        if ($n < 2) {
+            return $q;
+        }
+
+        $oldCorrect = (int) ($q['correct'] ?? -1);
+
+        // Permutation des positions 0..n-1.
+        $order = range(0, $n - 1);
+        shuffle($order);
+
+        $newChoices  = [];
+        $newCorrect  = $oldCorrect;
+        $oldFeedback = is_array($q['choice_feedback'] ?? null) ? $q['choice_feedback'] : null;
+        $newFeedback = $oldFeedback !== null ? [] : null;
+
+        foreach ($order as $newIndex => $oldIndex) {
+            $newChoices[$newIndex] = $choices[$oldIndex];
+
+            if ($oldIndex === $oldCorrect) {
+                $newCorrect = $newIndex;
+            }
+
+            if ($newFeedback !== null) {
+                // choice_feedback peut être indexé int OU string : on lit les deux.
+                $fb = $oldFeedback[$oldIndex] ?? ($oldFeedback[(string) $oldIndex] ?? null);
+                if ($fb !== null) {
+                    $newFeedback[$newIndex] = $fb;
+                }
+            }
+        }
+
+        $q['choices'] = $newChoices;
+        $q['correct'] = $newCorrect;
+        if ($newFeedback !== null) {
+            $q['choice_feedback'] = $newFeedback;
+        }
+
+        return $q;
+    }
+
+    /**
      * Calcule le score d'une soumission de quiz.
      *
      * V1-c - SCORING PONDÉRÉ : chaque question porte un champ `points` (défaut 1 si

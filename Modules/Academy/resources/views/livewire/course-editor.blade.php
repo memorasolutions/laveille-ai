@@ -726,7 +726,7 @@
                                                             @php($videoUrlValue = $item->payload['player_url'] ?? ($item->payload['embed'] ?? ''))
                                                             @php($posterValue = $item->payload['poster'] ?? '')
                                                             @php($durationMin = isset($item->payload['duration_seconds']) ? (int) ceil(((int) $item->payload['duration_seconds']) / 60) : '')
-                                                            <form wire:submit="updateItem({{ $item->id }}, '{{ $item->type }}', $event.target.title.value, $event.target.estimated_minutes.value, { player_url: $event.target.player_url ? $event.target.player_url.value : null, poster_url: $event.target.poster_url ? $event.target.poster_url.value : null, duration_minutes: $event.target.duration_minutes ? $event.target.duration_minutes.value : null, rich_text: $event.target.rich_text ? $event.target.rich_text.value : null, qt_bank_key: $event.target.qt_bank_key ? $event.target.qt_bank_key.value : null, passing_score: $event.target.passing_score ? $event.target.passing_score.value : null, attempts_allowed: $event.target.attempts_allowed ? $event.target.attempts_allowed.value : null, bank_category_id: $event.target.bank_category_id ? $event.target.bank_category_id.value : null, bank_draw_count: $event.target.bank_draw_count ? $event.target.bank_draw_count.value : null, bank_include_subcategories: $event.target.bank_include_subcategories ? $event.target.bank_include_subcategories.checked : null, grading_method: $event.target.grading_method ? $event.target.grading_method.value : null })"
+                                                            <form wire:submit="updateItem({{ $item->id }}, '{{ $item->type }}', $event.target.title.value, $event.target.estimated_minutes.value, { player_url: $event.target.player_url ? $event.target.player_url.value : null, poster_url: $event.target.poster_url ? $event.target.poster_url.value : null, duration_minutes: $event.target.duration_minutes ? $event.target.duration_minutes.value : null, rich_text: $event.target.rich_text ? $event.target.rich_text.value : null, qt_bank_key: $event.target.qt_bank_key ? $event.target.qt_bank_key.value : null, passing_score: $event.target.passing_score ? $event.target.passing_score.value : null, attempts_allowed: $event.target.attempts_allowed ? $event.target.attempts_allowed.value : null, bank_category_id: $event.target.bank_category_id ? $event.target.bank_category_id.value : null, bank_draw_count: $event.target.bank_draw_count ? $event.target.bank_draw_count.value : null, bank_include_subcategories: $event.target.bank_include_subcategories ? $event.target.bank_include_subcategories.checked : null, grading_method: $event.target.grading_method ? $event.target.grading_method.value : null, shuffle_questions: $event.target.shuffle_questions ? $event.target.shuffle_questions.checked : null, shuffle_answers: $event.target.shuffle_answers ? $event.target.shuffle_answers.checked : null, time_limit_minutes: $event.target.time_limit_minutes ? $event.target.time_limit_minutes.value : null, review_options: $event.target.review_show_correctness ? { show_correctness: $event.target.review_show_correctness.checked, show_marks: $event.target.review_show_marks.checked, show_specific_feedback: $event.target.review_show_specific_feedback.checked, show_general_feedback: $event.target.review_show_general_feedback.checked, show_overall_feedback: $event.target.review_show_overall_feedback.checked, show_right_answer: $event.target.review_show_right_answer.checked } : null })"
                                                                   style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
                                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="item-title-{{ $item->id }}">Titre</label>
                                                                 <input id="item-title-{{ $item->id }}" type="text" name="title" value="{{ $item->title }}" aria-label="Titre de l'élément"
@@ -807,6 +807,55 @@
                                                                         <option value="first" @selected($gradingMethod === 'first')>Première tentative</option>
                                                                         <option value="last" @selected($gradingMethod === 'last')>Dernière tentative</option>
                                                                     </select>
+
+                                                                    {{-- V1-d : MÉLANGE (questions / réponses). --}}
+                                                                    @php($shuffleQ = (bool) ($item->payload['shuffle_questions'] ?? false))
+                                                                    @php($shuffleA = (bool) ($item->payload['shuffle_answers'] ?? false))
+                                                                    <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="item-shufq-{{ $item->id }}">
+                                                                        <input id="item-shufq-{{ $item->id }}" type="checkbox" name="shuffle_questions" value="1" @checked($shuffleQ)
+                                                                               style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                        <span>Mélanger les questions</span>
+                                                                    </label>
+                                                                    <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="item-shufa-{{ $item->id }}">
+                                                                        <input id="item-shufa-{{ $item->id }}" type="checkbox" name="shuffle_answers" value="1" @checked($shuffleA)
+                                                                               style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                        <span>Mélanger les réponses (choix multiples)</span>
+                                                                    </label>
+
+                                                                    {{-- V1-d : LIMITE DE TEMPS (minutes, vide = aucune). --}}
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-timelimit-{{ $item->id }}">Limite de temps (minutes, vide = aucune)</label>
+                                                                    <input id="item-timelimit-{{ $item->id }}" type="number" min="1" max="240" name="time_limit_minutes" value="{{ $item->payload['time_limit_minutes'] ?? '' }}" placeholder="Aucune" aria-label="Limite de temps en minutes"
+                                                                           style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                                    {{-- V1-d : OPTIONS DE RÉVISION (ce que l'étudiant voit après soumission). --}}
+                                                                    @php($ro = \Modules\Academy\Services\QuizReviewOptions::normalize($item->payload['review_options'] ?? null))
+                                                                    <fieldset style="border: 1px dashed #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 8px 12px; margin: 0;">
+                                                                        <legend style="font-size: 0.78rem; font-weight: 700; padding: 0 4px; width: auto;">Options de révision</legend>
+                                                                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem;" for="item-ro-correct-{{ $item->id }}">
+                                                                            <input id="item-ro-correct-{{ $item->id }}" type="checkbox" name="review_show_correctness" value="1" @checked($ro['show_correctness']) style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                            <span>Afficher la justesse</span>
+                                                                        </label>
+                                                                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem;" for="item-ro-marks-{{ $item->id }}">
+                                                                            <input id="item-ro-marks-{{ $item->id }}" type="checkbox" name="review_show_marks" value="1" @checked($ro['show_marks']) style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                            <span>Afficher les points</span>
+                                                                        </label>
+                                                                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem;" for="item-ro-spec-{{ $item->id }}">
+                                                                            <input id="item-ro-spec-{{ $item->id }}" type="checkbox" name="review_show_specific_feedback" value="1" @checked($ro['show_specific_feedback']) style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                            <span>Afficher la rétroaction du choix</span>
+                                                                        </label>
+                                                                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem;" for="item-ro-gen-{{ $item->id }}">
+                                                                            <input id="item-ro-gen-{{ $item->id }}" type="checkbox" name="review_show_general_feedback" value="1" @checked($ro['show_general_feedback']) style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                            <span>Afficher l'explication générale</span>
+                                                                        </label>
+                                                                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem;" for="item-ro-overall-{{ $item->id }}">
+                                                                            <input id="item-ro-overall-{{ $item->id }}" type="checkbox" name="review_show_overall_feedback" value="1" @checked($ro['show_overall_feedback']) style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                            <span>Afficher la rétroaction globale</span>
+                                                                        </label>
+                                                                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem;" for="item-ro-right-{{ $item->id }}">
+                                                                            <input id="item-ro-right-{{ $item->id }}" type="checkbox" name="review_show_right_answer" value="1" @checked($ro['show_right_answer']) style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                            <span>Afficher la bonne réponse</span>
+                                                                        </label>
+                                                                    </fieldset>
                                                                 @endif
 
                                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="item-min-{{ $item->id }}">Durée estimée de l'élément (min, facultatif)</label>
@@ -972,6 +1021,20 @@
                                                     <option value="first">Première tentative</option>
                                                     <option value="last">Dernière tentative</option>
                                                 </select>
+
+                                                {{-- V1-d : mélange + limite de temps (options de révision réglables après création, défaut = révision complète). --}}
+                                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="newitem-shufq-{{ $lesson->id }}">
+                                                    <input id="newitem-shufq-{{ $lesson->id }}" type="checkbox" wire:model="newItem.{{ $lesson->id }}.shuffle_questions" style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                    <span>Mélanger les questions</span>
+                                                </label>
+                                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="newitem-shufa-{{ $lesson->id }}">
+                                                    <input id="newitem-shufa-{{ $lesson->id }}" type="checkbox" wire:model="newItem.{{ $lesson->id }}.shuffle_answers" style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                    <span>Mélanger les réponses (choix multiples)</span>
+                                                </label>
+
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-timelimit-{{ $lesson->id }}">Limite de temps (minutes, vide = aucune)</label>
+                                                <input id="newitem-timelimit-{{ $lesson->id }}" type="number" min="1" max="240" wire:model="newItem.{{ $lesson->id }}.time_limit_minutes" placeholder="Aucune"
+                                                       style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
 
                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-min-{{ $lesson->id }}">Durée estimée (min, facultatif)</label>
                                                 <input id="newitem-min-{{ $lesson->id }}" type="number" min="1" wire:model="newItem.{{ $lesson->id }}.estimated_minutes" placeholder="Durée estimée"

@@ -98,6 +98,18 @@ class QuizController extends Controller
             return back()->with('error', 'Quiz indisponible pour le moment.');
         }
 
+        // V1-d : MÉLANGE serveur (le client ne choisit jamais l'ordre). Le round
+        // mélangé devient la SOURCE DE VÉRITÉ (session + snapshot) : score() et la
+        // révision V1-a lisent ce round → le scoring reste exact (l'index `correct`
+        // des qcm est remappé par shuffleRound). Absents → false → aucun mélange
+        // (rétrocompat stricte).
+        $shuffleQuestions = (bool) ($item->payload['shuffle_questions'] ?? false);
+        $shuffleAnswers   = (bool) ($item->payload['shuffle_answers'] ?? false);
+
+        if ($shuffleQuestions || $shuffleAnswers) {
+            $round = QuizService::shuffleRound($round, $shuffleQuestions, $shuffleAnswers);
+        }
+
         // Stocker le round en session serveur (les questions restent côté serveur)
         $request->session()->put("academy.quiz.{$item->id}", [
             'questions'  => $round,
@@ -156,6 +168,23 @@ class QuizController extends Controller
             }
         }
 
+        // V1-d : GARDE SERVEUR DE LA LIMITE DE TEMPS. Le serveur ne fait JAMAIS
+        // confiance au client : il re-calcule l'écoulement depuis started_at (posé
+        // serveur) et la limite du payload. Comme Moodle, la soumission tardive est
+        // ACCEPTÉE (on ne pénalise pas une fermeture/latence), mais on MARQUE la
+        // tentative comme hors-temps (timed_out=true) pour l'analytics/affichage.
+        // Tolérance de 10 s (latence réseau, horloge). Sans limite → jamais timed_out.
+        $timedOut          = false;
+        $timeLimitMinutes  = isset($item->payload['time_limit_minutes'])
+            ? (int) $item->payload['time_limit_minutes']
+            : null;
+
+        if ($timeLimitMinutes !== null && $timeLimitMinutes > 0 && $startedAt !== null) {
+            $elapsedSeconds = now()->diffInSeconds($startedAt, true);
+            $allowedSeconds = $timeLimitMinutes * 60 + 10; // tolérance 10 s
+            $timedOut       = $elapsedSeconds > $allowedSeconds;
+        }
+
         // Supprimer la session (une tentative = une soumission)
         $request->session()->forget($sessionKey);
 
@@ -163,11 +192,11 @@ class QuizController extends Controller
         // (si réussi) dans une SEULE transaction. La complétion reste INCHANGÉE
         // (toujours appelée si réussi) ; la table d'historique démarre vide
         // (rétrocompat des Completion existantes).
-        DB::transaction(function () use ($user, $item, $scoreResult, $passed, $answers, $questions, $startedAt): void {
+        DB::transaction(function () use ($user, $item, $scoreResult, $passed, $answers, $questions, $startedAt, $timedOut): void {
             // V1-c : l'historique conserve le PERCENT pondéré (champ déterminant pour
             // la méthode de notation). max_score reste le NB de questions ; on ne
             // change PAS la sémantique des colonnes existantes (rétrocompat V1-b).
-            QuizAttempt::create([
+            $attributes = [
                 'user_id'            => $user->id,
                 'lesson_item_id'     => $item->id,
                 'course_id'          => $this->resolveCourseId($item),
@@ -179,7 +208,15 @@ class QuizController extends Controller
                 'questions_snapshot' => $questions,
                 'started_at'         => $startedAt,
                 'submitted_at'       => now(),
-            ]);
+            ];
+
+            // V1-d : `timed_out` n'est écrit que si la colonne existe (migration
+            // additive guardée). Sur une base sans la colonne → on ne plante pas.
+            if (\Illuminate\Support\Facades\Schema::hasColumn('academy_quiz_attempts', 'timed_out')) {
+                $attributes['timed_out'] = $timedOut;
+            }
+
+            QuizAttempt::create($attributes);
 
             if ($passed) {
                 // SECURITY/RÉTROCOMPAT : Completion.score = NB de bonnes réponses
@@ -197,6 +234,8 @@ class QuizController extends Controller
             'percent'         => $scoreResult['percent'],
             'correct'         => $scoreResult['correct'],
             'total'           => $scoreResult['total'],
+            // V1-d : soumission hors-temps (garde serveur).
+            'timed_out'       => $timedOut,
             // V1-c : points pondérés pour l'affichage « X / Y points ».
             'points_earned'   => $scoreResult['points_earned'],
             'points_possible' => $scoreResult['points_possible'],
