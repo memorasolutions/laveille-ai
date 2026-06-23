@@ -38,6 +38,12 @@ use Modules\Academy\Services\H5pPackageService;
 
 class H5pPlayerController extends Controller
 {
+    /**
+     * Injection du service (DI) plutôt qu'un « new » en dur : testabilité et
+     * cohérence avec le conteneur. Le service reste sans état (idempotent).
+     */
+    public function __construct(private readonly H5pPackageService $h5p) {}
+
     public function play(Request $request, Course $course, Lesson $lesson, int $itemId): \Illuminate\Http\Response
     {
         // 1. RE-RÉSOLUTION SERVEUR de l'item (anti-IDOR) : il doit appartenir à
@@ -89,7 +95,7 @@ class H5pPlayerController extends Controller
         }
 
         // 5. URL publique du dossier extrait (validée hors périmètre = null).
-        $contentUrl = (new H5pPackageService())->publicUrl($item->payload['h5p_path'] ?? null);
+        $contentUrl = $this->h5p->publicUrl($item->payload['h5p_path'] ?? null);
         if ($contentUrl === null) {
             abort(404);
         }
@@ -100,13 +106,18 @@ class H5pPlayerController extends Controller
         $html = view('academy::public.h5p-player', [
             'contentUrl' => $contentUrl,
             'cdnBase'    => $cdnBase,
+            // Empreintes SRI (intégrité des ressources CDN). Vides => pas d'attribut.
+            'sriMainJs'  => (string) config('academy.h5p.sri.main_js', ''),
+            'sriCss'     => (string) config('academy.h5p.sri.css', ''),
             'title'      => $item->title,
         ])->render();
 
         // 6. CSP DÉDIÉE à la page player : jsdelivr autorisé pour le player
         //    uniquement (scripts/styles/fonts), contenu servi en same-origin.
         //    frame-ancestors borne l'inclusion à notre propre domaine.
-        $siteHost = (string) config('academy.site_host', 'laveille.ai');
+        //    Le domaine vient de la config (« academy.site_host » a déjà son défaut
+        //    dans config/config.php) : aucun domaine en dur ici.
+        $siteHost = (string) config('academy.site_host');
         $csp = implode('; ', [
             "default-src 'self'",
             "script-src 'self' 'unsafe-inline' https://{$cdnHost}",
@@ -122,6 +133,9 @@ class H5pPlayerController extends Controller
 
         return response($html, 200)
             ->header('Content-Security-Policy', $csp)
+            // Complément de « frame-ancestors » : refuse l'inclusion de cette page
+            // dans un cadre d'origine tierce (défense en profondeur anti-clickjacking).
+            ->header('X-Frame-Options', 'SAMEORIGIN')
             ->header('X-Content-Type-Options', 'nosniff')
             ->header('Referrer-Policy', 'strict-origin-when-cross-origin');
     }

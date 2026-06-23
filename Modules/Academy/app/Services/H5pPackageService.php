@@ -14,7 +14,10 @@
  * ensuite dans un iframe SANDBOX via le player h5p-standalone (CDN jsdelivr).
  *
  * DÉFENSES (sécurité d'abord) :
- *  - taille bornée (<= 30 Mo) ;
+ *  - taille bornée (<= 30 Mo, configurable « academy.h5p.max_kb ») ;
+ *  - ANTI ZIP-BOMB : nombre d'entrées borné (« max_entries ») ET taille TOTALE
+ *    décompressée bornée (« max_extract_kb ») → un petit zip ne peut pas saturer
+ *    le disque ; dépassement => nettoyage du dossier partiel + rejet propre ;
  *  - le fichier doit s'ouvrir comme un ZIP valide (on ne se fie pas au mime) ;
  *  - le ZIP doit contenir « h5p.json » ET « content/content.json » (sinon rejet
  *    propre, jamais de 500) ;
@@ -38,8 +41,14 @@ use ZipArchive;
 
 final class H5pPackageService
 {
-    /** Taille maximale d'un paquet .h5p (30 Mo). */
+    /** Taille maximale par DÉFAUT d'un paquet .h5p compressé (30 Mo). Surchargée par config. */
     public const MAX_BYTES = 30 * 1024 * 1024;
+
+    /** Nombre d'entrées zip par DÉFAUT (anti zip-bomb). Surchargé par config. */
+    public const MAX_ENTRIES = 5000;
+
+    /** Taille DÉCOMPRESSÉE totale par DÉFAUT (200 Mo, anti zip-bomb). Surchargée par config. */
+    public const MAX_EXTRACT_BYTES = 200 * 1024 * 1024;
 
     /** Disque public (servi via storage:link). Le contenu y est statique, jamais exécuté. */
     public const DISK = 'public';
@@ -79,9 +88,11 @@ final class H5pPackageService
      */
     public function extract(UploadedFile $file): array
     {
-        // 1. Taille bornée AVANT toute ouverture.
-        if ($file->getSize() > self::MAX_BYTES) {
-            throw self::reject('Le paquet H5P dépasse la taille maximale de 30 Mo.');
+        // 1. Taille (COMPRESSÉE) bornée AVANT toute ouverture. Lue depuis la config
+        //    (« academy.h5p.max_kb », défaut 30 Mo) pour cohérence avec l'upload.
+        $maxBytes = $this->maxBytes();
+        if ($file->getSize() > $maxBytes) {
+            throw self::reject('Le paquet H5P dépasse la taille maximale de '.intdiv($maxBytes, 1024 * 1024).' Mo.');
         }
 
         $realPath = $file->getRealPath();
@@ -96,20 +107,30 @@ final class H5pPackageService
         }
 
         try {
-            // 3. Structure obligatoire : h5p.json + content/content.json.
+            // 3. ANTI ZIP-BOMB (1/2) : nombre d'entrées borné AVANT la boucle. Un zip
+            //    avec un nombre démesuré d'entrées est rejeté proprement (jamais de 500).
+            if ($zip->numFiles > $this->maxEntries()) {
+                throw self::reject('Paquet H5P rejeté : trop de fichiers ('.$zip->numFiles.').');
+            }
+
+            // 4. Structure obligatoire : h5p.json + content/content.json.
             foreach (self::REQUIRED_ENTRIES as $required) {
                 if ($zip->locateName($required) === false) {
                     throw self::reject('Paquet H5P invalide : « '.$required.' » est manquant.');
                 }
             }
 
-            // 4. Titre (best-effort) depuis h5p.json.
+            // 5. Titre (best-effort) depuis h5p.json.
             $title = $this->readTitle($zip);
 
-            // 5. Extraction entrée par entrée (anti zip-slip + liste noire).
+            // 6. Extraction entrée par entrée (anti zip-slip + liste noire + anti zip-bomb).
             $uuid    = (string) Str::uuid();
             $relRoot = self::BASE_DIR.'/'.$uuid;
             $disk    = Storage::disk(self::DISK);
+
+            // ANTI ZIP-BOMB (2/2) : accumulateur de la taille TOTALE décompressée.
+            $maxExtractBytes = $this->maxExtractBytes();
+            $extractedBytes  = 0;
 
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 $entryName = (string) $zip->getNameIndex($i);
@@ -145,12 +166,21 @@ final class H5pPackageService
                     continue; // entrée illisible : on l'ignore plutôt que d'échouer
                 }
 
+                // ANTI ZIP-BOMB : on somme la taille RÉELLE décompressée. Au dépassement
+                // du seuil, on nettoie le dossier déjà extrait et on rejette proprement
+                // (jamais de 500, aucun fichier orphelin laissé sur le disque).
+                $extractedBytes += strlen($contents);
+                if ($extractedBytes > $maxExtractBytes) {
+                    $disk->deleteDirectory($relRoot);
+                    throw self::reject('Paquet H5P rejeté : le contenu décompressé dépasse la taille autorisée.');
+                }
+
                 // Écriture via le disque (compatible Storage::fake en test ;
                 // le disque public ne sert jamais de PHP).
                 $disk->put($relRoot.'/'.$normalized, $contents);
             }
 
-            // 6. Garde-fou final : les fichiers obligatoires ont bien été posés.
+            // 7. Garde-fou final : les fichiers obligatoires ont bien été posés.
             if (! $disk->exists($relRoot.'/h5p.json')
                 || ! $disk->exists($relRoot.'/content/content.json')) {
                 // Nettoyage si l'extraction a échoué à mi-chemin.
@@ -200,6 +230,39 @@ final class H5pPackageService
         }
 
         return rtrim(Storage::disk(self::DISK)->url($normalized), '/');
+    }
+
+    /**
+     * Taille maximale du fichier COMPRESSÉ (octets). Lue depuis la config
+     * (« academy.h5p.max_kb », en Ko) ; repli sur la constante par défaut.
+     */
+    private function maxBytes(): int
+    {
+        $kb = (int) config('academy.h5p.max_kb', intdiv(self::MAX_BYTES, 1024));
+
+        return $kb > 0 ? $kb * 1024 : self::MAX_BYTES;
+    }
+
+    /**
+     * Nombre maximal d'entrées du zip (anti zip-bomb). Lu depuis la config
+     * (« academy.h5p.max_entries ») ; repli sur la constante par défaut.
+     */
+    private function maxEntries(): int
+    {
+        $n = (int) config('academy.h5p.max_entries', self::MAX_ENTRIES);
+
+        return $n > 0 ? $n : self::MAX_ENTRIES;
+    }
+
+    /**
+     * Taille maximale TOTALE décompressée (octets). Lue depuis la config
+     * (« academy.h5p.max_extract_kb », en Ko) ; repli sur la constante par défaut.
+     */
+    private function maxExtractBytes(): int
+    {
+        $kb = (int) config('academy.h5p.max_extract_kb', intdiv(self::MAX_EXTRACT_BYTES, 1024));
+
+        return $kb > 0 ? $kb * 1024 : self::MAX_EXTRACT_BYTES;
     }
 
     /** Lit le titre depuis h5p.json (best-effort, jamais d'échec). */

@@ -248,6 +248,22 @@ test('service : un paquet trop lourd (> 30 Mo déclaré) est rejeté', function 
         ->toThrow(\RuntimeException::class);
 });
 
+test('service : ANTI ZIP-BOMB - un contenu décompressé au-delà du seuil est rejeté sans 500 ni dossier orphelin', function (): void {
+    // Seuil volontairement bas (5 Ko) pour le test ; le service lit la config.
+    config()->set('academy.h5p.max_extract_kb', 5);
+
+    $files = h5pValidFiles();
+    // Une entrée légitime (json, non filtrée) dont le DÉCOMPRESSÉ dépasse le seuil.
+    $files['content/big.json'] = str_repeat('a', 50 * 1024);
+    $path = h5pZipFile($files);
+
+    expect(fn () => (new H5pPackageService())->extract(h5pUpload($path)))
+        ->toThrow(\RuntimeException::class);
+
+    // Aucun dossier extrait laissé sur le disque (nettoyage du partiel).
+    expect(Storage::disk('public')->allFiles(H5pPackageService::BASE_DIR))->toBe([]);
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. SERVICE - delete borné (anti-traversal)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -371,6 +387,28 @@ test('ANTI-ESCALADE : un formateur d\'un AUTRE cours ne peut pas ajouter de h5p 
     expect(LessonItem::where('lesson_id', $lesson->id)->where('type', 'h5p')->count())->toBe(0);
 });
 
+test('RESTRICTION ADMIN : un formateur non-admin (owner de CE cours) ne peut PAS téléverser de h5p', function (): void {
+    $course = h5pCourse('cours-no-admin', 'draft');
+    $lesson = h5pLesson($course);
+
+    // Formateur propriétaire de CE cours : il PASSE manageStructure mais n'a PAS
+    // « academy.manage » → le téléversement H5P (JS tiers) doit être refusé proprement.
+    $instructor = User::factory()->create();
+    $instructor->assignRole('instructor');
+    CourseRole::create(['course_id' => $course->id, 'user_id' => $instructor->id, 'role' => 'owner']);
+    expect($instructor->can('academy.manage'))->toBeFalse();
+
+    Livewire::actingAs($instructor)
+        ->test(CourseEditor::class, ['course' => $course])
+        ->set("newItem.{$lesson->id}.title", 'Tentative non-admin')
+        ->set("newH5p.{$lesson->id}", h5pFake(h5pValidFiles()))
+        ->call('addH5pItem', $lesson->id)
+        ->assertHasErrors("newH5p.{$lesson->id}");
+
+    // Aucun item créé, aucun contenu extrait.
+    expect(LessonItem::where('lesson_id', $lesson->id)->where('type', 'h5p')->count())->toBe(0);
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 4. LECTEUR - iframe sandbox pour un inscrit, panneau gaté sinon
 // ─────────────────────────────────────────────────────────────────────────────
@@ -430,6 +468,17 @@ test('player : un inscrit obtient 200 + le bundle h5p-standalone (chargé en ifr
     // NON restreint → le bundle jsdelivr se charge quand même, et l'iframe est cadré
     // en same-origin (« frame-src 'self' »). On vérifie donc la politique effective.
     expect($resp->headers->get('Content-Security-Policy'))->toContain("frame-src 'self'");
+});
+
+test('player : un visiteur NON authentifié sur un item NON-preview obtient 403 (gating contrôleur)', function (): void {
+    $course = h5pCourse('cours-guest');
+    $lesson = h5pLesson($course);
+    $item   = h5pReadyItem($lesson); // item non-preview par défaut
+
+    // Aucune session : la route n'est pas derrière « auth », le gating est dans le
+    // contrôleur (ni preview, ni gérant, ni inscrit) → 403, jamais le contenu.
+    $this->get(route('academy.h5p.play', [$course, $lesson, $item->id]))
+        ->assertForbidden();
 });
 
 test('player : un non-inscrit est refusé (403)', function (): void {

@@ -1306,16 +1306,66 @@ class CourseEditor extends Component
      * Un paquet invalide (zip corrompu, structure manquante, zip-slip) est rejeté
      * proprement en erreur de champ (jamais de 500).
      */
+    /**
+     * F16 - SÉCURITÉ : un paquet .h5p embarque du JavaScript TIERS rendu dans un
+     * iframe « allow-same-origin allow-scripts » (le JS peut donc lire le DOM parent).
+     * On RESTREINT le téléversement aux comptes ADMIN de confiance
+     * (permission « academy.manage ») : un simple formateur peut gérer la structure
+     * de SES cours mais NE PEUT PAS publier de JS tiers. Le RENDU (lecture) reste,
+     * lui, ouvert aux inscrits. Mitigation des risques du sandbox same-origin, en
+     * attendant le fix définitif (servir le contenu sur un sous-domaine isolé, dette v2).
+     *
+     * @return bool true si l'utilisateur courant peut téléverser un paquet H5P.
+     */
+    private function canUploadH5p(): bool
+    {
+        return (bool) Auth::user()?->can('academy.manage');
+    }
+
+    /**
+     * Règles de validation d'un téléversement de paquet H5P (DRY, partagé entre
+     * l'ajout et le remplacement). On accepte .h5p ET .zip (extensions:h5p,zip).
+     * En COMPLÉMENT, pour un fichier nommé « .zip », on EXIGE que son type MIME soit
+     * réellement zip (mimes:zip) : défense en profondeur côté Livewire, en plus de la
+     * validation ZIP stricte du service. Un paquet « .h5p » légitime est aussi un zip
+     * mais porte une extension non standard : la garde mime ne s'applique qu'au cas
+     * « .zip » pour ne pas rejeter les paquets H5P valides.
+     *
+     * @return array<int, string>
+     */
+    private function h5pFileRules(mixed $file): array
+    {
+        $rules = ['required', 'file', 'extensions:h5p,zip', 'max:'.self::H5P_MAX_KB];
+
+        $ext = is_object($file) && method_exists($file, 'getClientOriginalExtension')
+            ? strtolower((string) $file->getClientOriginalExtension())
+            : '';
+
+        if ($ext === 'zip') {
+            $rules[] = 'mimes:zip';
+        }
+
+        return $rules;
+    }
+
     public function addH5pItem(int $lessonId): void
     {
         $course = $this->resolveCourse();
         $this->authorize('manageStructure', $course);
 
+        // RESTRICTION ADMIN (JS tiers) : refus propre en erreur de champ (pas de 500,
+        // pas de popup natif). Un formateur non-admin ne peut pas téléverser de .h5p.
+        if (! $this->canUploadH5p()) {
+            $this->addError("newH5p.$lessonId", 'Seul un administrateur peut téléverser du contenu interactif H5P (sécurité : code tiers).');
+
+            return;
+        }
+
         // Anti-IDOR : la leçon doit appartenir à un chapitre de CE cours.
         $lesson = $this->resolveLessonFor($course, $lessonId);
 
         $this->validate(
-            ["newH5p.$lessonId" => ['required', 'file', 'extensions:h5p,zip', 'max:'.self::H5P_MAX_KB]],
+            ["newH5p.$lessonId" => $this->h5pFileRules($this->newH5p[$lessonId] ?? null)],
             [],
             ["newH5p.$lessonId" => 'paquet H5P']
         );
@@ -1354,13 +1404,20 @@ class CourseEditor extends Component
         $course = $this->resolveCourse();
         $this->authorize('manageStructure', $course);
 
+        // RESTRICTION ADMIN (JS tiers) : même garde que l'ajout. Refus propre.
+        if (! $this->canUploadH5p()) {
+            $this->addError("itemH5p.$itemId", 'Seul un administrateur peut téléverser du contenu interactif H5P (sécurité : code tiers).');
+
+            return;
+        }
+
         $item = $this->resolveItemFor($course, $itemId);
         if ($item->type !== 'h5p') {
             return;
         }
 
         $this->validate(
-            ["itemH5p.$itemId" => ['required', 'file', 'extensions:h5p,zip', 'max:'.self::H5P_MAX_KB]],
+            ["itemH5p.$itemId" => $this->h5pFileRules($this->itemH5p[$itemId] ?? null)],
             [],
             ["itemH5p.$itemId" => 'paquet H5P']
         );

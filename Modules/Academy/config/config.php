@@ -50,11 +50,38 @@ return [
     | « cdn_base » : base jsdelivr du player (versionnée, sans slash final).
     | Le bundle principal, le bundle de cadre et la feuille de style en
     | découlent (dist/main.bundle.js, dist/frame.bundle.js, dist/styles/h5p.css).
+    |
+    | « cdn_version » : version du paquet h5p-standalone (centralisée pour les MAJ).
+    | ATTENTION : changer cette version (et « cdn_base ») IMPOSE de recalculer les
+    | empreintes SRI ci-dessous (« sri ») sinon le navigateur refusera de charger
+    | les ressources. Recalcul :
+    |   curl -sL <cdn_base>/dist/main.bundle.js | openssl dgst -sha384 -binary | openssl base64 -A
+    |   curl -sL <cdn_base>/dist/styles/h5p.css | openssl dgst -sha384 -binary | openssl base64 -A
+    |
+    | « sri » : empreintes Sub-Resource Integrity (sha384) des 2 ressources CDN
+    | chargées par la page player (intégrité : un CDN compromis ne peut pas servir
+    | un script altéré). Vides => pas d'attribut integrity (repli sûr, rétrocompat).
+    |
+    | Bornes de sécurité de l'extraction d'un paquet .h5p (zip) :
+    |   - « max_kb » : taille maximale du fichier COMPRESSÉ téléversé (défaut 30 Mo) ;
+    |   - « max_entries » : nombre maximal d'entrées dans le zip (anti zip-bomb) ;
+    |   - « max_extract_kb » : taille totale maximale une fois DÉCOMPRESSÉ (anti
+    |     zip-bomb : un petit zip peut se décompresser en plusieurs Go).
     */
     'h5p' => [
-        'cdn_base' => env('ACADEMY_H5P_CDN_BASE', 'https://cdn.jsdelivr.net/npm/h5p-standalone@3.8.0'),
-        'cdn_host' => env('ACADEMY_H5P_CDN_HOST', 'cdn.jsdelivr.net'),
-        'max_kb'   => (int) env('ACADEMY_H5P_MAX_KB', 30720), // 30 Mo
+        'cdn_base'    => env('ACADEMY_H5P_CDN_BASE', 'https://cdn.jsdelivr.net/npm/h5p-standalone@3.8.0'),
+        'cdn_host'    => env('ACADEMY_H5P_CDN_HOST', 'cdn.jsdelivr.net'),
+        'cdn_version' => env('ACADEMY_H5P_CDN_VERSION', '3.8.0'),
+
+        // Empreintes SRI calculées pour h5p-standalone@3.8.0 (recalculer si MAJ).
+        'sri' => [
+            'main_js' => env('ACADEMY_H5P_SRI_MAIN', 'sha384-ujIyUnJaNPyNEo9Su9WLZLEVYcvmS5I0bIBH6gWAZFxNoKUZJXOWE5R8+VpuPLoy'),
+            'css'     => env('ACADEMY_H5P_SRI_CSS', 'sha384-UmBzFWmi/UaVsCAkcnsIw7fNDru/FEInhq70Np+tRj7EkyrX+KGqj6wQUfGJnWQu'),
+        ],
+
+        'max_kb'         => (int) env('ACADEMY_H5P_MAX_KB', 30720),       // 30 Mo (compressé)
+        'max_entries'    => (int) env('ACADEMY_H5P_MAX_ENTRIES', 5000),   // nb d'entrées du zip
+        'max_extract_kb' => (int) env('ACADEMY_H5P_MAX_EXTRACT_KB', 204800), // 200 Mo (décompressé)
     ],
 
     /*

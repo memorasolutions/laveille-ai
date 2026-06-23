@@ -19,8 +19,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title>{{ $title }}</title>
-    {{-- Feuille de style du cadre H5P (CDN). --}}
-    <link rel="stylesheet" href="{{ $cdnBase }}/dist/styles/h5p.css">
+    {{--
+        Feuille de style du cadre H5P (CDN), protégée par SRI (sha384). Si un CDN
+        compromis sert un fichier altéré, l'empreinte ne correspond plus et le
+        navigateur refuse de l'appliquer. « crossorigin=anonymous » est requis pour
+        que la vérification d'intégrité s'applique à une ressource cross-origin.
+        $sriCss vide => pas d'attribut (repli sûr, rétrocompatible).
+        Recalcul des empreintes documenté dans Modules/Academy/config/config.php.
+    --}}
+    <link rel="stylesheet" href="{{ $cdnBase }}/dist/styles/h5p.css"
+        @if(!empty($sriCss)) integrity="{{ $sriCss }}" crossorigin="anonymous" @endif>
     <style>
         html, body { margin: 0; padding: 0; background: #fff; }
         #h5p-container { width: 100%; }
@@ -39,8 +47,9 @@
         <p class="h5p-loading">Chargement du contenu interactif…</p>
     </div>
 
-    {{-- Bundle principal h5p-standalone (CDN). --}}
-    <script src="{{ $cdnBase }}/dist/main.bundle.js"></script>
+    {{-- Bundle principal h5p-standalone (CDN), protégé par SRI (sha384, voir ci-dessus). --}}
+    <script src="{{ $cdnBase }}/dist/main.bundle.js"
+        @if(!empty($sriMainJs)) integrity="{{ $sriMainJs }}" crossorigin="anonymous" @endif></script>
     <script>
         (function () {
             var el = document.getElementById('h5p-container');

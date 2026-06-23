@@ -1163,6 +1163,14 @@
                                     le contenu tiers ne peut donc PAS naviguer la page hôte, ouvrir de
                                     popups ni poster vers la session. L'URL du dossier extrait n'est
                                     jamais injectée ici : elle vit dans la page player, elle-même gatée.
+
+                                    RISQUE CONNU (dette v2) : « allow-same-origin » + « allow-scripts »
+                                    laisse le JS H5P s'exécuter dans NOTRE origine ; il peut donc lire le
+                                    DOM parent (p. ex. le jeton CSRF). On l'ACCEPTE car le téléversement
+                                    d'un paquet .h5p est restreint aux ADMINS de confiance (permission
+                                    « academy.manage », cf. CourseEditor::canUploadH5p) + audit manuel.
+                                    Fix définitif : servir le contenu sur un SOUS-DOMAINE distinct (origine
+                                    isolée) pour que le sandbox same-origin ne soit plus la nôtre.
                                 --}}
                                 <div class="academy-h5p-wrapper">
                                     <iframe
