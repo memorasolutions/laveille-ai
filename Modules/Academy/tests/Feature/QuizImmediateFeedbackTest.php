@@ -175,7 +175,7 @@ test('QuizBehaviour : défaut deferred, immediate reconnu, valeur inconnue retom
     expect(QuizBehaviour::for(null))->toBe('deferred');
     expect(QuizBehaviour::for([]))->toBe('deferred');
     expect(QuizBehaviour::for(['question_behaviour' => 'immediate']))->toBe('immediate');
-    expect(QuizBehaviour::for(['question_behaviour' => 'adaptive']))->toBe('deferred'); // non actif
+    expect(QuizBehaviour::for(['question_behaviour' => 'adaptive']))->toBe('adaptive'); // désormais actif
     expect(QuizBehaviour::for(['question_behaviour' => 'n_importe_quoi']))->toBe('deferred');
 
     expect(QuizBehaviour::isImmediate(['question_behaviour' => 'immediate']))->toBeTrue();

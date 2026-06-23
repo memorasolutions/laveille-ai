@@ -501,10 +501,22 @@
         @php
             $quizData  = session("academy.quiz.{$item->id}");
             $questions = $quizData['questions'] ?? [];
-            // V1-f : comportement de rétroaction (différé = défaut, immédiat = par question).
-            $behaviour    = \Modules\Academy\Services\QuizBehaviour::for($item->payload);
-            $isImmediate  = ($behaviour === \Modules\Academy\Services\QuizBehaviour::IMMEDIATE);
-            $validatedAll = ($isImmediate && is_array($quizData['validated'] ?? null)) ? $quizData['validated'] : [];
+            // V1-f / ADAPTATIF : comportement de rétroaction. Différé = défaut (1 soumission).
+            // Immédiat ET adaptatif = rétroaction PAR QUESTION (même rendu « Vérifier ») ;
+            // l'adaptatif ajoute le RÉESSAI PÉNALISÉ (la question n'est pas verrouillée
+            // tant qu'elle n'est pas correcte ou que le max d'essais n'est pas atteint).
+            $behaviour     = \Modules\Academy\Services\QuizBehaviour::for($item->payload);
+            $isImmediate   = ($behaviour === \Modules\Academy\Services\QuizBehaviour::IMMEDIATE);
+            $isAdaptive    = ($behaviour === \Modules\Academy\Services\QuizBehaviour::ADAPTIVE);
+            $isPerQuestion = $isImmediate || $isAdaptive;
+            $validatedAll  = ($isPerQuestion && is_array($quizData['validated'] ?? null)) ? $quizData['validated'] : [];
+            // Réglages adaptatifs pour l'affichage (% pénalité + nb d'essais).
+            $adaptivePenaltyPct = $isAdaptive
+                ? (int) round(\Modules\Academy\Services\QuizBehaviour::penaltyFor($item->payload) * 100)
+                : 0;
+            $adaptiveMaxTries = $isAdaptive
+                ? \Modules\Academy\Services\QuizBehaviour::maxTriesFor($item->payload)
+                : 0;
             // V1-d : limite de temps (minutes) + horodatage de début posé SERVEUR.
             // Le compte à rebours est dérivé d'un instant de fin calculé serveur
             // (started_at + limite) ; le client n'a qu'à afficher/auto-soumettre.
@@ -528,7 +540,7 @@
              Comportement HISTORIQUE strictement inchangé : toutes les questions, une
              seule soumission, révision affichée à la fin. Le mode immédiat (par
              question) est rendu dans la branche @else ci-dessous. --}}
-        @if(! $isImmediate)
+        @if(! $isPerQuestion)
         <form method="POST"
               action="{{ route('academy.quiz.submit', [$course, $lesson, $item->id]) }}"
               id="academy-quiz-form-{{ $item->id }}">
@@ -790,10 +802,17 @@
                     $defs     = $question['defs']      ?? [];
                     $elements = $question['elements']  ?? [];
 
-                    $v        = $validatedAll[$i] ?? ($validatedAll[(string) $i] ?? null);
-                    $locked   = is_array($v);
+                    $v         = $validatedAll[$i] ?? ($validatedAll[(string) $i] ?? null);
+                    $hasEntry  = is_array($v);
+                    // VERROUILLAGE : en immédiat, toute entrée est verrouillée. En adaptatif,
+                    // seules les entrées marquées `locked` le sont (correcte OU max d'essais).
+                    $locked    = $hasEntry && ($isAdaptive ? (bool) ($v['locked'] ?? false) : true);
+                    // RÉESSAI adaptatif : une entrée existe (échec) mais n'est pas verrouillée.
+                    $showRetry = $isAdaptive && $hasEntry && ! $locked;
                     $isCorrect = $locked ? (bool) ($v['correct'] ?? false) : false;
-                    $isMulti  = ($type === 'qcm') && ! empty($question['multiple']);
+                    $triesUsed = $hasEntry ? (int) ($v['tries'] ?? 0) : 0;
+                    $triesLeft = $isAdaptive ? max(0, $adaptiveMaxTries - $triesUsed) : 0;
+                    $isMulti   = ($type === 'qcm') && ! empty($question['multiple']);
                 @endphp
 
                 <div class="mb-4 p-3 rounded" style="background: #F8FAFC; border: 1px solid #E2E8F0;
@@ -821,6 +840,27 @@
                                   placeholder="Rédigez votre réponse…"></textarea>
 
                     @elseif(! $locked)
+                        {{-- ADAPTATIF, RÉESSAI : la question a déjà reçu un essai RATÉ mais
+                             n'est pas verrouillée. On annonce l'échec (sans révéler la bonne
+                             réponse, pour permettre un vrai réessai) + les essais restants +
+                             la pénalité. aria-live=assertive + focus (a11y) pour annoncer le
+                             changement après le rechargement de page. --}}
+                        @if($showRetry)
+                            <div role="alert" aria-live="assertive" tabindex="-1"
+                                 x-data x-init="$el.focus()"
+                                 class="mb-2 p-2 rounded"
+                                 style="background: #FEF2F2; border: 1px solid #FCA5A5; outline: none;">
+                                <p class="mb-1" style="font-size: 0.88rem; font-weight: 600; color: #991B1B;">
+                                    ✗ Réponse incorrecte. Réessayez.
+                                </p>
+                                <p class="mb-0 text-muted" style="font-size: 0.82rem;">
+                                    @if($triesLeft > 0)
+                                        Il vous reste {{ $triesLeft }} essai{{ $triesLeft > 1 ? 's' : '' }}.
+                                    @endif
+                                    Chaque essai raté retranche {{ $adaptivePenaltyPct }} % des points de cette question.
+                                </p>
+                            </div>
+                        @endif
                         {{-- Formulaire de validation de CETTE question (scoring serveur). --}}
                         <form method="POST" action="{{ route('academy.quiz.verify', [$course, $lesson, $item->id]) }}">
                             @csrf
@@ -926,7 +966,7 @@
                             @endif
 
                             <div class="mt-2">
-                                <button type="submit" class="btn ct-btn ct-btn-primary btn-sm">Vérifier</button>
+                                <button type="submit" class="btn ct-btn ct-btn-primary btn-sm">{{ $showRetry ? 'Réessayer (pénalité appliquée)' : 'Vérifier' }}</button>
                             </div>
                         </form>
                     @else
@@ -980,6 +1020,14 @@
                         <p class="mb-1" style="font-size: 0.88rem; font-weight: 600; color: {{ $isCorrect ? '#166534' : '#991B1B' }};">
                             {{ $isCorrect ? '✔ Bonne réponse' : '✗ À revoir' }}
                         </p>
+
+                        {{-- ADAPTATIF : rappel du nombre d'essais utilisés + pénalité appliquée
+                             (la question est désormais verrouillée : réussie ou max d'essais). --}}
+                        @if($isAdaptive && $triesUsed > 0)
+                            <p class="mb-1 text-muted" style="font-size: 0.8rem;">
+                                {{ $triesUsed }} essai{{ $triesUsed > 1 ? 's' : '' }} raté{{ $triesUsed > 1 ? 's' : '' }} : pénalité de {{ $adaptivePenaltyPct }} % par essai appliquée.
+                            </p>
+                        @endif
 
                         @if($type === 'appariement')
                             <p class="mb-1 text-muted" style="font-size: 0.85rem;">
@@ -1046,7 +1094,14 @@
                     if (($qq['type'] ?? null) === 'essai') { $essayCount++; }
                 }
                 $requiredValidations = count($questions) - $essayCount;
-                $allValidated = count($questions) > 0 && count($validatedAll) >= $requiredValidations;
+                // ADAPTATIF : ne comptent que les questions VERROUILLÉES (en immédiat, toute
+                // entrée l'est ; en adaptatif, une question « en réessai » ne compte pas).
+                $lockedCount = 0;
+                foreach ($validatedAll as $entry) {
+                    if (! is_array($entry)) { continue; }
+                    if ($isAdaptive ? ($entry['locked'] ?? false) : true) { $lockedCount++; }
+                }
+                $allValidated = count($questions) > 0 && $lockedCount >= $requiredValidations;
             @endphp
             @if($allValidated)
                 <form method="POST" action="{{ route('academy.quiz.submit', [$course, $lesson, $item->id]) }}"

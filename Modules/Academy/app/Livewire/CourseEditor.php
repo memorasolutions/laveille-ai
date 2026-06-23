@@ -835,8 +835,11 @@ class CourseEditor extends Component
             'shuffle_answers'     => $extra['shuffle_answers']     ?? null,
             'time_limit_minutes'  => $extra['time_limit_minutes']  ?? null,
             'review_options'      => $extra['review_options']      ?? null,
-            // V1-f : comportement de question (deferred par défaut / immediate).
+            // V1-f : comportement de question (deferred par défaut / immediate / adaptive).
             'question_behaviour'  => $extra['question_behaviour']  ?? null,
+            // ADAPTATIF : pénalité par essai raté (% saisi) + nb d'essais maximal.
+            'adaptive_penalty'    => $extra['adaptive_penalty']    ?? null,
+            'adaptive_max_tries'  => $extra['adaptive_max_tries']  ?? null,
             // V2-c : critère d'achèvement configurable (manual / view / min_grade).
             'completion'          => $extra['completion']          ?? null,
         ];
@@ -1161,6 +1164,10 @@ class CourseEditor extends Component
             // V1-f : comportement de question (liste blanche stricte ; vide/inconnu =
             // défaut « deferred » appliqué au build → rétrocompat stricte).
             'question_behaviour' => ['nullable', Rule::in(\Modules\Academy\Services\QuizBehaviour::BEHAVIOURS)],
+            // ADAPTATIF : pénalité par essai raté (en %, 0..100) + nb d'essais (1..10).
+            // Persistées (au build) UNIQUEMENT si le mode adaptatif est choisi.
+            'adaptive_penalty'   => 'nullable|integer|min:0|max:100',
+            'adaptive_max_tries' => 'nullable|integer|min:1|max:10',
             // V2-c : critère d'achèvement (liste blanche globale ; l'autorisation par
             // TYPE est appliquée au build, où min_grade sur un non-quiz est ignoré).
             'completion'         => ['nullable', Rule::in(\Modules\Academy\Services\ActivityCompletionService::CRITERIA)],
@@ -1339,6 +1346,22 @@ class CourseEditor extends Component
             && $behaviour !== \Modules\Academy\Services\QuizBehaviour::DEFAULT_BEHAVIOUR
         ) {
             $payload['question_behaviour'] = $behaviour;
+
+            // ADAPTATIF : pénalité + nb d'essais : écrits SEULEMENT pour ce mode (les
+            // autres modes n'ont pas ces réglages → clés absentes, rétrocompat stricte).
+            // La pénalité est saisie en POURCENTAGE (0..100) et convertie en FRACTION
+            // (0..1) pour QuizBehaviour::penaltyFor. Vide → clé absente → défauts (1/3, 3).
+            if ($behaviour === \Modules\Academy\Services\QuizBehaviour::ADAPTIVE) {
+                $penaltyPct = $input['adaptive_penalty'] ?? null;
+                if ($penaltyPct !== null && $penaltyPct !== '') {
+                    $payload['adaptive_penalty'] = max(0, min(100, (int) $penaltyPct)) / 100;
+                }
+
+                $maxTries = $input['adaptive_max_tries'] ?? null;
+                if ($maxTries !== null && $maxTries !== '') {
+                    $payload['adaptive_max_tries'] = max(1, min(10, (int) $maxTries));
+                }
+            }
         }
 
         return $payload;

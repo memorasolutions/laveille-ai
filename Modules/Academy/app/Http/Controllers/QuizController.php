@@ -152,11 +152,12 @@ class QuizController extends Controller
 
         $questions = $quizData['questions'] ?? [];
 
-        // V1-f — En mode IMMÉDIAT, les réponses ont été VERROUILLÉES côté serveur
-        // (session) au fil des validations par question : on les reconstruit ici (le
-        // client n'en soumet aucune au « Terminer »). En mode différé (défaut), on lit
-        // les réponses du formulaire comme aujourd'hui (comportement INCHANGÉ).
-        if (QuizBehaviour::isImmediate($item->payload)) {
+        // V1-f / ADAPTATIF : en mode PAR QUESTION (immédiat OU adaptatif), les réponses
+        // ont été VERROUILLÉES côté serveur (session) au fil des validations par
+        // question : on les reconstruit ici (le client n'en soumet aucune au
+        // « Terminer »). En mode différé (défaut), on lit les réponses du formulaire
+        // comme aujourd'hui (comportement INCHANGÉ).
+        if (QuizBehaviour::isPerQuestion($item->payload)) {
             $validated = is_array($quizData['validated'] ?? null) ? $quizData['validated'] : [];
             $answers   = [];
             foreach ($validated as $i => $v) {
@@ -211,6 +212,33 @@ class QuizController extends Controller
         // le score final du mode immédiat est, par construction, identique à celui
         // qu'aurait donné une soumission différée des mêmes réponses.
         $scoreResult = QuizService::score($questions, $answers);
+
+        // ADAPTATIF : application de la pénalité AU SCORE FINAL. score() recalcule la
+        // justesse BRUTE (chemin commun, donc `correct` = nb de bonnes réponses pour le
+        // badge « sans faute »). On REMPLACE ensuite points_earned / percent par la somme
+        // des points PÉNALISÉS figés question par question en session (essais × pénalité,
+        // bornés >= 0) : le client n'a jamais envoyé la justesse ni la pénalité, le
+        // serveur seul les a comptées. points_possible et correct restent ceux de score().
+        if (QuizBehaviour::isAdaptive($item->payload)) {
+            $validatedState = is_array($quizData['validated'] ?? null) ? $quizData['validated'] : [];
+
+            $penalizedEarned = 0.0;
+            foreach ($validatedState as $v) {
+                // Seules les questions VERROUILLÉES portent des points figés (anti-forge :
+                // une question non verrouillée ne contribue pas au total).
+                if (is_array($v) && ($v['locked'] ?? false)) {
+                    $penalizedEarned += (float) ($v['points_earned'] ?? 0);
+                }
+            }
+
+            $pointsPossible = (int) ($scoreResult['points_possible'] ?? 0);
+            $penalizedDisplay = self::normalizePoints($penalizedEarned);
+            $scoreResult['points_earned'] = $penalizedDisplay;
+            $scoreResult['score']         = $penalizedDisplay;
+            $scoreResult['percent']       = $pointsPossible > 0
+                ? (int) round(($penalizedEarned / $pointsPossible) * 100)
+                : 0;
+        }
 
         $passingScore = isset($item->payload['passing_score'])
             ? (int) $item->payload['passing_score']
@@ -375,7 +403,10 @@ class QuizController extends Controller
         $item = LessonItem::findOrFail($itemId);
         $this->authorizeAccess($course, $lesson, $item);
 
-        if ($item->type !== 'quiz' || ! QuizBehaviour::isImmediate($item->payload)) {
+        // V1-f / ADAPTATIF : la validation par question s'applique aux deux modes de
+        // rétroaction par question (immédiat ET adaptatif). Le mode différé n'expose
+        // PAS cette route (abort 404) → comportement actuel intact.
+        if ($item->type !== 'quiz' || ! QuizBehaviour::isPerQuestion($item->payload)) {
             abort(404);
         }
 
@@ -395,9 +426,16 @@ class QuizController extends Controller
         }
 
         $validated = is_array($quizData['validated'] ?? null) ? $quizData['validated'] : [];
+        $existing  = is_array($validated[$index] ?? null) ? $validated[$index] : null;
 
-        // Idempotent / anti-triche : une question déjà verrouillée ne peut plus changer.
-        if (array_key_exists($index, $validated)) {
+        // Idempotent / anti-triche : une question VERROUILLÉE ne peut plus changer. En
+        // immédiat, toute entrée est verrouillée ; en adaptatif, seules les entrées
+        // marquées `locked` le sont (une entrée « en cours de réessai » reste modifiable).
+        $isAdaptive = QuizBehaviour::isAdaptive($item->payload);
+        $isLocked   = $existing !== null
+            && ($isAdaptive ? (bool) ($existing['locked'] ?? false) : true);
+
+        if ($isLocked) {
             return redirect()
                 ->route('academy.lessons.show', [$course, $lesson])
                 ->withFragment("item-{$item->id}");
@@ -410,14 +448,83 @@ class QuizController extends Controller
         $single = QuizService::score([$questions[$index]], ['0' => $given]);
         $detail = $single['details'][0] ?? ['correct' => false];
 
-        $validated[$index] = [
-            'answer'          => $given,
-            'correct'         => (bool) ($detail['correct'] ?? false),
-            // Crédit partiel : conserve la valeur native de score() (int si entier,
-            // float ex. 0,5 si fractionnaire) — surtout PAS de cast int qui tronquerait.
-            'points_earned'   => $single['points_earned'] ?? 0,
-            'points_possible' => (int) ($single['points_possible'] ?? 0),
-        ];
+        $isCorrect = (bool) ($detail['correct'] ?? false);
+        // Crédit partiel : conserve la valeur native de score() (int si entier, float
+        // ex. 0,5 si fractionnaire), surtout PAS de cast int qui tronquerait.
+        $rawEarned = $single['points_earned'] ?? 0;
+        $possible  = (int) ($single['points_possible'] ?? 0);
+
+        if (! $isAdaptive) {
+            // ── MODE IMMÉDIAT (inchangé) : une seule validation, verrouillage direct. ──
+            $validated[$index] = [
+                'answer'          => $given,
+                'correct'         => $isCorrect,
+                'points_earned'   => $rawEarned,
+                'points_possible' => $possible,
+            ];
+        } else {
+            // ── MODE ADAPTATIF : réessai PÉNALISÉ, décompte des essais 100 % SERVEUR. ──
+            // FORMULE (parité Moodle « Adaptive mode »), 100 % serveur :
+            //   - `n`        = nb d'essais RATÉS (jamais soumis par le client) ;
+            //   - multiplier = max(0, 1 - n × pénalité)        (borné >= 0) ;
+            //   - points     = multiplier × justesse_brute      (borné >= 0).
+            // Correct au n-ième essai (n ratés avant) → multiplier × points pleins.
+            // Jamais correct (max essais) → multiplier × MEILLEURE justesse atteinte.
+            $penalty  = QuizBehaviour::penaltyFor($item->payload);
+            $maxTries = QuizBehaviour::maxTriesFor($item->payload);
+
+            // État accumulé serveur de la question (essais ratés + meilleure justesse).
+            $prevTries = (int) ($existing['tries'] ?? 0);
+            $bestRaw   = max((float) ($existing['best_raw'] ?? 0.0), (float) $rawEarned);
+
+            if ($isCorrect) {
+                // Réussite : on fige avec la pénalité des essais ratés AVANT celui-ci.
+                $multiplier = QuizBehaviour::penaltyMultiplier($prevTries, $penalty);
+                $earned     = $multiplier * (float) $rawEarned;
+
+                $validated[$index] = [
+                    'answer'             => $given,
+                    'correct'            => true,
+                    'locked'             => true,
+                    'tries'              => $prevTries,
+                    'penalty_multiplier' => $multiplier,
+                    'points_earned'      => self::normalizePoints($earned),
+                    'points_possible'    => $possible,
+                    'best_raw'           => self::normalizePoints($bestRaw),
+                ];
+            } else {
+                // Échec : un essai raté de plus. BORNE SERVEUR : au max d'essais, la
+                // question se VERROUILLE (un client qui spamme « Vérifier » ne dépasse
+                // jamais max_tries) ; sinon elle reste ouverte au réessai.
+                $newTries = $prevTries + 1;
+                $reached  = $newTries >= $maxTries;
+
+                if ($reached) {
+                    $multiplier = QuizBehaviour::penaltyMultiplier($newTries, $penalty);
+                    $earned     = $multiplier * $bestRaw;
+
+                    $validated[$index] = [
+                        'answer'             => $given,
+                        'correct'            => false,
+                        'locked'             => true,
+                        'tries'              => $newTries,
+                        'penalty_multiplier' => $multiplier,
+                        'points_earned'      => self::normalizePoints($earned),
+                        'points_possible'    => $possible,
+                        'best_raw'           => self::normalizePoints($bestRaw),
+                    ];
+                } else {
+                    $validated[$index] = [
+                        'answer'          => $given,
+                        'correct'         => false,
+                        'locked'          => false,
+                        'tries'           => $newTries,
+                        'best_raw'        => self::normalizePoints($bestRaw),
+                        'points_possible' => $possible,
+                    ];
+                }
+            }
+        }
 
         $quizData['validated'] = $validated;
         $request->session()->put($sessionKey, $quizData);
@@ -425,6 +532,17 @@ class QuizController extends Controller
         return redirect()
             ->route('academy.lessons.show', [$course, $lesson])
             ->withFragment("item-{$item->id}");
+    }
+
+    /**
+     * ADAPTATIF : normalise des points (float) en int si la valeur est entière (DRY,
+     * même règle d'affichage que QuizService::score : 3.0 → 3, 0,6667 → reste float).
+     */
+    private static function normalizePoints(float $value): float|int
+    {
+        $rounded = round($value, 4);
+
+        return $rounded === (float) (int) $rounded ? (int) $rounded : $rounded;
     }
 
     /**
