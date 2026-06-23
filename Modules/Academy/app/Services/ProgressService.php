@@ -17,6 +17,7 @@ use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Models\Progress;
 use Modules\Academy\Services\BadgeService;
 use Modules\Academy\Services\CertificateService;
+use Modules\Academy\Services\CourseCompletionService;
 
 final class ProgressService
 {
@@ -84,15 +85,20 @@ final class ProgressService
             // Silencieux
         }
 
-        // 6. M6 — Si 100% atteint, émettre le certificat (défensif, idempotent)
-        if ($percent === 100) {
-            try {
+        // 6. M6 — Émettre le certificat si le cours est COMPLÉTÉ selon son critère
+        // configuré (CourseCompletionService, source unique). Défaut « all_required »
+        // ⇒ percent ≥ 100 ⇒ comportement historique strictement préservé. issueFor()
+        // re-vérifie isComplete() de son côté (idempotent), donc l'appel est sûr même
+        // pour les critères percent/min_grade (≤ 100 %).
+        try {
+            if (class_exists(CourseCompletionService::class)
+                && (new CourseCompletionService())->isComplete($user, $course)) {
                 if (class_exists(CertificateService::class)) {
                     (new CertificateService())->issueFor($user, $course);
                 }
-            } catch (\Throwable) {
-                // Silencieux : ne jamais bloquer la progression pour un cert raté
             }
+        } catch (\Throwable) {
+            // Silencieux : ne jamais bloquer la progression pour un cert raté
         }
 
         // 7. E1 — Évaluer les badges/jalons d'engagement (défensif, idempotent).

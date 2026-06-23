@@ -81,11 +81,25 @@ class Dashboard extends Component
                         ->first()
                     : null;
 
+                // Achèvement configurable : progression vers le critère du cours.
+                // Affiché seulement si ce n'est pas le défaut all_required (la barre %
+                // le représente déjà). Lecture seule, calcul serveur, défensif.
+                $completion = null;
+                if ($course && class_exists(\Modules\Academy\Services\CourseCompletionService::class)) {
+                    try {
+                        $completion = (new \Modules\Academy\Services\CourseCompletionService())
+                            ->progressToward($user, $course);
+                    } catch (\Throwable) {
+                        $completion = null;
+                    }
+                }
+
                 return [
                     'course'      => $course,
                     'percent'     => (int) ($progress->percent ?? 0),
                     'firstLesson' => $course ? $this->firstLessonOf($course) : null,
                     'certificate' => $certificate,
+                    'completion'  => $completion,
                 ];
             })
             ->filter(fn (array $row): bool => $row['course'] !== null)

@@ -30,7 +30,7 @@ Implanter de manière EXHAUSTIVE les fonctionnalités Moodle manquantes (cf. gap
 ### VAGUE 4 — Activités
 - [x] F7 · Activité **Feedback / Sondage** (questionnaire non noté) ✅ V4-b (v350-351, /sim 8/8, /audit 84→corrigé : participants anti-respam + SoftDeletes)
 - [x] F8 · Activité **Choice** (vote/sondage simple) ✅ V4-a (v348-349, /sim 6/6, /audit 83→corrigé)
-- [ ] F9 · Activité **Forum** (discussions, anti-spam)
+- [x] F9 · Activité **Forum** (discussions, anti-spam) ✅ V4-c (v352-353, /sim A→G, /audit 91→corrigé) — **VAGUE 4 COMPLÈTE** (Choice+Feedback+Forum).
 
 ### VAGUE 5 — Communication & progression
 - [ ] F10 · **Calendrier** + événements + **rappels d'échéance**
@@ -55,6 +55,7 @@ Implanter de manière EXHAUSTIVE les fonctionnalités Moodle manquantes (cf. gap
 ## Journal d'exécution (le plus récent en haut)
 | Date | Feature | Version | Implant | /sim | /audit | Notes |
 |------|---------|---------|---------|------|--------|-------|
+| 2026-06-23 | **V4-c Forum → VAGUE 4 COMPLÈTE** | v352-353 | 789 tests (+25) | A→G PASS (sujet+réponse, modération pin/lock/delete soft, honeypot, XSS strippé, locked/allow_student_topics, non-régression) | 91/100 (meilleur) puis corrigé | Type d'item `forum` (tables topics+posts SoftDeletes, critère achèvement `post`, anti-spam honeypot+throttle, trait authz). Corrigé v353 (793 tests) : a11y sr-only épinglé/verrouillé, posts bornés 50 + repère troncature, 2 `—`. **JALON Vague 4 = activités Choice + Feedback + Forum.** Dette : images markdown posts étudiants (politique). |
 | 2026-06-23 | **V4-b Activité Feedback/Sondage** | v350-351 | 755 tests (+19) | 8/8 PASS (multi-questions, anonyme user_id null, résultats formateur-seul, required, sécurité, non-régression) | 84/100 puis corrigé, XSS sûr | Type d'item `feedback` (table academy_feedback_responses, critère achèvement `submit`). Corrigé v351 (764 tests) : anti-respam anonyme robuste (table academy_feedback_participants, anonymat préservé), requête sortie de la vue (LessonController preload), SoftDeletes + withTrashed. Dette : results() agrégation PHP (OK volume). |
 | 2026-06-23 | **V4-a Activité Choice** | v348-349 | 727 tests (+20) | 6/6 PASS (vote unique, re-vote, visibilité never/after_vote/anonyme, achèvement, sécurité, non-régression) | 83/100 puis corrigé | 1re activité Vague 4. Nouveau type d'item `choice` (table academy_choice_responses, critère achèvement `vote`). Corrigé v349 (736 tests) : trait DRY `AuthorizesAcademyAccess` (partagé quiz+choice), **throttle:20,1 sur tous les POST Academy** (anti-DoS), perf tally lazy + preload N+1, a11y/PII. |
 | 2026-06-23 | **F6 Adaptatif → VAGUE 3 COMPLÈTE** | v346-347 | 700 tests (+11) | PASS A→E (1pt/0,67pt/0pt, anti-spam serveur, deferred inchangé) | 85/100 puis corrigé | Réessai avec pénalité max(0,1-n×p)×justesse, bornage serveur, idempotent. Corrigé v347 (707 tests) : review_options respecté en vue verrouillée immédiat/adaptatif (tous types), focus visible WCAG, masquage champs adaptatifs. **JALON : Vague 3 = 9 types de questions + 3 comportements = parité Moodle sur les questions.** Dette : score/max_score DB bruts vs percent pénalisé ; immédiat non testé en /sim live (pas d'item en base, vérifié par code). |

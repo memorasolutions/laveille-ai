@@ -26,6 +26,7 @@ use Modules\Academy\Models\Completion;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Progress;
 use Modules\Academy\Models\UserBadge;
+use Modules\Academy\Services\CourseCompletionService;
 
 final class BadgeService
 {
@@ -139,20 +140,28 @@ final class BadgeService
             return [false, null];
         }
 
-        $percent = (int) (Progress::query()
-            ->where('user_id', $user->id)
-            ->where('course_id', $course->id)
-            ->value('percent') ?? 0);
+        // Complétion SELON le critère configuré du cours (source unique). Défaut
+        // « all_required » ⇒ percent ≥ 100 ⇒ comportement historique préservé.
+        $complete = (new CourseCompletionService())->isComplete($user, $course);
 
-        return [$percent >= 100, $course->id];
+        return [$complete, $course->id];
     }
 
-    /** Nombre de cours complétés (Progress.percent >= 100). */
+    /**
+     * Nombre de cours COMPLÉTÉS par l'utilisateur, selon le critère propre à chaque
+     * cours (CourseCompletionService). On parcourt ses lignes de progression (petit N)
+     * et on délègue la décision au service. Défaut « all_required » ⇒ percent ≥ 100 ⇒
+     * identique au comportement historique (rétrocompat).
+     */
     private function countCompletedCourses(User $user): int
     {
+        $svc = new CourseCompletionService();
+
         return Progress::query()
             ->where('user_id', $user->id)
-            ->where('percent', '>=', 100)
+            ->with('course')
+            ->get()
+            ->filter(fn (Progress $p): bool => $p->course !== null && $svc->isComplete($user, $p->course))
             ->count();
     }
 

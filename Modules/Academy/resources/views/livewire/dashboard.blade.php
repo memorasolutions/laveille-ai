@@ -31,6 +31,18 @@
                                 <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
                                     {{ $row['percent'] }} % complété
                                 </p>
+
+                                @if(is_array($row['completion'] ?? null) && ($row['completion']['type'] ?? 'all_required') !== 'all_required')
+                                    <p style="font-size: 0.8rem; color: var(--sys-text-default, #374151); margin: 6px 0 0;">
+                                        <span style="font-weight: 600; color: var(--c-primary, #064E5A);">Pour valider :</span>
+                                        {{ $row['completion']['label'] ?? '' }}
+                                        @if(!empty($row['completion']['complete']))
+                                            <span style="color: var(--c-primary, #064E5A); font-weight: 600;">- ✓ atteint</span>
+                                        @else
+                                            <span style="color: var(--sys-text-muted, #6B7280);">- {{ (int) ($row['completion']['percentOfGoal'] ?? 0) }} %</span>
+                                        @endif
+                                    </p>
+                                @endif
                             </div>
 
                             <div class="d-flex flex-wrap align-items-center gap-2">

@@ -389,6 +389,90 @@
                 </div>
             @endcan
 
+            {{-- Achèvement du cours (course completion configurable) : gâté manageStructure.
+                 Choisit QUAND le cours est considéré complété (déblocage certificat + badges).
+                 Défaut « all_required » = comportement actuel. Sécurité 100 % serveur
+                 (saveCompletion : resolveCourse + authorize + re-filtrage anti-IDOR). --}}
+            @can('manageStructure', $course)
+                <div style="flex: 1 1 100%; border-top: 1px solid #F1F5F9; padding-top: 12px;">
+                    <p style="font-weight: 600; margin: 0 0 4px;">Achèvement du cours</p>
+                    <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 10px;">
+                        Définissez la condition qui déclenche la complétion du cours (certificat et badges). Par défaut, l'apprenant doit compléter toutes les leçons requises.
+                    </p>
+
+                    <fieldset style="border: 0; margin: 0; padding: 0;">
+                        <legend class="visually-hidden">Critère d'achèvement</legend>
+
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.9rem;">
+                                <input type="radio" wire:model.live="completion_type" value="all_required" style="margin-top: 3px; min-width: 18px; min-height: 18px;">
+                                <span>Toutes les leçons requises (par défaut)</span>
+                            </label>
+
+                            <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.9rem;">
+                                <input type="radio" wire:model.live="completion_type" value="percent" style="margin-top: 3px; min-width: 18px; min-height: 18px;">
+                                <span>Un pourcentage des leçons requises</span>
+                            </label>
+
+                            <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.9rem;">
+                                <input type="radio" wire:model.live="completion_type" value="min_grade" style="margin-top: 3px; min-width: 18px; min-height: 18px;">
+                                <span>Une note finale minimale au carnet</span>
+                            </label>
+
+                            <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.9rem;">
+                                <input type="radio" wire:model.live="completion_type" value="selected_activities" style="margin-top: 3px; min-width: 18px; min-height: 18px;">
+                                <span>Des activités précises à compléter</span>
+                            </label>
+                        </div>
+
+                        @error('completion_type') <span style="display:block; color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+
+                        {{-- Seuil X pour percent / min_grade --}}
+                        @if(in_array($completion_type, ['percent', 'min_grade'], true))
+                            <div style="margin-top: 10px; max-width: 260px;">
+                                <label for="completion-value" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem;">
+                                    {{ $completion_type === 'min_grade' ? 'Note finale minimale (%)' : 'Pourcentage requis (%)' }}
+                                </label>
+                                <input id="completion-value" type="number" min="1" max="100" step="1"
+                                       wire:model.live.blur="completion_value"
+                                       style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 8px;">
+                                @error('completion_value') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                            </div>
+                        @endif
+
+                        {{-- Activités désignées pour selected_activities --}}
+                        @if($completion_type === 'selected_activities')
+                            <div style="margin-top: 10px;">
+                                <p style="font-weight: 600; margin: 0 0 6px; font-size: 0.85rem;">Activités à compléter</p>
+                                @if(count($this->completionItems) === 0)
+                                    <p style="font-size: 0.82rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+                                        Ajoutez d'abord des leçons et des activités ci-dessous, puis revenez désigner celles qui valident le cours.
+                                    </p>
+                                @else
+                                    <div style="display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow: auto; border: 1px solid #E5E7EB; border-radius: 8px; padding: 10px;">
+                                        @foreach($this->completionItems as $ci)
+                                            <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.86rem;">
+                                                <input type="checkbox" value="{{ $ci['id'] }}" wire:model.live="completion_selected"
+                                                       style="margin-top: 3px; min-width: 18px; min-height: 18px;">
+                                                <span>{{ $ci['label'] }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                @endif
+                                @error('completion_selected') <span style="display:block; color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                            </div>
+                        @endif
+                    </fieldset>
+
+                    <div class="d-flex flex-wrap align-items-center gap-2" style="margin-top: 10px;">
+                        <x-core::button type="button" wire:click="saveCompletion" wire:loading.attr="disabled" wire:target="saveCompletion" variant="secondary" size="sm">
+                            <span wire:loading.remove wire:target="saveCompletion">Enregistrer l'achèvement</span>
+                            <span wire:loading wire:target="saveCompletion">Enregistrement…</span>
+                        </x-core::button>
+                    </div>
+                </div>
+            @endcan
+
             <p style="font-size: 0.74rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">
                 Les modifications sont enregistrées automatiquement dès que vous quittez un champ.
             </p>

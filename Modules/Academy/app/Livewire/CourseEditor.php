@@ -44,6 +44,7 @@ use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Models\QuestionCategory;
+use Modules\Academy\Services\CourseCompletionService;
 
 class CourseEditor extends Component
 {
@@ -79,6 +80,17 @@ class CourseEditor extends Component
     public ?string $certificate_message = null;
     public ?string $certificate_signature_name = null;
     public ?string $certificate_accent_color = null;
+
+    // ── Achèvement du cours (course completion configurable) ────────────────────
+    // Critère décidant quand le cours est COMPLÉTÉ (certificat + badges). Défaut
+    // « all_required » = comportement historique. UN seul critère actif à la fois.
+    public string $completion_type = 'all_required';
+
+    /** Seuil X (1..100) pour les critères percent / min_grade. */
+    public ?int $completion_value = 80;
+
+    /** Ids des items DÉSIGNÉS pour le critère selected_activities (anti-IDOR à l'écriture). */
+    public array $completion_selected = [];
 
     /**
      * Prérequis du cours (C4) : ids des AUTRES cours à compléter avant celui-ci.
@@ -413,6 +425,98 @@ class CourseEditor extends Component
         ]);
 
         $this->flashSaved('Certificat du cours enregistré.');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // ACHÈVEMENT DU COURS (course completion configurable) - gâté manageStructure
+    //
+    // SÉCURITÉ : resolveCourse() → authorize('manageStructure') → validate → écrire.
+    // Le critère décide quand le cours est COMPLÉTÉ (certificat + badges, via
+    // CourseCompletionService côté serveur). Défaut « all_required » = comportement
+    // historique. Pour selected_activities, les ids reçus sont RE-FILTRÉS aux items
+    // appartenant réellement à CE cours (anti-IDOR), jamais de confiance au client.
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    public function saveCompletion(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $needsValue    = in_array($this->completion_type, [
+            CourseCompletionService::TYPE_PERCENT,
+            CourseCompletionService::TYPE_MIN_GRADE,
+        ], true);
+        $needsSelected = $this->completion_type === CourseCompletionService::TYPE_SELECTED;
+
+        $this->validate([
+            'completion_type'  => ['required', 'string', Rule::in(CourseCompletionService::TYPES)],
+            'completion_value' => [$needsValue ? 'required' : 'nullable', 'integer', 'min:1', 'max:100'],
+            'completion_selected'   => [$needsSelected ? 'required' : 'nullable', 'array'],
+            'completion_selected.*' => ['integer'],
+        ], [
+            'completion_value.required'    => 'Indiquez un seuil entre 1 et 100.',
+            'completion_selected.required' => 'Sélectionnez au moins une activité.',
+        ]);
+
+        // Construction du critère normalisé à stocker (forme minimale par type).
+        $criteria = ['type' => $this->completion_type];
+
+        if ($needsValue) {
+            $criteria['value'] = max(1, min(100, (int) $this->completion_value));
+        }
+
+        if ($needsSelected) {
+            // Anti-IDOR : ne garder que les items appartenant réellement à ce cours.
+            $valid = (new CourseCompletionService())
+                ->validItemIdsForCourse($course, $this->completion_selected);
+
+            if ($valid === []) {
+                $this->addError('completion_selected', 'Sélectionnez au moins une activité valide de ce cours.');
+
+                return;
+            }
+
+            $criteria['items']         = $valid;
+            $this->completion_selected = $valid;
+        }
+
+        $course->update([
+            'completion_criteria' => $criteria,
+            'updated_by'          => Auth::id(),
+        ]);
+
+        $this->flashSaved('Critère d\'achèvement enregistré.');
+    }
+
+    /**
+     * Liste APLATIE des items du cours (pour la sélection « activités désignées »).
+     * Source serveur, scopée à CE cours. Chaque entrée : {id, label}.
+     *
+     * @return array<int, array{id: int, label: string}>
+     */
+    #[Computed]
+    public function completionItems(): array
+    {
+        $course = $this->resolveCourse();
+        $course->loadMissing([
+            'chapters'                     => fn ($q) => $q->orderBy('position'),
+            'chapters.lessons'             => fn ($q) => $q->orderBy('position'),
+            'chapters.lessons.lessonItems' => fn ($q) => $q->orderBy('position'),
+        ]);
+
+        $rows = [];
+        foreach ($course->chapters as $chapter) {
+            foreach ($chapter->lessons as $lesson) {
+                foreach ($lesson->lessonItems as $item) {
+                    $rows[] = [
+                        'id'    => (int) $item->id,
+                        'label' => trim(($lesson->title ?? 'Leçon').' - '.($item->title ?? 'Activité')),
+                    ];
+                }
+            }
+        }
+
+        return $rows;
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -1943,6 +2047,12 @@ class CourseEditor extends Component
         $this->certificate_message        = $course->certificate_message;
         $this->certificate_signature_name = $course->certificate_signature_name;
         $this->certificate_accent_color   = $course->certificate_accent_color;
+
+        // Achèvement du cours : critère normalisé (défaut all_required si NULL).
+        $criteria                  = $course->completionCriteria();
+        $this->completion_type     = $criteria['type'];
+        $this->completion_value    = $criteria['value'] ?? 80;
+        $this->completion_selected = array_map('intval', $criteria['items']);
     }
 
     public function render()

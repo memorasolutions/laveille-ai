@@ -97,6 +97,7 @@ class Course extends Model implements HasMedia
         'certificate_signature_name',
         'certificate_accent_color',
         'grade_letter_scheme',
+        'completion_criteria',
         'created_by',
         'updated_by',
     ];
@@ -109,7 +110,20 @@ class Course extends Model implements HasMedia
         'price_cents'         => 'integer',
         'is_template'         => 'boolean',
         'grade_letter_scheme' => 'array',
+        'completion_criteria' => 'array',
     ];
+
+    /**
+     * Critère d'ACHÈVEMENT du cours, NORMALISÉ (source unique de la forme attendue).
+     * NULL en base ou forme inconnue → défaut « all_required » (= comportement actuel,
+     * rétrocompatibilité stricte). Voir Modules\Academy\Services\CourseCompletionService.
+     *
+     * @return array{type: string, value: int|null, items: array<int, int>}
+     */
+    public function completionCriteria(): array
+    {
+        return \Modules\Academy\Services\CourseCompletionService::criteriaFor($this);
+    }
 
     // Relations
 

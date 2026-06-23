@@ -10,6 +10,7 @@
     $userProgress = null;
     $resumeLesson = null;
     $firstLesson  = null;
+    $completion   = null; // Achèvement configurable : progression vers le critère du cours
     if (auth()->check() && $isEnrolled && class_exists(\Modules\Academy\Models\Progress::class)) {
         try {
             $userProgress = \Modules\Academy\Models\Progress::where('user_id', auth()->id())
@@ -17,6 +18,10 @@
                 ->first();
             if ($userProgress !== null && class_exists(\Modules\Academy\Services\ProgressService::class)) {
                 $resumeLesson = \Modules\Academy\Services\ProgressService::resumeLesson(auth()->user(), $course);
+            }
+            if (class_exists(\Modules\Academy\Services\CourseCompletionService::class)) {
+                $completion = (new \Modules\Academy\Services\CourseCompletionService())
+                    ->progressToward(auth()->user(), $course);
             }
         } catch (\Throwable) {}
     }
@@ -300,6 +305,7 @@
                     'course'       => $course,
                     'resumeLesson' => $resumeLesson,
                     'firstLesson'  => $firstLesson,
+                    'completion'   => $completion ?? null,
                 ])
 
                 {{-- Titre + meta --}}
