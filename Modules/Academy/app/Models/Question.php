@@ -37,8 +37,13 @@ class Question extends Model
 {
     protected $table = 'academy_questions';
 
-    /** Types de questions supportés (reproduisent QtService / QuizService::score). */
-    public const TYPES = ['mcq', 'truefalse', 'short', 'matching', 'ordering', 'cloze', 'numerical', 'ddwtos'];
+    /**
+     * Types de questions supportés (reproduisent QtService / QuizService::score).
+     * `essay` (ajouté en dernier, rétrocompat de l'ordre) = réponse rédigée à
+     * CORRECTION MANUELLE (type Moodle « Essay ») : aucun scoring auto, le formateur
+     * attribue les points après coup (cf. QuizService::score / EssayGradingService).
+     */
+    public const TYPES = ['mcq', 'truefalse', 'short', 'matching', 'ordering', 'cloze', 'numerical', 'ddwtos', 'essay'];
 
     protected $fillable = [
         'category_id',

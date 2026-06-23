@@ -155,6 +155,7 @@
                         <option value="cloze">Texte à trous</option>
                         <option value="numerical">Réponse numérique</option>
                         <option value="ddwtos">Glisser-déposer sur texte</option>
+                        <option value="essay">Réponse rédigée (essai)</option>
                     </select>
                     @error('qType') <span role="alert" style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
 
@@ -441,6 +442,22 @@
                             <input type="text" id="qNumericalUnit" wire:model="qNumericalUnit" maxlength="40"
                                    placeholder="km, %, $…"
                                    style="width: 100%; margin: 4px 0 0; padding: 7px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                        </fieldset>
+                    @elseif ($qType === 'essay')
+                        <fieldset style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px; margin: 0;">
+                            <legend style="font-size: 0.8rem; font-weight: 700; padding: 0 6px;">Réponse rédigée (essai)</legend>
+                            <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 10px;">
+                                L'apprenant rédige une réponse libre. Il n'y a pas de bonne réponse automatique : le formateur attribue les points (jusqu'au barème ci-dessous) après la soumission.
+                            </p>
+
+                            <label for="qGraderInfo" style="font-size: 0.8rem; font-weight: 600;">Consignes de correction (facultatif)</label>
+                            <textarea id="qGraderInfo" wire:model="qGraderInfo" rows="3" maxlength="2000"
+                                      placeholder="Critères, barème détaillé, points à vérifier…"
+                                      style="width: 100%; margin: 4px 0 0; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+                            <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">
+                                Visibles SEULEMENT par le formateur lors de la correction (jamais par l'apprenant).
+                            </p>
+                            @error('qGraderInfo') <span role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 4px;">{{ $message }}</span> @enderror
                         </fieldset>
                     @endif
 

@@ -20,6 +20,7 @@ use Modules\Academy\Livewire\CourseCreate;
 use Modules\Academy\Livewire\CourseEditor;
 use Modules\Academy\Livewire\CourseRoster;
 use Modules\Academy\Livewire\Dashboard;
+use Modules\Academy\Livewire\EssayGrading;
 use Modules\Academy\Livewire\QuestionBankManager;
 use Modules\Academy\Livewire\StudentAssignments;
 use Modules\Academy\Livewire\StudentGrades;
@@ -101,6 +102,12 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // manageStructure ; corriger + gradebook gâté manageEnrollments), objets
         // re-résolus et scopés au cours (anti-IDOR). Voir CourseAssignments.
         Livewire::component('academy.course-assignments', CourseAssignments::class);
+
+        // ESSAI (type Moodle « Essay ») - CORRECTION MANUELLE des tentatives de quiz
+        // contenant un essai (gâté manageEnrollments), tentative re-résolue scopée au
+        // cours (anti-IDOR), points bornés au barème, recalcul + complétion en
+        // transaction. Voir EssayGrading + EssayGradingService.
+        Livewire::component('academy.essay-grading', EssayGrading::class);
 
         // PHASE E (E2) - Devoirs : ÉTUDIANT (voir les devoirs publiés de ses cours
         // suivis, soumettre/éditer SA remise, voir sa note). user_id forcé = auth,

@@ -58,6 +58,18 @@
                         </div>
                     @endcan
 
+                    {{-- ESSAI (type « Essay ») - Correction des essais de quiz en attente.
+                         Gâté manageEnrollments (admin OU owner/instructor) ; tentative
+                         re-résolue scopée au cours (anti-IDOR). Vraie garde = serveur. --}}
+                    @can('manageEnrollments', $course)
+                        <div style="margin-top: 28px;">
+                            <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin: 0 0 8px;">
+                                Essais à corriger
+                            </h2>
+                            @livewire('academy.essay-grading', ['course' => $course])
+                        </div>
+                    @endcan
+
                     {{-- PHASE 4 (FE-4) - Inscriptions + équipe. Rendu seulement si la
                          personne peut gérer les inscriptions (admin OU owner/instructor) ;
                          la section « équipe » à l'intérieur est en plus gâtée par

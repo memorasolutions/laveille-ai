@@ -37,8 +37,15 @@ final class QuizGradeService
     /**
      * Note EFFECTIVE d'un item quiz pour un utilisateur, selon la méthode de l'item.
      *
-     * @return array{percent: int, attempts: int, method: string}
-     *               percent=0 et attempts=0 si aucune tentative.
+     * ESSAI : la note effective ne tient compte que des tentatives FINALISÉES
+     * (needs_grading=false : auto-notées OU correction terminée). Une tentative EN
+     * ATTENTE de correction n'est PAS comptée comme 0 ni 100 (son percent auto est
+     * provisoire) : on la signale via `pending`. Quand un quiz ne contient pas d'essai,
+     * toutes les tentatives sont finalisées → comportement strictement INCHANGÉ.
+     *
+     * @return array{percent: int, attempts: int, method: string, pending: bool}
+     *               percent=0 et attempts=0 si aucune tentative ;
+     *               pending=true si des tentatives existent mais AUCUNE n'est finalisée.
      */
     public static function effectiveGrade(int $userId, LessonItem $item): array
     {
@@ -49,15 +56,24 @@ final class QuizGradeService
             ->forItem($item->id)
             ->orderBy('submitted_at')
             ->orderBy('id')
-            ->get(['percent', 'submitted_at']);
+            ->get(['percent', 'submitted_at', 'needs_grading']);
 
         $count = $attempts->count();
 
         if ($count === 0) {
-            return ['percent' => 0, 'attempts' => 0, 'method' => $method];
+            return ['percent' => 0, 'attempts' => 0, 'method' => $method, 'pending' => false];
         }
 
-        $percents = $attempts->map(static fn ($a): int => (int) $a->percent);
+        // ESSAI : on ne note que les tentatives finalisées (note définitive).
+        $finalized = $attempts->filter(static fn ($a): bool => ! (bool) $a->needs_grading);
+
+        if ($finalized->isEmpty()) {
+            // Toutes les tentatives sont en attente de correction → « à corriger »
+            // (ni 0 ni 100 : on remonte pending pour que l'appelant le distingue).
+            return ['percent' => 0, 'attempts' => $count, 'method' => $method, 'pending' => true];
+        }
+
+        $percents = $finalized->map(static fn ($a): int => (int) $a->percent);
 
         $percent = match ($method) {
             'average' => (int) round($percents->avg()),
@@ -67,7 +83,7 @@ final class QuizGradeService
             default   => (int) $percents->max(),
         };
 
-        return ['percent' => $percent, 'attempts' => $count, 'method' => $method];
+        return ['percent' => $percent, 'attempts' => $count, 'method' => $method, 'pending' => false];
     }
 
     /**

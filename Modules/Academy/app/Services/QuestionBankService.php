@@ -380,6 +380,24 @@ final class QuestionBankService
                     'points'    => $points,
                 ];
 
+            case 'essay':
+                // ESSAI (type Moodle « Essay ») : réponse rédigée à CORRECTION MANUELLE.
+                // Aucune bonne réponse → toujours jouable. L'énoncé = `question` (déjà dans
+                // $base via le prompt). On transporte `grader_info` (consignes de correction
+                // OPTIONNELLES) dans l'item du round : elles sont snapshotées avec la
+                // tentative pour l'écran de correction, et JAMAIS rendues au joueur (le
+                // lecteur n'affiche pour un essai que l'énoncé + un <textarea>). Les points
+                // servent de barème maximum à la correction manuelle.
+                $graderInfo = isset($payload['grader_info']) && is_string($payload['grader_info'])
+                    ? trim($payload['grader_info'])
+                    : '';
+
+                return $base + [
+                    'type'        => 'essai',
+                    'grader_info' => $graderInfo,
+                    'points'      => $points,
+                ];
+
             default:
                 return null;
         }

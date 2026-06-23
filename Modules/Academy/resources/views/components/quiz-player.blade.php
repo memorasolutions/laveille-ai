@@ -55,6 +55,9 @@
     {{-- ── Panneau résultat (après soumission) ── --}}
     @if($quizResult !== null)
         @php
+            // ESSAI : tentative en attente de correction → on n'affiche PAS un faux
+            // score/percent final ni « réussi », mais un message « en attente ».
+            $needsGradingResult = (bool) ($quizResult['needs_grading'] ?? false);
             $passed         = (bool) ($quizResult['passed'] ?? false);
             $percent        = (int)  ($quizResult['percent'] ?? 0);
             $correct        = (int)  ($quizResult['correct'] ?? 0);
@@ -74,6 +77,24 @@
                 ⏱️ Temps écoulé : votre quiz a été soumis automatiquement à l'expiration de la limite.
             </div>
         @endif
+
+        @if($needsGradingResult)
+            {{-- ESSAI : tentative en attente de correction manuelle. On n'affiche PAS de
+                 score/percent final ni « réussi » : la note définitive viendra après la
+                 correction du formateur. --}}
+            <div role="status" class="p-4 rounded mb-4"
+                 style="background: #EFF6FF; border: 2px solid #BFDBFE; color: #1E3A8A;">
+                <h5 style="font-weight: 700; color: #1E40AF;">📝 Réponse enregistrée - en attente de correction</h5>
+                <p class="mb-1" style="font-size: 0.92rem;">
+                    Votre quiz contient une réponse rédigée (essai) corrigée manuellement par le formateur.
+                    Votre note finale s'affichera une fois la correction effectuée.
+                </p>
+                <a href="{{ route('academy.lessons.show', [$course, $lesson]) }}"
+                   class="btn ct-btn ct-btn-primary mt-2">
+                    Continuer →
+                </a>
+            </div>
+        @else
         <div class="p-4 rounded mb-4" style="
             background: {{ $passed ? '#DCFCE7' : '#FEF9C3' }};
             border: 2px solid {{ $passed ? '#86EFAC' : '#FDE047' }};
@@ -286,19 +307,26 @@
                     @endphp
 
                     <div wire:key="review-{{ $review->id }}-{{ $i }}" class="mb-3 p-3 rounded"
-                         style="background: #fff; border: 1px solid #E2E8F0; border-left: 4px solid {{ $reviewOpts['show_correctness'] ? ($isCorrect ? '#16A34A' : '#DC2626') : '#94A3B8' }};">
+                         style="background: #fff; border: 1px solid #E2E8F0; border-left: 4px solid {{ $qType === 'essai' ? '#94A3B8' : ($reviewOpts['show_correctness'] ? ($isCorrect ? '#16A34A' : '#DC2626') : '#94A3B8') }};">
                         <p class="mb-2" style="font-weight: 600; color: #1A1D23;">
                             <span class="badge me-2" style="background: var(--c-primary, #064E5A); color: #fff;">{{ $i + 1 }}</span>
                             {{ $q['question'] ?? '' }}
                         </p>
 
-                        @if($reviewOpts['show_correctness'])
+                        @if($reviewOpts['show_correctness'] && $qType !== 'essai')
                             <p class="mb-1" style="font-size: 0.88rem; color: {{ $isCorrect ? '#166534' : '#991B1B' }};">
                                 {{ $isCorrect ? '✔ Bonne réponse' : '✗ À revoir' }}
                             </p>
                         @endif
 
-                        @if($qType === 'appariement')
+                        @if($qType === 'essai')
+                            {{-- ESSAI : pas d'auto-correction. On rappelle la réponse soumise
+                                 (rendue anti-XSS) ; la note vient de la correction manuelle. --}}
+                            <p class="mb-1 text-muted" style="font-size: 0.85rem;">Réponse rédigée (corrigée par le formateur) :</p>
+                            <div class="mb-1 p-2 rounded" style="background: #F8FAFC; border: 1px solid #E2E8F0; font-size: 0.85rem;">
+                                {!! \Modules\Academy\Models\LessonItem::renderRichText(is_string($userAns) ? $userAns : '') !!}
+                            </div>
+                        @elseif($qType === 'appariement')
                             @if($reviewOpts['show_correctness'])
                                 <p class="mb-1 text-muted" style="font-size: 0.85rem;">
                                     {{ $isCorrect ? 'Toutes les associations sont correctes.' : 'Certaines associations sont à revoir.' }}
@@ -379,6 +407,7 @@
                 @endforeach
             </section>
         @endif
+        @endif {{-- /needsGradingResult --}}
     @endif
 
     {{-- ── Erreur éventuelle ── --}}
@@ -607,6 +636,18 @@
                             'legend'     => $question['question'] ?? 'Glisser-déposer sur texte',
                         ])
 
+                    {{-- ESSAI : réponse rédigée libre, corrigée manuellement (pas de
+                         « bonne réponse », pas de validation auto). --}}
+                    @elseif($type === 'essai')
+                        <p class="text-muted mb-2" style="font-size: 0.85rem;">
+                            Réponse rédigée : elle sera corrigée par le formateur.
+                        </p>
+                        <textarea name="answers[{{ $i }}]"
+                                  class="form-control mt-1"
+                                  rows="6"
+                                  aria-label="{{ $question['question'] ?? 'Réponse rédigée' }}"
+                                  placeholder="Rédigez votre réponse…"></textarea>
+
                     @else
                         <p class="text-muted small">Type de question non pris en charge.</p>
                     @endif
@@ -682,7 +723,23 @@
                         {{ $question['question'] ?? '' }}
                     </p>
 
-                    @if(! $locked)
+                    @if($type === 'essai')
+                        {{-- ESSAI : aucune validation par question (« Vérifier » n'a pas de
+                             sens). La réponse est saisie ici et rattachée au formulaire
+                             « Terminer » via l'attribut form= (HTML5) ; elle est soumise
+                             au « Terminer le quiz ». À rédiger en dernier (les autres
+                             validations rechargent la page). --}}
+                        <p class="text-muted mb-2" style="font-size: 0.85rem;">
+                            Réponse rédigée : corrigée par le formateur. Rédigez-la avant de terminer le quiz.
+                        </p>
+                        <textarea name="answers[{{ $i }}]"
+                                  form="academy-quiz-finish-{{ $item->id }}"
+                                  class="form-control mt-1"
+                                  rows="6"
+                                  aria-label="{{ $question['question'] ?? 'Réponse rédigée' }}"
+                                  placeholder="Rédigez votre réponse…"></textarea>
+
+                    @elseif(! $locked)
                         {{-- Formulaire de validation de CETTE question (scoring serveur). --}}
                         <form method="POST" action="{{ route('academy.quiz.verify', [$course, $lesson, $item->id]) }}">
                             @csrf
@@ -898,11 +955,21 @@
                 </div>
             @endforeach
 
-            {{-- Terminer : disponible quand TOUTES les questions sont validées. Le
-                 « Terminer » ne porte AUCUNE réponse (elles sont verrouillées serveur). --}}
-            @php $allValidated = count($questions) > 0 && count($validatedAll) >= count($questions); @endphp
+            {{-- Terminer : disponible quand toutes les questions AUTO-NOTÉES sont validées
+                 (les essais n'ont pas de validation par question). Le « Terminer » porte
+                 les réponses d'ESSAI (rattachées via form=) ; les autres réponses restent
+                 verrouillées serveur. --}}
+            @php
+                $essayCount = 0;
+                foreach ($questions as $qq) {
+                    if (($qq['type'] ?? null) === 'essai') { $essayCount++; }
+                }
+                $requiredValidations = count($questions) - $essayCount;
+                $allValidated = count($questions) > 0 && count($validatedAll) >= $requiredValidations;
+            @endphp
             @if($allValidated)
-                <form method="POST" action="{{ route('academy.quiz.submit', [$course, $lesson, $item->id]) }}">
+                <form method="POST" action="{{ route('academy.quiz.submit', [$course, $lesson, $item->id]) }}"
+                      id="academy-quiz-finish-{{ $item->id }}">
                     @csrf
                     <button type="submit" class="btn ct-btn ct-btn-primary" style="margin-top: 0.5rem;">
                         Terminer le quiz

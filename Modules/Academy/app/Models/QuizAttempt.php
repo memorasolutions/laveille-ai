@@ -28,10 +28,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int                              $percent
  * @property bool                             $passed
  * @property bool                             $timed_out
+ * @property bool                             $needs_grading
  * @property array                            $answers
+ * @property array|null                       $manual_scores
+ * @property array|null                       $manual_feedback
  * @property array|null                       $questions_snapshot
  * @property \Illuminate\Support\Carbon|null  $started_at
  * @property \Illuminate\Support\Carbon       $submitted_at
+ * @property \Illuminate\Support\Carbon|null  $graded_at
+ * @property int|null                         $graded_by
  * @property \Illuminate\Support\Carbon|null  $created_at
  * @property \Illuminate\Support\Carbon|null  $updated_at
  */
@@ -49,10 +54,18 @@ class QuizAttempt extends Model
         'passed',
         // V1-d : true si la soumission est arrivée hors-temps (garde serveur).
         'timed_out',
+        // ESSAI : true tant qu'au moins un essai de la tentative reste à corriger.
+        'needs_grading',
         'answers',
+        // ESSAI : {index_essai: points} et {index_essai: feedback} (saisie formateur).
+        'manual_scores',
+        'manual_feedback',
         'questions_snapshot',
         'started_at',
         'submitted_at',
+        // ESSAI : horodatage + auteur de la correction (jamais une valeur du client).
+        'graded_at',
+        'graded_by',
     ];
 
     protected $casts = [
@@ -61,15 +74,25 @@ class QuizAttempt extends Model
         'percent'            => 'integer',
         'passed'             => 'boolean',
         'timed_out'          => 'boolean',
+        'needs_grading'      => 'boolean',
         'answers'            => 'array',
+        'manual_scores'      => 'array',
+        'manual_feedback'    => 'array',
         'questions_snapshot' => 'array',
         'started_at'         => 'datetime',
         'submitted_at'       => 'datetime',
+        'graded_at'          => 'datetime',
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /** ESSAI : correcteur (formateur) ayant attribué les points manuels. */
+    public function grader(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'graded_by');
     }
 
     public function lessonItem(): BelongsTo
@@ -107,5 +130,17 @@ class QuizAttempt extends Model
             ->where('user_id', $userId)
             ->where('lesson_item_id', $itemId)
             ->count();
+    }
+
+    /** ESSAI : tentatives EN ATTENTE de correction (au moins un essai non corrigé). */
+    public function scopeNeedsGrading(Builder $query): Builder
+    {
+        return $query->where('needs_grading', true);
+    }
+
+    /** ESSAI : tentatives FINALISÉES (auto-notées OU correction terminée). */
+    public function scopeFinalized(Builder $query): Builder
+    {
+        return $query->where('needs_grading', false);
     }
 }

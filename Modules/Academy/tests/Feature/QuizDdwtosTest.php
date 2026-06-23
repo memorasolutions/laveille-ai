@@ -278,9 +278,9 @@ test('sécurité : marqueur [[1]] dupliqué → un seul trou jouable (anti-biais
 // 4. Rétrocompat : 8 types reconnus + round mixte (qcm + glisser-texte)
 // ─────────────────────────────────────────────────────────────────────────────
 
-test('rétrocompat : les 8 types restent reconnus', function (): void {
+test('rétrocompat : les 9 types restent reconnus (essai ajouté en dernier)', function (): void {
     expect(Question::TYPES)->toBe([
-        'mcq', 'truefalse', 'short', 'matching', 'ordering', 'cloze', 'numerical', 'ddwtos',
+        'mcq', 'truefalse', 'short', 'matching', 'ordering', 'cloze', 'numerical', 'ddwtos', 'essay',
     ]);
 });
 

@@ -169,6 +169,14 @@ class QuestionBankManager extends Component
     public array $qDdwtosWords = ['', '', ''];
     public array $qDdwtosAnswers = [];
 
+    /**
+     * ESSAI (type Moodle « Essay »). Réponse rédigée à CORRECTION MANUELLE : pas de
+     * bonne réponse. L'énoncé = $qPrompt ; le barème = $qPoints. Champ propre :
+     *   - $qGraderInfo : consignes de correction OPTIONNELLES (visibles seulement au
+     *                    formateur lors de la correction). Stockées dans payload['grader_info'].
+     */
+    public ?string $qGraderInfo = null;
+
     // ── Confirmations inline à 2 temps (jamais de popup native) ───────────────────
     public ?int $confirmingCategoryDeletion = null;
     public ?int $confirmingQuestionDeletion = null;
@@ -529,6 +537,8 @@ class QuestionBankManager extends Component
             // C2 (audit F3) : l'unité numérique n'avait QUE le maxlength HTML
             // (contournable). Règle serveur (inerte pour les autres types : qNumericalUnit vide).
             'qNumericalUnit' => 'nullable|string|max:40',
+            // ESSAI : consignes de correction (inerte pour les autres types : qGraderInfo vide).
+            'qGraderInfo'    => 'nullable|string|max:2000',
         ]);
 
         // Construit + valide le payload selon le type (mêmes invariants que mapToRoundItem).
@@ -618,8 +628,24 @@ class QuestionBankManager extends Component
             'cloze'     => $this->buildClozePayload(),
             'numerical' => $this->buildNumericalPayload(),
             'ddwtos'    => $this->buildDdwtosPayload(),
+            'essay'     => $this->buildEssayPayload(),
             default     => [],
         };
+    }
+
+    /**
+     * @return array<string, mixed>
+     *
+     * ESSAI. Forme canonique du payload : payload['grader_info'] = consignes de
+     * correction (optionnelles, bornées). Aucune bonne réponse ; toujours jouable
+     * (cf. QuestionBankService::mapToRoundItem cas essay). L'énoncé et le barème
+     * vivent dans Question.prompt / Question.points (déjà validés en amont).
+     */
+    private function buildEssayPayload(): array
+    {
+        $info = $this->qGraderInfo !== null ? trim($this->qGraderInfo) : '';
+
+        return $info !== '' ? ['grader_info' => mb_substr($info, 0, 2000)] : [];
     }
 
     /**
@@ -1201,6 +1227,10 @@ class QuestionBankManager extends Component
                 }
                 $this->qDdwtosAnswers = $answers;
                 break;
+
+            case 'essay':
+                $this->qGraderInfo = isset($payload['grader_info']) ? (string) $payload['grader_info'] : null;
+                break;
         }
     }
 
@@ -1236,6 +1266,7 @@ class QuestionBankManager extends Component
         $this->qDdwtosText         = '';
         $this->qDdwtosWords        = ['', '', ''];
         $this->qDdwtosAnswers      = [];
+        $this->qGraderInfo         = null;
     }
 
     /**
@@ -1447,6 +1478,7 @@ class QuestionBankManager extends Component
             'cloze'     => 'Texte à trous',
             'numerical' => 'Réponse numérique',
             'ddwtos'    => 'Glisser-déposer sur texte',
+            'essay'     => 'Réponse rédigée (essai)',
             default     => $type,
         };
     }

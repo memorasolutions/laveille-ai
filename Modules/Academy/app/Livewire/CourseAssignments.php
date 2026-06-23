@@ -1262,7 +1262,11 @@ class CourseAssignments extends Component
             $effective = [];
             foreach ($quizItems as $quizItem) {
                 $grade = \Modules\Academy\Services\QuizGradeService::effectiveGrade($userId, $quizItem);
-                if ($grade['attempts'] > 0) {
+                // ESSAI : un item dont la (seule) tentative est en attente de correction
+                // est « à corriger » → exclu de la moyenne (ni 0 ni 100). Sa note finale
+                // entrera dès la correction terminée (effectiveGrade ne renvoie alors plus
+                // pending). Un quiz sans essai n'est jamais pending → INCHANGÉ.
+                if ($grade['attempts'] > 0 && empty($grade['pending'])) {
                     $effective[] = $grade['percent'];
                 }
             }

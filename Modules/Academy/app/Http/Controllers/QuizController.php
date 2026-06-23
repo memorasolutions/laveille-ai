@@ -162,6 +162,21 @@ class QuizController extends Controller
             foreach ($validated as $i => $v) {
                 $answers[(string) $i] = is_array($v) ? ($v['answer'] ?? null) : null;
             }
+
+            // ESSAI - en mode immédiat, un essai n'a PAS de bouton « Vérifier » : sa
+            // réponse n'est jamais verrouillée en session. Elle est saisie dans le
+            // formulaire « Terminer » et fusionnée ICI (uniquement pour les index
+            // d'essais du round serveur). Les autres types restent reconstruits depuis
+            // la session (le client ne peut pas forger une réponse auto-notée tardive).
+            $posted = $request->input('answers', []);
+            if (is_array($posted)) {
+                foreach ($questions as $qi => $q) {
+                    if (is_array($q) && ($q['type'] ?? null) === 'essai') {
+                        $raw = $posted[$qi] ?? ($posted[(string) $qi] ?? null);
+                        $answers[(string) $qi] = is_string($raw) ? $raw : '';
+                    }
+                }
+            }
         } else {
             $answers = $request->input('answers', []);
         }
@@ -188,7 +203,15 @@ class QuizController extends Controller
             ? (int) $item->payload['passing_score']
             : 60;
 
-        $passed = $scoreResult['percent'] >= $passingScore;
+        // ESSAI - le round contient au moins un essai → la tentative est EN ATTENTE de
+        // correction : le score auto est PROVISOIRE, la complétion n'est PAS posée et la
+        // réussite reste indéterminée tant que le formateur n'a pas attribué les points.
+        // Un quiz SANS essai → needs_grading=false → comportement auto-noté INCHANGÉ.
+        $needsGrading = (bool) ($scoreResult['needs_grading'] ?? false);
+
+        // « passed » provisoire : tant que la correction n'est pas faite, on ne déclare
+        // jamais réussi (false). Recalculé définitivement à la correction (EssayGrading).
+        $passed = ! $needsGrading && $scoreResult['percent'] >= $passingScore;
 
         // H1 — limite de tentatives (récupérée comme dans startQuiz). Re-vérifiée
         // DANS la transaction ci-dessous, AVANT la création (anti-TOCTOU : plusieurs
@@ -235,7 +258,7 @@ class QuizController extends Controller
         // tentatives est déjà atteinte → aucune tentative créée (idempotence).
         $limitReached = false;
 
-        DB::transaction(function () use ($user, $item, $scoreResult, $passed, $answers, $questions, $startedAt, $timedOut, $attemptsAllowed, &$limitReached): void {
+        DB::transaction(function () use ($user, $item, $scoreResult, $passed, $needsGrading, $answers, $questions, $startedAt, $timedOut, $attemptsAllowed, &$limitReached): void {
             // H1 — RE-VÉRIFICATION ANTI-TOCTOU. La limite est relue ICI, dans la même
             // transaction que la création, sur l'HISTORIQUE RÉEL (QuizAttempt). Sans
             // ce garde, N onglets soumis simultanément contournaient le contrôle de
@@ -261,6 +284,8 @@ class QuizController extends Controller
                 'percent'            => $scoreResult['percent'],
                 'passed'             => $passed,
                 'timed_out'          => $timedOut,
+                // ESSAI : marque la tentative à corriger (défaut false → rétrocompat stricte).
+                'needs_grading'      => $needsGrading,
                 'answers'            => $answers,
                 'questions_snapshot' => $questions,
                 'started_at'         => $startedAt,
@@ -289,7 +314,9 @@ class QuizController extends Controller
             return back()->with('error', 'Nombre de tentatives maximum atteint.');
         }
 
-        // Flasher le résultat (item_id inclus pour affichage ciblé en vue)
+        // Flasher le résultat (item_id inclus pour affichage ciblé en vue).
+        // ESSAI : `needs_grading` → le lecteur affiche « En attente de correction »
+        // au lieu d'un score final (le pourcentage auto est provisoire).
         $request->session()->flash('academy.quiz_result', [
             'item_id'         => $item->id,
             'passed'          => $passed,
@@ -301,6 +328,8 @@ class QuizController extends Controller
             // V1-c : points pondérés pour l'affichage « X / Y points ».
             'points_earned'   => $scoreResult['points_earned'],
             'points_possible' => $scoreResult['points_possible'],
+            // ESSAI : tentative en attente de correction manuelle.
+            'needs_grading'   => $needsGrading,
         ]);
 
         return redirect()

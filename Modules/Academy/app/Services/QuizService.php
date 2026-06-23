@@ -202,6 +202,8 @@ final class QuizService
                 'wrong'           => 0,
                 'points_earned'   => 0,
                 'points_possible' => 0,
+                'needs_grading'   => false,
+                'essay_indexes'   => [],
                 'details'         => [],
             ];
         }
@@ -210,6 +212,9 @@ final class QuizService
         $pointsEarned   = 0.0; // crédit partiel : accumulé en FLOAT (jamais arrondi par question)
         $pointsPossible = 0;
         $details        = [];
+        // ESSAI : indices des essais du round + drapeau « à corriger » (≥ 1 essai).
+        $essayIndexes   = [];
+        $needsGrading   = false;
 
         foreach ($questions as $index => $question) {
             $type      = $question['type'] ?? null;
@@ -482,6 +487,26 @@ final class QuizService
 
                     continue 2; // question suivante (bypass du bloc commun)
 
+                case 'essai':
+                    // ESSAI - réponse rédigée à CORRECTION MANUELLE (type Moodle « Essay »).
+                    // AUCUN scoring automatique : rapporte 0 point auto et n'entre PAS dans
+                    // le compte des bonnes réponses (correct). Ses points restent toutefois
+                    // dans pointsPossible (déjà ajoutés avant le switch) → le pourcentage
+                    // AUTO est PROVISOIRE tant que le formateur n'a pas attribué les points
+                    // manuels (cf. EssayGradingService::recompute). On marque l'index « à
+                    // corriger » pour piloter le workflow de correction (needs_grading).
+                    $needsGrading   = true;
+                    $essayIndexes[] = $index;
+
+                    $details[$index] = [
+                        'correct'       => false,
+                        'needs_grading' => true,
+                        'expected'      => null,
+                        'given'         => is_string($given) ? $given : '',
+                    ];
+
+                    continue 2; // question suivante (bypass du bloc commun ; 0 point auto)
+
                 default:
                     $isCorrect = false;
                     break;
@@ -521,11 +546,14 @@ final class QuizService
         return [
             'score'           => $pointsEarnedDisplay, // points obtenus (= points_earned)
             'total'           => $total,        // NB de questions (inchangé)
-            'percent'         => $percent,      // pondéré
+            'percent'         => $percent,      // pondéré (PROVISOIRE si needs_grading)
             'correct'         => $correct,      // NB de bonnes réponses (badge « sans faute »)
             'wrong'           => $wrong,
             'points_earned'   => $pointsEarnedDisplay,
             'points_possible' => $pointsPossible,
+            // ESSAI : ≥ 1 essai dans le round → correction manuelle requise.
+            'needs_grading'   => $needsGrading,
+            'essay_indexes'   => $essayIndexes,
             'details'         => $details,
         ];
     }
