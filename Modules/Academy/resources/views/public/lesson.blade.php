@@ -122,6 +122,15 @@
         .academy-lesson-content { padding: 1.25rem 1rem; }
     }
 
+    /* ── V5-d : Item verrouillé par restriction d'accès (grisé, a11y) ── */
+    .academy-restricted-panel {
+        border: 1px solid #E5E7EB;
+        border-radius: 10px;
+        background: #F9FAFB;
+        padding: 14px 16px;
+        opacity: 0.75;
+    }
+
     /* ── Contenu « document » : markdown rendu SÛR (.academy-richtext) ── */
     .academy-richtext { line-height: 1.75; color: #374151; max-width: 72ch; }
     .academy-richtext > :first-child { margin-top: 0; }
@@ -367,9 +376,46 @@
                     @php
                         $itemPreview = (bool) ($item->payload['preview'] ?? false);
                         $hasAccess = $canWatch || $itemPreview;
+
+                        // V5-d : restrictions d'accès par item (calcul SERVEUR dans LessonController).
+                        // En prévisualisation : le gérant voit tout (aucune restriction appliquée).
+                        // Rétrocompat : clé absente dans la map = accès ouvert (défaut).
+                        $__restrict = (!($isPreview ?? false) && $canWatch)
+                            ? ($itemRestrictions[$item->id] ?? ['allowed' => true, 'hidden' => false, 'reasons' => []])
+                            : ['allowed' => true, 'hidden' => false, 'reasons' => []];
                     @endphp
 
+                    {{-- Item complètement masqué (hide=true sur au moins une condition non remplie). --}}
+                    @if($__restrict['hidden'])
+                        @continue
+                    @endif
+
                     <div class="mb-5" id="item-{{ $item->id }}">
+
+                    {{-- Item grisé avec cadenas + raison(s) : inscrit mais restriction non remplie. --}}
+                    @if(!$__restrict['allowed'])
+                        <div class="academy-restricted-panel"
+                             role="status"
+                             aria-label="Contenu verrouillé : {{ $item->title }}">
+                            <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                <span aria-hidden="true" style="font-size: 1.5rem; flex-shrink: 0;">🔒</span>
+                                <div>
+                                    @if($item->title)
+                                        <p style="font-weight: 700; color: #374151; margin: 0 0 4px;">{{ $item->title }}</p>
+                                    @endif
+                                    <ul style="margin: 0; padding-left: 1.1rem; font-size: 0.9rem; color: #6B7280;">
+                                        @foreach($__restrict['reasons'] as $__reason)
+                                            <li>{{ $__reason }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        </div>{{-- ferme le div.mb-5 ouvert juste avant (item verrouillé) --}}
+                        @php unset($__restrict, $__reason); @endphp
+                        @continue
+                    @endif
+                    @php unset($__restrict); @endphp
 
                         @if($item->title)
                             <h2 class="h5 mb-3" style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23);">

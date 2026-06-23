@@ -18,6 +18,7 @@ use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
+use Modules\Academy\Services\AccessRestrictionService;
 use Modules\Academy\Services\ActivityCompletionService;
 use Modules\Academy\Services\CompletionService;
 
@@ -69,6 +70,13 @@ class CompletionController extends Controller
             abort(403);
         }
         if ($lesson->isDripLockedFor($enrollment->enrolled_at)) {
+            abort(403);
+        }
+
+        // V5-d : RESTRICTIONS D'ACCES serveur. Un item verrouillé par une restriction
+        // ne peut pas être marqué comme terminé par POST direct (anti-contournement).
+        $restriction = AccessRestrictionService::evaluate(Auth::user(), $item, $course);
+        if (! $restriction['allowed']) {
             abort(403);
         }
 

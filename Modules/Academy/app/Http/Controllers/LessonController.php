@@ -113,7 +113,30 @@ class LessonController extends Controller
             \Modules\Academy\Services\ActivityCompletionService::autoMarkViewItems(auth()->user(), $lesson);
         }
 
-        // 5e. C3 (anti N+1) - Précharge en UNE requête les votes « choice » de
+        // 5e. V5-d - RESTRICTIONS D'ACCES par item (calcul SERVEUR, 100 %). Pour chaque
+        //     item de la leçon, on évalue les conditions access_restrictions du payload
+        //     et on construit une map [item_id => {allowed, hidden, reasons}].
+        //     - En prévisualisation : le gérant voit tout (aucune restriction).
+        //     - Non inscrit / drip verrouillé : inutile de calculer (le gating $hasAccess
+        //       coupe déjà l'accès ; la map reste vide = tout ouvert par défaut).
+        //     Rétrocompat stricte : un item sans la clé retourne always allowed=true.
+        $itemRestrictions = [];
+        if (! $isPreview && $isEnrolled && auth()->check()
+            && class_exists(\Modules\Academy\Services\AccessRestrictionService::class)) {
+            $course->loadMissing(['chapters.lessons.lessonItems']);
+            $validItemIds = \Modules\Academy\Services\AccessRestrictionService::courseItemIds($course);
+            foreach ($lesson->lessonItems as $lessonItem) {
+                $itemRestrictions[$lessonItem->id] = \Modules\Academy\Services\AccessRestrictionService::evaluate(
+                    auth()->user(),
+                    $lessonItem,
+                    $course,
+                );
+                // Correction anti-IDOR : on ne passe que les IDs du cours courant
+                // (courseItemIds() a déjà été calculé avec la relation chargée).
+            }
+        }
+
+        // 5f. C3 (anti N+1) - Précharge en UNE requête les votes « choice » de
         //     l'utilisateur courant pour TOUS les items de la leçon. Le lecteur consulte
         //     ensuite cette map au lieu de requêter par item. Vide si anonyme ou en
         //     prévisualisation (le gérant ne vote pas).
@@ -131,7 +154,7 @@ class LessonController extends Controller
             }
         }
 
-        // 5f. C2 (requête hors vue) - Précharge en UNE requête les réponses NOMMÉES de
+        // 5g. C2 (requête hors vue) - Précharge en UNE requête les réponses NOMMÉES de
         //     l'utilisateur courant pour TOUS les items « feedback » de la leçon, pour le
         //     pré-remplissage du formulaire (réponse modifiable). La vue ne requête plus.
         //     Vide si anonyme ou en prévisualisation (le gérant ne répond pas) ; les
@@ -207,6 +230,7 @@ class LessonController extends Controller
             'choiceVotes',
             'feedbackResponses',
             'courseCompleted',
+            'itemRestrictions',
         ));
     }
 }

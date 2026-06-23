@@ -1219,6 +1219,157 @@
                                                                     </div>
                                                                 </div>
                                                             @endif
+                                                            {{-- ── V5-d : Restrictions d'accès (parité Moodle « Restrict access ») ── --}}
+                                                            <div style="margin-top: 12px; border-top: 1px dashed #E5E7EB; padding-top: 10px;">
+                                                                <span style="display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px;">Restrictions d'accès</span>
+                                                                <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 8px;">
+                                                                    Conditionne la visibilité de cet élément (date, note, achèvement d'un autre élément, groupe).
+                                                                </p>
+
+                                                                @php($__rBuf = $editRestrictions[$item->id] ?? null)
+
+                                                                @if($__rBuf === null)
+                                                                    {{-- Panneau fermé --}}
+                                                                    @if(!empty($item->payload['access_restrictions']['conditions']))
+                                                                        <p style="font-size: 0.8rem; color: var(--sys-action-primary, #064E5A); margin: 0 0 6px;">
+                                                                            🔒 {{ count($item->payload['access_restrictions']['conditions']) }} restriction(s) active(s)
+                                                                        </p>
+                                                                    @endif
+                                                                    <x-core::button type="button"
+                                                                        wire:click="loadItemRestrictions({{ $item->id }})"
+                                                                        variant="secondary" size="sm">
+                                                                        @if(!empty($item->payload['access_restrictions']['conditions']))
+                                                                            Modifier les restrictions
+                                                                        @else
+                                                                            Ajouter une restriction
+                                                                        @endif
+                                                                    </x-core::button>
+                                                                @else
+                                                                    {{-- Panneau ouvert --}}
+                                                                    <fieldset style="border: 0; padding: 0; margin: 0 0 8px;">
+                                                                        <legend class="visually-hidden">Opérateur logique des restrictions</legend>
+                                                                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 0.82rem;">
+                                                                            <label for="restrict-match-{{ $item->id }}" style="font-weight: 600;">L'étudiant doit remplir :</label>
+                                                                            <select id="restrict-match-{{ $item->id }}"
+                                                                                    wire:model="editRestrictions.{{ $item->id }}.match"
+                                                                                    style="padding: 4px 8px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); font-size: 0.82rem;">
+                                                                                <option value="all">Toutes les conditions (ET)</option>
+                                                                                <option value="any">Au moins une condition (OU)</option>
+                                                                            </select>
+                                                                        </div>
+                                                                    </fieldset>
+
+                                                                    @php($__refItems = $this->restrictionRefItems($item->id))
+
+                                                                    @forelse($__rBuf['conditions'] as $__ci => $__cond)
+                                                                        <div wire:key="rcond-{{ $item->id }}-{{ $__ci }}"
+                                                                             style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; background: #FAFAFA;">
+                                                                            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px;">
+                                                                                <div style="flex: 1;">
+                                                                                    <label for="rcond-type-{{ $item->id }}-{{ $__ci }}" class="visually-hidden">Type de condition</label>
+                                                                                    <select id="rcond-type-{{ $item->id }}-{{ $__ci }}"
+                                                                                            wire:model="editRestrictions.{{ $item->id }}.conditions.{{ $__ci }}.type"
+                                                                                            style="width: 100%; padding: 5px 8px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); font-size: 0.82rem; margin-bottom: 6px;">
+                                                                                        <option value="completion">Achèvement requis</option>
+                                                                                        <option value="grade">Note minimale</option>
+                                                                                        <option value="date">Date</option>
+                                                                                        <option value="group">Groupe</option>
+                                                                                    </select>
+
+                                                                                    {{-- Champs dynamiques selon le type --}}
+                                                                                    @if(($__cond['type'] ?? '') === 'completion')
+                                                                                        <label for="rcond-item-{{ $item->id }}-{{ $__ci }}" class="visually-hidden">Élément à compléter</label>
+                                                                                        <select id="rcond-item-{{ $item->id }}-{{ $__ci }}"
+                                                                                                wire:model="editRestrictions.{{ $item->id }}.conditions.{{ $__ci }}.item_id"
+                                                                                                style="width: 100%; padding: 5px 8px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); font-size: 0.82rem;">
+                                                                                            <option value="0">-- Choisir un élément --</option>
+                                                                                            @foreach($__refItems as $__ref)
+                                                                                                <option value="{{ $__ref['id'] }}">{{ $__ref['title'] }} ({{ $__ref['type'] }})</option>
+                                                                                            @endforeach
+                                                                                        </select>
+                                                                                    @elseif(($__cond['type'] ?? '') === 'grade')
+                                                                                        <label for="rcond-gitem-{{ $item->id }}-{{ $__ci }}" class="visually-hidden">Quiz cible</label>
+                                                                                        <select id="rcond-gitem-{{ $item->id }}-{{ $__ci }}"
+                                                                                                wire:model="editRestrictions.{{ $item->id }}.conditions.{{ $__ci }}.item_id"
+                                                                                                style="width: 100%; padding: 5px 8px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); font-size: 0.82rem; margin-bottom: 4px;">
+                                                                                            <option value="0">-- Choisir un quiz --</option>
+                                                                                            @foreach($__refItems as $__ref)
+                                                                                                @if($__ref['type'] === 'quiz')
+                                                                                                    <option value="{{ $__ref['id'] }}">{{ $__ref['title'] }}</option>
+                                                                                                @endif
+                                                                                            @endforeach
+                                                                                        </select>
+                                                                                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem;">
+                                                                                            <label for="rcond-gpct-{{ $item->id }}-{{ $__ci }}" style="white-space: nowrap;">Min. :</label>
+                                                                                            <input id="rcond-gpct-{{ $item->id }}-{{ $__ci }}" type="number" min="0" max="100"
+                                                                                                   wire:model="editRestrictions.{{ $item->id }}.conditions.{{ $__ci }}.min_percent"
+                                                                                                   style="width: 72px; padding: 4px 6px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); font-size: 0.82rem;">
+                                                                                            <span>%</span>
+                                                                                        </div>
+                                                                                    @elseif(($__cond['type'] ?? '') === 'date')
+                                                                                        <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem;">
+                                                                                            <label for="rcond-from-{{ $item->id }}-{{ $__ci }}" style="font-size: 0.78rem;">Disponible à partir du :</label>
+                                                                                            <input id="rcond-from-{{ $item->id }}-{{ $__ci }}" type="datetime-local"
+                                                                                                   wire:model="editRestrictions.{{ $item->id }}.conditions.{{ $__ci }}.from"
+                                                                                                   style="padding: 4px 6px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); font-size: 0.8rem;">
+                                                                                            <label for="rcond-until-{{ $item->id }}-{{ $__ci }}" style="font-size: 0.78rem; margin-top: 4px;">Disponible jusqu'au :</label>
+                                                                                            <input id="rcond-until-{{ $item->id }}-{{ $__ci }}" type="datetime-local"
+                                                                                                   wire:model="editRestrictions.{{ $item->id }}.conditions.{{ $__ci }}.until"
+                                                                                                   style="padding: 4px 6px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); font-size: 0.8rem;">
+                                                                                        </div>
+                                                                                    @elseif(($__cond['type'] ?? '') === 'group')
+                                                                                        <label for="rcond-group-{{ $item->id }}-{{ $__ci }}" class="visually-hidden">Groupe (cohorte)</label>
+                                                                                        <input id="rcond-group-{{ $item->id }}-{{ $__ci }}" type="number" min="1"
+                                                                                               wire:model="editRestrictions.{{ $item->id }}.conditions.{{ $__ci }}.group_id"
+                                                                                               placeholder="ID de la cohorte"
+                                                                                               style="width: 100%; padding: 5px 8px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); font-size: 0.82rem;">
+                                                                                        <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 3px 0 0;">Identifiant de la cohorte (visible dans la liste de gestion du cours).</p>
+                                                                                    @endif
+                                                                                </div>
+                                                                                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
+                                                                                    <x-core::button type="button"
+                                                                                        wire:click="removeRestrictionCondition({{ $item->id }}, {{ $__ci }})"
+                                                                                        variant="ghost" size="sm"
+                                                                                        aria-label="Retirer cette condition">✕</x-core::button>
+                                                                                    <label style="display: flex; align-items: center; gap: 4px; font-size: 0.72rem; cursor: pointer; white-space: nowrap;"
+                                                                                           for="rcond-hide-{{ $item->id }}-{{ $__ci }}">
+                                                                                        <input id="rcond-hide-{{ $item->id }}-{{ $__ci }}" type="checkbox"
+                                                                                               wire:model="editRestrictions.{{ $item->id }}.conditions.{{ $__ci }}.hide"
+                                                                                               style="width: 16px; height: 16px; flex-shrink: 0;">
+                                                                                        Masquer si non remplie
+                                                                                    </label>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    @empty
+                                                                        <p style="font-size: 0.82rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 8px;">Aucune restriction pour l'instant.</p>
+                                                                    @endforelse
+
+                                                                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;">
+                                                                        <x-core::button type="button"
+                                                                            wire:click="addRestrictionCondition({{ $item->id }}, 'completion')"
+                                                                            variant="ghost" size="sm">+ Achèvement</x-core::button>
+                                                                        <x-core::button type="button"
+                                                                            wire:click="addRestrictionCondition({{ $item->id }}, 'grade')"
+                                                                            variant="ghost" size="sm">+ Note</x-core::button>
+                                                                        <x-core::button type="button"
+                                                                            wire:click="addRestrictionCondition({{ $item->id }}, 'date')"
+                                                                            variant="ghost" size="sm">+ Date</x-core::button>
+                                                                        <x-core::button type="button"
+                                                                            wire:click="addRestrictionCondition({{ $item->id }}, 'group')"
+                                                                            variant="ghost" size="sm">+ Groupe</x-core::button>
+                                                                    </div>
+                                                                    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+                                                                        <x-core::button type="button"
+                                                                            wire:click="saveItemRestrictions({{ $item->id }})"
+                                                                            variant="primary" size="sm">Enregistrer les restrictions</x-core::button>
+                                                                        <x-core::button type="button"
+                                                                            wire:click="cancelItemRestrictions({{ $item->id }})"
+                                                                            variant="ghost" size="sm">Annuler</x-core::button>
+                                                                    </div>
+                                                                @endif
+                                                                {{-- variables temporaires ($__rBuf, $__refItems) réinitialisées à chaque itération --}}
+                                                            </div>
                                                         </details>
                                                     </li>
                                                 @endforeach

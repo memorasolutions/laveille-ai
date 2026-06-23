@@ -55,5 +55,21 @@ trait AuthorizesAcademyAccess
         if (! $isEnrolled) {
             abort(403);
         }
+
+        // V5-d : RESTRICTIONS D'ACCES serveur (anti-IDOR + anti-contournement POST).
+        // Un item verrouillé par une restriction déclenche un 403 direct : le client
+        // ne peut pas soumettre de réponse / marquer comme terminé si l'accès est
+        // restreint, même en forgeant la requête HTTP.
+        if (class_exists(\Modules\Academy\Services\AccessRestrictionService::class)) {
+            $restriction = \Modules\Academy\Services\AccessRestrictionService::evaluate(
+                Auth::user(),
+                $item,
+                $course,
+            );
+
+            if (! $restriction['allowed']) {
+                abort(403);
+            }
+        }
     }
 }

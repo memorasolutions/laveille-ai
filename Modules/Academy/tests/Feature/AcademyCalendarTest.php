@@ -408,7 +408,7 @@ test('dashboard etudiant voit le bandeau echeances si une echeance future existe
     $response = $this->actingAs($student)->get(route('academy.dashboard'));
 
     $response->assertOk();
-    $response->assertSee('Echeances a venir', false);
+    $response->assertSee('Échéances à venir', false);
 });
 
 test('dashboard masque le bandeau echeances si aucune echeance future', function (): void {
@@ -436,7 +436,7 @@ test('etudiant inscrit peut acceder a la page calendrier du cours', function ():
         ->get(route('academy.courses.calendar', $course->slug));
 
     $response->assertOk();
-    $response->assertSee('Calendrier des echeances', false);
+    $response->assertSee('Calendrier des échéances', false);
 });
 
 test('etudiant non inscrit est refuse sur la page calendrier (anti-IDOR)', function (): void {
