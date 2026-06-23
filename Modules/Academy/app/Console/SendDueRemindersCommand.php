@@ -75,6 +75,10 @@ class SendDueRemindersCommand extends Command
                     if (! is_object($startsAt) || ! method_exists($startsAt, 'lessThanOrEqualTo')) {
                         continue;
                     }
+                    // Ignorer les échéances déjà passées (aucun rappel rétroactif).
+                    if ($startsAt->lessThan(now())) {
+                        continue;
+                    }
                     if ($startsAt->greaterThan($limit)) {
                         continue;
                     }

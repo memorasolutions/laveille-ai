@@ -249,6 +249,7 @@ class EssayGrading extends Component
                         $course,
                         (string) ($attempt->lessonItem->title ?? 'Quiz'),
                         (int) $result['percent'],
+                        'graded:attempt-' . $attempt->id,
                     );
             } catch (\Throwable) {
                 // Best-effort.

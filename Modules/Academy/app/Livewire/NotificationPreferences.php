@@ -31,12 +31,19 @@ class NotificationPreferences extends Component
     /** Libellés et descriptions FR des types (affichage). */
     public array $labels = [];
 
+    /**
+     * Vrai si l'interrupteur maître des notifications est activé sur la plateforme.
+     * Quand faux, un bandeau info est affiché (les préférences restent enregistrées).
+     */
+    public bool $notificationsEnabled = false;
+
     public function mount(): void
     {
         abort_unless(auth()->check(), 403);
 
         $service = app(AcademyNotificationService::class);
-        $this->prefs = $service->preferencesFor(auth()->user());
+        $this->prefs              = $service->preferencesFor(auth()->user());
+        $this->notificationsEnabled = $service->isMasterEnabled();
 
         $this->labels = [
             AcademyNotificationService::TYPE_ANNOUNCEMENT => [
@@ -71,10 +78,16 @@ class NotificationPreferences extends Component
             return;
         }
 
-        $new = ! ($this->prefs[$type] ?? true);
+        $service = app(AcademyNotificationService::class);
+
+        // SÉCURITÉ : lire l'état RÉEL depuis la base (anti-manipulation client).
+        // On ne fait jamais confiance à $this->prefs[$type] qui vient du navigateur.
+        $current = $service->isEnabledFor(auth()->user(), $type);
+        $new     = ! $current;
+
         $this->prefs[$type] = $new;
 
-        app(AcademyNotificationService::class)->setPreference(auth()->user(), $type, $new);
+        $service->setPreference(auth()->user(), $type, $new);
 
         session()->flash('academy_notif_prefs_status', 'Préférences enregistrées.');
     }

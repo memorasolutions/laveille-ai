@@ -17,6 +17,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Academy\Models\LessonItem;
 
 /**
  * @property int      $id
@@ -51,5 +52,20 @@ class ForumPost extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Corps de la réponse rendu en HTML sûr (anti-XSS stockée) : même pipeline que
+     * Announcement::renderedBody() - LessonItem::renderRichText (html_input=strip +
+     * allow_unsafe_links=false). Le résultat peut être rendu via {!! ... !!} en toute
+     * sûreté : aucun HTML brut de l'utilisateur ne survit.
+     *
+     * Note : AcademyNotificationService::forumReply() avait un fallback `e($post->body)`
+     * (sûr) ; cette méthode assure la cohérence et permet de supprimer la dépendance
+     * au `method_exists()` défensif dans le service.
+     */
+    public function renderedBody(): string
+    {
+        return LessonItem::renderRichText($this->body);
     }
 }

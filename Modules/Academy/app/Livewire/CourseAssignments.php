@@ -488,7 +488,7 @@ class CourseAssignments extends Component
             $percent = $max > 0 ? (int) round(((int) $submission->score) / $max * 100) : null;
 
             app(\Modules\Academy\Services\AcademyNotificationService::class)
-                ->graded($student, $course, (string) $assignment->title, $percent);
+                ->graded($student, $course, (string) $assignment->title, $percent, 'graded:submission-' . $submission->id);
         } catch (\Throwable) {
             // Best-effort.
         }

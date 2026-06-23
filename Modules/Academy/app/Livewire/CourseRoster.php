@@ -704,7 +704,7 @@ class CourseRoster extends Component
         $this->resetErrorBag(['announcementTitle', 'announcementBody']);
     }
 
-    /** Publie une annonce existante (brouillon → publiée) de CE cours (anti-IDOR). */
+    /** Publie une annonce existante (brouillon -> publiée) de CE cours (anti-IDOR). */
     public function publishAnnouncement(int $announcementId): void
     {
         $course = $this->resolveCourse();
@@ -712,8 +712,18 @@ class CourseRoster extends Component
 
         $announcement = $this->resolveAnnouncementFor($course, $announcementId);
 
-        if ($announcement->published_at === null) {
+        // V5-c - Notifier uniquement à la TRANSITION brouillon -> publié (jamais 2× sur retry).
+        $wasUnpublished = $announcement->published_at === null;
+
+        if ($wasUnpublished) {
             $announcement->update(['published_at' => now()]);
+
+            try {
+                app(\Modules\Academy\Services\AcademyNotificationService::class)
+                    ->announcementPublished($announcement);
+            } catch (\Throwable) {
+                // Best-effort : un échec d'envoi ne casse pas la publication.
+            }
         }
 
         session()->flash('academy_roster_status', 'Annonce publiée.');

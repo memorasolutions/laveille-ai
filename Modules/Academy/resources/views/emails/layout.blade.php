@@ -24,7 +24,7 @@
 <tr><td style="background-color:#0d9488;padding:20px 28px;">
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
-<td style="font-size:18px;font-weight:bold;color:#ffffff;">La veille - Académie</td>
+<td style="font-size:18px;font-weight:bold;color:#ffffff;">{{ config('app.name') }} - Académie</td>
 <td align="right" style="font-size:12px;color:#ccfbf1;">{{ now()->translatedFormat('d F Y') }}</td>
 </tr>
 </table>
@@ -47,7 +47,7 @@
 
 <!-- Pied -->
 <tr><td style="border-top:1px solid #e2e8f0;padding:18px 28px;font-size:12px;color:#64748b;text-align:center;">
-<p style="margin:0 0 8px;">Vous recevez ce courriel parce que vous participez à un cours de l'Académie de La veille.</p>
+<p style="margin:0 0 8px;">Vous recevez ce courriel parce que vous participez à un cours de l'Académie de {{ config('app.name') }}.</p>
 <p style="margin:0;"><a href="{{ $preferencesUrl }}" style="color:#0d9488;text-decoration:underline;">Gérer mes préférences de notification</a></p>
 </td></tr>
 

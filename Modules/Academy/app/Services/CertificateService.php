@@ -33,15 +33,15 @@ final class CertificateService
             return null;
         }
 
-        // Progression persistée (pour les heures). Peut etre absente si la completion
-        // est atteinte par un critere hors items requis (ex. min_grade).
+        // Progression persistée (pour les heures). Peut être absente si la complétion
+        // est atteinte par un critère hors items requis (ex. min_grade).
         $progress = Progress::where('user_id', $user->id)
             ->where('course_id', $course->id)
             ->first();
 
-        // V5a-2 : final_score selon le critere configure du cours (source unique).
-        // Pour min_grade : note finale du carnet (peut etre elevee avec 0 items requis).
-        // Pour les autres criteres : ratio items/total (comportement historique).
+        // V5a-2 : final_score selon le critère configuré du cours (source unique).
+        // Pour min_grade : note finale du carnet (peut être élevée avec 0 items requis).
+        // Pour les autres critères : ratio items/total (comportement historique).
         $criteria   = CourseCompletionService::criteriaFor($course);
         $finalScore = 100;
         if ($criteria['type'] === CourseCompletionService::TYPE_MIN_GRADE) {
@@ -57,7 +57,7 @@ final class CertificateService
             $finalScore = (int) round($progress->required_completed / $progress->required_total * 100);
         }
 
-        // Champs uniques generes AVANT la transaction (pas de side-effect DB ici).
+        // Champs uniques générés AVANT la transaction (pas de side-effect DB ici).
         $serial           = 'ACAD-' . strtoupper(substr(md5(uniqid((string) $user->id . (string) $course->id, true)), 0, 12));
         $verificationHash = hash('sha256', $user->id . $course->id . uniqid('', true) . config('app.key', ''));
         $publicUrlSlug    = 'cert-' . substr($verificationHash, 0, 16) . '-' . time();
@@ -65,7 +65,7 @@ final class CertificateService
         $scoreForClosure  = $finalScore;
 
         // V5a-3 : race condition - firstOrCreate dans une transaction. L'index unique
-        // (user_id, course_id) (migration additive) empeche tout doublon meme sous
+        // (user_id, course_id) (migration additive) empêche tout doublon même sous
         // concurrence : Laravel catchera la UniqueConstraintViolationException et
         // renverra la ligne existante.
         $certificate = DB::transaction(

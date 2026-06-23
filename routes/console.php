@@ -58,10 +58,10 @@ Schedule::command('app:block-suspicious-ips')->everyFiveMinutes();
 Schedule::command('notifications:send-digest --frequency=daily')->dailyAt('08:00');
 Schedule::command('notifications:send-digest --frequency=weekly')->weeklyOn(1, '08:00');
 
-// Academy V5-c - Rappels d'echeance (parite Moodle). La commande SORT immediatement
-// si l'interrupteur maitre academy.notifications.enabled est faux (defaut) : zero envoi
-// premature tant que l'Academie est en construction. Gate aussi sur module actif pour
-// eviter NamespaceNotFoundException quand le module Academy est desactive.
+// Academy V5-c - Rappels d'échéance (parité Moodle). La commande SORT immédiatement
+// si l'interrupteur maître academy.notifications.enabled est faux (défaut) : zéro envoi
+// prématuré tant que l'Académie est en construction. Gate aussi sur module actif pour
+// éviter NamespaceNotFoundException quand le module Academy est désactivé.
 if (\Nwidart\Modules\Facades\Module::find('Academy')?->isEnabled()) {
     Schedule::command('academy:send-due-reminders')->dailyAt('08:00')->withoutOverlapping();
 }

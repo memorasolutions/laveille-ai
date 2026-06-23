@@ -126,6 +126,9 @@ final class AcademyNotificationService
     /**
      * Nouvelle annonce publiée -> tous les inscrits ACTIFS du cours.
      * Retourne le nombre de courriels réellement envoyés (0 si interrupteur off).
+     *
+     * Préférence : préchargée en UNE requête (anti-N+1) puis vérifiée localement
+     * avant l'appel send() afin d'éviter N SELECT sur des cours à grande audience.
      */
     public function announcementPublished(Announcement $announcement): int
     {
@@ -138,22 +141,51 @@ final class AcademyNotificationService
             return 0;
         }
 
-        $sent = 0;
-        foreach ($this->activeStudents($course) as $user) {
-            $ok = $this->send(
+        $userIds = Enrollment::query()
+            ->where('course_id', $course->id)
+            ->where('status', 'active')
+            ->pluck('user_id')
+            ->unique()
+            ->values();
+
+        if ($userIds->isEmpty()) {
+            return 0;
+        }
+
+        // Anti-N+1 : toutes les préférences « announcement » en UNE requête.
+        $prefMap        = NotificationPreference::whereIn('user_id', $userIds)
+            ->where('type', self::TYPE_ANNOUNCEMENT)
+            ->get()
+            ->keyBy('user_id');
+        $defaultEnabled = $this->defaultFor(self::TYPE_ANNOUNCEMENT);
+
+        $users = User::whereIn('id', $userIds)->get();
+
+        $sent    = 0;
+        $data    = [
+            'course'       => $course,
+            'announcement' => $announcement,
+            'bodyHtml'     => $announcement->renderedBody(),
+            'ctaUrl'       => $this->courseUrl($course),
+            'ctaLabel'     => 'Ouvrir le cours',
+        ];
+
+        foreach ($users as $user) {
+            // Décision locale depuis la carte préchargée (zéro SELECT supplémentaire par user).
+            $prefRow = $prefMap->get($user->id);
+            $enabled = $prefRow !== null ? (bool) $prefRow->enabled : $defaultEnabled;
+
+            if (! $enabled) {
+                continue;
+            }
+
+            if ($this->send(
                 self::TYPE_ANNOUNCEMENT,
                 $user,
                 'Nouvelle annonce : ' . $announcement->title,
                 'academy::emails.announcement',
-                [
-                    'course'           => $course,
-                    'announcement'     => $announcement,
-                    'bodyHtml'         => $announcement->renderedBody(),
-                    'ctaUrl'           => $this->courseUrl($course),
-                    'ctaLabel'         => 'Ouvrir le cours',
-                ],
-            );
-            if ($ok) {
+                $data,
+            )) {
                 $sent++;
             }
         }
@@ -181,6 +213,9 @@ final class AcademyNotificationService
             return false;
         }
 
+        // Dedup : un post précis ne notifie qu'une seule fois l'auteur (anti-retry).
+        $dedupKey = 'forum_reply:post-' . $post->id;
+
         return $this->send(
             self::TYPE_FORUM_REPLY,
             $author,
@@ -190,18 +225,23 @@ final class AcademyNotificationService
                 'course'   => $course,
                 'topic'    => $topic,
                 'post'     => $post,
-                'bodyHtml' => method_exists($post, 'renderedBody') ? $post->renderedBody() : e($post->body),
+                'bodyHtml' => $post->renderedBody(),
                 'ctaUrl'   => $this->courseUrl($course),
                 'ctaLabel' => 'Voir la discussion',
             ],
+            $dedupKey,
         );
     }
 
     /**
      * Travail corrigé (devoir ou essai) -> à l'étudiant concerné.
-     * $scorePercent : note finale en pourcentage (facultatif, affichée si fournie).
+     *
+     * @param  int|null    $scorePercent  Note finale en pourcentage (facultatif, affichée si fournie).
+     * @param  string|null $dedupKey      Clé de dédoublonnage basée sur l'entité source
+     *                                   (ex. « graded:submission-{id} », « graded:attempt-{id} »).
+     *                                   Si null, aucun dédoublonnage n'est appliqué.
      */
-    public function graded(User $student, Course $course, string $itemTitle, ?int $scorePercent = null): bool
+    public function graded(User $student, Course $course, string $itemTitle, ?int $scorePercent = null, ?string $dedupKey = null): bool
     {
         if (! $this->isMasterEnabled()) {
             return false;
@@ -219,6 +259,7 @@ final class AcademyNotificationService
                 'ctaUrl'       => $this->courseUrl($course),
                 'ctaLabel'     => 'Voir ma note',
             ],
+            $dedupKey,
         );
     }
 
@@ -231,9 +272,12 @@ final class AcademyNotificationService
             return false;
         }
 
-        $certUrl = Route::has('academy.certificates.show')
+        $certUrl  = Route::has('academy.certificates.show')
             ? route('academy.certificates.show', $certificate->public_url_slug)
             : $this->courseUrl($course);
+
+        // Dedup : un certificat est unique par (user, course) -> une seule notification.
+        $dedupKey = 'course_completed:cert-' . $certificate->id;
 
         return $this->send(
             self::TYPE_COURSE_COMPLETED,
@@ -246,6 +290,7 @@ final class AcademyNotificationService
                 'ctaUrl'      => $certUrl,
                 'ctaLabel'    => 'Voir mon certificat',
             ],
+            $dedupKey,
         );
     }
 
