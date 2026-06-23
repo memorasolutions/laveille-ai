@@ -45,6 +45,7 @@ use Modules\Academy\Models\Cohort;
 use Modules\Academy\Models\Completion;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\LessonItem;
+use Modules\Academy\Services\QuizGradeService;
 
 final class AccessRestrictionService
 {
@@ -97,7 +98,7 @@ final class AccessRestrictionService
 
             $totalValid++;
 
-            [$ok, $reason] = self::evaluateCondition($user, $type, $cond, $validItemIds);
+            [$ok, $reason] = self::evaluateCondition($user, $type, $cond, $validItemIds, $course->id);
 
             if ($ok) {
                 $totalPassed++;
@@ -131,19 +132,21 @@ final class AccessRestrictionService
      *
      * @param  array<string, mixed>  $cond
      * @param  array<int, int>       $validItemIds  IDs d'items du cours (anti-IDOR)
+     * @param  int                   $courseId      ID du cours courant (scope cohortes)
      * @return array{0: bool, 1: string}  [remplie, raison si non remplie]
      */
     private static function evaluateCondition(
         User $user,
         string $type,
         array $cond,
-        array $validItemIds
+        array $validItemIds,
+        int $courseId = 0
     ): array {
         return match ($type) {
             'date'       => self::evalDate($cond),
             'grade'      => self::evalGrade($user, $cond, $validItemIds),
             'completion' => self::evalCompletion($user, $cond, $validItemIds),
-            'group'      => self::evalGroup($user, $cond),
+            'group'      => self::evalGroup($user, $cond, $courseId),
             default      => [true, ''],
         };
     }
@@ -269,13 +272,14 @@ final class AccessRestrictionService
 
     /**
      * Condition GROUP : l'utilisateur doit appartenir à la cohorte X.
-     * Cohort est scopé au cours courant (la relation course() le garantit).
+     * Scope : la cohorte DOIT appartenir au cours courant (anti-fuite cross-cours).
      * Supporté grâce au modèle Cohort existant (V3, table academy_cohorts).
      *
      * @param  array<string, mixed>  $cond
+     * @param  int                   $courseId  ID du cours courant (0 = pas de scope)
      * @return array{0: bool, 1: string}
      */
-    private static function evalGroup(User $user, array $cond): array
+    private static function evalGroup(User $user, array $cond, int $courseId = 0): array
     {
         if (! class_exists(Cohort::class)) {
             return [true, ''];  // fonctionnalité groupes non présente → permissive
@@ -286,9 +290,15 @@ final class AccessRestrictionService
             return [true, ''];
         }
 
-        $cohort = Cohort::find($groupId);
+        // Anti-fuite cross-cours : la cohorte doit appartenir au cours courant.
+        $query = Cohort::where('id', $groupId);
+        if ($courseId > 0) {
+            $query->where('course_id', $courseId);
+        }
+        $cohort = $query->first();
+
         if ($cohort === null) {
-            return [true, ''];  // cohorte supprimée → permissive
+            return [true, ''];  // cohorte supprimée ou hors du cours → permissive
         }
 
         $isMember = $cohort->members()->where('user_id', $user->id)->exists();
@@ -326,14 +336,20 @@ final class AccessRestrictionService
     /**
      * Valide et sanitise une liste de conditions avant stockage dans le payload.
      * Retourne uniquement les conditions valides (liste blanche de type, bornes %,
-     * dates cohérentes, anti-IDOR sur item_id).
+     * dates cohérentes, anti-IDOR sur item_id, scope cohorte au cours, pas d'auto-ref).
      *
      * @param  array<int, array<string, mixed>>  $conditions
-     * @param  array<int, int>                   $validItemIds  items du cours (anti-IDOR)
+     * @param  array<int, int>                   $validItemIds   items du cours (anti-IDOR)
+     * @param  int                               $courseId       ID du cours courant (scope cohortes)
+     * @param  int                               $excludeItemId  item courant à exclure (anti-auto-ref)
      * @return array<int, array<string, mixed>>
      */
-    public static function sanitizeConditions(array $conditions, array $validItemIds): array
-    {
+    public static function sanitizeConditions(
+        array $conditions,
+        array $validItemIds,
+        int $courseId = 0,
+        int $excludeItemId = 0
+    ): array {
         $out = [];
 
         foreach ($conditions as $cond) {
@@ -387,6 +403,10 @@ final class AccessRestrictionService
                     if ($refId <= 0 || ! in_array($refId, $validItemIds, true)) {
                         continue 2;  // anti-IDOR ou item absent → rejeté
                     }
+                    // Anti-auto-référence : un item ne peut pas se bloquer lui-même.
+                    if ($excludeItemId > 0 && $refId === $excludeItemId) {
+                        continue 2;
+                    }
                     $clean['item_id']     = $refId;
                     $clean['min_percent'] = max(0, min(100, (int) ($cond['min_percent'] ?? 0)));
                     break;
@@ -396,6 +416,10 @@ final class AccessRestrictionService
                     if ($refId <= 0 || ! in_array($refId, $validItemIds, true)) {
                         continue 2;  // anti-IDOR ou item absent → rejeté
                     }
+                    // Anti-auto-référence : un item ne peut pas se bloquer lui-même.
+                    if ($excludeItemId > 0 && $refId === $excludeItemId) {
+                        continue 2;
+                    }
                     $clean['item_id'] = $refId;
                     break;
 
@@ -403,6 +427,12 @@ final class AccessRestrictionService
                     $groupId = (int) ($cond['group_id'] ?? 0);
                     if ($groupId <= 0) {
                         continue 2;
+                    }
+                    // Anti-fuite cross-cours : la cohorte doit appartenir au cours courant.
+                    if ($courseId > 0 && class_exists(Cohort::class)) {
+                        if (Cohort::where('id', $groupId)->where('course_id', $courseId)->doesntExist()) {
+                            continue 2;
+                        }
                     }
                     $clean['group_id'] = $groupId;
                     break;

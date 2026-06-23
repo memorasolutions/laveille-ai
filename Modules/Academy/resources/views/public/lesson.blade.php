@@ -395,7 +395,7 @@
                     {{-- Item grisé avec cadenas + raison(s) : inscrit mais restriction non remplie. --}}
                     @if(!$__restrict['allowed'])
                         <div class="academy-restricted-panel"
-                             role="status"
+                             role="region"
                              aria-label="Contenu verrouillé : {{ $item->title }}">
                             <div style="display: flex; align-items: flex-start; gap: 10px;">
                                 <span aria-hidden="true" style="font-size: 1.5rem; flex-shrink: 0;">🔒</span>

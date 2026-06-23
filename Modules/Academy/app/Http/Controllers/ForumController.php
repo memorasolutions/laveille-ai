@@ -40,6 +40,7 @@ use Modules\Academy\Models\ForumPost;
 use Modules\Academy\Models\ForumTopic;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
+use Modules\Academy\Services\AccessRestrictionService;
 use Modules\Academy\Services\ActivityCompletionService;
 use Modules\Academy\Services\CompletionService;
 use Modules\Academy\Services\ForumService;
@@ -63,6 +64,16 @@ class ForumController extends Controller
         // Écrire exige l'inscription active OU le rôle gérant.
         if (! $manager && ! $this->isEnrolled($course)) {
             abort(403);
+        }
+
+        // V5-d : les restrictions d'accès de l'item s'appliquent aussi au forum.
+        // Un étudiant ne peut pas poster dans un item verrouillé par une restriction.
+        // Les gérants ne sont jamais bloqués (ils gèrent le forum).
+        if (! $manager) {
+            $restriction = AccessRestrictionService::evaluate(Auth::user(), $item, $course);
+            if (! ($restriction['allowed'] ?? true)) {
+                abort(403);
+            }
         }
 
         // Honeypot : rempli => rejet SILENCIEUX (le bot croit avoir réussi).
@@ -110,6 +121,14 @@ class ForumController extends Controller
 
         if (! $manager && ! $this->isEnrolled($course)) {
             abort(403);
+        }
+
+        // V5-d : restrictions d'accès - même vérification que createTopic.
+        if (! $manager) {
+            $restriction = AccessRestrictionService::evaluate(Auth::user(), $item, $course);
+            if (! ($restriction['allowed'] ?? true)) {
+                abort(403);
+            }
         }
 
         if ($this->isSpam($request)) {

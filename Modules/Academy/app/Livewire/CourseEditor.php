@@ -1989,8 +1989,14 @@ class CourseEditor extends Component
         $rawConds   = is_array($tampon['conditions'] ?? null) ? $tampon['conditions'] : [];
 
         // Anti-IDOR : seuls les items du cours courant sont acceptés comme référence.
+        // On exclut aussi l'item courant lui-même (anti-auto-référence = deadlock).
         $validItemIds = AccessRestrictionService::courseItemIds($course);
-        $cleanConds   = AccessRestrictionService::sanitizeConditions($rawConds, $validItemIds);
+        $cleanConds   = AccessRestrictionService::sanitizeConditions(
+            $rawConds,
+            $validItemIds,
+            $course->id,
+            $item->id
+        );
 
         $payload = is_array($item->payload) ? $item->payload : [];
 
@@ -2026,6 +2032,8 @@ class CourseEditor extends Component
     public function restrictionRefItems(int $currentItemId): array
     {
         $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
         $course->loadMissing(['chapters.lessons.lessonItems']);
 
         $items = [];
