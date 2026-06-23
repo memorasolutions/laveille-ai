@@ -58,9 +58,13 @@ Schedule::command('app:block-suspicious-ips')->everyFiveMinutes();
 Schedule::command('notifications:send-digest --frequency=daily')->dailyAt('08:00');
 Schedule::command('notifications:send-digest --frequency=weekly')->weeklyOn(1, '08:00');
 
-// Newsletter digest (preview mardi, envoi mercredi)
-Schedule::command('newsletter:digest --preview')->weeklyOn(2, '09:00');
-Schedule::command('newsletter:digest --send --force')->weeklyOn(3, '09:00');
+// Newsletter digest (preview mardi, envoi mercredi).
+// PAUSE ESTIVALE 2026 : auto-envoi suspendu jusqu'a la semaine du 17 aout.
+// Le garde ne laisse les planifs s'executer QU'A PARTIR du 2026-08-17 (reprise
+// automatique le mardi 18 preview + mercredi 19 envoi, sans reactivation manuelle).
+$reprisePostPauseEstivale = fn (): bool => now('America/Toronto')->greaterThanOrEqualTo('2026-08-17');
+Schedule::command('newsletter:digest --preview')->weeklyOn(2, '09:00')->when($reprisePostPauseEstivale);
+Schedule::command('newsletter:digest --send --force')->weeklyOn(3, '09:00')->when($reprisePostPauseEstivale);
 // Newsletter double opt-in : rappel J+1 09:00, purge J+7 09:30 (mark unsubscribed_at)
 Schedule::command('newsletter:remind-pending')->dailyAt('09:00')->withoutOverlapping();
 Schedule::command('newsletter:purge-unconfirmed')->dailyAt('09:30')->withoutOverlapping();
