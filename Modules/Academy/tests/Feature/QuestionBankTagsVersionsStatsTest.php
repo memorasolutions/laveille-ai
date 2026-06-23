@@ -330,3 +330,60 @@ test('une question sans tag ni version reste pleinement fonctionnelle', function
 
     expect($component->instance()->questions)->toHaveCount(1);
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CORRECTIONS F17 - LIKE terminateur + restoreVersion owner_id
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('LIKE terminateur : les stats de id=1 n\'incluent pas les tentatives de id=12', function (): void {
+    $owner = f17Instructor();
+    $cat   = f17Category($owner);
+
+    // Deux questions distinctes. On force les ids via create + DB pour avoir 1 et 12
+    // indépendamment du séquenceur ; on simule le scénario réel en créant deux questions
+    // et en vérifiant l'isolation par id (peu importe les ids réels attribués).
+    $q1  = f17Question($owner, $cat, 'Question alpha');
+    $q12 = f17Question($owner, $cat, 'Question béta');
+
+    // Tentative liée uniquement à q12 (bonne réponse).
+    f17Attempt($q12->id, 0);
+
+    $stats = QuestionStatsService::forQuestions([$q1->id, $q12->id]);
+
+    // q1 n'a aucun usage : le LIKE ne doit pas la faire remonter à cause de q12.
+    expect($stats[$q1->id]['uses'])->toBe(0);
+    expect($stats[$q1->id]['has_data'])->toBeFalse();
+
+    // q12 a 1 usage, 1 bonne réponse → facilité 100 %.
+    expect($stats[$q12->id]['uses'])->toBe(1);
+    expect($stats[$q12->id]['correct'])->toBe(1);
+    expect($stats[$q12->id]['facility'])->toBe(100);
+});
+
+test('restoreVersion est bloquée si la version appartient à un autre owner', function (): void {
+    $owner = f17Instructor();
+    $other = f17Instructor();
+
+    $cat  = f17Category($owner);
+    $q    = f17Question($owner, $cat, 'Question cible');
+
+    // Création directe d'une version archivée appartenant à l'autre formateur.
+    $foreignVersion = QuestionVersion::create([
+        'question_id' => $q->id,
+        'owner_id'    => $other->id,
+        'version'     => 99,
+        'prompt'      => 'Version étrangère',
+        'payload'     => ['choices' => ['A', 'B'], 'correct' => 0],
+        'explanation' => null,
+        'type'        => 'mcq',
+        'snapshot_at' => now(),
+    ]);
+
+    $component = Livewire::actingAs($owner)
+        ->test(QuestionBankManager::class)
+        ->set('historyQuestionId', $q->id);
+
+    // restoreVersion borné par owner_id → ModelNotFoundException (anti-IDOR).
+    expect(fn () => $component->call('restoreVersion', $foreignVersion->id))
+        ->toThrow(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+});

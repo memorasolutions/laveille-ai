@@ -144,10 +144,12 @@
                                             ? 'Utilisée '.$stat['uses'].' fois'.($stat['facility'] !== null ? ' · Facilité '.$stat['facility'].'%' : '')
                                             : 'Pas encore utilisée')
                                         @if ($stat && $stat['has_data'])
+                                            {{-- aria-label remplace title (accessible clavier/mobile, WCAG 2.2). --}}
                                             <span style="display: inline-block; font-size: 0.7rem; font-weight: 600; color: #374151; background: #F3F4F6; padding: 2px 8px; border-radius: 999px;"
-                                                  title="Indice de facilité = pourcentage de bonnes réponses (essais exclus).">{{ $statLabel }}</span>
+                                                  aria-label="Indice de facilité = pourcentage de bonnes réponses (essais exclus).">{{ $statLabel }}</span>
                                         @else
-                                            <span style="display: inline-block; font-size: 0.7rem; font-weight: 600; color: #6B7280; background: #F9FAFB; padding: 2px 8px; border-radius: 999px;">{{ $statLabel }}</span>
+                                            {{-- Contraste : #5F6B7A > 4.5:1 sur #F9FAFB (corrige #6B7280 insuffisant). --}}
+                                            <span style="display: inline-block; font-size: 0.7rem; font-weight: 600; color: #5F6B7A; background: #F9FAFB; padding: 2px 8px; border-radius: 999px;">{{ $statLabel }}</span>
                                         @endif
 
                                         <p style="margin: 6px 0 0; font-weight: 600;">{{ \Illuminate\Support\Str::limit($question->prompt, 120) }}</p>
@@ -194,7 +196,8 @@
                                                             {{ optional($version->snapshot_at)->timezone('America/Toronto')?->format('Y-m-d H:i') ?? '-' }}
                                                             <span style="color: var(--sys-text-muted, #6B7280);">({{ $this->typeLabel($version->type) }})</span>
                                                         </span>
-                                                        <x-core::button type="button" wire:click="restoreVersion({{ $version->id }})" variant="secondary" size="sm">Recharger</x-core::button>
+                                                        {{-- aria-label distinct : chaque bouton est unique pour le lecteur d'écran. --}}
+                                        <x-core::button type="button" wire:click="restoreVersion({{ $version->id }})" variant="secondary" size="sm" aria-label="Recharger la version {{ $version->version }}">Recharger</x-core::button>
                                                     </li>
                                                 @endforeach
                                             </ul>
@@ -541,8 +544,8 @@
 
                     {{-- V1-c : pondération de la question (barème). 1 = barème neutre. --}}
                     <label for="qPoints" style="font-size: 0.8rem; font-weight: 600;">Points (barème, 1 à 100)</label>
+                    {{-- aria-label retiré : le <label for="qPoints"> suffit (WCAG 2.2 - aria-label écrasait le label visible). --}}
                     <input id="qPoints" type="number" min="1" max="100" wire:model="qPoints"
-                           aria-label="Points attribués à cette question"
                            style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                     <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
                         Pondération de la question dans le score du quiz. Laissez 1 pour un barème égal entre toutes les questions.

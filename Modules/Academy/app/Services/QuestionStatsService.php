@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace Modules\Academy\Services;
 
 use Modules\Academy\Models\QuizAttempt;
+use Modules\Academy\Services\QuizService;
 
 final class QuestionStatsService
 {
@@ -65,11 +66,17 @@ final class QuestionStatsService
         // motif "bank_question_id":<id> y apparait litteralement. LIKE est portable
         // (MySQL + SQLite). Garde-fou : la verification reelle (par id exact) se refait
         // en PHP ci-dessous, le LIKE ne sert qu'a reduire le volume scanne.
+        // Pré-filtrage borné : on matche le terminateur JSON (virgule ou accolade fermante)
+        // pour éviter qu'un id court (ex. 1) remonte les tentatives d'un id plus long (12, 100).
+        // La vérification réelle par id exact se refait en PHP ; le LIKE ne réduit que le volume.
         $rows = QuizAttempt::query()
             ->whereNotNull('questions_snapshot')
             ->where(function ($query) use ($ids): void {
                 foreach ($ids as $id) {
-                    $query->orWhere('questions_snapshot', 'like', '%"bank_question_id":'.$id.'%');
+                    $query->orWhere(function ($inner) use ($id): void {
+                        $inner->where('questions_snapshot', 'like', '%"bank_question_id":'.$id.',%')
+                              ->orWhere('questions_snapshot', 'like', '%"bank_question_id":'.$id.'}%');
+                    });
                 }
             })
             ->select(['id', 'answers', 'questions_snapshot'])
@@ -124,7 +131,7 @@ final class QuestionStatsService
         // Indice de facilite = correct / usages SCORABLES (hors essais). On recompte les
         // usages scorables pour ne pas diluer la facilite avec des essais non notes.
         foreach ($stats as $id => $row) {
-            $scorableUses = self::scorableUses($rows, $id, $wanted);
+            $scorableUses = self::scorableUses($rows, $id);
             $stats[$id]['facility'] = $scorableUses > 0
                 ? (int) round(($row['correct'] / $scorableUses) * 100)
                 : null;
@@ -135,13 +142,12 @@ final class QuestionStatsService
 
     /**
      * Compte les apparitions SCORABLES (non-essai) d'une question dans le jeu de
-     * tentatives deja charge. Lecture seule, pas de requete (sur la collection en
-     * memoire) -> aucun N+1.
+     * tentatives déjà chargé. Lecture seule, pas de requête (sur la collection en
+     * mémoire) - aucun N+1.
      *
      * @param  \Illuminate\Support\Collection<int, QuizAttempt>  $rows
-     * @param  array<int, int>                                    $wanted
      */
-    private static function scorableUses($rows, int $bankId, array $wanted): int
+    private static function scorableUses($rows, int $bankId): int
     {
         $count = 0;
 

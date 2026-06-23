@@ -31,6 +31,7 @@ declare(strict_types=1);
 namespace Modules\Academy\Livewire;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -718,18 +719,22 @@ class QuestionBankManager extends Component
             return;
         }
 
-        $nextVersion = (int) QuestionVersion::where('question_id', $question->id)->max('version') + 1;
+        // Transaction : isole le max()+1 et le INSERT pour éviter une collision de numéro
+        // de version en cas d'édition simultanée (deux formateurs admin sur la même question).
+        DB::transaction(function () use ($question, $oldPayload): void {
+            $nextVersion = (int) QuestionVersion::where('question_id', $question->id)->max('version') + 1;
 
-        QuestionVersion::create([
-            'question_id' => $question->id,
-            'owner_id'    => (int) ($question->owner_id ?: Auth::id()),
-            'version'     => $nextVersion,
-            'prompt'      => (string) $question->prompt,
-            'payload'     => $oldPayload,
-            'explanation' => $question->explanation,
-            'type'        => (string) $question->type,
-            'snapshot_at' => now(),
-        ]);
+            QuestionVersion::create([
+                'question_id' => $question->id,
+                'owner_id'    => (int) ($question->owner_id ?: Auth::id()),
+                'version'     => $nextVersion,
+                'prompt'      => (string) $question->prompt,
+                'payload'     => $oldPayload,
+                'explanation' => $question->explanation,
+                'type'        => (string) $question->type,
+                'snapshot_at' => now(),
+            ]);
+        });
     }
 
     /** Ouvre le panneau d'historique d'une question (anti-IDOR via resolveQuestion). */
@@ -758,8 +763,12 @@ class QuestionBankManager extends Component
 
         $question = $this->resolveQuestion((int) $this->historyQuestionId);
 
+        // Anti-IDOR en profondeur : on borne aussi à owner_id = auth (la question est déjà
+        // résolue owner-scopée, mais cette garde supplémentaire bloque un id de version
+        // appartenant à un autre formateur sur la même question).
         $version = QuestionVersion::where('id', $versionId)
             ->where('question_id', $question->id)
+            ->where('owner_id', Auth::id())
             ->firstOrFail();
 
         $this->editingQuestionId  = $question->id;
@@ -1590,11 +1599,13 @@ class QuestionBankManager extends Component
             $query->where('owner_id', Auth::id());
         }
 
-        // F17 (TAGS) : filtre optionnel par étiquette. Un id forgé d'un autre owner ne
-        // remonte rien (les questions de l'utilisateur ne lui sont pas attachées) → pas de fuite.
+        // F17 (TAGS) : filtre optionnel par étiquette. Défense en profondeur : en plus du
+        // scoping sur l'id du tag, on borne à l'owner_id courant - un id forgé d'un autre
+        // owner ne peut jamais remonter des questions (double garde anti-IDOR).
         if ($this->filterTagId !== null) {
             $tagId = (int) $this->filterTagId;
-            $query->whereHas('tags', fn ($q) => $q->where('academy_question_tags.id', $tagId));
+            $query->whereHas('tags', fn ($q) => $q->where('academy_question_tags.id', $tagId)
+                ->where('academy_question_tags.owner_id', Auth::id()));
         }
 
         return $query->get();

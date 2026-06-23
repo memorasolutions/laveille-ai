@@ -29,13 +29,13 @@ return new class extends Migration
 
         Schema::create('academy_question_tags', function (Blueprint $table): void {
             $table->id();
-            // Proprietaire (formateur). Pas de FK inter-module (portabilite, cf. QuizAttempt).
+            // Propriétaire (formateur). Pas de FK inter-module (portabilité, cf. QuizAttempt).
             $table->unsignedBigInteger('owner_id')->index();
             $table->string('name', 80);
             $table->string('slug', 100);
             $table->timestamps();
 
-            // Unicite du slug par proprietaire (anti-doublon owner-scope).
+            // Unicité du slug par propriétaire (anti-doublon owner-scope).
             $table->unique(['owner_id', 'slug']);
         });
     }
