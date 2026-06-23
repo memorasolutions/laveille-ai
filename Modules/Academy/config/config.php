@@ -41,6 +41,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | F16 - Contenu interactif H5P (player h5p-standalone via CDN)
+    |--------------------------------------------------------------------------
+    | Le paquet .h5p (zip) est extrait sur le disque public (non exécutable) et
+    | rendu DANS UN IFRAME SANDBOX par h5p-standalone chargé depuis jsdelivr.
+    | Aucune dépendance composer/npm : tout vient du CDN (le CI ne build pas).
+    |
+    | « cdn_base » : base jsdelivr du player (versionnée, sans slash final).
+    | Le bundle principal, le bundle de cadre et la feuille de style en
+    | découlent (dist/main.bundle.js, dist/frame.bundle.js, dist/styles/h5p.css).
+    */
+    'h5p' => [
+        'cdn_base' => env('ACADEMY_H5P_CDN_BASE', 'https://cdn.jsdelivr.net/npm/h5p-standalone@3.8.0'),
+        'cdn_host' => env('ACADEMY_H5P_CDN_HOST', 'cdn.jsdelivr.net'),
+        'max_kb'   => (int) env('ACADEMY_H5P_MAX_KB', 30720), // 30 Mo
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Notifications courriel d'activité (V5-c, parité Moodle)
     |--------------------------------------------------------------------------
     | INTERRUPTEUR MAITRE - défaut FALSE.

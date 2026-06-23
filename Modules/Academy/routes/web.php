@@ -15,6 +15,7 @@ use Modules\Academy\Http\Controllers\CourseBackupController;
 use Modules\Academy\Http\Controllers\ChoiceController;
 use Modules\Academy\Http\Controllers\FeedbackController;
 use Modules\Academy\Http\Controllers\ForumController;
+use Modules\Academy\Http\Controllers\H5pPlayerController;
 use Modules\Academy\Http\Controllers\CourseController;
 use Modules\Academy\Http\Controllers\EnrollmentController;
 use Modules\Academy\Http\Controllers\ExportController;
@@ -229,4 +230,16 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             [ForumController::class, 'deletePost']
         )->name('forum.posts.delete');
     });
+});
+
+// F16 - LECTEUR H5P (page chargée dans l'iframe sandbox du lecteur de leçon).
+// Déclarée HORS du groupe AcademyCsp : le contrôleur pose sa PROPRE CSP (jsdelivr
+// autorisé pour le player h5p-standalone), que le middleware AcademyCsp écraserait
+// sinon. L'accès est gaté ENTIÈREMENT côté contrôleur (anti-IDOR + inscription /
+// gérant / item preview), comme le fait LessonController pour la vidéo.
+Route::prefix('academie')->name('academy.')->group(function () {
+    Route::get(
+        'courses/{course:slug}/lessons/{lesson}/items/{itemId}/h5p',
+        [H5pPlayerController::class, 'play']
+    )->name('h5p.play');
 });

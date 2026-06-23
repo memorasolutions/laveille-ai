@@ -281,6 +281,7 @@
                                 'choice'   => '📊',
                                 'feedback' => '📝',
                                 'forum'    => '💬',
+                                'h5p'      => '🧩',
                                 default    => '📄',
                             };
                         @endphp
@@ -1148,6 +1149,79 @@
                                 </div>
                             @endif
 
+                        {{-- ── TYPE H5P (contenu interactif, parité Moodle « H5P ») ── --}}
+                        @elseif($item->type === 'h5p')
+                            @php $h5pPath = $item->payload['h5p_path'] ?? null; @endphp
+                            @if($hasAccess && !empty($h5pPath))
+                                {{--
+                                    ISOLATION (le contenu H5P exécute du JS tiers) :
+                                    le contenu est rendu DANS UN IFRAME SANDBOX pointant vers une page
+                                    dédiée (H5pPlayerController) qui charge le player h5p-standalone.
+                                    sandbox="allow-scripts allow-same-origin" = le MINIMUM nécessaire
+                                    (scripts du player + fetch same-origin du content.json). On NE donne
+                                    PAS allow-forms / allow-popups / allow-top-navigation / allow-modals :
+                                    le contenu tiers ne peut donc PAS naviguer la page hôte, ouvrir de
+                                    popups ni poster vers la session. L'URL du dossier extrait n'est
+                                    jamais injectée ici : elle vit dans la page player, elle-même gatée.
+                                --}}
+                                <div class="academy-h5p-wrapper">
+                                    <iframe
+                                        src="{{ route('academy.h5p.play', [$course, $lesson, $item->id]) }}"
+                                        title="{{ $item->title ?? $lesson->title }}"
+                                        sandbox="allow-scripts allow-same-origin"
+                                        loading="lazy"
+                                        referrerpolicy="strict-origin-when-cross-origin"
+                                        style="width: 100%; min-height: 480px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff;"
+                                    ></iframe>
+                                </div>
+                            @else
+                                {{-- Accès refusé : aucune URL de contenu dans le DOM (même logique que la vidéo). --}}
+                                <div class="academy-gated-panel">
+                                    <div class="gated-icon">🔐</div>
+                                    <div class="gated-title">
+                                        @if(!auth()->check())
+                                            Connexion requise pour ce contenu interactif
+                                        @elseif(!$isEnrolled)
+                                            Inscrivez-vous pour accéder à ce contenu interactif
+                                        @else
+                                            Contenu interactif en cours de préparation
+                                        @endif
+                                    </div>
+                                    <p class="gated-sub">
+                                        @if(!auth()->check())
+                                            Créez un compte gratuit ou connectez-vous pour accéder aux activités H5P.
+                                        @elseif(!$isEnrolled && $isFree)
+                                            Ce cours est gratuit - inscrivez-vous pour accéder au contenu interactif.
+                                        @elseif(!$isEnrolled && !$isFree)
+                                            Ce cours est payant - achetez-le pour accéder à l'ensemble du contenu.
+                                        @else
+                                            Votre inscription vous donne accès à l'ensemble du contenu.
+                                        @endif
+                                    </p>
+                                    @if(!auth()->check())
+                                        <span class="d-inline-flex flex-wrap gap-2 justify-content-center">
+                                            <x-core::button :href="Route::has('login') ? route('login') : '#'" variant="primary" size="sm">
+                                                Se connecter
+                                            </x-core::button>
+                                            <x-core::button :href="Route::has('register') ? route('register') : '#'" variant="secondary" size="sm">
+                                                Créer un compte
+                                            </x-core::button>
+                                        </span>
+                                    @elseif(!$isEnrolled && $isFree)
+                                        <form action="{{ route('academy.courses.enroll', $course) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <x-core::button type="submit" variant="primary" size="sm">
+                                                S'inscrire gratuitement
+                                            </x-core::button>
+                                        </form>
+                                    @elseif(!$isEnrolled && !$isFree)
+                                        <x-core::button :href="route('academy.courses.purchase', $course)" variant="primary" size="sm">
+                                            Acheter ce cours
+                                        </x-core::button>
+                                    @endif
+                                </div>
+                            @endif
+
                         @else
                             {{-- Type inconnu : rendu défensif --}}
                             <div class="text-muted p-3 rounded" style="background: #F3F4F6; font-size: 0.9rem;">
@@ -1182,7 +1256,7 @@
                                 <p class="mt-3" style="font-size: 0.9rem; color: #166534;" role="status">
                                     ✅ Terminé
                                 </p>
-                            @elseif($itemCriterion === 'manual' && in_array($item->type, ['video', 'doc', 'document', 'choice', 'forum']))
+                            @elseif($itemCriterion === 'manual' && in_array($item->type, ['video', 'doc', 'document', 'choice', 'forum', 'h5p']))
                                 <form method="POST"
                                       action="{{ route('academy.lessons.complete', [$course, $lesson, $item->id]) }}"
                                       class="mt-3">

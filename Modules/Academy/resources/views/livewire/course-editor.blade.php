@@ -1099,6 +1099,10 @@
                                                                                style="width: 24px; height: 24px; flex: 0 0 auto;">
                                                                         <span>Verrouiller le forum (lecture seule, aucune nouvelle contribution)</span>
                                                                     </label>
+                                                                @elseif ($item->type === 'h5p')
+                                                                    <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+                                                                        Modifiez le titre et le critère d'achèvement ici. Le contenu interactif se remplace via « Remplacer le paquet H5P » plus bas.
+                                                                    </p>
                                                                 @endif
 
                                                                 {{-- V2-c : critère d'achèvement (parité Moodle « activity completion »). --}}
@@ -1216,6 +1220,28 @@
                                                                     <div wire:loading wire:target="itemAttachment.{{ $item->id }}" role="status" aria-live="polite" style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin-top: 4px;">Téléversement…</div>
                                                                     <div style="margin-top: 8px;">
                                                                         <x-core::button type="button" wire:click="uploadItemAttachment({{ $item->id }})" wire:loading.attr="disabled" wire:target="uploadItemAttachment({{ $item->id }}),itemAttachment.{{ $item->id }}" variant="secondary" size="sm">Ajouter la pièce jointe</x-core::button>
+                                                                    </div>
+                                                                </div>
+                                                            @endif
+
+                                                            {{-- ── F16 : Paquet H5P (item h5p) - remplacement hors du formulaire principal ── --}}
+                                                            @if ($item->type === 'h5p')
+                                                                <div style="margin-top: 12px; border-top: 1px dashed #E5E7EB; padding-top: 10px;">
+                                                                    <span style="display: block; font-size: 0.78rem; font-weight: 600; margin-bottom: 6px;">Contenu interactif H5P</span>
+                                                                    @if (!empty($item->payload['h5p_path']))
+                                                                        <p style="font-size: 0.8rem; color: var(--sys-action-primary, #064E5A); margin: 0 0 6px;">
+                                                                            🧩 Paquet en place : {{ $item->payload['title'] ?? 'contenu H5P' }}
+                                                                        </p>
+                                                                    @else
+                                                                        <p style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 6px;">Aucun paquet pour l'instant.</p>
+                                                                    @endif
+                                                                    <label class="visually-hidden" for="item-h5p-file-{{ $item->id }}">Nouveau paquet H5P</label>
+                                                                    <input id="item-h5p-file-{{ $item->id }}" type="file" accept=".h5p,application/zip" wire:model="itemH5p.{{ $item->id }}" style="width: 100%;">
+                                                                    <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">Fichier .h5p, 30 Mo max. Remplace le contenu actuel.</p>
+                                                                    @error("itemH5p.{$item->id}") <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
+                                                                    <div wire:loading wire:target="itemH5p.{{ $item->id }}" role="status" aria-live="polite" style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin-top: 4px;">Téléversement…</div>
+                                                                    <div style="margin-top: 8px;">
+                                                                        <x-core::button type="button" wire:click="replaceH5pPackage({{ $item->id }})" wire:loading.attr="disabled" wire:target="replaceH5pPackage({{ $item->id }}),itemH5p.{{ $item->id }}" variant="secondary" size="sm">Remplacer le paquet H5P</x-core::button>
                                                                     </div>
                                                                 </div>
                                                             @endif
@@ -1532,6 +1558,24 @@
                                                     <input id="newitem-forumlock-{{ $lesson->id }}" type="checkbox" wire:model="newItem.{{ $lesson->id }}.locked" style="width: 24px; height: 24px; flex: 0 0 auto;">
                                                     <span>Verrouiller le forum (lecture seule)</span>
                                                 </label>
+
+                                                {{-- F16 : contenu interactif H5P. Le paquet .h5p (zip) est validé + extrait
+                                                     côté serveur (H5pPackageService), puis rendu dans un iframe sandbox. --}}
+                                                <p style="font-size: 0.74rem; font-weight: 700; color: var(--sys-text-default, #1A1D23); margin: 8px 0 0;">Champs pour un contenu interactif H5P</p>
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-h5p-{{ $lesson->id }}">Paquet .h5p (max 30 Mo)</label>
+                                                <input id="newitem-h5p-{{ $lesson->id }}" type="file" accept=".h5p,application/zip" wire:model="newH5p.{{ $lesson->id }}"
+                                                       style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+                                                    Exportez votre activité depuis H5P (.h5p). Le titre ci-dessus est repris ; sinon le titre du paquet est utilisé.
+                                                </p>
+                                                @error('newH5p.'.$lesson->id) <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
+                                                <div wire:loading wire:target="newH5p.{{ $lesson->id }}" style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280);">Téléversement du paquet…</div>
+                                                <div>
+                                                    <x-core::button type="button" wire:click="addH5pItem({{ $lesson->id }})" wire:loading.attr="disabled"
+                                                        wire:target="addH5pItem({{ $lesson->id }}),newH5p.{{ $lesson->id }}" variant="primary" size="sm">
+                                                        Ajouter un contenu interactif H5P
+                                                    </x-core::button>
+                                                </div>
 
                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-min-{{ $lesson->id }}">Durée estimée (min, facultatif)</label>
                                                 <input id="newitem-min-{{ $lesson->id }}" type="number" min="1" wire:model="newItem.{{ $lesson->id }}.estimated_minutes" placeholder="Durée estimée"

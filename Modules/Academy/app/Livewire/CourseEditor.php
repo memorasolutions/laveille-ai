@@ -52,12 +52,13 @@ class CourseEditor extends Component
     use WithFileUploads;
 
     /** Types d'items autorisés (liste blanche, alignée sur l'admin Backoffice). */
-    private const ITEM_TYPES = ['video', 'document', 'quiz', 'choice', 'feedback', 'forum'];
+    private const ITEM_TYPES = ['video', 'document', 'quiz', 'choice', 'feedback', 'forum', 'h5p'];
 
     /** Tailles maximales (Ko) des téléversements - validées côté SERVEUR. */
     private const COVER_MAX_KB = 4096;       // ~4 Mo (image de couverture)
     private const POSTER_MAX_KB = 4096;      // ~4 Mo (affiche vidéo)
     private const ATTACHMENT_MAX_KB = 10240; // ~10 Mo (pièce jointe document)
+    private const H5P_MAX_KB = 30720;        // ~30 Mo (paquet .h5p / F16)
 
     /** Identifiant du cours géré (figé au montage, source de vérité serveur). */
     public int $courseId;
@@ -151,6 +152,18 @@ class CourseEditor extends Component
 
     /** Pièce jointe document en attente, indexée par item_id (TemporaryUploadedFile). */
     public array $itemAttachment = [];
+
+    /**
+     * F16 - Paquet .h5p en attente pour un NOUVEL item, indexé par lesson_id
+     * (TemporaryUploadedFile). Sa présence + un titre déclenchent addH5pItem().
+     */
+    public array $newH5p = [];
+
+    /**
+     * F16 - Paquet .h5p en attente pour REMPLACER le contenu d'un item h5p existant,
+     * indexé par item_id (TemporaryUploadedFile).
+     */
+    public array $itemH5p = [];
 
     /**
      * V5-d : restrictions d'accès par item (tampon d'édition Livewire).
@@ -1063,6 +1076,18 @@ class CourseEditor extends Component
         // Anti-IDOR : l'item doit appartenir à une leçon d'un chapitre de CE cours.
         $item = $this->resolveItemFor($course, $itemId);
 
+        // F16 : le contenu d'un item h5p (h5p_path) n'est PAS éditable via ce
+        // formulaire générique (il se remplace via replaceH5pPackage). On le
+        // PRÉSERVE en l'injectant dans l'entrée pour que buildItemPayload ne
+        // l'écrase pas (le formulaire ne modifie que le titre / l'achèvement).
+        $h5pPreserve = [];
+        if ($type === 'h5p') {
+            $h5pPreserve = [
+                'h5p_path'  => $item->payload['h5p_path'] ?? null,
+                'h5p_title' => $item->payload['title'] ?? null,
+            ];
+        }
+
         $input = [
             'type'              => $type,
             'title'             => $title,
@@ -1104,7 +1129,7 @@ class CourseEditor extends Component
             'forum_intro'          => $extra['forum_intro']          ?? null,
             'allow_student_topics' => $extra['allow_student_topics'] ?? null,
             'locked'               => $extra['locked']               ?? null,
-        ];
+        ] + $h5pPreserve;
 
         $data    = $this->validateItem($input);
         $payload = $this->buildItemPayload($data['type'], $input);
@@ -1126,6 +1151,14 @@ class CourseEditor extends Component
         $this->authorize('manageStructure', $course);
 
         $item = $this->resolveItemFor($course, $itemId);
+
+        // F16 : nettoyer le dossier H5P extrait (disque public) avant suppression
+        // pour ne pas laisser de contenu orphelin. delete() borne le chemin à
+        // academy-h5p/ (anti-traversal).
+        if ($item->type === 'h5p') {
+            (new \Modules\Academy\Services\H5pPackageService())->delete($item->payload['h5p_path'] ?? null);
+        }
+
         $item->delete();
 
         $this->confirmingItemDeletion = null;
@@ -1254,6 +1287,106 @@ class CourseEditor extends Component
         $item->forceFill(['payload' => $payload])->save();
 
         $this->flashSaved('Pièce jointe retirée.');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // F16 - CONTENU INTERACTIF H5P (paquet .h5p extrait sur disque public + iframe sandbox)
+    //
+    // Sécurité : resolveCourse() → authorize('manageStructure') → (anti-IDOR via
+    // resolveItemFor au remplacement) → validation upload (taille/extension) →
+    // H5pPackageService valide le ZIP (structure h5p.json + content/content.json,
+    // anti zip-slip, liste noire d'exécutables) et extrait sur un disque NON
+    // exécutable. Le rendu se fait via h5p-standalone (CDN) dans un iframe SANDBOX :
+    // ZÉRO dépendance composer/npm (le CI ne build pas).
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Crée un NOUVEL item « h5p » à partir d'un paquet .h5p téléversé pour la leçon.
+     * Titre : celui saisi (newItem.{lesson}.title) sinon celui lu dans h5p.json.
+     * Un paquet invalide (zip corrompu, structure manquante, zip-slip) est rejeté
+     * proprement en erreur de champ (jamais de 500).
+     */
+    public function addH5pItem(int $lessonId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        // Anti-IDOR : la leçon doit appartenir à un chapitre de CE cours.
+        $lesson = $this->resolveLessonFor($course, $lessonId);
+
+        $this->validate(
+            ["newH5p.$lessonId" => ['required', 'file', 'extensions:h5p,zip', 'max:'.self::H5P_MAX_KB]],
+            [],
+            ["newH5p.$lessonId" => 'paquet H5P']
+        );
+
+        try {
+            $result = (new \Modules\Academy\Services\H5pPackageService())->extract($this->newH5p[$lessonId]);
+        } catch (\Throwable $e) {
+            $this->addError("newH5p.$lessonId", $e->getMessage());
+
+            return;
+        }
+
+        $title    = trim((string) ($this->newItem[$lessonId]['title'] ?? '')) ?: $result['title'];
+        $position = (int) LessonItem::where('lesson_id', $lesson->id)->max('position') + 1;
+
+        LessonItem::create([
+            'lesson_id'   => $lesson->id,
+            'type'        => 'h5p',
+            'title'       => mb_substr($title, 0, 255),
+            'position'    => $position,
+            'payload'     => ['h5p_path' => $result['path'], 'title' => $result['title']],
+            'is_required' => (bool) ($this->newItem[$lessonId]['is_required'] ?? false),
+        ]);
+
+        unset($this->newH5p[$lessonId], $this->newItem[$lessonId]);
+        $this->flashSaved('Contenu interactif H5P ajouté.');
+    }
+
+    /**
+     * Remplace le paquet d'un item « h5p » existant (anti-IDOR : item de CE cours).
+     * L'ancien dossier extrait est supprimé APRÈS extraction réussie du nouveau
+     * (pas de fenêtre où l'item pointe vers un dossier supprimé).
+     */
+    public function replaceH5pPackage(int $itemId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $item = $this->resolveItemFor($course, $itemId);
+        if ($item->type !== 'h5p') {
+            return;
+        }
+
+        $this->validate(
+            ["itemH5p.$itemId" => ['required', 'file', 'extensions:h5p,zip', 'max:'.self::H5P_MAX_KB]],
+            [],
+            ["itemH5p.$itemId" => 'paquet H5P']
+        );
+
+        $service = new \Modules\Academy\Services\H5pPackageService();
+
+        try {
+            $result = $service->extract($this->itemH5p[$itemId]);
+        } catch (\Throwable $e) {
+            $this->addError("itemH5p.$itemId", $e->getMessage());
+
+            return;
+        }
+
+        $oldPath             = $item->payload['h5p_path'] ?? null;
+        $payload             = $item->payload ?? [];
+        $payload['h5p_path'] = $result['path'];
+        $payload['title']    = $result['title'];
+        $item->forceFill(['payload' => $payload])->save();
+
+        if (is_string($oldPath) && $oldPath !== $result['path']) {
+            $service->delete($oldPath);
+        }
+
+        unset($this->itemH5p[$itemId]);
+        $this->flashSaved('Contenu interactif H5P remplacé.');
     }
 
     /**
@@ -1524,6 +1657,7 @@ class CourseEditor extends Component
             'choice'   => $this->buildChoicePayload($input),
             'feedback' => $this->buildFeedbackPayload($input),
             'forum'    => $this->buildForumPayload($input),
+            'h5p'      => $this->buildH5pPayload($input),
             default    => [],
         };
 
@@ -1638,6 +1772,32 @@ class CourseEditor extends Component
             'allow_student_topics' => $allow === null ? true : $this->truthy($allow),
             'locked'               => $this->truthy($input['locked'] ?? null),
         ];
+    }
+
+    /**
+     * F16 - H5P : le payload PRÉSERVE le chemin du dossier extrait (h5p_path) et le
+     * titre lu dans h5p.json. Le contenu lui-même ne se modifie JAMAIS par ce
+     * formulaire générique (il se remplace via replaceH5pPackage) : on se contente
+     * de reporter les valeurs existantes injectées par updateItem (rétrocompat).
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    private function buildH5pPayload(array $input): array
+    {
+        $payload = [];
+
+        $path = $input['h5p_path'] ?? null;
+        if (is_string($path) && $path !== '') {
+            $payload['h5p_path'] = $path;
+        }
+
+        $title = $input['h5p_title'] ?? null;
+        if (is_string($title) && $title !== '') {
+            $payload['title'] = $title;
+        }
+
+        return $payload;
     }
 
     /**

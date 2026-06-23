@@ -55,6 +55,9 @@ final class ActivityCompletionService
             'choice'   => ['vote', 'view', 'manual'],
             'feedback' => ['submit', 'view', 'manual'],
             'forum'    => ['post', 'view', 'manual'],
+            // F16 : un contenu H5P se complète naturellement à la consultation
+            // (view) ; on autorise aussi le clic manuel.
+            'h5p'      => ['view', 'manual'],
             default    => ['manual', 'view'],
         };
     }
@@ -71,6 +74,9 @@ final class ActivityCompletionService
             'choice'   => 'vote',
             'feedback' => 'submit',
             'forum'    => 'post',
+            // F16 : achèvement « view » par défaut (auto-marqué à la consultation
+            // par un inscrit réel, jamais en prévisualisation).
+            'h5p'      => 'view',
             default    => 'manual',
         };
     }
