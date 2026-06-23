@@ -6,16 +6,16 @@
  * @project memora/laravel-saas-boilerplate
  *
  * Service calendrier V5-b. Fusionne en lecture :
- *   (a) evenements MANUELS (table academy_calendar_events) ;
- *   (b) echeances DERIVEES des devoirs publies (Assignment.due_at) calculées
- *       a la volee - jamais dupliquees en base.
+ *   (a) événements MANUELS (table academy_calendar_events) ;
+ *   (b) échéances DÉRIVÉES des devoirs publiés (Assignment.due_at) calculées
+ *       à la volée - jamais dupliquées en base.
  *
- * SECURITE :
+ * SÉCURITÉ :
  *  - upcomingForUser scope les cours via les inscriptions actives de l'utilisateur
- *    (anti-IDOR : un etudiant ne voit jamais un cours ou il n'est pas inscrit).
+ *    (anti-IDOR : un étudiant ne voit jamais un cours où il n'est pas inscrit).
  *  - forCourse ne filtre pas par user : c'est l'appelant (Livewire/Controller)
- *    qui doit avoir verifié l'autorisation avant d'invoquer ce service.
- *  - Aucune ecriture dans ce service (lecture seule).
+ *    qui doit avoir vérifié l'autorisation avant d'invoquer ce service.
+ *  - Aucune écriture dans ce service (lecture seule).
  */
 
 declare(strict_types=1);
@@ -36,13 +36,16 @@ class CalendarService
     // -------------------------------------------------------------------------
 
     /**
-     * Echeances FUTURES de tous les cours ou l'utilisateur est inscrit actif.
+     * Échéances FUTURES de tous les cours où l'utilisateur est inscrit actif.
      *
      * Scope strict (anti-IDOR) : les inscriptions actives de $user servent de
-     * filtre ; un etudiant ne voit jamais un cours ou il n'est pas inscrit.
+     * filtre ; un étudiant ne voit jamais un cours où il n'est pas inscrit.
      * Tri : date ascendante (la plus proche en premier).
      *
-     * @param  int  $limit  Nombre maximum de resultats (défaut 10).
+     * Implémentation anti-N+1 : 3 requêtes globales (cours, événements, devoirs)
+     * puis fusion/tri en PHP, au lieu d'une boucle par cours.
+     *
+     * @param  int  $limit  Nombre maximum de résultats (défaut 10).
      * @return Collection<int, array<string, mixed>>
      */
     public function upcomingForUser(User $user, int $limit = 10): Collection
@@ -56,20 +59,35 @@ class CalendarService
             return collect();
         }
 
-        // Charge les cours en une seule requete pour eviter N+1.
+        // Requête 1 : cours indexés par id (évite N+1).
         $courses = Course::whereIn('id', $enrolledIds)->get()->keyBy('id');
 
-        $all = collect();
+        // Requête 2 : tous les événements manuels des cours inscrits.
+        $manualAll = CalendarEvent::whereIn('course_id', $enrolledIds)
+            ->orderBy('starts_at')
+            ->get();
 
-        foreach ($enrolledIds as $courseId) {
-            $course = $courses->get($courseId);
-            if ($course === null) {
-                continue;
-            }
-            $all = $all->merge($this->forCourse($course));
-        }
+        // Requête 3 : tous les devoirs publiés avec échéance des cours inscrits.
+        $derivedAll = Assignment::query()
+            ->whereIn('course_id', $enrolledIds)
+            ->where('is_published', true)
+            ->whereNotNull('due_at')
+            ->orderBy('due_at')
+            ->get();
 
-        return $all
+        // Normalisation en PHP (pas de requête supplémentaire).
+        $manual = $manualAll
+            ->filter(fn (CalendarEvent $ev): bool => $courses->has($ev->course_id))
+            ->map(fn (CalendarEvent $ev): array => $this->normalizeManual($ev, $courses->get($ev->course_id)))
+            ->values();
+
+        $derived = $derivedAll
+            ->filter(fn (Assignment $a): bool => $courses->has($a->course_id))
+            ->map(fn (Assignment $a): array => $this->normalizeDerived($a, $courses->get($a->course_id)))
+            ->values();
+
+        return $manual
+            ->merge($derived)
             ->filter(fn (array $ev): bool => $ev['starts_at']->isFuture())
             ->sortBy('starts_at')
             ->take($limit)
@@ -77,11 +95,11 @@ class CalendarService
     }
 
     /**
-     * Tous les evenements d'un cours : manuels + derives, tries par date.
+     * Tous les événements d'un cours : manuels + dérivés, triés par date.
      *
-     * NOTE : l'autorisation d'accès au cours est de la responsabilite de
+     * NOTE : l'autorisation d'accès au cours est de la responsabilité de
      * l'appelant (Livewire::mount() / Controller). Ce service ne fait
-     * qu'agréger ; il ne vérfie PAS les droits.
+     * qu'agréger ; il ne vérifie PAS les droits.
      *
      * @return Collection<int, array<string, mixed>>
      */
@@ -101,8 +119,8 @@ class CalendarService
     // -------------------------------------------------------------------------
 
     /**
-     * Evenements manuels depuis academy_calendar_events (non supprimes).
-     * Retourne une Collection de tableaux normalises.
+     * Événements manuels depuis academy_calendar_events (non supprimés).
+     * Retourne une Collection de tableaux normalisés.
      *
      * @return Collection<int, array<string, mixed>>
      */
@@ -115,8 +133,8 @@ class CalendarService
     }
 
     /**
-     * Echeances derivees : Assignment.due_at publies du cours.
-     * JAMAIS dupliquees en base - calculees ici uniquement.
+     * Échéances dérivées : Assignment.due_at publiés du cours.
+     * JAMAIS dupliquées en base - calculées ici uniquement.
      *
      * @return Collection<int, array<string, mixed>>
      */
@@ -136,7 +154,7 @@ class CalendarService
     // -------------------------------------------------------------------------
 
     /**
-     * Tableau uniforme pour un evenement manuel.
+     * Tableau uniforme pour un événement manuel.
      *
      * @return array<string, mixed>
      */
@@ -160,7 +178,7 @@ class CalendarService
     }
 
     /**
-     * Tableau uniforme pour une echeance derivee d'un devoir.
+     * Tableau uniforme pour une échéance dérivée d'un devoir.
      *
      * @return array<string, mixed>
      */

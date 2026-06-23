@@ -1,8 +1,8 @@
 {{-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca --}}
 {{--
-    Calendrier d'echeances - V5-b (CourseCalendar Livewire).
-    - Etudiant : liste en lecture seule.
-    - Gerant   : liste + CRUD d'evenements manuels, confirmation inline a 2 temps.
+    Calendrier d'échéances - V5-b (CourseCalendar Livewire).
+    - Étudiant : liste en lecture seule.
+    - Gérant   : liste + CRUD d'événements manuels, confirmation inline à 2 temps.
     Aucune popup native (confirm/alert/prompt).
 --}}
 <div style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23);">
@@ -17,32 +17,32 @@
         </div>
     @endif
 
-    {{-- ── En-tete : titre + bouton Ajouter (gerant uniquement) ── --}}
+    {{-- ── En-tête : titre + bouton Ajouter (gérant uniquement) ── --}}
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3" style="margin-bottom: 20px;">
         <h2 style="font-family: var(--f-heading); font-size: 1.35rem;
                    color: var(--sys-text-default, #1A1D23); margin: 0;">
-            Calendrier des echeances
+            Calendrier des échéances
         </h2>
 
         <div class="d-flex flex-wrap gap-2 align-items-center">
-            {{-- Export iCal (etudiant inscrit OU gerant) --}}
+            {{-- Export iCal (étudiant inscrit OU gérant) --}}
             <a href="{{ route('academy.courses.calendar.ical', $this->course->slug) }}"
                style="font-size: 0.82rem; color: var(--sys-action-primary, #064E5A);
                       text-decoration: underline; white-space: nowrap;"
-               aria-label="Telecharger le calendrier au format iCal">
-                Telecharger .ics
+               aria-label="Télécharger le calendrier au format iCal">
+                Télécharger .ics
             </a>
 
             @if($this->canManage && !$showForm)
                 <x-core::button type="button" variant="primary" size="sm"
                                 wire:click="openCreate">
-                    Ajouter un evenement
+                    Ajouter un événement
                 </x-core::button>
             @endif
         </div>
     </div>
 
-    {{-- ── Formulaire de creation/edition (gerant uniquement) ── --}}
+    {{-- ── Formulaire de création/édition (gérant uniquement) ── --}}
     @if($showForm && $this->canManage)
         <div role="region"
              aria-labelledby="cal-form-title"
@@ -52,7 +52,7 @@
             <h3 id="cal-form-title"
                 style="font-family: var(--f-heading); font-size: 1rem;
                        color: var(--sys-text-default, #1A1D23); margin: 0 0 16px;">
-                {{ $editingEvent ? 'Modifier l\'evenement' : 'Nouvel evenement' }}
+                {{ $editingEvent ? 'Modifier l\'événement' : 'Nouvel événement' }}
             </h3>
 
             {{-- Titre --}}
@@ -103,10 +103,10 @@
                                border-radius: var(--sys-radius-sm, 0.5rem);
                                padding: 8px 12px; font-size: 0.92rem; color: #1A1D23;
                                background: #fff;">
-                    <option value="due">Echeance de devoir</option>
+                    <option value="due">Échéance de devoir</option>
                     <option value="exam">Examen</option>
                     <option value="live">Session en direct</option>
-                    <option value="manual">Autre evenement</option>
+                    <option value="manual">Autre événement</option>
                 </select>
                 @error('evType')
                     <p role="alert" style="font-size: 0.8rem; color: #B91C1C; margin: 4px 0 0;">{{ $message }}</p>
@@ -119,7 +119,7 @@
                     <label for="cal-starts"
                            style="display: block; font-size: 0.88rem; font-weight: 600;
                                   color: var(--sys-text-default, #374151); margin-bottom: 4px;">
-                        Date de debut <span aria-hidden="true" style="color:#B91C1C;">*</span>
+                        Date de début <span aria-hidden="true" style="color:#B91C1C;">*</span>
                     </label>
                     <input id="cal-starts" type="datetime-local" wire:model.blur="evStartsAt"
                            style="width: 100%; border: 1px solid #D1D5DB;
@@ -161,13 +161,13 @@
         </div>
     @endif
 
-    {{-- ── Liste chronologique des evenements ── --}}
+    {{-- ── Liste chronologique des événements ── --}}
     @php
         $typeLabels = [
-            'due'    => 'Echeance',
+            'due'    => 'Échéance',
             'exam'   => 'Examen',
             'live'   => 'En direct',
-            'manual' => 'Evenement',
+            'manual' => 'Événement',
         ];
         $typeColors = [
             'due'    => 'background: #FEE2E2; color: #991B1B;',
@@ -183,7 +183,7 @@
                 @php
                     $isPast   = $ev['is_past'];
                     $isManual = $ev['source'] === 'manual';
-                    $label    = $typeLabels[$ev['type']] ?? 'Evenement';
+                    $label    = $typeLabels[$ev['type']] ?? 'Événement';
                     $badgeStyle = $typeColors[$ev['type']] ?? $typeColors['manual'];
                 @endphp
                 <li wire:key="cal-ev-{{ $ev['id'] }}" role="listitem"
@@ -204,7 +204,7 @@
                                     {{ $label }}
                                 </span>
 
-                                {{-- Badge 'derive' (devoir) --}}
+                                {{-- Badge 'dérivé' (devoir) --}}
                                 @if($ev['source'] === 'derived')
                                     <span style="font-size: 0.7rem; color: var(--sys-text-muted, #6B7280);
                                                  background: #F3F4F6; border-radius: 999px;
@@ -214,11 +214,11 @@
                                 @endif
 
                                 @if($isPast)
-                                    <span aria-label="Echeance passee"
+                                    <span aria-label="Échéance passée"
                                           style="font-size: 0.7rem; font-weight: 600;
                                                  color: #9A3412; background: #FFEDD5;
                                                  border-radius: 999px; padding: 2px 8px;">
-                                        Passe
+                                        Passé
                                     </span>
                                 @endif
                             </div>
@@ -237,7 +237,7 @@
 
                             <p style="font-size: 0.82rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
                                 <time datetime="{{ $ev['starts_at']->timezone('America/Toronto')->toIso8601String() }}">
-                                    {{ $ev['starts_at']->timezone('America/Toronto')->translatedFormat('D j M Y \a\t H\hi') }}
+                                    {{ $ev['starts_at']->timezone('America/Toronto')->translatedFormat('D j M Y \à H\hi') }}
                                 </time>
                                 @if($ev['ends_at'])
                                     - <time datetime="{{ $ev['ends_at']->timezone('America/Toronto')->toIso8601String() }}">
@@ -247,7 +247,7 @@
                             </p>
                         </div>
 
-                        {{-- Actions gerant : uniquement evenements manuels --}}
+                        {{-- Actions gérant : uniquement événements manuels --}}
                         @if($this->canManage && $isManual)
                             <div class="d-flex flex-wrap align-items-center gap-2">
                                 @if($confirmingRemoval === $ev['event_id'])
@@ -283,9 +283,9 @@
         <div style="border: 1px dashed #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem);
                     padding: 28px; text-align: center;">
             <p style="color: var(--sys-text-muted, #6B7280); margin: 0;">
-                Aucune echeance pour ce cours.
+                Aucune échéance pour ce cours.
                 @if($this->canManage)
-                    Utilisez le bouton « Ajouter un evenement » pour en creer une.
+                    Utilisez le bouton « Ajouter un événement » pour en créer une.
                 @endif
             </p>
         </div>

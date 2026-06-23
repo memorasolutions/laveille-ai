@@ -5,9 +5,9 @@
  *
  * @project memora/laravel-saas-boilerplate
  *
- * Événement de calendrier manuel (V5-b). Les evenements derives des devoirs
- * (Assignment.due_at) sont CALCULES A LA VOLEE par CalendarService - jamais
- * stockes dans cette table. Soft-delete pour permettre aux formateurs de
+ * Événement de calendrier manuel (V5-b). Les événements dérivés des devoirs
+ * (Assignment.due_at) sont CALCULÉS À LA VOLÉE par CalendarService - jamais
+ * stockés dans cette table. Soft-delete pour permettre aux formateurs de
  * retrouver par erreur un événement supprimé via l'admin superadmin.
  */
 
@@ -39,7 +39,7 @@ class CalendarEvent extends Model
 {
     use SoftDeletes;
 
-    /** Types d'evenements valides (liste blanche). */
+    /** Types d'événements valides (liste blanche). */
     public const TYPES = ['due', 'exam', 'live', 'manual'];
 
     protected $table = 'academy_calendar_events';
@@ -52,6 +52,8 @@ class CalendarEvent extends Model
         'type',
         'starts_at',
         'ends_at',
+        // created_by : toujours assigné explicitement côté serveur
+        // (Auth::id() dans CourseCalendar::save()) avant l'appel à create().
         'created_by',
     ];
 

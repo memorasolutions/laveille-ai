@@ -87,12 +87,12 @@
         @endif
     </section>
 
-    {{-- ───────── V5-b : Echeances a venir (bandeau, masque si vide) ───────── --}}
+    {{-- ───────── V5-b : Échéances à venir (bandeau, masqué si vide) ─────── --}}
     @if($this->upcomingDeadlines->isNotEmpty())
         <section aria-labelledby="academy-echeances" class="mb-5">
             <h2 id="academy-echeances"
                 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 14px;">
-                Echeances a venir
+                Échéances à venir
             </h2>
 
             @php
@@ -100,7 +100,7 @@
                     'due'    => 'Devoir',
                     'exam'   => 'Examen',
                     'live'   => 'En direct',
-                    'manual' => 'Evenement',
+                    'manual' => 'Événement',
                 ];
                 $typeColors = [
                     'due'    => 'background: #FEE2E2; color: #991B1B;',
@@ -113,9 +113,10 @@
             <ul class="list-unstyled d-flex flex-column gap-2" role="list" style="margin: 0;">
                 @foreach($this->upcomingDeadlines as $ev)
                     @php
-                        $label      = $typeLabels[$ev['type']] ?? 'Evenement';
+                        $label      = $typeLabels[$ev['type']] ?? 'Événement';
                         $badgeStyle = $typeColors[$ev['type']] ?? $typeColors['manual'];
-                        $daysLeft   = (int) now('America/Toronto')->diffInDays($ev['starts_at'], false);
+                        // timezone() sur starts_at évite l'écart d'un jour autour de minuit.
+                        $daysLeft   = (int) now('America/Toronto')->diffInDays($ev['starts_at']->timezone('America/Toronto'), false);
                         $daysLabel  = match(true) {
                             $daysLeft === 0 => "aujourd'hui",
                             $daysLeft === 1 => 'demain',

@@ -62,16 +62,16 @@
     .cbd-btn:hover, .cbd-btn:focus-visible { background: rgba(255,255,255,.22); color: #fff; }
     .cbd-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
     .cbd-stage {
-        flex: 1 1 auto; overflow: auto; display: flex; align-items: flex-start;
+        flex: 1 1 auto; overflow: auto; display: flex; align-items: center;
         justify-content: center; padding: 0 16px 24px;
     }
     .cbd-stage img {
-        max-width: 100%; height: auto; display: block; border-radius: 6px;
+        max-width: 100%; max-height: 100%; width: auto; height: auto; display: block; border-radius: 6px;
         box-shadow: 0 10px 40px rgba(0,0,0,.5); transform-origin: top center;
         transition: transform .2s ease; cursor: zoom-in;
     }
     .cbd-stage.is-zoomed { align-items: flex-start; }
-    .cbd-stage.is-zoomed img { cursor: zoom-out; max-width: none; }
+    .cbd-stage.is-zoomed img { cursor: zoom-out; max-width: none; max-height: none; width: auto; }
     [x-cloak] { display: none !important; }
     @media (prefers-reduced-motion: reduce) {
         .cbd-trigger, .cbd-stage img { transition: none; }

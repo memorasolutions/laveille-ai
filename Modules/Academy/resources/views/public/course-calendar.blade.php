@@ -2,7 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', 'Calendrier - ' . $course->title . ' - ' . config('app.name'))
-@section('meta_description', 'Calendrier des echeances et evenements de la formation : devoirs, examens, sessions en direct.')
+@section('meta_description', 'Calendrier des échéances et événements de la formation : devoirs, examens, sessions en direct.')
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Calendrier'])
@@ -19,7 +19,7 @@
                     <nav aria-label="Fil d'Ariane"
                          style="margin-bottom: 14px; font-size: 0.85rem; color: var(--sys-text-muted, #6B7280);">
                         <a href="{{ route('academy.dashboard') }}"
-                           style="color: var(--sys-action-primary, #064E5A); text-decoration: underline;">Academie</a>
+                           style="color: var(--sys-action-primary, #064E5A); text-decoration: underline;">Académie</a>
                         <span aria-hidden="true"> / </span>
                         <a href="{{ route('academy.courses.show', $course->slug) }}"
                            style="color: var(--sys-action-primary, #064E5A); text-decoration: underline;">{{ $course->title }}</a>
@@ -31,7 +31,7 @@
                         Calendrier de la formation
                     </h1>
                     <p style="margin-bottom: 28px; color: var(--sys-text-muted, #6B7280); max-width: 620px;">
-                        Toutes les echeances et evenements de ce cours, calcules et securises cote serveur.
+                        Toutes les échéances et événements de ce cours, calculés et sécurisés côté serveur.
                         Les devoirs incluent automatiquement leur date de remise.
                     </p>
 

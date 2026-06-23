@@ -103,6 +103,7 @@ test('un instructor non superadmin reçoit la page en construction (verrou stric
     config()->set('academy.under_construction', true);
 
     $instructor = User::factory()->create(['email' => 'formateur.test@example.com']);
+    \Spatie\Permission\Models\Role::findOrCreate('instructor', 'web');
     $instructor->assignRole('instructor');
 
     $response = $this->actingAs($instructor)->get(route('academy.index'));
