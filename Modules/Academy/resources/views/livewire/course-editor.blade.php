@@ -812,8 +812,13 @@
                                                                          (1 soumission, révision à la fin). Immédiat = rétroaction par
                                                                          question avant de continuer. --}}
                                                                     @php($questionBehaviour = \Modules\Academy\Services\QuizBehaviour::for($item->payload))
+                                                                    {{-- C3 (audit F6) : scope Alpine partagé select↔champs adaptatifs.
+                                                                         display:contents = ne perturbe pas le flex/gap du parent ; le
+                                                                         pré-remplissage (option @selected) et le wire:submit (name=)
+                                                                         restent intacts (x-model lit la même valeur initiale). --}}
+                                                                    <div x-data="{ behaviour: @js($questionBehaviour) }" style="display: contents;">
                                                                     <label style="font-size: 0.78rem; font-weight: 600;" for="item-behaviour-{{ $item->id }}">Rétroaction des questions</label>
-                                                                    <select id="item-behaviour-{{ $item->id }}" name="question_behaviour" aria-label="Comportement de rétroaction des questions"
+                                                                    <select id="item-behaviour-{{ $item->id }}" name="question_behaviour" x-model="behaviour" aria-label="Comportement de rétroaction des questions"
                                                                             style="width: 100%; padding: 8px 12px; min-height: 38px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                                                                         <option value="deferred" @selected($questionBehaviour === 'deferred')>Différée (révision à la fin)</option>
                                                                         <option value="immediate" @selected($questionBehaviour === 'immediate')>Immédiate (par question)</option>
@@ -823,9 +828,11 @@
                                                                     {{-- ADAPTATIF : pénalité par essai raté (%) + nombre d'essais maximal.
                                                                          N'a d'effet que si le mode « Adaptative » est choisi (les valeurs
                                                                          ne sont écrites au payload que dans ce cas). Pénalité saisie en %,
-                                                                         convertie en fraction au build (défaut 33 % = 1/3, défaut 3 essais). --}}
+                                                                         convertie en fraction au build (défaut 33 % = 1/3, défaut 3 essais).
+                                                                         C3 : masqués hors mode adaptatif (clarté UX ; inoffensif si envoyés). --}}
                                                                     @php($adaptivePenaltyPct = isset($item->payload['adaptive_penalty']) && is_numeric($item->payload['adaptive_penalty']) ? (int) round(((float) $item->payload['adaptive_penalty']) * 100) : 33)
                                                                     @php($adaptiveMaxTries = isset($item->payload['adaptive_max_tries']) ? max(1, min(10, (int) $item->payload['adaptive_max_tries'])) : 3)
+                                                                    <div x-show="behaviour === 'adaptive'" x-cloak style="display: flex; flex-direction: column; gap: 8px;">
                                                                     <label style="font-size: 0.78rem; font-weight: 600;" for="item-adpen-{{ $item->id }}">Pénalité adaptative par essai raté (%)</label>
                                                                     <input id="item-adpen-{{ $item->id }}" type="number" min="0" max="100" name="adaptive_penalty" value="{{ $adaptivePenaltyPct }}" aria-label="Pénalité par essai raté en pourcentage (mode adaptatif)"
                                                                            style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
@@ -835,6 +842,8 @@
                                                                     <label style="font-size: 0.78rem; font-weight: 600;" for="item-adtries-{{ $item->id }}">Essais maximaux (mode adaptatif, 1 à 10)</label>
                                                                     <input id="item-adtries-{{ $item->id }}" type="number" min="1" max="10" name="adaptive_max_tries" value="{{ $adaptiveMaxTries }}" aria-label="Nombre d'essais maximal (mode adaptatif)"
                                                                            style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                    </div>
+                                                                    </div>
 
                                                                     {{-- V1-d : MÉLANGE (questions / réponses). --}}
                                                                     @php($shuffleQ = (bool) ($item->payload['shuffle_questions'] ?? false))

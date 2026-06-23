@@ -770,6 +770,27 @@
              affichées en lecture seule avec leur rétroaction. Aucune bonne réponse
              n'est exposée avant validation (le round + les corrigés restent serveur). --}}
 
+            {{-- C1 (audit F6) : options de révision du formateur, normalisées (défaut tout
+                 vrai = rétrocompat). En mode VERROUILLÉ (immédiat/adaptatif), l'exposition
+                 des bonnes réponses et du ✔/✗ suit EXACTEMENT les mêmes toggles qu'en
+                 différé (parité Moodle ; pas de fuite si « afficher la bonne réponse » est
+                 désactivé). Le feedback spécifique/général garde ses propres règles. --}}
+            @php
+                $reviewOpts = \Modules\Academy\Services\QuizReviewOptions::normalize(
+                    $item->payload['review_options'] ?? null
+                );
+            @endphp
+
+            {{-- C2 (WCAG 2.4.7) : focus visible pour l'alerte de réessai (focus
+                 programmatique). On garde un outline net plutôt qu'outline:none. --}}
+            <style>
+                .academy-quiz-retry-alert:focus,
+                .academy-quiz-retry-alert:focus-visible {
+                    outline: 2px solid #991B1B;
+                    outline-offset: 2px;
+                }
+            </style>
+
             {{-- Compte à rebours informatif (la garde réelle reste serveur au « Terminer »). --}}
             @if($deadlineTs !== null)
                 <div x-data="{
@@ -816,7 +837,7 @@
                 @endphp
 
                 <div class="mb-4 p-3 rounded" style="background: #F8FAFC; border: 1px solid #E2E8F0;
-                     border-left: 4px solid {{ $locked ? ($isCorrect ? '#16A34A' : '#DC2626') : '#CBD5E1' }};">
+                     border-left: 4px solid {{ $locked ? ($reviewOpts['show_correctness'] ? ($isCorrect ? '#16A34A' : '#DC2626') : '#94A3B8') : '#CBD5E1' }};">
                     <p class="mb-2" style="font-weight: 600; font-size: 0.95rem; color: #1A1D23;">
                         <span class="badge me-2" style="background: var(--c-primary, #064E5A); color: #fff;">{{ $i + 1 }}</span>
                         {{ $question['question'] ?? '' }}
@@ -846,10 +867,13 @@
                              la pénalité. aria-live=assertive + focus (a11y) pour annoncer le
                              changement après le rechargement de page. --}}
                         @if($showRetry)
+                            {{-- C2 (WCAG 2.4.7) : l'alerte reçoit un focus programmatique ; le
+                                 focus DOIT rester visible (classe academy-quiz-retry-alert
+                                 fournit un outline visible, voir le bloc de styles plus haut). --}}
                             <div role="alert" aria-live="assertive" tabindex="-1"
                                  x-data x-init="$el.focus()"
-                                 class="mb-2 p-2 rounded"
-                                 style="background: #FEF2F2; border: 1px solid #FCA5A5; outline: none;">
+                                 class="mb-2 p-2 rounded academy-quiz-retry-alert"
+                                 style="background: #FEF2F2; border: 1px solid #FCA5A5;">
                                 <p class="mb-1" style="font-size: 0.88rem; font-weight: 600; color: #991B1B;">
                                     ✗ Réponse incorrecte. Réessayez.
                                 </p>
@@ -1017,9 +1041,11 @@
                             }
                         @endphp
 
-                        <p class="mb-1" style="font-size: 0.88rem; font-weight: 600; color: {{ $isCorrect ? '#166534' : '#991B1B' }};">
-                            {{ $isCorrect ? '✔ Bonne réponse' : '✗ À revoir' }}
-                        </p>
+                        @if($reviewOpts['show_correctness'])
+                            <p class="mb-1" style="font-size: 0.88rem; font-weight: 600; color: {{ $isCorrect ? '#166534' : '#991B1B' }};">
+                                {{ $isCorrect ? '✔ Bonne réponse' : '✗ À revoir' }}
+                            </p>
+                        @endif
 
                         {{-- ADAPTATIF : rappel du nombre d'essais utilisés + pénalité appliquée
                              (la question est désormais verrouillée : réussie ou max d'essais). --}}
@@ -1030,41 +1056,50 @@
                         @endif
 
                         @if($type === 'appariement')
-                            <p class="mb-1 text-muted" style="font-size: 0.85rem;">
-                                {{ $isCorrect ? 'Toutes les associations sont correctes.' : 'Certaines associations sont à revoir.' }}
-                            </p>
+                            {{-- C1 : le verdict d'association suit show_correctness (comme en différé). --}}
+                            @if($reviewOpts['show_correctness'])
+                                <p class="mb-1 text-muted" style="font-size: 0.85rem;">
+                                    {{ $isCorrect ? 'Toutes les associations sont correctes.' : 'Certaines associations sont à revoir.' }}
+                                </p>
+                            @endif
                         @elseif($type === 'ordonnancement')
-                            <p class="mb-1 text-muted" style="font-size: 0.85rem;">
-                                {{ $isCorrect ? 'L\'ordre est exact.' : 'L\'ordre est à revoir.' }}
-                            </p>
+                            {{-- C1 : le verdict d'ordre suit show_correctness (comme en différé). --}}
+                            @if($reviewOpts['show_correctness'])
+                                <p class="mb-1 text-muted" style="font-size: 0.85rem;">
+                                    {{ $isCorrect ? 'L\'ordre est exact.' : 'L\'ordre est à revoir.' }}
+                                </p>
+                            @endif
                         @elseif($type === 'cloze')
-                            {{-- C3 : révision par trou DRY (immédiat = rétroaction toujours montrée). --}}
+                            {{-- C1/C3 : révision par trou DRY ; respecte review_options (parité différé). --}}
                             @include('academy::livewire.partials.cloze-review', [
                                 'blanks'      => is_array($question['blanks'] ?? null) ? $question['blanks'] : [],
                                 'userAns'     => $userAns,
-                                'showRight'   => true,
-                                'showSummary' => true,
+                                'showRight'   => $reviewOpts['show_right_answer'],
+                                'showSummary' => $reviewOpts['show_correctness'],
                                 'isCorrect'   => $isCorrect,
                             ])
                         @elseif($type === 'glisser-texte')
-                            {{-- Révision par trou DRY (immédiat = rétroaction toujours montrée). --}}
+                            {{-- C1 : révision par trou DRY ; respecte review_options (parité différé). --}}
                             @include('academy::livewire.partials.ddwtos-review', [
                                 'answers'     => is_array($question['answers'] ?? null) ? $question['answers'] : [],
                                 'options'     => is_array($question['options'] ?? null) ? $question['options'] : [],
                                 'userAns'     => $userAns,
-                                'showRight'   => true,
-                                'showSummary' => true,
+                                'showRight'   => $reviewOpts['show_right_answer'],
+                                'showSummary' => $reviewOpts['show_correctness'],
                                 'isCorrect'   => $isCorrect,
                             ])
                         @else
                             <p class="mb-1 text-muted" style="font-size: 0.85rem;">
                                 Votre réponse : <strong>{{ $givenLabel }}</strong>
                             </p>
-                            @unless($isCorrect)
-                                <p class="mb-1 text-muted" style="font-size: 0.85rem;">
-                                    Bonne réponse : <strong>{{ $expectedLabel }}</strong>
-                                </p>
-                            @endunless
+                            {{-- C1 : la bonne réponse n'est exposée que si le formateur l'autorise. --}}
+                            @if($reviewOpts['show_right_answer'])
+                                @unless($isCorrect)
+                                    <p class="mb-1 text-muted" style="font-size: 0.85rem;">
+                                        Bonne réponse : <strong>{{ $expectedLabel }}</strong>
+                                    </p>
+                                @endunless
+                            @endif
                         @endif
 
                         @if($choiceFb !== null)
