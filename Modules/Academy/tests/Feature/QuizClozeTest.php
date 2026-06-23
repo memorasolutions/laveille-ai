@@ -364,3 +364,210 @@ test('éditeur : édition recharge texte + trous (hydratation)', function (): vo
             ['kind' => 'mcq', 'accepted' => '', 'display' => '', 'choices' => "chaud\nfroid", 'correct' => 0],
         ]);
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 5. CORRECTIONS D'AUDIT (F2) — C1 marqueurs dupliqués / C2-C3 partials / C4 bornes
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('C1 service : marqueur [[1]] dupliqué → un seul trou jouable (anti-biais)', function (): void {
+    $owner = f2Instructor();
+    $cat   = f2Category($owner);
+
+    // Créé EN DIRECT (bypass éditeur) : prouve la défense côté service au tirage.
+    Question::create([
+        'category_id' => $cat->id,
+        'owner_id'    => $owner->id,
+        'type'        => 'cloze',
+        'prompt'      => 'Doublon',
+        'payload'     => [
+            'text'   => 'Le ciel est [[1]] et encore [[1]].',
+            'blanks' => [['kind' => 'short', 'accepted' => ['bleu']]],
+        ],
+        'difficulty'  => 'moyen',
+        'points'      => 2,
+        'is_active'   => true,
+    ]);
+
+    $round = QuestionBankService::drawFromCategory($cat, 1, true, 7);
+    expect($round)->toHaveCount(1);
+
+    // Un SEUL segment blank (le 2e [[1]] ne crée pas un 2e champ au même name).
+    $blankSegs = array_values(array_filter(
+        $round[0]['segments'],
+        fn ($s): bool => ($s['type'] ?? '') === 'blank'
+    ));
+    expect($blankSegs)->toHaveCount(1);
+
+    // Le marqueur dupliqué est rendu en TEXTE littéral.
+    $literal = array_filter(
+        $round[0]['segments'],
+        fn ($s): bool => ($s['type'] ?? '') === 'text' && str_contains((string) ($s['value'] ?? ''), '[[1]]')
+    );
+    expect($literal)->not->toBeEmpty();
+
+    // Le scoring n'évalue qu'un trou → 1 bonne réponse = 100 %.
+    $r = QuizService::score([$round[0]], ['0' => [0 => 'bleu']]);
+    expect($r['percent'])->toBe(100);
+});
+
+test('C1 éditeur : texte avec [[1]] en double → rejeté à l\'édition', function (): void {
+    $instructor = f2Instructor();
+    $cat        = f2Category($instructor);
+
+    Livewire::actingAs($instructor)
+        ->test(QuestionBankManager::class)
+        ->call('selectCategory', $cat->id)
+        ->set('qType', 'cloze')
+        ->set('qPrompt', 'Doublon')
+        ->set('qClozeText', 'La capitale est [[1]] ou [[1]].')
+        ->set('qClozeBlanks', [
+            ['kind' => 'short', 'accepted' => 'Québec', 'display' => '', 'choices' => '', 'correct' => 0],
+        ])
+        ->call('saveQuestion')
+        ->assertHasErrors('qClozeText');
+
+    expect(Question::where('category_id', $cat->id)->count())->toBe(0);
+});
+
+test('C2/C3 partial cloze-inputs : fieldset + legend + noms préservés (différé & immédiat)', function (): void {
+    $segments = [
+        ['type' => 'text',  'value' => 'La capitale est '],
+        ['type' => 'blank', 'index' => 0, 'kind' => 'short'],
+        ['type' => 'text',  'value' => ' lettre '],
+        ['type' => 'blank', 'index' => 1, 'kind' => 'mcq', 'choices' => ['A', 'B']],
+    ];
+
+    // Mode DIFFÉRÉ : names answers[i][k].
+    $diff = view('academy::livewire.partials.cloze-inputs', [
+        'segments'   => $segments,
+        'namePrefix' => 'answers[0]',
+        'legend'     => 'Ma question',
+    ])->render();
+
+    expect($diff)->toContain('<fieldset');
+    expect($diff)->toContain('<legend');
+    expect($diff)->toContain('Ma question');
+    expect($diff)->toContain('name="answers[0][0]"');
+    expect($diff)->toContain('name="answers[0][1]"');
+    expect($diff)->toContain('aria-label="Trou 1"');
+    expect($diff)->toContain('aria-label="Trou 2"');
+
+    // Mode IMMÉDIAT (C2) : fieldset/legend AUSSI ; names answer[k].
+    $imm = view('academy::livewire.partials.cloze-inputs', [
+        'segments'   => $segments,
+        'namePrefix' => 'answer',
+        'legend'     => 'Ma question',
+    ])->render();
+
+    expect($imm)->toContain('<fieldset');
+    expect($imm)->toContain('<legend');
+    expect($imm)->toContain('name="answer[0]"');
+    expect($imm)->toContain('name="answer[1]"');
+    expect($imm)->toContain('aria-label="Trou 1"');
+});
+
+test('C3 partial cloze-review : réponses par trou + bonne réponse selon showRight', function (): void {
+    $blanks = [
+        0 => ['kind' => 'short', 'accepted' => ['Québec']],
+        1 => ['kind' => 'mcq', 'choices' => ['A', 'B'], 'correct' => 1],
+    ];
+    $userAns = [0 => 'Paris', 1 => 0]; // les deux faux
+
+    // showRight + showSummary actifs → bonne réponse + synthèse affichées.
+    $shown = view('academy::livewire.partials.cloze-review', [
+        'blanks'      => $blanks,
+        'userAns'     => $userAns,
+        'showRight'   => true,
+        'showSummary' => true,
+        'isCorrect'   => false,
+    ])->render();
+    expect($shown)->toContain('Trou 1');
+    expect($shown)->toContain('Paris');
+    expect($shown)->toContain('bonne réponse');
+    expect($shown)->toContain('Québec');
+    expect($shown)->toContain('Certains trous');
+
+    // showRight + showSummary inactifs → ni bonne réponse ni synthèse.
+    $hidden = view('academy::livewire.partials.cloze-review', [
+        'blanks'      => $blanks,
+        'userAns'     => $userAns,
+        'showRight'   => false,
+        'showSummary' => false,
+        'isCorrect'   => false,
+    ])->render();
+    expect($hidden)->toContain('Trou 1');
+    expect($hidden)->not->toContain('bonne réponse');
+    expect($hidden)->not->toContain('Certains trous');
+});
+
+test('C4 éditeur : un qClozeText trop long → rejeté', function (): void {
+    $instructor = f2Instructor();
+    $cat        = f2Category($instructor);
+
+    $long = str_repeat('a', 2100).' [[1]].';
+
+    Livewire::actingAs($instructor)
+        ->test(QuestionBankManager::class)
+        ->call('selectCategory', $cat->id)
+        ->set('qType', 'cloze')
+        ->set('qPrompt', 'Trop long')
+        ->set('qClozeText', $long)
+        ->set('qClozeBlanks', [
+            ['kind' => 'short', 'accepted' => 'Québec', 'display' => '', 'choices' => '', 'correct' => 0],
+        ])
+        ->call('saveQuestion')
+        ->assertHasErrors('qClozeText');
+
+    expect(Question::where('category_id', $cat->id)->count())->toBe(0);
+});
+
+test('C4 éditeur : une réponse acceptée trop longue → rejetée', function (): void {
+    $instructor = f2Instructor();
+    $cat        = f2Category($instructor);
+
+    Livewire::actingAs($instructor)
+        ->test(QuestionBankManager::class)
+        ->call('selectCategory', $cat->id)
+        ->set('qType', 'cloze')
+        ->set('qPrompt', 'Réponse géante')
+        ->set('qClozeText', 'Réponse : [[1]].')
+        ->set('qClozeBlanks', [
+            ['kind' => 'short', 'accepted' => str_repeat('z', 600), 'display' => '', 'choices' => '', 'correct' => 0],
+        ])
+        ->call('saveQuestion')
+        ->assertHasErrors('qClozeBlanks');
+
+    expect(Question::where('category_id', $cat->id)->count())->toBe(0);
+});
+
+test('rétrocompat C1 : 2 trous DISTINCTS restent jouables et notés comme avant', function (): void {
+    $owner = f2Instructor();
+    $cat   = f2Category($owner);
+
+    Question::create([
+        'category_id' => $cat->id,
+        'owner_id'    => $owner->id,
+        'type'        => 'cloze',
+        'prompt'      => 'Deux trous',
+        'payload'     => [
+            'text'   => 'La capitale est [[1]] et la lettre est [[2]].',
+            'blanks' => [
+                ['kind' => 'short', 'accepted' => ['Québec', 'Quebec']],
+                ['kind' => 'mcq', 'choices' => ['A', 'B', 'C'], 'correct' => 1],
+            ],
+        ],
+        'difficulty'  => 'moyen',
+        'points'      => 4,
+        'is_active'   => true,
+    ]);
+
+    $round = QuestionBankService::drawFromCategory($cat, 1, true, 7);
+    $blankSegs = array_values(array_filter(
+        $round[0]['segments'],
+        fn ($s): bool => ($s['type'] ?? '') === 'blank'
+    ));
+    expect($blankSegs)->toHaveCount(2);
+
+    $r = QuizService::score([$round[0]], ['0' => [0 => 'Québec', 1 => 1]]);
+    expect($r['percent'])->toBe(100);
+});

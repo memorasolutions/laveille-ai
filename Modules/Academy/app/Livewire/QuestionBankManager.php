@@ -42,6 +42,10 @@ class QuestionBankManager extends Component
     /** Niveaux de difficulté autorisés (liste blanche). */
     private const DIFFICULTIES = ['facile', 'moyen', 'difficile'];
 
+    /** C4 : bornes anti-payload abusif pour le cloze (texte global + chaque entrée). */
+    private const MAX_CLOZE_TEXT = 2000;
+    private const MAX_CLOZE_ENTRY = 500;
+
     // ── Création de catégorie ────────────────────────────────────────────────────
     public string $newCategoryName = '';
     public ?int $newCategoryParentId = null;
@@ -456,6 +460,9 @@ class QuestionBankManager extends Component
             'qDifficulty'  => ['required', Rule::in(self::DIFFICULTIES)],
             // V1-c : pondération bornée serveur 1..100 (défaut 1).
             'qPoints'      => 'required|integer|min:1|max:100',
+            // C4 : borne de longueur du texte à trous (anti-payload abusif). Inerte pour
+            // les autres types (qClozeText vide) ; détaillé par trou dans buildClozePayload.
+            'qClozeText'   => 'nullable|string|max:'.self::MAX_CLOZE_TEXT,
         ]);
 
         // Construit + valide le payload selon le type (mêmes invariants que mapToRoundItem).
@@ -734,6 +741,23 @@ class QuestionBankManager extends Component
             ]);
         }
 
+        // C4 : borne de longueur (défense en profondeur ; la règle validate() la couvre déjà).
+        if (mb_strlen($text) > self::MAX_CLOZE_TEXT) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'qClozeText' => 'Le texte à trous est trop long (maximum '.self::MAX_CLOZE_TEXT.' caractères).',
+            ]);
+        }
+
+        // C1 (anti-biais de notation) : un même marqueur [[n]] ne peut pas apparaître en
+        // double — deux champs partageraient le même `name` et un seul serait évalué.
+        preg_match_all('/\[\[(\d+)\]\]/', $text, $allMarkers);
+        $markerNums = array_map('intval', $allMarkers[1] ?? []);
+        if (count($markerNums) !== count(array_unique($markerNums))) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'qClozeText' => 'Chaque trou [[n]] doit être unique : un même numéro ne peut pas apparaître deux fois.',
+            ]);
+        }
+
         $blanks = [];
         foreach (array_values($this->qClozeBlanks) as $raw) {
             if (! is_array($raw)) {
@@ -755,6 +779,14 @@ class QuestionBankManager extends Component
                         'qClozeBlanks' => 'Un trou à choix exige au moins 2 options (une par ligne).',
                     ]);
                 }
+                // C4 : borne de longueur par option (anti-payload abusif).
+                foreach ($choices as $choice) {
+                    if (mb_strlen($choice) > self::MAX_CLOZE_ENTRY) {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'qClozeBlanks' => 'Une option de trou est trop longue (maximum '.self::MAX_CLOZE_ENTRY.' caractères).',
+                        ]);
+                    }
+                }
                 $correct = (int) ($raw['correct'] ?? 0);
                 if ($correct < 0 || $correct >= count($choices)) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
@@ -771,6 +803,14 @@ class QuestionBankManager extends Component
                     throw \Illuminate\Validation\ValidationException::withMessages([
                         'qClozeBlanks' => 'Un trou à réponse courte exige au moins une réponse acceptée.',
                     ]);
+                }
+                // C4 : borne de longueur par réponse acceptée (anti-payload abusif).
+                foreach ($accepted as $acc) {
+                    if (mb_strlen($acc) > self::MAX_CLOZE_ENTRY) {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'qClozeBlanks' => 'Une réponse acceptée est trop longue (maximum '.self::MAX_CLOZE_ENTRY.' caractères).',
+                        ]);
+                    }
                 }
                 $blank   = ['kind' => 'short', 'accepted' => $accepted];
                 $display = trim((string) ($raw['display'] ?? ''));

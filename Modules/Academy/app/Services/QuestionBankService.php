@@ -354,10 +354,22 @@ final class QuestionBankService
 
         $segments  = [];
         $blanksOut = [];
+        // C1 (anti-biais de notation) : un même marqueur [[n]] ne doit produire QU'UN
+        // seul champ jouable. Si [[n]] apparaît plusieurs fois, les occurrences SUIVANTES
+        // sont rendues en TEXTE littéral (sinon 2 champs partageraient le même `name`
+        // answers[i][k] → seul le dernier serait évalué, biais en faveur de l'étudiant).
+        $seenBlankIndex = [];
 
         foreach ($parts as $part) {
             if (preg_match('/^\[\[(\d+)\]\]$/', $part, $m) === 1) {
                 $k = (int) $m[1] - 1; // [[1]] → index 0 dans blanks
+
+                if (isset($seenBlankIndex[$k])) {
+                    // Marqueur DUPLIQUÉ : ce trou a déjà produit un champ → texte littéral.
+                    $segments[] = ['type' => 'text', 'value' => $part];
+
+                    continue;
+                }
 
                 $normalized = isset($blanksIn[$k]) ? self::normalizeClozeBlank($blanksIn[$k]) : null;
 
@@ -374,8 +386,9 @@ final class QuestionBankService
                     $seg['choices'] = $normalized['choices'];
                 }
 
-                $segments[]    = $seg;
-                $blanksOut[$k] = $normalized; // corrigé serveur
+                $segments[]           = $seg;
+                $blanksOut[$k]        = $normalized; // corrigé serveur
+                $seenBlankIndex[$k]   = true;        // C1 : trou désormais « consommé »
             } else {
                 $segments[] = ['type' => 'text', 'value' => $part];
             }

@@ -217,33 +217,20 @@
                             $correctSequence = array_values($correctSequence);
                         } elseif ($qType === 'cloze') {
                             // Crédit par trou : correct (badge) seulement si TOUS les trous justes.
+                            // Le détail par trou (réponse/bonne réponse) est rendu par le partial
+                            // cloze-review (C3) ; ici on ne calcule QUE la synthèse « tout juste ».
                             $blanks   = is_array($q['blanks'] ?? null) ? $q['blanks'] : [];
                             $givenMap = is_array($userAns) ? $userAns : [];
-                            $blankRows = [];
                             $allBlanksOk = count($blanks) > 0;
                             foreach ($blanks as $bk => $blank) {
                                 $kind = ($blank['kind'] ?? 'short') === 'mcq' ? 'mcq' : 'short';
                                 $ans  = $givenMap[$bk] ?? ($givenMap[(string) $bk] ?? null);
                                 if ($kind === 'mcq') {
-                                    $bChoices = is_array($blank['choices'] ?? null) ? $blank['choices'] : [];
-                                    $bCorrect = (int) ($blank['correct'] ?? -1);
-                                    $bGiven   = is_numeric($ans) ? (int) $ans : -1;
-                                    $bOk      = $bGiven === $bCorrect;
-                                    $blankRows[$bk] = [
-                                        'ok'    => $bOk,
-                                        'given' => $bChoices[$bGiven] ?? 'Aucune réponse',
-                                        'right' => $bChoices[$bCorrect] ?? '',
-                                    ];
+                                    $bOk = (is_numeric($ans) ? (int) $ans : -1) === (int) ($blank['correct'] ?? -1);
                                 } else {
                                     $bAccepted = array_map(fn ($s) => mb_strtolower(trim((string) $s)), (array) ($blank['accepted'] ?? []));
                                     $bGivenStr = is_string($ans) ? trim($ans) : '';
                                     $bOk       = $bGivenStr !== '' && in_array(mb_strtolower($bGivenStr), $bAccepted, true);
-                                    $bRaw      = array_values((array) ($blank['accepted'] ?? []));
-                                    $blankRows[$bk] = [
-                                        'ok'    => $bOk,
-                                        'given' => $bGivenStr !== '' ? $bGivenStr : 'Aucune réponse',
-                                        'right' => $bRaw[0] ?? '',
-                                    ];
                                 }
                                 if (! $bOk) {
                                     $allBlanksOk = false;
@@ -311,22 +298,14 @@
                                 @endunless
                             @endif
                         @elseif($qType === 'cloze')
-                            @if($reviewOpts['show_correctness'])
-                                <p class="mb-1 text-muted" style="font-size: 0.85rem;">
-                                    {{ $isCorrect ? 'Tous les trous sont corrects.' : 'Certains trous sont à revoir.' }}
-                                </p>
-                            @endif
-                            {{-- Réponse de l'étudiant par trou + (si autorisé) la bonne réponse. --}}
-                            <ul class="mb-1 text-muted" style="font-size: 0.85rem; padding-left: 1.1rem;">
-                                @foreach(($blankRows ?? []) as $bk => $row)
-                                    <li>
-                                        Trou {{ $bk + 1 }} : <strong>{{ $row['given'] }}</strong>
-                                        @if($reviewOpts['show_right_answer'] && ! $row['ok'] && $row['right'] !== '')
-                                            <span aria-hidden="true">→</span> bonne réponse : <strong>{{ $row['right'] }}</strong>
-                                        @endif
-                                    </li>
-                                @endforeach
-                            </ul>
+                            {{-- C3 : révision par trou DRY (différé respecte review_options). --}}
+                            @include('academy::livewire.partials.cloze-review', [
+                                'blanks'      => is_array($q['blanks'] ?? null) ? $q['blanks'] : [],
+                                'userAns'     => $userAns,
+                                'showRight'   => $reviewOpts['show_right_answer'],
+                                'showSummary' => $reviewOpts['show_correctness'],
+                                'isCorrect'   => $isCorrect,
+                            ])
                         @else
                             <p class="mb-1 text-muted" style="font-size: 0.85rem;">
                                 Votre réponse : <strong>{{ $givenLabel }}</strong>
@@ -561,36 +540,12 @@
                          (input pour short, select pour mcq), relié à answers[i][indexTrou].
                          Les bonnes réponses ne sont jamais exposées (segments seuls). --}}
                     @elseif($type === 'cloze')
-                        @php $segments = $question['segments'] ?? []; @endphp
-                        <fieldset style="border:0;padding:0;margin:0;">
-                            <legend class="visually-hidden">{{ $question['question'] ?? 'Texte à trous' }}</legend>
-                            <p class="text-muted mb-2" style="font-size: 0.85rem;">Complétez chaque trou.</p>
-                            <p style="line-height: 2.4;">
-                                @foreach($segments as $seg)
-                                    @if(($seg['type'] ?? '') === 'blank')
-                                        @php $k = (int) ($seg['index'] ?? 0); $bk = $seg['kind'] ?? 'short'; @endphp
-                                        @if($bk === 'mcq')
-                                            <select name="answers[{{ $i }}][{{ $k }}]"
-                                                    class="form-select form-select-sm d-inline-block"
-                                                    style="width:auto; max-width: 240px; vertical-align: baseline;"
-                                                    aria-label="Trou {{ $k + 1 }}" required>
-                                                <option value="">— Choisir —</option>
-                                                @foreach(($seg['choices'] ?? []) as $ci => $choice)
-                                                    <option value="{{ $ci }}">{{ $choice }}</option>
-                                                @endforeach
-                                            </select>
-                                        @else
-                                            <input type="text" name="answers[{{ $i }}][{{ $k }}]"
-                                                   class="form-control form-control-sm d-inline-block"
-                                                   style="width:auto; max-width: 200px; vertical-align: baseline;"
-                                                   autocomplete="off" aria-label="Trou {{ $k + 1 }}" required>
-                                        @endif
-                                    @else
-                                        {{ $seg['value'] ?? '' }}
-                                    @endif
-                                @endforeach
-                            </p>
-                        </fieldset>
+                        {{-- C3 : rendu DRY (fieldset/legend intégré) ; name = answers[i][k]. --}}
+                        @include('academy::livewire.partials.cloze-inputs', [
+                            'segments'   => $question['segments'] ?? [],
+                            'namePrefix' => 'answers['.$i.']',
+                            'legend'     => $question['question'] ?? 'Texte à trous',
+                        ])
 
                     @else
                         <p class="text-muted small">Type de question non pris en charge.</p>
@@ -742,33 +697,12 @@
                                     @endforeach
                                 </div>
                             @elseif($type === 'cloze')
-                                @php $segments = $question['segments'] ?? []; @endphp
-                                <p class="text-muted mb-2" style="font-size: 0.85rem;">Complétez chaque trou.</p>
-                                <p style="line-height: 2.4;">
-                                    @foreach($segments as $seg)
-                                        @if(($seg['type'] ?? '') === 'blank')
-                                            @php $k = (int) ($seg['index'] ?? 0); $bk = $seg['kind'] ?? 'short'; @endphp
-                                            @if($bk === 'mcq')
-                                                <select name="answer[{{ $k }}]"
-                                                        class="form-select form-select-sm d-inline-block"
-                                                        style="width:auto; max-width: 240px; vertical-align: baseline;"
-                                                        aria-label="Trou {{ $k + 1 }}" required>
-                                                    <option value="">— Choisir —</option>
-                                                    @foreach(($seg['choices'] ?? []) as $ci => $choice)
-                                                        <option value="{{ $ci }}">{{ $choice }}</option>
-                                                    @endforeach
-                                                </select>
-                                            @else
-                                                <input type="text" name="answer[{{ $k }}]"
-                                                       class="form-control form-control-sm d-inline-block"
-                                                       style="width:auto; max-width: 200px; vertical-align: baseline;"
-                                                       autocomplete="off" aria-label="Trou {{ $k + 1 }}" required>
-                                            @endif
-                                        @else
-                                            {{ $seg['value'] ?? '' }}
-                                        @endif
-                                    @endforeach
-                                </p>
+                                {{-- C2 + C3 : même rendu DRY, fieldset/legend AUSSI en immédiat ; name = answer[k]. --}}
+                                @include('academy::livewire.partials.cloze-inputs', [
+                                    'segments'   => $question['segments'] ?? [],
+                                    'namePrefix' => 'answer',
+                                    'legend'     => $question['question'] ?? 'Texte à trous',
+                                ])
                             @else
                                 <p class="text-muted small">Type de question non pris en charge.</p>
                             @endif
@@ -831,41 +765,14 @@
                                 {{ $isCorrect ? 'L\'ordre est exact.' : 'L\'ordre est à revoir.' }}
                             </p>
                         @elseif($type === 'cloze')
-                            @php
-                                $blanks2   = is_array($question['blanks'] ?? null) ? $question['blanks'] : [];
-                                $givenMap2 = is_array($userAns) ? $userAns : [];
-                            @endphp
-                            <p class="mb-1 text-muted" style="font-size: 0.85rem;">
-                                {{ $isCorrect ? 'Tous les trous sont corrects.' : 'Certains trous sont à revoir.' }}
-                            </p>
-                            <ul class="mb-1 text-muted" style="font-size: 0.85rem; padding-left: 1.1rem;">
-                                @foreach($blanks2 as $bk2 => $blank2)
-                                    @php
-                                        $kind2 = ($blank2['kind'] ?? 'short') === 'mcq' ? 'mcq' : 'short';
-                                        $ans2  = $givenMap2[$bk2] ?? ($givenMap2[(string) $bk2] ?? null);
-                                        if ($kind2 === 'mcq') {
-                                            $choices2  = is_array($blank2['choices'] ?? null) ? $blank2['choices'] : [];
-                                            $gi2       = is_numeric($ans2) ? (int) $ans2 : -1;
-                                            $okb2      = $gi2 === (int) ($blank2['correct'] ?? -1);
-                                            $givenTxt2 = $choices2[$gi2] ?? 'Aucune réponse';
-                                            $rightTxt2 = $choices2[(int) ($blank2['correct'] ?? -1)] ?? '';
-                                        } else {
-                                            $accepted2 = array_map(fn ($s) => mb_strtolower(trim((string) $s)), (array) ($blank2['accepted'] ?? []));
-                                            $gstr2     = is_string($ans2) ? trim($ans2) : '';
-                                            $okb2      = $gstr2 !== '' && in_array(mb_strtolower($gstr2), $accepted2, true);
-                                            $rawAcc2   = array_values((array) ($blank2['accepted'] ?? []));
-                                            $givenTxt2 = $gstr2 !== '' ? $gstr2 : 'Aucune réponse';
-                                            $rightTxt2 = $rawAcc2[0] ?? '';
-                                        }
-                                    @endphp
-                                    <li>
-                                        Trou {{ $bk2 + 1 }} : <strong>{{ $givenTxt2 }}</strong>
-                                        @unless($okb2)
-                                            @if($rightTxt2 !== '')<span aria-hidden="true">→</span> bonne réponse : <strong>{{ $rightTxt2 }}</strong>@endif
-                                        @endunless
-                                    </li>
-                                @endforeach
-                            </ul>
+                            {{-- C3 : révision par trou DRY (immédiat = rétroaction toujours montrée). --}}
+                            @include('academy::livewire.partials.cloze-review', [
+                                'blanks'      => is_array($question['blanks'] ?? null) ? $question['blanks'] : [],
+                                'userAns'     => $userAns,
+                                'showRight'   => true,
+                                'showSummary' => true,
+                                'isCorrect'   => $isCorrect,
+                            ])
                         @else
                             <p class="mb-1 text-muted" style="font-size: 0.85rem;">
                                 Votre réponse : <strong>{{ $givenLabel }}</strong>
