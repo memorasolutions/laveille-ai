@@ -66,8 +66,14 @@
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body text-center">
                 <i data-lucide="user-minus" class="text-danger mb-2" style="width: 28px; height: 28px;"></i>
-                <h6 class="text-muted mb-1 fw-normal small">Désabonnements</h6>
-                <h3 class="mb-0 fw-bold">{{ number_format($global['unsubscribes'], 0, ',', ' ') }}</h3>
+                <h6 class="text-muted mb-1 fw-normal small">Désabonnements réels</h6>
+                <h3 class="mb-0 fw-bold">{{ number_format($global['real_unsubs'], 0, ',', ' ') }}</h3>
+                @if($global['hygiene_purges'] > 0)
+                    <small class="text-muted d-block mt-1">
+                        + {{ number_format($global['hygiene_purges'], 0, ',', ' ') }}
+                        <span title="Non-confirmés purgés automatiquement apres 7 jours - ne sont pas de vrais departs">purges J+7</span>
+                    </small>
+                @endif
             </div>
         </div>
     </div>
@@ -145,14 +151,81 @@
     </div>
 </div>
 
+{{-- ===================== REPARTITION DES ABONNES (table newsletter_subscribers) ===================== --}}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom d-flex align-items-center">
+                <h5 class="card-title mb-0">
+                    <i data-lucide="users" class="me-2 text-muted" style="width: 18px; height: 18px;"></i>
+                    Repartition des abonnes (base locale)
+                </h5>
+            </div>
+            <div class="card-body pb-2">
+                <div class="row g-3">
+                    {{-- Désabonnements réels --}}
+                    <div class="col-12 col-md-6">
+                        <div class="p-3 rounded border bg-danger bg-opacity-5">
+                            <div class="d-flex align-items-center gap-3">
+                                <i data-lucide="user-minus" class="text-danger flex-shrink-0" style="width: 24px; height: 24px;"></i>
+                                <div>
+                                    <h4 class="mb-0 fw-bold text-danger">{{ number_format($global['real_unsubs'], 0, ',', ' ') }}</h4>
+                                    <div class="fw-semibold small">Désabonnements réels</div>
+                                    <div class="text-muted" style="font-size: 0.78rem;">
+                                        Abonnes confirmes qui ont cliqué « se désabonner ».
+                                        Ce sont de vrais departs a analyser.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{-- Purges d'hygiène --}}
+                    <div class="col-12 col-md-6">
+                        <div class="p-3 rounded border bg-secondary bg-opacity-5">
+                            <div class="d-flex align-items-center gap-3">
+                                <i data-lucide="filter-x" class="text-secondary flex-shrink-0" style="width: 24px; height: 24px;"></i>
+                                <div>
+                                    <h4 class="mb-0 fw-bold text-secondary">{{ number_format($global['hygiene_purges'], 0, ',', ' ') }}</h4>
+                                    <div class="fw-semibold small">Purges d'hygiene (J+7)</div>
+                                    <div class="text-muted" style="font-size: 0.78rem;">
+                                        Non-confirmes purges automatiquement apres 7 jours.
+                                        Ils n'ont jamais recu d'infolettre : ce ne sont pas des departs.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @if($global['hygiene_purges'] > 0 && ($global['real_unsubs'] + $global['hygiene_purges']) > 0)
+                    @php
+                        $totalUnsubs = $global['real_unsubs'] + $global['hygiene_purges'];
+                        $hygieneRatio = $totalUnsubs > 0 ? round($global['hygiene_purges'] / $totalUnsubs * 100, 0) : 0;
+                    @endphp
+                    <div class="alert alert-warning border-0 d-flex align-items-start gap-2 mt-3 mb-0" role="alert">
+                        <i data-lucide="alert-triangle" class="flex-shrink-0 mt-1" style="width: 16px; height: 16px;"></i>
+                        <div class="small">
+                            <strong>{{ $hygieneRatio }}&nbsp;% des « désabonnements » sont en fait des purges d'hygiene</strong>
+                            ({{ number_format($global['hygiene_purges'], 0, ',', ' ') }} sur {{ number_format($totalUnsubs, 0, ',', ' ') }}).
+                            Le chiffre de désabonnements réels a prendre en compte est
+                            <strong>{{ number_format($global['real_unsubs'], 0, ',', ' ') }}</strong>.
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-12">
         <div class="alert alert-light border text-muted mb-0" role="alert">
             <i data-lucide="info" class="me-1" style="width: 16px; height: 16px;"></i>
-            Données issues des webhooks Brevo (table <code>newsletter_events</code>). Les ouvertures et
-            clics « uniques » par numéro sont attribués par appartenance (liste d'envoi) et fenêtre
-            temporelle jusqu'au numéro suivant reçu par l'abonné. Heures affichées au fuseau de Québec
-            (America/Toronto).
+            <strong>Désabonnements réels</strong> : abonnes confirmes qui ont utilise le lien de désabonnement.
+            <strong>Purges J+7</strong> : inscrits qui n'ont jamais confirme leur courriel, purges automatiquement apres 7 jours par la commande
+            <code>newsletter:purge-unconfirmed</code> — ils n'ont jamais recu d'infolettre et ne representent pas un vrai depart.
+            Les cartes « Désabonnements Brevo » (colonne de gauche) proviennent des webhooks
+            (table <code>newsletter_events</code>). Les ouvertures et clics « uniques » par numero sont attribues
+            par appartenance (liste d'envoi) et fenetre temporelle. Heures : Québec (America/Toronto).
         </div>
     </div>
 </div>

@@ -148,7 +148,21 @@ class AnalyticsService
             ->pluck('cnt', 'date')
             ->toArray();
 
-        $unsubscribed = Subscriber::whereNotNull('unsubscribed_at')
+        // Désabonnements réels : abonnés confirmes qui ont cliqué « se désabonner ».
+        $realUnsubscribed = Subscriber::whereNotNull('unsubscribed_at')
+            ->whereNotNull('confirmed_at')
+            ->where(static fn ($q) => $q
+                ->whereNull('bounce_reason')
+                ->orWhere('bounce_reason', '!=', 'auto_purge_unconfirmed_j7'))
+            ->where('unsubscribed_at', '>=', $start)
+            ->selectRaw('DATE(unsubscribed_at) as date, count(*) as cnt')
+            ->groupBy('date')
+            ->pluck('cnt', 'date')
+            ->toArray();
+
+        // Purges J+7 : non-confirmes purges automatiquement — a ne pas confondre avec des departs.
+        $hygienePurged = Subscriber::where('bounce_reason', 'auto_purge_unconfirmed_j7')
+            ->whereNotNull('unsubscribed_at')
             ->where('unsubscribed_at', '>=', $start)
             ->selectRaw('DATE(unsubscribed_at) as date, count(*) as cnt')
             ->groupBy('date')
@@ -159,9 +173,10 @@ class AnalyticsService
         foreach (CarbonPeriod::create($start, $end) as $date) {
             $key = $date->format('Y-m-d');
             $timeline[] = [
-                'date' => $key,
-                'subscribed' => $confirmed[$key] ?? 0,
-                'unsubscribed' => $unsubscribed[$key] ?? 0,
+                'date'        => $key,
+                'subscribed'  => $confirmed[$key] ?? 0,
+                'unsubscribed' => $realUnsubscribed[$key] ?? 0,   // désabos réels uniquement
+                'hygiene'     => $hygienePurged[$key] ?? 0,        // purges J+7
             ];
         }
 

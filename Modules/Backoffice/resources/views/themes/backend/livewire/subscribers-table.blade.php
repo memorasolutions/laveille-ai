@@ -52,8 +52,14 @@
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="small fw-medium text-muted mb-1">{{ __('Désabonnés') }}</p>
-                            <h6 class="fs-4 fw-bold text-body mb-0">{{ $unsubscribedCount }}</h6>
+                            <p class="small fw-medium text-muted mb-1">{{ __('Désabonnés réels') }}</p>
+                            <h6 class="fs-4 fw-bold text-body mb-0">{{ $realUnsubscribedCount }}</h6>
+                            @if($hygienePurgesCount > 0)
+                                <p class="small text-muted mb-0 mt-1"
+                                   title="{{ __('Non-confirmés purgés automatiquement apres 7 jours — pas de vrais departs') }}">
+                                    + {{ $hygienePurgesCount }} {{ __('purges J+7') }}
+                                </p>
+                            @endif
                         </div>
                         <div class="d-flex align-items-center justify-content-center rounded-circle bg-danger bg-opacity-10 text-danger" style="width:48px;height:48px;flex-shrink:0;">
                             <i data-lucide="x-circle" style="width:22px;height:22px;"></i>

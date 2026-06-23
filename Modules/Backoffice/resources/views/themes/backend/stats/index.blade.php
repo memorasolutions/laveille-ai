@@ -477,11 +477,12 @@ window.addEventListener('load', function () {
         export: { csv: { filename: 'laveille-stats', headerCategory: 'Date' }, svg: { filename: 'laveille-stats' }, png: { filename: 'laveille-stats' } },
     };
 
-    // Newsletter Growth - Area Chart (subscribed vs unsubscribed)
+    // Newsletter Growth - Area Chart (inscriptions / désabos réels / purges J+7)
     new ApexCharts(document.querySelector("#chart-newsletter-growth"), {
         series: [
             { name: "{{ __('Inscriptions') }}", data: @json(array_column($newsletterGrowth, 'subscribed')) },
-            { name: "{{ __('Désabonnements') }}", data: @json(array_column($newsletterGrowth, 'unsubscribed')) },
+            { name: "{{ __('Désabonnements réels') }}", data: @json(array_column($newsletterGrowth, 'unsubscribed')) },
+            { name: "{{ __('Purges J+7 (hygiene)') }}", data: @json(array_column($newsletterGrowth, 'hygiene')) },
         ],
         chart: { type: 'area', height: 280, toolbar: commonToolbar, stacked: false, group: 'daily', id: 'newsletter', animations: { enabled: true, speed: 600 } },
         xaxis: {
@@ -489,8 +490,8 @@ window.addEventListener('load', function () {
             labels: { style: { fontSize: '11px' }, rotate: -45, rotateAlways: @json(count($newsletterGrowth) > 14) }
         },
         yaxis: { labels: { formatter: (v) => Math.round(v) }, decimalsInFloat: 0 },
-        colors: ['#8B5CF6', '#ef4444'],
-        stroke: { curve: 'smooth', width: 2 },
+        colors: ['#8B5CF6', '#ef4444', '#94a3b8'],
+        stroke: { curve: 'smooth', width: [2, 2, 1], dashArray: [0, 0, 6] },
         fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05, stops: [0, 100] } },
         dataLabels: { enabled: false },
         grid: { borderColor: gridColor, strokeDashArray: 4 },

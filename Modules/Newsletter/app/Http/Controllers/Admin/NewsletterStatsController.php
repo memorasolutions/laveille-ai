@@ -14,6 +14,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Modules\Newsletter\Models\NewsletterEvent;
 use Modules\Newsletter\Models\NewsletterIssue;
+use Modules\Newsletter\Models\Subscriber;
 
 /**
  * Page ADMIN « Statistiques newsletter » — LECTURE SEULE.
@@ -55,12 +56,30 @@ class NewsletterStatsController extends Controller
         $sumOf = static fn (array $types): int => collect($types)
             ->sum(static fn (string $t): int => (int) $rawCounts->get($t, 0));
 
+        // Désabonnements réels : abonnés confirmés qui se sont désabonnés volontairement
+        // (marqueur bounce_reason != 'auto_purge_unconfirmed_j7').
+        $realUnsubs = (int) Subscriber::whereNotNull('unsubscribed_at')
+            ->whereNotNull('confirmed_at')
+            ->where(static fn ($q) => $q
+                ->whereNull('bounce_reason')
+                ->orWhere('bounce_reason', '!=', 'auto_purge_unconfirmed_j7'))
+            ->count();
+
+        // Purges d'hygiène J+7 : non-confirmés purgés automatiquement après 7 jours.
+        // Ce ne sont PAS des départs réels (ils n'ont jamais reçu d'infolettre).
+        $hygienePurges = (int) Subscriber::where('bounce_reason', 'auto_purge_unconfirmed_j7')
+            ->count();
+
         $global = [
             'total_events' => (int) $rawCounts->sum(),
             'opens'        => $sumOf(self::OPEN_EVENTS),
             'clicks'       => $sumOf(self::CLICK_EVENTS),
             'bounces'      => $sumOf(self::BOUNCE_EVENTS),
-            'unsubscribes' => (int) $rawCounts->get('unsubscribed', 0),
+            // Désabonnements Brevo (webhook) — événements reçus de l'API.
+            'unsubscribes'     => (int) $rawCounts->get('unsubscribed', 0),
+            // Désabonnements abonnés (table newsletter_subscribers) — séparés en deux catégories.
+            'real_unsubs'      => $realUnsubs,
+            'hygiene_purges'   => $hygienePurges,
             'spam'         => $sumOf(self::SPAM_EVENTS),
             // Ouvertures / clics UNIQUES = COUNT(DISTINCT email) sur la famille.
             'unique_opens'  => (int) NewsletterEvent::query()

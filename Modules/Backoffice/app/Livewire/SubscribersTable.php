@@ -187,14 +187,29 @@ class SubscribersTable extends Component
         $totalCount = Subscriber::count();
         $activeCount = Subscriber::whereNotNull('confirmed_at')->whereNull('unsubscribed_at')->count();
         $pendingCount = Subscriber::whereNull('confirmed_at')->whereNull('unsubscribed_at')->count();
-        $unsubscribedCount = Subscriber::whereNotNull('unsubscribed_at')->count();
+
+        // Désabonnements réels : abonnés confirmes qui ont cliqué « se désabonner ».
+        $realUnsubscribedCount = Subscriber::whereNotNull('unsubscribed_at')
+            ->whereNotNull('confirmed_at')
+            ->where(static fn ($q) => $q
+                ->whereNull('bounce_reason')
+                ->orWhere('bounce_reason', '!=', 'auto_purge_unconfirmed_j7'))
+            ->count();
+
+        // Purges d'hygiene J+7 : non-confirmes purges automatiquement — pas de vrais departs.
+        $hygienePurgesCount = Subscriber::where('bounce_reason', 'auto_purge_unconfirmed_j7')->count();
+
+        // Compatibilité aval : total pour le filtre « Désabonné » de la table (inchangé).
+        $unsubscribedCount = $realUnsubscribedCount + $hygienePurgesCount;
 
         return view('backoffice::livewire.subscribers-table', compact(
             'subscribers',
             'totalCount',
             'activeCount',
             'pendingCount',
-            'unsubscribedCount'
+            'unsubscribedCount',
+            'realUnsubscribedCount',
+            'hygienePurgesCount'
         ));
     }
 }
