@@ -28,7 +28,7 @@ Implanter de manière EXHAUSTIVE les fonctionnalités Moodle manquantes (cf. gap
 - [x] F6 · Mode quiz **Adaptatif** (réessai avec pénalité) ✅ (v346-347, /sim PASS, /audit 85→corrigé) — **VAGUE 3 COMPLÈTE** : 9 types + 3 comportements = parité Moodle questions.
 
 ### VAGUE 4 — Activités
-- [ ] F7 · Activité **Feedback / Sondage** (questionnaire non noté)
+- [x] F7 · Activité **Feedback / Sondage** (questionnaire non noté) ✅ V4-b (v350-351, /sim 8/8, /audit 84→corrigé : participants anti-respam + SoftDeletes)
 - [x] F8 · Activité **Choice** (vote/sondage simple) ✅ V4-a (v348-349, /sim 6/6, /audit 83→corrigé)
 - [ ] F9 · Activité **Forum** (discussions, anti-spam)
 
@@ -55,6 +55,7 @@ Implanter de manière EXHAUSTIVE les fonctionnalités Moodle manquantes (cf. gap
 ## Journal d'exécution (le plus récent en haut)
 | Date | Feature | Version | Implant | /sim | /audit | Notes |
 |------|---------|---------|---------|------|--------|-------|
+| 2026-06-23 | **V4-b Activité Feedback/Sondage** | v350-351 | 755 tests (+19) | 8/8 PASS (multi-questions, anonyme user_id null, résultats formateur-seul, required, sécurité, non-régression) | 84/100 puis corrigé, XSS sûr | Type d'item `feedback` (table academy_feedback_responses, critère achèvement `submit`). Corrigé v351 (764 tests) : anti-respam anonyme robuste (table academy_feedback_participants, anonymat préservé), requête sortie de la vue (LessonController preload), SoftDeletes + withTrashed. Dette : results() agrégation PHP (OK volume). |
 | 2026-06-23 | **V4-a Activité Choice** | v348-349 | 727 tests (+20) | 6/6 PASS (vote unique, re-vote, visibilité never/after_vote/anonyme, achèvement, sécurité, non-régression) | 83/100 puis corrigé | 1re activité Vague 4. Nouveau type d'item `choice` (table academy_choice_responses, critère achèvement `vote`). Corrigé v349 (736 tests) : trait DRY `AuthorizesAcademyAccess` (partagé quiz+choice), **throttle:20,1 sur tous les POST Academy** (anti-DoS), perf tally lazy + preload N+1, a11y/PII. |
 | 2026-06-23 | **F6 Adaptatif → VAGUE 3 COMPLÈTE** | v346-347 | 700 tests (+11) | PASS A→E (1pt/0,67pt/0pt, anti-spam serveur, deferred inchangé) | 85/100 puis corrigé | Réessai avec pénalité max(0,1-n×p)×justesse, bornage serveur, idempotent. Corrigé v347 (707 tests) : review_options respecté en vue verrouillée immédiat/adaptatif (tous types), focus visible WCAG, masquage champs adaptatifs. **JALON : Vague 3 = 9 types de questions + 3 comportements = parité Moodle sur les questions.** Dette : score/max_score DB bruts vs percent pénalisé ; immédiat non testé en /sim live (pas d'item en base, vérifié par code). |
 | 2026-06-23 | **F5 Essai (correction manuelle)** | v344-345 | 680 tests (+11) | 6/7 → bloquant corrigé | 87/100 puis corrigé | Type le + complexe : workflow soumission→en attente→correction formateur→note finale→complétion. Migration additive (needs_grading/manual_scores/feedback/graded_at/by), service EssayGradingService + composant EssayGrading gatés. **/sim a trouvé bloquant** : étudiant ne voyait pas son essai corrigé (note+feedback en flash seul). Corrigé v345 (689 tests) : RÉSULTAT PERSISTANT (charge dernière QuizAttempt user+item, affiche note+feedback+révision, anti-IDOR, review_options) → bénéficie à TOUS les quiz. + completion score, N+1, bornes longueur. |

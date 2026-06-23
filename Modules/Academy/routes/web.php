@@ -12,6 +12,7 @@ use Modules\Academy\Http\Controllers\CertificateController;
 use Modules\Academy\Http\Controllers\CompletionController;
 use Modules\Academy\Http\Controllers\ChoiceController;
 use Modules\Academy\Http\Controllers\FeedbackController;
+use Modules\Academy\Http\Controllers\ForumController;
 use Modules\Academy\Http\Controllers\CourseController;
 use Modules\Academy\Http\Controllers\EnrollmentController;
 use Modules\Academy\Http\Controllers\ExportController;
@@ -149,5 +150,39 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             'courses/{course:slug}/lessons/{lesson}/items/{itemId}/feedback/submit',
             [FeedbackController::class, 'submit']
         )->name('feedback.submit');
+
+        // FORUM — discussions attachées à une leçon (item « forum », type Moodle
+        // « Forum »). Auth + inscription/gérant vérifiés, item re-résolu (anti-IDOR),
+        // honeypot `hp_url`, bornes serveur. Ouvrir un sujet / répondre (étudiant ou
+        // gérant) + modération (épingler/verrouiller/supprimer) gatée manageEnrollments.
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/forum/topics',
+            [ForumController::class, 'createTopic']
+        )->name('forum.topics.create');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/forum/topics/{topicId}/reply',
+            [ForumController::class, 'reply']
+        )->name('forum.topics.reply');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/forum/topics/{topicId}/pin',
+            [ForumController::class, 'pinTopic']
+        )->name('forum.topics.pin');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/forum/topics/{topicId}/lock',
+            [ForumController::class, 'lockTopic']
+        )->name('forum.topics.lock');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/forum/topics/{topicId}/delete',
+            [ForumController::class, 'deleteTopic']
+        )->name('forum.topics.delete');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/forum/posts/{postId}/delete',
+            [ForumController::class, 'deletePost']
+        )->name('forum.posts.delete');
     });
 });

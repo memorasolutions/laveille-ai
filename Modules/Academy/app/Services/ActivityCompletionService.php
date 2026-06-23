@@ -39,7 +39,7 @@ use Modules\Academy\Models\LessonItem;
 final class ActivityCompletionService
 {
     /** Critères de complétion connus (liste blanche globale). */
-    public const CRITERIA = ['manual', 'view', 'min_grade', 'vote', 'submit'];
+    public const CRITERIA = ['manual', 'view', 'min_grade', 'vote', 'submit', 'post'];
 
     /**
      * Critères autorisés pour un TYPE d'item donné (liste blanche serveur).
@@ -54,6 +54,7 @@ final class ActivityCompletionService
             'quiz'     => ['min_grade', 'view', 'manual'],
             'choice'   => ['vote', 'view', 'manual'],
             'feedback' => ['submit', 'view', 'manual'],
+            'forum'    => ['post', 'view', 'manual'],
             default    => ['manual', 'view'],
         };
     }
@@ -69,6 +70,7 @@ final class ActivityCompletionService
             'quiz'     => 'min_grade',
             'choice'   => 'vote',
             'feedback' => 'submit',
+            'forum'    => 'post',
             default    => 'manual',
         };
     }
@@ -135,6 +137,7 @@ final class ActivityCompletionService
             'min_grade' => 'se complète en réussissant le quiz',
             'vote'      => 'se complète en votant',
             'submit'    => 'se complète en répondant au sondage',
+            'post'      => 'se complète en participant au forum',
             default     => 'à marquer comme terminé',
         };
     }

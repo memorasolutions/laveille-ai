@@ -682,7 +682,7 @@
                                                 x-sort:config="{ handle: '[data-sort-handle]', animation: 150 }"
                                                 style="margin: 0 0 10px; display: flex; flex-direction: column; gap: 8px;">
                                                 @foreach ($lesson->lessonItems as $item)
-                                                    @php($typeLabel = ['video' => 'Vidéo', 'document' => 'Document', 'quiz' => 'Quiz', 'choice' => 'Sondage', 'feedback' => 'Rétroaction'][$item->type] ?? $item->type)
+                                                    @php($typeLabel = ['video' => 'Vidéo', 'document' => 'Document', 'quiz' => 'Quiz', 'choice' => 'Sondage', 'feedback' => 'Rétroaction', 'forum' => 'Forum'][$item->type] ?? $item->type)
                                                     <li x-sort:item="{{ $item->id }}" data-sort-id="{{ $item->id }}"
                                                         wire:key="item-{{ $item->id }}"
                                                         style="border: 1px solid #F1F5F9; border-radius: var(--sys-radius-md, 0.5rem); padding: 10px 12px;">
@@ -803,7 +803,7 @@
                                                                     </div>
                                                                 @endif
                                                             @else
-                                                            <form wire:submit="updateItem({{ $item->id }}, '{{ $item->type }}', $event.target.title.value, $event.target.estimated_minutes.value, { player_url: $event.target.player_url ? $event.target.player_url.value : null, poster_url: $event.target.poster_url ? $event.target.poster_url.value : null, duration_minutes: $event.target.duration_minutes ? $event.target.duration_minutes.value : null, rich_text: $event.target.rich_text ? $event.target.rich_text.value : null, qt_bank_key: $event.target.qt_bank_key ? $event.target.qt_bank_key.value : null, passing_score: $event.target.passing_score ? $event.target.passing_score.value : null, attempts_allowed: $event.target.attempts_allowed ? $event.target.attempts_allowed.value : null, bank_category_id: $event.target.bank_category_id ? $event.target.bank_category_id.value : null, bank_draw_count: $event.target.bank_draw_count ? $event.target.bank_draw_count.value : null, bank_include_subcategories: $event.target.bank_include_subcategories ? $event.target.bank_include_subcategories.checked : null, grading_method: $event.target.grading_method ? $event.target.grading_method.value : null, shuffle_questions: $event.target.shuffle_questions ? $event.target.shuffle_questions.checked : null, shuffle_answers: $event.target.shuffle_answers ? $event.target.shuffle_answers.checked : null, time_limit_minutes: $event.target.time_limit_minutes ? $event.target.time_limit_minutes.value : null, review_options: $event.target.review_show_correctness ? { show_correctness: $event.target.review_show_correctness.checked, show_marks: $event.target.review_show_marks.checked, show_specific_feedback: $event.target.review_show_specific_feedback.checked, show_general_feedback: $event.target.review_show_general_feedback.checked, show_overall_feedback: $event.target.review_show_overall_feedback.checked, show_right_answer: $event.target.review_show_right_answer.checked } : null, question_behaviour: $event.target.question_behaviour ? $event.target.question_behaviour.value : null, adaptive_penalty: $event.target.adaptive_penalty ? $event.target.adaptive_penalty.value : null, adaptive_max_tries: $event.target.adaptive_max_tries ? $event.target.adaptive_max_tries.value : null, completion: $event.target.completion ? $event.target.completion.value : null, choice_question: $event.target.choice_question ? $event.target.choice_question.value : null, choice_options: $event.target.choice_options ? $event.target.choice_options.value : null, allow_multiple: $event.target.allow_multiple ? $event.target.allow_multiple.checked : null, anonymous: $event.target.anonymous ? $event.target.anonymous.checked : null, results_visibility: $event.target.results_visibility ? $event.target.results_visibility.value : null })"
+                                                            <form wire:submit="updateItem({{ $item->id }}, '{{ $item->type }}', $event.target.title.value, $event.target.estimated_minutes.value, { player_url: $event.target.player_url ? $event.target.player_url.value : null, poster_url: $event.target.poster_url ? $event.target.poster_url.value : null, duration_minutes: $event.target.duration_minutes ? $event.target.duration_minutes.value : null, rich_text: $event.target.rich_text ? $event.target.rich_text.value : null, qt_bank_key: $event.target.qt_bank_key ? $event.target.qt_bank_key.value : null, passing_score: $event.target.passing_score ? $event.target.passing_score.value : null, attempts_allowed: $event.target.attempts_allowed ? $event.target.attempts_allowed.value : null, bank_category_id: $event.target.bank_category_id ? $event.target.bank_category_id.value : null, bank_draw_count: $event.target.bank_draw_count ? $event.target.bank_draw_count.value : null, bank_include_subcategories: $event.target.bank_include_subcategories ? $event.target.bank_include_subcategories.checked : null, grading_method: $event.target.grading_method ? $event.target.grading_method.value : null, shuffle_questions: $event.target.shuffle_questions ? $event.target.shuffle_questions.checked : null, shuffle_answers: $event.target.shuffle_answers ? $event.target.shuffle_answers.checked : null, time_limit_minutes: $event.target.time_limit_minutes ? $event.target.time_limit_minutes.value : null, review_options: $event.target.review_show_correctness ? { show_correctness: $event.target.review_show_correctness.checked, show_marks: $event.target.review_show_marks.checked, show_specific_feedback: $event.target.review_show_specific_feedback.checked, show_general_feedback: $event.target.review_show_general_feedback.checked, show_overall_feedback: $event.target.review_show_overall_feedback.checked, show_right_answer: $event.target.review_show_right_answer.checked } : null, question_behaviour: $event.target.question_behaviour ? $event.target.question_behaviour.value : null, adaptive_penalty: $event.target.adaptive_penalty ? $event.target.adaptive_penalty.value : null, adaptive_max_tries: $event.target.adaptive_max_tries ? $event.target.adaptive_max_tries.value : null, completion: $event.target.completion ? $event.target.completion.value : null, choice_question: $event.target.choice_question ? $event.target.choice_question.value : null, choice_options: $event.target.choice_options ? $event.target.choice_options.value : null, allow_multiple: $event.target.allow_multiple ? $event.target.allow_multiple.checked : null, anonymous: $event.target.anonymous ? $event.target.anonymous.checked : null, results_visibility: $event.target.results_visibility ? $event.target.results_visibility.value : null, forum_intro: $event.target.forum_intro ? $event.target.forum_intro.value : null, allow_student_topics: $event.target.allow_student_topics ? $event.target.allow_student_topics.checked : null, locked: $event.target.locked ? $event.target.locked.checked : null })"
                                                                   style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
                                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="item-title-{{ $item->id }}">Titre</label>
                                                                 <input id="item-title-{{ $item->id }}" type="text" name="title" value="{{ $item->title }}" aria-label="Titre de l'élément"
@@ -1000,6 +1000,21 @@
                                                                         <option value="always" @selected($choiceVisibility === 'always')>Toujours visibles</option>
                                                                         <option value="never" @selected($choiceVisibility === 'never')>Jamais (formateur seulement)</option>
                                                                     </select>
+                                                                @elseif ($item->type === 'forum')
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-forumintro-{{ $item->id }}">Introduction du forum (facultative)</label>
+                                                                    <textarea id="item-forumintro-{{ $item->id }}" name="forum_intro" rows="2" placeholder="Présentez le sujet de discussion…" aria-label="Introduction du forum"
+                                                                              style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;">{{ \Modules\Academy\Services\ForumService::intro($item) }}</textarea>
+
+                                                                    <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="item-forumallow-{{ $item->id }}">
+                                                                        <input id="item-forumallow-{{ $item->id }}" type="checkbox" name="allow_student_topics" value="1" @checked(\Modules\Academy\Services\ForumService::allowsStudentTopics($item))
+                                                                               style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                        <span>Autoriser les étudiants à ouvrir des sujets</span>
+                                                                    </label>
+                                                                    <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="item-forumlock-{{ $item->id }}">
+                                                                        <input id="item-forumlock-{{ $item->id }}" type="checkbox" name="locked" value="1" @checked(\Modules\Academy\Services\ForumService::isLocked($item))
+                                                                               style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                        <span>Verrouiller le forum (lecture seule, aucune nouvelle contribution)</span>
+                                                                    </label>
                                                                 @endif
 
                                                                 {{-- V2-c : critère d'achèvement (parité Moodle « activity completion »). --}}
@@ -1014,6 +1029,9 @@
                                                                     @endif
                                                                     @if ($item->type === 'choice')
                                                                         <option value="vote" @selected($itemCriterion === 'vote')>En votant au sondage</option>
+                                                                    @endif
+                                                                    @if ($item->type === 'forum')
+                                                                        <option value="post" @selected($itemCriterion === 'post')>En participant au forum (sujet ou réponse)</option>
                                                                     @endif
                                                                 </select>
 
@@ -1267,6 +1285,19 @@
                                                     <span>Réponses anonymes (ne pas lier la réponse à l'étudiant)</span>
                                                 </label>
 
+                                                <p style="font-size: 0.74rem; font-weight: 700; color: var(--sys-text-default, #1A1D23); margin: 8px 0 0;">Champs pour un forum (discussion)</p>
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-forumintro-{{ $lesson->id }}">Introduction (facultative)</label>
+                                                <textarea id="newitem-forumintro-{{ $lesson->id }}" wire:model="newItem.{{ $lesson->id }}.forum_intro" rows="2" placeholder="Présentez le sujet de discussion…"
+                                                          style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+                                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="newitem-forumallow-{{ $lesson->id }}">
+                                                    <input id="newitem-forumallow-{{ $lesson->id }}" type="checkbox" wire:model="newItem.{{ $lesson->id }}.allow_student_topics" style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                    <span>Autoriser les étudiants à ouvrir des sujets (par défaut : oui)</span>
+                                                </label>
+                                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="newitem-forumlock-{{ $lesson->id }}">
+                                                    <input id="newitem-forumlock-{{ $lesson->id }}" type="checkbox" wire:model="newItem.{{ $lesson->id }}.locked" style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                    <span>Verrouiller le forum (lecture seule)</span>
+                                                </label>
+
                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-min-{{ $lesson->id }}">Durée estimée (min, facultatif)</label>
                                                 <input id="newitem-min-{{ $lesson->id }}" type="number" min="1" wire:model="newItem.{{ $lesson->id }}.estimated_minutes" placeholder="Durée estimée"
                                                        style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
@@ -1282,6 +1313,7 @@
                                                     <option value="min_grade">En réussissant le quiz (quiz seulement)</option>
                                                     <option value="vote">En votant au sondage (sondage seulement)</option>
                                                     <option value="submit">En répondant à la rétroaction (rétroaction seulement)</option>
+                                                    <option value="post">En participant au forum (forum seulement)</option>
                                                 </select>
 
                                                 <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;">
@@ -1295,6 +1327,7 @@
                                                     <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'quiz')" variant="primary" size="sm">Ajouter un quiz</x-core::button>
                                                     <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'choice')" variant="primary" size="sm">Ajouter un sondage</x-core::button>
                                                     <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'feedback')" variant="primary" size="sm">Ajouter une rétroaction</x-core::button>
+                                                    <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'forum')" variant="primary" size="sm">Ajouter un forum</x-core::button>
                                                 </div>
                                             </div>
                                         </details>

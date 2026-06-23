@@ -50,7 +50,7 @@ class CourseEditor extends Component
     use WithFileUploads;
 
     /** Types d'items autorisés (liste blanche, alignée sur l'admin Backoffice). */
-    private const ITEM_TYPES = ['video', 'document', 'quiz', 'choice', 'feedback'];
+    private const ITEM_TYPES = ['video', 'document', 'quiz', 'choice', 'feedback', 'forum'];
 
     /** Tailles maximales (Ko) des téléversements - validées côté SERVEUR. */
     private const COVER_MAX_KB = 4096;       // ~4 Mo (image de couverture)
@@ -986,6 +986,10 @@ class CourseEditor extends Component
             'allow_multiple'      => $extra['allow_multiple']      ?? null,
             'anonymous'           => $extra['anonymous']           ?? null,
             'results_visibility'  => $extra['results_visibility']  ?? null,
+            // FORUM : intro + réglages (allow_student_topics / locked).
+            'forum_intro'          => $extra['forum_intro']          ?? null,
+            'allow_student_topics' => $extra['allow_student_topics'] ?? null,
+            'locked'               => $extra['locked']               ?? null,
         ];
 
         $data    = $this->validateItem($input);
@@ -1322,6 +1326,11 @@ class CourseEditor extends Component
             'results_visibility' => ['nullable', Rule::in(\Modules\Academy\Services\ChoiceService::VISIBILITIES)],
             // FEEDBACK : intro facultative ; les questions sont validées conditionnellement.
             'feedback_intro'     => 'nullable|string|max:2000',
+            // FORUM : intro facultative + réglages booléens (le défaut « allow_student_topics »
+            // = true est appliqué au build quand la clé est absente).
+            'forum_intro'         => 'nullable|string|max:2000',
+            'allow_student_topics' => 'nullable|boolean',
+            'locked'              => 'nullable|boolean',
         ];
 
         // FEEDBACK : un questionnaire EXIGE AU MOINS UNE question valide. On normalise les
@@ -1400,6 +1409,7 @@ class CourseEditor extends Component
             'quiz'     => $this->buildQuizPayload($input),
             'choice'   => $this->buildChoicePayload($input),
             'feedback' => $this->buildFeedbackPayload($input),
+            'forum'    => $this->buildForumPayload($input),
             default    => [],
         };
 
@@ -1492,6 +1502,27 @@ class CourseEditor extends Component
                 $input['feedback_questions'] ?? []
             ),
             'anonymous' => $this->truthy($input['anonymous'] ?? null),
+        ];
+    }
+
+    /**
+     * FORUM : construit le payload d'un forum de discussion. Intro facultative,
+     * allow_student_topics (booléen, DÉFAUT true → stocké true quand la clé est absente
+     * pour préserver le défaut « les étudiants peuvent ouvrir des sujets »), locked
+     * (booléen, défaut false). Le contenu des sujets/réponses n'est PAS stocké ici
+     * (tables dédiées) ; l'échappement anti-XSS est fait au rendu (renderRichText).
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    private function buildForumPayload(array $input): array
+    {
+        $allow = $input['allow_student_topics'] ?? null;
+
+        return [
+            'intro'                => trim((string) ($input['forum_intro'] ?? '')),
+            'allow_student_topics' => $allow === null ? true : $this->truthy($allow),
+            'locked'               => $this->truthy($input['locked'] ?? null),
         ];
     }
 

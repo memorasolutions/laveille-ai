@@ -203,6 +203,22 @@
     .academy-feedback-bar-fill { display: block; height: 100%; background: var(--c-primary, #064E5A); border-radius: 999px; }
     .academy-feedback-texts { list-style: none; padding: 0; margin: 6px 0 0; }
     .academy-feedback-texts li { padding: 8px 12px; margin-bottom: 6px; background: #F9FAFB; border-left: 3px solid var(--c-primary, #064E5A); border-radius: 4px; font-size: 0.9rem; color: #374151; }
+
+    /* ── Forum (discussion) ── */
+    .academy-forum { max-width: 64ch; }
+    .academy-forum-intro { color: var(--sys-text-muted, #6B7280); margin: 0 0 1rem; font-size: 0.95rem; }
+    .academy-forum-topic { border: 1px solid #E5E7EB; border-radius: 10px; margin-bottom: 12px; background: #fff; }
+    .academy-forum-topic > summary { list-style: none; cursor: pointer; padding: 12px 14px; display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+    .academy-forum-topic > summary::-webkit-details-marker { display: none; }
+    .academy-forum-topic-title { font-weight: 600; color: var(--sys-text-default, #1A1D23); }
+    .academy-forum-meta { font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); white-space: nowrap; }
+    .academy-forum-badge { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: #E0F2F1; color: #064E5A; margin-left: 6px; }
+    .academy-forum-body { padding: 0 14px 12px; }
+    .academy-forum-post { padding: 10px 12px; margin: 8px 0; background: #F9FAFB; border-radius: 8px; }
+    .academy-forum-post-meta { font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin-bottom: 4px; }
+    .academy-forum-text { width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: 8px; resize: vertical; font: inherit; }
+    .academy-forum-field { width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: 8px; font: inherit; margin-bottom: 8px; }
+    .academy-forum-mod { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
 </style>
 @endpush
 
@@ -250,6 +266,7 @@
                                 'quiz'     => '✏️',
                                 'choice'   => '📊',
                                 'feedback' => '📝',
+                                'forum'    => '💬',
                                 default    => '📄',
                             };
                         @endphp
@@ -798,6 +815,200 @@
                                 </div>
                             @endif
 
+                        {{-- ── TYPE FORUM (discussions attachées à la leçon, type Moodle « Forum ») ── --}}
+                        @elseif($item->type === 'forum')
+                            @php
+                                $forumIntro       = \Modules\Academy\Services\ForumService::intro($item);
+                                $forumLocked      = \Modules\Academy\Services\ForumService::isLocked($item);
+                                $forumAllowTopics = \Modules\Academy\Services\ForumService::allowsStudentTopics($item);
+                                // Gérant de CE cours (admin OU owner/instructor) : peut modérer ET
+                                // contribuer même hors inscription. L'autorisation réelle est TOUJOURS
+                                // re-vérifiée côté serveur (ForumController) ; ici c'est de l'affichage.
+                                $forumCanModerate = auth()->check() && auth()->user()->can('manageEnrollments', $course);
+                                // Peut ouvrir un sujet : un gérant toujours ; un étudiant si l'accès
+                                // est accordé, que les sujets étudiants sont permis et le forum non verrouillé.
+                                $forumCanCreate = $forumCanModerate
+                                    || ($hasAccess && auth()->check() && $forumAllowTopics && ! $forumLocked);
+                                $forumTopics = ($hasAccess || $forumCanModerate)
+                                    ? \Modules\Academy\Services\ForumService::topics($item)
+                                    : null;
+                            @endphp
+                            @if($hasAccess || $forumCanModerate)
+                                <div class="academy-forum">
+                                    @if($forumIntro !== '')
+                                        <p class="academy-forum-intro">{{ $forumIntro }}</p>
+                                    @endif
+
+                                    @if($forumLocked)
+                                        <p class="text-muted p-2 rounded" style="background: #F3F4F6; font-size: 0.85rem;">
+                                            <span aria-hidden="true">🔒</span> Ce forum est en lecture seule.
+                                            @if($forumCanModerate) (Vous pouvez tout de même contribuer en tant que gérant.) @endif
+                                        </p>
+                                    @endif
+
+                                    {{-- Nouveau sujet (a11y : champs étiquetés ; honeypot caché anti-spam). --}}
+                                    @if($forumCanCreate)
+                                        <details class="academy-forum-topic" style="border-style: dashed;">
+                                            <summary>
+                                                <span class="academy-forum-topic-title">+ Ouvrir un nouveau sujet</span>
+                                            </summary>
+                                            <div class="academy-forum-body">
+                                                <form method="POST" action="{{ route('academy.forum.topics.create', [$course, $lesson, $item->id]) }}">
+                                                    @csrf
+                                                    {{-- Honeypot MAISON : doit rester vide ; hors écran, non focusable. --}}
+                                                    <div aria-hidden="true" style="position: absolute; left: -9999px; top: -9999px;">
+                                                        <label for="forum-hp-{{ $item->id }}">Ne pas remplir</label>
+                                                        <input type="text" id="forum-hp-{{ $item->id }}" name="{{ \Modules\Academy\Services\ForumService::HONEYPOT }}" tabindex="-1" autocomplete="off">
+                                                    </div>
+                                                    <label for="forum-title-{{ $item->id }}" style="font-size: 0.82rem; font-weight: 600;">Titre du sujet</label>
+                                                    <input type="text" id="forum-title-{{ $item->id }}" name="title" class="academy-forum-field"
+                                                           maxlength="{{ \Modules\Academy\Services\ForumService::TITLE_MAX }}" required>
+                                                    <label for="forum-body-{{ $item->id }}" style="font-size: 0.82rem; font-weight: 600;">Message</label>
+                                                    <textarea id="forum-body-{{ $item->id }}" name="body" class="academy-forum-text" rows="3"
+                                                              maxlength="{{ \Modules\Academy\Services\ForumService::BODY_MAX }}" required></textarea>
+                                                    <div class="mt-2">
+                                                        <x-core::button type="submit" variant="primary" size="sm">Publier le sujet</x-core::button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </details>
+                                    @elseif(! $forumAllowTopics && ! $forumLocked)
+                                        <p class="text-muted" style="font-size: 0.85rem;">Seul le formateur peut ouvrir de nouveaux sujets ; vous pouvez répondre aux sujets existants.</p>
+                                    @endif
+
+                                    {{-- Liste des sujets : épinglés en tête, puis récents (pagination simple). --}}
+                                    @forelse($forumTopics as $topic)
+                                        @php
+                                            $topicReplyAllowed = $forumCanModerate || (! $forumLocked && ! $topic->is_locked && $hasAccess && auth()->check());
+                                        @endphp
+                                        <details class="academy-forum-topic" wire:key="forum-topic-{{ $topic->id }}" @if(request('forum_open') == $topic->id) open @endif>
+                                            <summary>
+                                                <span class="academy-forum-topic-title">
+                                                    @if($topic->is_pinned)<span aria-hidden="true" title="Épinglé">📌</span> @endif
+                                                    @if($topic->is_locked)<span aria-hidden="true" title="Verrouillé">🔒</span> @endif
+                                                    {{ $topic->title }}
+                                                    <span class="academy-forum-badge">{{ $topic->posts_count }} {{ $topic->posts_count === 1 ? 'réponse' : 'réponses' }}</span>
+                                                </span>
+                                                <span class="academy-forum-meta">{{ $topic->user?->name ?? '(inconnu)' }} · {{ $topic->created_at?->diffForHumans() }}</span>
+                                            </summary>
+                                            <div class="academy-forum-body">
+                                                {{-- SÉCURITÉ : renderRichText() (markdown, html_input=strip) neutralise tout HTML brut → anti-XSS. --}}
+                                                <div class="prose academy-richtext">{!! \Modules\Academy\Models\LessonItem::renderRichText($topic->body) !!}</div>
+
+                                                @foreach($topic->posts as $post)
+                                                    <div class="academy-forum-post" wire:key="forum-post-{{ $post->id }}">
+                                                        <div class="academy-forum-post-meta">{{ $post->user?->name ?? '(inconnu)' }} · {{ $post->created_at?->diffForHumans() }}</div>
+                                                        <div class="prose academy-richtext">{!! \Modules\Academy\Models\LessonItem::renderRichText($post->body) !!}</div>
+                                                        @if($forumCanModerate)
+                                                            {{-- Modération : confirmation INLINE 2 temps (details), jamais de confirm() natif. --}}
+                                                            <details class="mt-1">
+                                                                <summary style="cursor: pointer; font-size: 0.78rem; color: var(--sys-action-danger, #DC2626);">Supprimer cette réponse</summary>
+                                                                <form method="POST" action="{{ route('academy.forum.posts.delete', [$course, $lesson, $item->id, $post->id]) }}" class="mt-1">
+                                                                    @csrf
+                                                                    <x-core::button type="submit" variant="ghost" size="sm">Confirmer la suppression</x-core::button>
+                                                                </form>
+                                                            </details>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+
+                                                {{-- Répondre --}}
+                                                @if($topicReplyAllowed)
+                                                    <form method="POST" action="{{ route('academy.forum.topics.reply', [$course, $lesson, $item->id, $topic->id]) }}" class="mt-2">
+                                                        @csrf
+                                                        <div aria-hidden="true" style="position: absolute; left: -9999px; top: -9999px;">
+                                                            <label for="forum-rhp-{{ $topic->id }}">Ne pas remplir</label>
+                                                            <input type="text" id="forum-rhp-{{ $topic->id }}" name="{{ \Modules\Academy\Services\ForumService::HONEYPOT }}" tabindex="-1" autocomplete="off">
+                                                        </div>
+                                                        <label for="forum-reply-{{ $topic->id }}" style="font-size: 0.82rem; font-weight: 600;">Répondre</label>
+                                                        <textarea id="forum-reply-{{ $topic->id }}" name="body" class="academy-forum-text" rows="2"
+                                                                  maxlength="{{ \Modules\Academy\Services\ForumService::BODY_MAX }}" required></textarea>
+                                                        <div class="mt-2">
+                                                            <x-core::button type="submit" variant="secondary" size="sm">Répondre</x-core::button>
+                                                        </div>
+                                                    </form>
+                                                @elseif($topic->is_locked)
+                                                    <p class="text-muted mt-2" style="font-size: 0.82rem;"><span aria-hidden="true">🔒</span> Ce sujet est verrouillé.</p>
+                                                @endif
+
+                                                {{-- Modération du sujet (gérant) : épingler / verrouiller (bascule) + supprimer (2 temps). --}}
+                                                @if($forumCanModerate)
+                                                    <div class="academy-forum-mod">
+                                                        <form method="POST" action="{{ route('academy.forum.topics.pin', [$course, $lesson, $item->id, $topic->id]) }}">
+                                                            @csrf
+                                                            <x-core::button type="submit" variant="ghost" size="sm">{{ $topic->is_pinned ? 'Désépingler' : 'Épingler' }}</x-core::button>
+                                                        </form>
+                                                        <form method="POST" action="{{ route('academy.forum.topics.lock', [$course, $lesson, $item->id, $topic->id]) }}">
+                                                            @csrf
+                                                            <x-core::button type="submit" variant="ghost" size="sm">{{ $topic->is_locked ? 'Déverrouiller' : 'Verrouiller' }}</x-core::button>
+                                                        </form>
+                                                        <details>
+                                                            <summary style="cursor: pointer; font-size: 0.82rem; color: var(--sys-action-danger, #DC2626);">Supprimer le sujet</summary>
+                                                            <form method="POST" action="{{ route('academy.forum.topics.delete', [$course, $lesson, $item->id, $topic->id]) }}" class="mt-1">
+                                                                @csrf
+                                                                <x-core::button type="submit" variant="ghost" size="sm">Confirmer la suppression du sujet</x-core::button>
+                                                            </form>
+                                                        </details>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </details>
+                                    @empty
+                                        <p class="text-muted" style="font-size: 0.9rem;">Aucun sujet pour l'instant. @if($forumCanCreate) Soyez le premier à en ouvrir un. @endif</p>
+                                    @endforelse
+
+                                    @if($forumTopics && $forumTopics->hasPages())
+                                        <div class="mt-3">{{ $forumTopics->withQueryString()->links() }}</div>
+                                    @endif
+                                </div>
+                            @else
+                                {{-- Accès refusé (même logique que les autres types : rien dans le DOM). --}}
+                                <div class="academy-gated-panel">
+                                    <div class="gated-icon">🔐</div>
+                                    <div class="gated-title">
+                                        @if(!auth()->check())
+                                            Connexion requise pour accéder au forum
+                                        @elseif(!$isEnrolled)
+                                            Inscrivez-vous pour participer au forum
+                                        @else
+                                            Forum en cours de préparation
+                                        @endif
+                                    </div>
+                                    <p class="gated-sub">
+                                        @if(!auth()->check())
+                                            Créez un compte gratuit ou connectez-vous pour participer aux discussions.
+                                        @elseif(!$isEnrolled && $isFree)
+                                            Ce cours est gratuit - inscrivez-vous pour participer.
+                                        @elseif(!$isEnrolled && !$isFree)
+                                            Ce cours est payant - achetez-le pour accéder à l'ensemble du contenu.
+                                        @else
+                                            Votre inscription vous donne accès à l'ensemble du contenu.
+                                        @endif
+                                    </p>
+                                    @if(!auth()->check())
+                                        <span class="d-inline-flex flex-wrap gap-2 justify-content-center">
+                                            <x-core::button :href="Route::has('login') ? route('login') : '#'" variant="primary" size="sm">
+                                                Se connecter
+                                            </x-core::button>
+                                            <x-core::button :href="Route::has('register') ? route('register') : '#'" variant="secondary" size="sm">
+                                                Créer un compte
+                                            </x-core::button>
+                                        </span>
+                                    @elseif(!$isEnrolled && $isFree)
+                                        <form action="{{ route('academy.courses.enroll', $course) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <x-core::button type="submit" variant="primary" size="sm">
+                                                S'inscrire gratuitement
+                                            </x-core::button>
+                                        </form>
+                                    @elseif(!$isEnrolled && !$isFree)
+                                        <x-core::button :href="route('academy.courses.purchase', $course)" variant="primary" size="sm">
+                                            Acheter ce cours
+                                        </x-core::button>
+                                    @endif
+                                </div>
+                            @endif
+
                         {{-- ── TYPE DOC ── --}}
                         @elseif(in_array($item->type, ['doc', 'document'], true))
                             @if($hasAccess)
@@ -911,7 +1122,7 @@
                                 <p class="mt-3" style="font-size: 0.9rem; color: #166534;" role="status">
                                     ✅ Terminé
                                 </p>
-                            @elseif($itemCriterion === 'manual' && in_array($item->type, ['video', 'doc', 'document', 'choice']))
+                            @elseif($itemCriterion === 'manual' && in_array($item->type, ['video', 'doc', 'document', 'choice', 'forum']))
                                 <form method="POST"
                                       action="{{ route('academy.lessons.complete', [$course, $lesson, $item->id]) }}"
                                       class="mt-3">
