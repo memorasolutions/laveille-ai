@@ -73,6 +73,15 @@ class CourseAssignments extends Component
     public string $gradeFeedback = '';
     /** F14 - Niveau d'échelle retenu à la correction (index dans les niveaux), '' = aucun. */
     public string $gradeScaleLevel = '';
+    /**
+     * F14 - Niveaux de l'échelle du devoir en cours de correction, avec leur
+     * équivalence en points pré-calculée côté composant (évite la logique lourde
+     * dans la vue). Format : [{label: string, value: float, points: int}, ...].
+     * Peuplé par startGrading(), vidé par cancelGrading().
+     *
+     * @var array<int, array{label: string, value: float, points: int}>
+     */
+    public array $scaleLevelsWithPoints = [];
 
     /** Devoir dont on affiche les remises à corriger (id), null = aucun. */
     public ?int $reviewingAssignment = null;
@@ -451,17 +460,26 @@ class CourseAssignments extends Component
         $this->gradeScore        = $submission->score !== null ? (string) $submission->score : '';
         $this->gradeFeedback     = (string) $submission->feedback;
 
-        // F14 : devoir noté par échelle → pré-sélectionner le niveau dont la conversion
-        // redonne le score stocké (meilleure correspondance ; sinon laisser à choisir).
-        $this->gradeScaleLevel = '';
-        $assignmentForScale    = $submission->assignment;
-        if ($assignmentForScale !== null && $assignmentForScale->hasScale() && $submission->score !== null) {
-            $scale = $assignmentForScale->scale;
+        // F14 : devoir noté par échelle -> pré-calculer les niveaux avec points convertis
+        // (affichés dans le sélecteur) et pré-sélectionner le niveau correspondant au score
+        // stocké (meilleure correspondance ; sinon laisser à choisir).
+        $this->gradeScaleLevel      = '';
+        $this->scaleLevelsWithPoints = [];
+        $assignmentForScale          = $submission->assignment;
+        if ($assignmentForScale !== null && $assignmentForScale->hasScale()) {
+            // hasScale() a déjà chargé la relation 'scale' via loadMissing() : 0 requête extra.
+            $scale    = $assignmentForScale->scale;
+            $maxPts   = (int) $assignmentForScale->max_points;
             foreach ($scale->levels() as $i => $lvl) {
-                $points = GradebookService::scaleValueToPoints($scale, (float) $lvl['value'], (int) $assignmentForScale->max_points);
-                if ($points === (int) $submission->score) {
+                $points = GradebookService::scaleValueToPoints($scale, (float) $lvl['value'], $maxPts);
+                $this->scaleLevelsWithPoints[$i] = [
+                    'label'  => $lvl['label'],
+                    'value'  => $lvl['value'],
+                    'points' => $points,
+                ];
+                // Pré-sélectionner le niveau dont la conversion redonne le score stocké.
+                if ($submission->score !== null && $points === (int) $submission->score) {
                     $this->gradeScaleLevel = (string) $i;
-                    break;
                 }
             }
         }
@@ -478,7 +496,7 @@ class CourseAssignments extends Component
 
     public function cancelGrading(): void
     {
-        $this->reset('gradingSubmission', 'gradeScore', 'gradeFeedback', 'rubricSelection', 'gradeScaleLevel');
+        $this->reset('gradingSubmission', 'gradeScore', 'gradeFeedback', 'rubricSelection', 'gradeScaleLevel', 'scaleLevelsWithPoints');
         $this->resetErrorBag(['gradeScore', 'gradeFeedback', 'rubricSelection', 'gradeScaleLevel']);
     }
 
@@ -500,17 +518,19 @@ class CourseAssignments extends Component
         $assignment = $submission->assignment;
 
         // Chemins de correction par PRÉCÉDENCE :
-        //  - AVEC grille (V2-a) → un niveau par critère, note AUTO-calculée (mise à l'échelle).
-        //  - AVEC échelle (F14) → un niveau d'échelle, converti en points sur max_points.
-        //  - SANS rien          → correction manuelle (note libre bornée) : INCHANGÉ.
+        //  - AVEC grille (V2-a) -> un niveau par critère, note AUTO-calculée (mise à l'échelle).
+        //  - AVEC échelle (F14) -> un niveau d'échelle, converti en points sur max_points.
+        //  - SANS rien          -> correction manuelle (note libre bornée) : INCHANGÉ.
+        // $course est déjà re-résolu + autorisé ci-dessus ; on le passe en paramètre
+        // pour éviter une 2e requête redondante dans gradeWithRubric/gradeWithScale.
         if ($assignment->hasRubric()) {
-            $this->gradeWithRubric($assignment, $submission);
+            $this->gradeWithRubric($assignment, $submission, $course);
 
             return;
         }
 
         if ($assignment->hasScale()) {
-            $this->gradeWithScale($assignment, $submission);
+            $this->gradeWithScale($assignment, $submission, $course);
 
             return;
         }
@@ -564,12 +584,15 @@ class CourseAssignments extends Component
 
     /**
      * V2-a - Correction PAR GRILLE : exige un niveau retenu par critère notable.
-     * La note est AUTO-calculée (somme des points → mise à l'échelle sur max_points,
+     * La note est AUTO-calculée (somme des points -> mise à l'échelle sur max_points,
      * bornée) ; les niveaux sont re-résolus côté modèle (anti-IDOR : un niveau
      * étranger est ignoré). rubric_scores ({criterion_id: level_id}) + score +
      * graded_at/by écrits ensemble. graded_by = utilisateur connecté.
+     *
+     * @param Course $course  Cours déjà re-résolu et autorisé par gradeSubmission()
+     *                        (passé en paramètre pour éviter une requête redondante).
      */
-    private function gradeWithRubric(Assignment $assignment, Submission $submission): void
+    private function gradeWithRubric(Assignment $assignment, Submission $submission, Course $course): void
     {
         $this->validate(
             ['gradeFeedback' => 'nullable|string|max:20000'],
@@ -591,7 +614,7 @@ class CourseAssignments extends Component
             'graded_by'     => auth()->id(),
         ]);
 
-        $this->notifyGraded($this->resolveCourse(), $submission, $assignment);
+        $this->notifyGraded($course, $submission, $assignment);
 
         $this->cancelGrading();
         $this->flashSaved('Remise corrigée selon la grille.');
@@ -604,12 +627,16 @@ class CourseAssignments extends Component
      * comme une note numérique ordinaire (le carnet/CSV restent inchangés). Le niveau
      * est re-résolu SERVEUR contre les niveaux de l'échelle (anti-IDOR : un index
      * hors liste est rejeté). graded_by = utilisateur connecté.
+     *
+     * @param Course $course  Cours déjà re-résolu et autorisé par gradeSubmission()
+     *                        (passé en paramètre pour éviter une requête redondante).
      */
-    private function gradeWithScale(Assignment $assignment, Submission $submission): void
+    private function gradeWithScale(Assignment $assignment, Submission $submission, Course $course): void
     {
         $this->validate(['gradeFeedback' => 'nullable|string|max:20000']);
 
-        $scale  = $assignment->scale; // garanti non null + niveaux exploitables par hasScale()
+        // hasScale() (appelé par gradeSubmission) a déjà chargé 'scale' via loadMissing().
+        $scale  = $assignment->scale; // garanti non null + niveaux exploitables
         $levels = $scale?->levels() ?? [];
 
         $idxRaw = trim($this->gradeScaleLevel);
@@ -629,7 +656,7 @@ class CourseAssignments extends Component
             'graded_by' => auth()->id(),
         ]);
 
-        $this->notifyGraded($this->resolveCourse(), $submission, $assignment);
+        $this->notifyGraded($course, $submission, $assignment);
 
         $this->cancelGrading();
         $this->flashSaved('Remise corrigée selon l\'échelle.');
@@ -949,7 +976,8 @@ class CourseAssignments extends Component
         foreach (GradebookService::gradableItems($course) as $item) {
             $key = $item['type'].'_'.$item['id'];
             $this->itemCategoryMap[$key] = $item['category_id'] !== null ? (string) $item['category_id'] : '';
-            $this->itemWeightMap[$key]   = rtrim(rtrim((string) $item['weight'], '0'), '.') ?: '1';
+            $iw = (string) $item['weight']; // ne trimmer les zéros QUE pour un décimal (sinon « 60 » -> « 6 »)
+            $this->itemWeightMap[$key]   = (str_contains($iw, '.') ? rtrim(rtrim($iw, '0'), '.') : $iw) ?: '1';
         }
 
         $this->letterBands = [];
@@ -1003,7 +1031,8 @@ class CourseAssignments extends Component
 
         $this->editingCategory    = $category->id;
         $this->editCategoryName   = $category->name;
-        $this->editCategoryWeight = rtrim(rtrim((string) $category->weight, '0'), '.') ?: '0';
+        $cw = (string) $category->weight; // ne trimmer les zéros QUE pour un décimal (sinon « 60 » -> « 6 »)
+        $this->editCategoryWeight = (str_contains($cw, '.') ? rtrim(rtrim($cw, '0'), '.') : $cw) ?: '0';
         $this->editCategoryMethod = $category->effectiveAggregationMethod();
         $this->resetErrorBag(['editCategoryName', 'editCategoryWeight', 'editCategoryMethod']);
     }

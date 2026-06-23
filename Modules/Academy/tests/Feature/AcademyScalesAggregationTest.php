@@ -329,6 +329,18 @@ it('corrige un devoir PAR ÉCHELLE : le niveau choisi est converti et stocké', 
     expect($submission->fresh()->graded_at)->not->toBeNull();
 });
 
+// Régression BUG-1 (/sim F14) : editCategory ne doit PAS corrompre un poids entier
+// finissant par 0 (l'ancien rtrim '0' transformait « 60 » en « 6 », « 100 » en « 1 »).
+it('editCategory préserve un poids entier finissant par 0 (60 reste 60)', function (): void {
+    $owner = f14Owner($this->course);
+    $cat   = f14Category($this->course, 'Pondération', 60, 'weighted_mean');
+
+    Livewire::actingAs($owner)
+        ->test(CourseAssignments::class, ['course' => $this->course])
+        ->call('editCategory', $cat->id)
+        ->assertSet('editCategoryWeight', '60');
+});
+
 it('refuse une correction par échelle sans niveau choisi', function (): void {
     $owner   = f14Owner($this->course);
     $student = f14Student($this->course);

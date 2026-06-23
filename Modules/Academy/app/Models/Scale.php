@@ -57,7 +57,16 @@ class Scale extends Model
         return $this->belongsTo(User::class, 'owner_id');
     }
 
-    /** Devoirs qui utilisent cette échelle. */
+    /**
+     * Devoirs qui utilisent cette échelle.
+     *
+     * SUPPRESSION DEFINITIVE : ce modèle n'utilise PAS SoftDeletes. Un `delete()`
+     * est IRREVERSIBLE. Les devoirs qui référencent cette échelle via scale_id ne
+     * sont pas cassés : la FK est définie nullOnDelete (migration add_scale_id_to_
+     * academy_assignments), donc scale_id passe automatiquement à null et le devoir
+     * redevient noté NUMERIQUEMENT (notes déjà saisies inchangées). Ne pas ajouter
+     * SoftDeletes sans réfléchir à l'impact sur ces devoirs.
+     */
     public function assignments(): HasMany
     {
         return $this->hasMany(Assignment::class, 'scale_id');

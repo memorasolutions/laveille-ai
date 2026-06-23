@@ -342,8 +342,9 @@
                                                             <select id="grade-scale-{{ $submission->id }}" wire:model="gradeScaleLevel"
                                                                     style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                                                                 <option value="">Choisir un niveau</option>
-                                                                @foreach ($assignment->scale?->levels() ?? [] as $i => $lvl)
-                                                                    <option value="{{ $i }}">{{ $lvl['label'] }}</option>
+                                                                {{-- scaleLevelsWithPoints pré-calculé dans startGrading() : {label, value, points} --}}
+                                                                @foreach ($scaleLevelsWithPoints as $i => $lvl)
+                                                                    <option value="{{ $i }}">{{ $lvl['label'] }} ({{ $lvl['points'] }} / {{ $assignment->max_points }} pts)</option>
                                                                 @endforeach
                                                             </select>
                                                             @error('gradeScaleLevel') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror

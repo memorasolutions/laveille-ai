@@ -31,6 +31,17 @@ return new class extends Migration
         Schema::table('academy_assignments', function (Blueprint $table): void {
             $table->unsignedBigInteger('scale_id')->nullable()->after('max_points');
 
+            // Index posé inconditionnellement pour garantir la performance sur scale_id
+            // même si la table academy_scales est absente et que la FK n'est pas créée.
+            // Le try/catch absorbe un éventuel conflit si la FK crée l'index implicitement
+            // (MySQL le fait ; le guard Schema::hasColumn ci-dessus empêche le double-run
+            // en temps normal, mais on reste défensif pour les re-runs manuels).
+            try {
+                $table->index('scale_id');
+            } catch (\Throwable) {
+                // Index déjà posé (ex. via FK implicite) : ignoré.
+            }
+
             if (Schema::hasTable('academy_scales')) {
                 $table->foreign('scale_id')
                     ->references('id')

@@ -80,7 +80,11 @@ class Assignment extends Model
     /**
      * F14 - Le devoir est-il noté PAR UNE ÉCHELLE ? Vrai seulement si une échelle
      * existante est référencée ET qu'elle a au moins un niveau exploitable. Défensif :
-     * une échelle supprimée (scale_id orphelin) → faux (retombe en numérique).
+     * une échelle supprimée (scale_id orphelin) -> faux (retombe en numérique).
+     *
+     * Utilise loadMissing() pour peupler le cache de relation en un seul passage :
+     * un appel ultérieur à $this->scale (ex. dans gradeWithScale()) ne déclenchera
+     * plus de requête supplémentaire.
      */
     public function hasScale(): bool
     {
@@ -88,9 +92,9 @@ class Assignment extends Model
             return false;
         }
 
-        $scale = $this->relationLoaded('scale') ? $this->scale : Scale::find($this->scale_id);
+        $this->loadMissing('scale');
 
-        return $scale !== null && $scale->levels() !== [];
+        return $this->scale !== null && $this->scale->levels() !== [];
     }
 
     public function submissions(): HasMany
