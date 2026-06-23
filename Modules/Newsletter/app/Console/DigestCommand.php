@@ -234,7 +234,10 @@ class DigestCommand extends Command
             ? DigestContentService::gatherFromIssue($issue)
             : DigestContentService::gatherFreshContent();
 
-        if (! ($data['highlight'] ?? null) && ($data['topNews'] ?? collect())->isEmpty()) {
+        // Un custom_html (annonce simple, ex. pause estivale) est un contenu valide en soi :
+        // on n'abandonne PAS faute de sections (highlight/topNews). L'override L288 enverra ce HTML.
+        if (! ($data['highlight'] ?? null) && ($data['topNews'] ?? collect())->isEmpty()
+            && empty($issue?->content['custom_html'] ?? null)) {
             $this->components->info('Pas de contenu. Newsletter non envoyée.');
 
             return self::SUCCESS;
