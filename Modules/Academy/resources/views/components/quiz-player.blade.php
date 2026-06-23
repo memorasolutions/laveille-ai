@@ -411,6 +411,12 @@
                             // relit answers[i][] en TABLEAU). QCM simple / vraifaux = radio.
                             $isMulti = ($type === 'qcm') && ! empty($question['multiple']);
                         @endphp
+                        {{-- M4 (WCAG 1.3.1) : groupe radio/checkbox enrobé dans un
+                             <fieldset> (sans bordure) + <legend> reprenant l'intitulé
+                             (visually-hidden : l'énoncé visible reste le <p> ci-dessus,
+                             la mise en page est inchangée). --}}
+                        <fieldset style="border:0;padding:0;margin:0;">
+                            <legend class="visually-hidden">{{ $question['question'] ?? 'Question' }}</legend>
                         @if($isMulti)
                             <p class="text-muted mb-2" style="font-size: 0.85rem;">Plusieurs réponses possibles.</p>
                         @endif
@@ -436,6 +442,7 @@
                                 </label>
                             </div>
                         @endforeach
+                        </fieldset>
 
                     {{-- Réponse courte --}}
                     @elseif($type === 'court')
@@ -580,6 +587,11 @@
                             <input type="hidden" name="index" value="{{ $i }}">
 
                             @if($type === 'qcm' || $type === 'vraifaux')
+                                {{-- M4 (WCAG 1.3.1) : groupe radio/checkbox enrobé dans un
+                                     <fieldset> (sans bordure) + <legend> (visually-hidden,
+                                     mise en page inchangée). --}}
+                                <fieldset style="border:0;padding:0;margin:0;">
+                                    <legend class="visually-hidden">{{ $question['question'] ?? 'Question' }}</legend>
                                 @if($isMulti)
                                     <p class="text-muted mb-2" style="font-size: 0.85rem;">Plusieurs réponses possibles.</p>
                                 @endif
@@ -596,6 +608,7 @@
                                         </label>
                                     </div>
                                 @endforeach
+                                </fieldset>
 
                             @elseif($type === 'court')
                                 <input type="text" name="answer" class="form-control mt-2"

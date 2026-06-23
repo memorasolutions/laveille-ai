@@ -85,6 +85,14 @@ class QuestionCategory extends Model
     }
 
     /**
+     * M3 — profondeur maximale d'arbre explorée par descendantIds() (garde-fou
+     * anti-abus API contre un arbre profond/cyclique forgé). L'arbre RÉEL est à
+     * 2 niveaux (catégorie → sous-catégories) ; cette borne ne change donc rien
+     * au comportement nominal, elle plafonne seulement la boucle BFS.
+     */
+    private const MAX_DEPTH = 6;
+
+    /**
      * IDs de cette catégorie + toutes ses sous-catégories (récursif),
      * borné à l'arbre du MÊME propriétaire (anti-fuite inter-formateurs).
      * Sert au tirage récursif de QuestionBankService.
@@ -95,9 +103,12 @@ class QuestionCategory extends Model
     {
         $ids   = [(int) $this->getKey()];
         $queue = [(int) $this->getKey()];
+        $depth = 0;
 
         // Largeur d'abord, scopé au propriétaire de la racine (null compris).
-        while ($queue !== []) {
+        // M3 : la boucle est bornée à MAX_DEPTH niveaux (anti-arbre profond/cyclique).
+        while ($queue !== [] && $depth < self::MAX_DEPTH) {
+            $depth++;
             $children = self::query()
                 ->whereIn('parent_id', $queue)
                 ->where('owner_id', $this->owner_id)

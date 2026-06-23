@@ -49,10 +49,16 @@ final class QuestionBankService
             ? $cat->descendantIds()
             : [(int) $cat->getKey()];
 
+        // M2 — on ne charge QUE les colonnes nécessaires à mapToRoundItem() (mémoire
+        // réduite sur de grosses banques) SANS toucher au chemin de tirage : le shuffle
+        // PHP seedé reste IDENTIQUE (donc DÉTERMINISTE quand $seed est fourni — les
+        // tests F1/QB en dépendent). On NE remplace PAS par inRandomOrder() (qui
+        // casserait la reproductibilité par seed).
         $questions = Question::query()
             ->active()
             ->whereIn('category_id', $categoryIds)
             ->whereIn('type', Question::TYPES)
+            ->select(['id', 'category_id', 'owner_id', 'type', 'prompt', 'payload', 'explanation', 'difficulty', 'points', 'is_active'])
             ->get()
             ->all();
 

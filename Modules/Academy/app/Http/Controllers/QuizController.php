@@ -166,6 +166,19 @@ class QuizController extends Controller
             $answers = $request->input('answers', []);
         }
 
+        // M1 — BORNE DES RÉPONSES (anti-abus mémoire/forge). Le client ne peut pas
+        // soumettre plus de réponses qu'il n'y a de questions dans le round serveur.
+        // On normalise d'abord (jamais un scalaire) puis on rejette PROPREMENT (pas
+        // de 500) un tableau surnuméraire. Le mode immédiat reconstruit `$answers`
+        // depuis la session (toujours <= nb de questions) → garde sans effet pour lui.
+        if (! is_array($answers)) {
+            $answers = [];
+        }
+
+        if (count($answers) > count($questions)) {
+            return back()->with('error', 'Réponses invalides. Recommencez le quiz.');
+        }
+
         // SCORING SERVEUR : même chemin que le mode différé sur les MÊMES réponses →
         // le score final du mode immédiat est, par construction, identique à celui
         // qu'aurait donné une soumission différée des mêmes réponses.
@@ -176,6 +189,13 @@ class QuizController extends Controller
             : 60;
 
         $passed = $scoreResult['percent'] >= $passingScore;
+
+        // H1 — limite de tentatives (récupérée comme dans startQuiz). Re-vérifiée
+        // DANS la transaction ci-dessous, AVANT la création (anti-TOCTOU : plusieurs
+        // onglets soumis en parallèle ne peuvent plus dépasser attempts_allowed).
+        $attemptsAllowed = isset($item->payload['attempts_allowed'])
+            ? (int) $item->payload['attempts_allowed']
+            : null;
 
         // V1-b : horodatage de début du round (posé par startQuiz en session).
         $startedAt = null;
@@ -211,11 +231,28 @@ class QuizController extends Controller
         // (si réussi) dans une SEULE transaction. La complétion reste INCHANGÉE
         // (toujours appelée si réussi) ; la table d'historique démarre vide
         // (rétrocompat des Completion existantes).
-        DB::transaction(function () use ($user, $item, $scoreResult, $passed, $answers, $questions, $startedAt, $timedOut): void {
+        // H1 : `$limitReached` est positionné DANS la transaction si la limite de
+        // tentatives est déjà atteinte → aucune tentative créée (idempotence).
+        $limitReached = false;
+
+        DB::transaction(function () use ($user, $item, $scoreResult, $passed, $answers, $questions, $startedAt, $timedOut, $attemptsAllowed, &$limitReached): void {
+            // H1 — RE-VÉRIFICATION ANTI-TOCTOU. La limite est relue ICI, dans la même
+            // transaction que la création, sur l'HISTORIQUE RÉEL (QuizAttempt). Sans
+            // ce garde, N onglets soumis simultanément contournaient le contrôle de
+            // startQuiz. Limite atteinte → on n'insère RIEN et on signale au-dessus.
+            if ($attemptsAllowed !== null
+                && QuizAttempt::attemptCount($user->id, $item->id) >= $attemptsAllowed) {
+                $limitReached = true;
+
+                return;
+            }
+
             // V1-c : l'historique conserve le PERCENT pondéré (champ déterminant pour
             // la méthode de notation). max_score reste le NB de questions ; on ne
             // change PAS la sémantique des colonnes existantes (rétrocompat V1-b).
-            $attributes = [
+            // V1-d : `timed_out` écrit directement (colonne déployée en prod, migration
+            // additive idempotente présente) → plus d'introspection Schema par soumission.
+            QuizAttempt::create([
                 'user_id'            => $user->id,
                 'lesson_item_id'     => $item->id,
                 'course_id'          => $this->resolveCourseId($item),
@@ -223,19 +260,12 @@ class QuizController extends Controller
                 'max_score'          => $scoreResult['total'],
                 'percent'            => $scoreResult['percent'],
                 'passed'             => $passed,
+                'timed_out'          => $timedOut,
                 'answers'            => $answers,
                 'questions_snapshot' => $questions,
                 'started_at'         => $startedAt,
                 'submitted_at'       => now(),
-            ];
-
-            // V1-d : `timed_out` n'est écrit que si la colonne existe (migration
-            // additive guardée). Sur une base sans la colonne → on ne plante pas.
-            if (\Illuminate\Support\Facades\Schema::hasColumn('academy_quiz_attempts', 'timed_out')) {
-                $attributes['timed_out'] = $timedOut;
-            }
-
-            QuizAttempt::create($attributes);
+            ]);
 
             // V2-c : la complétion à la SOUMISSION ne s'applique qu'au critère
             // « min_grade » (= défaut historique d'un quiz : réussi → complété). Un
@@ -252,6 +282,12 @@ class QuizController extends Controller
                 CompletionService::markComplete($user, $item, $scoreResult['correct']);
             }
         });
+
+        // H1 — limite déjà atteinte (re-vérifiée en transaction) : aucune tentative
+        // n'a été créée. On renvoie le MÊME message que startQuiz (cohérence UX).
+        if ($limitReached) {
+            return back()->with('error', 'Nombre de tentatives maximum atteint.');
+        }
 
         // Flasher le résultat (item_id inclus pour affichage ciblé en vue)
         $request->session()->flash('academy.quiz_result', [
