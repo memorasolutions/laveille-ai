@@ -231,7 +231,7 @@
          style="background: var(--sys-action-primary, #064E5A); color: #FFFFFF; padding: 12px 16px;">
         <div class="container d-flex flex-wrap align-items-center justify-content-between gap-2">
             <span style="font-weight: 600; font-size: 0.95rem;">
-                👁️ Mode prévisualisation — vous voyez ce cours comme un étudiant.
+                👁️ Mode prévisualisation : vous voyez ce cours comme un étudiant.
             </span>
             <a href="{{ route('academy.courses.manage', $course->slug) }}"
                style="display: inline-flex; align-items: center; min-height: 24px; padding: 5px 14px; border-radius: 999px; background: #FFFFFF; color: var(--sys-action-primary, #064E5A); font-weight: 700; font-size: 0.85rem; text-decoration: none;">
@@ -884,8 +884,8 @@
                                         <details class="academy-forum-topic" wire:key="forum-topic-{{ $topic->id }}" @if(request('forum_open') == $topic->id) open @endif>
                                             <summary>
                                                 <span class="academy-forum-topic-title">
-                                                    @if($topic->is_pinned)<span aria-hidden="true" title="Épinglé">📌</span> @endif
-                                                    @if($topic->is_locked)<span aria-hidden="true" title="Verrouillé">🔒</span> @endif
+                                                    @if($topic->is_pinned)<span aria-hidden="true" title="Épinglé">📌</span><span class="visually-hidden">Épinglé</span> @endif
+                                                    @if($topic->is_locked)<span aria-hidden="true" title="Verrouillé">🔒</span><span class="visually-hidden">Verrouillé</span> @endif
                                                     {{ $topic->title }}
                                                     <span class="academy-forum-badge">{{ $topic->posts_count }} {{ $topic->posts_count === 1 ? 'réponse' : 'réponses' }}</span>
                                                 </span>
@@ -911,6 +911,14 @@
                                                         @endif
                                                     </div>
                                                 @endforeach
+
+                                                {{-- Liste bornée (ForumService::POSTS_PER_TOPIC) : si le sujet a plus de
+                                                     réponses que celles chargées, on l'indique sans charger le fil entier. --}}
+                                                @if($topic->posts_count > $topic->posts->count())
+                                                    <p class="text-muted mt-1" style="font-size: 0.8rem;">
+                                                        {{ $topic->posts->count() }} des {{ $topic->posts_count }} réponses affichées (les plus anciennes en premier).
+                                                    </p>
+                                                @endif
 
                                                 {{-- Répondre --}}
                                                 @if($topicReplyAllowed)

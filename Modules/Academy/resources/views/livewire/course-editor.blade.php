@@ -33,7 +33,7 @@
 @endonce
 
 {{-- Scripts via @assets (Livewire v4) : injectés tôt (avant le boot d'Alpine par Livewire),
-     ce qui garantit que le listener alpine:init est enregistré À TEMPS — contrairement à
+     ce qui garantit que le listener alpine:init est enregistré À TEMPS - contrairement à
      @push('scripts') rendu en bas (alpine:init déjà émis → plugin sort + Alpine.data jamais
      enregistrés). @assets est dédupliqué automatiquement par Livewire (une seule injection). --}}
 @assets

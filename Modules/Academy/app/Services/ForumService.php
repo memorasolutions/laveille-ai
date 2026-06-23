@@ -39,6 +39,16 @@ final class ForumService
     /** Nombre de sujets par page (pagination simple). */
     public const PER_PAGE = 10;
 
+    /**
+     * Borne du nombre de réponses chargées par sujet dans la VUE LISTE (anti-explosion
+     * mémoire/requête : un sujet très actif ne doit pas charger des milliers de posts à
+     * l'affichage de la liste). Le badge « N réponses » reste exact (withCount, compte
+     * total). On charge les PREMIÈRES réponses en ordre chronologique (lecture naturelle
+     * du fil depuis le sujet) ; au-delà de cette borne, un repère « voir plus » est
+     * affiché. Laravel 12 applique cette limite PAR sujet (limited eager loading).
+     */
+    public const POSTS_PER_TOPIC = 50;
+
     // ─────────────────────────────────────────────────────────────────────────────
     // LECTURE DE LA CONFIGURATION (payload)
     // ─────────────────────────────────────────────────────────────────────────────
@@ -81,7 +91,9 @@ final class ForumService
         return ForumTopic::where('lesson_item_id', $item->id)
             ->with([
                 'user:id,name',
-                'posts' => fn ($q) => $q->orderBy('created_at')->with('user:id,name'),
+                // Bornée (POSTS_PER_TOPIC) : la liste ne charge jamais un nombre non
+                // borné de réponses par sujet. Ordre chronologique conservé.
+                'posts' => fn ($q) => $q->orderBy('created_at')->with('user:id,name')->limit(self::POSTS_PER_TOPIC),
             ])
             ->withCount('posts')
             ->orderByDesc('is_pinned')

@@ -609,3 +609,90 @@ test('rétrocompat : les défauts d\'achèvement des autres types sont inchangé
     expect(ActivityCompletionService::criterionFor($choice))->toBe('vote');
     expect(ActivityCompletionService::criterionFor($fb))->toBe('submit');
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 10. CORRECTIFS D'AUDIT V4-c (helpers fix4c)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// C1 [a11y WCAG 1.3.1] : l'état épinglé/verrouillé d'un sujet doit être perçu par un
+// lecteur d'écran. L'émoji reste aria-hidden ; un texte visually-hidden porte l'info.
+test('fix4c C1 : un sujet épinglé/verrouillé expose un texte visually-hidden « Épinglé » / « Verrouillé »', function (): void {
+    $course  = v4cCourse('cours-forum-fix4c-c1');
+    $lesson  = v4cLesson($course);
+    $item    = v4cForumItem($lesson);
+    $student = v4cStudent();
+    v4cEnroll($course, $student);
+
+    v4cTopic($item, $student, ['title' => 'Sujet épinglé et verrouillé', 'is_pinned' => true, 'is_locked' => true]);
+
+    $html = $this->actingAs($student)->get(v4cShowUrl($course, $lesson))
+        ->assertOk()
+        ->getContent();
+
+    // Texte alternatif accessible présent (classe visually-hidden = convention du thème).
+    expect($html)->toContain('<span class="visually-hidden">Épinglé</span>');
+    expect($html)->toContain('<span class="visually-hidden">Verrouillé</span>');
+    // L'émoji demeure décoratif (aria-hidden) : il ne porte pas l'information à lui seul.
+    expect($html)->toContain('aria-hidden="true" title="Épinglé"');
+});
+
+// C2 [scalabilité] : la vue liste ne charge JAMAIS un nombre non borné de réponses par
+// sujet. On crée plus de réponses que la borne et on vérifie que le service en charge au
+// plus POSTS_PER_TOPIC, tout en gardant le compte total exact (badge) et le fonctionnel.
+test('fix4c C2 : ForumService::topics() borne les réponses chargées par sujet', function (): void {
+    $course  = v4cCourse('cours-forum-fix4c-c2');
+    $lesson  = v4cLesson($course);
+    $item    = v4cForumItem($lesson);
+    $student = v4cStudent();
+    v4cEnroll($course, $student);
+
+    $topic = v4cTopic($item, $student, ['title' => 'Sujet très actif']);
+
+    $total = ForumService::POSTS_PER_TOPIC + 10; // dépasse la borne
+    for ($i = 0; $i < $total; $i++) {
+        // created_at espacé : ordre chronologique déterministe (pas d'égalité à la seconde).
+        ForumPost::create(['topic_id' => $topic->id, 'user_id' => $student->id, 'body' => 'Réponse '.$i])
+            ->forceFill(['created_at' => now()->addSeconds($i)])->save();
+    }
+
+    $paginator = ForumService::topics($item);
+    $loaded    = $paginator->getCollection()->first();
+
+    // Borne respectée : pas de chargement illimité.
+    expect($loaded->posts->count())->toBe(ForumService::POSTS_PER_TOPIC);
+    // Le compte total (badge) reste exact via withCount.
+    expect($loaded->posts_count)->toBe($total);
+    // Ordre chronologique préservé (la 1re réponse chargée est la plus ancienne).
+    expect($loaded->posts->first()->body)->toBe('Réponse 0');
+});
+
+// C2 (rendu) : la page reste fonctionnelle et indique la troncature quand un sujet
+// dépasse la borne, sans charger le fil entier.
+test('fix4c C2 : la page de leçon affiche un repère de troncature au-delà de la borne', function (): void {
+    $course  = v4cCourse('cours-forum-fix4c-c2b');
+    $lesson  = v4cLesson($course);
+    $item    = v4cForumItem($lesson);
+    $student = v4cStudent();
+    v4cEnroll($course, $student);
+
+    $topic = v4cTopic($item, $student, ['title' => 'Fil long']);
+    $total = ForumService::POSTS_PER_TOPIC + 5;
+    for ($i = 0; $i < $total; $i++) {
+        ForumPost::create(['topic_id' => $topic->id, 'user_id' => $student->id, 'body' => 'R'.$i]);
+    }
+
+    $this->actingAs($student)->get(v4cShowUrl($course, $lesson))
+        ->assertOk()
+        ->assertSee((string) $total) // le total figure dans le repère + le badge
+        ->assertSee('réponses affichées');
+});
+
+// C3 [règle 10] : aucun tiret cadratin dans les vues touchées.
+test('fix4c C3 : aucun tiret cadratin dans les vues forum/éditeur touchées', function (): void {
+    foreach ([
+        base_path('Modules/Academy/resources/views/public/lesson.blade.php'),
+        base_path('Modules/Academy/resources/views/livewire/course-editor.blade.php'),
+    ] as $path) {
+        expect(file_get_contents($path))->not->toContain('—');
+    }
+});
