@@ -350,6 +350,44 @@ test('le formateur du cours voit le rapport (OK)', function (): void {
 // 4. RÉTROCOMPAT : cours vide
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 5. SÉCURITÉ F23 : #[Locked] + neutralisation injection CSV
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('mutation du courseId après mount rejetée par #[Locked] (étanchéité)', function (): void {
+    $courseA = f23MakeCourse('f23-locked-a');
+    $courseB = f23MakeCourse('f23-locked-b');
+
+    // Inscrit visible uniquement dans B : ne doit jamais fuir vers A.
+    $studentB = f23MakeStudent();
+    f23Enroll($courseB, $studentB);
+
+    $ownerA = f23MakeOwner($courseA);
+    $this->actingAs($ownerA);
+
+    // Avec #[Locked], Livewire rejette la mutation côté client : l'appel ->set()
+    // doit lever une exception (CannotMutateLockedPropertyException ou équivalent).
+    expect(fn () => Livewire::test(CourseReports::class, ['course' => $courseA])
+        ->set('courseId', $courseB->id)
+    )->toThrow(\Exception::class);
+});
+
+test('le CSV neutralise les formules en tete de cellule (injection CSV)', function (): void {
+    $course = f23MakeCourse('f23-csv-injection');
+
+    // Étudiant dont le nom commence par un caractère d'activation Excel/Sheets.
+    $student = f23MakeStudent();
+    $student->name  = '=HYPERLINK("http://x","clic")';
+    $student->save();
+    f23Enroll($course, $student);
+
+    $csv = app(CourseReportService::class)->participationCsv($course);
+
+    // La cellule doit être préfixée d'une apostrophe (neutralisée), jamais brute.
+    expect($csv)->toContain("'=HYPERLINK");
+    expect($csv)->not->toContain('"=HYPERLINK');
+});
+
 test('un cours sans inscrit ni évènement ne plante pas (états vides)', function (): void {
     $course = f23MakeCourse('f23-empty');
     $service = app(CourseReportService::class);

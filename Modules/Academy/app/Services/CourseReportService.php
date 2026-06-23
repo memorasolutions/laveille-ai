@@ -425,13 +425,33 @@ final class CourseReportService
     /** Une ligne CSV échappée (séparateur « ; »). */
     private function csvRow(array $cells): string
     {
-        $escaped = array_map(static function (string $cell): string {
+        // SELF: <5 lignes — injection formule neutralisée avant l'échappement guillemets.
+        $escaped = array_map(function (string $cell): string {
+            $cell = $this->sanitizeCsvCell($cell);
             $cell = str_replace('"', '""', $cell);
 
             return '"' . $cell . '"';
         }, array_map(static fn ($c) => (string) $c, $cells));
 
         return implode(';', $escaped);
+    }
+
+    /**
+     * Neutralise l'injection de formule CSV (Excel, LibreOffice, Google Sheets).
+     *
+     * Toute cellule issue de données utilisateur débutant par un caractère
+     * d'activation (`= + - @ | \t \r`) est préfixée d'une apostrophe afin
+     * d'être interprétée comme du texte brut par les tableurs.
+     *
+     * À appeler AVANT l'échappement des guillemets (DRY, ordre critique).
+     */
+    private function sanitizeCsvCell(string $cell): string
+    {
+        if ($cell !== '' && preg_match('/^[=+\-@|\t\r]/', $cell)) {
+            return "'" . $cell;
+        }
+
+        return $cell;
     }
 
     /** Format numérique FR (virgule décimale) sans dépendance. */

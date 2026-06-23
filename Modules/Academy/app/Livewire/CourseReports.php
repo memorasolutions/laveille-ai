@@ -26,6 +26,7 @@ namespace Modules\Academy\Livewire;
 
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Modules\Academy\Models\Course;
@@ -33,7 +34,13 @@ use Modules\Academy\Services\CourseReportService;
 
 class CourseReports extends Component
 {
-    /** Identifiant du cours (figé au montage, source de vérité serveur). */
+    /**
+     * Identifiant du cours (figé au montage, source de vérité serveur).
+     *
+     * #[Locked] empêche toute réhydratation cliente : un payload forgé ne peut
+     * pas pointer vers un autre cours (OWASP A01 - couche défense en profondeur).
+     */
+    #[Locked]
     public int $courseId;
 
     /** Onglet actif : 'participation' ou 'journal'. */
@@ -128,6 +135,10 @@ class CourseReports extends Component
     #[Computed]
     public function activityLog(): LengthAwarePaginator
     {
+        // Borne $perPage (min 10, max 100) : empêche qu'un payload client
+        // fixe une valeur arbitraire (0, -1, 999999…) et charge toute la table.
+        $perPage = max(10, min(100, $this->perPage));
+
         $all = $this->service()->activityLog($this->resolveCourse(), [
             'user_id' => $this->filterUser,
             'type'    => $this->filterType,
@@ -135,12 +146,12 @@ class CourseReports extends Component
 
         $total = $all->count();
         $page = max(1, $this->logPage);
-        $items = $all->forPage($page, $this->perPage)->values();
+        $items = $all->forPage($page, $perPage)->values();
 
         return new LengthAwarePaginator(
             $items,
             $total,
-            $this->perPage,
+            $perPage,
             $page,
             ['pageName' => 'logPage']
         );
