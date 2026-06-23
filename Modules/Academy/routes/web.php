@@ -92,7 +92,9 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
         // le cours est re-résolu serveur puis autorisé (manageStructure) dans le
         // contrôleur (anti-IDOR). Aucune donnée personnelle d'étudiant n'est exportée.
         Route::get('courses/{course:slug}/exporter', [CourseBackupController::class, 'export'])
-            ->middleware('auth')
+            // throttle:20,1 = anti-abus (téléchargement de fichier généré, même plafond
+            // que les autres GET à génération dynamique : calendrier iCal, exports CSV).
+            ->middleware(['auth', 'throttle:20,1'])
             ->name('courses.export');
 
         // PHASE D (D1) - Tableau de bord d'analytics PAR COURS (pilotage).

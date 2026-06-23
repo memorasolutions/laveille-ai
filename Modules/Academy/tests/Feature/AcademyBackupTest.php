@@ -348,6 +348,115 @@ test('le owner peut télécharger la sauvegarde (.json) de son cours', function 
 // 5. RÉTROCOMPATIBILITÉ - item sans restriction inchangé après import
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. CHAMPS TEXTE LONGS - tronqués à l'import (anti-DoS mémoire)
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('import : description trop longue est tronquée à 200 000 caractères', function (): void {
+    $source = makeBkCourse('bk-trunc-desc', 'Cours long');
+    seedBkRichCourse($source);
+    $data = app(CourseBackupService::class)->export($source->fresh());
+
+    // Injecter une description hors-borne (300 000 caractères).
+    $data['course']['description'] = str_repeat('D', 300000);
+
+    $importer = makeBkInstructor();
+    $copy     = app(CourseBackupService::class)->import($data, $importer);
+
+    expect(mb_strlen((string) ($copy->description ?? '')))->toBeLessThanOrEqual(200000);
+});
+
+test('import : instructions de devoir trop longues sont tronquées à 65 535 caractères', function (): void {
+    $source = makeBkCourse('bk-trunc-instr', 'Cours instructions');
+    seedBkRichCourse($source);
+    $data = app(CourseBackupService::class)->export($source->fresh());
+
+    // Injecter des instructions hors-borne.
+    $data['assignments'][0]['instructions'] = str_repeat('I', 100000);
+
+    $copy  = app(CourseBackupService::class)->import($data, makeBkInstructor());
+    $instr = Assignment::where('course_id', $copy->id)->value('instructions');
+
+    expect(mb_strlen((string) $instr))->toBeLessThanOrEqual(65535);
+});
+
+test('import : certificate_message trop long est tronqué à 65 535 caractères', function (): void {
+    $importer = makeBkInstructor();
+    $data = [
+        'format_version' => '1.0',
+        'course' => [
+            'title'               => 'Cours certif long',
+            'certificate_message' => str_repeat('M', 100000),
+        ],
+    ];
+
+    $copy = app(CourseBackupService::class)->import($data, $importer);
+
+    expect(mb_strlen((string) ($copy->certificate_message ?? '')))->toBeLessThanOrEqual(65535);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 7. COULEUR CERTIFICAT - validation regex (anti-injection style)
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('import : certificate_accent_color invalide est ignoré (null en base)', function (): void {
+    $importer = makeBkInstructor();
+
+    foreach (['javascript:alert(1)', 'red', '#xyz', '', 'expression(alert(1))'] as $couleur) {
+        $data = [
+            'format_version' => '1.0',
+            'course'         => ['title' => 'Cours couleur', 'certificate_accent_color' => $couleur],
+        ];
+        $copy = app(CourseBackupService::class)->import($data, $importer);
+        expect($copy->certificate_accent_color)->toBeNull("Couleur « {$couleur} » aurait dû être rejetée.");
+    }
+});
+
+test('import : certificate_accent_color valide est conservé', function (): void {
+    $importer = makeBkInstructor();
+
+    foreach (['#abc', '#AABBCC', '#1a2b3c', '#fff', '#12345678'] as $couleur) {
+        $data = [
+            'format_version' => '1.0',
+            'course'         => ['title' => 'Cours couleur valide', 'certificate_accent_color' => $couleur],
+        ];
+        $copy = app(CourseBackupService::class)->import($data, $importer);
+        expect($copy->certificate_accent_color)->toBe($couleur, "Couleur valide « {$couleur} » aurait dû être conservée.");
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 8. assertValidEnvelope PUBLIQUE STATIQUE - réutilisable dès l'aperçu
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('assertValidEnvelope est publique et rejette un titre vide', function (): void {
+    expect(fn () => CourseBackupService::assertValidEnvelope([
+        'format_version' => '1.0',
+        'course'         => ['title' => ''],
+    ]))->toThrow(InvalidCourseBackupException::class);
+});
+
+test('assertValidEnvelope rejette une section corrompue (non-tableau)', function (): void {
+    expect(fn () => CourseBackupService::assertValidEnvelope([
+        'format_version' => '1.0',
+        'course'         => ['title' => 'Cours'],
+        'chapters'       => 'pas_un_tableau',
+    ]))->toThrow(InvalidCourseBackupException::class);
+});
+
+test('assertValidEnvelope accepte une enveloppe minimale valide sans lever d\'exception', function (): void {
+    // Ne doit PAS lever d'exception.
+    CourseBackupService::assertValidEnvelope([
+        'format_version' => '1.0',
+        'course'         => ['title' => 'Cours minimal'],
+    ]);
+    expect(true)->toBeTrue();
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 5. RÉTROCOMPATIBILITÉ - item sans restriction inchangé après import
+// ─────────────────────────────────────────────────────────────────────────────
+
 test('un item SANS access_restrictions est restauré tel quel (rétrocompat)', function (): void {
     $source  = makeBkCourse('bk-retro', 'Cours simple');
     $chapter = Chapter::create(['course_id' => $source->id, 'title' => 'Ch', 'position' => 1]);

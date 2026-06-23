@@ -73,7 +73,8 @@ class CourseImport extends Component
         $this->reset(['preview', 'payload', 'importError']);
 
         $this->validate([
-            'backupFile' => ['required', 'file', 'mimes:json,txt', 'max:5120'], // 5 Mo max
+            // Refus strict : texte/plain (.txt) rejeté dès l'upload (anti-DoS, évite la lecture d'un fichier non-JSON).
+            'backupFile' => ['required', 'file', 'mimes:json', 'max:5120'], // 5 Mo max
         ], [
             'backupFile.mimes' => 'Le fichier doit être une sauvegarde .json.',
             'backupFile.max'   => 'Le fichier dépasse la taille maximale (5 Mo).',
@@ -89,6 +90,10 @@ class CourseImport extends Component
             if (! is_array($data)) {
                 throw new InvalidCourseBackupException('Le fichier ne contient pas une sauvegarde valide.');
             }
+
+            // Validation de structure légère DÈS l'aperçu (version + titre + sections)
+            // pour afficher l'erreur immédiatement, sans attendre la confirmation d'import.
+            CourseBackupService::assertValidEnvelope($data);
         } catch (\JsonException) {
             $this->importError = 'Le fichier n\'est pas un JSON valide.';
 

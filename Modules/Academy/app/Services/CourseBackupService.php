@@ -150,18 +150,20 @@ class CourseBackupService
      */
     private function exportChapters(Course $course): array
     {
-        return Chapter::where('course_id', $course->id)
-            ->orderBy('position')
-            ->get()
+        // Utilise les relations déjà chargées par loadMissing() en début d'export :
+        // zéro requête N+1, tri sur la collection en mémoire (même résultat qu'orderBy).
+        return $course->chapters
+            ->sortBy('position')
+            ->values()
             ->map(function (Chapter $chapter): array {
                 return [
                     '_ref'     => (int) $chapter->id,
                     'title'    => $chapter->title,
                     'position' => (int) $chapter->position,
                     'summary'  => $chapter->summary,
-                    'lessons'  => Lesson::where('chapter_id', $chapter->id)
-                        ->orderBy('position')
-                        ->get()
+                    'lessons'  => $chapter->lessons
+                        ->sortBy('position')
+                        ->values()
                         ->map(fn (Lesson $lesson): array => [
                             '_ref'              => (int) $lesson->id,
                             'title'             => $lesson->title,
@@ -170,9 +172,9 @@ class CourseBackupService
                             'summary'           => $lesson->summary,
                             'estimated_minutes' => $lesson->estimated_minutes,
                             'drip_days'         => $lesson->drip_days,
-                            'items'             => LessonItem::where('lesson_id', $lesson->id)
-                                ->orderBy('position')
-                                ->get()
+                            'items'             => $lesson->lessonItems
+                                ->sortBy('position')
+                                ->values()
                                 ->map(fn (LessonItem $item): array => [
                                     '_ref'              => (int) $item->id,
                                     'type'              => $item->type,
@@ -367,7 +369,7 @@ class CourseBackupService
      */
     public function import(array $data, User $owner): Course
     {
-        $this->assertValidEnvelope($data);
+        self::assertValidEnvelope($data);
 
         return DB::transaction(function () use ($data, $owner): Course {
             $course = $this->createCourse($data['course'] ?? [], $owner);
@@ -402,12 +404,14 @@ class CourseBackupService
     /**
      * Valide rapidement un JSON décodé : structure d'enveloppe + version supportée.
      * Échoue PROPREMENT (exception métier) plutôt que de laisser planter plus loin.
+     * Exposée en public static pour que CourseImport puisse la réutiliser DÈS l'aperçu
+     * (validation à l'upload, sans attendre le clic « Importer »).
      *
      * @param  array<string, mixed>  $data
      *
      * @throws InvalidCourseBackupException
      */
-    private function assertValidEnvelope(array $data): void
+    public static function assertValidEnvelope(array $data): void
     {
         $version = (string) ($data['format_version'] ?? '');
         if (! in_array($version, self::SUPPORTED_FORMATS, true)) {
@@ -464,7 +468,8 @@ class CourseBackupService
             'title'                      => mb_substr($title, 0, 255),
             'subtitle'                   => $this->cleanNullableString($meta['subtitle'] ?? null, 255),
             'summary'                    => $this->cleanNullableString($meta['summary'] ?? null, 2000),
-            'description'                => is_string($meta['description'] ?? null) ? $meta['description'] : null,
+            // Borne anti-DoS : longText ≤ 200 000 caractères.
+            'description'                => $this->cleanNullableString($meta['description'] ?? null, 200000),
             'language'                   => $language,
             'level'                      => $level,
             'duration_minutes'           => $this->cleanNullableInt($meta['duration_minutes'] ?? null, 0, 100000),
@@ -482,9 +487,11 @@ class CourseBackupService
             'faq_dictionary_ids'         => null,
             'tools_collection_id'        => null,
             'certificate_title'          => $this->cleanNullableString($meta['certificate_title'] ?? null, 255),
-            'certificate_message'        => is_string($meta['certificate_message'] ?? null) ? $meta['certificate_message'] : null,
+            // Borne anti-DoS : text ≤ 65 535 caractères.
+            'certificate_message'        => $this->cleanNullableString($meta['certificate_message'] ?? null, 65535),
             'certificate_signature_name' => $this->cleanNullableString($meta['certificate_signature_name'] ?? null, 255),
-            'certificate_accent_color'   => $this->cleanNullableString($meta['certificate_accent_color'] ?? null, 32),
+            // Couleur CSS validée : #RGB, #RRGGBB, #RGBA, #RRGGBBAA uniquement (anti-injection style).
+            'certificate_accent_color'   => $this->cleanCertificateColor($meta['certificate_accent_color'] ?? null),
             'grade_letter_scheme'        => is_array($meta['grade_letter_scheme'] ?? null) ? $meta['grade_letter_scheme'] : null,
             // completion_criteria recréé tel quel ; ses items[] sont remappés en fin d'import.
             'completion_criteria'        => is_array($meta['completion_criteria'] ?? null) ? $meta['completion_criteria'] : null,
@@ -597,7 +604,8 @@ class CourseBackupService
                 'course_id'    => $course->id,
                 'lesson_id'    => $newLessonId,
                 'title'        => mb_substr(trim((string) ($data['title'] ?? 'Devoir')) ?: 'Devoir', 0, 255),
-                'instructions' => is_string($data['instructions'] ?? null) ? $data['instructions'] : null,
+                // Borne anti-DoS : text ≤ 65 535 caractères.
+                'instructions' => $this->cleanNullableString($data['instructions'] ?? null, 65535),
                 'max_points'   => $this->cleanNullableInt($data['max_points'] ?? 100, 0, 100000) ?? 100,
                 'due_at'       => $this->cleanNullableDate($data['due_at'] ?? null),
                 'is_published' => (bool) ($data['is_published'] ?? false),
@@ -792,13 +800,21 @@ class CourseBackupService
 
             $payload = is_array($data['payload'] ?? null) ? $data['payload'] : [];
 
+            // Borne payload anti-DoS : rejeter un payload anormalement volumineux
+            // avant toute sérialisation Eloquent (protection mémoire).
+            $encodedPayload = json_encode($payload);
+            if ($encodedPayload === false || strlen($encodedPayload) > 200000) {
+                continue;
+            }
+
             Question::create([
                 'category_id' => $map[$catRef],
                 'owner_id'    => $owner->id,
                 'type'        => $type,
-                'prompt'      => (string) ($data['prompt'] ?? ''),
+                // Borne anti-DoS : text ≤ 65 535 caractères.
+                'prompt'      => mb_substr((string) ($data['prompt'] ?? ''), 0, 65535),
                 'payload'     => $payload,
-                'explanation' => is_string($data['explanation'] ?? null) ? $data['explanation'] : null,
+                'explanation' => $this->cleanNullableString($data['explanation'] ?? null, 65535),
                 'difficulty'  => $this->cleanNullableString($data['difficulty'] ?? null, 32),
                 'points'      => $this->cleanNullableInt($data['points'] ?? 1, 1, 100) ?? 1,
                 'is_active'   => (bool) ($data['is_active'] ?? true),
@@ -920,6 +936,21 @@ class CourseBackupService
     // ─────────────────────────────────────────────────────────────────────────────
     // Aides (assainissement + slugs uniques)
     // ─────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Couleur CSS de certificat validée (liste blanche par regex) : accepte uniquement
+     * #RGB, #RGBA, #RRGGBB ou #RRGGBBAA (3 à 8 chiffres hexadécimaux après le #).
+     * Toute autre valeur (chaîne longue, JavaScript:, etc.) retourne null.
+     */
+    private function cleanCertificateColor(mixed $value): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+        $value = trim($value);
+
+        return ($value !== '' && preg_match('/^#[0-9A-Fa-f]{3,8}$/', $value)) ? $value : null;
+    }
 
     /** Chaîne assainie (trim + longueur max) ou null si vide/non-chaîne. */
     private function cleanNullableString(mixed $value, int $max): ?string
