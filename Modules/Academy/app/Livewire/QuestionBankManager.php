@@ -36,11 +36,18 @@ use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Modules\Academy\Models\Question;
 use Modules\Academy\Models\QuestionCategory;
+use Modules\Academy\Models\QuestionTag;
+use Modules\Academy\Models\QuestionVersion;
+use Modules\Academy\Services\QuestionStatsService;
 
 class QuestionBankManager extends Component
 {
     /** Niveaux de difficulté autorisés (liste blanche). */
     private const DIFFICULTIES = ['facile', 'moyen', 'difficile'];
+
+    /** F17 (TAGS) : bornes anti-abus (nombre d'étiquettes par question + longueur). */
+    private const MAX_TAGS = 20;
+    private const MAX_TAG_LENGTH = 80;
 
     /** C4 : bornes anti-payload abusif pour le cloze (texte global + chaque entrée). */
     private const MAX_CLOZE_TEXT = 2000;
@@ -59,6 +66,25 @@ class QuestionBankManager extends Component
 
     /** Catégorie actuellement sélectionnée (édition des questions). */
     public ?int $selectedCategoryId = null;
+
+    /**
+     * F17 (TAGS) - filtre de la liste des questions par étiquette (owner-scopé).
+     * null = aucun filtre (toutes les questions de la catégorie).
+     */
+    public ?int $filterTagId = null;
+
+    /**
+     * F17 (TAGS) - saisie des étiquettes de la question en cours d'édition, séparées
+     * par des virgules. Les étiquettes inconnues sont créées à la volée (owner-scopé)
+     * à l'enregistrement. Vide = aucune étiquette.
+     */
+    public string $qTags = '';
+
+    /**
+     * F17 (VERSIONS) - question dont l'historique est actuellement affiché (panneau
+     * inline en lecture seule), ou null si fermé. Owner-scopé via resolveQuestion.
+     */
+    public ?int $historyQuestionId = null;
 
     // ── Formulaire de question (création / édition) ──────────────────────────────
     /** Id de la question en cours d'édition (null = création d'une nouvelle). */
@@ -347,6 +373,8 @@ class QuestionBankManager extends Component
         $category = $this->resolveCategory($categoryId);
 
         $this->selectedCategoryId = $category->id;
+        $this->filterTagId        = null; // F17 : nouvelle catégorie → on repart sans filtre.
+        $this->historyQuestionId  = null;
         $this->resetQuestionForm();
     }
 
@@ -559,14 +587,24 @@ class QuestionBankManager extends Component
 
         if ($this->editingQuestionId !== null) {
             $question = $this->resolveQuestion((int) $this->editingQuestionId);
+
+            // F17 (VERSIONS) : on archive d'ABORD l'état PRÉCÉDENT si le CONTENU change
+            // (prompt / payload / explanation / type). Une simple modification de
+            // difficulté/points/activité/tags ne crée pas de version (bruit inutile).
+            $this->maybeSnapshotVersion($question, $attributes);
+
             // La catégorie cible est re-validée comme mienne ci-dessus → réaffectation sûre.
             $question->update($attributes);
             $message = 'Question mise à jour.';
         } else {
             $attributes['owner_id'] = Auth::id(); // FORCÉ = auth.
-            Question::create($attributes);
+            $question = Question::create($attributes);
             $message = 'Question ajoutée.';
         }
+
+        // F17 (TAGS) : synchronisation owner-scopée (création à la volée). Anti-IDOR :
+        // chaque tag est résolu/créé pour owner_id = auth → jamais un tag d'un autre owner.
+        $this->syncTags($question);
 
         $this->resetQuestionForm();
         session()->flash('academy_bank_status', $message);
@@ -591,6 +629,10 @@ class QuestionBankManager extends Component
         $payload = is_array($question->payload) ? $question->payload : [];
         $this->hydratePayloadForm($this->qType, $payload);
 
+        // F17 (TAGS) : pré-remplit la saisie avec les étiquettes existantes (libellés
+        // séparés par des virgules), owner-scopées via la relation.
+        $this->qTags = $question->tags()->orderBy('name')->pluck('name')->implode(', ');
+
         $this->resetErrorBag();
     }
 
@@ -602,8 +644,141 @@ class QuestionBankManager extends Component
         if ($this->editingQuestionId === $questionId) {
             $this->resetQuestionForm();
         }
+        if ($this->historyQuestionId === $questionId) {
+            $this->historyQuestionId = null;
+        }
         $this->confirmingQuestionDeletion = null;
         session()->flash('academy_bank_status', 'Question supprimée.');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // F17 - TAGS (étiquettes owner-scopées, création à la volée) + VERSIONS
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Synchronise les étiquettes de la question depuis la saisie $qTags (libellés
+     * séparés par des virgules). Owner-scopé STRICT : chaque tag est résolu/créé pour
+     * l'OWNER de la question (= auth à la création ; l'owner d'origine si un admin
+     * édite la question d'un autre). Un tag d'un AUTRE owner n'est donc jamais attaché
+     * (firstOrCreate sur owner_id + slug → un libellé homonyme d'un autre owner crée un
+     * tag DISTINCT). Doublons (par slug) et entrées vides ignorés ; bornes appliquées.
+     */
+    private function syncTags(Question $question): void
+    {
+        $ownerId = (int) ($question->owner_id ?: Auth::id());
+
+        $tagIds    = [];
+        $seenSlugs = [];
+
+        foreach (explode(',', $this->qTags) as $raw) {
+            if (count($tagIds) >= self::MAX_TAGS) {
+                break;
+            }
+
+            $name = trim((string) $raw);
+            if ($name === '') {
+                continue;
+            }
+            $name = mb_substr($name, 0, self::MAX_TAG_LENGTH);
+            $slug = QuestionTag::slugify($name);
+            if ($slug === '' || isset($seenSlugs[$slug])) {
+                continue;
+            }
+            $seenSlugs[$slug] = true;
+
+            $tag = QuestionTag::firstOrCreate(
+                ['owner_id' => $ownerId, 'slug' => $slug],
+                ['name' => $name]
+            );
+            $tagIds[] = $tag->id;
+        }
+
+        $question->tags()->sync($tagIds);
+    }
+
+    /**
+     * F17 (VERSIONS) : archive l'état PRÉCÉDENT de la question AVANT écriture, mais
+     * SEULEMENT si le contenu noté change (prompt / type / explication / payload). Une
+     * édition purement « cosmétique » (difficulté, points, activité, tags) ne génère
+     * pas de version. Le numéro est incrémenté par question. Owner recopié de la question.
+     *
+     * @param  array<string, mixed>  $newAttributes
+     */
+    private function maybeSnapshotVersion(Question $question, array $newAttributes): void
+    {
+        $oldPayload = is_array($question->payload) ? $question->payload : [];
+        $newPayload = is_array($newAttributes['payload'] ?? null) ? $newAttributes['payload'] : [];
+
+        $contentChanged = (string) $question->prompt !== (string) ($newAttributes['prompt'] ?? '')
+            || (string) $question->type !== (string) ($newAttributes['type'] ?? '')
+            || (string) ($question->explanation ?? '') !== (string) ($newAttributes['explanation'] ?? '')
+            || json_encode($oldPayload) !== json_encode($newPayload);
+
+        if (! $contentChanged) {
+            return;
+        }
+
+        $nextVersion = (int) QuestionVersion::where('question_id', $question->id)->max('version') + 1;
+
+        QuestionVersion::create([
+            'question_id' => $question->id,
+            'owner_id'    => (int) ($question->owner_id ?: Auth::id()),
+            'version'     => $nextVersion,
+            'prompt'      => (string) $question->prompt,
+            'payload'     => $oldPayload,
+            'explanation' => $question->explanation,
+            'type'        => (string) $question->type,
+            'snapshot_at' => now(),
+        ]);
+    }
+
+    /** Ouvre le panneau d'historique d'une question (anti-IDOR via resolveQuestion). */
+    public function showHistory(int $questionId): void
+    {
+        $question = $this->resolveQuestion($questionId);
+        $this->historyQuestionId = $question->id;
+    }
+
+    public function closeHistory(): void
+    {
+        $this->historyQuestionId = null;
+    }
+
+    /**
+     * Recharge une version archivée DANS le formulaire d'édition (l'utilisateur
+     * ré-enregistre ensuite pour restaurer). Pas de « le quiz épingle une version »
+     * (hors périmètre F17). Anti-IDOR : la version est bornée à une question résolue
+     * owner-scopée (et au question_id de celle-ci).
+     */
+    public function restoreVersion(int $versionId): void
+    {
+        if ($this->historyQuestionId === null) {
+            return;
+        }
+
+        $question = $this->resolveQuestion((int) $this->historyQuestionId);
+
+        $version = QuestionVersion::where('id', $versionId)
+            ->where('question_id', $question->id)
+            ->firstOrFail();
+
+        $this->editingQuestionId  = $question->id;
+        $this->selectedCategoryId = (int) $question->category_id;
+
+        $this->qType        = in_array($version->type, Question::TYPES, true) ? $version->type : 'mcq';
+        $this->qPrompt      = (string) $version->prompt;
+        $this->qExplanation = $version->explanation;
+        // Difficulté / points / activité / tags ne sont pas versionnés → conservés tels quels.
+        $this->qDifficulty  = in_array($question->difficulty, self::DIFFICULTIES, true) ? (string) $question->difficulty : 'moyen';
+        $this->qPoints      = max(1, min(100, (int) ($question->points ?? 1)));
+        $this->qIsActive    = (bool) $question->is_active;
+        $this->qTags        = $question->tags()->orderBy('name')->pluck('name')->implode(', ');
+
+        $this->hydratePayloadForm($this->qType, is_array($version->payload) ? $version->payload : []);
+
+        $this->historyQuestionId = null;
+        $this->resetErrorBag();
+        session()->flash('academy_bank_status', 'Version '.$version->version.' rechargée dans le formulaire. Enregistrez pour la restaurer.');
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -1302,6 +1477,7 @@ class QuestionBankManager extends Component
         $this->qDifficulty       = 'moyen';
         $this->qPoints           = 1;
         $this->qIsActive         = true;
+        $this->qTags             = '';
         $this->resetPayloadFields();
         $this->resetErrorBag();
     }
@@ -1407,13 +1583,75 @@ class QuestionBankManager extends Component
         }
 
         $query = Question::where('category_id', $this->selectedCategoryId)
+            ->with('tags')
             ->orderByDesc('id');
 
         if (! $this->isManager()) {
             $query->where('owner_id', Auth::id());
         }
 
+        // F17 (TAGS) : filtre optionnel par étiquette. Un id forgé d'un autre owner ne
+        // remonte rien (les questions de l'utilisateur ne lui sont pas attachées) → pas de fuite.
+        if ($this->filterTagId !== null) {
+            $tagId = (int) $this->filterTagId;
+            $query->whereHas('tags', fn ($q) => $q->where('academy_question_tags.id', $tagId));
+        }
+
         return $query->get();
+    }
+
+    /**
+     * F17 (TAGS) - mes étiquettes (admin : toutes), pour le menu de filtre + la liste
+     * d'aide à la saisie. Owner-scopé (sauf admin academy.manage).
+     *
+     * @return \Illuminate\Support\Collection<int, QuestionTag>
+     */
+    #[Computed]
+    public function tags(): \Illuminate\Support\Collection
+    {
+        $query = QuestionTag::query()->orderBy('name');
+
+        if (! $this->isManager()) {
+            $query->where('owner_id', Auth::id());
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * F17 (STATISTIQUES) - usages + indice de facilité pour les questions AFFICHÉES,
+     * agrégés en UN lot (aucun N+1). Map id_question => stats.
+     *
+     * @return array<int, array{uses: int, correct: int, facility: int|null, has_data: bool}>
+     */
+    #[Computed]
+    public function questionStats(): array
+    {
+        $ids = $this->questions->pluck('id')->map(fn ($id): int => (int) $id)->all();
+
+        return QuestionStatsService::forQuestions($ids);
+    }
+
+    /**
+     * F17 (VERSIONS) - historique de la question dont le panneau est ouvert (lecture
+     * seule), de la plus récente à la plus ancienne. Owner-scopé via resolveQuestion.
+     *
+     * @return \Illuminate\Support\Collection<int, QuestionVersion>
+     */
+    #[Computed]
+    public function questionVersions(): \Illuminate\Support\Collection
+    {
+        if ($this->historyQuestionId === null) {
+            return collect();
+        }
+
+        try {
+            $question = $this->resolveQuestion((int) $this->historyQuestionId);
+        } catch (\Throwable) {
+            return collect();
+        }
+
+        return $question->versions()->get();
     }
 
     /** La catégorie sélectionnée (ou null). */

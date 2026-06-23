@@ -18,6 +18,8 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int         $id
@@ -75,6 +77,25 @@ class Question extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    /**
+     * F17 - Etiquettes (tags) attachees a cette question. Additif : une question sans
+     * tag se comporte exactement comme avant (relation vide).
+     */
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(QuestionTag::class, 'academy_question_tag', 'question_id', 'tag_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * F17 - Historique des versions (etats precedents archives avant chaque edition),
+     * de la plus recente a la plus ancienne.
+     */
+    public function versions(): HasMany
+    {
+        return $this->hasMany(QuestionVersion::class, 'question_id')->orderByDesc('version');
     }
 
     /** Scope : questions actives uniquement. */

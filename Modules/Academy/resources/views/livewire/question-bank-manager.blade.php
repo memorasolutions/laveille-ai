@@ -102,13 +102,31 @@
                 <x-academy::empty-state icon="👈"
                     message="Sélectionnez une catégorie à gauche pour voir et gérer ses questions." />
             @else
+                {{-- F17 (TAGS) : filtre de la liste par étiquette (owner-scopé). --}}
+                @if ($this->tags->isNotEmpty())
+                    <div style="display: flex; align-items: center; gap: 8px; margin: 0 0 12px; flex-wrap: wrap;">
+                        <label for="filterTagId" style="font-size: 0.8rem; font-weight: 600;">Filtrer par étiquette</label>
+                        <select id="filterTagId" wire:model.live="filterTagId"
+                                style="padding: 6px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                            <option value="">Toutes les étiquettes</option>
+                            @foreach ($this->tags as $tag)
+                                <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                            @endforeach
+                        </select>
+                        @if ($filterTagId !== null)
+                            <x-core::button type="button" wire:click="$set('filterTagId', null)" variant="ghost" size="sm">Réinitialiser</x-core::button>
+                        @endif
+                    </div>
+                @endif
+
                 {{-- Liste des questions existantes --}}
                 @if ($this->questions->isEmpty())
                     <x-academy::empty-state icon="❓" :compact="true"
-                        message="Cette catégorie n'a aucune question. Ajoutez-en une avec le formulaire ci-dessous." />
+                        message="Aucune question ne correspond. Ajoutez-en une avec le formulaire ci-dessous (ou retirez le filtre)." />
                 @else
                     <ul style="list-style: none; margin: 0 0 18px; padding: 0; display: flex; flex-direction: column; gap: 8px;">
                         @foreach ($this->questions as $question)
+                            @php($stat = $this->questionStats[$question->id] ?? null)
                             <li wire:key="q-{{ $question->id }}"
                                 style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 10px 12px;">
                                 <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;">
@@ -120,10 +138,32 @@
                                         @unless ($question->is_active)
                                             <span style="display: inline-block; font-size: 0.7rem; font-weight: 700; color: #92400E; background: #FEF3C7; padding: 2px 8px; border-radius: 999px;">Inactive</span>
                                         @endunless
+
+                                        {{-- F17 (STATISTIQUES) : usages + indice de facilité (lecture seule). --}}
+                                        @php($statLabel = ($stat && $stat['has_data'])
+                                            ? 'Utilisée '.$stat['uses'].' fois'.($stat['facility'] !== null ? ' · Facilité '.$stat['facility'].'%' : '')
+                                            : 'Pas encore utilisée')
+                                        @if ($stat && $stat['has_data'])
+                                            <span style="display: inline-block; font-size: 0.7rem; font-weight: 600; color: #374151; background: #F3F4F6; padding: 2px 8px; border-radius: 999px;"
+                                                  title="Indice de facilité = pourcentage de bonnes réponses (essais exclus).">{{ $statLabel }}</span>
+                                        @else
+                                            <span style="display: inline-block; font-size: 0.7rem; font-weight: 600; color: #6B7280; background: #F9FAFB; padding: 2px 8px; border-radius: 999px;">{{ $statLabel }}</span>
+                                        @endif
+
                                         <p style="margin: 6px 0 0; font-weight: 600;">{{ \Illuminate\Support\Str::limit($question->prompt, 120) }}</p>
+
+                                        {{-- F17 (TAGS) : étiquettes de la question. --}}
+                                        @if ($question->tags->isNotEmpty())
+                                            <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px;">
+                                                @foreach ($question->tags as $tag)
+                                                    <span style="font-size: 0.68rem; color: #1E3A8A; background: #EFF6FF; padding: 2px 8px; border-radius: 999px;">{{ $tag->name }}</span>
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </div>
-                                    <div style="display: flex; gap: 6px; flex: 0 0 auto;">
+                                    <div style="display: flex; gap: 6px; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end;">
                                         <x-core::button type="button" wire:click="editQuestion({{ $question->id }})" variant="secondary" size="sm">Éditer</x-core::button>
+                                        <x-core::button type="button" wire:click="showHistory({{ $question->id }})" variant="ghost" size="sm" aria-label="Voir l'historique des versions">Historique</x-core::button>
                                         @if ($confirmingQuestionDeletion === $question->id)
                                             <x-core::button type="button" wire:click="deleteQuestion({{ $question->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                                             <x-core::button type="button" wire:click="cancelQuestionDeletion" variant="ghost" size="sm">Annuler</x-core::button>
@@ -132,6 +172,35 @@
                                         @endif
                                     </div>
                                 </div>
+
+                                {{-- F17 (VERSIONS) : panneau d'historique inline (lecture seule). --}}
+                                @if ($historyQuestionId === $question->id)
+                                    <div style="margin-top: 10px; border-top: 1px dashed #E5E7EB; padding-top: 10px;">
+                                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                                            <strong style="font-size: 0.82rem;">Historique des versions</strong>
+                                            <x-core::button type="button" wire:click="closeHistory" variant="ghost" size="sm">Fermer</x-core::button>
+                                        </div>
+                                        @if ($this->questionVersions->isEmpty())
+                                            <p style="margin: 8px 0 0; font-size: 0.8rem; color: var(--sys-text-muted, #6B7280);">
+                                                Aucune version archivée. Une version est créée à chaque modification du contenu de la question.
+                                            </p>
+                                        @else
+                                            <ul style="list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px;">
+                                                @foreach ($this->questionVersions as $version)
+                                                    <li wire:key="ver-{{ $version->id }}"
+                                                        style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 0.8rem; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 6px 10px;">
+                                                        <span>
+                                                            Version {{ $version->version }} ·
+                                                            {{ optional($version->snapshot_at)->timezone('America/Toronto')?->format('Y-m-d H:i') ?? '-' }}
+                                                            <span style="color: var(--sys-text-muted, #6B7280);">({{ $this->typeLabel($version->type) }})</span>
+                                                        </span>
+                                                        <x-core::button type="button" wire:click="restoreVersion({{ $version->id }})" variant="secondary" size="sm">Recharger</x-core::button>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+                                    </div>
+                                @endif
                             </li>
                         @endforeach
                     </ul>
@@ -485,6 +554,21 @@
                               style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
                     <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
                         Affichée à la révision quelle que soit la réponse (comme la « rétroaction générale » de Moodle).
+                    </p>
+
+                    {{-- F17 (TAGS) : étiquettes, séparées par des virgules, créées à la volée. --}}
+                    <label for="qTags" style="font-size: 0.8rem; font-weight: 600;">Étiquettes (facultatif)</label>
+                    <input id="qTags" type="text" wire:model="qTags" list="qTagsList" maxlength="1000"
+                           placeholder="Séparez les étiquettes par des virgules (ex. : grammaire, niveau 2)"
+                           aria-describedby="qTags-help"
+                           style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                    <datalist id="qTagsList">
+                        @foreach ($this->tags as $tag)
+                            <option value="{{ $tag->name }}"></option>
+                        @endforeach
+                    </datalist>
+                    <p id="qTags-help" style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+                        Servent à regrouper et filtrer vos questions. Une étiquette inconnue est créée automatiquement.
                     </p>
 
                     <label style="display: inline-flex; align-items: center; gap: 8px; min-height: 36px; font-size: 0.85rem;">

@@ -117,6 +117,13 @@ final class QuestionBankService
         //    dupliquer côté banque ;
         //  - choice_feedback (mcq/vraifaux) = textes de rétroaction par choix, normalisés.
         // Ces clés sont ainsi SNAPSHOTÉES dans QuizAttempt → disponibles à la révision.
+        // F17 (STATISTIQUES) : on PROPAGE l'identifiant STABLE de la question de banque
+        // dans l'item du round. Comme le round est snapshote tel quel dans QuizAttempt
+        // (questions_snapshot), cet identifiant relie chaque occurrence en tentative a sa
+        // question d'origine -> QuestionStatsService compte usages + indice de facilite.
+        // Ajout PUREMENT additif : score()/shuffleRound()/la revision lisent des cles
+        // precises et ignorent celle-ci (retrocompat stricte). Une question hors banque
+        // (round QT historique) n'a simplement pas cette cle.
         $base = [
             'theme'            => 'banque',
             'difficulty'       => $difficulty,
@@ -124,6 +131,7 @@ final class QuestionBankService
             'explanation'      => $explanation,
             'general_feedback' => $explanation,
             'fiche'            => null,
+            'bank_question_id' => (int) $question->getKey(),
         ];
 
         switch ($question->type) {
