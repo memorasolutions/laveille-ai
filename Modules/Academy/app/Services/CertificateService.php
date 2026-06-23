@@ -104,6 +104,18 @@ final class CertificateService
             // Silencieux
         }
 
+        // V5-c - Notification « cours complété » UNIQUEMENT à la première émission
+        // (wasRecentlyCreated) : idempotent, jamais de doublon sur ré-appel. Gardée
+        // par l'interrupteur maître + préférence. Défensif : ne casse jamais l'émission.
+        if ($certificate->wasRecentlyCreated) {
+            try {
+                app(\Modules\Academy\Services\AcademyNotificationService::class)
+                    ->courseCompleted($user, $course, $certificate);
+            } catch (\Throwable) {
+                // Silencieux
+            }
+        }
+
         return $certificate;
     }
 

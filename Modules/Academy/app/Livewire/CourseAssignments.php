@@ -465,8 +465,33 @@ class CourseAssignments extends Component
             'graded_by' => auth()->id(),
         ]);
 
+        $this->notifyGraded($course, $submission, $assignment);
+
         $this->cancelGrading();
         $this->flashSaved('Remise corrigée.');
+    }
+
+    /**
+     * V5-c - Notifie l'étudiant que sa remise a été corrigée (note finale).
+     * Gardée par l'interrupteur maître + préférence dans le service. Défensif :
+     * ne casse jamais la correction. Le pourcentage est calculé sur max_points.
+     */
+    private function notifyGraded(Course $course, Submission $submission, Assignment $assignment): void
+    {
+        try {
+            $student = $submission->user;
+            if ($student === null) {
+                return;
+            }
+
+            $max     = (int) ($assignment->max_points ?? 0);
+            $percent = $max > 0 ? (int) round(((int) $submission->score) / $max * 100) : null;
+
+            app(\Modules\Academy\Services\AcademyNotificationService::class)
+                ->graded($student, $course, (string) $assignment->title, $percent);
+        } catch (\Throwable) {
+            // Best-effort.
+        }
     }
 
     /**
@@ -497,6 +522,8 @@ class CourseAssignments extends Component
             'graded_at'     => now(),
             'graded_by'     => auth()->id(),
         ]);
+
+        $this->notifyGraded($this->resolveCourse(), $submission, $assignment);
 
         $this->cancelGrading();
         $this->flashSaved('Remise corrigée selon la grille.');

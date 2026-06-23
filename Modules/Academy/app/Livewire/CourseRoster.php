@@ -636,9 +636,16 @@ class CourseRoster extends Component
             'announcementBody'  => 'required|string|max:5000',
         ]);
 
+        // V5-c : ne notifier que lors de la TRANSITION vers « publiée » (jamais un
+        // simple ré-enregistrement d'une annonce déjà publiée -> pas de spam).
+        $justPublished = false;
+        $publishedAnnouncement = null;
+
         if ($this->editingAnnouncement !== null) {
             // ÉDITION : annonce re-résolue et scopée à CE cours (anti-IDOR).
             $announcement = $this->resolveAnnouncementFor($course, (int) $this->editingAnnouncement);
+
+            $wasUnpublished = $announcement->published_at === null;
 
             $announcement->title = trim($data['announcementTitle']);
             $announcement->body  = $data['announcementBody'];
@@ -651,9 +658,12 @@ class CourseRoster extends Component
 
             $announcement->save();
             $message = $publish ? 'Annonce publiée.' : 'Annonce enregistrée.';
+
+            $justPublished = $publish && $wasUnpublished && $announcement->published_at !== null;
+            $publishedAnnouncement = $announcement;
         } else {
             // CRÉATION : author_id = utilisateur connecté (jamais le client).
-            Announcement::create([
+            $publishedAnnouncement = Announcement::create([
                 'course_id'    => $course->id,
                 'author_id'    => auth()->id(),
                 'title'        => trim($data['announcementTitle']),
@@ -661,6 +671,19 @@ class CourseRoster extends Component
                 'published_at' => $publish ? now() : null,
             ]);
             $message = $publish ? 'Annonce publiée.' : 'Brouillon d\'annonce enregistré.';
+
+            $justPublished = $publish;
+        }
+
+        // V5-c - Notifier les inscrits actifs (gardé par l'interrupteur maître +
+        // préférence). Défensif : ne casse jamais l'enregistrement de l'annonce.
+        if ($justPublished && $publishedAnnouncement !== null) {
+            try {
+                app(\Modules\Academy\Services\AcademyNotificationService::class)
+                    ->announcementPublished($publishedAnnouncement);
+            } catch (\Throwable) {
+                // Best-effort.
+            }
         }
 
         $this->resetAnnouncementForm();

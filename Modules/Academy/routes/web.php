@@ -40,6 +40,13 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             ->middleware('auth')
             ->name('dashboard');
 
+        // V5-c - Préférences de notification courriel (opt-in/opt-out par type).
+        // Connexion requise ; le composant Livewire n'agit que sur auth()->user()
+        // (jamais un id du client). Lien présent dans chaque courriel (Loi 25 / LCAP).
+        Route::get('notifications', fn () => view('academy::public.notification-preferences'))
+            ->middleware('auth')
+            ->name('notifications.preferences');
+
         // PHASE 5 (FE-5) - Création de cours front-end.
         // Connexion requise ; l'autorisation d'entrée (create) vit dans
         // CourseCreate::mount() via $this->authorize('create', Course::class)

@@ -17,8 +17,11 @@
                 <div style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
 
                     <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 12px;">Mon espace Académie</h1>
-                    <p style="margin-bottom: 28px; color: var(--sys-text-muted, #6B7280);">
+                    <p style="margin-bottom: 16px; color: var(--sys-text-muted, #6B7280);">
                         Retrouvez ici vos formations, votre progression et, si vous en gérez, vos cours.
+                    </p>
+                    <p style="margin-bottom: 28px;">
+                        <a href="{{ route('academy.notifications.preferences') }}" style="color: var(--sys-accent, #0d9488); text-decoration: underline;">Gérer mes préférences de notification</a>
                     </p>
 
                     @livewire('academy.dashboard')

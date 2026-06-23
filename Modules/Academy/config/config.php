@@ -38,4 +38,39 @@ return [
     | Autorise uniquement l'embed de ce site dans ses propres pages.
     */
     'site_host' => env('ACADEMY_SITE_HOST', 'laveille.ai'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Notifications courriel d'activité (V5-c, parité Moodle)
+    |--------------------------------------------------------------------------
+    | INTERRUPTEUR MAITRE - défaut FALSE.
+    |
+    | Tant que « enabled » = false, AUCUN courriel de notification n'est envoyé :
+    | les notifications sont préparées et journalisées (log info) mais jamais
+    | transmises à Brevo. Cela évite tout envoi prématuré pendant que l'Académie
+    | est « en construction » (aucun vrai étudiant). À l'ouverture publique,
+    | poser ACADEMY_NOTIFICATIONS_ENABLED=true dans le .env de production.
+    |
+    | Cet interrupteur est vérifié au point d'envoi UNIQUE
+    | (AcademyNotificationService::send) ainsi qu'en tête de chaque méthode
+    | publique et de la commande de rappels : aucun chemin ne peut le contourner.
+    |
+    | « defaults » : préférence par défaut par type quand l'utilisateur n'a rien
+    | choisi (opt-in raisonnable - les notifications transactionnelles importantes
+    | sont activées). L'utilisateur peut désactiver chaque type depuis son espace.
+    */
+    'notifications' => [
+        'enabled' => env('ACADEMY_NOTIFICATIONS_ENABLED', false),
+
+        'defaults' => [
+            'announcement'     => true,
+            'forum_reply'      => true,
+            'graded'           => true,
+            'course_completed' => true,
+            'due_reminder'     => true,
+        ],
+
+        // Fenêtre des rappels d'échéance (en jours avant l'échéance).
+        'reminder_window_days' => env('ACADEMY_REMINDER_WINDOW_DAYS', 2),
+    ],
 ];

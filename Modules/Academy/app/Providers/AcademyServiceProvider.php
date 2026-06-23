@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use Modules\Academy\Console\CourseReindexCommand;
+use Modules\Academy\Console\SendDueRemindersCommand;
 use Modules\Academy\Livewire\CourseAnalytics;
 use Modules\Academy\Livewire\CourseAssignments;
 use Modules\Academy\Livewire\CourseCalendar;
@@ -22,6 +23,7 @@ use Modules\Academy\Livewire\CourseEditor;
 use Modules\Academy\Livewire\CourseRoster;
 use Modules\Academy\Livewire\Dashboard;
 use Modules\Academy\Livewire\EssayGrading;
+use Modules\Academy\Livewire\NotificationPreferences;
 use Modules\Academy\Livewire\QuestionBankManager;
 use Modules\Academy\Livewire\StudentAssignments;
 use Modules\Academy\Livewire\StudentGrades;
@@ -64,8 +66,12 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         $this->registerLivewireComponents();
 
         // M7 — Commande Artisan de réindexation Scout
+        // V5-c — Commande de rappels d'échéance planifiés (gardée par l'interrupteur maître).
         if ($this->app->runningInConsole()) {
-            $this->commands([CourseReindexCommand::class]);
+            $this->commands([
+                CourseReindexCommand::class,
+                SendDueRemindersCommand::class,
+            ]);
         }
     }
 
@@ -131,6 +137,11 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // des devoirs sont calculees en lecture par CalendarService (anti-duplication).
         // Autorisation verifiee dans mount() et a chaque mutation. Voir CourseCalendar.
         Livewire::component('academy.course-calendar', CourseCalendar::class);
+
+        // V5-c - Réglages des notifications courriel (opt-in/opt-out par type).
+        // Gaté auth ; chaque mutation s'applique UNIQUEMENT à auth()->user().
+        // Rendu via @livewire('academy.notification-preferences'). Voir NotificationPreferences.
+        Livewire::component('academy.notification-preferences', NotificationPreferences::class);
     }
 
     public function register(): void

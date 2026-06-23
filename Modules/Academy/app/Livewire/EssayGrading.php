@@ -239,6 +239,22 @@ class EssayGrading extends Component
             }
         });
 
+        // V5-c - Notifier l'étudiant que son essai a été corrigé (note finale).
+        // Gardée par l'interrupteur maître + préférence. Défensif.
+        if ($attempt->user !== null) {
+            try {
+                app(\Modules\Academy\Services\AcademyNotificationService::class)
+                    ->graded(
+                        $attempt->user,
+                        $course,
+                        (string) ($attempt->lessonItem->title ?? 'Quiz'),
+                        (int) $result['percent'],
+                    );
+            } catch (\Throwable) {
+                // Best-effort.
+            }
+        }
+
         $this->cancelGrading();
         $this->flashSaved('Essai corrigé : note enregistrée.');
     }

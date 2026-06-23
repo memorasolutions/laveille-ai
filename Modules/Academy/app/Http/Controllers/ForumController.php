@@ -131,11 +131,20 @@ class ForumController extends Controller
             'body' => 'required|string|max:'.ForumService::BODY_MAX,
         ]);
 
-        ForumPost::create([
+        $post = ForumPost::create([
             'topic_id' => $topic->id,
             'user_id'  => Auth::id(),
             'body'     => $data['body'],
         ]);
+
+        // V5-c - Notifier l'auteur du sujet (gardé par l'interrupteur maître + préférence,
+        // jamais l'auteur de la réponse). Défensif : ne casse jamais la publication.
+        try {
+            app(\Modules\Academy\Services\AcademyNotificationService::class)
+                ->forumReply($topic, $post, $course);
+        } catch (\Throwable) {
+            // Best-effort : l'échec d'une notification ne bloque pas le forum.
+        }
 
         $this->maybeComplete($item, $manager);
 

@@ -58,6 +58,14 @@ Schedule::command('app:block-suspicious-ips')->everyFiveMinutes();
 Schedule::command('notifications:send-digest --frequency=daily')->dailyAt('08:00');
 Schedule::command('notifications:send-digest --frequency=weekly')->weeklyOn(1, '08:00');
 
+// Academy V5-c - Rappels d'echeance (parite Moodle). La commande SORT immediatement
+// si l'interrupteur maitre academy.notifications.enabled est faux (defaut) : zero envoi
+// premature tant que l'Academie est en construction. Gate aussi sur module actif pour
+// eviter NamespaceNotFoundException quand le module Academy est desactive.
+if (\Nwidart\Modules\Facades\Module::find('Academy')?->isEnabled()) {
+    Schedule::command('academy:send-due-reminders')->dailyAt('08:00')->withoutOverlapping();
+}
+
 // Newsletter digest (preview mardi, envoi mercredi).
 // PAUSE ESTIVALE 2026 : auto-envoi suspendu jusqu'a la semaine du 17 aout.
 // Le garde ne laisse les planifs s'executer QU'A PARTIR du 2026-08-17 (reprise
