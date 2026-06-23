@@ -21,8 +21,8 @@ Implanter de manière EXHAUSTIVE les fonctionnalités Moodle manquantes (cf. gap
 
 ### VAGUE 3 — Profondeur quiz (types de questions) — extension directe de la banque QB1-3
 - [x] F1 · Question **Ordonnancement** (mettre en ordre) — auto-scoré ✅ (v335-337, /sim PASS, /audit 75→corrigé)
-- [ ] F2 · Question **Cloze / texte à trous** (sous-questions intégrées)
-- [ ] F3 · Question **Numérique** (réponse + tolérance/unités)
+- [x] F2 · Question **Cloze / texte à trous** (sous-questions intégrées) ✅ (v338-339, /sim 5/5, /audit ciblé 79→corrigé)
+- [x] F3 · Question **Numérique** (réponse + tolérance/unités) ✅ (v340-341, /sim 18/18, /audit 83→corrigé)
 - [ ] F4 · Question **Glisser-déposer sur texte**
 - [ ] F5 · Question **Essai** (correction MANUELLE, reliée au carnet)
 - [ ] F6 · Mode quiz **Adaptatif** (réessai avec pénalité ; reporté de V1-f)
@@ -55,5 +55,7 @@ Implanter de manière EXHAUSTIVE les fonctionnalités Moodle manquantes (cf. gap
 ## Journal d'exécution (le plus récent en haut)
 | Date | Feature | Version | Implant | /sim | /audit | Notes |
 |------|---------|---------|---------|------|--------|-------|
+| 2026-06-22 | **F3 Numérique** | v340-341 | 627 tests (+18) | 18/18 PASS (42 plein, 42,4 virgule plein, 43 hors=0, vide/abc=0, sécurité, non-régression) | 83/100 ciblé puis corrigé | parseNumber DRY (virgule/point). Corrigés v341 (639 tests) : C1 BLOQUANT overflow INF (is_finite racine + défense profonde), C2 bornes unité (max:40 serveur), C3 DRY partial numerical-input + formatNumber. **DETTE (à traiter plus tard, non bloquant)** : BUG-1 sélecteur catégorie de banque absent du form « Ajouter un élément » (faut Éditer) ; OBS-2 minuteur n'inhibe pas les boutons « Vérifier » en mode immédiat à 0:00 (garde serveur timed_out OK) ; OBS-3 3 erreurs console pré-existantes sur /academie (non liées). |
+| 2026-06-22 | **F2 Cloze** | v338-339 | 602 tests (+13) | 5/5 PASS (inline input+select, plein 4/4, partiel 2/4, réponses non exposées, QuizAttempt OK) | 79/100 ciblé puis corrigé | Méthode : audit CIBLÉ par type (code-reviewer-fr) + remédiation, pas de re-audit 100pts redondant (section déjà auditée à F1). Corrigés v339 (609 tests) : C1 marqueur dupliqué [[1]][[1]] (biais notation), C2 fieldset immédiat a11y, C3 DRY 2 partials cloze, C4 bornes validation. |
 | 2026-06-22 | **F1 Ordonnancement** | v335-337 | 584 tests (+13) | PASS A→F (ordre exact 8/8, partiel 4/8, non-régression, QuizAttempt OK) | 75/100 puis corrigé | Bug pré-existant B1 (minutes vides → TypeError ?int) corrigé v336. Audit : 0 critique ; H1 TOCTOU attempts + M1 bornes + M3 depth + M4 fieldset a11y + B1 Schema::hasColumn + M2 select perf → corrigés v337 (589 tests). Dette notée : B2 (agrég PHP), B3 (checkbox required), B4 (détail révision mode immédiat). |
 | 2026-06-22 | (init du chantier) | v334 base | - | - | - | Journal + plan créés. Démarrage F1. |

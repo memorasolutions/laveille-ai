@@ -96,9 +96,10 @@ final class QuizService
     /**
      * Permute les choix d'UNE question qcm en remappant l'index correct (et le
      * feedback par choix) pour que le scoring reste exact. Toute autre forme de
-     * question est renvoyée inchangée (vraifaux/court/appariement/ordonnancement/cloze :
-     * ordre signifiant ou mapping déjà mélangé en amont ; le cloze suit l'ordre du
-     * texte → jamais mélangé, comme `court`).
+     * question est renvoyée inchangée (vraifaux/court/appariement/ordonnancement/cloze/
+     * glisser-texte : ordre signifiant ou mapping déjà mélangé en amont ; le cloze et le
+     * glisser-texte suivent l'ordre du texte → jamais re-mélangés (le pool ddwtos est déjà
+     * mélangé au mapping et `answers` y est apparié), comme `court`).
      *
      * @param  array<string, mixed> $q
      * @return array<string, mixed>
@@ -426,6 +427,54 @@ final class QuizService
                         'correct'  => $isCorrect,
                         'expected' => $expectedCloze,
                         'given'    => $givenBlanks,
+                    ];
+
+                    continue 2; // question suivante (bypass du bloc commun)
+
+                case 'glisser-texte':
+                    // GLISSER-DÉPOSER SUR TEXTE (ddwtos) - CRÉDIT PARTIEL PAR TROU (parité
+                    // Moodle « Drag and drop into text »). `answers` = map index_de_trou
+                    // (0-based stable) => INDEX du mot correct DANS LE POOL MÉLANGÉ (`options`).
+                    // `given` = TABLEAU index_de_trou => index du mot CHOISI dans le pool.
+                    // Formule (bornée [0,1]) :
+                    //   fraction = (#trous avec le bon mot) / (#trous)
+                    //   points obtenus = round(fraction * points)   (cohérent V1-c)
+                    // Tous trous corrects → fraction 1 → points pleins. La question n'est
+                    // comptée « correcte » (badge sans-faute) QUE si fraction == 1. Un trou
+                    // vide / un distracteur choisi = faux. Les bonnes réponses (answers)
+                    // restent serveur : jamais exposées avant soumission (seuls les segments
+                    // d'affichage + le pool mélangé sont rendus).
+                    $glisserAnswers = is_array($question['answers'] ?? null) ? $question['answers'] : [];
+                    $glisserOptions = is_array($question['options'] ?? null) ? $question['options'] : [];
+                    $givenGlisser   = is_array($given) ? $given : [];
+                    $nbBlanks       = count($glisserAnswers);
+
+                    $hits            = 0;
+                    $expectedGlisser = [];
+                    foreach ($glisserAnswers as $k => $correctIdx) {
+                        $correctIdx = (int) $correctIdx;
+                        $ans        = $givenGlisser[$k] ?? ($givenGlisser[(string) $k] ?? null);
+                        $givenIdx   = is_numeric($ans) ? (int) $ans : -1;
+                        if ($givenIdx === $correctIdx) {
+                            $hits++;
+                        }
+                        $expectedGlisser[$k] = $glisserOptions[$correctIdx] ?? '';
+                    }
+
+                    $fraction  = $nbBlanks > 0 ? $hits / $nbBlanks : 0.0;
+                    $isCorrect = ($fraction >= 1.0);
+
+                    // On note ICI (points fractionnaires) puis on SAUTE le bloc commun.
+                    // pointsPossible a déjà reçu le poids plein de la question avant le switch.
+                    $pointsEarned += (int) round($fraction * $points);
+                    if ($isCorrect) {
+                        $correct++;
+                    }
+
+                    $details[$index] = [
+                        'correct'  => $isCorrect,
+                        'expected' => $expectedGlisser,
+                        'given'    => $givenGlisser,
                     ];
 
                     continue 2; // question suivante (bypass du bloc commun)

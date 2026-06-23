@@ -151,6 +151,21 @@ class QuestionBankManager extends Component
     public ?string $qNumericalTolerance = null;
     public ?string $qNumericalUnit = null;
 
+    /**
+     * GLISSER-DÉPOSER SUR TEXTE (« Drag and drop into text » Moodle, ddwtos).
+     *  - $qDdwtosText    : texte à marqueurs [[1]], [[2]], … (1-based) ;
+     *  - $qDdwtosWords   : POOL de mots PARTAGÉ (inclut les distracteurs), repeater ;
+     *  - $qDdwtosAnswers : map index_de_trou (0-based : [[1]] → 0) => index du mot correct
+     *                      DANS LE POOL ($qDdwtosWords). Chaque trou se remplit avec un mot
+     *                      du pool ; à l'examen le pool est mélangé et présenté en <select>.
+     *
+     * @var array<int, string>
+     * @var array<int, int|string>
+     */
+    public string $qDdwtosText = '';
+    public array $qDdwtosWords = ['', '', ''];
+    public array $qDdwtosAnswers = [];
+
     // ── Confirmations inline à 2 temps (jamais de popup native) ───────────────────
     public ?int $confirmingCategoryDeletion = null;
     public ?int $confirmingQuestionDeletion = null;
@@ -447,6 +462,37 @@ class QuestionBankManager extends Component
         $this->qClozeBlanks = array_values($this->qClozeBlanks);
     }
 
+    /** Ajoute un mot au pool ddwtos (glisser-déposer sur texte). */
+    public function addDdwtosWord(): void
+    {
+        $this->qDdwtosWords[] = '';
+    }
+
+    /**
+     * Retire un mot du pool ddwtos et ré-indexe. Met à jour $qDdwtosAnswers : un trou
+     * qui pointait le mot retiré perd sa désignation ; les index supérieurs reculent d'un
+     * cran (cohérence avec la ré-indexation du pool, comme removeChoice le fait pour le QCM).
+     */
+    public function removeDdwtosWord(int $index): void
+    {
+        if (count($this->qDdwtosWords) <= 2) {
+            return; // pool minimal de 2 mots.
+        }
+
+        unset($this->qDdwtosWords[$index]);
+        $this->qDdwtosWords = array_values($this->qDdwtosWords);
+
+        $newAnswers = [];
+        foreach ($this->qDdwtosAnswers as $blankIdx => $wordIdx) {
+            $wordIdx = (int) $wordIdx;
+            if ($wordIdx === $index) {
+                continue; // ce trou perd sa désignation (mot retiré).
+            }
+            $newAnswers[(int) $blankIdx] = $wordIdx > $index ? $wordIdx - 1 : $wordIdx;
+        }
+        $this->qDdwtosAnswers = $newAnswers;
+    }
+
     /**
      * Enregistre une question (création OU édition selon $editingQuestionId).
      * La catégorie est re-résolue scopée owner (anti-IDOR) ; le type est en liste
@@ -474,6 +520,9 @@ class QuestionBankManager extends Component
             // C4 : borne de longueur du texte à trous (anti-payload abusif). Inerte pour
             // les autres types (qClozeText vide) ; détaillé par trou dans buildClozePayload.
             'qClozeText'   => 'nullable|string|max:'.self::MAX_CLOZE_TEXT,
+            // Borne de longueur du texte ddwtos (anti-payload abusif). Inerte pour les
+            // autres types (qDdwtosText vide) ; détail par mot dans buildDdwtosPayload.
+            'qDdwtosText'  => 'nullable|string|max:'.self::MAX_CLOZE_TEXT,
             // C2 (audit F3) : l'unité numérique n'avait QUE le maxlength HTML
             // (contournable). Règle serveur (inerte pour les autres types : qNumericalUnit vide).
             'qNumericalUnit' => 'nullable|string|max:40',
@@ -565,6 +614,7 @@ class QuestionBankManager extends Component
             'ordering'  => $this->buildOrderingPayload(),
             'cloze'     => $this->buildClozePayload(),
             'numerical' => $this->buildNumericalPayload(),
+            'ddwtos'    => $this->buildDdwtosPayload(),
             default     => [],
         };
     }
@@ -920,6 +970,93 @@ class QuestionBankManager extends Component
     }
 
     /**
+     * @return array<string, mixed>
+     *
+     * GLISSER-DÉPOSER SUR TEXTE (ddwtos). Forme canonique du payload :
+     *   payload['text']    = texte avec marqueurs [[1]], [[2]], … ;
+     *   payload['words']   = POOL de mots (>= 1, inclut les distracteurs) ;
+     *   payload['answers'] = map index_de_trou (0-based) => INDEX du mot correct dans words.
+     * Mêmes invariants que QuestionBankService::buildDdwtosRound → une question créée est
+     * TOUJOURS jouable : >= 1 trou, pool >= nombre de trous, chaque trou pointe un mot valide.
+     */
+    private function buildDdwtosPayload(): array
+    {
+        $text = trim((string) $this->qDdwtosText);
+
+        if ($text === '' || preg_match('/\[\[\d+\]\]/', $text) !== 1) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'qDdwtosText' => 'Le texte doit contenir au moins un trou au format [[1]], [[2]]…',
+            ]);
+        }
+
+        if (mb_strlen($text) > self::MAX_CLOZE_TEXT) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'qDdwtosText' => 'Le texte est trop long (maximum '.self::MAX_CLOZE_TEXT.' caractères).',
+            ]);
+        }
+
+        // Marqueurs : uniques (un même [[n]] en double = deux champs au même name = biais).
+        preg_match_all('/\[\[(\d+)\]\]/', $text, $allMarkers);
+        $markerNums = array_map('intval', $allMarkers[1] ?? []);
+        if ($markerNums === [] || count($markerNums) !== count(array_unique($markerNums))) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'qDdwtosText' => 'Chaque trou [[n]] doit être unique : un même numéro ne peut pas apparaître deux fois.',
+            ]);
+        }
+        $blankNums = array_values(array_unique($markerNums)); // 1-based
+        sort($blankNums);
+
+        // Pool de mots : trim + filtre des vides, en gardant l'index d'origine (les
+        // désignations $qDdwtosAnswers y réfèrent) → map originalIndex => indexFiltré.
+        $words           = [];
+        $originalToFinal = [];
+        foreach (array_values($this->qDdwtosWords) as $oi => $w) {
+            $value = is_string($w) ? trim($w) : '';
+            if ($value === '') {
+                continue;
+            }
+            if (mb_strlen($value) > self::MAX_CLOZE_ENTRY) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'qDdwtosWords' => 'Un mot du pool est trop long (maximum '.self::MAX_CLOZE_ENTRY.' caractères).',
+                ]);
+            }
+            $originalToFinal[(int) $oi] = count($words);
+            $words[]                    = $value;
+        }
+
+        if ($words === []) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'qDdwtosWords' => 'Ajoutez au moins un mot au pool.',
+            ]);
+        }
+
+        if (count($words) < count($blankNums)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'qDdwtosWords' => 'Le pool doit contenir au moins autant de mots que de trous ('.count($blankNums).').',
+            ]);
+        }
+
+        // Désignation du mot correct par trou : $qDdwtosAnswers[blankIdx] référence l'index
+        // D'ORIGINE du pool → remappé vers l'index filtré (comme le QCM remappe qCorrect).
+        $answers = [];
+        foreach ($blankNums as $n) {
+            $blankIdx       = $n - 1;
+            $originalWordIdx = isset($this->qDdwtosAnswers[$blankIdx]) && is_numeric($this->qDdwtosAnswers[$blankIdx])
+                ? (int) $this->qDdwtosAnswers[$blankIdx]
+                : -1;
+            $finalWordIdx = $originalToFinal[$originalWordIdx] ?? null;
+            if ($finalWordIdx === null) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'qDdwtosAnswers' => 'Désignez un mot valide du pool pour chaque trou.',
+                ]);
+            }
+            $answers[$blankIdx] = (int) $finalWordIdx;
+        }
+
+        return ['text' => $text, 'words' => $words, 'answers' => $answers];
+    }
+
+    /**
      * Pré-remplit les champs du sous-formulaire à partir d'un payload existant.
      *
      * @param  array<string, mixed>  $payload
@@ -1033,6 +1170,24 @@ class QuestionBankManager extends Component
                     : '0';
                 $this->qNumericalUnit = isset($payload['unit']) ? (string) $payload['unit'] : null;
                 break;
+
+            case 'ddwtos':
+                $this->qDdwtosText = (string) ($payload['text'] ?? '');
+                $words             = array_values(array_map(
+                    fn ($w) => (string) $w,
+                    (array) ($payload['words'] ?? [])
+                ));
+                $this->qDdwtosWords = count($words) >= 2 ? $words : ['', '', ''];
+                // Le pool stocké est déjà filtré (sans vides) → l'index d'origine y est égal
+                // à l'index filtré ; on recharge la désignation par trou telle quelle.
+                $answers = [];
+                foreach ((array) ($payload['answers'] ?? []) as $bk => $wi) {
+                    if (is_numeric($wi)) {
+                        $answers[(int) $bk] = (int) $wi;
+                    }
+                }
+                $this->qDdwtosAnswers = $answers;
+                break;
         }
     }
 
@@ -1065,6 +1220,9 @@ class QuestionBankManager extends Component
         $this->qNumericalCorrect   = null;
         $this->qNumericalTolerance = '0';
         $this->qNumericalUnit      = null;
+        $this->qDdwtosText         = '';
+        $this->qDdwtosWords        = ['', '', ''];
+        $this->qDdwtosAnswers      = [];
     }
 
     /**
@@ -1229,6 +1387,41 @@ class QuestionBankManager extends Component
         }
     }
 
+    /**
+     * GLISSER-TEXTE — numéros de trous (1-based, uniques, triés) détectés dans le texte
+     * en cours d'édition. Utilisé par la vue pour rendre un <select> par trou. Lecture
+     * seule (n'altère aucun état) ; évite toute logique lourde dans le Blade.
+     *
+     * @return array<int, int>
+     */
+    public function ddwtosBlankNumbers(): array
+    {
+        preg_match_all('/\[\[(\d+)\]\]/', (string) $this->qDdwtosText, $m);
+        $nums = array_values(array_unique(array_map('intval', $m[1] ?? [])));
+        sort($nums);
+
+        return $nums;
+    }
+
+    /**
+     * GLISSER-TEXTE — pool de mots NON VIDES indexé par leur index D'ORIGINE (= valeur
+     * des <option> du select de désignation, alignée sur $qDdwtosAnswers). Lecture seule.
+     *
+     * @return array<int, string>
+     */
+    public function ddwtosPool(): array
+    {
+        $pool = [];
+        foreach ($this->qDdwtosWords as $wi => $w) {
+            $wv = is_string($w) ? trim($w) : '';
+            if ($wv !== '') {
+                $pool[(int) $wi] = $wv;
+            }
+        }
+
+        return $pool;
+    }
+
     /** Libellé FR d'un type de question. */
     public function typeLabel(string $type): string
     {
@@ -1240,6 +1433,7 @@ class QuestionBankManager extends Component
             'ordering'  => 'Ordonnancement',
             'cloze'     => 'Texte à trous',
             'numerical' => 'Réponse numérique',
+            'ddwtos'    => 'Glisser-déposer sur texte',
             default     => $type,
         };
     }

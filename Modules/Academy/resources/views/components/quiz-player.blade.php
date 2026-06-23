@@ -252,6 +252,19 @@
                                 }
                             }
                             $isCorrect = $allBlanksOk;
+                        } elseif ($qType === 'glisser-texte') {
+                            // Correct (badge) seulement si TOUS les trous portent le bon mot.
+                            // Le détail par trou est rendu par le partial ddwtos-review.
+                            $glAnswers = is_array($q['answers'] ?? null) ? $q['answers'] : [];
+                            $glGiven   = is_array($userAns) ? $userAns : [];
+                            $allGlOk   = count($glAnswers) > 0;
+                            foreach ($glAnswers as $gk => $gCorrect) {
+                                $gAns = $glGiven[$gk] ?? ($glGiven[(string) $gk] ?? null);
+                                if ((is_numeric($gAns) ? (int) $gAns : -1) !== (int) $gCorrect) {
+                                    $allGlOk = false;
+                                }
+                            }
+                            $isCorrect = $allGlOk;
                         }
 
                         // Couche 1 : feedback du CHOIX SÉLECTIONNÉ (mcq / vraifaux).
@@ -316,6 +329,16 @@
                             {{-- C3 : révision par trou DRY (différé respecte review_options). --}}
                             @include('academy::livewire.partials.cloze-review', [
                                 'blanks'      => is_array($q['blanks'] ?? null) ? $q['blanks'] : [],
+                                'userAns'     => $userAns,
+                                'showRight'   => $reviewOpts['show_right_answer'],
+                                'showSummary' => $reviewOpts['show_correctness'],
+                                'isCorrect'   => $isCorrect,
+                            ])
+                        @elseif($qType === 'glisser-texte')
+                            {{-- Révision par trou DRY (différé respecte review_options). --}}
+                            @include('academy::livewire.partials.ddwtos-review', [
+                                'answers'     => is_array($q['answers'] ?? null) ? $q['answers'] : [],
+                                'options'     => is_array($q['options'] ?? null) ? $q['options'] : [],
                                 'userAns'     => $userAns,
                                 'showRight'   => $reviewOpts['show_right_answer'],
                                 'showSummary' => $reviewOpts['show_correctness'],
@@ -571,6 +594,16 @@
                             'legend'     => $question['question'] ?? 'Texte à trous',
                         ])
 
+                    {{-- Glisser-déposer sur texte : chaque trou est un <select> du pool
+                         de mots mélangé (a11y-first) ; les bonnes réponses restent serveur. --}}
+                    @elseif($type === 'glisser-texte')
+                        @include('academy::livewire.partials.ddwtos-inputs', [
+                            'segments'   => $question['segments'] ?? [],
+                            'options'    => $question['options'] ?? [],
+                            'namePrefix' => 'answers['.$i.']',
+                            'legend'     => $question['question'] ?? 'Glisser-déposer sur texte',
+                        ])
+
                     @else
                         <p class="text-muted small">Type de question non pris en charge.</p>
                     @endif
@@ -735,6 +768,13 @@
                                     'namePrefix' => 'answer',
                                     'legend'     => $question['question'] ?? 'Texte à trous',
                                 ])
+                            @elseif($type === 'glisser-texte')
+                                @include('academy::livewire.partials.ddwtos-inputs', [
+                                    'segments'   => $question['segments'] ?? [],
+                                    'options'    => $question['options'] ?? [],
+                                    'namePrefix' => 'answer',
+                                    'legend'     => $question['question'] ?? 'Glisser-déposer sur texte',
+                                ])
                             @else
                                 <p class="text-muted small">Type de question non pris en charge.</p>
                             @endif
@@ -812,6 +852,16 @@
                             {{-- C3 : révision par trou DRY (immédiat = rétroaction toujours montrée). --}}
                             @include('academy::livewire.partials.cloze-review', [
                                 'blanks'      => is_array($question['blanks'] ?? null) ? $question['blanks'] : [],
+                                'userAns'     => $userAns,
+                                'showRight'   => true,
+                                'showSummary' => true,
+                                'isCorrect'   => $isCorrect,
+                            ])
+                        @elseif($type === 'glisser-texte')
+                            {{-- Révision par trou DRY (immédiat = rétroaction toujours montrée). --}}
+                            @include('academy::livewire.partials.ddwtos-review', [
+                                'answers'     => is_array($question['answers'] ?? null) ? $question['answers'] : [],
+                                'options'     => is_array($question['options'] ?? null) ? $question['options'] : [],
                                 'userAns'     => $userAns,
                                 'showRight'   => true,
                                 'showSummary' => true,

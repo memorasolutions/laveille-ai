@@ -154,6 +154,7 @@
                         <option value="ordering">Ordonnancement</option>
                         <option value="cloze">Texte à trous</option>
                         <option value="numerical">Réponse numérique</option>
+                        <option value="ddwtos">Glisser-déposer sur texte</option>
                     </select>
                     @error('qType') <span role="alert" style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
 
@@ -355,6 +356,63 @@
                                 <x-core::button type="button" wire:click="addClozeBlank" variant="secondary" size="sm">+ Ajouter un trou</x-core::button>
                             </div>
                             @error('qClozeBlanks') <span role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 6px;">{{ $message }}</span> @enderror
+                        </fieldset>
+                    @elseif ($qType === 'ddwtos')
+                        {{-- Numéros de trous + pool non vide calculés côté composant. On
+                             utilise volontairement la forme inline du directive PHP : un
+                             bloc PHP multi-ligne casserait la compilation Blade en happant
+                             le directive inline qui le précède dans la colonne catégories. --}}
+                        @php($ddwBlankNums = $this->ddwtosBlankNumbers())
+                        @php($ddwPool = $this->ddwtosPool())
+                        <fieldset style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px; margin: 0;">
+                            <legend style="font-size: 0.8rem; font-weight: 700; padding: 0 6px;">Glisser-déposer sur texte</legend>
+                            <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 8px;">
+                                Écrivez le texte et placez les trous avec des marqueurs numérotés <code>[[1]]</code>, <code>[[2]]</code>… Préparez un pool de mots (avec des distracteurs) ; à l'examen, chaque trou se remplit par un mot du pool (menu déroulant, le pool est présenté mélangé).
+                            </p>
+
+                            <label for="qDdwtosText" style="font-size: 0.8rem; font-weight: 600;">Texte avec les trous <span aria-hidden="true">*</span></label>
+                            <textarea id="qDdwtosText" wire:model.live="qDdwtosText" rows="3" maxlength="2000"
+                                      aria-required="true" @error('qDdwtosText') aria-invalid="true" aria-describedby="qDdwtosText-err" @enderror
+                                      placeholder="Le [[1]] mange la [[2]] et le chat boit du lait."
+                                      style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+                            @error('qDdwtosText') <span id="qDdwtosText-err" role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 4px;">{{ $message }}</span> @enderror
+
+                            {{-- Pool de mots (repeater) --}}
+                            <p style="font-size: 0.8rem; font-weight: 700; margin: 12px 0 6px;">Pool de mots (avec distracteurs)</p>
+                            @foreach ($qDdwtosWords as $i => $word)
+                                <div wire:key="ddw-word-{{ $i }}" style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                    <span aria-hidden="true" style="flex: 0 0 auto; min-width: 22px; font-weight: 700; color: var(--sys-action-primary, #064E5A);">{{ $i + 1 }}.</span>
+                                    <label class="visually-hidden" for="qDdwtosWords-{{ $i }}">Mot {{ $i + 1 }} du pool</label>
+                                    <input type="text" id="qDdwtosWords-{{ $i }}" wire:model.live="qDdwtosWords.{{ $i }}" maxlength="500" placeholder="Mot {{ $i + 1 }}"
+                                           style="flex: 1; padding: 7px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                    @if (count($qDdwtosWords) > 2)
+                                        <x-core::button type="button" wire:click="removeDdwtosWord({{ $i }})" variant="ghost" size="sm" aria-label="Retirer le mot {{ $i + 1 }}">✕</x-core::button>
+                                    @endif
+                                </div>
+                            @endforeach
+                            <x-core::button type="button" wire:click="addDdwtosWord" variant="secondary" size="sm">+ Ajouter un mot</x-core::button>
+                            @error('qDdwtosWords') <span role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 6px;">{{ $message }}</span> @enderror
+
+                            {{-- Bon mot par trou --}}
+                            <p style="font-size: 0.8rem; font-weight: 700; margin: 14px 0 6px;">Bon mot pour chaque trou</p>
+                            @if (empty($ddwBlankNums))
+                                <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0;">Ajoutez d'abord un trou <code>[[1]]</code> dans le texte.</p>
+                            @else
+                                @foreach ($ddwBlankNums as $n)
+                                    @php($blankIdx = $n - 1)
+                                    <div wire:key="ddw-answer-{{ $blankIdx }}" style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                        <label for="qDdwtosAnswers-{{ $blankIdx }}" style="flex: 0 0 auto; min-width: 70px; font-size: 0.8rem; font-weight: 600;">Trou [[{{ $n }}]]</label>
+                                        <select id="qDdwtosAnswers-{{ $blankIdx }}" wire:model="qDdwtosAnswers.{{ $blankIdx }}"
+                                                style="flex: 1; max-width: 320px; padding: 7px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                            <option value="">– Choisir un mot –</option>
+                                            @foreach ($ddwPool as $wi => $wv)
+                                                <option value="{{ $wi }}">{{ \Illuminate\Support\Str::limit($wv, 60) }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                @endforeach
+                            @endif
+                            @error('qDdwtosAnswers') <span role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 6px;">{{ $message }}</span> @enderror
                         </fieldset>
                     @elseif ($qType === 'numerical')
                         <fieldset style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px; margin: 0;">

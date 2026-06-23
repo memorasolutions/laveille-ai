@@ -319,6 +319,32 @@ final class QuestionBankService
                     'points'   => $points,
                 ];
 
+            case 'ddwtos':
+                // GLISSER-DÉPOSER SUR TEXTE (« Drag and drop into text » Moodle, ddwtos).
+                // Représentation banque : payload['text'] = texte avec marqueurs numérotés
+                // [[1]], [[2]], … (1-based) ; payload['words'] = POOL de mots PARTAGÉ (inclut
+                // des distracteurs) ; payload['answers'] = pour chaque trou (clé 0-based :
+                // [[1]] → answers[0]) l'INDEX du mot correct dans `words`.
+                // mapToRoundItem produit la liste de SEGMENTS d'affichage (texte + trous SANS
+                // corrigé) + `options` = pool de mots MÉLANGÉ (présenté à l'étudiant, chaque
+                // trou est un <select> listant TOUT le pool) + `answers` = corrigé serveur
+                // (pour chaque trou, l'INDEX du mot correct DANS LE POOL MÉLANGÉ). Comme pour
+                // l'ordonnancement/cloze, `answers` reste serveur (session/snapshot) et n'est
+                // lu qu'au scoring/à la révision ; seuls `segments` + `options` sont rendus.
+                // L'index de trou stable = son index dans `answers` (relie answers[i][k]).
+                $built = self::buildDdwtosRound($payload);
+                if ($built === null) {
+                    return null; // au moins un trou valide pointant un mot du pool exigé
+                }
+
+                return $base + [
+                    'type'     => 'glisser-texte',
+                    'segments' => $built['segments'],
+                    'options'  => $built['options'],
+                    'answers'  => $built['answers'],
+                    'points'   => $points,
+                ];
+
             case 'numerical':
                 // NUMÉRIQUE (type Moodle « Numerical ») : réponse chiffrée avec une
                 // TOLÉRANCE (±) et une UNITÉ facultative (purement indicative).
@@ -434,6 +460,108 @@ final class QuestionBankService
         }
 
         return ['segments' => $segments, 'blanks' => $blanksOut];
+    }
+
+    /**
+     * Construit la structure d'affichage + de scoring d'un GLISSER-DÉPOSER SUR TEXTE
+     * (ddwtos) à partir du payload (texte à marqueurs + pool de mots + corrigé). Le pool
+     * est MÉLANGÉ une fois (présentation à l'étudiant) ; chaque trou listera TOUT le pool.
+     *  - 'segments' : liste ordonnée pour l'affichage - {type:'text', value} ou
+     *    {type:'blank', index}. AUCUN corrigé exposé (pas de bonne réponse par trou).
+     *  - 'options'  : pool de mots MÉLANGÉ (partagé par tous les trous), rendu côté client.
+     *  - 'answers'  : map index_de_trou (0-based stable) => INDEX du mot correct DANS LE
+     *    POOL MÉLANGÉ, gardée serveur (jamais rendue au client).
+     * Retourne null si aucun trou ne pointe vers un mot valide du pool (défensif : la
+     * question n'est alors pas jouable et n'est pas mise en round). Les marqueurs [[n]]
+     * dupliqués sont traités comme en cloze (2e occurrence = texte littéral) pour éviter
+     * deux champs au même `name` (biais de notation).
+     *
+     * @param  array<string, mixed>  $payload
+     * @return array{segments: array<int, array<string, mixed>>, options: array<int, string>, answers: array<int, int>}|null
+     */
+    private static function buildDdwtosRound(array $payload): ?array
+    {
+        $text    = (string) ($payload['text'] ?? '');
+        $wordsIn = is_array($payload['words'] ?? null) ? array_values($payload['words']) : [];
+        $answers = is_array($payload['answers'] ?? null) ? $payload['answers'] : [];
+
+        if (trim($text) === '' || $wordsIn === []) {
+            return null;
+        }
+
+        // Normalise le pool en conservant l'INDEX D'ORIGINE (les `answers` du payload y
+        // réfèrent) → map originalIndex => indexFiltré. Un mot vide est ignoré.
+        $words           = [];
+        $originalToFinal = [];
+        foreach ($wordsIn as $oi => $w) {
+            $value = is_string($w) ? trim($w) : '';
+            if ($value !== '') {
+                $originalToFinal[(int) $oi] = count($words);
+                $words[]                    = $value;
+            }
+        }
+        if ($words === []) {
+            return null;
+        }
+
+        // Mélange du pool présenté : permutation des positions filtrées. On garde la
+        // correspondance indexFiltré => indexMélangé pour remapper les `answers`.
+        $shuffleOrder = range(0, count($words) - 1);
+        if (count($shuffleOrder) > 1) {
+            shuffle($shuffleOrder);
+        }
+        $options       = [];
+        $finalToShuffle = [];
+        foreach ($shuffleOrder as $shuffledPos => $finalIndex) {
+            $options[$shuffledPos]      = $words[$finalIndex];
+            $finalToShuffle[$finalIndex] = $shuffledPos;
+        }
+
+        // Découpe en conservant les marqueurs [[n]] comme jetons séparés (comme cloze).
+        $parts = preg_split('/(\[\[\d+\]\])/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        if ($parts === false) {
+            return null;
+        }
+
+        $segments    = [];
+        $answersOut  = [];
+        $seenBlankIndex = [];
+
+        foreach ($parts as $part) {
+            if (preg_match('/^\[\[(\d+)\]\]$/', $part, $m) === 1) {
+                $k = (int) $m[1] - 1; // [[1]] → index 0
+
+                if (isset($seenBlankIndex[$k])) {
+                    // Marqueur DUPLIQUÉ : déjà un champ pour ce trou → texte littéral.
+                    $segments[] = ['type' => 'text', 'value' => $part];
+
+                    continue;
+                }
+
+                // L'index correct (payload) réfère le pool D'ORIGINE → filtré → mélangé.
+                $originalCorrect = isset($answers[$k]) && is_numeric($answers[$k]) ? (int) $answers[$k] : -1;
+                $finalCorrect    = $originalToFinal[$originalCorrect] ?? null;
+
+                if ($finalCorrect === null) {
+                    // Trou pointant un mot absent du pool → rendu en texte littéral (défensif).
+                    $segments[] = ['type' => 'text', 'value' => $part];
+
+                    continue;
+                }
+
+                $segments[]         = ['type' => 'blank', 'index' => $k];
+                $answersOut[$k]     = (int) $finalToShuffle[$finalCorrect]; // index dans le pool mélangé
+                $seenBlankIndex[$k] = true;
+            } else {
+                $segments[] = ['type' => 'text', 'value' => $part];
+            }
+        }
+
+        if ($answersOut === []) {
+            return null; // aucun trou résolu → non jouable
+        }
+
+        return ['segments' => $segments, 'options' => $options, 'answers' => $answersOut];
     }
 
     /**
