@@ -58,6 +58,17 @@
                         @endforeach
                     </select>
                 </div>
+                <div style="display: flex; flex-direction: column; gap: 6px; flex: 1 1 240px;">
+                    <label for="assignment-scale" style="font-weight: 600; font-size: 0.85rem;">Mode de notation</label>
+                    <select id="assignment-scale" wire:model="scaleId"
+                            style="width: 100%; padding: 9px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                        <option value="">Note numérique (sur les points maximum)</option>
+                        @foreach ($this->selectableScales as $scale)
+                            <option value="{{ $scale->id }}">Échelle : {{ $scale->name }}</option>
+                        @endforeach
+                    </select>
+                    <span style="font-size: 0.74rem; color: var(--sys-text-muted, #6B7280);">Une échelle convertit le niveau choisi en points sur le maximum. Gérez vos échelles dans « Pondération et lettres ».</span>
+                </div>
             </div>
 
             <div class="d-flex flex-wrap align-items-center gap-2">
@@ -324,6 +335,19 @@
                                                                 @endforeach
                                                                 @error('rubricSelection') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
                                                             </fieldset>
+                                                        @elseif ($assignment->hasScale())
+                                                        {{-- F14 : correction PAR ÉCHELLE (un niveau ; converti en points sur max_points) --}}
+                                                        <div style="display: flex; flex-direction: column; gap: 6px; max-width: 320px;">
+                                                            <label for="grade-scale-{{ $submission->id }}" style="font-weight: 600; font-size: 0.82rem;">Niveau de l'échelle « {{ $assignment->scale?->name }} » (ramené sur {{ $assignment->max_points }} points)</label>
+                                                            <select id="grade-scale-{{ $submission->id }}" wire:model="gradeScaleLevel"
+                                                                    style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                <option value="">Choisir un niveau</option>
+                                                                @foreach ($assignment->scale?->levels() ?? [] as $i => $lvl)
+                                                                    <option value="{{ $i }}">{{ $lvl['label'] }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                            @error('gradeScaleLevel') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
+                                                        </div>
                                                         @else
                                                         <div style="display: flex; flex-direction: column; gap: 6px; max-width: 200px;">
                                                             <label for="grade-score-{{ $submission->id }}" style="font-weight: 600; font-size: 0.82rem;">Note (0 à {{ $assignment->max_points }})</label>
@@ -410,12 +434,22 @@
                                                    style="width: 100%; padding: 7px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                                             @error('editCategoryWeight') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.78rem;">{{ $message }}</span> @enderror
                                         </div>
+                                        <div style="flex: 1 1 240px; display: flex; flex-direction: column; gap: 4px;">
+                                            <label for="cat-edit-method-{{ $cat->id }}" style="font-size: 0.78rem; font-weight: 600;">Méthode d'agrégation</label>
+                                            <select id="cat-edit-method-{{ $cat->id }}" wire:model="editCategoryMethod"
+                                                    style="width: 100%; padding: 7px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                @foreach (\Modules\Academy\Models\GradeCategory::aggregationLabels() as $value => $label)
+                                                    <option value="{{ $value }}">{{ $label }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('editCategoryMethod') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.78rem;">{{ $message }}</span> @enderror
+                                        </div>
                                         <x-core::button type="submit" variant="primary" size="sm">Enregistrer</x-core::button>
                                         <x-core::button type="button" wire:click="cancelCategoryEdit" variant="ghost" size="sm">Annuler</x-core::button>
                                     </form>
                                 @else
                                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                                        <span style="font-size: 0.9rem;"><strong>{{ $cat->name }}</strong> <span style="color: var(--sys-text-muted, #6B7280);">· {{ rtrim(rtrim(number_format($cat->weight, 2, '.', ''), '0'), '.') }} %</span></span>
+                                        <span style="font-size: 0.9rem;"><strong>{{ $cat->name }}</strong> <span style="color: var(--sys-text-muted, #6B7280);">· {{ rtrim(rtrim(number_format($cat->weight, 2, '.', ''), '0'), '.') }} % · {{ \Modules\Academy\Models\GradeCategory::aggregationLabels()[$cat->effectiveAggregationMethod()] ?? '' }}</span></span>
                                         <span class="d-flex flex-wrap align-items-center gap-2">
                                             <x-core::button type="button" wire:click="editCategory({{ $cat->id }})" variant="ghost" size="sm">Modifier</x-core::button>
                                             @if ($confirmingCategoryRemoval === $cat->id)
@@ -448,6 +482,16 @@
                         <input id="cat-new-weight" type="number" min="0" max="100" step="0.01" wire:model="newCategoryWeight" placeholder="40"
                                style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                         @error('newCategoryWeight') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.8rem;">{{ $message }}</span> @enderror
+                    </div>
+                    <div style="flex: 1 1 240px; display: flex; flex-direction: column; gap: 4px;">
+                        <label for="cat-new-method" style="font-size: 0.8rem; font-weight: 600;">Méthode d'agrégation</label>
+                        <select id="cat-new-method" wire:model="newCategoryMethod"
+                                style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                            @foreach (\Modules\Academy\Models\GradeCategory::aggregationLabels() as $value => $label)
+                                <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        @error('newCategoryMethod') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.8rem;">{{ $message }}</span> @enderror
                     </div>
                     <x-core::button type="submit" variant="secondary" size="sm">Ajouter la catégorie</x-core::button>
                 </form>
@@ -531,6 +575,90 @@
                         <x-core::button type="submit" variant="secondary" size="sm">Enregistrer le barème</x-core::button>
                     </div>
                 </form>
+            </div>
+
+            {{-- F14 : Échelles personnalisées (CRUD owner-scopé) --}}
+            <div style="margin-top: 18px; border-top: 1px dashed #E5E7EB; padding-top: 16px;">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <strong style="font-size: 0.95rem;">Échelles personnalisées</strong>
+                    <x-core::button type="button" wire:click="toggleScales" variant="ghost" size="sm">
+                        {{ $showScales ? 'Masquer' : 'Gérer mes échelles' }}
+                    </x-core::button>
+                </div>
+                <p style="font-size: 0.82rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 12px;">
+                    Une échelle (ex. « Insuffisant, Acceptable, Maîtrisé ») peut noter un devoir : à la correction, le niveau choisi est converti en points sur le maximum du devoir.
+                </p>
+
+                @if ($showScales)
+                    @if ($this->selectableScales->isNotEmpty())
+                        <ul class="list-unstyled d-flex flex-column gap-2" style="margin: 0 0 14px;">
+                            @foreach ($this->selectableScales as $scale)
+                                <li wire:key="scale-{{ $scale->id }}"
+                                    style="border: 1px solid #F3F4F6; border-radius: var(--sys-radius-md, 0.5rem); padding: 10px 12px; background: #FAFAFA;">
+                                    @if ($editingScale === $scale->id)
+                                        <form wire:submit="saveScale" style="display: flex; flex-direction: column; gap: 8px;">
+                                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                                <label for="scale-edit-name-{{ $scale->id }}" style="font-size: 0.78rem; font-weight: 600;">Nom</label>
+                                                <input id="scale-edit-name-{{ $scale->id }}" type="text" wire:model="editScaleName" maxlength="120"
+                                                       style="width: 100%; padding: 7px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                @error('editScaleName') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.78rem;">{{ $message }}</span> @enderror
+                                            </div>
+                                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                                <label for="scale-edit-items-{{ $scale->id }}" style="font-size: 0.78rem; font-weight: 600;">Niveaux (un par ligne : « libellé | valeur », du plus faible au plus fort)</label>
+                                                <textarea id="scale-edit-items-{{ $scale->id }}" wire:model="editScaleItems" rows="4" maxlength="5000"
+                                                          style="width: 100%; padding: 7px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); font-family: inherit;"></textarea>
+                                                @error('editScaleItems') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.78rem;">{{ $message }}</span> @enderror
+                                            </div>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <x-core::button type="submit" variant="primary" size="sm">Enregistrer</x-core::button>
+                                                <x-core::button type="button" wire:click="cancelScaleEdit" variant="ghost" size="sm">Annuler</x-core::button>
+                                            </div>
+                                        </form>
+                                    @else
+                                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                            <span style="font-size: 0.9rem;">
+                                                <strong>{{ $scale->name }}</strong>
+                                                <span style="color: var(--sys-text-muted, #6B7280);">· {{ collect($scale->levels())->pluck('label')->implode(', ') }}</span>
+                                                @if ($scale->owner_id === null)<span style="color: var(--sys-text-muted, #6B7280);"> · système</span>@endif
+                                            </span>
+                                            <span class="d-flex flex-wrap align-items-center gap-2">
+                                                <x-core::button type="button" wire:click="editScale({{ $scale->id }})" variant="ghost" size="sm">Modifier</x-core::button>
+                                                @if ($confirmingScaleRemoval === $scale->id)
+                                                    <span style="font-size: 0.8rem; font-weight: 600;">Supprimer ?</span>
+                                                    <x-core::button type="button" wire:click="deleteScale({{ $scale->id }})" variant="danger" size="sm">Confirmer</x-core::button>
+                                                    <x-core::button type="button" wire:click="cancelScaleRemoval" variant="ghost" size="sm">Annuler</x-core::button>
+                                                @else
+                                                    <x-core::button type="button" wire:click="confirmScaleRemoval({{ $scale->id }})" variant="ghost" size="sm"
+                                                                    aria-label="Supprimer l'échelle « {{ $scale->name }} »">Supprimer</x-core::button>
+                                                @endif
+                                            </span>
+                                        </div>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 14px;">Aucune échelle pour l'instant.</p>
+                    @endif
+
+                    <form wire:submit="addScale" style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <label for="scale-new-name" style="font-size: 0.8rem; font-weight: 600;">Nouvelle échelle</label>
+                            <input id="scale-new-name" type="text" wire:model="newScaleName" maxlength="120" placeholder="Ex. : Maîtrise"
+                                   style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                            @error('newScaleName') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.8rem;">{{ $message }}</span> @enderror
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <label for="scale-new-items" style="font-size: 0.8rem; font-weight: 600;">Niveaux (un par ligne : « libellé | valeur », du plus faible au plus fort)</label>
+                            <textarea id="scale-new-items" wire:model="newScaleItems" rows="4" maxlength="5000" placeholder="Insuffisant | 0&#10;Acceptable | 1&#10;Maîtrisé | 2"
+                                      style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); font-family: inherit;"></textarea>
+                            @error('newScaleItems') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.8rem;">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <x-core::button type="submit" variant="secondary" size="sm">Créer l'échelle</x-core::button>
+                        </div>
+                    </form>
+                @endif
             </div>
         @endif
     </section>

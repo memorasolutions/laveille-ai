@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string      $title
  * @property string|null $instructions
  * @property int         $max_points
+ * @property int|null    $scale_id
  * @property \Illuminate\Support\Carbon|null $due_at
  * @property bool        $is_published
  * @property int         $position
@@ -43,6 +44,7 @@ class Assignment extends Model
         'title',
         'instructions',
         'max_points',
+        'scale_id',
         'due_at',
         'is_published',
         'position',
@@ -50,6 +52,7 @@ class Assignment extends Model
 
     protected $casts = [
         'max_points'   => 'integer',
+        'scale_id'     => 'integer',
         'position'     => 'integer',
         'is_published' => 'boolean',
         'due_at'       => 'datetime',
@@ -63,6 +66,31 @@ class Assignment extends Model
     public function lesson(): BelongsTo
     {
         return $this->belongsTo(Lesson::class);
+    }
+
+    /**
+     * F14 - Échelle personnalisée référencée par CE devoir (optionnelle). Null =
+     * devoir noté NUMÉRIQUEMENT (rétrocompat). Voir Scale + GradebookService.
+     */
+    public function scale(): BelongsTo
+    {
+        return $this->belongsTo(Scale::class, 'scale_id');
+    }
+
+    /**
+     * F14 - Le devoir est-il noté PAR UNE ÉCHELLE ? Vrai seulement si une échelle
+     * existante est référencée ET qu'elle a au moins un niveau exploitable. Défensif :
+     * une échelle supprimée (scale_id orphelin) → faux (retombe en numérique).
+     */
+    public function hasScale(): bool
+    {
+        if ($this->scale_id === null) {
+            return false;
+        }
+
+        $scale = $this->relationLoaded('scale') ? $this->scale : Scale::find($this->scale_id);
+
+        return $scale !== null && $scale->levels() !== [];
     }
 
     public function submissions(): HasMany

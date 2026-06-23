@@ -43,6 +43,7 @@ use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Models\RubricCriterion;
 use Modules\Academy\Models\RubricLevel;
+use Modules\Academy\Models\Scale;
 use Modules\Academy\Models\Submission;
 use Modules\Academy\Services\GradebookService;
 
@@ -61,6 +62,8 @@ class CourseAssignments extends Component
     public string $dueAt = '';
     /** Leçon de rattachement (id) ou '' = rattaché au cours entier. */
     public string $lessonId = '';
+    /** F14 - Échelle d'évaluation (id) ou '' = note numérique (rétrocompat). */
+    public string $scaleId = '';
 
     // ── Correction : note + feedback d'une remise ───────────────────────────────
     /** Remise en cours de correction (id), null = aucune. */
@@ -68,6 +71,8 @@ class CourseAssignments extends Component
     /** Note saisie (chaîne brute du DOM, normalisée serveur). */
     public string $gradeScore = '';
     public string $gradeFeedback = '';
+    /** F14 - Niveau d'échelle retenu à la correction (index dans les niveaux), '' = aucun. */
+    public string $gradeScaleLevel = '';
 
     /** Devoir dont on affiche les remises à corriger (id), null = aucun. */
     public ?int $reviewingAssignment = null;
@@ -111,6 +116,9 @@ class CourseAssignments extends Component
     public ?int $editingCategory = null;
     public string $editCategoryName = '';
     public string $editCategoryWeight = '';
+    /** F14 - Méthode d'agrégation des catégories (liste blanche serveur). */
+    public string $newCategoryMethod = GradeCategory::AGGREGATION_WEIGHTED_MEAN;
+    public string $editCategoryMethod = GradeCategory::AGGREGATION_WEIGHTED_MEAN;
     /** Confirmation inline de suppression d'une catégorie (jamais de popup native). */
     public ?int $confirmingCategoryRemoval = null;
     /** Affectation item↔catégorie : maps indexées « {type}_{id} » (chaînes du DOM). */
@@ -118,6 +126,19 @@ class CourseAssignments extends Component
     public array $itemWeightMap = [];
     /** Barème de lettres éditable : liste de {letter, min} (chaînes du DOM). */
     public array $letterBands = [];
+
+    // ── F14 : ÉCHELLES personnalisées (scales) : CRUD owner-scopé ───────────────
+    /** Panneau de gestion des échelles ouvert ? */
+    public bool $showScales = false;
+    /** Saisie d'une NOUVELLE échelle (niveaux = textarea « libellé | valeur » par ligne). */
+    public string $newScaleName = '';
+    public string $newScaleItems = '';
+    /** Échelle en cours d'édition (id) + ses champs. */
+    public ?int $editingScale = null;
+    public string $editScaleName = '';
+    public string $editScaleItems = '';
+    /** Confirmation inline de suppression d'une échelle (jamais de popup native). */
+    public ?int $confirmingScaleRemoval = null;
 
     /**
      * Entrée. Autorisation SERVEUR d'affichage : pour voir CET espace il faut au
@@ -251,6 +272,10 @@ class CourseAssignments extends Component
         // validation (jamais de cast ?int strict = TypeError/500).
         $lessonIdRaw = trim($this->lessonId) === '' ? null : (int) $this->lessonId;
         $dueAtRaw    = trim($this->dueAt) === '' ? null : $this->dueAt;
+        // F14 : échelle optionnelle re-résolue (échelle de l'actor OU système, OU
+        // n'importe laquelle si admin) ; une échelle étrangère → null (anti-IDOR).
+        $scaleIdRaw       = trim($this->scaleId) === '' ? null : (int) $this->scaleId;
+        $resolvedScaleId  = $scaleIdRaw !== null ? $this->resolveSelectableScaleId($scaleIdRaw) : null;
 
         $data = $this->validate([
             'title'        => 'required|string|max:200',
@@ -272,6 +297,7 @@ class CourseAssignments extends Component
             $assignment->title        = trim($data['title']);
             $assignment->instructions = $data['instructions'] !== '' ? $data['instructions'] : null;
             $assignment->max_points   = (int) $data['maxPoints'];
+            $assignment->scale_id     = $resolvedScaleId;
             $assignment->due_at       = $dueAtRaw;
             $assignment->lesson_id    = $resolvedLessonId;
 
@@ -291,6 +317,7 @@ class CourseAssignments extends Component
                 'title'        => trim($data['title']),
                 'instructions' => $data['instructions'] !== '' ? $data['instructions'] : null,
                 'max_points'   => (int) $data['maxPoints'],
+                'scale_id'     => $resolvedScaleId,
                 'due_at'       => $dueAtRaw,
                 'is_published' => $publish,
                 'position'     => $position,
@@ -314,6 +341,7 @@ class CourseAssignments extends Component
         $this->title             = $assignment->title;
         $this->instructions      = (string) $assignment->instructions;
         $this->maxPoints         = $assignment->max_points;
+        $this->scaleId           = $assignment->scale_id !== null ? (string) $assignment->scale_id : '';
         $this->dueAt             = $assignment->due_at?->format('Y-m-d\TH:i') ?? '';
         $this->lessonId          = $assignment->lesson_id !== null ? (string) $assignment->lesson_id : '';
         $this->resetErrorBag();
@@ -365,9 +393,27 @@ class CourseAssignments extends Component
     /** Réinitialise le formulaire de devoir (annule l'édition en cours). */
     public function resetAssignmentForm(): void
     {
-        $this->reset('editingAssignment', 'title', 'instructions', 'dueAt', 'lessonId');
+        $this->reset('editingAssignment', 'title', 'instructions', 'dueAt', 'lessonId', 'scaleId');
         $this->maxPoints = 100;
         $this->resetErrorBag();
+    }
+
+    /**
+     * F14 - Re-résout l'identifiant d'une échelle SÉLECTIONNABLE par l'utilisateur
+     * courant : une échelle qu'il POSSÈDE (owner_id = auth), une échelle SYSTÈME
+     * (owner_id null), OU n'importe laquelle s'il est admin (academy.manage). Toute
+     * autre échelle (d'un autre formateur) → null (anti-IDOR, jamais rattachée).
+     */
+    private function resolveSelectableScaleId(int $scaleId): ?int
+    {
+        $query = Scale::where('id', $scaleId);
+
+        if (! (bool) auth()->user()?->can('academy.manage')) {
+            $uid = (int) auth()->id();
+            $query->where(fn ($q) => $q->where('owner_id', $uid)->orWhereNull('owner_id'));
+        }
+
+        return $query->value('id') !== null ? $scaleId : null;
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -405,6 +451,21 @@ class CourseAssignments extends Component
         $this->gradeScore        = $submission->score !== null ? (string) $submission->score : '';
         $this->gradeFeedback     = (string) $submission->feedback;
 
+        // F14 : devoir noté par échelle → pré-sélectionner le niveau dont la conversion
+        // redonne le score stocké (meilleure correspondance ; sinon laisser à choisir).
+        $this->gradeScaleLevel = '';
+        $assignmentForScale    = $submission->assignment;
+        if ($assignmentForScale !== null && $assignmentForScale->hasScale() && $submission->score !== null) {
+            $scale = $assignmentForScale->scale;
+            foreach ($scale->levels() as $i => $lvl) {
+                $points = GradebookService::scaleValueToPoints($scale, (float) $lvl['value'], (int) $assignmentForScale->max_points);
+                if ($points === (int) $submission->score) {
+                    $this->gradeScaleLevel = (string) $i;
+                    break;
+                }
+            }
+        }
+
         // V2-a : si une grille existe, pré-remplir la sélection {criterion_id: level_id}
         // depuis la correction antérieure (chaînes, pour des radios HTML).
         $this->rubricSelection = [];
@@ -417,8 +478,8 @@ class CourseAssignments extends Component
 
     public function cancelGrading(): void
     {
-        $this->reset('gradingSubmission', 'gradeScore', 'gradeFeedback', 'rubricSelection');
-        $this->resetErrorBag(['gradeScore', 'gradeFeedback', 'rubricSelection']);
+        $this->reset('gradingSubmission', 'gradeScore', 'gradeFeedback', 'rubricSelection', 'gradeScaleLevel');
+        $this->resetErrorBag(['gradeScore', 'gradeFeedback', 'rubricSelection', 'gradeScaleLevel']);
     }
 
     /**
@@ -438,11 +499,18 @@ class CourseAssignments extends Component
         $submission = $this->resolveSubmissionFor($course, (int) $this->gradingSubmission);
         $assignment = $submission->assignment;
 
-        // V2-a : DEUX chemins selon que le devoir a une grille ACTIVE ou non.
-        //  - SANS grille  → correction manuelle (note libre bornée) : INCHANGÉ.
-        //  - AVEC grille  → un niveau par critère, note AUTO-calculée (mise à l'échelle).
+        // Chemins de correction par PRÉCÉDENCE :
+        //  - AVEC grille (V2-a) → un niveau par critère, note AUTO-calculée (mise à l'échelle).
+        //  - AVEC échelle (F14) → un niveau d'échelle, converti en points sur max_points.
+        //  - SANS rien          → correction manuelle (note libre bornée) : INCHANGÉ.
         if ($assignment->hasRubric()) {
             $this->gradeWithRubric($assignment, $submission);
+
+            return;
+        }
+
+        if ($assignment->hasScale()) {
+            $this->gradeWithScale($assignment, $submission);
 
             return;
         }
@@ -527,6 +595,44 @@ class CourseAssignments extends Component
 
         $this->cancelGrading();
         $this->flashSaved('Remise corrigée selon la grille.');
+    }
+
+    /**
+     * F14 - Correction PAR ÉCHELLE : le formateur choisit UN niveau de l'échelle du
+     * devoir ; la valeur du niveau est CONVERTIE en points sur max_points par
+     * GradebookService::scaleValueToPoints (formule documentée là-bas) puis stockée
+     * comme une note numérique ordinaire (le carnet/CSV restent inchangés). Le niveau
+     * est re-résolu SERVEUR contre les niveaux de l'échelle (anti-IDOR : un index
+     * hors liste est rejeté). graded_by = utilisateur connecté.
+     */
+    private function gradeWithScale(Assignment $assignment, Submission $submission): void
+    {
+        $this->validate(['gradeFeedback' => 'nullable|string|max:20000']);
+
+        $scale  = $assignment->scale; // garanti non null + niveaux exploitables par hasScale()
+        $levels = $scale?->levels() ?? [];
+
+        $idxRaw = trim($this->gradeScaleLevel);
+        if ($idxRaw === '' || ! ctype_digit($idxRaw) || ! array_key_exists((int) $idxRaw, $levels)) {
+            $this->addError('gradeScaleLevel', 'Choisissez un niveau de l\'échelle.');
+
+            return;
+        }
+
+        $level = $levels[(int) $idxRaw];
+        $score = GradebookService::scaleValueToPoints($scale, (float) $level['value'], (int) $assignment->max_points);
+
+        $submission->update([
+            'score'     => $score,
+            'feedback'  => trim($this->gradeFeedback) !== '' ? $this->gradeFeedback : null,
+            'graded_at' => now(),
+            'graded_by' => auth()->id(),
+        ]);
+
+        $this->notifyGraded($this->resolveCourse(), $submission, $assignment);
+
+        $this->cancelGrading();
+        $this->flashSaved('Remise corrigée selon l\'échelle.');
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -864,21 +970,26 @@ class CourseAssignments extends Component
         $data = $this->validate([
             'newCategoryName'   => 'required|string|max:120',
             'newCategoryWeight' => 'required|numeric|min:0|max:100',
+            // F14 : méthode d'agrégation contrainte par la LISTE BLANCHE (serveur).
+            'newCategoryMethod' => ['required', \Illuminate\Validation\Rule::in(GradeCategory::AGGREGATION_METHODS)],
         ], [], [
             'newCategoryName'   => 'nom de la catégorie',
             'newCategoryWeight' => 'poids',
+            'newCategoryMethod' => 'méthode d\'agrégation',
         ]);
 
         $position = (int) GradeCategory::where('course_id', $course->id)->max('position') + 1;
 
         GradeCategory::create([
-            'course_id' => $course->id,
-            'name'      => trim($data['newCategoryName']),
-            'weight'    => (float) $data['newCategoryWeight'],
-            'position'  => $position,
+            'course_id'          => $course->id,
+            'name'               => trim($data['newCategoryName']),
+            'weight'             => (float) $data['newCategoryWeight'],
+            'aggregation_method' => $data['newCategoryMethod'],
+            'position'           => $position,
         ]);
 
         $this->reset('newCategoryName', 'newCategoryWeight');
+        $this->newCategoryMethod = GradeCategory::AGGREGATION_WEIGHTED_MEAN;
         $this->loadGradeStructure();
         $this->flashSaved('Catégorie ajoutée.');
     }
@@ -893,7 +1004,8 @@ class CourseAssignments extends Component
         $this->editingCategory    = $category->id;
         $this->editCategoryName   = $category->name;
         $this->editCategoryWeight = rtrim(rtrim((string) $category->weight, '0'), '.') ?: '0';
-        $this->resetErrorBag(['editCategoryName', 'editCategoryWeight']);
+        $this->editCategoryMethod = $category->effectiveAggregationMethod();
+        $this->resetErrorBag(['editCategoryName', 'editCategoryWeight', 'editCategoryMethod']);
     }
 
     public function saveCategory(): void
@@ -909,24 +1021,29 @@ class CourseAssignments extends Component
         $data = $this->validate([
             'editCategoryName'   => 'required|string|max:120',
             'editCategoryWeight' => 'required|numeric|min:0|max:100',
+            'editCategoryMethod' => ['required', \Illuminate\Validation\Rule::in(GradeCategory::AGGREGATION_METHODS)],
         ], [], [
             'editCategoryName'   => 'nom de la catégorie',
             'editCategoryWeight' => 'poids',
+            'editCategoryMethod' => 'méthode d\'agrégation',
         ]);
 
         $category->update([
-            'name'   => trim($data['editCategoryName']),
-            'weight' => (float) $data['editCategoryWeight'],
+            'name'               => trim($data['editCategoryName']),
+            'weight'             => (float) $data['editCategoryWeight'],
+            'aggregation_method' => $data['editCategoryMethod'],
         ]);
 
         $this->reset('editingCategory', 'editCategoryName', 'editCategoryWeight');
+        $this->editCategoryMethod = GradeCategory::AGGREGATION_WEIGHTED_MEAN;
         $this->flashSaved('Catégorie modifiée.');
     }
 
     public function cancelCategoryEdit(): void
     {
         $this->reset('editingCategory', 'editCategoryName', 'editCategoryWeight');
-        $this->resetErrorBag(['editCategoryName', 'editCategoryWeight']);
+        $this->editCategoryMethod = GradeCategory::AGGREGATION_WEIGHTED_MEAN;
+        $this->resetErrorBag(['editCategoryName', 'editCategoryWeight', 'editCategoryMethod']);
     }
 
     public function confirmCategoryRemoval(int $categoryId): void
@@ -1062,6 +1179,210 @@ class CourseAssignments extends Component
             'Content-Type'        => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // F14 : ÉCHELLES personnalisées (scales) : CRUD owner-scopé (gâté manageStructure)
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Parse le textarea « niveaux » en liste ordonnée [{label, value}]. Une ligne =
+     * « libellé | valeur » (séparateur « | »). Sans valeur explicite → valeur = rang
+     * (1, 2, 3…) dans l'ordre saisi (du plus faible au plus fort). Lignes vides ignorées.
+     *
+     * @return array<int, array{label: string, value: float}>
+     */
+    private function parseScaleItems(string $raw): array
+    {
+        $items = [];
+        $rank  = 0;
+        foreach (preg_split('/\r\n|\r|\n/', $raw) ?: [] as $line) {
+            $line = trim((string) $line);
+            if ($line === '') {
+                continue;
+            }
+            $rank++;
+            $parts = explode('|', $line, 2);
+            $label = trim($parts[0]);
+            if ($label === '') {
+                continue;
+            }
+            $value = (count($parts) === 2 && is_numeric(trim($parts[1]))) ? (float) trim($parts[1]) : (float) $rank;
+            $items[] = ['label' => $label, 'value' => $value];
+        }
+
+        return Scale::sanitizeItems($items);
+    }
+
+    /** Re-sérialise des niveaux en texte « libellé | valeur » (une ligne par niveau). */
+    private function scaleItemsToText(array $items): string
+    {
+        $lines = [];
+        foreach (Scale::sanitizeItems($items) as $lvl) {
+            $value   = rtrim(rtrim(number_format($lvl['value'], 2, '.', ''), '0'), '.') ?: '0';
+            $lines[] = $lvl['label'].' | '.$value;
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /** Ouvre/ferme le panneau de gestion des échelles (gâté manageStructure). */
+    public function toggleScales(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $this->showScales = ! $this->showScales;
+    }
+
+    /**
+     * Re-résout une échelle GÉRABLE par l'utilisateur : une échelle qu'il POSSÈDE,
+     * OU n'importe laquelle s'il est admin (academy.manage). Les échelles système
+     * (owner_id null) ne sont éditables QUE par un admin. Sinon → ModelNotFound.
+     */
+    private function resolveManageableScale(int $scaleId): Scale
+    {
+        $query = Scale::where('id', $scaleId);
+
+        if (! (bool) auth()->user()?->can('academy.manage')) {
+            $query->where('owner_id', (int) auth()->id());
+        }
+
+        return $query->firstOrFail();
+    }
+
+    /** Crée une échelle POSSÉDÉE par l'utilisateur courant (owner_id = auth). */
+    public function addScale(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $this->validate([
+            'newScaleName'  => 'required|string|max:120',
+            'newScaleItems' => 'required|string|max:5000',
+        ], [], [
+            'newScaleName'  => 'nom de l\'échelle',
+            'newScaleItems' => 'niveaux',
+        ]);
+
+        $items = $this->parseScaleItems($this->newScaleItems);
+        if (count($items) < 2) {
+            $this->addError('newScaleItems', 'Une échelle doit comporter au moins deux niveaux (un par ligne).');
+
+            return;
+        }
+
+        Scale::create([
+            'owner_id' => (int) auth()->id(),
+            'name'     => trim($this->newScaleName),
+            'slug'     => \Illuminate\Support\Str::slug(trim($this->newScaleName)).'-'.\Illuminate\Support\Str::random(6),
+            'items'    => $items,
+        ]);
+
+        $this->reset('newScaleName', 'newScaleItems');
+        $this->flashSaved('Échelle créée.');
+    }
+
+    /** Charge une échelle gérable en édition (anti-IDOR). */
+    public function editScale(int $scaleId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $scale = $this->resolveManageableScale($scaleId);
+
+        $this->editingScale   = $scale->id;
+        $this->editScaleName  = $scale->name;
+        $this->editScaleItems = $this->scaleItemsToText((array) $scale->items);
+        $this->resetErrorBag(['editScaleName', 'editScaleItems']);
+    }
+
+    public function saveScale(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        if ($this->editingScale === null) {
+            return;
+        }
+        $scale = $this->resolveManageableScale((int) $this->editingScale);
+
+        $this->validate([
+            'editScaleName'  => 'required|string|max:120',
+            'editScaleItems' => 'required|string|max:5000',
+        ], [], [
+            'editScaleName'  => 'nom de l\'échelle',
+            'editScaleItems' => 'niveaux',
+        ]);
+
+        $items = $this->parseScaleItems($this->editScaleItems);
+        if (count($items) < 2) {
+            $this->addError('editScaleItems', 'Une échelle doit comporter au moins deux niveaux (un par ligne).');
+
+            return;
+        }
+
+        $scale->update([
+            'name'  => trim($this->editScaleName),
+            'items' => $items,
+        ]);
+
+        $this->reset('editingScale', 'editScaleName', 'editScaleItems');
+        $this->flashSaved('Échelle modifiée.');
+    }
+
+    public function cancelScaleEdit(): void
+    {
+        $this->reset('editingScale', 'editScaleName', 'editScaleItems');
+        $this->resetErrorBag(['editScaleName', 'editScaleItems']);
+    }
+
+    public function confirmScaleRemoval(int $scaleId): void
+    {
+        $this->confirmingScaleRemoval = $scaleId;
+    }
+
+    public function cancelScaleRemoval(): void
+    {
+        $this->confirmingScaleRemoval = null;
+    }
+
+    /**
+     * Supprime une échelle gérable (anti-IDOR). Les devoirs qui la référencent
+     * redeviennent NUMÉRIQUES (scale_id → null via FK nullOnDelete), jamais cassés.
+     */
+    public function deleteScale(int $scaleId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $scale = $this->resolveManageableScale($scaleId);
+        $scale->delete();
+
+        $this->confirmingScaleRemoval = null;
+        if ($this->editingScale === $scaleId) {
+            $this->reset('editingScale', 'editScaleName', 'editScaleItems');
+        }
+        $this->flashSaved('Échelle supprimée (les devoirs concernés redeviennent numériques).');
+    }
+
+    /**
+     * Échelles SÉLECTIONNABLES par l'utilisateur (les siennes + les échelles système),
+     * ou TOUTES s'il est admin. Sert au sélecteur d'échelle du devoir et au panneau.
+     *
+     * @return EloquentCollection<int, Scale>
+     */
+    #[Computed]
+    public function selectableScales(): EloquentCollection
+    {
+        $query = Scale::query()->orderBy('name');
+
+        if (! (bool) auth()->user()?->can('academy.manage')) {
+            $uid = (int) auth()->id();
+            $query->where(fn ($q) => $q->where('owner_id', $uid)->orWhereNull('owner_id'));
+        }
+
+        return $query->get();
     }
 
     // ─────────────────────────────────────────────────────────────────────────────

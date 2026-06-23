@@ -45,6 +45,7 @@ use Modules\Academy\Models\Course;
 use Modules\Academy\Models\GradeCategory;
 use Modules\Academy\Models\GradeItem;
 use Modules\Academy\Models\LessonItem;
+use Modules\Academy\Models\Scale;
 use Modules\Academy\Models\Submission;
 
 final class GradebookService
@@ -141,6 +142,107 @@ final class GradebookService
     public static function hasWeighting(Course $course): bool
     {
         return GradeCategory::where('course_id', $course->id)->exists();
+    }
+
+    /**
+     * F14 - Agrège les pourcentages [0..100] des items NOTÉS d'une catégorie selon
+     * la MÉTHODE choisie, et renvoie le score de catégorie [0..100] (ou NULL si
+     * aucune donnée). POINT UNIQUE d'agrégation (DRY). Les items vides sont déjà
+     * EXCLUS par l'appelant (parité Moodle « ignorer les notes vides »).
+     *
+     *   • weighted_mean (DÉFAUT = V2-b inchangé) : Σ(pct × poids) / Σ poids.
+     *     Identique au calcul historique → RÉTROCOMPAT STRICTE.
+     *   • simple_mean : Σ pct / n (les poids des items sont IGNORÉS).
+     *   • sum         : Σ pct, PLAFONNÉE à 100 (le score de catégorie reste borné
+     *     0..100, cohérent avec la pondération finale par catégorie).
+     *   • highest     : max(pct).
+     *   • lowest      : min(pct).
+     *   • median      : médiane des pct (moyenne des 2 centrales si n pair).
+     *
+     * Une méthode inconnue retombe sur weighted_mean (défensif).
+     *
+     * @param  array<int, array{pct: float, weight: float}>  $entries  items notés (pct non-null)
+     */
+    public static function aggregate(array $entries, string $method = GradeCategory::AGGREGATION_WEIGHTED_MEAN): ?float
+    {
+        if ($entries === []) {
+            return null;
+        }
+
+        if (! in_array($method, GradeCategory::AGGREGATION_METHODS, true)) {
+            $method = GradeCategory::AGGREGATION_WEIGHTED_MEAN;
+        }
+
+        $pcts = array_map(static fn (array $e): float => (float) $e['pct'], $entries);
+
+        $score = match ($method) {
+            GradeCategory::AGGREGATION_SIMPLE_MEAN => array_sum($pcts) / count($pcts),
+            GradeCategory::AGGREGATION_SUM         => min(100.0, array_sum($pcts)),
+            GradeCategory::AGGREGATION_HIGHEST     => max($pcts),
+            GradeCategory::AGGREGATION_LOWEST      => min($pcts),
+            GradeCategory::AGGREGATION_MEDIAN      => self::median($pcts),
+            default                                => self::weightedMean($entries),
+        };
+
+        return max(0.0, min(100.0, (float) $score));
+    }
+
+    /**
+     * Moyenne PONDÉRÉE Σ(pct × poids) / Σ poids (calcul V2-b historique extrait ici).
+     *
+     * @param  array<int, array{pct: float, weight: float}>  $entries
+     */
+    private static function weightedMean(array $entries): float
+    {
+        $sumPctWeight = 0.0;
+        $sumWeight    = 0.0;
+        foreach ($entries as $e) {
+            $sumPctWeight += (float) $e['pct'] * (float) $e['weight'];
+            $sumWeight    += (float) $e['weight'];
+        }
+
+        return $sumWeight > 0.0 ? $sumPctWeight / $sumWeight : 0.0;
+    }
+
+    /**
+     * Médiane d'une liste de nombres (moyenne des 2 valeurs centrales si n pair).
+     *
+     * @param  array<int, float>  $values  liste non vide
+     */
+    private static function median(array $values): float
+    {
+        sort($values);
+        $n = count($values);
+        $mid = intdiv($n, 2);
+
+        return $n % 2 === 1
+            ? $values[$mid]
+            : ($values[$mid - 1] + $values[$mid]) / 2;
+    }
+
+    /**
+     * F14 - Convertit la VALEUR d'un niveau d'échelle en POINTS sur max_points du
+     * devoir. POINT UNIQUE de conversion (DRY), utilisé à la correction d'un devoir
+     * noté PAR ÉCHELLE. La note obtenue est ensuite stockée comme une note numérique
+     * ordinaire (submission.score), donc le carnet et le CSV l'agrègent SANS code
+     * spécifique (l'échelle est transparente pour l'agrégation).
+     *
+     * FORMULE : points = round( value / maxValue × max_points ), bornée [0..max_points].
+     *   • maxValue = valeur du niveau le plus élevé de l'échelle (dénominateur) ;
+     *   • le niveau le plus haut vaut donc 100 % (max_points), le plus bas sa
+     *     fraction proportionnelle (0 si sa valeur est 0) ;
+     *   • maxValue <= 0 (échelle dégénérée) → 0 (défensif, jamais de division par 0).
+     */
+    public static function scaleValueToPoints(Scale $scale, float $value, int $maxPoints): int
+    {
+        $maxValue = $scale->maxValue();
+        if ($maxValue <= 0.0) {
+            return 0;
+        }
+
+        $points = (int) round($value / $maxValue * max(0, $maxPoints));
+
+        return max(0, min(max(0, $maxPoints), $points));
     }
 
     /**
@@ -273,9 +375,10 @@ final class GradebookService
         foreach ($categories as $category) {
             $catItems = $itemsByCategory->get($category->id, collect());
 
-            // Moyenne PONDÉRÉE des items de la catégorie (items vides exclus).
-            $sumPctWeight = 0.0;
-            $sumWeight    = 0.0;
+            // Items NOTÉS de la catégorie (items vides exclus = parité Moodle).
+            // Le poids est normalisé comme historiquement (0/absent → 1.0) ; il ne
+            // sert qu'à la méthode weighted_mean (les autres l'ignorent).
+            $entries = [];
             foreach ($catItems as $item) {
                 $pct = self::itemPercentFor($user->id, $item);
                 if ($pct === null) {
@@ -285,12 +388,13 @@ final class GradebookService
                 if ($w <= 0.0) {
                     $w = 1.0; // poids non renseigné → poids neutre
                 }
-                $sumPctWeight += $pct * $w;
-                $sumWeight    += $w;
+                $entries[] = ['pct' => $pct, 'weight' => $w];
             }
 
-            $hasData = $sumWeight > 0.0;
-            $score   = $hasData ? $sumPctWeight / $sumWeight : null;
+            // F14 : agrégation paramétrée par la méthode de la catégorie. Le défaut
+            // (weighted_mean) reproduit EXACTEMENT le calcul V2-b → rétrocompat stricte.
+            $score   = self::aggregate($entries, $category->effectiveAggregationMethod());
+            $hasData = $score !== null;
 
             $catWeight = max(0.0, (float) $category->weight);
 
