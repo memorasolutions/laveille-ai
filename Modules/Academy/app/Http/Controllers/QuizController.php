@@ -371,7 +371,9 @@ class QuizController extends Controller
         $validated[$index] = [
             'answer'          => $given,
             'correct'         => (bool) ($detail['correct'] ?? false),
-            'points_earned'   => (int) ($single['points_earned'] ?? 0),
+            // Crédit partiel : conserve la valeur native de score() (int si entier,
+            // float ex. 0,5 si fractionnaire) — surtout PAS de cast int qui tronquerait.
+            'points_earned'   => $single['points_earned'] ?? 0,
             'points_possible' => (int) ($single['points_possible'] ?? 0),
         ];
 

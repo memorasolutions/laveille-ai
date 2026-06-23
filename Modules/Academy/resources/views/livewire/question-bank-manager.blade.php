@@ -403,6 +403,8 @@
                                     <div wire:key="ddw-answer-{{ $blankIdx }}" style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
                                         <label for="qDdwtosAnswers-{{ $blankIdx }}" style="flex: 0 0 auto; min-width: 70px; font-size: 0.8rem; font-weight: 600;">Trou [[{{ $n }}]]</label>
                                         <select id="qDdwtosAnswers-{{ $blankIdx }}" wire:model="qDdwtosAnswers.{{ $blankIdx }}"
+                                                aria-required="true"
+                                                @error('qDdwtosAnswers') aria-invalid="true" aria-describedby="qDdwtosAnswers-err" @enderror
                                                 style="flex: 1; max-width: 320px; padding: 7px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                                             <option value="">– Choisir un mot –</option>
                                             @foreach ($ddwPool as $wi => $wv)
@@ -412,7 +414,7 @@
                                     </div>
                                 @endforeach
                             @endif
-                            @error('qDdwtosAnswers') <span role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 6px;">{{ $message }}</span> @enderror
+                            @error('qDdwtosAnswers') <span id="qDdwtosAnswers-err" role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 6px;">{{ $message }}</span> @enderror
                         </fieldset>
                     @elseif ($qType === 'numerical')
                         <fieldset style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px; margin: 0;">

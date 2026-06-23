@@ -173,9 +173,12 @@ final class QuizService
      *
      * V1-c - SCORING PONDÉRÉ : chaque question porte un champ `points` (défaut 1 si
      * absent → comportement strictement identique au comptage simple historique).
-     *   - points_earned   = somme des points des questions correctes ;
+     *   - points_earned   = somme des points (CRÉDIT PARTIEL inclus, fraction * points
+     *                       accumulée en float puis arrondie à 2 décimales pour l'affichage,
+     *                       JAMAIS arrondie par question) ;
      *   - points_possible = somme des points de toutes les questions ;
-     *   - percent         = round(points_earned / points_possible * 100).
+     *   - percent         = round(points_earned_float / points_possible * 100), calculé sur
+     *                       la somme float non arrondie (pondération exacte).
      * Les clés existantes sont CONSERVÉES :
      *   - score   = points obtenus (= points_earned) ;
      *   - correct = NB de bonnes réponses (inchangé, sert le badge « sans faute ») ;
@@ -184,7 +187,7 @@ final class QuizService
      *
      * @param  array<int, array<string, mixed>> $questions  Questions du round (telles que retournées par buildRound)
      * @param  array<string, mixed>             $answers    Réponses indexées par numéro de question (clés string "0","1",…)
-     * @return array{score: int, total: int, percent: int, correct: int, wrong: int, points_earned: int, points_possible: int, details: array<int, array{correct: bool, expected: mixed, given: mixed}>}
+     * @return array{score: int|float, total: int, percent: int, correct: int, wrong: int, points_earned: int|float, points_possible: int, details: array<int, array{correct: bool, expected: mixed, given: mixed}>}
      */
     public static function score(array $questions, array $answers): array
     {
@@ -204,7 +207,7 @@ final class QuizService
         }
 
         $correct        = 0;
-        $pointsEarned   = 0;
+        $pointsEarned   = 0.0; // crédit partiel : accumulé en FLOAT (jamais arrondi par question)
         $pointsPossible = 0;
         $details        = [];
 
@@ -229,7 +232,7 @@ final class QuizService
                     // bornée >= 0) :
                     //   gagne    = (#bonnes cochées) - (#mauvaises cochées)
                     //   fraction = max(0, gagne / #bonnes)         (jamais négatif)
-                    //   points obtenus = round(fraction * points)  (cohérent V1-c)
+                    //   points obtenus = fraction * points (FLOAT, jamais arrondi par question)
                     // Tout-correct exact → fraction 1 → points pleins ; tout-faux ou rien
                     // → 0. La question n'est comptée « correcte » (badge sans-faute) QUE
                     // si fraction == 1 (toutes les bonnes, aucune mauvaise).
@@ -257,7 +260,7 @@ final class QuizService
                         // On note ICI (points fractionnaires) puis on SAUTE le bloc commun
                         // (qui ajouterait les points pleins). pointsPossible a déjà reçu
                         // le poids plein de la question avant le switch.
-                        $pointsEarned += (int) round($fraction * $points);
+                        $pointsEarned += $fraction * $points;
                         if ($isCorrect) {
                             $correct++;
                         }
@@ -333,7 +336,7 @@ final class QuizService
                     // `given` = position absolue choisie par l'étudiant pour CE même élément.
                     // Formule (bornée [0,1]) :
                     //   fraction = (#éléments à leur position absolue correcte) / N
-                    //   points obtenus = round(fraction * points)   (cohérent V1-c)
+                    //   points obtenus = fraction * points (FLOAT, jamais arrondi par question)
                     // Ordre exact → fraction 1 → points pleins. La question n'est comptée
                     // « correcte » (badge sans-faute) QUE si fraction == 1 (ordre exact).
                     $expectedArr = array_map('intval', (array) ($question['answer'] ?? []));
@@ -352,7 +355,7 @@ final class QuizService
 
                     // On note ICI (points fractionnaires) puis on SAUTE le bloc commun.
                     // pointsPossible a déjà reçu le poids plein de la question avant le switch.
-                    $pointsEarned += (int) round($fraction * $points);
+                    $pointsEarned += $fraction * $points;
                     if ($isCorrect) {
                         $correct++;
                     }
@@ -376,7 +379,7 @@ final class QuizService
                     // `given` = TABLEAU index_de_trou => valeur soumise (texte pour short,
                     // index pour mcq). Formule (bornée [0,1]) :
                     //   fraction = (#trous corrects) / (#trous)
-                    //   points obtenus = round(fraction * points)   (cohérent V1-c)
+                    //   points obtenus = fraction * points (FLOAT, jamais arrondi par question)
                     // Tous trous corrects → fraction 1 → points pleins. La question n'est
                     // comptée « correcte » (badge sans-faute) QUE si fraction == 1. Les
                     // bonnes réponses (accepted/correct) restent serveur : jamais exposées
@@ -418,7 +421,7 @@ final class QuizService
 
                     // On note ICI (points fractionnaires) puis on SAUTE le bloc commun.
                     // pointsPossible a déjà reçu le poids plein de la question avant le switch.
-                    $pointsEarned += (int) round($fraction * $points);
+                    $pointsEarned += $fraction * $points;
                     if ($isCorrect) {
                         $correct++;
                     }
@@ -438,7 +441,7 @@ final class QuizService
                     // `given` = TABLEAU index_de_trou => index du mot CHOISI dans le pool.
                     // Formule (bornée [0,1]) :
                     //   fraction = (#trous avec le bon mot) / (#trous)
-                    //   points obtenus = round(fraction * points)   (cohérent V1-c)
+                    //   points obtenus = fraction * points (FLOAT, jamais arrondi par question)
                     // Tous trous corrects → fraction 1 → points pleins. La question n'est
                     // comptée « correcte » (badge sans-faute) QUE si fraction == 1. Un trou
                     // vide / un distracteur choisi = faux. Les bonnes réponses (answers)
@@ -466,7 +469,7 @@ final class QuizService
 
                     // On note ICI (points fractionnaires) puis on SAUTE le bloc commun.
                     // pointsPossible a déjà reçu le poids plein de la question avant le switch.
-                    $pointsEarned += (int) round($fraction * $points);
+                    $pointsEarned += $fraction * $points;
                     if ($isCorrect) {
                         $correct++;
                     }
@@ -503,13 +506,25 @@ final class QuizService
             ? (int) round(($pointsEarned / $pointsPossible) * 100)
             : 0;
 
+        // Crédit partiel : points obtenus arrondis à 2 décimales pour l'affichage
+        // (notation décimale façon Moodle) ; le percent, lui, reste calculé sur la
+        // somme FLOAT non arrondie pour une pondération exacte.
+        // RÉTROCOMPAT : un total ENTIER reste un int (3.0 → 3) — seul un crédit partiel
+        // réellement fractionnaire (ex. 0,5) demeure un float. On évite ainsi de casser
+        // les appelants/tests qui comparent des points entiers en strict (===), tout en
+        // affichant proprement les demi-points.
+        $pointsEarnedDisplay = round($pointsEarned, 2);
+        if ($pointsEarnedDisplay === (float) (int) $pointsEarnedDisplay) {
+            $pointsEarnedDisplay = (int) $pointsEarnedDisplay;
+        }
+
         return [
-            'score'           => $pointsEarned, // points obtenus (= points_earned)
+            'score'           => $pointsEarnedDisplay, // points obtenus (= points_earned)
             'total'           => $total,        // NB de questions (inchangé)
             'percent'         => $percent,      // pondéré
             'correct'         => $correct,      // NB de bonnes réponses (badge « sans faute »)
             'wrong'           => $wrong,
-            'points_earned'   => $pointsEarned,
+            'points_earned'   => $pointsEarnedDisplay,
             'points_possible' => $pointsPossible,
             'details'         => $details,
         ];

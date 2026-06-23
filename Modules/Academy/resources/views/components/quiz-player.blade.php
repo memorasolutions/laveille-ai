@@ -2,11 +2,11 @@
 {{--
     Composant anonyme : <x-academy::quiz-player>
     Props :
-      $item        — LessonItem (type=quiz)
-      $isEnrolled  — bool
-      $course      — Course
-      $lesson      — Lesson
-      $quizResult  — array|null (from flash 'academy.quiz_result', filtered to this item)
+      $item        – LessonItem (type=quiz)
+      $isEnrolled  – bool
+      $course      – Course
+      $lesson      – Lesson
+      $quizResult  – array|null (from flash 'academy.quiz_result', filtered to this item)
 --}}
 @props([
     'item',
@@ -31,7 +31,7 @@
             @if(! auth()->check())
                 Créez un compte gratuit ou connectez-vous pour participer.
             @elseif($course->access_type === 'free')
-                Ce cours est gratuit — inscrivez-vous pour accéder à tous les quiz.
+                Ce cours est gratuit : inscrivez-vous pour accéder à tous les quiz.
             @else
                 Votre inscription vous donnera accès à l'ensemble du contenu.
             @endif
@@ -60,8 +60,11 @@
             $correct        = (int)  ($quizResult['correct'] ?? 0);
             $total          = (int)  ($quizResult['total'] ?? 0);
             // V1-c : points pondérés (défaut = nb correct/total si absent, rétrocompat).
-            $pointsEarned   = (int)  ($quizResult['points_earned']   ?? $correct);
-            $pointsPossible = (int)  ($quizResult['points_possible'] ?? $total);
+            // C1 : points_earned peut être FRACTIONNAIRE (crédit partiel, ex. 0,5) →
+            // garder le float et l'afficher en décimal localisé (virgule FR).
+            $pointsEarned   = (float) ($quizResult['points_earned']   ?? $correct);
+            $pointsPossible = (int)   ($quizResult['points_possible'] ?? $total);
+            $pointsEarnedFr = str_replace('.', ',', \Modules\Academy\Services\QuizService::formatNumber($pointsEarned));
             // V1-d : soumission hors-temps (garde serveur).
             $timedOut       = (bool) ($quizResult['timed_out'] ?? false);
         @endphp
@@ -79,7 +82,7 @@
                 <h5 style="color: #166534; font-weight: 700;">✅ Quiz Réussi !</h5>
                 <p class="mb-1">Score : <strong>{{ $percent }}%</strong></p>
             @else
-                <h5 style="color: #92400E; font-weight: 700;">⚠️ Score : {{ $percent }}% — Non réussi</h5>
+                <h5 style="color: #92400E; font-weight: 700;">⚠️ Score : {{ $percent }}% – Non réussi</h5>
                 <p class="mb-1">Score requis : <strong>{{ $item->payload['passing_score'] ?? 60 }}%</strong></p>
             @endif
             <p class="mb-1 text-muted" style="font-size: 0.9rem;">
@@ -87,7 +90,7 @@
             </p>
             @if($pointsPossible > 0)
                 <p class="mb-3 text-muted" style="font-size: 0.9rem;">
-                    <strong>{{ $pointsEarned }}</strong> / <strong>{{ $pointsPossible }}</strong> points
+                    <strong>{{ $pointsEarnedFr }}</strong> / <strong>{{ $pointsPossible }}</strong> {{ $pointsPossible >= 2 ? 'points' : 'point' }}
                 </p>
             @else
                 <span class="mb-3 d-block"></span>
@@ -180,7 +183,7 @@
                             sort($givenSet);
                             // Correct (badge) seulement si fraction == 1 (exactement les bonnes).
                             $isCorrect     = $givenSet === $correctSet;
-                            $expectedLabel = implode(', ', array_map(fn ($k) => $choices[$k] ?? '', $correctSet)) ?: '—';
+                            $expectedLabel = implode(', ', array_map(fn ($k) => $choices[$k] ?? '', $correctSet)) ?: '–';
                             $givenLabels   = array_filter(array_map(fn ($k) => $choices[$k] ?? null, $givenSet), fn ($v) => $v !== null);
                             $givenLabel    = $givenLabels !== [] ? implode(', ', $givenLabels) : 'Aucune réponse';
                         } elseif ($qType === 'qcm' || $qType === 'vraifaux') {
@@ -312,7 +315,7 @@
                             <ul class="mb-1 text-muted" style="font-size: 0.85rem; padding-left: 1.1rem;">
                                 @foreach(($orderElements ?? []) as $j => $el)
                                     @php $chosen = $givenArr[$j] ?? null; @endphp
-                                    <li>{{ $el }} <span aria-hidden="true">→</span> position {{ is_int($chosen) && $chosen >= 0 ? $chosen + 1 : '—' }}</li>
+                                    <li>{{ $el }} <span aria-hidden="true">→</span> position {{ is_int($chosen) && $chosen >= 0 ? $chosen + 1 : '–' }}</li>
                                 @endforeach
                             </ul>
                             @if($reviewOpts['show_right_answer'])
@@ -413,7 +416,7 @@
             }
         @endphp
 
-        {{-- ════════════ V1-f : MODE DIFFÉRÉ (défaut) — un seul formulaire ════════════
+        {{-- ════════════ V1-f : MODE DIFFÉRÉ (défaut) – un seul formulaire ════════════
              Comportement HISTORIQUE strictement inchangé : toutes les questions, une
              seule soumission, révision affichée à la fin. Le mode immédiat (par
              question) est rendu dans la branche @else ci-dessous. --}}
@@ -525,7 +528,7 @@
 
                     {{-- Réponse numérique (valeur + unité indicative ; bonnes réponses serveur) --}}
                     @elseif($type === 'numerique')
-                        {{-- C3 : rendu DRY (partial) — name = answers[i], id dédié. --}}
+                        {{-- C3 : rendu DRY (partial) – name = answers[i], id dédié. --}}
                         @include('academy::livewire.partials.numerical-input', [
                             'nameAttr' => 'answers['.$i.']',
                             'inputId'  => 'q'.$item->id.'_'.$i.'_num',
@@ -547,7 +550,7 @@
                                             style="max-width: 320px;"
                                             aria-label="Définition pour : {{ $term }}"
                                             required>
-                                        <option value="">— Choisir une définition —</option>
+                                        <option value="">Choisir une définition…</option>
                                         @foreach($defs as $k => $def)
                                             <option value="{{ $k }}">{{ $def }}</option>
                                         @endforeach
@@ -574,7 +577,7 @@
                                             style="max-width: 160px;"
                                             aria-label="Position de : {{ $element }}"
                                             required>
-                                        <option value="">— Position —</option>
+                                        <option value="">Position…</option>
                                         @foreach($elements as $p => $ignored)
                                             <option value="{{ $p }}">{{ $p + 1 }}</option>
                                         @endforeach
@@ -627,7 +630,7 @@
         </form>
 
         @else
-        {{-- ════════════ V1-f : MODE IMMÉDIAT — validation par question ════════════
+        {{-- ════════════ V1-f : MODE IMMÉDIAT – validation par question ════════════
              Chaque question non encore validée porte SON PROPRE formulaire « Vérifier »
              (POST quiz.verify) : le scoring se fait SERVEUR puis la question est
              verrouillée (relue depuis la session). Les questions déjà validées sont
@@ -715,7 +718,7 @@
                                        style="max-width: 320px;">
 
                             @elseif($type === 'numerique')
-                                {{-- C3 : MÊME partial qu'en différé — name = answer, id ajouté (cohérence). --}}
+                                {{-- C3 : MÊME partial qu'en différé – name = answer, id ajouté (cohérence). --}}
                                 @include('academy::livewire.partials.numerical-input', [
                                     'nameAttr' => 'answer',
                                     'inputId'  => 'iq'.$item->id.'_'.$i.'_num',
@@ -733,7 +736,7 @@
                                             <select id="{{ $selectId }}" name="answer[]"
                                                     class="form-select form-select-sm" style="max-width: 320px;"
                                                     aria-label="Définition pour : {{ $term }}" required>
-                                                <option value="">— Choisir une définition —</option>
+                                                <option value="">Choisir une définition…</option>
                                                 @foreach($defs as $k => $def)
                                                     <option value="{{ $k }}">{{ $def }}</option>
                                                 @endforeach
@@ -753,7 +756,7 @@
                                             <select id="{{ $selectId }}" name="answer[]"
                                                     class="form-select form-select-sm" style="max-width: 160px;"
                                                     aria-label="Position de : {{ $element }}" required>
-                                                <option value="">— Position —</option>
+                                                <option value="">Position…</option>
                                                 @foreach($elements as $p => $ignored)
                                                     <option value="{{ $p }}">{{ $p + 1 }}</option>
                                                 @endforeach
@@ -804,7 +807,7 @@
                                 $givenSet = is_array($userAns)
                                     ? array_values(array_unique(array_map('intval', $userAns)))
                                     : (is_numeric($userAns) ? [(int) $userAns] : []);
-                                $expectedLabel = implode(', ', array_map(fn ($k) => $choices[$k] ?? '', $correctSet)) ?: '—';
+                                $expectedLabel = implode(', ', array_map(fn ($k) => $choices[$k] ?? '', $correctSet)) ?: '–';
                                 $givenLabels = array_filter(array_map(fn ($k) => $choices[$k] ?? null, $givenSet), fn ($x) => $x !== null);
                                 $givenLabel = $givenLabels !== [] ? implode(', ', $givenLabels) : 'Aucune réponse';
                             } elseif ($type === 'qcm' || $type === 'vraifaux') {

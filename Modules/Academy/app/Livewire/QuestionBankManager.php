@@ -46,6 +46,9 @@ class QuestionBankManager extends Component
     private const MAX_CLOZE_TEXT = 2000;
     private const MAX_CLOZE_ENTRY = 500;
 
+    /** C4 (F4) : borne dédiée au texte ddwtos (glisser-déposer), distincte du cloze. */
+    private const MAX_DDWTOS_TEXT = 2000;
+
     // ── Création de catégorie ────────────────────────────────────────────────────
     public string $newCategoryName = '';
     public ?int $newCategoryParentId = null;
@@ -522,7 +525,7 @@ class QuestionBankManager extends Component
             'qClozeText'   => 'nullable|string|max:'.self::MAX_CLOZE_TEXT,
             // Borne de longueur du texte ddwtos (anti-payload abusif). Inerte pour les
             // autres types (qDdwtosText vide) ; détail par mot dans buildDdwtosPayload.
-            'qDdwtosText'  => 'nullable|string|max:'.self::MAX_CLOZE_TEXT,
+            'qDdwtosText'  => 'nullable|string|max:'.self::MAX_DDWTOS_TEXT,
             // C2 (audit F3) : l'unité numérique n'avait QUE le maxlength HTML
             // (contournable). Règle serveur (inerte pour les autres types : qNumericalUnit vide).
             'qNumericalUnit' => 'nullable|string|max:40',
@@ -989,9 +992,9 @@ class QuestionBankManager extends Component
             ]);
         }
 
-        if (mb_strlen($text) > self::MAX_CLOZE_TEXT) {
+        if (mb_strlen($text) > self::MAX_DDWTOS_TEXT) {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'qDdwtosText' => 'Le texte est trop long (maximum '.self::MAX_CLOZE_TEXT.' caractères).',
+                'qDdwtosText' => 'Le texte est trop long (maximum '.self::MAX_DDWTOS_TEXT.' caractères).',
             ]);
         }
 
@@ -1027,6 +1030,16 @@ class QuestionBankManager extends Component
         if ($words === []) {
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'qDdwtosWords' => 'Ajoutez au moins un mot au pool.',
+            ]);
+        }
+
+        // C2 (F4) : les libellés du pool doivent être DISTINCTS. Deux mots identiques
+        // créent une ambiguïté de notation (deux index pointent le même libellé : un
+        // distracteur visuellement confondu avec la bonne réponse). On rejette donc tout
+        // doublon (comparaison sur la valeur déjà trimée du pool).
+        if (count($words) !== count(array_unique($words))) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'qDdwtosWords' => 'Les mots du pool doivent être distincts.',
             ]);
         }
 
