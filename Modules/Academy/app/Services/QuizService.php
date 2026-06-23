@@ -96,8 +96,9 @@ final class QuizService
     /**
      * Permute les choix d'UNE question qcm en remappant l'index correct (et le
      * feedback par choix) pour que le scoring reste exact. Toute autre forme de
-     * question est renvoyée inchangée (vraifaux/court/appariement/ordonnancement :
-     * ordre signifiant ou mapping déjà mélangé en amont).
+     * question est renvoyée inchangée (vraifaux/court/appariement/ordonnancement/cloze :
+     * ordre signifiant ou mapping déjà mélangé en amont ; le cloze suit l'ordre du
+     * texte → jamais mélangé, comme `court`).
      *
      * @param  array<string, mixed> $q
      * @return array<string, mixed>
@@ -337,6 +338,72 @@ final class QuizService
                         'correct'  => $isCorrect,
                         'expected' => $expectedArr,
                         'given'    => $givenArr,
+                    ];
+
+                    continue 2; // question suivante (bypass du bloc commun)
+
+                case 'cloze':
+                    // CLOZE / TEXTE À TROUS - CRÉDIT PARTIEL PAR TROU (parité Moodle
+                    // « Embedded answers », notation par sous-question). `blanks` = map
+                    // index_de_trou (0-based stable) => corrigé du trou :
+                    //   - kind=short : { accepted:[…] } → comparé comme `court`
+                    //     (normalisation casse + espaces, mb_strtolower/trim) ;
+                    //   - kind=mcq   : { choices:[…], correct:int } → comparé comme `qcm`
+                    //     (égalité d'index).
+                    // `given` = TABLEAU index_de_trou => valeur soumise (texte pour short,
+                    // index pour mcq). Formule (bornée [0,1]) :
+                    //   fraction = (#trous corrects) / (#trous)
+                    //   points obtenus = round(fraction * points)   (cohérent V1-c)
+                    // Tous trous corrects → fraction 1 → points pleins. La question n'est
+                    // comptée « correcte » (badge sans-faute) QUE si fraction == 1. Les
+                    // bonnes réponses (accepted/correct) restent serveur : jamais exposées
+                    // avant soumission (seuls les segments d'affichage sont rendus).
+                    $blanks      = is_array($question['blanks'] ?? null) ? $question['blanks'] : [];
+                    $givenBlanks = is_array($given) ? $given : [];
+                    $nbBlanks    = count($blanks);
+
+                    $hits         = 0;
+                    $expectedCloze = [];
+                    foreach ($blanks as $k => $blank) {
+                        $kind = ($blank['kind'] ?? 'short') === 'mcq' ? 'mcq' : 'short';
+                        $ans  = $givenBlanks[$k] ?? ($givenBlanks[(string) $k] ?? null);
+
+                        if ($kind === 'mcq') {
+                            $choices          = is_array($blank['choices'] ?? null) ? $blank['choices'] : [];
+                            $correctIdx       = (int) ($blank['correct'] ?? -1);
+                            $givenIdx         = is_numeric($ans) ? (int) $ans : -1;
+                            $ok               = $givenIdx === $correctIdx;
+                            $expectedCloze[$k] = $choices[$correctIdx] ?? '';
+                        } else {
+                            $accepted = array_map(
+                                fn ($s): string => trim(mb_strtolower((string) $s, 'UTF-8')),
+                                (array) ($blank['accepted'] ?? [])
+                            );
+                            $givenStr          = is_string($ans) ? trim(mb_strtolower($ans, 'UTF-8')) : '';
+                            $ok                = $givenStr !== '' && in_array($givenStr, $accepted, true);
+                            $acceptedRaw       = array_values((array) ($blank['accepted'] ?? []));
+                            $expectedCloze[$k] = $acceptedRaw[0] ?? '';
+                        }
+
+                        if ($ok) {
+                            $hits++;
+                        }
+                    }
+
+                    $fraction  = $nbBlanks > 0 ? $hits / $nbBlanks : 0.0;
+                    $isCorrect = ($fraction >= 1.0);
+
+                    // On note ICI (points fractionnaires) puis on SAUTE le bloc commun.
+                    // pointsPossible a déjà reçu le poids plein de la question avant le switch.
+                    $pointsEarned += (int) round($fraction * $points);
+                    if ($isCorrect) {
+                        $correct++;
+                    }
+
+                    $details[$index] = [
+                        'correct'  => $isCorrect,
+                        'expected' => $expectedCloze,
+                        'given'    => $givenBlanks,
                     ];
 
                     continue 2; // question suivante (bypass du bloc commun)

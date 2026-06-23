@@ -114,6 +114,28 @@ class QuestionBankManager extends Component
      */
     public array $qOrderingItems = ['', '', ''];
 
+    /**
+     * CLOZE / TEXTE À TROUS. Le texte porte des marqueurs numérotés [[1]], [[2]], …
+     * (1-based) ; chaque marqueur [[n]] renvoie au trou $qClozeBlanks[n-1].
+     */
+    public string $qClozeText = '';
+
+    /**
+     * Trous du cloze (repeater). Chaque entrée :
+     *   - kind     : 'short' | 'mcq' ;
+     *   - accepted : réponses acceptées (short), saisies séparées par des virgules ;
+     *   - display  : indice d'affichage (short), facultatif ;
+     *   - choices  : options (mcq), une par ligne ;
+     *   - correct  : index 0-based de la bonne option (mcq).
+     * Les chaînes accepted/choices sont DÉCOUPÉES au build (forme tableau canonique du
+     * payload), pour garder le sous-formulaire simple et robuste (pas de repeater imbriqué).
+     *
+     * @var array<int, array<string, mixed>>
+     */
+    public array $qClozeBlanks = [
+        ['kind' => 'short', 'accepted' => '', 'display' => '', 'choices' => '', 'correct' => 0],
+    ];
+
     // ── Confirmations inline à 2 temps (jamais de popup native) ───────────────────
     public ?int $confirmingCategoryDeletion = null;
     public ?int $confirmingQuestionDeletion = null;
@@ -394,6 +416,22 @@ class QuestionBankManager extends Component
         $this->qOrderingItems = $items;
     }
 
+    /** Ajoute un trou de cloze (à la suite ; son numéro de marqueur = position + 1). */
+    public function addClozeBlank(): void
+    {
+        $this->qClozeBlanks[] = ['kind' => 'short', 'accepted' => '', 'display' => '', 'choices' => '', 'correct' => 0];
+    }
+
+    public function removeClozeBlank(int $index): void
+    {
+        if (count($this->qClozeBlanks) <= 1) {
+            return; // minimum 1 trou.
+        }
+
+        unset($this->qClozeBlanks[$index]);
+        $this->qClozeBlanks = array_values($this->qClozeBlanks);
+    }
+
     /**
      * Enregistre une question (création OU édition selon $editingQuestionId).
      * La catégorie est re-résolue scopée owner (anti-IDOR) ; le type est en liste
@@ -504,6 +542,7 @@ class QuestionBankManager extends Component
             'short'     => $this->buildShortPayload(),
             'matching'  => $this->buildMatchingPayload(),
             'ordering'  => $this->buildOrderingPayload(),
+            'cloze'     => $this->buildClozePayload(),
             default     => [],
         };
     }
@@ -676,6 +715,99 @@ class QuestionBankManager extends Component
     }
 
     /**
+     * @return array<string, mixed>
+     *
+     * CLOZE / TEXTE À TROUS. Forme canonique du payload :
+     *   payload['text']   = texte avec marqueurs [[1]], [[2]], … ;
+     *   payload['blanks'] = TABLEAU ordonné des trous : { kind:'short', accepted:[…],
+     *                       display? } OU { kind:'mcq', choices:[…], correct:int }.
+     * Mêmes invariants que QuestionBankService::normalizeClozeBlank → une question
+     * créée est TOUJOURS jouable (au moins un marqueur résolu vers un trou valide).
+     */
+    private function buildClozePayload(): array
+    {
+        $text = trim((string) $this->qClozeText);
+
+        if ($text === '' || preg_match('/\[\[\d+\]\]/', $text) !== 1) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'qClozeText' => 'Le texte doit contenir au moins un trou au format [[1]], [[2]]…',
+            ]);
+        }
+
+        $blanks = [];
+        foreach (array_values($this->qClozeBlanks) as $raw) {
+            if (! is_array($raw)) {
+                continue;
+            }
+
+            $kind = (($raw['kind'] ?? 'short') === 'mcq') ? 'mcq' : 'short';
+
+            if ($kind === 'mcq') {
+                $choices = array_values(array_filter(
+                    array_map(
+                        fn ($c): string => trim((string) $c),
+                        preg_split('/\r\n|\r|\n/', (string) ($raw['choices'] ?? '')) ?: []
+                    ),
+                    fn (string $c): bool => $c !== ''
+                ));
+                if (count($choices) < 2) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'qClozeBlanks' => 'Un trou à choix exige au moins 2 options (une par ligne).',
+                    ]);
+                }
+                $correct = (int) ($raw['correct'] ?? 0);
+                if ($correct < 0 || $correct >= count($choices)) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'qClozeBlanks' => 'Désignez une bonne option valide pour chaque trou à choix.',
+                    ]);
+                }
+                $blanks[] = ['kind' => 'mcq', 'choices' => $choices, 'correct' => $correct];
+            } else {
+                $accepted = array_values(array_filter(
+                    array_map(fn ($a): string => trim((string) $a), explode(',', (string) ($raw['accepted'] ?? ''))),
+                    fn (string $a): bool => $a !== ''
+                ));
+                if ($accepted === []) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'qClozeBlanks' => 'Un trou à réponse courte exige au moins une réponse acceptée.',
+                    ]);
+                }
+                $blank   = ['kind' => 'short', 'accepted' => $accepted];
+                $display = trim((string) ($raw['display'] ?? ''));
+                if ($display !== '') {
+                    $blank['display'] = $display;
+                }
+                $blanks[] = $blank;
+            }
+        }
+
+        if ($blanks === []) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'qClozeBlanks' => 'Ajoutez au moins un trou.',
+            ]);
+        }
+
+        // Garde-fou « toujours jouable » : au moins un marqueur [[n]] doit pointer vers
+        // un trou défini (1 <= n <= nb de trous). Sinon le round serait vide au tirage.
+        preg_match_all('/\[\[(\d+)\]\]/', $text, $mm);
+        $hasResolved = false;
+        foreach (($mm[1] ?? []) as $num) {
+            $n = (int) $num;
+            if ($n >= 1 && $n <= count($blanks)) {
+                $hasResolved = true;
+                break;
+            }
+        }
+        if (! $hasResolved) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'qClozeText' => 'Au moins un trou [[n]] doit correspondre à un trou défini ci-dessous.',
+            ]);
+        }
+
+        return ['text' => $text, 'blanks' => $blanks];
+    }
+
+    /**
      * Pré-remplit les champs du sous-formulaire à partir d'un payload existant.
      *
      * @param  array<string, mixed>  $payload
@@ -748,6 +880,36 @@ class QuestionBankManager extends Component
                 ));
                 $this->qOrderingItems = count($items) >= 2 ? $items : ['', '', ''];
                 break;
+
+            case 'cloze':
+                $this->qClozeText = (string) ($payload['text'] ?? '');
+                $blanks = [];
+                foreach ((array) ($payload['blanks'] ?? []) as $b) {
+                    if (! is_array($b)) {
+                        continue;
+                    }
+                    if (($b['kind'] ?? 'short') === 'mcq') {
+                        $blanks[] = [
+                            'kind'     => 'mcq',
+                            'accepted' => '',
+                            'display'  => '',
+                            'choices'  => implode("\n", array_map(fn ($c): string => (string) $c, (array) ($b['choices'] ?? []))),
+                            'correct'  => (int) ($b['correct'] ?? 0),
+                        ];
+                    } else {
+                        $blanks[] = [
+                            'kind'     => 'short',
+                            'accepted' => implode(', ', array_map(fn ($a): string => (string) $a, (array) ($b['accepted'] ?? []))),
+                            'display'  => (string) ($b['display'] ?? ''),
+                            'choices'  => '',
+                            'correct'  => 0,
+                        ];
+                    }
+                }
+                $this->qClozeBlanks = $blanks !== []
+                    ? $blanks
+                    : [['kind' => 'short', 'accepted' => '', 'display' => '', 'choices' => '', 'correct' => 0]];
+                break;
         }
     }
 
@@ -764,6 +926,8 @@ class QuestionBankManager extends Component
         $this->qDisplay        = null;
         $this->qPairs          = [['term' => '', 'def' => ''], ['term' => '', 'def' => '']];
         $this->qOrderingItems  = ['', '', ''];
+        $this->qClozeText      = '';
+        $this->qClozeBlanks    = [['kind' => 'short', 'accepted' => '', 'display' => '', 'choices' => '', 'correct' => 0]];
     }
 
     /**
@@ -937,6 +1101,7 @@ class QuestionBankManager extends Component
             'short'     => 'Réponse courte',
             'matching'  => 'Appariement',
             'ordering'  => 'Ordonnancement',
+            'cloze'     => 'Texte à trous',
             default     => $type,
         };
     }

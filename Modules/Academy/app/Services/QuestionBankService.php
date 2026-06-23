@@ -292,9 +292,150 @@ final class QuestionBankService
                     'points'   => $points,
                 ];
 
+            case 'cloze':
+                // CLOZE / TEXTE À TROUS (« Embedded answers » Moodle, modèle STRUCTURÉ).
+                // Représentation banque : payload['text'] = texte avec des marqueurs
+                // numérotés [[1]], [[2]], … (1-based) ; payload['blanks'] = TABLEAU
+                // ordonné des trous (index 0-based : [[1]] → blanks[0]). Chaque trou est
+                //   - kind=short : { accepted:[…], display? }  (scoré comme `court`) ;
+                //   - kind=mcq   : { choices:[…], correct:int } (scoré comme `qcm`).
+                // mapToRoundItem produit la liste de SEGMENTS d'affichage (texte + trous)
+                // SANS exposer les bonnes réponses : les `segments` ne portent JAMAIS
+                // `accepted`/`correct` (les trous mcq exposent leurs `choices`, déjà
+                // visibles dans le <select>). Les corrigés vivent UNIQUEMENT dans
+                // `blanks` (indexé par index de trou stable), gardé serveur (session /
+                // snapshot) et lu seulement au scoring/à la révision - comme `answer`
+                // l'est pour l'ordonnancement. L'index stable d'un trou = son index dans
+                // `blanks` (relie la réponse soumise answers[i][index]).
+                $built = self::buildClozeRound($payload);
+                if ($built === null) {
+                    return null; // au moins un trou valide exigé (sinon non jouable)
+                }
+
+                return $base + [
+                    'type'     => 'cloze',
+                    'segments' => $built['segments'],
+                    'blanks'   => $built['blanks'],
+                    'points'   => $points,
+                ];
+
             default:
                 return null;
         }
+    }
+
+    /**
+     * Construit la structure d'affichage + de scoring d'un cloze à partir du payload
+     * (texte à marqueurs + trous). Découpe le texte sur les marqueurs [[n]] :
+     *  - 'segments' : liste ordonnée pour l'affichage - {type:'text', value} ou
+     *    {type:'blank', index, kind, choices?(mcq)}. AUCUN corrigé (accepted/correct).
+     *  - 'blanks'   : map index_de_trou => trou NORMALISÉ avec le corrigé (accepted /
+     *    correct), gardée serveur (jamais rendue au client).
+     * Retourne null si aucun trou valide (texte vide, aucun marqueur résolu, trous
+     * invalides) → la question n'est pas jouable et n'est pas mise en round (défensif).
+     *
+     * @param  array<string, mixed>  $payload
+     * @return array{segments: array<int, array<string, mixed>>, blanks: array<int, array<string, mixed>>}|null
+     */
+    private static function buildClozeRound(array $payload): ?array
+    {
+        $text     = (string) ($payload['text'] ?? '');
+        $blanksIn = is_array($payload['blanks'] ?? null) ? array_values($payload['blanks']) : [];
+
+        if (trim($text) === '' || $blanksIn === []) {
+            return null;
+        }
+
+        // Découpe en conservant les marqueurs [[n]] comme jetons séparés.
+        $parts = preg_split('/(\[\[\d+\]\])/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        if ($parts === false) {
+            return null;
+        }
+
+        $segments  = [];
+        $blanksOut = [];
+
+        foreach ($parts as $part) {
+            if (preg_match('/^\[\[(\d+)\]\]$/', $part, $m) === 1) {
+                $k = (int) $m[1] - 1; // [[1]] → index 0 dans blanks
+
+                $normalized = isset($blanksIn[$k]) ? self::normalizeClozeBlank($blanksIn[$k]) : null;
+
+                if ($normalized === null) {
+                    // Marqueur orphelin / trou invalide → rendu en texte littéral (défensif).
+                    $segments[] = ['type' => 'text', 'value' => $part];
+
+                    continue;
+                }
+
+                // Segment d'AFFICHAGE : jamais d'accepted/correct ; choices pour le mcq.
+                $seg = ['type' => 'blank', 'index' => $k, 'kind' => $normalized['kind']];
+                if ($normalized['kind'] === 'mcq') {
+                    $seg['choices'] = $normalized['choices'];
+                }
+
+                $segments[]    = $seg;
+                $blanksOut[$k] = $normalized; // corrigé serveur
+            } else {
+                $segments[] = ['type' => 'text', 'value' => $part];
+            }
+        }
+
+        if ($blanksOut === []) {
+            return null; // aucun trou résolu → non jouable
+        }
+
+        return ['segments' => $segments, 'blanks' => $blanksOut];
+    }
+
+    /**
+     * Normalise un trou de cloze (forme canonique du payload) vers la structure de
+     * scoring, ou null s'il est invalide (mêmes invariants que QuestionBankManager) :
+     *  - mcq   : >= 2 choix non vides + un index `correct` valide ;
+     *  - short : >= 1 réponse acceptée non vide (display optionnel).
+     *
+     * @param  mixed  $blank
+     * @return array<string, mixed>|null
+     */
+    private static function normalizeClozeBlank(mixed $blank): ?array
+    {
+        if (! is_array($blank)) {
+            return null;
+        }
+
+        $kind = (($blank['kind'] ?? 'short') === 'mcq') ? 'mcq' : 'short';
+
+        if ($kind === 'mcq') {
+            $choices = array_values(array_filter(
+                array_map(fn ($c): string => is_string($c) ? trim($c) : '', (array) ($blank['choices'] ?? [])),
+                fn (string $c): bool => $c !== ''
+            ));
+            if (count($choices) < 2) {
+                return null;
+            }
+            $correct = (int) ($blank['correct'] ?? -1);
+            if ($correct < 0 || $correct >= count($choices)) {
+                return null;
+            }
+
+            return ['kind' => 'mcq', 'choices' => $choices, 'correct' => $correct];
+        }
+
+        $accepted = array_values(array_filter(
+            array_map(fn ($a): string => is_string($a) ? trim($a) : '', (array) ($blank['accepted'] ?? [])),
+            fn (string $a): bool => $a !== ''
+        ));
+        if ($accepted === []) {
+            return null;
+        }
+
+        $out     = ['kind' => 'short', 'accepted' => $accepted];
+        $display = isset($blank['display']) && is_string($blank['display']) ? trim($blank['display']) : '';
+        if ($display !== '') {
+            $out['display'] = $display;
+        }
+
+        return $out;
     }
 
     private static function pointsFromDifficulty(string $difficulty): int

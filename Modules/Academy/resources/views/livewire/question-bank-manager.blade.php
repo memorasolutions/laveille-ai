@@ -152,6 +152,7 @@
                         <option value="short">Réponse courte</option>
                         <option value="matching">Appariement</option>
                         <option value="ordering">Ordonnancement</option>
+                        <option value="cloze">Texte à trous</option>
                     </select>
                     @error('qType') <span role="alert" style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
 
@@ -289,6 +290,70 @@
                             @endforeach
                             <x-core::button type="button" wire:click="addOrderingItem" variant="secondary" size="sm">+ Ajouter un élément</x-core::button>
                             @error('qOrderingItems') <span role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 6px;">{{ $message }}</span> @enderror
+                        </fieldset>
+                    @elseif ($qType === 'cloze')
+                        <fieldset style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px; margin: 0;">
+                            <legend style="font-size: 0.8rem; font-weight: 700; padding: 0 6px;">Texte à trous</legend>
+                            <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 8px;">
+                                Écrivez le texte et placez les trous avec des marqueurs numérotés <code>[[1]]</code>, <code>[[2]]</code>… Chaque marqueur <code>[[n]]</code> correspond au trou n° n ci-dessous.
+                            </p>
+
+                            <label for="qClozeText" style="font-size: 0.8rem; font-weight: 600;">Texte avec les trous <span aria-hidden="true">*</span></label>
+                            <textarea id="qClozeText" wire:model="qClozeText" rows="3" maxlength="2000"
+                                      aria-required="true" @error('qClozeText') aria-invalid="true" aria-describedby="qClozeText-err" @enderror
+                                      placeholder="La capitale du Québec est [[1]] et la province compte environ [[2]] habitants."
+                                      style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+                            @error('qClozeText') <span id="qClozeText-err" role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 4px;">{{ $message }}</span> @enderror
+
+                            <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px;">
+                                @foreach ($qClozeBlanks as $i => $blank)
+                                    <div wire:key="cloze-blank-{{ $i }}"
+                                         style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 10px;">
+                                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px;">
+                                            <span style="font-size: 0.8rem; font-weight: 700; color: var(--sys-action-primary, #064E5A);">Trou [[{{ $i + 1 }}]]</span>
+                                            @if (count($qClozeBlanks) > 1)
+                                                <x-core::button type="button" wire:click="removeClozeBlank({{ $i }})" variant="ghost" size="sm" aria-label="Retirer le trou {{ $i + 1 }}">✕</x-core::button>
+                                            @endif
+                                        </div>
+
+                                        <label for="qClozeKind-{{ $i }}" style="font-size: 0.78rem; font-weight: 600;">Type de trou</label>
+                                        <select id="qClozeKind-{{ $i }}" wire:model.live="qClozeBlanks.{{ $i }}.kind"
+                                                style="width: 100%; margin: 4px 0 8px; padding: 7px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                            <option value="short">Réponse courte (texte saisi)</option>
+                                            <option value="mcq">Choix (menu déroulant)</option>
+                                        </select>
+
+                                        @if (($blank['kind'] ?? 'short') === 'mcq')
+                                            <label for="qClozeChoices-{{ $i }}" style="font-size: 0.78rem; font-weight: 600;">Options (une par ligne, au moins deux)</label>
+                                            <textarea id="qClozeChoices-{{ $i }}" wire:model.live="qClozeBlanks.{{ $i }}.choices" rows="3"
+                                                      placeholder="Une option par ligne"
+                                                      style="width: 100%; margin: 4px 0 8px; padding: 7px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+
+                                            @php($clozeOptions = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) ($blank['choices'] ?? '')) ?: []), fn ($o) => $o !== '')))
+                                            <label for="qClozeCorrect-{{ $i }}" style="font-size: 0.78rem; font-weight: 600;">Bonne option</label>
+                                            <select id="qClozeCorrect-{{ $i }}" wire:model="qClozeBlanks.{{ $i }}.correct"
+                                                    style="width: 100%; margin-top: 4px; padding: 7px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                @forelse ($clozeOptions as $oi => $opt)
+                                                    <option value="{{ $oi }}">{{ $oi + 1 }}. {{ \Illuminate\Support\Str::limit($opt, 60) }}</option>
+                                                @empty
+                                                    <option value="0">Saisissez d'abord les options</option>
+                                                @endforelse
+                                            </select>
+                                        @else
+                                            <label for="qClozeAccepted-{{ $i }}" style="font-size: 0.78rem; font-weight: 600;">Réponses acceptées (séparées par des virgules)</label>
+                                            <input type="text" id="qClozeAccepted-{{ $i }}" wire:model="qClozeBlanks.{{ $i }}.accepted"
+                                                   placeholder="Québec, Quebec, Ville de Québec"
+                                                   style="width: 100%; margin: 4px 0 8px; padding: 7px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                            <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">La casse et les espaces de début/fin sont ignorés.</p>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <div style="margin-top: 10px;">
+                                <x-core::button type="button" wire:click="addClozeBlank" variant="secondary" size="sm">+ Ajouter un trou</x-core::button>
+                            </div>
+                            @error('qClozeBlanks') <span role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 6px;">{{ $message }}</span> @enderror
                         </fieldset>
                     @endif
 

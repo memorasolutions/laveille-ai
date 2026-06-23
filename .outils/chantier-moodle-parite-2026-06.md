@@ -20,7 +20,7 @@ Implanter de manière EXHAUSTIVE les fonctionnalités Moodle manquantes (cf. gap
 ## Backlog ordonné (je décide l'ordre — valeur d'abord, auto-contenu d'abord)
 
 ### VAGUE 3 — Profondeur quiz (types de questions) — extension directe de la banque QB1-3
-- [ ] F1 · Question **Ordonnancement** (mettre en ordre) — auto-scoré
+- [x] F1 · Question **Ordonnancement** (mettre en ordre) — auto-scoré ✅ (v335-337, /sim PASS, /audit 75→corrigé)
 - [ ] F2 · Question **Cloze / texte à trous** (sous-questions intégrées)
 - [ ] F3 · Question **Numérique** (réponse + tolérance/unités)
 - [ ] F4 · Question **Glisser-déposer sur texte**
@@ -55,4 +55,5 @@ Implanter de manière EXHAUSTIVE les fonctionnalités Moodle manquantes (cf. gap
 ## Journal d'exécution (le plus récent en haut)
 | Date | Feature | Version | Implant | /sim | /audit | Notes |
 |------|---------|---------|---------|------|--------|-------|
+| 2026-06-22 | **F1 Ordonnancement** | v335-337 | 584 tests (+13) | PASS A→F (ordre exact 8/8, partiel 4/8, non-régression, QuizAttempt OK) | 75/100 puis corrigé | Bug pré-existant B1 (minutes vides → TypeError ?int) corrigé v336. Audit : 0 critique ; H1 TOCTOU attempts + M1 bornes + M3 depth + M4 fieldset a11y + B1 Schema::hasColumn + M2 select perf → corrigés v337 (589 tests). Dette notée : B2 (agrég PHP), B3 (checkbox required), B4 (détail révision mode immédiat). |
 | 2026-06-22 | (init du chantier) | v334 base | - | - | - | Journal + plan créés. Démarrage F1. |
