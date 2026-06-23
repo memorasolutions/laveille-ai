@@ -140,6 +140,17 @@ class QuestionBankManager extends Component
         ['kind' => 'short', 'accepted' => '', 'display' => '', 'choices' => '', 'correct' => 0],
     ];
 
+    /**
+     * NUMÉRIQUE (type Moodle « Numerical »). Saisies en chaîne (tolère la virgule
+     * décimale, normalisées au build via QuizService::parseNumber) :
+     *   - qNumericalCorrect   : réponse attendue (REQUISE, numérique) ;
+     *   - qNumericalTolerance : écart absolu admis (± , facultatif, >= 0, défaut 0) ;
+     *   - qNumericalUnit      : unité indicative facultative (ex. « km », « % »).
+     */
+    public ?string $qNumericalCorrect = null;
+    public ?string $qNumericalTolerance = null;
+    public ?string $qNumericalUnit = null;
+
     // ── Confirmations inline à 2 temps (jamais de popup native) ───────────────────
     public ?int $confirmingCategoryDeletion = null;
     public ?int $confirmingQuestionDeletion = null;
@@ -550,8 +561,49 @@ class QuestionBankManager extends Component
             'matching'  => $this->buildMatchingPayload(),
             'ordering'  => $this->buildOrderingPayload(),
             'cloze'     => $this->buildClozePayload(),
+            'numerical' => $this->buildNumericalPayload(),
             default     => [],
         };
+    }
+
+    /**
+     * @return array<string, mixed>
+     *
+     * NUMÉRIQUE. Forme canonique du payload :
+     *   payload['correct']   = float (réponse attendue, REQUISE) ;
+     *   payload['tolerance'] = float >= 0 (défaut 0) ;
+     *   payload['unit']      = string (si non vide).
+     * Mêmes invariants que QuestionBankService::mapToRoundItem (cas numerical) → une
+     * question créée est TOUJOURS jouable (réponse numérique valide garantie).
+     */
+    private function buildNumericalPayload(): array
+    {
+        $correct = \Modules\Academy\Services\QuizService::parseNumber($this->qNumericalCorrect);
+        if ($correct === null) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'qNumericalCorrect' => 'Indiquez une réponse numérique valide (ex. 42 ou 3,14).',
+            ]);
+        }
+
+        $tolerance = 0.0;
+        if ($this->qNumericalTolerance !== null && trim((string) $this->qNumericalTolerance) !== '') {
+            $parsed = \Modules\Academy\Services\QuizService::parseNumber($this->qNumericalTolerance);
+            if ($parsed === null || $parsed < 0) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'qNumericalTolerance' => 'La tolérance doit être un nombre positif ou nul.',
+                ]);
+            }
+            $tolerance = $parsed;
+        }
+
+        $payload = ['correct' => $correct, 'tolerance' => $tolerance];
+
+        $unit = $this->qNumericalUnit !== null ? trim($this->qNumericalUnit) : '';
+        if ($unit !== '') {
+            $payload['unit'] = $unit;
+        }
+
+        return $payload;
     }
 
     /** @return array<string, mixed> */
@@ -950,7 +1002,29 @@ class QuestionBankManager extends Component
                     ? $blanks
                     : [['kind' => 'short', 'accepted' => '', 'display' => '', 'choices' => '', 'correct' => 0]];
                 break;
+
+            case 'numerical':
+                // Affichage en chaîne (point décimal canonique) ; '0' pour la tolérance.
+                $this->qNumericalCorrect = isset($payload['correct']) && is_numeric($payload['correct'])
+                    ? self::numberToInput((float) $payload['correct'])
+                    : null;
+                $this->qNumericalTolerance = isset($payload['tolerance']) && is_numeric($payload['tolerance'])
+                    ? self::numberToInput((float) $payload['tolerance'])
+                    : '0';
+                $this->qNumericalUnit = isset($payload['unit']) ? (string) $payload['unit'] : null;
+                break;
         }
+    }
+
+    /**
+     * Formate un float pour l'affichage dans un champ de saisie : point décimal,
+     * sans zéros de fin parasites (42.0 → « 42 », 3.140 → « 3.14 »).
+     */
+    private static function numberToInput(float $value): string
+    {
+        $s = rtrim(rtrim(number_format($value, 6, '.', ''), '0'), '.');
+
+        return $s === '' || $s === '-0' ? '0' : $s;
     }
 
     private function resetPayloadFields(): void
@@ -968,6 +1042,9 @@ class QuestionBankManager extends Component
         $this->qOrderingItems  = ['', '', ''];
         $this->qClozeText      = '';
         $this->qClozeBlanks    = [['kind' => 'short', 'accepted' => '', 'display' => '', 'choices' => '', 'correct' => 0]];
+        $this->qNumericalCorrect   = null;
+        $this->qNumericalTolerance = '0';
+        $this->qNumericalUnit      = null;
     }
 
     /**
@@ -1142,6 +1219,7 @@ class QuestionBankManager extends Component
             'matching'  => 'Appariement',
             'ordering'  => 'Ordonnancement',
             'cloze'     => 'Texte à trous',
+            'numerical' => 'Réponse numérique',
             default     => $type,
         };
     }

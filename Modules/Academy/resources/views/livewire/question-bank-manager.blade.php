@@ -153,6 +153,7 @@
                         <option value="matching">Appariement</option>
                         <option value="ordering">Ordonnancement</option>
                         <option value="cloze">Texte à trous</option>
+                        <option value="numerical">Réponse numérique</option>
                     </select>
                     @error('qType') <span role="alert" style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
 
@@ -354,6 +355,32 @@
                                 <x-core::button type="button" wire:click="addClozeBlank" variant="secondary" size="sm">+ Ajouter un trou</x-core::button>
                             </div>
                             @error('qClozeBlanks') <span role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 6px;">{{ $message }}</span> @enderror
+                        </fieldset>
+                    @elseif ($qType === 'numerical')
+                        <fieldset style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px; margin: 0;">
+                            <legend style="font-size: 0.8rem; font-weight: 700; padding: 0 6px;">Réponse numérique</legend>
+                            <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 10px;">
+                                L'apprenant saisit un nombre. La réponse est correcte si elle se situe dans la tolérance (±) autour de la valeur attendue. La virgule et le point décimal sont acceptés. L'unité est indicative (non notée).
+                            </p>
+
+                            <label for="qNumericalCorrect" style="font-size: 0.8rem; font-weight: 600;">Réponse attendue <span aria-hidden="true">*</span></label>
+                            <input type="text" inputmode="decimal" id="qNumericalCorrect" wire:model="qNumericalCorrect"
+                                   aria-required="true" @error('qNumericalCorrect') aria-invalid="true" aria-describedby="qNumericalCorrect-err" @enderror
+                                   placeholder="42"
+                                   style="width: 100%; margin: 4px 0 4px; padding: 7px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                            @error('qNumericalCorrect') <span id="qNumericalCorrect-err" role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 4px;">{{ $message }}</span> @enderror
+
+                            <label for="qNumericalTolerance" style="display: block; font-size: 0.8rem; font-weight: 600; margin-top: 10px;">Tolérance (±, facultatif)</label>
+                            <input type="text" inputmode="decimal" id="qNumericalTolerance" wire:model="qNumericalTolerance"
+                                   @error('qNumericalTolerance') aria-invalid="true" aria-describedby="qNumericalTolerance-err" @enderror
+                                   placeholder="0"
+                                   style="width: 100%; margin: 4px 0 4px; padding: 7px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                            @error('qNumericalTolerance') <span id="qNumericalTolerance-err" role="alert" style="display: block; color: var(--sys-action-danger, #DC2626); font-size: 0.82rem; margin-top: 4px;">{{ $message }}</span> @enderror
+
+                            <label for="qNumericalUnit" style="display: block; font-size: 0.8rem; font-weight: 600; margin-top: 10px;">Unité (facultatif)</label>
+                            <input type="text" id="qNumericalUnit" wire:model="qNumericalUnit" maxlength="40"
+                                   placeholder="km, %, $…"
+                                   style="width: 100%; margin: 4px 0 0; padding: 7px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                         </fieldset>
                     @endif
 

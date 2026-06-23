@@ -294,6 +294,28 @@ final class QuizService
                     $isCorrect = in_array($givenStr, $normalizedAccepted, true);
                     break;
 
+                case 'numerique':
+                    // NUMÉRIQUE - scoring BINAIRE avec tolérance (parité Moodle « Numerical »).
+                    // `correct` = réponse attendue (float, serveur) ; `tolerance` = écart
+                    // absolu admis (>= 0). La réponse de l'étudiant est parsée en float
+                    // (virgule OU point décimal, espaces / séparateurs de milliers tolérés)
+                    // via parseNumber(). Correct si abs(donné - correct) <= tolerance.
+                    // L'UNITÉ n'est PAS notée (purement indicative) : on score sur la valeur
+                    // seule (choix documenté). Réponse vide / non numérique → 0 (jamais 500).
+                    $expectedNum = isset($question['correct']) && is_numeric($question['correct'])
+                        ? (float) $question['correct']
+                        : null;
+                    $tolerance = isset($question['tolerance']) && is_numeric($question['tolerance'])
+                        ? abs((float) $question['tolerance'])
+                        : 0.0;
+                    $givenNum  = self::parseNumber($given);
+                    $isCorrect = $expectedNum !== null
+                        && $givenNum !== null
+                        && abs($givenNum - $expectedNum) <= $tolerance;
+                    $expected  = $expectedNum;
+                    $given     = $givenNum; // valeur normalisée pour le détail
+                    break;
+
                 case 'appariement':
                     $expected    = $question['answer'] ?? [];
                     $givenArr    = is_array($given) ? array_values(array_map('intval', $given)) : [];
@@ -442,5 +464,55 @@ final class QuizService
             'points_possible' => $pointsPossible,
             'details'         => $details,
         ];
+    }
+
+    /**
+     * Parse une valeur saisie en nombre flottant, TOLÉRANTE à la locale (FR/EN) :
+     *  - accepte la VIRGULE ou le POINT comme séparateur décimal ;
+     *  - tolère les espaces (normaux, insécables, fins) = séparateurs de milliers ;
+     *  - si virgule ET point sont présents, le DERNIER rencontré est le décimal,
+     *    l'autre est traité comme séparateur de milliers (retiré) ;
+     *  - une virgule seule est interprétée comme décimale (locale québécoise).
+     * Retourne null si la valeur est vide ou non numérique (le scoring la note 0,
+     * jamais d'exception). Partagé (DRY) par score() et l'éditeur de banque.
+     */
+    public static function parseNumber(mixed $raw): ?float
+    {
+        if (is_int($raw) || is_float($raw)) {
+            return (float) $raw;
+        }
+        if (! is_string($raw)) {
+            return null;
+        }
+
+        $s = trim($raw);
+        if ($s === '') {
+            return null;
+        }
+
+        // Retire les espaces (ordinaire, insécable U+00A0, fin U+202F, fin U+2009).
+        $s = preg_replace('/[\s\x{00A0}\x{202F}\x{2009}]/u', '', $s) ?? '';
+        if ($s === '') {
+            return null;
+        }
+
+        $hasComma = str_contains($s, ',');
+        $hasDot   = str_contains($s, '.');
+
+        if ($hasComma && $hasDot) {
+            if (strrpos($s, ',') > strrpos($s, '.')) {
+                // Virgule = décimal ; point = milliers.
+                $s = str_replace('.', '', $s);
+                $s = str_replace(',', '.', $s);
+            } else {
+                // Point = décimal ; virgule = milliers.
+                $s = str_replace(',', '', $s);
+            }
+        } elseif ($hasComma) {
+            // Virgule seule = séparateur décimal (FR/QC).
+            $s = str_replace(',', '.', $s);
+        }
+
+        return is_numeric($s) ? (float) $s : null;
     }
 }

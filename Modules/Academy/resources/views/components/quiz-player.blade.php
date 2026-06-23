@@ -195,6 +195,20 @@
                             $isCorrect  = in_array(mb_strtolower($givenStr), $accepted, true);
                             $expectedLabel = implode(', ', (array) ($q['accepted'] ?? []));
                             $givenLabel    = $givenStr !== '' ? $givenStr : 'Aucune réponse';
+                        } elseif ($qType === 'numerique') {
+                            // Correctness recalculée via le parseur partagé (tolérance + unité indicative).
+                            $expectedNum = isset($q['correct']) && is_numeric($q['correct']) ? (float) $q['correct'] : null;
+                            $tolNum      = isset($q['tolerance']) && is_numeric($q['tolerance']) ? abs((float) $q['tolerance']) : 0.0;
+                            $unitNum     = isset($q['unit']) && is_string($q['unit']) ? trim($q['unit']) : '';
+                            $givenNum    = \Modules\Academy\Services\QuizService::parseNumber($userAns);
+                            $isCorrect   = $expectedNum !== null && $givenNum !== null && abs($givenNum - $expectedNum) <= $tolNum;
+                            $fmtNum      = fn (float $v): string => rtrim(rtrim(number_format($v, 6, '.', ''), '0'), '.');
+                            $expectedLabel = $expectedNum !== null
+                                ? $fmtNum($expectedNum).($tolNum > 0 ? ' (± '.$fmtNum($tolNum).')' : '').($unitNum !== '' ? ' '.$unitNum : '')
+                                : '';
+                            $givenLabel = (is_string($userAns) && trim($userAns) !== '')
+                                ? trim($userAns)
+                                : (is_numeric($userAns) ? (string) $userAns : 'Aucune réponse');
                         } elseif ($qType === 'appariement') {
                             $expectedArr = array_map('intval', (array) ($q['answer'] ?? []));
                             $givenArr    = is_array($userAns) ? array_map('intval', array_values($userAns)) : [];
@@ -485,6 +499,25 @@
                                required
                                style="max-width: 320px;">
 
+                    {{-- Réponse numérique (valeur + unité indicative ; bonnes réponses serveur) --}}
+                    @elseif($type === 'numerique')
+                        @php $numUnit = isset($question['unit']) && is_string($question['unit']) ? trim($question['unit']) : ''; @endphp
+                        <div class="mt-2 d-flex align-items-center gap-2" style="max-width: 320px;">
+                            <input type="text"
+                                   inputmode="decimal"
+                                   name="answers[{{ $i }}]"
+                                   id="q{{ $item->id }}_{{ $i }}_num"
+                                   class="form-control"
+                                   placeholder="Votre réponse…"
+                                   autocomplete="off"
+                                   required
+                                   aria-label="Réponse numérique{{ $numUnit !== '' ? ' en '.$numUnit : '' }}"
+                                   style="max-width: 220px;">
+                            @if($numUnit !== '')
+                                <span aria-hidden="true" style="font-weight: 600; color: #475569;">{{ $numUnit }}</span>
+                            @endif
+                        </div>
+
                     {{-- Appariement --}}
                     @elseif($type === 'appariement')
                         <div class="mt-2">
@@ -657,6 +690,18 @@
                                        placeholder="Votre réponse…" autocomplete="off" required
                                        style="max-width: 320px;">
 
+                            @elseif($type === 'numerique')
+                                @php $numUnit = isset($question['unit']) && is_string($question['unit']) ? trim($question['unit']) : ''; @endphp
+                                <div class="mt-2 d-flex align-items-center gap-2" style="max-width: 320px;">
+                                    <input type="text" inputmode="decimal" name="answer" class="form-control"
+                                           placeholder="Votre réponse…" autocomplete="off" required
+                                           aria-label="Réponse numérique{{ $numUnit !== '' ? ' en '.$numUnit : '' }}"
+                                           style="max-width: 220px;">
+                                    @if($numUnit !== '')
+                                        <span aria-hidden="true" style="font-weight: 600; color: #475569;">{{ $numUnit }}</span>
+                                    @endif
+                                </div>
+
                             @elseif($type === 'appariement')
                                 <div class="mt-2">
                                     @foreach($terms as $j => $term)
@@ -749,6 +794,17 @@
                             } elseif ($type === 'court') {
                                 $expectedLabel = implode(', ', (array) ($question['accepted'] ?? []));
                                 $givenLabel = (is_string($userAns) && trim($userAns) !== '') ? trim($userAns) : 'Aucune réponse';
+                            } elseif ($type === 'numerique') {
+                                $expectedNum = isset($question['correct']) && is_numeric($question['correct']) ? (float) $question['correct'] : null;
+                                $tolNum      = isset($question['tolerance']) && is_numeric($question['tolerance']) ? abs((float) $question['tolerance']) : 0.0;
+                                $unitNum     = isset($question['unit']) && is_string($question['unit']) ? trim($question['unit']) : '';
+                                $fmtNum      = fn (float $v): string => rtrim(rtrim(number_format($v, 6, '.', ''), '0'), '.');
+                                $expectedLabel = $expectedNum !== null
+                                    ? $fmtNum($expectedNum).($tolNum > 0 ? ' (± '.$fmtNum($tolNum).')' : '').($unitNum !== '' ? ' '.$unitNum : '')
+                                    : '';
+                                $givenLabel = (is_string($userAns) && trim($userAns) !== '')
+                                    ? trim($userAns)
+                                    : (is_numeric($userAns) ? (string) $userAns : 'Aucune réponse');
                             }
                         @endphp
 

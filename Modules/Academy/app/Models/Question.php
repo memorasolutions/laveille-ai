@@ -38,7 +38,7 @@ class Question extends Model
     protected $table = 'academy_questions';
 
     /** Types de questions supportés (reproduisent QtService / QuizService::score). */
-    public const TYPES = ['mcq', 'truefalse', 'short', 'matching', 'ordering', 'cloze'];
+    public const TYPES = ['mcq', 'truefalse', 'short', 'matching', 'ordering', 'cloze', 'numerical'];
 
     protected $fillable = [
         'category_id',

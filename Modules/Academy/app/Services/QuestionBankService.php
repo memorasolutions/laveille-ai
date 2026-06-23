@@ -319,6 +319,36 @@ final class QuestionBankService
                     'points'   => $points,
                 ];
 
+            case 'numerical':
+                // NUMÉRIQUE (type Moodle « Numerical ») : réponse chiffrée avec une
+                // TOLÉRANCE (±) et une UNITÉ facultative (purement indicative).
+                // Représentation banque :
+                //   payload['correct']   = float (réponse attendue) ;
+                //   payload['tolerance'] = float >= 0 (écart absolu admis, défaut 0) ;
+                //   payload['unit']      = string optionnel (ex. « km », « % »).
+                // L'item de round porte correct/tolerance pour le scoring SERVEUR (comme
+                // `accepted` pour `court`) : ils ne sont JAMAIS rendus dans le HTML
+                // (la vue n'affiche que l'input + l'unité indicative). Le scoring est
+                // binaire (abs(donné - correct) <= tolerance) ; l'unité n'est pas notée.
+                if (! isset($payload['correct']) || ! is_numeric($payload['correct'])) {
+                    return null; // une réponse numérique valide est exigée (sinon non jouable)
+                }
+
+                $tolerance = is_numeric($payload['tolerance'] ?? null)
+                    ? abs((float) $payload['tolerance'])
+                    : 0.0;
+                $unit = isset($payload['unit']) && is_string($payload['unit'])
+                    ? trim($payload['unit'])
+                    : '';
+
+                return $base + [
+                    'type'      => 'numerique',
+                    'correct'   => (float) $payload['correct'],
+                    'tolerance' => $tolerance,
+                    'unit'      => $unit,
+                    'points'    => $points,
+                ];
+
             default:
                 return null;
         }
