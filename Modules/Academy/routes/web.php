@@ -12,6 +12,7 @@ use Modules\Academy\Http\Controllers\CalendarController;
 use Modules\Academy\Http\Controllers\CertificateController;
 use Modules\Academy\Http\Controllers\CompletionController;
 use Modules\Academy\Http\Controllers\CourseBackupController;
+use Modules\Academy\Http\Controllers\CourseReportController;
 use Modules\Academy\Http\Controllers\ChoiceController;
 use Modules\Academy\Http\Controllers\FeedbackController;
 use Modules\Academy\Http\Controllers\ForumController;
@@ -108,6 +109,23 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
         })
             ->middleware('auth')
             ->name('courses.analytics');
+
+        // F23 - Rapports et journaux PAR COURS (participation + journal d'activité).
+        // Connexion requise ; le cours est re-résolu côté serveur (binding par slug)
+        // puis ré-autorisé par le composant Livewire (manageEnrollments = admin OU
+        // owner/instructor) à chaque rendu. Lecture seule, scopé au cours (anti-IDOR).
+        Route::get('courses/{course:slug}/rapports', function (\Modules\Academy\Models\Course $course) {
+            return view('academy::public.course-reports', ['course' => $course]);
+        })
+            ->middleware('auth')
+            ->name('courses.reports');
+
+        // F23 - Export CSV du rapport de participation. Re-résolu + autorisé serveur
+        // dans le contrôleur (anti-IDOR). throttle = même plafond que les autres GET
+        // à génération dynamique (analytics export, calendrier iCal).
+        Route::get('courses/{course:slug}/rapports/participation.csv', [CourseReportController::class, 'participationCsv'])
+            ->middleware(['auth', 'throttle:20,1'])
+            ->name('courses.reports.participation.csv');
 
         // V5-b - Calendrier d'echeances par cours (etudiant inscrit OU gerant).
         // Autorisation verifiee par CourseCalendar::mount() (inscription active

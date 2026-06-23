@@ -21,6 +21,7 @@ use Modules\Academy\Livewire\CourseCalendar;
 use Modules\Academy\Livewire\CourseCreate;
 use Modules\Academy\Livewire\CourseImport;
 use Modules\Academy\Livewire\CourseEditor;
+use Modules\Academy\Livewire\CourseReports;
 use Modules\Academy\Livewire\CourseRoster;
 use Modules\Academy\Livewire\Dashboard;
 use Modules\Academy\Livewire\EssayGrading;
@@ -110,6 +111,12 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // Gate serveur manageEnrollments + métriques scopées au cours (anti-IDOR).
         // Voir CourseAnalytics + AnalyticsService.
         Livewire::component('academy.course-analytics', CourseAnalytics::class);
+
+        // F23 - Rapports et journaux par cours (participation + journal d'activité),
+        // LECTURE SEULE. Gate serveur manageEnrollments + données scopées au cours
+        // (anti-IDOR), journal dérivé des timestamps existants. Voir CourseReports
+        // + CourseReportService.
+        Livewire::component('academy.course-reports', CourseReports::class);
 
         // PHASE E (E2) - Devoirs : GÉRANT (créer/éditer/publier/supprimer gâté
         // manageStructure ; corriger + gradebook gâté manageEnrollments), objets

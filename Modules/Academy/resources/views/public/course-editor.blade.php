@@ -42,6 +42,13 @@
                                 variant="secondary" size="sm">
                                 <span aria-hidden="true">📊</span> Voir les statistiques
                             </x-core::button>
+                            {{-- F23 - Rapports et journaux (participation + journal d'activité).
+                                 Gâté manageEnrollments ; la vraie garde reste authorize() serveur. --}}
+                            <x-core::button
+                                :href="route('academy.courses.reports', $course->slug)"
+                                variant="secondary" size="sm">
+                                <span aria-hidden="true">📋</span> Rapports et journaux
+                            </x-core::button>
                         @endcan
                         @can('manageStructure', $course)
                             <x-core::button

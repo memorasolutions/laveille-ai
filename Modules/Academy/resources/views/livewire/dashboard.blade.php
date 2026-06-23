@@ -338,6 +338,13 @@
                                             variant="secondary" size="sm">
                                             <span aria-hidden="true">📊</span> Statistiques
                                         </x-core::button>
+                                        {{-- F23 — Rapports et journaux par cours. Même gate
+                                             manageEnrollments ; vraie garde = authorize() serveur. --}}
+                                        <x-core::button
+                                            :href="route('academy.courses.reports', $course->slug)"
+                                            variant="secondary" size="sm">
+                                            <span aria-hidden="true">📋</span> Rapports
+                                        </x-core::button>
                                     @endcan
 
                                     @if($confirmingDuplicationId === $course->id)
