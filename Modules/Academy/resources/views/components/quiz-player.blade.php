@@ -202,7 +202,8 @@
                             $unitNum     = isset($q['unit']) && is_string($q['unit']) ? trim($q['unit']) : '';
                             $givenNum    = \Modules\Academy\Services\QuizService::parseNumber($userAns);
                             $isCorrect   = $expectedNum !== null && $givenNum !== null && abs($givenNum - $expectedNum) <= $tolNum;
-                            $fmtNum      = fn (float $v): string => rtrim(rtrim(number_format($v, 6, '.', ''), '0'), '.');
+                            // C3 : formatage centralisé (DRY) au lieu d'une closure dupliquée.
+                            $fmtNum      = fn (float $v): string => \Modules\Academy\Services\QuizService::formatNumber($v);
                             $expectedLabel = $expectedNum !== null
                                 ? $fmtNum($expectedNum).($tolNum > 0 ? ' (± '.$fmtNum($tolNum).')' : '').($unitNum !== '' ? ' '.$unitNum : '')
                                 : '';
@@ -501,22 +502,12 @@
 
                     {{-- Réponse numérique (valeur + unité indicative ; bonnes réponses serveur) --}}
                     @elseif($type === 'numerique')
-                        @php $numUnit = isset($question['unit']) && is_string($question['unit']) ? trim($question['unit']) : ''; @endphp
-                        <div class="mt-2 d-flex align-items-center gap-2" style="max-width: 320px;">
-                            <input type="text"
-                                   inputmode="decimal"
-                                   name="answers[{{ $i }}]"
-                                   id="q{{ $item->id }}_{{ $i }}_num"
-                                   class="form-control"
-                                   placeholder="Votre réponse…"
-                                   autocomplete="off"
-                                   required
-                                   aria-label="Réponse numérique{{ $numUnit !== '' ? ' en '.$numUnit : '' }}"
-                                   style="max-width: 220px;">
-                            @if($numUnit !== '')
-                                <span aria-hidden="true" style="font-weight: 600; color: #475569;">{{ $numUnit }}</span>
-                            @endif
-                        </div>
+                        {{-- C3 : rendu DRY (partial) — name = answers[i], id dédié. --}}
+                        @include('academy::livewire.partials.numerical-input', [
+                            'nameAttr' => 'answers['.$i.']',
+                            'inputId'  => 'q'.$item->id.'_'.$i.'_num',
+                            'unit'     => $question['unit'] ?? '',
+                        ])
 
                     {{-- Appariement --}}
                     @elseif($type === 'appariement')
@@ -691,16 +682,12 @@
                                        style="max-width: 320px;">
 
                             @elseif($type === 'numerique')
-                                @php $numUnit = isset($question['unit']) && is_string($question['unit']) ? trim($question['unit']) : ''; @endphp
-                                <div class="mt-2 d-flex align-items-center gap-2" style="max-width: 320px;">
-                                    <input type="text" inputmode="decimal" name="answer" class="form-control"
-                                           placeholder="Votre réponse…" autocomplete="off" required
-                                           aria-label="Réponse numérique{{ $numUnit !== '' ? ' en '.$numUnit : '' }}"
-                                           style="max-width: 220px;">
-                                    @if($numUnit !== '')
-                                        <span aria-hidden="true" style="font-weight: 600; color: #475569;">{{ $numUnit }}</span>
-                                    @endif
-                                </div>
+                                {{-- C3 : MÊME partial qu'en différé — name = answer, id ajouté (cohérence). --}}
+                                @include('academy::livewire.partials.numerical-input', [
+                                    'nameAttr' => 'answer',
+                                    'inputId'  => 'iq'.$item->id.'_'.$i.'_num',
+                                    'unit'     => $question['unit'] ?? '',
+                                ])
 
                             @elseif($type === 'appariement')
                                 <div class="mt-2">
@@ -798,7 +785,8 @@
                                 $expectedNum = isset($question['correct']) && is_numeric($question['correct']) ? (float) $question['correct'] : null;
                                 $tolNum      = isset($question['tolerance']) && is_numeric($question['tolerance']) ? abs((float) $question['tolerance']) : 0.0;
                                 $unitNum     = isset($question['unit']) && is_string($question['unit']) ? trim($question['unit']) : '';
-                                $fmtNum      = fn (float $v): string => rtrim(rtrim(number_format($v, 6, '.', ''), '0'), '.');
+                                // C3 : formatage centralisé (DRY) au lieu d'une closure dupliquée.
+                                $fmtNum      = fn (float $v): string => \Modules\Academy\Services\QuizService::formatNumber($v);
                                 $expectedLabel = $expectedNum !== null
                                     ? $fmtNum($expectedNum).($tolNum > 0 ? ' (± '.$fmtNum($tolNum).')' : '').($unitNum !== '' ? ' '.$unitNum : '')
                                     : '';

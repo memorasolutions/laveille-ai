@@ -330,11 +330,16 @@ final class QuestionBankService
                 // `accepted` pour `court`) : ils ne sont JAMAIS rendus dans le HTML
                 // (la vue n'affiche que l'input + l'unité indicative). Le scoring est
                 // binaire (abs(donné - correct) <= tolerance) ; l'unité n'est pas notée.
-                if (! isset($payload['correct']) || ! is_numeric($payload['correct'])) {
+                // C1 (audit F3) : rejette aussi les valeurs NON FINIES (INF/-INF/NAN,
+                // ex. payload corrompu « 1e309 ») → question non jouable, exclue du round,
+                // par cohérence avec parseNumber()/buildNumericalPayload().
+                if (! isset($payload['correct'])
+                    || ! is_numeric($payload['correct'])
+                    || ! is_finite((float) $payload['correct'])) {
                     return null; // une réponse numérique valide est exigée (sinon non jouable)
                 }
 
-                $tolerance = is_numeric($payload['tolerance'] ?? null)
+                $tolerance = is_numeric($payload['tolerance'] ?? null) && is_finite((float) $payload['tolerance'])
                     ? abs((float) $payload['tolerance'])
                     : 0.0;
                 $unit = isset($payload['unit']) && is_string($payload['unit'])

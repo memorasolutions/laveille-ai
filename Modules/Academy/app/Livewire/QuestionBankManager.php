@@ -474,6 +474,9 @@ class QuestionBankManager extends Component
             // C4 : borne de longueur du texte à trous (anti-payload abusif). Inerte pour
             // les autres types (qClozeText vide) ; détaillé par trou dans buildClozePayload.
             'qClozeText'   => 'nullable|string|max:'.self::MAX_CLOZE_TEXT,
+            // C2 (audit F3) : l'unité numérique n'avait QUE le maxlength HTML
+            // (contournable). Règle serveur (inerte pour les autres types : qNumericalUnit vide).
+            'qNumericalUnit' => 'nullable|string|max:40',
         ]);
 
         // Construit + valide le payload selon le type (mêmes invariants que mapToRoundItem).
@@ -585,6 +588,16 @@ class QuestionBankManager extends Component
             ]);
         }
 
+        // C1 (audit F3) : DÉFENSE en profondeur. parseNumber renvoie déjà null pour
+        // INF/-INF/NAN (« 1e309 ») → correct serait déjà null ci-dessus ; cette garde
+        // protège contre toute valeur non finie qui passerait autrement, avec un
+        // message clair (un payload INF casserait json_encode → corruption / 500).
+        if (! is_finite($correct)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'qNumericalCorrect' => 'Valeur hors plage numérique.',
+            ]);
+        }
+
         $tolerance = 0.0;
         if ($this->qNumericalTolerance !== null && trim((string) $this->qNumericalTolerance) !== '') {
             $parsed = \Modules\Academy\Services\QuizService::parseNumber($this->qNumericalTolerance);
@@ -593,14 +606,21 @@ class QuestionBankManager extends Component
                     'qNumericalTolerance' => 'La tolérance doit être un nombre positif ou nul.',
                 ]);
             }
+            if (! is_finite($parsed)) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'qNumericalTolerance' => 'Valeur hors plage numérique.',
+                ]);
+            }
             $tolerance = $parsed;
         }
 
         $payload = ['correct' => $correct, 'tolerance' => $tolerance];
 
+        // C2 (audit F3) : l'unité est purement indicative ; on la borne à 40 caractères
+        // (parité avec la règle serveur de saveQuestion) pour éviter tout payload abusif.
         $unit = $this->qNumericalUnit !== null ? trim($this->qNumericalUnit) : '';
         if ($unit !== '') {
-            $payload['unit'] = $unit;
+            $payload['unit'] = mb_substr($unit, 0, 40);
         }
 
         return $payload;

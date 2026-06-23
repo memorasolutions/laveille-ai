@@ -479,7 +479,11 @@ final class QuizService
     public static function parseNumber(mixed $raw): ?float
     {
         if (is_int($raw) || is_float($raw)) {
-            return (float) $raw;
+            $result = (float) $raw;
+
+            // C1 (audit F3) : INF/-INF/NAN ne sont JAMAIS des réponses valides
+            // (un float déjà infini en entrée serait sinon propagé).
+            return is_finite($result) ? $result : null;
         }
         if (! is_string($raw)) {
             return null;
@@ -513,6 +517,29 @@ final class QuizService
             $s = str_replace(',', '.', $s);
         }
 
-        return is_numeric($s) ? (float) $s : null;
+        if (! is_numeric($s)) {
+            return null;
+        }
+
+        $result = (float) $s;
+
+        // C1 (audit F3) : RACINE de l'overflow. is_numeric('1e309') est vrai mais
+        // (float) '1e309' = INF → json_encode(['correct'=>INF]) échoue (corruption
+        // silencieuse / 500 à l'enregistrement) et INF pollue le scoring/les détails.
+        // On renvoie null pour INF/-INF/NAN : l'éditeur rejette proprement (« numérique
+        // requis ») et le scoring le note 0, sans exception.
+        return is_finite($result) ? $result : null;
+    }
+
+    /**
+     * C3 (audit F3, DRY) — formate un float pour l'AFFICHAGE de la réponse attendue
+     * dans la révision numérique (différé ET immédiat). Source unique de vérité :
+     * 6 décimales max, zéros et point décimal superflus retirés (« 42.500000 » → « 42.5 »,
+     * « 7.000000 » → « 7 »). Remplace la closure `fmtNum` jusqu'ici dupliquée dans
+     * quiz-player.blade.php.
+     */
+    public static function formatNumber(float $value): string
+    {
+        return rtrim(rtrim(number_format($value, 6, '.', ''), '0'), '.');
     }
 }
