@@ -11,6 +11,7 @@ use Modules\Academy\Http\Controllers\AcademyController;
 use Modules\Academy\Http\Controllers\CertificateController;
 use Modules\Academy\Http\Controllers\CompletionController;
 use Modules\Academy\Http\Controllers\ChoiceController;
+use Modules\Academy\Http\Controllers\FeedbackController;
 use Modules\Academy\Http\Controllers\CourseController;
 use Modules\Academy\Http\Controllers\EnrollmentController;
 use Modules\Academy\Http\Controllers\ExportController;
@@ -139,5 +140,14 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             'courses/{course:slug}/lessons/{lesson}/items/{itemId}/choice/vote',
             [ChoiceController::class, 'vote']
         )->name('choice.vote');
+
+        // FEEDBACK — répondre à un sondage / questionnaire de rétroaction (item
+        // « feedback », multi-questions, non noté). Auth + inscription vérifiées, item
+        // re-résolu (anti-IDOR), réponses bornées aux questions du payload, 1 réponse
+        // nommée/étudiant (upsert) ou anonyme (user_id null + borne de session).
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/feedback/submit',
+            [FeedbackController::class, 'submit']
+        )->name('feedback.submit');
     });
 });

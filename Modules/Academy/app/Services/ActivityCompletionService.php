@@ -17,6 +17,8 @@
  *                 c'est le comportement HISTORIQUE d'un quiz, donc son DÉFAUT.
  *   - vote       : item « choice » (sondage) complété dès que l'étudiant a voté -
  *                 c'est le comportement naturel d'un sondage, donc son DÉFAUT.
+ *   - submit     : item « feedback » (questionnaire) complété dès que l'étudiant a
+ *                 répondu - comportement naturel d'un sondage de rétroaction, son DÉFAUT.
  *
  * RÉTROCOMPATIBILITÉ STRICTE (le cœur du design) : un item SANS payload['completion']
  * retombe sur le DÉFAUT PROPRE À SON TYPE - 'min_grade' pour un quiz, 'manual' pour le
@@ -37,7 +39,7 @@ use Modules\Academy\Models\LessonItem;
 final class ActivityCompletionService
 {
     /** Critères de complétion connus (liste blanche globale). */
-    public const CRITERIA = ['manual', 'view', 'min_grade', 'vote'];
+    public const CRITERIA = ['manual', 'view', 'min_grade', 'vote', 'submit'];
 
     /**
      * Critères autorisés pour un TYPE d'item donné (liste blanche serveur).
@@ -49,9 +51,10 @@ final class ActivityCompletionService
     public static function allowedForType(string $type): array
     {
         return match ($type) {
-            'quiz'   => ['min_grade', 'view', 'manual'],
-            'choice' => ['vote', 'view', 'manual'],
-            default  => ['manual', 'view'],
+            'quiz'     => ['min_grade', 'view', 'manual'],
+            'choice'   => ['vote', 'view', 'manual'],
+            'feedback' => ['submit', 'view', 'manual'],
+            default    => ['manual', 'view'],
         };
     }
 
@@ -63,9 +66,10 @@ final class ActivityCompletionService
     public static function defaultForType(string $type): string
     {
         return match ($type) {
-            'quiz'   => 'min_grade',
-            'choice' => 'vote',
-            default  => 'manual',
+            'quiz'     => 'min_grade',
+            'choice'   => 'vote',
+            'feedback' => 'submit',
+            default    => 'manual',
         };
     }
 
@@ -130,6 +134,7 @@ final class ActivityCompletionService
             'view'      => 'se complète automatiquement à la consultation',
             'min_grade' => 'se complète en réussissant le quiz',
             'vote'      => 'se complète en votant',
+            'submit'    => 'se complète en répondant au sondage',
             default     => 'à marquer comme terminé',
         };
     }

@@ -29,7 +29,7 @@ Implanter de manière EXHAUSTIVE les fonctionnalités Moodle manquantes (cf. gap
 
 ### VAGUE 4 — Activités
 - [ ] F7 · Activité **Feedback / Sondage** (questionnaire non noté)
-- [ ] F8 · Activité **Choice** (vote/sondage simple)
+- [x] F8 · Activité **Choice** (vote/sondage simple) ✅ V4-a (v348-349, /sim 6/6, /audit 83→corrigé)
 - [ ] F9 · Activité **Forum** (discussions, anti-spam)
 
 ### VAGUE 5 — Communication & progression
@@ -55,6 +55,7 @@ Implanter de manière EXHAUSTIVE les fonctionnalités Moodle manquantes (cf. gap
 ## Journal d'exécution (le plus récent en haut)
 | Date | Feature | Version | Implant | /sim | /audit | Notes |
 |------|---------|---------|---------|------|--------|-------|
+| 2026-06-23 | **V4-a Activité Choice** | v348-349 | 727 tests (+20) | 6/6 PASS (vote unique, re-vote, visibilité never/after_vote/anonyme, achèvement, sécurité, non-régression) | 83/100 puis corrigé | 1re activité Vague 4. Nouveau type d'item `choice` (table academy_choice_responses, critère achèvement `vote`). Corrigé v349 (736 tests) : trait DRY `AuthorizesAcademyAccess` (partagé quiz+choice), **throttle:20,1 sur tous les POST Academy** (anti-DoS), perf tally lazy + preload N+1, a11y/PII. |
 | 2026-06-23 | **F6 Adaptatif → VAGUE 3 COMPLÈTE** | v346-347 | 700 tests (+11) | PASS A→E (1pt/0,67pt/0pt, anti-spam serveur, deferred inchangé) | 85/100 puis corrigé | Réessai avec pénalité max(0,1-n×p)×justesse, bornage serveur, idempotent. Corrigé v347 (707 tests) : review_options respecté en vue verrouillée immédiat/adaptatif (tous types), focus visible WCAG, masquage champs adaptatifs. **JALON : Vague 3 = 9 types de questions + 3 comportements = parité Moodle sur les questions.** Dette : score/max_score DB bruts vs percent pénalisé ; immédiat non testé en /sim live (pas d'item en base, vérifié par code). |
 | 2026-06-23 | **F5 Essai (correction manuelle)** | v344-345 | 680 tests (+11) | 6/7 → bloquant corrigé | 87/100 puis corrigé | Type le + complexe : workflow soumission→en attente→correction formateur→note finale→complétion. Migration additive (needs_grading/manual_scores/feedback/graded_at/by), service EssayGradingService + composant EssayGrading gatés. **/sim a trouvé bloquant** : étudiant ne voyait pas son essai corrigé (note+feedback en flash seul). Corrigé v345 (689 tests) : RÉSULTAT PERSISTANT (charge dernière QuizAttempt user+item, affiche note+feedback+révision, anti-IDOR, review_options) → bénéficie à TOUS les quiz. + completion score, N+1, bornes longueur. |
 | 2026-06-22 | **F4 Glisser-déposer (ddwtos)** | v342-343 | 657 tests (+18) | release-blocker trouvé puis corrigé | 84/100 ciblé puis corrigé | select a11y-first + pool partagé. **BUG CRITIQUE SYSTÉMIQUE attrapé par le /sim** (pas par les tests !) : crédit partiel `(int)round(fraction*points)` → question 1 pt à 50 % = 100 % (passing_score faussé) sur les 4 types partiels. **LEÇON : le /sim après chaque feature est indispensable** (les tests utilisaient des points pairs où l'arrondi tombait juste). Corrigé v343 (669 tests) : accumulation FLOAT + percent exact ; + dédup pool, 0 tiret cadratin (règle 10), MAX_DDWTOS_TEXT, aria-required. Bénéficie rétroactivement à F1/F2/V1-e. |

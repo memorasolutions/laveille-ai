@@ -50,7 +50,7 @@ class CourseEditor extends Component
     use WithFileUploads;
 
     /** Types d'items autorisés (liste blanche, alignée sur l'admin Backoffice). */
-    private const ITEM_TYPES = ['video', 'document', 'quiz', 'choice'];
+    private const ITEM_TYPES = ['video', 'document', 'quiz', 'choice', 'feedback'];
 
     /** Tailles maximales (Ko) des téléversements - validées côté SERVEUR. */
     private const COVER_MAX_KB = 4096;       // ~4 Mo (image de couverture)
@@ -107,6 +107,17 @@ class CourseEditor extends Component
      * }>
      */
     public array $newItem = [];
+
+    /**
+     * FEEDBACK : tampon d'édition d'un item « feedback », indexé par item_id. Chaque
+     * entrée = { title, intro, anonymous, completion, estimated_minutes, questions[] }.
+     * Édité par des actions dédiées (chargement, ajout/retrait de question,
+     * enregistrement), à la manière du feedback global : un répéteur de questions ne se
+     * prête pas au $event.target inline du formulaire générique.
+     *
+     * @var array<int, array<string, mixed>>
+     */
+    public array $editFeedback = [];
 
     /**
      * V1-a : feedback global par tranche de score (« grade boundaries » Moodle),
@@ -784,6 +795,133 @@ class CourseEditor extends Component
         $this->flashSaved('Élément ajouté.');
     }
 
+    // ─────────────────────────────────────────────────────────────────────────────
+    // FEEDBACK - répéteur de questions (NOUVEL item + ÉDITION). Un répéteur dynamique
+    // ne se prête pas au $event.target inline : on passe par des actions dédiées qui
+    // manipulent un tampon Livewire (newItem.{lesson}.feedback_questions à la création,
+    // editFeedback.{item} à l'édition).
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    /** Gabarit d'une question vierge (répéteur feedback). */
+    private function blankFeedbackQuestion(): array
+    {
+        return ['type' => 'rating', 'label' => '', 'scale' => \Modules\Academy\Services\FeedbackService::DEFAULT_SCALE, 'options' => '', 'required' => false];
+    }
+
+    /** NOUVEL item feedback : ajoute une question vierge. */
+    public function addNewFeedbackQuestion(int $lessonId): void
+    {
+        $this->newItem[$lessonId]['feedback_questions'][] = $this->blankFeedbackQuestion();
+    }
+
+    /** NOUVEL item feedback : retire la question d'index donné (réindexée). */
+    public function removeNewFeedbackQuestion(int $lessonId, int $index): void
+    {
+        if (isset($this->newItem[$lessonId]['feedback_questions'][$index])) {
+            unset($this->newItem[$lessonId]['feedback_questions'][$index]);
+            $this->newItem[$lessonId]['feedback_questions'] = array_values($this->newItem[$lessonId]['feedback_questions']);
+        }
+    }
+
+    /**
+     * ÉDITION : charge le tampon d'édition d'un item feedback depuis son payload.
+     * Anti-IDOR : l'item doit appartenir à CE cours. Les options « choice » sont
+     * converties en chaîne multiligne pour l'édition.
+     */
+    public function loadFeedbackEditor(int $itemId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+        $item = $this->resolveItemFor($course, $itemId);
+
+        if ($item->type !== 'feedback') {
+            return;
+        }
+
+        $questions = [];
+        foreach (\Modules\Academy\Services\FeedbackService::questions($item) as $q) {
+            $questions[] = [
+                'type'     => $q['type'],
+                'label'    => $q['label'],
+                'scale'    => $q['scale'] ?? \Modules\Academy\Services\FeedbackService::DEFAULT_SCALE,
+                'options'  => isset($q['options']) ? implode("\n", $q['options']) : '',
+                'required' => (bool) ($q['required'] ?? false),
+            ];
+        }
+
+        $this->editFeedback[$itemId] = [
+            'title'             => $item->title,
+            'intro'             => \Modules\Academy\Services\FeedbackService::intro($item),
+            'anonymous'         => \Modules\Academy\Services\FeedbackService::isAnonymous($item),
+            'completion'        => \Modules\Academy\Services\ActivityCompletionService::criterionFor($item),
+            'estimated_minutes' => $item->estimated_minutes,
+            'questions'         => $questions,
+        ];
+    }
+
+    /** Abandonne l'édition en cours d'un item feedback (vide le tampon). */
+    public function cancelFeedbackEditor(int $itemId): void
+    {
+        unset($this->editFeedback[$itemId]);
+    }
+
+    /** ÉDITION : ajoute une question vierge au tampon. */
+    public function addFeedbackQuestion(int $itemId): void
+    {
+        $this->editFeedback[$itemId]['questions'][] = $this->blankFeedbackQuestion();
+    }
+
+    /** ÉDITION : retire la question d'index donné du tampon (réindexée). */
+    public function removeFeedbackQuestion(int $itemId, int $index): void
+    {
+        if (isset($this->editFeedback[$itemId]['questions'][$index])) {
+            unset($this->editFeedback[$itemId]['questions'][$index]);
+            $this->editFeedback[$itemId]['questions'] = array_values($this->editFeedback[$itemId]['questions']);
+        }
+    }
+
+    /**
+     * ÉDITION : enregistre un item feedback depuis son tampon. Mêmes gardes que
+     * updateItem (resolveCourse → manageStructure → resolveItemFor anti-IDOR →
+     * validateItem → buildItemPayload). Réutilise la construction de payload DRY.
+     */
+    public function saveFeedback(int $itemId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+        $item = $this->resolveItemFor($course, $itemId);
+
+        if ($item->type !== 'feedback') {
+            abort(404);
+        }
+
+        $buffer = $this->editFeedback[$itemId] ?? [];
+        $minutes = $buffer['estimated_minutes'] ?? null;
+
+        $input = [
+            'type'               => 'feedback',
+            'title'              => (string) ($buffer['title'] ?? $item->title),
+            'estimated_minutes'  => ($minutes === '' || $minutes === null) ? null : (int) $minutes,
+            'feedback_intro'     => $buffer['intro'] ?? null,
+            'feedback_questions' => $buffer['questions'] ?? [],
+            'anonymous'          => $buffer['anonymous'] ?? null,
+            'completion'         => $buffer['completion'] ?? null,
+        ];
+
+        $data    = $this->validateItem($input);
+        $payload = $this->buildItemPayload('feedback', $input);
+
+        $item->update([
+            'type'              => 'feedback',
+            'title'             => $data['title'],
+            'payload'           => $payload,
+            'estimated_minutes' => $data['estimated_minutes'] ?? null,
+        ]);
+
+        unset($this->editFeedback[$itemId]);
+        $this->flashSaved('Sondage de rétroaction mis à jour.');
+    }
+
     /**
      * Met à jour un item. Les champs facultatifs propres à un type (vidéo / quiz)
      * sont passés en tableau associatif $extra pour éviter une signature trop longue
@@ -1182,7 +1320,19 @@ class CourseEditor extends Component
             'allow_multiple'     => 'nullable|boolean',
             'anonymous'          => 'nullable|boolean',
             'results_visibility' => ['nullable', Rule::in(\Modules\Academy\Services\ChoiceService::VISIBILITIES)],
+            // FEEDBACK : intro facultative ; les questions sont validées conditionnellement.
+            'feedback_intro'     => 'nullable|string|max:2000',
         ];
+
+        // FEEDBACK : un questionnaire EXIGE AU MOINS UNE question valide. On normalise les
+        // questions (types/énoncés/options/échelles) AVANT validation pour que « min:1 »
+        // porte sur le tableau réel des questions retenues (clé d'erreur : feedback_questions).
+        if (($input['type'] ?? null) === 'feedback') {
+            $input['feedback_questions'] = \Modules\Academy\Services\FeedbackService::normalizeQuestions(
+                $input['feedback_questions'] ?? []
+            );
+            $rules['feedback_questions'] = 'required|array|min:1';
+        }
 
         // CHOICE : un sondage EXIGE un énoncé et AU MOINS 2 options. On parse les options
         // (chaîne multiligne ou tableau) AVANT validation pour que la règle « min:2 »
@@ -1249,6 +1399,7 @@ class CourseEditor extends Component
             'document' => ['rich_text' => (string) ($input['rich_text'] ?? '')],
             'quiz'     => $this->buildQuizPayload($input),
             'choice'   => $this->buildChoicePayload($input),
+            'feedback' => $this->buildFeedbackPayload($input),
             default    => [],
         };
 
@@ -1321,6 +1472,26 @@ class CourseEditor extends Component
             'allow_multiple'     => $this->truthy($input['allow_multiple'] ?? null),
             'anonymous'          => $this->truthy($input['anonymous'] ?? null),
             'results_visibility' => $visibility,
+        ];
+    }
+
+    /**
+     * FEEDBACK : construit le payload d'un questionnaire de rétroaction. Intro
+     * facultative, questions NORMALISÉES (>= 1 ; types/énoncés/options/échelles validés
+     * par FeedbackService), anonyme (booléen, défaut false). Énoncés et options sont
+     * stockés bruts ; l'échappement anti-XSS est fait AU RENDU (e()).
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    private function buildFeedbackPayload(array $input): array
+    {
+        return [
+            'intro'     => trim((string) ($input['feedback_intro'] ?? '')),
+            'questions' => \Modules\Academy\Services\FeedbackService::normalizeQuestions(
+                $input['feedback_questions'] ?? []
+            ),
+            'anonymous' => $this->truthy($input['anonymous'] ?? null),
         ];
     }
 

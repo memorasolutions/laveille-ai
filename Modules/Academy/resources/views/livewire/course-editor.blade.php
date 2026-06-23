@@ -682,7 +682,7 @@
                                                 x-sort:config="{ handle: '[data-sort-handle]', animation: 150 }"
                                                 style="margin: 0 0 10px; display: flex; flex-direction: column; gap: 8px;">
                                                 @foreach ($lesson->lessonItems as $item)
-                                                    @php($typeLabel = ['video' => 'Vidéo', 'document' => 'Document', 'quiz' => 'Quiz', 'choice' => 'Sondage'][$item->type] ?? $item->type)
+                                                    @php($typeLabel = ['video' => 'Vidéo', 'document' => 'Document', 'quiz' => 'Quiz', 'choice' => 'Sondage', 'feedback' => 'Rétroaction'][$item->type] ?? $item->type)
                                                     <li x-sort:item="{{ $item->id }}" data-sort-id="{{ $item->id }}"
                                                         wire:key="item-{{ $item->id }}"
                                                         style="border: 1px solid #F1F5F9; border-radius: var(--sys-radius-md, 0.5rem); padding: 10px 12px;">
@@ -726,6 +726,83 @@
                                                             @php($videoUrlValue = $item->payload['player_url'] ?? ($item->payload['embed'] ?? ''))
                                                             @php($posterValue = $item->payload['poster'] ?? '')
                                                             @php($durationMin = isset($item->payload['duration_seconds']) ? (int) ceil(((int) $item->payload['duration_seconds']) / 60) : '')
+                                                            {{-- ── FEEDBACK : éditeur dédié (répéteur de questions). Le formulaire
+                                                                 générique ($event.target) ne sait pas sérialiser un répéteur dynamique ;
+                                                                 on passe par un tampon Livewire (editFeedback.{item}) + actions dédiées. --}}
+                                                            @if ($item->type === 'feedback')
+                                                                @if (! isset($editFeedback[$item->id]))
+                                                                    <div style="margin-top: 10px;">
+                                                                        <x-core::button type="button" wire:click="loadFeedbackEditor({{ $item->id }})" variant="secondary" size="sm">Modifier la rétroaction</x-core::button>
+                                                                    </div>
+                                                                @else
+                                                                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                                                                        <label style="font-size: 0.78rem; font-weight: 600;" for="fbedit-title-{{ $item->id }}">Titre</label>
+                                                                        <input id="fbedit-title-{{ $item->id }}" type="text" wire:model="editFeedback.{{ $item->id }}.title" aria-label="Titre du sondage"
+                                                                               style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                        @error('title') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
+
+                                                                        <label style="font-size: 0.78rem; font-weight: 600;" for="fbedit-intro-{{ $item->id }}">Introduction (facultative)</label>
+                                                                        <textarea id="fbedit-intro-{{ $item->id }}" wire:model="editFeedback.{{ $item->id }}.intro" rows="2" aria-label="Introduction du sondage"
+                                                                                  style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+
+                                                                        <span style="font-size: 0.78rem; font-weight: 700;">Questions</span>
+                                                                        @error('feedback_questions') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
+                                                                        @forelse ($editFeedback[$item->id]['questions'] ?? [] as $qi => $q)
+                                                                            <div wire:key="fbedit-{{ $item->id }}-{{ $qi }}" style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+                                                                                <label style="font-size: 0.74rem; font-weight: 600;" for="fbedit-type-{{ $item->id }}-{{ $qi }}">Type</label>
+                                                                                <select id="fbedit-type-{{ $item->id }}-{{ $qi }}" wire:model="editFeedback.{{ $item->id }}.questions.{{ $qi }}.type" aria-label="Type de question"
+                                                                                        style="width: 100%; padding: 6px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                                    <option value="rating">Échelle (note)</option>
+                                                                                    <option value="choice">Choix</option>
+                                                                                    <option value="text">Texte libre</option>
+                                                                                </select>
+                                                                                <label style="font-size: 0.74rem; font-weight: 600;" for="fbedit-label-{{ $item->id }}-{{ $qi }}">Énoncé</label>
+                                                                                <input id="fbedit-label-{{ $item->id }}-{{ $qi }}" type="text" wire:model="editFeedback.{{ $item->id }}.questions.{{ $qi }}.label" placeholder="Votre question"
+                                                                                       style="width: 100%; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                                @if (($q['type'] ?? '') === 'rating')
+                                                                                    <label style="font-size: 0.74rem; font-weight: 600;" for="fbedit-scale-{{ $item->id }}-{{ $qi }}">Échelle 1 à</label>
+                                                                                    <input id="fbedit-scale-{{ $item->id }}-{{ $qi }}" type="number" min="2" max="10" wire:model="editFeedback.{{ $item->id }}.questions.{{ $qi }}.scale"
+                                                                                           style="width: 100%; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                                @elseif (($q['type'] ?? '') === 'choice')
+                                                                                    <label style="font-size: 0.74rem; font-weight: 600;" for="fbedit-opts-{{ $item->id }}-{{ $qi }}">Options (une par ligne, au moins 2)</label>
+                                                                                    <textarea id="fbedit-opts-{{ $item->id }}-{{ $qi }}" wire:model="editFeedback.{{ $item->id }}.questions.{{ $qi }}.options" rows="3"
+                                                                                              style="width: 100%; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+                                                                                @endif
+                                                                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.78rem; font-weight: 600;">
+                                                                                    <input type="checkbox" wire:model="editFeedback.{{ $item->id }}.questions.{{ $qi }}.required" style="width: 22px; height: 22px; flex: 0 0 auto;">
+                                                                                    <span>Réponse obligatoire</span>
+                                                                                </label>
+                                                                                <div><x-core::button type="button" wire:click="removeFeedbackQuestion({{ $item->id }}, {{ $qi }})" variant="ghost" size="sm">Retirer cette question</x-core::button></div>
+                                                                            </div>
+                                                                        @empty
+                                                                            <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0;">Aucune question. Ajoutez-en au moins une.</p>
+                                                                        @endforelse
+                                                                        <div><x-core::button type="button" wire:click="addFeedbackQuestion({{ $item->id }})" variant="ghost" size="sm">+ Ajouter une question</x-core::button></div>
+
+                                                                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;">
+                                                                            <input type="checkbox" wire:model="editFeedback.{{ $item->id }}.anonymous" style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                            <span>Réponses anonymes (ne pas lier la réponse à l'étudiant)</span>
+                                                                        </label>
+
+                                                                        <label style="font-size: 0.78rem; font-weight: 600;" for="fbedit-completion-{{ $item->id }}">Critère d'achèvement</label>
+                                                                        <select id="fbedit-completion-{{ $item->id }}" wire:model="editFeedback.{{ $item->id }}.completion" aria-label="Critère d'achèvement de l'élément"
+                                                                                style="width: 100%; padding: 8px 12px; min-height: 38px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                            <option value="submit">En répondant au sondage</option>
+                                                                            <option value="view">Automatique à la consultation</option>
+                                                                            <option value="manual">Manuel (l'étudiant le marque terminé)</option>
+                                                                        </select>
+
+                                                                        <label style="font-size: 0.78rem; font-weight: 600;" for="fbedit-min-{{ $item->id }}">Durée estimée (min, facultatif)</label>
+                                                                        <input id="fbedit-min-{{ $item->id }}" type="number" min="1" wire:model="editFeedback.{{ $item->id }}.estimated_minutes" aria-label="Durée estimée en minutes"
+                                                                               style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                                        <div class="d-flex flex-wrap gap-2">
+                                                                            <x-core::button type="button" wire:click="saveFeedback({{ $item->id }})" variant="secondary" size="sm">Enregistrer le sondage</x-core::button>
+                                                                            <x-core::button type="button" wire:click="cancelFeedbackEditor({{ $item->id }})" variant="ghost" size="sm">Annuler</x-core::button>
+                                                                        </div>
+                                                                    </div>
+                                                                @endif
+                                                            @else
                                                             <form wire:submit="updateItem({{ $item->id }}, '{{ $item->type }}', $event.target.title.value, $event.target.estimated_minutes.value, { player_url: $event.target.player_url ? $event.target.player_url.value : null, poster_url: $event.target.poster_url ? $event.target.poster_url.value : null, duration_minutes: $event.target.duration_minutes ? $event.target.duration_minutes.value : null, rich_text: $event.target.rich_text ? $event.target.rich_text.value : null, qt_bank_key: $event.target.qt_bank_key ? $event.target.qt_bank_key.value : null, passing_score: $event.target.passing_score ? $event.target.passing_score.value : null, attempts_allowed: $event.target.attempts_allowed ? $event.target.attempts_allowed.value : null, bank_category_id: $event.target.bank_category_id ? $event.target.bank_category_id.value : null, bank_draw_count: $event.target.bank_draw_count ? $event.target.bank_draw_count.value : null, bank_include_subcategories: $event.target.bank_include_subcategories ? $event.target.bank_include_subcategories.checked : null, grading_method: $event.target.grading_method ? $event.target.grading_method.value : null, shuffle_questions: $event.target.shuffle_questions ? $event.target.shuffle_questions.checked : null, shuffle_answers: $event.target.shuffle_answers ? $event.target.shuffle_answers.checked : null, time_limit_minutes: $event.target.time_limit_minutes ? $event.target.time_limit_minutes.value : null, review_options: $event.target.review_show_correctness ? { show_correctness: $event.target.review_show_correctness.checked, show_marks: $event.target.review_show_marks.checked, show_specific_feedback: $event.target.review_show_specific_feedback.checked, show_general_feedback: $event.target.review_show_general_feedback.checked, show_overall_feedback: $event.target.review_show_overall_feedback.checked, show_right_answer: $event.target.review_show_right_answer.checked } : null, question_behaviour: $event.target.question_behaviour ? $event.target.question_behaviour.value : null, adaptive_penalty: $event.target.adaptive_penalty ? $event.target.adaptive_penalty.value : null, adaptive_max_tries: $event.target.adaptive_max_tries ? $event.target.adaptive_max_tries.value : null, completion: $event.target.completion ? $event.target.completion.value : null, choice_question: $event.target.choice_question ? $event.target.choice_question.value : null, choice_options: $event.target.choice_options ? $event.target.choice_options.value : null, allow_multiple: $event.target.allow_multiple ? $event.target.allow_multiple.checked : null, anonymous: $event.target.anonymous ? $event.target.anonymous.checked : null, results_visibility: $event.target.results_visibility ? $event.target.results_visibility.value : null })"
                                                                   style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
                                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="item-title-{{ $item->id }}">Titre</label>
@@ -946,6 +1023,7 @@
 
                                                                 <div><x-core::button type="submit" variant="secondary" size="sm">Enregistrer l'élément</x-core::button></div>
                                                             </form>
+                                                            @endif
 
                                                             {{-- ── V1-a : Rétroaction globale par tranche de score (item quiz) - hors du formulaire principal ── --}}
                                                             @if ($item->type === 'quiz')
@@ -1146,6 +1224,49 @@
                                                     <option value="never">Jamais (formateur seulement)</option>
                                                 </select>
 
+                                                <p style="font-size: 0.74rem; font-weight: 700; color: var(--sys-text-default, #1A1D23); margin: 8px 0 0;">Champs pour une rétroaction (questionnaire)</p>
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-fbintro-{{ $lesson->id }}">Introduction (facultative)</label>
+                                                <textarea id="newitem-fbintro-{{ $lesson->id }}" wire:model="newItem.{{ $lesson->id }}.feedback_intro" rows="2" placeholder="Quelques mots pour présenter le sondage…"
+                                                          style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+
+                                                <span style="font-size: 0.78rem; font-weight: 700;">Questions</span>
+                                                @error('feedback_questions') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
+                                                @forelse ($newItem[$lesson->id]['feedback_questions'] ?? [] as $qi => $q)
+                                                    <div wire:key="newfb-{{ $lesson->id }}-{{ $qi }}" style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+                                                        <label style="font-size: 0.74rem; font-weight: 600;" for="newfb-type-{{ $lesson->id }}-{{ $qi }}">Type</label>
+                                                        <select id="newfb-type-{{ $lesson->id }}-{{ $qi }}" wire:model="newItem.{{ $lesson->id }}.feedback_questions.{{ $qi }}.type" aria-label="Type de question"
+                                                                style="width: 100%; padding: 6px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                            <option value="rating">Échelle (note)</option>
+                                                            <option value="choice">Choix</option>
+                                                            <option value="text">Texte libre</option>
+                                                        </select>
+                                                        <label style="font-size: 0.74rem; font-weight: 600;" for="newfb-label-{{ $lesson->id }}-{{ $qi }}">Énoncé</label>
+                                                        <input id="newfb-label-{{ $lesson->id }}-{{ $qi }}" type="text" wire:model="newItem.{{ $lesson->id }}.feedback_questions.{{ $qi }}.label" placeholder="Votre question"
+                                                               style="width: 100%; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                        @if (($q['type'] ?? '') === 'rating')
+                                                            <label style="font-size: 0.74rem; font-weight: 600;" for="newfb-scale-{{ $lesson->id }}-{{ $qi }}">Échelle 1 à</label>
+                                                            <input id="newfb-scale-{{ $lesson->id }}-{{ $qi }}" type="number" min="2" max="10" wire:model="newItem.{{ $lesson->id }}.feedback_questions.{{ $qi }}.scale"
+                                                                   style="width: 100%; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                        @elseif (($q['type'] ?? '') === 'choice')
+                                                            <label style="font-size: 0.74rem; font-weight: 600;" for="newfb-opts-{{ $lesson->id }}-{{ $qi }}">Options (une par ligne, au moins 2)</label>
+                                                            <textarea id="newfb-opts-{{ $lesson->id }}-{{ $qi }}" wire:model="newItem.{{ $lesson->id }}.feedback_questions.{{ $qi }}.options" rows="3"
+                                                                      style="width: 100%; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+                                                        @endif
+                                                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.78rem; font-weight: 600;">
+                                                            <input type="checkbox" wire:model="newItem.{{ $lesson->id }}.feedback_questions.{{ $qi }}.required" style="width: 22px; height: 22px; flex: 0 0 auto;">
+                                                            <span>Réponse obligatoire</span>
+                                                        </label>
+                                                        <div><x-core::button type="button" wire:click="removeNewFeedbackQuestion({{ $lesson->id }}, {{ $qi }})" variant="ghost" size="sm">Retirer cette question</x-core::button></div>
+                                                    </div>
+                                                @empty
+                                                    <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0;">Aucune question. Ajoutez-en au moins une pour un sondage de rétroaction.</p>
+                                                @endforelse
+                                                <div><x-core::button type="button" wire:click="addNewFeedbackQuestion({{ $lesson->id }})" variant="ghost" size="sm">+ Ajouter une question</x-core::button></div>
+                                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="newitem-fbanon-{{ $lesson->id }}">
+                                                    <input id="newitem-fbanon-{{ $lesson->id }}" type="checkbox" wire:model="newItem.{{ $lesson->id }}.anonymous" style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                    <span>Réponses anonymes (ne pas lier la réponse à l'étudiant)</span>
+                                                </label>
+
                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-min-{{ $lesson->id }}">Durée estimée (min, facultatif)</label>
                                                 <input id="newitem-min-{{ $lesson->id }}" type="number" min="1" wire:model="newItem.{{ $lesson->id }}.estimated_minutes" placeholder="Durée estimée"
                                                        style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
@@ -1155,11 +1276,12 @@
                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-completion-{{ $lesson->id }}">Critère d'achèvement</label>
                                                 <select id="newitem-completion-{{ $lesson->id }}" wire:model="newItem.{{ $lesson->id }}.completion" aria-label="Critère d'achèvement de l'élément"
                                                         style="width: 100%; padding: 8px 12px; min-height: 38px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
-                                                    <option value="">Défaut (manuel ; quiz : réussir le quiz ; sondage : voter)</option>
+                                                    <option value="">Défaut (manuel ; quiz : réussir ; sondage : voter ; rétroaction : répondre)</option>
                                                     <option value="manual">Manuel (l'étudiant le marque terminé)</option>
                                                     <option value="view">Automatique à la consultation</option>
                                                     <option value="min_grade">En réussissant le quiz (quiz seulement)</option>
                                                     <option value="vote">En votant au sondage (sondage seulement)</option>
+                                                    <option value="submit">En répondant à la rétroaction (rétroaction seulement)</option>
                                                 </select>
 
                                                 <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;">
@@ -1172,6 +1294,7 @@
                                                     <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'document')" variant="primary" size="sm">Ajouter un document</x-core::button>
                                                     <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'quiz')" variant="primary" size="sm">Ajouter un quiz</x-core::button>
                                                     <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'choice')" variant="primary" size="sm">Ajouter un sondage</x-core::button>
+                                                    <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'feedback')" variant="primary" size="sm">Ajouter une rétroaction</x-core::button>
                                                 </div>
                                             </div>
                                         </details>

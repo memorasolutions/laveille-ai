@@ -180,6 +180,29 @@
     .academy-choice-result-count { color: var(--sys-text-muted, #6B7280); white-space: nowrap; }
     .academy-choice-bar { height: 10px; background: #E5E7EB; border-radius: 999px; overflow: hidden; }
     .academy-choice-bar-fill { display: block; height: 100%; background: var(--c-primary, #064E5A); border-radius: 999px; transition: width 0.3s; }
+
+    /* ── Rétroaction / questionnaire (feedback) ── */
+    .academy-feedback { max-width: 60ch; }
+    .academy-feedback-intro { color: var(--sys-text-muted, #6B7280); margin: 0 0 1rem; font-size: 0.95rem; }
+    .academy-feedback-q { margin: 0 0 1.25rem; border: 0; padding: 0; }
+    .academy-feedback-q legend { font-weight: 600; color: var(--sys-text-default, #1A1D23); font-size: 0.95rem; padding: 0; margin-bottom: 0.5rem; }
+    .academy-feedback-required { color: var(--sys-action-danger, #DC2626); }
+    .academy-feedback-rating { display: flex; flex-wrap: wrap; gap: 6px; }
+    .academy-feedback-rating label {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 6px 12px; min-height: 24px; border: 1px solid #E5E7EB; border-radius: 999px;
+        cursor: pointer; font-size: 0.9rem; color: #374151;
+    }
+    .academy-feedback-rating label:hover { border-color: var(--c-primary, #064E5A); background: #F9FAFB; }
+    .academy-feedback-opt { display: flex; align-items: center; gap: 10px; padding: 8px 12px; margin-bottom: 6px; border: 1px solid #E5E7EB; border-radius: 8px; cursor: pointer; font-size: 0.92rem; color: #374151; }
+    .academy-feedback-opt:hover { border-color: var(--c-primary, #064E5A); background: #F9FAFB; }
+    .academy-feedback-text { width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: 8px; resize: vertical; font: inherit; }
+    .academy-feedback-result { margin-bottom: 10px; }
+    .academy-feedback-result-head { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.86rem; color: #374151; margin-bottom: 4px; }
+    .academy-feedback-bar { height: 10px; background: #E5E7EB; border-radius: 999px; overflow: hidden; }
+    .academy-feedback-bar-fill { display: block; height: 100%; background: var(--c-primary, #064E5A); border-radius: 999px; }
+    .academy-feedback-texts { list-style: none; padding: 0; margin: 6px 0 0; }
+    .academy-feedback-texts li { padding: 8px 12px; margin-bottom: 6px; background: #F9FAFB; border-left: 3px solid var(--c-primary, #064E5A); border-radius: 4px; font-size: 0.9rem; color: #374151; }
 </style>
 @endpush
 
@@ -223,10 +246,11 @@
                             $firstItem = $chLesson->lessonItems->first();
                             $lessonType = $firstItem?->type ?? 'doc';
                             $icon = match($lessonType) {
-                                'video'  => '▶',
-                                'quiz'   => '✏️',
-                                'choice' => '📊',
-                                default  => '📄',
+                                'video'    => '▶',
+                                'quiz'     => '✏️',
+                                'choice'   => '📊',
+                                'feedback' => '📝',
+                                default    => '📄',
                             };
                         @endphp
                         @php
@@ -554,6 +578,198 @@
                                             Créez un compte gratuit ou connectez-vous pour voter.
                                         @elseif(!$isEnrolled && $isFree)
                                             Ce cours est gratuit - inscrivez-vous pour participer.
+                                        @elseif(!$isEnrolled && !$isFree)
+                                            Ce cours est payant - achetez-le pour accéder à l'ensemble du contenu.
+                                        @else
+                                            Votre inscription vous donne accès à l'ensemble du contenu.
+                                        @endif
+                                    </p>
+                                    @if(!auth()->check())
+                                        <span class="d-inline-flex flex-wrap gap-2 justify-content-center">
+                                            <x-core::button :href="Route::has('login') ? route('login') : '#'" variant="primary" size="sm">
+                                                Se connecter
+                                            </x-core::button>
+                                            <x-core::button :href="Route::has('register') ? route('register') : '#'" variant="secondary" size="sm">
+                                                Créer un compte
+                                            </x-core::button>
+                                        </span>
+                                    @elseif(!$isEnrolled && $isFree)
+                                        <form action="{{ route('academy.courses.enroll', $course) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <x-core::button type="submit" variant="primary" size="sm">
+                                                S'inscrire gratuitement
+                                            </x-core::button>
+                                        </form>
+                                    @elseif(!$isEnrolled && !$isFree)
+                                        <x-core::button :href="route('academy.courses.purchase', $course)" variant="primary" size="sm">
+                                            Acheter ce cours
+                                        </x-core::button>
+                                    @endif
+                                </div>
+                            @endif
+
+                        {{-- ── TYPE FEEDBACK (questionnaire de rétroaction, multi-questions, non noté) ── --}}
+                        @elseif($item->type === 'feedback')
+                            @php
+                                $fbQuestions = \Modules\Academy\Services\FeedbackService::questions($item);
+                                $fbIntro     = \Modules\Academy\Services\FeedbackService::intro($item);
+                                $fbAnon      = \Modules\Academy\Services\FeedbackService::isAnonymous($item);
+                                // Le formateur visualise via la prévisualisation : il voit les
+                                // résultats agrégés, ne répond pas (aucune progression).
+                                $fbIsManager = (bool) ($isPreview ?? false);
+                                $fbResponded = (! $fbIsManager && auth()->check())
+                                    ? \Modules\Academy\Services\FeedbackService::hasResponded($item, auth()->user())
+                                    : false;
+                                // Pré-remplissage d'un sondage NOMMÉ (réponse modifiable) : les
+                                // réponses précédentes de l'utilisateur courant. Jamais en anonyme
+                                // (aucune réponse n'est liée à une identité).
+                                $fbPrev = [];
+                                if (! $fbIsManager && ! $fbAnon && auth()->check()) {
+                                    $fbPrevRow = \Modules\Academy\Models\FeedbackResponse::where('lesson_item_id', $item->id)
+                                        ->where('user_id', auth()->id())->first();
+                                    $fbPrev = $fbPrevRow ? (array) $fbPrevRow->answers : [];
+                                }
+                                // Résultats UNIQUEMENT pour le formateur (jamais l'étudiant).
+                                $fbResults = $fbIsManager ? \Modules\Academy\Services\FeedbackService::results($item) : null;
+                            @endphp
+                            @if($hasAccess && count($fbQuestions) >= 1)
+                                <div class="academy-feedback">
+                                    @if($fbIntro !== '')
+                                        <p class="academy-feedback-intro">{{ $fbIntro }}</p>
+                                    @endif
+
+                                    @if($fbIsManager)
+                                        {{-- Prévisualisation formateur : aucune réponse, résultats AGRÉGÉS
+                                             et anonymisés (jamais d'identité, même si non anonyme). --}}
+                                        <p class="text-muted p-3 rounded" style="background: #F3F4F6; font-size: 0.9rem;">
+                                            La réponse est désactivée en prévisualisation. Les résultats ci-dessous (agrégés et anonymisés) reflètent les réponses réelles.
+                                        </p>
+                                        <div class="academy-feedback-results" role="group" aria-label="Résultats du sondage">
+                                            @foreach($fbResults['questions'] as $qr)
+                                                <div style="margin-bottom: 1rem;">
+                                                    <p style="font-weight: 600; margin: 0 0 0.4rem;">{{ $qr['label'] }}</p>
+                                                    @if($qr['type'] === 'rating')
+                                                        @for($s = 1; $s <= $qr['scale']; $s++)
+                                                            @php
+                                                                $cnt = $qr['counts'][$s] ?? 0;
+                                                                $pct = ($qr['answered'] ?? 0) > 0 ? (int) round($cnt / $qr['answered'] * 100) : 0;
+                                                            @endphp
+                                                            <div class="academy-feedback-result">
+                                                                <div class="academy-feedback-result-head"><span>{{ $s }}</span><span>{{ $cnt }} ({{ $pct }}%)</span></div>
+                                                                <div class="academy-feedback-bar" role="presentation"><span class="academy-feedback-bar-fill" style="width: {{ $pct }}%;"></span></div>
+                                                            </div>
+                                                        @endfor
+                                                        @if(! is_null($qr['average']))
+                                                            <p class="text-muted" style="font-size: 0.8rem;">Moyenne : {{ $qr['average'] }} / {{ $qr['scale'] }}</p>
+                                                        @endif
+                                                    @elseif($qr['type'] === 'choice')
+                                                        @foreach($qr['options'] as $oi => $ol)
+                                                            @php
+                                                                $cnt = $qr['counts'][$oi] ?? 0;
+                                                                $pct = ($qr['answered'] ?? 0) > 0 ? (int) round($cnt / $qr['answered'] * 100) : 0;
+                                                            @endphp
+                                                            <div class="academy-feedback-result">
+                                                                <div class="academy-feedback-result-head"><span>{{ $ol }}</span><span>{{ $cnt }} ({{ $pct }}%)</span></div>
+                                                                <div class="academy-feedback-bar" role="presentation"><span class="academy-feedback-bar-fill" style="width: {{ $pct }}%;"></span></div>
+                                                            </div>
+                                                        @endforeach
+                                                    @else
+                                                        @if(count($qr['texts']) > 0)
+                                                            <ul class="academy-feedback-texts">
+                                                                @foreach($qr['texts'] as $t)
+                                                                    <li>{{ $t }}</li>
+                                                                @endforeach
+                                                            </ul>
+                                                        @else
+                                                            <p class="text-muted" style="font-size: 0.85rem;">Aucune réponse pour l'instant.</p>
+                                                        @endif
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                            <p class="text-muted" style="font-size: 0.8rem;">
+                                                {{ $fbResults['total'] }} {{ $fbResults['total'] === 1 ? 'réponse' : 'réponses' }}
+                                            </p>
+                                        </div>
+                                    @elseif($fbAnon && $fbResponded)
+                                        {{-- Sondage anonyme déjà rempli (borne de session) : remerciement seul,
+                                             jamais les résultats (le retour va au formateur). --}}
+                                        <p role="status" style="font-size: 0.9rem; color: #166534;">
+                                            <span aria-hidden="true">✅</span> Merci, votre réponse anonyme a été enregistrée.
+                                        </p>
+                                    @else
+                                        {{-- Formulaire de réponse a11y (fieldset/legend par question). L'étudiant
+                                             ne voit JAMAIS les résultats : un sondage est un retour au formateur. --}}
+                                        <form method="POST"
+                                              action="{{ route('academy.feedback.submit', [$course, $lesson, $item->id]) }}"
+                                              class="academy-feedback-form">
+                                            @csrf
+                                            @foreach($fbQuestions as $qi => $q)
+                                                <fieldset class="academy-feedback-q">
+                                                    <legend>{{ $q['label'] }}@if($q['required']) <span class="academy-feedback-required" aria-hidden="true">*</span><span class="visually-hidden"> (obligatoire)</span>@endif</legend>
+                                                    @if($q['type'] === 'rating')
+                                                        <div class="academy-feedback-rating" role="radiogroup" aria-label="{{ $q['label'] }}">
+                                                            @for($s = 1; $s <= $q['scale']; $s++)
+                                                                <label for="fb-{{ $item->id }}-{{ $qi }}-{{ $s }}">
+                                                                    <input type="radio" id="fb-{{ $item->id }}-{{ $qi }}-{{ $s }}" name="answers[{{ $qi }}]" value="{{ $s }}"
+                                                                           @checked((string) ($fbPrev[$qi] ?? '') === (string) $s) @required($q['required'])
+                                                                           style="width: 20px; height: 20px; margin: 0;">
+                                                                    <span>{{ $s }}</span>
+                                                                </label>
+                                                            @endfor
+                                                        </div>
+                                                    @elseif($q['type'] === 'choice')
+                                                        @foreach($q['options'] as $oi => $ol)
+                                                            <label class="academy-feedback-opt" for="fb-{{ $item->id }}-{{ $qi }}-{{ $oi }}">
+                                                                <input type="radio" id="fb-{{ $item->id }}-{{ $qi }}-{{ $oi }}" name="answers[{{ $qi }}]" value="{{ $oi }}"
+                                                                       @checked((string) ($fbPrev[$qi] ?? '') === (string) $oi) @required($q['required'])
+                                                                       style="width: 24px; height: 24px; flex: 0 0 auto; margin: 0;">
+                                                                <span>{{ $ol }}</span>
+                                                            </label>
+                                                        @endforeach
+                                                    @else
+                                                        <textarea class="academy-feedback-text" name="answers[{{ $qi }}]" rows="3"
+                                                                  maxlength="{{ \Modules\Academy\Services\FeedbackService::MAX_TEXT }}"
+                                                                  aria-label="{{ $q['label'] }}" @required($q['required'])>{{ is_string($fbPrev[$qi] ?? null) ? $fbPrev[$qi] : '' }}</textarea>
+                                                    @endif
+                                                </fieldset>
+                                            @endforeach
+                                            <div class="mt-2">
+                                                <x-core::button type="submit" variant="primary" size="sm">
+                                                    {{ (! $fbAnon && $fbResponded) ? 'Modifier ma réponse' : 'Envoyer ma réponse' }}
+                                                </x-core::button>
+                                            </div>
+                                        </form>
+
+                                        @if(! $fbAnon && $fbResponded)
+                                            <p class="mt-2" role="status" style="font-size: 0.85rem; color: #166534;">
+                                                <span aria-hidden="true">✅</span> Votre réponse est enregistrée. Vous pouvez la modifier à tout moment.
+                                            </p>
+                                        @endif
+                                        @if($fbAnon)
+                                            <p class="text-muted mt-2" style="font-size: 0.8rem;">
+                                                <span aria-hidden="true">🔒</span> Ce sondage est anonyme : votre réponse n'est associée à aucune identité.
+                                            </p>
+                                        @endif
+                                    @endif
+                                </div>
+                            @else
+                                {{-- Accès refusé (même logique que les autres types : rien dans le DOM). --}}
+                                <div class="academy-gated-panel">
+                                    <div class="gated-icon">🔐</div>
+                                    <div class="gated-title">
+                                        @if(!auth()->check())
+                                            Connexion requise pour répondre au sondage
+                                        @elseif(!$isEnrolled)
+                                            Inscrivez-vous pour répondre à ce sondage
+                                        @else
+                                            Sondage en cours de préparation
+                                        @endif
+                                    </div>
+                                    <p class="gated-sub">
+                                        @if(!auth()->check())
+                                            Créez un compte gratuit ou connectez-vous pour répondre.
+                                        @elseif(!$isEnrolled && $isFree)
+                                            Ce cours est gratuit - inscrivez-vous pour répondre.
                                         @elseif(!$isEnrolled && !$isFree)
                                             Ce cours est payant - achetez-le pour accéder à l'ensemble du contenu.
                                         @else
