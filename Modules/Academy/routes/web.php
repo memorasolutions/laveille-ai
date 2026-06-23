@@ -8,6 +8,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Academy\Http\Controllers\AcademyController;
+use Modules\Academy\Http\Controllers\CalendarController;
 use Modules\Academy\Http\Controllers\CertificateController;
 use Modules\Academy\Http\Controllers\CompletionController;
 use Modules\Academy\Http\Controllers\ChoiceController;
@@ -80,10 +81,27 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
         })
             ->middleware('auth')
             ->name('courses.analytics');
+
+        // V5-b - Calendrier d'echeances par cours (etudiant inscrit OU gerant).
+        // Autorisation verifiee par CourseCalendar::mount() (inscription active
+        // OU manageStructure). Lecture seule pour l'etudiant, CRUD pour le gerant.
+        Route::get('courses/{course:slug}/calendrier', function (\Modules\Academy\Models\Course $course) {
+            return view('academy::public.course-calendar', ['course' => $course]);
+        })
+            ->middleware('auth')
+            ->name('courses.calendar');
     });
 
     // M6 — Certificats publics vérifiables (pas d'auth requise)
     Route::get('certificats/{public_url_slug}', [CertificateController::class, 'show'])->name('certificates.show');
+
+    // V5-b — Export iCal du calendrier d'un cours. Auth requis ; acces gate dans
+    // CalendarController::ical() : inscrit actif OU manageStructure. throttle:20,1
+    // = anti-abus (GET qui genere un fichier). Declare hors AcademyUnderConstruction
+    // pour etre accessible meme en mode maintenance (meme pattern que les certificats).
+    Route::get('courses/{course:slug}/calendrier.ics', [CalendarController::class, 'ical'])
+        ->middleware(['auth', 'throttle:20,1'])
+        ->name('courses.calendar.ical');
 
     // M1 — Inscription à un cours (auth requis). throttle:20,1 = anti-DoS léger (C2).
     Route::post('courses/{course}/enroll', [EnrollmentController::class, 'store'])

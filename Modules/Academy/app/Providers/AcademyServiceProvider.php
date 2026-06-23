@@ -16,6 +16,7 @@ use Livewire\Livewire;
 use Modules\Academy\Console\CourseReindexCommand;
 use Modules\Academy\Livewire\CourseAnalytics;
 use Modules\Academy\Livewire\CourseAssignments;
+use Modules\Academy\Livewire\CourseCalendar;
 use Modules\Academy\Livewire\CourseCreate;
 use Modules\Academy\Livewire\CourseEditor;
 use Modules\Academy\Livewire\CourseRoster;
@@ -124,6 +125,12 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // (owner_id = auth) ; l'admin (academy.manage) voit tout. Chaque mutation est
         // gardée serveur (entité re-résolue scopée owner = anti-IDOR). Voir QuestionBankManager.
         Livewire::component('academy.question-bank-manager', QuestionBankManager::class);
+
+        // V5-b - Calendrier d'echeances par cours. Etudiant inscrit = lecture seule ;
+        // gerant (manageStructure) = CRUD d'evenements manuels. Les echeances derivees
+        // des devoirs sont calculees en lecture par CalendarService (anti-duplication).
+        // Autorisation verifiee dans mount() et a chaque mutation. Voir CourseCalendar.
+        Livewire::component('academy.course-calendar', CourseCalendar::class);
     }
 
     public function register(): void

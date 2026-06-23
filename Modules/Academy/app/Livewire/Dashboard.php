@@ -27,6 +27,7 @@ use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Modules\Academy\Models\Course;
+use Modules\Academy\Services\CalendarService;
 use Modules\Academy\Services\CourseDuplicator;
 
 class Dashboard extends Component
@@ -104,6 +105,31 @@ class Dashboard extends Component
             })
             ->filter(fn (array $row): bool => $row['course'] !== null)
             ->values();
+    }
+
+    /**
+     * V5-b - Echeances a venir : les 10 prochaines echeances futures de tous les
+     * cours ou l'utilisateur est inscrit actif (evenements manuels + devoirs
+     * publies avec due_at). Calcul serveur, scope strict (anti-IDOR) via
+     * CalendarService::upcomingForUser. Retourne une Collection vide si aucun
+     * cours ou aucune echeance - dans ce cas le bandeau est masque.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
+    #[Computed]
+    public function upcomingDeadlines(): Collection
+    {
+        $user = Auth::user();
+
+        if ($user === null) {
+            return collect();
+        }
+
+        try {
+            return (new CalendarService())->upcomingForUser($user, 10);
+        } catch (\Throwable) {
+            return collect();
+        }
     }
 
     /**

@@ -339,8 +339,15 @@ test('QuizController existe avec méthodes startQuiz et submitQuiz', function ()
 });
 
 test('QuizController vérifie l inscription avant d agir (abort 403)', function () {
+    // C1 (DRY) : la garde « auth + inscription active + anti-IDOR » est extraite dans
+    // le trait partagé AuthorizesAcademyAccess, utilisé par QuizController ET
+    // ChoiceController. On vérifie donc que la logique vit dans le trait ET que le
+    // contrôleur l'emploie (comportement identique, source unique).
+    expect(class_uses_recursive(\Modules\Academy\Http\Controllers\QuizController::class))
+        ->toContain(\Modules\Academy\Http\Controllers\Concerns\AuthorizesAcademyAccess::class);
+
     $source = file_get_contents(
-        base_path('Modules/Academy/app/Http/Controllers/QuizController.php')
+        base_path('Modules/Academy/app/Http/Controllers/Concerns/AuthorizesAcademyAccess.php')
     );
     expect($source)->toContain('abort(403)');
     expect($source)->toContain('Enrollment');

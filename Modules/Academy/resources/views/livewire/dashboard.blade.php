@@ -87,6 +87,85 @@
         @endif
     </section>
 
+    {{-- ───────── V5-b : Echeances a venir (bandeau, masque si vide) ───────── --}}
+    @if($this->upcomingDeadlines->isNotEmpty())
+        <section aria-labelledby="academy-echeances" class="mb-5">
+            <h2 id="academy-echeances"
+                style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 14px;">
+                Echeances a venir
+            </h2>
+
+            @php
+                $typeLabels = [
+                    'due'    => 'Devoir',
+                    'exam'   => 'Examen',
+                    'live'   => 'En direct',
+                    'manual' => 'Evenement',
+                ];
+                $typeColors = [
+                    'due'    => 'background: #FEE2E2; color: #991B1B;',
+                    'exam'   => 'background: #FFEDD5; color: #9A3412;',
+                    'live'   => 'background: #D1FAE5; color: #065F46;',
+                    'manual' => 'background: #E0F2FE; color: #075985;',
+                ];
+            @endphp
+
+            <ul class="list-unstyled d-flex flex-column gap-2" role="list" style="margin: 0;">
+                @foreach($this->upcomingDeadlines as $ev)
+                    @php
+                        $label      = $typeLabels[$ev['type']] ?? 'Evenement';
+                        $badgeStyle = $typeColors[$ev['type']] ?? $typeColors['manual'];
+                        $daysLeft   = (int) now('America/Toronto')->diffInDays($ev['starts_at'], false);
+                        $daysLabel  = match(true) {
+                            $daysLeft === 0 => "aujourd'hui",
+                            $daysLeft === 1 => 'demain',
+                            default         => 'dans ' . $daysLeft . ' j',
+                        };
+                    @endphp
+                    <li role="listitem"
+                        style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem);
+                               padding: 14px 18px; display: flex; flex-wrap: wrap;
+                               align-items: center; gap: 12px; background: #FFFFFF;">
+
+                        {{-- Badge type --}}
+                        <span style="font-size: 0.72rem; font-weight: 700; padding: 2px 10px;
+                                     border-radius: 999px; white-space: nowrap; {{ $badgeStyle }}">
+                            {{ $label }}
+                        </span>
+
+                        {{-- Titre et cours --}}
+                        <span style="flex: 1 1 180px; font-size: 0.92rem;
+                                     color: var(--sys-text-default, #1A1D23); font-weight: 500;">
+                            {{ $ev['title'] }}
+                            <span style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280);
+                                         font-weight: 400; margin-left: 6px;">
+                                ({{ $ev['course_title'] }})
+                            </span>
+                        </span>
+
+                        {{-- Date relative + absolue --}}
+                        <time datetime="{{ $ev['starts_at']->timezone('America/Toronto')->toIso8601String() }}"
+                              style="font-size: 0.82rem; color: var(--sys-text-muted, #6B7280);
+                                     white-space: nowrap;">
+                            {{ $ev['starts_at']->timezone('America/Toronto')->translatedFormat('j M Y') }}
+                            <span style="font-weight: 600; color: var(--sys-action-primary, #064E5A);">
+                                ({{ $daysLabel }})
+                            </span>
+                        </time>
+
+                        {{-- Lien vers le calendrier du cours --}}
+                        <a href="{{ route('academy.courses.calendar', $ev['course_slug']) }}"
+                           style="font-size: 0.8rem; color: var(--sys-action-primary, #064E5A);
+                                  text-decoration: underline; white-space: nowrap;"
+                           aria-label="Voir le calendrier de {{ $ev['course_title'] }}">
+                            Voir le calendrier
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
+
     {{-- ───────────────────────── Mes devoirs (E2) ─────────────────────────
          Composant role-aware : requêtes scopées à auth()->id() et aux cours où
          l'utilisateur est inscrit ACTIF. Ne s'affiche que s'il y a des devoirs. --}}

@@ -33,10 +33,10 @@ Implanter de manière EXHAUSTIVE les fonctionnalités Moodle manquantes (cf. gap
 - [x] F9 · Activité **Forum** (discussions, anti-spam) ✅ V4-c (v352-353, /sim A→G, /audit 91→corrigé) — **VAGUE 4 COMPLÈTE** (Choice+Feedback+Forum).
 
 ### VAGUE 5 — Communication & progression
-- [ ] F10 · **Calendrier** + événements + **rappels d'échéance**
-- [ ] F11 · **Notifications courriel d'activité** (Brevo, déjà en place)
-- [ ] F12 · **Achèvement de cours configurable** (critères)
-- [ ] F13 · **Restrictions d'accès** étendues (date/note/groupe/profil)
+- [x] V5-a · **Achèvement de cours configurable** (critères) ✅ (v354-355, /sim 4/6→bloquant corrigé→5/5, /audit 81→corrigé)
+- [ ] V5-b · **Calendrier** + événements + **échéances** (rappels in-app event-driven ; courriels planifiés = V5-c)
+- [ ] V5-c · **Notifications courriel d'activité** (Brevo) + rappels d'échéance planifiés
+- [ ] V5-d · **Restrictions d'accès** étendues (date/note/groupe/profil)
 
 ### VAGUE 6 — Profondeur notes & contenu
 - [ ] F14 · **Échelles personnalisées (scales)** + méthodes d'agrégation du carnet
@@ -55,6 +55,7 @@ Implanter de manière EXHAUSTIVE les fonctionnalités Moodle manquantes (cf. gap
 ## Journal d'exécution (le plus récent en haut)
 | Date | Feature | Version | Implant | /sim | /audit | Notes |
 |------|---------|---------|---------|------|--------|-------|
+| 2026-06-23 | **V5-a Achèvement de cours configurable** | v354-355 | 816 tests (+23 cumul) | 4/6 → bloquant C+D corrigé → revérif 5/5 PASS | 81/100 puis corrigé | 1re feature Vague 5. Colonne JSON ADDITIVE `courses.completion_criteria` (NULL=all_required=défaut). Service `CourseCompletionService` (criteriaFor/isComplete/progressToward, 4 critères : all_required/percent/min_grade/selected_activities, anti-IDOR, value bornée). Certificat+badges branchés sur `isComplete` (plus de 100 % codé en dur). **/sim a trouvé LE bloquant** : `lesson.blade` affichait+émettait le certificat sur `percent>=100` codé en dur → corrigé v355 (`LessonController` calcule `$courseCompleted` via isComplete ; recalcul défensif après soumission quiz pour min_grade). **Audit bloquant** : `final_score` du certificat min_grade valait 0 → branché sur `finalGradePercent` (revérif : 80 % et 77 % réels, pas 0). + race condition émission (transaction+firstOrCreate+index unique migration additive), logs sur catches silencieux, validation min:1. RÉTROCOMPAT prouvée (all_required ⇒ certificat à 100 % inchangé). Dette : N+1 BadgeService::countCompletedCourses (non bloquant). Réversible. Codename seo-piliers-veille-generative. |
 | 2026-06-23 | **V4-c Forum → VAGUE 4 COMPLÈTE** | v352-353 | 789 tests (+25) | A→G PASS (sujet+réponse, modération pin/lock/delete soft, honeypot, XSS strippé, locked/allow_student_topics, non-régression) | 91/100 (meilleur) puis corrigé | Type d'item `forum` (tables topics+posts SoftDeletes, critère achèvement `post`, anti-spam honeypot+throttle, trait authz). Corrigé v353 (793 tests) : a11y sr-only épinglé/verrouillé, posts bornés 50 + repère troncature, 2 `—`. **JALON Vague 4 = activités Choice + Feedback + Forum.** Dette : images markdown posts étudiants (politique). |
 | 2026-06-23 | **V4-b Activité Feedback/Sondage** | v350-351 | 755 tests (+19) | 8/8 PASS (multi-questions, anonyme user_id null, résultats formateur-seul, required, sécurité, non-régression) | 84/100 puis corrigé, XSS sûr | Type d'item `feedback` (table academy_feedback_responses, critère achèvement `submit`). Corrigé v351 (764 tests) : anti-respam anonyme robuste (table academy_feedback_participants, anonymat préservé), requête sortie de la vue (LessonController preload), SoftDeletes + withTrashed. Dette : results() agrégation PHP (OK volume). |
 | 2026-06-23 | **V4-a Activité Choice** | v348-349 | 727 tests (+20) | 6/6 PASS (vote unique, re-vote, visibilité never/after_vote/anonyme, achèvement, sécurité, non-régression) | 83/100 puis corrigé | 1re activité Vague 4. Nouveau type d'item `choice` (table academy_choice_responses, critère achèvement `vote`). Corrigé v349 (736 tests) : trait DRY `AuthorizesAcademyAccess` (partagé quiz+choice), **throttle:20,1 sur tous les POST Academy** (anti-DoS), perf tally lazy + preload N+1, a11y/PII. |
