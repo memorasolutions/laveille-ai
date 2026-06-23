@@ -95,12 +95,21 @@ class FeedbackController extends Controller
             FeedbackService::markAnsweredInSession($item);
         } else {
             // Réponse NOMMÉE : UNE par (item, étudiant) ; le ré-envoi MET À JOUR la même
-            // ligne (contrainte UNIQUE en base), jamais de doublon.
-            FeedbackResponse::updateOrCreate(
-                ['lesson_item_id' => $item->id, 'user_id' => $user->id],
-                ['answers' => $result['answers']]
-            );
+            // ligne (contrainte UNIQUE en base), jamais de doublon. withTrashed : si une
+            // réponse a été soft-supprimée (C3), on la restaure + met à jour plutôt que
+            // de violer l'UNIQUE(item, user) par une insertion.
+            $response = FeedbackResponse::withTrashed()
+                ->firstOrNew(['lesson_item_id' => $item->id, 'user_id' => $user->id]);
+            $response->answers = $result['answers'];
+            if ($response->trashed()) {
+                $response->deleted_at = null;
+            }
+            $response->save();
         }
+
+        // C1 - PARTICIPATION (nommé ET anonyme) : trace le FAIT d'avoir répondu sans
+        // lier au contenu, pour borner le re-spam anonyme même après reconnexion.
+        FeedbackService::recordParticipation($item, $user);
 
         // Achèvement : répondre complète l'item quand le critère effectif est « submit »
         // (défaut d'un feedback). markComplete est idempotent.

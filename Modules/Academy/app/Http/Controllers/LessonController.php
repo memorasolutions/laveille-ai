@@ -131,6 +131,25 @@ class LessonController extends Controller
             }
         }
 
+        // 5f. C2 (requête hors vue) - Précharge en UNE requête les réponses NOMMÉES de
+        //     l'utilisateur courant pour TOUS les items « feedback » de la leçon, pour le
+        //     pré-remplissage du formulaire (réponse modifiable). La vue ne requête plus.
+        //     Vide si anonyme ou en prévisualisation (le gérant ne répond pas) ; les
+        //     réponses anonymes (user_id NULL) sont naturellement exclues.
+        $feedbackResponses = collect();
+        if (! $isPreview && auth()->check()) {
+            $feedbackItemIds = $lesson->lessonItems
+                ->where('type', 'feedback')
+                ->pluck('id');
+
+            if ($feedbackItemIds->isNotEmpty()) {
+                $feedbackResponses = \Modules\Academy\Services\FeedbackService::preloadUserResponses(
+                    $feedbackItemIds,
+                    auth()->user()
+                );
+            }
+        }
+
         // 6. Navigation préc/suiv
         $allLessons = $course->chapters->flatMap(fn ($ch) => $ch->lessons);
         $currentIndex = $allLessons->search(fn ($l) => $l->id === $lesson->id);
@@ -167,6 +186,7 @@ class LessonController extends Controller
             'dripAvailableAt',
             'dripLockedLessonIds',
             'choiceVotes',
+            'feedbackResponses',
         ));
     }
 }

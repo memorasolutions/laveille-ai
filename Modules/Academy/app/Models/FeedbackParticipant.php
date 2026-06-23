@@ -5,12 +5,12 @@
  *
  * @project memora/laravel-saas-boilerplate
  *
- * FEEDBACK - réponse d'un étudiant à un item de leçon « feedback » (questionnaire
- * multi-questions, non noté). `answers` = { index_question => valeur }. `user_id`
- * est NULL pour une réponse anonyme (aucun lien vers l'identité).
- *
- * SoftDeletes (audit trail, C3) : une réponse supprimée est conservée (deleted_at)
- * et exclue des agrégats par le scope par défaut, plutôt que perdue.
+ * FEEDBACK - PARTICIPATION : trace QUI (étudiant authentifié) a répondu à un item de
+ * leçon « feedback », SANS lien vers le contenu de ses réponses. C'est le filet anti
+ * re-spam ANONYME robuste : la réponse anonyme reste user_id NULL dans
+ * {@see FeedbackResponse}, alors qu'ICI on enregistre uniquement le FAIT d'avoir
+ * participé (anonymat des RÉPONSES intégralement préservé). UNIQUE(item, user) borne
+ * le re-spam même après reconnexion (la session seule est contournable).
  */
 
 declare(strict_types=1);
@@ -20,30 +20,24 @@ namespace Modules\Academy\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * @property int      $id
- * @property int      $lesson_item_id
- * @property int|null $user_id
- * @property array    $answers
+ * @property int $id
+ * @property int $lesson_item_id
+ * @property int $user_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
-class FeedbackResponse extends Model
+class FeedbackParticipant extends Model
 {
-    use SoftDeletes;
-
-    protected $table = 'academy_feedback_responses';
+    protected $table = 'academy_feedback_participants';
 
     protected $fillable = [
         'lesson_item_id',
         'user_id',
-        'answers',
     ];
 
     protected $casts = [
-        'answers'        => 'array',
         'lesson_item_id' => 'integer',
         'user_id'        => 'integer',
     ];

@@ -621,14 +621,12 @@
                                     ? \Modules\Academy\Services\FeedbackService::hasResponded($item, auth()->user())
                                     : false;
                                 // Pré-remplissage d'un sondage NOMMÉ (réponse modifiable) : les
-                                // réponses précédentes de l'utilisateur courant. Jamais en anonyme
-                                // (aucune réponse n'est liée à une identité).
-                                $fbPrev = [];
-                                if (! $fbIsManager && ! $fbAnon && auth()->check()) {
-                                    $fbPrevRow = \Modules\Academy\Models\FeedbackResponse::where('lesson_item_id', $item->id)
-                                        ->where('user_id', auth()->id())->first();
-                                    $fbPrev = $fbPrevRow ? (array) $fbPrevRow->answers : [];
-                                }
+                                // réponses précédentes de l'utilisateur courant, PRÉCHARGÉES par le
+                                // contrôleur (C2 : aucune requête dans la vue). Jamais en anonyme
+                                // (aucune réponse n'est liée à une identité ; previousAnswers le borne).
+                                $fbPrev = (! $fbIsManager && auth()->check())
+                                    ? \Modules\Academy\Services\FeedbackService::previousAnswers($item, auth()->user(), $feedbackResponses ?? null)
+                                    : [];
                                 // Résultats UNIQUEMENT pour le formateur (jamais l'étudiant).
                                 $fbResults = $fbIsManager ? \Modules\Academy\Services\FeedbackService::results($item) : null;
                             @endphp

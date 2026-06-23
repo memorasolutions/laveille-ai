@@ -33,6 +33,7 @@ use Modules\Academy\Models\Completion;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\CourseRole;
 use Modules\Academy\Models\Enrollment;
+use Modules\Academy\Models\FeedbackParticipant;
 use Modules\Academy\Models\FeedbackResponse;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
@@ -466,6 +467,170 @@ test('rétrocompat : répondre sur un item NON-feedback (document) est refusé (
 
     $this->actingAs($student)->post(v4bSubmitUrl($course, $lesson, $doc), ['answers' => [0 => 1]])->assertNotFound();
     expect(FeedbackResponse::where('lesson_item_id', $doc->id)->count())->toBe(0);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 9. C1 - ANTI RE-SPAM ANONYME ROBUSTE (participation en base, anti-reconnexion)
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('C1 : feedback anonyme - 1re soumission enregistre une réponse user_id NULL + une participation', function (): void {
+    $course  = v4bCourse('cours-c1-anon-1');
+    $lesson  = v4bLesson($course);
+    $item    = v4bFeedbackItem($lesson, [], ['anonymous' => true]);
+    $student = v4bStudent();
+    v4bEnroll($course, $student);
+
+    $this->actingAs($student)
+        ->post(v4bSubmitUrl($course, $lesson, $item), ['answers' => [0 => 4, 1 => 0]])
+        ->assertRedirect();
+
+    // La réponse reste anonyme (user_id NULL) : aucune identité dans la réponse.
+    $resp = FeedbackResponse::where('lesson_item_id', $item->id)->first();
+    expect($resp)->not->toBeNull();
+    expect($resp->user_id)->toBeNull();
+
+    // La participation est tracée (le FAIT de répondre), liée à l'étudiant.
+    expect(FeedbackParticipant::where('lesson_item_id', $item->id)->where('user_id', $student->id)->exists())->toBeTrue();
+});
+
+test('C1 : feedback anonyme - 2e soumission du MÊME user refusée même après reconnexion (session régénérée)', function (): void {
+    $course  = v4bCourse('cours-c1-anon-respam');
+    $lesson  = v4bLesson($course);
+    $item    = v4bFeedbackItem($lesson, [], ['anonymous' => true]);
+    $student = v4bStudent();
+    v4bEnroll($course, $student);
+
+    $this->actingAs($student)->post(v4bSubmitUrl($course, $lesson, $item), ['answers' => [0 => 4]])->assertRedirect();
+
+    // Simule une déconnexion/reconnexion : la session (et son drapeau) est régénérée.
+    $this->flushSession();
+
+    $this->actingAs($student)
+        ->post(v4bSubmitUrl($course, $lesson, $item), ['answers' => [0 => 1]])
+        ->assertRedirect()
+        ->assertSessionHas('info');
+
+    // UNE seule réponse anonyme : le re-spam est borné par la participation en base.
+    expect(FeedbackResponse::where('lesson_item_id', $item->id)->count())->toBe(1);
+    expect(FeedbackParticipant::where('lesson_item_id', $item->id)->count())->toBe(1);
+});
+
+test('C1 : feedback anonyme - un AUTRE user peut répondre ; anonymat préservé dans l\'agrégat', function (): void {
+    $course  = v4bCourse('cours-c1-anon-other');
+    $lesson  = v4bLesson($course);
+    $item    = v4bFeedbackItem($lesson, [], ['anonymous' => true]);
+    $alice   = v4bStudent('Alice Unique Nom');
+    $bob     = v4bStudent('Bob Autre Nom');
+    v4bEnroll($course, $alice);
+    v4bEnroll($course, $bob);
+
+    $this->actingAs($alice)->post(v4bSubmitUrl($course, $lesson, $item), ['answers' => [0 => 5]])->assertRedirect();
+    $this->flushSession();
+    $this->actingAs($bob)->post(v4bSubmitUrl($course, $lesson, $item), ['answers' => [0 => 2]])->assertRedirect();
+
+    // Deux réponses anonymes (user_id NULL), deux participations distinctes.
+    expect(FeedbackResponse::where('lesson_item_id', $item->id)->count())->toBe(2);
+    expect(FeedbackResponse::where('lesson_item_id', $item->id)->whereNull('user_id')->count())->toBe(2);
+    expect(FeedbackParticipant::where('lesson_item_id', $item->id)->count())->toBe(2);
+
+    // L'agrégat ne contient AUCUNE identité.
+    $results = FeedbackService::results($item);
+    expect($results['total'])->toBe(2);
+    $json = json_encode($results);
+    expect($json)->not->toContain('Alice Unique Nom');
+    expect($json)->not->toContain('Bob Autre Nom');
+});
+
+test('C1 : feedback NOMMÉ - upsert modifiable inchangé + participation tracée', function (): void {
+    $course  = v4bCourse('cours-c1-named');
+    $lesson  = v4bLesson($course);
+    $item    = v4bFeedbackItem($lesson); // non anonyme
+    $student = v4bStudent();
+    v4bEnroll($course, $student);
+
+    $this->actingAs($student)->post(v4bSubmitUrl($course, $lesson, $item), ['answers' => [0 => 2]])->assertRedirect();
+    $this->flushSession();
+    $this->actingAs($student)->post(v4bSubmitUrl($course, $lesson, $item), ['answers' => [0 => 5]])->assertRedirect();
+
+    // Toujours UNE réponse nommée, modifiable (dernière valeur), participation idempotente.
+    expect(FeedbackResponse::where('lesson_item_id', $item->id)->where('user_id', $student->id)->count())->toBe(1);
+    expect(FeedbackResponse::where('lesson_item_id', $item->id)->first()->answers[0])->toBe(5);
+    expect(FeedbackParticipant::where('lesson_item_id', $item->id)->where('user_id', $student->id)->count())->toBe(1);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 10. C2 - AUCUNE requête dans la vue (pré-remplissage via le contrôleur)
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('C2 : la vue lesson.blade ne contient AUCUNE requête FeedbackResponse', function (): void {
+    $blade = file_get_contents(__DIR__.'/../../resources/views/public/lesson.blade.php');
+    expect($blade)->not->toContain('FeedbackResponse::');
+});
+
+test('C2 : pré-remplissage NOMMÉ fonctionne (réponses précédentes affichées, via le contrôleur)', function (): void {
+    $course  = v4bCourse('cours-c2-prefill');
+    $lesson  = v4bLesson($course);
+    $item    = v4bFeedbackItem($lesson); // Q2 = text
+    $student = v4bStudent();
+    v4bEnroll($course, $student);
+
+    $this->actingAs($student)
+        ->post(v4bSubmitUrl($course, $lesson, $item), ['answers' => [0 => 4, 2 => 'Mon commentaire prerempli']])
+        ->assertRedirect();
+
+    $this->actingAs($student)->get(v4bShowUrl($course, $lesson))
+        ->assertOk()
+        ->assertSee('Mon commentaire prerempli');
+});
+
+test('C2 : previousAnswers retourne vide pour un sondage anonyme', function (): void {
+    $course  = v4bCourse('cours-c2-anon-noprefill');
+    $lesson  = v4bLesson($course);
+    $item    = v4bFeedbackItem($lesson, [], ['anonymous' => true]);
+    $student = v4bStudent();
+
+    expect(FeedbackService::previousAnswers($item, $student, null))->toBe([]);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 11. C3 - SoftDeletes (audit trail) sur les réponses
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('C3 : FeedbackResponse est softdeletable (conservé withTrashed, exclu par défaut)', function (): void {
+    $course  = v4bCourse('cours-c3-softdelete');
+    $lesson  = v4bLesson($course);
+    $item    = v4bFeedbackItem($lesson);
+    $student = v4bStudent();
+    v4bEnroll($course, $student);
+
+    $this->actingAs($student)->post(v4bSubmitUrl($course, $lesson, $item), ['answers' => [0 => 3]])->assertRedirect();
+    $resp = FeedbackResponse::where('lesson_item_id', $item->id)->first();
+    $resp->delete();
+
+    // Exclue des requêtes normales (donc des agrégats), conservée withTrashed.
+    expect(FeedbackResponse::where('lesson_item_id', $item->id)->count())->toBe(0);
+    expect(FeedbackResponse::withTrashed()->where('lesson_item_id', $item->id)->count())->toBe(1);
+    expect(FeedbackService::results($item)['total'])->toBe(0);
+});
+
+test('C3 : re-soumettre après soft-delete restaure/met à jour sans violer l\'UNIQUE(item, user)', function (): void {
+    $course  = v4bCourse('cours-c3-resubmit');
+    $lesson  = v4bLesson($course);
+    $item    = v4bFeedbackItem($lesson);
+    $student = v4bStudent();
+    v4bEnroll($course, $student);
+
+    $this->actingAs($student)->post(v4bSubmitUrl($course, $lesson, $item), ['answers' => [0 => 2]])->assertRedirect();
+    FeedbackResponse::where('lesson_item_id', $item->id)->first()->delete();
+
+    // Nouvelle soumission : aucune erreur de contrainte unique, la ligne est restaurée+MAJ.
+    $this->actingAs($student)->post(v4bSubmitUrl($course, $lesson, $item), ['answers' => [0 => 5]])->assertRedirect();
+
+    expect(FeedbackResponse::withTrashed()->where('lesson_item_id', $item->id)->where('user_id', $student->id)->count())->toBe(1);
+    $resp = FeedbackResponse::where('lesson_item_id', $item->id)->where('user_id', $student->id)->first();
+    expect($resp)->not->toBeNull();
+    expect($resp->trashed())->toBeFalse();
+    expect($resp->answers[0])->toBe(5);
 });
 
 test('rétrocompat : les défauts d\'achèvement video/document/quiz/choice sont inchangés', function (): void {

@@ -31,6 +31,7 @@ declare(strict_types=1);
 namespace Modules\Academy\Services;
 
 use App\Models\User;
+use Modules\Academy\Models\FeedbackParticipant;
 use Modules\Academy\Models\FeedbackResponse;
 use Modules\Academy\Models\LessonItem;
 
@@ -333,8 +334,10 @@ final class FeedbackService
 
     /**
      * L'utilisateur courant a-t-il déjà répondu à CE sondage ? Sondage NOMMÉ : on
-     * regarde sa réponse (clé user). Sondage ANONYME : aucune identité n'est stockée,
-     * donc on s'appuie sur un drapeau de SESSION (re-spam borné par session).
+     * regarde sa réponse (clé user). Sondage ANONYME : aucune identité n'est stockée
+     * dans la RÉPONSE (user_id NULL), donc on borne le re-spam par la PARTICIPATION
+     * (table dédiée, robuste à la reconnexion) ET, en défense en profondeur, par le
+     * drapeau de SESSION.
      */
     public static function hasResponded(LessonItem $item, ?User $user): bool
     {
@@ -343,12 +346,100 @@ final class FeedbackService
         }
 
         if (self::isAnonymous($item)) {
-            return in_array($item->id, (array) session(self::SESSION_KEY, []), true);
+            return self::hasParticipated($item, $user)
+                || in_array($item->id, (array) session(self::SESSION_KEY, []), true);
         }
 
         return FeedbackResponse::where('lesson_item_id', $item->id)
             ->where('user_id', $user->id)
             ->exists();
+    }
+
+    /**
+     * L'étudiant authentifié a-t-il déjà PARTICIPÉ à ce sondage ? Lit la table
+     * {@see FeedbackParticipant} (le FAIT de répondre, jamais le contenu). Borne le
+     * re-spam anonyme même après déconnexion/reconnexion (session régénérée).
+     */
+    public static function hasParticipated(LessonItem $item, ?User $user): bool
+    {
+        if ($user === null) {
+            return false;
+        }
+
+        return FeedbackParticipant::where('lesson_item_id', $item->id)
+            ->where('user_id', $user->id)
+            ->exists();
+    }
+
+    /**
+     * Enregistre (idempotent) la PARTICIPATION de l'étudiant authentifié à ce sondage,
+     * pour les soumissions NOMMÉES comme ANONYMES. N'enregistre AUCUNE réponse : seul
+     * le couple (item, user) est tracé, donc l'anonymat des réponses est préservé.
+     */
+    public static function recordParticipation(LessonItem $item, User $user): void
+    {
+        FeedbackParticipant::firstOrCreate([
+            'lesson_item_id' => $item->id,
+            'user_id'        => $user->id,
+        ]);
+    }
+
+    /**
+     * Précharge en UNE requête les réponses NOMMÉES de l'utilisateur pour un lot
+     * d'items « feedback » (anti N+1 ; pré-remplissage côté contrôleur, jamais dans la
+     * vue). Les réponses ANONYMES (user_id NULL) sont naturellement exclues. Retourne
+     * une collection indexée par lesson_item_id, à passer à {@see previousAnswers}.
+     *
+     * @param  iterable<int, LessonItem|int>  $items
+     * @return \Illuminate\Support\Collection<int, FeedbackResponse>
+     */
+    public static function preloadUserResponses(iterable $items, ?User $user): \Illuminate\Support\Collection
+    {
+        if ($user === null) {
+            return collect();
+        }
+
+        $itemIds = [];
+        foreach ($items as $it) {
+            $itemIds[] = (int) (is_object($it) ? $it->id : $it);
+        }
+        $itemIds = array_values(array_unique($itemIds));
+
+        if ($itemIds === []) {
+            return collect();
+        }
+
+        return FeedbackResponse::where('user_id', $user->id)
+            ->whereIn('lesson_item_id', $itemIds)
+            ->get(['lesson_item_id', 'answers'])
+            ->keyBy('lesson_item_id');
+    }
+
+    /**
+     * Réponses précédentes de l'utilisateur pour CET item (pré-remplissage d'un sondage
+     * NOMMÉ et modifiable). ANONYME => toujours vide (aucune réponse n'est liée à une
+     * identité). Si `$preloaded` est fourni il fait AUTORITÉ (aucune requête).
+     *
+     * @param  \Illuminate\Support\Collection<int, FeedbackResponse>|null  $preloaded
+     * @return array<int|string, mixed>
+     */
+    public static function previousAnswers(LessonItem $item, ?User $user, $preloaded = null): array
+    {
+        if ($user === null || self::isAnonymous($item)) {
+            return [];
+        }
+
+        if ($preloaded !== null) {
+            $row = $preloaded->get($item->id);
+
+            return $row ? (array) $row->answers : [];
+        }
+
+        $row = FeedbackResponse::where('lesson_item_id', $item->id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        return $row ? (array) $row->answers : [];
     }
 
     /** Marque (session) que le sondage anonyme courant a reçu une réponse de cette session. */
