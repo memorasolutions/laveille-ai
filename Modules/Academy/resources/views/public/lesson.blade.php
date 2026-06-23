@@ -1166,8 +1166,9 @@
                 @endforelse
                 @endif {{-- /!$__lessonLocked --}}
 
-                {{-- M6 - Certificat : affiché quand 100% complété (jamais en prévisualisation) --}}
-                @if(auth()->check() && $isEnrolled && !($isPreview ?? false) && ($userProgress?->percent ?? 0) >= 100)
+                {{-- M6 - Certificat : affiché quand le cours est complété selon son critère configuré
+                     (CourseCompletionService - variable $courseCompleted du contrôleur), jamais en prévisualisation --}}
+                @if(auth()->check() && $isEnrolled && !($isPreview ?? false) && ($courseCompleted ?? false))
                     @php
                         $__certificate = null;
                         try {
@@ -1182,7 +1183,7 @@
                              style="background: #ECFDF5; border: 1px solid #6EE7B7; border-radius: 12px;">
                             <div style="font-size: 1.5rem; margin-bottom: 0.4rem;">🎓</div>
                             <p class="mb-3 fw-bold" style="color: #065F46;">
-                                Félicitations ! Tu as complété ce cours à 100 %.
+                                Félicitations ! Tu as complété ce cours.
                             </p>
                             <x-core::button :href="route('academy.certificates.show', $__certificate->public_url_slug)" variant="primary">
                                 Obtenir mon certificat

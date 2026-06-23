@@ -36,9 +36,16 @@ return new class extends Migration
         }
 
         Schema::table('courses', function (Blueprint $table): void {
-            // Placée après grade_letter_scheme si présente, sinon en fin de table
-            // (défensif : after() est ignoré si la colonne de référence manque).
-            $table->json('completion_criteria')->nullable()->after('grade_letter_scheme');
+            // V5a-5 : after() positionne la colonne sur MySQL mais provoque une
+            // exception si la colonne de référence est absente (contrairement à ce
+            // que l'ancien commentaire affirmait à tort). On n'utilise after() que
+            // si grade_letter_scheme est présente ; sinon la colonne est ajoutée en
+            // fin de table (comportement identique sur SQLite qui ignore after()).
+            if (Schema::hasColumn('courses', 'grade_letter_scheme')) {
+                $table->json('completion_criteria')->nullable()->after('grade_letter_scheme');
+            } else {
+                $table->json('completion_criteria')->nullable();
+            }
         });
     }
 

@@ -173,6 +173,25 @@ class LessonController extends Controller
             }
         }
 
+        // 7c. M6 - Complétion de cours calculée serveur (CourseCompletionService, source
+        // unique). La vue affiche le certificat uniquement sur la base de cette variable
+        // booléenne ; plus de >= 100 codé en dur. Gaté class_exists ; défaut historique :
+        // percent persisté >= 100 si le service est absent.
+        $courseCompleted = false;
+        if (auth()->check() && $isEnrolled && ! $isPreview) {
+            if (class_exists(\Modules\Academy\Services\CourseCompletionService::class)) {
+                try {
+                    $courseCompleted = (new \Modules\Academy\Services\CourseCompletionService())
+                        ->isComplete(auth()->user(), $course);
+                } catch (\Throwable) {}
+            } else {
+                $pct = \Modules\Academy\Models\Progress::where('user_id', auth()->id())
+                    ->where('course_id', $course->id)
+                    ->value('percent');
+                $courseCompleted = (int) ($pct ?? 0) >= 100;
+            }
+        }
+
         return view('academy::public.lesson', compact(
             'course',
             'lesson',
@@ -187,6 +206,7 @@ class LessonController extends Controller
             'dripLockedLessonIds',
             'choiceVotes',
             'feedbackResponses',
+            'courseCompleted',
         ));
     }
 }

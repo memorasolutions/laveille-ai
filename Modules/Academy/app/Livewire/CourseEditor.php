@@ -452,7 +452,7 @@ class CourseEditor extends Component
             'completion_type'  => ['required', 'string', Rule::in(CourseCompletionService::TYPES)],
             'completion_value' => [$needsValue ? 'required' : 'nullable', 'integer', 'min:1', 'max:100'],
             'completion_selected'   => [$needsSelected ? 'required' : 'nullable', 'array'],
-            'completion_selected.*' => ['integer'],
+            'completion_selected.*' => ['integer', 'min:1'],
         ], [
             'completion_value.required'    => 'Indiquez un seuil entre 1 et 100.',
             'completion_selected.required' => 'Sélectionnez au moins une activité.',

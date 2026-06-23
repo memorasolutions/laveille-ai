@@ -357,6 +357,20 @@ class QuizController extends Controller
             return back()->with('error', 'Nombre de tentatives maximum atteint.');
         }
 
+        // V5a-1 : recalcul défensif post-soumission pour les cours à critère min_grade.
+        // CompletionService::markComplete est idempotent : si l'item est déjà complété
+        // (première réussite antérieure), il retourne sans appeler recalculate(). Une
+        // tentative ultérieure améliorant la note du carnet ne déclencherait donc jamais
+        // l'émission du certificat. Ce recalcul force la vérification isComplete() sur
+        // chaque soumission (lecture seule, aucune duplication grâce à firstOrCreate).
+        try {
+            if (class_exists(\Modules\Academy\Services\ProgressService::class)) {
+                \Modules\Academy\Services\ProgressService::recalculate($user, $course);
+            }
+        } catch (\Throwable) {
+            // Silencieux : ne jamais bloquer la soumission pour un recalcul raté.
+        }
+
         // Flasher le résultat (item_id inclus pour affichage ciblé en vue).
         // ESSAI : `needs_grading` → le lecteur affiche « En attente de correction »
         // au lieu d'un score final (le pourcentage auto est provisoire).

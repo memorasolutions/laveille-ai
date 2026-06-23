@@ -101,7 +101,9 @@ final class CourseCompletionService
                 self::TYPE_SELECTED  => $this->selectedActivitiesComplete($user, $course, $criteria['items']),
                 default              => $this->coursePercent($user, $course) >= 100, // all_required
             };
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            \Log::warning('[CourseCompletionService] isComplete erreur défensive', ['exception' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -174,7 +176,11 @@ final class CourseCompletionService
      * notes vides » de GradebookService::itemPercentFor). NULL distinct de 0 : sans
      * aucune note, le critère min_grade n'est pas rempli (jamais complété par défaut).
      */
-    private function finalGradePercent(User $user, Course $course): ?float
+    /**
+     * Exposé public pour CertificateService (final_score en min_grade). Retourne
+     * la note finale du carnet (%) pour l'utilisateur, ou null si aucune note.
+     */
+    public function finalGradePercent(User $user, Course $course): ?float
     {
         if (! class_exists(GradebookService::class)) {
             return null;

@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Modules\Academy\Services;
 
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Modules\Academy\Models\CertificateIssued;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Progress;
@@ -32,41 +33,56 @@ final class CertificateService
             return null;
         }
 
-        // Progression persistée (pour les heures + la note du certificat). Peut être
-        // absente si la complétion est atteinte par un critère hors items requis : on
-        // reste défensif (final_score retombe sur 100).
+        // Progression persistée (pour les heures). Peut etre absente si la completion
+        // est atteinte par un critere hors items requis (ex. min_grade).
         $progress = Progress::where('user_id', $user->id)
             ->where('course_id', $course->id)
             ->first();
 
-        // Idempotence : retourner le certificat existant
-        $existing = CertificateIssued::where('user_id', $user->id)
-            ->where('course_id', $course->id)
-            ->first();
-
-        if ($existing !== null) {
-            return $existing;
+        // V5a-2 : final_score selon le critere configure du cours (source unique).
+        // Pour min_grade : note finale du carnet (peut etre elevee avec 0 items requis).
+        // Pour les autres criteres : ratio items/total (comportement historique).
+        $criteria   = CourseCompletionService::criteriaFor($course);
+        $finalScore = 100;
+        if ($criteria['type'] === CourseCompletionService::TYPE_MIN_GRADE) {
+            try {
+                $grade = (new CourseCompletionService())->finalGradePercent($user, $course);
+                if ($grade !== null) {
+                    $finalScore = (int) round(max(0.0, min(100.0, $grade)));
+                }
+            } catch (\Throwable) {
+                $finalScore = 100;
+            }
+        } elseif ($progress !== null && $progress->required_total > 0) {
+            $finalScore = (int) round($progress->required_completed / $progress->required_total * 100);
         }
 
-        // Génération des champs uniques
+        // Champs uniques generes AVANT la transaction (pas de side-effect DB ici).
         $serial           = 'ACAD-' . strtoupper(substr(md5(uniqid((string) $user->id . (string) $course->id, true)), 0, 12));
         $verificationHash = hash('sha256', $user->id . $course->id . uniqid('', true) . config('app.key', ''));
         $publicUrlSlug    = 'cert-' . substr($verificationHash, 0, 16) . '-' . time();
         $hoursEarned      = (int) ceil(($course->duration_minutes ?? 0) / 60);
-        $finalScore       = ($progress !== null && $progress->required_total > 0)
-            ? (int) round($progress->required_completed / $progress->required_total * 100)
-            : 100;
+        $scoreForClosure  = $finalScore;
 
-        $certificate = CertificateIssued::create([
-            'user_id'           => $user->id,
-            'course_id'         => $course->id,
-            'serial'            => $serial,
-            'verification_hash' => $verificationHash,
-            'public_url_slug'   => $publicUrlSlug,
-            'issued_at'         => now(),
-            'hours_earned'      => $hoursEarned,
-            'final_score'       => $finalScore,
-        ]);
+        // V5a-3 : race condition - firstOrCreate dans une transaction. L'index unique
+        // (user_id, course_id) (migration additive) empeche tout doublon meme sous
+        // concurrence : Laravel catchera la UniqueConstraintViolationException et
+        // renverra la ligne existante.
+        $certificate = DB::transaction(
+            static function () use ($user, $course, $serial, $verificationHash, $publicUrlSlug, $hoursEarned, $scoreForClosure): CertificateIssued {
+                return CertificateIssued::firstOrCreate(
+                    ['user_id' => $user->id, 'course_id' => $course->id],
+                    [
+                        'serial'            => $serial,
+                        'verification_hash' => $verificationHash,
+                        'public_url_slug'   => $publicUrlSlug,
+                        'issued_at'         => now(),
+                        'hours_earned'      => $hoursEarned,
+                        'final_score'       => $scoreForClosure,
+                    ]
+                );
+            }
+        );
 
         // ActivityLog défensif
         if (class_exists(\Spatie\Activitylog\Facades\Activity::class)) {

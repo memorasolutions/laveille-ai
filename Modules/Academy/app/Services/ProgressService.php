@@ -97,8 +97,9 @@ final class ProgressService
                     (new CertificateService())->issueFor($user, $course);
                 }
             }
-        } catch (\Throwable) {
-            // Silencieux : ne jamais bloquer la progression pour un cert raté
+        } catch (\Throwable $e) {
+            // V5a-5 : log le contexte pour faciliter le diagnostic (repli silencieux).
+            \Log::warning('[ProgressService] Emission certificat echouee', ['exception' => $e->getMessage()]);
         }
 
         // 7. E1 — Évaluer les badges/jalons d'engagement (défensif, idempotent).
@@ -111,8 +112,9 @@ final class ProgressService
             if (class_exists(BadgeService::class)) {
                 (new BadgeService())->evaluateForUser($user, $course);
             }
-        } catch (\Throwable) {
-            // Silencieux : un badge raté ne casse jamais la progression.
+        } catch (\Throwable $e) {
+            // V5a-5 : log le contexte pour faciliter le diagnostic (repli silencieux).
+            \Log::warning('[ProgressService] Evaluation badges echouee', ['exception' => $e->getMessage()]);
         }
 
         return $progress;
