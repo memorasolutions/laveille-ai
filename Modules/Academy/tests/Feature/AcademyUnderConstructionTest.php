@@ -96,3 +96,18 @@ test('quand under_construction = false, le guest voit le catalogue', function ()
     $response->assertOk();
     $response->assertSee('Cours public de démonstration', false);
 });
+
+// ── 5. Verrou strict : un utilisateur avec un rôle Académie (non superadmin) est BLOQUÉ ─
+
+test('un instructor non superadmin reçoit la page en construction (verrou strict superadmin seul)', function (): void {
+    config()->set('academy.under_construction', true);
+
+    $instructor = User::factory()->create(['email' => 'formateur.test@example.com']);
+    $instructor->assignRole('instructor');
+
+    $response = $this->actingAs($instructor)->get(route('academy.index'));
+
+    $response->assertStatus(503);
+    $response->assertSee('bientôt disponible', false);
+    $response->assertDontSee('Cours public de démonstration', false);
+});

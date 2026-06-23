@@ -32,14 +32,12 @@ class AcademyUnderConstruction
         if (config('academy.under_construction', true) === true) {
             $user = $request->user();
 
-            // Accès « bêta » tant que le mode construction est actif : superadmin OU tout
-            // utilisateur ayant un rôle Académie (admin/instructor/student) peut prévisualiser
-            // pour tester. Le public (anonyme ou utilisateur sans rôle Académie) reçoit la 503.
+            // Verrou « en construction » : SEUL le superadmin (toi) accède pour valider en prod.
+            // Tout le reste (anonyme ET tout utilisateur connecté, même avec un rôle Académie)
+            // reçoit la 503. On rouvrira au public via ACADEMY_UNDER_CONSTRUCTION=false.
             $isSuperAdmin = $user && method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin();
-            $hasAcademyRole = $user && method_exists($user, 'hasAnyRole')
-                && $user->hasAnyRole(['super_admin', 'admin', 'instructor', 'student']);
 
-            if (! $isSuperAdmin && ! $hasAcademyRole) {
+            if (! $isSuperAdmin) {
                 // 503 volontaire : la page n'est pas encore disponible publiquement.
                 return response(view('academy::public.under-construction'), 503);
             }
