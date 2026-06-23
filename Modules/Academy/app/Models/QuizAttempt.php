@@ -89,7 +89,17 @@ class QuizAttempt extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /** ESSAI : correcteur (formateur) ayant attribué les points manuels. */
+    /**
+     * ESSAI : correcteur (formateur) ayant attribué les points manuels.
+     *
+     * C5 : `graded_by` est volontairement un `unsignedBigInteger` NULLABLE SANS clé
+     * étrangère (cf. migration add_essay_grading). Choix assumé : pas de FK
+     * `nullOnDelete` afin de rester portable (la table `users` vit dans l'app, pas le
+     * module ; une FK inter-module compliquerait l'activation/désactivation et les
+     * rollbacks). La lecture passe TOUJOURS par cette relation Eloquent : un formateur
+     * supprimé donne simplement `grader === null` (aucune fuite, aucun 500), ce qui
+     * suffit pour l'affichage. `graded_by` n'est jamais issu du client (= auth()->id()).
+     */
     public function grader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'graded_by');

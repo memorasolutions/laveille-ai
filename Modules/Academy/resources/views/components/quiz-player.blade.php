@@ -52,24 +52,85 @@
     </div>
 
 @else
-    {{-- ── Panneau résultat (après soumission) ── --}}
-    @if($quizResult !== null)
+    @php
+        // C1 - Un quiz est-il ACTIF en session (mid-quiz) ? Si oui, on n'affiche pas de
+        // panneau résultat persistant (l'étudiant est en train de répondre).
+        $hasActiveSession = session()->has("academy.quiz.{$item->id}");
+
+        // C1 - DERNIÈRE tentative PERSISTANTE de l'UTILISATEUR COURANT pour CET item,
+        // scopée user_id + lesson_item_id (anti-IDOR : jamais celle d'autrui). Source
+        // unique du panneau résultat persistant ET de la section de révision. Défensif.
+        $latestAttempt = null;
+        if (auth()->check() && class_exists(\Modules\Academy\Models\QuizAttempt::class)) {
+            try {
+                $latestAttempt = \Modules\Academy\Models\QuizAttempt::query()
+                    ->forUser((int) auth()->id())
+                    ->forItem((int) $item->id)
+                    ->latest('submitted_at')
+                    ->latest('id')
+                    ->first();
+            } catch (\Throwable) {
+                $latestAttempt = null;
+            }
+        }
+
+        // C1 - Source du panneau résultat :
+        //   • flash 'academy.quiz_result' = affichage IMMÉDIAT juste après soumission ;
+        //   • sinon, si une tentative existe et qu'aucun quiz n'est en cours, on rend le
+        //     DERNIER résultat de façon PERSISTANTE (note + révision + feedback formateur).
+        $showPersistent = ($quizResult === null && $latestAttempt !== null && ! $hasActiveSession);
+        $showResult     = ($quizResult !== null) || $showPersistent;
+
+        // Révision (immédiat ET persistant) : même tentative déjà résolue (anti-IDOR).
+        $review = $latestAttempt;
+    @endphp
+
+    {{-- ── Panneau résultat (immédiat = flash, ou persistant = dernière tentative) ── --}}
+    @if($showResult)
         @php
-            // ESSAI : tentative en attente de correction → on n'affiche PAS un faux
-            // score/percent final ni « réussi », mais un message « en attente ».
-            $needsGradingResult = (bool) ($quizResult['needs_grading'] ?? false);
-            $passed         = (bool) ($quizResult['passed'] ?? false);
-            $percent        = (int)  ($quizResult['percent'] ?? 0);
-            $correct        = (int)  ($quizResult['correct'] ?? 0);
-            $total          = (int)  ($quizResult['total'] ?? 0);
-            // V1-c : points pondérés (défaut = nb correct/total si absent, rétrocompat).
-            // C1 : points_earned peut être FRACTIONNAIRE (crédit partiel, ex. 0,5) →
-            // garder le float et l'afficher en décimal localisé (virgule FR).
-            $pointsEarned   = (float) ($quizResult['points_earned']   ?? $correct);
-            $pointsPossible = (int)   ($quizResult['points_possible'] ?? $total);
-            $pointsEarnedFr = str_replace('.', ',', \Modules\Academy\Services\QuizService::formatNumber($pointsEarned));
-            // V1-d : soumission hors-temps (garde serveur).
-            $timedOut       = (bool) ($quizResult['timed_out'] ?? false);
+            // Normalisation commune du panneau (flash OU persistant). Mêmes noms de
+            // variables que l'affichage flash historique (rendu inchangé en aval).
+            if ($quizResult !== null) {
+                // ESSAI : tentative en attente de correction → on n'affiche PAS un faux
+                // score/percent final ni « réussi », mais un message « en attente ».
+                $needsGradingResult = (bool) ($quizResult['needs_grading'] ?? false);
+                $passed         = (bool) ($quizResult['passed'] ?? false);
+                $percent        = (int)  ($quizResult['percent'] ?? 0);
+                $correct        = (int)  ($quizResult['correct'] ?? 0);
+                $total          = (int)  ($quizResult['total'] ?? 0);
+                // V1-c : points pondérés (défaut = nb correct/total si absent, rétrocompat).
+                // C1 : points_earned peut être FRACTIONNAIRE (crédit partiel, ex. 0,5) →
+                // garder le float et l'afficher en décimal localisé (virgule FR).
+                $pointsEarned   = (float) ($quizResult['points_earned']   ?? $correct);
+                $pointsPossible = (int)   ($quizResult['points_possible'] ?? $total);
+                // V1-d : soumission hors-temps (garde serveur).
+                $timedOut       = (bool) ($quizResult['timed_out'] ?? false);
+            } else {
+                // C1 - PERSISTANT : on relit la tentative. Tant qu'un essai n'est pas
+                // corrigé (needs_grading), on n'affiche jamais un faux score. Sinon, on
+                // RECALCULE les points pondérés depuis le round snapshoté (auto + manuel
+                // d'essai) via EssayGradingService::recompute - DRY : pour un quiz sans
+                // essai, le recalcul redonne exactement le score auto.
+                $needsGradingResult = (bool) $latestAttempt->needs_grading;
+                $passed         = (bool) $latestAttempt->passed;
+                $percent        = (int)  $latestAttempt->percent;
+                $total          = (int)  $latestAttempt->max_score;
+                $timedOut       = (bool) $latestAttempt->timed_out;
+                $correct        = (int)  $latestAttempt->score;
+                $pointsEarned   = (float) $correct;
+                $pointsPossible = $total;
+                if (! $needsGradingResult) {
+                    try {
+                        $rc = \Modules\Academy\Services\EssayGradingService::recompute($latestAttempt);
+                        $correct        = (int)   $rc['correct'];
+                        $pointsEarned   = (float) $rc['points_earned'];
+                        $pointsPossible = (int)   $rc['points_possible'];
+                    } catch (\Throwable) {
+                        // Repli : on garde les colonnes stockées (déjà posées ci-dessus).
+                    }
+                }
+            }
+            $pointsEarnedFr = str_replace('.', ',', \Modules\Academy\Services\QuizService::formatNumber((float) $pointsEarned));
         @endphp
         @if($timedOut)
             <div role="alert" class="p-3 rounded mb-3"
@@ -140,22 +201,6 @@
              + answers (réponses soumises). Tous les textes passent par renderRichText
              (anti-XSS : html_input=strip). On n'affiche la révision QU'au résultat
              (après soumission) = comportement « deferred feedback » par défaut. --}}
-        @php
-            $review = null;
-            if (auth()->check() && class_exists(\Modules\Academy\Models\QuizAttempt::class)) {
-                try {
-                    $review = \Modules\Academy\Models\QuizAttempt::query()
-                        ->forUser((int) auth()->id())
-                        ->forItem((int) $item->id)
-                        ->latest('submitted_at')
-                        ->latest('id')
-                        ->first();
-                } catch (\Throwable) {
-                    $review = null;
-                }
-            }
-        @endphp
-
         @if($review !== null && is_array($review->questions_snapshot) && $review->questions_snapshot !== [])
             @php
                 $snapshot       = $review->questions_snapshot;
@@ -326,6 +371,40 @@
                             <div class="mb-1 p-2 rounded" style="background: #F8FAFC; border: 1px solid #E2E8F0; font-size: 0.85rem;">
                                 {!! \Modules\Academy\Models\LessonItem::renderRichText(is_string($userAns) ? $userAns : '') !!}
                             </div>
+                            @php
+                                // C1 - Note + commentaire du formateur (correction manuelle). Affichés
+                                // seulement si la tentative est CORRIGÉE (needs_grading=false). Ce sont
+                                // les données PERSONNELLES de CET étudiant (re-résolues anti-IDOR), donc
+                                // toujours visibles pour lui, indépendamment de review_options (qui ne
+                                // gouverne que l'exposition des bonnes réponses, sans objet pour un essai).
+                                $essayManualScore = null;
+                                $essayManualMax   = null;
+                                $essayManualFb    = null;
+                                if ($review !== null && ! $review->needs_grading) {
+                                    $ms = is_array($review->manual_scores) ? $review->manual_scores : [];
+                                    $mf = is_array($review->manual_feedback) ? $review->manual_feedback : [];
+                                    $sc = $ms[$i] ?? ($ms[(string) $i] ?? null);
+                                    if ($sc !== null && is_numeric($sc)) {
+                                        $essayManualScore = (int) $sc;
+                                        $essayManualMax   = \Modules\Academy\Services\EssayGradingService::essayMaxPoints($review, (int) $i);
+                                    }
+                                    $fbVal = $mf[$i] ?? ($mf[(string) $i] ?? null);
+                                    if (is_string($fbVal) && trim($fbVal) !== '') {
+                                        $essayManualFb = $fbVal;
+                                    }
+                                }
+                            @endphp
+                            @if($essayManualScore !== null)
+                                <p class="mb-1" style="font-size: 0.85rem; color: #166534; font-weight: 600;">
+                                    Points obtenus : {{ $essayManualScore }} / {{ $essayManualMax }} {{ $essayManualMax >= 2 ? 'points' : 'point' }}
+                                </p>
+                            @endif
+                            @if($essayManualFb !== null)
+                                <div class="mt-2 p-2 rounded" style="background: #F0F9FF; border: 1px solid #BAE6FD; font-size: 0.85rem;">
+                                    <span style="font-weight: 600;">Commentaire du formateur :</span>
+                                    {!! \Modules\Academy\Models\LessonItem::renderRichText($essayManualFb) !!}
+                                </div>
+                            @endif
                         @elseif($qType === 'appariement')
                             @if($reviewOpts['show_correctness'])
                                 <p class="mb-1 text-muted" style="font-size: 0.85rem;">
@@ -645,6 +724,7 @@
                         <textarea name="answers[{{ $i }}]"
                                   class="form-control mt-1"
                                   rows="6"
+                                  maxlength="50000"
                                   aria-label="{{ $question['question'] ?? 'Réponse rédigée' }}"
                                   placeholder="Rédigez votre réponse…"></textarea>
 
@@ -736,6 +816,7 @@
                                   form="academy-quiz-finish-{{ $item->id }}"
                                   class="form-control mt-1"
                                   rows="6"
+                                  maxlength="50000"
                                   aria-label="{{ $question['question'] ?? 'Réponse rédigée' }}"
                                   placeholder="Rédigez votre réponse…"></textarea>
 

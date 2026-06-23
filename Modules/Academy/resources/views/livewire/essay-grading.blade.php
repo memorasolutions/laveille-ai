@@ -115,6 +115,7 @@
                             <textarea id="essay-feedback-{{ $idx }}"
                                       wire:model="essayFeedback.{{ $idx }}"
                                       rows="2" class="form-control form-control-sm"
+                                      maxlength="20000"
                                       placeholder="Commentaire pour l'étudiant…"></textarea>
                             @error("essayFeedback.{$idx}")
                                 <span role="alert" style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span>

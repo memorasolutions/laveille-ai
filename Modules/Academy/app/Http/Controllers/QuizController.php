@@ -194,6 +194,19 @@ class QuizController extends Controller
             return back()->with('error', 'Réponses invalides. Recommencez le quiz.');
         }
 
+        // C4 : BORNE DE LONGUEUR DES RÉPONSES D'ESSAI (anti-abus mémoire/DoS). Une réponse
+        // rédigée ne peut dépasser 50 000 caractères. On lit les index d'essais dans le
+        // round SERVEUR (jamais le client) et on rejette PROPREMENT (pas de 500). Les
+        // autres types ne sont pas concernés (réponses courtes/numériques déjà bornées).
+        foreach ($questions as $qi => $q) {
+            if (is_array($q) && ($q['type'] ?? null) === 'essai') {
+                $raw = $answers[(string) $qi] ?? ($answers[$qi] ?? null);
+                if (is_string($raw) && mb_strlen($raw) > 50000) {
+                    return back()->with('error', 'Votre réponse rédigée est trop longue (50 000 caractères maximum).');
+                }
+            }
+        }
+
         // SCORING SERVEUR : même chemin que le mode différé sur les MÊMES réponses →
         // le score final du mode immédiat est, par construction, identique à celui
         // qu'aurait donné une soumission différée des mêmes réponses.

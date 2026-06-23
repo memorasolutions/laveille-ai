@@ -135,6 +135,12 @@ class EssayGrading extends Component
         }
 
         $attempt = $this->resolveAttemptFor($course, (int) $this->gradingAttempt);
+
+        // C3 : Charger les relations EN AMONT (une seule fois) : la logique ci-dessous lit
+        // $attempt->lessonItem (passing_score, critère) et $attempt->user (complétion). Sans
+        // ce loadMissing, ce sont 2 requêtes paresseuses dont une DANS la transaction.
+        $attempt->loadMissing(['lessonItem', 'user']);
+
         $indexes = EssayGradingService::essayIndexes($attempt);
 
         if ($indexes === []) {
@@ -193,11 +199,26 @@ class EssayGrading extends Component
             : 60;
         $passed = $result['percent'] >= $passingScore;
 
-        DB::transaction(function () use ($attempt, $manualScores, $manualFeedback, $result, $passed): void {
+        // C2 : NB de bonnes réponses COHÉRENT (colonne `score` + score de complétion).
+        // Sémantique conservée : `score` = nombre de questions RÉUSSIES (jamais les points
+        // pondérés), socle du badge « sans faute » (BadgeService compare score === nb de
+        // questions). On y AJOUTE chaque essai noté AU MAXIMUM de son barème (= question
+        // réussie). Sans cela, un quiz 100 % essai posait toujours score=0 même corrigé au
+        // maximum (incohérence : la complétion valait « 0 bonne réponse »). Un essai noté
+        // partiellement n'est pas « sans faute » → non compté (cohérent avec le badge).
+        $correctCount = (int) $result['correct'];
+        foreach ($indexes as $i) {
+            $max = EssayGradingService::essayMaxPoints($attempt, $i);
+            if (isset($manualScores[$i]) && (int) $manualScores[$i] >= $max) {
+                $correctCount++;
+            }
+        }
+
+        DB::transaction(function () use ($attempt, $manualScores, $manualFeedback, $result, $passed, $correctCount): void {
             $attempt->update([
                 'manual_scores'   => $manualScores,
                 'manual_feedback' => $manualFeedback !== [] ? $manualFeedback : null,
-                'score'           => $result['correct'],
+                'score'           => $correctCount,
                 'percent'         => $result['percent'],
                 'passed'          => $passed,
                 'needs_grading'   => false,
@@ -207,11 +228,13 @@ class EssayGrading extends Component
 
             // Pose la complétion SI réussi et SI le critère de l'item est min_grade
             // (comportement par défaut d'un quiz), exactement comme à la soumission auto.
+            // C2 : on transmet le MÊME nombre de bonnes réponses cohérent que la colonne
+            // `score` (jamais 0 quand l'essai vaut des points), pour le badge « sans faute ».
             $item = $attempt->lessonItem;
             if ($passed && $item !== null) {
                 $criterion = ActivityCompletionService::criterionFor($item);
                 if ($criterion === 'min_grade' && $attempt->user !== null) {
-                    CompletionService::markComplete($attempt->user, $item, $result['correct']);
+                    CompletionService::markComplete($attempt->user, $item, $correctCount);
                 }
             }
         });
