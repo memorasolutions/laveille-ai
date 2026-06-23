@@ -290,9 +290,15 @@
                 </h2>
 
                 @if($this->canCreateCourse)
-                    <x-core::button :href="route('academy.courses.create')" variant="secondary" size="sm">
-                        Créer un cours
-                    </x-core::button>
+                    <div class="d-flex flex-wrap gap-2">
+                        <x-core::button :href="route('academy.courses.create')" variant="secondary" size="sm">
+                            Créer un cours
+                        </x-core::button>
+                        {{-- F15 - Importer un cours depuis une sauvegarde .json (gâté create()). --}}
+                        <x-core::button :href="route('academy.courses.import')" variant="ghost" size="sm">
+                            Importer un cours
+                        </x-core::button>
+                    </div>
                 @endif
             </div>
 

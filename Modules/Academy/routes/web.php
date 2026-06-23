@@ -11,6 +11,7 @@ use Modules\Academy\Http\Controllers\AcademyController;
 use Modules\Academy\Http\Controllers\CalendarController;
 use Modules\Academy\Http\Controllers\CertificateController;
 use Modules\Academy\Http\Controllers\CompletionController;
+use Modules\Academy\Http\Controllers\CourseBackupController;
 use Modules\Academy\Http\Controllers\ChoiceController;
 use Modules\Academy\Http\Controllers\FeedbackController;
 use Modules\Academy\Http\Controllers\ForumController;
@@ -57,6 +58,15 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             ->middleware('auth')
             ->name('courses.create');
 
+        // F15 - Import / restauration d'un cours depuis une sauvegarde .json.
+        // Connexion requise ; l'autorisation d'entrée (create) vit dans
+        // CourseImport::mount() et est RÉ-AUTORISÉE à l'import. Déclarée AVANT les
+        // routes wildcard courses/{course:slug} pour que « importer » ne soit jamais
+        // capté comme un slug de cours.
+        Route::get('importer', fn () => view('academy::public.course-import'))
+            ->middleware('auth')
+            ->name('courses.import');
+
         // QB2 - Éditeur de la BANQUE DE QUESTIONS réutilisable (owner-scoped).
         // Connexion requise ; l'autorisation d'entrée (instructor/admin) vit dans
         // QuestionBankManager::mount() (abort 403 sinon) et chaque mutation est
@@ -77,6 +87,13 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
         })
             ->middleware('auth')
             ->name('courses.manage');
+
+        // F15 - Téléchargement de la sauvegarde (.json) d'un cours. Connexion requise ;
+        // le cours est re-résolu serveur puis autorisé (manageStructure) dans le
+        // contrôleur (anti-IDOR). Aucune donnée personnelle d'étudiant n'est exportée.
+        Route::get('courses/{course:slug}/exporter', [CourseBackupController::class, 'export'])
+            ->middleware('auth')
+            ->name('courses.export');
 
         // PHASE D (D1) - Tableau de bord d'analytics PAR COURS (pilotage).
         // Connexion requise ; le cours est re-résolu côté serveur (binding par slug)

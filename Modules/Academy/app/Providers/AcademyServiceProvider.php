@@ -19,6 +19,7 @@ use Modules\Academy\Livewire\CourseAnalytics;
 use Modules\Academy\Livewire\CourseAssignments;
 use Modules\Academy\Livewire\CourseCalendar;
 use Modules\Academy\Livewire\CourseCreate;
+use Modules\Academy\Livewire\CourseImport;
 use Modules\Academy\Livewire\CourseEditor;
 use Modules\Academy\Livewire\CourseRoster;
 use Modules\Academy\Livewire\Dashboard;
@@ -90,6 +91,11 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // Crée le Course (status='draft') + le CourseRole 'owner' du créateur en
         // transaction, puis redirige vers l'éditeur. Voir CourseCreate.
         Livewire::component('academy.course-create', CourseCreate::class);
+
+        // F15 - Import / restauration d'un cours depuis une sauvegarde .json (gâté
+        // create()). Téléverse -> aperçu -> confirme -> crée un cours NEUF (brouillon,
+        // owner = importateur) avec remappage des références internes. Voir CourseImport.
+        Livewire::component('academy.course-import', CourseImport::class);
 
         // PHASE 3 (FE-3) - Éditeur de cours front-end (métadonnées + structure).
         // Chaque mutation est gardée serveur par $this->authorize(...) (voir CourseEditor).

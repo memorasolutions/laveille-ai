@@ -32,16 +32,25 @@
                     </p>
 
                     {{-- D1 — Accès au tableau de bord d'analytics du cours. Gâté
-                         manageEnrollments ; la vraie garde reste authorize() serveur. --}}
-                    @can('manageEnrollments', $course)
-                        <p style="margin-bottom: 28px;">
+                         manageEnrollments ; la vraie garde reste authorize() serveur.
+                         F15 - Export (.json) de la structure du cours, gâté manageStructure
+                         (la vraie garde reste authorize() dans le contrôleur). --}}
+                    <p class="d-flex flex-wrap gap-2" style="margin-bottom: 28px;">
+                        @can('manageEnrollments', $course)
                             <x-core::button
                                 :href="route('academy.courses.analytics', $course->slug)"
                                 variant="secondary" size="sm">
                                 <span aria-hidden="true">📊</span> Voir les statistiques
                             </x-core::button>
-                        </p>
-                    @endcan
+                        @endcan
+                        @can('manageStructure', $course)
+                            <x-core::button
+                                :href="route('academy.courses.export', $course->slug)"
+                                variant="ghost" size="sm">
+                                <span aria-hidden="true">💾</span> Exporter le cours (.json)
+                            </x-core::button>
+                        @endcan
+                    </p>
 
                     @livewire('academy.course-editor', ['course' => $course])
 
