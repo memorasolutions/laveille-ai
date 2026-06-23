@@ -682,7 +682,7 @@
                                                 x-sort:config="{ handle: '[data-sort-handle]', animation: 150 }"
                                                 style="margin: 0 0 10px; display: flex; flex-direction: column; gap: 8px;">
                                                 @foreach ($lesson->lessonItems as $item)
-                                                    @php($typeLabel = ['video' => 'Vidéo', 'document' => 'Document', 'quiz' => 'Quiz'][$item->type] ?? $item->type)
+                                                    @php($typeLabel = ['video' => 'Vidéo', 'document' => 'Document', 'quiz' => 'Quiz', 'choice' => 'Sondage'][$item->type] ?? $item->type)
                                                     <li x-sort:item="{{ $item->id }}" data-sort-id="{{ $item->id }}"
                                                         wire:key="item-{{ $item->id }}"
                                                         style="border: 1px solid #F1F5F9; border-radius: var(--sys-radius-md, 0.5rem); padding: 10px 12px;">
@@ -726,7 +726,7 @@
                                                             @php($videoUrlValue = $item->payload['player_url'] ?? ($item->payload['embed'] ?? ''))
                                                             @php($posterValue = $item->payload['poster'] ?? '')
                                                             @php($durationMin = isset($item->payload['duration_seconds']) ? (int) ceil(((int) $item->payload['duration_seconds']) / 60) : '')
-                                                            <form wire:submit="updateItem({{ $item->id }}, '{{ $item->type }}', $event.target.title.value, $event.target.estimated_minutes.value, { player_url: $event.target.player_url ? $event.target.player_url.value : null, poster_url: $event.target.poster_url ? $event.target.poster_url.value : null, duration_minutes: $event.target.duration_minutes ? $event.target.duration_minutes.value : null, rich_text: $event.target.rich_text ? $event.target.rich_text.value : null, qt_bank_key: $event.target.qt_bank_key ? $event.target.qt_bank_key.value : null, passing_score: $event.target.passing_score ? $event.target.passing_score.value : null, attempts_allowed: $event.target.attempts_allowed ? $event.target.attempts_allowed.value : null, bank_category_id: $event.target.bank_category_id ? $event.target.bank_category_id.value : null, bank_draw_count: $event.target.bank_draw_count ? $event.target.bank_draw_count.value : null, bank_include_subcategories: $event.target.bank_include_subcategories ? $event.target.bank_include_subcategories.checked : null, grading_method: $event.target.grading_method ? $event.target.grading_method.value : null, shuffle_questions: $event.target.shuffle_questions ? $event.target.shuffle_questions.checked : null, shuffle_answers: $event.target.shuffle_answers ? $event.target.shuffle_answers.checked : null, time_limit_minutes: $event.target.time_limit_minutes ? $event.target.time_limit_minutes.value : null, review_options: $event.target.review_show_correctness ? { show_correctness: $event.target.review_show_correctness.checked, show_marks: $event.target.review_show_marks.checked, show_specific_feedback: $event.target.review_show_specific_feedback.checked, show_general_feedback: $event.target.review_show_general_feedback.checked, show_overall_feedback: $event.target.review_show_overall_feedback.checked, show_right_answer: $event.target.review_show_right_answer.checked } : null, question_behaviour: $event.target.question_behaviour ? $event.target.question_behaviour.value : null, adaptive_penalty: $event.target.adaptive_penalty ? $event.target.adaptive_penalty.value : null, adaptive_max_tries: $event.target.adaptive_max_tries ? $event.target.adaptive_max_tries.value : null, completion: $event.target.completion ? $event.target.completion.value : null })"
+                                                            <form wire:submit="updateItem({{ $item->id }}, '{{ $item->type }}', $event.target.title.value, $event.target.estimated_minutes.value, { player_url: $event.target.player_url ? $event.target.player_url.value : null, poster_url: $event.target.poster_url ? $event.target.poster_url.value : null, duration_minutes: $event.target.duration_minutes ? $event.target.duration_minutes.value : null, rich_text: $event.target.rich_text ? $event.target.rich_text.value : null, qt_bank_key: $event.target.qt_bank_key ? $event.target.qt_bank_key.value : null, passing_score: $event.target.passing_score ? $event.target.passing_score.value : null, attempts_allowed: $event.target.attempts_allowed ? $event.target.attempts_allowed.value : null, bank_category_id: $event.target.bank_category_id ? $event.target.bank_category_id.value : null, bank_draw_count: $event.target.bank_draw_count ? $event.target.bank_draw_count.value : null, bank_include_subcategories: $event.target.bank_include_subcategories ? $event.target.bank_include_subcategories.checked : null, grading_method: $event.target.grading_method ? $event.target.grading_method.value : null, shuffle_questions: $event.target.shuffle_questions ? $event.target.shuffle_questions.checked : null, shuffle_answers: $event.target.shuffle_answers ? $event.target.shuffle_answers.checked : null, time_limit_minutes: $event.target.time_limit_minutes ? $event.target.time_limit_minutes.value : null, review_options: $event.target.review_show_correctness ? { show_correctness: $event.target.review_show_correctness.checked, show_marks: $event.target.review_show_marks.checked, show_specific_feedback: $event.target.review_show_specific_feedback.checked, show_general_feedback: $event.target.review_show_general_feedback.checked, show_overall_feedback: $event.target.review_show_overall_feedback.checked, show_right_answer: $event.target.review_show_right_answer.checked } : null, question_behaviour: $event.target.question_behaviour ? $event.target.question_behaviour.value : null, adaptive_penalty: $event.target.adaptive_penalty ? $event.target.adaptive_penalty.value : null, adaptive_max_tries: $event.target.adaptive_max_tries ? $event.target.adaptive_max_tries.value : null, completion: $event.target.completion ? $event.target.completion.value : null, choice_question: $event.target.choice_question ? $event.target.choice_question.value : null, choice_options: $event.target.choice_options ? $event.target.choice_options.value : null, allow_multiple: $event.target.allow_multiple ? $event.target.allow_multiple.checked : null, anonymous: $event.target.anonymous ? $event.target.anonymous.checked : null, results_visibility: $event.target.results_visibility ? $event.target.results_visibility.value : null })"
                                                                   style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
                                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="item-title-{{ $item->id }}">Titre</label>
                                                                 <input id="item-title-{{ $item->id }}" type="text" name="title" value="{{ $item->title }}" aria-label="Titre de l'élément"
@@ -893,6 +893,36 @@
                                                                             <span>Afficher la bonne réponse</span>
                                                                         </label>
                                                                     </fieldset>
+
+                                                                {{-- ── CHOICE : sondage / vote simple (non noté) ── --}}
+                                                                @elseif ($item->type === 'choice')
+                                                                    @php($choiceVisibility = \Modules\Academy\Services\ChoiceService::visibility($item))
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-choiceq-{{ $item->id }}">Énoncé du sondage</label>
+                                                                    <input id="item-choiceq-{{ $item->id }}" type="text" name="choice_question" value="{{ \Modules\Academy\Services\ChoiceService::question($item) }}" placeholder="Quelle est votre préférence ?" aria-label="Énoncé du sondage"
+                                                                           style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-choiceopts-{{ $item->id }}">Options (une par ligne, au moins 2)</label>
+                                                                    <textarea id="item-choiceopts-{{ $item->id }}" name="choice_options" rows="4" placeholder="Option A&#10;Option B&#10;Option C" aria-label="Options du sondage, une par ligne"
+                                                                              style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;">{{ implode("\n", \Modules\Academy\Services\ChoiceService::options($item)) }}</textarea>
+
+                                                                    <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="item-choicemulti-{{ $item->id }}">
+                                                                        <input id="item-choicemulti-{{ $item->id }}" type="checkbox" name="allow_multiple" value="1" @checked(\Modules\Academy\Services\ChoiceService::allowsMultiple($item))
+                                                                               style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                        <span>Autoriser plusieurs réponses</span>
+                                                                    </label>
+                                                                    <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="item-choiceanon-{{ $item->id }}">
+                                                                        <input id="item-choiceanon-{{ $item->id }}" type="checkbox" name="anonymous" value="1" @checked(\Modules\Academy\Services\ChoiceService::isAnonymous($item))
+                                                                               style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                        <span>Vote anonyme (ne pas révéler qui a voté)</span>
+                                                                    </label>
+
+                                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="item-choicevis-{{ $item->id }}">Visibilité des résultats</label>
+                                                                    <select id="item-choicevis-{{ $item->id }}" name="results_visibility" aria-label="Visibilité des résultats du sondage"
+                                                                            style="width: 100%; padding: 8px 12px; min-height: 38px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                        <option value="after_vote" @selected($choiceVisibility === 'after_vote')>Après avoir voté</option>
+                                                                        <option value="always" @selected($choiceVisibility === 'always')>Toujours visibles</option>
+                                                                        <option value="never" @selected($choiceVisibility === 'never')>Jamais (formateur seulement)</option>
+                                                                    </select>
                                                                 @endif
 
                                                                 {{-- V2-c : critère d'achèvement (parité Moodle « activity completion »). --}}
@@ -904,6 +934,9 @@
                                                                     <option value="view" @selected($itemCriterion === 'view')>Automatique à la consultation</option>
                                                                     @if ($item->type === 'quiz')
                                                                         <option value="min_grade" @selected($itemCriterion === 'min_grade')>En réussissant le quiz (note de passage)</option>
+                                                                    @endif
+                                                                    @if ($item->type === 'choice')
+                                                                        <option value="vote" @selected($itemCriterion === 'vote')>En votant au sondage</option>
                                                                     @endif
                                                                 </select>
 
@@ -1085,6 +1118,34 @@
                                                 <input id="newitem-timelimit-{{ $lesson->id }}" type="number" min="1" max="240" wire:model="newItem.{{ $lesson->id }}.time_limit_minutes" placeholder="Aucune"
                                                        style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
 
+                                                <p style="font-size: 0.74rem; font-weight: 700; color: var(--sys-text-default, #1A1D23); margin: 8px 0 0;">Champs pour un sondage</p>
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-choiceq-{{ $lesson->id }}">Énoncé du sondage</label>
+                                                <input id="newitem-choiceq-{{ $lesson->id }}" type="text" wire:model="newItem.{{ $lesson->id }}.choice_question" placeholder="Quelle est votre préférence ?"
+                                                       style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                @error('choice_question') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
+
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-choiceopts-{{ $lesson->id }}">Options (une par ligne, au moins 2)</label>
+                                                <textarea id="newitem-choiceopts-{{ $lesson->id }}" wire:model="newItem.{{ $lesson->id }}.choice_options" rows="4" placeholder="Option A&#10;Option B&#10;Option C"
+                                                          style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+                                                @error('choice_options') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
+
+                                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="newitem-choicemulti-{{ $lesson->id }}">
+                                                    <input id="newitem-choicemulti-{{ $lesson->id }}" type="checkbox" wire:model="newItem.{{ $lesson->id }}.allow_multiple" style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                    <span>Autoriser plusieurs réponses</span>
+                                                </label>
+                                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="newitem-choiceanon-{{ $lesson->id }}">
+                                                    <input id="newitem-choiceanon-{{ $lesson->id }}" type="checkbox" wire:model="newItem.{{ $lesson->id }}.anonymous" style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                    <span>Vote anonyme (ne pas révéler qui a voté)</span>
+                                                </label>
+
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-choicevis-{{ $lesson->id }}">Visibilité des résultats</label>
+                                                <select id="newitem-choicevis-{{ $lesson->id }}" wire:model="newItem.{{ $lesson->id }}.results_visibility" aria-label="Visibilité des résultats du sondage"
+                                                        style="width: 100%; padding: 8px 12px; min-height: 38px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                    <option value="after_vote">Après avoir voté</option>
+                                                    <option value="always">Toujours visibles</option>
+                                                    <option value="never">Jamais (formateur seulement)</option>
+                                                </select>
+
                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-min-{{ $lesson->id }}">Durée estimée (min, facultatif)</label>
                                                 <input id="newitem-min-{{ $lesson->id }}" type="number" min="1" wire:model="newItem.{{ $lesson->id }}.estimated_minutes" placeholder="Durée estimée"
                                                        style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
@@ -1094,10 +1155,11 @@
                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-completion-{{ $lesson->id }}">Critère d'achèvement</label>
                                                 <select id="newitem-completion-{{ $lesson->id }}" wire:model="newItem.{{ $lesson->id }}.completion" aria-label="Critère d'achèvement de l'élément"
                                                         style="width: 100%; padding: 8px 12px; min-height: 38px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
-                                                    <option value="">Défaut (manuel ; quiz : réussir le quiz)</option>
+                                                    <option value="">Défaut (manuel ; quiz : réussir le quiz ; sondage : voter)</option>
                                                     <option value="manual">Manuel (l'étudiant le marque terminé)</option>
                                                     <option value="view">Automatique à la consultation</option>
                                                     <option value="min_grade">En réussissant le quiz (quiz seulement)</option>
+                                                    <option value="vote">En votant au sondage (sondage seulement)</option>
                                                 </select>
 
                                                 <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;">
@@ -1109,6 +1171,7 @@
                                                     <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'video')" variant="primary" size="sm">Ajouter une vidéo</x-core::button>
                                                     <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'document')" variant="primary" size="sm">Ajouter un document</x-core::button>
                                                     <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'quiz')" variant="primary" size="sm">Ajouter un quiz</x-core::button>
+                                                    <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'choice')" variant="primary" size="sm">Ajouter un sondage</x-core::button>
                                                 </div>
                                             </div>
                                         </details>

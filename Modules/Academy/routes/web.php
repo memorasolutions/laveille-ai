@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Academy\Http\Controllers\AcademyController;
 use Modules\Academy\Http\Controllers\CertificateController;
 use Modules\Academy\Http\Controllers\CompletionController;
+use Modules\Academy\Http\Controllers\ChoiceController;
 use Modules\Academy\Http\Controllers\CourseController;
 use Modules\Academy\Http\Controllers\EnrollmentController;
 use Modules\Academy\Http\Controllers\ExportController;
@@ -129,5 +130,12 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             'courses/{course:slug}/lessons/{lesson}/items/{itemId}/quiz/verify',
             [QuizController::class, 'verifyQuestion']
         )->name('quiz.verify');
+
+        // CHOICE — voter à un sondage (item « choice »). Auth + inscription vérifiées,
+        // item re-résolu (anti-IDOR), choix bornés aux options, 1 vote/étudiant (upsert).
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/choice/vote',
+            [ChoiceController::class, 'vote']
+        )->name('choice.vote');
     });
 });

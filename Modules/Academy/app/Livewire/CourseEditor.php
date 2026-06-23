@@ -50,7 +50,7 @@ class CourseEditor extends Component
     use WithFileUploads;
 
     /** Types d'items autorisés (liste blanche, alignée sur l'admin Backoffice). */
-    private const ITEM_TYPES = ['video', 'document', 'quiz'];
+    private const ITEM_TYPES = ['video', 'document', 'quiz', 'choice'];
 
     /** Tailles maximales (Ko) des téléversements - validées côté SERVEUR. */
     private const COVER_MAX_KB = 4096;       // ~4 Mo (image de couverture)
@@ -840,8 +840,14 @@ class CourseEditor extends Component
             // ADAPTATIF : pénalité par essai raté (% saisi) + nb d'essais maximal.
             'adaptive_penalty'    => $extra['adaptive_penalty']    ?? null,
             'adaptive_max_tries'  => $extra['adaptive_max_tries']  ?? null,
-            // V2-c : critère d'achèvement configurable (manual / view / min_grade).
+            // V2-c : critère d'achèvement configurable (manual / view / min_grade / vote).
             'completion'          => $extra['completion']          ?? null,
+            // CHOICE : énoncé + options (chaîne multiligne ou tableau) + réglages.
+            'choice_question'     => $extra['choice_question']     ?? null,
+            'choice_options'      => $extra['choice_options']      ?? null,
+            'allow_multiple'      => $extra['allow_multiple']      ?? null,
+            'anonymous'           => $extra['anonymous']           ?? null,
+            'results_visibility'  => $extra['results_visibility']  ?? null,
         ];
 
         $data    = $this->validateItem($input);
@@ -1134,7 +1140,7 @@ class CourseEditor extends Component
             $input['completion'] = null;
         }
 
-        return validator($input, [
+        $rules = [
             'type'              => ['required', Rule::in(self::ITEM_TYPES)],
             'title'             => 'required|string|max:255',
             'estimated_minutes' => 'nullable|integer|min:1',
@@ -1171,7 +1177,54 @@ class CourseEditor extends Component
             // V2-c : critère d'achèvement (liste blanche globale ; l'autorisation par
             // TYPE est appliquée au build, où min_grade sur un non-quiz est ignoré).
             'completion'         => ['nullable', Rule::in(\Modules\Academy\Services\ActivityCompletionService::CRITERIA)],
-        ])->validate();
+            // CHOICE : énoncé + réglages (les options sont validées conditionnellement).
+            'choice_question'    => 'nullable|string|max:1000',
+            'allow_multiple'     => 'nullable|boolean',
+            'anonymous'          => 'nullable|boolean',
+            'results_visibility' => ['nullable', Rule::in(\Modules\Academy\Services\ChoiceService::VISIBILITIES)],
+        ];
+
+        // CHOICE : un sondage EXIGE un énoncé et AU MOINS 2 options. On parse les options
+        // (chaîne multiligne ou tableau) AVANT validation pour que la règle « min:2 »
+        // porte sur le tableau réel (clé d'erreur lisible : choice_options).
+        if (($input['type'] ?? null) === 'choice') {
+            $input['choice_options']    = $this->parseChoiceOptions($input);
+            $rules['choice_question']   = 'required|string|max:1000';
+            $rules['choice_options']    = 'required|array|min:2|max:'.\Modules\Academy\Services\ChoiceService::MAX_OPTIONS;
+            $rules['choice_options.*']  = 'required|string|max:255';
+        }
+
+        return validator($input, $rules)->validate();
+    }
+
+    /**
+     * Parse les options d'un sondage depuis l'entrée brute : soit un tableau (déjà
+     * structuré), soit une chaîne MULTILIGNE (une option par ligne). Trim, retrait des
+     * lignes vides, dédoublonnage des libellés identiques, réindexation, cap au maximum.
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<int, string>
+     */
+    private function parseChoiceOptions(array $input): array
+    {
+        $raw = $input['choice_options'] ?? ($input['options'] ?? []);
+
+        if (is_string($raw)) {
+            $raw = preg_split('/\r\n|\r|\n/', $raw) ?: [];
+        }
+
+        $clean = [];
+        foreach ((array) $raw as $label) {
+            if (! is_string($label)) {
+                continue;
+            }
+            $label = trim($label);
+            if ($label !== '' && ! in_array($label, $clean, true)) {
+                $clean[] = $label;
+            }
+        }
+
+        return array_slice($clean, 0, \Modules\Academy\Services\ChoiceService::MAX_OPTIONS);
     }
 
     /**
@@ -1195,6 +1248,7 @@ class CourseEditor extends Component
             'video'    => $this->buildVideoPayload($input),
             'document' => ['rich_text' => (string) ($input['rich_text'] ?? '')],
             'quiz'     => $this->buildQuizPayload($input),
+            'choice'   => $this->buildChoicePayload($input),
             default    => [],
         };
 
@@ -1243,6 +1297,31 @@ class CourseEditor extends Component
         }
 
         return $payload;
+    }
+
+    /**
+     * CHOICE : construit le payload d'un sondage. Énoncé + options (>= 2, parsées),
+     * allow_multiple + anonymous (booléens, défaut false), results_visibility (liste
+     * blanche, défaut after_vote). Les options et l'énoncé sont stockés bruts ;
+     * l'échappement anti-XSS est fait AU RENDU (e() / renderRichText).
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    private function buildChoicePayload(array $input): array
+    {
+        $visibility = $input['results_visibility'] ?? null;
+        if (! in_array($visibility, \Modules\Academy\Services\ChoiceService::VISIBILITIES, true)) {
+            $visibility = \Modules\Academy\Services\ChoiceService::DEFAULT_VISIBILITY;
+        }
+
+        return [
+            'question'           => trim((string) ($input['choice_question'] ?? '')),
+            'options'            => $this->parseChoiceOptions($input),
+            'allow_multiple'     => $this->truthy($input['allow_multiple'] ?? null),
+            'anonymous'          => $this->truthy($input['anonymous'] ?? null),
+            'results_visibility' => $visibility,
+        ];
     }
 
     /**

@@ -157,6 +157,29 @@
         border-left: 3px solid var(--sys-action-primary, #064E5A);
         color: var(--sys-text-muted, #6B7280);
     }
+
+    /* ── Sondage (choice) ── */
+    .academy-choice { max-width: 56ch; }
+    .academy-choice-question { font-weight: 600; color: var(--sys-text-default, #1A1D23); margin: 0 0 0.75rem; }
+    .academy-choice-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        border: 1px solid #E5E7EB;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        color: #374151;
+        transition: border-color 0.15s, background 0.15s;
+    }
+    .academy-choice-option:hover { border-color: var(--c-primary, #064E5A); background: #F9FAFB; }
+    .academy-choice-result { margin-bottom: 10px; }
+    .academy-choice-result-head { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.88rem; color: #374151; margin-bottom: 4px; }
+    .academy-choice-result-count { color: var(--sys-text-muted, #6B7280); white-space: nowrap; }
+    .academy-choice-bar { height: 10px; background: #E5E7EB; border-radius: 999px; overflow: hidden; }
+    .academy-choice-bar-fill { display: block; height: 100%; background: var(--c-primary, #064E5A); border-radius: 999px; transition: width 0.3s; }
 </style>
 @endpush
 
@@ -200,9 +223,10 @@
                             $firstItem = $chLesson->lessonItems->first();
                             $lessonType = $firstItem?->type ?? 'doc';
                             $icon = match($lessonType) {
-                                'video' => '▶',
-                                'quiz'  => '✏️',
-                                default => '📄',
+                                'video'  => '▶',
+                                'quiz'   => '✏️',
+                                'choice' => '📊',
+                                default  => '📄',
                             };
                         @endphp
                         @php
@@ -402,6 +426,160 @@
                                 />
                             @endif
 
+                        {{-- ── TYPE CHOICE (sondage / vote simple, non noté) ── --}}
+                        @elseif($item->type === 'choice')
+                            @php
+                                $choiceOptions  = \Modules\Academy\Services\ChoiceService::options($item);
+                                $choiceQuestion = \Modules\Academy\Services\ChoiceService::question($item);
+                                $choiceMultiple = \Modules\Academy\Services\ChoiceService::allowsMultiple($item);
+                                $choiceAnon     = \Modules\Academy\Services\ChoiceService::isAnonymous($item);
+                                // Le formateur visualise via le mode prévisualisation : il voit
+                                // toujours les résultats, mais ne vote pas (aucune progression).
+                                $choiceIsManager = (bool) ($isPreview ?? false);
+                                $choiceUserVote  = (! $choiceIsManager && auth()->check())
+                                    ? \Modules\Academy\Services\ChoiceService::userVote($item, auth()->user())
+                                    : null;
+                                $choiceHasVoted    = $choiceUserVote !== null;
+                                $choiceShowResults = $choiceIsManager
+                                    || \Modules\Academy\Services\ChoiceService::resultsVisibleToStudent($item, $choiceHasVoted);
+                                $choiceTally = $choiceShowResults
+                                    ? \Modules\Academy\Services\ChoiceService::tally($item)
+                                    : null;
+                            @endphp
+                            @if($hasAccess && count($choiceOptions) >= 2)
+                                <div class="academy-choice">
+                                    {{-- Énoncé : e() (anti-XSS) ; l'énoncé est du texte simple. --}}
+                                    @if($choiceQuestion !== '')
+                                        <p class="academy-choice-question">{{ $choiceQuestion }}</p>
+                                    @endif
+
+                                    @if($choiceIsManager)
+                                        {{-- Prévisualisation : pas de vote (le gérant n'enregistre rien). --}}
+                                        <p class="text-muted p-3 rounded" style="background: #F3F4F6; font-size: 0.9rem;">
+                                            Le vote est désactivé en prévisualisation. Les résultats ci-dessous reflètent les votes réels.
+                                        </p>
+                                    @else
+                                        {{-- Formulaire de vote a11y (radio = choix unique, case = choix multiple).
+                                             Le vote est modifiable : la sélection courante est pré-cochée. --}}
+                                        <form method="POST"
+                                              action="{{ route('academy.choice.vote', [$course, $lesson, $item->id]) }}"
+                                              class="academy-choice-form">
+                                            @csrf
+                                            <fieldset style="border: 0; padding: 0; margin: 0;">
+                                                <legend class="visually-hidden">{{ $choiceQuestion !== '' ? $choiceQuestion : 'Sondage' }}</legend>
+                                                @foreach($choiceOptions as $ci => $optLabel)
+                                                    <label class="academy-choice-option" for="choice-{{ $item->id }}-{{ $ci }}">
+                                                        <input type="{{ $choiceMultiple ? 'checkbox' : 'radio' }}"
+                                                               id="choice-{{ $item->id }}-{{ $ci }}"
+                                                               name="{{ $choiceMultiple ? 'choices[]' : 'choice' }}"
+                                                               value="{{ $ci }}"
+                                                               @checked(is_array($choiceUserVote) && in_array($ci, $choiceUserVote, true))
+                                                               style="width: 24px; height: 24px; flex: 0 0 auto; margin: 0;">
+                                                        <span>{{ $optLabel }}</span>
+                                                    </label>
+                                                @endforeach
+                                            </fieldset>
+                                            <div class="mt-3">
+                                                <x-core::button type="submit" variant="primary" size="sm">
+                                                    {{ $choiceHasVoted ? 'Modifier mon vote' : 'Voter' }}
+                                                </x-core::button>
+                                            </div>
+                                        </form>
+
+                                        @if($choiceHasVoted)
+                                            <p class="mt-2" role="status" style="font-size: 0.85rem; color: #166534;">
+                                                ✅ Votre vote est enregistré. Vous pouvez le modifier à tout moment.
+                                            </p>
+                                        @endif
+                                    @endif
+
+                                    {{-- Résultats agrégés (selon la visibilité). On ne montre QUE des
+                                         comptes/pourcentages anonymisés, jamais l'identité des votants. --}}
+                                    @if($choiceShowResults && $choiceTally)
+                                        <div class="academy-choice-results mt-3" role="group" aria-label="Résultats du sondage">
+                                            @foreach($choiceTally['options'] as $row)
+                                                <div class="academy-choice-result">
+                                                    <div class="academy-choice-result-head">
+                                                        <span>{{ $row['label'] }}</span>
+                                                        <span class="academy-choice-result-count">{{ $row['count'] }} ({{ $row['percent'] }}%)</span>
+                                                    </div>
+                                                    <div class="academy-choice-bar" role="presentation">
+                                                        <span class="academy-choice-bar-fill" style="width: {{ $row['percent'] }}%;"></span>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                            <p class="text-muted mt-1" style="font-size: 0.8rem;">
+                                                {{ $choiceTally['total_voters'] }} {{ $choiceTally['total_voters'] === 1 ? 'votant' : 'votants' }}
+                                            </p>
+                                        </div>
+
+                                        {{-- Liste des votants : UNIQUEMENT au formateur (prévisualisation) ET
+                                             si le sondage n'est PAS anonyme. Jamais affichée à un étudiant. --}}
+                                        @if($choiceIsManager && !$choiceAnon)
+                                            @php
+                                                $choiceVoters = \Modules\Academy\Services\ChoiceService::voters($item);
+                                            @endphp
+                                            @if($choiceVoters->isNotEmpty())
+                                                <div class="mt-2" style="font-size: 0.82rem; color: var(--sys-text-muted, #6B7280);">
+                                                    <strong>Votants :</strong>
+                                                    {{ $choiceVoters->map(fn ($u) => $u->name ?? $u->email)->implode(', ') }}
+                                                </div>
+                                            @endif
+                                        @endif
+                                    @elseif(!$choiceIsManager && \Modules\Academy\Services\ChoiceService::visibility($item) === 'after_vote' && !$choiceHasVoted)
+                                        <p class="text-muted mt-2" style="font-size: 0.85rem;">
+                                            Les résultats s'afficheront après votre vote.
+                                        </p>
+                                    @endif
+                                </div>
+                            @else
+                                {{-- Accès refusé (même logique que les autres types : rien dans le DOM). --}}
+                                <div class="academy-gated-panel">
+                                    <div class="gated-icon">🔐</div>
+                                    <div class="gated-title">
+                                        @if(!auth()->check())
+                                            Connexion requise pour participer au sondage
+                                        @elseif(!$isEnrolled)
+                                            Inscrivez-vous pour participer à ce sondage
+                                        @else
+                                            Sondage en cours de préparation
+                                        @endif
+                                    </div>
+                                    <p class="gated-sub">
+                                        @if(!auth()->check())
+                                            Créez un compte gratuit ou connectez-vous pour voter.
+                                        @elseif(!$isEnrolled && $isFree)
+                                            Ce cours est gratuit - inscrivez-vous pour participer.
+                                        @elseif(!$isEnrolled && !$isFree)
+                                            Ce cours est payant - achetez-le pour accéder à l'ensemble du contenu.
+                                        @else
+                                            Votre inscription vous donne accès à l'ensemble du contenu.
+                                        @endif
+                                    </p>
+                                    @if(!auth()->check())
+                                        <span class="d-inline-flex flex-wrap gap-2 justify-content-center">
+                                            <x-core::button :href="Route::has('login') ? route('login') : '#'" variant="primary" size="sm">
+                                                Se connecter
+                                            </x-core::button>
+                                            <x-core::button :href="Route::has('register') ? route('register') : '#'" variant="secondary" size="sm">
+                                                Créer un compte
+                                            </x-core::button>
+                                        </span>
+                                    @elseif(!$isEnrolled && $isFree)
+                                        <form action="{{ route('academy.courses.enroll', $course) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <x-core::button type="submit" variant="primary" size="sm">
+                                                S'inscrire gratuitement
+                                            </x-core::button>
+                                        </form>
+                                    @elseif(!$isEnrolled && !$isFree)
+                                        <x-core::button :href="route('academy.courses.purchase', $course)" variant="primary" size="sm">
+                                            Acheter ce cours
+                                        </x-core::button>
+                                    @endif
+                                </div>
+                            @endif
+
                         {{-- ── TYPE DOC ── --}}
                         @elseif(in_array($item->type, ['doc', 'document'], true))
                             @if($hasAccess)
@@ -515,7 +693,7 @@
                                 <p class="mt-3" style="font-size: 0.9rem; color: #166534;" role="status">
                                     ✅ Terminé
                                 </p>
-                            @elseif($itemCriterion === 'manual' && in_array($item->type, ['video', 'doc', 'document']))
+                            @elseif($itemCriterion === 'manual' && in_array($item->type, ['video', 'doc', 'document', 'choice']))
                                 <form method="POST"
                                       action="{{ route('academy.lessons.complete', [$course, $lesson, $item->id]) }}"
                                       class="mt-3">

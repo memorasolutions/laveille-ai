@@ -15,6 +15,8 @@
  *   - view       : complété AUTOMATIQUEMENT à la consultation de la leçon (idempotent) ;
  *   - min_grade  : item quiz complété UNIQUEMENT si réussi (note ≥ passing_score) -
  *                 c'est le comportement HISTORIQUE d'un quiz, donc son DÉFAUT.
+ *   - vote       : item « choice » (sondage) complété dès que l'étudiant a voté -
+ *                 c'est le comportement naturel d'un sondage, donc son DÉFAUT.
  *
  * RÉTROCOMPATIBILITÉ STRICTE (le cœur du design) : un item SANS payload['completion']
  * retombe sur le DÉFAUT PROPRE À SON TYPE - 'min_grade' pour un quiz, 'manual' pour le
@@ -35,28 +37,36 @@ use Modules\Academy\Models\LessonItem;
 final class ActivityCompletionService
 {
     /** Critères de complétion connus (liste blanche globale). */
-    public const CRITERIA = ['manual', 'view', 'min_grade'];
+    public const CRITERIA = ['manual', 'view', 'min_grade', 'vote'];
 
     /**
      * Critères autorisés pour un TYPE d'item donné (liste blanche serveur).
-     * min_grade n'a de sens que pour un quiz (relie V1-c / QuizGradeService).
+     * min_grade n'a de sens que pour un quiz (relie V1-c / QuizGradeService) ;
+     * vote n'a de sens que pour un sondage « choice ».
      *
      * @return array<int, string>
      */
     public static function allowedForType(string $type): array
     {
-        return $type === 'quiz'
-            ? ['min_grade', 'view', 'manual']
-            : ['manual', 'view'];
+        return match ($type) {
+            'quiz'   => ['min_grade', 'view', 'manual'],
+            'choice' => ['vote', 'view', 'manual'],
+            default  => ['manual', 'view'],
+        };
     }
 
     /**
-     * Critère par défaut d'un type (= comportement HISTORIQUE) : un quiz se complète
-     * à la réussite (min_grade), tout le reste par clic manuel.
+     * Critère par défaut d'un type (= comportement HISTORIQUE/naturel) : un quiz se
+     * complète à la réussite (min_grade), un sondage en votant (vote), le reste par
+     * clic manuel.
      */
     public static function defaultForType(string $type): string
     {
-        return $type === 'quiz' ? 'min_grade' : 'manual';
+        return match ($type) {
+            'quiz'   => 'min_grade',
+            'choice' => 'vote',
+            default  => 'manual',
+        };
     }
 
     /** @return array<int, string> */
@@ -119,6 +129,7 @@ final class ActivityCompletionService
         return match ($criterion) {
             'view'      => 'se complète automatiquement à la consultation',
             'min_grade' => 'se complète en réussissant le quiz',
+            'vote'      => 'se complète en votant',
             default     => 'à marquer comme terminé',
         };
     }
