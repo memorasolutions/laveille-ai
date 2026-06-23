@@ -22,9 +22,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Modules\Academy\Http\Controllers\Concerns\AuthorizesAcademyAccess;
 use Modules\Academy\Models\ChoiceResponse;
 use Modules\Academy\Models\Course;
-use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Services\ActivityCompletionService;
@@ -33,6 +33,8 @@ use Modules\Academy\Services\CompletionService;
 
 class ChoiceController extends Controller
 {
+    use AuthorizesAcademyAccess;
+
     /**
      * POST academy.choice.vote
      */
@@ -102,34 +104,5 @@ class ChoiceController extends Controller
             ->route('academy.lessons.show', [$course, $lesson])
             ->withFragment("item-{$item->id}")
             ->with('success', 'Votre vote a été enregistré.');
-    }
-
-    /**
-     * Auth + inscription active + appartenance item → leçon → cours (anti-IDOR).
-     * Calque EXACT de QuizController::authorizeAccess.
-     */
-    private function authorizeAccess(Course $course, Lesson $lesson, LessonItem $item): void
-    {
-        if (! Auth::check()) {
-            abort(403);
-        }
-
-        if ((int) $item->lesson_id !== $lesson->id) {
-            abort(404);
-        }
-
-        $lesson->loadMissing('chapter');
-        if ((int) $lesson->chapter->course_id !== $course->id) {
-            abort(404);
-        }
-
-        $isEnrolled = Enrollment::where('user_id', Auth::id())
-            ->where('course_id', $course->id)
-            ->where('status', 'active')
-            ->exists();
-
-        if (! $isEnrolled) {
-            abort(403);
-        }
     }
 }

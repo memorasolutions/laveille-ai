@@ -113,6 +113,24 @@ class LessonController extends Controller
             \Modules\Academy\Services\ActivityCompletionService::autoMarkViewItems(auth()->user(), $lesson);
         }
 
+        // 5e. C3 (anti N+1) - Précharge en UNE requête les votes « choice » de
+        //     l'utilisateur courant pour TOUS les items de la leçon. Le lecteur consulte
+        //     ensuite cette map au lieu de requêter par item. Vide si anonyme ou en
+        //     prévisualisation (le gérant ne vote pas).
+        $choiceVotes = collect();
+        if (! $isPreview && auth()->check()) {
+            $choiceItemIds = $lesson->lessonItems
+                ->where('type', 'choice')
+                ->pluck('id');
+
+            if ($choiceItemIds->isNotEmpty()) {
+                $choiceVotes = \Modules\Academy\Services\ChoiceService::preloadUserVotes(
+                    $choiceItemIds,
+                    auth()->user()
+                );
+            }
+        }
+
         // 6. Navigation préc/suiv
         $allLessons = $course->chapters->flatMap(fn ($ch) => $ch->lessons);
         $currentIndex = $allLessons->search(fn ($l) => $l->id === $lesson->id);
@@ -148,6 +166,7 @@ class LessonController extends Controller
             'isDripLocked',
             'dripAvailableAt',
             'dripLockedLessonIds',
+            'choiceVotes',
         ));
     }
 }

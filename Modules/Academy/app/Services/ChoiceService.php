@@ -84,12 +84,27 @@ final class ChoiceService
     /**
      * Le vote (indices choisis) d'un utilisateur pour cet item, ou null s'il n'a pas voté.
      *
+     * Perf (C3 - anti N+1) : si une leçon contient PLUSIEURS items « choice », le lecteur
+     * appellerait une requête par item. On accepte un `$preloaded` (votes de l'utilisateur
+     * pour TOUS les items de la leçon, chargés en UNE requête via {@see preloadUserVotes})
+     * indexé par `lesson_item_id`. Quand il est fourni il fait AUTORITÉ (aucune requête) :
+     * item absent = pas de vote. Sans `$preloaded`, comportement INCHANGÉ (1 requête).
+     *
+     * @param  \Illuminate\Support\Collection<int, ChoiceResponse>|null  $preloaded
      * @return array<int, int>|null
      */
-    public static function userVote(LessonItem $item, ?User $user): ?array
+    public static function userVote(LessonItem $item, ?User $user, $preloaded = null): ?array
     {
         if ($user === null) {
             return null;
+        }
+
+        if ($preloaded !== null) {
+            $response = $preloaded->get($item->id);
+
+            return $response === null
+                ? null
+                : array_values(array_map('intval', (array) $response->choices));
         }
 
         $response = ChoiceResponse::where('lesson_item_id', $item->id)
@@ -103,9 +118,40 @@ final class ChoiceService
         return array_values(array_map('intval', (array) $response->choices));
     }
 
-    public static function hasVoted(LessonItem $item, ?User $user): bool
+    /**
+     * Précharge en UNE requête les votes d'un utilisateur pour un lot d'items « choice »
+     * (anti N+1, C3). Retourne une collection de {@see ChoiceResponse} indexée par
+     * `lesson_item_id`, à passer en `$preloaded` de {@see userVote}. Vide si pas
+     * d'utilisateur ou pas d'item.
+     *
+     * @param  iterable<int, LessonItem|int>  $items
+     * @return \Illuminate\Support\Collection<int, ChoiceResponse>
+     */
+    public static function preloadUserVotes(iterable $items, ?User $user): \Illuminate\Support\Collection
     {
-        return self::userVote($item, $user) !== null;
+        if ($user === null) {
+            return collect();
+        }
+
+        $itemIds = [];
+        foreach ($items as $it) {
+            $itemIds[] = (int) (is_object($it) ? $it->id : $it);
+        }
+        $itemIds = array_values(array_unique($itemIds));
+
+        if ($itemIds === []) {
+            return collect();
+        }
+
+        return ChoiceResponse::where('user_id', $user->id)
+            ->whereIn('lesson_item_id', $itemIds)
+            ->get(['lesson_item_id', 'choices'])
+            ->keyBy('lesson_item_id');
+    }
+
+    public static function hasVoted(LessonItem $item, ?User $user, $preloaded = null): bool
+    {
+        return self::userVote($item, $user, $preloaded) !== null;
     }
 
     /**
@@ -122,7 +168,10 @@ final class ChoiceService
         $counts = array_fill(0, count($options), 0);
         $voters = 0;
 
-        foreach (ChoiceResponse::where('lesson_item_id', $item->id)->get() as $response) {
+        // Perf (C3) : on ne sélectionne QUE la colonne `choices` et on parcourt en
+        // flux (lazy / curseur paginé) plutôt que de charger toutes les lignes et
+        // toutes les colonnes en mémoire. Résultat identique, empreinte mémoire bornée.
+        foreach (ChoiceResponse::where('lesson_item_id', $item->id)->select('choices')->lazy() as $response) {
             $voters++;
             foreach ((array) $response->choices as $idx) {
                 $idx = (int) $idx;

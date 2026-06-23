@@ -15,8 +15,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Modules\Academy\Http\Controllers\Concerns\AuthorizesAcademyAccess;
 use Modules\Academy\Models\Course;
-use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Models\QuestionCategory;
@@ -29,6 +29,8 @@ use Modules\Academy\Services\QuizService;
 
 class QuizController extends Controller
 {
+    use AuthorizesAcademyAccess;
+
     /**
      * POST academy.quiz.start
      *
@@ -543,38 +545,6 @@ class QuizController extends Controller
         $rounded = round($value, 4);
 
         return $rounded === (float) (int) $rounded ? (int) $rounded : $rounded;
-    }
-
-    /**
-     * Vérifie que l'utilisateur est authentifié, inscrit, et que l'item appartient à la leçon
-     * qui appartient au cours. Abort 403/404 sinon.
-     */
-    private function authorizeAccess(Course $course, Lesson $lesson, LessonItem $item): void
-    {
-        if (! Auth::check()) {
-            abort(403);
-        }
-
-        // Item appartient à la leçon
-        if ((int) $item->lesson_id !== $lesson->id) {
-            abort(404);
-        }
-
-        // Leçon appartient au cours (via chapter)
-        $lesson->loadMissing('chapter');
-        if ((int) $lesson->chapter->course_id !== $course->id) {
-            abort(404);
-        }
-
-        // Inscription active
-        $isEnrolled = Enrollment::where('user_id', Auth::id())
-            ->where('course_id', $course->id)
-            ->where('status', 'active')
-            ->exists();
-
-        if (! $isEnrolled) {
-            abort(403);
-        }
     }
 
     /**

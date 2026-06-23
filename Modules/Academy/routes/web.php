@@ -83,9 +83,9 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
     // M6 — Certificats publics vérifiables (pas d'auth requise)
     Route::get('certificats/{public_url_slug}', [CertificateController::class, 'show'])->name('certificates.show');
 
-    // M1 — Inscription à un cours (auth requis)
+    // M1 — Inscription à un cours (auth requis). throttle:20,1 = anti-DoS léger (C2).
     Route::post('courses/{course}/enroll', [EnrollmentController::class, 'store'])
-        ->middleware('auth')
+        ->middleware(['auth', 'throttle:20,1'])
         ->name('courses.enroll');
 
     // M5 — Achat d'un cours payant via Stripe Checkout (auth requis)
@@ -103,8 +103,10 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             Route::get('/progress', [ExportController::class, 'exportProgress'])->name('progress');
         });
 
-    // M4 — Complétion, quiz
-    Route::middleware('auth')->group(function () {
+    // M4 — Complétion, quiz, vote. throttle:20,1 (20 req/min/utilisateur) = anti-DoS
+    // léger sur les MUTATIONS étudiant POST (C2). Ne bride QUE ces POST gardés `auth` ;
+    // les GET (lecture) et l'admin ne sont jamais affectés.
+    Route::middleware(['auth', 'throttle:20,1'])->group(function () {
         // Bouton « Marquer comme terminé » (video / doc)
         Route::post(
             'courses/{course:slug}/lessons/{lesson}/items/{itemId}/complete',

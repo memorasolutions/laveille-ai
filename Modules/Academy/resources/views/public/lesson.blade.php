@@ -436,8 +436,12 @@
                                 // Le formateur visualise via le mode prévisualisation : il voit
                                 // toujours les résultats, mais ne vote pas (aucune progression).
                                 $choiceIsManager = (bool) ($isPreview ?? false);
+                                // C3 (anti N+1) : on consulte la map préchargée par le
+                                // contrôleur (1 requête pour toute la leçon) au lieu de
+                                // requêter par item. Repli inoffensif si la variable
+                                // n'est pas fournie (ex. autre point d'entrée).
                                 $choiceUserVote  = (! $choiceIsManager && auth()->check())
-                                    ? \Modules\Academy\Services\ChoiceService::userVote($item, auth()->user())
+                                    ? \Modules\Academy\Services\ChoiceService::userVote($item, auth()->user(), $choiceVotes ?? null)
                                     : null;
                                 $choiceHasVoted    = $choiceUserVote !== null;
                                 $choiceShowResults = $choiceIsManager
@@ -488,7 +492,7 @@
 
                                         @if($choiceHasVoted)
                                             <p class="mt-2" role="status" style="font-size: 0.85rem; color: #166534;">
-                                                ✅ Votre vote est enregistré. Vous pouvez le modifier à tout moment.
+                                                <span aria-hidden="true">✅</span> Votre vote est enregistré. Vous pouvez le modifier à tout moment.
                                             </p>
                                         @endif
                                     @endif
@@ -522,7 +526,7 @@
                                             @if($choiceVoters->isNotEmpty())
                                                 <div class="mt-2" style="font-size: 0.82rem; color: var(--sys-text-muted, #6B7280);">
                                                     <strong>Votants :</strong>
-                                                    {{ $choiceVoters->map(fn ($u) => $u->name ?? $u->email)->implode(', ') }}
+                                                    {{ $choiceVoters->map(fn ($u) => $u->name ?? '(nom inconnu)')->implode(', ') }}
                                                 </div>
                                             @endif
                                         @endif
