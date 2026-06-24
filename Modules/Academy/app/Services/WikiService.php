@@ -28,6 +28,7 @@ namespace Modules\Academy\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Models\WikiPage;
@@ -162,21 +163,26 @@ final class WikiService
      */
     public static function applyEdit(WikiPage $page, ?int $userId, string $title, string $body): void
     {
-        WikiRevision::create([
-            'wiki_page_id' => $page->id,
-            'user_id'      => $page->edited_by,
-            'title'        => $page->title,
-            'body'         => $page->body,
-            'revision'     => $page->revision,
-            'snapshot_at'  => now(),
-        ]);
+        // Transaction : le snapshot de révision ET l'incrément du numéro de révision de la
+        // page doivent être atomiques. Sinon, un échec de l'update après la création de la
+        // révision laisserait deux révisions au même numéro (journal incohérent).
+        DB::transaction(function () use ($page, $userId, $title, $body): void {
+            WikiRevision::create([
+                'wiki_page_id' => $page->id,
+                'user_id'      => $page->edited_by,
+                'title'        => $page->title,
+                'body'         => $page->body,
+                'revision'     => $page->revision,
+                'snapshot_at'  => now(),
+            ]);
 
-        $page->update([
-            'title'     => $title,
-            'body'      => $body,
-            'edited_by' => $userId,
-            'revision'  => $page->revision + 1,
-        ]);
+            $page->update([
+                'title'     => $title,
+                'body'      => $body,
+                'edited_by' => $userId,
+                'revision'  => $page->revision + 1,
+            ]);
+        });
     }
 
     /**
