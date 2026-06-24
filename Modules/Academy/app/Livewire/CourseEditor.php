@@ -52,7 +52,7 @@ class CourseEditor extends Component
     use WithFileUploads;
 
     /** Types d'items autorisés (liste blanche, alignée sur l'admin Backoffice). */
-    private const ITEM_TYPES = ['video', 'document', 'quiz', 'choice', 'feedback', 'forum', 'h5p'];
+    private const ITEM_TYPES = ['video', 'document', 'quiz', 'choice', 'feedback', 'forum', 'wiki', 'h5p'];
 
     /** Tailles maximales (Ko) des téléversements - validées côté SERVEUR. */
     private const COVER_MAX_KB = 4096;       // ~4 Mo (image de couverture)
@@ -907,7 +907,7 @@ class CourseEditor extends Component
 
         $position = (int) LessonItem::where('lesson_id', $lesson->id)->max('position') + 1;
 
-        LessonItem::create([
+        $item = LessonItem::create([
             'lesson_id'         => $lesson->id,
             'type'              => $data['type'],
             'title'             => $data['title'],
@@ -917,6 +917,11 @@ class CourseEditor extends Component
             'is_required'       => (bool) ($input['is_required'] ?? false),
             'external_ref'      => $data['external_ref'] ?? null,
         ]);
+
+        // F19 - WIKI : garantir la page d'accueil dès la création de l'item (parité Moodle).
+        if ($data['type'] === 'wiki') {
+            \Modules\Academy\Services\WikiService::ensureHomePage($item, (int) auth()->id() ?: null);
+        }
 
         unset($this->newItem[$lessonId]);
         $this->flashSaved('Élément ajouté.');
@@ -1129,6 +1134,9 @@ class CourseEditor extends Component
             'forum_intro'          => $extra['forum_intro']          ?? null,
             'allow_student_topics' => $extra['allow_student_topics'] ?? null,
             'locked'               => $extra['locked']               ?? null,
+            // WIKI : intro + édition collaborative (allow_student_edit).
+            'wiki_intro'           => $extra['wiki_intro']           ?? null,
+            'allow_student_edit'   => $extra['allow_student_edit']   ?? null,
         ] + $h5pPreserve;
 
         $data    = $this->validateItem($input);
@@ -1635,6 +1643,10 @@ class CourseEditor extends Component
             'forum_intro'         => 'nullable|string|max:2000',
             'allow_student_topics' => 'nullable|boolean',
             'locked'              => 'nullable|boolean',
+            // WIKI : intro facultative + édition collaborative (le défaut « allow_student_edit »
+            // = true est appliqué au build quand la clé est absente).
+            'wiki_intro'          => 'nullable|string|max:2000',
+            'allow_student_edit'  => 'nullable|boolean',
         ];
 
         // FEEDBACK : un questionnaire EXIGE AU MOINS UNE question valide. On normalise les
@@ -1714,6 +1726,7 @@ class CourseEditor extends Component
             'choice'   => $this->buildChoicePayload($input),
             'feedback' => $this->buildFeedbackPayload($input),
             'forum'    => $this->buildForumPayload($input),
+            'wiki'     => $this->buildWikiPayload($input),
             'h5p'      => $this->buildH5pPayload($input),
             default    => [],
         };
@@ -1828,6 +1841,23 @@ class CourseEditor extends Component
             'intro'                => trim((string) ($input['forum_intro'] ?? '')),
             'allow_student_topics' => $allow === null ? true : $this->truthy($allow),
             'locked'               => $this->truthy($input['locked'] ?? null),
+        ];
+    }
+
+    /**
+     * F19 - WIKI : intro facultative + édition collaborative (allow_student_edit, défaut
+     * true quand la clé est absente). Aucune nouvelle colonne (payload), comme le forum.
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    private function buildWikiPayload(array $input): array
+    {
+        $allow = $input['allow_student_edit'] ?? null;
+
+        return [
+            'intro'              => trim((string) ($input['wiki_intro'] ?? '')),
+            'allow_student_edit' => $allow === null ? true : $this->truthy($allow),
         ];
     }
 

@@ -233,6 +233,24 @@
     .academy-forum-text { width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: 8px; resize: vertical; font: inherit; }
     .academy-forum-field { width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: 8px; font: inherit; margin-bottom: 8px; }
     .academy-forum-mod { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
+    .academy-wiki { max-width: 72ch; }
+    .academy-wiki-intro { color: var(--sys-text-muted, #6B7280); margin: 0 0 1rem; font-size: 0.95rem; }
+    .academy-wiki-layout { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+    .academy-wiki-nav { flex: 0 0 220px; min-width: 200px; border: 1px solid #E5E7EB; border-radius: 10px; padding: 10px 12px; background: #fff; }
+    .academy-wiki-nav ul { list-style: none; margin: 6px 0 0; padding: 0; }
+    .academy-wiki-nav li { margin: 2px 0; }
+    .academy-wiki-nav a { display: block; padding: 4px 8px; border-radius: 6px; color: var(--sys-text-default, #1A1D23); text-decoration: none; font-size: 0.88rem; }
+    .academy-wiki-nav a[aria-current="page"] { background: #E0F2F1; color: #064E5A; font-weight: 700; }
+    .academy-wiki-main { flex: 1 1 320px; min-width: 280px; }
+    .academy-wiki-page-title { font-weight: 700; color: var(--sys-text-default, #1A1D23); margin: 0; }
+    .academy-wiki-meta { font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 2px 0 10px; }
+    .academy-wiki-badge { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: #E0F2F1; color: #064E5A; margin-left: 6px; }
+    .academy-wiki-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 10px 0; }
+    .academy-wiki-field { width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: 8px; font: inherit; margin-bottom: 8px; }
+    .academy-wiki-text { width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: 8px; resize: vertical; font: inherit; }
+    .academy-wiki-rev { padding: 8px 10px; margin: 6px 0; background: #F9FAFB; border-radius: 8px; font-size: 0.85rem; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+    .academy-wiki-link { color: #064E5A; text-decoration: underline; }
+    .academy-wiki-missing { color: #B45309; text-decoration: underline dotted; }
     /* F18 - notes (étoiles) + commentaires */
     .academy-engage { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #E5E7EB; max-width: 64ch; }
     .academy-rating { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
@@ -302,6 +320,7 @@
                                 'choice'   => '📊',
                                 'feedback' => '📝',
                                 'forum'    => '💬',
+                                'wiki'     => '📖',
                                 'h5p'      => '🧩',
                                 default    => '📄',
                             };
@@ -1087,6 +1106,216 @@
                                         <x-core::button :href="route('academy.courses.purchase', $course)" variant="primary" size="sm">
                                             Acheter ce cours
                                         </x-core::button>
+                                    @endif
+                                </div>
+                            @endif
+
+                        {{-- ── TYPE WIKI (F19) : pages collaboratives + historique ── --}}
+                        @elseif($item->type === 'wiki')
+                            @php
+                                $wikiIntro       = \Modules\Academy\Services\WikiService::intro($item);
+                                $wikiAllowEdit   = \Modules\Academy\Services\WikiService::allowsStudentEdit($item);
+                                // Gérant de CE cours (admin OU owner/instructor) : modère ET contribue
+                                // même hors inscription. L'autorisation réelle est TOUJOURS re-vérifiée
+                                // serveur (WikiController) ; ici c'est de l'affichage.
+                                $wikiCanModerate = auth()->check() && auth()->user()->can('manageEnrollments', $course);
+                                $wikiPages       = ($hasAccess || $wikiCanModerate)
+                                    ? \Modules\Academy\Services\WikiService::pages($item)
+                                    : collect();
+                                // Page courante : ?wpage_{id}=slug, sinon accueil, sinon 1re page.
+                                $wikiSlug    = request('wpage_'.$item->id);
+                                $wikiCurrent = $wikiSlug ? $wikiPages->firstWhere('slug', $wikiSlug) : null;
+                                $wikiCurrent = $wikiCurrent ?: ($wikiPages->firstWhere('is_home', true) ?: $wikiPages->first());
+                                // Peut créer une page : gérant toujours ; étudiant si inscrit + édition permise.
+                                $wikiCanCreate = $wikiCanModerate || ($hasAccess && auth()->check() && $wikiAllowEdit);
+                                // Peut éditer la page courante : gérant ; ou inscrit + édition permise + page non verrouillée.
+                                $wikiCanEdit = $wikiCurrent && ($wikiCanModerate || ($hasAccess && auth()->check() && $wikiAllowEdit && ! $wikiCurrent->is_locked));
+                                // Peut restaurer : gérant ; ou auteur (created_by) sous les mêmes règles d'édition.
+                                $wikiCanRestore = $wikiCurrent && ($wikiCanModerate || ($wikiCanEdit && (int) ($wikiCurrent->created_by ?? 0) === (int) auth()->id()));
+                                // Historique demandé pour la page courante ?
+                                $wikiHistOpen  = $wikiCurrent && (int) request('whist_'.$item->id) === (int) $wikiCurrent->id;
+                                $wikiRevisions = $wikiHistOpen ? \Modules\Academy\Services\WikiService::revisions($wikiCurrent) : null;
+                            @endphp
+                            @if($hasAccess || $wikiCanModerate)
+                                <div class="academy-wiki">
+                                    @if($wikiIntro !== '')
+                                        <p class="academy-wiki-intro">{{ $wikiIntro }}</p>
+                                    @endif
+
+                                    @if(! $wikiAllowEdit)
+                                        <p class="text-muted p-2 rounded" style="background: #F3F4F6; font-size: 0.85rem;">
+                                            <span aria-hidden="true">🔒</span> Wiki en lecture seule pour les étudiants.
+                                            @if($wikiCanModerate) (Vous pouvez tout de même éditer en tant que gérant.) @endif
+                                        </p>
+                                    @endif
+
+                                    <div class="academy-wiki-layout">
+                                        {{-- Navigation : pages (accueil en tête) + nouvelle page. --}}
+                                        <nav class="academy-wiki-nav" aria-label="Pages du wiki">
+                                            <strong style="font-size: 0.8rem;">Pages</strong>
+                                            <ul>
+                                                @forelse($wikiPages as $p)
+                                                    <li>
+                                                        <a href="?wpage_{{ $item->id }}={{ urlencode($p->slug) }}#item-{{ $item->id }}"
+                                                           @if($wikiCurrent && $p->id === $wikiCurrent->id) aria-current="page" @endif>
+                                                            @if($p->is_home)<span aria-hidden="true" title="Accueil">🏠</span> @endif
+                                                            {{ $p->title }}
+                                                            @if($p->is_locked)<span aria-hidden="true" title="Verrouillée">🔒</span><span class="visually-hidden">Verrouillée</span>@endif
+                                                        </a>
+                                                    </li>
+                                                @empty
+                                                    <li class="text-muted" style="font-size: 0.82rem; padding: 4px 8px;">Aucune page pour l'instant.</li>
+                                                @endforelse
+                                            </ul>
+
+                                            @if($wikiCanCreate)
+                                                <details class="mt-2">
+                                                    <summary style="cursor: pointer; font-size: 0.82rem; font-weight: 600;">+ Nouvelle page</summary>
+                                                    <form method="POST" action="{{ route('academy.wiki.pages.create', [$course, $lesson, $item->id]) }}" class="mt-1">
+                                                        @csrf
+                                                        {{-- Honeypot MAISON : doit rester vide ; hors écran, non focusable. --}}
+                                                        <div aria-hidden="true" style="position: absolute; left: -9999px; top: -9999px;">
+                                                            <label for="wiki-hp-{{ $item->id }}">Ne pas remplir</label>
+                                                            <input type="text" id="wiki-hp-{{ $item->id }}" name="{{ \Modules\Academy\Services\WikiService::HONEYPOT }}" tabindex="-1" autocomplete="off">
+                                                        </div>
+                                                        <label for="wiki-new-title-{{ $item->id }}" style="font-size: 0.8rem; font-weight: 600;">Titre de la page</label>
+                                                        <input type="text" id="wiki-new-title-{{ $item->id }}" name="title" class="academy-wiki-field"
+                                                               maxlength="{{ \Modules\Academy\Services\WikiService::TITLE_MAX }}" required>
+                                                        <label for="wiki-new-body-{{ $item->id }}" style="font-size: 0.8rem; font-weight: 600;">Contenu (markdown ; lien interne : [[Titre]])</label>
+                                                        <textarea id="wiki-new-body-{{ $item->id }}" name="body" class="academy-wiki-text" rows="4"
+                                                                  maxlength="{{ \Modules\Academy\Services\WikiService::BODY_MAX }}"></textarea>
+                                                        <div class="mt-2"><x-core::button type="submit" variant="primary" size="sm">Créer la page</x-core::button></div>
+                                                    </form>
+                                                </details>
+                                            @endif
+                                        </nav>
+
+                                        {{-- Contenu de la page courante. --}}
+                                        <div class="academy-wiki-main">
+                                            @if($wikiCurrent)
+                                                <h3 class="academy-wiki-page-title">
+                                                    {{ $wikiCurrent->title }}
+                                                    @if($wikiCurrent->is_locked)<span class="academy-wiki-badge"><span aria-hidden="true">🔒</span> Verrouillée</span>@endif
+                                                </h3>
+                                                <p class="academy-wiki-meta">
+                                                    Version {{ $wikiCurrent->revision }} · modifiée par {{ $wikiCurrent->editor?->name ?? '(inconnu)' }}
+                                                    @if($wikiCurrent->updated_at) · {{ $wikiCurrent->updated_at->diffForHumans() }} @endif
+                                                </p>
+
+                                                {{-- SÉCURITÉ : renderBody = markdown html_input=strip (anti-XSS) + liens [[..]] internes. --}}
+                                                <div class="prose academy-richtext">{!! \Modules\Academy\Services\WikiService::renderBody($item, $wikiCurrent, $wikiPages) !!}</div>
+
+                                                <div class="academy-wiki-actions">
+                                                    {{-- Historique (lecture seule) : bascule via paramètre de requête. --}}
+                                                    @if($wikiHistOpen)
+                                                        <x-core::button :href="'?wpage_'.$item->id.'='.urlencode($wikiCurrent->slug).'#item-'.$item->id" variant="ghost" size="sm">Masquer l'historique</x-core::button>
+                                                    @else
+                                                        <x-core::button :href="'?wpage_'.$item->id.'='.urlencode($wikiCurrent->slug).'&whist_'.$item->id.'='.$wikiCurrent->id.'#item-'.$item->id" variant="ghost" size="sm">Historique ({{ $wikiCurrent->revision - 1 }})</x-core::button>
+                                                    @endif
+
+                                                    {{-- Modération (gérant) : verrouiller (bascule) + supprimer (sauf accueil, 2 temps). --}}
+                                                    @if($wikiCanModerate)
+                                                        <form method="POST" action="{{ route('academy.wiki.pages.lock', [$course, $lesson, $item->id, $wikiCurrent->id]) }}">
+                                                            @csrf
+                                                            <x-core::button type="submit" variant="ghost" size="sm">{{ $wikiCurrent->is_locked ? 'Déverrouiller' : 'Verrouiller' }}</x-core::button>
+                                                        </form>
+                                                        @unless($wikiCurrent->is_home)
+                                                            <details>
+                                                                <summary style="cursor: pointer; font-size: 0.82rem; color: var(--sys-action-danger, #DC2626);">Supprimer la page</summary>
+                                                                <form method="POST" action="{{ route('academy.wiki.pages.delete', [$course, $lesson, $item->id, $wikiCurrent->id]) }}" class="mt-1">
+                                                                    @csrf
+                                                                    <x-core::button type="submit" variant="ghost" size="sm">Confirmer la suppression de la page</x-core::button>
+                                                                </form>
+                                                            </details>
+                                                        @endunless
+                                                    @endif
+                                                </div>
+
+                                                {{-- Éditer la page courante (collaboratif). Confirmation par dépliage, jamais de popup. --}}
+                                                @if($wikiCanEdit)
+                                                    <details>
+                                                        <summary style="cursor: pointer; font-size: 0.85rem; font-weight: 600;">Modifier cette page</summary>
+                                                        <form method="POST" action="{{ route('academy.wiki.pages.update', [$course, $lesson, $item->id, $wikiCurrent->id]) }}" class="mt-1">
+                                                            @csrf
+                                                            <div aria-hidden="true" style="position: absolute; left: -9999px; top: -9999px;">
+                                                                <label for="wiki-ehp-{{ $wikiCurrent->id }}">Ne pas remplir</label>
+                                                                <input type="text" id="wiki-ehp-{{ $wikiCurrent->id }}" name="{{ \Modules\Academy\Services\WikiService::HONEYPOT }}" tabindex="-1" autocomplete="off">
+                                                            </div>
+                                                            <label for="wiki-edit-title-{{ $wikiCurrent->id }}" style="font-size: 0.8rem; font-weight: 600;">Titre</label>
+                                                            <input type="text" id="wiki-edit-title-{{ $wikiCurrent->id }}" name="title" class="academy-wiki-field"
+                                                                   value="{{ $wikiCurrent->title }}" maxlength="{{ \Modules\Academy\Services\WikiService::TITLE_MAX }}" required>
+                                                            <label for="wiki-edit-body-{{ $wikiCurrent->id }}" style="font-size: 0.8rem; font-weight: 600;">Contenu (markdown ; lien interne : [[Titre]])</label>
+                                                            <textarea id="wiki-edit-body-{{ $wikiCurrent->id }}" name="body" class="academy-wiki-text" rows="8"
+                                                                      maxlength="{{ \Modules\Academy\Services\WikiService::BODY_MAX }}">{{ $wikiCurrent->body }}</textarea>
+                                                            <div class="mt-2"><x-core::button type="submit" variant="secondary" size="sm">Enregistrer la page</x-core::button></div>
+                                                        </form>
+                                                    </details>
+                                                @endif
+
+                                                {{-- Panneau historique (révisions, lecture seule + restauration gatée). --}}
+                                                @if($wikiHistOpen && $wikiRevisions)
+                                                    <div class="mt-3" style="border-top: 1px dashed #E5E7EB; padding-top: 10px;">
+                                                        <strong style="font-size: 0.85rem;">Historique des révisions</strong>
+                                                        @forelse($wikiRevisions as $rev)
+                                                            <div class="academy-wiki-rev" wire:key="wiki-rev-{{ $rev->id }}">
+                                                                <span>Version {{ $rev->revision }} · {{ $rev->user?->name ?? '(inconnu)' }} · {{ $rev->snapshot_at?->diffForHumans() }}</span>
+                                                                @if($wikiCanRestore)
+                                                                    <form method="POST" action="{{ route('academy.wiki.pages.restore', [$course, $lesson, $item->id, $wikiCurrent->id, $rev->id]) }}">
+                                                                        @csrf
+                                                                        <x-core::button type="submit" variant="ghost" size="sm">Restaurer cette version</x-core::button>
+                                                                    </form>
+                                                                @endif
+                                                            </div>
+                                                        @empty
+                                                            <p class="text-muted" style="font-size: 0.85rem;">Aucune révision : cette page n'a pas encore été modifiée.</p>
+                                                        @endforelse
+                                                        @if($wikiRevisions->hasPages())
+                                                            <div class="mt-2">{{ $wikiRevisions->withQueryString()->links() }}</div>
+                                                        @endif
+                                                    </div>
+                                                @endif
+                                            @else
+                                                <p class="text-muted" style="font-size: 0.9rem;">Ce wiki n'a pas encore de page. @if($wikiCanCreate) Créez la première page (elle deviendra l'accueil). @endif</p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @else
+                                {{-- Accès refusé (même logique que les autres types : rien dans le DOM). --}}
+                                <div class="academy-gated-panel">
+                                    <div class="gated-icon">🔐</div>
+                                    <div class="gated-title">
+                                        @if(!auth()->check())
+                                            Connexion requise pour accéder au wiki
+                                        @elseif(!$isEnrolled)
+                                            Inscrivez-vous pour accéder au wiki
+                                        @else
+                                            Wiki en cours de préparation
+                                        @endif
+                                    </div>
+                                    <p class="gated-sub">
+                                        @if(!auth()->check())
+                                            Créez un compte gratuit ou connectez-vous pour consulter et contribuer au wiki.
+                                        @elseif(!$isEnrolled && $isFree)
+                                            Ce cours est gratuit : inscrivez-vous pour contribuer.
+                                        @elseif(!$isEnrolled && !$isFree)
+                                            Ce cours est payant : achetez-le pour accéder à l'ensemble du contenu.
+                                        @else
+                                            Votre inscription vous donne accès à l'ensemble du contenu.
+                                        @endif
+                                    </p>
+                                    @if(!auth()->check())
+                                        <span class="d-inline-flex flex-wrap gap-2 justify-content-center">
+                                            <x-core::button :href="Route::has('login') ? route('login') : '#'" variant="primary" size="sm">Se connecter</x-core::button>
+                                            <x-core::button :href="Route::has('register') ? route('register') : '#'" variant="secondary" size="sm">Créer un compte</x-core::button>
+                                        </span>
+                                    @elseif(!$isEnrolled && $isFree)
+                                        <form action="{{ route('academy.courses.enroll', $course) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <x-core::button type="submit" variant="primary" size="sm">S'inscrire gratuitement</x-core::button>
+                                        </form>
+                                    @elseif(!$isEnrolled && !$isFree)
+                                        <x-core::button :href="route('academy.courses.purchase', $course)" variant="primary" size="sm">Acheter ce cours</x-core::button>
                                     @endif
                                 </div>
                             @endif

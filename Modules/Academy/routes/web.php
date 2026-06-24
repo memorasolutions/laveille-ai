@@ -24,6 +24,7 @@ use Modules\Academy\Http\Controllers\ExportController;
 use Modules\Academy\Http\Controllers\LessonController;
 use Modules\Academy\Http\Controllers\PurchaseController;
 use Modules\Academy\Http\Controllers\QuizController;
+use Modules\Academy\Http\Controllers\WikiController;
 use Modules\Academy\Http\Middleware\AcademyCsp;
 use Modules\Academy\Http\Middleware\AcademyUnderConstruction;
 
@@ -258,6 +259,36 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             'courses/{course:slug}/lessons/{lesson}/items/{itemId}/forum/posts/{postId}/delete',
             [ForumController::class, 'deletePost']
         )->name('forum.posts.delete');
+
+        // F19 - WIKI : pages collaboratives attachées à une leçon (item « wiki », type
+        // Moodle « Wiki »). Auth + inscription/gérant vérifiés, item re-résolu (anti-IDOR),
+        // honeypot `hp_url`, bornes serveur. Créer / éditer une page (collaboratif selon
+        // allow_student_edit) + restaurer une révision (gérant ou auteur) + modération
+        // (verrouiller/supprimer) gatée manageEnrollments.
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/wiki/pages',
+            [WikiController::class, 'createPage']
+        )->name('wiki.pages.create');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/wiki/pages/{pageId}/update',
+            [WikiController::class, 'editPage']
+        )->name('wiki.pages.update');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/wiki/pages/{pageId}/revisions/{revisionId}/restore',
+            [WikiController::class, 'restoreRevision']
+        )->name('wiki.pages.restore');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/wiki/pages/{pageId}/lock',
+            [WikiController::class, 'lockPage']
+        )->name('wiki.pages.lock');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/wiki/pages/{pageId}/delete',
+            [WikiController::class, 'deletePage']
+        )->name('wiki.pages.delete');
 
         // F18 - NOTES + COMMENTAIRES sur un item de leçon (parité Moodle
         // ratings/comments). Noter / commenter EXIGE l'inscription active (trait),
