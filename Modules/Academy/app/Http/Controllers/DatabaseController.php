@@ -33,6 +33,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\DatabaseEntry;
 use Modules\Academy\Models\Enrollment;
@@ -73,13 +74,17 @@ class DatabaseController extends Controller
         // gérant publie directement (parité Moodle).
         $approved = $manager || ! DatabaseService::requiresApproval($item);
 
-        $entry = DatabaseEntry::create([
-            'lesson_item_id' => $item->id,
-            'user_id'        => Auth::id(),
-            'is_approved'    => $approved,
-        ]);
+        // Transaction : la fiche ET ses valeurs forment un tout. Sinon, un échec de
+        // storeValues laisserait une fiche approuvée sans valeur, visible des inscrits.
+        DB::transaction(function () use ($item, $approved, $fields, $request): void {
+            $entry = DatabaseEntry::create([
+                'lesson_item_id' => $item->id,
+                'user_id'        => Auth::id(),
+                'is_approved'    => $approved,
+            ]);
 
-        DatabaseService::storeValues($entry, $fields, (array) $request->input('values', []));
+            DatabaseService::storeValues($entry, $fields, (array) $request->input('values', []));
+        });
 
         return $this->backToItem($course, $lesson, $item)->with(
             'success',
@@ -109,7 +114,10 @@ class DatabaseController extends Controller
         $fields = DatabaseService::fields($item);
         $request->validate(DatabaseService::entryRules($fields));
 
-        DatabaseService::storeValues($entry, $fields, (array) $request->input('values', []));
+        // Transaction : mise à jour atomique des valeurs (anti état partiel visible).
+        DB::transaction(function () use ($entry, $fields, $request): void {
+            DatabaseService::storeValues($entry, $fields, (array) $request->input('values', []));
+        });
 
         return $this->backToItem($course, $lesson, $item)->with('success', 'La fiche a été mise à jour.');
     }

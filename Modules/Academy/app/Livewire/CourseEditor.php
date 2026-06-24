@@ -52,7 +52,7 @@ class CourseEditor extends Component
     use WithFileUploads;
 
     /** Types d'items autorisés (liste blanche, alignée sur l'admin Backoffice). */
-    private const ITEM_TYPES = ['video', 'document', 'quiz', 'choice', 'feedback', 'forum', 'wiki', 'database', 'h5p'];
+    private const ITEM_TYPES = ['video', 'document', 'quiz', 'choice', 'feedback', 'forum', 'wiki', 'database', 'workshop', 'h5p'];
 
     /** Tailles maximales (Ko) des téléversements - validées côté SERVEUR. */
     private const COVER_MAX_KB = 4096;       // ~4 Mo (image de couverture)
@@ -143,6 +143,15 @@ class CourseEditor extends Component
      * @var array<int, array<string, mixed>>
      */
     public array $editDatabase = [];
+
+    /**
+     * F21 - ATELIER : tampon d'édition d'un item « workshop » indexé par item_id (titre,
+     * intro, reviews_per_student, anonymous, grille de critères). Comme la base de données,
+     * un répéteur de critères ne se prête pas au $event.target inline : actions dédiées.
+     *
+     * @var array<int, array<string, mixed>>
+     */
+    public array $editWorkshop = [];
 
     /**
      * V1-a : feedback global par tranche de score (« grade boundaries » Moodle),
@@ -939,6 +948,11 @@ class CourseEditor extends Component
             \Modules\Academy\Services\DatabaseService::syncFields($item, $input['database_fields'] ?? []);
         }
 
+        // F21 - ATELIER : synchroniser la GRILLE (critères) saisie à la création.
+        if ($data['type'] === 'workshop') {
+            \Modules\Academy\Services\WorkshopService::syncCriteria($item, $input['workshop_criteria'] ?? []);
+        }
+
         unset($this->newItem[$lessonId]);
         $this->flashSaved('Élément ajouté.');
     }
@@ -1087,12 +1101,15 @@ class CourseEditor extends Component
     /** NOUVEL item database : ajoute un champ vierge au schéma. */
     public function addNewDatabaseField(int $lessonId): void
     {
+        // Défense en profondeur : même une mutation du tampon exige le droit de gérer.
+        $this->authorize('manageStructure', $this->resolveCourse());
         $this->newItem[$lessonId]['database_fields'][] = $this->blankDatabaseField();
     }
 
     /** NOUVEL item database : retire le champ d'index donné (réindexé). */
     public function removeNewDatabaseField(int $lessonId, int $index): void
     {
+        $this->authorize('manageStructure', $this->resolveCourse());
         if (isset($this->newItem[$lessonId]['database_fields'][$index])) {
             unset($this->newItem[$lessonId]['database_fields'][$index]);
             $this->newItem[$lessonId]['database_fields'] = array_values($this->newItem[$lessonId]['database_fields']);
@@ -1145,12 +1162,14 @@ class CourseEditor extends Component
     /** ÉDITION : ajoute un champ vierge au schéma en cours d'édition. */
     public function addDatabaseField(int $itemId): void
     {
+        $this->authorize('manageStructure', $this->resolveCourse());
         $this->editDatabase[$itemId]['fields'][] = $this->blankDatabaseField();
     }
 
     /** ÉDITION : retire le champ d'index donné du schéma (réindexé). */
     public function removeDatabaseField(int $itemId, int $index): void
     {
+        $this->authorize('manageStructure', $this->resolveCourse());
         if (isset($this->editDatabase[$itemId]['fields'][$index])) {
             unset($this->editDatabase[$itemId]['fields'][$index]);
             $this->editDatabase[$itemId]['fields'] = array_values($this->editDatabase[$itemId]['fields']);
@@ -1200,6 +1219,136 @@ class CourseEditor extends Component
 
         unset($this->editDatabase[$itemId]);
         $this->flashSaved('Base de données mise à jour.');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // F21 - ATELIER (workshop) : répéteur de critères (NOUVEL item + ÉDITION). Comme la
+    // base de données, la grille passe par un tampon Livewire (newItem.{lesson}.
+    // workshop_criteria à la création, editWorkshop.{item} à l'édition) + actions dédiées.
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    /** Gabarit d'un critère vierge (répéteur de grille). */
+    private function blankWorkshopCriterion(): array
+    {
+        return ['label' => '', 'description' => '', 'max_score' => 10, 'weight' => 1];
+    }
+
+    /** NOUVEL item workshop : ajoute un critère vierge à la grille. */
+    public function addNewWorkshopCriterion(int $lessonId): void
+    {
+        $this->newItem[$lessonId]['workshop_criteria'][] = $this->blankWorkshopCriterion();
+    }
+
+    /** NOUVEL item workshop : retire le critère d'index donné (réindexé). */
+    public function removeNewWorkshopCriterion(int $lessonId, int $index): void
+    {
+        if (isset($this->newItem[$lessonId]['workshop_criteria'][$index])) {
+            unset($this->newItem[$lessonId]['workshop_criteria'][$index]);
+            $this->newItem[$lessonId]['workshop_criteria'] = array_values($this->newItem[$lessonId]['workshop_criteria']);
+        }
+    }
+
+    /**
+     * ÉDITION : charge le tampon d'édition d'un item workshop depuis ses critères + réglages.
+     * Anti-IDOR : l'item doit appartenir à CE cours. Réservé au gérant (manageStructure).
+     */
+    public function loadWorkshopEditor(int $itemId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+        $item = $this->resolveItemFor($course, $itemId);
+
+        if ($item->type !== 'workshop') {
+            return;
+        }
+
+        $criteria = [];
+        foreach (\Modules\Academy\Services\WorkshopService::criteria($item) as $c) {
+            $criteria[] = [
+                'id'          => $c->id,
+                'label'       => $c->label,
+                'description' => $c->description ?? '',
+                'max_score'   => $c->max_score,
+                'weight'      => $c->weight,
+            ];
+        }
+
+        $this->editWorkshop[$itemId] = [
+            'title'               => $item->title,
+            'intro'               => \Modules\Academy\Services\WorkshopService::intro($item),
+            'reviews_per_student' => \Modules\Academy\Services\WorkshopService::reviewsPerStudent($item),
+            'anonymous'           => \Modules\Academy\Services\WorkshopService::isAnonymous($item),
+            'estimated_minutes'   => $item->estimated_minutes,
+            'criteria'            => $criteria,
+        ];
+    }
+
+    /** Abandonne l'édition en cours de l'atelier (vide le tampon). */
+    public function cancelWorkshopEditor(int $itemId): void
+    {
+        unset($this->editWorkshop[$itemId]);
+    }
+
+    /** ÉDITION : ajoute un critère vierge à la grille en cours d'édition. */
+    public function addWorkshopCriterion(int $itemId): void
+    {
+        $this->editWorkshop[$itemId]['criteria'][] = $this->blankWorkshopCriterion();
+    }
+
+    /** ÉDITION : retire le critère d'index donné de la grille (réindexé). */
+    public function removeWorkshopCriterion(int $itemId, int $index): void
+    {
+        if (isset($this->editWorkshop[$itemId]['criteria'][$index])) {
+            unset($this->editWorkshop[$itemId]['criteria'][$index]);
+            $this->editWorkshop[$itemId]['criteria'] = array_values($this->editWorkshop[$itemId]['criteria']);
+        }
+    }
+
+    /**
+     * ÉDITION : enregistre un item workshop depuis son tampon (payload + GRILLE). Mêmes
+     * gardes que updateItem (resolveCourse -> manageStructure -> resolveItemFor anti-IDOR
+     * -> validateItem -> buildItemPayload), puis synchronisation des critères via le service.
+     * La PHASE en cours est PRÉSERVÉE (elle se pilote depuis le lecteur, pas l'éditeur).
+     */
+    public function saveWorkshop(int $itemId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+        $item = $this->resolveItemFor($course, $itemId);
+
+        if ($item->type !== 'workshop') {
+            abort(404);
+        }
+
+        $buffer  = $this->editWorkshop[$itemId] ?? [];
+        $minutes = $buffer['estimated_minutes'] ?? null;
+
+        $input = [
+            'type'                => 'workshop',
+            'title'               => (string) ($buffer['title'] ?? $item->title),
+            'estimated_minutes'   => ($minutes === '' || $minutes === null) ? null : (int) $minutes,
+            'workshop_intro'      => $buffer['intro'] ?? null,
+            'reviews_per_student' => $buffer['reviews_per_student'] ?? null,
+            'workshop_anonymous'  => $buffer['anonymous'] ?? null,
+            // PRÉSERVE la phase actuelle (l'éditeur ne la change pas).
+            'workshop_phase'      => \Modules\Academy\Services\WorkshopService::phase($item),
+        ];
+
+        $data    = $this->validateItem($input);
+        $payload = $this->buildItemPayload('workshop', $input);
+
+        $item->update([
+            'type'              => 'workshop',
+            'title'             => $data['title'],
+            'payload'           => $payload,
+            'estimated_minutes' => $data['estimated_minutes'] ?? null,
+        ]);
+
+        // GRILLE : synchronise les critères (création / mise à jour / soft-suppression).
+        \Modules\Academy\Services\WorkshopService::syncCriteria($item, $buffer['criteria'] ?? []);
+
+        unset($this->editWorkshop[$itemId]);
+        $this->flashSaved('Atelier mis à jour.');
     }
 
     /**
@@ -1801,6 +1950,14 @@ class CourseEditor extends Component
             'database_intro'      => 'nullable|string|max:2000',
             'allow_student_add'   => 'nullable|boolean',
             'require_approval'    => 'nullable|boolean',
+            // F21 - ATELIER : intro facultative + nb d'évaluations par pair (1..REVIEWS_MAX)
+            // + anonymat (les défauts reviews_per_student=2 et anonymous=true sont appliqués
+            // au build quand la clé est absente). La grille (critères) est synchronisée à
+            // part ; la phase est validée côté contrôleur, jamais ici.
+            'workshop_intro'      => 'nullable|string|max:2000',
+            'reviews_per_student' => 'nullable|integer|min:1|max:'.\Modules\Academy\Services\WorkshopService::REVIEWS_MAX,
+            'workshop_anonymous'  => 'nullable|boolean',
+            'workshop_phase'      => ['nullable', Rule::in(\Modules\Academy\Services\WorkshopService::PHASES)],
         ];
 
         // FEEDBACK : un questionnaire EXIGE AU MOINS UNE question valide. On normalise les
@@ -1882,6 +2039,7 @@ class CourseEditor extends Component
             'forum'    => $this->buildForumPayload($input),
             'wiki'     => $this->buildWikiPayload($input),
             'database' => $this->buildDatabasePayload($input),
+            'workshop' => $this->buildWorkshopPayload($input),
             'h5p'      => $this->buildH5pPayload($input),
             default    => [],
         };
@@ -2034,6 +2192,39 @@ class CourseEditor extends Component
             'allow_student_add' => $allowAdd === null ? true : $this->truthy($allowAdd),
             'require_approval'  => $this->truthy($input['require_approval'] ?? null),
         ];
+    }
+
+    /**
+     * F21 - ATELIER : intro facultative + reviews_per_student (DÉFAUT 2, borné 1..REVIEWS_MAX)
+     * + anonymous (DÉFAUT true) + phase (préservée ; défaut « submission » via le service quand
+     * absente). Aucune nouvelle colonne (payload). La GRILLE (critères) vit dans une table
+     * dédiée et est synchronisée à part (WorkshopService::syncCriteria), pas dans ce payload.
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    private function buildWorkshopPayload(array $input): array
+    {
+        $anon    = $input['workshop_anonymous'] ?? null;
+        $reviews = $input['reviews_per_student'] ?? null;
+        $reviews = ($reviews === '' || $reviews === null)
+            ? \Modules\Academy\Services\WorkshopService::REVIEWS_DEFAULT
+            : max(1, min(\Modules\Academy\Services\WorkshopService::REVIEWS_MAX, (int) $reviews));
+
+        $payload = [
+            'intro'               => trim((string) ($input['workshop_intro'] ?? '')),
+            'reviews_per_student' => $reviews,
+            'anonymous'           => $anon === null ? true : $this->truthy($anon),
+        ];
+
+        // PHASE : on ne l'écrit QUE si une valeur valide est fournie (préservation à l'édition).
+        // Absente à la création => le service applique le défaut « submission » (rétrocompat).
+        $phase = $input['workshop_phase'] ?? null;
+        if (in_array($phase, \Modules\Academy\Services\WorkshopService::PHASES, true)) {
+            $payload['phase'] = $phase;
+        }
+
+        return $payload;
     }
 
     /**

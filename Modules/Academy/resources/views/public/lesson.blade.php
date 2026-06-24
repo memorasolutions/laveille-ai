@@ -1577,6 +1577,229 @@
                                 </div>
                             @endif
 
+                        {{-- ── TYPE ATELIER (workshop : évaluation par les pairs, parité Moodle « Workshop ») ── --}}
+                        @elseif($item->type === 'workshop')
+                            @php
+                                $wsIntro    = \Modules\Academy\Services\WorkshopService::intro($item);
+                                $wsPhase    = \Modules\Academy\Services\WorkshopService::phase($item);
+                                $wsAnon     = \Modules\Academy\Services\WorkshopService::isAnonymous($item);
+                                // Gérant de CE cours (admin OU owner/instructor) : l'autorisation réelle
+                                // est TOUJOURS re-vérifiée serveur (WorkshopController) ; ici, affichage.
+                                $wsManage = auth()->check() && auth()->user()->can('manageEnrollments', $course);
+                                $wsCriteria = ($hasAccess || $wsManage)
+                                    ? \Modules\Academy\Services\WorkshopService::criteria($item)
+                                    : collect();
+                                $wsMine = ($hasAccess && auth()->check())
+                                    ? \Modules\Academy\Services\WorkshopService::submissionFor($item, auth()->id())
+                                    : null;
+                                $wsAssignments = ($hasAccess && auth()->check() && $wsPhase === 'assessment')
+                                    ? \Modules\Academy\Services\WorkshopService::assignmentsFor($item, (int) auth()->id())
+                                    : collect();
+                                $wsPhaseLabel = ['setup' => 'Préparation', 'submission' => 'Soumission', 'assessment' => 'Évaluation', 'closed' => 'Notes'][$wsPhase] ?? $wsPhase;
+                            @endphp
+                            @if($hasAccess || $wsManage)
+                                <div class="academy-workshop">
+                                    @if($wsIntro !== '')
+                                        <p class="academy-db-intro">{{ $wsIntro }}</p>
+                                    @endif
+
+                                    <p class="text-muted p-2 rounded" style="background: #F3F4F6; font-size: 0.85rem;">
+                                        Phase courante : <strong>{{ $wsPhaseLabel }}</strong>.
+                                        @if($wsPhase === 'submission') Remettez votre travail ci-dessous.
+                                        @elseif($wsPhase === 'assessment') Évaluez les travaux qui vous sont attribués.
+                                        @elseif($wsPhase === 'closed') Consultez votre note finale.
+                                        @else L'atelier est en préparation.
+                                        @endif
+                                    </p>
+
+                                    {{-- ── TABLEAU DE BORD GÉRANT : phase, progression, actions ── --}}
+                                    @if($wsManage)
+                                        @php
+                                            $wsSubs     = \Modules\Academy\Services\WorkshopService::submissions($item);
+                                            $wsProgress = \Modules\Academy\Services\WorkshopService::assessmentProgress($item);
+                                        @endphp
+                                        <div class="academy-db-entry" style="background: #FAFAFA;">
+                                            <p class="academy-db-meta"><strong>Pilotage de l'atelier (gérant)</strong></p>
+                                            <p style="font-size: 0.85rem; margin: 0 0 6px;">
+                                                Travaux remis : {{ $wsSubs->count() }} ·
+                                                Évaluations attribuées : {{ $wsProgress['allocated'] }} ·
+                                                rendues : {{ $wsProgress['submitted'] }}
+                                            </p>
+
+                                            <form method="POST" action="{{ route('academy.workshop.phase', [$course, $lesson, $item->id]) }}" style="display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 8px;">
+                                                @csrf
+                                                <span style="display: flex; flex-direction: column; gap: 4px;">
+                                                    <label for="ws-phase-{{ $item->id }}" style="font-size: 0.78rem; font-weight: 600;">Changer la phase</label>
+                                                    <select id="ws-phase-{{ $item->id }}" name="phase" style="padding: 6px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                        @foreach(['setup' => 'Préparation', 'submission' => 'Soumission', 'assessment' => 'Évaluation (attribue les évaluations)', 'closed' => 'Notes'] as $pv => $pl)
+                                                            <option value="{{ $pv }}" @selected($wsPhase === $pv)>{{ $pl }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </span>
+                                                <x-core::button type="submit" variant="primary" size="sm">Appliquer la phase</x-core::button>
+                                            </form>
+
+                                            <form method="POST" action="{{ route('academy.workshop.allocate', [$course, $lesson, $item->id]) }}">
+                                                @csrf
+                                                <x-core::button type="submit" variant="secondary" size="sm">Attribuer les évaluations</x-core::button>
+                                            </form>
+
+                                            @if($wsSubs->isNotEmpty())
+                                                <details class="mt-2">
+                                                    <summary style="cursor: pointer; font-size: 0.85rem; font-weight: 600;">Voir les travaux et leurs notes</summary>
+                                                    <ul style="list-style: none; padding: 0; margin: 8px 0 0;">
+                                                        @php $wsScoreMap = \Modules\Academy\Services\WorkshopService::batchFinalScores($wsSubs); @endphp
+                                                        @foreach($wsSubs as $sub)
+                                                            @php $subScore = $wsScoreMap[$sub->id] ?? null; @endphp
+                                                            <li style="border-top: 1px solid #E5E7EB; padding: 6px 0; font-size: 0.85rem;">
+                                                                <strong>{{ $sub->title }}</strong> - {{ $sub->author?->name ?? '(inconnu)' }}
+                                                                · Note : {{ $subScore === null ? 'en attente' : number_format($subScore, 1, ',', ' ').' %' }}
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                </details>
+                                            @endif
+                                        </div>
+                                    @endif
+
+                                    {{-- ── PHASE SOUMISSION : remettre / consulter SON travail ── --}}
+                                    @if($wsPhase === 'submission' && $hasAccess && auth()->check())
+                                        <details class="mt-3" @if($wsMine === null) open @endif>
+                                            <summary style="cursor: pointer; font-size: 0.88rem; font-weight: 700;">{{ $wsMine ? 'Modifier mon travail' : '+ Remettre mon travail' }}</summary>
+                                            <form method="POST" action="{{ route('academy.workshop.submit', [$course, $lesson, $item->id]) }}" class="mt-2" style="display: flex; flex-direction: column; gap: 8px;">
+                                                @csrf
+                                                <div aria-hidden="true" style="position: absolute; left: -9999px; top: -9999px;">
+                                                    <label for="ws-hp-{{ $item->id }}">Ne pas remplir</label>
+                                                    <input type="text" id="ws-hp-{{ $item->id }}" name="{{ \Modules\Academy\Services\WorkshopService::HONEYPOT }}" tabindex="-1" autocomplete="off">
+                                                </div>
+                                                <label for="ws-title-{{ $item->id }}" style="font-size: 0.78rem; font-weight: 600;">Titre de mon travail</label>
+                                                <input id="ws-title-{{ $item->id }}" type="text" name="title" value="{{ $wsMine->title ?? '' }}" maxlength="{{ \Modules\Academy\Services\WorkshopService::TITLE_MAX }}" required
+                                                       style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                <label for="ws-body-{{ $item->id }}" style="font-size: 0.78rem; font-weight: 600;">Mon travail</label>
+                                                <textarea id="ws-body-{{ $item->id }}" name="body" rows="6" maxlength="{{ \Modules\Academy\Services\WorkshopService::BODY_MAX }}"
+                                                          style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;">{{ $wsMine->body ?? '' }}</textarea>
+                                                <div><x-core::button type="submit" variant="primary" size="sm">{{ $wsMine ? 'Mettre à jour mon travail' : 'Remettre mon travail' }}</x-core::button></div>
+                                            </form>
+                                        </details>
+                                        @if($wsMine)
+                                            <div class="academy-db-entry mt-2">
+                                                <p class="academy-db-meta">Mon travail remis - <strong>{{ $wsMine->title }}</strong></p>
+                                                <div>{!! \Modules\Academy\Services\WorkshopService::renderText($wsMine->body) !!}</div>
+                                            </div>
+                                        @endif
+                                    @endif
+
+                                    {{-- ── PHASE ÉVALUATION : noter les travaux attribués (anonymisés) ── --}}
+                                    @if($wsPhase === 'assessment' && $hasAccess && auth()->check())
+                                        <h4 style="font-size: 0.95rem; font-weight: 700; margin: 14px 0 6px;">Travaux à évaluer</h4>
+                                        @forelse($wsAssignments as $assessment)
+                                            @php $wsScores = \Modules\Academy\Services\WorkshopService::scoresByCriterion($assessment); @endphp
+                                            <div class="academy-db-entry" wire:key="ws-assess-{{ $assessment->id }}">
+                                                <p class="academy-db-meta">
+                                                    <strong>{{ $assessment->submission->title ?? 'Travail' }}</strong>
+                                                    @unless($wsAnon) - {{ $assessment->submission->author?->name ?? '(inconnu)' }} @endunless
+                                                    @if($assessment->submitted_at)<span class="academy-db-badge">Évaluation rendue</span>@endif
+                                                </p>
+                                                <div style="margin-bottom: 8px;">{!! \Modules\Academy\Services\WorkshopService::renderText($assessment->submission->body ?? '') !!}</div>
+
+                                                <form method="POST" action="{{ route('academy.workshop.assess', [$course, $lesson, $item->id, $assessment->id]) }}" style="display: flex; flex-direction: column; gap: 8px;">
+                                                    @csrf
+                                                    <div aria-hidden="true" style="position: absolute; left: -9999px; top: -9999px;">
+                                                        <label for="ws-ahp-{{ $assessment->id }}">Ne pas remplir</label>
+                                                        <input type="text" id="ws-ahp-{{ $assessment->id }}" name="{{ \Modules\Academy\Services\WorkshopService::HONEYPOT }}" tabindex="-1" autocomplete="off">
+                                                    </div>
+                                                    @foreach($wsCriteria as $criterion)
+                                                        <span style="display: flex; flex-direction: column; gap: 4px;">
+                                                            <label for="ws-score-{{ $assessment->id }}-{{ $criterion->id }}" style="font-size: 0.8rem; font-weight: 600;">
+                                                                {{ $criterion->label }} <span class="text-muted">(0 à {{ $criterion->max_score }})</span>
+                                                            </label>
+                                                            @if($criterion->description)<span class="text-muted" style="font-size: 0.78rem;">{{ $criterion->description }}</span>@endif
+                                                            <input id="ws-score-{{ $assessment->id }}-{{ $criterion->id }}" type="number" min="0" max="{{ $criterion->max_score }}"
+                                                                   name="scores[{{ $criterion->id }}]" value="{{ $wsScores[$criterion->id] ?? '' }}"
+                                                                   style="width: 110px; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                        </span>
+                                                    @endforeach
+                                                    <label for="ws-fb-{{ $assessment->id }}" style="font-size: 0.8rem; font-weight: 600;">Commentaire (facultatif)</label>
+                                                    <textarea id="ws-fb-{{ $assessment->id }}" name="feedback" rows="3" maxlength="{{ \Modules\Academy\Services\WorkshopService::FEEDBACK_MAX }}"
+                                                              style="width: 100%; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;">{{ $assessment->feedback }}</textarea>
+                                                    <div><x-core::button type="submit" variant="primary" size="sm">Enregistrer mon évaluation</x-core::button></div>
+                                                </form>
+                                            </div>
+                                        @empty
+                                            <p class="text-muted" style="font-size: 0.9rem;">Aucun travail ne vous est attribué pour l'instant. Le formateur attribuera les évaluations.</p>
+                                        @endforelse
+                                    @endif
+
+                                    {{-- ── PHASE NOTES : ma note finale + retours reçus ── --}}
+                                    @if($wsPhase === 'closed' && $hasAccess && auth()->check())
+                                        @php
+                                            $wsFinal = \Modules\Academy\Services\WorkshopService::finalGradeForStudent($item, auth()->id());
+                                        @endphp
+                                        <div class="academy-db-entry mt-2">
+                                            <p class="academy-db-meta"><strong>Ma note finale</strong></p>
+                                            @if($wsMine === null)
+                                                <p class="text-muted" style="font-size: 0.9rem;">Vous n'avez pas remis de travail pour cet atelier.</p>
+                                            @elseif($wsFinal === null)
+                                                <p class="text-muted" style="font-size: 0.9rem;">Votre travail n'a pas encore reçu d'évaluation.</p>
+                                            @else
+                                                <p style="font-size: 1.1rem; font-weight: 700;">{{ number_format($wsFinal, 1, ',', ' ') }} %</p>
+                                                @php $wsReceived = \Modules\Academy\Services\WorkshopService::receivedFeedbacks($wsMine)->filter(fn ($a) => filled($a->feedback)); @endphp
+                                                @if($wsReceived->isNotEmpty())
+                                                    <p class="academy-db-meta" style="margin-top: 8px;">Retours reçus</p>
+                                                    @foreach($wsReceived as $rec)
+                                                        <div style="border-top: 1px solid #E5E7EB; padding: 6px 0;">
+                                                            <div>{!! \Modules\Academy\Services\WorkshopService::renderText($rec->feedback) !!}</div>
+                                                        </div>
+                                                    @endforeach
+                                                @endif
+                                            @endif
+                                        </div>
+                                    @endif
+
+                                    @if($wsCriteria->isEmpty())
+                                        <p class="text-muted mt-2" style="font-size: 0.85rem;">Cet atelier n'a pas encore de grille d'évaluation. Définissez les critères dans l'éditeur de cours.</p>
+                                    @endif
+                                </div>
+                            @else
+                                {{-- Accès refusé (même logique que les autres types : rien de sensible dans le DOM). --}}
+                                <div class="academy-gated-panel">
+                                    <div class="gated-icon">🔐</div>
+                                    <div class="gated-title">
+                                        @if(!auth()->check())
+                                            Connexion requise pour accéder à l'atelier
+                                        @elseif(!$isEnrolled)
+                                            Inscrivez-vous pour accéder à l'atelier
+                                        @else
+                                            Atelier en cours de préparation
+                                        @endif
+                                    </div>
+                                    <p class="gated-sub">
+                                        @if(!auth()->check())
+                                            Créez un compte gratuit ou connectez-vous pour remettre un travail et évaluer vos pairs.
+                                        @elseif(!$isEnrolled && $isFree)
+                                            Ce cours est gratuit : inscrivez-vous pour participer.
+                                        @elseif(!$isEnrolled && !$isFree)
+                                            Ce cours est payant : achetez-le pour accéder à l'ensemble du contenu.
+                                        @else
+                                            Votre inscription vous donne accès à l'ensemble du contenu.
+                                        @endif
+                                    </p>
+                                    @if(!auth()->check())
+                                        <span class="d-inline-flex flex-wrap gap-2 justify-content-center">
+                                            <x-core::button :href="Route::has('login') ? route('login') : '#'" variant="primary" size="sm">Se connecter</x-core::button>
+                                            <x-core::button :href="Route::has('register') ? route('register') : '#'" variant="secondary" size="sm">Créer un compte</x-core::button>
+                                        </span>
+                                    @elseif(!$isEnrolled && $isFree)
+                                        <form action="{{ route('academy.courses.enroll', $course) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <x-core::button type="submit" variant="primary" size="sm">S'inscrire gratuitement</x-core::button>
+                                        </form>
+                                    @elseif(!$isEnrolled && !$isFree)
+                                        <x-core::button :href="route('academy.courses.purchase', $course)" variant="primary" size="sm">Acheter ce cours</x-core::button>
+                                    @endif
+                                </div>
+                            @endif
+
                         {{-- ── TYPE H5P (contenu interactif, parité Moodle « H5P ») ── --}}
                         @elseif($item->type === 'h5p')
                             @php $h5pPath = $item->payload['h5p_path'] ?? null; @endphp

@@ -26,6 +26,7 @@ use Modules\Academy\Http\Controllers\LessonController;
 use Modules\Academy\Http\Controllers\PurchaseController;
 use Modules\Academy\Http\Controllers\QuizController;
 use Modules\Academy\Http\Controllers\WikiController;
+use Modules\Academy\Http\Controllers\WorkshopController;
 use Modules\Academy\Http\Middleware\AcademyCsp;
 use Modules\Academy\Http\Middleware\AcademyUnderConstruction;
 
@@ -315,6 +316,33 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             'courses/{course:slug}/lessons/{lesson}/items/{itemId}/database/entries/{entryId}/approve',
             [DatabaseController::class, 'approveEntry']
         )->name('database.entries.approve');
+
+        // F21 - ATELIER (Workshop) : évaluation par les pairs attachée à une leçon (item
+        // « workshop », type Moodle « Workshop »). Auth + inscription/gérant vérifiés, item
+        // re-résolu (anti-IDOR), honeypot `hp_url`, VALIDATION DE PHASE serveur. Étudiant :
+        // remettre SON travail (phase submission) + évaluer les travaux ATTRIBUÉS (phase
+        // assessment, anti-IDOR sur assessor_id, anti auto-évaluation). Gérant : changer la
+        // phase + attribuer les évaluations (allocation déterministe), gatés manageEnrollments.
+        // La GRILLE de critères se gère dans l'éditeur de cours.
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/workshop/submit',
+            [WorkshopController::class, 'submitWork']
+        )->name('workshop.submit');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/workshop/assessments/{assessmentId}/assess',
+            [WorkshopController::class, 'assess']
+        )->name('workshop.assess');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/workshop/phase',
+            [WorkshopController::class, 'setPhase']
+        )->name('workshop.phase');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/workshop/allocate',
+            [WorkshopController::class, 'allocate']
+        )->name('workshop.allocate');
 
         // F18 - NOTES + COMMENTAIRES sur un item de leçon (parité Moodle
         // ratings/comments). Noter / commenter EXIGE l'inscription active (trait),

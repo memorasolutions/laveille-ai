@@ -766,7 +766,7 @@
                                                 x-sort:config="{ handle: '[data-sort-handle]', animation: 150 }"
                                                 style="margin: 0 0 10px; display: flex; flex-direction: column; gap: 8px;">
                                                 @foreach ($lesson->lessonItems as $item)
-                                                    @php($typeLabel = ['video' => 'Vidéo', 'document' => 'Document', 'quiz' => 'Quiz', 'choice' => 'Sondage', 'feedback' => 'Rétroaction', 'forum' => 'Forum', 'wiki' => 'Wiki', 'database' => 'Base de données', 'h5p' => 'H5P'][$item->type] ?? $item->type)
+                                                    @php($typeLabel = ['video' => 'Vidéo', 'document' => 'Document', 'quiz' => 'Quiz', 'choice' => 'Sondage', 'feedback' => 'Rétroaction', 'forum' => 'Forum', 'wiki' => 'Wiki', 'database' => 'Base de données', 'workshop' => 'Atelier', 'h5p' => 'H5P'][$item->type] ?? $item->type)
                                                     <li x-sort:item="{{ $item->id }}" data-sort-id="{{ $item->id }}"
                                                         wire:key="item-{{ $item->id }}"
                                                         style="border: 1px solid #F1F5F9; border-radius: var(--sys-radius-md, 0.5rem); padding: 10px 12px;">
@@ -952,6 +952,73 @@
                                                                         <div class="d-flex flex-wrap gap-2">
                                                                             <x-core::button type="button" wire:click="saveDatabase({{ $item->id }})" variant="secondary" size="sm">Enregistrer la base de données</x-core::button>
                                                                             <x-core::button type="button" wire:click="cancelDatabaseEditor({{ $item->id }})" variant="ghost" size="sm">Annuler</x-core::button>
+                                                                        </div>
+                                                                    </div>
+                                                                @endif
+                                                            @elseif ($item->type === 'workshop')
+                                                                {{-- ── F21 - ATELIER : éditeur dédié de la GRILLE (répéteur de critères) + réglages.
+                                                                     Comme la base de données, on passe par un tampon Livewire (editWorkshop.{item})
+                                                                     + actions dédiées : la grille ne se sérialise pas via $event.target.
+                                                                     La PHASE se pilote depuis le lecteur (tableau de bord gérant), pas ici. --}}
+                                                                @if (! isset($editWorkshop[$item->id]))
+                                                                    <div style="margin-top: 10px;">
+                                                                        <x-core::button type="button" wire:click="loadWorkshopEditor({{ $item->id }})" variant="secondary" size="sm">Modifier l'atelier (grille)</x-core::button>
+                                                                    </div>
+                                                                @else
+                                                                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                                                                        <label style="font-size: 0.78rem; font-weight: 600;" for="wsedit-title-{{ $item->id }}">Titre</label>
+                                                                        <input id="wsedit-title-{{ $item->id }}" type="text" wire:model="editWorkshop.{{ $item->id }}.title" aria-label="Titre de l'atelier"
+                                                                               style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                        @error('title') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
+
+                                                                        <label style="font-size: 0.78rem; font-weight: 600;" for="wsedit-intro-{{ $item->id }}">Consigne / introduction (facultative)</label>
+                                                                        <textarea id="wsedit-intro-{{ $item->id }}" wire:model="editWorkshop.{{ $item->id }}.intro" rows="2" aria-label="Introduction de l'atelier"
+                                                                                  style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+
+                                                                        <span style="font-size: 0.78rem; font-weight: 700;">Grille d'évaluation (critères)</span>
+                                                                        @forelse ($editWorkshop[$item->id]['criteria'] ?? [] as $ci => $c)
+                                                                            <div wire:key="wsedit-{{ $item->id }}-{{ $ci }}" style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+                                                                                <label style="font-size: 0.74rem; font-weight: 600;" for="wsedit-label-{{ $item->id }}-{{ $ci }}">Libellé du critère</label>
+                                                                                <input id="wsedit-label-{{ $item->id }}-{{ $ci }}" type="text" wire:model="editWorkshop.{{ $item->id }}.criteria.{{ $ci }}.label" placeholder="Ex. : Clarté de l'argumentation"
+                                                                                       style="width: 100%; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                                <label style="font-size: 0.74rem; font-weight: 600;" for="wsedit-desc-{{ $item->id }}-{{ $ci }}">Description (facultative)</label>
+                                                                                <textarea id="wsedit-desc-{{ $item->id }}-{{ $ci }}" wire:model="editWorkshop.{{ $item->id }}.criteria.{{ $ci }}.description" rows="2"
+                                                                                          style="width: 100%; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+                                                                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                                                                    <span style="display: flex; flex-direction: column; gap: 4px;">
+                                                                                        <label style="font-size: 0.74rem; font-weight: 600;" for="wsedit-max-{{ $item->id }}-{{ $ci }}">Note max</label>
+                                                                                        <input id="wsedit-max-{{ $item->id }}-{{ $ci }}" type="number" min="1" max="100" wire:model="editWorkshop.{{ $item->id }}.criteria.{{ $ci }}.max_score"
+                                                                                               style="width: 90px; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                                    </span>
+                                                                                    <span style="display: flex; flex-direction: column; gap: 4px;">
+                                                                                        <label style="font-size: 0.74rem; font-weight: 600;" for="wsedit-weight-{{ $item->id }}-{{ $ci }}">Poids</label>
+                                                                                        <input id="wsedit-weight-{{ $item->id }}-{{ $ci }}" type="number" min="0" step="0.5" wire:model="editWorkshop.{{ $item->id }}.criteria.{{ $ci }}.weight"
+                                                                                               style="width: 90px; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div><x-core::button type="button" wire:click="removeWorkshopCriterion({{ $item->id }}, {{ $ci }})" variant="ghost" size="sm">Retirer ce critère</x-core::button></div>
+                                                                            </div>
+                                                                        @empty
+                                                                            <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0;">Aucun critère. Ajoutez-en pour définir la grille d'évaluation par les pairs.</p>
+                                                                        @endforelse
+                                                                        <div><x-core::button type="button" wire:click="addWorkshopCriterion({{ $item->id }})" variant="ghost" size="sm">+ Ajouter un critère</x-core::button></div>
+
+                                                                        <label style="font-size: 0.78rem; font-weight: 600;" for="wsedit-reviews-{{ $item->id }}">Évaluations par étudiant</label>
+                                                                        <input id="wsedit-reviews-{{ $item->id }}" type="number" min="1" max="10" wire:model="editWorkshop.{{ $item->id }}.reviews_per_student" aria-label="Nombre de travaux à évaluer par étudiant"
+                                                                               style="width: 120px; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;">
+                                                                            <input type="checkbox" wire:model="editWorkshop.{{ $item->id }}.anonymous" style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                            <span>Évaluation anonyme (masquer l'auteur des travaux ; par défaut : oui)</span>
+                                                                        </label>
+
+                                                                        <label style="font-size: 0.78rem; font-weight: 600;" for="wsedit-min-{{ $item->id }}">Durée estimée (min, facultatif)</label>
+                                                                        <input id="wsedit-min-{{ $item->id }}" type="number" min="1" wire:model="editWorkshop.{{ $item->id }}.estimated_minutes" aria-label="Durée estimée en minutes"
+                                                                               style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                                        <div class="d-flex flex-wrap gap-2">
+                                                                            <x-core::button type="button" wire:click="saveWorkshop({{ $item->id }})" variant="secondary" size="sm">Enregistrer l'atelier</x-core::button>
+                                                                            <x-core::button type="button" wire:click="cancelWorkshopEditor({{ $item->id }})" variant="ghost" size="sm">Annuler</x-core::button>
                                                                         </div>
                                                                     </div>
                                                                 @endif
@@ -1698,6 +1765,48 @@
                                                     <span>Exiger l'approbation d'un gérant avant de publier une fiche</span>
                                                 </label>
 
+                                                {{-- F21 : atelier d'évaluation par les pairs. Le gérant définit une GRILLE de
+                                                     critères ; les inscrits remettent un travail puis évaluent ceux de leurs pairs. --}}
+                                                <p style="font-size: 0.74rem; font-weight: 700; color: var(--sys-text-default, #1A1D23); margin: 8px 0 0;">Champs pour un atelier (évaluation par les pairs)</p>
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-wsintro-{{ $lesson->id }}">Consigne / introduction (facultative)</label>
+                                                <textarea id="newitem-wsintro-{{ $lesson->id }}" wire:model="newItem.{{ $lesson->id }}.workshop_intro" rows="2" placeholder="Décrivez le travail à remettre et l'objectif de l'évaluation…"
+                                                          style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+
+                                                <span style="font-size: 0.78rem; font-weight: 700;">Grille d'évaluation (critères)</span>
+                                                @forelse ($newItem[$lesson->id]['workshop_criteria'] ?? [] as $ci => $c)
+                                                    <div wire:key="newws-{{ $lesson->id }}-{{ $ci }}" style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+                                                        <label style="font-size: 0.74rem; font-weight: 600;" for="newws-label-{{ $lesson->id }}-{{ $ci }}">Libellé du critère</label>
+                                                        <input id="newws-label-{{ $lesson->id }}-{{ $ci }}" type="text" wire:model="newItem.{{ $lesson->id }}.workshop_criteria.{{ $ci }}.label" placeholder="Ex. : Clarté de l'argumentation"
+                                                               style="width: 100%; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                        <label style="font-size: 0.74rem; font-weight: 600;" for="newws-desc-{{ $lesson->id }}-{{ $ci }}">Description (facultative)</label>
+                                                        <textarea id="newws-desc-{{ $lesson->id }}-{{ $ci }}" wire:model="newItem.{{ $lesson->id }}.workshop_criteria.{{ $ci }}.description" rows="2"
+                                                                  style="width: 100%; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+                                                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                                            <span style="display: flex; flex-direction: column; gap: 4px;">
+                                                                <label style="font-size: 0.74rem; font-weight: 600;" for="newws-max-{{ $lesson->id }}-{{ $ci }}">Note max</label>
+                                                                <input id="newws-max-{{ $lesson->id }}-{{ $ci }}" type="number" min="1" max="100" wire:model="newItem.{{ $lesson->id }}.workshop_criteria.{{ $ci }}.max_score"
+                                                                       style="width: 90px; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                            </span>
+                                                            <span style="display: flex; flex-direction: column; gap: 4px;">
+                                                                <label style="font-size: 0.74rem; font-weight: 600;" for="newws-weight-{{ $lesson->id }}-{{ $ci }}">Poids</label>
+                                                                <input id="newws-weight-{{ $lesson->id }}-{{ $ci }}" type="number" min="0" step="0.5" wire:model="newItem.{{ $lesson->id }}.workshop_criteria.{{ $ci }}.weight"
+                                                                       style="width: 90px; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                            </span>
+                                                        </div>
+                                                        <div><x-core::button type="button" wire:click="removeNewWorkshopCriterion({{ $lesson->id }}, {{ $ci }})" variant="ghost" size="sm">Retirer ce critère</x-core::button></div>
+                                                    </div>
+                                                @empty
+                                                    <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0;">Aucun critère. Ajoutez-en pour définir la grille d'évaluation par les pairs.</p>
+                                                @endforelse
+                                                <div><x-core::button type="button" wire:click="addNewWorkshopCriterion({{ $lesson->id }})" variant="ghost" size="sm">+ Ajouter un critère</x-core::button></div>
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-wsreviews-{{ $lesson->id }}">Évaluations par étudiant (par défaut : 2)</label>
+                                                <input id="newitem-wsreviews-{{ $lesson->id }}" type="number" min="1" max="10" wire:model="newItem.{{ $lesson->id }}.reviews_per_student" placeholder="2"
+                                                       style="width: 120px; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="newitem-wsanon-{{ $lesson->id }}">
+                                                    <input id="newitem-wsanon-{{ $lesson->id }}" type="checkbox" wire:model="newItem.{{ $lesson->id }}.workshop_anonymous" style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                    <span>Évaluation anonyme (masquer l'auteur des travaux ; par défaut : oui)</span>
+                                                </label>
+
                                                 {{-- F16 : contenu interactif H5P. Le paquet .h5p (zip) est validé + extrait
                                                      côté serveur (H5pPackageService), puis rendu dans un iframe sandbox. --}}
                                                 <p style="font-size: 0.74rem; font-weight: 700; color: var(--sys-text-default, #1A1D23); margin: 8px 0 0;">Champs pour un contenu interactif H5P</p>
@@ -1748,6 +1857,7 @@
                                                     <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'forum')" variant="primary" size="sm">Ajouter un forum</x-core::button>
                                                     <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'wiki')" variant="primary" size="sm">Ajouter un wiki</x-core::button>
                                                     <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'database')" variant="primary" size="sm">Ajouter une base de données</x-core::button>
+                                                    <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'workshop')" variant="primary" size="sm">Ajouter un atelier</x-core::button>
                                                 </div>
                                             </div>
                                         </details>

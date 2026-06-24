@@ -31,6 +31,7 @@ namespace Modules\Academy\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Modules\Academy\Models\DatabaseEntry;
@@ -63,6 +64,11 @@ final class DatabaseService
     public const URL_MAX = 2000;
 
     public const OPTION_MAX = 200;
+
+    /** Bornes d'un champ « number » (anti valeurs extrêmes / infinies). */
+    public const NUMBER_MIN = -1000000000;
+
+    public const NUMBER_MAX = 1000000000;
 
     /** Nom du champ honeypot anti-spam (caché, doit rester vide). */
     public const HONEYPOT = 'hp_url';
@@ -189,38 +195,42 @@ final class DatabaseService
     {
         $normalized = self::normalizeFields($rawFields);
 
-        // Champs actuels de l'item (re-scopés : anti-IDOR sur l'id fourni par l'éditeur).
-        $existing = DatabaseField::forItem($item->id)->get()->keyBy('id');
-        $keptIds  = [];
+        // Transaction : les créations, mises à jour et soft-suppressions du schéma forment
+        // un tout (sinon un échec à mi-sync laisserait le schéma dans un état incohérent).
+        DB::transaction(function () use ($item, $normalized): void {
+            // Champs actuels de l'item (re-scopés : anti-IDOR sur l'id fourni par l'éditeur).
+            $existing = DatabaseField::forItem($item->id)->get()->keyBy('id');
+            $keptIds  = [];
 
-        foreach ($normalized as $position => $def) {
-            $attrs = [
-                'lesson_item_id' => $item->id,
-                'label'          => $def['label'],
-                'name'           => $def['name'],
-                'type'           => $def['type'],
-                'options'        => $def['type'] === 'select' ? $def['options'] : null,
-                'required'       => $def['required'],
-                'position'       => $position,
-            ];
+            foreach ($normalized as $position => $def) {
+                $attrs = [
+                    'lesson_item_id' => $item->id,
+                    'label'          => $def['label'],
+                    'name'           => $def['name'],
+                    'type'           => $def['type'],
+                    'options'        => $def['type'] === 'select' ? $def['options'] : null,
+                    'required'       => $def['required'],
+                    'position'       => $position,
+                ];
 
-            $current = $def['id'] !== null ? $existing->get($def['id']) : null;
+                $current = $def['id'] !== null ? $existing->get($def['id']) : null;
 
-            if ($current !== null) {
-                $current->update($attrs);
-                $keptIds[] = $current->id;
-            } else {
-                $created   = DatabaseField::create($attrs);
-                $keptIds[] = $created->id;
+                if ($current !== null) {
+                    $current->update($attrs);
+                    $keptIds[] = $current->id;
+                } else {
+                    $created   = DatabaseField::create($attrs);
+                    $keptIds[] = $created->id;
+                }
             }
-        }
 
-        // Champs retirés du schéma : soft-suppression (les valeurs restent en base).
-        foreach ($existing as $id => $field) {
-            if (! in_array((int) $id, $keptIds, true)) {
-                $field->delete();
+            // Champs retirés du schéma : soft-suppression (les valeurs restent en base).
+            foreach ($existing as $id => $field) {
+                if (! in_array((int) $id, $keptIds, true)) {
+                    $field->delete();
+                }
             }
-        }
+        });
     }
 
     /**
@@ -310,7 +320,7 @@ final class DatabaseService
 
             $rules[$key] = match ($field->type) {
                 'textarea' => [$required, 'string', 'max:'.self::TEXTAREA_MAX],
-                'number'   => [$required, 'numeric'],
+                'number'   => [$required, 'numeric', 'min:'.self::NUMBER_MIN, 'max:'.self::NUMBER_MAX],
                 'url'      => [$required, 'url', 'max:'.self::URL_MAX],
                 'select'   => [$required, 'string', Rule::in($field->options ?? [])],
                 default    => [$required, 'string', 'max:'.self::TEXT_MAX],
