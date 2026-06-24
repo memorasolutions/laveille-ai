@@ -11,6 +11,7 @@ use Modules\Academy\Http\Controllers\AcademyController;
 use Modules\Academy\Http\Controllers\CalendarController;
 use Modules\Academy\Http\Controllers\CertificateController;
 use Modules\Academy\Http\Controllers\CompletionController;
+use Modules\Academy\Http\Controllers\DatabaseController;
 use Modules\Academy\Http\Controllers\CourseBackupController;
 use Modules\Academy\Http\Controllers\CourseReportController;
 use Modules\Academy\Http\Controllers\ChoiceController;
@@ -289,6 +290,31 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             'courses/{course:slug}/lessons/{lesson}/items/{itemId}/wiki/pages/{pageId}/delete',
             [WikiController::class, 'deletePage']
         )->name('wiki.pages.delete');
+
+        // F20 - BASE DE DONNÉES collaborative attachée à une leçon (item « database », type
+        // Moodle « Database »). Auth + inscription/gérant vérifiés, item re-résolu (anti-IDOR),
+        // honeypot `hp_url`, validation des valeurs PAR TYPE dérivée du schéma. Ajouter une
+        // fiche (gaté allow_student_add) + éditer/supprimer SA fiche + modération
+        // (approuver) gatée manageEnrollments. Le SCHÉMA se gère dans l'éditeur de cours.
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/database/entries',
+            [DatabaseController::class, 'addEntry']
+        )->name('database.entries.create');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/database/entries/{entryId}/update',
+            [DatabaseController::class, 'updateEntry']
+        )->name('database.entries.update');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/database/entries/{entryId}/delete',
+            [DatabaseController::class, 'deleteEntry']
+        )->name('database.entries.delete');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/database/entries/{entryId}/approve',
+            [DatabaseController::class, 'approveEntry']
+        )->name('database.entries.approve');
 
         // F18 - NOTES + COMMENTAIRES sur un item de leçon (parité Moodle
         // ratings/comments). Noter / commenter EXIGE l'inscription active (trait),

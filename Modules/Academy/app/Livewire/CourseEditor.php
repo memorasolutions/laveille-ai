@@ -52,7 +52,7 @@ class CourseEditor extends Component
     use WithFileUploads;
 
     /** Types d'items autorisés (liste blanche, alignée sur l'admin Backoffice). */
-    private const ITEM_TYPES = ['video', 'document', 'quiz', 'choice', 'feedback', 'forum', 'wiki', 'h5p'];
+    private const ITEM_TYPES = ['video', 'document', 'quiz', 'choice', 'feedback', 'forum', 'wiki', 'database', 'h5p'];
 
     /** Tailles maximales (Ko) des téléversements - validées côté SERVEUR. */
     private const COVER_MAX_KB = 4096;       // ~4 Mo (image de couverture)
@@ -132,6 +132,17 @@ class CourseEditor extends Component
      * @var array<int, array<string, mixed>>
      */
     public array $editFeedback = [];
+
+    /**
+     * F20 - BASE DE DONNÉES : tampon d'édition du SCHÉMA d'un item « database », indexé par
+     * item_id. Chaque entrée = { title, intro, allow_student_add, require_approval,
+     * completion, estimated_minutes, fields[] }. Édité par des actions dédiées (chargement,
+     * ajout/retrait de champ, enregistrement) : un répéteur de champs (le schéma) ne se
+     * prête pas au $event.target inline du formulaire générique, comme la rétroaction.
+     *
+     * @var array<int, array<string, mixed>>
+     */
+    public array $editDatabase = [];
 
     /**
      * V1-a : feedback global par tranche de score (« grade boundaries » Moodle),
@@ -923,6 +934,11 @@ class CourseEditor extends Component
             \Modules\Academy\Services\WikiService::ensureHomePage($item, (int) auth()->id() ?: null);
         }
 
+        // F20 - BASE DE DONNÉES : synchroniser le SCHÉMA (champs) saisi à la création.
+        if ($data['type'] === 'database') {
+            \Modules\Academy\Services\DatabaseService::syncFields($item, $input['database_fields'] ?? []);
+        }
+
         unset($this->newItem[$lessonId]);
         $this->flashSaved('Élément ajouté.');
     }
@@ -1052,6 +1068,138 @@ class CourseEditor extends Component
 
         unset($this->editFeedback[$itemId]);
         $this->flashSaved('Sondage de rétroaction mis à jour.');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // F20 - BASE DE DONNÉES : répéteur de CHAMPS (schéma). Comme la rétroaction, un
+    // répéteur dynamique ne se prête pas au $event.target inline : on passe par un tampon
+    // Livewire (newItem.{lesson}.database_fields à la création, editDatabase.{item} à
+    // l'édition) + actions dédiées. La GESTION DU SCHÉMA est réservée au gérant : chaque
+    // action ré-autorise manageStructure (anti-IDOR via resolveItemFor).
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    /** Gabarit d'un champ vierge (répéteur de schéma). */
+    private function blankDatabaseField(): array
+    {
+        return ['label' => '', 'type' => 'text', 'required' => false, 'options' => ''];
+    }
+
+    /** NOUVEL item database : ajoute un champ vierge au schéma. */
+    public function addNewDatabaseField(int $lessonId): void
+    {
+        $this->newItem[$lessonId]['database_fields'][] = $this->blankDatabaseField();
+    }
+
+    /** NOUVEL item database : retire le champ d'index donné (réindexé). */
+    public function removeNewDatabaseField(int $lessonId, int $index): void
+    {
+        if (isset($this->newItem[$lessonId]['database_fields'][$index])) {
+            unset($this->newItem[$lessonId]['database_fields'][$index]);
+            $this->newItem[$lessonId]['database_fields'] = array_values($this->newItem[$lessonId]['database_fields']);
+        }
+    }
+
+    /**
+     * ÉDITION : charge le tampon d'édition du SCHÉMA d'un item database depuis ses champs.
+     * Anti-IDOR : l'item doit appartenir à CE cours. Réservé au gérant (manageStructure).
+     * Les options « select » sont converties en chaîne multiligne pour l'édition.
+     */
+    public function loadDatabaseEditor(int $itemId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+        $item = $this->resolveItemFor($course, $itemId);
+
+        if ($item->type !== 'database') {
+            return;
+        }
+
+        $fields = [];
+        foreach (\Modules\Academy\Services\DatabaseService::fields($item) as $f) {
+            $fields[] = [
+                'id'       => $f->id,
+                'label'    => $f->label,
+                'type'     => $f->type,
+                'required' => (bool) $f->required,
+                'options'  => is_array($f->options) ? implode("\n", $f->options) : '',
+            ];
+        }
+
+        $this->editDatabase[$itemId] = [
+            'title'             => $item->title,
+            'intro'             => \Modules\Academy\Services\DatabaseService::intro($item),
+            'allow_student_add' => \Modules\Academy\Services\DatabaseService::allowsStudentAdd($item),
+            'require_approval'  => \Modules\Academy\Services\DatabaseService::requiresApproval($item),
+            'completion'        => \Modules\Academy\Services\ActivityCompletionService::criterionFor($item),
+            'estimated_minutes' => $item->estimated_minutes,
+            'fields'            => $fields,
+        ];
+    }
+
+    /** Abandonne l'édition en cours du schéma (vide le tampon). */
+    public function cancelDatabaseEditor(int $itemId): void
+    {
+        unset($this->editDatabase[$itemId]);
+    }
+
+    /** ÉDITION : ajoute un champ vierge au schéma en cours d'édition. */
+    public function addDatabaseField(int $itemId): void
+    {
+        $this->editDatabase[$itemId]['fields'][] = $this->blankDatabaseField();
+    }
+
+    /** ÉDITION : retire le champ d'index donné du schéma (réindexé). */
+    public function removeDatabaseField(int $itemId, int $index): void
+    {
+        if (isset($this->editDatabase[$itemId]['fields'][$index])) {
+            unset($this->editDatabase[$itemId]['fields'][$index]);
+            $this->editDatabase[$itemId]['fields'] = array_values($this->editDatabase[$itemId]['fields']);
+        }
+    }
+
+    /**
+     * ÉDITION : enregistre un item database depuis son tampon (payload + SCHÉMA). Mêmes
+     * gardes que updateItem (resolveCourse -> manageStructure -> resolveItemFor anti-IDOR
+     * -> validateItem -> buildItemPayload), puis synchronisation des champs via le service.
+     */
+    public function saveDatabase(int $itemId): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+        $item = $this->resolveItemFor($course, $itemId);
+
+        if ($item->type !== 'database') {
+            abort(404);
+        }
+
+        $buffer  = $this->editDatabase[$itemId] ?? [];
+        $minutes = $buffer['estimated_minutes'] ?? null;
+
+        $input = [
+            'type'              => 'database',
+            'title'             => (string) ($buffer['title'] ?? $item->title),
+            'estimated_minutes' => ($minutes === '' || $minutes === null) ? null : (int) $minutes,
+            'database_intro'    => $buffer['intro'] ?? null,
+            'allow_student_add' => $buffer['allow_student_add'] ?? null,
+            'require_approval'  => $buffer['require_approval'] ?? null,
+            'completion'        => $buffer['completion'] ?? null,
+        ];
+
+        $data    = $this->validateItem($input);
+        $payload = $this->buildItemPayload('database', $input);
+
+        $item->update([
+            'type'              => 'database',
+            'title'             => $data['title'],
+            'payload'           => $payload,
+            'estimated_minutes' => $data['estimated_minutes'] ?? null,
+        ]);
+
+        // SCHÉMA : synchronise les champs (création / mise à jour / soft-suppression).
+        \Modules\Academy\Services\DatabaseService::syncFields($item, $buffer['fields'] ?? []);
+
+        unset($this->editDatabase[$itemId]);
+        $this->flashSaved('Base de données mise à jour.');
     }
 
     /**
@@ -1647,6 +1795,12 @@ class CourseEditor extends Component
             // = true est appliqué au build quand la clé est absente).
             'wiki_intro'          => 'nullable|string|max:2000',
             'allow_student_edit'  => 'nullable|boolean',
+            // F20 - BASE DE DONNÉES : intro facultative + réglages booléens (les défauts
+            // « allow_student_add » = true et « require_approval » = false sont appliqués au
+            // build quand la clé est absente). Le schéma (champs) est synchronisé à part.
+            'database_intro'      => 'nullable|string|max:2000',
+            'allow_student_add'   => 'nullable|boolean',
+            'require_approval'    => 'nullable|boolean',
         ];
 
         // FEEDBACK : un questionnaire EXIGE AU MOINS UNE question valide. On normalise les
@@ -1727,6 +1881,7 @@ class CourseEditor extends Component
             'feedback' => $this->buildFeedbackPayload($input),
             'forum'    => $this->buildForumPayload($input),
             'wiki'     => $this->buildWikiPayload($input),
+            'database' => $this->buildDatabasePayload($input),
             'h5p'      => $this->buildH5pPayload($input),
             default    => [],
         };
@@ -1858,6 +2013,26 @@ class CourseEditor extends Component
         return [
             'intro'              => trim((string) ($input['wiki_intro'] ?? '')),
             'allow_student_edit' => $allow === null ? true : $this->truthy($allow),
+        ];
+    }
+
+    /**
+     * F20 - BASE DE DONNÉES : intro facultative + allow_student_add (DÉFAUT true quand la
+     * clé est absente => les inscrits peuvent ajouter une fiche) + require_approval (défaut
+     * false). Aucune nouvelle colonne (payload). Le SCHÉMA (champs) vit dans une table
+     * dédiée et est synchronisé à part (DatabaseService::syncFields), pas dans ce payload.
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    private function buildDatabasePayload(array $input): array
+    {
+        $allowAdd = $input['allow_student_add'] ?? null;
+
+        return [
+            'intro'             => trim((string) ($input['database_intro'] ?? '')),
+            'allow_student_add' => $allowAdd === null ? true : $this->truthy($allowAdd),
+            'require_approval'  => $this->truthy($input['require_approval'] ?? null),
         ];
     }
 

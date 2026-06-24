@@ -766,7 +766,7 @@
                                                 x-sort:config="{ handle: '[data-sort-handle]', animation: 150 }"
                                                 style="margin: 0 0 10px; display: flex; flex-direction: column; gap: 8px;">
                                                 @foreach ($lesson->lessonItems as $item)
-                                                    @php($typeLabel = ['video' => 'Vidéo', 'document' => 'Document', 'quiz' => 'Quiz', 'choice' => 'Sondage', 'feedback' => 'Rétroaction', 'forum' => 'Forum', 'wiki' => 'Wiki', 'h5p' => 'H5P'][$item->type] ?? $item->type)
+                                                    @php($typeLabel = ['video' => 'Vidéo', 'document' => 'Document', 'quiz' => 'Quiz', 'choice' => 'Sondage', 'feedback' => 'Rétroaction', 'forum' => 'Forum', 'wiki' => 'Wiki', 'database' => 'Base de données', 'h5p' => 'H5P'][$item->type] ?? $item->type)
                                                     <li x-sort:item="{{ $item->id }}" data-sort-id="{{ $item->id }}"
                                                         wire:key="item-{{ $item->id }}"
                                                         style="border: 1px solid #F1F5F9; border-radius: var(--sys-radius-md, 0.5rem); padding: 10px 12px;">
@@ -883,6 +883,75 @@
                                                                         <div class="d-flex flex-wrap gap-2">
                                                                             <x-core::button type="button" wire:click="saveFeedback({{ $item->id }})" variant="secondary" size="sm">Enregistrer le sondage</x-core::button>
                                                                             <x-core::button type="button" wire:click="cancelFeedbackEditor({{ $item->id }})" variant="ghost" size="sm">Annuler</x-core::button>
+                                                                        </div>
+                                                                    </div>
+                                                                @endif
+                                                            @elseif ($item->type === 'database')
+                                                                {{-- ── F20 - BASE DE DONNÉES : éditeur dédié du SCHÉMA (répéteur de champs).
+                                                                     Comme la rétroaction, on passe par un tampon Livewire (editDatabase.{item})
+                                                                     + actions dédiées : le schéma ne se sérialise pas via $event.target. --}}
+                                                                @if (! isset($editDatabase[$item->id]))
+                                                                    <div style="margin-top: 10px;">
+                                                                        <x-core::button type="button" wire:click="loadDatabaseEditor({{ $item->id }})" variant="secondary" size="sm">Modifier la base de données (schéma)</x-core::button>
+                                                                    </div>
+                                                                @else
+                                                                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                                                                        <label style="font-size: 0.78rem; font-weight: 600;" for="dbedit-title-{{ $item->id }}">Titre</label>
+                                                                        <input id="dbedit-title-{{ $item->id }}" type="text" wire:model="editDatabase.{{ $item->id }}.title" aria-label="Titre de la base de données"
+                                                                               style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                        @error('title') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
+
+                                                                        <label style="font-size: 0.78rem; font-weight: 600;" for="dbedit-intro-{{ $item->id }}">Introduction (facultative)</label>
+                                                                        <textarea id="dbedit-intro-{{ $item->id }}" wire:model="editDatabase.{{ $item->id }}.intro" rows="2" aria-label="Introduction de la base de données"
+                                                                                  style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+
+                                                                        <span style="font-size: 0.78rem; font-weight: 700;">Champs du schéma</span>
+                                                                        @forelse ($editDatabase[$item->id]['fields'] ?? [] as $fi => $f)
+                                                                            <div wire:key="dbedit-{{ $item->id }}-{{ $fi }}" style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+                                                                                <label style="font-size: 0.74rem; font-weight: 600;" for="dbedit-label-{{ $item->id }}-{{ $fi }}">Libellé du champ</label>
+                                                                                <input id="dbedit-label-{{ $item->id }}-{{ $fi }}" type="text" wire:model="editDatabase.{{ $item->id }}.fields.{{ $fi }}.label" placeholder="Ex. : Titre de l'outil"
+                                                                                       style="width: 100%; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                                <label style="font-size: 0.74rem; font-weight: 600;" for="dbedit-type-{{ $item->id }}-{{ $fi }}">Type</label>
+                                                                                <select id="dbedit-type-{{ $item->id }}-{{ $fi }}" wire:model.live="editDatabase.{{ $item->id }}.fields.{{ $fi }}.type" aria-label="Type du champ"
+                                                                                        style="width: 100%; padding: 6px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                                    <option value="text">Texte court</option>
+                                                                                    <option value="textarea">Texte long</option>
+                                                                                    <option value="number">Nombre</option>
+                                                                                    <option value="url">Lien (URL)</option>
+                                                                                    <option value="select">Liste de choix</option>
+                                                                                </select>
+                                                                                @if (($f['type'] ?? '') === 'select')
+                                                                                    <label style="font-size: 0.74rem; font-weight: 600;" for="dbedit-opts-{{ $item->id }}-{{ $fi }}">Options (une par ligne)</label>
+                                                                                    <textarea id="dbedit-opts-{{ $item->id }}-{{ $fi }}" wire:model="editDatabase.{{ $item->id }}.fields.{{ $fi }}.options" rows="3"
+                                                                                              style="width: 100%; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+                                                                                @endif
+                                                                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.78rem; font-weight: 600;">
+                                                                                    <input type="checkbox" wire:model="editDatabase.{{ $item->id }}.fields.{{ $fi }}.required" style="width: 22px; height: 22px; flex: 0 0 auto;">
+                                                                                    <span>Champ obligatoire</span>
+                                                                                </label>
+                                                                                <div><x-core::button type="button" wire:click="removeDatabaseField({{ $item->id }}, {{ $fi }})" variant="ghost" size="sm">Retirer ce champ</x-core::button></div>
+                                                                            </div>
+                                                                        @empty
+                                                                            <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0;">Aucun champ. Ajoutez-en pour définir la fiche que les inscrits rempliront.</p>
+                                                                        @endforelse
+                                                                        <div><x-core::button type="button" wire:click="addDatabaseField({{ $item->id }})" variant="ghost" size="sm">+ Ajouter un champ</x-core::button></div>
+
+                                                                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;">
+                                                                            <input type="checkbox" wire:model="editDatabase.{{ $item->id }}.allow_student_add" style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                            <span>Autoriser les inscrits à ajouter une fiche (par défaut : oui)</span>
+                                                                        </label>
+                                                                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;">
+                                                                            <input type="checkbox" wire:model="editDatabase.{{ $item->id }}.require_approval" style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                                            <span>Exiger l'approbation d'un gérant avant de publier une fiche</span>
+                                                                        </label>
+
+                                                                        <label style="font-size: 0.78rem; font-weight: 600;" for="dbedit-min-{{ $item->id }}">Durée estimée (min, facultatif)</label>
+                                                                        <input id="dbedit-min-{{ $item->id }}" type="number" min="1" wire:model="editDatabase.{{ $item->id }}.estimated_minutes" aria-label="Durée estimée en minutes"
+                                                                               style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+
+                                                                        <div class="d-flex flex-wrap gap-2">
+                                                                            <x-core::button type="button" wire:click="saveDatabase({{ $item->id }})" variant="secondary" size="sm">Enregistrer la base de données</x-core::button>
+                                                                            <x-core::button type="button" wire:click="cancelDatabaseEditor({{ $item->id }})" variant="ghost" size="sm">Annuler</x-core::button>
                                                                         </div>
                                                                     </div>
                                                                 @endif
@@ -1583,6 +1652,52 @@
                                                     <span>Autoriser les étudiants à modifier les pages (par défaut : oui)</span>
                                                 </label>
 
+                                                {{-- F20 : base de données collaborative. Le gérant définit un SCHÉMA de
+                                                     champs ; les inscrits soumettent ensuite des fiches selon ce schéma. --}}
+                                                <p style="font-size: 0.74rem; font-weight: 700; color: var(--sys-text-default, #1A1D23); margin: 8px 0 0;">Champs pour une base de données (fiches collaboratives)</p>
+                                                <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-dbintro-{{ $lesson->id }}">Introduction (facultative)</label>
+                                                <textarea id="newitem-dbintro-{{ $lesson->id }}" wire:model="newItem.{{ $lesson->id }}.database_intro" rows="2" placeholder="Expliquez ce que les inscrits doivent saisir…"
+                                                          style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+
+                                                <span style="font-size: 0.78rem; font-weight: 700;">Schéma (champs de la fiche)</span>
+                                                @forelse ($newItem[$lesson->id]['database_fields'] ?? [] as $fi => $f)
+                                                    <div wire:key="newdb-{{ $lesson->id }}-{{ $fi }}" style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.5rem); padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+                                                        <label style="font-size: 0.74rem; font-weight: 600;" for="newdb-label-{{ $lesson->id }}-{{ $fi }}">Libellé du champ</label>
+                                                        <input id="newdb-label-{{ $lesson->id }}-{{ $fi }}" type="text" wire:model="newItem.{{ $lesson->id }}.database_fields.{{ $fi }}.label" placeholder="Ex. : Nom de l'outil"
+                                                               style="width: 100%; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                        <label style="font-size: 0.74rem; font-weight: 600;" for="newdb-type-{{ $lesson->id }}-{{ $fi }}">Type</label>
+                                                        <select id="newdb-type-{{ $lesson->id }}-{{ $fi }}" wire:model.live="newItem.{{ $lesson->id }}.database_fields.{{ $fi }}.type" aria-label="Type du champ"
+                                                                style="width: 100%; padding: 6px 10px; min-height: 36px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                            <option value="text">Texte court</option>
+                                                            <option value="textarea">Texte long</option>
+                                                            <option value="number">Nombre</option>
+                                                            <option value="url">Lien (URL)</option>
+                                                            <option value="select">Liste de choix</option>
+                                                        </select>
+                                                        @if (($f['type'] ?? '') === 'select')
+                                                            <label style="font-size: 0.74rem; font-weight: 600;" for="newdb-opts-{{ $lesson->id }}-{{ $fi }}">Options (une par ligne)</label>
+                                                            <textarea id="newdb-opts-{{ $lesson->id }}-{{ $fi }}" wire:model="newItem.{{ $lesson->id }}.database_fields.{{ $fi }}.options" rows="3"
+                                                                      style="width: 100%; padding: 6px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); resize: vertical;"></textarea>
+                                                        @endif
+                                                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.78rem; font-weight: 600;">
+                                                            <input type="checkbox" wire:model="newItem.{{ $lesson->id }}.database_fields.{{ $fi }}.required" style="width: 22px; height: 22px; flex: 0 0 auto;">
+                                                            <span>Champ obligatoire</span>
+                                                        </label>
+                                                        <div><x-core::button type="button" wire:click="removeNewDatabaseField({{ $lesson->id }}, {{ $fi }})" variant="ghost" size="sm">Retirer ce champ</x-core::button></div>
+                                                    </div>
+                                                @empty
+                                                    <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0;">Aucun champ. Ajoutez-en pour définir la fiche que les inscrits rempliront.</p>
+                                                @endforelse
+                                                <div><x-core::button type="button" wire:click="addNewDatabaseField({{ $lesson->id }})" variant="ghost" size="sm">+ Ajouter un champ</x-core::button></div>
+                                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="newitem-dballow-{{ $lesson->id }}">
+                                                    <input id="newitem-dballow-{{ $lesson->id }}" type="checkbox" wire:model="newItem.{{ $lesson->id }}.allow_student_add" style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                    <span>Autoriser les inscrits à ajouter une fiche (par défaut : oui)</span>
+                                                </label>
+                                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600;" for="newitem-dbapprove-{{ $lesson->id }}">
+                                                    <input id="newitem-dbapprove-{{ $lesson->id }}" type="checkbox" wire:model="newItem.{{ $lesson->id }}.require_approval" style="width: 24px; height: 24px; flex: 0 0 auto;">
+                                                    <span>Exiger l'approbation d'un gérant avant de publier une fiche</span>
+                                                </label>
+
                                                 {{-- F16 : contenu interactif H5P. Le paquet .h5p (zip) est validé + extrait
                                                      côté serveur (H5pPackageService), puis rendu dans un iframe sandbox. --}}
                                                 <p style="font-size: 0.74rem; font-weight: 700; color: var(--sys-text-default, #1A1D23); margin: 8px 0 0;">Champs pour un contenu interactif H5P</p>
@@ -1632,6 +1747,7 @@
                                                     <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'feedback')" variant="primary" size="sm">Ajouter une rétroaction</x-core::button>
                                                     <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'forum')" variant="primary" size="sm">Ajouter un forum</x-core::button>
                                                     <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'wiki')" variant="primary" size="sm">Ajouter un wiki</x-core::button>
+                                                    <x-core::button type="button" wire:click="addItem({{ $lesson->id }}, 'database')" variant="primary" size="sm">Ajouter une base de données</x-core::button>
                                                 </div>
                                             </div>
                                         </details>

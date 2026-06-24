@@ -251,6 +251,21 @@
     .academy-wiki-rev { padding: 8px 10px; margin: 6px 0; background: #F9FAFB; border-radius: 8px; font-size: 0.85rem; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
     .academy-wiki-link { color: #064E5A; text-decoration: underline; }
     .academy-wiki-missing { color: #B45309; text-decoration: underline dotted; }
+    /* F20 - base de données collaborative */
+    .academy-db { max-width: 100%; }
+    .academy-db-intro { color: var(--sys-text-muted, #6B7280); margin: 0 0 1rem; font-size: 0.95rem; }
+    .academy-db-entries { display: flex; flex-direction: column; gap: 12px; }
+    .academy-db-entry { border: 1px solid #E5E7EB; border-radius: 10px; padding: 12px 14px; background: #fff; }
+    .academy-db-entry.is-pending { border-style: dashed; background: #FFFBEB; }
+    .academy-db-meta { font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 8px; }
+    .academy-db-badge { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: #FEF3C7; color: #92400E; margin-left: 6px; }
+    .academy-db-row { margin: 0 0 6px; font-size: 0.9rem; }
+    .academy-db-row dt { font-weight: 700; color: var(--sys-text-default, #1A1D23); font-size: 0.8rem; }
+    .academy-db-row dd { margin: 0 0 4px; color: var(--sys-text-default, #1A1D23); }
+    .academy-db-empty { color: #9CA3AF; }
+    .academy-db-link { color: #064E5A; text-decoration: underline; word-break: break-all; }
+    .academy-db-field { width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: 8px; font: inherit; }
+    .academy-db-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
     /* F18 - notes (étoiles) + commentaires */
     .academy-engage { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #E5E7EB; max-width: 64ch; }
     .academy-rating { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
@@ -321,6 +336,7 @@
                                 'feedback' => '📝',
                                 'forum'    => '💬',
                                 'wiki'     => '📖',
+                                'database' => '🗃️',
                                 'h5p'      => '🧩',
                                 default    => '📄',
                             };
@@ -1395,6 +1411,168 @@
                                         <x-core::button :href="route('academy.courses.purchase', $course)" variant="primary" size="sm">
                                             Acheter ce cours
                                         </x-core::button>
+                                    @endif
+                                </div>
+                            @endif
+
+                        {{-- ── TYPE BASE DE DONNÉES (F20, parité Moodle « Database ») ── --}}
+                        @elseif($item->type === 'database')
+                            @php
+                                $dbIntro          = \Modules\Academy\Services\DatabaseService::intro($item);
+                                $dbAllowAdd       = \Modules\Academy\Services\DatabaseService::allowsStudentAdd($item);
+                                // Gérant de CE cours (admin OU owner/instructor) : modère ET contribue
+                                // même hors inscription. L'autorisation réelle est TOUJOURS re-vérifiée
+                                // serveur (DatabaseController) ; ici c'est de l'affichage.
+                                $dbCanModerate = auth()->check() && auth()->user()->can('manageEnrollments', $course);
+                                $dbFields  = ($hasAccess || $dbCanModerate)
+                                    ? \Modules\Academy\Services\DatabaseService::fields($item)
+                                    : collect();
+                                $dbEntries = ($hasAccess || $dbCanModerate)
+                                    ? \Modules\Academy\Services\DatabaseService::entries($item, auth()->id(), $dbCanModerate)
+                                    : null;
+                                // Peut ajouter une fiche : gérant toujours ; inscrit si l'ajout est permis.
+                                $dbCanAdd = $dbCanModerate || ($hasAccess && auth()->check() && $dbAllowAdd);
+                            @endphp
+                            @if($hasAccess || $dbCanModerate)
+                                <div class="academy-db">
+                                    @if($dbIntro !== '')
+                                        <p class="academy-db-intro">{{ $dbIntro }}</p>
+                                    @endif
+
+                                    @if(! $dbAllowAdd)
+                                        <p class="text-muted p-2 rounded" style="background: #F3F4F6; font-size: 0.85rem;">
+                                            <span aria-hidden="true">🔒</span> L'ajout de fiches est réservé au formateur.
+                                            @if($dbCanModerate) (Vous pouvez tout de même ajouter une fiche en tant que gérant.) @endif
+                                        </p>
+                                    @endif
+
+                                    {{-- Collection des fiches (approuvées pour tous ; en attente visibles à
+                                         l'auteur + au gérant ; déjà filtrées côté service, anti-fuite). --}}
+                                    <div class="academy-db-entries">
+                                        @forelse($dbEntries as $entry)
+                                            @php $dbVals = \Modules\Academy\Services\DatabaseService::valuesByField($entry); @endphp
+                                            @php $dbIsOwner = auth()->check() && (int) ($entry->user_id ?? 0) === (int) auth()->id(); @endphp
+                                            <div class="academy-db-entry @if(! $entry->is_approved) is-pending @endif" wire:key="db-entry-{{ $entry->id }}">
+                                                <p class="academy-db-meta">
+                                                    Par {{ $entry->author?->name ?? '(inconnu)' }}
+                                                    @if($entry->created_at) · {{ $entry->created_at->diffForHumans() }} @endif
+                                                    @unless($entry->is_approved)<span class="academy-db-badge">En attente d'approbation</span>@endunless
+                                                </p>
+                                                <dl class="academy-db-row">
+                                                    @foreach($dbFields as $field)
+                                                        <dt>{{ $field->label }}</dt>
+                                                        <dd>{!! \Modules\Academy\Services\DatabaseService::renderValue($field, $dbVals[$field->id] ?? null) !!}</dd>
+                                                    @endforeach
+                                                </dl>
+
+                                                <div class="academy-db-actions">
+                                                    {{-- Modération : approuver une fiche en attente (gérant). --}}
+                                                    @if($dbCanModerate && ! $entry->is_approved)
+                                                        <form method="POST" action="{{ route('academy.database.entries.approve', [$course, $lesson, $item->id, $entry->id]) }}">
+                                                            @csrf
+                                                            <x-core::button type="submit" variant="primary" size="sm">Approuver</x-core::button>
+                                                        </form>
+                                                    @endif
+
+                                                    {{-- Supprimer SA fiche (ou n'importe laquelle si gérant) : 2 temps, jamais de popup. --}}
+                                                    @if($dbIsOwner || $dbCanModerate)
+                                                        <details>
+                                                            <summary style="cursor: pointer; font-size: 0.82rem; color: var(--sys-action-danger, #DC2626);">Supprimer cette fiche</summary>
+                                                            <form method="POST" action="{{ route('academy.database.entries.delete', [$course, $lesson, $item->id, $entry->id]) }}" class="mt-1">
+                                                                @csrf
+                                                                <x-core::button type="submit" variant="ghost" size="sm">Confirmer la suppression</x-core::button>
+                                                            </form>
+                                                        </details>
+                                                    @endif
+                                                </div>
+
+                                                {{-- Éditer SA fiche (collaboratif : seul l'auteur ou un gérant). --}}
+                                                @if(($dbIsOwner || $dbCanModerate) && $dbFields->isNotEmpty())
+                                                    <details>
+                                                        <summary style="cursor: pointer; font-size: 0.85rem; font-weight: 600;">Modifier cette fiche</summary>
+                                                        <form method="POST" action="{{ route('academy.database.entries.update', [$course, $lesson, $item->id, $entry->id]) }}" class="mt-1" style="display: flex; flex-direction: column; gap: 8px;">
+                                                            @csrf
+                                                            <div aria-hidden="true" style="position: absolute; left: -9999px; top: -9999px;">
+                                                                <label for="db-ehp-{{ $entry->id }}">Ne pas remplir</label>
+                                                                <input type="text" id="db-ehp-{{ $entry->id }}" name="{{ \Modules\Academy\Services\DatabaseService::HONEYPOT }}" tabindex="-1" autocomplete="off">
+                                                            </div>
+                                                            @foreach($dbFields as $field)
+                                                                @include('academy::public.partials.database-field', ['field' => $field, 'value' => $dbVals[$field->id] ?? '', 'entryId' => $entry->id])
+                                                            @endforeach
+                                                            <div><x-core::button type="submit" variant="secondary" size="sm">Enregistrer la fiche</x-core::button></div>
+                                                        </form>
+                                                    </details>
+                                                @endif
+                                            </div>
+                                        @empty
+                                            <p class="text-muted" style="font-size: 0.9rem;">Aucune fiche pour l'instant.@if($dbCanAdd) Ajoutez la première ci-dessous.@endif</p>
+                                        @endforelse
+                                    </div>
+
+                                    @if($dbEntries && $dbEntries->hasPages())
+                                        <div class="mt-2">{{ $dbEntries->withQueryString()->links() }}</div>
+                                    @endif
+
+                                    {{-- Ajouter une fiche (gaté allow_student_add ; le gérant toujours). --}}
+                                    @if($dbCanAdd && $dbFields->isNotEmpty())
+                                        <details class="mt-3">
+                                            <summary style="cursor: pointer; font-size: 0.88rem; font-weight: 700;">+ Ajouter une fiche</summary>
+                                            <form method="POST" action="{{ route('academy.database.entries.create', [$course, $lesson, $item->id]) }}" class="mt-2" style="display: flex; flex-direction: column; gap: 8px;">
+                                                @csrf
+                                                {{-- Honeypot MAISON : doit rester vide ; hors écran, non focusable. --}}
+                                                <div aria-hidden="true" style="position: absolute; left: -9999px; top: -9999px;">
+                                                    <label for="db-hp-{{ $item->id }}">Ne pas remplir</label>
+                                                    <input type="text" id="db-hp-{{ $item->id }}" name="{{ \Modules\Academy\Services\DatabaseService::HONEYPOT }}" tabindex="-1" autocomplete="off">
+                                                </div>
+                                                @foreach($dbFields as $field)
+                                                    @include('academy::public.partials.database-field', ['field' => $field, 'value' => '', 'entryId' => 'new-'.$item->id])
+                                                @endforeach
+                                                @if(\Modules\Academy\Services\DatabaseService::requiresApproval($item) && ! $dbCanModerate)
+                                                    <p class="text-muted" style="font-size: 0.8rem;">Votre fiche sera visible après l'approbation du formateur.</p>
+                                                @endif
+                                                <div><x-core::button type="submit" variant="primary" size="sm">Ajouter la fiche</x-core::button></div>
+                                            </form>
+                                        </details>
+                                    @elseif($dbCanAdd && $dbFields->isEmpty())
+                                        <p class="text-muted mt-2" style="font-size: 0.85rem;">Cette base de données n'a pas encore de champ. Définissez le schéma dans l'éditeur de cours.</p>
+                                    @endif
+                                </div>
+                            @else
+                                {{-- Accès refusé (même logique que les autres types : rien de sensible dans le DOM). --}}
+                                <div class="academy-gated-panel">
+                                    <div class="gated-icon">🔐</div>
+                                    <div class="gated-title">
+                                        @if(!auth()->check())
+                                            Connexion requise pour accéder à la base de données
+                                        @elseif(!$isEnrolled)
+                                            Inscrivez-vous pour accéder à la base de données
+                                        @else
+                                            Base de données en cours de préparation
+                                        @endif
+                                    </div>
+                                    <p class="gated-sub">
+                                        @if(!auth()->check())
+                                            Créez un compte gratuit ou connectez-vous pour consulter et contribuer.
+                                        @elseif(!$isEnrolled && $isFree)
+                                            Ce cours est gratuit : inscrivez-vous pour contribuer.
+                                        @elseif(!$isEnrolled && !$isFree)
+                                            Ce cours est payant : achetez-le pour accéder à l'ensemble du contenu.
+                                        @else
+                                            Votre inscription vous donne accès à l'ensemble du contenu.
+                                        @endif
+                                    </p>
+                                    @if(!auth()->check())
+                                        <span class="d-inline-flex flex-wrap gap-2 justify-content-center">
+                                            <x-core::button :href="Route::has('login') ? route('login') : '#'" variant="primary" size="sm">Se connecter</x-core::button>
+                                            <x-core::button :href="Route::has('register') ? route('register') : '#'" variant="secondary" size="sm">Créer un compte</x-core::button>
+                                        </span>
+                                    @elseif(!$isEnrolled && $isFree)
+                                        <form action="{{ route('academy.courses.enroll', $course) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <x-core::button type="submit" variant="primary" size="sm">S'inscrire gratuitement</x-core::button>
+                                        </form>
+                                    @elseif(!$isEnrolled && !$isFree)
+                                        <x-core::button :href="route('academy.courses.purchase', $course)" variant="primary" size="sm">Acheter ce cours</x-core::button>
                                     @endif
                                 </div>
                             @endif
