@@ -803,8 +803,12 @@
                                                             </div>
                                                         </div>
 
-                                                        {{-- Modifier cet élément (formulaire par type) --}}
-                                                        <details style="margin-top: 8px;">
+                                                        {{-- Modifier cet élément (formulaire par type).
+                                                             wire:ignore.self : Livewire ne re-morphe PAS l'attribut natif `open` du
+                                                             <details> à chaque action (ajout d'un champ de schéma / critère), il
+                                                             met seulement à jour les enfants -> le panneau reste ouvert et le champ
+                                                             ajouté reste visible (correctif SIM BUG-3). wire:key stabilise le morph. --}}
+                                                        <details style="margin-top: 8px;" wire:key="item-edit-{{ $item->id }}" wire:ignore.self>
                                                             <summary style="cursor: pointer; font-size: 0.78rem; color: var(--sys-action-primary, #064E5A); font-weight: 600;">Modifier cet élément</summary>
                                                             {{-- Valeur affichée pour l'URL vidéo : champ canonique player_url, repli sur l'ancien payload['embed']. --}}
                                                             @php($videoUrlValue = $item->payload['player_url'] ?? ($item->payload['embed'] ?? ''))
