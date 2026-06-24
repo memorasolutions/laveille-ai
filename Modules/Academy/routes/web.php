@@ -17,6 +17,7 @@ use Modules\Academy\Http\Controllers\ChoiceController;
 use Modules\Academy\Http\Controllers\FeedbackController;
 use Modules\Academy\Http\Controllers\ForumController;
 use Modules\Academy\Http\Controllers\H5pPlayerController;
+use Modules\Academy\Http\Controllers\ItemEngagementController;
 use Modules\Academy\Http\Controllers\CourseController;
 use Modules\Academy\Http\Controllers\EnrollmentController;
 use Modules\Academy\Http\Controllers\ExportController;
@@ -257,6 +258,26 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             'courses/{course:slug}/lessons/{lesson}/items/{itemId}/forum/posts/{postId}/delete',
             [ForumController::class, 'deletePost']
         )->name('forum.posts.delete');
+
+        // F18 - NOTES + COMMENTAIRES sur un item de leçon (parité Moodle
+        // ratings/comments). Noter / commenter EXIGE l'inscription active (trait),
+        // item re-résolu (anti-IDOR), honeypot `hp_url` + bornes serveur sur le
+        // commentaire, note bornée 1..5 (1 note/utilisateur). Suppression d'un
+        // commentaire : auteur OU gérant (manageEnrollments), soft-delete.
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/comments',
+            [ItemEngagementController::class, 'storeComment']
+        )->name('items.comments.store');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/comments/{commentId}/delete',
+            [ItemEngagementController::class, 'deleteComment']
+        )->name('items.comments.delete');
+
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/rate',
+            [ItemEngagementController::class, 'rate']
+        )->name('items.rate');
     });
 });
 

@@ -233,6 +233,27 @@
     .academy-forum-text { width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: 8px; resize: vertical; font: inherit; }
     .academy-forum-field { width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: 8px; font: inherit; margin-bottom: 8px; }
     .academy-forum-mod { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
+    /* F18 - notes (étoiles) + commentaires */
+    .academy-engage { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #E5E7EB; max-width: 64ch; }
+    .academy-rating { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+    .academy-rating-avg { font-weight: 700; color: var(--sys-text-default, #1A1D23); }
+    .academy-rating-count { font-size: 0.82rem; color: var(--sys-text-muted, #6B7280); }
+    .academy-rating-stars { letter-spacing: 1px; font-size: 1.05rem; }
+    .academy-rating-form { margin-top: 8px; }
+    .academy-rating-fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+    .academy-rating-legend { font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 0 8px 0 0; padding: 0; float: none; width: auto; }
+    .academy-star { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; min-height: 28px; cursor: pointer; border-radius: 6px; }
+    .academy-star input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .academy-star > span[aria-hidden] { font-size: 1.3rem; color: #D1D5DB; line-height: 1; }
+    .academy-star input:checked + span[aria-hidden] { color: #F59E0B; }
+    .academy-star input:focus-visible + span[aria-hidden] { outline: 2px solid var(--sys-action-primary, #064E5A); outline-offset: 2px; border-radius: 4px; }
+    .academy-comments { margin-top: 1rem; }
+    .academy-comments-title { font-size: 0.95rem; font-weight: 700; color: var(--sys-text-default, #1A1D23); margin: 0 0 8px; }
+    .academy-comment { padding: 10px 12px; margin: 8px 0; background: #F9FAFB; border-radius: 8px; }
+    .academy-comment-meta { font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin-bottom: 4px; }
+    .academy-comment-del { margin-top: 6px; }
+    .academy-comment-del > summary { cursor: pointer; font-size: 0.8rem; color: #9B1C1C; display: inline-block; }
+    .academy-comment-form { margin-top: 10px; }
 </style>
 @endpush
 
@@ -1286,6 +1307,102 @@
                             <p class="text-muted mt-3" style="font-size: 0.85rem;">
                                 Les actions (progression, quiz) sont désactivées en prévisualisation.
                             </p>
+                        @endif
+
+                        {{-- F18 - NOTES (étoiles) + COMMENTAIRES (parité Moodle ratings/comments).
+                             Affiché quand l'utilisateur a accès à l'item ($hasAccess). La moyenne
+                             et les commentaires sont visibles par tout utilisateur ayant accès ; le
+                             contrôle de note et le formulaire de commentaire ne s'affichent QUE pour
+                             un inscrit réel (hors prévisualisation : un gérant ne note/commente pas).
+                             Données préchargées dans LessonController (anti N+1). L'autorisation
+                             d'écrire est TOUJOURS revalidée serveur (trait AuthorizesAcademyAccess). --}}
+                        @if($hasAccess)
+                            @php
+                                $__ratingStat   = ($itemRatingStats ?? collect())->get($item->id);
+                                $__ratingCount  = $__ratingStat ? (int) $__ratingStat->votes_count : 0;
+                                $__ratingAvg    = $__ratingStat ? round((float) $__ratingStat->avg_value, 1) : 0.0;
+                                $__userRating   = (int) (($userRatings ?? collect())->get($item->id) ?? 0);
+                                $__itemComments = ($itemComments ?? collect())->get($item->id) ?? collect();
+                                $__canEngage    = ($isEnrolled ?? false) && !($isPreview ?? false) && auth()->check();
+                                $__canModerate  = auth()->check() && auth()->user()->can('manageEnrollments', $course);
+                            @endphp
+
+                            <div class="academy-engage">
+                                {{-- ── Note moyenne + nombre de notes ── --}}
+                                <div class="academy-rating">
+                                    <span class="academy-rating-stars" aria-hidden="true">@for($__s = 1; $__s <= 5; $__s++)<span style="color: {{ $__s <= round($__ratingAvg) ? '#F59E0B' : '#D1D5DB' }};">★</span>@endfor</span>
+                                    <span class="academy-rating-avg">{{ $__ratingCount > 0 ? number_format($__ratingAvg, 1) : '-' }}/5</span>
+                                    <span class="academy-rating-count">{{ $__ratingCount }} note{{ $__ratingCount > 1 ? 's' : '' }}</span>
+                                </div>
+
+                                {{-- ── Contrôle de note (inscrit réel uniquement) ── --}}
+                                @if($__canEngage)
+                                    <form method="POST" action="{{ route('academy.items.rate', [$course, $lesson, $item->id]) }}" class="academy-rating-form">
+                                        @csrf
+                                        <fieldset class="academy-rating-fieldset" role="radiogroup" aria-label="Votre note sur 5 pour : {{ $item->title ?? 'cet élément' }}">
+                                            <legend class="academy-rating-legend">Votre note</legend>
+                                            @for($__s = 1; $__s <= 5; $__s++)
+                                                <label class="academy-star">
+                                                    <input type="radio" name="value" value="{{ $__s }}" @checked($__userRating === $__s) required>
+                                                    <span aria-hidden="true">★</span>
+                                                    <span class="visually-hidden">{{ $__s }} étoile{{ $__s > 1 ? 's' : '' }}</span>
+                                                </label>
+                                            @endfor
+                                            <x-core::button type="submit" variant="secondary" size="sm">
+                                                {{ $__userRating > 0 ? 'Modifier ma note' : 'Enregistrer ma note' }}
+                                            </x-core::button>
+                                        </fieldset>
+                                    </form>
+                                @endif
+
+                                {{-- ── Commentaires ── --}}
+                                <div class="academy-comments">
+                                    <h3 class="academy-comments-title">Commentaires ({{ $__itemComments->count() }})</h3>
+
+                                    @forelse($__itemComments as $__comment)
+                                        <div class="academy-comment" id="comment-{{ $__comment->id }}">
+                                            <div class="academy-comment-meta">
+                                                {{ $__comment->user?->name ?? '(inconnu)' }}
+                                                @if($__comment->created_at)
+                                                    · {{ $__comment->created_at->timezone('America/Toronto')->format('d/m/Y H:i') }}
+                                                @endif
+                                            </div>
+                                            <div class="academy-comment-body prose academy-richtext">{!! $__comment->renderedBody() !!}</div>
+
+                                            @if($__canModerate || (auth()->check() && (int) $__comment->user_id === (int) auth()->id()))
+                                                <details class="academy-comment-del">
+                                                    <summary>Supprimer</summary>
+                                                    <form method="POST" action="{{ route('academy.items.comments.delete', [$course, $lesson, $item->id, $__comment->id]) }}" class="mt-2">
+                                                        @csrf
+                                                        <p class="mb-2" style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280);">Confirmer la suppression de ce commentaire ?</p>
+                                                        <x-core::button type="submit" variant="danger" size="sm">Oui, supprimer</x-core::button>
+                                                    </form>
+                                                </details>
+                                            @endif
+                                        </div>
+                                    @empty
+                                        <p class="text-muted" style="font-size: 0.9rem;">Aucun commentaire pour l'instant.@if($__canEngage) Soyez le premier à en publier un.@endif</p>
+                                    @endforelse
+
+                                    @if($__canEngage)
+                                        <form method="POST" action="{{ route('academy.items.comments.store', [$course, $lesson, $item->id]) }}" class="academy-comment-form">
+                                            @csrf
+                                            {{-- Honeypot anti-bot (caché, doit rester vide) - vérifié serveur. --}}
+                                            <div style="position: absolute; left: -9999px;" aria-hidden="true">
+                                                <label>Ne pas remplir ce champ
+                                                    <input type="text" name="hp_url" tabindex="-1" autocomplete="off">
+                                                </label>
+                                            </div>
+                                            <label for="comment-body-{{ $item->id }}" class="visually-hidden">Votre commentaire sur : {{ $item->title ?? 'cet élément' }}</label>
+                                            <textarea id="comment-body-{{ $item->id }}" name="body" rows="3" maxlength="2000" required class="academy-forum-text" placeholder="Partagez un commentaire (2000 caractères max)"></textarea>
+                                            <div class="mt-2">
+                                                <x-core::button type="submit" variant="primary" size="sm">Publier le commentaire</x-core::button>
+                                            </div>
+                                        </form>
+                                    @endif
+                                </div>
+                            </div>
+                            @php unset($__ratingStat, $__ratingCount, $__ratingAvg, $__userRating, $__itemComments, $__canEngage, $__canModerate); @endphp
                         @endif
 
                     </div>

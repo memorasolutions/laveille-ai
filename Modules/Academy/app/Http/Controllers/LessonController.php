@@ -173,6 +173,30 @@ class LessonController extends Controller
             }
         }
 
+        // 5h. F18 (anti N+1) - Précharge en quelques requêtes les NOTES (moyenne + note
+        //     de l'utilisateur) et les COMMENTAIRES de TOUS les items de la leçon. Le
+        //     lecteur consulte ensuite ces maps au lieu de requêter par item. Les notes
+        //     de l'utilisateur restent vides si anonyme ou en prévisualisation (le gérant
+        //     ne note pas) ; la moyenne et les commentaires sont préchargés dans tous les
+        //     cas (affichage). Rétrocompat : un item sans note/commentaire est absent des
+        //     maps (moyenne 0 / 0 commentaire côté vue).
+        $itemRatingStats = collect();
+        $userRatings     = collect();
+        $itemComments    = collect();
+        if (class_exists(\Modules\Academy\Services\ItemEngagementService::class)) {
+            $engageItemIds = $lesson->lessonItems->pluck('id');
+            if ($engageItemIds->isNotEmpty()) {
+                $itemRatingStats = \Modules\Academy\Services\ItemEngagementService::preloadRatingStats($engageItemIds);
+                $itemComments    = \Modules\Academy\Services\ItemEngagementService::preloadComments($engageItemIds);
+                if (! $isPreview && auth()->check()) {
+                    $userRatings = \Modules\Academy\Services\ItemEngagementService::preloadUserRatings(
+                        $engageItemIds,
+                        auth()->user()
+                    );
+                }
+            }
+        }
+
         // 6. Navigation préc/suiv
         $allLessons = $course->chapters->flatMap(fn ($ch) => $ch->lessons);
         $currentIndex = $allLessons->search(fn ($l) => $l->id === $lesson->id);
@@ -231,6 +255,9 @@ class LessonController extends Controller
             'feedbackResponses',
             'courseCompleted',
             'itemRestrictions',
+            'itemRatingStats',
+            'userRatings',
+            'itemComments',
         ));
     }
 }
