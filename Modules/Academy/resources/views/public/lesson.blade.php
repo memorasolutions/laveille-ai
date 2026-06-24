@@ -1343,7 +1343,7 @@
                                             <legend class="academy-rating-legend">Votre note</legend>
                                             @for($__s = 1; $__s <= 5; $__s++)
                                                 <label class="academy-star">
-                                                    <input type="radio" name="value" value="{{ $__s }}" @checked($__userRating === $__s) required>
+                                                    <input type="radio" name="value" value="{{ $__s }}" @checked($__userRating === $__s) @if($__s === 1) required @endif>
                                                     <span aria-hidden="true">★</span>
                                                     <span class="visually-hidden">{{ $__s }} étoile{{ $__s > 1 ? 's' : '' }}</span>
                                                 </label>
@@ -1388,13 +1388,13 @@
                                         <form method="POST" action="{{ route('academy.items.comments.store', [$course, $lesson, $item->id]) }}" class="academy-comment-form">
                                             @csrf
                                             {{-- Honeypot anti-bot (caché, doit rester vide) - vérifié serveur. --}}
-                                            <div style="position: absolute; left: -9999px;" aria-hidden="true">
+                                            <div style="position: absolute; left: -9999px; top: -9999px;" aria-hidden="true">
                                                 <label>Ne pas remplir ce champ
-                                                    <input type="text" name="hp_url" tabindex="-1" autocomplete="off">
+                                                    <input type="text" name="{{ \Modules\Academy\Services\ItemEngagementService::HONEYPOT }}" tabindex="-1" autocomplete="off">
                                                 </label>
                                             </div>
                                             <label for="comment-body-{{ $item->id }}" class="visually-hidden">Votre commentaire sur : {{ $item->title ?? 'cet élément' }}</label>
-                                            <textarea id="comment-body-{{ $item->id }}" name="body" rows="3" maxlength="2000" required class="academy-forum-text" placeholder="Partagez un commentaire (2000 caractères max)"></textarea>
+                                            <textarea id="comment-body-{{ $item->id }}" name="body" rows="3" maxlength="{{ \Modules\Academy\Services\ItemEngagementService::COMMENT_MAX }}" required class="academy-forum-text" placeholder="Partagez un commentaire (2000 caractères max)"></textarea>
                                             <div class="mt-2">
                                                 <x-core::button type="submit" variant="primary" size="sm">Publier le commentaire</x-core::button>
                                             </div>
