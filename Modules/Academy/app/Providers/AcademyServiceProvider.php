@@ -15,9 +15,11 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use Modules\Academy\Console\CourseReindexCommand;
 use Modules\Academy\Console\SendDueRemindersCommand;
+use Modules\Academy\Livewire\CompetencyManager;
 use Modules\Academy\Livewire\CourseAnalytics;
 use Modules\Academy\Livewire\CourseAssignments;
 use Modules\Academy\Livewire\CourseCalendar;
+use Modules\Academy\Livewire\CourseCompetencies;
 use Modules\Academy\Livewire\CourseCreate;
 use Modules\Academy\Livewire\CourseImport;
 use Modules\Academy\Livewire\CourseEditor;
@@ -28,6 +30,7 @@ use Modules\Academy\Livewire\EssayGrading;
 use Modules\Academy\Livewire\NotificationPreferences;
 use Modules\Academy\Livewire\QuestionBankManager;
 use Modules\Academy\Livewire\StudentAssignments;
+use Modules\Academy\Livewire\StudentCompetencies;
 use Modules\Academy\Livewire\StudentGrades;
 use Modules\Academy\Models\Chapter;
 use Modules\Academy\Models\Course;
@@ -144,6 +147,20 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // (owner_id = auth) ; l'admin (academy.manage) voit tout. Chaque mutation est
         // gardée serveur (entité re-résolue scopée owner = anti-IDOR). Voir QuestionBankManager.
         Livewire::component('academy.question-bank-manager', QuestionBankManager::class);
+
+        // F22 - RÉFÉRENTIEL de COMPÉTENCES (CRUD owner-scopé) ; l'admin (academy.manage)
+        // voit tout. Chaque mutation est gardée serveur (entité re-résolue scopée owner =
+        // anti-IDOR). Rendu via @livewire('academy.competency-manager'). Voir CompetencyManager.
+        Livewire::component('academy.competency-manager', CompetencyManager::class);
+
+        // F22 - ASSOCIATION compétences <-> cours/items + rapport d'acquisition par étudiant.
+        // Gâté manageStructure (association) et manageEnrollments (rapport) ; cours re-résolu,
+        // item re-scopé au cours, compétence scopée owner (anti-IDOR). Voir CourseCompetencies.
+        Livewire::component('academy.course-competencies', CourseCompetencies::class);
+
+        // F22 - ÉTUDIANT : « Mes compétences » (LECTURE SEULE), scopé à auth()->id()
+        // (anti-IDOR), état dérivé serveur (CompetencyService). Voir StudentCompetencies.
+        Livewire::component('academy.student-competencies', StudentCompetencies::class);
 
         // V5-b - Calendrier d'echeances par cours. Etudiant inscrit = lecture seule ;
         // gerant (manageStructure) = CRUD d'evenements manuels. Les echeances derivees

@@ -79,6 +79,16 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             ->middleware('auth')
             ->name('questions.bank');
 
+        // F22 - RÉFÉRENTIEL de COMPÉTENCES (résultats / outcomes), owner-scopé.
+        // Connexion requise ; l'autorisation d'entrée (instructor/admin) vit dans
+        // CompetencyManager::mount() (abort 403 sinon) et chaque mutation est
+        // ré-autorisée + owner-scopée côté serveur (anti-IDOR). Déclarée AVANT les
+        // routes wildcard courses/{course:slug} pour que « competences » ne soit
+        // jamais capté comme un slug de cours.
+        Route::get('competences', fn () => view('academy::public.competencies'))
+            ->middleware('auth')
+            ->name('competencies');
+
         // PHASE 3 (FE-3) - Éditeur de cours front-end (« mode édition »).
         // Connexion requise ; le cours est re-résolu côté serveur (binding par slug)
         // puis ré-autorisé À CHAQUE action par le composant Livewire (jamais de

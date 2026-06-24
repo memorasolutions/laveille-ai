@@ -74,6 +74,19 @@
                         </div>
                     @endcan
 
+                    {{-- F22 - Compétences (résultats) : association au cours/items (gâté
+                         manageStructure) + suivi d'acquisition par étudiant (le rapport
+                         à l'intérieur est en plus gâté manageEnrollments). Vraie garde =
+                         authorize() serveur (CourseCompetencies). --}}
+                    @can('manageStructure', $course)
+                        <div style="margin-top: 28px;">
+                            <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin: 0 0 8px;">
+                                Compétences et résultats
+                            </h2>
+                            @livewire('academy.course-competencies', ['course' => $course])
+                        </div>
+                    @endcan
+
                     {{-- ESSAI (type « Essay ») - Correction des essais de quiz en attente.
                          Gâté manageEnrollments (admin OU owner/instructor) ; tentative
                          re-résolue scopée au cours (anti-IDOR). Vraie garde = serveur. --}}

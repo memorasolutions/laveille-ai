@@ -26,6 +26,11 @@
 
                     @livewire('academy.dashboard')
 
+                    {{-- F22 - « Mes compétences » (étudiant, lecture seule). Scopé à
+                         auth()->id() (anti-IDOR) ; section masquée si aucune compétence
+                         rattachée à un cours suivi (rétrocompat). Voir StudentCompetencies. --}}
+                    @livewire('academy.student-competencies')
+
                 </div>
             </div>
         </div>
