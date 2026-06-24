@@ -510,27 +510,34 @@ test('player : ANTI-IDOR - un item d\'un autre cours demandé via ce cours → 4
 // 6. ACHÈVEMENT V2-c « view » + service
 // ─────────────────────────────────────────────────────────────────────────────
 
-test('service : défaut h5p = view ; critères autorisés = view + manual', function (): void {
+test('service : défaut h5p = manual (interactif) ; critères autorisés = manual + view', function (): void {
     $lesson = h5pLesson(h5pCourse('cours-crit', 'draft'));
     $item   = h5pReadyItem($lesson);
 
-    expect(ActivityCompletionService::defaultForType('h5p'))->toBe('view');
-    expect(ActivityCompletionService::criterionFor($item))->toBe('view');
-    expect(ActivityCompletionService::allowedForType('h5p'))->toBe(['view', 'manual']);
+    expect(ActivityCompletionService::defaultForType('h5p'))->toBe('manual');
+    expect(ActivityCompletionService::criterionFor($item))->toBe('manual');
+    expect(ActivityCompletionService::allowedForType('h5p'))->toBe(['manual', 'view']);
 });
 
-test('achèvement : consulter la leçon marque l\'item h5p « view » comme terminé (inscrit réel)', function (): void {
+test('achèvement : consulter la leçon NE marque PAS l\'item h5p (défaut manual) ; « view » reste opt-in', function (): void {
     $course = h5pCourse('cours-ach');
     $lesson = h5pLesson($course);
     $item   = h5pReadyItem($lesson);
     $student = h5pStudent();
     h5pEnroll($course, $student);
 
+    // Défaut manual : la simple consultation ne complète PAS l'item H5P interactif.
+    $this->actingAs($student)->get(h5pShowUrl($course, $lesson))->assertOk();
     expect(Completion::where('user_id', $student->id)->where('lesson_item_id', $item->id)->where('status', 'completed')->exists())->toBeFalse();
 
-    $this->actingAs($student)->get(h5pShowUrl($course, $lesson))->assertOk();
+    // « view » reste disponible en option explicite : un H5P consultatif s'auto-complète alors.
+    $viewItem = h5pReadyItem($lesson);
+    $viewItem->payload = array_merge($viewItem->payload ?? [], ['completion' => 'view']);
+    $viewItem->save();
+    expect(ActivityCompletionService::criterionFor($viewItem))->toBe('view');
 
-    expect(Completion::where('user_id', $student->id)->where('lesson_item_id', $item->id)->where('status', 'completed')->exists())->toBeTrue();
+    $this->actingAs($student)->get(h5pShowUrl($course, $lesson))->assertOk();
+    expect(Completion::where('user_id', $student->id)->where('lesson_item_id', $viewItem->id)->where('status', 'completed')->exists())->toBeTrue();
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

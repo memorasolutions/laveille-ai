@@ -55,9 +55,9 @@ final class ActivityCompletionService
             'choice'   => ['vote', 'view', 'manual'],
             'feedback' => ['submit', 'view', 'manual'],
             'forum'    => ['post', 'view', 'manual'],
-            // F16 : un contenu H5P se complète naturellement à la consultation
-            // (view) ; on autorise aussi le clic manuel.
-            'h5p'      => ['view', 'manual'],
+            // H5P : « manual » par défaut (clic explicite, activité interactive) ; « view »
+            // reste proposé pour un contenu H5P purement consultatif.
+            'h5p'      => ['manual', 'view'],
             default    => ['manual', 'view'],
         };
     }
@@ -74,9 +74,11 @@ final class ActivityCompletionService
             'choice'   => 'vote',
             'feedback' => 'submit',
             'forum'    => 'post',
-            // F16 : achèvement « view » par défaut (auto-marqué à la consultation
-            // par un inscrit réel, jamais en prévisualisation).
-            'h5p'      => 'view',
+            // H5P étant une activité INTERACTIVE, l'achèvement par défaut est « manual »
+            // (clic explicite « Marquer comme terminé » après l'activité), comme video/doc
+            // et tous les autres types : aucun type ne se complète au simple chargement de
+            // la leçon. « view » reste proposé en option explicite (cf. allowedForType) pour
+            // un contenu H5P purement consultatif. Achèvement réel via xAPI = piste future.
             default    => 'manual',
         };
     }
