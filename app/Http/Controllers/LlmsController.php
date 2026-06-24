@@ -40,6 +40,17 @@ class LlmsController extends Controller
             $content .= "- [Infolettre](" . url('/infolettre') . ") : archives de l'infolettre hebdomadaire.\n";
             $content .= "- [Boutique](" . url('/boutique') . ") : produits dérivés (impression à la demande).\n";
             $content .= "- [Roadmap](" . url('/roadmap') . ") : fonctionnalités prévues et en cours.\n\n";
+            $content .= "## Cas d'usage de l'IA par secteur\n";
+            $content .= "- [IA dans le secteur public québécois](" . url('/ia-secteur-public-quebec') . ") : encadrement MCN et Loi 25.\n";
+            $content .= "- [IA pour les PME québécoises](" . url('/ia-pme-quebec') . ") : adopter l'IA dans une PME.\n";
+            $content .= "- [IA et Loi 25 pour les PME](" . url('/ia-loi-25-pme-quebec') . ") : conformité et anonymisation avant toute IA publique.\n";
+            $content .= "- [Cas d'usage concrets pour PME](" . url('/ia-cas-usage-pme-quebec') . ") : usages par fonction et « quick wins ».\n";
+            $content .= "- [IA pour l'éducation au Québec](" . url('/ia-education-quebec') . ").\n";
+            $content .= "- [IA pour les développeurs québécois](" . url('/ia-developpeurs-quebec') . ").\n";
+            $content .= "- [IA générative au Québec](" . url('/ia-generative-quebec') . ") : capacités et limites.\n";
+            $content .= "- [Veille sur l'IA en français québécois](" . url('/veille-ia-quebec') . ").\n";
+            $content .= "- [Top outils IA pour le secteur public](" . url('/collections/top-outils-ia-secteur-public') . ").\n";
+            $content .= "- [État de l'IA au Québec en 2026](" . url('/etat-ia-quebec-2026') . ") : compilation sourcée (adoption, encadrement, perception).\n\n";
             $content .= "## Expertise et positionnement\n";
             $content .= "- **Québec-first** : ressource IA francophone avec focus explicite sur le Québec et l'éducation.\n";
             $content .= "- **Contenu vérifié** : chaque outil est testé, tarifé, daté (last_verified_at).\n";
