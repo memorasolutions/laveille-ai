@@ -80,7 +80,7 @@
                             <x-core::button type="button" wire:click="delete({{ $competency->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                             <x-core::button type="button" wire:click="cancelDelete" variant="ghost" size="sm">Annuler</x-core::button>
                         @else
-                            <x-core::button type="button" wire:click="confirmDelete({{ $competency->id }})" variant="ghost" size="sm" aria-label="Supprimer la compétence">Supprimer</x-core::button>
+                            <x-core::button type="button" wire:click="confirmDelete({{ $competency->id }})" variant="ghost" size="sm" aria-label="Supprimer la compétence {{ $competency->name }}">Supprimer</x-core::button>
                         @endif
                     </div>
                 </div>

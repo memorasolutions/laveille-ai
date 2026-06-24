@@ -25,6 +25,7 @@ namespace Modules\Academy\Livewire;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Modules\Academy\Models\Competency;
 use Modules\Academy\Models\CompetencyLink;
@@ -34,6 +35,8 @@ use Modules\Academy\Services\CompetencyService;
 
 class CourseCompetencies extends Component
 {
+    /** Cours lié à ce composant. Verrouillé : le navigateur ne peut pas substituer un autre cours. */
+    #[Locked]
     public Course $course;
 
     /** Compétence sélectionnée pour l'association rapide à un item (null = aucune). */
@@ -46,11 +49,11 @@ class CourseCompetencies extends Component
         $this->course = $course;
     }
 
-    /** Compétences disponibles : les MIENNES (ou toutes si admin), actives en priorité. */
+    /** Compétences disponibles : les MIENNES (ou toutes si admin), actives uniquement. */
     #[Computed]
     public function availableCompetencies()
     {
-        $query = Competency::query()->orderByDesc('is_active')->orderBy('name');
+        $query = Competency::query()->where('is_active', true)->orderBy('name');
 
         if (! Auth::user()?->can('academy.manage')) {
             $query->where('owner_id', Auth::id());

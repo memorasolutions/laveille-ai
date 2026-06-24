@@ -41,8 +41,10 @@ namespace Modules\Academy\Services;
 
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Modules\Academy\Models\Competency;
 use Modules\Academy\Models\Completion;
+use Modules\Academy\Models\CompetencyLink;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Models\LessonItem;
@@ -204,6 +206,7 @@ final class CompetencyService
     /**
      * « Mes compétences » d'un étudiant : compétences liées aux cours qu'il SUIT (inscription
      * active) ou à leurs items, avec leur état. Strictement scopé à l'utilisateur (anti-IDOR).
+     * Délègue le calcul à acquisitionForCompetencies (anti-N+1, lot unique).
      *
      * @return Collection<int, array{competency: Competency, state: array{state: string, total: int, achieved: int, percent: float, level: string}}>
      */
@@ -232,10 +235,160 @@ final class CompetencyService
             ->orderBy('name')
             ->get();
 
+        // Calcul en LOT (anti-N+1) : une seule passe pour toutes les compétences.
+        $states = self::acquisitionForCompetencies($user, $competencies);
+
         return $competencies->map(fn (Competency $c): array => [
             'competency' => $c,
-            'state'      => self::acquisitionState($user, $c),
+            'state'      => $states[(int) $c->id] ?? self::neutralState($c),
         ])->values();
+    }
+
+    /**
+     * État d'acquisition de PLUSIEURS compétences pour UN étudiant, EN UN LOT (anti-N+1).
+     * Symétrique de acquisitionForUsers : regroupe les item_ids de toutes les compétences,
+     * précharge complétions + tentatives en quelques requêtes, puis dispatche par compétence.
+     *
+     * @param  Collection<int, Competency>  $competencies
+     * @return array<int, array{state: string, total: int, achieved: int, percent: float, level: string}>  indexé par competencyId
+     */
+    public static function acquisitionForCompetencies(User $user, Collection $competencies): array
+    {
+        if ($competencies->isEmpty()) {
+            return [];
+        }
+
+        $userId        = (int) $user->getKey();
+        $competencyIds = $competencies->pluck('id')->map(fn ($id): int => (int) $id)->all();
+
+        // ── Étape 1 : tous les liens en UNE requête ──────────────────────────────
+        $allLinks = CompetencyLink::query()
+            ->whereIn('competency_id', $competencyIds)
+            ->get(['competency_id', 'course_id', 'lesson_item_id']);
+
+        $linksByCompetency = $allLinks->groupBy(fn ($l): int => (int) $l->competency_id);
+
+        // ── Étape 2 : items requis par cours, UNE seule requête jointe ───────────
+        $allCourseIds = $allLinks->pluck('course_id')->filter()
+            ->map(fn ($id): int => (int) $id)->unique()->values()->all();
+
+        // Map course_id => int[] (item_ids requis du cours)
+        $courseItemsMap = [];
+        if ($allCourseIds !== []) {
+            DB::table('lesson_items')
+                ->join('lessons', 'lessons.id', '=', 'lesson_items.lesson_id')
+                ->join('chapters', 'chapters.id', '=', 'lessons.chapter_id')
+                ->where('lesson_items.is_required', true)
+                ->whereIn('chapters.course_id', $allCourseIds)
+                ->select('lesson_items.id as item_id', 'chapters.course_id as course_id')
+                ->get()
+                ->each(function ($row) use (&$courseItemsMap): void {
+                    $courseItemsMap[(int) $row->course_id][] = (int) $row->item_id;
+                });
+        }
+
+        // ── Étape 3 : map competency_id => item_ids pertinents ───────────────────
+        $itemsPerCompetency = [];
+        foreach ($competencies as $competency) {
+            $cId   = (int) $competency->id;
+            $links = $linksByCompetency->get($cId, collect());
+
+            $directIds = $links->pluck('lesson_item_id')->filter()
+                ->map(fn ($id): int => (int) $id)->all();
+
+            $courseItemIds = [];
+            foreach ($links->pluck('course_id')->filter()->map(fn ($id): int => (int) $id)->unique() as $courseId) {
+                $courseItemIds = array_merge($courseItemIds, $courseItemsMap[$courseId] ?? []);
+            }
+
+            $itemsPerCompetency[$cId] = array_values(array_unique(
+                array_merge($directIds, $courseItemIds)
+            ));
+        }
+
+        // ── Étape 4 : union de tous les item_ids nécessaires ─────────────────────
+        $merged = [];
+        foreach ($itemsPerCompetency as $ids) {
+            foreach ($ids as $id) {
+                $merged[] = $id;
+            }
+        }
+        $allItemIds = array_values(array_unique($merged));
+
+        if ($allItemIds === []) {
+            // Toutes les compétences sont sans item : état neutre pour chacune.
+            $out = [];
+            foreach ($competencies as $competency) {
+                $out[(int) $competency->id] = self::neutralState($competency);
+            }
+
+            return $out;
+        }
+
+        // ── Étape 5 : préchargement complétions + démarrages EN LOT ─────────────
+        $items        = self::loadItems($allItemIds);
+        $completedAll = self::completionMap([$userId], $allItemIds)[$userId] ?? [];
+        $startedAll   = self::startedMap([$userId], $allItemIds)[$userId] ?? [];
+
+        // ── Étape 6 : tentatives quiz EN LOT (une requête si seuil présent) ──────
+        $allAttemptsRaw  = collect();
+        $hasAnyThreshold = $competencies->contains(fn (Competency $c): bool => $c->pass_threshold !== null);
+
+        if ($hasAnyThreshold) {
+            $quizItemIds = $items
+                ->filter(fn (LessonItem $i): bool => in_array($i->type, self::GRADABLE_TYPES, true))
+                ->keys()->all();
+
+            if ($quizItemIds !== []) {
+                $allAttemptsRaw = QuizAttempt::query()
+                    ->where('user_id', $userId)
+                    ->whereIn('lesson_item_id', $quizItemIds)
+                    ->orderBy('submitted_at')
+                    ->orderBy('id')
+                    ->get(['user_id', 'lesson_item_id', 'percent', 'needs_grading']);
+            }
+        }
+
+        // ── Étape 7 : dispatcher computeState par compétence ─────────────────────
+        $out = [];
+        foreach ($competencies as $competency) {
+            $cId     = (int) $competency->id;
+            $itemIds = $itemsPerCompetency[$cId] ?? [];
+
+            if ($itemIds === []) {
+                $out[$cId] = self::neutralState($competency);
+                continue;
+            }
+
+            // Sous-ensemble d'items pertinents pour cette compétence.
+            $compItems = $items->only($itemIds);
+
+            // Tentatives pertinentes pour cette compétence (filtrées depuis le lot global).
+            $compAttempts = [];
+            if ($competency->pass_threshold !== null && $allAttemptsRaw->isNotEmpty()) {
+                $quizItems = $compItems->filter(fn (LessonItem $i): bool => in_array($i->type, self::GRADABLE_TYPES, true));
+
+                if ($quizItems->isNotEmpty()) {
+                    $methods = [];
+                    foreach ($quizItems as $item) {
+                        $methods[(int) $item->id] = QuizGradeService::methodFor($item);
+                    }
+
+                    foreach ($allAttemptsRaw->groupBy('lesson_item_id') as $itemId => $itemRows) {
+                        if ($quizItems->has((int) $itemId)) {
+                            $compAttempts[(int) $itemId] = self::effectivePercent(
+                                $itemRows,
+                                $methods[(int) $itemId] ?? 'highest'
+                            );
+                        }
+                    }
+                }
+            }
+
+            $out[$cId] = self::computeState($competency, $compItems, $completedAll, $startedAll, $compAttempts);
+        }
+
+        return $out;
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -380,6 +533,13 @@ final class CompetencyService
     ): array {
         $threshold = $competency->pass_threshold;
         $total     = $items->count();
+
+        // Garde défensive : items liés supprimés en race condition (total=0).
+        // Sans cette garde, 0 >= 0 retournerait ACQUIRED à tort.
+        if ($total === 0) {
+            return self::neutralState($competency);
+        }
+
         $achieved  = 0;
         $anyStart  = false;
 

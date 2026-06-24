@@ -21,7 +21,7 @@
             </nav>
 
             <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 12px;">
-                🎯 Compétences
+                <span aria-hidden="true">🎯</span> Compétences
             </h1>
             <p style="margin-bottom: 28px; color: var(--sys-text-muted, #6B7280); max-width: 70ch;">
                 Définissez vos compétences (résultats d'apprentissage), associez-les à vos cours et à leurs items dans l'éditeur de cours, puis suivez leur acquisition par vos étudiants. L'acquisition est dérivée automatiquement de l'achèvement et, si vous fixez un seuil, des notes obtenues.

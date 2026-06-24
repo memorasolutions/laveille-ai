@@ -28,13 +28,15 @@ namespace Modules\Academy\Livewire;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Modules\Academy\Models\Competency;
 use Modules\Academy\Models\Scale;
 
 class CompetencyManager extends Component
 {
-    /** Id de la compétence en cours d'édition (null = création). */
+    /** Id de la compétence en cours d'édition (null = création). Verrouillé : non modifiable par le navigateur. */
+    #[Locked]
     public ?int $editingId = null;
 
     public string $name = '';
@@ -44,7 +46,8 @@ class CompetencyManager extends Component
     public ?int $passThreshold = null;
     public bool $isActive = true;
 
-    /** Compétence dont la suppression est en attente de confirmation (inline 2 temps). */
+    /** Compétence dont la suppression est en attente de confirmation (inline 2 temps). Verrouillé : non modifiable par le navigateur. */
+    #[Locked]
     public ?int $confirmingDeleteId = null;
 
     public function mount(): void
@@ -165,7 +168,15 @@ class CompetencyManager extends Component
         $c->scale_id       = $data['scaleId'] ?? null;
         $c->pass_threshold = $data['passThreshold'] ?? null;
         $c->is_active      = (bool) $data['isActive'];
-        $c->save();
+
+        // Protection contre la collision de slug en accès concurrent (race condition).
+        try {
+            $c->save();
+        } catch (\Illuminate\Database\UniqueConstraintViolationException) {
+            $this->addError('name', 'Ce nom de compétence produit un slug déjà utilisé. Choisissez un nom légèrement différent.');
+
+            return;
+        }
 
         $this->resetForm();
         $this->dispatch('competency-saved');

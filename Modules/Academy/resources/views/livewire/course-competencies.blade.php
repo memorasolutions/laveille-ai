@@ -71,7 +71,7 @@
                                 @endif
                             </span>
                         </span>
-                        <x-core::button type="button" variant="ghost" size="sm" wire:click="detach({{ $link->id }})" aria-label="Retirer l'association">Retirer</x-core::button>
+                        <x-core::button type="button" variant="ghost" size="sm" wire:click="detach({{ $link->id }})" aria-label="Retirer l'association de {{ $link->competency?->name ?? 'cette compétence' }}">Retirer</x-core::button>
                     </li>
                 @endforeach
             </ul>

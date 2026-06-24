@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Modules\Academy\Livewire\CompetencyManager;
 use Modules\Academy\Livewire\CourseCompetencies;
@@ -296,6 +297,75 @@ it('un étudiant ne voit que les compétences de SES cours suivis', function ():
 
     $names = CompetencyService::studentCompetencies($student)->pluck('competency.name');
     expect($names)->toContain('Mienne')->not->toContain('Autre');
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// F22-F01 : faux positif total=0 (correctif bloquant)
+// ─────────────────────────────────────────────────────────────────────────────
+
+it('retourne non_commencée (pas acquise) quand les items liés ont été supprimés (total=0)', function (): void {
+    $owner   = f22Instructor();
+    $course  = f22Course('f22-race-cond');
+    $student = f22Student();
+    Enrollment::create(['user_id' => $student->id, 'course_id' => $course->id, 'status' => 'active']);
+
+    [$item] = f22Items($course, 1);
+
+    $competency = Competency::create([
+        'owner_id'  => $owner->id,
+        'name'      => 'Race condition',
+        'slug'      => 'race-condition',
+        'is_active' => true,
+    ]);
+    CompetencyLink::create(['competency_id' => $competency->id, 'lesson_item_id' => $item->id]);
+
+    // Supprimer l'item lié (simulation race : item supprimé après la création du lien).
+    $item->delete();
+
+    $state = CompetencyService::acquisitionState($student, $competency);
+
+    // Avant le correctif : 0 >= 0 retournait ACQUIRED à tort.
+    expect($state['state'])->toBe(CompetencyService::STATE_NOT_STARTED)
+        ->and($state['total'])->toBe(0)
+        ->and($state['achieved'])->toBe(0);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// F22-F02 : studentCompetencies batchée, anti-N+1 (correctif haut)
+// ─────────────────────────────────────────────────────────────────────────────
+
+it('studentCompetencies avec 5 compétences ne génère pas N×requêtes (anti-N+1)', function (): void {
+    $owner   = f22Instructor();
+    $course  = f22Course('f22-batch');
+    $student = f22Student();
+    Enrollment::create(['user_id' => $student->id, 'course_id' => $course->id, 'status' => 'active']);
+
+    $items = f22Items($course, 5);
+
+    for ($i = 0; $i < 5; $i++) {
+        $competency = Competency::create([
+            'owner_id'  => $owner->id,
+            'name'      => "Comp batch $i",
+            'slug'      => "comp-batch-$i",
+            'is_active' => true,
+        ]);
+        CompetencyLink::create(['competency_id' => $competency->id, 'lesson_item_id' => $items[$i]->id]);
+        f22Complete($student, $items[$i]);
+    }
+
+    DB::enableQueryLog();
+    $result     = CompetencyService::studentCompetencies($student);
+    $queryCount = count(DB::getQueryLog());
+    DB::disableQueryLog();
+
+    // Avant le correctif : 3 + 5×4 = 23 requêtes. Après : 8 requêtes au plus.
+    expect($result)->toHaveCount(5)
+        ->and($queryCount)->toBeLessThan(12);
+
+    // Vérifier la cohérence des états (tous les items étant complétés, tout doit être acquis).
+    foreach ($result as $row) {
+        expect($row['state']['state'])->toBe(CompetencyService::STATE_ACQUIRED);
+    }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
