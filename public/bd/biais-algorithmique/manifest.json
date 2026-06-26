@@ -1,0 +1,17 @@
+{
+  "term_slug": "biais-algorithmique",
+  "title": "Le biais algorithmique",
+  "alt": "Bande dessinée pédagogique : Octopus explique le biais algorithmique en 5 cases : un logiciel d'IA trie les CV et rejette injustement une candidate qualifiée car il a appris sur des données passées biaisées ; la solution = des données équilibrées et une vérification humaine.",
+  "planches": [
+    {
+      "avif": "bd-biais-algorithmique-2026-06-site.avif",
+      "webp": "bd-biais-algorithmique-2026-06-site.webp",
+      "jpg": "bd-biais-algorithmique-2026-06-site.jpg",
+      "avif_1024": "bd-biais-algorithmique-2026-06-site-1024.avif",
+      "webp_1024": "bd-biais-algorithmique-2026-06-site-1024.webp",
+      "thumb": "bd-biais-algorithmique-2026-06-thumb.jpg",
+      "width": 1600,
+      "height": 3120
+    }
+  ]
+}
