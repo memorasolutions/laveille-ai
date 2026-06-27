@@ -191,9 +191,10 @@
     get filteredTools() {
         const key = this.filterKey;
         if (key !== this._lastFilterKey) { this.displayCount = 30; this._lastFilterKey = key; }
-        const s = this.search.toLowerCase();
+        const norm = v => (v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const s = norm(this.search);
         let t = this.tools.filter(t => {
-            const matchSearch = !s || t.name.toLowerCase().includes(s) || t.shortDesc.toLowerCase().includes(s);
+            const matchSearch = !s || norm(t.name).includes(s) || norm(t.shortDesc).includes(s);
             const matchPricing = !this.activePricing || (this.activePricing === 'education' ? t.hasEduPricing : t.pricing === this.activePricing);
             const matchCat = !this.activeCategory || t.categorySlugs.includes(this.activeCategory);
             const matchEdu = !this.eduFilter || t.hasEduPricing;

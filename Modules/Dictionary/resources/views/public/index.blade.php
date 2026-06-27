@@ -398,9 +398,10 @@
             get filteredTerms() {
                 const key = this.filterKey;
                 if (key !== this._lastFilterKey) { this.displayCount = 30; this._lastFilterKey = key; }
-                const s = this.search.toLowerCase();
+                const norm = v => (v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                const s = norm(this.search);
                 return this.terms.filter(t => {
-                    const matchSearch = !s || t.name.toLowerCase().includes(s) || t.fullDef.toLowerCase().includes(s);
+                    const matchSearch = !s || norm(t.name).includes(s) || norm(t.fullDef).includes(s);
                     const matchType = !this.activeType || t.type === this.activeType;
                     const matchLetter = !this.activeLetter || t.firstLetter === this.activeLetter;
                     const matchCat = !this.activeCategory || t.categorySlug === this.activeCategory;
