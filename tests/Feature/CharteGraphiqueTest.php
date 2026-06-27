@@ -228,32 +228,34 @@ it('testimonials index has Bootstrap card structure', function () {
     $response->assertSee('card-body', false);
 })->skip(fn () => ! \Nwidart\Modules\Facades\Module::find('Testimonials')?->isEnabled(), 'Module Testimonials désactivé dans ce déploiement.');
 
-// ── 4. Dark mode support (color-modes.js injected by admin layout) ──
+// ── 4. Mode clair forcé dans l'admin (dark mode retiré 2026-06-02) ──
+// Le layout admin force data-bs-theme="light" et nettoie localStorage ; color-modes.js
+// n'est plus injecté. Les 4 tests ci-dessous valident le marqueur réel.
 
-it('admin layout includes color-modes script for dark mode', function () {
+it('admin layout enforces light mode', function () {
     $response = $this->actingAs($this->admin)->get('/admin');
 
     $response->assertOk();
-    $response->assertSee('color-modes', false);
+    $response->assertSee('data-bs-theme="light"', false);
 });
 
-it('blog articles page includes color-modes script for dark mode', function () {
+it('blog articles page enforces light mode', function () {
     $response = $this->actingAs($this->admin)->get('/admin/blog/articles');
 
     $response->assertOk();
-    $response->assertSee('color-modes', false);
+    $response->assertSee('data-bs-theme="light"', false);
 });
 
-it('users page includes color-modes script for dark mode', function () {
+it('users page enforces light mode', function () {
     $response = $this->actingAs($this->admin)->get('/admin/users');
 
     $response->assertOk();
-    $response->assertSee('color-modes', false);
+    $response->assertSee('data-bs-theme="light"', false);
 });
 
-it('settings page includes color-modes script for dark mode', function () {
+it('settings page enforces light mode', function () {
     $response = $this->actingAs($this->admin)->get('/admin/settings');
 
     $response->assertOk();
-    $response->assertSee('color-modes', false);
+    $response->assertSee('data-bs-theme="light"', false);
 });
