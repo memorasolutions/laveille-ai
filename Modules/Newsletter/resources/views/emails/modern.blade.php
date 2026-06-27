@@ -19,7 +19,7 @@
 <tr><td align="center" style="padding:30px 20px;background-color:#ffffff;" class="dark-card">
 <table border="0" cellpadding="0" cellspacing="0">
 <tr><td align="center" style="font-size:28px;font-weight:800;letter-spacing:-0.5px;color:#0ea5e9;">La veille<span style="color:#f97316;">.</span></td></tr>
-<tr><td align="center" style="font-size:13px;color:#64748b;padding-top:5px;text-transform:uppercase;letter-spacing:1px;">Votre veille IA au Quebec</td></tr>
+<tr><td align="center" style="font-size:13px;color:#64748b;padding-top:5px;text-transform:uppercase;letter-spacing:1px;">Votre veille IA au Québec</td></tr>
 </table>
 </td></tr>
 
