@@ -117,8 +117,8 @@ class ImportWordPressCommand extends Command
     protected function importPosts(string $baseUrl, int $perPage): void
     {
         $headResponse = Http::head("{$baseUrl}/wp-json/wp/v2/posts", ['per_page' => $perPage]);
-        $totalPages = (int) $headResponse->header('X-WP-TotalPages', '1');
-        $totalPosts = (int) $headResponse->header('X-WP-Total', '0');
+        $totalPages = (int) ($headResponse->header('X-WP-TotalPages') ?: '1');
+        $totalPosts = (int) ($headResponse->header('X-WP-Total') ?: '0');
 
         $this->info("Import de {$totalPosts} articles ({$totalPages} pages)...");
 

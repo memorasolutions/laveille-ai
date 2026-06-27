@@ -115,7 +115,7 @@ if (! function_exists('lv_typo_fr')) {
         $trim = ltrim($text);
         if ($trim !== '' && ($trim[0] === '{' || $trim[0] === '[')) {
             $decoded = json_decode($text, true);
-            if (json_last_error() === JSON_ERROR_NONE && (is_array($decoded) || is_object($decoded))) {
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                 $walked = lv_typo_fr_walk($decoded);
 
                 return (string) json_encode($walked, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

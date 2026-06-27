@@ -77,11 +77,11 @@ class IndexNowService
 
     public static function getKey(): string
     {
-        return env('INDEXNOW_KEY', 'b79927568427fb2c3fe6a1c410f2c35b');
+        return (string) config('services.indexnow.key', 'b79927568427fb2c3fe6a1c410f2c35b');
     }
 
     public static function isEnabled(): bool
     {
-        return (bool) env('INDEXNOW_ENABLED', false);
+        return (bool) config('services.indexnow.enabled', false);
     }
 }

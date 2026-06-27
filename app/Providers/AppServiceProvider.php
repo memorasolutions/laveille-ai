@@ -63,7 +63,7 @@ class AppServiceProvider extends ServiceProvider
         // Typographie française — directive Blade @typo + macro Str::typoFr
         // (helper lv_typo_fr déjà chargé via files[] composer.json + register())
         Blade::directive('typo', static fn (string $expression): string => "<?php echo lv_typo_fr({$expression}); ?>");
-        Str::macro('typoFr', static fn (?string $t): string => lv_typo_fr($t));
+        Str::macro('typoFr', fn (?string $t): string => lv_typo_fr($t));
 
         Model::automaticallyEagerLoadRelationships();
         Model::preventLazyLoading(! app()->isProduction());

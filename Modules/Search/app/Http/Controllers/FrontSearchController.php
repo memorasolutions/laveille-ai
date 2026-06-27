@@ -10,6 +10,7 @@ namespace Modules\Search\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Modules\Core\Contracts\Searchable;
 use Modules\Search\Services\SearchService;
 
 class FrontSearchController
@@ -46,7 +47,7 @@ class FrontSearchController
             $items = [];
 
             foreach ($section['paginator']->items() as $model) {
-                if (! method_exists($model, 'searchableResultTitle')) {
+                if (! ($model instanceof Searchable)) {
                     continue;
                 }
 

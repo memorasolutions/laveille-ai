@@ -28,8 +28,9 @@ class MagicLinkController extends Controller
 
     public function showRequestForm(): View
     {
-        if (view()->exists('fronttheme::auth.magic-link-request')) {
-            return view('fronttheme::auth.magic-link-request');
+        $frontView = 'fronttheme::auth.magic-link-request';
+        if (class_exists(\Modules\FrontTheme\Providers\FrontThemeServiceProvider::class)) {
+            return view($frontView);
         }
 
         return view('auth::livewire.magic-link-request');
@@ -54,7 +55,7 @@ class MagicLinkController extends Controller
             ['name' => explode('@', $request->email)[0], 'password' => bcrypt(\Str::random(32))]
         );
 
-        if ($user->wasRecentlyCreated && method_exists($user, 'assignRole')) {
+        if ($user->wasRecentlyCreated) {
             $user->assignRole('user');
         }
 
@@ -121,7 +122,7 @@ class MagicLinkController extends Controller
         $smsButtonDelay = (int) Settings::get('sms_button_delay_seconds', 10);
         $expiryMinutes = (int) Settings::get('magic_link_expiry_minutes', 15);
 
-        if (view()->exists('fronttheme::auth.magic-link-verify')) {
+        if (class_exists(\Modules\FrontTheme\Providers\FrontThemeServiceProvider::class)) {
             return view('fronttheme::auth.magic-link-verify', compact('email', 'hasPhone', 'smsButtonDelay', 'expiryMinutes'));
         }
 
@@ -174,7 +175,7 @@ class MagicLinkController extends Controller
             ['name' => explode('@', $request->email)[0], 'password' => bcrypt(\Str::random(32))]
         );
 
-        if ($user->wasRecentlyCreated && method_exists($user, 'assignRole')) {
+        if ($user->wasRecentlyCreated) {
             $user->assignRole('user');
         }
 

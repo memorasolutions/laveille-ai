@@ -79,8 +79,8 @@ class GlossaryLinkifier
      */
     public static function linkify(?string $html, array $options = []): string
     {
-        if (empty($html) || ! is_string($html)) {
-            return (string) $html;
+        if ($html === null || $html === '') {
+            return '';
         }
 
         $skipSlug = $options['skip_slug'] ?? null;
@@ -395,8 +395,7 @@ class GlossaryLinkifier
         // forme minuscule « transformer » est un mot/verbe FR courant de STOP_LIST_FR) ne doit JAMAIS
         // dériver sa forme minuscule, sinon cette variante re-matche le verbe partout dans les textes.
         $firstChar = mb_substr($clean, 0, 1);
-        $isUpperInitialHomograph = $firstChar !== ''
-            && mb_strtolower($firstChar) !== $firstChar
+        $isUpperInitialHomograph = mb_strtolower($firstChar) !== $firstChar
             && in_array(mb_strtolower($clean), self::STOP_LIST_FR, true)
             && ! in_array(mb_strtolower($clean), self::HOMOGRAPH_LOWERCASE_OK, true);
 

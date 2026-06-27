@@ -188,7 +188,7 @@ class DigestContentService
         }
 
         try {
-            $apiKey = env('OPENROUTER_API_KEY');
+            $apiKey = config('services.openrouter.api_key');
             if (! $apiKey) {
                 return null;
             }
@@ -426,7 +426,7 @@ class DigestContentService
         $selectedTechnique = $techniques[$weekNumber % count($techniques)];
 
         try {
-            $apiKey = env('OPENROUTER_API_KEY');
+            $apiKey = config('services.openrouter.api_key');
             if (! $apiKey) {
                 throw new \RuntimeException('OPENROUTER_API_KEY manquante');
             }

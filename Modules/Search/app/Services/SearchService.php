@@ -104,6 +104,7 @@ class SearchService
 
         foreach ($registry->all() as $modelClass) {
             try {
+                /** @var class-string<\Illuminate\Database\Eloquent\Model&\Modules\Core\Contracts\Searchable> $modelClass */
                 $modelInstance = new $modelClass();
                 $table = $modelInstance->getTable();
                 $fields = $modelClass::searchableFields();

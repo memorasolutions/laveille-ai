@@ -111,4 +111,17 @@ return [
         ],
     ],
 
+    'browsershot' => [
+        'node_path' => env('BROWSERSHOT_NODE_PATH'),
+    ],
+
+    'opengraph' => [
+        'api_key' => env('OPENGRAPH_API_KEY'),
+    ],
+
+    'indexnow' => [
+        'key'     => env('INDEXNOW_KEY', 'b79927568427fb2c3fe6a1c410f2c35b'),
+        'enabled' => (bool) env('INDEXNOW_ENABLED', false),
+    ],
+
 ];

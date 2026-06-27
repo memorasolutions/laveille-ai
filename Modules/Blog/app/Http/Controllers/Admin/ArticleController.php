@@ -155,7 +155,7 @@ class ArticleController extends Controller
         }
 
         // Limite à 8 puces maximum
-        return array_values(array_slice($points, 0, 8));
+        return array_slice($points, 0, 8);
     }
 
     private function syncFaqs(Article $article, array $faqsInput): void
@@ -177,6 +177,7 @@ class ArticleController extends Controller
             if ($faqId) {
                 $faq = $article->faqs()->find($faqId);
                 if ($faq) {
+                    /** @var \Modules\Blog\Models\Faq $faq */
                     $faq->setTranslation('question', $locale, $question);
                     $faq->setTranslation('answer', $locale, $answer);
                     $faq->position     = $position;

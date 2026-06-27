@@ -34,11 +34,16 @@ class NewsletterPromptPreset extends Model
 
     /**
      * Retourne le preset par défaut, ou le plus récent si aucun n'est marqué.
+     *
+     * @return static|null
      */
-    public static function loadDefault(): ?static
+    public static function loadDefault(): ?self
     {
-        return static::where('is_default', true)->first()
+        /** @var static|null $result */
+        $result = static::where('is_default', true)->first()
             ?? static::latest()->first();
+
+        return $result;
     }
 
     /**

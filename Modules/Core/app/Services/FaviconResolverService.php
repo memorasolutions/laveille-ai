@@ -27,7 +27,7 @@ final class FaviconResolverService
         try {
             $domain = self::sanitizeDomain($domain);
 
-            if ($domain === '' || $domain === null) {
+            if ($domain === '') {
                 return null;
             }
 
@@ -58,7 +58,7 @@ final class FaviconResolverService
 
             return $resolvedUrl;
         } catch (\Throwable $e) {
-            Log::warning('[FaviconResolver] Échec pour le domaine « ' . ($domain ?? '?') . ' » : ' . $e->getMessage());
+            Log::warning('[FaviconResolver] Échec pour le domaine « ' . $domain . ' » : ' . $e->getMessage());
 
             return null;
         }
@@ -68,7 +68,7 @@ final class FaviconResolverService
     {
         $domain = self::sanitizeDomain($domain);
 
-        if ($domain === '' || $domain === null) {
+        if ($domain === '') {
             return;
         }
 
@@ -126,7 +126,7 @@ final class FaviconResolverService
                     continue;
                 }
 
-                $contentType = $response->header('Content-Type') ?? '';
+                $contentType = $response->header('Content-Type');
 
                 if (self::isImageContentType($contentType)) {
                     return $url;

@@ -164,7 +164,7 @@ class DigestCommand extends Command
         }
 
         // Envoyer l'aperçu à l'admin dans TOUS les cas
-        $adminEmail = env('SUPER_ADMIN_EMAIL');
+        $adminEmail = config('app.superadmin_email');
         if ($adminEmail) {
             Notification::route('mail', $adminEmail)->notify(
                 new WeeklyDigestNotification(

@@ -30,7 +30,7 @@ trait HasKillSwitch
             return false;
         }
 
-        if ($this->hasOption('force') && $this->option('force')) {
+        if ($this->option('force')) {
             return false;
         }
 

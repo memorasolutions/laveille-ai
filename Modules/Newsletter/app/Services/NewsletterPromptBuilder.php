@@ -29,7 +29,7 @@ class NewsletterPromptBuilder
      * 'placeholder'  : hint dans la vue
      * 'shape'        : FORME EXACTE à écrire dans NewsletterIssue.content (injectée dans le prompt PERSONNALISER)
      *
-     * @return array<string, array{label: string, content_keys: string[], auto_source: string, field_type: string, placeholder: string, shape: string}>
+     * @return array<string, array{label: string, content_keys: string[], auto_source: string, field_type: string, placeholder: string, shape: string, multi?: bool}>
      */
     public static function sectionsMap(): array
     {

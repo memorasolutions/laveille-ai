@@ -38,7 +38,7 @@ class PreviewController
             abort(404);
         }
 
-        if ($type === 'article' && ViewFacade::exists('fronttheme::blog.show')) {
+        if ($type === 'article' && $model instanceof \Modules\Blog\Models\Article && ViewFacade::exists('fronttheme::blog.show')) {
             // Pas de eager load — l'Article n'a pas toujours les relations chargées selon le module
 
             return view('fronttheme::blog.show', [

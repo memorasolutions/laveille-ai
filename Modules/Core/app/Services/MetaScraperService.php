@@ -108,7 +108,7 @@ class MetaScraperService
         return $node->count() ? trim($node->first()->text()) ?: null : null;
     }
 
-    private static function findFavicon(Crawler $crawler): ?string
+    private static function findFavicon(Crawler $crawler): string
     {
         foreach (['link[rel="icon"]', 'link[rel="shortcut icon"]', 'link[rel="apple-touch-icon"]'] as $sel) {
             $node = $crawler->filter($sel);
@@ -149,7 +149,7 @@ class MetaScraperService
             return $data['og_image'];
         }
 
-        $apiKey = env('OPENGRAPH_API_KEY');
+        $apiKey = config('services.opengraph.api_key');
         if (! $apiKey) {
             return null;
         }

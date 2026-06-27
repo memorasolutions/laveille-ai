@@ -147,6 +147,7 @@ class MediaController extends Controller
         $model = $media->model;
         $media->delete();
 
+        /** @var \Spatie\MediaLibrary\HasMedia $model */
         $newMedia = $model->addMedia($tempPath)
             ->usingFileName($originalName)
             ->toMediaCollection('images');

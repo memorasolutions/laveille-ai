@@ -40,7 +40,7 @@ class TranslationService
         $cacheKey = 'translation_'.md5($text.$from.$to);
 
         return Cache::remember($cacheKey, now()->addHours(24), function () use ($text, $from, $to) {
-            $apiKey = config('services.openrouter.api_key', env('OPENROUTER_API_KEY'));
+            $apiKey = config('services.openrouter.api_key');
             if (! $apiKey) {
                 return $text;
             }

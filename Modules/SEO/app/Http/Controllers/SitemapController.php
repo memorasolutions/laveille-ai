@@ -182,15 +182,13 @@ class SitemapController
         // Pages auteur EEAT 2026 (#218 S84 — Schema.org Person + sameAs)
         if (Route::has('author.show')) {
             $authors = (array) trans('fronttheme::authors');
-            if (is_array($authors)) {
-                foreach ($authors as $slug => $data) {
-                    if (is_string($slug) && is_array($data)) {
-                        $sitemap->add(
-                            Url::create(route('author.show', $slug))
-                                ->setPriority(0.7)
-                                ->setChangeFrequency('monthly')
-                        );
-                    }
+            foreach ($authors as $slug => $data) {
+                if (is_string($slug) && is_array($data)) {
+                    $sitemap->add(
+                        Url::create(route('author.show', $slug))
+                            ->setPriority(0.7)
+                            ->setChangeFrequency('monthly')
+                    );
                 }
             }
         }

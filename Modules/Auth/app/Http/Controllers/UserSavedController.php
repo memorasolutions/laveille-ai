@@ -65,16 +65,15 @@ class UserSavedController extends Controller
                     ->get()
                     ->map(function ($p) {
                         $puzzle = $p->puzzle;
-                        $difficultyLabel = $puzzle ? $puzzle->getDifficultyLabel() : '?';
+                        $difficultyLabel = ($puzzle && method_exists($puzzle, 'getDifficultyLabel')) ? $puzzle->getDifficultyLabel() : '?';
                         $puzzleDate = $puzzle ? \Carbon\Carbon::parse($puzzle->date)->isoFormat('LL') : '';
                         $filled = 0;
-                        $total = 81;
                         if (is_array($p->grid_state)) {
                             foreach ($p->grid_state as $row) {
                                 if (is_array($row)) foreach ($row as $v) if ((int) $v !== 0) $filled++;
                             }
                         }
-                        $pct = $total > 0 ? (int) round($filled / $total * 100) : 0;
+                        $pct = (int) round($filled / 81 * 100);
                         $minutes = (int) floor(((int) $p->time_elapsed) / 60);
                         $seconds = ((int) $p->time_elapsed) % 60;
                         $timeStr = sprintf('%02d:%02d', $minutes, $seconds);

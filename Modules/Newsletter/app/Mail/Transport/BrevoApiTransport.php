@@ -56,7 +56,7 @@ class BrevoApiTransport extends AbstractTransport
 
         $messageId = $result['message_id'] ?? null;
         if ($messageId) {
-            $message->getOriginalMessage()->getHeaders()->addTextHeader('X-Brevo-Message-Id', (string) $messageId);
+            $email->getHeaders()->addTextHeader('X-Brevo-Message-Id', (string) $messageId);
         }
     }
 

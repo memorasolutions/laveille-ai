@@ -31,7 +31,7 @@ class DownloadWpImagesCommand extends Command
 
         $this->info("Téléchargement images depuis : {$wpUrl}");
 
-        do {
+        while (true) {
             $response = Http::get("{$wpUrl}/wp-json/wp/v2/posts", [
                 'per_page' => 20,
                 'page' => $page,
@@ -42,6 +42,7 @@ class DownloadWpImagesCommand extends Command
                 break;
             }
 
+            /** @var array<int, array<string, mixed>>|null $posts */
             $posts = $response->json();
             if (empty($posts)) {
                 break;
@@ -119,7 +120,7 @@ class DownloadWpImagesCommand extends Command
             }
 
             $page++;
-        } while (! empty($posts));
+        }
 
         $this->newLine();
         $this->table(['Métrique', 'Nombre'], [

@@ -57,8 +57,7 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($moduleSeeders as $moduleName => $seeder) {
-            $module = Module::find($moduleName);
-            if ($module && $module->isEnabled() && class_exists($seeder)) {
+            if (Module::has($moduleName) && Module::isEnabled($moduleName) && class_exists($seeder)) {
                 $this->call($seeder);
             }
         }

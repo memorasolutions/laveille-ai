@@ -220,12 +220,13 @@ class DemoSeederCommand extends Command
 
     private function seedEcommerce(): void
     {
-        if (! class_exists(\Modules\Ecommerce\Database\Seeders\EcommerceDatabaseSeeder::class)) {
+        $seederClass = 'Modules\Ecommerce\Database\Seeders\EcommerceDatabaseSeeder';
+        if (! class_exists($seederClass)) {
             return;
         }
 
-        $this->components->task('Seeding ecommerce demo data', function () {
-            $this->callSilent('db:seed', ['--class' => \Modules\Ecommerce\Database\Seeders\EcommerceDatabaseSeeder::class]);
+        $this->components->task('Seeding ecommerce demo data', function () use ($seederClass) {
+            $this->callSilent('db:seed', ['--class' => $seederClass]);
 
             return true;
         });
@@ -244,9 +245,11 @@ class DemoSeederCommand extends Command
             ['Subscribers', Subscriber::where('email', 'like', '%@demo.test')->count()],
         ];
 
-        if (class_exists(\Modules\Ecommerce\Models\Product::class)) {
+        $couponClass = 'Modules\Ecommerce\Models\Coupon';
+        if (class_exists(\Modules\Ecommerce\Models\Product::class)
+            && class_exists($couponClass)) {
             $rows[] = ['Products', \Modules\Ecommerce\Models\Product::count()];
-            $rows[] = ['Coupons', \Modules\Ecommerce\Models\Coupon::count()];
+            $rows[] = ['Coupons', $couponClass::count()];
         }
 
         $this->table(['Data', 'Count'], $rows);

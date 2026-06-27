@@ -146,16 +146,16 @@ class PromptBuilderSearchService
             ->limit(self::LIMIT)
             ->get(['id', 'name']);
 
-        return $results->map(function ($tool): array {
+        return $results->map(function (\Illuminate\Database\Eloquent\Model $tool): array {
             // getTranslation peut ne pas exister si module différent — defensive
             $label = method_exists($tool, 'getTranslation')
-                ? (string) ($tool->getTranslation('name', 'fr_CA', false)
+                ? (string) ($tool->getTranslation('name', 'fr_CA', false) // @phpstan-ignore-line method.notFound
                     ?: $tool->getTranslation('name', 'fr', false)
                     ?: $tool->getTranslation('name', 'en', false)
-                    ?: (string) $tool->name)
-                : (string) $tool->name;
+                    ?: (string) $tool->getAttribute('name'))
+                : (string) $tool->getAttribute('name');
 
-            return ['id' => (int) $tool->id, 'label' => $label];
+            return ['id' => (int) $tool->getKey(), 'label' => $label];
         })->values()->all();
     }
 
@@ -189,15 +189,15 @@ class PromptBuilderSearchService
             ->limit(self::LIMIT)
             ->get(['id', 'name']);
 
-        return $results->map(function ($term): array {
+        return $results->map(function (\Illuminate\Database\Eloquent\Model $term): array {
             $label = method_exists($term, 'getTranslation')
-                ? (string) ($term->getTranslation('name', 'fr_CA', false)
+                ? (string) ($term->getTranslation('name', 'fr_CA', false) // @phpstan-ignore-line method.notFound
                     ?: $term->getTranslation('name', 'fr', false)
                     ?: $term->getTranslation('name', 'en', false)
-                    ?: (string) $term->name)
-                : (string) $term->name;
+                    ?: (string) $term->getAttribute('name'))
+                : (string) $term->getAttribute('name');
 
-            return ['id' => (int) $term->id, 'label' => $label];
+            return ['id' => (int) $term->getKey(), 'label' => $label];
         })->values()->all();
     }
 
@@ -231,19 +231,20 @@ class PromptBuilderSearchService
             ->limit(self::LIMIT)
             ->get(['id', 'title', 'published_at']);
 
-        return $results->map(function ($article): array {
+        return $results->map(function (\Illuminate\Database\Eloquent\Model $article): array {
             $label = method_exists($article, 'getTranslation')
-                ? (string) ($article->getTranslation('title', 'fr_CA', false)
+                ? (string) ($article->getTranslation('title', 'fr_CA', false) // @phpstan-ignore-line method.notFound
                     ?: $article->getTranslation('title', 'fr', false)
                     ?: $article->getTranslation('title', 'en', false)
-                    ?: (string) $article->title)
-                : (string) $article->title;
+                    ?: (string) $article->getAttribute('title'))
+                : (string) $article->getAttribute('title');
 
-            $sublabel = $article->published_at
-                ? Carbon::parse($article->published_at)->format('d M Y')
+            $publishedAt = $article->getAttribute('published_at');
+            $sublabel = $publishedAt
+                ? Carbon::parse($publishedAt)->format('d M Y')
                 : '';
 
-            return ['id' => (int) $article->id, 'label' => $label, 'sublabel' => $sublabel];
+            return ['id' => (int) $article->getKey(), 'label' => $label, 'sublabel' => $sublabel];
         })->values()->all();
     }
 

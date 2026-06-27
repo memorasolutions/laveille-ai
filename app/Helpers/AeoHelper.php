@@ -53,7 +53,7 @@ class AeoHelper
             $hasHeading = false;
 
             foreach ($nodes as $node) {
-                if ($node->nodeType === XML_ELEMENT_NODE && in_array($node->tagName, ['h2', 'h3'])) {
+                if ($node instanceof \DOMElement && in_array($node->tagName, ['h2', 'h3'])) {
                     $hasHeading = true;
                     // Ajouter ID si absent
                     if (! $node->getAttribute('id')) {
@@ -66,7 +66,7 @@ class AeoHelper
                 // Ajouter itemprop="text" sur le premier <p>
                 $firstPDone = false;
                 foreach ($nodes as $node) {
-                    if (! $firstPDone && $node->nodeType === XML_ELEMENT_NODE && $node->tagName === 'p') {
+                    if (! $firstPDone && $node instanceof \DOMElement && $node->tagName === 'p') {
                         $node->setAttribute('itemprop', 'text');
                         $firstPDone = true;
                     }
