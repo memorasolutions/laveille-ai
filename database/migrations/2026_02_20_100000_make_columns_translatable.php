@@ -32,13 +32,16 @@ return new class extends Migration
     {
         $isMySQL = DB::connection()->getDriverName() === 'mysql';
 
-        // 1. Drop unique indexes (can't have unique on JSON columns)
-        foreach ($this->uniqueIndexes as $table => $indexes) {
-            Schema::table($table, function (Blueprint $blueprint) use ($indexes) {
-                foreach ($indexes as $indexName => $column) {
-                    $blueprint->dropUnique($indexName);
-                }
-            });
+        // MySQL only: drop unique indexes (JSON columns n'acceptent pas de contrainte unique)
+        // En SQLite (tests :memory:) les index n'ont pas été créés de cette façon → on n'y touche pas
+        if ($isMySQL) {
+            foreach ($this->uniqueIndexes as $table => $indexes) {
+                Schema::table($table, function (Blueprint $blueprint) use ($indexes) {
+                    foreach ($indexes as $indexName => $column) {
+                        $blueprint->dropUnique($indexName);
+                    }
+                });
+            }
         }
 
         // MySQL only: wrap existing data and convert columns to JSON
@@ -81,13 +84,15 @@ return new class extends Migration
             }
         }
 
-        // Restore unique indexes
-        foreach ($this->uniqueIndexes as $table => $indexes) {
-            Schema::table($table, function (Blueprint $blueprint) use ($indexes) {
-                foreach ($indexes as $indexName => $column) {
-                    $blueprint->unique($column, $indexName);
-                }
-            });
+        // MySQL only: restaurer les index unique (symétriques du up())
+        if ($isMySQL) {
+            foreach ($this->uniqueIndexes as $table => $indexes) {
+                Schema::table($table, function (Blueprint $blueprint) use ($indexes) {
+                    foreach ($indexes as $indexName => $column) {
+                        $blueprint->unique($column, $indexName);
+                    }
+                });
+            }
         }
     }
 };
