@@ -12,6 +12,7 @@ namespace Modules\Newsletter\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Modules\Newsletter\Database\Factories\SubscriberFactory;
@@ -21,7 +22,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Subscriber extends Model
 {
-    use BelongsToTenant, HasFactory, LogsActivity, Notifiable;
+    use BelongsToTenant, HasFactory, LogsActivity, Notifiable, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
     {
