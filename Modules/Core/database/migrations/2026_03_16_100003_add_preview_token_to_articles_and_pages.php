@@ -14,23 +14,32 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('articles', function (Blueprint $table) {
-            $table->string('preview_token', 64)->nullable()->unique()->after('content_password');
-        });
+        // articles est créé par le module Blog (désactivable) — garde pour SQLite/tests
+        if (Schema::hasTable('articles')) {
+            Schema::table('articles', function (Blueprint $table) {
+                $table->string('preview_token', 64)->nullable()->unique()->after('content_password');
+            });
+        }
 
-        Schema::table('static_pages', function (Blueprint $table) {
-            $table->string('preview_token', 64)->nullable()->unique()->after('content_password');
-        });
+        if (Schema::hasTable('static_pages')) {
+            Schema::table('static_pages', function (Blueprint $table) {
+                $table->string('preview_token', 64)->nullable()->unique()->after('content_password');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('articles', function (Blueprint $table) {
-            $table->dropColumn('preview_token');
-        });
+        if (Schema::hasTable('articles')) {
+            Schema::table('articles', function (Blueprint $table) {
+                $table->dropColumn('preview_token');
+            });
+        }
 
-        Schema::table('static_pages', function (Blueprint $table) {
-            $table->dropColumn('preview_token');
-        });
+        if (Schema::hasTable('static_pages')) {
+            Schema::table('static_pages', function (Blueprint $table) {
+                $table->dropColumn('preview_token');
+            });
+        }
     }
 };
