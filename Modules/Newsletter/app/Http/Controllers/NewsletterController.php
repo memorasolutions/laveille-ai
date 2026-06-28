@@ -51,6 +51,17 @@ class NewsletterController extends Controller
             ['name' => $validated['name'] ?? null]
         );
 
+        // Réactivation automatique après purge J+7 : si l'abonné a été désabonné par le cron
+        // (jamais confirmé → purge automatique), on efface la marque de désabonnement pour qu'il
+        // puisse confirmer normalement. RÈGLE : on ne réactive JAMAIS un abonné qui s'est
+        // explicitement désabonné (= déjà confirmé un jour), d'où la condition ! isConfirmed().
+        if ($subscriber->unsubscribed_at !== null && ! $subscriber->isConfirmed()) {
+            $subscriber->update([
+                'unsubscribed_at' => null,
+                'bounce_count' => 0,
+            ]);
+        }
+
         if (! $subscriber->isConfirmed()) {
             \Illuminate\Support\Facades\Notification::route('mail', $subscriber->email)
                 ->notify(new WelcomeNewsletterNotification($subscriber));

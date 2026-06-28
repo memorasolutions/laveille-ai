@@ -80,8 +80,11 @@ class BrevoWebhookController extends Controller
             // Effets de bord (maj abonné) UNIQUEMENT si l'événement vient d'être créé (idempotent).
             if ($record->wasRecentlyCreated) {
                 match ($event) {
-                    'hard_bounce', 'complaint', 'blocked' => $this->handlePermanentFailure($subscriber, $event),
-                    'soft_bounce' => $this->handleSoftBounce($subscriber),
+                    // Échecs permanents : désabonnement définitif immédiat.
+                    'hard_bounce', 'complaint' => $this->handlePermanentFailure($subscriber, $event),
+                    // Échecs transitoires : incrément bounce_count ; désabo seulement au seuil ≥ 3.
+                    // `blocked` est souvent transitoire (quota Brevo, filtre temporaire) → même traitement que soft_bounce.
+                    'soft_bounce', 'blocked' => $this->handleSoftBounce($subscriber),
                     'unsubscribed' => $this->handleUnsubscribe($subscriber),
                     default => null,
                 };
