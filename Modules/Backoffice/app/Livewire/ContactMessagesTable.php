@@ -63,9 +63,11 @@ class ContactMessagesTable extends Component
 
     /**
      * Réhabilite un message spam (faux positif) : status 'spam' -> 'new'.
+     * Requiert la permission view_contacts (cohérent avec la route POST legit).
      */
     public function markLegit(int $id): void
     {
+        abort_if(! auth()->user()?->can('view_contacts'), 403);
         $msg = ContactMessage::findOrFail($id);
         if ($msg->isSpam()) {
             $msg->update(['status' => 'new', 'spam_reason' => null]);

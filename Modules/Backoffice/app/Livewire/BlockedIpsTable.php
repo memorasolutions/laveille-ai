@@ -24,9 +24,11 @@ class BlockedIpsTable extends Component
 
     /**
      * Débloque une IP : supprime l'entrée de la liste.
+     * Requiert la permission manage_security (cohérent avec la route DELETE).
      */
     public function unblock(int $id): void
     {
+        abort_if(! auth()->user()?->can('manage_security'), 403);
         $ip = BlockedIp::findOrFail($id);
         $address = $ip->ip_address;
         $ip->delete();
