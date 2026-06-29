@@ -11,9 +11,8 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Modules\Core\Services\GlossaryLinkifier;
 use Modules\Core\Services\ScreenshotUploadService;
-use Modules\Directory\Models\Tool;
+use Modules\News\Actions\NewsToolSyncAction;
 use Modules\News\Models\NewsArticle;
 use Modules\News\Models\NewsSource;
 use Modules\News\Services\AiSummaryService;
@@ -187,12 +186,10 @@ class AdminNewsController extends Controller
             unset($validated['slug']);
         }
 
-        // ACTION: synchroniser les outils liés (source=manual pour les nouvelles liaisons)
+        // ACTION: synchroniser les outils liés via NewsToolSyncAction (DRY)
         // MCP: SELF (<5 lignes)
         // RAISON: curation admin manuelle
-        $toolIds = $validated['tool_ids'] ?? [];
-        $syncData = array_fill_keys($toolIds, ['source' => 'manual']);
-        $article->tools()->sync($syncData);
+        app(NewsToolSyncAction::class)->sync($article, $validated['tool_ids'] ?? []);
 
         unset($validated['tool_ids']);
         $article->update($validated);
@@ -208,41 +205,10 @@ class AdminNewsController extends Controller
      */
     public function suggestTools(NewsArticle $article): JsonResponse
     {
-        // ACTION: détecter les outils via GlossaryLinkifier sur titre + description + summary
+        // ACTION: déléguer la suggestion à NewsToolSyncAction (DRY)
         // MCP: SELF (<5 lignes)
         // RAISON: suggestion automatique pour accélérer la curation
-        GlossaryLinkifier::resetState();
-
-        $text = implode(' ', array_filter([
-            strip_tags($article->title ?? ''),
-            strip_tags($article->description ?? ''),
-            strip_tags($article->summary ?? ''),
-        ]));
-
-        GlossaryLinkifier::linkify($text);
-
-        $matchedTools = collect(GlossaryLinkifier::getLastMatchedTerms())
-            ->filter(fn (array $t) => ($t['type'] ?? '') === 'tool');
-
-        // Outils de TOOL_NEVER_AUTO présents en mot entier dans le TITRE (signal fort)
-        $titleLower = mb_strtolower(strip_tags($article->title ?? ''));
-        $neverAutoIds = collect(GlossaryLinkifier::TOOL_NEVER_AUTO)
-            ->filter(fn (string $name) => (bool) preg_match('/\b' . preg_quote($name, '/') . '\b/iu', $titleLower))
-            ->map(fn (string $name) => Tool::published()
-                ->whereRaw("LOWER(JSON_EXTRACT(name, '$.\"fr_CA\"')) = ?", [mb_strtolower($name)])
-                ->value('id'))
-            ->filter()
-            ->values();
-
-        $locale = app()->getLocale();
-
-        $slugsFromLinkifier = $matchedTools->pluck('slug');
-
-        $detectedBySlug = Tool::published()
-            ->whereIn("slug->{$locale}", $slugsFromLinkifier)
-            ->pluck('id');
-
-        $allIds = $detectedBySlug->merge($neverAutoIds)->unique()->values();
+        $allIds = app(NewsToolSyncAction::class)->suggest($article);
 
         return response()->json(['tool_ids' => $allIds]);
     }
