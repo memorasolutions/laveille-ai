@@ -96,6 +96,22 @@
                     </th>
                     <th class="fw-medium">{{ __('Statut') }}</th>
                     <th class="fw-medium">{{ __('Rôles') }}</th>
+                    <th class="fw-medium" style="cursor:pointer;white-space:nowrap" wire:click="sort('created_at')">
+                        {{ __('Inscrit le') }}
+                        @if($sortBy === 'created_at')
+                            <i data-lucide="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="icon-sm ms-1 text-primary"></i>
+                        @else
+                            <i data-lucide="chevrons-up-down" class="icon-sm ms-1 text-muted"></i>
+                        @endif
+                    </th>
+                    <th class="fw-medium" style="cursor:pointer;white-space:nowrap" wire:click="sort('last_login_at')">
+                        {{ __('Dernière connexion') }}
+                        @if($sortBy === 'last_login_at')
+                            <i data-lucide="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="icon-sm ms-1 text-primary"></i>
+                        @else
+                            <i data-lucide="chevrons-up-down" class="icon-sm ms-1 text-muted"></i>
+                        @endif
+                    </th>
                     <th class="fw-medium text-center">{{ __('Actions') }}</th>
                 </tr>
             </thead>
@@ -145,6 +161,18 @@
                                 @endforeach
                             </div>
                         </td>
+                        <td style="white-space:nowrap">
+                            <span class="d-block">{{ $user->created_at?->timezone('America/Toronto')->format('Y-m-d H:i') }}</span>
+                            <small class="text-muted">{{ $user->created_at?->timezone('America/Toronto')->diffForHumans() }}</small>
+                        </td>
+                        <td style="white-space:nowrap">
+                            @if($user->last_login_at)
+                                <span class="d-block">{{ \Illuminate\Support\Carbon::parse($user->last_login_at)->timezone('America/Toronto')->format('Y-m-d H:i') }}</span>
+                                <small class="text-muted">{{ \Illuminate\Support\Carbon::parse($user->last_login_at)->timezone('America/Toronto')->diffForHumans() }}</small>
+                            @else
+                                <em class="text-muted">{{ __('Jamais') }}</em>
+                            @endif
+                        </td>
                         <td class="text-center">
                             <div class="dropdown" x-data="{ open: false }" @click.outside="open = false" style="position:relative;">
                                 <button @click="open = !open" type="button"
@@ -190,7 +218,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="py-5 text-center text-muted">
+                        <td colspan="8" class="py-5 text-center text-muted">
                             <i data-lucide="user" class="d-block mx-auto mb-2" style="width:32px;height:32px"></i>
                             {{ __('Aucun utilisateur trouvé') }}
                         </td>

@@ -14,11 +14,13 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
+use Modules\Auth\Models\LoginAttempt;
 use Modules\Auth\Observers\UserObserver;
 use Modules\Core\Contracts\UserInterface;
 use Modules\Team\Traits\HasTeams;
@@ -186,6 +188,14 @@ class User extends Authenticatable implements HasMedia, HasPasskeys, MustVerifyE
         return $this->hasRole(['admin', 'super_admin'])
             ? route('admin.dashboard')
             : route('user.dashboard');
+    }
+
+    /**
+     * Historique des connexions de l'utilisateur.
+     */
+    public function loginAttempts(): HasMany
+    {
+        return $this->hasMany(LoginAttempt::class);
     }
 
     protected static function booted(): void
