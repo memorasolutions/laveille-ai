@@ -46,7 +46,7 @@ final class NewsToolSyncAction
      * Les outils de TOOL_NEVER_AUTO sont inclus uniquement si leur nom apparaît
      * en mot entier (insensible à la casse) dans le TITRE de l'article.
      *
-     * Renvoie une Collection d'IDs d'outils (sans enregistrer — l'admin valide).
+     * Renvoie une Collection d'IDs d'outils (sans enregistrer - l'admin valide).
      *
      * @return Collection<int, int>
      */

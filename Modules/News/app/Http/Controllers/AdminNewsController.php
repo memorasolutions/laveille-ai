@@ -17,6 +17,7 @@ use Modules\News\Models\NewsArticle;
 use Modules\News\Models\NewsSource;
 use Modules\News\Services\AiSummaryService;
 use Modules\News\Services\RssFetcherService;
+use Modules\Directory\Models\Tool;
 use Modules\Settings\Facades\Settings;
 
 class AdminNewsController extends Controller
@@ -201,7 +202,7 @@ class AdminNewsController extends Controller
      * Suggère les outils détectés automatiquement dans le contenu de l'actualité.
      * Les outils de TOOL_NEVER_AUTO sont inclus uniquement si leur nom apparaît
      * en mot entier (insensible à la casse) dans le TITRE de l'article.
-     * Retourne une liste d'ids JSON (sans enregistrer — l'admin valide puis Enregistre).
+     * Retourne une liste d'ids JSON (sans enregistrer - l'admin valide puis Enregistre).
      */
     public function suggestTools(NewsArticle $article): JsonResponse
     {

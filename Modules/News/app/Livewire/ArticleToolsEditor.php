@@ -111,7 +111,14 @@ class ArticleToolsEditor extends Component
             ->map(fn ($id) => (int) $id)
             ->all();
 
-        ResponseCache::clear();
+        // Invalidation ciblée : seule la page publique de cet article pour les visiteurs
+        // anonymes (suffix vide = non authentifiés). Ne purge pas tout le site.
+        // On rompt la chaîne car usingSuffix() retourne AbstractRequestBuilder (lib Spatie),
+        // ce qui tromperait PHPStan si chaîné avec forget() de CacheItemSelector.
+        $cacheSelector = ResponseCache::selectCachedItems()
+            ->forUrls(route('news.show', $article->slug));
+        $cacheSelector->usingSuffix('');
+        $cacheSelector->forget();
 
         session()->flash('news_tools_editor_status', 'Outils enregistrés.');
     }
