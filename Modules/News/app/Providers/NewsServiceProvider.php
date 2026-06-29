@@ -6,6 +6,7 @@ namespace Modules\News\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -31,6 +32,11 @@ class NewsServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
 
         \Modules\News\Models\NewsArticle::observe(\Modules\News\Observers\NewsArticleObserver::class);
+
+        // ACTION: enregistrement du composant Livewire d'édition inline des outils liés.
+        // MCP: SELF (<5 lignes)
+        // RAISON: composant front-end admin-gaté sur la page publique actualité.
+        Livewire::component('news.article-tools-editor', \Modules\News\Livewire\ArticleToolsEditor::class);
     }
 
     /**
