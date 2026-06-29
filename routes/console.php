@@ -10,9 +10,11 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Schedule;
 
-// Backups
-Schedule::command('backup:run')->dailyAt('03:00');
-Schedule::command('backup:clean')->dailyAt('04:00');
+// Backups — PRODUCTION uniquement. Sur dev/local, les sauvegardes sont déjà
+// couvertes par Mac2 (disque 20 To) + le forge maison Forgejo : inutile de
+// remplir le disque local (le disque `local` Spatie avait accumulé 113 Go).
+Schedule::command('backup:run')->dailyAt('03:00')->when(fn () => app()->environment('production'));
+Schedule::command('backup:clean')->dailyAt('04:00')->when(fn () => app()->environment('production'));
 
 // Horizon (skip si ext-redis absent — shared hosting sans Redis)
 Schedule::command('horizon:snapshot')->everyFiveMinutes()->when(fn () => extension_loaded('redis'));
