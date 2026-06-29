@@ -17,7 +17,7 @@
         font-weight: 400 !important;
     }
     .nw-tool-opt:not(:disabled):hover { background: #ecfeff !important; }
-    .nw-tool-opt:last-child { border-bottom: none !important; }
+    li:last-child > .nw-tool-opt { border-bottom: none !important; }
     .nw-tool-results { list-style: none !important; padding: 0 !important; margin: 0 0 12px !important; border: 1px solid #e5e7eb !important; border-radius: 6px !important; max-height: 220px !important; overflow-y: auto !important; background: #fff !important; }
     .nw-tool-results li { margin: 0 !important; padding: 0 !important; }
 </style>
