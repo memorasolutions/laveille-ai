@@ -78,11 +78,18 @@ it('la vue Directory show contient le bouton onglet Actualités conditionnel', f
     expect($content)->toContain("Actualités");
 });
 
-it('la vue Directory show contient le panneau news avec les cartes actualités', function () {
+it('la vue Directory show contient le panneau news avec l\'include du partial article-card', function () {
     $content = file_get_contents(base_path('Modules/Directory/resources/views/public/show.blade.php'));
     expect($content)->toContain("x-show=\"tab==='news'\"");
+    // Le markup des cartes est dans le partial réutilisable (DRY) — vérifier l'include.
+    expect($content)->toContain("news::public.partials.article-card");
+});
+
+it('le partial article-card contient bien le lien news.show et pub_date', function () {
+    $content = file_get_contents(base_path('Modules/News/resources/views/public/partials/article-card.blade.php'));
     expect($content)->toContain('news.show');
     expect($content)->toContain('pub_date');
+    expect($content)->toContain('nw-card');
 });
 
 // ── Tests de relation (modèle) : logique de comptage ─────────────────────────

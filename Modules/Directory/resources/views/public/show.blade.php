@@ -1375,26 +1375,8 @@
             </h3>
             <div class="row g-3">
                 @foreach($toolNewsArticles as $newsItem)
-                <div class="col-md-4 col-sm-6">
-                    <a href="{{ route('news.show', $newsItem->slug) }}"
-                       style="display: flex; flex-direction: column; border: 1px solid #E5E7EB; border-radius: var(--r-base); overflow: hidden; text-decoration: none; color: inherit; height: 100%; transition: box-shadow 0.2s;"
-                       onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
-                        @if($newsItem->image_url)
-                        <img src="{{ $newsItem->image_url }}" alt="{{ $newsItem->title }}"
-                             style="width: 100%; height: 120px; object-fit: cover;"
-                             loading="lazy">
-                        @endif
-                        <div style="padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 6px;">
-                            @if($newsItem->category_tag)
-                            <span style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-primary);">{{ $newsItem->category_tag }}</span>
-                            @endif
-                            <p style="font-weight: 600; font-size: 0.9rem; margin: 0; line-height: 1.4; color: var(--c-dark);">{{ $newsItem->title }}</p>
-                            <time datetime="{{ $newsItem->pub_date?->toIso8601String() }}"
-                                  style="font-size: 0.75rem; color: #9CA3AF; margin-top: auto;">
-                                {{ $newsItem->pub_date ? $newsItem->pub_date->translatedFormat('j F Y') : '' }}
-                            </time>
-                        </div>
-                    </a>
+                <div class="col-sm-6 col-md-4" style="margin-bottom: 1.25rem;">
+                    @include('news::public.partials.article-card', ['article' => $newsItem])
                 </div>
                 @endforeach
             </div>
