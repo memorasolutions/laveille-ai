@@ -216,8 +216,10 @@ class AdminNewsController extends Controller
 
     public function rescoreArticle(NewsArticle $article, AiSummaryService $aiService): RedirectResponse
     {
-        $text = $article->title . '. ' . ($article->description ?? '');
-        $result = $aiService->scoreAndSummarize($text);
+        // ACTION: passer titre et texte séparément (la signature exige 2 arguments)
+        // SELF: correction <5 lignes
+        // RAISON: l'appel à 1 argument levait une ArgumentCountError (« Rescorer » cassé)
+        $result = $aiService->scoreAndSummarize($article->title, $article->description ?? '');
 
         if ($result) {
             $article->update([
