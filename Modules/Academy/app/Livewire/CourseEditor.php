@@ -46,6 +46,8 @@ use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Livewire\Concerns\HandlesChapters;
 use Modules\Academy\Livewire\Concerns\HandlesCourseReordering;
 use Modules\Academy\Livewire\Concerns\HandlesCourseSettings;
+use Modules\Academy\Livewire\Concerns\HandlesH5p;
+use Modules\Academy\Livewire\Concerns\HandlesItemMedia;
 use Modules\Academy\Livewire\Concerns\HandlesItems;
 use Modules\Academy\Livewire\Concerns\HandlesDatabaseEditor;
 use Modules\Academy\Livewire\Concerns\HandlesFeedbackEditor;
@@ -60,6 +62,8 @@ class CourseEditor extends Component
     use HandlesChapters;
     use HandlesCourseReordering;
     use HandlesCourseSettings;
+    use HandlesH5p;
+    use HandlesItemMedia;
     use HandlesItems;
     use HandlesItemRestrictions;
     use HandlesLessons;
@@ -71,11 +75,8 @@ class CourseEditor extends Component
     /** Types d'items autorisés (liste blanche, alignée sur l'admin Backoffice). */
     private const ITEM_TYPES = ['video', 'document', 'quiz', 'choice', 'feedback', 'forum', 'wiki', 'database', 'workshop', 'h5p'];
 
-    /** Tailles maximales (Ko) des téléversements - validées côté SERVEUR. */
-    private const COVER_MAX_KB = 4096;       // ~4 Mo (image de couverture)
-    private const POSTER_MAX_KB = 4096;      // ~4 Mo (affiche vidéo)
-    private const ATTACHMENT_MAX_KB = 10240; // ~10 Mo (pièce jointe document)
-    private const H5P_MAX_KB = 30720;        // ~30 Mo (paquet .h5p / F16)
+    /** Taille maximale (Ko) de l'image de couverture (~4 Mo) - validée côté SERVEUR. */
+    private const COVER_MAX_KB = 4096;
 
     /** Identifiant du cours géré (figé au montage, source de vérité serveur). */
     public int $courseId;
@@ -422,290 +423,6 @@ class CourseEditor extends Component
 
         $this->reset('cover');
         $this->flashSaved('Image de couverture retirée.');
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────────
-    // MÉDIA DES ITEMS : affiche vidéo (poster) + pièces jointes document
-    //
-    // SÉCURITÉ : chaque action re-résout le cours + authorize('manageStructure'),
-    // puis resolveItemFor() (anti-IDOR : l'item doit appartenir à CE cours) AVANT
-    // toute écriture ; mime + taille validés côté SERVEUR ; noms non devinables.
-    // ─────────────────────────────────────────────────────────────────────────────
-
-    public function uploadItemPoster(int $itemId): void
-    {
-        $course = $this->resolveCourse();
-        $this->authorize('manageStructure', $course);
-
-        $item = $this->resolveItemFor($course, $itemId);
-
-        $this->validate([
-            "itemPoster.$itemId" => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.self::POSTER_MAX_KB],
-        ]);
-
-        $file  = $this->itemPoster[$itemId];
-        $media = $item->addMedia($file)
-            ->usingFileName($this->safeFileName($file, 'affiche'))
-            ->toMediaCollection('poster');
-
-        // Le lecteur lit posterUrl() (média en priorité) ; on garde aussi payload['poster']
-        // synchronisé pour la rétrocompatibilité de l'affichage existant.
-        $payload           = $item->payload ?? [];
-        $payload['poster'] = $media->getUrl();
-        $item->forceFill(['poster_media_id' => $media->id, 'payload' => $payload])->save();
-
-        unset($this->itemPoster[$itemId]);
-        $this->flashSaved('Affiche de la vidéo mise à jour.');
-    }
-
-    public function removeItemPoster(int $itemId): void
-    {
-        $course = $this->resolveCourse();
-        $this->authorize('manageStructure', $course);
-
-        $item = $this->resolveItemFor($course, $itemId);
-        $item->clearMediaCollection('poster');
-
-        $payload = $item->payload ?? [];
-        unset($payload['poster']);
-        $item->forceFill(['poster_media_id' => null, 'payload' => $payload])->save();
-
-        unset($this->itemPoster[$itemId]);
-        $this->flashSaved('Affiche de la vidéo retirée.');
-    }
-
-    public function uploadItemAttachment(int $itemId): void
-    {
-        $course = $this->resolveCourse();
-        $this->authorize('manageStructure', $course);
-
-        $item = $this->resolveItemFor($course, $itemId);
-
-        $this->validate([
-            "itemAttachment.$itemId" => [
-                'required', 'file',
-                'mimes:pdf,doc,docx,jpg,jpeg,png,webp',
-                'max:'.self::ATTACHMENT_MAX_KB,
-            ],
-        ]);
-
-        $file = $this->itemAttachment[$itemId];
-
-        // Lire le nom client AVANT addMedia() (qui déplace le fichier temporaire).
-        // Ce nom ne sert que de LIBELLÉ d'affichage, jamais de nom de stockage.
-        $displayName = $file->getClientOriginalName();
-
-        $media = $item->addMedia($file)
-            ->usingFileName($this->safeFileName($file, 'document'))
-            ->toMediaCollection('attachments');
-
-        // Le lecteur (lesson.blade) lit payload['attachments'] = [{name, url}].
-        $payload                = $item->payload ?? [];
-        $attachments            = $payload['attachments'] ?? [];
-        $attachments[]          = [
-            'name'     => $displayName,
-            'url'      => $media->getUrl(),
-            'media_id' => $media->id,
-        ];
-        $payload['attachments'] = array_values($attachments);
-        $item->forceFill(['payload' => $payload])->save();
-
-        unset($this->itemAttachment[$itemId]);
-        $this->flashSaved('Pièce jointe ajoutée.');
-    }
-
-    public function removeItemAttachment(int $itemId, int $mediaId): void
-    {
-        $course = $this->resolveCourse();
-        $this->authorize('manageStructure', $course);
-
-        $item = $this->resolveItemFor($course, $itemId);
-
-        // Le média doit appartenir à CET item (anti-IDOR) avant suppression.
-        $media = $item->getMedia('attachments')->firstWhere('id', $mediaId);
-        if ($media) {
-            $media->delete();
-        }
-
-        $payload                = $item->payload ?? [];
-        $payload['attachments'] = array_values(array_filter(
-            $payload['attachments'] ?? [],
-            fn ($a) => ($a['media_id'] ?? null) !== $mediaId
-        ));
-        $item->forceFill(['payload' => $payload])->save();
-
-        $this->flashSaved('Pièce jointe retirée.');
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────────
-    // F16 - CONTENU INTERACTIF H5P (paquet .h5p extrait sur disque public + iframe sandbox)
-    //
-    // Sécurité : resolveCourse() → authorize('manageStructure') → (anti-IDOR via
-    // resolveItemFor au remplacement) → validation upload (taille/extension) →
-    // H5pPackageService valide le ZIP (structure h5p.json + content/content.json,
-    // anti zip-slip, liste noire d'exécutables) et extrait sur un disque NON
-    // exécutable. Le rendu se fait via h5p-standalone (CDN) dans un iframe SANDBOX :
-    // ZÉRO dépendance composer/npm (le CI ne build pas).
-    // ─────────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Crée un NOUVEL item « h5p » à partir d'un paquet .h5p téléversé pour la leçon.
-     * Titre : celui saisi (newItem.{lesson}.title) sinon celui lu dans h5p.json.
-     * Un paquet invalide (zip corrompu, structure manquante, zip-slip) est rejeté
-     * proprement en erreur de champ (jamais de 500).
-     */
-    /**
-     * F16 - SÉCURITÉ : un paquet .h5p embarque du JavaScript TIERS rendu dans un
-     * iframe « allow-same-origin allow-scripts » (le JS peut donc lire le DOM parent).
-     * On RESTREINT le téléversement aux comptes ADMIN de confiance
-     * (permission « academy.manage ») : un simple formateur peut gérer la structure
-     * de SES cours mais NE PEUT PAS publier de JS tiers. Le RENDU (lecture) reste,
-     * lui, ouvert aux inscrits. Mitigation des risques du sandbox same-origin, en
-     * attendant le fix définitif (servir le contenu sur un sous-domaine isolé, dette v2).
-     *
-     * @return bool true si l'utilisateur courant peut téléverser un paquet H5P.
-     */
-    private function canUploadH5p(): bool
-    {
-        return (bool) Auth::user()?->can('academy.manage');
-    }
-
-    /**
-     * Règles de validation d'un téléversement de paquet H5P (DRY, partagé entre
-     * l'ajout et le remplacement). On accepte .h5p ET .zip (extensions:h5p,zip).
-     * En COMPLÉMENT, pour un fichier nommé « .zip », on EXIGE que son type MIME soit
-     * réellement zip (mimes:zip) : défense en profondeur côté Livewire, en plus de la
-     * validation ZIP stricte du service. Un paquet « .h5p » légitime est aussi un zip
-     * mais porte une extension non standard : la garde mime ne s'applique qu'au cas
-     * « .zip » pour ne pas rejeter les paquets H5P valides.
-     *
-     * @return array<int, string>
-     */
-    private function h5pFileRules(mixed $file): array
-    {
-        $rules = ['required', 'file', 'extensions:h5p,zip', 'max:'.self::H5P_MAX_KB];
-
-        $ext = is_object($file) && method_exists($file, 'getClientOriginalExtension')
-            ? strtolower((string) $file->getClientOriginalExtension())
-            : '';
-
-        if ($ext === 'zip') {
-            $rules[] = 'mimes:zip';
-        }
-
-        return $rules;
-    }
-
-    public function addH5pItem(int $lessonId): void
-    {
-        $course = $this->resolveCourse();
-        $this->authorize('manageStructure', $course);
-
-        // RESTRICTION ADMIN (JS tiers) : refus propre en erreur de champ (pas de 500,
-        // pas de popup natif). Un formateur non-admin ne peut pas téléverser de .h5p.
-        if (! $this->canUploadH5p()) {
-            $this->addError("newH5p.$lessonId", 'Seul un administrateur peut téléverser du contenu interactif H5P (sécurité : code tiers).');
-
-            return;
-        }
-
-        // Anti-IDOR : la leçon doit appartenir à un chapitre de CE cours.
-        $lesson = $this->resolveLessonFor($course, $lessonId);
-
-        $this->validate(
-            ["newH5p.$lessonId" => $this->h5pFileRules($this->newH5p[$lessonId] ?? null)],
-            [],
-            ["newH5p.$lessonId" => 'paquet H5P']
-        );
-
-        try {
-            $result = (new \Modules\Academy\Services\H5pPackageService())->extract($this->newH5p[$lessonId]);
-        } catch (\Throwable $e) {
-            $this->addError("newH5p.$lessonId", $e->getMessage());
-
-            return;
-        }
-
-        $title    = trim((string) ($this->newItem[$lessonId]['title'] ?? '')) ?: $result['title'];
-        $position = (int) LessonItem::where('lesson_id', $lesson->id)->max('position') + 1;
-
-        LessonItem::create([
-            'lesson_id'   => $lesson->id,
-            'type'        => 'h5p',
-            'title'       => mb_substr($title, 0, 255),
-            'position'    => $position,
-            'payload'     => ['h5p_path' => $result['path'], 'title' => $result['title']],
-            'is_required' => (bool) ($this->newItem[$lessonId]['is_required'] ?? false),
-        ]);
-
-        unset($this->newH5p[$lessonId], $this->newItem[$lessonId]);
-        $this->flashSaved('Contenu interactif H5P ajouté.');
-    }
-
-    /**
-     * Remplace le paquet d'un item « h5p » existant (anti-IDOR : item de CE cours).
-     * L'ancien dossier extrait est supprimé APRÈS extraction réussie du nouveau
-     * (pas de fenêtre où l'item pointe vers un dossier supprimé).
-     */
-    public function replaceH5pPackage(int $itemId): void
-    {
-        $course = $this->resolveCourse();
-        $this->authorize('manageStructure', $course);
-
-        // RESTRICTION ADMIN (JS tiers) : même garde que l'ajout. Refus propre.
-        if (! $this->canUploadH5p()) {
-            $this->addError("itemH5p.$itemId", 'Seul un administrateur peut téléverser du contenu interactif H5P (sécurité : code tiers).');
-
-            return;
-        }
-
-        $item = $this->resolveItemFor($course, $itemId);
-        if ($item->type !== 'h5p') {
-            return;
-        }
-
-        $this->validate(
-            ["itemH5p.$itemId" => $this->h5pFileRules($this->itemH5p[$itemId] ?? null)],
-            [],
-            ["itemH5p.$itemId" => 'paquet H5P']
-        );
-
-        $service = new \Modules\Academy\Services\H5pPackageService();
-
-        try {
-            $result = $service->extract($this->itemH5p[$itemId]);
-        } catch (\Throwable $e) {
-            $this->addError("itemH5p.$itemId", $e->getMessage());
-
-            return;
-        }
-
-        $oldPath             = $item->payload['h5p_path'] ?? null;
-        $payload             = $item->payload ?? [];
-        $payload['h5p_path'] = $result['path'];
-        $payload['title']    = $result['title'];
-        $item->forceFill(['payload' => $payload])->save();
-
-        if (is_string($oldPath) && $oldPath !== $result['path']) {
-            $service->delete($oldPath);
-        }
-
-        unset($this->itemH5p[$itemId]);
-        $this->flashSaved('Contenu interactif H5P remplacé.');
-    }
-
-    /**
-     * Nom de fichier non devinable et sûr : slug du préfixe + identifiant unique +
-     * extension d'origine en liste blanche (jamais .php/.phtml, etc.). On ne se fie
-     * jamais au nom client pour le stockage (le nom client n'est conservé que comme
-     * libellé d'affichage des pièces jointes).
-     */
-    private function safeFileName($file, string $prefix): string
-    {
-        $ext  = strtolower((string) $file->getClientOriginalExtension());
-        $safe = in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'doc', 'docx'], true) ? $ext : 'bin';
-
-        return Str::slug($prefix).'-'.Str::random(16).'.'.$safe;
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
