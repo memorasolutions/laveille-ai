@@ -319,6 +319,19 @@ class Tool extends Model implements Searchable
             ->withTimestamps();
     }
 
+    /**
+     * Actualités liées à cet outil (curation manuelle ou auto).
+     */
+    public function newsArticles(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            \Modules\News\Models\NewsArticle::class,
+            'news_article_tool',
+            'tool_id',
+            'news_article_id'
+        )->withPivot('source')->withTimestamps();
+    }
+
     public function allAlternatives()
     {
         return $this->alternatives->merge($this->alternativeOf)->unique('id');

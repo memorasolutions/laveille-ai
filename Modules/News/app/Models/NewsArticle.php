@@ -7,6 +7,7 @@ namespace Modules\News\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 use Modules\Community\Traits\HasComments;
 use Modules\Community\Traits\HasReports;
@@ -86,6 +87,19 @@ class NewsArticle extends Model implements Searchable
     public function source(): BelongsTo
     {
         return $this->belongsTo(NewsSource::class, 'news_source_id');
+    }
+
+    /**
+     * Outils annuaire liés à cette actualité (curation manuelle ou auto).
+     */
+    public function tools(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            \Modules\Directory\Models\Tool::class,
+            'news_article_tool',
+            'news_article_id',
+            'tool_id'
+        )->withPivot('source')->withTimestamps();
     }
 
     public function originalArticle(): BelongsTo
