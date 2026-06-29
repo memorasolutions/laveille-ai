@@ -49,9 +49,10 @@ use Modules\Academy\Livewire\Concerns\HandlesCourseSettings;
 use Modules\Academy\Livewire\Concerns\HandlesItems;
 use Modules\Academy\Livewire\Concerns\HandlesDatabaseEditor;
 use Modules\Academy\Livewire\Concerns\HandlesFeedbackEditor;
+use Modules\Academy\Livewire\Concerns\HandlesItemRestrictions;
 use Modules\Academy\Livewire\Concerns\HandlesLessons;
+use Modules\Academy\Livewire\Concerns\HandlesOverallFeedback;
 use Modules\Academy\Livewire\Concerns\HandlesWorkshopEditor;
-use Modules\Academy\Services\AccessRestrictionService;
 
 class CourseEditor extends Component
 {
@@ -60,9 +61,11 @@ class CourseEditor extends Component
     use HandlesCourseReordering;
     use HandlesCourseSettings;
     use HandlesItems;
+    use HandlesItemRestrictions;
     use HandlesLessons;
     use HandlesFeedbackEditor;
     use HandlesDatabaseEditor;
+    use HandlesOverallFeedback;
     use HandlesWorkshopEditor;
 
     /** Types d'items autorisés (liste blanche, alignée sur l'admin Backoffice). */
@@ -703,267 +706,6 @@ class CourseEditor extends Component
         $safe = in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'doc', 'docx'], true) ? $ext : 'bin';
 
         return Str::slug($prefix).'-'.Str::random(16).'.'.$safe;
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────────
-    // V1-a : FEEDBACK GLOBAL PAR TRANCHE DE SCORE (item quiz) - gâté manageStructure
-    //
-    // SÉCURITÉ : resolveCourse() → authorize('manageStructure') → resolveItemFor()
-    // (anti-IDOR : l'item doit appartenir à CE cours) → normalisation/validation des
-    // bornes (QuizFeedbackService) → écriture dans payload['overall_feedback'].
-    // Une liste vide efface la clé (rétrocompat : pas de clé parasite).
-    // ─────────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Charge dans $overallFeedback[item] les bornes existantes d'un item (édition).
-     * Re-résout l'item scopé à CE cours (anti-IDOR). Ajoute une ligne vide si aucune,
-     * pour que l'UI propose toujours un point de départ.
-     */
-    public function loadOverallFeedback(int $itemId): void
-    {
-        $course = $this->resolveCourse();
-        $this->authorize('manageStructure', $course);
-
-        $item = $this->resolveItemFor($course, $itemId);
-
-        $rows = [];
-        foreach ((array) ($item->payload['overall_feedback'] ?? []) as $row) {
-            if (is_array($row) && isset($row['message'])) {
-                $rows[] = [
-                    'min_percent' => (int) ($row['min_percent'] ?? 0),
-                    'message'     => (string) $row['message'],
-                ];
-            }
-        }
-
-        if ($rows === []) {
-            $rows[] = ['min_percent' => 80, 'message' => ''];
-        }
-
-        $this->overallFeedback[$itemId] = $rows;
-    }
-
-    public function addOverallBoundary(int $itemId): void
-    {
-        if (! isset($this->overallFeedback[$itemId])) {
-            $this->overallFeedback[$itemId] = [];
-        }
-
-        if (count($this->overallFeedback[$itemId]) >= \Modules\Academy\Services\QuizFeedbackService::MAX_BOUNDARIES) {
-            return; // garde-fou : pas plus que le maximum autorisé.
-        }
-
-        $this->overallFeedback[$itemId][] = ['min_percent' => 0, 'message' => ''];
-    }
-
-    public function removeOverallBoundary(int $itemId, int $index): void
-    {
-        if (! isset($this->overallFeedback[$itemId][$index])) {
-            return;
-        }
-
-        unset($this->overallFeedback[$itemId][$index]);
-        $this->overallFeedback[$itemId] = array_values($this->overallFeedback[$itemId]);
-    }
-
-    /**
-     * Enregistre le feedback global d'un item quiz. La liste est NORMALISÉE/validée
-     * par QuizFeedbackService (seuils 0..100, messages bornés, dédoublonnage, tri DESC,
-     * max bornes). Une liste vide retire la clé (rétrocompat).
-     */
-    public function saveOverallFeedback(int $itemId): void
-    {
-        $course = $this->resolveCourse();
-        $this->authorize('manageStructure', $course);
-
-        $item = $this->resolveItemFor($course, $itemId);
-
-        $clean = \Modules\Academy\Services\QuizFeedbackService::normalizeBoundaries(
-            $this->overallFeedback[$itemId] ?? []
-        );
-
-        $payload = is_array($item->payload) ? $item->payload : [];
-        if ($clean === []) {
-            unset($payload['overall_feedback']);
-        } else {
-            $payload['overall_feedback'] = $clean;
-        }
-
-        $item->update(['payload' => $payload]);
-
-        // Reflète l'état normalisé dans l'UI (tri/dédoublonnage visibles immédiatement).
-        $this->overallFeedback[$itemId] = $clean !== []
-            ? $clean
-            : [['min_percent' => 80, 'message' => '']];
-
-        $this->flashSaved('Rétroaction globale du quiz enregistrée.');
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────────
-    // V5-d : RESTRICTIONS D'ACCES PAR ITEM (parité Moodle « Restrict access »)
-    //
-    // Sécurité : resolveCourse() → authorize('manageStructure') → resolveItemFor()
-    // (anti-IDOR item→leçon→cours) → AccessRestrictionService::sanitizeConditions()
-    // (liste blanche type + bornes % + anti-IDOR item_id ∈ cours) → payload.
-    //
-    // Le tampon $editRestrictions[itemId] est chargé par loadItemRestrictions() et
-    // enregistré par saveItemRestrictions(). Un tableau null = panneau fermé.
-    // ─────────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Charge le tampon d'édition des restrictions d'un item depuis son payload.
-     * Ouvre le panneau de restrictions dans l'UI. Anti-IDOR : l'item doit
-     * appartenir à CE cours.
-     */
-    public function loadItemRestrictions(int $itemId): void
-    {
-        $course = $this->resolveCourse();
-        $this->authorize('manageStructure', $course);
-
-        $item   = $this->resolveItemFor($course, $itemId);
-        $config = is_array($item->payload['access_restrictions'] ?? null)
-            ? $item->payload['access_restrictions']
-            : [];
-
-        $this->editRestrictions[$itemId] = [
-            'match'      => ($config['match'] ?? 'all') === 'any' ? 'any' : 'all',
-            'conditions' => is_array($config['conditions'] ?? null) ? $config['conditions'] : [],
-        ];
-    }
-
-    /** Ferme le panneau (vide le tampon) sans enregistrer. */
-    public function cancelItemRestrictions(int $itemId): void
-    {
-        unset($this->editRestrictions[$itemId]);
-    }
-
-    /**
-     * Ajoute une condition vierge au tampon de restrictions d'un item.
-     * L'item doit exister dans le tampon (sinon : appeler loadItemRestrictions d'abord).
-     */
-    public function addRestrictionCondition(int $itemId, string $type = 'completion'): void
-    {
-        if (! isset($this->editRestrictions[$itemId])) {
-            return;
-        }
-
-        if (! in_array($type, AccessRestrictionService::TYPES, true)) {
-            $type = 'completion';
-        }
-
-        $blank = match ($type) {
-            'date'       => ['type' => 'date', 'from' => '', 'until' => '', 'hide' => false],
-            'grade'      => ['type' => 'grade', 'item_id' => 0, 'min_percent' => 50, 'hide' => false],
-            'group'      => ['type' => 'group', 'group_id' => 0, 'hide' => false],
-            default      => ['type' => 'completion', 'item_id' => 0, 'hide' => false],
-        };
-
-        $this->editRestrictions[$itemId]['conditions'][] = $blank;
-    }
-
-    /** Retire la condition d'index donné du tampon (réindexée). */
-    public function removeRestrictionCondition(int $itemId, int $index): void
-    {
-        if (! isset($this->editRestrictions[$itemId]['conditions'][$index])) {
-            return;
-        }
-
-        unset($this->editRestrictions[$itemId]['conditions'][$index]);
-        $this->editRestrictions[$itemId]['conditions'] = array_values(
-            $this->editRestrictions[$itemId]['conditions']
-        );
-    }
-
-    /**
-     * Enregistre les restrictions d'un item depuis le tampon.
-     *
-     * Gardes (DRY, identiques aux autres méthodes item) :
-     *   resolveCourse() → authorize('manageStructure') → resolveItemFor() (anti-IDOR)
-     *   → AccessRestrictionService::sanitizeConditions() (liste blanche + anti-IDOR).
-     *
-     * Une liste vide de conditions RETIRE la clé du payload (rétrocompat stricte :
-     * item sans 'access_restrictions' = toujours accessible).
-     */
-    public function saveItemRestrictions(int $itemId): void
-    {
-        $course = $this->resolveCourse();
-        $this->authorize('manageStructure', $course);
-
-        $item = $this->resolveItemFor($course, $itemId);
-
-        $tampon = $this->editRestrictions[$itemId] ?? null;
-        if (! is_array($tampon)) {
-            return;
-        }
-
-        $match      = ($tampon['match'] ?? 'all') === 'any' ? 'any' : 'all';
-        $rawConds   = is_array($tampon['conditions'] ?? null) ? $tampon['conditions'] : [];
-
-        // Anti-IDOR : seuls les items du cours courant sont acceptés comme référence.
-        // On exclut aussi l'item courant lui-même (anti-auto-référence = deadlock).
-        $validItemIds = AccessRestrictionService::courseItemIds($course);
-        $cleanConds   = AccessRestrictionService::sanitizeConditions(
-            $rawConds,
-            $validItemIds,
-            $course->id,
-            $item->id
-        );
-
-        $payload = is_array($item->payload) ? $item->payload : [];
-
-        if (count($cleanConds) === 0) {
-            // Aucune condition valide : retire la clé (rétrocompat).
-            unset($payload['access_restrictions']);
-        } else {
-            $payload['access_restrictions'] = [
-                'match'      => $match,
-                'conditions' => $cleanConds,
-            ];
-        }
-
-        $item->update(['payload' => $payload]);
-
-        // Reflète l'état sanitisé dans l'UI.
-        $this->editRestrictions[$itemId] = [
-            'match'      => $match,
-            'conditions' => $cleanConds,
-        ];
-
-        $this->flashSaved('Restrictions d\'accès enregistrées.');
-    }
-
-    /**
-     * Liste des items du cours utilisables comme référence dans une restriction
-     * grade/completion (sauf l'item courant lui-même - on ne peut pas s'auto-bloquer).
-     * Sert à alimenter le sélecteur de l'UI éditeur.
-     *
-     * @param  int  $currentItemId  item en cours d'édition (exclu de la liste)
-     * @return array<int, array{id: int, title: string, type: string}>
-     */
-    public function restrictionRefItems(int $currentItemId): array
-    {
-        $course = $this->resolveCourse();
-        $this->authorize('manageStructure', $course);
-
-        $course->loadMissing(['chapters.lessons.lessonItems']);
-
-        $items = [];
-        foreach ($course->chapters as $chapter) {
-            foreach ($chapter->lessons as $lesson) {
-                foreach ($lesson->lessonItems as $lessonItem) {
-                    if ((int) $lessonItem->id === $currentItemId) {
-                        continue;  // ne pas s'auto-référencer
-                    }
-                    $items[] = [
-                        'id'    => (int) $lessonItem->id,
-                        'title' => (string) ($lessonItem->title ?? 'Sans titre'),
-                        'type'  => (string) $lessonItem->type,
-                    ];
-                }
-            }
-        }
-
-        return $items;
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
