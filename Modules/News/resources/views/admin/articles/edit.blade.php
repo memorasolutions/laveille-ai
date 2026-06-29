@@ -51,6 +51,32 @@
                 @error('summary') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
 
+            {{-- ── Section : Outils liés (curation manuelle) ── --}}
+            <div class="card mb-3 border" id="outils">
+                <div class="card-header d-flex align-items-center justify-content-between py-2 px-3">
+                    <span class="fw-semibold">🔗 {{ __('Outils liés') }}</span>
+                    <button type="button" id="btn-suggest-tools" class="btn btn-sm btn-outline-secondary">
+                        {{ __('Suggérer les outils détectés') }}
+                    </button>
+                </div>
+                <div class="card-body p-3">
+                    <label class="form-label visually-hidden" for="tool-ids-select">{{ __('Outils liés') }}</label>
+                    <select name="tool_ids[]" id="tool-ids-select" multiple placeholder="{{ __('Rechercher un outil…') }}">
+                        @foreach ($allTools as $t)
+                            <option value="{{ $t['id'] }}"
+                                {{ in_array($t['id'], $linkedToolIds) ? 'selected' : '' }}>
+                                {{ $t['label'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <small class="text-muted d-block mt-1">
+                        {{ __('Liaison manuelle. Le bouton « Suggérer » propose les outils détectés automatiquement — l\'admin valide avant d\'enregistrer.') }}
+                    </small>
+                    @error('tool_ids') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                    @error('tool_ids.*') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                </div>
+            </div>
+
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary">{{ __('Enregistrer') }}</button>
                 <a href="{{ route('admin.news.articles.index') }}" class="btn btn-secondary">{{ __('Annuler') }}</a>
@@ -64,3 +90,56 @@
     </div>
 </div>
 @endsection
+
+@push('plugin-styles')
+<link href="{{ asset('build/nobleui/plugins/tom-select/tom-select.bootstrap5.min.css') }}" rel="stylesheet">
+@endpush
+
+@push('custom-scripts')
+<script src="{{ asset('build/nobleui/plugins/tom-select/tom-select.complete.min.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var toolSelect = new TomSelect('#tool-ids-select', {
+        plugins: ['remove_button'],
+        placeholder: '{{ __('Rechercher un outil…') }}',
+        maxOptions: null,
+        sortField: { field: 'text', direction: 'asc' },
+    });
+
+    // ── Bouton Suggérer les outils détectés ──────────────────────────────
+    document.getElementById('btn-suggest-tools').addEventListener('click', function () {
+        var btn = this;
+        btn.disabled = true;
+        btn.textContent = '{{ __('Détection en cours…') }}';
+
+        fetch('{{ route('admin.news.articles.suggest-tools', $article) }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            var ids = data.tool_ids || [];
+            ids.forEach(function (id) {
+                var strId = String(id);
+                if (toolSelect.options[strId] && !toolSelect.items.includes(strId)) {
+                    toolSelect.addItem(strId, true);
+                }
+            });
+            btn.textContent = ids.length
+                ? '{{ __('Suggestions ajoutées') }} (' + ids.length + ')'
+                : '{{ __('Aucun outil détecté') }}';
+        })
+        .catch(function () {
+            btn.textContent = '{{ __('Erreur — réessayez') }}';
+        })
+        .finally(function () {
+            btn.disabled = false;
+        });
+    });
+});
+</script>
+@endpush

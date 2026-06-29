@@ -57,6 +57,7 @@ Route::prefix('admin/news')
         Route::patch('articles/{article}/toggle', [AdminNewsController::class, 'toggleArticle'])->name('articles.toggle');
         Route::delete('articles/{article}', [AdminNewsController::class, 'destroyArticle'])->name('articles.destroy');
         Route::post('articles/{article}/upload-image', [AdminNewsController::class, 'uploadArticleImage'])->name('articles.upload-image');
+        Route::post('articles/{article}/suggest-tools', [AdminNewsController::class, 'suggestTools'])->name('articles.suggest-tools');
     });
 
 // ── Concentre Builder (admin, S90) ──

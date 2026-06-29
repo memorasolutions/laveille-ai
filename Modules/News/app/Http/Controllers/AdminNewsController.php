@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Modules\News\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Modules\Core\Services\GlossaryLinkifier;
 use Modules\Core\Services\ScreenshotUploadService;
+use Modules\Directory\Models\Tool;
 use Modules\News\Models\NewsArticle;
 use Modules\News\Models\NewsSource;
 use Modules\News\Services\AiSummaryService;
@@ -146,9 +149,24 @@ class AdminNewsController extends Controller
 
     public function editArticle(NewsArticle $article): View
     {
-        $article->load('source');
+        $article->load('source', 'tools');
 
-        return view('news::admin.articles.edit', compact('article'));
+        $locale = app()->getLocale();
+
+        // ACTION: charger tous les outils publiés pour TomSelect
+        // MCP: SELF (<5 lignes)
+        // RAISON: sélection manuelle par l'admin
+        $allTools = Tool::published()
+            ->orderByRaw("JSON_EXTRACT(name, '$.\"{$locale}\"') ASC")
+            ->get(['id', 'name', 'slug'])
+            ->map(fn (Tool $t) => [
+                'id' => $t->id,
+                'label' => $t->getTranslation('name', $locale, false) ?: (is_array($t->name) ? reset($t->name) : (string) $t->name),
+            ]);
+
+        $linkedToolIds = $article->tools->pluck('id')->all();
+
+        return view('news::admin.articles.edit', compact('article', 'allTools', 'linkedToolIds'));
     }
 
     public function updateArticle(Request $request, NewsArticle $article): RedirectResponse
@@ -159,6 +177,8 @@ class AdminNewsController extends Controller
             'meta_description' => 'nullable|string|max:255',
             'category_tag' => 'nullable|string|max:50',
             'summary' => 'nullable|string|max:2000',
+            'tool_ids' => 'nullable|array',
+            'tool_ids.*' => 'integer|exists:directory_tools,id',
         ]);
 
         if ($request->filled('slug')) {
@@ -167,9 +187,64 @@ class AdminNewsController extends Controller
             unset($validated['slug']);
         }
 
+        // ACTION: synchroniser les outils liés (source=manual pour les nouvelles liaisons)
+        // MCP: SELF (<5 lignes)
+        // RAISON: curation admin manuelle
+        $toolIds = $validated['tool_ids'] ?? [];
+        $syncData = array_fill_keys($toolIds, ['source' => 'manual']);
+        $article->tools()->sync($syncData);
+
+        unset($validated['tool_ids'], $validated['tool_ids.*']);
         $article->update($validated);
 
-        return redirect()->route('admin.news.articles.index')->with('success', __('Article mis a jour.'));
+        return redirect()->route('admin.news.articles.index')->with('success', __('Article mis à jour.'));
+    }
+
+    /**
+     * Suggère les outils détectés automatiquement dans le contenu de l'actualité.
+     * Les outils de TOOL_NEVER_AUTO sont inclus uniquement si leur nom apparaît
+     * en mot entier (insensible à la casse) dans le TITRE de l'article.
+     * Retourne une liste d'ids JSON (sans enregistrer — l'admin valide puis Enregistre).
+     */
+    public function suggestTools(NewsArticle $article): JsonResponse
+    {
+        // ACTION: détecter les outils via GlossaryLinkifier sur titre + description + summary
+        // MCP: SELF (<5 lignes)
+        // RAISON: suggestion automatique pour accélérer la curation
+        GlossaryLinkifier::resetState();
+
+        $text = implode(' ', array_filter([
+            strip_tags($article->title ?? ''),
+            strip_tags($article->description ?? ''),
+            strip_tags($article->summary ?? ''),
+        ]));
+
+        GlossaryLinkifier::linkify($text);
+
+        $matchedTools = collect(GlossaryLinkifier::getLastMatchedTerms())
+            ->filter(fn (array $t) => ($t['type'] ?? '') === 'tool');
+
+        // Outils de TOOL_NEVER_AUTO présents en mot entier dans le TITRE (signal fort)
+        $titleLower = mb_strtolower(strip_tags($article->title ?? ''));
+        $neverAutoIds = collect(GlossaryLinkifier::TOOL_NEVER_AUTO)
+            ->filter(fn (string $name) => (bool) preg_match('/\b' . preg_quote($name, '/') . '\b/iu', $titleLower))
+            ->map(fn (string $name) => Tool::published()
+                ->whereRaw("LOWER(JSON_EXTRACT(name, '$.\"fr_CA\"')) = ?", [mb_strtolower($name)])
+                ->value('id'))
+            ->filter()
+            ->values();
+
+        $locale = app()->getLocale();
+
+        $slugsFromLinkifier = $matchedTools->pluck('slug');
+
+        $detectedBySlug = Tool::published()
+            ->whereIn("slug->{$locale}", $slugsFromLinkifier)
+            ->pluck('id');
+
+        $allIds = $detectedBySlug->merge($neverAutoIds)->unique()->values();
+
+        return response()->json(['tool_ids' => $allIds]);
     }
 
     public function rescoreArticle(NewsArticle $article, AiSummaryService $aiService): RedirectResponse

@@ -63,6 +63,7 @@
     'label' => __('Article admin'),
     'actions' => array_filter([
         Route::has('admin.news.articles.edit') ? ['label' => __('Éditer'), 'icon' => 'pencil', 'url' => route('admin.news.articles.edit', $article->id)] : null,
+        Route::has('admin.news.articles.edit') ? ['label' => __('Outils liés'), 'icon' => 'link', 'url' => route('admin.news.articles.edit', $article->id).'#outils'] : null,
         Route::has('admin.news.articles.rescore') ? ['label' => __('Rescorer'), 'icon' => 'bar-chart-2', 'url' => route('admin.news.articles.rescore', $article->id), 'method' => 'POST', 'confirm' => __('Relancer le scoring IA ?')] : null,
         ['divider' => true],
         Route::has('admin.news.articles.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.news.articles.destroy', $article->id), 'method' => 'DELETE', 'confirm' => __('Supprimer cet article ?'), 'danger' => true] : null,
