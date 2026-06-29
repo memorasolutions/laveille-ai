@@ -44,6 +44,7 @@ use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Models\QuestionCategory;
+use Modules\Academy\Livewire\Concerns\HandlesChapters;
 use Modules\Academy\Livewire\Concerns\HandlesCourseReordering;
 use Modules\Academy\Livewire\Concerns\HandlesCourseSettings;
 use Modules\Academy\Services\AccessRestrictionService;
@@ -51,6 +52,7 @@ use Modules\Academy\Services\AccessRestrictionService;
 class CourseEditor extends Component
 {
     use WithFileUploads;
+    use HandlesChapters;
     use HandlesCourseReordering;
     use HandlesCourseSettings;
 
@@ -408,65 +410,6 @@ class CourseEditor extends Component
 
         $this->reset('cover');
         $this->flashSaved('Image de couverture retirée.');
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────────
-    // CHAPITRES
-    // ─────────────────────────────────────────────────────────────────────────────
-
-    public function addChapter(): void
-    {
-        $course = $this->resolveCourse();
-        $this->authorize('manageStructure', $course);
-
-        $this->validate([
-            'newChapterTitle'   => 'required|string|max:200',
-            'newChapterSummary' => 'nullable|string|max:1000',
-        ]);
-
-        $position = (int) Chapter::where('course_id', $course->id)->max('position') + 1;
-
-        Chapter::create([
-            'course_id' => $course->id,
-            'title'     => $this->newChapterTitle,
-            'summary'   => $this->newChapterSummary,
-            'position'  => $position,
-        ]);
-
-        $this->reset(['newChapterTitle', 'newChapterSummary']);
-        $this->flashSaved('Chapitre ajouté.');
-    }
-
-    public function updateChapter(int $chapterId, string $title, ?string $summary = null): void
-    {
-        $course  = $this->resolveCourse();
-        $this->authorize('manageStructure', $course);
-
-        $chapter = $this->resolveChapterFor($course, $chapterId);
-
-        $data = validator(
-            ['title' => $title, 'summary' => $summary],
-            [
-                'title'   => 'required|string|max:200',
-                'summary' => 'nullable|string|max:1000',
-            ]
-        )->validate();
-
-        $chapter->update($data);
-
-        $this->flashSaved('Chapitre mis à jour.');
-    }
-
-    public function deleteChapter(int $chapterId): void
-    {
-        $course  = $this->resolveCourse();
-        $this->authorize('manageStructure', $course);
-
-        $chapter = $this->resolveChapterFor($course, $chapterId);
-        $chapter->delete(); // suppression en cascade des leçons gérée par la FK (onDelete cascade)
-
-        $this->confirmingChapterDeletion = null;
-        $this->flashSaved('Chapitre supprimé.');
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -2273,16 +2216,6 @@ class CourseEditor extends Component
     // ─────────────────────────────────────────────────────────────────────────────
     // Confirmations inline à 2 temps (jamais de popup native)
     // ─────────────────────────────────────────────────────────────────────────────
-
-    public function confirmChapterDeletion(int $chapterId): void
-    {
-        $this->confirmingChapterDeletion = $chapterId;
-    }
-
-    public function cancelChapterDeletion(): void
-    {
-        $this->confirmingChapterDeletion = null;
-    }
 
     public function confirmLessonDeletion(int $lessonId): void
     {
