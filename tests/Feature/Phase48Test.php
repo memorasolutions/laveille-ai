@@ -89,13 +89,15 @@ it('mail log admin page loads for admin', function () {
         ->assertOk();
 });
 
-it('mail log view has emails variable', function () {
+it('mail log table livewire component is rendered', function () {
+    // La liste est désormais rendue par le composant Livewire MailLogTable.
+    // On vérifie que le composant est présent dans la page.
     $this->actingAs($this->admin)
         ->get('/admin/mail-log')
-        ->assertViewHas('emails');
+        ->assertSeeLivewire('backoffice-mail-log-table');
 });
 
-it('mail log shows sent emails in table', function () {
+it('mail log livewire component shows sent emails', function () {
     SentEmail::create([
         'to' => 'user@test.com',
         'subject' => 'Welcome',
@@ -103,6 +105,7 @@ it('mail log shows sent emails in table', function () {
         'sent_at' => now(),
     ]);
 
+    // Livewire rend le HTML initial côté serveur : les données sont visibles dès la première réponse.
     $this->actingAs($this->admin)
         ->get('/admin/mail-log')
         ->assertSee('user@test.com')

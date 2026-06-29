@@ -14,18 +14,17 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Auth\Models\BlockedIp;
-use Modules\Settings\Facades\Settings;
 
 class BlockedIpController
 {
     public function index(): View
     {
-        $blockedIps = BlockedIp::latest()->paginate((int) Settings::get('backoffice.blocked_ips_per_page', 25));
-
+        // ACTION: Délégation de la pagination au composant Livewire BlockedIpsTable
+        // MCP: SELF (< 5 lignes)
+        // RAISON: La liste est gérée par BlockedIpsTable (scroll infini) ; le déblocage se fait via wire:click.
         return view('backoffice::blocked-ips.index', [
-            'title' => 'IPs bloquées',
+            'title'    => 'IPs bloquées',
             'subtitle' => 'Sécurité',
-            'blockedIps' => $blockedIps,
         ]);
     }
 

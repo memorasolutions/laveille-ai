@@ -17,7 +17,7 @@
     </x-backoffice::help-modal>
 </div>
 
-{{-- Diffuser une alerte système --}}
+{{-- Diffuser une alerte système (reste dans le contrôleur via POST) --}}
 <div class="card mb-3">
     <div class="card-header">
         <h5 class="mb-0 fw-semibold">{{ __('Diffuser une alerte système') }}</h5>
@@ -63,87 +63,7 @@
 {{-- Liste des notifications --}}
 <div class="card">
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th class="fw-semibold small text-muted">{{ __('Type') }}</th>
-                        <th class="fw-semibold small text-muted">{{ __('Message') }}</th>
-                        <th class="fw-semibold small text-muted">{{ __('Date') }}</th>
-                        <th class="fw-semibold small text-muted">{{ __('Statut') }}</th>
-                        <th class="fw-semibold small text-muted text-center">{{ __('Actions') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($notifications as $notification)
-                        <tr class="{{ $notification->read_at ? '' : 'table-primary bg-opacity-25' }}">
-                            <td class="align-middle">
-                                @if($notification->read_at)
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary">
-                                        {{ class_basename($notification->type) }}
-                                    </span>
-                                @else
-                                    <span class="badge bg-primary bg-opacity-10 text-primary">
-                                        {{ class_basename($notification->type) }}
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="align-middle">
-                                <p class="fw-semibold small text-body mb-0">{{ $notification->data['title'] ?? 'Notification' }}</p>
-                                <p class="small text-muted mb-0">{{ $notification->data['message'] ?? '' }}</p>
-                            </td>
-                            <td class="align-middle small text-muted text-nowrap">
-                                {{ $notification->created_at->format('d/m/Y H:i') }}
-                            </td>
-                            <td class="align-middle">
-                                @if($notification->read_at)
-                                    <span class="small text-muted">{{ __('Lu') }}</span>
-                                @else
-                                    <span class="small fw-semibold text-primary">{{ __('Non lu') }}</span>
-                                @endif
-                            </td>
-                            <td class="align-middle text-center">
-                                <div class="dropdown">
-                                    <button class="btn btn-light btn-sm d-inline-flex align-items-center justify-content-center"
-                                            style="width:36px;height:36px;"
-                                            type="button"
-                                            data-bs-toggle="dropdown"
-                                            aria-expanded="false">
-                                        <i data-lucide="more-vertical"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                        <li>
-                                            <form action="{{ route('admin.notifications.destroy', $notification->id) }}" method="POST" x-data>
-                                                @csrf @method('DELETE')
-                                                <button type="button"
-                                                        @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Supprimer cette notification ?')), action: () => $el.closest('form').submit() })"
-                                                        class="dropdown-item text-danger d-flex align-items-center gap-2">
-                                                    <i data-lucide="trash-2"></i>
-                                                    {{ __('Supprimer') }}
-                                                </button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-center py-5">
-                                <i data-lucide="bell" class="icon-xxl text-muted mb-3 d-block mx-auto" style="width:48px;height:48px;opacity:0.3;"></i>
-                                <p class="small fw-medium text-muted mb-0">{{ __('Aucune notification') }}</p>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        @if($notifications->hasPages())
-            <div class="px-3 py-3 border-top">
-                {{ $notifications->links() }}
-            </div>
-        @endif
+        @livewire('backoffice-notifications-table')
     </div>
 </div>
 

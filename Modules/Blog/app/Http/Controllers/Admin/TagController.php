@@ -15,15 +15,15 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use Modules\Blog\Models\Tag;
-use Modules\Settings\Facades\Settings;
 
 class TagController extends Controller
 {
     public function index(): View
     {
-        $tags = Tag::withCount('articles')->orderBy('name')->paginate((int) Settings::get('blog.tags_per_page', 20));
-
-        return view('blog::admin.tags.index', compact('tags'));
+        // ACTION: Délégation de la pagination au composant Livewire TagsTable
+        // MCP: SELF (< 5 lignes)
+        // RAISON: La liste est gérée par TagsTable (scroll infini) ; la suppression se fait via wire:click.
+        return view('blog::admin.tags.index');
     }
 
     public function create(): View

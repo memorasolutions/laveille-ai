@@ -12,43 +12,17 @@ namespace Modules\Backoffice\Http\Controllers;
 
 use App\Models\ContactMessage;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
-use Modules\Settings\Facades\Settings;
 
 class ContactMessageController extends Controller
 {
-    public function index(Request $request): View
+    public function index(): View
     {
-        $query = ContactMessage::query()->latest();
-
-        // Filtre de statut. Valeurs : 'new', 'read', 'spam' ou vide.
-        // Par défaut (vide) on affiche la boîte légitime (new + read) et JAMAIS le spam :
-        // le spam n'apparait que via l'onglet dédié « Spam ».
-        $status = (string) $request->input('status', '');
-        if ($status === 'spam') {
-            $query->where('status', 'spam');
-        } elseif (in_array($status, ['new', 'read'], true)) {
-            $query->where('status', $status);
-        } else {
-            $query->whereIn('status', ['new', 'read']);
-        }
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('subject', 'like', "%{$search}%");
-            });
-        }
-
-        $messages = $query->paginate((int) Settings::get('backoffice.contact_messages_per_page', 20));
-        $unreadCount = ContactMessage::unread()->count();
-        $spamCount = ContactMessage::spam()->count();
-
-        return view('backoffice::themes.backend.contact-messages.index', compact('messages', 'unreadCount', 'spamCount'));
+        // ACTION: Délégation de la pagination et des filtres au composant Livewire ContactMessagesTable
+        // MCP: SELF (< 5 lignes)
+        // RAISON: Filtres, compteurs et suppression sont gérés par ContactMessagesTable (scroll infini).
+        return view('backoffice::themes.backend.contact-messages.index');
     }
 
     public function show(ContactMessage $contactMessage): View

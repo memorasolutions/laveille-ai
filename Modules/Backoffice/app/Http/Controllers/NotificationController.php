@@ -16,15 +16,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 use Modules\Notifications\Notifications\SystemAlertNotification;
-use Modules\Settings\Facades\Settings;
 
 class NotificationController
 {
     public function index(): View
     {
-        $notifications = auth()->user()->notifications()->paginate((int) Settings::get('backoffice.notifications_per_page', 20));
-
-        return view('backoffice::notifications.index', compact('notifications'));
+        // ACTION: Délégation de la pagination au composant Livewire NotificationsTable
+        // MCP: SELF (< 5 lignes)
+        // RAISON: La liste est gérée par NotificationsTable (scroll infini) ; la suppression se fait via wire:click.
+        return view('backoffice::notifications.index');
     }
 
     public function destroy(string $id): RedirectResponse

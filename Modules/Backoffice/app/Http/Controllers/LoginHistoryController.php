@@ -11,21 +11,17 @@ declare(strict_types=1);
 namespace Modules\Backoffice\Http\Controllers;
 
 use Illuminate\View\View;
-use Modules\Auth\Models\LoginAttempt;
-use Modules\Settings\Facades\Settings;
 
 class LoginHistoryController
 {
     public function index(): View
     {
-        $attempts = LoginAttempt::with('user')
-            ->latest('logged_in_at')
-            ->paginate((int) Settings::get('backoffice.login_history_per_page', 30));
-
+        // ACTION: Délégation de la pagination au composant Livewire LoginHistoryTable
+        // MCP: SELF (< 5 lignes, suppression du paginator du contrôleur)
+        // RAISON: La liste est gérée par LoginHistoryTable (scroll infini).
         return view('backoffice::login-history.index', [
-            'title' => 'Historique des connexions',
+            'title'    => 'Historique des connexions',
             'subtitle' => 'Sécurité',
-            'attempts' => $attempts,
         ]);
     }
 }
