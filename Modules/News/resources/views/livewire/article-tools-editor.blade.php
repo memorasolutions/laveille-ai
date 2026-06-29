@@ -1,8 +1,25 @@
 @once
 @push('styles')
 <style>
+    .nw-tool-opt {
+        display: block !important;
+        width: 100% !important;
+        text-align: left !important;
+        padding: 9px 14px !important;
+        margin: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        border-bottom: 1px solid #eef2f7 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        font-size: 0.875rem !important;
+        color: #111827 !important;
+        font-weight: 400 !important;
+    }
     .nw-tool-opt:not(:disabled):hover { background: #ecfeff !important; }
     .nw-tool-opt:last-child { border-bottom: none !important; }
+    .nw-tool-results { list-style: none !important; padding: 0 !important; margin: 0 0 12px !important; border: 1px solid #e5e7eb !important; border-radius: 6px !important; max-height: 220px !important; overflow-y: auto !important; background: #fff !important; }
+    .nw-tool-results li { margin: 0 !important; padding: 0 !important; }
 </style>
 @endpush
 @endonce
