@@ -63,7 +63,7 @@
     'label' => __('Article admin'),
     'actions' => array_filter([
         Route::has('admin.news.articles.edit') ? ['label' => __('Éditer'), 'icon' => 'pencil', 'url' => route('admin.news.articles.edit', $article)] : null,
-        Route::has('admin.news.articles.edit') ? ['label' => __('Outils liés'), 'icon' => 'link', 'url' => route('admin.news.articles.edit', $article).'#outils'] : null,
+        Route::has('admin.news.articles.edit') ? ['label' => __('Outils liés'), 'icon' => 'link', 'url' => '#nw-tools-editor'] : null,
         Route::has('admin.news.articles.rescore') ? ['label' => __('Rescorer'), 'icon' => 'bar-chart-2', 'url' => route('admin.news.articles.rescore', $article), 'method' => 'POST', 'confirm' => __('Relancer le scoring IA ?')] : null,
         ['divider' => true],
         Route::has('admin.news.articles.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.news.articles.destroy', $article), 'method' => 'DELETE', 'confirm' => __('Supprimer cet article ?'), 'danger' => true] : null,
@@ -416,7 +416,9 @@
                     {{-- Éditeur inline « Outils liés » (admin uniquement, gaté serveur). --}}
                     @auth
                         @can('view_admin_panel')
-                            <livewire:news.article-tools-editor :article="$article" />
+                            <div id="nw-tools-editor" style="scroll-margin-top: 90px;">
+                                <livewire:news.article-tools-editor :article="$article" />
+                            </div>
                         @endcan
                     @endauth
 
