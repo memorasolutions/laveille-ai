@@ -13,13 +13,14 @@ namespace Modules\Backoffice\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Core\Traits\HasTableSorting;
 use Modules\Settings\Facades\Settings;
 use Modules\Settings\Models\Setting;
 
 class SettingsTable extends Component
 {
-    use HasTableSorting, WithPagination;
+    use HasTableSorting, WithInfiniteScroll, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -36,11 +37,13 @@ class SettingsTable extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingFilterGroup(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function resetFilters(): void
@@ -48,6 +51,7 @@ class SettingsTable extends Component
         $this->search = '';
         $this->filterGroup = '';
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function render(): \Illuminate\View\View
@@ -64,7 +68,7 @@ class SettingsTable extends Component
         ))
             ->when($this->filterGroup, fn ($q) => $q->where('group', $this->filterGroup))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate((int) Settings::get('backoffice.settings_table_per_page', 20));
+            ->paginate((int) $this->perPage);
 
         return view('backoffice::livewire.settings-table', compact('settings', 'groups'));
     }

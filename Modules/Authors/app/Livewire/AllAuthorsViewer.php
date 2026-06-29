@@ -6,6 +6,7 @@ namespace Modules\Authors\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Authors\Models\AuthorComment;
 use Modules\Authors\Models\AuthorPost;
 use Modules\Authors\Models\AuthorProfile;
@@ -13,7 +14,7 @@ use Modules\Authors\Models\AuthorSubscriber;
 
 class AllAuthorsViewer extends Component
 {
-    use WithPagination;
+    use WithInfiniteScroll, WithPagination;
 
     public string $search = '';
 
@@ -22,11 +23,13 @@ class AllAuthorsViewer extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingTierFilter(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function render()
@@ -45,7 +48,7 @@ class AllAuthorsViewer extends Component
             $query->where('tier', $this->tierFilter);
         }
 
-        $authors = $query->latest('created_at')->paginate(25);
+        $authors = $query->latest('created_at')->paginate($this->perPage);
 
         $stats = $authors->mapWithKeys(function (AuthorProfile $author): array {
             return [

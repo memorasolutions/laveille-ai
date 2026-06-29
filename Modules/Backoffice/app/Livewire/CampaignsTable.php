@@ -13,6 +13,7 @@ namespace Modules\Backoffice\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Core\Traits\HasBulkActions;
 use Modules\Newsletter\Models\Campaign;
 use Modules\Settings\Facades\Settings;
@@ -22,7 +23,7 @@ use Spatie\ModelStates\Exceptions\CouldNotPerformTransition;
 
 class CampaignsTable extends Component
 {
-    use HasBulkActions, WithPagination;
+    use HasBulkActions, WithInfiniteScroll, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -35,11 +36,13 @@ class CampaignsTable extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingFilterStatus(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function resetFilters(): void
@@ -47,6 +50,7 @@ class CampaignsTable extends Component
         $this->search = '';
         $this->filterStatus = '';
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function changeStatus(int $campaignId, string $status): void
@@ -91,7 +95,7 @@ class CampaignsTable extends Component
             ->when($this->search, fn ($q) => $q->where('subject', 'like', '%'.$this->search.'%'))
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->latest()
-            ->paginate((int) Settings::get('backoffice.campaigns_per_page', 15))
+            ->paginate((int) $this->perPage)
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
@@ -103,7 +107,7 @@ class CampaignsTable extends Component
             ->when($this->search, fn ($q) => $q->where('subject', 'like', '%'.$this->search.'%'))
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->latest()
-            ->paginate((int) Settings::get('backoffice.campaigns_per_page', 15));
+            ->paginate((int) $this->perPage);
 
         return view('backoffice::livewire.campaigns-table', compact('campaigns'));
     }

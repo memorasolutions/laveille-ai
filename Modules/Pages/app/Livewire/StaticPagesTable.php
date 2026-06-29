@@ -13,13 +13,14 @@ namespace Modules\Pages\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Core\Traits\HasTableSorting;
 use Modules\Pages\Models\StaticPage;
 use Modules\Settings\Facades\Settings;
 
 class StaticPagesTable extends Component
 {
-    use HasTableSorting, WithPagination;
+    use HasTableSorting, WithInfiniteScroll, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -36,11 +37,13 @@ class StaticPagesTable extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingFilterStatus(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function resetFilters(): void
@@ -48,6 +51,7 @@ class StaticPagesTable extends Component
         $this->search = '';
         $this->filterStatus = '';
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function deletePage(int $pageId): void
@@ -62,7 +66,7 @@ class StaticPagesTable extends Component
             ->when($this->search, fn ($q) => $q->where('title->'.app()->getLocale(), 'like', "%{$this->search}%"))
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate((int) Settings::get('pages.static_pages_per_page', 15));
+            ->paginate($this->perPage);
 
         return view('pages::livewire.static-pages-table', compact('pages'));
     }

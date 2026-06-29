@@ -13,13 +13,14 @@ namespace Modules\Backoffice\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Core\Traits\HasTableSorting;
 use Modules\Settings\Facades\Settings;
 use Spatie\Permission\Models\Role;
 
 class RolesTable extends Component
 {
-    use HasTableSorting, WithPagination;
+    use HasTableSorting, WithInfiniteScroll, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -33,6 +34,7 @@ class RolesTable extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function render(): \Illuminate\View\View
@@ -40,7 +42,7 @@ class RolesTable extends Component
         $roles = Role::withCount(['permissions', 'users'])
             ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate((int) Settings::get('backoffice.roles_per_page', 15));
+            ->paginate($this->perPage);
 
         return view('backoffice::livewire.roles-table', compact('roles'));
     }

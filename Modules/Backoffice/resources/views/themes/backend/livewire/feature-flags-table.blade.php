@@ -205,6 +205,6 @@
     </div>
 
     @if($features->hasPages())
-        <div class="mt-3">{{ $features->links() }}</div>
+        @include('backoffice::partials.infinite-scroll', ['paginator' => $features])
     @endif
 </div>

@@ -53,6 +53,6 @@
                 </tbody>
             </table>
         </div>
-        <div class="mt-4">{{ $authors->links() }}</div>
+        @include('backoffice::partials.infinite-scroll', ['paginator' => \$authors])
     @endif
 </div>

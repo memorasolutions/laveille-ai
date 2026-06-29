@@ -14,13 +14,14 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Backoffice\Models\FeatureFlagCondition;
 use Modules\Settings\Facades\Settings;
 use Spatie\Permission\Models\Role;
 
 class FeatureFlagsTable extends Component
 {
-    use WithPagination;
+    use WithInfiniteScroll, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -74,6 +75,7 @@ class FeatureFlagsTable extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function editCondition(string $name): void
@@ -116,7 +118,7 @@ class FeatureFlagsTable extends Component
             ->where('scope', 'global')
             ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
             ->orderBy('name')
-            ->paginate((int) Settings::get('backoffice.feature_flags_per_page', 20));
+            ->paginate((int) $this->perPage);
 
         $knownFeatures = $this->knownFeatures;
         $conditions = FeatureFlagCondition::all()->keyBy('feature_name');

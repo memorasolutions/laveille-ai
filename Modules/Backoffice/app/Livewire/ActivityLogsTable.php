@@ -14,12 +14,13 @@ use App\Models\User;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Settings\Facades\Settings;
 use Spatie\Activitylog\Models\Activity;
 
 class ActivityLogsTable extends Component
 {
-    use WithPagination;
+    use WithInfiniteScroll, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -46,31 +47,37 @@ class ActivityLogsTable extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingFilterCauser(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingFilterLogName(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingFilterEvent(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingDateFrom(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingDateTo(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function resetFilters(): void
@@ -82,6 +89,7 @@ class ActivityLogsTable extends Component
         $this->dateFrom = '';
         $this->dateTo = '';
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function showDetail(int $id): void
@@ -106,7 +114,7 @@ class ActivityLogsTable extends Component
             ->when($this->dateFrom, fn ($q) => $q->whereDate('created_at', '>=', $this->dateFrom))
             ->when($this->dateTo, fn ($q) => $q->whereDate('created_at', '<=', $this->dateTo))
             ->orderBy('created_at', 'desc')
-            ->paginate((int) Settings::get('backoffice.activity_logs_per_page', 30));
+            ->paginate($this->perPage);
 
         $users = User::orderBy('name')->get(['id', 'name']);
         $logNames = Activity::distinct()->orderBy('log_name')->pluck('log_name');

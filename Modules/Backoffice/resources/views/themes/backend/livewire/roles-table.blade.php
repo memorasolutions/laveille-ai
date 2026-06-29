@@ -111,6 +111,6 @@
     </div>
 
     @if($roles->hasPages())
-        <div class="mt-3">{{ $roles->links() }}</div>
+        @include('backoffice::partials.infinite-scroll', ['paginator' => $roles])
     @endif
 </div>

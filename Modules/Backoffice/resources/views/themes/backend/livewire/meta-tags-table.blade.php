@@ -110,5 +110,5 @@
         </table>
     </div>
 
-    {{ $metaTags->links() }}
+    @include('backoffice::partials.infinite-scroll', ['paginator' => $metaTags])
 </div>

@@ -165,7 +165,7 @@
 
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3 pt-3 border-top">
             <span class="text-muted">{{ $articles->total() }} {{ __('entrée(s)') }}</span>
-            {{ $articles->links() }}
+            @include('backoffice::partials.infinite-scroll', ['paginator' => $articles])
         </div>
     @endif
 </div>

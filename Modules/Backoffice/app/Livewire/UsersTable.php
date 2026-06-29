@@ -15,14 +15,14 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\Auth\Models\LoginAttempt;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Core\Traits\HasBulkActions;
 use Modules\Core\Traits\HasTableSorting;
-use Modules\Settings\Facades\Settings;
 use Spatie\Permission\Models\Role;
 
 class UsersTable extends Component
 {
-    use HasBulkActions, HasTableSorting, WithPagination;
+    use HasBulkActions, HasTableSorting, WithInfiniteScroll, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -62,16 +62,19 @@ class UsersTable extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingFilterStatus(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingFilterRole(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function resetFilters(): void
@@ -80,6 +83,7 @@ class UsersTable extends Component
         $this->filterRole = '';
         $this->search = '';
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     protected function getBulkActions(): array
@@ -129,7 +133,7 @@ class UsersTable extends Component
             ->when($this->filterStatus === 'inactive', fn ($q) => $q->where('is_active', false))
             ->when($this->filterRole, fn ($q) => $q->whereHas('roles', fn ($r) => $r->where('name', $this->filterRole)))
             ->orderBy($validSort, $this->sortDirection)
-            ->paginate((int) Settings::get('backoffice.users_per_page', 15))
+            ->paginate($this->perPage)
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
@@ -147,7 +151,7 @@ class UsersTable extends Component
             ->when($this->filterStatus === 'inactive', fn ($q) => $q->where('is_active', false))
             ->when($this->filterRole, fn ($q) => $q->whereHas('roles', fn ($r) => $r->where('name', $this->filterRole)))
             ->orderBy($validSort, $this->sortDirection)
-            ->paginate((int) Settings::get('backoffice.users_per_page', 15));
+            ->paginate($this->perPage);
 
         $roles = Role::orderBy('name')->get();
 

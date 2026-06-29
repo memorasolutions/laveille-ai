@@ -13,13 +13,14 @@ namespace Modules\Backoffice\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Blog\Models\Category;
 use Modules\Settings\Facades\Settings;
 use Modules\Core\Traits\HasBulkActions;
 
 class CategoriesTable extends Component
 {
-    use HasBulkActions, WithPagination;
+    use HasBulkActions, WithInfiniteScroll, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -32,11 +33,13 @@ class CategoriesTable extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingFilterActive(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function resetFilters(): void
@@ -44,6 +47,7 @@ class CategoriesTable extends Component
         $this->search = '';
         $this->filterActive = '';
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function toggleActive(int $categoryId): void
@@ -79,7 +83,7 @@ class CategoriesTable extends Component
             ->when($this->search, fn ($q) => $q->where('name->'.app()->getLocale(), 'like', '%'.$this->search.'%'))
             ->when($this->filterActive !== '', fn ($q) => $q->where('is_active', (bool) $this->filterActive))
             ->orderBy('name')
-            ->paginate((int) Settings::get('backoffice.categories_per_page', 15))
+            ->paginate((int) $this->perPage)
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
@@ -91,7 +95,7 @@ class CategoriesTable extends Component
             ->when($this->search, fn ($q) => $q->where('name->'.app()->getLocale(), 'like', '%'.$this->search.'%'))
             ->when($this->filterActive !== '', fn ($q) => $q->where('is_active', (bool) $this->filterActive))
             ->orderBy('name')
-            ->paginate((int) Settings::get('backoffice.categories_per_page', 15));
+            ->paginate((int) $this->perPage);
 
         return view('backoffice::livewire.categories-table', compact('categories'));
     }

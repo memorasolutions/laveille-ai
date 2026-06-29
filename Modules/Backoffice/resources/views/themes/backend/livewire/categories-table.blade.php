@@ -139,6 +139,6 @@
 
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-3 pt-3 border-top">
         <span class="text-muted small">{{ $categories->total() }} {{ __('catégorie(s)') }}</span>
-        {{ $categories->links() }}
+        @include('backoffice::partials.infinite-scroll', ['paginator' => $categories])
     </div>
 </div>

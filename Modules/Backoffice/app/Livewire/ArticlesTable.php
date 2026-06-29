@@ -13,8 +13,8 @@ namespace Modules\Backoffice\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Blog\Models\Article;
-use Modules\Settings\Facades\Settings;
 use Modules\Blog\Models\Category;
 use Modules\Blog\States\ArchivedArticleState;
 use Modules\Blog\States\DraftArticleState;
@@ -25,7 +25,7 @@ use Spatie\ModelStates\Exceptions\CouldNotPerformTransition;
 
 class ArticlesTable extends Component
 {
-    use HasBulkActions, HasTableSorting, WithPagination;
+    use HasBulkActions, HasTableSorting, WithInfiniteScroll, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -45,16 +45,19 @@ class ArticlesTable extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingFilterStatus(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingFilterCategory(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function resetFilters(): void
@@ -63,6 +66,7 @@ class ArticlesTable extends Component
         $this->filterStatus = '';
         $this->filterCategory = '';
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function changeStatus(int $articleId, string $status): void
@@ -129,7 +133,7 @@ class ArticlesTable extends Component
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->when($this->filterCategory, fn ($q) => $q->where('category_id', $this->filterCategory))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate((int) Settings::get('backoffice.articles_per_page', 15))
+            ->paginate($this->perPage)
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
@@ -142,7 +146,7 @@ class ArticlesTable extends Component
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->when($this->filterCategory, fn ($q) => $q->where('category_id', $this->filterCategory))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate((int) Settings::get('backoffice.articles_per_page', 15));
+            ->paginate($this->perPage);
 
         $categories = Category::active()->orderBy('name')->get();
 

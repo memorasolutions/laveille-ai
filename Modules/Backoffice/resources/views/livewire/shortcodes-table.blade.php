@@ -155,6 +155,6 @@
     </div>
 
     @if($shortcodes->hasPages())
-        <div class="mt-3">{{ $shortcodes->links() }}</div>
+        @include('backoffice::partials.infinite-scroll', ['paginator' => $shortcodes])
     @endif
 </div>

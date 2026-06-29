@@ -13,13 +13,14 @@ namespace Modules\Backoffice\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Community\Models\Comment;
 use Modules\Settings\Facades\Settings;
 use Modules\Core\Traits\HasBulkActions;
 
 class CommentsTable extends Component
 {
-    use HasBulkActions, WithPagination;
+    use HasBulkActions, WithInfiniteScroll, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -32,11 +33,13 @@ class CommentsTable extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingFilterStatus(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function resetFilters(): void
@@ -44,6 +47,7 @@ class CommentsTable extends Component
         $this->search = '';
         $this->filterStatus = '';
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function changeStatus(int $commentId, string $status): void
@@ -100,7 +104,7 @@ class CommentsTable extends Component
             ))
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->latest()
-            ->paginate((int) Settings::get('backoffice.comments_per_page', 20))
+            ->paginate((int) $this->perPage)
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
@@ -117,7 +121,7 @@ class CommentsTable extends Component
             ))
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->latest()
-            ->paginate((int) Settings::get('backoffice.comments_per_page', 20));
+            ->paginate((int) $this->perPage);
 
         return view('backoffice::livewire.comments-table', compact('comments'));
     }

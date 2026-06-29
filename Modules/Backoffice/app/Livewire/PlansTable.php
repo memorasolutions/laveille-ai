@@ -13,6 +13,7 @@ namespace Modules\Backoffice\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Core\Traits\HasBulkActions;
 use Modules\Core\Traits\HasTableSorting;
 use Modules\SaaS\Models\Plan;
@@ -20,7 +21,7 @@ use Modules\Settings\Facades\Settings;
 
 class PlansTable extends Component
 {
-    use HasBulkActions, HasTableSorting, WithPagination;
+    use HasBulkActions, HasTableSorting, WithInfiniteScroll, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -40,16 +41,19 @@ class PlansTable extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingFilterInterval(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingFilterActive(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function resetFilters(): void
@@ -58,6 +62,7 @@ class PlansTable extends Component
         $this->filterInterval = '';
         $this->filterActive = '';
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function toggleActive(int $planId): void
@@ -97,7 +102,7 @@ class PlansTable extends Component
             ->when($this->filterInterval, fn ($q) => $q->where('interval', $this->filterInterval))
             ->when($this->filterActive !== '', fn ($q) => $q->where('is_active', (bool) $this->filterActive))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate((int) Settings::get('backoffice.plans_per_page', 15))
+            ->paginate((int) $this->perPage)
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
@@ -112,7 +117,7 @@ class PlansTable extends Component
             ->when($this->filterInterval, fn ($q) => $q->where('interval', $this->filterInterval))
             ->when($this->filterActive !== '', fn ($q) => $q->where('is_active', (bool) $this->filterActive))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate((int) Settings::get('backoffice.plans_per_page', 15));
+            ->paginate((int) $this->perPage);
 
         return view('backoffice::livewire.plans-table', compact('plans'));
     }

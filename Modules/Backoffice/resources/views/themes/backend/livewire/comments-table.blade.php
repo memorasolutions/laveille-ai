@@ -217,6 +217,6 @@
 
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-3 pt-3 border-top">
         <span class="text-muted small">{{ $comments->total() }} {{ __('commentaire(s)') }}</span>
-        {{ $comments->links() }}
+        @include('backoffice::partials.infinite-scroll', ['paginator' => $comments])
     </div>
 </div>

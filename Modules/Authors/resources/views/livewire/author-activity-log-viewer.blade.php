@@ -66,7 +66,7 @@
             </table>
         </div>
 
-        <div class="mt-4">{{ $activities->links() }}</div>
+        @include('backoffice::partials.infinite-scroll', ['paginator' => \$activities])
     @endif
 
     <p class="mt-6 text-xs text-gray-500">

@@ -13,13 +13,14 @@ namespace Modules\Backoffice\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Core\Traits\HasTableSorting;
 use Modules\SEO\Models\MetaTag;
 use Modules\Settings\Facades\Settings;
 
 class MetaTagsTable extends Component
 {
-    use HasTableSorting, WithPagination;
+    use HasTableSorting, WithInfiniteScroll, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -36,11 +37,13 @@ class MetaTagsTable extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingFilterActive(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function resetFilters(): void
@@ -48,6 +51,7 @@ class MetaTagsTable extends Component
         $this->search = '';
         $this->filterActive = '';
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function toggleActive(int $metaTagId): void
@@ -66,7 +70,7 @@ class MetaTagsTable extends Component
         ))
             ->when($this->filterActive !== '', fn ($q) => $q->where('is_active', (bool) $this->filterActive))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate((int) Settings::get('backoffice.meta_tags_per_page', 15));
+            ->paginate((int) $this->perPage);
 
         return view('backoffice::livewire.meta-tags-table', compact('metaTags'));
     }

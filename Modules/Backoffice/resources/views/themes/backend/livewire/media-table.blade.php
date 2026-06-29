@@ -213,7 +213,7 @@
     </div>
 
     @if($media->hasPages())
-        <div class="mt-3">{{ $media->links() }}</div>
+        @include('backoffice::partials.infinite-scroll', ['paginator' => $media])
     @endif
 
     {{-- Modal édition métadonnées --}}

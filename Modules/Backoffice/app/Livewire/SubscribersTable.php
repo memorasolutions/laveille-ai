@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Notification;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Core\Traits\HasBulkActions;
 use Modules\Newsletter\Models\Subscriber;
 use Modules\Newsletter\Notifications\WelcomeNewsletterNotification;
@@ -23,7 +24,7 @@ use Throwable;
 
 class SubscribersTable extends Component
 {
-    use HasBulkActions, WithPagination;
+    use HasBulkActions, WithInfiniteScroll, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -36,11 +37,13 @@ class SubscribersTable extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatingFilterStatus(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function resetFilters(): void
@@ -48,6 +51,7 @@ class SubscribersTable extends Component
         $this->search = '';
         $this->filterStatus = '';
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     /**
@@ -165,7 +169,7 @@ class SubscribersTable extends Component
             ->when($this->filterStatus === 'pending', fn ($q) => $q->whereNull('confirmed_at')->whereNull('unsubscribed_at'))
             ->when($this->filterStatus === 'unsubscribed', fn ($q) => $q->whereNotNull('unsubscribed_at'))
             ->latest()
-            ->paginate((int) Settings::get('backoffice.subscribers_per_page', 20))
+            ->paginate($this->perPage)
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
@@ -183,7 +187,7 @@ class SubscribersTable extends Component
             ->when($this->filterStatus === 'unsubscribed', fn ($q) => $q->whereNotNull('unsubscribed_at'))
             ->latest();
 
-        $subscribers = $query->paginate((int) Settings::get('backoffice.subscribers_per_page', 20));
+        $subscribers = $query->paginate($this->perPage);
         $totalCount = Subscriber::count();
         $activeCount = Subscriber::whereNotNull('confirmed_at')->whereNull('unsubscribed_at')->count();
         $pendingCount = Subscriber::whereNull('confirmed_at')->whereNull('unsubscribed_at')->count();

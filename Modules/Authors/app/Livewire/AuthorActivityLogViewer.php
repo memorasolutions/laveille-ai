@@ -6,13 +6,14 @@ namespace Modules\Authors\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Authors\Models\AuthorPost;
 use Modules\Authors\Models\AuthorProfile;
 use Spatie\Activitylog\Models\Activity;
 
 class AuthorActivityLogViewer extends Component
 {
-    use WithPagination;
+    use WithInfiniteScroll, WithPagination;
 
     public int $authorProfileId;
 
@@ -30,6 +31,7 @@ class AuthorActivityLogViewer extends Component
         if (in_array($period, ['today', '7d', '30d', 'all'], true)) {
             $this->period = $period;
             $this->resetPage();
+            $this->resetInfiniteScroll();
         }
     }
 
@@ -38,6 +40,7 @@ class AuthorActivityLogViewer extends Component
         if (in_array($logName, ['all', 'author_post', 'author_profile'], true)) {
             $this->logName = $logName;
             $this->resetPage();
+            $this->resetInfiniteScroll();
         }
     }
 
@@ -74,7 +77,7 @@ class AuthorActivityLogViewer extends Component
             $query->where('log_name', $this->logName);
         }
 
-        $activities = $query->latest()->paginate(20);
+        $activities = $query->latest()->paginate($this->perPage);
 
         return view('authors::livewire.author-activity-log-viewer', compact('activities'));
     }

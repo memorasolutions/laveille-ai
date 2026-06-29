@@ -7,11 +7,12 @@ namespace Modules\Authors\Livewire;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Authors\Models\AuthorAffiliateLink;
 
 class AffiliateLinkManager extends Component
 {
-    use WithPagination;
+    use WithInfiniteScroll, WithPagination;
 
     public int $authorProfileId;
 
@@ -103,7 +104,7 @@ class AffiliateLinkManager extends Component
     {
         $links = AuthorAffiliateLink::where('author_profile_id', $this->authorProfileId)
             ->latest()
-            ->paginate(20);
+            ->paginate($this->perPage);
 
         return view('authors::livewire.affiliate-link-manager', compact('links'));
     }

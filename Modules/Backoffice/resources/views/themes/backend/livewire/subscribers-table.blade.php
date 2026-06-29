@@ -193,6 +193,6 @@
 
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-3 pt-3 border-top">
         <span class="text-muted small">{{ $subscribers->total() }} {{ __('abonné(s)') }}</span>
-        {{ $subscribers->links() }}
+        @include('backoffice::partials.infinite-scroll', ['paginator' => $subscribers])
     </div>
 </div>

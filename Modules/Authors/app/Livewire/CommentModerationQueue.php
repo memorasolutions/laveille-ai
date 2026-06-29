@@ -7,11 +7,12 @@ namespace Modules\Authors\Livewire;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Authors\Models\AuthorComment;
 
 final class CommentModerationQueue extends Component
 {
-    use WithPagination;
+    use WithInfiniteScroll, WithPagination;
 
     protected string $paginationTheme = 'tailwind';
 
@@ -24,12 +25,14 @@ final class CommentModerationQueue extends Component
     public function updatedSearch(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function updatedStatus(): void
     {
         $this->selected = [];
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function approve(int $id): void
@@ -103,7 +106,7 @@ final class CommentModerationQueue extends Component
             default => $query,
         };
 
-        $comments = $query->orderByDesc('created_at')->paginate(20);
+        $comments = $query->orderByDesc('created_at')->paginate($this->perPage);
 
         $counts = [
             'pending' => AuthorComment::whereNull('approved_at')->whereNull('flagged_at')->where('spam_score', '<', 70)->count(),

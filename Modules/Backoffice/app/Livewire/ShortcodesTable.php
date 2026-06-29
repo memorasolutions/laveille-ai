@@ -13,6 +13,7 @@ namespace Modules\Backoffice\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Core\Traits\HasBulkActions;
 use Modules\Core\Traits\HasTableSorting;
 use Modules\Editor\Models\Shortcode;
@@ -20,7 +21,7 @@ use Modules\Settings\Facades\Settings;
 
 class ShortcodesTable extends Component
 {
-    use HasBulkActions, HasTableSorting, WithPagination;
+    use HasBulkActions, HasTableSorting, WithInfiniteScroll, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -36,12 +37,14 @@ class ShortcodesTable extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     public function resetFilters(): void
     {
         $this->search = '';
         $this->resetPage();
+        $this->resetInfiniteScroll();
     }
 
     protected function getBulkActions(): array
@@ -67,7 +70,7 @@ class ShortcodesTable extends Component
                     ->orWhere('name', 'like', "%{$this->search}%");
             })
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate((int) Settings::get('backoffice.shortcodes_per_page', 15))
+            ->paginate((int) $this->perPage)
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
@@ -81,7 +84,7 @@ class ShortcodesTable extends Component
                     ->orWhere('name', 'like', "%{$this->search}%");
             })
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate((int) Settings::get('backoffice.shortcodes_per_page', 15));
+            ->paginate((int) $this->perPage);
 
         return view('backoffice::livewire.shortcodes-table', ['shortcodes' => $shortcodes]);
     }

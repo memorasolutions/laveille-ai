@@ -172,5 +172,5 @@
         </table>
     </div>
 
-    {{ $plans->links() }}
+    @include('backoffice::partials.infinite-scroll', ['paginator' => $plans])
 </div>
