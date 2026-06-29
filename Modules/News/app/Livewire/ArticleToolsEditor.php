@@ -59,8 +59,8 @@ class ArticleToolsEditor extends Component
         $locale = app()->getLocale();
 
         $this->allTools = Tool::published()
-            ->orderByRaw("JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"fr_CA\"'))")
             ->get(['id', 'name', 'slug'])
+            ->sortBy(fn (Tool $t) => $t->getTranslation('name', 'fr_CA', false) ?: $t->getTranslation('name', 'en', false) ?: '')
             ->map(fn (Tool $tool) => [
                 'id'   => $tool->id,
                 'name' => $tool->getTranslation('name', $locale, false)

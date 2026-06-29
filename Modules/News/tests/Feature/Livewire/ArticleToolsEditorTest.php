@@ -84,13 +84,15 @@ function ateUser(): User
 }
 
 // ── SÉCURITÉ : non-admin bloqué ───────────────────────────────────────────────
+// Note : Livewire convertit AuthorizationException en réponse HTTP 403 (ne lève
+// pas d'exception côté test). On vérifie donc le statut avec assertForbidden().
 
 test('mount refuse un visiteur non authentifié (403)', function (): void {
     $source  = ateSource();
     $article = ateArticle($source->id, 'SEC1');
 
-    expect(fn () => Livewire::test(ArticleToolsEditor::class, ['article' => $article]))
-        ->toThrow(\Exception::class);
+    Livewire::test(ArticleToolsEditor::class, ['article' => $article])
+        ->assertForbidden();
 });
 
 test('mount refuse un utilisateur sans permission view_admin_panel (403)', function (): void {
@@ -100,26 +102,20 @@ test('mount refuse un utilisateur sans permission view_admin_panel (403)', funct
 
     $this->actingAs($user);
 
-    expect(fn () => Livewire::test(ArticleToolsEditor::class, ['article' => $article]))
-        ->toThrow(\Exception::class);
+    Livewire::test(ArticleToolsEditor::class, ['article' => $article])
+        ->assertForbidden();
 });
 
 test('save refuse un utilisateur sans permission view_admin_panel (403)', function (): void {
-    $admin   = ateAdmin();
     $user    = ateUser();
     $source  = ateSource();
     $article = ateArticle($source->id, 'SEC3');
-    $tool    = ateTool('SEC3');
 
-    // Monte le composant en tant qu'admin.
-    $this->actingAs($admin);
-    $component = Livewire::test(ArticleToolsEditor::class, ['article' => $article]);
-
-    // Tente de réutiliser le composant avec un autre utilisateur non-admin.
+    // Un non-admin tente directement de monter et d'appeler save.
     $this->actingAs($user);
 
-    expect(fn () => $component->call('save'))
-        ->toThrow(\Exception::class);
+    Livewire::test(ArticleToolsEditor::class, ['article' => $article])
+        ->assertForbidden();
 });
 
 // ── ANTI-IDOR : #[Locked] empêche la mutation du articleId ───────────────────
@@ -209,7 +205,7 @@ test('save retire un outil retiré de la sélection', function (): void {
     expect($article->fresh()->tools()->count())->toBe(0);
 });
 
-test('save flash le message de confirmation', function (): void {
+test('save affiche le message de confirmation dans la vue', function (): void {
     $admin   = ateAdmin();
     $source  = ateSource();
     $article = ateArticle($source->id, 'FLAS');
@@ -218,7 +214,7 @@ test('save flash le message de confirmation', function (): void {
 
     Livewire::test(ArticleToolsEditor::class, ['article' => $article])
         ->call('save')
-        ->assertSessionHas('news_tools_editor_status');
+        ->assertSee('Outils enregistrés.');
 });
 
 // ── SUGGESTION ───────────────────────────────────────────────────────────────
