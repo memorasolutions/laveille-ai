@@ -75,7 +75,7 @@
             <li role="option" :aria-selected="isSelected(tool.id)">
                 <button
                     type="button"
-                    x-on:click="$wire.addTool(tool.id); search = ''"
+                    x-on:click="$wire.addTool(tool.id).then(() => { search = ''; document.getElementById('nw-tools-search')?.focus() })"
                     :disabled="isSelected(tool.id)"
                     :style="isSelected(tool.id) ? 'opacity:0.5; cursor:not-allowed;' : 'cursor:pointer;'"
                     style="width: 100%; text-align: left; padding: 7px 14px; background: none; border: none; border-bottom: 1px solid #f3f4f6; font-size: 0.875rem; color: #111827;"
