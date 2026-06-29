@@ -23,6 +23,7 @@ use Livewire\Component;
 use Modules\Directory\Models\Tool;
 use Modules\News\Actions\NewsToolSyncAction;
 use Modules\News\Models\NewsArticle;
+use Spatie\ResponseCache\Facades\ResponseCache;
 
 class ArticleToolsEditor extends Component
 {
@@ -109,6 +110,8 @@ class ArticleToolsEditor extends Component
             ->pluck('directory_tools.id')
             ->map(fn ($id) => (int) $id)
             ->all();
+
+        ResponseCache::clear();
 
         session()->flash('news_tools_editor_status', 'Outils enregistrés.');
     }
