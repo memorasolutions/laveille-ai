@@ -194,7 +194,16 @@ class PublicDirectoryController extends Controller
                 ->get();
         }
 
-        return view('directory::public.show', compact('tool', 'similarTools', 'resources', 'relatedCollections'));
+        // ACTION: charger les actualités liées publiées pour l'onglet Actualités
+        // MCP: SELF (<5 lignes)
+        // RAISON: évite le N+1 sur la vue, limite à 12 pour l'affichage
+        $toolNewsArticles = $tool->newsArticles()
+            ->published()
+            ->latest('pub_date')
+            ->limit(12)
+            ->get();
+
+        return view('directory::public.show', compact('tool', 'similarTools', 'resources', 'relatedCollections', 'toolNewsArticles'));
     }
 
     /**

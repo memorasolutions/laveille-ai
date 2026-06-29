@@ -52,10 +52,11 @@ function makePivotTool(string $suffix = 'A'): Tool
     $name = "Outil pivot {$suffix}";
     $slug = "outil-pivot-" . strtolower($suffix);
 
+    // Tableau associatif (PAS json_encode) pour que Spatie appelle setTranslations() correctement.
     // withoutEvents évite l'appel route('directory.show') du trait NotifiesIndexNow en test.
     return Tool::withoutEvents(fn () => Tool::create([
-        'name' => json_encode(['fr_CA' => $name, 'en' => $name]),
-        'slug' => json_encode(['fr_CA' => $slug, 'en' => $slug]),
+        'name' => ['fr_CA' => $name, 'en' => $name],
+        'slug' => ['fr_CA' => $slug, 'en' => $slug],
         'status' => 'published',
         'pricing' => 'free',
     ]));

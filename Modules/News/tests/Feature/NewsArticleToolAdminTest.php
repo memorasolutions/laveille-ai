@@ -50,9 +50,10 @@ function natAdminTool(string $suffix = 'A'): Tool
     $name = "Outil admin {$suffix}";
     $slug = "outil-admin-" . strtolower($suffix);
 
+    // Tableau associatif (PAS json_encode) pour que Spatie appelle setTranslations() correctement.
     return Tool::withoutEvents(fn () => Tool::create([
-        'name' => json_encode(['fr_CA' => $name, 'en' => $name]),
-        'slug' => json_encode(['fr_CA' => $slug, 'en' => $slug]),
+        'name' => ['fr_CA' => $name, 'en' => $name],
+        'slug' => ['fr_CA' => $slug, 'en' => $slug],
         'status' => 'published',
         'pricing' => 'free',
     ]));

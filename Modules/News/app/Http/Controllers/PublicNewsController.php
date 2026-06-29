@@ -72,7 +72,10 @@ class PublicNewsController extends Controller
         abort_if(($article->seo_status ?? 'index') === 'gone', 410);
 
         $article->increment('views_count');
-        $article->load('source');
+        // ACTION: charger source + outils liés publiés (maillage SEO, évite N+1 en vue)
+        // MCP: SELF (<5 lignes)
+        // RAISON: bloc « Outils mentionnés » dans show.blade
+        $article->load(['source', 'tools' => fn ($q) => $q->where('status', 'published')]);
 
         // Article précédent (même catégorie, puis toutes)
         $previousArticle = NewsArticle::published()

@@ -383,6 +383,36 @@
                     </div>
                     @endif
 
+                    {{-- Outils mentionnés dans cette actualité (maillage SEO interne) --}}
+                    @php $articleTools = $article->relationLoaded('tools') ? $article->tools : $article->tools()->published()->get(); @endphp
+                    @if($articleTools->isNotEmpty())
+                    <div style="margin: 28px 0; padding: 20px; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: var(--r-base, 8px);">
+                        <p style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; color: #6B7280; margin: 0 0 14px;">🔧 {{ __('Outils mentionnés') }}</p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                            @foreach($articleTools as $linkedTool)
+                            @php
+                                $toolLocale = app()->getLocale();
+                                $toolSlug = $linkedTool->getTranslation('slug', $toolLocale, false)
+                                    ?: $linkedTool->getTranslation('slug', 'fr_CA', false)
+                                    ?: $linkedTool->getTranslation('slug', 'en', false)
+                                    ?: '';
+                                $toolName = $linkedTool->getTranslation('name', $toolLocale, false)
+                                    ?: $linkedTool->getTranslation('name', 'fr_CA', false)
+                                    ?: $linkedTool->getTranslation('name', 'en', false)
+                                    ?: '';
+                            @endphp
+                            @if($toolSlug)
+                            <a href="{{ route('directory.show', $toolSlug) }}"
+                               style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border: 1px solid #D1D5DB; border-radius: 99px; text-decoration: none; font-size: 0.85rem; font-weight: 600; color: var(--c-dark, #111827); background: #fff; transition: background 0.15s, border-color 0.15s;"
+                               onmouseover="this.style.background='#EEF7FF'; this.style.borderColor='var(--c-primary)'" onmouseout="this.style.background='#fff'; this.style.borderColor='#D1D5DB'">
+                                {{ $toolName }}
+                            </a>
+                            @endif
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
                     @include('fronttheme::partials.evergreen-related', ['haystack' => \Illuminate\Support\Str::lower(($article->title ?? '').' '.($article->category_tag ?? '').' '.strip_tags((string) ($article->summary ?? $article->meta_description ?? '')))])
 
                     {{-- Commentaires — 2026-05-27 #312 DÉSACTIVÉS sur actualités (décision user).

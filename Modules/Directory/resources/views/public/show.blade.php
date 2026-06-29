@@ -328,7 +328,7 @@
 @endphp
 
 <section class="section-padding" style="padding-top: 10px;">
-<div class="container rt-page" x-data="{ tab: (['info','reviews','discussions','resources','screenshots','alternatives'].includes(window.location.hash.slice(1)) ? window.location.hash.slice(1) : 'info'), setTab(t) { this.tab = t; history.replaceState(null, '', '#' + t); } }">
+<div class="container rt-page" x-data="{ tab: (['info','reviews','discussions','resources','screenshots','alternatives','news'].includes(window.location.hash.slice(1)) ? window.location.hash.slice(1) : 'info'), setTab(t) { this.tab = t; history.replaceState(null, '', '#' + t); } }">
 
     {{-- Back --}}
     <a href="{{ route('directory.index') }}" class="rt-back">
@@ -464,6 +464,9 @@
             <button type="button" class="rt-tab-btn" :class="tab==='resources' && 'rt-tab-active'" @click="setTab('resources')">📚 {{ __('Tutoriels') }} ({{ $resources->count() }})</button>
             <button type="button" class="rt-tab-btn" :class="tab==='screenshots' && 'rt-tab-active'" @click="setTab('screenshots')">📸 {{ __('Screenshots') }} ({{ $screenshots->count() }})</button>
             <button type="button" class="rt-tab-btn" :class="tab==='alternatives' && 'rt-tab-active'" @click="setTab('alternatives')">🔄 {{ __('Alternatives') }}</button>
+            @if(isset($toolNewsArticles) && $toolNewsArticles->isNotEmpty())
+            <button type="button" class="rt-tab-btn" :class="tab==='news' && 'rt-tab-active'" @click="setTab('news')">📰 {{ __('Actualités') }} ({{ $toolNewsArticles->count() }})</button>
+            @endif
         </div>
 
         {{-- TAB: Informations --}}
@@ -1363,6 +1366,49 @@
             </div>
             @else <p style="color: #6B7280; text-align: center; padding: 30px;">{{ __('Aucune alternative pour le moment.') }}</p> @endif
         </div>
+
+        {{-- TAB: Actualités liées (visible uniquement si au moins une actualité publiée est liée) --}}
+        @if(isset($toolNewsArticles) && $toolNewsArticles->isNotEmpty())
+        <div class="rt-panel" x-show="tab==='news'" x-cloak style="padding: 24px;">
+            <h3 style="font-family: var(--f-heading); font-size: 1.15rem; font-weight: 700; margin: 0 0 18px; color: var(--c-dark);">
+                📰 {{ __('Actualités liées') }}
+            </h3>
+            <div class="row g-3">
+                @foreach($toolNewsArticles as $newsItem)
+                <div class="col-md-4 col-sm-6">
+                    <a href="{{ route('news.show', $newsItem->slug) }}"
+                       style="display: flex; flex-direction: column; border: 1px solid #E5E7EB; border-radius: var(--r-base); overflow: hidden; text-decoration: none; color: inherit; height: 100%; transition: box-shadow 0.2s;"
+                       onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+                        @if($newsItem->image_url)
+                        <img src="{{ $newsItem->image_url }}" alt="{{ e($newsItem->title) }}"
+                             style="width: 100%; height: 120px; object-fit: cover;"
+                             loading="lazy">
+                        @endif
+                        <div style="padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 6px;">
+                            @if($newsItem->category_tag)
+                            <span style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-primary);">{{ $newsItem->category_tag }}</span>
+                            @endif
+                            <p style="font-weight: 600; font-size: 0.9rem; margin: 0; line-height: 1.4; color: var(--c-dark);">{{ $newsItem->title }}</p>
+                            <time datetime="{{ $newsItem->pub_date?->toIso8601String() }}"
+                                  style="font-size: 0.75rem; color: #9CA3AF; margin-top: auto;">
+                                {{ $newsItem->pub_date ? $newsItem->pub_date->translatedFormat('j F Y') : '' }}
+                            </time>
+                        </div>
+                    </a>
+                </div>
+                @endforeach
+            </div>
+            @php $totalNews = $tool->newsArticles()->published()->count(); @endphp
+            @if($totalNews > 12)
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="{{ route('news.index') }}" style="color: var(--c-primary); font-weight: 600; font-size: 0.9rem;">
+                    {{ __('Voir toutes les actualités') }} &rarr;
+                </a>
+            </div>
+            @endif
+        </div>
+        @endif
+
     </div>
 </div>
 
