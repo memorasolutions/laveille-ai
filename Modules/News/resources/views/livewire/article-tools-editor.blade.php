@@ -1,3 +1,11 @@
+@once
+@push('styles')
+<style>
+    .nw-tool-opt:not(:disabled):hover { background: #ecfeff !important; }
+    .nw-tool-opt:last-child { border-bottom: none !important; }
+</style>
+@endpush
+@endonce
 <div
     x-data="{
         search: '',
@@ -71,10 +79,11 @@
             <li role="option" :aria-selected="isSelected(tool.id)">
                 <button
                     type="button"
+                    class="nw-tool-opt"
                     x-on:click="$wire.addTool(tool.id).then(() => { search = ''; document.getElementById('nw-tools-search')?.focus() })"
                     :disabled="isSelected(tool.id)"
-                    :style="isSelected(tool.id) ? 'opacity:0.5; cursor:not-allowed;' : 'cursor:pointer;'"
-                    style="width: 100%; text-align: left; padding: 7px 14px; background: none; border: none; border-bottom: 1px solid #f3f4f6; font-size: 0.875rem; color: #111827;"
+                    :style="{ opacity: isSelected(tool.id) ? '0.5' : '1', cursor: isSelected(tool.id) ? 'not-allowed' : 'pointer' }"
+                    style="display: block; width: 100%; text-align: left; padding: 9px 14px; background: transparent; border: none; border-bottom: 1px solid #eef2f7; font-size: 0.875rem; color: #111827;"
                     :aria-label="isSelected(tool.id) ? `${tool.name} (déjà sélectionné)` : `Ajouter ${tool.name}`"
                 >
                     <span x-text="tool.name"></span>
