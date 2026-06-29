@@ -292,7 +292,7 @@ class GlossaryLinkifier
                 try {
                     \Modules\Directory\Models\Tool::query()
                         ->where('status', 'published')
-                        ->get(['id', 'name', 'slug', 'short_description'])
+                        ->get(['id', 'name', 'slug', 'short_description', 'aliases'])
                         ->each(function ($tool) use (&$terms, &$takenLower, $locale) {
                             try {
                                 $name = $tool->getTranslation('name', $locale, false) ?: $tool->name;
@@ -312,15 +312,43 @@ class GlossaryLinkifier
                                 }
                                 $desc = $tool->getTranslation('short_description', $locale, false) ?: $tool->short_description;
                                 $shortDesc = Str::limit(self::stripMarkdownInline(strip_tags((string) $desc)), 180);
+                                $url = '/annuaire/'.$slug;
                                 $terms[] = [
                                     'name' => $name,
                                     'slug' => $slug,
                                     'definition' => $shortDesc,
                                     'type' => 'tool',
-                                    'url' => '/annuaire/'.$slug,
+                                    'url' => $url,
                                     'match_strategy' => 'case_sensitive',
                                 ];
                                 $takenLower[$lower] = true;
+
+                                // 2026-06-29 : aliases de l'outil → même URL, même stratégie case_sensitive.
+                                // Même garde-fous que le nom principal (TOOL_NEVER_AUTO, longueur minimale,
+                                // précédence glossaire/acronyme/nom-outil déjà pris).
+                                if (is_array($tool->aliases)) {
+                                    foreach ($tool->aliases as $alias) {
+                                        if (! is_string($alias) || mb_strlen(trim($alias)) < self::MIN_LENGTH) {
+                                            continue;
+                                        }
+                                        $aliasLower = mb_strtolower(trim($alias));
+                                        if (in_array($aliasLower, self::TOOL_NEVER_AUTO, true)) {
+                                            continue;
+                                        }
+                                        if (isset($takenLower[$aliasLower])) {
+                                            continue; // glossaire/acronyme ou autre outil a priorité
+                                        }
+                                        $terms[] = [
+                                            'name'           => trim($alias),
+                                            'slug'           => $slug,
+                                            'definition'     => $shortDesc,
+                                            'type'           => 'tool_alias',
+                                            'url'            => $url,
+                                            'match_strategy' => 'case_sensitive',
+                                        ];
+                                        $takenLower[$aliasLower] = true;
+                                    }
+                                }
                             } catch (\Throwable $e) {
                                 return;
                             }

@@ -344,7 +344,9 @@ class Tool extends Model implements Searchable
 
     public static function searchableFields(): array
     {
-        return ['name', 'short_description', 'description'];
+        // 2026-06-29 : 'aliases' ajouté — la colonne JSON est stockée en texte,
+        // le LIKE %term% match un alias dans le tableau (ex. %GLM% dans ["GLM","GLM-5.1"]).
+        return ['name', 'short_description', 'description', 'aliases'];
     }
 
     public static function searchSectionKey(): string
