@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -199,7 +200,7 @@ class PublicDirectoryController extends Controller
         // RAISON: garde-fou class_exists (portabilité module News), booléen $hasMoreNews évite le count() dans la vue
         $toolNewsArticles = collect();
         $hasMoreNews = false;
-        if (class_exists(\Modules\News\Models\NewsArticle::class)) {
+        if (class_exists(\Modules\News\Models\NewsArticle::class) && Schema::hasTable('news_article_tool')) {
             $toolNewsArticles = $tool->newsArticles()->published()->latest('pub_date')->limit(13)->get();
             $hasMoreNews = $toolNewsArticles->count() === 13;
             if ($hasMoreNews) {
