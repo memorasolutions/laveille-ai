@@ -62,15 +62,15 @@
 @include('core::components.admin-bar', [
     'label' => __('Article admin'),
     'actions' => array_filter([
-        Route::has('admin.news.articles.edit') ? ['label' => __('Éditer'), 'icon' => 'pencil', 'url' => route('admin.news.articles.edit', $article->id)] : null,
-        Route::has('admin.news.articles.edit') ? ['label' => __('Outils liés'), 'icon' => 'link', 'url' => route('admin.news.articles.edit', $article->id).'#outils'] : null,
-        Route::has('admin.news.articles.rescore') ? ['label' => __('Rescorer'), 'icon' => 'bar-chart-2', 'url' => route('admin.news.articles.rescore', $article->id), 'method' => 'POST', 'confirm' => __('Relancer le scoring IA ?')] : null,
+        Route::has('admin.news.articles.edit') ? ['label' => __('Éditer'), 'icon' => 'pencil', 'url' => route('admin.news.articles.edit', $article)] : null,
+        Route::has('admin.news.articles.edit') ? ['label' => __('Outils liés'), 'icon' => 'link', 'url' => route('admin.news.articles.edit', $article).'#outils'] : null,
+        Route::has('admin.news.articles.rescore') ? ['label' => __('Rescorer'), 'icon' => 'bar-chart-2', 'url' => route('admin.news.articles.rescore', $article), 'method' => 'POST', 'confirm' => __('Relancer le scoring IA ?')] : null,
         ['divider' => true],
-        Route::has('admin.news.articles.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.news.articles.destroy', $article->id), 'method' => 'DELETE', 'confirm' => __('Supprimer cet article ?'), 'danger' => true] : null,
+        Route::has('admin.news.articles.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.news.articles.destroy', $article), 'method' => 'DELETE', 'confirm' => __('Supprimer cet article ?'), 'danger' => true] : null,
     ]),
 ])
 @if(Route::has('admin.news.articles.edit'))
-    @include('core::components.mode-toggle', ['editUrl' => route('admin.news.articles.edit', $article->id)])
+    @include('core::components.mode-toggle', ['editUrl' => route('admin.news.articles.edit', $article)])
 @endif
 @include('core::components.admin-activity-mini', ['model' => $article])
 @can('view_admin_panel')
