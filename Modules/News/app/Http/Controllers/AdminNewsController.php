@@ -194,7 +194,7 @@ class AdminNewsController extends Controller
         $syncData = array_fill_keys($toolIds, ['source' => 'manual']);
         $article->tools()->sync($syncData);
 
-        unset($validated['tool_ids'], $validated['tool_ids.*']);
+        unset($validated['tool_ids']);
         $article->update($validated);
 
         return redirect()->route('admin.news.articles.index')->with('success', __('Article mis à jour.'));

@@ -1380,7 +1380,7 @@
                        style="display: flex; flex-direction: column; border: 1px solid #E5E7EB; border-radius: var(--r-base); overflow: hidden; text-decoration: none; color: inherit; height: 100%; transition: box-shadow 0.2s;"
                        onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
                         @if($newsItem->image_url)
-                        <img src="{{ $newsItem->image_url }}" alt="{{ e($newsItem->title) }}"
+                        <img src="{{ $newsItem->image_url }}" alt="{{ $newsItem->title }}"
                              style="width: 100%; height: 120px; object-fit: cover;"
                              loading="lazy">
                         @endif
@@ -1398,8 +1398,7 @@
                 </div>
                 @endforeach
             </div>
-            @php $totalNews = $tool->newsArticles()->published()->count(); @endphp
-            @if($totalNews > 12)
+            @if($hasMoreNews ?? false)
             <div style="text-align: center; margin-top: 20px;">
                 <a href="{{ route('news.index') }}" style="color: var(--c-primary); font-weight: 600; font-size: 0.9rem;">
                     {{ __('Voir toutes les actualités') }} &rarr;

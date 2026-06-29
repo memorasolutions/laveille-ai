@@ -70,7 +70,7 @@
                         @endforeach
                     </select>
                     <small class="text-muted d-block mt-1">
-                        {{ __('Liaison manuelle. Le bouton « Suggérer » propose les outils détectés automatiquement — l\'admin valide avant d\'enregistrer.') }}
+                        {{ __('Liaison manuelle. Le bouton « Suggérer » propose les outils détectés automatiquement - l\'admin valide avant d\'enregistrer.') }}
                     </small>
                     @error('tool_ids') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                     @error('tool_ids.*') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 : '{{ __('Aucun outil détecté') }}';
         })
         .catch(function () {
-            btn.textContent = '{{ __('Erreur — réessayez') }}';
+            btn.textContent = '{{ __('Erreur - réessayez') }}';
         })
         .finally(function () {
             btn.disabled = false;

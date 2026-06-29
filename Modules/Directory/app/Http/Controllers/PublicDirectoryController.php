@@ -196,14 +196,18 @@ class PublicDirectoryController extends Controller
 
         // ACTION: charger les actualités liées publiées pour l'onglet Actualités
         // MCP: SELF (<5 lignes)
-        // RAISON: évite le N+1 sur la vue, limite à 12 pour l'affichage
-        $toolNewsArticles = $tool->newsArticles()
-            ->published()
-            ->latest('pub_date')
-            ->limit(12)
-            ->get();
+        // RAISON: garde-fou class_exists (portabilité module News), booléen $hasMoreNews évite le count() dans la vue
+        $toolNewsArticles = collect();
+        $hasMoreNews = false;
+        if (class_exists(\Modules\News\Models\NewsArticle::class)) {
+            $toolNewsArticles = $tool->newsArticles()->published()->latest('pub_date')->limit(13)->get();
+            $hasMoreNews = $toolNewsArticles->count() === 13;
+            if ($hasMoreNews) {
+                $toolNewsArticles = $toolNewsArticles->take(12);
+            }
+        }
 
-        return view('directory::public.show', compact('tool', 'similarTools', 'resources', 'relatedCollections', 'toolNewsArticles'));
+        return view('directory::public.show', compact('tool', 'similarTools', 'resources', 'relatedCollections', 'toolNewsArticles', 'hasMoreNews'));
     }
 
     /**
