@@ -12,12 +12,8 @@
             return $wire.selectedToolIds.includes(id);
         }
     }"
-    style="margin: 20px 0; padding: 20px; background: #f0f9fa; border: 1.5px solid var(--c-primary, #064E5A); border-radius: 8px;"
+    style="padding: 4px 16px 16px;"
 >
-    {{-- En-tête --}}
-    <p style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; color: #064E5A; margin: 0 0 14px;">
-        ✏️ {{ __('Outils liés (admin)') }}
-    </p>
 
     {{-- Message de statut --}}
     @if(session('news_tools_editor_status'))

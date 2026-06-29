@@ -248,6 +248,29 @@
                         'adminShareItems' => auth()->user()?->isSuperAdmin() ? $article->adminShareContents() : null,
                     ])
 
+                    {{-- Éditeur « Outils liés » (admin uniquement) : accordéon FERMÉ par défaut, au-dessus de l'image.
+                         Le <details> est PARENT du composant Livewire → l'état ouvert/fermé survit au morph (cf. piège Livewire v4). --}}
+                    @auth
+                        @can('view_admin_panel')
+                            <details id="nw-tools-editor" style="scroll-margin-top: 90px; margin: 0 0 1.25rem; border: 1.5px solid var(--c-primary, #064E5A); border-radius: 8px; background: #f0f9fa;">
+                                <summary style="cursor: pointer; padding: 10px 16px; font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; color: #064E5A;">🔗 {{ __('Outils liés (admin)') }}</summary>
+                                <livewire:news.article-tools-editor :article="$article" />
+                            </details>
+                            <script>
+                                (function () {
+                                    function openNwTools() {
+                                        if (location.hash === '#nw-tools-editor') {
+                                            var d = document.getElementById('nw-tools-editor');
+                                            if (d) { d.open = true; }
+                                        }
+                                    }
+                                    window.addEventListener('hashchange', openNwTools);
+                                    document.addEventListener('DOMContentLoaded', openNwTools);
+                                })();
+                            </script>
+                        @endcan
+                    @endauth
+
                     @if($article->image_url)
                         <img src="{{ $article->image_url }}{{ str_contains($article->image_url, 'http') ? '' : '?v='.($article->updated_at?->timestamp ?? time()) }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-hero" loading="lazy">
                     @endif
@@ -412,15 +435,6 @@
                         </div>
                     </div>
                     @endif
-
-                    {{-- Éditeur inline « Outils liés » (admin uniquement, gaté serveur). --}}
-                    @auth
-                        @can('view_admin_panel')
-                            <div id="nw-tools-editor" style="scroll-margin-top: 90px;">
-                                <livewire:news.article-tools-editor :article="$article" />
-                            </div>
-                        @endcan
-                    @endauth
 
                     @include('fronttheme::partials.evergreen-related', ['haystack' => \Illuminate\Support\Str::lower(($article->title ?? '').' '.($article->category_tag ?? '').' '.strip_tags((string) ($article->summary ?? $article->meta_description ?? '')))])
 
