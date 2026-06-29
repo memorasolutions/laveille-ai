@@ -413,6 +413,13 @@
                     </div>
                     @endif
 
+                    {{-- Éditeur inline « Outils liés » (admin uniquement, gaté serveur). --}}
+                    @auth
+                        @can('view_admin_panel')
+                            <livewire:news.article-tools-editor :article="$article" />
+                        @endcan
+                    @endauth
+
                     @include('fronttheme::partials.evergreen-related', ['haystack' => \Illuminate\Support\Str::lower(($article->title ?? '').' '.($article->category_tag ?? '').' '.strip_tags((string) ($article->summary ?? $article->meta_description ?? '')))])
 
                     {{-- Commentaires — 2026-05-27 #312 DÉSACTIVÉS sur actualités (décision user).
