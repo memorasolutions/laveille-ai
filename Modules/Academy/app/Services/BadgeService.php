@@ -24,6 +24,7 @@ use Modules\Academy\Models\Badge;
 use Modules\Academy\Models\CertificateIssued;
 use Modules\Academy\Models\Completion;
 use Modules\Academy\Models\Course;
+use Modules\Academy\Models\QuizAttempt;
 use Modules\Academy\Models\Progress;
 use Modules\Academy\Models\UserBadge;
 use Modules\Academy\Services\CourseCompletionService;
@@ -185,39 +186,23 @@ final class BadgeService
     /**
      * L'utilisateur a-t-il au moins un quiz réussi PARFAITEMENT ?
      *
-     * Réel : QuizController stocke dans Completion.score le NOMBRE de bonnes
-     * réponses (pas un pourcentage). Un sans-faute = score égal au nombre de
-     * questions du quiz (item->payload['questions']), avec au moins une question.
-     * On évalue défensivement : aucune confiance au client, lecture des items
-     * de type quiz complétés par l'utilisateur.
+     * Fix B03 : lit QuizAttempt (source de vérité réelle) au lieu de
+     * payload['questions'] (vide pour les quiz bank/QT — cf. QuizService::buildRound).
+     * Condition : tentative réussie (passed=true), score ÉGAL à max_score,
+     * et au moins une question (max_score > 0). Lecture SERVEUR uniquement.
+     *
+     * // ACTION: fix B03 — hasPerfectQuiz lit QuizAttempt.score/max_score
+     * // SELF: remplacement ciblé <20 lignes
+     * // RAISON: payload['questions'] vide sur les quiz bank/QT → $total=0 → badge jamais décerné
      */
     private function hasPerfectQuiz(User $user): bool
     {
-        $completions = Completion::query()
+        return QuizAttempt::query()
             ->where('user_id', $user->id)
-            ->where('status', 'completed')
-            ->whereNotNull('score')
-            ->with('lessonItem')
-            ->get();
-
-        foreach ($completions as $completion) {
-            $item = $completion->lessonItem;
-
-            if ($item === null || $item->type !== 'quiz') {
-                continue;
-            }
-
-            $questions = is_array($item->payload['questions'] ?? null)
-                ? $item->payload['questions']
-                : [];
-            $total = count($questions);
-
-            if ($total > 0 && (int) $completion->score === $total) {
-                return true;
-            }
-        }
-
-        return false;
+            ->where('passed', true)
+            ->whereColumn('score', 'max_score')
+            ->where('max_score', '>', 0)
+            ->exists();
     }
 
     /**

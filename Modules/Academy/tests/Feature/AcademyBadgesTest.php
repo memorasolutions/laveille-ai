@@ -34,6 +34,7 @@ use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Models\Progress;
+use Modules\Academy\Models\QuizAttempt;
 use Modules\Academy\Models\UserBadge;
 use Modules\Academy\Services\BadgeService;
 
@@ -234,8 +235,8 @@ test('perfect_quiz décerné quand une complétion a un score de 100', function 
     $lesson  = Lesson::create([
         'chapter_id' => $chapter->id, 'title' => 'L', 'slug' => 'e1-quiz-'.$course->id, 'position' => 1,
     ]);
-    // Quiz à 3 questions ; score réel stocké = nb de bonnes réponses (réalité
-    // QuizController). Sans-faute = score (3) égal au nombre de questions (3).
+    // Quiz à 3 questions. QuizAttempt = source de vérité pour hasPerfectQuiz (fix B03).
+    // Payload['questions'] conservé pour la rétrocompat d'autres parties du code.
     $item = LessonItem::create([
         'lesson_id'   => $lesson->id,
         'type'        => 'quiz',
@@ -249,8 +250,20 @@ test('perfect_quiz décerné quand une complétion a un score de 100', function 
         'course_id'      => $course->id,
         'lesson_item_id' => $item->id,
         'status'         => 'completed',
-        'score'          => 3, // 3/3 = parfait
+        'score'          => 3,
         'completed_at'   => now(),
+    ]);
+    // QuizAttempt requis pour hasPerfectQuiz après fix B03.
+    QuizAttempt::create([
+        'user_id'        => $user->id,
+        'lesson_item_id' => $item->id,
+        'course_id'      => $course->id,
+        'score'          => 3,
+        'max_score'      => 3,
+        'percent'        => 100,
+        'passed'         => true,
+        'answers'        => [],
+        'submitted_at'   => now(),
     ]);
 
     $awarded = (new BadgeService())->evaluateForUser($user, $course);
@@ -263,9 +276,98 @@ test('perfect_quiz décerné quand une complétion a un score de 100', function 
         'course_id'      => $course->id,
         'lesson_item_id' => $item->id,
         'status'         => 'completed',
-        'score'          => 2, // 2/3 = imparfait
+        'score'          => 2,
         'completed_at'   => now(),
     ]);
+    QuizAttempt::create([
+        'user_id'        => $other->id,
+        'lesson_item_id' => $item->id,
+        'course_id'      => $course->id,
+        'score'          => 2,
+        'max_score'      => 3,
+        'percent'        => 67,
+        'passed'         => false,
+        'answers'        => [],
+        'submitted_at'   => now(),
+    ]);
+    $awardedOther = (new BadgeService())->evaluateForUser($other, $course);
+    expect($awardedOther->pluck('key')->all())->not->toContain('sans_faute');
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 5b. B03 — perfect_quiz via QuizAttempt (chemin réel de production)
+//
+//     Reproduit le bug B03 : un quiz créé via l'admin N'A PAS de
+//     payload['questions'] (les questions viennent de QuizService/QuestionBank,
+//     stockées dans QuizAttempt). Avec l'ANCIEN code, $total=0 → badge jamais
+//     décerné. Après le fix (hasPerfectQuiz lit QuizAttempt), le badge est attribué.
+//
+//     Ce test ÉCHOUAIT avant le fix (sans_faute absent) et PASSE après.
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('B03 régression — perfect_quiz attribué via QuizAttempt (sans payload questions)', function (): void {
+    $user   = User::factory()->create();
+    $course = e1Course('e1-b03');
+
+    $chapter = Chapter::create(['course_id' => $course->id, 'title' => 'Ch B03', 'position' => 1]);
+    $lesson  = Lesson::create([
+        'chapter_id' => $chapter->id,
+        'title'      => 'L B03',
+        'slug'       => 'e1-b03-quiz-' . $course->id,
+        'position'   => 1,
+    ]);
+
+    // Quiz sans payload['questions'] = chemin réel (QuizService/QuestionBank stocke
+    // les questions dans QuizAttempt.questions_snapshot, pas dans item.payload).
+    $item = LessonItem::create([
+        'lesson_id'   => $lesson->id,
+        'type'        => 'quiz',
+        'title'       => 'Quiz B03',
+        'position'    => 1,
+        'is_required' => true,
+        'payload'     => [],   // PAS de 'questions' = cas de production réel
+    ]);
+
+    // Complétion avec score parfait.
+    Completion::create([
+        'user_id'        => $user->id,
+        'course_id'      => $course->id,
+        'lesson_item_id' => $item->id,
+        'status'         => 'completed',
+        'score'          => 5,
+        'completed_at'   => now(),
+    ]);
+
+    // QuizAttempt réussie à 100 % (source de vérité réelle).
+    QuizAttempt::create([
+        'user_id'        => $user->id,
+        'lesson_item_id' => $item->id,
+        'course_id'      => $course->id,
+        'score'          => 5,
+        'max_score'      => 5,
+        'percent'        => 100,
+        'passed'         => true,
+        'answers'        => [],
+        'submitted_at'   => now(),
+    ]);
+
+    $awarded = (new BadgeService())->evaluateForUser($user, $course);
+    expect($awarded->pluck('key')->all())->toContain('sans_faute');
+
+    // Contre-épreuve : tentative non parfaite (4/5) → badge absent.
+    $other = User::factory()->create();
+    QuizAttempt::create([
+        'user_id'        => $other->id,
+        'lesson_item_id' => $item->id,
+        'course_id'      => $course->id,
+        'score'          => 4,
+        'max_score'      => 5,
+        'percent'        => 80,
+        'passed'         => true,   // réussi mais pas parfait
+        'answers'        => [],
+        'submitted_at'   => now(),
+    ]);
+
     $awardedOther = (new BadgeService())->evaluateForUser($other, $course);
     expect($awardedOther->pluck('key')->all())->not->toContain('sans_faute');
 });
