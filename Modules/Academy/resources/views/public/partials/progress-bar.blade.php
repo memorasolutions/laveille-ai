@@ -17,9 +17,11 @@
             <span style="font-size: 0.85rem; font-weight: 600; color: var(--c-primary, #064E5A);">
                 Votre progression
             </span>
+            @if($progress->required_total > 0)
             <span style="font-size: 0.85rem; color: var(--sys-text-default, #374151);">
                 {{ $progress->required_completed }} / {{ $progress->required_total }} leçon{{ $progress->required_total > 1 ? 's' : '' }} requise{{ $progress->required_total > 1 ? 's' : '' }}
             </span>
+            @endif
         </div>
 
         {{-- Barre Bootstrap 5 --}}
