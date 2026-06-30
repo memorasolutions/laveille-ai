@@ -221,12 +221,17 @@ class GlossaryLinkifier
             }
 
             // Acronyms (matche acronym ET full_name + aliases)
+            // ACTION: regroupement des sigles homonymes vers page de désambiguïsation
+            // MCP: Hermes→qwen3-max | RAISON: sigle ambigu (N sens) → 1 seule entrée linkifier → /disambiguate/{sigle}
             if (class_exists(\Modules\Acronyms\Models\Acronym::class)) {
                 try {
+                    // Tableau temporaire : [strtolower($acro)] → [entries candidats pour le sigle court]
+                    $acrGrouped = [];
+
                     \Modules\Acronyms\Models\Acronym::published()
                         ->select(['id', 'acronym', 'full_name', 'slug', 'description', 'match_strategy', 'aliases'])
                         ->get()
-                        ->each(function ($a) use (&$terms, $locale) {
+                        ->each(function ($a) use (&$terms, &$acrGrouped, $locale) {
                             $acro = $a->getTranslation('acronym', $locale, false) ?: $a->acronym;
                             $full = $a->getTranslation('full_name', $locale, false) ?: $a->full_name;
                             $slug = $a->getTranslation('slug', $locale, false) ?: $a->slug;
@@ -236,15 +241,8 @@ class GlossaryLinkifier
                             if ($strategy === 'never_auto') return;
                             $url = '/acronymes-education/'.$slug;
                             $shortDesc = Str::limit(self::stripMarkdownInline(strip_tags((string) $desc)), 180);
-                            // Acronyme exact (ex "OBVIA") : strict casse + min 2 chars
-                            if ($acro && mb_strlen($acro) >= 2) {
-                                $terms[] = [
-                                    'name' => $acro, 'slug' => $slug,
-                                    'definition' => $full ? "{$full} : {$shortDesc}" : $shortDesc,
-                                    'type' => 'acronym', 'url' => $url, 'match_strategy' => $strategy,
-                                ];
-                            }
-                            // Forme longue (ex "Observatoire de l'IA et du numérique")
+
+                            // Forme longue (ex "Observatoire de l'IA et du numérique") → URL individuelle toujours
                             if ($full && mb_strlen($full) >= self::MIN_LENGTH) {
                                 $fullStrategy = self::escalateStrategyIfStopList($full, $strategy === 'case_sensitive' ? 'loose' : $strategy);
                                 $terms[] = [
@@ -252,7 +250,7 @@ class GlossaryLinkifier
                                     'type' => 'acronym_full', 'url' => $url, 'match_strategy' => $fullStrategy,
                                 ];
                             }
-                            // 2026-05-05 #151 : aliases (variations) avec strategy heritee
+                            // 2026-05-05 #151 : aliases (variations) avec strategy heritee → URL individuelle
                             $aliases = is_array($a->aliases) ? $a->aliases : (is_string($a->aliases) ? json_decode($a->aliases, true) : []);
                             if (is_array($aliases)) {
                                 foreach ($aliases as $alias) {
@@ -264,7 +262,7 @@ class GlossaryLinkifier
                                     ];
                                 }
                             }
-                            // 2026-05-11 #138 : auto-extract qualifier "X (Y)" sur full_name
+                            // 2026-05-11 #138 : auto-extract qualifier "X (Y)" sur full_name → URL individuelle
                             if ($full) {
                                 foreach (self::extractQualifierAliases($full) as $autoAlias) {
                                     if (mb_strlen($autoAlias) < 2) continue;
@@ -275,7 +273,36 @@ class GlossaryLinkifier
                                     ];
                                 }
                             }
+                            // Sigle court : regrouper par clé normalisée (minuscules)
+                            // La résolution ambiguïté se fait APRÈS la boucle complète
+                            if ($acro && mb_strlen($acro) >= 2) {
+                                $acrKey = strtolower($acro);
+                                $acrGrouped[$acrKey][] = [
+                                    'name' => $acro, 'slug' => $slug,
+                                    'definition' => $full ? "{$full} : {$shortDesc}" : $shortDesc,
+                                    'type' => 'acronym', 'url' => $url, 'match_strategy' => $strategy,
+                                ];
+                            }
                         });
+
+                    // Résolution des sigles courts : 1 fiche → direct ; N fiches → désambiguïsation
+                    foreach ($acrGrouped as $acrKey => $candidates) {
+                        $resolvedUrl = self::resolveAmbiguousAcronymUrl($candidates[0]['name'], $candidates);
+                        if (count($candidates) === 1) {
+                            // Sigle non ambigu : comportement original préservé
+                            $terms[] = $candidates[0];
+                        } else {
+                            // Sigle ambigu : une seule entrée linkifier → page de désambiguïsation
+                            $terms[] = [
+                                'name' => $candidates[0]['name'],
+                                'slug' => 'disambiguate-'.$acrKey,
+                                'definition' => 'Sigle ambigu — '.count($candidates).' significations. Cliquez pour choisir.',
+                                'type' => 'acronym',
+                                'url' => $resolvedUrl,
+                                'match_strategy' => 'case_sensitive', // strict pour les sigles
+                            ];
+                        }
+                    }
                 } catch (\Throwable $e) {
                     Log::warning('GlossaryLinkifier - Acronym load fail', ['e' => $e->getMessage()]);
                 }
@@ -467,6 +494,23 @@ class GlossaryLinkifier
         }
 
         return $out;
+    }
+
+    /**
+     * 2026-06-30 : résout l'URL cible pour un sigle potentiellement ambigu.
+     * ACTION: calcul URL désambiguïsation acronymes homonymes
+     * MCP: Hermes→qwen3-max | RAISON: 1 candidat → URL directe ; N candidats → page de désambiguïsation
+     *
+     * @param  string                          $acro       Sigle exact (ex. "ATE")
+     * @param  array<int, array<string,mixed>> $candidates Tableau d'entrées candidats (chacune avec 'url')
+     */
+    public static function resolveAmbiguousAcronymUrl(string $acro, array $candidates): string
+    {
+        if (count($candidates) === 1) {
+            return $candidates[0]['url'];
+        }
+
+        return '/acronymes-education/disambiguate/'.strtolower($acro);
     }
 
     /**

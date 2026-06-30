@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Modules\Acronyms\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
@@ -49,7 +50,7 @@ class PublicAcronymController extends Controller
                 'acronym' => $a->acronym,
                 'full_name' => $a->full_name,
                 'slug' => $a->getTranslation('slug', $locale),
-                'icon' => $a->icon, // emoji de catégorie (rendu net et cohérent avec la fiche)
+                'icon' => $a->icon,
                 'cat_id' => $a->acronym_category_id,
                 'cat_name' => $a->category ? $a->category->name : __('Général'),
                 'cat_color' => $a->category ? $a->category->color : '#6B7280',
@@ -69,18 +70,84 @@ class PublicAcronymController extends Controller
         return view('acronyms::public.index', compact('acronyms', 'categories', 'acronymsJson', 'categoriesJson'));
     }
 
-    public function show(string $slug): View
+    /**
+     * Affiche une fiche acronyme par slug exact.
+     * Si le slug ne correspond pas à une fiche mais à un sigle ambigu (N fiches),
+     * redirige vers la page de désambiguïsation.
+     * Si 1 seule fiche correspond au sigle → redirection 301 directe.
+     */
+    public function show(string $slug): View|RedirectResponse
     {
-        $acronym = Acronym::published()
-            ->where('slug->'.app()->getLocale(), $slug)
-            ->firstOrFail();
+        $locale = app()->getLocale();
 
-        $relatedAcronyms = Acronym::published()
-            ->where('id', '!=', $acronym->id)
-            ->where('acronym_category_id', $acronym->acronym_category_id)
-            ->limit((int) Settings::get('acronyms.related_acronyms_limit', 6))
+        // 1. Cherche la fiche par slug exact (tous domaines confondus)
+        $acronym = Acronym::published()
+            ->where("slug->{$locale}", $slug)
+            ->with('category')
+            ->first();
+
+        if ($acronym !== null) {
+            $relatedAcronyms = Acronym::published()
+                ->where('acronym_category_id', $acronym->acronym_category_id)
+                ->where('id', '!=', $acronym->id)
+                ->limit((int) Settings::get('acronyms.related_acronyms_limit', 6))
+                ->get();
+
+            return view('acronyms::public.show', compact('acronym', 'relatedAcronyms'));
+        }
+
+        // 2. Slug non trouvé — chercher si ce slug correspond à un sigle (ex. "ate" → "ATE")
+        $sigle = strtoupper($slug);
+        $fiches = Acronym::published()
+            ->where("acronym->{$locale}", $sigle)
+            ->with('category')
             ->get();
 
-        return view('acronyms::public.show', compact('acronym', 'relatedAcronyms'));
+        $count = $fiches->count();
+
+        if ($count === 0) {
+            abort(404);
+        }
+
+        if ($count === 1) {
+            return redirect()
+                ->route('acronyms.show', $fiches->first()->getTranslation('slug', $locale))
+                ->setStatusCode(301);
+        }
+
+        // N > 1 → page de désambiguïsation
+        return view('acronyms::public.disambiguate', [
+            'sigle' => $sigle,
+            'fiches' => $fiches->sortBy(fn ($f) => $f->getTranslation('full_name', $locale, false) ?: $f->full_name),
+        ]);
+    }
+
+    /**
+     * Page de désambiguïsation pour un sigle ayant plusieurs significations.
+     * Route : GET /acronymes-education/disambiguate/{sigle}
+     */
+    public function disambiguate(string $sigle): View|RedirectResponse
+    {
+        $locale = app()->getLocale();
+        $sigle = strtoupper($sigle);
+
+        $fiches = Acronym::published()
+            ->where("acronym->{$locale}", $sigle)
+            ->with('category')
+            ->get();
+
+        $count = $fiches->count();
+
+        if ($count === 0) {
+            abort(404);
+        }
+
+        if ($count === 1) {
+            return redirect()
+                ->route('acronyms.show', $fiches->first()->getTranslation('slug', $locale))
+                ->setStatusCode(301);
+        }
+
+        return view('acronyms::public.disambiguate', compact('sigle', 'fiches'));
     }
 }

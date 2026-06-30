@@ -12,6 +12,9 @@ use Modules\Acronyms\Http\Controllers\PublicAcronymController;
 
 Route::middleware('web')->group(function () {
     Route::get('/acronymes-education', [PublicAcronymController::class, 'index'])->name('acronyms.index');
+    // ACTION: ajout route désambiguïsation acronymes homonymes (DOIT être AVANT {slug} pour ne pas être capturé)
+    // MCP: Hermes→qwen3-max | RAISON: sigle ambigu (N sens) → page de choix générée dynamiquement
+    Route::get('/acronymes-education/disambiguate/{sigle}', [PublicAcronymController::class, 'disambiguate'])->name('acronyms.disambiguate');
     Route::get('/acronymes-education/{slug}', [PublicAcronymController::class, 'show'])->name('acronyms.show');
 });
 
