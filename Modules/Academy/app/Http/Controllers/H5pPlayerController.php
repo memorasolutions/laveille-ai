@@ -77,7 +77,11 @@ class H5pPlayerController extends Controller
             abort(403);
         }
 
-        if (! $isManager && ($course->status !== 'published' || $course->visibility !== 'public') && ! $itemPreview) {
+        // BUG-001 fix compagnon H5P : visibility ne bloque plus les inscrits actifs sur
+        // un cours private/unlisted. Un cours non publié (draft/archived) reste réservé
+        // au gérant ou à un item preview. L'accès inscrit est déjà gardé par la
+        // vérification ci-dessus (abort 403 si non-inscrit non-gérant non-preview).
+        if (! $isManager && $course->status !== 'published' && ! $itemPreview) {
             abort(404);
         }
 

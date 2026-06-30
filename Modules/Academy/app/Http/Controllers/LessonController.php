@@ -36,8 +36,30 @@ class LessonController extends Controller
             && auth()->check()
             && auth()->user()->can('update', $course);
 
-        if (! $isPreview && ($course->status !== 'published' || $course->visibility !== 'public')) {
+        // Cours non publié : 404 sauf en prévisualisation par un gérant.
+        if (! $isPreview && $course->status !== 'published') {
             abort(404);
+        }
+
+        // BUG-001 fix : la visibility ne bloque PAS l'accès leçon d'un inscrit actif
+        // ni d'un staff/admin. private/unlisted : seuls les inscrits et le staff peuvent
+        // accéder aux leçons ; les non-inscrits voient 404 (pas 403, pour ne pas divulguer
+        // l'existence du cours). En preview, l'accès est déjà accordé ci-dessus.
+        // Note : le middleware `auth` est sur la route — auth()->user() est toujours défini.
+        if (! $isPreview && $course->visibility !== 'public') {
+            $isStaffEarly = auth()->user()->can('academy.manage')
+                || $course->hasRole(auth()->user(), ['owner', 'instructor', 'editor', 'assistant']);
+
+            if (! $isStaffEarly) {
+                $enrolledEarly = Enrollment::where('user_id', auth()->id())
+                    ->where('course_id', $course->id)
+                    ->where('status', 'active')
+                    ->exists();
+
+                if (! $enrolledEarly) {
+                    abort(404);
+                }
+            }
         }
 
         // 2. Charger l'arborescence du cours pour la navigation latérale

@@ -27,8 +27,30 @@ class CourseController extends Controller
             && auth()->check()
             && auth()->user()->can('update', $course);
 
-        if (! $isPreview && ($course->status !== 'published' || $course->visibility !== 'public')) {
+        // Cours non publié : 404 sauf en prévisualisation par un gérant.
+        if (! $isPreview && $course->status !== 'published') {
             abort(404);
+        }
+
+        // BUG-002 fix : visibilité par cours.
+        //  - public    -> visible par tous (y compris les anonymes) : aucune restriction.
+        //  - unlisted  -> visible par lien direct pour tous (pas de 404).
+        //  - private   -> visible uniquement par un inscrit actif ou un staff/admin ; 404 sinon.
+        if (! $isPreview && $course->visibility === 'private') {
+            $canAccess = false;
+
+            if (auth()->check()) {
+                $canAccess = auth()->user()->can('academy.manage')
+                    || $course->hasRole(auth()->user(), ['owner', 'instructor', 'editor', 'assistant'])
+                    || Enrollment::where('user_id', auth()->id())
+                        ->where('course_id', $course->id)
+                        ->where('status', 'active')
+                        ->exists();
+            }
+
+            if (! $canAccess) {
+                abort(404);
+            }
         }
 
         $course->load([
