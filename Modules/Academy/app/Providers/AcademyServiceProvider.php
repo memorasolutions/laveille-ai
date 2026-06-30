@@ -27,6 +27,7 @@ use Modules\Academy\Livewire\CourseReports;
 use Modules\Academy\Livewire\CourseRoster;
 use Modules\Academy\Livewire\Dashboard;
 use Modules\Academy\Livewire\EssayGrading;
+use Modules\Academy\Livewire\NotificationMasterSwitch;
 use Modules\Academy\Livewire\NotificationPreferences;
 use Modules\Academy\Livewire\QuestionBankManager;
 use Modules\Academy\Livewire\StudentAssignments;
@@ -172,6 +173,12 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // Gaté auth ; chaque mutation s'applique UNIQUEMENT à auth()->user().
         // Rendu via @livewire('academy.notification-preferences'). Voir NotificationPreferences.
         Livewire::component('academy.notification-preferences', NotificationPreferences::class);
+
+        // D02 - Interrupteur MAÎTRE des notifications courriel, pilotable par l'admin
+        // (sans .env). Réservé can('academy.manage'), autorisation re-vérifiée à chaque
+        // action (anti-IDOR). Rendu via @livewire('academy.notification-master-switch').
+        // Voir NotificationMasterSwitch + AcademyNotificationService::setMasterEnabled().
+        Livewire::component('academy.notification-master-switch', NotificationMasterSwitch::class);
 
         // DeckPlayer : présentation de leçon en cartes plein écran (drapeau academy.lesson_deck_mode).
         // Activé via ACADEMY_LESSON_DECK_MODE=true dans le .env.

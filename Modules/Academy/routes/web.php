@@ -59,6 +59,15 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             ->middleware('auth')
             ->name('notifications.preferences');
 
+        // D02 - Interrupteur MAÎTRE des notifications (admin), pilotable sans .env.
+        // Double garde : middleware can:academy.manage ICI + ré-autorisation dans le
+        // composant Livewire à chaque action (anti-IDOR). Le réglage est persisté en
+        // table settings (clé academy_notifications_enabled), avec repli .env si le
+        // module Settings est absent.
+        Route::get('notifications/admin', fn () => view('academy::public.notification-master-switch'))
+            ->middleware(['auth', 'can:academy.manage'])
+            ->name('notifications.master');
+
         // PHASE 5 (FE-5) - Création de cours front-end.
         // Connexion requise ; l'autorisation d'entrée (create) vit dans
         // CourseCreate::mount() via $this->authorize('create', Course::class)

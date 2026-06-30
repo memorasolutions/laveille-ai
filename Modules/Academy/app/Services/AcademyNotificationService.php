@@ -64,10 +64,47 @@ final class AcademyNotificationService
     // INTERRUPTEUR MAITRE + PRÉFÉRENCES
     // ─────────────────────────────────────────────────────────────────────────────
 
-    /** Interrupteur maître global (défaut FALSE). Aucun envoi possible s'il est faux. */
+    /** Clé du réglage admin (table settings) qui pilote l'interrupteur maître. */
+    public const SETTING_KEY = 'academy_notifications_enabled';
+
+    /**
+     * Interrupteur maître global (défaut FALSE). Aucun envoi possible s'il est faux.
+     *
+     * Source de vérité, dans l'ordre :
+     *   1. Réglage admin « academy_notifications_enabled » (table settings), s'il existe :
+     *      il permet d'activer/désactiver les courriels depuis l'admin SANS toucher au .env.
+     *   2. Sinon, défaut config/.env « academy.notifications.enabled » (FALSE par défaut).
+     *
+     * La lecture du réglage est gardée par class_exists() : si le module Settings est
+     * absent/désactivé, on retombe proprement sur la config (zéro casse, portable).
+     */
     public function isMasterEnabled(): bool
     {
-        return (bool) config('academy.notifications.enabled', false);
+        $configDefault = (bool) config('academy.notifications.enabled', false);
+
+        if (class_exists(\Modules\Settings\Models\Setting::class)) {
+            return (bool) \Modules\Settings\Models\Setting::get(self::SETTING_KEY, $configDefault);
+        }
+
+        return $configDefault;
+    }
+
+    /**
+     * Active/désactive l'interrupteur maître depuis l'admin (table settings).
+     *
+     * Persistance gardée par class_exists() : sans le module Settings, l'appel est
+     * un no-op silencieux (le défaut .env reste la seule source) — zéro casse.
+     * Retourne true si le réglage a pu être persisté.
+     */
+    public function setMasterEnabled(bool $enabled): bool
+    {
+        if (! class_exists(\Modules\Settings\Models\Setting::class)) {
+            return false;
+        }
+
+        \Modules\Settings\Models\Setting::set(self::SETTING_KEY, $enabled, 'boolean', 'academy');
+
+        return true;
     }
 
     /** Préférence par défaut d'un type (config), utilisée si l'utilisateur n'a rien choisi. */
