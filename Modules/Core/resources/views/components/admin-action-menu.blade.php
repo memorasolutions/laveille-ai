@@ -9,8 +9,8 @@
 @php $menuId = 'action-' . uniqid(); @endphp
 <div x-data="{ open: false }" class="position-relative" style="display: inline-block;">
     <button @click="open = !open" @click.outside="open = false"
-            class="btn btn-sm btn-outline-secondary"
-            style="border-radius: 6px; padding: 4px 8px; line-height: 1; font-size: 18px; min-width: 32px;"
+            class="btn btn-outline-secondary"
+            style="border-radius: 8px; padding: 0; line-height: 1; font-size: 22px; width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;"
             aria-label="{{ __('Actions') }}" aria-haspopup="true" :aria-expanded="open">
         &#8942;
     </button>
