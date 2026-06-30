@@ -52,14 +52,18 @@ jobs:
         run: |
           ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan optimize:clear; php artisan responsecache:clear" || true
 
-      - name: Build caches prod (optimize — config+route+event+view)
-        # ACTION: remplacer route:cache+event:cache+view:cache par php artisan optimize
+      - name: Build caches prod (route+event+view — JAMAIS config:cache)
+        # ACTION: caches sûrs uniquement, on retire config:cache (php artisan optimize).
         # MCP: SELF (diff < 5 lignes)
-        # RAISON: les 6 env() bruts hors config/ ont été migrés vers config() — config:cache
-        #   est désormais sûr. php artisan optimize couvre config+route+event+view en une passe
-        #   et active le health-check OptimizedApp (BUG-A08 P3 résolu).
+        # RAISON: config:cache a silencieusement REFERMÉ l'Académie en prod (le middleware
+        #   AcademyUnderConstruction ne lisait plus ACADEMY_UNDER_CONSTRUCTION=false du .env :
+        #   tout env() devient null une fois la config cachée). Risque latent sur tout env()
+        #   non migré (vendor/runtime). On garde donc route/event/view (sans env()), et la
+        #   config reste lue en direct depuis le .env. OptimizedApp restera partiellement rouge
+        #   (P3 cosmétique) — acceptable vs régression silencieuse. NE PAS réactiver config:cache
+        #   sans audit exhaustif de TOUS les env() (app + vendor + runtime).
         run: |
-          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan optimize" || true
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan route:cache && php artisan event:cache && php artisan view:cache" || true
 
       - name: Purge Cloudflare cache
         # Token scopé "Cache Purge" limité à la zone laveille.ai (jamais la Global API Key).
