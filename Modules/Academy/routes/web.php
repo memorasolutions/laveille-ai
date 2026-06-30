@@ -36,8 +36,13 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
         Route::get('/', [AcademyController::class, 'index'])->name('index');
         Route::get('courses/{course:slug}', [CourseController::class, 'show'])->name('courses.show');
 
-        // M3 — Lecteur de leçon (auth requis pour les vidéos protégées, mais la route est publique)
+        // M3 — Lecteur de leçon (auth requis : inscriptions, complétions et vidéos ScreenPal gatées).
+        // ACTION: fix B01 — ajout middleware auth (route était publique, exposait le contenu aux guests)
+        // SELF: 1 ligne
+        // RAISON: sans ce middleware, un guest obtenait un 200 avec la page de cours gâtée logiciellement
+        //         mais SANS redirection vers la connexion, contournant la gate d'inscription.
         Route::get('courses/{course:slug}/lessons/{lesson}', [LessonController::class, 'show'])
+            ->middleware('auth')
             ->name('lessons.show');
 
         // PHASE 2 - Espace personnel front-end UNIQUE et role-aware (connexion requise).
