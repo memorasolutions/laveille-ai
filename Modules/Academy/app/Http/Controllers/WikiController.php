@@ -39,6 +39,8 @@ use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Models\WikiPage;
 use Modules\Academy\Models\WikiRevision;
 use Modules\Academy\Services\AccessRestrictionService;
+use Modules\Academy\Services\ActivityCompletionService;
+use Modules\Academy\Services\CompletionService;
 use Modules\Academy\Services\WikiService;
 
 class WikiController extends Controller
@@ -71,6 +73,8 @@ class WikiController extends Controller
 
         $page = WikiService::createPage($item, Auth::id(), $data['title'], (string) ($data['body'] ?? ''));
 
+        $this->maybeComplete($item, $manager);
+
         return $this->backToPage($course, $lesson, $item, $page)->with('success', 'La page a été créée.');
     }
 
@@ -101,6 +105,8 @@ class WikiController extends Controller
 
         // VERSIONING : snapshot de l'état précédent avant écrasement (cf. WikiService).
         WikiService::applyEdit($page, Auth::id(), $data['title'], (string) ($data['body'] ?? ''));
+
+        $this->maybeComplete($item, $manager);
 
         return $this->backToPage($course, $lesson, $item, $page)->with('success', 'La page a été mise à jour.');
     }
@@ -136,6 +142,8 @@ class WikiController extends Controller
         }
 
         WikiService::applyEdit($page, Auth::id(), $revision->title, (string) ($revision->body ?? ''));
+
+        $this->maybeComplete($item, $manager);
 
         return $this->backToPage($course, $lesson, $item, $page)->with('success', 'La révision a été restaurée.');
     }
@@ -274,6 +282,18 @@ class WikiController extends Controller
     private function isSpam(Request $request): bool
     {
         return trim((string) $request->input(WikiService::HONEYPOT, '')) !== '';
+    }
+
+    /**
+     * Achèvement « edit » (défaut wiki) : un ÉTUDIANT complète l'item en contribuant
+     * (page créée / éditée / révision restaurée). Jamais pour un gérant (aucune
+     * progression). markComplete est idempotent (une seule complétion par user/item).
+     */
+    private function maybeComplete(LessonItem $item, bool $manager): void
+    {
+        if (! $manager && ActivityCompletionService::criterionFor($item) === 'edit') {
+            CompletionService::markComplete(Auth::user(), $item);
+        }
     }
 
     private function backToItem(Course $course, Lesson $lesson, LessonItem $item): RedirectResponse

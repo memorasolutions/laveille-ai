@@ -40,6 +40,8 @@ use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Models\WorkshopAssessment;
 use Modules\Academy\Services\AccessRestrictionService;
+use Modules\Academy\Services\ActivityCompletionService;
+use Modules\Academy\Services\CompletionService;
 use Modules\Academy\Services\WorkshopService;
 
 class WorkshopController extends Controller
@@ -76,6 +78,8 @@ class WorkshopController extends Controller
             (string) $data['title'],
             $data['body'] ?? null,
         );
+
+        $this->maybeComplete($item, $manager);
 
         return $this->backToItem($course, $lesson, $item)->with('success', 'Votre travail a été remis.');
     }
@@ -261,6 +265,18 @@ class WorkshopController extends Controller
     private function isSpam(Request $request): bool
     {
         return trim((string) $request->input(WorkshopService::HONEYPOT, '')) !== '';
+    }
+
+    /**
+     * Achèvement « submit_work » (défaut atelier) : un ÉTUDIANT complète l'item en
+     * remettant son travail (phase « submission »). Jamais pour un gérant (aucune
+     * progression). markComplete est idempotent.
+     */
+    private function maybeComplete(LessonItem $item, bool $manager): void
+    {
+        if (! $manager && ActivityCompletionService::criterionFor($item) === 'submit_work') {
+            CompletionService::markComplete(Auth::user(), $item);
+        }
     }
 
     private function backToItem(Course $course, Lesson $lesson, LessonItem $item): RedirectResponse

@@ -782,7 +782,7 @@ test('rétrocompat : remettre sur un item NON-workshop (document) est refusé (4
         ->assertNotFound();
 });
 
-test('rétrocompat : les défauts d\'achèvement des autres types sont inchangés ; workshop => manual', function (): void {
+test('rétrocompat : les défauts d\'achèvement des autres types sont inchangés ; workshop => submit_work', function (): void {
     $lesson = v21Lesson(v21Course('cours-ws-retro-defaults'));
     $video  = LessonItem::create(['lesson_id' => $lesson->id, 'type' => 'video', 'title' => 'V', 'position' => 1, 'payload' => []]);
     $quiz   = LessonItem::create(['lesson_id' => $lesson->id, 'type' => 'quiz', 'title' => 'Q', 'position' => 2, 'payload' => []]);
@@ -790,7 +790,7 @@ test('rétrocompat : les défauts d\'achèvement des autres types sont inchangé
 
     expect(ActivityCompletionService::criterionFor($video))->toBe('manual');
     expect(ActivityCompletionService::criterionFor($quiz))->toBe('min_grade');
-    expect(ActivityCompletionService::criterionFor($ws))->toBe('manual'); // type non spécialisé => défaut manual
+    expect(ActivityCompletionService::criterionFor($ws))->toBe('submit_work'); // workshop => achèvement par remise du travail
 });
 
 // C3 [règle 10] : aucun tiret cadratin dans les vues touchées.
@@ -801,4 +801,27 @@ test('aucun tiret cadratin dans les vues workshop/éditeur touchées', function 
     ] as $path) {
         expect(file_get_contents($path))->not->toContain('—');
     }
+});
+
+// BUG-1 : auto-complétion sur participation (comme le forum).
+test('remettre son travail auto-complète l\'item atelier (critère submit_work)', function (): void {
+    $course = v21Course('cours-atelier-autocomplete');
+    $lesson = v21Lesson($course);
+    $item = v21Item($lesson);
+    $student = v21Student();
+    v21Enroll($course, $student);
+
+    expect(\Modules\Academy\Models\Completion::where('user_id', $student->id)
+        ->where('lesson_item_id', $item->id)
+        ->where('status', 'completed')
+        ->exists())->toBeFalse();
+
+    $this->actingAs($student)
+        ->post(v21SubmitUrl($course, $lesson, $item), ['title' => 'Mon travail', 'body' => 'Contenu'])
+        ->assertRedirect();
+
+    expect(\Modules\Academy\Models\Completion::where('user_id', $student->id)
+        ->where('lesson_item_id', $item->id)
+        ->where('status', 'completed')
+        ->exists())->toBeTrue();
 });

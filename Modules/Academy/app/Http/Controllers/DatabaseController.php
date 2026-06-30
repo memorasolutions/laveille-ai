@@ -40,6 +40,8 @@ use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Services\AccessRestrictionService;
+use Modules\Academy\Services\ActivityCompletionService;
+use Modules\Academy\Services\CompletionService;
 use Modules\Academy\Services\DatabaseService;
 
 class DatabaseController extends Controller
@@ -85,6 +87,8 @@ class DatabaseController extends Controller
 
             DatabaseService::storeValues($entry, $fields, (array) $request->input('values', []));
         });
+
+        $this->maybeComplete($item, $manager);
 
         return $this->backToItem($course, $lesson, $item)->with(
             'success',
@@ -243,6 +247,18 @@ class DatabaseController extends Controller
     private function isSpam(Request $request): bool
     {
         return trim((string) $request->input(DatabaseService::HONEYPOT, '')) !== '';
+    }
+
+    /**
+     * Achèvement « add » (défaut base de données) : un INSCRIT complète l'item en
+     * ajoutant une fiche (même en attente d'approbation : la participation suffit,
+     * comme le forum). Jamais pour un gérant. markComplete est idempotent.
+     */
+    private function maybeComplete(LessonItem $item, bool $manager): void
+    {
+        if (! $manager && ActivityCompletionService::criterionFor($item) === 'add') {
+            CompletionService::markComplete(Auth::user(), $item);
+        }
     }
 
     private function backToItem(Course $course, Lesson $lesson, LessonItem $item): RedirectResponse

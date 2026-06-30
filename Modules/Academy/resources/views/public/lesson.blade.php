@@ -1915,7 +1915,7 @@
                                 <p class="mt-3" style="font-size: 0.9rem; color: #166534;" role="status">
                                     ✅ Terminé
                                 </p>
-                            @elseif($itemCriterion === 'manual' && in_array($item->type, ['video', 'doc', 'document', 'choice', 'forum', 'h5p']))
+                            @elseif($itemCriterion === 'manual' && in_array($item->type, ['video', 'doc', 'document', 'choice', 'forum', 'h5p', 'wiki', 'database', 'workshop']))
                                 <form method="POST"
                                       action="{{ route('academy.lessons.complete', [$course, $lesson, $item->id]) }}"
                                       class="mt-3">

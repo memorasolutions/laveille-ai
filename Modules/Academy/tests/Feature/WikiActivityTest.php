@@ -563,7 +563,7 @@ test('rétrocompat : créer une page sur un item NON-wiki (document) est refusé
     expect(WikiPage::where('lesson_item_id', $doc->id)->count())->toBe(0);
 });
 
-test('rétrocompat : les défauts d\'achèvement des autres types sont inchangés ; wiki => manual', function (): void {
+test('rétrocompat : les défauts d\'achèvement des autres types sont inchangés ; wiki => edit', function (): void {
     $lesson = v19Lesson(v19Course('cours-wiki-retro-defaults'));
     $video  = LessonItem::create(['lesson_id' => $lesson->id, 'type' => 'video', 'title' => 'V', 'position' => 1, 'payload' => []]);
     $doc    = LessonItem::create(['lesson_id' => $lesson->id, 'type' => 'document', 'title' => 'D', 'position' => 2, 'payload' => []]);
@@ -577,7 +577,7 @@ test('rétrocompat : les défauts d\'achèvement des autres types sont inchangé
     expect(ActivityCompletionService::criterionFor($quiz))->toBe('min_grade');
     expect(ActivityCompletionService::criterionFor($choice))->toBe('vote');
     expect(ActivityCompletionService::criterionFor($fb))->toBe('submit');
-    expect(ActivityCompletionService::criterionFor($wiki))->toBe('manual'); // type non spécialisé => défaut manual
+    expect(ActivityCompletionService::criterionFor($wiki))->toBe('edit'); // wiki => achèvement par contribution (édition)
 });
 
 // C3 [règle 10] : aucun tiret cadratin dans les vues touchées.
@@ -588,4 +588,27 @@ test('aucun tiret cadratin dans les vues wiki/éditeur touchées', function (): 
     ] as $path) {
         expect(file_get_contents($path))->not->toContain('—');
     }
+});
+
+// BUG-1 : auto-complétion sur participation (comme le forum).
+test('créer une page wiki auto-complète l\'item pour l\'étudiant (critère edit)', function (): void {
+    $course = v19Course('cours-wiki-autocomplete');
+    $lesson = v19Lesson($course);
+    $item = v19WikiItem($lesson);
+    $student = v19Student();
+    v19Enroll($course, $student);
+
+    expect(\Modules\Academy\Models\Completion::where('user_id', $student->id)
+        ->where('lesson_item_id', $item->id)
+        ->where('status', 'completed')
+        ->exists())->toBeFalse();
+
+    $this->actingAs($student)
+        ->post(v19CreateUrl($course, $lesson, $item), ['title' => 'Ma page', 'body' => 'Contenu'])
+        ->assertRedirect();
+
+    expect(\Modules\Academy\Models\Completion::where('user_id', $student->id)
+        ->where('lesson_item_id', $item->id)
+        ->where('status', 'completed')
+        ->exists())->toBeTrue();
 });

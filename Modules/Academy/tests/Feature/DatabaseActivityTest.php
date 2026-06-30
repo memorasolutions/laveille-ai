@@ -661,7 +661,7 @@ test('rétrocompat : ajouter une fiche sur un item NON-database (document) est r
         ->assertNotFound();
 });
 
-test('rétrocompat : les défauts d\'achèvement des autres types sont inchangés ; database => manual', function (): void {
+test('rétrocompat : les défauts d\'achèvement des autres types sont inchangés ; database => add', function (): void {
     $lesson = v20Lesson(v20Course('cours-db-retro-defaults'));
     $video  = LessonItem::create(['lesson_id' => $lesson->id, 'type' => 'video', 'title' => 'V', 'position' => 1, 'payload' => []]);
     $quiz   = LessonItem::create(['lesson_id' => $lesson->id, 'type' => 'quiz', 'title' => 'Q', 'position' => 2, 'payload' => []]);
@@ -670,8 +670,8 @@ test('rétrocompat : les défauts d\'achèvement des autres types sont inchangé
 
     expect(ActivityCompletionService::criterionFor($video))->toBe('manual');
     expect(ActivityCompletionService::criterionFor($quiz))->toBe('min_grade');
-    expect(ActivityCompletionService::criterionFor($wiki))->toBe('manual');
-    expect(ActivityCompletionService::criterionFor($db))->toBe('manual'); // type non spécialisé => défaut manual
+    expect(ActivityCompletionService::criterionFor($wiki))->toBe('edit');
+    expect(ActivityCompletionService::criterionFor($db))->toBe('add'); // database => achèvement par ajout de fiche
 });
 
 // C3 [règle 10] : aucun tiret cadratin dans les vues touchées.
@@ -683,4 +683,34 @@ test('aucun tiret cadratin dans les vues database/éditeur touchées', function 
     ] as $path) {
         expect(file_get_contents($path))->not->toContain('—');
     }
+});
+
+// BUG-1 : auto-complétion sur participation (comme le forum).
+test('ajouter une fiche auto-complète l\'item base de données (critère add)', function (): void {
+    $course = v20Course('cours-db-autocomplete');
+    $lesson = v20Lesson($course);
+    $item = v20DbItem($lesson);
+    $schema = v20Schema($item);
+    $student = v20Student();
+    v20Enroll($course, $student);
+
+    expect(\Modules\Academy\Models\Completion::where('user_id', $student->id)
+        ->where('lesson_item_id', $item->id)
+        ->where('status', 'completed')
+        ->exists())->toBeFalse();
+
+    $this->actingAs($student)
+        ->post(v20AddUrl($course, $lesson, $item), [
+            'values' => [
+                $schema['texte']->id => 'ChatGPT',
+                $schema['lien']->id  => 'https://chat.openai.com',
+                $schema['choix']->id => 'IA',
+            ],
+        ])
+        ->assertRedirect();
+
+    expect(\Modules\Academy\Models\Completion::where('user_id', $student->id)
+        ->where('lesson_item_id', $item->id)
+        ->where('status', 'completed')
+        ->exists())->toBeTrue();
 });

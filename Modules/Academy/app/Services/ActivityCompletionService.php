@@ -39,7 +39,7 @@ use Modules\Academy\Models\LessonItem;
 final class ActivityCompletionService
 {
     /** Critères de complétion connus (liste blanche globale). */
-    public const CRITERIA = ['manual', 'view', 'min_grade', 'vote', 'submit', 'post'];
+    public const CRITERIA = ['manual', 'view', 'min_grade', 'vote', 'submit', 'post', 'edit', 'add', 'submit_work'];
 
     /**
      * Critères autorisés pour un TYPE d'item donné (liste blanche serveur).
@@ -55,6 +55,11 @@ final class ActivityCompletionService
             'choice'   => ['vote', 'view', 'manual'],
             'feedback' => ['submit', 'view', 'manual'],
             'forum'    => ['post', 'view', 'manual'],
+            // Activités contributives : complétées par PARTICIPATION (comme le forum),
+            // « view » ou « manual » restant proposés en option explicite.
+            'wiki'     => ['edit', 'view', 'manual'],
+            'database' => ['add', 'view', 'manual'],
+            'workshop' => ['submit_work', 'view', 'manual'],
             // H5P : « manual » par défaut (clic explicite, activité interactive) ; « view »
             // reste proposé pour un contenu H5P purement consultatif.
             'h5p'      => ['manual', 'view'],
@@ -64,8 +69,9 @@ final class ActivityCompletionService
 
     /**
      * Critère par défaut d'un type (= comportement HISTORIQUE/naturel) : un quiz se
-     * complète à la réussite (min_grade), un sondage en votant (vote), le reste par
-     * clic manuel.
+     * complète à la réussite (min_grade), un sondage en votant (vote), une activité
+     * contributive en participant (wiki édité / fiche ajoutée / travail remis), le reste
+     * par clic manuel.
      */
     public static function defaultForType(string $type): string
     {
@@ -74,6 +80,9 @@ final class ActivityCompletionService
             'choice'   => 'vote',
             'feedback' => 'submit',
             'forum'    => 'post',
+            'wiki'     => 'edit',
+            'database' => 'add',
+            'workshop' => 'submit_work',
             // H5P étant une activité INTERACTIVE, l'achèvement par défaut est « manual »
             // (clic explicite « Marquer comme terminé » après l'activité), comme video/doc
             // et tous les autres types : aucun type ne se complète au simple chargement de
@@ -146,6 +155,9 @@ final class ActivityCompletionService
             'vote'      => 'se complète en votant',
             'submit'    => 'se complète en répondant au sondage',
             'post'      => 'se complète en participant au forum',
+            'edit'      => 'se complète en contribuant au wiki',
+            'add'       => 'se complète en ajoutant une fiche',
+            'submit_work' => 'se complète en remettant son travail',
             default     => 'à marquer comme terminé',
         };
     }
