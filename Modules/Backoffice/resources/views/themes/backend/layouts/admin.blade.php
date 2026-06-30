@@ -124,6 +124,20 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="msapplication-TileColor" content="{{ config('pwa.theme_color') }}">
     @endif
+    {{-- Boutons de menu d'actions (kebab « ... ») des listes admin : cible de clic confortable (WCAG), hors sidebar/navbar --}}
+    <style>
+        #main-content .btn:has(> .lucide-more-vertical),
+        #main-content .btn:has(> [data-lucide="more-vertical"]),
+        #main-content .btn:has(> svg.lucide-more-vertical) {
+            width: 40px !important; min-width: 40px !important; height: 40px !important;
+            padding: 0 !important; display: inline-flex !important;
+            align-items: center !important; justify-content: center !important;
+        }
+        #main-content .btn > .lucide-more-vertical,
+        #main-content .btn > [data-lucide="more-vertical"] {
+            width: 22px !important; height: 22px !important;
+        }
+    </style>
 </head>
 <body class="sidebar-dark" data-base-url="{{ url('/') }}">
 
