@@ -26,7 +26,7 @@ class EnrichTutorialsSonarCommand extends Command
             return Command::SUCCESS;
         }
 
-        if (empty(env('OPENROUTER_API_KEY'))) {
+        if (empty(config('services.openrouter.api_key'))) {
             $this->error('OPENROUTER_API_KEY non configurée. Commande annulée.');
 
             return Command::FAILURE;
@@ -116,7 +116,7 @@ class EnrichTutorialsSonarCommand extends Command
     private function searchTutorialsViaSonar(string $toolName, int $needed): array
     {
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.env('OPENROUTER_API_KEY'),
+            'Authorization' => 'Bearer '.config('services.openrouter.api_key'),
             'Content-Type' => 'application/json',
         ])
             ->timeout(60)

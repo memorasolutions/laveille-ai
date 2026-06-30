@@ -99,7 +99,7 @@ class GoogleNewsResolver
     private function resolveViaPuppeteer(string $url): ?string
     {
         try {
-            $nodePath = env('BROWSERSHOT_NODE_PATH', '/usr/bin/node');
+            $nodePath = config('services.browsershot.node_path', '/usr/bin/node');
             $scriptPath = base_path('scripts/resolve-google-news-url.cjs');
 
             if (! file_exists($scriptPath)) {

@@ -70,7 +70,7 @@ class PlaywrightScreenshotSource extends AbstractPricingSource
             ->setOption('args', ['--no-sandbox']);
 
         // BROWSERSHOT_NODE_PATH dans .env prod (cf. handoff S86)
-        if ($nodePath = env('BROWSERSHOT_NODE_PATH')) {
+        if ($nodePath = config('services.browsershot.node_path')) {
             $shotter = $shotter->setNodeBinary($nodePath);
         }
 

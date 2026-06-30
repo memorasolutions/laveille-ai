@@ -18,14 +18,14 @@
     @endif
     <style>[x-cloak] { display: none !important; }</style>
     {{-- AdSense désactivé sur les pages déclarant @section('no_ads') (outils traitant des PII — posture Loi 25) --}}
-    @if(env('ADSENSE_CLIENT_ID') && ! \Illuminate\Support\Facades\View::hasSection('no_ads'))
+    @if(config('services.adsense.client_id') && ! \Illuminate\Support\Facades\View::hasSection('no_ads'))
     <script>
     (function(){
       var loadAdsense = function() {
         var s = document.createElement('script');
         s.async = true;
         s.crossOrigin = 'anonymous';
-        s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ env('ADSENSE_CLIENT_ID') }}';
+        s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config('services.adsense.client_id') }}';
         document.head.appendChild(s);
       };
       if ('requestIdleCallback' in window) {
@@ -36,8 +36,8 @@
     })();
     </script>
     @endif
-    @if(env('GA_MEASUREMENT_ID') && env('PRIVACY_GA_ENABLED', false) && ! \Illuminate\Support\Facades\View::hasSection('no_analytics'))
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ env('GA_MEASUREMENT_ID') }}"></script>
+    @if(config('services.ga.measurement_id') && config('services.ga.privacy_enabled', false) && ! \Illuminate\Support\Facades\View::hasSection('no_analytics'))
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.ga.measurement_id') }}"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -48,7 +48,7 @@
         'ad_personalization': 'denied'
       });
       gtag('js', new Date());
-      gtag('config', '{{ env('GA_MEASUREMENT_ID') }}', {
+      gtag('config', '{{ config('services.ga.measurement_id') }}', {
         'anonymize_ip': true,
         'send_page_view': true
       });

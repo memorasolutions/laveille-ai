@@ -26,6 +26,12 @@ return [
         'key' => env('POSTMARK_API_KEY'),
     ],
 
+    // Cloudflare API (purge cache, etc.)
+    'cloudflare' => [
+        'zone_id'   => env('CLOUDFLARE_ZONE_ID'),
+        'api_token' => env('CLOUDFLARE_API_TOKEN'),
+    ],
+
     // Cloudflare Turnstile (S108 — anti-bot privacy-first newsletter + comments)
     'turnstile' => [
         'site_key' => env('CLOUDFLARE_TURNSTILE_SITE_KEY'),
@@ -122,6 +128,17 @@ return [
     'indexnow' => [
         'key'     => env('INDEXNOW_KEY', 'b79927568427fb2c3fe6a1c410f2c35b'),
         'enabled' => (bool) env('INDEXNOW_ENABLED', false),
+    ],
+
+    // Google AdSense (frontend — désactivé sur pages PII via @section('no_ads'))
+    'adsense' => [
+        'client_id' => env('ADSENSE_CLIENT_ID'),
+    ],
+
+    // Google Analytics (frontend — consent mode v2, gated privacy_enabled)
+    'ga' => [
+        'measurement_id'  => env('GA_MEASUREMENT_ID'),
+        'privacy_enabled' => (bool) env('PRIVACY_GA_ENABLED', false),
     ],
 
 ];

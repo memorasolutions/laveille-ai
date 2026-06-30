@@ -101,7 +101,7 @@ class ContentExtractor
     public static function extractOgImageViaPuppeteer(string $url): ?string
     {
         try {
-            $nodePath = env('BROWSERSHOT_NODE_PATH', '/usr/bin/node');
+            $nodePath = config('services.browsershot.node_path', '/usr/bin/node');
             $scriptPath = base_path('scripts/extract-og-image.cjs');
 
             if (! file_exists($scriptPath)) {

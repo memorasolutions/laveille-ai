@@ -95,7 +95,7 @@ class FetchNewsCommand extends Command
                 }
 
                 // DEDUP-SKIP : evite resume IA sur doublons cross-source
-                if (env('NEWS_DEDUP_SKIP_ENABLED', true) && class_exists(\Modules\News\Services\DedupService::class)) {
+                if (config('news.dedup_skip_enabled', true) && class_exists(\Modules\News\Services\DedupService::class)) {
                     $isDuplicate = false;
                     try {
                         $candidates = NewsArticle::where('id', '!=', $article->id)

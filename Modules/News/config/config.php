@@ -16,4 +16,13 @@ return [
     | Pour réactiver : .env NEWS_COMMENTS_ENABLED=true OU passer default true.
     */
     'comments_enabled' => env('NEWS_COMMENTS_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Déduplication cross-source
+    |--------------------------------------------------------------------------
+    | Évite le résumé IA sur des articles en doublon cross-source.
+    | Désactiver temporairement si la déduplication est trop agressive.
+    */
+    'dedup_skip_enabled' => (bool) env('NEWS_DEDUP_SKIP_ENABLED', true),
 ];

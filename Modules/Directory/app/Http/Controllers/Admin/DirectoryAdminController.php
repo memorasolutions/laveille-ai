@@ -236,8 +236,8 @@ class DirectoryAdminController extends Controller
     private function purgeCloudflareScreenshot(string $filePath): void
     {
         try {
-            $zoneId = env('CLOUDFLARE_ZONE_ID');
-            $apiToken = env('CLOUDFLARE_API_TOKEN');
+            $zoneId = config('services.cloudflare.zone_id');
+            $apiToken = config('services.cloudflare.api_token');
             if (empty($zoneId) || empty($apiToken)) {
                 return;
             }
