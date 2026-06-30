@@ -168,6 +168,13 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
     // M6 — Certificats publics vérifiables (pas d'auth requise)
     Route::get('certificats/{public_url_slug}', [CertificateController::class, 'show'])->name('certificates.show');
 
+    // D11 — Téléchargement PDF du certificat (parité Moodle). Public et vérifiable
+    // comme la page HTML ; throttle:30,1 = anti-abus (GET qui génère un PDF). Repli
+    // automatique vers la page HTML si dompdf est absent (géré dans le contrôleur).
+    Route::get('certificats/{public_url_slug}/pdf', [CertificateController::class, 'download'])
+        ->middleware('throttle:30,1')
+        ->name('certificates.download');
+
     // V5-b — Export iCal du calendrier d'un cours. Auth requis ; acces gate dans
     // CalendarController::ical() : inscrit actif OU manageStructure. throttle:20,1
     // = anti-abus (GET qui genere un fichier). Declare hors AcademyUnderConstruction

@@ -304,8 +304,11 @@
 
         {{-- Actions (masquées à l'impression) --}}
         <div class="mt-4 d-flex flex-wrap justify-content-center gap-3 no-print">
-            <x-core::button type="button" variant="primary" icon="🖨️" onclick="window.print()">
-                Imprimer / Exporter en PDF
+            <x-core::button :href="route('academy.certificates.download', $certificate->public_url_slug)" variant="primary" icon="📄">
+                Télécharger le PDF
+            </x-core::button>
+            <x-core::button type="button" variant="secondary" icon="🖨️" onclick="window.print()">
+                Imprimer
             </x-core::button>
             <x-core::button :href="route('academy.courses.show', $certificate->course->slug)" variant="secondary">
                 Retour au cours
