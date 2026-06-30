@@ -53,6 +53,6 @@
                 </tbody>
             </table>
         </div>
-        @include('backoffice::partials.infinite-scroll', ['paginator' => \$authors])
+        @include('backoffice::partials.infinite-scroll', ['paginator' => $authors])
     @endif
 </div>
