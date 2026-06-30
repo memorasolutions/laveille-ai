@@ -52,6 +52,18 @@ jobs:
         run: |
           ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan optimize:clear; php artisan responsecache:clear" || true
 
+      - name: Build caches prod (route + event + view — config:cache exclu volontairement)
+        # ACTION: ajouter les caches sûrs pour passer OptimizedAppCheck (BUG-A08 P3)
+        # MCP: SELF (diff < 5 lignes)
+        # RAISON: env() bruts détectés dans DirectoryAdminController, EnrichTutorialsSonarCommand,
+        #   FetchNewsCommand, ScreenshotService, ContentExtractor, GoogleNewsResolver — si
+        #   config:cache était activé, ces appels retourneraient null en prod et casseraient
+        #   les commandes artisan et la purge Cloudflare côté admin.
+        #   config:cache sera activé seulement après avoir migré ces env() vers config().
+        #   route:cache + event:cache + view:cache ne lisent pas env() directement → sûrs.
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan route:cache && php artisan event:cache && php artisan view:cache" || true
+
       - name: Purge Cloudflare cache
         # Token scopé "Cache Purge" limité à la zone laveille.ai (jamais la Global API Key).
         run: |
