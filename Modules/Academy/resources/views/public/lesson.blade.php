@@ -430,8 +430,8 @@
                 {{-- Items de la leçon --}}
                 @if(!$__lessonLocked)
 
-                {{-- DeckPlayer : activé via academy.lesson_deck_mode=true dans la config/l'env. --}}
-                @if(config('academy.lesson_deck_mode', false))
+                {{-- DeckPlayer : activé via academy.lesson_deck_mode=true (config/env), ou prévisualisation superadmin via ?deck=1. --}}
+                @if(config('academy.lesson_deck_mode', false) || (request()->query('deck') === '1' && auth()->user()?->isSuperAdmin()))
                     @livewire('academy.deck-player', [
                         'lesson'             => $lesson,
                         'course'             => $course,
