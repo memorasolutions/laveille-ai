@@ -194,8 +194,10 @@ test('V5a-B : min_grade avec 0 items requis - certificat emis quand note >= seui
     ProgressService::recalculate($user, $course);
 
     $progress = Progress::where('user_id', $user->id)->where('course_id', $course->id)->first();
-    expect($progress->required_total)->toBe(0, 'Aucun item requis dans ce cours');
-    expect($progress->percent)->toBe(0, 'Percent = 0 car aucun item requis');
+    // BUG-2 : quand aucun item n'est marqué requis, on retombe sur TOUS les items
+    // comptables (le quiz ici). required_total = 1 (le quiz non-requis inclus en repli).
+    expect($progress->required_total)->toBe(1, 'BUG-2 : repli sur tous les items quand aucun requis');
+    expect($progress->percent)->toBe(0, 'Percent = 0 car le quiz (seul item) n\'est pas complete');
 
     // Malgre percent = 0, isComplete = true car note 75 >= seuil 70
     expect((new CourseCompletionService())->isComplete($user, $course))->toBeTrue();
