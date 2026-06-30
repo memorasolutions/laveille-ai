@@ -22,6 +22,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Mode DeckPlayer (présentation en cartes plein écran, zéro défilement)
+    |--------------------------------------------------------------------------
+    | Quand false (défaut), la leçon s'affiche sous forme de longue page
+    | déroulante (comportement historique, inchangé).
+    | Quand true, chaque item de leçon est affiché comme une carte plein écran
+    | navigable clavier + boutons (DeckPlayer Livewire).
+    | Activer via ACADEMY_LESSON_DECK_MODE=true dans le .env.
+    */
+    'lesson_deck_mode' => env('ACADEMY_LESSON_DECK_MODE', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Hébergeur vidéo autorisé (embed ScreenPal)
     |--------------------------------------------------------------------------
     | Domaine ajouté à la CSP frame-src des routes Academy.

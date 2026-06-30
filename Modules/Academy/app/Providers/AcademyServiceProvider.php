@@ -172,6 +172,10 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // Gaté auth ; chaque mutation s'applique UNIQUEMENT à auth()->user().
         // Rendu via @livewire('academy.notification-preferences'). Voir NotificationPreferences.
         Livewire::component('academy.notification-preferences', NotificationPreferences::class);
+
+        // DeckPlayer : présentation de leçon en cartes plein écran (drapeau academy.lesson_deck_mode).
+        // Activé via ACADEMY_LESSON_DECK_MODE=true dans le .env.
+        Livewire::component('academy.deck-player', \Modules\Academy\Livewire\DeckPlayer::class);
     }
 
     public function register(): void
