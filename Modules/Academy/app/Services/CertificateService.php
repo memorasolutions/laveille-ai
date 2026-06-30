@@ -84,24 +84,34 @@ final class CertificateService
             }
         );
 
-        // ActivityLog défensif
-        if (class_exists(\Spatie\Activitylog\Facades\Activity::class)) {
+        // ACTION: fix BUG-B02b — guard activity log + event sur wasRecentlyCreated
+        // SELF: 3 lignes modifiées
+        // RAISON: sans garde, chaque re-appel de issueFor (ex. ProgressService::recalculate
+        //         à chaque item complété après la certification) écrivait 1-2 entrées
+        //         supplémentaires dans activity_log (même causer_id, même subject_id, même
+        //         seconde), car firstOrCreate retourne le cert existant MAIS la journalisation
+        //         s'exécutait inconditionnellement. La garde wasRecentlyCreated est la même
+        //         que celle déjà appliquée sur la notification (ligne ci-dessous).
+        if ($certificate->wasRecentlyCreated) {
+            // ActivityLog défensif — UNIQUEMENT à la première émission
+            if (class_exists(\Spatie\Activitylog\Facades\Activity::class)) {
+                try {
+                    activity('academy')
+                        ->performedOn($certificate)
+                        ->causedBy($user)
+                        ->withProperties(['course_id' => $course->id, 'serial' => $certificate->serial])
+                        ->log('academy.certificate.issued');
+                } catch (\Throwable) {
+                    // Silencieux
+                }
+            }
+
+            // Événement défensif — UNIQUEMENT à la première émission
             try {
-                activity('academy')
-                    ->performedOn($certificate)
-                    ->causedBy($user)
-                    ->withProperties(['course_id' => $course->id, 'serial' => $serial])
-                    ->log('academy.certificate.issued');
+                event('academy.certificate.issued', [$user, $course, $certificate]);
             } catch (\Throwable) {
                 // Silencieux
             }
-        }
-
-        // Événement défensif
-        try {
-            event('academy.certificate.issued', [$user, $course, $certificate]);
-        } catch (\Throwable) {
-            // Silencieux
         }
 
         // V5-c - Notification « cours complété » UNIQUEMENT à la première émission

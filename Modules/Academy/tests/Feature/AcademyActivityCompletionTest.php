@@ -487,3 +487,44 @@ test('BUG-2 : sans aucun item requis, la progression compte TOUS les items (pas 
 
     expect($p2->required_total)->toBe(1);
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BUG-B02b (cert) — activity_log idempotent pour les certificats
+//
+// Prouve que CertificateService::issueFor n'ecrit qu'UNE SEULE entree
+// 'academy.certificate.issued' dans activity_log, meme si issueFor est appele
+// plusieurs fois (ex. ProgressService::recalculate apres chaque completion
+// d'item dans un cours deja certifie).
+// Fix B02b : guard wasRecentlyCreated sur l'activity log + l'evenement.
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('BUG-B02b (cert) — issueFor N fois = 1 seule entree academy.certificate.issued dans activity_log', function (): void {
+    $course  = v2cCourse('cours-b02b-cert');
+    $lesson  = v2cLesson($course);
+    $item    = v2cItem($lesson, 'document', ['completion' => 'manual', 'rich_text' => 'x'], true);
+    $student = v2cStudent();
+    v2cEnroll($course, $student);
+
+    // Completer l'item => cours complete => issueFor appele par ProgressService.
+    \Modules\Academy\Services\CompletionService::markComplete($student, $item);
+
+    // Appels supplementaires directs (simule plusieurs recalculate apres la certification).
+    $svc = new \Modules\Academy\Services\CertificateService();
+    $svc->issueFor($student, $course->fresh());
+    $svc->issueFor($student, $course->fresh());
+
+    // 1 seul certificat en base.
+    expect(\Modules\Academy\Models\CertificateIssued::where('user_id', $student->id)
+        ->where('course_id', $course->id)
+        ->count()
+    )->toBe(1, 'Un seul certificat en base');
+
+    // 1 seule entree 'academy.certificate.issued' dans activity_log.
+    $logCount = \Spatie\Activitylog\Models\Activity::query()
+        ->where('causer_id', $student->id)
+        ->where('causer_type', get_class($student))
+        ->where('description', 'academy.certificate.issued')
+        ->count();
+
+    expect($logCount)->toBe(1, 'Une seule entree academy.certificate.issued dans activity_log');
+});
