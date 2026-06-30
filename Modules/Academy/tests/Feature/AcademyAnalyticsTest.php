@@ -374,3 +374,104 @@ test('l\'activité récente est scopée au cours et ne mélange pas deux cours',
     expect($activity['enrollments'])->toHaveCount(1);
     expect($activity['enrollments']->first()->user_id)->toBe($ua->id);
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 8. BUG-A06 — lessonDropoff repli « tous items » quand aucun is_required
+//
+// Un cours completé à 100 % dont aucun item n'est marqué is_required=true
+// affichait « Aucune donnée » car lessonDropoff ne renvoyait [].
+// Fix : repli identique à ProgressService (si aucun requis → compter tous les items).
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('BUG-A06 : lessonDropoff retourne des données même si aucun item n\'est is_required', function (): void {
+    $course = d1MakeCourse('d1-a06');
+
+    // Leçon avec 2 items NON requis (is_required = false par défaut).
+    $chapter = \Modules\Academy\Models\Chapter::create([
+        'course_id' => $course->id,
+        'title'     => 'Chapitre A06',
+        'position'  => 1,
+    ]);
+    $lesson = \Modules\Academy\Models\Lesson::create([
+        'chapter_id' => $chapter->id,
+        'title'      => 'Leçon A06',
+        'slug'       => 'd1-a06-lecon',
+        'position'   => 1,
+    ]);
+    $item1 = LessonItem::create([
+        'lesson_id'   => $lesson->id,
+        'type'        => 'document',
+        'title'       => 'Item 1',
+        'position'    => 1,
+        'is_required' => false,
+    ]);
+    $item2 = LessonItem::create([
+        'lesson_id'   => $lesson->id,
+        'type'        => 'document',
+        'title'       => 'Item 2',
+        'position'    => 2,
+        'is_required' => false,
+    ]);
+
+    $student = d1MakeStudent();
+    d1Enroll($course, $student);
+
+    // Compléter les 2 items non-requis.
+    CompletionService::markComplete($student, $item1);
+    CompletionService::markComplete($student, $item2);
+
+    $service = app(AnalyticsService::class);
+    $dropoff = $service->lessonDropoff($course);
+
+    // Avant le fix : $dropoff = [] → « Aucune donnée ».
+    // Après le fix : 1 entrée avec rate 100 % (inscrit a tout fait).
+    expect($dropoff)->toHaveCount(1, 'lessonDropoff ne doit pas retourner [] si aucun item n\'est requis');
+    expect($dropoff[0]['lesson_id'])->toBe($lesson->id);
+    expect($dropoff[0]['completed'])->toBe(1);
+    expect($dropoff[0]['total'])->toBe(1);
+    expect($dropoff[0]['rate'])->toBe(100);
+});
+
+test('BUG-A06 non-régression : cours AVEC items requis — lessonDropoff compte seulement les requis', function (): void {
+    $course = d1MakeCourse('d1-a06-nr');
+
+    $chapter = \Modules\Academy\Models\Chapter::create([
+        'course_id' => $course->id,
+        'title'     => 'Chapitre NR',
+        'position'  => 1,
+    ]);
+    $lesson = \Modules\Academy\Models\Lesson::create([
+        'chapter_id' => $chapter->id,
+        'title'      => 'Leçon NR',
+        'slug'       => 'd1-a06-nr-lecon',
+        'position'   => 1,
+    ]);
+    $required = LessonItem::create([
+        'lesson_id'   => $lesson->id,
+        'type'        => 'document',
+        'title'       => 'Requis',
+        'position'    => 1,
+        'is_required' => true,
+    ]);
+    $optional = LessonItem::create([
+        'lesson_id'   => $lesson->id,
+        'type'        => 'document',
+        'title'       => 'Optionnel',
+        'position'    => 2,
+        'is_required' => false,
+    ]);
+
+    $student = d1MakeStudent();
+    d1Enroll($course, $student);
+
+    // Ne compléter QUE l'item requis (pas l'optionnel).
+    CompletionService::markComplete($student, $required);
+
+    $service = app(AnalyticsService::class);
+    $dropoff = $service->lessonDropoff($course);
+
+    // La leçon doit apparaître comme complétée à 100 % (1 requis / 1 requis complété).
+    // L'item optionnel non-complété ne compte pas.
+    expect($dropoff)->toHaveCount(1);
+    expect($dropoff[0]['rate'])->toBe(100, 'Seul l\'item requis compte ; l\'optionnel ne doit pas bloquer la complétion');
+});

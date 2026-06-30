@@ -121,13 +121,13 @@ final class AnalyticsService
     }
 
     /**
-     * Décrochage PAR LEÇON : pour chaque leçon contenant au moins un item REQUIS,
-     * combien d'inscrits actifs ont complété TOUS ses items requis vs pas.
+     * Décrochage PAR LEÇON : pour chaque leçon contenant au moins un item COMPTABLE,
+     * combien d'inscrits actifs ont complété TOUS ses items comptables vs pas.
      *
-     * Une leçon est « complétée » par un inscrit lorsqu'il a complété chacun de ses
-     * items requis (cohérent avec la définition de progression de ProgressService,
-     * qui compte les items requis). Le « point de décrochage » est la première leçon
-     * (dans l'ordre chapitre→leçon) au plus faible taux de complétion.
+     * « Items comptables » = items is_required=true si le cours en a, sinon TOUS les
+     * items du cours (parité exacte avec ProgressService::recalculate, fix BUG-2 /
+     * BUG-A06). Ainsi, un cours dont aucun item n'est requis affiche bien ses données
+     * de complétion par leçon au lieu de retourner « Aucune donnée ».
      *
      * Anti-IDOR : tous les items/leçons sont scopés via leur cours parent ; seuls les
      * inscrits ACTIFS de CE cours sont comptés.
@@ -148,31 +148,46 @@ final class AnalyticsService
 
         $enrolled = count($activeUserIds);
 
-        // Structure ordonnée chapitre → leçon → items requis, scopée à CE cours.
+        // ACTION: fix BUG-A06 — repli « tous les items » quand aucun is_required (parité ProgressService)
+        // SELF: chargement adapté + repli post-collecte
+        // RAISON: si aucun item n'a is_required=true, la requête retournait [] → « Aucune donnée ».
+        //         ProgressService::recalculate() a le même repli (BUG-2 déjà corrigé) :
+        //         si requiredIds === [], on compte TOUS les items. On applique ici la même logique
+        //         pour la cohérence analytics ↔ progression. Les cours AVEC items requis
+        //         ne sont pas affectés (le filtre is_required=true s'applique comme avant).
+
+        // Étape 1 : charger TOUS les items pour pouvoir faire le repli (on filtre en PHP).
         $course->loadMissing([
             'chapters' => fn ($q) => $q->orderBy('position')->orderBy('id'),
             'chapters.lessons' => fn ($q) => $q->orderBy('position')->orderBy('id'),
-            'chapters.lessons.lessonItems' => fn ($q) => $q->where('is_required', true)->orderBy('position'),
+            'chapters.lessons.lessonItems' => fn ($q) => $q->orderBy('position'),
         ]);
 
-        // IDs de tous les items requis du cours (pour une SEULE requête de complétions).
+        // Étape 2 : collecter les items requis ; si aucun → repli sur TOUS les items
+        // (parité exacte avec ProgressService::recalculate, BUG-2).
         $requiredItemIds = [];
+        $allItemIds      = [];
         foreach ($course->chapters as $chapter) {
             foreach ($chapter->lessons as $lesson) {
                 foreach ($lesson->lessonItems as $item) {
-                    $requiredItemIds[] = $item->id;
+                    $allItemIds[] = $item->id;
+                    if ($item->is_required) {
+                        $requiredItemIds[] = $item->id;
+                    }
                 }
             }
         }
+        $countableItemIds = $requiredItemIds !== [] ? $requiredItemIds : $allItemIds;
+        $hasRequiredItems = $requiredItemIds !== [];
 
         // Map item_id => [user_id, ...] des complétions, restreinte aux inscrits actifs.
         // Aucune complétion d'un autre cours ne peut entrer : on filtre par items du cours
         // ET par utilisateurs inscrits actifs de ce cours.
         $completionsByItem = [];
-        if (! empty($requiredItemIds) && $enrolled > 0) {
+        if (! empty($countableItemIds) && $enrolled > 0) {
             $rows = Completion::query()
                 ->where('status', 'completed')
-                ->whereIn('lesson_item_id', $requiredItemIds)
+                ->whereIn('lesson_item_id', $countableItemIds)
                 ->whereIn('user_id', $activeUserIds)
                 ->get(['lesson_item_id', 'user_id']);
 
@@ -185,10 +200,13 @@ final class AnalyticsService
 
         foreach ($course->chapters as $chapter) {
             foreach ($chapter->lessons as $lesson) {
-                $items = $lesson->lessonItems;
+                // Filtrer les items comptables de cette leçon (requis si le cours en a,
+                // sinon tous — parité avec ProgressService::recalculate).
+                $items = $hasRequiredItems
+                    ? $lesson->lessonItems->where('is_required', true)->values()
+                    : $lesson->lessonItems->whereIn('id', $countableItemIds)->values();
 
-                // On n'inclut que les leçons ayant au moins un item requis (les autres
-                // n'entrent pas dans le calcul de progression, donc pas de décrochage).
+                // On n'inclut que les leçons contenant au moins un item comptable.
                 if ($items->isEmpty()) {
                     continue;
                 }
