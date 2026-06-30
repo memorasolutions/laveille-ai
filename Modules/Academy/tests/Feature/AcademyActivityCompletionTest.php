@@ -418,3 +418,44 @@ test('non-gérant : impossible de configurer le critère (éditeur interdit)', f
         ->test(CourseEditor::class, ['course' => $course])
         ->assertForbidden();
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// B02b — Journal d'activité idempotent : N markComplete → 1 seule entrée Spatie
+//
+// Prouve que CompletionService::markComplete n'écrit qu'UNE SEULE entrée dans
+// activity_log quelle que soit la séquence d'appels (markStarted + markComplete ×N).
+// Fix B02b : guard wasRecentlyCreated || wasChanged('status') dans markComplete.
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('B02b — markComplete N fois sur le même item = 1 seule entrée activity_log', function (): void {
+    $course  = v2cCourse('cours-b02b');
+    $lesson  = v2cLesson($course);
+    $item    = v2cItem($lesson, 'document', ['completion' => 'view', 'rich_text' => 'x'], true);
+    $student = v2cStudent();
+    v2cEnroll($course, $student);
+
+    $item->loadMissing(['lesson.chapter.course']);
+
+    // Appels multiples : markStarted puis markComplete × 3.
+    \Modules\Academy\Services\CompletionService::markStarted($student, $item);
+    \Modules\Academy\Services\CompletionService::markComplete($student, $item);
+    \Modules\Academy\Services\CompletionService::markComplete($student, $item);
+    \Modules\Academy\Services\CompletionService::markComplete($student, $item);
+
+    // 1 seule entrée dans activity_log pour ce couple (user, item).
+    $logCount = \Spatie\Activitylog\Models\Activity::query()
+        ->where('causer_id', $student->id)
+        ->where('causer_type', get_class($student))
+        ->where('subject_id', $item->id)
+        ->where('subject_type', get_class($item))
+        ->where('description', 'academy.item.completed')
+        ->count();
+
+    expect($logCount)->toBe(1);
+
+    // 1 seule complétion en base (idempotence DB déjà garantie par contrainte unique).
+    expect(\Modules\Academy\Models\Completion::where('user_id', $student->id)
+        ->where('lesson_item_id', $item->id)
+        ->count()
+    )->toBe(1);
+});

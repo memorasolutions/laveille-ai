@@ -83,8 +83,16 @@ final class CompletionService
             // Silencieux
         }
 
-        // ActivityLog défensif
-        if (class_exists(\Spatie\Activitylog\Facades\Activity::class)) {
+        // ActivityLog défensif — guard idempotence B02b : écrire UNIQUEMENT si la
+        // completion est NOUVELLE (wasRecentlyCreated) OU si le statut vient de passer
+        // à 'completed' pour la première fois (wasChanged). Empêche toute écriture
+        // double en cas de concurrence ou d'appels multiples (race window, retry HTTP).
+        // ACTION: fix B02b — guard activity log write (idempotence)
+        // SELF: 3 lignes
+        // RAISON: sans guard, un appel concurrent qui contourne l'early-return peut
+        //         écrire une 2e entrée même si la complétion existe déjà en DB.
+        if (class_exists(\Spatie\Activitylog\Facades\Activity::class)
+            && ($completion->wasRecentlyCreated || $completion->wasChanged('status'))) {
             try {
                 activity('academy')
                     ->performedOn($item)
