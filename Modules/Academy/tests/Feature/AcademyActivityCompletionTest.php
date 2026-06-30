@@ -459,3 +459,31 @@ test('B02b — markComplete N fois sur le même item = 1 seule entrée activity_
         ->count()
     )->toBe(1);
 });
+
+// BUG-2 : progression « 0 / 0 leçon requise » => 0 % quand aucun item n'est marqué requis.
+test('BUG-2 : sans aucun item requis, la progression compte TOUS les items (pas 0/0)', function (): void {
+    $course = v2cCourse('cours-bug2-fallback');
+    $lesson = v2cLesson($course);
+    $a = v2cItem($lesson, 'document', ['completion' => 'view', 'rich_text' => 'a'], false, 1);
+    $b = v2cItem($lesson, 'document', ['completion' => 'view', 'rich_text' => 'b'], false, 2);
+    $student = v2cStudent();
+    v2cEnroll($course, $student);
+
+    // Aucun item requis : sans le repli, on aurait 0 / 0. Une seule complétion => 50 %.
+    \Modules\Academy\Services\CompletionService::markComplete($student, $a);
+    $progress = ProgressService::recalculate($student, $course->fresh());
+
+    expect($progress->required_total)->toBe(2);
+    expect($progress->required_completed)->toBe(1);
+    expect($progress->percent)->toBe(50);
+
+    // Non-régression : un cours AVEC item requis ne compte QUE le requis (repli inactif).
+    $c2 = v2cCourse('cours-bug2-requis');
+    $l2 = v2cLesson($c2);
+    $r = v2cItem($l2, 'document', ['rich_text' => 'r'], true, 1);
+    $o = v2cItem($l2, 'document', ['rich_text' => 'o'], false, 2);
+    v2cEnroll($c2, $student);
+    $p2 = ProgressService::recalculate($student, $c2->fresh());
+
+    expect($p2->required_total)->toBe(1);
+});

@@ -25,9 +25,11 @@ final class ProgressService
      * Recalcule et persiste la progression d'un utilisateur pour un cours donné.
      *
      * Algorithme :
-     *   1. Récupère tous les LessonItems is_required=true du cours (via chapters→lessons→lessonItems).
+     *   1. Récupère les LessonItems COMPTABLES du cours : les items is_required=true, ou
+     *      à défaut (aucun requis) TOUS les items du cours (évite « 0/0 → 0 % » trompeur
+     *      pour un cours dont aucun item n'a été marqué requis).
      *   2. Compte combien sont complétés (status='completed') pour cet utilisateur.
-     *   3. Calcule le pourcentage (0 si aucun item requis).
+     *   3. Calcule le pourcentage (0 seulement si le cours n'a aucun item).
      *   4. Enregistre dans `progresses` (updateOrCreate) avec last_lesson_item_id + last_activity_at.
      *   5. Déclenche l'événement 'academy.progress.updated' (défensif).
      *
@@ -35,18 +37,23 @@ final class ProgressService
      */
     public static function recalculate(User $user, Course $course): Progress
     {
-        // 1. Tous les IDs d'items requis de ce cours
-        $requiredIds = LessonItem::whereHas(
+        // 1. Items COMPTABLES du cours : d'abord les requis ; si AUCUN item n'est requis,
+        // on retombe sur TOUS les items du cours. Sans ce repli, un cours sans item requis
+        // afficherait « 0 / 0 » et une progression bloquée à 0 % (BUG-2).
+        $courseItemsQuery = fn () => LessonItem::whereHas(
             'lesson.chapter',
             fn ($q) => $q->where('course_id', $course->id)
-        )
-            ->where('is_required', true)
-            ->pluck('id')
-            ->all();
+        );
+
+        $requiredIds = $courseItemsQuery()->where('is_required', true)->pluck('id')->all();
+
+        if ($requiredIds === []) {
+            $requiredIds = $courseItemsQuery()->pluck('id')->all();
+        }
 
         $requiredTotal = count($requiredIds);
 
-        // 2. Items requis complétés par l'utilisateur
+        // 2. Items comptables complétés par l'utilisateur
         $completedQuery = Completion::where('user_id', $user->id)
             ->whereIn('lesson_item_id', $requiredIds)
             ->where('status', 'completed')

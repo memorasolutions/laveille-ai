@@ -60,7 +60,11 @@ trait HandlesItems
             'position'          => $position,
             'payload'           => $payload,
             'estimated_minutes' => $data['estimated_minutes'] ?? null,
-            'is_required'       => (bool) ($input['is_required'] ?? false),
+            // BUG-2 : un item compte dans la progression par DÉFAUT (parité migration
+            // is_required default=true). Le formulaire d'ajout n'expose pas de case
+            // « requis » → une clé absente DOIT valoir true (sinon 0/0 → 0 %). Le
+            // formateur peut ensuite basculer en facultatif via toggleRequired().
+            'is_required'       => (bool) ($input['is_required'] ?? true),
             'external_ref'      => $data['external_ref'] ?? null,
         ]);
 
