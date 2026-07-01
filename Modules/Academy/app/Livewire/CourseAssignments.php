@@ -41,6 +41,7 @@ namespace Modules\Academy\Livewire;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Modules\Academy\Livewire\Concerns\HandlesAiFeedback;
 use Modules\Academy\Livewire\Concerns\HandlesAssignmentCrud;
 use Modules\Academy\Livewire\Concerns\HandlesGradeStructure;
 use Modules\Academy\Livewire\Concerns\HandlesRubric;
@@ -60,6 +61,7 @@ use Modules\Academy\Services\GradebookService;
 
 class CourseAssignments extends Component
 {
+    use HandlesAiFeedback;
     use HandlesAssignmentCrud;
     use HandlesSubmissionGrading;
     use HandlesRubric;

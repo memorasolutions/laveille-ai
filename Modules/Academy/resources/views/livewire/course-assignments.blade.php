@@ -375,9 +375,54 @@
                                                                 <strong>Rétroaction :</strong> {!! $submission->renderedFeedback() !!}
                                                             </div>
                                                         @endif
-                                                        <x-core::button type="button" wire:click="startGrading({{ $submission->id }})" variant="secondary" size="sm">
-                                                            {{ $submission->isGraded() ? 'Modifier la note' : 'Noter' }}
-                                                        </x-core::button>
+
+                                                        {{-- Feedback IA sur réponses ouvertes (LMS 2026) : PROPOSITION seulement.
+                                                             Gâté par le drapeau academy.ai_feedback_enabled + service IA présent.
+                                                             L'IA ne note JAMAIS : le formateur garde le dernier mot. --}}
+                                                        @if ($this->aiFeedbackAvailable && $aiFeedbackSubmission === $submission->id)
+                                                            <div style="margin: 8px 0 10px; border: 1px solid #064E5A; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px; background: rgba(6,78,90,0.04);">
+                                                                <p style="margin: 0 0 8px; font-weight: 600; font-size: 0.82rem; color: #064E5A;">
+                                                                    ✨ Proposition de feedback IA
+                                                                    <span style="font-weight: 400; color: var(--sys-text-muted, #4B5563);">(brouillon — à réviser, jamais appliqué automatiquement)</span>
+                                                                </p>
+                                                                <div style="display: flex; flex-direction: column; gap: 6px; max-width: 220px; margin-bottom: 8px;">
+                                                                    <label for="ai-score-{{ $submission->id }}" style="font-weight: 600; font-size: 0.82rem;">Note suggérée (sur {{ $assignment->max_points }})</label>
+                                                                    <input id="ai-score-{{ $submission->id }}" type="number" min="0" max="{{ $assignment->max_points }}" wire:model.live.blur="aiSuggestedScoreDraft"
+                                                                           style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                                </div>
+                                                                <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
+                                                                    <label for="ai-fb-{{ $submission->id }}" style="font-weight: 600; font-size: 0.82rem;">Feedback suggéré (markdown, éditable)</label>
+                                                                    <textarea id="ai-fb-{{ $submission->id }}" wire:model.live.blur="aiFeedbackDraft" rows="6" maxlength="20000"
+                                                                              style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); font-family: inherit;"></textarea>
+                                                                </div>
+                                                                <div class="d-flex flex-wrap gap-2">
+                                                                    <x-core::button type="button" wire:click="applyAiFeedbackToGrading({{ $submission->id }})" variant="primary" size="sm">
+                                                                        Utiliser dans la correction
+                                                                    </x-core::button>
+                                                                    <x-core::button type="button" wire:click="dismissAiFeedback" variant="ghost" size="sm">
+                                                                        Rejeter
+                                                                    </x-core::button>
+                                                                </div>
+                                                                <p style="margin: 8px 0 0; font-size: 0.78rem; color: var(--sys-text-muted, #4B5563);">
+                                                                    « Utiliser dans la correction » pré-remplit le formulaire ; rien n'est officiel tant que vous n'avez pas cliqué « Enregistrer la note ».
+                                                                </p>
+                                                            </div>
+                                                        @elseif ($this->aiFeedbackAvailable && $aiFeedbackError !== '' && $aiFeedbackSubmission === null)
+                                                            <p style="margin: 0 0 8px; font-size: 0.82rem; color: var(--sys-action-danger, #DC2626);" wire:key="ai-err-{{ $submission->id }}">{{ $aiFeedbackError }}</p>
+                                                        @endif
+
+                                                        <div class="d-flex flex-wrap gap-2">
+                                                            <x-core::button type="button" wire:click="startGrading({{ $submission->id }})" variant="secondary" size="sm">
+                                                                {{ $submission->isGraded() ? 'Modifier la note' : 'Noter' }}
+                                                            </x-core::button>
+                                                            @if ($this->aiFeedbackAvailable && $aiFeedbackSubmission !== $submission->id)
+                                                                <x-core::button type="button" wire:click="proposeAiFeedback({{ $submission->id }})" variant="ghost" size="sm"
+                                                                                wire:loading.attr="disabled" wire:target="proposeAiFeedback({{ $submission->id }})">
+                                                                    <span wire:loading.remove wire:target="proposeAiFeedback({{ $submission->id }})">✨ Proposer un feedback IA</span>
+                                                                    <span wire:loading wire:target="proposeAiFeedback({{ $submission->id }})">Génération…</span>
+                                                                </x-core::button>
+                                                            @endif
+                                                        </div>
                                                     </div>
                                                 @endif
                                             </li>

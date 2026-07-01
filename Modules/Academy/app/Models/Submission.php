@@ -32,6 +32,9 @@ use Spatie\MediaLibrary\HasMedia;
  * @property string|null $feedback
  * @property \Illuminate\Support\Carbon|null $graded_at
  * @property int|null    $graded_by
+ * @property string|null $ai_feedback
+ * @property float|null  $ai_suggested_score
+ * @property \Illuminate\Support\Carbon|null $ai_generated_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
@@ -51,13 +54,18 @@ class Submission extends Model implements HasMedia
         'rubric_scores',
         'graded_at',
         'graded_by',
+        'ai_feedback',
+        'ai_suggested_score',
+        'ai_generated_at',
     ];
 
     protected $casts = [
-        'score'         => 'integer',
-        'submitted_at'  => 'datetime',
-        'graded_at'     => 'datetime',
-        'rubric_scores' => 'array',
+        'score'              => 'integer',
+        'submitted_at'       => 'datetime',
+        'graded_at'          => 'datetime',
+        'rubric_scores'      => 'array',
+        'ai_suggested_score' => 'decimal:2',
+        'ai_generated_at'    => 'datetime',
     ];
 
     public function assignment(): BelongsTo
@@ -133,5 +141,12 @@ class Submission extends Model implements HasMedia
     public function renderedFeedback(): string
     {
         return LessonItem::renderRichText($this->feedback);
+    }
+
+    /** Vrai si un brouillon de feedback IA a été généré pour cette remise. */
+    public function hasAiFeedback(): bool
+    {
+        return $this->ai_generated_at !== null
+            && (! empty($this->ai_feedback) || $this->ai_suggested_score !== null);
     }
 }

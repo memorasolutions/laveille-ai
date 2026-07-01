@@ -23,6 +23,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Feedback IA sur réponses ouvertes (correction assistée - LMS 2026)
+    |--------------------------------------------------------------------------
+    | Quand true, le formateur voit un bouton « Proposer un feedback IA » sur
+    | la correction des remises rédigées (devoirs/études de cas). L'IA évalue
+    | la remise SELON LA RUBRIQUE et propose un feedback + une note SUGGÉRÉE,
+    | en BROUILLON ÉDITABLE. Le formateur garde TOUJOURS le dernier mot :
+    | l'IA ne note JAMAIS l'apprenant automatiquement (proposition seulement).
+    | Défaut false : bouton absent, aucun appel IA, comportement inchangé.
+    | Activer via ACADEMY_AI_FEEDBACK_ENABLED=true dans le .env.
+    */
+    'ai_feedback_enabled' => env('ACADEMY_AI_FEEDBACK_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Mode « EN CONSTRUCTION » (go-live progressif)
     |--------------------------------------------------------------------------
     | Quand true (défaut), les pages publiques /academie/* affichent une page
