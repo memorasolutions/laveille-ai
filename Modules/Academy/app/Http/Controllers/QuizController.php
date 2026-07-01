@@ -371,6 +371,26 @@ class QuizController extends Controller
             // Silencieux : ne jamais bloquer la soumission pour un recalcul raté.
         }
 
+        // Gamification - crédit XP sur un quiz RÉUSSI (idempotent, drapeau
+        // academy.gamification_enabled OFF par défaut). GamificationService::award()
+        // vérifie l'idempotence via la clé (user, quiz_attempt, "quiz_passed") :
+        // une resoumission ou un recalcul répété ne peut jamais créditer deux fois.
+        try {
+            if ($passed && class_exists(\Modules\Academy\Services\GamificationService::class)) {
+                $attempt = QuizAttempt::where('user_id', $user->id)
+                    ->where('lesson_item_id', $item->id)
+                    ->latest('id')
+                    ->first();
+
+                if ($attempt !== null) {
+                    app(\Modules\Academy\Services\GamificationService::class)
+                        ->awardQuizPassed($user, $course, $attempt);
+                }
+            }
+        } catch (\Throwable) {
+            // Silencieux : ne jamais bloquer la soumission pour un crédit XP raté.
+        }
+
         // Flasher le résultat (item_id inclus pour affichage ciblé en vue).
         // ESSAI : `needs_grading` → le lecteur affiche « En attente de correction »
         // au lieu d'un score final (le pourcentage auto est provisoire).

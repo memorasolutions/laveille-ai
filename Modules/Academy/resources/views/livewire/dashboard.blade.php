@@ -194,6 +194,13 @@
          au moins un cours pondéré. --}}
     @livewire('academy.student-grades')
 
+    {{-- ───────────────────────── Gamification moderne (XP/niveau/classement) ─────────────────────────
+         Drapeau academy.gamification_enabled (défaut OFF). Double garde : ce @if
+         ET le composant lui-même (Gamification::enabled). Voir GamificationService. --}}
+    @if(config('academy.gamification_enabled'))
+        @livewire('academy.gamification')
+    @endif
+
     {{-- ───────────────────────── Vos badges (E1) ───────────────────────── --}}
     <section aria-labelledby="academy-mes-badges" class="mb-5">
         <h2 id="academy-mes-badges"

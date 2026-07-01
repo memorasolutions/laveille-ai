@@ -74,6 +74,7 @@ final class CompletionService
         }
 
         // Recalcul de progression
+        $course = null;
         try {
             $course = $item->lesson->chapter->course ?? null;
             if ($course !== null && class_exists(ProgressService::class)) {
@@ -81,6 +82,18 @@ final class CompletionService
             }
         } catch (\Throwable) {
             // Silencieux
+        }
+
+        // Gamification - crédit XP pour une leçon COMPLÉTÉE (idempotent, drapeau
+        // academy.gamification_enabled OFF par défaut). Branché ICI (pas dans
+        // ProgressService) car on dispose directement de la Completion précise
+        // (source_id stable pour l'anti-triche) — voir GamificationService.
+        if ($course !== null && class_exists(GamificationService::class)) {
+            try {
+                app(GamificationService::class)->awardLessonCompleted($user, $course, $item, $completion);
+            } catch (\Throwable) {
+                // Silencieux
+            }
         }
 
         // SRS - Répétition espacée (différenciateur rétention). Gardé par le drapeau

@@ -124,6 +124,21 @@ final class ProgressService
             \Log::warning('[ProgressService] Evaluation badges echouee', ['exception' => $e->getMessage()]);
         }
 
+        // 8 — Gamification : crédit XP pour un cours COMPLÉTÉ (idempotent, drapeau
+        // academy.gamification_enabled OFF par défaut). Branché ici comme les
+        // badges : recalculate() est le point de passage UNIQUE après chaque
+        // complétion. award() re-vérifie l'idempotence, donc l'appel est sûr même
+        // si recalculate() est invoqué plusieurs fois pour le même cours complété.
+        try {
+            if (class_exists(GamificationService::class)
+                && class_exists(CourseCompletionService::class)
+                && (new CourseCompletionService())->isComplete($user, $course)) {
+                app(GamificationService::class)->awardCourseCompleted($user, $course);
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('[ProgressService] Evaluation gamification echouee', ['exception' => $e->getMessage()]);
+        }
+
         return $progress;
     }
 
