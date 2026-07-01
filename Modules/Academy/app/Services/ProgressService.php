@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Modules\Academy\Services;
 
 use App\Models\User;
+use Modules\Academy\Models\CertificateIssued;
 use Modules\Academy\Models\Completion;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\LessonItem;
@@ -179,5 +180,66 @@ final class ProgressService
         }
 
         return null;
+    }
+
+    /**
+     * URL « Continuer le cours » pour un inscrit (bouton CTA sidebar public.show).
+     * DRY : réutilise resumeLesson() (source unique de la « prochaine leçon ») et
+     * CourseCompletionService::isComplete() (source unique de la complétion) — aucun
+     * nouveau système de progression.
+     *
+     * Ordre de résolution :
+     *   1. resumeLesson() renvoie une leçon → on y va (couvre aussi « aucune leçon
+     *      complétée » : c'est alors la toute première leçon du cours).
+     *   2. Sinon, cours COMPLÉTÉ selon son critère configuré → certificat émis le plus
+     *      récent si disponible, sinon la dernière leçon du cours.
+     *   3. Sinon (cours sans item requis configuré) → repli sur la première leçon.
+     *   4. Aucune leçon dans le cours → repli sur la fiche du cours (jamais de lien mort).
+     */
+    public static function continueUrlFor(User $user, Course $course): string
+    {
+        $nextLesson = self::resumeLesson($user, $course);
+
+        if ($nextLesson !== null) {
+            return route('academy.lessons.show', [$course, $nextLesson]);
+        }
+
+        $course->loadMissing([
+            'chapters'         => fn ($q) => $q->orderBy('position'),
+            'chapters.lessons' => fn ($q) => $q->orderBy('position'),
+        ]);
+
+        $lessons    = $course->chapters->flatMap(fn ($chapter) => $chapter->lessons);
+        $isComplete = false;
+
+        try {
+            $isComplete = class_exists(CourseCompletionService::class)
+                && (new CourseCompletionService())->isComplete($user, $course);
+        } catch (\Throwable) {
+            // Silencieux — repli sur la logique « non complété » ci-dessous.
+        }
+
+        if ($isComplete) {
+            $certificate = CertificateIssued::where('user_id', $user->id)
+                ->where('course_id', $course->id)
+                ->orderByDesc('issued_at')
+                ->first();
+
+            if ($certificate !== null) {
+                return route('academy.certificates.show', $certificate->public_url_slug);
+            }
+
+            $lastLesson = $lessons->last();
+            if ($lastLesson !== null) {
+                return route('academy.lessons.show', [$course, $lastLesson]);
+            }
+        }
+
+        $firstLesson = $lessons->first();
+        if ($firstLesson !== null) {
+            return route('academy.lessons.show', [$course, $firstLesson]);
+        }
+
+        return route('academy.courses.show', $course->slug);
     }
 }

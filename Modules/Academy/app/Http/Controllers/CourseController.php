@@ -14,6 +14,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Enrollment;
+use Modules\Academy\Services\ProgressService;
 
 class CourseController extends Controller
 {
@@ -88,13 +89,23 @@ class CourseController extends Controller
             $prerequisitesUnmet = $course->prerequisitesUnmetFor(auth()->user());
         }
 
+        // Bouton « Continuer le cours » (sidebar) : URL réelle de reprise, calculée
+        // SERVEUR via ProgressService (DRY, source unique de la progression). Calculé
+        // uniquement pour un inscrit (actif ou gérant en preview) : c'est la seule
+        // situation où ce bouton s'affiche (cf. academy::public.show).
+        $continueUrl = null;
+        if ($isEnrolled && auth()->check()) {
+            $continueUrl = ProgressService::continueUrlFor(auth()->user(), $course);
+        }
+
         return view('academy::public.show', compact(
             'course',
             'isEnrolled',
             'isFree',
             'enrollment',
             'isPreview',
-            'prerequisitesUnmet'
+            'prerequisitesUnmet',
+            'continueUrl'
         ));
     }
 }

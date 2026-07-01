@@ -59,6 +59,12 @@
 .ct-btn--primary:hover:not(:disabled) {
     background-color: var(--sys-action-primary-hover, #032E36);
     border-color: var(--sys-action-primary-hover, #032E36);
+    /* ACTION: fix contraste survol (audit academy::public.show, 2026-07-01) — sans
+       cette ligne, la règle globale `a:hover { color: var(--c-primary) }` (charte.css)
+       est PLUS spécifique que « .ct-btn--primary { color: white } » sur la propriété
+       color (élément+pseudo-classe > classe seule) et repeint le texte en teal foncé
+       sur fond teal quasi noir : ratio mesuré 1.55:1 (échec AA/AAA). Fixé à 14.5:1. */
+    color: var(--sys-text-on-accent, #fff);
 }
 
 .ct-btn--secondary {
@@ -79,6 +85,8 @@
 .ct-btn--accent:hover:not(:disabled) {
     background-color: var(--sys-action-accent-hover, #771E04);
     border-color: var(--sys-action-accent-hover, #771E04);
+    /* Même correctif de contraste que primary (cf. commentaire ci-dessus). */
+    color: var(--sys-text-on-accent, #fff);
 }
 
 .ct-btn--danger {
@@ -89,6 +97,8 @@
 .ct-btn--danger:hover:not(:disabled) {
     background-color: var(--sys-action-danger-hover, #B91C1C);
     border-color: var(--sys-action-danger-hover, #B91C1C);
+    /* Même correctif de contraste que primary (cf. commentaire ci-dessus). */
+    color: var(--sys-text-on-accent, #fff);
 }
 
 .ct-btn--ghost {

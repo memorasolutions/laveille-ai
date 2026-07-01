@@ -61,6 +61,16 @@
     }
     .syllabus-lessons li:last-child { border-bottom: none; }
     .syllabus-lock { color: var(--sys-text-muted, #9CA3AF); font-size: 0.85rem; }
+    .syllabus-lesson-link {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+        color: var(--sys-text-link, var(--c-primary, #064E5A));
+        text-decoration: none;
+    }
+    .syllabus-lesson-link:hover,
+    .syllabus-lesson-link:focus-visible { text-decoration: underline; }
     .accordion-button:not(.collapsed) { background: rgba(6,78,90,0.05); color: var(--c-primary, #064E5A); box-shadow: none; }
     .accordion-button:focus { box-shadow: none; }
 
@@ -181,13 +191,22 @@
                                                 @foreach($chapter->lessons as $lesson)
                                                     <li>
                                                         @if($isEnrolled)
-                                                            <span style="color: var(--c-primary, #064E5A);">▶</span>
+                                                            {{-- Inscrit (ou staff/preview) : leçon cliquable vers sa page. --}}
+                                                            <a href="{{ route('academy.lessons.show', [$course, $lesson]) }}"
+                                                               class="syllabus-lesson-link">
+                                                                <span aria-hidden="true">▶</span>
+                                                                <span>{{ $lesson->title }}</span>
+                                                                @if($lesson->estimated_minutes)
+                                                                    <span class="text-muted ms-auto" style="font-size:0.8rem; white-space:nowrap;">{{ $lesson->estimated_minutes }} min</span>
+                                                                @endif
+                                                            </a>
                                                         @else
+                                                            {{-- Non inscrit : aperçu du titre seulement, pas de lien (verrouillé). --}}
                                                             <span class="syllabus-lock">🔒</span>
-                                                        @endif
-                                                        {{ $lesson->title }}
-                                                        @if($lesson->estimated_minutes)
-                                                            <span class="text-muted ms-auto" style="font-size:0.8rem; white-space:nowrap;">{{ $lesson->estimated_minutes }} min</span>
+                                                            {{ $lesson->title }}
+                                                            @if($lesson->estimated_minutes)
+                                                                <span class="text-muted ms-auto" style="font-size:0.8rem; white-space:nowrap;">{{ $lesson->estimated_minutes }} min</span>
+                                                            @endif
                                                         @endif
                                                     </li>
                                                 @endforeach
@@ -298,7 +317,10 @@
                                 </div>
                             @else
                                 <div class="mb-3">
-                                    <x-core::button href="#" variant="primary" :block="true">
+                                    {{-- Bug show.blade.php#2 : href calculé serveur (ProgressService::continueUrlFor
+                                         dans CourseController@show) — prochaine leçon non complétée, ou certificat/
+                                         dernière leçon si le cours est complété. Jamais de lien mort « # ». --}}
+                                    <x-core::button :href="$continueUrl ?? route('academy.courses.show', $course->slug)" variant="primary" :block="true">
                                         Continuer le cours
                                     </x-core::button>
                                 </div>
