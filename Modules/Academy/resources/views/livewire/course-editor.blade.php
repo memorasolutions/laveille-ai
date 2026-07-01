@@ -373,11 +373,11 @@
                             @error('certificate_message') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
                         </div>
 
-                        {{-- Phase 2 câblage — sélecteur owner-scopé, gâté par le drapeau, `null` = comportement actuel inchangé --}}
+                        {{-- Phase 2 câblage - sélecteur owner-scopé, gâté par le drapeau, `null` = comportement actuel inchangé --}}
                         @if(config('academy.diploma_editor_enabled', false))
                             <div style="flex: 1 1 100%;">
                                 <label for="cert-diploma-template" style="font-weight: 600; margin-bottom: 6px; font-size: 0.85rem; display: block;">
-                                    Gabarit de diplôme (Phase 2 — optionnel)
+                                    Gabarit de diplôme (Phase 2 - optionnel)
                                 </label>
                                 <select id="cert-diploma-template"
                                         wire:model.live="diploma_template_id"
