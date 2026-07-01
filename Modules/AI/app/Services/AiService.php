@@ -12,6 +12,7 @@ namespace Modules\AI\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Modules\AI\Exceptions\AiBudgetExceededException;
 use Modules\Settings\Models\Setting;
 
 class AiService
@@ -121,9 +122,21 @@ class AiService
 
     /**
      * @param  array<int, array{role: string, content: string}>  $messages
+     *
+     * @throws AiBudgetExceededException  Budget mensuel IA dépassé (`ai.monthly_budget`).
+     *                                     Point d'entrée UNIQUE de tous les appelants
+     *                                     (Tuteur/Feedback/Authoring/Traduction Academy +
+     *                                     cascade d'escalade interne) — DRY strict, un seul
+     *                                     disjoncteur pour tout le chemin `chatWithHistory()`.
      */
     public function chatWithHistory(array $messages, ?string $model = null): string
     {
+        if (! $this->checkBudget()) {
+            Log::warning('AI Service: Monthly budget exceeded');
+
+            throw new AiBudgetExceededException('Budget IA mensuel dépassé.');
+        }
+
         $apiKey = Setting::get('ai.openrouter_api_key');
 
         if (! $apiKey) {

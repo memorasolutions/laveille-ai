@@ -20,6 +20,7 @@ namespace Modules\Academy\Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Livewire;
 use Modules\Academy\Livewire\CourseAssignments;
 use Modules\Academy\Models\Assignment;
@@ -246,5 +247,39 @@ class AcademyAiFeedbackTest extends TestCase
         Livewire::actingAs($student)
             ->test(CourseAssignments::class, ['course' => $course])
             ->assertForbidden();
+    }
+
+    // -------------------------------------------------------------------------
+    // (e) Disjoncteur DoS financier : rate-limit 20/heure sur proposeAiFeedback()
+    // -------------------------------------------------------------------------
+
+    public function test_rate_limit_propose_ai_feedback_bloque_apres_20_par_heure(): void
+    {
+        config(['academy.ai_feedback_enabled' => true]);
+
+        $course     = $this->makeCourse('cours-fb-rate-limit');
+        $owner      = $this->makeOwner($course);
+        $student    = $this->makeStudent($course);
+        $assignment = $this->makeAssignment($course);
+        $submission = $this->makeSubmission($assignment, $student, 'Réponse de l\'apprenant à évaluer.');
+
+        // Pré-remplit le disjoncteur à sa limite (20/heure) sans jamais appeler l'IA.
+        $key = 'ai-feedback:' . $owner->id;
+        for ($i = 0; $i < 20; $i++) {
+            RateLimiter::hit($key, 3600);
+        }
+
+        // La limite étant atteinte, AUCUN appel IA ne doit être effectué (21e tentative bloquée).
+        $this->mock(AiService::class)->shouldNotReceive('chatWithHistory');
+
+        $component = Livewire::actingAs($owner)
+            ->test(CourseAssignments::class, ['course' => $course])
+            ->call('proposeAiFeedback', $submission->id)
+            ->assertSet('aiFeedbackSubmission', null);
+
+        $this->assertStringContainsString('20/heure', $component->get('aiFeedbackError'));
+
+        $submission->refresh();
+        $this->assertNull($submission->ai_feedback);
     }
 }

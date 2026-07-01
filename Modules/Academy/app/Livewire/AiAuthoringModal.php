@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace Modules\Academy\Livewire;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 use Modules\Academy\Actions\InsertOutlineDraftAction;
 use Modules\Academy\Models\Course;
@@ -30,6 +31,16 @@ use Modules\Academy\Services\AcademyAuthoringAiService;
 
 class AiAuthoringModal extends Component
 {
+    /**
+     * Disjoncteur DoS financier : l'authoring IA est réservé au personnel formateur
+     * (authorize('manageStructure', ...) déjà en place) — limite plus généreuse que
+     * le tuteur (10/min) mais bien réelle. Clé par utilisateur ET par action, comme
+     * TutorChat::sendQuestion().
+     */
+    private const AI_RATE_LIMIT_MAX = 20;
+
+    private const AI_RATE_LIMIT_DECAY_SECONDS = 3600;
+
     public int $courseId;
 
     public string $outlinePrompt   = '';
@@ -66,6 +77,12 @@ class AiAuthoringModal extends Component
         $this->authorize('manageStructure', $course);
 
         $this->validate(['outlinePrompt' => ['required', 'string', 'max:2000']]);
+
+        if ($this->tooManyAiRequests('outline')) {
+            $this->errorMessage = "Vous avez atteint la limite de générations de plan IA pour cette heure (20/heure). Réessayez plus tard.";
+
+            return;
+        }
 
         $this->isLoadingOutline = true;
         $this->errorMessage     = '';
@@ -130,6 +147,12 @@ class AiAuthoringModal extends Component
             'questionsCount'  => ['required', 'integer', 'min:1', 'max:20'],
         ]);
 
+        if ($this->tooManyAiRequests('questions')) {
+            $this->errorMessage = "Vous avez atteint la limite de générations de questions IA pour cette heure (20/heure). Réessayez plus tard.";
+
+            return;
+        }
+
         $this->isLoadingQuestions = true;
         $this->errorMessage       = '';
 
@@ -192,8 +215,31 @@ class AiAuthoringModal extends Component
         $this->questionsInserted  = true;
     }
 
+    public function render(): \Illuminate\Contracts\View\View
+    {
+        return view('academy::livewire.ai-authoring-modal');
+    }
+
     private function resolveCourse(): Course
     {
         return Course::findOrFail($this->courseId);
+    }
+
+    /**
+     * Disjoncteur DoS financier (défense en profondeur, en plus du budget IA global) :
+     * enregistre la tentative et retourne true si la limite horaire par utilisateur
+     * ET par action est atteinte. Clé au format `ai-authoring-{action}:{userId}`.
+     */
+    private function tooManyAiRequests(string $action): bool
+    {
+        $key = "ai-authoring-{$action}:" . (string) Auth::id();
+
+        if (RateLimiter::tooManyAttempts($key, self::AI_RATE_LIMIT_MAX)) {
+            return true;
+        }
+
+        RateLimiter::hit($key, self::AI_RATE_LIMIT_DECAY_SECONDS);
+
+        return false;
     }
 }

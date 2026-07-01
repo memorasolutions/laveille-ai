@@ -19,6 +19,7 @@ namespace Modules\Academy\Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Livewire;
 use Modules\Academy\Actions\InsertOutlineDraftAction;
 use Modules\Academy\Livewire\AiAuthoringModal;
@@ -158,5 +159,34 @@ class AiAuthoringTest extends TestCase
         Livewire::actingAs($intruder)
             ->test(AiAuthoringModal::class, ['course' => $course])
             ->assertForbidden();
+    }
+
+    // -------------------------------------------------------------------------
+    // (e) Disjoncteur DoS financier : rate-limit 20/heure sur generateOutline()
+    // -------------------------------------------------------------------------
+
+    public function test_rate_limit_generate_outline_bloque_apres_20_par_heure(): void
+    {
+        config(['academy.ai_authoring_enabled' => true]);
+
+        $course = $this->makeCourse('cours-rate-limit-outline');
+        $owner  = $this->makeOwner($course);
+
+        // Pré-remplit le disjoncteur à sa limite (20/heure) sans jamais appeler l'IA.
+        $key = 'ai-authoring-outline:' . $owner->id;
+        for ($i = 0; $i < 20; $i++) {
+            RateLimiter::hit($key, 3600);
+        }
+
+        // La limite étant atteinte, AUCUN appel IA ne doit être effectué (21e tentative bloquée).
+        $this->mock(AiService::class)->shouldNotReceive('chatWithHistory');
+
+        $component = Livewire::actingAs($owner)
+            ->test(AiAuthoringModal::class, ['course' => $course])
+            ->set('outlinePrompt', 'Un cours sur l\'IA')
+            ->call('generateOutline')
+            ->assertSet('generatedOutline', []);
+
+        $this->assertStringContainsString('20/heure', $component->get('errorMessage'));
     }
 }

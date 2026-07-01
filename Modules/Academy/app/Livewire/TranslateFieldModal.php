@@ -22,12 +22,22 @@ declare(strict_types=1);
 
 namespace Modules\Academy\Livewire;
 
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Services\AcademyTranslationAiService;
 
 class TranslateFieldModal extends Component
 {
+    /**
+     * Disjoncteur DoS financier : la traduction IA est réservée au personnel formateur
+     * (authorize('manageStructure', ...) déjà en place) — limite plus généreuse que
+     * le tuteur (10/min) mais bien réelle. Clé par utilisateur, comme TutorChat::sendQuestion().
+     */
+    private const AI_RATE_LIMIT_MAX = 20;
+
+    private const AI_RATE_LIMIT_DECAY_SECONDS = 3600;
+
     public int $courseId;
 
     public string $sourceText = '';
@@ -61,6 +71,16 @@ class TranslateFieldModal extends Component
             'sourceLocale' => ['required', 'string', 'in:fr,en'],
             'targetLocale' => ['required', 'string', 'in:fr,en'],
         ]);
+
+        $rateLimitKey = 'ai-translate:' . (string) auth()->id();
+
+        if (RateLimiter::tooManyAttempts($rateLimitKey, self::AI_RATE_LIMIT_MAX)) {
+            $this->errorMessage = "Vous avez atteint la limite de traductions IA pour cette heure (20/heure). Réessayez plus tard.";
+
+            return;
+        }
+
+        RateLimiter::hit($rateLimitKey, self::AI_RATE_LIMIT_DECAY_SECONDS);
 
         $this->isLoading    = true;
         $this->errorMessage = '';

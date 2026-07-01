@@ -23,12 +23,22 @@ declare(strict_types=1);
 
 namespace Modules\Academy\Livewire\Concerns;
 
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Computed;
 use Modules\Academy\Models\Submission;
 use Modules\Academy\Services\AcademyFeedbackAiService;
 
 trait HandlesAiFeedback
 {
+    /**
+     * Disjoncteur DoS financier : le feedback IA est réservé au personnel formateur
+     * (authorize('manageEnrollments', ...) déjà en place) — limite plus généreuse que
+     * le tuteur (10/min) mais bien réelle. Clé par utilisateur, comme TutorChat::sendQuestion().
+     */
+    private const AI_FEEDBACK_RATE_LIMIT_MAX = 20;
+
+    private const AI_FEEDBACK_RATE_LIMIT_DECAY_SECONDS = 3600;
+
     /** Remise pour laquelle un brouillon IA est affiché (id), null = aucun. */
     public ?int $aiFeedbackSubmission = null;
 
@@ -76,6 +86,16 @@ trait HandlesAiFeedback
 
             return;
         }
+
+        $rateLimitKey = 'ai-feedback:' . (string) auth()->id();
+
+        if (RateLimiter::tooManyAttempts($rateLimitKey, self::AI_FEEDBACK_RATE_LIMIT_MAX)) {
+            $this->aiFeedbackError = 'Vous avez atteint la limite de propositions de feedback IA pour cette heure (20/heure). Réessayez plus tard.';
+
+            return;
+        }
+
+        RateLimiter::hit($rateLimitKey, self::AI_FEEDBACK_RATE_LIMIT_DECAY_SECONDS);
 
         $result = app(AcademyFeedbackAiService::class)->evaluate($submission, $assignment);
 
