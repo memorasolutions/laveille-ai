@@ -372,6 +372,31 @@
                                       style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 8px;"></textarea>
                             @error('certificate_message') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
                         </div>
+
+                        {{-- Phase 2 câblage — sélecteur owner-scopé, gâté par le drapeau, `null` = comportement actuel inchangé --}}
+                        @if(config('academy.diploma_editor_enabled', false))
+                            <div style="flex: 1 1 100%;">
+                                <label for="cert-diploma-template" style="font-weight: 600; margin-bottom: 6px; font-size: 0.85rem; display: block;">
+                                    Gabarit de diplôme (Phase 2 — optionnel)
+                                </label>
+                                <select id="cert-diploma-template"
+                                        wire:model.live="diploma_template_id"
+                                        style="width: 100%; border: 1px solid #D1D5DB; border-radius: 8px; padding: 8px 10px; font-size: 0.875rem;">
+                                    <option value="">Rendu par défaut (aucun gabarit personnalisé)</option>
+                                    @foreach($this->myDiplomaTemplates as $template)
+                                        <option value="{{ $template->id }}">{{ $template->name }}</option>
+                                    @endforeach
+                                </select>
+                                @if(\Illuminate\Support\Facades\Route::has('academy.diplomas.templates.editor'))
+                                    <a href="{{ route('academy.diplomas.templates.editor') }}"
+                                       target="_blank"
+                                       rel="noopener"
+                                       style="font-size: 0.74rem; color: var(--sys-text-muted, #6B7280); text-decoration: none; margin-top: 4px; display: inline-block;">
+                                        Gérer mes gabarits de diplôme →
+                                    </a>
+                                @endif
+                            </div>
+                        @endif
                     </div>
 
                     <div class="d-flex flex-wrap align-items-center gap-2" style="margin-top: 10px;">

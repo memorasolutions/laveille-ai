@@ -48,6 +48,7 @@ use Spatie\MediaLibrary\HasMedia;
  * @property string|null $certificate_message
  * @property string|null $certificate_signature_name
  * @property string|null $certificate_accent_color
+ * @property int|null    $diploma_template_id
  * @property string      $ai_tutor_window_type
  * @property int|null    $ai_tutor_window_days
  * @property \Illuminate\Support\Carbon|null $ai_tutor_fixed_expiry_at
@@ -101,6 +102,8 @@ class Course extends Model implements HasMedia
         'certificate_message',
         'certificate_signature_name',
         'certificate_accent_color',
+        // Phase 2 — diplomation moderne : gabarit de diplôme associé (null = rendu par défaut).
+        'diploma_template_id',
         'grade_letter_scheme',
         'completion_criteria',
         // Tuteur IA — fenêtre d'accès + quota (recommandation veille juillet 2026).
@@ -187,6 +190,15 @@ class Course extends Model implements HasMedia
     public function certificatesIssued(): HasMany
     {
         return $this->hasMany(CertificateIssued::class);
+    }
+
+    /**
+     * Phase 2 — gabarit de diplôme associé à ce cours (null = rendu par défaut,
+     * voir CertificateController::resolveDiplomaTemplate()).
+     */
+    public function diplomaTemplate(): BelongsTo
+    {
+        return $this->belongsTo(DiplomaTemplate::class);
     }
 
     /**

@@ -6,7 +6,8 @@
  * @project memora/laravel-saas-boilerplate
  *
  * Trait extrait du God-component CourseEditor — réglages et règles du cours :
- * prérequis (C4), personnalisation du certificat (E3), achèvement configurable.
+ * prérequis (C4), personnalisation du certificat (E3), gabarit de diplôme (Phase 2),
+ * achèvement configurable.
  *
  * SÉCURITÉ : chaque mutation re-résout le cours via $this->resolveCourse() et
  * ré-autorise 'manageStructure' (anti-IDOR), exactement comme dans le composant
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Modules\Academy\Models\Course;
+use Modules\Academy\Models\DiplomaTemplate;
 use Modules\Academy\Services\CourseCompletionService;
 use Modules\Academy\Services\TutorAccessService;
 
@@ -134,6 +136,30 @@ trait HandlesCourseSettings
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
+    // GABARIT DE DIPLÔME (Phase 2 — diplomation moderne) - gâté manageStructure
+    //
+    // SÉCURITÉ : owner-scopé — un formateur ne voit/assigne QUE SES PROPRES
+    // gabarits (created_by = auth id). Invisible côté vue si
+    // academy.diploma_editor_enabled est désactivé, mais cette méthode reste
+    // inoffensive même appelée (lecture scoped uniquement).
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Gabarits de diplôme du formateur COURANT uniquement (jamais ceux d'un tiers),
+     * pour le sélecteur de l'éditeur de cours.
+     *
+     * @return \Illuminate\Support\Collection<int, DiplomaTemplate>
+     */
+    #[Computed]
+    public function myDiplomaTemplates(): \Illuminate\Support\Collection
+    {
+        return DiplomaTemplate::query()
+            ->where('created_by', Auth::id())
+            ->orderByDesc('updated_at')
+            ->get();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
     // PERSONNALISATION DU CERTIFICAT (E3) - gâtée manageStructure
     //
     // SÉCURITÉ : resolveCourse() → authorize('manageStructure') → validate → écrire.
@@ -142,6 +168,10 @@ trait HandlesCourseSettings
     // (rétrocompatibilité totale). La couleur d'accent est validée comme hex #RGB/#RRGGBB ;
     // l'anti-XSS final est assuré au RENDU (e() pour titre/signature, markdown nettoyé
     // pour le message), cf. public/certificate.blade.php.
+    //
+    // Phase 2 : diploma_template_id est ANTI-IDOR — un id forgé n'appartenant pas au
+    // formateur courant (created_by ≠ auth id) est silencieusement remis à null,
+    // jamais d'erreur affichée (pas de divulgation de l'existence d'un id d'autrui).
     // ─────────────────────────────────────────────────────────────────────────────
 
     public function saveCertificate(): void
@@ -166,11 +196,26 @@ trait HandlesCourseSettings
             'certificate_accent_color.regex' => 'La couleur doit être un code hexadécimal valide (ex. #064E5A).',
         ]);
 
+        // Phase 2 — anti-IDOR : le gabarit choisi doit appartenir au formateur courant.
+        $templateId = $this->diploma_template_id;
+        if ($templateId !== null) {
+            $owned = DiplomaTemplate::query()
+                ->where('id', $templateId)
+                ->where('created_by', Auth::id())
+                ->exists();
+
+            if (! $owned) {
+                $templateId = null;
+                $this->diploma_template_id = null;
+            }
+        }
+
         $course->update([
             'certificate_title'          => $validated['certificate_title'] ?? null,
             'certificate_message'        => $validated['certificate_message'] ?? null,
             'certificate_signature_name' => $validated['certificate_signature_name'] ?? null,
             'certificate_accent_color'   => $validated['certificate_accent_color'] ?? null,
+            'diploma_template_id'        => $templateId,
             'updated_by'                 => Auth::id(),
         ]);
 

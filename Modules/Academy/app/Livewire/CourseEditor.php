@@ -101,6 +101,9 @@ class CourseEditor extends Component
     public ?string $certificate_signature_name = null;
     public ?string $certificate_accent_color = null;
 
+    /** Phase 2 — gabarit de diplôme choisi (owner-scopé, null = rendu par défaut). */
+    public ?int $diploma_template_id = null;
+
     // ── Tuteur IA : fenêtre d'accès + quota (recommandation veille juillet 2026) ─
     // Visible/actionnable uniquement si academy.ai_tutor_access_control_enabled
     // est activé (voir Concerns\HandlesCourseSettings::saveAiTutorAccess). Modifier
@@ -239,6 +242,7 @@ class CourseEditor extends Component
     private const CERTIFICATE_FIELDS = [
         'certificate_title', 'certificate_message',
         'certificate_signature_name', 'certificate_accent_color',
+        'diploma_template_id', // Phase 2 — sélecteur de gabarit (voir HandlesCourseSettings::saveCertificate).
     ];
 
     /**
@@ -543,6 +547,7 @@ class CourseEditor extends Component
         $this->certificate_message        = $course->certificate_message;
         $this->certificate_signature_name = $course->certificate_signature_name;
         $this->certificate_accent_color   = $course->certificate_accent_color;
+        $this->diploma_template_id        = $course->diploma_template_id;
 
         // Tuteur IA — fenêtre d'accès + quota : valeurs courantes du cours.
         $this->ai_tutor_window_type          = (string) ($course->ai_tutor_window_type ?? 'none');
