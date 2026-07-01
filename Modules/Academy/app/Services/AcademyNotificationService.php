@@ -37,6 +37,7 @@ use Modules\Academy\Models\CourseRole;
 use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Models\ForumPost;
 use Modules\Academy\Models\ForumTopic;
+use Modules\Academy\Models\LiveSession;
 use Modules\Academy\Models\NotificationLog;
 use Modules\Academy\Models\NotificationPreference;
 use Modules\Newsletter\Services\BrevoService;
@@ -49,6 +50,7 @@ final class AcademyNotificationService
     public const TYPE_COURSE_COMPLETED = 'course_completed';
     public const TYPE_DUE_REMINDER     = 'due_reminder';
     public const TYPE_SRS_REMINDER     = 'srs_reminder';
+    public const TYPE_LIVE_REMINDER    = 'live_reminder';
 
     // Nudges comportementaux (relances bienveillantes). Regroupés sous UNE seule
     // préférence utilisateur « nudge » (opt-out global des relances), tout en gardant
@@ -75,6 +77,7 @@ final class AcademyNotificationService
         self::TYPE_COURSE_COMPLETED,
         self::TYPE_DUE_REMINDER,
         self::TYPE_SRS_REMINDER,
+        self::TYPE_LIVE_REMINDER,
         self::PREF_NUDGE,
     ];
 
@@ -427,6 +430,37 @@ final class AcademyNotificationService
                 'dueCount' => $dueCount,
                 'ctaUrl'   => $reviewUrl,
                 'ctaLabel' => 'Réviser maintenant',
+            ],
+            $dedupKey,
+        );
+    }
+
+    /**
+     * Rappel d'une séance en direct imminente -> à l'apprenant inscrit.
+     * IDEMPOTENT : la clé de dédoublonnage (séance + jour + user) empêche tout
+     * second rappel de la même séance au même utilisateur le même jour.
+     *
+     * L'heure est affichée en HEURE DU QUÉBEC d'abord (America/Toronto) dans le
+     * gabarit, l'UTC entre parenthèses (norme Memora).
+     */
+    public function liveSessionReminder(User $user, LiveSession $session): bool
+    {
+        if (! $this->isMasterEnabled()) {
+            return false;
+        }
+
+        $dedupKey = 'live:' . $session->id . ':' . now()->format('Ymd') . ':' . $user->id;
+
+        return $this->send(
+            self::TYPE_LIVE_REMINDER,
+            $user,
+            'Séance en direct à venir : ' . $session->title,
+            'academy::emails.live-reminder',
+            [
+                'session'  => $session,
+                'course'   => $session->course,
+                'ctaUrl'   => $session->join_url,
+                'ctaLabel' => 'Rejoindre la séance',
             ],
             $dedupKey,
         );

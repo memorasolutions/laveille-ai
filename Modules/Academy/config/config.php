@@ -201,6 +201,25 @@ return [
     */
     'open_badges_enabled' => env('ACADEMY_OPEN_BADGES_ENABLED', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Séances en direct / visioconférence natives (capacité LMS 2026)
+    |--------------------------------------------------------------------------
+    | Quand true, un formateur peut planifier des séances en direct rattachées
+    | à un cours (date/heure Québec + lien Zoom/Teams/Google Meet) depuis
+    | l'éditeur de cours ; les inscrits actifs les voient sur la page du cours,
+    | les rejoignent (la présence est enregistrée), et peuvent les ajouter à
+    | leur calendrier (.ics). La relance planifiée « academy:live-remind »
+    | rappelle les séances imminentes (via l'interrupteur maître des notifs).
+    |
+    | MVP « par lien » : le formateur colle l'URL de sa réunion (fournisseur
+    | par défaut = Google Meet). Architecture extensible à l'API plus tard
+    | (auto-création du lien Meet via Google Calendar API — phase 2).
+    | Défaut false : aucun onglet, routes/actions 404, commande no-op.
+    | Activer via ACADEMY_LIVE_SESSIONS_ENABLED=true dans le .env.
+    */
+    'live_sessions_enabled' => env('ACADEMY_LIVE_SESSIONS_ENABLED', false),
+
     'notifications' => [
         'enabled' => env('ACADEMY_NOTIFICATIONS_ENABLED', false),
 
@@ -211,9 +230,13 @@ return [
             'course_completed' => true,
             'due_reminder'     => true,
             'srs_reminder'     => true,
+            'live_reminder'    => true,
             // Préférence unique gouvernant tous les nudges (opt-in raisonnable, opt-out clair).
             'nudge'            => true,
         ],
+
+        // Fenêtre des rappels de séance en direct (en heures avant le début).
+        'live_reminder_window_hours' => env('ACADEMY_LIVE_REMINDER_WINDOW_HOURS', 24),
 
         // Fenêtre des rappels d'échéance (en jours avant l'échéance).
         'reminder_window_days' => env('ACADEMY_REMINDER_WINDOW_DAYS', 2),

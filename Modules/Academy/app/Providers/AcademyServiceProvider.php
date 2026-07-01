@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use Modules\Academy\Console\CourseReindexCommand;
+use Modules\Academy\Console\LiveRemindCommand;
 use Modules\Academy\Console\NudgeCommand;
 use Modules\Academy\Console\SendDueRemindersCommand;
 use Modules\Academy\Console\SrsRemindCommand;
@@ -81,6 +82,7 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
                 SendDueRemindersCommand::class,
                 SrsRemindCommand::class,
                 NudgeCommand::class,
+                LiveRemindCommand::class,
             ]);
         }
     }
@@ -195,6 +197,16 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // ACTION: Tuteur IA ancré au cours — drapeau academy.ai_tutor_enabled requis.
         // RAISON: Composant conversationnel RAG, gating serveur strict, Loi 25.
         Livewire::component('academy.tutor-chat', \Modules\Academy\Livewire\TutorChat::class);
+
+        // Séances en direct - GÉRANT (CRUD formateur, gâté manageStructure + drapeau
+        // academy.live_sessions_enabled). Séance/cohorte re-résolues scopées au cours
+        // (anti-IDOR). Heures saisies en Québec -> stockées UTC. Voir LiveSessionsManager.
+        Livewire::component('academy.live-sessions-manager', \Modules\Academy\Livewire\LiveSessionsManager::class);
+
+        // Séances en direct - APPRENANT (inscrit actif : liste à venir/passées +
+        // « Rejoindre » qui enregistre la présence IDEMPOTENTE). Gâté drapeau + accès
+        // serveur (inscription/staff). Voir CourseLiveSessions.
+        Livewire::component('academy.course-live-sessions', \Modules\Academy\Livewire\CourseLiveSessions::class);
     }
 
     public function register(): void

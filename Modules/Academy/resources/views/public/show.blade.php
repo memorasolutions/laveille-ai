@@ -200,6 +200,16 @@
                     @endif
                 </div>
 
+                {{-- Séances en direct (visioconférence native). Visible aux INSCRITS
+                     ACTIFS (ou staff en preview) seulement + drapeau live_sessions_enabled.
+                     Le composant re-vérifie l'accès serveur (403 sinon) : ce @if n'est
+                     qu'un affichage. Aucune fuite pour un non-inscrit. --}}
+                @if($isEnrolled && config('academy.live_sessions_enabled'))
+                    <div class="mb-5" style="margin-top: 36px;">
+                        @livewire('academy.course-live-sessions', ['course' => $course])
+                    </div>
+                @endif
+
                 {{-- FAQ placeholder --}}
                 @if(!empty($course->faq_dictionary_ids))
                     <div class="mb-5">

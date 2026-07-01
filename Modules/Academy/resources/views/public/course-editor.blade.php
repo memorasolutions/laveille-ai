@@ -87,6 +87,21 @@
                         </div>
                     @endcan
 
+                    {{-- Séances en direct (visioconférence native). Gâté manageStructure
+                         + drapeau academy.live_sessions_enabled (OFF => section absente).
+                         Le composant re-vérifie l'autorisation ET le drapeau à chaque
+                         mutation (anti-IDOR). Vraie garde = authorize() serveur. --}}
+                    @can('manageStructure', $course)
+                        @if(config('academy.live_sessions_enabled'))
+                            <div style="margin-top: 28px;">
+                                <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin: 0 0 8px;">
+                                    Séances en direct
+                                </h2>
+                                @livewire('academy.live-sessions-manager', ['course' => $course])
+                            </div>
+                        @endif
+                    @endcan
+
                     {{-- ESSAI (type « Essay ») - Correction des essais de quiz en attente.
                          Gâté manageEnrollments (admin OU owner/instructor) ; tentative
                          re-résolue scopée au cours (anti-IDOR). Vraie garde = serveur. --}}

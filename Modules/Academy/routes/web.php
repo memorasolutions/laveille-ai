@@ -24,6 +24,7 @@ use Modules\Academy\Http\Controllers\CourseController;
 use Modules\Academy\Http\Controllers\EnrollmentController;
 use Modules\Academy\Http\Controllers\ExportController;
 use Modules\Academy\Http\Controllers\LessonController;
+use Modules\Academy\Http\Controllers\LiveSessionController;
 use Modules\Academy\Http\Controllers\PurchaseController;
 use Modules\Academy\Http\Controllers\QuizController;
 use Modules\Academy\Http\Controllers\WikiController;
@@ -135,6 +136,15 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             // que les autres GET à génération dynamique : calendrier iCal, exports CSV).
             ->middleware(['auth', 'throttle:20,1'])
             ->name('courses.export');
+
+        // Séances en direct - export iCalendar (.ics) « Ajouter à mon calendrier ».
+        // Connexion requise ; accès gâté serveur (drapeau live_sessions_enabled +
+        // inscrit actif OU staff du cours) dans le contrôleur (anti-IDOR). throttle:20,1
+        // = même plafond anti-abus que les autres GET à génération dynamique.
+        Route::get('courses/{course:slug}/live/{session}/ics', [LiveSessionController::class, 'ics'])
+            ->middleware(['auth', 'throttle:20,1'])
+            ->whereNumber('session')
+            ->name('courses.live.ics');
 
         // PHASE D (D1) - Tableau de bord d'analytics PAR COURS (pilotage).
         // Connexion requise ; le cours est re-résolu côté serveur (binding par slug)

@@ -79,6 +79,13 @@ if (\Nwidart\Modules\Facades\Module::find('Academy')?->isEnabled()) {
     // IDEMPOTENTE (au plus 1 nudge/jour/user, tous types confondus). Entrée
     // PERMANENTE, gâtée sur module actif ; un seul passage quotidien.
     Schedule::command('academy:nudge')->dailyAt('07:30')->withoutOverlapping();
+
+    // Séances en direct - relance des séances imminentes (fenêtre J - 24 h par défaut).
+    // DOUBLE garde interne : drapeau academy.live_sessions_enabled (défaut FALSE) +
+    // interrupteur maître des notifications (défaut FALSE) -> commande no-op tant que
+    // non activée. IDEMPOTENTE (au plus 1 rappel/séance/jour/user). Entrée PERMANENTE,
+    // gâtée sur module actif ; un passage horaire capte les séances entrant dans la fenêtre.
+    Schedule::command('academy:live-remind')->hourly()->withoutOverlapping();
 }
 
 // Newsletter digest (preview mardi, envoi mercredi).
