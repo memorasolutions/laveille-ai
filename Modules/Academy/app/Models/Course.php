@@ -48,6 +48,11 @@ use Spatie\MediaLibrary\HasMedia;
  * @property string|null $certificate_message
  * @property string|null $certificate_signature_name
  * @property string|null $certificate_accent_color
+ * @property string      $ai_tutor_window_type
+ * @property int|null    $ai_tutor_window_days
+ * @property \Illuminate\Support\Carbon|null $ai_tutor_fixed_expiry_at
+ * @property int|null    $ai_tutor_monthly_quota
+ * @property int|null    $ai_tutor_reminder_days_before
  * @property int|null    $created_by
  * @property int|null    $updated_by
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -98,19 +103,29 @@ class Course extends Model implements HasMedia
         'certificate_accent_color',
         'grade_letter_scheme',
         'completion_criteria',
+        // Tuteur IA — fenêtre d'accès + quota (recommandation veille juillet 2026).
+        'ai_tutor_window_type',
+        'ai_tutor_window_days',
+        'ai_tutor_fixed_expiry_at',
+        'ai_tutor_monthly_quota',
+        'ai_tutor_reminder_days_before',
         'created_by',
         'updated_by',
     ];
 
     protected $casts = [
-        'published_at'        => 'datetime',
-        'seo_jsonld'          => 'array',
-        'faq_dictionary_ids'  => 'array',
-        'duration_minutes'    => 'integer',
-        'price_cents'         => 'integer',
-        'is_template'         => 'boolean',
-        'grade_letter_scheme' => 'array',
-        'completion_criteria' => 'array',
+        'published_at'                  => 'datetime',
+        'seo_jsonld'                    => 'array',
+        'faq_dictionary_ids'            => 'array',
+        'duration_minutes'              => 'integer',
+        'price_cents'                   => 'integer',
+        'is_template'                   => 'boolean',
+        'grade_letter_scheme'           => 'array',
+        'completion_criteria'           => 'array',
+        'ai_tutor_fixed_expiry_at'      => 'datetime',
+        'ai_tutor_window_days'          => 'integer',
+        'ai_tutor_monthly_quota'        => 'integer',
+        'ai_tutor_reminder_days_before' => 'integer',
     ];
 
     /**

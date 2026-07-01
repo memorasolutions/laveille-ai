@@ -18,6 +18,7 @@ use Modules\Academy\Console\LiveRemindCommand;
 use Modules\Academy\Console\NudgeCommand;
 use Modules\Academy\Console\SendDueRemindersCommand;
 use Modules\Academy\Console\SrsRemindCommand;
+use Modules\Academy\Console\TutorAccessRemindCommand;
 use Modules\Academy\Livewire\CompetencyManager;
 use Modules\Academy\Livewire\CourseAnalytics;
 use Modules\Academy\Livewire\CourseAssignments;
@@ -38,8 +39,10 @@ use Modules\Academy\Livewire\StudentCompetencies;
 use Modules\Academy\Livewire\StudentGrades;
 use Modules\Academy\Models\Chapter;
 use Modules\Academy\Models\Course;
+use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
+use Modules\Academy\Observers\EnrollmentObserver;
 use Modules\Academy\Policies\ChapterPolicy;
 use Modules\Academy\Policies\CoursePolicy;
 use Modules\Academy\Policies\LessonItemPolicy;
@@ -69,6 +72,12 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         Gate::policy(Lesson::class, LessonPolicy::class);
         Gate::policy(LessonItem::class, LessonItemPolicy::class);
 
+        // TUTEUR IA — Fenêtre d'accès + quota : calcule et FIGE le grant à chaque
+        // inscription créée (SOURCE UNIQUE, tous chemins confondus). NO-OP tant que
+        // le drapeau academy.ai_tutor_access_control_enabled est désactivé (défaut).
+        // Voir Observers\EnrollmentObserver + Services\TutorAccessService.
+        Enrollment::observe(EnrollmentObserver::class);
+
         // PHASE 2 - Espace personnel front-end (composant Livewire role-aware).
         // Même pattern que Authors/Backoffice : Livewire::component('namespace.kebab', Class).
         // Rendu via @livewire('academy.dashboard') dans la vue page public/dashboard.blade.php.
@@ -83,6 +92,7 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
                 SrsRemindCommand::class,
                 NudgeCommand::class,
                 LiveRemindCommand::class,
+                TutorAccessRemindCommand::class,
             ]);
         }
     }

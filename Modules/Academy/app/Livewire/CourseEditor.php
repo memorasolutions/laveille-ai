@@ -101,6 +101,17 @@ class CourseEditor extends Component
     public ?string $certificate_signature_name = null;
     public ?string $certificate_accent_color = null;
 
+    // ── Tuteur IA : fenêtre d'accès + quota (recommandation veille juillet 2026) ─
+    // Visible/actionnable uniquement si academy.ai_tutor_access_control_enabled
+    // est activé (voir Concerns\HandlesCourseSettings::saveAiTutorAccess). Modifier
+    // ces réglages n'affecte JAMAIS un grant déjà figé pour un apprenant déjà
+    // inscrit (voir TutorAccessService) — uniquement les NOUVELLES inscriptions.
+    public string $ai_tutor_window_type = 'none';
+    public ?int $ai_tutor_window_days = null;
+    public ?string $ai_tutor_fixed_expiry_at = null;
+    public ?int $ai_tutor_monthly_quota = null;
+    public ?int $ai_tutor_reminder_days_before = 7;
+
     // ── Achèvement du cours (course completion configurable) ────────────────────
     // Critère décidant quand le cours est COMPLÉTÉ (certificat + badges). Défaut
     // « all_required » = comportement historique. UN seul critère actif à la fois.
@@ -532,6 +543,13 @@ class CourseEditor extends Component
         $this->certificate_message        = $course->certificate_message;
         $this->certificate_signature_name = $course->certificate_signature_name;
         $this->certificate_accent_color   = $course->certificate_accent_color;
+
+        // Tuteur IA — fenêtre d'accès + quota : valeurs courantes du cours.
+        $this->ai_tutor_window_type          = (string) ($course->ai_tutor_window_type ?? 'none');
+        $this->ai_tutor_window_days          = $course->ai_tutor_window_days;
+        $this->ai_tutor_fixed_expiry_at      = $course->ai_tutor_fixed_expiry_at?->format('Y-m-d');
+        $this->ai_tutor_monthly_quota        = $course->ai_tutor_monthly_quota;
+        $this->ai_tutor_reminder_days_before = $course->ai_tutor_reminder_days_before ?? 7;
 
         // Achèvement du cours : critère normalisé (défaut all_required si NULL).
         $criteria                  = $course->completionCriteria();

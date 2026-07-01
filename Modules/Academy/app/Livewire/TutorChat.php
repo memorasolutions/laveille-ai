@@ -20,6 +20,7 @@ use Livewire\Component;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Models\Lesson;
+use Modules\Academy\Services\TutorAccessService;
 
 class TutorChat extends Component
 {
@@ -44,6 +45,13 @@ class TutorChat extends Component
 
     public bool $isLoading = false;
 
+    /**
+     * TUTEUR IA — Fenêtre d'accès + quota (drapeau academy.ai_tutor_access_control_enabled,
+     * défaut OFF = jamais bloqué). Vrai quand la fenêtre est expirée ou le quota mensuel
+     * atteint : le CHAT reste visible (historique conservé), seule la saisie est désactivée.
+     */
+    public bool $accessBlocked = false;
+
     // -------------------------------------------------------------------------
     // Cycle de vie
     // -------------------------------------------------------------------------
@@ -53,6 +61,15 @@ class TutorChat extends Component
         $this->lesson   = $lesson;
         $this->course   = $course;
         $this->messages = [];
+
+        // Reflète l'état d'accès dès l'ouverture (NO-OP si le drapeau est désactivé
+        // ou si l'utilisateur n'est pas encore authentifié : gate anti-IDOR inchangée).
+        if (auth()->check()) {
+            /** @var \App\Models\User $user */
+            $user   = auth()->user();
+            $access = app(TutorAccessService::class)->isAccessAllowed($user, $course);
+            $this->accessBlocked = ! $access['allowed'];
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -73,6 +90,26 @@ class TutorChat extends Component
         $this->validate([
             'question' => ['required', 'string', 'min:3', 'max:500'],
         ]);
+
+        // TUTEUR IA — Fenêtre d'accès + quota (NO-OP tant que le drapeau
+        // academy.ai_tutor_access_control_enabled est désactivé, défaut). Le CHAT
+        // reste visible (historique conservé) ; seule la saisie est désactivée
+        // côté vue (accessBlocked). Message CALME, jamais de popup native.
+        /** @var \App\Models\User $currentUser */
+        $currentUser = auth()->user();
+        $access      = app(TutorAccessService::class)->isAccessAllowed($currentUser, $this->course);
+
+        if (! $access['allowed']) {
+            $this->accessBlocked = true;
+            $this->messages[]    = [
+                'role'    => 'assistant',
+                'content' => $this->accessDeniedMessage($access['reason']),
+                'error'   => false,
+            ];
+            $this->question = '';
+
+            return;
+        }
 
         // Rate-limit : 10 questions par minute par utilisateur
         $key = 'tutor:' . (string) auth()->id();
@@ -106,6 +143,12 @@ class TutorChat extends Component
                 'content' => $result['answer'],
                 'error'   => $result['error'],
             ];
+
+            // Quota mensuel : incrémenté UNIQUEMENT sur une question réussie
+            // (NO-OP tant que le drapeau est désactivé ou sans grant calculé).
+            if (! $result['error']) {
+                app(TutorAccessService::class)->incrementUsage($currentUser, $this->course);
+            }
         } catch (\Exception) {
             $this->messages[] = [
                 'role'    => 'assistant',
@@ -164,6 +207,19 @@ class TutorChat extends Component
         }
 
         return $result;
+    }
+
+    /**
+     * Message CALME et EXPLICITE affiché quand l'accès au tuteur est refusé.
+     * Précise TOUJOURS que seul le tuteur est coupé, jamais le reste du cours.
+     */
+    private function accessDeniedMessage(string $reason): string
+    {
+        return match ($reason) {
+            TutorAccessService::REASON_EXPIRED => 'Ton accès au tuteur IA pour ce cours est terminé, mais tu gardes accès à tout le reste du cours.',
+            TutorAccessService::REASON_QUOTA_EXCEEDED => 'Tu as atteint ton quota de questions ce mois-ci pour ce cours. Le reste du cours reste accessible ; ton quota sera renouvelé au prochain mois.',
+            default => 'Le tuteur IA n\'est pas disponible pour le moment, mais le reste du cours reste accessible.',
+        };
     }
 
     /**

@@ -86,6 +86,14 @@ if (\Nwidart\Modules\Facades\Module::find('Academy')?->isEnabled()) {
     // non activée. IDEMPOTENTE (au plus 1 rappel/séance/jour/user). Entrée PERMANENTE,
     // gâtée sur module actif ; un passage horaire capte les séances entrant dans la fenêtre.
     Schedule::command('academy:live-remind')->hourly()->withoutOverlapping();
+
+    // Tuteur IA — rappel calme avant expiration de la fenêtre d'accès (J-7/J-1).
+    // DOUBLE garde interne : drapeau academy.ai_tutor_access_control_enabled
+    // (défaut FALSE) + interrupteur maître des notifications (défaut FALSE) ->
+    // commande no-op tant que non activée. IDEMPOTENTE (au plus 1 rappel/cours/
+    // jour/user). Entrée PERMANENTE, gâtée sur module actif ; un seul passage
+    // quotidien suffit (comparaison par date calendaire, pas par heure).
+    Schedule::command('academy:tutor-access-remind')->dailyAt('09:00')->withoutOverlapping();
 }
 
 // Newsletter digest (preview mardi, envoi mercredi).

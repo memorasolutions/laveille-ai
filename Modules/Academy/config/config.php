@@ -23,6 +23,27 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Tuteur IA — Fenêtre d'accès + quota (recommandation de veille juillet 2026)
+    |--------------------------------------------------------------------------
+    | Quand true, le Tuteur IA applique la fenêtre d'accès ET le quota mensuel
+    | configurés PAR COURS (voir Course::ai_tutor_window_type et suivants,
+    | éditables par le formateur dans l'éditeur de cours). Un rappel calme est
+    | envoyé à J-<ai_tutor_reminder_days_before> et J-1 avant expiration,
+    | précisant que SEUL le tuteur est coupé (le cours reste accessible).
+    |
+    | CRITIQUE (zéro effet rétroactif surprise) : la date d'expiration effective
+    | d'un apprenant déjà inscrit est CALCULÉE ET FIGÉE à l'inscription — modifier
+    | la config du cours après coup n'affecte QUE les nouvelles inscriptions.
+    | Voir Services\TutorAccessService.
+    |
+    | Défaut false : comportement du Tuteur IA EXACTEMENT identique à aujourd'hui
+    | (aucune vérification de fenêtre/quota, accès illimité tant qu'actif).
+    | Activer via ACADEMY_AI_TUTOR_ACCESS_CONTROL_ENABLED=true dans le .env.
+    */
+    'ai_tutor_access_control_enabled' => env('ACADEMY_AI_TUTOR_ACCESS_CONTROL_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Feedback IA sur réponses ouvertes (correction assistée - LMS 2026)
     |--------------------------------------------------------------------------
     | Quand true, le formateur voit un bouton « Proposer un feedback IA » sur
@@ -304,6 +325,8 @@ return [
             'due_reminder'     => true,
             'srs_reminder'     => true,
             'live_reminder'    => true,
+            // Tuteur IA — rappel calme avant expiration de la fenêtre d'accès (J-7/J-1).
+            'ai_tutor_access_reminder' => true,
             // Préférence unique gouvernant tous les nudges (opt-in raisonnable, opt-out clair).
             'nudge'            => true,
             // Gamification (LMS 2026) : opt-in raisonnable — visible par défaut dans le

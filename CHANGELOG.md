@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.71.0] - 2026-07-01
+
+### Added
+- **Académie — Tuteur IA : fenêtre d'accès + quota + rappel** (recommandation de veille juillet 2026). Le formateur peut limiter (optionnel) la durée pendant laquelle un apprenant peut utiliser le tuteur IA d'un cours (aucune fenêtre, X jours après l'inscription, X jours après le lancement du cours, ou date fixe) et/ou un quota mensuel de questions, réglables à tout moment dans l'éditeur de cours. Le contenu du cours reste **toujours** accessible, même après la fin de l'accès au tuteur. Un rappel calme est envoyé par courriel avant l'échéance (une semaine avant, puis la veille). Modifier ces réglages n'affecte jamais un apprenant déjà inscrit : seules les nouvelles inscriptions suivent la nouvelle configuration. Activable via `ACADEMY_AI_TUTOR_ACCESS_CONTROL_ENABLED` (désactivé par défaut — le tuteur IA se comporte comme avant).
+
 ## [1.70.0] - 2026-07-01
 
 ### Added

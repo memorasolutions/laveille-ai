@@ -144,8 +144,8 @@
             <div style="display: flex; gap: 8px; align-items: flex-end;">
                 <textarea
                     wire:model.live.blur="question"
-                    @disabled($isLoading)
-                    placeholder="Posez votre question sur la leçon..."
+                    @disabled($isLoading || $accessBlocked)
+                    placeholder="{{ $accessBlocked ? 'Tuteur IA indisponible pour ce cours' : 'Posez votre question sur la leçon...' }}"
                     rows="2"
                     aria-label="Votre question au tuteur"
                     x-ref="tutorInput"
@@ -167,12 +167,12 @@
                 <button
                     type="submit"
                     aria-label="Envoyer la question"
-                    @disabled($isLoading || strlen(trim($question)) < 3)
+                    @disabled($isLoading || $accessBlocked || strlen(trim($question)) < 3)
                     style="
                         background: var(--c-primary, #064E5A); color: #fff;
                         border: none; border-radius: 10px; padding: 8px 12px;
                         cursor: pointer; font-size: 1rem; min-width: 40px; min-height: 40px;
-                        opacity: {{ ($isLoading || strlen(trim($question)) < 3) ? '0.5' : '1' }};
+                        opacity: {{ ($isLoading || $accessBlocked || strlen(trim($question)) < 3) ? '0.5' : '1' }};
                     "
                 >→</button>
             </div>

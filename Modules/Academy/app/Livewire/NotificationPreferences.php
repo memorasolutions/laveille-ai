@@ -70,6 +70,10 @@ class NotificationPreferences extends Component
                 'titre' => 'Rappels de révision',
                 'desc'  => 'Recevoir un rappel quand des cartes de révision espacée sont dues.',
             ],
+            AcademyNotificationService::TYPE_AI_TUTOR_ACCESS_REMINDER => [
+                'titre' => 'Rappel d\'accès au tuteur IA',
+                'desc'  => 'Être prévenu avant la fin de votre accès au tuteur IA d\'un cours (le contenu du cours reste toujours accessible).',
+            ],
             AcademyNotificationService::PREF_NUDGE => [
                 'titre' => 'Encouragements personnalisés',
                 'desc'  => 'Recevoir de courts messages bienveillants adaptés à votre progression (félicitations, invitation à réviser ou à reprendre). Au plus un par jour.',

@@ -52,6 +52,9 @@ final class AcademyNotificationService
     public const TYPE_SRS_REMINDER     = 'srs_reminder';
     public const TYPE_LIVE_REMINDER    = 'live_reminder';
 
+    /** Tuteur IA — rappel calme avant expiration de la fenêtre d'accès (J-7/J-1). */
+    public const TYPE_AI_TUTOR_ACCESS_REMINDER = 'ai_tutor_access_reminder';
+
     // Nudges comportementaux (relances bienveillantes). Regroupés sous UNE seule
     // préférence utilisateur « nudge » (opt-out global des relances), tout en gardant
     // un dédoublonnage FIN par sous-type (milestone / mastery_drop / inactivity).
@@ -78,6 +81,7 @@ final class AcademyNotificationService
         self::TYPE_DUE_REMINDER,
         self::TYPE_SRS_REMINDER,
         self::TYPE_LIVE_REMINDER,
+        self::TYPE_AI_TUTOR_ACCESS_REMINDER,
         self::PREF_NUDGE,
     ];
 
@@ -461,6 +465,40 @@ final class AcademyNotificationService
                 'course'   => $session->course,
                 'ctaUrl'   => $session->join_url,
                 'ctaLabel' => 'Rejoindre la séance',
+            ],
+            $dedupKey,
+        );
+    }
+
+    /**
+     * Tuteur IA — rappel calme avant expiration de la fenêtre d'accès de CE cours
+     * (J-<reminder_days_before> et J-1, voir Console\TutorAccessRemindCommand).
+     * Précise TOUJOURS que seul le tuteur est coupé, jamais le cours.
+     *
+     * IDEMPOTENT : la clé de dédoublonnage (cours + jour + user) empêche tout
+     * second rappel le même jour pour ce cours et cet utilisateur (J-7 et J-1
+     * tombent sur des jours calendaires distincts, donc aucun risque de collision).
+     */
+    public function aiTutorAccessReminder(User $user, Course $course, int $daysLeft): bool
+    {
+        if (! $this->isMasterEnabled()) {
+            return false;
+        }
+
+        $dedupKey = 'ai_tutor_access:' . $course->id . ':' . now()->format('Ymd') . ':' . $user->id;
+
+        return $this->send(
+            self::TYPE_AI_TUTOR_ACCESS_REMINDER,
+            $user,
+            $daysLeft <= 1
+                ? 'Votre accès au tuteur IA se termine demain : ' . $course->title
+                : "Votre accès au tuteur IA se termine dans {$daysLeft} jours : " . $course->title,
+            'academy::emails.ai-tutor-access-reminder',
+            [
+                'course'   => $course,
+                'daysLeft' => $daysLeft,
+                'ctaUrl'   => $this->courseUrl($course),
+                'ctaLabel' => 'Ouvrir le cours',
             ],
             $dedupKey,
         );

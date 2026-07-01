@@ -22,9 +22,56 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Services\CourseCompletionService;
+use Modules\Academy\Services\TutorAccessService;
 
 trait HandlesCourseSettings
 {
+    // ─────────────────────────────────────────────────────────────────────────────
+    // TUTEUR IA — Fenêtre d'accès + quota (recommandation veille juillet 2026) -
+    // gâtée manageStructure + drapeau academy.ai_tutor_access_control_enabled.
+    //
+    // SÉCURITÉ : resolveCourse() → authorize('manageStructure') → validate → écrire.
+    // CRITIQUE (zéro effet rétroactif surprise) : cette méthode ne touche QUE la
+    // config du COURS. Elle ne recalcule JAMAIS les grants déjà figés des
+    // apprenants déjà inscrits (voir TutorAccessService::calculateGrantFor,
+    // appelé uniquement à l'inscription) — seules les NOUVELLES inscriptions
+    // suivent la config mise à jour ici.
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    public function saveAiTutorAccess(): void
+    {
+        $course = $this->resolveCourse();
+        $this->authorize('manageStructure', $course);
+
+        $needsDays  = in_array($this->ai_tutor_window_type, [
+            TutorAccessService::WINDOW_RELATIVE_TO_ENROLLMENT,
+            TutorAccessService::WINDOW_RELATIVE_TO_LAUNCH,
+        ], true);
+        $needsFixed = $this->ai_tutor_window_type === TutorAccessService::WINDOW_FIXED_DATE;
+
+        $validated = $this->validate([
+            'ai_tutor_window_type'          => ['required', 'string', Rule::in(TutorAccessService::WINDOW_TYPES)],
+            'ai_tutor_window_days'          => [$needsDays ? 'required' : 'nullable', 'integer', 'min:1', 'max:3650'],
+            'ai_tutor_fixed_expiry_at'      => [$needsFixed ? 'required' : 'nullable', 'date'],
+            'ai_tutor_monthly_quota'        => ['nullable', 'integer', 'min:1', 'max:100000'],
+            'ai_tutor_reminder_days_before' => ['nullable', 'integer', 'min:1', 'max:60'],
+        ], [
+            'ai_tutor_window_days.required'     => 'Indiquez le nombre de jours de la fenêtre.',
+            'ai_tutor_fixed_expiry_at.required' => 'Indiquez la date d\'expiration fixe.',
+        ]);
+
+        $course->update([
+            'ai_tutor_window_type'          => $validated['ai_tutor_window_type'],
+            'ai_tutor_window_days'          => $needsDays ? $validated['ai_tutor_window_days'] : null,
+            'ai_tutor_fixed_expiry_at'      => $needsFixed ? $validated['ai_tutor_fixed_expiry_at'] : null,
+            'ai_tutor_monthly_quota'        => $validated['ai_tutor_monthly_quota'] ?? null,
+            'ai_tutor_reminder_days_before' => $validated['ai_tutor_reminder_days_before'] ?? 7,
+            'updated_by'                    => Auth::id(),
+        ]);
+
+        $this->flashSaved('Accès au tuteur IA enregistré.');
+    }
+
     // ─────────────────────────────────────────────────────────────────────────────
     // PRÉREQUIS DE COURS (C4) - gâtés manageStructure
     //

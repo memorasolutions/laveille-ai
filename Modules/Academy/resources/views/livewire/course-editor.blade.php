@@ -389,6 +389,78 @@
                 </div>
             @endcan
 
+            {{-- Tuteur IA — fenêtre d'accès + quota (recommandation veille juillet 2026).
+                 Gâté manageStructure ET drapeau academy.ai_tutor_access_control_enabled
+                 (absent en OFF : aucune régression du Tuteur IA existant). Modifier ces
+                 réglages n'affecte JAMAIS un apprenant déjà inscrit (grant déjà figé) —
+                 uniquement les NOUVELLES inscriptions. Sécurité 100 % serveur
+                 (saveAiTutorAccess : resolveCourse + authorize). --}}
+            @if(config('academy.ai_tutor_access_control_enabled'))
+                @can('manageStructure', $course)
+                    <div style="flex: 1 1 100%; border-top: 1px solid #F1F5F9; padding-top: 12px;">
+                        <p style="font-weight: 600; margin: 0 0 4px;">🤖 Accès au tuteur IA</p>
+                        <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 10px;">
+                            Limitez (optionnel) la durée pendant laquelle un apprenant peut poser des questions au tuteur IA et/ou le nombre de questions par mois. Le contenu du cours reste TOUJOURS accessible, même si le tuteur se termine. Modifier ces réglages n'affecte que les <strong>nouvelles</strong> inscriptions, jamais celles déjà en cours.
+                        </p>
+
+                        <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                            <div style="flex: 1 1 240px;">
+                                <label for="tutor-window-type" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem;">Type de fenêtre</label>
+                                <select id="tutor-window-type" wire:model.live="ai_tutor_window_type"
+                                        style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 8px;">
+                                    <option value="none">Aucune (accès illimité)</option>
+                                    <option value="relative_to_enrollment">X jours après l'inscription</option>
+                                    <option value="relative_to_course_launch">X jours après le lancement du cours</option>
+                                    <option value="fixed_date">Date fixe</option>
+                                </select>
+                                @error('ai_tutor_window_type') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                            </div>
+
+                            @if(in_array($ai_tutor_window_type, ['relative_to_enrollment', 'relative_to_course_launch']))
+                                <div style="flex: 0 1 160px;">
+                                    <label for="tutor-window-days" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem;">Nombre de jours</label>
+                                    <input id="tutor-window-days" type="number" min="1" max="3650" wire:model.live.blur="ai_tutor_window_days"
+                                           style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 8px;">
+                                    @error('ai_tutor_window_days') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                                </div>
+                            @endif
+
+                            @if($ai_tutor_window_type === 'fixed_date')
+                                <div style="flex: 0 1 200px;">
+                                    <label for="tutor-fixed-expiry" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem;">Date d'expiration</label>
+                                    <input id="tutor-fixed-expiry" type="date" wire:model.live.blur="ai_tutor_fixed_expiry_at"
+                                           style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 8px;">
+                                    @error('ai_tutor_fixed_expiry_at') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                                </div>
+                            @endif
+
+                            <div style="flex: 0 1 200px;">
+                                <label for="tutor-monthly-quota" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem;">Quota mensuel de questions</label>
+                                <input id="tutor-monthly-quota" type="number" min="1" max="100000" wire:model.live.blur="ai_tutor_monthly_quota"
+                                       placeholder="Illimité"
+                                       style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 8px;">
+                                @error('ai_tutor_monthly_quota') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div style="flex: 0 1 200px;">
+                                <label for="tutor-reminder-days" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem;">1er rappel avant expiration (jours)</label>
+                                <input id="tutor-reminder-days" type="number" min="1" max="60" wire:model.live.blur="ai_tutor_reminder_days_before"
+                                       style="width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 8px;">
+                                <span style="display: block; font-size: 0.74rem; color: var(--sys-text-muted, #6B7280); margin-top: 4px;">Un second rappel est toujours envoyé à J-1.</span>
+                                @error('ai_tutor_reminder_days_before') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap align-items-center gap-2" style="margin-top: 10px;">
+                            <x-core::button type="button" wire:click="saveAiTutorAccess" wire:loading.attr="disabled" wire:target="saveAiTutorAccess" variant="secondary" size="sm">
+                                <span wire:loading.remove wire:target="saveAiTutorAccess">Enregistrer l'accès au tuteur IA</span>
+                                <span wire:loading wire:target="saveAiTutorAccess">Enregistrement…</span>
+                            </x-core::button>
+                        </div>
+                    </div>
+                @endcan
+            @endif
+
             {{-- Achèvement du cours (course completion configurable) : gâté manageStructure.
                  Choisit QUAND le cours est considéré complété (déblocage certificat + badges).
                  Défaut « all_required » = comportement actuel. Sécurité 100 % serveur
