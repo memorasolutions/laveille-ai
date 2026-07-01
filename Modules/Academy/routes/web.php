@@ -155,6 +155,19 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             ->middleware(['auth', 'throttle:20,1'])
             ->name('courses.reports.participation.csv');
 
+        // Analytiques prédictifs — vue organisationnelle (admin uniquement).
+        // Gate `academy.manage` + drapeau `predictive_analytics_enabled` vérifiés dans
+        // OrgAnalyticsDashboard::mount() (lecture seule, anti-IDOR).
+        Route::get('admin/analytiques', function () {
+            if (! config('academy.predictive_analytics_enabled', false)) {
+                return view('academy::public.dashboard'); // redirige vers espace si off
+            }
+
+            return view('academy::public.org-analytics-dashboard');
+        })
+            ->middleware(['auth', 'can:academy.manage'])
+            ->name('admin.org-analytics');
+
         // V5-b - Calendrier d'echeances par cours (etudiant inscrit OU gerant).
         // Autorisation verifiee par CourseCalendar::mount() (inscription active
         // OU manageStructure). Lecture seule pour l'etudiant, CRUD pour le gerant.

@@ -142,6 +142,21 @@ return [
     | choisi (opt-in raisonnable - les notifications transactionnelles importantes
     | sont activées). L'utilisateur peut désactiver chaque type depuis son espace.
     */
+    /*
+    |--------------------------------------------------------------------------
+    | Analytiques prédictifs (score de risque d'abandon)
+    |--------------------------------------------------------------------------
+    | Quand true, le RiskScoreService est actif : les formateurs voient les
+    | scores de risque de leurs apprenants, les étudiants voient un bandeau
+    | d'encouragement personnalisé, et l'admin accède au tableau de bord org.
+    | Défaut false : aucune donnée prédictive n'est affichée ou calculée.
+    | Activer via ACADEMY_PREDICTIVE_ANALYTICS_ENABLED=true dans le .env.
+    |
+    | Note Loi 25 QC : le score sert l'accompagnement pédagogique uniquement.
+    | Visible seulement au formateur/admin du cours et à l'apprenant lui-même.
+    */
+    'predictive_analytics_enabled' => env('ACADEMY_PREDICTIVE_ANALYTICS_ENABLED', false),
+
     'notifications' => [
         'enabled' => env('ACADEMY_NOTIFICATIONS_ENABLED', false),
 
