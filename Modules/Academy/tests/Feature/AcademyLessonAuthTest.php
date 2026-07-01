@@ -103,15 +103,29 @@ test('B01 caractérisation — guest sur lessons.show reçoit 200 (route sans mi
 })->skip('Caractérisation du bug B01 — désactiver le skip pour confirmer le bug AVANT le fix.');
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 2. Test de régression B01 (APRÈS fix)
-//    Ce test ÉCHOUE avant le fix (guest → 200) et PASSE après (guest → 302).
+// 2. Test de régression B01 (APRÈS fix), réconcilié avec BUG-001 (2026-07-01)
+//    La vraie faille B01 concernait les cours PRIVÉS/NON-LISTÉS accessibles à un
+//    guest sans redirection. Un cours PUBLIC, lui, doit rester accessible à
+//    l'anonyme (BUG-001, SEO/GEO) — voir section 4 ci-dessous.
+//    Ce test ÉCHOUE avant le fix (guest → 200 sur un cours privé) et PASSE
+//    après (guest → 302 vers la connexion).
 // ─────────────────────────────────────────────────────────────────────────────
 
-test('B01 régression — guest sur lessons.show est redirigé 302 vers la connexion', function (): void {
-    $course = b01Course('b01-cours-auth');
+test('B01 régression — guest sur lessons.show d\'un cours PRIVÉ est redirigé 302 vers la connexion', function (): void {
+    $course = b01Course('b01-cours-auth-prive');
+    $course->update(['visibility' => 'private']);
     $lesson = b01Lesson($course);
 
-    // Après le fix (middleware auth ajouté), le guest est redirigé.
+    // Après le fix, le guest sur un cours non-public est redirigé (jamais de 404 muet).
+    $this->get(route('academy.lessons.show', [$course, $lesson]))
+        ->assertRedirect(route('login'));
+});
+
+test('B01 régression — guest sur lessons.show d\'un cours NON-LISTÉ est redirigé 302 vers la connexion', function (): void {
+    $course = b01Course('b01-cours-auth-non-liste');
+    $course->update(['visibility' => 'unlisted']);
+    $lesson = b01Lesson($course);
+
     $this->get(route('academy.lessons.show', [$course, $lesson]))
         ->assertRedirect(route('login'));
 });
@@ -127,5 +141,22 @@ test('B01 non-régression — étudiant inscrit accède à lessons.show (200)', 
 
     $this->actingAs($student)
         ->get(route('academy.lessons.show', [$course, $lesson]))
+        ->assertStatus(200);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 4. Réconciliation B01 + BUG-001 (2026-07-01)
+//    Documente le comportement voulu : un guest sur une leçon d'un cours PUBLIC
+//    reçoit 200 (BUG-001, aucune régression SEO/GEO), tandis qu'un guest sur un
+//    cours PRIVÉ/NON-LISTÉ est redirigé vers la connexion (B01, section 2 ci-dessus).
+//    Ce test est le pendant de AcademyPreviewTest (« une leçon d'un cours publié
+//    reste accessible sans preview ») : les deux doivent être verts simultanément.
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('B01 + BUG-001 réconciliés — guest sur une leçon d\'un cours PUBLIC reçoit 200', function (): void {
+    $course = b01Course('b01-bug001-cours-public');
+    $lesson = b01Lesson($course);
+
+    $this->get(route('academy.lessons.show', [$course, $lesson]))
         ->assertStatus(200);
 });

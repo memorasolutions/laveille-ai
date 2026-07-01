@@ -26,7 +26,7 @@ class LessonController extends Controller
      * - 404 si la leçon n'appartient pas au cours (via le chapitre)
      * - Le contenu vidéo n'est injecté dans la vue QUE si l'accès est autorisé
      */
-    public function show(Request $request, Course $course, Lesson $lesson): \Illuminate\View\View
+    public function show(Request $request, Course $course, Lesson $lesson): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         // 1. Prévisualisation « en tant qu'étudiant » : réservée à un gérant de CE cours
         //    (can('update') = admin OU owner/instructor/editor). Le query param ?preview=1
@@ -45,8 +45,15 @@ class LessonController extends Controller
         // ni d'un staff/admin. private/unlisted : seuls les inscrits et le staff peuvent
         // accéder aux leçons ; les non-inscrits voient 404 (pas 403, pour ne pas divulguer
         // l'existence du cours). En preview, l'accès est déjà accordé ci-dessus.
-        // Note : le middleware `auth` est sur la route — auth()->user() est toujours défini.
+        // Note : le middleware `auth` global a été retiré de la route — ce bloc gère désormais
+        // lui-même la redirection des anonymes vers la page de connexion conformément à B01.
         if (! $isPreview && $course->visibility !== 'public') {
+            // B01 : un utilisateur anonyme sur un cours non-public doit être redirigé vers la connexion,
+            // jamais confronté à un 404 muet ni autorisé silencieusement.
+            if (! auth()->check()) {
+                return redirect()->guest(route('login'));
+            }
+
             $isStaffEarly = auth()->user()->can('academy.manage')
                 || $course->hasRole(auth()->user(), ['owner', 'instructor', 'editor', 'assistant']);
 
