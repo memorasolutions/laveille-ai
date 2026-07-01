@@ -183,6 +183,10 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // DeckPlayer : présentation de leçon en cartes plein écran (drapeau academy.lesson_deck_mode).
         // Activé via ACADEMY_LESSON_DECK_MODE=true dans le .env.
         Livewire::component('academy.deck-player', \Modules\Academy\Livewire\DeckPlayer::class);
+
+        // ACTION: Tuteur IA ancré au cours — drapeau academy.ai_tutor_enabled requis.
+        // RAISON: Composant conversationnel RAG, gating serveur strict, Loi 25.
+        Livewire::component('academy.tutor-chat', \Modules\Academy\Livewire\TutorChat::class);
     }
 
     public function register(): void

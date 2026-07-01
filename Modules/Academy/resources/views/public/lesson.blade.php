@@ -2136,4 +2136,12 @@
         </div>{{-- /academy-lesson-layout --}}
     </div>
 </section>
+
+{{-- ══ Tuteur IA (drapeau academy.ai_tutor_enabled + inscrit/staff) ══ --}}
+{{-- ACTION: Injecte le panneau tuteur flottant si le drapeau est actif  --}}
+{{-- RAISON: Gating serveur dans le composant TutorChat (anti-IDOR)      --}}
+@if(config('academy.ai_tutor_enabled', false) && auth()->check() && ($isEnrolled || auth()->user()->isSuperAdmin()))
+    @livewire('academy.tutor-chat', ['lesson' => $lesson, 'course' => $course], key('tutor-' . $lesson->id))
+@endif
+
 @endsection

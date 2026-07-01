@@ -11,6 +11,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Tuteur IA ancré au cours (différenciateur LMS 2026)
+    |--------------------------------------------------------------------------
+    | Quand true, un panneau conversationnel flottant apparaît sur la page de
+    | leçon pour les apprenants inscrits (et le staff). Le tuteur répond
+    | UNIQUEMENT à partir du contenu de la leçon (RAG), en français québécois.
+    | Défaut false : rien ne s'affiche, aucun appel IA n'est effectué.
+    | Activer via ACADEMY_AI_TUTOR_ENABLED=true dans le .env.
+    */
+    'ai_tutor_enabled' => env('ACADEMY_AI_TUTOR_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Mode « EN CONSTRUCTION » (go-live progressif)
     |--------------------------------------------------------------------------
     | Quand true (défaut), les pages publiques /academie/* affichent une page
