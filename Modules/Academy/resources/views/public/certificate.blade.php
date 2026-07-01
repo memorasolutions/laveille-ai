@@ -310,6 +310,12 @@
             <x-core::button type="button" variant="secondary" icon="🖨️" onclick="window.print()">
                 Imprimer
             </x-core::button>
+            {{-- D09 — Open Badge 3.0 vérifiable (visible uniquement si la fonctionnalité est activée) --}}
+            @if(config('academy.open_badges_enabled', false))
+            <x-core::button :href="route('academy.badges.show', $certificate->serial)" variant="secondary" icon="🏅">
+                Badge vérifiable
+            </x-core::button>
+            @endif
             <x-core::button :href="route('academy.courses.show', $certificate->course->slug)" variant="secondary">
                 Retour au cours
             </x-core::button>

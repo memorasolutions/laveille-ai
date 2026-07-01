@@ -8,6 +8,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Academy\Http\Controllers\AcademyController;
+use Modules\Academy\Http\Controllers\OpenBadgeController;
 use Modules\Academy\Http\Controllers\CalendarController;
 use Modules\Academy\Http\Controllers\CertificateController;
 use Modules\Academy\Http\Controllers\CompletionController;
@@ -185,6 +186,17 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             ->middleware('auth')
             ->name('courses.calendar');
     });
+
+    // D09 — OpenBadge 3.0 vérifiables (public, pas d'auth, gâtés par academy.open_badges_enabled).
+    // Route user-badge AVANT {serial} pour éviter que « user-badge » soit capté comme serial.
+    Route::get('badges/user-badge/{id}/assertion', [OpenBadgeController::class, 'userBadgeAssertion'])
+        ->middleware('throttle:60,1')
+        ->name('badges.user-badge-assertion');
+    Route::get('badges/{serial}/assertion', [OpenBadgeController::class, 'assertion'])
+        ->middleware('throttle:60,1')
+        ->name('badges.assertion');
+    Route::get('badges/{serial}', [OpenBadgeController::class, 'show'])
+        ->name('badges.show');
 
     // M6 — Certificats publics vérifiables (pas d'auth requise)
     Route::get('certificats/{public_url_slug}', [CertificateController::class, 'show'])->name('certificates.show');

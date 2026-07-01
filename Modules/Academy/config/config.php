@@ -187,6 +187,20 @@ return [
     */
     'nudges_enabled' => env('ACADEMY_NUDGES_ENABLED', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | D09 — Open Badges 3.0 vérifiables (standard 1EdTech)
+    |--------------------------------------------------------------------------
+    | Quand true, les endpoints publics /academie/badges/{serial}[/assertion]
+    | et /academie/badges/user-badge/{id}/assertion sont actifs. Chaque
+    | certificat ou badge gagné expose une assertion JSON-LD conforme OB 3.0 /
+    | Verifiable Credentials (W3C + 1EdTech), avec identifiant apprenant
+    | pseudonyme (HMAC-SHA256, Loi 25 QC / RGPD).
+    | OFF (défaut) → routes 404, aucun bouton « Badge vérifiable » affiché.
+    | Activer via ACADEMY_OPEN_BADGES_ENABLED=true dans le .env.
+    */
+    'open_badges_enabled' => env('ACADEMY_OPEN_BADGES_ENABLED', false),
+
     'notifications' => [
         'enabled' => env('ACADEMY_NOTIFICATIONS_ENABLED', false),
 
