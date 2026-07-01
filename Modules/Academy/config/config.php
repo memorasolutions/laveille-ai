@@ -233,6 +233,21 @@ return [
     */
     'live_sessions_enabled' => env('ACADEMY_LIVE_SESSIONS_ENABLED', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Gamification moderne — XP, niveaux, classement PAR COHORTE (LMS 2026)
+    |--------------------------------------------------------------------------
+    | Quand true, chaque VRAIE action pédagogique (leçon complétée, quiz réussi,
+    | cours complété) crédite un XP pondéré et documenté (voir
+    | GamificationService), affiché dans « Mon espace » avec un niveau et un
+    | classement scopé À LA COHORTE de l'apprenant (jamais un classement global).
+    | Idempotent (une même action ne crédite jamais deux fois) et respectueux de
+    | la Loi 25 QC : l'apprenant peut se retirer du classement à tout moment.
+    | Défaut false : aucun crédit XP, aucun bloc affiché, aucun classement.
+    | Activer via ACADEMY_GAMIFICATION_ENABLED=true dans le .env.
+    */
+    'gamification_enabled' => env('ACADEMY_GAMIFICATION_ENABLED', false),
+
     'notifications' => [
         'enabled' => env('ACADEMY_NOTIFICATIONS_ENABLED', false),
 
@@ -246,6 +261,9 @@ return [
             'live_reminder'    => true,
             // Préférence unique gouvernant tous les nudges (opt-in raisonnable, opt-out clair).
             'nudge'            => true,
+            // Gamification (LMS 2026) : opt-in raisonnable — visible par défaut dans le
+            // classement de sa cohorte, retrait possible à tout moment (Loi 25 QC).
+            'gamification_leaderboard' => true,
         ],
 
         // Fenêtre des rappels de séance en direct (en heures avant le début).

@@ -211,6 +211,11 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // Authoring IA - génération de plan + questions en brouillon (gâté drapeau
         // academy.ai_authoring_enabled + authorize manageStructure dans chaque action).
         Livewire::component('academy.ai-authoring-modal', \Modules\Academy\Livewire\AiAuthoringModal::class);
+
+        // Gamification moderne (XP/niveaux/classement de cohorte) — gâtée par le
+        // drapeau academy.gamification_enabled dans le composant lui-même ET dans
+        // la vue qui l'inclut (double garde). Voir GamificationService.
+        Livewire::component('academy.gamification', \Modules\Academy\Livewire\Gamification::class);
     }
 
     public function register(): void
