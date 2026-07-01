@@ -30,6 +30,7 @@ use Modules\Academy\Livewire\CourseEditor;
 use Modules\Academy\Livewire\CourseReports;
 use Modules\Academy\Livewire\CourseRoster;
 use Modules\Academy\Livewire\Dashboard;
+use Modules\Academy\Livewire\DiplomaTemplateEditor;
 use Modules\Academy\Livewire\EssayGrading;
 use Modules\Academy\Livewire\NotificationMasterSwitch;
 use Modules\Academy\Livewire\NotificationPreferences;
@@ -236,6 +237,12 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // (Course/Lesson/Chapter ne sont pas Translatable). Gâté drapeau
         // academy.ai_translation_enabled + authorize manageStructure dans chaque action.
         Livewire::component('academy.translate-field-modal', \Modules\Academy\Livewire\TranslateFieldModal::class);
+
+        // Phase 1 — Éditeur de gabarits de diplômes (Konva.js pour le placement,
+        // rendu final HTML/CSS via DiplomaRenderService). OWNER-SCOPED (formateur :
+        // ses gabarits ; admin academy.manage : tous), gâté par le drapeau
+        // academy.diploma_editor_enabled (404 si désactivé). Voir DiplomaTemplateEditor.
+        Livewire::component('academy.diploma-template-editor', DiplomaTemplateEditor::class);
     }
 
     public function register(): void

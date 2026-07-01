@@ -41,6 +41,14 @@
             'label' => '🏛️ Banque de questions',
             'show'  => $canManage,
         ],
+        [
+            'route' => 'academy.diplomas.templates.editor',
+            'label' => '🎓 Gabarits de diplômes',
+            // Phase 1 : lien visible UNIQUEMENT si le drapeau est actif (OFF = système
+            // de certificat existant inchangé, aucun bouton affiché — même convention
+            // que le bouton « Badge vérifiable » gâté academy.open_badges_enabled).
+            'show'  => $canManage && config('academy.diploma_editor_enabled', false),
+        ],
     ];
 @endphp
 

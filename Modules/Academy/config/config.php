@@ -316,6 +316,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Éditeur de gabarits de diplômes (Phase 1 — système de diplomation moderne)
+    |--------------------------------------------------------------------------
+    | Quand true, un formateur (ou l'admin) peut créer/éditer des gabarits de
+    | diplôme personnalisés via un éditeur visuel Konva.js (positionnement des
+    | éléments — logo, nom, titre du cours, date, signature, QR, texte libre —
+    | en pourcentages, portable entre écrans/impressions). Le RENDU FINAL reste
+    | en HTML/CSS (DiplomaRenderService), jamais en canvas ; le PDF réutilise le
+    | même moteur dompdf que CertificateController (aucun 2e pipeline). Le QR
+    | encode la MÊME URL de vérification publique que le certificat existant
+    | (academy.certificates.show) — un seul système de confiance, jamais deux.
+    | Défaut false : route/actions de l'éditeur 404, le système de certificat
+    | existant (gabarit unique actuel) continue de fonctionner à l'identique.
+    | Activer via ACADEMY_DIPLOMA_EDITOR_ENABLED=true dans le .env.
+    */
+    'diploma_editor_enabled' => env('ACADEMY_DIPLOMA_EDITOR_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Discussion sociale structurée par vidéo (LMS 2026)
     |--------------------------------------------------------------------------
     | Quand true, un item de leçon « video » porte son propre forum (réutilise

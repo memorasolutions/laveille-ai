@@ -129,6 +129,19 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             ->middleware('auth')
             ->name('competencies');
 
+        // Phase 1 — Éditeur de gabarits de diplômes (Konva.js, drapeau
+        // academy.diploma_editor_enabled). Connexion requise ; l'autorisation
+        // d'entrée (academy.manage OU rôle instructor) ET le drapeau vivent dans
+        // DiplomaTemplateEditor::mount() (abort 404/403), owner-scopé (anti-IDOR).
+        // Déclarée AVANT les routes wildcard courses/{course:slug} pour que
+        // « diplomes » ne soit jamais capté comme un slug de cours.
+        Route::get('diplomes/gabarits/{templateId?}', function (?int $templateId = null) {
+            return view('academy::public.diploma-template-editor', ['templateId' => $templateId]);
+        })
+            ->whereNumber('templateId')
+            ->middleware('auth')
+            ->name('diplomas.templates.editor');
+
         // PHASE 3 (FE-3) - Éditeur de cours front-end (« mode édition »).
         // Connexion requise ; le cours est re-résolu côté serveur (binding par slug)
         // puis ré-autorisé À CHAQUE action par le composant Livewire (jamais de
