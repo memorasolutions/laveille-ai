@@ -52,6 +52,14 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             ->middleware('auth')
             ->name('dashboard');
 
+        // SRS - Session de révision espacée (répétition espacée native, LMS 2026).
+        // Connexion requise ; le composant Livewire SrsReviewer abort 404 si le
+        // drapeau academy.srs_enabled est désactivé et ne révise QUE les cartes de
+        // auth()->user() (scope serveur, anti-IDOR). Deeplink des courriels de relance.
+        Route::get('espace/reviser', fn () => view('academy::public.srs-review'))
+            ->middleware('auth')
+            ->name('srs.review');
+
         // V5-c - Préférences de notification courriel (opt-in/opt-out par type).
         // Connexion requise ; le composant Livewire n'agit que sur auth()->user()
         // (jamais un id du client). Lien présent dans chaque courriel (Loi 25 / LCAP).

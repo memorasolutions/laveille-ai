@@ -157,6 +157,20 @@ return [
     */
     'predictive_analytics_enabled' => env('ACADEMY_PREDICTIVE_ANALYTICS_ENABLED', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Répétition espacée native (SRS - différenciateur rétention LMS 2026)
+    |--------------------------------------------------------------------------
+    | Quand true, à la complétion d'une leçon des cartes de révision (concepts
+    | et mini-quiz) sont créées pour l'apprenant, reprogrammées au moment
+    | optimal par l'algorithme SM-2. Un bouton « Réviser (N cartes) » apparaît
+    | dans l'espace, et la relance planifiée « academy:srs-remind » notifie les
+    | apprenants ayant des cartes dues (via l'interrupteur maître des notifs).
+    | Défaut false : aucune carte créée, aucun bouton, commande no-op.
+    | Activer via ACADEMY_SRS_ENABLED=true dans le .env.
+    */
+    'srs_enabled' => env('ACADEMY_SRS_ENABLED', false),
+
     'notifications' => [
         'enabled' => env('ACADEMY_NOTIFICATIONS_ENABLED', false),
 
@@ -166,6 +180,7 @@ return [
             'graded'           => true,
             'course_completed' => true,
             'due_reminder'     => true,
+            'srs_reminder'     => true,
         ],
 
         // Fenêtre des rappels d'échéance (en jours avant l'échéance).

@@ -55,6 +55,25 @@ class Dashboard extends Component
      *
      * @return Collection<int, array<string, mixed>>
      */
+    /**
+     * SRS - Nombre de cartes de révision DUES de l'utilisateur courant.
+     * Retourne 0 si le drapeau academy.srs_enabled est désactivé (SrsService
+     * garde le drapeau) : le bouton « Réviser » reste alors masqué. Défensif.
+     */
+    #[Computed]
+    public function srsDueCount(): int
+    {
+        if (! class_exists(\Modules\Academy\Services\SrsService::class)) {
+            return 0;
+        }
+
+        try {
+            return app(\Modules\Academy\Services\SrsService::class)->dueCountFor(Auth::user());
+        } catch (\Throwable) {
+            return 0;
+        }
+    }
+
     #[Computed]
     public function enrollments(): Collection
     {

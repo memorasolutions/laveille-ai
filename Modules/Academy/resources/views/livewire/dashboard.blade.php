@@ -6,6 +6,22 @@
             {{ session('academy_dashboard_status') }}
         </div>
     @endif
+    {{-- ───────────── SRS : bouton de révision (visible si cartes dues ; masqué si drapeau off) ───────────── --}}
+    @if($this->srsDueCount > 0)
+        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;border:1px solid #99F6E4;background:#F0FDFA;border-radius:var(--sys-radius-md, 0.75rem);padding:16px 20px;margin-bottom:22px;">
+            <div>
+                <p style="margin:0;font-weight:700;color:#064E5A;font-size:1.05rem;">Il est temps de réviser</p>
+                <p style="margin:2px 0 0;color:#334155;font-size:0.9rem;">
+                    {{ $this->srsDueCount }} {{ $this->srsDueCount > 1 ? 'cartes vous attendent' : 'carte vous attend' }} - moins de deux minutes suffisent.
+                </p>
+            </div>
+            <a href="{{ route('academy.srs.review') }}"
+               style="display:inline-block;background:#064E5A;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:600;min-height:44px;line-height:20px;white-space:nowrap;">
+                Réviser ({{ $this->srsDueCount }})
+            </a>
+        </div>
+    @endif
+
     {{-- ───────────────────────── Mes formations (tous rôles) ───────────────────────── --}}
     <section aria-labelledby="academy-mes-formations" class="mb-5">
         <h2 id="academy-mes-formations"

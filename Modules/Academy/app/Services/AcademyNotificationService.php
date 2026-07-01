@@ -48,6 +48,7 @@ final class AcademyNotificationService
     public const TYPE_GRADED           = 'graded';
     public const TYPE_COURSE_COMPLETED = 'course_completed';
     public const TYPE_DUE_REMINDER     = 'due_reminder';
+    public const TYPE_SRS_REMINDER     = 'srs_reminder';
 
     /** Tous les types gérables par l'utilisateur (ordre d'affichage de la page préférences). */
     public const TYPES = [
@@ -56,6 +57,7 @@ final class AcademyNotificationService
         self::TYPE_GRADED,
         self::TYPE_COURSE_COMPLETED,
         self::TYPE_DUE_REMINDER,
+        self::TYPE_SRS_REMINDER,
     ];
 
     public function __construct(private readonly BrevoService $brevo) {}
@@ -359,6 +361,42 @@ final class AcademyNotificationService
                     ? route('academy.courses.calendar', $event['course_slug'])
                     : url('/academie/espace'),
                 'ctaLabel' => 'Voir le calendrier',
+            ],
+            $dedupKey,
+        );
+    }
+
+    /**
+     * Relance de révision espacée (SRS) -> à l'apprenant ayant des cartes dues.
+     * IDEMPOTENT : la clé de dédoublonnage (type + jour + user) empêche plus
+     * d'une relance SRS par jour et par utilisateur (anti-spam).
+     *
+     * @param  int  $dueCount  Nombre de cartes dues (affiché dans le courriel).
+     */
+    public function srsReminder(User $user, int $dueCount): bool
+    {
+        if (! $this->isMasterEnabled()) {
+            return false;
+        }
+
+        // Un seul rappel SRS par jour et par utilisateur.
+        $dedupKey = 'srs:' . now()->format('Ymd') . ':' . $user->id;
+
+        $reviewUrl = Route::has('academy.srs.review')
+            ? route('academy.srs.review')
+            : url('/academie/espace');
+
+        return $this->send(
+            self::TYPE_SRS_REMINDER,
+            $user,
+            $dueCount > 1
+                ? "Vous avez {$dueCount} cartes à réviser aujourd'hui"
+                : 'Vous avez une carte à réviser aujourd\'hui',
+            'academy::emails.srs-reminder',
+            [
+                'dueCount' => $dueCount,
+                'ctaUrl'   => $reviewUrl,
+                'ctaLabel' => 'Réviser maintenant',
             ],
             $dedupKey,
         );

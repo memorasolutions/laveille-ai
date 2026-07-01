@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.66.0] - 2026-07-01
+
+### Added
+- **Académie — répétition espacée (SRS) native** : après une leçon complétée, l'apprenant peut réviser de courtes cartes (concepts et mini-quiz) reprogrammées au meilleur moment par l'algorithme SM-2. Un bouton « Réviser » apparaît dans l'espace personnel, une session plein écran présente chaque carte avec auto-évaluation (Facile / Correct / Difficile / À revoir), et une relance quotidienne par courriel invite à réviser (au plus une fois par jour). Fonctionnalité entièrement activable et désactivable (drapeau `ACADEMY_SRS_ENABLED`, désactivée par défaut) : lorsqu'elle est désactivée, aucune carte n'est créée et rien ne s'affiche.
+
 ## [1.65.264] - 2026-06-18
 
 ### Fixed

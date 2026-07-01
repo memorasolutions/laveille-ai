@@ -66,6 +66,12 @@ Schedule::command('notifications:send-digest --frequency=weekly')->weeklyOn(1, '
 // éviter NamespaceNotFoundException quand le module Academy est désactivé.
 if (\Nwidart\Modules\Facades\Module::find('Academy')?->isEnabled()) {
     Schedule::command('academy:send-due-reminders')->dailyAt('08:00')->withoutOverlapping();
+
+    // SRS - Relance de révision espacée (différenciateur rétention). DOUBLE garde
+    // interne : drapeau academy.srs_enabled (défaut FALSE) + interrupteur maître des
+    // notifications (défaut FALSE) -> commande no-op tant que non activée. Idempotente
+    // (une relance/jour/user max). Entrée PERMANENTE, gâtée sur module actif.
+    Schedule::command('academy:srs-remind')->dailyAt('17:00')->withoutOverlapping();
 }
 
 // Newsletter digest (preview mardi, envoi mercredi).

@@ -83,6 +83,19 @@ final class CompletionService
             // Silencieux
         }
 
+        // SRS - Répétition espacée (différenciateur rétention). Gardé par le drapeau
+        // academy.srs_enabled : si désactivé, enqueueForLesson() est un no-op complet
+        // (aucune carte créée). Idempotent (unicité user+source en base) et défensif :
+        // un échec ici ne casse jamais la complétion.
+        try {
+            $lesson = $item->lesson ?? null;
+            if ($lesson !== null && class_exists(SrsService::class)) {
+                app(SrsService::class)->enqueueForLesson($user, $lesson);
+            }
+        } catch (\Throwable) {
+            // Silencieux
+        }
+
         // ActivityLog défensif — guard idempotence B02b : écrire UNIQUEMENT si la
         // completion est NOUVELLE (wasRecentlyCreated) OU si le statut vient de passer
         // à 'completed' pour la première fois (wasChanged). Empêche toute écriture

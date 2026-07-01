@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use Modules\Academy\Console\CourseReindexCommand;
 use Modules\Academy\Console\SendDueRemindersCommand;
+use Modules\Academy\Console\SrsRemindCommand;
 use Modules\Academy\Livewire\CompetencyManager;
 use Modules\Academy\Livewire\CourseAnalytics;
 use Modules\Academy\Livewire\CourseAssignments;
@@ -77,6 +78,7 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
             $this->commands([
                 CourseReindexCommand::class,
                 SendDueRemindersCommand::class,
+                SrsRemindCommand::class,
             ]);
         }
     }
@@ -183,6 +185,10 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // DeckPlayer : présentation de leçon en cartes plein écran (drapeau academy.lesson_deck_mode).
         // Activé via ACADEMY_LESSON_DECK_MODE=true dans le .env.
         Livewire::component('academy.deck-player', \Modules\Academy\Livewire\DeckPlayer::class);
+
+        // SRS - Session de révision espacée (gâtée par le drapeau academy.srs_enabled
+        // dans le composant lui-même ; l'enregistrement reste inconditionnel).
+        Livewire::component('academy.srs-reviewer', \Modules\Academy\Livewire\SrsReviewer::class);
 
         // ACTION: Tuteur IA ancré au cours — drapeau academy.ai_tutor_enabled requis.
         // RAISON: Composant conversationnel RAG, gating serveur strict, Loi 25.
