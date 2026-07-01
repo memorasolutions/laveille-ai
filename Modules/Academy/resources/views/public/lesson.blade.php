@@ -383,6 +383,28 @@
                     <p class="mb-4" style="color: var(--sys-text-muted, #6B7280); font-size: 1rem; line-height: 1.6;">{{ $lesson->summary }}</p>
                 @endif
 
+                {{-- Narration TTS (accessibilité) : Web Speech API 100% navigateur, gâtée par
+                     academy.tts_enabled. Texte = titre + résumé + contenu texte des items « doc »,
+                     débarrassé du HTML côté serveur avant d'être injecté (voir tts-button.blade.php). --}}
+                @if (config('academy.tts_enabled', false))
+                    @php
+                        $__ttsParts = array_filter([$lesson->title, $lesson->summary]);
+                        foreach ($lesson->lessonItems as $__ttsItem) {
+                            if ($__ttsItem->type === 'doc' && ! empty($__ttsItem->payload['rich_text'])) {
+                                $__ttsHtml = \Modules\Academy\Models\LessonItem::renderRichText($__ttsItem->payload['rich_text']);
+                                $__ttsText = trim(strip_tags($__ttsHtml));
+                                if ($__ttsText !== '') {
+                                    $__ttsParts[] = $__ttsText;
+                                }
+                            }
+                        }
+                        $__ttsFullText = implode('. ', $__ttsParts);
+                    @endphp
+                    <div class="mb-4">
+                        <x-academy::tts-button :text="$__ttsFullText" />
+                    </div>
+                @endif
+
                 {{-- C4 : prérequis non satisfaits → bandeau + liens, AUCUN contenu rendu
                      (le contrôleur a coupé l'accès : $isEnrolled=false → gating $hasAccess). --}}
                 @if(!($isPreview ?? false) && ($prerequisitesUnmet ?? collect())->isNotEmpty())
@@ -430,7 +452,11 @@
                 {{-- Items de la leçon --}}
                 @if(!$__lessonLocked)
 
-                {{-- DeckPlayer : activé via academy.lesson_deck_mode=true (config/env), ou prévisualisation superadmin via ?deck=1. --}}
+                {{-- DeckPlayer : activé via academy.lesson_deck_mode=true (config/env), ou prévisualisation superadmin via ?deck=1.
+                     LIMITE DOCUMENTÉE (TTS) : le bouton de narration audio (x-academy::tts-button, ci-dessus) n'est câblé
+                     QUE dans la vue classique. Le DeckPlayer est un composant Livewire séparé (carte plein écran par item) ;
+                     y ajouter le TTS demanderait de dupliquer/partager l'état Alpine entre cartes, hors scope de cette
+                     phase. Choix assumé : vue classique seulement, zéro impact sur le DeckPlayer (aucun risque de casse). --}}
                 @if(config('academy.lesson_deck_mode', false) || (request()->query('deck') === '1' && auth()->user()?->isSuperAdmin()))
                     @livewire('academy.deck-player', [
                         'lesson'             => $lesson,

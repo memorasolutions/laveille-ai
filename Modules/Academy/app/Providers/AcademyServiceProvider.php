@@ -221,6 +221,11 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // academy.placement_test_enabled + inscription active vérifiés dans
         // PlacementTest::mount() (anti-IDOR). Voir AdaptivePlacementService.
         Livewire::component('academy.placement-test', \Modules\Academy\Livewire\PlacementTest::class);
+
+        // Traduction IA d'un champ texte — aperçu éditable, AUCUNE écriture en base
+        // (Course/Lesson/Chapter ne sont pas Translatable). Gâté drapeau
+        // academy.ai_translation_enabled + authorize manageStructure dans chaque action.
+        Livewire::component('academy.translate-field-modal', \Modules\Academy\Livewire\TranslateFieldModal::class);
     }
 
     public function register(): void

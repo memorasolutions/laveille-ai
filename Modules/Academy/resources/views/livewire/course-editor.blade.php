@@ -1918,6 +1918,22 @@
         @endcan
     @endif
 
+    {{-- ───────────────────────── Traduction IA (brouillon, aucune sauvegarde auto) ──────────── --}}
+    @if (config('academy.ai_translation_enabled', false))
+        @can('manageStructure', $course)
+            <section aria-labelledby="editor-ai-translation"
+                     style="border: 1px solid #A7F3D0; background: #F0FDF4; border-radius: var(--sys-radius-md, 0.75rem); padding: 22px 24px;">
+                <h2 id="editor-ai-translation" style="font-family: var(--f-heading); color: var(--sys-action-primary, #064E5A); margin: 0 0 6px; font-size: 1.1rem;">
+                    🌐 Traduction IA
+                </h2>
+                <p style="font-size: 0.85rem; color: #374151; margin: 0 0 16px;">
+                    Traduis un texte du cours (description, résumé…) en aperçu éditable. Aucune sauvegarde automatique : copie le résultat où tu en as besoin.
+                </p>
+                <livewire:academy.translate-field-modal :course="$course" />
+            </section>
+        @endcan
+    @endif
+
     {{-- ───────────────────────── Zone sensible : suppression du cours ───────────────────────── --}}
     @can('delete', $course)
         <section aria-labelledby="editor-danger"

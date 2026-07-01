@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.70.0] - 2026-07-01
+
+### Added
+- **Académie — traduction IA d'un champ de cours (formateur, brouillon)** : panneau « 🌐 Traduction IA » dans l'éditeur de cours — le formateur colle un texte, l'IA propose une traduction, il relit et modifie l'aperçu, puis VALIDE. Aucune écriture automatique dans le cours (les cours ne stockent pas encore de contenu multilingue) : le résultat reste un brouillon à copier soi-même. Activable via `ACADEMY_AI_TRANSLATION_ENABLED` (désactivé par défaut).
+- **Académie — narration audio d'une leçon (accessibilité)** : bouton « 🔊 Écouter cette leçon » sur la page de leçon, basé exclusivement sur la synthèse vocale native du navigateur (aucun service tiers, aucun coût). Contrôles lecture/pause/reprise/arrêt, voix française privilégiée si disponible. Activable via `ACADEMY_TTS_ENABLED` (désactivé par défaut).
+
 ## [1.66.0] - 2026-07-01
 
 ### Added

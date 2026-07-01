@@ -50,6 +50,36 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Traduction IA d'un champ de cours (formateur - brouillon éditable)
+    |--------------------------------------------------------------------------
+    | Quand true, l'éditeur de cours affiche un panneau « 🌐 Traduction IA » :
+    | le formateur colle un texte (description, résumé...) → l'IA propose une
+    | traduction → il relit et modifie l'aperçu → il VALIDE. AUCUNE écriture
+    | automatique dans le cours : Course/Lesson/Chapter n'utilisent PAS Spatie
+    | Translatable dans ce projet (pas de colonne JSON multi-langue), donc le
+    | résultat reste un brouillon que le formateur copie lui-même où il en a
+    | besoin (voir Modules\Academy\Services\AcademyTranslationAiService).
+    | Défaut false : panneau absent, aucun appel IA, comportement inchangé.
+    | Activer via ACADEMY_AI_TRANSLATION_ENABLED=true dans le .env.
+    */
+    'ai_translation_enabled' => env('ACADEMY_AI_TRANSLATION_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Narration TTS de la leçon (accessibilité - Web Speech API native)
+    |--------------------------------------------------------------------------
+    | Quand true, un bouton « 🔊 Écouter cette leçon » apparaît sur la page de
+    | leçon (vue classique). Utilise EXCLUSIVEMENT l'API Web Speech native du
+    | navigateur (window.speechSynthesis) côté client : zéro coût, zéro clé
+    | API, aucun service tiers payant appelé. Voix française privilégiée si
+    | disponible sur le poste de l'apprenant.
+    | Défaut false : bouton absent, aucun script chargé.
+    | Activer via ACADEMY_TTS_ENABLED=true dans le .env.
+    */
+    'tts_enabled' => env('ACADEMY_TTS_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Mode « EN CONSTRUCTION » (go-live progressif)
     |--------------------------------------------------------------------------
     | Quand true (défaut), les pages publiques /academie/* affichent une page
