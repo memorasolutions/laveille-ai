@@ -389,10 +389,10 @@
                 </div>
             @endcan
 
-            {{-- Tuteur IA — fenêtre d'accès + quota (recommandation veille juillet 2026).
+            {{-- Tuteur IA - fenêtre d'accès + quota (recommandation veille juillet 2026).
                  Gâté manageStructure ET drapeau academy.ai_tutor_access_control_enabled
                  (absent en OFF : aucune régression du Tuteur IA existant). Modifier ces
-                 réglages n'affecte JAMAIS un apprenant déjà inscrit (grant déjà figé) —
+                 réglages n'affecte JAMAIS un apprenant déjà inscrit (grant déjà figé) -
                  uniquement les NOUVELLES inscriptions. Sécurité 100 % serveur
                  (saveAiTutorAccess : resolveCourse + authorize). --}}
             @if(config('academy.ai_tutor_access_control_enabled'))
@@ -1983,7 +1983,7 @@
                     ✨ Authoring IA
                 </h2>
                 <p style="font-size: 0.85rem; color: #374151; margin: 0 0 16px;">
-                    Génère un plan de cours ou des questions de quiz depuis un prompt — en brouillon éditable, jamais publié automatiquement.
+                    Génère un plan de cours ou des questions de quiz depuis un prompt - en brouillon éditable, jamais publié automatiquement.
                 </p>
                 <livewire:academy.ai-authoring-modal :course="$course" />
             </section>
