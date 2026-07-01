@@ -216,6 +216,11 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // drapeau academy.gamification_enabled dans le composant lui-même ET dans
         // la vue qui l'inclut (double garde). Voir GamificationService.
         Livewire::component('academy.gamification', \Modules\Academy\Livewire\Gamification::class);
+
+        // Test de positionnement adaptatif (CAT) — gâté par le drapeau
+        // academy.placement_test_enabled + inscription active vérifiés dans
+        // PlacementTest::mount() (anti-IDOR). Voir AdaptivePlacementService.
+        Livewire::component('academy.placement-test', \Modules\Academy\Livewire\PlacementTest::class);
     }
 
     public function register(): void

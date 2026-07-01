@@ -248,6 +248,21 @@ return [
     */
     'gamification_enabled' => env('ACADEMY_GAMIFICATION_ENABLED', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Test de positionnement adaptatif (CAT — Computer Adaptive Testing)
+    |--------------------------------------------------------------------------
+    | Quand true, un apprenant inscrit peut passer un test court (≈5-8 questions
+    | de la banque du cours) qui s'ajuste en temps réel à sa performance (plus
+    | difficile après 2 bonnes réponses consécutives, plus facile après 2
+    | mauvaises) puis recommande une leçon de départ (évite de relire le
+    | déjà-su). Jamais bloquant : l'apprenant garde toujours le choix d'y aller
+    | ou de commencer au début. Voir AdaptivePlacementService.
+    | Défaut false : bouton absent, route 404, aucun calcul effectué.
+    | Activer via ACADEMY_PLACEMENT_TEST_ENABLED=true dans le .env.
+    */
+    'placement_test_enabled' => env('ACADEMY_PLACEMENT_TEST_ENABLED', false),
+
     'notifications' => [
         'enabled' => env('ACADEMY_NOTIFICATIONS_ENABLED', false),
 

@@ -210,6 +210,20 @@
                     </div>
                 @endif
 
+                {{-- Test de positionnement adaptatif (CAT). Visible seulement aux INSCRITS
+                     ACTIFS + drapeau academy.placement_test_enabled. Le composant Livewire
+                     re-vérifie l'accès serveur (403/404 sinon) : ce @if n'est qu'un affichage,
+                     jamais la source de vérité de l'autorisation. Jamais bloquant : l'apprenant
+                     garde toujours le choix d'ignorer le test et de commencer directement. --}}
+                @if($isEnrolled && config('academy.placement_test_enabled'))
+                    <div class="mb-5" style="margin-top: 24px; text-align: center;">
+                        <a href="{{ route('academy.placement.show', $course->slug) }}"
+                           style="display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 22px; background: #ffffff; color: #064E5A; border: 2px solid #064E5A; border-radius: 12px; font-weight: 600; text-decoration: none;">
+                            🎯 Passer un test de positionnement (2 min)
+                        </a>
+                    </div>
+                @endif
+
                 {{-- FAQ placeholder --}}
                 @if(!empty($course->faq_dictionary_ids))
                     <div class="mb-5">

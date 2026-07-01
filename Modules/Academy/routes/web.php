@@ -62,6 +62,17 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             ->middleware('auth')
             ->name('srs.review');
 
+        // CAT — Test de positionnement adaptatif (recommande une leçon de départ).
+        // Connexion requise ; le composant Livewire PlacementTest::mount() abort 404
+        // si le drapeau academy.placement_test_enabled est désactivé et abort 403 si
+        // l'apprenant n'est pas inscrit ACTIF à ce cours (anti-IDOR). Le cours est
+        // re-résolu côté serveur (binding par slug), jamais fait confiance au client.
+        Route::get('courses/{course:slug}/positionnement', function (\Modules\Academy\Models\Course $course) {
+            return view('academy::public.placement-test', ['course' => $course]);
+        })
+            ->middleware('auth')
+            ->name('placement.show');
+
         // V5-c - Préférences de notification courriel (opt-in/opt-out par type).
         // Connexion requise ; le composant Livewire n'agit que sur auth()->user()
         // (jamais un id du client). Lien présent dans chaque courriel (Loi 25 / LCAP).

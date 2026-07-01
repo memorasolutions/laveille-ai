@@ -94,9 +94,13 @@ final class QuestionBankService
      * telle que QuizService::score() l'attend. Retourne null si le payload est
      * inexploitable (défensif : aucune exception, jamais d'item invalide noté).
      *
+     * Visibilité PUBLIC (CAT) : AdaptivePlacementService réutilise cette même
+     * traduction pour scorer une question à la fois via QuizService::score(),
+     * sans dupliquer la logique de correction (DRY).
+     *
      * @return array<string, mixed>|null
      */
-    private static function mapToRoundItem(Question $question): ?array
+    public static function mapToRoundItem(Question $question): ?array
     {
         $payload     = is_array($question->payload) ? $question->payload : [];
         $prompt      = (string) $question->prompt;
