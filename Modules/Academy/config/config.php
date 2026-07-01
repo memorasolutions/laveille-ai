@@ -314,6 +314,23 @@ return [
     */
     'placement_test_enabled' => env('ACADEMY_PLACEMENT_TEST_ENABLED', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Discussion sociale structurée par vidéo (LMS 2026)
+    |--------------------------------------------------------------------------
+    | Quand true, un item de leçon « video » porte son propre forum (réutilise
+    | intégralement ForumTopic/ForumPost/ForumController/ForumService, aucun
+    | nouveau système) : un apprenant peut poser une question/commentaire ancré
+    | à un instant précis de la vidéo (« à 2:34, je ne comprends pas... »),
+    | affiché en badge horodaté cliquable sous chaque sujet/réponse concerné.
+    | Le fil peut être trié par ordre de publication (défaut) ou par ordre du
+    | contenu vidéo. Voir ForumService::parseTimestamp()/formatTimestamp().
+    | Défaut false : aucun champ horodatage affiché, comportement du forum
+    | inchangé, un item « video » reste 404 sur les routes forum (rétrocompat).
+    | Activer via ACADEMY_VIDEO_DISCUSSION_ENABLED=true dans le .env.
+    */
+    'video_discussion_enabled' => env('ACADEMY_VIDEO_DISCUSSION_ENABLED', false),
+
     'notifications' => [
         'enabled' => env('ACADEMY_NOTIFICATIONS_ENABLED', false),
 

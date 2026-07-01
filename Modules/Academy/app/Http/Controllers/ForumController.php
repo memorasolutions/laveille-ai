@@ -92,15 +92,19 @@ class ForumController extends Controller
         }
 
         $data = $request->validate([
-            'title' => 'required|string|max:'.ForumService::TITLE_MAX,
-            'body'  => 'required|string|max:'.ForumService::BODY_MAX,
+            'title'            => 'required|string|max:'.ForumService::TITLE_MAX,
+            'body'             => 'required|string|max:'.ForumService::BODY_MAX,
+            // Discussion sociale par vidéo (dette D-video-discussion) : « mm:ss » ou
+            // « h:mm:ss » facultatif, ignoré (colonne null) si absent ou hors format.
+            'video_timestamp'  => ['nullable', 'string', 'max:8'],
         ]);
 
         ForumTopic::create([
-            'lesson_item_id' => $item->id,
-            'user_id'        => Auth::id(),
-            'title'          => $data['title'],
-            'body'           => $data['body'],
+            'lesson_item_id'           => $item->id,
+            'user_id'                  => Auth::id(),
+            'title'                    => $data['title'],
+            'body'                     => $data['body'],
+            'video_timestamp_seconds'  => ForumService::parseTimestamp($data['video_timestamp'] ?? null),
         ]);
 
         $this->maybeComplete($item, $manager);
@@ -147,13 +151,17 @@ class ForumController extends Controller
         }
 
         $data = $request->validate([
-            'body' => 'required|string|max:'.ForumService::BODY_MAX,
+            'body'             => 'required|string|max:'.ForumService::BODY_MAX,
+            // Discussion sociale par vidéo (dette D-video-discussion) : « mm:ss » ou
+            // « h:mm:ss » facultatif, ignoré (colonne null) si absent ou hors format.
+            'video_timestamp'  => ['nullable', 'string', 'max:8'],
         ]);
 
         $post = ForumPost::create([
-            'topic_id' => $topic->id,
-            'user_id'  => Auth::id(),
-            'body'     => $data['body'],
+            'topic_id'                 => $topic->id,
+            'user_id'                  => Auth::id(),
+            'body'                     => $data['body'],
+            'video_timestamp_seconds'  => ForumService::parseTimestamp($data['video_timestamp'] ?? null),
         ]);
 
         // V5-c - Notifier l'auteur du sujet (gardé par l'interrupteur maître + préférence,
@@ -257,7 +265,16 @@ class ForumController extends Controller
             abort(404);
         }
 
-        if ($item->type !== 'forum') {
+        // Type autorisé : « forum » toujours ; « video » seulement si la discussion
+        // sociale par vidéo est activée (dette D-video-discussion, défaut false =
+        // comportement IDENTIQUE à avant, 404 sur un item video comme n'importe quel
+        // autre type non-forum).
+        $allowedTypes = ['forum'];
+        if (config('academy.video_discussion_enabled') === true) {
+            $allowedTypes[] = 'video';
+        }
+
+        if (! in_array($item->type, $allowedTypes, true)) {
             abort(404);
         }
 

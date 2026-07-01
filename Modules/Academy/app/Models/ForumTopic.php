@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string   $body
  * @property bool     $is_pinned
  * @property bool     $is_locked
+ * @property int|null $video_timestamp_seconds
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
@@ -45,13 +46,17 @@ class ForumTopic extends Model
         'body',
         'is_pinned',
         'is_locked',
+        // Discussion sociale par vidéo (dette D-video-discussion) : ancre facultative
+        // à un instant précis de la vidéo, null si non renseignée ou non applicable.
+        'video_timestamp_seconds',
     ];
 
     protected $casts = [
-        'lesson_item_id' => 'integer',
-        'user_id'        => 'integer',
-        'is_pinned'      => 'boolean',
-        'is_locked'      => 'boolean',
+        'lesson_item_id'           => 'integer',
+        'user_id'                  => 'integer',
+        'is_pinned'                => 'boolean',
+        'is_locked'                => 'boolean',
+        'video_timestamp_seconds'  => 'integer',
     ];
 
     public function lessonItem(): BelongsTo
@@ -67,5 +72,15 @@ class ForumTopic extends Model
     public function posts(): HasMany
     {
         return $this->hasMany(ForumPost::class, 'topic_id');
+    }
+
+    /**
+     * Horodatage vidéo formaté « m:ss » (ou « h:mm:ss » au-delà d'une heure), ou
+     * null si non renseigné. DRY : délègue à ForumService::formatTimestamp()
+     * (source unique de formatage, partagée avec ForumPost::formattedVideoTimestamp()).
+     */
+    public function formattedVideoTimestamp(): ?string
+    {
+        return \Modules\Academy\Services\ForumService::formatTimestamp($this->video_timestamp_seconds);
     }
 }

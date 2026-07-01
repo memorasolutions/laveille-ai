@@ -17,17 +17,32 @@
                                     Côté serveur, Blade ne rend pas le composant si la condition est fausse.
                                     Aucune URL vidéo ne fuite dans le HTML rendu au visiteur non-inscrit.
                                 --}}
-                                <x-academy::video-player
-                                    :playerUrl="$videoUrl"
-                                    :poster="$item->posterUrl()"
-                                    :title="$item->title ?? $lesson->title"
-                                />
+                                {{-- id stable : ancre de défilement pour les badges horodatés de la
+                                     discussion sociale par vidéo (voir partials/video-discussion). --}}
+                                <div id="lesson-video-{{ $item->id }}">
+                                    <x-academy::video-player
+                                        :playerUrl="$videoUrl"
+                                        :poster="$item->posterUrl()"
+                                        :title="$item->title ?? $lesson->title"
+                                    />
 
-                                @if(isset($item->payload['duration_seconds']))
-                                    <p class="text-muted mt-2" style="font-size: 0.85rem;">
-                                        ⏱ Durée : {{ ceil($item->payload['duration_seconds'] / 60) }} min
-                                    </p>
-                                @endif
+                                    @if(isset($item->payload['duration_seconds']))
+                                        <p class="text-muted mt-2" style="font-size: 0.85rem;">
+                                            ⏱ Durée : {{ ceil($item->payload['duration_seconds'] / 60) }} min
+                                        </p>
+                                    @endif
+                                </div>
+
+                                {{-- DISCUSSION SOCIALE PAR VIDÉO (dette D-video-discussion, LMS 2026) :
+                                     réutilise le forum existant sur l'item vidéo lui-même. No-op tant que
+                                     ACADEMY_VIDEO_DISCUSSION_ENABLED=false (défaut). --}}
+                                @include('academy::public.partials.video-discussion', [
+                                    'item'       => $item,
+                                    'course'     => $course,
+                                    'lesson'     => $lesson,
+                                    'hasAccess'  => $hasAccess,
+                                    'isEnrolled' => $isEnrolled,
+                                ])
 
                             @else
                                 {{-- Panneau d'appel à l'action (pas d'URL dans le DOM) --}}

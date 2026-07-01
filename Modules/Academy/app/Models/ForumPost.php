@@ -24,6 +24,7 @@ use Modules\Academy\Models\LessonItem;
  * @property int      $topic_id
  * @property int|null $user_id
  * @property string   $body
+ * @property int|null $video_timestamp_seconds
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
@@ -37,11 +38,15 @@ class ForumPost extends Model
         'topic_id',
         'user_id',
         'body',
+        // Discussion sociale par vidéo (dette D-video-discussion) : ancre facultative
+        // à un instant précis de la vidéo, null si non renseignée ou non applicable.
+        'video_timestamp_seconds',
     ];
 
     protected $casts = [
-        'topic_id' => 'integer',
-        'user_id'  => 'integer',
+        'topic_id'                 => 'integer',
+        'user_id'                  => 'integer',
+        'video_timestamp_seconds'  => 'integer',
     ];
 
     public function topic(): BelongsTo
@@ -67,5 +72,15 @@ class ForumPost extends Model
     public function renderedBody(): string
     {
         return LessonItem::renderRichText($this->body);
+    }
+
+    /**
+     * Horodatage vidéo formaté « m:ss » (ou « h:mm:ss » au-delà d'une heure), ou
+     * null si non renseigné. DRY : délègue à ForumService::formatTimestamp()
+     * (source unique de formatage, partagée avec ForumTopic::formattedVideoTimestamp()).
+     */
+    public function formattedVideoTimestamp(): ?string
+    {
+        return \Modules\Academy\Services\ForumService::formatTimestamp($this->video_timestamp_seconds);
     }
 }
