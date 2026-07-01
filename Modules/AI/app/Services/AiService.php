@@ -112,6 +112,14 @@ class AiService
     }
 
     /**
+     * Mots-clés FR-QC signalant une tâche complexe (analyse/synthèse/planification longue) :
+     * déclenchent une escalade DIRECTE vers le modèle puissant, sans passer par le modèle
+     * primaire (évite un aller-retour inutile). Liste éditable via le réglage
+     * `ai.escalation_keywords` (CSV) sans toucher au code — voir panneau Réglages > IA.
+     */
+    private const DEFAULT_ESCALATION_KEYWORDS = 'analyse complète,compare en détail,rédige un plan,explique en profondeur,audit complet,stratégie détaillée,démontre étape par étape,rédige un rapport détaillé';
+
+    /**
      * @param  array<int, array{role: string, content: string}>  $messages
      */
     public function chatWithHistory(array $messages, ?string $model = null): string
@@ -124,8 +132,60 @@ class AiService
             return '';
         }
 
-        $model ??= $this->getModelForTask('chatbot');
+        if (! $this->isEscalationEnabled()) {
+            $model ??= $this->getModelForTask('chatbot');
 
+            return $this->performChatRequest($messages, $model, $apiKey);
+        }
+
+        $lastUserMessage = $this->extractLastUserMessage($messages);
+        $heuristicReason = $this->detectHeuristicEscalation($lastUserMessage);
+
+        if ($heuristicReason !== null) {
+            $escalationModel = trim((string) Setting::get('ai.model_escalation', '')) ?: 'deepseek/deepseek-v3.2-20251201';
+            Log::info('AI Service: escalade heuristique déclenchée', ['reason' => $heuristicReason]);
+
+            return $this->performChatRequest($messages, $escalationModel, $apiKey);
+        }
+
+        if ($model !== null) {
+            $primaryModel = $model;
+        } else {
+            $configuredPrimary = trim((string) Setting::get('ai.model_primary', ''));
+            $primaryModel = $configuredPrimary !== '' ? $configuredPrimary : $this->getModelForTask('chatbot');
+        }
+
+        $escalationModel = trim((string) Setting::get('ai.model_escalation', '')) ?: 'deepseek/deepseek-v3.2-20251201';
+
+        $messagesWithInstruction = $this->appendEscalationInstruction($messages);
+        $primaryResponse = $this->performChatRequest($messagesWithInstruction, $primaryModel, $apiKey);
+
+        if ($primaryResponse === '') {
+            Log::info('AI Service: escalade suite à l’échec du modèle primaire');
+
+            return $this->performChatRequest($messages, $escalationModel, $apiKey);
+        }
+
+        $markerReason = $this->detectEscalationMarker($primaryResponse);
+
+        if ($markerReason !== null) {
+            Log::info('AI Service: escalade signalée par le modèle', ['reason' => $markerReason]);
+
+            return $this->performChatRequest($messages, $escalationModel, $apiKey);
+        }
+
+        return $primaryResponse;
+    }
+
+    /**
+     * Effectue l'appel HTTP OpenRouter et retourne le contenu de la réponse (ou '' en cas
+     * d'échec). Extrait du corps historique de chatWithHistory() pour être réutilisé par le
+     * chemin standard ET par la cascade d'escalade (DRY strict — un seul point d'appel HTTP).
+     *
+     * @param  array<int, array{role: string, content: string}>  $messages
+     */
+    private function performChatRequest(array $messages, string $model, string $apiKey): string
+    {
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer '.$apiKey,
@@ -147,6 +207,98 @@ class AiService
 
             return '';
         }
+    }
+
+    /**
+     * Cascade activable via le réglage `ai.escalation_enabled` (défaut false = comportement
+     * inchangé). Tant que désactivé, chatWithHistory() se comporte EXACTEMENT comme avant.
+     */
+    private function isEscalationEnabled(): bool
+    {
+        return filter_var(Setting::get('ai.escalation_enabled', 'false'), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * @param  array<int, array{role: string, content: string}>  $messages
+     */
+    private function extractLastUserMessage(array $messages): string
+    {
+        foreach (array_reverse($messages) as $message) {
+            if (($message['role'] ?? '') === 'user') {
+                return (string) ($message['content'] ?? '');
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Filet de sécurité heuristique : déclenche l'escalade SANS attendre la réponse du modèle
+     * primaire, sur (1) une question anormalement longue ou (2) un mot-clé de tâche complexe.
+     * Seuils/mots-clés éditables via `ai.escalation_length_threshold` / `ai.escalation_keywords`.
+     */
+    private function detectHeuristicEscalation(string $lastUserMessage): ?string
+    {
+        $lengthThreshold = (int) Setting::get('ai.escalation_length_threshold', '2000');
+
+        if ($lengthThreshold > 0 && mb_strlen($lastUserMessage) > $lengthThreshold) {
+            return 'message très long ('.mb_strlen($lastUserMessage).' caractères)';
+        }
+
+        $keywordsCsv = (string) Setting::get('ai.escalation_keywords', self::DEFAULT_ESCALATION_KEYWORDS);
+        $keywords = array_map('trim', explode(',', $keywordsCsv));
+        $lowerMessage = mb_strtolower($lastUserMessage);
+
+        foreach ($keywords as $keyword) {
+            if ($keyword !== '' && str_contains($lowerMessage, mb_strtolower($keyword))) {
+                return "mot-clé détecté : « {$keyword} »";
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Ajoute l'invite d'auto-escalade au message système existant (ou en crée un) sans
+     * dupliquer le reste de l'historique. N'est utilisée QUE pour l'appel au modèle primaire ;
+     * les appels au modèle d'escalade repartent toujours des messages ORIGINAUX.
+     *
+     * @param  array<int, array{role: string, content: string}>  $messages
+     * @return array<int, array{role: string, content: string}>
+     */
+    private function appendEscalationInstruction(array $messages): array
+    {
+        $instruction = "\n\nSi tu juges cette question trop complexe, ambiguë, ou hors de ta capacité à bien répondre, réponds UNIQUEMENT par : ESCALATE: <raison courte> (rien d'autre, aucun autre texte, aucune explication).";
+
+        foreach ($messages as $index => $message) {
+            if (($message['role'] ?? '') === 'system') {
+                $messages[$index]['content'] = ($message['content'] ?? '').$instruction;
+
+                return $messages;
+            }
+        }
+
+        array_unshift($messages, ['role' => 'system', 'content' => trim($instruction)]);
+
+        return $messages;
+    }
+
+    /**
+     * Détecte le marqueur `ESCALATE: <raison>` renvoyé par le modèle primaire. Le marqueur
+     * n'est JAMAIS exposé à l'appelant : dès qu'il est détecté, la réponse est jetée et
+     * remplacée par celle du modèle d'escalade.
+     */
+    private function detectEscalationMarker(string $response): ?string
+    {
+        $trimmed = trim($response);
+
+        if (preg_match('/^ESCALATE:\s*(.+)$/isu', $trimmed, $matches) === 1) {
+            $reason = trim($matches[1]);
+
+            return mb_substr($reason !== '' ? $reason : 'raison non précisée', 0, 200);
+        }
+
+        return null;
     }
 
     /**
