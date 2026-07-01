@@ -70,15 +70,15 @@
             style="border:2px solid #064E5A;border-radius:16px;background:#ffffff;box-shadow:0 4px 16px rgba(6,78,90,.10);overflow:hidden;"
         >
             <div style="padding:32px 28px;min-height:180px;display:flex;flex-direction:column;justify-content:center;">
-                <p style="text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:#0f6b7a;margin:0 0 12px;font-weight:700;">Question</p>
+                <p style="text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:var(--sys-status-accent-text, #0B5560);margin:0 0 12px;font-weight:700;">Question</p>
                 <div style="font-size:20px;line-height:1.5;color:#0f172a;font-weight:600;">
                     {{ $card->front }}
                 </div>
             </div>
 
             @if($revealed)
-                <div style="padding:24px 28px 32px;border-top:1px solid #e2e8f0;background:#f0fdfa;">
-                    <p style="text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:#0f6b7a;margin:0 0 12px;font-weight:700;">Réponse</p>
+                <div style="padding:24px 28px 32px;border-top:1px solid #e2e8f0;background:var(--sys-status-accent-bg, #F0FDFA);">
+                    <p style="text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:var(--sys-status-accent-text, #0B5560);margin:0 0 12px;font-weight:700;">Réponse</p>
                     <div style="font-size:17px;line-height:1.6;color:#0f172a;">
                         {{ $card->back ?? 'Aucune réponse détaillée pour cette carte : évaluez selon votre rappel du concept.' }}
                     </div>

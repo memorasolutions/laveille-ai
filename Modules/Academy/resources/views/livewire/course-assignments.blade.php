@@ -103,9 +103,9 @@
                                 </h4>
                                 <div class="d-flex flex-wrap align-items-center gap-2" style="font-size: 0.72rem;">
                                     @if ($assignment->is_published)
-                                        <span style="display: inline-block; font-weight: 700; color: #166534; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 999px; padding: 2px 10px;">Publié</span>
+                                        <span style="display: inline-block; font-weight: 700; color: var(--sys-status-success-alt-text, #134E2A); background: var(--sys-status-success-alt-bg, #F0FDF4); border: 1px solid #BBF7D0; border-radius: 999px; padding: 2px 10px;">Publié</span>
                                     @else
-                                        <span style="display: inline-block; font-weight: 700; color: #92400E; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 999px; padding: 2px 10px;">Brouillon</span>
+                                        <span style="display: inline-block; font-weight: 700; color: var(--sys-status-caution-text, #7A3406); background: var(--sys-status-caution-bg, #FFFBEB); border: 1px solid #FDE68A; border-radius: 999px; padding: 2px 10px;">Brouillon</span>
                                     @endif
                                     <span style="color: var(--sys-text-muted, #6B7280);">Sur {{ $assignment->max_points }} pts</span>
                                     @if ($assignment->lesson)

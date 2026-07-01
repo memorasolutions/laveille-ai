@@ -10,9 +10,9 @@
 @if ($showBanner)
     @php
         if ($isHigh) {
-            $bg      = '#FFF7ED';
+            $bg      = 'var(--sys-status-warning-bg-subtle, #FFF7ED)';
             $border  = '#EA580C';
-            $textCol = '#9A3412';
+            $textCol = 'var(--sys-status-warning-text, #7C2D12)';
             $label   = 'Relance conseillée';
             $msg     = "Reprends où tu t'es arrêté — une leçon suffit pour relancer ton élan !";
         } else {

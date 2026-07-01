@@ -1393,6 +1393,27 @@ article h3 {
   --sys-info: var(--c-primary);
   --sys-info-bg: var(--c-primary-light);
 
+  /* 5b. Badges de statut pastel (AAA renforcé, audit WCAG 2026-07-01) —
+     nommage générique réutilisable par tout module (Academy, Core, Tools,
+     FrontTheme, Authors...), pas seulement Academy. Chaque paire texte/fond
+     dépasse 7:1 (AAA) avec marge confortable ; les *-bg gardent la teinte
+     pastel d'origine (seul le texte a été assombri pour la conformité). */
+  --sys-status-danger-text: #7F1414;
+  --sys-status-danger-bg: #FEE2E2;
+  --sys-status-warning-text: #7C2D12;
+  --sys-status-warning-bg: #FFEDD5;
+  --sys-status-warning-bg-subtle: #FFF7ED;
+  --sys-status-success-text: #054F3A;
+  --sys-status-success-bg: #D1FAE5;
+  --sys-status-success-alt-text: #134E2A;
+  --sys-status-success-alt-bg: #F0FDF4;
+  --sys-status-info-text: #0C4A6E;
+  --sys-status-info-bg: #E0F2FE;
+  --sys-status-caution-text: #7A3406;
+  --sys-status-caution-bg: #FFFBEB;
+  --sys-status-accent-text: #0B5560;
+  --sys-status-accent-bg: #F0FDFA;
+
   /* 6. Voile/scrim (texte sur image) */
   --sys-scrim: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 100%);
   --sys-scrim-solid: rgba(17,20,23,0.62);

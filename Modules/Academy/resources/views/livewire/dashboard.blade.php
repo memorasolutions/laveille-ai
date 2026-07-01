@@ -119,10 +119,10 @@
                     'manual' => 'Événement',
                 ];
                 $typeColors = [
-                    'due'    => 'background: #FEE2E2; color: #991B1B;',
-                    'exam'   => 'background: #FFEDD5; color: #9A3412;',
-                    'live'   => 'background: #D1FAE5; color: #065F46;',
-                    'manual' => 'background: #E0F2FE; color: #075985;',
+                    'due'    => 'background: var(--sys-status-danger-bg, #FEE2E2); color: var(--sys-status-danger-text, #7F1414);',
+                    'exam'   => 'background: var(--sys-status-warning-bg, #FFEDD5); color: var(--sys-status-warning-text, #7C2D12);',
+                    'live'   => 'background: var(--sys-status-success-bg, #D1FAE5); color: var(--sys-status-success-text, #054F3A);',
+                    'manual' => 'background: var(--sys-status-info-bg, #E0F2FE); color: var(--sys-status-info-text, #0C4A6E);',
                 ];
             @endphp
 

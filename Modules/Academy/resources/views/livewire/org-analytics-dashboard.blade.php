@@ -5,12 +5,12 @@
     // Couleur du badge score moyen (+ libellé texte — WCAG AAA, pas couleur seule).
     $riskBadge = static function (int $avg): array {
         if ($avg >= 67) {
-            return ['bg' => '#FEE2E2', 'color' => '#991B1B', 'label' => 'Élevé'];
+            return ['bg' => 'var(--sys-status-danger-bg, #FEE2E2)', 'color' => 'var(--sys-status-danger-text, #7F1414)', 'label' => 'Élevé'];
         }
         if ($avg >= 34) {
-            return ['bg' => '#FFEDD5', 'color' => '#9A3412', 'label' => 'Modéré'];
+            return ['bg' => 'var(--sys-status-warning-bg, #FFEDD5)', 'color' => 'var(--sys-status-warning-text, #7C2D12)', 'label' => 'Modéré'];
         }
-        return ['bg' => '#D1FAE5', 'color' => '#065F46', 'label' => 'Faible'];
+        return ['bg' => 'var(--sys-status-success-bg, #D1FAE5)', 'color' => 'var(--sys-status-success-text, #054F3A)', 'label' => 'Faible'];
     };
 @endphp
 
