@@ -66,6 +66,14 @@ class NotificationPreferences extends Component
                 'titre' => 'Rappels d\'échéance',
                 'desc'  => 'Recevoir un rappel avant l\'échéance d\'un devoir ou d\'un événement.',
             ],
+            AcademyNotificationService::TYPE_SRS_REMINDER => [
+                'titre' => 'Rappels de révision',
+                'desc'  => 'Recevoir un rappel quand des cartes de révision espacée sont dues.',
+            ],
+            AcademyNotificationService::PREF_NUDGE => [
+                'titre' => 'Encouragements personnalisés',
+                'desc'  => 'Recevoir de courts messages bienveillants adaptés à votre progression (félicitations, invitation à réviser ou à reprendre). Au plus un par jour.',
+            ],
         ];
     }
 

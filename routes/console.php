@@ -72,6 +72,13 @@ if (\Nwidart\Modules\Facades\Module::find('Academy')?->isEnabled()) {
     // notifications (défaut FALSE) -> commande no-op tant que non activée. Idempotente
     // (une relance/jour/user max). Entrée PERMANENTE, gâtée sur module actif.
     Schedule::command('academy:srs-remind')->dailyAt('17:00')->withoutOverlapping();
+
+    // Nudges comportementaux (relances intelligentes). DOUBLE garde interne :
+    // drapeau academy.nudges_enabled (défaut FALSE) + interrupteur maître des
+    // notifications (défaut FALSE) -> commande no-op tant que non activée.
+    // IDEMPOTENTE (au plus 1 nudge/jour/user, tous types confondus). Entrée
+    // PERMANENTE, gâtée sur module actif ; un seul passage quotidien.
+    Schedule::command('academy:nudge')->dailyAt('07:30')->withoutOverlapping();
 }
 
 // Newsletter digest (preview mardi, envoi mercredi).

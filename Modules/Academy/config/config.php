@@ -171,6 +171,22 @@ return [
     */
     'srs_enabled' => env('ACADEMY_SRS_ENABLED', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Nudges comportementaux (relances intelligentes - LMS 2026)
+    |--------------------------------------------------------------------------
+    | Quand true, la commande planifiée « academy:nudge » parcourt chaque jour les
+    | inscrits ACTIFS et envoie, au plus, UNE relance bienveillante par apprenant et
+    | par jour (tous types confondus), choisie selon son COMPORTEMENT réel (jalon
+    | franchi, révisions à reprendre, inactivité) via RiskScoreService. Jamais
+    | culpabilisant, toujours un deeplink vers la bonne action.
+    | DOUBLE garde : ce drapeau ET l'interrupteur maître des notifications. Chaque
+    | envoi respecte l'opt-out unique « nudge » de l'apprenant (Loi 25 QC / LCAP).
+    | Défaut false : commande no-op, aucun envoi.
+    | Activer via ACADEMY_NUDGES_ENABLED=true dans le .env.
+    */
+    'nudges_enabled' => env('ACADEMY_NUDGES_ENABLED', false),
+
     'notifications' => [
         'enabled' => env('ACADEMY_NOTIFICATIONS_ENABLED', false),
 
@@ -181,6 +197,8 @@ return [
             'course_completed' => true,
             'due_reminder'     => true,
             'srs_reminder'     => true,
+            // Préférence unique gouvernant tous les nudges (opt-in raisonnable, opt-out clair).
+            'nudge'            => true,
         ],
 
         // Fenêtre des rappels d'échéance (en jours avant l'échéance).

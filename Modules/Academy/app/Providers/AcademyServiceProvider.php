@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use Modules\Academy\Console\CourseReindexCommand;
+use Modules\Academy\Console\NudgeCommand;
 use Modules\Academy\Console\SendDueRemindersCommand;
 use Modules\Academy\Console\SrsRemindCommand;
 use Modules\Academy\Livewire\CompetencyManager;
@@ -79,6 +80,7 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
                 CourseReindexCommand::class,
                 SendDueRemindersCommand::class,
                 SrsRemindCommand::class,
+                NudgeCommand::class,
             ]);
         }
     }
