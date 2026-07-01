@@ -331,6 +331,49 @@ return [
     */
     'video_discussion_enabled' => env('ACADEMY_VIDEO_DISCUSSION_ENABLED', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Paliers d'abonnement (freemium/pro/organisation — LMS 2026)
+    |--------------------------------------------------------------------------
+    | Quand true, l'accès à certaines fonctionnalités Academy est EN PLUS filtré
+    | PAR PALIER D'ABONNEMENT de l'utilisateur courant (voir Services\TierGateService,
+    | Models\SubscriptionTier, /admin/academy/subscription-tiers). Un palier ne
+    | peut JAMAIS réactiver une fonctionnalité dont le drapeau global
+    | academy.*_enabled ci-dessus est désactivé : il ne fait que restreindre
+    | DAVANTAGE un ensemble déjà actif (gating par utilisateur, pas un 2e
+    | interrupteur global).
+    | Défaut false : aucun gating par palier, comportement actuel inchangé (tout
+    | ce que les drapeaux globaux débloquent reste accessible à tous, comme
+    | aujourd'hui). Activer via ACADEMY_SUBSCRIPTION_TIERS_ENABLED=true.
+    |
+    | ZÉRO STRIPE : les prix des paliers sont des données NEUTRES saisies par
+    | l'admin (`price_cents`), jamais un produit/prix Stripe créé par le code.
+    | `stripe_price_id` reste NULL tant que l'admin ne colle pas manuellement
+    | l'identifiant d'un vrai prix créé dans le Dashboard Stripe.
+    |
+    | « feature_keys » : liste CANONIQUE des clés assignables à un palier depuis
+    | l'admin — chaque clé correspond à une fonctionnalité Academy existante
+    | (documentée par son propre drapeau global ci-dessus). Source unique de
+    | vérité pour le formulaire admin + la validation (jamais de clé libre).
+    */
+    'subscription_tiers_enabled' => env('ACADEMY_SUBSCRIPTION_TIERS_ENABLED', false),
+
+    'subscription_tier_feature_keys' => [
+        'academy_ai_tutor'             => "Tuteur IA ancré au cours",
+        'academy_ai_feedback'          => "Feedback IA sur réponses ouvertes",
+        'academy_ai_authoring'         => "Authoring IA (plan de cours + questions)",
+        'academy_ai_translation'       => "Traduction IA d'un champ de cours",
+        'academy_tts'                  => "Narration TTS de la leçon",
+        'academy_predictive_analytics' => "Analytiques prédictifs (score de risque)",
+        'academy_srs'                  => "Répétition espacée (SRS)",
+        'academy_nudges'               => "Nudges comportementaux",
+        'academy_open_badges'          => "Open Badges 3.0 vérifiables",
+        'academy_live_sessions'        => "Séances en direct / visioconférence",
+        'academy_gamification'         => "Gamification (XP, niveaux, classement)",
+        'academy_placement_test'       => "Test de positionnement adaptatif",
+        'academy_video_discussion'     => "Discussion sociale par vidéo",
+    ],
+
     'notifications' => [
         'enabled' => env('ACADEMY_NOTIFICATIONS_ENABLED', false),
 

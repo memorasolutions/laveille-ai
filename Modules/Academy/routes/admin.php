@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Academy\Http\Controllers\Admin\AdminCourseController;
 use Modules\Academy\Http\Controllers\Admin\AdminInstructorController;
 use Modules\Academy\Http\Controllers\Admin\AdminStructureController;
+use Modules\Academy\Http\Controllers\Admin\AdminSubscriptionTierController;
 use Modules\Core\Http\Middleware\EnsureIsAdmin;
 use Modules\Core\Http\Middleware\SetBackofficeTheme;
 
@@ -52,4 +53,15 @@ Route::prefix('admin/academy')
         // ── Instructeurs ────────────────────────────────────────────────────────
         Route::post('courses/{course}/roles', [AdminInstructorController::class, 'store'])->name('course-roles.store');
         Route::delete('roles/{courseRole}', [AdminInstructorController::class, 'destroy'])->name('course-roles.destroy');
+
+        // ── Paliers d'abonnement (freemium/pro/organisation — LMS 2026) ────────
+        // Zéro Stripe : prix NEUTRE saisi par l'admin, stripe_price_id à remplir
+        // plus tard manuellement. Voir Services\TierGateService.
+        Route::get('subscription-tiers', [AdminSubscriptionTierController::class, 'index'])->name('subscription-tiers.index');
+        Route::get('subscription-tiers/create', [AdminSubscriptionTierController::class, 'create'])->name('subscription-tiers.create');
+        Route::post('subscription-tiers', [AdminSubscriptionTierController::class, 'store'])->name('subscription-tiers.store');
+        Route::get('subscription-tiers/{subscriptionTier}/edit', [AdminSubscriptionTierController::class, 'edit'])->name('subscription-tiers.edit');
+        Route::put('subscription-tiers/{subscriptionTier}', [AdminSubscriptionTierController::class, 'update'])->name('subscription-tiers.update');
+        Route::post('subscription-tiers/{subscriptionTier}/toggle-status', [AdminSubscriptionTierController::class, 'toggleStatus'])->name('subscription-tiers.toggle-status');
+        Route::delete('subscription-tiers/{subscriptionTier}', [AdminSubscriptionTierController::class, 'destroy'])->name('subscription-tiers.destroy');
     });
