@@ -13,6 +13,7 @@
                                 @if(!$loop->last)
                                     @php
                                         $breadcrumbRoutes = [
+                                            __('Académie') => Route::has('academy.dashboard') ? route('academy.dashboard') : null,
                                             __('Outils') => Route::has('tools.index') ? route('tools.index') : null,
                                             __('Blog') => Route::has('blog.index') ? route('blog.index') : null,
                                             __('Glossaire IA') => Route::has('dictionary.index') ? route('dictionary.index') : null,
