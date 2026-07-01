@@ -207,6 +207,10 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // « Rejoindre » qui enregistre la présence IDEMPOTENTE). Gâté drapeau + accès
         // serveur (inscription/staff). Voir CourseLiveSessions.
         Livewire::component('academy.course-live-sessions', \Modules\Academy\Livewire\CourseLiveSessions::class);
+
+        // Authoring IA - génération de plan + questions en brouillon (gâté drapeau
+        // academy.ai_authoring_enabled + authorize manageStructure dans chaque action).
+        Livewire::component('academy.ai-authoring-modal', \Modules\Academy\Livewire\AiAuthoringModal::class);
     }
 
     public function register(): void

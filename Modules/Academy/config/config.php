@@ -37,6 +37,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Authoring IA (génération de plan de cours et de questions — LMS 2026)
+    |--------------------------------------------------------------------------
+    | Quand true, l'éditeur de cours affiche un panneau « ✨ Authoring IA » :
+    | le formateur entre un prompt → l'IA génère un plan structuré (chapitres +
+    | leçons) ou des questions QCM → il relit l'aperçu → confirme l'insertion
+    | en BROUILLON (jamais de publication automatique).
+    | Défaut false : panneau absent, aucun appel IA, comportement inchangé.
+    | Activer via ACADEMY_AI_AUTHORING_ENABLED=true dans le .env.
+    */
+    'ai_authoring_enabled' => env('ACADEMY_AI_AUTHORING_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Mode « EN CONSTRUCTION » (go-live progressif)
     |--------------------------------------------------------------------------
     | Quand true (défaut), les pages publiques /academie/* affichent une page
