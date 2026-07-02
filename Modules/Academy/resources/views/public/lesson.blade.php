@@ -108,7 +108,7 @@
     .academy-gated-panel .gated-title { font-family: var(--f-heading); font-weight: 700; font-size: 1.3rem; color: var(--sys-text-default, #1A1D23); margin-bottom: 0.5rem; }
     .academy-gated-panel .gated-sub { color: var(--sys-text-muted, #6B7280); margin-bottom: 1.5rem; font-size: 0.95rem; }
 
-    /* Navigation préc/suiv — boutons x-core::button (cohérence visuelle avec le reste du site,
+    /* Navigation préc/suiv - boutons x-core::button (cohérence visuelle avec le reste du site,
        cf. audit 2026-07-02 : les <a> bruts précédents ressemblaient à des liens discrets,
        incohérents avec le CTA teal plein utilisé partout ailleurs). Bordure/radius/couleurs/
        hover/focus déjà gérés par .ct-btn / .ct-btn--secondary (DRY, ne pas dupliquer ici) :
@@ -2142,7 +2142,7 @@
                 @endif
 
                 {{-- ══ Navigation préc/suiv (x-core::button variant="secondary", cohérence
-                     visuelle avec le reste du site — audit boutons 2026-07-02) ══ --}}
+                     visuelle avec le reste du site - audit boutons 2026-07-02) ══ --}}
                 <div class="academy-lesson-nav">
                     @if($prevLesson)
                         <x-core::button variant="secondary" size="sm" :href="route('academy.lessons.show', [$course, $prevLesson])" class="academy-nav-btn nav-prev">

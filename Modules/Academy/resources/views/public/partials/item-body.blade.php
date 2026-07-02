@@ -1015,6 +1015,16 @@
                                                     @endforeach
                                                 </dl>
 
+                                                {{-- Consolidation menu kebab (core::admin-action-menu) ÉVALUÉE et écartée ici :
+                                                     (1) zone FRONT-END publique (fiches d'élèves), pas un écran admin - le nom
+                                                     du composant ("admin-*") ne correspond pas sémantiquement à ce contexte ;
+                                                     (2) ces actions sont des <form method="POST"> classiques (pas wire:click,
+                                                     cette section n'est pas un composant Livewire) ; (3) « Approuver » est une
+                                                     action de modération PRINCIPALE (pas secondaire/rare) qui doit rester
+                                                     visible en un clic, pas cachée dans un menu ; (4) la confirmation 2-temps
+                                                     par <details> existante pour Supprimer est déjà conforme (zéro popup) et
+                                                     reste inchangée. Au plus 2-3 boutons par fiche : le bruit visuel qu'un menu
+                                                     kebab résorbe sur un écran admin dense n'existe pas ici. --}}
                                                 <div class="academy-db-actions">
                                                     {{-- Modération : approuver une fiche en attente (gérant). --}}
                                                     @if($dbCanModerate && ! $entry->is_approved)

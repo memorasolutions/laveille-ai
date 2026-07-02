@@ -729,6 +729,8 @@
 
                     @can('manageStructure', $course)
                         <div class="d-flex flex-wrap align-items-center gap-1">
+                            {{-- Monter/Descendre : action PRINCIPALE (réorganisation fréquente pendant l'édition),
+                                 reste un bouton flèche TOUJOURS VISIBLE, jamais caché dans le menu kebab. --}}
                             <x-core::button type="button" wire:click="moveChapterUp({{ $chapter->id }})" variant="ghost" size="sm" title="Monter le chapitre" aria-label="Monter le chapitre">↑</x-core::button>
                             <x-core::button type="button" wire:click="moveChapterDown({{ $chapter->id }})" variant="ghost" size="sm" title="Descendre le chapitre" aria-label="Descendre le chapitre">↓</x-core::button>
                             @if ($confirmingChapterDeletion === $chapter->id)
@@ -736,7 +738,12 @@
                                 <x-core::button type="button" wire:click="deleteChapter({{ $chapter->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                                 <x-core::button type="button" wire:click="cancelChapterDeletion" variant="ghost" size="sm">Annuler</x-core::button>
                             @else
-                                <x-core::button type="button" wire:click="confirmChapterDeletion({{ $chapter->id }})" variant="ghost" size="sm" title="Supprimer le chapitre">Supprimer</x-core::button>
+                                {{-- Action secondaire/rare : dans le menu kebab. La méthode Livewire
+                                     confirmChapterDeletion gère elle-même son état de confirmation 2-temps
+                                     (bloc @if ci-dessus), donc wireClick seul, sans wireConfirm. --}}
+                                @include('core::components.admin-action-menu', ['actions' => [
+                                    ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmChapterDeletion({$chapter->id})", 'danger' => true],
+                                ]])
                             @endif
                         </div>
                     @endcan
@@ -814,6 +821,8 @@
 
                                     @can('manageStructure', $course)
                                         <div class="d-flex flex-wrap align-items-center gap-1">
+                                            {{-- Monter/Descendre : action PRINCIPALE (réorganisation fréquente pendant l'édition),
+                                                 reste un bouton flèche TOUJOURS VISIBLE, jamais caché dans le menu kebab. --}}
                                             <x-core::button type="button" wire:click="moveLessonUp({{ $lesson->id }})" variant="ghost" size="sm" title="Monter la leçon" aria-label="Monter la leçon">↑</x-core::button>
                                             <x-core::button type="button" wire:click="moveLessonDown({{ $lesson->id }})" variant="ghost" size="sm" title="Descendre la leçon" aria-label="Descendre la leçon">↓</x-core::button>
                                             @if ($confirmingLessonDeletion === $lesson->id)
@@ -821,7 +830,11 @@
                                                 <x-core::button type="button" wire:click="deleteLesson({{ $lesson->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                                                 <x-core::button type="button" wire:click="cancelLessonDeletion" variant="ghost" size="sm">Annuler</x-core::button>
                                             @else
-                                                <x-core::button type="button" wire:click="confirmLessonDeletion({{ $lesson->id }})" variant="ghost" size="sm" title="Supprimer la leçon">Supprimer</x-core::button>
+                                                {{-- Action secondaire/rare : dans le menu kebab. Le crayon inline (renommer)
+                                                     reste tel quel juste au-dessus, ce n'est pas ce mécanisme qu'on consolide. --}}
+                                                @include('core::components.admin-action-menu', ['actions' => [
+                                                    ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmLessonDeletion({$lesson->id})", 'danger' => true],
+                                                ]])
                                             @endif
                                         </div>
                                     @endcan
@@ -885,17 +898,21 @@
                                                             </div>
 
                                                             <div class="d-flex flex-wrap align-items-center gap-1">
+                                                                {{-- Monter/Descendre : action PRINCIPALE (réorganisation fréquente pendant l'édition),
+                                                                     reste un bouton flèche TOUJOURS VISIBLE, jamais caché dans le menu kebab. --}}
                                                                 <x-core::button type="button" wire:click="moveItemUp({{ $item->id }})" variant="ghost" size="sm" title="Monter l'élément" aria-label="Monter l'élément">↑</x-core::button>
                                                                 <x-core::button type="button" wire:click="moveItemDown({{ $item->id }})" variant="ghost" size="sm" title="Descendre l'élément" aria-label="Descendre l'élément">↓</x-core::button>
-                                                                <x-core::button type="button" wire:click="toggleRequired({{ $item->id }})" variant="ghost" size="sm" title="Basculer « obligatoire »">
-                                                                    {{ $item->is_required ? 'Rendre facultatif' : 'Rendre obligatoire' }}
-                                                                </x-core::button>
                                                                 @if ($confirmingItemDeletion === $item->id)
                                                                     <span style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280);">Supprimer ?</span>
                                                                     <x-core::button type="button" wire:click="deleteItem({{ $item->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                                                                     <x-core::button type="button" wire:click="cancelItemDeletion" variant="ghost" size="sm">Annuler</x-core::button>
                                                                 @else
-                                                                    <x-core::button type="button" wire:click="confirmItemDeletion({{ $item->id }})" variant="ghost" size="sm" title="Supprimer l'élément">Supprimer</x-core::button>
+                                                                    {{-- Actions secondaires/rares : toggle Obligatoire/Facultatif + Supprimer, dans le menu kebab. --}}
+                                                                    @include('core::components.admin-action-menu', ['actions' => [
+                                                                        ['label' => $item->is_required ? 'Rendre facultatif' : 'Rendre obligatoire', 'icon' => $item->is_required ? 'circle' : 'check-circle', 'wireClick' => "toggleRequired({$item->id})"],
+                                                                        ['divider' => true],
+                                                                        ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmItemDeletion({$item->id})", 'danger' => true],
+                                                                    ]])
                                                                 @endif
                                                             </div>
                                                         </div>

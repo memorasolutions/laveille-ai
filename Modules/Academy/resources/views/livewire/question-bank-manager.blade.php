@@ -163,14 +163,20 @@
                                             </div>
                                         @endif
                                     </div>
-                                    <div style="display: flex; gap: 6px; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end;">
-                                        <x-core::button type="button" wire:click="editQuestion({{ $question->id }})" variant="secondary" size="sm">Éditer</x-core::button>
-                                        <x-core::button type="button" wire:click="showHistory({{ $question->id }})" variant="ghost" size="sm" aria-label="Voir l'historique des versions">Historique</x-core::button>
+                                    <div style="display: flex; gap: 6px; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; align-items: center;">
                                         @if ($confirmingQuestionDeletion === $question->id)
                                             <x-core::button type="button" wire:click="deleteQuestion({{ $question->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                                             <x-core::button type="button" wire:click="cancelQuestionDeletion" variant="ghost" size="sm">Annuler</x-core::button>
                                         @else
-                                            <x-core::button type="button" wire:click="confirmQuestionDeletion({{ $question->id }})" variant="ghost" size="sm" aria-label="Supprimer la question">Supprimer</x-core::button>
+                                            {{-- Éditer / Historique / Supprimer : 3 actions secondaires, consolidées dans le
+                                                 menu kebab. La méthode confirmQuestionDeletion gère elle-même sa confirmation
+                                                 2-temps (bloc @if ci-dessus) -> wireClick seul, sans wireConfirm. --}}
+                                            @include('core::components.admin-action-menu', ['actions' => [
+                                                ['label' => 'Éditer', 'icon' => 'pencil', 'wireClick' => "editQuestion({$question->id})"],
+                                                ['label' => 'Historique', 'icon' => 'history', 'wireClick' => "showHistory({$question->id})"],
+                                                ['divider' => true],
+                                                ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmQuestionDeletion({$question->id})", 'danger' => true],
+                                            ]])
                                         @endif
                                     </div>
                                 </div>
