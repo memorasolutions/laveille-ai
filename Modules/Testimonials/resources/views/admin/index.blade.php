@@ -62,18 +62,11 @@
                     <span class="badge bg-{{ $testimonial->is_approved ? 'success' : 'warning' }}">
                         {{ $testimonial->is_approved ? __('Approuvé') : __('En attente') }}
                     </span>
-                    <div class="d-flex gap-1">
-                        <a href="{{ route('admin.testimonials.edit', $testimonial) }}" class="btn btn-sm btn-outline-primary" title="{{ __('Modifier') }}">
-                            <i data-lucide="pencil"></i>
-                        </a>
-                        <form action="{{ route('admin.testimonials.destroy', $testimonial) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('Supprimer') }}" onclick="return confirm('{{ __('Supprimer ce témoignage ?') }}')">
-                                <i data-lucide="trash-2"></i>
-                            </button>
-                        </form>
-                    </div>
+                    @include('core::components.admin-action-menu', ['actions' => [
+                        ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.testimonials.edit', $testimonial)],
+                        ['divider' => true],
+                        ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.testimonials.destroy', $testimonial), 'method' => 'DELETE', 'confirm' => __('Supprimer ce témoignage ?'), 'danger' => true],
+                    ]])
                 </div>
                 @endforeach
             </div>

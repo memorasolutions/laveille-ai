@@ -55,18 +55,11 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="{{ route('admin.booking.webhooks.edit', $webhook) }}" class="btn btn-outline-primary" title="Modifier">
-                                            <i data-lucide="edit-2"></i>
-                                        </a>
-                                        <form action="{{ route('admin.booking.webhooks.destroy', $webhook) }}" method="POST" class="d-inline" data-confirm="Supprimer ce webhook ?">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-outline-danger" title="Supprimer">
-                                                <i data-lucide="trash-2"></i>
-                                            </button>
-                                        </form>
-                                    </div>
+                                    @include('core::components.admin-action-menu', ['actions' => [
+                                        ['label' => 'Modifier', 'icon' => 'pencil', 'url' => route('admin.booking.webhooks.edit', $webhook)],
+                                        ['divider' => true],
+                                        ['label' => 'Supprimer', 'icon' => 'trash-2', 'url' => route('admin.booking.webhooks.destroy', $webhook), 'method' => 'DELETE', 'confirm' => 'Supprimer ce webhook ?', 'danger' => true],
+                                    ]])
                                 </td>
                             </tr>
                         @empty

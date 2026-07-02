@@ -38,15 +38,11 @@
                         <td>{{ !$override->all_day ? $override->start_time . ' – ' . $override->end_time : '—' }}</td>
                         <td>{{ Str::limit($override->reason, 40) }}</td>
                         <td>
-                            <a href="{{ route('admin.booking.date-overrides.edit', $override) }}" class="btn btn-sm btn-outline-primary" aria-label="Modifier">
-                                <i data-lucide="edit-2" class="icon-sm"></i>
-                            </a>
-                            <form action="{{ route('admin.booking.date-overrides.destroy', $override) }}" method="POST" class="d-inline">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Supprimer ?')" aria-label="Supprimer">
-                                    <i data-lucide="trash-2" class="icon-sm"></i>
-                                </button>
-                            </form>
+                            @include('core::components.admin-action-menu', ['actions' => [
+                                ['label' => 'Modifier', 'icon' => 'pencil', 'url' => route('admin.booking.date-overrides.edit', $override)],
+                                ['divider' => true],
+                                ['label' => 'Supprimer', 'icon' => 'trash-2', 'url' => route('admin.booking.date-overrides.destroy', $override), 'method' => 'DELETE', 'confirm' => 'Supprimer ?', 'danger' => true],
+                            ]])
                         </td>
                     </tr>
                     @empty

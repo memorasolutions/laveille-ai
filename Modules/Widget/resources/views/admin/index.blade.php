@@ -53,17 +53,11 @@
                                             <span class="badge bg-info ms-1" style="font-size:10px;">{{ \Modules\Widget\Models\Widget::TYPE_LABELS[$widget->type] ?? $widget->type }}</span>
                                         </div>
                                     </div>
-                                    <div class="d-flex gap-1">
-                                        <a href="{{ route('admin.widgets.edit', $widget) }}" class="btn btn-sm btn-outline-warning p-1" title="{{ __('Modifier') }}">
-                                            <i data-lucide="edit" style="width:14px;height:14px;"></i>
-                                        </a>
-                                        <form action="{{ route('admin.widgets.destroy', $widget) }}" method="POST" class="d-inline">
-                                            @csrf @method('DELETE')
-                                            <button type="button" class="btn btn-sm btn-outline-danger p-1" onclick="if(confirm('{{ __("Supprimer ce widget ?") }}')) this.form.submit()" title="{{ __('Supprimer') }}">
-                                                <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
-                                            </button>
-                                        </form>
-                                    </div>
+                                    @include('core::components.admin-action-menu', ['actions' => [
+                                        ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.widgets.edit', $widget)],
+                                        ['divider' => true],
+                                        ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.widgets.destroy', $widget), 'method' => 'DELETE', 'confirm' => __('Supprimer ce widget ?'), 'danger' => true],
+                                    ]])
                                 </li>
                             @endforeach
                         </ul>

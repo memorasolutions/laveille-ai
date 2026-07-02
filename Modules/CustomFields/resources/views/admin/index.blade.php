@@ -59,17 +59,11 @@
                                 <span class="badge bg-{{ $definition->is_active ? 'success' : 'secondary' }}">{{ $definition->is_active ? __('Oui') : __('Non') }}</span>
                             </td>
                             <td class="text-end">
-                                <div class="d-flex gap-1 justify-content-end">
-                                    <a href="{{ route('admin.custom-fields.edit', $definition) }}" class="btn btn-sm btn-outline-warning p-1" title="{{ __('Modifier') }}">
-                                        <i data-lucide="edit" style="width:14px;height:14px;"></i>
-                                    </a>
-                                    <form action="{{ route('admin.custom-fields.destroy', $definition) }}" method="POST" class="d-inline">
-                                        @csrf @method('DELETE')
-                                        <button type="button" class="btn btn-sm btn-outline-danger p-1" onclick="if(confirm('{{ __("Supprimer ce champ ?") }}')) this.form.submit()" title="{{ __('Supprimer') }}">
-                                            <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                                @include('core::components.admin-action-menu', ['actions' => [
+                                    ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.custom-fields.edit', $definition)],
+                                    ['divider' => true],
+                                    ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.custom-fields.destroy', $definition), 'method' => 'DELETE', 'confirm' => __('Supprimer ce champ ?'), 'danger' => true],
+                                ]])
                             </td>
                         </tr>
                     @endforeach

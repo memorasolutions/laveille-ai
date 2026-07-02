@@ -47,18 +47,11 @@
                             <span class="badge bg-secondary">{{ __('Brouillon') }}</span>
                         @endif
                     </div>
-                    <div class="d-flex gap-1">
-                        <a href="{{ route('admin.faqs.edit', $faq) }}" class="btn btn-sm btn-outline-primary" title="{{ __('Modifier') }}">
-                            <i data-lucide="edit"></i>
-                        </a>
-                        <form action="{{ route('admin.faqs.destroy', $faq) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer cette question ?') }}">
-                            @csrf
-                            @method('DELETE')
-                            <button type="button" class="btn btn-sm btn-outline-danger" title="{{ __('Supprimer') }}" onclick="if(confirm('{{ __('Supprimer cette question ?') }}')) this.closest('form').submit()">
-                                <i data-lucide="trash-2"></i>
-                            </button>
-                        </form>
-                    </div>
+                    @include('core::components.admin-action-menu', ['actions' => [
+                        ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.faqs.edit', $faq)],
+                        ['divider' => true],
+                        ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.faqs.destroy', $faq), 'method' => 'DELETE', 'confirm' => __('Supprimer cette question ?'), 'danger' => true],
+                    ]])
                 </div>
                 @endforeach
             </div>

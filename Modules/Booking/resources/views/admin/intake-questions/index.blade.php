@@ -58,18 +58,11 @@
                                         @endif
                                     </td>
                                     <td class="text-end">
-                                        <div class="btn-group btn-group-sm">
-                                            <a href="{{ route('admin.booking.intake-questions.edit', $question) }}" class="btn btn-outline-primary" title="Modifier">
-                                                <i data-lucide="edit-2"></i>
-                                            </a>
-                                            <form action="{{ route('admin.booking.intake-questions.destroy', $question) }}" method="POST" class="d-inline" data-confirm="Supprimer cette question ?">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-outline-danger" title="Supprimer">
-                                                    <i data-lucide="trash-2"></i>
-                                                </button>
-                                            </form>
-                                        </div>
+                                        @include('core::components.admin-action-menu', ['actions' => [
+                                            ['label' => 'Modifier', 'icon' => 'pencil', 'url' => route('admin.booking.intake-questions.edit', $question)],
+                                            ['divider' => true],
+                                            ['label' => 'Supprimer', 'icon' => 'trash-2', 'url' => route('admin.booking.intake-questions.destroy', $question), 'method' => 'DELETE', 'confirm' => 'Supprimer cette question ?', 'danger' => true],
+                                        ]])
                                     </td>
                                 </tr>
                             @endforeach
