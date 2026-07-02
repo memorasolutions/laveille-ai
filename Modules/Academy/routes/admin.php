@@ -8,15 +8,31 @@
  * Routes admin du module Academy — enregistrées depuis AcademyServiceProvider
  * Préfixe : /admin/academy  |  Nom : admin.academy.*
  * Gating  : middleware 'web' + 'auth' + EnsureIsAdmin + can:academy.manage
+ *
+ * D03 (2026-07-02) — ménage dette technique « doublon admin legacy ∥ gestion
+ * front-end » (voir .outils/academie-roadmap-moderne-vs-moodle-2026-06-30.md).
+ * Le CRUD cours/structure/instructeurs vivait ici EN DOUBLE de l'éditeur
+ * front-end (CourseEditor/CourseRoster, refonte 2026-06-20) et était déjà
+ * flagué DORMANT depuis v1.65.296 (sidebar retirée, filet accessible par URL
+ * directe seulement — voir CHANGELOG). AdminCourseController/
+ * AdminStructureController/AdminInstructorController ont été SUPPRIMÉS
+ * (logique 100 % dupliquée, admin=academy.manage a déjà accès total au
+ * front-end via CoursePolicy). Les 3 URLs GET historiques sont conservées en
+ * redirection douce (zéro 404 sur un bookmark existant) ; les actions
+ * d'écriture (store/update/toggle-status/archive/chapitres/leçons/items/
+ * rôles) n'ont plus de vue pour les déclencher et ont donc été retirées.
+ *
+ * Les paliers d'abonnement (subscription-tiers) restent INCHANGÉS : config
+ * PLATEFORME globale (freemium/pro/organisation), pas owner-scopée par cours,
+ * sans équivalent front-end — ce n'est PAS un doublon (voir
+ * AdminSubscriptionTierController).
  */
 
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
-use Modules\Academy\Http\Controllers\Admin\AdminCourseController;
-use Modules\Academy\Http\Controllers\Admin\AdminInstructorController;
-use Modules\Academy\Http\Controllers\Admin\AdminStructureController;
 use Modules\Academy\Http\Controllers\Admin\AdminSubscriptionTierController;
+use Modules\Academy\Models\Course;
 use Modules\Core\Http\Middleware\EnsureIsAdmin;
 use Modules\Core\Http\Middleware\SetBackofficeTheme;
 
@@ -25,34 +41,13 @@ Route::prefix('admin/academy')
     ->middleware(['web', 'auth', EnsureIsAdmin::class, SetBackofficeTheme::class, 'can:academy.manage'])
     ->group(function (): void {
 
-        // ── CRUD Cours ─────────────────────────────────────────────────────────
-        Route::get('courses', [AdminCourseController::class, 'index'])->name('courses.index');
-        Route::get('courses/create', [AdminCourseController::class, 'create'])->name('courses.create');
-        Route::post('courses', [AdminCourseController::class, 'store'])->name('courses.store');
-        Route::get('courses/{course}/edit', [AdminCourseController::class, 'edit'])->name('courses.edit');
-        Route::put('courses/{course}', [AdminCourseController::class, 'update'])->name('courses.update');
-        Route::post('courses/{course}/toggle-status', [AdminCourseController::class, 'toggleStatus'])->name('courses.toggle-status');
-        Route::post('courses/{course}/archive', [AdminCourseController::class, 'archive'])->name('courses.archive');
-
-        // ── Structure : Chapitres ───────────────────────────────────────────────
-        Route::post('courses/{course}/chapters', [AdminStructureController::class, 'addChapter'])->name('chapters.store');
-        Route::put('chapters/{chapter}', [AdminStructureController::class, 'updateChapter'])->name('chapters.update');
-        Route::delete('chapters/{chapter}', [AdminStructureController::class, 'deleteChapter'])->name('chapters.destroy');
-
-        // ── Structure : Leçons ─────────────────────────────────────────────────
-        Route::post('chapters/{chapter}/lessons', [AdminStructureController::class, 'addLesson'])->name('lessons.store');
-        Route::get('lessons/{lesson}/edit', [AdminStructureController::class, 'editLesson'])->name('lessons.edit');
-        Route::put('lessons/{lesson}', [AdminStructureController::class, 'updateLesson'])->name('lessons.update');
-        Route::delete('lessons/{lesson}', [AdminStructureController::class, 'deleteLesson'])->name('lessons.destroy');
-
-        // ── Structure : Éléments de leçon ──────────────────────────────────────
-        Route::post('lessons/{lesson}/items', [AdminStructureController::class, 'addItem'])->name('lesson-items.store');
-        Route::put('items/{item}', [AdminStructureController::class, 'updateItem'])->name('lesson-items.update');
-        Route::delete('items/{item}', [AdminStructureController::class, 'deleteItem'])->name('lesson-items.destroy');
-
-        // ── Instructeurs ────────────────────────────────────────────────────────
-        Route::post('courses/{course}/roles', [AdminInstructorController::class, 'store'])->name('course-roles.store');
-        Route::delete('roles/{courseRole}', [AdminInstructorController::class, 'destroy'])->name('course-roles.destroy');
+        // ── Cours : redirections douces vers l'unique surface (front-end) ──────
+        Route::get('courses', fn () => redirect()->route('academy.dashboard'))
+            ->name('courses.index');
+        Route::get('courses/create', fn () => redirect()->route('academy.courses.create'))
+            ->name('courses.create');
+        Route::get('courses/{course}/edit', fn (Course $course) => redirect()->route('academy.courses.manage', $course->slug))
+            ->name('courses.edit');
 
         // ── Paliers d'abonnement (freemium/pro/organisation — LMS 2026) ────────
         // Zéro Stripe : prix NEUTRE saisi par l'admin, stripe_price_id à remplir
