@@ -384,7 +384,7 @@
                                                              L'IA ne note JAMAIS : le formateur garde le dernier mot.
                                                              DÉCISION (consolidation menu kebab, non migré) : « Utiliser dans la
                                                              correction » / « Rejeter » est un choix BINAIRE central du workflow
-                                                             (accepter ou écarter la proposition IA affichée juste au-dessus) — les
+                                                             (accepter ou écarter la proposition IA affichée juste au-dessus) - les
                                                              deux options doivent rester des boutons visibles pour que le formateur
                                                              voie IMMÉDIATEMENT ses 2 issues, pas cachées dans un menu ⋮ qui nuirait
                                                              à l'usage actif de cette fonctionnalité. --}}
@@ -392,7 +392,7 @@
                                                             <div style="margin: 8px 0 10px; border: 1px solid #064E5A; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px; background: rgba(6,78,90,0.04);">
                                                                 <p style="margin: 0 0 8px; font-weight: 600; font-size: 0.82rem; color: #064E5A;">
                                                                     ✨ Proposition de feedback IA
-                                                                    <span style="font-weight: 400; color: var(--sys-text-muted, #4B5563);">(brouillon — à réviser, jamais appliqué automatiquement)</span>
+                                                                    <span style="font-weight: 400; color: var(--sys-text-muted, #4B5563);">(brouillon - à réviser, jamais appliqué automatiquement)</span>
                                                                 </p>
                                                                 <div style="display: flex; flex-direction: column; gap: 6px; max-width: 220px; margin-bottom: 8px;">
                                                                     <label for="ai-score-{{ $submission->id }}" style="font-weight: 600; font-size: 0.82rem;">Note suggérée (sur {{ $assignment->max_points }})</label>
@@ -423,7 +423,7 @@
                                                         {{-- DÉCISION (consolidation menu kebab, non migré) : « Noter » est
                                                              l'action PRINCIPALE de cette carte de remise (raison d'être de
                                                              l'écran de correction) et « Proposer un feedback IA » a un état de
-                                                             chargement (wire:loading) que le formateur doit voir en direct —
+                                                             chargement (wire:loading) que le formateur doit voir en direct -
                                                              les deux restent des boutons visibles, pas dans le menu ⋮. --}}
                                                         <div class="d-flex flex-wrap gap-2">
                                                             <x-core::button type="button" wire:click="startGrading({{ $submission->id }})" variant="secondary" size="sm">
