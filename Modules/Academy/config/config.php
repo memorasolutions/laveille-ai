@@ -341,6 +341,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | xAPI léger (couche de traçabilité pédagogique standard — dette F16)
+    |--------------------------------------------------------------------------
+    | Quand true, chaque événement pédagogique DÉJÀ enregistré ailleurs (leçon
+    | complétée, cours complété, tentative de quiz soumise, XP crédité, carte
+    | SRS révisée, présence à une séance en direct) est EN PLUS reformaté en un
+    | statement standard actor-verb-object (voir Services\XapiRecorderService)
+    | et journalisé dans academy_xapi_statements. AUCUNE donnée métier n'est
+    | dupliquée : c'est un REFORMATTAGE de lecture, fondation pour un futur
+    | tuteur IA / graphe de compétences (pas d'UI aujourd'hui).
+    | Défaut false : aucun statement créé, zéro requête SQL supplémentaire,
+    | comportement actuel inchangé.
+    | Activer via ACADEMY_XAPI_ENABLED=true dans le .env.
+    */
+    'xapi_enabled' => env('ACADEMY_XAPI_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Test de positionnement adaptatif (CAT — Computer Adaptive Testing)
     |--------------------------------------------------------------------------
     | Quand true, un apprenant inscrit peut passer un test court (≈5-8 questions

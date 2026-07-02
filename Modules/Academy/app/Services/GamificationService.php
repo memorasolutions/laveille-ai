@@ -146,7 +146,7 @@ final class GamificationService
                 return null;
             }
 
-            return XpEvent::create([
+            $event = XpEvent::create([
                 'user_id'     => $user->id,
                 'course_id'   => $course?->id,
                 'source_type' => $sourceType,
@@ -154,6 +154,27 @@ final class GamificationService
                 'reason'      => $reason,
                 'points'      => $points,
             ]);
+
+            // xAPI léger - statement 'earned'/'xp_event' (dette F16, drapeau
+            // academy.xapi_enabled OFF par défaut). Point d'émission UNIQUE de
+            // tout crédit XP (lesson_completed, quiz_passed, course_completed,
+            // streak) : brancher ICI évite de dupliquer l'appel à 4 endroits.
+            if (class_exists(XapiRecorderService::class)) {
+                try {
+                    app(XapiRecorderService::class)->record(
+                        $user,
+                        XapiRecorderService::VERB_EARNED,
+                        XapiRecorderService::OBJECT_XP_EVENT,
+                        $event->id,
+                        ['points' => $points, 'reason' => $reason],
+                        ['course_id' => $course?->id, 'source_type' => $sourceType, 'source_id' => $sourceId],
+                    );
+                } catch (\Throwable) {
+                    // Silencieux
+                }
+            }
+
+            return $event;
         } catch (\Throwable $e) {
             \Log::warning('[GamificationService] Crédit XP échoué', ['exception' => $e->getMessage()]);
 

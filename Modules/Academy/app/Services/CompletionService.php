@@ -96,6 +96,24 @@ final class CompletionService
             }
         }
 
+        // xAPI léger - statement 'completed'/'lesson' (dette F16, drapeau
+        // academy.xapi_enabled OFF par défaut). REFORMATTAGE seulement : ne
+        // duplique pas $completion, juste un enregistrement standard en plus.
+        if (class_exists(XapiRecorderService::class)) {
+            try {
+                app(XapiRecorderService::class)->record(
+                    $user,
+                    XapiRecorderService::VERB_COMPLETED,
+                    XapiRecorderService::OBJECT_LESSON,
+                    $item->id,
+                    $score !== null ? ['score' => $score] : null,
+                    $course !== null ? ['course_id' => $course->id] : null,
+                );
+            } catch (\Throwable) {
+                // Silencieux
+            }
+        }
+
         // SRS - Répétition espacée (différenciateur rétention). Gardé par le drapeau
         // academy.srs_enabled : si désactivé, enqueueForLesson() est un no-op complet
         // (aucune carte créée). Idempotent (unicité user+source en base) et défensif :

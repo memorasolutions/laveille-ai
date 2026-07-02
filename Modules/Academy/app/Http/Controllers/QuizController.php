@@ -391,6 +391,38 @@ class QuizController extends Controller
             // Silencieux : ne jamais bloquer la soumission pour un crédit XP raté.
         }
 
+        // xAPI léger - statement 'attempted'/'quiz' (dette F16, drapeau
+        // academy.xapi_enabled OFF par défaut). onceOnly=false : CHAQUE
+        // tentative soumise est une action pédagogique distincte à tracer
+        // (contrairement à la complétion, qui n'arrive qu'une fois).
+        try {
+            if (class_exists(\Modules\Academy\Services\XapiRecorderService::class)) {
+                $latestAttempt = QuizAttempt::where('user_id', $user->id)
+                    ->where('lesson_item_id', $item->id)
+                    ->latest('id')
+                    ->first();
+
+                if ($latestAttempt !== null) {
+                    app(\Modules\Academy\Services\XapiRecorderService::class)->record(
+                        $user,
+                        \Modules\Academy\Services\XapiRecorderService::VERB_ATTEMPTED,
+                        \Modules\Academy\Services\XapiRecorderService::OBJECT_QUIZ,
+                        $latestAttempt->id,
+                        [
+                            'score'   => $latestAttempt->score,
+                            'max'     => $latestAttempt->max_score,
+                            'percent' => $latestAttempt->percent,
+                            'passed'  => $latestAttempt->passed,
+                        ],
+                        ['course_id' => $course->id, 'lesson_item_id' => $item->id],
+                        onceOnly: false,
+                    );
+                }
+            }
+        } catch (\Throwable) {
+            // Silencieux : ne jamais bloquer la soumission pour un enregistrement xAPI raté.
+        }
+
         // Flasher le résultat (item_id inclus pour affichage ciblé en vue).
         // ESSAI : `needs_grading` → le lecteur affiche « En attente de correction »
         // au lieu d'un score final (le pourcentage auto est provisoire).

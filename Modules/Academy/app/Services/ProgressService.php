@@ -140,6 +140,26 @@ final class ProgressService
             \Log::warning('[ProgressService] Evaluation gamification echouee', ['exception' => $e->getMessage()]);
         }
 
+        // 9 — xAPI léger : statement 'completed'/'course' (dette F16, drapeau
+        // academy.xapi_enabled OFF par défaut). recalculate() est rappelé à
+        // chaque complétion d'item : record() est idempotent par défaut
+        // (onceOnly=true), donc un seul statement est écrit même si ce bloc
+        // s'exécute plusieurs fois pour le même cours complété.
+        try {
+            if (class_exists(XapiRecorderService::class)
+                && class_exists(CourseCompletionService::class)
+                && (new CourseCompletionService())->isComplete($user, $course)) {
+                app(XapiRecorderService::class)->record(
+                    $user,
+                    XapiRecorderService::VERB_COMPLETED,
+                    XapiRecorderService::OBJECT_COURSE,
+                    $course->id,
+                );
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('[ProgressService] Enregistrement xAPI echoue', ['exception' => $e->getMessage()]);
+        }
+
         return $progress;
     }
 

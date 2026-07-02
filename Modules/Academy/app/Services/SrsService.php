@@ -154,6 +154,26 @@ class SrsService
         $card->due_at           = now()->addDays($interval);
         $card->save();
 
+        // xAPI léger - statement 'reviewed'/'srs_card' (dette F16, drapeau
+        // academy.xapi_enabled OFF par défaut). onceOnly=false : chaque
+        // révision successive de la MÊME carte est une action distincte
+        // (contrairement à la mise en file, qui n'arrive qu'une fois par carte).
+        if (class_exists(XapiRecorderService::class)) {
+            try {
+                app(XapiRecorderService::class)->record(
+                    $card->user,
+                    XapiRecorderService::VERB_REVIEWED,
+                    XapiRecorderService::OBJECT_SRS_CARD,
+                    $card->id,
+                    ['quality' => $quality, 'repetitions' => $repetitions, 'interval_days' => $interval],
+                    ['course_id' => $card->course_id, 'lesson_id' => $card->lesson_id],
+                    onceOnly: false,
+                );
+            } catch (\Throwable) {
+                // Silencieux
+            }
+        }
+
         return $card;
     }
 

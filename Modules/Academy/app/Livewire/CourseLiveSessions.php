@@ -32,6 +32,7 @@ use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Models\LiveSession;
 use Modules\Academy\Models\LiveSessionAttendance;
+use Modules\Academy\Services\XapiRecorderService;
 
 class CourseLiveSessions extends Component
 {
@@ -121,6 +122,25 @@ class CourseLiveSessions extends Component
                 ['live_session_id' => $session->id, 'user_id' => Auth::id()],
                 ['joined_at' => now()],
             );
+
+            // xAPI léger - statement 'attended'/'live_session' (dette F16, drapeau
+            // academy.xapi_enabled OFF par défaut). firstOrCreate ci-dessus est déjà
+            // idempotent (une seule présence par séance/user) : onceOnly=true (défaut)
+            // reste cohérent, sans risque de double statement sur un rejoin.
+            if (class_exists(XapiRecorderService::class)) {
+                try {
+                    app(XapiRecorderService::class)->record(
+                        Auth::user(),
+                        XapiRecorderService::VERB_ATTENDED,
+                        XapiRecorderService::OBJECT_LIVE_SESSION,
+                        $session->id,
+                        null,
+                        ['course_id' => $this->course->id],
+                    );
+                } catch (\Throwable) {
+                    // Silencieux
+                }
+            }
         }
 
         // Ouverture du lien en nouvel onglet, côté client (rel=noopener géré par la vue).
