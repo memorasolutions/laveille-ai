@@ -225,7 +225,10 @@ class AcademyDemoSeeder extends Seeder
                 // Vidéo ScreenPal, URL d'intégration /player/… (pas /watch/…) pour respecter
                 // le verrou de domaine — voir video-player.blade.php. Domaine générique
                 // go.screenpal.com (aucune marque blanche, zéro dépendance CNAME/SSL tierce).
-                'player_url'       => 'https://go.screenpal.com/player/cOn6rBn0hMl?ff=1&ahc=1&dcc=1&tl=1&bg=transparent&share=0&download=0&embed=1&cl=1',
+                // oembed=1 : respecte les réglages « Viewer actions » du tableau de bord
+                // ScreenPal (Copy URL / Download désactivés côté compte) — vérifié (diff HTML)
+                // que « Copy »/« Download » disparaissent du rendu avec ce paramètre.
+                'player_url'       => 'https://go.screenpal.com/player/cOn6rBn0hMl?ff=1&ahc=1&dcc=1&tl=1&bg=transparent&width=100%25&height=100%25&oembed=1',
                 'duration_seconds' => 360,
                 'domain_lock'      => true,
                 'aspect_ratio'     => 1.320866,
