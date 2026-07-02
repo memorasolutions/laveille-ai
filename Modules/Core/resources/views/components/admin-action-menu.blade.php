@@ -1,9 +1,21 @@
 {{-- Composant réutilisable : menu actions admin (kebab ⋮)
-     Usage: @include('core::components.admin-action-menu', ['actions' => [
+     Usage (mode routes, POST/DELETE classiques) :
+     @include('core::components.admin-action-menu', ['actions' => [
          ['label' => 'Modifier', 'icon' => 'pencil', 'url' => route('admin.xxx.edit', $item)],
          ['label' => 'Voir', 'icon' => 'eye', 'url' => route('xxx.show', $item), 'target' => '_blank'],
          ['divider' => true],
          ['label' => 'Supprimer', 'icon' => 'trash-2', 'url' => route('admin.xxx.destroy', $item), 'method' => 'DELETE', 'confirm' => 'Supprimer ?', 'danger' => true],
+     ]])
+
+     Usage (mode Livewire, wire:click) : remplace 'url' par 'wireClick'. La
+     confirmation en 2 temps (Confirmer/Annuler inline) N'EST PAS gérée ici -
+     'wireClick' appelle une méthode qui existe déjà dans le composant Livewire
+     (ex. confirmCohortRemoval($id)) et qui bascule un état interne affiché par
+     LA VUE Livewire elle-même (jamais de popup native, jamais de logique de
+     confirmation dupliquée dans ce menu).
+     @include('core::components.admin-action-menu', ['actions' => [
+         ['label' => 'Renommer', 'icon' => 'pencil', 'wireClick' => "startRenameCohort({$cohort->id})"],
+         ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmCohortRemoval({$cohort->id})", 'danger' => true],
      ]])
 --}}
 @php $menuId = 'action-' . uniqid(); @endphp
@@ -19,6 +31,14 @@
         @foreach($actions as $action)
             @if(isset($action['divider']) && $action['divider'])
                 <div style="border-top: 1px solid #f3f4f6; margin: 4px 0;"></div>
+            @elseif(isset($action['wireClick']))
+                <button type="button" wire:click="{{ $action['wireClick'] }}" @click="open = false"
+                        style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 14px; border: none; background: none; cursor: pointer; font-size: 13px; color: {{ isset($action['danger']) && $action['danger'] ? '#DC2626' : '#374151' }}; text-align: left;"
+                        onmouseover="this.style.background='{{ isset($action['danger']) && $action['danger'] ? '#FEF2F2' : '#F9FAFB' }}'"
+                        onmouseout="this.style.background='transparent'">
+                    @if(isset($action['icon']))<i data-lucide="{{ $action['icon'] }}" style="width: 14px; height: 14px;"></i>@endif
+                    {{ $action['label'] }}
+                </button>
             @elseif(isset($action['method']) && $action['method'] !== 'GET')
                 <form action="{{ $action['url'] }}" method="POST" style="margin: 0;" x-data>
                     @csrf
