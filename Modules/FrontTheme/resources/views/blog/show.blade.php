@@ -246,6 +246,9 @@
                                 </span>
                             </nav>
 
+                            {{-- Sommaire flottant + navigation par ancres (2026-07) : premier cas d'application, gabarit article de blog. --}}
+                            <x-fronttheme::table-of-contents content-selector=".entry-details" />
+
                             <div class="entry-details">
                                 @php
                                     $articleContent = $article->content;
