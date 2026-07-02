@@ -51,6 +51,17 @@ trait HandlesCourseSettings
         ], true);
         $needsFixed = $this->ai_tutor_window_type === TutorAccessService::WINDOW_FIXED_DATE;
 
+        // ACTION: fix sauvegarde silencieuse bloquée — un champ masqué (type de
+        // fenêtre changé) gardait une ancienne valeur invalide (ex. 0 jour) qui
+        // échouait min:1 sans message visible (le bloc @error est masqué avec lui).
+        // SELF: 2 lignes — RAISON: purger l'état inapplicable avant validation.
+        if (! $needsDays) {
+            $this->ai_tutor_window_days = null;
+        }
+        if (! $needsFixed) {
+            $this->ai_tutor_fixed_expiry_at = null;
+        }
+
         $validated = $this->validate([
             'ai_tutor_window_type'          => ['required', 'string', Rule::in(TutorAccessService::WINDOW_TYPES)],
             'ai_tutor_window_days'          => [$needsDays ? 'required' : 'nullable', 'integer', 'min:1', 'max:3650'],

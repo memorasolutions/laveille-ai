@@ -27,6 +27,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Services\GamificationService;
+use Modules\Academy\Services\TierGateService;
 
 class Gamification extends Component
 {
@@ -35,11 +36,18 @@ class Gamification extends Component
         abort_unless(Auth::check(), 403);
     }
 
-    /** Le drapeau maître est-il activé ? La vue Blade masque déjà tout si false. */
+    /**
+     * Le drapeau maître est-il activé ? La vue Blade masque déjà tout si false.
+     * ACTION: fix Scénario F — le palier d'abonnement de l'utilisateur (TierGateService)
+     * n'était jamais consulté ici, un palier sans la feature academy_gamification
+     * voyait quand même le widget. SELF: 3 lignes. RAISON: refus propre (fail-closed),
+     * cohérent avec les autres features gérées par palier (voir TierGateService).
+     */
     #[Computed]
     public function enabled(): bool
     {
-        return app(GamificationService::class)->isEnabled();
+        return app(GamificationService::class)->isEnabled()
+            && app(TierGateService::class)->hasFeature(Auth::user(), 'academy_gamification');
     }
 
     /**

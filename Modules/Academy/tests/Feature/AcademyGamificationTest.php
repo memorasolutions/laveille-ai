@@ -13,7 +13,10 @@
  *  - le niveau progresse avec le total d'XP (courbe croissante) ;
  *  - le classement d'une cohorte est STRICTEMENT scopé (un apprenant d'une autre
  *    cohorte n'y apparaît jamais) ;
- *  - un apprenant retiré du classement (opt-out Loi 25 QC) en est absent.
+ *  - un apprenant retiré du classement (opt-out Loi 25 QC) en est absent ;
+ *  - RÉGRESSION Scénario F (simulation croisée 2026-07-02) : le widget Livewire
+ *    respecte le gating par palier d'abonnement (TierGateService) sans jamais
+ *    500 (racine Blade unique conservée que le widget soit affiché ou masqué).
  *
  * Autonome : helpers préfixés `gami`, aucune redéclaration d'une fonction d'un
  * autre fichier de test. Garde-fou : si le module Academy est désactivé, tous
@@ -24,12 +27,15 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+use Modules\Academy\Livewire\Gamification;
 use Modules\Academy\Models\Chapter;
 use Modules\Academy\Models\Cohort;
 use Modules\Academy\Models\Completion;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
+use Modules\Academy\Models\SubscriptionTier;
 use Modules\Academy\Models\XpEvent;
 use Modules\Academy\Services\CompletionService;
 use Modules\Academy\Services\GamificationService;
@@ -239,4 +245,57 @@ test('un apprenant retiré du classement (opt-out) en est absent', function (): 
     // Alice peut se réinscrire au classement à tout moment.
     $service->setLeaderboardVisibility($alice, true);
     expect($service->leaderboardForCohort($cohort->fresh())->pluck('user.id')->all())->toContain($alice->id);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// (f) RÉGRESSION Scénario F : gating par palier d'abonnement, jamais de 500
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('palier SANS la fonctionnalité gamification masque le widget sans jamais planter', function (): void {
+    config(['academy.gamification_enabled' => true]);
+    config(['academy.subscription_tiers_enabled' => true]);
+    config(['academy.subscription_tier_feature_keys' => [
+        'academy_gamification' => 'Gamification',
+    ]]);
+
+    // Palier par défaut (freemium) SANS la fonctionnalité — aucune assignation.
+    SubscriptionTier::create([
+        'name'       => 'Freemium',
+        'slug'       => 'freemium-gami-'.uniqid(),
+        'features'   => [],
+        'is_default' => true,
+        'is_active'  => true,
+    ]);
+
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Gamification::class)
+        ->assertOk()
+        ->assertSet('enabled', false)
+        ->assertDontSee('Ma progression');
+});
+
+test('palier AVEC la fonctionnalité gamification affiche le widget normalement', function (): void {
+    config(['academy.gamification_enabled' => true]);
+    config(['academy.subscription_tiers_enabled' => true]);
+    config(['academy.subscription_tier_feature_keys' => [
+        'academy_gamification' => 'Gamification',
+    ]]);
+
+    SubscriptionTier::create([
+        'name'       => 'Pro',
+        'slug'       => 'pro-gami-'.uniqid(),
+        'features'   => ['academy_gamification'],
+        'is_default' => true,
+        'is_active'  => true,
+    ]);
+
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Gamification::class)
+        ->assertOk()
+        ->assertSet('enabled', true)
+        ->assertSee('Ma progression');
 });

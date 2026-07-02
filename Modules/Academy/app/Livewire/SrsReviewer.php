@@ -58,9 +58,14 @@ class SrsReviewer extends Component
      * @return \Illuminate\Support\Collection<int, SrsCard>
      */
     #[Computed]
-    public function dueCards(SrsService $srs)
+    public function dueCards()
     {
-        return $srs->dueFor($this->user());
+        // ACTION: fix 500 régression Scénario A (simulation 2026-07-02) —
+        // Livewire n'injecte PAS les dépendances des méthodes #[Computed]
+        // (contrairement à mount()/aux actions publiques) : appelées sans
+        // argument via __get(), ArgumentCountError sur $srs.
+        // SELF: 2 lignes — RAISON: résoudre le service depuis le conteneur.
+        return app(SrsService::class)->dueFor($this->user());
     }
 
     /** Carte courante = première carte due, ou null si la file est vide. */

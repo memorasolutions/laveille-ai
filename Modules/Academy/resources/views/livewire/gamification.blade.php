@@ -3,8 +3,19 @@
 
     Gamification moderne (LMS 2026) : « Ma progression » (XP/niveau/palier) +
     classement PAR COHORTE (jamais global). Rendu UNIQUEMENT si le drapeau
-    academy.gamification_enabled est activé (double garde : vue + composant).
+    academy.gamification_enabled est activé (double garde : vue + composant)
+    ET si le palier d'abonnement de l'utilisateur donne droit à la feature
+    (TierGateService::hasFeature, voir Gamification::enabled()).
+
+    ACTION: fix régression Scénario F — Livewire exige toujours une racine
+    HTML unique ; @if(...) seul autour de TOUT le template produit une sortie
+    vide (et une RootTagMissingFromViewException) dès que enabled()=false pour
+    un utilisateur connecté sans que le composant soit démonté (cas nouveau
+    depuis le tier-gating : le drapeau global reste ON, seul le palier refuse).
+    SELF: 2 lignes (div racine toujours présente) — RAISON: refus propre sans
+    casser la contrainte "un seul élément racine" de Livewire.
 --}}
+<div>
 @if($this->enabled)
 <section aria-labelledby="academy-gamification" class="mb-5">
     <h2 id="academy-gamification"
@@ -114,3 +125,4 @@
     @endforelse
 </section>
 @endif
+</div>
