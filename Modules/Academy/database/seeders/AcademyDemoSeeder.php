@@ -222,10 +222,12 @@ class AcademyDemoSeeder extends Seeder
             'estimated_minutes' => 6,
             'external_ref'      => 'sp-demo-placeholder-001',
             'payload'           => [
-                // Vidéo ScreenPal (marque blanche media.memora.solutions), URL d'intégration
-                // /player/… (pas /watch/…) pour respecter le verrou de domaine — voir
-                // Modules/Academy/resources/views/components/video-player.blade.php.
-                'player_url'       => 'https://media.memora.solutions/player/cOVXDznrxUF',
+                // Vidéo ScreenPal, URL d'intégration /player/… (pas /watch/…) pour respecter
+                // le verrou de domaine — voir video-player.blade.php. Domaine standard
+                // share.screenpal.com utilisé temporairement : media.memora.solutions (CNAME
+                // marque blanche) est en panne côté infra (Cloudflare 526), à réactiver une
+                // fois le certificat SSL de l'origine corrigé côté Cloudflare/ScreenPal.
+                'player_url'       => 'https://share.screenpal.com/player/cOVXDznrxUF',
                 'duration_seconds' => 360,
                 'domain_lock'      => true,
             ],
