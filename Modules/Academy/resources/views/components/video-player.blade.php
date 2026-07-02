@@ -27,6 +27,18 @@
     4. NE PAS utiliser le lien de partage (go.screenpal.com/watch/…) comme player_url :
        utiliser l'URL d'embed (go.screenpal.com/player/…) qui répond au domain lock.
     5. Le payload seeder contient domain_lock: true comme rappel de cette exigence.
+    6. Clic droit (« Copy Video Link »/« Copy Embed Code ») : ScreenPal injecte ce menu
+       lui-même (pas le navigateur), donc AUCUN code côté laveille.ai ne peut l'affecter
+       (iframe cross-origin). Le désactiver se fait UNIQUEMENT dans le tableau de bord
+       ScreenPal : Bibliothèque > Gérer la vidéo > Partager > Contrôles du lecteur >
+       Actions du spectateur > désactiver « Copy URL » et « Embed Video » (plan Solo Max/Team).
+    7. Le domain lock protège l'INTÉGRATION (iframe) mais PAS la page « watch » directe sur
+       screenpal.com/go.screenpal.com : quelqu'un avec le lien watch exact pourrait la
+       regarder hors laveille.ai si la visibilité est « Unlisted ». Risque accepté standard
+       (identique à Vimeo/YouTube) : l'ID n'est jamais exposé publiquement par l'app.
+       Le script « player_appearance » (snippet officiel sp-embed-player de ScreenPal)
+       a été testé et retourne 404 de façon fiable même avec Referer autorisé — NE PAS
+       en dépendre, l'iframe seule (déjà en place) est plus robuste.
     ─────────────────────────────────────────────────
 --}}
 @props(['playerUrl', 'title' => 'Vidéo de leçon', 'poster' => null, 'aspectRatio' => null])
