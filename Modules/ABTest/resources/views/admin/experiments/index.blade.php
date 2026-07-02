@@ -49,13 +49,11 @@
                             </td>
                             <td>{{ format_date($experiment->created_at, 'datetime') }}</td>
                             <td>
-                                <div class="d-flex gap-1">
-                                    <a href="{{ route('admin.experiments.show', $experiment) }}" class="btn btn-sm btn-outline-primary" title="{{ __('Voir') }}"><i data-lucide="eye"></i></a>
-                                    <form action="{{ route('admin.experiments.destroy', $experiment) }}" method="POST" class="d-inline">
-                                        @csrf @method('DELETE')
-                                        <button type="button" class="btn btn-sm btn-outline-danger" title="{{ __('Supprimer') }}" onclick="if(confirm('{{ __('Supprimer cette expérience ?') }}')) this.closest('form').submit()"><i data-lucide="trash-2"></i></button>
-                                    </form>
-                                </div>
+                                @include('core::components.admin-action-menu', ['actions' => [
+                                    ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('admin.experiments.show', $experiment)],
+                                    ['divider' => true],
+                                    ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.experiments.destroy', $experiment), 'method' => 'DELETE', 'confirm' => __('Supprimer cette expérience ?'), 'danger' => true],
+                                ]])
                             </td>
                         </tr>
                         @endforeach

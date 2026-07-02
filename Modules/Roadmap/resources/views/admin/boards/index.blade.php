@@ -56,18 +56,11 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a href="{{ route('admin.roadmap.boards.edit', $board) }}" class="btn btn-outline-primary" title="{{ __('Modifier') }}">
-                                            <i data-lucide="pencil"></i>
-                                        </a>
-                                        <form action="{{ route('admin.roadmap.boards.destroy', $board) }}" method="POST" class="d-inline" data-confirm="{{ __('Êtes-vous sûr de vouloir supprimer ce tableau ?') }}">
-                                            @method('DELETE')
-                                            @csrf
-                                            <button type="submit" class="btn btn-outline-danger" title="{{ __('Supprimer') }}">
-                                                <i data-lucide="trash-2"></i>
-                                            </button>
-                                        </form>
-                                    </div>
+                                    @include('core::components.admin-action-menu', ['actions' => [
+                                        ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.roadmap.boards.edit', $board)],
+                                        ['divider' => true],
+                                        ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.roadmap.boards.destroy', $board), 'method' => 'DELETE', 'confirm' => __('Êtes-vous sûr de vouloir supprimer ce tableau ?'), 'danger' => true],
+                                    ]])
                                 </td>
                             </tr>
                         @empty

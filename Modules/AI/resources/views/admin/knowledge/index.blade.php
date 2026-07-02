@@ -121,19 +121,11 @@
                                 @endif
                             </td>
                             <td class="align-middle text-end">
-                                <div class="d-flex gap-1 justify-content-end">
-                                    <a href="{{ route('admin.ai.knowledge.edit', $document) }}" class="btn btn-sm btn-outline-primary" title="{{ __('Modifier') }}">
-                                        <i data-lucide="edit"></i>
-                                    </a>
-                                    <form action="{{ route('admin.ai.knowledge.destroy', $document) }}" method="POST" class="d-inline" x-data>
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="btn btn-sm btn-outline-danger" title="{{ __('Supprimer') }}"
-                                                @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Supprimer ce document de la base de connaissances ?')), action: () => $el.closest('form').submit() })">
-                                            <i data-lucide="trash-2"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                                @include('core::components.admin-action-menu', ['actions' => [
+                                    ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.ai.knowledge.edit', $document)],
+                                    ['divider' => true],
+                                    ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.ai.knowledge.destroy', $document), 'method' => 'DELETE', 'confirm' => __('Supprimer ce document de la base de connaissances ?'), 'danger' => true],
+                                ]])
                             </td>
                         </tr>
                         @endforeach

@@ -79,18 +79,11 @@
                                 <td>{{ $idea->comment_count }}</td>
                                 <td>{{ $idea->user->name ?? __('Anonyme') }}</td>
                                 <td>
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a href="{{ route('admin.roadmap.ideas.show', $idea) }}" class="btn btn-outline-info" title="{{ __('Voir') }}">
-                                            <i data-lucide="eye"></i>
-                                        </a>
-                                        <form action="{{ route('admin.roadmap.ideas.destroy', $idea) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer cette idée ?') }}">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-outline-danger" title="{{ __('Supprimer') }}">
-                                                <i data-lucide="trash-2"></i>
-                                            </button>
-                                        </form>
-                                    </div>
+                                    @include('core::components.admin-action-menu', ['actions' => [
+                                        ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('admin.roadmap.ideas.show', $idea)],
+                                        ['divider' => true],
+                                        ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.roadmap.ideas.destroy', $idea), 'method' => 'DELETE', 'confirm' => __('Supprimer cette idée ?'), 'danger' => true],
+                                    ]])
                                 </td>
                             </tr>
                         @empty

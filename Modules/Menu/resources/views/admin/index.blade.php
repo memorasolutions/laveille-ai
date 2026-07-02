@@ -43,16 +43,11 @@
                                 @endif
                             </td>
                             <td class="text-end">
-                                <a href="{{ route('admin.menus.edit', $menu) }}" class="btn btn-sm btn-outline-primary" title="Modifier">
-                                    <i data-lucide="edit"></i>
-                                </a>
-                                <form action="{{ route('admin.menus.destroy', $menu) }}" method="POST" class="d-inline" data-confirm="Supprimer ce menu ?">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
-                                        <i data-lucide="trash-2"></i>
-                                    </button>
-                                </form>
+                                @include('core::components.admin-action-menu', ['actions' => [
+                                    ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.menus.edit', $menu)],
+                                    ['divider' => true],
+                                    ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.menus.destroy', $menu), 'method' => 'DELETE', 'confirm' => __('Supprimer ce menu ?'), 'danger' => true],
+                                ]])
                             </td>
                         </tr>
                         @endforeach

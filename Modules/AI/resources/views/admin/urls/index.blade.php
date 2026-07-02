@@ -141,26 +141,12 @@
                                 @endif
                             </td>
                             <td class="align-middle text-end">
-                                <div class="d-flex gap-1 justify-content-end">
-                                    <form action="{{ route('admin.ai.urls.scrape', $url) }}" method="POST" class="d-inline" x-data>
-                                        @csrf
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" title="{{ __('Lancer le scraping') }}"
-                                                @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Lancer le scraping de cette URL ?')), action: () => $el.closest('form').submit() })">
-                                            <i data-lucide="refresh-cw"></i>
-                                        </button>
-                                    </form>
-                                    <a href="{{ route('admin.ai.urls.edit', $url) }}" class="btn btn-sm btn-outline-primary" title="{{ __('Modifier') }}">
-                                        <i data-lucide="edit"></i>
-                                    </a>
-                                    <form action="{{ route('admin.ai.urls.destroy', $url) }}" method="POST" class="d-inline" x-data>
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="btn btn-sm btn-outline-danger" title="{{ __('Supprimer') }}"
-                                                @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Supprimer cette source URL et tous ses documents indexés ?')), action: () => $el.closest('form').submit() })">
-                                            <i data-lucide="trash-2"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                                @include('core::components.admin-action-menu', ['actions' => [
+                                    ['label' => __('Lancer le scraping'), 'icon' => 'refresh-cw', 'url' => route('admin.ai.urls.scrape', $url), 'method' => 'POST', 'confirm' => __('Lancer le scraping de cette URL ?')],
+                                    ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.ai.urls.edit', $url)],
+                                    ['divider' => true],
+                                    ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.ai.urls.destroy', $url), 'method' => 'DELETE', 'confirm' => __('Supprimer cette source URL et tous ses documents indexés ?'), 'danger' => true],
+                                ]])
                             </td>
                         </tr>
                         @endforeach
