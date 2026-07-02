@@ -201,12 +201,38 @@
         @livewire('academy.gamification')
     @endif
 
-    {{-- ───────────────────────── Vos badges (E1) ───────────────────────── --}}
-    <section aria-labelledby="academy-mes-badges" class="mb-5">
-        <h2 id="academy-mes-badges"
-            style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 16px;">
-            <span aria-hidden="true">🏅</span> Vos badges
-        </h2>
+    {{-- ─────────── Sections secondaires en accordéon (Option E hybride) ───────────
+         Mes formations + Échéances restent TOUJOURS visibles ci-dessus (consultées
+         quotidiennement). Badges/Annonces/Modèles/Vue admin sont repliables pour
+         raccourcir la page. Même pattern Bootstrap que public/show.blade.php
+         (syllabus) : .accordion/.accordion-item/.accordion-button/.accordion-collapse,
+         DRY, zéro nouveau CSS. Tous les id="academy-xxx" existants sont conservés
+         (ancres utilisées ailleurs). --}}
+    @php
+        // Annonce publiée il y a moins de 7 jours = contenu « urgent/nouveau » →
+        // on ouvre l'accordéon Annonces par défaut pour ne pas la cacher.
+        $__hasRecentAnnouncement = $this->announcements->contains(
+            fn ($a) => $a->published_at && $a->published_at->timezone('America/Toronto')->diffInDays(now('America/Toronto')) < 7
+        );
+    @endphp
+    <div class="accordion" id="academySecondaryAccordion">
+
+        {{-- ───────────────────────── Vos badges (E1) ───────────────────────── --}}
+        <div class="accordion-item" style="border-radius: 8px; margin-bottom: 6px; overflow: hidden; border: 1px solid #E5E7EB;">
+            <h2 class="accordion-header" id="academy-mes-badges">
+                <button class="accordion-button collapsed" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#academy-mes-badges-collapse"
+                        aria-expanded="false"
+                        aria-controls="academy-mes-badges-collapse">
+                    <span aria-hidden="true">🏅</span>&nbsp;Vos badges
+                </button>
+            </h2>
+            <div id="academy-mes-badges-collapse"
+                 class="accordion-collapse collapse"
+                 aria-labelledby="academy-mes-badges"
+                 data-bs-parent="#academySecondaryAccordion">
+            <div class="accordion-body">
 
         @if($this->earnedBadges->isNotEmpty())
             <ul class="list-unstyled d-flex flex-wrap gap-3" role="list" style="margin: 0;">
@@ -269,39 +295,61 @@
                 @endforeach
             </ul>
         @endif
-    </section>
 
-    {{-- ───────────────────── Annonces de vos formations (D3) ───────────────────── --}}
-    @if($this->announcements->isNotEmpty())
-        <section aria-labelledby="academy-annonces" class="mb-5">
-            <h2 id="academy-annonces"
-                style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 16px;">
-                Annonces de vos formations
-            </h2>
-            <ul class="list-unstyled d-flex flex-column gap-3" style="margin: 0;">
-                @foreach($this->announcements as $announcement)
-                    <li wire:key="dash-announcement-{{ $announcement->id }}"
-                        style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 18px 20px;">
-                        <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2">
-                            <h3 style="font-family: var(--f-heading); font-size: 1.05rem; color: var(--sys-text-default, #1A1D23); margin: 0;">
-                                {{ $announcement->title }}
-                            </h3>
-                            <span style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280);">
-                                {{ $announcement->course?->title }}
+            </div>
+            </div>
+        </div>
+
+        {{-- ───────────────────── Annonces de vos formations (D3) ───────────────────── --}}
+        @if($this->announcements->isNotEmpty())
+            <div class="accordion-item" style="border-radius: 8px; margin-bottom: 6px; overflow: hidden; border: 1px solid #E5E7EB;">
+                <h2 class="accordion-header" id="academy-annonces">
+                    <button class="accordion-button {{ $__hasRecentAnnouncement ? '' : 'collapsed' }}" type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#academy-annonces-collapse"
+                            aria-expanded="{{ $__hasRecentAnnouncement ? 'true' : 'false' }}"
+                            aria-controls="academy-annonces-collapse">
+                        Annonces de vos formations
+                        @if($__hasRecentAnnouncement)
+                            <span aria-hidden="true" style="margin-left: 8px; font-size: 0.72rem; font-weight: 700; padding: 2px 10px; border-radius: 999px; background: var(--sys-status-info-bg, #E0F2FE); color: var(--sys-status-info-text, #0C4A6E);">
+                                Nouveau
                             </span>
-                        </div>
-                        <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 10px;">
-                            Publiée le {{ $announcement->published_at->timezone('America/Toronto')->format('Y-m-d H\hi') }}
-                            @if($announcement->author?->name) · par {{ $announcement->author->name }} @endif
-                        </p>
-                        <div style="font-size: 0.92rem; color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
-                            {!! $announcement->renderedBody() !!}
-                        </div>
-                    </li>
-                @endforeach
-            </ul>
-        </section>
-    @endif
+                        @endif
+                    </button>
+                </h2>
+                <div id="academy-annonces-collapse"
+                     class="accordion-collapse collapse {{ $__hasRecentAnnouncement ? 'show' : '' }}"
+                     aria-labelledby="academy-annonces"
+                     data-bs-parent="#academySecondaryAccordion">
+                    <div class="accordion-body">
+                        <ul class="list-unstyled d-flex flex-column gap-3" style="margin: 0;">
+                            @foreach($this->announcements as $announcement)
+                                <li wire:key="dash-announcement-{{ $announcement->id }}"
+                                    style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 18px 20px;">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2">
+                                        <h3 style="font-family: var(--f-heading); font-size: 1.05rem; color: var(--sys-text-default, #1A1D23); margin: 0;">
+                                            {{ $announcement->title }}
+                                        </h3>
+                                        <span style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280);">
+                                            {{ $announcement->course?->title }}
+                                        </span>
+                                    </div>
+                                    <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 10px;">
+                                        Publiée le {{ $announcement->published_at->timezone('America/Toronto')->format('Y-m-d H\hi') }}
+                                        @if($announcement->author?->name) · par {{ $announcement->author->name }} @endif
+                                    </p>
+                                    <div style="font-size: 0.92rem; color: var(--sys-text-default, #1A1D23); line-height: 1.7;">
+                                        {!! $announcement->renderedBody() !!}
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+    </div>
 
     {{-- ───────────────────── Mes cours (formateur / admin) ───────────────────── --}}
     @if($this->canManageCourses)
@@ -404,13 +452,29 @@
             @endif
         </section>
 
+        {{-- ─────────── Sections secondaires gestion, en accordéon ───────────
+             Modèles + Vue admin sont repliables (fermées par défaut, rien d'urgent
+             à signaler ici). Même pattern Bootstrap DRY que ci-dessus / show.blade.php. --}}
+        @if($this->managedTemplates->isNotEmpty() || $this->isAcademyAdmin)
+        <div class="accordion" id="academyManageAccordion">
+
         {{-- ───────────────────── Modèles réutilisables (C3) ───────────────────── --}}
         @if($this->managedTemplates->isNotEmpty())
-            <section aria-labelledby="academy-modeles" class="mb-5">
-                <h2 id="academy-modeles"
-                    style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 6px;">
-                    Modèles
+            <div class="accordion-item" style="border-radius: 8px; margin-bottom: 6px; overflow: hidden; border: 1px solid #E5E7EB;">
+                <h2 class="accordion-header" id="academy-modeles">
+                    <button class="accordion-button collapsed" type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#academy-modeles-collapse"
+                            aria-expanded="false"
+                            aria-controls="academy-modeles-collapse">
+                        Modèles
+                    </button>
                 </h2>
+                <div id="academy-modeles-collapse"
+                     class="accordion-collapse collapse"
+                     aria-labelledby="academy-modeles"
+                     data-bs-parent="#academyManageAccordion">
+                <div class="accordion-body">
                 <p style="font-size: 0.9rem; color: var(--sys-text-muted, #6B7280); margin-bottom: 16px;">
                     Partez d'un modèle réutilisable : « Utiliser ce modèle » crée une copie modifiable en brouillon.
                 </p>
@@ -451,21 +515,38 @@
                         </li>
                     @endforeach
                 </ul>
-            </section>
+                </div>
+                </div>
+            </div>
         @endif
-    @endif
 
-    {{-- ───────────────────── Vue admin (academy.manage) ───────────────────── --}}
-    @if($this->isAcademyAdmin)
-        <section aria-labelledby="academy-vue-admin"
-                 style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 18px 20px; background: #F9FAFB;">
-            <h2 id="academy-vue-admin"
-                style="font-family: var(--f-heading); font-size: 1rem; color: var(--sys-text-default, #1A1D23); margin-bottom: 6px;">
-                Administration
-            </h2>
-            <p style="font-size: 0.9rem; color: var(--sys-text-muted, #6B7280); margin-bottom: 0;">
-                En tant qu'administrateur, vous gérez tous les cours directement ci-dessus : création, édition du contenu, inscriptions et rôles.
-            </p>
-        </section>
+        {{-- ───────────────────── Vue admin (academy.manage) ───────────────────── --}}
+        @if($this->isAcademyAdmin)
+            <div class="accordion-item" style="border-radius: 8px; margin-bottom: 6px; overflow: hidden; border: 1px solid #E5E7EB; background: #F9FAFB;">
+                <h2 class="accordion-header" id="academy-vue-admin">
+                    <button class="accordion-button collapsed" type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#academy-vue-admin-collapse"
+                            aria-expanded="false"
+                            aria-controls="academy-vue-admin-collapse"
+                            style="font-size: 1rem;">
+                        Administration
+                    </button>
+                </h2>
+                <div id="academy-vue-admin-collapse"
+                     class="accordion-collapse collapse"
+                     aria-labelledby="academy-vue-admin"
+                     data-bs-parent="#academyManageAccordion">
+                    <div class="accordion-body">
+                        <p style="font-size: 0.9rem; color: var(--sys-text-muted, #6B7280); margin-bottom: 0;">
+                            En tant qu'administrateur, vous gérez tous les cours directement ci-dessus : création, édition du contenu, inscriptions et rôles.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        </div>
+        @endif
     @endif
 </div>
