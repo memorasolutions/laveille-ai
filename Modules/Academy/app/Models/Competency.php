@@ -14,6 +14,12 @@
  * binaire par défaut. L'état d'acquisition par étudiant est DÉRIVÉ (jamais stocké) par
  * Modules\Academy\Services\CompetencyService à partir de l'achèvement (V2-c) et/ou des
  * notes (carnet), donc toujours cohérent avec la réalité de l'apprenant.
+ *
+ * F22-b - GRAPHE DE COMPÉTENCES : une compétence peut REQUÉRIR d'autres compétences
+ * (prérequis pondérés, table académy_competency_relations) — voir requiresCompetencies()
+ * / requiredByCompetencies() et Modules\Academy\Services\CompetencyGraphService pour le
+ * calcul de maîtrise et le déverrouillage. Rétrocompat stricte : sans relation créée,
+ * toute compétence reste déverrouillée (comportement actuel inchangé).
  */
 
 declare(strict_types=1);
@@ -24,6 +30,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -76,6 +83,34 @@ class Competency extends Model
     public function links(): HasMany
     {
         return $this->hasMany(CompetencyLink::class, 'competency_id');
+    }
+
+    /**
+     * F22-b - Prérequis de CETTE compétence (arêtes sortantes du graphe) : les
+     * compétences qu'il faut maîtriser AVANT celle-ci, avec leur seuil/pondération.
+     */
+    public function requiresCompetencies(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            self::class,
+            'academy_competency_relations',
+            'competency_id',
+            'requires_competency_id',
+        )->withPivot(['mastery_threshold', 'weight'])->withTimestamps();
+    }
+
+    /**
+     * F22-b - Compétences qui REQUIÈRENT celle-ci (arêtes entrantes du graphe) :
+     * utile pour afficher « débloque » dans une vue de graphe.
+     */
+    public function requiredByCompetencies(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            self::class,
+            'academy_competency_relations',
+            'requires_competency_id',
+            'competency_id',
+        )->withPivot(['mastery_threshold', 'weight'])->withTimestamps();
     }
 
     /**

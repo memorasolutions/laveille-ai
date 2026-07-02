@@ -358,6 +358,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Graphe de compétences (F22-b — relations pondérées entre compétences)
+    |--------------------------------------------------------------------------
+    | Quand true, le référentiel F22 (jusqu'ici PLAT) gagne des RELATIONS entre
+    | compétences elles-mêmes (academy_competency_relations : « compétence B
+    | requiert compétence A à 70 % de maîtrise »). La maîtrise réelle d'un
+    | apprenant est calculée à partir des statements xAPI déjà journalisés
+    | (voir Services\XapiRecorderService / academy_xapi_statements) — AUCUNE
+    | nouvelle donnée métier n'est dupliquée. Voir Services\CompetencyGraphService.
+    | Défaut false : masteryFor()/isUnlocked()/graphFor() restent NO-OP (retour
+    | neutre : 0.0, true, graphe vide), zéro requête SQL supplémentaire, aucune
+    | compétence n'est jamais verrouillée quand le drapeau est désactivé.
+    | Activer via ACADEMY_COMPETENCY_GRAPH_ENABLED=true dans le .env.
+    */
+    'competency_graph_enabled' => env('ACADEMY_COMPETENCY_GRAPH_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Test de positionnement adaptatif (CAT — Computer Adaptive Testing)
     |--------------------------------------------------------------------------
     | Quand true, un apprenant inscrit peut passer un test court (≈5-8 questions
