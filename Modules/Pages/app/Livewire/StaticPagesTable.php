@@ -34,6 +34,8 @@ class StaticPagesTable extends Component
 
     public string $sortDirection = 'asc';
 
+    public ?int $confirmingDeleteId = null;
+
     public function updatingSearch(): void
     {
         $this->resetPage();
@@ -54,9 +56,22 @@ class StaticPagesTable extends Component
         $this->resetInfiniteScroll();
     }
 
+    /** Arme la confirmation inline de suppression (aucun popup navigateur natif). */
+    public function confirmDeletePage(int $pageId): void
+    {
+        $this->confirmingDeleteId = $pageId;
+    }
+
+    /** Annule la confirmation de suppression. */
+    public function cancelDeletePage(): void
+    {
+        $this->confirmingDeleteId = null;
+    }
+
     public function deletePage(int $pageId): void
     {
         StaticPage::findOrFail($pageId)->delete();
+        $this->confirmingDeleteId = null;
         session()->flash('success', 'Page supprimée.');
     }
 

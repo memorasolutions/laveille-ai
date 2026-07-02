@@ -159,12 +159,10 @@
                                         @endif
                                     </td>
                                     <td class="text-nowrap">
-                                        <a href="{{ route('directory.show', $tool->slug) }}" class="btn btn-sm btn-outline-primary me-1" target="_blank" aria-label="Voir l'outil">
-                                            <i data-lucide="eye"></i>
-                                        </a>
-                                        <a href="{{ route('admin.directory.edit', $tool) }}" class="btn btn-sm btn-outline-secondary" aria-label="Modifier l'outil">
-                                            <i data-lucide="pencil"></i>
-                                        </a>
+                                        @include('core::components.admin-action-menu', ['actions' => [
+                                            ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('directory.show', $tool->slug), 'target' => '_blank'],
+                                            ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.directory.edit', $tool)],
+                                        ]])
                                     </td>
                                 </tr>
                             @empty

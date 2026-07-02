@@ -93,18 +93,10 @@
                                 </td>
                                 <td>
                                     @if($report->status === 'pending')
-                                        <form action="{{ route('admin.directory.pricing-reports.approve', $report) }}" method="POST" class="d-inline" data-confirm="{{ __('Confirmer l\'approbation de ce signalement ?') }}">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-success" aria-label="{{ __('Approuver') }}">
-                                                <i data-lucide="check"></i>
-                                            </button>
-                                        </form>
-                                        <form action="{{ route('admin.directory.pricing-reports.reject', $report) }}" method="POST" class="d-inline" data-confirm="{{ __('Confirmer le rejet de ce signalement ?') }}">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-danger" aria-label="{{ __('Rejeter') }}">
-                                                <i data-lucide="x"></i>
-                                            </button>
-                                        </form>
+                                        @include('core::components.admin-action-menu', ['actions' => [
+                                            ['label' => __('Approuver'), 'icon' => 'check', 'url' => route('admin.directory.pricing-reports.approve', $report), 'method' => 'POST', 'confirm' => __('Confirmer l\'approbation de ce signalement ?')],
+                                            ['label' => __('Rejeter'), 'icon' => 'x', 'url' => route('admin.directory.pricing-reports.reject', $report), 'method' => 'POST', 'confirm' => __('Confirmer le rejet de ce signalement ?'), 'danger' => true],
+                                        ]])
                                     @else
                                         <small>
                                             {{ __('Revu par') }} {{ $report->reviewer?->email ?? '?' }}<br>

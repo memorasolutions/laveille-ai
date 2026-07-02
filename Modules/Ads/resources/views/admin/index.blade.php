@@ -44,11 +44,11 @@
                             @endif
                         </td>
                         <td class="text-end">
-                            <a href="{{ route('admin.ads.edit', $ad) }}" class="btn btn-outline-primary btn-icon btn-sm"><i data-feather="edit"></i></a>
-                            <form action="{{ route('admin.ads.destroy', $ad) }}" method="POST" class="d-inline" data-confirm="Supprimer cette publicité ?">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-outline-danger btn-icon btn-sm"><i data-feather="trash-2"></i></button>
-                            </form>
+                            @include('core::components.admin-action-menu', ['actions' => [
+                                ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.ads.edit', $ad)],
+                                ['divider' => true],
+                                ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.ads.destroy', $ad), 'method' => 'DELETE', 'confirm' => __('Supprimer cette publicité ?'), 'danger' => true],
+                            ]])
                         </td>
                     </tr>
                     @empty

@@ -55,20 +55,12 @@
                                         @endswitch
                                     </td>
                                     <td class="text-end">
-                                        <div class="d-flex justify-content-end gap-1">
-                                            <a href="{{ route('admin.newsletter.workflows.show', $workflow) }}" class="btn btn-sm btn-outline-info" title="Voir">
-                                                <i data-lucide="bar-chart-3"></i>
-                                            </a>
-                                            <a href="{{ route('admin.newsletter.workflows.edit', $workflow) }}" class="btn btn-sm btn-outline-primary" title="Modifier">
-                                                <i data-lucide="pencil"></i>
-                                            </a>
-                                            <form method="POST" action="{{ route('admin.newsletter.workflows.destroy', $workflow) }}" data-confirm="Supprimer ce workflow ?">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
-                                                    <i data-lucide="trash-2"></i>
-                                                </button>
-                                            </form>
-                                        </div>
+                                        @include('core::components.admin-action-menu', ['actions' => [
+                                            ['label' => __('Voir'), 'icon' => 'bar-chart-3', 'url' => route('admin.newsletter.workflows.show', $workflow)],
+                                            ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.newsletter.workflows.edit', $workflow)],
+                                            ['divider' => true],
+                                            ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.newsletter.workflows.destroy', $workflow), 'method' => 'DELETE', 'confirm' => __('Supprimer ce workflow ?'), 'danger' => true],
+                                        ]])
                                     </td>
                                 </tr>
                                 @endforeach

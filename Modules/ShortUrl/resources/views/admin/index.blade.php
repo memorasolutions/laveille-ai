@@ -125,44 +125,13 @@
                             </td>
                             <td>{{ format_date($shortUrl->created_at) }}</td>
                             <td class="text-end">
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
-                                            data-bs-toggle="dropdown" aria-expanded="false" aria-label="Actions">
-                                        <i data-lucide="more-horizontal" style="width:14px;height:14px;"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('admin.short-urls.show', $shortUrl) }}">
-                                                <i data-lucide="bar-chart-2" style="width:14px;height:14px;" class="me-2"></i>Statistiques
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('admin.short-urls.edit', $shortUrl) }}">
-                                                <i data-lucide="edit" style="width:14px;height:14px;" class="me-2"></i>Modifier
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <form method="POST" action="{{ route('admin.short-urls.toggle', $shortUrl) }}">
-                                                @csrf
-                                                <button type="submit" class="dropdown-item">
-                                                    <i data-lucide="{{ $shortUrl->is_active ? 'eye-off' : 'eye' }}" style="width:14px;height:14px;" class="me-2"></i>
-                                                    {{ $shortUrl->is_active ? 'Désactiver' : 'Activer' }}
-                                                </button>
-                                            </form>
-                                        </li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <form method="POST" action="{{ route('admin.short-urls.destroy', $shortUrl) }}"
-                                                  data-confirm="Supprimer ce lien court ?">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="dropdown-item text-danger">
-                                                    <i data-lucide="trash-2" style="width:14px;height:14px;" class="me-2"></i>Supprimer
-                                                </button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
+                                @include('core::components.admin-action-menu', ['actions' => [
+                                    ['label' => __('Statistiques'), 'icon' => 'bar-chart-2', 'url' => route('admin.short-urls.show', $shortUrl)],
+                                    ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.short-urls.edit', $shortUrl)],
+                                    ['label' => $shortUrl->is_active ? __('Désactiver') : __('Activer'), 'icon' => $shortUrl->is_active ? 'eye-off' : 'eye', 'url' => route('admin.short-urls.toggle', $shortUrl), 'method' => 'POST'],
+                                    ['divider' => true],
+                                    ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.short-urls.destroy', $shortUrl), 'method' => 'DELETE', 'confirm' => __('Supprimer ce lien court ?'), 'danger' => true],
+                                ]])
                             </td>
                         </tr>
                         @endforeach

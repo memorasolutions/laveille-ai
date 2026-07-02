@@ -56,20 +56,12 @@
                                         @endif
                                     </td>
                                     <td class="text-end">
-                                        <div class="d-flex justify-content-end gap-1">
-                                            <a href="{{ route('admin.newsletter.templates.preview', $template) }}" class="btn btn-sm btn-outline-info" target="_blank" title="Aperçu">
-                                                <i data-lucide="eye"></i>
-                                            </a>
-                                            <a href="{{ route('admin.newsletter.templates.edit', $template) }}" class="btn btn-sm btn-outline-primary" title="Modifier">
-                                                <i data-lucide="pencil"></i>
-                                            </a>
-                                            <form method="POST" action="{{ route('admin.newsletter.templates.destroy', $template) }}" data-confirm="Supprimer ce template ?">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
-                                                    <i data-lucide="trash-2"></i>
-                                                </button>
-                                            </form>
-                                        </div>
+                                        @include('core::components.admin-action-menu', ['actions' => [
+                                            ['label' => __('Aperçu'), 'icon' => 'eye', 'url' => route('admin.newsletter.templates.preview', $template), 'target' => '_blank'],
+                                            ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.newsletter.templates.edit', $template)],
+                                            ['divider' => true],
+                                            ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.newsletter.templates.destroy', $template), 'method' => 'DELETE', 'confirm' => __('Supprimer ce template ?'), 'danger' => true],
+                                        ]])
                                     </td>
                                 </tr>
                                 @endforeach

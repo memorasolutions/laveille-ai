@@ -82,24 +82,22 @@
                         </td>
                         <td class="py-3 px-4 text-muted">{{ format_date($page->created_at) }}</td>
                         <td class="py-3 px-4">
-                            <div class="d-flex align-items-center justify-content-center gap-2">
-                                <a href="{{ route('page.show', $page->slug) }}" target="_blank"
-                                   class="btn btn-sm btn-outline-secondary"
-                                   title="Voir public">
-                                    <i data-lucide="eye" class="icon-sm"></i>
-                                </a>
-                                <a href="{{ route('admin.pages.edit', $page->slug) }}"
-                                   class="btn btn-sm btn-outline-secondary"
-                                   title="Modifier">
-                                    <i data-lucide="pencil" class="icon-sm"></i>
-                                </a>
-                                <button wire:click="deletePage({{ $page->id }})"
-                                        wire:confirm="Confirmer la suppression ?"
-                                        class="btn btn-sm btn-outline-danger"
-                                        title="Supprimer">
-                                    <i data-lucide="trash-2" class="icon-sm"></i>
-                                </button>
-                            </div>
+                            @if($confirmingDeleteId === $page->id)
+                                <div class="d-flex align-items-center justify-content-center gap-2">
+                                    <span class="text-danger small fw-semibold">{{ __('Confirmer ?') }}</span>
+                                    <button type="button" wire:click="deletePage({{ $page->id }})" class="btn btn-sm btn-danger">{{ __('Oui') }}</button>
+                                    <button type="button" wire:click="cancelDeletePage" class="btn btn-sm btn-outline-secondary">{{ __('Annuler') }}</button>
+                                </div>
+                            @else
+                                <div class="d-flex align-items-center justify-content-center">
+                                    @include('core::components.admin-action-menu', ['actions' => [
+                                        ['label' => __('Voir public'), 'icon' => 'eye', 'url' => route('page.show', $page->slug), 'target' => '_blank'],
+                                        ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.pages.edit', $page->slug)],
+                                        ['divider' => true],
+                                        ['label' => __('Supprimer'), 'icon' => 'trash-2', 'wireClick' => "confirmDeletePage({$page->id})", 'danger' => true],
+                                    ]])
+                                </div>
+                            @endif
                         </td>
                     </tr>
                 @empty
