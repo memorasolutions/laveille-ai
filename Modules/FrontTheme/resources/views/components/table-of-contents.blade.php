@@ -172,7 +172,11 @@
         white-space: nowrap;
         border-width: 0;
     }
-    .toc-skip:focus {
+    /* Sélecteur renforcé (.toc-details .toc-skip:focus) : une règle thème/Bootstrap
+       a:focus{color:var(--bs-navbar-active-color)} de même spécificité, chargée après ce
+       composant, écrasait color:#fff (2.08:1, fail même AA) — audit WCAG AAA 2026-07-02.
+       #fff sur --c-primary (#064E5A) = 9.35:1 AAA. */
+    .toc-details .toc-skip:focus {
         position: static;
         width: auto;
         height: auto;
@@ -205,7 +209,11 @@
         if (!tocNav) return;
         const container = document.querySelector(CONTENT_SELECTOR);
         if (!container) return;
-        const headings = Array.from(container.querySelectorAll('h2, h3')).filter(h => (h.id || h.textContent.trim()));
+        // Exclut les titres internes à des widgets encartés (ex. x-fronttheme::book-promo) :
+        // pollution éditoriale hors-sujet dans le sommaire, pas le contenu de l'article - audit WCAG 2026-07-02.
+        const headings = Array.from(container.querySelectorAll('h2, h3'))
+            .filter(h => (h.id || h.textContent.trim()))
+            .filter(h => !h.closest('.lv-book-promo'));
         if (headings.length < MIN_HEADINGS) return;
 
         const usedIds = new Set();
@@ -218,6 +226,9 @@
             }
             usedIds.add(h.id);
             h.style.scrollMarginTop = '90px';
+            // WCAG 2.4.3 : rend le titre ciblé programmatiquement focusable (sans l'ajouter
+            // à l'ordre de tabulation naturel) pour que le focus clavier suive le scroll - audit 2026-07-02.
+            if (!h.hasAttribute('tabindex')) h.setAttribute('tabindex', '-1');
         });
 
         const tocList = tocNav.querySelector('.toc-list');
@@ -272,6 +283,9 @@
                 const y = target.getBoundingClientRect().top + window.scrollY - offset;
                 window.scrollTo({ top: y, behavior: 'smooth' });
                 history.pushState(null, '', `#${link.dataset.target}`);
+                // WCAG 2.4.3 Ordre du focus : le focus clavier doit suivre la cible visuelle,
+                // pas rester sur le lien du sommaire - audit AAA 2026-07-02.
+                target.focus({ preventScroll: true });
             });
         });
 

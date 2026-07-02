@@ -1454,3 +1454,17 @@ article h3 {
   --bs-success: var(--sys-success, #047857);
   --bs-border-color: var(--sys-border-default, #D1D5DB);
 }
+
+/* ===== Accordéon Bootstrap — focus clavier visible + AAA état déplié (audit WCAG AAA 2026-07-02) =====
+   Centralisé ici (DRY) : couvre TOUS les accordéons .accordion-button du site
+   (Academy dashboard.blade.php ET public/show.blade.php partagent ce même pattern Bootstrap).
+   Cause racine : --bs-accordion-btn-focus-box-shadow est neutralisée localement (box-shadow: none)
+   sans compensation ; ce bloc rétablit un indicateur de focus clavier + un contraste AAA à l'état actif. */
+.accordion-button:focus-visible {
+  outline: 3px solid var(--c-accent, #9A2A06);
+  outline-offset: 2px;
+  z-index: 3;
+}
+.accordion-button:not(.collapsed) {
+  color: var(--c-primary, #064E5A); /* 8.21:1 AAA sur fond bleu pâle rgba(6,78,90,.05)/#E7F1FF — S135 audit */
+}

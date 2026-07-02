@@ -71,7 +71,8 @@
     }
     .syllabus-lesson-link:hover,
     .syllabus-lesson-link:focus-visible { text-decoration: underline; }
-    .accordion-button:not(.collapsed) { background: rgba(6,78,90,0.05); color: var(--c-primary, #064E5A); box-shadow: none; }
+    /* Focus-visible + contraste AAA état déplié centralisés dans public/css/charte.css (DRY, audit 2026-07-02) */
+    .accordion-button:not(.collapsed) { background: rgba(6,78,90,0.05); box-shadow: none; }
     .accordion-button:focus { box-shadow: none; }
 
     /* Bloc de partage du cours (marketing) - charte teal, cibles >=44px, WCAG 2.2 AA */
