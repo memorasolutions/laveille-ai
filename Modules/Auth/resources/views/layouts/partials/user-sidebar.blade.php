@@ -8,9 +8,9 @@
         <div style="display: flex !important; align-items: center !important;">
             @if(auth()->user()?->avatar)
                 <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}"
-                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
+                     style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; flex-shrink: 0; border-radius: 50%; object-fit: cover; margin-right: 10px;">
             @else
-                <span style="width: 40px; height: 40px; border-radius: 50%; background: #337ab7; color: #fff; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: 700; font-size: 16px; margin-right: 10px;">
+                <span style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; flex-shrink: 0; border-radius: 50%; background: #337ab7; color: #fff; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: 700; font-size: 16px; margin-right: 10px; overflow: hidden;">
                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                 </span>
             @endif
