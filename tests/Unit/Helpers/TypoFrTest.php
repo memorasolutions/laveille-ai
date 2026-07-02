@@ -138,3 +138,42 @@ it('JSON array imbriqué reste valide après typographie', function () use ($nbs
         ->and($decoded['items'][0]['label'])->toBe("Conformité{$nbsp}?")
         ->and($decoded['items'][0]['value'])->toBe("25{$nbsp}M\$");
 });
+
+// Régression : entités HTML (&rsquo; &#039; &#x27; &amp; &nbsp;...) cassées
+// par la règle NBSP-avant-`;` — le `;` de fin d'entité matchait la règle
+// "ponctuation double FR" et se faisait précéder d'un NBSP, cassant l'entité
+// (elle ne se décode plus, ex. `&rsquo ;` s'affiche en clair au lieu de `'`).
+it('ne casse PAS une entité HTML &rsquo; (apostrophe typographique)', function (): void {
+    $in = 'Votre détecteur d&rsquo;IA vous ment-il ?';
+    $out = lv_typo_fr($in);
+    expect($out)->toContain('&rsquo;')
+        ->and($out)->not->toContain('&rsquo ;')
+        ->and($out)->not->toContain("&rsquo\u{00A0};");
+});
+
+it('ne casse PAS les entités numériques &#039; et &#x27;', function (): void {
+    expect(lv_typo_fr('Test d&#039;entité numérique?'))->toContain('&#039;')
+        ->and(lv_typo_fr('Test d&#x27;entité hex?'))->toContain('&#x27;');
+});
+
+it('ne casse PAS &amp; &nbsp; &eacute; (entités courantes diverses)', function (): void {
+    expect(lv_typo_fr('Table &amp; chaise?'))->toContain('&amp;')
+        ->and(lv_typo_fr('Mot1&nbsp;mot2!'))->toContain('&nbsp;')
+        ->and(lv_typo_fr('Caf&eacute; chaud?'))->toContain('&eacute;');
+});
+
+it('applique quand même le NBSP sur la ponctuation qui suit une entité protégée', function () use ($nbsp): void {
+    // Le "?" final n'est pas collé à l'entité (segment séparé) : il reste
+    // collé au dernier \S du segment texte qui le précède (ici "il").
+    $out = lv_typo_fr('Votre détecteur d&rsquo;IA vous ment-il ?');
+    expect($out)->toContain("il{$nbsp}?")
+        ->and($out)->toContain('&rsquo;');
+});
+
+it('reste idempotent sur un texte mêlant entité HTML et ponctuation FR normale', function (): void {
+    $in = "Votre détecteur d&rsquo;IA vous ment-il ? Loi 25 : 4 % du CA.";
+    $once = lv_typo_fr($in);
+    $twice = lv_typo_fr($once);
+    expect($twice)->toBe($once)
+        ->and($once)->toContain('&rsquo;');
+});

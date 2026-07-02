@@ -16,8 +16,13 @@ declare(strict_types=1);
  *   3. NBSP entre chiffre et unité : 25 % | 4 € | 35 M$ | 20 M€ | 200 k€ | 21 °C
  *
  * Préservation :
- *   - HTML : segmentation balises (<...>) / texte. Seul le texte hors-balise
- *     est typographié. Les URLs `https://...?q=1` sont donc INTOUCHÉES.
+ *   - HTML : segmentation à 3 voies — balises (<...>) / entités HTML
+ *     (`&rsquo;`, `&#039;`, `&#x27;`, `&amp;`, `&nbsp;`, etc.) / texte pur.
+ *     Seul le texte pur est typographié. Les balises ET les entités sont
+ *     recopiées telles quelles. Sans cette protection, la règle NBSP-avant-`;`
+ *     matcherait le `;` final d'une entité (ex. `&rsquo;` → `&rsquo ;`) et la
+ *     casserait (le navigateur ne la décode plus). Les URLs `https://...?q=1`
+ *     restent également INTOUCHÉES (déjà protégées par la segmentation balises).
  *   - JSON : si le payload commence par `{` ou `[` et parse en JSON valide,
  *     on itère récursivement sur les valeurs string et on ré-encode. Évite
  *     de casser les colonnes spatie/laravel-translatable (`{"fr_CA":"..."}`).
@@ -68,12 +73,26 @@ if (! function_exists('lv_typo_fr_apply_rules')) {
 
 if (! function_exists('lv_typo_fr_apply_to_html')) {
     /**
-     * Segmente HTML en balises/texte et applique les règles sur le texte uniquement.
+     * Segmente HTML en balises / entités HTML / texte, et applique les
+     * règles de typographie sur le texte pur uniquement.
+     *
+     * Segmentation à 3 voies (dans cet ordre de priorité) :
+     *   1. Balises `<...>`                      → recopiées telles quelles.
+     *   2. Entités HTML `&nom;` / `&#123;` / `&#x1F;` → recopiées telles
+     *      quelles (jamais de NBSP inséré avant leur `;` final, sinon
+     *      l'entité est cassée et s'affiche en clair au lieu d'être décodée).
+     *   3. Tout le reste (texte pur)             → typographié.
      */
     function lv_typo_fr_apply_to_html(string $text): string
     {
-        // Segmente en tags HTML (`<...>`) vs texte. Tags laissés intacts.
-        $parts = preg_split('/(<[^>]*>)/', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+        // Capture les balises ET les entités HTML valides comme délimiteurs
+        // protégés ; tout le reste retombe dans les segments "texte".
+        $parts = preg_split(
+            '/(<[^>]*>|&#x[0-9a-fA-F]+;|&#[0-9]+;|&[a-zA-Z][a-zA-Z0-9]*;)/u',
+            $text,
+            -1,
+            PREG_SPLIT_DELIM_CAPTURE
+        );
         if ($parts === false) {
             return $text;
         }
@@ -83,7 +102,8 @@ if (! function_exists('lv_typo_fr_apply_to_html')) {
             if ($part === '') {
                 continue;
             }
-            if ($part[0] === '<') {
+            if ($part[0] === '<' || $part[0] === '&') {
+                // Balise ou entité HTML protégée : recopiée sans modification.
                 $out .= $part;
 
                 continue;
