@@ -222,9 +222,10 @@ class AcademyDemoSeeder extends Seeder
             'estimated_minutes' => 6,
             'external_ref'      => 'sp-demo-placeholder-001',
             'payload'           => [
-                // REMPLACER par une vraie vidéo ScreenPal via l'éditeur de leçon :
-                // le lecteur lit payload['player_url'] (URL d'intégration share.screenpal.com).
-                'player_url'       => 'https://share.screenpal.com/watch/REMPLACER-PAR-VRAI-ID',
+                // Vidéo ScreenPal (marque blanche media.memora.solutions), URL d'intégration
+                // /player/… (pas /watch/…) pour respecter le verrou de domaine — voir
+                // Modules/Academy/resources/views/components/video-player.blade.php.
+                'player_url'       => 'https://media.memora.solutions/player/cOVXDznrxUF',
                 'duration_seconds' => 360,
                 'domain_lock'      => true,
             ],
