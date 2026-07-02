@@ -71,9 +71,9 @@
                         <dt class="text-muted text-sm">Créé par</dt>
                         <dd>{{ $workflow->creator?->name ?? '-' }}</dd>
                         <dt class="text-muted text-sm">Créé le</dt>
-                        <dd>{{ $workflow->created_at->format('d/m/Y H:i') }}</dd>
+                        <dd>{{ format_date($workflow->created_at, 'datetime') }}</dd>
                         <dt class="text-muted text-sm">Modifié le</dt>
-                        <dd class="mb-0">{{ $workflow->updated_at->format('d/m/Y H:i') }}</dd>
+                        <dd class="mb-0">{{ format_date($workflow->updated_at, 'datetime') }}</dd>
                     </dl>
                 </div>
             </div>

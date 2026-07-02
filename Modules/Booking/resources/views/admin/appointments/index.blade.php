@@ -39,7 +39,7 @@
                 <tbody>
                     @forelse($appointments as $appointment)
                     <tr>
-                        <td>{{ $appointment->start_at->format('d/m/Y H:i') }}</td>
+                        <td>{{ format_date($appointment->start_at, 'datetime') }}</td>
                         <td>{{ $appointment->service->name }}</td>
                         <td>{{ $appointment->customer->full_name }}</td>
                         <td>{{ $appointment->assignedAdmin?->name ?? '—' }}</td>

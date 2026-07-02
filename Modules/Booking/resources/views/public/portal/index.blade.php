@@ -41,7 +41,7 @@
                                     </div>
 
                                     <p class="card-text">
-                                        {{ $appointment->start_at->format('d/m/Y H:i') }}
+                                        {{ format_date($appointment->start_at, 'datetime') }}
                                     </p>
 
                                     <div class="mt-4">
@@ -84,7 +84,7 @@
                         <tbody>
                             @foreach($past as $appointment)
                                 <tr>
-                                    <td>{{ $appointment->start_at->format('d/m/Y H:i') }}</td>
+                                    <td>{{ format_date($appointment->start_at, 'datetime') }}</td>
                                     <td>{{ $appointment->service->name }}</td>
                                     <td>
                                         @if($appointment->status === 'cancelled')

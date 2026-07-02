@@ -54,7 +54,7 @@
                 <h6 class="mb-0">Informations</h6>
             </div>
             <div class="card-body">
-                <p class="text-muted text-sm mb-2">Creee le <strong>{{ $campaign->created_at->format('d/m/Y H:i') }}</strong></p>
+                <p class="text-muted text-sm mb-2">Creee le <strong>{{ format_date($campaign->created_at, 'datetime') }}</strong></p>
                 <p class="text-muted text-sm mb-2">Statut : <strong>{{ ucfirst($campaign->status) }}</strong></p>
             </div>
         </div>

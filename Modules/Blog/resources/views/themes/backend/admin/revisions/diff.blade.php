@@ -47,7 +47,7 @@
                             <i data-lucide="check-circle" class="icon-sm"></i>
                             {{ __('Version actuelle') }}
                         </h5>
-                        <p class="small text-muted mt-1 mb-0">{{ $article->updated_at->format('d/m/Y H:i') }}</p>
+                        <p class="small text-muted mt-1 mb-0">{{ format_date($article->updated_at, 'datetime') }}</p>
                     </div>
                     <div class="card-body p-4">
                         <h6 class="fw-semibold text-body mb-3 small">{{ $article->title }}</h6>
@@ -64,7 +64,7 @@
                             <i data-lucide="history" class="icon-sm"></i>
                             {{ __('Révision') }} #{{ $revision->revision_number }}
                         </h5>
-                        <p class="small text-muted mt-1 mb-0">{{ $revision->created_at->format('d/m/Y H:i') }} {{ __('par') }} {{ $revision->user->name ?? __('Système') }}</p>
+                        <p class="small text-muted mt-1 mb-0">{{ format_date($revision->created_at, 'datetime') }} {{ __('par') }} {{ $revision->user->name ?? __('Système') }}</p>
                     </div>
                     <div class="card-body p-4">
                         @php

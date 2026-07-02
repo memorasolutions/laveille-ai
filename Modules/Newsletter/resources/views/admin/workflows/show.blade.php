@@ -97,7 +97,7 @@
                     <dt class="text-muted text-sm">Créé par</dt>
                     <dd>{{ $workflow->creator?->name ?? '-' }}</dd>
                     <dt class="text-muted text-sm">Créé le</dt>
-                    <dd>{{ $workflow->created_at->format('d/m/Y H:i') }}</dd>
+                    <dd>{{ format_date($workflow->created_at, 'datetime') }}</dd>
                     <dt class="text-muted text-sm">Annulés</dt>
                     <dd class="mb-0">{{ $stats['cancelled'] }}</dd>
                 </dl>

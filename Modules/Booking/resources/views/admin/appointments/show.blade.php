@@ -20,7 +20,7 @@
                     </div>
                     <div class="col-md-6">
                         <h6>Horaire</h6>
-                        <p>{{ $appointment->start_at->format('d/m/Y H:i') }} – {{ $appointment->end_at->format('H:i') }}</p>
+                        <p>{{ format_date($appointment->start_at, 'datetime') }} – {{ $appointment->end_at->format('H:i') }}</p>
                     </div>
                 </div>
                 <div class="row mb-3">

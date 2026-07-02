@@ -26,12 +26,12 @@
         <div style="font-size: 12px; color: var(--c-text-muted, #6E7687);">{{ __('clics') }}</div>
     </div>
     <div style="background: #F9FAFB; border-radius: 10px; padding: 12px 20px; flex: 1 !important; min-width: 120px; text-align: center;">
-        <div style="font-size: 14px; font-weight: 600; color: var(--c-dark, #1A1D23);">{{ $shortUrl->created_at->format('d/m/Y') }}</div>
+        <div style="font-size: 14px; font-weight: 600; color: var(--c-dark, #1A1D23);">{{ format_date($shortUrl->created_at) }}</div>
         <div style="font-size: 12px; color: var(--c-text-muted, #6E7687);">{{ __('créé le') }}</div>
     </div>
     @if($shortUrl->expires_at)
     <div style="background: #FFFBEB; border-radius: 10px; padding: 12px 20px; flex: 1 !important; min-width: 120px; text-align: center;">
-        <div style="font-size: 14px; font-weight: 600; color: #92400E;">{{ $shortUrl->expires_at->format('d/m/Y H:i') }}</div>
+        <div style="font-size: 14px; font-weight: 600; color: #92400E;">{{ format_date($shortUrl->expires_at, 'datetime') }}</div>
         <div style="font-size: 12px; color: var(--c-text-muted, #6E7687);">{{ __('expire le') }}</div>
     </div>
     @endif

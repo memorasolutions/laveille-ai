@@ -123,7 +123,7 @@
                                             <span title="{{ $row['subject'] }}">{{ \Illuminate\Support\Str::limit($row['subject'], 50) }}</span>
                                         </td>
                                         <td class="text-nowrap text-muted">
-                                            {{ optional($row['sent_at'])->copy()->setTimezone('America/Toronto')->format('d/m/Y H:i') }}
+                                            {{ format_date(optional($row['sent_at'])->copy()->setTimezone('America/Toronto'), 'datetime') }}
                                             <small class="d-block text-muted">(Québec)</small>
                                         </td>
                                         <td class="text-center">{{ number_format($row['recipients'], 0, ',', ' ') }}</td>

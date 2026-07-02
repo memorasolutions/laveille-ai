@@ -22,7 +22,7 @@
         </div>
         @if($shortUrl->expires_at)
             <span style="background: #FFFBEB; color: #92400E; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid #FDE68A;">
-                ⏰ {{ __('Expire le') }} {{ $shortUrl->expires_at->format('d/m/Y') }}
+                ⏰ {{ __('Expire le') }} {{ format_date($shortUrl->expires_at) }}
             </span>
         @endif
     </div>

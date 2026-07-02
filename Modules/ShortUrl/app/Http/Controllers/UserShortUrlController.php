@@ -45,7 +45,7 @@ class UserShortUrlController
                 'clicks_count' => $link->clicks_count ?? 0,
                 'created_at_human' => $link->created_at->diffForHumans(),
                 'expires_at' => $link->expires_at ? true : false,
-                'expires_at_formatted' => $link->expires_at?->format('d/m/Y'),
+                'expires_at_formatted' => format_date($link->expires_at),
                 'is_expired' => $link->isExpired(),
                 'has_password' => ! empty($link->password),
                 'can_extend' => $link->expires_at && \Illuminate\Support\Facades\Route::has('shorturl.user.extend'),

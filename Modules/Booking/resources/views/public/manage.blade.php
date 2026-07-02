@@ -26,7 +26,7 @@
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-4 text-muted">Date et heure</div>
-                    <div class="col-sm-8">{{ $appointment->start_at->format('d/m/Y H:i') }} – {{ $appointment->end_at->format('H:i') }}</div>
+                    <div class="col-sm-8">{{ format_date($appointment->start_at, 'datetime') }} – {{ $appointment->end_at->format('H:i') }}</div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-4 text-muted">Client</div>

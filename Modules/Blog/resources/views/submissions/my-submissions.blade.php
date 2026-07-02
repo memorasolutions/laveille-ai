@@ -20,7 +20,7 @@
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                 <div>
                     <h3 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); margin: 0 0 6px; font-size: 1.1rem;">{{ $article->title }}</h3>
-                    <p style="color: #6B7280; font-size: 13px; margin: 0;">{{ $article->created_at?->format('d/m/Y') }} · {{ $article->blogCategory?->name ?? '-' }}</p>
+                    <p style="color: #6B7280; font-size: 13px; margin: 0;">{{ format_date($article->created_at) }} · {{ $article->blogCategory?->name ?? '-' }}</p>
                 </div>
                 <div>
                     @if($article->submission_status === 'pending')

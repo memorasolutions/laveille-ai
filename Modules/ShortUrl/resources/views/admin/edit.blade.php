@@ -242,7 +242,7 @@
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted small">Créé le</span>
-                        <span>{{ $shortUrl->created_at->format('d/m/Y H:i') }}</span>
+                        <span>{{ format_date($shortUrl->created_at, 'datetime') }}</span>
                     </div>
                     <div class="d-flex justify-content-between">
                         <span class="text-muted small">Créé par</span>

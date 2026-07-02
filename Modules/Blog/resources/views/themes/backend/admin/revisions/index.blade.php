@@ -56,7 +56,7 @@
                             <td class="py-3 px-3">
                                 <span class="badge bg-primary bg-opacity-10 text-primary">{{ $revision->revision_number }}</span>
                             </td>
-                            <td class="py-3 px-3 text-muted">{{ $revision->created_at->format('d/m/Y H:i') }}</td>
+                            <td class="py-3 px-3 text-muted">{{ format_date($revision->created_at, 'datetime') }}</td>
                             <td class="py-3 px-3 text-muted">{{ $revision->user->name ?? __('Système') }}</td>
                             <td class="py-3 px-3">
                                 <div class="d-flex align-items-center justify-content-end gap-2">

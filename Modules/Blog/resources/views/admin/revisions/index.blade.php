@@ -35,7 +35,7 @@
                     @foreach($revisions as $revision)
                     <tr>
                         <td><span class="badge bg-primary bg-opacity-10 text-primary">{{ $revision->revision_number }}</span></td>
-                        <td>{{ $revision->created_at->format('d/m/Y H:i') }}</td>
+                        <td>{{ format_date($revision->created_at, 'datetime') }}</td>
                         <td>{{ $revision->user->name ?? __('Système') }}</td>
                         <td>
                             <div class="dropdown">

@@ -38,7 +38,7 @@
                             <span class="badge bg-danger">{{ __('Refusé') }}</span>
                         @endif
                     </td>
-                    <td>{{ $article->created_at?->format('d/m/Y H:i') }}</td>
+                    <td>{{ format_date($article->created_at, 'datetime') }}</td>
                     <td class="text-end">
                         @if($article->submission_status === 'pending')
                             <form action="{{ route('admin.blog.submissions.approve', $article) }}" method="POST" class="d-inline" data-confirm="{{ __('Approuver et publier cet article ?') }}">

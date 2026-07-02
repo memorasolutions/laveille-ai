@@ -69,16 +69,16 @@
                         @if($article->published_at)
                         <div class="mb-3">
                             <span class="small text-muted">{{ __('Publié le') }}</span>
-                            <p class="small fw-medium text-body mt-1 mb-0">{{ $article->published_at->format('d/m/Y H:i') }}</p>
+                            <p class="small fw-medium text-body mt-1 mb-0">{{ format_date($article->published_at, 'datetime') }}</p>
                         </div>
                         @endif
                         <div class="mb-3">
                             <span class="small text-muted">{{ __('Créé le') }}</span>
-                            <p class="small fw-medium text-body mt-1 mb-0">{{ $article->created_at->format('d/m/Y H:i') }}</p>
+                            <p class="small fw-medium text-body mt-1 mb-0">{{ format_date($article->created_at, 'datetime') }}</p>
                         </div>
                         <div>
                             <span class="small text-muted">{{ __('Mis à jour') }}</span>
-                            <p class="small fw-medium text-body mt-1 mb-0">{{ $article->updated_at->format('d/m/Y H:i') }}</p>
+                            <p class="small fw-medium text-body mt-1 mb-0">{{ format_date($article->updated_at, 'datetime') }}</p>
                         </div>
                     </div>
                 </div>

@@ -79,9 +79,9 @@
                     <dt class="text-muted text-sm">Slug</dt>
                     <dd><code>{{ $template->slug }}</code></dd>
                     <dt class="text-muted text-sm">Créé le</dt>
-                    <dd>{{ $template->created_at->format('d/m/Y H:i') }}</dd>
+                    <dd>{{ format_date($template->created_at, 'datetime') }}</dd>
                     <dt class="text-muted text-sm">Modifié le</dt>
-                    <dd class="mb-0">{{ $template->updated_at->format('d/m/Y H:i') }}</dd>
+                    <dd class="mb-0">{{ format_date($template->updated_at, 'datetime') }}</dd>
                 </dl>
             </div>
         </div>

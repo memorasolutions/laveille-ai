@@ -23,7 +23,7 @@
                         <dt>Email</dt><dd class="mb-2">{{ $customer->email }}</dd>
                         <dt>Téléphone</dt><dd class="mb-2">{{ $customer->phone ?? '-' }}</dd>
                         <dt>Fuseau</dt><dd class="mb-2">{{ $customer->timezone ?? 'America/Toronto' }}</dd>
-                        <dt>Inscrit</dt><dd class="mb-2">{{ $customer->created_at->format('d/m/Y') }}</dd>
+                        <dt>Inscrit</dt><dd class="mb-2">{{ format_date($customer->created_at) }}</dd>
                     </dl>
                     <hr>
                     <div class="row text-center">
@@ -57,7 +57,7 @@
                                 <tbody>
                                     @foreach($appointments as $appt)
                                     <tr>
-                                        <td>{{ $appt->start_at->format('d/m/Y H:i') }}</td>
+                                        <td>{{ format_date($appt->start_at, 'datetime') }}</td>
                                         <td>{{ $appt->service->name }}</td>
                                         <td>
                                             @php

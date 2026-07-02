@@ -28,7 +28,7 @@
                 <tbody>
                     @forelse($overrides as $override)
                     <tr>
-                        <td>{{ $override->date->format('d/m/Y') }}</td>
+                        <td>{{ format_date($override->date) }}</td>
                         <td>
                             <span class="badge bg-{{ $override->override_type === 'blocked' ? 'danger' : 'success' }}">
                                 {{ $override->override_type === 'blocked' ? 'Bloqué' : 'Disponible' }}

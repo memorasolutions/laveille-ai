@@ -28,7 +28,7 @@ class ShortUrlExpiredNotification extends Notification
             ->line('Le lien court **' . $this->shortUrl->slug . '** pointant vers :')
             ->line('`' . $this->shortUrl->original_url . '`')
             ->line('a expiré et a été supprimé automatiquement après 12 mois d\'inactivité.')
-            ->line('Dernière visite : ' . ($this->shortUrl->last_visited_at?->format('d/m/Y') ?? 'Jamais'))
+            ->line('Dernière visite : ' . ($this->shortUrl->last_visited_at ? format_date($this->shortUrl->last_visited_at) : 'Jamais'))
             ->line('Vous pouvez créer un nouveau lien court à tout moment.')
             ->action('Créer un nouveau lien', url('/raccourcir'));
     }

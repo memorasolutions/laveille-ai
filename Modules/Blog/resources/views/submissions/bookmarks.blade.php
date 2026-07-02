@@ -48,7 +48,7 @@
                                     {{ $item->name ?? $item->title ?? '-' }}
                                 @endif
                             </strong>
-                            <p style="color: #6B7280; font-size: 13px; margin: 4px 0 0;">{{ __('Sauvegardé le') }} {{ $bookmark->created_at?->format('d/m/Y') }}</p>
+                            <p style="color: #6B7280; font-size: 13px; margin: 4px 0 0;">{{ __('Sauvegardé le') }} {{ format_date($bookmark->created_at) }}</p>
                         </div>
                         <div>
                             @if($type === 'Modules\\Blog\\Models\\Article' && Route::has('blog.show'))

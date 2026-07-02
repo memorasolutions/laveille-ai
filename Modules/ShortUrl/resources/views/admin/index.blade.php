@@ -123,7 +123,7 @@
                                     <span class="badge bg-warning text-dark">Expiré</span>
                                 @endif
                             </td>
-                            <td>{{ $shortUrl->created_at->format('d/m/Y') }}</td>
+                            <td>{{ format_date($shortUrl->created_at) }}</td>
                             <td class="text-end">
                                 <div class="dropdown">
                                     <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"

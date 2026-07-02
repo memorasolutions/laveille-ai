@@ -94,7 +94,7 @@
                     <tbody>
                         @foreach($upcoming as $appt)
                         <tr>
-                            <td>{{ $appt->start_at->format('d/m/Y H:i') }}</td>
+                            <td>{{ format_date($appt->start_at, 'datetime') }}</td>
                             <td>{{ $appt->service->name }}</td>
                             <td>{{ $appt->customer->full_name }}</td>
                             <td><span class="badge bg-success">Confirmé</span></td>

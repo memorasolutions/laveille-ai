@@ -9,7 +9,7 @@
             {{ __('Révision') }} #{{ $revision->revision_number }}
         </h6>
         <p class="text-muted text-sm mb-0">
-            {{ $revision->created_at->format('d/m/Y H:i') }} {{ __('par') }} {{ $revision->user->name ?? __('Système') }}
+            {{ format_date($revision->created_at, 'datetime') }} {{ __('par') }} {{ $revision->user->name ?? __('Système') }}
         </p>
     </div>
     <div class="card-body p-4">
