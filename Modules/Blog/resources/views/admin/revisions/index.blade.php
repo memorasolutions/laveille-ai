@@ -38,35 +38,12 @@
                         <td>{{ format_date($revision->created_at, 'datetime') }}</td>
                         <td>{{ $revision->user->name ?? __('Système') }}</td>
                         <td>
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-outline-secondary rounded-2 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i data-lucide="more-horizontal"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-sm-start">
-                                    <li>
-                                        <a href="{{ route('admin.blog.articles.revisions.show', [$article, $revision]) }}" class="dropdown-item d-flex align-items-center gap-2">
-                                            <i data-lucide="eye"></i>
-                                            {{ __('Voir') }}
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('admin.blog.articles.revisions.diff', [$article, $revision]) }}" class="dropdown-item d-flex align-items-center gap-2">
-                                            <i data-lucide="git-compare"></i>
-                                            {{ __('Comparer') }}
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form action="{{ route('admin.blog.articles.revisions.restore', [$article, $revision]) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="dropdown-item d-flex align-items-center gap-2 text-warning" onclick="return confirm('{{ __('Restaurer cette version ?') }}')">
-                                                <i data-lucide="refresh-cw"></i>
-                                                {{ __('Restaurer') }}
-                                            </button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </div>
+                            @include('core::components.admin-action-menu', ['actions' => [
+                                ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('admin.blog.articles.revisions.show', [$article, $revision])],
+                                ['label' => __('Comparer'), 'icon' => 'git-compare', 'url' => route('admin.blog.articles.revisions.diff', [$article, $revision])],
+                                ['divider' => true],
+                                ['label' => __('Restaurer'), 'icon' => 'refresh-cw', 'url' => route('admin.blog.articles.revisions.restore', [$article, $revision]), 'method' => 'POST', 'confirm' => __('Restaurer cette version ?')],
+                            ]])
                         </td>
                     </tr>
                     @endforeach
