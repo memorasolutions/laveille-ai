@@ -19,12 +19,13 @@
        Une vidéo « Public » peut être cherchée sur ScreenPal.com et partagée librement.
     2. Domain lock : dans ScreenPal > Share > Embed settings, activer « Restrict to domains »
        et entrer uniquement laveille.ai (et www.laveille.ai).
-       → Toute tentative d'embed depuis un autre domaine est rejetée par ScreenPal.
-    3. CNAME optionnel : ScreenPal permet un CNAME custom (ex. video.laveille.ai → screenpal.com)
-       pour masquer l'hôte tiers dans l'URL. Non obligatoire, mais renforce la perception de
-       maîtrise du contenu.
-    4. NE PAS utiliser le lien de partage direct (share.screenpal.com/watch/…) comme player_url :
-       utiliser l'URL d'embed (share.screenpal.com/player/…) qui répond au domain lock.
+       → Toute tentative d'embed depuis un autre domaine est rejetée par ScreenPal, peu importe
+       le domaine ScreenPal utilisé pour servir le player (générique ou marque blanche).
+    3. Domaine du lien player_url : go.screenpal.com (générique, zéro marque memora, zéro
+       dépendance CNAME/certificat SSL tierce). share.screenpal.com est déprécié (ne résout
+       plus) ; media.memora.solutions (CNAME marque blanche) reste possible mais inutile ici.
+    4. NE PAS utiliser le lien de partage (go.screenpal.com/watch/…) comme player_url :
+       utiliser l'URL d'embed (go.screenpal.com/player/…) qui répond au domain lock.
     5. Le payload seeder contient domain_lock: true comme rappel de cette exigence.
     ─────────────────────────────────────────────────
 --}}

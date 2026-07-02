@@ -223,13 +223,12 @@ class AcademyDemoSeeder extends Seeder
             'external_ref'      => 'sp-demo-placeholder-001',
             'payload'           => [
                 // Vidéo ScreenPal, URL d'intégration /player/… (pas /watch/…) pour respecter
-                // le verrou de domaine — voir video-player.blade.php. Domaine standard
-                // share.screenpal.com utilisé temporairement : media.memora.solutions (CNAME
-                // marque blanche) est en panne côté infra (Cloudflare 526), à réactiver une
-                // fois le certificat SSL de l'origine corrigé côté Cloudflare/ScreenPal.
-                'player_url'       => 'https://share.screenpal.com/player/cOVXDznrxUF',
+                // le verrou de domaine — voir video-player.blade.php. Domaine générique
+                // go.screenpal.com (aucune marque blanche, zéro dépendance CNAME/SSL tierce).
+                'player_url'       => 'https://go.screenpal.com/player/cOn6rBn0hMl?ff=1&ahc=1&dcc=1&tl=1&bg=transparent&share=0&download=0&embed=1&cl=1',
                 'duration_seconds' => 360,
                 'domain_lock'      => true,
+                'aspect_ratio'     => 1.320866,
             ],
         ]);
 
