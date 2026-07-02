@@ -30,6 +30,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property array<string, mixed>|null       $layout_config
  * @property bool                            $is_default
  * @property int|null                        $created_by
+ * @property int|null                        $background_id
+ * @property-read DiplomaBackground|null     $background
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
@@ -42,6 +44,8 @@ class DiplomaTemplate extends Model
         'layout_config',
         'is_default',
         'created_by',
+        // Phase 3 — bibliothèque d'arrière-plans réutilisables (voir DiplomaBackground).
+        'background_id',
     ];
 
     protected $casts = [
@@ -52,6 +56,12 @@ class DiplomaTemplate extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /** Arrière-plan réutilisable de la bibliothèque (Phase 3), ou null (fond uni). */
+    public function background(): BelongsTo
+    {
+        return $this->belongsTo(DiplomaBackground::class);
     }
 
     /** Gabarits marqués par défaut par leur créateur. */

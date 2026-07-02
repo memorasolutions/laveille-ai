@@ -13,9 +13,13 @@ namespace Modules\Academy\Livewire;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Modules\Academy\Models\CertificateIssued;
+use Modules\Academy\Models\DiplomaBackground;
 use Modules\Academy\Models\DiplomaTemplate;
 use Modules\Academy\Services\DiplomaRenderService;
 
@@ -34,6 +38,25 @@ use Modules\Academy\Services\DiplomaRenderService;
  */
 class DiplomaTemplateEditor extends Component
 {
+    use WithFileUploads;
+
+    /**
+     * Phase 3 — disjoncteurs DoS/abus : sauvegarde de gabarit ET téléversement
+     * d'arrière-plan, même seuil que les actions de formateur similaires
+     * (AiAuthoringModal::AI_RATE_LIMIT_MAX / TranslateFieldModal), clé par
+     * utilisateur ET par action.
+     */
+    private const SAVE_RATE_LIMIT_MAX = 20;
+
+    private const SAVE_RATE_LIMIT_DECAY_SECONDS = 3600;
+
+    private const BACKGROUND_UPLOAD_RATE_LIMIT_MAX = 20;
+
+    private const BACKGROUND_UPLOAD_RATE_LIMIT_DECAY_SECONDS = 3600;
+
+    /** Taille maximale (Ko) d'une image d'arrière-plan (5 Mo). */
+    private const BACKGROUND_MAX_KB = 5120;
+
     /** Élément de départ d'un gabarit vierge : nom de l'apprenant, centré en haut. */
     private const DEFAULT_ELEMENT = [
         'kind'        => 'text',
@@ -62,6 +85,16 @@ class DiplomaTemplateEditor extends Component
 
     public ?int $confirmingDeleteId = null;
 
+    /** Phase 3 — bibliothèque d'arrière-plans réutilisables. */
+    public ?int $backgroundId = null;
+
+    public string $newBackgroundName = 'Arrière-plan';
+
+    /** @var \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null Upload temporaire Livewire. */
+    public $newBackgroundFile = null;
+
+    public ?int $confirmingDeleteBackgroundId = null;
+
     public function mount(?int $templateId = null): void
     {
         // Drapeau OFF ⇒ fonctionnalité entièrement invisible (même garde que les
@@ -86,6 +119,13 @@ class DiplomaTemplateEditor extends Component
     public function myTemplates(): Collection
     {
         return $this->scopedQuery()->orderByDesc('updated_at')->get();
+    }
+
+    /** Phase 3 — mes arrière-plans réutilisables (admin : tous), les plus récents en premier. */
+    #[Computed]
+    public function myBackgrounds(): Collection
+    {
+        return $this->backgroundScopedQuery()->orderByDesc('created_at')->get();
     }
 
     /** Taxonomie des 4 familles de variables pour le panneau d'insertion. */
@@ -116,7 +156,11 @@ class DiplomaTemplateEditor extends Component
     public function previewHtml(): string
     {
         try {
-            $transientTemplate = new DiplomaTemplate(['layout_config' => ['elements' => $this->elements]]);
+            // Phase 3 : background_id inclus pour que l'aperçu reflète l'arrière-plan sélectionné.
+            $transientTemplate = new DiplomaTemplate([
+                'layout_config' => ['elements' => $this->elements],
+                'background_id' => $this->backgroundId,
+            ]);
 
             return app(DiplomaRenderService::class)->renderHtml(
                 $transientTemplate,
@@ -212,15 +256,25 @@ class DiplomaTemplateEditor extends Component
             return;
         }
 
+        // Phase 3 — disjoncteur DoS/abus sur la sauvegarde de gabarit.
+        if ($this->tooManySaveAttempts()) {
+            session()->flash('diploma_editor_error', "Vous avez atteint la limite d'enregistrements de gabarits pour cette heure (20/heure). Réessayez plus tard.");
+
+            return;
+        }
+
         $userId = Auth::id();
 
         $template = $this->templateId !== null
             ? $this->scopedQuery()->findOrFail($this->templateId)
             : new DiplomaTemplate(['created_by' => $userId]);
 
+        // Phase 3 — anti-IDOR : l'arrière-plan choisi doit appartenir à l'utilisateur courant
+        // (ou être visible par l'admin academy.manage) ; sinon on retombe silencieusement à null.
         $template->name          = $this->name;
         $template->layout_config = ['elements' => $this->elements];
         $template->is_default    = $this->isDefault;
+        $template->background_id = $this->resolveOwnedBackgroundId($this->backgroundId, $userId);
 
         DB::transaction(function () use ($template, $userId): void {
             $template->save();
@@ -249,6 +303,7 @@ class DiplomaTemplateEditor extends Component
         $this->elements           = $template->elements();
         $this->isDefault          = $template->is_default;
         $this->selectedElementId  = null;
+        $this->backgroundId       = $template->background_id;
     }
 
     /** Réinitialise l'état à un nouveau gabarit vierge. */
@@ -259,6 +314,7 @@ class DiplomaTemplateEditor extends Component
         $this->isDefault         = false;
         $this->selectedElementId = null;
         $this->elements          = [array_merge(['id' => uniqid('el_', true)], self::DEFAULT_ELEMENT)];
+        $this->backgroundId      = null;
     }
 
     public function confirmDelete(int $id): void
@@ -291,6 +347,92 @@ class DiplomaTemplateEditor extends Component
         session()->flash('diploma_editor_status', 'Gabarit supprimé.');
     }
 
+    // ─────────────────────────────────────────────────────────────────────
+    // Phase 3 — bibliothèque d'arrière-plans réutilisables (owner-scopée,
+    // anti-IDOR strict, rate-limitée). Une image est indépendante des
+    // gabarits qui l'utilisent : sa suppression fait retomber CE composant
+    // sur $backgroundId = null (le gabarit persisté ne sera mis à jour
+    // qu'au prochain save(), même esprit que la suppression d'un gabarit
+    // assigné à un cours — nullOnDelete côté FK).
+    // ─────────────────────────────────────────────────────────────────────
+
+    /** Sélectionne un arrière-plan pour le gabarit courant — anti-IDOR (silencieux). */
+    public function selectBackground(?int $id): void
+    {
+        if ($id === null) {
+            $this->backgroundId = null;
+
+            return;
+        }
+
+        $owned               = $this->backgroundScopedQuery()->where('id', $id)->exists();
+        $this->backgroundId  = $owned ? $id : null;
+    }
+
+    /** Téléverse un nouvel arrière-plan dans la bibliothèque (owner-scopée, rate-limitée). */
+    public function uploadBackground(): void
+    {
+        if ($this->tooManyBackgroundUploadAttempts()) {
+            session()->flash('diploma_editor_error', "Vous avez atteint la limite de téléversements d'arrière-plans pour cette heure (20/heure). Réessayez plus tard.");
+
+            return;
+        }
+
+        $this->validate([
+            'newBackgroundName' => ['required', 'string', 'max:120'],
+            'newBackgroundFile' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:' . self::BACKGROUND_MAX_KB],
+        ]);
+
+        try {
+            $background = DiplomaBackground::create([
+                'name'       => $this->newBackgroundName,
+                'created_by' => Auth::id(),
+            ]);
+
+            $background->addMedia($this->newBackgroundFile)
+                ->usingFileName($this->safeBackgroundFileName($this->newBackgroundFile))
+                ->toMediaCollection('background');
+        } catch (\Throwable) {
+            session()->flash('diploma_editor_error', "Le téléversement de l'arrière-plan a échoué.");
+
+            return;
+        }
+
+        $this->backgroundId       = $background->id;
+        $this->newBackgroundFile  = null;
+        $this->newBackgroundName  = 'Arrière-plan';
+        session()->flash('diploma_editor_status', 'Arrière-plan téléversé.');
+    }
+
+    public function confirmDeleteBackground(int $id): void
+    {
+        $this->confirmingDeleteBackgroundId = $id;
+    }
+
+    public function cancelDeleteBackground(): void
+    {
+        $this->confirmingDeleteBackgroundId = null;
+    }
+
+    /** Supprime un arrière-plan — UNIQUEMENT après confirmation inline, scopé (anti-IDOR). */
+    public function deleteBackground(int $id): void
+    {
+        if ($this->confirmingDeleteBackgroundId !== $id) {
+            return;
+        }
+
+        $background = $this->backgroundScopedQuery()->findOrFail($id);
+
+        if ($this->backgroundId === $id) {
+            $this->backgroundId = null;
+        }
+
+        $background->delete();
+
+        $this->confirmingDeleteBackgroundId = null;
+        session()->flash('diploma_editor_status', 'Arrière-plan supprimé.');
+    }
+
     /**
      * Requête owner-scopée (admin academy.manage voit tout).
      *
@@ -305,6 +447,89 @@ class DiplomaTemplateEditor extends Component
         }
 
         return $query;
+    }
+
+    /**
+     * Requête owner-scopée sur la bibliothèque d'arrière-plans (Phase 3),
+     * même esprit que scopedQuery() — admin academy.manage voit tout.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder<DiplomaBackground>
+     */
+    private function backgroundScopedQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = DiplomaBackground::query();
+
+        if (! $this->isManager()) {
+            $query->where('created_by', Auth::id());
+        }
+
+        return $query;
+    }
+
+    /**
+     * Anti-IDOR : résout l'arrière-plan choisi UNIQUEMENT s'il appartient à
+     * l'utilisateur courant (ou est visible par l'admin academy.manage).
+     * Jamais d'erreur affichée pour un id forgé — retombe silencieusement à null.
+     */
+    private function resolveOwnedBackgroundId(?int $backgroundId, ?int $userId): ?int
+    {
+        if ($backgroundId === null) {
+            return null;
+        }
+
+        $owned = DiplomaBackground::query()
+            ->where('id', $backgroundId)
+            ->when(! $this->isManager(), fn ($q) => $q->where('created_by', $userId))
+            ->exists();
+
+        return $owned ? $backgroundId : null;
+    }
+
+    /**
+     * Disjoncteur DoS/abus sur la SAUVEGARDE de gabarit — même pattern que
+     * AiAuthoringModal::tooManyAiRequests(), clé par utilisateur.
+     */
+    private function tooManySaveAttempts(): bool
+    {
+        $key = 'diploma-template-save:' . (string) Auth::id();
+
+        if (RateLimiter::tooManyAttempts($key, self::SAVE_RATE_LIMIT_MAX)) {
+            return true;
+        }
+
+        RateLimiter::hit($key, self::SAVE_RATE_LIMIT_DECAY_SECONDS);
+
+        return false;
+    }
+
+    /**
+     * Disjoncteur DoS/abus sur le TÉLÉVERSEMENT d'arrière-plan — même pattern
+     * que tooManySaveAttempts(), clé par utilisateur ET par action.
+     */
+    private function tooManyBackgroundUploadAttempts(): bool
+    {
+        $key = 'diploma-background-upload:' . (string) Auth::id();
+
+        if (RateLimiter::tooManyAttempts($key, self::BACKGROUND_UPLOAD_RATE_LIMIT_MAX)) {
+            return true;
+        }
+
+        RateLimiter::hit($key, self::BACKGROUND_UPLOAD_RATE_LIMIT_DECAY_SECONDS);
+
+        return false;
+    }
+
+    /**
+     * Nom de fichier stocké non devinable (même pattern que
+     * HandlesH5p::safeFileName() / HandlesItemMedia — dupliqué localement,
+     * ce composant n'inclut pas ces traits couplés à CourseEditor).
+     */
+    private function safeBackgroundFileName(mixed $file): string
+    {
+        $ext  = strtolower((string) $file->getClientOriginalExtension());
+        $safe = in_array($ext, ['jpg', 'jpeg', 'png', 'webp'], true) ? $ext : 'bin';
+
+        return Str::slug('arriere-plan') . '-' . Str::random(16) . '.' . $safe;
     }
 
     private function isManager(): bool

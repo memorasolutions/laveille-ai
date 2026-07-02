@@ -200,6 +200,58 @@
                 @endforelse
             </section>
 
+            {{-- Phase 3 — bibliothèque d'arrière-plans réutilisables (owner-scopée, anti-IDOR, rate-limitée) --}}
+            <section aria-labelledby="diploma-background-h" style="border:1px solid #E5E7EB; border-radius:var(--sys-radius-md, 0.75rem); padding:14px;">
+                <h2 id="diploma-background-h" style="font-family:var(--f-heading); font-size:0.95rem; margin:0 0 10px; color:var(--sys-text-default, #1A1D23);">
+                    Arrière-plan
+                </h2>
+                <button type="button" wire:click="selectBackground(null)"
+                        style="background:none; border:none; padding:0; text-align:left; cursor:pointer; font-size:0.85rem; color:{{ $backgroundId === null ? 'var(--sys-action-primary, #064E5A)' : '#374151' }}; font-weight:{{ $backgroundId === null ? '700' : '400' }};">
+                    Aucun (fond uni)
+                </button>
+
+                <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">
+                    @forelse ($this->myBackgrounds as $bg)
+                        <div style="position:relative; width:64px; height:64px;">
+                            <button type="button" wire:click="selectBackground({{ $bg->id }})" aria-label="Utiliser l'arrière-plan {{ $bg->name }}"
+                                    style="padding:0; background:none; border:none; cursor:pointer; display:block;">
+                                <img src="{{ $bg->imageUrl() }}" alt="{{ $bg->name }}" loading="lazy"
+                                     style="width:64px; height:64px; object-fit:cover; border-radius:6px; border:2px solid {{ $backgroundId === $bg->id ? 'var(--sys-action-primary, #064E5A)' : '#E5E7EB' }}; display:block;">
+                            </button>
+
+                            @if ($confirmingDeleteBackgroundId === $bg->id)
+                                <span style="position:absolute; top:-6px; right:-6px; display:flex; flex-direction:column; gap:2px;">
+                                    <button type="button" wire:click="deleteBackground({{ $bg->id }})" aria-label="Confirmer la suppression de {{ $bg->name }}"
+                                            style="background:#fff; border:1px solid #E5E7EB; border-radius:50%; width:18px; height:18px; font-size:10px; line-height:1; cursor:pointer; color:#B91C1C;">✓</button>
+                                    <button type="button" wire:click="cancelDeleteBackground"
+                                            style="background:#fff; border:1px solid #E5E7EB; border-radius:50%; width:18px; height:18px; font-size:10px; line-height:1; cursor:pointer; color:#6B7280;">✕</button>
+                                </span>
+                            @else
+                                <button type="button" wire:click="confirmDeleteBackground({{ $bg->id }})" aria-label="Supprimer {{ $bg->name }}"
+                                        style="position:absolute; top:-6px; right:-6px; background:#fff; border:1px solid #E5E7EB; border-radius:50%; width:18px; height:18px; font-size:10px; line-height:1; cursor:pointer; color:#9CA3AF;">✕</button>
+                            @endif
+                        </div>
+                    @empty
+                        <p style="font-size:0.82rem; color:#6B7280; margin:8px 0;">Aucun arrière-plan téléversé.</p>
+                    @endforelse
+                </div>
+
+                <form wire:submit.prevent="uploadBackground" style="border-top:1px solid #F3F4F6; margin-top:12px; padding-top:12px;">
+                    <label for="diploma-new-background-name" style="display:block; font-size:0.85rem; margin-bottom:4px; color:var(--sys-text-default, #1A1D23);">Nom</label>
+                    <input id="diploma-new-background-name" type="text" wire:model="newBackgroundName" maxlength="120" class="form-control">
+                    @error('newBackgroundName') <div style="color:#B91C1C; font-size:0.8rem;">{{ $message }}</div> @enderror
+
+                    <label for="diploma-new-background-file" style="display:block; font-size:0.85rem; margin:8px 0 4px; color:var(--sys-text-default, #1A1D23);">Fichier image</label>
+                    <input id="diploma-new-background-file" type="file" wire:model="newBackgroundFile" accept="image/jpeg,image/png,image/webp">
+                    @error('newBackgroundFile') <div style="color:#B91C1C; font-size:0.8rem;">{{ $message }}</div> @enderror
+
+                    <span wire:loading wire:target="newBackgroundFile" style="font-size:0.75rem; color:#6B7280;">Téléversement…</span>
+
+                    <x-core::button type="submit" variant="ghost" size="sm" icon="🖼️">Téléverser</x-core::button>
+                    <p style="font-size:0.72rem; color:#9CA3AF; margin:4px 0 0;">JPG, PNG ou WebP, 5 Mo maximum.</p>
+                </form>
+            </section>
+
             <section aria-labelledby="diploma-insert-h" style="border:1px solid #E5E7EB; border-radius:var(--sys-radius-md, 0.75rem); padding:14px;">
                 <h2 id="diploma-insert-h" style="font-family:var(--f-heading); font-size:0.95rem; margin:0 0 10px; color:var(--sys-text-default, #1A1D23);">
                     Insérer un élément

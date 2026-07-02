@@ -152,6 +152,10 @@ final class DiplomaRenderService
             $elementsHtml .= $this->renderElement(is_array($element) ? $element : [], $variables, $certificate, $sample);
         }
 
+        // Phase 3 — bibliothèque d'arrière-plans : fragment de style inline (vide si
+        // le gabarit n'a pas d'arrière-plan, comportement Phase 1/2 inchangé).
+        $backgroundStyle = $this->backgroundStyle($template);
+
         return <<<HTML
 <!DOCTYPE html>
 <html lang="fr">
@@ -172,10 +176,38 @@ final class DiplomaRenderService
     </style>
 </head>
 <body>
-    <div class="diploma-container">{$elementsHtml}</div>
+    <div class="diploma-container" style="{$backgroundStyle}">{$elementsHtml}</div>
 </body>
 </html>
 HTML;
+    }
+
+    /**
+     * Fragment de style CSS inline pour l'arrière-plan réutilisable du gabarit
+     * (Phase 3). Chaîne vide si le gabarit n'a pas d'arrière-plan assigné —
+     * comportement Phase 1/2 (fond uni) strictement inchangé. Défensif : jamais
+     * d'exception propagée (relation absente/orpheline), même esprit que le reste
+     * du service. L'URL est échappée (addslashes) avant injection dans le CSS.
+     */
+    private function backgroundStyle(DiplomaTemplate $template): string
+    {
+        try {
+            $background = $template->background;
+            if ($background === null) {
+                return '';
+            }
+
+            $url = $background->imageUrl();
+            if ($url === null || $url === '') {
+                return '';
+            }
+
+            $escapedUrl = addslashes($url);
+
+            return " background-image:url('{$escapedUrl}'); background-size:cover; background-position:center;";
+        } catch (\Throwable) {
+            return '';
+        }
     }
 
     /**
