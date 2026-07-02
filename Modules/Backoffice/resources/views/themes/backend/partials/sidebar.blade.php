@@ -199,6 +199,16 @@
                 </a>
             </li>
             @endif
+
+            {{-- Paliers Académie : gestion des paliers d'abonnement (freemium/pro/organisation). --}}
+            @if(Route::has('admin.academy.subscription-tiers.index'))
+            <li class="nav-item {{ request()->routeIs('admin.academy.subscription-tiers.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.academy.subscription-tiers.index') }}" class="nav-link {{ request()->routeIs('admin.academy.subscription-tiers.*') ? 'active' : '' }}" {{ request()->routeIs('admin.academy.subscription-tiers.*') ? 'aria-current=page' : '' }}>
+                    <i class="link-icon" data-lucide="layers"></i>
+                    <span class="link-title">{{ __('Paliers Académie') }}</span>
+                </a>
+            </li>
+            @endif
             @endcan
 
             {{-- ===== RESSOURCES (Glossaire, Répertoire, Acronymes, Modération) ===== --}}

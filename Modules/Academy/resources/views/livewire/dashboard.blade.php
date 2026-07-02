@@ -538,9 +538,35 @@
                      aria-labelledby="academy-vue-admin"
                      data-bs-parent="#academyManageAccordion">
                     <div class="accordion-body">
-                        <p style="font-size: 0.9rem; color: var(--sys-text-muted, #6B7280); margin-bottom: 0;">
+                        <p style="font-size: 0.9rem; color: var(--sys-text-muted, #6B7280); margin-bottom: 16px;">
                             En tant qu'administrateur, vous gérez tous les cours directement ci-dessus : création, édition du contenu, inscriptions et rôles.
                         </p>
+
+                        {{-- Analytiques prédictifs organisation — masqué si le drapeau est off
+                             (sinon la route retourne un rendu neutre, jamais un lien mort). --}}
+                        @if(config('academy.predictive_analytics_enabled'))
+                            <div class="mb-3">
+                                <x-core::button :href="route('academy.admin.org-analytics')" variant="secondary" size="sm">
+                                    <span aria-hidden="true">📈</span> Analytiques organisation
+                                </x-core::button>
+                            </div>
+                        @endif
+
+                        {{-- Exports CSV admin (M7) — gâtés academy.reports.view ; vraie garde
+                             = middleware `can:academy.reports.view` sur les routes. --}}
+                        @can('academy.reports.view')
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <x-core::button :href="route('academy.admin.export.enrollments')" variant="ghost" size="sm">
+                                    <span aria-hidden="true">⬇️</span> Exporter les inscriptions
+                                </x-core::button>
+                                <x-core::button :href="route('academy.admin.export.completions')" variant="ghost" size="sm">
+                                    <span aria-hidden="true">⬇️</span> Exporter les complétions
+                                </x-core::button>
+                                <x-core::button :href="route('academy.admin.export.progress')" variant="ghost" size="sm">
+                                    <span aria-hidden="true">⬇️</span> Exporter la progression
+                                </x-core::button>
+                            </div>
+                        @endcan
                     </div>
                 </div>
             </div>
