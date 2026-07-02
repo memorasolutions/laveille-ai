@@ -286,6 +286,46 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Auto-création du lien Google Meet (phase 2 des séances en direct)
+    |--------------------------------------------------------------------------
+    | Quand true ET que des identifiants Google valides sont configurés
+    | (voir Services\GoogleMeetService), le formateur peut cocher « Générer
+    | automatiquement le lien Meet » lors de la création d'une séance
+    | provider=meet : le lien est créé via l'API Google Calendar
+    | (conferenceData hangoutsMeet) au lieu d'être collé manuellement.
+    |
+    | Défaut false : case absente, AUCUN appel Google, comportement du champ
+    | join_url EXACTEMENT identique à aujourd'hui (saisie manuelle). Le repli
+    | manuel reste TOUJOURS disponible même si le drapeau est actif (l'appel
+    | API peut échouer silencieusement — voir GoogleMeetService::createMeetLink).
+    | Activer via ACADEMY_GOOGLE_MEET_AUTOCREATE_ENABLED=true dans le .env.
+    |
+    | « service_account_json » : contenu JSON complet de la clé du compte de
+    | service Google (Google Cloud Console > IAM > Comptes de service > Clés),
+    | collé en une ligne dans GOOGLE_MEET_SERVICE_ACCOUNT_JSON. JAMAIS commité
+    | en dur — variable d'environnement uniquement.
+    |
+    | « service_account_json_path » : alternative à la variable ci-dessus —
+    | chemin absolu vers le fichier JSON sur le serveur (hors du dépôt git),
+    | via GOOGLE_MEET_SERVICE_ACCOUNT_JSON_PATH. Utile si le fichier est
+    | déposé hors-repo par l'hébergeur plutôt que collé dans le .env.
+    |
+    | « impersonate_user » : adresse courriel du compte Google Workspace au
+    | nom duquel les événements sont créés (délégation domain-wide). Requis
+    | pour que l'API génère un vrai lien Meet — un compte de service seul,
+    | sans délégation, ne peut pas créer de conférence Meet.
+    | Voir GOOGLE_MEET_IMPERSONATE_USER dans le .env.
+    */
+    'google_meet_autocreate_enabled' => env('ACADEMY_GOOGLE_MEET_AUTOCREATE_ENABLED', false),
+
+    'google_meet_service_account_json' => env('GOOGLE_MEET_SERVICE_ACCOUNT_JSON'),
+
+    'google_meet_service_account_json_path' => env('GOOGLE_MEET_SERVICE_ACCOUNT_JSON_PATH'),
+
+    'google_meet_impersonate_user' => env('GOOGLE_MEET_IMPERSONATE_USER'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Gamification moderne — XP, niveaux, classement PAR COHORTE (LMS 2026)
     |--------------------------------------------------------------------------
     | Quand true, chaque VRAIE action pédagogique (leçon complétée, quiz réussi,

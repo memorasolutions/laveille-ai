@@ -47,23 +47,41 @@
                 @endif
             </div>
 
-            <div class="mb-3">
-                <label for="ls-url" style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:4px;">Lien de la réunion</label>
-                <div class="d-flex flex-wrap align-items-center gap-2">
-                    <input type="url" id="ls-url" wire:model="join_url" class="form-control" style="flex:1 1 320px;"
-                        placeholder="https://meet.google.com/xxx-xxxx-xxx" maxlength="2048" required>
-                    {{-- Le formateur crée la salle sous SON compte Google, copie le lien, le colle ici.
-                         TODO phase 2 : auto-création du lien Meet via Google Calendar API (fin du copier-coller). --}}
-                    <a href="https://meet.google.com/new" target="_blank" rel="noopener"
-                       class="btn btn-outline-secondary btn-sm" style="white-space:nowrap;">
-                        <span aria-hidden="true">➕</span> Créer une réunion Google Meet
-                    </a>
+            @if ($provider === 'meet' && $this->canAutoCreateMeet)
+                {{-- Auto-création du lien Meet (phase 2) : n'apparaît QUE si le drapeau
+                     academy.google_meet_autocreate_enabled est actif ET les identifiants
+                     Google sont configurés. Sinon la saisie manuelle ci-dessous (inchangée). --}}
+                <div class="mb-3 form-check">
+                    <input type="checkbox" id="ls-auto-meet" wire:model.live="generateMeetLink" class="form-check-input">
+                    <label for="ls-auto-meet" class="form-check-label" style="font-weight:600; font-size:0.85rem;">
+                        ✨ Générer automatiquement le lien Meet
+                    </label>
                 </div>
-                <p style="margin:6px 0 0; font-size:0.8rem; color: var(--sys-text-muted, #6B7280);">
-                    Crée la salle, copie le lien, colle-le ici.
+            @endif
+
+            @unless ($generateMeetLink && $provider === 'meet' && $this->canAutoCreateMeet)
+                <div class="mb-3">
+                    <label for="ls-url" style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:4px;">Lien de la réunion</label>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <input type="url" id="ls-url" wire:model="join_url" class="form-control" style="flex:1 1 320px;"
+                            placeholder="https://meet.google.com/xxx-xxxx-xxx" maxlength="2048" required>
+                        {{-- Le formateur crée la salle sous SON compte Google, copie le lien, le colle ici. --}}
+                        <a href="https://meet.google.com/new" target="_blank" rel="noopener"
+                           class="btn btn-outline-secondary btn-sm" style="white-space:nowrap;">
+                            <span aria-hidden="true">➕</span> Créer une réunion Google Meet
+                        </a>
+                    </div>
+                    <p style="margin:6px 0 0; font-size:0.8rem; color: var(--sys-text-muted, #6B7280);">
+                        Crée la salle, copie le lien, colle-le ici.
+                    </p>
+                    @error('join_url') <p class="text-danger small mt-1 mb-0">{{ $message }}</p> @enderror
+                </div>
+            @else
+                <p style="margin:0 0 12px; font-size:0.85rem; color: var(--sys-text-muted, #6B7280);">
+                    Le lien Meet sera généré automatiquement à l'enregistrement.
                 </p>
                 @error('join_url') <p class="text-danger small mt-1 mb-0">{{ $message }}</p> @enderror
-            </div>
+            @endunless
 
             <div class="row g-3 mb-3">
                 <div class="col-md-6">

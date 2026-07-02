@@ -48,6 +48,11 @@ tests/Browser/screenshots/
 # Sources themes (copie locale, pas dans le repo)
 .themes/
 
+# Artefacts simulation E2E (/sim)
+.rapports/
+.scenarios/
+.platform-card.yaml
+
 # Fichiers Claude/AI session
 .claude/SESSION_STATE.md
 .claude/plans/
@@ -69,6 +74,10 @@ MIGRATION_PLAN.md
 
 # CSRF temp
 csrf*
+
+# Compte de service Google (Meet auto-création — Academy) : JAMAIS commité.
+google-meet-service-account*.json
+storage/google-meet-service-account*.json
 
 # Debug / dev temp
 stripe-*.yml
