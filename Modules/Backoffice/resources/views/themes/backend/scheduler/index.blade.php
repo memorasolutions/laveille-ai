@@ -174,10 +174,10 @@
                             @endif
                         </td>
                         <td class="py-3 px-4 align-middle text-end">
-                            <form action="{{ route('admin.scheduler.kill-switch.toggle', ['flag' => $ks['flag']]) }}" method="POST" class="d-inline">
+                            <form action="{{ route('admin.scheduler.kill-switch.toggle', ['flag' => $ks['flag']]) }}" method="POST" class="d-inline" x-data>
                                 @csrf
                                 @if($ks['active'])
-                                    <button type="submit" class="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-1" title="{{ __('Mettre en pause') }}" onclick="return confirm('{{ __('Désactiver cette automatisation ?') }}')">
+                                    <button type="button" class="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-1" title="{{ __('Mettre en pause') }}" @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Désactiver cette automatisation ?')), action: () => $el.closest('form').submit() })">
                                         <i data-lucide="pause" class="icon-sm"></i> {{ __('Pause') }}
                                     </button>
                                 @else
