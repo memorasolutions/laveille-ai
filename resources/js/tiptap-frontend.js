@@ -111,6 +111,21 @@ window.anonymiseurClearDetections = function () {
   editor.view.dispatch(editor.view.state.tr.setMeta(AnonymDetectPluginKey, { detections: [], activeIndex: -1 }))
 }
 
+// === Style partagé, injecté UNE SEULE FOIS, pour TOUS les éditeurs Tiptap frontend ===
+// Point central unique (DRY) : fond blanc + retrait de l'outline navigateur par défaut sur
+// la zone contenteditable réelle (.ProseMirror, ajoutée par ProseMirror lui-même, quel que
+// soit le gabarit Blade qui héberge l'éditeur : tiptap-light, author-editor, anonymiseur...).
+// L'indicateur de focus accessible (WCAG 2.4.11) est redessiné au niveau du conteneur
+// parent (bordure teal #064E5A, contraste 9.35:1) dans le CSS scoped de chaque gabarit Blade.
+function ensureSharedProseMirrorStyles() {
+    if (document.getElementById('tiptap-frontend-shared-styles')) return
+    const style = document.createElement('style')
+    style.id = 'tiptap-frontend-shared-styles'
+    style.textContent = '.ProseMirror{background:#ffffff;outline:none;}.ProseMirror:focus,.ProseMirror:focus-visible{outline:none;}'
+    document.head.appendChild(style)
+}
+ensureSharedProseMirrorStyles()
+
 function registerTiptapEditor() {
     if (window._tiptapFrontendRegistered) return
     const Alpine = window.Alpine

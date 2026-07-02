@@ -200,15 +200,20 @@
     .lv-ae-tag-remove:focus-visible { outline:2px solid #fff; outline-offset:2px; border-radius:4px; }
     .lv-ae-tag-add { display:flex; gap:8px; }
     .lv-ae-tag-add .lv-ae-input { flex:1; }
-    .lv-ae-tiptap { border:2px solid #e5e7eb; border-radius:12px; overflow:hidden; }
-    .lv-ae-tiptap-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:2px; padding:8px 10px; background:#f8fafc; border-bottom:2px solid #e5e7eb; }
+    /* Fond blanc explicite sur toute la zone (barre d'outils + contenu) + indicateur de focus
+       accessible et discret (WCAG 2.4.11, contraste 9.35:1) redessiné sur le conteneur, en
+       remplacement de l'outline bleu par défaut du navigateur (retiré côté JS partagé,
+       voir resources/js/tiptap-frontend.js, .ProseMirror). */
+    .lv-ae-tiptap { border:2px solid #e5e7eb; border-radius:12px; overflow:hidden; background:#fff; transition:border-color .15s ease, box-shadow .15s ease; }
+    .lv-ae-tiptap:focus-within { border-color:#064E5A; box-shadow: inset 0 0 0 1px #064E5A; }
+    .lv-ae-tiptap-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:2px; padding:8px 10px; background:#fff; border-bottom:2px solid #e5e7eb; }
     .lv-ae-tt-btn { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; min-width:24px; min-height:24px; border:none; border-radius:8px; background:transparent; color:#374151; cursor:pointer; transition:all .15s ease; }
     .lv-ae-tt-btn:hover { background:rgba(6,78,90,0.08); color:var(--c-primary,#064E5A); }
     .lv-ae-tt-btn.is-active { background:var(--c-primary,#064E5A); color:#fff; }
     .lv-ae-tt-btn:focus-visible { outline:3px solid var(--c-primary,#064E5A); outline-offset:2px; }
     .lv-ae-tt-btn--text { font-size:13px; font-weight:700; font-family:'DM Sans',sans-serif; width:auto; padding:0 10px; }
     .lv-ae-tt-sep { width:1px; height:22px; background:#e2e8f0; margin:0 4px; flex-shrink:0; }
-    .lv-ae-tiptap-content { min-height:360px; padding:16px 18px; outline:none; font-size:16px; line-height:1.7; }
+    .lv-ae-tiptap-content { min-height:360px; padding:16px 18px; outline:none; font-size:16px; line-height:1.7; background:#fff; }
     .lv-ae-tiptap-content .tiptap p.is-editor-empty:first-child::before { content:attr(data-placeholder); color:#9ca3af; float:left; height:0; pointer-events:none; }
     .lv-ae-tiptap-content h1 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.7em; font-weight:700; margin:0.8em 0 0.4em; }
     .lv-ae-tiptap-content h2 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.35em; font-weight:700; margin:0.7em 0 0.35em; }

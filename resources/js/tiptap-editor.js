@@ -38,6 +38,20 @@ import FontFamily from '@tiptap/extension-font-family'
 
 const lowlight = createLowlight(common)
 
+// === Style partagé, injecté UNE SEULE FOIS, pour TOUS les éditeurs Tiptap backend/admin ===
+// Point central unique (DRY), miroir de resources/js/tiptap-frontend.js : fond blanc +
+// retrait de l'outline navigateur par défaut sur la zone contenteditable réelle (.ProseMirror).
+// L'indicateur de focus accessible (WCAG 2.4.11) est redessiné sur le conteneur parent
+// (bordure teal #064E5A, contraste 9.35:1) dans Modules/Editor/resources/views/components/tiptap.blade.php.
+function ensureSharedProseMirrorStyles() {
+    if (document.getElementById('tiptap-editor-shared-styles')) return
+    const style = document.createElement('style')
+    style.id = 'tiptap-editor-shared-styles'
+    style.textContent = '.ProseMirror{background:#ffffff;outline:none;}.ProseMirror:focus,.ProseMirror:focus-visible{outline:none;}'
+    document.head.appendChild(style)
+}
+ensureSharedProseMirrorStyles()
+
 export function tiptapEditorComponent(config = {}) {
     return {
         editor: null,

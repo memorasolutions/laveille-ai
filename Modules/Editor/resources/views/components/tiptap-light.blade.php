@@ -8,7 +8,7 @@
 @endpush
 @endonce
 
-<div x-data="tiptapEditor({ content: {{ json_encode($value ?: '') }} })" style="border:1px solid #d1d5db;border-radius:10px;overflow:hidden;">
+<div class="tt-shell" x-data="tiptapEditor({ content: {{ json_encode($value ?: '') }} })">
 
     {{-- Toolbar light --}}
     <div class="tt-toolbar">
@@ -50,14 +50,21 @@
     </div>
 
     {{-- Zone d'édition --}}
-    <div x-ref="editorContent" style="min-height:120px;padding:12px 14px;outline:none;font-size:14px;line-height:1.6;color:#1f2937;"></div>
+    <div x-ref="editorContent" class="tt-content" style="min-height:120px;padding:12px 14px;outline:none;font-size:14px;line-height:1.6;color:#1f2937;"></div>
 
     {{-- Hidden input pour le formulaire --}}
     <input type="hidden" x-ref="hiddenInput" name="{{ $name }}" :value="content">
 </div>
 
 <style>
-    .tt-toolbar { display:flex; flex-wrap:wrap; gap:2px; padding:6px 10px; background:#f8fafc; border-bottom:1px solid #e5e7eb; align-items:center; }
+    /* Point central (DRY) : fond blanc sur toute la zone (barre d'outils + contenu) + indicateur
+       de focus accessible et discret (WCAG 2.4.11, contraste 9.35:1) redessiné sur le conteneur
+       parent au lieu de l'outline bleu par défaut du navigateur (retiré côté JS partagé,
+       voir resources/js/tiptap-frontend.js). */
+    .tt-shell { background:#ffffff; border:1px solid #d1d5db; border-radius:10px; overflow:hidden; transition:border-color .15s ease, box-shadow .15s ease; }
+    .tt-shell:focus-within { border-color:#064E5A; box-shadow: inset 0 0 0 1px #064E5A; }
+    .tt-content { background:#ffffff; }
+    .tt-toolbar { display:flex; flex-wrap:wrap; gap:2px; padding:6px 10px; background:#ffffff; border-bottom:1px solid #e5e7eb; align-items:center; }
     .tt-btn { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border:none; border-radius:6px; background:transparent; color:#64748b; cursor:pointer; transition:all 0.15s ease; }
     .tt-btn:hover { background:rgba(11,114,133,0.08); color:#0B7285; }
     .tt-btn.active { background:#0B7285; color:#fff; }

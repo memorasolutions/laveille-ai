@@ -190,10 +190,22 @@
 
 @push('styles')
 <style>
+/* Fond blanc explicite sur TOUTE la zone (barre d'outils + contenu + barre d'état) — pas
+   d'héritage du gris bg-body-tertiary/bg-light du thème backend. Indicateur de focus
+   accessible et discret (WCAG 2.4.11) redessiné sur les 3 blocs via :focus-within, en
+   remplacement de l'outline bleu par défaut du navigateur (retiré côté JS partagé,
+   voir resources/js/tiptap-editor.js). */
+#tiptap-wrap .tiptap-toolbar,
+#tiptap-wrap .tiptap-content,
+#tiptap-wrap .tiptap-statusbar { background-color:#ffffff; transition:border-color .15s ease, box-shadow .15s ease; }
+#tiptap-wrap:focus-within .tiptap-toolbar,
+#tiptap-wrap:focus-within .tiptap-content,
+#tiptap-wrap:focus-within .tiptap-statusbar { border-color:#064E5A; }
+#tiptap-wrap:focus-within .tiptap-content { box-shadow: inset 0 0 0 1px #064E5A; }
 .tiptap-toolbar .btn { font-size:13px; padding:3px 8px; line-height:1.5; background-color:var(--bs-body-bg, #fff); }
 .tiptap-toolbar .btn.is-active { background-color:rgba(var(--bs-primary-rgb),.12); color:var(--bs-primary); border-color:rgba(var(--bs-primary-rgb),.4); }
 .tiptap-toolbar .btn:not(.is-active):hover { background-color:rgba(var(--bs-primary-rgb),.05); }
-.tiptap-content .ProseMirror { outline:none; min-height:310px; padding:1rem; }
+.tiptap-content .ProseMirror { background-color:#ffffff; outline:none; min-height:310px; padding:1rem; }
 .tiptap-content .ProseMirror h1 { font-size:1.8em; font-weight:700; margin:.8em 0 .4em; }
 .tiptap-content .ProseMirror h2 { font-size:1.4em; font-weight:600; margin:.7em 0 .3em; }
 .tiptap-content .ProseMirror h3 { font-size:1.2em; font-weight:600; margin:.6em 0 .3em; }
