@@ -83,7 +83,7 @@
                 <div>
                     <small class="text-muted">
                         {{ __('Soumis par') }} {{ $resource->user?->name ?? __('Anonyme') }}
-                        {{ __('le') }} {{ $resource->created_at?->format('d/m/Y H:i') ?? '-' }}
+                        {{ __('le') }} {{ $resource->created_at ? format_date($resource->created_at, 'datetime') : '-' }}
                         | {{ __('Outil') }} : {{ is_array($resource->tool?->name) ? ($resource->tool->name['fr_CA'] ?? '') : ($resource->tool?->name ?? '-') }}
                     </small>
                 </div>

@@ -276,7 +276,7 @@ class DirectoryAdminController extends Controller
         } else {
             $days = $request->integer('duration_days') ?: 30;
             $tool->activateSponsorship($days);
-            $msg = __(':name activé en sponsorisé jusqu\'au :date.', ['name' => $tool->name, 'date' => $tool->featured_until->format('d/m/Y')]);
+            $msg = __(':name activé en sponsorisé jusqu\'au :date.', ['name' => $tool->name, 'date' => format_date($tool->featured_until)]);
         }
 
         activity('directory')->performedOn($tool)->causedBy(auth()->user())->log('tool_featured_toggled');

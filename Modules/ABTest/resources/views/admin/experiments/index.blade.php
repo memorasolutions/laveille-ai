@@ -47,7 +47,7 @@
                                 @php $statusClasses = ['draft' => 'secondary', 'running' => 'primary', 'completed' => 'success']; @endphp
                                 <span class="badge bg-{{ $statusClasses[$experiment->status] ?? 'secondary' }}">{{ $experiment->status }}</span>
                             </td>
-                            <td>{{ $experiment->created_at->format('d/m/Y H:i') }}</td>
+                            <td>{{ format_date($experiment->created_at, 'datetime') }}</td>
                             <td>
                                 <div class="d-flex gap-1">
                                     <a href="{{ route('admin.experiments.show', $experiment) }}" class="btn btn-sm btn-outline-primary" title="{{ __('Voir') }}"><i data-lucide="eye"></i></a>

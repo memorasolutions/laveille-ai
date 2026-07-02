@@ -74,7 +74,7 @@
                             <span class="badge bg-primary rounded-pill">{{ $team->members_count }}</span>
                         </td>
                         <td class="text-muted d-none d-lg-table-cell">
-                            {{ $team->created_at->format('d/m/Y') }}
+                            {{ format_date($team->created_at) }}
                         </td>
                         <td class="text-end">
                             <a href="{{ route('admin.teams.show', $team) }}"

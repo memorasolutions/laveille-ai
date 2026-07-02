@@ -56,7 +56,7 @@
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
                             <span class="text-muted">Créé le</span>
-                            <span>{{ $tenant->created_at->format('d/m/Y H:i') }}</span>
+                            <span>{{ format_date($tenant->created_at, 'datetime') }}</span>
                         </li>
                     </ul>
                 </div>

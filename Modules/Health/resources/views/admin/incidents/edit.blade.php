@@ -78,7 +78,7 @@
             @if($incident->resolved_at)
             <div class="alert alert-success">
                 <i data-lucide="check-circle" class="me-1"></i>
-                {{ __('Résolu le') }} : {{ $incident->resolved_at->format('d/m/Y H:i') }}
+                {{ __('Résolu le') }} : {{ format_date($incident->resolved_at, 'datetime') }}
             </div>
             @endif
 

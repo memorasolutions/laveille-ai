@@ -56,7 +56,7 @@
                                     <td>{{ $comment->user?->name ?? $comment->guest_name }}</td>
                                     <td>{{ Str::limit($comment->content, 100) }}</td>
                                     <td>{{ class_basename($comment->commentable_type) }}</td>
-                                    <td>{{ $comment->created_at->format('d/m/Y H:i') }}</td>
+                                    <td>{{ format_date($comment->created_at, 'datetime') }}</td>
                                     <td class="d-flex gap-1">
                                         <form action="{{ route('admin.community.moderate') }}" method="POST">
                                             @csrf
@@ -101,7 +101,7 @@
                                     <td style="color: #F59E0B;">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</td>
                                     <td>{{ Str::limit($review->content, 100) }}</td>
                                     <td>{{ class_basename($review->reviewable_type) }}</td>
-                                    <td>{{ $review->created_at->format('d/m/Y H:i') }}</td>
+                                    <td>{{ format_date($review->created_at, 'datetime') }}</td>
                                     <td class="d-flex gap-1">
                                         <form action="{{ route('admin.community.moderate') }}" method="POST">
                                             @csrf

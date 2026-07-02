@@ -16,7 +16,7 @@
                 <h1 style="font-family: var(--f-heading, inherit); font-weight: 700; margin-bottom: 8px;">{{ $page->title }}</h1>
                 @if($page->updated_at)
                     <p class="text-muted" style="font-size: 13px; margin-bottom: 24px;">
-                        {{ __('Dernière mise à jour') }} : {{ $page->updated_at->format('d/m/Y') }}
+                        {{ __('Dernière mise à jour') }} : {{ format_date($page->updated_at) }}
                     </p>
                 @endif
                 <div class="legal-content" style="line-height: 1.8; font-size: 15px;">

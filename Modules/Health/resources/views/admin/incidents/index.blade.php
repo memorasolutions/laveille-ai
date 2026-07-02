@@ -69,7 +69,7 @@
                                 {{ $severityLabels[$incident->severity] ?? $incident->severity }}
                             </span>
                         </td>
-                        <td>{{ $incident->created_at->format('d/m/Y H:i') }}</td>
+                        <td>{{ format_date($incident->created_at, 'datetime') }}</td>
                         <td>
                             <div class="btn-group" role="group">
                                 <a href="{{ route('admin.health.incidents.edit', $incident) }}"

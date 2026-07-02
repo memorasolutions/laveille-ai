@@ -89,7 +89,7 @@
 
                             <div class="mb-0">
                                 <small class="text-muted d-block">{{ __('Créée le') }}</small>
-                                <span class="mt-1 d-block">{{ $team->created_at->format('d/m/Y à H\hi') }}</span>
+                                <span class="mt-1 d-block">{{ format_date($team->created_at, 'datetime') }}</span>
                             </div>
                         </div>
                     </div>

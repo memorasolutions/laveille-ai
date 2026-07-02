@@ -85,7 +85,7 @@
                                             {{ $announcement->is_published ? 'Publie' : 'Brouillon' }}
                                         </span>
                                     </td>
-                                    <td>{{ $announcement->created_at->format('d/m/Y') }}</td>
+                                    <td>{{ format_date($announcement->created_at) }}</td>
                                     <td class="text-end">
                                         <div class="btn-group btn-group-sm">
                                             <a href="{{ route('admin.announcements.edit', $announcement) }}" class="btn btn-outline-primary">

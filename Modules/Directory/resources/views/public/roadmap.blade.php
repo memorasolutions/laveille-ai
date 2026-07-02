@@ -69,7 +69,7 @@
                                 <span style="background: #F3F4F6; color: #6B7280; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-left: 4px;">{{ \Modules\Directory\Models\ToolSuggestion::fieldLabels()[$s->field] ?? $s->field }}</span>
                             </div>
                             <div style="font-weight: 600; color: var(--c-dark); font-size: 14px; line-height: 1.4;">{{ Str::limit($s->suggested_value, 80) }}</div>
-                            <div style="margin-top: 6px; color: #6B7280; font-size: 11px;">{{ __('Par') }} <strong>{{ $s->user->name ?? __('Anonyme') }}</strong> · {{ $s->created_at->format('d/m/Y') }}</div>
+                            <div style="margin-top: 6px; color: #6B7280; font-size: 11px;">{{ __('Par') }} <strong>{{ $s->user->name ?? __('Anonyme') }}</strong> · {{ format_date($s->created_at) }}</div>
                         </div>
                     </div>
                 </div>

@@ -24,8 +24,8 @@
                         <dt>{{ __('Description') }}</dt><dd>{{ $experiment->description ?? '-' }}</dd>
                         <dt>{{ __('Statut') }}</dt><dd>@php $statusClasses = ['draft' => 'secondary', 'running' => 'primary', 'completed' => 'success']; @endphp<span class="badge bg-{{ $statusClasses[$experiment->status] ?? 'secondary' }}">{{ $experiment->status }}</span></dd>
                         <dt>{{ __('Variantes') }}</dt><dd>@foreach($experiment->variants as $variant)<span class="badge bg-light text-dark border me-1">{{ $variant }}</span>@endforeach</dd>
-                        <dt>{{ __('Debut') }}</dt><dd>{{ $experiment->started_at?->format('d/m/Y H:i') ?? '-' }}</dd>
-                        <dt>{{ __('Fin') }}</dt><dd>{{ $experiment->ended_at?->format('d/m/Y H:i') ?? '-' }}</dd>
+                        <dt>{{ __('Debut') }}</dt><dd>{{ $experiment->started_at ? format_date($experiment->started_at, 'datetime') : '-' }}</dd>
+                        <dt>{{ __('Fin') }}</dt><dd>{{ $experiment->ended_at ? format_date($experiment->ended_at, 'datetime') : '-' }}</dd>
                     </dl>
                 </div>
             </div>
@@ -95,7 +95,7 @@
                     <div class="alert alert-success mb-0">
                         <i data-lucide="trophy" class="me-2"></i>
                         {{ __('Variante gagnante :') }} <strong>{{ $experiment->winner }}</strong>
-                        - {{ __('terminee le') }} {{ $experiment->ended_at->format('d/m/Y a H:i') }}
+                        - {{ __('terminee le') }} {{ format_date($experiment->ended_at, 'datetime') }}
                     </div>
                 </div>
             </div>

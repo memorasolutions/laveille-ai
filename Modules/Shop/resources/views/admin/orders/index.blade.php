@@ -50,7 +50,7 @@
                                 </td>
                                 <td>{{ number_format($order->total, 2, ',', ' ') }} $</td>
                                 <td>{{ $order->items_count }}</td>
-                                <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
+                                <td>{{ format_date($order->created_at, 'datetime') }}</td>
                                 <td><a href="{{ route('admin.shop.orders.show', $order) }}" class="btn btn-outline-primary btn-sm">{{ __('Details') }}</a></td>
                             </tr>
                             @empty

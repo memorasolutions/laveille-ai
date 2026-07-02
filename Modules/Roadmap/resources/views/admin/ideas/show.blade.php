@@ -29,7 +29,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <small class="text-muted">
                             {{ __('Soumise par') }} <strong>{{ $idea->user->name ?? __('Anonyme') }}</strong>
-                            {{ __('le') }} {{ $idea->created_at->format('d/m/Y') }}
+                            {{ __('le') }} {{ format_date($idea->created_at) }}
                         </small>
                         <span class="badge bg-secondary">{{ $idea->board->name }}</span>
                     </div>
@@ -52,7 +52,7 @@
                                             <span class="badge bg-primary ms-2">{{ __('Officiel') }}</span>
                                         @endif
                                     </div>
-                                    <small class="text-muted">{{ $comment->created_at->format('d/m/Y H:i') }}</small>
+                                    <small class="text-muted">{{ format_date($comment->created_at, 'datetime') }}</small>
                                 </div>
                                 <p class="mb-0">{{ $comment->content }}</p>
                             </div>
@@ -81,7 +81,7 @@
                                         {{ $log->old_value ?? '—' }} → {{ $log->new_value }}
                                         @if($log->note) <em class="text-muted">{{ $log->note }}</em> @endif
                                     </small>
-                                    <small class="text-muted">{{ $log->created_at->format('d/m/Y H:i') }}</small>
+                                    <small class="text-muted">{{ format_date($log->created_at, 'datetime') }}</small>
                                 </div>
                             </div>
                         @empty

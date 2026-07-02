@@ -49,7 +49,7 @@
                 <h6 class="card-title">Métadonnées</h6>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item d-flex justify-content-between px-0">
-                        Date <span>{{ $submission->created_at->format('d/m/Y H:i:s') }}</span>
+                        Date <span>{{ format_date($submission->created_at, 'datetime') }}</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between px-0">
                         IP <span>{{ $submission->ip_address }}</span>

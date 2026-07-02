@@ -61,7 +61,7 @@
                                     <span class="badge bg-secondary">Brouillon</span>
                                 @endif
                             </td>
-                            <td>{{ $form->created_at->format('d/m/Y') }}</td>
+                            <td>{{ format_date($form->created_at) }}</td>
                             <td class="text-end">
                                 <div class="d-inline-flex gap-1">
                                     <a href="{{ route('admin.formbuilder.forms.submissions.index', $form) }}" class="btn btn-sm btn-info text-white" title="Soumissions">

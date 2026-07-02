@@ -16,7 +16,7 @@ class CheckBanned
 
             if ($user->ban_expires_at) {
                 if ($user->ban_expires_at > now()) {
-                    $date = Carbon::parse($user->ban_expires_at)->format('d/m/Y à H:i');
+                    $date = format_date(Carbon::parse($user->ban_expires_at), 'datetime');
                     abort(403, __('Votre compte est temporairement suspendu jusqu\'au :date.', ['date' => $date]));
                 }
 

@@ -8,7 +8,7 @@
 | {{ __('Titre') }} | {{ __('Message') }} | {{ __('Date') }} |
 |-------|---------|------|
 @foreach($notifications as $notification)
-| {{ $notification->data['title'] ?? __('Sans titre') }} | {{ Str::limit($notification->data['message'] ?? '', 100) }} | {{ $notification->created_at->format('d/m/Y H:i') }} |
+| {{ $notification->data['title'] ?? __('Sans titre') }} | {{ Str::limit($notification->data['message'] ?? '', 100) }} | {{ format_date($notification->created_at, 'datetime') }} |
 @endforeach
 @endcomponent
 

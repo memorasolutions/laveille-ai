@@ -61,7 +61,7 @@
 
                     <div class="card bg-light">
                         <div class="card-body py-2 px-3">
-                            <small class="text-muted d-block">{{ __('Créé le') }} {{ $testimonial->created_at->format('d/m/Y H:i') }}</small>
+                            <small class="text-muted d-block">{{ __('Créé le') }} {{ format_date($testimonial->created_at, 'datetime') }}</small>
                             <small class="text-muted d-block">{{ __('Ordre :') }} {{ $testimonial->order }}</small>
                         </div>
                     </div>

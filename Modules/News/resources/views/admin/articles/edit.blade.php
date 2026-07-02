@@ -7,7 +7,7 @@
 
         <div class="mb-3 p-3 bg-light rounded">
             <strong>{{ $article->title }}</strong><br>
-            <small class="text-muted">{{ $article->source->name ?? '' }} &middot; {{ $article->pub_date?->format('d/m/Y H:i') }} &middot; Score : {{ $article->relevance_score ?? '-' }}/10</small>
+            <small class="text-muted">{{ $article->source->name ?? '' }} &middot; {{ $article->pub_date ? format_date($article->pub_date, 'datetime') : '' }} &middot; Score : {{ $article->relevance_score ?? '-' }}/10</small>
         </div>
 
         <form action="{{ route('admin.news.articles.update', $article) }}" method="POST">

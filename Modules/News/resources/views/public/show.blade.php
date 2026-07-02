@@ -229,7 +229,7 @@
                             <span class="nw-pill">{{ $article->author }}</span>
                         @endif
                         <span class="nw-pill-sep">&middot;</span>
-                        <span class="nw-pill">{{ $article->pub_date?->format('d/m/Y') }}</span>
+                        <span class="nw-pill">{{ $article->pub_date ? format_date($article->pub_date) : '' }}</span>
                         @if($article->category_tag)
                             <span class="nw-pill nw-pill-cat">{{ $article->category_tag }}</span>
                         @endif

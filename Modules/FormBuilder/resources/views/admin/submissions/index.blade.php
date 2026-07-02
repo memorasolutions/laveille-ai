@@ -66,7 +66,7 @@
                     @forelse($submissions as $submission)
                         <tr class="{{ $submission->isNew() ? 'fw-bold' : '' }}">
                             <td>{{ $submission->id }}</td>
-                            <td>{{ $submission->created_at->format('d/m/Y H:i') }}</td>
+                            <td>{{ format_date($submission->created_at, 'datetime') }}</td>
                             <td>
                                 @if($submission->isNew())
                                     <span class="badge bg-primary">Nouveau</span>

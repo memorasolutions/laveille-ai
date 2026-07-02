@@ -72,7 +72,7 @@
                                 <span class="badge bg-warning bg-opacity-10 text-warning">Brouillon</span>
                             @endif
                         </td>
-                        <td class="text-muted">{{ $page->created_at->format('d/m/Y') }}</td>
+                        <td class="text-muted">{{ format_date($page->created_at) }}</td>
                         <td>
                             <div class="d-flex align-items-center justify-content-center gap-2">
                                 <a href="{{ route('page.show', $page->slug) }}" target="_blank"

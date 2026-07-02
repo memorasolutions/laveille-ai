@@ -64,10 +64,10 @@
                     </dd>
 
                     <dt class="col-5 text-muted fw-normal small">{{ __('Créée le') }}</dt>
-                    <dd class="col-7 text-muted small">{{ $team->created_at->format('d/m/Y') }}</dd>
+                    <dd class="col-7 text-muted small">{{ format_date($team->created_at) }}</dd>
 
                     <dt class="col-5 text-muted fw-normal small">{{ __('Modifiée le') }}</dt>
-                    <dd class="col-7 text-muted small">{{ $team->updated_at->format('d/m/Y') }}</dd>
+                    <dd class="col-7 text-muted small">{{ format_date($team->updated_at) }}</dd>
                 </dl>
             </div>
         </div>
@@ -227,11 +227,11 @@
                             @endif
                         </td>
                         <td class="text-muted small d-none d-md-table-cell">
-                            {{ $invitation->created_at->format('d/m/Y à H\hi') }}
+                            {{ format_date($invitation->created_at, 'datetime') }}
                         </td>
                         <td class="small d-none d-md-table-cell {{ $expired ? 'text-danger fw-semibold' : 'text-muted' }}">
                             @if($invitation->expires_at)
-                                {{ $invitation->expires_at->format('d/m/Y à H\hi') }}
+                                {{ format_date($invitation->expires_at, 'datetime') }}
                             @else
                                 <span class="text-muted">—</span>
                             @endif

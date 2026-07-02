@@ -65,7 +65,7 @@
                 <h1 class="h3 mb-0">{{ __('Statut du service') }}</h1>
                 <div class="text-muted">
                     <i class="bi bi-clock me-1"></i>
-                    {{ __('Dernière mise à jour') }} : {{ now()->format('d/m/Y H:i') }}
+                    {{ __('Dernière mise à jour') }} : {{ format_date(now(), 'datetime') }}
                 </div>
             </div>
             <hr>
@@ -174,12 +174,12 @@
                                 <div class="d-flex justify-content-between text-muted small">
                                     <span>
                                         <i class="bi bi-calendar me-1"></i>
-                                        {{ $incident->created_at->format('d/m/Y H:i') }}
+                                        {{ format_date($incident->created_at, 'datetime') }}
                                     </span>
                                     @if($incident->resolved_at)
                                         <span>
                                             <i class="bi bi-check-circle me-1"></i>
-                                            {{ __('Résolu le') }} {{ $incident->resolved_at->format('d/m/Y H:i') }}
+                                            {{ __('Résolu le') }} {{ format_date($incident->resolved_at, 'datetime') }}
                                         </span>
                                     @endif
                                 </div>

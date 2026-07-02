@@ -451,7 +451,7 @@
         </div>
         <div style="border-top: 1px solid #E5E7EB; padding-top: 12px; margin-top: 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
             <span style="display: inline-flex; align-items: center; color: #065F46; font-weight: 600; font-size: 12px; background: #D1FAE5; padding: 4px 10px; border-radius: 99px; border: 1px solid #A7F3D0;">✓ {{ __('Vérifié par La veille') }}</span>
-            <span style="font-size: 12px; color: #6B7280;">{{ __('Mis à jour le') }} {{ $tool->updated_at->format('d/m/Y') }}</span>
+            <span style="font-size: 12px; color: #6B7280;">{{ __('Mis à jour le') }} {{ format_date($tool->updated_at) }}</span>
         </div>
     </div>
 
@@ -975,7 +975,7 @@
                         @if($durationFormatted)
                             <span>⏱️ {{ $durationFormatted }}</span>
                         @endif
-                        <span>📅 {{ __('Soumis le') }} {{ $res->created_at->format('d/m/Y') }}</span>
+                        <span>📅 {{ __('Soumis le') }} {{ format_date($res->created_at) }}</span>
                         <span>👤 {{ __('par') }} {{ $res->user->name ?? __('Anonyme') }}</span>
                     </div>
 

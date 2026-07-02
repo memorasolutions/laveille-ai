@@ -138,7 +138,7 @@
                             <td>{{ Str::limit($idea->title, 50) }}</td>
                             <td>{{ $idea->user->name ?? __('Anonyme') }}</td>
                             <td><span class="badge" style="background-color: {{ $idea->status->color() }};">{{ $idea->status->label() }}</span></td>
-                            <td>{{ $idea->created_at->format('d/m/Y') }}</td>
+                            <td>{{ format_date($idea->created_at) }}</td>
                         </tr>
                     @endforeach
                 </tbody>

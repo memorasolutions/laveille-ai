@@ -52,7 +52,7 @@
                             @endif
                         </td>
                         <td>{{ $r->user->name ?? '-' }}</td>
-                        <td>{{ $r->created_at->format('d/m/Y') }}</td>
+                        <td>{{ format_date($r->created_at) }}</td>
                         <td class="text-end">
                             @include('core::components.admin-action-menu', ['actions' => array_filter([
                                 ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.directory.resources.edit', $r->id)],
