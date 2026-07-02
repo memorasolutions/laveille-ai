@@ -480,6 +480,7 @@
                         'dripAvailableAt'    => isset($dripAvailableAt) ? $dripAvailableAt->toIso8601String() : null,
                         'dripLockedLessonIds'=> $dripLockedLessonIds ?? [],
                         'courseCompleted'    => $courseCompleted ?? false,
+                        'videoRedirectUrls'  => $videoRedirectUrls ?? [],
                     ])
                 @else
                 {{-- Vue classique (longue page, comportement historique) --}}
@@ -546,6 +547,7 @@
                             'lesson'            => $lesson,
                             'choiceVotes'       => $choiceVotes ?? [],
                             'feedbackResponses' => $feedbackResponses ?? [],
+                            'videoRedirectUrls' => $videoRedirectUrls ?? [],
                         ])
                         {{-- Contenu inline supprimé et déplacé dans item-body.blade.php (DRY) --}}
                         @if(false) {{-- Bloc de rendu désactivé - voir partial item-body.blade.php --}}

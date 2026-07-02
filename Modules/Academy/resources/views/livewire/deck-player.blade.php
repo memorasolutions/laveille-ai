@@ -110,6 +110,7 @@
                             'lesson'            => $lesson,
                             'choiceVotes'       => $choiceVotes,
                             'feedbackResponses' => $feedbackResponses,
+                            'videoRedirectUrls' => $videoRedirectUrls,
                         ])
                     @endif
 

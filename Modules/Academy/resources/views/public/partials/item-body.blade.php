@@ -2,26 +2,36 @@
      Partial DRY : corps de rendu dun item de leçon (tous types).
      Inclus par lesson.blade.php ET livewire/deck-player.blade.php.
      Variables requises : $item, $hasAccess, $isEnrolled, $isPreview, $isFree,
-                         $course, $lesson, $choiceVotes, $feedbackResponses
+                         $course, $lesson, $choiceVotes, $feedbackResponses,
+                         $videoRedirectUrls
 --}}
                         {{-- ── TYPE VIDEO ── --}}
                         @if($item->type === 'video')
                             @php
                                 // Champ canonique : player_url. Repli rétrocompat : ancien payload['embed'].
                                 $videoUrl = $item->payload['player_url'] ?? ($item->payload['embed'] ?? null);
+
+                                // PROXY VIDÉO SIGNÉ (« protéger l'accès, pas l'iframe ») : le lien
+                                // ScreenPal brut ($videoUrl) ne doit JAMAIS être injecté dans le DOM.
+                                // L'iframe pointe vers l'URL SIGNÉE à expiration (calculée par
+                                // LessonController, 4 h — voir VideoRedirectController). À défaut
+                                // (map absente/incomplète), rien n'est rendu plutôt que de retomber
+                                // sur le lien brut.
+                                $videoSignedUrl = ($videoRedirectUrls ?? [])[$item->id] ?? null;
                             @endphp
-                            @if($hasAccess && !empty($videoUrl))
+                            @if($hasAccess && !empty($videoUrl) && !empty($videoSignedUrl))
                                 {{--
                                     GATING CRITIQUE :
                                     L'URL vidéo n'est injectée dans le DOM QUE si $hasAccess === true.
                                     Côté serveur, Blade ne rend pas le composant si la condition est fausse.
-                                    Aucune URL vidéo ne fuite dans le HTML rendu au visiteur non-inscrit.
+                                    Aucune URL vidéo ScreenPal ne fuite dans le HTML : seule l'URL SIGNÉE
+                                    (proxy interne, à expiration) atteint le navigateur de l'élève.
                                 --}}
                                 {{-- id stable : ancre de défilement pour les badges horodatés de la
                                      discussion sociale par vidéo (voir partials/video-discussion). --}}
                                 <div id="lesson-video-{{ $item->id }}">
                                     <x-academy::video-player
-                                        :playerUrl="$videoUrl"
+                                        :playerUrl="$videoSignedUrl"
                                         :poster="$item->posterUrl()"
                                         :title="$item->title ?? $lesson->title"
                                     />

@@ -71,6 +71,16 @@ class DeckPlayer extends Component
     #[Locked]
     public bool $courseCompleted = false;
 
+    /**
+     * Proxy vidéo signé (« protéger l'accès, pas l'iframe ») : map
+     * [lesson_item_id => URL signée à expiration] calculée par LessonController
+     * (URL::temporarySignedRoute, 4 h). Jamais le lien ScreenPal brut.
+     *
+     * @var array<int, string>
+     */
+    #[Locked]
+    public array $videoRedirectUrls = [];
+
     // --- État navigable ---
 
     public int $currentIndex = 0;
@@ -93,6 +103,7 @@ class DeckPlayer extends Component
         ?string $dripAvailableAt = null,
         array $dripLockedLessonIds = [],
         bool $courseCompleted = false,
+        array $videoRedirectUrls = [],
     ): void {
         $this->lesson               = $lesson;
         $this->course               = $course;
@@ -109,6 +120,7 @@ class DeckPlayer extends Component
         $this->dripAvailableAt      = $dripAvailableAt;
         $this->dripLockedLessonIds  = $dripLockedLessonIds;
         $this->courseCompleted      = $courseCompleted;
+        $this->videoRedirectUrls    = $videoRedirectUrls;
     }
 
     // --- Computed : items visibles (exclut les items masqués par restriction) ---

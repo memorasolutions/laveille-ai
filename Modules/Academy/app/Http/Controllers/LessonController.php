@@ -226,6 +226,23 @@ class LessonController extends Controller
             }
         }
 
+        // 5i. Proxy vidéo SIGNÉ (« protéger l'accès, pas l'iframe ») : pour chaque item
+        //     vidéo de la leçon, on calcule une URL SIGNÉE À EXPIRATION (4 h) vers
+        //     VideoRedirectController plutôt que d'injecter le lien ScreenPal brut dans
+        //     le DOM. Le contrôleur re-vérifie l'autorisation à chaque appel (voir
+        //     LessonAccessService) : la signature borne seulement la fenêtre de rejeu.
+        //     Calculée pour TOUT item vidéo (même hors accès) : la vue ne l'utilise que
+        //     si $hasAccess est vrai, mais autant éviter une génération conditionnelle
+        //     dispersée dans le partial (DRY, une seule source de calcul).
+        $videoRedirectUrls = [];
+        foreach ($lesson->lessonItems->where('type', 'video') as $videoItem) {
+            $videoRedirectUrls[$videoItem->id] = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                'academy.lessons.video-redirect',
+                now()->addHours(4),
+                ['course' => $course->slug, 'lesson' => $lesson->id, 'itemId' => $videoItem->id],
+            );
+        }
+
         // 6. Navigation préc/suiv
         $allLessons = $course->chapters->flatMap(fn ($ch) => $ch->lessons);
         $currentIndex = $allLessons->search(fn ($l) => $l->id === $lesson->id);
@@ -287,6 +304,7 @@ class LessonController extends Controller
             'itemRatingStats',
             'userRatings',
             'itemComments',
+            'videoRedirectUrls',
         ));
     }
 }

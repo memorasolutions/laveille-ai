@@ -27,6 +27,7 @@ use Modules\Academy\Http\Controllers\LessonController;
 use Modules\Academy\Http\Controllers\LiveSessionController;
 use Modules\Academy\Http\Controllers\PurchaseController;
 use Modules\Academy\Http\Controllers\QuizController;
+use Modules\Academy\Http\Controllers\VideoRedirectController;
 use Modules\Academy\Http\Controllers\WikiController;
 use Modules\Academy\Http\Controllers\WorkshopController;
 use Modules\Academy\Http\Middleware\AcademyCsp;
@@ -465,4 +466,19 @@ Route::prefix('academie')->name('academy.')->group(function () {
         'courses/{course:slug}/lessons/{lesson}/items/{itemId}/h5p',
         [H5pPlayerController::class, 'play']
     )->name('h5p.play');
+
+    // PROXY VIDÉO SIGNÉ (« protéger l'accès, pas l'iframe ») : le lien ScreenPal
+    // réel ne fuite plus dans le HTML de la leçon. L'iframe pointe vers CETTE
+    // route (URL::temporarySignedRoute, 4 h) ; middleware `signed` = signature +
+    // expiration validées automatiquement par Laravel. L'autorisation d'accès
+    // à l'item est RE-VÉRIFIÉE intégralement dans VideoRedirectController
+    // (LessonAccessService, DRY avec LessonController/H5pPlayerController) :
+    // une signature valide seule ne suffit jamais, elle ne fait que borner la
+    // fenêtre de rejeu d'un lien déjà autorisé.
+    Route::get(
+        'courses/{course:slug}/lessons/{lesson}/items/{itemId}/video-redirect',
+        VideoRedirectController::class
+    )
+        ->middleware('signed')
+        ->name('lessons.video-redirect');
 });
