@@ -25,6 +25,7 @@ use Modules\Academy\Http\Controllers\EnrollmentController;
 use Modules\Academy\Http\Controllers\ExportController;
 use Modules\Academy\Http\Controllers\LessonController;
 use Modules\Academy\Http\Controllers\LiveSessionController;
+use Modules\Academy\Http\Controllers\LtiLaunchController;
 use Modules\Academy\Http\Controllers\PurchaseController;
 use Modules\Academy\Http\Controllers\QuizController;
 use Modules\Academy\Http\Controllers\VideoRedirectController;
@@ -48,6 +49,15 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
         // la vraie faille corrigée par B01), un connecté non-inscrit/non-staff reçoit 404.
         Route::get('courses/{course:slug}/lessons/{lesson}', [LessonController::class, 'show'])
             ->name('lessons.show');
+
+        // Consumer LTI 1.3 minimal (Academy branche des outils EXTERNES, jamais
+        // l'inverse). Connexion requise ; l'item est re-résolu et ré-autorisé
+        // intégralement côté serveur dans LtiLaunchController (anti-IDOR, même
+        // pattern DRY que le proxy vidéo signé / H5P via LessonAccessService).
+        Route::get('courses/{course:slug}/lessons/{lesson}/lti/{item}/launch', [LtiLaunchController::class, 'launch'])
+            ->whereNumber('item')
+            ->middleware('auth')
+            ->name('lti.launch');
 
         // PHASE 2 - Espace personnel front-end UNIQUE et role-aware (connexion requise).
         // Gâté comme le reste (AcademyUnderConstruction) + `auth`. Le contenu est
@@ -222,6 +232,15 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             ->middleware('auth')
             ->name('courses.calendar');
     });
+
+    // Consumer LTI 1.3 — retour OIDC (form_post) de l'outil externe. Pas d'auth :
+    // l'appelant est l'outil tiers, pas l'apprenant connecté ; la sécurité vient
+    // du state/nonce à usage unique et de la validation du jeton (LtiLaunchService).
+    // throttle:30,1 = anti-abus (même plafond que les autres GET/POST publics à
+    // génération dynamique du module).
+    Route::match(['get', 'post'], 'lti/callback', [LtiLaunchController::class, 'callback'])
+        ->middleware('throttle:30,1')
+        ->name('lti.callback');
 
     // D09 — OpenBadge 3.0 vérifiables (public, pas d'auth, gâtés par academy.open_badges_enabled).
     // Route user-badge AVANT {serial} pour éviter que « user-badge » soit capté comme serial.

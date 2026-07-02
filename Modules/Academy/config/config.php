@@ -449,6 +449,24 @@ return [
         'academy_video_discussion'     => "Discussion sociale par vidéo",
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Consumer LTI 1.3 (outils pédagogiques externes)
+    |--------------------------------------------------------------------------
+    | Quand true, un item de leçon « lti_tool » peut être lancé (bouton « Ouvrir
+    | l'outil externe ») vers un outil pédagogique tiers enregistré (voir
+    | Models\LtiToolRegistration, table academy_lti_tool_registrations). Academy
+    | agit UNIQUEMENT comme CONSUMER (plateforme qui lance l'outil), JAMAIS comme
+    | Tool Provider : le flux suit le standard 1EdTech LTI 1.3 Core (OIDC Third-
+    | Party Initiated Login + validation du jeton d'identité signé, voir
+    | Services\LtiLaunchService). Deep Linking, Assignment and Grade Services
+    | (AGS) et Names and Roles Provisioning (NRPS) sont HORS PÉRIMÈTRE de ce MVP.
+    | Défaut false : routes launch/callback 404, aucun bouton affiché, aucun
+    | appel réseau vers un outil externe.
+    | Activer via ACADEMY_LTI_ENABLED=true dans le .env.
+    */
+    'lti_enabled' => env('ACADEMY_LTI_ENABLED', false),
+
     'notifications' => [
         'enabled' => env('ACADEMY_NOTIFICATIONS_ENABLED', false),
 

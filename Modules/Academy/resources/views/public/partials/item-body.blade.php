@@ -1431,6 +1431,71 @@
                                 </div>
                             @endif
 
+                        {{-- ── TYPE LTI_TOOL (consumer LTI 1.3 - outil pédagogique externe) ── --}}
+                        @elseif($item->type === 'lti_tool')
+                            @if($hasAccess && config('academy.lti_enabled', false))
+                                {{-- Aucune URL d'outil externe dans le DOM : le lancement passe
+                                     entièrement par la route serveur (re-résolution + re-autorisation
+                                     intégrales, voir LtiLaunchController), jamais par un lien direct. --}}
+                                <div class="academy-gated-panel" style="background: #F3F4F6;">
+                                    <div class="gated-icon" aria-hidden="true">🔗</div>
+                                    <div class="gated-title">Outil pédagogique externe</div>
+                                    <p class="gated-sub">
+                                        Cet outil s'ouvre dans un nouvel onglet, en gardant votre
+                                        progression sur ce cours.
+                                    </p>
+                                    <x-core::button :href="route('academy.lti.launch', [$course, $lesson, $item->id])" target="_blank" rel="noopener" variant="primary" size="sm">
+                                        Ouvrir l'outil externe
+                                    </x-core::button>
+                                </div>
+                            @else
+                                {{-- Panneau d'appel à l'action (même logique que les autres types : rien de sensible dans le DOM). --}}
+                                <div class="academy-gated-panel">
+                                    <div class="gated-icon">🔐</div>
+                                    <div class="gated-title">
+                                        @if(!auth()->check())
+                                            Connexion requise pour cet outil externe
+                                        @elseif(!$isEnrolled)
+                                            Inscrivez-vous pour accéder à cet outil externe
+                                        @else
+                                            Outil externe en cours de préparation
+                                        @endif
+                                    </div>
+                                    <p class="gated-sub">
+                                        @if(!auth()->check())
+                                            Créez un compte gratuit ou connectez-vous pour accéder aux outils externes de ce cours.
+                                        @elseif(!$isEnrolled && $isFree)
+                                            Ce cours est gratuit - inscrivez-vous pour accéder à cet outil externe.
+                                        @elseif(!$isEnrolled && !$isFree)
+                                            Ce cours est payant - achetez-le pour accéder à l'ensemble du contenu.
+                                        @else
+                                            Votre inscription vous donne accès à l'ensemble du contenu.
+                                        @endif
+                                    </p>
+                                    @if(!auth()->check())
+                                        <span class="d-inline-flex flex-wrap gap-2 justify-content-center">
+                                            <x-core::button :href="Route::has('login') ? route('login') : '#'" variant="primary" size="sm">
+                                                Se connecter
+                                            </x-core::button>
+                                            <x-core::button :href="Route::has('register') ? route('register') : '#'" variant="secondary" size="sm">
+                                                Créer un compte
+                                            </x-core::button>
+                                        </span>
+                                    @elseif(!$isEnrolled && $isFree)
+                                        <form action="{{ route('academy.courses.enroll', $course) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <x-core::button type="submit" variant="primary" size="sm">
+                                                S'inscrire gratuitement
+                                            </x-core::button>
+                                        </form>
+                                    @elseif(!$isEnrolled && !$isFree)
+                                        <x-core::button :href="route('academy.courses.purchase', $course)" variant="primary" size="sm">
+                                            Acheter ce cours
+                                        </x-core::button>
+                                    @endif
+                                </div>
+                            @endif
+
                         @else
                             {{-- Type inconnu : rendu défensif --}}
                             <div class="text-muted p-3 rounded" style="background: #F3F4F6; font-size: 0.9rem;">
