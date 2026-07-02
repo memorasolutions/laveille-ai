@@ -34,6 +34,7 @@
                                         :playerUrl="$videoSignedUrl"
                                         :poster="$item->posterUrl()"
                                         :title="$item->title ?? $lesson->title"
+                                        :aspectRatio="$item->payload['aspect_ratio'] ?? null"
                                     />
 
                                     @if(isset($item->payload['duration_seconds']))

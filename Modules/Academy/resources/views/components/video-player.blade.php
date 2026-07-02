@@ -28,7 +28,7 @@
     5. Le payload seeder contient domain_lock: true comme rappel de cette exigence.
     ─────────────────────────────────────────────────
 --}}
-@props(['playerUrl', 'title' => 'Vidéo de leçon', 'poster' => null])
+@props(['playerUrl', 'title' => 'Vidéo de leçon', 'poster' => null, 'aspectRatio' => null])
 
 @php
     // Identifiant de l'utilisateur connecté (email ou nom, avec fallback)
@@ -38,11 +38,15 @@
 
     // Timestamp court (affiché à l'initialisation Alpine, mis à jour dynamiquement)
     $nowLabel = now()->setTimezone('America/Toronto')->format('Y-m-d H:i');
+
+    // Ratio d'aspect dynamique (ex. ScreenPal fournit 1.320866 pour une vidéo non 16:9).
+    // Repli 16/9 si absent/invalide, rétrocompatible avec toutes les vidéos existantes.
+    $ratioCss = (is_numeric($aspectRatio) && $aspectRatio > 0) ? (string) $aspectRatio : '16/9';
 @endphp
 
 <div
     class="academy-video-wrapper"
-    style="position: relative; width: 100%; aspect-ratio: 16/9; background: #000 @if($poster) center / cover no-repeat url('{{ $poster }}') @endif; border-radius: 8px; overflow: hidden;"
+    style="position: relative; width: 100%; aspect-ratio: {{ $ratioCss }}; background: #000 @if($poster) center / cover no-repeat url('{{ $poster }}') @endif; border-radius: 8px; overflow: hidden;"
 >
     {{-- ── Iframe ScreenPal ── --}}
     <iframe
