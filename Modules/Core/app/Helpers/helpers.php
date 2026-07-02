@@ -10,12 +10,9 @@ declare(strict_types=1);
 
 use Illuminate\Support\Carbon;
 
-if (! function_exists('format_date')) {
-    function format_date(?Carbon $date, string $format = 'd/m/Y'): string
-    {
-        return $date ? $date->format($format) : '-';
-    }
-}
+// format_date() N'EST PAS DÉFINIE ICI : app/Helpers/dates.php (chargé en amont via
+// composer.json autoload.files) fournit LA version canonique, configurable via Settings.
+// Voir Modules/Core/tests/Unit/HelpersTest.php pour le contrat attendu.
 
 if (! function_exists('format_datetime')) {
     function format_datetime(?Carbon $date, string $format = 'd/m/Y H:i'): string

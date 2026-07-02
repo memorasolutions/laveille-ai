@@ -14,18 +14,17 @@ use Illuminate\Support\Carbon;
 // format_date lit le format depuis la table settings → RefreshDatabase pour disposer du schéma.
 uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-test('format_date formats correctly', function () {
-    $date = Carbon::create(2026, 2, 15);
-    expect(format_date($date))->toBe('15/02/2026');
-    expect(format_date(null))->toBe('-');
-})->skip(
-    // En prod, app/Helpers/dates.php redéfinit (shadow) la fonction format_date() du module Core
-    // avec une signature/contrat différents (type localisé + settings) ET un bug de format
-    // (isoFormat 'd' = jour-de-semaine au lieu de 'DD' = jour-du-mois → "0 févr. 2026").
-    // Le contrat Core (d/m/Y, null → "-") ne peut donc pas être vérifié ici.
-    // À corriger côté prod : nécessite changement applicatif (hors scope env de test).
-    'format_date() est shadowée par app/Helpers/dates.php (contrat différent + bug DD vs d) — fix prod requis.'
-);
+// format_date() n'est plus définie deux fois : Modules/Core/app/Helpers/helpers.php a été
+// nettoyé de son doublon mort (jamais appelé côté applicatif) et buggé. La version canonique
+// vit désormais uniquement dans app/Helpers/dates.php (configurable via Settings).
+// Ce test couvre cette version survivante et sert de non-régression pour le bug corrigé :
+// isoFormat 'd' = jour-de-semaine (ex. "0" un dimanche) alors que 'D' = jour-du-mois.
+test('format_date (app/Helpers/dates.php) formats correctly and no longer uses the buggy day token', function () {
+    $date = Carbon::create(2026, 2, 15); // un dimanche
+
+    expect(format_date($date))->toBe('15 févr. 2026');
+    expect(format_date(null))->toBe('');
+});
 
 test('format_datetime formats correctly', function () {
     $date = Carbon::create(2026, 2, 15, 14, 30);

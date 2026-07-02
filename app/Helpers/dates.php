@@ -27,9 +27,9 @@ if (! function_exists('format_date')) {
         $carbon = $date instanceof Carbon ? $date : Carbon::parse($date);
 
         $defaults = [
-            'long' => 'd MMMM YYYY',
-            'short' => 'd MMM YYYY',
-            'datetime' => 'd MMM YYYY [à] HH:mm',
+            'long' => 'D MMMM YYYY',
+            'short' => 'D MMM YYYY',
+            'datetime' => 'D MMM YYYY [à] HH:mm',
             'time' => 'HH:mm',
         ];
 
@@ -66,15 +66,14 @@ if (! function_exists('format_date_options')) {
             'long' => [
                 'label' => __('Date longue'),
                 'formats' => [
-                    'd MMMM YYYY' => $now->isoFormat('d MMMM YYYY'),
-                    'dddd d MMMM YYYY' => $now->isoFormat('dddd d MMMM YYYY'),
                     'D MMMM YYYY' => $now->isoFormat('D MMMM YYYY'),
+                    'dddd D MMMM YYYY' => $now->isoFormat('dddd D MMMM YYYY'),
                 ],
             ],
             'short' => [
                 'label' => __('Date courte'),
                 'formats' => [
-                    'd MMM YYYY' => $now->isoFormat('d MMM YYYY'),
+                    'D MMM YYYY' => $now->isoFormat('D MMM YYYY'),
                     'DD/MM/YYYY' => $now->isoFormat('DD/MM/YYYY'),
                     'YYYY-MM-DD' => $now->isoFormat('YYYY-MM-DD'),
                     'DD-MM-YYYY' => $now->isoFormat('DD-MM-YYYY'),
@@ -83,9 +82,9 @@ if (! function_exists('format_date_options')) {
             'datetime' => [
                 'label' => __('Date et heure'),
                 'formats' => [
-                    'd MMM YYYY [à] HH:mm' => $now->isoFormat('d MMM YYYY [à] HH:mm'),
+                    'D MMM YYYY [à] HH:mm' => $now->isoFormat('D MMM YYYY [à] HH:mm'),
                     'DD/MM/YYYY HH:mm' => $now->isoFormat('DD/MM/YYYY HH:mm'),
-                    'dddd d MMMM YYYY [à] HH:mm' => $now->isoFormat('dddd d MMMM YYYY [à] HH:mm'),
+                    'dddd D MMMM YYYY [à] HH:mm' => $now->isoFormat('dddd D MMMM YYYY [à] HH:mm'),
                 ],
             ],
             'time' => [
