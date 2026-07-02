@@ -30,9 +30,10 @@ class ContentSecurityPolicy
             "img-src 'self' data: https:",
             "font-src 'self'",
             "connect-src 'self' https://api.stripe.com",
-            // screenpal.com : vidéos du module Academy (AcademyCsp le couvre aussi, mais la CSP globale
-            // peut écraser celle du middleware de route si elle est appliquée après — on l'ajoute ici par sécurité).
-            "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://screenpal.com https://*.screenpal.com",
+            // screenpal.com + media.memora.solutions (CNAME ScreenPal marque blanche, domaine Memora premier niveau) :
+            // vidéos du module Academy (AcademyCsp le couvre aussi, mais la CSP globale peut écraser celle du
+            // middleware de route si elle est appliquée après — on l'ajoute ici par sécurité).
+            "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://screenpal.com https://*.screenpal.com https://media.memora.solutions",
             "frame-ancestors 'self'",
             "base-uri 'self'",
             "form-action 'self' https://api.stripe.com",
