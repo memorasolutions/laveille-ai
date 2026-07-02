@@ -121,7 +121,6 @@
                                 @if ($this->canGrade)
                                     <x-core::button type="button" wire:click="reviewAssignment({{ $assignment->id }})" variant="secondary" size="sm">Corriger</x-core::button>
                                 @endif
-                                <x-core::button type="button" wire:click="editAssignment({{ $assignment->id }})" variant="ghost" size="sm">Modifier</x-core::button>
                                 @if ($rubricAssignment === $assignment->id)
                                     <x-core::button type="button" wire:click="closeRubric" variant="secondary" size="sm">Fermer la grille</x-core::button>
                                 @else
@@ -137,8 +136,10 @@
                                     <x-core::button type="button" wire:click="deleteAssignment({{ $assignment->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                                     <x-core::button type="button" wire:click="cancelAssignmentRemoval" variant="ghost" size="sm">Annuler</x-core::button>
                                 @else
-                                    <x-core::button type="button" wire:click="confirmAssignmentRemoval({{ $assignment->id }})" variant="ghost" size="sm"
-                                                    aria-label="Supprimer le devoir « {{ $assignment->title }} »">Supprimer</x-core::button>
+                                    @include('core::components.admin-action-menu', ['actions' => [
+                                        ['label' => 'Modifier', 'icon' => 'pencil', 'wireClick' => "editAssignment({$assignment->id})"],
+                                        ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmAssignmentRemoval({$assignment->id})", 'danger' => true],
+                                    ]])
                                 @endif
                             </div>
                         </div>
@@ -175,14 +176,15 @@
                                                     <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
                                                         <strong style="font-size: 0.9rem; flex: 1 1 240px;">{{ $criterion->description }}</strong>
                                                         <div class="d-flex flex-wrap align-items-center gap-2">
-                                                            <x-core::button type="button" wire:click="editCriterion({{ $criterion->id }})" variant="ghost" size="sm">Modifier</x-core::button>
                                                             @if ($confirmingCriterionRemoval === $criterion->id)
                                                                 <span style="font-size: 0.8rem; font-weight: 600;">Supprimer ce critère ?</span>
                                                                 <x-core::button type="button" wire:click="deleteCriterion({{ $criterion->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                                                                 <x-core::button type="button" wire:click="cancelCriterionRemoval" variant="ghost" size="sm">Annuler</x-core::button>
                                                             @else
-                                                                <x-core::button type="button" wire:click="confirmCriterionRemoval({{ $criterion->id }})" variant="ghost" size="sm"
-                                                                                aria-label="Supprimer le critère « {{ $criterion->description }} »">Supprimer</x-core::button>
+                                                                @include('core::components.admin-action-menu', ['actions' => [
+                                                                    ['label' => 'Modifier', 'icon' => 'pencil', 'wireClick' => "editCriterion({$criterion->id})"],
+                                                                    ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmCriterionRemoval({$criterion->id})", 'danger' => true],
+                                                                ]])
                                                             @endif
                                                         </div>
                                                     </div>
@@ -214,14 +216,15 @@
                                                                      style="border: 1px solid #F3F4F6; border-radius: var(--sys-radius-md, 0.4rem); padding: 6px 10px; background: #FFFFFF;">
                                                                     <span>{{ $level->description }} <span style="color: var(--sys-text-muted, #6B7280);">· {{ $level->points }} pt(s)</span></span>
                                                                     <span class="d-flex flex-wrap align-items-center gap-2">
-                                                                        <x-core::button type="button" wire:click="editLevel({{ $level->id }})" variant="ghost" size="sm">Modifier</x-core::button>
                                                                         @if ($confirmingLevelRemoval === $level->id)
                                                                             <span style="font-size: 0.78rem; font-weight: 600;">Supprimer ?</span>
                                                                             <x-core::button type="button" wire:click="deleteLevel({{ $level->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                                                                             <x-core::button type="button" wire:click="cancelLevelRemoval" variant="ghost" size="sm">Annuler</x-core::button>
                                                                         @else
-                                                                            <x-core::button type="button" wire:click="confirmLevelRemoval({{ $level->id }})" variant="ghost" size="sm"
-                                                                                            aria-label="Supprimer le niveau « {{ $level->description }} »">Supprimer</x-core::button>
+                                                                            @include('core::components.admin-action-menu', ['actions' => [
+                                                                                ['label' => 'Modifier', 'icon' => 'pencil', 'wireClick' => "editLevel({$level->id})"],
+                                                                                ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmLevelRemoval({$level->id})", 'danger' => true],
+                                                                            ]])
                                                                         @endif
                                                                     </span>
                                                                 </div>
@@ -378,7 +381,13 @@
 
                                                         {{-- Feedback IA sur réponses ouvertes (LMS 2026) : PROPOSITION seulement.
                                                              Gâté par le drapeau academy.ai_feedback_enabled + service IA présent.
-                                                             L'IA ne note JAMAIS : le formateur garde le dernier mot. --}}
+                                                             L'IA ne note JAMAIS : le formateur garde le dernier mot.
+                                                             DÉCISION (consolidation menu kebab, non migré) : « Utiliser dans la
+                                                             correction » / « Rejeter » est un choix BINAIRE central du workflow
+                                                             (accepter ou écarter la proposition IA affichée juste au-dessus) — les
+                                                             deux options doivent rester des boutons visibles pour que le formateur
+                                                             voie IMMÉDIATEMENT ses 2 issues, pas cachées dans un menu ⋮ qui nuirait
+                                                             à l'usage actif de cette fonctionnalité. --}}
                                                         @if ($this->aiFeedbackAvailable && $aiFeedbackSubmission === $submission->id)
                                                             <div style="margin: 8px 0 10px; border: 1px solid #064E5A; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px; background: rgba(6,78,90,0.04);">
                                                                 <p style="margin: 0 0 8px; font-weight: 600; font-size: 0.82rem; color: #064E5A;">
@@ -411,6 +420,11 @@
                                                             <p style="margin: 0 0 8px; font-size: 0.82rem; color: var(--sys-action-danger, #DC2626);" wire:key="ai-err-{{ $submission->id }}">{{ $aiFeedbackError }}</p>
                                                         @endif
 
+                                                        {{-- DÉCISION (consolidation menu kebab, non migré) : « Noter » est
+                                                             l'action PRINCIPALE de cette carte de remise (raison d'être de
+                                                             l'écran de correction) et « Proposer un feedback IA » a un état de
+                                                             chargement (wire:loading) que le formateur doit voir en direct —
+                                                             les deux restent des boutons visibles, pas dans le menu ⋮. --}}
                                                         <div class="d-flex flex-wrap gap-2">
                                                             <x-core::button type="button" wire:click="startGrading({{ $submission->id }})" variant="secondary" size="sm">
                                                                 {{ $submission->isGraded() ? 'Modifier la note' : 'Noter' }}
