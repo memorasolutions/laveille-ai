@@ -17,6 +17,13 @@
          ['label' => 'Renommer', 'icon' => 'pencil', 'wireClick' => "startRenameCohort({$cohort->id})"],
          ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmCohortRemoval({$cohort->id})", 'danger' => true],
      ]])
+
+     Variante 'wireClick' + confirmation via la modale du thème (event Alpine
+     'confirm-action', jamais de popup navigateur native) : ajouter 'wireConfirm'.
+     La méthode Livewire cible reste responsable de l'autorisation serveur.
+     @include('core::components.admin-action-menu', ['actions' => [
+         ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "deleteMessage({$msg->id})", 'wireConfirm' => 'Supprimer ce message ?', 'danger' => true],
+     ]])
 --}}
 @php $menuId = 'action-' . uniqid(); @endphp
 <div x-data="{ open: false }" class="position-relative" style="display: inline-block;">
@@ -32,7 +39,12 @@
             @if(isset($action['divider']) && $action['divider'])
                 <div style="border-top: 1px solid #f3f4f6; margin: 4px 0;"></div>
             @elseif(isset($action['wireClick']))
-                <button type="button" wire:click="{{ $action['wireClick'] }}" @click="open = false"
+                <button type="button"
+                        @if(isset($action['wireConfirm']))
+                            @click="open = false; $dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js($action['wireConfirm']), action: () => $wire.{{ $action['wireClick'] }} })"
+                        @else
+                            wire:click="{{ $action['wireClick'] }}" @click="open = false"
+                        @endif
                         style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 14px; border: none; background: none; cursor: pointer; font-size: 13px; color: {{ isset($action['danger']) && $action['danger'] ? '#DC2626' : '#374151' }}; text-align: left;"
                         onmouseover="this.style.background='{{ isset($action['danger']) && $action['danger'] ? '#FEF2F2' : '#F9FAFB' }}'"
                         onmouseout="this.style.background='transparent'">

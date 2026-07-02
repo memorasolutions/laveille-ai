@@ -290,23 +290,12 @@
                                 @endif
                             </td>
                             <td class="py-3 px-4">
-                                <div class="d-flex gap-1">
-                                    <a href="{{ route('admin.scheduler.edit', $task) }}" class="btn btn-sm btn-outline-primary" title="{{ __('Modifier') }}">
-                                        <i data-lucide="edit" class="icon-sm"></i>
-                                    </a>
-                                    <form action="{{ route('admin.scheduler.toggle', $task) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm {{ $task->is_active ? 'btn-outline-warning' : 'btn-outline-success' }}" title="{{ $task->is_active ? __('Désactiver') : __('Activer') }}">
-                                            <i data-lucide="{{ $task->is_active ? 'pause' : 'play' }}" class="icon-sm"></i>
-                                        </button>
-                                    </form>
-                                    <form action="{{ route('admin.scheduler.destroy', $task) }}" method="POST" class="d-inline">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('Supprimer') }}" onclick="return confirm('{{ __('Supprimer cette tâche ?') }}')">
-                                            <i data-lucide="trash-2" class="icon-sm"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                                @include('core::components.admin-action-menu', ['actions' => [
+                                    ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.scheduler.edit', $task)],
+                                    ['label' => $task->is_active ? __('Désactiver') : __('Activer'), 'icon' => $task->is_active ? 'toggle-left' : 'toggle-right', 'url' => route('admin.scheduler.toggle', $task), 'method' => 'POST'],
+                                    ['divider' => true],
+                                    ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.scheduler.destroy', $task), 'method' => 'DELETE', 'confirm' => __('Supprimer cette tâche ?'), 'danger' => true],
+                                ]])
                             </td>
                         </tr>
                         @endforeach

@@ -77,29 +77,12 @@
                             {{ format_date($team->created_at) }}
                         </td>
                         <td class="text-end">
-                            <a href="{{ route('admin.teams.show', $team) }}"
-                               class="btn btn-sm btn-outline-secondary me-1"
-                               title="{{ __('Voir l\'équipe') }}"
-                               aria-label="{{ __('Voir l\'équipe') }} {{ $team->name }}">
-                                <i data-lucide="eye"></i>
-                            </a>
-                            <a href="{{ route('admin.teams.edit', $team) }}"
-                               class="btn btn-sm btn-outline-primary me-1"
-                               title="{{ __('Modifier l\'équipe') }}"
-                               aria-label="{{ __('Modifier l\'équipe') }} {{ $team->name }}">
-                                <i data-lucide="pencil"></i>
-                            </a>
-                            <form action="{{ route('admin.teams.destroy', $team) }}" method="POST" class="d-inline" x-data>
-                                @csrf
-                                @method('DELETE')
-                                <button type="button"
-                                        class="btn btn-sm btn-outline-danger"
-                                        title="{{ __('Supprimer l\'équipe') }}"
-                                        aria-label="{{ __('Supprimer l\'équipe') }} {{ $team->name }}"
-                                        @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Supprimer l\'équipe') . ' « ' . $team->name . ' » ? ' . __('Cette action est irréversible.')), action: () => $el.closest('form').submit() })">
-                                    <i data-lucide="trash-2"></i>
-                                </button>
-                            </form>
+                            @include('core::components.admin-action-menu', ['actions' => [
+                                ['label' => __('Voir l\'équipe'), 'icon' => 'eye', 'url' => route('admin.teams.show', $team)],
+                                ['label' => __('Modifier l\'équipe'), 'icon' => 'pencil', 'url' => route('admin.teams.edit', $team)],
+                                ['divider' => true],
+                                ['label' => __('Supprimer l\'équipe'), 'icon' => 'trash-2', 'url' => route('admin.teams.destroy', $team), 'method' => 'DELETE', 'confirm' => __('Supprimer l\'équipe') . ' « ' . $team->name . ' » ? ' . __('Cette action est irréversible.'), 'danger' => true],
+                            ]])
                         </td>
                     </tr>
                     @empty

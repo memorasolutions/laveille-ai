@@ -57,21 +57,12 @@
                                 @endif
                             </td>
                             <td class="text-end">
-                                <div class="d-flex gap-1 justify-content-end">
-                                    <a href="{{ route('admin.tenants.show', $tenant) }}" class="btn btn-sm btn-outline-secondary" title="{{ __('Voir') }}">
-                                        <i data-lucide="eye"></i>
-                                    </a>
-                                    <a href="{{ route('admin.tenants.edit', $tenant) }}" class="btn btn-sm btn-outline-primary" title="{{ __('Modifier') }}">
-                                        <i data-lucide="edit"></i>
-                                    </a>
-                                    <form action="{{ route('admin.tenants.destroy', $tenant) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="btn btn-sm btn-outline-danger" title="{{ __('Supprimer') }}" onclick="if(confirm('{{ __('Supprimer ce tenant ?') }}')) this.closest('form').submit()">
-                                            <i data-lucide="trash-2"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                                @include('core::components.admin-action-menu', ['actions' => [
+                                    ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('admin.tenants.show', $tenant)],
+                                    ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.tenants.edit', $tenant)],
+                                    ['divider' => true],
+                                    ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.tenants.destroy', $tenant), 'method' => 'DELETE', 'confirm' => __('Supprimer ce tenant ?'), 'danger' => true],
+                                ]])
                             </td>
                         </tr>
                         @endforeach

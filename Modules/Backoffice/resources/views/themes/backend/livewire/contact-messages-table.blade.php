@@ -116,33 +116,11 @@
                                 </span>
                             </td>
                             <td class="text-end">
-                                <a href="{{ route('admin.contact-messages.show', $msg) }}"
-                                   class="btn btn-sm btn-outline-primary"
-                                   title="{{ __('Voir') }}">
-                                    <i data-lucide="eye"></i>
-                                </a>
-                                @if($msg->isSpam())
-                                <button
-                                    wire:click="markLegit({{ $msg->id }})"
-                                    wire:confirm="{{ __('Marquer ce message comme légitime ?') }}"
-                                    type="button"
-                                    class="btn btn-sm btn-outline-success ms-1"
-                                    title="{{ __('Marquer comme légitime') }}"
-                                >
-                                    <i data-lucide="shield-check"></i>
-                                </button>
-                                @endif
-                                @can('delete_contacts')
-                                <button
-                                    wire:click="deleteMessage({{ $msg->id }})"
-                                    wire:confirm="{{ __('Supprimer ce message ?') }}"
-                                    type="button"
-                                    class="btn btn-sm btn-outline-danger ms-1"
-                                    title="{{ __('Supprimer') }}"
-                                >
-                                    <i data-lucide="trash-2"></i>
-                                </button>
-                                @endcan
+                                @include('core::components.admin-action-menu', ['actions' => array_filter([
+                                    ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('admin.contact-messages.show', $msg)],
+                                    $msg->isSpam() ? ['label' => __('Marquer comme légitime'), 'icon' => 'shield-check', 'wireClick' => "markLegit({$msg->id})", 'wireConfirm' => __('Marquer ce message comme légitime ?')] : null,
+                                    auth()->user()?->can('delete_contacts') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'wireClick' => "deleteMessage({$msg->id})", 'wireConfirm' => __('Supprimer ce message ?'), 'danger' => true] : null,
+                                ])])
                             </td>
                         </tr>
                         @endforeach
