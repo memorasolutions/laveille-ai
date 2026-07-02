@@ -475,10 +475,13 @@ Route::prefix('academie')->name('academy.')->group(function () {
     // (LessonAccessService, DRY avec LessonController/H5pPlayerController) :
     // une signature valide seule ne suffit jamais, elle ne fait que borner la
     // fenêtre de rejeu d'un lien déjà autorisé.
+    // ACTION: throttle:60,1 sur le proxy vidéo signé (audit sécurité 2026-07-02)
+    // SELF: 1 ligne. RAISON: la signature bloque déjà la forge d'itemId, mais rien
+    // ne limitait le débit de requêtes légitimement signées (bande passante ScreenPal).
     Route::get(
         'courses/{course:slug}/lessons/{lesson}/items/{itemId}/video-redirect',
         VideoRedirectController::class
     )
-        ->middleware('signed')
+        ->middleware(['signed', 'throttle:60,1'])
         ->name('lessons.video-redirect');
 });
