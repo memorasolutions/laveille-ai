@@ -61,6 +61,18 @@ class AuthorEditor extends Component
         }
     }
 
+    /**
+     * Déclenche l'auto-sauvegarde quand le titre ou le contenu (Tiptap) changent,
+     * en s'appuyant sur les modificateurs Livewire .live des champs du formulaire
+     * plutôt que sur un minuteur JS séparé (S107 → migration Tiptap).
+     */
+    public function updated(string $property): void
+    {
+        if (in_array($property, ['title', 'body_markdown'], true)) {
+            $this->autoSave();
+        }
+    }
+
     public function autoSave(): void
     {
         if (mb_strlen(trim($this->title)) < 3 && mb_strlen(trim($this->body_markdown)) < 3) {

@@ -160,6 +160,20 @@ if (app()->environment('local')) {
     Route::get('/auteur/test-dashboard/{authorProfileId}', function ($authorProfileId) {
         return view('authors::test-dashboard', ['authorProfileId' => (int) $authorProfileId]);
     })->name('authors.test-dashboard');
+
+    // Preview AuthorEditor (migration Tiptap) sans auth — validation visuelle Playwright
+    Route::get('/auteur/test-editor', function () {
+        $user = \App\Models\User::firstOrCreate(
+            ['email' => 'test-editor@laveille.local'],
+            ['name' => 'Auteur Test', 'password' => bcrypt(str()->random(32))]
+        );
+        $profile = \Modules\Authors\Models\AuthorProfile::firstOrCreate(
+            ['user_id' => $user->id],
+            ['slug' => 'auteur-test-editor', 'display_name' => 'Auteur Test', 'tier' => 'free']
+        );
+
+        return view('authors::test-editor', ['authorProfile' => $profile]);
+    })->name('authors.test-editor');
 }
 
 // Actions modération via signed URLs (depuis emails)

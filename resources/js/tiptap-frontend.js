@@ -118,8 +118,16 @@ function registerTiptapEditor() {
     window._tiptapFrontendRegistered = true
 
     Alpine.data('tiptapEditor', (config = {}) => ({
-        editor: null,
+        // L'instance Editor (ProseMirror) N'EST JAMAIS assignée à une propriété réactive Alpine :
+        // Alpine.reactive() proxy-wrap récursivement les objets imbriqués, et ProseMirror compare
+        // ses transactions par référence stricte (tr.doc === state.doc) — un editor proxifié casse
+        // ce contrôle ("Applying a mismatched transaction") dès que plusieurs commandes s'enchaînent
+        // rapidement (ex: gras puis titre). L'instance brute vit sur le noeud DOM (el._tiptapEditor,
+        // hors du graphe réactif Alpine) ; `editor` n'est qu'un getter qui la relit à chaque accès.
         content: config.content || '',
+        get editor() {
+            return this.$refs.editorContent?._tiptapEditor || null
+        },
 
         init() {
             if (this.editor) this.editor.destroy()
@@ -137,24 +145,45 @@ function registerTiptapEditor() {
                     this.content = editor.getHTML()
                     if (this.$refs.hiddenInput) {
                         this.$refs.hiddenInput.value = this.content
+                        // Notifie Livewire (wire:model) de la nouvelle valeur — même pattern
+                        // que academyMarkdownEditor (course-editor.blade.php) : Livewire écoute
+                        // les évènements DOM natifs, pas les mutations directes de .value.
+                        this.$refs.hiddenInput.dispatchEvent(new Event('input', { bubbles: true }))
                     }
                 },
             })
-            this.editor = editorInstance
+            // __v_skip (flag public @vue/reactivity, celui posé par markRaw()) : empêche Alpine
+            // (qui proxifie via @vue/reactivity en interne) de re-wrapper l'instance Editor dans
+            // un NOUVEAU Proxy à CHAQUE accès `editor.xxx` depuis un template/méthode Alpine —
+            // même en la lisant depuis le DOM brut (el._tiptapEditor), Vue proxifie tout objet
+            // "plain" renvoyé par un getter réactif. Sans ce flag, deux commandes ProseMirror
+            // enchaînées (ex: gras puis titre) passent chacune par un Proxy DIFFÉRENT → l'égalité
+            // stricte tr.before === state.doc que ProseMirror exige échoue ("Applying a mismatched
+            // transaction"). Root-cause confirmée empiriquement (Alpine.raw() donne une référence
+            // différente de el._tiptapEditor tant que ce flag est absent).
+            editorInstance.__v_skip = true
             el._tiptapEditor = editorInstance
         },
 
         destroy() {
-            if (this.editor) {
-                const el = this.$refs.editorContent
-                if (el) delete el._tiptapEditor
-                this.editor.destroy()
-                this.editor = null
+            const el = this.$refs.editorContent
+            const instance = el?._tiptapEditor
+            if (instance) {
+                delete el._tiptapEditor
+                instance.destroy()
             }
         },
 
         cmd(fn) {
             if (!this.editor) return
+            // Pré-focus TOUJOURS via editor.commands.focus() (commande Tiptap dédiée, PAS
+            // view.dom.focus() natif) avant la commande : évite "Applying a mismatched
+            // transaction". Cause : un .focus() natif DOM déclenche une synchronisation de
+            // sélection ProseMirror asynchrone qui entre en collision avec la transaction
+            // suivante ; la commande Tiptap dédiée dispatch sa propre transaction de façon
+            // synchrone et sûre, y compris quand le chain appelé ensuite (fn) contient lui
+            // aussi un .focus() redondant (cas de tous les boutons toolbar existants).
+            this.editor.commands.focus()
             try { fn() } catch (e) { console.warn('[TipTap]', e.message) }
         },
 

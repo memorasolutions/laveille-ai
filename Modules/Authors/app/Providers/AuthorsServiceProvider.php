@@ -60,6 +60,7 @@ class AuthorsServiceProvider extends ServiceProvider
         Livewire::component('authors.author-related-posts', \Modules\Authors\Livewire\AuthorRelatedPosts::class);
         Livewire::component('authors.comment-moderation-queue', \Modules\Authors\Livewire\CommentModerationQueue::class);
         Livewire::component('authors.author-analytics-widget', \Modules\Authors\Livewire\AuthorAnalyticsWidget::class);
+        Livewire::component('authors.author-editor', \Modules\Authors\Livewire\AuthorEditor::class);
     }
 
     /**
