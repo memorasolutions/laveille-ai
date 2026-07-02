@@ -32,12 +32,14 @@
         </button>
 
         <span style="display: inline-flex; gap: 4px; flex: 0 0 auto;">
-            <x-core::button type="button" wire:click="startRenameCategory({{ $category->id }})" variant="ghost" size="sm" aria-label="Renommer la catégorie « {{ $category->name }} »">Renommer</x-core::button>
             @if ($confirmingCategoryDeletion === $category->id)
                 <x-core::button type="button" wire:click="deleteCategory({{ $category->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                 <x-core::button type="button" wire:click="cancelCategoryDeletion" variant="ghost" size="sm">Annuler</x-core::button>
             @else
-                <x-core::button type="button" wire:click="confirmCategoryDeletion({{ $category->id }})" variant="ghost" size="sm" aria-label="Supprimer la catégorie « {{ $category->name }} »">Supprimer</x-core::button>
+                @include('core::components.admin-action-menu', ['actions' => [
+                    ['label' => 'Renommer', 'icon' => 'pencil', 'wireClick' => "startRenameCategory({$category->id})"],
+                    ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmCategoryDeletion({$category->id})", 'danger' => true],
+                ]])
             @endif
         </span>
     </div>

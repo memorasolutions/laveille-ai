@@ -70,19 +70,18 @@
                                     @endif
                                 </div>
                                 <div class="d-flex flex-wrap align-items-center gap-2">
-                                    <x-core::button type="button" wire:click="editAnnouncement({{ $announcement->id }})" variant="ghost" size="sm">Modifier</x-core::button>
-                                    @if ($announcement->published_at)
-                                        <x-core::button type="button" wire:click="unpublishAnnouncement({{ $announcement->id }})" variant="ghost" size="sm">Repasser en brouillon</x-core::button>
-                                    @else
-                                        <x-core::button type="button" wire:click="publishAnnouncement({{ $announcement->id }})" variant="secondary" size="sm">Publier</x-core::button>
-                                    @endif
                                     @if ($confirmingAnnouncementRemoval === $announcement->id)
                                         <span style="font-size: 0.82rem; font-weight: 600;">Supprimer ?</span>
                                         <x-core::button type="button" wire:click="deleteAnnouncement({{ $announcement->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                                         <x-core::button type="button" wire:click="cancelAnnouncementRemoval" variant="ghost" size="sm">Annuler</x-core::button>
                                     @else
-                                        <x-core::button type="button" wire:click="confirmAnnouncementRemoval({{ $announcement->id }})" variant="ghost" size="sm"
-                                                        aria-label="Supprimer l'annonce « {{ $announcement->title }} »">Supprimer</x-core::button>
+                                        @include('core::components.admin-action-menu', ['actions' => [
+                                            ['label' => 'Modifier', 'icon' => 'pencil', 'wireClick' => "editAnnouncement({$announcement->id})"],
+                                            $announcement->published_at
+                                                ? ['label' => 'Repasser en brouillon', 'icon' => 'undo-2', 'wireClick' => "unpublishAnnouncement({$announcement->id})"]
+                                                : ['label' => 'Publier', 'icon' => 'send', 'wireClick' => "publishAnnouncement({$announcement->id})"],
+                                            ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmAnnouncementRemoval({$announcement->id})", 'danger' => true],
+                                        ]])
                                     @endif
                                 </div>
                             </div>
@@ -257,9 +256,10 @@
                                                 <x-core::button type="button" wire:click="deleteCohort({{ $cohort->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                                                 <x-core::button type="button" wire:click="cancelCohortRemoval" variant="ghost" size="sm">Annuler</x-core::button>
                                             @else
-                                                <x-core::button type="button" wire:click="startRenameCohort({{ $cohort->id }})" variant="ghost" size="sm">Renommer</x-core::button>
-                                                <x-core::button type="button" wire:click="confirmCohortRemoval({{ $cohort->id }})" variant="ghost" size="sm"
-                                                                aria-label="Supprimer la cohorte {{ $cohort->name }}">Supprimer</x-core::button>
+                                                @include('core::components.admin-action-menu', ['actions' => [
+                                                    ['label' => 'Renommer', 'icon' => 'pencil', 'wireClick' => "startRenameCohort({$cohort->id})"],
+                                                    ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmCohortRemoval({$cohort->id})", 'danger' => true],
+                                                ]])
                                             @endif
                                         </div>
                                     @endif

@@ -75,12 +75,14 @@
                         </div>
                     </div>
                     <div class="d-flex gap-2 flex-shrink-0">
-                        <x-core::button type="button" wire:click="edit({{ $competency->id }})" variant="secondary" size="sm">Éditer</x-core::button>
                         @if ($confirmingDeleteId === $competency->id)
                             <x-core::button type="button" wire:click="delete({{ $competency->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                             <x-core::button type="button" wire:click="cancelDelete" variant="ghost" size="sm">Annuler</x-core::button>
                         @else
-                            <x-core::button type="button" wire:click="confirmDelete({{ $competency->id }})" variant="ghost" size="sm" aria-label="Supprimer la compétence {{ $competency->name }}">Supprimer</x-core::button>
+                            @include('core::components.admin-action-menu', ['actions' => [
+                                ['label' => 'Éditer', 'icon' => 'pencil', 'wireClick' => "edit({$competency->id})"],
+                                ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmDelete({$competency->id})", 'danger' => true],
+                            ]])
                         @endif
                     </div>
                 </div>
