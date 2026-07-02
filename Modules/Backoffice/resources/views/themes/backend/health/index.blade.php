@@ -197,7 +197,7 @@
                                 @endif
                             </td>
                             <td class="py-3 px-4 text-muted small">
-                                {{ $results->finishedAt ? \Carbon\Carbon::parse($results->finishedAt)->format('d/m/Y H:i:s') : '—' }}
+                                {{ $results->finishedAt ? format_date(\Carbon\Carbon::parse($results->finishedAt), 'datetime') : '—' }}
                             </td>
                         </tr>
                         @endforeach

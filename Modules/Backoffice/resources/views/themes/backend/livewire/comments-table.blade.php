@@ -141,7 +141,7 @@
                                                 <span class="badge bg-{{ $badge }}">{{ ucfirst((string) $comment->status) }}</span>
                                             </dd>
                                             <dt class="col-sm-3 text-muted">{{ __('Date') }}</dt>
-                                            <dd class="col-sm-9">{{ $comment->created_at->format('d/m/Y H:i:s') }}</dd>
+                                            <dd class="col-sm-9">{{ format_date($comment->created_at, 'datetime') }}</dd>
                                         </dl>
                                         <hr>
                                         <h6 class="text-muted small text-uppercase mb-2">{{ __('Contenu') }}</h6>
@@ -172,7 +172,7 @@
                             <option value="spam" @selected($comment->status === 'spam')>{{ __('Spam') }}</option>
                         </select>
                     </td>
-                    <td class="text-muted small">{{ $comment->created_at->format('d/m/Y H:i') }}</td>
+                    <td class="text-muted small">{{ format_date($comment->created_at, 'datetime') }}</td>
                     <td>
                         {{-- #183 : Bootstrap dropdown standard avec auto-flip Popper.js +
                              kebab 40x40 (WCAG target size). data-bs-display="dynamic"

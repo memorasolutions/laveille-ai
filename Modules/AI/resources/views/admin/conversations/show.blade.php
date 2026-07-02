@@ -66,11 +66,11 @@
                     <dd class="col-sm-8">{{ $conversation->cost_estimate ? number_format((float) $conversation->cost_estimate, 4) . ' $' : '-' }}</dd>
 
                     <dt class="col-sm-4">{{ __('Créée le') }}</dt>
-                    <dd class="col-sm-8">{{ $conversation->created_at->format('d/m/Y H:i') }}</dd>
+                    <dd class="col-sm-8">{{ format_date($conversation->created_at, 'datetime') }}</dd>
 
                     @if($conversation->closed_at)
                     <dt class="col-sm-4">{{ __('Fermée le') }}</dt>
-                    <dd class="col-sm-8">{{ $conversation->closed_at->format('d/m/Y H:i') }}</dd>
+                    <dd class="col-sm-8">{{ format_date($conversation->closed_at, 'datetime') }}</dd>
                     @endif
                 </dl>
             </div>
@@ -99,7 +99,7 @@
             <div class="d-flex justify-content-between align-items-start mb-2">
                 <span class="badge {{ $roleConfig['badge'] }}">{{ $roleConfig['label'] }}</span>
                 <small class="text-muted">
-                    {{ $message->created_at->format('d/m/Y H:i') }}
+                    {{ format_date($message->created_at, 'datetime') }}
                     @if($message->tokens)
                     <span class="ms-2">{{ $message->tokens }} tokens</span>
                     @endif

@@ -54,7 +54,7 @@
                 <div class="d-flex justify-content-between mb-3">
                     <div><strong>{{ __('Utilisateur') }} :</strong> {{ $ticket->user->name ?? '-' }}</div>
                     <div><strong>{{ __('Agent') }} :</strong> {{ $ticket->agent->name ?? __('Non assigné') }}</div>
-                    <div><strong>{{ __('Créé le') }} :</strong> {{ $ticket->created_at->format('d/m/Y H:i') }}</div>
+                    <div><strong>{{ __('Créé le') }} :</strong> {{ format_date($ticket->created_at, 'datetime') }}</div>
                 </div>
                 <div class="mb-3">
                     <strong>{{ __('Description') }} :</strong>
@@ -80,7 +80,7 @@
                     <div class="border-start border-{{ $reply->is_internal ? 'warning' : 'transparent' }} border-3 ps-3 mb-3">
                         <div class="d-flex justify-content-between">
                             <strong>{{ $reply->user->name ?? '-' }}</strong>
-                            <small class="text-muted">{{ $reply->created_at->format('d/m/Y H:i') }}</small>
+                            <small class="text-muted">{{ format_date($reply->created_at, 'datetime') }}</small>
                         </div>
                         @if($reply->is_internal)
                         <span class="badge bg-warning text-dark mb-1">{{ __('Note interne') }}</span>
@@ -198,15 +198,15 @@
                     <dd>{{ $ticket->slaPolicy->resolution_hours }}h</dd>
                     @if($ticket->due_at)
                     <dt>{{ __('Échéance') }}</dt>
-                    <dd>{{ $ticket->due_at->format('d/m/Y H:i') }}</dd>
+                    <dd>{{ format_date($ticket->due_at, 'datetime') }}</dd>
                     @endif
                     @if($ticket->first_response_at)
                     <dt>{{ __('Première réponse le') }}</dt>
-                    <dd>{{ $ticket->first_response_at->format('d/m/Y H:i') }}</dd>
+                    <dd>{{ format_date($ticket->first_response_at, 'datetime') }}</dd>
                     @endif
                     @if($ticket->resolved_at)
                     <dt>{{ __('Résolu le') }}</dt>
-                    <dd>{{ $ticket->resolved_at->format('d/m/Y H:i') }}</dd>
+                    <dd>{{ format_date($ticket->resolved_at, 'datetime') }}</dd>
                     @endif
                 </dl>
             </div>

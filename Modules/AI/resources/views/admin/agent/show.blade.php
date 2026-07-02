@@ -48,7 +48,7 @@
                         {{ __($conversation->status->value) }}
                     </span>
                 </div>
-                <small class="text-muted">{{ $conversation->created_at->format('d/m/Y H:i') }}</small>
+                <small class="text-muted">{{ format_date($conversation->created_at, 'datetime') }}</small>
             </div>
             <div class="card-body" style="max-height:500px;overflow-y:auto;" id="messagesContainer">
                 @foreach($conversation->messages->sortBy('created_at') as $msg)
@@ -118,7 +118,7 @@
                     <dt>{{ __('Messages') }}</dt>
                     <dd>{{ $conversation->messages->count() }}</dd>
                     <dt>{{ __('Créée le') }}</dt>
-                    <dd>{{ $conversation->created_at->format('d/m/Y H:i') }}</dd>
+                    <dd>{{ format_date($conversation->created_at, 'datetime') }}</dd>
                     @if($conversation->agent)
                     <dt>{{ __('Agent') }}</dt>
                     <dd>{{ $conversation->agent->name }}</dd>

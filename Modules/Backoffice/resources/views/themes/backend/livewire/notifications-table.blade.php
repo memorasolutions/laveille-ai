@@ -30,7 +30,7 @@
                             <p class="small text-muted mb-0">{{ $notification->data['message'] ?? '' }}</p>
                         </td>
                         <td class="align-middle small text-muted text-nowrap">
-                            {{ $notification->created_at->format('d/m/Y H:i') }}
+                            {{ format_date($notification->created_at, 'datetime') }}
                         </td>
                         <td class="align-middle">
                             @if($notification->read_at)

@@ -44,7 +44,7 @@
                         </dd>
 
                         <dt class="small text-muted">{{ __('Date') }}</dt>
-                        <dd>{{ $contactMessage->created_at->format('d/m/Y à H:i') }}</dd>
+                        <dd>{{ format_date($contactMessage->created_at, 'datetime') }}</dd>
 
                         <dt class="small text-muted">{{ __('Statut') }}</dt>
                         <dd>

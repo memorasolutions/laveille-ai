@@ -82,7 +82,7 @@
             <tbody>
                 @forelse($surveys as $survey)
                 <tr>
-                    <td>{{ $survey->created_at->format('d/m/Y H:i') }}</td>
+                    <td>{{ format_date($survey->created_at, 'datetime') }}</td>
                     <td>
                         @if($survey->ticket)
                         <a href="{{ route('admin.ai.tickets.show', $survey->ticket) }}" class="btn btn-sm btn-outline-primary">

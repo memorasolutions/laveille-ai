@@ -213,7 +213,7 @@
                                     <span class="badge bg-warning bg-opacity-10 text-warning">{{ __('Brouillon') }}</span>
                                 @endif
                             </td>
-                            <td class="py-3 px-4 text-muted small">{{ $article->created_at?->format('d/m/Y') }}</td>
+                            <td class="py-3 px-4 text-muted small">{{ format_date($article->created_at) }}</td>
                             <td class="py-3 px-4 text-center">
                                 <a href="{{ route('admin.blog.articles.edit', $article) }}"
                                    class="btn btn-sm btn-outline-success d-inline-flex align-items-center justify-content-center rounded-circle"

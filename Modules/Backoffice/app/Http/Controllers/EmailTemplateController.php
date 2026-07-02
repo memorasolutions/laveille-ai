@@ -62,7 +62,7 @@ class EmailTemplateController extends Controller
             'alert_message' => 'Ceci est un message d\'alerte de test.',
             'token' => '123456',
             'expire_minutes' => '15',
-            'order' => ['number' => 'CMD-2026-0001', 'total' => '149.99', 'date' => now()->format('d/m/Y'), 'url' => config('app.url').'/account/orders/1', 'tracking' => 'CA123456789'],
+            'order' => ['number' => 'CMD-2026-0001', 'total' => '149.99', 'date' => format_date(now()), 'url' => config('app.url').'/account/orders/1', 'tracking' => 'CA123456789'],
             'refund' => ['amount' => '49.99'],
             'currency' => 'CAD',
             'cart' => ['items' => 'T-shirt classique, Jeans slim, Ecouteurs', 'item_count' => '3', 'total' => '259.97', 'url' => config('app.url').'/cart'],

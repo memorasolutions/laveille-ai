@@ -175,7 +175,7 @@
                                 <span class="text-muted">-</span>
                             @endif
                         </td>
-                        <td title="{{ $conversation->created_at->format('d/m/Y H:i') }}">{{ $conversation->created_at->diffForHumans() }}</td>
+                        <td title="{{ format_date($conversation->created_at, 'datetime') }}">{{ $conversation->created_at->diffForHumans() }}</td>
                         <td>
                             <div class="btn-group btn-group-sm">
                                 <a href="{{ route('admin.ai.conversations.show', $conversation) }}" class="btn btn-outline-primary" title="{{ __('Voir') }}">

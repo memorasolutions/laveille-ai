@@ -93,8 +93,8 @@
                     <td>{{ $ticket->user->name ?? '-' }}</td>
                     <td>{{ $ticket->agent->name ?? '-' }}</td>
                     <td>{{ $ticket->category ?? '-' }}</td>
-                    <td>{{ $ticket->due_at?->format('d/m/Y H:i') ?? '-' }}</td>
-                    <td>{{ $ticket->created_at->format('d/m/Y H:i') }}</td>
+                    <td>{{ format_date($ticket->due_at, 'datetime') ?: '-' }}</td>
+                    <td>{{ format_date($ticket->created_at, 'datetime') }}</td>
                 </tr>
                 @empty
                 <tr><td colspan="9" class="text-center text-muted py-4">{{ __('Aucun ticket.') }}</td></tr>

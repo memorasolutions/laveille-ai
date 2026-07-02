@@ -92,7 +92,7 @@
                         <span class="text-muted">-</span>
                         @endif
                     </td>
-                    <td>{{ $msg->occurred_at?->format('d/m/Y H:i') ?? $msg->created_at->format('d/m/Y H:i') }}</td>
+                    <td>{{ format_date($msg->occurred_at, 'datetime') ?: format_date($msg->created_at, 'datetime') }}</td>
                 </tr>
                 @empty
                 <tr><td colspan="6" class="text-center text-muted py-4">{{ __('Aucun message.') }}</td></tr>

@@ -170,7 +170,7 @@
                                 {{ number_format($item->size / 1024, 1) }} KB
                             @endif
                         </td>
-                        <td class="text-muted small">{{ $item->created_at->format('d/m/Y') }}</td>
+                        <td class="text-muted small">{{ format_date($item->created_at) }}</td>
                         <td class="text-center">
                             <div class="position-relative d-inline-block" x-data="{ open: false }" @click.outside="open = false">
                                 <button @click="open = !open"

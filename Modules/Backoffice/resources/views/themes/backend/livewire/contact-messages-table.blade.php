@@ -111,7 +111,7 @@
                             </td>
                             @endif
                             <td>
-                                <span title="{{ $msg->created_at->format('d/m/Y H:i') }}">
+                                <span title="{{ format_date($msg->created_at, 'datetime') }}">
                                     {{ $msg->created_at->diffForHumans() }}
                                 </span>
                             </td>

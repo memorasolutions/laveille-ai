@@ -52,7 +52,7 @@
                                 </span>
                             </td>
                             <td class="py-3 px-4 text-muted small">
-                                {{ $article->deleted_at->format('d/m/Y H:i') }}
+                                {{ format_date($article->deleted_at, 'datetime') }}
                             </td>
                             <td class="py-3 px-4">
                                 <div class="dropdown">
@@ -131,7 +131,7 @@
                                 {{ $comment->article?->title ?? 'N/A' }}
                             </td>
                             <td class="py-3 px-4 text-muted small">
-                                {{ $comment->deleted_at->format('d/m/Y H:i') }}
+                                {{ format_date($comment->deleted_at, 'datetime') }}
                             </td>
                             <td class="py-3 px-4">
                                 <div class="dropdown">

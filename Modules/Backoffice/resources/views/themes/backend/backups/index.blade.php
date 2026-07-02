@@ -93,7 +93,7 @@
                                 </td>
                                 <td class="align-middle small fw-medium text-body">{{ $backup['name'] }}</td>
                                 <td class="align-middle small text-muted">{{ number_format($backup['size'] / 1024 / 1024, 2) }} MB</td>
-                                <td class="align-middle small text-muted">{{ \Carbon\Carbon::createFromTimestamp($backup['date'])->format('d/m/Y H:i') }}</td>
+                                <td class="align-middle small text-muted">{{ format_date(\Carbon\Carbon::createFromTimestamp($backup['date']), 'datetime') }}</td>
                                 <td class="align-middle">
                                     <div class="dropdown" x-data="{ open: false }" @click.outside="open = false">
                                         <button @click="open = !open"

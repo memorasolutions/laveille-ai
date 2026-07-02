@@ -82,7 +82,7 @@
                         </select>
                     </td>
                     <td class="text-muted">{{ $campaign->recipient_count }}</td>
-                    <td class="text-muted">{{ $campaign->sent_at?->format('d/m/Y H:i') ?? '–' }}</td>
+                    <td class="text-muted">{{ format_date($campaign->sent_at, 'datetime') ?: '–' }}</td>
                     <td>
                         <div class="position-relative d-inline-block" x-data="{ open: false }" @click.outside="open = false">
                             <button @click="open = !open"

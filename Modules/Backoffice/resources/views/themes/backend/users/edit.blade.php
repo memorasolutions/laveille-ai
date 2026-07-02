@@ -140,12 +140,12 @@
                     <div class="d-flex flex-column gap-2 small text-muted">
                         <div class="d-flex align-items-center gap-2">
                             <i data-lucide="calendar" class="icon-sm"></i>
-                            <span>{{ __('Inscrit le') }} {{ $user->created_at->format('d/m/Y H:i') }}</span>
+                            <span>{{ __('Inscrit le') }} {{ format_date($user->created_at, 'datetime') }}</span>
                         </div>
                         @if($user->email_verified_at)
                         <div class="d-flex align-items-center gap-2">
                             <i data-lucide="mail-check" class="icon-sm text-success"></i>
-                            <span>{{ __('Courriel vérifié le') }} {{ $user->email_verified_at->format('d/m/Y') }}</span>
+                            <span>{{ __('Courriel vérifié le') }} {{ format_date($user->email_verified_at) }}</span>
                         </div>
                         @else
                         <div class="d-flex align-items-center gap-2">

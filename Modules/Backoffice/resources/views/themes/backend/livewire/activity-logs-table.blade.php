@@ -105,7 +105,7 @@
                                 <span class="text-muted small">-</span>
                             @endif
                         </td>
-                        <td class="text-muted small">{{ $activity->created_at->format('d/m/Y H:i') }}</td>
+                        <td class="text-muted small">{{ format_date($activity->created_at, 'datetime') }}</td>
                         <td class="text-center">
                             <button wire:click="showDetail({{ $activity->id }})"
                                     class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center"
@@ -183,7 +183,7 @@
                     </div>
                     <div class="col-6">
                         <span class="text-muted small d-block mb-1">{{ __('Date') }}</span>
-                        <span class="fw-medium small text-body">{{ $detailActivity->created_at->format('d/m/Y H:i:s') }}</span>
+                        <span class="fw-medium small text-body">{{ format_date($detailActivity->created_at, 'datetime') }}</span>
                     </div>
                 </div>
 

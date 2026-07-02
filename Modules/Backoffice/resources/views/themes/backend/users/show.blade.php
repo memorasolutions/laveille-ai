@@ -74,7 +74,7 @@
                         <p class="text-muted small text-uppercase fw-medium mb-1">{{ __('Courriel vérifié') }}</p>
                         @if($user->email_verified_at)
                             <span class="badge bg-success bg-opacity-10 text-success fw-medium">
-                                {{ $user->email_verified_at->format('d/m/Y H:i') }}
+                                {{ format_date($user->email_verified_at, 'datetime') }}
                             </span>
                         @else
                             <span class="badge bg-warning bg-opacity-10 text-warning fw-medium">
@@ -85,12 +85,12 @@
 
                     <div class="col-sm-6">
                         <p class="text-muted small text-uppercase fw-medium mb-1">{{ __('Inscrit le') }}</p>
-                        <p class="fw-semibold mb-0">{{ $user->created_at->format('d/m/Y H:i') }}</p>
+                        <p class="fw-semibold mb-0">{{ format_date($user->created_at, 'datetime') }}</p>
                     </div>
 
                     <div class="col-sm-6">
                         <p class="text-muted small text-uppercase fw-medium mb-1">{{ __('Dernière modification') }}</p>
-                        <p class="fw-semibold mb-0">{{ $user->updated_at->format('d/m/Y H:i') }}</p>
+                        <p class="fw-semibold mb-0">{{ format_date($user->updated_at, 'datetime') }}</p>
                     </div>
 
                     <div class="col-sm-6">

@@ -131,7 +131,7 @@
                         </td>
                         <td class="text-muted">{{ $article->blogCategory?->name ?? '–' }}</td>
                         <td class="text-muted">{{ $article->user?->name ?? '–' }}</td>
-                        <td class="text-muted">{{ $article->created_at->format('d/m/Y') }}</td>
+                        <td class="text-muted">{{ format_date($article->created_at) }}</td>
                         <td>
                             <div class="dropdown" x-data="{ open: false }" @click.outside="open = false">
                                 <button @click="open = !open"

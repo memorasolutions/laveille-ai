@@ -30,7 +30,7 @@ class TicketSlaWarningNotification extends TemplatedNotification
             'app' => ['name' => config('app.name'), 'url' => config('app.url')],
             'ticket' => [
                 'title' => $this->ticket->title,
-                'due_at' => $this->ticket->due_at?->format('d/m/Y H:i'),
+                'due_at' => format_date($this->ticket->due_at, 'datetime'),
             ],
         ];
     }
@@ -40,7 +40,7 @@ class TicketSlaWarningNotification extends TemplatedNotification
         return (new MailMessage)
             ->subject(__('Alerte SLA : ').$this->ticket->title)
             ->line(__('Ticket : ').$this->ticket->title)
-            ->line(__('Echeance : ').$this->ticket->due_at?->format('d/m/Y H:i'))
+            ->line(__('Echeance : ').format_date($this->ticket->due_at, 'datetime'))
             ->action(__('Voir le ticket'), route('admin.ai.tickets.show', $this->ticket));
     }
 

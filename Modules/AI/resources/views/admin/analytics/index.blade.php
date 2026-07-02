@@ -105,7 +105,7 @@
                         <tbody>
                             @forelse($dailyActivity as $activity)
                             <tr>
-                                <td>{{ \Carbon\Carbon::parse($activity->date)->format('d/m/Y') }}</td>
+                                <td>{{ format_date(\Carbon\Carbon::parse($activity->date)) }}</td>
                                 <td class="text-end">
                                     <span class="badge bg-primary bg-opacity-10 text-primary">{{ number_format($activity->count) }}</span>
                                 </td>

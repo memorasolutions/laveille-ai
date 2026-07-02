@@ -152,8 +152,8 @@
                             <span class="badge rounded py-1 px-2 fw-medium small bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">{{ __('En attente') }}</span>
                         @endif
                     </td>
-                    <td class="text-muted small">{{ $sub->confirmed_at?->format('d/m/Y') ?? '–' }}</td>
-                    <td class="text-muted small">{{ $sub->created_at->format('d/m/Y') }}</td>
+                    <td class="text-muted small">{{ format_date($sub->confirmed_at) ?: '–' }}</td>
+                    <td class="text-muted small">{{ format_date($sub->created_at) }}</td>
                     <td>
                         <div class="position-relative d-inline-block" x-data="{ open: false }" @click.outside="open = false">
                             <button @click="open = !open"
