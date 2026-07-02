@@ -108,13 +108,19 @@
     .academy-gated-panel .gated-title { font-family: var(--f-heading); font-weight: 700; font-size: 1.3rem; color: var(--sys-text-default, #1A1D23); margin-bottom: 0.5rem; }
     .academy-gated-panel .gated-sub { color: var(--sys-text-muted, #6B7280); margin-bottom: 1.5rem; font-size: 0.95rem; }
 
-    /* Navigation préc/suiv */
-    .academy-lesson-nav { display: flex; justify-content: space-between; gap: 1rem; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #E5E7EB; }
-    .academy-lesson-nav a { flex: 1; padding: 0.75rem 1rem; border: 1px solid #E5E7EB; border-radius: 8px; text-decoration: none; color: #374151; font-size: 0.9rem; transition: border-color 0.15s, color 0.15s; }
-    .academy-lesson-nav a:hover { border-color: var(--c-primary, #064E5A); color: var(--c-primary, #064E5A); }
-    .academy-lesson-nav .nav-prev { text-align: left; }
-    .academy-lesson-nav .nav-next { text-align: right; }
-    .academy-lesson-nav .nav-label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6B7280; margin-bottom: 3px; }
+    /* Navigation préc/suiv — boutons x-core::button (cohérence visuelle avec le reste du site,
+       cf. audit 2026-07-02 : les <a> bruts précédents ressemblaient à des liens discrets,
+       incohérents avec le CTA teal plein utilisé partout ailleurs). Bordure/radius/couleurs/
+       hover/focus déjà gérés par .ct-btn / .ct-btn--secondary (DRY, ne pas dupliquer ici) :
+       seuls les overrides de mise en page (carte 2 lignes) sont nécessaires. */
+    .academy-lesson-nav { display: flex; justify-content: space-between; gap: 1rem; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #E5E7EB; flex-wrap: wrap; }
+    .academy-lesson-nav .academy-nav-btn { flex: 1 1 0; min-width: 180px; max-width: 360px; flex-direction: column; height: auto; white-space: normal; line-height: 1.35; }
+    .academy-lesson-nav .academy-nav-btn.nav-prev { align-items: flex-start; }
+    .academy-lesson-nav .academy-nav-btn.nav-next { align-items: flex-end; text-align: right; }
+    .academy-lesson-nav .nav-label,
+    .academy-lesson-nav .nav-title { display: block; }
+    .academy-lesson-nav .nav-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 3px; }
+    .academy-lesson-nav .nav-title { font-weight: 600; }
 
     @media (max-width: 768px) {
         .academy-lesson-layout { flex-direction: column; }
@@ -2133,29 +2139,27 @@
                     @endif
                 @endif
 
-                {{-- ══ Navigation préc/suiv ══ --}}
+                {{-- ══ Navigation préc/suiv (x-core::button variant="secondary", cohérence
+                     visuelle avec le reste du site — audit boutons 2026-07-02) ══ --}}
                 <div class="academy-lesson-nav">
-                    <div>
-                        @if($prevLesson)
-                            <a href="{{ route('academy.lessons.show', [$course, $prevLesson]) }}" class="nav-prev">
-                                <span class="nav-label">← Leçon précédente</span>
-                                {{ Str::limit($prevLesson->title, 50) }}
-                            </a>
-                        @else
-                            <a href="{{ route('academy.courses.show', $course) }}" class="nav-prev">
-                                <span class="nav-label">← Retour au cours</span>
-                                {{ Str::limit($course->title, 50) }}
-                            </a>
-                        @endif
-                    </div>
-                    <div>
-                        @if($nextLesson)
-                            <a href="{{ route('academy.lessons.show', [$course, $nextLesson]) }}" class="nav-next">
-                                <span class="nav-label">Leçon suivante →</span>
-                                {{ Str::limit($nextLesson->title, 50) }}
-                            </a>
-                        @endif
-                    </div>
+                    @if($prevLesson)
+                        <x-core::button variant="secondary" size="sm" :href="route('academy.lessons.show', [$course, $prevLesson])" class="academy-nav-btn nav-prev">
+                            <span class="nav-label">← Leçon précédente</span>
+                            <span class="nav-title">{{ Str::limit($prevLesson->title, 50) }}</span>
+                        </x-core::button>
+                    @else
+                        <x-core::button variant="secondary" size="sm" :href="route('academy.courses.show', $course)" class="academy-nav-btn nav-prev">
+                            <span class="nav-label">← Retour au cours</span>
+                            <span class="nav-title">{{ Str::limit($course->title, 50) }}</span>
+                        </x-core::button>
+                    @endif
+
+                    @if($nextLesson)
+                        <x-core::button variant="secondary" size="sm" :href="route('academy.lessons.show', [$course, $nextLesson])" class="academy-nav-btn nav-next">
+                            <span class="nav-label">Leçon suivante →</span>
+                            <span class="nav-title">{{ Str::limit($nextLesson->title, 50) }}</span>
+                        </x-core::button>
+                    @endif
                 </div>
 
             </div>{{-- /academy-lesson-content --}}
