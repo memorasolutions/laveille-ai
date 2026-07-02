@@ -64,7 +64,7 @@ class EmailTemplateSeeder extends Seeder
                 'subject' => 'Votre code de connexion',
                 'module' => 'auth',
                 'variables' => ['user.name', 'token', 'expire_minutes', 'app.name'],
-                'body_html' => '<p style="font-family:Arial,sans-serif;color:#333;">Bonjour {{user.name}},</p><p style="font-family:Arial,sans-serif;color:#333;">Votre code de connexion pour {{app.name}} :</p><p style="text-align:center;font-size:32px;font-weight:bold;letter-spacing:8px;color:#487FFF;font-family:monospace;">{{token}}</p><p style="font-family:Arial,sans-serif;color:#666;font-size:13px;">Ce code expire dans {{expire_minutes}} minutes.</p>',
+                'body_html' => '<p style="font-family:Arial,sans-serif;color:#333;">Bonjour {{user.name}},</p><p style="font-family:Arial,sans-serif;color:#333;">Votre code de connexion pour {{app.name}} :</p><p style="text-align:center;font-size:32px;font-weight:bold;letter-spacing:8px;color:#487FFF;font-family:monospace;">{{token}}</p><p style="font-family:Arial,sans-serif;color:#666;font-size:13px;">Ce code expire dans {{expire_minutes}} minutes.</p><p style="font-family:Arial,sans-serif;color:#666;font-size:13px;">💡 Astuce : ajoutez info@laveille.ai à vos contacts (Gmail) ou à vos expéditeurs fiables (Outlook/Microsoft) pour ne jamais manquer un code dans vos pourriels.</p>',
             ],
         ];
     }
