@@ -41,6 +41,21 @@ jobs:
             --exclude='error_log' \
             ./ gmemora@server.memora.pro:/home/gmemora/public_html/apps_diverses/laveille.ai/
 
+      - name: Install composer dependencies on server
+        # ACTION: composer install --no-dev après chaque déploiement.
+        # RAISON (incident 2026-07-02) : vendor/ est exclu du rsync (ci-dessus) et AUCUNE étape
+        #   de ce pipeline n'installait les dépendances composer côté serveur — un composer.lock
+        #   modifié (ex. ajout de google/apiclient pour l'auto-création Google Meet) se déployait
+        #   sans jamais installer le paquet, causant un "Class ... not found" fatal (500) sur
+        #   toute page chargeant la classe manquante. Root-causé et corrigé manuellement le jour
+        #   même (composer.phar téléchargé + installé via SSH), mais SANS cette étape le même
+        #   bug reviendrait à chaque nouvelle dépendance composer future. Self-healing : utilise
+        #   composer.phar déjà présent sur le serveur, sinon le télécharge.
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && \
+            (test -f composer.phar || curl -sS https://getcomposer.org/composer-stable.phar -o composer.phar) && \
+            php composer.phar install --no-dev --optimize-autoloader --no-interaction --no-scripts" || true
+
       - name: Run pending migrations (additive only, --force pour skip prompt prod)
         run: |
           # Pattern fix L15 LucidNest 2026-05-03 : sans cette étape, migrations s'accumulent
