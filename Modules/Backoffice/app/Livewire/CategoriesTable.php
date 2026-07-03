@@ -50,8 +50,13 @@ class CategoriesTable extends Component
         $this->resetInfiniteScroll();
     }
 
+    /**
+     * Requiert update_articles (cohérent avec la route PUT categories/{category} du module Blog).
+     */
     public function toggleActive(int $categoryId): void
     {
+        abort_if(! auth()->user()?->can('update_articles'), 403);
+
         $category = Category::findOrFail($categoryId);
         $category->update(['is_active' => ! $category->is_active]);
         $status = $category->is_active ? 'activée' : 'désactivée';
@@ -67,8 +72,18 @@ class CategoriesTable extends Component
         ];
     }
 
+    /**
+     * Requiert delete_articles (delete) ou update_articles (activate/deactivate),
+     * cohérent avec les routes DELETE/PUT categories du module Blog.
+     */
     protected function handleBulkAction(string $action, array $ids): void
     {
+        if ($action === 'delete') {
+            abort_if(! auth()->user()?->can('delete_articles'), 403);
+        } else {
+            abort_if(! auth()->user()?->can('update_articles'), 403);
+        }
+
         match ($action) {
             'activate' => Category::whereIn('id', $ids)->update(['is_active' => true]),
             'deactivate' => Category::whereIn('id', $ids)->update(['is_active' => false]),

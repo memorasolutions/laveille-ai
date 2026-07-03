@@ -53,8 +53,13 @@ class CampaignsTable extends Component
         $this->resetInfiniteScroll();
     }
 
+    /**
+     * Requiert update_campaigns (cohérent avec la route PUT campaigns/{campaign}).
+     */
     public function changeStatus(int $campaignId, string $status): void
     {
+        abort_if(! auth()->user()?->can('update_campaigns'), 403);
+
         $stateMap = [
             'draft' => DraftCampaignState::class,
             'sent' => SentCampaignState::class,
@@ -81,8 +86,15 @@ class CampaignsTable extends Component
         ];
     }
 
+    /**
+     * Requiert delete_campaigns (cohérent avec la route DELETE campaigns/{campaign}).
+     */
     protected function handleBulkAction(string $action, array $ids): void
     {
+        if ($action === 'delete') {
+            abort_if(! auth()->user()?->can('delete_campaigns'), 403);
+        }
+
         match ($action) {
             'delete' => Campaign::whereIn('id', $ids)->delete(),
             default => null,

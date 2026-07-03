@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Community\Http\Controllers\Admin\ModerationController;
 use Modules\Community\Http\Controllers\CategorySubscriptionController;
 use Modules\Community\Http\Controllers\ReportController;
+use Modules\Core\Http\Middleware\EnsureIsAdmin;
 
 // Public routes
 Route::middleware(['web', 'auth'])->group(function () {
@@ -14,7 +15,7 @@ Route::middleware(['web', 'auth'])->group(function () {
 });
 
 // Admin routes
-Route::middleware(['web', 'auth'])
+Route::middleware(['web', 'auth', EnsureIsAdmin::class])
     ->prefix('admin/community')
     ->name('admin.community.')
     ->group(function () {

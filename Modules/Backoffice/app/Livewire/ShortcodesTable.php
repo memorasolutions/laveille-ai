@@ -54,8 +54,15 @@ class ShortcodesTable extends Component
         ];
     }
 
+    /**
+     * Requiert manage_shortcodes (cohérent avec le groupe de routes shortcodes admin).
+     */
     protected function handleBulkAction(string $action, array $ids): void
     {
+        if ($action === 'delete') {
+            abort_if(! auth()->user()?->can('manage_shortcodes'), 403);
+        }
+
         match ($action) {
             'delete' => Shortcode::whereIn('id', $ids)->delete(),
             default => null,

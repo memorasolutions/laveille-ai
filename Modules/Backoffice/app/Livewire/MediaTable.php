@@ -80,8 +80,17 @@ class MediaTable extends Component
         $this->resetInfiniteScroll();
     }
 
+    /**
+     * Requiert update_media. NOTE : les routes media-api/media utilisent 'manage_media' en
+     * middleware, mais cette permission n'est JAMAIS seedée (RolesAndPermissionsSeeder ne crée
+     * que view_/create_/update_/delete_media, Pattern A CRUD) → 'manage_media' n'existe pour
+     * personne sauf super_admin (bypass Gate::before). On aligne donc sur la permission
+     * réellement seedée pour ne pas reproduire cette incohérence pré-existante des routes.
+     */
     public function editMedia(int $id): void
     {
+        abort_if(! auth()->user()?->can('update_media'), 403);
+
         $media = Media::findOrFail($id);
         $this->editingMediaId = $id;
         $this->editTitle = $media->getCustomProperty('title', '');
@@ -91,8 +100,13 @@ class MediaTable extends Component
         $this->editFolder = $media->getCustomProperty('folder', '');
     }
 
+    /**
+     * Requiert update_media (voir note editMedia() sur manage_media jamais seedée).
+     */
     public function updateMedia(): void
     {
+        abort_if(! auth()->user()?->can('update_media'), 403);
+
         $this->validate([
             'editTitle' => 'nullable|string|max:255',
             'editAltText' => 'nullable|string|max:255',
@@ -123,8 +137,13 @@ class MediaTable extends Component
         $this->editFolder = '';
     }
 
+    /**
+     * Requiert delete_media (voir note editMedia() sur manage_media jamais seedée).
+     */
     public function deleteMedia(int $id): void
     {
+        abort_if(! auth()->user()?->can('delete_media'), 403);
+
         $media = Media::findOrFail($id);
         $media->delete();
         $this->dispatch('toast', type: 'success', message: 'Média supprimé.');

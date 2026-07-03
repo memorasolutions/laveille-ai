@@ -50,8 +50,13 @@ class CommentsTable extends Component
         $this->resetInfiniteScroll();
     }
 
+    /**
+     * Requiert update_comments (cohérent avec la route PUT comments/{comment}).
+     */
     public function changeStatus(int $commentId, string $status): void
     {
+        abort_if(! auth()->user()?->can('update_comments'), 403);
+
         // #177 : pivot vers community_comments (Modules\Community\Models\Comment).
         // Plus de Spatie ModelStates - simple update enum.
         if (! in_array($status, ['pending', 'approved', 'rejected', 'spam'], true)) {
@@ -64,8 +69,13 @@ class CommentsTable extends Component
         $this->dispatch('toast', type: 'success', message: "Commentaire #{$comment->id} → {$status}.");
     }
 
+    /**
+     * Requiert delete_comments (cohérent avec la route DELETE comments/{comment}).
+     */
     public function delete(int $id): void
     {
+        abort_if(! auth()->user()?->can('delete_comments'), 403);
+
         Comment::find($id)?->delete();
     }
 
@@ -78,8 +88,18 @@ class CommentsTable extends Component
         ];
     }
 
+    /**
+     * Requiert delete_comments (delete) ou update_comments (approve/spam),
+     * cohérent avec les routes DELETE/PUT comments du contrôleur admin.
+     */
     protected function handleBulkAction(string $action, array $ids): void
     {
+        if ($action === 'delete') {
+            abort_if(! auth()->user()?->can('delete_comments'), 403);
+        } else {
+            abort_if(! auth()->user()?->can('update_comments'), 403);
+        }
+
         $statusMap = [
             'approve' => 'approved',
             'spam' => 'spam',

@@ -87,8 +87,13 @@ class FeatureFlagsTable extends Component
         $this->conditionConfig = $condition ? ($condition->condition_config ?? []) : [];
     }
 
+    /**
+     * Requiert manage_feature_flags (cohérent avec les routes PUT/POST feature-flags admin).
+     */
     public function saveCondition(): void
     {
+        abort_if(! auth()->user()?->can('manage_feature_flags'), 403);
+
         $this->validate([
             'conditionType' => 'required|in:always,percentage,roles,environment,schedule',
         ]);

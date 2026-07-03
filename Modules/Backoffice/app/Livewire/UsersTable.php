@@ -95,8 +95,18 @@ class UsersTable extends Component
         ];
     }
 
+    /**
+     * Requiert update_users (activate/deactivate) ou delete_users (delete),
+     * cohérent avec les routes PUT/DELETE users du contrôleur admin.
+     */
     protected function handleBulkAction(string $action, array $ids): void
     {
+        if ($action === 'delete') {
+            abort_if(! auth()->user()?->can('delete_users'), 403);
+        } else {
+            abort_if(! auth()->user()?->can('update_users'), 403);
+        }
+
         match ($action) {
             'activate' => User::whereIn('id', $ids)->update(['is_active' => true]),
             'deactivate' => User::whereIn('id', $ids)->update(['is_active' => false]),
@@ -105,16 +115,26 @@ class UsersTable extends Component
         };
     }
 
+    /**
+     * Requiert update_users (cohérent avec la route PUT users/{user}).
+     */
     public function toggleActive(int $userId): void
     {
+        abort_if(! auth()->user()?->can('update_users'), 403);
+
         $user = User::findOrFail($userId);
         $user->update(['is_active' => ! $user->is_active]);
         $status = $user->is_active ? 'activé' : 'désactivé';
         $this->dispatch('toast', type: 'success', message: "Utilisateur {$user->name} {$status}.");
     }
 
+    /**
+     * Requiert update_users (cohérent avec la route PUT users/{user}).
+     */
     public function inlineUpdateName(int $userId, string $name): void
     {
+        abort_if(! auth()->user()?->can('update_users'), 403);
+
         $trimmed = trim($name);
         if ($trimmed === '') {
             return;

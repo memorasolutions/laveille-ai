@@ -65,8 +65,13 @@ class PlansTable extends Component
         $this->resetInfiniteScroll();
     }
 
+    /**
+     * Requiert update_plans (cohérent avec la route PUT plans/{plan}).
+     */
     public function toggleActive(int $planId): void
     {
+        abort_if(! auth()->user()?->can('update_plans'), 403);
+
         $plan = Plan::findOrFail($planId);
         $plan->update(['is_active' => ! $plan->is_active]);
         $status = $plan->is_active ? 'activé' : 'désactivé';
@@ -82,8 +87,18 @@ class PlansTable extends Component
         ];
     }
 
+    /**
+     * Requiert delete_plans (delete) ou update_plans (activate/deactivate),
+     * cohérent avec les routes DELETE/PUT plans du contrôleur admin.
+     */
     protected function handleBulkAction(string $action, array $ids): void
     {
+        if ($action === 'delete') {
+            abort_if(! auth()->user()?->can('delete_plans'), 403);
+        } else {
+            abort_if(! auth()->user()?->can('update_plans'), 403);
+        }
+
         match ($action) {
             'activate' => Plan::whereIn('id', $ids)->update(['is_active' => true]),
             'deactivate' => Plan::whereIn('id', $ids)->update(['is_active' => false]),

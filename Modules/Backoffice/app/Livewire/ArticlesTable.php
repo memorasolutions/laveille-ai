@@ -69,8 +69,13 @@ class ArticlesTable extends Component
         $this->resetInfiniteScroll();
     }
 
+    /**
+     * Requiert update_articles (cohérent avec la route PUT articles/{article}).
+     */
     public function changeStatus(int $articleId, string $status): void
     {
+        abort_if(! auth()->user()?->can('update_articles'), 403);
+
         $stateMap = [
             'draft' => DraftArticleState::class,
             'published' => PublishedArticleState::class,
@@ -101,8 +106,18 @@ class ArticlesTable extends Component
         ];
     }
 
+    /**
+     * Requiert delete_articles (delete) ou update_articles (publish/draft/archive),
+     * cohérent avec les routes DELETE/PUT articles du contrôleur admin.
+     */
     protected function handleBulkAction(string $action, array $ids): void
     {
+        if ($action === 'delete') {
+            abort_if(! auth()->user()?->can('delete_articles'), 403);
+        } else {
+            abort_if(! auth()->user()?->can('update_articles'), 403);
+        }
+
         $stateMap = [
             'publish' => PublishedArticleState::class,
             'draft' => DraftArticleState::class,

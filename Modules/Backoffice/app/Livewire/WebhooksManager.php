@@ -27,8 +27,13 @@ class WebhooksManager extends Component
 
     public ?string $successMessage = null;
 
+    /**
+     * Requiert manage_webhooks (cohérent avec le groupe de routes webhooks admin).
+     */
     public function store(): void
     {
+        abort_if(! auth()->user()?->can('manage_webhooks'), 403);
+
         $this->validate();
 
         WebhookEndpoint::create([
@@ -43,8 +48,13 @@ class WebhooksManager extends Component
         $this->successMessage = 'Webhook créé avec succès.';
     }
 
+    /**
+     * Requiert manage_webhooks (cohérent avec le groupe de routes webhooks admin).
+     */
     public function delete(int $id): void
     {
+        abort_if(! auth()->user()?->can('manage_webhooks'), 403);
+
         WebhookEndpoint::findOrFail($id)->delete();
         $this->successMessage = 'Webhook supprimé.';
     }

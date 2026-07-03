@@ -68,8 +68,13 @@ class StaticPagesTable extends Component
         $this->confirmingDeleteId = null;
     }
 
+    /**
+     * Requiert delete_pages (cohérent avec la route DELETE admin/pages/{page}).
+     */
     public function deletePage(int $pageId): void
     {
+        abort_if(! auth()->user()?->can('delete_pages'), 403);
+
         StaticPage::findOrFail($pageId)->delete();
         $this->confirmingDeleteId = null;
         session()->flash('success', 'Page supprimée.');

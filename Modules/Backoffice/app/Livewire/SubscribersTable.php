@@ -58,6 +58,11 @@ class SubscribersTable extends Component
      * Surcharge de la méthode du trait HasBulkActions.
      * L'action 'resend' gère son propre toast récapitulatif ;
      * les autres actions gardent le toast générique du trait.
+     * NOTE : la route DELETE newsletter/{subscriber} utilise 'manage_newsletter' en middleware,
+     * mais cette permission n'est JAMAIS seedée (RolesAndPermissionsSeeder ne crée que
+     * view_/create_/update_/delete_newsletter, Pattern A CRUD) → on vérifie ici au cas par cas
+     * (delete_newsletter / update_newsletter) dans handleBulkAction()/bulkResendConfirmation(),
+     * la garde générique est donc déléguée plus bas selon l'action réelle.
      */
     public function executeBulkAction(): void
     {
@@ -80,13 +85,25 @@ class SubscribersTable extends Component
         $this->dispatch('toast', type: 'success', message: __('Action effectuée.'));
     }
 
+    /**
+     * Requiert delete_newsletter (permission Pattern A réellement seedée ; la route DELETE
+     * newsletter/{subscriber} référence 'manage_newsletter', qui n'existe dans aucun seeder).
+     */
     public function delete(int $id): void
     {
+        abort_if(! auth()->user()?->can('delete_newsletter'), 403);
+
         Subscriber::find($id)?->delete();
     }
 
+    /**
+     * Requiert update_newsletter (mutation sans suppression ; aucune route HTTP dédiée au
+     * renvoi n'existe, permission Pattern A la plus proche retenue pour ce module).
+     */
     public function resendConfirmation(int $id): void
     {
+        abort_if(! auth()->user()?->can('update_newsletter'), 403);
+
         $subscriber = Subscriber::find($id);
 
         if (! $subscriber || ! $subscriber->canResendConfirmation()) {
@@ -116,8 +133,18 @@ class SubscribersTable extends Component
         ];
     }
 
+    /**
+     * Requiert delete_newsletter (delete) ou update_newsletter (resend),
+     * permissions Pattern A réellement seedées pour ce module.
+     */
     protected function handleBulkAction(string $action, array $ids): void
     {
+        if ($action === 'delete') {
+            abort_if(! auth()->user()?->can('delete_newsletter'), 403);
+        } else {
+            abort_if(! auth()->user()?->can('update_newsletter'), 403);
+        }
+
         match ($action) {
             'delete' => Subscriber::whereIn('id', $ids)->delete(),
             'resend' => $this->bulkResendConfirmation($ids),

@@ -26,8 +26,13 @@ class SettingsManager extends Component
         }
     }
 
+    /**
+     * Requiert manage_settings (cohérent avec les groupes de routes settings admin).
+     */
     public function updateSetting(int $id): void
     {
+        abort_if(! auth()->user()?->can('manage_settings'), 403);
+
         $setting = Setting::findOrFail($id);
         $setting->update(['value' => $this->values[$id] ?? '']);
         Cache::forget("setting.{$setting->key}");
@@ -35,8 +40,13 @@ class SettingsManager extends Component
     }
 
     // Principe ADHD: un seul bouton "Sauver" par onglet au lieu d'un par champ
+    /**
+     * Requiert manage_settings (cohérent avec les groupes de routes settings admin).
+     */
     public function saveGroup(string $groupName): void
     {
+        abort_if(! auth()->user()?->can('manage_settings'), 403);
+
         $settings = Setting::where('group', $groupName)
             ->where('type', '!=', 'boolean')
             ->get();
@@ -55,8 +65,13 @@ class SettingsManager extends Component
         $this->dispatch('toast', type: 'success', message: __('Paramètres sauvegardés.'));
     }
 
+    /**
+     * Requiert manage_settings (cohérent avec les groupes de routes settings admin).
+     */
     public function saveTheme(string $theme): void
     {
+        abort_if(! auth()->user()?->can('manage_settings'), 403);
+
         $themesDir = module_path('Backoffice', 'resources/views/themes');
         $available = array_map('basename', array_filter(glob($themesDir.'/*'), 'is_dir'));
 
@@ -87,8 +102,13 @@ class SettingsManager extends Component
         $this->js('window.location.href = "'.request()->url().'?tab=apparence"');
     }
 
+    /**
+     * Requiert manage_settings (cohérent avec les groupes de routes settings admin).
+     */
     public function toggleBoolean(int $id): void
     {
+        abort_if(! auth()->user()?->can('manage_settings'), 403);
+
         $setting = Setting::findOrFail($id);
         $newValue = ! filter_var($setting->value, FILTER_VALIDATE_BOOLEAN);
         $setting->update(['value' => $newValue ? 'true' : 'false']);

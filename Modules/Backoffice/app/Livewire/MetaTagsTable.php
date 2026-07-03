@@ -54,8 +54,18 @@ class MetaTagsTable extends Component
         $this->resetInfiniteScroll();
     }
 
+    /**
+     * Requiert update_seo. NOTE : la route PUT seo/{metaTag} utilise 'manage_seo' en
+     * middleware, mais cette permission n'est JAMAIS seedée (RolesAndPermissionsSeeder ne crée
+     * que view_/create_/update_/delete_seo, Pattern A CRUD) → 'manage_seo' n'existe pour
+     * personne sauf super_admin (bypass Gate::before), donc même la route HTTP est de facto
+     * inaccessible aux admins/éditeurs aujourd'hui. On aligne sur la permission réellement
+     * seedée pour ne pas reproduire cette incohérence pré-existante des routes.
+     */
     public function toggleActive(int $metaTagId): void
     {
+        abort_if(! auth()->user()?->can('update_seo'), 403);
+
         $metaTag = MetaTag::findOrFail($metaTagId);
         $metaTag->update(['is_active' => ! $metaTag->is_active]);
         $status = $metaTag->is_active ? 'activé' : 'désactivé';

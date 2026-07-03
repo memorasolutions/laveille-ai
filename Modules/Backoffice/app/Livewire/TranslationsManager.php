@@ -64,20 +64,35 @@ class TranslationsManager extends Component
         }
     }
 
+    /**
+     * Requiert manage_translations (cohérent avec la route translations.export du module).
+     */
     public function updateTranslation(string $key, string $value): void
     {
+        abort_if(! auth()->user()?->can('manage_translations'), 403);
+
         $this->service->setTranslation($this->targetLocale, $key, $value);
         $this->dispatch('toast', message: 'Traduction mise à jour.', type: 'success');
     }
 
+    /**
+     * Requiert manage_translations (cohérent avec la route translations.export du module).
+     */
     public function deleteKey(string $key): void
     {
+        abort_if(! auth()->user()?->can('manage_translations'), 403);
+
         $this->service->deleteKey($key);
         $this->dispatch('toast', message: 'Clé supprimée.', type: 'success');
     }
 
+    /**
+     * Requiert manage_translations (cohérent avec la route translations.export du module).
+     */
     public function addKey(): void
     {
+        abort_if(! auth()->user()?->can('manage_translations'), 403);
+
         $this->validate([
             'newKey' => 'required|string',
         ]);
@@ -91,8 +106,13 @@ class TranslationsManager extends Component
         $this->dispatch('toast', message: 'Clé ajoutée.', type: 'success');
     }
 
+    /**
+     * Requiert manage_translations (cohérent avec la route translations.export du module).
+     */
     public function addLocale(): void
     {
+        abort_if(! auth()->user()?->can('manage_translations'), 403);
+
         $this->validate([
             'newLocale' => 'required|string|size:2|alpha',
         ]);
@@ -113,8 +133,13 @@ class TranslationsManager extends Component
         }, $this->targetLocale.'.json');
     }
 
+    /**
+     * Requiert manage_translations (cohérent avec la route translations.export du module).
+     */
     public function importLocale(): void
     {
+        abort_if(! auth()->user()?->can('manage_translations'), 403);
+
         $this->validate([
             'importFile' => 'required|file',
         ]);
@@ -133,8 +158,13 @@ class TranslationsManager extends Component
         $this->dispatch('toast', message: 'Traductions importées.', type: 'success');
     }
 
+    /**
+     * Requiert manage_translations (mutation de traduction, même exigence que updateTranslation).
+     */
     public function autoTranslate(string $key): void
     {
+        abort_if(! auth()->user()?->can('manage_translations'), 403);
+
         $this->translatingKey = $key;
 
         $sourceTranslations = $this->service->getTranslations('fr');
@@ -160,8 +190,13 @@ class TranslationsManager extends Component
         $this->translatingKey = '';
     }
 
+    /**
+     * Requiert manage_translations (mutation de traduction, même exigence que updateTranslation).
+     */
     public function autoTranslateAll(): void
     {
+        abort_if(! auth()->user()?->can('manage_translations'), 403);
+
         $this->translating = true;
 
         $filtered = $this->filteredTranslations();
