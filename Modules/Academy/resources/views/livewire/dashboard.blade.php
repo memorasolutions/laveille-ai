@@ -113,6 +113,27 @@
                     </li>
                 @endforeach
             </ul>
+
+            {{-- ───── CORRECTIF E (Vague 2 design-critique) : suggestions de cours ─────
+                 N'apparaît QUE quand suggestedCourses() a jugé pertinent de suggérer
+                 (1 seule formation, à peine entamée) : voir Dashboard::suggestedCourses(). --}}
+            @if($this->suggestedCourses->isNotEmpty())
+                <div style="border: 1px dashed #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 18px 20px; margin-top: 4px;">
+                    <p style="font-size: 0.85rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 10px; font-weight: 600;">
+                        Vous pourriez aussi aimer
+                    </p>
+                    <ul class="list-unstyled d-flex flex-wrap gap-2" role="list" style="margin: 0;">
+                        @foreach($this->suggestedCourses as $suggested)
+                            <li role="listitem">
+                                <a href="{{ route('academy.courses.show', $suggested->slug) }}"
+                                   style="display: inline-block; border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 8px 14px; font-size: 0.88rem; color: var(--sys-action-primary, #064E5A); text-decoration: none; background: #FFFFFF;">
+                                    {{ $suggested->title }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
         @else
             <div style="border: 1px dashed #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 28px; text-align: center;">
                 <p style="color: var(--sys-text-default, #1A1D23); margin-bottom: 6px; font-weight: 600;">
@@ -219,13 +240,6 @@
          au moins un cours pondéré. --}}
     @livewire('academy.student-grades')
 
-    {{-- ───────────────────────── Gamification moderne (XP/niveau/classement) ─────────────────────────
-         Drapeau academy.gamification_enabled (défaut OFF). Double garde : ce @if
-         ET le composant lui-même (Gamification::enabled). Voir GamificationService. --}}
-    @if(config('academy.gamification_enabled'))
-        @livewire('academy.gamification')
-    @endif
-
     {{-- ─────────── Sections secondaires en accordéon (Option E hybride) ───────────
          Mes formations + Échéances restent TOUJOURS visibles ci-dessus (consultées
          quotidiennement). Badges/Annonces/Modèles/Vue admin sont repliables pour
@@ -241,6 +255,16 @@
         );
     @endphp
     <div class="accordion" id="academySecondaryAccordion">
+
+        {{-- ───────────────────────── Gamification moderne (XP/niveau/classement) - CORRECTIF D ─────────────────────────
+             Drapeau academy.gamification_enabled (défaut OFF). Double garde : ce @if
+             ET le composant lui-même (Gamification::enabled). Voir GamificationService.
+             Placée en 1er item de l'accordéon (avant Badges/Annonces) : c'est la section
+             la plus personnelle/motivante (XP du jour, classement), cohérente avec sa
+             position d'origine juste avant l'accordéon - audit design-critique 2026-07-03. --}}
+        @if(config('academy.gamification_enabled'))
+            @livewire('academy.gamification')
+        @endif
 
         {{-- ───────────────────────── Vos badges (E1) ───────────────────────── --}}
         <div class="accordion-item" style="border-radius: 8px; margin-bottom: 6px; overflow: hidden; border: 1px solid #E5E7EB;">

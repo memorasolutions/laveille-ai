@@ -127,6 +127,51 @@ class Dashboard extends Component
     }
 
     /**
+     * CORRECTIF E (Vague 2 design-critique, 2026-07-03) - Suggestions de cours quand
+     * une SEULE formation est en cours et à peine entamée (< 5 %) : l'étudiant risque
+     * de croire que l'Académie n'a qu'un seul cours à offrir. On propose au maximum 2
+     * AUTRES cours publiés, jamais déjà suivis par l'utilisateur.
+     *
+     * Sécurité (moindre privilège, anti-fuite) :
+     *  - uniquement des cours `status = published` (jamais un brouillon/archivé) ;
+     *  - jamais un cours où l'utilisateur a déjà une inscription ACTIVE (peu importe
+     *    sa progression sur cet autre cours) ;
+     *  - retourne une Collection VIDE si l'utilisateur a 0 ou 2+ formations, ou si son
+     *    unique formation est déjà entamée au-delà du seuil (SUGGESTION_PROGRESS_THRESHOLD).
+     *
+     * @return Collection<int, Course>
+     */
+    private const SUGGESTION_PROGRESS_THRESHOLD = 5;
+
+    #[Computed]
+    public function suggestedCourses(): Collection
+    {
+        $enrollments = $this->enrollments;
+
+        if ($enrollments->count() !== 1) {
+            return collect();
+        }
+
+        if ((int) ($enrollments->first()['percent'] ?? 0) >= self::SUGGESTION_PROGRESS_THRESHOLD) {
+            return collect();
+        }
+
+        $user = Auth::user();
+
+        $activeCourseIds = \Modules\Academy\Models\Enrollment::query()
+            ->where('user_id', $user->id)
+            ->where('status', 'active')
+            ->pluck('course_id');
+
+        return Course::query()
+            ->where('status', 'published')
+            ->whereNotIn('id', $activeCourseIds)
+            ->orderByDesc('updated_at')
+            ->limit(2)
+            ->get();
+    }
+
+    /**
      * V5-b - Echeances a venir : les 10 prochaines echeances futures de tous les
      * cours ou l'utilisateur est inscrit actif (evenements manuels + devoirs
      * publies avec due_at). Calcul serveur, scope strict (anti-IDOR) via

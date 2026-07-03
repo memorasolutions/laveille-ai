@@ -14,14 +14,34 @@
     depuis le tier-gating : le drapeau global reste ON, seul le palier refuse).
     SELF: 2 lignes (div racine toujours présente) — RAISON: refus propre sans
     casser la contrainte "un seul élément racine" de Livewire.
+
+    ACTION: correctif D (Vague 2 design-critique) — « Ma progression » devient
+    un accordion-item repliable par défaut, injecté DANS l'accordéon
+    #academySecondaryAccordion du dashboard (même patron que « Vos badges » :
+    accordion-item > h2.accordion-header > button.accordion-button.collapsed
+    + accordion-collapse > accordion-body). Le style typographique du bouton
+    est déjà unifié par le CSS scopé #academySecondaryAccordion .accordion-button
+    (dashboard.blade.php, commit 46bf8184) : rien à dupliquer ici.
+    SELF: <5 lignes de structure — RAISON: la racine <div> unique de Livewire
+    est conservée intacte, seul le contenu interne change de patron d'affichage.
 --}}
 <div>
 @if($this->enabled)
-<section aria-labelledby="academy-gamification" class="mb-5">
-    <h2 id="academy-gamification"
-        style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 16px;">
-        <span aria-hidden="true">⭐</span> Ma progression
+<div class="accordion-item" style="border-radius: 8px; margin-bottom: 6px; overflow: hidden; border: 1px solid #E5E7EB;">
+    <h2 class="accordion-header" id="academy-gamification">
+        <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#academy-gamification-collapse"
+                aria-expanded="false"
+                aria-controls="academy-gamification-collapse">
+            <span aria-hidden="true">⭐</span>&nbsp;Ma progression
+        </button>
     </h2>
+    <div id="academy-gamification-collapse"
+         class="accordion-collapse collapse"
+         aria-labelledby="academy-gamification"
+         data-bs-parent="#academySecondaryAccordion">
+    <div class="accordion-body">
 
     @php($progress = $this->progress)
 
@@ -135,6 +155,9 @@
             Aucun classement disponible pour l'instant (inscrivez-vous à une formation pour en débloquer un).
         </p>
     @endforelse
-</section>
+
+    </div>
+    </div>
+</div>
 @endif
 </div>
