@@ -160,7 +160,7 @@ class ChatBot extends Component
             return;
         }
 
-        $conversation = AiConversation::find($this->conversationId);
+        $conversation = AiConversation::byUser(auth()->id())->find($this->conversationId);
         if ($conversation && $conversation->status === ConversationStatus::AiActive) {
             $conversation->update(['status' => ConversationStatus::WaitingHuman]);
             $this->conversationStatus = ConversationStatus::WaitingHuman->value;
@@ -207,7 +207,9 @@ class ChatBot extends Component
             return;
         }
 
-        $conversation = AiConversation::find($this->conversationId);
+        $conversation = auth()->check()
+            ? AiConversation::byUser(auth()->id())->find($this->conversationId)
+            : AiConversation::find($this->conversationId);
         if (! $conversation) {
             return;
         }
@@ -243,7 +245,7 @@ class ChatBot extends Component
     public function clearConversation(): void
     {
         if (auth()->check() && $this->conversationId) {
-            $conversation = AiConversation::find($this->conversationId);
+            $conversation = AiConversation::byUser(auth()->id())->find($this->conversationId);
             if ($conversation) {
                 $conversation->update([
                     'status' => ConversationStatus::Closed,
