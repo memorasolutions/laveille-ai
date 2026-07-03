@@ -290,6 +290,14 @@ class QuizController extends Controller
             $timedOut       = $elapsedSeconds > $allowedSeconds;
         }
 
+        // MODE KIOSQUE : incidents empilés en session PENDANT la tentative en cours
+        // (voir KioskController::recordViolation + KioskViolationService::stageInSession).
+        // Capturés AVANT le forget() ci-dessous, migrés vers academy_kiosk_violations
+        // une fois la QuizAttempt créée (aucun impact sur le scoring — pur audit).
+        $stagedKioskViolations = is_array($quizData['kiosk_violations'] ?? null)
+            ? $quizData['kiosk_violations']
+            : [];
+
         // Supprimer la session (une tentative = une soumission)
         $request->session()->forget($sessionKey);
 
@@ -299,9 +307,10 @@ class QuizController extends Controller
         // (rétrocompat des Completion existantes).
         // H1 : `$limitReached` est positionné DANS la transaction si la limite de
         // tentatives est déjà atteinte → aucune tentative créée (idempotence).
-        $limitReached = false;
+        $limitReached  = false;
+        $createdAttempt = null;
 
-        DB::transaction(function () use ($user, $item, $scoreResult, $passed, $needsGrading, $answers, $questions, $startedAt, $timedOut, $attemptsAllowed, &$limitReached): void {
+        DB::transaction(function () use ($user, $item, $scoreResult, $passed, $needsGrading, $answers, $questions, $startedAt, $timedOut, $attemptsAllowed, &$limitReached, &$createdAttempt): void {
             // H1 — RE-VÉRIFICATION ANTI-TOCTOU. La limite est relue ICI, dans la même
             // transaction que la création, sur l'HISTORIQUE RÉEL (QuizAttempt). Sans
             // ce garde, N onglets soumis simultanément contournaient le contrôle de
@@ -318,7 +327,7 @@ class QuizController extends Controller
             // change PAS la sémantique des colonnes existantes (rétrocompat V1-b).
             // V1-d : `timed_out` écrit directement (colonne déployée en prod, migration
             // additive idempotente présente) → plus d'introspection Schema par soumission.
-            QuizAttempt::create([
+            $createdAttempt = QuizAttempt::create([
                 'user_id'            => $user->id,
                 'lesson_item_id'     => $item->id,
                 'course_id'          => $this->resolveCourseId($item),
@@ -355,6 +364,19 @@ class QuizController extends Controller
         // n'a été créée. On renvoie le MÊME message que startQuiz (cohérence UX).
         if ($limitReached) {
             return back()->with('error', 'Nombre de tentatives maximum atteint.');
+        }
+
+        // MODE KIOSQUE : migration des incidents empilés en session vers la table
+        // dédiée, maintenant que la QuizAttempt existe réellement (jamais avant :
+        // voir KioskController::recordViolation). Silencieux, aucun impact sur le
+        // score déjà calculé ci-dessus.
+        try {
+            if ($stagedKioskViolations !== [] && $createdAttempt !== null && class_exists(\Modules\Academy\Services\KioskViolationService::class)) {
+                app(\Modules\Academy\Services\KioskViolationService::class)
+                    ->flushSessionToAttempt($user, $createdAttempt, $stagedKioskViolations);
+            }
+        } catch (\Throwable) {
+            // Silencieux : ne jamais bloquer la soumission pour une migration d'audit ratée.
         }
 
         // V5a-1 : recalcul défensif post-soumission pour les cours à critère min_grade.

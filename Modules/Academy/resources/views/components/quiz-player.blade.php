@@ -496,6 +496,172 @@
         </div>
     @endif
 
+    {{-- ════════════════════════════════════════════════════════════════════════
+         MODE KIOSQUE (verrouillage anti-triche des évaluations surveillées).
+         Actif UNIQUEMENT si config('academy.kiosk_mode_enabled') ET
+         $item->kiosk_mode sont vrais ET qu'un round est actif en session (double
+         garde + round démarré). Alpine.js vanilla, cohérent avec le style du
+         minuteur existant plus haut dans ce fichier.
+
+         AVERTISSEMENT (dissuasion, pas garantie) : ce bloc est purement côté
+         CLIENT et donc contournable par un utilisateur technique (DevTools,
+         extension navigateur, JS désactivé). Il ne fait QUE dissuader et
+         journaliser des comportements suspects à des fins d'audit formateur.
+         La notation du quiz reste et restera TOUJOURS calculée exclusivement
+         côté SERVEUR par Services\QuizService::score() (voir
+         QuizController::submitQuiz) - ce bloc n'influence jamais le score et
+         n'invalide jamais automatiquement une tentative.
+    ════════════════════════════════════════════════════════════════════════ --}}
+    @if(config('academy.kiosk_mode_enabled') && ($item->kiosk_mode ?? false) && session()->has("academy.quiz.{$item->id}"))
+        <div
+            x-data="{
+                banner: null,
+                bannerTimeout: null,
+                devtoolsWarned: false,
+
+                init() {
+                    // Plein écran natif au démarrage (best-effort : certains
+                    // navigateurs/contextes refusent silencieusement - on n'échoue
+                    // jamais le quiz pour autant, c'est de la DISSUASION).
+                    this.requestKioskFullscreen();
+
+                    document.addEventListener('fullscreenchange', () => {
+                        if (! document.fullscreenElement) {
+                            this.reportIncident('fullscreen_exit');
+                        }
+                    });
+
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.hidden) {
+                            this.reportIncident('tab_blur');
+                        }
+                    });
+
+                    window.addEventListener('blur', () => {
+                        this.reportIncident('tab_blur');
+                    });
+
+                    // Dissuasion : clic-droit et raccourcis copier/coller/imprimer
+                    // désactivés PENDANT le quiz. Contournable (ex. menu clavier
+                    // système), mais décourage la copie occasionnelle.
+                    this.$el.addEventListener('contextmenu', (e) => e.preventDefault());
+
+                    document.addEventListener('keydown', (e) => {
+                        const key = (e.key || '').toLowerCase();
+                        const mod = e.ctrlKey || e.metaKey;
+
+                        if (mod && ['c', 'v', 'p'].includes(key)) {
+                            e.preventDefault();
+                        }
+
+                        // Heuristique BEST-EFFORT (non garantie) de détection des
+                        // outils de développement via un raccourci connu. Un
+                        // utilisateur technique dispose d'autres moyens d'ouvrir
+                        // DevTools (menu navigateur) que ce bloc ne peut pas voir.
+                        if (key === 'f12' || (mod && e.shiftKey && ['i', 'j', 'c'].includes(key))) {
+                            e.preventDefault();
+                            this.reportIncident('devtools_suspected');
+                        }
+                    });
+
+                    // Heuristique BEST-EFFORT (non garantie) : un écart marqué entre
+                    // la largeur de la fenêtre et celle du viewport suggère un
+                    // panneau DevTools ancré. Faux positifs possibles (barres
+                    // d'outils, zoom) → seuil large, signalé UNE seule fois.
+                    setInterval(() => {
+                        const widthGap  = window.outerWidth - window.innerWidth;
+                        const heightGap = window.outerHeight - window.innerHeight;
+                        if (! this.devtoolsWarned && (widthGap > 200 || heightGap > 200)) {
+                            this.devtoolsWarned = true;
+                            this.reportIncident('devtools_suspected');
+                        }
+                    }, 2000);
+                },
+
+                requestKioskFullscreen() {
+                    const el = document.documentElement;
+                    if (el.requestFullscreen) {
+                        el.requestFullscreen().catch(() => {
+                            // Refus silencieux (navigateur/contexte) : on continue sans
+                            // bloquer l'apprenant, c'est de la dissuasion, pas un mur.
+                        });
+                    }
+                },
+
+                showBanner(message) {
+                    clearTimeout(this.bannerTimeout);
+                    this.banner = message;
+                    this.bannerTimeout = setTimeout(() => { this.banner = null; }, 6000);
+                },
+
+                reportIncident(type) {
+                    const messages = {
+                        fullscreen_exit:     'Incident consigné : sortie du mode plein écran.',
+                        tab_blur:            'Incident consigné : changement d\'onglet ou de fenêtre détecté.',
+                        devtools_suspected:  'Incident consigné : outils de développement suspectés.',
+                        voluntary_exit:      'Sortie du mode kiosque enregistrée.',
+                    };
+                    this.showBanner(messages[type] || 'Incident consigné.');
+
+                    fetch('{{ route('academy.quiz.kiosk-violation', [$course, $lesson, $item->id]) }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']')?.content || '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({ type: type }),
+                        credentials: 'same-origin',
+                    }).catch(() => {
+                        // Réseau indisponible : l'incident reste affiché à l'apprenant
+                        // (transparence) même si la consignation serveur a échoué.
+                    });
+                },
+
+                exitKiosk() {
+                    this.reportIncident('voluntary_exit');
+                    if (document.fullscreenElement && document.exitFullscreen) {
+                        document.exitFullscreen().catch(() => {});
+                    }
+                    window.location.href = '{{ route('academy.lessons.show', [$course, $lesson]) }}#item-{{ $item->id }}';
+                }
+            }"
+            role="region"
+            aria-label="Mode kiosque actif"
+        >
+            {{-- Bandeau de transparence : PAS d'alert() natif, toast inline visible
+                 immédiatement après chaque incident consigné (role=status pour les
+                 lecteurs d'écran, sans voler le focus). --}}
+            <div
+                x-show="banner"
+                x-cloak
+                x-text="banner"
+                role="status"
+                aria-live="polite"
+                class="mb-2 p-2 rounded"
+                style="background:#FEF3C7;border:1px solid #FCD34D;color:#78350F;font-weight:600;font-size:0.85rem;"
+            ></div>
+
+            {{-- Bouton « Quitter le mode kiosque » : TOUJOURS visible, jamais masqué
+                 ni piégé, atteignable au clavier (élément <button> natif, tabindex
+                 implicite 0), contraste AAA (7:1) : #FFFFFF sur #7F1D1D ≈ 10,4:1. --}}
+            <button
+                type="button"
+                @click="exitKiosk()"
+                class="mb-3"
+                style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#7F1D1D;color:#FFFFFF;border:2px solid #7F1D1D;border-radius:var(--sys-radius-md, 0.5rem);font-weight:700;font-size:0.85rem;cursor:pointer;"
+                onfocus="this.style.outline='3px solid #1D4ED8'; this.style.outlineOffset='2px';"
+                onblur="this.style.outline='none';"
+            >
+                Quitter le mode kiosque
+            </button>
+
+            <p class="text-muted mb-3" style="font-size:0.78rem;">
+                Mode kiosque actif : le plein écran est appliqué et les incidents (sortie de plein écran, changement d'onglet, outils de développement) sont consignés et visibles par le formateur. Ceci est une mesure de dissuasion, pas un blocage : vous pouvez quitter à tout moment via le bouton ci-dessus.
+            </p>
+        </div>
+    @endif
+
     {{-- ── Quiz actif en session ── --}}
     @if(session()->has("academy.quiz.{$item->id}"))
         @php

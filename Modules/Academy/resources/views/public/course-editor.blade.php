@@ -114,6 +114,21 @@
                         </div>
                     @endcan
 
+                    {{-- MODE KIOSQUE - Journal des incidents des évaluations surveillées.
+                         Gâté manageEnrollments (admin OU owner/instructor) ET par le
+                         drapeau global (défaut off). Tentatives re-scopées au cours
+                         (anti-IDOR). Vraie garde = serveur. --}}
+                    @if(config('academy.kiosk_mode_enabled'))
+                        @can('manageEnrollments', $course)
+                            <div style="margin-top: 28px;">
+                                <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin: 0 0 8px;">
+                                    Mode kiosque — incidents consignés
+                                </h2>
+                                @livewire('academy.kiosk-violations', ['course' => $course])
+                            </div>
+                        @endcan
+                    @endif
+
                     {{-- PHASE 4 (FE-4) - Inscriptions + équipe. Rendu seulement si la
                          personne peut gérer les inscriptions (admin OU owner/instructor) ;
                          la section « équipe » à l'intérieur est en plus gâtée par

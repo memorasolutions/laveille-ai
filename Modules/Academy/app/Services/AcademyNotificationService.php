@@ -34,6 +34,8 @@ use Modules\Academy\Models\Announcement;
 use Modules\Academy\Models\CertificateIssued;
 use Modules\Academy\Models\Course;
 use Modules\Academy\Models\CourseRole;
+use Modules\Academy\Models\DirectMessage;
+use Modules\Academy\Models\DirectMessageConversation;
 use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Models\ForumPost;
 use Modules\Academy\Models\ForumTopic;
@@ -54,6 +56,9 @@ final class AcademyNotificationService
 
     /** Tuteur IA — rappel calme avant expiration de la fenêtre d'accès (J-7/J-1). */
     public const TYPE_AI_TUTOR_ACCESS_REMINDER = 'ai_tutor_access_reminder';
+
+    /** Messagerie directe (DM) — nouveau message reçu dans un fil privé. */
+    public const TYPE_DM_RECEIVED = 'dm_received';
 
     // Nudges comportementaux (relances bienveillantes). Regroupés sous UNE seule
     // préférence utilisateur « nudge » (opt-out global des relances), tout en gardant
@@ -83,6 +88,7 @@ final class AcademyNotificationService
         self::TYPE_LIVE_REMINDER,
         self::TYPE_AI_TUTOR_ACCESS_REMINDER,
         self::PREF_NUDGE,
+        self::TYPE_DM_RECEIVED,
     ];
 
     public function __construct(private readonly BrevoService $brevo) {}
@@ -554,6 +560,43 @@ final class AcademyNotificationService
                 'context'  => $nudge['context'],
                 'ctaUrl'   => $ctaUrl,
                 'ctaLabel' => $nudge['cta_label'],
+            ],
+            $dedupKey,
+        );
+    }
+
+    /**
+     * Messagerie directe (DM) — nouveau message reçu -> au DESTINATAIRE du message.
+     * Aucun envoi si le destinataire est l'expéditeur (ne devrait jamais arriver,
+     * DirectMessageService l'empêche déjà en amont, mais défense en profondeur).
+     * IDEMPOTENT : un message précis ne notifie qu'une seule fois (anti-retry).
+     */
+    public function directMessageReceived(User $recipient, User $sender, DirectMessageConversation $conversation, DirectMessage $message): bool
+    {
+        if (! $this->isMasterEnabled()) {
+            return false;
+        }
+
+        if ((int) $recipient->id === (int) $sender->id) {
+            return false;
+        }
+
+        $dedupKey = 'dm_received:message-' . $message->id;
+
+        $threadUrl = Route::has('academy.messages.show')
+            ? route('academy.messages.show', $conversation->id)
+            : url('/academie/messages');
+
+        return $this->send(
+            self::TYPE_DM_RECEIVED,
+            $recipient,
+            'Nouveau message de ' . $sender->name,
+            'academy::emails.dm-received',
+            [
+                'sender'   => $sender,
+                'excerpt'  => \Illuminate\Support\Str::limit($message->body, 160),
+                'ctaUrl'   => $threadUrl,
+                'ctaLabel' => 'Répondre',
             ],
             $dedupKey,
         );

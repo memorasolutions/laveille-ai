@@ -613,8 +613,10 @@ class GlossaryLinkifier
     {
         if ($linkCount >= $maxLinks) return;
 
-        // Skip zones interdites
-        $skipTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a', 'code', 'pre', 'abbr', 'blockquote', 'dfn', 'label', 'script', 'style', 'kbd', 'samp', 'var'];
+        // Skip zones interdites. button/select/option/textarea : 2026-07-03 - un lien injecté dans le
+        // texte d'un <button> (ex. "Générer mon prompt optimisé") intercepte le clic et navigue vers le
+        // glossaire au lieu de soumettre le formulaire (incident générateur de prompt interactif article 16).
+        $skipTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a', 'code', 'pre', 'abbr', 'blockquote', 'dfn', 'label', 'script', 'style', 'kbd', 'samp', 'var', 'button', 'select', 'option', 'textarea'];
         if ($node->nodeType === XML_ELEMENT_NODE && in_array(strtolower($node->nodeName), $skipTags, true)) {
             return;
         }

@@ -149,6 +149,9 @@ trait HandlesItems
             'shuffle_questions'   => $extra['shuffle_questions']   ?? null,
             'shuffle_answers'     => $extra['shuffle_answers']     ?? null,
             'time_limit_minutes'  => $extra['time_limit_minutes']  ?? null,
+            // MODE KIOSQUE : verrouillage anti-triche des évaluations surveillées
+            // (voir Services\KioskViolationService, config('academy.kiosk_mode_enabled')).
+            'kiosk_mode'          => $extra['kiosk_mode']          ?? null,
             'review_options'      => $extra['review_options']      ?? null,
             // V1-f : comportement de question (deferred par défaut / immediate / adaptive).
             'question_behaviour'  => $extra['question_behaviour']  ?? null,
@@ -175,12 +178,18 @@ trait HandlesItems
         $data    = $this->validateItem($input);
         $payload = $this->buildItemPayload($data['type'], $input);
 
+        // MODE KIOSQUE : colonne physique (pas une clé du payload JSON), n'a d'effet
+        // QUE sur un item de type quiz ET si config('academy.kiosk_mode_enabled') est
+        // actif (double garde appliquée au lecteur — voir quiz-player.blade.php).
+        $kioskMode = $data['type'] === 'quiz' && $this->truthy($data['kiosk_mode'] ?? null);
+
         $item->update([
             'type'              => $data['type'],
             'title'             => $data['title'],
             'payload'           => $payload,
             'estimated_minutes' => $data['estimated_minutes'] ?? null,
             'external_ref'      => $data['external_ref'] ?? null,
+            'kiosk_mode'        => $kioskMode,
         ]);
 
         $this->flashSaved('Élément mis à jour.');
@@ -277,6 +286,9 @@ trait HandlesItems
             'shuffle_questions'  => 'nullable|boolean',
             'shuffle_answers'    => 'nullable|boolean',
             'time_limit_minutes' => 'nullable|integer|min:1|max:240',
+            // MODE KIOSQUE : n'a d'effet que si config('academy.kiosk_mode_enabled')
+            // est également actif (double garde, voir buildQuizPayload).
+            'kiosk_mode'         => 'nullable|boolean',
             'review_options'     => 'nullable|array',
             // V1-f : comportement de question (liste blanche stricte ; vide/inconnu =
             // défaut « deferred » appliqué au build → rétrocompat stricte).

@@ -20,6 +20,7 @@ use Modules\Academy\Http\Controllers\FeedbackController;
 use Modules\Academy\Http\Controllers\ForumController;
 use Modules\Academy\Http\Controllers\H5pPlayerController;
 use Modules\Academy\Http\Controllers\ItemEngagementController;
+use Modules\Academy\Http\Controllers\KioskController;
 use Modules\Academy\Http\Controllers\CourseController;
 use Modules\Academy\Http\Controllers\EnrollmentController;
 use Modules\Academy\Http\Controllers\ExportController;
@@ -100,6 +101,29 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
         Route::get('notifications/admin', fn () => view('academy::public.notification-master-switch'))
             ->middleware(['auth', 'can:academy.manage'])
             ->name('notifications.master');
+
+        // Messagerie directe (DM) formateur <-> apprenant (parité Moodle, LMS 2026).
+        // Connexion requise ; chaque composant Livewire re-vérifie
+        // config('academy.direct_messaging_enabled') (404 si désactivé) ET que
+        // l'utilisateur est bien participant de la conversation demandée
+        // (abort_if anti-IDOR, pattern Modules/Authors — voir ConversationThread::mount()).
+        // Déclarées AVANT les routes wildcard courses/{course:slug} par précaution,
+        // même si le préfixe courses/ ne peut normalement pas entrer en collision.
+        Route::get('messages', fn () => view('academy::public.messages-index'))
+            ->middleware('auth')
+            ->name('messages.index');
+
+        Route::get('messages/nouveau', fn () => view('academy::public.messages-new'))
+            ->middleware('auth')
+            ->name('messages.new');
+
+        Route::get('messages/{conversation}', function (\Modules\Academy\Models\DirectMessageConversation $conversation) {
+            abort_if(! $conversation->hasParticipant(auth()->user()), 403);
+
+            return view('academy::public.messages-show', ['conversation' => $conversation]);
+        })
+            ->middleware('auth')
+            ->name('messages.show');
 
         // PHASE 5 (FE-5) - Création de cours front-end.
         // Connexion requise ; l'autorisation d'entrée (create) vit dans
@@ -320,6 +344,16 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             'courses/{course:slug}/lessons/{lesson}/items/{itemId}/quiz/verify',
             [QuizController::class, 'verifyQuestion']
         )->name('quiz.verify');
+
+        // MODE KIOSQUE — consignation d'un incident (sortie plein écran, changement
+        // d'onglet, devtools suspectés, sortie volontaire) pendant une tentative
+        // surveillée. Auth + inscription vérifiées (authorizeAccess), anti-IDOR strict
+        // (la tentative doit appartenir à l'utilisateur courant), throttle:20,1 du
+        // groupe parent (anti-DoS léger, cohérent avec les autres mutations étudiant).
+        Route::post(
+            'courses/{course:slug}/lessons/{lesson}/items/{itemId}/quiz/kiosk-violation',
+            [KioskController::class, 'recordViolation']
+        )->name('quiz.kiosk-violation');
 
         // CHOICE — voter à un sondage (item « choice »). Auth + inscription vérifiées,
         // item re-résolu (anti-IDOR), choix bornés aux options, 1 vote/étudiant (upsert).

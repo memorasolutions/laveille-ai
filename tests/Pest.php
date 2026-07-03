@@ -13,6 +13,14 @@ pest()->extend(Tests\TestCase::class)
 pest()->extend(Tests\TestCase::class)
     ->in(__DIR__.'/../Modules/Academy/tests/Feature');
 
+// Module Sso (SSO SAML + provisioning SCIM) — désactivé par défaut
+// (modules_statuses.json). Chaque test active le module lui-même via
+// Modules\Sso\Tests\Concerns\SkipsWhenSsoDisabled + Nwidart Module::find()
+// forcé enabled en beforeEach (même pattern que Academy), donc PAS dans
+// $disabledModuleTestDirs ci-dessous (qui skip inconditionnellement).
+pest()->extend(Tests\TestCase::class)
+    ->in(__DIR__.'/../Modules/Sso/tests/Feature');
+
 pest()->extend(Tests\TestCase::class)
     ->in('Unit/Helpers');
 

@@ -425,6 +425,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Messagerie directe (DM) formateur ↔ apprenant (parité Moodle, LMS 2026)
+    |--------------------------------------------------------------------------
+    | Quand true, un apprenant et un formateur qui partagent une inscription à
+    | un même cours (formateur du cours OU apprenant inscrit à ce cours) peuvent
+    | s'échanger des messages directs privés via /academie/messages. Autorisation
+    | STRICTE : voir DirectMessageConversation::canMessage() — la relation
+    | pédagogique commune est vérifiée à CHAQUE envoi, jamais mise en cache de
+    | façon permissive (anti-spam/harcèlement entre utilisateurs sans lien).
+    | Réutilise AcademyNotificationService (préférence + interrupteur maître déjà
+    | existants) pour prévenir le destinataire d'un nouveau message.
+    | Défaut false : route 404, aucune table lue/écrite, aucun lien affiché.
+    | Activer via ACADEMY_DIRECT_MESSAGING_ENABLED=true dans le .env.
+    */
+    'direct_messaging_enabled' => env('ACADEMY_DIRECT_MESSAGING_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Paliers d'abonnement (freemium/pro/organisation — LMS 2026)
     |--------------------------------------------------------------------------
     | Quand true, l'accès à certaines fonctionnalités Academy est EN PLUS filtré
@@ -464,6 +481,7 @@ return [
         'academy_gamification'         => "Gamification (XP, niveaux, classement)",
         'academy_placement_test'       => "Test de positionnement adaptatif",
         'academy_video_discussion'     => "Discussion sociale par vidéo",
+        'academy_kiosk_mode'           => "Mode kiosque (évaluations surveillées)",
     ],
 
     /*
@@ -484,6 +502,32 @@ return [
     */
     'lti_enabled' => env('ACADEMY_LTI_ENABLED', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Mode kiosque (verrouillage anti-triche des évaluations surveillées — LMS 2026)
+    |--------------------------------------------------------------------------
+    | Quand true ET que le formateur a coché « Mode kiosque » sur un item de
+    | quiz (payload['kiosk_mode']), le lecteur applique le plein écran natif au
+    | démarrage et consigne les incidents (sortie plein écran, changement
+    | d'onglet, outils de développement suspectés, sortie volontaire) dans
+    | academy_kiosk_violations (voir Services\KioskViolationService), visibles
+    | par le formateur propriétaire du cours. Transparence totale : l'apprenant
+    | voit un bandeau à chaque incident consigné, jamais un blocage silencieux.
+    |
+    | DISSUASION, PAS GARANTIE : un utilisateur technique peut contourner ces
+    | mesures (DevTools, extension navigateur, requête forgée). La notation du
+    | quiz reste TOUJOURS calculée exclusivement côté serveur (QuizService::score,
+    | appelé depuis QuizController::submitQuiz) — le mode kiosque n'influence
+    | jamais le score, il journalise uniquement à des fins d'audit. Aucune
+    | invalidation automatique de tentative n'est appliquée.
+    |
+    | Défaut false : aucun plein écran forcé, aucune case à cocher affichée dans
+    | l'éditeur de cours, routes de consignation 404, comportement du lecteur de
+    | quiz EXACTEMENT inchangé.
+    | Activer via ACADEMY_KIOSK_MODE_ENABLED=true dans le .env.
+    */
+    'kiosk_mode_enabled' => env('ACADEMY_KIOSK_MODE_ENABLED', false),
+
     'notifications' => [
         'enabled' => env('ACADEMY_NOTIFICATIONS_ENABLED', false),
 
@@ -502,6 +546,9 @@ return [
             // Gamification (LMS 2026) : opt-in raisonnable — visible par défaut dans le
             // classement de sa cohorte, retrait possible à tout moment (Loi 25 QC).
             'gamification_leaderboard' => true,
+            // Messagerie directe (DM) : opt-in raisonnable — prévenu par courriel
+            // d'un nouveau message, désactivable sans perdre l'accès au fil.
+            'dm_received' => true,
         ],
 
         // Fenêtre des rappels de séance en direct (en heures avant le début).

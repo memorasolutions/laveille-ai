@@ -32,20 +32,26 @@ use Modules\Academy\Livewire\CourseRoster;
 use Modules\Academy\Livewire\Dashboard;
 use Modules\Academy\Livewire\DiplomaTemplateEditor;
 use Modules\Academy\Livewire\EssayGrading;
+use Modules\Academy\Livewire\KioskViolations;
 use Modules\Academy\Livewire\NotificationMasterSwitch;
 use Modules\Academy\Livewire\NotificationPreferences;
 use Modules\Academy\Livewire\QuestionBankManager;
 use Modules\Academy\Livewire\StudentAssignments;
 use Modules\Academy\Livewire\StudentCompetencies;
 use Modules\Academy\Livewire\StudentGrades;
+use Modules\Academy\Livewire\DirectMessages\ConversationList;
+use Modules\Academy\Livewire\DirectMessages\ConversationThread;
+use Modules\Academy\Livewire\DirectMessages\NewConversation;
 use Modules\Academy\Models\Chapter;
 use Modules\Academy\Models\Course;
+use Modules\Academy\Models\DirectMessageConversation;
 use Modules\Academy\Models\Enrollment;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Observers\EnrollmentObserver;
 use Modules\Academy\Policies\ChapterPolicy;
 use Modules\Academy\Policies\CoursePolicy;
+use Modules\Academy\Policies\DirectMessageConversationPolicy;
 use Modules\Academy\Policies\LessonItemPolicy;
 use Modules\Academy\Policies\LessonPolicy;
 use Modules\Core\Providers\BaseModuleServiceProvider;
@@ -72,6 +78,10 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         Gate::policy(Chapter::class, ChapterPolicy::class);
         Gate::policy(Lesson::class, LessonPolicy::class);
         Gate::policy(LessonItem::class, LessonItemPolicy::class);
+
+        // Messagerie directe (DM) : modèle « participant uniquement » (jamais
+        // d'accès admin de contournement — vie privée Loi 25 QC, voir la policy).
+        Gate::policy(DirectMessageConversation::class, DirectMessageConversationPolicy::class);
 
         // TUTEUR IA — Fenêtre d'accès + quota : calcule et FIGE le grant à chaque
         // inscription créée (SOURCE UNIQUE, tous chemins confondus). NO-OP tant que
@@ -149,6 +159,13 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // cours (anti-IDOR), points bornés au barème, recalcul + complétion en
         // transaction. Voir EssayGrading + EssayGradingService.
         Livewire::component('academy.essay-grading', EssayGrading::class);
+
+        // MODE KIOSQUE - Journal des incidents (sortie plein écran, changement
+        // d'onglet, outils de développement suspectés, sortie volontaire) consignés
+        // pendant les évaluations surveillées (gâté manageEnrollments), tentatives
+        // re-scopées au cours (anti-IDOR). PUREMENT DÉCLARATIF, aucune action de
+        // correction. Voir KioskViolations + KioskViolationService.
+        Livewire::component('academy.kiosk-violations', KioskViolations::class);
 
         // PHASE E (E2) - Devoirs : ÉTUDIANT (voir les devoirs publiés de ses cours
         // suivis, soumettre/éditer SA remise, voir sa note). user_id forcé = auth,
@@ -243,6 +260,13 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // ses gabarits ; admin academy.manage : tous), gâté par le drapeau
         // academy.diploma_editor_enabled (404 si désactivé). Voir DiplomaTemplateEditor.
         Livewire::component('academy.diploma-template-editor', DiplomaTemplateEditor::class);
+
+        // Messagerie directe (DM) formateur <-> apprenant — gâtée par le drapeau
+        // academy.direct_messaging_enabled (404 si désactivé, vérifié dans mount()
+        // de chaque composant). Autorisation stricte : DirectMessageConversation::canMessage().
+        Livewire::component('academy.direct-messages.conversation-list', ConversationList::class);
+        Livewire::component('academy.direct-messages.new-conversation', NewConversation::class);
+        Livewire::component('academy.direct-messages.conversation-thread', ConversationThread::class);
     }
 
     public function register(): void

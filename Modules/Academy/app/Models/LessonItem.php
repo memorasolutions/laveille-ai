@@ -28,6 +28,7 @@ use Spatie\MediaLibrary\HasMedia;
  * @property bool        $is_required
  * @property string|null $external_ref
  * @property int|null    $poster_media_id
+ * @property bool        $kiosk_mode
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
@@ -45,6 +46,9 @@ class LessonItem extends Model implements HasMedia
         'is_required',
         'external_ref',
         'poster_media_id',
+        // Mode kiosque (évaluations surveillées) — voir Services\KioskViolationService,
+        // config('academy.kiosk_mode_enabled') gate la fonctionnalité entière.
+        'kiosk_mode',
     ];
 
     protected $casts = [
@@ -52,6 +56,7 @@ class LessonItem extends Model implements HasMedia
         'is_required'       => 'boolean',
         'position'          => 'integer',
         'estimated_minutes' => 'integer',
+        'kiosk_mode'        => 'boolean',
     ];
 
     public function lesson(): BelongsTo
