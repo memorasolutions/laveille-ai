@@ -26,7 +26,9 @@
     @php($progress = $this->progress)
 
     {{-- ─────────────────────── Bloc XP / niveau ─────────────────────── --}}
-    <div class="mb-4 p-3" style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: var(--sys-radius-md, 0.75rem);">
+    {{-- mb-5 (au lieu de mb-4) : coupure visuelle nette avec le bloc classement qui suit,
+         évite l'impression de bloc dense unique - audit design-critique 2026-07-03. --}}
+    <div class="mb-5 p-3" style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: var(--sys-radius-md, 0.75rem);">
         <div class="d-flex justify-content-between align-items-center mb-1" style="flex-wrap: wrap; gap: 6px;">
             <span style="font-size: 0.85rem; font-weight: 600; color: var(--c-primary, #064E5A);">
                 Niveau {{ $progress['level'] }}
@@ -56,6 +58,16 @@
             @endif
         </span>
     </div>
+
+    {{-- Eyebrow label : signale le changement de sous-section (XP → classement) sans dupliquer
+         visuellement le "Classement — {label}" qui suit déjà par cohorte. N'affiche rien si
+         aucun groupe (évite un titre orphelin sur "Aucun classement disponible") - audit
+         design-critique 2026-07-03. --}}
+    @if($this->leaderboards->isNotEmpty())
+        <h3 style="font-family: var(--f-heading); font-size: 0.95rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.04em;">
+            Classement de votre cohorte
+        </h3>
+    @endif
 
     {{-- ─────────────────────── Opt-out du classement (Loi 25 QC) ─────────────────────── --}}
     <div class="mb-3">

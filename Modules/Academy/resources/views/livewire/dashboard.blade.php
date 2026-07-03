@@ -1,4 +1,22 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
+@once
+    @push('styles')
+        <style>
+            /* Uniformise le style des titres d'accordéon (Vos badges / Annonces / Modèles /
+               Administration) avec les h2 classiques du dashboard (Mes formations / Mes cours) :
+               .accordion-button Bootstrap rend le texte plus petit/pâle par défaut, ce qui cassait
+               la cohérence visuelle - audit design-critique 2026-07-03. Chevron natif conservé. */
+            #academySecondaryAccordion .accordion-button,
+            #academyManageAccordion .accordion-button {
+                font-family: var(--f-heading);
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--sys-text-default, #1A1D23);
+                min-height: 44px;
+            }
+        </style>
+    @endpush
+@endonce
 <div>
     @if(session('academy_dashboard_status'))
         <div role="status" aria-live="polite"
@@ -6,6 +24,9 @@
             {{ session('academy_dashboard_status') }}
         </div>
     @endif
+
+    <x-fronttheme::table-of-contents content-selector="#academy-dashboard-root" title="Sommaire" />
+
     {{-- ───────────── SRS : bouton de révision (visible si cartes dues ; masqué si drapeau off) ───────────── --}}
     @if($this->srsDueCount > 0)
         <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;border:1px solid #99F6E4;background:#F0FDFA;border-radius:var(--sys-radius-md, 0.75rem);padding:16px 20px;margin-bottom:22px;">
@@ -21,6 +42,10 @@
             </a>
         </div>
     @endif
+
+    {{-- Conteneur scanné par x-fronttheme::table-of-contents (h2/h3 internes) : posé sur un
+         div interne, pas sur la racine Livewire, pour ne rien changer à son comportement. --}}
+    <div id="academy-dashboard-root">
 
     {{-- ───────────────────────── Mes formations (tous rôles) ───────────────────────── --}}
     <section aria-labelledby="academy-mes-formations" class="mb-5">
@@ -575,4 +600,6 @@
         </div>
         @endif
     @endif
+
+    </div>
 </div>
