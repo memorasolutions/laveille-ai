@@ -10,6 +10,7 @@ use Illuminate\View\View;
 use Livewire\Component;
 use Modules\Authors\Models\AuthorComment;
 use Modules\Authors\Models\AuthorPost;
+use Modules\Authors\Models\AuthorProfile;
 use Modules\Authors\Models\AuthorSubscriber;
 
 final class AuthorAnalyticsWidget extends Component
@@ -18,6 +19,9 @@ final class AuthorAnalyticsWidget extends Component
 
     public function mount(int $authorProfileId): void
     {
+        $profile = AuthorProfile::findOrFail($authorProfileId);
+        abort_if($profile->user_id !== auth()->id(), 403);
+
         $this->authorProfileId = $authorProfileId;
     }
 

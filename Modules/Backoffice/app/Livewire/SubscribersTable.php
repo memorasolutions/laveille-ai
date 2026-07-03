@@ -58,11 +58,11 @@ class SubscribersTable extends Component
      * Surcharge de la méthode du trait HasBulkActions.
      * L'action 'resend' gère son propre toast récapitulatif ;
      * les autres actions gardent le toast générique du trait.
-     * NOTE : la route DELETE newsletter/{subscriber} utilise 'manage_newsletter' en middleware,
-     * mais cette permission n'est JAMAIS seedée (RolesAndPermissionsSeeder ne crée que
-     * view_/create_/update_/delete_newsletter, Pattern A CRUD) → on vérifie ici au cas par cas
-     * (delete_newsletter / update_newsletter) dans handleBulkAction()/bulkResendConfirmation(),
-     * la garde générique est donc déléguée plus bas selon l'action réelle.
+     * NOTE : la route DELETE newsletter/{subscriber} a été corrigée pour utiliser
+     * 'delete_newsletter' (Pattern A CRUD réellement seedé, au lieu de 'manage_newsletter'
+     * qui n'était jamais seedée) → on vérifie ici au cas par cas (delete_newsletter /
+     * update_newsletter) dans handleBulkAction()/bulkResendConfirmation(), la garde générique
+     * est donc déléguée plus bas selon l'action réelle.
      */
     public function executeBulkAction(): void
     {
@@ -86,8 +86,8 @@ class SubscribersTable extends Component
     }
 
     /**
-     * Requiert delete_newsletter (permission Pattern A réellement seedée ; la route DELETE
-     * newsletter/{subscriber} référence 'manage_newsletter', qui n'existe dans aucun seeder).
+     * Requiert delete_newsletter (permission Pattern A réellement seedée, cohérente avec la
+     * route DELETE newsletter/{subscriber} désormais alignée sur 'delete_newsletter').
      */
     public function delete(int $id): void
     {

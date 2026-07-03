@@ -9,6 +9,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\Backoffice\Livewire\Concerns\WithInfiniteScroll;
 use Modules\Authors\Models\AuthorAffiliateLink;
+use Modules\Authors\Models\AuthorProfile;
 
 class AffiliateLinkManager extends Component
 {
@@ -26,6 +27,9 @@ class AffiliateLinkManager extends Component
 
     public function mount(int $authorProfileId): void
     {
+        $profile = AuthorProfile::findOrFail($authorProfileId);
+        abort_if($profile->user_id !== auth()->id(), 403);
+
         $this->authorProfileId = $authorProfileId;
     }
 

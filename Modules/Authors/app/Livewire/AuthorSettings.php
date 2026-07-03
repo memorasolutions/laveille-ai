@@ -17,8 +17,10 @@ class AuthorSettings extends Component
 
     public function mount(?int $authorProfileId = null): void
     {
+        $author = $authorProfileId !== null ? AuthorProfile::findOrFail($authorProfileId) : null;
+        abort_if($author !== null && $author->user_id !== auth()->id(), 403);
+
         $this->authorProfileId = $authorProfileId;
-        $author = AuthorProfile::find($authorProfileId);
 
         $this->modulesVisible = $author?->modules_visible ?? AuthorProfile::MODULES_DEFAULTS;
 

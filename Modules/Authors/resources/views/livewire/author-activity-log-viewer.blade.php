@@ -66,7 +66,7 @@
             </table>
         </div>
 
-        @include('backoffice::partials.infinite-scroll', ['paginator' => \$activities])
+        @include('backoffice::partials.infinite-scroll', ['paginator' => $activities])
     @endif
 
     <p class="mt-6 text-xs text-gray-500">

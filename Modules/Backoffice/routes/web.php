@@ -181,12 +181,14 @@ Route::prefix('admin')
 
         // ── Media API (pour TipTap editor) ──
         Route::get('media-api', [\Modules\Media\Http\Controllers\MediaController::class, 'index'])->name('media-api.index')->middleware('permission:view_media');
-        Route::middleware('permission:manage_media')->group(function () {
+        Route::middleware('permission:create_media')->group(function () {
             Route::post('media-api', [\Modules\Media\Http\Controllers\MediaController::class, 'store'])->name('media-api.store');
+        });
+        Route::middleware('permission:update_media')->group(function () {
             Route::patch('media-api/{id}', [\Modules\Media\Http\Controllers\MediaController::class, 'update'])->name('media-api.update');
-            Route::delete('media-api/{id}', [\Modules\Media\Http\Controllers\MediaController::class, 'destroy'])->name('media-api.destroy');
             Route::post('media-api/{id}/crop', [\Modules\Media\Http\Controllers\MediaController::class, 'crop'])->name('media-api.crop');
         });
+        Route::delete('media-api/{id}', [\Modules\Media\Http\Controllers\MediaController::class, 'destroy'])->name('media-api.destroy')->middleware('permission:delete_media');
 
         // ── Paramètres ──
         Route::middleware('permission:view_settings')->group(function () {
@@ -335,20 +337,24 @@ Route::prefix('admin')
             Route::get('seo', [SeoController::class, 'index'])->name('seo.index');
             Route::get('redirects', [UrlRedirectController::class, 'index'])->name('redirects.index');
         });
-        Route::middleware('permission:manage_seo')->group(function () {
+        Route::middleware('permission:create_seo')->group(function () {
             Route::get('seo/create', [SeoController::class, 'create'])->name('seo.create');
             Route::post('seo', [SeoController::class, 'store'])->name('seo.store');
+            Route::post('redirects', [UrlRedirectController::class, 'store'])->name('redirects.store');
+        });
+        Route::middleware('permission:update_seo')->group(function () {
             Route::get('seo/{metaTag}/edit', [SeoController::class, 'edit'])->name('seo.edit');
             Route::put('seo/{metaTag}', [SeoController::class, 'update'])->name('seo.update');
-            Route::delete('seo/{metaTag}', [SeoController::class, 'destroy'])->name('seo.destroy');
-            Route::post('redirects', [UrlRedirectController::class, 'store'])->name('redirects.store');
             Route::put('redirects/{redirect}', [UrlRedirectController::class, 'update'])->name('redirects.update');
+        });
+        Route::middleware('permission:delete_seo')->group(function () {
+            Route::delete('seo/{metaTag}', [SeoController::class, 'destroy'])->name('seo.destroy');
             Route::delete('redirects/{redirect}', [UrlRedirectController::class, 'destroy'])->name('redirects.destroy');
         });
 
         // ── Médias ──
         Route::get('media', [MediaController::class, 'index'])->name('media.index')->middleware('permission:view_media');
-        Route::delete('media/{id}', [MediaController::class, 'destroy'])->name('media.destroy')->middleware('permission:manage_media');
+        Route::delete('media/{id}', [MediaController::class, 'destroy'])->name('media.destroy')->middleware('permission:delete_media');
 
         // ── Santé système ──
         Route::middleware('permission:view_health')->group(function () {

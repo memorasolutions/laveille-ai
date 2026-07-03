@@ -83,6 +83,7 @@ it('NewsletterSubscriberService confirm does NOT re-dispatch welcome on already-
 
 it('AuthorRecentNotifications mounts with authorProfileId', function () {
     $author = makeAuthorS118();
+    $this->actingAs($author->user);
 
     Livewire::test(\Modules\Authors\Livewire\AuthorRecentNotifications::class, [
         'authorProfileId' => $author->id,
@@ -91,6 +92,7 @@ it('AuthorRecentNotifications mounts with authorProfileId', function () {
 
 it('AuthorRecentNotifications renders empty state when no activity', function () {
     $author = makeAuthorS118();
+    $this->actingAs($author->user);
 
     $component = Livewire::test(\Modules\Authors\Livewire\AuthorRecentNotifications::class, [
         'authorProfileId' => $author->id,
@@ -103,6 +105,7 @@ it('AuthorRecentNotifications renders empty state when no activity', function ()
 
 it('AuthorRecentNotifications aggregates comments + subscribers events', function () {
     $author = makeAuthorS118();
+    $this->actingAs($author->user);
 
     AuthorComment::create([
         'author_profile_id' => $author->id,
@@ -132,6 +135,7 @@ it('AuthorRecentNotifications aggregates comments + subscribers events', functio
 
 it('AuthorRecentNotifications limits aggregate at 10 events', function () {
     $author = makeAuthorS118();
+    $this->actingAs($author->user);
 
     for ($i = 0; $i < 15; $i++) {
         AuthorComment::create([

@@ -64,7 +64,7 @@ Route::prefix('admin/newsletter')
         Route::get('/', [NewsletterAdminController::class, 'index'])->name('index')->middleware('permission:view_newsletter');
         Route::get('/stats', [\Modules\Newsletter\Http\Controllers\Admin\NewsletterStatsController::class, 'index'])->name('stats')->middleware('permission:view_newsletter');
         Route::get('/export', [NewsletterAdminController::class, 'export'])->name('export')->middleware('permission:view_newsletter');
-        Route::delete('/{subscriber}', [NewsletterAdminController::class, 'destroy'])->name('destroy')->middleware('permission:manage_newsletter');
+        Route::delete('/{subscriber}', [NewsletterAdminController::class, 'destroy'])->name('destroy')->middleware('permission:delete_newsletter');
 
         // Campagnes - view
         Route::get('/campaigns', [CampaignController::class, 'index'])->name('campaigns.index')->middleware('permission:view_campaigns');
@@ -82,8 +82,8 @@ Route::prefix('admin/newsletter')
         });
         Route::delete('/campaigns/{campaign}', [CampaignController::class, 'destroy'])->name('campaigns.destroy')->middleware('permission:delete_campaigns');
 
-        // Campagnes - send (operational write)
-        Route::post('/campaigns/{campaign}/send', [CampaignController::class, 'send'])->name('campaigns.send')->middleware('permission:manage_campaigns');
+        // Campagnes - send (operational write, rattaché à update_campaigns : pas de permission manage_campaigns distincte seedée)
+        Route::post('/campaigns/{campaign}/send', [CampaignController::class, 'send'])->name('campaigns.send')->middleware('permission:update_campaigns');
 
         // Templates marketing - view
         Route::get('/templates', [MarketingTemplateController::class, 'index'])->name('templates.index')->middleware('permission:view_campaigns');
@@ -120,11 +120,11 @@ Route::prefix('admin/newsletter')
             Route::delete('/presets/{preset}', [PromptBuilderController::class, 'destroyPreset'])->name('preset.destroy')->middleware('permission:delete_newsletter');
         });
 
-        // Brouillon newsletter hebdomadaire (digest)
-        Route::get('/digest/draft', [\Modules\Newsletter\Http\Controllers\Admin\DigestDraftController::class, 'edit'])->name('digest.edit');
-        Route::put('/digest/draft/{issue}', [\Modules\Newsletter\Http\Controllers\Admin\DigestDraftController::class, 'update'])->name('digest.update');
-        Route::get('/digest/draft/{issue}/preview', [\Modules\Newsletter\Http\Controllers\Admin\DigestDraftController::class, 'preview'])->name('digest.preview');
-        Route::post('/digest/draft/{issue}/send', [\Modules\Newsletter\Http\Controllers\Admin\DigestDraftController::class, 'sendNow'])->name('digest.send');
+        // Brouillon newsletter hebdomadaire (digest) - édition réservée à update_newsletter
+        Route::get('/digest/draft', [\Modules\Newsletter\Http\Controllers\Admin\DigestDraftController::class, 'edit'])->name('digest.edit')->middleware('permission:update_newsletter');
+        Route::put('/digest/draft/{issue}', [\Modules\Newsletter\Http\Controllers\Admin\DigestDraftController::class, 'update'])->name('digest.update')->middleware('permission:update_newsletter');
+        Route::get('/digest/draft/{issue}/preview', [\Modules\Newsletter\Http\Controllers\Admin\DigestDraftController::class, 'preview'])->name('digest.preview')->middleware('permission:view_newsletter');
+        Route::post('/digest/draft/{issue}/send', [\Modules\Newsletter\Http\Controllers\Admin\DigestDraftController::class, 'sendNow'])->name('digest.send')->middleware('permission:update_newsletter');
 
         // Workflows - view
         Route::middleware('permission:view_workflows')->group(function () {

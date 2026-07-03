@@ -6,6 +6,7 @@ namespace Modules\Authors\Livewire;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Modules\Authors\Models\AuthorProfile;
 use Modules\Authors\Services\ImagePipelineService;
 
 class ImageUploader extends Component
@@ -24,6 +25,11 @@ class ImageUploader extends Component
 
     public function mount(?int $authorProfileId = null): void
     {
+        if ($authorProfileId !== null) {
+            $profile = AuthorProfile::findOrFail($authorProfileId);
+            abort_if($profile->user_id !== auth()->id(), 403);
+        }
+
         $this->authorProfileId = $authorProfileId;
     }
 

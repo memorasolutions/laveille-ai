@@ -78,6 +78,6 @@
                 </tbody>
             </table>
         </div>
-        @include('backoffice::partials.infinite-scroll', ['paginator' => \$links])
+        @include('backoffice::partials.infinite-scroll', ['paginator' => $links])
     @endif
 </div>

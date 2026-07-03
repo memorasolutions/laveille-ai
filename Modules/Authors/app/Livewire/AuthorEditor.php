@@ -43,6 +43,8 @@ class AuthorEditor extends Component
 
     public function mount(AuthorProfile $authorProfile, ?int $postId = null): void
     {
+        abort_if($authorProfile->user_id !== auth()->id(), 403);
+
         $this->authorProfile = $authorProfile;
 
         if ($postId !== null) {

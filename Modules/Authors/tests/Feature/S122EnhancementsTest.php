@@ -123,6 +123,7 @@ it('Scheduled post not visible on public mini-site timeline', function () {
 
 it('AuthorAnalyticsWidget renders with 30-day series', function () {
     $author = makeAuthorS122();
+    $this->actingAs($author->user);
     makeS122Post($author, ['published_at' => now()->subDays(2)]);
 
     $component = Livewire::test(AuthorAnalyticsWidget::class, ['authorProfileId' => $author->id]);
@@ -134,6 +135,7 @@ it('AuthorAnalyticsWidget renders with 30-day series', function () {
 
 it('AuthorAnalyticsWidget computes totals + sparkline path', function () {
     $author = makeAuthorS122();
+    $this->actingAs($author->user);
     makeS122Post($author, ['published_at' => now()->subDays(1)]);
     makeS122Post($author, ['published_at' => now()->subDays(3)]);
 

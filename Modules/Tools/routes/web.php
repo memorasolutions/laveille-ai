@@ -41,8 +41,11 @@ Route::middleware('web')->group(function () {
 
     // Mots croisés - routes API spécifiques + fiche (S80 #63 : ouvert au public, lockdown #48 retiré)
     // Note : middleware EnsureCrosswordTester conservé en code (Modules/Tools/Http/Middleware/) pour réactivation rapide si besoin
+    // Audit OWASP 2026-07-03 : cacheResponse ajouté (manquait ici, présent partout ailleurs sur PublicToolController::show)
+    // pour éviter l'écriture DB (views_count + trackUsage) à chaque requête sans aucune protection.
     Route::get('/outils/mots-croises', [PublicToolController::class, 'show'])
         ->defaults('slug', 'mots-croises')
+        ->middleware('cacheResponse:600')
         ->name('tools.crossword.fiche');
 
     Route::post('/outils/mots-croises/generate', [PublicCrosswordController::class, 'generate'])
@@ -64,14 +67,21 @@ Route::middleware('web')->group(function () {
     Route::get('/outils/mots-croises/csv-template', [PublicCrosswordController::class, 'csvTemplate'])
         ->name('tools.crossword.csv-template');
     // 2026-05-05 #94 : index publique grilles partagées (sans publicId) — DOIT venir AVANT /jeumc/{identifier}
-    Route::get('/jeumc', [PublicCrosswordController::class, 'index'])->name('tools.crossword.public-index');
+    // Audit OWASP 2026-07-03 : throttle ajouté (recherche LIKE + pagination, aucune protection avant)
+    Route::get('/jeumc', [PublicCrosswordController::class, 'index'])
+        ->middleware('throttle:60,1')
+        ->name('tools.crossword.public-index');
     // 2026-05-05 #97 Phase 2 : QR PNG personnalisable — DOIT venir AVANT /jeumc/{identifier} fallback
+    // Audit OWASP 2026-07-03 : throttle ajouté (génération PNG coûteuse CPU, aucune protection avant)
     Route::get('/jeumc/{identifier}/qr.png', [PublicCrosswordController::class, 'qrPng'])
         ->where('identifier', '[a-zA-Z0-9_-]+')
+        ->middleware('throttle:60,1')
         ->name('tools.crossword.qr');
     // 2026-05-05 #97 Phase 1 : {identifier} accepte custom_slug OU public_id (BC garantie via Model::findByShareIdentifier)
+    // Audit OWASP 2026-07-03 : throttle ajouté (écriture DB play_count à chaque requête hors-session)
     Route::get('/jeumc/{identifier}', [PublicCrosswordController::class, 'play'])
         ->where('identifier', '[a-zA-Z0-9_-]+')
+        ->middleware('throttle:60,1')
         ->name('tools.crossword.play');
     // Backward compatibility : ancien path /jeu/{identifier} -> redirect 301 vers /jeumc/ (S79+ libère /jeu/ pour outils interactifs futurs)
     Route::get('/jeu/{identifier}', fn (string $identifier) => redirect('/jeumc/'.$identifier, 301))

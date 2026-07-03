@@ -17,6 +17,11 @@ class AuthorDashboard extends Component
 
     public function mount(?int $authorProfileId = null): void
     {
+        if ($authorProfileId !== null) {
+            $profile = AuthorProfile::findOrFail($authorProfileId);
+            abort_if($profile->user_id !== auth()->id(), 403);
+        }
+
         $this->authorProfileId = $authorProfileId;
     }
 

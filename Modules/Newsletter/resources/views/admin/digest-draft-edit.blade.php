@@ -1,6 +1,4 @@
-@extends('backoffice::themes.backend.master')
-
-@section('title', 'Brouillon newsletter #' . $issue->week_number)
+@extends('backoffice::layouts.admin', ['title' => 'Brouillon newsletter #' . $issue->week_number])
 
 @section('content')
 <div class="container-fluid">

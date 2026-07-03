@@ -55,12 +55,8 @@ class MetaTagsTable extends Component
     }
 
     /**
-     * Requiert update_seo. NOTE : la route PUT seo/{metaTag} utilise 'manage_seo' en
-     * middleware, mais cette permission n'est JAMAIS seedée (RolesAndPermissionsSeeder ne crée
-     * que view_/create_/update_/delete_seo, Pattern A CRUD) → 'manage_seo' n'existe pour
-     * personne sauf super_admin (bypass Gate::before), donc même la route HTTP est de facto
-     * inaccessible aux admins/éditeurs aujourd'hui. On aligne sur la permission réellement
-     * seedée pour ne pas reproduire cette incohérence pré-existante des routes.
+     * Requiert update_seo (Pattern A CRUD réellement seedé). La route PUT seo/{metaTag} a été
+     * alignée sur view_/create_/update_/delete_seo — 'manage_seo' n'est plus référencé nulle part.
      */
     public function toggleActive(int $metaTagId): void
     {

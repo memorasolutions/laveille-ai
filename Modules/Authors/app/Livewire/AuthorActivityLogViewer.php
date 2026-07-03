@@ -23,6 +23,9 @@ class AuthorActivityLogViewer extends Component
 
     public function mount(int $authorProfileId): void
     {
+        $profile = AuthorProfile::findOrFail($authorProfileId);
+        abort_if($profile->user_id !== auth()->id(), 403);
+
         $this->authorProfileId = $authorProfileId;
     }
 

@@ -81,11 +81,9 @@ class MediaTable extends Component
     }
 
     /**
-     * Requiert update_media. NOTE : les routes media-api/media utilisent 'manage_media' en
-     * middleware, mais cette permission n'est JAMAIS seedée (RolesAndPermissionsSeeder ne crée
-     * que view_/create_/update_/delete_media, Pattern A CRUD) → 'manage_media' n'existe pour
-     * personne sauf super_admin (bypass Gate::before). On aligne donc sur la permission
-     * réellement seedée pour ne pas reproduire cette incohérence pré-existante des routes.
+     * Requiert update_media (Pattern A CRUD réellement seedé). Les routes media.destroy et
+     * media-api/* (store/update/destroy/crop, utilisé par TipTap) ont été alignées sur
+     * view_/create_/update_/delete_media — 'manage_media' n'est plus référencé nulle part.
      */
     public function editMedia(int $id): void
     {
@@ -101,7 +99,7 @@ class MediaTable extends Component
     }
 
     /**
-     * Requiert update_media (voir note editMedia() sur manage_media jamais seedée).
+     * Requiert update_media.
      */
     public function updateMedia(): void
     {
@@ -138,7 +136,7 @@ class MediaTable extends Component
     }
 
     /**
-     * Requiert delete_media (voir note editMedia() sur manage_media jamais seedée).
+     * Requiert delete_media (cohérent avec media.destroy, voir note editMedia()).
      */
     public function deleteMedia(int $id): void
     {

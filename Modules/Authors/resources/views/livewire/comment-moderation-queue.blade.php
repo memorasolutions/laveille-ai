@@ -101,7 +101,7 @@
         </div>
 
         <div class="mt-4">
-            @include('backoffice::partials.infinite-scroll', ['paginator' => \$comments])
+            @include('backoffice::partials.infinite-scroll', ['paginator' => $comments])
         </div>
     @endif
 </div>
