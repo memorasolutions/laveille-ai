@@ -26,7 +26,8 @@ Route::get('oembed', OEmbedController::class)->middleware('web')->name('oembed')
 if (\Nwidart\Modules\Facades\Module::find('FrontTheme')?->isEnabled()) {
     Route::middleware(['web', \Modules\FrontTheme\Http\Middleware\SetFrontendTheme::class])->group(function () {
         Route::get('/blog', [\Modules\Blog\Http\Controllers\PublicPostController::class, 'index'])->name('blog.index')->middleware('cacheResponse:600');
-        Route::get('/blog/{slug}', [\Modules\Blog\Http\Controllers\PublicPostController::class, 'show'])->name('blog.show')->middleware('cacheResponse:600');
+        // TTL aligné sur Dictionary (contenu d'un article publié = statique une fois en ligne, contrairement à l'index qui liste les nouveautés)
+        Route::get('/blog/{slug}', [\Modules\Blog\Http\Controllers\PublicPostController::class, 'show'])->name('blog.show')->middleware('cacheResponse:3600');
         Route::get('/categorie/{slug}', [\Modules\Blog\Http\Controllers\PublicPostController::class, 'category'])->name('blog.category');
         // RSS désactivé (décision utilisateur 2026-04-04)
         // Route::get('/feed', [\Modules\Blog\Http\Controllers\FeedController::class, 'rss'])->name('blog.feed')->middleware('cacheResponse:3600');
