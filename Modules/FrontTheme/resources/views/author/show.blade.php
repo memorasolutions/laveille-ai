@@ -1,7 +1,7 @@
 @extends('fronttheme::layouts.master')
 
 @section('title', $author['name'] . ' — ' . ($author['role'] ?? __('Auteur')) . ' — La veille')
-@section('meta_description', \Illuminate\Support\Str::limit(strip_tags($author['bio'] ?? ''), 160))
+@section('meta_description', safe_excerpt($author['bio'] ?? '', 160))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $author['name'] ?? __('Auteur'), 'breadcrumbItems' => [__('Auteur'), $author['name'] ?? '']])

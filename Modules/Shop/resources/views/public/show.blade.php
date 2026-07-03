@@ -2,8 +2,8 @@
 
 @php
     $metaDescription = $product->short_description
-        ? Str::limit($product->short_description, 160)
-        : Str::limit(strip_tags($product->description), 160);
+        ? safe_excerpt($product->short_description, 160)
+        : safe_excerpt(strip_tags($product->description), 160);
 
     $productImage = file_exists(public_path('images/shop/tshirt-laveille-og.jpg'))
         ? asset('images/shop/tshirt-laveille-og.jpg')

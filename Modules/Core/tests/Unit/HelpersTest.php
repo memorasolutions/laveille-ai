@@ -31,3 +31,41 @@ test('format_datetime formats correctly', function () {
     expect(format_datetime($date))->toBe('15/02/2026 14:30');
     expect(format_datetime(null))->toBe('-');
 });
+
+// Bug SEO confirmé (2026-07-03, /glossaire/modele-frontiere) : Str::limit() coupait en plein
+// mot ("...comporte d..."), ce qui décourage le clic dans les SERP Google. safe_excerpt() coupe
+// toujours au dernier espace avant la limite.
+test('safe_excerpt coupe au dernier espace avant la limite, jamais en plein mot', function () {
+    $text = 'La veille technologique est essentielle parce que repousser la limite comporte des risques importants pour toute organisation moderne qui souhaite rester compétitive sur son marché aujourd\'hui.';
+
+    $result = safe_excerpt($text, 160);
+
+    expect($result)->toEndWith('...');
+    expect($result)->not->toContain('  ');
+
+    // Le mot juste avant "..." doit être un mot complet du texte original, pas un fragment.
+    $withoutEnd = mb_substr($result, 0, -3);
+    $lastWord = trim(mb_substr($withoutEnd, mb_strrpos($withoutEnd, ' ') ?: 0));
+    expect($text)->toContain($lastWord);
+});
+
+test('safe_excerpt ne modifie pas un texte déjà plus court que la limite', function () {
+    $text = 'Un texte court.';
+
+    expect(safe_excerpt($text, 160))->toBe($text);
+});
+
+test('safe_excerpt ne dépasse jamais limit + strlen(end) caractères', function () {
+    $text = str_repeat('mot ', 100); // texte long sans ponctuation
+    $end = '...';
+    $limit = 160;
+
+    $result = safe_excerpt($text, $limit, $end);
+
+    expect(mb_strlen($result))->toBeLessThanOrEqual($limit + mb_strlen($end));
+});
+
+test('safe_excerpt gère null et chaîne vide', function () {
+    expect(safe_excerpt(null))->toBe('');
+    expect(safe_excerpt(''))->toBe('');
+});

@@ -2,7 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', $page->title . ' - ' . config('app.name'))
-@section('meta_description', Str::limit($page->meta_description ?? $page->excerpt ?? strip_tags($page->content), 160))
+@section('meta_description', safe_excerpt($page->meta_description ?? $page->excerpt ?? strip_tags($page->content), 160))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $page->title])

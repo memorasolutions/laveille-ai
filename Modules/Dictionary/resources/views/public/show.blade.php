@@ -2,7 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', $term->name . ' - ' . __('Glossaire IA') . ' - ' . config('app.name'))
-@section('meta_description', Str::limit($term->analogy ?? strip_tags($term->definition), 160))
+@section('meta_description', safe_excerpt($term->analogy ?? strip_tags($term->definition), 160))
 @section('og_type', 'article')
 {{-- og:image fallback chain : .jpg (prioritaire) → hero_image original (.png/.webp) → absent (L-JPEG-vs-WebP-social-V1 S75) --}}
 @php

@@ -9,6 +9,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 // format_date() N'EST PAS DÉFINIE ICI : app/Helpers/dates.php (chargé en amont via
 // composer.json autoload.files) fournit LA version canonique, configurable via Settings.
@@ -78,5 +79,47 @@ if (! function_exists('lv_social')) {
         } catch (\Throwable $e) {
             return $fallback;
         }
+    }
+}
+
+if (! function_exists('safe_excerpt')) {
+    /**
+     * Extrait sécurisé (meta description, résumés) qui ne coupe JAMAIS en plein milieu d'un mot.
+     *
+     * Bug SEO confirmé (audit 2026-07-03, /glossaire/modele-frontiere) : Str::limit() coupe
+     * par nombre de caractères pur, sans respecter les limites de mots ("...comporte d...").
+     * Une meta description tronquée en plein mot dans les SERP Google décourage le clic.
+     *
+     * @param  string|null  $text
+     * @param  int  $limit
+     * @param  string  $end
+     * @return string
+     */
+    function safe_excerpt(?string $text, int $limit = 160, string $end = '...'): string
+    {
+        if ($text === null || $text === '') {
+            return '';
+        }
+
+        $clean = trim(strip_tags($text));
+
+        if ($clean === '') {
+            return '';
+        }
+
+        if (mb_strlen($clean) <= $limit) {
+            return $clean;
+        }
+
+        $truncated = mb_substr($clean, 0, $limit);
+        $lastSpace = mb_strrpos($truncated, ' ');
+
+        if ($lastSpace !== false) {
+            $truncated = mb_substr($truncated, 0, $lastSpace);
+        }
+
+        $truncated = rtrim($truncated);
+
+        return Str::of($truncated)->append($end)->toString();
     }
 }

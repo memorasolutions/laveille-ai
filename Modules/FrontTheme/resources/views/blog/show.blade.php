@@ -2,7 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', ($article->seo_title ?? $article->title) . ' - ' . config('app.name'))
-@section('meta_description', Str::limit($article->excerpt ?? strip_tags($article->content), 160))
+@section('meta_description', safe_excerpt($article->excerpt ?? strip_tags($article->content), 160))
 @section('og_type', 'article')
 @section('share_text')
 @php

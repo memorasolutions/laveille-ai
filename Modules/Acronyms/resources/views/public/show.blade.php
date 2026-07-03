@@ -2,7 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', $acronym->acronym . ' - ' . $acronym->full_name . ' - ' . config('app.name'))
-@section('meta_description', __('Signification de') . ' ' . $acronym->acronym . ' : ' . $acronym->full_name . '. ' . Str::limit(strip_tags($acronym->one_sentence_answer ?: $acronym->description), 120))
+@section('meta_description', __('Signification de') . ' ' . $acronym->acronym . ' : ' . $acronym->full_name . '. ' . safe_excerpt($acronym->one_sentence_answer ?: $acronym->description, 120))
 @section('og_type', 'article')
 @if(!empty($acronym->logo_url))
     @section('og_image', str_starts_with($acronym->logo_url, 'http') ? $acronym->logo_url : url($acronym->logo_url).'?v='.($acronym->updated_at?->timestamp ?? '0'))

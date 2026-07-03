@@ -8,7 +8,7 @@
 @endif
 
 @section('title', ($article->seo_title ?? $article->title) . ' - ' . __('Actualités') . ' - ' . config('app.name'))
-@section('meta_description', $article->meta_description ?? Str::limit($article->summary ?? strip_tags($article->description), 155))
+@section('meta_description', $article->meta_description ?? safe_excerpt($article->summary ?? strip_tags($article->description), 155))
 @section('share_text')
 @php
     // Refonte share_text News — pattern viral 2026 aligné Blog (sonar-pro hybride #3+#1+#5)
