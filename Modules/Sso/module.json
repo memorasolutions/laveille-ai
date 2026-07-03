@@ -1,0 +1,11 @@
+{
+    "name": "Sso",
+    "alias": "sso",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Sso\\Providers\\SsoServiceProvider"
+    ],
+    "files": []
+}
