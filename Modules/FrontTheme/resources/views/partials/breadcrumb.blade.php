@@ -6,6 +6,7 @@
             <div class="col-12">
                 <div class="wpo-breadcumb-wrap">
                     <h2>{{ $breadcrumbTitle ?? '' }}</h2>
+                    <nav aria-label="{{ __('Fil d\'Ariane') }}">
                     <ul>
                         <li><a href="{{ route('home') }}">{{ __('Accueil') }}</a></li>
                         @isset($breadcrumbItems)
@@ -45,6 +46,7 @@
                             <li><span>{{ $breadcrumbTitle ?? '' }}</span></li>
                         @endisset
                     </ul>
+                    </nav>
                 </div>
             </div>
         </div>

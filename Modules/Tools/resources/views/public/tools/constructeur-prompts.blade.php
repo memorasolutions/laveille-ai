@@ -116,18 +116,18 @@
                                         <input type="radio" name="verbType" value="custom" x-model="verbType"> {{ __('Personnalisée') }}
                                     </label>
                                 </div>
-                                <select class="form-control" x-show="verbType === 'preset'" x-model="verb" aria-label="{{ __('Verbe d\'action') }}">
+                                <select class="form-control" x-show="verbType === 'preset'" x-model="verb" :aria-required="verbType === 'preset'" aria-label="{{ __('Verbe d\'action') }}">
                                     <option value="">{{ __('-- Sélectionnez un verbe --') }}</option>
                                     <template x-for="v in verbs" :key="v">
                                         <option :value="v" x-text="v"></option>
                                     </template>
                                 </select>
-                                <input type="text" class="form-control" x-show="verbType === 'custom'" x-model="verbCustom" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}" aria-label="{{ __('Verbe personnalisé') }}">
+                                <input type="text" class="form-control" x-show="verbType === 'custom'" x-model="verbCustom" :aria-required="verbType === 'custom'" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}" aria-label="{{ __('Verbe personnalisé') }}">
                             </div>
                             <div class="form-group mb-3">
                                 <p class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: rgba(11,114,133,0.05); border-left: 3px solid var(--c-primary); border-radius: 8px;">🔒 {{ __('Ton texte contient un vrai nom, courriel, numéro ou adresse ? Ne mets jamais tes vraies infos dans une IA. Masque-les d\'abord avec le bouton ci-dessous.') }}</p>
                                 <label class="form-label fw-medium">{{ __('Objet de la tâche') }} <span style="color: #DC2626;">*</span></label>
-                                <textarea id="cpTaskObject" class="form-control" rows="3" x-model="taskObject" placeholder="{{ __('Ex: un plan marketing pour le lancement d\'une application mobile au Québec') }}" aria-label="{{ __('Description de la tâche') }}"></textarea>
+                                <textarea id="cpTaskObject" class="form-control" rows="3" x-model="taskObject" aria-required="true" placeholder="{{ __('Ex: un plan marketing pour le lancement d\'une application mobile au Québec') }}" aria-label="{{ __('Description de la tâche') }}"></textarea>
                                 <small class="text-muted">{{ __('Décrivez précisément ce que l\'IA doit produire.') }}</small>
                             </div>
 
