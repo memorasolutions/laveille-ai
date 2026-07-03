@@ -329,7 +329,8 @@
                     @foreach($popularTools as $tool)
                     @php
                         $screenshotSrc = $tool->screenshot ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.($tool->updated_at?->timestamp ?? '0')) : '';
-                        $gradientColors = ['#064E5A','#064E5A','#E67E22','#D46A1F','#1A1D23','#2D3039'];
+                        // Couleurs assombries pour contraste AAA (7:1+) avec le texte blanc superposé (WCAG 1.4.6) : audit 2026-07-03
+                        $gradientColors = ['#064E5A','#064E5A','#854914','#8A4514','#1A1D23','#2D3039'];
                         $gIdx = abs(crc32($tool->name)) % count($gradientColors);
                         $pricingLabels = ['free' => __('Gratuit'), 'freemium' => 'Freemium', 'paid' => __('Payant'), 'open_source' => 'Open source'];
                         $pricingColors = ['free' => '#065f46', 'freemium' => '#B45309', 'paid' => '#B91C1C', 'open_source' => '#6366F1'];

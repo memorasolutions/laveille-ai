@@ -105,7 +105,8 @@
                                 </div>
                             @else
                                 @php
-                                    $gradients = [['#0B7285','#1a365d'],['#8E44AD','#2C3E50'],['#E67E22','#C0392B'],['#2ECC71','#16A085'],['#3498DB','#2980B9']];
+                                    // Couleurs assombries pour contraste AAA (7:1+) avec le texte blanc superposé (WCAG 1.4.6) : audit 2026-07-03
+                                    $gradients = [['#0B7285','#1a365d'],['#8E44AD','#2C3E50'],['#854914','#983C00'],['#176638','#0E6352'],['#205D86','#1E5D87']];
                                     $idx = abs(crc32($tool->name)) % count($gradients);
                                     [$c1, $c2] = $gradients[$idx];
                                 @endphp

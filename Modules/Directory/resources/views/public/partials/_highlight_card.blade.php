@@ -7,7 +7,8 @@
         ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.($tool->updated_at?->timestamp ?? '0'))
         : '';
     $pricingLabels = \Modules\Directory\Support\PricingCategories::labels();
-    $gradientColors = ['#0B7285','#1a365d','#8E44AD','#E67E22','#2ECC71','#E74C3C','#3498DB','#F39C12'];
+    // Couleurs assombries pour contraste AAA (7:1+) avec le texte blanc superposé (WCAG 1.4.6) : audit 2026-07-03
+    $gradientColors = ['#0B7285','#1a365d','#8E44AD','#854914','#176638','#9F3429','#205D86','#794E09'];
     $gIdx = abs(crc32($tool->name)) % count($gradientColors);
 @endphp
 

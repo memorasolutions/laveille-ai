@@ -29,8 +29,9 @@
             'launchYear' => $tool->launch_year ?? 0,
             'createdTs' => $tool->created_at ? $tool->created_at->timestamp : 0,
             'avgRating' => round($tool->averageRating(), 1),
-            'gradientFrom' => ['#0B7285','#1a365d','#8E44AD','#E67E22','#2ECC71','#E74C3C','#3498DB','#F39C12'][crc32($tool->name) % 8 < 0 ? (crc32($tool->name) % 8) + 8 : crc32($tool->name) % 8],
-            'gradientTo' => ['#1a365d','#0B7285','#2C3E50','#C0392B','#16A085','#8E44AD','#2980B9','#D35400'][crc32($tool->name) % 8 < 0 ? (crc32($tool->name) % 8) + 8 : crc32($tool->name) % 8],
+            // Couleurs assombries pour contraste AAA (7:1+) avec le texte blanc superposé (WCAG 1.4.6) : audit 2026-07-03
+            'gradientFrom' => ['#0B7285','#1a365d','#8E44AD','#854914','#176638','#9F3429','#205D86','#794E09'][crc32($tool->name) % 8 < 0 ? (crc32($tool->name) % 8) + 8 : crc32($tool->name) % 8],
+            'gradientTo' => ['#1a365d','#0B7285','#2C3E50','#983C00','#0E6352','#8E44AD','#1E5D87','#983C00'][crc32($tool->name) % 8 < 0 ? (crc32($tool->name) % 8) + 8 : crc32($tool->name) % 8],
             'hasEduPricing' => (bool) $tool->has_education_pricing,
             'tutorialsCount' => $tool->tutorials_count ?? 0,
             'lifecycleStatus' => $tool->lifecycle_status ?? 'active',
