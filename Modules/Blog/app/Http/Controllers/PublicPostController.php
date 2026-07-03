@@ -109,6 +109,18 @@ class PublicPostController extends Controller
             ->with(['user', 'blogCategory', 'tagsRelation'])
             ->firstOrFail();
 
+        // Composants Blade réutilisables (ex. <x-fronttheme::text-generator .../>) embarqués dans le
+        // contenu éditorial : Blade::render() DOIT s'exécuter ici, avant le début du rendu de la vue -
+        // appelé au milieu d'un @section('content') actif, il corrompt la pile de sections partagée du
+        // Factory et casse le @endsection principal (incident 2026-07-03).
+        if (is_string($article->content) && str_contains($article->content, '<x-')) {
+            try {
+                $article->content = \Illuminate\Support\Facades\Blade::render($article->content);
+            } catch (\Throwable $e) {
+                \Log::warning('Blog show : Blade::render du contenu article a échoué', ['article_id' => $article->id, 'error' => $e->getMessage()]);
+            }
+        }
+
         $relatedArticles = Article::published()
             ->where('id', '!=', $article->id)
             ->when($article->blog_category_id, fn ($q) => $q->where('blog_category_id', $article->blog_category_id))

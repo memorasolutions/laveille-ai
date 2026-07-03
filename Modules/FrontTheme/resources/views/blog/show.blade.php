@@ -260,6 +260,10 @@
                                     if (function_exists('render_shortcodes')) {
                                         $articleContent = render_shortcodes($articleContent);
                                     }
+                                    // Composants Blade réutilisables (ex. <x-fronttheme::text-generator .../>)
+                                    // déjà rendus par PublicPostController::show() AVANT le début du rendu de
+                                    // cette vue (Blade::render() ne doit jamais s'exécuter au milieu d'un
+                                    // @section actif - corrompt la pile de sections partagée, incident 2026-07-03).
                                     // AEO : sections wrappées, IDs sur headings, itemprop. DOIT précéder le wrap Sources :
                                     // sinon le </div> injecté ferme le wrapper interne de chunkContent (DOMDocument) et la
                                     // section Sources tombe hors $body → disparition silencieuse sur articles publiés (fix 2026-05-25).
