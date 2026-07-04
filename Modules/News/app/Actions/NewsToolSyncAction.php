@@ -17,6 +17,7 @@ declare(strict_types=1);
 namespace Modules\News\Actions;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Modules\Core\Services\GlossaryLinkifier;
 use Modules\Directory\Models\Tool;
 use Modules\News\Models\NewsArticle;
@@ -80,10 +81,19 @@ final class NewsToolSyncAction
         $matchedTools = collect(GlossaryLinkifier::getLastMatchedTerms())
             ->filter(fn (array $t) => ($t['type'] ?? '') === 'tool');
 
+        // 2026-07-04 : JSON_UNQUOTE indispensable sous MySQL (règle projet permanente, cf. #227/#306) -
+        // sans lui, JSON_EXTRACT renvoie la valeur JSON-quotée (ex. "claude" avec guillemets littéraux),
+        // qui ne matche donc JAMAIS mb_strtolower($name) ('claude' sans guillemets). SQLite (tests)
+        // déquote déjà les scalaires nativement dans JSON_EXTRACT et n'a PAS de fonction JSON_UNQUOTE
+        // (cf. migration 2026_05_05_180100_set_transformer_case_sensitive.php) - d'où le conditionnel.
+        $nameJsonExpr = DB::getDriverName() === 'mysql'
+            ? "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"fr_CA\"')))"
+            : "LOWER(JSON_EXTRACT(name, '$.\"fr_CA\"'))";
+
         $neverAutoIds = collect(GlossaryLinkifier::TOOL_NEVER_AUTO)
             ->filter(fn (string $name) => (bool) preg_match('/\b' . preg_quote(ucfirst($name), '/') . '\b/u', $text))
             ->map(fn (string $name) => Tool::published()
-                ->whereRaw("LOWER(JSON_EXTRACT(name, '$.\"fr_CA\"')) = ?", [mb_strtolower($name)])
+                ->whereRaw("{$nameJsonExpr} = ?", [mb_strtolower($name)])
                 ->value('id'))
             ->filter()
             ->values();
