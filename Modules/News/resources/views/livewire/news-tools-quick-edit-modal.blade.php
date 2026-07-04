@@ -8,7 +8,7 @@
     @project laveille.ai
 --}}
 <div>
-    <x-core::modal name="news-tools-modal" title="{{ $article ? $article->title : __('Outils liés à cette actualité') }}" title-icon="🔧" max-width="640px">
+    <x-core::modal name="news-tools-modal" title="{{ $article ? $article->title : __('Gérer les outils liés') }}" title-icon="🔧" max-width="640px">
         @if($article)
             <livewire:news.article-tools-editor :article="$article" :key="'ate-modal-'.$article->id" />
         @else

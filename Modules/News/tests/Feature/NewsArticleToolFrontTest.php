@@ -15,6 +15,7 @@ declare(strict_types=1);
  * @project laveille.ai
  */
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Modules\Directory\Models\Tool;
@@ -22,6 +23,15 @@ use Modules\News\Models\NewsArticle;
 use Modules\News\Models\NewsSource;
 
 uses(Tests\TestCase::class, RefreshDatabase::class);
+
+function natFrontAdmin(): User
+{
+    $role = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+    $user = User::factory()->create(['email_verified_at' => now()]);
+    $user->assignRole($role);
+
+    return $user;
+}
 
 // ── Helpers locaux ────────────────────────────────────────────────────────────
 
@@ -151,13 +161,14 @@ it('page actualité : le bloc Outils mentionnés est absent quand aucun outil n\
 
 // ── Liste /actualites : badge « outils liés » sur la miniature (2026-07-04) ──
 
-it('liste des actualités : le badge outil apparaît sur la miniature quand des outils sont liés', function () {
+it('liste des actualités : le badge outil apparaît sur la miniature pour un admin quand des outils sont liés', function () {
     $source = natFrontSource();
     $article = natFrontArticle($source->id, 'BADGE');
     $tool = natFrontTool('BADGE');
 
     $article->tools()->attach($tool->id, ['source' => 'manual']);
 
+    $this->actingAs(natFrontAdmin());
     $response = $this->get(route('news.index'));
 
     $response->assertStatus(200);
@@ -166,9 +177,23 @@ it('liste des actualités : le badge outil apparaît sur la miniature quand des 
     $response->assertSee(__('Outils liés à cette actualité'));
 });
 
-it('liste des actualités : le badge outil est absent de la miniature quand aucun outil n\'est lié', function () {
+it('liste des actualités : le badge outil est absent de la miniature quand aucun outil n\'est lié (admin)', function () {
     $source = natFrontSource();
     natFrontArticle($source->id, 'NOBADGE');
+
+    $this->actingAs(natFrontAdmin());
+    $response = $this->get(route('news.index'));
+
+    $response->assertStatus(200);
+    $response->assertDontSee(__('Outils liés à cette actualité'));
+});
+
+it('liste des actualités : le badge outil est admin-only (masqué pour un visiteur non authentifié même avec des outils liés)', function () {
+    $source = natFrontSource();
+    $article = natFrontArticle($source->id, 'BADGEGUEST');
+    $tool = natFrontTool('BADGEGUEST');
+
+    $article->tools()->attach($tool->id, ['source' => 'manual']);
 
     $response = $this->get(route('news.index'));
 

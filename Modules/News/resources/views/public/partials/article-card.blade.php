@@ -41,11 +41,12 @@
         width: 34px; height: 34px; border-radius: 50%;
         background: rgba(255,255,255,0.92); box-shadow: 0 2px 6px rgba(0,0,0,0.18);
     }
-    /* Indicateur « outils liés » : repère visuel admin pour savoir quelle actualité a déjà été traitée */
+    /* Indicateur « outils liés » (admin-only) : repère visuel pour savoir quelle actualité a déjà été traitée */
     .nw-tools-flag {
         position: absolute; bottom: 8px; left: 8px; z-index: 2;
         display: inline-flex; align-items: center; justify-content: center;
-        width: 30px; height: 30px; border-radius: 50%; font-size: 1rem;
+        width: 34px; height: 34px; min-width: 44px; min-height: 44px; margin: -5px;
+        padding: 0; line-height: 1; border-radius: 50%; font-size: 1rem;
         background: rgba(255,255,255,0.92); box-shadow: 0 2px 6px rgba(0,0,0,0.18);
     }
     /* Bouton engrenage admin : ouvre la popup rapide de liaison d'outils sans quitter la liste */
@@ -119,12 +120,14 @@
                     <x-tools::octopus variant="happy" :size="24" :animate="false" />
                 </span>
             @endif
-            {{-- Indicateur « outils liés » : repère visuel pour savoir quelle actualité a déjà été traitée --}}
-            @if($article->relationLoaded('tools') && $article->tools->isNotEmpty())
-                <span class="nw-tools-flag" aria-label="{{ __('Outils liés à cette actualité') }}" title="{{ __('Outils liés à cette actualité') }}">
-                    🔧
-                </span>
-            @endif
+            {{-- Indicateur « outils liés » (admin-only) : repère visuel pour savoir quelle actualité a déjà été traitée --}}
+            @can('view_admin_panel')
+                @if($article->relationLoaded('tools') && $article->tools->isNotEmpty())
+                    <span class="nw-tools-flag" aria-label="{{ __('Outils liés à cette actualité') }}" title="{{ __('Outils liés à cette actualité') }}">
+                        🔧
+                    </span>
+                @endif
+            @endcan
             {{-- Bouton engrenage admin : popup rapide pour lier des outils sans quitter la liste --}}
             @can('view_admin_panel')
                 <button
