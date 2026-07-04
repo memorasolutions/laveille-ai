@@ -15,16 +15,19 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Modules\Academy\Models\Course;
+use Modules\Academy\Models\CourseCategory;
 use Throwable;
 
 class AcademyController extends Controller
 {
     public function index(Request $request)
     {
-        $q             = trim((string) $request->input('q', ''));
-        $currentFilter = $request->input('filter');
-        $currentLevel  = $request->input('level');
-        $currentSearch = $q;
+        $q              = trim((string) $request->input('q', ''));
+        $currentFilter  = $request->input('filter');
+        $currentLevel   = $request->input('level');
+        $currentSearch  = $q;
+        $categoriesOn   = (bool) config('academy.course_categories_enabled', false);
+        $currentCategory = $categoriesOn ? $request->input('category') : null;
 
         if ($q !== '') {
             // Recherche avec Scout (Meilisearch) — fallback SQL LIKE si indisponible/erreur
@@ -49,11 +52,28 @@ class AcademyController extends Controller
             $query->where('level', $currentLevel);
         }
 
-        $courses = $query->orderBy('published_at', 'desc')
+        // Filtre par catégorie (Vague 4) - gâté par le drapeau, sinon ignoré.
+        if ($currentCategory) {
+            $query->inCategory((int) $currentCategory);
+        }
+
+        $courses = $query->with($categoriesOn ? ['category'] : [])
+            ->orderBy('published_at', 'desc')
             ->paginate(12)
             ->withQueryString();
 
-        return view('academy::public.index', compact('courses', 'currentFilter', 'currentLevel', 'currentSearch'));
+        $categories = $categoriesOn
+            ? CourseCategory::orderBy('position')->orderBy('name')->get()
+            : collect();
+
+        return view('academy::public.index', compact(
+            'courses',
+            'currentFilter',
+            'currentLevel',
+            'currentSearch',
+            'currentCategory',
+            'categories'
+        ));
     }
 
     /**

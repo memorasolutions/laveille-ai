@@ -31,6 +31,7 @@ use Spatie\MediaLibrary\HasMedia;
  * @property string|null $description
  * @property string      $language
  * @property string      $level
+ * @property int|null    $category_id
  * @property int|null    $duration_minutes
  * @property int|null    $image_media_id
  * @property string      $visibility
@@ -85,6 +86,8 @@ class Course extends Model implements HasMedia
         'description',
         'language',
         'level',
+        // Catégorie de cours (taxonomie simple, 0 ou 1) - voir Models\CourseCategory.
+        'category_id',
         'duration_minutes',
         'image_media_id',
         'visibility',
@@ -120,6 +123,7 @@ class Course extends Model implements HasMedia
         'published_at'                  => 'datetime',
         'seo_jsonld'                    => 'array',
         'faq_dictionary_ids'            => 'array',
+        'category_id'                   => 'integer',
         'duration_minutes'              => 'integer',
         'price_cents'                   => 'integer',
         'is_template'                   => 'boolean',
@@ -289,11 +293,28 @@ class Course extends Model implements HasMedia
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    /**
+     * Catégorie de cours (taxonomie simple, 0 ou 1). Null = cours non classé
+     * (rétrocompatibilité totale, comportement identique à avant l'ajout).
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(CourseCategory::class, 'category_id');
+    }
+
     // Scopes
 
     public function scopePublished($query)
     {
         return $query->where('status', 'published')->where('visibility', 'public');
+    }
+
+    /**
+     * Filtre sur une catégorie précise. Utilisé par le filtre public (AcademyController).
+     */
+    public function scopeInCategory($query, int $categoryId)
+    {
+        return $query->where('category_id', $categoryId);
     }
 
     // -------------------------------------------------------------------------

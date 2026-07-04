@@ -23,6 +23,7 @@ use Modules\Academy\Livewire\CompetencyManager;
 use Modules\Academy\Livewire\CourseAnalytics;
 use Modules\Academy\Livewire\CourseAssignments;
 use Modules\Academy\Livewire\CourseCalendar;
+use Modules\Academy\Livewire\CourseCategoryManager;
 use Modules\Academy\Livewire\CourseCompetencies;
 use Modules\Academy\Livewire\CourseCreate;
 use Modules\Academy\Livewire\CourseImport;
@@ -32,6 +33,7 @@ use Modules\Academy\Livewire\CourseRoster;
 use Modules\Academy\Livewire\Dashboard;
 use Modules\Academy\Livewire\DiplomaTemplateEditor;
 use Modules\Academy\Livewire\EssayGrading;
+use Modules\Academy\Livewire\GlobalCalendar;
 use Modules\Academy\Livewire\KioskViolations;
 use Modules\Academy\Livewire\NotificationMasterSwitch;
 use Modules\Academy\Livewire\NotificationPreferences;
@@ -267,6 +269,15 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         Livewire::component('academy.direct-messages.conversation-list', ConversationList::class);
         Livewire::component('academy.direct-messages.new-conversation', NewConversation::class);
         Livewire::component('academy.direct-messages.conversation-thread', ConversationThread::class);
+
+        // Vague 4 - Catégories de cours (taxonomie simple, réservée academy.manage,
+        // gâtée par le drapeau academy.course_categories_enabled dans mount()).
+        Livewire::component('academy.course-category-manager', CourseCategoryManager::class);
+
+        // Vague 4 - Calendrier global (vue mensuelle, lecture seule, RÉUTILISE
+        // CalendarService/LiveSession existants). Gâté par le drapeau
+        // academy.global_calendar_enabled dans mount() (404 si désactivé).
+        Livewire::component('academy.global-calendar', GlobalCalendar::class);
     }
 
     public function register(): void

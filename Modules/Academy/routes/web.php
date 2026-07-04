@@ -164,6 +164,16 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             ->middleware('auth')
             ->name('competencies');
 
+        // Vague 4 - Calendrier GLOBAL (vue mensuelle, lecture seule, parité Moodle).
+        // Connexion requise ; le drapeau academy.global_calendar_enabled + le scope
+        // (inscriptions + cours gérés) sont vérifiés dans GlobalCalendar::mount()/
+        // events() (anti-IDOR, jamais un id reçu du navigateur). Déclarée AVANT les
+        // routes wildcard courses/{course:slug} pour que « calendrier » ne soit
+        // jamais capté comme un slug de cours.
+        Route::get('calendrier', fn () => view('academy::public.global-calendar'))
+            ->middleware('auth')
+            ->name('calendar.index');
+
         // Phase 1 — Éditeur de gabarits de diplômes (Konva.js, drapeau
         // academy.diploma_editor_enabled). Connexion requise ; l'autorisation
         // d'entrée (academy.manage OU rôle instructor) ET le drapeau vivent dans
@@ -246,6 +256,13 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
         })
             ->middleware(['auth', 'can:academy.manage'])
             ->name('admin.org-analytics');
+
+        // Vague 4 - Catégories de cours (taxonomie simple, réservée academy.manage).
+        // Le drapeau academy.course_categories_enabled est re-vérifié dans
+        // CourseCategoryManager::mount() (404 si désactivé, défense en profondeur).
+        Route::get('admin/categories', fn () => view('academy::public.category-manager'))
+            ->middleware(['auth', 'can:academy.manage'])
+            ->name('admin.categories');
 
         // V5-b - Calendrier d'echeances par cours (etudiant inscrit OU gerant).
         // Autorisation verifiee par CourseCalendar::mount() (inscription active

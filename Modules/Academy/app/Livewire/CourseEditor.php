@@ -41,6 +41,7 @@ use Livewire\WithFileUploads;
 use Modules\Academy\Models\CertificateIssued;
 use Modules\Academy\Models\Chapter;
 use Modules\Academy\Models\Course;
+use Modules\Academy\Models\CourseCategory;
 use Modules\Academy\Models\Lesson;
 use Modules\Academy\Models\LessonItem;
 use Modules\Academy\Livewire\Concerns\HandlesChapters;
@@ -86,6 +87,13 @@ class CourseEditor extends Component
     public ?string $subtitle = null;
     public ?string $summary = null;
     public string $level = 'intro';
+    /**
+     * Catégorie de cours (Vague 4, taxonomie simple) : null = non classé.
+     * Volontairement NON typée (int|null impossible à déclarer proprement pour
+     * un <select> qui envoie '' pour « aucune catégorie ») - normalisée en
+     * null dans save() avant validation, jamais utilisée telle quelle ailleurs.
+     */
+    public $category_id = null;
     public string $language = 'fr-CA';
     public string $visibility = 'public';
     public string $access_type = 'free';
@@ -234,7 +242,7 @@ class CourseEditor extends Component
 
     /** Liste blanche des métadonnées du cours en autosave (wire:model.blur → updated()). */
     private const METADATA_FIELDS = [
-        'title', 'subtitle', 'summary', 'level',
+        'title', 'subtitle', 'summary', 'level', 'category_id',
         'language', 'visibility', 'access_type', 'price_cents', 'is_template',
     ];
 
@@ -342,11 +350,18 @@ class CourseEditor extends Component
         $course = $this->resolveCourse();
         $this->authorize('update', $course);
 
+        // Normalisation '' → null AVANT validation : le <select> envoie une chaîne
+        // vide pour « Aucune catégorie » (même idiome que saveCertificate() ci-dessous).
+        if ($this->category_id === '' || $this->category_id === 0) {
+            $this->category_id = null;
+        }
+
         $validated = $this->validate([
             'title'       => 'required|string|max:255',
             'subtitle'    => 'nullable|string|max:255',
             'summary'     => 'nullable|string|max:1000',
             'level'       => ['required', Rule::in(['intro', 'inter', 'avance'])],
+            'category_id' => ['nullable', 'integer', Rule::exists('academy_course_categories', 'id')],
             'language'    => 'required|string|max:10',
             'visibility'  => ['required', Rule::in(['public', 'unlisted', 'private'])],
             'access_type' => ['required', Rule::in(['free', 'paid_one_time', 'paid_subscription'])],
@@ -484,6 +499,19 @@ class CourseEditor extends Component
     }
 
     /**
+     * Catégories disponibles pour le sélecteur (Vague 4). Toujours calculé
+     * (requête bon marché) ; l'affichage du sélecteur reste gâté par le drapeau
+     * academy.course_categories_enabled côté vue.
+     *
+     * @return \Illuminate\Support\Collection<int, CourseCategory>
+     */
+    #[Computed]
+    public function courseCategories(): \Illuminate\Support\Collection
+    {
+        return CourseCategory::orderBy('position')->orderBy('name')->get();
+    }
+
+    /**
      * Slug public d'un certificat DÉJÀ ÉMIS pour ce cours (s'il en existe un), pour
      * offrir un lien « Prévisualiser le certificat » qui montre le rendu réel avec la
      * personnalisation appliquée. Null si aucun certificat n'a encore été décerné :
@@ -536,6 +564,7 @@ class CourseEditor extends Component
         $this->subtitle    = $course->subtitle;
         $this->summary     = $course->summary;
         $this->level       = (string) ($course->level ?? 'intro');
+        $this->category_id = $course->category_id;
         $this->language    = (string) ($course->language ?? 'fr-CA');
         $this->visibility  = (string) ($course->visibility ?? 'public');
         $this->access_type = (string) ($course->access_type ?? 'free');

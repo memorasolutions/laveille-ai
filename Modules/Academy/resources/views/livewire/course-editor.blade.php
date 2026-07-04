@@ -243,6 +243,20 @@
                            style="width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                     @error('language') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
                 </div>
+
+                @if(config('academy.course_categories_enabled', false))
+                    <div style="flex: 1 1 200px;">
+                        <label for="meta-category" style="display: block; font-weight: 600; margin-bottom: 6px;">Catégorie</label>
+                        <select id="meta-category" wire:model.live.blur="category_id"
+                                style="width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                            <option value="">Aucune catégorie</option>
+                            @foreach($this->courseCategories as $cat)
+                                <option value="{{ $cat->id }}">{{ $cat->icon ? $cat->icon . ' ' : '' }}{{ $cat->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('category_id') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
+                    </div>
+                @endif
             </div>
 
             <div class="d-flex flex-wrap gap-3">

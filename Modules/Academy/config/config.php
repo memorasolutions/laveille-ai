@@ -528,6 +528,42 @@ return [
     */
     'kiosk_mode_enabled' => env('ACADEMY_KIOSK_MODE_ENABLED', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Catégories de cours (taxonomie simple, parité Moodle - Vague 4)
+    |--------------------------------------------------------------------------
+    | Quand true, un admin (academy.manage) peut créer/renommer/réordonner/
+    | supprimer des catégories (nom, couleur, icône) depuis « academie/admin/
+    | categories » ; un formateur peut ensuite classer SES cours dans une
+    | catégorie existante depuis l'éditeur de cours (aucune création de
+    | catégorie par un formateur - taxonomie partagée site-wide, évite les
+    | doublons/conflits entre formateurs). Le filtre par catégorie apparaît
+    | sur la liste publique des cours.
+    | Défaut false : aucun filtre, aucun sélecteur, aucune route de gestion
+    | (404), comportement du reste du module EXACTEMENT inchangé.
+    | Activer via ACADEMY_COURSE_CATEGORIES_ENABLED=true dans le .env.
+    */
+    'course_categories_enabled' => env('ACADEMY_COURSE_CATEGORIES_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Calendrier global (parité Moodle - Vague 4)
+    |--------------------------------------------------------------------------
+    | Quand true, un apprenant connecté voit une vue calendrier MENSUELLE
+    | agrégeant toutes ses échéances/évènements à travers TOUS les cours où il
+    | est inscrit actif : échéances de devoirs publiés (Assignment.due_at),
+    | événements manuels du calendrier de cours (academy_calendar_events) et,
+    | si academy.live_sessions_enabled est également actif, les séances en
+    | direct planifiées (Models\LiveSession, RÉUTILISÉ sans duplication - voir
+    | Services\CalendarService::monthForUser). Un formateur/admin voit en plus
+    | les cours qu'il gère (course_roles, ou tous les cours pour academy.manage).
+    | Lecture seule : la création d'événements reste dans le calendrier PAR
+    | COURS existant (CourseCalendar, V5-b).
+    | Défaut false : route « academie/calendrier » 404, aucun lien affiché.
+    | Activer via ACADEMY_GLOBAL_CALENDAR_ENABLED=true dans le .env.
+    */
+    'global_calendar_enabled' => env('ACADEMY_GLOBAL_CALENDAR_ENABLED', false),
+
     'notifications' => [
         'enabled' => env('ACADEMY_NOTIFICATIONS_ENABLED', false),
 

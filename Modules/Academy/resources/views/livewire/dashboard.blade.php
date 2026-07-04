@@ -229,6 +229,16 @@
         </section>
     @endif
 
+    {{-- Vague 4 - Lien vers le calendrier GLOBAL (toutes échéances, tous cours). --}}
+    @if(config('academy.global_calendar_enabled', false))
+        <p class="mb-5">
+            <a href="{{ route('academy.calendar.index') }}"
+               style="font-size: 0.9rem; color: var(--sys-action-primary, #064E5A); text-decoration: underline;">
+                Voir mon calendrier complet (tous mes cours)
+            </a>
+        </p>
+    @endif
+
     {{-- ───────────────────────── Mes devoirs (E2) ─────────────────────────
          Composant role-aware : requêtes scopées à auth()->id() et aux cours où
          l'utilisateur est inscrit ACTIF. Ne s'affiche que s'il y a des devoirs. --}}
@@ -597,6 +607,15 @@
                             <div class="mb-3">
                                 <x-core::button :href="route('academy.admin.org-analytics')" variant="secondary" size="sm">
                                     <span aria-hidden="true">📈</span> Analytiques organisation
+                                </x-core::button>
+                            </div>
+                        @endif
+
+                        {{-- Vague 4 - Catégories de cours (taxonomie) - masqué si le drapeau est off. --}}
+                        @if(config('academy.course_categories_enabled', false))
+                            <div class="mb-3">
+                                <x-core::button :href="route('academy.admin.categories')" variant="secondary" size="sm">
+                                    <span aria-hidden="true">🗂️</span> Catégories de cours
                                 </x-core::button>
                             </div>
                         @endif

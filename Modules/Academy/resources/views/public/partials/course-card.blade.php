@@ -32,6 +32,17 @@
                          font-size: 0.75rem; padding: 4px 10px;">
                 {{ $isFreeCard ? 'Gratuit' : 'Payant' }}
             </span>
+
+            {{-- Catégorie de cours (Vague 4, gâtée par le drapeau) --}}
+            @if(config('academy.course_categories_enabled', false) && $course->relationLoaded('category') && $course->category)
+                <span class="badge rounded-pill"
+                      style="background: #F3F4F6;
+                             border: 1px solid {{ $course->category->color ?: '#9CA3AF' }};
+                             color: var(--sys-text-default, #1A1D23);
+                             font-size: 0.75rem; padding: 4px 10px;">
+                    {{ $course->category->icon ? $course->category->icon . ' ' : '' }}{{ $course->category->name }}
+                </span>
+            @endif
         </div>
 
         {{-- Titre --}}
