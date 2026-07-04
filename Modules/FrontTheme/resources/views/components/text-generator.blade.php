@@ -6,6 +6,12 @@
     Réutilise le pattern déjà en place dans le constructeur de prompts (Modules/Tools) : substitution
     de variables + navigator.clipboard.writeText() + toast global "toast-show".
 
+    IMPORTANT : utiliser EXCLUSIVEMENT la syntaxe longue Alpine (x-on:click, pas @click) sur tout
+    élément ici. Le contenu d'article passe par AeoHelper::chunkContent() qui reparse le HTML via
+    DOMDocument - un nom d'attribut commencant par "@" n'est pas un nom XML valide et est
+    silencieusement supprime par le parseur (x-on:click survit car "x" est un caractere de depart
+    valide). Incident 2026-07-04 : bouton "Générer" et "Copier" inertes en prod pour cette raison.
+
     Props :
     - titre       (string)  Titre affiché en en-tête.
     - icon        (string)  Emoji/icône affiché à côté du titre.
@@ -58,7 +64,7 @@
         <div class="lv-text-generator__intro" style="margin-bottom:1.25rem;">{!! $introHtml !!}</div>
     @endif
 
-    <form @submit.prevent="generate()" class="lv-text-generator__form">
+    <form x-on:submit.prevent="generate()" class="lv-text-generator__form">
         <div class="row">
             @foreach($fields as $field)
                 @php
@@ -114,7 +120,7 @@
 
         <button
             type="button"
-            @click="generate()"
+            x-on:click="generate()"
             class="ct-btn"
             style="background: {{ $couleur }}; color:#fff; border:none; padding:0.65rem 1.25rem; border-radius: var(--r-base, 10px); font-weight:600;"
         >
@@ -132,7 +138,7 @@
             <button
                 type="button"
                 class="ct-btn ct-btn-outline mt-2"
-                @click="copy()"
+                x-on:click="copy()"
                 x-text="copied ? copiedLabel : copyLabel"
             ></button>
         </div>
