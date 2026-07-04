@@ -310,13 +310,15 @@
                     try { localStorage.setItem('mv_color', key); } catch (e) {}
                 },
 
+                // Persistance localStorage seulement — x-model a DÉJÀ mis à jour la propriété
+                // réactive au moment où ce handler @change se déclenche (le double-toggle
+                // this.x = !this.x annulait le clic de l'utilisateur : la case se recochait
+                // visuellement à l'état précédent, jamais réellement "cochable").
                 toggleSound: function () {
-                    this.soundEnabled = !this.soundEnabled;
                     try { localStorage.setItem('mv_sound', String(this.soundEnabled)); } catch (e) {}
                 },
 
                 toggleReducedMotion: function () {
-                    this.reducedMotion = !this.reducedMotion;
                     try { localStorage.setItem('mv_reduced_motion', String(this.reducedMotion)); } catch (e) {}
                 },
 

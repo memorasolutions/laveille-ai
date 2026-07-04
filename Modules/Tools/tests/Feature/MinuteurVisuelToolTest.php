@@ -59,6 +59,11 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     $response->assertSee('feTurbulence', escape: false);
     $response->assertSee('class="mv-hourglass-sand-surface"', escape: false);
 
+    // Checkbox Réglages visibles (convention charte display:inline-block !important,
+    // cf. tirage-presentations/generateur-mots-passe) + suffixe "s" du seuil d'alerte.
+    $response->assertSee('display:inline-block !important; width:20px; height:20px', escape: false);
+    $response->assertSee('id="mvWarningThreshold"', escape: false);
+
     // Annonces ARIA sobres.
     $response->assertSee('aria-live="polite"', escape: false);
 

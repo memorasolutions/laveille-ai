@@ -292,15 +292,18 @@
                             <div class="mv-settings__body">
                                 <div class="mv-settings__row">
                                     <label for="mvSoundToggle">{{ __('Alerte sonore') }}</label>
-                                    <input type="checkbox" id="mvSoundToggle" x-model="soundEnabled" @change="toggleSound()" style="width:20px;height:20px;accent-color:var(--c-primary);">
+                                    <input type="checkbox" id="mvSoundToggle" x-model="soundEnabled" @change="toggleSound()" style="display:inline-block !important; width:20px; height:20px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
                                 </div>
                                 <div class="mv-settings__row">
                                     <label for="mvReducedMotionToggle">{{ __('Réduire les animations') }}</label>
-                                    <input type="checkbox" id="mvReducedMotionToggle" x-model="reducedMotion" @change="toggleReducedMotion()" style="width:20px;height:20px;accent-color:var(--c-primary);">
+                                    <input type="checkbox" id="mvReducedMotionToggle" x-model="reducedMotion" @change="toggleReducedMotion()" style="display:inline-block !important; width:20px; height:20px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
                                 </div>
                                 <div class="mv-settings__row">
                                     <label for="mvWarningThreshold">{{ __('Alerte « bientôt fini » (secondes avant la fin)') }}</label>
-                                    <input type="number" id="mvWarningThreshold" min="0" max="600" x-model.number="warningThresholdSec" @change="setWarningThreshold(warningThresholdSec)">
+                                    <span style="display:flex; align-items:center; gap:.4rem;">
+                                        <input type="number" id="mvWarningThreshold" min="0" max="600" x-model.number="warningThresholdSec" @change="setWarningThreshold(warningThresholdSec)">
+                                        <span aria-hidden="true" style="font-size:.85rem; color:var(--c-dark, #1A1D23); opacity:.75;">{{ __('s') }}</span>
+                                    </span>
                                 </div>
                             </div>
                         </details>
