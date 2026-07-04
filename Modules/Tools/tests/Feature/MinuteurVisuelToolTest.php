@@ -48,6 +48,10 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     $response->assertSee('id="mvCustomMinutes"', escape: false);
     $response->assertSee('Définir', escape: false);
 
+    // Légende du feu de circulation — explique la logique des 3 couleurs.
+    $response->assertSee('class="mv-traffic-legend"', escape: false);
+    $response->assertSee('Plus de la moitié du temps', escape: false);
+
     // Annonces ARIA sobres.
     $response->assertSee('aria-live="polite"', escape: false);
 

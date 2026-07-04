@@ -121,6 +121,17 @@
 .mv-style-hourglass .mv-center-display { font-size: clamp(1.5rem, 7vw, 2.25rem); }
 .mv-style-traffic .mv-center-display { font-size: clamp(1.75rem, 8vw, 2.75rem); }
 
+/* --- Légende du feu de circulation — explique la logique des 3 couleurs --- */
+.mv-traffic-legend {
+    text-align: center;
+    font-size: .85rem;
+    color: var(--c-dark, #1A1D23);
+    opacity: .85;
+    margin: .75rem auto 0;
+    max-width: 32rem;
+    line-height: 1.5;
+}
+
 /* --- Live region ARIA (visible mais discrète) --- */
 .mv-live {
     text-align: center;

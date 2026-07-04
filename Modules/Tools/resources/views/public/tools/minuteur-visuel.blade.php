@@ -192,6 +192,11 @@
                             </template>
                         </div>
 
+                        {{-- Légende du feu de circulation — explique la logique des 3 couleurs, visible uniquement en style "traffic" --}}
+                        <p class="mv-traffic-legend" x-show="style === 'traffic'" x-cloak>
+                            {{ __('🟢 Plus de la moitié du temps · 🟡 Bientôt fini · 🔴 Presque terminé — le chiffre au centre reste le temps exact restant.') }}
+                        </p>
+
                         {{-- Annonces ARIA sobres (jamais à chaque seconde) --}}
                         <div class="mv-live" aria-live="polite" role="status" x-text="ariaMessage"></div>
 
