@@ -231,7 +231,10 @@
 
                         {{-- Réglages accessibilité --}}
                         <details class="mv-settings">
-                            <summary>{{ __('Réglages') }}</summary>
+                            <summary>
+                                <span>{{ __('Réglages') }}</span>
+                                <span class="mv-settings__chevron" aria-hidden="true">▼</span>
+                            </summary>
                             <div class="mv-settings__body">
                                 <div class="mv-settings__row">
                                     <label for="mvSoundToggle">{{ __('Alerte sonore') }}</label>

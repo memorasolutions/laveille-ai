@@ -165,7 +165,17 @@
     min-height: 44px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    list-style: none;
+    padding: 0 12px;
+    border: 1px solid var(--c-primary, #064E5A);
+    border-radius: var(--r-btn, 8px);
+    outline-offset: 2px;
 }
+.mv-settings summary::-webkit-details-marker { display: none; }
+.mv-settings__chevron { color: var(--c-primary, #064E5A); font-size: .75rem; transition: transform .2s ease; flex-shrink: 0; }
+.mv-settings[open] summary .mv-settings__chevron { transform: rotate(180deg); }
 .mv-settings__body {
     display: grid;
     gap: .75rem;
