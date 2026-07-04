@@ -9,8 +9,10 @@
  *
  * Prouve :
  *  - SÉCURITÉ (OWASP A01) : non-admin → 403 sur mount ET sur chaque action ;
- *  - CRUD : admin peut ajouter/retirer/enregistrer → pivot mis à jour ;
- *  - SUGGESTION : suggestTools fusionne les outils détectés ;
+ *  - CRUD : addTool/removeTool ENREGISTRENT IMMÉDIATEMENT en base (2026-07-04 :
+ *    plus d'étape "Enregistrer" séparée - chaque clic persiste tout de suite,
+ *    demande utilisateur pour accélérer la liaison multiple d'outils) ;
+ *  - SUGGESTION : suggestTools fusionne les outils détectés ET enregistre ;
  *  - ANTI-IDOR : mutation du articleId (#[Locked]) → exception Livewire ;
  *  - INVARIANT : les tests admin HTTP existants restent verts après le refactor DRY.
  *
@@ -106,12 +108,12 @@ test('mount refuse un utilisateur sans permission view_admin_panel (403)', funct
         ->assertForbidden();
 });
 
-test('save refuse un utilisateur sans permission view_admin_panel (403)', function (): void {
+test('addTool refuse un utilisateur sans permission view_admin_panel (403 au mount)', function (): void {
     $user    = ateUser();
     $source  = ateSource();
     $article = ateArticle($source->id, 'SEC3');
 
-    // Un non-admin tente directement de monter et d'appeler save.
+    // Un non-admin tente directement de monter (bloqué avant même d'appeler addTool).
     $this->actingAs($user);
 
     Livewire::test(ArticleToolsEditor::class, ['article' => $article])
@@ -133,9 +135,9 @@ test('mutation du articleId après mount rejetée par #[Locked]', function (): v
     )->toThrow(\Exception::class);
 });
 
-// ── CRUD admin : add / remove / save ─────────────────────────────────────────
+// ── CRUD admin : add / remove (persistance immédiate, zéro clic "Enregistrer") ──
 
-test('addTool ajoute un outil à la sélection sans enregistrer', function (): void {
+test('addTool ajoute un outil à la sélection ET enregistre immédiatement en base', function (): void {
     $admin   = ateAdmin();
     $source  = ateSource();
     $article = ateArticle($source->id, 'ADD');
@@ -147,11 +149,29 @@ test('addTool ajoute un outil à la sélection sans enregistrer', function (): v
         ->call('addTool', $tool->id)
         ->assertSet('selectedToolIds', [$tool->id]);
 
-    // Pas encore en base.
-    expect($article->tools()->count())->toBe(0);
+    // Déjà en base après ce seul appel - aucune étape "Enregistrer" séparée requise.
+    expect($article->fresh()->tools()->pluck('directory_tools.id')->all())->toBe([$tool->id]);
 });
 
-test('removeTool retire un outil de la sélection sans enregistrer', function (): void {
+test('deux addTool successifs enregistrent les deux outils sans étape intermédiaire', function (): void {
+    $admin   = ateAdmin();
+    $source  = ateSource();
+    $article = ateArticle($source->id, 'ADD2');
+    $toolA   = ateTool('ADD2A');
+    $toolB   = ateTool('ADD2B');
+
+    $this->actingAs($admin);
+
+    Livewire::test(ArticleToolsEditor::class, ['article' => $article])
+        ->call('addTool', $toolA->id)
+        ->call('addTool', $toolB->id);
+
+    $ids = $article->fresh()->tools()->pluck('directory_tools.id')->all();
+    expect($ids)->toContain($toolA->id)->toContain($toolB->id);
+    expect(count($ids))->toBe(2);
+});
+
+test('removeTool retire un outil de la sélection ET l\'enregistre immédiatement en base', function (): void {
     $admin   = ateAdmin();
     $source  = ateSource();
     $article = ateArticle($source->id, 'REM');
@@ -165,74 +185,43 @@ test('removeTool retire un outil de la sélection sans enregistrer', function ()
         ->call('removeTool', $tool->id)
         ->assertSet('selectedToolIds', []);
 
-    // Pas encore en base.
-    expect($article->tools()->count())->toBe(1);
-});
-
-test('save synchronise le pivot en base', function (): void {
-    $admin   = ateAdmin();
-    $source  = ateSource();
-    $article = ateArticle($source->id, 'SAVE');
-    $toolA   = ateTool('SAVEA');
-    $toolB   = ateTool('SAVEB');
-
-    $this->actingAs($admin);
-
-    Livewire::test(ArticleToolsEditor::class, ['article' => $article])
-        ->call('addTool', $toolA->id)
-        ->call('addTool', $toolB->id)
-        ->call('save');
-
-    $ids = $article->fresh()->tools()->pluck('directory_tools.id')->all();
-    expect($ids)->toContain($toolA->id)->toContain($toolB->id);
-    expect(count($ids))->toBe(2);
-});
-
-test('save retire un outil retiré de la sélection', function (): void {
-    $admin   = ateAdmin();
-    $source  = ateSource();
-    $article = ateArticle($source->id, 'SAVR');
-    $tool    = ateTool('SAVR');
-
-    $article->tools()->attach($tool->id, ['source' => 'manual']);
-
-    $this->actingAs($admin);
-
-    Livewire::test(ArticleToolsEditor::class, ['article' => $article])
-        ->call('removeTool', $tool->id)
-        ->call('save');
-
+    // Déjà retiré en base après ce seul appel.
     expect($article->fresh()->tools()->count())->toBe(0);
 });
 
-test('save affiche le message de confirmation dans la vue', function (): void {
+test('addTool ignore un doublon (outil déjà sélectionné)', function (): void {
     $admin   = ateAdmin();
     $source  = ateSource();
-    $article = ateArticle($source->id, 'FLAS');
+    $article = ateArticle($source->id, 'DUP');
+    $tool    = ateTool('DUP');
 
     $this->actingAs($admin);
 
     Livewire::test(ArticleToolsEditor::class, ['article' => $article])
-        ->call('save')
-        ->assertSee('Outils enregistrés.');
+        ->call('addTool', $tool->id)
+        ->call('addTool', $tool->id)
+        ->assertSet('selectedToolIds', [$tool->id]);
+
+    expect($article->fresh()->tools()->count())->toBe(1);
 });
 
 // ── SUGGESTION ───────────────────────────────────────────────────────────────
 
-test('suggestTools fusionne les outils suggérés sans écrire en base', function (): void {
+test('suggestTools fusionne les outils suggérés ET enregistre immédiatement en base', function (): void {
     $admin   = ateAdmin();
     $source  = ateSource();
     $article = ateArticle($source->id, 'SUGG');
 
     $this->actingAs($admin);
 
-    // Sans outils détectables dans le contenu, la liste est vide ou inchangée.
+    // Sans outils détectables dans ce contenu de test, la liste reste vide - mais
+    // le point testé est que l'état du composant et l'état en base restent
+    // TOUJOURS synchronisés après suggestTools (persistance immédiate).
     $component = Livewire::test(ArticleToolsEditor::class, ['article' => $article])
         ->call('suggestTools');
 
-    // selectedToolIds est un array (potentiellement vide = OK, aucune exception).
     expect($component->get('selectedToolIds'))->toBeArray();
 
-    // Rien n'est écrit en base.
-    expect($article->tools()->count())->toBe(0);
+    $persistedIds = $article->fresh()->tools()->pluck('directory_tools.id')->map(fn ($id) => (int) $id)->all();
+    expect($persistedIds)->toEqualCanonicalizing($component->get('selectedToolIds'));
 });

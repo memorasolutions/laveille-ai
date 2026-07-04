@@ -221,4 +221,12 @@ function newsLiveSearch() {
 </script>
 @endpush
 
+{{-- Popup rapide « Outils liés » (icône engrenage sur les cartes) - instance UNIQUE
+     partagée par toute la page, jamais une par carte (évite de monter 20 fois le
+     même éditeur). L'admin choisit l'actualité via l'événement, le wrapper affiche
+     la bonne fiche dans le modal générique réutilisable. --}}
+@can('view_admin_panel')
+    @livewire('news.tools-quick-edit-modal')
+@endcan
+
 @endsection

@@ -14,7 +14,7 @@ class PublicNewsController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = NewsArticle::published()->with('source');
+        $query = NewsArticle::published()->with('source', 'tools');
 
         // Filtre catégorie
         $category = $request->input('category');

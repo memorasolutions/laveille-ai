@@ -21,7 +21,7 @@ return [
      *  You can provide your own class given that it implements the
      *  CacheProfile interface.
      */
-    'cache_profile' => Spatie\ResponseCache\CacheProfiles\CacheAllSuccessfulGetRequests::class,
+    'cache_profile' => App\Support\ResponseCache\SkipAuthenticatedCacheProfile::class,
 
     /*
      *  Optionally, you can specify a header that will force a cache bypass.

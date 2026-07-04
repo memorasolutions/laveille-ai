@@ -16,6 +16,7 @@ declare(strict_types=1);
  */
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Modules\Directory\Models\Tool;
 use Modules\News\Models\NewsArticle;
 use Modules\News\Models\NewsSource;
@@ -146,4 +147,52 @@ it('page actualité : le bloc Outils mentionnés est absent quand aucun outil n\
 
     $response->assertStatus(200);
     $response->assertDontSee(__('Outils mentionnés'));
+});
+
+// ── Liste /actualites : badge « outils liés » sur la miniature (2026-07-04) ──
+
+it('liste des actualités : le badge outil apparaît sur la miniature quand des outils sont liés', function () {
+    $source = natFrontSource();
+    $article = natFrontArticle($source->id, 'BADGE');
+    $tool = natFrontTool('BADGE');
+
+    $article->tools()->attach($tool->id, ['source' => 'manual']);
+
+    $response = $this->get(route('news.index'));
+
+    $response->assertStatus(200);
+    // Vérifie le badge RENDU (aria-label), pas juste le nom de classe CSS qui
+    // apparaît toujours une fois dans le <style> @once, même sans aucun badge.
+    $response->assertSee(__('Outils liés à cette actualité'));
+});
+
+it('liste des actualités : le badge outil est absent de la miniature quand aucun outil n\'est lié', function () {
+    $source = natFrontSource();
+    natFrontArticle($source->id, 'NOBADGE');
+
+    $response = $this->get(route('news.index'));
+
+    $response->assertStatus(200);
+    $response->assertDontSee(__('Outils liés à cette actualité'));
+});
+
+it('la relation tools est eager-loadée sur la liste des actualités (anti N+1)', function () {
+    $source = natFrontSource();
+    $articleA = natFrontArticle($source->id, 'EAGERA');
+    $articleB = natFrontArticle($source->id, 'EAGERB');
+    $tool = natFrontTool('EAGER');
+    $articleA->tools()->attach($tool->id, ['source' => 'manual']);
+    $articleB->tools()->attach($tool->id, ['source' => 'manual']);
+
+    DB::enableQueryLog();
+    $this->get(route('news.index'));
+    $toolQueries = collect(DB::getQueryLog())->pluck('query')->filter(
+        fn (string $q) => str_contains($q, 'directory_tools') && str_contains($q, 'news_article_tool')
+    );
+    DB::disableQueryLog();
+
+    // Signature anti-N+1 : UNE requête JOIN unique qui couvre TOUS les articles de
+    // la page via IN (...), jamais une requête répétée par article (N+1).
+    expect($toolQueries)->toHaveCount(1);
+    expect($toolQueries->first())->toContain('in (');
 });

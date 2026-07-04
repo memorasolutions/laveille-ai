@@ -41,6 +41,24 @@
         width: 34px; height: 34px; border-radius: 50%;
         background: rgba(255,255,255,0.92); box-shadow: 0 2px 6px rgba(0,0,0,0.18);
     }
+    /* Indicateur « outils liés » : repère visuel admin pour savoir quelle actualité a déjà été traitée */
+    .nw-tools-flag {
+        position: absolute; bottom: 8px; left: 8px; z-index: 2;
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 30px; height: 30px; border-radius: 50%; font-size: 1rem;
+        background: rgba(255,255,255,0.92); box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    }
+    /* Bouton engrenage admin : ouvre la popup rapide de liaison d'outils sans quitter la liste */
+    .nw-gear-btn {
+        position: absolute; bottom: 8px; right: 8px; z-index: 3;
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 34px; height: 34px; min-width: 44px; min-height: 44px; margin: -5px;
+        border-radius: 50%; border: none; cursor: pointer; font-size: 1rem;
+        background: rgba(6,78,90,0.9); color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        transition: background 0.15s, transform 0.15s;
+    }
+    .nw-gear-btn:hover { background: #064E5A; transform: scale(1.06); }
+    .nw-gear-btn:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
     .nw-card-body { padding: 1rem; flex: 1; display: flex; flex-direction: column; }
     .nw-card-title {
         font-family: var(--f-heading); font-size: 1.05rem; font-weight: 700;
@@ -100,6 +118,22 @@
                     <x-tools::octopus variant="happy" :size="24" :animate="false" />
                 </span>
             @endif
+            {{-- Indicateur « outils liés » : repère visuel pour savoir quelle actualité a déjà été traitée --}}
+            @if($article->relationLoaded('tools') && $article->tools->isNotEmpty())
+                <span class="nw-tools-flag" aria-label="{{ __('Outils liés à cette actualité') }}" title="{{ __('Outils liés à cette actualité') }}">
+                    🔧
+                </span>
+            @endif
+            {{-- Bouton engrenage admin : popup rapide pour lier des outils sans quitter la liste --}}
+            @can('view_admin_panel')
+                <button
+                    type="button"
+                    class="nw-gear-btn"
+                    x-on:click.stop.prevent="Livewire.dispatch('open-news-tools-editor', { articleId: {{ $article->id }} })"
+                    aria-label="{{ __('Gérer les outils liés à :title', ['title' => $article->title]) }}"
+                    title="{{ __('Gérer les outils liés') }}"
+                >⚙️</button>
+            @endcan
         </div>
         <div class="nw-card-body">
             <h3 class="nw-card-title" role="heading" aria-level="2">{{ $article->seo_title ?? $article->title }}</h3>

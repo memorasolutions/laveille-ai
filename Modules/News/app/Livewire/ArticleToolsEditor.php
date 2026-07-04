@@ -77,7 +77,7 @@ class ArticleToolsEditor extends Component
             ->all();
     }
 
-    /** Ajoute un outil à la sélection (sans enregistrer). */
+    /** Ajoute un outil à la sélection et enregistre immédiatement (zéro clic supplémentaire). */
     public function addTool(int $id): void
     {
         $this->authorize('view_admin_panel');
@@ -85,9 +85,11 @@ class ArticleToolsEditor extends Component
         if (! in_array($id, $this->selectedToolIds, true)) {
             $this->selectedToolIds[] = $id;
         }
+
+        $this->persist();
     }
 
-    /** Retire un outil de la sélection (sans enregistrer). */
+    /** Retire un outil de la sélection et enregistre immédiatement. */
     public function removeTool(int $id): void
     {
         $this->authorize('view_admin_panel');
@@ -95,17 +97,42 @@ class ArticleToolsEditor extends Component
         $this->selectedToolIds = array_values(
             array_filter($this->selectedToolIds, fn (int $v) => $v !== $id)
         );
+
+        $this->persist();
     }
 
-    /** Enregistre la sélection en base (sync pivot). */
-    public function save(): void
+    /** Suggère les outils détectés automatiquement et enregistre immédiatement. */
+    public function suggestTools(): void
     {
         $article = NewsArticle::findOrFail($this->articleId);
         $this->authorize('view_admin_panel');
 
+        $suggested = app(NewsToolSyncAction::class)->suggest($article);
+
+        $this->selectedToolIds = collect($this->selectedToolIds)
+            ->merge($suggested)
+            ->unique()
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
+
+        $this->persist();
+
+        session()->flash('news_tools_editor_status', count($suggested) . ' outil(s) suggéré(s) ajouté(s).');
+    }
+
+    /**
+     * Synchronise le pivot en base (source de vérité serveur) et invalide le cache
+     * ciblé de la page publique. Appelé après chaque mutation (add/remove/suggest)
+     * pour que la sélection soit TOUJOURS enregistrée sans étape manuelle séparée.
+     */
+    private function persist(): void
+    {
+        $article = NewsArticle::findOrFail($this->articleId);
+
         app(NewsToolSyncAction::class)->sync($article, $this->selectedToolIds);
 
-        // Recharge depuis la BD pour refléter les IDs validés.
+        // Recharge depuis la BD pour refléter les IDs validés (Tool::published() only).
         $this->selectedToolIds = $article->tools()
             ->pluck('directory_tools.id')
             ->map(fn ($id) => (int) $id)
@@ -119,28 +146,6 @@ class ArticleToolsEditor extends Component
             ->forUrls(route('news.show', $article->slug));
         $cacheSelector->usingSuffix('');
         $cacheSelector->forget();
-
-        session()->flash('news_tools_editor_status', 'Outils enregistrés.');
-    }
-
-    /** Suggère les outils détectés automatiquement (sans enregistrer). */
-    public function suggestTools(): void
-    {
-        $article = NewsArticle::findOrFail($this->articleId);
-        $this->authorize('view_admin_panel');
-
-        $suggested = app(NewsToolSyncAction::class)->suggest($article);
-
-        $merged = collect($this->selectedToolIds)
-            ->merge($suggested)
-            ->unique()
-            ->map(fn ($id) => (int) $id)
-            ->values()
-            ->all();
-
-        $this->selectedToolIds = $merged;
-
-        session()->flash('news_tools_editor_status', count($suggested) . ' outil(s) suggéré(s) ajouté(s).');
     }
 
     public function render(): \Illuminate\View\View

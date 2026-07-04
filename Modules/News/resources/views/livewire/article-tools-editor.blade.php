@@ -97,7 +97,7 @@
                 <button
                     type="button"
                     class="nw-tool-opt"
-                    x-on:click="$wire.addTool(tool.id).then(() => { search = ''; document.getElementById('nw-tools-search')?.focus() })"
+                    x-on:click="$wire.addTool(tool.id).then(() => { document.getElementById('nw-tools-search')?.focus() })"
                     :disabled="isSelected(tool.id)"
                     :style="{ opacity: isSelected(tool.id) ? '0.5' : '1', cursor: isSelected(tool.id) ? 'not-allowed' : 'pointer' }"
                     style="display: block; width: 100%; text-align: left; padding: 9px 14px; background: transparent; border: none; border-bottom: 1px solid #eef2f7; font-size: 0.875rem; color: #111827;"
@@ -110,19 +110,8 @@
         </template>
     </ul>
 
-    {{-- Actions --}}
+    {{-- Actions (chaque ajout/retrait s'enregistre déjà immédiatement, aucun bouton "Enregistrer" séparé requis) --}}
     <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-        <button
-            type="button"
-            wire:click="save"
-            wire:loading.attr="disabled"
-            style="padding: 7px 18px; background: var(--c-primary, #064E5A); color: #fff; border: none; border-radius: 6px; font-size: 0.875rem; font-weight: 600; cursor: pointer;"
-            aria-label="{{ __('Enregistrer les outils liés') }}"
-        >
-            <span wire:loading.remove wire:target="save">{{ __('Enregistrer') }}</span>
-            <span wire:loading wire:target="save">{{ __('Enregistrement...') }}</span>
-        </button>
-
         <button
             type="button"
             wire:click="suggestTools"

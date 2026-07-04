@@ -37,6 +37,11 @@ class NewsServiceProvider extends ServiceProvider
         // MCP: SELF (<5 lignes)
         // RAISON: composant front-end admin-gaté sur la page publique actualité.
         Livewire::component('news.article-tools-editor', \Modules\News\Livewire\ArticleToolsEditor::class);
+
+        // ACTION: popup rapide « Outils liés » depuis la liste /actualites (icône engrenage).
+        // MCP: SELF (<5 lignes)
+        // RAISON: réutilise ArticleToolsEditor tel quel, wrapper d'aiguillage seulement.
+        Livewire::component('news.tools-quick-edit-modal', \Modules\News\Livewire\NewsToolsQuickEditModal::class);
     }
 
     /**
