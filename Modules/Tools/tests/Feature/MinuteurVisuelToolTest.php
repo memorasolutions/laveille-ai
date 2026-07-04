@@ -44,6 +44,10 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     $response->assertSee('Pomodoro 25 min', escape: false);
     $response->assertSee('Pause 5 min', escape: false);
 
+    // Durée personnalisée — saisie exacte en minutes, hors présélections.
+    $response->assertSee('id="mvCustomMinutes"', escape: false);
+    $response->assertSee('Définir', escape: false);
+
     // Annonces ARIA sobres.
     $response->assertSee('aria-live="polite"', escape: false);
 

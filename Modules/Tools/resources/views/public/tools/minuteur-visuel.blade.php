@@ -229,6 +229,22 @@
                             @endforeach
                         </div>
 
+                        {{-- Durée personnalisée — saisie exacte en minutes, hors présélections --}}
+                        <div class="mv-custom-time" role="group" aria-label="{{ __('Durée personnalisée') }}">
+                            <label for="mvCustomMinutes">{{ __('Durée personnalisée (minutes)') }}</label>
+                            <input type="number"
+                                   id="mvCustomMinutes"
+                                   min="1"
+                                   max="180"
+                                   x-model.number="customMinutes"
+                                   :disabled="state === 'running'"
+                                   @keydown.enter.prevent="applyCustomMinutes()">
+                            <button type="button"
+                                    class="ct-btn ct-btn-primary ct-btn-sm"
+                                    :disabled="state === 'running'"
+                                    @click="applyCustomMinutes()">{{ __('Définir') }}</button>
+                        </div>
+
                         {{-- Réglages accessibilité --}}
                         <details class="mv-settings">
                             <summary>

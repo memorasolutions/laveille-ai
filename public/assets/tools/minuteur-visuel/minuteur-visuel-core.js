@@ -78,6 +78,7 @@
 
                 palette: PALETTE,
                 presets: PRESETS,
+                customMinutes: 20,
 
                 init: function () {
                     var self = this;
@@ -210,6 +211,20 @@
                     this.totalSeconds = preset.minutes * 60;
                     this.remainingMs = this.totalSeconds * 1000;
                     this.pomodoroPhase = preset.phase || null;
+                    this.state = 'idle';
+                    this._resetAnnounceFlags();
+                    this.start();
+                },
+
+                applyCustomMinutes: function () {
+                    if (this.state === 'running') return;
+                    var raw = parseInt(this.customMinutes, 10);
+                    if (!raw || raw < 1) raw = 1;
+                    if (raw > 180) raw = 180;
+                    this.customMinutes = raw;
+                    this.totalSeconds = raw * 60;
+                    this.remainingMs = this.totalSeconds * 1000;
+                    this.pomodoroPhase = null;
                     this.state = 'idle';
                     this._resetAnnounceFlags();
                     this.start();
