@@ -197,7 +197,7 @@
 
                         {{-- Contrôles principaux — classes charte ct-btn (aucune bordure ad hoc) --}}
                         <div class="mv-controls">
-                            <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" @click="adjustMinutes(-1)" aria-label="{{ __('Retirer 1 minute') }}" title="{{ __('-1 min') }}">−1</button>
+                            <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" @click="adjustMinutes(-1)" aria-label="{{ __('Réduire de 1 minute') }}" title="{{ __('-1 min') }}">−1</button>
 
                             <button type="button" class="ct-btn ct-btn-accent" @click="toggleStartPause()" x-show="state === 'idle' || state === 'paused'">
                                 <span aria-hidden="true">▶</span> <span x-text="state === 'paused' ? '{{ __('Reprendre') }}' : '{{ __('Démarrer') }}'"></span>
