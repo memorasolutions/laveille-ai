@@ -37,10 +37,15 @@ namespace Modules\Academy\Services;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Modules\Academy\Services\Concerns\ZipEntrySafety;
 use ZipArchive;
 
 final class H5pPackageService
 {
+    // DRY (ajout SCORM) : règles de sécurité d'extraction ZIP partagées
+    // (liste noire d'extensions + zip-slip + artefacts macOS), voir trait.
+    use ZipEntrySafety;
+
     /** Taille maximale par DÉFAUT d'un paquet .h5p compressé (30 Mo). Surchargée par config. */
     public const MAX_BYTES = 30 * 1024 * 1024;
 
@@ -58,15 +63,6 @@ final class H5pPackageService
 
     /** Fichiers obligatoires d'un paquet H5P valide (parité Moodle / h5p.org). */
     public const REQUIRED_ENTRIES = ['h5p.json', 'content/content.json'];
-
-    /**
-     * Extensions exécutables JAMAIS extraites (défense en profondeur anti-RCE).
-     * Un paquet H5P légitime ne contient que js/css/json/images/audio/vidéo/fonts.
-     */
-    private const BLOCKED_EXTENSIONS = [
-        'php', 'php3', 'php4', 'php5', 'php7', 'php8', 'phtml', 'phps', 'phar',
-        'pht', 'shtml', 'cgi', 'pl', 'py', 'rb', 'sh', 'bash', 'exe', 'htaccess',
-    ];
 
     /**
      * Exception de validation (message FR sûr à afficher). Ne fuite jamais de
@@ -141,23 +137,18 @@ final class H5pPackageService
                 }
 
                 // ANTI ZIP-SLIP : aucun chemin absolu, aucune remontée « .. ».
-                $normalized = str_replace('\\', '/', $entryName);
-                if (str_starts_with($normalized, '/')
-                    || str_contains($normalized, '../')
-                    || str_contains($normalized, '..\\')
-                    || in_array($normalized, ['..'], true)
-                ) {
+                $normalized = $this->normalizeZipEntryName($entryName);
+                if ($this->isUnsafeZipEntryPath($normalized)) {
                     throw self::reject('Paquet H5P rejeté : chemin de fichier non sûr détecté.');
                 }
 
                 // Métadonnées macOS / fichiers cachés : ignorés.
-                if (str_starts_with($normalized, '__MACOSX/') || str_contains($normalized, '/.')) {
+                if ($this->isIgnorableZipEntry($normalized)) {
                     continue;
                 }
 
                 // Liste NOIRE d'extensions exécutables : jamais extraites.
-                $ext = strtolower(pathinfo($normalized, PATHINFO_EXTENSION));
-                if ($ext !== '' && in_array($ext, self::BLOCKED_EXTENSIONS, true)) {
+                if ($this->isBlockedZipExtension($normalized)) {
                     continue;
                 }
 

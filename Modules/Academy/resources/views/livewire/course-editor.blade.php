@@ -890,7 +890,7 @@
                                                 x-sort:config="{ handle: '[data-sort-handle]', animation: 150 }"
                                                 style="margin: 0 0 10px; display: flex; flex-direction: column; gap: 8px;">
                                                 @foreach ($lesson->lessonItems as $item)
-                                                    @php($typeLabel = ['video' => 'Vidéo', 'document' => 'Document', 'quiz' => 'Quiz', 'choice' => 'Sondage', 'feedback' => 'Rétroaction', 'forum' => 'Forum', 'wiki' => 'Wiki', 'database' => 'Base de données', 'workshop' => 'Atelier', 'h5p' => 'H5P'][$item->type] ?? $item->type)
+                                                    @php($typeLabel = ['video' => 'Vidéo', 'document' => 'Document', 'quiz' => 'Quiz', 'choice' => 'Sondage', 'feedback' => 'Rétroaction', 'forum' => 'Forum', 'wiki' => 'Wiki', 'database' => 'Base de données', 'workshop' => 'Atelier', 'h5p' => 'H5P', 'scorm' => 'SCORM'][$item->type] ?? $item->type)
                                                     <li x-sort:item="{{ $item->id }}" data-sort-id="{{ $item->id }}"
                                                         wire:key="item-{{ $item->id }}"
                                                         style="border: 1px solid #F1F5F9; border-radius: var(--sys-radius-md, 0.5rem); padding: 10px 12px;">
@@ -1400,10 +1400,23 @@
                                                                     <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
                                                                         Modifiez le titre et le critère d'achèvement ici. Le contenu interactif se remplace via « Remplacer le paquet H5P » plus bas.
                                                                     </p>
+                                                                @elseif ($item->type === 'scorm')
+                                                                    <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+                                                                        Modifiez le titre ici. Le paquet SCORM se remplace via « Remplacer le paquet SCORM » plus bas.
+                                                                    </p>
                                                                 @endif
 
-                                                                {{-- V2-c : critère d'achèvement (parité Moodle « activity completion »). --}}
+                                                                {{--
+                                                                    V2-c : critère d'achèvement (parité Moodle « activity completion »).
+                                                                    Import SCORM : critère IMPOSÉ (piloté par le runtime), pas de sélecteur -
+                                                                    voir ActivityCompletionService::allowedForType('scorm') = ['scorm'] seul.
+                                                                --}}
                                                                 @php($itemCriterion = \Modules\Academy\Services\ActivityCompletionService::criterionFor($item))
+                                                                @if ($item->type === 'scorm')
+                                                                    <p style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+                                                                        Achèvement : {{ \Modules\Academy\Services\ActivityCompletionService::modeLabel($itemCriterion) }} (non modifiable).
+                                                                    </p>
+                                                                @else
                                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="item-completion-{{ $item->id }}">Critère d'achèvement</label>
                                                                 <select id="item-completion-{{ $item->id }}" name="completion" aria-label="Critère d'achèvement de l'élément"
                                                                         style="width: 100%; padding: 8px 12px; min-height: 38px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
@@ -1419,6 +1432,7 @@
                                                                         <option value="post" @selected($itemCriterion === 'post')>En participant au forum (sujet ou réponse)</option>
                                                                     @endif
                                                                 </select>
+                                                                @endif
 
                                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="item-min-{{ $item->id }}">Durée estimée de l'élément (min, facultatif)</label>
                                                                 <input id="item-min-{{ $item->id }}" type="number" min="1" name="estimated_minutes" value="{{ $item->estimated_minutes }}" aria-label="Durée estimée en minutes"
@@ -1539,6 +1553,29 @@
                                                                     <div wire:loading wire:target="itemH5p.{{ $item->id }}" role="status" aria-live="polite" style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin-top: 4px;">Téléversement…</div>
                                                                     <div style="margin-top: 8px;">
                                                                         <x-core::button type="button" wire:click="replaceH5pPackage({{ $item->id }})" wire:loading.attr="disabled" wire:target="replaceH5pPackage({{ $item->id }}),itemH5p.{{ $item->id }}" variant="secondary" size="sm">Remplacer le paquet H5P</x-core::button>
+                                                                    </div>
+                                                                </div>
+                                                            @endif
+
+                                                            {{-- ── Import SCORM (item scorm) - remplacement hors du formulaire principal ── --}}
+                                                            @if ($item->type === 'scorm')
+                                                                <div style="margin-top: 12px; border-top: 1px dashed #E5E7EB; padding-top: 10px;">
+                                                                    <span style="display: block; font-size: 0.78rem; font-weight: 600; margin-bottom: 6px;">Paquet SCORM</span>
+                                                                    @if (!empty($item->payload['scorm_path']))
+                                                                        <p style="font-size: 0.8rem; color: var(--sys-action-primary, #064E5A); margin: 0 0 6px;">
+                                                                            📦 Paquet en place : {{ $item->payload['scorm_title'] ?? 'contenu SCORM' }}
+                                                                            (SCORM {{ $item->payload['scorm_version'] ?? 'inconnu' }})
+                                                                        </p>
+                                                                    @else
+                                                                        <p style="font-size: 0.8rem; color: var(--sys-text-muted, #6B7280); margin: 0 0 6px;">Aucun paquet pour l'instant.</p>
+                                                                    @endif
+                                                                    <label class="visually-hidden" for="item-scorm-file-{{ $item->id }}">Nouveau paquet SCORM</label>
+                                                                    <input id="item-scorm-file-{{ $item->id }}" type="file" accept=".zip,application/zip" wire:model="itemScorm.{{ $item->id }}" style="width: 100%;">
+                                                                    <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 4px 0 0;">Fichier .zip SCORM 1.2 ou 2004 (single-SCO), 200 Mo max. Remplace le contenu actuel.</p>
+                                                                    @error("itemScorm.{$item->id}") <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
+                                                                    <div wire:loading wire:target="itemScorm.{{ $item->id }}" role="status" aria-live="polite" style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280); margin-top: 4px;">Téléversement…</div>
+                                                                    <div style="margin-top: 8px;">
+                                                                        <x-core::button type="button" wire:click="replaceScormPackage({{ $item->id }})" wire:loading.attr="disabled" wire:target="replaceScormPackage({{ $item->id }}),itemScorm.{{ $item->id }}" variant="secondary" size="sm">Remplacer le paquet SCORM</x-core::button>
                                                                     </div>
                                                                 </div>
                                                             @endif
@@ -1972,6 +2009,27 @@
                                                         Ajouter un contenu interactif H5P
                                                     </x-core::button>
                                                 </div>
+
+                                                @if (config('academy.scorm_enabled', false))
+                                                    {{-- Import SCORM : le paquet .zip (imsmanifest.xml + SCO) est validé + extrait
+                                                         côté serveur (ScormPackageService, disque privé), puis rendu dans un iframe
+                                                         sandbox via un pont API SCORM 1.2/2004 basique. Single-SCO uniquement. --}}
+                                                    <p style="font-size: 0.74rem; font-weight: 700; color: var(--sys-text-default, #1A1D23); margin: 8px 0 0;">Champs pour un import SCORM</p>
+                                                    <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-scorm-{{ $lesson->id }}">Paquet SCORM .zip (max 200 Mo)</label>
+                                                    <input id="newitem-scorm-{{ $lesson->id }}" type="file" accept=".zip,application/zip" wire:model="newScorm.{{ $lesson->id }}"
+                                                           style="width: 100%; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
+                                                    <p style="font-size: 0.72rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
+                                                        SCORM 1.2 (prioritaire) ou 2004 (basique), UN SEUL SCO par paquet. Le titre ci-dessus est repris ; sinon le titre du manifeste est utilisé.
+                                                    </p>
+                                                    @error('newScorm.'.$lesson->id) <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.82rem;">{{ $message }}</span> @enderror
+                                                    <div wire:loading wire:target="newScorm.{{ $lesson->id }}" style="font-size: 0.78rem; color: var(--sys-text-muted, #6B7280);">Téléversement du paquet…</div>
+                                                    <div>
+                                                        <x-core::button type="button" wire:click="addScormItem({{ $lesson->id }})" wire:loading.attr="disabled"
+                                                            wire:target="addScormItem({{ $lesson->id }}),newScorm.{{ $lesson->id }}" variant="primary" size="sm">
+                                                            Ajouter un import SCORM
+                                                        </x-core::button>
+                                                    </div>
+                                                @endif
 
                                                 <label style="font-size: 0.78rem; font-weight: 600;" for="newitem-min-{{ $lesson->id }}">Durée estimée (min, facultatif)</label>
                                                 <input id="newitem-min-{{ $lesson->id }}" type="number" min="1" wire:model="newItem.{{ $lesson->id }}.estimated_minutes" placeholder="Durée estimée"

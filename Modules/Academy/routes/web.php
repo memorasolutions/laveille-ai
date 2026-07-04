@@ -29,6 +29,9 @@ use Modules\Academy\Http\Controllers\LiveSessionController;
 use Modules\Academy\Http\Controllers\LtiLaunchController;
 use Modules\Academy\Http\Controllers\PurchaseController;
 use Modules\Academy\Http\Controllers\QuizController;
+use Modules\Academy\Http\Controllers\ScormAssetController;
+use Modules\Academy\Http\Controllers\ScormCommitController;
+use Modules\Academy\Http\Controllers\ScormPlayerController;
 use Modules\Academy\Http\Controllers\VideoRedirectController;
 use Modules\Academy\Http\Controllers\WikiController;
 use Modules\Academy\Http\Controllers\WorkshopController;
@@ -554,4 +557,35 @@ Route::prefix('academie')->name('academy.')->group(function () {
     )
         ->middleware(['signed', 'throttle:60,1'])
         ->name('lessons.video-redirect');
+
+    // IMPORT SCORM - lecteur (pont API) + proxy d'asset protégé + commit runtime.
+    // Drapeau academy.scorm_enabled vérifié EN TÊTE de chaque contrôleur (404 si
+    // désactivé) ; accès re-vérifié intégralement à CHAQUE requête (aucun cache
+    // d'autorisation), DRY via LessonAccessService comme H5P/vidéo ci-dessus.
+    Route::get(
+        'courses/{course:slug}/lessons/{lesson}/items/{itemId}/scorm',
+        [ScormPlayerController::class, 'play']
+    )->name('scorm.play');
+
+    // Proxy d'asset : {path} est un joker (fichier de lancement + toutes ses
+    // ressources relatives : css/js/images/médias). Le disque est PRIVÉ (jamais
+    // servi par le serveur web directement) - seule cette route y donne accès,
+    // et seulement après re-vérification de l'inscription au cours.
+    Route::get(
+        'courses/{course:slug}/lessons/{lesson}/items/{itemId}/scorm/asset/{path}',
+        [ScormAssetController::class, 'show']
+    )
+        ->where('path', '.*')
+        ->middleware('throttle:120,1')
+        ->name('scorm.asset');
+
+    // Commit du runtime (pont API → serveur) : persiste l'état CMI et branche
+    // l'achèvement dans CompletionService/ProgressService (DRY, aucun système
+    // de progression parallèle). Authentification exigée dans le contrôleur.
+    Route::post(
+        'courses/{course:slug}/lessons/{lesson}/items/{itemId}/scorm/commit',
+        [ScormCommitController::class, 'store']
+    )
+        ->middleware('throttle:60,1')
+        ->name('scorm.commit');
 });

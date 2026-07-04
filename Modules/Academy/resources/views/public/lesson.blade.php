@@ -344,6 +344,7 @@
                                 'wiki'     => '📖',
                                 'database' => '🗃️',
                                 'h5p'      => '🧩',
+                                'scorm'    => '📦',
                                 default    => '📄',
                             };
                         @endphp

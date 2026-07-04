@@ -1441,6 +1441,81 @@
                                 </div>
                             @endif
 
+                        {{-- ── TYPE SCORM (import SCORM 1.2 / 2004 basique, parité Moodle « SCORM ») ── --}}
+                        @elseif($item->type === 'scorm')
+                            @php
+                                $scormPath   = $item->payload['scorm_path'] ?? null;
+                                $scormLaunch = $item->payload['scorm_launch_url'] ?? null;
+                            @endphp
+                            @if($hasAccess && config('academy.scorm_enabled', false) && !empty($scormPath) && !empty($scormLaunch))
+                                {{--
+                                    ISOLATION (le SCO exécute du JS tiers, comme H5P) : rendu DANS UN
+                                    IFRAME SANDBOX pointant vers ScormPlayerController, qui définit le
+                                    pont API (window.API/window.API_1484_11) puis charge le SCO dans une
+                                    iframe IMBRIQUÉE servie par ScormAssetController (disque PRIVÉ, jamais
+                                    public - contrairement à H5P). sandbox="allow-scripts allow-same-origin" =
+                                    le minimum nécessaire (pont API + fetch same-origin des assets). Aucune
+                                    URL de contenu n'est injectée ici : elle vit dans la page player, elle-
+                                    même gatée (LessonAccessService, re-vérifié à chaque requête).
+                                --}}
+                                <div class="academy-scorm-wrapper">
+                                    <iframe
+                                        src="{{ route('academy.scorm.play', [$course, $lesson, $item->id]) }}"
+                                        title="{{ $item->title ?? $lesson->title }}"
+                                        sandbox="allow-scripts allow-same-origin"
+                                        loading="lazy"
+                                        referrerpolicy="strict-origin-when-cross-origin"
+                                        style="width: 100%; min-height: 520px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff;"
+                                    ></iframe>
+                                </div>
+                            @else
+                                {{-- Accès refusé OU drapeau désactivé : aucune URL de contenu dans le DOM. --}}
+                                <div class="academy-gated-panel">
+                                    <div class="gated-icon">🔐</div>
+                                    <div class="gated-title">
+                                        @if(!auth()->check())
+                                            Connexion requise pour ce contenu SCORM
+                                        @elseif(!$isEnrolled)
+                                            Inscrivez-vous pour accéder à ce contenu SCORM
+                                        @else
+                                            Contenu SCORM en cours de préparation
+                                        @endif
+                                    </div>
+                                    <p class="gated-sub">
+                                        @if(!auth()->check())
+                                            Créez un compte gratuit ou connectez-vous pour accéder au contenu SCORM.
+                                        @elseif(!$isEnrolled && $isFree)
+                                            Ce cours est gratuit - inscrivez-vous pour accéder à l'ensemble du contenu.
+                                        @elseif(!$isEnrolled && !$isFree)
+                                            Ce cours est payant - achetez-le pour accéder à l'ensemble du contenu.
+                                        @else
+                                            Votre inscription vous donne accès à l'ensemble du contenu.
+                                        @endif
+                                    </p>
+                                    @if(!auth()->check())
+                                        <span class="d-inline-flex flex-wrap gap-2 justify-content-center">
+                                            <x-core::button :href="Route::has('login') ? route('login') : '#'" variant="primary" size="sm">
+                                                Se connecter
+                                            </x-core::button>
+                                            <x-core::button :href="Route::has('register') ? route('register') : '#'" variant="secondary" size="sm">
+                                                Créer un compte
+                                            </x-core::button>
+                                        </span>
+                                    @elseif(!$isEnrolled && $isFree)
+                                        <form action="{{ route('academy.courses.enroll', $course) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <x-core::button type="submit" variant="primary" size="sm">
+                                                S'inscrire gratuitement
+                                            </x-core::button>
+                                        </form>
+                                    @elseif(!$isEnrolled && !$isFree)
+                                        <x-core::button :href="route('academy.courses.purchase', $course)" variant="primary" size="sm">
+                                            Acheter ce cours
+                                        </x-core::button>
+                                    @endif
+                                </div>
+                            @endif
+
                         {{-- ── TYPE LTI_TOOL (consumer LTI 1.3 - outil pédagogique externe) ── --}}
                         @elseif($item->type === 'lti_tool')
                             @if($hasAccess && config('academy.lti_enabled', false))

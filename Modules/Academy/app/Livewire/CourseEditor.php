@@ -48,6 +48,7 @@ use Modules\Academy\Livewire\Concerns\HandlesChapters;
 use Modules\Academy\Livewire\Concerns\HandlesCourseReordering;
 use Modules\Academy\Livewire\Concerns\HandlesCourseSettings;
 use Modules\Academy\Livewire\Concerns\HandlesH5p;
+use Modules\Academy\Livewire\Concerns\HandlesScorm;
 use Modules\Academy\Livewire\Concerns\HandlesItemMedia;
 use Modules\Academy\Livewire\Concerns\HandlesItems;
 use Modules\Academy\Livewire\Concerns\HandlesDatabaseEditor;
@@ -64,6 +65,7 @@ class CourseEditor extends Component
     use HandlesCourseReordering;
     use HandlesCourseSettings;
     use HandlesH5p;
+    use HandlesScorm;
     use HandlesItemMedia;
     use HandlesItems;
     use HandlesItemRestrictions;
@@ -74,7 +76,7 @@ class CourseEditor extends Component
     use HandlesWorkshopEditor;
 
     /** Types d'items autorisés (liste blanche, alignée sur l'admin Backoffice). */
-    private const ITEM_TYPES = ['video', 'document', 'quiz', 'choice', 'feedback', 'forum', 'wiki', 'database', 'workshop', 'h5p'];
+    private const ITEM_TYPES = ['video', 'document', 'quiz', 'choice', 'feedback', 'forum', 'wiki', 'database', 'workshop', 'h5p', 'scorm'];
 
     /** Taille maximale (Ko) de l'image de couverture (~4 Mo) - validée côté SERVEUR. */
     private const COVER_MAX_KB = 4096;
@@ -224,6 +226,19 @@ class CourseEditor extends Component
      * indexé par item_id (TemporaryUploadedFile).
      */
     public array $itemH5p = [];
+
+    /**
+     * Import SCORM - paquet .zip en attente pour un NOUVEL item, indexé par
+     * lesson_id (TemporaryUploadedFile). Sa présence + un titre déclenchent
+     * addScormItem().
+     */
+    public array $newScorm = [];
+
+    /**
+     * Import SCORM - paquet .zip en attente pour REMPLACER le contenu d'un item
+     * scorm existant, indexé par item_id (TemporaryUploadedFile).
+     */
+    public array $itemScorm = [];
 
     /**
      * V5-d : restrictions d'accès par item (tampon d'édition Livewire).

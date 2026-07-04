@@ -126,6 +126,20 @@ trait HandlesItems
             ];
         }
 
+        // Import SCORM : même logique DRY que h5p ci-dessus - le contenu extrait
+        // (scorm_path/launch/version) n'est PAS éditable via ce formulaire générique
+        // (il se remplace via replaceScormPackage). On le PRÉSERVE pour que
+        // buildItemPayload ne l'écrase pas.
+        $scormPreserve = [];
+        if ($type === 'scorm') {
+            $scormPreserve = [
+                'scorm_path'       => $item->payload['scorm_path'] ?? null,
+                'scorm_launch_url' => $item->payload['scorm_launch_url'] ?? null,
+                'scorm_version'    => $item->payload['scorm_version'] ?? null,
+                'scorm_title'      => $item->payload['scorm_title'] ?? null,
+            ];
+        }
+
         $input = [
             'type'              => $type,
             'title'             => $title,
@@ -173,7 +187,7 @@ trait HandlesItems
             // WIKI : intro + édition collaborative (allow_student_edit).
             'wiki_intro'           => $extra['wiki_intro']           ?? null,
             'allow_student_edit'   => $extra['allow_student_edit']   ?? null,
-        ] + $h5pPreserve;
+        ] + $h5pPreserve + $scormPreserve;
 
         $data    = $this->validateItem($input);
         $payload = $this->buildItemPayload($data['type'], $input);
@@ -207,6 +221,13 @@ trait HandlesItems
         // academy-h5p/ (anti-traversal).
         if ($item->type === 'h5p') {
             (new \Modules\Academy\Services\H5pPackageService())->delete($item->payload['h5p_path'] ?? null);
+        }
+
+        // Import SCORM : nettoyer le dossier extrait (disque PRIVÉ « local ») avant
+        // suppression, même logique DRY que H5P (delete() borne le chemin à
+        // academy-scorm/, anti-traversal).
+        if ($item->type === 'scorm') {
+            (new \Modules\Academy\Services\ScormPackageService())->delete($item->payload['scorm_path'] ?? null);
         }
 
         $item->delete();
@@ -413,6 +434,7 @@ trait HandlesItems
             'database' => $this->buildDatabasePayload($input),
             'workshop' => $this->buildWorkshopPayload($input),
             'h5p'      => $this->buildH5pPayload($input),
+            'scorm'    => $this->buildScormPayload($input),
             default    => [],
         };
 
@@ -620,6 +642,25 @@ trait HandlesItems
         $title = $input['h5p_title'] ?? null;
         if (is_string($title) && $title !== '') {
             $payload['title'] = $title;
+        }
+
+        return $payload;
+    }
+
+    /**
+     * Import SCORM : préserve les champs posés par ScormPackageService à
+     * l'extraction (scorm_path/launch/version/title), le formulaire générique
+     * d'édition d'item ne modifie ni ne réextrait jamais le paquet.
+     */
+    private function buildScormPayload(array $input): array
+    {
+        $payload = [];
+
+        foreach (['scorm_path', 'scorm_launch_url', 'scorm_version', 'scorm_title'] as $key) {
+            $value = $input[$key] ?? null;
+            if (is_string($value) && $value !== '') {
+                $payload[$key] = $value;
+            }
         }
 
         return $payload;

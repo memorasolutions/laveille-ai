@@ -39,7 +39,7 @@ use Modules\Academy\Models\LessonItem;
 final class ActivityCompletionService
 {
     /** Critères de complétion connus (liste blanche globale). */
-    public const CRITERIA = ['manual', 'view', 'min_grade', 'vote', 'submit', 'post', 'edit', 'add', 'submit_work'];
+    public const CRITERIA = ['manual', 'view', 'min_grade', 'vote', 'submit', 'post', 'edit', 'add', 'submit_work', 'scorm'];
 
     /**
      * Critères autorisés pour un TYPE d'item donné (liste blanche serveur).
@@ -63,6 +63,10 @@ final class ActivityCompletionService
             // H5P : « manual » par défaut (clic explicite, activité interactive) ; « view »
             // reste proposé pour un contenu H5P purement consultatif.
             'h5p'      => ['manual', 'view'],
+            // SCORM : achèvement PILOTÉ PAR LE RUNTIME (cmi.core.lesson_status via
+            // ScormCommitController), jamais par clic ni par simple consultation -
+            // un seul critère possible, imposé (pas d'option manual/view sur ce type).
+            'scorm'    => ['scorm'],
             default    => ['manual', 'view'],
         };
     }
@@ -83,6 +87,8 @@ final class ActivityCompletionService
             'wiki'     => 'edit',
             'database' => 'add',
             'workshop' => 'submit_work',
+            // SCORM : le runtime pilote seul l'achèvement (voir allowedForType).
+            'scorm'    => 'scorm',
             // H5P étant une activité INTERACTIVE, l'achèvement par défaut est « manual »
             // (clic explicite « Marquer comme terminé » après l'activité), comme video/doc
             // et tous les autres types : aucun type ne se complète au simple chargement de
@@ -158,6 +164,7 @@ final class ActivityCompletionService
             'edit'      => 'se complète en contribuant au wiki',
             'add'       => 'se complète en ajoutant une fiche',
             'submit_work' => 'se complète en remettant son travail',
+            'scorm'     => 'se complète selon le résultat du contenu SCORM',
             default     => 'à marquer comme terminé',
         };
     }

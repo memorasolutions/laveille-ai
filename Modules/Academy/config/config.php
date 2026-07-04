@@ -188,6 +188,51 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Import SCORM (1.2 prioritaire, 2004 basique) - parité Moodle « SCORM »
+    |--------------------------------------------------------------------------
+    | INTERRUPTEUR MAÎTRE - défaut FALSE. Tant que « scorm_enabled » est faux,
+    | TOUTES les routes SCORM (lecteur, actif protégé, commit) répondent 404 et
+    | aucun item « scorm » ne peut être ajouté depuis l'éditeur. Activer via
+    | ACADEMY_SCORM_ENABLED=true dans le .env.
+    |
+    | Contrairement au paquet H5P (servi depuis le disque PUBLIC, protégé par
+    | obscurité de dossier UUID), le paquet SCORM extrait est stocké sur le
+    | disque PRIVÉ « local » (storage/app/private, jamais servi directement par
+    | le serveur web) : CHAQUE fichier du paquet (page de lancement, JS, images…)
+    | est diffusé via ScormAssetController, qui RE-VÉRIFIE l'inscription active
+    | au cours à CHAQUE requête (LessonAccessService, DRY avec H5P/vidéo). Un
+    | apprenant non inscrit ne peut donc JAMAIS deviner l'URL d'un asset SCORM
+    | (anti-IDOR structurel, pas seulement par obscurité).
+    |
+    | PÉRIMÈTRE MVP (documenté, pas la lune) :
+    |   - SCORM 1.2 : pris en charge intégralement (API LMSInitialize/GetValue/
+    |     SetValue/Commit/Finish, cmi.core.lesson_status, cmi.core.score.raw) ;
+    |   - SCORM 2004 : pris en charge en mode BASIQUE (API_1484_11 Initialize/
+    |     GetValue/SetValue/Commit/Terminate, cmi.completion_status/success_status/
+    |     score.raw) — le SÉQUENCEMENT/NAVIGATION 2004 (règles IMS SS) N'EST PAS
+    |     implémenté (aucun moteur de règles ; le SCO est lancé tel quel) ;
+    |   - SINGLE-SCO uniquement : seul le PREMIER <item>/<resource> de la
+    |     PREMIÈRE organisation du manifeste est retenu comme point d'entrée. Un
+    |     paquet multi-SCO (plusieurs activités séquencées) n'est PAS géré : les
+    |     SCO additionnels du manifeste sont ignorés (dette documentée, pas une
+    |     tentative bancale de support partiel) ;
+    |   - suivi granulaire par interaction (cmi.interactions.*) NON capturé : seul
+    |     l'état global (lesson_status/score) est persisté.
+    |
+    | « max_kb »/« max_entries »/« max_extract_kb » : mêmes bornes anti zip-bomb
+    | que H5P (voir ScormPackageService), taille max par défaut 200 Mo compressés
+    | (packages SCORM contiennent souvent vidéo/audio, plus lourds qu'un H5P).
+    */
+    'scorm_enabled' => env('ACADEMY_SCORM_ENABLED', false),
+
+    'scorm' => [
+        'max_kb'         => (int) env('ACADEMY_SCORM_MAX_KB', 204800),    // 200 Mo (compressé)
+        'max_entries'    => (int) env('ACADEMY_SCORM_MAX_ENTRIES', 10000), // nb d'entrées du zip
+        'max_extract_kb' => (int) env('ACADEMY_SCORM_MAX_EXTRACT_KB', 512000), // 500 Mo (décompressé)
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Notifications courriel d'activité (V5-c, parité Moodle)
     |--------------------------------------------------------------------------
     | INTERRUPTEUR MAITRE - défaut FALSE.
