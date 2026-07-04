@@ -174,13 +174,18 @@
    Boutons = classes charte (ct-btn / ct-btn-outline / ct-btn-primary / ct-btn-accent / ct-btn-sm),
    aucune classe/bordure ad hoc ici — voir minuteur-visuel.blade.php. On complète seulement
    ce que le système ct-btn ne couvre pas déjà (disposition + état désactivé, cibles 44px). */
+/* Chunking visuel (convention charte des 2 autres outils de la famille "outils gratuits" —
+   generateur-mots-passe/tirage-presentations : chaque groupe logique encadré sur fond #f8f9fa).
+   La marge entre panneaux est portée par ce wrapper, pas par les classes internes ci-dessous
+   (sinon double espacement à l'intérieur du panneau). */
+.mv-panel { background: #f8f9fa; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
+
 .mv-controls {
     display: flex;
     flex-wrap: wrap;
     gap: .6rem;
     justify-content: center;
     align-items: center;
-    margin-bottom: 1.25rem;
 }
 .mv-controls .ct-btn,
 .mv-presets .ct-btn,
@@ -192,7 +197,6 @@
     flex-wrap: wrap;
     gap: .5rem;
     justify-content: center;
-    margin-bottom: 1.5rem;
 }
 
 /* --- Durée personnalisée — saisie exacte en minutes, alignée avec .mv-presets --- */
@@ -202,7 +206,6 @@
     align-items: center;
     justify-content: center;
     gap: .6rem;
-    margin-bottom: 1.5rem;
 }
 .mv-custom-time label {
     font-size: .9rem;
@@ -244,7 +247,7 @@
     display: grid;
     gap: .75rem;
     padding: 1rem;
-    background: #F8FAFB;
+    background: #f8f9fa;
     border-radius: 10px;
     margin-top: .5rem;
 }

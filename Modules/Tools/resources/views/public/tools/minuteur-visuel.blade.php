@@ -69,7 +69,7 @@
 <section class="wpo-blog-single-section section-padding">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-9 col-12">
+            <div class="col-lg-8 col-12">
                 <div class="card shadow-sm tool-fullscreen-target" id="mv-fullscreen-target" style="border-radius: var(--r-base);">
                     <div class="card-body p-4 p-md-5 mv-wrap"
                          x-data="minuteurVisuel()"
@@ -77,16 +77,14 @@
                          @keydown.space.window="handleSpaceKey($event)"
                          :class="{ 'mv-reduced-motion': reducedMotion }">
 
-                        <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
-                            <div>
-                                <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0;">{{ $tool->icon }} {{ $tool->name }}</h1>
-                                <p class="text-muted mb-0">{{ $tool->description }}</p>
-                            </div>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0;">{{ $tool->name }}</h1>
                             <div class="d-flex gap-1 align-items-center" style="flex-shrink:0;">
                                 @include('tools::partials.fullscreen-btn', ['targetId' => '#mv-fullscreen-target'])
                                 @include('tools::partials.share-btn', ['tool' => $tool])
                             </div>
                         </div>
+                        <p class="text-muted mb-3">{{ $tool->description }}</p>
 
                         {{-- Sélecteur de style visuel (5 styles) — classes charte ct-btn (pas de bordure ad hoc) --}}
                         <div role="radiogroup" aria-label="{{ __('Style visuel du minuteur') }}" class="mv-style-selector">
@@ -237,8 +235,8 @@
                         {{-- Légende du feu de circulation — seuils réels dérivés de la durée choisie
                              (une ligne par couleur, recalculée si l'utilisateur change de durée). --}}
                         <div class="mv-traffic-legend" x-show="style === 'traffic'" x-cloak>
-                            <p class="mv-traffic-legend__line">🟢 {{ __('Plus de la moitié du temps') }} — <span x-text="'de ' + trafficGreenThreshold + ' à ' + trafficTotalFormatted"></span></p>
-                            <p class="mv-traffic-legend__line">🟡 {{ __('Bientôt fini') }} — <span x-text="'de ' + trafficYellowThreshold + ' à ' + trafficGreenThreshold"></span></p>
+                            <p class="mv-traffic-legend__line">🟢 {{ __('Plus de la moitié du temps') }} — <span x-text="'de ' + trafficTotalFormatted + ' à ' + trafficGreenThreshold"></span></p>
+                            <p class="mv-traffic-legend__line">🟡 {{ __('Bientôt fini') }} — <span x-text="'de ' + trafficGreenThreshold + ' à ' + trafficYellowThreshold"></span></p>
                             <p class="mv-traffic-legend__line">🔴 {{ __('Presque terminé') }} — <span x-text="'{{ __('moins de') }} ' + trafficYellowThreshold"></span></p>
                             <p class="mv-traffic-legend__note">{{ __('Le chiffre au centre reste le temps exact restant.') }}</p>
                         </div>
@@ -246,54 +244,61 @@
                         {{-- Annonces ARIA sobres (jamais à chaque seconde) --}}
                         <div class="mv-live" aria-live="polite" role="status" x-text="ariaMessage"></div>
 
-                        {{-- Contrôles principaux — classes charte ct-btn (aucune bordure ad hoc) --}}
-                        <div class="mv-controls">
-                            <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" @click="adjustMinutes(-1)" aria-label="{{ __('Réduire de 1 minute') }}" title="{{ __('-1 min') }}">−1</button>
+                        {{-- Contrôles principaux — classes charte ct-btn (aucune bordure ad hoc) ;
+                             panneau fond #f8f9fa, convention charte des 2 autres outils "outils gratuits" --}}
+                        <div class="mv-panel">
+                            <div class="mv-controls">
+                                <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" @click="adjustMinutes(-1)" aria-label="{{ __('Réduire de 1 minute') }}" title="{{ __('-1 min') }}">−1</button>
 
-                            <button type="button" class="ct-btn ct-btn-accent" @click="toggleStartPause()" x-show="state === 'idle' || state === 'paused'">
-                                <span aria-hidden="true">▶</span> <span x-text="state === 'paused' ? '{{ __('Reprendre') }}' : '{{ __('Démarrer') }}'"></span>
-                            </button>
-                            <button type="button" class="ct-btn ct-btn-outline" @click="toggleStartPause()" x-show="state === 'running'">
-                                <span aria-hidden="true">⏸</span> {{ __('Pause') }}
-                            </button>
-                            <button type="button" class="ct-btn ct-btn-accent" @click="toggleStartPause()" x-show="state === 'finished'">
-                                <span aria-hidden="true">↻</span> {{ __('Recommencer') }}
-                            </button>
-                            <button type="button" class="ct-btn ct-btn-outline" @click="reset()" x-show="state !== 'idle'">
-                                {{ __('Réinitialiser') }}
-                            </button>
+                                <button type="button" class="ct-btn ct-btn-accent" @click="toggleStartPause()" x-show="state === 'idle' || state === 'paused'">
+                                    <span aria-hidden="true">▶</span> <span x-text="state === 'paused' ? '{{ __('Reprendre') }}' : '{{ __('Démarrer') }}'"></span>
+                                </button>
+                                <button type="button" class="ct-btn ct-btn-outline" @click="toggleStartPause()" x-show="state === 'running'">
+                                    <span aria-hidden="true">⏸</span> {{ __('Pause') }}
+                                </button>
+                                <button type="button" class="ct-btn ct-btn-accent" @click="toggleStartPause()" x-show="state === 'finished'">
+                                    <span aria-hidden="true">↻</span> {{ __('Recommencer') }}
+                                </button>
+                                <button type="button" class="ct-btn ct-btn-outline" @click="reset()" x-show="state !== 'idle'">
+                                    {{ __('Réinitialiser') }}
+                                </button>
 
-                            <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" @click="adjustMinutes(1)" aria-label="{{ __('Ajouter 1 minute') }}" title="{{ __('+1 min') }}">+1</button>
+                                <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" @click="adjustMinutes(1)" aria-label="{{ __('Ajouter 1 minute') }}" title="{{ __('+1 min') }}">+1</button>
 
-                            <button type="button" class="ct-btn ct-btn-ghost ct-btn-sm" @click="shareCurrentUrl()" aria-label="{{ __('Copier le lien de ce minuteur') }}" title="{{ __('Partager ce réglage') }}">
-                                <span aria-hidden="true">🔗</span> <span x-text="shareCopied ? '{{ __('Copié !') }}' : '{{ __('Partager') }}'"></span>
-                            </button>
+                                <button type="button" class="ct-btn ct-btn-ghost ct-btn-sm" @click="shareCurrentUrl()" aria-label="{{ __('Copier le lien de ce minuteur') }}" title="{{ __('Partager ce réglage') }}">
+                                    <span aria-hidden="true">🔗</span> <span x-text="shareCopied ? '{{ __('Copié !') }}' : '{{ __('Partager') }}'"></span>
+                                </button>
+                            </div>
                         </div>
 
                         {{-- Présélections nommées — classes charte ct-btn --}}
-                        <div class="mv-presets" role="group" aria-label="{{ __('Présélections de durée') }}">
-                            @foreach($mvPresets as $p)
-                                <button type="button"
-                                        class="ct-btn ct-btn-outline ct-btn-sm"
-                                        :disabled="state === 'running'"
-                                        @click="applyPreset('{{ $p['key'] }}')">{{ $p['label'] }}</button>
-                            @endforeach
+                        <div class="mv-panel">
+                            <div class="mv-presets" role="group" aria-label="{{ __('Présélections de durée') }}">
+                                @foreach($mvPresets as $p)
+                                    <button type="button"
+                                            class="ct-btn ct-btn-outline ct-btn-sm"
+                                            :disabled="state === 'running'"
+                                            @click="applyPreset('{{ $p['key'] }}')">{{ $p['label'] }}</button>
+                                @endforeach
+                            </div>
                         </div>
 
                         {{-- Durée personnalisée — saisie exacte en minutes, hors présélections --}}
-                        <div class="mv-custom-time" role="group" aria-label="{{ __('Durée personnalisée') }}">
-                            <label for="mvCustomMinutes">{{ __('Durée personnalisée (minutes)') }}</label>
-                            <input type="number"
-                                   id="mvCustomMinutes"
-                                   min="1"
-                                   max="180"
-                                   x-model.number="customMinutes"
-                                   :disabled="state === 'running'"
-                                   @keydown.enter.prevent="applyCustomMinutes()">
-                            <button type="button"
-                                    class="ct-btn ct-btn-primary ct-btn-sm"
-                                    :disabled="state === 'running'"
-                                    @click="applyCustomMinutes()">{{ __('Définir') }}</button>
+                        <div class="mv-panel">
+                            <div class="mv-custom-time" role="group" aria-label="{{ __('Durée personnalisée') }}">
+                                <label for="mvCustomMinutes">{{ __('Durée personnalisée (minutes)') }}</label>
+                                <input type="number"
+                                       id="mvCustomMinutes"
+                                       min="1"
+                                       max="180"
+                                       x-model.number="customMinutes"
+                                       :disabled="state === 'running'"
+                                       @keydown.enter.prevent="applyCustomMinutes()">
+                                <button type="button"
+                                        class="ct-btn ct-btn-primary ct-btn-sm"
+                                        :disabled="state === 'running'"
+                                        @click="applyCustomMinutes()">{{ __('Définir') }}</button>
+                            </div>
                         </div>
 
                         {{-- Réglages accessibilité --}}
