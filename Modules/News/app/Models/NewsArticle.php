@@ -185,6 +185,29 @@ class NewsArticle extends Model implements Searchable
     }
 
     /**
+     * 2026-07-04 : aplatit le résumé structuré IA (hook + points clés + pourquoi important) en
+     * texte brut. Centralise cette concaténation pour éviter la duplication entre le calcul du
+     * temps de lecture (article-card.blade.php, show.blade.php) et la détection automatique
+     * d'outils (NewsToolSyncAction::suggest()) — cette dernière ignorait jusqu'ici entièrement
+     * structured_summary, qui porte pourtant le gros du contenu réel de l'actualité (description
+     * et summary sont souvent vides quand structured_summary est renseigné, cf. show.blade.php
+     * ligne 333 : le résumé brut n'est affiché QUE en absence de résumé structuré).
+     */
+    public function flattenStructuredSummary(): string
+    {
+        $ss = is_array($this->structured_summary) ? $this->structured_summary : null;
+        if (! $ss) {
+            return '';
+        }
+
+        $keyPoints = is_array($ss['key_points'] ?? null) ? $ss['key_points'] : [];
+
+        return trim(
+            ($ss['hook'] ?? '').' '.implode(' ', $keyPoints).' '.($ss['why_important'] ?? '')
+        );
+    }
+
+    /**
      * Contenus de partage admin (superadmin) : résumé NotebookLM, prompt NotebookLM, post réseaux sociaux.
      * Retourne un tableau d'items [label, icon, text] pour le composant <x-core::admin-copy-menu>.
      * Logique générée Hermes, hashtag affiné (préserve la casse des acronymes).

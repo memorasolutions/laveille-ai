@@ -99,7 +99,7 @@
     };
     $readText = strip_tags($article->description ?? '') . ' ' . ($article->summary ?? '');
     if ($ss) {
-        $readText .= ' ' . ($ss['hook'] ?? '') . ' ' . implode(' ', $ss['key_points'] ?? []) . ' ' . ($ss['why_important'] ?? '');
+        $readText .= ' ' . $article->flattenStructuredSummary();
     }
     $readMinutes = max(1, (int) ceil(str_word_count($readText) / 200));
 @endphp

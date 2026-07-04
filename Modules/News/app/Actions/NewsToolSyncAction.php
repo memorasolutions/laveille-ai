@@ -43,8 +43,22 @@ final class NewsToolSyncAction
 
     /**
      * Suggère les outils détectés automatiquement dans le contenu de l'actualité.
-     * Les outils de TOOL_NEVER_AUTO sont inclus uniquement si leur nom apparaît
-     * en mot entier (insensible à la casse) dans le TITRE de l'article.
+     *
+     * 2026-07-04 : le texte scanné inclut désormais aussi le résumé structuré IA
+     * (hook + points clés + pourquoi important), pas seulement title/description/summary.
+     * Pour beaucoup d'actualités, description/summary sont vides et TOUT le contenu réel
+     * vit dans structured_summary (cf. show.blade.php : le résumé brut ne s'affiche QUE en
+     * l'absence de résumé structuré) - sans cet ajout, la détection échouait silencieusement
+     * à 0 dès que le nom de l'outil n'apparaissait que dans le résumé IA.
+     *
+     * Les outils de TOOL_NEVER_AUTO (mots aussi courants en français : "Claude", "Avec",
+     * "Tome", "Make"...) sont exclus des $terms de GlossaryLinkifier et donc jamais détectés
+     * par linkify() ci-dessous, quel que soit $text. On les détecte séparément sur le texte
+     * COMPLET de l'article (titre + description + résumé + résumé structuré), mais en CASSE
+     * STRICTE (la forme capitalisée "Claude", pas "claude") : un mot français courant comme
+     * "avec" apparaît presque toujours en minuscule en milieu de phrase, jamais capitalisé
+     * hors début de phrase - la casse stricte limite donc fortement le risque de faux positif
+     * (confirmé : un outil "Avec" existe bel et bien, publié, dans l'annuaire).
      *
      * Renvoie une Collection d'IDs d'outils (sans enregistrer - l'admin valide).
      *
@@ -58,6 +72,7 @@ final class NewsToolSyncAction
             strip_tags($article->title ?? ''),
             strip_tags($article->description ?? ''),
             strip_tags($article->summary ?? ''),
+            strip_tags($article->flattenStructuredSummary()),
         ]));
 
         GlossaryLinkifier::linkify($text);
@@ -65,9 +80,8 @@ final class NewsToolSyncAction
         $matchedTools = collect(GlossaryLinkifier::getLastMatchedTerms())
             ->filter(fn (array $t) => ($t['type'] ?? '') === 'tool');
 
-        $titleLower = mb_strtolower(strip_tags($article->title ?? ''));
         $neverAutoIds = collect(GlossaryLinkifier::TOOL_NEVER_AUTO)
-            ->filter(fn (string $name) => (bool) preg_match('/\b' . preg_quote($name, '/') . '\b/iu', $titleLower))
+            ->filter(fn (string $name) => (bool) preg_match('/\b' . preg_quote(ucfirst($name), '/') . '\b/u', $text))
             ->map(fn (string $name) => Tool::published()
                 ->whereRaw("LOWER(JSON_EXTRACT(name, '$.\"fr_CA\"')) = ?", [mb_strtolower($name)])
                 ->value('id'))
