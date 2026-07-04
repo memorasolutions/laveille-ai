@@ -74,7 +74,10 @@
 /* Sable : dégradé vertical (relief) + texture de grain (feTurbulence, mix-blend-mode multiply)
    + fine ligne de surface ombrée à la limite du clip existant (aucun changement de hauteur/calcul JS). */
 .mv-hourglass-sand { fill: url(#mvSandGradient); transition: y .3s linear, height .3s linear; }
-.mv-hourglass-sand-grain { filter: url(#mvSandGrain); mix-blend-mode: multiply; transition: y .3s linear, height .3s linear; }
+/* Garde-fou défensif : si le filtre feTurbulence échoue à s'appliquer pour une raison
+   quelconque (moteur de rendu), le pire cas visuel doit être un rect quasi invisible à 7%,
+   jamais le fill noir opaque par défaut d'un <rect> SVG sans fill explicite. */
+.mv-hourglass-sand-grain { filter: url(#mvSandGrain); mix-blend-mode: multiply; opacity: .07; transition: y .3s linear, height .3s linear; }
 .mv-hourglass-sand-surface { fill: rgba(0, 0, 0, .14); transition: y .3s linear; }
 .mv-hourglass-stream { stroke: #D4A574; stroke-width: 2; opacity: .8; }
 .mv-hourglass-stream.is-running:not(.mv-reduced-motion .mv-hourglass-stream) {
