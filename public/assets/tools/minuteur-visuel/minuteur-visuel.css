@@ -1,0 +1,208 @@
+/* Author: MEMORA solutions, https://memora.solutions ; info@memora.ca */
+/* Minuteur visuel — styles des 5 cadrans (disque, sablier, anneau, chiffres, feu de circulation). */
+
+[x-cloak] { display: none !important; }
+
+.mv-wrap { max-width: 640px; margin: 0 auto; }
+
+/* --- Sélecteurs (style + couleur) ---
+   Boutons de style : classes charte ct-btn (ct-btn-outline au repos / ct-btn-primary actif),
+   pas de bordure ad hoc — cohérent avec tirage-presentations/constructeur-prompts. */
+.mv-style-selector,
+.mv-color-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    justify-content: center;
+    margin: 0 0 1.25rem;
+}
+
+/* Swatches de couleur : pastilles pleines (pas de bouton texte) — le seul moyen sensé d'indiquer
+   « sélectionné » est un anneau autour de la couleur elle-même (pattern standard des sélecteurs
+   de couleur), pas une bordure de bouton texte. Anneau via box-shadow (jamais `border` de contour). */
+.mv-color-btn {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 1.5px var(--sys-border-subtle, #E5E7EB);
+    cursor: pointer;
+    padding: 0;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+.mv-color-btn:hover { transform: scale(1.1); }
+.mv-color-btn:focus-visible { outline: 3px solid var(--c-accent, #9A2A06); outline-offset: 2px; }
+.mv-color-btn.active { box-shadow: 0 0 0 2.5px var(--c-dark, #1A1D23); }
+
+/* --- Zone visuelle du cadran ---
+   Le cadran EST l'élément visuel principal (comme les vrais TimeTimer) : il doit dominer la
+   carte, pas se fondre parmi les contrôles. */
+.mv-dial-zone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    width: min(70vw, 420px);
+    max-width: 420px;
+    aspect-ratio: 1 / 1;
+}
+/* !important nécessaire : un reset global d'icônes du thème (svg { width/height: 24px }) a une
+   spécificité concurrente et écraserait sinon la mise à l'échelle du cadran (SVG à viewBox). */
+.mv-dial-zone svg { width: 100% !important; height: 100% !important; max-width: none !important; max-height: none !important; display: block; }
+
+.mv-ring-track { fill: none; stroke: #E5E7EB; stroke-width: 12; }
+.mv-ring-progress {
+    fill: none;
+    stroke-width: 12;
+    stroke-linecap: round;
+    transition: stroke-dashoffset .3s linear, stroke .2s ease;
+}
+
+.mv-disk-face { fill: #fff; stroke: #E5E7EB; stroke-width: 2; }
+.mv-disk-slice { transition: d .3s linear, fill .2s ease; }
+.mv-disk-knob { fill: var(--c-dark, #1A1D23); opacity: .35; }
+.mv-tick { stroke: #C7CDD6; stroke-width: 1.5; }
+.mv-tick-major { stroke: #9AA3B2; stroke-width: 2.5; }
+
+.mv-hourglass-frame { fill: none; stroke: #B08D57; stroke-width: 3; stroke-linejoin: round; }
+.mv-hourglass-sand { fill: #D4A574; transition: y .3s linear, height .3s linear; }
+.mv-hourglass-stream { stroke: #D4A574; stroke-width: 2; opacity: .8; }
+.mv-hourglass-stream.is-running:not(.mv-reduced-motion .mv-hourglass-stream) {
+    animation: mv-stream-flow 0.6s linear infinite;
+}
+
+.mv-traffic-circle { stroke: #D1D5DB; stroke-width: 3; transition: fill .3s ease, opacity .3s ease; }
+.mv-traffic-circle.mv-off { fill: #E5E7EB; opacity: .5; }
+.mv-traffic-circle.mv-green.mv-on { fill: #15803D; }
+.mv-traffic-circle.mv-yellow.mv-on { fill: #CA8A04; }
+.mv-traffic-circle.mv-red.mv-on { fill: #B91C1C; }
+
+/* Chiffres / flip */
+.mv-flip-display {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: var(--c-dark, #1A1D23);
+    color: #fff;
+    border-radius: 16px;
+    font-family: 'Consolas', 'Menlo', monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(2.5rem, 12vw, 4.5rem);
+    font-weight: 800;
+    letter-spacing: 2px;
+    transition: transform .15s ease;
+}
+.mv-flip-display.mv-flip-pulse { transform: scale(1.03); }
+
+/* --- Affichage central mm:ss superposé, À L'INTÉRIEUR du cadran (tous styles) ---
+   Couleur adaptée par style pour garantir le contraste avec ce qu'il y a dessous :
+   blanc sur le disque (secteur coloré plein) et le feu (plaque foncée), sombre sur
+   l'anneau/le sablier (fond carte blanc au centre). */
+.mv-dial-zone { position: relative; }
+.mv-center-display {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Consolas', 'Menlo', monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(2.25rem, 11vw, 4rem);
+    font-weight: 800;
+    color: var(--c-dark, #1A1D23);
+    pointer-events: none;
+}
+.mv-style-disk .mv-center-display,
+.mv-style-traffic .mv-center-display { color: #fff; }
+.mv-style-hourglass .mv-center-display { font-size: clamp(1.5rem, 7vw, 2.25rem); }
+.mv-style-traffic .mv-center-display { font-size: clamp(1.75rem, 8vw, 2.75rem); }
+
+/* --- Live region ARIA (visible mais discrète) --- */
+.mv-live {
+    text-align: center;
+    min-height: 1.2rem;
+    font-size: .85rem;
+    color: var(--c-primary, #064E5A);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+/* --- Contrôles & présélections ---
+   Boutons = classes charte (ct-btn / ct-btn-outline / ct-btn-primary / ct-btn-accent / ct-btn-sm),
+   aucune classe/bordure ad hoc ici — voir minuteur-visuel.blade.php. On complète seulement
+   ce que le système ct-btn ne couvre pas déjà (disposition + état désactivé, cibles 44px). */
+.mv-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+.mv-controls .ct-btn,
+.mv-presets .ct-btn { min-height: 44px; }
+.mv-wrap .ct-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.mv-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+/* --- Réglages accessibilité --- */
+.mv-settings { margin-bottom: 1rem; }
+.mv-settings summary {
+    cursor: pointer;
+    font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif);
+    font-weight: 700;
+    color: var(--c-dark, #1A1D23);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+}
+.mv-settings__body {
+    display: grid;
+    gap: .75rem;
+    padding: 1rem;
+    background: #F8FAFB;
+    border-radius: 10px;
+    margin-top: .5rem;
+}
+.mv-settings__row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; font-size: .9rem; }
+.mv-settings__row input[type="number"] {
+    width: 80px;
+    padding: .4rem .6rem;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 8px;
+    font-size: .9rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mv-ring-progress, .mv-disk-slice, .mv-hourglass-sand, .mv-flip-display, .ct-btn {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+.mv-reduced-motion .mv-ring-progress,
+.mv-reduced-motion .mv-disk-slice,
+.mv-reduced-motion .mv-hourglass-sand,
+.mv-reduced-motion .mv-flip-display {
+    transition: none !important;
+    animation: none !important;
+}
+
+@keyframes mv-stream-flow {
+    0% { opacity: .4; }
+    50% { opacity: 1; }
+    100% { opacity: .4; }
+}
+
+@media (max-width: 540px) {
+    .mv-dial-zone { width: min(82vw, 300px); }
+}
