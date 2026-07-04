@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.76.9] - 2026-07-04
+
+### Changed
+- **Renommage « Glossaire IA » → « Glossaire Techno »** (décision produit) : changement de libellé site-wide (menu, fil d'Ariane, pied de page, pages piliers SEO, module Dictionary, `llms.txt`, infolettre, admin). Aucun changement de schéma DB ni d'URL (`/glossaire` inchangé).
+
 ## [1.71.0] - 2026-07-01
 
 ### Added

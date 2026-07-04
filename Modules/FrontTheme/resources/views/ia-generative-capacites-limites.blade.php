@@ -74,7 +74,7 @@ $jsonLd = [
                     <p>Explorez les concepts clés dans le glossaire, comparez les outils dans l'annuaire, et approfondissez le sujet dans le dossier thématique.</p>
                     <p style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;">
                         <x-core::button :href="route('pillar.ia-generative')" variant="primary">Retour au dossier : l'IA générative</x-core::button>
-                        <x-core::button :href="route('dictionary.index')" variant="secondary" size="sm">Glossaire IA</x-core::button>
+                        <x-core::button :href="route('dictionary.index')" variant="secondary" size="sm">Glossaire Techno</x-core::button>
                         <x-core::button :href="route('directory.index')" variant="secondary" size="sm">Explorer les outils</x-core::button>
                     </p>
 

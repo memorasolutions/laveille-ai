@@ -105,7 +105,7 @@
 <p style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;">
     <x-core::button :href="url('/outils/constructeur-prompts')" variant="primary">Constructeur de prompts</x-core::button>
     <x-core::button :href="url('/annuaire')" variant="secondary" size="sm">Annuaire d'outils IA</x-core::button>
-    <x-core::button :href="url('/glossaire')" variant="secondary" size="sm">Glossaire IA</x-core::button>
+    <x-core::button :href="url('/glossaire')" variant="secondary" size="sm">Glossaire Techno</x-core::button>
 </p>
 
 <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-top: 36px;">Questions fréquentes</h2>

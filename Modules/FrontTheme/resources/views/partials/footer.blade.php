@@ -23,7 +23,7 @@
                                 <li><a href="{{ route('blog.index') }}">{{ __('Blog') }}</a></li>
                             @endif
                             @if(Route::has('dictionary.index'))
-                                <li><a href="{{ route('dictionary.index') }}">{{ __('Glossaire IA') }}</a></li>
+                                <li><a href="{{ route('dictionary.index') }}">{{ __('Glossaire Techno') }}</a></li>
                             @endif
                             @if(Route::has('directory.index'))
                                 <li><a href="{{ route('directory.index') }}">{{ __('Répertoire techno') }}</a></li>

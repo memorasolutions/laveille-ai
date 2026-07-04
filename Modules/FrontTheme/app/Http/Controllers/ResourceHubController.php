@@ -35,7 +35,7 @@ class ResourceHubController extends Controller
             $model = \Modules\Dictionary\Models\Term::class;
             $sections[] = [
                 'icon' => '📖',
-                'title' => __('Glossaire IA'),
+                'title' => __('Glossaire Techno'),
                 'description' => __('Glossaire terminologique sur l\'intelligence artificielle et les technologies.'),
                 'count' => $model::count(),
                 'url' => route('dictionary.index'),

@@ -32,7 +32,7 @@ class LlmsController extends Controller
             $content .= "- [Actualités](" . url('/actualites') . ") : nouvelles auto-curées de 23 sources RSS, classées par score de pertinence IA.\n";
             $content .= "- [Annuaire](" . url('/annuaire') . ") : {$c['tools']} outils d'IA testés, tarifés, datés (last_verified_at).\n";
             $content .= "- [Collections](" . url('/collections') . ") : collections thématiques publiques créées par les membres.\n";
-            $content .= "- [Glossaire](" . url('/glossaire') . ") : {$c['terms']} termes d'IA expliqués (Définition + termes simples + exemple québécois + source datée).\n";
+            $content .= "- [Glossaire](" . url('/glossaire') . ") : {$c['terms']} termes de technologie expliqués (Définition + termes simples + exemple québécois + source datée).\n";
             $content .= "- [Acronymes éducation](" . url('/acronymes-education') . ") : {$c['acronyms']} acronymes du système d'éducation québécois.\n";
             $content .= "- [Outils](" . url('/outils') . ") : outils interactifs pratiques (calculateur d'impôt Québec, générateur de mots de passe, etc.).\n";
             $content .= "- [FAQ](" . url('/faq') . ") : questions fréquentes sur le site.\n";

@@ -30,7 +30,7 @@
     $topPillars = array_slice($scores, 0, 2);
 
     $links = [
-        ['route' => 'dictionary.index', 'label' => __('Glossaire IA')],
+        ['route' => 'dictionary.index', 'label' => __('Glossaire Techno')],
         ['route' => 'directory.index', 'label' => __("Annuaire d'outils IA")],
     ];
 

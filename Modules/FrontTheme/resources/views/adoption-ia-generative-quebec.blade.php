@@ -59,7 +59,7 @@ $jsonLd = [
                     <p>Dans un contexte d'adoption rapide, une veille structurée devient précieuse : choisir des sources fiables, filtrer le bruit ambiant et conserver un esprit critique permettent de distinguer les usages réellement utiles des simples effets de mode. Suivre l'évolution des outils et des pratiques aide à faire des choix éclairés, sans céder à la précipitation.</p>
                     <p style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;">
                         <x-core::button :href="route('pillar.veille-ia')" variant="primary">Retour au dossier : faire sa veille IA</x-core::button>
-                        <x-core::button :href="route('dictionary.index')" variant="secondary" size="sm">Glossaire IA</x-core::button>
+                        <x-core::button :href="route('dictionary.index')" variant="secondary" size="sm">Glossaire Techno</x-core::button>
                         <x-core::button :href="route('directory.index')" variant="secondary" size="sm">Explorer les outils</x-core::button>
                     </p>
 

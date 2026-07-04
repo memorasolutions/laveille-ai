@@ -17,7 +17,7 @@
                                             __('Académie') => Route::has('academy.dashboard') ? route('academy.dashboard') : null,
                                             __('Outils') => Route::has('tools.index') ? route('tools.index') : null,
                                             __('Blog') => Route::has('blog.index') ? route('blog.index') : null,
-                                            __('Glossaire IA') => Route::has('dictionary.index') ? route('dictionary.index') : null,
+                                            __('Glossaire Techno') => Route::has('dictionary.index') ? route('dictionary.index') : null,
                                             __('Répertoire techno') => Route::has('directory.index') ? route('directory.index') : null,
                                             __('FAQ') => Route::has('faq.index') ? route('faq.index') : null,
                                             __('Acronymes éducation') => Route::has('acronyms.index') ? route('acronyms.index') : null,

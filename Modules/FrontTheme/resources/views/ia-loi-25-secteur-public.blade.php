@@ -64,7 +64,7 @@ $jsonLd = [
                     <p style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;">
                         <x-core::button :href="url('/outils/anonymiseur')" variant="primary">Utiliser l'anonymiseur (100 % local)</x-core::button>
                         <x-core::button :href="route('pillar.ia-secteur-public')" variant="secondary" size="sm">Retour au dossier</x-core::button>
-                        <x-core::button :href="route('dictionary.index')" variant="secondary" size="sm">Glossaire IA</x-core::button>
+                        <x-core::button :href="route('dictionary.index')" variant="secondary" size="sm">Glossaire Techno</x-core::button>
                     </p>
 
                     <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-top: 32px; margin-bottom: 16px;">Rester à jour</h2>

@@ -126,7 +126,7 @@ return [
         ],
         'bonus' => 'Demande à une IA : <em>« Quels sont les signes typiques d\'une image générée par IA en 2026 ? »</em> et compare avec ta propre liste.',
         'cta_url' => 'https://www.laveille.ai/glossaire',
-        'cta_label' => 'Explorer le glossaire IA',
+        'cta_label' => 'Explorer le glossaire techno',
     ],
 
     // À enrichir : autres défis IA, numériques et bien-être. Structure identique.

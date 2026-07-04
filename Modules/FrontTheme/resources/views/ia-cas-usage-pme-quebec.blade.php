@@ -96,7 +96,7 @@ $faqLd = [
                         <x-core::button :href="url('/outils/constructeur-prompts')" variant="primary">Construire un prompt efficace</x-core::button>
                         <x-core::button :href="route('directory.index')" variant="secondary" size="sm">Annuaire d'outils IA</x-core::button>
                         <x-core::button :href="url('/collections/stack-marketeur-pme-quebec')" variant="secondary" size="sm">Stack marketeur PME</x-core::button>
-                        <x-core::button :href="route('dictionary.index')" variant="secondary" size="sm">Glossaire IA</x-core::button>
+                        <x-core::button :href="route('dictionary.index')" variant="secondary" size="sm">Glossaire Techno</x-core::button>
                     </p>
 
                     <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-top: 32px; margin-bottom: 16px;">Rester à jour</h2>

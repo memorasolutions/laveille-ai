@@ -36,7 +36,7 @@
 
             <h2 style="font-family: var(--f-heading); margin-top: 36px;">Comprendre les concepts</h2>
             <p>Un glossaire simple pour démystifier les termes liés à l'IA, sans jargon inutile.</p>
-            <p style="margin:16px 0;"><x-core::button :href="route('dictionary.index')" variant="secondary">Consulter le glossaire IA</x-core::button></p>
+            <p style="margin:16px 0;"><x-core::button :href="route('dictionary.index')" variant="secondary">Consulter le glossaire techno</x-core::button></p>
 
             <h2 style="font-family: var(--f-heading); margin-top: 36px;">Guides pratiques</h2>
             <p>Des articles concrets pour utiliser l'IA de façon éthique et efficace dans les études.</p>

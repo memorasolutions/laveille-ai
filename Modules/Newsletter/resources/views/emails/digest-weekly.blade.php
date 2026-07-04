@@ -120,7 +120,7 @@
                     <span style="font-size:13px;color:#555;">Fiches détaillées, screenshots, avis de la communauté</span>
                 </td></tr>
                 <tr><td style="padding-bottom:12px;">
-                    <strong style="font-size:15px;color:#1a1a2e;">Glossaire IA interactif</strong><br/>
+                    <strong style="font-size:15px;color:#1a1a2e;">Glossaire Techno interactif</strong><br/>
                     <span style="font-size:13px;color:#555;">140+ termes expliqués simplement avec analogies</span>
                 </td></tr>
                 <tr><td style="padding-bottom:12px;">

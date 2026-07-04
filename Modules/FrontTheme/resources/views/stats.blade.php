@@ -54,7 +54,7 @@
                     ['emoji' => '📦', 'value' => $stats['collections_public'], 'label' => __('Collections & stacks IA'), 'sub' => __('top par tâche · stacks par persona'),                  'cta' => url('/collections'), 'cta_label' => __('Voir les collections')],
                     ['emoji' => '📰', 'value' => $stats['articles_published'], 'label' => __('Articles publiés'),         'sub' => __('analyses + concentrés IA hebdo'),                       'cta' => url('/blog'),        'cta_label' => __('Voir le blog')],
                     ['emoji' => '🗞️', 'value' => $stats['concentres_published'], 'label' => __('Concentrés IA hebdo'),     'sub' => __('chaque lundi depuis 2025'),                             'cta' => url('/rss/concentres.xml'), 'cta_label' => '📡 RSS'],
-                    ['emoji' => '📖', 'value' => $stats['glossary_terms'], 'label' => __('Termes du glossaire IA'),  'sub' => __('vocabulaire francophone'),                              'cta' => url('/glossaire'),   'cta_label' => __('Glossaire')],
+                    ['emoji' => '📖', 'value' => $stats['glossary_terms'], 'label' => __('Termes du glossaire techno'),  'sub' => __('vocabulaire francophone'),                              'cta' => url('/glossaire'),   'cta_label' => __('Glossaire')],
                     ['emoji' => '🎮', 'value' => $stats['interactive_tools'], 'label' => __('Outils interactifs gratuits'), 'sub' => __('sudoku, mots-croisés, calc. taxes...'),     'cta' => url('/outils'),      'cta_label' => __('Voir les outils')],
                 ];
             @endphp

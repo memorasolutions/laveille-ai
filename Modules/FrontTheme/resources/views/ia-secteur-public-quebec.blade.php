@@ -50,7 +50,7 @@ $spJsonLd = ['@context'=>'https://schema.org','@type'=>'FAQPage','mainEntity'=>a
 
 <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-top: 36px;">Comprendre les concepts</h2>
 <p>Familiarisez-vous avec les termes techniques, les types d'IA et les notions clés pour mieux évaluer les outils et leurs usages dans votre milieu.</p>
-<p style="margin:16px 0;"><x-core::button :href="route('dictionary.index')" variant="secondary">Consulter le glossaire IA</x-core::button></p>
+<p style="margin:16px 0;"><x-core::button :href="route('dictionary.index')" variant="secondary">Consulter le glossaire techno</x-core::button></p>
 
 <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-top: 36px;">Guides et analyses</h2>
 <ul>

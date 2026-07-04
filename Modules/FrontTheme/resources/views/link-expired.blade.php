@@ -46,7 +46,7 @@
                         <div class="col-12 col-sm-6">
                             <a href="{{ route('dictionary.index') }}" style="text-decoration:none;" class="d-block h-100">
                                 <div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:18px 20px;height:100%;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--c-primary)'" onmouseout="this.style.borderColor='#E5E7EB'">
-                                    <div style="font-weight:700;font-family:var(--f-heading);color:var(--c-dark);margin-bottom:5px;">{{ __('Glossaire IA') }}</div>
+                                    <div style="font-weight:700;font-family:var(--f-heading);color:var(--c-dark);margin-bottom:5px;">{{ __('Glossaire Techno') }}</div>
                                     <div style="font-size:0.85rem;color:#6B7280;">{{ __('400+ termes expliqués en français') }}</div>
                                 </div>
                             </a>

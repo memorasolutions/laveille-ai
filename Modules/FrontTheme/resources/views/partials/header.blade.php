@@ -247,7 +247,7 @@
                                             @if(Route::has('dictionary.index'))
                                             <a href="{{ route('dictionary.index') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
                                                 <span style="font-size:18px;line-height:1;">📚</span>
-                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Glossaire IA') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ $dictionaryCount }} {{ __('termes et définitions') }}</div></div>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Glossaire Techno') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ $dictionaryCount }} {{ __('termes et définitions') }}</div></div>
                                             </a>
                                             @endif
                                             @if(Route::has('acronyms.index'))
@@ -269,7 +269,7 @@
                                 <ul class="sub-menu">
                                     @if(Route::has('news.index'))<li><a href="{{ route('news.index') }}">📰 {{ __('Actualités') }}</a></li>@endif
                                     @if(Route::has('blog.index'))<li><a href="{{ route('blog.index') }}">✍️ {{ __('Blog') }}</a></li>@endif
-                                    @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">📚 {{ __('Glossaire IA') }}</a></li>@endif
+                                    @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">📚 {{ __('Glossaire Techno') }}</a></li>@endif
                                     @if(Route::has('acronyms.index'))<li><a href="{{ route('acronyms.index') }}">🔤 {{ __('Acronymes') }}</a></li>@endif
                                     @if(Route::has('faq.index'))<li><a href="{{ route('faq.index') }}">❓ {{ __('FAQ') }}</a></li>@endif
                                     @if(Route::has('shop.index') && ! config('shop.maintenance', false))<li><a href="{{ route('shop.index') }}">🛍️ {{ __('Boutique') }}</a></li>@endif
@@ -312,7 +312,7 @@
                                             @if(Route::has('dictionary.index'))
                                             <a href="{{ route('dictionary.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                                                 <span style="font-size:18px;line-height:1;">📚</span>
-                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Glossaire IA') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ cache()->remember('dictionary_terms_count', 3600, fn () => class_exists(\Modules\Dictionary\Models\Term::class) ? \Modules\Dictionary\Models\Term::where('is_published', 1)->count() : 0) }} {{ __('termes et définitions de l\'IA') }}</div></div>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Glossaire Techno') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ cache()->remember('dictionary_terms_count', 3600, fn () => class_exists(\Modules\Dictionary\Models\Term::class) ? \Modules\Dictionary\Models\Term::where('is_published', 1)->count() : 0) }} {{ __('termes et définitions techno') }}</div></div>
                                             </a>
                                             @endif
                                             @if(Route::has('acronyms.index'))
@@ -357,7 +357,7 @@
                                 <ul class="sub-menu">
                                     @if(Route::has('news.index'))<li><a href="{{ route('news.index') }}">{{ __('Actualités') }}</a></li>@endif
                                     @if(Route::has('directory.index'))<li><a href="{{ route('directory.index') }}">{{ __('Répertoire techno') }}</a></li>@endif
-                                    @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">{{ __('Glossaire IA') }}</a></li>@endif
+                                    @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">{{ __('Glossaire Techno') }}</a></li>@endif
                                     @if(Route::has('acronyms.index'))<li><a href="{{ route('acronyms.index') }}">{{ __('Acronymes éducation') }}</a></li>@endif
                                     @if(Route::has('collections.index'))<li><a href="{{ route('collections.index') }}">{{ __('Collections') }}</a></li>@endif
                                     @if(Route::has('roadmap.boards.index'))<li><a href="{{ route('roadmap.boards.index') }}">{{ __('Propositions') }}</a></li>@endif
@@ -622,7 +622,7 @@
                                             <ul>
                                                 @if(Route::has('news.index'))<li><a href="{{ route('news.index') }}">📰 {{ __('Actualités') }}</a></li>@endif
                                                 @if(Route::has('blog.index'))<li><a href="{{ route('blog.index') }}">✍️ {{ __('Blog') }}</a></li>@endif
-                                                @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">📚 {{ __('Glossaire IA ('.$dictionaryCount.')') }}</a></li>@endif
+                                                @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">📚 {{ __('Glossaire Techno ('.$dictionaryCount.')') }}</a></li>@endif
                                                 @if(Route::has('acronyms.index'))<li><a href="{{ route('acronyms.index') }}">🔤 {{ __('Acronymes') }}</a></li>@endif
                                                 @if(Route::has('faq.index'))<li><a href="{{ route('faq.index') }}">❓ {{ __('FAQ') }}</a></li>@endif
                                                 @if(Route::has('shop.index') && ! config('shop.maintenance', false))<li><a href="{{ route('shop.index') }}">🛍️ {{ __('Boutique') }}</a></li>@endif

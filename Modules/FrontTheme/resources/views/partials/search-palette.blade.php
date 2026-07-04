@@ -58,7 +58,7 @@
                         <x-tools::octopus variant="loved" :size="96" />
                     </div>
                     <p class="sp-empty__title">{{ __('Commencez à taper') }}</p>
-                    <p class="sp-empty__hint">{{ __('Octopus cherche pour vous parmi les outils, le glossaire IA, les articles et plus.') }}</p>
+                    <p class="sp-empty__hint">{{ __('Octopus cherche pour vous parmi les outils, le glossaire techno, les articles et plus.') }}</p>
                     <ul class="sp-shortcuts">
                         <li><kbd>↑</kbd><kbd>↓</kbd> {{ __('naviguer') }}</li>
                         <li><kbd>⏎</kbd> {{ __('ouvrir') }}</li>

@@ -1,7 +1,7 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 
-@section('title', $term->name . ' - ' . __('Glossaire IA') . ' - ' . config('app.name'))
+@section('title', $term->name . ' - ' . __('Glossaire Techno') . ' - ' . config('app.name'))
 @section('meta_description', safe_excerpt($term->analogy ?? strip_tags($term->definition), 160))
 @section('og_type', 'article')
 {{-- og:image fallback chain : .jpg (prioritaire) → hero_image original (.png/.webp) → absent (L-JPEG-vs-WebP-social-V1 S75) --}}
@@ -45,7 +45,7 @@
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [
         'breadcrumbTitle' => $term->name,
-        'breadcrumbItems' => [__('Glossaire IA'), $term->name]
+        'breadcrumbItems' => [__('Glossaire Techno'), $term->name]
     ])
 @endsection
 
@@ -66,8 +66,8 @@
 
 {{-- Meta AEO/LLM-first 2026 : aide les crawlers IA à citer la définition --}}
 @push('head')
-<meta name="llm:summary" content="{{ e($term->name) }} — {{ e(Str::limit(strip_tags($term->analogy ?? $term->definition ?? ''), 200)) }} (Glossaire IA)">
-<meta name="llm:keywords" content="{{ e($term->name) }}, glossaire IA, intelligence artificielle, définition, francophone, Québec">
+<meta name="llm:summary" content="{{ e($term->name) }} — {{ e(Str::limit(strip_tags($term->analogy ?? $term->definition ?? ''), 200)) }} (Glossaire Techno)">
+<meta name="llm:keywords" content="{{ e($term->name) }}, glossaire techno, intelligence artificielle, définition, francophone, Québec">
 <meta name="llm:url" content="{{ route('dictionary.show', $term->slug) }}">
 @endpush
 

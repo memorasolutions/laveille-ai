@@ -45,7 +45,7 @@
 
             <h2 style="font-family: var(--f-heading); margin-top: 36px;">Comprendre les concepts</h2>
             <p>Clarifiez les termes techniques et les tendances grâce à des explications simples.</p>
-            <p style="margin:16px 0;"><x-core::button :href="route('dictionary.index')" variant="secondary">Consulter le glossaire IA</x-core::button></p>
+            <p style="margin:16px 0;"><x-core::button :href="route('dictionary.index')" variant="secondary">Consulter le glossaire techno</x-core::button></p>
 
             <h2 style="font-family: var(--f-heading); margin-top: 36px;">Recevoir la veille</h2>
             <p>Notre infolettre hebdomadaire synthétise l'essentiel de l'actualité IA, sans le superflu.</p>

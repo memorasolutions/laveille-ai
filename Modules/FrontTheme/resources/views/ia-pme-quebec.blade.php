@@ -50,7 +50,7 @@
 
                     <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-top: 36px;">Comprendre les concepts</h2>
                     <p>L'IA regorge de termes techniques (modèles, apprentissage automatique, RAG…). Notre glossaire simplifié vous aide à y voir clair et à poser les bonnes questions, même sans bagage technique.</p>
-                    <p style="margin:16px 0;"><x-core::button :href="route('dictionary.index')" variant="secondary">Consulter le glossaire IA</x-core::button></p>
+                    <p style="margin:16px 0;"><x-core::button :href="route('dictionary.index')" variant="secondary">Consulter le glossaire techno</x-core::button></p>
 
                     <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-top: 36px;">Guides et analyses</h2>
                     <p>Des articles concrets pour les décideurs de PME : cas d'usage, comparaisons, erreurs à éviter et réflexions stratégiques, sans jargon inutile.</p>

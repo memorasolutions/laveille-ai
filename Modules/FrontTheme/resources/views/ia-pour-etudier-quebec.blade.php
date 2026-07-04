@@ -69,7 +69,7 @@ $jsonLd = [
                     <p>Ciblez une tâche précise (par exemple reformuler un paragraphe ou générer un plan), validez toujours l'information produite, gardez votre esprit critique et respectez les règles de votre établissement.</p>
                     <p style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;">
                         <x-core::button :href="route('pillar.ia-education')" variant="primary">Retour au dossier : l'IA en éducation</x-core::button>
-                        <x-core::button :href="route('dictionary.index')" variant="secondary" size="sm">Glossaire IA</x-core::button>
+                        <x-core::button :href="route('dictionary.index')" variant="secondary" size="sm">Glossaire Techno</x-core::button>
                         <x-core::button :href="route('directory.index')" variant="secondary" size="sm">Explorer les outils</x-core::button>
                     </p>
 

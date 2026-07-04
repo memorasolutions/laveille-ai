@@ -1,11 +1,11 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 
-@section('title', __('Glossaire IA') . ' - ' . config('app.name'))
+@section('title', __('Glossaire Techno') . ' - ' . config('app.name'))
 @section('meta_description', __('Comprendre les termes de l\'intelligence artificielle, simplement. Définitions, analogies et exemples concrets pour 20+ termes IA essentiels.'))
 
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Glossaire IA')])
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Glossaire Techno')])
 @endsection
 
 @php
@@ -430,7 +430,7 @@
         {{-- Hero + 2-step wizard wrapper --}}
         <div x-data="{ step: 0, submitted: false, termName: '', termDef: '' }">
             <div class="gl-hero">
-                <h1>{{ __('Glossaire IA') }}</h1>
+                <h1>{{ __('Glossaire Techno') }}</h1>
                 <p>{{ __('Comprendre les termes de l\'intelligence artificielle, simplement.') }}</p>
 
                 <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
@@ -746,7 +746,7 @@
 {
     "@@context": "https://schema.org",
     "@@type": "DefinedTermSet",
-    "name": "{{ __('Glossaire IA') }}",
+    "name": "{{ __('Glossaire Techno') }}",
     "description": "{{ __('Comprendre les termes de l\'intelligence artificielle, simplement.') }}",
     "url": "{{ route('dictionary.index') }}"
 }

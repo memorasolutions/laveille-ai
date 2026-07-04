@@ -79,7 +79,7 @@ $jsonLd = [
                     </ul>
                     <p style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;">
                         <x-core::button :href="route('pillar.ia-dev')" variant="primary">Retour au dossier : l'IA pour les développeurs</x-core::button>
-                        <x-core::button :href="route('dictionary.index')" variant="secondary" size="sm">Glossaire IA</x-core::button>
+                        <x-core::button :href="route('dictionary.index')" variant="secondary" size="sm">Glossaire Techno</x-core::button>
                         <x-core::button :href="route('directory.index')" variant="secondary" size="sm">Explorer les outils</x-core::button>
                     </p>
 

@@ -2,7 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', __('Ressources') . ' - ' . config('app.name'))
-@section('meta_description', __('Explorez toutes les ressources disponibles sur laveille.ai : répertoire techno, glossaire IA, acronymes, blog, actualités et outils gratuits.'))
+@section('meta_description', __('Explorez toutes les ressources disponibles sur laveille.ai : répertoire techno, glossaire techno, acronymes, blog, actualités et outils gratuits.'))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Ressources')])

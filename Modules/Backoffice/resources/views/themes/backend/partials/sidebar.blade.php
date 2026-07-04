@@ -228,7 +228,7 @@
                 <div class="collapse {{ request()->routeIs('admin.dictionary.*', 'admin.directory.*', 'admin.acronyms.*', 'admin.moderation.*') ? 'show' : '' }}" id="resourcesMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         @if(Route::has('admin.dictionary.index'))
-                        <li class="nav-item"><a href="{{ route('admin.dictionary.index') }}" class="nav-link {{ request()->routeIs('admin.dictionary.*') ? 'active' : '' }}">{{ __('Glossaire IA') }}</a></li>
+                        <li class="nav-item"><a href="{{ route('admin.dictionary.index') }}" class="nav-link {{ request()->routeIs('admin.dictionary.*') ? 'active' : '' }}">{{ __('Glossaire Techno') }}</a></li>
                         @endif
                         @if(Route::has('admin.directory.index'))
                         <li class="nav-item"><a href="{{ route('admin.directory.index') }}" class="nav-link {{ request()->routeIs('admin.directory.*') ? 'active' : '' }}">{{ __('Répertoire techno') }}</a></li>

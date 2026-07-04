@@ -680,7 +680,7 @@
             </div>
 
             <p style="font-size:.875rem;color:var(--c-muted);margin:1.5rem 0 0;text-align:center;">
-                Voir aussi : <a href="{{ url('/glossaire') }}" style="color:var(--c-primary,#0B7285);font-weight:600;">Glossaire IA laveille.ai</a> · <a href="{{ url('/outils') }}" style="color:var(--c-primary,#0B7285);font-weight:600;">Autres outils gratuits</a>
+                Voir aussi : <a href="{{ url('/glossaire') }}" style="color:var(--c-primary,#0B7285);font-weight:600;">Glossaire Techno laveille.ai</a> · <a href="{{ url('/outils') }}" style="color:var(--c-primary,#0B7285);font-weight:600;">Autres outils gratuits</a>
             </p>
         </div>
     </section>

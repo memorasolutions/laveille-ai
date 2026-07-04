@@ -12,7 +12,7 @@
         'repertoire_consultation' => 'Consultation du répertoire IA',
         'repertoire_complet' => 'Répertoire complet + filtres avancés',
         'repertoire_alertes' => 'Alertes nouveaux outils par catégorie',
-        'glossaire_consultation' => 'Consultation du glossaire IA',
+        'glossaire_consultation' => 'Consultation du glossaire techno',
         'glossaire_complet' => 'Glossaire complet + contributions',
         'acronymes_consultation' => 'Consultation des acronymes',
         'acronymes_complet' => 'Acronymes complet + contributions',
