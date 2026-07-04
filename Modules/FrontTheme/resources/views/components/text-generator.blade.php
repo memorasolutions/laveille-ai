@@ -113,7 +113,8 @@
         </div>
 
         <button
-            type="submit"
+            type="button"
+            @click="generate()"
             class="ct-btn"
             style="background: {{ $couleur }}; color:#fff; border:none; padding:0.65rem 1.25rem; border-radius: var(--r-base, 10px); font-weight:600;"
         >
