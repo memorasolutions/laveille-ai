@@ -52,6 +52,13 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     $response->assertSee('class="mv-traffic-legend"', escape: false);
     $response->assertSee('Plus de la moitié du temps', escape: false);
 
+    // Sablier réaliste — dégradé de sable, texture de grain (feTurbulence) et verre dégradé.
+    $response->assertSee('id="mvSandGradient"', escape: false);
+    $response->assertSee('id="mvGlassGradient"', escape: false);
+    $response->assertSee('id="mvSandGrain"', escape: false);
+    $response->assertSee('feTurbulence', escape: false);
+    $response->assertSee('class="mv-hourglass-sand-surface"', escape: false);
+
     // Annonces ARIA sobres.
     $response->assertSee('aria-live="polite"', escape: false);
 

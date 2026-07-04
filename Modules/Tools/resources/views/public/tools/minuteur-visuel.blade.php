@@ -149,20 +149,53 @@
                                 </div>
                             </template>
 
-                            {{-- Sablier stylisé --}}
+                            {{-- Sablier stylisé — sable en dégradé + grain (feTurbulence) + ligne de surface ombrée + verre dégradé --}}
                             <template x-if="style === 'hourglass'">
                                 <div style="position:relative;width:100%;height:100%;">
                                     <svg viewBox="0 0 200 260" role="img" aria-label="{{ __('Sablier du minuteur') }}">
                                         <defs>
+                                            <linearGradient id="mvSandGradient" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stop-color="#E8C393"></stop>
+                                                <stop offset="55%" stop-color="#D4A574"></stop>
+                                                <stop offset="100%" stop-color="#B8875A"></stop>
+                                            </linearGradient>
+                                            <linearGradient id="mvGlassGradient" x1="0" y1="0" x2="1" y2="1">
+                                                <stop offset="0%" stop-color="#E5C687"></stop>
+                                                <stop offset="100%" stop-color="#8B6914"></stop>
+                                            </linearGradient>
+                                            <filter id="mvSandGrain" x="-20%" y="-20%" width="140%" height="140%">
+                                                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="noise"></feTurbulence>
+                                                <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.08 0"></feColorMatrix>
+                                            </filter>
                                             <clipPath id="mvTopSandClip">
                                                 <rect x="0" :y="topSandY" width="200" :height="topSandHeight"></rect>
                                             </clipPath>
                                             <clipPath id="mvBottomSandClip">
                                                 <rect x="0" :y="bottomSandY" width="200" :height="bottomSandHeight"></rect>
                                             </clipPath>
+                                            {{-- Clips triangulaires — contiennent la texture de grain + la ligne de surface DANS le sablier (sinon un <rect> plein-largeur déborderait des flancs obliques du verre). --}}
+                                            <clipPath id="mvTopTriangleClip">
+                                                <path d="M 40 20 L 160 20 L 100 130 Z"></path>
+                                            </clipPath>
+                                            <clipPath id="mvBottomTriangleClip">
+                                                <path d="M 100 130 L 40 240 L 160 240 Z"></path>
+                                            </clipPath>
                                         </defs>
+
+                                        {{-- Sable haut : dégradé vertical clair→foncé (relief), même hauteur que le clip d'origine --}}
                                         <path d="M 40 20 L 160 20 L 100 130 Z" class="mv-hourglass-sand" clip-path="url(#mvTopSandClip)"></path>
+                                        <g clip-path="url(#mvTopSandClip)">
+                                            <rect x="0" :y="topSandY" width="200" :height="topSandHeight" class="mv-hourglass-sand-grain" clip-path="url(#mvTopTriangleClip)"></rect>
+                                            <rect x="0" :y="topSandY" width="200" height="4" class="mv-hourglass-sand-surface" clip-path="url(#mvTopTriangleClip)"></rect>
+                                        </g>
+
+                                        {{-- Sable bas --}}
                                         <path d="M 100 130 L 40 240 L 160 240 Z" class="mv-hourglass-sand" clip-path="url(#mvBottomSandClip)"></path>
+                                        <g clip-path="url(#mvBottomSandClip)">
+                                            <rect x="0" :y="bottomSandY" width="200" :height="bottomSandHeight" class="mv-hourglass-sand-grain" clip-path="url(#mvBottomTriangleClip)"></rect>
+                                            <rect x="0" :y="bottomSandY" width="200" height="4" class="mv-hourglass-sand-surface" clip-path="url(#mvBottomTriangleClip)"></rect>
+                                        </g>
+
                                         <line x1="100" y1="124" x2="100" y2="136" class="mv-hourglass-stream" :class="{ 'is-running': state === 'running' }"></line>
                                         <path d="M 40 20 L 160 20 L 100 130 Z" class="mv-hourglass-frame"></path>
                                         <path d="M 100 130 L 40 240 L 160 240 Z" class="mv-hourglass-frame"></path>

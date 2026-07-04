@@ -66,8 +66,16 @@
 .mv-tick { stroke: #C7CDD6; stroke-width: 1.5; }
 .mv-tick-major { stroke: #9AA3B2; stroke-width: 2.5; }
 
-.mv-hourglass-frame { fill: none; stroke: #B08D57; stroke-width: 3; stroke-linejoin: round; }
-.mv-hourglass-sand { fill: #D4A574; transition: y .3s linear, height .3s linear; }
+/* Verre : dégradé translucide (au lieu d'un brun uni plat) + ombre douce sur tout le cadran sablier
+   pour suggérer l'épaisseur du verre, sans toucher à la géométrie des paths (angles droits inchangés). */
+.mv-hourglass-frame { fill: none; stroke: url(#mvGlassGradient); stroke-opacity: .92; stroke-width: 3; stroke-linejoin: round; }
+.mv-style-hourglass svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,.18)); }
+
+/* Sable : dégradé vertical (relief) + texture de grain (feTurbulence, mix-blend-mode multiply)
+   + fine ligne de surface ombrée à la limite du clip existant (aucun changement de hauteur/calcul JS). */
+.mv-hourglass-sand { fill: url(#mvSandGradient); transition: y .3s linear, height .3s linear; }
+.mv-hourglass-sand-grain { filter: url(#mvSandGrain); mix-blend-mode: multiply; transition: y .3s linear, height .3s linear; }
+.mv-hourglass-sand-surface { fill: rgba(0, 0, 0, .14); transition: y .3s linear; }
 .mv-hourglass-stream { stroke: #D4A574; stroke-width: 2; opacity: .8; }
 .mv-hourglass-stream.is-running:not(.mv-reduced-motion .mv-hourglass-stream) {
     animation: mv-stream-flow 0.6s linear infinite;
@@ -230,7 +238,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .mv-ring-progress, .mv-disk-slice, .mv-hourglass-sand, .mv-flip-display, .ct-btn {
+    .mv-ring-progress, .mv-disk-slice, .mv-hourglass-sand, .mv-hourglass-sand-grain, .mv-hourglass-sand-surface, .mv-flip-display, .ct-btn {
         transition: none !important;
         animation: none !important;
     }
@@ -238,6 +246,8 @@
 .mv-reduced-motion .mv-ring-progress,
 .mv-reduced-motion .mv-disk-slice,
 .mv-reduced-motion .mv-hourglass-sand,
+.mv-reduced-motion .mv-hourglass-sand-grain,
+.mv-reduced-motion .mv-hourglass-sand-surface,
 .mv-reduced-motion .mv-flip-display {
     transition: none !important;
     animation: none !important;
