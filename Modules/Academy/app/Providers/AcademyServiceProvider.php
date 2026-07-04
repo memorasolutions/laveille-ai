@@ -27,6 +27,7 @@ use Modules\Academy\Livewire\CourseCategoryManager;
 use Modules\Academy\Livewire\CourseCompetencies;
 use Modules\Academy\Livewire\CourseCreate;
 use Modules\Academy\Livewire\CourseImport;
+use Modules\Academy\Livewire\CourseMoodleImport;
 use Modules\Academy\Livewire\CourseEditor;
 use Modules\Academy\Livewire\CourseReports;
 use Modules\Academy\Livewire\CourseRoster;
@@ -130,6 +131,13 @@ class AcademyServiceProvider extends BaseModuleServiceProvider
         // create()). Téléverse -> aperçu -> confirme -> crée un cours NEUF (brouillon,
         // owner = importateur) avec remappage des références internes. Voir CourseImport.
         Livewire::component('academy.course-import', CourseImport::class);
+
+        // Import d'une sauvegarde MOODLE (.mbz, gâté academy.moodle_import_enabled
+        // ET create()). Miroir de CourseImport : téléverse -> importe -> crée un
+        // cours NEUF (brouillon, owner = importateur) -> redirige vers l'éditeur
+        // avec un résumé (sections/activités importées/ignorées). Voir
+        // Services\MoodleBackupImportService.
+        Livewire::component('academy.course-moodle-import', CourseMoodleImport::class);
 
         // PHASE 3 (FE-3) - Éditeur de cours front-end (métadonnées + structure).
         // Chaque mutation est gardée serveur par $this->authorize(...) (voir CourseEditor).

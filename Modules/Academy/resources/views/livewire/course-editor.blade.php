@@ -611,6 +611,17 @@
                         {{ $isPublished ? 'Dépublier le cours' : 'Publier le cours' }}
                     </x-core::button>
                 @endcan
+
+                {{-- Import Moodle (.mbz) : crée un NOUVEAU cours à part (pas une fusion dans
+                     CE cours) - lien vers l'écran d'import dédié, gâté academy.moodle_import_enabled
+                     ET create(). Voir CourseMoodleImport. --}}
+                @if(config('academy.moodle_import_enabled'))
+                    @can('create', \Modules\Academy\Models\Course::class)
+                        <x-core::button :href="route('academy.courses.moodle-import')" variant="ghost" size="sm">
+                            Importer un cours Moodle (.mbz)
+                        </x-core::button>
+                    @endcan
+                @endif
             </div>
 
             @can('publish', $course)

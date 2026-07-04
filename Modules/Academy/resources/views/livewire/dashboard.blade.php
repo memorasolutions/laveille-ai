@@ -428,6 +428,12 @@
                         <x-core::button :href="route('academy.courses.import')" variant="ghost" size="sm">
                             Importer un cours
                         </x-core::button>
+                        {{-- Import Moodle (.mbz), gâté academy.moodle_import_enabled ET create(). --}}
+                        @if(config('academy.moodle_import_enabled'))
+                            <x-core::button :href="route('academy.courses.moodle-import')" variant="ghost" size="sm">
+                                Importer un cours Moodle (.mbz)
+                            </x-core::button>
+                        @endif
                     </div>
                 @endif
             </div>

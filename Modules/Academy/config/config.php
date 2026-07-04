@@ -233,6 +233,48 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Import de sauvegardes Moodle (.mbz) - parité Moodle « restauration »
+    |--------------------------------------------------------------------------
+    | INTERRUPTEUR MAÎTRE - défaut FALSE (même pattern que scorm_enabled ci-dessus).
+    | Tant que « moodle_import_enabled » est faux, la page/l'action d'import Moodle
+    | répond 404 : aucun cours ne peut être créé depuis un fichier .mbz. Activer via
+    | ACADEMY_MOODLE_IMPORT_ENABLED=true dans le .env.
+    |
+    | PÉRIMÈTRE MVP (documenté, pas la lune - voir Services\MoodleBackupImportService) :
+    |   - un fichier .mbz (ZIP standard) est lu directement depuis l'archive (AUCUNE
+    |     extraction massive sur disque, contrairement à SCORM/H5P - seul le fichier
+    |     JOINT d'une activité « resource », s'il est retrouvé, est copié dans la
+    |     collection média « attachments » de l'item créé) ;
+    |   - un cours Moodle -> un NOUVEAU Course Academy (TOUJOURS brouillon, gratuit,
+    |     propriétaire = importateur - jamais publié automatiquement) ;
+    |   - UN chapitre unique regroupe les leçons importées ; chaque SECTION Moodle
+    |     devient une Lesson Academy, dans l'ordre du manifeste ;
+    |   - SEULES les activités simples « page », « resource » (fichier/lien) et
+    |     « label » deviennent des items Academy (type « document ») ; toute autre
+    |     activité (quiz, assign, forum, scorm, h5pactivity, url, etc.) est IGNORÉE
+    |     mais TOUJOURS comptée et rapportée à l'utilisateur (jamais de perte
+    |     silencieuse) ;
+    |   - le contenu HTML des activités est converti en TEXTE BRUT sûr (jamais de
+    |     HTML brut réinjecté - le rendu « document » applique de toute façon
+    |     html_input=strip, voir LessonItem::renderRichText).
+    |
+    | « max_kb »/« max_entries »/« max_read_kb » : bornes anti zip-bomb (taille
+    | compressée, nombre d'entrées, total décompressé LU pendant le parsing - il n'y
+    | a pas d'extraction massive donc pas de « max_extract_kb » comme SCORM/H5P).
+    | « max_attachment_kb » : taille max du fichier joint d'une activité « resource »
+    | retrouvé et rapatrié (au-delà, l'item est quand même créé, SANS pièce jointe).
+    */
+    'moodle_import_enabled' => env('ACADEMY_MOODLE_IMPORT_ENABLED', false),
+
+    'moodle_import' => [
+        'max_kb'            => (int) env('ACADEMY_MOODLE_IMPORT_MAX_KB', 204800),     // 200 Mo (compressé)
+        'max_entries'       => (int) env('ACADEMY_MOODLE_IMPORT_MAX_ENTRIES', 20000), // nb d'entrées du zip
+        'max_read_kb'       => (int) env('ACADEMY_MOODLE_IMPORT_MAX_READ_KB', 307200), // 300 Mo (total lu, anti zip-bomb)
+        'max_attachment_kb' => (int) env('ACADEMY_MOODLE_IMPORT_MAX_ATTACHMENT_KB', 20480), // 20 Mo (pièce jointe « resource »)
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Notifications courriel d'activité (V5-c, parité Moodle)
     |--------------------------------------------------------------------------
     | INTERRUPTEUR MAITRE - défaut FALSE.

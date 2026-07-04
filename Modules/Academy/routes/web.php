@@ -147,6 +147,15 @@ Route::prefix('academie')->name('academy.')->middleware(AcademyCsp::class)->grou
             ->middleware('auth')
             ->name('courses.import');
 
+        // Import d'une sauvegarde MOODLE (.mbz). Connexion requise ; le drapeau
+        // academy.moodle_import_enabled ET l'autorisation (create) vivent dans
+        // CourseMoodleImport::mount() (404/403 sinon) et sont RÉ-AUTORISÉS à
+        // l'import. Déclarée AVANT les routes wildcard courses/{course:slug} pour
+        // que « importer-moodle » ne soit jamais capté comme un slug de cours.
+        Route::get('importer-moodle', fn () => view('academy::public.course-moodle-import'))
+            ->middleware('auth')
+            ->name('courses.moodle-import');
+
         // QB2 - Éditeur de la BANQUE DE QUESTIONS réutilisable (owner-scoped).
         // Connexion requise ; l'autorisation d'entrée (instructor/admin) vit dans
         // QuestionBankManager::mount() (abort 403 sinon) et chaque mutation est

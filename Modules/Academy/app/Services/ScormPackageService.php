@@ -40,11 +40,13 @@ namespace Modules\Academy\Services;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Modules\Academy\Services\Concerns\SafeXmlParsing;
 use Modules\Academy\Services\Concerns\ZipEntrySafety;
 use ZipArchive;
 
 final class ScormPackageService
 {
+    use SafeXmlParsing;  // parseXmlSafely() anti-XXE, DRY avec MoodleBackupImportService
     use ZipEntrySafety;
 
     /** Taille maximale par DÉFAUT d'un paquet SCORM compressé (200 Mo). Surchargée par config. */
@@ -263,26 +265,18 @@ final class ScormPackageService
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * Parse le manifeste XML de façon SÛRE (anti-XXE) : LIBXML_NONET seul, SANS
-     * LIBXML_DTDLOAD ni LIBXML_NOENT - aucune entité externe (fichier local,
-     * URL réseau) n'est jamais résolue, quel que soit le contenu du manifeste.
-     * Les erreurs libxml sont capturées (jamais de warning PHP, jamais de 500).
+     * Parse le manifeste XML de façon SÛRE (anti-XXE, voir Concerns\SafeXmlParsing
+     * partagé avec MoodleBackupImportService) et lève un message métier clair si
+     * le manifeste n'est pas un XML valide.
      */
     private function parseManifest(string $xml): \SimpleXMLElement
     {
-        $previous = libxml_use_internal_errors(true);
-
-        try {
-            $doc = simplexml_load_string($xml, \SimpleXMLElement::class, LIBXML_NONET);
-            if ($doc === false) {
-                throw self::reject('Paquet SCORM invalide : « imsmanifest.xml » n\'est pas un XML valide.');
-            }
-
-            return $doc;
-        } finally {
-            libxml_clear_errors();
-            libxml_use_internal_errors($previous);
+        $doc = $this->parseXmlSafely($xml);
+        if ($doc === null) {
+            throw self::reject('Paquet SCORM invalide : « imsmanifest.xml » n\'est pas un XML valide.');
         }
+
+        return $doc;
     }
 
     /**
