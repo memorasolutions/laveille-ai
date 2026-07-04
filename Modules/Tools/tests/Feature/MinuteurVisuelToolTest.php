@@ -48,9 +48,15 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     $response->assertSee('id="mvCustomMinutes"', escape: false);
     $response->assertSee('Définir', escape: false);
 
-    // Légende du feu de circulation — explique la logique des 3 couleurs.
+    // Légende du feu de circulation — 3 lignes dynamiques (seuils dérivés de totalSeconds)
+    // + rappel que le chiffre au centre reste le temps exact restant.
     $response->assertSee('class="mv-traffic-legend"', escape: false);
+    $response->assertSee('class="mv-traffic-legend__line"', escape: false);
+    $response->assertSee('class="mv-traffic-legend__note"', escape: false);
     $response->assertSee('Plus de la moitié du temps', escape: false);
+    $response->assertSee('trafficGreenThreshold', escape: false);
+    $response->assertSee('trafficYellowThreshold', escape: false);
+    $response->assertSee('trafficTotalFormatted', escape: false);
 
     // Sablier réaliste — dégradé de sable, texture de grain (feTurbulence) et verre dégradé.
     $response->assertSee('id="mvSandGradient"', escape: false);

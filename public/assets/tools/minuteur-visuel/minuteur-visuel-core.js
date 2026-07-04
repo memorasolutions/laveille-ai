@@ -203,6 +203,23 @@
                     return 'red';
                 },
 
+                // Seuils de la légende du feu de circulation — dérivés de totalSeconds (mêmes
+                // seuils que trafficPhase : 50 % et 20 %), reformatés mm:ss. Réactifs : se
+                // recalculent automatiquement si l'utilisateur change de durée (preset, ±1,
+                // durée personnalisée), puisque totalSeconds est lu à chaque évaluation.
+                get trafficTotalFormatted() {
+                    var s = Math.round(this.totalSeconds);
+                    return pad2(Math.floor(s / 60)) + ':' + pad2(s % 60);
+                },
+                get trafficGreenThreshold() {
+                    var s = Math.round(this.totalSeconds * 0.5);
+                    return pad2(Math.floor(s / 60)) + ':' + pad2(s % 60);
+                },
+                get trafficYellowThreshold() {
+                    var s = Math.round(this.totalSeconds * 0.2);
+                    return pad2(Math.floor(s / 60)) + ':' + pad2(s % 60);
+                },
+
                 // --- Contrôle du décompte ---
                 applyPreset: function (key) {
                     if (this.state === 'running') return;

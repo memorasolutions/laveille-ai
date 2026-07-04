@@ -148,16 +148,17 @@
 .mv-style-hourglass .mv-center-display { font-size: clamp(1.5rem, 7vw, 2.25rem); }
 .mv-style-traffic .mv-center-display { font-size: clamp(1.75rem, 8vw, 2.75rem); }
 
-/* --- Légende du feu de circulation — explique la logique des 3 couleurs --- */
+/* --- Légende du feu de circulation — seuils réels (mm:ss), une ligne par couleur --- */
 .mv-traffic-legend {
     text-align: center;
     font-size: .85rem;
     color: var(--c-dark, #1A1D23);
-    opacity: .85;
     margin: .75rem auto 0;
     max-width: 32rem;
-    line-height: 1.5;
+    line-height: 1.6;
 }
+.mv-traffic-legend__line { margin: 0 0 .2rem; opacity: .85; }
+.mv-traffic-legend__note { margin: .4rem 0 0; opacity: .7; font-style: italic; }
 
 /* --- Live region ARIA (visible mais discrète) --- */
 .mv-live {
