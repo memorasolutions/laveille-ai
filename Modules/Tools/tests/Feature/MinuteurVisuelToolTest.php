@@ -64,6 +64,12 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     $response->assertSee('display:inline-block !important; width:20px; height:20px', escape: false);
     $response->assertSee('id="mvWarningThreshold"', escape: false);
 
+    // Grains qui tombent visiblement à travers le goulot du sablier pendant le décompte.
+    $response->assertSee('class="mv-sand-stream"', escape: false);
+    $response->assertSee('mv-sand-grain-particle-1', escape: false);
+    $response->assertSee('mv-sand-grain-particle-2', escape: false);
+    $response->assertSee('mv-sand-grain-particle-3', escape: false);
+
     // Annonces ARIA sobres.
     $response->assertSee('aria-live="polite"', escape: false);
 

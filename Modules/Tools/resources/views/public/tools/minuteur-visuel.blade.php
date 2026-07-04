@@ -201,6 +201,15 @@
                                         <path d="M 100 130 L 40 240 L 160 240 Z" class="mv-hourglass-frame"></path>
                                         <line x1="30" y1="20" x2="170" y2="20" class="mv-hourglass-frame"></line>
                                         <line x1="30" y1="240" x2="170" y2="240" class="mv-hourglass-frame"></line>
+
+                                        {{-- 3 grains qui tombent visiblement à travers le goulot pendant le décompte —
+                                             peints APRÈS le cadre (sinon les traits du cadre, qui convergent exactement
+                                             au même point 100,130, recouvraient les particules). --}}
+                                        <g class="mv-sand-stream" :class="{ 'is-running': state === 'running' }">
+                                            <circle cx="100" cy="130" r="2.2" class="mv-sand-grain-particle mv-sand-grain-particle-1"></circle>
+                                            <circle cx="100" cy="130" r="2.2" class="mv-sand-grain-particle mv-sand-grain-particle-2"></circle>
+                                            <circle cx="100" cy="130" r="2.2" class="mv-sand-grain-particle mv-sand-grain-particle-3"></circle>
+                                        </g>
                                     </svg>
                                     <div class="mv-center-display" x-text="display" aria-hidden="true"></div>
                                 </div>

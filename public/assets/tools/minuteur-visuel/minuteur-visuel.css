@@ -84,6 +84,22 @@
     animation: mv-stream-flow 0.6s linear infinite;
 }
 
+/* Grains individuels qui tombent visiblement à travers le goulot pendant le décompte
+   (en plus du filet mv-hourglass-stream) — 3 particules décalées pour un effet de flux continu. */
+.mv-sand-grain-particle { fill: #5C3A1E; stroke: #fff; stroke-width: .5; opacity: 0; }
+.mv-sand-stream.is-running .mv-sand-grain-particle {
+    animation: mv-grain-fall .6s linear infinite;
+}
+.mv-sand-stream.is-running .mv-sand-grain-particle-1 { animation-delay: 0s; }
+.mv-sand-stream.is-running .mv-sand-grain-particle-2 { animation-delay: .2s; }
+.mv-sand-stream.is-running .mv-sand-grain-particle-3 { animation-delay: .4s; }
+@keyframes mv-grain-fall {
+    0% { transform: translateY(-8px); opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: translateY(8px); opacity: 0; }
+}
+
 .mv-traffic-circle { stroke: #D1D5DB; stroke-width: 3; transition: fill .3s ease, opacity .3s ease; }
 .mv-traffic-circle.mv-off { fill: #E5E7EB; opacity: .5; }
 .mv-traffic-circle.mv-green.mv-on { fill: #15803D; }
@@ -241,7 +257,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .mv-ring-progress, .mv-disk-slice, .mv-hourglass-sand, .mv-hourglass-sand-grain, .mv-hourglass-sand-surface, .mv-flip-display, .ct-btn {
+    .mv-ring-progress, .mv-disk-slice, .mv-hourglass-sand, .mv-hourglass-sand-grain, .mv-hourglass-sand-surface, .mv-sand-grain-particle, .mv-flip-display, .ct-btn {
         transition: none !important;
         animation: none !important;
     }
@@ -251,6 +267,7 @@
 .mv-reduced-motion .mv-hourglass-sand,
 .mv-reduced-motion .mv-hourglass-sand-grain,
 .mv-reduced-motion .mv-hourglass-sand-surface,
+.mv-reduced-motion .mv-sand-grain-particle,
 .mv-reduced-motion .mv-flip-display {
     transition: none !important;
     animation: none !important;
