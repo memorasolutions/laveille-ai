@@ -244,61 +244,54 @@
                         {{-- Annonces ARIA sobres (jamais à chaque seconde) --}}
                         <div class="mv-live" aria-live="polite" role="status" x-text="ariaMessage"></div>
 
-                        {{-- Contrôles principaux — classes charte ct-btn (aucune bordure ad hoc) ;
-                             panneau fond #f8f9fa, convention charte des 2 autres outils "outils gratuits" --}}
-                        <div class="mv-panel">
-                            <div class="mv-controls">
-                                <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" @click="adjustMinutes(-1)" aria-label="{{ __('Réduire de 1 minute') }}" title="{{ __('-1 min') }}">−1</button>
+                        {{-- Contrôles principaux — classes charte ct-btn (aucune bordure ad hoc) --}}
+                        <div class="mv-controls">
+                            <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" @click="adjustMinutes(-1)" aria-label="{{ __('Réduire de 1 minute') }}" title="{{ __('-1 min') }}">−1</button>
 
-                                <button type="button" class="ct-btn ct-btn-accent" @click="toggleStartPause()" x-show="state === 'idle' || state === 'paused'">
-                                    <span aria-hidden="true">▶</span> <span x-text="state === 'paused' ? '{{ __('Reprendre') }}' : '{{ __('Démarrer') }}'"></span>
-                                </button>
-                                <button type="button" class="ct-btn ct-btn-outline" @click="toggleStartPause()" x-show="state === 'running'">
-                                    <span aria-hidden="true">⏸</span> {{ __('Pause') }}
-                                </button>
-                                <button type="button" class="ct-btn ct-btn-accent" @click="toggleStartPause()" x-show="state === 'finished'">
-                                    <span aria-hidden="true">↻</span> {{ __('Recommencer') }}
-                                </button>
-                                <button type="button" class="ct-btn ct-btn-outline" @click="reset()" x-show="state !== 'idle'">
-                                    {{ __('Réinitialiser') }}
-                                </button>
+                            <button type="button" class="ct-btn ct-btn-accent" @click="toggleStartPause()" x-show="state === 'idle' || state === 'paused'">
+                                <span aria-hidden="true">▶</span> <span x-text="state === 'paused' ? '{{ __('Reprendre') }}' : '{{ __('Démarrer') }}'"></span>
+                            </button>
+                            <button type="button" class="ct-btn ct-btn-outline" @click="toggleStartPause()" x-show="state === 'running'">
+                                <span aria-hidden="true">⏸</span> {{ __('Pause') }}
+                            </button>
+                            <button type="button" class="ct-btn ct-btn-accent" @click="toggleStartPause()" x-show="state === 'finished'">
+                                <span aria-hidden="true">↻</span> {{ __('Recommencer') }}
+                            </button>
+                            <button type="button" class="ct-btn ct-btn-outline" @click="reset()" x-show="state !== 'idle'">
+                                {{ __('Réinitialiser') }}
+                            </button>
 
-                                <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" @click="adjustMinutes(1)" aria-label="{{ __('Ajouter 1 minute') }}" title="{{ __('+1 min') }}">+1</button>
+                            <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" @click="adjustMinutes(1)" aria-label="{{ __('Ajouter 1 minute') }}" title="{{ __('+1 min') }}">+1</button>
 
-                                <button type="button" class="ct-btn ct-btn-ghost ct-btn-sm" @click="shareCurrentUrl()" aria-label="{{ __('Copier le lien de ce minuteur') }}" title="{{ __('Partager ce réglage') }}">
-                                    <span aria-hidden="true">🔗</span> <span x-text="shareCopied ? '{{ __('Copié !') }}' : '{{ __('Partager') }}'"></span>
-                                </button>
-                            </div>
+                            <button type="button" class="ct-btn ct-btn-ghost ct-btn-sm" @click="shareCurrentUrl()" aria-label="{{ __('Copier le lien de ce minuteur') }}" title="{{ __('Partager ce réglage') }}">
+                                <span aria-hidden="true">🔗</span> <span x-text="shareCopied ? '{{ __('Copié !') }}' : '{{ __('Partager') }}'"></span>
+                            </button>
                         </div>
 
                         {{-- Présélections nommées — classes charte ct-btn --}}
-                        <div class="mv-panel">
-                            <div class="mv-presets" role="group" aria-label="{{ __('Présélections de durée') }}">
-                                @foreach($mvPresets as $p)
-                                    <button type="button"
-                                            class="ct-btn ct-btn-outline ct-btn-sm"
-                                            :disabled="state === 'running'"
-                                            @click="applyPreset('{{ $p['key'] }}')">{{ $p['label'] }}</button>
-                                @endforeach
-                            </div>
+                        <div class="mv-presets" role="group" aria-label="{{ __('Présélections de durée') }}">
+                            @foreach($mvPresets as $p)
+                                <button type="button"
+                                        class="ct-btn ct-btn-outline ct-btn-sm"
+                                        :disabled="state === 'running'"
+                                        @click="applyPreset('{{ $p['key'] }}')">{{ $p['label'] }}</button>
+                            @endforeach
                         </div>
 
                         {{-- Durée personnalisée — saisie exacte en minutes, hors présélections --}}
-                        <div class="mv-panel">
-                            <div class="mv-custom-time" role="group" aria-label="{{ __('Durée personnalisée') }}">
-                                <label for="mvCustomMinutes">{{ __('Durée personnalisée (minutes)') }}</label>
-                                <input type="number"
-                                       id="mvCustomMinutes"
-                                       min="1"
-                                       max="180"
-                                       x-model.number="customMinutes"
-                                       :disabled="state === 'running'"
-                                       @keydown.enter.prevent="applyCustomMinutes()">
-                                <button type="button"
-                                        class="ct-btn ct-btn-primary ct-btn-sm"
-                                        :disabled="state === 'running'"
-                                        @click="applyCustomMinutes()">{{ __('Définir') }}</button>
-                            </div>
+                        <div class="mv-custom-time" role="group" aria-label="{{ __('Durée personnalisée') }}">
+                            <label for="mvCustomMinutes">{{ __('Durée personnalisée (minutes)') }}</label>
+                            <input type="number"
+                                   id="mvCustomMinutes"
+                                   min="1"
+                                   max="180"
+                                   x-model.number="customMinutes"
+                                   :disabled="state === 'running'"
+                                   @keydown.enter.prevent="applyCustomMinutes()">
+                            <button type="button"
+                                    class="ct-btn ct-btn-primary ct-btn-sm"
+                                    :disabled="state === 'running'"
+                                    @click="applyCustomMinutes()">{{ __('Définir') }}</button>
                         </div>
 
                         {{-- Réglages accessibilité --}}

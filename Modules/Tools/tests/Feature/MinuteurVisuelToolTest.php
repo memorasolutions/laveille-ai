@@ -29,12 +29,12 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
 
     // Uniformisation de mise en page avec les 2 autres outils "outils gratuits"
     // (generateur-mots-passe/tirage-presentations) : col-lg-8 (pas col-lg-9),
-    // pas d'icône emoji dans le H1 (uniquement $tool->name, comme les 2 autres),
-    // panneaux #f8f9fa pour chunker les groupes de contrôles.
+    // pas d'icône emoji dans le H1 (uniquement $tool->name, comme les 2 autres).
+    // Note : le fond #f8f9fa "chunké" (.mv-panel) a été essayé puis retiré (#705,
+    // effet "pains empilés" signalé par l'utilisateur) — pas d'assertion dessus.
     $response->assertSee('col-lg-8', escape: false);
     $response->assertDontSee('col-lg-9', escape: false);
     $response->assertDontSee('⏱️ Minuteur visuel', escape: false);
-    $response->assertSee('class="mv-panel"', escape: false);
 
     // 5 styles visuels dans un radiogroup.
     $response->assertSee('role="radiogroup"', escape: false);
