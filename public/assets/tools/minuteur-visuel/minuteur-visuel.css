@@ -97,6 +97,12 @@
 .mv-disk-knob { fill: var(--c-dark, #1A1D23); opacity: .35; }
 .mv-tick { stroke: #C7CDD6; stroke-width: 1.5; }
 .mv-tick-major { stroke: #9AA3B2; stroke-width: 2.5; }
+/* #718 : couche 2 des graduations, peinte APRÈS le secteur coloré (voir minuteur-visuel.blade.php).
+   Ton blanc = strictement identique au fill de .mv-disk-face (#fff) : invisible sur la face
+   blanche (aucune graduation dupliquée visible là où le secteur n'a pas encore progressé),
+   nettement visible sur les 5 teintes sombres de la palette une fois recouvertes. */
+.mv-tick-overlay { stroke: #fff; stroke-width: 1.5; opacity: .55; }
+.mv-tick-overlay-major { stroke: #fff; stroke-width: 2.5; opacity: .8; }
 
 /* Verre : dégradé translucide (au lieu d'un brun uni plat) + ombre douce sur tout le cadran sablier
    pour suggérer l'épaisseur du verre, sans toucher à la géométrie des paths (angles droits inchangés). */

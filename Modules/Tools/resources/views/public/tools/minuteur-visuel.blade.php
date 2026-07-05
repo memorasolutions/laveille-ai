@@ -147,10 +147,22 @@
                                 <div style="position:relative;width:100%;height:100%;">
                                     <svg viewBox="0 0 200 200" role="img" aria-label="{{ __('Disque TimeTimer du minuteur') }}">
                                         <circle cx="100" cy="100" r="90" class="mv-disk-face"></circle>
+                                        {{-- Graduations (couche 1, ton gris) — visibles sur la zone blanche restante,
+                                             comme avant. Peintes AVANT le secteur : recouvertes là où il progresse. --}}
                                         @foreach($mvTicks as $t)
                                             <line x1="{{ $t['x1'] }}" y1="{{ $t['y1'] }}" x2="{{ $t['x2'] }}" y2="{{ $t['y2'] }}" class="{{ $t['major'] ? 'mv-tick mv-tick-major' : 'mv-tick' }}"></line>
                                         @endforeach
                                         <path class="mv-disk-slice" :d="diskPathD" :fill="dialColorHex"></path>
+                                        {{-- #718 : graduations (couche 2, ton clair) peintes APRÈS le secteur — signalé
+                                             par l'utilisateur (capture 2026-07-05_13-11-14.jpg, graduations invisibles
+                                             sous la couleur qui progresse). Identiques en position à la couche 1, mais
+                                             en ton clair (minuteur-visuel.css) : invisibles sur la face blanche (même
+                                             teinte que le fond, aucune graduation dupliquée visible) et nettement
+                                             visibles sur les 5 teintes sombres de la palette — sans logique JS par
+                                             graduation ni mix-blend-mode (support navigateur incertain sur SVG). --}}
+                                        @foreach($mvTicks as $t)
+                                            <line x1="{{ $t['x1'] }}" y1="{{ $t['y1'] }}" x2="{{ $t['x2'] }}" y2="{{ $t['y2'] }}" class="{{ $t['major'] ? 'mv-tick-overlay mv-tick-overlay-major' : 'mv-tick-overlay' }}"></line>
+                                        @endforeach
                                         <circle cx="100" cy="100" r="5" class="mv-disk-knob"></circle>
                                     </svg>
                                     <div class="mv-center-display" x-text="display" aria-hidden="true"></div>
