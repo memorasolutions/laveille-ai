@@ -133,6 +133,25 @@
                             @endforeach
                         </div>
 
+                        {{-- #746 : bandeau visible (pas caché dans le panneau "Réglages" replié) quand les
+                             animations sont réduites - signalé par l'utilisateur (grains de sable "invisibles"
+                             malgré plusieurs correctifs CSS confirmés déployés) : cause réelle trouvée, la case
+                             "Réduire les animations" est cochée AUTOMATIQUEMENT si le système/navigateur
+                             déclare `prefers-reduced-motion: reduce` (comportement d'accessibilité correct et
+                             volontaire, cf. minuteur-visuel-core.js ligne ~125), ce qui coupe TOUTES les
+                             animations (grains, anneau, disque, chiffres) via `!important` sans aucune
+                             indication visuelle - l'utilisateur ne pouvait pas savoir pourquoi. On ne force
+                             PAS l'animation à revenir (ça casserait l'accessibilité pour qui a réellement
+                             besoin de moins de mouvement) : on rend seulement l'état visible et réversible en
+                             un clic, sans creuser dans "Réglages". --}}
+                        <div class="mv-motion-hint" x-show="reducedMotion" x-cloak>
+                            <span aria-hidden="true">ⓘ</span>
+                            {{ __('Animations réduites car votre système ou navigateur demande « moins de mouvement ». Les grains, l\'anneau, le disque et les chiffres ne bougent pas.') }}
+                            <button type="button" @click="reducedMotion = false; toggleReducedMotion()">
+                                {{ __('Réactiver les animations pour cet outil') }}
+                            </button>
+                        </div>
+
                         {{-- Sélecteur de couleur (palette curatée, 5 tons WCAG AAA) — disque et anneau seulement.
                              #742 : + 1 couleur personnalisée (n'importe quel hex) - le contraste du texte
                              se recalcule automatiquement (diskAccentTextColor), pas de risque WCAG même

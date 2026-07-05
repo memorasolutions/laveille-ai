@@ -17,6 +17,31 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.84.1 · 2026-07-05 · fix(outils) MINUTEUR VISUEL - VRAIE cause racine trouvée pour le signalement répété
+ *     de l'utilisateur (« je ne vois pas les grains tomber ») après deux sessions ayant déjà « corrigé » et
+ *     redéployé le CSS des grains en se basant uniquement sur des vérifications locales. Diagnostic mené
+ *     directement sur https://laveille.ai (pas en local) dans l'ordre : (1) minuteur bien démarré (classe
+ *     is-running confirmée, bouton Pause visible) ; (2) CSS servi en production identique octet pour octet au
+ *     fichier source, bon numéro de version (?v=1.84.0) - donc PAS un problème de cache Cloudflare/serveur ;
+ *     (3) vérification numérique getAnimations() sur les 9 particules : `animCount: 0` sur toutes malgré
+ *     is-running actif. Cause réelle : la case à cocher "Réduire les animations" (accessibilité,
+ *     minuteur-visuel-core.js) se coche AUTOMATIQUEMENT si le système/navigateur déclare
+ *     `prefers-reduced-motion: reduce`, et la classe `.mv-reduced-motion` coupe alors TOUTES les animations
+ *     via `!important` - y compris les grains de sable, silencieusement, sans aucune indication visuelle
+ *     (case cachée dans un panneau "Réglages" replié par défaut). Confirmé que le Mac de test avait
+ *     effectivement `Réduire les animations` activé au niveau système (`defaults read com.apple.Accessibility
+ *     ReduceMotionEnabled` = 1) - ce qui explique pourquoi le problème survivait à chaque "correctif" CSS :
+ *     les sessions précédentes testaient en local avec un navigateur par défaut (préférence système absente),
+ *     jamais dans les conditions réelles de l'utilisateur. Le code d'accessibilité lui-même est CORRECT et
+ *     volontaire (ne pas forcer l'animation pour qui a réellement besoin de moins de mouvement serait
+ *     casser l'accessibilité) - le vrai bogue était l'absence totale de visibilité sur cet état. Correctif
+ *     appliqué : nouveau bandeau visible immédiatement (pas caché dans "Réglages"), affiché uniquement
+ *     quand `reducedMotion` est vrai, expliquant la cause et offrant un bouton "Réactiver les animations
+ *     pour cet outil" en un clic (persiste le choix comme la case à cocher existante). Contraste vérifié
+ *     `wcag_check_contrast` : #78350f sur #fffbeb = 8,75:1 AAA, #78350f sur #fef3c7 (bouton) = 8,15:1 AAA.
+ *     Purement additif (nouveau bloc HTML + nouvelles classes CSS), aucune modification du CSS des grains ni
+ *     du comportement existant pour les utilisateurs sans préférence de mouvement réduit. 26 tests Tools
+ *     verts, aucune régression. Charte #064E5A, zéro signature IA. Réversible.
  *   1.84.0 · 2026-07-05 · feat(outils) MINUTEUR VISUEL - style Sablier : grains de sable qui tombent réellement (demande utilisateur, plusieurs itérations en conditions réelles). 9 grains individuels (au lieu de 3 identiques synchronisés) tombent en ligne verticale nette (dérive latérale quasi nulle - un vrai filet de sable ne part pas en éventail au passage du goulot) du haut du goulot jusque bien à l'intérieur du bulbe du bas, avec un décalage temporel échelonné pour que plusieurs grains soient visibles à des hauteurs différentes du même filet à tout instant. Deux défauts réels détectés et corrigés en cours de route grâce à un retour direct de l'utilisateur sur des captures : (1) une dérive latérale trop marquée dispersait les grains en nuage diagonal au lieu d'un filet cohérent - corrigé en réduisant la dérive à un minimum ; (2) un fondu d'opacité linéaire sur toute la durée de la chute rendait les grains quasi invisibles bien avant d'atteindre le bas - corrigé avec un point d'ancrage d'opacité maintenue à 1 jusqu'à 85 % du trajet. Calibrage final précis effectué à l'aide d'une grille de repérage de coordonnées temporaire (jamais livrée) superposée au SVG, vérifié numériquement via l'API Web Animations (échantillonnage de la position et de l'opacité à plusieurs fractions du cycle) en plus d'une vérification visuelle - la course verticale finale place l'arrivée bien à l'intérieur du triangle du bas plutôt qu'à sa pointe. Contraste et couleur du grain revus (fill uni foncé, sans contour blanc qui donnait un effet tacheté à petite taille). `prefers-reduced-motion` reste respecté (sélecteurs de garde-fou inchangés). 26 tests Tools verts, aucune régression sur les 4 autres styles. Charte #064E5A, zéro signature IA. Réversible.
  *   1.83.0 · 2026-07-05 · feat(outils) MINUTEUR VISUEL - style Chiffres (flip) : fond et couleur des chiffres personnalisables, comme le disque et l'anneau (demande utilisateur, « même couleurs que TimeTimer »). `COLORABLE_STYLES` étendu à `flip` : la palette de 5 teintes curées, la couleur personnalisée, les couleurs récentes et le bandeau d'incitation à la connexion (tout ce qui existait déjà pour disque/anneau) s'appliquent désormais aussi aux chiffres, sans nouveau code d'interface. Nouveau getter `flipTextColor` réutilisant `bestTextColorOn(dialColorHex)` (même fonction de contraste WCAG 2.2 AAA automatique déjà validée pour le disque) : un seul calque suffit ici (fond plein, pas un secteur partiel comme le disque) - blanc sur les 5 teintes curées et sur toute couleur personnalisée foncée, bascule automatique vers noir dès qu'une couleur pâle est choisie. Fond et texte liés en ligne (`:style`) plutôt que fixés en CSS ; le CSS garde des valeurs de repli (fond sombre, texte blanc) pour le rendu sans JavaScript. Vérifié en conditions réelles (Playwright) : fond rouge classique avec texte blanc, puis fond jaune pâle personnalisé avec bascule automatique confirmée vers texte noir, bandeaux invité (couleurs et durées) toujours corrects sur ce style. 26 tests Tools verts, aucune régression sur les 4 autres styles. Charte #064E5A, zéro signature IA. Réversible.
  *   1.82.0 · 2026-07-05 · feat(outils) MINUTEUR VISUEL - retrait du préréglage 45 min (demande utilisateur), Pomodoro/Pause déplacés sur leur propre ligne DÉLIBÉRÉE (deux groupes distincts au lieu d'un retour à la ligne dépendant de la largeur d'écran), et jusqu'à 2 durées personnalisées épinglables pour les utilisateurs connectés (incitation à la connexion pour les invités). Veille pp_search (2026-07-05, America/Toronto) confirmant le pattern icône étoile pour marquer/démarquer un préréglage directement depuis la vue principale (pas un gestionnaire dédié séparé) - option retenue (94/100) contre un modal de gestion nommé (72/100, disproportionné pour 2 durées simples) ou une liste de 5-7 favoris réordonnables (65/100, hors du périmètre demandé). Réutilise l'architecture générique `users.tool_preferences` déjà livrée pour les couleurs (clé `custom_durations`, validation serveur entiers 1-180, plafond 2, dédoublonnage). Comportement de bascule explicite (épingler/désépingler, pas un historique roulant comme les couleurs) : un favori doit rester tel quel jusqu'au retrait volontaire, avec un petit bouton de retrait (×) sur chaque durée épinglée. Bug découvert et corrigé en cours de route : une apostrophe française (« jusqu'à ») insérée dans une chaîne JavaScript Alpine (`:title`) cassait le parseur d'expression au chargement (HTML entity `&#039;` redécodée en apostrophe littérale par le navigateur avant qu'Alpine ne l'évalue) - reformulé sans apostrophe dans les expressions JS, uniquement dans le texte HTML affiché (sans risque là). Vérifié en conditions réelles (Playwright, vrai navigateur, vraie connexion utilisateur de test) : bandeau invité correct, épinglage de 2 durées confirmé en base de données, persistance après rechargement complet de page, retrait explicite d'une durée confirmé en base. 26 tests Tools verts (4 nouveaux), aucune régression. Charte #064E5A, zéro signature IA. Réversible.
@@ -573,7 +598,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 84;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,
