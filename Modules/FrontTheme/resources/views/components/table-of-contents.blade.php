@@ -105,10 +105,16 @@
         .toc-details {
             position: fixed;
             right: 24px;
-            top: 140px;
+            top: 210px;
             width: 260px;
             z-index: 1000;
         }
+        /* #739 : décalé de 140px à 210px - chevauchait la barre admin flottante
+           (Modules/Core/components/admin-bar.blade.php, top:80px + son menu déroulant qui
+           s'étend sous elle) signalée illisible/encombrée par l'utilisateur en tant
+           qu'admin. Décalage universel (pas conditionné à l'admin) : reste une position
+           tout à fait normale pour un visiteur non-admin, évite un couplage fragile entre
+           composants indépendants. */
         /* #735 : sommaire sticky masquable - le garder toujours visible sans échappatoire
            peut devenir intrusif sur un long article (best practice 2026, pp_search
            2026-07-05 : bouton fermer réversible + mini-bascule persistante de rappel,
@@ -122,9 +128,9 @@
         .toc {
             position: fixed;
             right: 24px;
-            top: 140px;
+            top: 210px;
             width: 260px;
-            max-height: calc(100vh - 160px);
+            max-height: calc(100vh - 230px);
             overflow-y: auto;
             display: block !important;
             border: 1px solid rgba(6, 78, 90, 0.12);
@@ -172,7 +178,7 @@
             display: none;
             position: fixed;
             right: 24px;
-            top: 140px;
+            top: 210px;
             z-index: 1000;
             padding: 0.5rem 0.9rem;
             border: 1px solid rgba(6, 78, 90, 0.12);
@@ -438,34 +444,36 @@
         }
     }
 
-    // #735 : masquer/rappeler le sommaire sticky desktop (préférence persistée
+    // #735/#739 : masquer/rappeler le sommaire sticky desktop (préférence persistée
     // localStorage, comme le sélecteur clair/sombre déjà présent sur le site) - un
     // sommaire toujours visible sans échappatoire peut devenir intrusif sur un long
     // article. Portée volontairement limitée au panneau desktop (>=1400px) : mobile a
     // déjà son propre mécanisme d'ouverture/fermeture natif (<details>/<summary>).
+    // #739 : FERMÉ par défaut (demande utilisateur) - seule une ouverture explicite via
+    // le bouton de rappel persiste ; l'absence de préférence = fermé, pas ouvert.
     function initDismiss() {
         const detailsEl = document.querySelector('.toc-details');
         const reopenBtn = document.getElementById('toc-reopen');
         const closeBtn = document.querySelector('.toc-close');
         if (!detailsEl || !reopenBtn || !closeBtn) return;
-        const STORAGE_KEY = 'toc_dismissed';
+        const STORAGE_KEY = 'toc_open';
 
         function applyState(dismissed) {
             detailsEl.classList.toggle('toc-dismissed', dismissed);
             reopenBtn.classList.toggle('is-visible', dismissed);
         }
 
-        let dismissed = false;
-        try { dismissed = localStorage.getItem(STORAGE_KEY) === '1'; } catch (e) {}
-        applyState(dismissed);
+        let open = false;
+        try { open = localStorage.getItem(STORAGE_KEY) === '1'; } catch (e) {}
+        applyState(!open);
 
         closeBtn.addEventListener('click', () => {
             applyState(true);
-            try { localStorage.setItem(STORAGE_KEY, '1'); } catch (e) {}
+            try { localStorage.setItem(STORAGE_KEY, '0'); } catch (e) {}
         });
         reopenBtn.addEventListener('click', () => {
             applyState(false);
-            try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+            try { localStorage.setItem(STORAGE_KEY, '1'); } catch (e) {}
         });
     }
 
