@@ -17,6 +17,15 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.86.1 · 2026-07-05 · fix(outils) MINUTEUR VISUEL - seuils du feu de circulation : l'utilisateur a signalé
+ *     que « les 3 boutons de profils ne fonctionnent pas ». Diagnostic mené directement sur
+ *     https://laveille.ai (session connectée réelle, inspection Alpine.$data() en direct) : les boutons
+ *     fonctionnaient réellement (POST /api/tool-preferences 200, 0 erreur console, isAuthenticated=true,
+ *     trafficThresholds bien persisté et appliqué) - mais le feu de circulation lui-même reste VERT tant que
+ *     le décompte n'a pas commencé (100 % restant dépasse même le seuil vert le plus haut, 70 %), donc cliquer
+ *     un profil ne produit AUCUN changement visible sur le widget avant que le minuteur ne tourne. Corrigé en
+ *     ajoutant une confirmation textuelle immédiate (« ✓ Appliqué : … ») colocalisée avec les boutons, seule
+ *     preuve visible indépendante de l'état du feu.
  *   1.86.0 · 2026-07-05 · feat(outils) MINUTEUR VISUEL - 3 ajouts groupés. (1) Couleurs FAVORITES épinglables
  *     (2 max, étoile ☆/★, connectés) : même bascule explicite que les durées épinglées, distincte de
  *     l'historique roulant automatique des couleurs récentes. (2) Retrait de la pulsation (scale 1.03) du
@@ -616,7 +625,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 86;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,

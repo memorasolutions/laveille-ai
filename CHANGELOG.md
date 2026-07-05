@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.86.1] - 2026-07-05
+
+### Fixed
+- **Minuteur visuel — seuils du feu de circulation : confirmation visible manquante.** Les 3 boutons de profils fonctionnaient réellement (préférence bien appliquée et persistée), mais le feu de circulation reste vert tant que le décompte n'a pas commencé, donc cliquer un profil ne changeait visiblement rien avant le démarrage du minuteur. Ajout d'une confirmation textuelle immédiate à côté des boutons, indépendante de l'état du feu.
+
 ## [1.86.0] - 2026-07-05
 
 ### Added

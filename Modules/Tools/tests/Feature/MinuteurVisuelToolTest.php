@@ -125,6 +125,10 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     $response->assertSee('class="mv-traffic-custom"', escape: false);
     $response->assertSee('Connectez-vous pour choisir vos propres seuils du feu de circulation', escape: false);
 
+    // #802-805 — confirmation immédiate du profil appliqué (le feu reste vert tant que le
+    // décompte n'a pas commencé - sans cette ligne, aucune preuve visible que le clic a agi).
+    $response->assertSee('class="mv-traffic-applied-hint"', escape: false);
+
     // #751-758 — Pomodoro/Pause sur leur propre groupe (ligne déliberée) + incitation à se
     // connecter pour épingler des durées personnalisées (invités).
     $response->assertSee('Présélections Pomodoro', escape: false);

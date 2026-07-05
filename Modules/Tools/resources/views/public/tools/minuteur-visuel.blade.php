@@ -602,6 +602,17 @@
                                                 class="ct-btn ct-btn-primary ct-btn-xs"
                                                 @click="setTrafficThresholdsCustom(customTrafficGreen, customTrafficYellow)">{{ __('Appliquer') }}</button>
                                     </div>
+                                    {{-- #802-805 : confirmation immédiate colocalisée avec les boutons - le feu
+                                         lui-même reste vert tant que le décompte n'a pas commencé (100% restant
+                                         dépasse même le seuil vert le plus haut, 70%), donc cliquer un profil ne
+                                         change RIEN visuellement au feu avant que le minuteur ne tourne. Sans cette
+                                         ligne, l'utilisateur ne voit aucune preuve que le clic a fait quelque chose
+                                         (signalé comme "les boutons ne fonctionnent pas" alors que le réglage était
+                                         bien appliqué et persisté). --}}
+                                    <p class="mv-traffic-applied-hint" aria-live="polite">
+                                        <span aria-hidden="true">✓</span>
+                                        <span x-text="'{{ __('Appliqué') }} : {{ __('vert au-dessus de') }} ' + trafficGreenThreshold + ', {{ __('jaune de') }} ' + trafficYellowThreshold + ' {{ __('à') }} ' + trafficGreenThreshold + ', {{ __('rouge en dessous de') }} ' + trafficYellowThreshold"></span>
+                                    </p>
                                 </div>
                                 <div class="mv-login-hint" x-show="style === 'traffic' && !isAuthenticated" x-cloak>
                                     {{ __('Connectez-vous pour choisir vos propres seuils du feu de circulation.') }}

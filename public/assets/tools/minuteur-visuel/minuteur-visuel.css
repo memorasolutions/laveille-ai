@@ -537,6 +537,15 @@
 .mv-traffic-profiles { display: flex; flex-wrap: wrap; gap: .4rem; }
 .mv-traffic-custom { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; font-size: .85rem; }
 .mv-traffic-custom input[type="number"] { width: 70px; }
+/* #802-805 : confirmation immédiate du profil appliqué - contraste AAA vérifié (7.13:1). */
+.mv-traffic-applied-hint {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    margin: 0;
+    font-size: .8rem;
+    color: #166534;
+}
 
 @media (prefers-reduced-motion: reduce) {
     .mv-ring-progress, .mv-disk-slice, .mv-hourglass-sand, .mv-hourglass-sand-grain, .mv-hourglass-sand-surface, .mv-sand-grain-particle, .ct-btn {
