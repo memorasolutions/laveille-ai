@@ -3,6 +3,16 @@
 
 [x-cloak] { display: none !important; }
 
+/* --- Conteneur externe (#708) ---
+   Le blade utilise .container-fluid (pas .container, qui plafonne LUI-MÊME 960/1140/1320px
+   selon le breakpoint, indépendamment du viewport réel — cause des bandes grises vides sur
+   grand écran malgré col-lg-10). .container-fluid n'a pas ce plafond ; on en reprend un ici,
+   plus généreux, pour éviter une carte démesurée en 4K/ultra-wide. EXCEPTION DÉLIBÉRÉE (voir
+   minuteur-visuel.blade.php) cohérente avec les précédentes (col-lg-10, .mv-dial-zone 520px) :
+   cet outil visuel doit dominer l'espace disponible, contrairement aux outils texte/formulaire
+   restés en .container standard. */
+.mv-outer-container { max-width: 1600px; margin: 0 auto; }
+
 .mv-wrap { max-width: 640px; margin: 0 auto; }
 
 /* --- Sélecteurs (style + couleur) ---
@@ -148,7 +158,10 @@
 .mv-style-disk .mv-center-display,
 .mv-style-traffic .mv-center-display { color: #fff; }
 .mv-style-hourglass .mv-center-display { font-size: clamp(1.5rem, 7vw, 2.25rem); }
-.mv-style-traffic .mv-center-display { font-size: clamp(1.75rem, 8vw, 2.75rem); }
+/* #709 : plafond réduit (2.75rem -> 2rem) en cohérence avec le rayon des cercles réduit
+   34 -> 28 (voir minuteur-visuel.blade.php, bloc style === 'traffic') : le cercle du milieu
+   est maintenant plus petit, un texte trop grand y déborderait à nouveau. */
+.mv-style-traffic .mv-center-display { font-size: clamp(1.4rem, 6vw, 2rem); }
 
 /* --- Légende du feu de circulation — seuils réels (mm:ss), une ligne par couleur --- */
 .mv-traffic-legend {

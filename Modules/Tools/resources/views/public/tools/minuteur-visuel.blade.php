@@ -66,7 +66,17 @@
 
 @section('content')
 <section class="wpo-blog-single-section section-padding">
-    <div class="container">
+    {{-- #708 : container-fluid (pas .container) — DEUXIÈME EXCEPTION DÉLIBÉRÉE pour cet outil
+         visuel. `.container` Bootstrap plafonne LUI-MÊME la largeur (960/1140/1320px selon le
+         breakpoint) indépendamment du viewport réel : sur un grand écran (1920px+), col-lg-10
+         restait bloqué bien avant d'utiliser l'espace disponible, laissant deux bandes grises
+         vides de chaque côté de la carte. `.container-fluid` n'a pas ce plafond (juste un
+         padding latéral) ; le plafond raisonnable est repris nous-mêmes via `.mv-outer-container`
+         (minuteur-visuel.css, max-width: 1600px) pour éviter une carte démesurée en 4K/ultra-wide.
+         Le contenu à l'intérieur de la carte (.mv-wrap, minuteur-visuel.css) reste plafonné à
+         640px : élargir le conteneur externe élargit la CARTE (fond/bordure blanche), pas les
+         contrôles, qui restent centrés et lisibles — pas d'étirement disgracieux. --}}
+    <div class="container-fluid mv-outer-container">
         <div class="row justify-content-center">
             {{-- col-lg-10 (pas col-lg-8 comme generateur-mots-passe/tirage-presentations) — EXCEPTION
                  DÉLIBÉRÉE : le minuteur est un outil visuel (grand cadran central, usage salle de
@@ -221,14 +231,21 @@
                                 </div>
                             </template>
 
-                            {{-- Feu de circulation --}}
+                            {{-- Feu de circulation — #709 : r=28 (pas 34) sur les 3 cercles, cy inchangés
+                                 (65/130/195). Avec r=34, le diamètre (68) dépassait l'espacement centre-à-centre
+                                 (65) : les cercles se chevauchaient structurellement entre eux, et le chiffre
+                                 central (superposé pile sur le cercle du milieu) débordait visuellement sur
+                                 la jonction avec le cercle vert. r=28 (diamètre 56) laisse un vrai collier de
+                                 fond sombre #374151 visible entre chaque cercle. Voir aussi .mv-style-traffic
+                                 .mv-center-display (minuteur-visuel.css) dont le plafond de taille a été
+                                 réduit en cohérence, sinon le texte déborderait toujours du cercle rétréci. --}}
                             <template x-if="style === 'traffic'">
                                 <div style="position:relative;width:100%;height:100%;">
                                     <svg viewBox="0 0 120 260" role="img" aria-label="{{ __('Feu de circulation du minuteur') }}">
                                         <rect x="20" y="10" width="80" height="240" rx="24" fill="#374151"></rect>
-                                        <circle cx="60" cy="65" r="34" class="mv-traffic-circle mv-green" :class="trafficPhase === 'green' ? 'mv-on' : 'mv-off'"></circle>
-                                        <circle cx="60" cy="130" r="34" class="mv-traffic-circle mv-yellow" :class="trafficPhase === 'yellow' ? 'mv-on' : 'mv-off'"></circle>
-                                        <circle cx="60" cy="195" r="34" class="mv-traffic-circle mv-red" :class="trafficPhase === 'red' ? 'mv-on' : 'mv-off'"></circle>
+                                        <circle cx="60" cy="65" r="28" class="mv-traffic-circle mv-green" :class="trafficPhase === 'green' ? 'mv-on' : 'mv-off'"></circle>
+                                        <circle cx="60" cy="130" r="28" class="mv-traffic-circle mv-yellow" :class="trafficPhase === 'yellow' ? 'mv-on' : 'mv-off'"></circle>
+                                        <circle cx="60" cy="195" r="28" class="mv-traffic-circle mv-red" :class="trafficPhase === 'red' ? 'mv-on' : 'mv-off'"></circle>
                                     </svg>
                                     <div class="mv-center-display" x-text="display" aria-hidden="true"></div>
                                 </div>
