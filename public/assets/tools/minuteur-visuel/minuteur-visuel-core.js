@@ -30,9 +30,9 @@
         'pomodoro-break': { minutes: 5, phase: 'break' }
     };
 
-    // Styles supportant la palette de couleur curatée (disque + anneau — voir écart documenté :
+    // Styles supportant la palette de couleur curatée (disque + anneau + chiffres, #759-764 —
     // le feu de circulation garde son code sémantique vert/jaune/rouge, non personnalisable).
-    var COLORABLE_STYLES = ['disk', 'ring'];
+    var COLORABLE_STYLES = ['disk', 'ring', 'flip'];
 
     var RING_RADIUS = 90;
     var RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS; // ≈ 565.4867
@@ -232,6 +232,11 @@
                 // le secteur coloré du disque) — blanc par défaut, mais choisi AUTOMATIQUEMENT
                 // (meilleur contraste réel) pour toute couleur pâle, curatée ou personnalisée.
                 get diskAccentTextColor() {
+                    return bestTextColorOn(this.dialColorHex);
+                },
+                // #759-764 : le style Chiffres a un fond plein (pas un secteur partiel comme le
+                // disque) — un seul calque suffit, même fonction de contraste automatique.
+                get flipTextColor() {
                     return bestTextColorOn(this.dialColorHex);
                 },
                 // #742 : le "+" du swatch personnalisé doit rester lisible peu importe la

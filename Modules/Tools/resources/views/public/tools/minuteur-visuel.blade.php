@@ -320,9 +320,15 @@
                                 </div>
                             </template>
 
-                            {{-- Chiffres / flip --}}
+                            {{-- Chiffres / flip — #759-764 : fond et texte personnalisables (même palette et
+                                 même fonction de contraste WCAG AAA automatique que le disque/anneau). --}}
                             <template x-if="style === 'flip'">
-                                <div class="mv-flip-display" :class="{ 'mv-flip-pulse': flipPulse }" x-text="display" role="img" aria-label="{{ __('Affichage numérique du minuteur') }}"></div>
+                                <div class="mv-flip-display"
+                                     :class="{ 'mv-flip-pulse': flipPulse }"
+                                     :style="'background:' + dialColorHex + '; color:' + flipTextColor + ';'"
+                                     x-text="display"
+                                     role="img"
+                                     aria-label="{{ __('Affichage numérique du minuteur') }}"></div>
                             </template>
                         </div>
 

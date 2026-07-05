@@ -215,7 +215,9 @@
 .mv-traffic-circle.mv-yellow.mv-on { fill: #CA8A04; }
 .mv-traffic-circle.mv-red.mv-on { fill: #B91C1C; }
 
-/* Chiffres / flip */
+/* Chiffres / flip — #759-764 : fond et couleur de texte pilotés en ligne (dialColorHex/
+   flipTextColor, même palette + contraste WCAG AAA automatique que le disque/anneau) ;
+   fond de repli si JS désactivé (rendu SSR uniquement). */
 .mv-flip-display {
     display: inline-flex;
     align-items: center;
