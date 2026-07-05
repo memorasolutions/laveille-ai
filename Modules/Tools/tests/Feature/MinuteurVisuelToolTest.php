@@ -114,6 +114,17 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     $response->assertSee('class="mv-login-hint"', escape: false);
     $response->assertSee('Connectez-vous pour retrouver vos couleurs personnalisées', escape: false);
 
+    // #787-792 — étoile de favoris couleur (max 2), distincte de l'historique roulant récent.
+    $response->assertSee('class="mv-color-favorite-toggle"', escape: false);
+    $response->assertSee('toggleFavoriteColor()', escape: false);
+    $response->assertSee('class="mv-favorite-colors"', escape: false);
+
+    // #797-801 — seuils du feu de circulation configurables (profils préréglés + personnalisé).
+    $response->assertSee('class="mv-traffic-profiles"', escape: false);
+    $response->assertSee('setTrafficProfile(key)', escape: false);
+    $response->assertSee('class="mv-traffic-custom"', escape: false);
+    $response->assertSee('Connectez-vous pour choisir vos propres seuils du feu de circulation', escape: false);
+
     // #751-758 — Pomodoro/Pause sur leur propre groupe (ligne déliberée) + incitation à se
     // connecter pour épingler des durées personnalisées (invités).
     $response->assertSee('Présélections Pomodoro', escape: false);

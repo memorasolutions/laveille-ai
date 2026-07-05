@@ -17,6 +17,17 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.86.0 · 2026-07-05 · feat(outils) MINUTEUR VISUEL - 3 ajouts groupés. (1) Couleurs FAVORITES épinglables
+ *     (2 max, étoile ☆/★, connectés) : même bascule explicite que les durées épinglées, distincte de
+ *     l'historique roulant automatique des couleurs récentes. (2) Retrait de la pulsation (scale 1.03) du
+ *     style Chiffres déclenchée à chaque seconde de décompte - anti-pattern UX confirmé par veille pp_search
+ *     (fatigue visuelle sans bénéfice, le changement du chiffre suffit déjà comme signal), signalé par
+ *     l'utilisateur comme « très fatiguant ». (3) Seuils du feu de circulation configurables (connectés) :
+ *     3 profils préréglés en 1 clic (Standard 50/20, Alerte précoce 70/40, Sprint final 30/10) + repli
+ *     « Personnalisé » (2 champs %), option retenue à 95/100 après veille pp_search (hybride préréglés +
+ *     champs numériques, plus facile et plus fiable qu'un double curseur de plage). Corrige au passage 2 bugs
+ *     détectés en vérification visuelle : double surlignage actif du segmented control pendant l'édition, et
+ *     champs "Personnalisé" non resynchronisés avec la valeur active après rechargement de page.
  *   1.85.0 · 2026-07-05 · feat(outils) MINUTEUR VISUEL - palette de couleurs élargie à 6 teintes (retrait de
  *     « orange », un rouille perçu par l'utilisateur comme un second rouge redondant avec le rouge classique
  *     TimeTimer ; ajout de « Rose poudré » #E8A9AE et « Sable pâle » #DCC3A0, 2 teintes tendance 2026 confirmées
@@ -604,7 +615,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 85;
+$lvMinor = 86;
 $lvPatch = 0;
 
 return [

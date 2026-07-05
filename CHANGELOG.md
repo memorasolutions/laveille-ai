@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.86.0] - 2026-07-05
+
+### Added
+- **Minuteur visuel — couleurs favorites épinglables (connectés)** : jusqu'à 2 couleurs favorites via une étoile ☆/★, bascule explicite (même comportement que les durées épinglées), distinctes de l'historique roulant automatique des couleurs personnalisées récentes.
+- **Minuteur visuel — seuils du feu de circulation configurables (connectés)** : 3 profils préréglés en un clic (Standard 50 %/20 %, Alerte précoce 70 %/40 %, Sprint final 30 %/10 %) + repli « Personnalisé » (2 champs en pourcentage). Option retenue après veille : hybride préréglés + champs numériques, plus simple et plus fiable qu'un double curseur de plage.
+
+### Changed
+- **Minuteur visuel — retrait de la pulsation du style Chiffres** : l'effet de zoom (scale) déclenché à chaque seconde de décompte, jugé fatiguant par un utilisateur, a été retiré (anti-pattern UX confirmé par veille : le changement du chiffre suffit déjà comme signal, sans animation supplémentaire).
+
 ## [1.85.0] - 2026-07-05
 
 ### Changed

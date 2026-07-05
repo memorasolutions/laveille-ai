@@ -39,6 +39,16 @@
     // le feu de circulation garde son code sémantique vert/jaune/rouge, non personnalisable).
     var COLORABLE_STYLES = ['disk', 'ring', 'flip'];
 
+    // #797-801 : profils de seuils du feu de circulation - option "très facile" retenue après
+    // veille pp_search (préréglés en 1 clic > double curseur, moins accessible/plus sensible).
+    // 'standard' = comportement historique (défaut). 'early' = plus de préavis (classe/enfants).
+    // 'sprint' = alerte tardive seulement (présentations/sprints focus).
+    var TRAFFIC_PROFILES = {
+        standard: { label: 'Standard', green: 50, yellow: 20 },
+        early: { label: 'Alerte précoce', green: 70, yellow: 40 },
+        sprint: { label: 'Sprint final', green: 30, yellow: 10 }
+    };
+
     var RING_RADIUS = 90;
     var RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS; // ≈ 565.4867
 
@@ -115,6 +125,15 @@
                 // les invités plutôt que de dupliquer un historique local non synchronisé.
                 isAuthenticated: !!isAuthenticated,
                 recentCustomColors: [],
+                // #787-792 : jusqu'à 2 couleurs FAVORITES épinglées (connectés) - même bascule
+                // étoile explicite que les durées (customDurations), distincte de l'historique
+                // roulant automatique ci-dessus (recentCustomColors, 5 entrées, non explicite).
+                favoriteColors: [],
+                // #797-801 : seuils du feu de circulation configurables (connectés) - profils
+                // préréglés en 1 clic (option la PLUS facile confirmée par veille pp_search),
+                // "Personnalisé" en repli pour qui veut de la précision. Défaut = comportement
+                // historique (vert >50%, jaune 20-50%, rouge &lt;20%).
+                trafficThresholds: { green: 50, yellow: 20 },
                 // #751-758 : jusqu'à 2 durées personnalisées épinglées (connectés) - bascule
                 // étoile (pas un historique roulant comme les couleurs) : le rôle d'un "favori"
                 // qu'on épingle est de rester tel quel jusqu'à ce qu'on le retire explicitement.
@@ -150,12 +169,22 @@
                 warningAnnounced: false,
 
                 // --- Divers UI ---
-                flipPulse: false,
-                _lastFlipSecond: null,
                 shareCopied: false,
 
                 palette: PALETTE,
                 presets: PRESETS,
+                trafficProfiles: TRAFFIC_PROFILES,
+                // Champs bruts du profil "Personnalisé" (repli, #797-801) - valeurs de travail
+                // avant validation/application, pour ne pas modifier trafficThresholds en direct
+                // pendant la saisie (cohérent avec le pattern customMinutes/applyCustomMinutes).
+                customTrafficGreen: 50,
+                customTrafficYellow: 20,
+                customTrafficOpen: false,
+                openCustomTrafficFields: function () {
+                    this.customTrafficGreen = this.trafficThresholds.green;
+                    this.customTrafficYellow = this.trafficThresholds.yellow;
+                    this.customTrafficOpen = true;
+                },
                 customMinutes: 20,
 
                 init: function () {
@@ -265,6 +294,16 @@
                     return this.isCurrentDurationPinned || this.customDurations.length < 2;
                 },
 
+                // Même logique symétrique que les durées, appliquée à la couleur ACTIVE
+                // (accentHex - curatée ou personnalisée, peu importe, toujours un hex résolu).
+                get isCurrentColorFavorite() {
+                    var hex = this.accentHex.toLowerCase();
+                    return this.favoriteColors.some(function (c) { return c.toLowerCase() === hex; });
+                },
+                get isCurrentColorPinnable() {
+                    return this.isCurrentColorFavorite || this.favoriteColors.length < 2;
+                },
+
                 // Anneau : cercle stroke-dasharray/offset.
                 get ringCircumference() {
                     return RING_CIRCUMFERENCE.toFixed(2);
@@ -305,29 +344,42 @@
                     return ((1 - this.fraction) * 110 + 12).toFixed(2);
                 },
 
-                // Feu de circulation : phase par seuils fixes (V1).
+                // Feu de circulation : phase par seuils configurables (#797-801, connectés) -
+                // défaut 50 %/20 % (comportement historique) si non connecté ou non configuré.
                 get trafficPhase() {
                     var p = this.percentRemaining;
-                    if (p > 50) return 'green';
-                    if (p > 20) return 'yellow';
+                    if (p > this.trafficThresholds.green) return 'green';
+                    if (p > this.trafficThresholds.yellow) return 'yellow';
                     return 'red';
                 },
 
                 // Seuils de la légende du feu de circulation — dérivés de totalSeconds (mêmes
-                // seuils que trafficPhase : 50 % et 20 %), reformatés mm:ss. Réactifs : se
-                // recalculent automatiquement si l'utilisateur change de durée (preset, ±1,
-                // durée personnalisée), puisque totalSeconds est lu à chaque évaluation.
+                // seuils que trafficPhase), reformatés mm:ss. Réactifs : se recalculent
+                // automatiquement si l'utilisateur change de durée (preset, ±1, durée
+                // personnalisée) OU de profil de seuils, puisque les deux sont lus à chaque
+                // évaluation.
                 get trafficTotalFormatted() {
                     var s = Math.round(this.totalSeconds);
                     return pad2(Math.floor(s / 60)) + ':' + pad2(s % 60);
                 },
                 get trafficGreenThreshold() {
-                    var s = Math.round(this.totalSeconds * 0.5);
+                    var s = Math.round(this.totalSeconds * this.trafficThresholds.green / 100);
                     return pad2(Math.floor(s / 60)) + ':' + pad2(s % 60);
                 },
                 get trafficYellowThreshold() {
-                    var s = Math.round(this.totalSeconds * 0.2);
+                    var s = Math.round(this.totalSeconds * this.trafficThresholds.yellow / 100);
                     return pad2(Math.floor(s / 60)) + ':' + pad2(s % 60);
+                },
+                // Profil actif (pour cocher le bon bouton dans le segmented control) — 'custom'
+                // si les seuils ne correspondent à aucun préréglage connu.
+                get trafficProfile() {
+                    for (var key in TRAFFIC_PROFILES) {
+                        var p = TRAFFIC_PROFILES[key];
+                        if (p.green === this.trafficThresholds.green && p.yellow === this.trafficThresholds.yellow) {
+                            return key;
+                        }
+                    }
+                    return 'custom';
                 },
 
                 // --- Contrôle du décompte ---
@@ -489,6 +541,19 @@
                             if (Array.isArray(data.preferences.custom_durations)) {
                                 self.customDurations = data.preferences.custom_durations;
                             }
+                            if (Array.isArray(data.preferences.favorite_colors)) {
+                                self.favoriteColors = data.preferences.favorite_colors;
+                            }
+                            if (data.preferences.traffic_thresholds
+                                && typeof data.preferences.traffic_thresholds.green === 'number'
+                                && typeof data.preferences.traffic_thresholds.yellow === 'number') {
+                                self.trafficThresholds = data.preferences.traffic_thresholds;
+                                // #797-801 - bug détecté en vérification visuelle : sans ceci, les champs
+                                // "Personnalisé" restaient sur les défauts (50/20) après rechargement au
+                                // lieu de refléter le seuil réellement actif chargé du serveur.
+                                self.customTrafficGreen = self.trafficThresholds.green;
+                                self.customTrafficYellow = self.trafficThresholds.yellow;
+                            }
                         })
                         .catch(function () {});
                 },
@@ -500,6 +565,69 @@
                         headers: this._headers(),
                         body: JSON.stringify({ key: 'custom_colors', value: this.recentCustomColors })
                     }).catch(function () {});
+                },
+
+                _saveFavoriteColors: function () {
+                    if (!this.isAuthenticated) return;
+                    fetch('/api/tool-preferences/minuteur-visuel', {
+                        method: 'POST',
+                        headers: this._headers(),
+                        body: JSON.stringify({ key: 'favorite_colors', value: this.favoriteColors })
+                    }).catch(function () {});
+                },
+
+                // #797-801 : profils de seuils du feu de circulation (connectés) - 1 clic pour
+                // les 3 préréglages ; setTrafficThresholdsCustom pour le repli "Personnalisé".
+                setTrafficProfile: function (key) {
+                    if (!this.isAuthenticated) return;
+                    var profile = TRAFFIC_PROFILES[key];
+                    if (!profile) return;
+                    this.trafficThresholds = { green: profile.green, yellow: profile.yellow };
+                    this._saveTrafficThresholds();
+                },
+
+                setTrafficThresholdsCustom: function (green, yellow) {
+                    if (!this.isAuthenticated) return;
+                    green = parseInt(green, 10);
+                    yellow = parseInt(yellow, 10);
+                    if (!green || !yellow || green < 2 || green > 99 || yellow < 1 || yellow >= green) return;
+                    this.trafficThresholds = { green: green, yellow: yellow };
+                    this._saveTrafficThresholds();
+                },
+
+                _saveTrafficThresholds: function () {
+                    if (!this.isAuthenticated) return;
+                    fetch('/api/tool-preferences/minuteur-visuel', {
+                        method: 'POST',
+                        headers: this._headers(),
+                        body: JSON.stringify({ key: 'traffic_thresholds', value: this.trafficThresholds })
+                    }).catch(function () {});
+                },
+
+                // #787-792 : bascule étoile - épingle la couleur ACTIVE (accentHex) si elle n'est
+                // pas déjà favorite et qu'il reste une place (max 2) ; la retire si elle l'est déjà
+                // (symétrique, même comportement que pinCurrentDuration).
+                toggleFavoriteColor: function () {
+                    if (!this.isAuthenticated) return;
+                    var hex = this.accentHex;
+                    if (this.isCurrentColorFavorite) {
+                        this.removeFavoriteColor(hex);
+                        return;
+                    }
+                    if (this.favoriteColors.length >= 2) return;
+                    this.favoriteColors.push(hex);
+                    this._saveFavoriteColors();
+                },
+
+                removeFavoriteColor: function (hex) {
+                    var idx = this.favoriteColors.findIndex(function (c) { return c.toLowerCase() === hex.toLowerCase(); });
+                    if (idx === -1) return;
+                    this.favoriteColors.splice(idx, 1);
+                    this._saveFavoriteColors();
+                },
+
+                applyFavoriteColor: function (hex) {
+                    this.setCustomColor(hex);
                 },
 
                 _saveCustomDurations: function () {
@@ -607,8 +735,6 @@
                         this.state = 'finished';
                         if (this.rafId) { cancelAnimationFrame(this.rafId); this.rafId = null; }
                         this._onFinished();
-                    } else {
-                        this._maybeFlipPulse();
                     }
                 },
 
@@ -616,7 +742,6 @@
                     this.lastAnnouncedMinute = null;
                     this.warningAnnounced = false;
                     this.ariaMessage = '';
-                    this._lastFlipSecond = null;
                 },
 
                 // Annonces ARIA sobres : uniquement sur changement de minute entière + un avertissement
@@ -636,17 +761,6 @@
                         this.warningAnnounced = true;
                         this.ariaMessage = 'Bientôt fini : ' + this.display + ' restant';
                         this.playWarningSound();
-                    }
-                },
-
-                _maybeFlipPulse: function () {
-                    if (this.reducedMotion) return;
-                    var secondsLeft = Math.ceil(this.remainingMs / 1000);
-                    if (secondsLeft !== this._lastFlipSecond) {
-                        this._lastFlipSecond = secondsLeft;
-                        this.flipPulse = true;
-                        var self = this;
-                        setTimeout(function () { self.flipPulse = false; }, 180);
                     }
                 },
 

@@ -34,8 +34,12 @@ class ToolPreferenceController
 
         if ($key === 'custom_colors') {
             $value = $this->sanitizeCustomColors($value);
+        } elseif ($key === 'favorite_colors') {
+            $value = $this->sanitizeCustomColors($value, 2);
         } elseif ($key === 'custom_durations') {
             $value = $this->sanitizeCustomDurations($value);
+        } elseif ($key === 'traffic_thresholds') {
+            $value = $this->sanitizeTrafficThresholds($value);
         } elseif (strlen(json_encode($value) ?: '') > 2000) {
             throw ValidationException::withMessages(['value' => 'Trop volumineux.']);
         }
@@ -48,7 +52,7 @@ class ToolPreferenceController
         return response()->json(['preferences' => $prefs[$tool]]);
     }
 
-    private function sanitizeCustomColors(mixed $value): array
+    private function sanitizeCustomColors(mixed $value, int $max = 5): array
     {
         if (! is_array($value)) {
             throw ValidationException::withMessages(['value' => 'Format de couleurs invalide.']);
@@ -56,7 +60,7 @@ class ToolPreferenceController
 
         $colors = array_values(array_filter($value, fn ($c) => is_string($c) && preg_match('/^#[0-9a-f]{6}$/i', $c)));
 
-        return array_slice($colors, 0, 5);
+        return array_slice($colors, 0, $max);
     }
 
     private function sanitizeCustomDurations(mixed $value): array
@@ -68,5 +72,21 @@ class ToolPreferenceController
         $minutes = array_values(array_unique(array_filter($value, fn ($m) => is_int($m) && $m >= 1 && $m <= 180)));
 
         return array_slice($minutes, 0, 2);
+    }
+
+    private function sanitizeTrafficThresholds(mixed $value): array
+    {
+        if (! is_array($value) || ! isset($value['green'], $value['yellow'])) {
+            throw ValidationException::withMessages(['value' => 'Format de seuils invalide.']);
+        }
+
+        $green = (int) $value['green'];
+        $yellow = (int) $value['yellow'];
+
+        if ($green < 2 || $green > 99 || $yellow < 1 || $yellow >= $green) {
+            throw ValidationException::withMessages(['value' => 'Seuils invalides (jaune doit être inférieur à vert).']);
+        }
+
+        return ['green' => $green, 'yellow' => $yellow];
     }
 }

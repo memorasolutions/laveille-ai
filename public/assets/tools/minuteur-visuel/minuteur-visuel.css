@@ -82,6 +82,58 @@
     pointer-events: none;
 }
 
+/* #787-792 : bouton étoile "épingler cette couleur" - même classe .mv-pin-btn que les durées
+   (44x44 AAA), simplement inline avec un libellé texte (pas à côté d'un bouton "Définir" ici). */
+.mv-color-favorite-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    margin: -.25rem 0 .75rem;
+}
+.mv-color-favorite-toggle__label {
+    font-size: .8rem;
+    color: var(--c-text-muted, #52586a);
+}
+
+/* #787-792 : couleurs favorites épinglées (max 2) - chip bordée avec pastille + bouton × propre
+   segment cliquable (pattern chip 2026, cf. .mv-preset-pinned pour les durées), jamais un rond
+   flottant hors-cadre. */
+.mv-favorite-colors {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .4rem;
+    justify-content: center;
+    margin: -.5rem 0 1.25rem;
+}
+.mv-favorite-color-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    background: #fff;
+    border: 1px solid var(--sys-border-subtle, #E5E7EB);
+    border-radius: 999px;
+    padding: .2rem .3rem;
+}
+.mv-favorite-color-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--c-text-muted, #52586a);
+    font-size: .9rem;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+}
+.mv-favorite-color-remove:hover { background: var(--c-danger, #DC2626); color: #fff; }
+.mv-favorite-color-remove:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; }
+
 /* #744-750 : couleurs personnalisées récentes (connectés seulement) - rangée discrète sous le
    sélecteur, mêmes pastilles que .mv-color-btn mais plus petites (rôle secondaire de rappel). */
 .mv-recent-colors {
@@ -279,9 +331,7 @@
     font-size: clamp(2.5rem, 12vw, 4.5rem);
     font-weight: 800;
     letter-spacing: 2px;
-    transition: transform .15s ease;
 }
-.mv-flip-display.mv-flip-pulse { transform: scale(1.03); }
 
 /* --- Affichage central mm:ss superposé, À L'INTÉRIEUR du cadran (tous styles) ---
    Couleur adaptée par style pour garantir le contraste avec ce qu'il y a dessous :
@@ -481,8 +531,15 @@
     font-size: .9rem;
 }
 
+/* #797-801 : variante empilée (label au-dessus, pas côte-à-côte) pour les seuils du feu -
+   plusieurs contrôles (profils + repli personnalisé) ne tiennent pas sur une seule ligne. */
+.mv-settings__row--stack { flex-direction: column; align-items: stretch; gap: .5rem; }
+.mv-traffic-profiles { display: flex; flex-wrap: wrap; gap: .4rem; }
+.mv-traffic-custom { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; font-size: .85rem; }
+.mv-traffic-custom input[type="number"] { width: 70px; }
+
 @media (prefers-reduced-motion: reduce) {
-    .mv-ring-progress, .mv-disk-slice, .mv-hourglass-sand, .mv-hourglass-sand-grain, .mv-hourglass-sand-surface, .mv-sand-grain-particle, .mv-flip-display, .ct-btn {
+    .mv-ring-progress, .mv-disk-slice, .mv-hourglass-sand, .mv-hourglass-sand-grain, .mv-hourglass-sand-surface, .mv-sand-grain-particle, .ct-btn {
         transition: none !important;
         animation: none !important;
     }
@@ -492,8 +549,7 @@
 .mv-reduced-motion .mv-hourglass-sand,
 .mv-reduced-motion .mv-hourglass-sand-grain,
 .mv-reduced-motion .mv-hourglass-sand-surface,
-.mv-reduced-motion .mv-sand-grain-particle,
-.mv-reduced-motion .mv-flip-display {
+.mv-reduced-motion .mv-sand-grain-particle {
     transition: none !important;
     animation: none !important;
 }
