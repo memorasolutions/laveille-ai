@@ -54,7 +54,8 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     $response->assertSee('10 min', escape: false);
     $response->assertSee('15 min', escape: false);
     $response->assertSee('25 min', escape: false);
-    $response->assertSee('45 min', escape: false);
+    // #751-758 : 45 min retiré (demande utilisateur) - jamais présent dans le DOM.
+    $response->assertDontSee('45 min', escape: false);
     $response->assertSee('Pomodoro 25 min', escape: false);
     $response->assertSee('Pause 5 min', escape: false);
 
@@ -110,6 +111,11 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     // #744-750 — couleurs personnalisées récentes (connectés) + incitation à se connecter (invités).
     $response->assertSee('class="mv-login-hint"', escape: false);
     $response->assertSee('Connectez-vous pour retrouver vos couleurs personnalisées', escape: false);
+
+    // #751-758 — Pomodoro/Pause sur leur propre groupe (ligne déliberée) + incitation à se
+    // connecter pour épingler des durées personnalisées (invités).
+    $response->assertSee('Présélections Pomodoro', escape: false);
+    $response->assertSee('Connectez-vous pour épingler jusqu&#039;à 2 durées personnalisées', escape: false);
 });
 
 it('exposes the curated 5-tone color palette in the DOM', function () {

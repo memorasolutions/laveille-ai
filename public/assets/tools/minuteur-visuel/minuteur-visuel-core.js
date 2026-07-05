@@ -26,7 +26,6 @@
         'p10': { minutes: 10 },
         'p15': { minutes: 15 },
         'p25': { minutes: 25 },
-        'p45': { minutes: 45 },
         'pomodoro-focus': { minutes: 25, phase: 'focus' },
         'pomodoro-break': { minutes: 5, phase: 'break' }
     };
@@ -111,6 +110,10 @@
                 // les invités plutôt que de dupliquer un historique local non synchronisé.
                 isAuthenticated: !!isAuthenticated,
                 recentCustomColors: [],
+                // #751-758 : jusqu'à 2 durées personnalisées épinglées (connectés) - bascule
+                // étoile (pas un historique roulant comme les couleurs) : le rôle d'un "favori"
+                // qu'on épingle est de rester tel quel jusqu'à ce qu'on le retire explicitement.
+                customDurations: [],
                 accentColor: localStorage.getItem('mv_color') || 'red',
                 // #742 : couleur personnalisée, en plus des 5 teintes curées — accentColor
                 // devient 'custom' quand active, la vraie valeur vit ici (validée hex strict).
@@ -154,7 +157,7 @@
                     var self = this;
                     self.remainingMs = self.totalSeconds * 1000;
                     self._applyUrlParams();
-                    if (self.isAuthenticated) self._loadRecentColors();
+                    if (self.isAuthenticated) self._loadToolPreferences();
 
                     document.addEventListener('visibilitychange', function () {
                         if (!document.hidden && self.state === 'running') {
@@ -238,6 +241,18 @@
                 },
                 get supportsColorPalette() {
                     return COLORABLE_STYLES.indexOf(this.style) !== -1;
+                },
+                // #751-758 : l'étoile d'épinglage est désactivée si la durée courante est déjà
+                // invalide, OU si les 2 emplacements sont pleins ET que cette durée n'y figure pas
+                // déjà (dans ce cas précis, la bascule doit rester possible pour la DÉSépingler).
+                get isCurrentDurationPinned() {
+                    var minutes = parseInt(this.customMinutes, 10);
+                    return this.customDurations.indexOf(minutes) !== -1;
+                },
+                get isCustomMinutesPinnable() {
+                    var minutes = parseInt(this.customMinutes, 10);
+                    if (!minutes || minutes < 1 || minutes > 180) return false;
+                    return this.isCurrentDurationPinned || this.customDurations.length < 2;
                 },
 
                 // Anneau : cercle stroke-dasharray/offset.
@@ -450,13 +465,19 @@
                     };
                 },
 
-                _loadRecentColors: function () {
+                // Un seul GET pour toutes les préférences serveur de cet outil (couleurs récentes
+                // + durées épinglées) - évite de multiplier les appels réseau au chargement.
+                _loadToolPreferences: function () {
                     var self = this;
                     fetch('/api/tool-preferences/minuteur-visuel', { headers: self._headers() })
                         .then(function (r) { return r.ok ? r.json() : null; })
                         .then(function (data) {
-                            if (data && data.preferences && Array.isArray(data.preferences.custom_colors)) {
+                            if (!data || !data.preferences) return;
+                            if (Array.isArray(data.preferences.custom_colors)) {
                                 self.recentCustomColors = data.preferences.custom_colors;
+                            }
+                            if (Array.isArray(data.preferences.custom_durations)) {
+                                self.customDurations = data.preferences.custom_durations;
                             }
                         })
                         .catch(function () {});
@@ -469,6 +490,48 @@
                         headers: this._headers(),
                         body: JSON.stringify({ key: 'custom_colors', value: this.recentCustomColors })
                     }).catch(function () {});
+                },
+
+                _saveCustomDurations: function () {
+                    if (!this.isAuthenticated) return;
+                    fetch('/api/tool-preferences/minuteur-visuel', {
+                        method: 'POST',
+                        headers: this._headers(),
+                        body: JSON.stringify({ key: 'custom_durations', value: this.customDurations })
+                    }).catch(function () {});
+                },
+
+                // #751-758 : bascule étoile - épingle la durée COURANTE (customMinutes) si elle
+                // n'est pas déjà épinglée et qu'il reste une place (max 2) ; la retire si elle
+                // l'est déjà (symétrique, comportement de bascule attendu d'une icône étoile).
+                pinCurrentDuration: function () {
+                    if (!this.isAuthenticated) return;
+                    var minutes = parseInt(this.customMinutes, 10);
+                    if (!minutes || minutes < 1 || minutes > 180) return;
+                    if (this.customDurations.indexOf(minutes) !== -1) {
+                        this.removeCustomDuration(minutes);
+                        return;
+                    }
+                    if (this.customDurations.length >= 2) return;
+                    this.customDurations.push(minutes);
+                    this._saveCustomDurations();
+                },
+
+                removeCustomDuration: function (minutes) {
+                    var idx = this.customDurations.indexOf(minutes);
+                    if (idx === -1) return;
+                    this.customDurations.splice(idx, 1);
+                    this._saveCustomDurations();
+                },
+
+                applyCustomDuration: function (minutes) {
+                    if (this.state === 'running') return;
+                    this.totalSeconds = minutes * 60;
+                    this.remainingMs = this.totalSeconds * 1000;
+                    this.pomodoroPhase = null;
+                    this.state = 'idle';
+                    this._resetAnnounceFlags();
+                    this.start();
                 },
 
                 // Persistance localStorage seulement — x-model a DÉJÀ mis à jour la propriété

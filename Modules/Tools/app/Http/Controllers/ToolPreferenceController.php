@@ -34,6 +34,8 @@ class ToolPreferenceController
 
         if ($key === 'custom_colors') {
             $value = $this->sanitizeCustomColors($value);
+        } elseif ($key === 'custom_durations') {
+            $value = $this->sanitizeCustomDurations($value);
         } elseif (strlen(json_encode($value) ?: '') > 2000) {
             throw ValidationException::withMessages(['value' => 'Trop volumineux.']);
         }
@@ -55,5 +57,16 @@ class ToolPreferenceController
         $colors = array_values(array_filter($value, fn ($c) => is_string($c) && preg_match('/^#[0-9a-f]{6}$/i', $c)));
 
         return array_slice($colors, 0, 5);
+    }
+
+    private function sanitizeCustomDurations(mixed $value): array
+    {
+        if (! is_array($value)) {
+            throw ValidationException::withMessages(['value' => 'Format de durées invalide.']);
+        }
+
+        $minutes = array_values(array_unique(array_filter($value, fn ($m) => is_int($m) && $m >= 1 && $m <= 180)));
+
+        return array_slice($minutes, 0, 2);
     }
 }

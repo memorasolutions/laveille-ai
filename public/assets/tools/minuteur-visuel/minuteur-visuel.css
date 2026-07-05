@@ -317,8 +317,51 @@
     flex-wrap: wrap;
     gap: .5rem;
     justify-content: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: .6rem;
 }
+/* Les 2 groupes (durées simples, Pomodoro) sont désormais des lignes déliberées (#751-758) —
+   le dernier garde la marge normale avant la durée personnalisée. */
+.mv-presets:last-of-type { margin-bottom: 1.5rem; }
+
+/* #751-758 : durée personnalisée épinglée - même pastille que les présélections, avec un petit
+   bouton de retrait superposé (coin haut-droit), cohérent avec le pattern déjà en place ailleurs
+   sur le site pour les éléments "récents/épinglés" retirables. */
+.mv-preset-pinned {
+    position: relative;
+    display: inline-flex;
+}
+.mv-preset-pinned__remove {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--sys-border-subtle, #E5E7EB);
+    background: #fff;
+    color: var(--c-text-muted, #52586a);
+    font-size: .7rem;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+}
+.mv-preset-pinned__remove:hover { color: var(--c-danger, #DC2626); }
+
+/* Bouton étoile "épingler cette durée" - à côté de "Définir", même hauteur de cible tactile. */
+.mv-pin-btn {
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 8px;
+    border: 1.5px solid var(--sys-border-subtle, #E5E7EB);
+    background: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--c-text-muted, #52586a);
+}
+.mv-pin-btn.active { color: #B45309; border-color: #B45309; }
+.mv-pin-btn:disabled { opacity: .4; cursor: not-allowed; }
 
 /* --- Durée personnalisée — saisie exacte en minutes, alignée avec .mv-presets --- */
 .mv-custom-time {

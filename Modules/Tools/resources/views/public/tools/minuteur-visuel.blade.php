@@ -21,12 +21,16 @@
         ['key' => 'violet', 'label' => 'Violet', 'hex' => '#6B21A8'],
         ['key' => 'blue', 'label' => 'Bleu', 'hex' => '#1E40AF'],
     ];
+    // #751-758 : 45 min retiré (demande utilisateur) ; Pomodoro/Pause déplacés dans leur propre
+    // groupe (mvPresetsPomodoro) - deux lignes DÉLIBÉRÉES plutôt qu'un retour à la ligne accidentel
+    // dépendant de la largeur d'écran.
     $mvPresets = [
         ['key' => 'p5', 'label' => '5 min'],
         ['key' => 'p10', 'label' => '10 min'],
         ['key' => 'p15', 'label' => '15 min'],
         ['key' => 'p25', 'label' => '25 min'],
-        ['key' => 'p45', 'label' => '45 min'],
+    ];
+    $mvPresetsPomodoro = [
         ['key' => 'pomodoro-focus', 'label' => 'Pomodoro 25 min'],
         ['key' => 'pomodoro-break', 'label' => 'Pause 5 min'],
     ];
@@ -368,13 +372,41 @@
                                 <button type="button"
                                         class="ct-btn ct-btn-outline ct-btn-sm"
                                         :disabled="state === 'running'"
+                                        @click="applyPreset('{{ $p['key'] }}')">{{ $p['label'] }}</button>
+                            @endforeach
+                            {{-- #751-758 : jusqu'à 2 durées personnalisées épinglées (connectés) - bascule
+                                 étoile (pas d'écrasement silencieux), même architecture que les couleurs
+                                 récentes (users.tool_preferences, clé custom_durations). --}}
+                            <template x-if="isAuthenticated">
+                                <template x-for="minutes in customDurations" :key="'dur'+minutes">
+                                    <span class="mv-preset-pinned">
+                                        <button type="button"
+                                                class="ct-btn ct-btn-outline ct-btn-sm"
+                                                :disabled="state === 'running'"
+                                                @click="applyCustomDuration(minutes)"
+                                                x-text="minutes + ' {{ __('min') }}'"></button>
+                                        <button type="button"
+                                                class="mv-preset-pinned__remove"
+                                                @click="removeCustomDuration(minutes)"
+                                                :aria-label="'{{ __('Retirer') }} ' + minutes + ' {{ __('min') }}'"
+                                                title="{{ __('Retirer') }}">&times;</button>
+                                    </span>
+                                </template>
+                            </template>
+                        </div>
+
+                        {{-- Pomodoro/Pause — groupe déliberément distinct (pas un retour à la ligne
+                             accidentel dépendant de la largeur d'écran, #751-758). --}}
+                        <div class="mv-presets" role="group" aria-label="{{ __('Présélections Pomodoro') }}">
+                            @foreach($mvPresetsPomodoro as $p)
+                                <button type="button"
+                                        class="ct-btn ct-btn-outline ct-btn-sm"
+                                        :disabled="state === 'running'"
                                         @click="applyPreset('{{ $p['key'] }}')">
                                     @if($p['key'] === 'pomodoro-focus')
                                         <span x-text="'{{ __('Pomodoro') }} ' + pomodoroFocusMin + ' {{ __('min') }}'">{{ $p['label'] }}</span>
-                                    @elseif($p['key'] === 'pomodoro-break')
-                                        <span x-text="'{{ __('Pause') }} ' + pomodoroBreakMin + ' {{ __('min') }}'">{{ $p['label'] }}</span>
                                     @else
-                                        {{ $p['label'] }}
+                                        <span x-text="'{{ __('Pause') }} ' + pomodoroBreakMin + ' {{ __('min') }}'">{{ $p['label'] }}</span>
                                     @endif
                                 </button>
                             @endforeach
@@ -394,6 +426,21 @@
                                     class="ct-btn ct-btn-primary ct-btn-sm"
                                     :disabled="state === 'running'"
                                     @click="applyCustomMinutes()">{{ __('Définir') }}</button>
+                            <button type="button"
+                                    class="mv-pin-btn"
+                                    x-show="isAuthenticated"
+                                    x-cloak
+                                    :disabled="!isCustomMinutesPinnable"
+                                    @click="pinCurrentDuration()"
+                                    :aria-label="isCurrentDurationPinned ? '{{ __('Désépingler cette durée') }}' : '{{ __('Épingler cette durée') }}'"
+                                    :title="isCurrentDurationPinned ? '{{ __('Désépingler cette durée') }}' : '{{ __('Épingler cette durée (2 maximum)') }}'"
+                                    :class="{ 'active': isCurrentDurationPinned }">
+                                <span aria-hidden="true" x-text="isCurrentDurationPinned ? '★' : '☆'"></span>
+                            </button>
+                        </div>
+                        <div class="mv-login-hint" x-show="!isAuthenticated" x-cloak>
+                            {{ __('Connectez-vous pour épingler jusqu\'à 2 durées personnalisées et les retrouver sur tous vos appareils.') }}
+                            <a href="{{ route('login') }}">{{ __('Se connecter') }}</a>
                         </div>
 
                         {{-- Réglages accessibilité --}}

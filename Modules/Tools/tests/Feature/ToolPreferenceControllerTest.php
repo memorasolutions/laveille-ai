@@ -52,6 +52,35 @@ it('caps custom_colors at 5 entries and filters invalid hex values', function ()
     expect($colors)->not->toContain('not-a-color');
 });
 
+it('saves and retrieves custom_durations for the authenticated user', function () {
+    $user = User::factory()->create();
+
+    $store = $this->actingAs($user)->postJson('/api/tool-preferences/minuteur-visuel', [
+        'key' => 'custom_durations',
+        'value' => [32, 90],
+    ]);
+    $store->assertOk();
+    $store->assertJson(['preferences' => ['custom_durations' => [32, 90]]]);
+
+    $show = $this->actingAs($user)->get('/api/tool-preferences/minuteur-visuel');
+    $show->assertJson(['preferences' => ['custom_durations' => [32, 90]]]);
+});
+
+it('caps custom_durations at 2 entries and filters out-of-range values', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->postJson('/api/tool-preferences/minuteur-visuel', [
+        'key' => 'custom_durations',
+        'value' => [32, 0, 999, 90, 45],
+    ]);
+
+    $response->assertOk();
+    $durations = $response->json('preferences.custom_durations');
+    expect($durations)->toHaveCount(2);
+    expect($durations)->not->toContain(0);
+    expect($durations)->not->toContain(999);
+});
+
 it('rejects an unknown preference key format', function () {
     $user = User::factory()->create();
 
