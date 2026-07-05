@@ -45,11 +45,13 @@
 @endpush
 
 @section('content')
-                    @include('tools::public.partials.tool-geo')
 <section class="wpo-blog-single-section section-padding">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-10 col-12">
+                {{-- #707 : tool-geo (JSON-LD + answer-box) déplacé DANS le conteneur pour respecter
+                     la largeur du contenu (auparavant plein-largeur hors .container, cf. blog/show.blade.php). --}}
+                @include('tools::public.partials.tool-geo')
                 <div class="card shadow-sm tool-fullscreen-target" style="border-radius: var(--r-base);">
                     <div class="card-body p-4 p-md-5 anon-wrap">
 

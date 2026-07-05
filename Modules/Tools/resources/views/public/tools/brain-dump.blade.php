@@ -84,7 +84,6 @@
 @endpush
 
 @section('content')
-                    @include('tools::public.partials.tool-geo')
 <style>
 [x-cloak] { display: none !important; }
 .bd-page { --c-bg: #F0F4F8; --c-surface: #fff; --c-dark: #1a1d23; --c-muted: #52586a; }
@@ -259,6 +258,9 @@
     {{-- HERO refonte v1.14.0 — combo A+F (visuel Before/After + 3 étapes icônes), clarté 5s, NN/g 2026 < 50 mots --}}
     <section class="bd-hero" aria-labelledby="bd-h1">
         <div class="bd-container">
+            {{-- #707 : tool-geo (JSON-LD + answer-box) déplacé DANS .bd-container (largeur de
+                 contenu propre à cette page bespoke), auparavant plein-largeur hors conteneur. --}}
+            @include('tools::public.partials.tool-geo')
             <div class="bd-hero__intro">
                 <x-tools::octopus variant="intro" :size="72" />
                 <div>

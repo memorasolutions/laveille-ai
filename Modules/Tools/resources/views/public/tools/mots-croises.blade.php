@@ -10,7 +10,6 @@
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $tool->name, 'breadcrumbItems' => [__('Outils'), $tool->name]])
 @endsection
 @section('content')
-                    @include('tools::public.partials.tool-geo')
 {{-- 2026-05-05 #106 : helper WCAG contrast global (window.WcagContrast.ratio) - DRY --}}
 @include('core::partials.wcag-contrast-helper')
 {{-- 2026-05-05 #108 : helper slugify global (window.SlugHelper.slugify) - DRY --}}
@@ -19,6 +18,9 @@
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-10 col-12">
+        {{-- #707 : tool-geo (JSON-LD + answer-box) déplacé DANS le conteneur pour respecter
+             la largeur du contenu (auparavant plein-largeur hors .container, cf. blog/show.blade.php). --}}
+        @include('tools::public.partials.tool-geo')
         <div class="card shadow-sm" style="border-radius: var(--r-base);">
           <div class="card-body p-4 p-md-5" x-data="crosswordGenerator()" x-init="init()">
             <h1 class="h2 mb-2" style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark);">{{ $tool->name }}</h1>

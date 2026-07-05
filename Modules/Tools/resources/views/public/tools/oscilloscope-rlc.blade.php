@@ -18,10 +18,16 @@
 </style>
 @endpush
 @section('content')
-                    @include('tools::public.partials.tool-geo')
 <section class="wpo-blog-single-section" style="padding-top: 0;">
     {{-- h1 accessible (a11y/SEO) — outil canvas plein écran, titre visuel via l'UI/fil d'Ariane --}}
     <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">{{ $tool->name }}</h1>
+    {{-- #707 : tool-geo (JSON-LD + answer-box) placé dans un .container standard, DISTINCT du
+         .container-fluid plein écran du canvas ci-dessous. Cet outil n'a pas de colonne "contenu
+         principal" (canvas plein-bleed volontaire) : l'answer-box doit quand même respecter une
+         largeur de lecture normale, pas s'étirer sur toute la largeur de l'écran. --}}
+    <div class="container">
+        @include('tools::public.partials.tool-geo')
+    </div>
     <div class="container-fluid" style="padding: 0;">
         <div class="oscilloscope-wrapper" data-theme="light">
     <div class="app-container">

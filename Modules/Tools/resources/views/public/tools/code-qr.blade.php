@@ -16,11 +16,13 @@ $lvDefaultDomain = class_exists(\Modules\ShortUrl\Models\ShortUrlDomain::class)
     : null;
 $lvDefaultDomainName = $lvDefaultDomain ? $lvDefaultDomain->domain : 'lurl.ca';
 @endphp
-                    @include('tools::public.partials.tool-geo')
 <section class="wpo-blog-single-section section-padding">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-8 col-12">
+                {{-- #707 : tool-geo (JSON-LD + answer-box) déplacé DANS le conteneur pour respecter
+                     la largeur du contenu (auparavant plein-largeur hors .container, cf. blog/show.blade.php). --}}
+                @include('tools::public.partials.tool-geo')
                 <div class="card shadow-sm tool-fullscreen-target" style="border-radius: var(--r-base);">
                     <div class="card-body p-4 p-md-5" x-data="qrGenerator()" x-init="renderQR(); initEditMode()">
                         <div class="d-flex justify-content-between align-items-start">

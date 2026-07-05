@@ -120,9 +120,13 @@ function fiscalSim(cfg) {
 </script>
 @endpush
 @section('content')
-                    @include('tools::public.partials.tool-geo')
 <section class="wpo-blog-single-section section-padding">
     <div class="container">
+        {{-- #707 : tool-geo (JSON-LD + answer-box) déplacé DANS le conteneur pour respecter la largeur
+             du contenu (auparavant plein-largeur hors .container, cf. blog/show.blade.php). Placé au
+             niveau du conteneur (pas dans col-lg-4/col-lg-8) car cet outil a une mise en page 2 colonnes
+             sans colonne "contenu principal" unique — largeur pleine .container, comme les 2 colonnes réunies. --}}
+        @include('tools::public.partials.tool-geo')
         <script>window.__fiscalConfig = @json($toolConfig);</script>
         <div class="row justify-content-center tool-fullscreen-target" style="display: flex; flex-wrap: wrap;" x-data="fiscalSim(window.__fiscalConfig)">
                     {{-- Colonne gauche sticky (contrôles) --}}
