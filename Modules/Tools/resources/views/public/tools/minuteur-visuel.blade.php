@@ -51,6 +51,24 @@
             'major' => $isMajor,
         ];
     }
+
+    // #765-770 : 9 grains de sable individuels (au lieu de 3 identiques synchronisés) — chute
+    // VERTICALE nette (pas de dérive latérale, qui donnait un nuage de points dispersés en
+    // diagonale plutôt qu'un filet cohérent, signalé par l'utilisateur) traversant tout le
+    // goulot jusque dans le bulbe du bas (avant : seulement ~13px de course, invisible/inutile —
+    // désormais ~55px, bien visible entrant réellement DANS le tas du bas). Décalage
+    // vertical/temporel pré-calculé côté serveur (motif déterministe, même logique que les
+    // graduations ci-dessus, pas de hasard JS) pour que plusieurs grains soient visibles à des
+    // hauteurs différentes du même filet à tout instant, comme un vrai écoulement.
+    $mvSandGrains = [];
+    for ($i = 0; $i < 9; $i++) {
+        $mvSandGrains[] = [
+            'jitter' => round((($i % 3) - 1) * 0.35, 2),
+            'radius' => round(1.9 + ($i % 3) * 0.3, 2),
+            'delay' => round($i * 0.15, 2),
+            'duration' => round(1.1 + ($i % 3) * 0.15, 2),
+        ];
+    }
 @endphp
 
 @section('title', $tool->name . ' - ' . config('app.name'))
@@ -287,13 +305,16 @@
                                         <line x1="30" y1="20" x2="170" y2="20" class="mv-hourglass-frame"></line>
                                         <line x1="30" y1="240" x2="170" y2="240" class="mv-hourglass-frame"></line>
 
-                                        {{-- 3 grains qui tombent visiblement à travers le goulot pendant le décompte —
+                                        {{-- #765-770 : 9 grains qui tombent à travers le goulot pendant le décompte,
+                                             jitter/taille/vitesse variables (au lieu de 3 identiques synchronisés) —
                                              peints APRÈS le cadre (sinon les traits du cadre, qui convergent exactement
                                              au même point 100,130, recouvraient les particules). --}}
                                         <g class="mv-sand-stream" :class="{ 'is-running': state === 'running' }">
-                                            <circle cx="100" cy="130" r="2.2" class="mv-sand-grain-particle mv-sand-grain-particle-1"></circle>
-                                            <circle cx="100" cy="130" r="2.2" class="mv-sand-grain-particle mv-sand-grain-particle-2"></circle>
-                                            <circle cx="100" cy="130" r="2.2" class="mv-sand-grain-particle mv-sand-grain-particle-3"></circle>
+                                            @foreach($mvSandGrains as $g)
+                                                <circle cx="100" cy="130" r="{{ $g['radius'] }}"
+                                                        class="mv-sand-grain-particle"
+                                                        style="--gx: {{ $g['jitter'] }}px; --gd: {{ $g['delay'] }}s; --gdur: {{ $g['duration'] }}s;"></circle>
+                                            @endforeach
                                         </g>
                                     </svg>
                                     <div class="mv-center-display" x-text="display" aria-hidden="true"></div>

@@ -193,20 +193,34 @@
     animation: mv-stream-flow 0.6s linear infinite;
 }
 
-/* Grains individuels qui tombent visiblement à travers le goulot pendant le décompte
-   (en plus du filet mv-hourglass-stream) — 3 particules décalées pour un effet de flux continu. */
-.mv-sand-grain-particle { fill: #5C3A1E; stroke: #fff; stroke-width: .5; opacity: 0; }
+/* #765-770 (v2, corrige un retour utilisateur : le v1 dispersait les grains en diagonale au lieu
+   d'un filet cohérent, et la course était trop courte pour atteindre visiblement le bulbe du
+   bas) : 9 grains individuels tombent en ligne DROITE (dérive latérale quasi nulle - la neige
+   d'un vrai sablier ne part pas en éventail au passage du goulot) sur ~54px, du haut du goulot
+   jusque bien À L'INTÉRIEUR du tas du bas. Un seul @keyframes partagé, chaque grain lit ses
+   propres variables CSS (--gx micro-dérive, --gd délai, --gdur vitesse) posées en style inline
+   par le Blade : plusieurs grains visibles à des hauteurs différentes du même filet à tout
+   instant, comme un vrai écoulement - pas de contour blanc (donnait un effet "œuf tacheté" à
+   cette petite taille), fill uni à fort contraste sur le fond clair du goulot. */
+.mv-sand-grain-particle { fill: #3D2410; opacity: 0; }
 .mv-sand-stream.is-running .mv-sand-grain-particle {
-    animation: mv-grain-fall .6s linear infinite;
+    animation: mv-grain-fall var(--gdur, 1.1s) linear infinite;
+    animation-delay: var(--gd, 0s);
 }
-.mv-sand-stream.is-running .mv-sand-grain-particle-1 { animation-delay: 0s; }
-.mv-sand-stream.is-running .mv-sand-grain-particle-2 { animation-delay: .2s; }
-.mv-sand-stream.is-running .mv-sand-grain-particle-3 { animation-delay: .4s; }
 @keyframes mv-grain-fall {
-    0% { transform: translateY(-8px); opacity: 0; }
-    20% { opacity: 1; }
-    80% { opacity: 1; }
-    100% { transform: translateY(8px); opacity: 0; }
+    0%   { transform: translate(0, -16px) scale(.9); opacity: 0; }
+    8%   { opacity: 1; }
+    /* Opacité maintenue à 1 jusqu'à 85% du trajet (pas un fondu linéaire sur toute la chute,
+       sinon le grain est quasi invisible bien avant d'atteindre le bas - c'est ce qui donnait
+       l'impression qu'il "ne tombe pas en bas") : le grain reste net tout le long de la
+       descente, ne s'estompe qu'à l'arrivée dans le tas.
+       Course verticale recalibrée (v3, grille de calibrage sur viewBox 200x260) : départ
+       y≈114 (juste au-dessus du goulot y=130), arrivée y≈180 (translateY +50, bien À
+       L'INTÉRIEUR du triangle du bas dont la largeur à cette hauteur est déjà d'environ 63
+       unités - donc visiblement dans le tas, pas juste au bord du goulot comme avant
+       (translateY +38 ne portait qu'à y≈168, trop proche du sommet du triangle). */
+    85%  { opacity: 1; transform: translate(calc(var(--gx, 0px) * .85), 46px) scale(.82); }
+    100% { transform: translate(var(--gx, 0px), 50px) scale(.8); opacity: 0; }
 }
 
 .mv-traffic-circle { stroke: #D1D5DB; stroke-width: 3; transition: fill .3s ease, opacity .3s ease; }

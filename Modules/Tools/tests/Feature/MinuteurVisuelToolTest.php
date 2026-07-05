@@ -92,11 +92,13 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     $response->assertSee('pomodoroFocusMin', escape: false);
     $response->assertSee('pomodoroBreakMin', escape: false);
 
-    // Grains qui tombent visiblement à travers le goulot du sablier pendant le décompte.
+    // #765-770 — 9 grains (jitter/taille/vitesse variables via variables CSS --gx/--gd/--gdur)
+    // qui tombent visiblement à travers le goulot du sablier pendant le décompte.
     $response->assertSee('class="mv-sand-stream"', escape: false);
-    $response->assertSee('mv-sand-grain-particle-1', escape: false);
-    $response->assertSee('mv-sand-grain-particle-2', escape: false);
-    $response->assertSee('mv-sand-grain-particle-3', escape: false);
+    $sandGrainCount = substr_count($response->getContent(), 'class="mv-sand-grain-particle"');
+    expect($sandGrainCount)->toBe(9);
+    $response->assertSee('--gx:', escape: false);
+    $response->assertSee('--gdur:', escape: false);
 
     // Annonces ARIA sobres.
     $response->assertSee('aria-live="polite"', escape: false);
