@@ -57,6 +57,10 @@
                     ? localStorage.getItem('mv_reduced_motion') === 'true'
                     : (window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false),
                 warningThresholdSec: parseInt(localStorage.getItem('mv_warning_threshold') || '60', 10),
+                // Durées Pomodoro configurables (défaut 25/5 classique) — pilotent les presets
+                // 'pomodoro-focus'/'pomodoro-break' de PRESETS à la place des minutes fixes.
+                pomodoroFocusMin: clamp(parseInt(localStorage.getItem('mv_pomodoro_focus'), 10) || 25, 1, 120),
+                pomodoroBreakMin: clamp(parseInt(localStorage.getItem('mv_pomodoro_break'), 10) || 5, 1, 30),
 
                 // --- État du décompte ---
                 totalSeconds: 5 * 60,
@@ -225,7 +229,11 @@
                     if (this.state === 'running') return;
                     var preset = this.presets[key];
                     if (!preset) return;
-                    this.totalSeconds = preset.minutes * 60;
+                    // Pomodoro : minutes configurables (Réglages) plutôt que la valeur fixe de PRESETS.
+                    var minutes = preset.minutes;
+                    if (key === 'pomodoro-focus') minutes = this.pomodoroFocusMin;
+                    else if (key === 'pomodoro-break') minutes = this.pomodoroBreakMin;
+                    this.totalSeconds = minutes * 60;
                     this.remainingMs = this.totalSeconds * 1000;
                     this.pomodoroPhase = preset.phase || null;
                     this.state = 'idle';
@@ -344,6 +352,18 @@
                     if (isNaN(value) || value < 0) value = 60;
                     this.warningThresholdSec = value;
                     try { localStorage.setItem('mv_warning_threshold', String(value)); } catch (e) {}
+                },
+
+                setPomodoroFocus: function (minutes) {
+                    var value = clamp(parseInt(minutes, 10) || 25, 1, 120);
+                    this.pomodoroFocusMin = value;
+                    try { localStorage.setItem('mv_pomodoro_focus', String(value)); } catch (e) {}
+                },
+
+                setPomodoroBreak: function (minutes) {
+                    var value = clamp(parseInt(minutes, 10) || 5, 1, 30);
+                    this.pomodoroBreakMin = value;
+                    try { localStorage.setItem('mv_pomodoro_break', String(value)); } catch (e) {}
                 },
 
                 shareCurrentUrl: function () {

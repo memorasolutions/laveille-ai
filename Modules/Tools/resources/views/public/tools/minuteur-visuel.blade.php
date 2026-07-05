@@ -314,7 +314,15 @@
                                 <button type="button"
                                         class="ct-btn ct-btn-outline ct-btn-sm"
                                         :disabled="state === 'running'"
-                                        @click="applyPreset('{{ $p['key'] }}')">{{ $p['label'] }}</button>
+                                        @click="applyPreset('{{ $p['key'] }}')">
+                                    @if($p['key'] === 'pomodoro-focus')
+                                        <span x-text="'{{ __('Pomodoro') }} ' + pomodoroFocusMin + ' {{ __('min') }}'">{{ $p['label'] }}</span>
+                                    @elseif($p['key'] === 'pomodoro-break')
+                                        <span x-text="'{{ __('Pause') }} ' + pomodoroBreakMin + ' {{ __('min') }}'">{{ $p['label'] }}</span>
+                                    @else
+                                        {{ $p['label'] }}
+                                    @endif
+                                </button>
                             @endforeach
                         </div>
 
@@ -355,6 +363,17 @@
                                         <input type="number" id="mvWarningThreshold" min="0" max="600" x-model.number="warningThresholdSec" @change="setWarningThreshold(warningThresholdSec)">
                                         <span aria-hidden="true" style="font-size:.85rem; color:var(--c-dark, #1A1D23); opacity:.75;">{{ __('s') }}</span>
                                     </span>
+                                </div>
+                                {{-- #712 : durées Pomodoro configurables — pilotent les presets "Pomodoro"/"Pause"
+                                     ci-dessus (défaut 25/5 classique, persistées localStorage comme le reste
+                                     de Réglages). --}}
+                                <div class="mv-settings__row">
+                                    <label for="mvPomodoroFocus">{{ __('Durée du focus Pomodoro (minutes)') }}</label>
+                                    <input type="number" id="mvPomodoroFocus" min="1" max="120" x-model.number="pomodoroFocusMin" @change="setPomodoroFocus(pomodoroFocusMin)">
+                                </div>
+                                <div class="mv-settings__row">
+                                    <label for="mvPomodoroBreak">{{ __('Durée de la pause Pomodoro (minutes)') }}</label>
+                                    <input type="number" id="mvPomodoroBreak" min="1" max="30" x-model.number="pomodoroBreakMin" @change="setPomodoroBreak(pomodoroBreakMin)">
                                 </div>
                             </div>
                         </details>

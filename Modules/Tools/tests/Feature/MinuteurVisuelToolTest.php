@@ -81,6 +81,13 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     $response->assertSee('display:inline-block !important; width:20px; height:20px', escape: false);
     $response->assertSee('id="mvWarningThreshold"', escape: false);
 
+    // #712 — durées Pomodoro configurables (Réglages) : pilotent dynamiquement les 2 presets
+    // Pomodoro (fallback SSR = valeurs par défaut 25/5, cf. x-text avec contenu de repli).
+    $response->assertSee('id="mvPomodoroFocus"', escape: false);
+    $response->assertSee('id="mvPomodoroBreak"', escape: false);
+    $response->assertSee('pomodoroFocusMin', escape: false);
+    $response->assertSee('pomodoroBreakMin', escape: false);
+
     // Grains qui tombent visiblement à travers le goulot du sablier pendant le décompte.
     $response->assertSee('class="mv-sand-stream"', escape: false);
     $response->assertSee('mv-sand-grain-particle-1', escape: false);
