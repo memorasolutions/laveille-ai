@@ -1,0 +1,238 @@
+[
+    {
+        "slug": "pamstealer",
+        "name": "PamStealer",
+        "cat_slug": "securite-et-ethique",
+        "difficulty": "intermediate",
+        "type": "concept",
+        "icon": "🦹",
+        "match_strategy": "loose",
+        "aliases": ["Pam Stealer", "PAMStealer", "pamstealer"],
+        "broader_slugs": ["malware"],
+        "narrower_slugs": [],
+        "has_image": true,
+        "definition": "PamStealer est un logiciel malveillant de type infostealer (voleur d'informations) qui cible spécifiquement les Mac équipés de puces Apple Silicon. Découvert en 2026 par les chercheurs de Jamf Threat Labs, il se fait passer pour Maccy, une application légitime de gestion du presse-papiers, distribuée via de faux sites imitant le site officiel. La victime télécharge une image disque contenant un script AppleScript compilé qui, une fois ouvert dans l'éditeur de script, déclenche un second stade écrit en Rust. Ce second stade se fait passer pour des composants système comme Finder ou les mises à jour logicielles, ce qui complique sa détection. Sa particularité : il affiche une fausse boîte de dialogue imitant les invites natives de macOS et vérifie réellement, via l'interface PAM du système, que le mot de passe saisi par la victime est le bon avant de l'exfiltrer, en plus de voler l'historique des navigateurs, le contenu du trousseau iCloud, les extensions de portefeuilles de cryptomonnaies et le presse-papiers.",
+        "analogy": "C'est comme un cambrioleur déguisé en livreur de confiance qui te demande poliment ton code de porte « pour vérifier qu'il fonctionne », confirme qu'il est bon, puis repart avec la combinaison et le contenu de ta maison.",
+        "example": "Une personne cherche à télécharger Maccy et tombe sur un site qui imite parfaitement le vrai (maccyapp au lieu de maccy.app). Le fichier téléchargé est en réalité un script AppleScript compilé qui, une fois exécuté, installe PamStealer sur son Mac.",
+        "did_you_know": "PamStealer redemande le mot de passe tant qu'il n'est pas valide, car il le vérifie réellement via l'API PAM du système avant de l'exfiltrer, une technique documentée par The Hacker News et Jamf Threat Labs en juillet 2026.",
+        "one_sentence_answer": "PamStealer est un infostealer macOS découvert en 2026 qui se déguise en application Maccy, valide le mot de passe volé via l'interface PAM du système, puis exfiltre navigateurs, trousseau et portefeuilles de cryptomonnaies.",
+        "faq": [
+            {"question": "Comment PamStealer infecte-t-il un Mac ?", "answer": "Via un faux site imitant Maccy, une application légitime de gestion du presse-papiers. La victime télécharge une image disque contenant un AppleScript compilé qui déclenche un second stade écrit en Rust une fois exécuté dans l'éditeur de script."},
+            {"question": "Pourquoi PamStealer utilise-t-il l'interface PAM de macOS ?", "answer": "Pour vérifier localement, via l'API PAM du système, que le mot de passe saisi par la victime est le bon avant de l'exfiltrer, ce qui rend le vol de données plus fiable pour les attaquants."},
+            {"question": "Comment se protéger de PamStealer ?", "answer": "Toujours télécharger les applications depuis leur site officiel vérifié, se méfier d'une app qui demande d'être ouverte dans l'éditeur de script plutôt que d'être installée normalement, et rester attentif à toute demande inhabituelle du mot de passe administrateur."}
+        ],
+        "sources": [
+            {"label": "The Hacker News - PamStealer utilise de faux sites Maccy et l'interface PAM de macOS", "url": "https://thehackernews.com/2026/07/pamstealer-uses-fake-maccy-sites-and.html", "year": 2026, "author": "The Hacker News"},
+            {"label": "AppleWorld Today - PamStealer, un infostealer macOS écrit en Rust qui valide les identifiants via PAM", "url": "https://appleworld.today/2026/07/pamstealer-is-a-rust-based-macos-infostealer-that-validates-credentials-through-pam/", "year": 2026, "author": "AppleWorld Today"}
+        ]
+    },
+    {
+        "slug": "macos",
+        "name": "macOS",
+        "cat_slug": "outils-et-techniques",
+        "difficulty": "beginner",
+        "type": "technique",
+        "icon": "🍎",
+        "match_strategy": "loose",
+        "aliases": ["Mac OS X", "OS X", "Mac OS"],
+        "broader_slugs": [],
+        "narrower_slugs": ["jamf", "interface-pam", "applescript"],
+        "has_image": true,
+        "definition": "macOS est le système d'exploitation développé par Apple pour ses ordinateurs Mac. Bâti sur Darwin, un noyau open source dérivé de BSD (Berkeley Software Distribution), il repose sur des bases Unix solides, ce qui lui donne accès à des mécanismes partagés avec Linux, dont l'interface PAM pour l'authentification. macOS combine une interface graphique intuitive avec des outils de développement et d'administration puissants, et sert de socle à des technologies natives comme AppleScript pour l'automatisation. Il s'appelait officiellement Mac OS X à son lancement en 2001, puis simplement OS X à partir de 2012, avant qu'Apple adopte le nom macOS en 2016 pour harmoniser sa gamme avec iOS, watchOS et tvOS. En entreprise ou en milieu scolaire, les parcs de Mac sont souvent administrés à distance via des solutions de gestion des appareils (MDM) comme Jamf, qui permettent de déployer des configurations et des mises à jour sans intervenir sur chaque poste individuellement.",
+        "analogy": "Si Windows est une grande ville tentaculaire ouverte à de nombreux promoteurs, macOS est un quartier soigneusement planifié par un seul urbaniste, Apple, qui contrôle chaque détail de la construction à l'entretien.",
+        "example": "Une PME équipée de Mac utilise Jamf pour déployer les mises à jour de macOS et les politiques de sécurité sur tous les postes de ses employés, sans avoir à intervenir sur chaque appareil individuellement.",
+        "did_you_know": "macOS s'est appelé officiellement Mac OS X jusqu'en 2012, puis OS X jusqu'en 2016, avant qu'Apple adopte le nom macOS pour harmoniser sa gamme avec iOS, watchOS et tvOS.",
+        "one_sentence_answer": "macOS est le système d'exploitation d'Apple pour les ordinateurs Mac, basé sur Unix (Darwin), qui alimente des outils natifs comme AppleScript et l'interface PAM, et peut être géré à distance via des solutions comme Jamf.",
+        "faq": [
+            {"question": "macOS est-il basé sur Unix ?", "answer": "Oui. macOS repose sur Darwin, un noyau open source dérivé de BSD, ce qui lui donne des bases Unix solides partagées avec Linux sur plusieurs mécanismes, dont l'interface PAM."},
+            {"question": "Quelle est la différence entre macOS, Mac OS X et OS X ?", "answer": "Ce sont les mêmes systèmes sous des noms différents dans le temps : Mac OS X de 2001 à 2012, puis OS X de 2012 à 2016, puis macOS depuis 2016, à mesure qu'Apple harmonisait le nom avec ses autres systèmes."}
+        ],
+        "sources": [
+            {"label": "Wikipédia - macOS", "url": "https://fr.wikipedia.org/wiki/MacOS", "year": 2026, "author": "Wikipédia"},
+            {"label": "Apple - macOS", "url": "https://www.apple.com/macos/", "year": 2026, "author": "Apple"}
+        ]
+    },
+    {
+        "slug": "jamf",
+        "name": "Jamf",
+        "cat_slug": "outils-et-techniques",
+        "difficulty": "intermediate",
+        "type": "outil",
+        "icon": "🧰",
+        "match_strategy": "loose",
+        "aliases": ["Jamf Pro", "JAMF"],
+        "broader_slugs": ["macos"],
+        "narrower_slugs": [],
+        "has_image": true,
+        "definition": "Jamf est une plateforme de gestion des appareils Apple (MDM, Mobile Device Management) qui permet aux entreprises et aux écoles de configurer, sécuriser et surveiller à distance des parcs de Mac, iPhone, iPad et Apple TV, sans avoir à intervenir manuellement sur chaque appareil. Jamf communique avec les appareils inscrits via le service de notifications push d'Apple (APNs), qui relaie les commandes et les profils de configuration du serveur Jamf vers chaque appareil, où qu'il se trouve. La plateforme permet notamment de déployer et de mettre à jour des applications en volume, d'appliquer des politiques de sécurité (chiffrement, code d'accès, restrictions), et d'exécuter des commandes ponctuelles comme l'effacement à distance d'un appareil perdu ou volé. Les équipes de sécurité de l'entreprise, réunies sous le nom Jamf Threat Labs, publient aussi régulièrement des recherches sur les menaces ciblant macOS, dont le malware PamStealer documenté en 2026.",
+        "analogy": "Jamf, c'est comme un chef d'orchestre qui, depuis son pupitre, ajuste en même temps le volume, la partition et les réglages de centaines de musiciens (les appareils) sans avoir à se déplacer vers chacun.",
+        "example": "Le service informatique d'une commission scolaire québécoise utilise Jamf School pour installer automatiquement les mêmes applications pédagogiques sur des centaines d'iPad, dès leur premier démarrage.",
+        "did_you_know": "Les équipes de sécurité de Jamf, connues sous le nom Jamf Threat Labs, ont été parmi les premières à documenter publiquement le malware PamStealer en 2026, qui cible spécifiquement les Mac équipés de puces Apple Silicon.",
+        "one_sentence_answer": "Jamf est une plateforme de gestion à distance (MDM) des appareils Apple, utilisée par les entreprises et les écoles pour configurer, sécuriser et surveiller des parcs de Mac, iPhone et iPad sans y toucher physiquement.",
+        "faq": [
+            {"question": "Comment Jamf communique-t-il avec les appareils Apple ?", "answer": "Via le service de notifications push d'Apple (APNs), qui relaie les commandes et les profils de configuration du serveur Jamf vers chaque appareil inscrit, où qu'il se trouve."},
+            {"question": "Jamf sert-il uniquement aux grandes entreprises ?", "answer": "Non. Des écoles, des PME et de grandes organisations l'utilisent dès qu'elles doivent gérer plusieurs appareils Apple de façon cohérente : déploiement d'applications, mises à jour, restrictions de sécurité, effacement à distance en cas de perte ou de vol."}
+        ],
+        "sources": [
+            {"label": "Jamf - site officiel", "url": "https://www.jamf.com/", "year": 2026, "author": "Jamf"},
+            {"label": "The Hacker News - PamStealer utilise de faux sites Maccy et l'interface PAM de macOS", "url": "https://thehackernews.com/2026/07/pamstealer-uses-fake-maccy-sites-and.html", "year": 2026, "author": "The Hacker News"}
+        ]
+    },
+    {
+        "slug": "interface-pam",
+        "name": "Interface PAM (Pluggable Authentication Modules)",
+        "cat_slug": "outils-et-techniques",
+        "difficulty": "advanced",
+        "type": "technique",
+        "icon": "🔐",
+        "match_strategy": "case_sensitive",
+        "aliases": ["PAM", "Pluggable Authentication Modules", "Linux-PAM"],
+        "broader_slugs": ["macos"],
+        "narrower_slugs": [],
+        "has_image": false,
+        "acronym_full": "Pluggable Authentication Modules",
+        "definition": "L'interface PAM (Pluggable Authentication Modules) est un cadre d'authentification modulaire utilisé par les systèmes Unix et Unix-like, dont macOS et Linux. Plutôt que chaque application réinvente sa propre logique de vérification de mot de passe, elle délègue cette tâche à PAM, qui charge les modules appropriés selon des règles définies dans des fichiers de configuration, généralement rangés dans le dossier /etc/pam.d/ (un fichier par service : sshd, sudo, login...). PAM a été introduit par Sun Microsystems au milieu des années 1990, à l'origine pour Solaris ; le monde Linux en a ensuite développé sa propre implémentation, Linux-PAM, aujourd'hui largement répandue. Son rôle couvre l'authentification, la gestion de compte, la mise à jour des mots de passe et la gestion de session. Sur macOS, PAM sert notamment à vérifier les mots de passe lors de commandes administratives comme sudo dans le Terminal, ce qui en fait aussi une cible pour des malwares comme PamStealer, qui détournent cette vérification pour confirmer qu'ils ont capturé le véritable mot de passe d'une victime.",
+        "analogy": "PAM, c'est comme un poste de sécurité central dans un édifice à bureaux : au lieu que chaque compagnie locataire installe son propre système de cartes d'accès, tout le monde passe par le même poste, qui applique les règles définies par la direction de l'immeuble.",
+        "example": "Quand un administrateur tape une commande sudo dans le Terminal de macOS, c'est l'interface PAM qui vérifie en coulisse son mot de passe avant d'autoriser l'action, exactement comme elle le ferait sur un serveur Linux.",
+        "did_you_know": "PAM a été introduit par Sun Microsystems au milieu des années 1990, à l'origine pour Solaris ; le monde Linux en a ensuite développé sa propre implémentation, Linux-PAM, aujourd'hui largement répandue sur les distributions modernes.",
+        "one_sentence_answer": "L'interface PAM (Pluggable Authentication Modules) est un cadre d'authentification modulaire, né chez Sun Microsystems dans les années 1990, utilisé par macOS et Linux pour déléguer la vérification des mots de passe à des modules configurables plutôt qu'à chaque application individuellement.",
+        "faq": [
+            {"question": "Où se trouve la configuration de PAM sur un système Unix ?", "answer": "Généralement dans le dossier /etc/pam.d/, avec un fichier par service (sshd, sudo, login...), qui décrit dans quel ordre les modules d'authentification doivent être appelés."},
+            {"question": "Pourquoi un malware comme PamStealer s'intéresse-t-il à PAM ?", "answer": "Parce que PAM permet de vérifier localement, de façon fiable, qu'un mot de passe saisi est bien le bon. Un malware qui détourne cette vérification peut confirmer qu'il a capturé le véritable mot de passe de la victime avant de l'exfiltrer."}
+        ],
+        "sources": [
+            {"label": "Wikipedia - Pluggable authentication module", "url": "https://en.wikipedia.org/wiki/Pluggable_authentication_module", "year": 2026, "author": "Wikipedia"},
+            {"label": "Linux-PAM - site officiel du projet", "url": "http://www.linux-pam.org/", "year": 2026, "author": "Projet Linux-PAM"}
+        ]
+    },
+    {
+        "slug": "applescript",
+        "name": "AppleScript",
+        "cat_slug": "outils-et-techniques",
+        "difficulty": "intermediate",
+        "type": "outil",
+        "icon": "📜",
+        "match_strategy": "loose",
+        "aliases": ["Apple Script", "osascript"],
+        "broader_slugs": ["macos"],
+        "narrower_slugs": [],
+        "has_image": false,
+        "definition": "AppleScript est un langage de script créé par Apple et intégré à Mac OS depuis le début des années 1990 (System 7), qui permet d'automatiser des tâches en pilotant directement les applications compatibles et certaines fonctions du système. Sa syntaxe, volontairement proche du pseudo-anglais, le rend accessible même à des utilisateurs non programmeurs. Techniquement, AppleScript pilote les Apple events, une technologie de communication entre applications ; les scripts existent sous plusieurs formes : en texte source (extension .applescript), compilés (.scpt) ou en paquet (.scptd), et s'ouvrent typiquement dans l'éditeur de script de macOS. Une variante plus récente, JavaScript for Automation (JXA), permet d'automatiser les mêmes fonctions du système mais en utilisant la syntaxe JavaScript plutôt que celle d'AppleScript. Comme tout mécanisme d'automatisation puissant, AppleScript peut aussi être détourné à des fins malveillantes : des campagnes comme celle du malware PamStealer ont utilisé des scripts AppleScript compilés déguisés en applications légitimes pour tromper les utilisateurs.",
+        "analogy": "AppleScript, c'est comme donner des instructions écrites en français courant à un assistant qui comprend et exécute des tâches répétitives à ta place, sans que tu aies à apprendre un jargon de programmeur.",
+        "example": "Un script AppleScript peut automatiquement trier les courriels reçus dans Mail, extraire les pièces jointes et les ranger dans un dossier précis, chaque matin, sans intervention humaine.",
+        "did_you_know": "Les fichiers AppleScript existent sous plusieurs formes, en texte source (.applescript), compilés (.scpt) ou en paquet (.scptd) ; une variante plus récente, JavaScript for Automation (JXA), permet d'automatiser les mêmes fonctions de macOS mais en JavaScript plutôt qu'en AppleScript.",
+        "one_sentence_answer": "AppleScript est le langage d'automatisation natif de macOS, introduit dans les années 1990, à la syntaxe proche de l'anglais courant, qui permet de piloter les applications et certaines fonctions du système sans compétences avancées en programmation.",
+        "faq": [
+            {"question": "Faut-il être programmeur pour utiliser AppleScript ?", "answer": "Pas nécessairement. Sa syntaxe volontairement proche de l'anglais courant le rend accessible aux débutants, même si des scripts plus complexes demandent une vraie logique de programmation."},
+            {"question": "Quelle est la différence entre AppleScript et JXA ?", "answer": "Les deux pilotent la même infrastructure d'automatisation de macOS, les Apple events, mais AppleScript utilise son propre langage pseudo-anglais alors que JXA, JavaScript for Automation, utilise la syntaxe JavaScript."},
+            {"question": "AppleScript peut-il être détourné à des fins malveillantes ?", "answer": "Oui. Des malwares comme PamStealer ont utilisé des scripts AppleScript compilés déguisés en applications légitimes pour tromper les utilisateurs et déclencher l'installation de logiciels malveillants."}
+        ],
+        "sources": [
+            {"label": "Wikipedia - AppleScript", "url": "https://en.wikipedia.org/wiki/AppleScript", "year": 2026, "author": "Wikipedia"},
+            {"label": "Apple Developer - AppleScript Language Guide", "url": "https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptX/AppleScriptX.html", "year": 2026, "author": "Apple"}
+        ]
+    },
+    {
+        "slug": "malware",
+        "name": "Malware",
+        "cat_slug": "securite-et-ethique",
+        "difficulty": "beginner",
+        "type": "concept",
+        "icon": "👾",
+        "match_strategy": "loose",
+        "aliases": ["logiciel malveillant", "maliciel", "programme malveillant"],
+        "broader_slugs": [],
+        "narrower_slugs": ["virus-informatique", "ver-informatique", "pamstealer", "cheval-de-troie"],
+        "has_image": true,
+        "definition": "Un malware, ou logiciel malveillant (aussi appelé maliciel), est tout programme conçu intentionnellement pour nuire à un système informatique, voler des données ou obtenir un accès non autorisé, à l'insu de la personne qui l'utilise. Le terme anglais est un mot-valise formé de « malicious » et « software ». C'est une catégorie générale qui regroupe plusieurs familles de menaces bien distinctes : le virus informatique, qui s'insère dans un fichier hôte et a besoin d'une action humaine pour se propager ; le ver informatique, autonome, qui se propage seul via un réseau ; le cheval de Troie, déguisé en logiciel légitime ; le rançongiciel, qui chiffre des données contre une rançon ; et le logiciel espion, qui collecte des informations à l'insu de l'utilisateur. Des menaces plus récentes et ciblées, comme l'infostealer PamStealer découvert en 2026 sur macOS, entrent aussi dans cette grande famille. Se protéger des malwares passe par la mise à jour régulière des systèmes et logiciels, la prudence face aux téléchargements provenant de sources non officielles, et l'utilisation d'un antivirus fiable.",
+        "analogy": "Le malware est à l'informatique ce que les parasites sont à la biologie : une grande famille de menaces, virus, vers, chevaux de Troie, qui partagent un seul point commun, s'installer et nuire sans y être invitées.",
+        "example": "Un rançongiciel qui chiffre les fichiers d'une PME et exige une rançon, un cheval de Troie déguisé en logiciel gratuit, ou un infostealer comme PamStealer qui vole des mots de passe sont tous, au sens large, des malwares.",
+        "did_you_know": "Le mot malware désigne une catégorie entière de menaces et non un type précis : un virus, un ver informatique et un cheval de Troie sont tous des malwares, mais ils se propagent de façons très différentes.",
+        "one_sentence_answer": "Un malware est un programme conçu intentionnellement pour nuire à un système informatique ou voler des données à l'insu de l'utilisateur ; c'est un terme générique qui regroupe les virus, les vers, les chevaux de Troie, les rançongiciels et les logiciels espions.",
+        "faq": [
+            {"question": "Malware et virus, est-ce la même chose ?", "answer": "Non. Malware est un terme générique qui regroupe plusieurs familles de menaces, dont le virus n'est qu'un exemple parmi d'autres, avec les vers, les chevaux de Troie et les rançongiciels."},
+            {"question": "Comment se protéger des malwares ?", "answer": "Garder son système et ses logiciels à jour, éviter de télécharger des fichiers depuis des sources non officielles, utiliser un antivirus fiable, et se méfier des pièces jointes ou des liens inattendus."}
+        ],
+        "sources": [
+            {"label": "Wikipédia - Logiciel malveillant", "url": "https://fr.wikipedia.org/wiki/Logiciel_malveillant", "year": 2026, "author": "Wikipédia"}
+        ]
+    },
+    {
+        "slug": "ver-informatique",
+        "name": "Ver informatique (ver de sécurité informatique)",
+        "cat_slug": "securite-et-ethique",
+        "difficulty": "beginner",
+        "type": "concept",
+        "icon": "🪱",
+        "match_strategy": "case_sensitive",
+        "aliases": ["ver de sécurité informatique", "worm", "ver réseau"],
+        "broader_slugs": ["malware"],
+        "narrower_slugs": [],
+        "has_image": true,
+        "definition": "Un ver informatique (worm) est un type de malware autonome capable de se propager seul à travers un réseau, sans avoir besoin de s'attacher à un programme hôte ni d'attendre qu'une personne exécute un fichier. Il exploite généralement des failles de sécurité ou des services réseau mal protégés pour se copier automatiquement d'un ordinateur à l'autre. C'est ce qui le distingue fondamentalement du virus informatique, qui a besoin d'un fichier hôte et d'une action humaine pour se propager. Le ver Morris, lancé en 1988 par Robert Tappan Morris, est considéré comme l'un des premiers vers informatiques à grande échelle sur Internet : il s'est propagé de lui-même sur ARPANET en exploitant des failles de logiciels réseau, infectant environ 6000 ordinateurs, soit près de 10% des machines alors connectées à Internet. Depuis, d'autres vers célèbres ont marqué l'histoire de la sécurité informatique, chacun exploitant des failles propres à son époque.",
+        "analogy": "Si le virus informatique a besoin qu'on lui ouvre la porte, une action de l'utilisateur, le ver informatique, lui, sait crocheter la serrure tout seul et se déplace de maison en maison sans jamais avoir besoin d'y être invité.",
+        "example": "Le ver Morris, lancé en 1988, s'est propagé de lui-même sur ARPANET en exploitant des failles de logiciels réseau, infectant environ 6000 ordinateurs, soit près de 10% des machines alors connectées à Internet.",
+        "did_you_know": "Contrairement à un virus, un ver informatique n'a pas besoin d'infecter un fichier ni qu'une personne clique sur quoi que ce soit : une fois lancé sur un réseau vulnérable, il continue de se propager de lui-même.",
+        "one_sentence_answer": "Un ver informatique est un malware autonome qui se propage seul sur un réseau, en exploitant des failles de sécurité, sans avoir besoin d'un fichier hôte ni d'une action de l'utilisateur, contrairement à un virus.",
+        "faq": [
+            {"question": "Quelle est la différence entre un ver informatique et un virus ?", "answer": "Le virus a besoin d'un programme hôte et d'une action humaine, ouvrir un fichier, lancer un programme, pour se propager, alors que le ver est autonome et se propage seul via le réseau, sans intervention humaine directe."},
+            {"question": "Quel est l'exemple historique le plus connu de ver informatique ?", "answer": "Le ver Morris, lancé en 1988 par Robert Tappan Morris, est considéré comme l'un des premiers vers informatiques à grande échelle sur Internet ; il a infecté environ 6000 ordinateurs, soit environ 10% des machines connectées à l'époque."}
+        ],
+        "sources": [
+            {"label": "Wikipédia - Ver informatique", "url": "https://fr.wikipedia.org/wiki/Ver_informatique", "year": 2026, "author": "Wikipédia"},
+            {"label": "Wikipedia - Morris worm", "url": "https://en.wikipedia.org/wiki/Morris_worm", "year": 2026, "author": "Wikipedia"}
+        ]
+    },
+    {
+        "slug": "virus-informatique",
+        "name": "Virus (informatique)",
+        "cat_slug": "securite-et-ethique",
+        "difficulty": "beginner",
+        "type": "concept",
+        "icon": "🦠",
+        "match_strategy": "loose",
+        "aliases": ["virus informatique"],
+        "broader_slugs": ["malware"],
+        "narrower_slugs": [],
+        "has_image": true,
+        "definition": "Un virus informatique est un type de malware qui s'insère dans un programme ou un fichier hôte et se duplique lorsque ce dernier est exécuté ou ouvert. Contrairement à un ver, il a besoin d'une action de la personne qui l'utilise, ouvrir une pièce jointe, lancer un programme infecté, pour se propager, et provoque généralement des dommages : corruption, modification ou destruction de données. Elk Cloner, apparu en 1982 sur les ordinateurs Apple II et diffusé par disquettes, est généralement considéré comme le premier virus informatique à s'être propagé dans la nature, en dehors d'un environnement de laboratoire ; un programme antérieur, Creeper, avait circulé sur ARPANET dès 1971, mais il est plutôt vu comme un ancêtre expérimental des virus et des vers modernes que comme un véritable virus au sens actuel. Depuis, les virus ont évolué avec les systèmes qu'ils ciblent, mais leur principe reste le même : se cacher dans un hôte et attendre d'être activés pour se reproduire.",
+        "analogy": "Un virus informatique se comporte comme son équivalent biologique : il se cache dans un hôte, un fichier ou un programme, et attend d'être activé, exécuté, pour se reproduire et se répandre à d'autres hôtes.",
+        "example": "Une personne ouvre une pièce jointe infectée reçue par courriel ; le virus s'insère alors dans d'autres fichiers du même ordinateur et peut se propager davantage si ces fichiers sont partagés avec d'autres personnes.",
+        "did_you_know": "Elk Cloner, apparu en 1982 sur les ordinateurs Apple II et diffusé par disquettes, est généralement considéré comme le premier virus informatique à s'être propagé dans la nature, en dehors d'un environnement de laboratoire.",
+        "one_sentence_answer": "Un virus informatique est un malware qui s'insère dans un fichier ou un programme hôte et se duplique lorsqu'une personne l'exécute, contrairement à un ver qui se propage seul via le réseau.",
+        "faq": [
+            {"question": "Un virus informatique peut-il se propager sans intervention humaine ?", "answer": "Non, en général. Un virus a besoin qu'un fichier ou un programme infecté soit exécuté ou ouvert par une personne pour continuer à se propager, ce qui le distingue d'un ver informatique, autonome."},
+            {"question": "Quel est le premier virus informatique connu ?", "answer": "Elk Cloner, apparu en 1982 sur les ordinateurs Apple II et diffusé par disquettes, est généralement cité comme le premier virus informatique à s'être propagé largement en dehors d'un environnement de laboratoire."}
+        ],
+        "sources": [
+            {"label": "Wikipédia - Virus informatique", "url": "https://fr.wikipedia.org/wiki/Virus_informatique", "year": 2026, "author": "Wikipédia"},
+            {"label": "Wikipedia - Elk Cloner", "url": "https://en.wikipedia.org/wiki/Elk_Cloner", "year": 2026, "author": "Wikipedia"}
+        ]
+    },
+    {
+        "slug": "javascript",
+        "name": "JavaScript",
+        "cat_slug": "outils-et-techniques",
+        "difficulty": "beginner",
+        "type": "outil",
+        "icon": "🟨",
+        "match_strategy": "loose",
+        "aliases": ["JS", "ECMAScript"],
+        "broader_slugs": [],
+        "narrower_slugs": [],
+        "has_image": false,
+        "definition": "JavaScript est un langage de programmation créé en 1995 par Brendan Eich pour le navigateur Netscape. Devenu depuis le langage le plus répandu du Web, il permet de rendre les pages interactives, formulaires, animations, mises à jour dynamiques, et s'exécute aussi bien dans le navigateur que côté serveur, notamment grâce à des environnements comme Node.js apparu en 2009. Malgré son nom, JavaScript n'a presque aucun lien technique avec le langage Java ; le nom a été choisi à l'époque pour profiter de la popularité de Java. Sa spécification standardisée s'appelle ECMAScript. Aujourd'hui, JavaScript est utilisé du front-end (ce qui s'affiche et réagit dans le navigateur) au back-end (la logique serveur) d'une même application, ce qui en fait un langage central de l'écosystème Web moderne.",
+        "analogy": "Si le HTML construit le squelette d'une page Web et le CSS l'habille, JavaScript lui donne des muscles et des réflexes : c'est lui qui fait réagir la page aux clics, aux formulaires et aux mises à jour en temps réel.",
+        "example": "Un site web québécois utilise JavaScript pour valider en temps réel les champs d'un formulaire de contact, sans avoir à recharger la page à chaque erreur.",
+        "did_you_know": "JavaScript a été créé en seulement dix jours en mai 1995 par Brendan Eich chez Netscape, initialement sous le nom Mocha puis LiveScript, avant d'être renommé JavaScript pour profiter de la popularité du langage Java, avec lequel il n'a pourtant presque aucun lien technique.",
+        "one_sentence_answer": "JavaScript est le langage de programmation du Web, créé en 1995 par Brendan Eich en dix jours, qui rend les pages interactives et s'exécute autant dans le navigateur que côté serveur via des environnements comme Node.js.",
+        "faq": [
+            {"question": "JavaScript et Java, est-ce la même chose ?", "answer": "Non, malgré leurs noms similaires. JavaScript n'a presque aucun lien technique avec Java ; son nom a été choisi en 1995 pour profiter de la popularité de Java à l'époque."},
+            {"question": "JavaScript ne fonctionne-t-il que dans le navigateur ?", "answer": "Non. Depuis l'arrivée de Node.js en 2009, JavaScript peut aussi s'exécuter côté serveur, ce qui en fait un langage utilisable du front-end au back-end d'une même application."}
+        ],
+        "sources": [
+            {"label": "Wikipédia - JavaScript", "url": "https://fr.wikipedia.org/wiki/JavaScript", "year": 2026, "author": "Wikipédia"},
+            {"label": "MDN Web Docs - JavaScript", "url": "https://developer.mozilla.org/fr/docs/Web/JavaScript", "year": 2026, "author": "MDN Web Docs"}
+        ]
+    }
+]
