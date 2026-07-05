@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.85.0] - 2026-07-05
+
+### Changed
+- **Minuteur visuel — palette de couleurs élargie à 6 teintes** : retrait de « Orange » (une rouille perçue comme un second rouge redondant avec le rouge classique TimeTimer), ajout de « Rose poudré » (#E8A9AE) et « Sable pâle » (#DCC3A0), deux teintes pâles tendance 2026 confirmées par veille. Le contraste du texte affiché reste calculé automatiquement (WCAG AAA) sur les 3 styles supportant la palette (disque, anneau, chiffres).
+- **Minuteur visuel — bouton de retrait d'une durée personnalisée épinglée redessiné** : l'ancien petit rond flottant (18x18px, hors du cadre du bouton, sous le seuil de cible tactile WCAG) est remplacé par un segment intégré à même la pastille (28x28px), pattern chip « dismissible tag » (Material 3/shadcn) plus lisible et tendance 2026.
+
 ## [1.76.9] - 2026-07-04
 
 ### Changed

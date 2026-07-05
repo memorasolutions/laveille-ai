@@ -6,18 +6,23 @@
  * pas un setInterval décrémenté naïvement (dérive dans le temps).
  *
  * Styles de rendu (5) : disque TimeTimer, sablier, anneau, chiffres (flip), feu de circulation.
- * Palette de couleur curatée (5 tons, WCAG AAA ≥ 7:1 sur fond blanc), persistée localStorage.
+ * Palette de couleur curatée (6 tons), persistée localStorage. Le texte/contour affiché sur
+ * chaque teinte est calculé automatiquement (bestTextColorOn) pour rester WCAG AAA.
  */
 (function () {
     'use strict';
 
-    // Palette curatée — tons validés WCAG AAA (≥ 7:1) contre fond blanc du cadran.
+    // Palette curatée — le contraste du texte affiché dessus est recalculé automatiquement
+    // (bestTextColorOn), pas besoin que chaque teinte soit elle-même AAA contre le blanc.
+    // #776-781 : « orange » retiré (rouille perçue comme un 2e rouge) ; ajout de 2 teintes
+    // pâles tendance 2026 (rose poudré, sable pâle).
     var PALETTE = {
         red: { label: 'Rouge classique', hex: '#991B1B' },
         teal: { label: 'Teal', hex: '#064E5A' },
-        orange: { label: 'Orange', hex: '#9A2A06' },
         violet: { label: 'Violet', hex: '#6B21A8' },
-        blue: { label: 'Bleu', hex: '#1E40AF' }
+        blue: { label: 'Bleu', hex: '#1E40AF' },
+        rose: { label: 'Rose poudré', hex: '#E8A9AE' },
+        sable: { label: 'Sable pâle', hex: '#DCC3A0' }
     };
 
     // Presets nommés — clé -> minutes (+ phase Pomodoro optionnelle).

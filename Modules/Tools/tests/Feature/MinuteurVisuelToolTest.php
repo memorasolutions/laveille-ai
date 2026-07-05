@@ -120,7 +120,7 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     $response->assertSee('Connectez-vous pour épingler jusqu&#039;à 2 durées personnalisées', escape: false);
 });
 
-it('exposes the curated 5-tone color palette in the DOM', function () {
+it('exposes the curated 6-tone color palette in the DOM', function () {
     Tool::where('slug', 'minuteur-visuel')->update(['is_under_construction' => false]);
 
     $response = $this->get('/outils/minuteur-visuel');
@@ -128,9 +128,13 @@ it('exposes the curated 5-tone color palette in the DOM', function () {
     $response->assertStatus(200);
     $response->assertSee('#991B1B', escape: false);
     $response->assertSee('#064E5A', escape: false);
-    $response->assertSee('#9A2A06', escape: false);
     $response->assertSee('#6B21A8', escape: false);
     $response->assertSee('#1E40AF', escape: false);
+    // #776-781 : « orange » retiré de la palette curatée (remplacé par 2 teintes pâles tendance
+    // 2026). Note : #9A2A06 reste présent ailleurs dans le DOM (--c-accent, couleur de marque
+    // globale du site, sans lien avec cette palette) - pas d'assertDontSee dessus.
+    $response->assertSee('#E8A9AE', escape: false);
+    $response->assertSee('#DCC3A0', escape: false);
 });
 
 it('accepts share query params without breaking server render', function () {

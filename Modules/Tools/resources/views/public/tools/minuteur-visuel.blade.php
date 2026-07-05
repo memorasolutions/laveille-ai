@@ -14,12 +14,18 @@
         ['key' => 'flip', 'label' => 'Chiffres', 'icon' => '🔢'],
         ['key' => 'traffic', 'label' => 'Feu de circulation', 'icon' => '🚦'],
     ];
+    // #776-781 : « orange » (#9A2A06, une rouille très rouge) retiré - perçu par l'utilisateur
+    // comme un second rouge redondant avec le vrai rouge classique TimeTimer. Remplacé par
+    // « Rose poudré » + ajout de « Sable pâle » : 2 teintes pâles distinctes, confirmées
+    // tendance 2026 par veille pp_search (pastel poudré + sable/beige), sans chevaucher les
+    // familles de teintes déjà couvertes (teal/violet/bleu).
     $mvColors = [
         ['key' => 'red', 'label' => 'Rouge classique', 'hex' => '#991B1B'],
         ['key' => 'teal', 'label' => 'Teal', 'hex' => '#064E5A'],
-        ['key' => 'orange', 'label' => 'Orange', 'hex' => '#9A2A06'],
         ['key' => 'violet', 'label' => 'Violet', 'hex' => '#6B21A8'],
         ['key' => 'blue', 'label' => 'Bleu', 'hex' => '#1E40AF'],
+        ['key' => 'rose', 'label' => 'Rose poudré', 'hex' => '#E8A9AE'],
+        ['key' => 'sable', 'label' => 'Sable pâle', 'hex' => '#DCC3A0'],
     ];
     // #751-758 : 45 min retiré (demande utilisateur) ; Pomodoro/Pause déplacés dans leur propre
     // groupe (mvPresetsPomodoro) - deux lignes DÉLIBÉRÉES plutôt qu'un retour à la ligne accidentel

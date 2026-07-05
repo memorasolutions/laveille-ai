@@ -17,6 +17,13 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.85.0 · 2026-07-05 · feat(outils) MINUTEUR VISUEL - palette de couleurs élargie à 6 teintes (retrait de
+ *     « orange », un rouille perçu par l'utilisateur comme un second rouge redondant avec le rouge classique
+ *     TimeTimer ; ajout de « Rose poudré » #E8A9AE et « Sable pâle » #DCC3A0, 2 teintes tendance 2026 confirmées
+ *     par veille pp_search - pastel poudré + sable/beige) + redesign du bouton × de retrait d'une durée
+ *     personnalisée épinglée (ancien pattern : petit rond flottant 18x18px hors-cadre, sous le seuil WCAG 24px
+ *     et jugé « pas tendance 2026 » par l'utilisateur ; nouveau pattern : segment intégré à même la pastille,
+ *     28x28px, chip Material 3/shadcn « dismissible tag »).
  *   1.84.1 · 2026-07-05 · fix(outils) MINUTEUR VISUEL - VRAIE cause racine trouvée pour le signalement répété
  *     de l'utilisateur (« je ne vois pas les grains tomber ») après deux sessions ayant déjà « corrigé » et
  *     redéployé le CSS des grains en se basant uniquement sur des vérifications locales. Diagnostic mené
@@ -597,8 +604,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 84;
-$lvPatch = 1;
+$lvMinor = 85;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,
