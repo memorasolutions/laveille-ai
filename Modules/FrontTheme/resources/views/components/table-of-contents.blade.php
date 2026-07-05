@@ -19,10 +19,21 @@
         >
             {{ __('Aller au contenu') }}
         </a>
+        <button
+            type="button"
+            class="toc-close"
+            aria-label="{{ __('Masquer le sommaire') }}"
+        >&times;</button>
         <p class="toc-title">{{ $title }}</p>
         <ol class="toc-list"></ol>
     </nav>
 </details>
+<button
+    type="button"
+    id="toc-reopen"
+    class="toc-reopen"
+    aria-label="{{ __('Afficher le sommaire') }}"
+>{{ __('☰ Sommaire') }}</button>
 
 <style>
     .toc-details {
@@ -39,6 +50,13 @@
         border-left: 1px solid rgba(6, 78, 90, 0.12);
         list-style: none;
         margin: 0;
+    }
+    /* #735 : masquer/rappeler n'a de sens que sur le panneau sticky desktop - mobile a déjà
+       son propre mécanisme d'ouverture/fermeture natif (<details>/<summary>), inutile d'y
+       dupliquer un second contrôle. Affichés uniquement dans le media query >=1400px. */
+    .toc-close,
+    .toc-reopen {
+        display: none;
     }
     @media (max-width: 1399px) {
         .toc-details {
@@ -91,6 +109,13 @@
             width: 260px;
             z-index: 1000;
         }
+        /* #735 : sommaire sticky masquable - le garder toujours visible sans échappatoire
+           peut devenir intrusif sur un long article (best practice 2026, pp_search
+           2026-07-05 : bouton fermer réversible + mini-bascule persistante de rappel,
+           qui ne recouvre pas le contenu). Masqué = ni le panneau ni son résumé mobile. */
+        .toc-details.toc-dismissed {
+            display: none;
+        }
         .toc-summary {
             display: none;
         }
@@ -115,6 +140,59 @@
             letter-spacing: 0.08em;
             color: var(--c-text-muted);
             margin: 0 0 0.75rem 0;
+            display: block;
+        }
+        .toc-close {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border: none;
+            border-radius: 999px;
+            background: transparent;
+            color: var(--c-text-muted);
+            font-size: 1.25rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+        .toc-close:hover {
+            background: var(--c-primary-light, #F0FAFB);
+            color: var(--c-primary);
+        }
+        .toc-close:focus-visible {
+            outline: 2px solid var(--c-accent);
+            outline-offset: 2px;
+        }
+        .toc-reopen {
+            display: none;
+            position: fixed;
+            right: 24px;
+            top: 140px;
+            z-index: 1000;
+            padding: 0.5rem 0.9rem;
+            border: 1px solid rgba(6, 78, 90, 0.12);
+            border-radius: 999px;
+            background: #fff;
+            color: var(--c-primary, #064E5A);
+            font-family: var(--f-heading), system-ui, sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            cursor: pointer;
+        }
+        .toc-reopen:hover {
+            background: var(--c-primary-light, #F0FAFB);
+        }
+        .toc-reopen:focus-visible {
+            outline: 2px solid var(--c-accent);
+            outline-offset: 2px;
+        }
+        .toc-reopen.is-visible {
             display: block;
         }
     }
@@ -360,10 +438,43 @@
         }
     }
 
+    // #735 : masquer/rappeler le sommaire sticky desktop (préférence persistée
+    // localStorage, comme le sélecteur clair/sombre déjà présent sur le site) - un
+    // sommaire toujours visible sans échappatoire peut devenir intrusif sur un long
+    // article. Portée volontairement limitée au panneau desktop (>=1400px) : mobile a
+    // déjà son propre mécanisme d'ouverture/fermeture natif (<details>/<summary>).
+    function initDismiss() {
+        const detailsEl = document.querySelector('.toc-details');
+        const reopenBtn = document.getElementById('toc-reopen');
+        const closeBtn = document.querySelector('.toc-close');
+        if (!detailsEl || !reopenBtn || !closeBtn) return;
+        const STORAGE_KEY = 'toc_dismissed';
+
+        function applyState(dismissed) {
+            detailsEl.classList.toggle('toc-dismissed', dismissed);
+            reopenBtn.classList.toggle('is-visible', dismissed);
+        }
+
+        let dismissed = false;
+        try { dismissed = localStorage.getItem(STORAGE_KEY) === '1'; } catch (e) {}
+        applyState(dismissed);
+
+        closeBtn.addEventListener('click', () => {
+            applyState(true);
+            try { localStorage.setItem(STORAGE_KEY, '1'); } catch (e) {}
+        });
+        reopenBtn.addEventListener('click', () => {
+            applyState(false);
+            try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+        });
+    }
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initTOC);
+        document.addEventListener('DOMContentLoaded', initDismiss);
     } else {
         initTOC();
+        initDismiss();
     }
 })();
 </script>
