@@ -204,6 +204,15 @@
             .replace(/^-+|-+$/g, '');
     }
 
+    // Certains titres H2 (ex. "Concentré IA" hebdo) portent un numéro d'ordre en dur
+    // ("14. Titre") : le sommaire les liste déjà dans un <ol> qui numérote lui-même —
+    // le garder produirait un double numéro visuel ("14." + "14. Titre") et une ancre
+    // moche commençant par un chiffre (ex. #14-titre). Retiré ici uniquement (texte du
+    // lien + ancre) ; le titre affiché dans l'article lui-même n'est pas touché.
+    function stripListNumber(text) {
+        return text.replace(/^\s*\d+[.)]\s*/, '');
+    }
+
     function initTOC() {
         const tocNav = document.getElementById(TOC_ID);
         if (!tocNav) return;
@@ -219,7 +228,7 @@
         const usedIds = new Set();
         headings.forEach(h => {
             if (!h.id) {
-                let baseId = slugify(h.textContent) || 'heading';
+                let baseId = slugify(stripListNumber(h.textContent)) || 'heading';
                 let id = baseId, counter = 1;
                 while (usedIds.has(id) || document.getElementById(id)) { id = `${baseId}-${counter++}`; }
                 h.id = id;
@@ -237,7 +246,7 @@
         headings.forEach(h => {
             const link = document.createElement('a');
             link.href = `#${h.id}`;
-            link.textContent = h.textContent;
+            link.textContent = stripListNumber(h.textContent);
             link.className = 'toc-link';
             link.dataset.target = h.id;
             const li = document.createElement('li');
