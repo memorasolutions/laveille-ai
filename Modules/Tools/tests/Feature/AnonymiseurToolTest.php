@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Tools\Models\Tool;
 use Tests\TestCase;
 
-uses(Tests\TestCase::class);
+uses(Tests\TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
     Tool::firstOrCreate(['slug' => 'anonymiseur'], [
