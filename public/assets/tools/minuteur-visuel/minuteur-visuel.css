@@ -38,14 +38,16 @@
 
 /* --- Zone visuelle du cadran ---
    Le cadran EST l'élément visuel principal (comme les vrais TimeTimer) : il doit dominer la
-   carte, pas se fondre parmi les contrôles. */
+   carte, pas se fondre parmi les contrôles. Plafond relevé 420px -> 520px en même temps que
+   la carte col-lg-8 -> col-lg-10 (exception délibérée, voir minuteur-visuel.blade.php) : sans
+   ce relevé, élargir la carte seule n'aurait rien changé à la taille visible du cadran. */
 .mv-dial-zone {
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 1.5rem;
-    width: min(70vw, 420px);
-    max-width: 420px;
+    width: min(60vw, 520px);
+    max-width: 520px;
     aspect-ratio: 1 / 1;
 }
 /* !important nécessaire : un reset global d'icônes du thème (svg { width/height: 24px }) a une

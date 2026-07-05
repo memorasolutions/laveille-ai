@@ -69,7 +69,13 @@
 <section class="wpo-blog-single-section section-padding">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-12">
+            {{-- col-lg-10 (pas col-lg-8 comme generateur-mots-passe/tirage-presentations) — EXCEPTION
+                 DÉLIBÉRÉE : le minuteur est un outil visuel (grand cadran central, usage salle de
+                 classe/plein écran), pas un outil texte/formulaire où une colonne étroite sert la
+                 lisibilité. Voir aussi .mv-dial-zone (minuteur-visuel.css) dont le plafond a été
+                 relevé en conséquence, sinon élargir la carte seule ne change rien à la taille
+                 visible du cadran. --}}
+            <div class="col-lg-10 col-12">
                 <div class="card shadow-sm tool-fullscreen-target" id="mv-fullscreen-target" style="border-radius: var(--r-base);">
                     <div class="card-body p-4 p-md-5 mv-wrap"
                          x-data="minuteurVisuel()"
