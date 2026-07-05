@@ -256,8 +256,18 @@
 
         const usedIds = new Set();
         headings.forEach(h => {
-            if (!h.id) {
-                let baseId = slugify(extractListNumber(h.textContent).rest) || 'heading';
+            const parsedForId = extractListNumber(h.textContent);
+            // Certains articles (ex. "Concentré IA" déjà publiés) ont un id BAKÉ EN DUR dans
+            // le HTML stocké (ex. id="14-titre", écrit à la création du contenu, PAS généré
+            // par ce script) - un simple `if (!h.id)` le préservait tel quel, donc l'ancre
+            // moche restait active même après ce correctif (signalé par l'utilisateur en
+            // revisitant l'URL exacte de son premier signalement). Détecté via le même
+            // numéro que celui trouvé dans le texte du titre -> régénéré proprement ; tout
+            // id NE correspondant PAS à ce motif (ex. ids personnalisés Académie) reste
+            // intact, comme avant.
+            const isLegacyNumberedId = h.id && parsedForId.num && h.id.startsWith(parsedForId.num + '-');
+            if (!h.id || isLegacyNumberedId) {
+                let baseId = slugify(parsedForId.rest) || 'heading';
                 let id = baseId, counter = 1;
                 while (usedIds.has(id) || document.getElementById(id)) { id = `${baseId}-${counter++}`; }
                 h.id = id;
