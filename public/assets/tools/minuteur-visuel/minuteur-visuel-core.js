@@ -46,12 +46,73 @@
         return (n < 10 ? '0' : '') + n;
     }
 
+    // --- Contraste WCAG 2.2 (#740/#741) : la couleur accent peut être une des 5 teintes
+    // curées OU une couleur personnalisée choisie par l'utilisateur — dans les deux cas,
+    // il faut choisir AUTOMATIQUEMENT la meilleure couleur de texte (jamais blanc à
+    // l'aveugle) : si la couleur de base est pâle, blanc échouerait le contraste.
+    function hexToRgb(hex) {
+        var m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || '');
+        if (!m) return { r: 0, g: 0, b: 0 };
+        return { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) };
+    }
+
+    function relativeLuminance(hex) {
+        var rgb = hexToRgb(hex);
+        var chans = [rgb.r, rgb.g, rgb.b].map(function (c) {
+            var s = c / 255;
+            return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+        });
+        return 0.2126 * chans[0] + 0.7152 * chans[1] + 0.0722 * chans[2];
+    }
+
+    function contrastRatio(hexA, hexB) {
+        var lA = relativeLuminance(hexA) + 0.05;
+        var lB = relativeLuminance(hexB) + 0.05;
+        return lA > lB ? lA / lB : lB / lA;
+    }
+
+    // Choisit, parmi les candidats, celui qui offre le MEILLEUR contraste contre bgHex —
+    // garantit le meilleur résultat possible (jamais un simple "blanc par défaut") pour
+    // n'importe quelle couleur (curatée ou personnalisée), de façon entièrement automatique.
+    function bestTextColorOn(bgHex, candidates) {
+        candidates = candidates || ['#FFFFFF', '#1A1D23'];
+        var best = candidates[0], bestRatio = 0;
+        for (var i = 0; i < candidates.length; i++) {
+            var ratio = contrastRatio(bgHex, candidates[i]);
+            if (ratio > bestRatio) { bestRatio = ratio; best = candidates[i]; }
+        }
+        return best;
+    }
+
+    function isValidHexColor(hex) {
+        return /^#[a-f\d]{6}$/i.test(hex || '');
+    }
+
+    // Secteur (pie slice) partagé par diskPathD (coordonnées SVG 0-200) et
+    // diskPathDNormalized (coordonnées 0-1, objectBoundingBox — #740) : même géométrie,
+    // juste une échelle différente, pour éviter de dupliquer le calcul trigonométrique.
+    function buildPieSlicePath(cx, cy, r, angleDeg, decimals) {
+        if (angleDeg <= 0.01) return '';
+        var rad = angleDeg * Math.PI / 180;
+        var x2 = cx + r * Math.sin(rad);
+        var y2 = cy - r * Math.cos(rad);
+        var largeArc = angleDeg > 180 ? 1 : 0;
+        return 'M ' + cx + ' ' + cy + ' L ' + cx + ' ' + (cy - r) +
+            ' A ' + r + ' ' + r + ' 0 ' + largeArc + ' 1 ' + x2.toFixed(decimals) + ' ' + y2.toFixed(decimals) + ' Z';
+    }
+
     document.addEventListener('alpine:init', function () {
         window.Alpine.data('minuteurVisuel', function () {
             return {
                 // --- État persisté (localStorage) ---
                 style: localStorage.getItem('mv_style') || 'disk',
                 accentColor: localStorage.getItem('mv_color') || 'red',
+                // #742 : couleur personnalisée, en plus des 5 teintes curées — accentColor
+                // devient 'custom' quand active, la vraie valeur vit ici (validée hex strict).
+                customColorHex: (function () {
+                    var v = localStorage.getItem('mv_color_custom');
+                    return isValidHexColor(v) ? v : '#4B5563';
+                })(),
                 soundEnabled: localStorage.getItem('mv_sound') !== 'false',
                 reducedMotion: localStorage.getItem('mv_reduced_motion') !== null
                     ? localStorage.getItem('mv_reduced_motion') === 'true'
@@ -149,11 +210,25 @@
                         && Math.ceil(this.remainingMs / 1000) <= this.warningThresholdSec;
                 },
                 get accentHex() {
+                    if (this.accentColor === 'custom' && isValidHexColor(this.customColorHex)) {
+                        return this.customColorHex;
+                    }
                     var entry = this.palette[this.accentColor] || this.palette.red;
                     return entry.hex;
                 },
                 get dialColorHex() {
                     return this.isWarning ? '#DC2626' : this.accentHex;
+                },
+                // #740/#741 : couleur du calque de texte superposé (celui qui se révèle sur
+                // le secteur coloré du disque) — blanc par défaut, mais choisi AUTOMATIQUEMENT
+                // (meilleur contraste réel) pour toute couleur pâle, curatée ou personnalisée.
+                get diskAccentTextColor() {
+                    return bestTextColorOn(this.dialColorHex);
+                },
+                // #742 : le "+" du swatch personnalisé doit rester lisible peu importe la
+                // dernière couleur personnalisée mémorisée (même logique de contraste auto).
+                get customSwatchTextColor() {
+                    return bestTextColorOn(this.customColorHex);
                 },
                 get supportsColorPalette() {
                     return COLORABLE_STYLES.indexOf(this.style) !== -1;
@@ -168,21 +243,21 @@
                 },
 
                 // Disque TimeTimer : secteur (pie slice) qui rétrécit depuis midi, sens horaire.
+                // Clamp à 359.9° (pas 359.999) : au-delà, l'arrondi .toFixed() fait coïncider
+                // le point de départ et d'arrivée de l'arc SVG (tous deux ~100,10), ce qui
+                // dégénère en tracé quasi invisible au lieu du disque plein attendu.
                 get diskPathD() {
-                    var cx = 100, cy = 100, r = 90;
-                    // Clamp à 359.9° (pas 359.999) : au-delà, l'arrondi .toFixed(2) fait
-                    // coïncider le point de départ et d'arrivée de l'arc SVG (tous deux ~100,10),
-                    // ce qui dégénère en tracé quasi invisible au lieu du disque plein attendu.
                     var angleDeg = clamp(this.fraction * 360, 0, 359.9);
-                    var rad = angleDeg * Math.PI / 180;
-                    var x2 = cx + r * Math.sin(rad);
-                    var y2 = cy - r * Math.cos(rad);
-                    var largeArc = angleDeg > 180 ? 1 : 0;
-                    if (angleDeg <= 0.01) {
-                        return '';
-                    }
-                    return 'M ' + cx + ' ' + cy + ' L ' + cx + ' ' + (cy - r) +
-                        ' A ' + r + ' ' + r + ' 0 ' + largeArc + ' 1 ' + x2.toFixed(2) + ' ' + y2.toFixed(2) + ' Z';
+                    return buildPieSlicePath(100, 100, 90, angleDeg, 2);
+                },
+                // #740 : même secteur, coordonnées normalisées 0-1 (objectBoundingBox) — sert
+                // de clip-path pour le calque de texte HTML au-dessus du SVG (pas les mêmes
+                // unités que diskPathD, un clip-path CSS classique interprète les coordonnées
+                // en pixels réels du div, PAS relatif à un viewBox : objectBoundingBox est le
+                // seul mécanisme natif qui recale automatiquement sur la taille réelle du cadran).
+                get diskPathDNormalized() {
+                    var angleDeg = clamp(this.fraction * 360, 0, 359.9);
+                    return buildPieSlicePath(0.5, 0.5, 0.45, angleDeg, 4);
                 },
 
                 // Sablier : hauteur de sable (haut qui se vide, bas qui se remplit) — approximation esthétique.
@@ -333,6 +408,20 @@
                     if (!this.palette[key]) return;
                     this.accentColor = key;
                     try { localStorage.setItem('mv_color', key); } catch (e) {}
+                },
+
+                // #742 : couleur personnalisée — valeur venant d'un <input type="color">
+                // (toujours un hex valide par construction du navigateur), persistée à part
+                // de la clé de palette curatée. Le contraste du texte se recalcule tout seul
+                // via diskAccentTextColor, aucune action supplémentaire requise ici.
+                setCustomColor: function (hex) {
+                    if (!isValidHexColor(hex)) return;
+                    this.customColorHex = hex;
+                    this.accentColor = 'custom';
+                    try {
+                        localStorage.setItem('mv_color_custom', hex);
+                        localStorage.setItem('mv_color', 'custom');
+                    } catch (e) {}
                 },
 
                 // Persistance localStorage seulement — x-model a DÉJÀ mis à jour la propriété

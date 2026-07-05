@@ -111,7 +111,10 @@
                             @endforeach
                         </div>
 
-                        {{-- Sélecteur de couleur (palette curatée, 5 tons WCAG AAA) — disque et anneau seulement --}}
+                        {{-- Sélecteur de couleur (palette curatée, 5 tons WCAG AAA) — disque et anneau seulement.
+                             #742 : + 1 couleur personnalisée (n'importe quel hex) - le contraste du texte
+                             se recalcule automatiquement (diskAccentTextColor), pas de risque WCAG même
+                             si la couleur choisie est pâle. --}}
                         <div role="radiogroup" aria-label="{{ __('Couleur du minuteur') }}" class="mv-color-selector" x-show="supportsColorPalette" x-cloak>
                             @foreach($mvColors as $c)
                                 <button type="button"
@@ -124,6 +127,20 @@
                                         title="{{ $c['label'] }}"
                                         @click="setColor('{{ $c['key'] }}')"></button>
                             @endforeach
+                            <label class="mv-color-btn mv-color-btn--custom"
+                                   :class="{ 'active': accentColor === 'custom' }"
+                                   :style="'background:' + customColorHex + ';'"
+                                   title="{{ __('Couleur personnalisée') }}">
+                                <input type="color"
+                                       class="mv-color-custom-input"
+                                       :value="customColorHex"
+                                       @input="setCustomColor($event.target.value)"
+                                       aria-label="{{ __('Couleur personnalisée (choisir n\'importe quelle teinte)') }}">
+                                <span class="mv-color-btn--custom-icon"
+                                      aria-hidden="true"
+                                      x-show="accentColor !== 'custom'"
+                                      :style="'color:' + customSwatchTextColor">+</span>
+                            </label>
                         </div>
 
                         {{-- Zone visuelle du cadran actif --}}
@@ -164,8 +181,29 @@
                                             <line x1="{{ $t['x1'] }}" y1="{{ $t['y1'] }}" x2="{{ $t['x2'] }}" y2="{{ $t['y2'] }}" class="{{ $t['major'] ? 'mv-tick-overlay mv-tick-overlay-major' : 'mv-tick-overlay' }}"></line>
                                         @endforeach
                                         <circle cx="100" cy="100" r="5" class="mv-disk-knob"></circle>
+                                        {{-- #740 : clipPath objectBoundingBox (coordonnées 0-1) partagé par le calque de
+                                             texte clair ci-dessous - un clip-path CSS classique interprète ses coordonnées
+                                             en pixels réels du div ciblé, PAS relatif à ce viewBox 0-200 ; objectBoundingBox
+                                             est le seul mécanisme natif qui recale automatiquement sur la taille réelle
+                                             du cadran (fluide selon l'écran). --}}
+                                        <defs>
+                                            <clipPath id="mvDiskTextClip" clipPathUnits="objectBoundingBox">
+                                                <path :d="diskPathDNormalized"></path>
+                                            </clipPath>
+                                        </defs>
                                     </svg>
-                                    <div class="mv-center-display" x-text="display" aria-hidden="true"></div>
+                                    {{-- #740/#741 : double calque au lieu d'un mix-blend-mode (teinte inversée
+                                         émergente, pas le "blanc sur couleur / noir sur blanc" demandé). Calque du bas
+                                         TOUJOURS foncé (visible partout où le secteur coloré n'a pas encore progressé -
+                                         la face blanche du cadran). Calque du haut découpé EXACTEMENT sur le secteur
+                                         coloré (même tracé que .mv-disk-slice) : couleur choisie AUTOMATIQUEMENT selon
+                                         le contraste réel contre l'accent (blanc par défaut, mais foncé si l'accent
+                                         est trop pâle pour rester lisible en blanc - curatée ou personnalisée). --}}
+                                    <div class="mv-center-display mv-center-display--base" x-text="display" aria-hidden="true"></div>
+                                    <div class="mv-center-display mv-center-display--accent"
+                                         x-text="display"
+                                         aria-hidden="true"
+                                         :style="'clip-path:url(#mvDiskTextClip); color:' + diskAccentTextColor"></div>
                                 </div>
                             </template>
 

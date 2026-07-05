@@ -54,6 +54,33 @@
 .mv-color-btn:hover { transform: scale(1.1); }
 .mv-color-btn:focus-visible { outline: 3px solid var(--c-accent, #9A2A06); outline-offset: 2px; }
 .mv-color-btn.active { box-shadow: 0 0 0 2.5px var(--c-dark, #1A1D23); }
+/* #742 : 6e swatch "couleur personnalisée" - un <label> habillé comme les boutons ronds
+   ci-dessus, avec l'<input type="color"> natif invisible mais superposé (pleine taille,
+   opacity:0) pour garder l'accessibilité clavier/lecteur d'écran native du color picker OS,
+   sans avoir à réimplémenter un picker maison. */
+.mv-color-btn--custom {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+.mv-color-custom-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: none;
+    opacity: 0;
+    cursor: pointer;
+}
+.mv-color-btn--custom-icon {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--c-text-muted, #52586a);
+    pointer-events: none;
+}
 
 /* --- Zone visuelle du cadran ---
    #713 : 520px -> 400px (col-lg-8 standard). #714 : 400px -> 440px (carte élargie à col-lg-10
@@ -185,20 +212,20 @@
     color: var(--c-dark, #1A1D23);
     pointer-events: none;
 }
-.mv-style-disk .mv-center-display,
 .mv-style-traffic .mv-center-display { color: #fff; }
-/* #719 : le secteur du disque est un triangle dont la pointe part exactement du centre —
-   là où le chiffre est affiché. Pour certaines fractions, la ligne de démarcation
-   blanc/couleur traverse le texte : la portion sur fond blanc devenait invisible (blanc
-   sur blanc), cf. capture utilisateur (le "0" de "03:46" absorbé par la zone blanche).
-   mix-blend-mode: difference (pp_search 2026-07-05, pattern "auto-contraste") : le chiffre
-   reste déclaré blanc dans le HTML, mais son rendu final = |blanc - fond| pixel par pixel.
-   Sur la face blanche restante -> |255-255| = noir (contraste 21:1). Sur le secteur coloré
-   -> teinte inversée de l'accent (ex. rouge -> cyan #66E4E4, teal -> saumon #F9B1A5), TOUJOURS
-   ≥ 4.59:1 AAA grand texte contre les 5 tons de la palette curatée (vérifié wcag_check_contrast).
-   Remplace le halo statique (rendu redondant avec le diff, qui gère déjà tous les cas). */
-.mv-style-disk .mv-center-display {
-    mix-blend-mode: difference;
+/* #740/#741 : le secteur du disque est un triangle dont la pointe part exactement du centre -
+   là où le chiffre est affiché - donc AUCUNE couleur de texte unique ne peut rester lisible
+   des deux côtés à la fois. Un premier essai (mix-blend-mode: difference) produisait une
+   teinte inversée émergente (rouge -> cyan) au lieu du "blanc sur couleur / noir sur blanc"
+   demandé. Remplacé par un vrai double calque (voir minuteur-visuel.blade.php) :
+   - .mv-center-display--base : TOUJOURS foncé, visible partout où le secteur coloré n'a pas
+     encore progressé (la face blanche du cadran).
+   - .mv-center-display--accent : découpé EXACTEMENT sur le secteur coloré (clip-path url()
+     vers un <clipPath objectBoundingBox> partageant le même tracé que .mv-disk-slice) ;
+     couleur choisie AUTOMATIQUEMENT (JS, diskAccentTextColor) selon le contraste réel contre
+     l'accent - blanc par défaut, mais foncé si l'accent est trop pâle, curatée ou personnalisée. */
+.mv-style-disk .mv-center-display--base {
+    color: var(--c-dark, #1A1D23);
 }
 .mv-style-hourglass .mv-center-display { font-size: clamp(1.5rem, 7vw, 2.25rem); }
 /* #709 : plafond réduit (2.75rem -> 2rem) en cohérence avec le rayon des cercles réduit
