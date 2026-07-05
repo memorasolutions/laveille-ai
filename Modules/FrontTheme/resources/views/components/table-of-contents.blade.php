@@ -152,6 +152,30 @@
     .toc-link:hover {
         color: var(--c-primary);
     }
+    /* Badge de numéro d'ordre (ex. sections "Concentré IA" hebdo) - séparé du titre plutôt
+       que baké dans le texte : corrélation avec le corps de l'article conservée, sans
+       recréer un simple "14. Titre" en texte brut. .toc-list ayant list-style:none, c'est
+       la SEULE numérotation visible du sommaire pour ces titres (#723, 2026-07-05). */
+    .toc-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.25rem;
+        height: 1.25rem;
+        padding: 0 0.3rem;
+        margin-right: 0.4rem;
+        border-radius: 999px;
+        background: var(--c-primary-light, #F0FAFB);
+        color: var(--c-primary, #064E5A);
+        font-size: 0.7rem;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        vertical-align: middle;
+    }
+    .toc-link.toc-active .toc-num {
+        background: var(--c-primary, #064E5A);
+        color: #fff;
+    }
     .toc-link.toc-active {
         font-weight: 600;
         color: var(--c-primary);
@@ -205,12 +229,17 @@
     }
 
     // Certains titres H2 (ex. "Concentré IA" hebdo) portent un numéro d'ordre en dur
-    // ("14. Titre") : le sommaire les liste déjà dans un <ol> qui numérote lui-même —
-    // le garder produirait un double numéro visuel ("14." + "14. Titre") et une ancre
-    // moche commençant par un chiffre (ex. #14-titre). Retiré ici uniquement (texte du
-    // lien + ancre) ; le titre affiché dans l'article lui-même n'est pas touché.
-    function stripListNumber(text) {
-        return text.replace(/^\s*\d+[.)]\s*/, '');
+    // ("14. Titre"). Correctif #723 (2026-07-05) : .toc-list a `list-style: none` (pas de
+    // numérotation native du <ol>) - un premier correctif retirait le numéro du texte du
+    // lien en pensant qu'il ferait doublon avec une numérotation native inexistante,
+    // ce qui cassait en réalité la corrélation visuelle avec le "14." resté dans le corps
+    // de l'article (capture utilisateur 2026-07-05_14-10-23.jpg). Fix corrigé : le numéro
+    // est conservé mais extrait dans un badge distinct (`.toc-num`), séparé du titre -
+    // corrélation intacte avec le corps, ancre TOUJOURS sans le chiffre en préfixe (ex.
+    // #titre au lieu de #14-titre, qui restait le vrai défaut signalé au départ).
+    function extractListNumber(text) {
+        const m = text.match(/^\s*(\d+)[.)]\s*(.*)$/s);
+        return m ? { num: m[1], rest: m[2] } : { num: null, rest: text };
     }
 
     function initTOC() {
@@ -228,7 +257,7 @@
         const usedIds = new Set();
         headings.forEach(h => {
             if (!h.id) {
-                let baseId = slugify(stripListNumber(h.textContent)) || 'heading';
+                let baseId = slugify(extractListNumber(h.textContent).rest) || 'heading';
                 let id = baseId, counter = 1;
                 while (usedIds.has(id) || document.getElementById(id)) { id = `${baseId}-${counter++}`; }
                 h.id = id;
@@ -246,7 +275,16 @@
         headings.forEach(h => {
             const link = document.createElement('a');
             link.href = `#${h.id}`;
-            link.textContent = stripListNumber(h.textContent);
+            const parsed = extractListNumber(h.textContent);
+            if (parsed.num) {
+                const badge = document.createElement('span');
+                badge.className = 'toc-num';
+                badge.textContent = parsed.num;
+                link.appendChild(badge);
+                link.appendChild(document.createTextNode(parsed.rest));
+            } else {
+                link.textContent = h.textContent;
+            }
             link.className = 'toc-link';
             link.dataset.target = h.id;
             const li = document.createElement('li');
