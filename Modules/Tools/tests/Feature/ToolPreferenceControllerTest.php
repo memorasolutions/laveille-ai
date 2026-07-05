@@ -145,6 +145,31 @@ it('rejects traffic_thresholds missing required fields', function () {
     $response->assertStatus(422);
 });
 
+it('saves and retrieves default_color for the authenticated user', function () {
+    $user = User::factory()->create();
+
+    $store = $this->actingAs($user)->postJson('/api/tool-preferences/minuteur-visuel', [
+        'key' => 'default_color',
+        'value' => '#6B21A8',
+    ]);
+    $store->assertOk();
+    $store->assertJson(['preferences' => ['default_color' => '#6B21A8']]);
+
+    $show = $this->actingAs($user)->get('/api/tool-preferences/minuteur-visuel');
+    $show->assertJson(['preferences' => ['default_color' => '#6B21A8']]);
+});
+
+it('rejects an invalid default_color value', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->postJson('/api/tool-preferences/minuteur-visuel', [
+        'key' => 'default_color',
+        'value' => 'not-a-color',
+    ]);
+
+    $response->assertStatus(422);
+});
+
 it('rejects an unknown preference key format', function () {
     $user = User::factory()->create();
 

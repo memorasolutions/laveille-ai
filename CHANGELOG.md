@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.87.0] - 2026-07-05
+
+### Added
+- **Minuteur visuel — couleur par défaut du compte (connectés)** : bouton « Définir comme couleur par défaut » près du sélecteur de couleur, sauvegarde la teinte active (curatée ou personnalisée) comme défaut multi-appareils. S'applique automatiquement sur tout nouvel appareil ou navigateur connecté n'ayant encore fait aucun choix de couleur local, sans jamais écraser une personnalisation déjà faite sur un appareil existant.
+
 ## [1.86.1] - 2026-07-05
 
 ### Fixed

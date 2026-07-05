@@ -119,6 +119,10 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     $response->assertSee('toggleFavoriteColor()', escape: false);
     $response->assertSee('class="mv-favorite-colors"', escape: false);
 
+    // #806-811 — couleur par défaut du compte (connectés), distincte des favoris.
+    $response->assertSee('setDefaultColor()', escape: false);
+    $response->assertSee('Définir comme couleur par défaut', escape: false);
+
     // #797-801 — seuils du feu de circulation configurables (profils préréglés + personnalisé).
     $response->assertSee('class="mv-traffic-profiles"', escape: false);
     $response->assertSee('setTrafficProfile(key)', escape: false);

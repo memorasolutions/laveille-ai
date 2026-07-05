@@ -138,6 +138,13 @@
                 // étoile (pas un historique roulant comme les couleurs) : le rôle d'un "favori"
                 // qu'on épingle est de rester tel quel jusqu'à ce qu'on le retire explicitement.
                 customDurations: [],
+                // #806-811 : couleur par défaut du compte (connectés) - ne s'applique QUE si cet
+                // appareil n'a encore JAMAIS eu de choix de couleur local explicite (repère capturé
+                // AVANT le fallback ci-dessous), pour ne jamais écraser une personnalisation déjà
+                // faite sur cet appareil précis. C'est ce qui rend le défaut "cohérent multi-appareils"
+                // sans jamais surprendre un utilisateur récurrent.
+                _hadExplicitColorChoice: localStorage.getItem('mv_color') !== null,
+                defaultColorHex: null,
                 accentColor: localStorage.getItem('mv_color') || 'red',
                 // #742 : couleur personnalisée, en plus des 5 teintes curées — accentColor
                 // devient 'custom' quand active, la vraie valeur vit ici (validée hex strict).
@@ -302,6 +309,12 @@
                 },
                 get isCurrentColorPinnable() {
                     return this.isCurrentColorFavorite || this.favoriteColors.length < 2;
+                },
+
+                // #806-811 : la couleur active est-elle déjà LA couleur par défaut du compte ?
+                get isCurrentColorDefault() {
+                    if (!this.defaultColorHex) return false;
+                    return this.accentHex.toLowerCase() === this.defaultColorHex.toLowerCase();
                 },
 
                 // Anneau : cercle stroke-dasharray/offset.
@@ -554,6 +567,15 @@
                                 self.customTrafficGreen = self.trafficThresholds.green;
                                 self.customTrafficYellow = self.trafficThresholds.yellow;
                             }
+                            if (isValidHexColor(data.preferences.default_color)) {
+                                self.defaultColorHex = data.preferences.default_color;
+                                // #806-811 : appliqué SEULEMENT si cet appareil n'a jamais eu de choix
+                                // de couleur local explicite - jamais d'écrasement d'une personnalisation
+                                // déjà faite ici, uniquement une valeur de départ cohérente multi-appareils.
+                                if (!self._hadExplicitColorChoice) {
+                                    self.setCustomColor(data.preferences.default_color);
+                                }
+                            }
                         })
                         .catch(function () {});
                 },
@@ -601,6 +623,18 @@
                         method: 'POST',
                         headers: this._headers(),
                         body: JSON.stringify({ key: 'traffic_thresholds', value: this.trafficThresholds })
+                    }).catch(function () {});
+                },
+
+                // #806-811 : sauvegarde la couleur ACTIVE comme couleur par défaut du compte -
+                // action explicite (pas de capture automatique), même esprit que les favoris/durées.
+                setDefaultColor: function () {
+                    if (!this.isAuthenticated) return;
+                    this.defaultColorHex = this.accentHex;
+                    fetch('/api/tool-preferences/minuteur-visuel', {
+                        method: 'POST',
+                        headers: this._headers(),
+                        body: JSON.stringify({ key: 'default_color', value: this.defaultColorHex })
                     }).catch(function () {});
                 },
 

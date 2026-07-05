@@ -17,6 +17,11 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.87.0 · 2026-07-05 · feat(outils) MINUTEUR VISUEL - couleur par défaut du compte (connectés) : bouton
+ *     « Définir comme couleur par défaut » près du sélecteur, sauvegarde la teinte active (curatée ou
+ *     personnalisée) comme défaut multi-appareils. S'applique automatiquement sur tout NOUVEL appareil/
+ *     navigateur connecté (aucun choix local déjà fait), mais n'écrase JAMAIS un choix de couleur déjà
+ *     personnalisé sur un appareil existant - vérifié dans les deux sens en vérification visuelle.
  *   1.86.1 · 2026-07-05 · fix(outils) MINUTEUR VISUEL - seuils du feu de circulation : l'utilisateur a signalé
  *     que « les 3 boutons de profils ne fonctionnent pas ». Diagnostic mené directement sur
  *     https://laveille.ai (session connectée réelle, inspection Alpine.$data() en direct) : les boutons
@@ -624,8 +629,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 86;
-$lvPatch = 1;
+$lvMinor = 87;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

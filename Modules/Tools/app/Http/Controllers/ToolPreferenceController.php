@@ -40,6 +40,8 @@ class ToolPreferenceController
             $value = $this->sanitizeCustomDurations($value);
         } elseif ($key === 'traffic_thresholds') {
             $value = $this->sanitizeTrafficThresholds($value);
+        } elseif ($key === 'default_color') {
+            $value = $this->sanitizeSingleColor($value);
         } elseif (strlen(json_encode($value) ?: '') > 2000) {
             throw ValidationException::withMessages(['value' => 'Trop volumineux.']);
         }
@@ -88,5 +90,14 @@ class ToolPreferenceController
         }
 
         return ['green' => $green, 'yellow' => $yellow];
+    }
+
+    private function sanitizeSingleColor(mixed $value): string
+    {
+        if (! is_string($value) || ! preg_match('/^#[0-9a-f]{6}$/i', $value)) {
+            throw ValidationException::withMessages(['value' => 'Couleur invalide.']);
+        }
+
+        return $value;
     }
 }

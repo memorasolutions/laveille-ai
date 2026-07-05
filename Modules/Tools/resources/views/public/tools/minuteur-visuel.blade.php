@@ -206,6 +206,19 @@
                             </button>
                             <span class="mv-color-favorite-toggle__label">{{ __('Épingler cette couleur comme favorite') }}</span>
                         </div>
+
+                        {{-- #806-811 : couleur par défaut du compte - action explicite distincte des
+                             favoris (qui servent à un accès rapide entre 2 teintes) : le défaut est LA
+                             teinte qui s'applique automatiquement sur tout nouvel appareil connecté. --}}
+                        <div class="mv-color-favorite-toggle" x-show="supportsColorPalette && isAuthenticated" x-cloak>
+                            <button type="button"
+                                    class="ct-btn ct-btn-outline ct-btn-xs"
+                                    :disabled="isCurrentColorDefault"
+                                    @click="setDefaultColor()">
+                                <span aria-hidden="true" x-show="isCurrentColorDefault">✓</span>
+                                <span x-text="isCurrentColorDefault ? '{{ __('Couleur par défaut') }}' : '{{ __('Définir comme couleur par défaut') }}'"></span>
+                            </button>
+                        </div>
                         <template x-if="supportsColorPalette && isAuthenticated && favoriteColors.length > 0">
                             <div class="mv-favorite-colors" aria-label="{{ __('Couleurs favorites') }}">
                                 <span class="mv-recent-colors-label">{{ __('Favoris :') }}</span>
@@ -246,7 +259,7 @@
                             </div>
                         </template>
                         <div class="mv-login-hint" x-show="supportsColorPalette && !isAuthenticated" x-cloak>
-                            {{ __('Connectez-vous pour retrouver vos couleurs personnalisées et vos favoris sur tous vos appareils.') }}
+                            {{ __('Connectez-vous pour retrouver vos couleurs personnalisées, vos favoris et votre couleur par défaut sur tous vos appareils.') }}
                             <a href="{{ route('login') }}">{{ __('Se connecter') }}</a>
                         </div>
 
