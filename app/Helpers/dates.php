@@ -9,7 +9,6 @@ declare(strict_types=1);
  */
 
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 
 if (! function_exists('format_date')) {
     /**
@@ -41,14 +40,21 @@ if (! function_exists('format_date')) {
             return $carbon->toISOString();
         }
 
+        // Bug 2026-07-05 : l'ancien fallback littéral ('d MMM YYYY', d minuscule = jour de la
+        // SEMAINE en tokens Moment.js/isoFormat, pas jour du MOIS) avait été copié tel quel dans
+        // la table settings (seed du 2026-03-20) au lieu du bon défaut 'D' majuscule ci-dessus.
+        // Résultat : le badge de date des actualités affichait l'index du jour de semaine (0-6)
+        // à la place du quantième, avec parfois un vrai changement de mois erroné. Le format
+        // correct ('D' majuscule) est désormais la SEULE source de fallback (plus de littéral
+        // dupliqué), et Setting::get() gère déjà son propre cache (clé "setting.{$key}",
+        // invalidée par Setting::set()) : on ne rajoute plus de second niveau de cache ici, qui
+        // pouvait servir une valeur corrigée en base mais encore périmée jusqu'à 1h.
         $settingKey = "date.format_{$type}";
-        $format = Cache::remember("setting.date.{$type}", 3600, function () use ($settingKey, $type, $defaults) {
-            if (class_exists(\Modules\Settings\Models\Setting::class)) {
-                return \Modules\Settings\Models\Setting::get($settingKey, $defaults[$type] ?? 'd MMM YYYY');
-            }
+        $fallback = $defaults[$type] ?? 'D MMM YYYY';
 
-            return $defaults[$type] ?? 'd MMM YYYY';
-        });
+        $format = class_exists(\Modules\Settings\Models\Setting::class)
+            ? \Modules\Settings\Models\Setting::get($settingKey, $fallback)
+            : $fallback;
 
         return $carbon->isoFormat($format);
     }
