@@ -106,6 +106,10 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     // Fichiers statiques référencés.
     $response->assertSee('assets/tools/minuteur-visuel/minuteur-visuel-core.js', escape: false);
     $response->assertSee('assets/tools/minuteur-visuel/minuteur-visuel.css', escape: false);
+
+    // #744-750 — couleurs personnalisées récentes (connectés) + incitation à se connecter (invités).
+    $response->assertSee('class="mv-login-hint"', escape: false);
+    $response->assertSee('Connectez-vous pour retrouver vos couleurs personnalisées', escape: false);
 });
 
 it('exposes the curated 5-tone color palette in the DOM', function () {

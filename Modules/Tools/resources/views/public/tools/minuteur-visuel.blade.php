@@ -82,7 +82,7 @@
                 @include('tools::public.partials.tool-geo')
                 <div class="card shadow-sm tool-fullscreen-target" id="mv-fullscreen-target" style="border-radius: var(--r-base);">
                     <div class="card-body p-4 p-md-5 mv-wrap"
-                         x-data="minuteurVisuel()"
+                         x-data="minuteurVisuel({{ auth()->check() ? 'true' : 'false' }})"
                          x-init="init()"
                          @keydown.space.window="handleSpaceKey($event)"
                          :class="{ 'mv-reduced-motion': reducedMotion }">
@@ -135,12 +135,35 @@
                                        class="mv-color-custom-input"
                                        :value="customColorHex"
                                        @input="setCustomColor($event.target.value)"
+                                       @change="persistCustomColorHistory($event.target.value)"
                                        aria-label="{{ __('Couleur personnalisée (choisir n\'importe quelle teinte)') }}">
                                 <span class="mv-color-btn--custom-icon"
                                       aria-hidden="true"
                                       x-show="accentColor !== 'custom'"
                                       :style="'color:' + customSwatchTextColor">+</span>
                             </label>
+                        </div>
+
+                        {{-- #744-750 : couleurs personnalisées récentes (connectés) + incitation à se
+                             connecter (invités) - le rappel serveur (users.tool_preferences) évite de
+                             perdre ses teintes personnalisées d'un appareil/navigateur à l'autre. --}}
+                        <template x-if="supportsColorPalette && isAuthenticated && recentCustomColors.length > 0">
+                            <div class="mv-recent-colors" aria-label="{{ __('Couleurs personnalisées récentes') }}">
+                                <span class="mv-recent-colors-label">{{ __('Récentes :') }}</span>
+                                <template x-for="(hex, i) in recentCustomColors" :key="'recent'+i">
+                                    <button type="button"
+                                            class="mv-color-btn mv-color-btn-recent"
+                                            :style="'background:' + hex + ';'"
+                                            :class="{ 'active': accentColor === 'custom' && customColorHex.toLowerCase() === hex.toLowerCase() }"
+                                            :aria-label="hex"
+                                            :title="hex"
+                                            @click="setCustomColor(hex)"></button>
+                                </template>
+                            </div>
+                        </template>
+                        <div class="mv-login-hint" x-show="supportsColorPalette && !isAuthenticated" x-cloak>
+                            {{ __('Connectez-vous pour retrouver vos couleurs personnalisées sur tous vos appareils.') }}
+                            <a href="{{ route('login') }}">{{ __('Se connecter') }}</a>
                         </div>
 
                         {{-- Zone visuelle du cadran actif --}}

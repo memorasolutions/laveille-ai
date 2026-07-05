@@ -99,6 +99,7 @@ class User extends Authenticatable implements HasMedia, HasPasskeys, MustVerifyE
         'notification_frequency',
         'password_changed_at',
         'social_links',
+        'tool_preferences',
     ];
 
     /**
@@ -127,6 +128,7 @@ class User extends Authenticatable implements HasMedia, HasPasskeys, MustVerifyE
             'is_active' => 'boolean',
             'phone_verified_at' => 'datetime',
             'shipping_address' => 'array',
+            'tool_preferences' => 'array',
             'must_change_password' => 'boolean',
             'failed_login_count' => 'integer',
             'locked_until' => 'datetime',

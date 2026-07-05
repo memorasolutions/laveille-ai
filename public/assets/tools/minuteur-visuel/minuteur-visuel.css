@@ -82,6 +82,46 @@
     pointer-events: none;
 }
 
+/* #744-750 : couleurs personnalisées récentes (connectés seulement) - rangée discrète sous le
+   sélecteur, mêmes pastilles que .mv-color-btn mais plus petites (rôle secondaire de rappel). */
+.mv-recent-colors {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .4rem;
+    justify-content: center;
+    margin: -.5rem 0 1.25rem;
+}
+.mv-recent-colors-label {
+    font-size: .75rem;
+    color: var(--c-text-muted, #52586a);
+}
+.mv-color-btn-recent {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    min-height: 26px;
+}
+
+/* Bandeau d'incitation à la connexion (invités) - mêmes tons que le rappel de sauvegarde des
+   autres outils (roue-tirage), pour une cohérence visuelle site-wide. */
+.mv-login-hint {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 10px;
+    padding: .6rem .9rem;
+    margin: -.5rem 0 1.25rem;
+    font-size: .85rem;
+    color: #0369a1;
+    text-align: center;
+}
+.mv-login-hint a {
+    color: #0369a1;
+    font-weight: 700;
+    text-decoration: underline;
+    margin-left: .25rem;
+}
+
 /* --- Zone visuelle du cadran ---
    #713 : 520px -> 400px (col-lg-8 standard). #714 : 400px -> 440px (carte élargie à col-lg-10
    site-wide, cf. .mv-wrap) — léger réajustement proportionné, toujours loin de l'ancienne

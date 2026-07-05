@@ -9,6 +9,7 @@ use Modules\Tools\Http\Controllers\SavedCrosswordPresetController;
 use Modules\Tools\Http\Controllers\SavedQrPresetController;
 use Modules\Tools\Http\Controllers\SavedWheelPresetController;
 use Modules\Tools\Http\Controllers\SavedTeamPresetController;
+use Modules\Tools\Http\Controllers\ToolPreferenceController;
 use Modules\Tools\Http\Controllers\ToolsController;
 
 Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
@@ -45,4 +46,11 @@ Route::middleware(['web', 'auth', 'throttle:60,1'])->group(function () {
     Route::post('/crossword-presets', [SavedCrosswordPresetController::class, 'store'])->name('api.crossword-presets.store');
     Route::put('/crossword-presets/{publicId}', [SavedCrosswordPresetController::class, 'update'])->name('api.crossword-presets.update');
     Route::delete('/crossword-presets/{publicId}', [SavedCrosswordPresetController::class, 'destroy'])->name('api.crossword-presets.destroy');
+
+    Route::get('/tool-preferences/{tool}', [ToolPreferenceController::class, 'show'])
+        ->where('tool', '[a-z0-9\-]+')
+        ->name('api.tool-preferences.show');
+    Route::post('/tool-preferences/{tool}', [ToolPreferenceController::class, 'update'])
+        ->where('tool', '[a-z0-9\-]+')
+        ->name('api.tool-preferences.update');
 });

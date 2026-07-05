@@ -102,10 +102,15 @@
     }
 
     document.addEventListener('alpine:init', function () {
-        window.Alpine.data('minuteurVisuel', function () {
+        window.Alpine.data('minuteurVisuel', function (isAuthenticated) {
             return {
                 // --- État persisté (localStorage) ---
                 style: localStorage.getItem('mv_style') || 'disk',
+                // Couleurs personnalisées récentes (#744-750) : synchronisées côté serveur
+                // uniquement si connecté (users.tool_preferences) — incite à la connexion pour
+                // les invités plutôt que de dupliquer un historique local non synchronisé.
+                isAuthenticated: !!isAuthenticated,
+                recentCustomColors: [],
                 accentColor: localStorage.getItem('mv_color') || 'red',
                 // #742 : couleur personnalisée, en plus des 5 teintes curées — accentColor
                 // devient 'custom' quand active, la vraie valeur vit ici (validée hex strict).
@@ -149,6 +154,7 @@
                     var self = this;
                     self.remainingMs = self.totalSeconds * 1000;
                     self._applyUrlParams();
+                    if (self.isAuthenticated) self._loadRecentColors();
 
                     document.addEventListener('visibilitychange', function () {
                         if (!document.hidden && self.state === 'running') {
@@ -422,6 +428,47 @@
                         localStorage.setItem('mv_color_custom', hex);
                         localStorage.setItem('mv_color', 'custom');
                     } catch (e) {}
+                },
+
+                // Appelé sur @change (une fois le choix finalisé), pas @input (qui déclenche en
+                // continu pendant le glissement dans le sélecteur natif) - évite de spammer le
+                // serveur pendant qu'on fait glisser le curseur de teinte.
+                persistCustomColorHistory: function (hex) {
+                    if (!isValidHexColor(hex) || !this.isAuthenticated) return;
+                    var idx = this.recentCustomColors.findIndex(function (c) { return c.toLowerCase() === hex.toLowerCase(); });
+                    if (idx !== -1) this.recentCustomColors.splice(idx, 1);
+                    this.recentCustomColors.unshift(hex);
+                    this.recentCustomColors = this.recentCustomColors.slice(0, 5);
+                    this._saveRecentColors();
+                },
+
+                _headers: function () {
+                    return {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').content : ''
+                    };
+                },
+
+                _loadRecentColors: function () {
+                    var self = this;
+                    fetch('/api/tool-preferences/minuteur-visuel', { headers: self._headers() })
+                        .then(function (r) { return r.ok ? r.json() : null; })
+                        .then(function (data) {
+                            if (data && data.preferences && Array.isArray(data.preferences.custom_colors)) {
+                                self.recentCustomColors = data.preferences.custom_colors;
+                            }
+                        })
+                        .catch(function () {});
+                },
+
+                _saveRecentColors: function () {
+                    if (!this.isAuthenticated) return;
+                    fetch('/api/tool-preferences/minuteur-visuel', {
+                        method: 'POST',
+                        headers: this._headers(),
+                        body: JSON.stringify({ key: 'custom_colors', value: this.recentCustomColors })
+                    }).catch(function () {});
                 },
 
                 // Persistance localStorage seulement — x-model a DÉJÀ mis à jour la propriété
