@@ -51,7 +51,7 @@
 <section class="wpo-blog-single-section section-padding">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-12">
+            <div class="col-lg-10 col-12">
                 {{-- #707 : tool-geo (JSON-LD + answer-box) déplacé DANS le conteneur pour respecter
                      la largeur du contenu (auparavant plein-largeur hors .container, cf. blog/show.blade.php). --}}
                 @include('tools::public.partials.tool-geo')

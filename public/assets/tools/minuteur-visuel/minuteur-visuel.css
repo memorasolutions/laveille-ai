@@ -3,14 +3,18 @@
 
 [x-cloak] { display: none !important; }
 
-/* --- #713 (2026-07-05) : gabarit réaligné sur les autres outils gratuits ---
-   Les exceptions précédentes (#706 col-lg-10, #708 container-fluid, #711 grille 2 colonnes)
-   ont été retirées à la demande explicite de l'utilisateur : le blade utilise maintenant
-   `.container` + `.col-lg-8`, identique à generateur-mots-passe/tirage-presentations. La carte
-   ne "domine" plus l'espace disponible — elle s'inscrit dans le même gabarit que le reste du
-   site ; la présentation soignée vient de la composition à l'intérieur de cette largeur standard
-   (rythme d'espacement, cadran mis en scène, séparateur avant les contrôles), pas de la taille. */
-.mv-wrap { max-width: 640px; margin: 0 auto; }
+/* --- #713/#714 (2026-07-05) : gabarit réaligné sur les autres outils gratuits ---
+   Les exceptions précédentes (#706 col-lg-10 isolé, #708 container-fluid, #711 grille 2 colonnes)
+   ont été retirées : le blade utilise `.container` + `.col-lg-10`, désormais la largeur STANDARD
+   de tous les outils "carte unique" du site (élargie site-wide en #714, generateur-mots-passe/
+   tirage-presentations/etc. inclus — l'espace vide signalé n'était pas un bug du minuteur mais
+   le gabarit col-lg-8 partagé par 6 outils, tous portés à col-lg-10 ensemble).
+   AUCUN plafond de largeur ici (contrairement à l'ancien max-width:640px) : comme les autres
+   outils, la carte (.card, Bootstrap) remplit naturellement sa colonne — le cadran garde son
+   propre plafond (.mv-dial-zone, 400px) et les groupes de boutons restent centrés via flex, donc
+   rien ne s'étire de façon disgracieuse. Un plafond ici recréerait exactement le problème de
+   #711 (bandes vides à l'intérieur d'une carte redevenue large). */
+.mv-wrap { margin: 0 auto; }
 
 /* Séparateur discret entre le cadran (le "spectacle") et les contrôles (l'"outil") — hiérarchie
    visuelle en une seule colonne, sans réintroduire de grille 2 colonnes. */
@@ -52,17 +56,18 @@
 .mv-color-btn.active { box-shadow: 0 0 0 2.5px var(--c-dark, #1A1D23); }
 
 /* --- Zone visuelle du cadran ---
-   #713 : plafond ramené 520px -> 400px (retour proportionné au gabarit col-lg-8 standard, cf.
-   .mv-wrap 640px). Fond circulaire doux (radial-gradient) derrière le cadran : une mise en scène
-   discrète qui lui donne du relief sans agrandir la carte elle-même — c'est la composition, pas
-   la taille, qui porte la présentation. */
+   #713 : 520px -> 400px (col-lg-8 standard). #714 : 400px -> 440px (carte élargie à col-lg-10
+   site-wide, cf. .mv-wrap) — léger réajustement proportionné, toujours loin de l'ancienne
+   exception 520px qui faisait "dominer" le cadran. Fond circulaire doux (radial-gradient)
+   derrière le cadran : mise en scène discrète qui lui donne du relief sans agrandir la carte
+   elle-même — c'est la composition, pas la taille, qui porte la présentation. */
 .mv-dial-zone {
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 1.5rem;
-    width: min(70vw, 400px);
-    max-width: 400px;
+    width: min(70vw, 440px);
+    max-width: 440px;
     aspect-ratio: 1 / 1;
     position: relative;
 }

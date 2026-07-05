@@ -33,11 +33,12 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     // (uniquement $tool->name, comme les autres).
     // Note : le fond #f8f9fa "chunké" (.mv-panel) a été essayé puis retiré (#705,
     // effet "pains empilés" signalé par l'utilisateur) — pas d'assertion dessus.
-    // Note #713 (2026-07-05, décision finale de l'utilisateur) : les exceptions col-lg-10/
-    // container-fluid/grille 2 colonnes (#706/#708/#711) ont été retirées — gabarit
-    // désormais IDENTIQUE aux autres outils (.container + col-lg-8).
-    $response->assertSee('col-lg-8', escape: false);
-    $response->assertDontSee('col-lg-10', escape: false);
+    // Note #713/#714 (2026-07-05) : container-fluid/grille 2 colonnes (#708/#711) retirés —
+    // gabarit identique aux autres outils "carte unique". #714 : l'ancien col-lg-8 laissait
+    // un espace vide identique (au pixel) sur generateur-mots-passe/tirage-presentations —
+    // pas un bug isolé, donc élargi SITE-WIDE (6 fichiers) à col-lg-10 plutôt que de créer
+    // une nouvelle exception pour le seul minuteur.
+    $response->assertSee('col-lg-10', escape: false);
     $response->assertDontSee('⏱️ Minuteur visuel', escape: false);
 
     // 5 styles visuels dans un radiogroup.

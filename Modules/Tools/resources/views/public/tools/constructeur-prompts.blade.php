@@ -14,7 +14,7 @@
 <section class="wpo-blog-single-section section-padding">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-12">
+            <div class="col-lg-10 col-12">
                 <div class="card shadow-sm tool-fullscreen-target" style="border-radius: var(--r-base);">
                     <div class="card-body p-4 p-md-5" x-data="promptBuilder()" x-init="init()">
                         <div class="d-flex justify-content-between align-items-start">

@@ -66,13 +66,17 @@
 
 @section('content')
 <section class="wpo-blog-single-section section-padding">
-    {{-- #713 (2026-07-05) : gabarit RÉALIGNÉ sur les autres outils gratuits (demande explicite de
-         l'utilisateur, qui a rejeté les exceptions #706/#708/#711 ci-dessous). `.container` +
-         col-lg-8, identique à generateur-mots-passe/tirage-presentations — plus d'exception de
-         largeur pour cet outil. --}}
+    {{-- #713/#714 (2026-07-05) : gabarit RÉALIGNÉ sur les autres outils gratuits (demande explicite
+         de l'utilisateur, qui a rejeté les exceptions #706/#708/#711 ci-dessous). `.container` +
+         col-lg-10 — même largeur que TOUS les outils "carte unique" du site (calculatrice-taxes,
+         code-qr, constructeur-prompts, generateur-mots-passe, tirage-presentations, anonymiseur,
+         generateur-equipes, liens-google, mots-croises, roue-tirage). #714 : l'espace vide restant
+         à col-lg-8 était identique (au pixel près) sur generateur-mots-passe/tirage-presentations —
+         pas un bug du minuteur mais le gabarit standard ; élargi SITE-WIDE (6 fichiers col-lg-8
+         portés à col-lg-10) plutôt qu'une nouvelle exception isolée. --}}
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-12">
+            <div class="col-lg-10 col-12">
                 {{-- #707 : tool-geo (JSON-LD + answer-box) déplacé DANS le conteneur pour respecter
                      la largeur du contenu (auparavant plein-largeur hors .container, cf. blog/show.blade.php). --}}
                 @include('tools::public.partials.tool-geo')
