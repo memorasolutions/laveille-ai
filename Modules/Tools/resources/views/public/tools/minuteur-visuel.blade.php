@@ -66,25 +66,13 @@
 
 @section('content')
 <section class="wpo-blog-single-section section-padding">
-    {{-- #708 : container-fluid (pas .container) — DEUXIÈME EXCEPTION DÉLIBÉRÉE pour cet outil
-         visuel. `.container` Bootstrap plafonne LUI-MÊME la largeur (960/1140/1320px selon le
-         breakpoint) indépendamment du viewport réel : sur un grand écran (1920px+), col-lg-10
-         restait bloqué bien avant d'utiliser l'espace disponible, laissant deux bandes grises
-         vides de chaque côté de la carte. `.container-fluid` n'a pas ce plafond (juste un
-         padding latéral) ; le plafond raisonnable est repris nous-mêmes via `.mv-outer-container`
-         (minuteur-visuel.css, max-width: 1600px) pour éviter une carte démesurée en 4K/ultra-wide.
-         Le contenu à l'intérieur de la carte (.mv-wrap, minuteur-visuel.css) reste plafonné à
-         640px : élargir le conteneur externe élargit la CARTE (fond/bordure blanche), pas les
-         contrôles, qui restent centrés et lisibles — pas d'étirement disgracieux. --}}
-    <div class="container-fluid mv-outer-container">
+    {{-- #713 (2026-07-05) : gabarit RÉALIGNÉ sur les autres outils gratuits (demande explicite de
+         l'utilisateur, qui a rejeté les exceptions #706/#708/#711 ci-dessous). `.container` +
+         col-lg-8, identique à generateur-mots-passe/tirage-presentations — plus d'exception de
+         largeur pour cet outil. --}}
+    <div class="container">
         <div class="row justify-content-center">
-            {{-- col-lg-10 (pas col-lg-8 comme generateur-mots-passe/tirage-presentations) — EXCEPTION
-                 DÉLIBÉRÉE : le minuteur est un outil visuel (grand cadran central, usage salle de
-                 classe/plein écran), pas un outil texte/formulaire où une colonne étroite sert la
-                 lisibilité. Voir aussi .mv-dial-zone (minuteur-visuel.css) dont le plafond a été
-                 relevé en conséquence, sinon élargir la carte seule ne change rien à la taille
-                 visible du cadran. --}}
-            <div class="col-lg-10 col-12">
+            <div class="col-lg-8 col-12">
                 {{-- #707 : tool-geo (JSON-LD + answer-box) déplacé DANS le conteneur pour respecter
                      la largeur du contenu (auparavant plein-largeur hors .container, cf. blog/show.blade.php). --}}
                 @include('tools::public.partials.tool-geo')
@@ -103,18 +91,6 @@
                             </div>
                         </div>
                         <p class="text-muted mb-3">{{ $tool->description }}</p>
-
-                        {{-- #711 : mise en page 2 colonnes (lg+) — la carte (.mv-wrap) va jusqu'à 1100px
-                             (col-lg-10 dans .mv-outer-container), mais tout le contenu restait empilé
-                             dans une seule colonne plafonnée à 640px : ça laissait deux grandes bandes
-                             vides À L'INTÉRIEUR de la carte sur écran large (signalé par l'utilisateur,
-                             capture 2026-07-05_09-14-11.jpg — distinct de #708 qui concernait la largeur
-                             de la carte elle-même, déjà réglée). Colonne gauche = le visuel (sélecteurs +
-                             cadran + légende) ; colonne droite = les contrôles (start/presets/durée/réglages).
-                             En dessous de 992px, .mv-layout redevient un simple empilement (aucun changement
-                             mobile/tablette). Voir .mv-layout/.mv-wrap (minuteur-visuel.css). --}}
-                        <div class="mv-layout">
-                        <div class="mv-col-visual">
 
                         {{-- Sélecteur de style visuel (5 styles) — classes charte ct-btn (pas de bordure ad hoc) --}}
                         <div role="radiogroup" aria-label="{{ __('Style visuel du minuteur') }}" class="mv-style-selector">
@@ -281,8 +257,9 @@
                         {{-- Annonces ARIA sobres (jamais à chaque seconde) --}}
                         <div class="mv-live" aria-live="polite" role="status" x-text="ariaMessage"></div>
 
-                        </div>{{-- /.mv-col-visual --}}
-                        <div class="mv-col-controls">
+                        {{-- Séparateur discret entre le cadran (le "spectacle") et les contrôles (l'"outil") —
+                             hiérarchie visuelle claire sans découpage en colonnes. --}}
+                        <hr class="mv-divider">
 
                         {{-- Contrôles principaux — classes charte ct-btn (aucune bordure ad hoc) --}}
                         <div class="mv-controls">
@@ -377,9 +354,6 @@
                                 </div>
                             </div>
                         </details>
-
-                        </div>{{-- /.mv-col-controls --}}
-                        </div>{{-- /.mv-layout --}}
 
                     </div>
                 </div>

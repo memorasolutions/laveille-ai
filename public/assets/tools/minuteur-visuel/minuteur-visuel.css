@@ -3,36 +3,21 @@
 
 [x-cloak] { display: none !important; }
 
-/* --- Conteneur externe (#708) ---
-   Le blade utilise .container-fluid (pas .container, qui plafonne LUI-MÊME 960/1140/1320px
-   selon le breakpoint, indépendamment du viewport réel — cause des bandes grises vides sur
-   grand écran malgré col-lg-10). .container-fluid n'a pas ce plafond ; on en reprend un ici,
-   plus généreux, pour éviter une carte démesurée en 4K/ultra-wide. EXCEPTION DÉLIBÉRÉE (voir
-   minuteur-visuel.blade.php) cohérente avec les précédentes (col-lg-10, .mv-dial-zone 520px) :
-   cet outil visuel doit dominer l'espace disponible, contrairement aux outils texte/formulaire
-   restés en .container standard. */
-.mv-outer-container { max-width: 1600px; margin: 0 auto; }
-
+/* --- #713 (2026-07-05) : gabarit réaligné sur les autres outils gratuits ---
+   Les exceptions précédentes (#706 col-lg-10, #708 container-fluid, #711 grille 2 colonnes)
+   ont été retirées à la demande explicite de l'utilisateur : le blade utilise maintenant
+   `.container` + `.col-lg-8`, identique à generateur-mots-passe/tirage-presentations. La carte
+   ne "domine" plus l'espace disponible — elle s'inscrit dans le même gabarit que le reste du
+   site ; la présentation soignée vient de la composition à l'intérieur de cette largeur standard
+   (rythme d'espacement, cadran mis en scène, séparateur avant les contrôles), pas de la taille. */
 .mv-wrap { max-width: 640px; margin: 0 auto; }
 
-/* --- #711 : mise en page 2 colonnes (lg+) ---
-   La carte (.mv-wrap) peut monter à 1100px sur grand écran (col-lg-10 dans .mv-outer-container,
-   1600px), mais le contenu restait empilé en une seule colonne à 640px : deux grandes bandes
-   vides à l'INTÉRIEUR de la carte (distinct de #708, qui réglait la largeur de la carte elle-même).
-   À partir de 992px, .mv-layout passe en grille 2 colonnes (visuel à gauche, contrôles à droite)
-   et .mv-wrap peut s'élargir pour les accueillir ; en dessous, retour à l'empilement simple
-   (aucun changement mobile/tablette). */
-@media (min-width: 992px) {
-    .mv-wrap { max-width: 1100px; }
-    .mv-layout {
-        display: grid;
-        grid-template-columns: minmax(360px, 560px) minmax(320px, 480px);
-        gap: 2.5rem;
-        justify-content: center;
-        align-items: start;
-    }
-    .mv-col-visual,
-    .mv-col-controls { min-width: 0; }
+/* Séparateur discret entre le cadran (le "spectacle") et les contrôles (l'"outil") — hiérarchie
+   visuelle en une seule colonne, sans réintroduire de grille 2 colonnes. */
+.mv-divider {
+    border: none;
+    border-top: 1px solid var(--sys-border-subtle, #E5E7EB);
+    margin: 1.75rem 0 1.5rem;
 }
 
 /* --- Sélecteurs (style + couleur) ---
@@ -67,18 +52,28 @@
 .mv-color-btn.active { box-shadow: 0 0 0 2.5px var(--c-dark, #1A1D23); }
 
 /* --- Zone visuelle du cadran ---
-   Le cadran EST l'élément visuel principal (comme les vrais TimeTimer) : il doit dominer la
-   carte, pas se fondre parmi les contrôles. Plafond relevé 420px -> 520px en même temps que
-   la carte col-lg-8 -> col-lg-10 (exception délibérée, voir minuteur-visuel.blade.php) : sans
-   ce relevé, élargir la carte seule n'aurait rien changé à la taille visible du cadran. */
+   #713 : plafond ramené 520px -> 400px (retour proportionné au gabarit col-lg-8 standard, cf.
+   .mv-wrap 640px). Fond circulaire doux (radial-gradient) derrière le cadran : une mise en scène
+   discrète qui lui donne du relief sans agrandir la carte elle-même — c'est la composition, pas
+   la taille, qui porte la présentation. */
 .mv-dial-zone {
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 1.5rem;
-    width: min(60vw, 520px);
-    max-width: 520px;
+    width: min(70vw, 400px);
+    max-width: 400px;
     aspect-ratio: 1 / 1;
+    position: relative;
+}
+.mv-dial-zone::before {
+    content: '';
+    position: absolute;
+    inset: -6%;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--c-primary, #064E5A) 0%, transparent 72%);
+    opacity: .05;
+    z-index: -1;
 }
 /* !important nécessaire : un reset global d'icônes du thème (svg { width/height: 24px }) a une
    spécificité concurrente et écraserait sinon la mise à l'échelle du cadran (SVG à viewBox). */
