@@ -15,6 +15,26 @@
 
 .mv-wrap { max-width: 640px; margin: 0 auto; }
 
+/* --- #711 : mise en page 2 colonnes (lg+) ---
+   La carte (.mv-wrap) peut monter à 1100px sur grand écran (col-lg-10 dans .mv-outer-container,
+   1600px), mais le contenu restait empilé en une seule colonne à 640px : deux grandes bandes
+   vides à l'INTÉRIEUR de la carte (distinct de #708, qui réglait la largeur de la carte elle-même).
+   À partir de 992px, .mv-layout passe en grille 2 colonnes (visuel à gauche, contrôles à droite)
+   et .mv-wrap peut s'élargir pour les accueillir ; en dessous, retour à l'empilement simple
+   (aucun changement mobile/tablette). */
+@media (min-width: 992px) {
+    .mv-wrap { max-width: 1100px; }
+    .mv-layout {
+        display: grid;
+        grid-template-columns: minmax(360px, 560px) minmax(320px, 480px);
+        gap: 2.5rem;
+        justify-content: center;
+        align-items: start;
+    }
+    .mv-col-visual,
+    .mv-col-controls { min-width: 0; }
+}
+
 /* --- Sélecteurs (style + couleur) ---
    Boutons de style : classes charte ct-btn (ct-btn-outline au repos / ct-btn-primary actif),
    pas de bordure ad hoc — cohérent avec tirage-presentations/constructeur-prompts. */

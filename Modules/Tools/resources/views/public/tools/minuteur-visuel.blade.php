@@ -104,6 +104,18 @@
                         </div>
                         <p class="text-muted mb-3">{{ $tool->description }}</p>
 
+                        {{-- #711 : mise en page 2 colonnes (lg+) — la carte (.mv-wrap) va jusqu'à 1100px
+                             (col-lg-10 dans .mv-outer-container), mais tout le contenu restait empilé
+                             dans une seule colonne plafonnée à 640px : ça laissait deux grandes bandes
+                             vides À L'INTÉRIEUR de la carte sur écran large (signalé par l'utilisateur,
+                             capture 2026-07-05_09-14-11.jpg — distinct de #708 qui concernait la largeur
+                             de la carte elle-même, déjà réglée). Colonne gauche = le visuel (sélecteurs +
+                             cadran + légende) ; colonne droite = les contrôles (start/presets/durée/réglages).
+                             En dessous de 992px, .mv-layout redevient un simple empilement (aucun changement
+                             mobile/tablette). Voir .mv-layout/.mv-wrap (minuteur-visuel.css). --}}
+                        <div class="mv-layout">
+                        <div class="mv-col-visual">
+
                         {{-- Sélecteur de style visuel (5 styles) — classes charte ct-btn (pas de bordure ad hoc) --}}
                         <div role="radiogroup" aria-label="{{ __('Style visuel du minuteur') }}" class="mv-style-selector">
                             @foreach($mvStyles as $s)
@@ -269,6 +281,9 @@
                         {{-- Annonces ARIA sobres (jamais à chaque seconde) --}}
                         <div class="mv-live" aria-live="polite" role="status" x-text="ariaMessage"></div>
 
+                        </div>{{-- /.mv-col-visual --}}
+                        <div class="mv-col-controls">
+
                         {{-- Contrôles principaux — classes charte ct-btn (aucune bordure ad hoc) --}}
                         <div class="mv-controls">
                             <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" @click="adjustMinutes(-1)" aria-label="{{ __('Réduire de 1 minute') }}" title="{{ __('-1 min') }}">−1</button>
@@ -343,6 +358,9 @@
                                 </div>
                             </div>
                         </details>
+
+                        </div>{{-- /.mv-col-controls --}}
+                        </div>{{-- /.mv-layout --}}
 
                     </div>
                 </div>
