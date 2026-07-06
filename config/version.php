@@ -17,6 +17,16 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.88.0 · 2026-07-06 · feat(outils) MINUTEUR VISUEL - la « Durée personnalisée » accepte
+ *     désormais aussi des SECONDES (0-59), pas seulement des minutes entières (ex. 1 min 30 s,
+ *     ou 45 s seules). Veille pp_search confirmée : champs séparés Minutes/Secondes (pas un mm:ss
+ *     unique), pattern le plus clair pour un usage grand public/mobile. Les durées épinglées
+ *     (`custom_durations`) stockent désormais un TOTAL EN SECONDES (au lieu de minutes),
+ *     affichées formatées (`formatPinnedDuration()` : "1 min 30 s"/"45 s"/"2 min"). Le partage
+ *     d'URL gagne un paramètre optionnel `seconds` qui s'additionne à `minutes` - les anciens
+ *     liens `?minutes=25` restent identiques (rétrocompatibilité totale, vérifiée). Aucune
+ *     migration de données : le changement de sémantique de `custom_durations` est sans impact
+ *     réel, l'outil restant gated superadmin-only (aucune donnée publique existante).
  *   1.87.5 · 2026-07-06 · fix(core) Bouton x-core::button - collision de classe .ct-btn SITE-WIDE :
  *     le composant Blade Modules/Core/resources/views/components/button.blade.php injectait un
  *     style global redéfinissant .ct-btn (border-width:1px, border-radius:0.75rem) qui collisionnait
@@ -674,8 +684,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 87;
-$lvPatch = 5;
+$lvMinor = 88;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.88.0] - 2026-07-06
+
+### Added
+- **Minuteur visuel — durée personnalisée en secondes.** Le champ "Durée personnalisée" accepte désormais un champ Secondes (0-59) en plus des Minutes, permettant des durées comme "1 min 30 s" ou "45 s" seules. Les durées épinglées et le partage d'URL (`?minutes=X&seconds=Y`) suivent le même format ; les anciens liens `?minutes=X` restent identiques (rétrocompatibilité vérifiée).
+
 ## [1.87.5] - 2026-07-06
 
 ### Fixed

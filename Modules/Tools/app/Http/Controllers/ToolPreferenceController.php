@@ -65,15 +65,18 @@ class ToolPreferenceController
         return array_slice($colors, 0, $max);
     }
 
+    // #843-846 : stocke désormais des TOTAUX EN SECONDES (pas des minutes) - le champ
+    // "Durée personnalisée" accepte aussi des secondes (0-59) en plus des minutes.
+    // Borne haute = 180 min 59 s (10859s), reprend le plafond de 180 min existant.
     private function sanitizeCustomDurations(mixed $value): array
     {
         if (! is_array($value)) {
             throw ValidationException::withMessages(['value' => 'Format de durées invalide.']);
         }
 
-        $minutes = array_values(array_unique(array_filter($value, fn ($m) => is_int($m) && $m >= 1 && $m <= 180)));
+        $seconds = array_values(array_unique(array_filter($value, fn ($s) => is_int($s) && $s >= 1 && $s <= 10859)));
 
-        return array_slice($minutes, 0, 2);
+        return array_slice($seconds, 0, 2);
     }
 
     private function sanitizeTrafficThresholds(mixed $value): array

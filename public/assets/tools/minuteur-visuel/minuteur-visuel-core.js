@@ -193,6 +193,7 @@
                     this.customTrafficOpen = true;
                 },
                 customMinutes: 20,
+                customSeconds: 0,
 
                 init: function () {
                     var self = this;
@@ -215,26 +216,42 @@
                     });
                 },
 
+                // #843-846 : param `seconds` optionnel, S'ADDITIONNE aux minutes - les anciens
+                // liens partagés `?minutes=25` (sans seconds) restent identiques.
                 _applyUrlParams: function () {
                     try {
                         var params = new URLSearchParams(window.location.search);
                         var minutes = parseInt(params.get('minutes'), 10);
+                        var seconds = parseInt(params.get('seconds'), 10);
                         var styleParam = params.get('style');
                         if (styleParam && ['disk', 'hourglass', 'ring', 'flip', 'traffic'].indexOf(styleParam) !== -1) {
                             this.style = styleParam;
                         }
-                        if (!isNaN(minutes) && minutes > 0 && minutes <= 180) {
-                            this.totalSeconds = minutes * 60;
+                        if (!isNaN(minutes) && minutes >= 0 && minutes <= 180) {
+                            if (isNaN(seconds) || seconds < 0) seconds = 0;
+                            if (seconds > 59) seconds = 59;
+                            var totalSecs = minutes * 60 + seconds;
+                            if (totalSecs < 1) totalSecs = 1;
+                            if (totalSecs > 10859) totalSecs = 10859;
+                            this.totalSeconds = totalSecs;
                             this.remainingMs = this.totalSeconds * 1000;
                         }
                     } catch (e) {}
                 },
 
+                // #843-846 : `seconds` seulement écrit si non nul, pour ne pas changer l'allure
+                // des liens déjà partagés sur des durées en minutes rondes.
                 _syncUrl: function () {
                     try {
-                        var minutes = Math.max(1, Math.round(this.totalSeconds / 60));
+                        var totalMinutes = Math.floor(this.totalSeconds / 60);
+                        var secondsPart = this.totalSeconds % 60;
                         var params = new URLSearchParams(window.location.search);
-                        params.set('minutes', String(minutes));
+                        params.set('minutes', String(totalMinutes));
+                        if (secondsPart === 0) {
+                            params.delete('seconds');
+                        } else {
+                            params.set('seconds', String(secondsPart));
+                        }
                         params.set('style', this.style);
                         var newUrl = window.location.pathname + '?' + params.toString();
                         window.history.replaceState({}, '', newUrl);
@@ -291,13 +308,19 @@
                 // #751-758 : l'étoile d'épinglage est désactivée si la durée courante est déjà
                 // invalide, OU si les 2 emplacements sont pleins ET que cette durée n'y figure pas
                 // déjà (dans ce cas précis, la bascule doit rester possible pour la DÉSépingler).
+                // #843-846 : customDurations stocke désormais des TOTAUX EN SECONDES (pas des
+                // minutes) - seule façon de représenter fidèlement une durée type "1 min 30 s".
                 get isCurrentDurationPinned() {
-                    var minutes = parseInt(this.customMinutes, 10);
-                    return this.customDurations.indexOf(minutes) !== -1;
+                    var minutes = parseInt(this.customMinutes, 10) || 0;
+                    var seconds = parseInt(this.customSeconds, 10) || 0;
+                    var totalSecs = minutes * 60 + seconds;
+                    return this.customDurations.indexOf(totalSecs) !== -1;
                 },
                 get isCustomMinutesPinnable() {
-                    var minutes = parseInt(this.customMinutes, 10);
-                    if (!minutes || minutes < 1 || minutes > 180) return false;
+                    var minutes = parseInt(this.customMinutes, 10) || 0;
+                    var seconds = parseInt(this.customSeconds, 10) || 0;
+                    var totalSecs = minutes * 60 + seconds;
+                    if (totalSecs < 1 || totalSecs > 10859) return false;
                     return this.isCurrentDurationPinned || this.customDurations.length < 2;
                 },
 
@@ -412,13 +435,31 @@
                     this.start();
                 },
 
+                // #843-846 : accepte désormais aussi des secondes (this.customSeconds), pas
+                // seulement des minutes entières - raw peut valoir 0 si l'utilisateur ne veut
+                // que quelques secondes (ex: 45s), mais si les DEUX champs sont vides/à zéro on
+                // retombe sur le défaut historique de 1 minute (jamais une durée de 0).
                 applyCustomMinutes: function () {
                     if (this.state === 'running') return;
                     var raw = parseInt(this.customMinutes, 10);
-                    if (!raw || raw < 1) raw = 1;
+                    var secs = parseInt(this.customSeconds, 10);
+                    if (isNaN(raw) || raw < 0) raw = 0;
                     if (raw > 180) raw = 180;
+                    if (isNaN(secs) || secs < 0) secs = 0;
+                    if (secs > 59) secs = 59;
+                    var totalSecs = raw * 60 + secs;
+                    if (totalSecs < 1) {
+                        raw = 1;
+                        secs = 0;
+                        totalSecs = 60;
+                    } else if (totalSecs > 10859) {
+                        raw = 180;
+                        secs = 59;
+                        totalSecs = 10859;
+                    }
                     this.customMinutes = raw;
-                    this.totalSeconds = raw * 60;
+                    this.customSeconds = secs;
+                    this.totalSeconds = totalSecs;
                     this.remainingMs = this.totalSeconds * 1000;
                     this.pomodoroPhase = null;
                     this.state = 'idle';
@@ -678,32 +719,47 @@
                 // l'est déjà (symétrique, comportement de bascule attendu d'une icône étoile).
                 pinCurrentDuration: function () {
                     if (!this.isAuthenticated) return;
-                    var minutes = parseInt(this.customMinutes, 10);
-                    if (!minutes || minutes < 1 || minutes > 180) return;
-                    if (this.customDurations.indexOf(minutes) !== -1) {
-                        this.removeCustomDuration(minutes);
+                    var minutes = parseInt(this.customMinutes, 10) || 0;
+                    var seconds = parseInt(this.customSeconds, 10) || 0;
+                    var totalSecs = minutes * 60 + seconds;
+                    if (totalSecs < 1 || totalSecs > 10859) return;
+                    if (this.customDurations.indexOf(totalSecs) !== -1) {
+                        this.removeCustomDuration(totalSecs);
                         return;
                     }
                     if (this.customDurations.length >= 2) return;
-                    this.customDurations.push(minutes);
+                    this.customDurations.push(totalSecs);
                     this._saveCustomDurations();
                 },
 
-                removeCustomDuration: function (minutes) {
-                    var idx = this.customDurations.indexOf(minutes);
+                removeCustomDuration: function (totalSecs) {
+                    var idx = this.customDurations.indexOf(totalSecs);
                     if (idx === -1) return;
                     this.customDurations.splice(idx, 1);
                     this._saveCustomDurations();
                 },
 
-                applyCustomDuration: function (minutes) {
+                applyCustomDuration: function (totalSecs) {
                     if (this.state === 'running') return;
-                    this.totalSeconds = minutes * 60;
+                    this.totalSeconds = totalSecs;
                     this.remainingMs = this.totalSeconds * 1000;
                     this.pomodoroPhase = null;
                     this.state = 'idle';
                     this._resetAnnounceFlags();
                     this.start();
+                },
+
+                // #843-846 : formatage lisible d'une durée épinglée (en secondes totales) - ex.
+                // 90 -> "1 min 30 s", 45 -> "45 s", 120 -> "2 min".
+                formatPinnedDuration: function (totalSecs) {
+                    var minutes = Math.floor(totalSecs / 60);
+                    var seconds = totalSecs % 60;
+                    if (minutes === 0) {
+                        return seconds + ' s';
+                    } else if (seconds === 0) {
+                        return minutes + ' min';
+                    }
+                    return minutes + ' min ' + seconds + ' s';
                 },
 
                 // Persistance localStorage seulement — x-model a DÉJÀ mis à jour la propriété

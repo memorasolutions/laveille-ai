@@ -69,16 +69,18 @@ it('saves and retrieves custom_durations for the authenticated user', function (
 it('caps custom_durations at 2 entries and filters out-of-range values', function () {
     $user = User::factory()->create();
 
+    // #843-846 : bornes en SECONDES désormais (1 à 10859, soit 180 min 59 s) - 999 était
+    // hors-plage quand la borne était en minutes (180), mais reste valide en secondes.
     $response = $this->actingAs($user)->postJson('/api/tool-preferences/minuteur-visuel', [
         'key' => 'custom_durations',
-        'value' => [32, 0, 999, 90, 45],
+        'value' => [32, 0, 99999, 90, 45],
     ]);
 
     $response->assertOk();
     $durations = $response->json('preferences.custom_durations');
     expect($durations)->toHaveCount(2);
     expect($durations)->not->toContain(0);
-    expect($durations)->not->toContain(999);
+    expect($durations)->not->toContain(99999);
 });
 
 it('saves and retrieves favorite_colors for the authenticated user', function () {

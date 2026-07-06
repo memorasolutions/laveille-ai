@@ -407,17 +407,20 @@
                                  étoile (pas d'écrasement silencieux), même architecture que les couleurs
                                  récentes (users.tool_preferences, clé custom_durations). --}}
                             <template x-if="isAuthenticated">
-                                <template x-for="minutes in customDurations" :key="'dur'+minutes">
+                                {{-- #843-846 : customDurations stocke des TOTAUX EN SECONDES (pas des
+                                     minutes) depuis l'ajout du champ "Secondes" - formatPinnedDuration()
+                                     affiche "1 min 30 s"/"45 s" plutôt qu'un simple "X min". --}}
+                                <template x-for="secs in customDurations" :key="'dur'+secs">
                                     <span class="mv-preset-pinned">
                                         <button type="button"
                                                 class="ct-btn ct-btn-outline ct-btn-sm"
                                                 :disabled="state === 'running'"
-                                                @click="applyCustomDuration(minutes)"
-                                                x-text="minutes + ' {{ __('min') }}'"></button>
+                                                @click="applyCustomDuration(secs)"
+                                                x-text="formatPinnedDuration(secs)"></button>
                                         <button type="button"
                                                 class="mv-preset-pinned__remove"
-                                                @click="removeCustomDuration(minutes)"
-                                                :aria-label="'{{ __('Retirer') }} ' + minutes + ' {{ __('min') }}'"
+                                                @click="removeCustomDuration(secs)"
+                                                :aria-label="'{{ __('Retirer') }} ' + formatPinnedDuration(secs)"
                                                 title="{{ __('Retirer') }}">&times;</button>
                                     </span>
                                 </template>
@@ -441,14 +444,26 @@
                             @endforeach
                         </div>
 
-                        {{-- Durée personnalisée — saisie exacte en minutes, hors présélections --}}
+                        {{-- Durée personnalisée — minutes ET secondes, hors présélections.
+                             #843-846 : ajout du champ secondes (0-59) - signalé par l'utilisateur
+                             (le champ n'acceptait que des minutes entières, impossible de régler
+                             par ex. 1 min 30 s ou 45 s). min="0" sur les minutes désormais (une
+                             durée peut être exprimée uniquement en secondes). --}}
                         <div class="mv-custom-time" role="group" aria-label="{{ __('Durée personnalisée') }}">
-                            <label for="mvCustomMinutes">{{ __('Durée personnalisée (minutes)') }}</label>
+                            <label for="mvCustomMinutes">{{ __('Minutes') }}</label>
                             <input type="number"
                                    id="mvCustomMinutes"
-                                   min="1"
+                                   min="0"
                                    max="180"
                                    x-model.number="customMinutes"
+                                   :disabled="state === 'running'"
+                                   @keydown.enter.prevent="applyCustomMinutes()">
+                            <label for="mvCustomSeconds">{{ __('Secondes') }}</label>
+                            <input type="number"
+                                   id="mvCustomSeconds"
+                                   min="0"
+                                   max="59"
+                                   x-model.number="customSeconds"
                                    :disabled="state === 'running'"
                                    @keydown.enter.prevent="applyCustomMinutes()">
                             <button type="button"

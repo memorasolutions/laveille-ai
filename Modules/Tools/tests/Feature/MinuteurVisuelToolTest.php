@@ -59,8 +59,9 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     $response->assertSee('Pomodoro 25 min', escape: false);
     $response->assertSee('Pause 5 min', escape: false);
 
-    // Durée personnalisée — saisie exacte en minutes, hors présélections.
+    // Durée personnalisée — minutes ET secondes, hors présélections (#843-846).
     $response->assertSee('id="mvCustomMinutes"', escape: false);
+    $response->assertSee('id="mvCustomSeconds"', escape: false);
     $response->assertSee('Définir', escape: false);
 
     // Légende du feu de circulation — 3 lignes dynamiques (seuils dérivés de totalSeconds)
