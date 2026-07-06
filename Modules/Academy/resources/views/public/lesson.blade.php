@@ -111,7 +111,7 @@
     /* Navigation préc/suiv - boutons x-core::button (cohérence visuelle avec le reste du site,
        cf. audit 2026-07-02 : les <a> bruts précédents ressemblaient à des liens discrets,
        incohérents avec le CTA teal plein utilisé partout ailleurs). Bordure/radius/couleurs/
-       hover/focus déjà gérés par .ct-btn / .ct-btn--secondary (DRY, ne pas dupliquer ici) :
+       hover/focus déjà gérés par .core-btn / .core-btn--secondary (DRY, ne pas dupliquer ici) :
        seuls les overrides de mise en page (carte 2 lignes) sont nécessaires. */
     .academy-lesson-nav { display: flex; justify-content: space-between; gap: 1rem; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #E5E7EB; flex-wrap: wrap; }
     .academy-lesson-nav .academy-nav-btn { flex: 1 1 0; min-width: 180px; max-width: 360px; flex-direction: column; height: auto; white-space: normal; line-height: 1.35; }

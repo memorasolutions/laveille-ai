@@ -8,11 +8,19 @@
     'disabled' => false,
 ])
 
+{{-- #840-843 : renommé de .ct-btn à .core-btn - collisionnait avec .ct-btn-outline/.ct-btn-primary
+     de charte.css (même classe de base .ct-btn, convention de modificateur différente : simple
+     tiret côté charte, double tiret BEM ici). Les deux définitions divergentes de la classe
+     partagée (border-width 1px vs 2px, border-radius --sys-radius-md vs --r-btn) s'écrasaient
+     silencieusement selon l'ordre d'injection dans le DOM, produisant des bordures/rayons
+     incohérents dès que les deux systèmes coexistaient sur une même page (ex: minuteur-visuel +
+     bandeau newsletter). Renommage à blast radius nul : ce composant est le SEUL point d'émission
+     de ces classes (aucune référence directe à ct-btn-- ailleurs sur le site, vérifié par grep). --}}
 @once
 <style>
-.ct-btn {
-    --ct-btn-padding-y: 0.92rem;
-    --ct-btn-min-height: 44px;
+.core-btn {
+    --core-btn-padding-y: 0.92rem;
+    --core-btn-min-height: 44px;
     font-family: var(--f-heading, system-ui);
     border-radius: var(--sys-radius-md, 0.75rem);
     border-width: 1px;
@@ -26,102 +34,102 @@
     text-decoration: none;
     font-weight: 600;
     box-sizing: border-box;
-    min-height: var(--ct-btn-min-height);
-    padding: var(--ct-btn-padding-y) 1.25rem;
+    min-height: var(--core-btn-min-height);
+    padding: var(--core-btn-padding-y) 1.25rem;
 }
 
-.ct-btn--sm {
-    --ct-btn-padding-y: 0.65rem;
-    --ct-btn-min-height: 38px;
+.core-btn--sm {
+    --core-btn-padding-y: 0.65rem;
+    --core-btn-min-height: 38px;
     font-size: 0.82rem;
 }
 
-.ct-btn--md {
+.core-btn--md {
     font-size: 0.92rem;
 }
 
-.ct-btn--lg {
-    --ct-btn-padding-y: 1.05rem;
-    --ct-btn-min-height: 46px;
+.core-btn--lg {
+    --core-btn-padding-y: 1.05rem;
+    --core-btn-min-height: 46px;
     font-size: 1.05rem;
 }
 
-.ct-btn--block {
+.core-btn--block {
     width: 100%;
 }
 
 /* Variants */
-.ct-btn--primary {
+.core-btn--primary {
     background-color: var(--sys-action-primary, #064E5A);
     color: var(--sys-text-on-accent, #fff);
     border-color: var(--sys-action-primary, #064E5A);
 }
-.ct-btn--primary:hover:not(:disabled) {
+.core-btn--primary:hover:not(:disabled) {
     background-color: var(--sys-action-primary-hover, #032E36);
     border-color: var(--sys-action-primary-hover, #032E36);
     /* ACTION: fix contraste survol (audit academy::public.show, 2026-07-01) — sans
        cette ligne, la règle globale `a:hover { color: var(--c-primary) }` (charte.css)
-       est PLUS spécifique que « .ct-btn--primary { color: white } » sur la propriété
+       est PLUS spécifique que « .core-btn--primary { color: white } » sur la propriété
        color (élément+pseudo-classe > classe seule) et repeint le texte en teal foncé
        sur fond teal quasi noir : ratio mesuré 1.55:1 (échec AA/AAA). Fixé à 14.5:1. */
     color: var(--sys-text-on-accent, #fff);
 }
 
-.ct-btn--secondary {
+.core-btn--secondary {
     background-color: transparent;
     color: var(--sys-action-primary, #064E5A);
     border-color: var(--sys-action-primary, #064E5A);
 }
-.ct-btn--secondary:hover:not(:disabled) {
+.core-btn--secondary:hover:not(:disabled) {
     background-color: var(--sys-action-primary, #064E5A);
     color: var(--sys-text-on-accent, #fff);
 }
 
-.ct-btn--accent {
+.core-btn--accent {
     background-color: var(--sys-action-accent, #9A2A06);
     color: var(--sys-text-on-accent, #fff);
     border-color: var(--sys-action-accent, #9A2A06);
 }
-.ct-btn--accent:hover:not(:disabled) {
+.core-btn--accent:hover:not(:disabled) {
     background-color: var(--sys-action-accent-hover, #771E04);
     border-color: var(--sys-action-accent-hover, #771E04);
     /* Même correctif de contraste que primary (cf. commentaire ci-dessus). */
     color: var(--sys-text-on-accent, #fff);
 }
 
-.ct-btn--danger {
+.core-btn--danger {
     background-color: var(--sys-action-danger, #DC2626);
     color: var(--sys-text-on-accent, #fff);
     border-color: var(--sys-action-danger, #DC2626);
 }
-.ct-btn--danger:hover:not(:disabled) {
+.core-btn--danger:hover:not(:disabled) {
     background-color: var(--sys-action-danger-hover, #B91C1C);
     border-color: var(--sys-action-danger-hover, #B91C1C);
     /* Même correctif de contraste que primary (cf. commentaire ci-dessus). */
     color: var(--sys-text-on-accent, #fff);
 }
 
-.ct-btn--ghost {
+.core-btn--ghost {
     background-color: transparent;
     color: var(--sys-action-primary, #064E5A);
     border-color: transparent;
 }
-.ct-btn--ghost:hover:not(:disabled) {
+.core-btn--ghost:hover:not(:disabled) {
     background-color: var(--sys-surface-sunken, #F1F5F9);
 }
 
 /* Focus AAA — toutes variantes */
-.ct-btn:focus-visible {
+.core-btn:focus-visible {
     outline: var(--sys-focus-ring-width, 3px) solid var(--sys-focus-ring, #9A2A06);
     outline-offset: var(--sys-focus-ring-offset, 2px);
 }
-.ct-btn:focus:not(:focus-visible) {
+.core-btn:focus:not(:focus-visible) {
     outline: none;
 }
 
 /* Disabled */
-.ct-btn:disabled,
-.ct-btn[aria-disabled="true"] {
+.core-btn:disabled,
+.core-btn[aria-disabled="true"] {
     opacity: 0.55;
     cursor: not-allowed;
 }
@@ -135,9 +143,9 @@ $sizes = ['sm', 'md', 'lg'];
 $variant = in_array($variant, $variants) ? $variant : 'primary';
 $size = in_array($size, $sizes) ? $size : 'md';
 
-$classes = ['ct-btn', "ct-btn--{$variant}", "ct-btn--{$size}"];
+$classes = ['core-btn', "core-btn--{$variant}", "core-btn--{$size}"];
 if ($block) {
-    $classes[] = 'ct-btn--block';
+    $classes[] = 'core-btn--block';
 }
 
 $isLink = filled($href);

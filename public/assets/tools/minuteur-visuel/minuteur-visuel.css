@@ -438,20 +438,32 @@
 /* #782-786 : durée personnalisée épinglée - le × est désormais un segment intégré à même la
    pastille (chip Material 3 / shadcn « dismissible tag », tendance 2026 confirmée pp_search),
    pas un petit rond flottant hors-cadre (ancien pattern, sous le seuil WCAG 24px + peu lisible). */
+/* #840-843 : bordure UNIQUE portée par le conteneur englobant (pattern chip 2026 confirmé par
+   pp_search : "one chip container with an integrated trailing remove button, not two visibly
+   segmented bordered parts" - Material 3 / shadcn). Remplace l'ancienne approche où CHAQUE
+   segment (bouton durée + bouton ×) portait sa propre bordure de 2px collées l'une à l'autre :
+   fragile par nature (cause réelle d'un bug signalé - un composant Blade sans lien avec cette
+   page redéfinissait ailleurs la classe .ct-btn partagée, réduisant silencieusement sa bordure
+   à 1px pile à cette jonction, ce qui créait un "step" visible lu comme une 2e forme imbriquée).
+   Une seule bordure sur .mv-preset-pinned + overflow:hidden pour clipper les coins des enfants
+   (rendus totalement sans bordure propre) élimine structurellement tout risque de dédoublement
+   ou de désalignement à la jonction, quel que soit ce qui arrive à .ct-btn par ailleurs. */
 .mv-preset-pinned {
     display: inline-flex;
     align-items: stretch;
+    border: 2px solid var(--c-primary);
+    border-radius: var(--r-btn);
+    overflow: hidden;
 }
 .mv-preset-pinned .ct-btn {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-right: none;
+    border: none !important;
+    border-radius: 0;
 }
 /* #812-815 : aria-label="Retirer ..." (accessibilité) matche par accident la règle globale
    charte.css `[aria-label*="Retirer"]` (pensée pour un bouton "vote/soutenir" ailleurs sur le
-   site) qui force border/background à none en !important - le × perdait silencieusement son
-   fond/sa bordure, semblant "flottant" hors du chip (bug détecté en capture utilisateur). Double
-   sélecteur (spécificité) + !important pour battre cette règle globale sans la modifier. */
+   site) qui force border/background à none en !important - conservé ici en !important sur le
+   fond (le × doit rester visible), mais la bordure est désormais entièrement retirée (c'est le
+   conteneur .mv-preset-pinned qui porte l'unique bordure du chip). */
 .mv-preset-pinned .mv-preset-pinned__remove {
     display: inline-flex;
     align-items: center;
@@ -459,10 +471,9 @@
     min-width: 28px;
     min-height: 28px;
     padding: 0 8px;
-    border: 2px solid var(--c-primary) !important;
+    border: none !important;
     border-left: 1px solid rgba(6, 78, 90, .25) !important;
-    border-top-right-radius: var(--r-btn);
-    border-bottom-right-radius: var(--r-btn);
+    border-radius: 0;
     background: #fff !important;
     color: var(--c-text-muted, #52586a);
     font-size: 1rem;
@@ -470,7 +481,7 @@
     cursor: pointer;
     flex: 0 0 auto;
 }
-.mv-preset-pinned .mv-preset-pinned__remove:hover { background: var(--c-danger, #DC2626) !important; color: #fff; border-color: var(--c-danger, #DC2626) !important; }
+.mv-preset-pinned .mv-preset-pinned__remove:hover { background: var(--c-danger, #DC2626) !important; color: #fff; }
 .mv-preset-pinned .mv-preset-pinned__remove:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; }
 
 /* Bouton étoile "épingler cette durée/couleur" - à côté de "Définir", même hauteur de cible

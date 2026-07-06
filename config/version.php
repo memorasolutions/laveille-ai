@@ -17,6 +17,21 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.87.5 · 2026-07-06 · fix(core) Bouton x-core::button - collision de classe .ct-btn SITE-WIDE :
+ *     le composant Blade Modules/Core/resources/views/components/button.blade.php injectait un
+ *     style global redéfinissant .ct-btn (border-width:1px, border-radius:0.75rem) qui collisionnait
+ *     silencieusement avec .ct-btn-outline/.ct-btn-primary de charte.css (border:2px, --r-btn:0.5rem)
+ *     dès que les deux composants coexistaient sur une même page (ex: minuteur-visuel + bandeau
+ *     newsletter) - toute bordure/rayon des boutons ct-btn-outline se retrouvait silencieusement
+ *     réduits. Signalé par l'utilisateur via capture du chip "20 min ×" du minuteur (ligne
+ *     intérieure/2e forme + contour du × disproportionné). Cause racine corrigée en renommant
+ *     TOUTES les classes du composant Core en `core-btn`/`core-btn--xxx` (aucune collision de nom
+ *     possible désormais, 0 blast radius : seul point d'émission de ces classes, vérifié par grep
+ *     sur les ~48 vues utilisatrices). En complément, .mv-preset-pinned (chip durée épinglée du
+ *     minuteur) redesigné en bordure UNIQUE portée par le conteneur englobant (enfants sans bordure
+ *     propre) - pattern chip 2026 confirmé par pp_search (Material 3/shadcn : "one chip container
+ *     with an integrated trailing remove button"), défense en profondeur contre toute future
+ *     collision similaire sur .ct-btn.
  *   1.87.4 · 2026-07-06 · fix(outils) MINUTEUR VISUEL - le texte "X minutes restantes" affiché
  *     visuellement sous le cadran (élément `.mv-live`, annonce ARIA `aria-live="polite"`) dupliquait
  *     purement le chiffre mm:ss déjà affiché en continu au centre du cadran - signalé comme inutile
@@ -660,7 +675,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 87;
-$lvPatch = 4;
+$lvPatch = 5;
 
 return [
     'major' => $lvMajor,

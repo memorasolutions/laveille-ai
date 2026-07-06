@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.87.5] - 2026-07-06
+
+### Fixed
+- **Collision CSS site-wide `.ct-btn` (composant `x-core::button`).** Un composant Blade du module Core injectait un style global redéfinissant `.ct-btn` (bordure 1px, rayon 0.75rem), collisionnant silencieusement avec `.ct-btn-outline`/`.ct-btn-primary` de la charte graphique (bordure 2px, rayon 0.5rem) dès que les deux coexistaient sur une même page - signalé via le chip "durée épinglée" du minuteur visuel (ligne intérieure visible + contour disproportionné). Corrigé en renommant toutes les classes du composant Core en `core-btn`/`core-btn--xxx` (zéro collision possible). En complément, le chip du minuteur a été redesigné en bordure unique portée par le conteneur (pattern 2026 confirmé), immunisé contre toute collision future similaire.
+
 ## [1.87.4] - 2026-07-06
 
 ### Fixed
