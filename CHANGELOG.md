@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.89.0] - 2026-07-06
+
+### Added
+- **Minuteur visuel — mise en ligne publique.** L'outil `/outils/minuteur-visuel`, développé et affiné en gate superadmin-only depuis son introduction, est maintenant public. Levé après régression complète du module Tools (33 tests verts) et vérification de l'accès invité (plus de gate "En construction", présence confirmée dans `/outils`).
+
 ## [1.88.0] - 2026-07-06
 
 ### Added

@@ -17,6 +17,13 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.89.0 · 2026-07-06 · feat(outils) MINUTEUR VISUEL - MISE EN LIGNE PUBLIQUE : le gate
+ *     `is_under_construction` (superadmin-only depuis le développement initial de l'outil,
+ *     #688-847) est levé après régression complète du module Tools (33 tests verts) et
+ *     vérification locale de l'accès public (invité, pas de gate, 5 styles visibles, présence
+ *     dans /outils). Décision explicite de l'utilisateur ("go" de mise en ligne). Aucun
+ *     changement fonctionnel - uniquement le flag `tools.is_under_construction` passé à false
+ *     pour le slug `minuteur-visuel` (migration réversible).
  *   1.88.0 · 2026-07-06 · feat(outils) MINUTEUR VISUEL - la « Durée personnalisée » accepte
  *     désormais aussi des SECONDES (0-59), pas seulement des minutes entières (ex. 1 min 30 s,
  *     ou 45 s seules). Veille pp_search confirmée : champs séparés Minutes/Secondes (pas un mm:ss
@@ -684,7 +691,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 88;
+$lvMinor = 89;
 $lvPatch = 0;
 
 return [
