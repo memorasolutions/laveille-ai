@@ -1,0 +1,48 @@
+[
+  {
+    "slug": "doctolib",
+    "name": "Doctolib",
+    "cat_slug": "outils-et-techniques",
+    "difficulty": "beginner",
+    "type": "tool",
+    "icon": "🏥",
+    "match_strategy": "loose",
+    "aliases": [],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "has_image": true,
+    "definition": "Doctolib est une plateforme française de santé en ligne qui permet la prise de rendez-vous médicaux, la téléconsultation et la gestion de cabinet. Fondée en 2013 par Stanislas Niox-Chateau, Steve Abou Rjeily, Jessy Bernal et Ivan Schneider, elle est dirigée par son PDG Stanislas Niox-Chateau. Le service est gratuit pour les patients, tandis que les professionnels paient un abonnement. En 2019, Doctolib obtient le statut de licorne grâce à une levée de 150 millions d'euros. Son siège est à Levallois-Perret et elle opère en France, en Italie, en Allemagne et aux Pays-Bas. En novembre 2025, elle est condamnée à une amende de 4,6 millions d'euros pour abus de position dominante. En 2026, elle lance une application controversée qui collecte des données de santé pour entraîner son intelligence artificielle, accélérant ses investissements en IA clinique. En 2024, elle comptait 1 722 employés et, en 2025, elle a atteint la rentabilité nette avec un chiffre d'affaires de 383,8 millions d'euros.",
+    "analogy": "C'est comme un Uber pour les rendez-vous médicaux : simple pour le patient, mais avec des outils de gestion avancés pour les cliniques.",
+    "example": "En 2026, un patient à Paris utilise Doctolib pour prendre rendez-vous chez un dermatologue et effectuer une téléconsultation, simplifiant ainsi son accès aux soins.",
+    "did_you_know": "Saviez-vous qu'en 2024, Doctolib comptait 1 722 employés, et qu'en 2025 elle a atteint la rentabilité nette avec un chiffre d'affaires de 383,8 millions d'euros ?",
+    "one_sentence_answer": "Doctolib est une plateforme française de santé en ligne qui permet de prendre rendez-vous, de faire des téléconsultations et de gérer un cabinet, gratuite pour les patients et payante pour les professionnels.",
+    "faq": [
+      {
+        "question": "Doctolib est-il gratuit pour les patients ?",
+        "answer": "Oui, la plateforme est entièrement gratuite pour les patients. Les professionnels de santé paient un abonnement pour utiliser les logiciels de gestion."
+      },
+      {
+        "question": "Pourquoi Doctolib a-t-il été condamné en 2025 ?",
+        "answer": "En novembre 2025, l'Autorité de la concurrence française a condamné Doctolib à une amende de 4,6 millions d'euros pour abus de position dominante sur le marché de la prise de rendez-vous en ligne."
+      },
+      {
+        "question": "Doctolib est-il disponible dans d'autres pays ?",
+        "answer": "Oui, Doctolib est disponible en France, en Italie, en Allemagne et aux Pays-Bas."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Wikipedia - Doctolib",
+        "url": "https://fr.wikipedia.org/wiki/Doctolib",
+        "year": 2026,
+        "author": "Wikipedia"
+      },
+      {
+        "label": "Le Figaro - Doctolib condamné pour abus de position dominante",
+        "url": "https://www.lefigaro.fr/societes/doctolib-condamne-pour-abus-de-position-dominante-20251106",
+        "year": 2025,
+        "author": "Le Figaro"
+      }
+    ]
+  }
+]
