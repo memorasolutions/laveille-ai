@@ -114,6 +114,11 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     $response->assertSee('class="mv-login-hint"', escape: false);
     $response->assertSee('Connectez-vous pour retrouver vos couleurs personnalisées', escape: false);
 
+    // #816-820 — favoris/défaut/récentes consolidés dans un repli compact, replié par défaut
+    // (empilés en rangées séparées, ils ajoutaient trop de hauteur avant le cadran).
+    $response->assertSee('class="mv-color-manager"', escape: false);
+    $response->assertSee('Favoris, couleur par défaut, récentes', escape: false);
+
     // #787-792 — étoile de favoris couleur (max 2), distincte de l'historique roulant récent.
     $response->assertSee('class="mv-color-favorite-toggle"', escape: false);
     $response->assertSee('toggleFavoriteColor()', escape: false);

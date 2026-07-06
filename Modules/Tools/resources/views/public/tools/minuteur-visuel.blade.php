@@ -191,77 +191,93 @@
                             </label>
                         </div>
 
-                        {{-- #787-792 : étoile favoris couleur (max 2) - même bascule explicite que les
-                             durées épinglées (customDurations), distincte de l'historique roulant
-                             automatique des couleurs personnalisées récentes ci-dessous. --}}
-                        <div class="mv-color-favorite-toggle" x-show="supportsColorPalette && isAuthenticated" x-cloak>
-                            <button type="button"
-                                    class="mv-pin-btn"
-                                    :disabled="!isCurrentColorPinnable"
-                                    @click="toggleFavoriteColor()"
-                                    :aria-label="isCurrentColorFavorite ? '{{ __('Retirer cette couleur des favoris') }}' : '{{ __('Ajouter cette couleur aux favoris') }}'"
-                                    :title="isCurrentColorFavorite ? '{{ __('Retirer cette couleur des favoris') }}' : '{{ __('Ajouter cette couleur aux favoris (2 maximum)') }}'"
-                                    :class="{ 'active': isCurrentColorFavorite }">
-                                <span aria-hidden="true" x-text="isCurrentColorFavorite ? '★' : '☆'"></span>
-                            </button>
-                            <span class="mv-color-favorite-toggle__label">{{ __('Épingler cette couleur comme favorite') }}</span>
-                        </div>
-
-                        {{-- #806-811 : couleur par défaut du compte - action explicite distincte des
-                             favoris (qui servent à un accès rapide entre 2 teintes) : le défaut est LA
-                             teinte qui s'applique automatiquement sur tout nouvel appareil connecté. --}}
-                        <div class="mv-color-favorite-toggle" x-show="supportsColorPalette && isAuthenticated" x-cloak>
-                            <button type="button"
-                                    class="ct-btn ct-btn-outline ct-btn-xs"
-                                    :disabled="isCurrentColorDefault"
-                                    @click="setDefaultColor()">
-                                <span aria-hidden="true" x-show="isCurrentColorDefault">✓</span>
-                                <span x-text="isCurrentColorDefault ? '{{ __('Couleur par défaut') }}' : '{{ __('Définir comme couleur par défaut') }}'"></span>
-                            </button>
-                        </div>
-                        <template x-if="supportsColorPalette && isAuthenticated && favoriteColors.length > 0">
-                            <div class="mv-favorite-colors" aria-label="{{ __('Couleurs favorites') }}">
-                                <span class="mv-recent-colors-label">{{ __('Favoris :') }}</span>
-                                <template x-for="(hex, i) in favoriteColors" :key="'fav'+i">
-                                    <span class="mv-favorite-color-chip">
-                                        <button type="button"
-                                                class="mv-color-btn mv-color-btn-recent"
-                                                :style="'background:' + hex + ';'"
-                                                :class="{ 'active': accentHex.toLowerCase() === hex.toLowerCase() }"
-                                                :aria-label="hex"
-                                                :title="hex"
-                                                @click="applyFavoriteColor(hex)"></button>
-                                        <button type="button"
-                                                class="mv-favorite-color-remove"
-                                                @click="removeFavoriteColor(hex)"
-                                                :aria-label="'{{ __('Retirer') }} ' + hex"
-                                                title="{{ __('Retirer') }}">&times;</button>
-                                    </span>
-                                </template>
-                            </div>
-                        </template>
-
-                        {{-- #744-750 : couleurs personnalisées récentes (connectés) + incitation à se
-                             connecter (invités) - le rappel serveur (users.tool_preferences) évite de
-                             perdre ses teintes personnalisées d'un appareil/navigateur à l'autre. --}}
-                        <template x-if="supportsColorPalette && isAuthenticated && recentCustomColors.length > 0">
-                            <div class="mv-recent-colors" aria-label="{{ __('Couleurs personnalisées récentes') }}">
-                                <span class="mv-recent-colors-label">{{ __('Récentes :') }}</span>
-                                <template x-for="(hex, i) in recentCustomColors" :key="'recent'+i">
+                        {{-- #816-820 : favoris/défaut/récentes consolidés dans un repli COMPACT, replié par
+                             défaut - empilés en rangées séparées, ils ajoutaient ~200px avant même d'arriver
+                             au cadran (signalé "beaucoup trop haut" par l'utilisateur, capture à l'appui).
+                             Choix retenu après veille pp_search : disclosure natif (cohérent avec le pattern
+                             "Réglages" déjà utilisé plus bas sur cette page), pas un popover ancré - moins de
+                             risque d'introduire une nouvelle classe de bugs d'interaction (positionnement,
+                             clic extérieur, focus trap) après plusieurs rounds de correctifs CSS aujourd'hui. --}}
+                        <details class="mv-color-manager" x-show="supportsColorPalette" x-cloak>
+                            <summary>
+                                <span aria-hidden="true">★</span>
+                                {{ __('Favoris, couleur par défaut, récentes') }}
+                                <span class="mv-color-manager__chevron" aria-hidden="true">▼</span>
+                            </summary>
+                            <div class="mv-color-manager__body">
+                                {{-- #787-792 : étoile favoris couleur (max 2) - même bascule explicite que les
+                                     durées épinglées (customDurations), distincte de l'historique roulant
+                                     automatique des couleurs personnalisées récentes ci-dessous. --}}
+                                <div class="mv-color-favorite-toggle" x-show="isAuthenticated" x-cloak>
                                     <button type="button"
-                                            class="mv-color-btn mv-color-btn-recent"
-                                            :style="'background:' + hex + ';'"
-                                            :class="{ 'active': accentColor === 'custom' && customColorHex.toLowerCase() === hex.toLowerCase() }"
-                                            :aria-label="hex"
-                                            :title="hex"
-                                            @click="setCustomColor(hex)"></button>
+                                            class="mv-pin-btn"
+                                            :disabled="!isCurrentColorPinnable"
+                                            @click="toggleFavoriteColor()"
+                                            :aria-label="isCurrentColorFavorite ? '{{ __('Retirer cette couleur des favoris') }}' : '{{ __('Ajouter cette couleur aux favoris') }}'"
+                                            :title="isCurrentColorFavorite ? '{{ __('Retirer cette couleur des favoris') }}' : '{{ __('Ajouter cette couleur aux favoris (2 maximum)') }}'"
+                                            :class="{ 'active': isCurrentColorFavorite }">
+                                        <span aria-hidden="true" x-text="isCurrentColorFavorite ? '★' : '☆'"></span>
+                                    </button>
+                                    <span class="mv-color-favorite-toggle__label">{{ __('Épingler cette couleur comme favorite') }}</span>
+                                </div>
+
+                                {{-- #806-811 : couleur par défaut du compte - action explicite distincte des
+                                     favoris (qui servent à un accès rapide entre 2 teintes) : le défaut est LA
+                                     teinte qui s'applique automatiquement sur tout nouvel appareil connecté. --}}
+                                <div class="mv-color-favorite-toggle" x-show="isAuthenticated" x-cloak>
+                                    <button type="button"
+                                            class="ct-btn ct-btn-outline ct-btn-xs"
+                                            :disabled="isCurrentColorDefault"
+                                            @click="setDefaultColor()">
+                                        <span aria-hidden="true" x-show="isCurrentColorDefault">✓</span>
+                                        <span x-text="isCurrentColorDefault ? '{{ __('Couleur par défaut') }}' : '{{ __('Définir comme couleur par défaut') }}'"></span>
+                                    </button>
+                                </div>
+                                <template x-if="isAuthenticated && favoriteColors.length > 0">
+                                    <div class="mv-favorite-colors" aria-label="{{ __('Couleurs favorites') }}">
+                                        <span class="mv-recent-colors-label">{{ __('Favoris :') }}</span>
+                                        <template x-for="(hex, i) in favoriteColors" :key="'fav'+i">
+                                            <span class="mv-favorite-color-chip">
+                                                <button type="button"
+                                                        class="mv-color-btn mv-color-btn-recent"
+                                                        :style="'background:' + hex + ';'"
+                                                        :class="{ 'active': accentHex.toLowerCase() === hex.toLowerCase() }"
+                                                        :aria-label="hex"
+                                                        :title="hex"
+                                                        @click="applyFavoriteColor(hex)"></button>
+                                                <button type="button"
+                                                        class="mv-favorite-color-remove"
+                                                        @click="removeFavoriteColor(hex)"
+                                                        :aria-label="'{{ __('Retirer') }} ' + hex"
+                                                        title="{{ __('Retirer') }}">&times;</button>
+                                            </span>
+                                        </template>
+                                    </div>
                                 </template>
+
+                                {{-- #744-750 : couleurs personnalisées récentes (connectés) + incitation à se
+                                     connecter (invités) - le rappel serveur (users.tool_preferences) évite de
+                                     perdre ses teintes personnalisées d'un appareil/navigateur à l'autre. --}}
+                                <template x-if="isAuthenticated && recentCustomColors.length > 0">
+                                    <div class="mv-recent-colors" aria-label="{{ __('Couleurs personnalisées récentes') }}">
+                                        <span class="mv-recent-colors-label">{{ __('Récentes :') }}</span>
+                                        <template x-for="(hex, i) in recentCustomColors" :key="'recent'+i">
+                                            <button type="button"
+                                                    class="mv-color-btn mv-color-btn-recent"
+                                                    :style="'background:' + hex + ';'"
+                                                    :class="{ 'active': accentColor === 'custom' && customColorHex.toLowerCase() === hex.toLowerCase() }"
+                                                    :aria-label="hex"
+                                                    :title="hex"
+                                                    @click="setCustomColor(hex)"></button>
+                                        </template>
+                                    </div>
+                                </template>
+                                <div class="mv-login-hint" x-show="!isAuthenticated" x-cloak>
+                                    {{ __('Connectez-vous pour retrouver vos couleurs personnalisées, vos favoris et votre couleur par défaut sur tous vos appareils.') }}
+                                    <a href="{{ route('login') }}">{{ __('Se connecter') }}</a>
+                                </div>
                             </div>
-                        </template>
-                        <div class="mv-login-hint" x-show="supportsColorPalette && !isAuthenticated" x-cloak>
-                            {{ __('Connectez-vous pour retrouver vos couleurs personnalisées, vos favoris et votre couleur par défaut sur tous vos appareils.') }}
-                            <a href="{{ route('login') }}">{{ __('Se connecter') }}</a>
-                        </div>
+                        </details>
 
                         {{-- Zone visuelle du cadran actif --}}
                         <div class="mv-dial-zone" :class="'mv-style-' + style">

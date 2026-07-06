@@ -82,6 +82,26 @@
     pointer-events: none;
 }
 
+/* #816-820 : disclosure compact regroupant favoris/défaut/récentes (repliés par défaut) - même
+   principe que .mv-settings plus bas sur la page, en plus léger (texte seul, pas de boîte pleine
+   largeur) puisqu'il s'agit d'un repli secondaire tout de suite après les pastilles de couleur. */
+.mv-color-manager { margin: -.25rem 0 1.25rem; text-align: center; }
+.mv-color-manager summary {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .85rem;
+    color: var(--c-text-muted, #52586a);
+    list-style: none;
+    padding: .3rem .5rem;
+    min-height: 24px;
+}
+.mv-color-manager summary::-webkit-details-marker { display: none; }
+.mv-color-manager__chevron { font-size: .7rem; transition: transform .2s ease; }
+.mv-color-manager[open] summary .mv-color-manager__chevron { transform: rotate(180deg); }
+.mv-color-manager__body { display: grid; gap: .5rem; margin-top: .5rem; }
+
 /* #787-792 : bouton étoile "épingler cette couleur" - même classe .mv-pin-btn que les durées
    (44x44 AAA), simplement inline avec un libellé texte (pas à côté d'un bouton "Définir" ici). */
 .mv-color-favorite-toggle {

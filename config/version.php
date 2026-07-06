@@ -17,6 +17,13 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.87.2 · 2026-07-05 · fix(outils) MINUTEUR VISUEL - mise en page du bloc couleur beaucoup trop haute :
+ *     l'ajout incrémental de 3 fonctionnalités (étoile favoris #787-792, couleur par défaut #806-811, plus
+ *     l'historique récent existant) empilait chacune sa propre rangée toujours visible, portant le bloc à
+ *     4-5 rangées (~200px) avant même d'atteindre le cadran - signalé par l'utilisateur via capture annotée.
+ *     Consolidé dans un unique `<details class="mv-color-manager">` (repli natif, replié par défaut, calqué
+ *     sur le pattern « Réglages » déjà présent sur la page), qui ne prend que 28px replié contre ~200px avant.
+ *     Aucune fonctionnalité perdue (étoile, bouton défaut, chips favoris/récentes toutes vérifiées après coup).
  *   1.87.1 · 2026-07-05 · fix(outils) MINUTEUR VISUEL - le bouton × des chips épinglés (durées ET couleurs
  *     favorites) perdait silencieusement sa bordure/son fond (redevenait un rond flottant, malgré le fix
  *     #782-786) à cause d'une collision de sélecteur : la règle globale `charte.css` `[aria-label*="Retirer"]`

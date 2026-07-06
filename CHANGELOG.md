@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.87.2] - 2026-07-05
+
+### Fixed
+- **Minuteur visuel — bloc couleur beaucoup trop haut avant le cadran.** L'ajout incrémental des favoris (étoile), de la couleur par défaut du compte et de l'historique récent empilait chacun sa propre rangée toujours visible, portant le bloc à 4-5 rangées (~200px) avant même d'atteindre le cadran. Consolidé dans un disclosure natif replié par défaut (« ★ Favoris, couleur par défaut, récentes »), calqué sur le pattern « Réglages » déjà présent sur la page : 28px replié contre ~200px avant, aucune fonctionnalité perdue.
+
 ## [1.87.1] - 2026-07-05
 
 ### Fixed
