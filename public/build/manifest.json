@@ -381,16 +381,14 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-DVPYElbt.js",
+    "file": "assets/app--lRqWGYj.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
       "_vendor-BxpX-Pxt.js",
-      "_editor-DWpTwHKk.js"
-    ],
-    "dynamicImports": [
-      "_vendor-BxpX-Pxt.js"
+      "_editor-DWpTwHKk.js",
+      "resources/js/pwa.js"
     ]
   },
   "resources/js/nobleui/color-modes.js": {
@@ -404,6 +402,15 @@
     "name": "template",
     "src": "resources/js/nobleui/template.js",
     "isEntry": true
+  },
+  "resources/js/pwa.js": {
+    "file": "assets/pwa-D-ZDVxyK.js",
+    "name": "pwa",
+    "src": "resources/js/pwa.js",
+    "isEntry": true,
+    "dynamicImports": [
+      "_vendor-BxpX-Pxt.js"
+    ]
   },
   "resources/js/tiptap-frontend.js": {
     "file": "assets/tiptap-frontend-DmJ1ut5r.js",

@@ -198,6 +198,10 @@
     @stack('styles')
     {{-- #165 fix : Livewire styles indispensables pour composants comme commentaires (community-comments-thread) --}}
     @livewireStyles
+    {{-- #876 : ce layout ne chargeait jamais pwa.js (contrairement a app.js sur dashboard/admin/editeur) -
+         le manifest PWA annonce pourtant ces pages publiques comme installables, sans le SW actif.
+         Entree Vite dediee et legere (pas de bootstrap/tiptap-editor). --}}
+    @vite(['resources/js/pwa.js'])
 </head>
 
 <body>

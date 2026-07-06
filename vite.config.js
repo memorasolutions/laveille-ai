@@ -14,6 +14,12 @@ export default defineConfig({
                 'resources/js/nobleui/template.js',
                 'resources/js/nobleui/color-modes.js',
                 'resources/js/tiptap-frontend.js',
+                // Entree LEGERE separee (aucun import bootstrap/tiptap-editor) pour le theme
+                // public FrontTheme, qui ne charge pas app.js (trop lourd - chunk editor
+                // 400 Ko) : sans elle, le SW PWA n'etait jamais enregistre sur les pages
+                // publiques (accueil, actualites, academie...), seulement sur
+                // dashboard/admin/editeur qui chargent deja pwa.js via app.js.
+                'resources/js/pwa.js',
             ],
             refresh: true,
         }),
