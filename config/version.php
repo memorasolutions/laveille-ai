@@ -17,6 +17,12 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.91.0 · 2026-07-06 · feat(contenu) Glossaire - backfill hero_image pour 13 termes publiés
+ *     sans image (applescript, blindspot-pass, fable-5, fate-h-fate-x, interface-pam,
+ *     javascript, lean-4, leanstral, licence-apache-2-0, minif2f, putnambench,
+ *     thariq-shihipar, unknown-unknowns) - détecté par comparaison du sitemap public
+ *     (446 URLs /glossaire/*) contre le listing réel des fichiers en production. Images
+ *     générées via /nanobanana (Gemini, compte Workspace), compressées 1200x669 jpg+webp.
  *   1.90.0 · 2026-07-06 · feat(pwa) VAGUE 2 mobile/offline-first (Académie) + FIX SITE-WIDE
  *     scope Service Worker : ajout du raccourci "Académie" au manifest.webmanifest (parité
  *     avec Actualités/Répertoire/Glossaire/Outils). Audit responsive des 33 vues publiques
@@ -704,7 +710,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 90;
+$lvMinor = 91;
 $lvPatch = 0;
 
 return [

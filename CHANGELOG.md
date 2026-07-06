@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.91.0] - 2026-07-06
+
+### Fixed
+- **Glossaire — 13 images manquantes.** Comparaison du sitemap public (446 URLs) contre le listing réel des fichiers en production a révélé 13 termes publiés sans aucune image (applescript, blindspot-pass, fable-5, fate-h-fate-x, interface-pam, javascript, lean-4, leanstral, licence-apache-2-0, minif2f, putnambench, thariq-shihipar, unknown-unknowns). Images générées via `/nanobanana` (Gemini), compressées 1200x669 (jpg+webp), `hero_image` mis à jour via migration réversible.
+
 ## [1.90.0] - 2026-07-06
 
 ### Added
