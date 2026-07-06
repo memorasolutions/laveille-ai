@@ -1,0 +1,48 @@
+[
+  {
+    "slug": "kernels",
+    "name": "Kernels",
+    "cat_slug": "outils-et-techniques",
+    "difficulty": "advanced",
+    "type": "tool",
+    "icon": "⚡",
+    "match_strategy": "loose",
+    "aliases": ["Kernel Hub", "Hugging Face Kernels", "kernels-community"],
+    "broader_slugs": ["hugging-face", "cuda"],
+    "narrower_slugs": [],
+    "has_image": false,
+    "definition": "Les Kernels sont des noyaux de calcul précompilés pour GPU et CPU, optimisés au niveau bas niveau (attention, normalisation, routage MoE, quantification), et hébergés sur le Hub Hugging Face. Depuis avril 2026, ils constituent un type de dépôt de première classe, au même titre que les Models, Datasets et Spaces, formant le « Kernel Hub ». Ces noyaux offrent des gains de performance mesurés de 1,7 à 2,5 fois par rapport à l'exécution PyTorch standard. La bibliothèque Python « kernels » charge ces artefacts depuis le Hub à l'exécution, en gérant la correspondance matériel-environnement et en s'intégrant avec Torch et la pile d'inférence Hugging Face. Chaque dépôt est un paquet structuré avec artefacts, manifeste et métadonnées ; un pipeline de construction déterministe (kernel-builder, basé sur Nix) garantit un artefact identique par commit. À la mi-2026, Hugging Face a ajouté le « trusted publishing », où des workflows CI publient par identité fédérée sans jeton long terme, agissant comme une signature de code : l'organisation kernels-community publie des binaires déterministes validés avant chargement, évitant la compilation individuelle et réduisant configuration et surface d'attaque.",
+    "analogy": "Pensez à une bibliothèque de pièces détachées prévalidées pour moteurs de calcul haute performance, où chaque composant est testé et optimisé pour votre châssis GPU ou CPU.",
+    "example": "Le dépôt kernels-community/triton_kernels fournit des noyaux Triton fusionnés (RMSNorm, RoPE, SwiGLU, CrossEntropy) qui accélèrent l'entraînement multi-GPU.",
+    "did_you_know": "Les Kernels offrent un gain de vitesse de 1,7 à 2,5 fois par rapport à PyTorch standard sur plusieurs architectures GPU et CPU, grâce à des noyaux précompilés et optimisés hébergés sur le Hub.",
+    "one_sentence_answer": "Les Kernels sont des noyaux de calcul précompilés et vérifiés, hébergés sur le Hub Hugging Face, qui accélèrent les opérations GPU/CPU courantes de 1,7 à 2,5 fois.",
+    "faq": [
+      {
+        "question": "Pourquoi utiliser les Kernels plutôt que compiler ses propres noyaux ?",
+        "answer": "Les Kernels évitent la compilation locale, réduisent la complexité de configuration et la surface d'attaque, tout en offrant des performances supérieures grâce à des artefacts précompilés et vérifiés."
+      },
+      {
+        "question": "Comment la sécurité des Kernels est-elle garantie ?",
+        "answer": "La construction déterministe (kernel-builder) et la publication de confiance (trusted publishing) permettent de vérifier que les binaires proviennent d'une source fiable, sans stocker de jeton sensible."
+      },
+      {
+        "question": "Quels frameworks et matériels sont supportés ?",
+        "answer": "Principalement PyTorch, avec compatibilité torch.compile, intégration avec TGI et Transformers, et support des architectures NVIDIA CUDA, AMD ROCm, Apple Metal et Intel XPU."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Hugging Face - Changelog",
+        "url": "https://huggingface.co/changelog",
+        "year": 2026,
+        "author": "Hugging Face"
+      },
+      {
+        "label": "Hugging Face - kernels-community",
+        "url": "https://huggingface.co/kernels-community",
+        "year": 2026,
+        "author": "Hugging Face"
+      }
+    ]
+  }
+]
