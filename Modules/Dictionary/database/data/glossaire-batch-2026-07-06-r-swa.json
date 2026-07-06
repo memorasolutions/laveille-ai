@@ -1,0 +1,49 @@
+[
+  {
+    "slug": "r-swa",
+    "name": "R-SWA",
+    "acronym_full": "Reference Sliding Window Attention",
+    "cat_slug": "outils-et-techniques",
+    "difficulty": "advanced",
+    "type": "technique",
+    "icon": "🧠",
+    "match_strategy": "loose",
+    "aliases": ["Reference Sliding Window Attention"],
+    "broader_slugs": ["mecanisme-attention", "fenetre-attention"],
+    "narrower_slugs": [],
+    "has_image": false,
+    "definition": "Le R-SWA (Reference Sliding Window Attention) est un mécanisme d'attention conçu pour les transformeurs, visant à offrir une mémoire à long terme tout en maintenant une taille de cache KV (Key-Value) constante, même lorsque la séquence d'entrée s'allonge. Introduit par Baidu en juin 2026 dans le cadre de son modèle open source Unlimited OCR, il combine une fenêtre glissante pour le contexte local récent avec un petit ensemble de « mémoires de référence », qui sont des résumés compressés des informations plus anciennes. Ainsi, au lieu de conserver tout l'historique complet, le modèle garde une mémoire récente et une mémoire compressée à long terme, ce qui empêche la croissance linéaire du cache KV, contrairement aux transformeurs standards. Cette approche a d'abord été démontrée pour l'OCR de longs documents, permettant d'analyser des dizaines de pages en un seul passage sans découpage ni recollage. Elle préserve suffisamment de contexte global pour des tâches nécessitant une copie fidèle de longues entrées, comme la reconnaissance vocale ou la traduction, tout en gardant une mémoire d'inférence plate.",
+    "analogy": "Comme notre mémoire humaine : on se souvient précisément des dernières secondes, mais on résume les souvenirs plus anciens en quelques notes clés.",
+    "example": "Baidu a utilisé le R-SWA dans son modèle Unlimited OCR pour lire des dizaines de pages d'un document en un seul passage, sans les découper.",
+    "did_you_know": "Le R-SWA pourrait remplacer la logique « tout se souvenir » des LLM par une mémoire structurée et sélective, idéale pour des contextes de plusieurs millions de tokens.",
+    "one_sentence_answer": "Le R-SWA est un mécanisme d'attention qui donne aux transformeurs une mémoire longue avec un cache KV constant, en combinant une fenêtre glissante et des résumés compressés de l'information ancienne.",
+    "faq": [
+      {
+        "question": "Pourquoi le cache KV est-il un problème dans les transformeurs standards ?",
+        "answer": "Dans les transformeurs standards, le cache KV croît linéairement avec la longueur de la séquence, ce qui devient un goulot d'étranglement pour les longues sorties, car il consomme beaucoup de mémoire."
+      },
+      {
+        "question": "Comment le R-SWA résout-il ce problème ?",
+        "answer": "Le R-SWA garde une fenêtre glissante pour le contexte récent et un petit ensemble de mémoires de référence compressées pour l'information ancienne, ce qui maintient la taille du cache KV constante, même quand la séquence s'allonge."
+      },
+      {
+        "question": "Le R-SWA est-il réservé à l'OCR ?",
+        "answer": "Non, bien qu'il ait été démontré sur l'OCR, il vise des tâches comme la reconnaissance vocale ou la traduction, et pourrait être utilisé dans les futurs LLM pour gérer de très longs contextes."
+      }
+    ],
+    "sources": [
+      {
+        "label": "arXiv - Unlimited OCR (R-SWA)",
+        "url": "https://arxiv.org/abs/2606.23050",
+        "year": 2026,
+        "author": "Baidu"
+      },
+      {
+        "label": "GIGAZINE - Baidu has released 'Unlimited OCR'",
+        "url": "https://gigazine.net/gsc_news/en/20260624-baidu-unlimited-ocr/",
+        "year": 2026,
+        "author": "GIGAZINE"
+      }
+    ]
+  }
+]
