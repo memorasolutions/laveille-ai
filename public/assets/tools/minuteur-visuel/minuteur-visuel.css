@@ -116,23 +116,29 @@
     border-radius: 999px;
     padding: .2rem .3rem;
 }
-.mv-favorite-color-remove {
+/* #812-815 : ces boutons ont aria-label="Retirer ..." (nécessaire pour l'accessibilité), ce qui
+   les fait matcher malencontreusement la règle globale charte.css `[aria-label*="Retirer"]`
+   (pensée pour un bouton "vote/soutenir" ailleurs sur le site) qui force border/background à
+   none en !important. D'où le doublement de sélecteur (spécificité) + !important ici, sinon le
+   fond/bordure du bouton × disparaît silencieusement (bug détecté en capture utilisateur - le ×
+   semblait "flottant" hors du chip faute de fond/bordure visibles). */
+.mv-favorite-color-chip .mv-favorite-color-remove {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-width: 24px;
     min-height: 24px;
-    border: none;
+    border: none !important;
     border-radius: 50%;
-    background: transparent;
+    background: transparent !important;
     color: var(--c-text-muted, #52586a);
     font-size: .9rem;
     line-height: 1;
     padding: 0;
     cursor: pointer;
 }
-.mv-favorite-color-remove:hover { background: var(--c-danger, #DC2626); color: #fff; }
-.mv-favorite-color-remove:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; }
+.mv-favorite-color-chip .mv-favorite-color-remove:hover { background: var(--c-danger, #DC2626) !important; color: #fff; }
+.mv-favorite-color-chip .mv-favorite-color-remove:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; }
 
 /* #744-750 : couleurs personnalisées récentes (connectés seulement) - rangée discrète sous le
    sélecteur, mêmes pastilles que .mv-color-btn mais plus petites (rôle secondaire de rappel). */
@@ -434,34 +440,42 @@
     border-bottom-right-radius: 0;
     border-right: none;
 }
-.mv-preset-pinned__remove {
+/* #812-815 : aria-label="Retirer ..." (accessibilité) matche par accident la règle globale
+   charte.css `[aria-label*="Retirer"]` (pensée pour un bouton "vote/soutenir" ailleurs sur le
+   site) qui force border/background à none en !important - le × perdait silencieusement son
+   fond/sa bordure, semblant "flottant" hors du chip (bug détecté en capture utilisateur). Double
+   sélecteur (spécificité) + !important pour battre cette règle globale sans la modifier. */
+.mv-preset-pinned .mv-preset-pinned__remove {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-width: 28px;
     min-height: 28px;
     padding: 0 8px;
-    border: 2px solid var(--c-primary);
-    border-left: 1px solid rgba(6, 78, 90, .25);
+    border: 2px solid var(--c-primary) !important;
+    border-left: 1px solid rgba(6, 78, 90, .25) !important;
     border-top-right-radius: var(--r-btn);
     border-bottom-right-radius: var(--r-btn);
-    background: #fff;
+    background: #fff !important;
     color: var(--c-text-muted, #52586a);
     font-size: 1rem;
     line-height: 1;
     cursor: pointer;
     flex: 0 0 auto;
 }
-.mv-preset-pinned__remove:hover { background: var(--c-danger, #DC2626); color: #fff; border-color: var(--c-danger, #DC2626); }
-.mv-preset-pinned__remove:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; }
+.mv-preset-pinned .mv-preset-pinned__remove:hover { background: var(--c-danger, #DC2626) !important; color: #fff; border-color: var(--c-danger, #DC2626) !important; }
+.mv-preset-pinned .mv-preset-pinned__remove:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; }
 
-/* Bouton étoile "épingler cette durée" - à côté de "Définir", même hauteur de cible tactile. */
+/* Bouton étoile "épingler cette durée/couleur" - à côté de "Définir", même hauteur de cible
+   tactile. #812-815 : son aria-label devient "Retirer ..." une fois actif (favoris couleur),
+   ce qui matche par accident la règle globale charte.css `[aria-label*="Retirer"]` (!important) -
+   border/background forcés en !important ici pour ne pas perdre l'apparence au bascule actif. */
 .mv-pin-btn {
     min-width: 44px;
     min-height: 44px;
     border-radius: 8px;
-    border: 1.5px solid var(--sys-border-subtle, #E5E7EB);
-    background: #fff;
+    border: 1.5px solid var(--sys-border-subtle, #E5E7EB) !important;
+    background: #fff !important;
     font-size: 1.2rem;
     cursor: pointer;
     color: var(--c-text-muted, #52586a);

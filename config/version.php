@@ -17,6 +17,15 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.87.1 · 2026-07-05 · fix(outils) MINUTEUR VISUEL - le bouton × des chips épinglés (durées ET couleurs
+ *     favorites) perdait silencieusement sa bordure/son fond (redevenait un rond flottant, malgré le fix
+ *     #782-786) à cause d'une collision de sélecteur : la règle globale `charte.css` `[aria-label*="Retirer"]`
+ *     (!important, pensée pour un bouton "vote/soutenir" ailleurs sur le site) matche par accident TOUT
+ *     élément dont l'aria-label contient "Retirer" - exactement le texte utilisé par nos boutons × pour
+ *     l'accessibilité. Cause racine confirmée directement en prod (capture utilisateur + inspection
+ *     getComputedStyle + reproduction isolée avec les 2 feuilles de style réelles). Corrigé par double
+ *     sélecteur (spécificité) + !important sur .mv-preset-pinned__remove, .mv-favorite-color-remove et
+ *     .mv-pin-btn (ce dernier bascule aussi vers un aria-label "Retirer..." une fois actif).
  *   1.87.0 · 2026-07-05 · feat(outils) MINUTEUR VISUEL - couleur par défaut du compte (connectés) : bouton
  *     « Définir comme couleur par défaut » près du sélecteur, sauvegarde la teinte active (curatée ou
  *     personnalisée) comme défaut multi-appareils. S'applique automatiquement sur tout NOUVEL appareil/
@@ -630,7 +639,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 87;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,

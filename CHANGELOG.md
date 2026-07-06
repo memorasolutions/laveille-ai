@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.87.1] - 2026-07-05
+
+### Fixed
+- **Minuteur visuel — bouton × des chips épinglés (durées et couleurs favorites) redevenu un rond flottant.** Une règle CSS globale du site ciblant tout élément dont l'attribut `aria-label` contient « Retirer » (pensée pour un bouton vote/soutenir ailleurs sur le site, en `!important`) entrait accidentellement en collision avec nos boutons ×, qui utilisent le même mot pour l'accessibilité. Corrigé en renforçant la spécificité de nos sélecteurs CSS sans toucher à la règle globale.
+
 ## [1.87.0] - 2026-07-05
 
 ### Added
