@@ -1,0 +1,96 @@
+[
+  {
+    "slug": "iwf",
+    "name": "IWF",
+    "acronym_full": "Internet Watch Foundation",
+    "cat_slug": "securite-et-ethique",
+    "difficulty": "intermediate",
+    "type": "acronym",
+    "icon": "🔍",
+    "match_strategy": "loose",
+    "aliases": ["Internet Watch Foundation"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "has_image": false,
+    "definition": "L'Internet Watch Foundation (IWF) est une organisation britannique à but non lucratif fondée en 1996 à Cambridge, spécialisée dans la détection, la suppression et la prévention de la diffusion de matériel d'abus sexuels sur enfants (CSAM) en ligne. Sa création a été motivée par la découverte d'images d'abus dans des newsgroups hébergés par des fournisseurs d'accès britanniques, à la suite de discussions entre la Metropolitan Police, des autorités britanniques et des acteurs de l'industrie. L'IWF exploite une hotline permettant au public de signaler anonymement des contenus suspects, et ses analystes examinent chaque signalement. Si le contenu est confirmé comme illégal, l'organisation émet des avis de retrait aux hébergeurs et ajoute l'URL à une liste de blocage utilisée par de nombreux fournisseurs d'accès. Depuis le début des années 2000, l'IWF mène aussi des recherches proactives. Financée par l'industrie et des donateurs, elle alerte en 2026 sur la hausse des contenus générés par intelligence artificielle, qu'elle qualifie de facteur aggravant.",
+    "analogy": "L'IWF agit comme un vigile numérique qui surveille les recoins sombres du web pour signaler les contenus interdits.",
+    "example": "En 2025, l'IWF a identifié 8 029 images et vidéos d'abus sexuels sur enfants générées par IA, une hausse de 14 % par rapport à l'année précédente, et a émis des avis de retrait aux hébergeurs concernés.",
+    "did_you_know": "L'IWF recommande aux parents de renforcer la confidentialité des photos d'enfants publiées en ligne, car des images publiques légitimes peuvent être détournées par l'IA pour créer du contenu illégal.",
+    "one_sentence_answer": "L'Internet Watch Foundation est une organisation britannique qui lutte contre la diffusion de matériel d'abus sexuels sur enfants en ligne via une hotline de signalement et des actions de retrait.",
+    "faq": [
+      {
+        "question": "Comment puis-je signaler un contenu suspect à l'IWF ?",
+        "answer": "Vous pouvez utiliser le formulaire de signalement anonyme sur le site de l'IWF, que vous soyez au Royaume-Uni ou à l'international, pour signaler des images ou vidéos suspectes."
+      },
+      {
+        "question": "Que fait l'IWF après avoir reçu un signalement ?",
+        "answer": "Des analystes spécialisés examinent le signalement ; si le contenu est confirmé comme illégal, l'IWF émet un avis de retrait aux fournisseurs d'accès et ajoute l'URL à une liste de blocage."
+      },
+      {
+        "question": "L'IWF agit-elle uniquement sur signalement ?",
+        "answer": "Non, elle mène aussi des recherches proactives de matériel illégal depuis le début des années 2000, en plus de traiter les signalements du public."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Internet Watch Foundation - Our history",
+        "url": "https://www.iwf.org.uk/about-us/why-we-exist/our-history/",
+        "year": 2026,
+        "author": "Internet Watch Foundation"
+      },
+      {
+        "label": "BBC - Parents warned not to publicly share children's images amid AI abuse risks",
+        "url": "https://www.bbc.com/news/articles/cd7wj7d0jzzo",
+        "year": 2026,
+        "author": "BBC"
+      }
+    ]
+  },
+  {
+    "slug": "nca",
+    "name": "NCA",
+    "acronym_full": "National Crime Agency",
+    "cat_slug": "securite-et-ethique",
+    "difficulty": "intermediate",
+    "type": "acronym",
+    "icon": "🚔",
+    "match_strategy": "loose",
+    "aliases": ["National Crime Agency", "CEOP", "Child Exploitation and Online Protection"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "has_image": false,
+    "definition": "La National Crime Agency (NCA) est l'agence nationale britannique chargée de la lutte contre la criminalité grave et organisée, au niveau national et international. Elle construit du renseignement centralisé, soutient les forces de police locales et développe des capacités spécialisées en cybercriminalité et coopération internationale. La protection des enfants contre l'exploitation sexuelle en ligne est l'une de ses priorités centrales, notamment via le volet Child Exploitation and Online Protection (CEOP), intégré à la NCA en 2013. Le CEOP cible la production, la diffusion et le visionnage de contenu CSAM, ainsi que le grooming. La NCA enquête et interpelle les délinquants sexuels d'enfants, en ligne comme hors ligne, et reçoit un volume important de signalements de plateformes et partenaires internationaux pour lancer des opérations et protéger les victimes. Depuis 2023, le Online Safety Act impose aux plateformes de détecter et signaler à la NCA le matériel CSAM, incluant désormais le contenu généré par IA. La NCA préside aussi la Virtual Global Taskforce, alliance internationale d'agences de police.",
+    "analogy": "La NCA est le chef d'orchestre de la lutte contre les crimes graves au Royaume-Uni, coordonnant les forces locales et internationales.",
+    "example": "En 2025, la NCA a travaillé avec l'IWF sur les 8 029 images CSAM générées par IA, utilisant le Online Safety Act pour obliger les plateformes à signaler ces contenus.",
+    "did_you_know": "La NCA préside la Virtual Global Taskforce, une alliance internationale d'agences de police dédiée à la protection des enfants dans l'environnement numérique.",
+    "one_sentence_answer": "La National Crime Agency est l'agence britannique de lutte contre la criminalité grave, avec une priorité sur la protection des enfants contre l'exploitation sexuelle en ligne via le CEOP.",
+    "faq": [
+      {
+        "question": "Quel est le rôle du CEOP au sein de la NCA ?",
+        "answer": "Le CEOP est le centre dédié à la protection des enfants contre l'exploitation sexuelle en ligne, qui enquête sur la production, la diffusion et le visionnage de contenu CSAM, le grooming et d'autres abus."
+      },
+      {
+        "question": "Comment la NCA reçoit-elle les signalements de contenus illégaux ?",
+        "answer": "La NCA reçoit des signalements des plateformes en ligne, de partenaires internationaux et du public, et utilise ces informations pour lancer des opérations de protection des victimes."
+      },
+      {
+        "question": "Quel est l'impact du Online Safety Act sur le travail de la NCA ?",
+        "answer": "Depuis octobre 2023, le Online Safety Act oblige les plateformes à détecter et signaler le CSAM à la NCA, incluant désormais les contenus générés par IA."
+      }
+    ],
+    "sources": [
+      {
+        "label": "National Crime Agency - Child sexual abuse and exploitation",
+        "url": "https://www.nationalcrimeagency.gov.uk/what-we-do/crime-threats/child-sexual-abuse-and-exploitation",
+        "year": 2026,
+        "author": "National Crime Agency"
+      },
+      {
+        "label": "Wikipedia - Child Exploitation and Online Protection Centre",
+        "url": "https://fr.wikipedia.org/wiki/Child_Exploitation_and_Online_Protection_Centre",
+        "year": 2026,
+        "author": "Wikipedia"
+      }
+    ]
+  }
+]
