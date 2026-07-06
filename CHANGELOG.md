@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.90.0] - 2026-07-06
+
+### Added
+- **PWA Académie — raccourci manifest.** Ajout de "Académie" aux raccourcis PWA (parité avec Actualités/Répertoire/Glossaire/Outils).
+
+### Fixed
+- **Scope du service worker PWA limité à `/build/` (site-wide).** Le service worker (vite-plugin-pwa) n'était en réalité enregistré et actif que sur les fichiers sous `/build/` - aucune page du site n'était contrôlée ni mise en cache hors-ligne, malgré la stratégie NetworkFirst configurée dans le code source du SW. Corrigé via `scope:'/'` (vite.config.js) + en-tête `Service-Worker-Allowed: /` (public/.htaccess) - les deux mécanismes sont nécessaires ensemble pour élargir le scope au-delà du répertoire du fichier SW.
+
 ## [1.89.0] - 2026-07-06
 
 ### Added

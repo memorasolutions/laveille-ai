@@ -17,6 +17,19 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.90.0 · 2026-07-06 · feat(pwa) VAGUE 2 mobile/offline-first (Académie) + FIX SITE-WIDE
+ *     scope Service Worker : ajout du raccourci "Académie" au manifest.webmanifest (parité
+ *     avec Actualités/Répertoire/Glossaire/Outils). Audit responsive des 33 vues publiques
+ *     Academy : aucun risque réel trouvé (grilles Bootstrap déjà en place sur les pages à
+ *     layout riche, conteneurs fluides ailleurs). DÉCOUVERTE MAJEURE en vérifiant : le service
+ *     worker PWA (vite-plugin-pwa, sw-source.js) avait un scope navigateur limité à /build/
+ *     (répertoire du fichier buildé) - `navigator.serviceWorker.controller` était `null` sur
+ *     TOUTE page hors /build/, donc AUCUNE page du site (pas seulement Académie) n'était
+ *     réellement contrôlée/mise en cache offline par le SW, contrairement à ce qui était
+ *     documenté. Corrigé par `scope:'/'` (vite.config.js) + en-tête `Service-Worker-Allowed: /`
+ *     (public/.htaccess, ciblé sur sw-source.js) - les deux mécanismes sont requis ensemble
+ *     pour qu'un navigateur autorise un scope plus large que le répertoire du fichier SW.
+ *     Rebuild npm run build effectué et vérifié (scope:"/" confirmé dans le bundle).
  *   1.89.0 · 2026-07-06 · feat(outils) MINUTEUR VISUEL - MISE EN LIGNE PUBLIQUE : le gate
  *     `is_under_construction` (superadmin-only depuis le développement initial de l'outil,
  *     #688-847) est levé après régression complète du module Tools (33 tests verts) et
@@ -691,7 +704,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 89;
+$lvMinor = 90;
 $lvPatch = 0;
 
 return [

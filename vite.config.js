@@ -62,6 +62,10 @@ export default defineConfig({
             srcDir: 'resources/js',
             filename: 'sw-source.js',
             registerType: 'prompt',
+            // scope:'/' — le fichier buildé vit sous /build/ (scope navigateur par defaut =
+            // /build/, verifie en prod : navigator.serviceWorker.controller null hors /build/).
+            // Elargi a tout le site via ce scope + l'en-tete Service-Worker-Allowed (public/.htaccess).
+            scope: '/',
             manifest: false,
             injectManifest: {
                 // Précache LÉGER : js/css/woff2 + icônes PWA (png/ico) seulement.

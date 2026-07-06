@@ -32,6 +32,14 @@
 # ETag optimisation
 FileETag MTime Size
 
+# Service worker PWA (build/sw-source.js) : elargit le scope au-dela de /build/
+# (defaut navigateur = repertoire du fichier) pour que le SW controle tout le site.
+<IfModule mod_headers.c>
+    <FilesMatch "^sw-source\.js$">
+        Header set Service-Worker-Allowed "/"
+    </FilesMatch>
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
