@@ -14,7 +14,7 @@
     ],
     "broader_slugs": ["rgpd", "data-privacy-framework"],
     "narrower_slugs": [],
-    "has_image": false,
+    "has_image": true,
     "definition": "Noyb (acronyme de « None Of Your Business », soit « Ça ne te regarde pas ») est le Centre européen pour les droits numériques, une organisation à but non lucratif basée à Vienne, en Autriche. Fondée par l'avocat et activiste Max Schrems, elle a été juridiquement créée en 2017 et est devenue opérationnelle le 25 mai 2018, date d'entrée en vigueur du RGPD, grâce à une campagne de financement participatif. Sa mission est d'utiliser les outils du RGPD (plaintes collectives, mandats, contentieux stratégique) pour faire respecter les droits numériques des citoyens face aux grandes plateformes technologiques. Max Schrems était déjà connu pour ses plaintes contre Facebook ayant mené aux arrêts Schrems I et II de la CJUE, invalidant les cadres Safe Harbor et Privacy Shield. En 2026, Noyb critique vivement le nouveau Data Privacy Framework, qu'elle juge presque identique aux mécanismes précédents, et prépare un nouveau recours devant la CJUE après le rejet d'une première action portée par le député Philippe Latombe.",
     "analogy": "Noyb agit comme un chien de garde numérique : il mord les géants de la tech quand ils violent la vie privée des Européens.",
     "example": "En juillet 2026, Noyb prépare un recours devant la CJUE contre le Data Privacy Framework, jugeant ses garanties insuffisantes face à la surveillance américaine.",

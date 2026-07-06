@@ -10,7 +10,7 @@
     "aliases": ["DPF", "EU-US Data Privacy Framework", "Cadre de protection des données UE-É.-U."],
     "broader_slugs": ["rgpd"],
     "narrower_slugs": [],
-    "has_image": false,
+    "has_image": true,
     "definition": "Le Data Privacy Framework (DPF) est le troisième mécanisme de transfert transatlantique de données personnelles entre l'Union européenne et les États-Unis, après Safe Harbor et Privacy Shield, tous deux annulés par la Cour de justice de l'UE (arrêts Schrems I et II). Adopté par la Commission européenne le 10 juillet 2023 au titre de l'article 45 du RGPD, il combine l'auto-certification des entreprises américaines - surveillée par la Federal Trade Commission - avec les garanties du décret présidentiel Executive Order 14086, qui limite l'accès du renseignement américain aux données européennes. Les plaintes passent d'abord par le Civil Liberties Protection Officer, puis par la Data Protection Review Court, une cour indépendante aux décisions contraignantes. Étendu à l'Espace économique européen et à la Suisse en 2024, le cadre a résisté à un recours en annulation devant le Tribunal de l'UE en septembre 2025, mais un pourvoi reste pendant devant la CJUE. En juillet 2026, une décision de la Cour suprême américaine sur l'indépendance de la FTC (Trump v. Slaughter) relance les doutes sur sa stabilité à long terme.",
     "analogy": "C'est un pont transatlantique pour données, avec certification obligatoire, surveillance de la FTC et un tribunal indépendant pour les recours.",
     "example": "Un fournisseur de services cloud américain certifié DPF peut recevoir des données personnelles d'une entreprise européenne sans clauses contractuelles types supplémentaires.",

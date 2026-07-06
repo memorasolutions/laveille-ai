@@ -11,7 +11,7 @@
     "aliases": ["Reference Sliding Window Attention"],
     "broader_slugs": ["mecanisme-attention", "fenetre-attention"],
     "narrower_slugs": [],
-    "has_image": false,
+    "has_image": true,
     "definition": "Le R-SWA (Reference Sliding Window Attention) est un mécanisme d'attention conçu pour les transformeurs, visant à offrir une mémoire à long terme tout en maintenant une taille de cache KV (Key-Value) constante, même lorsque la séquence d'entrée s'allonge. Introduit par Baidu en juin 2026 dans le cadre de son modèle open source Unlimited OCR, il combine une fenêtre glissante pour le contexte local récent avec un petit ensemble de « mémoires de référence », qui sont des résumés compressés des informations plus anciennes. Ainsi, au lieu de conserver tout l'historique complet, le modèle garde une mémoire récente et une mémoire compressée à long terme, ce qui empêche la croissance linéaire du cache KV, contrairement aux transformeurs standards. Cette approche a d'abord été démontrée pour l'OCR de longs documents, permettant d'analyser des dizaines de pages en un seul passage sans découpage ni recollage. Elle préserve suffisamment de contexte global pour des tâches nécessitant une copie fidèle de longues entrées, comme la reconnaissance vocale ou la traduction, tout en gardant une mémoire d'inférence plate.",
     "analogy": "Comme notre mémoire humaine : on se souvient précisément des dernières secondes, mais on résume les souvenirs plus anciens en quelques notes clés.",
     "example": "Baidu a utilisé le R-SWA dans son modèle Unlimited OCR pour lire des dizaines de pages d'un document en un seul passage, sans les découper.",
