@@ -390,14 +390,21 @@
 .mv-traffic-legend__line { margin: 0 0 .2rem; opacity: .85; }
 .mv-traffic-legend__note { margin: .4rem 0 0; opacity: .7; font-style: italic; }
 
-/* --- Live region ARIA (visible mais discrète) --- */
+/* --- Live region ARIA (lecteurs d'écran uniquement) ---
+   #837-840 : rendue visuellement masquée (pattern sr-only standard) - le message
+   ("14 minutes restantes") dupliquait purement le mm:ss déjà affiché en continu au centre du
+   cadran, signalé comme inutile à l'écran par l'utilisateur. L'annonce reste dans le DOM et
+   continue de fonctionner pour les lecteurs d'écran (aria-live="polite" inchangé côté blade/JS). */
 .mv-live {
-    text-align: center;
-    min-height: 1.2rem;
-    font-size: .85rem;
-    color: var(--c-primary, #064E5A);
-    font-weight: 600;
-    margin-bottom: 1rem;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 /* --- Contrôles & présélections ---

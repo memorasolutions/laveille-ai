@@ -17,6 +17,12 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.87.4 · 2026-07-06 · fix(outils) MINUTEUR VISUEL - le texte "X minutes restantes" affiché
+ *     visuellement sous le cadran (élément `.mv-live`, annonce ARIA `aria-live="polite"`) dupliquait
+ *     purement le chiffre mm:ss déjà affiché en continu au centre du cadran - signalé comme inutile
+ *     par l'utilisateur. Masqué visuellement via le pattern standard sr-only (position absolute,
+ *     1x1px, clip rect), en gardant l'élément et l'annonce intacts dans le DOM pour les lecteurs
+ *     d'écran (aucune régression d'accessibilité, vérifié via getComputedStyle + textContent peuplé).
  *   1.87.3 · 2026-07-06 · fix(outils) MINUTEUR VISUEL - fusion du disclosure "Favoris, couleur par
  *     défaut, récentes" (v1.87.2) DANS le panneau "Réglages" (désormais "Réglages et personnalisations")
  *     - l'utilisateur a signalé que les fonctions personnalisées prenaient encore trop de place. Veille
@@ -654,7 +660,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 87;
-$lvPatch = 3;
+$lvPatch = 4;
 
 return [
     'major' => $lvMajor,

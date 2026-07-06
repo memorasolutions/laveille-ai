@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.87.4] - 2026-07-06
+
+### Fixed
+- **Minuteur visuel — texte "X minutes restantes" redondant sous le cadran.** Ce texte était en fait une annonce ARIA (`aria-live="polite"`) pensée pour les lecteurs d'écran, mais affichée visuellement alors qu'elle dupliquait le chiffre mm:ss déjà visible en continu au centre du cadran. Masqué visuellement (pattern sr-only standard), l'annonce reste fonctionnelle pour les lecteurs d'écran.
+
 ## [1.87.3] - 2026-07-06
 
 ### Fixed
