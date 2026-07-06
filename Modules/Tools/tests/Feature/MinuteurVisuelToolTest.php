@@ -114,10 +114,15 @@ it('renders minuteur-visuel tool page with required DOM markers', function () {
     $response->assertSee('class="mv-login-hint"', escape: false);
     $response->assertSee('Connectez-vous pour retrouver vos couleurs personnalisées', escape: false);
 
-    // #816-820 — favoris/défaut/récentes consolidés dans un repli compact, replié par défaut
-    // (empilés en rangées séparées, ils ajoutaient trop de hauteur avant le cadran).
-    $response->assertSee('class="mv-color-manager"', escape: false);
-    $response->assertSee('Favoris, couleur par défaut, récentes', escape: false);
+    // #831-836 — favoris/défaut/récentes fusionnés DANS le panneau "Réglages et personnalisations"
+    // (l'ancien 2e disclosure séparé .mv-color-manager, #816-820, prenait encore de la place à
+    // l'écran même replié - un seul point d'entrée replié, conforme à la veille pp_search 2026 :
+    // accordéon unique + sous-sections groupées, pas plusieurs tiroirs empilés).
+    $response->assertSee('Réglages et personnalisations', escape: false);
+    $response->assertDontSee('class="mv-color-manager"', escape: false);
+    $response->assertSee('class="mv-settings__group"', escape: false);
+    $response->assertSee('class="mv-settings__group-title"', escape: false);
+    $response->assertSee('Personnalisation des couleurs', escape: false);
 
     // #787-792 — étoile de favoris couleur (max 2), distincte de l'historique roulant récent.
     $response->assertSee('class="mv-color-favorite-toggle"', escape: false);

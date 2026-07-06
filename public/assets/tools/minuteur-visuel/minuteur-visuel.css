@@ -82,26 +82,6 @@
     pointer-events: none;
 }
 
-/* #816-820 : disclosure compact regroupant favoris/défaut/récentes (repliés par défaut) - même
-   principe que .mv-settings plus bas sur la page, en plus léger (texte seul, pas de boîte pleine
-   largeur) puisqu'il s'agit d'un repli secondaire tout de suite après les pastilles de couleur. */
-.mv-color-manager { margin: -.25rem 0 1.25rem; text-align: center; }
-.mv-color-manager summary {
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: .4rem;
-    font-size: .85rem;
-    color: var(--c-text-muted, #52586a);
-    list-style: none;
-    padding: .3rem .5rem;
-    min-height: 24px;
-}
-.mv-color-manager summary::-webkit-details-marker { display: none; }
-.mv-color-manager__chevron { font-size: .7rem; transition: transform .2s ease; }
-.mv-color-manager[open] summary .mv-color-manager__chevron { transform: rotate(180deg); }
-.mv-color-manager__body { display: grid; gap: .5rem; margin-top: .5rem; }
-
 /* #787-792 : bouton étoile "épingler cette couleur" - même classe .mv-pin-btn que les durées
    (44x44 AAA), simplement inline avec un libellé texte (pas à côté d'un bouton "Définir" ici). */
 .mv-color-favorite-toggle {
@@ -563,6 +543,26 @@
     border: 1.5px solid #E5E7EB;
     border-radius: 8px;
     font-size: .9rem;
+}
+
+/* #831-836 : sous-sections groupées à l'intérieur du panneau unique "Réglages et
+   personnalisations" (fusion de l'ancien 2e disclosure .mv-color-manager) - veille pp_search
+   2026 confirmée : un seul accordéon avec des sous-titres légers plutôt que plusieurs tiroirs
+   empilés ou des onglets imbriqués (qui doublent le coût d'interaction pour un contenu qui
+   n'est pas comparatif). Chaque groupe = un droit d'en-tête discret + un filet supérieur
+   (sauf le premier), pas une nouvelle boîte pleine largeur qui alourdirait le panneau déjà replié. */
+.mv-settings__group { display: grid; gap: .6rem; }
+.mv-settings__group + .mv-settings__group {
+    padding-top: .85rem;
+    border-top: 1px solid var(--sys-border-subtle, #E5E7EB);
+}
+.mv-settings__group-title {
+    margin: 0;
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: var(--c-text-muted, #52586a);
 }
 
 /* #797-801 : variante empilée (label au-dessus, pas côte-à-côte) pour les seuils du feu -

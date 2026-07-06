@@ -17,6 +17,14 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.87.3 · 2026-07-06 · fix(outils) MINUTEUR VISUEL - fusion du disclosure "Favoris, couleur par
+ *     défaut, récentes" (v1.87.2) DANS le panneau "Réglages" (désormais "Réglages et personnalisations")
+ *     - l'utilisateur a signalé que les fonctions personnalisées prenaient encore trop de place. Veille
+ *     pp_search 2026 confirmée : un seul accordéon avec sous-sections groupées par en-tête léger (🎨/♿/
+ *     🍅/🚦), plutôt que plusieurs tiroirs empilés ou des onglets imbriqués (coût d'interaction doublé
+ *     pour un contenu non comparatif). Ancienne classe `.mv-color-manager` entièrement retirée du DOM et
+ *     du CSS ; 4 sous-groupes conditionnels selon le style actif (personnalisation couleurs uniquement si
+ *     supportsColorPalette, feu de circulation uniquement si style=traffic). Zéro fonctionnalité perdue.
  *   1.87.2 · 2026-07-05 · fix(outils) MINUTEUR VISUEL - mise en page du bloc couleur beaucoup trop haute :
  *     l'ajout incrémental de 3 fonctionnalités (étoile favoris #787-792, couleur par défaut #806-811, plus
  *     l'historique récent existant) empilait chacune sa propre rangée toujours visible, portant le bloc à
@@ -646,7 +654,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 87;
-$lvPatch = 2;
+$lvPatch = 3;
 
 return [
     'major' => $lvMajor,

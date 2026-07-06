@@ -191,94 +191,6 @@
                             </label>
                         </div>
 
-                        {{-- #816-820 : favoris/défaut/récentes consolidés dans un repli COMPACT, replié par
-                             défaut - empilés en rangées séparées, ils ajoutaient ~200px avant même d'arriver
-                             au cadran (signalé "beaucoup trop haut" par l'utilisateur, capture à l'appui).
-                             Choix retenu après veille pp_search : disclosure natif (cohérent avec le pattern
-                             "Réglages" déjà utilisé plus bas sur cette page), pas un popover ancré - moins de
-                             risque d'introduire une nouvelle classe de bugs d'interaction (positionnement,
-                             clic extérieur, focus trap) après plusieurs rounds de correctifs CSS aujourd'hui. --}}
-                        <details class="mv-color-manager" x-show="supportsColorPalette" x-cloak>
-                            <summary>
-                                <span aria-hidden="true">★</span>
-                                {{ __('Favoris, couleur par défaut, récentes') }}
-                                <span class="mv-color-manager__chevron" aria-hidden="true">▼</span>
-                            </summary>
-                            <div class="mv-color-manager__body">
-                                {{-- #787-792 : étoile favoris couleur (max 2) - même bascule explicite que les
-                                     durées épinglées (customDurations), distincte de l'historique roulant
-                                     automatique des couleurs personnalisées récentes ci-dessous. --}}
-                                <div class="mv-color-favorite-toggle" x-show="isAuthenticated" x-cloak>
-                                    <button type="button"
-                                            class="mv-pin-btn"
-                                            :disabled="!isCurrentColorPinnable"
-                                            @click="toggleFavoriteColor()"
-                                            :aria-label="isCurrentColorFavorite ? '{{ __('Retirer cette couleur des favoris') }}' : '{{ __('Ajouter cette couleur aux favoris') }}'"
-                                            :title="isCurrentColorFavorite ? '{{ __('Retirer cette couleur des favoris') }}' : '{{ __('Ajouter cette couleur aux favoris (2 maximum)') }}'"
-                                            :class="{ 'active': isCurrentColorFavorite }">
-                                        <span aria-hidden="true" x-text="isCurrentColorFavorite ? '★' : '☆'"></span>
-                                    </button>
-                                    <span class="mv-color-favorite-toggle__label">{{ __('Épingler cette couleur comme favorite') }}</span>
-                                </div>
-
-                                {{-- #806-811 : couleur par défaut du compte - action explicite distincte des
-                                     favoris (qui servent à un accès rapide entre 2 teintes) : le défaut est LA
-                                     teinte qui s'applique automatiquement sur tout nouvel appareil connecté. --}}
-                                <div class="mv-color-favorite-toggle" x-show="isAuthenticated" x-cloak>
-                                    <button type="button"
-                                            class="ct-btn ct-btn-outline ct-btn-xs"
-                                            :disabled="isCurrentColorDefault"
-                                            @click="setDefaultColor()">
-                                        <span aria-hidden="true" x-show="isCurrentColorDefault">✓</span>
-                                        <span x-text="isCurrentColorDefault ? '{{ __('Couleur par défaut') }}' : '{{ __('Définir comme couleur par défaut') }}'"></span>
-                                    </button>
-                                </div>
-                                <template x-if="isAuthenticated && favoriteColors.length > 0">
-                                    <div class="mv-favorite-colors" aria-label="{{ __('Couleurs favorites') }}">
-                                        <span class="mv-recent-colors-label">{{ __('Favoris :') }}</span>
-                                        <template x-for="(hex, i) in favoriteColors" :key="'fav'+i">
-                                            <span class="mv-favorite-color-chip">
-                                                <button type="button"
-                                                        class="mv-color-btn mv-color-btn-recent"
-                                                        :style="'background:' + hex + ';'"
-                                                        :class="{ 'active': accentHex.toLowerCase() === hex.toLowerCase() }"
-                                                        :aria-label="hex"
-                                                        :title="hex"
-                                                        @click="applyFavoriteColor(hex)"></button>
-                                                <button type="button"
-                                                        class="mv-favorite-color-remove"
-                                                        @click="removeFavoriteColor(hex)"
-                                                        :aria-label="'{{ __('Retirer') }} ' + hex"
-                                                        title="{{ __('Retirer') }}">&times;</button>
-                                            </span>
-                                        </template>
-                                    </div>
-                                </template>
-
-                                {{-- #744-750 : couleurs personnalisées récentes (connectés) + incitation à se
-                                     connecter (invités) - le rappel serveur (users.tool_preferences) évite de
-                                     perdre ses teintes personnalisées d'un appareil/navigateur à l'autre. --}}
-                                <template x-if="isAuthenticated && recentCustomColors.length > 0">
-                                    <div class="mv-recent-colors" aria-label="{{ __('Couleurs personnalisées récentes') }}">
-                                        <span class="mv-recent-colors-label">{{ __('Récentes :') }}</span>
-                                        <template x-for="(hex, i) in recentCustomColors" :key="'recent'+i">
-                                            <button type="button"
-                                                    class="mv-color-btn mv-color-btn-recent"
-                                                    :style="'background:' + hex + ';'"
-                                                    :class="{ 'active': accentColor === 'custom' && customColorHex.toLowerCase() === hex.toLowerCase() }"
-                                                    :aria-label="hex"
-                                                    :title="hex"
-                                                    @click="setCustomColor(hex)"></button>
-                                        </template>
-                                    </div>
-                                </template>
-                                <div class="mv-login-hint" x-show="!isAuthenticated" x-cloak>
-                                    {{ __('Connectez-vous pour retrouver vos couleurs personnalisées, vos favoris et votre couleur par défaut sur tous vos appareils.') }}
-                                    <a href="{{ route('login') }}">{{ __('Se connecter') }}</a>
-                                </div>
-                            </div>
-                        </details>
-
                         {{-- Zone visuelle du cadran actif --}}
                         <div class="mv-dial-zone" :class="'mv-style-' + style">
 
@@ -560,92 +472,173 @@
                             <a href="{{ route('login') }}">{{ __('Se connecter') }}</a>
                         </div>
 
-                        {{-- Réglages accessibilité --}}
+                        {{-- Réglages ET personnalisations — #831-836 : fusion de l'ancien disclosure séparé
+                             .mv-color-manager (favoris/défaut/récentes, #816-820) DANS ce panneau unique,
+                             suite à la demande explicite de l'utilisateur ("les fonctions personnalisées
+                             prennent trop de place, descendre dans Réglages"). Un seul point d'entrée replié
+                             plutôt que 2 disclosures empilées - conforme à la veille pp_search 2026 (accordéon
+                             unique + sous-sections groupées par en-tête léger, plutôt que multiplier les
+                             tiroirs ou imbriquer des onglets qui doublent le coût d'interaction). --}}
                         <details class="mv-settings">
                             <summary>
-                                <span>{{ __('Réglages') }}</span>
+                                <span>{{ __('Réglages et personnalisations') }}</span>
                                 <span class="mv-settings__chevron" aria-hidden="true">▼</span>
                             </summary>
                             <div class="mv-settings__body">
-                                <div class="mv-settings__row">
-                                    <label for="mvSoundToggle">{{ __('Alerte sonore') }}</label>
-                                    <input type="checkbox" id="mvSoundToggle" x-model="soundEnabled" @change="toggleSound()" style="display:inline-block !important; width:20px; height:20px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
-                                </div>
-                                <div class="mv-settings__row">
-                                    <label for="mvReducedMotionToggle">{{ __('Réduire les animations') }}</label>
-                                    <input type="checkbox" id="mvReducedMotionToggle" x-model="reducedMotion" @change="toggleReducedMotion()" style="display:inline-block !important; width:20px; height:20px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
-                                </div>
-                                <div class="mv-settings__row">
-                                    <label for="mvWarningThreshold">{{ __('Alerte « bientôt fini » (secondes avant la fin)') }}</label>
-                                    <span style="display:flex; align-items:center; gap:.4rem;">
-                                        <input type="number" id="mvWarningThreshold" min="0" max="600" x-model.number="warningThresholdSec" @change="setWarningThreshold(warningThresholdSec)">
-                                        <span aria-hidden="true" style="font-size:.85rem; color:var(--c-dark, #1A1D23); opacity:.75;">{{ __('s') }}</span>
-                                    </span>
-                                </div>
-                                {{-- #712 : durées Pomodoro configurables — pilotent les presets "Pomodoro"/"Pause"
-                                     ci-dessus (défaut 25/5 classique, persistées localStorage comme le reste
-                                     de Réglages). --}}
-                                <div class="mv-settings__row">
-                                    <label for="mvPomodoroFocus">{{ __('Durée du focus Pomodoro (minutes)') }}</label>
-                                    <input type="number" id="mvPomodoroFocus" min="1" max="120" x-model.number="pomodoroFocusMin" @change="setPomodoroFocus(pomodoroFocusMin)">
-                                </div>
-                                <div class="mv-settings__row">
-                                    <label for="mvPomodoroBreak">{{ __('Durée de la pause Pomodoro (minutes)') }}</label>
-                                    <input type="number" id="mvPomodoroBreak" min="1" max="30" x-model.number="pomodoroBreakMin" @change="setPomodoroBreak(pomodoroBreakMin)">
+                                {{-- Groupe 1 : personnalisation des couleurs (ex mv-color-manager) — favoris,
+                                     couleur par défaut du compte, historique récent. Seulement pour les styles
+                                     qui supportent une couleur d'accent (disque/anneau/chiffres). --}}
+                                <div class="mv-settings__group" x-show="supportsColorPalette" x-cloak>
+                                    <p class="mv-settings__group-title"><span aria-hidden="true">🎨</span> {{ __('Personnalisation des couleurs') }}</p>
+                                    <div class="mv-color-favorite-toggle" x-show="isAuthenticated" x-cloak>
+                                        <button type="button"
+                                                class="mv-pin-btn"
+                                                :disabled="!isCurrentColorPinnable"
+                                                @click="toggleFavoriteColor()"
+                                                :aria-label="isCurrentColorFavorite ? '{{ __('Retirer cette couleur des favoris') }}' : '{{ __('Ajouter cette couleur aux favoris') }}'"
+                                                :title="isCurrentColorFavorite ? '{{ __('Retirer cette couleur des favoris') }}' : '{{ __('Ajouter cette couleur aux favoris (2 maximum)') }}'"
+                                                :class="{ 'active': isCurrentColorFavorite }">
+                                            <span aria-hidden="true" x-text="isCurrentColorFavorite ? '★' : '☆'"></span>
+                                        </button>
+                                        <span class="mv-color-favorite-toggle__label">{{ __('Épingler cette couleur comme favorite') }}</span>
+                                    </div>
+                                    <div class="mv-color-favorite-toggle" x-show="isAuthenticated" x-cloak>
+                                        <button type="button"
+                                                class="ct-btn ct-btn-outline ct-btn-xs"
+                                                :disabled="isCurrentColorDefault"
+                                                @click="setDefaultColor()">
+                                            <span aria-hidden="true" x-show="isCurrentColorDefault">✓</span>
+                                            <span x-text="isCurrentColorDefault ? '{{ __('Couleur par défaut') }}' : '{{ __('Définir comme couleur par défaut') }}'"></span>
+                                        </button>
+                                    </div>
+                                    <template x-if="isAuthenticated && favoriteColors.length > 0">
+                                        <div class="mv-favorite-colors" aria-label="{{ __('Couleurs favorites') }}">
+                                            <span class="mv-recent-colors-label">{{ __('Favoris :') }}</span>
+                                            <template x-for="(hex, i) in favoriteColors" :key="'fav'+i">
+                                                <span class="mv-favorite-color-chip">
+                                                    <button type="button"
+                                                            class="mv-color-btn mv-color-btn-recent"
+                                                            :style="'background:' + hex + ';'"
+                                                            :class="{ 'active': accentHex.toLowerCase() === hex.toLowerCase() }"
+                                                            :aria-label="hex"
+                                                            :title="hex"
+                                                            @click="applyFavoriteColor(hex)"></button>
+                                                    <button type="button"
+                                                            class="mv-favorite-color-remove"
+                                                            @click="removeFavoriteColor(hex)"
+                                                            :aria-label="'{{ __('Retirer') }} ' + hex"
+                                                            title="{{ __('Retirer') }}">&times;</button>
+                                                </span>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    <template x-if="isAuthenticated && recentCustomColors.length > 0">
+                                        <div class="mv-recent-colors" aria-label="{{ __('Couleurs personnalisées récentes') }}">
+                                            <span class="mv-recent-colors-label">{{ __('Récentes :') }}</span>
+                                            <template x-for="(hex, i) in recentCustomColors" :key="'recent'+i">
+                                                <button type="button"
+                                                        class="mv-color-btn mv-color-btn-recent"
+                                                        :style="'background:' + hex + ';'"
+                                                        :class="{ 'active': accentColor === 'custom' && customColorHex.toLowerCase() === hex.toLowerCase() }"
+                                                        :aria-label="hex"
+                                                        :title="hex"
+                                                        @click="setCustomColor(hex)"></button>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    <div class="mv-login-hint" x-show="!isAuthenticated" x-cloak>
+                                        {{ __('Connectez-vous pour retrouver vos couleurs personnalisées, vos favoris et votre couleur par défaut sur tous vos appareils.') }}
+                                        <a href="{{ route('login') }}">{{ __('Se connecter') }}</a>
+                                    </div>
                                 </div>
 
-                                {{-- #797-801 : seuils du feu de circulation - profils préréglés en 1 clic
-                                     (option la plus facile confirmée par veille pp_search 2026), repli
-                                     "Personnalisé" avec 2 champs % pour qui veut de la précision. --}}
-                                <div class="mv-settings__row mv-settings__row--stack" x-show="style === 'traffic' && isAuthenticated" x-cloak>
-                                    <label id="mvTrafficProfilesLabel">{{ __('Seuils du feu de circulation') }}</label>
-                                    <div class="mv-traffic-profiles" role="radiogroup" aria-labelledby="mvTrafficProfilesLabel">
-                                        <template x-for="(profile, key) in trafficProfiles" :key="key">
+                                {{-- Groupe 2 : accessibilité --}}
+                                <div class="mv-settings__group">
+                                    <p class="mv-settings__group-title"><span aria-hidden="true">♿</span> {{ __('Accessibilité') }}</p>
+                                    <div class="mv-settings__row">
+                                        <label for="mvSoundToggle">{{ __('Alerte sonore') }}</label>
+                                        <input type="checkbox" id="mvSoundToggle" x-model="soundEnabled" @change="toggleSound()" style="display:inline-block !important; width:20px; height:20px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
+                                    </div>
+                                    <div class="mv-settings__row">
+                                        <label for="mvReducedMotionToggle">{{ __('Réduire les animations') }}</label>
+                                        <input type="checkbox" id="mvReducedMotionToggle" x-model="reducedMotion" @change="toggleReducedMotion()" style="display:inline-block !important; width:20px; height:20px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
+                                    </div>
+                                    <div class="mv-settings__row">
+                                        <label for="mvWarningThreshold">{{ __('Alerte « bientôt fini » (secondes avant la fin)') }}</label>
+                                        <span style="display:flex; align-items:center; gap:.4rem;">
+                                            <input type="number" id="mvWarningThreshold" min="0" max="600" x-model.number="warningThresholdSec" @change="setWarningThreshold(warningThresholdSec)">
+                                            <span aria-hidden="true" style="font-size:.85rem; color:var(--c-dark, #1A1D23); opacity:.75;">{{ __('s') }}</span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {{-- Groupe 3 : Pomodoro — #712, durées configurables pilotant les presets ci-dessus. --}}
+                                <div class="mv-settings__group">
+                                    <p class="mv-settings__group-title"><span aria-hidden="true">🍅</span> {{ __('Minuteur Pomodoro') }}</p>
+                                    <div class="mv-settings__row">
+                                        <label for="mvPomodoroFocus">{{ __('Durée du focus Pomodoro (minutes)') }}</label>
+                                        <input type="number" id="mvPomodoroFocus" min="1" max="120" x-model.number="pomodoroFocusMin" @change="setPomodoroFocus(pomodoroFocusMin)">
+                                    </div>
+                                    <div class="mv-settings__row">
+                                        <label for="mvPomodoroBreak">{{ __('Durée de la pause Pomodoro (minutes)') }}</label>
+                                        <input type="number" id="mvPomodoroBreak" min="1" max="30" x-model.number="pomodoroBreakMin" @change="setPomodoroBreak(pomodoroBreakMin)">
+                                    </div>
+                                </div>
+
+                                {{-- Groupe 4 : seuils du feu de circulation - #797-801, profils préréglés en 1
+                                     clic + repli "Personnalisé". Seulement visible sur le style Feu. --}}
+                                <div class="mv-settings__group" x-show="style === 'traffic'" x-cloak>
+                                    <p class="mv-settings__group-title"><span aria-hidden="true">🚦</span> {{ __('Feu de circulation') }}</p>
+                                    <div class="mv-settings__row mv-settings__row--stack" x-show="isAuthenticated" x-cloak>
+                                        <label id="mvTrafficProfilesLabel">{{ __('Seuils du feu de circulation') }}</label>
+                                        <div class="mv-traffic-profiles" role="radiogroup" aria-labelledby="mvTrafficProfilesLabel">
+                                            <template x-for="(profile, key) in trafficProfiles" :key="key">
+                                                <button type="button"
+                                                        role="radio"
+                                                        class="ct-btn ct-btn-outline ct-btn-xs"
+                                                        :class="{ 'ct-btn-primary': trafficProfile === key }"
+                                                        :aria-checked="(trafficProfile === key).toString()"
+                                                        @click="customTrafficOpen = false; setTrafficProfile(key)"
+                                                        x-text="profile.label"></button>
+                                            </template>
+                                            {{-- Reflète uniquement l'état RÉEL (trafficProfile), jamais le fait que le
+                                                 panneau soit ouvert - sinon 2 boutons du groupe peuvent apparaître actifs
+                                                 en même temps tant qu'on édite sans avoir cliqué "Appliquer" (bug détecté
+                                                 en vérification visuelle #797-801). Le panneau ouvert est déjà signalé
+                                                 par sa propre visibilité (x-show ci-dessous), pas besoin de doubler l'état
+                                                 sur le bouton du segmented control. --}}
                                             <button type="button"
                                                     role="radio"
                                                     class="ct-btn ct-btn-outline ct-btn-xs"
-                                                    :class="{ 'ct-btn-primary': trafficProfile === key }"
-                                                    :aria-checked="(trafficProfile === key).toString()"
-                                                    @click="customTrafficOpen = false; setTrafficProfile(key)"
-                                                    x-text="profile.label"></button>
-                                        </template>
-                                        {{-- Reflète uniquement l'état RÉEL (trafficProfile), jamais le fait que le
-                                             panneau soit ouvert - sinon 2 boutons du groupe peuvent apparaître actifs
-                                             en même temps tant qu'on édite sans avoir cliqué "Appliquer" (bug détecté
-                                             en vérification visuelle #797-801). Le panneau ouvert est déjà signalé
-                                             par sa propre visibilité (x-show ci-dessous), pas besoin de doubler l'état
-                                             sur le bouton du segmented control. --}}
-                                        <button type="button"
-                                                role="radio"
-                                                class="ct-btn ct-btn-outline ct-btn-xs"
-                                                :class="{ 'ct-btn-primary': trafficProfile === 'custom' }"
-                                                :aria-checked="(trafficProfile === 'custom').toString()"
-                                                @click="openCustomTrafficFields()">{{ __('Personnalisé') }}</button>
+                                                    :class="{ 'ct-btn-primary': trafficProfile === 'custom' }"
+                                                    :aria-checked="(trafficProfile === 'custom').toString()"
+                                                    @click="openCustomTrafficFields()">{{ __('Personnalisé') }}</button>
+                                        </div>
+                                        <div class="mv-traffic-custom" x-show="customTrafficOpen || trafficProfile === 'custom'" x-cloak>
+                                            <label for="mvTrafficGreen">{{ __('Vert au-dessus de (%)') }}</label>
+                                            <input type="number" id="mvTrafficGreen" min="2" max="99" x-model.number="customTrafficGreen">
+                                            <label for="mvTrafficYellow">{{ __('Jaune au-dessus de (%)') }}</label>
+                                            <input type="number" id="mvTrafficYellow" min="1" max="98" x-model.number="customTrafficYellow">
+                                            <button type="button"
+                                                    class="ct-btn ct-btn-primary ct-btn-xs"
+                                                    @click="setTrafficThresholdsCustom(customTrafficGreen, customTrafficYellow)">{{ __('Appliquer') }}</button>
+                                        </div>
+                                        {{-- #802-805 : confirmation immédiate colocalisée avec les boutons - le feu
+                                             lui-même reste vert tant que le décompte n'a pas commencé (100% restant
+                                             dépasse même le seuil vert le plus haut, 70%), donc cliquer un profil ne
+                                             change RIEN visuellement au feu avant que le minuteur ne tourne. Sans cette
+                                             ligne, l'utilisateur ne voit aucune preuve que le clic a fait quelque chose
+                                             (signalé comme "les boutons ne fonctionnent pas" alors que le réglage était
+                                             bien appliqué et persisté). --}}
+                                        <p class="mv-traffic-applied-hint" aria-live="polite">
+                                            <span aria-hidden="true">✓</span>
+                                            <span x-text="'{{ __('Appliqué') }} : {{ __('vert au-dessus de') }} ' + trafficGreenThreshold + ', {{ __('jaune de') }} ' + trafficYellowThreshold + ' {{ __('à') }} ' + trafficGreenThreshold + ', {{ __('rouge en dessous de') }} ' + trafficYellowThreshold"></span>
+                                        </p>
                                     </div>
-                                    <div class="mv-traffic-custom" x-show="customTrafficOpen || trafficProfile === 'custom'" x-cloak>
-                                        <label for="mvTrafficGreen">{{ __('Vert au-dessus de (%)') }}</label>
-                                        <input type="number" id="mvTrafficGreen" min="2" max="99" x-model.number="customTrafficGreen">
-                                        <label for="mvTrafficYellow">{{ __('Jaune au-dessus de (%)') }}</label>
-                                        <input type="number" id="mvTrafficYellow" min="1" max="98" x-model.number="customTrafficYellow">
-                                        <button type="button"
-                                                class="ct-btn ct-btn-primary ct-btn-xs"
-                                                @click="setTrafficThresholdsCustom(customTrafficGreen, customTrafficYellow)">{{ __('Appliquer') }}</button>
+                                    <div class="mv-login-hint" x-show="!isAuthenticated" x-cloak>
+                                        {{ __('Connectez-vous pour choisir vos propres seuils du feu de circulation.') }}
+                                        <a href="{{ route('login') }}">{{ __('Se connecter') }}</a>
                                     </div>
-                                    {{-- #802-805 : confirmation immédiate colocalisée avec les boutons - le feu
-                                         lui-même reste vert tant que le décompte n'a pas commencé (100% restant
-                                         dépasse même le seuil vert le plus haut, 70%), donc cliquer un profil ne
-                                         change RIEN visuellement au feu avant que le minuteur ne tourne. Sans cette
-                                         ligne, l'utilisateur ne voit aucune preuve que le clic a fait quelque chose
-                                         (signalé comme "les boutons ne fonctionnent pas" alors que le réglage était
-                                         bien appliqué et persisté). --}}
-                                    <p class="mv-traffic-applied-hint" aria-live="polite">
-                                        <span aria-hidden="true">✓</span>
-                                        <span x-text="'{{ __('Appliqué') }} : {{ __('vert au-dessus de') }} ' + trafficGreenThreshold + ', {{ __('jaune de') }} ' + trafficYellowThreshold + ' {{ __('à') }} ' + trafficGreenThreshold + ', {{ __('rouge en dessous de') }} ' + trafficYellowThreshold"></span>
-                                    </p>
-                                </div>
-                                <div class="mv-login-hint" x-show="style === 'traffic' && !isAuthenticated" x-cloak>
-                                    {{ __('Connectez-vous pour choisir vos propres seuils du feu de circulation.') }}
-                                    <a href="{{ route('login') }}">{{ __('Se connecter') }}</a>
                                 </div>
                             </div>
                         </details>

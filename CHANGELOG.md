@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.87.3] - 2026-07-06
+
+### Fixed
+- **Minuteur visuel — les fonctions personnalisées prenaient encore trop de place.** Le disclosure « Favoris, couleur par défaut, récentes » (v1.87.2) a été fusionné directement dans le panneau « Réglages », renommé « Réglages et personnalisations », organisé en 4 sous-sections groupées (🎨 Personnalisation des couleurs, ♿ Accessibilité, 🍅 Minuteur Pomodoro, 🚦 Feu de circulation), visibles selon le style actif. Décision confirmée par veille pp_search 2026 : un seul accordéon avec sous-sections légères plutôt que plusieurs tiroirs empilés ou des onglets imbriqués. Aucune fonctionnalité perdue.
+
 ## [1.87.2] - 2026-07-05
 
 ### Fixed
