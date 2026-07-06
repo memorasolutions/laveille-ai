@@ -1,0 +1,48 @@
+[
+  {
+    "slug": "omnidocbench",
+    "name": "OmniDocBench",
+    "cat_slug": "outils-et-techniques",
+    "difficulty": "advanced",
+    "type": "concept",
+    "icon": "📄",
+    "match_strategy": "loose",
+    "aliases": ["OmniDocBench v1.5", "OmniDocBench benchmark"],
+    "broader_slugs": ["ocr", "benchmark-ia"],
+    "narrower_slugs": [],
+    "has_image": false,
+    "definition": "OmniDocBench est un banc d'essai standardisé présenté à CVPR 2025, conçu pour évaluer de manière exhaustive les systèmes d'analyse et d'extraction de documents. Développé par le Shanghai AI Laboratory, ce benchmark va au-delà de l'OCR en mesurant la capacité à transformer un PDF brut en un format structuré complet comme le Markdown. Il permet une évaluation standardisée et reproductible de la structuration complète des documents. La version v1.5 (mi-2026) compte 1355 pages et plus de 100 000 annotations fines, couvrant plusieurs catégories de documents (articles académiques, diapositives, livres) avec des annotations de régions, d'éléments et d'ordre de lecture. L'évaluation se fait de bout en bout (PDF vers Markdown) et par module (détection de mise en page, OCR, reconnaissance de tableaux et de formules). Les métriques principales sont Text Edit, TEDS, CDM et Read Order, évaluant respectivement la distance d'édition, la similarité d'arbre pour les tableaux, la précision structurelle pour les formules et la fidélité de l'ordre de lecture.",
+    "analogy": "OmniDocBench est comme un examen complet pour un assistant de bibliothèque, testant sa capacité à lire, comprendre et organiser chaque document parfaitement.",
+    "example": "Un chercheur utilise OmniDocBench pour comparer des modèles d'IA sur l'extraction de tableaux et de formules dans des articles scientifiques complexes, optimisant son choix pour un projet.",
+    "did_you_know": "OmniDocBench v1.5 contient plus de 100 000 annotations fines sur 1355 pages PDF, couvrant 9 catégories de documents et 3 types de langue.",
+    "one_sentence_answer": "OmniDocBench est un benchmark de référence pour évaluer les systèmes d'extraction de documents, mesurant la qualité de la conversion de PDF en format structuré comme le Markdown.",
+    "faq": [
+      {
+        "question": "Pourquoi OmniDocBench est-il important pour l'analyse de documents ?",
+        "answer": "Il va au-delà de l'OCR simple en évaluant la capacité à structurer un document complet (tableaux, formules, ordre de lecture), ce qui est crucial pour des applications comme la numérisation de livres ou l'analyse de rapports financiers."
+      },
+      {
+        "question": "Quels types de documents sont inclus dans OmniDocBench ?",
+        "answer": "Le benchmark couvre 9 catégories : articles académiques, diapositives, livres, examens, notes manuscrites, magazines, rapports financiers et journaux, avec des mises en page variées et plusieurs langues comme l'anglais et le chinois."
+      },
+      {
+        "question": "Comment est calculé le score global dans OmniDocBench ?",
+        "answer": "Le score Overall combine trois métriques : la précision du texte extrait (Text Edit), la qualité des tableaux (TEDS) et la précision des formules (CDM), pour donner une note globale de performance."
+      }
+    ],
+    "sources": [
+      {
+        "label": "GitHub - opendatalab/OmniDocBench",
+        "url": "https://github.com/opendatalab/OmniDocBench",
+        "year": 2026,
+        "author": "OpenDataLab"
+      },
+      {
+        "label": "Nanonets - OmniDocBench Benchmarking",
+        "url": "https://benchmarking.nanonets.com/benchmarks/omnidocbench",
+        "year": 2026,
+        "author": "Nanonets"
+      }
+    ]
+  }
+]
