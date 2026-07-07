@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.94.0] - 2026-07-07
+
+### Added
+- **Glossaire — BD pédagogique "Octopus et le rançongiciel".** Nouvelle bande dessinée sur `/glossaire/rancongiciel` (personnage Octopus, 6 cases : chiffrement des fichiers, WannaCry 2017, hameçonnage, rançon en cryptomonnaie, sauvegardes hors ligne, ne jamais payer). Déployée via `public/bd/rancongiciel/` (manifest.json + avif/webp/jpg/thumb), détectée automatiquement par `ComicLibrary` (bouton "Lire la BD" sur la fiche). Premier livrable du nouveau workflow `/bd` (2026-07-07) : Claude Code génère les images de case, l'utilisateur assemble bulles/encadrés/contours/branding.
+
 ## [1.93.0] - 2026-07-07
 
 ### Added

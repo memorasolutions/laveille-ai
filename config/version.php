@@ -17,6 +17,12 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.94.0 · 2026-07-07 · feat(contenu) Glossaire - BD pédagogique "Octopus et le rançongiciel"
+ *     sur /glossaire/rancongiciel (6 cases, personnage Octopus, WannaCry/rançon/sauvegardes).
+ *     Nouveau workflow /bd (2026-07-07) : Claude Code livre les images de case + un fichier .md
+ *     de structure/textes, l'utilisateur assemble bulles/encadrés/contours/branding lui-même.
+ *     Déployée via public/bd/rancongiciel/ (manifest.json + avif/webp/jpg/thumb), détection
+ *     automatique par ComicLibrary (bouton "Lire la BD" sur la fiche glossaire).
  *   1.93.0 · 2026-07-07 · feat(contenu) Glossaire - nouveau terme AlphaFold (systèmes d'IA de
  *     Google DeepMind prédisant la structure 3D des protéines - CASP13 2018, percée AlphaFold2
  *     CASP14 2020, AlphaFold3 2024, prix Nobel de chimie 2024 Hassabis/Jumper/Baker). Lié au
@@ -724,7 +730,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 93;
+$lvMinor = 94;
 $lvPatch = 0;
 
 return [
