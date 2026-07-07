@@ -1,0 +1,54 @@
+[
+  {
+    "slug": "cybermenaces",
+    "name": "Cybermenaces",
+    "cat_slug": "securite-et-ethique",
+    "difficulty": "beginner",
+    "type": "explainer",
+    "icon": "👾",
+    "match_strategy": "loose",
+    "aliases": ["cybermenace", "menaces informatiques", "menaces cyber"],
+    "broader_slugs": ["cybersecurite"],
+    "narrower_slugs": ["malware", "rancongiciel", "virus-informatique", "ver-informatique", "cheval-de-troie", "deni-de-service", "hameconnage", "pamstealer", "jadepuffer", "attaque-adversariale", "data-poisoning", "model-extraction", "prompt-injection", "jailbreak", "zero-day"],
+    "has_image": true,
+    "definition": "Une cybermenace désigne tout événement, action, acteur ou condition susceptible de porter atteinte à la disponibilité, intégrité, confidentialité ou traçabilité des systèmes d'information et des données via des moyens numériques ou réseaux. Il s'agit d'un concept générique englobant tous les dangers potentiels dans le cyberespace. La taxonomie ENISA, toujours en vigueur, classe ces menaces en rançongiciels, logiciels malveillants, menaces sur la chaîne d'approvisionnement, exfiltration de données, ingénierie sociale (hameçonnage), déni de service (DDoS), désinformation, BEC, et menaces ciblant les environnements cloud, IoT ou OT. L'ANSSI, dans son Panorama de la cybermenace 2025-2026, distingue cybercriminalité financière (rançongiciel à double extorsion, fraude au président) et espionnage étatique. La CISA ajoute les acteurs et capacités perturbant les systèmes. Une évolution marquante récente est l'émergence de menaces agentiques, où des agents IA autonomes orchestrent des attaques, comme le rançongiciel JadePuffer en juillet 2026, ainsi que des attaques ciblant les modèles d'IA (empoisonnement de données, extraction de modèle, injection de prompt).",
+    "analogy": "Comme la météo qui annonce plusieurs types de tempêtes possibles, les cybermenaces regroupent tous les dangers numériques qui pourraient frapper un système.",
+    "example": "En 2025, une campagne de hameçonnage ciblant les employés d'une PME québécoise a mené à l'installation d'un rançongiciel, paralysant ses opérations pendant une semaine.",
+    "did_you_know": "Selon les estimations de Cybersecurity Ventures, la cybercriminalité mondiale devait coûter environ 10 500 milliards de dollars américains par année dès 2025.",
+    "one_sentence_answer": "Les cybermenaces regroupent tout événement, acteur ou action susceptible de compromettre la disponibilité, l'intégrité ou la confidentialité des systèmes numériques et des données.",
+    "faq": [
+      {
+        "question": "Quelle est la différence entre une cybermenace et une cyberattaque ?",
+        "answer": "Une cybermenace est un danger potentiel ou une catégorie de risque, tandis qu'une cyberattaque est l'incident réel où cette menace se concrétise contre une cible précise."
+      },
+      {
+        "question": "Quelles sont les principales catégories de cybermenaces selon l'ENISA ?",
+        "answer": "Rançongiciels, logiciels malveillants, menaces sur la chaîne d'approvisionnement, ingénierie sociale, attaques par déni de service, désinformation, compromission de courriels professionnels et menaces cloud/IoT/OT."
+      },
+      {
+        "question": "Comment les cybermenaces ont-elles évolué récemment ?",
+        "answer": "Depuis 2025-2026, on observe l'émergence de menaces agentiques pilotées par des agents IA autonomes, comme le rançongiciel JadePuffer, en plus des attaques classiques ciblant maintenant aussi les modèles d'IA eux-mêmes."
+      }
+    ],
+    "sources": [
+      {
+        "label": "ENISA - Cyber Threats (Threat Landscape)",
+        "url": "https://www.enisa.europa.eu/topics/cyber-threats",
+        "year": 2026,
+        "author": "ENISA"
+      },
+      {
+        "label": "ANSSI / CERT-FR - Panorama de la cybermenace",
+        "url": "https://cert.ssi.gouv.fr/",
+        "year": 2026,
+        "author": "ANSSI"
+      },
+      {
+        "label": "CISA - Cyber Threats and Advisories",
+        "url": "https://www.cisa.gov/topics/cyber-threats-and-advisories",
+        "year": 2026,
+        "author": "CISA"
+      }
+    ]
+  }
+]

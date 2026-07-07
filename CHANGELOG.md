@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.92.0] - 2026-07-07
+
+### Added
+- **Glossaire — 3 nouveaux termes.** JadePuffer (premier rançongiciel entièrement autonome piloté par un agent LLM, Sysdig Threat Research Team, juillet 2026), Cybermenaces (terme umbrella liant 15 termes de menaces déjà présents, taxonomie ENISA/ANSSI/CISA), Bitcoin (réseau monétaire décentralisé, Satoshi Nakamoto 2008-2009). Images générées via `/nanobanana`. Graphe de connaissances bidirectionnel construit (broader/narrower_slugs).
+
 ## [1.91.0] - 2026-07-06
 
 ### Fixed

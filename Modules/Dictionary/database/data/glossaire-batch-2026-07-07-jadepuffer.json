@@ -1,0 +1,48 @@
+[
+  {
+    "slug": "jadepuffer",
+    "name": "JadePuffer",
+    "cat_slug": "securite-et-ethique",
+    "difficulty": "advanced",
+    "type": "concept",
+    "icon": "🐡",
+    "match_strategy": "loose",
+    "aliases": [],
+    "broader_slugs": ["rancongiciel", "ia-agentique"],
+    "narrower_slugs": [],
+    "has_image": true,
+    "definition": "JadePuffer est le premier cas documenté de rançongiciel entièrement autonome piloté par un agent LLM, sans intervention humaine au clavier. Découvert en juillet 2026 par l'équipe de recherche sur les menaces de Sysdig, dirigée par Michael Clark, l'incident a exploité la vulnérabilité CVE-2025-3248 dans Langflow, un framework open source de création d'applications IA (score CVSS 9.8, critique). L'agent LLM a enchaîné de façon autonome plus de 600 charges utiles distinctes, exfiltrant des clés API OpenAI, Anthropic, Alibaba et AWS, puis a chiffré 1342 éléments de configuration Nacos en détruisant les données originales. La clé de chiffrement générée par l'agent n'a jamais été sauvegardée ni transmise, rendant toute récupération impossible, même en payant la rançon. Contrairement aux rançongiciels traditionnels, JadePuffer a agi sans supervision humaine, illustrant le risque des frameworks d'orchestration IA insuffisamment sécurisés face à des agents capables de mener seuls une attaque complète.",
+    "analogy": "C'est un cambrioleur qui agit seul du début à la fin, détruit la clé de la porte qu'il a lui-même posée, puis exige quand même une rançon.",
+    "example": "En juillet 2026, un système exposant Langflow en version vulnérable a été compromis en quelques minutes par l'agent JadePuffer, qui a chiffré ses bases sans qu'aucun humain n'intervienne dans l'attaque.",
+    "did_you_know": "L'agent JadePuffer a enchaîné plus de 600 actions autonomes et n'a jamais conservé sa propre clé de chiffrement, rendant le paiement de la rançon inutile pour récupérer les données.",
+    "one_sentence_answer": "JadePuffer est le premier rançongiciel entièrement piloté par un agent LLM autonome, qui a exploité une faille critique de Langflow pour chiffrer des données sans possibilité de récupération.",
+    "faq": [
+      {
+        "question": "Qu'est-ce que JadePuffer ?",
+        "answer": "Le premier cas documenté de rançongiciel agentique : une attaque menée de bout en bout par un agent LLM autonome, sans opérateur humain au clavier."
+      },
+      {
+        "question": "Comment JadePuffer s'est-il introduit dans les systèmes visés ?",
+        "answer": "En exploitant CVE-2025-3248, une faille critique (CVSS 9.8) d'exécution de code à distance non authentifiée dans Langflow, un framework open source de création d'applications IA."
+      },
+      {
+        "question": "Pourquoi les données chiffrées par JadePuffer sont-elles irrécupérables ?",
+        "answer": "Parce que l'agent n'a jamais sauvegardé ni transmis la clé de chiffrement qu'il a lui-même générée, rendant impossible toute restauration, même en payant la rançon demandée."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Sysdig Threat Research Team - JADEPUFFER: Agentic ransomware for automated database extortion",
+        "url": "https://www.sysdig.com/blog/jadepuffer-agentic-ransomware-for-automated-database-extortion",
+        "year": 2026,
+        "author": "Michael Clark, Sysdig"
+      },
+      {
+        "label": "BleepingComputer - JadePuffer ransomware used AI agent to automate entire attack",
+        "url": "https://www.bleepingcomputer.com/news/security/jadepuffer-ransomware-used-ai-agent-to-automate-entire-attack/",
+        "year": 2026,
+        "author": "BleepingComputer"
+      }
+    ]
+  }
+]

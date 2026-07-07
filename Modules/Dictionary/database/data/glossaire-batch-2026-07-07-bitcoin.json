@@ -1,0 +1,54 @@
+[
+  {
+    "slug": "bitcoin",
+    "name": "Bitcoin",
+    "cat_slug": "concepts-fondamentaux",
+    "difficulty": "beginner",
+    "type": "concept",
+    "icon": "🪙",
+    "match_strategy": "loose",
+    "aliases": ["BTC"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "has_image": true,
+    "definition": "Bitcoin est un réseau monétaire pair à pair décentralisé, proposé en 2008 par Satoshi Nakamoto dans un livre blanc. Lancé en janvier 2009, il repose sur une blockchain où les transactions sont regroupées en blocs chaînés cryptographiquement. Il utilise le modèle UTXO (sorties de transactions non dépensées). La sécurité est assurée par une preuve de travail SHA-256 : les mineurs cherchent un hachage sous une cible. Le réseau vise un bloc toutes les 10 minutes, avec un ajustement de la difficulté tous les 2016 blocs. L'offre maximale est plafonnée à 21 millions de bitcoins, rendant l'actif déflationniste. Le halving réduit la récompense tous les 210 000 blocs (environ 4 ans) ; le dernier a eu lieu en avril 2024, le prochain vers 2028. Bitcoin est critiqué pour sa consommation énergétique élevée, sa volatilité et son usage dans des activités illicites, malgré une blockchain publique et traçable.",
+    "analogy": "Bitcoin, c'est comme un registre comptable public que tout le monde peut vérifier, sans banquier ni notaire pour l'administrer.",
+    "example": "En 2021, une personne au Salvador envoie l'équivalent de 50 dollars en bitcoins à sa famille à l'étranger via son téléphone, sans passer par un service de transfert bancaire traditionnel.",
+    "did_you_know": "L'offre maximale de Bitcoin est plafonnée exactement à 20 999 999,9769 BTC, soit environ 21 millions, un chiffre fixé une fois pour toutes dans le protocole d'origine.",
+    "one_sentence_answer": "Bitcoin est un réseau décentralisé de monnaie numérique pair à pair, sécurisé par la preuve de travail, avec une offre plafonnée à 21 millions d'unités.",
+    "faq": [
+      {
+        "question": "Qui a créé Bitcoin ?",
+        "answer": "Bitcoin a été proposé en 2008 par une personne ou un groupe utilisant le pseudonyme Satoshi Nakamoto, dont l'identité réelle demeure inconnue à ce jour."
+      },
+      {
+        "question": "Comment la sécurité de Bitcoin est-elle assurée ?",
+        "answer": "Par la preuve de travail (SHA-256) : les mineurs résolvent des puzzles cryptographiques coûteux en calcul pour valider chaque bloc, ce qui rend le réseau très difficile à falsifier."
+      },
+      {
+        "question": "Pourquoi Bitcoin est-il critiqué pour sa consommation d'énergie ?",
+        "answer": "Le minage par preuve de travail exige une puissance de calcul considérable et continue, ce qui entraîne une consommation électrique comparable à celle de certains pays entiers."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Nakamoto, S. - Bitcoin: A Peer-to-Peer Electronic Cash System (livre blanc original)",
+        "url": "https://bitcoin.org/bitcoin.pdf",
+        "year": 2008,
+        "author": "Satoshi Nakamoto"
+      },
+      {
+        "label": "Bitcoin.org - ressource officielle du projet",
+        "url": "https://bitcoin.org/fr/",
+        "year": 2026,
+        "author": "Bitcoin Project"
+      },
+      {
+        "label": "Wikipédia FR - Bitcoin",
+        "url": "https://fr.wikipedia.org/wiki/Bitcoin",
+        "year": 2026,
+        "author": "Wikipédia"
+      }
+    ]
+  }
+]

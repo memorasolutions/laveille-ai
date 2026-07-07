@@ -17,6 +17,13 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.92.0 · 2026-07-07 · feat(contenu) Glossaire - 3 nouveaux termes : JadePuffer (premier
+ *     ransomware entièrement autonome piloté par un agent LLM, Sysdig TRT juillet 2026),
+ *     Cybermenaces (terme umbrella liant 15 termes de menaces existants, taxonomie
+ *     ENISA/ANSSI/CISA) et Bitcoin (réseau monétaire décentralisé, Nakamoto 2008-2009).
+ *     Images générées via /nanobanana. pp_search hors service pendant la rédaction
+ *     (browser_up=false) - recherche via mcp__openrouter__chat_with_model perplexity/sonar-pro
+ *     en repli, sources vérifiées HTTP 200 avant écriture.
  *   1.91.0 · 2026-07-06 · feat(contenu) Glossaire - backfill hero_image pour 13 termes publiés
  *     sans image (applescript, blindspot-pass, fable-5, fate-h-fate-x, interface-pam,
  *     javascript, lean-4, leanstral, licence-apache-2-0, minif2f, putnambench,
@@ -710,7 +717,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 91;
+$lvMinor = 92;
 $lvPatch = 0;
 
 return [
