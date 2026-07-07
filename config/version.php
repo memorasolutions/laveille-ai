@@ -17,6 +17,13 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.93.0 · 2026-07-07 · feat(contenu) Glossaire - nouveau terme AlphaFold (systèmes d'IA de
+ *     Google DeepMind prédisant la structure 3D des protéines - CASP13 2018, percée AlphaFold2
+ *     CASP14 2020, AlphaFold3 2024, prix Nobel de chimie 2024 Hassabis/Jumper/Baker). Lié au
+ *     terme existant "transformer" (broader/narrower réciproque). Image générée via /nanobanana.
+ *     pp_search hors service pendant la rédaction (browser_up=false) - recherche via
+ *     mcp__openrouter__chat_with_model perplexity/sonar-pro en repli, toutes les sources
+ *     vérifiées HTTP 200 avant écriture (nobelprize.org, deepmind.google, ebi.ac.uk).
  *   1.92.0 · 2026-07-07 · feat(contenu) Glossaire - 3 nouveaux termes : JadePuffer (premier
  *     ransomware entièrement autonome piloté par un agent LLM, Sysdig TRT juillet 2026),
  *     Cybermenaces (terme umbrella liant 15 termes de menaces existants, taxonomie
@@ -717,7 +724,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 92;
+$lvMinor = 93;
 $lvPatch = 0;
 
 return [

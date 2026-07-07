@@ -1,0 +1,50 @@
+[
+  {
+    "slug": "alphafold",
+    "name": "AlphaFold",
+    "cat_slug": "concepts-fondamentaux",
+    "difficulty": "intermediate",
+    "type": "ai_term",
+    "icon": "🧬",
+    "match_strategy": "loose",
+    "aliases": ["AlphaFold2", "AlphaFold 2", "AlphaFold3", "AlphaFold 3"],
+    "broader_slugs": ["transformer"],
+    "narrower_slugs": [],
+    "has_image": true,
+    "definition": "AlphaFold est une famille de systèmes d'IA de Google DeepMind qui prédit la structure 3D des protéines. En 2018, sa première version a gagné CASP13, mais AlphaFold2 en 2020 a marqué une percée en atteignant une précision comparable aux méthodes expérimentales, résolvant le problème du repliement vieux de 50 ans. Son architecture de deep learning, inspirée des Transformers, inclut le module Evoformer qui traite simultanément séquence et interactions entre paires d'acides aminés, raffinant itérativement les coordonnées 3D. En 2024, AlphaFold3 a étendu ses capacités aux complexes biomoléculaires. La même année, le prix Nobel de chimie a été attribué à Hassabis, Jumper et Baker. La base de données avec l'EMBL-EBI offre plus de 200 millions de structures prédites, couvrant presque toutes les protéines connues. Cet outil a révolutionné la recherche pharmaceutique en fournissant des modèles 3D fiables en quelques heures, alors que les méthodes expérimentales prenaient des mois ou des années.",
+    "analogy": "C'est comme si, à partir de la liste des ingrédients d'un gâteau, on pouvait prédire sa forme finale sans jamais le cuire.",
+    "example": "Par exemple, la base de données AlphaFold Protein Structure Database (EMBL-EBI) a été consultée par plus de 3,4 millions d'utilisateurs dans 190 pays, ce qui montre son adoption mondiale.",
+    "did_you_know": "AlphaFold a prédit la structure de plus de 200 millions de protéines, couvrant presque toutes celles connues, un exploit qui aurait nécessité des siècles de travail expérimental.",
+    "one_sentence_answer": "AlphaFold est un système d'IA de Google DeepMind qui prédit avec une précision quasi expérimentale la forme 3D des protéines à partir de leur séquence, révolutionnant la biologie et la médecine.",
+    "faq": [
+      {
+        "question": "Pourquoi la prédiction de la structure des protéines est-elle si importante ?",
+        "answer": "La forme d'une protéine détermine sa fonction ; la connaître permet de comprendre les maladies et de concevoir des médicaments ciblés, ce qui accélère la recherche biomédicale."
+      },
+      {
+        "question": "Est-ce qu'AlphaFold remplace complètement les expériences en laboratoire ?",
+        "answer": "Non, mais il fournit des modèles très précis qui réduisent le besoin d'expériences longues et coûteuses, servant de point de départ fiable pour les chercheurs."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Fondation Nobel - Communiqué officiel, prix Nobel de chimie 2024",
+        "url": "https://www.nobelprize.org/prizes/chemistry/2024/press-release/",
+        "year": 2024,
+        "author": "Fondation Nobel"
+      },
+      {
+        "label": "Google DeepMind - AlphaFold (page officielle)",
+        "url": "https://deepmind.google/science/alphafold/",
+        "year": 2026,
+        "author": "Google DeepMind"
+      },
+      {
+        "label": "EMBL-EBI - AlphaFold predicts structure of almost every catalogued protein",
+        "url": "https://www.ebi.ac.uk/about/news/technology-and-innovation/alphafold-200-million",
+        "year": 2022,
+        "author": "EMBL-EBI"
+      }
+    ]
+  }
+]

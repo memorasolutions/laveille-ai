@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.93.0] - 2026-07-07
+
+### Added
+- **Glossaire — nouveau terme AlphaFold.** Systèmes d'IA de Google DeepMind qui prédisent la structure 3D des protéines (CASP13 2018, percée AlphaFold2 CASP14 2020, AlphaFold3 2024 pour les complexes biomoléculaires) - prix Nobel de chimie 2024 attribué à Demis Hassabis et John Jumper, partagé avec David Baker. Lien bidirectionnel avec le terme existant "transformer" (architecture Evoformer). Image générée via `/nanobanana`.
+
 ## [1.92.0] - 2026-07-07
 
 ### Added
