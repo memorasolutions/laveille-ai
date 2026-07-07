@@ -38,7 +38,7 @@ it('affiche le badge non lus', function () {
     $this->actingAs($this->admin)
         ->get(route('admin.contact-messages.index'))
         ->assertOk()
-        ->assertSee('1 non lu');
+        ->assertSeeTextInOrder(['Non lus', '1']);
 });
 
 it('filtre par statut', function () {

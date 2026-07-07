@@ -1,9 +1,10 @@
 <?php
 declare(strict_types=1);
 
-test('DirectoryAdminController pricingDrift uses Tool pricingDistribution', function () {
+test('DirectoryAdminController pricingDrift uses Tool healthMetrics distribution', function () {
     $source = file_get_contents(base_path('Modules/Directory/app/Http/Controllers/Admin/DirectoryAdminController.php'));
-    expect($source)->toContain('Tool::pricingDistribution()');
+    expect($source)->toContain('Tool::healthMetrics()');
+    expect($source)->toContain("\$healthMetrics['distribution']");
 });
 
 test('DirectoryAdminController pricingDrift compact contains distribution', function () {

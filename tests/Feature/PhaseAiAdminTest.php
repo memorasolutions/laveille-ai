@@ -106,6 +106,13 @@ it('conversations destroy closes conversation', function () {
     ]);
 });
 
+// NOTE (2026-07): le commit 41fc317b (« refactor(nav): restructure sidebar from 14 to 7
+// categories ») a fusionné la catégorie « Support IA » dans la catégorie « Outils »
+// (IA + Roadmap), restructuration délibérée et vérifiée visuellement (voir message de
+// commit). Le libellé « Support IA » n'apparaît donc plus dans le HTML rendu ; on
+// vérifie désormais la présence du lien « Conversations » (sous menu.ia, gate view_ai),
+// symétrique à l'assertion déjà utilisée par le test « hides AI section for editor »
+// ci-dessous.
 it('sidebar contains AI section for admin', function () {
     $admin = User::factory()->create();
     $admin->assignRole('admin');
@@ -113,7 +120,7 @@ it('sidebar contains AI section for admin', function () {
     $this->actingAs($admin)
         ->get(route('admin.dashboard'))
         ->assertOk()
-        ->assertSee('Support IA');
+        ->assertSee(route('admin.ai.conversations.index'), false);
 });
 
 it('sidebar hides AI section for editor', function () {

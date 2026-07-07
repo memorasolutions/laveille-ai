@@ -36,9 +36,14 @@ test('all fr.json keys exist in en.json', function () {
 });
 
 test('locale controller switches to fr', function () {
+    // LocaleController canonicalise volontairement 'fr' en 'fr_CA' depuis le
+    // commit a6a1d6d0 (locale applicative officielle = fr_CA, cf. APP_LOCALE
+    // dans .env et le symlink lang/fr_CA.json -> lang/fr.json). Ce test
+    // attendait encore l'ancienne valeur 'fr' et n'avait pas été mis à jour ;
+    // voir tests/Feature/Phase123Test.php qui documente déjà ce comportement.
     $this->post('/locale/fr')
         ->assertRedirect()
-        ->assertSessionHas('locale', 'fr');
+        ->assertSessionHas('locale', 'fr_CA');
 });
 
 test('locale controller switches to en', function () {

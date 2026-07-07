@@ -54,9 +54,17 @@ it('article can transition to pending_review', function () {
     expect((string) $article->fresh()->status)->toBe('pending_review');
 });
 
-it('draft article cannot directly transition to published', function () {
+// NOTE (2026-07): le commit 5c98d557 (« fix(blog): add missing Draft→Published state
+// transition ») a délibérément ouvert la transition directe Draft→Published (via
+// PublishTransition) pour que l'action admin « Publier » (route
+// /admin/blog/articles/{slug}/publish, cf. tests/Feature/BlogAdminTest.php) puisse
+// publier un brouillon sans passer par pending_review. La route pending_review reste
+// un chemin optionnel (workflow éditorial étendu), pas une étape obligatoire. Le test
+// ci-dessous vérifiait l'ancien comportement (obligatoire) ; mis à jour pour refléter
+// la règle produit actuelle : les deux transitions sont permises depuis draft.
+it('draft article can transition to pending_review or be published directly by an admin', function () {
     $article = Article::factory()->create(['status' => 'draft']);
 
     expect($article->status->canTransitionTo(PendingReviewArticleState::class))->toBeTrue()
-        ->and($article->status->canTransitionTo(PublishedArticleState::class))->toBeFalse();
+        ->and($article->status->canTransitionTo(PublishedArticleState::class))->toBeTrue();
 });

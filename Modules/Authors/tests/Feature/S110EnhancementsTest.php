@@ -26,6 +26,9 @@ function makeAuthorS110(): AuthorProfile
 }
 
 it('AuthorsSitemapService generates valid sitemap XML with authors and posts', function () {
+    config(['app.url' => 'https://laveille.ai']);
+    app('url')->forceRootUrl('https://laveille.ai');
+
     $author = makeAuthorS110();
     AuthorPost::create([
         'author_profile_id' => $author->id,

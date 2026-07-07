@@ -24,7 +24,7 @@ class ContactMessagesTable extends Component
     protected string $paginationTheme = 'bootstrap';
 
     /** Filtre de statut : '', 'new', 'read' ou 'spam'. */
-    #[Url]
+    #[Url(as: 'status')]
     public string $filterStatus = '';
 
     #[Url]

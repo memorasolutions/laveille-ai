@@ -1,15 +1,16 @@
 <?php
 declare(strict_types=1);
 
-test('DirectoryAdminController pricingDrift uses Tool driftCount helper', function () {
+test('DirectoryAdminController pricingDrift uses Tool healthMetrics aggregate helper', function () {
     $source = file_get_contents(base_path('Modules/Directory/app/Http/Controllers/Admin/DirectoryAdminController.php'));
-    expect($source)->toContain('Tool::driftCount(90)');
-    expect($source)->toContain('Tool::driftCount(180)');
+    expect($source)->toContain('Tool::healthMetrics()');
+    expect($source)->toContain("\$healthMetrics['drift_90']");
+    expect($source)->toContain("\$healthMetrics['drift_180']");
 });
 
-test('DirectoryAdminController pricingDrift uses Tool neverCheckedCount helper', function () {
+test('DirectoryAdminController pricingDrift uses Tool healthMetrics for never checked count', function () {
     $source = file_get_contents(base_path('Modules/Directory/app/Http/Controllers/Admin/DirectoryAdminController.php'));
-    expect($source)->toContain('Tool::neverCheckedCount()');
+    expect($source)->toContain("\$healthMetrics['never_checked']");
 });
 
 test('DirectoryAdminController pricingDrift no hardcoded count of last_enriched_at', function () {

@@ -36,9 +36,17 @@ test('LessonController possède la méthode show', function () {
 
 test('LessonController::show retourne une View (type-hint correct)', function () {
     $reflection = new ReflectionMethod(\Modules\Academy\Http\Controllers\LessonController::class, 'show');
-    $returnType = $reflection->getReturnType()?->getName();
-    // \Illuminate\View\View ou \Illuminate\Contracts\View\View
-    expect($returnType)->toContain('View');
+    $returnType = $reflection->getReturnType();
+
+    // Depuis le fix B01 (redirection des anonymes vers la connexion sur un cours
+    // non-public), le type de retour est un union type View|RedirectResponse.
+    // ReflectionUnionType n'a pas de getName() : on énumère ses branches.
+    $typeNames = $returnType instanceof ReflectionUnionType
+        ? array_map(fn (ReflectionNamedType $t) => $t->getName(), $returnType->getTypes())
+        : [$returnType?->getName()];
+
+    // \Illuminate\View\View ou \Illuminate\Contracts\View\View doit figurer parmi les branches.
+    expect(collect($typeNames)->contains(fn ($name) => str_contains((string) $name, 'View')))->toBeTrue();
 });
 
 test('LessonController vérifie que le cours est publié (abort 404 si draft)', function () {

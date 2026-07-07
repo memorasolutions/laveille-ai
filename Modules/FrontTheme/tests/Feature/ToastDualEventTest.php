@@ -41,8 +41,11 @@ it('toast partial style error applique fond rouge', function () {
 
 it('toast partial fallback type info (fond teal)', function () {
     // Pas de mapping explicite : le ternaire retombe sur le style info par défaut.
+    // Couleur mise à jour de #0B7285 (5.59:1, échec AAA) vers #064E5A (9.35:1, conforme
+    // WCAG AAA) suite au remplacement du token --c-primary dans public/css/charte.css
+    // (issue #217, session S83). Le partial toast.blade.php utilise la valeur actuelle.
     expect($this->content)->toContain("type === 'info'");
-    expect($this->content)->toContain('#0B7285');
+    expect($this->content)->toContain('#064E5A');
 });
 
 it('toast partial auto-dismiss après 3000ms', function () {
