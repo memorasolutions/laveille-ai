@@ -17,6 +17,14 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.94.3 · 2026-07-08 · feat(contenu) BD pédagogique 2 pages "Octopus face au deepfake"
+ *     publiée sur /glossaire/deepfake. Page 1 : définition, réalisme, mécanisme IA,
+ *     menace/arnaque. Page 2 : protection (mot de passe familial, règle des 10 min,
+ *     vérification source). Personnages : Octopus, Hibou, Enfant, Pirate. Produite via
+ *     workflow /bd (2026-07-07) - Claude Code a généré les 8 images (skill nanobanana/Gemini).
+ *     Déployée dans public/bd/deepfake/ (manifest.json 2 planches, avif/webp/jpg + 1024 +
+ *     thumb par page). Détectée automatiquement par ComicLibrary (bouton "Lire la BD").
+ *     Correction d'un défaut de bulle de pensée interdite sur une case (régénération ciblée).
  *   1.94.2 · 2026-07-08 · fix(pwa) Service Worker interceptait /admin/* et TOUS les POST
  *     Livewire (dont /livewire/update) - le scope site-wide "/" du SW captait le backoffice et
  *     enveloppait chaque requête POST dans un BackgroundSyncPlugin (queue retry 24h, conçu pour
@@ -748,7 +756,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 94;
-$lvPatch = 2;
+$lvPatch = 3;
 
 return [
     'major' => $lvMajor,

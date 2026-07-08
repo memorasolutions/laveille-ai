@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.94.3] - 2026-07-08
+
+### Added
+- **Glossaire — BD pédagogique "Octopus face au deepfake"** (2 planches). Ajout d'une nouvelle bande dessinée pédagogique de deux pages sur le glossaire `/glossaire/deepfake`. La page 1 explique le deepfake (définition, réalisme, mécanisme d'IA, menaces et arnaques) ; la page 2 présente des mesures de protection (mot de passe familial, règle des 10 minutes, vérification de la source), sourcées via la veille pp_search de juillet 2026. Les personnages sont Octopus (héros), Hibou (mentor), Enfant (novice) et Pirate (menace). La BD a été produite le 2026-07-07 via le nouveau workflow `/bd` : Claude Code a généré les 8 images de case (skill nanobanana/Gemini), l'utilisateur a assemblé bulles, encadrés, branding et QR code dans son propre outil. Déployée dans `public/bd/deepfake/` (manifest.json décrivant les 2 planches, fichiers avif/webp/jpg + variante 1024 + miniature par page). La détection automatique par `ComicLibrary` ajoute un bouton "Lire la BD" sur la fiche glossaire. Un défaut de forme de bulle de pensée interdite sur une case a été corrigé par régénération ciblée de cette seule case.
+
 ## [1.94.2] - 2026-07-08
 
 ### Fixed
