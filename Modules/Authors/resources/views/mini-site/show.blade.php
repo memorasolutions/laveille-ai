@@ -17,7 +17,11 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw-authors.js').catch(() => {});
+                // Scope restreint aux mini-sites (/@slug) : sans ce scope explicite, le
+                // scope par défaut est "/" (racine du fichier), identique au SW vite-pwa
+                // principal - conflit ping-pong install/activate à chaque navigation entre
+                // pages publiques et mini-sites (cf. incident sw-register.js déjà corrigé).
+                navigator.serviceWorker.register('/sw-authors.js', { scope: '/@' }).catch(() => {});
             });
         }
     </script>

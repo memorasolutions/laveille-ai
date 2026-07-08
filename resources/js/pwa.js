@@ -9,6 +9,25 @@ window.deferredPwaPrompt = null;
 // le SW sur ces routes (évite la tempête SW + précache + tour Driver.js au 1er login).
 const isAdminRoute = /^\/admin(\/|$)/.test(window.location.pathname);
 
+// Nettoyage des anciennes registrations sw-authors.js mal scopées à la racine (incident de scope)
+if (!isAdminRoute && 'serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (const registration of registrations) {
+            try {
+                if (
+                    registration.scope === window.location.origin + '/' &&
+                    registration.active &&
+                    registration.active.scriptURL.endsWith('/sw-authors.js')
+                ) {
+                    registration.unregister();
+                }
+            } catch (e) {
+                // ignore errors silently
+            }
+        }
+    }).catch(() => {});
+}
+
 // Enregistrement du SW avec gestion des mises à jour.
 // registerType:'prompt' => AUCUN rechargement automatique ; onNeedRefresh ne fait
 // qu'émettre un événement, le reload n'a lieu que via window.pwaUpdate() (action user).

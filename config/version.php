@@ -17,6 +17,14 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.94.1 · 2026-07-08 · fix(pwa) Conflit de scope Service Worker (rechargements infinis
+ *     "Update on reload" surtout /actualites) - /sw-authors.js (mini-site auteur /@slug) était
+ *     enregistré sans scope explicite → scope racine "/" identique au SW vite-pwa principal,
+ *     causant un remplacement ping-pong install/activate à chaque navigation entre pages
+ *     publiques et mini-sites. Corrigé : scope explicite {scope:'/@'} dans
+ *     mini-site/show.blade.php + cleanup rétroactif dans pwa.js (désenregistre les anciennes
+ *     registrations sw-authors.js au scope racine pour les visiteurs déjà affectés). 82 tests
+ *     Authors verts, npm run build vérifié.
  *   1.94.0 · 2026-07-07 · feat(contenu) Glossaire - BD pédagogique "Octopus et le rançongiciel"
  *     sur /glossaire/rancongiciel (6 cases, personnage Octopus, WannaCry/rançon/sauvegardes).
  *     Nouveau workflow /bd (2026-07-07) : Claude Code livre les images de case + un fichier .md
@@ -731,7 +739,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 94;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,

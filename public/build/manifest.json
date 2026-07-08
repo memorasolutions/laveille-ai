@@ -381,7 +381,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app--lRqWGYj.js",
+    "file": "assets/app-BcPSL0av.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -404,7 +404,7 @@
     "isEntry": true
   },
   "resources/js/pwa.js": {
-    "file": "assets/pwa-D-ZDVxyK.js",
+    "file": "assets/pwa-BLd3Z5ku.js",
     "name": "pwa",
     "src": "resources/js/pwa.js",
     "isEntry": true,

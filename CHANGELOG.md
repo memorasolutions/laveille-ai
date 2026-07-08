@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.94.1] - 2026-07-08
+
+### Fixed
+- **Conflit de scope Service Worker — rechargements infinis, surtout /actualites.** `/sw-authors.js` (mini-site auteur `/@slug`) était enregistré sans scope explicite, héritant du scope racine `/` identique au Service Worker vite-pwa principal (déjà widened via `Service-Worker-Allowed`). Résultat : ping-pong install/activate à chaque navigation entre pages publiques et mini-sites, visible côté DevTools comme "Service Worker was updated because 'Update on reload' was checked" s'incrémentant indéfiniment. Corrigé par un scope explicite `{scope: '/@'}` (`Modules/Authors/resources/views/mini-site/show.blade.php`) + un nettoyage rétroactif dans `resources/js/pwa.js` qui désenregistre toute ancienne registration `sw-authors.js` au scope racine, pour les visiteurs déjà affectés.
+
 ## [1.94.0] - 2026-07-07
 
 ### Added
