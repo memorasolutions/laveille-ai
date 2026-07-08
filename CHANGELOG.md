@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.94.4] - 2026-07-08
+
+### Fixed
+- **Visionneur BD ne naviguait pas entre les planches multi-pages.** Le composant `comic-viewer.blade.php` utilisait `$planche = $comic['planches'][0] ?? null` pour l'ensemble du rendu de la lightbox, limitant l'affichage à la première planche du manifest.json. En production, la BD deepfake (2 pages) ne permettait pas d'accéder à la seconde planche, malgré l'annonce du README. Correctif : le composant charge désormais le tableau complet des planches en JSON dans l'état Alpine.js, avec un index de page courant, des boutons précédent/suivant, un compteur "X / Y" (affiché seulement si plus d'une planche), une navigation clavier (PageUp/PageDown, virgule/point) et un lien de téléchargement pointant vers la planche affichée. Le zoom/pan/fit existant reste intact. 9 tests Pest verts (module Dictionary), dont un nouveau test vérifiant le rendu de la navigation multi-planches sur la BD deepfake réelle.
+
 ## [1.94.3] - 2026-07-08
 
 ### Added

@@ -17,6 +17,12 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.94.4 · 2026-07-08 · fix(contenu) Visionneur BD (comic-viewer.blade.php) ne lisait que
+ *     la 1re planche du tableau planches[] du manifest.json, rendant les pages suivantes
+ *     inaccessibles. Cause : $planche = $comic['planches'][0] utilisé pour tout le rendu.
+ *     Correctif : chargement complet du tableau en JSON dans Alpine.js, navigation
+ *     précédent/suivant, compteur X/Y, navigation clavier, lien télécharger dynamique.
+ *     9 tests Pest verts dont un nouveau test multi-planches sur la BD deepfake réelle.
  *   1.94.3 · 2026-07-08 · feat(contenu) BD pédagogique 2 pages "Octopus face au deepfake"
  *     publiée sur /glossaire/deepfake. Page 1 : définition, réalisme, mécanisme IA,
  *     menace/arnaque. Page 2 : protection (mot de passe familial, règle des 10 min,
@@ -756,7 +762,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 94;
-$lvPatch = 3;
+$lvPatch = 4;
 
 return [
     'major' => $lvMajor,

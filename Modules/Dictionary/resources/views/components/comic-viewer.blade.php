@@ -5,6 +5,7 @@
     Zoom continu (molette+Ctrl, pincement, double-clic), modes d'ajustement
     (page/largeur/hauteur/100 %), pan au glisser, focus-trap, verrou de défilement
     robuste iOS (anti scroll-chaining), raccourcis clavier, télécharger. a11y AA.
+    Navigation multi-planches (précédent/suivant/compteur) si plusieurs pages.
 
     Usage : <x-dictionary::comic-viewer :comic="$comic" />
     où $comic = Modules\Dictionary\Support\ComicLibrary::forSlug($slug)
@@ -56,6 +57,10 @@
     }
     .cbd-caption { font-weight: 600; font-size: 1rem; line-height: 1.3; flex: 1 1 160px; min-width: 0; }
     .cbd-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; flex-wrap: wrap; }
+    .cbd-nav {
+        display: flex; align-items: center; gap: 4px; flex-wrap: nowrap;
+        background: rgba(255,255,255,.08); border-radius: 10px; padding: 4px;
+    }
     .cbd-zoom {
         display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
         background: rgba(255,255,255,.08); border-radius: 10px; padding: 4px;
@@ -72,6 +77,7 @@
         background: var(--c-primary, #0b7285); border-color: #fff;
     }
     .cbd-btn-icon { padding: 8px 10px; font-size: 1.05rem; }
+    .cbd-btn:disabled { opacity: .35; cursor: not-allowed; }
     .cbd-level {
         min-width: 56px; text-align: center; font-variant-numeric: tabular-nums;
         font-size: .9rem; font-weight: 600; padding: 0 4px; user-select: none;
@@ -110,8 +116,10 @@
      x-data="{
         open: false,
         ready: false,
-        imgW: {{ (int) ($planche['width'] ?? 0) }},
-        imgH: {{ (int) ($planche['height'] ?? 0) }},
+        planches: @js($comic['planches']),
+        pageIndex: 0,
+        imgW: 0,
+        imgH: 0,
         scale: 1,
         fitScale: 1,
         tx: 0, ty: 0,
@@ -124,6 +132,10 @@
         _ptrs: {},
         lastFocus: null,
         scrollY: 0,
+
+        get current() {
+            return this.planches[this.pageIndex] || this.planches[0];
+        },
 
         show() {
             this.lastFocus = document.activeElement;
@@ -298,6 +310,8 @@
             else if (k === 'ArrowDown')  { e.preventDefault(); this.ty -= 60; this.mode='free'; this.clampPan(); }
             else if (k === 'ArrowLeft')  { e.preventDefault(); this.tx += 60; this.mode='free'; this.clampPan(); }
             else if (k === 'ArrowRight') { e.preventDefault(); this.tx -= 60; this.mode='free'; this.clampPan(); }
+            else if (k === 'PageUp' || k === ',') { e.preventDefault(); this.prev(); }
+            else if (k === 'PageDown' || k === '.') { e.preventDefault(); this.next(); }
         },
         trapTab(e) {
             const root = this.$refs.overlay;
@@ -309,6 +323,25 @@
             const first = list[0], last = list[list.length - 1];
             if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
             else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        },
+
+        goTo(index) {
+            const clamped = Math.max(0, Math.min(this.planches.length - 1, index));
+            if (clamped === this.pageIndex) return;
+            this.pageIndex = clamped;
+            this.$nextTick(() => {
+                this.fit('page');
+            });
+        },
+        next() {
+            if (this.pageIndex < this.planches.length - 1) {
+                this.goTo(this.pageIndex + 1);
+            }
+        },
+        prev() {
+            if (this.pageIndex > 0) {
+                this.goTo(this.pageIndex - 1);
+            }
         },
 
         _dist() { const p = Object.values(this._ptrs); return Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y); },
@@ -343,6 +376,15 @@
             <div class="cbd-bar">
                 <span class="cbd-caption">{{ $comic['title'] ?: __('Bande dessinée') }}</span>
 
+                <div x-show="planches.length > 1" class="cbd-nav" role="group" aria-label="{{ __('Navigation entre planches') }}">
+                    <button type="button" class="cbd-btn cbd-btn-icon" @click="prev()" :disabled="pageIndex === 0"
+                            aria-label="{{ __('Planche précédente') }}">‹</button>
+                    <span class="cbd-level" aria-live="polite"
+                          aria-label="{{ __('Planche courante sur total') }}" x-text="(pageIndex + 1) + ' / ' + planches.length"></span>
+                    <button type="button" class="cbd-btn cbd-btn-icon" @click="next()" :disabled="pageIndex === planches.length - 1"
+                            aria-label="{{ __('Planche suivante') }}">›</button>
+                </div>
+
                 <div class="cbd-zoom" role="group" aria-label="{{ __('Contrôles de zoom') }}">
                     <button type="button" class="cbd-btn cbd-btn-icon" @click="zoomBy(0.8)"
                             aria-label="{{ __('Zoom arrière') }}">−</button>
@@ -367,12 +409,10 @@
                 </div>
 
                 <div class="cbd-actions">
-                    @if($comic['download_url'])
-                        <a class="cbd-btn" href="{{ $comic['download_url'] }}" download
-                           aria-label="{{ __('Télécharger la BD') }}">
-                            ⬇ <span>{{ __('Télécharger') }}</span>
-                        </a>
-                    @endif
+                    <a class="cbd-btn" :href="current.jpg || current.webp || current.avif" download
+                       aria-label="{{ __('Télécharger la planche courante') }}">
+                        ⬇ <span>{{ __('Télécharger') }}</span>
+                    </a>
                     <button type="button" class="cbd-btn" x-ref="closeBtn" @click="hide()"
                             aria-label="{{ __('Fermer le visionneur') }}">
                         ✕ <span>{{ __('Fermer') }}</span>
@@ -384,13 +424,17 @@
                  @wheel.prevent="onWheel($event)"
                  @click.self="hide()">
                 <picture>
-                    @if($planche['avif'])<source srcset="{{ $planche['avif'] }}" type="image/avif">@endif
-                    @if($planche['webp'])<source srcset="{{ $planche['webp'] }}" type="image/webp">@endif
-                    <img src="{{ $planche['jpg'] }}"
-                         x-ref="img"
+                    <template x-if="current.avif">
+                        <source :srcset="current.avif" type="image/avif">
+                    </template>
+                    <template x-if="current.webp">
+                        <source :srcset="current.webp" type="image/webp">
+                    </template>
+                    <img x-ref="img"
+                         :src="current.jpg"
                          alt="{{ $comic['alt'] }}"
-                         @if($planche['width']) width="{{ $planche['width'] }}" @endif
-                         @if($planche['height']) height="{{ $planche['height'] }}" @endif
+                         :width="current.width"
+                         :height="current.height"
                          loading="lazy"
                          tabindex="0"
                          :style="transformStyle"

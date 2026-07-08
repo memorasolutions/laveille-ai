@@ -69,6 +69,21 @@ it('ne rend aucun viewer quand il n’y a pas de BD', function () {
         ->and(trim($html))->not->toContain('role="dialog"');
 });
 
+it('rend la navigation multi-planches quand une BD a plusieurs pages', function () {
+    $comic = ComicLibrary::forSlug('deepfake');
+
+    expect($comic)->toBeArray()
+        ->and($comic['planches'])->toHaveCount(2);
+
+    $html = Blade::render('<x-dictionary::comic-viewer :comic="$comic" />', ['comic' => $comic]);
+
+    expect($html)->toContain('cbd-nav')
+        ->and($html)->toContain('planches.length > 1')
+        ->and($html)->toContain('pageIndex')
+        ->and($html)->toContain('bd-deepfake-p1-site')
+        ->and($html)->toContain('bd-deepfake-p2-site');
+});
+
 it('expose hasBd dans le JSON des termes et intègre le filtre « Avec BD » à l’index', function () {
     $view = file_get_contents(
         module_path('Dictionary', 'resources/views/public/index.blade.php')
