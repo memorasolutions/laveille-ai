@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.94.2] - 2026-07-08
+
+### Fixed
+- **Service Worker interceptait /admin/* et tous les POST Livewire — lenteur sur /admin/users.** Le scope site-wide `/` du Service Worker captait aussi le backoffice et enveloppait CHAQUE requête POST (dont `/livewire/update`, utilisé par tout composant interactif) dans un `BackgroundSyncPlugin` (file de retry 24h, prévu pour de vrais formulaires hors-ligne, pas pour l'AJAX temps réel Livewire) — d'où l'attente perçue entre chaque sélection sur `/admin/users`. Des requêtes cross-origin (ex. AdSense) tombaient aussi dans le handler par défaut du SW, provoquant des erreurs réseau en console. Corrigé par 3 routes `NetworkOnly` passthrough prioritaires dans `sw-source.js` (avant les routes de cache) : `/admin/*`, `/livewire/*`, et tout cross-origin — zéro interception, zéro cache, zéro background sync sur ces requêtes.
+
 ## [1.94.1] - 2026-07-08
 
 ### Fixed

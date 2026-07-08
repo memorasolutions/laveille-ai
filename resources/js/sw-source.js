@@ -14,6 +14,28 @@ clientsClaim();
 // Precaching automatique (injecté par vite-plugin-pwa au build)
 precacheAndRoute(self.__WB_MANIFEST);
 
+// --- Exclusions prioritaires (passthrough réseau pur, AUCUNE interception) ---
+// Le scope du SW est élargi à "/" (site-wide) - sans ces exclusions, le SW capte
+// aussi /admin/* et les appels AJAX Livewire (POST /livewire/update, utilisés par
+// tout composant interactif dont l'admin), les enveloppant dans le background sync
+// POST ci-dessous -> latence perçue à chaque clic (ex. sélection multiple sur
+// /admin/users). Ces 3 routes DOIVENT rester AVANT les routes de cache (Workbox
+// utilise la première route qui matche).
+registerRoute(
+    ({ url }) => url.pathname.startsWith('/admin'),
+    new NetworkOnly()
+);
+
+registerRoute(
+    ({ url }) => url.pathname.startsWith('/livewire/'),
+    new NetworkOnly()
+);
+
+registerRoute(
+    ({ url }) => url.origin !== self.location.origin,
+    new NetworkOnly()
+);
+
 // --- Stratégies de cache runtime ---
 
 // Pages HTML - Network First (toujours chercher le réseau d'abord)

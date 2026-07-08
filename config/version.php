@@ -17,6 +17,15 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.94.2 · 2026-07-08 · fix(pwa) Service Worker interceptait /admin/* et TOUS les POST
+ *     Livewire (dont /livewire/update) - le scope site-wide "/" du SW captait le backoffice et
+ *     enveloppait chaque requête POST dans un BackgroundSyncPlugin (queue retry 24h, conçu pour
+ *     de vrais formulaires hors-ligne, pas pour l'AJAX temps réel Livewire) → latence perçue à
+ *     chaque clic sur /admin/users (sélection multi-utilisateurs). Erreurs réseau console
+ *     supplémentaires sur les requêtes cross-origin (ex. AdSense) faute d'exclusion. Corrigé par
+ *     3 routes NetworkOnly passthrough PRIORITAIRES (avant les routes de cache) dans
+ *     sw-source.js : /admin/*, /livewire/*, et tout cross-origin - aucune caching, aucun
+ *     background sync sur ces requêtes.
  *   1.94.1 · 2026-07-08 · fix(pwa) Conflit de scope Service Worker (rechargements infinis
  *     "Update on reload" surtout /actualites) - /sw-authors.js (mini-site auteur /@slug) était
  *     enregistré sans scope explicite → scope racine "/" identique au SW vite-pwa principal,
@@ -739,7 +748,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 94;
-$lvPatch = 1;
+$lvPatch = 2;
 
 return [
     'major' => $lvMajor,
