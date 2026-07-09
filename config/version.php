@@ -17,6 +17,18 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.96.3 · 2026-07-09 · fix(annuaire) Correction d'un bug où la saisie dans le champ de
+ *     recherche de la page /annuaire donnait l'impression d'un rechargement de page, dû à un
+ *     jank causé par le recalcul du getter Alpine.js "filteredTools" sans debounce sur le
+ *     x-model="search" (Modules/Directory/resources/views/public/index.blade.php) - à chaque
+ *     frappe, le filtre/tri/rendu de ~391 outils avec images se recalculait entièrement. Ajout de
+ *     .debounce.200ms pour différer le filtrage de 200 ms (la saisie native reste instantanée).
+ *     Confirmé par tests Playwright (focus et valeur intacts, aucune requête réseau répétée,
+ *     aucun événement beforeunload) et 26/26 tests Pest du module Directory verts sans
+ *     régression. Deux problèmes secondaires investigués mais sans lien avec le bug : bruit
+ *     console CSP/AdSense (confirmé étranger au bug) et 404 favicons Google pour 2 outils
+ *     (nodus-ai.app, storage.mixpeek.com), déjà mitigés par un fallback onerror existant, non
+ *     corrigés dans cette passe (documentés pour une passe dédiée future).
  *   1.96.2 · 2026-07-09 · fix(sécurité) Correction d'une fuite mineure de défense en profondeur
  *     dans le composant Modules/News/resources/views/components/admin-shared-dot.blade.php. La
  *     règle CSS .nw-shared-dot poussée via @once @push('styles') se trouvait avant la vérification
@@ -828,7 +840,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 96;
-$lvPatch = 2;
+$lvPatch = 3;
 
 return [
     'major' => $lvMajor,

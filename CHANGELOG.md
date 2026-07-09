@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.96.3] - 2026-07-09
+
+### Fixed
+- **Recherche `/annuaire` donnait l'impression de recharger la page.** Diagnostic Playwright : ce n'était pas une vraie navigation (aucune requête réseau de navigation, aucun `beforeunload`), mais un jank causé par le champ Alpine.js `x-model="search"` sans debounce, qui recalculait le filtrage/tri/rendu d'environ 391 outils à chaque frappe. Corrigé par l'ajout de `.debounce.200ms` sur le `x-model` (`Modules/Directory/resources/views/public/index.blade.php`) - la saisie reste instantanée, seul le filtrage est différé de 200 ms. Vérifié par test Playwright (focus/valeur intacts, aucune requête répétée) et 26/26 tests Pest du module Directory, aucune régression. Deux problèmes secondaires signalés dans les logs (bruit console CSP/AdSense, 404 favicons Google pour 2 outils) ont été investigués et confirmés sans lien avec ce bug - non corrigés dans cette passe, documentés pour plus tard.
+
 ## [1.96.2] - 2026-07-09
 
 ### Fixed

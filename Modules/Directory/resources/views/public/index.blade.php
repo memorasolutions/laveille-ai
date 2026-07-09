@@ -435,7 +435,11 @@
 
             <div class="rt-search" x-show="wStep === 0">
                 <svg class="rt-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <input type="text" class="rt-search-input" x-model="search"
+                {{-- 2026-07-09 : debounce 200ms — évite de recalculer filteredTools (~391 outils, filtre + x-for + images)
+                     à CHAQUE frappe. La saisie native du champ n'est jamais affectée (le navigateur affiche le texte
+                     immédiatement) ; seul le filtrage réactif est différé, ce qui élimine le jank ressenti comme un
+                     "rechargement" de la page sur les gros catalogues. --}}
+                <input type="text" class="rt-search-input" x-model.debounce.200ms="search"
                        placeholder="{{ __('Rechercher un outil, une catégorie...') }}"
                        aria-label="{{ __('Rechercher un outil') }}">
             </div>
