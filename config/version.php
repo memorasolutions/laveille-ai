@@ -17,6 +17,15 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.96.2 · 2026-07-09 · fix(sécurité) Correction d'une fuite mineure de défense en profondeur
+ *     dans le composant Modules/News/resources/views/components/admin-shared-dot.blade.php. La
+ *     règle CSS .nw-shared-dot poussée via @once @push('styles') se trouvait avant la vérification
+ *     isSuperAdmin(), ce qui la rendait visible dans la balise <style> du HTML pour tout visiteur
+ *     anonyme, bien qu'aucune donnée sensible (shared_at ou article) n'ait été exposée. Le
+ *     correctif déplace le bloc @once/@push à l'intérieur du @if(isSuperAdmin()), garantissant
+ *     ainsi l'absence totale de trace CSS pour un non-admin. Compilation Blade, suite de tests
+ *     Pest NewsArticleShareTrackingTest (10/10 verts) et validation curl en production confirment
+ *     l'élimination de la règle 'nw-shared-dot' dans le HTML anonyme.
  *   1.96.1 · 2026-07-09 · fix(actualités) Point rouge admin-only "déjà publié" sur la liste
  *     publique des actualités : le point rouge livré en 1.96.0 sur la fiche individuelle et la
  *     liste admin manquait sur la grille de cartes publique /actualites, causant une incohérence
@@ -819,7 +828,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 96;
-$lvPatch = 1;
+$lvPatch = 2;
 
 return [
     'major' => $lvMajor,

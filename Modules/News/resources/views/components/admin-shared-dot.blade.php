@@ -20,15 +20,15 @@
 --}}
 @props(['article'])
 
-@once
-@push('styles')
-<style>
-    .nw-shared-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--c-danger, #DC2626); margin-right: 0.5rem; vertical-align: middle; flex-shrink: 0; }
-</style>
-@endpush
-@endonce
-
 @if(auth()->user()?->isSuperAdmin())
+    @once
+    @push('styles')
+    <style>
+        .nw-shared-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--c-danger, #DC2626); margin-right: 0.5rem; vertical-align: middle; flex-shrink: 0; }
+    </style>
+    @endpush
+    @endonce
+
     @php
         $nwLinkedinTrackUrl = route('admin.news.articles.mark-shared', ['article' => $article, 'platform' => 'linkedin']);
         $nwFacebookTrackUrl = route('admin.news.articles.mark-shared', ['article' => $article, 'platform' => 'facebook']);

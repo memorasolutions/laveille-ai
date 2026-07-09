@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.96.2] - 2026-07-09
+
+### Fixed
+- **Fuite mineure de défense en profondeur (règle CSS `.nw-shared-dot`).** Vérification post-déploiement de 1.96.1 : la règle CSS `.nw-shared-dot` (composant `admin-shared-dot.blade.php`) était poussée via `@once @push('styles')` **avant** la vérification `isSuperAdmin()`, la rendant visible dans la balise `<style>` du HTML pour tout visiteur anonyme - aucune donnée sensible n'était exposée (ni `shared_at`, ni article), mais cela ne respectait pas l'exigence "zéro trace dans le HTML pour un non-admin". Corrigé en déplaçant le bloc `@once`/`@push` à l'intérieur du `@if(isSuperAdmin())`. Vérifié : compilation Blade OK, 10/10 tests Pest `NewsArticleShareTrackingTest` toujours verts, `curl` en production confirme l'absence totale de `nw-shared-dot` dans le HTML anonyme.
+
 ## [1.96.1] - 2026-07-09
 
 ### Fixed
