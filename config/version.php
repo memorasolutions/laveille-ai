@@ -17,6 +17,12 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.98.1 · 2026-07-09 · fix(ci) Le pattern rsync --exclude='vendor/' du pipeline de déploiement
+ *     (non ancré à la racine) excluait aussi public/vendor/ (pas seulement le vrai vendor/
+ *     composer) - la librairie vendorisée StPageFlip du lecteur "feuilleter" (1.98.0) ne se
+ *     déployait donc jamais en prod (404 sur page-flip.browser.js). Corrigé en ancrant le motif
+ *     à la racine (--exclude='/vendor/'). Détecté par vérification post-déploiement (curl direct
+ *     sur l'asset), aucune régression sur l'exclusion du vrai vendor/ composer.
  *   1.98.0 · 2026-07-09 · feat(books) Nouveau lecteur "feuilleter" générique et réutilisable
  *     basé sur StPageFlip vendorisé localement (sans CDN, conforme CSP), intégré dans l'onglet
  *     Extrait des fiches livre (/livres/{slug}) pour offrir un aperçu de 15 à 26 pages
@@ -878,7 +884,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 98;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,

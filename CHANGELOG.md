@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.98.1] - 2026-07-09
+
+### Fixed
+- **La librairie StPageFlip vendorisée (flip-reader) ne se déployait jamais en prod (404).** Le pipeline `.github/workflows/deploy.yml` exclut `vendor/` du rsync pour ne jamais copier le vrai dossier `vendor/` composer, mais le motif n'était pas ancré à la racine (`vendor/` au lieu de `/vendor/`) - il excluait donc aussi `public/vendor/page-flip/`, livré en 1.98.0. Détecté par vérification directe en production (`curl` sur `page-flip.browser.js` -> 404) après le déploiement de 1.98.0. Corrigé en ancrant le motif (`--exclude='/vendor/'`), aucun impact sur l'exclusion du vrai `vendor/` composer.
+
 ## [1.98.0] - 2026-07-09
 
 ### Added

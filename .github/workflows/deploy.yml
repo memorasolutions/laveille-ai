@@ -27,7 +27,7 @@ jobs:
           rsync -azP \
             --exclude='.git/' \
             --exclude='.github/' \
-            --exclude='vendor/' \
+            --exclude='/vendor/' \
             --exclude='node_modules/' \
             --exclude='storage/' \
             --exclude='.env' \
