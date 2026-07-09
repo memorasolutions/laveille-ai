@@ -50,5 +50,6 @@
     "Sudoku": true,
     "Authors": true,
     "Academy": true,
-    "Sso": true
+    "Sso": true,
+    "Books": true
 }

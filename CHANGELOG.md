@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.95.0] - 2026-07-09
+
+### Added
+- **Bibliothèque de livres `/livres` (nouveau module `Modules/Books`).** Catalogue + fiche riche par livre, calqué sur le module Dictionary (modèle `Book` avec `HasPublishedState`/`Searchable`, `BookSchemaService` générant un JSON-LD `@graph` `Book`+`Offer[]`+`BreadcrumbList`+`FAQPage`+`Person`). 5 livres publiés : "L'IA sans se faire poursuivre" et "L'IA pour les parents" (essais), trilogie "Nexus Neural" (3 tomes de science-fiction). Chaque fiche est optimisée SEO/AEO/GEO : hero avec 2 CTA (papier/Kindle vers Amazon), bénéfices, extrait, structure/table des matières, biographie de l'auteur, FAQ de 5 à 10 questions - toutes les données (prix, ASIN, ISBN, disponibilité) ont été vérifiées en direct sur Amazon via Playwright avant la rédaction, aucune donnée inventée. Navigation cliquable ajoutée entre les 3 tomes de la trilogie (badge "Tome N/3", tome courant non cliquable avec `aria-current`). Correctif inclus : les boutons d'achat étaient repoussés sous la ligne de flottaison mobile (390px) par l'ordre du flex du hero - corrigé par un `order` CSS scopé au module. La section est techniquement en ligne mais invisible au public : middleware `BooksUnderConstruction` (503 pour tout visiteur non-superadmin, piloté par `BOOKS_UNDER_CONSTRUCTION`) + `@section('page_noindex')` en défense en profondeur. Aucun lien de menu ajouté - la section reste invisible tant qu'elle n'est pas activée explicitement. 6 tests Pest verts (gate 503/200, contenu, JSON-LD, 404 propre sur slug inexistant).
+
+### Fixed
+- **Icône "réinitialiser le zoom" du visionneur BD minuscule/difforme.** Le bouton utilisait le caractère Unicode `⟳` (U+27F3), mal supporté par les polices système, ce qui le rendait visuellement cassé comparé aux autres icônes du même bandeau (`-`, `+`, `‹`, `›`, `⬇`, `✕`). Remplacé par une icône SVG inline 18×18px (`stroke="currentColor"`, style refresh/rotate cohérent avec Feather/Lucide). Vérifié visuellement (icône désormais cohérente en taille et en poids avec les autres) et 9 tests Pest du module Dictionary toujours verts.
+
 ## [1.94.4] - 2026-07-08
 
 ### Fixed

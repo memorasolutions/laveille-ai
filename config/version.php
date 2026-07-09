@@ -17,6 +17,29 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.95.0 · 2026-07-09 · feat(modules) Nouveau module nwidart Modules/Books : bibliothèque de
+ *     livres /livres (catalogue + fiche riche par livre), calqué sur le module Dictionary (modèle
+ *     Book avec HasPublishedState/Searchable, BookSchemaService générant un JSON-LD @graph
+ *     Book+Offer[]+BreadcrumbList+FAQPage+Person). 5 livres publiés : "L'IA sans se faire
+ *     poursuivre" et "L'IA pour les parents" (essais), trilogie "Nexus Neural" (3 tomes SF).
+ *     Fiches riches SEO/AEO/GEO : hero avec 2 CTA (papier/Kindle vers Amazon), bénéfices, extrait,
+ *     structure/TDM, bio auteur, FAQ 5-10 questions, données réelles vérifiées en direct sur
+ *     Amazon (prix, ASIN, ISBN, disponibilité) via Playwright avant rédaction - aucune donnée
+ *     inventée. Navigation cliquable ajoutée entre les 3 tomes de la trilogie (badge "Tome N/3",
+ *     tome courant non cliquable avec aria-current). Fix additionnel : CTA d'achat repoussés sous
+ *     la ligne de flottaison mobile (390px) par l'ordre du flex hero - corrigé (order CSS scopé au
+ *     module, gain visuel confirmé par mesure getBoundingClientRect). Section techniquement en
+ *     ligne mais invisible au public : middleware BooksUnderConstruction (503 pour tout visiteur
+ *     non-superadmin, config BOOKS_UNDER_CONSTRUCTION) + @section('page_noindex') en défense en
+ *     profondeur. Aucun lien de menu ajouté (invisible tant que non activée). 6 tests Pest verts
+ *     (gate 503/200, contenu, JSON-LD, 404 propre sur slug inexistant).
+ *   1.95.0 · 2026-07-09 · fix(contenu) Icône "réinitialiser le zoom" du visionneur BD
+ *     (comic-viewer.blade.php) utilisait le caractère Unicode ⟳ (U+27F3) mal supporté par les
+ *     polices système, rendant l'icône minuscule et difforme comparée aux autres icônes du même
+ *     bouton (-, +, ‹, ›, ⬇, ✕). Correctif : remplacement par une icône SVG inline 18x18px (stroke
+ *     currentColor, style refresh/rotate cohérent Feather/Lucide). Vérifié visuellement (icône
+ *     maintenant cohérente en taille/poids avec les autres) + 9 tests Pest Dictionary toujours
+ *     verts (aucune régression).
  *   1.94.4 · 2026-07-08 · fix(contenu) Visionneur BD (comic-viewer.blade.php) ne lisait que
  *     la 1re planche du tableau planches[] du manifest.json, rendant les pages suivantes
  *     inaccessibles. Cause : $planche = $comic['planches'][0] utilisé pour tout le rendu.
@@ -761,8 +784,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 94;
-$lvPatch = 4;
+$lvMinor = 95;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,
