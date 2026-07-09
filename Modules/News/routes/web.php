@@ -58,6 +58,9 @@ Route::prefix('admin/news')
         Route::delete('articles/{article}', [AdminNewsController::class, 'destroyArticle'])->name('articles.destroy');
         Route::post('articles/{article}/upload-image', [AdminNewsController::class, 'uploadArticleImage'])->name('articles.upload-image');
         Route::post('articles/{article}/suggest-tools', [AdminNewsController::class, 'suggestTools'])->name('articles.suggest-tools');
+        Route::post('articles/{article}/marquer-partage/{platform}', [AdminNewsController::class, 'markShared'])
+            ->where('platform', 'linkedin|facebook')
+            ->name('articles.mark-shared');
     });
 
 // ── Concentre Builder (admin, S90) ──

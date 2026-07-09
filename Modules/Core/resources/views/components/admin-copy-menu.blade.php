@@ -24,7 +24,7 @@
      x-data="{
         open: false,
         copied: null,
-        async copy(i, ref) {
+        async copy(i, ref, trackUrl) {
             const el = this.$refs[ref];
             const text = el.value;
             try {
@@ -37,6 +37,25 @@
             }
             this.copied = i;
             setTimeout(() => { this.copied = null; }, 1500);
+
+            // Tracking optionnel (clé 'track_url' par item, ignorée si absente — zéro impact
+            // sur les usages existants du composant). Fire-and-forget : la copie ne doit jamais
+            // être bloquée par un échec réseau. Émet un événement navigateur pour que la page
+            // parente puisse réagir instantanément (ex. point rouge « déjà publié ») sans reload.
+            // NOTE : aucun caractère guillemet double (droit, échappé ou pas) dans ce bloc —
+            // x-data est lui-même un attribut HTML entre guillemets doubles ; un tel caractère
+            // y termine prématurément l'attribut (bug vécu : cassait tout le composant, copy() introuvable).
+            if (trackUrl) {
+                try {
+                    const token = document.querySelector('meta[name=csrf-token]')?.content;
+                    fetch(trackUrl, {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': token ?? '', 'Accept': 'application/json' },
+                    }).then(() => {
+                        window.dispatchEvent(new CustomEvent('admin-share-tracked', { detail: { trackUrl } }));
+                    }).catch(() => {});
+                } catch (e) {}
+            }
         }
      }"
      x-on:click.outside="open = false"
@@ -53,7 +72,7 @@
         @foreach ($items as $i => $item)
             <button type="button" role="menuitem" class="ct-acm-item"
                     :class="{ 'is-copied': copied === {{ $i }} }"
-                    x-on:click="copy({{ $i }}, 'acmsrc{{ $i }}')">
+                    x-on:click="copy({{ $i }}, 'acmsrc{{ $i }}', @js($item['track_url'] ?? null))">
                 <span aria-hidden="true">{{ $item['icon'] ?? '📋' }}</span>
                 <span x-text="copied === {{ $i }} ? 'Copié ✓' : @js($item['label'])"></span>
             </button>

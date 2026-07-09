@@ -124,6 +124,7 @@
     .nw-show { max-width: 740px; margin: 0 auto; }
     .nw-hero { width: 100%; max-height: 420px; object-fit: cover; border-radius: 12px; margin-bottom: 1.5rem; }
     .nw-show-title { font-family: var(--f-heading); font-size: 2rem; line-height: 1.2; margin-bottom: 1rem; }
+    .nw-shared-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--c-danger, #DC2626); margin-right: 0.5rem; vertical-align: middle; flex-shrink: 0; }
     .nw-lead { font-size: 1.0625rem; font-weight: 600; color: var(--c-dark); line-height: 1.6; margin-bottom: 1.5rem; }
     .nw-meta-bar {
         display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;
@@ -211,7 +212,35 @@
             <div class="col-lg-8">
                 <div class="nw-show">
 
-                    <h1 class="nw-show-title" data-editable="title">{{ $article->seo_title ?? $article->title }}</h1>
+                    {{-- Point rouge "déjà publié" (superadmin only) — même gate que le menu de partage
+                         admin plus bas (isSuperAdmin()). AUCUNE trace (dot ni *_shared_at) dans le HTML
+                         pour un visiteur non-admin : le bloc entier est omis côté serveur, pas juste
+                         caché en CSS. Réactif sans reload via l'événement 'admin-share-tracked' émis par
+                         <x-core::admin-copy-menu> au clic sur "Post LinkedIn"/"Post Facebook". --}}
+                    <h1 class="nw-show-title" data-editable="title">
+                        @if(auth()->user()?->isSuperAdmin())
+                            @php
+                                $nwLinkedinTrackUrl = route('admin.news.articles.mark-shared', ['article' => $article, 'platform' => 'linkedin']);
+                                $nwFacebookTrackUrl = route('admin.news.articles.mark-shared', ['article' => $article, 'platform' => 'facebook']);
+                            @endphp
+                            <span class="nw-shared-dot"
+                                  x-cloak
+                                  x-data="{
+                                      linkedin: {{ $article->linkedin_shared_at ? 'true' : 'false' }},
+                                      facebook: {{ $article->facebook_shared_at ? 'true' : 'false' }},
+                                  }"
+                                  x-on:admin-share-tracked.window="
+                                      if ($event.detail.trackUrl === @js($nwLinkedinTrackUrl)) linkedin = true;
+                                      if ($event.detail.trackUrl === @js($nwFacebookTrackUrl)) facebook = true;
+                                  "
+                                  x-show="linkedin || facebook"
+                                  role="img"
+                                  :aria-label="linkedin && facebook ? '{{ __('Déjà publié sur LinkedIn et Facebook') }}' : (linkedin ? '{{ __('Déjà publié sur LinkedIn') }}' : '{{ __('Déjà publié sur Facebook') }}')"
+                                  :title="linkedin && facebook ? '{{ __('Déjà publié sur LinkedIn et Facebook') }}' : (linkedin ? '{{ __('Déjà publié sur LinkedIn') }}' : '{{ __('Déjà publié sur Facebook') }}')"
+                            ></span>
+                        @endif
+                        {{ $article->seo_title ?? $article->title }}
+                    </h1>
 
                     @php
                         $readText = strip_tags($article->description ?? '') . ' ' . ($article->summary ?? '');

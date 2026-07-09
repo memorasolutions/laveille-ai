@@ -17,6 +17,30 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.96.0 · 2026-07-09 · feat(glossaire) Nouveau terme glossaire "PinPoint Test" (slug
+ *     pinpoint-test) : test sanguin de dépistage/triage du cancer basé sur l'IA (machine
+ *     learning), utilisé dans le NHS (Royaume-Uni). Analyse ~30-33 biomarqueurs sanguins
+ *     routiniers + données démographiques (âge, sexe), modèle entraîné sur plus de 370 000
+ *     patients (jeu rétrospectif) + suivi prospectif de 17 000 patients sur 5 ans. Logiciel de
+ *     diagnostic in vitro (Software IVD) réglementé CE/UKCA. Outil de triage pour 9 groupes de
+ *     cancers (sein, gynécologique, hématologique, tête et cou, GI haut/bas, poumon, peau,
+ *     urologique), PAS un substitut au diagnostic clinique. 3 sources vérifiées (BMJ Open 2022,
+ *     Pinpoint Data Science 2026, AI News 2026). Image générée via /nanobanana (tube sanguin
+ *     stylisé + réseau de neurones + tableau de bord risque).
+ *   1.96.0 · 2026-07-09 · feat(actualités) Point rouge admin-only "déjà publié" sur les
+ *     actualités : quand un admin clique "Post LinkedIn" ou "Post Facebook" (menu de copie
+ *     presse-papier existant, aucun appel API externe), un point rouge apparaît désormais avant
+ *     le titre de l'actualité (page publique ET liste admin), indiquant que le texte de partage a
+ *     déjà été copié pour ce réseau. Nouvelles colonnes linkedin_shared_at/facebook_shared_at
+ *     (timestamps nullables) sur news_articles. Tracking ajouté de façon générique et
+ *     rétrocompatible dans le composant partagé Modules/Core/admin-copy-menu.blade.php (clé
+ *     optionnelle track_url par item, zéro impact sur les 3 autres usages du composant -
+ *     Acronym/Term/Tool/Article). Route POST admin-only (isSuperAdmin strict, liste blanche de
+ *     plateformes, idempotente) marque le timestamp ; mise à jour instantanée du point sans
+ *     recharger la page (CustomEvent Alpine.js). Sécurité vérifiée : le point et les données de
+ *     tracking sont totalement absents du HTML pour un visiteur non-admin, même si les champs
+ *     sont remplis en base. Accessibilité : aria-label/title explicite (pas de couleur seule).
+ *     72 tests Pest verts (8 nouveaux + 64 régression News/composant partagé).
  *   1.95.0 · 2026-07-09 · feat(modules) Nouveau module nwidart Modules/Books : bibliothèque de
  *     livres /livres (catalogue + fiche riche par livre), calqué sur le module Dictionary (modèle
  *     Book avec HasPublishedState/Searchable, BookSchemaService générant un JSON-LD @graph
@@ -784,7 +808,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 95;
+$lvMinor = 96;
 $lvPatch = 0;
 
 return [

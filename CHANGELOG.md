@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.96.0] - 2026-07-09
+
+### Added
+- **Glossaire — nouveau terme "PinPoint Test".** Test sanguin de dépistage/triage du cancer basé sur l'IA (machine learning), utilisé dans le NHS (Royaume-Uni). Analyse ~30-33 biomarqueurs sanguins routiniers combinés à des données démographiques (âge, sexe) dans un modèle entraîné sur plus de 370 000 patients (jeu rétrospectif), avec un suivi prospectif de 17 000 patients sur 5 ans. Logiciel de diagnostic in vitro (Software IVD) réglementé CE/UKCA, utilisé comme outil de triage pour 9 groupes de cancers (sein, gynécologique, hématologique, tête et cou, gastro-intestinal haut et bas, poumon, peau, urologique) - un outil d'aide à la décision, pas un substitut au diagnostic clinique. 3 sources vérifiées (BMJ Open 2022, Pinpoint Data Science 2026, AI News 2026). Image générée via `/nanobanana`.
+- **Actualités — point rouge admin-only "déjà publié" sur LinkedIn/Facebook.** Quand un admin clique "Post LinkedIn" ou "Post Facebook" (menu de copie presse-papier existant, aucun appel API externe), un point rouge apparaît désormais avant le titre de l'actualité (page publique et liste admin), indiquant que le texte de partage a déjà été copié pour ce réseau. Nouvelles colonnes `linkedin_shared_at`/`facebook_shared_at` sur `news_articles`. Le tracking a été ajouté de façon générique et rétrocompatible dans le composant partagé `Modules/Core/admin-copy-menu.blade.php` (clé optionnelle `track_url` par item, zéro impact sur les 3 autres usages du composant - Acronyme/Terme/Outil/Article). Une route POST admin-only (`isSuperAdmin` strict, liste blanche de plateformes, idempotente) marque le timestamp ; le point se met à jour instantanément sans recharger la page. Vérifié : le point et les données de tracking sont totalement absents du HTML pour un visiteur non-admin, même si les champs sont remplis en base - et l'indicateur porte un `aria-label`/`title` explicite (pas de couleur seule). 72 tests Pest verts (8 nouveaux + 64 régression).
+
 ## [1.95.0] - 2026-07-09
 
 ### Added

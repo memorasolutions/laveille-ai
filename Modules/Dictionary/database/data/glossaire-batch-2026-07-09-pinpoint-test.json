@@ -1,0 +1,54 @@
+[
+  {
+    "slug": "pinpoint-test",
+    "name": "PinPoint Test",
+    "cat_slug": "concepts-fondamentaux",
+    "difficulty": "intermediate",
+    "type": "ai_term",
+    "icon": "🩸",
+    "match_strategy": "case_sensitive",
+    "aliases": ["PinPoint", "Pinpoint Test", "Test PinPoint"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "has_image": true,
+    "definition": "Le PinPoint Test est un test sanguin de triage du cancer utilisant l'intelligence artificielle pour évaluer le risque de cancer chez des patients symptomatiques. Développé par la firme britannique Pinpoint Data Science, il mesure 31 biomarqueurs sanguins routiniers combinés à l'âge et au sexe dans un modèle de machine learning. Validé sur une cohorte rétrospective de 371 799 recommandations urgentes à Leeds (2011-2019, étude BMJ Open 2022), il a ensuite été évalué prospectivement par le NHS auprès d'environ 17 000 patients du West Yorkshire sur cinq ans. Le test produit un score de risque catégorisé (rouge, jaune, vert) qui aide les cliniciens à prioriser les examens (scanner, endoscopie, hystéroscopie) ou à rassurer rapidement les patients à faible risque. Couvrant neuf grands groupes de cancers, il affiche une valeur prédictive négative très élevée (environ 99 % dans certains sous-groupes). C'est un logiciel de diagnostic in vitro marqué CE/UKCA, un outil d'aide à la décision, pas un substitut au diagnostic.",
+    "analogy": "C'est comme un feu de circulation qui indique aux médecins quel patient passer en priorité au scanner ou qui peut être rassuré rapidement.",
+    "example": "En juillet 2026, le NHS a utilisé le PinPoint Test pour réduire le nombre d'hystéroscopies invasives inutiles chez les patientes à faible risque de cancer gynécologique.",
+    "did_you_know": "Sa valeur prédictive négative atteint environ 99 % pour certains cancers, comme les cancers gynécologiques, ce qui permet d'exclure en sécurité une partie des patients suspectés.",
+    "one_sentence_answer": "Le PinPoint Test est un test sanguin utilisant l'intelligence artificielle pour évaluer le risque de cancer et prioriser les examens chez les patients symptomatiques, sans remplacer le diagnostic.",
+    "faq": [
+      {
+        "question": "Comment fonctionne ce test sanguin ?",
+        "answer": "Il mesure 31 biomarqueurs dans le sang et combine ces données avec l'âge et le sexe dans un modèle d'intelligence artificielle pour produire un score de risque de cancer."
+      },
+      {
+        "question": "Est-ce que ce test remplace les examens comme le scanner ou la biopsie ?",
+        "answer": "Non, c'est un outil d'aide à la décision. Il aide les médecins à prioriser les examens ou à rassurer les patients à faible risque, mais ne remplace pas le diagnostic."
+      },
+      {
+        "question": "Le test est-il fiable pour tous les types de cancer ?",
+        "answer": "Il couvre neuf grands groupes de cancers et offre une très haute valeur prédictive négative pour certains, mais il n'est pas parfait et doit être utilisé avec d'autres examens cliniques."
+      }
+    ],
+    "sources": [
+      {
+        "label": "BMJ Open - Development and validation of multivariable machine learning algorithms to predict risk of cancer in symptomatic patients referred urgently from primary care: a diagnostic accuracy study",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35365520/",
+        "year": 2022,
+        "author": "Savage R, Messenger M, Neal RD et al."
+      },
+      {
+        "label": "Pinpoint Data Science - NHS evaluation of the PinPoint test complete",
+        "url": "https://pinpointdatascience.com/nhs-evaluation-of-the-pinpoint-test-complete/",
+        "year": 2026,
+        "author": "Pinpoint Data Science"
+      },
+      {
+        "label": "AI News - NHS AI blood test could reduce invasive womb cancer checks",
+        "url": "https://www.artificialintelligence-news.com/news/nhs-ai-blood-test-womb-cancer-checks/",
+        "year": 2026,
+        "author": "AI News"
+      }
+    ]
+  }
+]

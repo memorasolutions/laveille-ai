@@ -264,4 +264,27 @@ class AdminNewsController extends Controller
             ? response()->json(['ok' => false, 'message' => $result['message']], 422)
             : back()->with('error', $result['message']);
     }
+
+    /**
+     * Marque une actualité comme "déjà publiée" sur LinkedIn/Facebook (point rouge admin).
+     * Superadmin strict (aligné sur le gate d'affichage du menu de partage, cf. show.blade.php
+     * et article-action-bar.blade.php : auth()->user()?->isSuperAdmin()). Idempotent : re-cliquer
+     * met simplement à jour le timestamp, ne plante jamais.
+     */
+    public function markShared(Request $request, NewsArticle $article, string $platform): JsonResponse
+    {
+        abort_unless($request->user()?->isSuperAdmin(), 403);
+
+        if (! in_array($platform, ['linkedin', 'facebook'], true)) {
+            abort(404);
+        }
+
+        $article->forceFill(["{$platform}_shared_at" => now()])->save();
+
+        return response()->json([
+            'ok' => true,
+            'platform' => $platform,
+            'shared_at' => $article->{"{$platform}_shared_at"}->toIso8601String(),
+        ]);
+    }
 }

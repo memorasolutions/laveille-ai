@@ -39,6 +39,7 @@ class NewsArticle extends Model implements Searchable
         'category_tag', 'impact_level', 'feed_type', 'seo_title', 'meta_description',
         'short_url_id', 'views_count', 'canonical_url', 'is_potential_duplicate_of', 'dedup_score', 'dedup_reason',
         'seo_status', // index | noindex | gone — élagage SEO réversible des vieilles news peu vues
+        'linkedin_shared_at', 'facebook_shared_at', // tracking "déjà publié" (admin, point rouge)
     ];
 
     protected $casts = [
@@ -48,6 +49,8 @@ class NewsArticle extends Model implements Searchable
         'relevance_score' => 'integer',
         'is_potential_duplicate_of' => 'integer',
         'dedup_score' => 'float',
+        'linkedin_shared_at' => 'datetime',
+        'facebook_shared_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -284,8 +287,14 @@ class NewsArticle extends Model implements Searchable
             ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
             ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
             ['label' => 'NotebookLM Diapositives', 'icon' => '🖼️', 'text' => $slides],
-            ['label' => 'Post LinkedIn', 'icon' => '💼', 'text' => $linkedin],
-            ['label' => 'Post Facebook', 'icon' => '📘', 'text' => $facebook],
+            [
+                'label' => 'Post LinkedIn', 'icon' => '💼', 'text' => $linkedin,
+                'track_url' => route('admin.news.articles.mark-shared', ['article' => $this, 'platform' => 'linkedin']),
+            ],
+            [
+                'label' => 'Post Facebook', 'icon' => '📘', 'text' => $facebook,
+                'track_url' => route('admin.news.articles.mark-shared', ['article' => $this, 'platform' => 'facebook']),
+            ],
         ];
     }
 

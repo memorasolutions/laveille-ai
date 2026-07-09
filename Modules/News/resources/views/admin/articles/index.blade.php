@@ -78,6 +78,14 @@
                         </td>
                         <td style="max-width: 300px;">
                             <a href="{{ route('news.show', $a) }}" target="_blank" style="font-weight: 600; color: var(--bs-body-color); text-decoration: none;">
+                                @if($a->linkedin_shared_at || $a->facebook_shared_at)
+                                    @php
+                                        $sharedLabel = $a->linkedin_shared_at && $a->facebook_shared_at
+                                            ? 'Déjà publié sur LinkedIn et Facebook'
+                                            : ($a->linkedin_shared_at ? 'Déjà publié sur LinkedIn' : 'Déjà publié sur Facebook');
+                                    @endphp
+                                    <span role="img" aria-label="{{ $sharedLabel }}" title="{{ $sharedLabel }}" style="display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--c-danger, #DC2626); margin-right:6px; vertical-align:middle;"></span>
+                                @endif
                                 {{ Str::limit($a->seo_title ?? $a->title, 60) }}
                             </a>
                             @if($a->score_justification)
