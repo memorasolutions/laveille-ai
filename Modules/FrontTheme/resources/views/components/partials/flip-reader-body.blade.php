@@ -56,11 +56,30 @@
                      x-show="!useSimple || current === {{ $i + 1 }}"
                      x-cloak
                      @if($i === 0 || $i === count($pages) - 1) data-density="hard" @endif>
-                    <img src="{{ $p['image'] }}"
-                         alt="{{ $p['alt'] ?? '' }}"
-                         @if(!empty($p['width'])) width="{{ (int) $p['width'] }}" @endif
-                         @if(!empty($p['height'])) height="{{ (int) $p['height'] }}" @endif
-                         loading="lazy">
+                    {{-- Squelette « papier » + blur-up (LQIP) pendant le chargement -
+                         aria-busy et classe --loaded pilotés par pageLoaded[i] (Alpine),
+                         mis à jour au @load de l'image pleine résolution. --}}
+                    <div class="fpr-page-media"
+                         :class="{ 'fpr-page-media--loaded': pageLoaded[{{ $i }}] }"
+                         :aria-busy="pageLoaded[{{ $i }}] ? 'false' : 'true'">
+                        @if(!empty($p['lqip']))
+                        <img class="fpr-page-lqip"
+                             src="{{ $p['lqip'] }}"
+                             alt="" aria-hidden="true" loading="lazy" decoding="async">
+                        @endif
+                        <img class="fpr-page-full"
+                             src="{{ $p['image'] }}"
+                             alt="{{ $p['alt'] ?? '' }}"
+                             @if(!empty($p['width'])) width="{{ (int) $p['width'] }}" @endif
+                             @if(!empty($p['height'])) height="{{ (int) $p['height'] }}" @endif
+                             @if($i === 0)
+                             fetchpriority="high"
+                             @else
+                             loading="lazy"
+                             @endif
+                             decoding="async"
+                             @load="markLoaded({{ $i }})">
+                    </div>
                 </div>
             @endforeach
         </div>

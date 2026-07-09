@@ -17,6 +17,14 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.100.0 · 2026-07-09 · feat(books) Lecteur flip-reader : état de chargement (pages blanches
+ *     signalées par l'utilisateur). Veille best-practices 2026 (squelette + blur-up + priorité de
+ *     chargement, préférés à un spinner générique). LQIP générées (97 images, ~4 Ko, ImageMagick)
+ *     pour les 5 livres, Book::excerptPages() expose lqip par page (fix au passage : le glob
+ *     excluait mal les -lqip.jpg). Squelette shimmer désactivé sous prefers-reduced-motion,
+ *     retrait de loading=lazy + fetchpriority=high sur la page courante, aria-busy + annonce
+ *     aria-live sobre. Vérifié réseau ralenti (CDP) sur 2 livres, aucune régression clavier/souris/
+ *     rognage. 12/12 tests Pest verts.
  *   1.99.1 · 2026-07-09 · fix(books) Régression visuelle du fix 1.99.0 (flip-reader) signalée par
  *     capture d'écran de l'utilisateur : titre de la page 1 rogné en haut sur grands écrans
  *     (1717x1151). Cause : .fpr-book combinait width:100% explicite avec aspect-ratio +
@@ -901,8 +909,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 99;
-$lvPatch = 1;
+$lvMinor = 100;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

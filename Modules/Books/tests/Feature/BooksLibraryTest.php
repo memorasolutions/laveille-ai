@@ -119,3 +119,51 @@ test('Book::excerptPages retourne un tableau vide pour un slug sans dossier extr
 
     expect($book->excerptPages())->toBe([]);
 });
+
+// #flip-reader-lqip-2026-07-09 : chaque page porte désormais une clé 'lqip'
+// (blur-up pendant le chargement, x-fronttheme::flip-reader) - présente et
+// pointant vers le fichier page-NN-lqip.jpg généré via ImageMagick quand il
+// existe, jamais de valeur en dur (Book::excerptPages scanne le disque).
+
+test('Book::excerptPages inclut la clé lqip pointant vers le fichier -lqip.jpg généré', function (): void {
+    $book = new \Modules\Books\Models\Book(['slug' => 'ia-sans-se-faire-poursuivre', 'title' => 'Test']);
+
+    $pages = $book->excerptPages();
+
+    expect($pages)->not->toBeEmpty();
+
+    foreach ($pages as $page) {
+        expect($page)->toHaveKeys(['image', 'lqip', 'alt', 'width', 'height']);
+        expect($page['lqip'])->not->toBeNull();
+        expect($page['lqip'])->toEndWith('-lqip.jpg');
+    }
+});
+
+test('Book::excerptPages ne confond pas les fichiers -lqip.jpg avec des pages', function (): void {
+    $book = new \Modules\Books\Models\Book(['slug' => 'ia-sans-se-faire-poursuivre', 'title' => 'Test']);
+
+    // 26 pages annoncées par le test « feuilleter » ci-dessus : le glob page-*.jpg
+    // matche aussi page-NN-lqip.jpg s'il n'est pas explicitement filtré - régression
+    // à surveiller (aurait doublé le compte de pages).
+    expect($book->excerptPages())->toHaveCount(26);
+});
+
+test('Book::excerptPages retourne lqip=null si le fichier LQIP est absent', function (): void {
+    // Slug avec dossier + une page mais sans LQIP généré : simule le cas défensif
+    // (squelette shimmer seul, sans blur-up) via un dossier de test jetable.
+    $dir = public_path('images/livres-extraits/test-sans-lqip-tmp');
+    @mkdir($dir, 0755, true);
+    copy(
+        public_path('images/livres-extraits/ia-sans-se-faire-poursuivre/page-01.jpg'),
+        $dir.'/page-01.jpg'
+    );
+
+    $book = new \Modules\Books\Models\Book(['slug' => 'test-sans-lqip-tmp', 'title' => 'Test']);
+    $pages = $book->excerptPages();
+
+    @unlink($dir.'/page-01.jpg');
+    @rmdir($dir);
+
+    expect($pages)->toHaveCount(1);
+    expect($pages[0]['lqip'])->toBeNull();
+});

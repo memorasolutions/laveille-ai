@@ -114,7 +114,14 @@ class Book extends Model implements Searchable
      * dynamiquement dans public/images/livres-extraits/{slug}/page-NN.jpg -
      * jamais de valeur en dur : un livre sans dossier retourne simplement [].
      *
-     * @return array<int, array{image: string, alt: string, width: int, height: int}>
+     * Inclut le LQIP (Low Quality Image Placeholder, ~40px, quelques Ko) associé
+     * à chaque page quand il existe (page-NN-lqip.jpg, généré hors-ligne via
+     * ImageMagick) : le composant flip-reader l'affiche flouté pendant le
+     * chargement de l'image pleine résolution. Défensif : si le LQIP n'a pas
+     * encore été généré pour une page, la clé vaut simplement null - le
+     * squelette shimmer du composant suffit alors seul.
+     *
+     * @return array<int, array{image: string, lqip: ?string, alt: string, width: int, height: int}>
      */
     public function excerptPages(): array
     {
@@ -129,6 +136,8 @@ class Book extends Model implements Searchable
         }
 
         $files = glob($dir.'/page-*.jpg') ?: [];
+        // Exclure les LQIP eux-mêmes du glob (page-NN-lqip.jpg matche aussi page-*.jpg).
+        $files = array_values(array_filter($files, fn (string $f): bool => ! str_ends_with($f, '-lqip.jpg')));
 
         if (! $files) {
             return [];
@@ -145,9 +154,13 @@ class Book extends Model implements Searchable
 
         foreach ($files as $index => $file) {
             $page = $index + 1;
+            $lqipPath = $dir.'/'.pathinfo($file, PATHINFO_FILENAME).'-lqip.jpg';
 
             $pages[] = [
                 'image' => asset('images/livres-extraits/'.$this->slug.'/'.basename($file)),
+                'lqip' => is_file($lqipPath)
+                    ? asset('images/livres-extraits/'.$this->slug.'/'.basename($lqipPath))
+                    : null,
                 'alt' => trim(__('Page :page de l\'extrait de :title', [
                     'page' => $page,
                     'title' => (string) $this->title,

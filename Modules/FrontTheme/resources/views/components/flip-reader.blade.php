@@ -157,8 +157,43 @@
         position: absolute; inset: 0; width: 100%; height: 100%;
         transition: opacity .15s ease;
     }
+
+    /* Squelette « papier » + blur-up (LQIP) pendant le chargement d'une page -
+       remplit EXACTEMENT le même espace que .fpr-page (width/height:100%),
+       sans jamais imposer d'aspect-ratio propre : c'est déjà .fpr-page qui est
+       correctement dimensionné (StPageFlip en mode livre, CSS en mode simple),
+       voir le commentaire au-dessus de .fpr-book sur la fragilité mesurée d'un
+       aspect-ratio superposé - on ne le reproduit pas ici. */
+    .fpr-page-media {
+        position: relative; display: block; width: 100%; height: 100%;
+        overflow: hidden; background: #f2efe7;
+    }
+    .fpr-page-media::before {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(100deg, rgba(255,255,255,0) 28%, rgba(255,255,255,.65) 50%, rgba(255,255,255,0) 72%);
+        background-size: 200% 100%;
+        animation: fpr-shimmer 1.5s ease-in-out infinite;
+        opacity: 1; transition: opacity .2s ease; pointer-events: none;
+    }
+    .fpr-page-media--loaded::before { opacity: 0; }
+    @keyframes fpr-shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    .fpr-page-lqip {
+        position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+        filter: blur(16px); transform: scale(1.05); opacity: 1;
+        transition: opacity .22s ease; -webkit-user-select: none; user-select: none;
+    }
+    .fpr-page-full {
+        position: relative; opacity: 0; transition: opacity .22s ease;
+    }
+    .fpr-page-media--loaded .fpr-page-full { opacity: 1; }
+    .fpr-page-media--loaded .fpr-page-lqip { opacity: 0; }
     @media (prefers-reduced-motion: reduce) {
         .fpr-trigger, .fpr-book--simple .fpr-page { transition: none; }
+        .fpr-page-media::before { animation: none; transition: none; }
+        .fpr-page-lqip, .fpr-page-full { transition: none; }
     }
     @media (max-width: 560px) {
         .fpr-caption { flex-basis: 100%; }
@@ -192,6 +227,7 @@
             liveMsg: '',
             lastFocus: null,
             scrollY: 0,
+            pageLoaded: {},
 
             init() {
                 this.useSimple = mq.matches || typeof window.St === 'undefined' || !window.St.PageFlip;
@@ -199,7 +235,10 @@
                     this.useSimple = e.matches || typeof window.St === 'undefined' || !window.St.PageFlip;
                 });
                 if (this.mode !== 'modal') {
-                    this.$nextTick(() => this.mount());
+                    this.$nextTick(() => {
+                        this.mount();
+                        this.scanLoadedImages();
+                    });
                 }
             },
 
@@ -233,7 +272,27 @@
             },
 
             announce() {
-                this.liveMsg = this.current + ' / ' + this.pageCount;
+                const idx = this.current - 1;
+                this.liveMsg = this.pageLoaded[idx]
+                    ? (this.current + ' / ' + this.pageCount)
+                    : @json(__('Chargement de la page…'));
+            },
+
+            markLoaded(i) {
+                this.pageLoaded[i] = true;
+                if (i === this.current - 1) {
+                    this.liveMsg = this.current + ' / ' + this.pageCount;
+                }
+            },
+
+            scanLoadedImages() {
+                const root = this.$refs.overlay;
+                if (!root) { return; }
+                root.querySelectorAll('.fpr-page-full').forEach((img, i) => {
+                    if (img.complete && img.naturalWidth > 0) {
+                        this.markLoaded(i);
+                    }
+                });
             },
 
             next() {
@@ -265,6 +324,7 @@
                 this.$nextTick(() => {
                     this.$nextTick(() => {
                         this.mount();
+                        this.scanLoadedImages();
                         if (this.$refs.closeBtn) { this.$refs.closeBtn.focus(); }
                     });
                 });

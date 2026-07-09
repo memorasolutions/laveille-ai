@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.100.0] - 2026-07-09
+
+### Added
+- **État de chargement du lecteur flip-reader avec LQIP, squelette et optimisation des priorités.** Sur signalement utilisateur de « pages blanches constantes » à l'ouverture des extraits, un état de chargement complet a été implémenté dans le composant flip-reader. La solution repose sur une veille des meilleures pratiques 2026 (squelette + blur-up + priorité de chargement) plutôt qu'un simple spinner générique, jugé moins performant pour un contenu à mise en page connue. Détails techniques : génération d'images LQIP (~40 px de large, ~4 Ko chacune via ImageMagick) pour les 97 pages d'extraits existantes (5 livres), affichées instantanément et floutées en attendant l'image nette avec un fondu CSS de 220 ms ; `Book::excerptPages()` (`Modules/Books/app/Models/Book.php`) retourne désormais une clé `lqip` par page (chemin ou null si absent), avec correction d'un bug réel au passage : le glob `page-*.jpg` comptait aussi les nouveaux fichiers `-lqip.jpg` comme des pages, désormais filtrés explicitement ; squelette shimmer ajouté au composant générique `Modules/FrontTheme/resources/views/components/flip-reader.blade.php`, désactivé automatiquement sous `prefers-reduced-motion` ; retrait de `loading="lazy"` sur l'image de la page actuelle (`fetchpriority="high"` à la place), ce lazy-load étant inapproprié pour du contenu déjà à l'écran ; `aria-busy` sur la case en cours de chargement et annonce `aria-live` sobre (« Chargement de la page… », reprend le compteur de pages une fois chargée), sans duplication du mécanisme d'annonce existant. Vérifié visuellement avec un réseau ralenti simulé (CDP) confirmant le bon affichage du squelette et du flou LQIP pendant le chargement sur deux livres différents ; navigation clavier/souris et absence de rognage (`object-fit:contain`) reconfirmées sans régression. 12/12 tests Pest verts (3 nouveaux).
+
 ## [1.99.1] - 2026-07-09
 
 ### Fixed
