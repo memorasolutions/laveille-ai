@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.99.1] - 2026-07-09
+
+### Fixed
+- **Régression visuelle sur le lecteur flip-reader (page rognée sur grands écrans).** Le correctif précédent (v1.99.0) avait résolu le clic souris bloqué sur le bouton "Page suivante" mais avait introduit une régression non détectée : sur fenêtres hautes (ex. 1717x1151), le titre de la page 1 apparaissait rogné en haut. Cause : `.fpr-book` combinait `width:100%` explicite avec `aspect-ratio` et `max-height:100%`, or l'algorithme CSS "transferred size" ne réduit la largeur que si `width` est `auto`. La hauteur était plafonnée mais la largeur restait à 900px, créant une boîte 900x1063 au lieu de 708x1063, et `object-fit:cover` rognait le haut/bas. Tentative de `width:auto` (boîte effondrée à 0x0, aucune dimension pour amorcer aspect-ratio). Correctif final (`Modules/FrontTheme/resources/views/components/flip-reader.blade.php`) : `.fpr-book` utilise `width:100%; height:100%; max-width:900px` sans `aspect-ratio` ; l'image passe en `object-fit:contain` (plus de rognage) ; StPageFlip en mode `stretch` préserve son ratio en interne. Vérifié par mesures DOM et captures sur 2 tailles de fenêtre (1717x1151, 1280x800) et 2 livres à ratios de page différents : plus aucun rognage, clic souris toujours fonctionnel. 9/9 tests Pest verts.
+
 ## [1.99.0] - 2026-07-09
 
 ### Fixed

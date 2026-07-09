@@ -17,6 +17,15 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.99.1 · 2026-07-09 · fix(books) Régression visuelle du fix 1.99.0 (flip-reader) signalée par
+ *     capture d'écran de l'utilisateur : titre de la page 1 rogné en haut sur grands écrans
+ *     (1717x1151). Cause : .fpr-book combinait width:100% explicite avec aspect-ratio +
+ *     max-height:100% - l'algorithme "transferred size" ne réduit la largeur que si width est
+ *     auto, laissant la boîte déformée (900x1063 au lieu de 708x1063) et object-fit:cover rognait
+ *     l'image. Fix final : .fpr-book se contente de remplir l'espace (width/height:100%,
+ *     max-width:900px, sans aspect-ratio) ; object-fit:contain sur l'image garantit l'absence de
+ *     rognage ; StPageFlip préserve son propre ratio en mode stretch. Revérifié par mesures DOM +
+ *     captures sur 2 tailles de fenêtre et 2 livres à ratios différents. 9/9 tests Pest verts.
  *   1.99.0 · 2026-07-09 · fix(books) Lecteur flip-reader : le bouton "Page suivante" devenait
  *     injoignable au clic souris (timeout Playwright confirmé, signalé aussi par l'utilisateur).
  *     Cause racine : .fpr-book n'avait pas de max-height (seulement un aspect-ratio dérivant la
@@ -893,7 +902,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 99;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,

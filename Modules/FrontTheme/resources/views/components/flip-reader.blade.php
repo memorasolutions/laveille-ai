@@ -127,27 +127,30 @@
     .fpr-reader--modal .fpr-stage { min-height: 60vh; }
     .fpr-reader--inline .fpr-stage { min-height: 320px; }
 
-    /* Cause racine du chevauchement du bouton "Page suivante" : sans max-height,
-       .fpr-book n'était contraint qu'en largeur (aspect-ratio dérive la hauteur
-       sans jamais tenir compte de la hauteur DISPONIBLE dans .fpr-stage). Pour
-       des pages au format portrait dans une modale (hauteur de scène fixée par
-       le viewport), le livre calculait une hauteur supérieure à la scène et
-       débordait symétriquement (centré par le flex du parent) par-dessus
-       .fpr-bar. max-height: 100% force le navigateur à réduire la largeur en
-       proportion (algorithme de « transferred size » CSS aspect-ratio) pour que
-       le livre tienne toujours entièrement dans .fpr-stage, comme un
-       object-fit: contain - qu'il soit rendu en <img> simple ou via StPageFlip
-       (qui lit les dimensions déjà contraintes de .fpr-book au montage). */
+    /* Cause racine RÉELLE (round 3, mesurée) : combiner aspect-ratio avec
+       max-width/max-height sur .fpr-book est fragile - avec width:100%
+       explicite, le navigateur ignore l'algorithme "transferred size" et
+       laisse la largeur figée pendant que la hauteur est plafonnée (ratio
+       cassé, image rognée par object-fit:cover) ; avec width:auto SANS
+       hauteur définie, la boîte n'a plus aucune dimension définie pour
+       amorcer aspect-ratio et s'effondre à 0x0 (reproduit et mesuré aux deux
+       tentatives via getBoundingClientRect). Fix robuste : .fpr-book se
+       contente de REMPLIR l'espace disponible (width/height:100%, plafonné en
+       largeur par max-width) SANS essayer de reproduire le ratio de la page
+       lui-même - c'est object-fit:contain sur l'image (ci-dessous) qui
+       garantit l'absence de rognage et le bon letterboxing, quel que soit le
+       ratio de la boîte. StPageFlip (mode livre) lit lui-même la taille réelle
+       du conteneur au montage et préserve son propre ratio en interne
+       (size:'stretch'), indépendamment du CSS de .fpr-book. */
     .fpr-book {
-        position: relative; width: 100%; max-width: 900px; max-height: 100%; margin: 0 auto;
-        aspect-ratio: {{ $baseWidth }} / {{ $baseHeight }};
+        position: relative; width: 100%; height: 100%; max-width: 900px; margin: 0 auto;
     }
     .fpr-page {
         background: #fff; border-radius: 2px; overflow: hidden;
         box-shadow: 0 8px 30px rgba(0,0,0,.35);
     }
     .fpr-page img {
-        display: block; width: 100%; height: 100%; object-fit: cover;
+        display: block; width: 100%; height: 100%; object-fit: contain;
         -webkit-user-select: none; user-select: none; -webkit-user-drag: none;
     }
     .fpr-book--simple .fpr-page {
