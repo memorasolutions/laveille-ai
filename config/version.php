@@ -17,6 +17,16 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.98.0 · 2026-07-09 · feat(books) Nouveau lecteur "feuilleter" générique et réutilisable
+ *     basé sur StPageFlip vendorisé localement (sans CDN, conforme CSP), intégré dans l'onglet
+ *     Extrait des fiches livre (/livres/{slug}) pour offrir un aperçu de 15 à 26 pages
+ *     (couverture, table des matières, extraits de chapitres) avec navigation clavier complète,
+ *     mode simplifié en cas de prefers-reduced-motion ou d'échec de chargement, focus-trap et
+ *     restauration, ARIA live sobre ; ajout du helper Book::excerptPages() (scan des images
+ *     d'extraits par livre) ; passage du CTA "version papier" en primaire pour les 5 livres
+ *     (trilogie SF bascule de Kindle à papier, suivant la préférence des lecteurs déjà active
+ *     pour les 2 essais) ; fil d'ariane "Livres" désormais cliquable partout où il apparaît.
+ *     9/9 tests Pest verts (BooksLibraryTest).
  *   1.97.2 · 2026-07-09 · fix(books) Déplacement du bloc "Pourquoi lire ce livre" des onglets
  *     vers la colonne droite du hero (entre l'auteur et le CTA) pour affichage immédiat sans
  *     interaction ; réduction des onglets de 5 à 4 (Extrait/Structure/Auteur/FAQ) avec Extrait
@@ -867,8 +877,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 97;
-$lvPatch = 2;
+$lvMinor = 98;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

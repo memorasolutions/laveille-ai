@@ -94,3 +94,28 @@ test('une fiche livre inexistante retourne 404 pour un superadmin', function ():
 
     $response->assertStatus(404);
 });
+
+// ── 7. Extrait feuilletable (flip-reader) ───────────────────────────────────
+// #flip-reader-extrait-2026-07-09 : bouton « Feuilleter » présent sur les 5
+// fiches ayant un dossier public/images/livres-extraits/{slug}/ ; nombre de
+// pages annoncé = compte réel scanné (Book::excerptPages(), pas de valeur en dur).
+
+test('la fiche ia-sans-se-faire-poursuivre affiche le bouton feuilleter avec 26 pages', function (): void {
+    $response = $this->actingAs($this->superadmin)->get('/livres/ia-sans-se-faire-poursuivre');
+
+    $response->assertOk();
+    $response->assertSee('Feuilleter les 26 premières pages', false);
+});
+
+test('la fiche nexus-neural-tome-1 affiche le bouton feuilleter avec 18 pages', function (): void {
+    $response = $this->actingAs($this->superadmin)->get('/livres/nexus-neural-tome-1');
+
+    $response->assertOk();
+    $response->assertSee('Feuilleter les 18 premières pages', false);
+});
+
+test('Book::excerptPages retourne un tableau vide pour un slug sans dossier extrait', function (): void {
+    $book = new \Modules\Books\Models\Book(['slug' => 'slug-sans-dossier-extrait-xyz', 'title' => 'Test']);
+
+    expect($book->excerptPages())->toBe([]);
+});

@@ -272,8 +272,8 @@
 
                 @php
                     $_isFiction = ! empty($book->series_slug);
-                    // CTA primaire papier pour les essais, Kindle pour la fiction (lectorat thriller/SF, lecture rapide).
-                    $_primaryFormat = $_isFiction ? 'kindle' : 'paperback';
+                    // CTA primaire toujours papier/broché (préférence lectorat confirmée) ; Kindle reste disponible en secondaire.
+                    $_primaryFormat = 'paperback';
                     $_seriesTomes = $_isFiction
                         ? \Modules\Books\Models\Book::where('series_slug', $book->series_slug)->orderBy('series_position')->get()
                         : collect();
@@ -347,6 +347,9 @@
                     $_bkTabIds = array_column($_bkTabs, 'id');
                     $_bkDefaultTab = $_bkTabIds[0] ?? null;
                     $_bkTabIdsJs = collect($_bkTabIds)->map(fn ($id) => "'{$id}'")->implode(',');
+                    // #flip-reader-extrait-2026-07-09 : scan dynamique des pages d'extrait
+                    // (public/images/livres-extraits/{slug}/) - livre sans dossier = [].
+                    $_bkExcerptPages = $book->excerptPages();
                 @endphp
 
                 @if($_bkDefaultTab)
@@ -390,6 +393,15 @@
                             class="bk-section bk-tabpanel"
                         >
                             <h2 class="bk-section-title">📖 {{ __('Extrait') }}</h2>
+                            @if(count($_bkExcerptPages))
+                                <x-fronttheme::flip-reader
+                                    :pages="$_bkExcerptPages"
+                                    mode="modal"
+                                    :downloadable="false"
+                                    :title="$book->title"
+                                    :trigger-label="__('Feuilleter les :count premières pages', ['count' => count($_bkExcerptPages)])"
+                                />
+                            @endif
                             <div class="bk-excerpt-box">{{ $book->excerpt }}</div>
                         </div>
                     @endif

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.98.0] - 2026-07-09
+
+### Added
+- **Nouveau lecteur "feuilleter" (flip-reader) intégré dans l'onglet Extrait des fiches livre.** Composant Blade générique et réutilisable `Modules/FrontTheme/resources/views/components/flip-reader.blade.php` avec partial partagé `partials/flip-reader-body.blade.php` (modal/inline, zéro duplication), basé sur la librairie StPageFlip vendorisée localement à `public/vendor/page-flip/page-flip.browser.js` (npm pack, aucun CDN externe pour respecter la Content-Security-Policy). Nouveau helper `Book::excerptPages()` qui scanne `public/images/livres-extraits/{slug}/page-*.jpg` (tri naturel, dimensions lues via getimagesize) et affiche 15 à 26 pages par livre (couverture, table des matières, extraits de chapitres réels) générées depuis les dernières versions vérifiées des manuscrits sources (deux corrections de fraîcheur appliquées : Livre 1 utilisait un PDF du 7 mai remplacé par la version du 1er juillet avec différences de contenu réelles ; Tome 1 utilisait un PDF du 26 décembre remplacé par la version du 5-6 janvier avec conversion typographique dialogue tiret vers guillemets). Accessibilité complète : navigation clavier (flèches, Home/End, Échap avec restauration du focus), mode simplifié automatique si `prefers-reduced-motion` ou échec de chargement de la librairie, annonce `aria-live="polite"` sobre (uniquement au changement de page), cibles tactiles 44x44px, contrastes WCAG AAA (8,81:1 à 18,65:1). Composant volontairement générique (props: pages/triggerLabel/title/mode/downloadable) sans concept de "livre" en dur, prévu pour une réutilisation future (lecteur d'actualités/glossaire).
+
+### Changed
+- **CTA "version papier" passé en primaire pour les 5 livres.** Auparavant Kindle était primaire pour la trilogie Nexus Neural, changé sur demande explicite (le papier est le format préféré des lecteurs).
+- **Fil d'ariane : l'entrée "Livres" est désormais cliquable partout.** Ajout dans la table `$breadcrumbRoutes` de `Modules/FrontTheme/resources/views/partials/breadcrumb.blade.php`, corrige automatiquement tous les usages.
+- **9/9 tests Pest verts** (`BooksLibraryTest.php`, 3 nouveaux tests ajoutés pour le compte de pages d'extrait et la présence du bouton du lecteur).
+
 ## [1.97.2] - 2026-07-09
 
 ### Fixed

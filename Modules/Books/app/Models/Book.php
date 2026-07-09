@@ -108,4 +108,55 @@ class Book extends Model implements Searchable
     {
         return route('books.show', $this->slug);
     }
+
+    /**
+     * Pages de l'extrait « feuilletable » (x-fronttheme::flip-reader), scannées
+     * dynamiquement dans public/images/livres-extraits/{slug}/page-NN.jpg -
+     * jamais de valeur en dur : un livre sans dossier retourne simplement [].
+     *
+     * @return array<int, array{image: string, alt: string, width: int, height: int}>
+     */
+    public function excerptPages(): array
+    {
+        if (blank($this->slug)) {
+            return [];
+        }
+
+        $dir = public_path('images/livres-extraits/'.$this->slug);
+
+        if (! is_dir($dir)) {
+            return [];
+        }
+
+        $files = glob($dir.'/page-*.jpg') ?: [];
+
+        if (! $files) {
+            return [];
+        }
+
+        natsort($files);
+        $files = array_values($files);
+
+        [$width, $height] = @getimagesize($files[0]) ?: [0, 0];
+        $width = (int) $width;
+        $height = (int) $height;
+
+        $pages = [];
+
+        foreach ($files as $index => $file) {
+            $page = $index + 1;
+
+            $pages[] = [
+                'image' => asset('images/livres-extraits/'.$this->slug.'/'.basename($file)),
+                'alt' => trim(__('Page :page de l\'extrait de :title', [
+                    'page' => $page,
+                    'title' => (string) $this->title,
+                ])),
+                'width' => $width,
+                'height' => $height,
+            ];
+        }
+
+        return $pages;
+    }
 }
