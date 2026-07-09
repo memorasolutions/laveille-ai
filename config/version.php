@@ -17,6 +17,17 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.97.1 · 2026-07-09 · fix(books) Correction de deux problèmes signalés suite à la refonte
+ *     de la fiche livre (1.97.0) : (1) déplacement du bandeau "Trilogie Nexus Neural" après le
+ *     premier bloc CTA pour éliminer l'espace vide entre le hero et la section "Pourquoi lire"
+ *     qui suit désormais directement le hero ; (2) remplacement du sommaire flottant par ancres
+ *     par de vrais onglets ARIA (role tablist/tab/tabpanel, aria-selected, navigation clavier
+ *     flèches gauche/droite) pour les sections Pourquoi lire (actif par défaut)/Extrait/
+ *     Structure/Auteur/FAQ, un seul panneau visible à la fois mais les 5 panneaux conservés
+ *     dans le HTML brut (masquage CSS uniquement, pas de chargement AJAX) pour préserver le
+ *     SEO/AEO. Correction additionnelle : couleur du texte des onglets inactifs ajustée de
+ *     #6B7280 (contraste 4,83:1, AA) à #4B5563 (contraste 7,55:1, AAA). 6 tests Pest verts,
+ *     vérifié desktop et mobile, contenu rédigé inchangé.
  *   1.97.0 · 2026-07-09 · feat(books) Refonte de l'ordre de la page fiche livre suite à une
  *     veille pp_search (best practices pages de vente) - hero compact, section "pourquoi lire"
  *     immédiate, premier CTA, sommaire flottant par ancres réutilisant le composant DRY
@@ -852,7 +863,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 97;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,

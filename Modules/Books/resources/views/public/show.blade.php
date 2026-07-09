@@ -111,6 +111,31 @@
     .bk-proof-item { font-size: 0.92rem; color: #4B5563; }
     .bk-proof-item strong { color: var(--c-dark); display: block; font-size: 1.05rem; font-family: var(--f-heading); }
 
+    {{-- #refonte-onglets-2026-07-09 : vrais onglets (WAI-ARIA tabs) directement sous le hero -
+         remplace le sommaire flottant par ancres (x-fronttheme::table-of-contents, réintroduit
+         ici en Alpine local plutôt qu'en réutilisant le partial fronttheme::partials.tabs pour
+         ne pas ajouter la navigation clavier flèches à 13 autres pages non testées dans ce tour). --}}
+    .bk-tabs { margin-bottom: 24px; }
+    .bk-tablist {
+        display: flex; gap: 2px; border-bottom: 2px solid #E5E7EB;
+        overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin;
+    }
+    .bk-tab-btn {
+        flex: 0 0 auto; background: transparent; border: none; border-bottom: 3px solid transparent;
+        padding: 14px 18px; font-family: var(--f-heading); font-size: 0.95rem; font-weight: 600;
+        {{-- #4B5563 (pas #6B7280) : 7,55:1 sur blanc = AAA (7:1), même gris que .bk-proof-item déjà validé. --}}
+        color: #4B5563; cursor: pointer; white-space: nowrap; transition: color 0.2s, border-color 0.2s;
+        margin-bottom: -2px;
+    }
+    .bk-tab-btn:hover { color: var(--c-dark); }
+    .bk-tab-btn.is-active { color: var(--c-primary); border-bottom-color: var(--c-primary); font-weight: 800; }
+    .bk-tab-btn:focus-visible { outline: 3px solid var(--c-accent, #9A2A06); outline-offset: -3px; }
+    .bk-tabpanel { border-top-left-radius: 0; border-top-right-radius: 0; margin-bottom: 0; }
+
+    @media (max-width: 640px) {
+        .bk-tab-btn { padding: 12px 14px; font-size: 0.88rem; }
+    }
+
     .bk-section { background: #fff; border-radius: var(--r-base); padding: 32px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #E5E7EB; }
     .bk-section-title {
         font-family: var(--f-heading); font-size: 1.35rem; font-weight: 700;
@@ -276,7 +301,188 @@
                     </div>
                 </div>
 
-                {{-- Navigation inter-tomes (trilogie Nexus Neural) --}}
+                {{-- #refonte-onglets-2026-07-09 : onglets ARIA (Pourquoi lire actif par défaut).
+                     Tout le contenu des 5 panneaux reste dans le HTML servi (SEO/AEO) : seul le
+                     masquage visuel (Alpine x-show) gère quel panneau est visible. --}}
+                @php
+                    $_bkTabs = [];
+                    if (! empty($book->benefits) && is_array($book->benefits)) {
+                        $_bkTabs[] = ['id' => 'why', 'label' => __('Pourquoi lire')];
+                    }
+                    if (! empty($book->excerpt)) {
+                        $_bkTabs[] = ['id' => 'excerpt', 'label' => __('Extrait')];
+                    }
+                    if (! empty($book->toc_summary) && is_array($book->toc_summary)) {
+                        $_bkTabs[] = ['id' => 'structure', 'label' => __('Structure')];
+                    }
+                    if (! empty($book->author_bio_short)) {
+                        $_bkTabs[] = ['id' => 'author', 'label' => __('Auteur')];
+                    }
+                    if (! empty($book->faq) && is_array($book->faq)) {
+                        $_bkTabs[] = ['id' => 'faq', 'label' => __('FAQ')];
+                    }
+                    $_bkTabIds = array_column($_bkTabs, 'id');
+                    $_bkDefaultTab = in_array('why', $_bkTabIds, true) ? 'why' : ($_bkTabIds[0] ?? null);
+                    $_bkTabIdsJs = collect($_bkTabIds)->map(fn ($id) => "'{$id}'")->implode(',');
+                @endphp
+
+                @if($_bkDefaultTab)
+                <div
+                    class="bk-tabs"
+                    x-data="{
+                        activeTab: '{{ $_bkDefaultTab }}',
+                        tabIds: [{{ $_bkTabIdsJs }}],
+                        focusTab(dir) {
+                            let idx = this.tabIds.indexOf(this.activeTab);
+                            idx = (idx + dir + this.tabIds.length) % this.tabIds.length;
+                            this.activeTab = this.tabIds[idx];
+                            this.$nextTick(() => this.$refs['bkTabBtn_' + this.activeTab] &amp;&amp; this.$refs['bkTabBtn_' + this.activeTab].focus());
+                        }
+                    }"
+                >
+                    <div role="tablist" class="bk-tablist" aria-label="{{ __('Sections du livre') }}">
+                        @foreach($_bkTabs as $_tab)
+                            <button
+                                type="button" role="tab"
+                                id="bk-tab-{{ $_tab['id'] }}"
+                                aria-controls="bk-panel-{{ $_tab['id'] }}"
+                                x-ref="bkTabBtn_{{ $_tab['id'] }}"
+                                :aria-selected="activeTab === '{{ $_tab['id'] }}'"
+                                :tabindex="activeTab === '{{ $_tab['id'] }}' ? '0' : '-1'"
+                                :class="{ 'is-active': activeTab === '{{ $_tab['id'] }}' }"
+                                class="bk-tab-btn"
+                                @click="activeTab = '{{ $_tab['id'] }}'"
+                                @keydown.right.prevent="focusTab(1)"
+                                @keydown.left.prevent="focusTab(-1)"
+                            >{{ $_tab['label'] }}</button>
+                        @endforeach
+                    </div>
+
+                    {{-- Pourquoi lire ce livre --}}
+                    @if(! empty($book->benefits) && is_array($book->benefits))
+                        <div
+                            id="bk-panel-why" role="tabpanel" aria-labelledby="bk-tab-why" tabindex="0"
+                            x-show="activeTab === 'why'"
+                            @if($_bkDefaultTab !== 'why') style="display:none" @endif
+                            class="bk-section bk-tabpanel"
+                        >
+                            <h2 class="bk-section-title">✅ {{ $_isFiction ? __('Pourquoi lire ce tome') : __('Ce que vous allez apprendre') }}</h2>
+                            <ul class="bk-benefits">
+                                @foreach($book->benefits as $benefit)
+                                    <li>{{ $benefit }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    {{-- Extrait --}}
+                    @if(! empty($book->excerpt))
+                        <div
+                            id="bk-panel-excerpt" role="tabpanel" aria-labelledby="bk-tab-excerpt" tabindex="0"
+                            x-show="activeTab === 'excerpt'"
+                            @if($_bkDefaultTab !== 'excerpt') style="display:none" @endif
+                            class="bk-section bk-tabpanel"
+                        >
+                            <h2 class="bk-section-title">📖 {{ __('Extrait') }}</h2>
+                            <div class="bk-excerpt-box">{{ $book->excerpt }}</div>
+                        </div>
+                    @endif
+
+                    {{-- Structure / table des matières --}}
+                    @if(! empty($book->toc_summary) && is_array($book->toc_summary))
+                        <div
+                            id="bk-panel-structure" role="tabpanel" aria-labelledby="bk-tab-structure" tabindex="0"
+                            x-show="activeTab === 'structure'"
+                            @if($_bkDefaultTab !== 'structure') style="display:none" @endif
+                            class="bk-section bk-tabpanel"
+                        >
+                            <h2 class="bk-section-title">📑 {{ __('Structure du livre') }}</h2>
+                            @foreach($book->toc_summary as $part)
+                                @if(is_array($part) && ! empty($part['part']))
+                                    <div class="bk-toc-item">
+                                        <p class="bk-toc-part">{{ $part['part'] }}</p>
+                                        @if(! empty($part['chapters']))
+                                            <p class="bk-toc-chapters">{{ $part['chapters'] }}</p>
+                                        @endif
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    @endif
+
+                    {{-- À propos de l'auteur --}}
+                    @if(! empty($book->author_bio_short))
+                        <div
+                            id="bk-panel-author" role="tabpanel" aria-labelledby="bk-tab-author" tabindex="0"
+                            x-show="activeTab === 'author'"
+                            @if($_bkDefaultTab !== 'author') style="display:none" @endif
+                            class="bk-section bk-tabpanel"
+                        >
+                            <h2 class="bk-section-title">✍️ {{ __("À propos de l'auteur") }}</h2>
+                            <div class="bk-author-box">
+                                <div class="bk-author-avatar" aria-hidden="true">SL</div>
+                                <p class="bk-author-text"><strong>Stéphane Lapointe</strong> — {{ $book->author_bio_short }}</p>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- FAQ (AEO/GEO) --}}
+                    @if(! empty($book->faq) && is_array($book->faq))
+                        <div
+                            id="bk-panel-faq" role="tabpanel" aria-labelledby="bk-tab-faq" tabindex="0"
+                            x-show="activeTab === 'faq'"
+                            @if($_bkDefaultTab !== 'faq') style="display:none" @endif
+                            class="bk-section bk-tabpanel"
+                        >
+                            <h2 class="bk-section-title">❓ {{ __('Questions fréquentes') }}</h2>
+                            @foreach($book->faq as $qa)
+                                @if(is_array($qa) && ! empty($qa['question']) && ! empty($qa['answer']))
+                                    <details class="bk-faq-item">
+                                        <summary>{{ $qa['question'] }}</summary>
+                                        <div>{{ $qa['answer'] }}</div>
+                                    </details>
+                                @endif
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+                @endif
+
+                {{-- 1er bloc CTA principal (retiré du hero - cf. bk-hero-buy-link) --}}
+                @if($book->amazon_url_paperback || $book->amazon_url_kindle)
+                    <div class="bk-cta-block" id="bk-cta-primary">
+                        <h2>{{ __('Acheter') }}</h2>
+                        <div class="bk-hero-ctas">
+                            @if($book->amazon_url_paperback)
+                                <x-core::button
+                                    :href="$book->amazon_url_paperback"
+                                    :variant="$_primaryFormat === 'paperback' ? 'primary' : 'secondary'"
+                                    size="lg"
+                                    target="_blank"
+                                    rel="noopener sponsored"
+                                    aria-label="{{ __('Acheter la version papier sur Amazon') }} — {{ $book->title }} ({{ __('nouvel onglet') }})"
+                                >
+                                    {{ __('Acheter la version papier sur Amazon') }}
+                                </x-core::button>
+                            @endif
+                            @if($book->amazon_url_kindle)
+                                <x-core::button
+                                    :href="$book->amazon_url_kindle"
+                                    :variant="$_primaryFormat === 'kindle' ? 'primary' : 'secondary'"
+                                    size="lg"
+                                    target="_blank"
+                                    rel="noopener sponsored"
+                                    aria-label="{{ __('Acheter la version Kindle sur Amazon') }} — {{ $book->title }} ({{ __('nouvel onglet') }})"
+                                >
+                                    {{ __('Acheter la version Kindle sur Amazon') }}
+                                </x-core::button>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Navigation inter-tomes (trilogie Nexus Neural) - déplacée après le CTA1
+                     (2026-07-09) pour ne plus laisser d'espace vide entre le hero et les onglets. --}}
                 @if($_isFiction && $_seriesTomes->count() > 1)
                     <div class="bk-series-nav" aria-labelledby="bk-series-nav-title">
                         <h2 class="bk-series-nav-title" id="bk-series-nav-title">{{ __('Trilogie Nexus Neural') }}</h2>
@@ -314,61 +520,6 @@
                     </div>
                 @endif
 
-                {{-- #refonte-cta-2026-07-09 : conteneur scanné par x-fronttheme::table-of-contents
-                     (h2 internes -> ancres Pourquoi lire / Acheter / Extrait / Structure / Auteur /
-                     FAQ). La navigation inter-tomes ci-dessus et le CTA final plus bas restent
-                     volontairement HORS de ce conteneur (pas des sections de lecture). --}}
-                <div id="bk-toc-content">
-
-                {{-- Ce que vous allez apprendre / pourquoi lire ce livre --}}
-                @if(! empty($book->benefits) && is_array($book->benefits))
-                    <div class="bk-section">
-                        <h2 class="bk-section-title">✅ {{ $_isFiction ? __('Pourquoi lire ce tome') : __('Ce que vous allez apprendre') }}</h2>
-                        <ul class="bk-benefits">
-                            @foreach($book->benefits as $benefit)
-                                <li>{{ $benefit }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                {{-- 1er bloc CTA principal (retiré du hero - cf. bk-hero-buy-link) --}}
-                @if($book->amazon_url_paperback || $book->amazon_url_kindle)
-                    <div class="bk-cta-block" id="bk-cta-primary">
-                        <h2>{{ __('Acheter') }}</h2>
-                        <div class="bk-hero-ctas">
-                            @if($book->amazon_url_paperback)
-                                <x-core::button
-                                    :href="$book->amazon_url_paperback"
-                                    :variant="$_primaryFormat === 'paperback' ? 'primary' : 'secondary'"
-                                    size="lg"
-                                    target="_blank"
-                                    rel="noopener sponsored"
-                                    aria-label="{{ __('Acheter la version papier sur Amazon') }} — {{ $book->title }} ({{ __('nouvel onglet') }})"
-                                >
-                                    {{ __('Acheter la version papier sur Amazon') }}
-                                </x-core::button>
-                            @endif
-                            @if($book->amazon_url_kindle)
-                                <x-core::button
-                                    :href="$book->amazon_url_kindle"
-                                    :variant="$_primaryFormat === 'kindle' ? 'primary' : 'secondary'"
-                                    size="lg"
-                                    target="_blank"
-                                    rel="noopener sponsored"
-                                    aria-label="{{ __('Acheter la version Kindle sur Amazon') }} — {{ $book->title }} ({{ __('nouvel onglet') }})"
-                                >
-                                    {{ __('Acheter la version Kindle sur Amazon') }}
-                                </x-core::button>
-                            @endif
-                        </div>
-                    </div>
-                @endif
-
-                {{-- Sommaire flottant par ancres - composant DRY existant (réutilisé tel quel,
-                     déjà en place sur blog/show et academy/dashboard). --}}
-                <x-fronttheme::table-of-contents content-selector="#bk-toc-content" title="{{ __('Sommaire') }}" />
-
                 {{-- Bandeau preuve sobre : faits seulement, pas de faux avis --}}
                 @php
                     $_pageCount = null; // Non stocké en base pour l'instant (colonne absente du modèle Book) — omis volontairement plutôt qu'inventé.
@@ -399,59 +550,6 @@
                         </div>
                     @endif
                 </div>
-
-                {{-- Extrait --}}
-                @if(! empty($book->excerpt))
-                    <div class="bk-section">
-                        <h2 class="bk-section-title">📖 {{ __('Extrait') }}</h2>
-                        <div class="bk-excerpt-box">{{ $book->excerpt }}</div>
-                    </div>
-                @endif
-
-                {{-- Structure / table des matières --}}
-                @if(! empty($book->toc_summary) && is_array($book->toc_summary))
-                    <div class="bk-section">
-                        <h2 class="bk-section-title">📑 {{ __('Structure du livre') }}</h2>
-                        @foreach($book->toc_summary as $part)
-                            @if(is_array($part) && ! empty($part['part']))
-                                <div class="bk-toc-item">
-                                    <p class="bk-toc-part">{{ $part['part'] }}</p>
-                                    @if(! empty($part['chapters']))
-                                        <p class="bk-toc-chapters">{{ $part['chapters'] }}</p>
-                                    @endif
-                                </div>
-                            @endif
-                        @endforeach
-                    </div>
-                @endif
-
-                {{-- À propos de l'auteur --}}
-                @if(! empty($book->author_bio_short))
-                    <div class="bk-section">
-                        <h2 class="bk-section-title">✍️ {{ __("À propos de l'auteur") }}</h2>
-                        <div class="bk-author-box">
-                            <div class="bk-author-avatar" aria-hidden="true">SL</div>
-                            <p class="bk-author-text"><strong>Stéphane Lapointe</strong> — {{ $book->author_bio_short }}</p>
-                        </div>
-                    </div>
-                @endif
-
-                {{-- FAQ (AEO/GEO) --}}
-                @if(! empty($book->faq) && is_array($book->faq))
-                    <div class="bk-section">
-                        <h2 class="bk-section-title">❓ {{ __('Questions fréquentes') }}</h2>
-                        @foreach($book->faq as $qa)
-                            @if(is_array($qa) && ! empty($qa['question']) && ! empty($qa['answer']))
-                                <details class="bk-faq-item">
-                                    <summary>{{ $qa['question'] }}</summary>
-                                    <div>{{ $qa['answer'] }}</div>
-                                </details>
-                            @endif
-                        @endforeach
-                    </div>
-                @endif
-
-                </div>{{-- /#bk-toc-content --}}
 
                 {{-- 2e bloc CTA (final) --}}
                 <div class="bk-cta-block">

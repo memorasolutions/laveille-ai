@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.97.1] - 2026-07-09
+
+### Fixed
+- **Deux problèmes signalés sur la fiche livre suite à la refonte 1.97.0.** (1) Le bandeau « Trilogie Nexus Neural » s'était retrouvé entre le hero et la section « Pourquoi lire », créant un grand espace vide - déplacé après le premier bloc CTA, « Pourquoi lire » suit désormais directement le hero sans rien entre les deux. (2) Remplacement du sommaire flottant par ancres par de **vrais onglets ARIA** (`role="tablist"/"tab"/"tabpanel"`, `aria-selected`, navigation clavier flèches gauche/droite) pour les sections Pourquoi lire (actif par défaut), Extrait, Structure, Auteur et FAQ - un seul panneau visible à la fois, mais les 5 panneaux restent présents dans le HTML brut (masquage CSS uniquement, pas de chargement AJAX) pour préserver le SEO/AEO. Correction additionnelle : couleur du texte des onglets inactifs ajustée de `#6B7280` (contraste 4,83:1, AA) à `#4B5563` (7,55:1, AAA). 6 tests Pest verts, vérifié desktop et mobile.
+
 ## [1.97.0] - 2026-07-09
 
 ### Added
