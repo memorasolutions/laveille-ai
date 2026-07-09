@@ -176,6 +176,35 @@ it('le point rouge est absent (état initial false) pour un admin quand aucun ch
     $response->assertSee('facebook: false', escape: false);
 });
 
+// ── (g) Point rouge sur la liste publique /actualites (composant partagé x-news::admin-shared-dot) ──
+
+it('le point rouge apparaît sur la liste publique des actualités pour un admin après marquage', function () {
+    $article = nastArticle(nastSource()->id, 'LISTADMIN');
+    $article->forceFill(['linkedin_shared_at' => now()])->save();
+
+    $this->actingAs(nastSuperAdmin());
+    $response = $this->get(route('news.index'));
+
+    $response->assertStatus(200);
+    $response->assertSee('nw-shared-dot', escape: false);
+    $response->assertSee('Déjà publié sur LinkedIn', escape: false);
+});
+
+it('le point rouge et les données *_shared_at sont absents de la liste publique pour un visiteur non-admin', function () {
+    $article = nastArticle(nastSource()->id, 'LISTGUEST');
+    $article->forceFill(['linkedin_shared_at' => now(), 'facebook_shared_at' => now()])->save();
+
+    $response = $this->get(route('news.index'));
+
+    $response->assertStatus(200);
+    // Même raisonnement que le test analogue sur la fiche individuelle (voir plus haut) : le
+    // signal serveur-only propre à cette fonctionnalité est l'écouteur 'admin-share-tracked',
+    // jamais rendu pour un visiteur non-admin, quel que soit l'état des colonnes *_shared_at.
+    $response->assertDontSee('admin-share-tracked', escape: false);
+    $response->assertDontSee('linkedin_shared_at', escape: false);
+    $response->assertDontSee('facebook_shared_at', escape: false);
+});
+
 // ── (f) Validation platform invalide ────────────────────────────────────────
 
 it('une plateforme invalide est rejetée avec un 404', function () {

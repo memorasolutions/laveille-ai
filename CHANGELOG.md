@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.96.1] - 2026-07-09
+
+### Fixed
+- **Point rouge admin-only "déjà publié" manquant sur la liste publique des actualités.** Le point rouge livré en 1.96.0 sur la fiche individuelle et la liste admin manquait sur la grille de cartes publique `/actualites`, créant une incohérence pour les admins qui parcourent la liste. Ajouté dans le partial `article-card.blade.php` et refactorisé en composant Blade partagé `x-news::admin-shared-dot` pour éliminer la duplication du markup Alpine/aria - réutilisé maintenant sur la fiche individuelle et la liste publique (la liste admin garde son propre markup statique préexistant). Vérifié par 10/10 tests verts (2 nouveaux : présence pour superadmin après marquage, absence totale du HTML pour un visiteur anonyme même avec des données en base) et 99/99 sur toute la suite News (230 assertions), zéro régression.
+
 ## [1.96.0] - 2026-07-09
 
 ### Added

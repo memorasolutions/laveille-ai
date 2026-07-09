@@ -140,7 +140,11 @@
             @endcan
         </div>
         <div class="nw-card-body">
-            <h3 class="nw-card-title" role="heading" aria-level="2">{{ $article->seo_title ?? $article->title }}</h3>
+            <h3 class="nw-card-title" role="heading" aria-level="2">
+                {{-- Point rouge "déjà publié" (superadmin only) — même composant partagé que la fiche
+                     article et la liste admin. Voir components/admin-shared-dot.blade.php. --}}
+                <x-news::admin-shared-dot :article="$article" />{{ $article->seo_title ?? $article->title }}
+            </h3>
             <p class="nw-card-hook">
                 @if($ss && isset($ss['hook']))
                     {{ $ss['hook'] }}

@@ -17,6 +17,16 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.96.1 · 2026-07-09 · fix(actualités) Point rouge admin-only "déjà publié" sur la liste
+ *     publique des actualités : le point rouge livré en 1.96.0 sur la fiche individuelle et la
+ *     liste admin manquait sur la grille de cartes publique /actualites, causant une incohérence
+ *     UX pour les admins ; ajouté dans le partial article-card.blade.php et refactorisé en
+ *     composant Blade partagé x-news::admin-shared-dot (nouveau fichier) pour éliminer la
+ *     duplication du markup Alpine/aria, réutilisé sur les 3 emplacements (fiche, liste publique,
+ *     liste admin garde son propre markup statique préexistant) ; vérifié par 10/10 tests verts
+ *     (2 nouveaux : présence pour superadmin après marquage, absence totale du HTML pour visiteur
+ *     anonyme même avec données en base) + 99/99 sur toute la suite News (230 assertions), zéro
+ *     régression.
  *   1.96.0 · 2026-07-09 · feat(glossaire) Nouveau terme glossaire "PinPoint Test" (slug
  *     pinpoint-test) : test sanguin de dépistage/triage du cancer basé sur l'IA (machine
  *     learning), utilisé dans le NHS (Royaume-Uni). Analyse ~30-33 biomarqueurs sanguins
@@ -809,7 +819,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 96;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,
