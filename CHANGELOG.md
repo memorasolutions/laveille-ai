@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.99.0] - 2026-07-09
+
+### Fixed
+- **Lecteur flip-reader : bouton "Page suivante" inaccessible.** Le lecteur "feuilleter" livré en 1.98.0 présentait un bug bloquant au clic souris : le bouton "Page suivante" (›) devenait injoignable (timeout Playwright confirmé, utilisateur signalant "impossible de lire les pages de prévisualisation"). La cause racine, identifiée par mesure DOM directe (`document.elementFromPoint` aux coordonnées du bouton retournait la balise IMG, pas le bouton), venait de l'absence de `max-height` sur `.fpr-book`. Un simple `aspect-ratio` dérivait la hauteur de la largeur : pour des pages portrait dans la modale (scène de hauteur fixe), le livre calculait une hauteur supérieure à l'espace disponible et débordait symétriquement (centré par le flex parent) par-dessus la barre de navigation `.fpr-bar`. Correction (`Modules/FrontTheme/resources/views/components/flip-reader.blade.php`, CSS uniquement) : ajout de `max-height: 100%` sur `.fpr-book` (force le navigateur à contraindre aussi la largeur via l'algorithme de "transferred size" de `aspect-ratio`, comme un `object-fit: contain`), plus des `z-index` explicites (`.fpr-bar` à 2, `.fpr-stage` à 1) en filet de sécurité pour garantir la cliquabilité de la barre au-dessus de tout contenu injecté par StPageFlip. Revérifié par clics souris réels (pas seulement au clavier) sur 2 livres à ratios de page différents : navigation avant et arrière fonctionnelle sur plusieurs essais consécutifs. 9/9 tests Pest toujours verts.
+
+### Changed
+- **Titre de section catalogue : "Essais" remplacé par "Guides pratiques".** Sur demande de l'utilisateur, le titre de section du catalogue `/livres` passe de "Essais" à "Guides pratiques" (`Modules/Books/resources/views/public/index.blade.php`), un intitulé jugé plus accessible que le terme littéraire "essais" pour désigner les 2 livres pratiques (conformité IA pour PME, parentalité numérique). La section "Fiction" (trilogie Nexus Neural) n'est pas touchée.
+
 ## [1.98.1] - 2026-07-09
 
 ### Fixed

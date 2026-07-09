@@ -17,6 +17,15 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.99.0 · 2026-07-09 · fix(books) Lecteur flip-reader : le bouton "Page suivante" devenait
+ *     injoignable au clic souris (timeout Playwright confirmé, signalé aussi par l'utilisateur).
+ *     Cause racine : .fpr-book n'avait pas de max-height (seulement un aspect-ratio dérivant la
+ *     hauteur de la largeur) - pour des pages portrait dans la modale, le livre débordait
+ *     symétriquement par-dessus la barre .fpr-bar. Corrigé (CSS uniquement) : max-height:100% sur
+ *     .fpr-book + z-index explicites (.fpr-bar:2, .fpr-stage:1) en filet de sécurité. Revérifié
+ *     par clics souris réels sur 2 livres à ratios différents, 9/9 tests Pest verts.
+ *   1.99.0 · 2026-07-09 · chore(books) Section catalogue "Essais" renommée "Guides pratiques" sur
+ *     demande de l'utilisateur (intitulé plus accessible que le terme littéraire).
  *   1.98.1 · 2026-07-09 · fix(ci) Le pattern rsync --exclude='vendor/' du pipeline de déploiement
  *     (non ancré à la racine) excluait aussi public/vendor/ (pas seulement le vrai vendor/
  *     composer) - la librairie vendorisée StPageFlip du lecteur "feuilleter" (1.98.0) ne se
@@ -883,8 +892,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 98;
-$lvPatch = 1;
+$lvMinor = 99;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

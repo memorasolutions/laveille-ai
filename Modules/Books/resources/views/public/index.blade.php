@@ -116,7 +116,7 @@
         @endphp
 
         @if($essays->isNotEmpty())
-            <h2 class="bk-section-title">{{ __('Essais') }}</h2>
+            <h2 class="bk-section-title">{{ __('Guides pratiques') }}</h2>
             <div class="bk-essays-grid">
                 @foreach($essays as $book)
                     <a href="{{ route('books.show', $book->slug) }}" class="bk-card" aria-label="{{ __('Voir le livre') }} {{ $book->title }}">

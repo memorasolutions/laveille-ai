@@ -72,14 +72,19 @@
         display: flex; flex-direction: column; overscroll-behavior: contain;
     }
     .fpr-reader--inline {
-        position: relative; display: flex; flex-direction: column;
+        position: relative; z-index: 0; display: flex; flex-direction: column;
         background: var(--c-surface, #f8fafb); border-radius: var(--r-base, .75rem);
         border: 1px solid color-mix(in srgb, var(--c-primary) 20%, transparent);
         overflow: hidden;
     }
     .fpr-reader:focus-visible { outline: none; }
 
+    /* z-index explicite : la barre de navigation doit TOUJOURS rester au-dessus
+       de .fpr-stage (et de tout ce que StPageFlip y injecte), même si un futur
+       calcul de taille venait à faire déborder le livre - filet de sécurité en
+       plus de la contrainte de hauteur posée sur .fpr-book ci-dessous. */
     .fpr-bar {
+        position: relative; z-index: 2;
         flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between;
         gap: 10px 14px; padding: 10px 14px; flex-wrap: wrap;
     }
@@ -115,14 +120,26 @@
     .fpr-reader--inline .fpr-level { color: var(--c-dark, #1a1d23); }
 
     .fpr-stage {
-        flex: 1 1 auto; position: relative; display: flex; align-items: center; justify-content: center;
+        flex: 1 1 auto; position: relative; z-index: 1; overflow: hidden;
+        display: flex; align-items: center; justify-content: center;
         padding: 12px; min-height: 0;
     }
     .fpr-reader--modal .fpr-stage { min-height: 60vh; }
     .fpr-reader--inline .fpr-stage { min-height: 320px; }
 
+    /* Cause racine du chevauchement du bouton "Page suivante" : sans max-height,
+       .fpr-book n'était contraint qu'en largeur (aspect-ratio dérive la hauteur
+       sans jamais tenir compte de la hauteur DISPONIBLE dans .fpr-stage). Pour
+       des pages au format portrait dans une modale (hauteur de scène fixée par
+       le viewport), le livre calculait une hauteur supérieure à la scène et
+       débordait symétriquement (centré par le flex du parent) par-dessus
+       .fpr-bar. max-height: 100% force le navigateur à réduire la largeur en
+       proportion (algorithme de « transferred size » CSS aspect-ratio) pour que
+       le livre tienne toujours entièrement dans .fpr-stage, comme un
+       object-fit: contain - qu'il soit rendu en <img> simple ou via StPageFlip
+       (qui lit les dimensions déjà contraintes de .fpr-book au montage). */
     .fpr-book {
-        position: relative; width: 100%; max-width: 900px; margin: 0 auto;
+        position: relative; width: 100%; max-width: 900px; max-height: 100%; margin: 0 auto;
         aspect-ratio: {{ $baseWidth }} / {{ $baseHeight }};
     }
     .fpr-page {
