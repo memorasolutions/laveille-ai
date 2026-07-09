@@ -55,6 +55,17 @@
          avant vente). Style calqué sur .bk-back-link (même ratio de contraste AAA déjà validé). --}}
     .bk-hero-author { font-size: 0.95rem; color: #4B5563; margin: 0 0 16px; }
     .bk-hero-author strong { color: var(--c-dark); }
+
+    {{-- #refonte-hero-pourquoi-lire-2026-07-09 : "Pourquoi lire" intégré directement dans le
+         hero (plus d'onglet à cliquer) - titre de section plus discret que .bk-section-title
+         (contexte hero déjà chargé visuellement) mais garde une vraie balise de titre (h2) pour
+         la hiérarchie. Liste .bk-benefits réutilisée telle quelle (DRY, même style que l'ancien
+         panneau d'onglet). --}}
+    .bk-hero-benefits { margin: 0 0 22px; }
+    .bk-hero-benefits-title {
+        font-family: var(--f-heading); font-size: 1.05rem; font-weight: 800;
+        color: var(--c-dark); margin: 0 0 12px; display: flex; align-items: center; gap: 8px;
+    }
     .bk-hero-buy-link {
         display: inline-flex; align-items: center; gap: 6px;
         color: var(--c-primary); font-weight: 600; font-size: 0.92rem;
@@ -235,11 +246,12 @@
         .bk-hero { padding: 24px; }
         .bk-hero-title { font-size: 1.6rem; }
         .bk-section { padding: 22px; }
-        /* CTA papier/Kindle au-dessus de la ligne de flottaison mobile : le corps (titre + CTA)
-           passe avant la couverture dans l'ordre visuel, et la couverture est réduite. Conserve
-           l'ordre DOM d'origine (SEO/lecteurs d'écran), seul l'ordre visuel flex change. */
-        .bk-hero-body { order: 1; }
-        .bk-hero-cover { order: 2; max-width: 190px; }
+        /* #refonte-hero-pourquoi-lire-2026-07-09 : le corps du hero contient maintenant le bloc
+           "Pourquoi lire" (3-5 puces) en plus du titre/CTA - trop long pour justifier de le faire
+           passer avant la couverture (ancien choix, cf. historique git). Ordre visuel = ordre DOM
+           naturel : couverture → titre/sous-titre/auteur → Pourquoi lire → CTA. La couverture
+           reste réduite pour ne pas dominer l'écran. */
+        .bk-hero-cover { max-width: 190px; }
     }
 </style>
 @endpush
@@ -295,20 +307,31 @@
 
                         <p class="bk-hero-author">{{ __('par') }} <strong>Stéphane Lapointe</strong></p>
 
+                        {{-- Pourquoi lire ce livre - intégré au hero (2026-07-09), visible sans clic. --}}
+                        @if(! empty($book->benefits) && is_array($book->benefits))
+                            <div class="bk-hero-benefits">
+                                <h2 class="bk-hero-benefits-title">✅ {{ $_isFiction ? __('Pourquoi lire ce tome') : __('Ce que vous allez apprendre') }}</h2>
+                                <ul class="bk-benefits">
+                                    @foreach($book->benefits as $benefit)
+                                        <li>{{ $benefit }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                         @if($book->amazon_url_paperback || $book->amazon_url_kindle)
                             <a href="#bk-cta-primary" class="bk-hero-buy-link">{{ __("Voir les options d'achat") }} ↓</a>
                         @endif
                     </div>
                 </div>
 
-                {{-- #refonte-onglets-2026-07-09 : onglets ARIA (Pourquoi lire actif par défaut).
-                     Tout le contenu des 5 panneaux reste dans le HTML servi (SEO/AEO) : seul le
-                     masquage visuel (Alpine x-show) gère quel panneau est visible. --}}
+                {{-- #refonte-hero-pourquoi-lire-2026-07-09 : onglets ARIA (Extrait actif par
+                     défaut - "Pourquoi lire" est sorti des onglets, intégré directement au hero
+                     ci-dessus pour être visible sans clic). Tout le contenu des 4 panneaux reste
+                     dans le HTML servi (SEO/AEO) : seul le masquage visuel (Alpine x-show) gère
+                     quel panneau est visible. --}}
                 @php
                     $_bkTabs = [];
-                    if (! empty($book->benefits) && is_array($book->benefits)) {
-                        $_bkTabs[] = ['id' => 'why', 'label' => __('Pourquoi lire')];
-                    }
                     if (! empty($book->excerpt)) {
                         $_bkTabs[] = ['id' => 'excerpt', 'label' => __('Extrait')];
                     }
@@ -322,7 +345,7 @@
                         $_bkTabs[] = ['id' => 'faq', 'label' => __('FAQ')];
                     }
                     $_bkTabIds = array_column($_bkTabs, 'id');
-                    $_bkDefaultTab = in_array('why', $_bkTabIds, true) ? 'why' : ($_bkTabIds[0] ?? null);
+                    $_bkDefaultTab = $_bkTabIds[0] ?? null;
                     $_bkTabIdsJs = collect($_bkTabIds)->map(fn ($id) => "'{$id}'")->implode(',');
                 @endphp
 
@@ -357,23 +380,6 @@
                             >{{ $_tab['label'] }}</button>
                         @endforeach
                     </div>
-
-                    {{-- Pourquoi lire ce livre --}}
-                    @if(! empty($book->benefits) && is_array($book->benefits))
-                        <div
-                            id="bk-panel-why" role="tabpanel" aria-labelledby="bk-tab-why" tabindex="0"
-                            x-show="activeTab === 'why'"
-                            @if($_bkDefaultTab !== 'why') style="display:none" @endif
-                            class="bk-section bk-tabpanel"
-                        >
-                            <h2 class="bk-section-title">✅ {{ $_isFiction ? __('Pourquoi lire ce tome') : __('Ce que vous allez apprendre') }}</h2>
-                            <ul class="bk-benefits">
-                                @foreach($book->benefits as $benefit)
-                                    <li>{{ $benefit }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
 
                     {{-- Extrait --}}
                     @if(! empty($book->excerpt))

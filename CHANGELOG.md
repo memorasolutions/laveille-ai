@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.97.2] - 2026-07-09
+
+### Fixed
+- **« Pourquoi lire ce livre » déplacé du système d'onglets vers le hero.** Sur demande de l'utilisateur, ce bloc doit être visible immédiatement, sans interaction - déplacé dans la colonne droite du hero (entre le paragraphe auteur et le CTA), avec un nouveau titre `h2` au contraste ~18:1 (AAA). Les onglets passent de 5 à 4 (Extrait, Structure, Auteur, FAQ), avec Extrait comme onglet actif par défaut. L'ancien override CSS mobile qui inversait l'ordre corps/couverture a été retiré - l'ordre DOM naturel (couverture → titre/sous-titre/auteur → Pourquoi lire → CTA) suffit désormais. 6/6 tests Pest verts, aucune adaptation nécessaire.
+
 ## [1.97.1] - 2026-07-09
 
 ### Fixed

@@ -17,6 +17,11 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.97.2 · 2026-07-09 · fix(books) Déplacement du bloc "Pourquoi lire ce livre" des onglets
+ *     vers la colonne droite du hero (entre l'auteur et le CTA) pour affichage immédiat sans
+ *     interaction ; réduction des onglets de 5 à 4 (Extrait/Structure/Auteur/FAQ) avec Extrait
+ *     comme onglet actif par défaut ; retrait de l'override CSS mobile qui inversait l'ordre
+ *     corps/couverture. 6/6 tests Pest verts inchangés.
  *   1.97.1 · 2026-07-09 · fix(books) Correction de deux problèmes signalés suite à la refonte
  *     de la fiche livre (1.97.0) : (1) déplacement du bandeau "Trilogie Nexus Neural" après le
  *     premier bloc CTA pour éliminer l'espace vide entre le hero et la section "Pourquoi lire"
@@ -863,7 +868,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 97;
-$lvPatch = 1;
+$lvPatch = 2;
 
 return [
     'major' => $lvMajor,
