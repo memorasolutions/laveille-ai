@@ -17,6 +17,18 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.97.0 · 2026-07-09 · feat(books) Refonte de l'ordre de la page fiche livre suite à une
+ *     veille pp_search (best practices pages de vente) - hero compact, section "pourquoi lire"
+ *     immédiate, premier CTA, sommaire flottant par ancres réutilisant le composant DRY
+ *     x-fronttheme::table-of-contents, bandeau CTA sticky mobile (contraste AAA 9,35:1, cible
+ *     44px), correction du chevauchement du widget cookies avec règle CSS scopée, 6/6 tests
+ *     Pest verts, navigation inter-tomes fonctionnelle.
+ *   1.97.0 · 2026-07-09 · fix(catalogue) Correction de l'empilement pleine largeur des cartes
+ *     Essais sur grand écran par grille CSS (display:grid, repeat(auto-fit, minmax(360px,1fr)))
+ *     sans impact sur la section Trilogie Nexus Neural, remplacement des 3 couvertures
+ *     filigranées Gemini par les officielles Amazon (1600x2560, éditions françaises)
+ *     régénérées en 4 variantes (cover-600.jpg/.webp, cover-300.webp, og-1200x630.jpg) pour
+ *     les 3 tomes.
  *   1.96.3 · 2026-07-09 · fix(annuaire) Correction d'un bug où la saisie dans le champ de
  *     recherche de la page /annuaire donnait l'impression d'un rechargement de page, dû à un
  *     jank causé par le recalcul du getter Alpine.js "filteredTools" sans debounce sur le
@@ -839,8 +851,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 96;
-$lvPatch = 3;
+$lvMinor = 97;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

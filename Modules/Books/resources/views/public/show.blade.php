@@ -49,6 +49,60 @@
     .bk-hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; }
     .bk-hero-ctas .core-btn--secondary { --core-btn-padding-y: 0.92rem; }
 
+    {{-- #refonte-cta-2026-07-09 : hero compact - nom d'auteur discret + lien texte vers le
+         1er bloc CTA (retiré du hero pour laisser "Pourquoi lire" apparaître avant tout achat,
+         cf. recherche pp_search 2026-07 : livre conceptuel d'auteur peu connu = argumentaire
+         avant vente). Style calqué sur .bk-back-link (même ratio de contraste AAA déjà validé). --}}
+    .bk-hero-author { font-size: 0.95rem; color: #4B5563; margin: 0 0 16px; }
+    .bk-hero-author strong { color: var(--c-dark); }
+    .bk-hero-buy-link {
+        display: inline-flex; align-items: center; gap: 6px;
+        color: var(--c-primary); font-weight: 600; font-size: 0.92rem;
+        text-decoration: underline; text-underline-offset: 3px;
+    }
+    .bk-hero-buy-link:hover { color: var(--c-accent, #9A2A06); }
+    .bk-hero-buy-link:focus-visible {
+        outline: 3px solid var(--c-accent, #9A2A06); outline-offset: 2px;
+    }
+
+    {{-- Ancre du 1er bloc CTA - ciblée par le lien discret du hero et par le bandeau sticky mobile. --}}
+    #bk-cta-primary { scroll-margin-top: 90px; }
+
+    {{-- Bandeau CTA sticky mobile uniquement (<=640px, même seuil que .bk-series-nav-grid
+         plus bas sur cette page) : garantit un accès permanent à l'achat malgré le nouvel
+         ordre (bénéfices + CTA1 avant le reste). Couleurs #fff sur var(--c-primary) = 9.35:1
+         (AAA), même paire déjà validée pour .toc-skip (audit WCAG 2026-07-02). Cible tactile
+         pleine largeur, min-height 44px (WCAG 2.5.5 AAA). --}}
+    .bk-sticky-cta { display: none; }
+    @media (max-width: 640px) {
+        .bk-sticky-cta {
+            display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 1200;
+            background: var(--c-primary); padding: 10px 16px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.18);
+        }
+        .bk-sticky-cta-link {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            min-height: 44px; text-decoration: none !important; color: #fff;
+        }
+        .bk-sticky-cta-text {
+            font-size: 0.82rem; font-weight: 600; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap; color: #fff;
+        }
+        .bk-sticky-cta-action {
+            font-family: var(--f-heading); font-weight: 800; font-size: 0.92rem;
+            flex-shrink: 0; color: #fff;
+        }
+        .bk-sticky-cta-link:focus-visible {
+            outline: 3px solid #fff; outline-offset: -3px;
+        }
+        .bk-show-wrapper { padding-bottom: 84px; }
+        {{-- Le widget global "Gérer les témoins" (.cc-fab, z-index 9990, fixed bottom-left)
+             chevauche notre bandeau sticky à ce seuil - décalage scopé à cette page/breakpoint
+             uniquement (:has), zéro couplage avec le composant cookies partagé. --}}
+        body:has(.bk-sticky-cta) .cc-fab { bottom: 74px; }
+    }
+
     .bk-proof-banner {
         display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;
         background: #F8FAFC; border: 1px solid #E5E7EB; border-radius: var(--r-base);
@@ -214,77 +268,13 @@
                             <p class="bk-hero-subtitle">{{ $book->subtitle }}</p>
                         @endif
 
-                        <div class="bk-hero-ctas">
-                            @if($book->amazon_url_paperback)
-                                <x-core::button
-                                    :href="$book->amazon_url_paperback"
-                                    :variant="$_primaryFormat === 'paperback' ? 'primary' : 'secondary'"
-                                    size="lg"
-                                    target="_blank"
-                                    rel="noopener sponsored"
-                                    aria-label="{{ __('Acheter la version papier sur Amazon') }} — {{ $book->title }} ({{ __('nouvel onglet') }})"
-                                >
-                                    {{ __('Acheter la version papier sur Amazon') }}
-                                </x-core::button>
-                            @endif
-                            @if($book->amazon_url_kindle)
-                                <x-core::button
-                                    :href="$book->amazon_url_kindle"
-                                    :variant="$_primaryFormat === 'kindle' ? 'primary' : 'secondary'"
-                                    size="lg"
-                                    target="_blank"
-                                    rel="noopener sponsored"
-                                    aria-label="{{ __('Acheter la version Kindle sur Amazon') }} — {{ $book->title }} ({{ __('nouvel onglet') }})"
-                                >
-                                    {{ __('Acheter la version Kindle sur Amazon') }}
-                                </x-core::button>
-                            @endif
-                        </div>
+                        <p class="bk-hero-author">{{ __('par') }} <strong>Stéphane Lapointe</strong></p>
+
+                        @if($book->amazon_url_paperback || $book->amazon_url_kindle)
+                            <a href="#bk-cta-primary" class="bk-hero-buy-link">{{ __("Voir les options d'achat") }} ↓</a>
+                        @endif
                     </div>
                 </div>
-
-                {{-- Bandeau preuve sobre : faits seulement, pas de faux avis --}}
-                @php
-                    $_pageCount = null; // Non stocké en base pour l'instant (colonne absente du modèle Book) — omis volontairement plutôt qu'inventé.
-                @endphp
-                <div class="bk-proof-banner">
-                    @if($book->date_published)
-                        <div class="bk-proof-item">
-                            <strong>{{ $book->date_published->locale('fr_CA')->translatedFormat('j F Y') }}</strong>
-                            {{ __('date de publication') }}
-                        </div>
-                    @endif
-                    @if($book->price_paperback)
-                        <div class="bk-proof-item">
-                            <strong>{{ number_format((float) $book->price_paperback, 2, ',', ' ') }} $ CAD</strong>
-                            {{ __('broché') }}
-                        </div>
-                    @endif
-                    @if($book->price_kindle)
-                        <div class="bk-proof-item">
-                            <strong>{{ number_format((float) $book->price_kindle, 2, ',', ' ') }} $ CAD</strong>
-                            Kindle
-                        </div>
-                    @endif
-                    @if($_isFiction && $book->series_position)
-                        <div class="bk-proof-item">
-                            <strong>{{ __('Tome') }} {{ $book->series_position }}</strong>
-                            {{ __('trilogie Nexus Neural') }}
-                        </div>
-                    @endif
-                </div>
-
-                {{-- Ce que vous allez apprendre / pourquoi lire ce livre --}}
-                @if(! empty($book->benefits) && is_array($book->benefits))
-                    <div class="bk-section">
-                        <h2 class="bk-section-title">✅ {{ $_isFiction ? __('Pourquoi lire ce tome') : __('Ce que vous allez apprendre') }}</h2>
-                        <ul class="bk-benefits">
-                            @foreach($book->benefits as $benefit)
-                                <li>{{ $benefit }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
 
                 {{-- Navigation inter-tomes (trilogie Nexus Neural) --}}
                 @if($_isFiction && $_seriesTomes->count() > 1)
@@ -323,6 +313,92 @@
                         </div>
                     </div>
                 @endif
+
+                {{-- #refonte-cta-2026-07-09 : conteneur scanné par x-fronttheme::table-of-contents
+                     (h2 internes -> ancres Pourquoi lire / Acheter / Extrait / Structure / Auteur /
+                     FAQ). La navigation inter-tomes ci-dessus et le CTA final plus bas restent
+                     volontairement HORS de ce conteneur (pas des sections de lecture). --}}
+                <div id="bk-toc-content">
+
+                {{-- Ce que vous allez apprendre / pourquoi lire ce livre --}}
+                @if(! empty($book->benefits) && is_array($book->benefits))
+                    <div class="bk-section">
+                        <h2 class="bk-section-title">✅ {{ $_isFiction ? __('Pourquoi lire ce tome') : __('Ce que vous allez apprendre') }}</h2>
+                        <ul class="bk-benefits">
+                            @foreach($book->benefits as $benefit)
+                                <li>{{ $benefit }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                {{-- 1er bloc CTA principal (retiré du hero - cf. bk-hero-buy-link) --}}
+                @if($book->amazon_url_paperback || $book->amazon_url_kindle)
+                    <div class="bk-cta-block" id="bk-cta-primary">
+                        <h2>{{ __('Acheter') }}</h2>
+                        <div class="bk-hero-ctas">
+                            @if($book->amazon_url_paperback)
+                                <x-core::button
+                                    :href="$book->amazon_url_paperback"
+                                    :variant="$_primaryFormat === 'paperback' ? 'primary' : 'secondary'"
+                                    size="lg"
+                                    target="_blank"
+                                    rel="noopener sponsored"
+                                    aria-label="{{ __('Acheter la version papier sur Amazon') }} — {{ $book->title }} ({{ __('nouvel onglet') }})"
+                                >
+                                    {{ __('Acheter la version papier sur Amazon') }}
+                                </x-core::button>
+                            @endif
+                            @if($book->amazon_url_kindle)
+                                <x-core::button
+                                    :href="$book->amazon_url_kindle"
+                                    :variant="$_primaryFormat === 'kindle' ? 'primary' : 'secondary'"
+                                    size="lg"
+                                    target="_blank"
+                                    rel="noopener sponsored"
+                                    aria-label="{{ __('Acheter la version Kindle sur Amazon') }} — {{ $book->title }} ({{ __('nouvel onglet') }})"
+                                >
+                                    {{ __('Acheter la version Kindle sur Amazon') }}
+                                </x-core::button>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Sommaire flottant par ancres - composant DRY existant (réutilisé tel quel,
+                     déjà en place sur blog/show et academy/dashboard). --}}
+                <x-fronttheme::table-of-contents content-selector="#bk-toc-content" title="{{ __('Sommaire') }}" />
+
+                {{-- Bandeau preuve sobre : faits seulement, pas de faux avis --}}
+                @php
+                    $_pageCount = null; // Non stocké en base pour l'instant (colonne absente du modèle Book) — omis volontairement plutôt qu'inventé.
+                @endphp
+                <div class="bk-proof-banner">
+                    @if($book->date_published)
+                        <div class="bk-proof-item">
+                            <strong>{{ $book->date_published->locale('fr_CA')->translatedFormat('j F Y') }}</strong>
+                            {{ __('date de publication') }}
+                        </div>
+                    @endif
+                    @if($book->price_paperback)
+                        <div class="bk-proof-item">
+                            <strong>{{ number_format((float) $book->price_paperback, 2, ',', ' ') }} $ CAD</strong>
+                            {{ __('broché') }}
+                        </div>
+                    @endif
+                    @if($book->price_kindle)
+                        <div class="bk-proof-item">
+                            <strong>{{ number_format((float) $book->price_kindle, 2, ',', ' ') }} $ CAD</strong>
+                            Kindle
+                        </div>
+                    @endif
+                    @if($_isFiction && $book->series_position)
+                        <div class="bk-proof-item">
+                            <strong>{{ __('Tome') }} {{ $book->series_position }}</strong>
+                            {{ __('trilogie Nexus Neural') }}
+                        </div>
+                    @endif
+                </div>
 
                 {{-- Extrait --}}
                 @if(! empty($book->excerpt))
@@ -375,7 +451,9 @@
                     </div>
                 @endif
 
-                {{-- 2e bloc CTA --}}
+                </div>{{-- /#bk-toc-content --}}
+
+                {{-- 2e bloc CTA (final) --}}
                 <div class="bk-cta-block">
                     <h2>{{ __('Envie de le lire ?') }}</h2>
                     <div class="bk-hero-ctas">
@@ -410,6 +488,25 @@
         </div>
     </div>
 </div>
+
+{{-- CTA sticky mobile (<=640px) : accès permanent à l'achat malgré le nouvel ordre. --}}
+@php
+    $_stickyUrl = $_primaryFormat === 'paperback'
+        ? ($book->amazon_url_paperback ?: $book->amazon_url_kindle)
+        : ($book->amazon_url_kindle ?: $book->amazon_url_paperback);
+@endphp
+@if($_stickyUrl)
+    <div class="bk-sticky-cta">
+        <a
+            href="#bk-cta-primary"
+            class="bk-sticky-cta-link"
+            aria-label="{{ __('Voir les options d\'achat') }} — {{ $book->title }}"
+        >
+            <span class="bk-sticky-cta-text">{{ $book->title }}</span>
+            <span class="bk-sticky-cta-action">{{ __('Acheter') }} →</span>
+        </a>
+    </div>
+@endif
 </section>
 @endsection
 

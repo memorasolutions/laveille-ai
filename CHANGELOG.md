@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.97.0] - 2026-07-09
+
+### Added
+- **Refonte de l'ordre de la page fiche livre (`/livres/{slug}`).** Suite à une veille `pp_search` (best practices pages de vente de livres, juillet 2026) : pour un livre conceptuel d'un auteur moins connu, le CTA doit rester tôt, mais la section « Pourquoi lire ce livre » doit arriver immédiatement après le hero - les onglets classiques qui cachent du contenu sont déconseillés pour une fiche livre (nuisent à la découvrabilité et à l'indexation AEO/GEO), un sommaire flottant par ancres est recommandé. Nouvel ordre : hero compact (couverture/titre/sous-titre/auteur, sans gros bloc CTA) → « Pourquoi lire ce livre » → 1er bloc CTA principal → sommaire flottant par ancres (réutilisation du composant DRY `x-fronttheme::table-of-contents`, déjà utilisé sur le blog et l'Académie) → reste de la page inchangé (preuve, extrait, structure, auteur, FAQ, CTA final) → nouveau bandeau CTA sticky sur mobile (contraste AAA 9,35:1, cible tactile 44px). Bug découvert et corrigé en cours de route : le widget « Gérer les témoins » chevauchait le bandeau sticky mobile, corrigé par une règle CSS scopée à cette page. 6/6 tests Pest verts, navigation inter-tomes toujours fonctionnelle.
+
+### Fixed
+- **Catalogue `/livres` - cartes Essais en pleine largeur avec espace vide.** Les 2 cartes de la section « Essais » s'empilaient à 100 % de largeur, laissant un espace disproportionné sur grand écran. Corrigé par une grille CSS (`display:grid`, `repeat(auto-fit, minmax(360px,1fr))`) donnant 2 cartes côte à côte sur desktop et un repli naturel à 1 colonne sur mobile - la section « Trilogie Nexus Neural » n'était pas touchée (déjà en grille).
+- **Couvertures Nexus Neural avec filigrane Gemini visible.** Les 3 couvertures de la trilogie portaient un filigrane Gemini (aucune version propre trouvée dans les dossiers sources locaux après recherche exhaustive). Remplacées par les couvertures officielles récupérées depuis les fiches produit Amazon en direct (1600×2560, éditions françaises), confirmées sans filigrane, régénérées en 4 variantes pour les 3 tomes.
+
 ## [1.96.3] - 2026-07-09
 
 ### Fixed

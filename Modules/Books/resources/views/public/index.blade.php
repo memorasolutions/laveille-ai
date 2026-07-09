@@ -31,10 +31,14 @@
         width: 4px; background: var(--c-primary); border-radius: 2px;
     }
 
+    .bk-essays-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px;
+        margin-bottom: 20px;
+    }
     .bk-card {
         display: flex; gap: 20px; background: #fff; border-radius: var(--r-base);
         border: 1px solid #E5E7EB; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        padding: 24px; margin-bottom: 28px; text-decoration: none !important;
+        padding: 24px; text-decoration: none !important;
         color: inherit; transition: all 0.25s;
     }
     .bk-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1); }
@@ -113,35 +117,37 @@
 
         @if($essays->isNotEmpty())
             <h2 class="bk-section-title">{{ __('Essais') }}</h2>
-            @foreach($essays as $book)
-                <a href="{{ route('books.show', $book->slug) }}" class="bk-card" aria-label="{{ __('Voir le livre') }} {{ $book->title }}">
-                    <div class="bk-card-cover">
-                        <img
-                            src="{{ asset($book->cover_image) }}"
-                            alt="{{ $book->title }} - {{ __('couverture') }}"
-                            loading="lazy" decoding="async" width="300" height="452"
-                        >
-                    </div>
-                    <div class="bk-card-body">
-                        @if($book->genre)
-                            <p class="bk-card-genre">{{ $book->genre }}</p>
-                        @endif
-                        <h3 class="bk-card-title">{{ $book->title }}</h3>
-                        @if($book->subtitle)
-                            <p class="bk-card-subtitle">{{ Str::limit($book->subtitle, 140) }}</p>
-                        @endif
-                        <div class="bk-card-meta">
-                            @if($book->price_paperback)
-                                <span class="bk-card-price">{{ __('Broché') }} {{ number_format((float) $book->price_paperback, 2, ',', ' ') }} $ CAD</span>
-                            @endif
-                            @if($book->price_kindle)
-                                <span class="bk-card-price">Kindle {{ number_format((float) $book->price_kindle, 2, ',', ' ') }} $ CAD</span>
-                            @endif
+            <div class="bk-essays-grid">
+                @foreach($essays as $book)
+                    <a href="{{ route('books.show', $book->slug) }}" class="bk-card" aria-label="{{ __('Voir le livre') }} {{ $book->title }}">
+                        <div class="bk-card-cover">
+                            <img
+                                src="{{ asset($book->cover_image) }}"
+                                alt="{{ $book->title }} - {{ __('couverture') }}"
+                                loading="lazy" decoding="async" width="300" height="452"
+                            >
                         </div>
-                        <span class="bk-card-link">{{ __('Découvrir ce livre') }} →</span>
-                    </div>
-                </a>
-            @endforeach
+                        <div class="bk-card-body">
+                            @if($book->genre)
+                                <p class="bk-card-genre">{{ $book->genre }}</p>
+                            @endif
+                            <h3 class="bk-card-title">{{ $book->title }}</h3>
+                            @if($book->subtitle)
+                                <p class="bk-card-subtitle">{{ Str::limit($book->subtitle, 140) }}</p>
+                            @endif
+                            <div class="bk-card-meta">
+                                @if($book->price_paperback)
+                                    <span class="bk-card-price">{{ __('Broché') }} {{ number_format((float) $book->price_paperback, 2, ',', ' ') }} $ CAD</span>
+                                @endif
+                                @if($book->price_kindle)
+                                    <span class="bk-card-price">Kindle {{ number_format((float) $book->price_kindle, 2, ',', ' ') }} $ CAD</span>
+                                @endif
+                            </div>
+                            <span class="bk-card-link">{{ __('Découvrir ce livre') }} →</span>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
         @endif
 
         @if($nexusTomes->isNotEmpty())
