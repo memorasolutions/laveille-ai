@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.101.1] - 2026-07-10
+
+### Added
+- **Planche assemblée de la BD « Itération »** déployée sur `/glossaire/iteration` (`public/bd/iteration/`, formats avif/webp/jpg en 1600px, 1024px et miniature 600px, `manifest.json`). Standard `ComicLibrary`/`comic-viewer` déjà éprouvé (rançongiciel, deepfake, etc.) — contenu statique uniquement, aucun code touché.
+
 ## [1.101.0] - 2026-07-10
 
 ### Added

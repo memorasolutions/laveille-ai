@@ -17,6 +17,9 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.101.1 · 2026-07-10 · feat(bd) déploie la planche assemblée par l'utilisateur pour la BD
+ *     "Itération" sur /glossaire/iteration (public/bd/iteration/, standard manifest.json +
+ *     ComicLibrary déjà éprouvé sur 6 autres termes). Contenu statique uniquement, zéro code touché.
  *   1.101.0 · 2026-07-10 · feat(glossaire) 6 nouveaux termes (MTIA, Broadcom, TSMC, AMD, PyTorch,
  *     DMA/Digital Markets Act) — standard 10 champs skill /glossaire, images via /nanobanana,
  *     migrations réversibles. feat(bd) planche pédagogique "Itération" (Octopus, 5 cases +
@@ -914,7 +917,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 101;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,
