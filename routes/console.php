@@ -110,6 +110,9 @@ Schedule::command('newsletter:purge-unconfirmed')->dailyAt('09:30')->withoutOver
 // Queue worker pour jobs newsletter (shared hosting — pas de daemon)
 Schedule::command('queue:work --queue=newsletters --stop-when-empty --max-time=55')->everyMinute();
 
+// Queue worker pour AutoDetectNewsToolsJob (shared hosting — pas de daemon, meme convention que newsletters)
+Schedule::command('queue:work --queue=news-tools --stop-when-empty --max-time=55')->everyMinute();
+
 // Synchronisation produits Gelato (dimanche 3h)
 Schedule::command('shop:sync-gelato')->sundays()->at('03:00');
 

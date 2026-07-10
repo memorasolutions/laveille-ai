@@ -17,6 +17,15 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.102.0 · 2026-07-10 · feat(news) auto-détection outils annuaire à la publication d'une
+ *     actualité (source=auto) — NewsArticleObserver::dispatchAutoToolDetection() (garde
+ *     isDirty('is_published') capturée AVANT le traitement ShortUrl imbriqué pour éviter le
+ *     piège updateQuietly()/syncOriginal), AutoDetectNewsToolsJob (queue news-tools, calqué sur
+ *     PurgeCloudflareCacheJob), NewsToolSyncAction::attachAuto() (ajout pur, jamais d'écrasement
+ *     d'une sélection manuelle). Bouton manuel "Suggérer les outils détectés" inchangé
+ *     (source=manual via sync()). Worker de queue planifié (routes/console.php, hébergement
+ *     mutualisé sans démon) + migration de backfill réversible pour les actualités déjà
+ *     publiées sans outil lié. 6 nouveaux tests Pest, 24/24 verts sur le module News.
  *   1.101.1 · 2026-07-10 · feat(bd) déploie la planche assemblée par l'utilisateur pour la BD
  *     "Itération" sur /glossaire/iteration (public/bd/iteration/, standard manifest.json +
  *     ComicLibrary déjà éprouvé sur 6 autres termes). Contenu statique uniquement, zéro code touché.
@@ -916,8 +925,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 101;
-$lvPatch = 1;
+$lvMinor = 102;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

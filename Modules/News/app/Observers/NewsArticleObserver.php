@@ -12,12 +12,24 @@ class NewsArticleObserver
 {
     public function updated(NewsArticle $article): void
     {
+        // Capturé UNE SEULE FOIS avant tout traitement : createShortUrlIfNeeded() effectue
+        // un updateQuietly() imbriqué qui resynchronise l'état "original" du modèle (syncOriginal),
+        // ce qui ferait retomber isDirty('is_published') à false si on le recalculait après coup -
+        // dispatchAutoToolDetection() manquerait alors systématiquement la toute première publication.
+        $justPublished = (bool) $article->is_published && $article->isDirty('is_published');
+
+        $this->createShortUrlIfNeeded($article, $justPublished);
+        $this->dispatchAutoToolDetection($article, $justPublished);
+    }
+
+    private function createShortUrlIfNeeded(NewsArticle $article, bool $justPublished): void
+    {
         if (! class_exists(\Modules\ShortUrl\Services\ShortUrlService::class)) {
             return;
         }
 
         // Uniquement quand is_published passe à true
-        if (! $article->is_published || ! $article->isDirty('is_published')) {
+        if (! $justPublished) {
             return;
         }
 
@@ -58,5 +70,25 @@ class NewsArticleObserver
         } catch (\Throwable $e) {
             Log::warning("Short URL creation failed for article {$article->id}: ".$e->getMessage());
         }
+    }
+
+    /**
+     * Dispatch la détection automatique d'outils annuaire à la publication (source=auto).
+     * Couvre TOUS les articles peu importe category_tag (contrairement à ContentPublished
+     * dans NewsArticle::booted(), qui exige un category_tag) pour maximiser la détection.
+     * Le bouton manuel "Suggérer les outils détectés" reste disponible en parallèle
+     * (source=manual via sync(), jamais affecté par ce chantier).
+     */
+    private function dispatchAutoToolDetection(NewsArticle $article, bool $justPublished): void
+    {
+        if (! class_exists(\Modules\News\Jobs\AutoDetectNewsToolsJob::class)) {
+            return;
+        }
+
+        if (! $justPublished) {
+            return;
+        }
+
+        \Modules\News\Jobs\AutoDetectNewsToolsJob::dispatch($article);
     }
 }

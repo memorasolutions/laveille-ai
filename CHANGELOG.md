@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.102.0] - 2026-07-10
+
+### Added
+- **Auto-détection des outils annuaire à la publication d'une actualité.** Le bouton manuel « Suggérer les outils détectés » nécessitait une action admin ; les outils mentionnés dans une actualité sont désormais liés automatiquement dès la publication (`is_published` false→true, couvrant la publication auto par le cron `news:fetch` et la bascule manuelle admin), via `AutoDetectNewsToolsJob` (queue `news-tools`, calqué sur `PurgeCloudflareCacheJob`), déclenché depuis `NewsArticleObserver`. Les liaisons automatiques sont marquées `source=auto` en base et n'écrasent jamais une sélection manuelle existante (`NewsToolSyncAction::attachAuto()`, ajout pur) ; le bouton manuel reste disponible pour compléter/ajuster (`source=manual`, comportement inchangé). Worker de queue planifié (hébergement mutualisé sans démon, même convention que la queue `newsletters`) + migration de backfill réversible pour les actualités déjà publiées sans outil lié. 6 nouveaux tests Pest (24/24 verts sur le module News, aucune régression).
+
 ## [1.101.1] - 2026-07-10
 
 ### Added

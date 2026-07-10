@@ -43,6 +43,54 @@ final class NewsToolSyncAction
     }
 
     /**
+     * Attache automatiquement les outils détectés qui ne sont PAS déjà liés à l'actualité
+     * (source=auto). Contrairement à sync(), c'est un ajout PUR : ne touche JAMAIS aux
+     * liaisons déjà existantes (qu'elles soient manual ou auto) - aucune sélection admin
+     * n'est donc jamais écrasée par la détection automatique.
+     *
+     * @param  Collection<int, int>  $toolIds
+     * @return int nombre d'outils effectivement attachés
+     */
+    public function attachAuto(NewsArticle $article, Collection $toolIds): int
+    {
+        $existingIds = $article->tools()
+            ->pluck('directory_tools.id')
+            ->map(fn ($id) => (int) $id);
+
+        $newIds = $toolIds->map(fn ($id) => (int) $id)->diff($existingIds)->values();
+
+        if ($newIds->isEmpty()) {
+            return 0;
+        }
+
+        $article->tools()->attach(
+            $newIds->mapWithKeys(fn (int $id) => [$id => ['source' => 'auto']])->all()
+        );
+
+        return $newIds->count();
+    }
+
+    /**
+     * Invalidation ciblée du cache de la page publique de l'actualité (visiteurs anonymes),
+     * après un changement du pivot outils. Extrait du pattern déjà utilisé par
+     * ArticleToolsEditor::persist() (Livewire) pour rester réutilisable (jobs, futurs
+     * appelants) sans dupliquer la logique Spatie ResponseCache.
+     */
+    public static function invalidatePublicCache(NewsArticle $article): void
+    {
+        if (! class_exists(\Spatie\ResponseCache\Facades\ResponseCache::class)) {
+            return;
+        }
+
+        // On rompt la chaîne car usingSuffix() retourne AbstractRequestBuilder (lib Spatie),
+        // ce qui tromperait PHPStan si chaîné avec forget() de CacheItemSelector.
+        $cacheSelector = \Spatie\ResponseCache\Facades\ResponseCache::selectCachedItems()
+            ->forUrls(route('news.show', $article->slug));
+        $cacheSelector->usingSuffix('');
+        $cacheSelector->forget();
+    }
+
+    /**
      * Suggère les outils détectés automatiquement dans le contenu de l'actualité.
      *
      * 2026-07-04 : le texte scanné inclut désormais aussi le résumé structuré IA
