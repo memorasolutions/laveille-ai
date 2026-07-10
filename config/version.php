@@ -24,8 +24,11 @@ declare(strict_types=1);
  *     PurgeCloudflareCacheJob), NewsToolSyncAction::attachAuto() (ajout pur, jamais d'écrasement
  *     d'une sélection manuelle). Bouton manuel "Suggérer les outils détectés" inchangé
  *     (source=manual via sync()). Worker de queue planifié (routes/console.php, hébergement
- *     mutualisé sans démon) + migration de backfill réversible pour les actualités déjà
- *     publiées sans outil lié. 6 nouveaux tests Pest, 24/24 verts sur le module News.
+ *     mutualisé sans démon) + commande manuelle bornée `news:backfill-auto-tools --limit=200`
+ *     pour les actualités déjà publiées sans outil lié (incident déploiement : une 1re version
+ *     en migration a bloqué le pipeline CI >10 min sur le backlog prod, run annulé avant
+ *     réplication grâce au wrapping transactionnel Laravel, migration retirée au profit de
+ *     cette commande rejouable). 6 nouveaux tests Pest, 24/24 verts sur le module News.
  *   1.101.1 · 2026-07-10 · feat(bd) déploie la planche assemblée par l'utilisateur pour la BD
  *     "Itération" sur /glossaire/iteration (public/bd/iteration/, standard manifest.json +
  *     ComicLibrary déjà éprouvé sur 6 autres termes). Contenu statique uniquement, zéro code touché.

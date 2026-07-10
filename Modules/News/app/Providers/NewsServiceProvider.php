@@ -66,6 +66,7 @@ class NewsServiceProvider extends ServiceProvider
             \Modules\News\Console\RescrapeGoogleImagesCommand::class,
             \Modules\News\Console\ReprocessArticlesCommand::class,
             \Modules\News\Console\PruneSeoCommand::class,
+            \Modules\News\Console\BackfillAutoToolDetectionCommand::class,
         ]);
     }
 
