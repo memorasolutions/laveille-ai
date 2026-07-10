@@ -1,0 +1,52 @@
+[
+  {
+    "slug": "dma",
+    "name": "DMA",
+    "cat_slug": "concepts-fondamentaux",
+    "difficulty": "intermediate",
+    "type": "acronym",
+    "icon": "⚖️",
+    "match_strategy": "case_sensitive",
+    "acronym_full": "Digital Markets Act",
+    "aliases": [
+      "Digital Markets Act",
+      "Règlement sur les marchés numériques (UE 2022/1925)"
+    ],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "has_image": false,
+    "definition": "Le DMA (Digital Markets Act), ou règlement sur les marchés numériques, est un règlement européen (UE 2022/1925) adopté le 14 septembre 2022, entré en vigueur le 1er novembre 2022 et applicable depuis le 2 mai 2023. Il vise à encadrer le pouvoir des « contrôleurs d'accès » (gatekeepers) du numérique pour rendre les marchés numériques plus contestables et équitables. Un gatekeeper doit compter plus de 45 millions d'utilisateurs finaux actifs mensuels dans l'UE, plus de 10 000 entreprises utilisatrices actives annuelles, et occuper une position durable depuis au moins trois ans. Le DMA impose des obligations concrètes : interopérabilité des messageries, interdiction de l'auto-préférence, ouverture des magasins d'applications et des systèmes de paiement tiers, portabilité des données, et interdiction de croiser des données personnelles entre services sans consentement explicite. Alphabet/Google, Apple, Meta, Amazon, Microsoft et ByteDance/TikTok figurent parmi les gatekeepers désignés depuis 2024. Les sanctions peuvent atteindre 10 % du chiffre d'affaires mondial annuel, 20 % en cas de récidive.",
+    "analogy": "Le DMA agit comme un arbitre qui empêche les géants du numérique de favoriser leurs propres joueurs dans leur propre stade.",
+    "example": "En mars 2024, Apple a dû ouvrir l'App Store aux magasins d'applications tiers sur iPhone dans l'Union européenne, conformément au DMA.",
+    "did_you_know": "Les amendes pour non-respect du DMA peuvent atteindre 10 % du chiffre d'affaires mondial annuel, soit des milliards d'euros pour les plus grandes entreprises.",
+    "one_sentence_answer": "Le DMA (Digital Markets Act) est un règlement européen qui impose des règles équitables aux grandes plateformes numériques pour protéger la concurrence et les utilisateurs.",
+    "faq": [
+      {
+        "question": "Qu'est-ce qu'un gatekeeper selon le DMA ?",
+        "answer": "Un gatekeeper est une grande plateforme numérique qui contrôle l'accès à des services essentiels, avec plus de 45 millions d'utilisateurs finaux actifs mensuels dans l'UE, plus de 10 000 entreprises utilisatrices actives annuelles, et une position durable depuis au moins trois ans."
+      },
+      {
+        "question": "Quelles sont les principales obligations du DMA pour les gatekeepers ?",
+        "answer": "Les gatekeepers doivent notamment assurer l'interopérabilité des messageries, ne pas favoriser leurs propres services, ouvrir leurs magasins d'applications et systèmes de paiement, permettre la portabilité des données, et ne pas combiner des données personnelles sans consentement explicite."
+      },
+      {
+        "question": "Quelles entreprises sont concernées par le DMA ?",
+        "answer": "Les entreprises désignées gatekeepers entre 2024 et 2026 sont Alphabet/Google, Apple, Meta, Amazon, Microsoft et ByteDance/TikTok."
+      }
+    ],
+    "sources": [
+      {
+        "label": "EUR-Lex - Règlement (UE) 2022/1925 (Digital Markets Act)",
+        "url": "https://eur-lex.europa.eu/eli/reg/2022/1925/oj",
+        "year": 2022,
+        "author": "Parlement européen et Conseil de l'Union européenne"
+      },
+      {
+        "label": "Commission européenne - Le règlement sur les marchés numériques (Digital Markets Act)",
+        "url": "https://digital-markets-act.ec.europa.eu/index_fr",
+        "year": 2026,
+        "author": "Commission européenne"
+      }
+    ]
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "slug": "tsmc",
+    "name": "TSMC",
+    "cat_slug": "outils-et-techniques",
+    "difficulty": "intermediate",
+    "type": "acronym",
+    "icon": "🏭",
+    "match_strategy": "case_sensitive",
+    "acronym_full": "Taiwan Semiconductor Manufacturing Company",
+    "aliases": [
+      "Taiwan Semiconductor Manufacturing Company",
+      "Taiwan Semiconductor"
+    ],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "has_image": false,
+    "definition": "TSMC (Taiwan Semiconductor Manufacturing Company), fondée en 1987 à Hsinchu par Morris Chang, ingénieur formé au MIT et à Stanford, ancien cadre de Texas Instruments, avec le soutien du gouvernement taïwanais et la commercialisation des recherches de l'ITRI, est devenue le leader mondial de la fabrication sous contrat de semi-conducteurs. Dès sa création, elle a révolutionné l'industrie en adoptant le modèle « pure-play foundry », se consacrant uniquement à la fabrication de puces pour des clients concepteurs comme Apple, Nvidia, AMD et Qualcomm, sans les concurrencer. Ce modèle a permis l'essor des entreprises fabless et a transformé la chaîne d'approvisionnement. TSMC détient aujourd'hui plus de 60 % du marché mondial de la fonderie et domine les noeuds de gravure les plus avancés, notamment les 7 nm, 5 nm et 3 nm. L'entreprise travaille actuellement sur la transition vers les transistors GAAFET (gate-all-around) pour les prochaines générations. Ses usines principales sont à Taïwan, mais elle a ouvert une nouvelle installation en Arizona, aux États-Unis, pour renforcer sa présence mondiale.",
+    "analogy": "TSMC est comme une imprimerie de précision : elle fabrique les circuits conçus par d'autres, telle une fonderie au service des sculpteurs.",
+    "example": "En 2020, Apple a lancé l'iPhone 12 avec la puce A14 Bionic, fabriquée exclusivement par TSMC en gravure 5 nm, offrant des performances et une efficacité énergétique inédites pour l'époque.",
+    "did_you_know": "TSMC, fondée en 1987, détient plus de 60 % du marché mondial de la fonderie et fabrique les puces les plus avancées pour Apple, Nvidia et AMD.",
+    "one_sentence_answer": "TSMC (Taiwan Semiconductor Manufacturing Company) est le plus grand fabricant de puces sous contrat au monde, produisant les composants les plus avancés pour les entreprises technologiques.",
+    "faq": [
+      {
+        "question": "Qu'est-ce que TSMC ?",
+        "answer": "TSMC est une entreprise taïwanaise qui fabrique des puces électroniques pour d'autres sociétés, comme Apple, Nvidia et AMD, sans les concevoir elle-même."
+      },
+      {
+        "question": "Pourquoi TSMC est-elle si importante dans l'industrie technologique ?",
+        "answer": "TSMC détient plus de 60 % du marché mondial de la fabrication sous contrat et produit les puces les plus avancées, comme les gravures 5 nm et 3 nm, utilisées dans les appareils Apple et les cartes graphiques Nvidia."
+      },
+      {
+        "question": "Où sont situées les usines de TSMC ?",
+        "answer": "Ses principales usines sont à Taïwan, mais elle a ouvert une nouvelle installation en Arizona, aux États-Unis, pour diversifier sa production."
+      }
+    ],
+    "sources": [
+      {
+        "label": "TSMC - À propos de TSMC",
+        "url": "https://www.tsmc.com/english/aboutTSMC",
+        "year": 2026,
+        "author": "TSMC"
+      },
+      {
+        "label": "Wikipédia FR - Taiwan Semiconductor Manufacturing Company",
+        "url": "https://fr.wikipedia.org/wiki/Taiwan_Semiconductor_Manufacturing_Company",
+        "year": 2026,
+        "author": "Wikipédia"
+      }
+    ]
+  }
+]

@@ -1,0 +1,51 @@
+[
+  {
+    "slug": "mtia",
+    "name": "MTIA",
+    "cat_slug": "outils-et-techniques",
+    "difficulty": "intermediate",
+    "type": "acronym",
+    "icon": "⚡",
+    "match_strategy": "case_sensitive",
+    "acronym_full": "Meta Training and Inference Accelerator",
+    "aliases": [
+      "Meta Training and Inference Accelerator"
+    ],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "has_image": false,
+    "definition": "Le MTIA (Meta Training and Inference Accelerator) est une puce d'intelligence artificielle conçue sur mesure par Meta pour ses propres charges de travail. Développée en interne depuis environ 2020, elle a été officiellement présentée en mai 2023 sur le blog ai.meta.com. Sa première génération repose sur une architecture RISC-V, consomme seulement 25 W et est optimisée pour l'inférence des modèles de recommandation, notamment ceux qui alimentent les fils d'actualité et la publicité sur Facebook et Instagram. En 2024, Meta a dévoilé une nouvelle génération, et en mars 2026, la feuille de route a été étendue avec les générations MTIA 300, 400, 450 et 500, couvrant à la fois l'entraînement pour le classement et la recommandation (300) ainsi que l'inférence GenAI en production jusqu'en 2027. L'objectif stratégique est clair : réduire la dépendance de Meta aux GPU Nvidia pour ses tâches internes d'IA, en contrôlant sa propre chaîne de silicium.",
+    "analogy": "C'est comme si un restaurant géant décidait de cultiver ses propres légumes plutôt que de toujours les acheter à un fournisseur unique.",
+    "example": "En mai 2023, Meta a annoncé que le MTIA permettrait d'accélérer l'inférence des modèles de recommandation sur Facebook, réduisant la latence et la dépendance aux GPU Nvidia.",
+    "did_you_know": "Le MTIA de première génération ne consomme que 25 watts, soit environ 10 fois moins qu'un GPU classique, tout en étant taillé pour les algorithmes de recommandation de Meta.",
+    "one_sentence_answer": "Le MTIA est une puce maison de Meta conçue pour accélérer l'entraînement et l'inférence de ses modèles d'IA, visant à réduire sa dépendance aux GPU Nvidia.",
+    "faq": [
+      {
+        "question": "Le MTIA peut-il remplacer complètement les GPU Nvidia ?",
+        "answer": "Non, mais Meta vise à diminuer sa dépendance en dédiant cette puce à des charges spécifiques comme la recommandation. Les GPU resteront nécessaires pour d'autres tâches."
+      },
+      {
+        "question": "Quels sont les avantages du MTIA par rapport à un GPU classique ?",
+        "answer": "Il est optimisé pour les modèles de Meta, consomme beaucoup moins d'énergie (25 W) et offre une efficacité accrue pour l'inférence des recommandations."
+      },
+      {
+        "question": "Quand le MTIA est-il utilisé dans les produits Meta ?",
+        "answer": "La première génération est déployée en interne depuis 2023, et les générations futures (300, 400, etc.) arriveront progressivement jusqu'en 2027."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Meta AI - Meta Training and Inference Accelerator (MTIA)",
+        "url": "https://ai.meta.com/blog/meta-training-inference-accelerator-AI-MTIA/",
+        "year": 2023,
+        "author": "Meta AI"
+      },
+      {
+        "label": "Meta Newsroom - Expanding Meta's custom silicon to power our AI workloads",
+        "url": "https://about.fb.com/news/2026/03/expanding-metas-custom-silicon-to-power-our-ai-workloads/",
+        "year": 2026,
+        "author": "Meta Newsroom"
+      }
+    ]
+  }
+]

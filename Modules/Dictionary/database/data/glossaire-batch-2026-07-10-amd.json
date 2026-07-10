@@ -1,0 +1,51 @@
+[
+  {
+    "slug": "amd",
+    "name": "AMD",
+    "cat_slug": "outils-et-techniques",
+    "difficulty": "intermediate",
+    "type": "acronym",
+    "icon": "🖥️",
+    "match_strategy": "case_sensitive",
+    "acronym_full": "Advanced Micro Devices",
+    "aliases": [
+      "Advanced Micro Devices"
+    ],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "has_image": false,
+    "definition": "AMD (Advanced Micro Devices) est un fabricant américain de semi-conducteurs fondé le 1er mai 1969 par Jerry Sanders III et d'anciens collègues de Fairchild Semiconductor, à Sunnyvale, en Californie, avec environ 100 000 $ de capital initial. L'entreprise a d'abord produit des puces logiques MSI comme l'AM9300, puis des puces mémoire RAM et un clone x86 (AM9080) vendu comme seconde source pour Intel. Entrée en bourse en 1972, elle a commencé sa production en Malaisie dès 1973. L'Am386 a brisé le monopole d'Intel sur l'architecture x86. AMD a marqué l'histoire avec les processeurs K5, K6, Athlon (premier x86 à 1 GHz), les serveurs Opteron et l'architecture x86-64 avant Intel. L'acquisition d'ATI Technologies en 2006 a donné naissance aux cartes graphiques Radeon et aux APU Fusion. En 2026, AMD couvre trois marchés : centre de données (CPU EPYC, GPU Instinct CDNA 3), PC/gaming (Ryzen, Radeon) et embarqué. La série Instinct MI300 est sa ligne phare d'accélérateurs IA/HPC.",
+    "analogy": "AMD est comme un artisan qui a commencé par copier des plans, puis a inventé ses propres outils pour devenir un leader de l'innovation.",
+    "example": "En 2023, le supercalculateur Frontier utilise des processeurs AMD EPYC et des accélérateurs Instinct MI250X pour atteindre plus d'un exaflop de performance.",
+    "did_you_know": "AMD a lancé le premier processeur x86 à 1 GHz en 2000, devançant Intel dans la course à la fréquence.",
+    "one_sentence_answer": "AMD est un fabricant de semi-conducteurs fondé en 1969, connu pour ses processeurs Ryzen, EPYC et ses cartes graphiques Radeon.",
+    "faq": [
+      {
+        "question": "Quelle est la différence entre un CPU AMD et un CPU Intel ?",
+        "answer": "Les CPU AMD utilisent souvent plus de coeurs pour un prix similaire, tandis qu'Intel mise sur des fréquences élevées. Les deux sont compatibles avec les logiciels x86."
+      },
+      {
+        "question": "AMD fabrique-t-il ses propres puces ?",
+        "answer": "Non, AMD conçoit ses puces mais sous-traite la fabrication à des fonderies comme TSMC, contrairement à Intel qui possède ses propres usines."
+      },
+      {
+        "question": "Qu'est-ce que l'architecture x86-64 d'AMD ?",
+        "answer": "C'est une extension 64 bits du jeu d'instructions x86, introduite par AMD en 2003 avec l'Athlon 64, avant qu'Intel ne l'adopte."
+      }
+    ],
+    "sources": [
+      {
+        "label": "AMD - À propos d'AMD",
+        "url": "https://www.amd.com/en/corporate/about-amd.html",
+        "year": 2026,
+        "author": "AMD"
+      },
+      {
+        "label": "Wikipédia FR - Advanced Micro Devices",
+        "url": "https://fr.wikipedia.org/wiki/Advanced_Micro_Devices",
+        "year": 2026,
+        "author": "Wikipédia"
+      }
+    ]
+  }
+]

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.101.0] - 2026-07-10
+
+### Added
+- **6 nouveaux termes de glossaire** : MTIA (puce IA custom de Meta), Broadcom, TSMC, AMD, PyTorch et DMA (Digital Markets Act, règlement européen — orthographe officielle vérifiée « Markets » au pluriel, ajoutée en `acronym_full` et en alias pour l'auto-lien site-wide). Standard 10 champs du skill `/glossaire` respecté (définition, analogie, exemple, anecdote, réponse en une phrase, FAQ, sources datées et signées, alias, icône, type/difficulté). Contenu rédigé via `mcp__hermes__model_invoke` à partir de faits vérifiés (recherche `pp_search`/fallback `sonar-pro`), images générées via `/nanobanana` (compte Gemini Workspace), migrations réversibles (`Modules/Dictionary/database/migrations/2026_07_10_*`).
+- **Bande dessinée pédagogique « Itération »** (personnage Octopus) pour vulgariser `/glossaire/iteration` : 5 illustrations de case livrées (flux narratif définir → répéter → nommer l'époque → résumer) accompagnées du fichier `iteration-structure.md` (textes de bulles/encadrés fact-checkés). Conforme au périmètre resserré du skill `/bd` (2026-07-07) : images de contenu seules, sans contour ni bulle rendue, assemblage laissé à l'utilisateur.
+
+### Fixed
+- Investigation approfondie (round 2) du signalement « Service Worker was updated because 'Update on reload' » répété : confirmé qu'il ne s'agit pas d'une boucle serveur (5 minutes d'observation continue sans croissance des messages, aucun minuteur caché dans le code). La cause la plus probable est un comportement natif de Chrome DevTools (message émis à chaque reload réel tant que la case « Update on reload » est cochée), amplifié par « Preserve log ». Aucun correctif de code nécessaire.
+
 ## [1.100.0] - 2026-07-09
 
 ### Added

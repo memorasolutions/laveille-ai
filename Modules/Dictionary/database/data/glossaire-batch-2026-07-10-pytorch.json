@@ -1,0 +1,49 @@
+[
+  {
+    "slug": "pytorch",
+    "name": "PyTorch",
+    "cat_slug": "outils-et-techniques",
+    "difficulty": "intermediate",
+    "type": "tool",
+    "icon": "🔥",
+    "match_strategy": "case_sensitive",
+    "acronym_full": null,
+    "aliases": [],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "has_image": false,
+    "definition": "PyTorch est une bibliothèque Python open-source d'apprentissage profond, développée à l'origine par Facebook AI Research (FAIR, maintenant Meta AI) et publiée pour la première fois en 2016. Elle est inspirée de la bibliothèque Torch (écrite en Lua), mais entièrement réécrite en Python, sans dépendance à Lua. Le package central torch fournit la classe torch.Tensor, un tableau multidimensionnel similaire aux ndarrays de NumPy, utilisable sur CPU ou sur GPU via CUDA. Sa fonctionnalité clé est le module autograd, qui effectue de la différenciation automatique en construisant un graphe de calcul dynamique (« define-by-run »), contrairement aux frameworks à graphe statique plus anciens, ce qui facilite la recherche, le prototypage rapide et le débogage. Les modèles sont typiquement construits comme des classes héritant de torch.nn.Module, avec des couches comme nn.Linear ou nn.Conv2d et une méthode forward. L'écosystème comprend des fonctions de perte, des optimiseurs (SGD, Adam) et des utilitaires de chargement de données.",
+    "analogy": "PyTorch, c'est comme un jeu de blocs modulaires qui s'assemblent en temps réel, sans plan fixe à l'avance.",
+    "example": "En 2023, des chercheurs de Meta AI ont utilisé PyTorch pour entraîner le modèle de langage LLaMA, démontrant sa puissance pour la recherche en IA.",
+    "did_you_know": "PyTorch, sorti en 2016, est devenu l'un des frameworks les plus utilisés en recherche universitaire et par des entreprises comme Tesla et OpenAI.",
+    "one_sentence_answer": "PyTorch est une bibliothèque Python open-source d'apprentissage profond avec différenciation automatique dynamique, utilisée pour construire et entraîner des réseaux de neurones.",
+    "faq": [
+      {
+        "question": "Quelle est la différence principale entre PyTorch et TensorFlow ?",
+        "answer": "PyTorch utilise un graphe de calcul dynamique (define-by-run), ce qui le rend plus flexible et facile à déboguer, tandis que TensorFlow utilise historiquement un graphe statique, souvent optimisé pour la production."
+      },
+      {
+        "question": "PyTorch est-il gratuit ?",
+        "answer": "Oui, PyTorch est entièrement open-source et gratuit, distribué sous licence BSD."
+      },
+      {
+        "question": "Peut-on utiliser PyTorch sans GPU ?",
+        "answer": "Oui, PyTorch fonctionne sur CPU, mais l'utilisation d'un GPU via CUDA accélère considérablement l'entraînement des modèles."
+      }
+    ],
+    "sources": [
+      {
+        "label": "PyTorch - Site officiel et documentation",
+        "url": "https://pytorch.org/",
+        "year": 2026,
+        "author": "PyTorch Foundation"
+      },
+      {
+        "label": "Wikipédia FR - PyTorch",
+        "url": "https://fr.wikipedia.org/wiki/PyTorch",
+        "year": 2026,
+        "author": "Wikipédia"
+      }
+    ]
+  }
+]

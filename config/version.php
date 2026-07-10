@@ -17,6 +17,10 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.101.0 · 2026-07-10 · feat(glossaire) 6 nouveaux termes (MTIA, Broadcom, TSMC, AMD, PyTorch,
+ *     DMA/Digital Markets Act) — standard 10 champs skill /glossaire, images via /nanobanana,
+ *     migrations réversibles. feat(bd) planche pédagogique "Itération" (Octopus, 5 cases +
+ *     fichier .md de structure/textes livré, périmètre images-seules 2026-07-07).
  *   1.100.0 · 2026-07-09 · feat(books) Lecteur flip-reader : état de chargement (pages blanches
  *     signalées par l'utilisateur). Veille best-practices 2026 (squelette + blur-up + priorité de
  *     chargement, préférés à un spinner générique). LQIP générées (97 images, ~4 Ko, ImageMagick)
@@ -909,7 +913,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 100;
+$lvMinor = 101;
 $lvPatch = 0;
 
 return [

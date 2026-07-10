@@ -1,0 +1,52 @@
+[
+  {
+    "slug": "broadcom",
+    "name": "Broadcom",
+    "cat_slug": "outils-et-techniques",
+    "difficulty": "intermediate",
+    "type": "concept",
+    "icon": "🌐",
+    "match_strategy": "case_sensitive",
+    "acronym_full": null,
+    "aliases": [
+      "Broadcom Inc.",
+      "AVGO"
+    ],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "has_image": false,
+    "definition": "Broadcom Inc. est une multinationale américaine de conception et de vente de semi-conducteurs et de logiciels d'infrastructure, cotée au NASDAQ sous le symbole AVGO et dont le siège social est à Palo Alto, en Californie. Issue de la division semi-conducteurs de Hewlett-Packard via Agilent Technologies, elle est devenue le successeur légal de Broadcom Limited après sa réincorporation au Delaware le 4 avril 2018. Ses activités se divisent en deux grandes branches : Semiconductor Solutions, qui fournit des composants pour les réseaux, la connectivité, le stockage, le sans-fil et le large bande, et Infrastructure Software, qui couvre les domaines du mainframe, de la cybersécurité et du cloud hybride. En avril 2026, sa capitalisation boursière a franchi les 2 000 milliards de dollars américains, portée par une croissance fulgurante de son chiffre d'affaires, passé de 33,2 milliards $ en 2022 à 68,3 milliards $ sur les douze derniers mois à février 2026, largement stimulée par la demande liée à l'intelligence artificielle.",
+    "analogy": "Broadcom est comme un géant de la construction qui fournit à la fois les briques (semi-conducteurs) et les plans (logiciels) des autoroutes numériques.",
+    "example": "En juillet 2026, Broadcom a conclu un accord avec OpenAI pour concevoir des puces d'IA personnalisées, renforçant ainsi son rôle clé dans l'infrastructure des centres de données.",
+    "did_you_know": "Broadcom est le fournisseur dominant de silicium Ethernet pour les commutateurs et routeurs des centres de données hyperscale, notamment avec sa série Tomahawk 5.",
+    "one_sentence_answer": "Broadcom est une entreprise américaine de semi-conducteurs et de logiciels d'infrastructure, leader dans les composants réseau pour l'IA et partenaire d'Apple et OpenAI.",
+    "faq": [
+      {
+        "question": "Quels sont les principaux produits de Broadcom ?",
+        "answer": "Broadcom conçoit des semi-conducteurs pour les réseaux, le stockage et la connectivité, ainsi que des logiciels d'infrastructure pour les mainframes, la cybersécurité et le cloud hybride."
+      },
+      {
+        "question": "Pourquoi Broadcom est-il important dans l'IA ?",
+        "answer": "Ses commutateurs Ethernet Tomahawk 5 sont essentiels pour relier les serveurs dans les centres de données hyperscale, et ses puces personnalisées pour OpenAI montrent son rôle croissant dans l'IA."
+      },
+      {
+        "question": "Broadcom a-t-il des partenariats majeurs ?",
+        "answer": "Oui, Broadcom fournit des puces personnalisées à Apple depuis des années, avec un accord prolongé jusqu'en 2031, et a signé un accord avec OpenAI en juillet 2026."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Broadcom Inc. - À propos de l'entreprise",
+        "url": "https://www.broadcom.com/company",
+        "year": 2026,
+        "author": "Broadcom Inc."
+      },
+      {
+        "label": "Wikipédia FR - Broadcom",
+        "url": "https://fr.wikipedia.org/wiki/Broadcom",
+        "year": 2026,
+        "author": "Wikipédia"
+      }
+    ]
+  }
+]
