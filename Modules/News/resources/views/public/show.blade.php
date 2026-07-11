@@ -252,6 +252,7 @@
                     @include('fronttheme::partials.article-action-bar', [
                         'model' => $article,
                         'modelType' => 'Modules\\News\\Models\\NewsArticle',
+                        'journalSourceType' => 'news',
                         'adminShareItems' => auth()->user()?->isSuperAdmin() ? $article->adminShareContents() : null,
                     ])
 

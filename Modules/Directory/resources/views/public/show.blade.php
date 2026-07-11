@@ -360,7 +360,7 @@
                         style="display: inline-block; background: none; border: none; cursor: pointer; color: var(--c-primary, #2563EB); font-size: 0.9rem; padding: 8px 0; min-height: 44px; text-decoration: underline; text-underline-offset: 2px; line-height: 1.4; margin-top: 4px;"
                     >{{ __('Lire la suite') }} →</button>
                 @endif
-                @include('fronttheme::partials.article-action-bar', ['model' => $tool, 'modelType' => 'Modules\\Directory\\Models\\Tool', 'adminShareItems' => auth()->user()?->isSuperAdmin() ? $tool->adminShareContents() : null])
+                @include('fronttheme::partials.article-action-bar', ['model' => $tool, 'modelType' => 'Modules\\Directory\\Models\\Tool', 'journalSourceType' => 'directory_tool', 'adminShareItems' => auth()->user()?->isSuperAdmin() ? $tool->adminShareContents() : null])
                 <div style="margin-top: 6px;">
                     <a href="{{ route('directory.takedown.create', $tool->slug) }}" style="color:#9CA3AF; font-size:0.75rem; text-decoration:underline; text-underline-offset:2px;">⚖️ {{ __('Titulaire de droits ? Demander un retrait') }}</a>
                 </div>

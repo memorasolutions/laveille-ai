@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use Modules\Community\Models\Comment;
+use Modules\Community\Models\Report;
 use Modules\Community\Models\Review;
 
 class ModerationController extends Controller
@@ -17,8 +18,26 @@ class ModerationController extends Controller
     {
         $pendingComments = Comment::with('user')->pending()->orderByDesc('created_at')->get();
         $pendingReviews = Review::with('user')->pending()->orderByDesc('created_at')->get();
+        $pendingReports = Report::with(['user', 'reportable'])->pending()->orderBy('created_at')->get();
+        $overdueReportIds = Report::overdue()->pluck('id')->all();
 
-        return view('community::admin.moderation', compact('pendingComments', 'pendingReviews'));
+        return view('community::admin.moderation', compact('pendingComments', 'pendingReviews', 'pendingReports', 'overdueReportIds'));
+    }
+
+    /**
+     * Traite un signalement (preuve de diligence : status + reviewed_at +
+     * resolution_notes + handled_by, voir Report::markResolved()).
+     */
+    public function resolveReport(Request $request, Report $report): RedirectResponse
+    {
+        $validated = $request->validate([
+            'action' => 'required|in:resolved,dismissed',
+            'notes' => 'nullable|string|max:2000',
+        ]);
+
+        $report->markResolved($request->user()->id, $validated['action'], $validated['notes'] ?? null);
+
+        return redirect()->route('admin.community.moderation')->with('success', __('Signalement traité.'));
     }
 
     public function moderate(Request $request): RedirectResponse

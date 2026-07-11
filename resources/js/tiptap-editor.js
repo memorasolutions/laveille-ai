@@ -101,6 +101,9 @@ export function tiptapEditorComponent(config = {}) {
                     this.charCount = editor.storage.characterCount.characters()
                     if (this.$refs.hiddenInput) {
                         this.$refs.hiddenInput.value = this.content
+                        window.dispatchEvent(new CustomEvent('tiptap:updated', {
+                            detail: { name: this.$refs.hiddenInput.name, value: this.content },
+                        }))
                     }
                 },
             })

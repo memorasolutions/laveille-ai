@@ -252,7 +252,7 @@
 
                     {{-- Title + Bookmark --}}
                     <h1 class="gl-term-title" style="margin: 0 0 0.5rem;" data-editable="name">{{ $term->name }}</h1>
-                    @include('fronttheme::partials.article-action-bar', ['model' => $term, 'modelType' => 'Modules\\Dictionary\\Models\\Term', 'adminShareItems' => auth()->user()?->isSuperAdmin() ? $term->adminShareContents() : null])
+                    @include('fronttheme::partials.article-action-bar', ['model' => $term, 'modelType' => 'Modules\\Dictionary\\Models\\Term', 'journalSourceType' => 'glossary', 'adminShareItems' => auth()->user()?->isSuperAdmin() ? $term->adminShareContents() : null])
 
                     @php
                         $termTitle = $term->getTranslation('name', 'fr_CA', false) ?: $term->name;

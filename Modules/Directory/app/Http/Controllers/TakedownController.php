@@ -21,7 +21,14 @@ class TakedownController extends Controller
                 ->first();
         }
 
-        return view('directory::public.takedown', ['tool' => $tool]);
+        // Pré-remplissage générique (ex. Journal personnel) : ?url=... — validé comme URL
+        // avant affichage, jamais injecté tel quel dans le formulaire.
+        $prefillUrl = $request->query('url');
+        if ($prefillUrl && ! filter_var($prefillUrl, FILTER_VALIDATE_URL)) {
+            $prefillUrl = null;
+        }
+
+        return view('directory::public.takedown', ['tool' => $tool, 'prefillUrl' => $prefillUrl]);
     }
 
     public function store(Request $request)

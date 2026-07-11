@@ -24,6 +24,13 @@ class Report extends Model
         'reason',
         'details',
         'status',
+        'reviewed_at',
+        'resolution_notes',
+        'handled_by',
+    ];
+
+    protected $casts = [
+        'reviewed_at' => 'datetime',
     ];
 
     public function reportable(): MorphTo
@@ -36,8 +43,29 @@ class Report extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'handled_by');
+    }
+
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
+    }
+
+    /** Signalements en attente depuis plus de 48h (retard sur l'engagement de traitement). */
+    public function scopeOverdue($query)
+    {
+        return $query->pending()->where('created_at', '<', now()->subHours(48));
+    }
+
+    public function markResolved(int $reviewerId, string $status, ?string $notes = null): void
+    {
+        $this->update([
+            'status' => $status,
+            'reviewed_at' => now(),
+            'resolution_notes' => $notes,
+            'handled_by' => $reviewerId,
+        ]);
     }
 }

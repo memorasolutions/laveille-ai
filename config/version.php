@@ -17,6 +17,11 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.103.0 · 2026-07-11 · Journal personnel : nouveau module Modules/Journal (constructeur
+ *     Livewire blocs texte/image/vidéo/source, intégration "+Ajouter à mon journal" sur
+ *     News/Dictionary/Directory, Signaler + avis-et-avis, 33 tests Pest) + fix condition de
+ *     course Tiptap-light sur rendu Livewire différé + migration seed dictionary_categories
+ *     manquante (rattrapage ~150 migrations locales en retard)
  *   1.102.0 · 2026-07-10 · feat(news) auto-détection outils annuaire à la publication d'une
  *     actualité (source=auto) — NewsArticleObserver::dispatchAutoToolDetection() (garde
  *     isDirty('is_published') capturée AVANT le traitement ShortUrl imbriqué pour éviter le
@@ -928,7 +933,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 102;
+$lvMinor = 103;
 $lvPatch = 0;
 
 return [

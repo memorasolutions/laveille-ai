@@ -51,5 +51,6 @@
     "Authors": true,
     "Academy": true,
     "Sso": true,
-    "Books": true
+    "Books": true,
+    "Journal": true
 }

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.103.0] - 2026-07-11
+
+### Added
+- **Journal personnel** (nouveau module `Modules/Journal`) : chaque utilisateur connecté peut créer des journaux privés ou publiés (`/journaux`, `/journal/creer`, `/journaux/{slug}/editer`, `/journaux/{slug}`), composés de blocs de contenu réordonnables (texte riche, image, vidéo YouTube, source liée) via un constructeur Livewire (`JournalBuilder`) avec 4 gabarits de mise en page. Intégration « + Ajouter à mon journal » sur les pages Actualités, Glossaire et Annuaire (dropdown des journaux de l'utilisateur, ajout instantané par requête `fetch`, gate d'autorisation serveur anti-IDOR à chaque action). Page publique de lecture avec JSON-LD Article, réutilisation du système Signaler + extension du régime avis-et-avis (`/annuaire/retrait`) au contenu Journal. 33 tests Pest (modèle/policy, service de blocs, cycle de vie Livewire, HTTP/modération) — zéro régression sur 256 tests Journal+Directory+Authors.
+
+### Fixed
+- **Éditeur de texte riche (Tiptap) non fonctionnel dans le constructeur Journal.** Le panneau « + Texte » affichait une barre d'outils aux icônes vides puis, une fois corrigé, un éditeur complètement inerte (`ReferenceError: tiptapEditor is not defined`) : cause racine réelle = condition de course entre le chargement asynchrone du script de l'éditeur (`resources/js/tiptap-frontend.js`, module Vite) et le morph Livewire qui insère et évalue immédiatement le `x-data` Alpine correspondant, déclenché par le clic sur « + Texte » (contenu absent du rendu initial de la page, contrairement aux autres usages déjà en production de ce composant partagé sur Annuaire/Auteurs). Corrigé en chargeant le script au niveau racine du composant Livewire `JournalBuilder`, dès le rendu initial de la page d'édition — même mécanisme déjà éprouvé pour le plugin de réordonnancement par glisser-déposer dans ce même fichier.
+- **Erreur 500 sur `/admin` en environnement local** (colonne `newsletter_subscribers.deleted_at` manquante) et **~150 migrations en retard sur la base de données de développement locale**, dont une table `dictionary_categories` jamais peuplée par une migration versionnée (seedée manuellement en production à l'origine) — reliquat d'une restauration incomplète après un incident `migrate:fresh` accidentel du 2026-07-04. Nouvelle migration idempotente et réversible qui comble définitivement cette lacune pour tout environnement futur (local neuf, CI). Aucun impact production (déjà correctement peuplée, migration sans effet si déjà appliquée).
+
 ## [1.102.0] - 2026-07-10
 
 ### Added

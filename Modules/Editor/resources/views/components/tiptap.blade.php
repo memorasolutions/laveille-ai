@@ -1,6 +1,16 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @props(['name' => 'content', 'value' => '', 'label' => null, 'required' => false])
 
+{{-- Icônes de la barre d'outils (data-lucide) : le composant charge sa propre copie de Lucide
+     via @assets (injection dédupliquée avant le boot d'Alpine, même mécanisme que le plugin
+     @alpinejs/sort de Modules/Academy/course-editor.blade.php) au lieu de dépendre du layout
+     hôte. Nécessaire car ce composant est désormais réutilisé sur le thème front-end public
+     (ex. Modules/Journal), qui ne charge pas Lucide contrairement au layout admin backend -
+     sans ça, tous les boutons de la barre d'outils restent vides (icônes jamais dessinées). --}}
+@assets
+<script src="{{ asset('build/nobleui/plugins/lucide/lucide.min.js') }}"></script>
+@endassets
+
 <div wire:ignore>
 <div id="tiptap-wrap" x-data="tiptapEditor({ content: '{{ addslashes(old($name, $value)) }}' })" x-init="$nextTick(() => { if(window.lucide) lucide.createIcons({attrs: {}, nodes: $el.querySelectorAll('[data-lucide]')}) })" @destroy.window="destroy()" :class="{'tiptap-fullscreen': isFullscreen}">
     @if($label)

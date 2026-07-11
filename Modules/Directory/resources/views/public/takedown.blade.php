@@ -57,7 +57,7 @@
                                             {{ __('URL du contenu visé') }} <span style="color:var(--c-danger);">*</span>
                                         </label>
                                         <input type="url" id="target_url" name="target_url" required
-                                            value="{{ old('target_url', $tool ? route('directory.show', $tool->slug) : '') }}"
+                                            value="{{ old('target_url', $tool ? route('directory.show', $tool->slug) : ($prefillUrl ?? '')) }}"
                                             class="form-control {{ $errors->has('target_url') ? 'is-invalid' : '' }}"
                                             style="border-radius:8px;box-shadow:none;height:44px;"
                                             aria-describedby="target_url_help">

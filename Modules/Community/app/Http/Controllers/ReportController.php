@@ -7,16 +7,31 @@ namespace Modules\Community\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Modules\Community\Models\Report;
 
 class ReportController extends Controller
 {
+    /**
+     * Motifs de signalement (taxonomie unique, partagée par tous les
+     * types de contenu signalables — voir Modules/Journal design doc).
+     *
+     * @var array<int, string>
+     */
+    public const REASONS = [
+        "Droit d'auteur",
+        'Contenu illégal',
+        'Harcèlement',
+        'Vie privée',
+        'Autre',
+    ];
+
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'reportable_type' => 'required|string|max:255',
             'reportable_id' => 'required|integer',
-            'reason' => 'required|string|max:255',
+            'reason' => ['required', 'string', 'max:255', Rule::in(self::REASONS)],
             'details' => 'nullable|string|max:1000',
         ]);
 
@@ -26,6 +41,7 @@ class ReportController extends Controller
             'Modules\\Dictionary\\Models\\Term',
             'Modules\\Directory\\Models\\Tool',
             'Modules\\Acronyms\\Models\\Acronym',
+            'Modules\\Journal\\Models\\Journal',
         ];
 
         if (!in_array($validated['reportable_type'], $allowedTypes, true)) {

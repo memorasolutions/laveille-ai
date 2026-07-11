@@ -365,6 +365,16 @@ function registerTiptapEditor() {
     }))
 }
 
+// Exposé globalement (idempotent) pour permettre un appel explicite depuis un bloc Livewire
+// @script (voir Modules/Editor/resources/views/components/tiptap-light.blade.php) : ce bloc
+// s'exécute APRÈS le chargement des @assets du même rendu, ce qui garantit l'enregistrement
+// Alpine.data('tiptapEditor', ...) AVANT qu'Alpine ne scanne un x-data injecté par un morph
+// Livewire déclenché après le chargement initial de la page (ex: bouton "+ Texte" du
+// constructeur de journal). Sans cet appel explicite, un x-data apparu via un rendu Livewire
+// tardif peut être scanné par Alpine avant que ce module @vite (chargé en <script type="module">,
+// donc asynchrone) n'ait fini de s'exécuter — Alpine ne réévalue jamais un x-data en échec.
+window.registerTiptapEditor = registerTiptapEditor
+
 // Register on Alpine — handle both cases:
 // 1. If Alpine is not yet loaded, listen for alpine:init
 // 2. If Alpine is already loaded (CDN defer loaded before this module), register directly

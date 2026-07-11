@@ -21,4 +21,5 @@ Route::middleware(['web', 'auth', EnsureIsAdmin::class])
     ->group(function () {
         Route::get('moderation', [ModerationController::class, 'index'])->name('moderation');
         Route::post('moderate', [ModerationController::class, 'moderate'])->name('moderate');
+        Route::post('reports/{report}/resolve', [ModerationController::class, 'resolveReport'])->name('reports.resolve');
     });
