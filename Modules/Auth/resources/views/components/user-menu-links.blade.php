@@ -16,6 +16,7 @@
         ['route' => 'user.contributions', 'label' => __('Mes contributions'), 'icon' => 'fa-handshake-o', 'emoji' => '📝'],
         ['route' => 'user.saved', 'label' => __('Mes sauvegardes'), 'icon' => 'fa-floppy-o', 'emoji' => '💾'],
         ['route' => 'bookmarks.index', 'label' => __('Mes favoris'), 'icon' => 'fa-bookmark', 'emoji' => '❤️'],
+        ['route' => 'journal.index', 'label' => __('Mes journaux'), 'icon' => 'fa-book', 'emoji' => '📔'],
         ['route' => 'collections.my', 'label' => __('Mes collections'), 'icon' => 'fa-folder', 'emoji' => '📁'],
         ['route' => 'shop.my-orders', 'label' => __('Mes commandes'), 'icon' => 'fa-shopping-bag', 'emoji' => '🛒'],
         ['route' => 'shorturl.user.index', 'label' => __('Mes liens courts'), 'icon' => 'fa-link', 'emoji' => '🔗'],

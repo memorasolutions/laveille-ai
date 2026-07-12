@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.104.0] - 2026-07-12
+
+### Added
+- **Refonte visuelle "accents papier discrets" de la page publique du Journal** (`show.blade.php`) : police manuscrite self-hébergée `Caveat` (poids 600, latin+latin-ext, `public/fonts/caveat/`) appliquée uniquement à la date et aux citations, jamais au corps de texte ; papier ligné très subtil en fond des blocs (`repeating-linear-gradient`, opacité ~0.045) ; coin corné discret sur les photos du gabarit Carnet photo. Génération du CSS déléguée à `mcp__hermes__model_invoke` (Qwen3-max), validée et corrigée par revue avant intégration.
+- **Migration complète des boutons du module Journal vers le composant DRY `<x-core::button>`** (4 vues) — remplace 25 boutons Bootstrap bruts par le composant tokenisé de la charte (focus AAA, variants primary/secondary/danger déjà éprouvés site-wide).
+
+### Fixed
+- **Sécurité — le superadmin pouvait éditer silencieusement le journal privé de n'importe quel utilisateur.** Le bypass global `Gate::before()` (`Modules/RolesPermissions`) accordait un accès total à toutes les policies, y compris `JournalPolicy::update()` qui n'avait volontairement aucune exception admin. Corrigé par une exclusion ciblée (ability `update` sur `Journal` uniquement) — le pouvoir de modération/suppression admin reste intact. Confirmé juridiquement pertinent par veille (Loi 25/PIPEDA/RGPD : l'édition non consentie de contenu personnel excède la finalité de modération légitime).
+- **Assignation de rôle non-atomique et `email_verified_at` jamais posé sur connexion OTP** (`Modules/Auth/MagicLinkController`), trouvés par simulation E2E : un échec partiel de `assignRole()` laissait un compte orphelin sans rôle de façon permanente ; un utilisateur connecté uniquement par code OTP était bloqué par les routes gatées `verified` alors que le code prouve déjà la possession du courriel. Les deux corrigés (transaction DB + `email_verified_at` posé sur vérification OTP réussie), 31/31 tests Auth verts.
+- **Bug de compilation Blade** : la directive `@js()` ne se compile pas correctement à l'intérieur d'un attribut de balise composant (`<x-core::button @click="...@js(...)...">`), cassait le bouton "Supprimer" de `/journaux`. Corrigé en pré-calculant via `{{ Illuminate\Support\Js::from(...) }}` (echo standard) au lieu d'imbriquer la directive.
+- **Cache-bust manquant sur `fonts.css`** (`master.blade.php`) : les visiteurs ayant déjà ce fichier en cache ne recevraient jamais une police nouvellement ajoutée (repli silencieux sur `cursive` générique). Aligné sur le pattern `?v={{ filemtime(...) }}` déjà utilisé pour `charte.css`/`components.css`.
+- 2 bugs de spécificité CSS trouvés par vérification visuelle (citation manuscrite écrasée par une règle globale du thème sur le `<p>` enfant généré par Tiptap ; couleur de la date écrasée par `.wpo-blog-single-section p`), corrigés par sélecteurs qualifiés/ciblage explicite.
+
+### Verified
+- Simulation E2E complète du module Journal (skill `/simulation`) : 4 rôles (guest, owner, other_user, admin) testés avec régression complète relancée après chaque correctif, jusqu'à un passage 100% propre sans aucune correction nécessaire. Anti-IDOR vérifié rigoureusement (URL directe, DELETE forgé, appel Livewire direct sur ressource étrangère) — tous bloqués correctement.
+
 ## [1.103.0] - 2026-07-11
 
 ### Added

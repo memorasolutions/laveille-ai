@@ -16,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Modules\Auth\Notifications\MagicLinkNotification;
 use Modules\Auth\Services\MagicLinkService;
@@ -49,15 +50,22 @@ class MagicLinkController extends Controller
 
         RateLimiter::hit($rateLimitKey, 3600);
 
-        // Auto-créer le compte si l'email n'existe pas
-        $user = User::firstOrCreate(
-            ['email' => $request->email],
-            ['name' => explode('@', $request->email)[0], 'password' => bcrypt(\Str::random(32))]
-        );
+        // Auto-créer le compte + assigner le rôle par défaut dans une transaction : une création
+        // partielle (compte créé mais assignRole() en échec) laisserait sinon un compte orphelin
+        // sans rôle de façon PERMANENTE (wasRecentlyCreated devient false dès le 2e essai, donc
+        // assignRole() ne serait plus jamais rejoué) — trouvé par la simulation E2E du 2026-07-11.
+        $user = DB::transaction(function () use ($request) {
+            $user = User::firstOrCreate(
+                ['email' => $request->email],
+                ['name' => explode('@', $request->email)[0], 'password' => bcrypt(\Str::random(32))]
+            );
 
-        if ($user->wasRecentlyCreated) {
-            $user->assignRole('user');
-        }
+            if ($user->wasRecentlyCreated) {
+                $user->assignRole('user');
+            }
+
+            return $user;
+        });
 
         $result = $this->magicLink->generate($request->email);
         $user->notify(new MagicLinkNotification($result['token']));
@@ -147,6 +155,15 @@ class MagicLinkController extends Controller
             return redirect()->route('auth.two-factor-challenge');
         }
 
+        // Saisir correctement le code à 6 chiffres reçu par courriel EST la preuve de possession
+        // de l'adresse — exiger en plus un clic sur un lien de vérification signé est redondant
+        // et bloque à tort les fonctionnalités gatées par le middleware `verified` (ex. création
+        // de journal) pour tout utilisateur connecté uniquement via OTP — trouvé par la
+        // simulation E2E du 2026-07-11.
+        if ($user->email_verified_at === null) {
+            $user->forceFill(['email_verified_at' => now()])->save();
+        }
+
         $oldSessionId = session()->getId();
         auth()->login($user, true);
 
@@ -169,15 +186,20 @@ class MagicLinkController extends Controller
     {
         $request->validate(['email' => 'required|email|max:255']);
 
-        // Auto-créer le compte si l'email n'existe pas
-        $user = User::firstOrCreate(
-            ['email' => $request->email],
-            ['name' => explode('@', $request->email)[0], 'password' => bcrypt(\Str::random(32))]
-        );
+        // Auto-créer le compte + assigner le rôle par défaut dans une transaction (voir sendLink()
+        // ci-dessus pour la raison : évite un compte créé sans rôle de façon permanente).
+        $user = DB::transaction(function () use ($request) {
+            $user = User::firstOrCreate(
+                ['email' => $request->email],
+                ['name' => explode('@', $request->email)[0], 'password' => bcrypt(\Str::random(32))]
+            );
 
-        if ($user->wasRecentlyCreated) {
-            $user->assignRole('user');
-        }
+            if ($user->wasRecentlyCreated) {
+                $user->assignRole('user');
+            }
+
+            return $user;
+        });
 
         $rateLimitKey = 'magic-link-email:'.sha1($request->email);
         if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {

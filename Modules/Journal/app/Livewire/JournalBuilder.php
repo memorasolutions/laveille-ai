@@ -157,6 +157,9 @@ class JournalBuilder extends Component
         $this->validate([
             'imageFile' => ['required', 'image', 'max:8192'],
             'imageRightsConfirmed' => ['accepted'],
+        ], attributes: [
+            'imageFile' => 'l\'image',
+            'imageRightsConfirmed' => 'la confirmation des droits',
         ]);
 
         app(JournalBlockService::class)->addImageBlock($journal, $this->imageFile, $this->imageRightsConfirmed);
@@ -209,8 +212,8 @@ class JournalBuilder extends Component
         $block = $journal->blocks()->findOrFail($blockId);
 
         $neighbor = $direction === 'up'
-            ? $journal->blocks()->where('sort_order', '<', $block->sort_order)->orderByDesc('sort_order')->first()
-            : $journal->blocks()->where('sort_order', '>', $block->sort_order)->orderBy('sort_order')->first();
+            ? $journal->blocks()->where('sort_order', '<', $block->sort_order)->reorder('sort_order', 'desc')->first()
+            : $journal->blocks()->where('sort_order', '>', $block->sort_order)->reorder('sort_order')->first();
 
         if (! $neighbor) {
             return;

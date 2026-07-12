@@ -45,7 +45,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary">Créer le journal</button>
+                        <x-core::button type="submit" variant="primary">Créer le journal</x-core::button>
                     </form>
                 </div>
             </div>

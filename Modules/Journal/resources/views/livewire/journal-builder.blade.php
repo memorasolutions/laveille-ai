@@ -49,11 +49,14 @@
             </div>
         </div>
         <div class="d-flex align-items-center gap-2 mt-3">
-            <button type="button" class="btn btn-sm btn-primary" wire:click="updateSettings">Enregistrer les réglages</button>
-            <button type="button" class="btn btn-sm {{ $isPublished ? 'btn-outline-secondary' : 'btn-success' }}" wire:click="togglePublished">
+            <x-core::button variant="primary" size="sm" wire:click="updateSettings">Enregistrer les réglages</x-core::button>
+            <x-core::button variant="{{ $isPublished ? 'secondary' : 'primary' }}" size="sm" wire:click="togglePublished">
                 {{ $isPublished ? 'Repasser en brouillon privé' : 'Publier ce journal' }}
-            </button>
-            <span class="badge {{ $isPublished ? 'text-bg-success' : 'text-bg-secondary' }}">
+            </x-core::button>
+            {{-- Style inline (tokens charte) plutôt que text-bg-success/secondary — même correctif
+                 que Modules/Journal/resources/views/index.blade.php, appliqué ici aussi (round 2 :
+                 la simulation a détecté que ce badge du constructeur avait été oublié la 1re fois). --}}
+            <span class="badge" style="background-color: {{ $isPublished ? 'var(--sys-success, #047857)' : 'var(--sys-text-muted, #6b7280)' }}; color: #fff;">
                 {{ $isPublished ? 'Publié' : 'Brouillon privé' }}
             </span>
         </div>
@@ -68,8 +71,8 @@
         @forelse ($blocks as $block)
             <div x-sort:item="{{ $block->id }}" data-sort-id="{{ $block->id }}" class="border rounded p-3 d-flex align-items-start gap-3" style="background:#fff;">
                 <div class="d-flex flex-column gap-1">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" wire:click="moveBlockUp({{ $block->id }})" aria-label="Monter ce bloc">↑</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" wire:click="moveBlockDown({{ $block->id }})" aria-label="Descendre ce bloc">↓</button>
+                    <x-core::button variant="secondary" size="sm" wire:click="moveBlockUp({{ $block->id }})" aria-label="Monter ce bloc">↑</x-core::button>
+                    <x-core::button variant="secondary" size="sm" wire:click="moveBlockDown({{ $block->id }})" aria-label="Descendre ce bloc">↓</x-core::button>
                 </div>
 
                 <div class="flex-grow-1" style="min-width:0;">
@@ -95,15 +98,15 @@
 
                 <div class="d-flex flex-column gap-1">
                     @if ($block->type === 'text')
-                        <button type="button" class="btn btn-sm btn-outline-secondary" wire:click="editTextBlock({{ $block->id }})">Éditer</button>
+                        <x-core::button variant="secondary" size="sm" wire:click="editTextBlock({{ $block->id }})">Éditer</x-core::button>
                     @endif
                     {{-- Confirmation inline à 2 temps (jamais de popup native confirm()), même pattern que Modules/Academy/CourseCategoryManager --}}
                     @if ($confirmingRemoveBlockId === $block->id)
                         <span class="small text-danger">Retirer ?</span>
-                        <button type="button" class="btn btn-sm btn-danger" wire:click="removeBlock({{ $block->id }})">Oui, retirer</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" wire:click="cancelRemoveBlock">Annuler</button>
+                        <x-core::button variant="danger" size="sm" wire:click="removeBlock({{ $block->id }})">Oui, retirer</x-core::button>
+                        <x-core::button variant="secondary" size="sm" wire:click="cancelRemoveBlock">Annuler</x-core::button>
                     @else
-                        <button type="button" class="btn btn-sm btn-outline-danger" wire:click="confirmRemoveBlock({{ $block->id }})">Retirer</button>
+                        <x-core::button variant="danger" size="sm" wire:click="confirmRemoveBlock({{ $block->id }})">Retirer</x-core::button>
                     @endif
                 </div>
             </div>
@@ -114,9 +117,9 @@
 
     {{-- Barre d'ajout de blocs --}}
     <div class="d-flex flex-wrap gap-2 mb-3">
-        <button type="button" class="btn btn-sm btn-outline-primary" wire:click="openPanel('text')">+ Texte</button>
-        <button type="button" class="btn btn-sm btn-outline-primary" wire:click="openPanel('image')">+ Image</button>
-        <button type="button" class="btn btn-sm btn-outline-primary" wire:click="openPanel('video')">+ Vidéo YouTube</button>
+        <x-core::button variant="secondary" size="sm" wire:click="openPanel('text')">+ Texte</x-core::button>
+        <x-core::button variant="secondary" size="sm" wire:click="openPanel('image')">+ Image</x-core::button>
+        <x-core::button variant="secondary" size="sm" wire:click="openPanel('video')">+ Vidéo YouTube</x-core::button>
     </div>
 
     @if ($activePanel === 'text')
@@ -131,8 +134,8 @@
             <x-editor::tiptap-light name="journalBlockHtml" :value="$textBlockHtml" placeholder="Écrivez le contenu de ce bloc..." />
             @error('textBlockHtml') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
             <div class="d-flex gap-2 mt-2">
-                <button type="button" class="btn btn-sm btn-primary" wire:click="saveTextBlock">Enregistrer le bloc</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" wire:click="closePanel">Annuler</button>
+                <x-core::button variant="primary" size="sm" wire:click="saveTextBlock">Enregistrer le bloc</x-core::button>
+                <x-core::button variant="secondary" size="sm" wire:click="closePanel">Annuler</x-core::button>
             </div>
         </div>
     @endif
@@ -148,8 +151,8 @@
             </div>
             @error('imageRightsConfirmed') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
             <div class="d-flex gap-2 mt-2">
-                <button type="button" class="btn btn-sm btn-primary" wire:click="saveImageBlock" wire:loading.attr="disabled">Ajouter l'image</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" wire:click="closePanel">Annuler</button>
+                <x-core::button variant="primary" size="sm" wire:click="saveImageBlock" wire:loading.attr="disabled">Ajouter l'image</x-core::button>
+                <x-core::button variant="secondary" size="sm" wire:click="closePanel">Annuler</x-core::button>
             </div>
         </div>
     @endif
@@ -160,8 +163,8 @@
             <input type="url" id="journal-video-url" class="form-control" wire:model="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
             @error('videoUrl') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
             <div class="d-flex gap-2 mt-2">
-                <button type="button" class="btn btn-sm btn-primary" wire:click="saveVideoBlock">Ajouter la vidéo</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" wire:click="closePanel">Annuler</button>
+                <x-core::button variant="primary" size="sm" wire:click="saveVideoBlock">Ajouter la vidéo</x-core::button>
+                <x-core::button variant="secondary" size="sm" wire:click="closePanel">Annuler</x-core::button>
             </div>
         </div>
     @endif
