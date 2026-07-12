@@ -626,6 +626,15 @@
 </section>
 @endsection
 
+@can('view_admin_panel')
+{{-- Aucune route d'édition admin pour Modules/Books actuellement (badge informatif seulement,
+     prêt à recevoir des actions le jour où une gestion admin est ajoutée). --}}
+@include('core::components.admin-bar', [
+    'label' => __('Livre admin'),
+    'model' => $book,
+])
+@endcan
+
 @push('scripts')
 <script type="application/ld+json">{!! json_encode(\Modules\Books\Services\BookSchemaService::buildGraph($book), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}</script>
 @endpush

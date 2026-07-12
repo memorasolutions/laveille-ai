@@ -462,5 +462,14 @@
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    @can('view_admin_panel')
+    {{-- Aucune route d'édition admin fonctionnelle pour un profil auteur actuellement
+         (authors.edit est un stub de scaffold nwidart non branché) - badge informatif seulement. --}}
+    @include('core::components.admin-bar', [
+        'label' => __('Auteur admin'),
+        'model' => $author,
+    ])
+    @endcan
 </body>
 </html>

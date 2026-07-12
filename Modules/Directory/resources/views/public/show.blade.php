@@ -189,6 +189,8 @@
 @endcan
 @include('core::components.admin-bar', [
     'label' => __('Outil admin'),
+    'model' => $tool,
+    'editUrl' => Route::has('admin.directory.edit') ? route('admin.directory.edit', $tool->id) : null,
     'actions' => array_filter([
         Route::has('admin.directory.edit') ? ['label' => __('Éditer'), 'icon' => 'pencil', 'url' => route('admin.directory.edit', $tool->id)] : null,
         Route::has('admin.directory.capture-screenshot') ? ['label' => __('Recapturer screenshot'), 'icon' => 'camera', 'url' => route('admin.directory.capture-screenshot', $tool->id), 'method' => 'POST', 'confirm' => __('Recapturer le screenshot ?')] : null,
@@ -198,8 +200,6 @@
         Route::has('admin.directory.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.directory.destroy', $tool->id), 'method' => 'DELETE', 'confirm' => __('Supprimer cet outil définitivement ?'), 'danger' => true] : null,
     ]),
 ])
-@include('core::components.mode-toggle', ['editUrl' => route('admin.directory.edit', $tool->id)])
-@include('core::components.admin-activity-mini', ['model' => $tool])
 @endauth
 
 @push('styles')

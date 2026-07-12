@@ -158,3 +158,12 @@
     </div>
 </section>
 @endsection
+
+@can('view_admin_panel')
+{{-- Aucune route d'édition admin pour les collections actuellement (badge informatif seulement).
+     La suppression existe (`collections.destroy`) mais réservée au propriétaire, pas exposée ici. --}}
+@include('core::components.admin-bar', [
+    'label' => __('Collection admin'),
+    'model' => $collection,
+])
+@endcan

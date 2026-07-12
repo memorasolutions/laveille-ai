@@ -101,7 +101,7 @@
     if ($ss) {
         $readText .= ' ' . $article->flattenStructuredSummary();
     }
-    $readMinutes = max(1, (int) ceil(str_word_count($readText) / 200));
+    $readMinutes = reading_time_minutes($readText);
 @endphp
 
 <article class="nw-card nw-impact-bar {{ $impactClass }}">

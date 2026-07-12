@@ -234,3 +234,16 @@
     </div>
 </section>
 @endsection
+
+{{-- Barre admin flottante : PAS de toggle Lecture/Édition ici (volontaire) - un superadmin peut
+     supprimer/modérer un journal mais ne peut plus le modifier silencieusement (correction sécurité/
+     vie privée, cf. Gate::before RolesPermissionsServiceProvider). --}}
+@can('view_admin_panel')
+@include('core::components.admin-bar', [
+    'label' => __('Journal admin'),
+    'model' => $journal,
+    'actions' => array_filter([
+        Route::has('journal.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('journal.destroy', $journal), 'method' => 'DELETE', 'confirm' => __('Supprimer ce journal ? Cette action est irréversible.'), 'danger' => true] : null,
+    ]),
+])
+@endcan

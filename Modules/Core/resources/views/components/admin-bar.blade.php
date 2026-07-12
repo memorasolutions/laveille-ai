@@ -9,16 +9,61 @@
              ['label' => 'Supprimer', 'icon' => 'trash-2', 'url' => route('admin.directory.destroy', $tool->id), 'method' => 'DELETE', 'confirm' => 'Supprimer cet outil ?', 'danger' => true],
          ],
          'label' => 'Outil admin',
+         'model' => $tool,                                              // optionnel : ajoute "Modifié il y a X"
+         'editUrl' => route('admin.directory.edit', $tool->id),         // optionnel : ajoute le toggle Lecture/Édition
      ])
+
+     $model et $editUrl fusionnent ici les anciens widgets flottants admin-activity-mini.blade.php
+     et mode-toggle.blade.php (jusqu'ici 3 widgets empilés indépendamment, cf. le commentaire
+     "sticky repoussé à 210px" de table-of-contents.blade.php - clutter déjà documenté) - 2026-07-12.
+     Gate resserrée : "Modifié il y a X" était visible @auth (n'importe quel connecté) via
+     admin-activity-mini.blade.php ; elle est désormais @can('view_admin_panel') comme le reste
+     de cette barre - resserrement volontaire (moindre privilège), assumé.
 --}}
 
 @can('view_admin_panel')
 @php
     $barLabel = $label ?? __('Admin');
     $barActions = $actions ?? [];
+    $stateActions = [];
+
+    if (isset($model) && $model?->id && class_exists(\Spatie\Activitylog\Models\Activity::class)) {
+        $lastActivity = \Spatie\Activitylog\Models\Activity::query()
+            ->where('subject_type', get_class($model))
+            ->where('subject_id', $model->id)
+            ->latest()
+            ->first();
+        if ($lastActivity) {
+            $modifiedLabel = __('Modifié') . ' ' . $lastActivity->created_at->diffForHumans();
+            if ($lastActivity->causer) {
+                $modifiedLabel .= ' · ' . $lastActivity->causer->name;
+            }
+            $stateActions[] = ['info' => true, 'label' => $modifiedLabel, 'icon' => 'file-clock'];
+        }
+    }
+
+    if (isset($editUrl)) {
+        $stateActions[] = [
+            'alpineClick' => 'editMode = !editMode',
+            'labelExpr' => "editMode ? '✏️ Édition' : '👁 Lecture'",
+            'icon' => 'pencil',
+        ];
+    }
+
+    if (!empty($stateActions)) {
+        if (!empty($barActions)) {
+            $stateActions[] = ['divider' => true];
+        }
+        $barActions = array_merge($stateActions, $barActions);
+    }
 @endphp
 
-<div class="core-admin-bar" role="toolbar" aria-label="{{ __('Outils admin') }}">
+<div class="core-admin-bar" role="toolbar" aria-label="{{ __('Outils admin') }}"
+    @if(isset($editUrl))
+        x-data="{ editMode: localStorage.getItem('laveille.edit_mode') === 'true', init() { document.body.classList.toggle('edit-mode', this.editMode); } }"
+        x-effect="localStorage.setItem('laveille.edit_mode', editMode); document.body.classList.toggle('edit-mode', editMode);"
+    @endif
+>
     <div class="core-admin-bar__inner">
         <span class="core-admin-bar__icon" aria-hidden="true">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -43,5 +88,56 @@
     .core-admin-bar__separator { width: 1px; height: 20px; background: rgba(0,0,0,0.08); border-radius: 1px; flex-shrink: 0; }
     @media (max-width: 767px) { .core-admin-bar { right: 8px; top: 72px; } .core-admin-bar__inner { padding: 6px 8px; gap: 6px; border-radius: 10px; } .core-admin-bar__label { display: none; } .core-admin-bar__icon { width: 26px; height: 26px; } }
     @media print { .core-admin-bar { display: none !important; } }
+
+    @if(isset($editUrl))
+    body.edit-mode [data-editable] {
+        outline: 2px dashed rgba(194, 65, 12, 0.45);
+        outline-offset: 4px;
+        position: relative;
+        cursor: pointer;
+    }
+    body.edit-mode [data-editable]::after {
+        content: '✏️';
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: #ffffff;
+        border: 1px solid rgba(0,0,0,0.08);
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 13px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+        z-index: 9000;
+        line-height: 1;
+    }
+    @endif
 </style>
+
+@if(isset($editUrl))
+    <script>
+        (function () {
+            var editUrl = @json($editUrl);
+            document.addEventListener('click', function (e) {
+                if (!document.body.classList.contains('edit-mode')) return;
+                var target = e.target;
+                // Ignore les clics à l'intérieur de la barre admin elle-même (badge + menu)
+                if (target.closest && target.closest('.core-admin-bar')) return;
+                while (target && (!target.getAttribute || !target.getAttribute('data-editable'))) {
+                    target = target.parentElement;
+                }
+                if (target && target.getAttribute && target.getAttribute('data-editable')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var field = target.getAttribute('data-editable');
+                    window.location = editUrl + (editUrl.indexOf('?') > -1 ? '&' : '?') + 'focus=' + encodeURIComponent(field);
+                }
+            }, true);
+        })();
+    </script>
+@endif
 @endcan

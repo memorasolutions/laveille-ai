@@ -256,9 +256,7 @@ class AuthorEditor extends Component
 
     private function computeReadingTime(): int
     {
-        $words = str_word_count(strip_tags($this->renderHtml($this->body_markdown)));
-
-        return max(1, (int) ceil($words / 200));
+        return reading_time_minutes($this->renderHtml($this->body_markdown));
     }
 
     private function computeExcerpt(): string

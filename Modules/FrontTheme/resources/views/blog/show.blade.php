@@ -148,9 +148,11 @@
     ])
 @endsection
 
-@auth
+@can('view_admin_panel')
 @include('core::components.admin-bar', [
     'label' => __('Article admin'),
+    'model' => $article,
+    'editUrl' => Route::has('admin.blog.articles.edit') ? route('admin.blog.articles.edit', $article) : null,
     'actions' => array_filter([
         Route::has('admin.blog.articles.edit') ? ['label' => __('Éditer'), 'icon' => 'pencil', 'url' => route('admin.blog.articles.edit', $article)] : null,
         Route::has('admin.blog.comments.index') ? ['label' => __('Modération commentaires'), 'icon' => 'shield', 'url' => route('admin.blog.comments.index'), 'target' => '_blank'] : null,
@@ -158,11 +160,7 @@
         Route::has('admin.blog.articles.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.blog.articles.destroy', $article), 'method' => 'DELETE', 'confirm' => __('Supprimer cet article ?'), 'danger' => true] : null,
     ]),
 ])
-@if(Route::has('admin.blog.articles.edit'))
-    @include('core::components.mode-toggle', ['editUrl' => route('admin.blog.articles.edit', $article)])
-@endif
-@include('core::components.admin-activity-mini', ['model' => $article])
-@endauth
+@endcan
 
 @section('content')
     <!-- start wpo-blog-single-section -->

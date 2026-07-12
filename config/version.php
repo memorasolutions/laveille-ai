@@ -17,6 +17,18 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.105.0 · 2026-07-12 · feat(core) consolidation des 3 widgets admin flottants (badge+menu,
+ *     toggle Lecture/Édition, "Modifié il y a X") en UN SEUL menu déroulant `admin-bar` étendu
+ *     (props `model`/`editUrl`) sur 11 pages publiques (Glossaire, Actualités, Annuaire, Acronymes,
+ *     Blog, Journal, Livres, Académie, Collections Annuaire, Outils, mini-site Auteurs) — corrige le
+ *     chevauchement visuel documenté dans table-of-contents.blade.php. Sécurité : gate "Modifié"
+ *     resserrée de @auth à @can('view_admin_panel'). fix(core) helper global `reading_time_minutes()`
+ *     centralise le calcul dupliqué à 3 endroits (News show/article-card, Authors AuthorEditor).
+ *     fix(ui) menu profil du header passait sous les widgets flottants (admin-bar, onglets Académie
+ *     sticky, clone .sticky-header) — `.wpo-site-header .header-right` créait un contexte
+ *     d'empilement local qui plafonnait son dropdown enfant (z-index:9999 inline) à 991 face aux
+ *     éléments position:fixed hors header ; z-index 991→10000 (public/themes/bloggar/sass/style.css)
+ *     + cache-bust ajouté sur style.css (absent jusqu'ici, master.blade.php).
  *   1.104.1 · 2026-07-12 · fix(ci) durcissement du pipeline de déploiement suite à l'incident P0
  *     2026-07-11 (500 en prod pour tout utilisateur connecté sur Actualités/Glossaire/Annuaire).
  *     Cause racine complète : un fichier de migration supprimé de git (commit 9502674a) contenait
@@ -954,8 +966,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 104;
-$lvPatch = 1;
+$lvMinor = 105;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

@@ -15,20 +15,18 @@
     ])
 @endsection
 
-@auth
+@can('view_admin_panel')
 @include('core::components.admin-bar', [
     'label' => __('Acronyme admin'),
+    'model' => $acronym,
+    'editUrl' => Route::has('admin.acronyms.edit') ? route('admin.acronyms.edit', $acronym->id) : null,
     'actions' => array_filter([
         Route::has('admin.acronyms.edit') ? ['label' => __('Éditer'), 'icon' => 'pencil', 'url' => route('admin.acronyms.edit', $acronym->id)] : null,
         ['divider' => true],
         Route::has('admin.acronyms.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.acronyms.destroy', $acronym->id), 'method' => 'DELETE', 'confirm' => __('Supprimer cet acronyme ?'), 'danger' => true] : null,
     ]),
 ])
-@if(Route::has('admin.acronyms.edit'))
-    @include('core::components.mode-toggle', ['editUrl' => route('admin.acronyms.edit', $acronym->id)])
-@endif
-@include('core::components.admin-activity-mini', ['model' => $acronym])
-@endauth
+@endcan
 
 {{-- Meta AEO/LLM-first 2026 : aide les crawlers IA à citer l'acronyme --}}
 @push('head')

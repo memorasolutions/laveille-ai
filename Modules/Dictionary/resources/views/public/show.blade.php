@@ -49,20 +49,18 @@
     ])
 @endsection
 
-@auth
+@can('view_admin_panel')
 @include('core::components.admin-bar', [
     'label' => __('Terme admin'),
+    'model' => $term,
+    'editUrl' => Route::has('admin.dictionary.edit') ? route('admin.dictionary.edit', $term->id) : null,
     'actions' => array_filter([
         Route::has('admin.dictionary.edit') ? ['label' => __('Éditer'), 'icon' => 'pencil', 'url' => route('admin.dictionary.edit', $term->id)] : null,
         ['divider' => true],
         Route::has('admin.dictionary.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.dictionary.destroy', $term->id), 'method' => 'DELETE', 'confirm' => __('Supprimer ce terme ?'), 'danger' => true] : null,
     ]),
 ])
-@if(Route::has('admin.dictionary.edit'))
-    @include('core::components.mode-toggle', ['editUrl' => route('admin.dictionary.edit', $term->id)])
-@endif
-@include('core::components.admin-activity-mini', ['model' => $term])
-@endauth
+@endcan
 
 {{-- Meta AEO/LLM-first 2026 : aide les crawlers IA à citer la définition --}}
 @push('head')

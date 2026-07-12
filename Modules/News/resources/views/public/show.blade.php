@@ -58,9 +58,11 @@
     ])
 @endsection
 
-@auth
+@can('view_admin_panel')
 @include('core::components.admin-bar', [
     'label' => __('Article admin'),
+    'model' => $article,
+    'editUrl' => Route::has('admin.news.articles.edit') ? route('admin.news.articles.edit', $article) : null,
     'actions' => array_filter([
         Route::has('admin.news.articles.edit') ? ['label' => __('Éditer'), 'icon' => 'pencil', 'url' => route('admin.news.articles.edit', $article)] : null,
         Route::has('admin.news.articles.edit') ? ['label' => __('Outils liés'), 'icon' => 'link', 'url' => '#nw-tools-editor'] : null,
@@ -69,10 +71,7 @@
         Route::has('admin.news.articles.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.news.articles.destroy', $article), 'method' => 'DELETE', 'confirm' => __('Supprimer cet article ?'), 'danger' => true] : null,
     ]),
 ])
-@if(Route::has('admin.news.articles.edit'))
-    @include('core::components.mode-toggle', ['editUrl' => route('admin.news.articles.edit', $article)])
-@endif
-@include('core::components.admin-activity-mini', ['model' => $article])
+@endcan
 @can('view_admin_panel')
 <button type="button" class="core-capture-fab" onclick="document.getElementById('core-capture-dialog-news').showModal()" title="Capture assistée écran" aria-label="Capture assistée écran">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
@@ -102,7 +101,6 @@
     @media print { .core-capture-fab, .core-capture-dialog { display: none !important; } }
 </style>
 @endcan
-@endauth
 
 {{-- Meta AEO/LLM-first 2026 + Schema.org NewsArticle + FAQPage --}}
 @push('head')
@@ -225,7 +223,7 @@
                         if ($ss) {
                             $readText .= ' ' . $article->flattenStructuredSummary();
                         }
-                        $readMinutes = max(1, (int) ceil(str_word_count($readText) / 200));
+                        $readMinutes = reading_time_minutes($readText);
                     @endphp
                     <div class="nw-meta-bar">
                         <span class="nw-pill">{{ $readMinutes }} min {{ __('de lecture') }}</span>

@@ -139,7 +139,7 @@
         <link href="{{ fronttheme_asset('css/odometer-theme-default.css') }}" rel="stylesheet">
         <link href="{{ fronttheme_asset('css/component.css') }}" rel="stylesheet">
     </noscript>
-    <link href="{{ fronttheme_asset('sass/style.css') }}" rel="stylesheet">
+    <link href="{{ fronttheme_asset('sass/style.css') }}?v={{ filemtime(public_path('themes/' . config('frontend.theme', 'bloggar') . '/sass/style.css')) }}" rel="stylesheet">
     <link href="{{ fronttheme_asset('css/responsive.css') }}" rel="stylesheet">
     <link rel="preload" href="/fonts/dm-sans/dm-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/plus-jakarta-sans/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>

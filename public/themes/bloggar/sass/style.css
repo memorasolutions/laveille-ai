@@ -1782,7 +1782,12 @@ a:hover {
   -webkit-box-pack: end;
       -ms-flex-pack: end;
           justify-content: flex-end;
-  z-index: 991;
+  /* z-index 991 -> 10000 (2026-07-12) : ce bloc a "position:relative" donc crée son propre
+     contexte d'empilement - son dropdown enfant (z-index:9999 inline, header.blade.php) reste
+     piégé DANS ce contexte et ne peut jamais dépasser 991 face à des éléments position:fixed
+     hors du header (admin-bar consolidé, onglets Académie sticky, clone .sticky-header du
+     script.js). Confirmé par diagnostic Playwright réel (getComputedStyle des stacking contexts). */
+  z-index: 10000;
   position: relative;
   -webkit-box-align: center;
       -ms-flex-align: center;

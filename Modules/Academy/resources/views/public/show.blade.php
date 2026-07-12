@@ -416,3 +416,14 @@
     </div>
 </section>
 @endsection
+
+@can('view_admin_panel')
+@include('core::components.admin-bar', [
+    'label' => __('Cours admin'),
+    'model' => $course,
+    'editUrl' => Route::has('academy.courses.manage') ? route('academy.courses.manage', $course->slug) : null,
+    'actions' => array_filter([
+        Route::has('academy.courses.manage') ? ['label' => __('Gérer le cours'), 'icon' => 'settings', 'url' => route('academy.courses.manage', $course->slug)] : null,
+    ]),
+])
+@endcan

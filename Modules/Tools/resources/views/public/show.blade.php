@@ -38,3 +38,15 @@
         </div>
     </section>
 @endsection
+
+@can('view_admin_panel')
+@include('core::components.admin-bar', [
+    'label' => __('Outil admin'),
+    'model' => $tool,
+    'editUrl' => Route::has('admin.tools.edit') ? route('admin.tools.edit', $tool) : null,
+    'actions' => array_filter([
+        Route::has('admin.tools.edit') ? ['label' => __('Éditer'), 'icon' => 'pencil', 'url' => route('admin.tools.edit', $tool)] : null,
+        Route::has('admin.tools.toggle') ? ['label' => $tool->is_active ? __('Désactiver') : __('Activer'), 'icon' => 'power', 'url' => route('admin.tools.toggle', $tool), 'method' => 'POST', 'confirm' => $tool->is_active ? __('Désactiver cet outil ?') : __('Activer cet outil ?')] : null,
+    ]),
+])
+@endcan

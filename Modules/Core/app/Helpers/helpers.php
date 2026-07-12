@@ -123,3 +123,22 @@ if (! function_exists('safe_excerpt')) {
         return Str::of($truncated)->append($end)->toString();
     }
 }
+
+if (! function_exists('reading_time_minutes')) {
+    /**
+     * Temps de lecture estimé (minutes), 200 mots/minute (référence éditoriale standard).
+     * Formule dupliquée à 3 endroits (News show/article-card, Authors AuthorEditor) avant
+     * cette centralisation - 2026-07-12.
+     *
+     * @param  string|null  $text  HTML ou texte brut (les balises sont retirées avant le compte).
+     * @return int  Toujours ≥ 1.
+     */
+    function reading_time_minutes(?string $text): int
+    {
+        if ($text === null || $text === '') {
+            return 1;
+        }
+
+        return max(1, (int) ceil(str_word_count(strip_tags($text)) / 200));
+    }
+}

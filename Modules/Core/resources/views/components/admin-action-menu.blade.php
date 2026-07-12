@@ -38,6 +38,24 @@
         @foreach($actions as $action)
             @if(isset($action['divider']) && $action['divider'])
                 <div style="border-top: 1px solid #f3f4f6; margin: 4px 0;"></div>
+            @elseif(isset($action['info']))
+                {{-- Ligne informative non-cliquable (ex. "Modifié il y a X") --}}
+                <div style="display: flex; align-items: center; gap: 8px; padding: 8px 14px; font-size: 12px; font-style: italic; color: #6B7280;">
+                    @if(isset($action['icon']))<i data-lucide="{{ $action['icon'] }}" style="width: 14px; height: 14px;"></i>@endif
+                    {{ $action['label'] }}
+                </div>
+            @elseif(isset($action['alpineClick']))
+                {{-- Bouton avec expression Alpine brute (ex. toggle Lecture/Édition) - le menu ne se
+                     referme pas automatiquement, contrairement aux autres items, pour laisser
+                     l'utilisateur voir l'état changer avant de fermer lui-même. --}}
+                <button type="button"
+                        @click="{{ $action['alpineClick'] }}"
+                        style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 14px; border: none; background: none; cursor: pointer; font-size: 13px; color: #374151; text-align: left;"
+                        onmouseover="this.style.background='#F9FAFB'"
+                        onmouseout="this.style.background='transparent'">
+                    @if(isset($action['icon']))<i data-lucide="{{ $action['icon'] }}" style="width: 14px; height: 14px;"></i>@endif
+                    @if(isset($action['labelExpr']))<span x-text="{{ $action['labelExpr'] }}"></span>@else{{ $action['label'] }}@endif
+                </button>
             @elseif(isset($action['wireClick']))
                 <button type="button"
                         @if(isset($action['wireConfirm']))
