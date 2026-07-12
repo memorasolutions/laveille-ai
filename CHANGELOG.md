@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.105.1] - 2026-07-12
+
+### Fixed
+- **Bandeau `.wpo-breadcumb-area` (titre de page + fil d'Ariane, en haut de presque toutes les pages du site) prenait trop de place verticale.** `min-height: 400px` → `250px` (aligné sur la valeur déjà utilisée en mobile via media query `<767px`, désormais redondante et retirée). Vérifié visuellement via Playwright sur 2 gabarits (`/glossaire`, `/academie`) × 3 résolutions (desktop 1440px, tablette 768px, mobile 390px) : titre et fil d'Ariane restent bien centrés, aucun chevauchement avec le contenu qui suit.
+
 ## [1.105.0] - 2026-07-12
 
 ### Added

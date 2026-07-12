@@ -699,7 +699,7 @@ a:hover {
 
 .wpo-breadcumb-area {
   background: url(../images/page-title.jpg) no-repeat center top/cover;
-  min-height: 400px;
+  min-height: 250px;
   position: relative;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -712,12 +712,6 @@ a:hover {
       -ms-flex-direction: column;
           flex-direction: column;
   z-index: 1;
-}
-
-@media (max-width: 767px) {
-  .wpo-breadcumb-area {
-    min-height: 250px;
-  }
 }
 
 .wpo-breadcumb-area:before {

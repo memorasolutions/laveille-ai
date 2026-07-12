@@ -17,6 +17,11 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.105.1 · 2026-07-12 · fix(ui) bandeau .wpo-breadcumb-area (titre de page + fil d'Ariane, en
+ *     haut de presque toutes les pages du site) prenait trop de place verticale : min-height
+ *     400px → 250px (aligné sur la valeur déjà utilisée en mobile, media query <767px désormais
+ *     redondante et retirée). Vérifié visuellement Playwright sur 2 gabarits × 3 résolutions
+ *     (desktop/tablette/mobile) : titre et fil d'Ariane toujours bien centrés, aucun chevauchement.
  *   1.105.0 · 2026-07-12 · feat(core) consolidation des 3 widgets admin flottants (badge+menu,
  *     toggle Lecture/Édition, "Modifié il y a X") en UN SEUL menu déroulant `admin-bar` étendu
  *     (props `model`/`editUrl`) sur 11 pages publiques (Glossaire, Actualités, Annuaire, Acronymes,
@@ -967,7 +972,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 105;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,
