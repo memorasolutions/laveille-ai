@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.104.1] - 2026-07-12
+
+### Fixed
+- **Incident P0 production (2026-07-11) : 500 pour tout utilisateur connecté sur Actualités/Glossaire/Annuaire, cause racine complète et durcissement du pipeline CI.** Un fichier de migration (`Modules/News/database/migrations/2026_07_10_160000_backfill_auto_tool_detection.php`) avait été supprimé du dépôt git (commit `9502674a`) mais était resté physiquement présent en production, car le workflow `.github/workflows/deploy.yml` déploie via `rsync` sans le flag `--delete` : les fichiers retirés de git n'étaient jamais retirés du serveur. Ce fichier zombie contenait un `chunkById()` non borné qui faisait systématiquement timeout l'étape `php artisan migrate --force` à chaque déploiement — mais le `|| true` de cette étape (ajouté 2026-05-03, fix L15) avalait cet échec silencieusement depuis l'origine, empêchant TOUTES les migrations postérieures de s'exécuter, dont les 3 migrations du nouveau module Journal (2026-07-11) et la migration `add_review_tracking_to_reports_table` : le composant "+ Ajouter à mon journal", intégré sur ces trois familles de pages publiques, requêtait alors une table `journals` inexistante.
+- Correctifs déjà appliqués directement en production (hors dépôt) avant ce commit : fichier de migration zombie neutralisé en no-op via cPanel, puis `php artisan migrate --force` rejoué manuellement avec succès (3 migrations Journal + 1 migration reports confirmées `DONE`).
+- Durcissement `.github/workflows/deploy.yml` : retrait du `|| true` sur `php artisan migrate --force` (tout échec de migration fait désormais échouer le job CI visiblement, au lieu d'être masqué) + ajout d'un `timeout 300` (5 min) pour continuer à borner le risque qu'un futur backfill non borné bloque indéfiniment le pipeline, sans pour autant masquer l'échec. `--delete`/`--delete-after` sur rsync délibérément **NON activé** après audit : `public/fonts/` (police self-hébergée Caveat, v1.104.0) est présent en production, gitignoré localement et absent de la liste `--exclude` du rsync — l'activer aurait supprimé les polices en prod au prochain déploiement. Risque documenté en commentaire dans `deploy.yml` avec la marche à suivre pour l'activer un jour en sécurité (exclusions complémentaires + `--dry-run` obligatoire).
+
 ## [1.104.0] - 2026-07-12
 
 ### Added

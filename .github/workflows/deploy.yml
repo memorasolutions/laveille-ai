@@ -23,6 +23,18 @@ jobs:
           ssh-keyscan -H server.memora.pro >> ~/.ssh/known_hosts
 
       - name: Deploy via rsync
+        # NOTE (incident P0 2026-07-11) : ce rsync n'a volontairement PAS de --delete/--delete-after.
+        #   Un fichier de migration supprimé de git (commit 9502674a) est resté physiquement en
+        #   prod et a bloqué migrate --force (cf. étape suivante) — symptôme direct de cette
+        #   absence de synchronisation des suppressions. Vérifié le 2026-07-11 si --delete pouvait
+        #   être activé sans risque : NON, car public/fonts/ (police Caveat self-hébergée,
+        #   v1.104.0) est présent en prod, gitignoré localement (.gitignore: `/public/fonts`),
+        #   et N'EST PAS dans la liste --exclude ci-dessous → --delete le supprimerait au
+        #   prochain déploiement (police cassée site-wide). Idem pour d'éventuels autres chemins
+        #   gitignorés-mais-nécessaires-en-prod (public/hot, public/storage). Pour activer
+        #   --delete un jour : ajouter --exclude='public/fonts/' --exclude='public/hot'
+        #   --exclude='public/storage' (+ auditer tout autre chemin gitignore non exclu ici) et
+        #   tester d'abord avec `rsync --delete --dry-run` en observant la liste de suppression.
         run: |
           rsync -azP \
             --exclude='.git/' \
@@ -57,11 +69,20 @@ jobs:
             php composer.phar install --no-dev --optimize-autoloader --no-interaction --no-scripts" || true
 
       - name: Run pending migrations (additive only, --force pour skip prompt prod)
+        # ACTION: retrait du `|| true`, ajout d'un timeout 300s autour de `migrate --force`.
+        # RAISON (incident P0 2026-07-11) : un fichier de migration devenu zombie (supprimé de
+        #   git au commit 9502674a mais jamais retiré du serveur, faute de --delete sur rsync
+        #   ci-dessus) contenait un chunkById() non borné qui a fait timeout cette étape à
+        #   CHAQUE déploiement depuis son introduction. Le `|| true` original (ajouté 2026-05-03,
+        #   fix L15, pour ne jamais faire échouer tout le pipeline sur une migration) a masqué
+        #   cet échec silencieusement, empêchant TOUTES les migrations postérieures de s'exécuter
+        #   — dont les 3 migrations du module Journal (2026-07-11) — et causant une 500 en prod
+        #   pour tout utilisateur connecté (table `journals` inexistante). `timeout 300` reprend
+        #   l'intention originale du `|| true` (ne pas laisser un futur backfill non borné
+        #   bloquer indéfiniment le pipeline) SANS masquer l'échec : au-delà de 5 min ou sur
+        #   toute autre erreur, `migrate --force` fait maintenant échouer le job CI visiblement.
         run: |
-          # Pattern fix L15 LucidNest 2026-05-03 : sans cette étape, migrations s'accumulent
-          # silencieusement en pending → bombe à retardement quand l'app touche les nouvelles
-          # columns/tables. ADDITIVE only, --force = skip prompt prod, idempotent.
-          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan migrate --force" || true
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && timeout 300 php artisan migrate --force"
 
       - name: Clear caches on server
         run: |

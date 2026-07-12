@@ -17,6 +17,20 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.104.1 · 2026-07-12 · fix(ci) durcissement du pipeline de déploiement suite à l'incident P0
+ *     2026-07-11 (500 en prod pour tout utilisateur connecté sur Actualités/Glossaire/Annuaire).
+ *     Cause racine complète : un fichier de migration supprimé de git (commit 9502674a) contenait
+ *     un chunkById() non borné et est resté physiquement en prod car le rsync du déploiement n'a
+ *     jamais eu --delete ; ce fichier zombie a fait timeout `migrate --force` à chaque déploiement
+ *     depuis, mais le `|| true` de cette étape (ajouté 2026-05-03) a avalé l'échec silencieusement,
+ *     empêchant TOUTES les migrations postérieures (dont les 3 migrations du module Journal,
+ *     2026-07-11) de s'exécuter. Fix : retrait du `|| true` sur `migrate --force` (+ `timeout 300`
+ *     pour borner un futur backfill non borné sans masquer l'échec) — tout échec de migration fait
+ *     désormais échouer le job CI visiblement. --delete rsync délibérément NON activé (audité :
+ *     public/fonts/ est gitignoré-mais-nécessaire-en-prod et non exclu du rsync, --delete le
+ *     supprimerait) — documenté en commentaire dans deploy.yml pour activation future sécurisée.
+ *     Correctifs déjà appliqués en prod (fichier zombie neutralisé + migrate --force rejoué avec
+ *     succès) avant ce durcissement du pipeline.
  *   1.104.0 · 2026-07-12 · Journal personnel : simulation E2E complète 4 rôles (guest/owner/
  *     other_user/admin, régression zéro), fix sécurité Gate::before (superadmin ne peut plus
  *     éditer silencieusement le journal d'autrui - Loi 25/PIPEDA/RGPD), fix assignation rôle
@@ -941,7 +955,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 104;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,
