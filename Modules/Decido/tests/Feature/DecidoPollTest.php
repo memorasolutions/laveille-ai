@@ -214,6 +214,30 @@ test('votant anonyme peut voir un sondage ouvert', function (): void {
     $this->get(route('decido.vote.show', ['slug' => $poll->public_id]))->assertStatus(200);
 });
 
+test('les pages privées Décido (vote, résultats, Mes sondages, création) déclarent page_noindex', function (): void {
+    // Round 10 (skill /100) : aucune vue Décido ne déclarait @section('page_noindex') - une fois
+    // le module public (DECIDO_UNDER_CONSTRUCTION=false), les pages contenant des données privées
+    // (pseudonymes/choix de vote) auraient été indexables par défaut. Preuve HTTP réelle : la
+    // balise <meta name="robots"> ne passe en "noindex, follow" que si la section est déclarée
+    // (Modules/FrontTheme/resources/views/layouts/master.blade.php:13, View::hasSection()).
+    config()->set('decido.under_construction', false);
+    config()->set('app.noindex', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-noindex', 'type' => 'classic', 'vote_mode' => 'single_choice']);
+    PollOption::factory()->create(['poll_id' => $poll->id]);
+
+    $voteHtml = $this->get(route('decido.vote.show', ['slug' => $poll->public_id]))->getContent();
+    $this->assertStringContainsString('name="robots" content="noindex', $voteHtml);
+
+    $resultsHtml = $this->get(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-noindex']))->getContent();
+    $this->assertStringContainsString('name="robots" content="noindex', $resultsHtml);
+
+    $indexHtml = $this->actingAs($this->superadmin)->get(route('decido.index'))->getContent();
+    $this->assertStringContainsString('name="robots" content="noindex', $indexHtml);
+
+    $createHtml = $this->actingAs($this->superadmin)->get(route('decido.create'))->getContent();
+    $this->assertStringContainsString('name="robots" content="noindex', $createHtml);
+});
+
 test('votant anonyme peut voter (yes_no_maybe)', function (): void {
     config()->set('decido.under_construction', false);
     $poll = decidoCreatePoll(['type' => 'date', 'vote_mode' => 'yes_no_maybe']);

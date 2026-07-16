@@ -1,6 +1,9 @@
 {{-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca --}}
 @extends(fronttheme_layout())
 @section('title', "Résultats - {$poll->title} · " . config('app.name'))
+{{-- Round 10 (skill /100) : page de gestion protégée par un jeton devinable dans l'URL, jamais
+     destinée à l'indexation - expose les pseudonymes et résultats complets des votants. --}}
+@section('page_noindex', true)
 @section('meta_description', "Résultats du sondage Décido « {$poll->title} » : visualise les votes, clôture le sondage et exporte les données.")
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Résultats du sondage'])

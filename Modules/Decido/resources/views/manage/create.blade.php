@@ -1,6 +1,9 @@
 {{-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca --}}
 @extends(fronttheme_layout())
 @section('title', 'Créer un sondage Décido · ' . config('app.name'))
+{{-- Round 10 (skill /100) : page privée (auth requis), jamais destinée à l'indexation - même
+     politique noindex que le reste des vues privées Décido. --}}
+@section('page_noindex', true)
 @section('meta_description', "Crée un sondage Décido pour trouver le bon moment ou le bon choix avec ton équipe, ta famille ou ta communauté.")
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Créer un sondage Décido'])

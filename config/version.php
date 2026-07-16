@@ -17,6 +17,18 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.9 · 2026-07-16 · feat(tools) Décido listé sur /outils, marqué "en construction"
+ *     (superadmin-only) + fix(decido) round 10 passe adversariale /100 (SEO) : (1) migration
+ *     réversible ajoute l'entrée "decido" à la table tools (is_under_construction=true, pattern
+ *     updateOrInsert identique à Minuteur visuel/Anonymiseur) - le carton apparaît sur /outils
+ *     pour tous avec le badge "Bientôt", mais le lien pointe directement vers /decido (module
+ *     dédié avec ses propres routes, pas une vue générique tools::public.tools.{slug} - aucune
+ *     colonne external_url n'existe dans le schéma tools). Accès réel déjà gaté par
+ *     DecidoUnderConstruction (superadmin uniquement, testé). (2) aucune vue privée Décido
+ *     (vote/résultats/création/Mes sondages) ne déclarait @section('page_noindex') - une fois le
+ *     module rendu public, les pages contenant pseudonymes et choix de vote auraient été
+ *     indexables par défaut. Ajouté aux 4 vues + preuve HTTP réelle (balise meta robots).
+ *     39/39 tests Pest verts.
  *   1.107.8 · 2026-07-16 · fix(decido) round 9 passe adversariale /100 (angle migrations/rollback
  *     + données limites) : (1) aucun pliage de ligne conforme RFC 5545 §3.1 (limite 75 octets)
  *     dans l'export ICS - un titre long/unicode produisait une ligne SUMMARY de plusieurs
@@ -1119,7 +1131,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 8;
+$lvPatch = 9;
 
 return [
     'major' => $lvMajor,

@@ -1,6 +1,9 @@
 {{-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca --}}
 @extends(fronttheme_layout())
 @section('title', 'Mes sondages Décido · ' . config('app.name'))
+{{-- Round 10 (skill /100) : page privée (auth requis, liste des sondages d'un compte), jamais
+     destinée à l'indexation - même politique noindex que le reste des vues privées Décido. --}}
+@section('page_noindex', true)
 @section('meta_description', "Gère tes sondages Décido : crée, consulte et exporte les résultats de tes consultations collectives.")
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Mes sondages Décido'])

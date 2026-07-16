@@ -36,7 +36,10 @@
                 ? asset($t->featured_image) . '?v=' . filemtime(public_path($t->featured_image))
                 : null,
             'icon' => $t->icon ?? '🔧',
-            'show_url' => route('tools.show', $t->slug),
+            // #1092 : Décido a son propre module/routes (/decido), pas une vue générique
+            // tools::public.tools.{slug} - même exception que sudoku/avatar/motdle/qt dans
+            // routes/web.php. Le gate superadmin réel reste DecidoUnderConstruction.
+            'show_url' => $t->slug === 'decido' ? route('decido.index') : route('tools.show', $t->slug),
             'under_construction' => (bool) ($t->is_under_construction ?? false),
             'trending' => $isTrending,
             'new' => $isNew,

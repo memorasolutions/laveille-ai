@@ -1,6 +1,10 @@
 {{-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca --}}
 @extends(fronttheme_layout())
 @section('title', "{$poll->title} · " . config('app.name'))
+{{-- Round 10 (skill /100) : page privée partagée par lien, jamais destinée à l'indexation - un
+     sondage devenu public (DECIDO_UNDER_CONSTRUCTION=false) exposerait sinon les pseudonymes et
+     choix de vote dans les résultats de recherche. --}}
+@section('page_noindex', true)
 @section('meta_description', "Participe au sondage Décido « {$poll->title} » pour aider à trouver le bon moment ou le bon choix.")
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $poll->title])

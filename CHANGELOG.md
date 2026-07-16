@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.9] - 2026-07-16
+
+### Added
+- **Décido listé sur `/outils`, marqué « En construction ».** Migration réversible `2026_07_16_120000_seed_decido_tool_entry.php` ajoute l'entrée `decido` à la table `tools` (`is_under_construction=true`, pattern `updateOrInsert` identique à Minuteur visuel/Anonymiseur). Le carton apparaît pour tous les visiteurs sur `/outils` avec le badge « Bientôt », mais son lien pointe directement vers `/decido` (module dédié avec ses propres routes/contrôleurs — aucune colonne `external_url` n'existe dans le schéma `tools`, contrairement aux outils à vue générique). L'accès réel reste entièrement gouverné par le middleware `DecidoUnderConstruction` déjà en place (superadmin uniquement, testé) : un invité qui clique est redirigé vers la connexion, un utilisateur connecté non-superadmin reçoit 503.
+
+### Fixed
+- **Décido — pages privées indexables une fois le module public.** Aucune vue Décido (`vote.blade.php`, `results.blade.php`, `create.blade.php`, `manage/index.blade.php`) ne déclarait `@section('page_noindex', true)` — une fois `DECIDO_UNDER_CONSTRUCTION=false`, les pages contenant pseudonymes et choix de vote seraient devenues indexables par défaut. Ajouté aux 4 vues, avec preuve HTTP réelle (présence de la balise `<meta name="robots" content="noindex">`).
+
+Trouvés par une passe adversariale indépendante (skill `/100`, round 10, angle SEO/confidentialité). 39/39 tests Pest verts.
+
 ## [1.107.8] - 2026-07-16
 
 ### Fixed
