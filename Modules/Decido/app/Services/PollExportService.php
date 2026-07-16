@@ -55,8 +55,12 @@ class PollExportService
 
         $uid = Str::uuid()->toString().'@decido.laveille.ai';
         $dtstamp = now()->utc()->format('Ymd\THis\Z');
-        $dtstart = $finalOption->starts_at->utc()->format('Ymd\THis\Z');
-        $dtend = $finalOption->ends_at->utc()->format('Ymd\THis\Z');
+        // starts_at/ends_at sont stockés en UTC brut, mais config('app.timezone') = America/Toronto
+        // fait que le cast Eloquent datetime réinterprète à tort la valeur comme déjà en heure de
+        // Québec sans conversion : reparser explicitement la valeur brute comme UTC est requis
+        // (même cause racine que le fix results.blade.php v1.107.0).
+        $dtstart = \Carbon\Carbon::parse($finalOption->starts_at->format('Y-m-d H:i:s'), 'UTC')->format('Ymd\THis\Z');
+        $dtend = \Carbon\Carbon::parse($finalOption->ends_at->format('Y-m-d H:i:s'), 'UTC')->format('Ymd\THis\Z');
         $summary = $this->escapeIcsText($poll->title);
         $description = $this->escapeIcsText($poll->description ?? '');
 

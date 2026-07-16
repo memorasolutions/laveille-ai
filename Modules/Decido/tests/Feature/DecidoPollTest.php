@@ -318,6 +318,29 @@ test('export ICS disponible après clôture avec créneau final', function (): v
     $this->assertStringContainsString('text/calendar', $response->headers->get('Content-Type'));
 });
 
+test('le DTSTART de l’export ICS reflète l’heure UTC réelle, pas un fuseau mal interprété', function (): void {
+    // Reproduit le stockage réel de SlotGenerationService : starts_at/ends_at écrits en UTC
+    // brut. config('app.timezone') = America/Toronto fait que le cast Eloquent datetime, à la
+    // relecture depuis la DB (d'où le fresh() ci-dessous, indispensable pour déclencher le bug),
+    // réinterprète cette valeur comme si elle était déjà en heure de Québec sans la convertir.
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-ics-tz', 'type' => 'date', 'status' => 'closed']);
+    $option = PollOption::factory()->create([
+        'poll_id' => $poll->id,
+        'starts_at' => \Carbon\Carbon::create(2026, 8, 1, 13, 0, 0, 'UTC'),
+        'ends_at' => \Carbon\Carbon::create(2026, 8, 1, 14, 0, 0, 'UTC'),
+    ]);
+    $poll->final_option_id = $option->id;
+    $poll->save();
+    $poll = $poll->fresh(['options']);
+
+    $response = $this->get(route('decido.export.ics', ['poll' => $poll->public_id, 'adminToken' => 'jeton-ics-tz']));
+
+    $response->assertStatus(200);
+    $this->assertStringContainsString('DTSTART:20260801T130000Z', $response->getContent());
+    $this->assertStringContainsString('DTEND:20260801T140000Z', $response->getContent());
+});
+
 // ── Clôture ───────────────────────────────────────────────────────────────
 
 test('clôturer un sondage avec un créneau final fonctionne', function (): void {
