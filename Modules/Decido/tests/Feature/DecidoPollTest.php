@@ -272,6 +272,105 @@ test('soumettre deux options classiques au libellé identique est rejeté (disti
     expect(Poll::where('title', 'Sondage option dupliquée')->exists())->toBeFalse();
 });
 
+// ── Round 20 (skill /100) : contournement de `distinct` par variation de format ────────────
+
+test('deux dates candidates dans des formats DIFFÉRENTS représentant le MÊME jour sont rejetées (contournement de distinct)', function (): void {
+    // Round 20 (skill /100) : la règle Laravel `distinct` compare des CHAÎNES EXACTES, pas des
+    // dates calendaires. Avant ce fix, `candidate_dates.*` portait la règle générique `date`
+    // (accepte tout ce que strtotime() reconnaît) au lieu de `date_format:Y-m-d`. Preuve réelle
+    // AVANT le fix (requête HTTP réelle rejouée pendant cet audit) : POST avec
+    // candidate_dates=['2027-03-14', '2027-3-14'] (même jour calendaire, deux formats
+    // différents - le second sans zéro de tête sur le mois) passait `distinct` intact (ce sont
+    // deux chaînes différentes en octets) puis SlotGenerationService::generateSlots() ->
+    // Carbon::createFromFormat('Y-m-d H:i', ...) parsait les DEUX chaînes vers exactement le
+    // même instant UTC - créant 4 PollOption (2 créneaux x 2 dates "différentes") avec
+    // starts_at/ends_at strictement identiques deux à deux, recréant exactement le bug de
+    // scission de votes du round 11 par simple changement de format plutôt que par répétition
+    // littérale. Le <input type="date"> du formulaire (create.blade.php) soumet TOUJOURS le
+    // format canonique Y-m-d (spec HTML5) - ce durcissement ne restreint donc aucun usage
+    // légitime, seulement les requêtes forgées hors formulaire.
+    config()->set('decido.under_construction', false);
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage date format contourné',
+        'type' => 'date',
+        'timezone' => 'America/Toronto',
+        'duration_minutes' => 30,
+        'range_start_time' => '09:00',
+        'range_end_time' => '10:00',
+        'step_minutes' => 30,
+        'candidate_dates' => ['2027-03-14', '2027-3-14'],
+    ]);
+
+    $response->assertSessionHasErrors('candidate_dates.1');
+    expect(Poll::where('title', 'Sondage date format contourné')->exists())->toBeFalse();
+});
+
+test('deux options classiques qui ne diffèrent que par la casse sont rejetées (contournement de distinct)', function (): void {
+    // Round 20 (skill /100) : même famille de contournement que le test précédent, appliquée aux
+    // options texte du type classique. Preuve réelle AVANT le fix : POST avec
+    // options=['Pizza', 'pizza'] passait `distinct` (chaînes différentes en octets) et créait
+    // bien 2 PollOption distinctes ("Pizza" et "pizza"), visuellement quasi-identiques pour un
+    // votant - la même scission silencieuse de votes que le round 11, contournée via la casse
+    // plutôt que la répétition exacte. Corrigé par Modules\Decido\Rules\DistinctNormalized,
+    // ajoutée à la règle `options` (niveau tableau complet, nécessaire pour comparer chaque
+    // élément à tous les autres).
+    config()->set('decido.under_construction', false);
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage option casse contournée',
+        'type' => 'classic',
+        'timezone' => 'America/Toronto',
+        'vote_mode' => 'single_choice',
+        'options' => ['Pizza', 'pizza'],
+    ]);
+
+    $response->assertSessionHasErrors('options');
+    expect(Poll::where('title', 'Sondage option casse contournée')->exists())->toBeFalse();
+});
+
+test('deux options classiques qui ne diffèrent que par des espaces internes multiples sont rejetées (contournement de distinct)', function (): void {
+    // Round 20 (skill /100) : troisième volet du même contournement - un navigateur affiche
+    // "Pizza  4 fromages" (deux espaces) et "Pizza 4 fromages" (un espace) de façon strictement
+    // identique (collapse HTML des espaces multiples), rendant les deux options indiscernables
+    // pour un votant tout en étant deux chaînes différentes pour `distinct`. Preuve réelle AVANT
+    // le fix : cette requête créait bien 2 PollOption distinctes.
+    config()->set('decido.under_construction', false);
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage option espaces contournés',
+        'type' => 'classic',
+        'timezone' => 'America/Toronto',
+        'vote_mode' => 'single_choice',
+        'options' => ['Pizza 4 fromages', 'Pizza  4 fromages'],
+    ]);
+
+    $response->assertSessionHasErrors('options');
+    expect(Poll::where('title', 'Sondage option espaces contournés')->exists())->toBeFalse();
+});
+
+test('des options réellement distinctes (mots différents, accents différents) ne déclenchent pas de faux positif DistinctNormalized', function (): void {
+    // Contrôle négatif indispensable : DistinctNormalized ne doit PAS confondre des options qui
+    // sont légitimement différentes. "Café" et "the" ne partagent aucune racine ; "Pizza" et
+    // "Sushi" non plus. La normalisation (mb_strtolower + collapse des espaces) ne touche PAS
+    // aux accents (Café ≠ cafe après normalisation, seul un cas de variation Unicode NFC/NFD -
+    // hors périmètre de ce round - pourrait les confondre), donc ce test prouve que le
+    // correctif reste chirurgical et ne bloque aucun sondage légitime à options variées.
+    config()->set('decido.under_construction', false);
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage options réellement distinctes',
+        'type' => 'classic',
+        'timezone' => 'America/Toronto',
+        'vote_mode' => 'single_choice',
+        'options' => ['Café', 'Thé', 'Pizza', 'Sushi'],
+    ]);
+
+    $poll = Poll::where('title', 'Sondage options réellement distinctes')->first();
+    expect($poll)->not->toBeNull();
+    $this->assertSame(4, $poll->options()->count());
+});
+
 // ── Vote public ─────────────────────────────────────────────────────────────
 
 test('votant anonyme peut voir un sondage ouvert', function (): void {

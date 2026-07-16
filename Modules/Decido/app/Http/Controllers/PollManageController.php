@@ -18,6 +18,7 @@ use InvalidArgumentException;
 use Modules\Decido\Enums\PollType;
 use Modules\Decido\Enums\VoteMode;
 use Modules\Decido\Models\Poll;
+use Modules\Decido\Rules\DistinctNormalized;
 use Modules\Decido\Services\SlotGenerationService;
 
 class PollManageController extends Controller
@@ -71,9 +72,29 @@ class PollManageController extends Controller
             // starts_at/ends_at), créés comme deux PollOption distinctes. Les votants qui cliquaient
             // l'une ou l'autre carte voyaient leurs votes silencieusement scindés entre les deux
             // lignes dans les résultats, faussant le décompte sans jamais remonter d'erreur.
-            'candidate_dates.*' => $isDateType ? ['date', 'after_or_equal:today', 'distinct'] : ['nullable'],
+            // 'date_format:Y-m-d' (round 20, skill /100, remplace l'ancienne règle 'date') : `distinct`
+            // compare des CHAÎNES EXACTES, pas des dates calendaires - la règle Laravel générique `date`
+            // acceptait n'importe quel format reconnu par strtotime() ("2027-03-14", "2027-3-14",
+            // "2027-03-14T00:00:00"...). Deux dates soumises dans des formats DIFFÉRENTS mais
+            // représentant le MÊME jour ("2027-03-14" et "2027-3-14") passaient donc `distinct` (chaînes
+            // différentes) tout en étant ensuite parsées IDENTIQUEMENT par
+            // SlotGenerationService::generateSlots() -> Carbon::createFromFormat('Y-m-d H:i', ...) -
+            // recréant exactement le bug du round 11 (deux jeux de créneaux strictement identiques,
+            // votes scindés) sans jamais déclencher `distinct`. Preuve réelle avant ce fix : POST avec
+            // candidate_dates=['2027-03-14','2027-3-14'] créait 4 PollOption (2 créneaux x 2 dates
+            // identiques) au lieu de 2, avec starts_at/ends_at rigoureusement identiques deux à deux.
+            // Le <input type="date"> du formulaire (create.blade.php) soumet TOUJOURS le format canonique
+            // Y-m-d (spec HTML5) - cette règle ne restreint donc aucun usage légitime, seulement les
+            // requêtes forgées hors formulaire.
+            'candidate_dates.*' => $isDateType ? ['date_format:Y-m-d', 'after_or_equal:today', 'distinct'] : ['nullable'],
             'vote_mode' => $isDateType ? ['nullable'] : ['required', 'in:single_choice,approval'],
-            'options' => $isDateType ? ['nullable'] : ['required', 'array', 'min:2', 'max:20'],
+            // new DistinctNormalized (round 20, skill /100) : complète 'distinct' ci-dessous - voir
+            // Modules/Decido/app/Rules/DistinctNormalized.php pour le détail. 'distinct' seul ne détecte
+            // que l'égalité de chaîne EXACTE ; deux libellés qui ne diffèrent que par la casse
+            // ("Pizza"/"pizza") ou des espaces internes multiples ("Pizza 4 fromages"/"Pizza  4 fromages")
+            // le contournaient tout en créant 2 PollOption visuellement indiscernables pour un votant,
+            // recréant le bug de scission de votes du round 11 par un simple changement de format.
+            'options' => $isDateType ? ['nullable'] : ['required', 'array', 'min:2', 'max:20', new DistinctNormalized],
             // 'distinct' = round 11 (skill /100) : même faille pour le type classique - deux options
             // au libellé strictement identique ("Pizza" / "Pizza") créaient deux PollOption distinctes,
             // scindant les votes de la même façon (un sondage à 5 votes pour "Pizza" pouvait afficher

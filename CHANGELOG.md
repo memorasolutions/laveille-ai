@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.17] - 2026-07-16
+
+### Fixed
+- **Décido — la règle Laravel `distinct` (round 11) était contournable par variation de FORMAT plutôt que par duplication exacte.** `distinct` compare des chaînes exactes, pas des valeurs métier équivalentes — elle ne détecte pas deux valeurs différentes en octets mais identiques en pratique. Deux angles réels, prouvés par de vraies requêtes HTTP :
+  - **Dates candidates.** `candidate_dates.*` portait la règle générique `date` (accepte tout ce que `strtotime()` reconnaît) au lieu de `date_format:Y-m-d`. `POST candidate_dates=['2027-03-14', '2027-3-14']` (même jour calendaire, deux formats différents) passait `distinct` intact puis `SlotGenerationService::generateSlots()` → `Carbon::createFromFormat('Y-m-d H:i', ...)` parsait les deux chaînes vers le même instant UTC — 4 `PollOption` créées (2 créneaux × 2 dates « différentes ») avec `starts_at`/`ends_at` strictement identiques deux à deux, recréant le bug de scission de votes du round 11. Corrigé en durcissant la règle à `date_format:Y-m-d` (le `<input type="date">` HTML5 du formulaire soumet toujours ce format canonique — aucun usage légitime restreint).
+  - **Options texte (type classique).** Deux libellés qui ne diffèrent que par la casse (`"Pizza"`/`"pizza"`) ou des espaces internes multiples (`"Pizza 4 fromages"`/`"Pizza  4 fromages"`, collapsés identiquement à l'affichage HTML) passaient `distinct` et créaient réellement 2 `PollOption` distinctes, visuellement indiscernables pour un votant. Corrigé par une nouvelle règle de validation `Modules\Decido\Rules\DistinctNormalized` (normalise casse + espaces avant comparaison), ajoutée au champ `options` en complément de `distinct` sur `options.*`.
+
+Angle Unicode NFC/NFD non nécessaire — deux bugs réels déjà trouvés et corrigés sur les angles prioritaires demandés.
+
+Trouvé par une passe adversariale indépendante (skill `/100`, round 20, contournement de `distinct` par variation de format). Ce round n'est PAS clean (deux vrais bugs corrigés) — le compteur de rounds clean consécutifs reste à zéro. 61/61 tests Pest verts (57 existants + 4 nouveaux).
+
 ## [1.107.16] - 2026-07-16
 
 ### Fixed

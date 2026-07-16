@@ -17,6 +17,31 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.17 · 2026-07-16 · fix(decido) round 20 passe adversariale /100 (contournement de
+ *     `distinct` par variation de FORMAT plutôt que par duplication exacte) : la règle Laravel
+ *     `distinct` (déjà appliquée au round 11) compare des CHAÎNES EXACTES, pas des valeurs
+ *     métier équivalentes - elle ne détecte PAS deux valeurs différentes en octets mais
+ *     identiques en pratique. Deux angles réels prouvés par requêtes HTTP réelles (pas
+ *     théoriques) : (1) dates candidates - `candidate_dates.*` portait la règle générique `date`
+ *     (accepte tout ce que strtotime() reconnaît) au lieu de `date_format:Y-m-d` ; POST avec
+ *     candidate_dates=['2027-03-14', '2027-3-14'] (même jour calendaire, deux formats) passait
+ *     `distinct` intact puis SlotGenerationService::generateSlots() ->
+ *     Carbon::createFromFormat('Y-m-d H:i', ...) parsait les deux chaînes vers le MÊME instant
+ *     UTC - 4 PollOption créées (2 créneaux x 2 dates "différentes") avec starts_at/ends_at
+ *     strictement identiques deux à deux, recréant le bug de scission de votes du round 11.
+ *     Corrigé en durcissant la règle à `date_format:Y-m-d` (le <input type="date"> HTML5 du
+ *     formulaire soumet toujours ce format canonique - aucun usage légitime restreint). (2)
+ *     options texte (type classique) - deux libellés qui ne diffèrent que par la casse
+ *     ("Pizza"/"pizza") ou des espaces internes multiples ("Pizza 4 fromages"/"Pizza  4
+ *     fromages", collapsés identiquement à l'affichage HTML) passaient `distinct` et créaient
+ *     réellement 2 PollOption distinctes, visuellement indiscernables pour un votant. Corrigé
+ *     par une nouvelle règle de validation Modules\Decido\Rules\DistinctNormalized (normalise
+ *     casse + espaces avant comparaison), ajoutée au champ `options` en plus de `distinct` sur
+ *     `options.*`. Angle Unicode NFC/NFD non nécessaire (deux bugs réels déjà trouvés et
+ *     corrigés sur les angles prioritaires demandés). Compteur de rounds consécutifs clean remis
+ *     à zéro par CE round (round 19 avait déjà trouvé et corrigé un bug réel - le compteur exige
+ *     2 CLEAN consécutifs, donc ce round n'en compte pas un puisqu'un vrai problème a été
+ *     trouvé et corrigé). 61/61 tests Pest verts (57 existants + 4 nouveaux).
  *   1.107.16 · 2026-07-16 · fix(decido) round 19 passe adversariale /100 (angle sondage vide) :
  *     PollManageController::store() vérifiait count($slots) > 500 (plafond volumétrique, round 9)
  *     mais jamais count($slots) === 0. SlotGenerationService::validateInputs() ne compare la plage
@@ -1231,7 +1256,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 16;
+$lvPatch = 17;
 
 return [
     'major' => $lvMajor,
