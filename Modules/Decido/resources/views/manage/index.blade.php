@@ -31,11 +31,15 @@
                                             {{ $poll->type->label() }}
                                         </span>
                                         @php
+                                            // Décido round 6 (skill /100) : #6c757d (gris Bootstrap générique)
+                                            // n'atteint que 4.69:1 en texte blanc - passe l'AA (4.5:1) mais
+                                            // échoue l'AAA (7:1) exigé par la charte du projet. --c-dark est
+                                            // déjà validé AAA sur blanc ailleurs sur le site.
                                             $statusColor = match ($poll->status->value) {
                                                 'open' => 'var(--c-primary)',
-                                                'closed' => '#6c757d',
+                                                'closed' => 'var(--c-dark)',
                                                 'draft' => 'var(--c-accent)',
-                                                default => '#6c757d',
+                                                default => 'var(--c-dark)',
                                             };
                                         @endphp
                                         <span class="badge rounded-pill" style="background-color: {{ $statusColor }}; color: white;">

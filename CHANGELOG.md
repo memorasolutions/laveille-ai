@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.4] - 2026-07-16
+
+### Fixed
+- **Décido — sélecteur "Type de sondage" inaccessible au clavier.** Les radios de `/decido/creer` utilisaient `class="d-none"` (display:none), les retirant de l'ordre de tabulation — violation WCAG 2.1.1 (niveau A) sur le tout premier champ du formulaire de création. Remplacé par `visually-hidden` (masqué visuellement, reste focalisable/actionnable au clavier) avec un anneau de focus visible sur la carte via `:has(input:focus-visible)`.
+- **Décido — bug de données : votants homonymes silencieusement fusionnés.** Deux votants distincts partageant le même pseudonyme voyaient un de leurs deux votes disparaître du résumé et du tableau croisé de la page de résultats — `totalVoters`/`voterNames`/`matrix` étaient clés par `voter_pseudonym` (texte libre) au lieu de `voter_token` (identifiant réellement unique par votant). Reclé par `voter_token`, nouveau test de non-régression.
+- **Décido — race condition (TOCTOU) entre vote en cours et clôture du sondage.** Le statut du sondage n'était vérifié qu'une seule fois en tout début de traitement d'un vote, sans verrou — un vote soumis dans la fenêtre entre cette vérification et l'écriture pouvait être accepté silencieusement même si l'organisateur venait de clôturer le sondage entre-temps. `PublicPollController::vote()` enveloppé dans `DB::transaction()` avec `lockForUpdate()` et re-vérification du statut à l'intérieur de la transaction.
+- **Décido — contraste WCAG AAA du badge "Fermé" + cibles tactiles + accessibilité du drill-down.** Badge `#6c757d` (4.69:1, sous le seuil AAA 7:1) remplacé par `var(--c-dark)`. Six boutons secondaires (Copier ×3, Créer un lien court, Voir qui a répondu, Télécharger le QR code) sous la cible tactile AAA de 44×44px — le layout public du module n'hérite pas de la règle `.user-space` qui l'impose ailleurs sur le site — corrigés via une classe utilitaire `.decido-touch-target`. Bouton "Voir qui a répondu" doté de `aria-expanded`/`aria-controls`.
+- **Décido — cartes "Type de sondage" sans état sélectionné visible.** Signalé directement par l'utilisateur (capture d'écran) : les 2 cartes de `/decido/creer` n'affichaient aucune différence visuelle entre l'état sélectionné et non sélectionné. Ajout d'une classe `.decido-poll-type-selected` (bordure + fond `var(--c-primary-light)`) plus un badge "✓ Sélectionné" (icône+texte, jamais la couleur seule).
+
+Les 4 correctifs ci-dessus ont été trouvés par une passe adversariale indépendante (skill `/100`, round 6, angle WCAG 2.2 AAA + qualité du français + concurrence/données réelles). Un point supplémentaire a été signalé à l'utilisateur pour décision plutôt que corrigé unilatéralement : la suppression du compte créateur cascade la suppression intégrale d'un sondage, y compris les votes de tiers.
+
 ## [1.107.3] - 2026-07-16
 
 ### Fixed

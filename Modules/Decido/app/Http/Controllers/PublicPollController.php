@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
@@ -78,38 +79,50 @@ class PublicPollController extends Controller
         $voterToken = $request->cookie($cookieName) ?? (string) Str::uuid();
         $voterPseudonym = $validated['voter_pseudonym'];
 
-        if ($poll->vote_mode->value === 'yes_no_maybe') {
-            foreach ($validated['votes'] as $optionId => $value) {
-                PollVote::updateOrCreate(
-                    ['option_id' => (int) $optionId, 'voter_token' => $voterToken],
-                    ['poll_id' => $poll->id, 'voter_pseudonym' => $voterPseudonym, 'value' => $value]
-                );
+        // Décido round 6 (skill /100) : le statut n'était vérifié qu'une fois en tout début de
+        // méthode, sans verrou - un vote soumis dans la fenêtre entre cette vérification et
+        // l'écriture pouvait être accepté silencieusement même si l'organisateur venait de
+        // clôturer le sondage entre-temps (TOCTOU). lockForUpdate + re-vérification DANS la
+        // transaction éliminent cette fenêtre de course.
+        DB::transaction(function () use ($poll, $optionIds, $validated, $voterToken, $voterPseudonym) {
+            $lockedPoll = Poll::whereKey($poll->id)->lockForUpdate()->first();
+            if (! $lockedPoll || $lockedPoll->status->value !== 'open') {
+                abort(404);
             }
-        } elseif ($poll->vote_mode->value === 'single_choice') {
-            $selectedOptionId = (int) $validated['votes'];
-            PollVote::updateOrCreate(
-                ['option_id' => $selectedOptionId, 'voter_token' => $voterToken],
-                ['poll_id' => $poll->id, 'voter_pseudonym' => $voterPseudonym, 'value' => 'selected']
-            );
 
-            PollVote::where('voter_token', $voterToken)
-                ->whereIn('option_id', $optionIds)
-                ->where('option_id', '!=', $selectedOptionId)
-                ->delete();
-        } elseif ($poll->vote_mode->value === 'approval') {
-            $selectedOptionIds = array_map('intval', $validated['votes']);
-            foreach ($selectedOptionIds as $optionId) {
+            if ($poll->vote_mode->value === 'yes_no_maybe') {
+                foreach ($validated['votes'] as $optionId => $value) {
+                    PollVote::updateOrCreate(
+                        ['option_id' => (int) $optionId, 'voter_token' => $voterToken],
+                        ['poll_id' => $poll->id, 'voter_pseudonym' => $voterPseudonym, 'value' => $value]
+                    );
+                }
+            } elseif ($poll->vote_mode->value === 'single_choice') {
+                $selectedOptionId = (int) $validated['votes'];
                 PollVote::updateOrCreate(
-                    ['option_id' => $optionId, 'voter_token' => $voterToken],
+                    ['option_id' => $selectedOptionId, 'voter_token' => $voterToken],
                     ['poll_id' => $poll->id, 'voter_pseudonym' => $voterPseudonym, 'value' => 'selected']
                 );
-            }
 
-            PollVote::where('voter_token', $voterToken)
-                ->whereIn('option_id', $optionIds)
-                ->whereNotIn('option_id', $selectedOptionIds)
-                ->delete();
-        }
+                PollVote::where('voter_token', $voterToken)
+                    ->whereIn('option_id', $optionIds)
+                    ->where('option_id', '!=', $selectedOptionId)
+                    ->delete();
+            } elseif ($poll->vote_mode->value === 'approval') {
+                $selectedOptionIds = array_map('intval', $validated['votes']);
+                foreach ($selectedOptionIds as $optionId) {
+                    PollVote::updateOrCreate(
+                        ['option_id' => $optionId, 'voter_token' => $voterToken],
+                        ['poll_id' => $poll->id, 'voter_pseudonym' => $voterPseudonym, 'value' => 'selected']
+                    );
+                }
+
+                PollVote::where('voter_token', $voterToken)
+                    ->whereIn('option_id', $optionIds)
+                    ->whereNotIn('option_id', $selectedOptionIds)
+                    ->delete();
+            }
+        });
 
         return Redirect::back()
             ->withCookie(Cookie::make($cookieName, $voterToken, 525600, null, null, null, true))

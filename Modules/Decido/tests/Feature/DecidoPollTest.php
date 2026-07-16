@@ -268,6 +268,36 @@ test('créer un lien court associe un short_url_id au sondage et affiche le lien
         ->assertSee($poll->getShortUrlString(), escape: false);
 });
 
+test('deux votants homonymes (même pseudonyme, voter_token différents) ne sont pas fusionnés dans les résultats', function (): void {
+    // Round 6 adversarial (skill /100) : avant le fix, totalVoters/voterNames/matrix étaient
+    // clés par voter_pseudonym (texte libre) au lieu de voter_token (identifiant réel) - un
+    // deuxième votant "Marie" écrasait silencieusement le vote du premier "Marie".
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-homonymes', 'vote_mode' => 'single_choice']);
+    $option = $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+    PollOption::factory()->create(['poll_id' => $poll->id, 'label' => 'Option B', 'sort_order' => 1]);
+
+    $option->votes()->create([
+        'poll_id' => $poll->id,
+        'voter_token' => 'token-marie-1',
+        'voter_pseudonym' => 'Marie',
+        'value' => 'selected',
+    ]);
+    $option->votes()->create([
+        'poll_id' => $poll->id,
+        'voter_token' => 'token-marie-2',
+        'voter_pseudonym' => 'Marie',
+        'value' => 'selected',
+    ]);
+
+    $response = $this->get(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-homonymes']));
+
+    $response->assertStatus(200);
+    $response->assertSee('2 participant(s)', false);
+    // Les 2 votes doivent apparaître dans le total, pas être écrasés à 1.
+    $response->assertSee('✓ 2 sur 2 participants', false);
+});
+
 test('demander un lien court deux fois ne crée pas deux short_url distincts', function (): void {
     config()->set('decido.under_construction', false);
     $poll = decidoCreatePoll(['admin_token' => 'jeton-shortlink-2']);

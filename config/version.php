@@ -17,6 +17,31 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.4 · 2026-07-16 · fix(decido) round 6 passe adversariale /100 (angle WCAG 2.2 AAA +
+ *     français + concurrence/données réelles) : (1) le sélecteur "Type de sondage" de
+ *     /decido/creer était inaccessible au clavier (radios class="d-none" = retirées de l'ordre
+ *     de tabulation, violation WCAG 2.1.1 niveau A) - remplacé par "visually-hidden" (reste
+ *     focalisable) + anneau de focus visible via :has(:focus-visible). (2) bug de données :
+ *     deux votants homonymes (même pseudonyme, voter_token différents) voyaient un de leurs
+ *     deux votes silencieusement écrasé dans le résumé/tableau croisé - totalVoters/matrix
+ *     étaient clés par voter_pseudonym (texte libre) au lieu de voter_token (identifiant réel
+ *     unique) ; reclé, nouveau test de non-régression. (3) race condition (TOCTOU) entre un
+ *     vote en cours de soumission et la clôture du sondage par l'organisateur - le statut
+ *     n'était vérifié qu'une fois avant écriture, sans verrou ; PublicPollController::vote()
+ *     enveloppé dans DB::transaction + lockForUpdate + re-vérification du statut. (4) badge
+ *     "Fermé" hors charte (#6c757d, 4.69:1, sous le seuil AAA 7:1) remplacé par var(--c-dark) ;
+ *     6 boutons secondaires sous la cible tactile AAA 44x44px (le layout public n'inclut pas
+ *     .user-space qui porte cette règle) corrigés via classe .decido-touch-target ; bouton
+ *     drill-down "Voir qui a répondu" doté de aria-expanded/aria-controls. 30/30 tests Pest
+ *     verts. Point signalé à l'utilisateur pour décision (pas corrigé seul) : suppression du
+ *     compte créateur cascade la suppression intégrale du sondage (y compris les votes de
+ *     tiers), comportement potentiellement surprenant mais non tranché unilatéralement.
+ *     (5) signalé directement par l'utilisateur (capture d'écran) : les 2 cartes "Type de
+ *     sondage" de /decido/creer n'affichaient AUCUNE indication visuelle de sélection (bordure/
+ *     fond identiques peu importe le choix actif). Ajout d'une classe .decido-poll-type-selected
+ *     (bordure + fond var(--c-primary-light)) pilotée par x-bind:class, plus un badge
+ *     "✓ Sélectionné" (icône+texte, jamais la couleur seule - WCAG 1.4.1) visible sur la carte
+ *     active. Vérifié visuellement par sous-agent Playwright (état par défaut + bascule au clic).
  *   1.107.3 · 2026-07-16 · fix(decido) round 5 passe adversariale /100 (angle sécurité/
  *     autorisation/cas limites) : (1) injection de formule CSV (OWASP CSV Injection) - un
  *     votant anonyme contrôle voter_pseudonym, texte libre écrit verbatim dans le CSV export
@@ -1037,7 +1062,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 3;
+$lvPatch = 4;
 
 return [
     'major' => $lvMajor,

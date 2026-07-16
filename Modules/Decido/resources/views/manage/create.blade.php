@@ -22,11 +22,25 @@
 
                     <div class="mb-5">
                         <h2 class="h4 mb-3">1. Type de sondage</h2>
-                        <div class="row g-3">
+                        {{-- Décido round 6 (skill /100) : les radios utilisaient class="d-none" (display:none),
+                             ce qui les retire de l'ordre de tabulation - un utilisateur clavier seul ne pouvait
+                             jamais choisir le type de sondage (WCAG 2.1.1, niveau A). visually-hidden garde le
+                             radio natif focalisable/actionnable au clavier (Espace/flèches) tout en le masquant
+                             visuellement ; :has(:focus-visible) donne un anneau de focus visible sur la carte. --}}
+                        {{-- Signalé par l'utilisateur (capture 2026-07-16) : aucune des 2 cartes n'indiquait
+                             visuellement le type actuellement sélectionné (bordure/fond identiques dans les
+                             deux états), alors que "date" est sélectionné par défaut. Ajout d'une classe
+                             .decido-poll-type-selected pilotée par x-bind:class + un badge "Sélectionné"
+                             (icône + texte, jamais la couleur seule - WCAG 1.4.1) visible uniquement sur la
+                             carte active. --}}
+                        <div class="row g-3 decido-poll-type-choices">
                             <div class="col-md-6">
-                                <label class="d-flex flex-column h-100 border rounded p-3" style="cursor: pointer;"
-                                       x-on:click="type = 'date'">
-                                    <input type="radio" name="type" value="date" class="d-none" x-model="type" required>
+                                <label class="d-flex flex-column h-100 border rounded p-3 position-relative"
+                                       style="cursor: pointer;"
+                                       x-on:click="type = 'date'"
+                                       x-bind:class="{ 'decido-poll-type-selected': type === 'date' }">
+                                    <input type="radio" name="type" value="date" class="visually-hidden" x-model="type" required>
+                                    <span class="decido-poll-type-badge" x-show="type === 'date'" x-cloak>✓ Sélectionné</span>
                                     <div class="d-flex align-items-center gap-2 mb-2">
                                         <strong>Sondage de dates</strong>
                                     </div>
@@ -35,9 +49,12 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="d-flex flex-column h-100 border rounded p-3" style="cursor: pointer;"
-                                       x-on:click="type = 'classic'">
-                                    <input type="radio" name="type" value="classic" class="d-none" x-model="type" required>
+                                <label class="d-flex flex-column h-100 border rounded p-3 position-relative"
+                                       style="cursor: pointer;"
+                                       x-on:click="type = 'classic'"
+                                       x-bind:class="{ 'decido-poll-type-selected': type === 'classic' }">
+                                    <input type="radio" name="type" value="classic" class="visually-hidden" x-model="type" required>
+                                    <span class="decido-poll-type-badge" x-show="type === 'classic'" x-cloak>✓ Sélectionné</span>
                                     <div class="d-flex align-items-center gap-2 mb-2">
                                         <strong>Sondage classique</strong>
                                     </div>
@@ -45,6 +62,28 @@
                                 </label>
                             </div>
                         </div>
+                        <style>
+                            .decido-poll-type-choices label:has(input:focus-visible) {
+                                outline: 3px solid var(--c-primary, #064E5A);
+                                outline-offset: 2px;
+                            }
+                            .decido-poll-type-choices .decido-poll-type-selected {
+                                border-color: var(--c-primary, #064E5A);
+                                border-width: 2px;
+                                background-color: var(--c-primary-light, #F0FAFB);
+                            }
+                            .decido-poll-type-badge {
+                                position: absolute;
+                                top: 0.6rem;
+                                right: 0.6rem;
+                                font-size: 0.75rem;
+                                font-weight: 600;
+                                color: var(--c-primary, #064E5A);
+                                background-color: var(--c-primary-badge, #DDF4F8);
+                                border-radius: 999px;
+                                padding: 0.15rem 0.6rem;
+                            }
+                        </style>
                         @error('type')
                             <div class="text-danger mt-2">{{ $message }}</div>
                         @enderror
