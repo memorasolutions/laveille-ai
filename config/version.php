@@ -17,6 +17,19 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.11 · 2026-07-16 · fix(decido) round 12 passe adversariale /100 (angle fuite tierce) :
+ *     le jeton admin Décido (contrôle total du sondage - clôture, export des pseudonymes des
+ *     votants, lien court) transite en clair dans le CHEMIN de l'URL de gestion
+ *     (/decido/{poll}/gerer/{adminToken}). Le layout charge GA4 (send_page_view:true) sur toute
+ *     page ne déclarant pas no_analytics - le hit GA4 capture automatiquement page_location =
+ *     window.location.href, transmettant donc le jeton admin en clair à un tiers (Google), stocké
+ *     indéfiniment dans la propriété GA4, à chaque chargement de la page (création, rafraîchissement,
+ *     redirection post-clôture/lien court). Le round 10 avait déjà bloqué l'indexation
+ *     (page_noindex) pour la même raison de fond mais avait laissé passer ce second vecteur,
+ *     complètement distinct. @section('no_analytics')/@section('no_ads') ajoutés à
+ *     manage/results.blade.php (même posture que l'anonymiseur, outil traitant des PII). Nouveau
+ *     test avec contrôle négatif (decido.index charge bien GA4 normalement, preuve que le gate
+ *     n'est pas un faux positif). 42/42 tests Pest verts.
  *   1.107.10 · 2026-07-16 · fix(decido) round 11 passe adversariale /100 (angle intégrité des
  *     données de vote) : aucune règle de validation n'empêchait de soumettre deux fois la même
  *     date candidate ou deux options classiques au libellé identique - SlotGenerationService/store()
@@ -1140,7 +1153,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 10;
+$lvPatch = 11;
 
 return [
     'major' => $lvMajor,

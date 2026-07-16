@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.11] - 2026-07-16
+
+### Fixed
+- **Décido — fuite du jeton admin vers Google Analytics.** Le jeton admin (contrôle total du sondage - clôture, export des pseudonymes des votants, création de lien court) transite en clair dans le chemin de l'URL de gestion (`/decido/{poll}/gerer/{adminToken}`). Le layout global charge GA4 (`send_page_view: true`) sur toute page ne déclarant pas `no_analytics` : le hit GA4 capture automatiquement `page_location = window.location.href`, transmettant donc le jeton en clair à un tiers (Google), stocké indéfiniment dans la propriété GA4 à chaque chargement de la page. Le round 10 avait déjà bloqué l'indexation (`page_noindex`) pour la même raison de fond, mais avait laissé passer ce second vecteur, entièrement distinct. `@section('no_analytics', '1')` et `@section('no_ads', '1')` ajoutés (même posture que l'anonymiseur, outil traitant des PII).
+
+Trouvé par une passe adversariale indépendante (skill `/100`, round 12, angle fuite de données vers un tiers). 42/42 tests Pest verts.
+
 ## [1.107.10] - 2026-07-16
 
 ### Fixed

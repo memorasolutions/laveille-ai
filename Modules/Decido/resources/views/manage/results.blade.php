@@ -4,6 +4,19 @@
 {{-- Round 10 (skill /100) : page de gestion protégée par un jeton devinable dans l'URL, jamais
      destinée à l'indexation - expose les pseudonymes et résultats complets des votants. --}}
 @section('page_noindex', true)
+{{-- Round 12 (skill /100) : le jeton admin (contrôle TOTAL du sondage - clôture, export des
+     pseudonymes des votants, création de lien court) transite en clair dans le CHEMIN de l'URL
+     (/decido/{poll}/gerer/{adminToken}). Le round 10 bloquait déjà l'indexation (page_noindex),
+     mais laissait passer une fuite bien plus grave et systématique : le layout charge GA4 avec
+     send_page_view:true sur TOUTE page qui ne déclare pas no_analytics (master.blade.php) - le
+     hit GA4 capture automatiquement page_location = window.location.href, donc le jeton admin en
+     clair était transmis à un tiers (Google) et stocké indéfiniment dans la propriété GA4, à
+     chaque chargement de cette page (visite initiale après création, chaque rafraîchissement,
+     redirection post-clôture/lien court). Même posture que l'anonymiseur (Modules/Tools -
+     outil traitant des PII) : aucune pub ni analytics tierce sur une page qui expose un secret
+     de sécurité et des données de votants dans son URL/contenu. --}}
+@section('no_analytics', '1')
+@section('no_ads', '1')
 @section('meta_description', "Résultats du sondage Décido « {$poll->title} » : visualise les votes, clôture le sondage et exporte les données.")
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Résultats du sondage'])

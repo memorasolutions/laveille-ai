@@ -277,6 +277,32 @@ test('les pages privées Décido (vote, résultats, Mes sondages, création) dé
     $this->assertStringContainsString('name="robots" content="noindex', $createHtml);
 });
 
+test('la page de gestion (jeton admin dans l’URL) ne transmet pas ce jeton à Google Analytics (no_analytics)', function (): void {
+    // Round 12 (skill /100) : le jeton admin (contrôle total du sondage - clôture, export des
+    // pseudonymes des votants, lien court) transite EN CLAIR dans le chemin de l'URL
+    // (/decido/{poll}/gerer/{adminToken}). Le layout global (master.blade.php) charge GA4 avec
+    // send_page_view:true sur toute page ne déclarant PAS @section('no_analytics') - le hit GA4
+    // capture automatiquement page_location = window.location.href, donc sans ce gate, le jeton
+    // admin était transmis à Google (tiers) et stocké indéfiniment dans la propriété GA4 à chaque
+    // chargement (visite initiale, rafraîchissement, redirection post-clôture/lien court). Le
+    // round 10 avait bloqué l'indexation (page_noindex) mais pas ce vecteur de fuite distinct.
+    config()->set('decido.under_construction', false);
+    config()->set('services.ga.measurement_id', 'G-TESTFAKE123');
+    config()->set('services.ga.privacy_enabled', true);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-ga4-leak']);
+    PollOption::factory()->create(['poll_id' => $poll->id]);
+
+    $manageHtml = $this->get(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-ga4-leak']))->getContent();
+    $this->assertStringNotContainsString('googletagmanager.com', $manageHtml);
+
+    // Contrôle négatif : prouve que le gate GA4 est réellement actif dans cet environnement de
+    // test (sinon l'assertion précédente passerait trivialement même sans le correctif) - une
+    // page Décido dont l'URL propre ne porte aucun jeton (index, pas de no_analytics déclaré)
+    // charge bien GA4 normalement.
+    $indexHtml = $this->actingAs($this->superadmin)->get(route('decido.index'))->getContent();
+    $this->assertStringContainsString('googletagmanager.com', $indexHtml);
+});
+
 test('votant anonyme peut voter (yes_no_maybe)', function (): void {
     config()->set('decido.under_construction', false);
     $poll = decidoCreatePoll(['type' => 'date', 'vote_mode' => 'yes_no_maybe']);
