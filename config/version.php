@@ -17,6 +17,25 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.16 · 2026-07-16 · fix(decido) round 19 passe adversariale /100 (angle sondage vide) :
+ *     PollManageController::store() vérifiait count($slots) > 500 (plafond volumétrique, round 9)
+ *     mais jamais count($slots) === 0. SlotGenerationService::validateInputs() ne compare la plage
+ *     horaire à la durée que sur une date de référence NEUTRE ('2000-01-01', sans DST) - une
+ *     plage/durée nominalement valides (ex. 01h30-03h00 = 90 min, durée 60 min) passaient donc la
+ *     validation. Mais generateSlots() calcule l'écart RÉEL en UTC pour CHAQUE date candidate
+ *     (round 8) : le jour du passage à l'heure d'été (America/Toronto), l'écart réel entre 01h30 et
+ *     03h00 heure locale n'est que de 30 minutes (l'heure 02h00-02h59 n'existe pas ce jour-là) -
+ *     inférieur à la durée de 60 min. Prouvé en réel : generateSlots(['2027-03-14'], '01:30',
+ *     '03:00', 60, 15, 'America/Toronto') retourne un tableau vide. Si toutes les dates candidates
+ *     soumises tombaient dans ce cas, le Poll était quand même sauvegardé avec status='open' et
+ *     ZÉRO PollOption - un sondage publié, partageable, sur lequel personne ne peut voter, sans
+ *     aucun message d'erreur pour le créateur. Garde-fou count($slots) === 0 ajouté, avec rollback
+ *     complet via la transaction du round 16 (aucun sondage fantôme). Second angle audité en
+ *     profondeur (final_option_id vs IDOR sur close()) : DÉJÀ correctement scopé via
+ *     $pollModel->options()->where('id', $finalOptionId)->exists() (options() = HasMany scopé par
+ *     poll_id) - clean, verrouillé par un nouveau test de régression. Compteur de rounds
+ *     consécutifs remis à zéro (round 18 avait été CLEAN). 57/57 tests Pest verts (55 existants +
+ *     2 nouveaux).
  *   1.107.15 · 2026-07-16 · fix(decido) round 18 passe adversariale /100 (deux angles neufs) :
  *     (1) validation du fuseau horaire - 'timezone' (string|max:60) était la SEULE règle sur le
  *     champ `timezone` de PollManageController::store(), sans vérification IANA. Une chaîne
@@ -1212,7 +1231,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 15;
+$lvPatch = 16;
 
 return [
     'major' => $lvMajor,

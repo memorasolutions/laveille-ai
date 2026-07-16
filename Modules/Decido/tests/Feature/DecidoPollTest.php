@@ -204,6 +204,35 @@ test('un volume total de créneaux excessif (>500) est refusé même sous 60 dat
     expect(Poll::where('title', 'Sondage volume excessif')->exists())->toBeFalse();
 });
 
+test('une date candidate qui produit 0 créneau (passage à l\'heure d\'été) est rejetée, pas publiée sans options', function (): void {
+    // Round 19 (skill /100) : SlotGenerationService::validateInputs() compare la plage horaire
+    // à la durée sur une date de référence NEUTRE (2000-01-01, sans DST) - une plage/durée
+    // nominalement valides (01h30-03h00 = 90 min, durée 60 min) passent donc la validation.
+    // Mais le 14 mars 2027 (passage à l'heure d'été, America/Toronto), l'écart RÉEL entre
+    // 01h30 et 03h00 heure locale n'est que de 30 minutes (l'heure 02h00-02h59 n'existe pas ce
+    // jour-là) - inférieur à la durée de 60 min. Prouvé en réel avant le fix :
+    // SlotGenerationService::generateSlots(['2027-03-14'], '01:30', '03:00', 60, 15,
+    // 'America/Toronto') retourne un tableau VIDE. Avant ce fix, store() ne vérifiait que
+    // count($slots) > 500 (jamais === 0) : le Poll était quand même sauvegardé avec
+    // status='open' et ZÉRO PollOption - un sondage publié, partageable, sur lequel personne
+    // ne peut voter, sans aucun message d'erreur pour le créateur.
+    config()->set('decido.under_construction', false);
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage DST zéro créneau',
+        'type' => 'date',
+        'timezone' => 'America/Toronto',
+        'duration_minutes' => 60,
+        'range_start_time' => '01:30',
+        'range_end_time' => '03:00',
+        'step_minutes' => 15,
+        'candidate_dates' => ['2027-03-14'],
+    ]);
+
+    $response->assertSessionHasErrors('candidate_dates');
+    expect(Poll::where('title', 'Sondage DST zéro créneau')->exists())->toBeFalse();
+});
+
 test('soumettre deux fois la même date candidate est rejeté (distinct) au lieu de créer des créneaux dupliqués', function (): void {
     // Round 11 (skill /100) : avant le fix, cette requête créait le sondage avec DEUX jeux de
     // créneaux strictement identiques pour la même date (labels et starts_at/ends_at
@@ -714,6 +743,34 @@ test('clôturer un sondage avec un créneau final fonctionne', function (): void
     $poll->refresh();
     $this->assertSame('closed', $poll->status->value);
     $this->assertSame($option->id, $poll->final_option_id);
+});
+
+test('clôturer un sondage avec le final_option_id d\'un AUTRE sondage (IDOR) est rejeté (404)', function (): void {
+    // Round 19 (skill /100) : audit ciblé - PollManageController::close() ne valide
+    // final_option_id qu'avec ['nullable', 'integer'] côté règles Laravel (aucune contrainte
+    // exists:decido_poll_options,id,poll_id,{poll}). Le code applique cependant DÉJÀ un garde-fou
+    // manuel juste après la validation : `$pollModel->options()->where('id', $finalOptionId)
+    // ->exists()`, où options() est un HasMany scopé automatiquement par poll_id - un ID d'option
+    // appartenant à un AUTRE sondage échoue donc ce exists() et déclenche abort(404), AVANT toute
+    // écriture de final_option_id. Ce test verrouille ce comportement (déjà correct, vérifié en
+    // conditions réelles avec un vrai jeton admin valide et une vraie option étrangère) pour
+    // qu'une régression future soit détectée immédiatement - notamment tout export ICS qui
+    // référencerait, sous IDOR, les dates/heures d'un sondage totalement différent.
+    config()->set('decido.under_construction', false);
+
+    $pollA = decidoCreatePoll(['title' => 'Sondage A', 'admin_token' => 'jeton-a']);
+    $pollB = decidoCreatePoll(['title' => 'Sondage B', 'admin_token' => 'jeton-b']);
+    $optionOfPollB = PollOption::factory()->create(['poll_id' => $pollB->id]);
+
+    $response = $this->post(route('decido.close', ['poll' => $pollA->public_id, 'adminToken' => 'jeton-a']), [
+        'final_option_id' => $optionOfPollB->id,
+    ]);
+
+    $response->assertStatus(404);
+
+    $pollA->refresh();
+    $this->assertNotSame('closed', $pollA->status->value, 'Le sondage A a été clôturé malgré une option étrangère (IDOR).');
+    $this->assertNull($pollA->final_option_id);
 });
 
 // ── Service de génération de créneaux ────────────────────────────────────────

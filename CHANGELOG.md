@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.16] - 2026-07-16
+
+### Fixed
+- **Décido — un sondage de dates pouvait être publié sans AUCUN créneau (heure d'été).** `PollManageController::store()` vérifiait `count($slots) > 500` (plafond volumétrique, round 9) mais jamais `count($slots) === 0`. `SlotGenerationService::validateInputs()` ne compare la plage horaire à la durée que sur une date de référence neutre (`2000-01-01`, sans DST) — une plage/durée nominalement valides (ex. `01:30`-`03:00` = 90 min, durée 60 min) passaient donc la validation. Mais `generateSlots()` calcule l'écart réel en UTC pour chaque date candidate (round 8) : le jour du passage à l'heure d'été (America/Toronto), l'écart réel entre `01:30` et `03:00` heure locale n'est que de 30 minutes (l'heure `02:00`-`02:59` n'existe pas ce jour-là) — inférieur à la durée de 60 min. Prouvé en réel : `generateSlots(['2027-03-14'], '01:30', '03:00', 60, 15, 'America/Toronto')` retourne un tableau vide. Si toutes les dates candidates soumises tombaient dans ce cas, le `Poll` était quand même sauvegardé avec `status='open'` et zéro `PollOption` — un sondage publié, partageable, sur lequel personne ne peut voter, sans aucun message d'erreur pour le créateur. Garde-fou `count($slots) === 0` ajouté, avec rollback complet via la transaction du round 16 (aucun sondage fantôme en base).
+
+Second angle audité en profondeur sans trouver de bug : `final_option_id` sur `close()` (IDOR potentiel — un ID d'option appartenant à un autre sondage). Déjà correctement scopé via `$pollModel->options()->where('id', $finalOptionId)->exists()` (`options()` = `HasMany` scopé par `poll_id`) — vérifié par une vraie requête HTTP avec jeton admin valide et option étrangère, verrouillé par un nouveau test de régression.
+
+Trouvé par une passe adversariale indépendante (skill `/100`, round 19, angle sondage vide). Le round 18 avait été CLEAN ; ce round non-clean remet le compteur à zéro. 57/57 tests Pest verts (55 existants + 2 nouveaux).
+
 ## [1.107.15] - 2026-07-16
 
 ### Fixed

@@ -139,6 +139,28 @@ class PollManageController extends Controller
                         );
                     }
 
+                    // Round 19 (skill /100) : count($slots) > 500 était vérifié, jamais count($slots)
+                    // === 0. SlotGenerationService::validateInputs() ne compare la plage horaire à la
+                    // durée que sur une date de référence NEUTRE ('2000-01-01', sans DST), donc une
+                    // plage/durée nominalement valides (ex. 01h30-03h00 = 90 min nominal, durée 60 min)
+                    // passe la validation. Mais generateSlots() calcule l'écart RÉEL en UTC pour CHAQUE
+                    // date candidate (round 8) : un jour de passage à l'heure d'été (avance d'horloge),
+                    // l'écart réel entre 01h30 et 03h00 heure locale n'est que de 30 minutes (l'heure
+                    // 02h00-02h59 n'existe pas ce jour-là) - inférieur à la durée de 60 min, donc CETTE
+                    // date produit 0 créneau. Prouvé en réel : generateSlots(['2027-03-14'], '01:30',
+                    // '03:00', 60, 15, 'America/Toronto') retourne un tableau vide. Si TOUTES les dates
+                    // candidates soumises tombent dans ce cas (ex. une seule date choisie = le jour du
+                    // changement d'heure), $slots était vide, la boucle foreach ci-dessous ne créait
+                    // AUCUNE PollOption, et le sondage était quand même promu 'open' et sauvegardé :
+                    // un sondage publié, partageable, sur lequel personne ne peut voter, sans aucun
+                    // message d'erreur pour le créateur. Rejet propre désormais, avec rollback complet
+                    // (transaction round 16) au lieu d'un sondage fantôme sans options.
+                    if (count($slots) === 0) {
+                        throw new InvalidArgumentException(
+                            "Aucun créneau n'a pu être généré pour les dates sélectionnées avec cette plage horaire et cette durée. Vérifie que la durée de la rencontre ne dépasse pas la plage horaire réelle de chaque date (le passage à l'heure d'été peut raccourcir une plage en apparence valide)."
+                        );
+                    }
+
                     foreach ($slots as $index => $slot) {
                         $poll->options()->create([
                             'label' => $slot['label'],
