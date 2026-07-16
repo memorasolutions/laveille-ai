@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.1] - 2026-07-16
+
+### Fixed
+- **Décido — fuseau horaire manquant dans `PollExportService::exportIcs()`.** Le même bug corrigé dans `results.blade.php` (v1.107.0) était aussi présent dans l'export ICS : `DTSTART`/`DTEND` utilisaient `->utc()` directement sur une valeur `Carbon` déjà mal étiquetée par le cast Eloquent (`config('app.timezone')` = `America/Toronto` réinterprète à tort la valeur UTC stockée comme étant déjà en heure de Québec), causant un décalage de 4h dans le fichier `.ics` téléchargé. Trouvé par une passe adversariale indépendante (skill `/100`), reproduit empiriquement (`20260801T180000Z` au lieu de `20260801T140000Z`), corrigé par reparse explicite de la valeur brute comme UTC. Nouveau test Pest asserte la valeur `DTSTART`/`DTEND` exacte après un vrai `fresh()` depuis la DB — condition nécessaire pour déclencher le bug, que l'ancien test ne couvrait pas.
+
 ## [1.107.0] - 2026-07-16
 
 ### Changed

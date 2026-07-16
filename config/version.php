@@ -17,6 +17,15 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.1 · 2026-07-16 · fix(decido) fuseau horaire manquant dans PollExportService::exportIcs()
+ *     - le même bug corrigé dans results.blade.php (v1.107.0) était aussi présent dans l'export
+ *     ICS : DTSTART/DTEND utilisaient `->utc()` sur une valeur Carbon déjà mal étiquetée par le
+ *     cast Eloquent (`config('app.timezone')` = America/Toronto réinterprète à tort la valeur UTC
+ *     stockée), causant un décalage de 4h dans le fichier .ics téléchargé. Trouvé par une passe
+ *     adversariale indépendante (skill /100), reproduit empiriquement, corrigé par reparse
+ *     explicite en UTC. Nouveau test Pest asserte la valeur DTSTART/DTEND exacte après un vrai
+ *     `fresh()` depuis la DB (condition nécessaire pour déclencher le bug - l'ancien test ne
+ *     l'aurait jamais détecté).
  *   1.107.0 · 2026-07-16 · feat(decido) refonte UX de la page de résultats (superadmin) : l'ancien
  *     design (une carte pleine largeur par créneau, jusqu'à 16+ cartes empilées = page trop longue)
  *     est remplacé par un résumé "Meilleurs créneaux" toujours visible (tous les ex-æquo, compte
@@ -1004,7 +1013,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,
