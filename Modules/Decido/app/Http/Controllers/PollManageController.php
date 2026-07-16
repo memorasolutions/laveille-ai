@@ -45,7 +45,18 @@ class PollManageController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'type' => ['required', 'in:date,classic'],
-            'timezone' => ['required', 'string', 'max:60'],
+            // 'timezone' (règle Laravel) = round 18 (skill /100) : avant ce fix, seul 'string|max:60'
+            // gardait ce champ - une chaîne arbitraire non-IANA ("Not/AZone", "'; DROP TABLE...", une
+            // valeur à rallonge) passait la validation intacte puis atteignait directement
+            // SlotGenerationService::generateSlots() -> Carbon::createFromFormat(..., $timezone), qui
+            // construit un DateTimeZone en interne. DateTimeZone::__construct() lève une \Exception
+            // brute (jamais une InvalidArgumentException) sur une chaîne invalide, donc NI cette
+            // validation NI le catch (InvalidArgumentException $e) plus bas n'interceptaient l'erreur :
+            // elle remontait telle quelle jusqu'au gestionnaire d'exceptions global (crash 500). La
+            // règle 'timezone' de Laravel vérifie strictement l'appartenance à
+            // timezone_identifiers_list(DateTimeZone::ALL) - les vraies zones IANA uniquement (rejette
+            // aussi les abréviations ambiguës type "EST" et les décalages bruts type "+05:00").
+            'timezone' => ['required', 'string', 'max:60', 'timezone'],
             'duration_minutes' => $isDateType ? ['required', 'integer', 'min:5', 'max:480'] : ['nullable'],
             'range_start_time' => $isDateType ? ['required', 'date_format:H:i'] : ['nullable'],
             'range_end_time' => $isDateType ? ['required', 'date_format:H:i', 'after:range_start_time'] : ['nullable'],
@@ -190,6 +201,23 @@ class PollManageController extends Controller
         }
 
         $this->authorizeManage($pollModel, $adminToken);
+
+        // Round 18 (skill /100) : close() n'était pas idempotente - rien n'empêchait de rappeler
+        // cette action sur un sondage DÉJÀ clôturé (double-clic avant que l'UI ne masque le
+        // formulaire - lequel n'est affiché que si status==='open' côté vue, aucune garantie côté
+        // serveur -, ou simple rejeu de la requête POST). Un second appel écrasait silencieusement
+        // final_option_id (potentiellement vers une AUTRE option, ou vers null si le second appel
+        // omettait le champ) et repoussait indéfiniment expires_at à chaque rejeu, contournant la
+        // politique de purge automatique (decido:purge-expired, round 5). Une fois clôturé, le
+        // sondage reste sur son premier créneau final et sa première date d'expiration - on
+        // redirige simplement vers la page de gestion sans rien muter, comme si la clôture avait
+        // déjà eu lieu (elle a effectivement déjà eu lieu).
+        if ($pollModel->status->value === 'closed') {
+            return Redirect::route('decido.manage', [
+                'poll' => $pollModel->public_id,
+                'adminToken' => $adminToken,
+            ])->with('success', 'Le sondage a été clôturé.');
+        }
 
         $validated = $request->validate([
             'final_option_id' => ['nullable', 'integer'],

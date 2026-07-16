@@ -1200,3 +1200,105 @@ test('decido:purge-expired supprime les sondages clôturés expirés et épargne
     expect(Poll::find($notYetExpired->id))->not->toBeNull();
     expect(Poll::find($stillOpen->id))->not->toBeNull();
 });
+
+// ── Round 18 (skill /100) : validation du fuseau horaire fourni par l'utilisateur ──────────
+
+test('un fuseau horaire invalide (chaîne arbitraire non-IANA) est rejeté par une erreur de validation, pas un crash 500', function (): void {
+    // Round 18 (skill /100) : avant le fix, la règle de validation de `timezone` était
+    // `['required', 'string', 'max:60']` - AUCUNE vérification contre la vraie liste IANA
+    // (timezone_identifiers_list()). Cette chaîne arbitraire atteignait ensuite directement
+    // SlotGenerationService::generateSlots(), qui la transmet telle quelle à
+    // Carbon::createFromFormat(..., $timezone) - lequel construit un DateTimeZone en interne.
+    // DateTimeZone::__construct() lève une \Exception (jamais une InvalidArgumentException) sur
+    // une chaîne invalide - donc NI la règle de validation NI le catch (InvalidArgumentException
+    // $e) de PollManageController::store() n'interceptaient cette erreur : elle remontait telle
+    // quelle jusqu'au gestionnaire d'exceptions global de Laravel, produisant un crash 500 brut
+    // pour une simple erreur de saisie (ex. mauvaise valeur envoyée par un <select> altéré côté
+    // client, ou requête forgée). Le DB::transaction() du round 16 évite qu'un sondage fantôme
+    // survive à ce crash (rollback automatique), mais un 500 sur une entrée simplement invalide
+    // reste un défaut de robustesse : ce test le prouve avec une vraie requête HTTP.
+    config()->set('decido.under_construction', false);
+    $futureDate = now()->addDays(10)->format('Y-m-d');
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage fuseau invalide',
+        'type' => 'date',
+        'timezone' => 'Not/AZone',
+        'duration_minutes' => 30,
+        'range_start_time' => '09:00',
+        'range_end_time' => '10:30',
+        'step_minutes' => 30,
+        'candidate_dates' => [$futureDate],
+    ]);
+
+    $response->assertSessionHasErrors('timezone');
+    expect(Poll::where('title', 'Sondage fuseau invalide')->exists())->toBeFalse();
+});
+
+test('un fuseau horaire vide, à rallonge ou contenant des caractères spéciaux est rejeté sans exception PHP', function (): void {
+    // Complète le test précédent avec des variantes adverses supplémentaires explicitement
+    // demandées : chaîne vide (déjà couverte par `required`, mais vérifiée ici via le sondage
+    // classique pour prouver que le champ reste bien exigé sur les deux chemins de création),
+    // valeur à rallonge (> max:60) et caractères spéciaux/injection.
+    config()->set('decido.under_construction', false);
+
+    $tooLong = str_repeat('A/', 40).'Z'; // > 60 caractères, jamais un identifiant IANA valide
+    $special = "America/Toronto'; DROP TABLE decido_polls; --";
+
+    foreach ([$tooLong, $special, ''] as $badTimezone) {
+        $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+            'title' => 'Sondage classique fuseau '.md5($badTimezone),
+            'type' => 'classic',
+            'timezone' => $badTimezone,
+            'vote_mode' => 'single_choice',
+            'options' => ['Pizza', 'Sushi'],
+        ]);
+
+        $response->assertSessionHasErrors('timezone');
+        expect(Poll::where('title', 'Sondage classique fuseau '.md5($badTimezone))->exists())->toBeFalse();
+    }
+});
+
+// ── Round 18 (skill /100) : idempotence de la clôture d'un sondage déjà fermé ──────────────
+
+test('clôturer deux fois le même sondage (rejeu/double-clic) n’écrase pas le créneau final ni ne recule la date d’expiration', function (): void {
+    // Round 18 (skill /100) : PollManageController::close() ne vérifiait jamais si le sondage
+    // était DÉJÀ fermé avant de réappliquer status='closed', final_option_id=<valeur soumise> et
+    // expires_at=now()+N mois. Un second appel (double-clic avant que l'UI ne masque le
+    // formulaire de clôture - lequel n'est affiché QUE si status==='open', mais rien ne
+    // l'empêche côté serveur - ou un simple rejeu de la requête POST) pouvait donc : (1)
+    // remplacer silencieusement le créneau final déjà choisi et potentiellement déjà exporté en
+    // ICS/communiqué aux participants, y compris le mettre à NULL si le second appel omet
+    // final_option_id ; (2) repousser indéfiniment expires_at à chaque rejeu, contournant la
+    // politique de purge automatique (decido:purge-expired) que le round 5 avait justement
+    // instaurée. Preuve : premier appel clôture avec l'option A, second appel (rejeu) tente de
+    // clôturer avec l'option B - le sondage doit rester sur l'option A et l'expiration ne doit
+    // pas avoir bougé.
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-close-idempotent']);
+    $optionA = $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+    $optionB = $poll->options()->create(['label' => 'Option B', 'sort_order' => 1]);
+
+    $this->post(route('decido.close', ['poll' => $poll->public_id, 'adminToken' => 'jeton-close-idempotent']), [
+        'final_option_id' => $optionA->id,
+    ]);
+
+    $poll->refresh();
+    $this->assertSame('closed', $poll->status->value);
+    $this->assertSame($optionA->id, $poll->final_option_id);
+    $expiresAtAfterFirstClose = $poll->expires_at;
+
+    // Rejeu/double-clic : tente de clôturer À NOUVEAU avec une option DIFFÉRENTE.
+    $this->travel(1)->hour();
+    $this->post(route('decido.close', ['poll' => $poll->public_id, 'adminToken' => 'jeton-close-idempotent']), [
+        'final_option_id' => $optionB->id,
+    ]);
+
+    $poll->refresh();
+    $this->assertSame('closed', $poll->status->value);
+    $this->assertSame($optionA->id, $poll->final_option_id, 'Le créneau final a été écrasé par un second appel à close() - clôture non idempotente.');
+    $this->assertTrue(
+        $expiresAtAfterFirstClose->equalTo($poll->expires_at),
+        'La date d’expiration a reculé suite à un second appel à close() - purge automatique contournable par rejeu.'
+    );
+});

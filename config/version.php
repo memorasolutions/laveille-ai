@@ -17,6 +17,24 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.15 · 2026-07-16 · fix(decido) round 18 passe adversariale /100 (deux angles neufs) :
+ *     (1) validation du fuseau horaire - 'timezone' (string|max:60) était la SEULE règle sur le
+ *     champ `timezone` de PollManageController::store(), sans vérification IANA. Une chaîne
+ *     arbitraire ("Not/AZone", valeur à rallonge, caractères spéciaux) atteignait directement
+ *     Carbon::createFromFormat() dans SlotGenerationService, dont le DateTimeZone interne lève une
+ *     \Exception brute (jamais InvalidArgumentException) - donc NI la validation NI le catch de
+ *     store() n'interceptaient l'erreur, crash 500 pour une simple erreur de saisie. Règle Laravel
+ *     'timezone' ajoutée (vérifie contre timezone_identifiers_list(DateTimeZone::ALL)). (2)
+ *     idempotence de la clôture - PollManageController::close() n'était pas idempotente : rappeler
+ *     l'action sur un sondage déjà clôturé (double-clic, rejeu de requête) écrasait silencieusement
+ *     final_option_id (potentiellement vers une AUTRE option, ou vers null) et repoussait
+ *     indéfiniment expires_at à chaque appel, contournant la purge automatique (decido:purge-expired,
+ *     round 5). Un garde en début de méthode redirige désormais sans rien muter si le sondage est
+ *     déjà 'closed'. Angle SQL brut audité en profondeur (grep exhaustif DB::raw/whereRaw/selectRaw/
+ *     orderByRaw sur tout Modules/Decido) : aucune injection trouvée, le seul selectRaw existant
+ *     (PollOption::voteCounts()) est une chaîne statique sans interpolation utilisateur - clean.
+ *     Compteur de rounds consécutifs remis à zéro (round 17 avait été CLEAN). 55/55 tests Pest
+ *     verts (52 existants + 3 nouveaux).
  *   1.107.14 · 2026-07-16 · fix(decido) round 16 passe adversariale /100 (angle atomicité
  *     création) : PollManageController::store() insérait le Poll PUIS bouclait sur la création de
  *     ses PollOption (jusqu'à 500 créneaux pour le type date) sans DB::transaction() - seule
@@ -1194,7 +1212,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 14;
+$lvPatch = 15;
 
 return [
     'major' => $lvMajor,

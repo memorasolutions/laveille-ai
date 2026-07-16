@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.15] - 2026-07-16
+
+### Fixed
+- **Décido — validation du fuseau horaire manquante (crash 500 sur entrée invalide).** `PollManageController::store()` ne validait `timezone` que via `string|max:60`, sans vérification contre la liste IANA réelle. Une valeur arbitraire (`"Not/AZone"`, chaîne à rallonge, caractères spéciaux) passait la validation puis atteignait directement `Carbon::createFromFormat()` dans `SlotGenerationService`, dont le `DateTimeZone` interne lève une `\Exception` brute (jamais `InvalidArgumentException`) — ni la validation ni le `catch` de `store()` n'interceptaient l'erreur, produisant un crash 500 pour une simple erreur de saisie au lieu d'un message de validation convivial. Règle Laravel `'timezone'` ajoutée (vérifie `timezone_identifiers_list(DateTimeZone::ALL)`).
+- **Décido — clôture d'un sondage non idempotente.** `PollManageController::close()` ne vérifiait jamais si le sondage était déjà clôturé avant de réappliquer `status='closed'`, `final_option_id` et `expires_at`. Un second appel (double-clic avant que l'UI ne masque le formulaire, ou rejeu de la requête POST) écrasait silencieusement le créneau final déjà choisi — potentiellement vers une autre option ou vers `null` — et repoussait indéfiniment la date d'expiration à chaque rejeu, contournant la politique de purge automatique (`decido:purge-expired`, round 5). Un garde en début de méthode redirige désormais sans rien muter si le sondage est déjà `closed`.
+
+Trouvé par une passe adversariale indépendante (skill `/100`, round 18, angles fuseau horaire + idempotence clôture). Angle SQL brut audité en profondeur (grep exhaustif sur tout `Modules/Decido`) : aucune injection trouvée. Le round 17 avait été CLEAN ; ce round non-clean remet le compteur à zéro. 55/55 tests Pest verts (52 existants + 3 nouveaux).
+
 ## [1.107.14] - 2026-07-16
 
 ### Fixed
