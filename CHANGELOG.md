@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.2] - 2026-07-16
+
+### Fixed
+- **Décido — paramètres de génération de créneaux jamais persistés sur le sondage.** `duration_minutes`, `range_start_time`, `range_end_time` et `step_minutes` étaient validés et déjà présents dans `Poll::$fillable`, mais `PollManageController::store()` ne les assignait jamais à l'objet `$poll` avant sauvegarde — toujours `NULL` en base pour tout sondage de type date, bien que les créneaux eux-mêmes soient générés correctement (le service recevait les valeurs directement, pas via le modèle). Bloquait silencieusement toute fonctionnalité future de modification/régénération de créneaux. Trouvé par une passe adversariale indépendante (skill `/100`, round 4). Nouveau test Pest vérifie ces 4 colonnes après un vrai `fresh()` depuis la DB.
+- **Décido — impasse UX : aucun lien vers la gestion d'un sondage depuis « Mes sondages ».** Un créateur de sondage connecté qui perdait le lien admin à jeton reçu à la création n'avait plus aucun moyen d'accéder à la gestion de son propre sondage, malgré un bypass propriétaire déjà présent dans `PollManageController::authorizeManage()` (`Auth::id() === $poll->creator_id`) — ce bypass n'était simplement jamais exploité par aucune vue. Ajout d'un bouton **« Gérer »** sur chaque ligne de la liste `/decido`, exploitant ce bypass existant. Vérifié visuellement (navigation réelle jusqu'à la page de résultats, 200, aucune erreur 403/404) et par un nouveau test Pest.
+
 ## [1.107.1] - 2026-07-16
 
 ### Fixed

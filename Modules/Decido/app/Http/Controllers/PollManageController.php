@@ -65,6 +65,13 @@ class PollManageController extends Controller
         $poll->creator_id = Auth::id();
         $poll->status = 'draft';
 
+        if ($isDateType) {
+            $poll->duration_minutes = (int) $validated['duration_minutes'];
+            $poll->range_start_time = $validated['range_start_time'];
+            $poll->range_end_time = $validated['range_end_time'];
+            $poll->step_minutes = (int) $validated['step_minutes'];
+        }
+
         $plainToken = Str::random(40);
         $poll->admin_token_hash = hash('sha256', $plainToken);
         $poll->save();

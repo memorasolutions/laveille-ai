@@ -46,7 +46,7 @@
                                         Créé le {{ $poll->created_at->locale('fr')->isoFormat('LL') }}
                                     </small>
                                 </div>
-                                <em class="text-muted fst-italic text-end">Gérer via le lien admin reçu à la création</em>
+                                <x-core::button :href="route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'proprietaire'])" variant="ghost" size="sm">Gérer</x-core::button>
                             </div>
                         @endforeach
                     </div>

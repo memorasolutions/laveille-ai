@@ -78,6 +78,22 @@ test('superadmin voit l’assistant de création (200)', function (): void {
     $this->actingAs($this->superadmin)->get(route('decido.create'))->assertStatus(200);
 });
 
+test('la liste "Mes sondages" contient un lien Gérer fonctionnel (owner-bypass, sans jeton valide)', function (): void {
+    // Round 4 adversarial : authorizeManage() a toujours un bypass propriétaire (Auth::id() ===
+    // creator_id) mais aucune vue ne générait de lien l'utilisant - impasse UX pour le créateur
+    // qui n'a plus son jeton admin. Le lien utilise un jeton placeholder, invalide en tant que
+    // tel, mais accepté car l'utilisateur connecté est bien le créateur du sondage.
+    $poll = decidoCreatePoll(['creator_id' => $this->superadmin->id]);
+
+    $indexResponse = $this->actingAs($this->superadmin)->get(route('decido.index'));
+    $indexResponse->assertStatus(200);
+    $indexResponse->assertSee(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'proprietaire']), false);
+
+    $this->actingAs($this->superadmin)
+        ->get(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'proprietaire']))
+        ->assertStatus(200);
+});
+
 // ── Création ────────────────────────────────────────────────────────────────
 
 test('superadmin peut créer un sondage de dates', function (): void {
@@ -103,6 +119,15 @@ test('superadmin peut créer un sondage de dates', function (): void {
     $this->assertGreaterThan(0, $poll->options()->count());
     $this->assertNotNull($poll->options()->first()->starts_at);
     $this->assertNotNull($poll->options()->first()->ends_at);
+
+    // Les paramètres de génération de créneaux doivent être persistés sur le sondage lui-même
+    // (pas seulement utilisés en mémoire par SlotGenerationService), pour toute fonctionnalité
+    // future de modification/régénération - trouvé NULL en base par une passe adversariale.
+    $poll = $poll->fresh();
+    $this->assertSame(30, $poll->duration_minutes);
+    $this->assertSame('09:00', $poll->range_start_time);
+    $this->assertSame('10:30', $poll->range_end_time);
+    $this->assertSame(30, $poll->step_minutes);
 });
 
 test('superadmin peut créer un sondage classique', function (): void {

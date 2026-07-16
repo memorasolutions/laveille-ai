@@ -17,6 +17,17 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.2 · 2026-07-16 · fix(decido) round 4 passe adversariale /100 : (1) les paramètres de
+ *     génération de créneaux (duration_minutes/range_start_time/range_end_time/step_minutes),
+ *     validés et déjà présents dans Poll::$fillable, n'étaient jamais assignés dans
+ *     PollManageController::store() — toujours NULL en base pour tout sondage de type date,
+ *     bloquant silencieusement toute future modification/régénération de créneaux. (2) la page
+ *     « Mes sondages » n'offrait aucun lien vers la gestion d'un sondage pour son créateur
+ *     connecté (seul le lien admin reçu à la création — perdu si non conservé — permettait d'y
+ *     accéder), malgré un bypass propriétaire déjà présent dans authorizeManage(). Ajout d'un
+ *     bouton « Gérer » exploitant ce bypass existant. Les deux trouvés par une passe adversariale
+ *     fraîche et indépendante (skill /100, angle parcours utilisateur plutôt que lecture de code).
+ *     Tests Pest ajoutés pour les deux (26/26 verts).
  *   1.107.1 · 2026-07-16 · fix(decido) fuseau horaire manquant dans PollExportService::exportIcs()
  *     - le même bug corrigé dans results.blade.php (v1.107.0) était aussi présent dans l'export
  *     ICS : DTSTART/DTEND utilisaient `->utc()` sur une valeur Carbon déjà mal étiquetée par le
@@ -1013,7 +1024,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 1;
+$lvPatch = 2;
 
 return [
     'major' => $lvMajor,
