@@ -988,6 +988,98 @@ test('la page de résultats ne génère pas de requêtes SQL supplémentaires pr
     $this->assertLessThan(10, $largeVolumeQueryCount, 'Nombre de requêtes SQL anormalement élevé pour une page de résultats.');
 });
 
+// ── Round 16 (skill /100) : atomicité de la création d'un sondage ──────────
+
+test('un échec en cours de création (Nème option) ne laisse aucun sondage fantôme en base (atomicité, type date)', function (): void {
+    // Round 16 (skill /100) : PollManageController::store() créait le Poll (INSERT immédiat via
+    // $poll->save()) PUIS bouclait sur la création de chaque PollOption (jusqu'à 500 créneaux pour
+    // le type "date") SANS aucune DB::transaction() - contrairement au pattern déjà en place pour
+    // Poll::claimShortUrl() (round 15) et PublicPollController::vote() (lockForUpdate). Seule une
+    // InvalidArgumentException (garde-fou >500 créneaux, round 9) était rattrapée pour supprimer
+    // manuellement le sondage orphelin ; toute AUTRE exception survenant en cours de boucle (ex.
+    // contrainte DB, perte de connexion, timeout - un risque réel avec des centaines d'INSERT
+    // séquentiels) n'était rattrapée nulle part et laissait un sondage "fantôme" en base :
+    // status='draft', options PARTIELLEMENT créées (les 2 premières), jamais supprimé ni jamais
+    // promu à status='open', visible dans "Mes sondages" du créateur mais définitivement
+    // inutilisable. Ce test force une exception injectée sur la création de la 3e PollOption (sur
+    // 6 créneaux générés par la plage testée) et prouve que ni le Poll ni ses options partielles
+    // ne survivent à l'échec, une fois DB::transaction() en place.
+    config()->set('decido.under_construction', false);
+    $futureDate = now()->addDays(10)->format('Y-m-d');
+
+    $created = 0;
+    PollOption::creating(function () use (&$created) {
+        $created++;
+        if ($created === 3) {
+            throw new RuntimeException('Panne DB simulée (round 16)');
+        }
+    });
+
+    $pollCountBefore = Poll::count();
+    $optionCountBefore = PollOption::count();
+
+    try {
+        $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+            'title' => 'Sondage atomicité date',
+            'type' => 'date',
+            'timezone' => 'America/Toronto',
+            'duration_minutes' => 30,
+            'range_start_time' => '09:00',
+            'range_end_time' => '12:00', // 6 créneaux générés, largement > 3
+            'step_minutes' => 30,
+            'candidate_dates' => [$futureDate],
+        ]);
+
+        // La panne DB simulée n'est jamais une InvalidArgumentException (message convivial) : elle
+        // remonte telle quelle et Laravel la convertit en réponse d'erreur serveur - preuve que le
+        // code testé est réellement passé par l'exception injectée, pas contourné silencieusement.
+        $response->assertServerError();
+
+        expect(Poll::count())->toBe($pollCountBefore, 'Un sondage fantôme (draft, options incomplètes) a survécu à l’échec.');
+        expect(PollOption::count())->toBe($optionCountBefore, 'Des options partielles ont survécu à l’échec en cours de boucle.');
+        expect(Poll::where('title', 'Sondage atomicité date')->exists())->toBeFalse();
+    } finally {
+        PollOption::flushEventListeners();
+    }
+});
+
+test('un échec en cours de création (2e option) ne laisse aucun sondage fantôme en base (atomicité, type classique)', function (): void {
+    // Round 16 (skill /100) : même bug d'atomicité que le test précédent, sur le second chemin de
+    // code (type "classique", options texte libre au lieu de créneaux générés) - la boucle de
+    // création des PollOption est structurellement identique (foreach ... $poll->options()->create)
+    // et n'était pas davantage protégée pour ce type.
+    config()->set('decido.under_construction', false);
+
+    $created = 0;
+    PollOption::creating(function () use (&$created) {
+        $created++;
+        if ($created === 2) {
+            throw new RuntimeException('Panne DB simulée (round 16, type classique)');
+        }
+    });
+
+    $pollCountBefore = Poll::count();
+    $optionCountBefore = PollOption::count();
+
+    try {
+        $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+            'title' => 'Sondage atomicité classique',
+            'type' => 'classic',
+            'timezone' => 'America/Toronto',
+            'vote_mode' => 'single_choice',
+            'options' => ['Pizza', 'Sushi', 'Poutine'],
+        ]);
+
+        $response->assertServerError();
+
+        expect(Poll::count())->toBe($pollCountBefore);
+        expect(PollOption::count())->toBe($optionCountBefore);
+        expect(Poll::where('title', 'Sondage atomicité classique')->exists())->toBeFalse();
+    } finally {
+        PollOption::flushEventListeners();
+    }
+});
+
 test('decido:purge-expired supprime les sondages clôturés expirés et épargne les autres', function (): void {
     $expired = decidoCreatePoll(['status' => 'closed']);
     $expired->expires_at = now()->subDay();

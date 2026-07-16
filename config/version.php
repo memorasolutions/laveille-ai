@@ -17,6 +17,19 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.14 · 2026-07-16 · fix(decido) round 16 passe adversariale /100 (angle atomicité
+ *     création) : PollManageController::store() insérait le Poll PUIS bouclait sur la création de
+ *     ses PollOption (jusqu'à 500 créneaux pour le type date) sans DB::transaction() - seule
+ *     l'InvalidArgumentException du garde-fou 500 créneaux (round 9) était rattrapée pour
+ *     supprimer manuellement le sondage. Toute AUTRE exception en cours de boucle (contrainte DB,
+ *     perte de connexion, timeout - réaliste avec des centaines d'INSERT séquentiels) laissait un
+ *     sondage fantôme en base (status='draft', options partielles), jamais promu à 'open', visible
+ *     dans "Mes sondages" mais inutilisable. Toute la création (Poll + options + passage à
+ *     status='open') enveloppée dans un seul DB::transaction() - rollback automatique sur toute
+ *     exception. 2 nouveaux tests (exception injectée sur la Nème option, types date ET classique)
+ *     - vérifiés rouges contre l'ancien code avant le fix, verts après. Timing attack sur la
+ *     vérification du jeton admin également audité : déjà clean (hash_equals() en place depuis
+ *     l'origine). 50/50 tests Pest verts.
  *   1.107.13 · 2026-07-16 · fix(decido) round 15 passe adversariale /100 (angle race condition
  *     lien court) : PollManageController::createShortLink() lisait short_url_id sur l'instance
  *     Eloquent déjà chargée en début de méthode, créait le ShortUrl, PUIS écrivait - sans
@@ -1181,7 +1194,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 13;
+$lvPatch = 14;
 
 return [
     'major' => $lvMajor,

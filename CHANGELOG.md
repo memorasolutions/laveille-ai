@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.14] - 2026-07-16
+
+### Fixed
+- **Décido — création d'un sondage non atomique pouvait laisser un sondage fantôme en base.** `PollManageController::store()` insérait le `Poll` puis bouclait sur la création de ses `PollOption` (jusqu'à 500 créneaux pour le type date) sans transaction — seul le garde-fou 500 créneaux était rattrapé pour nettoyer manuellement. Toute autre exception en cours de boucle (contrainte DB, perte de connexion, timeout) laissait un sondage `status='draft'` avec des options partielles, jamais promu à `open`, visible dans « Mes sondages » mais inutilisable. Toute la création (Poll + options + passage à `open`) est désormais enveloppée dans un seul `DB::transaction()`.
+
+Trouvé par une passe adversariale indépendante (skill `/100`, round 16, angle atomicité). 50/50 tests Pest verts.
+
 ## [1.107.13] - 2026-07-16
 
 ### Fixed

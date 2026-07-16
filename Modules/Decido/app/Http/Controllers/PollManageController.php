@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
@@ -69,75 +70,91 @@ class PollManageController extends Controller
             'options.*' => $isDateType ? ['nullable'] : ['required', 'string', 'max:255', 'distinct'],
         ]);
 
-        $poll = new Poll;
-        $poll->title = $validated['title'];
-        $poll->description = $validated['description'] ?? null;
-        $poll->type = $validated['type'];
-        $poll->vote_mode = $isDateType ? 'yes_no_maybe' : $validated['vote_mode'];
-        $poll->timezone = $validated['timezone'];
-        $poll->creator_id = Auth::id();
-        $poll->status = 'draft';
-
-        if ($isDateType) {
-            $poll->duration_minutes = (int) $validated['duration_minutes'];
-            $poll->range_start_time = $validated['range_start_time'];
-            $poll->range_end_time = $validated['range_end_time'];
-            $poll->step_minutes = (int) $validated['step_minutes'];
-        }
-
-        $plainToken = Str::random(40);
-        $poll->admin_token_hash = hash('sha256', $plainToken);
-        $poll->save();
-
+        // Round 16 (skill /100) : la création du Poll (INSERT immédiat via $poll->save()) puis la
+        // boucle de création de ses PollOption (jusqu'à 500 créneaux pour le type "date") n'étaient
+        // enveloppées dans AUCUNE transaction. Seule une InvalidArgumentException (garde-fou >500
+        // créneaux, round 9) était rattrapée pour supprimer manuellement le sondage orphelin ;
+        // toute AUTRE exception survenant en cours de boucle (contrainte DB, perte de connexion,
+        // timeout) - un scénario réel avec des centaines d'INSERT séquentiels - propageait
+        // simplement l'erreur sans jamais nettoyer : un sondage "fantôme" restait en base
+        // (status='draft', options partiellement créées), jamais promu à 'open', visible dans "Mes
+        // sondages" du créateur mais définitivement inutilisable. DB::transaction() enveloppe
+        // désormais la création complète (Poll + toutes ses options + passage à status='open') :
+        // toute exception, quel que soit son type, annule intégralement l'opération (rollback
+        // automatique) avant d'être soit rattrapée ci-dessous (message convivial), soit
+        // retransmise telle quelle (page d'erreur générique) - dans les deux cas sans aucune trace
+        // partielle en base.
         try {
-            if ($isDateType) {
-                $slotService = new SlotGenerationService;
-                $slots = $slotService->generateSlots(
-                    $validated['candidate_dates'],
-                    $validated['range_start_time'],
-                    $validated['range_end_time'],
-                    (int) $validated['duration_minutes'],
-                    (int) $validated['step_minutes'],
-                    $validated['timezone']
-                );
+            [$poll, $plainToken] = DB::transaction(function () use ($validated, $isDateType) {
+                $poll = new Poll;
+                $poll->title = $validated['title'];
+                $poll->description = $validated['description'] ?? null;
+                $poll->type = $validated['type'];
+                $poll->vote_mode = $isDateType ? 'yes_no_maybe' : $validated['vote_mode'];
+                $poll->timezone = $validated['timezone'];
+                $poll->creator_id = Auth::id();
+                $poll->status = 'draft';
 
-                // Round 9 (skill /100) : le plafond de 60 dates candidates seul ne borne pas le
-                // volume total (plage large + pas court peut générer des centaines de créneaux
-                // par date) - 3800 créneaux créés en test réel sans ce garde-fou. Même pattern
-                // d'erreur que SlotGenerationService::validateInputs() (poll supprimé, formulaire
-                // renvoyé avec l'erreur).
-                if (count($slots) > 500) {
-                    throw new InvalidArgumentException(
-                        'Le nombre total de créneaux générés ('.count($slots).') dépasse la limite de 500. Réduis le nombre de dates, la plage horaire ou augmente le pas de temps.'
+                if ($isDateType) {
+                    $poll->duration_minutes = (int) $validated['duration_minutes'];
+                    $poll->range_start_time = $validated['range_start_time'];
+                    $poll->range_end_time = $validated['range_end_time'];
+                    $poll->step_minutes = (int) $validated['step_minutes'];
+                }
+
+                $plainToken = Str::random(40);
+                $poll->admin_token_hash = hash('sha256', $plainToken);
+                $poll->save();
+
+                if ($isDateType) {
+                    $slotService = new SlotGenerationService;
+                    $slots = $slotService->generateSlots(
+                        $validated['candidate_dates'],
+                        $validated['range_start_time'],
+                        $validated['range_end_time'],
+                        (int) $validated['duration_minutes'],
+                        (int) $validated['step_minutes'],
+                        $validated['timezone']
                     );
+
+                    // Round 9 (skill /100) : le plafond de 60 dates candidates seul ne borne pas le
+                    // volume total (plage large + pas court peut générer des centaines de créneaux
+                    // par date) - 3800 créneaux créés en test réel sans ce garde-fou. Cette exception
+                    // déclenche désormais le rollback automatique de DB::transaction() (round 16) au
+                    // lieu d'un $poll->delete() manuel.
+                    if (count($slots) > 500) {
+                        throw new InvalidArgumentException(
+                            'Le nombre total de créneaux générés ('.count($slots).') dépasse la limite de 500. Réduis le nombre de dates, la plage horaire ou augmente le pas de temps.'
+                        );
+                    }
+
+                    foreach ($slots as $index => $slot) {
+                        $poll->options()->create([
+                            'label' => $slot['label'],
+                            'starts_at' => $slot['starts_at'],
+                            'ends_at' => $slot['ends_at'],
+                            'sort_order' => $index,
+                        ]);
+                    }
+                } else {
+                    foreach ($validated['options'] as $index => $optionLabel) {
+                        $poll->options()->create([
+                            'label' => $optionLabel,
+                            'starts_at' => null,
+                            'ends_at' => null,
+                            'sort_order' => $index,
+                        ]);
+                    }
                 }
 
-                foreach ($slots as $index => $slot) {
-                    $poll->options()->create([
-                        'label' => $slot['label'],
-                        'starts_at' => $slot['starts_at'],
-                        'ends_at' => $slot['ends_at'],
-                        'sort_order' => $index,
-                    ]);
-                }
-            } else {
-                foreach ($validated['options'] as $index => $optionLabel) {
-                    $poll->options()->create([
-                        'label' => $optionLabel,
-                        'starts_at' => null,
-                        'ends_at' => null,
-                        'sort_order' => $index,
-                    ]);
-                }
-            }
+                $poll->status = 'open';
+                $poll->save();
+
+                return [$poll, $plainToken];
+            });
         } catch (InvalidArgumentException $e) {
-            $poll->delete();
-
             return Redirect::back()->withInput()->withErrors(['candidate_dates' => $e->getMessage()]);
         }
-
-        $poll->status = 'open';
-        $poll->save();
 
         Session::flash('admin_token_plain', $plainToken);
 
