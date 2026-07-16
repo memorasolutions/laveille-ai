@@ -536,6 +536,58 @@ test('demander un lien court deux fois ne crée pas deux short_url distincts', f
     expect($poll->short_url_id)->toBe($firstShortUrlId);
 });
 
+// ── Round 15 (skill /100) : race condition réelle sur la création de lien court ────────────
+
+test('Poll::claimShortUrl() sous interleaving réel (deux instances périmées du même sondage) ne crée qu’un seul ShortUrl', function (): void {
+    // Round 15 (skill /100) : le test précédent ("demander un lien court deux fois...") rejoue
+    // les deux requêtes STRICTEMENT l'une après l'autre, avec un $poll->refresh() explicite entre
+    // les deux - il prouve seulement le comportement SÉQUENTIEL, pas une vraie concurrence.
+    // L'ancien code (PollManageController::createShortLink) lisait `$pollModel->short_url_id` sur
+    // l'instance Eloquent chargée en tout début de méthode, PUIS créait le ShortUrl, PUIS
+    // écrivait - sans transaction ni verrou. Deux requêtes HTTP arrivant à quelques millisecondes
+    // d'écart auraient chacune leur PROPRE copie mémoire de $pollModel, toutes deux avec
+    // short_url_id=NULL au moment de la lecture (aucune ne voit l'écriture de l'autre avant sa
+    // propre lecture) - ce test reproduit fidèlement cette fenêtre de course en fabriquant
+    // délibérément deux instances Eloquent DISTINCTES et périmées du même sondage (chargées avant
+    // toute écriture, comme le seraient deux requêtes concurrentes) et en appelant sur CHACUNE la
+    // méthode de revendication du lien court.
+    //
+    // Avec l'ancien code (ou une implémentation naïve `if ($this->short_url_id) return; ... create
+    // ...; $this->update(...)`), les DEUX appels passeraient le garde (chaque instance a sa propre
+    // copie mémoire de short_url_id=NULL, jamais mise à jour par l'écriture de l'autre) et
+    // créeraient chacune un ShortUrl distinct - ce test échouerait alors (count() === 2). Le
+    // correctif (Poll::claimShortUrl(), DB::transaction + lockForUpdate) ignore délibérément l'état
+    // en mémoire de l'instance passée et relit la VÉRITÉ FRAÎCHE depuis la base à l'intérieur du
+    // verrou avant de décider - propriété exacte qui, sous une vraie concurrence MySQL en
+    // production, ferait attendre la seconde transaction jusqu'à ce que la première commette.
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-race-shortlink']);
+    PollOption::factory()->create(['poll_id' => $poll->id]);
+
+    $pollForRequestA = Poll::find($poll->id);
+    $pollForRequestB = Poll::find($poll->id);
+    expect($pollForRequestA->short_url_id)->toBeNull();
+    expect($pollForRequestB->short_url_id)->toBeNull();
+
+    $service = app(\Modules\ShortUrl\Services\ShortUrlService::class);
+
+    // Baseline scopée à CE sondage (pas un count() global) : la migration
+    // Modules/ShortUrl/database/migrations/2026_06_14_120000_create_qt_short_link.php insère un
+    // ShortUrl "qt" indépendant à chaque exécution de RefreshDatabase - compter la table entière
+    // produirait un faux résultat sans rapport avec la race condition testée ici.
+    $countShortUrlsForThisPoll = fn () => \Modules\ShortUrl\Models\ShortUrl::where('original_url', $poll->share_url)->count();
+    expect($countShortUrlsForThisPoll())->toBe(0);
+
+    $shortUrlFromA = $pollForRequestA->claimShortUrl($poll->creator_id, $service);
+    $shortUrlFromB = $pollForRequestB->claimShortUrl($poll->creator_id, $service);
+
+    expect($shortUrlFromA)->not->toBeNull();
+    expect($shortUrlFromB)->not->toBeNull();
+    expect($shortUrlFromB->id)->toBe($shortUrlFromA->id);
+    expect($countShortUrlsForThisPoll())->toBe(1);
+    expect($poll->fresh()->short_url_id)->toBe($shortUrlFromA->id);
+});
+
 test('un jeton admin invalide ne peut pas créer de lien court (403)', function (): void {
     config()->set('decido.under_construction', false);
     $poll = decidoCreatePoll(['admin_token' => 'le-vrai-jeton-3']);

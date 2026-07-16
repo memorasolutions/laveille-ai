@@ -254,20 +254,14 @@ class PollManageController extends Controller
                 ->withErrors(['shortlink' => "Le service de liens courts n'est pas disponible."]);
         }
 
-        if ($pollModel->short_url_id) {
-            return Redirect::route('decido.manage', ['poll' => $pollModel->public_id, 'adminToken' => $adminToken]);
-        }
-
         $userId = $pollModel->creator_id ?? Auth::id();
 
-        $shortUrl = app(\Modules\ShortUrl\Services\ShortUrlService::class)->createShortUrl([
-            'original_url' => $pollModel->share_url,
-            'title' => 'Sondage Décido : '.$pollModel->title,
-            'redirect_type' => 301,
-            'is_active' => true,
-        ], $userId);
-
-        $pollModel->update(['short_url_id' => $shortUrl->id]);
+        // Round 15 (skill /100) : la création + l'écriture du lien court passent désormais par
+        // Poll::claimShortUrl(), qui relit l'état à l'intérieur d'une transaction verrouillée
+        // (lockForUpdate) au lieu de faire confiance à $pollModel (potentiellement périmée sous
+        // requêtes concurrentes) - voir le commentaire de la méthode pour le détail de la race
+        // condition corrigée.
+        $pollModel->claimShortUrl($userId, app(\Modules\ShortUrl\Services\ShortUrlService::class));
 
         return Redirect::route('decido.manage', ['poll' => $pollModel->public_id, 'adminToken' => $adminToken])
             ->with('success', 'Lien court créé.');

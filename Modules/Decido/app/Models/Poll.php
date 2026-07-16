@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\Decido\Database\Factories\PollFactory;
 use Modules\Decido\Enums\PollStatus;
@@ -143,6 +144,53 @@ class Poll extends Model
         // redondantes observées via query log réel). $this->shortUrl passe par la relation
         // Eloquent, mise en cache après le premier accès.
         return $this->shortUrl?->getShortUrl();
+    }
+
+    /**
+     * Crée (si nécessaire) et associe un lien court au sondage, à l'abri d'une double création
+     * sous requêtes concurrentes.
+     *
+     * Round 15 (skill /100) : PollManageController::createShortLink() vérifiait
+     * `$pollModel->short_url_id` sur l'instance déjà chargée en début de méthode, PUIS créait le
+     * ShortUrl, PUIS écrivait - sans transaction ni verrou, contrairement au pattern déjà en place
+     * pour le vote/la clôture (PublicPollController::vote(), lockForUpdate). Deux requêtes quasi
+     * simultanées (ex. double-clic sur "Créer un lien court") pouvaient toutes deux lire
+     * short_url_id=NULL avant que l'une ou l'autre n'ait écrit, créant CHACUNE un ShortUrl distinct
+     * - la seconde écriture écrasait silencieusement la première, orphelinant un ShortUrl jamais
+     * référencé ni nettoyé (aucune contrainte unique sur decido_polls.short_url_id). Le correctif
+     * relit l'état à l'intérieur d'une transaction verrouillée (lockForUpdate) au lieu de faire
+     * confiance à l'instance $this, potentiellement périmée : sous MySQL en production, la seconde
+     * requête concurrente attend que la première commette avant de relire, et retrouve alors
+     * short_url_id déjà posé - elle n'appelle donc jamais ShortUrlService::createShortUrl() une
+     * seconde fois.
+     */
+    public function claimShortUrl(int $userId, \Modules\ShortUrl\Services\ShortUrlService $service): ?\Modules\ShortUrl\Models\ShortUrl
+    {
+        return DB::transaction(function () use ($userId, $service) {
+            $locked = static::whereKey($this->id)->lockForUpdate()->first();
+
+            if (! $locked) {
+                return null;
+            }
+
+            if ($locked->short_url_id) {
+                // Une requête concurrente a déjà créé le lien court entre-temps : on renvoie le
+                // sien plutôt que d'en créer un second.
+                return $locked->shortUrl;
+            }
+
+            $shortUrl = $service->createShortUrl([
+                'original_url' => $locked->share_url,
+                'title' => 'Sondage Décido : '.$locked->title,
+                'redirect_type' => 301,
+                'is_active' => true,
+            ], $userId);
+
+            $locked->update(['short_url_id' => $shortUrl->id]);
+            $this->short_url_id = $shortUrl->id;
+
+            return $shortUrl;
+        });
     }
 
     public function setAdminToken(string $plainToken): void

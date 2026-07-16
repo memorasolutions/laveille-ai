@@ -17,6 +17,20 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.13 · 2026-07-16 · fix(decido) round 15 passe adversariale /100 (angle race condition
+ *     lien court) : PollManageController::createShortLink() lisait short_url_id sur l'instance
+ *     Eloquent déjà chargée en début de méthode, créait le ShortUrl, PUIS écrivait - sans
+ *     transaction ni verrou, contrairement au pattern déjà en place pour le vote/la clôture
+ *     (lockForUpdate). Deux requêtes quasi simultanées (double-clic, retry réseau) pouvaient
+ *     chacune lire short_url_id=NULL avant qu'aucune n'ait écrit, créer chacune un ShortUrl
+ *     distinct, la seconde écriture écrasant silencieusement la première - orphelinant un
+ *     ShortUrl jamais référencé (aucune contrainte unique sur decido_polls.short_url_id).
+ *     Nouvelle méthode Poll::claimShortUrl() qui relit l'état dans une transaction verrouillée
+ *     au lieu de faire confiance à l'instance potentiellement périmée. Test avec deux instances
+ *     Eloquent périmées distinctes du même sondage (interleaving réel, pas juste séquentiel) -
+ *     échouait avant le fix (count=2), passe après. Le round 14 avait été le premier verdict
+ *     CLEAN depuis le round 3 ; ce round 15 non-clean remet le compteur à zéro. 48/48 tests
+ *     Pest verts.
  *   1.107.12 · 2026-07-16 · fix(sentry) round 13 passe adversariale /100 Décido (fuite tierce
  *     serveur) : Sentry\Integration\RequestIntegration capture inconditionnellement l'URL complète
  *     de la requête (event.request.url) sur chaque exception rapportée, MÊME quand
@@ -1167,7 +1181,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 12;
+$lvPatch = 13;
 
 return [
     'major' => $lvMajor,

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.13] - 2026-07-16
+
+### Fixed
+- **Décido — race condition sur la création de lien court pouvait orpheliner un `ShortUrl`.** `PollManageController::createShortLink()` lisait `short_url_id` sur l'instance Eloquent déjà chargée en début de méthode, créait le `ShortUrl`, puis écrivait — sans transaction ni verrou, contrairement au pattern déjà en place pour le vote/la clôture. Deux requêtes quasi simultanées (double-clic, retry réseau) pouvaient chacune lire `short_url_id=NULL` avant qu'aucune n'ait écrit, créer chacune un `ShortUrl` distinct, la seconde écriture écrasant silencieusement la première — orphelinant un `ShortUrl` jamais référencé. Nouvelle méthode `Poll::claimShortUrl()` qui relit l'état dans une transaction verrouillée (`lockForUpdate`) au lieu de faire confiance à l'instance potentiellement périmée.
+
+Trouvé par une passe adversariale indépendante (skill `/100`, round 15, angle concurrence réelle). Le round 14 avait été le premier verdict CLEAN depuis le round 3 ; ce round non-clean remet le compteur à zéro. 48/48 tests Pest verts.
+
 ## [1.107.12] - 2026-07-16
 
 ### Fixed
