@@ -49,7 +49,10 @@ class PollManageController extends Controller
             'range_start_time' => $isDateType ? ['required', 'date_format:H:i'] : ['nullable'],
             'range_end_time' => $isDateType ? ['required', 'date_format:H:i', 'after:range_start_time'] : ['nullable'],
             'step_minutes' => $isDateType ? ['required', 'integer', 'in:15,30,60'] : ['nullable'],
-            'candidate_dates' => $isDateType ? ['required', 'array', 'min:1'] : ['nullable'],
+            // max:60 = round 9 (skill /100) : aucune borne n'existait, contrairement au type
+            // classique (déjà plafonné à 20 options ci-dessous) - 3800 créneaux générés en test
+            // réel (40 dates x plage large x pas 15 min), risque de performance/abus.
+            'candidate_dates' => $isDateType ? ['required', 'array', 'min:1', 'max:60'] : ['nullable'],
             'candidate_dates.*' => $isDateType ? ['date', 'after_or_equal:today'] : ['nullable'],
             'vote_mode' => $isDateType ? ['nullable'] : ['required', 'in:single_choice,approval'],
             'options' => $isDateType ? ['nullable'] : ['required', 'array', 'min:2', 'max:20'],
@@ -87,6 +90,17 @@ class PollManageController extends Controller
                     (int) $validated['step_minutes'],
                     $validated['timezone']
                 );
+
+                // Round 9 (skill /100) : le plafond de 60 dates candidates seul ne borne pas le
+                // volume total (plage large + pas court peut générer des centaines de créneaux
+                // par date) - 3800 créneaux créés en test réel sans ce garde-fou. Même pattern
+                // d'erreur que SlotGenerationService::validateInputs() (poll supprimé, formulaire
+                // renvoyé avec l'erreur).
+                if (count($slots) > 500) {
+                    throw new InvalidArgumentException(
+                        'Le nombre total de créneaux générés ('.count($slots).') dépasse la limite de 500. Réduis le nombre de dates, la plage horaire ou augmente le pas de temps.'
+                    );
+                }
 
                 foreach ($slots as $index => $slot) {
                     $poll->options()->create([

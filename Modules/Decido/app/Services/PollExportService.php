@@ -82,7 +82,7 @@ class PollExportService
         $summary = $this->escapeIcsText($poll->title);
         $description = $this->escapeIcsText($poll->description ?? '');
 
-        $ics = implode("\r\n", [
+        $lines = [
             'BEGIN:VCALENDAR',
             'VERSION:2.0',
             'PRODID:-//Decido//laveille.ai//FR',
@@ -96,10 +96,46 @@ class PollExportService
             'STATUS:CONFIRMED',
             'END:VEVENT',
             'END:VCALENDAR',
-            '',
-        ]);
+        ];
+
+        // Round 9 (skill /100) : aucun pliage de ligne n'existait - un titre long/unicode produit
+        // une ligne SUMMARY dépassant largement la limite RFC 5545 §3.1 (75 octets), risquant une
+        // troncature par des lecteurs de calendrier stricts (ex. Outlook/Exchange).
+        $ics = implode("\r\n", array_map($this->foldIcsLine(...), $lines))."\r\n";
 
         return $ics;
+    }
+
+    /**
+     * Plie une ligne de contenu ICS conformément à RFC 5545 §3.1 : une ligne physique ne doit
+     * pas dépasser 75 octets (hors saut de ligne) ; le pliage insère un CRLF suivi d'une espace
+     * unique, et ne doit jamais couper au milieu d'une séquence UTF-8 multi-octets.
+     */
+    private function foldIcsLine(string $line): string
+    {
+        $totalBytes = strlen($line);
+
+        if ($totalBytes <= 75) {
+            return $line;
+        }
+
+        $folded = [];
+        $offset = 0;
+        $limit = 75;
+
+        while ($offset < $totalBytes) {
+            $end = min($offset + $limit, $totalBytes);
+
+            while ($end < $totalBytes && $end > $offset && (ord($line[$end]) & 0xC0) === 0x80) {
+                $end--;
+            }
+
+            $folded[] = substr($line, $offset, $end - $offset);
+            $offset = $end;
+            $limit = 74; // les lignes de continuation commencent par une espace (1 octet du budget de 75).
+        }
+
+        return implode("\r\n ", $folded);
     }
 
     private function escapeIcsText(string $text): string

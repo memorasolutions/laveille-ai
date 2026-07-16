@@ -17,6 +17,19 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.8 · 2026-07-16 · fix(decido) round 9 passe adversariale /100 (angle migrations/rollback
+ *     + données limites) : (1) aucun pliage de ligne conforme RFC 5545 §3.1 (limite 75 octets)
+ *     dans l'export ICS - un titre long/unicode produisait une ligne SUMMARY de plusieurs
+ *     centaines d'octets, risquant une troncature par des lecteurs de calendrier stricts (Outlook/
+ *     Exchange). PollExportService::foldIcsLine() ajouté (pliage UTF-8-safe, jamais au milieu
+ *     d'une séquence multi-octets). (2) aucune borne sur candidate_dates (contrairement au type
+ *     classique déjà plafonné à 20 options) ni sur le volume total de créneaux générés - 3800
+ *     options créées en test réel (40 dates x plage large x pas 15 min). Ajout de max:60 sur
+ *     candidate_dates + plafond de 500 créneaux total (même pattern d'erreur que
+ *     SlotGenerationService::validateInputs()). Cycle complet rollback/remigrate des 5 migrations
+ *     Décido testé réel (aucune erreur, schéma identique), titre 255 caractères + unicode/emoji +
+ *     XSS stocké via voter_pseudonym tous vérifiés propres par l'auditeur (aucune faille trouvée).
+ *     38/38 tests Pest verts.
  *   1.107.7 · 2026-07-16 · fix(decido) round 8 passe adversariale /100 (angle mobile réel + DST +
  *     frontières d'intégration) : (1) boutons "+ Ajouter une date/option" et "Retirer" de
  *     create.blade.php sous la cible tactile AAA 44x44px (le fix touch-target des rounds 6-7
@@ -1106,7 +1119,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 7;
+$lvPatch = 8;
 
 return [
     'major' => $lvMajor,

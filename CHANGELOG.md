@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.8] - 2026-07-16
+
+### Fixed
+- **Décido — export ICS sans pliage de ligne conforme RFC 5545.** Un titre de sondage long ou contenant des caractères unicode produisait une ligne `SUMMARY:` de plusieurs centaines d'octets, dépassant largement la limite RFC 5545 §3.1 (75 octets/ligne) — risque de troncature par des lecteurs de calendrier stricts (Outlook/Exchange). `PollExportService::foldIcsLine()` ajouté, plie chaque ligne de contenu ICS sans jamais couper au milieu d'une séquence UTF-8 multi-octets.
+- **Décido — aucune borne sur le nombre de dates candidates ni sur le volume total de créneaux générés.** Contrairement au type de sondage classique (déjà plafonné à 20 options), le type "date" n'avait aucune limite — 3800 options créées en test réel avec 40 dates candidates × une large plage horaire × un pas de 15 minutes. Ajout d'un plafond de 60 dates candidates et d'un plafond de 500 créneaux au total.
+
+Trouvés par une passe adversariale indépendante (skill `/100`, round 9, angle réversibilité des migrations + cas limites de données — cycle complet rollback/remigrate testé réellement sans erreur, titre 255 caractères, unicode/emoji et XSS stocké via `voter_pseudonym` tous vérifiés propres). 38/38 tests Pest verts.
+
 ## [1.107.7] - 2026-07-16
 
 ### Fixed

@@ -162,6 +162,48 @@ test('création sans titre retourne une erreur de validation, pas une exception'
     $response->assertSessionHasErrors('title');
 });
 
+test('61 dates candidates dépasse le plafond de validation (max:60)', function (): void {
+    // Round 9 (skill /100) : aucune borne n'existait sur candidate_dates, contrairement au type
+    // classique déjà plafonné à 20 options.
+    $dates = collect(range(1, 61))->map(fn ($i) => now()->addDays($i)->format('Y-m-d'))->all();
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage trop de dates',
+        'type' => 'date',
+        'timezone' => 'America/Toronto',
+        'duration_minutes' => 30,
+        'range_start_time' => '09:00',
+        'range_end_time' => '10:00',
+        'step_minutes' => 30,
+        'candidate_dates' => $dates,
+    ]);
+
+    $response->assertSessionHasErrors('candidate_dates');
+    expect(Poll::where('title', 'Sondage trop de dates')->exists())->toBeFalse();
+});
+
+test('un volume total de créneaux excessif (>500) est refusé même sous 60 dates candidates', function (): void {
+    // Round 9 (skill /100) : 60 dates x plage large x pas court peut encore générer des
+    // centaines de créneaux par date - le plafond de dates seul ne suffit pas. 3800 créneaux
+    // créés en test réel avant ce fix (40 dates x plage 00:00-23:45 x pas 15 min).
+    config()->set('decido.under_construction', false);
+    $dates = collect(range(1, 30))->map(fn ($i) => now()->addDays($i)->format('Y-m-d'))->all();
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage volume excessif',
+        'type' => 'date',
+        'timezone' => 'America/Toronto',
+        'duration_minutes' => 15,
+        'range_start_time' => '00:00',
+        'range_end_time' => '23:45',
+        'step_minutes' => 15,
+        'candidate_dates' => $dates,
+    ]);
+
+    $response->assertSessionHasErrors('candidate_dates');
+    expect(Poll::where('title', 'Sondage volume excessif')->exists())->toBeFalse();
+});
+
 // ── Vote public ─────────────────────────────────────────────────────────────
 
 test('votant anonyme peut voir un sondage ouvert', function (): void {
@@ -439,6 +481,34 @@ test('le DTSTART de l’export ICS reflète l’heure UTC réelle, pas un fuseau
     $response->assertStatus(200);
     $this->assertStringContainsString('DTSTART:20260801T130000Z', $response->getContent());
     $this->assertStringContainsString('DTEND:20260801T140000Z', $response->getContent());
+});
+
+test('l’export ICS plie les lignes trop longues conformément à RFC 5545 (aucune ligne > 75 octets)', function (): void {
+    // Round 9 (skill /100) : aucun pliage de ligne n'existait - un titre long/unicode produisait
+    // une ligne SUMMARY de plusieurs centaines d'octets, dépassant largement la limite RFC 5545
+    // §3.1 (75 octets/ligne), risquant une troncature par des lecteurs de calendrier stricts.
+    $longTitle = str_repeat('Réunion café ☕ São Paulo 🎉 ', 6); // > 75 octets une fois encodé UTF-8, < 255 caractères
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-ics-fold', 'type' => 'date', 'status' => 'closed', 'title' => $longTitle]);
+    $option = PollOption::factory()->create([
+        'poll_id' => $poll->id,
+        'starts_at' => \Carbon\Carbon::create(2026, 8, 1, 13, 0, 0, 'UTC'),
+        'ends_at' => \Carbon\Carbon::create(2026, 8, 1, 14, 0, 0, 'UTC'),
+    ]);
+    $poll->final_option_id = $option->id;
+    $poll->save();
+    $poll = $poll->fresh(['options']);
+
+    $response = $this->get(route('decido.export.ics', ['poll' => $poll->public_id, 'adminToken' => 'jeton-ics-fold']));
+    $response->assertStatus(200);
+
+    foreach (explode("\r\n", $response->getContent()) as $physicalLine) {
+        $this->assertLessThanOrEqual(75, strlen($physicalLine), "Ligne ICS physique > 75 octets : {$physicalLine}");
+    }
+
+    // Le titre complet doit rester reconstituable en dépliant (retirer CRLF + espace de continuation).
+    $unfolded = str_replace("\r\n ", '', $response->getContent());
+    $this->assertStringContainsString($longTitle, $unfolded);
 });
 
 // ── Clôture ───────────────────────────────────────────────────────────────
