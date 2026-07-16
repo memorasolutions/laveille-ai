@@ -17,6 +17,15 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.10 · 2026-07-16 · fix(decido) round 11 passe adversariale /100 (angle intégrité des
+ *     données de vote) : aucune règle de validation n'empêchait de soumettre deux fois la même
+ *     date candidate ou deux options classiques au libellé identique - SlotGenerationService/store()
+ *     créait alors deux PollOption distinctes strictement identiques. Les votants choisissant "la
+ *     même" carte visuellement voyaient leur vote silencieusement scindé entre les deux lignes en
+ *     base, faussant le décompte final sans jamais remonter d'erreur (ex. 5 votes réels pour "Pizza"
+ *     affichés 3/2 sur deux lignes séparées). Règle 'distinct' ajoutée sur candidate_dates.* et
+ *     options.* dans PollManageController::store(). 2 nouveaux tests Pest (double date candidate
+ *     rejetée, double option identique rejetée). 41/41 tests Pest verts.
  *   1.107.9 · 2026-07-16 · feat(tools) Décido listé sur /outils, marqué "en construction"
  *     (superadmin-only) + fix(decido) round 10 passe adversariale /100 (SEO) : (1) migration
  *     réversible ajoute l'entrée "decido" à la table tools (is_under_construction=true, pattern
@@ -1131,7 +1140,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 9;
+$lvPatch = 10;
 
 return [
     'major' => $lvMajor,

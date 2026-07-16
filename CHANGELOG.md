@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.10] - 2026-07-16
+
+### Fixed
+- **Décido — dates candidates ou options en double faussaient silencieusement le décompte des votes.** Aucune règle de validation n'empêchait de soumettre deux fois la même date candidate, ou deux options classiques au libellé strictement identique — `PollManageController::store()` créait alors deux `PollOption` distinctes en tout point identiques. Les votants qui cliquaient l'une ou l'autre carte voyaient leur vote silencieusement scindé entre les deux lignes en base, faussant le résultat final sans jamais faire remonter d'erreur (ex. 5 votes réels pour « Pizza » affichés 3/2 sur deux lignes séparées au lieu de révéler la vraie majorité). Règle `distinct` ajoutée sur `candidate_dates.*` et `options.*`.
+
+Trouvé par une passe adversariale indépendante (skill `/100`, round 11, angle intégrité des données de vote). 41/41 tests Pest verts.
+
 ## [1.107.9] - 2026-07-16
 
 ### Added

@@ -204,6 +204,45 @@ test('un volume total de créneaux excessif (>500) est refusé même sous 60 dat
     expect(Poll::where('title', 'Sondage volume excessif')->exists())->toBeFalse();
 });
 
+test('soumettre deux fois la même date candidate est rejeté (distinct) au lieu de créer des créneaux dupliqués', function (): void {
+    // Round 11 (skill /100) : avant le fix, cette requête créait le sondage avec DEUX jeux de
+    // créneaux strictement identiques pour la même date (labels et starts_at/ends_at
+    // identiques), scindant silencieusement les votes entre deux PollOption distinctes.
+    config()->set('decido.under_construction', false);
+    $futureDate = now()->addDays(10)->format('Y-m-d');
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage date dupliquée',
+        'type' => 'date',
+        'timezone' => 'America/Toronto',
+        'duration_minutes' => 30,
+        'range_start_time' => '09:00',
+        'range_end_time' => '10:00',
+        'step_minutes' => 30,
+        'candidate_dates' => [$futureDate, $futureDate],
+    ]);
+
+    $response->assertSessionHasErrors('candidate_dates.0');
+    expect(Poll::where('title', 'Sondage date dupliquée')->exists())->toBeFalse();
+});
+
+test('soumettre deux options classiques au libellé identique est rejeté (distinct) au lieu de scinder les votes', function (): void {
+    // Round 11 (skill /100) : même faille pour le type classique - "Pizza"/"Pizza" créait deux
+    // PollOption distinctes, chacune accumulant sa propre part des votes séparément.
+    config()->set('decido.under_construction', false);
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage option dupliquée',
+        'type' => 'classic',
+        'timezone' => 'America/Toronto',
+        'vote_mode' => 'single_choice',
+        'options' => ['Pizza', 'Pizza'],
+    ]);
+
+    $response->assertSessionHasErrors('options.0');
+    expect(Poll::where('title', 'Sondage option dupliquée')->exists())->toBeFalse();
+});
+
 // ── Vote public ─────────────────────────────────────────────────────────────
 
 test('votant anonyme peut voir un sondage ouvert', function (): void {

@@ -53,10 +53,20 @@ class PollManageController extends Controller
             // classique (déjà plafonné à 20 options ci-dessous) - 3800 créneaux générés en test
             // réel (40 dates x plage large x pas 15 min), risque de performance/abus.
             'candidate_dates' => $isDateType ? ['required', 'array', 'min:1', 'max:60'] : ['nullable'],
-            'candidate_dates.*' => $isDateType ? ['date', 'after_or_equal:today'] : ['nullable'],
+            // 'distinct' = round 11 (skill /100) : aucune règle n'empêchait de soumettre deux fois
+            // la même date candidate (double-clic, copier-coller, requête forgée) - SlotGenerationService
+            // générait alors deux jeux de créneaux strictement identiques (même libellé, mêmes
+            // starts_at/ends_at), créés comme deux PollOption distinctes. Les votants qui cliquaient
+            // l'une ou l'autre carte voyaient leurs votes silencieusement scindés entre les deux
+            // lignes dans les résultats, faussant le décompte sans jamais remonter d'erreur.
+            'candidate_dates.*' => $isDateType ? ['date', 'after_or_equal:today', 'distinct'] : ['nullable'],
             'vote_mode' => $isDateType ? ['nullable'] : ['required', 'in:single_choice,approval'],
             'options' => $isDateType ? ['nullable'] : ['required', 'array', 'min:2', 'max:20'],
-            'options.*' => $isDateType ? ['nullable'] : ['required', 'string', 'max:255'],
+            // 'distinct' = round 11 (skill /100) : même faille pour le type classique - deux options
+            // au libellé strictement identique ("Pizza" / "Pizza") créaient deux PollOption distinctes,
+            // scindant les votes de la même façon (un sondage à 5 votes pour "Pizza" pouvait afficher
+            // 3 et 2 sur deux lignes séparées au lieu de révéler la vraie majorité).
+            'options.*' => $isDateType ? ['nullable'] : ['required', 'string', 'max:255', 'distinct'],
         ]);
 
         $poll = new Poll;
