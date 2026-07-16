@@ -17,6 +17,19 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.6 · 2026-07-16 · fix(decido) round 7 passe adversariale /100 (angle performance/N+1 +
+ *     vérification E2E réelle) : (1) Poll::getShortUrlString() faisait un
+ *     ShortUrl::find($this->short_url_id) brut, jamais mis en cache - la page de résultats
+ *     appelant cette méthode 3 fois par chargement, 6 requêtes short_urls/short_url_domains
+ *     strictement redondantes observées via query log réel. Remplacé par $this->shortUrl (relation
+ *     Eloquent, mise en cache après le premier accès). (2) decido:purge-expired (round 5) chargeait
+ *     tous les sondages expirés en mémoire (->get()) puis émettait une requête DELETE individuelle
+ *     par sondage en boucle - défaut de conception qui empire linéairement avec le volume ; remplacé
+ *     par un DELETE en masse (aucun hook Eloquent deleting/deleted enregistré sur Poll, cascades
+ *     options/votes au niveau contrainte FK DB - comportement strictement identique, confirmé par
+ *     lecture). Vérification E2E réelle effectuée par l'auditeur (création/vote/clôture/export
+ *     CSV+ICS réels, contenu des fichiers exportés lu et validé) : tout le reste confirmé propre.
+ *     32/32 tests Pest verts.
  *   1.107.5 · 2026-07-16 · fix(decido) suppression du créateur orpheline le sondage au lieu de
  *     cascader. Décision explicite de l'utilisateur (question posée après le finding round 5) :
  *     cascadeOnDelete() sur creator_id détruisait INTÉGRALEMENT un sondage (créneaux + tous les
@@ -1071,7 +1084,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 5;
+$lvPatch = 6;
 
 return [
     'major' => $lvMajor,

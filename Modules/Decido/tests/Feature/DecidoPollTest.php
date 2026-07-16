@@ -268,6 +268,27 @@ test('créer un lien court associe un short_url_id au sondage et affiche le lien
         ->assertSee($poll->getShortUrlString(), escape: false);
 });
 
+test('Poll::getShortUrlString() ne ré-interroge pas la DB à chaque appel (fix N+1 round 7)', function (): void {
+    // Round 7 adversarial (skill /100) : ::find() brut à chaque appel générait 3 requêtes
+    // short_urls redondantes par chargement de results.blade.php (3 appels dans la vue).
+    // $this->shortUrl (relation Eloquent) est mis en cache après le premier accès.
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-n1']);
+    PollOption::factory()->create(['poll_id' => $poll->id]);
+    $this->post(route('decido.shortlink', ['poll' => $poll->public_id, 'adminToken' => 'jeton-n1']));
+    $poll->refresh();
+
+    \Illuminate\Support\Facades\DB::enableQueryLog();
+    $poll->getShortUrlString();
+    $poll->getShortUrlString();
+    $poll->getShortUrlString();
+    $shortUrlQueries = collect(\Illuminate\Support\Facades\DB::getQueryLog())
+        ->filter(fn ($q) => str_contains($q['query'], 'short_urls'));
+    \Illuminate\Support\Facades\DB::disableQueryLog();
+
+    expect($shortUrlQueries)->toHaveCount(1);
+});
+
 test('supprimer le compte créateur orpheline le sondage au lieu de le supprimer en cascade', function (): void {
     // Décision utilisateur (2026-07-16) : cascadeOnDelete détruisait intégralement un sondage
     // (créneaux + TOUS les votes de tiers) dès que le créateur supprimait son compte, sans

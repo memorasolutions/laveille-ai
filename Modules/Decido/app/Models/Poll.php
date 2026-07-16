@@ -132,9 +132,11 @@ class Poll extends Model
             return null;
         }
 
-        $shortUrl = \Modules\ShortUrl\Models\ShortUrl::find($this->short_url_id);
-
-        return $shortUrl?->getShortUrl();
+        // Round 7 (skill /100) : ::find() brut ré-interrogeait la DB à chaque appel - la vue
+        // results.blade.php appelle cette méthode 3 fois par chargement de page (6 requêtes
+        // redondantes observées via query log réel). $this->shortUrl passe par la relation
+        // Eloquent, mise en cache après le premier accès.
+        return $this->shortUrl?->getShortUrl();
     }
 
     public function setAdminToken(string $plainToken): void

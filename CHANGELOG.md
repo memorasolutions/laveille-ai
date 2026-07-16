@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.6] - 2026-07-16
+
+### Fixed
+- **Décido — requêtes redondantes (N+1) sur `Poll::getShortUrlString()`.** Un `ShortUrl::find()` brut, jamais mis en cache, était exécuté à chaque appel — la page de résultats appelant cette méthode 3 fois par chargement (6 requêtes `short_urls`/`short_url_domains` redondantes observées via query log réel). Remplacé par `$this->shortUrl` (relation Eloquent, mise en cache après le premier accès), nouveau test de non-régression comptant les requêtes réelles.
+- **Décido — `decido:purge-expired` chargeait tous les sondages expirés en mémoire avant de les supprimer un par un.** Défaut de conception qui empire linéairement avec le volume (aucun problème aujourd'hui, confirmé par exécution réelle). Remplacé par un `DELETE` en masse — comportement strictement identique (aucun hook Eloquent `deleting`/`deleted` enregistré sur `Poll`, cascades options/votes déjà au niveau contrainte FK de la base de données).
+
+Trouvés par une passe adversariale indépendante (skill `/100`, round 7, angle performance/N+1 + vérification end-to-end réelle : création/vote/clôture de sondages réels, contenu des exports CSV/ICS lu et validé, `decido:purge-expired` exécuté réellement). 32/32 tests Pest verts.
+
 ## [1.107.5] - 2026-07-16
 
 ### Fixed

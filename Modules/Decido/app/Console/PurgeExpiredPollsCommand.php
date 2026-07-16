@@ -23,16 +23,19 @@ class PurgeExpiredPollsCommand extends Command
 
     public function handle(): int
     {
-        $expired = Poll::where('status', 'closed')
+        // Round 7 (skill /100) : chargeait tous les sondages expirés en memoire (->get()) puis
+        // emettait une requete DELETE individuelle par sondage en boucle - defaut de conception
+        // qui empire lineairement avec le volume. Remplace par un DELETE en masse : aucun hook
+        // Eloquent deleting/deleted n'est enregistre sur Poll (verifie), et les cascades vers
+        // options/votes sont au niveau contrainte FK DB (cascadeOnDelete), pas au niveau Eloquent
+        // - donc un DELETE en masse se comporte de facon strictement identique et reste sur.
+        $query = Poll::where('status', 'closed')
             ->whereNotNull('expires_at')
-            ->where('expires_at', '<', now())
-            ->get();
+            ->where('expires_at', '<', now());
 
-        foreach ($expired as $poll) {
-            $poll->delete();
-        }
+        $count = $query->count();
+        $query->delete();
 
-        $count = $expired->count();
         $this->info("Sondages Decido expires supprimes : {$count}.");
 
         return self::SUCCESS;
