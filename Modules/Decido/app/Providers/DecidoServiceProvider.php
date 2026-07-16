@@ -53,7 +53,9 @@ class DecidoServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        // $this->commands([]);
+        $this->commands([
+            \Modules\Decido\Console\PurgeExpiredPollsCommand::class,
+        ]);
     }
 
     /**

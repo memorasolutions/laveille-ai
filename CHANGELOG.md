@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.3] - 2026-07-16
+
+### Fixed
+- **Décido — injection de formule CSV (OWASP CSV Injection).** `voter_pseudonym`, texte libre contrôlé par un votant anonyme non authentifié, était écrit verbatim dans les cellules du CSV exporté par l'organisateur. Une valeur commençant par `=`, `+`, `-`, `@`, une tabulation ou un retour chariot est interprétée comme une formule active par Excel/Google Sheets à l'ouverture (ex. `=HYPERLINK(...)` pouvant exfiltrer des données). Nouvelle méthode `PollExportService::sanitizeCsvCell()` qui préfixe d'une apostrophe toute valeur à risque, appliquée à `voter_pseudonym` et `option->label`. Trouvé par une passe adversariale indépendante (skill `/100`, round 5).
+- **Décido — aucun anti-abus sur la création de sondage ni le vote anonyme.** `decido.store` et `decido.vote.store` n'avaient aucune limite de fréquence, permettant en théorie un bourrage d'urnes (cookies `decido_voter_*` illimités) ou un spam de création de sondages. Ajout de `throttle:10,1` (création) et `throttle:20,1` (vote).
+- **Décido — politique de rétention `expires_at` jamais appliquée.** Le champ était écrit à la clôture d'un sondage (`PollManageController::close()`) mais jamais relu nulle part ailleurs dans le module — aucune purge réelle ne se produisait malgré le commentaire de config l'annonçant. Nouvelle commande `decido:purge-expired` (pattern calqué sur `shorturl:cleanup-expired`), planifiée quotidiennement à 06h15 (`routes/console.php`).
+
 ## [1.107.2] - 2026-07-16
 
 ### Fixed

@@ -17,6 +17,19 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.3 · 2026-07-16 · fix(decido) round 5 passe adversariale /100 (angle sécurité/
+ *     autorisation/cas limites) : (1) injection de formule CSV (OWASP CSV Injection) - un
+ *     votant anonyme contrôle voter_pseudonym, texte libre écrit verbatim dans le CSV export
+ *     sans neutraliser =/+/-/@ en tête de cellule, exécuté comme formule active à l'ouverture
+ *     Excel/Sheets par l'organisateur ; nouvelle méthode PollExportService::sanitizeCsvCell().
+ *     (2) aucun rate limiting sur decido.store (création de sondage) ni decido.vote.store (vote
+ *     anonyme) - bourrage d'urnes / spam de sondages possible ; ajout throttle:10,1 et
+ *     throttle:20,1. (3) expires_at était écrit à la clôture d'un sondage mais jamais lu ailleurs
+ *     dans le module - politique de rétention morte ; nouvelle commande decido:purge-expired
+ *     (pattern calqué sur shorturl:cleanup-expired) planifiée quotidiennement à 06h15. Les
+ *     points d'autorisation explicitement re-vérifiés par l'audit (collision du jeton placeholder
+ *     'proprietaire', IDOR sur les 6 routes admin, revote/cookie voter) étaient déjà corrects.
+ *     29/29 tests Pest verts + régression ciblée ShortUrl/Core (126/126).
  *   1.107.2 · 2026-07-16 · fix(decido) round 4 passe adversariale /100 : (1) les paramètres de
  *     génération de créneaux (duration_minutes/range_start_time/range_end_time/step_minutes),
  *     validés et déjà présents dans Poll::$fillable, n'étaient jamais assignés dans
@@ -1024,7 +1037,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 2;
+$lvPatch = 3;
 
 return [
     'major' => $lvMajor,

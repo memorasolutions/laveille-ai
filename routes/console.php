@@ -125,6 +125,9 @@ Schedule::command('privacy:purge-expired')->dailyAt('02:30');
 // Short URLs - nettoyage liens expires + avertissements 30j
 Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
 
+// Decido - purge sondages clotures expires (expires_at, round 5 skill /100)
+Schedule::command('decido:purge-expired')->dailyAt('06:15');
+
 // Messages de contact - purge de la quarantaine spam de plus de 60 jours (hebdo).
 // Passe par le schedule:run deja en place (pas un nouveau cron serveur). Defensif :
 // table possiblement absente en contexte de portabilite/migration.

