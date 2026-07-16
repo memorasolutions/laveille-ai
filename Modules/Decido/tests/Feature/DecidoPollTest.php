@@ -769,6 +769,173 @@ test('decido.store et decido.vote.store portent un middleware throttle (anti-abu
     expect($voteMiddleware->contains(fn ($m) => str_starts_with($m, 'throttle:')))->toBeTrue();
 });
 
+// ── Round 14 (skill /100) : injection d'en-tête HTTP, ResponseCache, N+1 volumétrique ──────
+
+test('un titre de sondage malveillant (CRLF, guillemets) n’est jamais reflété dans les en-têtes HTTP des exports (filename = identifiant opaque, jamais le titre)', function (): void {
+    // Round 14 (skill /100) : le titre du sondage est fourni par un créateur authentifié (mais
+    // texte libre non validé pour l'usage "nom de fichier") et réutilisé dans le CONTENU de
+    // l'ICS (SUMMARY, déjà neutralisé par escapeIcsText au round 9). Hypothèse testée ici :
+    // est-il AUSSI injecté dans l'en-tête Content-Disposition (filename="...") des exports
+    // CSV/ICS/QR, ce qui permettrait une injection d'en-tête HTTP (CRLF) ou une confusion de
+    // nom de fichier via des guillemets non échappés ? Vérification du code
+    // (PollManageController::exportCsv/exportIcs/qrCode) : les trois `Content-Disposition`
+    // utilisent exclusivement `$pollModel->public_id` (Str::random(12), alphanumérique pur,
+    // généré serveur, jamais dérivé du titre) - le titre n'apparaît JAMAIS dans un en-tête.
+    // Ce test le PROUVE avec un titre réellement malveillant, via une requête HTTP réelle.
+    config()->set('decido.under_construction', false);
+    $maliciousTitle = "Réunion\"; x=\r\nX-Injected: pwned\r\n\r\n<script>alert(1)</script>";
+
+    $poll = decidoCreatePoll([
+        'admin_token' => 'jeton-header-injection',
+        'title' => $maliciousTitle,
+        'type' => 'date',
+        'status' => 'closed',
+    ]);
+    $option = $poll->options()->create([
+        'label' => 'Créneau',
+        'sort_order' => 0,
+        'starts_at' => now()->addDay(),
+        'ends_at' => now()->addDay()->addMinutes(30),
+    ]);
+    $poll->final_option_id = $option->id;
+    $poll->save();
+
+    $csvResponse = $this->get(route('decido.export.csv', ['poll' => $poll->public_id, 'adminToken' => 'jeton-header-injection']));
+    $icsResponse = $this->get(route('decido.export.ics', ['poll' => $poll->public_id, 'adminToken' => 'jeton-header-injection']));
+    $qrResponse = $this->get(route('decido.qr', ['poll' => $poll->public_id, 'adminToken' => 'jeton-header-injection']));
+
+    foreach (['csv' => $csvResponse, 'ics' => $icsResponse, 'qr' => $qrResponse] as $kind => $response) {
+        $response->assertStatus(200);
+        $disposition = $response->headers->get('Content-Disposition');
+
+        // Aucun caractère du titre malveillant ne doit apparaître dans l'en-tête.
+        $this->assertStringNotContainsString('X-Injected', $disposition, "Export {$kind} : injection d'en-tête détectée.");
+        $this->assertStringNotContainsString('<script>', $disposition, "Export {$kind} : titre reflété dans l'en-tête.");
+        $this->assertStringNotContainsString("\r", $disposition, "Export {$kind} : CR brut dans l'en-tête (aurait cassé la réponse HTTP).");
+        $this->assertStringNotContainsString("\n", $disposition, "Export {$kind} : LF brut dans l'en-tête (aurait cassé la réponse HTTP).");
+        // Le filename attendu ne contient que l'identifiant public opaque (alphanumérique).
+        $this->assertMatchesRegularExpression('/filename="[a-zA-Z0-9\-]+(-votes)?\.(csv|ics|png)"/', $disposition);
+    }
+
+    // Contrôle positif : le titre malveillant apparaît bien QUELQUE PART (dans le corps ICS,
+    // neutralisé par escapeIcsText - round 9), preuve que ce n'est pas juste un test qui ne
+    // passe jamais par le code concerné.
+    $this->assertStringContainsString('Réunion', $icsResponse->getContent());
+});
+
+test('aucune route de gestion/vote/résultats Décido ne porte le middleware cacheResponse (incident #683 Modules/Tools : page personnalisée figée et servie à tous)', function (): void {
+    // Round 14 (skill /100) : Modules/Tools a déjà eu un incident réel où une page personnalisée
+    // par rôle/jeton était mise en cache HTTP serveur (Spatie ResponseCache) et servie ensuite à
+    // TOUS les visiteurs suivants. Décido est structurellement identique (page /gerer/{adminToken}
+    // affichant pseudonymes et jeton admin propres à CHAQUE sondage) - si `cacheResponse` était
+    // appliqué par erreur, le premier chargement de la page de gestion d'un sondage A figerait
+    // cette réponse et la SERVIRAIT à quiconque visite ensuite /decido/{n'importe-quel-poll}/gerer/...
+    // (le cache Spatie clé généralement par URL complète, donc le risque réel dépend des query
+    // strings, mais zéro tolérance ici : cacheResponse n'a AUCUNE légitimité sur du contenu privé
+    // par jeton). Confirmé par lecture directe de Modules/Decido/routes/web.php : aucune route ne
+    // déclare `cacheResponse`. Ce test le fige pour empêcher toute régression future.
+    $decidoRouteNames = [
+        'decido.index', 'decido.create', 'decido.store',
+        'decido.manage', 'decido.close', 'decido.export.csv', 'decido.export.ics',
+        'decido.shortlink', 'decido.qr', 'decido.vote.show', 'decido.vote.store',
+    ];
+
+    foreach ($decidoRouteNames as $name) {
+        $route = Route::getRoutes()->getByName($name);
+        expect($route)->not->toBeNull("Route {$name} introuvable.");
+
+        $middleware = collect($route->gatherMiddleware());
+        expect($middleware->contains(fn ($m) => str_starts_with($m, 'cacheResponse')))
+            ->toBeFalse("La route {$name} porte le middleware cacheResponse - fuite de données inter-sondages possible.");
+    }
+
+    // Contrôle négatif : prouve que la détection fonctionne réellement (sinon l'assertion
+    // ci-dessus passerait trivialement même avec une détection cassée) - une route connue pour
+    // porter réellement cacheResponse ailleurs sur le site le déclenche bien.
+    $toolsRoute = Route::getRoutes()->getByName('tools.index');
+    if ($toolsRoute) {
+        $toolsMiddleware = collect($toolsRoute->gatherMiddleware());
+        expect($toolsMiddleware->contains(fn ($m) => str_starts_with($m, 'cacheResponse')))->toBeTrue();
+    }
+});
+
+test('la page de résultats ne génère pas de requêtes SQL supplémentaires proportionnelles au nombre de votes (200+ votes réels, pas d’échantillon)', function (): void {
+    // Round 14 (skill /100) : les rounds précédents (7, 11) avaient déjà corrigé des N+1 ciblés
+    // (getShortUrlString, distinct sur candidate_dates/options) mais jamais mesuré le comportement
+    // de la page de résultats à un volume réaliste de votes. PollManageController::manage() fait
+    // `$pollModel->load(['options.votes'])` (eager loading) puis toute l'agrégation
+    // (results.blade.php) se fait en mémoire sur les collections déjà chargées (flatMap/unique/
+    // groupBy) - aucune requête supplémentaire ne devrait apparaître, quel que soit le nombre de
+    // votes. Ce test le PROUVE avec 210 votes réellement insérés en DB (pas un échantillon de 2-3
+    // votes comme les tests fonctionnels ci-dessus), en comparant le compte de requêtes à faible
+    // et fort volume.
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-volume-n1', 'vote_mode' => 'single_choice']);
+    $options = PollOption::factory()->count(5)->create(['poll_id' => $poll->id]);
+
+    // Volume faible : 5 votes.
+    foreach (range(1, 5) as $i) {
+        $options->random()->votes()->create([
+            'poll_id' => $poll->id,
+            'voter_token' => "petit-volume-{$i}",
+            'voter_pseudonym' => "Votant {$i}",
+            'value' => 'selected',
+        ]);
+    }
+
+    // Ne compter que les requêtes touchant les tables decido_* : le reste de la requête HTTP
+    // (settings applicatifs, cookies de consentement, IP bloquées, cache de session...) peut
+    // varier en nombre de requêtes d'un appel à l'autre indépendamment du volume de votes
+    // (mise en cache applicative interne réchauffée après le premier appel) - compter le TOTAL
+    // brut produirait un faux positif/négatif sans rapport avec l'hypothèse N+1 testée ici.
+    $countDecidoQueries = fn () => collect(\Illuminate\Support\Facades\DB::getQueryLog())
+        ->filter(fn ($q) => str_contains($q['query'], 'decido_'))
+        ->count();
+
+    \Illuminate\Support\Facades\DB::enableQueryLog();
+    $this->get(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-volume-n1']))->assertStatus(200);
+    $smallVolumeQueryCount = $countDecidoQueries();
+    \Illuminate\Support\Facades\DB::flushQueryLog();
+
+    // Volume élevé : 210 votes supplémentaires répartis sur les 5 options (215 votants distincts
+    // au total), insertion réelle en DB.
+    $rows = [];
+    foreach (range(1, 210) as $i) {
+        $rows[] = [
+            'poll_id' => $poll->id,
+            'option_id' => $options->random()->id,
+            'voter_token' => "gros-volume-{$i}",
+            'voter_pseudonym' => "Votant volume {$i}",
+            'value' => 'selected',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+    }
+    \Illuminate\Support\Facades\DB::table('decido_poll_votes')->insert($rows);
+
+    expect(PollVote::where('poll_id', $poll->id)->count())->toBe(215);
+
+    // flushQueryLog() vide le tampon mais NE désactive PAS la capture (déjà active depuis plus
+    // haut) - sans ce flush, l'INSERT en masse ci-dessus serait lui-même comptabilisé comme une
+    // requête « decido_ » et fausserait la comparaison à la hausse indépendamment de tout N+1 réel.
+    \Illuminate\Support\Facades\DB::flushQueryLog();
+    $response = $this->get(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-volume-n1']));
+    $largeVolumeQueryCount = $countDecidoQueries();
+    \Illuminate\Support\Facades\DB::disableQueryLog();
+
+    $response->assertStatus(200);
+    $response->assertSee('215 participant(s)', false);
+
+    // Le nombre de requêtes SQL ne doit PAS croître avec le nombre de votes (eager loading
+    // options.votes = 1 requête poll + 1 options + 1 votes, quel que soit le volume).
+    $this->assertSame(
+        $smallVolumeQueryCount,
+        $largeVolumeQueryCount,
+        "Le nombre de requêtes SQL a changé entre 5 votes ({$smallVolumeQueryCount}) et 215 votes ({$largeVolumeQueryCount}) - N+1 potentiel."
+    );
+    $this->assertLessThan(10, $largeVolumeQueryCount, 'Nombre de requêtes SQL anormalement élevé pour une page de résultats.');
+});
+
 test('decido:purge-expired supprime les sondages clôturés expirés et épargne les autres', function (): void {
     $expired = decidoCreatePoll(['status' => 'closed']);
     $expired->expires_at = now()->subDay();
