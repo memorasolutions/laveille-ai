@@ -17,6 +17,20 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.12 · 2026-07-16 · fix(sentry) round 13 passe adversariale /100 Décido (fuite tierce
+ *     serveur) : Sentry\Integration\RequestIntegration capture inconditionnellement l'URL complète
+ *     de la requête (event.request.url) sur chaque exception rapportée, MÊME quand
+ *     send_default_pii=false (ce flag ne protège que cookies/headers/IP, jamais l'URL). Le jeton
+ *     admin Décido transite dans le CHEMIN de l'URL (/decido/{poll}/gerer/{adminToken}, pas en
+ *     query string, donc invisible d'un audit "pas de token en paramètre") - toute exception levée
+ *     pendant le traitement d'une requête de gestion l'aurait envoyé en clair vers Sentry (tiers
+ *     hors UE). Même famille de fuite que le round 12 (GA4/page_location) mais vecteur distinct
+ *     (télémétrie d'erreurs serveur, pas analytics navigateur - le fix GA4 ne le couvrait pas).
+ *     Nouveau service générique/réutilisable Modules\Core\Services\SentryUrlScrubber (DRY - motif
+ *     regex extensible pour tout futur module avec jeton en chemin d'URL), branché via nouveau
+ *     config/sentry.php (clé before_send uniquement, fusionnée par mergeConfigFrom - aucune autre
+ *     option Sentry affectée). 2 nouveaux tests (jeton filtré avant envoi, chemin après le jeton
+ *     préservé). 44/44 tests Pest verts.
  *   1.107.11 · 2026-07-16 · fix(decido) round 12 passe adversariale /100 (angle fuite tierce) :
  *     le jeton admin Décido (contrôle total du sondage - clôture, export des pseudonymes des
  *     votants, lien court) transite en clair dans le CHEMIN de l'URL de gestion
@@ -1153,7 +1167,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 11;
+$lvPatch = 12;
 
 return [
     'major' => $lvMajor,

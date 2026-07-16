@@ -303,6 +303,54 @@ test('la page de gestion (jeton admin dans l’URL) ne transmet pas ce jeton à 
     $this->assertStringContainsString('googletagmanager.com', $indexHtml);
 });
 
+test('le jeton admin Décido dans l’URL est filtré avant tout envoi vers Sentry (before_send)', function (): void {
+    // Round 13 (skill /100) : Sentry\Integration\RequestIntegration capture INCONDITIONNELLEMENT
+    // l'URL complète de la requête (event.request.url), même avec send_default_pii=false (ce
+    // flag ne protège que cookies/headers/IP, jamais l'URL - vérifié dans le code source du SDK,
+    // vendor/sentry/sentry/src/Integration/RequestIntegration.php:129). La moindre exception
+    // levée pendant le traitement d'une requête /decido/{poll}/gerer/{adminToken}(/...) aurait
+    // donc envoyé le jeton admin (contrôle total du sondage) en clair vers Sentry, un tiers hors
+    // UE. Correctif : config/sentry.php 'before_send' branché sur SentryUrlScrubber, qui
+    // s'exécute (prouvé par Client::prepareEvent()) APRÈS que RequestIntegration a rempli
+    // request.url mais AVANT l'envoi au transport - la fenêtre exacte pour scruber sans rien
+    // casser d'autre. Même famille de fuite que le round 12 (GA4), angle distinct (télémétrie
+    // d'erreurs serveur, pas analytics navigateur).
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-secret-sentry']);
+
+    $url = route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-secret-sentry']);
+    expect($url)->toContain('jeton-secret-sentry');
+
+    $beforeSend = config('sentry.before_send');
+    expect($beforeSend)->toBeCallable();
+
+    $event = \Sentry\Event::createEvent();
+    $event->setRequest(['url' => $url, 'method' => 'GET']);
+
+    $scrubbed = $beforeSend($event, null);
+
+    expect($scrubbed)->not->toBeNull();
+    $scrubbedUrl = $scrubbed->getRequest()['url'];
+    expect($scrubbedUrl)->not->toContain('jeton-secret-sentry');
+    expect($scrubbedUrl)->toContain('/gerer/[jeton-filtre]');
+});
+
+test('SentryUrlScrubber préserve le chemin après le jeton admin (fermer/export/qr non tronqués)', function (): void {
+    // Preuve que le scrub ne consomme QUE le segment du jeton, pas les sous-routes de gestion
+    // qui suivent dans le chemin (fermer, export.csv, export.ics, lien-court, qr.png).
+    $scrubbed = \Modules\Core\Services\SentryUrlScrubber::scrubUrl(
+        'https://laveille.ai/decido/abc123def456/gerer/SUPERSECRETTOKEN1234567890/export.csv?foo=bar'
+    );
+
+    expect($scrubbed)
+        ->toBe('https://laveille.ai/decido/abc123def456/gerer/[jeton-filtre]/export.csv?foo=bar')
+        ->not->toContain('SUPERSECRETTOKEN1234567890');
+
+    // Contrôle négatif : une URL Décido sans jeton (page publique de vote) n'est pas altérée.
+    $publicUrl = 'https://laveille.ai/decido/abc123def456';
+    expect(\Modules\Core\Services\SentryUrlScrubber::scrubUrl($publicUrl))->toBe($publicUrl);
+});
+
 test('votant anonyme peut voter (yes_no_maybe)', function (): void {
     config()->set('decido.under_construction', false);
     $poll = decidoCreatePoll(['type' => 'date', 'vote_mode' => 'yes_no_maybe']);

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.12] - 2026-07-16
+
+### Fixed
+- **Décido — fuite du jeton admin vers Sentry (télémétrie d'erreurs serveur).** `Sentry\Integration\RequestIntegration` capture inconditionnellement l'URL complète de la requête (`event.request.url`) sur chaque exception rapportée, même avec `send_default_pii=false` (ce flag ne protège que cookies/headers/IP, jamais l'URL). Le jeton admin Décido transite dans le *chemin* de l'URL (`/decido/{poll}/gerer/{adminToken}`, invisible à un audit "pas de token en paramètre") : toute exception levée pendant une requête de gestion l'aurait envoyé en clair vers Sentry (tiers hors UE). Vecteur distinct du round 12 (GA4/`page_location`, uniquement navigateur) — télémétrie d'erreurs serveur, non couverte par ce fix. Nouveau service générique et réutilisable `Modules\Core\Services\SentryUrlScrubber` (motif regex extensible pour tout futur module exposant un jeton en chemin d'URL), branché via `config/sentry.php` (clé `before_send` uniquement, fusionnée par `mergeConfigFrom` - aucune autre option Sentry affectée).
+
+Trouvé par une passe adversariale indépendante (skill `/100`, round 13, angle brute-force/fuite tierce serveur). 44/44 tests Pest verts.
+
 ## [1.107.11] - 2026-07-16
 
 ### Fixed
