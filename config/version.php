@@ -17,6 +17,19 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.106.0 · 2026-07-16 · feat(decido) nouvel outil Décido (module Modules/Decido, type Framadate
+ *     repensé) : sondages "dates" (durée+plage+pas → créneaux auto-générés, SlotGenerationService)
+ *     et sondages "classiques" (options libres, single_choice/approval), lien admin à jeton
+ *     (SHA-256, jamais compte requis), votant anonyme via cookie signé, export CSV/ICS,
+ *     under_construction gate (503+noindex, superadmin-only pendant le développement), 20 tests
+ *     Pest. Fix découverts en vérification visuelle Playwright (non couverts par les tests car
+ *     les tests passaient des entiers PHP natifs, alors qu'un vrai POST HTML envoie des strings) :
+ *     (1) SlotGenerationService::generateSlots() recevait duration_minutes/step_minutes en string
+ *     depuis $request->validate() (Laravel "integer" valide mais ne caste pas) → TypeError sur le
+ *     typage strict du service, cast (int) ajouté au point d'appel ; (2) validation du vote
+ *     yes_no_maybe exigeait `required` sur CHAQUE créneau généré (jusqu'à 16+ radios obligatoires)
+ *     — cassait l'usage réel de l'outil (répondre seulement aux créneaux pertinents) → passé à
+ *     `sometimes` par créneau + `min:1` sur le tableau global (au moins une réponse).
  *   1.105.1 · 2026-07-12 · fix(ui) bandeau .wpo-breadcumb-area (titre de page + fil d'Ariane, en
  *     haut de presque toutes les pages du site) prenait trop de place verticale : min-height
  *     400px → 250px (aligné sur la valeur déjà utilisée en mobile, media query <767px désormais
@@ -971,8 +984,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 105;
-$lvPatch = 1;
+$lvMinor = 106;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

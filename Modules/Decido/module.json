@@ -1,0 +1,11 @@
+{
+    "name": "Decido",
+    "alias": "decido",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Decido\\Providers\\DecidoServiceProvider"
+    ],
+    "files": []
+}

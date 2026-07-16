@@ -52,5 +52,6 @@
     "Academy": true,
     "Sso": true,
     "Books": true,
-    "Journal": true
+    "Journal": true,
+    "Decido": true
 }

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.106.0] - 2026-07-16
+
+### Added
+- **Nouvel outil Décido** (`Modules/Decido`, nwidart) : générateur de sondages type Framadate repensé au complet (aucun code Framadate réutilisé). Deux types de sondages : **sondage de dates** (l'organisateur choisit d'abord la durée de la rencontre, la plage horaire et le pas entre créneaux ; `SlotGenerationService` génère automatiquement tous les créneaux candidats à partir des dates proposées) et **sondage classique** (options libres, mode `single_choice` ou `approval`). Vote anonyme sans compte requis (identité par cookie signé `decido_voter_{public_id}`, UUID, `updateOrCreate` idempotent pour la revote). Gestion sans compte pour l'organisateur non plus : lien admin à jeton (`admin_token_hash` SHA-256, `hash_equals`), généré une seule fois et affiché une seule fois. Export CSV et ICS (RFC 5545 minimal, sans dépendance Composer) disponibles depuis la page de gestion, ICS uniquement après clôture avec créneau final choisi. Réservé aux utilisateurs connectés pour la création ; **en construction (503 + `noindex`, superadmin-only)** jusqu'à mise en ligne publique. 20 tests Pest (création, vote, revote, clôture, exports, permissions admin-token, gate under-construction).
+
+### Fixed
+- **Décido — `TypeError` sur la création d'un sondage de dates** : `SlotGenerationService::generateSlots()` déclare `int $durationMinutes`/`int $stepMinutes` (typage strict) mais `PollManageController::store()` transmettait directement les valeurs de `$request->validate(['duration_minutes' => 'integer', ...])`, qui restent des **strings** après validation (la règle Laravel `integer` valide le format, elle ne caste pas la valeur). Les tests Pest passaient des entiers PHP natifs directement au service et ne l'ont donc jamais détecté ; découvert seulement à la vérification visuelle Playwright (soumission d'un vrai formulaire HTML → POST `application/x-www-form-urlencoded` → toutes les valeurs sont des strings). Fix : cast `(int)` explicite au point d'appel dans le contrôleur.
+- **Décido — validation du vote `yes_no_maybe` bloquait tout vote partiel.** Chaque créneau généré (potentiellement 16+ pour une seule journée) portait la règle `required`, forçant un votant à répondre Oui/Peut-être/Non à **tous** les créneaux avant de pouvoir soumettre — contraire au principe même de l'outil (répondre seulement aux créneaux pertinents), découvert en testant un vote réel via Playwright. Fix : règle par créneau passée à `sometimes`, avec `min:1` sur le tableau `votes` global pour continuer à refuser une soumission totalement vide.
+
 ## [1.105.1] - 2026-07-12
 
 ### Fixed
