@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.5] - 2026-07-16
+
+### Fixed
+- **Décido — suppression du compte créateur orpheline désormais le sondage au lieu de le cascader.** Décision explicite de l'utilisateur suite au finding round 5 : `cascadeOnDelete()` sur `creator_id` détruisait intégralement un sondage (créneaux + tous les votes de tiers) dès que le créateur supprimait son compte, sans préavis possible pour les votants anonymes (aucun compte requis pour voter). Nouvelle migration `2026_07_16_160000_orphan_instead_of_cascade_decido_polls_creator.php` : `creator_id` devient nullable + `nullOnDelete()` (réversible). Le sondage et tous les votes des participants survivent désormais, seule la gestion via compte devient indisponible (accès toujours possible via le lien admin à jeton).
+
 ## [1.107.4] - 2026-07-16
 
 ### Fixed

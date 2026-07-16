@@ -17,6 +17,15 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.5 · 2026-07-16 · fix(decido) suppression du créateur orpheline le sondage au lieu de
+ *     cascader. Décision explicite de l'utilisateur (question posée après le finding round 5) :
+ *     cascadeOnDelete() sur creator_id détruisait INTÉGRALEMENT un sondage (créneaux + tous les
+ *     votes de tiers) dès que le créateur supprimait son compte, sans préavis possible pour les
+ *     votants anonymes (aucun compte requis pour voter). Migration
+ *     2026_07_16_160000_orphan_instead_of_cascade_decido_polls_creator.php : creator_id devient
+ *     nullable + nullOnDelete() (réversible). authorizeManage() et index() déjà sûrs avec
+ *     creator_id NULL sans modification (vérifié par lecture + nouveau test). 31/31 tests Pest
+ *     verts.
  *   1.107.4 · 2026-07-16 · fix(decido) round 6 passe adversariale /100 (angle WCAG 2.2 AAA +
  *     français + concurrence/données réelles) : (1) le sélecteur "Type de sondage" de
  *     /decido/creer était inaccessible au clavier (radios class="d-none" = retirées de l'ordre
@@ -1062,7 +1071,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 4;
+$lvPatch = 5;
 
 return [
     'major' => $lvMajor,

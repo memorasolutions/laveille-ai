@@ -268,6 +268,29 @@ test('créer un lien court associe un short_url_id au sondage et affiche le lien
         ->assertSee($poll->getShortUrlString(), escape: false);
 });
 
+test('supprimer le compte créateur orpheline le sondage au lieu de le supprimer en cascade', function (): void {
+    // Décision utilisateur (2026-07-16) : cascadeOnDelete détruisait intégralement un sondage
+    // (créneaux + TOUS les votes de tiers) dès que le créateur supprimait son compte, sans
+    // préavis possible pour les votants anonymes. Remplacé par nullOnDelete (orphelinage).
+    $creator = User::factory()->create();
+    $poll = decidoCreatePoll(['creator_id' => $creator->id, 'admin_token' => 'jeton-orphelin']);
+    $option = $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+    $option->votes()->create([
+        'poll_id' => $poll->id,
+        'voter_token' => 'token-tiers',
+        'voter_pseudonym' => 'Un tiers',
+        'value' => 'selected',
+    ]);
+
+    $creator->delete();
+
+    $poll->refresh();
+    expect($poll)->not->toBeNull();
+    expect($poll->creator_id)->toBeNull();
+    expect($poll->options()->count())->toBe(1);
+    expect($option->fresh()->votes()->count())->toBe(1);
+});
+
 test('deux votants homonymes (même pseudonyme, voter_token différents) ne sont pas fusionnés dans les résultats', function (): void {
     // Round 6 adversarial (skill /100) : avant le fix, totalVoters/voterNames/matrix étaient
     // clés par voter_pseudonym (texte libre) au lieu de voter_token (identifiant réel) - un
