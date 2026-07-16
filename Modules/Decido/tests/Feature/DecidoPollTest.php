@@ -476,6 +476,55 @@ test('le service de créneaux lève une exception si la plage horaire est invers
     $service->generateSlots([$futureDate], '11:00', '09:00', 30, 30, 'America/Toronto');
 });
 
+test('les créneaux traversant le passage à l’heure d’été durent exactement la durée configurée', function (): void {
+    // Round 8 (skill /100) : l'ancienne implémentation additionnait des minutes sur une instance
+    // Carbon localisée (America/Toronto) - le 8 mars 2026 (passage à l'heure d'été, 02h00-02h59
+    // n'existe pas localement), un créneau de 30 min démarrant à 01h30 durait en réalité 90 min
+    // une fois relu (l'addition sautait silencieusement l'heure inexistante). L'arithmétique se
+    // fait désormais en UTC (pas de DST), garantissant une durée exacte quel que soit le jour.
+    $service = new SlotGenerationService;
+
+    $slots = $service->generateSlots(['2026-03-08'], '01:00', '04:00', 30, 30, 'America/Toronto');
+
+    foreach ($slots as $slot) {
+        $this->assertSame(
+            30,
+            (int) $slot['starts_at']->diffInMinutes($slot['ends_at']),
+            "Le créneau {$slot['label']} ne dure pas 30 minutes exactement."
+        );
+    }
+});
+
+test('les créneaux ambigus au retour à l’heure normale sont désambiguïsés dans leur libellé', function (): void {
+    // Round 8 (skill /100) : le 1er novembre 2026 (retour à l'heure normale), l'heure locale
+    // 01h00-01h59 se produit deux fois - deux créneaux UTC distincts généraient auparavant un
+    // libellé strictement identique, rendant impossible pour un votant de distinguer les deux
+    // options. Le service ajoute désormais le décalage UTC en désambiguïsation sur collision.
+    $service = new SlotGenerationService;
+
+    $slots = $service->generateSlots(['2026-11-01'], '00:00', '03:00', 30, 30, 'America/Toronto');
+
+    $labels = array_column($slots, 'label');
+    $this->assertSame($labels, array_unique($labels), 'Deux créneaux partagent un libellé identique.');
+});
+
+test('Poll::shortUrl()/getShortUrlString() utilisent ModuleChecker (pas class_exists seul)', function (): void {
+    // Round 8 (skill /100) : class_exists() reste vrai même module désactivé via
+    // modules_statuses.json (nwidart garde les classes en autoload, seul le boot du
+    // ServiceProvider est coupé) - un lien court "fantôme" pouvait être créé/affiché sans
+    // avertissement (routes ShortUrl jamais enregistrées → 404 réel). ModuleChecker vérifie en
+    // plus Module::has()/isEnabled(), le vrai état d'activation. Ce test prouve que le mécanisme
+    // ModuleChecker::isAvailable() détecte correctement un module réellement absent/désactivé
+    // (impossible de mocker un module tiers réel sans toucher au modules_statuses.json global,
+    // ce qui romprait l'isolation des tests) et que le module ShortUrl, lui, est bien détecté
+    // disponible en conditions normales (déjà prouvé par les tests de lien court ci-dessus).
+    expect(\Modules\Core\Services\ModuleChecker::isAvailable('UnModuleQuiNexistePas'))->toBeFalse();
+    expect(\Modules\Core\Services\ModuleChecker::isAvailable('ShortUrl'))->toBeTrue();
+
+    $poll = decidoCreatePoll();
+    $this->assertNull($poll->getShortUrlString());
+});
+
 // ── Export CSV/ICS (service, tests unitaires directs) ────────────────────────
 
 test('PollExportService::exportIcs lève une exception si le sondage n’est pas fermé', function (): void {

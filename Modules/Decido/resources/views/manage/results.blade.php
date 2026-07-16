@@ -332,16 +332,6 @@
         </div>
     </div>
 </section>
-{{-- Décido round 6 (skill /100) : cible tactile WCAG 2.5.5 AAA (44x44px) - le layout public
-     n'inclut pas .user-space (qui porte cette règle en charte.css), et .btn-sm de Bootstrap
-     tombe sous le seuil (~31px de hauteur) sur ces boutons secondaires. --}}
-<style>
-    .decido-touch-target {
-        min-height: 44px;
-        min-width: 44px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-</style>
+{{-- .decido-touch-target : voir public/css/charte.css (round 8, déplacé hors de cette vue pour
+     rester DRY - réutilisé aussi par create.blade.php et public/vote.blade.php). --}}
 @endsection

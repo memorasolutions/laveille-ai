@@ -221,7 +221,11 @@ class PollManageController extends Controller
 
         $this->authorizeManage($pollModel, $adminToken);
 
-        if (! class_exists(\Modules\ShortUrl\Services\ShortUrlService::class)) {
+        // Round 8 (skill /100) : class_exists() seul ne détecte pas un module ShortUrl désactivé
+        // via modules_statuses.json (nwidart garde les classes en autoload même désactivé) - un
+        // lien court "fantôme" pouvait être créé sans erreur, pointant vers des routes jamais
+        // enregistrées (404 réel). ModuleChecker vérifie le vrai état d'activation.
+        if (! \Modules\Core\Services\ModuleChecker::isAvailable('ShortUrl')) {
             return Redirect::route('decido.manage', ['poll' => $pollModel->public_id, 'adminToken' => $adminToken])
                 ->withErrors(['shortlink' => "Le service de liens courts n'est pas disponible."]);
         }

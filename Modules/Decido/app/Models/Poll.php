@@ -119,7 +119,13 @@ class Poll extends Model
 
     public function shortUrl(): ?BelongsTo
     {
-        if (! class_exists(\Modules\ShortUrl\Models\ShortUrl::class)) {
+        // Round 8 (skill /100) : class_exists() seul ne protège PAS contre un module désactivé
+        // via modules_statuses.json - nwidart-laravel-modules garde les classes dans le mapping
+        // PSR-4 Composer même module désactivé (seul le boot du ServiceProvider est coupé), donc
+        // class_exists() reste vrai et un lien court/QR "fantôme" (routes ShortUrl non
+        // enregistrées → 404 réel) pouvait être créé sans erreur ni avertissement. ModuleChecker
+        // vérifie en plus Module::has()/isEnabled(), le vrai état d'activation de la plateforme.
+        if (! \Modules\Core\Services\ModuleChecker::isAvailable('ShortUrl')) {
             return null;
         }
 
@@ -128,7 +134,7 @@ class Poll extends Model
 
     public function getShortUrlString(): ?string
     {
-        if (! $this->short_url_id || ! class_exists(\Modules\ShortUrl\Models\ShortUrl::class)) {
+        if (! $this->short_url_id || ! \Modules\Core\Services\ModuleChecker::isAvailable('ShortUrl')) {
             return null;
         }
 

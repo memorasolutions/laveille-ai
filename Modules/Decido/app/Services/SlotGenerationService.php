@@ -29,25 +29,70 @@ class SlotGenerationService
         $slots = [];
 
         foreach ($candidateDates as $date) {
-            $rangeStart = Carbon::createFromFormat('Y-m-d H:i', $date.' '.$rangeStartTime, $timezone);
-            $rangeEnd = Carbon::createFromFormat('Y-m-d H:i', $date.' '.$rangeEndTime, $timezone);
+            // Round 8 (skill /100) : l'arithmétique se fait désormais entièrement en UTC (jamais
+            // en heure locale) avant conversion pour l'affichage. Additionner des minutes sur une
+            // instance Carbon localisée traverse silencieusement les changements d'heure (DST) -
+            // un créneau de 30 min généré à cheval sur le passage à l'heure d'été durait en
+            // réalité 90 min une fois relu (l'heure locale 02h00-02h59 n'existe pas ce jour-là).
+            // L'UTC n'a pas de DST : la durée réelle d'un créneau est désormais toujours exacte.
+            $rangeStart = Carbon::createFromFormat('Y-m-d H:i', $date.' '.$rangeStartTime, $timezone)->utc();
+            $rangeEnd = Carbon::createFromFormat('Y-m-d H:i', $date.' '.$rangeEndTime, $timezone)->utc();
 
             $currentSlotStart = $rangeStart->copy();
+            $dateSlots = [];
 
             while ($currentSlotStart->copy()->addMinutes($durationMinutes)->lte($rangeEnd)) {
                 $slotEnd = $currentSlotStart->copy()->addMinutes($durationMinutes);
 
-                $slots[] = [
-                    'starts_at' => $currentSlotStart->copy()->utc(),
-                    'ends_at' => $slotEnd->copy()->utc(),
-                    'label' => $this->formatSlotLabel($currentSlotStart, $slotEnd),
+                $dateSlots[] = [
+                    'starts_at' => $currentSlotStart->copy(),
+                    'ends_at' => $slotEnd->copy(),
                 ];
 
                 $currentSlotStart->addMinutes($stepMinutes);
             }
+
+            $slots = array_merge($slots, $this->labelSlots($dateSlots, $timezone));
         }
 
         return $slots;
+    }
+
+    /**
+     * Ajoute le libellé lisible de chaque créneau (heure locale du sondage). Round 8 (skill
+     * /100) : lors du retour à l'heure normale (fin de l'heure d'été), l'heure locale
+     * 01h00-01h59 se produit DEUX FOIS - deux créneaux UTC distincts peuvent donc produire un
+     * libellé strictement identique ("1 h 00 - 1 h 30"), rendant impossible pour un votant de
+     * savoir lequel choisir. Si une collision de libellé est détectée pour une même date, le
+     * décalage UTC est ajouté en désambiguïsation - uniquement sur les créneaux concernés, pour
+     * ne pas alourdir l'affichage des cas non ambigus (l'immense majorité).
+     *
+     * @param  array<int, array{starts_at: CarbonInterface, ends_at: CarbonInterface}>  $dateSlots
+     * @return array<int, array<string, CarbonInterface|string>>
+     */
+    private function labelSlots(array $dateSlots, string $timezone): array
+    {
+        $labeled = array_map(function (array $slot) use ($timezone) {
+            $localStart = $slot['starts_at']->copy()->timezone($timezone);
+            $localEnd = $slot['ends_at']->copy()->timezone($timezone);
+
+            return $slot + [
+                'label' => $this->formatSlotLabel($localStart, $localEnd),
+                'local_start' => $localStart,
+            ];
+        }, $dateSlots);
+
+        $labelCounts = array_count_values(array_column($labeled, 'label'));
+
+        return array_map(function (array $slot) use ($labelCounts) {
+            if ($labelCounts[$slot['label']] > 1) {
+                $slot['label'] .= ' (UTC'.$slot['local_start']->format('P').')';
+            }
+
+            unset($slot['local_start']);
+
+            return $slot;
+        }, $labeled);
     }
 
     /**

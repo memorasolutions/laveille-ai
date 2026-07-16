@@ -17,6 +17,28 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.7 · 2026-07-16 · fix(decido) round 8 passe adversariale /100 (angle mobile réel + DST +
+ *     frontières d'intégration) : (1) boutons "+ Ajouter une date/option" et "Retirer" de
+ *     create.blade.php sous la cible tactile AAA 44x44px (le fix touch-target des rounds 6-7
+ *     n'avait jamais été porté sur cette vue) - classe .decido-touch-target déplacée de
+ *     results.blade.php vers public/css/charte.css (DRY, réutilisable site-wide) et appliquée aux
+ *     4 boutons. (2) grille de vote (yes/no/maybe, single_choice, approval) : radios/checkboxes
+ *     natifs ~14x14px avec libellé cliquable ~22x21px, jusqu'à 144 cibles trop petites sur un
+ *     sondage de dates multi-jours - remplacé par des libellés pleine largeur/pilules (44px min,
+ *     :has(input:checked)/:has(input:focus-visible) CSS pur, sans JS) dans public/vote.blade.php.
+ *     (3) DST : arithmétique de SlotGenerationService faite en heure locale traversait
+ *     silencieusement les changements d'heure - un créneau de 30min à cheval sur le passage à
+ *     l'heure d'été durait 90min une fois relu ; arithmétique déplacée entièrement en UTC (sans
+ *     DST par nature), durée désormais toujours exacte. (4) au retour à l'heure normale, deux
+ *     créneaux UTC distincts pouvaient produire un libellé local identique (heure dédoublée) -
+ *     ajout d'une désambiguïsation automatique (décalage UTC) uniquement sur collision détectée.
+ *     (5) class_exists(\Modules\ShortUrl\...) ne détecte PAS un module désactivé via
+ *     modules_statuses.json (nwidart garde les classes en autoload, seul le boot du
+ *     ServiceProvider est coupé) - un lien court "fantôme" (404 réel, routes jamais enregistrées)
+ *     pouvait être créé/affiché sans avertissement ; remplacé par
+ *     Modules\Core\Services\ModuleChecker::isAvailable() (Module::has()+isEnabled(), déjà
+ *     l'utilitaire DRY existant du projet) dans Poll::shortUrl()/getShortUrlString() et
+ *     PollManageController::createShortLink(). 35/35 tests Pest verts.
  *   1.107.6 · 2026-07-16 · fix(decido) round 7 passe adversariale /100 (angle performance/N+1 +
  *     vérification E2E réelle) : (1) Poll::getShortUrlString() faisait un
  *     ShortUrl::find($this->short_url_id) brut, jamais mis en cache - la page de résultats
@@ -1084,7 +1106,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 6;
+$lvPatch = 7;
 
 return [
     'major' => $lvMajor,

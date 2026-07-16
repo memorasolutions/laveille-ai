@@ -788,6 +788,17 @@ select:focus {
     justify-content: center;
 }
 
+/* Cible tactile WCAG 2.5.5 AAA (44x44px) - utilitaire générique pour tout bouton/lien qui
+   n'utilise pas <x-core::button> (celui-ci impose déjà 44px via .ct-btn). Décido round 6/8
+   (skill /100) : centralisé ici plutôt que dupliqué par vue pour rester DRY. */
+.decido-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* Titres sections accueil - pas de capitalize americain (decision utilisateur) */
 .wpo-section-title h2 { text-transform: none !important; }
 

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.7] - 2026-07-16
+
+### Fixed
+- **Décido — boutons "+ Ajouter" / "Retirer" sous la cible tactile AAA sur `/decido/creer`.** Le fix touch-target des rounds 6-7 n'avait jamais été porté sur cette vue. La classe `.decido-touch-target` a été déplacée de `results.blade.php` vers `public/css/charte.css` (utilitaire global réutilisable, DRY) et appliquée aux 4 boutons concernés.
+- **Décido — grille de vote peu utilisable au pouce sur mobile.** Les radios/checkboxes natifs (~14×14px, libellé cliquable ~22×21px) étaient bien sous 44×44px — jusqu'à 144 cibles trop petites pour un sondage de dates multi-jours. `public/vote.blade.php` utilise désormais des libellés pleine taille en pilules/blocs (44px minimum, `:has(input:checked)`/`:has(input:focus-visible)` en CSS pur, sans JavaScript) pour les 3 modes de vote.
+- **Décido — créneaux incohérents lors des changements d'heure (DST).** L'arithmétique de `SlotGenerationService` opérait en heure locale (`America/Toronto`), traversant silencieusement les changements d'heure : un créneau de 30 minutes à cheval sur le passage à l'heure d'été durait en réalité 90 minutes une fois relu. Déplacée entièrement en UTC (sans DST par nature) — la durée d'un créneau est désormais toujours exacte, quel que soit le jour candidat.
+- **Décido — libellés de créneaux ambigus au retour à l'heure normale.** Deux créneaux UTC distincts pouvaient produire un libellé local strictement identique (l'heure locale se produit deux fois ce jour-là), rendant impossible pour un votant de savoir lequel choisir. Le service ajoute désormais automatiquement le décalage UTC en désambiguïsation, uniquement sur les libellés en collision.
+- **Décido — `class_exists()` ne détecte pas un module ShortUrl réellement désactivé.** `class_exists()` reste vrai même quand un module est désactivé via `modules_statuses.json` (nwidart garde les classes en autoload, seul le boot du `ServiceProvider` est coupé) — un lien court "fantôme" (pointant vers des routes jamais enregistrées, 404 réel) pouvait être créé et affiché à l'organisateur sans le moindre avertissement. Remplacé par `Modules\Core\Services\ModuleChecker::isAvailable()` (utilitaire DRY déjà existant dans le projet, vérifie `Module::has()`+`isEnabled()`) dans `Poll::shortUrl()`/`getShortUrlString()` et `PollManageController::createShortLink()`.
+
+Trouvés par une passe adversariale indépendante (skill `/100`, round 8, angle responsive mobile réel + cas limites DST + frontières d'intégration entre modules — vérifiés en conditions réelles via Playwright et script PHP autonome). 35/35 tests Pest verts.
+
 ## [1.107.6] - 2026-07-16
 
 ### Fixed

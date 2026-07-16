@@ -166,14 +166,14 @@
                             <template x-for="(date, index) in candidateDates" :key="index">
                                 <div class="input-group mb-2">
                                     <input type="date" name="candidate_dates[]" class="form-control" x-model="candidateDates[index]">
-                                    <button type="button" class="btn btn-outline-secondary"
+                                    <button type="button" class="btn btn-outline-secondary decido-touch-target"
                                             x-on:click="candidateDates.splice(index, 1)"
                                             x-show="candidateDates.length > 1">
                                         Retirer
                                     </button>
                                 </div>
                             </template>
-                            <button type="button" class="btn btn-sm btn-outline-primary" x-on:click="candidateDates.push('')">
+                            <button type="button" class="btn btn-sm btn-outline-primary decido-touch-target" x-on:click="candidateDates.push('')">
                                 + Ajouter une date
                             </button>
                             @error('candidate_dates')
@@ -207,14 +207,14 @@
                             <template x-for="(option, index) in options" :key="index">
                                 <div class="input-group mb-2">
                                     <input type="text" name="options[]" class="form-control" x-model="options[index]">
-                                    <button type="button" class="btn btn-outline-secondary"
+                                    <button type="button" class="btn btn-outline-secondary decido-touch-target"
                                             x-on:click="options.splice(index, 1)"
                                             x-show="options.length > 2">
                                         Retirer
                                     </button>
                                 </div>
                             </template>
-                            <button type="button" class="btn btn-sm btn-outline-primary" x-on:click="options.push('')">
+                            <button type="button" class="btn btn-sm btn-outline-primary decido-touch-target" x-on:click="options.push('')">
                                 + Ajouter une option
                             </button>
                             @error('options')
