@@ -1080,6 +1080,109 @@ test('un échec en cours de création (2e option) ne laisse aucun sondage fantô
     }
 });
 
+// ── Round 17 (skill /100) : atomicité du VOTE lui-même (multi-options + revote) ────────────
+
+test('un échec en cours de vote multi-options (mode approval) ne laisse aucun vote partiel en base (atomicité)', function (): void {
+    // Round 17 (skill /100) : angle structurellement analogue au bug de création de sondage
+    // corrigé au round 16 (PollManageController::store() bouclait sur les PollOption sans
+    // DB::transaction()), mais testé ici sur le chemin de VOTE - PublicPollController::vote()
+    // boucle sur chaque option choisie (PollVote::updateOrCreate) pour les modes yes_no_maybe et
+    // approval, où un votant peut sélectionner plusieurs options en une seule soumission (une
+    // ligne PollVote par option). Lecture du code : contrairement à store() avant son correctif,
+    // vote() enveloppe déjà TOUTE la logique (loop d'upsert + delete des options désélectionnées)
+    // dans un DB::transaction() unique (ajouté au round 6 à l'origine pour la fenêtre TOCTOU sur
+    // le statut du sondage, lockForUpdate) - ce test le PROUVE en injectant une exception à la
+    // création du 3e vote sur 5 options sélectionnées : si la transaction protégeait réellement la
+    // boucle, aucun des 5 votes ne doit persister (tout ou rien), jamais un vote partiel silencieux
+    // (le votant croirait avoir voté pour 5 options alors qu'il n'en aurait obtenu que 2 en DB).
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'approval']);
+    $options = PollOption::factory()->count(5)->create(['poll_id' => $poll->id]);
+
+    $created = 0;
+    PollVote::creating(function () use (&$created): void {
+        $created++;
+        if ($created === 3) {
+            throw new RuntimeException('Panne DB simulée (round 17, vote multi-options)');
+        }
+    });
+
+    try {
+        $response = $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+            'voter_pseudonym' => 'Denise',
+            'votes' => $options->pluck('id')->all(),
+        ]);
+
+        // La panne DB simulée n'est jamais une exception de validation (Laravel la convertit en
+        // réponse d'erreur serveur) - preuve que le code testé est bien passé par l'exception
+        // injectée, pas contourné silencieusement par un chemin de validation antérieur.
+        $response->assertServerError();
+
+        expect(PollVote::where('poll_id', $poll->id)->count())
+            ->toBe(0, 'Des votes partiels ont survécu à l’échec en cours de boucle (tout-ou-rien violé).');
+    } finally {
+        PollVote::flushEventListeners();
+    }
+});
+
+test('un échec en cours de REVOTE (mode approval) ne perd pas les anciens votes et n’en laisse aucun nouveau partiel', function (): void {
+    // Round 17 (skill /100) : second volet du même angle - le REVOTE (modification du choix d'un
+    // votant déjà connu via son voter_token) crée d'abord les nouveaux votes (updateOrCreate) PUIS
+    // supprime les anciens votes désélectionnés, dans la MÊME transaction. Hypothèse adverse : la
+    // fenêtre la plus dangereuse n'est PAS entre le 1er nouveau vote et l'échec (rien n'a encore
+    // été fait d'irréversible), mais après que PLUSIEURS nouveaux votes ont déjà été insérés et
+    // qu'une panne survient sur le DERNIER avant que la suppression des anciens votes ne soit
+    // même atteinte : sans transaction, ceci laisserait à la fois les 2 anciens votes (jamais
+    // supprimés, cette ligne n'étant jamais exécutée) ET les nouveaux votes partiellement créés
+    // (C, D) en base simultanément - un état incohérent en UNION (4 votes au lieu de 2), pas une
+    // simple perte. Ce test simule un votant ayant déjà voté pour 2 options (A, B), qui revote
+    // pour 3 options complètement différentes (C, D, E) ; l'exception est injectée sur le 3e (et
+    // dernier) nouveau vote - preuve attendue : la transaction unique fait qu'AUCUNE écriture (ni
+    // les nouveaux votes partiels C/D, ni la suppression des anciens) n'est retenue, donc les
+    // votes originaux A et B - et EUX SEULS - doivent ressortir après l'échec.
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'approval']);
+    $options = PollOption::factory()->count(5)->create(['poll_id' => $poll->id]);
+    [$optA, $optB, $optC, $optD, $optE] = $options->all();
+
+    $voterToken = (string) Str::uuid();
+
+    // Vote initial inséré directement via DB::table() (pas Eloquent create()) pour ne PAS
+    // déclencher l'écouteur PollVote::creating installé plus bas, qui ne doit compter que les
+    // créations déclenchées par le revote HTTP testé ci-dessous.
+    \Illuminate\Support\Facades\DB::table('decido_poll_votes')->insert([
+        ['poll_id' => $poll->id, 'option_id' => $optA->id, 'voter_token' => $voterToken, 'voter_pseudonym' => 'Edouard', 'value' => 'selected', 'created_at' => now(), 'updated_at' => now()],
+        ['poll_id' => $poll->id, 'option_id' => $optB->id, 'voter_token' => $voterToken, 'voter_pseudonym' => 'Edouard', 'value' => 'selected', 'created_at' => now(), 'updated_at' => now()],
+    ]);
+
+    $cookieName = 'decido_voter_'.$poll->public_id;
+
+    $created = 0;
+    PollVote::creating(function () use (&$created): void {
+        $created++;
+        if ($created === 3) {
+            throw new RuntimeException('Panne DB simulée (round 17, revote)');
+        }
+    });
+
+    try {
+        $response = $this->withCookie($cookieName, $voterToken)->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+            'voter_pseudonym' => 'Edouard',
+            'votes' => [$optC->id, $optD->id, $optE->id],
+        ]);
+
+        $response->assertServerError();
+
+        // Les 2 votes originaux (A, B) doivent survivre INTACTS (rollback complet de la
+        // transaction), pas seulement partiellement, et aucun nouveau vote (C, D, E) ne doit
+        // exister.
+        $remainingOptionIds = PollVote::where('voter_token', $voterToken)->pluck('option_id')->sort()->values()->all();
+        expect($remainingOptionIds)->toBe(collect([$optA->id, $optB->id])->sort()->values()->all());
+    } finally {
+        PollVote::flushEventListeners();
+    }
+});
+
 test('decido:purge-expired supprime les sondages clôturés expirés et épargne les autres', function (): void {
     $expired = decidoCreatePoll(['status' => 'closed']);
     $expired->expires_at = now()->subDay();
