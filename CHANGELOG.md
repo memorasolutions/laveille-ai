@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.0] - 2026-07-16
+
+### Changed
+- **Décido — refonte UX de la page de résultats (superadmin).** L'ancien design (une carte pleine largeur par créneau candidat, jusqu'à 16+ cartes empilées pour un sondage de dates = page extrêmement longue) est remplacé par une architecture en divulgation progressive : un résumé **« Meilleurs créneaux »** toujours visible en haut de page (tous les ex-æquo au meilleur score, avec le compte réel oui/peut-être/non/sans réponse — jamais un simple pourcentage isolé) avec un **drill-down interactif** (Alpine.js) qui affiche qui a répondu quoi sans avoir à ouvrir la grille complète, puis une section **« Comparer toutes les réponses »** repliée par défaut (élément HTML natif `<details>`, accessible clavier sans JS custom) contenant le tableau croisé complet (vrai `<table>` sémantique avec `<caption>` et `<th scope>`, colonnes groupées par jour pour un sondage de dates, en-têtes et première colonne figées, icônes + texte pour coder l'état — jamais la couleur seule, conforme WCAG 2.2 AAA). Design établi par recherche `pp_search` (bonnes pratiques listes longues et pattern Framadate, juillet 2026) puis validé indépendamment par Codex (93-96/100) et Gemini via `agy` (92/100), les deux convergeant sur la même architecture sans concertation.
+
+### Fixed
+- **Décido — en-têtes du tableau croisé affichaient l'heure en UTC brute au lieu de l'heure du fuseau du sondage** (ex. « 13h00 » au lieu de « 9h00 »), découvert lors de la vérification visuelle de la refonte ci-dessus. Cause racine : `config('app.timezone')` de l'application est `America/Toronto` ; `starts_at` est stocké en UTC par `SlotGenerationService`, donc le cast Eloquent `datetime` réinterprète à tort la valeur brute comme étant déjà en heure de Québec à la lecture (pas de conversion automatique) — un simple `->timezone()` appliqué sur cette instance déjà mal étiquetée ne changeait donc rien. Fix : reparser explicitement la valeur brute comme UTC (`Carbon::parse($valeur->format('Y-m-d H:i:s'), 'UTC')`) avant de convertir vers le fuseau du sondage.
+
 ## [1.106.0] - 2026-07-16
 
 ### Added

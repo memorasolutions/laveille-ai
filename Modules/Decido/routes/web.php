@@ -16,6 +16,8 @@ Route::middleware(DecidoUnderConstruction::class)->group(function () {
     Route::post('/decido/{poll}/gerer/{adminToken}/fermer', [PollManageController::class, 'close'])->name('decido.close');
     Route::get('/decido/{poll}/gerer/{adminToken}/export.csv', [PollManageController::class, 'exportCsv'])->name('decido.export.csv');
     Route::get('/decido/{poll}/gerer/{adminToken}/export.ics', [PollManageController::class, 'exportIcs'])->name('decido.export.ics');
+    Route::post('/decido/{poll}/gerer/{adminToken}/lien-court', [PollManageController::class, 'createShortLink'])->name('decido.shortlink');
+    Route::get('/decido/{poll}/gerer/{adminToken}/qr.png', [PollManageController::class, 'qrCode'])->name('decido.qr');
 
     Route::get('/decido/{slug}', [PublicPollController::class, 'show'])->name('decido.vote.show');
     Route::post('/decido/{slug}/voter', [PublicPollController::class, 'vote'])->name('decido.vote.store');

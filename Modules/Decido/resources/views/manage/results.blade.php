@@ -29,54 +29,221 @@
                 @endif
 
                 @php
+                    $isDateType = $poll->type->value === 'date';
+                    $isYesNoMaybe = $poll->vote_mode->value === 'yes_no_maybe';
                     $totalVoters = $options->flatMap(fn ($opt) => $opt->votes)->unique('voter_pseudonym')->count();
+
+                    $optionStats = $options->map(function ($option) use ($isYesNoMaybe, $totalVoters) {
+                        $votes = $option->votes;
+                        $yes = $isYesNoMaybe ? $votes->where('value', 'yes')->count() : $votes->where('value', 'selected')->count();
+                        $maybe = $isYesNoMaybe ? $votes->where('value', 'maybe')->count() : 0;
+                        $no = $isYesNoMaybe ? $votes->where('value', 'no')->count() : 0;
+                        $noResponse = $isYesNoMaybe ? max(0, $totalVoters - $yes - $maybe - $no) : 0;
+
+                        return (object) [
+                            'option' => $option,
+                            'yes' => $yes,
+                            'maybe' => $maybe,
+                            'no' => $no,
+                            'noResponse' => $noResponse,
+                        ];
+                    });
+
+                    $bestCount = $optionStats->pluck('yes')->max() ?? 0;
+                    $bestOptions = $bestCount > 0 ? $optionStats->where('yes', $bestCount)->values() : collect();
+                    $otherOptionsCount = $options->count() - $bestOptions->count();
+
+                    $groupedByDay = $isDateType
+                        ? $options->groupBy(fn ($opt) => $opt->starts_at ? \Carbon\Carbon::parse($opt->starts_at->format('Y-m-d H:i:s'), 'UTC')->timezone($poll->timezone)->locale('fr')->isoFormat('dddd D MMMM') : null)
+                        : null;
+
+                    $voterNames = $options->flatMap(fn ($opt) => $opt->votes->pluck('voter_pseudonym'))->unique()->values();
+
+                    $matrix = [];
+                    foreach ($options as $option) {
+                        foreach ($option->votes as $vote) {
+                            $matrix[$option->id][$vote->voter_pseudonym] = $vote->value;
+                        }
+                    }
                 @endphp
 
-                @foreach($options as $option)
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h3 class="h5 mb-3">{{ $option->label }}</h3>
+                <div x-data="{ openDrill: null }">
+                    <h2 class="h4 mb-3">{{ $isDateType ? 'Meilleurs créneaux' : 'Options les mieux classées' }}</h2>
 
-                            @if($totalVoters > 0)
-                                @php
-                                    $positiveVotes = $option->votes->whereIn('value', ['yes', 'selected'])->count();
-                                    $percentage = round(($positiveVotes / $totalVoters) * 100);
-                                @endphp
-                                <div class="mb-3">
-                                    <div class="progress" style="height: 12px; border-radius: 6px;">
-                                        <div class="progress-bar"
-                                             style="width: {{ $percentage }}%; background-color: var(--c-primary);"
-                                             role="progressbar"
-                                             aria-valuenow="{{ $percentage }}"
-                                             aria-valuemin="0"
-                                             aria-valuemax="100">
-                                        </div>
-                                    </div>
-                                    <small class="text-muted">{{ $positiveVotes }}/{{ $totalVoters }} participants</small>
-                                </div>
-                            @endif
-
-                            @if($option->votes->isNotEmpty())
-                                <div class="mt-2">
-                                    @foreach($option->votes as $vote)
-                                        <div class="d-flex justify-content-between small">
-                                            <span>{{ $vote->voter_pseudonym }}</span>
-                                            <span>{{ match ($vote->value) {
-                                                'yes' => 'Oui',
-                                                'maybe' => 'Peut-être',
-                                                'no' => 'Non',
-                                                'selected' => 'Sélectionné',
-                                                default => $vote->value,
-                                            } }}</span>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @else
-                                <p class="text-muted small mb-0">Aucun vote pour cette option.</p>
-                            @endif
+                    @if($totalVoters === 0)
+                        <div class="alert alert-light border">
+                            Aucun vote pour l'instant.
                         </div>
-                    </div>
-                @endforeach
+                    @else
+                        @foreach($bestOptions as $stat)
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h3 class="h5 mb-2">{{ $stat->option->label }}</h3>
+                                    @if($isYesNoMaybe)
+                                        <div class="d-flex flex-wrap gap-2 mb-2">
+                                            <span class="badge" style="background-color: var(--sys-success-bg); color: var(--sys-success); border: 1px solid var(--sys-success);">
+                                                ✓ {{ $stat->yes }} oui
+                                            </span>
+                                            <span class="badge" style="background-color: var(--sys-warning-bg); color: var(--sys-warning); border: 1px solid var(--sys-warning);">
+                                                ? {{ $stat->maybe }} peut-être
+                                            </span>
+                                            <span class="badge" style="background-color: #fff; color: var(--sys-danger); border: 1px solid var(--sys-danger);">
+                                                ✕ {{ $stat->no }} non
+                                            </span>
+                                        </div>
+                                        <p class="text-muted small">{{ $stat->noResponse }} sans réponse</p>
+                                    @else
+                                        <div class="mb-2">
+                                            <span class="badge" style="background-color: var(--sys-success-bg); color: var(--sys-success); border: 1px solid var(--sys-success);">
+                                                ✓ {{ $stat->yes }} sur {{ $totalVoters }} participants
+                                            </span>
+                                        </div>
+                                    @endif
+                                    <button type="button" class="btn btn-sm btn-outline-secondary mt-2"
+                                            x-on:click="openDrill === {{ $stat->option->id }} ? openDrill = null : openDrill = {{ $stat->option->id }}"
+                                            x-text="openDrill === {{ $stat->option->id }} ? 'Masquer les réponses' : 'Voir qui a répondu'">
+                                        Voir qui a répondu
+                                    </button>
+                                    <div x-show="openDrill === {{ $stat->option->id }}" x-cloak class="mt-3 pt-3 border-top">
+                                        @if($stat->option->votes->isEmpty())
+                                            <p class="text-muted small">Aucun vote pour cette option.</p>
+                                        @else
+                                            @foreach($stat->option->votes as $vote)
+                                                <div class="d-flex justify-content-between small py-1">
+                                                    <span>{{ $vote->voter_pseudonym }}</span>
+                                                    <span>
+                                                        @php
+                                                            $label = match($vote->value) {
+                                                                'yes' => 'Oui',
+                                                                'maybe' => 'Peut-être',
+                                                                'no' => 'Non',
+                                                                'selected' => 'Sélectionné',
+                                                                default => $vote->value,
+                                                            };
+                                                        @endphp
+                                                        {{ $label }}
+                                                    </span>
+                                                </div>
+                                            @endforeach
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+
+                        @if($otherOptionsCount > 0)
+                            <p class="text-muted small">+ {{ $otherOptionsCount }} autre(s) option(s) disponible(s) - <a href="#decido-comparaison-complete">voir le détail complet ci-dessous</a>.</p>
+                        @endif
+                    @endif
+                </div>
+
+                <details id="decido-comparaison-complete" class="mt-4 border rounded p-3">
+                    <summary class="h5" style="cursor: pointer;">Comparer toutes les réponses ({{ $voterNames->count() }} participant(s) × {{ $options->count() }} option(s))</summary>
+                    @if($voterNames->isEmpty())
+                        <p class="text-muted">Aucun vote pour l'instant.</p>
+                    @else
+                        <div class="table-responsive mt-3" style="max-height: 70vh; overflow-y: auto;">
+                            <table class="table table-bordered table-sm align-middle">
+                                <caption class="visually-hidden">Tableau croisé des réponses par participant et par option</caption>
+                                @if($isDateType)
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            @foreach($groupedByDay as $dayName => $dayOptions)
+                                                <th colspan="{{ $dayOptions->count() }}" scope="colgroup" class="text-center" style="background-color: var(--c-primary); color: #fff;">
+                                                    {{ $dayName }}
+                                                </th>
+                                            @endforeach
+                                        </tr>
+                                        <tr>
+                                            <th scope="col" style="position: sticky; left: 0; background: #fff; z-index: 2;">Participant</th>
+                                            @foreach($groupedByDay as $dayOptions)
+                                                @foreach($dayOptions as $option)
+                                                    <th scope="col" class="text-center small">{{ \Carbon\Carbon::parse($option->starts_at->format('Y-m-d H:i:s'), 'UTC')->timezone($poll->timezone)->isoFormat('H[h]mm') }}</th>
+                                                @endforeach
+                                            @endforeach
+                                        </tr>
+                                    </thead>
+                                @else
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" style="position: sticky; left: 0; background: #fff; z-index: 2;">Participant</th>
+                                            @foreach($options as $option)
+                                                <th scope="col" class="text-center">{{ $option->label }}</th>
+                                            @endforeach
+                                        </tr>
+                                    </thead>
+                                @endif
+                                <tbody>
+                                    @foreach($voterNames as $voterName)
+                                        <tr>
+                                            <th scope="row" style="position: sticky; left: 0; background: #fff; z-index: 1;">{{ $voterName }}</th>
+                                            @if($isDateType)
+                                                @foreach($groupedByDay as $dayOptions)
+                                                    @foreach($dayOptions as $option)
+                                                        @php
+                                                            $value = $matrix[$option->id][$voterName] ?? null;
+                                                        @endphp
+                                                        <td class="text-center">
+                                                            @if($value === 'yes' || $value === 'selected')
+                                                                <span aria-label="{{ $voterName }} : oui" style="color: var(--sys-success);">✓</span>
+                                                            @elseif($value === 'maybe')
+                                                                <span aria-label="{{ $voterName }} : peut-être" style="color: var(--sys-warning);">?</span>
+                                                            @elseif($value === 'no')
+                                                                <span aria-label="{{ $voterName }} : non" style="color: var(--sys-danger);">✕</span>
+                                                            @else
+                                                                <span aria-label="{{ $voterName }} : sans réponse" class="text-muted">–</span>
+                                                            @endif
+                                                        </td>
+                                                    @endforeach
+                                                @endforeach
+                                            @else
+                                                @foreach($options as $option)
+                                                    @php
+                                                        $value = $matrix[$option->id][$voterName] ?? null;
+                                                    @endphp
+                                                    <td class="text-center">
+                                                        @if($value === 'yes' || $value === 'selected')
+                                                            <span aria-label="{{ $voterName }} : oui" style="color: var(--sys-success);">✓</span>
+                                                        @elseif($value === 'maybe')
+                                                            <span aria-label="{{ $voterName }} : peut-être" style="color: var(--sys-warning);">?</span>
+                                                        @elseif($value === 'no')
+                                                            <span aria-label="{{ $voterName }} : non" style="color: var(--sys-danger);">✕</span>
+                                                        @else
+                                                            <span aria-label="{{ $voterName }} : sans réponse" class="text-muted">–</span>
+                                                        @endif
+                                                    </td>
+                                                @endforeach
+                                            @endif
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th scope="row" style="position: sticky; left: 0; background: #fff;">Total</th>
+                                        @if($isDateType)
+                                            @foreach($groupedByDay as $dayOptions)
+                                                @foreach($dayOptions as $option)
+                                                    @php
+                                                        $stat = $optionStats->firstWhere('option.id', $option->id);
+                                                    @endphp
+                                                    <td class="text-center small">{{ $stat->yes }}✓</td>
+                                                @endforeach
+                                            @endforeach
+                                        @else
+                                            @foreach($options as $option)
+                                                @php
+                                                    $stat = $optionStats->firstWhere('option.id', $option->id);
+                                                @endphp
+                                                <td class="text-center small">{{ $stat->yes }}✓</td>
+                                            @endforeach
+                                        @endif
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    @endif
+                </details>
 
                 <div class="mt-5 p-3 border rounded">
                     <h3 class="h5 mb-3">Partage et export</h3>
@@ -87,6 +254,35 @@
                                 x-on:click="navigator.clipboard.writeText('{{ $poll->share_url }}')">
                             Copier
                         </button>
+                    </div>
+
+                    @if($poll->getShortUrlString())
+                        <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+                            <span class="text-muted">Lien court :</span>
+                            <code>{{ $poll->getShortUrlString() }}</code>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    x-on:click="navigator.clipboard.writeText('{{ $poll->getShortUrlString() }}')">
+                                Copier
+                            </button>
+                        </div>
+                    @else
+                        <form method="POST" action="{{ route('decido.shortlink', ['poll' => $poll->public_id, 'adminToken' => $adminToken]) }}" class="mb-3">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                Créer un lien court
+                            </button>
+                        </form>
+                    @endif
+
+                    <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+                        <img src="{{ route('decido.qr', ['poll' => $poll->public_id, 'adminToken' => $adminToken]) }}"
+                             alt="QR code du sondage {{ $poll->title }}" width="140" height="140" loading="lazy"
+                             class="border rounded">
+                        <a href="{{ route('decido.qr', ['poll' => $poll->public_id, 'adminToken' => $adminToken]) }}"
+                           download="qr-decido-{{ $poll->public_id }}.png"
+                           class="btn btn-sm btn-outline-secondary">
+                            Télécharger le QR code
+                        </a>
                     </div>
 
                     <div class="d-flex flex-wrap gap-2">

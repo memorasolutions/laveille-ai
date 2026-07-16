@@ -223,6 +223,61 @@ test('accès à la gestion avec le bon jeton admin fonctionne sans compte connec
         ->assertStatus(200);
 });
 
+// ── Intégration ShortUrl / QR code ──────────────────────────────────────────
+
+test('créer un lien court associe un short_url_id au sondage et affiche le lien court', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-shortlink']);
+    PollOption::factory()->create(['poll_id' => $poll->id]);
+
+    $this->post(route('decido.shortlink', ['poll' => $poll->public_id, 'adminToken' => 'jeton-shortlink']))
+        ->assertRedirect(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-shortlink']));
+
+    $poll->refresh();
+    expect($poll->short_url_id)->not->toBeNull();
+    expect($poll->getShortUrlString())->not->toBeNull();
+
+    $this->get(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-shortlink']))
+        ->assertStatus(200)
+        ->assertSee($poll->getShortUrlString(), escape: false);
+});
+
+test('demander un lien court deux fois ne crée pas deux short_url distincts', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-shortlink-2']);
+    PollOption::factory()->create(['poll_id' => $poll->id]);
+
+    $this->post(route('decido.shortlink', ['poll' => $poll->public_id, 'adminToken' => 'jeton-shortlink-2']));
+    $poll->refresh();
+    $firstShortUrlId = $poll->short_url_id;
+
+    $this->post(route('decido.shortlink', ['poll' => $poll->public_id, 'adminToken' => 'jeton-shortlink-2']));
+    $poll->refresh();
+
+    expect($poll->short_url_id)->toBe($firstShortUrlId);
+});
+
+test('un jeton admin invalide ne peut pas créer de lien court (403)', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'le-vrai-jeton-3']);
+    PollOption::factory()->create(['poll_id' => $poll->id]);
+
+    $this->post(route('decido.shortlink', ['poll' => $poll->public_id, 'adminToken' => 'mauvais-jeton']))
+        ->assertStatus(403);
+});
+
+test('le QR code du sondage renvoie une image PNG valide', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-qr']);
+    PollOption::factory()->create(['poll_id' => $poll->id]);
+
+    $response = $this->get(route('decido.qr', ['poll' => $poll->public_id, 'adminToken' => 'jeton-qr']));
+
+    $response->assertStatus(200);
+    $response->assertHeader('Content-Type', 'image/png');
+    expect(substr($response->getContent(), 0, 8))->toBe("\x89PNG\r\n\x1a\n");
+});
+
 // ── Exports ───────────────────────────────────────────────────────────────
 
 test('export CSV disponible en tout temps', function (): void {

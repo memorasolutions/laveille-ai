@@ -205,6 +205,57 @@ class PollManageController extends Controller
         ]);
     }
 
+    public function createShortLink(Request $request, string $poll, string $adminToken): RedirectResponse
+    {
+        $pollModel = Poll::findByShareIdentifier($poll);
+        if (! $pollModel) {
+            abort(404);
+        }
+
+        $this->authorizeManage($pollModel, $adminToken);
+
+        if (! class_exists(\Modules\ShortUrl\Services\ShortUrlService::class)) {
+            return Redirect::route('decido.manage', ['poll' => $pollModel->public_id, 'adminToken' => $adminToken])
+                ->withErrors(['shortlink' => "Le service de liens courts n'est pas disponible."]);
+        }
+
+        if ($pollModel->short_url_id) {
+            return Redirect::route('decido.manage', ['poll' => $pollModel->public_id, 'adminToken' => $adminToken]);
+        }
+
+        $userId = $pollModel->creator_id ?? Auth::id();
+
+        $shortUrl = app(\Modules\ShortUrl\Services\ShortUrlService::class)->createShortUrl([
+            'original_url' => $pollModel->share_url,
+            'title' => 'Sondage Décido : '.$pollModel->title,
+            'redirect_type' => 301,
+            'is_active' => true,
+        ], $userId);
+
+        $pollModel->update(['short_url_id' => $shortUrl->id]);
+
+        return Redirect::route('decido.manage', ['poll' => $pollModel->public_id, 'adminToken' => $adminToken])
+            ->with('success', 'Lien court créé.');
+    }
+
+    public function qrCode(Request $request, string $poll, string $adminToken, \Modules\Core\Services\QrCodeService $qr): \Symfony\Component\HttpFoundation\Response
+    {
+        $pollModel = Poll::findByShareIdentifier($poll);
+        if (! $pollModel) {
+            abort(404);
+        }
+
+        $this->authorizeManage($pollModel, $adminToken);
+
+        $url = $pollModel->getShortUrlString() ?? $pollModel->share_url;
+        $png = $qr->generate($url);
+
+        return response($png, 200, [
+            'Content-Type' => 'image/png',
+            'Content-Disposition' => 'inline; filename="qr-decido-'.$pollModel->public_id.'.png"',
+        ]);
+    }
+
     private function authorizeManage(Poll $poll, string $adminToken): void
     {
         $isOwner = Auth::check() && Auth::id() === $poll->creator_id;

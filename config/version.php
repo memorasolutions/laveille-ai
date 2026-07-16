@@ -17,6 +17,25 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.0 · 2026-07-16 · feat(decido) refonte UX de la page de résultats (superadmin) : l'ancien
+ *     design (une carte pleine largeur par créneau, jusqu'à 16+ cartes empilées = page trop longue)
+ *     est remplacé par un résumé "Meilleurs créneaux" toujours visible (tous les ex-æquo, compte
+ *     réel oui/peut-être/non/sans réponse - jamais un simple pourcentage) avec drill-down Alpine.js
+ *     au clic (affiche qui a répondu sans ouvrir la grille complète), et une section "Comparer
+ *     toutes les réponses" repliée par défaut (élément natif `<details>`) contenant le tableau
+ *     croisé complet (vrai `<table>` sémantique, `<caption>`/`<th scope>`, colonnes groupées par
+ *     jour, en-têtes et première colonne figés, icônes+texte jamais couleur seule - WCAG 2.2 AAA).
+ *     Design validé par recherche pp_search (best practices listes longues + patterns Framadate
+ *     juillet 2026) puis par double validation croisée indépendante (Codex 93-96/100, Gemini via
+ *     agy 92/100), les deux convergeant sur la même architecture. Fix additionnel découvert en
+ *     vérification visuelle : les en-têtes du tableau croisé affichaient l'heure en UTC brute
+ *     (ex. "13h00") au lieu de l'heure du fuseau du sondage (ex. "9h00") - cause racine :
+ *     `config('app.timezone')` de l'application est `America/Toronto`, donc le cast Eloquent
+ *     `datetime` de `starts_at` (stocké en UTC par `SlotGenerationService`) est réinterprété à la
+ *     lecture comme si la valeur brute était déjà en heure de Québec, sans conversion - un simple
+ *     `->timezone()` sur l'instance déjà mal étiquetée ne changeait rien. Fix : reparser
+ *     explicitement la valeur brute comme UTC (`Carbon::parse($v->format('Y-m-d H:i:s'), 'UTC')`)
+ *     avant de convertir vers le fuseau du sondage.
  *   1.106.0 · 2026-07-16 · feat(decido) nouvel outil Décido (module Modules/Decido, type Framadate
  *     repensé) : sondages "dates" (durée+plage+pas → créneaux auto-générés, SlotGenerationService)
  *     et sondages "classiques" (options libres, single_choice/approval), lien admin à jeton
@@ -984,7 +1003,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 106;
+$lvMinor = 107;
 $lvPatch = 0;
 
 return [

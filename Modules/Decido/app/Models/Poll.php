@@ -39,6 +39,7 @@ class Poll extends Model
         'expires_at',
         'admin_token_hash',
         'custom_slug',
+        'short_url_id',
     ];
 
     protected $casts = [
@@ -114,6 +115,26 @@ class Poll extends Model
         return static::where('custom_slug', $identifier)
             ->orWhere('public_id', $identifier)
             ->first();
+    }
+
+    public function shortUrl(): ?BelongsTo
+    {
+        if (! class_exists(\Modules\ShortUrl\Models\ShortUrl::class)) {
+            return null;
+        }
+
+        return $this->belongsTo(\Modules\ShortUrl\Models\ShortUrl::class, 'short_url_id');
+    }
+
+    public function getShortUrlString(): ?string
+    {
+        if (! $this->short_url_id || ! class_exists(\Modules\ShortUrl\Models\ShortUrl::class)) {
+            return null;
+        }
+
+        $shortUrl = \Modules\ShortUrl\Models\ShortUrl::find($this->short_url_id);
+
+        return $shortUrl?->getShortUrl();
     }
 
     public function setAdminToken(string $plainToken): void
