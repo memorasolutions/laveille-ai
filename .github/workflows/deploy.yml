@@ -22,6 +22,20 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H server.memora.pro >> ~/.ssh/known_hosts
 
+      - name: Enable maintenance mode (ferme la fenetre de race condition rsync/cache)
+        # ACTION: php artisan down avant rsync, up (if: always) apres la reconstruction des caches.
+        # RAISON (incident 2026-07-17, v1.109.0) : rsync deploie les nouvelles vues AVANT que
+        #   route:cache/view:cache ne soient reconstruits (etapes separees, plusieurs secondes
+        #   d'ecart). Une requete tombant pile dans cette fenetre voit une vue qui appelle
+        #   route('decido.create.date') alors que le cache de routes encore actif est l'ANCIEN
+        #   (sans cette route) -> RouteNotFoundException -> 500 en prod. Confirme par les logs :
+        #   erreur a 12:33:56 UTC, cache de routes reconstruit a 12:34:02 UTC (6s d'ecart exact).
+        #   Envelopper tout le déploiement (rsync + composer + migrate + caches) dans une courte
+        #   fenetre de maintenance elimine cette classe entiere de race condition, pas seulement
+        #   le cas des routes (idem colonnes de migration pas encore appliquees, etc.).
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan down --retry=15" || true
+
       - name: Deploy via rsync
         # NOTE (incident P0 2026-07-11) : ce rsync n'a volontairement PAS de --delete/--delete-after.
         #   Un fichier de migration supprimé de git (commit 9502674a) est resté physiquement en
@@ -100,6 +114,13 @@ jobs:
         #   sans audit exhaustif de TOUS les env() (app + vendor + runtime).
         run: |
           ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan route:cache && php artisan event:cache && php artisan view:cache" || true
+
+      - name: Disable maintenance mode
+        # if: always() -> le site ne reste JAMAIS bloque en mode maintenance meme si une etape
+        #   precedente (migrate, composer) a echoue et fait sauter le reste du job.
+        if: always()
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan up" || true
 
       - name: Purge Cloudflare cache
         # Token scopé "Cache Purge" limité à la zone laveille.ai (jamais la Global API Key).
