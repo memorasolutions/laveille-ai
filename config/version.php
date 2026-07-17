@@ -17,6 +17,24 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.109.9 · 2026-07-17 · fix(decido) round 27 (revue adversariale fraîche) - 3 correctifs
+ *     présentation. (1) HAUTE : create-date.blade.php/create-classic.blade.php initialisaient
+ *     x-data sans relire old() pour les champs-tableaux dynamiques (candidateDates/
+ *     candidateDateRanges/options) - un échec de validation (options dupliquées, chevauchement
+ *     de plages) effaçait toute la saisie de l'utilisateur au réaffichage. Correction : old()
+ *     normalisé injecté via json_encode() interpolé en `{{ }}` (échappement Blade HTML, jamais
+ *     `{!! !!}`, pour rester sécuritaire dans l'attribut x-data="..."). (2) MOYENNE :
+ *     results.blade.php - section "Meilleurs créneaux" pouvait s'afficher vide sans message
+ *     quand des votants ont répondu mais qu'aucun créneau n'a de réponse "Oui" (tout le monde
+ *     répond "peut-être"/"non") - nouveau message explicite ajouté. (3) MOYENNE :
+ *     vote.blade.php - aucun bloc n'affichait l'erreur de validation sur la clé racine "votes"
+ *     (required/min:1), violant WCAG 3.3.1 (un vote vide se rechargeait sans feedback) -
+ *     `@error('votes')` ajouté. 86/86 tests Pest verts (4 nouveaux tests ciblés round 27).
+ *     Vérifié visuellement (Herd, Playwright) : préservation old() reproduite et confirmée
+ *     corrigée sur create-classic (options dupliquées "Vérification"/"Vérification" restent
+ *     visibles après erreur), message vide-mais-voté vérifié via sondage de test local, erreur
+ *     votes visible confirmée. Module jugé solide côté sécurité applicative après 27 rounds
+ *     (aucune faille serveur trouvée ce round).
  *   1.109.8 · 2026-07-17 · fix(sudoku) 3 correctifs : (1) bouton « Indice » ne fonctionnait pas à
  *     la 2e demande - course réseau confirmée par reproduction directe (useHint() async sans
  *     verrou, un 2e appel avant la réponse du 1er retrouvait la même case vide et double-comptait
@@ -1534,7 +1552,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 109;
-$lvPatch = 8;
+$lvPatch = 9;
 
 return [
     'major' => $lvMajor,

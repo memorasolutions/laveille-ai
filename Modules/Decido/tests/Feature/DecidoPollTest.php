@@ -2254,3 +2254,116 @@ test('la page de gestion (jeton admin dans l’URL) n’expose pas ce jeton via 
     expect($breadcrumbBlock)->not->toBeNull();
     $this->assertStringNotContainsString('jeton-breadcrumb-inerte-r26', $breadcrumbBlock);
 });
+
+// ── Round 27 (skill /100, revue adversariale) : persistance old() et feedback d'erreur ─────
+
+test('Round 27 (bug 1a) : après un échec de validation (options dupliquées), les 2 valeurs saisies restent visibles dans le formulaire classique (old() relu par x-data)', function (): void {
+    // Avant le fix, x-data="{ options: ['', ''], ... }" (create-classic.blade.php) ignorait
+    // old() - contrairement à tous les autres champs du même formulaire. La saisie de
+    // l'utilisateur disparaissait totalement au réaffichage après une erreur DistinctNormalized.
+    config()->set('decido.under_construction', false);
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage options dupliquées round 27',
+        'type' => 'classic',
+        'timezone' => 'America/Toronto',
+        'vote_mode' => 'single_choice',
+        'options' => ['Test', 'Test'],
+    ]);
+
+    $response->assertSessionHasErrors('options.0');
+    $response->assertSessionHasInput('options', ['Test', 'Test']);
+    expect(Poll::where('title', 'Sondage options dupliquées round 27')->exists())->toBeFalse();
+
+    $createHtml = $this->actingAs($this->superadmin)->get(route('decido.create.classic'))->getContent();
+
+    // json_encode() est interpolé via {{ }} (échappement Blade HTML) - les guillemets du JSON
+    // sont donc rendus en entités &quot; dans l'attribut x-data="...", ce qui est le comportement
+    // SÉCURITAIRE attendu (le navigateur les décode avant qu'Alpine ne parse le JSON).
+    $this->assertStringContainsString('options: [&quot;Test&quot;,&quot;Test&quot;]', $createHtml);
+});
+
+test('Round 27 (bug 1b) : après un échec de validation (plages chevauchantes), les dates et plages horaires saisies restent visibles dans le formulaire de dates (old() relu par x-data)', function (): void {
+    // Avant le fix, x-data="{ candidateDates: [''], candidateDateRanges: [[]], ... }"
+    // (create-date.blade.php) ignorait old() - une date + ses plages personnalisées disparaissaient
+    // totalement au réaffichage après une erreur de chevauchement/doublon/DST.
+    config()->set('decido.under_construction', false);
+    $futureDate = now()->addDays(10)->format('Y-m-d');
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage dates round 27',
+        'type' => 'date',
+        'timezone' => 'America/Toronto',
+        'duration_minutes' => 30,
+        'range_start_time' => '09:00',
+        'range_end_time' => '17:00',
+        'step_minutes' => 30,
+        'candidate_dates' => [$futureDate],
+        'candidate_date_ranges' => [
+            0 => [
+                ['start' => '09:00', 'end' => '12:00'],
+                ['start' => '11:00', 'end' => '14:00'],
+            ],
+        ],
+    ]);
+
+    $response->assertSessionHasErrors('candidate_dates');
+    expect(Poll::where('title', 'Sondage dates round 27')->exists())->toBeFalse();
+
+    $createHtml = $this->actingAs($this->superadmin)->get(route('decido.create.date'))->getContent();
+
+    // Même logique d'échappement HTML que le bug 1a : guillemets JSON rendus en &quot;.
+    $this->assertStringContainsString('candidateDates: [&quot;'.$futureDate.'&quot;]', $createHtml);
+    $this->assertStringContainsString('{&quot;start&quot;:&quot;09:00&quot;,&quot;end&quot;:&quot;12:00&quot;}', $createHtml);
+    $this->assertStringContainsString('{&quot;start&quot;:&quot;11:00&quot;,&quot;end&quot;:&quot;14:00&quot;}', $createHtml);
+});
+
+test('Round 27 (bug 2) : quand des votants ont répondu mais qu\'aucun créneau n\'a de "Oui", un message clair remplace la section vide (au lieu de rien afficher)', function (): void {
+    // Avant le fix, $bestOptions pouvait être vide (bestCount === 0) alors que $totalVoters > 0
+    // (scénario réaliste : tout le monde répond "Peut-être"/"Non") - la section "Meilleurs
+    // créneaux" ne montrait alors RIEN, sans aucun message pour l'organisateur.
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-round27-bestcount0', 'type' => 'date', 'vote_mode' => 'yes_no_maybe']);
+    $option = PollOption::factory()->create([
+        'poll_id' => $poll->id,
+        'starts_at' => now()->addDays(5),
+        'ends_at' => now()->addDays(5)->addHour(),
+    ]);
+    PollVote::create([
+        'poll_id' => $poll->id,
+        'option_id' => $option->id,
+        'voter_token' => 'tok-round27',
+        'voter_pseudonym' => 'Alice',
+        'value' => 'maybe',
+    ]);
+
+    $manageHtml = $this->get(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-round27-bestcount0']))->getContent();
+
+    $this->assertStringContainsString('1 personne a voté, mais aucun créneau n\'a encore de réponse « Oui »', $manageHtml);
+    $this->assertStringNotContainsString('Aucun vote pour l\'instant.', $manageHtml);
+});
+
+test('Round 27 (bug 3) : voter sans rien cocher (mode oui/non/peut-être) affiche désormais un message d\'erreur visible sur la page de vote', function (): void {
+    // Avant le fix, seules les erreurs @error("votes.{id}") (une par carte d'option) étaient
+    // rendues - aucun bloc n'affichait l'erreur portant sur la clé racine 'votes'
+    // (required/min:1). Un votant qui soumettait sans rien cocher voyait la page se recharger
+    // SANS AUCUN feedback (violation WCAG 3.3.1).
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'date', 'vote_mode' => 'yes_no_maybe']);
+    PollOption::factory()->create([
+        'poll_id' => $poll->id,
+        'starts_at' => now()->addDays(5),
+        'ends_at' => now()->addDays(5)->addHour(),
+    ]);
+
+    $response = $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Dana',
+        // 'votes' intentionnellement omis.
+    ]);
+    $response->assertSessionHasErrors('votes');
+
+    $voteHtml = $this->get(route('decido.vote.show', ['slug' => $poll->public_id]))->getContent();
+
+    $expectedMessage = trans('validation.required', ['attribute' => 'votes']);
+    $this->assertStringContainsString('<div class="text-danger mt-2">'.$expectedMessage.'</div>', $voteHtml);
+});

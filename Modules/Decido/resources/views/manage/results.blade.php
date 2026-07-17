@@ -97,6 +97,18 @@
                         <div class="alert alert-light border">
                             Aucun vote pour l'instant.
                         </div>
+                    @elseif($bestOptions->isEmpty())
+                        {{-- Round 27 (revue adversariale) : $bestCount peut être 0 alors que des
+                             votants ont déjà répondu (ex. tout le monde a coché "Peut-être"/"Non"
+                             sans jamais cocher "Oui") - la section restait vide sans aucun message,
+                             confus pour l'organisateur. --}}
+                        <div class="alert alert-light border">
+                            @if($totalVoters === 1)
+                                1 personne a voté, mais aucun créneau n'a encore de réponse « Oui ». Consulte la grille détaillée ci-dessous pour voir la répartition des réponses.
+                            @else
+                                {{ $totalVoters }} personnes ont voté, mais aucun créneau n'a encore de réponse « Oui ». Consulte la grille détaillée ci-dessous pour voir la répartition des réponses.
+                            @endif
+                        </div>
                     @else
                         @foreach($bestOptions as $stat)
                             <div class="card mb-3">

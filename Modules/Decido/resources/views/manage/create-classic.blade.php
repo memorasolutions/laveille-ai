@@ -19,7 +19,20 @@
                      séparé du type "date" (fini le rendu conditionnel x-show sur une seule page).
                      Essentiel visible d'emblée (titre, mode de vote, options) ; description sous
                      "Plus d'options" repliée par défaut. --}}
-                <form x-data="{ options: ['', ''], voteMode: 'single_choice' }" method="POST" action="{{ route('decido.store') }}">
+                @php
+                    // Round 27 (revue adversariale) : x-data initialisait `options` en dur sans
+                    // jamais relire old(), contrairement à tous les autres champs du formulaire -
+                    // un échec de validation (ex. options dupliquées, DistinctNormalized) faisait
+                    // perdre la totalité de la saisie au réaffichage. json_encode() interpolé via
+                    // {{ }} (échappement Blade), jamais {!! !!}, pour rester sécuritaire dans
+                    // l'attribut HTML x-data="...".
+                    $decidoOldOptions = old('options');
+                    if (!is_array($decidoOldOptions) || count($decidoOldOptions) < 2) {
+                        $decidoOldOptions = ['', ''];
+                    }
+                    $decidoOldOptions = array_values($decidoOldOptions);
+                @endphp
+                <form x-data="{ options: {{ json_encode($decidoOldOptions) }}, voteMode: 'single_choice' }" method="POST" action="{{ route('decido.store') }}">
                     @csrf
                     <input type="hidden" name="type" value="classic">
 

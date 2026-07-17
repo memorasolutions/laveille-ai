@@ -75,6 +75,13 @@
                                     </div>
                                 </div>
                             @endforeach
+                            {{-- Round 27 (revue adversariale) : aucun bloc n'affichait l'erreur de
+                                 validation sur la clé racine 'votes' (required/min:1) - un votant
+                                 qui ne cochait rien voyait la page se recharger sans le moindre
+                                 feedback (violation WCAG 3.3.1). --}}
+                            @error('votes')
+                                <div class="text-danger mt-2">{{ $message }}</div>
+                            @enderror
                         </div>
                     @elseif($poll->vote_mode->value === 'single_choice')
                         <div class="mb-4">

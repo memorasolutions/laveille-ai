@@ -50,10 +50,29 @@
                         $decidoStepMode = 'flexible';
                     }
                     $decidoStepCustomOld = $decidoStepOld ?? $decidoFlexibleStepGuess;
+
+                    // Round 27 (revue adversariale) : candidateDates/candidateDateRanges
+                    // initialisaient x-data en dur sans jamais relire old(), contrairement à tous
+                    // les autres champs du formulaire - un échec de validation (chevauchement,
+                    // doublon, DST) faisait perdre toutes les dates/plages saisies au réaffichage.
+                    $decidoOldCandidateDates = old('candidate_dates');
+                    if (!is_array($decidoOldCandidateDates) || empty($decidoOldCandidateDates)) {
+                        $decidoOldCandidateDates = [''];
+                    }
+                    $decidoOldCandidateDates = array_values($decidoOldCandidateDates);
+
+                    $decidoOldCandidateDateRangesRaw = old('candidate_date_ranges');
+                    $decidoOldCandidateDateRanges = [];
+                    foreach ($decidoOldCandidateDates as $decidoIdx => $decidoDate) {
+                        $decidoRangesForIdx = (is_array($decidoOldCandidateDateRangesRaw) && isset($decidoOldCandidateDateRangesRaw[$decidoIdx]) && is_array($decidoOldCandidateDateRangesRaw[$decidoIdx]))
+                            ? array_values($decidoOldCandidateDateRangesRaw[$decidoIdx])
+                            : [];
+                        $decidoOldCandidateDateRanges[] = $decidoRangesForIdx;
+                    }
                 @endphp
                 <form x-data="{
-                    candidateDates: [''],
-                    candidateDateRanges: [[]],
+                    candidateDates: {{ json_encode($decidoOldCandidateDates) }},
+                    candidateDateRanges: {{ json_encode($decidoOldCandidateDateRanges) }},
                     rangeStartTime: '{{ old('range_start_time', '09:00') }}',
                     rangeEndTime: '{{ old('range_end_time', '17:00') }}',
                     durationChoice: '{{ $decidoDurationChoice }}',

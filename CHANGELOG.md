@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.109.9] - 2026-07-17
+
+### Fixed
+- **Décido - round 27 (revue adversariale fraîche) - 3 correctifs de présentation.** Sévérité HAUTE : `create-date.blade.php` et `create-classic.blade.php` initialisaient leur `x-data` Alpine sans jamais relire `old()` pour les champs-tableaux dynamiques (`candidateDates`/`candidateDateRanges`/`options`), contrairement à tous les autres champs du même formulaire - un échec de validation (ex. options en double, chevauchement de plages horaires) effaçait toute la saisie de l'utilisateur au réaffichage au lieu de lui permettre de corriger l'élément fautif en place. Corrigé en injectant les valeurs `old()` normalisées via `json_encode()` interpolé en `{{ }}` (échappement Blade, jamais `{!! !!}`, pour rester sécuritaire dans l'attribut HTML `x-data="..."`). Sévérité MOYENNE : la section « Meilleurs créneaux » de `results.blade.php` pouvait s'afficher vide sans aucun message quand des votants avaient répondu mais qu'aucun créneau n'avait de réponse « Oui » (scénario réaliste d'un groupe indécis) - un message explicite a été ajouté. Sévérité MOYENNE : `vote.blade.php` n'affichait nulle part l'erreur de validation sur la clé racine `votes` (règles `required`/`min:1`) - un votant qui soumettait sans rien cocher voyait la page se recharger sans le moindre feedback (violation WCAG 3.3.1) ; un bloc `@error('votes')` a été ajouté. 86/86 tests Pest verts (4 nouveaux tests ciblés). Vérifié visuellement (Herd local, Playwright) pour les 3 correctifs.
+
 ## [1.109.8] - 2026-07-17
 
 ### Fixed
