@@ -20,11 +20,21 @@
                      d'emblée (titre, durée, plage par défaut, dates) ; description/fuseau/pas
                      entre créneaux regroupés sous "Plus d'options" (<details>, replié par défaut,
                      natif donc accessible sans JS ni ARIA supplémentaire). --}}
+                @php
+                    // Demande utilisateur 2026-07-17 : durée de la rencontre personnalisable, pas
+                    // seulement les 6 valeurs présélectionnées - le backend (PollManageController)
+                    // valide déjà n'importe quel entier 5-480, seule l'UI manquait l'option libre.
+                    $decidoDurationOld = (int) old('duration_minutes', 60);
+                    $decidoDurationPresets = [15, 30, 45, 60, 90, 120];
+                    $decidoDurationChoice = in_array($decidoDurationOld, $decidoDurationPresets, true) ? (string) $decidoDurationOld : 'custom';
+                @endphp
                 <form x-data="{
                     candidateDates: [''],
                     candidateDateRanges: [[]],
                     rangeStartTime: '{{ old('range_start_time', '09:00') }}',
-                    rangeEndTime: '{{ old('range_end_time', '17:00') }}'
+                    rangeEndTime: '{{ old('range_end_time', '17:00') }}',
+                    durationChoice: '{{ $decidoDurationChoice }}',
+                    customDuration: {{ $decidoDurationOld }}
                 }" method="POST" action="{{ route('decido.store') }}">
                     @csrf
                     <input type="hidden" name="type" value="date">
@@ -33,14 +43,22 @@
 
                     <div class="mb-3">
                         <label for="duration_minutes" class="form-label">Durée de la rencontre (minutes)</label>
-                        <select id="duration_minutes" name="duration_minutes" class="form-select">
-                            <option value="15" {{ old('duration_minutes') == 15 ? 'selected' : '' }}>15</option>
-                            <option value="30" {{ old('duration_minutes') == 30 ? 'selected' : '' }}>30</option>
-                            <option value="45" {{ old('duration_minutes') == 45 ? 'selected' : '' }}>45</option>
-                            <option value="60" {{ old('duration_minutes', 60) == 60 ? 'selected' : '' }}>60</option>
-                            <option value="90" {{ old('duration_minutes') == 90 ? 'selected' : '' }}>90</option>
-                            <option value="120" {{ old('duration_minutes') == 120 ? 'selected' : '' }}>120</option>
-                        </select>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <select id="duration_minutes" class="form-select" style="max-width:180px;" x-model="durationChoice">
+                                <option value="15">15</option>
+                                <option value="30">30</option>
+                                <option value="45">45</option>
+                                <option value="60">60</option>
+                                <option value="90">90</option>
+                                <option value="120">120</option>
+                                <option value="custom">Personnalisée...</option>
+                            </select>
+                            <input type="number" class="form-control" style="max-width:130px;"
+                                   x-show="durationChoice === 'custom'" x-cloak
+                                   min="5" max="480" x-model.number="customDuration"
+                                   aria-label="Nombre de minutes personnalisé, de 5 à 480" placeholder="minutes">
+                        </div>
+                        <input type="hidden" name="duration_minutes" :value="durationChoice === 'custom' ? customDuration : durationChoice">
                         @error('duration_minutes')
                             <div class="text-danger mt-1">{{ $message }}</div>
                         @enderror

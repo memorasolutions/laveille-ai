@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.109.4] - 2026-07-17
+
+### Added
+- **Décido — durée de la rencontre personnalisable (formulaire de sondage de dates).** Le champ « Durée de la rencontre (minutes) » n'offrait que 6 valeurs présélectionnées (15/30/45/60/90/120), sans possibilité de saisir une valeur libre - déjà supporté côté backend (`PollManageController` valide n'importe quel entier de 5 à 480 minutes), seule l'interface manquait l'option. Ajout d'une option « Personnalisée... » dans le sélecteur qui révèle un champ numérique **inline à droite du select** (et non empilé dessous) ; le select lui-même a aussi été rétréci (`max-width: 180px`, il occupait toute la largeur du formulaire pour n'afficher qu'un nombre à 2-3 chiffres). Un champ caché porte la valeur effective (preset ou personnalisée) vers le serveur, contrat de validation inchangé. 82/82 tests Pest verts. Vérifié visuellement (Herd local, Playwright) sur les 3 états : affichage par défaut compact, sélection « Personnalisée... » (champ révélé inline, valeur saisie propagée correctement au champ soumis), retour à une valeur présélectionnée (champ masqué à nouveau).
+
 ## [1.109.3] - 2026-07-17
 
 ### Fixed

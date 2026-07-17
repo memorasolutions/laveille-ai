@@ -17,6 +17,18 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.109.4 · 2026-07-17 · feat(decido) durée de la rencontre personnalisable (create-date.blade.php).
+ *     Demande utilisateur : le select "Durée de la rencontre (minutes)" n'offrait que 6 valeurs
+ *     fixes (15/30/45/60/90/120), sans option libre - déjà supporté côté backend
+ *     (`PollManageController` valide n'importe quel entier 5-480), seule l'UI manquait l'option.
+ *     Ajout d'une option "Personnalisée..." dans le `<select>` (Alpine `x-model="durationChoice"`)
+ *     qui révèle un `<input type="number">` INLINE À DROITE du select (pas empilé dessous - le
+ *     select était aussi rétréci à `max-width:180px` au passage, il était "trop large pour rien"
+ *     pour n'afficher qu'un nombre à 2-3 chiffres). Un `<input type="hidden" name="duration_minutes">`
+ *     porte la valeur effective (preset ou personnalisée) vers le backend, contrat de validation
+ *     inchangé. 82/82 tests Pest verts. Vérifié visuellement (Herd/Playwright) sur les 3 états :
+ *     défaut compact, "Personnalisée..." sélectionné (champ révélé inline avec valeur 75 propagée
+ *     au champ caché), retour à un preset (champ masqué à nouveau).
  *   1.109.3 · 2026-07-17 · fix(decido) migration complète vers le système de boutons `.ct-btn` de la
  *     charte, en réponse à la question de l'utilisateur "est-ce que l'outil respecte la charte du
  *     site ? des autres outils de la plateforme ?". Audit comparatif contre les outils établis
@@ -1479,7 +1491,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 109;
-$lvPatch = 3;
+$lvPatch = 4;
 
 return [
     'major' => $lvMajor,
