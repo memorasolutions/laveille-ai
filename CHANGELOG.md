@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.109.5] - 2026-07-17
+
+### Fixed
+- **Décido — unité « minutes » affichée dans le select et le champ personnalisé de la durée de la rencontre.** Le sélecteur ne montrait que des nombres bruts (« 15 », « 30 »...) et le champ personnalisé n'avait « minutes » qu'en placeholder (texte qui disparaît dès que l'utilisateur saisit une valeur). Options du sélecteur passées à « 15 minutes » / « 30 minutes » / etc. ; champ personnalisé enveloppé dans un `input-group` avec un suffixe `input-group-text` « minutes » toujours visible (pattern déjà établi sur ce site pour les suffixes d'unité, ex. `simulateur-fiscal.blade.php` avec « $ »). Champ élargi de 130px à 200px pour que le nombre et le mot « minutes » ne soient pas à l'étroit. 82/82 tests Pest verts. Vérifié visuellement (Herd local, Playwright).
+
 ## [1.109.4] - 2026-07-17
 
 ### Added

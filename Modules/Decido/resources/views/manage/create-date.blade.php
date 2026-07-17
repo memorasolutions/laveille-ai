@@ -44,19 +44,21 @@
                     <div class="mb-3">
                         <label for="duration_minutes" class="form-label">Durée de la rencontre (minutes)</label>
                         <div class="d-flex gap-2 flex-wrap">
-                            <select id="duration_minutes" class="form-select" style="max-width:180px;" x-model="durationChoice">
-                                <option value="15">15</option>
-                                <option value="30">30</option>
-                                <option value="45">45</option>
-                                <option value="60">60</option>
-                                <option value="90">90</option>
-                                <option value="120">120</option>
+                            <select id="duration_minutes" class="form-select" style="max-width:220px;" x-model="durationChoice">
+                                <option value="15">15 minutes</option>
+                                <option value="30">30 minutes</option>
+                                <option value="45">45 minutes</option>
+                                <option value="60">60 minutes</option>
+                                <option value="90">90 minutes</option>
+                                <option value="120">120 minutes</option>
                                 <option value="custom">Personnalisée...</option>
                             </select>
-                            <input type="number" class="form-control" style="max-width:130px;"
-                                   x-show="durationChoice === 'custom'" x-cloak
-                                   min="5" max="480" x-model.number="customDuration"
-                                   aria-label="Nombre de minutes personnalisé, de 5 à 480" placeholder="minutes">
+                            <div class="input-group" style="max-width:200px;" x-show="durationChoice === 'custom'" x-cloak>
+                                <input type="number" class="form-control"
+                                       min="5" max="480" x-model.number="customDuration"
+                                       aria-label="Nombre de minutes personnalisé, de 5 à 480">
+                                <span class="input-group-text">minutes</span>
+                            </div>
                         </div>
                         <input type="hidden" name="duration_minutes" :value="durationChoice === 'custom' ? customDuration : durationChoice">
                         @error('duration_minutes')

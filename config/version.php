@@ -17,6 +17,14 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.109.5 · 2026-07-17 · fix(decido) unité "minutes" affichée dans le select et le champ
+ *     personnalisé de la durée de la rencontre. Le select ne montrait que des nombres bruts
+ *     ("15", "30"...) et le champ personnalisé n'avait "minutes" qu'en placeholder (disparaît à la
+ *     saisie). Options du select passées à "15 minutes"/"30 minutes"/etc. ; champ personnalisé
+ *     enveloppé dans un `.input-group` avec `.input-group-text` "minutes" (pattern déjà établi sur
+ *     ce site pour les suffixes d'unité - simulateur-fiscal.blade.php avec "$"), suffixe TOUJOURS
+ *     visible, pas seulement au repos. Champ élargi (130px -> 200px) pour ne pas être cramped avec
+ *     le nombre + le mot "minutes". 82/82 tests Pest verts, vérifié visuellement (Herd/Playwright).
  *   1.109.4 · 2026-07-17 · feat(decido) durée de la rencontre personnalisable (create-date.blade.php).
  *     Demande utilisateur : le select "Durée de la rencontre (minutes)" n'offrait que 6 valeurs
  *     fixes (15/30/45/60/90/120), sans option libre - déjà supporté côté backend
@@ -1491,7 +1499,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 109;
-$lvPatch = 4;
+$lvPatch = 5;
 
 return [
     'major' => $lvMajor,
