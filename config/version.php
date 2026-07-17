@@ -17,6 +17,11 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.109.10 · 2026-07-17 · fix(decido) bouton "×" bordé rouge jugé laid (retrait d'une plage
+ *     horaire personnalisée, create-date.blade.php) remplacé par une icône corbeille rouge sans
+ *     contour - style `.ct-btn-ghost` (transparent, pas de bordure) + `color: var(--c-danger)`,
+ *     icône SVG inline 18×18 (même famille que le fix #1133, jamais de dépendance externe).
+ *     Vérifié visuellement (Herd, Playwright).
  *   1.109.9 · 2026-07-17 · fix(decido) round 27 (revue adversariale fraîche) - 3 correctifs
  *     présentation. (1) HAUTE : create-date.blade.php/create-classic.blade.php initialisaient
  *     x-data sans relire old() pour les champs-tableaux dynamiques (candidateDates/
@@ -1552,7 +1557,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 109;
-$lvPatch = 9;
+$lvPatch = 10;
 
 return [
     'major' => $lvMajor,

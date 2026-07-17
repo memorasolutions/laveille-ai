@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.109.10] - 2026-07-17
+
+### Changed
+- **Décido - icône corbeille rouge sans contour** pour retirer une plage horaire personnalisée (`create-date.blade.php`). Le bouton "×" bordé rouge jugé peu esthétique par l'utilisateur est remplacé par une icône SVG corbeille inline, style `.ct-btn-ghost` (transparent, aucune bordure) coloré en `var(--c-danger)`. Vérifié visuellement (Herd, Playwright).
+
 ## [1.109.9] - 2026-07-17
 
 ### Fixed
