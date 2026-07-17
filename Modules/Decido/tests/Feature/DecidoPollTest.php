@@ -1661,3 +1661,143 @@ test('clôturer deux fois le même sondage (rejeu/double-clic) n’écrase pas l
         'La date d’expiration a reculé suite à un second appel à close() - purge automatique contournable par rejeu.'
     );
 });
+
+// ── Round 23 (skill /100) : limite de longueur de description, purge et ShortUrl orphelin,
+//    export ICS sans créneau final choisi ────────────────────────────────────────────────────
+
+test('une description de sondage dépassant 5000 caractères est rejetée par une erreur de validation, pas un crash', function (): void {
+    // Round 23 (skill /100) : avant ce fix, 'description' n'avait AUCUNE limite de longueur
+    // (['nullable', 'string'] seulement), contrairement à 'title' (max:255). Preuve réelle isolée
+    // hors framework (INSERT PDO direct sur la DB MySQL/MariaDB locale, 'strict' => true comme en
+    // prod - cf. config/database.php) : une description de 5 Mo ne produit PAS de troncature
+    // silencieuse mais lève une PDOException SQLSTATE 22001 "Data too long for column
+    // 'description'" (limite réelle de la colonne `text` : 65 535 octets). Cette exception
+    // (Illuminate\Database\QueryException, jamais une InvalidArgumentException) n'était
+    // interceptée NULLE PART dans store() - elle aurait remonté telle quelle jusqu'au
+    // gestionnaire d'exceptions global (crash 500 brut), même défaut de robustesse que le fuseau
+    // horaire invalide corrigé au round 18. Ce test prouve la couche de validation HTTP :
+    // indépendant du moteur DB utilisé par les tests (SQLite ici, sans limite native), la règle
+    // 'max:5000' doit à elle seule rejeter proprement une description trop longue.
+    config()->set('decido.under_construction', false);
+
+    $tooLongDescription = str_repeat('A', 5001);
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage description trop longue',
+        'description' => $tooLongDescription,
+        'type' => 'classic',
+        'timezone' => 'America/Toronto',
+        'vote_mode' => 'single_choice',
+        'options' => ['Pizza', 'Sushi'],
+    ]);
+
+    $response->assertSessionHasErrors('description');
+    expect(Poll::where('title', 'Sondage description trop longue')->exists())->toBeFalse();
+});
+
+test('une description de sondage de 5000 caractères exactement (limite incluse) est acceptée', function (): void {
+    // Complète le test précédent : la limite doit être inclusive (max:5000 accepte 5000, rejette
+    // 5001), pas une régression accidentelle qui rejetterait des descriptions légitimes.
+    config()->set('decido.under_construction', false);
+
+    $maxDescription = str_repeat('B', 5000);
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage description limite',
+        'description' => $maxDescription,
+        'type' => 'classic',
+        'timezone' => 'America/Toronto',
+        'vote_mode' => 'single_choice',
+        'options' => ['Pizza', 'Sushi'],
+    ]);
+
+    $response->assertSessionHasNoErrors();
+    $poll = Poll::where('title', 'Sondage description limite')->first();
+    expect($poll)->not->toBeNull();
+    expect(mb_strlen($poll->description))->toBe(5000);
+});
+
+test('decido:purge-expired soft-supprime le ShortUrl associé à un sondage expiré, au lieu de laisser un lien mort orphelin', function (): void {
+    // Round 23 (skill /100) : decido_polls.short_url_id n'a AUCUNE contrainte de clé étrangère
+    // (migration add_short_url_id_to_decido_polls : unsignedBigInteger nullable, ni constrained()
+    // ni cascadeOnDelete()). Avant ce fix, decido:purge-expired supprimait le Poll sans jamais
+    // toucher au ShortUrl associé (créé par Poll::claimShortUrl()) : celui-ci survivait
+    // indéfiniment en base et continuait de rediriger (301, is_active toujours true) vers l'URL
+    // du sondage désormais supprimée - un lien mort, potentiellement partagé publiquement (c'est
+    // tout l'objet d'un lien court), qui aboutissait à un 404 brut sans jamais être nettoyé.
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['status' => 'closed']);
+    $poll->expires_at = now()->subDay();
+    $poll->save();
+
+    $service = app(\Modules\ShortUrl\Services\ShortUrlService::class);
+    $shortUrl = $poll->claimShortUrl($poll->creator_id, $service);
+    expect($shortUrl)->not->toBeNull();
+    $shortUrlId = $shortUrl->id;
+
+    $this->artisan('decido:purge-expired')->assertExitCode(0);
+
+    expect(Poll::find($poll->id))->toBeNull();
+    // Le scope global SoftDeletes du modèle ShortUrl exclut les enregistrements soft-supprimés :
+    // ::find() ne le retrouve plus (donc ShortUrlService::resolve() non plus - la redirection
+    // publique affichera désormais /lien-expire au lieu d'un 404 brut).
+    expect(\Modules\ShortUrl\Models\ShortUrl::find($shortUrlId))->toBeNull();
+    $trashed = \Modules\ShortUrl\Models\ShortUrl::withTrashed()->find($shortUrlId);
+    expect($trashed)->not->toBeNull();
+    expect($trashed->trashed())->toBeTrue();
+});
+
+test('decido:purge-expired épargne le ShortUrl d’un sondage clôturé et expiré mais SANS lien court (short_url_id null)', function (): void {
+    // Garde-fou complémentaire : la requête ciblant les ShortUrl à nettoyer doit bien filtrer
+    // whereNotNull('short_url_id') et ne jamais tenter de matcher/supprimer sur un ID null - un
+    // sondage expiré sans lien court associé ne doit provoquer aucune erreur ni effet de bord.
+    config()->set('decido.under_construction', false);
+    $pollSansLien = decidoCreatePoll(['status' => 'closed']);
+    $pollSansLien->expires_at = now()->subDay();
+    $pollSansLien->save();
+
+    $countShortUrlsBefore = \Modules\ShortUrl\Models\ShortUrl::count();
+
+    $this->artisan('decido:purge-expired')->assertExitCode(0);
+
+    expect(Poll::find($pollSansLien->id))->toBeNull();
+    expect(\Modules\ShortUrl\Models\ShortUrl::count())->toBe($countShortUrlsBefore);
+});
+
+test('exportIcs via la route HTTP échoue proprement (redirection + message clair) si le sondage est clôturé sans créneau final choisi', function (): void {
+    // Round 23 (skill /100) : PollManageController::close() accepte final_option_id=null (le
+    // type yes_no_maybe notamment n'a pas nécessairement de "créneau final unique" au sens
+    // classique). PollExportService::exportIcs() gère déjà ce cas proprement au niveau service
+    // (RuntimeException levée dès que status!=='closed' OU final_option_id===null - cf. le test
+    // "PollExportService::exportIcs lève une exception si le sondage n'est pas fermé" plus haut,
+    // qui ne couvre que le premier terme du OU). Aucun test ne prouvait encore le parcours HTTP
+    // complet du second terme (clôturé SANS créneau final) : ce test le comble en clôturant
+    // réellement un sondage sans final_option_id puis en appelant la route d'export ICS - preuve
+    // qu'elle redirige avec un message d'erreur clair (déjà géré par le catch (\RuntimeException)
+    // de PollManageController::exportIcs()) plutôt que de produire un fichier ICS cassé/vide ou
+    // un crash.
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll([
+        'admin_token' => 'jeton-ics-sans-final',
+        'type' => 'classic',
+        'vote_mode' => 'single_choice',
+    ]);
+    $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+    $poll->options()->create(['label' => 'Option B', 'sort_order' => 1]);
+
+    $closeResponse = $this->post(
+        route('decido.close', ['poll' => $poll->public_id, 'adminToken' => 'jeton-ics-sans-final']),
+        [] // final_option_id volontairement omis
+    );
+    $closeResponse->assertRedirect();
+
+    $poll->refresh();
+    expect($poll->status->value)->toBe('closed');
+    expect($poll->final_option_id)->toBeNull();
+
+    $icsResponse = $this->get(route('decido.export.ics', ['poll' => $poll->public_id, 'adminToken' => 'jeton-ics-sans-final']));
+
+    $icsResponse->assertRedirect(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-ics-sans-final']));
+    $icsResponse->assertSessionHasErrors('export');
+    expect(Poll::find($poll->id))->not->toBeNull(); // aucune donnée corrompue par l'échec d'export
+});

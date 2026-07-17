@@ -29,12 +29,36 @@ class PurgeExpiredPollsCommand extends Command
         // Eloquent deleting/deleted n'est enregistre sur Poll (verifie), et les cascades vers
         // options/votes sont au niveau contrainte FK DB (cascadeOnDelete), pas au niveau Eloquent
         // - donc un DELETE en masse se comporte de facon strictement identique et reste sur.
-        $query = Poll::where('status', 'closed')
+        //
+        // baseConditions() = une closure plutot qu'un seul $query réutilisé (round 23, skill /100) :
+        // interroger deux fois le MEME objet Builder (compter les short_url_id, PUIS supprimer)
+        // risquerait de faire fuiter un ->whereNotNull('short_url_id') ajouté pour la première
+        // requête dans la seconde, excluant à tort du DELETE les sondages expirés SANS lien court.
+        // Reconstruire la requête à l'identique à chaque appel élimine ce risque par construction.
+        $baseConditions = fn () => Poll::where('status', 'closed')
             ->whereNotNull('expires_at')
             ->where('expires_at', '<', now());
 
-        $count = $query->count();
-        $query->delete();
+        $count = $baseConditions()->count();
+
+        // Round 23 (skill /100) : decido_polls.short_url_id n'a AUCUNE contrainte de clé étrangère
+        // (migration add_short_url_id_to_decido_polls : unsignedBigInteger nullable, ni constrained()
+        // ni cascadeOnDelete()) - un sondage supprimé ici laissait systématiquement survivre en base
+        // le ShortUrl associé (créé par Poll::claimShortUrl()), qui continue de rediriger (301,
+        // redirect_type actif, is_active jamais désactivé) vers l'URL du sondage désormais supprimée
+        // - un lien mort, potentiellement partagé publiquement (c'est tout l'objet d'un lien court),
+        // qui pointe indéfiniment vers une page 404 au lieu d'un message clair. Les ShortUrl
+        // concernés sont d'abord identifiés puis soft-supprimés (SoftDeletes du modèle ShortUrl) :
+        // ShortUrlService::resolve() applique le scope global "non supprimé" d'Eloquent et cesse donc
+        // de les résoudre, ShortUrlRedirectController affichant alors la page /lien-expire dédiée
+        // (reason=notfound) au lieu d'un 404 brut sur l'URL cible.
+        $shortUrlIds = $baseConditions()->whereNotNull('short_url_id')->pluck('short_url_id');
+
+        $baseConditions()->delete();
+
+        if ($shortUrlIds->isNotEmpty() && \Modules\Core\Services\ModuleChecker::isAvailable('ShortUrl')) {
+            \Modules\ShortUrl\Models\ShortUrl::whereIn('id', $shortUrlIds)->delete();
+        }
 
         $this->info("Sondages Decido expires supprimes : {$count}.");
 

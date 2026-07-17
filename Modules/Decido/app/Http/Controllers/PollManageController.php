@@ -44,7 +44,24 @@ class PollManageController extends Controller
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
+            // 'max:5000' = round 23 (skill /100) : avant ce fix, `description` n'avait AUCUNE limite
+            // de longueur, contrairement à `title` (max:255) - une valeur arbitrairement grande était
+            // acceptée par la validation. `description` est stockée dans une colonne MySQL `text`
+            // (limite réelle : 65 535 octets, cf. migration create_decido_polls_table). Preuve réelle
+            // isolée hors framework (INSERT direct sur la DB locale, config('database.connections.mysql.strict')
+            // = true comme en prod) : une description de 5 Mo ne produit PAS de troncature silencieuse
+            // mais lève une PDOException SQLSTATE 22001 "Data too long for column 'description'" -
+            // cette exception (Illuminate\Database\QueryException, PAS une InvalidArgumentException)
+            // n'est interceptée NULLE PART dans store() : elle remonte telle quelle jusqu'au
+            // gestionnaire d'exceptions global, produisant un crash 500 brut pour une simple entrée
+            // trop longue (copier-coller massif, requête forgée) - même défaut de robustesse que le
+            // fuseau horaire invalide corrigé au round 18. DB::transaction() (round 16) annule bien
+            // l'INSERT partiel (pas de sondage fantôme), mais un 500 au lieu d'une erreur de
+            // validation claire reste un défaut. 5000 caractères (mb_strlen, jamais des octets bruts
+            // côté règle Laravel `max` sur un string) laisse une marge large pour un texte libre
+            // légitime tout en restant très en-deçà de la limite de 65 535 octets même dans le pire
+            // cas UTF-8 (4 octets/caractère système emoji = 20 000 octets max).
+            'description' => ['nullable', 'string', 'max:5000'],
             'type' => ['required', 'in:date,classic'],
             // 'timezone' (règle Laravel) = round 18 (skill /100) : avant ce fix, seul 'string|max:60'
             // gardait ce champ - une chaîne arbitraire non-IANA ("Not/AZone", "'; DROP TABLE...", une

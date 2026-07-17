@@ -17,6 +17,37 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.20 · 2026-07-16 · fix(decido) round 23 passe adversariale /100 (deux angles neufs) :
+ *     (1) le champ `description` du sondage n'avait AUCUNE limite de longueur (['nullable',
+ *     'string'] seulement, contrairement à `title` max:255). Preuve réelle isolée hors framework
+ *     (INSERT PDO direct sur MySQL/MariaDB local, 'strict' => true comme en prod - cf.
+ *     config/database.php) : une description de 5 Mo ne produit PAS de troncature silencieuse
+ *     mais lève une PDOException SQLSTATE 22001 "Data too long for column 'description'" (limite
+ *     réelle de la colonne `text` : 65 535 octets) - cette Illuminate\Database\QueryException
+ *     n'est interceptée NULLE PART dans store() (seule InvalidArgumentException l'est), donc elle
+ *     aurait remonté telle quelle en crash 500 brut, même défaut de robustesse que le fuseau
+ *     horaire invalide du round 18. Corrigé par 'max:5000' (mb_strlen, marge large et très
+ *     en-deçà de la limite d'octets même dans le pire cas UTF-8 multi-octets). (2)
+ *     decido_polls.short_url_id n'a AUCUNE contrainte de clé étrangère (migration
+ *     add_short_url_id_to_decido_polls : unsignedBigInteger nullable, ni constrained() ni
+ *     cascadeOnDelete()) - decido:purge-expired supprimait le Poll expiré sans jamais toucher au
+ *     ShortUrl associé (créé par Poll::claimShortUrl()), qui survivait indéfiniment en base et
+ *     continuait de rediriger (301, is_active toujours true) vers l'URL du sondage désormais
+ *     supprimée : un lien mort, potentiellement partagé publiquement (c'est tout l'objet d'un
+ *     lien court), aboutissant à un 404 brut sans jamais être nettoyé. Corrigé en identifiant les
+ *     short_url_id des sondages purgés avant le DELETE en masse puis en soft-supprimant
+ *     (SoftDeletes du modèle ShortUrl) les ShortUrl correspondants - le scope global Eloquent les
+ *     exclut alors de ShortUrlService::resolve(), et ShortUrlRedirectController affiche désormais
+ *     la page /lien-expire dédiée au lieu d'un 404 brut. Troisième angle audité (close() avec
+ *     final_option_id NULL puis export ICS) : déjà géré proprement par le code existant
+ *     (PollExportService::exportIcs() lève une RuntimeException claire, interceptée et affichée
+ *     par PollManageController::exportIcs()) - seul le parcours HTTP complet de ce cas précis
+ *     n'était pas encore prouvé par un test ; test ajouté sans correctif (rien à corriger, angle
+ *     CLEAN). 70/70 tests Pest verts (65 existants + 5 nouveaux ; les 2 tests prouvant les bugs
+ *     échouent contre l'ancien code, vérifié par stash avant correctif). Premier des deux
+ *     verdicts CLEAN consécutifs requis pour clore le gate /100 : ce round contient deux vrais
+ *     bugs corrigés, donc NE COMPTE PAS comme un round clean - le compteur reste à zéro, il faut
+ *     encore deux rounds consécutifs sans aucun bug trouvé pour clore le gate.
  *   1.107.19 · 2026-07-16 · fix(decido) round 22 passe adversariale /100 (intégrité RFC4180 du
  *     CSV exporté) : PollExportService::exportCsv() appelait fputcsv(..., ';', '"', '\\') - le 5e
  *     argument '\\' active le mécanisme d'ÉCHAPPEMENT PROPRIÉTAIRE de PHP (non-RFC4180), qui
@@ -1306,7 +1337,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 19;
+$lvPatch = 20;
 
 return [
     'major' => $lvMajor,
