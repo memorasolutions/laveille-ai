@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.109.1] - 2026-07-17
+
+### Fixed
+- **Décido — bouton "×" de retrait de plage horaire (formulaire de dates dédié) flottait sans bordure ni fond, visuellement déconnecté des champs Début/Fin.** Repéré par l'utilisateur via capture d'écran après une vérification Playwright de ma part jugée insuffisamment critique (le défaut était déjà présent dans ma propre capture, mais qualifié à tort de « visuellement propre »). Cause racine confirmée par `getComputedStyle` (pas par supposition) : une règle CSS globale de `charte.css` - `[aria-label*="vote" i], [aria-label*="Soutenir"], [aria-label*="Retirer"] { border: none !important; background: none !important; }` (écrite pour les boutons de vote/avis BS3) - matchait accidentellement le nouveau bouton `aria-label="Retirer cette plage"` par simple inclusion de sous-chaîne, lui retirant bordure et fond avec `!important`. 17 fichiers du site utilisent un `aria-label` contenant « Retirer » et sont potentiellement affectés par cette règle trop large (non audités ici, hors périmètre de cette correction). Fix ciblé et à risque minimal : renommage de l'`aria-label` en « Supprimer cette plage horaire » (aucune sous-chaîne en commun avec la règle CSS globale) plutôt que de toucher la règle partagée elle-même. Second correctif du même repérage : la ligne Début/Fin/× utilisait des colonnes Bootstrap `col-5/col-5/col-2`, laissant une colonne vide disproportionnée pour le bouton - remplacé par un flex `d-flex gap-2` (Début/Fin en `flex-grow-1`, × en `flex-shrink-0`) pour que le bouton reste toujours collé au champ Fin quelle que soit la largeur du conteneur. Vérifié par `getComputedStyle` avant/après (bordure de `0px none` à `1px solid rgb(108,117,125)`, écart au champ Fin de ~200px à 7.5px) + capture d'écran zoomée. 82/82 tests Pest verts.
+
 ## [1.109.0] - 2026-07-17
 
 ### Added

@@ -90,25 +90,23 @@
                                 <template x-if="candidateDateRanges[index].length > 0">
                                     <div class="mt-1">
                                         <template x-for="(range, rangeIndex) in candidateDateRanges[index]" :key="rangeIndex">
-                                            <div class="row g-2 mb-2 align-items-end">
-                                                <div class="col-5">
+                                            <div class="d-flex gap-2 align-items-end mb-2">
+                                                <div class="flex-grow-1">
                                                     <label class="form-label small" :for="'decido-range-start-' + index + '-' + rangeIndex">Début</label>
                                                     <input type="time" class="form-control form-control-sm" :id="'decido-range-start-' + index + '-' + rangeIndex"
                                                            :name="'candidate_date_ranges[' + index + '][' + rangeIndex + '][start]'" x-model="range.start">
                                                 </div>
-                                                <div class="col-5">
+                                                <div class="flex-grow-1">
                                                     <label class="form-label small" :for="'decido-range-end-' + index + '-' + rangeIndex">Fin</label>
                                                     <input type="time" class="form-control form-control-sm" :id="'decido-range-end-' + index + '-' + rangeIndex"
                                                            :name="'candidate_date_ranges[' + index + '][' + rangeIndex + '][end]'" x-model="range.end">
                                                 </div>
-                                                <div class="col-2">
-                                                    <button type="button" class="btn btn-outline-secondary btn-sm decido-touch-target w-100"
-                                                            x-on:click="candidateDateRanges[index].splice(rangeIndex, 1)"
-                                                            x-show="candidateDateRanges[index].length > 0"
-                                                            aria-label="Retirer cette plage">
-                                                        ×
-                                                    </button>
-                                                </div>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm decido-touch-target flex-shrink-0"
+                                                        x-on:click="candidateDateRanges[index].splice(rangeIndex, 1)"
+                                                        x-show="candidateDateRanges[index].length > 0"
+                                                        aria-label="Supprimer cette plage horaire">
+                                                    ×
+                                                </button>
                                             </div>
                                         </template>
                                         <button type="button" class="btn btn-link btn-sm p-0 decido-touch-target"
