@@ -71,7 +71,7 @@
                             <div class="border rounded p-3 mb-2">
                                 <div class="input-group mb-2">
                                     <input type="date" name="candidate_dates[]" class="form-control" x-model="candidateDates[index]">
-                                    <button type="button" class="btn btn-outline-secondary decido-touch-target"
+                                    <button type="button" class="ct-btn ct-btn-outline-danger ct-btn-sm"
                                             x-on:click="candidateDates.splice(index, 1); candidateDateRanges.splice(index, 1)"
                                             x-show="candidateDates.length > 1">
                                         Retirer
@@ -82,7 +82,7 @@
                                      PLUSIEURS plages horaires (ex. 9h-12h ET 14h-17h, pour sauter le dîner),
                                      pas une seule surcharge. Le lien/icône discret (raffinement Gemini) révèle
                                      une LISTE de plages "Début/Fin" répétable au lieu de 2 champs fixes. --}}
-                                <button type="button" class="btn btn-link btn-sm p-0 decido-touch-target"
+                                <button type="button" class="ct-btn ct-btn-ghost ct-btn-sm"
                                         x-show="candidateDateRanges[index].length === 0"
                                         x-on:click="candidateDateRanges[index].push({ start: rangeStartTime, end: rangeEndTime })">
                                     ⚙ Personnaliser l'horaire pour cette date
@@ -101,17 +101,17 @@
                                                     <input type="time" class="form-control form-control-sm" :id="'decido-range-end-' + index + '-' + rangeIndex"
                                                            :name="'candidate_date_ranges[' + index + '][' + rangeIndex + '][end]'" x-model="range.end">
                                                 </div>
-                                                <button type="button" class="ct-range-remove"
+                                                <button type="button" class="ct-btn ct-btn-outline-danger ct-btn-sm"
                                                         x-on:click="candidateDateRanges[index].splice(rangeIndex, 1)"
                                                         x-show="candidateDateRanges[index].length > 0"
                                                         aria-label="Supprimer cette plage horaire">×</button>
                                             </div>
                                         </template>
-                                        <button type="button" class="btn btn-link btn-sm p-0 decido-touch-target"
+                                        <button type="button" class="ct-btn ct-btn-ghost ct-btn-sm"
                                                 x-on:click="candidateDateRanges[index].push({ start: '', end: '' })">
                                             + Ajouter une plage pour cette date
                                         </button>
-                                        <button type="button" class="btn btn-link btn-sm p-0 text-muted decido-touch-target ms-3"
+                                        <button type="button" class="ct-btn ct-btn-ghost ct-btn-sm ms-3"
                                                 x-on:click="candidateDateRanges[index] = []">
                                             ✕ Revenir à l'horaire par défaut
                                         </button>
@@ -119,7 +119,7 @@
                                 </template>
                             </div>
                         </template>
-                        <button type="button" class="btn btn-sm btn-outline-primary decido-touch-target"
+                        <button type="button" class="ct-btn ct-btn-outline ct-btn-sm"
                                 x-on:click="candidateDates.push(''); candidateDateRanges.push([])">
                             + Ajouter une date
                         </button>

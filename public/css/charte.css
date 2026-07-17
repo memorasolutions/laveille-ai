@@ -799,39 +799,6 @@ select:focus {
     justify-content: center;
 }
 
-/* Bouton de retrait générique (icône ×) - pattern chip 2026, DRY après 5 occurrences du même
-   défaut sur ce projet (minuteur visuel #784/#813/#837/#840-842, Décido ici) : un simple
-   btn-outline-secondary rendait un "×" minuscule et peu visible dans une cible 44x44. Ce
-   composant réutilisable impose un glyphe de taille lisible (1.375rem/gras), un fond blanc +
-   bordure neutre au repos, et un état hover/focus rouge (--c-danger) qui communique clairement
-   l'action de suppression - à utiliser pour TOUT bouton "×" de retrait d'un élément répétable
-   (plage horaire, ligne de formulaire, chip...) plutôt que de réinventer un bouton ad hoc. */
-.ct-range-remove {
-    flex-shrink: 0;
-    width: 44px;
-    height: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.375rem;
-    font-weight: 600;
-    line-height: 1;
-    border: 1px solid #D1D5DB;
-    border-radius: 8px;
-    background: #fff;
-    color: var(--c-text-secondary);
-    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-}
-.ct-range-remove:hover {
-    background: var(--c-danger);
-    border-color: var(--c-danger);
-    color: #fff;
-}
-.ct-range-remove:focus-visible {
-    outline: 2px solid var(--c-primary);
-    outline-offset: 2px;
-}
-
 /* Titres sections accueil - pas de capitalize americain (decision utilisateur) */
 .wpo-section-title h2 { text-transform: none !important; }
 

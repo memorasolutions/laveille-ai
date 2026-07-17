@@ -47,14 +47,14 @@
                         <template x-for="(option, index) in options" :key="index">
                             <div class="input-group mb-2">
                                 <input type="text" name="options[]" class="form-control" x-model="options[index]">
-                                <button type="button" class="btn btn-outline-secondary decido-touch-target"
+                                <button type="button" class="ct-btn ct-btn-outline-danger ct-btn-sm"
                                         x-on:click="options.splice(index, 1)"
                                         x-show="options.length > 2">
                                     Retirer
                                 </button>
                             </div>
                         </template>
-                        <button type="button" class="btn btn-sm btn-outline-primary decido-touch-target" x-on:click="options.push('')">
+                        <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" x-on:click="options.push('')">
                             + Ajouter une option
                         </button>
                         @error('options')

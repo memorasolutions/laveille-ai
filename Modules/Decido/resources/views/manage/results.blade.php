@@ -37,7 +37,7 @@
                             <strong>Lien d'administration à conserver précieusement, il ne sera plus jamais réaffiché :</strong><br>
                             <code class="d-block mt-1" style="word-break: break-all;">{{ $adminUrl }}</code>
                         </div>
-                        <button type="button" class="btn btn-sm btn-outline-dark flex-shrink-0 decido-touch-target"
+                        <button type="button" class="ct-btn ct-btn-outline ct-btn-sm flex-shrink-0"
                                 x-on:click="navigator.clipboard.writeText('{{ $adminUrl }}')">
                             Copier
                         </button>
@@ -122,7 +122,7 @@
                                             </span>
                                         </div>
                                     @endif
-                                    <button type="button" class="btn btn-sm btn-outline-secondary mt-2 decido-touch-target"
+                                    <button type="button" class="ct-btn ct-btn-outline ct-btn-sm mt-2"
                                             x-on:click="openDrill === {{ $stat->option->id }} ? openDrill = null : openDrill = {{ $stat->option->id }}"
                                             x-text="openDrill === {{ $stat->option->id }} ? 'Masquer les réponses' : 'Voir qui a répondu'"
                                             x-bind:aria-expanded="(openDrill === {{ $stat->option->id }}).toString()"
@@ -275,7 +275,7 @@
                     <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
                         <span class="text-muted">Lien public :</span>
                         <code>{{ $poll->share_url }}</code>
-                        <button type="button" class="btn btn-sm btn-outline-secondary decido-touch-target"
+                        <button type="button" class="ct-btn ct-btn-outline ct-btn-sm"
                                 x-on:click="navigator.clipboard.writeText('{{ $poll->share_url }}')">
                             Copier
                         </button>
@@ -285,7 +285,7 @@
                         <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
                             <span class="text-muted">Lien court :</span>
                             <code>{{ $poll->getShortUrlString() }}</code>
-                            <button type="button" class="btn btn-sm btn-outline-secondary decido-touch-target"
+                            <button type="button" class="ct-btn ct-btn-outline ct-btn-sm"
                                     x-on:click="navigator.clipboard.writeText('{{ $poll->getShortUrlString() }}')">
                                 Copier
                             </button>
@@ -293,7 +293,7 @@
                     @else
                         <form method="POST" action="{{ route('decido.shortlink', ['poll' => $poll->public_id, 'adminToken' => $adminToken]) }}" class="mb-3">
                             @csrf
-                            <button type="submit" class="btn btn-sm btn-outline-secondary decido-touch-target">
+                            <button type="submit" class="ct-btn ct-btn-outline ct-btn-sm">
                                 Créer un lien court
                             </button>
                         </form>
@@ -305,7 +305,7 @@
                              class="border rounded">
                         <a href="{{ route('decido.qr', ['poll' => $poll->public_id, 'adminToken' => $adminToken]) }}"
                            download="qr-decido-{{ $poll->public_id }}.png"
-                           class="btn btn-sm btn-outline-secondary decido-touch-target">
+                           class="ct-btn ct-btn-outline ct-btn-sm">
                             Télécharger le QR code
                         </a>
                     </div>

@@ -17,6 +17,24 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.109.3 · 2026-07-17 · fix(decido) migration complète vers le système de boutons `.ct-btn` de la
+ *     charte, en réponse à la question de l'utilisateur "est-ce que l'outil respecte la charte du
+ *     site ? des autres outils de la plateforme ?". Audit comparatif contre les outils établis
+ *     (code-qr, liens-google, generateur-equipes, tirage-presentations) a révélé que Décido utilisait
+ *     des classes Bootstrap brutes non tokenisées (`btn btn-outline-secondary`, `btn-outline-primary`,
+ *     `btn-link`) + une classe ad hoc `.decido-touch-target`, au lieu du système `.ct-btn` déjà
+ *     standard sur la plateforme — c'est la cause racine des 2 bugs visuels corrigés en v1.109.1/
+ *     v1.109.2 sur ce même bouton (pas un hasard : un composant hors-charte accumule les défauts).
+ *     13 boutons migrés sur 4 vues (create-date.blade.php: 6, create-classic.blade.php: 2,
+ *     results.blade.php: 6 dont 1 déjà `<x-core::button>` non touché) vers les combinaisons établies
+ *     site-wide : `ct-btn ct-btn-outline-danger ct-btn-sm` (retrait/suppression, y compris le bouton
+ *     "×" de plage horaire), `ct-btn ct-btn-ghost ct-btn-sm` (actions secondaires type lien),
+ *     `ct-btn ct-btn-outline ct-btn-sm` (actions neutres : ajouter, copier, télécharger).
+ *     index.blade.php déjà 100% conforme (`<x-core::button>` exclusivement), aucun changement.
+ *     Classe `.ct-range-remove` (ajoutée en v1.109.2, redondante avec `.ct-btn-icon`/`.ct-btn-outline-
+ *     danger` déjà existants) retirée de charte.css. `.decido-touch-target` conservée (encore utilisée
+ *     par public/vote.blade.php, hors périmètre de cette migration). 82/82 tests Pest verts, vérifié
+ *     visuellement (Herd/Playwright) sur les 4 vues avant/après.
  *   1.109.2 · 2026-07-17 · fix(decido/charte) polish visuel du bouton "×" - repéré par l'utilisateur
  *     après le fix v1.109.1 ("icon trop petit, et il me semble que la mise en page n'est pas très
  *     belle") : même corrigé (bordure/fond restaurés), le glyphe "×" restait minuscule et le bouton
@@ -1461,7 +1479,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 109;
-$lvPatch = 2;
+$lvPatch = 3;
 
 return [
     'major' => $lvMajor,

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.109.3] - 2026-07-17
+
+### Fixed
+- **Décido — migration complète vers le système de boutons `.ct-btn` de la charte (respect de la charte graphique et des autres outils de la plateforme).** En réponse à la question de l'utilisateur « est-ce que l'outil respecte la charte du site ? des autres outils de la plateforme ? », audit comparatif contre les outils établis (`code-qr`, `liens-google`, `generateur-equipes`, `tirage-presentations`) : Décido utilisait des classes Bootstrap brutes non tokenisées (`btn btn-outline-secondary`, `btn-outline-primary`, `btn-link`) + une classe ad hoc `.decido-touch-target`, au lieu du système `.ct-btn` déjà standard sur la plateforme - c'est la cause racine des deux bugs visuels corrigés en v1.109.1 et v1.109.2 sur ce même bouton « × » (un composant hors-charte accumule les défauts, ce n'était pas un hasard isolé). 13 boutons migrés sur 4 vues : `create-date.blade.php` (6), `create-classic.blade.php` (2), `results.blade.php` (6, dont 1 déjà `<x-core::button>` non touché) vers les combinaisons établies site-wide - `ct-btn ct-btn-outline-danger ct-btn-sm` pour le retrait/suppression (y compris le bouton « × » de plage horaire), `ct-btn ct-btn-ghost ct-btn-sm` pour les actions secondaires de type lien, `ct-btn ct-btn-outline ct-btn-sm` pour les actions neutres (ajouter, copier, télécharger). `index.blade.php` était déjà 100% conforme (`<x-core::button>` exclusivement), aucun changement nécessaire. Classe `.ct-range-remove` (ajoutée en v1.109.2, redondante avec `.ct-btn-icon`/`.ct-btn-outline-danger` déjà existants sur la plateforme) retirée de `charte.css`. `.decido-touch-target` conservée dans `charte.css` (encore utilisée par `public/vote.blade.php`, hors périmètre de cette migration). 82/82 tests Pest verts. Vérifié visuellement (Herd local, Playwright) sur les 4 vues avant/après - bouton « × » désormais avec bordure rouge visible, boutons « Retirer »/liens ghost/boutons neutres tous cohérents avec le reste du site.
+
 ## [1.109.2] - 2026-07-17
 
 ### Fixed
