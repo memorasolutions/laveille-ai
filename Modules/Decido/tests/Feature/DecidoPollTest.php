@@ -1070,6 +1070,108 @@ test('export CSV neutralise l’injection de formule (voter_pseudonym contrôlé
     expect($csv)->not->toContain('"=HYPERLINK');
 });
 
+// ── Round 22 (skill /100) : intégrité structurelle RFC4180 du CSV exporté ──────────────────
+
+test('un voter_pseudonym contenant virgule/guillemets/point-virgule/saut de ligne/backslash+guillemet ne corrompt pas la structure ni le contenu du CSV exporté (RFC4180)', function (): void {
+    // Round 22 (skill /100) : au-delà de l'injection de formule déjà neutralisée (round 5),
+    // exportCsv() appelle fputcsv($handle, [...], ';', '"', '\\') - le 5e argument '\\' active
+    // le mécanisme d'ÉCHAPPEMENT PROPRIÉTAIRE de PHP (non-RFC4180), qui échappe le caractère
+    // SUIVANT le backslash au lieu de doubler les guillemets internes comme le veut la norme.
+    // Bug réel trouvé par isolation directe de fputcsv/fgetcsv (hors framework, avant ce
+    // correctif) : un voter_pseudonym texte libre contenant un backslash immédiatement suivi
+    // d'un guillemet interne (ex. Jean\"Boss" - un votant qui se met des guillemets dans son
+    // pseudonyme après un backslash, ex. un chemin Windows halluciné ou juste une frappe libre)
+    // corrompt le champ de DEUX façons prouvées séparément : (a) relu avec le MÊME escape='\\'
+    // (round-trip PHP), le guillemet fermant est lui-même échappé - le parseur avale alors le
+    // reste de la ligne ET la ligne suivante entière dans le même champ (4 colonnes au lieu de
+    // 3, un votant entier disparaît) ; (b) relu avec un lecteur RFC4180 STRICT (escape='',
+    // comportement réel d'Excel/Google Sheets/Numbers, qui ignorent la convention backslash
+    // propriétaire de PHP), le nombre de colonnes reste correct MAIS la VALEUR récupérée est
+    // silencieusement GARBLED (`Jean\Boss"""` au lieu de `Jean\"Boss"`) - corruption de donnée
+    // invisible, sans erreur, pire qu'un plantage. Ce test prouve (b), le scénario le plus
+    // représentatif d'un usage réel (l'organisateur ouvre le CSV dans un tableur, pas avec du
+    // PHP). Requête HTTP RÉELLE vers l'export CSV, RE-PARSE avec fgetcsv() (parseur CSV
+    // standard, escape='' = RFC4180 strict), vérifie que la structure (lignes/colonnes) ET le
+    // CONTENU (pseudonyme exact) survivent. Avec l'ancien code, la dernière assertion de valeur
+    // échoue (contenu corrompu). Corrigé en passant une chaîne vide comme 5e argument à
+    // fputcsv() (désactive le mécanisme propriétaire, revient au pur doublage RFC4180 des
+    // guillemets internes) - vérifié : n'introduit AUCUNE régression sur les autres cas déjà
+    // couverts (virgule+guillemets round 5, saut de ligne, point-virgule = délimiteur réel).
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-csv-rfc4180', 'vote_mode' => 'single_choice']);
+
+    $optionA = $poll->options()->create(['label' => 'Option virgule/guillemets', 'sort_order' => 0]);
+    $optionA->votes()->create([
+        'poll_id' => $poll->id,
+        'voter_token' => Str::uuid()->toString(),
+        'voter_pseudonym' => 'Jean, "Le Boss"',
+        'value' => 'selected',
+    ]);
+
+    $optionB = $poll->options()->create(['label' => 'Option saut de ligne', 'sort_order' => 1]);
+    $optionB->votes()->create([
+        'poll_id' => $poll->id,
+        'voter_token' => Str::uuid()->toString(),
+        'voter_pseudonym' => "Marie\nDupont",
+        'value' => 'selected',
+    ]);
+
+    $optionC = $poll->options()->create(['label' => 'Option point-virgule (délimiteur réel)', 'sort_order' => 2]);
+    $optionC->votes()->create([
+        'poll_id' => $poll->id,
+        'voter_token' => Str::uuid()->toString(),
+        'voter_pseudonym' => 'Suzie; test',
+        'value' => 'selected',
+    ]);
+
+    // Le cas pathologique réel : backslash immédiatement suivi d'un guillemet interne.
+    $optionD = $poll->options()->create(['label' => 'Option backslash+guillemet', 'sort_order' => 3]);
+    $optionD->votes()->create([
+        'poll_id' => $poll->id,
+        'voter_token' => Str::uuid()->toString(),
+        'voter_pseudonym' => 'Jean\\"Boss"',
+        'value' => 'selected',
+    ]);
+
+    // Vote témoin, placé APRÈS le cas pathologique : si la corruption existe, son pseudonyme
+    // disparaît fusionné dans le champ précédent au lieu d'apparaître comme ligne distincte.
+    $optionE = $poll->options()->create(['label' => 'Option témoin après', 'sort_order' => 4]);
+    $optionE->votes()->create([
+        'poll_id' => $poll->id,
+        'voter_token' => Str::uuid()->toString(),
+        'voter_pseudonym' => 'Témoin Après',
+        'value' => 'selected',
+    ]);
+
+    $response = $this->get(route('decido.export.csv', ['poll' => $poll->public_id, 'adminToken' => 'jeton-csv-rfc4180']));
+    $response->assertStatus(200);
+
+    $stream = fopen('php://memory', 'r+');
+    fwrite($stream, $response->getContent());
+    rewind($stream);
+
+    $rows = [];
+    while (($row = fgetcsv($stream, 0, ';', '"', '')) !== false) {
+        $rows[] = $row;
+    }
+    fclose($stream);
+
+    // 1 ligne d'en-tête + 5 votes = 6 lignes, chacune à 3 colonnes exactement - aucune fusion.
+    expect($rows)->toHaveCount(6);
+    foreach ($rows as $row) {
+        expect($row)->toHaveCount(3);
+    }
+
+    $pseudonyms = collect($rows)->skip(1)->pluck(1)->values()->all();
+    expect($pseudonyms)->toBe([
+        'Jean, "Le Boss"',
+        "Marie\nDupont",
+        'Suzie; test',
+        'Jean\\"Boss"',
+        'Témoin Après',
+    ]);
+});
+
 test('decido.store et decido.vote.store portent un middleware throttle (anti-abus)', function (): void {
     $storeMiddleware = collect(Route::getRoutes()->getByName('decido.store')->gatherMiddleware());
     $voteMiddleware = collect(Route::getRoutes()->getByName('decido.vote.store')->gatherMiddleware());

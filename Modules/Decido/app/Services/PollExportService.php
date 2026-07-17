@@ -14,7 +14,21 @@ class PollExportService
     {
         $handle = fopen('php://memory', 'r+');
 
-        fputcsv($handle, ['Option', 'Votant', 'Réponse'], ';', '"', '\\');
+        // Round 22 (skill /100) : le 4e argument de fputcsv() ('\\', backslash) active le
+        // mécanisme d'échappement PROPRIÉTAIRE de PHP (non-RFC4180) - il fait échapper le
+        // caractère SUIVANT le backslash au lieu de doubler les guillemets internes. Un
+        // voter_pseudonym texte libre (contrôlé par un votant anonyme) se terminant par un
+        // backslash juste avant la fermeture du champ (ex. "Jean\") fait alors échapper le
+        // guillemet fermant LUI-MÊME au lieu de clore le champ : le parseur continue de
+        // consommer la ligne suivante comme faisant partie du même champ, fusionnant deux
+        // lignes en une, décalant les colonnes et faisant disparaître des votants du fichier
+        // exporté. Preuve réelle (isolée hors framework, fputcsv/fgetcsv) : "Jean\" produisait
+        // une ligne de 4 colonnes contenant la ligne suivante au lieu de 2 lignes de 3
+        // colonnes. Passer une chaîne vide comme 5e argument désactive ce mécanisme et revient
+        // au pur doublage de guillemets RFC4180 ("" pour un guillemet interne), qui gère
+        // correctement TOUS les cas testés : backslash seul/terminal, backslash+guillemet,
+        // virgule+guillemets, point-virgule (le vrai délimiteur ici), saut de ligne interne.
+        fputcsv($handle, ['Option', 'Votant', 'Réponse'], ';', '"', '');
 
         foreach ($poll->options as $option) {
             foreach ($option->votes as $vote) {
@@ -30,7 +44,7 @@ class PollExportService
                     $this->sanitizeCsvCell($option->label),
                     $this->sanitizeCsvCell($vote->voter_pseudonym),
                     $response,
-                ], ';', '"', '\\');
+                ], ';', '"', '');
             }
         }
 

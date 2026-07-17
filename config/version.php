@@ -17,6 +17,32 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.19 · 2026-07-16 · fix(decido) round 22 passe adversariale /100 (intégrité RFC4180 du
+ *     CSV exporté) : PollExportService::exportCsv() appelait fputcsv(..., ';', '"', '\\') - le 5e
+ *     argument '\\' active le mécanisme d'ÉCHAPPEMENT PROPRIÉTAIRE de PHP (non-RFC4180), qui
+ *     échappe le caractère SUIVANT le backslash au lieu de doubler les guillemets internes comme
+ *     le veut la norme. Bug réel trouvé par isolation directe de fputcsv/fgetcsv puis reproduit
+ *     par requête HTTP réelle : un voter_pseudonym texte libre (contrôlé par un votant anonyme)
+ *     contenant un backslash immédiatement suivi d'un guillemet interne (ex. Jean\"Boss") corrompt
+ *     le champ de deux façons distinctes selon le lecteur - (a) relu avec le même escape='\\'
+ *     (round-trip PHP), le guillemet fermant est lui-même échappé, le parseur avale la ligne
+ *     SUIVANTE entière dans le même champ (fusion de lignes, colonnes décalées, un votant
+ *     disparaît) ; (b) relu avec un lecteur RFC4180 strict (escape='', comportement réel
+ *     d'Excel/Google Sheets/Numbers), le nombre de colonnes reste correct mais la VALEUR récupérée
+ *     est silencieusement corrompue (Jean\Boss""" au lieu de Jean\"Boss") - corruption de donnée
+ *     invisible, sans erreur, pire qu'un plantage visible. Corrigé en passant une chaîne vide comme
+ *     5e argument à fputcsv() (désactive le mécanisme propriétaire, revient au pur doublage
+ *     RFC4180 des guillemets internes) - vérifié sans régression sur les cas déjà couverts
+ *     (virgule+guillemets round 5, saut de ligne, point-virgule = délimiteur réel du fichier).
+ *     Second angle audité (sémantique accessible des barres de résultats pour lecteur d'écran) :
+ *     AUCUNE barre de progression visuelle (width%) n'existe dans results.blade.php ni ailleurs
+ *     dans le module - vérifié par grep exhaustif de la vue - les résultats sont déjà affichés en
+ *     TEXTE pur (badges "✓ 3 oui") et le tableau croisé porte déjà des aria-label explicites par
+ *     cellule + caption + scope ; aucun correctif ARIA nécessaire (pas de correctif cosmétique
+ *     forcé sur un composant qui n'existe pas). Compteur de rounds consécutifs clean remis à zéro
+ *     par CE round (un vrai bug a été trouvé et corrigé - ne compte donc PAS comme un des deux
+ *     verdicts CLEAN consécutifs requis pour clore le gate /100 ; il faut désormais UN round clean
+ *     de plus pour clore). 65/65 tests Pest verts (64 existants + 1 nouveau).
  *   1.107.18 · 2026-07-16 · fix(decido) round 21 passe adversariale /100 (contournement de
  *     DistinctNormalized par normalisation UNICODE, angle explicitement laissé en suspens par le
  *     round 20 lui-même dans son propre test de contrôle négatif) : DistinctNormalized::validate()
@@ -1280,7 +1306,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 18;
+$lvPatch = 19;
 
 return [
     'major' => $lvMajor,

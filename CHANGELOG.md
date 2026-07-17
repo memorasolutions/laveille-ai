@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.19] - 2026-07-16
+
+### Fixed
+- **Décido — `PollExportService::exportCsv()` corrompait le CSV exporté pour un `voter_pseudonym` contenant un backslash suivi d'un guillemet interne (intégrité RFC4180, au-delà de l'injection de formule déjà neutralisée au round 5).** `fputcsv($handle, [...], ';', '"', '\\')` — le 5e argument `'\\'` active le mécanisme d'ÉCHAPPEMENT PROPRIÉTAIRE de PHP (non-RFC4180), qui échappe le caractère SUIVANT le backslash au lieu de doubler les guillemets internes comme le veut la norme. Bug réel trouvé par isolation directe de `fputcsv`/`fgetcsv` puis reproduit par requête HTTP réelle sur l'export : un pseudonyme texte libre (contrôlé par un votant anonyme) tel que `Jean\"Boss"` corrompt le champ de deux façons distinctes selon le lecteur —
+  - relu avec le même `escape='\\'` (round-trip PHP) : le guillemet fermant est lui-même échappé, le parseur avale la ligne SUIVANTE entière dans le même champ (fusion de lignes, colonnes décalées, un votant disparaît du fichier) ;
+  - relu avec un lecteur RFC4180 strict (`escape=''`, comportement réel d'Excel/Google Sheets/Numbers, qui ignorent la convention backslash propriétaire de PHP) : le nombre de colonnes reste correct mais la VALEUR récupérée est silencieusement corrompue (`Jean\Boss"""` au lieu de `Jean\"Boss"`) — corruption de donnée invisible, sans erreur, pire qu'un plantage visible.
+
+  Corrigé en passant une chaîne vide comme 5e argument à `fputcsv()` (désactive le mécanisme propriétaire, revient au pur doublage RFC4180 des guillemets internes) — vérifié sans régression sur tous les cas déjà couverts (virgule+guillemets round 5, saut de ligne interne, point-virgule = délimiteur réel du fichier).
+
+  Second angle audité (sémantique accessible des barres de résultats pour lecteur d'écran) : aucune barre de progression visuelle (`width%`) n'existe dans `results.blade.php` ni ailleurs dans le module — vérifié par grep exhaustif de la vue. Les résultats sont déjà affichés en TEXTE pur (badges `✓ 3 oui`) et le tableau croisé porte déjà des `aria-label` explicites par cellule + `caption` + `scope` — aucun correctif ARIA nécessaire, pas de correctif cosmétique forcé sur un composant qui n'existe pas.
+
+Trouvé par une passe adversariale indépendante (skill `/100`, round 22, intégrité structurelle RFC4180 du CSV exporté). Ce round n'est PAS clean (un vrai bug corrigé) — le compteur de rounds clean consécutifs reste à zéro, il faut désormais un round clean de plus pour clore le gate. 65/65 tests Pest verts (64 existants + 1 nouveau).
+
 ## [1.107.18] - 2026-07-16
 
 ### Fixed
