@@ -17,6 +17,19 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.109.2 · 2026-07-17 · fix(decido/charte) polish visuel du bouton "×" - repéré par l'utilisateur
+ *     après le fix v1.109.1 ("icon trop petit, et il me semble que la mise en page n'est pas très
+ *     belle") : même corrigé (bordure/fond restaurés), le glyphe "×" restait minuscule et le bouton
+ *     carré-net contrastait avec le reste de la charte. Nouvelle classe réutilisable
+ *     `.ct-range-remove` (public/css/charte.css) : glyphe 1.375rem/gras (au lieu de la taille
+ *     Bootstrap par défaut, quasi illisible dans une cible 44x44), coins arrondis 8px (au lieu des
+ *     angles vifs de .btn-outline-secondary), état hover/focus rouge (--c-danger) qui communique
+ *     clairement l'action de suppression - pattern chip 2026 déjà validé sur ce projet (minuteur
+ *     visuel #784/#813/#837/#840-842). DRY : c'est la 5e fois que ce même défaut (bouton × trop
+ *     discret) est corrigé sur ce projet - cette fois la solution est un composant réutilisable
+ *     dans charte.css plutôt qu'un patch local de plus, pour que le prochain bouton "×" du site
+ *     n'ait pas à réinventer la roue. Vérifié visuellement (capture zoomée avant/après). 82/82
+ *     tests Pest verts.
  *   1.109.1 · 2026-07-17 · fix(decido) bouton "×" de retrait de plage horaire flottant, sans bordure
  *     ni fond (repéré par l'utilisateur via capture d'écran après une vérification Playwright
  *     insuffisamment critique de ma part - le défaut était déjà présent dans ma propre capture
@@ -1448,7 +1461,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 109;
-$lvPatch = 1;
+$lvPatch = 2;
 
 return [
     'major' => $lvMajor,

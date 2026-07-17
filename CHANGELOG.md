@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.109.2] - 2026-07-17
+
+### Fixed
+- **Décido/charte — polish visuel du bouton "×" de retrait de plage horaire.** Repéré par l'utilisateur après le fix v1.109.1 (« icon trop petit, et il me semble que la mise en page n'est pas très belle ») : même corrigé (bordure/fond restaurés), le glyphe « × » restait minuscule dans sa cible 44x44 et le bouton carré aux angles vifs contrastait avec l'esthétique du reste de la charte. Nouvelle classe réutilisable `.ct-range-remove` dans `public/css/charte.css` : glyphe `1.375rem`/gras (au lieu de la taille Bootstrap par défaut, quasi illisible), coins arrondis `8px` (au lieu des angles vifs de `.btn-outline-secondary`), état hover/focus rouge (`--c-danger`) qui communique clairement l'action de suppression - pattern « chip 2026 » déjà validé sur ce projet pour le minuteur visuel. C'est la 5e fois que ce même défaut (bouton × trop discret/mal intégré) est corrigé sur ce projet ; cette fois la solution est un composant réutilisable dans `charte.css` plutôt qu'un patch local de plus, pour que le prochain bouton « × » du site n'ait pas à réinventer la roue. Vérifié visuellement (capture zoomée avant/après). 82/82 tests Pest verts.
+
 ## [1.109.1] - 2026-07-17
 
 ### Fixed

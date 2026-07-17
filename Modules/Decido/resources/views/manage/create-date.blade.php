@@ -101,12 +101,10 @@
                                                     <input type="time" class="form-control form-control-sm" :id="'decido-range-end-' + index + '-' + rangeIndex"
                                                            :name="'candidate_date_ranges[' + index + '][' + rangeIndex + '][end]'" x-model="range.end">
                                                 </div>
-                                                <button type="button" class="btn btn-outline-secondary btn-sm decido-touch-target flex-shrink-0"
+                                                <button type="button" class="ct-range-remove"
                                                         x-on:click="candidateDateRanges[index].splice(rangeIndex, 1)"
                                                         x-show="candidateDateRanges[index].length > 0"
-                                                        aria-label="Supprimer cette plage horaire">
-                                                    ×
-                                                </button>
+                                                        aria-label="Supprimer cette plage horaire">×</button>
                                             </div>
                                         </template>
                                         <button type="button" class="btn btn-link btn-sm p-0 decido-touch-target"
