@@ -149,6 +149,29 @@
                 </div>
                 </div>{{-- /sudoku-grid-wrapper --}}
 
+                {{-- Etat de fin de grille (#252c) : succes ou erreur, annonce clairement et
+                     de facon accessible (texte + icone, pas seulement la couleur). --}}
+                <div x-show="completed" role="status" aria-live="polite" class="sudoku-end-state sudoku-end-success" style="display:none;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  <div>
+                    <strong>{{ __('Grille complétée avec succès !') }}</strong>
+                    {{ __('Temps :') }} <span x-text="formatTime(timer)"></span>
+                  </div>
+                </div>
+
+                <div x-show="gridErrorState" role="alert" aria-live="assertive" class="sudoku-end-state sudoku-end-error" style="display:none;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                  <div>
+                    <strong>{{ __('Erreur(s) dans la grille.') }}</strong>
+                    {{ __('Corrigez les cases surlignées en rouge, puis cliquez de nouveau sur « Vérifier la grille ».') }}
+                  </div>
+                </div>
+
                 {{-- Keypad — bordure rouge en notesMode, bleue en saisie normale (#196) --}}
                 <div class="mt-3 d-flex flex-wrap justify-content-center gap-2" id="numeric-keypad" aria-label="{{ __('Clavier numérique') }}" :class="{ 'keypad-notes-mode': notesMode }">
                   <template x-for="n in 9" :key="'k'+n">
@@ -178,9 +201,9 @@
                     </div>
 
                     <div class="d-grid gap-2">
-                      <button type="button" class="btn" @click="verifyComplete()" :disabled="completed||paused" style="background:#053d4a;color:#fff;font-weight:600;">
+                      <button type="button" class="ct-btn ct-btn-primary ct-btn-lg sudoku-verify-btn" @click="verifyComplete()" :disabled="completed||paused">
                         <span class="d-inline-flex align-items-center gap-2 justify-content-center">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
                           {{ __('Vérifier la grille') }}
                         </span>
                       </button>
@@ -195,7 +218,7 @@
                           <span x-show="!notesMode" style="font-size:0.7rem;opacity:0.7;">(Maj+chiffre)</span>
                         </span>
                       </button>
-                      <button type="button" class="btn" @click="useHint()" :disabled="completed||paused" style="background:#053d4a;color:#fff;font-weight:600;">
+                      <button type="button" class="ct-btn ct-btn-outline" @click="useHint()" :disabled="completed||paused||hintPending">
                         <span class="d-inline-flex align-items-center gap-2 justify-content-center">
                           <span>{{ __('Indice') }}</span>
                           <span class="badge bg-light text-dark" x-text="'+' + hintPenaltySeconds() + 's'" style="font-size:0.7rem;"></span>
@@ -483,6 +506,54 @@
 @@media (prefers-reduced-motion: reduce) {
   .sudoku-cell, .sudoku-key { transition: none !important; }
 }
+
+/* #252c : etat de fin de grille (succes / erreur), texte + icone (pas seulement
+   la couleur, WCAG). Contraste texte recalcule AAA (7:1) sur fond teinte. */
+.sudoku-end-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: var(--r-base, 10px);
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-top: 12px;
+}
+.sudoku-end-state svg { flex-shrink: 0; }
+.sudoku-end-success {
+  background: var(--c-primary-light, #F0FAFB);
+  border: 2px solid var(--c-primary, #064E5A);
+  color: var(--c-primary, #064E5A);
+}
+.sudoku-end-error {
+  /* Texte #7F1D1D (pas var(--c-danger) directement) : #DC2626 en texte sur fond
+     clair ne passe pas le contraste AAA 7:1. Bordure/icone restent en
+     var(--c-danger) pour l'identite couleur. */
+  background: #FEF2F2;
+  border: 2px solid var(--c-danger, #DC2626);
+  color: #7F1D1D;
+}
+
+/* #252c : CTA principal "Verifier la grille" proeminent (vs boutons secondaires) */
+.sudoku-verify-btn {
+  width: 100%;
+  min-height: 48px;
+  font-size: 1rem;
+  box-shadow: 0 4px 14px rgba(6, 78, 90, 0.35);
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+.sudoku-verify-btn:hover:not(:disabled) {
+  box-shadow: 0 6px 18px rgba(6, 78, 90, 0.45);
+  transform: translateY(-1px);
+}
+.sudoku-verify-btn:disabled {
+  box-shadow: none;
+  opacity: 0.65;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sudoku-verify-btn:hover:not(:disabled) { transform: none; }
+}
 </style>
 
 <script>
@@ -502,8 +573,10 @@ document.addEventListener('alpine:init', () => {
     autoSaveId: null,
     paused: false,
     hintsUsed: 0,
+    hintPending: false, // verrou anti-double-clic/anti-course reseau pour l'indice (#252c)
     errorsCount: 0,
     completed: false,
+    gridErrorState: false, // grille pleine mais avec au moins un conflit (etat de fin d'erreur persistant)
     statusMessage: '',
     pseudo: '',
     submitting: false,
@@ -641,6 +714,9 @@ document.addEventListener('alpine:init', () => {
 
     inputValue(n) {
       if (this.completed || this.paused) return;
+      // L'utilisateur modifie la grille : l'ancien etat d'erreur persistant n'est
+      // plus a jour, il sera recalcule au prochain clic sur « Verifier la grille ».
+      this.gridErrorState = false;
       const { row, col } = this.selectedCell;
       if (row === -1 || this.originalGrid[row][col] !== 0) return;
       const num = parseInt(n, 10);
@@ -671,6 +747,7 @@ document.addEventListener('alpine:init', () => {
     },
 
     toggleNote(row, col, n) {
+      this.gridErrorState = false;
       if (this.originalGrid[row][col] !== 0) return;
       // Si grille a un chiffre, le clear pour montrer notes
       if (this.grid[row][col] !== 0) this.grid[row][col] = 0;
@@ -712,6 +789,7 @@ document.addEventListener('alpine:init', () => {
 
     clearCell() {
       if (this.completed || this.paused) return;
+      this.gridErrorState = false;
       const { row, col } = this.selectedCell;
       if (row === -1 || this.originalGrid[row][col] !== 0) return;
       this.grid[row][col] = 0;
@@ -751,43 +829,52 @@ document.addEventListener('alpine:init', () => {
     },
 
     async useHint() {
-      if (this.completed || this.paused) return;
-      // Trouve la premiere case vide (non-indice) puis demande au SERVEUR la
-      // valeur correcte (la solution n'est jamais exposee au client = anti-triche).
-      for (let r = 0; r < 9; r++) {
-        for (let c = 0; c < 9; c++) {
-          if (this.originalGrid[r][c] === 0 && this.grid[r][c] === 0) {
-            try {
-              const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
-              const res = await fetch('/api/sudoku/hint/' + this.currentPuzzleId, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'X-CSRF-TOKEN': csrf || '',
-                  'Accept': 'application/json',
-                },
-                body: JSON.stringify({ row: r, col: c }),
-              });
-              if (!res.ok) throw new Error('hint http ' + res.status);
-              const data = await res.json();
-              const n = data.value;
-              this.grid[r][c] = n;
-              this.hintsUsed++;
-              // #204 : ajout penalite temps
-              const penalty = this.hintPenaltySeconds();
-              this.timer = this.timer + penalty;
-              this.selectedCell = { row: r, col: c };
-              this.statusMessage = 'Indice : (' + (r+1) + ',' + (c+1) + ') = ' + n + ' · +' + penalty + 's pénalité.';
-              setTimeout(() => { this.statusMessage = ''; }, 3500);
-              // Auto-détection de fin si l'indice complète la grille.
-              this.checkCompletion();
-            } catch (e) {
-              this.statusMessage = 'Indice indisponible, réessayez.';
-              setTimeout(() => { this.statusMessage = ''; }, 3500);
+      // #252c : garde anti-course reseau. useHint() est async (scan sync + await
+      // fetch) ; sans ce verrou, un 2e appel avant la reponse du 1er retrouve la
+      // MEME case vide et double-charge hintsUsed/penalite sans reveler de
+      // nouvelle case (symptome observe : « l'indice ne marche pas la 2e fois »).
+      if (this.completed || this.paused || this.hintPending) return;
+      this.hintPending = true;
+      try {
+        // Trouve la premiere case vide (non-indice) puis demande au SERVEUR la
+        // valeur correcte (la solution n'est jamais exposee au client = anti-triche).
+        for (let r = 0; r < 9; r++) {
+          for (let c = 0; c < 9; c++) {
+            if (this.originalGrid[r][c] === 0 && this.grid[r][c] === 0) {
+              try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+                const res = await fetch('/api/sudoku/hint/' + this.currentPuzzleId, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrf || '',
+                    'Accept': 'application/json',
+                  },
+                  body: JSON.stringify({ row: r, col: c }),
+                });
+                if (!res.ok) throw new Error('hint http ' + res.status);
+                const data = await res.json();
+                const n = data.value;
+                this.grid[r][c] = n;
+                this.hintsUsed++;
+                // #204 : ajout penalite temps
+                const penalty = this.hintPenaltySeconds();
+                this.timer = this.timer + penalty;
+                this.selectedCell = { row: r, col: c };
+                this.statusMessage = 'Indice : (' + (r+1) + ',' + (c+1) + ') = ' + n + ' · +' + penalty + 's pénalité.';
+                setTimeout(() => { this.statusMessage = ''; }, 3500);
+                // Auto-détection de fin si l'indice complète la grille.
+                this.checkCompletion();
+              } catch (e) {
+                this.statusMessage = 'Indice indisponible, réessayez.';
+                setTimeout(() => { this.statusMessage = ''; }, 3500);
+              }
+              return;
             }
-            return;
           }
         }
+      } finally {
+        this.hintPending = false;
       }
     },
 
@@ -939,6 +1026,7 @@ document.addEventListener('alpine:init', () => {
     },
 
     verifyComplete() {
+      this.gridErrorState = false;
       for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) {
         if (this.grid[r][c] === 0) {
           this.statusMessage = 'Grille incomplete.';
@@ -946,12 +1034,21 @@ document.addEventListener('alpine:init', () => {
           return;
         }
       }
+      // Recalcule TOUTES les cases en conflit (pas seulement la premiere trouvee)
+      // pour un etat de fin clair : surlignage rouge complet + bandeau persistant.
+      this.errorsCells.clear();
+      let hasError = false;
       for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) {
         if (!this.checkLocal(r, c, this.grid[r][c])) {
-          this.statusMessage = 'Erreur ligne ' + (r+1) + ', colonne ' + (c+1) + '.';
-          setTimeout(() => { this.statusMessage = ''; }, 2500);
-          return;
+          this.errorsCells.add(r + '-' + c);
+          hasError = true;
         }
+      }
+      if (hasError) {
+        this.gridErrorState = true;
+        this.statusMessage = 'Erreur(s) dans la grille.';
+        setTimeout(() => { this.statusMessage = ''; }, 2500);
+        return;
       }
       this.completed = true;
       clearInterval(this.timerId);

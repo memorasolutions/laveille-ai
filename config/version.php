@@ -17,6 +17,18 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.109.8 · 2026-07-17 · fix(sudoku) 3 correctifs : (1) bouton « Indice » ne fonctionnait pas à
+ *     la 2e demande - course réseau confirmée par reproduction directe (useHint() async sans
+ *     verrou, un 2e appel avant la réponse du 1er retrouvait la même case vide et double-comptait
+ *     le compteur/la pénalité sans révéler de nouvelle case) - verrou `hintPending` + `try/finally`
+ *     ajouté. (2) Aucun état de fin de grille clair (succès/erreur) - bandeaux accessibles ajoutés
+ *     (`role="status"`/`role="alert"`, texte + icône, pas seulement la couleur ; contraste texte
+ *     erreur recalculé AAA 7:1). (3) Bouton « Vérifier la grille » peu visible - migré vers
+ *     `.ct-btn-primary.ct-btn-lg` + ombre dédiée, bouton « Indice » rétrogradé en `.ct-btn-outline`
+ *     pour restaurer la hiérarchie visuelle. 5/5 tests Pest verts. Vérifié visuellement (Herd,
+ *     Playwright, exécution directe des méthodes Alpine) : course réseau reproduite et corrigée,
+ *     bandeau succès et bandeau erreur tous deux rendus correctement, hiérarchie des boutons
+ *     confirmée à l'écran.
  *   1.109.7 · 2026-07-17 · fix(decido) icône engrenage "⚙" cassée/minuscule sur le lien
  *     "Personnaliser l'horaire pour cette date" (create-date.blade.php). Caractère unicode brut
  *     sans dimension explicite - glyphe absent des polices de charte DM Sans/Plus Jakarta Sans,
@@ -1522,7 +1534,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 109;
-$lvPatch = 7;
+$lvPatch = 8;
 
 return [
     'major' => $lvMajor,

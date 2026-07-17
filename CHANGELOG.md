@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.109.8] - 2026-07-17
+
+### Fixed
+- **Sudoku - 3 correctifs UX/bugs.** (1) Le bouton « Indice » ne fonctionnait pas à la 2e demande consécutive : course réseau confirmée par reproduction directe (`useHint()` est asynchrone et scannait la grille de façon synchrone avant d'attendre la réponse serveur - sans verrou, un 2e appel lancé avant la fin du 1er retrouvait la même case vide, doublant le compteur d'indices et la pénalité de temps sans révéler de nouvelle case). Un verrou de réentrance `hintPending` (avec `try/finally`) empêche désormais tout appel concurrent. (2) Aucun état de fin de grille clair n'existait, ni en cas de succès ni en cas d'erreur : deux bandeaux accessibles ajoutés (`role="status"`/`role="alert"`, texte ET icône - pas seulement une couleur - conforme WCAG), le texte du bandeau d'erreur a été recalculé pour respecter le contraste AAA 7:1. (3) Le bouton « Vérifier la grille » était visuellement identique au bouton secondaire « Indice », sans hiérarchie claire : migré vers les classes `.ct-btn-primary.ct-btn-lg` du design system avec une ombre dédiée, le bouton « Indice » passe en style secondaire (`.ct-btn-outline`). 5/5 tests Pest verts. Vérifié visuellement (Herd local, Playwright, exécution directe des méthodes du composant Alpine) : la course réseau a été reproduite puis confirmée corrigée, les deux bandeaux de fin de grille s'affichent correctement, la nouvelle hiérarchie des boutons est visible à l'écran.
+
 ## [1.109.7] - 2026-07-17
 
 ### Fixed
