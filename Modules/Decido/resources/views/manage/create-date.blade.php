@@ -27,6 +27,29 @@
                     $decidoDurationOld = (int) old('duration_minutes', 60);
                     $decidoDurationPresets = [15, 30, 45, 60, 90, 120];
                     $decidoDurationChoice = in_array($decidoDurationOld, $decidoDurationPresets, true) ? (string) $decidoDurationOld : 'custom';
+
+                    // Demande utilisateur 2026-07-17 (round 2) : "step_minutes" jugé confus pour un
+                    // public non-technique - veille pp_search juillet 2026 validée Perplexity +
+                    // Codex + Gemini (91-95/100, hybride retenu) : select brut remplacé par 2 choix
+                    // NOMMÉS par intention ("Flexible" vs "Sans chevauchement"), valeur calculée
+                    // dynamiquement depuis la durée (Doodle recommande step = durée/2) tant que non
+                    // personnalisée manuellement (pattern GOV.UK dependent-field), avec un lien
+                    // "Valeur personnalisée" en secours (même pattern reveal-on-demand que la durée).
+                    $decidoFlexibleStepGuess = max(5, (int) round(($decidoDurationOld / 2) / 5) * 5);
+                    $decidoStepOld = old('step_minutes');
+                    if ($decidoStepOld !== null) {
+                        $decidoStepOld = (int) $decidoStepOld;
+                        if ($decidoStepOld === $decidoFlexibleStepGuess) {
+                            $decidoStepMode = 'flexible';
+                        } elseif ($decidoStepOld === $decidoDurationOld) {
+                            $decidoStepMode = 'nooverlap';
+                        } else {
+                            $decidoStepMode = 'custom';
+                        }
+                    } else {
+                        $decidoStepMode = 'flexible';
+                    }
+                    $decidoStepCustomOld = $decidoStepOld ?? $decidoFlexibleStepGuess;
                 @endphp
                 <form x-data="{
                     candidateDates: [''],
@@ -34,7 +57,18 @@
                     rangeStartTime: '{{ old('range_start_time', '09:00') }}',
                     rangeEndTime: '{{ old('range_end_time', '17:00') }}',
                     durationChoice: '{{ $decidoDurationChoice }}',
-                    customDuration: {{ $decidoDurationOld }}
+                    customDuration: {{ $decidoDurationOld }},
+                    stepMode: '{{ $decidoStepMode }}',
+                    customStep: {{ $decidoStepCustomOld }},
+                    effectiveDuration() {
+                        return this.durationChoice === 'custom' ? this.customDuration : parseInt(this.durationChoice, 10);
+                    },
+                    computedStep() {
+                        if (this.stepMode === 'custom') return this.customStep;
+                        if (this.stepMode === 'nooverlap') return this.effectiveDuration();
+                        const step = Math.round((this.effectiveDuration() / 2) / 5) * 5;
+                        return step < 5 ? 5 : step;
+                    }
                 }" method="POST" action="{{ route('decido.store') }}">
                     @csrf
                     <input type="hidden" name="type" value="date">
@@ -154,21 +188,49 @@
                             @include('decido::manage.partials.description-timezone-fields')
 
                             <div class="mb-3">
-                                {{-- Libellé clarifié (demande utilisateur 2026-07-17, veille pp_search
-                                     validée Perplexity+Codex+Gemini, 96/100) : "Pas entre les créneaux"
-                                     était ambigu (lu comme la durée de la rencontre, pas l'espacement
-                                     entre les heures de début). Formulation en mini-phrase auto-explicative
-                                     alignée sur le pattern "Show available times every: [X]" identifié par
-                                     la recherche - le select devient grammaticalement partie du libellé. --}}
-                                <label for="step_minutes" class="form-label d-block">
-                                    Proposer une nouvelle heure de début toutes les
-                                    <select id="step_minutes" name="step_minutes" class="form-select d-inline-block w-auto mx-1">
-                                        <option value="15" {{ old('step_minutes') == 15 ? 'selected' : '' }}>15</option>
-                                        <option value="30" {{ old('step_minutes', 30) == 30 ? 'selected' : '' }}>30</option>
-                                        <option value="60" {{ old('step_minutes') == 60 ? 'selected' : '' }}>60</option>
-                                    </select>
-                                    minutes
+                                {{-- Refonte 2026-07-17 (round 2, demande utilisateur : "j'ai l'impression
+                                     que l'option est importante, mais comment rendre ça simple ?") - veille
+                                     pp_search juillet 2026 validée Perplexity + Codex + Gemini (91-95/100,
+                                     hybride retenu) : select de minutes brutes remplacé par 2 CHOIX NOMMÉS
+                                     par intention plutôt que par la valeur technique. La valeur réelle
+                                     (step_minutes) est calculée dynamiquement depuis la durée choisie
+                                     (Doodle recommande step = durée/2 pour doubler les options sans
+                                     complexité) et se recalcule tant que l'utilisateur n'a pas personnalisé
+                                     manuellement (pattern GOV.UK dependent-field). Lien "Valeur
+                                     personnalisée" en secours = même pattern reveal-on-demand que la durée
+                                     personnalisée (DRY, cohérent). --}}
+                                <label class="form-label d-flex align-items-center gap-2">
+                                    Créneaux proposés aux votants
+                                    <button type="button" class="ct-btn ct-btn-primary ct-btn-icon" @click="jQuery('#stepHelpModal').modal('show')" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;font-size:0.7rem;" title="Aide">?</button>
                                 </label>
+                                <div class="d-flex flex-wrap gap-2" role="group" aria-label="Créneaux proposés aux votants" x-show="stepMode !== 'custom'">
+                                    <button type="button" class="ct-btn ct-btn-sm" :class="stepMode === 'flexible' ? 'ct-btn-primary' : 'ct-btn-outline'"
+                                            @click="stepMode = 'flexible'" :aria-pressed="(stepMode === 'flexible').toString()">
+                                        Flexible (recommandé)
+                                    </button>
+                                    <button type="button" class="ct-btn ct-btn-sm" :class="stepMode === 'nooverlap' ? 'ct-btn-primary' : 'ct-btn-outline'"
+                                            @click="stepMode = 'nooverlap'" :aria-pressed="(stepMode === 'nooverlap').toString()">
+                                        Sans chevauchement
+                                    </button>
+                                </div>
+                                <p class="text-muted small mt-2 mb-0" x-show="stepMode !== 'custom'">
+                                    <span x-text="'Un nouveau créneau proposé toutes les ' + computedStep() + ' minutes.'"></span>
+                                </p>
+                                <button type="button" class="ct-btn ct-btn-ghost ct-btn-xs mt-1" x-show="stepMode !== 'custom'"
+                                        @click="customStep = computedStep(); stepMode = 'custom'">
+                                    Valeur personnalisée...
+                                </button>
+                                <div class="mt-2" x-show="stepMode === 'custom'" x-cloak>
+                                    <div class="input-group" style="max-width:200px;">
+                                        <input type="number" class="form-control" min="5" max="480" x-model.number="customStep"
+                                               aria-label="Pas personnalisé entre les créneaux, en minutes, de 5 à 480">
+                                        <span class="input-group-text">minutes</span>
+                                    </div>
+                                    <button type="button" class="ct-btn ct-btn-ghost ct-btn-xs mt-1" @click="stepMode = 'flexible'">
+                                        ← Revenir aux préréglages
+                                    </button>
+                                </div>
+                                <input type="hidden" name="step_minutes" :value="computedStep()">
                                 @error('step_minutes')
                                     <div class="text-danger mt-1">{{ $message }}</div>
                                 @enderror
@@ -184,4 +246,41 @@
         </div>
     </div>
 </section>
+
+{{-- Popup d'aide "Créneaux proposés aux votants" - patron identique aux autres outils du site
+     (ex. code-qr.blade.php #qrHelpModal) : bouton "?" circulaire ct-btn-icon + modale Bootstrap. --}}
+<div class="modal fade" id="stepHelpModal" tabindex="-1" role="dialog" aria-labelledby="stepHelpModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="border-radius: var(--r-base);">
+            <div class="modal-header" style="background: var(--c-primary); border-radius: var(--r-base) var(--r-base) 0 0;">
+                <h4 class="modal-title" id="stepHelpModalLabel" style="color: #fff; font-family: var(--f-heading); font-weight: 700;">Créneaux proposés aux votants</h4>
+                <button type="button" onclick="jQuery('#stepHelpModal').modal('hide')" aria-label="Fermer" style="background: none; border: none; color: #fff !important; opacity: 1; font-size: 1.5rem; font-weight: 700; cursor: pointer; float: right;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 2rem;">
+                <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem;">Comment ça fonctionne</h4>
+                <p>À partir de ta plage horaire (ex. 9h-17h) et de la durée de la rencontre (ex. 60 minutes), Décido génère automatiquement une série de créneaux candidats en avançant l'heure de début à intervalles réguliers. Ce réglage contrôle la taille de ces intervalles - pas la durée de la rencontre elle-même.</p>
+
+                <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">Flexible (recommandé)</h4>
+                <p>Les créneaux se chevauchent, ce qui double le nombre d'options proposées aux votants sans surcharger le sondage. Exemple pour une rencontre de 60 minutes entre 9h et 11h :</p>
+                <ul>
+                    <li>9h00 - 10h00</li>
+                    <li>9h30 - 10h30</li>
+                    <li>10h00 - 11h00</li>
+                </ul>
+                <p>Les votants trouvent plus facilement un moment qui leur convient vraiment.</p>
+
+                <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">Sans chevauchement</h4>
+                <p>Les créneaux sont collés bout à bout, sans se chevaucher. Même exemple (60 minutes, 9h-11h) :</p>
+                <ul>
+                    <li>9h00 - 10h00</li>
+                    <li>10h00 - 11h00</li>
+                </ul>
+                <p>Sondage plus court à remplir, utile quand chaque créneau correspond à un vrai bloc distinct (ex. plusieurs entrevues consécutives).</p>
+
+                <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">Valeur personnalisée</h4>
+                <p>Pour un contrôle précis (ex. un nouveau départ toutes les 10 minutes), utilise le lien « Valeur personnalisée » et saisis directement l'intervalle en minutes.</p>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

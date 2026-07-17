@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.109.6] - 2026-07-17
+
+### Added
+- **Décido — refonte du champ « intervalle entre les créneaux » en 2 choix nommés par intention + popup d'aide complète.** Question de l'utilisateur : « j'ai l'impression que l'option est importante, mais comment rendre ça simple ? ». Veille pp_search juillet 2026 (Doodle recommande un pas égal à la moitié de la durée pour doubler la flexibilité sans complexité ; Nielsen Norman Group sur la progressive disclosure ; GOV.UK Design System sur les valeurs suggérées dynamiquement plutôt que préselectionnées) + validation croisée indépendante par Codex/GPT-5 (86-95/100) et Gemini 2.5 Pro (via OpenRouter, `agy`/SuperAgent Gemini étant à quota épuisé et les 3 comptes 1min.ai également épuisés sur ce modèle - cascade niveau 4). Le select brut « toutes les 15/30/60 minutes » est remplacé par 2 boutons nommés par intention - « Flexible (recommandé) » et « Sans chevauchement » - dont la valeur réelle en minutes est calculée dynamiquement depuis la durée de la rencontre choisie (moitié de la durée, arrondie ; ou durée exacte) et se recalcule tant que l'utilisateur ne l'a pas personnalisée manuellement. Un lien « Valeur personnalisée... » en secours révèle le champ numérique brut, selon le même mécanisme *reveal-on-demand* déjà livré pour la durée personnalisée (v1.109.4). Un bouton d'aide « ? » circulaire ouvre une popup Bootstrap complète (patron identique aux autres outils du site, ex. `code-qr.blade.php`) avec des exemples concrets de créneaux générés pour chaque mode. Backend : la validation de `step_minutes` passe de `in:15,30,60` à `min:5,max:480`, alignée sur les bornes de `duration_minutes` (le service de génération de créneaux ne contraint réellement que `step > 0`). 82/82 tests Pest verts. Vérifié visuellement (Herd local, Playwright) : les 3 états du contrôle (Flexible, Sans chevauchement, Personnalisé) et le rendu complet de la popup d'aide.
+
 ## [1.109.5] - 2026-07-17
 
 ### Fixed

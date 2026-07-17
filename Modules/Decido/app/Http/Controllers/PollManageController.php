@@ -90,7 +90,12 @@ class PollManageController extends Controller
             'duration_minutes' => $isDateType ? ['required', 'integer', 'min:5', 'max:480'] : ['nullable'],
             'range_start_time' => $isDateType ? ['required', 'date_format:H:i'] : ['nullable'],
             'range_end_time' => $isDateType ? ['required', 'date_format:H:i', 'after:range_start_time'] : ['nullable'],
-            'step_minutes' => $isDateType ? ['required', 'integer', 'in:15,30,60'] : ['nullable'],
+            // Refonte 2026-07-17 (round 2) : le champ passe d'un select à 3 valeurs fixes (15/30/60)
+            // à une valeur calculée dynamiquement côté client (durée/2 arrondi, ou durée exacte, ou
+            // personnalisée) - la contrainte `in:15,30,60` rejetterait désormais la majorité des
+            // soumissions légitimes. SlotGenerationService ne borne réellement que stepMinutes > 0 ;
+            // on aligne la validation sur les mêmes bornes que duration_minutes (5-480) en défense.
+            'step_minutes' => $isDateType ? ['required', 'integer', 'min:5', 'max:480'] : ['nullable'],
             // max:60 = round 9 (skill /100) : aucune borne n'existait, contrairement au type
             // classique (déjà plafonné à 20 options ci-dessous) - 3800 créneaux générés en test
             // réel (40 dates x plage large x pas 15 min), risque de performance/abus.

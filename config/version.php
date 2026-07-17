@@ -17,6 +17,22 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.109.6 · 2026-07-17 · feat(decido) refonte "step_minutes" en 2 choix nommés + popup d'aide
+ *     complète (question utilisateur : "j'ai l'impression que l'option est importante, mais
+ *     comment rendre ça simple ?"). Veille pp_search juillet 2026 (Doodle : step = durée/2 double
+ *     la flexibilité sans complexité ; NNGroup : progressive disclosure ; GOV.UK : valeur suggérée
+ *     dynamique tant que non éditée manuellement) + validation croisée Codex/GPT-5 (86-95/100) et
+ *     Gemini 2.5 Pro via OpenRouter fallback (agy à quota épuisé 94h, 1min.ai comptes 1-3 épuisés
+ *     - cascade niveau 4). Select brut "toutes les 15/30/60 minutes" remplacé par 2 boutons nommés
+ *     par intention ("Flexible (recommandé)" / "Sans chevauchement"), valeur réelle calculée
+ *     dynamiquement depuis la durée choisie (durée/2 arrondi, ou durée exacte) et recalculée tant
+ *     que non personnalisée manuellement. Lien "Valeur personnalisée..." en secours - même pattern
+ *     reveal-on-demand que la durée personnalisée (v1.109.4). Bouton d'aide "?" circulaire ouvrant
+ *     une popup Bootstrap complète (patron identique aux autres outils, ex. code-qr.blade.php)
+ *     avec exemples concrets de créneaux générés pour chaque mode. Backend : validation
+ *     `step_minutes` relâchée de `in:15,30,60` vers `min:5,max:480` (SlotGenerationService ne
+ *     borne réellement que step > 0). 82/82 tests Pest verts. Vérifié visuellement (Herd/Playwright)
+ *     : 3 états du contrôle + rendu complet de la popup d'aide.
  *   1.109.5 · 2026-07-17 · fix(decido) unité "minutes" affichée dans le select et le champ
  *     personnalisé de la durée de la rencontre. Le select ne montrait que des nombres bruts
  *     ("15", "30"...) et le champ personnalisé n'avait "minutes" qu'en placeholder (disparaît à la
@@ -1499,7 +1515,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 109;
-$lvPatch = 5;
+$lvPatch = 6;
 
 return [
     'major' => $lvMajor,
