@@ -345,7 +345,16 @@
     <script src="/js/ga4-events.js" defer></script>
 
     {{-- Floating share bar (sidebar desktop + bottom bar mobile) — masqué sur pages protégées --}}
-    @if(!request()->is('user/*', 'dashboard*', 'login*', 'register*', 'magic-link*', 'admin*', 'academie', 'academie/*', 'privacy-policy*', 'terms-of-use*', 'cookie-policy*', 'rights-request*', 'boutique/panier*', 'boutique/paiement*', 'boutique/commander*', 'boutique/confirmation*', 'boutique/suivi*', 'boutique/mes-commandes*'))
+    {{-- Round 25 (skill /100) : 'decido/*/gerer*' ajouté à l'exclusion - $shareUrl (juste en dessous)
+         vaut request()->url(), l'URL COURANTE COMPLÈTE. Sur /decido/{poll}/gerer/{adminToken}, cette
+         URL porte le jeton admin (contrôle total du sondage) EN CLAIR dans le chemin. Sans cette
+         exclusion, les liens de partage Facebook/X/LinkedIn embarquaient ce jeton en clair dans leur
+         paramètre u=/url= (ex. facebook.com/sharer/sharer.php?u=.../gerer/{adminToken}) - une fuite
+         directe par paramètre de requête, distincte du Referer HTTP (déjà borné à l'origine seule par
+         Referrer-Policy: strict-origin-when-cross-origin, SecurityHeaders.php) et non couverte par
+         celui-ci. Même famille de fuite tierce que les rounds 12 (GA4 page_location) et 13 (Sentry
+         event.request.url), mécanisme distinct (lien de partage explicite, pas télémétrie). --}}
+    @if(!request()->is('user/*', 'dashboard*', 'login*', 'register*', 'magic-link*', 'admin*', 'academie', 'academie/*', 'privacy-policy*', 'terms-of-use*', 'cookie-policy*', 'rights-request*', 'boutique/panier*', 'boutique/paiement*', 'boutique/commander*', 'boutique/confirmation*', 'boutique/suivi*', 'boutique/mes-commandes*', 'decido/*/gerer*'))
     @php
         $shareUrl = urlencode(request()->url());
         $shareTitle = urlencode(config('app.name') . ' - ' . ($__env->yieldContent('title') ?: ''));

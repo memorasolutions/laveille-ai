@@ -1922,3 +1922,51 @@ test('un voter_token injecté comme simple CHAMP de formulaire (sans cookie) est
     expect($attackerVoteToken)->not->toBeNull();
     expect($attackerVoteToken)->not->toBe($rawVoterToken);
 });
+
+// ── Round 25 (skill /100) : fuite du jeton admin via la barre de partage réseaux sociaux ───
+
+test('la page de gestion (jeton admin dans l’URL) n’affiche pas la barre de partage Facebook/X/LinkedIn qui embarquerait ce jeton dans un lien sortant', function (): void {
+    // Round 25 (skill /100) : angle jamais audité - le Referer HTTP natif du navigateur. Piste
+    // initiale : master.blade.php (layout global) déclare bien Referrer-Policy:
+    // strict-origin-when-cross-origin (Modules/Core/app/Http/Middleware/SecurityHeaders.php:26),
+    // qui borne déjà correctement un Referer cross-origin à la seule origine (schéma+hôte), sans
+    // le chemin - donc un clic sortant "ordinaire" ne fuit PAS le jeton via ce mécanisme. Mais
+    // l'audit du layout global a révélé un vecteur bien plus direct et bien plus grave : la barre
+    // de partage flottante (Modules/FrontTheme/resources/views/layouts/master.blade.php, "Floating
+    // share bar") construit ses liens Facebook/X/LinkedIn avec
+    // `$shareUrl = urlencode(request()->url())` - l'URL COURANTE COMPLÈTE, jeton admin inclus -
+    // puis l'injecte EXPLICITEMENT en paramètre `u=`/`url=` des sharers (ex.
+    // https://www.facebook.com/sharer/sharer.php?u=https://laveille.ai/decido/{poll}/gerer/{jeton}).
+    // Ce n'est PAS une fuite Referer (que Referrer-Policy bornerait) mais une fuite par PARAMÈTRE
+    // DE REQUÊTE explicite, invisible à toute politique Referrer-Policy - le jeton donnant un
+    // contrôle total du sondage (clôture, export des pseudonymes des votants, lien court) serait
+    // transmis à Facebook/X/LinkedIn (et exploré par leurs robots de prévisualisation OG même sans
+    // clic complet de partage) au moindre clic accidentel sur "Partager" par l'organisateur. La
+    // liste d'exclusion de la barre (`request()->is('user/*', 'dashboard*', ...)`) ne couvrait pas
+    // le pattern `decido/*/gerer*` - contrairement à `admin*`, déjà exclu pour la même raison.
+    // Correctif proportionné : ajout de `decido/*/gerer*` à la liste d'exclusion existante (aucune
+    // réécriture de la politique Referrer-Policy globale, déjà correcte).
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-partage-fb-x-li']);
+    PollOption::factory()->create(['poll_id' => $poll->id]);
+
+    $manageUrl = route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-partage-fb-x-li']);
+    $manageHtml = $this->get($manageUrl)->getContent();
+
+    // Le jeton admin ne doit apparaître dans AUCUN lien de partage sortant vers un tiers. Noter
+    // que le jeton apparaît légitimement AILLEURS sur cette page (bandeau "lien d'administration à
+    // conserver", boutons d'export/QR/lien court pointant vers les propres routes internes du
+    // sondage) - ce n'est PAS une fuite, l'organisateur authentifié par ce jeton doit voir/copier
+    // son propre lien. Seule la présence d'un sharer tiers est un problème ; on verrouille donc la
+    // solution structurelle : la barre de partage entière est absente de cette page (pas
+    // seulement masquée en CSS - le HTML ne doit contenir aucun sharer tiers).
+    $this->assertStringNotContainsString('facebook.com/sharer/sharer.php', $manageHtml);
+    $this->assertStringNotContainsString('twitter.com/intent/tweet', $manageHtml);
+    $this->assertStringNotContainsString('linkedin.com/shareArticle', $manageHtml);
+
+    // Contrôle négatif : prouve que l'exclusion est ciblée (pas une désactivation globale de la
+    // barre de partage qui rendrait le test précédent trivial) - la page publique de vote, dont
+    // l'URL propre ne porte aucun secret, affiche bien la barre de partage normalement.
+    $voteHtml = $this->get(route('decido.vote.show', ['slug' => $poll->public_id]))->getContent();
+    $this->assertStringContainsString('facebook.com/sharer/sharer.php', $voteHtml);
+});

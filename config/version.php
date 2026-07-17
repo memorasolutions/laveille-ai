@@ -17,6 +17,34 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.21 · 2026-07-17 · fix(decido) round 25 passe adversariale /100 (fuite du jeton admin par
+ *     la barre de partage réseaux sociaux) : angle initial audité - Referrer-Policy HTTP native du
+ *     navigateur (Modules/Core/app/Http/Middleware/SecurityHeaders.php:26 déclare déjà
+ *     strict-origin-when-cross-origin, qui borne correctement tout Referer cross-origin à la seule
+ *     origine sans le chemin - donc un clic sortant ORDINAIRE ne fuit PAS le jeton via ce
+ *     mécanisme, CLEAN). Mais cet audit du layout global a révélé un vecteur bien plus direct :
+ *     Modules/FrontTheme/resources/views/layouts/master.blade.php (barre de partage flottante,
+ *     Facebook/X/LinkedIn/Messenger) construit `$shareUrl = urlencode(request()->url())` - l'URL
+ *     COURANTE COMPLÈTE - et l'injecte EXPLICITEMENT dans le paramètre u=/url= des sharers (ex.
+ *     facebook.com/sharer/sharer.php?u=.../decido/{poll}/gerer/{adminToken}). Ce n'est pas une
+ *     fuite Referer (que Referrer-Policy borne déjà) mais une fuite par PARAMÈTRE DE REQUÊTE
+ *     explicite, invisible à toute politique Referrer-Policy - le jeton admin (contrôle total du
+ *     sondage : clôture, export des pseudonymes des votants, lien court) aurait été transmis à
+ *     Facebook/X/LinkedIn (et exploré par leurs robots de prévisualisation OG) au moindre clic
+ *     accidentel de l'organisateur sur "Partager" depuis sa propre page de gestion. La liste
+ *     d'exclusion existante de la barre (`request()->is('user/*', 'dashboard*', 'admin*', ...)`)
+ *     couvrait déjà `admin*` pour la même raison mais pas le sous-chemin de gestion Décido.
+ *     Corrigé en ajoutant le motif "decido puis gerer" à la liste d'exclusion (solution proportionnée, aucune réécriture de la politique
+ *     Referrer-Policy globale, déjà correcte). Preuve réelle : requête HTTP simulée sur la page de
+ *     gestion AVANT correctif contenait littéralement
+ *     "facebook.com/sharer/sharer.php?u=...%2Fgerer%2Fjeton-partage-fb-x-li" dans le HTML rendu ;
+ *     après correctif, la barre de partage entière (Facebook/X/LinkedIn) est absente de cette page
+ *     uniquement, contrôle négatif prouvant que la page publique de vote (URL sans secret) continue
+ *     d'afficher la barre normalement. 73/73 tests Pest verts (72 existants + 1 nouveau ; le nouveau
+ *     test échoue contre l'ancien code, vérifié avant correctif). Second des deux verdicts CLEAN
+ *     consécutifs requis pour clore le gate /100 : CE ROUND CONTIENT UN VRAI BUG CORRIGÉ, donc NE
+ *     COMPTE PAS comme un round clean - le compteur repart à zéro (round 24 avait été le premier
+ *     CLEAN ; il faut de nouveau deux rounds consécutifs sans aucun bug trouvé).
  *   1.107.20 · 2026-07-16 · fix(decido) round 23 passe adversariale /100 (deux angles neufs) :
  *     (1) le champ `description` du sondage n'avait AUCUNE limite de longueur (['nullable',
  *     'string'] seulement, contrairement à `title` max:255). Preuve réelle isolée hors framework
@@ -1337,7 +1365,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 20;
+$lvPatch = 21;
 
 return [
     'major' => $lvMajor,
