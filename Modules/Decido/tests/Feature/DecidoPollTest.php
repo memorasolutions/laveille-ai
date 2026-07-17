@@ -1801,3 +1801,124 @@ test('exportIcs via la route HTTP échoue proprement (redirection + message clai
     $icsResponse->assertSessionHasErrors('export');
     expect(Poll::find($poll->id))->not->toBeNull(); // aucune donnée corrompue par l'échec d'export
 });
+
+// ── Round 24 (skill /100) : identité voter_token (votant anonyme) ──────────────
+
+test('un voter_token brut deviné ou obtenu par un tiers (cookie non chiffré) ne permet ni de lire ni d\'écraser le vote de la victime - seul un cookie chiffré/signé par le serveur (APP_KEY) constitue une identité valide', function (): void {
+    // Round 24 (skill /100) : angle jamais audité - le mécanisme d'identité d'un VOTANT anonyme
+    // (voter_token), distinct de l'admin_token de l'organisateur déjà audité en profondeur. Lecture
+    // du code : PublicPollController::vote()/show() ne lisent JAMAIS voter_token depuis un champ de
+    // formulaire ou un paramètre de requête ($request->input()/query()) - uniquement depuis
+    // $request->cookie('decido_voter_'.$poll->public_id), généré côté serveur (Str::uuid()) si
+    // absent. Ce cookie n'est PAS dans la liste d'exception de bootstrap/app.php
+    // (encryptCookies(except: ['consent_v1'])), donc il transite par
+    // Illuminate\Cookie\Middleware\EncryptCookies (AES-256-CBC + HMAC via APP_KEY) comme tout autre
+    // cookie applicatif, et n'est jamais imprimé dans aucune vue (public ou admin - results.blade.php
+    // ne s'en sert que comme clé de tableau PHP côté serveur). Preuve réelle ci-dessous par requêtes
+    // HTTP simulant un vrai attaquant : withUnencryptedCookie() envoie la valeur BRUTE (non chiffrée)
+    // - exactement ce qu'obtiendrait un tiers qui aurait deviné/intercepté/lu ce token sans détenir
+    // l'APP_KEY du serveur. EncryptCookies::decrypt() attrape le DecryptException et met le cookie à
+    // null (traité comme absent), donc AUCUNE impersonation possible : ni lecture de l'état existant
+    // de la victime (existingVotes vide, bandeau "déjà voté" absent), ni écrasement de son vote
+    // (updateOrCreate scopé par voter_token crée une ligne distincte sous un nouveau token aléatoire
+    // au lieu de toucher la ligne de la victime). Conclusion : conception saine, aucun correctif -
+    // ce test verrouille la propriété en régression.
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'single_choice']);
+    $optionA = $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+    $optionB = $poll->options()->create(['label' => 'Option B', 'sort_order' => 1]);
+
+    $cookieName = 'decido_voter_'.$poll->public_id;
+
+    // La victime vote une première fois (aucun cookie envoyé - le serveur génère un voter_token
+    // aléatoire et le renvoie chiffré via Set-Cookie httpOnly).
+    $victimResponse = $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Victime',
+        'votes' => (string) $optionA->id,
+    ]);
+
+    // TestResponse::getCookie() déchiffre automatiquement (2e argument $decrypt = true par défaut)
+    // - on récupère ainsi le voter_token BRUT, exactement ce qu'un attaquant obtiendrait via une
+    // fuite (accès DB, capture réseau en clair, historique d'un ordinateur partagé...).
+    $rawVoterToken = $victimResponse->getCookie($cookieName)->getValue();
+    expect($rawVoterToken)->not->toBeEmpty();
+
+    $victimVoteId = PollVote::where('voter_token', $rawVoterToken)->where('option_id', $optionA->id)->value('id');
+    expect($victimVoteId)->not->toBeNull();
+
+    // (c) L'ATTAQUANT tente de LIRE l'état existant de la victime avec ce token brut non chiffré.
+    $attackerReadResponse = $this->withUnencryptedCookie($cookieName, $rawVoterToken)
+        ->get(route('decido.vote.show', ['slug' => $poll->public_id]));
+
+    $attackerReadResponse->assertOk();
+    $attackerReadResponse->assertDontSee('Tu as déjà voté sous ce lien', escape: false);
+
+    // (b) L'ATTAQUANT tente d'ÉCRASER le vote de la victime (revote Option B, pseudonyme différent)
+    // en se faisant passer pour elle avec le même token brut non chiffré.
+    $this->withUnencryptedCookie($cookieName, $rawVoterToken)
+        ->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+            'voter_pseudonym' => 'Attaquant',
+            'votes' => (string) $optionB->id,
+        ]);
+
+    // Le vote ORIGINAL de la victime doit être totalement intact - même ligne, même option, même
+    // pseudonyme, même voter_token - jamais touché par la tentative de l'attaquant.
+    $victimVote = PollVote::find($victimVoteId);
+    expect($victimVote)->not->toBeNull();
+    expect($victimVote->voter_pseudonym)->toBe('Victime');
+    expect($victimVote->option_id)->toBe($optionA->id);
+    expect($victimVote->voter_token)->toBe($rawVoterToken);
+
+    // Le vote de "l'attaquant" a bien été enregistré (le serveur ne bloque pas un votant anonyme
+    // légitime), mais sous un voter_token DIFFÉRENT - nouveau UUID aléatoire généré côté serveur,
+    // puisque son cookie brut non chiffré a été rejeté par EncryptCookies et traité comme absent.
+    $attackerVoteToken = PollVote::where('option_id', $optionB->id)
+        ->where('voter_pseudonym', 'Attaquant')
+        ->value('voter_token');
+    expect($attackerVoteToken)->not->toBeNull();
+    expect($attackerVoteToken)->not->toBe($rawVoterToken);
+
+    expect(PollVote::where('poll_id', $poll->id)->count())->toBe(2);
+    expect(PollVote::where('poll_id', $poll->id)->distinct('voter_token')->count('voter_token'))->toBe(2);
+});
+
+test('un voter_token injecté comme simple CHAMP de formulaire (sans cookie) est silencieusement ignoré - la seule source d\'identité acceptée est le cookie chiffré', function (): void {
+    // Round 24 (skill /100), volet (a) : PublicPollController::vote() ne définit AUCUNE règle de
+    // validation pour 'voter_token' et ne lit jamais $request->input('voter_token') /
+    // $validated['voter_token'] - $request->validate($rules) ne retourne que les champs déclarés
+    // dans $rules, donc un champ de formulaire 'voter_token' envoyé par un client malveillant est
+    // purement et simplement ABSENT de $validated, jamais atteint par updateOrCreate(). Preuve
+    // réelle : un troisième "votant" (sans cookie du tout) soumet volontairement
+    // voter_token=<token brut de la victime> dans le corps de la requête POST, en tentant de se
+    // faire passer pour elle sans même passer par un cookie forgé.
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'single_choice']);
+    $optionA = $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+    $optionB = $poll->options()->create(['label' => 'Option B', 'sort_order' => 1]);
+
+    $cookieName = 'decido_voter_'.$poll->public_id;
+
+    $victimResponse = $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Victime2',
+        'votes' => (string) $optionA->id,
+    ]);
+    $rawVoterToken = $victimResponse->getCookie($cookieName)->getValue();
+    $victimVoteId = PollVote::where('voter_token', $rawVoterToken)->where('option_id', $optionA->id)->value('id');
+
+    // Aucun cookie envoyé ici - uniquement le champ de formulaire spoofé.
+    $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Attaquant2',
+        'voter_token' => $rawVoterToken,
+        'votes' => (string) $optionB->id,
+    ]);
+
+    $victimVote = PollVote::find($victimVoteId);
+    expect($victimVote->voter_pseudonym)->toBe('Victime2');
+    expect($victimVote->option_id)->toBe($optionA->id);
+
+    $attackerVoteToken = PollVote::where('option_id', $optionB->id)
+        ->where('voter_pseudonym', 'Attaquant2')
+        ->value('voter_token');
+    expect($attackerVoteToken)->not->toBeNull();
+    expect($attackerVoteToken)->not->toBe($rawVoterToken);
+});
