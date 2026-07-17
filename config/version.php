@@ -17,6 +17,30 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.18 · 2026-07-16 · fix(decido) round 21 passe adversariale /100 (contournement de
+ *     DistinctNormalized par normalisation UNICODE, angle explicitement laissé en suspens par le
+ *     round 20 lui-même dans son propre test de contrôle négatif) : DistinctNormalized::validate()
+ *     (round 20) ne fait que trim() + collapse des espaces + mb_strtolower() - AUCUNE
+ *     normalisation de forme Unicode. Un même caractère accentué peut être encodé en octets
+ *     strictement différents tout en étant rendu de façon IDENTIQUE par tout navigateur : "é"
+ *     précomposé (NFC, U+00E9, 1 code point) vs "é" décomposé (NFD, U+0065 + U+0301, 2 code
+ *     points). Preuve réelle par requête HTTP réelle rejouée pendant cet audit : POST avec
+ *     options=["café" en NFC, "café" en NFD] (bytes 636166c3a9 vs 63616665cc81, strictement
+ *     différents même après mb_strtolower()) passait DistinctNormalized intact et créait bien 2
+ *     PollOption distinctes rendues à l'identique par le navigateur - recréant le bug de scission
+ *     de votes des rounds 11/20 via un vecteur invisible à l'oeil nu (aucune différence de casse
+ *     ni d'espacement visible). Corrigé en ajoutant Normalizer::normalize($item,
+ *     Normalizer::FORM_C) AVANT le collapse d'espaces/minuscules dans DistinctNormalized
+ *     (extension intl confirmée chargée ; garde défensive si normalize() échoue). Second angle
+ *     audité (homoglyphes multi-scripts, ex. cyrillique "а" U+0430 vs latin "a" U+0061) confirmé
+ *     réel mais jugé HORS PÉRIMÈTRE RAISONNABLE (aucune relation de canonicité Unicode entre
+ *     scripts différents - une détection complète nécessiterait une table de correspondance type
+ *     TR39/UTS#39 avec risque de faux positifs sur des libellés légitimes non-latins) : documenté
+ *     comme limite connue et assumée dans le docblock de la classe plutôt que corrigé par un
+ *     correctif cosmétique fragile, avec un test de régression qui verrouille ce comportement
+ *     documenté. Compteur de rounds consécutifs clean remis à zéro par CE round (un vrai bug a
+ *     été trouvé et corrigé - il ne compte donc PAS comme un des deux verdicts CLEAN consécutifs
+ *     requis pour clore le gate /100). 64/64 tests Pest verts (61 existants + 3 nouveaux).
  *   1.107.17 · 2026-07-16 · fix(decido) round 20 passe adversariale /100 (contournement de
  *     `distinct` par variation de FORMAT plutôt que par duplication exacte) : la règle Laravel
  *     `distinct` (déjà appliquée au round 11) compare des CHAÎNES EXACTES, pas des valeurs
@@ -1256,7 +1280,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 17;
+$lvPatch = 18;
 
 return [
     'major' => $lvMajor,

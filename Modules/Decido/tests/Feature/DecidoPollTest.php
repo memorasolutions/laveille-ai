@@ -351,10 +351,10 @@ test('deux options classiques qui ne diffèrent que par des espaces internes mul
 
 test('des options réellement distinctes (mots différents, accents différents) ne déclenchent pas de faux positif DistinctNormalized', function (): void {
     // Contrôle négatif indispensable : DistinctNormalized ne doit PAS confondre des options qui
-    // sont légitimement différentes. "Café" et "the" ne partagent aucune racine ; "Pizza" et
-    // "Sushi" non plus. La normalisation (mb_strtolower + collapse des espaces) ne touche PAS
-    // aux accents (Café ≠ cafe après normalisation, seul un cas de variation Unicode NFC/NFD -
-    // hors périmètre de ce round - pourrait les confondre), donc ce test prouve que le
+    // sont légitimement différentes. "Café" et "Thé" ne partagent aucune racine ; "Pizza" et
+    // "Sushi" non plus. La normalisation (mb_strtolower + collapse des espaces, + Normalizer NFC
+    // depuis le round 21) ne touche PAS au CONTENU des mots - seule la FORME d'encodage d'un même
+    // caractère (round 21, cas NFC/NFD) est désormais neutralisée ; ce test prouve que le
     // correctif reste chirurgical et ne bloque aucun sondage légitime à options variées.
     config()->set('decido.under_construction', false);
 
@@ -367,6 +367,107 @@ test('des options réellement distinctes (mots différents, accents différents)
     ]);
 
     $poll = Poll::where('title', 'Sondage options réellement distinctes')->first();
+    expect($poll)->not->toBeNull();
+    $this->assertSame(4, $poll->options()->count());
+});
+
+// ── Round 21 (skill /100) : contournement de DistinctNormalized par normalisation Unicode ──
+
+test('deux options composées de code points Unicode différents (NFC vs NFD) mais visuellement identiques sont rejetées', function (): void {
+    // Round 21 (skill /100) : le round 20 avait lui-même documenté cette limite dans son propre
+    // test de contrôle négatif ("seul un cas de variation Unicode NFC/NFD - hors périmètre de ce
+    // round - pourrait les confondre"). DistinctNormalized::validate() ne fait que trim() +
+    // collapse des espaces + mb_strtolower() - AUCUNE normalisation de forme Unicode. Or un même
+    // caractère accentué peut être encodé de deux façons strictement différentes en octets tout
+    // en étant PARFAITEMENT identique à l'affichage dans tout navigateur/rendu texte :
+    //   - NFC (forme précomposée)  : "é" = U+00E9 seul (1 code point)
+    //   - NFD (forme décomposée)   : "é" = U+0065 (e) + U+0301 (accent aigu combinant, 2 code points)
+    // Preuve réelle AVANT ce fix (requête HTTP rejouée pendant cet audit) : POST avec
+    // options=["caf\u{E9}", "cafe\u{0301}"] (bytes strictement différents : 636166c3a9 vs
+    // 63616665cc81) passait DistinctNormalized intact (mb_strtolower ne touche pas à la
+    // composition Unicode) et créait bien 2 PollOption distinctes, rendues à l'identique "café"
+    // par le navigateur - recréant exactement le bug de scission de votes des rounds 11/20, cette
+    // fois via un vecteur invisible à l'oeil nu (aucune différence de casse ni d'espacement
+    // visible, seulement l'encodage sous-jacent). Corrigé en ajoutant
+    // Normalizer::normalize($str, Normalizer::FORM_C) AVANT le collapse d'espaces/minuscules dans
+    // DistinctNormalized::validate() (extension intl confirmée chargée sur ce projet).
+    config()->set('decido.under_construction', false);
+
+    $nfc = "caf\u{00E9}";   // é précomposé (U+00E9), 1 code point
+    $nfd = "cafe\u{0301}";  // e + accent combinant (U+0065 U+0301), 2 code points
+
+    // Contrôle : les deux chaînes sont bien différentes en octets mais rendues identiquement.
+    expect($nfc)->not->toBe($nfd);
+    expect(mb_strtolower($nfc))->not->toBe(mb_strtolower($nfd));
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage option Unicode NFC-NFD',
+        'type' => 'classic',
+        'timezone' => 'America/Toronto',
+        'vote_mode' => 'single_choice',
+        'options' => [$nfc, $nfd],
+    ]);
+
+    $response->assertSessionHasErrors('options');
+    expect(Poll::where('title', 'Sondage option Unicode NFC-NFD')->exists())->toBeFalse();
+});
+
+test('deux dates candidates dans des formats Unicode NFC vs NFD sont également rejetées (garde-fou partagé)', function (): void {
+    // Round 21 (skill /100) : DistinctNormalized n'est appliquée qu'au champ `options` (type
+    // classique) - `candidate_dates.*` reste protégée par la règle Laravel `distinct` seule
+    // (round 20), mais un format Y-m-d strict (imposé au round 20) ne contient que des chiffres
+    // et des tirets, aucun caractère accentué : la variation NFC/NFD est structurellement
+    // impossible sur ce champ. Ce test de contrôle documente ce raisonnement plutôt que de
+    // supposer une exposition qui n'existe pas : soumettre une chaîne accentuée dans
+    // candidate_dates échoue déjà à `date_format:Y-m-d`, avant même d'atteindre `distinct`.
+    config()->set('decido.under_construction', false);
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage date avec accent invalide',
+        'type' => 'date',
+        'timezone' => 'America/Toronto',
+        'duration_minutes' => 30,
+        'range_start_time' => '09:00',
+        'range_end_time' => '10:00',
+        'step_minutes' => 30,
+        'candidate_dates' => ["2027-03-\u{00E9}4"],
+    ]);
+
+    $response->assertSessionHasErrors('candidate_dates.0');
+    expect(Poll::where('title', 'Sondage date avec accent invalide')->exists())->toBeFalse();
+});
+
+test('des homoglyphes multi-scripts (cyrillique) et chiffres pleine chasse ne sont PAS détectés par DistinctNormalized (limite connue documentée)', function (): void {
+    // Round 21 (skill /100) : contrôle documentant une limite ASSUMÉE, pas un bug corrigé. La
+    // normalisation Unicode NFC résout la variation de COMPOSITION d'un même caractère (accent
+    // précomposé vs combinant), mais ne résout PAS la confusion entre caractères de SCRIPTS
+    // différents qui se ressemblent visuellement (homoglyphes) : la lettre latine "a" (U+0061) et
+    // la lettre cyrillique "а" (U+0430) restent deux code points totalement distincts après
+    // normalisation NFC - il n'existe aucune relation de canonicité Unicode entre eux (Cyrillique
+    // et Latin sont des scripts indépendants). Une détection complète des homoglyphes
+    // nécessiterait une table de correspondance multi-scripts substantielle (type
+    // TR39/UTS#39 skeleton) et introduirait un risque de faux positifs sur des libellés
+    // légitimes contenant des caractères non-latins - hors périmètre raisonnable pour ce module
+    // (pas de correctif cosmétique fragile). Preuve réelle : "cafe" (latin) et "cafе" (dernier
+    // caractère cyrillique U+0435 à la place de "e" latin U+0065) passent la validation et créent
+    // 2 PollOption distinctes, quasi-indétectables à l'oeil. Documenté comme limite connue dans
+    // le docblock de DistinctNormalized plutôt que laissé implicite.
+    config()->set('decido.under_construction', false);
+
+    $latin = 'cafe';
+    $cyrillicLookalike = "caf\u{0435}"; // dernier "e" remplacé par le cyrillique U+0435
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage homoglyphe cyrillique',
+        'type' => 'classic',
+        'timezone' => 'America/Toronto',
+        'vote_mode' => 'single_choice',
+        'options' => [$latin, $cyrillicLookalike, 'Thé', 'Pizza'],
+    ]);
+
+    // Comportement ACTUEL et ASSUMÉ : la validation passe (limite connue, pas un bug).
+    $response->assertSessionHasNoErrors();
+    $poll = Poll::where('title', 'Sondage homoglyphe cyrillique')->first();
     expect($poll)->not->toBeNull();
     $this->assertSame(4, $poll->options()->count());
 });

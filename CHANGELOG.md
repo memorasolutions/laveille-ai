@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.107.18] - 2026-07-16
+
+### Fixed
+- **Décido — `DistinctNormalized` (round 20) était contournable par NORMALISATION UNICODE, angle explicitement laissé en suspens par le round 20 lui-même dans son propre test de contrôle négatif.** `DistinctNormalized::validate()` ne faisait que `trim()` + collapse des espaces + `mb_strtolower()` — aucune normalisation de FORME Unicode. Un même caractère accentué peut être encodé en octets strictement différents tout en étant rendu de façon identique par tout navigateur : `"é"` précomposé (NFC, U+00E9, 1 code point) vs `"é"` décomposé (NFD, U+0065 + U+0301, 2 code points). Preuve réelle par requête HTTP réelle rejouée pendant cet audit : `POST options=["café" NFC, "café" NFD]` (bytes `636166c3a9` vs `63616665cc81`, strictement différents même après `mb_strtolower()`) passait `DistinctNormalized` intact et créait bien 2 `PollOption` distinctes rendues à l'identique par le navigateur — recréant le bug de scission de votes des rounds 11/20 via un vecteur invisible à l'œil nu (aucune différence de casse ni d'espacement visible). Corrigé en ajoutant `Normalizer::normalize($item, Normalizer::FORM_C)` AVANT le collapse d'espaces/minuscules (extension `intl` confirmée chargée sur ce projet ; garde défensive si `normalize()` échoue sur une entrée malformée).
+
+Second angle audité en profondeur : les homoglyphes multi-scripts (ex. cyrillique `"а"` U+0430 vs latin `"a"` U+0061) contournent bien la validation — confirmé réel par requête HTTP — mais jugé **hors périmètre raisonnable** : aucune relation de canonicité Unicode n'existe entre scripts différents, une détection complète nécessiterait une table de correspondance substantielle (type Unicode TR39/UTS#39 « skeleton ») avec un risque réel de faux positifs sur des libellés légitimes non-latins. Documenté comme limite connue et assumée dans le docblock de `DistinctNormalized`, verrouillé par un test de régression qui prouve ce comportement documenté plutôt que de le laisser implicite.
+
+Trouvé par une passe adversariale indépendante (skill `/100`, round 21, contournement Unicode de `DistinctNormalized`). Ce round n'est PAS clean (un vrai bug corrigé) — le compteur de rounds clean consécutifs reste à zéro. 64/64 tests Pest verts (61 existants + 3 nouveaux).
+
 ## [1.107.17] - 2026-07-16
 
 ### Fixed
