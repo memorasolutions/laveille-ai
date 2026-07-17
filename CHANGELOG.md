@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.109.7] - 2026-07-17
+
+### Fixed
+- **Décido — icône engrenage cassée/minuscule sur « Personnaliser l'horaire pour cette date ».** Signalé par l'utilisateur : « on dirait qu'elle est cassée ». Le caractère unicode brut `⚙` n'avait aucune dimension explicite et n'existe pas dans les polices de charte (DM Sans/Plus Jakarta Sans) - le navigateur repliait sur une police système, produisant un glyphe minuscule et incohérent avec le texte du bouton (même famille de défaut que l'audit #592 sur les icônes/SVG sans dimension explicite). Remplacé par une icône SVG inline 14×14px, `stroke="currentColor"` (hérite la couleur du bouton, y compris au survol), `aria-hidden="true"`. 82/82 tests Pest verts. Vérifié visuellement (Herd local, Playwright) : icône nette, taille cohérente, correctement alignée avec le texte.
+
 ## [1.109.6] - 2026-07-17
 
 ### Added

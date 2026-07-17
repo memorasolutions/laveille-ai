@@ -17,6 +17,13 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.109.7 · 2026-07-17 · fix(decido) icône engrenage "⚙" cassée/minuscule sur le lien
+ *     "Personnaliser l'horaire pour cette date" (create-date.blade.php). Caractère unicode brut
+ *     sans dimension explicite - glyphe absent des polices de charte DM Sans/Plus Jakarta Sans,
+ *     repli sur une police système à taille incohérente (même famille de bug que #592, icônes
+ *     sans dimension explicite). Remplacé par un SVG inline 14×14, stroke=currentColor (hérite la
+ *     couleur du bouton), aria-hidden. Vérifié visuellement (Herd/Playwright) : icône nette et
+ *     alignée avec le texte. 82/82 tests Pest verts (aucune régression).
  *   1.109.6 · 2026-07-17 · feat(decido) refonte "step_minutes" en 2 choix nommés + popup d'aide
  *     complète (question utilisateur : "j'ai l'impression que l'option est importante, mais
  *     comment rendre ça simple ?"). Veille pp_search juillet 2026 (Doodle : step = durée/2 double
@@ -1515,7 +1522,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 109;
-$lvPatch = 6;
+$lvPatch = 7;
 
 return [
     'major' => $lvMajor,
