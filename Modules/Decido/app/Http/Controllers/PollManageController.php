@@ -117,7 +117,37 @@ class PollManageController extends Controller
             // scindant les votes de la même façon (un sondage à 5 votes pour "Pizza" pouvait afficher
             // 3 et 2 sur deux lignes séparées au lieu de révéler la vraie majorité).
             'options.*' => $isDateType ? ['nullable'] : ['required', 'string', 'max:255', 'distinct'],
+            // Nouvelle fonctionnalité (demande utilisateur 2026-07-17) : range_start_time/
+            // range_end_time n'étaient jusqu'ici QUE globaux - toutes les dates candidates
+            // partageaient obligatoirement la même plage horaire, contrairement à Framadate qui
+            // permet une plage différente par jour. candidate_date_start_times[]/
+            // candidate_date_end_times[] sont des tableaux PARALLÈLES à candidate_dates[] (même
+            // index) : une entrée vide ou absente hérite de la plage par défaut ci-dessus, une
+            // entrée renseignée surcharge cette date précise.
+            'candidate_date_start_times' => $isDateType ? ['nullable', 'array'] : ['nullable'],
+            'candidate_date_start_times.*' => $isDateType ? ['nullable', 'date_format:H:i'] : ['nullable'],
+            'candidate_date_end_times' => $isDateType ? ['nullable', 'array'] : ['nullable'],
+            'candidate_date_end_times.*' => $isDateType ? ['nullable', 'date_format:H:i'] : ['nullable'],
         ]);
+
+        // Une surcharge partielle (début renseigné sans fin, ou l'inverse) produirait un mélange
+        // silencieux avec la plage par défaut, difficile à diagnostiquer pour l'utilisateur - rejet
+        // explicite plutôt que de laisser SlotGenerationService échouer plus loin avec un message
+        // moins clair.
+        if ($isDateType) {
+            foreach ($validated['candidate_dates'] as $index => $date) {
+                $overrideStart = $validated['candidate_date_start_times'][$index] ?? null;
+                $overrideEnd = $validated['candidate_date_end_times'][$index] ?? null;
+                $hasStart = $overrideStart !== null && $overrideStart !== '';
+                $hasEnd = $overrideEnd !== null && $overrideEnd !== '';
+
+                if ($hasStart !== $hasEnd) {
+                    return Redirect::back()->withInput()->withErrors([
+                        'candidate_dates' => "L'horaire personnalisé pour le {$date} doit avoir une heure de début ET de fin, ou aucune des deux.",
+                    ]);
+                }
+            }
+        }
 
         // Round 16 (skill /100) : la création du Poll (INSERT immédiat via $poll->save()) puis la
         // boucle de création de ses PollOption (jusqu'à 500 créneaux pour le type "date") n'étaient
@@ -157,14 +187,37 @@ class PollManageController extends Controller
 
                 if ($isDateType) {
                     $slotService = new SlotGenerationService;
-                    $slots = $slotService->generateSlots(
-                        $validated['candidate_dates'],
-                        $validated['range_start_time'],
-                        $validated['range_end_time'],
-                        (int) $validated['duration_minutes'],
-                        (int) $validated['step_minutes'],
-                        $validated['timezone']
-                    );
+
+                    // Nouvelle fonctionnalité (demande utilisateur 2026-07-17) : regroupement des
+                    // dates par plage horaire EFFECTIVE (surcharge ou plage par défaut), puis un
+                    // appel à generateSlots() PAR GROUPE - la méthode elle-même (durcie par 20+
+                    // rounds d'audit /100 : DST round 8, RFC5545 round 9, etc.) reste totalement
+                    // inchangée, on la réutilise telle quelle plutôt que de lui apprendre à gérer
+                    // des plages hétérogènes en interne. Le tri final par starts_at restaure l'ordre
+                    // chronologique, indépendant de l'ordre d'itération des groupes.
+                    $dateGroups = [];
+                    foreach ($validated['candidate_dates'] as $index => $date) {
+                        $overrideStart = $validated['candidate_date_start_times'][$index] ?? null;
+                        $overrideEnd = $validated['candidate_date_end_times'][$index] ?? null;
+                        $effectiveStart = ($overrideStart !== null && $overrideStart !== '') ? $overrideStart : $validated['range_start_time'];
+                        $effectiveEnd = ($overrideEnd !== null && $overrideEnd !== '') ? $overrideEnd : $validated['range_end_time'];
+                        $dateGroups[$effectiveStart.'|'.$effectiveEnd][] = $date;
+                    }
+
+                    $slots = [];
+                    foreach ($dateGroups as $rangeKey => $datesInGroup) {
+                        [$groupStart, $groupEnd] = explode('|', $rangeKey);
+                        $slots = array_merge($slots, $slotService->generateSlots(
+                            $datesInGroup,
+                            $groupStart,
+                            $groupEnd,
+                            (int) $validated['duration_minutes'],
+                            (int) $validated['step_minutes'],
+                            $validated['timezone']
+                        ));
+                    }
+
+                    usort($slots, static fn (array $a, array $b) => $a['starts_at'] <=> $b['starts_at']);
 
                     // Round 9 (skill /100) : le plafond de 60 dates candidates seul ne borne pas le
                     // volume total (plage large + pas court peut générer des centaines de créneaux

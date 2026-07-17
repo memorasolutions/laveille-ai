@@ -131,6 +131,71 @@ test('superadmin peut créer un sondage de dates', function (): void {
     $this->assertSame(30, $poll->step_minutes);
 });
 
+test('une date candidate peut personnaliser sa propre plage horaire (différente de la plage par défaut)', function (): void {
+    // Nouvelle fonctionnalité (demande utilisateur 2026-07-17) : avant ce fix, toutes les dates
+    // candidates partageaient obligatoirement la même plage horaire globale - impossible de
+    // proposer "lundi seulement l'après-midi, mercredi seulement le matin" comme le permet
+    // Framadate. candidate_date_start_times[]/candidate_date_end_times[] (parallèles à
+    // candidate_dates[]) surchargent la plage par défaut pour une date précise ; une entrée vide
+    // hérite de range_start_time/range_end_time.
+    $dateWithOverride = now()->addDays(10)->format('Y-m-d');
+    $dateWithDefault = now()->addDays(11)->format('Y-m-d');
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage plages mixtes',
+        'type' => 'date',
+        'timezone' => 'America/Toronto',
+        'duration_minutes' => 60,
+        'range_start_time' => '09:00',
+        'range_end_time' => '10:00',
+        'step_minutes' => 60,
+        'candidate_dates' => [$dateWithOverride, $dateWithDefault],
+        'candidate_date_start_times' => ['14:00', ''],
+        'candidate_date_end_times' => ['15:00', ''],
+    ]);
+
+    $poll = Poll::where('title', 'Sondage plages mixtes')->first();
+    expect($poll)->not->toBeNull();
+    $response->assertSessionDoesntHaveErrors();
+
+    $options = $poll->options()->orderBy('starts_at')->get();
+    // 09:00-10:00 (défaut) = exactement 1 créneau de 60 min ; 14:00-15:00 (surcharge) = exactement
+    // 1 créneau de 60 min -> 2 créneaux au total, chacun sur l'heure attendue selon sa date.
+    expect($options)->toHaveCount(2);
+
+    // getRawOriginal() + Carbon::parse(..., 'UTC') : app.timezone = America/Toronto (non-UTC) fait
+    // que le cast Eloquent datetime, à la relecture depuis la DB, réinterprète la valeur UTC brute
+    // comme si elle était déjà en heure de Québec (bug documenté ailleurs dans ce fichier, cf. le
+    // test « le DTSTART de l'export ICS reflète l'heure UTC réelle »).
+    $localStartOf = fn ($option) => \Carbon\Carbon::parse($option->getRawOriginal('starts_at'), 'UTC')->setTimezone('America/Toronto');
+
+    $overrideOption = $options->first(fn ($o) => $localStartOf($o)->format('Y-m-d') === $dateWithOverride);
+    $defaultOption = $options->first(fn ($o) => $localStartOf($o)->format('Y-m-d') === $dateWithDefault);
+
+    expect($localStartOf($overrideOption)->format('H:i'))->toBe('14:00');
+    expect($localStartOf($defaultOption)->format('H:i'))->toBe('09:00');
+});
+
+test('une surcharge partielle de plage horaire par date (début sans fin) est rejetée avec un message clair', function (): void {
+    $futureDate = now()->addDays(10)->format('Y-m-d');
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage surcharge incomplète',
+        'type' => 'date',
+        'timezone' => 'America/Toronto',
+        'duration_minutes' => 30,
+        'range_start_time' => '09:00',
+        'range_end_time' => '10:00',
+        'step_minutes' => 30,
+        'candidate_dates' => [$futureDate],
+        'candidate_date_start_times' => ['14:00'],
+        'candidate_date_end_times' => [''],
+    ]);
+
+    $response->assertSessionHasErrors('candidate_dates');
+    expect(Poll::where('title', 'Sondage surcharge incomplète')->exists())->toBeFalse();
+});
+
 test('superadmin peut créer un sondage classique', function (): void {
     $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
         'title' => 'Choix du resto',

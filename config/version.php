@@ -17,6 +17,17 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.108.0 · 2026-07-17 · feat(decido) plages horaires personnalisables PAR DATE candidate
+ *     (demande utilisateur) : jusqu'ici range_start_time/range_end_time étaient GLOBAUX à tout le
+ *     sondage - impossible de proposer "lundi seulement l'après-midi, mercredi seulement le matin"
+ *     comme le permet Framadate. PollManageController::store() regroupe désormais les dates
+ *     candidates par plage horaire EFFECTIVE (surcharge candidate_date_start_times[]/
+ *     candidate_date_end_times[] ou plage par défaut) puis appelle SlotGenerationService::
+ *     generateSlots() une fois par groupe - la méthode elle-même (durcie par 20+ rounds d'audit
+ *     /100 : DST, RFC5545, plafonds) reste totalement inchangée. Formulaire create.blade.php :
+ *     case "Horaire différent pour cette date" par date candidate, révèle 2 champs Début/Fin
+ *     préremplis avec la plage par défaut. 2 nouveaux tests Pest (plage mixte + rejet surcharge
+ *     partielle début-sans-fin). 77/77 tests verts. Vérifié visuellement (Herd, Playwright).
  *   1.107.22 · 2026-07-17 · fix(decido) round 26 passe adversariale /100 (fuite du jeton admin par
  *     og:url/canonical/hreflang du layout global) : consigne du round - le round 25 avait corrigé
  *     UN SEUL vecteur (barre de partage) parmi potentiellement plusieurs mécanismes du layout
@@ -1398,8 +1409,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 107;
-$lvPatch = 22;
+$lvMinor = 108;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

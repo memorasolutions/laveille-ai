@@ -18,6 +18,11 @@
                 <form x-data="{
                     type: 'date',
                     candidateDates: [''],
+                    candidateDateOverrides: [false],
+                    candidateDateStartTimes: [''],
+                    candidateDateEndTimes: [''],
+                    rangeStartTime: '{{ old('range_start_time', '09:00') }}',
+                    rangeEndTime: '{{ old('range_end_time', '17:00') }}',
                     options: ['', ''],
                     voteMode: 'single_choice'
                 }" method="POST" action="{{ route('decido.store') }}">
@@ -122,6 +127,11 @@
 
                         <div class="mb-3">
                             <label for="duration_minutes" class="form-label">Durée de la rencontre (minutes)</label>
+                            {{-- Nouvelle fonctionnalité (demande utilisateur 2026-07-17) : la durée et le pas
+                                 restent globaux (même durée de rencontre pour toutes les dates proposées),
+                                 seule la plage horaire (début/fin) peut être personnalisée par date
+                                 ci-dessous - c'est le seul axe demandé, éviter d'ajouter une complexité
+                                 non demandée sur la durée/le pas. --}}
                             <select id="duration_minutes" name="duration_minutes" class="form-select">
                                 <option value="15" {{ old('duration_minutes') == 15 ? 'selected' : '' }}>15</option>
                                 <option value="30" {{ old('duration_minutes') == 30 ? 'selected' : '' }}>30</option>
@@ -137,20 +147,23 @@
 
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="range_start_time" class="form-label">Début de la plage horaire</label>
-                                <input type="time" id="range_start_time" name="range_start_time" class="form-control" value="{{ old('range_start_time', '09:00') }}">
+                                <label for="range_start_time" class="form-label">Début de la plage horaire par défaut</label>
+                                <input type="time" id="range_start_time" name="range_start_time" class="form-control"
+                                       x-model="rangeStartTime" value="{{ old('range_start_time', '09:00') }}">
                                 @error('range_start_time')
                                     <div class="text-danger mt-1">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6">
-                                <label for="range_end_time" class="form-label">Fin de la plage horaire</label>
-                                <input type="time" id="range_end_time" name="range_end_time" class="form-control" value="{{ old('range_end_time', '17:00') }}">
+                                <label for="range_end_time" class="form-label">Fin de la plage horaire par défaut</label>
+                                <input type="time" id="range_end_time" name="range_end_time" class="form-control"
+                                       x-model="rangeEndTime" value="{{ old('range_end_time', '17:00') }}">
                                 @error('range_end_time')
                                     <div class="text-danger mt-1">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
+                        <p class="text-muted small mb-3">Cette plage s'applique à toutes les dates proposées, sauf si tu personnalises l'horaire d'une date précise ci-dessous.</p>
 
                         <div class="mb-3">
                             <label for="step_minutes" class="form-label">Pas entre les créneaux (minutes)</label>
@@ -166,17 +179,45 @@
 
                         <div class="mb-3">
                             <label class="form-label d-block">Dates proposées</label>
+                            {{-- Nouvelle fonctionnalité (demande utilisateur 2026-07-17) : chaque date
+                                 peut personnaliser sa propre plage horaire (ex. lundi seulement l'après-midi,
+                                 mercredi seulement le matin) au lieu d'être forcée d'utiliser la même plage
+                                 par défaut que toutes les autres dates - décrit dans PollManageController::store()
+                                 (regroupement par plage effective avant génération des créneaux). --}}
                             <template x-for="(date, index) in candidateDates" :key="index">
-                                <div class="input-group mb-2">
-                                    <input type="date" name="candidate_dates[]" class="form-control" x-model="candidateDates[index]">
-                                    <button type="button" class="btn btn-outline-secondary decido-touch-target"
-                                            x-on:click="candidateDates.splice(index, 1)"
-                                            x-show="candidateDates.length > 1">
-                                        Retirer
-                                    </button>
+                                <div class="border rounded p-3 mb-2">
+                                    <div class="input-group mb-2">
+                                        <input type="date" name="candidate_dates[]" class="form-control" x-model="candidateDates[index]">
+                                        <button type="button" class="btn btn-outline-secondary decido-touch-target"
+                                                x-on:click="candidateDates.splice(index, 1); candidateDateOverrides.splice(index, 1); candidateDateStartTimes.splice(index, 1); candidateDateEndTimes.splice(index, 1)"
+                                                x-show="candidateDates.length > 1">
+                                            Retirer
+                                        </button>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" :id="'decido-override-' + index"
+                                               x-model="candidateDateOverrides[index]"
+                                               x-on:change="if (candidateDateOverrides[index]) { candidateDateStartTimes[index] = candidateDateStartTimes[index] || rangeStartTime; candidateDateEndTimes[index] = candidateDateEndTimes[index] || rangeEndTime; } else { candidateDateStartTimes[index] = ''; candidateDateEndTimes[index] = ''; }">
+                                        <label class="form-check-label small" :for="'decido-override-' + index">
+                                            Horaire différent pour cette date
+                                        </label>
+                                    </div>
+                                    <div class="row g-2 mt-1" x-show="candidateDateOverrides[index]" x-cloak>
+                                        <div class="col-6">
+                                            <label class="form-label small" :for="'decido-override-start-' + index">Début</label>
+                                            <input type="time" class="form-control form-control-sm" :id="'decido-override-start-' + index"
+                                                   name="candidate_date_start_times[]" x-model="candidateDateStartTimes[index]">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small" :for="'decido-override-end-' + index">Fin</label>
+                                            <input type="time" class="form-control form-control-sm" :id="'decido-override-end-' + index"
+                                                   name="candidate_date_end_times[]" x-model="candidateDateEndTimes[index]">
+                                        </div>
+                                    </div>
                                 </div>
                             </template>
-                            <button type="button" class="btn btn-sm btn-outline-primary decido-touch-target" x-on:click="candidateDates.push('')">
+                            <button type="button" class="btn btn-sm btn-outline-primary decido-touch-target"
+                                    x-on:click="candidateDates.push(''); candidateDateOverrides.push(false); candidateDateStartTimes.push(''); candidateDateEndTimes.push('')">
                                 + Ajouter une date
                             </button>
                             @error('candidate_dates')

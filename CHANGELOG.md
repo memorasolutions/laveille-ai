@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.108.0] - 2026-07-17
+
+### Added
+- **Décido — plages horaires personnalisables par date candidate.** Jusqu'ici `range_start_time`/`range_end_time` étaient GLOBAUX à tout le sondage : toutes les dates candidates partageaient obligatoirement la même plage horaire, une limitation réelle par rapport à Framadate (impossible de proposer « lundi seulement l'après-midi, mercredi seulement le matin »). `candidate_date_start_times[]`/`candidate_date_end_times[]` (parallèles à `candidate_dates[]`) permettent désormais de surcharger la plage pour une date précise ; une entrée vide hérite de la plage par défaut. `PollManageController::store()` regroupe les dates candidates par plage horaire effective puis appelle `SlotGenerationService::generateSlots()` une fois par groupe - la méthode elle-même (durcie par 20+ rounds d'audit /100 : DST round 8, RFC5545 round 9, plafonds round 9) reste totalement inchangée, réutilisée telle quelle plutôt que réécrite pour gérer des plages hétérogènes en interne ; le tri final par `starts_at` restaure l'ordre chronologique. Une surcharge partielle (début renseigné sans fin, ou l'inverse) est rejetée avec un message clair plutôt que de mélanger silencieusement avec la plage par défaut. Formulaire (`create.blade.php`) : case à cocher « Horaire différent pour cette date » par date candidate, révèle 2 champs Début/Fin préremplis avec la plage par défaut au premier cochage. 2 nouveaux tests Pest (plage mixte défaut+surcharge, rejet surcharge partielle). 77/77 tests Pest verts. Vérifié visuellement (Herd local, Playwright).
+
 ## [1.107.22] - 2026-07-17
 
 ### Fixed
