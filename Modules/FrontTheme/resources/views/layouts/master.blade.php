@@ -79,7 +79,24 @@
     <meta property="og:title" content="@yield('title', config('app.name'))">
     <meta property="og:description" content="@yield('meta_description', \Modules\Settings\Facades\Settings::get('seo.meta_description', 'Votre source d\'information sur l\'intelligence artificielle et les technologies au Québec.'))">
     <meta property="og:type" content="@yield('og_type', 'website')">
+    {{-- Round 26 (skill /100) : og:url/canonical/hreflang embarquaient url()->current() SANS
+         AUCUNE exclusion (contrairement à la barre de partage, round 25) - sur
+         /decido/{poll}/gerer/{adminToken}, ces 4 balises diffusaient le jeton admin en clair dans
+         le <head>. Vecteur distinct du round 25 : pas un clic explicite sur un bouton de partage,
+         mais un "unfurl" AUTOMATIQUE - la quasi-totalité des messageries (Slack, Discord, Teams,
+         Messenger, WhatsApp, clients courriel) récupèrent og:url dès qu'un lien est collé dans une
+         conversation, pour générer un aperçu, et MISE EN CACHE ce contenu sur leurs propres
+         serveurs - donc le simple fait, pour l'organisateur, de coller son propre lien
+         d'administration dans une messagerie pour se l'envoyer ou le partager avec un
+         co-organisateur suffit à exfiltrer le jeton vers un tiers, sans clic de partage. Le round
+         10 posait déjà @section('page_noindex') sur cette page (robots noindex,follow) mais cela
+         ne bloque PAS les robots d'aperçu Open Graph, qui l'ignorent largement. Correctif : sur
+         cette route précise, on omet purement et simplement og:url/canonical/hreflang plutôt que
+         de leur substituer une valeur alternative (une page déjà noindex n'a aucune raison
+         fonctionnelle de s'auto-canonicaliser ni de s'annoncer aux crawlers social/SEO). --}}
+    @unless(request()->is('decido/*/gerer*'))
     <meta property="og:url" content="{{ url()->current() }}">
+    @endunless
     @hasSection('og_image')
         <meta property="og:image" content="@yield('og_image')">
         <meta property="og:image:width" content="1200">
@@ -95,9 +112,12 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="@yield('title', config('app.name'))">
     <meta name="twitter:description" content="@yield('meta_description', \Modules\Settings\Facades\Settings::get('seo.meta_description', 'Votre source d\'information sur l\'intelligence artificielle et les technologies au Québec.'))">
+    {{-- Round 26 (skill /100) : voir commentaire og:url ci-dessus - même fuite, même correctif. --}}
+    @unless(request()->is('decido/*/gerer*'))
     <link rel="canonical" href="{{ url()->current() }}">
     <link rel="alternate" hreflang="fr-CA" href="{{ url()->current() }}">
     <link rel="alternate" hreflang="x-default" href="{{ url()->current() }}">
+    @endunless
     {{-- EEAT 2026 NN/g #218 S84 — signal auteur principal site (link rel=author) --}}
     @if(Route::has('author.show'))
         <link rel="author" href="{{ route('author.show', 'stephane-lapointe') }}">

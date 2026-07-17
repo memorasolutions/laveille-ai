@@ -1970,3 +1970,76 @@ test('la page de gestion (jeton admin dans l’URL) n’affiche pas la barre de 
     $voteHtml = $this->get(route('decido.vote.show', ['slug' => $poll->public_id]))->getContent();
     $this->assertStringContainsString('facebook.com/sharer/sharer.php', $voteHtml);
 });
+
+// ── Round 26 (skill /100) : fuite du jeton admin via og:url/canonical/hreflang du layout global ──
+
+test('la page de gestion (jeton admin dans l’URL) n’expose pas ce jeton via og:url, canonical ou hreflang', function (): void {
+    // Round 26 (skill /100) : le round 25 avait corrigé UN SEUL vecteur (barre de partage
+    // Facebook/X/LinkedIn) parmi plusieurs mécanismes du layout global (master.blade.php) qui
+    // embarquent l'URL courante complète. Grep exhaustif de request()->url()/fullUrl()/
+    // url()->current() sur tout Modules/FrontTheme/resources/views/ : og:url (ligne 82) et
+    // canonical + 2x hreflang (lignes 98-100) utilisaient TOUS url()->current() SANS AUCUNE
+    // exclusion - contrairement à la barre de partage, l'exclusion 'decido/*/gerer*' ajoutée au
+    // round 25 ne les couvrait pas du tout. Vecteur distinct : pas un clic explicite sur un
+    // sharer, mais un "unfurl" AUTOMATIQUE - Slack/Discord/Teams/Messenger/WhatsApp/clients
+    // courriel récupèrent og:url dès qu'un lien est collé dans une conversation pour générer un
+    // aperçu, et mettent ce contenu en cache sur LEURS serveurs. Le simple fait, pour
+    // l'organisateur, de coller son propre lien d'administration dans une messagerie pour se
+    // l'envoyer ou le partager avec un co-organisateur suffisait donc à exfiltrer le jeton vers un
+    // tiers - sans aucun clic de partage. Le noindex du round 10 (meta robots) ne bloque pas ce
+    // mécanisme : les robots d'aperçu Open Graph l'ignorent largement.
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-og-canonical-r26']);
+    PollOption::factory()->create(['poll_id' => $poll->id]);
+
+    $manageUrl = route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-og-canonical-r26']);
+    $manageHtml = $this->get($manageUrl)->getContent();
+
+    $this->assertStringNotContainsString('og:url" content="' . $manageUrl, $manageHtml);
+    $this->assertStringNotContainsString('rel="canonical" href="' . $manageUrl, $manageHtml);
+    $this->assertStringNotContainsString('hreflang="fr-CA" href="' . $manageUrl, $manageHtml);
+    $this->assertStringNotContainsString('hreflang="x-default" href="' . $manageUrl, $manageHtml);
+    // Verrouillage structurel (pas seulement "le jeton n'est pas dans la valeur") : les balises
+    // og:url et canonical doivent être ABSENTES du HTML sur cette route, pas juste réécrites avec
+    // une valeur différente qui pourrait accidentellement recontenir le jeton plus tard.
+    preg_match('/<meta property="og:url"[^>]*>/', $manageHtml, $ogMatch);
+    preg_match('/<link rel="canonical"[^>]*>/', $manageHtml, $canonicalMatch);
+    expect($ogMatch)->toBe([]);
+    expect($canonicalMatch)->toBe([]);
+
+    // Contrôle négatif : la page publique de vote (URL sans secret) conserve bien og:url et
+    // canonical normalement - preuve que le correctif est ciblé sur la route à jeton, pas une
+    // suppression globale de ces balises qui casserait le SEO/partage de tout le site.
+    $voteUrl = route('decido.vote.show', ['slug' => $poll->public_id]);
+    $voteHtml = $this->get($voteUrl)->getContent();
+    $this->assertStringContainsString('og:url" content="' . $voteUrl, $voteHtml);
+    $this->assertStringContainsString('rel="canonical" href="' . $voteUrl, $voteHtml);
+});
+
+test('la page de gestion (jeton admin dans l’URL) n’expose pas ce jeton via le JSON-LD BreadcrumbList du fil d’Ariane', function (): void {
+    // Round 26 (skill /100) : le partial fronttheme::partials.breadcrumb (inclus par
+    // results.blade.php via @section('breadcrumb')) pousse un bloc <script
+    // type="application/ld+json"> BreadcrumbList dont les items intermédiaires/finaux utilisent
+    // url()->current() (Modules/FrontTheme/resources/views/partials/breadcrumb.blade.php lignes
+    // 77 et 84), SANS AUCUNE exclusion pour les routes à jeton. Vérifié RÉEL vs INERTE par requête
+    // HTTP : sur la page de gestion Décido, l'include ne passe que 'breadcrumbTitle' (pas
+    // 'breadcrumbItems'), donc la condition `@if(!empty($breadcrumbItems))` qui encadre les
+    // ListItem à url()->current() est actuellement TOUJOURS fausse sur cette route - le vecteur
+    // existe dans le code mais n'est PAS exploitable aujourd'hui. Aucun correctif de code n'est
+    // donc justifié (le round 26 n'invente pas de fuite fictive), mais ce test verrouille le
+    // constat en dur : si une future modification de results.blade.php se met à passer
+    // 'breadcrumbItems' à ce partial, ce test échouera immédiatement et signalera la
+    // réintroduction du vecteur.
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-breadcrumb-inerte-r26']);
+    PollOption::factory()->create(['poll_id' => $poll->id]);
+
+    $manageUrl = route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-breadcrumb-inerte-r26']);
+    $manageHtml = $this->get($manageUrl)->getContent();
+
+    $this->assertStringContainsString('BreadcrumbList', $manageHtml);
+    preg_match_all('/<script type="application\/ld\+json">(.*?)<\/script>/s', $manageHtml, $ldJsonMatches);
+    $breadcrumbBlock = collect($ldJsonMatches[1] ?? [])->first(fn ($block) => str_contains($block, 'BreadcrumbList'));
+    expect($breadcrumbBlock)->not->toBeNull();
+    $this->assertStringNotContainsString('jeton-breadcrumb-inerte-r26', $breadcrumbBlock);
+});

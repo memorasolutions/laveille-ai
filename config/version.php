@@ -17,6 +17,40 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.107.22 · 2026-07-17 · fix(decido) round 26 passe adversariale /100 (fuite du jeton admin par
+ *     og:url/canonical/hreflang du layout global) : consigne du round - le round 25 avait corrigé
+ *     UN SEUL vecteur (barre de partage) parmi potentiellement plusieurs mécanismes du layout
+ *     global embarquant l'URL courante complète. Grep exhaustif de request()->url()/fullUrl()/
+ *     url()->current() sur TOUT Modules/FrontTheme/resources/views/ (pas seulement le fichier déjà
+ *     corrigé) : Modules/FrontTheme/resources/views/layouts/master.blade.php lignes 82 (og:url) et
+ *     98-100 (canonical + 2x hreflang alternate) utilisaient TOUTES url()->current() SANS AUCUNE
+ *     exclusion - contrairement à $shareUrl (barre de partage), l'exclusion sur le motif "decido
+ *     puis gerer" ajoutée au round 25 ne les couvrait pas du tout. Vecteur distinct : pas un clic sur
+ *     un sharer, mais un "unfurl" AUTOMATIQUE - Slack/Discord/Teams/Messenger/WhatsApp/clients
+ *     courriel récupèrent og:url dès qu'un lien est collé dans une conversation pour générer un
+ *     aperçu, et mettent ce contenu en cache sur LEURS serveurs. Le simple fait, pour
+ *     l'organisateur, de coller son propre lien d'administration dans une messagerie pour se
+ *     l'envoyer ou le partager avec un co-organisateur suffisait à exfiltrer le jeton vers un tiers
+ *     - sans aucun clic de partage. Le noindex du round 10 (meta robots) ne bloque pas ce
+ *     mécanisme : les robots d'aperçu Open Graph l'ignorent largement. Preuve réelle par requête
+ *     HTTP : le HTML rendu de /decido/{poll}/gerer/{jeton} contenait littéralement
+ *     `<meta property="og:url" content=".../gerer/{jeton}">` et
+ *     `<link rel="canonical" href=".../gerer/{jeton}">` avant correctif (confirmé via test qui
+ *     échoue contre l'ancien code, vérifié en le rejouant après un `git stash` temporaire du
+ *     fichier corrigé) ; après correctif, ces 4 balises sont absentes du <head> UNIQUEMENT sur
+ *     cette route (motif "decido puis gerer" dans un @unless) - contrôle négatif : la page
+ *     publique de vote (URL sans secret) continue d'afficher og:url/canonical normalement. Audit
+ *     complémentaire du JSON-LD BreadcrumbList (Modules/FrontTheme/resources/views/partials/
+ *     breadcrumb.blade.php lignes 77/84, aussi non protégées) : vérifié RÉEL vs INERTE par requête
+ *     HTTP - le partial n'est inclus sur la page de gestion qu'avec 'breadcrumbTitle' (pas
+ *     'breadcrumbItems'), donc la condition qui encadre les ListItem à url()->current() y est
+ *     TOUJOURS fausse actuellement ; vecteur présent dans le code mais non exploitable, donc AUCUN
+ *     correctif appliqué (round 26 n'invente pas de fuite fictive) - verrouillé par un test de
+ *     non-régression. 75/75 tests Pest verts (73 existants + 2 nouveaux ; les 2 nouveaux tests
+ *     échouent contre l'ancien code pour og:url/canonical, vérifié avant correctif). CE ROUND
+ *     CONTIENT UN VRAI BUG CORRIGÉ (og:url/canonical/hreflang), donc NE COMPTE PAS comme round
+ *     clean - le compteur repart à zéro (round 26 n'est PAS le premier des deux verdicts clean
+ *     requis ; il faut reprendre à partir du round 27).
  *   1.107.21 · 2026-07-17 · fix(decido) round 25 passe adversariale /100 (fuite du jeton admin par
  *     la barre de partage réseaux sociaux) : angle initial audité - Referrer-Policy HTTP native du
  *     navigateur (Modules/Core/app/Http/Middleware/SecurityHeaders.php:26 déclare déjà
@@ -1365,7 +1399,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 107;
-$lvPatch = 21;
+$lvPatch = 22;
 
 return [
     'major' => $lvMajor,
