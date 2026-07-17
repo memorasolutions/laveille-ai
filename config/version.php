@@ -17,6 +17,24 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.109.0 · 2026-07-17 · feat(decido) Option E (formulaire de création par étape) + clarification
+ *     libellé + plages horaires MULTIPLES par date candidate. (1) Option E (recherche pp_search
+ *     juillet 2026 + validation croisée Codex/Gemini, 95/100) : /decido/creer devient un simple
+ *     sélecteur de type (2 cartes), chaque type route vers un formulaire DÉDIÉ et allégé
+ *     (decido.create.date / decido.create.classic) au lieu d'une seule page dense avec rendu
+ *     conditionnel x-show. Champs essentiels visibles d'emblée, champs secondaires (description,
+ *     fuseau, pas entre créneaux) sous <details> "Plus d'options" natif (accessible sans JS/ARIA
+ *     additionnel). POST inchangé vers decido.store. (2) Libellé "Pas entre les créneaux (minutes)"
+ *     jugé ambigu par l'utilisateur - remplacé par la mini-phrase auto-explicative "Proposer une
+ *     nouvelle heure de début toutes les [X] minutes" (validé 96/100). (3) Une date candidate peut
+ *     désormais proposer PLUSIEURS plages horaires (ex. 9h-12h ET 14h-17h pour sauter le dîner),
+ *     pas une seule surcharge (validé Codex+Gemini 92-95/100) : candidate_date_ranges[] (nested
+ *     array par date puis par plage), PollManageController::store() groupe les dates par plage
+ *     EFFECTIVE et appelle SlotGenerationService::generateSlots() une fois par groupe (méthode
+ *     elle-même inchangée, durcie par 20+ rounds d'audit /100) - chevauchement de plages sur une
+ *     même date rejeté avec message clair. 82/82 tests Pest verts. Vérifié visuellement (Herd,
+ *     Playwright) : chooser, formulaire dates (ajout/retrait de plage, retour à l'horaire par
+ *     défaut, nouveau libellé), formulaire classique.
  *   1.108.0 · 2026-07-17 · feat(decido) plages horaires personnalisables PAR DATE candidate
  *     (demande utilisateur) : jusqu'ici range_start_time/range_end_time étaient GLOBAUX à tout le
  *     sondage - impossible de proposer "lundi seulement l'après-midi, mercredi seulement le matin"
@@ -1409,7 +1427,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 108;
+$lvMinor = 109;
 $lvPatch = 0;
 
 return [

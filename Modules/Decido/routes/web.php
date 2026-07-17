@@ -10,6 +10,12 @@ use Modules\Decido\Http\Middleware\DecidoUnderConstruction;
 Route::middleware(DecidoUnderConstruction::class)->group(function () {
     Route::get('/decido', [PollManageController::class, 'index'])->middleware('auth')->name('decido.index');
     Route::get('/decido/creer', [PollManageController::class, 'create'])->middleware('auth')->name('decido.create');
+    // Option E (skill /100 hors gate, veille pp_search juillet 2026 validée Perplexity+Codex+Gemini) :
+    // /decido/creer n'est plus qu'un choix rapide de type - chaque type a son propre formulaire
+    // dédié et allégé (routes distinctes, placées AVANT /decido/{slug} pour éviter toute ambiguïté
+    // même si le nombre de segments diffère déjà).
+    Route::get('/decido/creer/date', [PollManageController::class, 'createDate'])->middleware('auth')->name('decido.create.date');
+    Route::get('/decido/creer/classique', [PollManageController::class, 'createClassic'])->middleware('auth')->name('decido.create.classic');
     // throttle:10,1 = anti-abus (10 sondages/min/utilisateur), trouvé manquant par une passe
     // adversariale indépendante (skill /100, round 5) - aucune limite ne bornait la création.
     Route::post('/decido', [PollManageController::class, 'store'])->middleware(['auth', 'throttle:10,1'])->name('decido.store');

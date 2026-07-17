@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
 use Illuminate\View\View as ViewContract;
 use InvalidArgumentException;
-use Modules\Decido\Enums\PollType;
 use Modules\Decido\Enums\VoteMode;
 use Modules\Decido\Models\Poll;
 use Modules\Decido\Rules\DistinctNormalized;
@@ -32,8 +31,21 @@ class PollManageController extends Controller
 
     public function create(): ViewContract
     {
-        return View::make('decido::manage.create', [
-            'pollTypes' => PollType::cases(),
+        return View::make('decido::manage.create');
+    }
+
+    // Option E (veille pp_search juillet 2026, validée Perplexity + Codex + Gemini, 95/100) :
+    // /decido/creer n'est plus qu'un choix rapide de type (create()) - chaque type a désormais
+    // son propre formulaire dédié et allégé, plutôt qu'une seule longue page avec rendu
+    // conditionnel x-show. Réduit le nombre de champs visibles au minimum pertinent par type.
+    public function createDate(): ViewContract
+    {
+        return View::make('decido::manage.create-date');
+    }
+
+    public function createClassic(): ViewContract
+    {
+        return View::make('decido::manage.create-classic', [
             'voteModes' => VoteMode::cases(),
         ]);
     }
@@ -117,37 +129,20 @@ class PollManageController extends Controller
             // scindant les votes de la même façon (un sondage à 5 votes pour "Pizza" pouvait afficher
             // 3 et 2 sur deux lignes séparées au lieu de révéler la vraie majorité).
             'options.*' => $isDateType ? ['nullable'] : ['required', 'string', 'max:255', 'distinct'],
-            // Nouvelle fonctionnalité (demande utilisateur 2026-07-17) : range_start_time/
-            // range_end_time n'étaient jusqu'ici QUE globaux - toutes les dates candidates
-            // partageaient obligatoirement la même plage horaire, contrairement à Framadate qui
-            // permet une plage différente par jour. candidate_date_start_times[]/
-            // candidate_date_end_times[] sont des tableaux PARALLÈLES à candidate_dates[] (même
-            // index) : une entrée vide ou absente hérite de la plage par défaut ci-dessus, une
-            // entrée renseignée surcharge cette date précise.
-            'candidate_date_start_times' => $isDateType ? ['nullable', 'array'] : ['nullable'],
-            'candidate_date_start_times.*' => $isDateType ? ['nullable', 'date_format:H:i'] : ['nullable'],
-            'candidate_date_end_times' => $isDateType ? ['nullable', 'array'] : ['nullable'],
-            'candidate_date_end_times.*' => $isDateType ? ['nullable', 'date_format:H:i'] : ['nullable'],
+            // Nouvelle fonctionnalité (demande utilisateur 2026-07-17, veille pp_search validée
+            // Perplexity+Codex+Gemini, 95/100 - "modéliser chaque jour comme une LISTE de fenêtres
+            // de disponibilité, jamais une seule paire début/fin") : range_start_time/range_end_time
+            // restent la plage PAR DÉFAUT (utilisée quand une date n'a aucune entrée ci-dessous),
+            // mais chaque date candidate peut désormais avoir PLUSIEURS plages (ex. 9h-12h ET
+            // 14h-17h, pour sauter le dîner) - candidate_date_ranges[index] est un tableau
+            // d'objets {start, end}, index correspondant à candidate_dates[index]. Remplace
+            // l'ancien candidate_date_start_times[]/candidate_date_end_times[] (une seule
+            // surcharge par date, insuffisant).
+            'candidate_date_ranges' => $isDateType ? ['nullable', 'array'] : ['nullable'],
+            'candidate_date_ranges.*' => $isDateType ? ['nullable', 'array'] : ['nullable'],
+            'candidate_date_ranges.*.*.start' => $isDateType ? ['nullable', 'date_format:H:i', 'required_with:candidate_date_ranges.*.*.end'] : ['nullable'],
+            'candidate_date_ranges.*.*.end' => $isDateType ? ['nullable', 'date_format:H:i', 'required_with:candidate_date_ranges.*.*.start'] : ['nullable'],
         ]);
-
-        // Une surcharge partielle (début renseigné sans fin, ou l'inverse) produirait un mélange
-        // silencieux avec la plage par défaut, difficile à diagnostiquer pour l'utilisateur - rejet
-        // explicite plutôt que de laisser SlotGenerationService échouer plus loin avec un message
-        // moins clair.
-        if ($isDateType) {
-            foreach ($validated['candidate_dates'] as $index => $date) {
-                $overrideStart = $validated['candidate_date_start_times'][$index] ?? null;
-                $overrideEnd = $validated['candidate_date_end_times'][$index] ?? null;
-                $hasStart = $overrideStart !== null && $overrideStart !== '';
-                $hasEnd = $overrideEnd !== null && $overrideEnd !== '';
-
-                if ($hasStart !== $hasEnd) {
-                    return Redirect::back()->withInput()->withErrors([
-                        'candidate_dates' => "L'horaire personnalisé pour le {$date} doit avoir une heure de début ET de fin, ou aucune des deux.",
-                    ]);
-                }
-            }
-        }
 
         // Round 16 (skill /100) : la création du Poll (INSERT immédiat via $poll->save()) puis la
         // boucle de création de ses PollOption (jusqu'à 500 créneaux pour le type "date") n'étaient
@@ -188,20 +183,50 @@ class PollManageController extends Controller
                 if ($isDateType) {
                     $slotService = new SlotGenerationService;
 
-                    // Nouvelle fonctionnalité (demande utilisateur 2026-07-17) : regroupement des
-                    // dates par plage horaire EFFECTIVE (surcharge ou plage par défaut), puis un
-                    // appel à generateSlots() PAR GROUPE - la méthode elle-même (durcie par 20+
-                    // rounds d'audit /100 : DST round 8, RFC5545 round 9, etc.) reste totalement
-                    // inchangée, on la réutilise telle quelle plutôt que de lui apprendre à gérer
-                    // des plages hétérogènes en interne. Le tri final par starts_at restaure l'ordre
+                    // Nouvelle fonctionnalité (demande utilisateur 2026-07-17, veille pp_search
+                    // validée Perplexity+Codex+Gemini, 95/100) : chaque date candidate peut
+                    // désormais avoir PLUSIEURS plages horaires (ex. 9h-12h ET 14h-17h). Chaque
+                    // plage de chaque date est ajoutée à son groupe "plage effective" - une même
+                    // date peut donc désormais apparaître dans PLUSIEURS groupes (un par plage),
+                    // generateSlots() étant appelé une fois par groupe comme avant. La méthode
+                    // elle-même (durcie par 20+ rounds d'audit /100 : DST round 8, RFC5545 round 9)
+                    // reste totalement inchangée. Le tri final par starts_at restaure l'ordre
                     // chronologique, indépendant de l'ordre d'itération des groupes.
                     $dateGroups = [];
                     foreach ($validated['candidate_dates'] as $index => $date) {
-                        $overrideStart = $validated['candidate_date_start_times'][$index] ?? null;
-                        $overrideEnd = $validated['candidate_date_end_times'][$index] ?? null;
-                        $effectiveStart = ($overrideStart !== null && $overrideStart !== '') ? $overrideStart : $validated['range_start_time'];
-                        $effectiveEnd = ($overrideEnd !== null && $overrideEnd !== '') ? $overrideEnd : $validated['range_end_time'];
-                        $dateGroups[$effectiveStart.'|'.$effectiveEnd][] = $date;
+                        // Une plage partielle (début renseigné sans fin, ou l'inverse) est déjà
+                        // rejetée en amont par la règle de validation `required_with` sur
+                        // candidate_date_ranges.*.*.start/end (vérifié empiriquement : Laravel
+                        // considère bien 'end' => '' comme absent une fois que 'start' est non
+                        // vide, donc le couple (start='14:00', end='') échoue la validation avant
+                        // même d'atteindre ce code) - aucun contrôle manuel supplémentaire requis.
+                        $ranges = array_values(array_filter(
+                            $validated['candidate_date_ranges'][$index] ?? [],
+                            fn ($r) => ! empty($r['start']) && ! empty($r['end'])
+                        ));
+
+                        if ($ranges === []) {
+                            $ranges = [['start' => $validated['range_start_time'], 'end' => $validated['range_end_time']]];
+                        } else {
+                            // Plages multiples pour la MÊME date : trier par heure de début et
+                            // rejeter tout chevauchement (ex. 9h-12h et 11h-14h saisies pour la
+                            // même date auraient produit des créneaux qui se recoupent sans
+                            // jamais faire remonter d'erreur claire à l'organisateur - veille
+                            // pp_search : "reject overlapping ranges").
+                            usort($ranges, fn ($a, $b) => $a['start'] <=> $b['start']);
+
+                            for ($i = 1; $i < count($ranges); $i++) {
+                                if ($ranges[$i]['start'] < $ranges[$i - 1]['end']) {
+                                    throw new InvalidArgumentException(
+                                        "Les plages horaires du {$date} se chevauchent ({$ranges[$i - 1]['start']}-{$ranges[$i - 1]['end']} et {$ranges[$i]['start']}-{$ranges[$i]['end']})."
+                                    );
+                                }
+                            }
+                        }
+
+                        foreach ($ranges as $range) {
+                            $dateGroups[$range['start'].'|'.$range['end']][] = $date;
+                        }
                     }
 
                     $slots = [];

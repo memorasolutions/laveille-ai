@@ -79,6 +79,22 @@ test('superadmin voit l’assistant de création (200)', function (): void {
     $this->actingAs($this->superadmin)->get(route('decido.create'))->assertStatus(200);
 });
 
+test('Option E : les 2 routes de formulaire dédié héritent bien du même gate (guest redirigé, non-superadmin 503, superadmin 200)', function (): void {
+    // Les nouvelles routes decido.create.date/decido.create.classic sont déclarées dans le MÊME
+    // groupe de middleware (auth + DecidoUnderConstruction) que decido.create - preuve qu'aucune
+    // n'a été oubliée hors du gate lors de la scission des formulaires.
+    $user = User::factory()->create();
+
+    $this->get(route('decido.create.date'))->assertRedirect();
+    $this->get(route('decido.create.classic'))->assertRedirect();
+
+    $this->actingAs($user)->get(route('decido.create.date'))->assertStatus(503);
+    $this->actingAs($user)->get(route('decido.create.classic'))->assertStatus(503);
+
+    $this->actingAs($this->superadmin)->get(route('decido.create.date'))->assertStatus(200);
+    $this->actingAs($this->superadmin)->get(route('decido.create.classic'))->assertStatus(200);
+});
+
 test('la liste "Mes sondages" contient un lien Gérer fonctionnel (owner-bypass, sans jeton valide)', function (): void {
     // Round 4 adversarial : authorizeManage() a toujours un bypass propriétaire (Auth::id() ===
     // creator_id) mais aucune vue ne générait de lien l'utilisant - impasse UX pour le créateur
@@ -132,12 +148,11 @@ test('superadmin peut créer un sondage de dates', function (): void {
 });
 
 test('une date candidate peut personnaliser sa propre plage horaire (différente de la plage par défaut)', function (): void {
-    // Nouvelle fonctionnalité (demande utilisateur 2026-07-17) : avant ce fix, toutes les dates
-    // candidates partageaient obligatoirement la même plage horaire globale - impossible de
-    // proposer "lundi seulement l'après-midi, mercredi seulement le matin" comme le permet
-    // Framadate. candidate_date_start_times[]/candidate_date_end_times[] (parallèles à
-    // candidate_dates[]) surchargent la plage par défaut pour une date précise ; une entrée vide
-    // hérite de range_start_time/range_end_time.
+    // Avant ce fix, toutes les dates candidates partageaient obligatoirement la même plage
+    // horaire globale - impossible de proposer "lundi seulement l'après-midi, mercredi seulement
+    // le matin" comme le permet Framadate. candidate_date_ranges[index] (tableau d'objets
+    // {start,end}, indexé comme candidate_dates[]) surcharge la plage par défaut pour une date
+    // précise ; une entrée absente/vide hérite de range_start_time/range_end_time.
     $dateWithOverride = now()->addDays(10)->format('Y-m-d');
     $dateWithDefault = now()->addDays(11)->format('Y-m-d');
 
@@ -150,8 +165,9 @@ test('une date candidate peut personnaliser sa propre plage horaire (différente
         'range_end_time' => '10:00',
         'step_minutes' => 60,
         'candidate_dates' => [$dateWithOverride, $dateWithDefault],
-        'candidate_date_start_times' => ['14:00', ''],
-        'candidate_date_end_times' => ['15:00', ''],
+        'candidate_date_ranges' => [
+            0 => [['start' => '14:00', 'end' => '15:00']],
+        ],
     ]);
 
     $poll = Poll::where('title', 'Sondage plages mixtes')->first();
@@ -176,7 +192,11 @@ test('une date candidate peut personnaliser sa propre plage horaire (différente
     expect($localStartOf($defaultOption)->format('H:i'))->toBe('09:00');
 });
 
-test('une surcharge partielle de plage horaire par date (début sans fin) est rejetée avec un message clair', function (): void {
+test('une plage horaire personnalisée partielle (début sans fin) est rejetée par la validation', function (): void {
+    // Vérifié empiriquement : la règle 'end' => required_with:...start capte déjà ce cas AVANT
+    // d'atteindre store() - une chaîne vide est traitée comme "absente" côté required_with, donc
+    // start='14:00' (présent) + end='' (absent) échoue la validation. Clé d'erreur exacte :
+    // candidate_date_ranges.0.0.end (indices imbriqués Laravel, pas la clé générique candidate_dates).
     $futureDate = now()->addDays(10)->format('Y-m-d');
 
     $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
@@ -188,12 +208,77 @@ test('une surcharge partielle de plage horaire par date (début sans fin) est re
         'range_end_time' => '10:00',
         'step_minutes' => 30,
         'candidate_dates' => [$futureDate],
-        'candidate_date_start_times' => ['14:00'],
-        'candidate_date_end_times' => [''],
+        'candidate_date_ranges' => [
+            0 => [['start' => '14:00', 'end' => '']],
+        ],
+    ]);
+
+    $response->assertSessionHasErrors('candidate_date_ranges.0.0.end');
+    expect(Poll::where('title', 'Sondage surcharge incomplète')->exists())->toBeFalse();
+});
+
+test('Multi-plages (demande utilisateur 2026-07-17) : une date candidate peut proposer PLUSIEURS plages horaires (matin ET après-midi)', function (): void {
+    // Veille pp_search juillet 2026, validée Perplexity + Codex + Gemini (95/100) : modéliser
+    // chaque date candidate comme une LISTE de plages horaires, pas une seule paire début/fin -
+    // permet de proposer "9h-12h ET 14h-17h" en sautant le dîner pour une même date.
+    $futureDate = now()->addDays(10)->format('Y-m-d');
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage matin et après-midi',
+        'type' => 'date',
+        'timezone' => 'America/Toronto',
+        'duration_minutes' => 60,
+        'range_start_time' => '09:00',
+        'range_end_time' => '17:00',
+        'step_minutes' => 60,
+        'candidate_dates' => [$futureDate],
+        'candidate_date_ranges' => [
+            0 => [
+                ['start' => '09:00', 'end' => '12:00'],
+                ['start' => '14:00', 'end' => '17:00'],
+            ],
+        ],
+    ]);
+
+    $poll = Poll::where('title', 'Sondage matin et après-midi')->first();
+    expect($poll)->not->toBeNull();
+    $response->assertSessionDoesntHaveErrors();
+
+    // 09:00-12:00 (durée 60, pas 60) = 3 créneaux (9h,10h,11h) ; 14:00-17:00 = 3 créneaux
+    // (14h,15h,16h) -> 6 créneaux au total, AUCUN entre 12h et 14h (le "dîner" est bien sauté).
+    $options = $poll->options()->orderBy('starts_at')->get();
+    expect($options)->toHaveCount(6);
+
+    $localStartOf = fn ($option) => \Carbon\Carbon::parse($option->getRawOriginal('starts_at'), 'UTC')->setTimezone('America/Toronto');
+    $localHours = $options->map(fn ($o) => $localStartOf($o)->format('H:i'))->sort()->values()->all();
+
+    expect($localHours)->toBe(['09:00', '10:00', '11:00', '14:00', '15:00', '16:00']);
+    expect($localHours)->not->toContain('12:00');
+    expect($localHours)->not->toContain('13:00');
+});
+
+test('Multi-plages : deux plages qui se chevauchent pour la même date sont rejetées avec un message clair', function (): void {
+    $futureDate = now()->addDays(10)->format('Y-m-d');
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage plages chevauchantes',
+        'type' => 'date',
+        'timezone' => 'America/Toronto',
+        'duration_minutes' => 30,
+        'range_start_time' => '09:00',
+        'range_end_time' => '17:00',
+        'step_minutes' => 30,
+        'candidate_dates' => [$futureDate],
+        'candidate_date_ranges' => [
+            0 => [
+                ['start' => '09:00', 'end' => '12:00'],
+                ['start' => '11:00', 'end' => '14:00'],
+            ],
+        ],
     ]);
 
     $response->assertSessionHasErrors('candidate_dates');
-    expect(Poll::where('title', 'Sondage surcharge incomplète')->exists())->toBeFalse();
+    expect(Poll::where('title', 'Sondage plages chevauchantes')->exists())->toBeFalse();
 });
 
 test('superadmin peut créer un sondage classique', function (): void {
@@ -569,6 +654,67 @@ test('les pages privées Décido (vote, résultats, Mes sondages, création) dé
 
     $createHtml = $this->actingAs($this->superadmin)->get(route('decido.create'))->getContent();
     $this->assertStringContainsString('name="robots" content="noindex', $createHtml);
+
+    // Option E (skill /100 hors gate) : les 2 nouveaux formulaires dédiés (create-date.blade.php,
+    // create-classic.blade.php) doivent respecter la même politique noindex que l'ancien
+    // formulaire unique qu'ils remplacent.
+    $createDateHtml = $this->actingAs($this->superadmin)->get(route('decido.create.date'))->getContent();
+    $this->assertStringContainsString('name="robots" content="noindex', $createDateHtml);
+
+    $createClassicHtml = $this->actingAs($this->superadmin)->get(route('decido.create.classic'))->getContent();
+    $this->assertStringContainsString('name="robots" content="noindex', $createClassicHtml);
+});
+
+test('Option E : le choix de type (decido.create) redirige vers les 2 formulaires dédiés allégés', function (): void {
+    // Veille pp_search juillet 2026, validée Perplexity + Codex + Gemini (95/100) : /decido/creer
+    // n'est plus qu'un choix rapide de type, chaque type ayant son propre formulaire dédié et
+    // allégé plutôt qu'une seule longue page avec rendu conditionnel x-show.
+    config()->set('decido.under_construction', false);
+
+    $chooserHtml = $this->actingAs($this->superadmin)->get(route('decido.create'))->getContent();
+    $this->assertStringContainsString(route('decido.create.date'), $chooserHtml);
+    $this->assertStringContainsString(route('decido.create.classic'), $chooserHtml);
+
+    $dateResponse = $this->actingAs($this->superadmin)->get(route('decido.create.date'));
+    $dateResponse->assertStatus(200);
+    $dateResponse->assertSee('Dates proposées', false);
+    $dateResponse->assertSee('Plus d\'options', false);
+
+    $classicResponse = $this->actingAs($this->superadmin)->get(route('decido.create.classic'));
+    $classicResponse->assertStatus(200);
+    $classicResponse->assertSee('Mode de vote', false);
+    $classicResponse->assertSee('Plus d\'options', false);
+});
+
+test('Option E : les 2 formulaires dédiés (date/classique) soumettent bien vers decido.store et créent le sondage', function (): void {
+    // Preuve end-to-end que la scission des formulaires n'a rien cassé côté soumission : chaque
+    // formulaire dédié pose un <input type="hidden" name="type"> et POST vers la même route
+    // decido.store (inchangée), dont la logique de branchement sur "type" reste identique.
+    config()->set('decido.under_construction', false);
+    $futureDate = now()->addDays(10)->format('Y-m-d');
+
+    $dateResponse = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage via formulaire dédié date',
+        'type' => 'date',
+        'timezone' => 'America/Toronto',
+        'duration_minutes' => 30,
+        'range_start_time' => '09:00',
+        'range_end_time' => '10:00',
+        'step_minutes' => 30,
+        'candidate_dates' => [$futureDate],
+    ]);
+    $dateResponse->assertSessionDoesntHaveErrors();
+    expect(Poll::where('title', 'Sondage via formulaire dédié date')->exists())->toBeTrue();
+
+    $classicResponse = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage via formulaire dédié classique',
+        'type' => 'classic',
+        'timezone' => 'America/Toronto',
+        'vote_mode' => 'single_choice',
+        'options' => ['Pizza', 'Sushi'],
+    ]);
+    $classicResponse->assertSessionDoesntHaveErrors();
+    expect(Poll::where('title', 'Sondage via formulaire dédié classique')->exists())->toBeTrue();
 });
 
 test('la page de gestion (jeton admin dans l’URL) ne transmet pas ce jeton à Google Analytics (no_analytics)', function (): void {
@@ -1311,7 +1457,7 @@ test('aucune route de gestion/vote/résultats Décido ne porte le middleware cac
     // par jeton). Confirmé par lecture directe de Modules/Decido/routes/web.php : aucune route ne
     // déclare `cacheResponse`. Ce test le fige pour empêcher toute régression future.
     $decidoRouteNames = [
-        'decido.index', 'decido.create', 'decido.store',
+        'decido.index', 'decido.create', 'decido.create.date', 'decido.create.classic', 'decido.store',
         'decido.manage', 'decido.close', 'decido.export.csv', 'decido.export.ics',
         'decido.shortlink', 'decido.qr', 'decido.vote.show', 'decido.vote.store',
     ];
