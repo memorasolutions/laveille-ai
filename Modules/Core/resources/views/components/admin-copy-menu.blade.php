@@ -36,6 +36,7 @@
                 el.setAttribute('hidden', '');
             }
             this.copied = i;
+            if (window.toast) { window.toast('Copié dans le presse-papiers', 'success', 2000); }
             setTimeout(() => { this.copied = null; }, 1500);
 
             // Tracking optionnel (clé 'track_url' par item, ignorée si absente — zéro impact

@@ -364,6 +364,7 @@ document.addEventListener('alpine:init', function() {
             copy: function(text) {
                 var self = this;
                 navigator.clipboard.writeText(text);
+                window.toast('{{ __("Mot de passe copié") }}', 'success', 2000);
                 this.copied = true;
                 setTimeout(function() { self.copied = false; }, 2000);
             },
@@ -402,6 +403,7 @@ document.addEventListener('alpine:init', function() {
             copyPassphrase: function() {
                 var self = this;
                 navigator.clipboard.writeText(this.passphrase);
+                window.toast('{{ __("Phrase de passe copiée") }}', 'success', 2000);
                 this.passphraseCopied = true;
                 setTimeout(function() { self.passphraseCopied = false; }, 2000);
             }

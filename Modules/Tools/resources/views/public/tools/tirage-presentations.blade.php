@@ -524,6 +524,7 @@ document.addEventListener('alpine:init', function() {
                 var self = this;
                 var text = this.fullOrder.map(function(item, i) { return (i + 1) + '. ' + item.student + ' \u2192 ' + item.question; }).join('\n');
                 navigator.clipboard.writeText(text);
+                window.toast('{{ __("Ordre de passage copi\u00e9") }}', 'success', 2000);
                 this.copied = true;
                 setTimeout(function() { self.copied = false; }, 2000);
             }

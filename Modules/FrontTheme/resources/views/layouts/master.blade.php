@@ -492,6 +492,21 @@
       window.toast = function(message, variant, duration){
         window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: message, variant: variant || 'success', duration: duration || 4000 } }));
       };
+      // Helper global copie presse-papiers + confirmation toast (demande utilisateur 2026-07-18 :
+      // un bouton "Copier" sur deux ne donnait AUCUN feedback). Le nom accessible du bouton doit
+      // rester stable (aria-label) pendant que son contenu visuel bascule vers "Copié !" en
+      // aria-hidden - le toast reste la SEULE annonce aria-live pour éviter la double-annonce
+      // lecteur d'écran. Retourne une Promise<boolean> pour que l'appelant pilote son propre état
+      // visuel local (x-data="{ copied: false }").
+      window.copyToClipboard = function(text, successMessage){
+        return navigator.clipboard.writeText(text).then(function(){
+          window.toast(successMessage || 'Copié dans le presse-papiers', 'success', 2500);
+          return true;
+        }).catch(function(){
+          window.toast('Copie impossible - copiez le texte manuellement.', 'error', 4000);
+          return false;
+        });
+      };
     })();
     </script>
     {{-- Speculation Rules API — prefetch/prerender navigation instantanee --}}
@@ -504,7 +519,7 @@
     <script>
     window.__openShare=function(url,text,platform,color,label){
         label=label||'publication';
-        navigator.clipboard.writeText(text).catch(function(){});
+        window.copyToClipboard(text, '{{ __("Texte copié") }}');
         var id='share-modal-overlay';
         var prev=document.getElementById(id);if(prev)prev.remove();
         var o=document.createElement('div');

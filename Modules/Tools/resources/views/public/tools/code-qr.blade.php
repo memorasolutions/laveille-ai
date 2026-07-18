@@ -952,6 +952,7 @@ document.addEventListener('alpine:init', function() {
             copyData: function() {
                 var self = this;
                 navigator.clipboard.writeText(this.qrData);
+                window.toast('{{ __("Données copiées") }}', 'success', 2000);
                 this.copied = true;
                 setTimeout(function() { self.copied = false; }, 2000);
             },

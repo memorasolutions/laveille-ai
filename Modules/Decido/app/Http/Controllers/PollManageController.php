@@ -472,12 +472,37 @@ class PollManageController extends Controller
 
         $userId = $pollModel->creator_id ?? Auth::id();
 
+        // Slug personnalisé (demande utilisateur 2026-07-18) : réutilise EXACTEMENT la validation
+        // du formulaire ShortUrl existant (UserShortUrlController::store()) - alpha_dash, unique,
+        // mots réservés - pour rester cohérent avec le reste du système plutôt que d'inventer une
+        // règle distincte.
+        $validated = $request->validate([
+            'slug' => [
+                'nullable', 'alpha_dash', 'max:50',
+                'unique:short_urls,slug',
+                'not_in:'.implode(',', \Modules\ShortUrl\Models\ShortUrl::RESERVED_SLUGS),
+            ],
+        ]);
+
         // Round 15 (skill /100) : la création + l'écriture du lien court passent désormais par
         // Poll::claimShortUrl(), qui relit l'état à l'intérieur d'une transaction verrouillée
         // (lockForUpdate) au lieu de faire confiance à $pollModel (potentiellement périmée sous
         // requêtes concurrentes) - voir le commentaire de la méthode pour le détail de la race
         // condition corrigée.
-        $pollModel->claimShortUrl($userId, app(\Modules\ShortUrl\Services\ShortUrlService::class));
+        try {
+            $pollModel->claimShortUrl(
+                $userId,
+                app(\Modules\ShortUrl\Services\ShortUrlService::class),
+                $validated['slug'] ?? null
+            );
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Angle mort signalé par Gemini (validation croisée 2026-07-18) : entre la vérification
+            // `unique` ci-dessus et l'écriture réelle, un autre visiteur peut avoir réservé le même
+            // slug (contrainte unique en base = filet de sécurité final, pas la validation seule).
+            return Redirect::route('decido.manage', ['poll' => $pollModel->public_id, 'adminToken' => $adminToken])
+                ->withErrors(['slug' => 'Ce slug vient d\'être pris par quelqu\'un d\'autre - réessaie avec un autre.'])
+                ->withInput();
+        }
 
         return Redirect::route('decido.manage', ['poll' => $pollModel->public_id, 'adminToken' => $adminToken])
             ->with('success', 'Lien court créé.');

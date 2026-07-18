@@ -20,7 +20,7 @@
             <div>
                 <code class="text-primary fs-5">/s/{{ $shortUrl->slug }}</code>
                 <button type="button" class="btn btn-sm btn-outline-primary ms-2" aria-label="Copier le lien"
-                        onclick="navigator.clipboard.writeText('{{ url('/s/' . $shortUrl->slug) }}');this.textContent='Copié !';setTimeout(()=>this.textContent='Copier',1500);">
+                        onclick="navigator.clipboard.writeText('{{ url('/s/' . $shortUrl->slug) }}');if(window.Livewire){Livewire.dispatch('toast',{type:'success',message:'{{ __('Lien copié') }}'})};this.textContent='Copié !';setTimeout(()=>this.textContent='Copier',1500);">
                     Copier
                 </button>
             </div>

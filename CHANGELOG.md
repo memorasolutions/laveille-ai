@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.112.0] - 2026-07-18
+
+### Added
+- **Décido - mise en public.** Feu vert utilisateur explicite après 27 rounds de revue adversariale + simulation E2E complète (#1134-1139). `DECIDO_UNDER_CONSTRUCTION=false` + migration `2026_07_18_180000_decido_publish.php` (retire le badge "Bientôt" sur `/outils`, pattern identique à Minuteur visuel).
+- **Confirmation de copie presse-papiers site-wide (toast + état bouton).** Nouveau helper global `window.copyToClipboard()` (`master.blade.php`) : bascule visuelle du bouton ("Copié !", `aria-hidden`, `aria-label` stable) + toast `window.toast()`/`toast-show` comme seule source d'annonce `aria-live` (évite la double-annonce lecteur d'écran). Options validées Codex (95/100) et Gemini (2e avis indépendant, aucun désaccord). Appliqué aux 3 boutons de `Decido/results.blade.php` (lien admin, lien public, lien court), à `admin-copy-menu.blade.php`, et à 20 fichiers supplémentaires (outils publics, Backoffice, ShortUrl, Newsletter/News). Corrige au passage 2 dispatches d'événement toast morts (`toast-show` dans un layout qui n'écoute que `notification-toast`).
+- **Décido - lien court personnalisable (slug perso pour connectés).** `Poll::claimShortUrl()` accepte un `$customSlug` optionnel, réutilise la validation ShortUrl existante (`alpha_dash`, `unique`, mots réservés). Nouveau lien "Options avancées" (nouvel onglet, ne casse pas le flux Décido) réservé au créateur connecté. Gère la race condition sur slug concurrent (`QueryException`).
+
+### Changed
+- **Décido - message "lien de gestion" reformulé.** L'ancien texte "il ne sera plus jamais réaffiché" était trompeur pour le créateur connecté (`authorizeManage()` le laisse toujours repasser via "Mes sondages") ; clarifié que ce lien sert à déléguer l'accès à un co-organisateur non connecté.
+
 ## [1.111.0] - 2026-07-18
 
 ### Added

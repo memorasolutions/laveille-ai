@@ -124,7 +124,7 @@
                         <div class="fw-medium small mb-1">{{ __('Utilisation') }}</div>
                         <div class="bg-white rounded p-2 position-relative border">
                             <code class="small" x-text="usage"></code>
-                            <button type="button" @click="navigator.clipboard.writeText(usage)"
+                            <button type="button" @click="navigator.clipboard.writeText(usage); if (window.Livewire) { Livewire.dispatch('toast', { type: 'success', message: '{{ __('Syntaxe copiée') }}' }) }"
                                     class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0 m-1" style="padding:2px 6px"
                                     title="{{ __('Copier') }}" aria-label="{{ __('Copier la syntaxe') }}">
                                 <i data-lucide="copy" style="width:12px;height:12px;"></i>

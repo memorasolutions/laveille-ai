@@ -651,6 +651,9 @@ function concentreBuilder(opts) {
         async copyToClipboard() {
             try {
                 await navigator.clipboard.writeText(this.generatedPrompt);
+                window.dispatchEvent(new CustomEvent('notification-toast', {
+                    detail: { type: 'success', message: 'Prompt copié dans le presse-papiers !' }
+                }));
                 this.copyOk = true;
                 setTimeout(() => { this.copyOk = false; }, 2500);
             } catch (e) {

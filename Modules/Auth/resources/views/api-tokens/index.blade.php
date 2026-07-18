@@ -28,7 +28,7 @@
                   style="background:#f8fafc; word-break:break-all;">
                 {{ session('token_value') }}
             </code>
-            <button onclick="navigator.clipboard.writeText(document.getElementById('token-display').innerText.trim()); this.textContent='Copié ✓';"
+            <button onclick="navigator.clipboard.writeText(document.getElementById('token-display').innerText.trim()); if (window.toast) { window.toast('{{ __('Token copié') }}', 'success', 2000) }; this.textContent='Copié ✓';"
                     class="btn btn-sm btn-primary rounded-2 flex-shrink-0">
                 {{ __('Copier') }}
             </button>

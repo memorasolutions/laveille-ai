@@ -164,9 +164,9 @@ class Poll extends Model
      * short_url_id déjà posé - elle n'appelle donc jamais ShortUrlService::createShortUrl() une
      * seconde fois.
      */
-    public function claimShortUrl(int $userId, \Modules\ShortUrl\Services\ShortUrlService $service): ?\Modules\ShortUrl\Models\ShortUrl
+    public function claimShortUrl(int $userId, \Modules\ShortUrl\Services\ShortUrlService $service, ?string $customSlug = null): ?\Modules\ShortUrl\Models\ShortUrl
     {
-        return DB::transaction(function () use ($userId, $service) {
+        return DB::transaction(function () use ($userId, $service, $customSlug) {
             $locked = static::whereKey($this->id)->lockForUpdate()->first();
 
             if (! $locked) {
@@ -179,12 +179,17 @@ class Poll extends Model
                 return $locked->shortUrl;
             }
 
-            $shortUrl = $service->createShortUrl([
+            $data = [
                 'original_url' => $locked->share_url,
                 'title' => 'Sondage Décido : '.$locked->title,
                 'redirect_type' => 301,
                 'is_active' => true,
-            ], $userId);
+            ];
+            if ($customSlug !== null && $customSlug !== '') {
+                $data['slug'] = $customSlug;
+            }
+
+            $shortUrl = $service->createShortUrl($data, $userId);
 
             $locked->update(['short_url_id' => $shortUrl->id]);
             $this->short_url_id = $shortUrl->id;

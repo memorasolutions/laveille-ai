@@ -99,7 +99,7 @@
         <h3 style="font-family:var(--f-heading);font-weight:700;color:var(--c-dark);margin-bottom:6px;font-size:1.1rem;">{{ __('Invitez vos collègues !') }}</h3>
         <p style="color:#6b7280;margin-bottom:16px;font-size:14px;">{{ __('Plus on est nombreux, plus le classement devient intéressant.') }}</p>
         <div style="display:flex!important;justify-content:center!important;flex-wrap:wrap!important;gap:10px;">
-            <button @click="navigator.clipboard.writeText('{{ url('/annuaire/classement') }}'); copied = true; setTimeout(() => copied = false, 2000)"
+            <button @click="navigator.clipboard.writeText('{{ url('/annuaire/classement') }}'); window.toast('{{ __('Lien copié') }}', 'success', 2000); copied = true; setTimeout(() => copied = false, 2000)"
                 :style="copied ? 'background:#059669;color:#fff;border:none;padding:10px 20px;border-radius:0.5rem;font-weight:600;font-size:13px;cursor:pointer;transition:all .2s;' : 'background:#f3f4f6;color:var(--c-dark);border:none;padding:10px 20px;border-radius:0.5rem;font-weight:600;font-size:13px;cursor:pointer;transition:all .2s;'">
                 <span x-show="!copied"><i class="fa fa-link"></i> {{ __('Copier le lien') }}</span>
                 <span x-show="copied" x-cloak><i class="fa fa-check"></i> {{ __('Copié !') }}</span>

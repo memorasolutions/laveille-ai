@@ -92,7 +92,7 @@
 
             <div class="flex space-x-3 flex-wrap gap-2">
                 <button type="button"
-                        x-on:click="navigator.clipboard.writeText($refs.prompt.innerText); copied = true; setTimeout(() => copied = false, 2000)"
+                        x-on:click="navigator.clipboard.writeText($refs.prompt.innerText); if (window.toast) { window.toast('Prompt copié', 'success', 2000) }; copied = true; setTimeout(() => copied = false, 2000)"
                         class="px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50">
                     <span x-text="copied ? 'Copié !' : 'Copier le prompt'"></span>
                 </button>

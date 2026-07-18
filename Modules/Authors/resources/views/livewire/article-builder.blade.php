@@ -94,7 +94,7 @@
                 <div x-data="{ copied: false }" class="relative">
                     <pre class="bg-gray-50 p-4 rounded-md overflow-x-auto text-sm whitespace-pre-wrap">{{ $generatedResult['prompt'] }}</pre>
                     <button type="button"
-                            x-on:click="navigator.clipboard.writeText({{ json_encode($generatedResult['prompt']) }}); copied = true; setTimeout(() => copied = false, 2000)"
+                            x-on:click="navigator.clipboard.writeText({{ json_encode($generatedResult['prompt']) }}); if (window.toast) { window.toast('Prompt copié', 'success', 2000) }; copied = true; setTimeout(() => copied = false, 2000)"
                             class="absolute top-2 right-2 bg-[#064E5A] text-white px-3 py-1 rounded text-xs">
                         <span x-text="copied ? 'Copié !' : 'Copier'"></span>
                     </button>

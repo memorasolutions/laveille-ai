@@ -41,12 +41,23 @@
                     @endphp
                     <div class="alert alert-warning d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
                         <div>
-                            <strong>Lien d'administration à conserver précieusement, il ne sera plus jamais réaffiché :</strong><br>
+                            {{-- Message reformulé (demande utilisateur 2026-07-18) : "il ne sera plus jamais
+                                 réaffiché" était trompeur pour TOI le créateur - decido.store exige d'être
+                                 connecté (middleware auth), et PollManageController::authorizeManage() laisse
+                                 déjà passer le créateur connecté avec n'importe quel jeton (Auth::id() ===
+                                 $poll->creator_id) : tu retrouveras toujours cette page via "Mes sondages".
+                                 Ce lien précis (avec le jeton en clair) ne sert vraiment qu'à DÉLÉGUER l'accès
+                                 de gestion à un co-organisateur qui n'a pas de compte. --}}
+                            <strong>Lien de gestion à partager avec un co-organisateur si besoin :</strong><br>
                             <code class="d-block mt-1" style="word-break: break-all;">{{ $adminUrl }}</code>
+                            <small class="text-muted d-block mt-1">Toi, tu retrouveras toujours ce sondage via <a href="{{ route('decido.index') }}">Mes sondages</a>.</small>
                         </div>
                         <button type="button" class="ct-btn ct-btn-outline ct-btn-sm flex-shrink-0"
-                                x-on:click="navigator.clipboard.writeText('{{ $adminUrl }}')">
-                            Copier
+                                aria-label="Copier le lien de gestion"
+                                x-data="{ copied: false }"
+                                x-on:click="copyToClipboard('{{ $adminUrl }}', 'Lien de gestion copié').then(ok => { if (ok) { copied = true; setTimeout(() => copied = false, 2000) } })">
+                            <span x-show="!copied">Copier</span>
+                            <span x-show="copied" aria-hidden="true">✓ Copié !</span>
                         </button>
                     </div>
                 @endif
@@ -295,8 +306,11 @@
                         <span class="text-muted">Lien public :</span>
                         <code>{{ $poll->share_url }}</code>
                         <button type="button" class="ct-btn ct-btn-outline ct-btn-sm"
-                                x-on:click="navigator.clipboard.writeText('{{ $poll->share_url }}')">
-                            Copier
+                                aria-label="Copier le lien public du sondage"
+                                x-data="{ copied: false }"
+                                x-on:click="copyToClipboard('{{ $poll->share_url }}', 'Lien public copié').then(ok => { if (ok) { copied = true; setTimeout(() => copied = false, 2000) } })">
+                            <span x-show="!copied">Copier</span>
+                            <span x-show="copied" aria-hidden="true">✓ Copié !</span>
                         </button>
                     </div>
 
@@ -305,16 +319,48 @@
                             <span class="text-muted">Lien court :</span>
                             <code>{{ $poll->getShortUrlString() }}</code>
                             <button type="button" class="ct-btn ct-btn-outline ct-btn-sm"
-                                    x-on:click="navigator.clipboard.writeText('{{ $poll->getShortUrlString() }}')">
-                                Copier
+                                    aria-label="Copier le lien court"
+                                    x-data="{ copied: false }"
+                                    x-on:click="copyToClipboard('{{ $poll->getShortUrlString() }}', 'Lien court copié').then(ok => { if (ok) { copied = true; setTimeout(() => copied = false, 2000) } })">
+                                <span x-show="!copied">Copier</span>
+                                <span x-show="copied" aria-hidden="true">✓ Copié !</span>
                             </button>
+                            @if(auth()->check() && auth()->id() === $poll->creator_id)
+                                {{-- Réservé au créateur connecté : UserShortUrlController::edit() vérifie
+                                     la propriété du lien, un token-only delegate n'y aurait pas accès. --}}
+                                <a href="{{ route('shorturl.user.edit', ['short_url' => $poll->shortUrl]) }}" target="_blank" rel="noopener"
+                                   class="ct-btn ct-btn-ghost ct-btn-sm" style="white-space:nowrap;">
+                                    Options avancées <span aria-hidden="true">↗</span>
+                                    <span class="visually-hidden">(s'ouvre dans un nouvel onglet)</span>
+                                </a>
+                            @endif
                         </div>
                     @else
+                        {{-- Slug personnalisé (demande utilisateur 2026-07-18) : connectés seulement (Décido
+                             exige déjà d'être connecté pour créer un sondage), réutilise EXACTEMENT la
+                             validation du module ShortUrl (alpha_dash, unique, mots réservés) - voir
+                             PollManageController::createShortLink(). Champ facultatif : slug aléatoire
+                             généré si laissé vide. Domaine affiché en texte fixe (pas de menu déroulant) :
+                             0 domaine secondaire n'est configuré actuellement sur ce site. --}}
                         <form method="POST" action="{{ route('decido.shortlink', ['poll' => $poll->public_id, 'adminToken' => $adminToken]) }}" class="mb-3">
                             @csrf
-                            <button type="submit" class="ct-btn ct-btn-outline ct-btn-sm">
-                                Créer un lien court
-                            </button>
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <span class="text-muted small">{{ parse_url(config('app.url'), PHP_URL_HOST) }}/s/</span>
+                                <input type="text" name="slug" maxlength="50" pattern="[a-zA-Z0-9_-]*"
+                                       placeholder="perso (facultatif)"
+                                       aria-label="Slug personnalisé du lien court (facultatif)"
+                                       class="form-control form-control-sm" style="max-width:180px;"
+                                       value="{{ old('slug') }}">
+                                <button type="submit" class="ct-btn ct-btn-outline ct-btn-sm">
+                                    Créer un lien court
+                                </button>
+                            </div>
+                            @error('shortlink')
+                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                            @enderror
+                            @error('slug')
+                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                            @enderror
                         </form>
                     @endif
 

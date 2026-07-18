@@ -852,7 +852,7 @@ document.addEventListener('alpine:init', function() {
                 window.open(url, '_blank', 'noopener');
             },
 
-            copyText: function(text) { navigator.clipboard.writeText(text); },
+            copyText: function(text) { window.copyToClipboard(text, '{{ __("Prompt copié") }}'); },
 
             armReset: function() {
                 if (this.resetArmed) { this.resetAll(); return; }

@@ -1182,12 +1182,12 @@ function promptBuilder() {
             if (!this.promptText) return;
             try {
                 await navigator.clipboard.writeText(this.promptText);
-                window.dispatchEvent(new CustomEvent('toast-show', {
-                    detail: { message: 'Prompt copié dans le presse-papiers !', variant: 'success', duration: 3000 }
+                window.dispatchEvent(new CustomEvent('notification-toast', {
+                    detail: { type: 'success', message: 'Prompt copié dans le presse-papiers !' }
                 }));
             } catch (e) {
-                window.dispatchEvent(new CustomEvent('toast-show', {
-                    detail: { message: 'Échec de la copie — sélectionnez le texte manuellement.', variant: 'warning', duration: 4000 }
+                window.dispatchEvent(new CustomEvent('notification-toast', {
+                    detail: { type: 'warning', message: 'Échec de la copie - sélectionnez le texte manuellement.' }
                 }));
             }
         },

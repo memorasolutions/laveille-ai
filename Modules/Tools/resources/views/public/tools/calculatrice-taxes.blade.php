@@ -392,6 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
         copyBtn.addEventListener('click', function() {
             var d = getCalculationData();
             navigator.clipboard.writeText(d.text);
+            window.toast('{{ __("Résultat copié") }}', 'success', 2000);
             this.textContent = '{{ __("Copié !") }}';
             var self = this;
             setTimeout(function() { self.textContent = '{{ __("Copier le résultat") }}'; }, 2000);
@@ -431,12 +432,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (err && err.name === 'AbortError') return; // user cancelled
                         // Fallback clipboard
                         navigator.clipboard.writeText(d.text + '\n\n' + shareUrl);
+                        window.toast('{{ __("Lien copié") }}', 'success', 2000);
                         self.textContent = '🔗 {{ __("Lien copié !") }}';
                         resetLabel();
                     });
             } else {
                 // Fallback desktop : copy résumé + URL clipboard
                 navigator.clipboard.writeText(d.text + '\n\n' + shareUrl);
+                window.toast('{{ __("Lien copié") }}', 'success', 2000);
                 self.textContent = '🔗 {{ __("Lien copié !") }}';
                 resetLabel();
             }

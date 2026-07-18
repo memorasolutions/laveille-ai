@@ -116,6 +116,7 @@
 
         copyLink() {
             navigator.clipboard.writeText(this.result.short_url);
+            window.toast('{{ __("Lien copié") }}', 'success', 2000);
             this.copied = true;
             setTimeout(() => this.copied = false, 2000);
         },
@@ -135,6 +136,7 @@
         },
         copyText(text) {
             navigator.clipboard.writeText(text);
+            window.toast('{{ __("Lien copié") }}', 'success', 2000);
             this.copiedUrl = text;
             setTimeout(() => {
                 if (this.copiedUrl === text) this.copiedUrl = '';
@@ -409,7 +411,7 @@
                         style="background: var(--c-primary, #064E5A); color: #fff; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none;">
                         📊 {{ __('Stats') }}
                     </a>
-                    <button @click="navigator.clipboard.writeText(item.short_url)"
+                    <button @click="window.copyToClipboard(item.short_url, '{{ __('Lien copié') }}')"
                         style="background: #F3F4F6; color: var(--c-dark, #1A1D23); border: none; padding: 5px 10px; border-radius: 6px; font-size: 11px; cursor: pointer;">
                         📋
                     </button>

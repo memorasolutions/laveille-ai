@@ -102,7 +102,7 @@
                                 <code class="text-primary">/s/{{ $shortUrl->slug }}</code>
                                 <button type="button" class="btn btn-link btn-sm p-0 ms-1" title="Copier le lien"
                                         aria-label="Copier le lien court"
-                                        onclick="navigator.clipboard.writeText('{{ url('/s/' . $shortUrl->slug) }}');this.innerHTML='<i data-lucide=&quot;check&quot; style=&quot;width:14px;height:14px;&quot;></i>';setTimeout(()=>{this.innerHTML='<i data-lucide=&quot;copy&quot; style=&quot;width:14px;height:14px;&quot;></i>';lucide.createIcons()},1500);lucide.createIcons();">
+                                        onclick="navigator.clipboard.writeText('{{ url('/s/' . $shortUrl->slug) }}');if(window.Livewire){Livewire.dispatch('toast',{type:'success',message:'{{ __('Lien copié') }}'})};this.innerHTML='<i data-lucide=&quot;check&quot; style=&quot;width:14px;height:14px;&quot;></i>';setTimeout(()=>{this.innerHTML='<i data-lucide=&quot;copy&quot; style=&quot;width:14px;height:14px;&quot;></i>';lucide.createIcons()},1500);lucide.createIcons();">
                                     <i data-lucide="copy" style="width:14px;height:14px;"></i>
                                 </button>
                             </td>

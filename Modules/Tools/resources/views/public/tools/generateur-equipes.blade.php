@@ -345,6 +345,7 @@ document.addEventListener('alpine:init', function() {
                     return team.name + ':\n  - ' + team.members.join('\n  - ');
                 }).join('\n\n');
                 navigator.clipboard.writeText(text);
+                window.toast('{{ __("Équipes copiées") }}', 'success', 2000);
                 this.copied = true;
                 setTimeout(function() { self.copied = false; }, 2000);
             },

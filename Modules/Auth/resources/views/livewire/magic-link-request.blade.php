@@ -20,7 +20,7 @@
 <div class="bg-amber-50 border border-amber-400 rounded-md p-3 mt-4">
     <div class="font-semibold text-amber-800 mb-1">{{ __('DEV - Code magic link :') }}</div>
     <code class="text-xl font-bold tracking-widest text-amber-900">{{ session('dev_magic_code') }}</code>
-    <button onclick="navigator.clipboard.writeText('{{ session('dev_magic_code') }}'); this.textContent='{{ __('Copié') }}';"
+    <button onclick="navigator.clipboard.writeText('{{ session('dev_magic_code') }}'); if (window.toast) { window.toast('{{ __('Code copié') }}', 'success', 2000) }; this.textContent='{{ __('Copié') }}';"
             class="ms-2 bg-amber-400 text-black border-none rounded px-2 py-1 text-sm cursor-pointer hover:bg-amber-500">
         {{ __('Copier') }}
     </button>

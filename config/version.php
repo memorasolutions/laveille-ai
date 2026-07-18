@@ -17,6 +17,36 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.112.0 · 2026-07-18 · feat(decido) mise en public + feat(copier) confirmation toast+bouton
+ *     site-wide + feat(decido) slug personnalisé lien court. Trois changements distincts livrés
+ *     ensemble (demande utilisateur) :
+ *     (1) MISE EN PUBLIC de Décido (feu vert utilisateur explicite après 27 rounds de revue
+ *     adversariale + simulation E2E complète) : DECIDO_UNDER_CONSTRUCTION=false, migration
+ *     2026_07_18_180000_decido_publish.php (badge "Bientôt" retiré sur /outils, pattern identique
+ *     à minuteur-visuel #857-861).
+ *     (2) Confirmation de copie presse-papiers PARTOUT sur le site : nouveau helper global
+ *     window.copyToClipboard() (master.blade.php) qui combine le changement d'état visuel du
+ *     bouton ("Copié !", aria-hidden, nom accessible stable via aria-label) ET le toast global
+ *     window.toast()/'toast-show' comme SEULE source d'annonce aria-live (évite la double-annonce
+ *     lecteur d'écran) - options validées Codex (95/100) + Gemini (2e avis indépendant, aucun
+ *     désaccord). Retrofit : 3 boutons Decido/results.blade.php (lien admin, lien public, lien
+ *     court) + admin-copy-menu.blade.php + 20 fichiers supplémentaires (outils publics,
+ *     Backoffice, ShortUrl, Newsletter/News - 2 dispatch d'événement toast mort corrigés vers
+ *     'notification-toast', le vrai événement câblé du layout admin). 4 fichiers (Auth, Authors
+ *     Livewire) n'ont aucune infrastructure toast dans leur layout - fallback défensif appliqué,
+ *     parité complète nécessite une tâche de suivi sur ces layouts.
+ *     (3) Décido : slug de lien court personnalisé pour connectés (réutilise exactement la
+ *     validation ShortUrl existante - alpha_dash, unique, mots réservés - Poll::claimShortUrl()
+ *     accepte désormais un $customSlug optionnel), + lien "Options avancées" vers /raccourcir en
+ *     nouvel onglet (ne casse pas le flux Décido, angle mort signalé par Gemini) réservé au
+ *     créateur connecté (vérifie creator_id, cohérent avec UserShortUrlController::edit()).
+ *     Domaine affiché en texte fixe (pas de dropdown) : 0 domaine secondaire configuré en base
+ *     actuellement (YAGNI, ajouté plus tard si pertinent). Catch QueryException sur race condition
+ *     de slug (angle mort Gemini). Bonus découvert en auditant results.blade.php : le message
+ *     "lien admin ne sera plus jamais réaffiché" était trompeur pour le créateur connecté (il
+ *     retrouve toujours la gestion via Mes sondages, authorizeManage() le confirme) - reformulé
+ *     pour clarifier que ce lien sert à déléguer l'accès à un co-organisateur.
+ *
  *   1.111.0 · 2026-07-18 · feat(decido) image de couverture sur /outils (featured_image). Générée
  *     via Gemini (compte stephane@memora.ca, skill /nanobanana) : 3D isométrique teal/orange
  *     (urne de vote + calendrier + horloge + silhouettes), cohérente avec le style des autres
@@ -1612,7 +1642,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 111;
+$lvMinor = 112;
 $lvPatch = 0;
 
 return [

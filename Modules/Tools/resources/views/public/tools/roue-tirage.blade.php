@@ -714,11 +714,11 @@ document.addEventListener('alpine:init', function() {
 
             // Partage
             copyResult: function() {
-                navigator.clipboard.writeText('🎯 Tirage : ' + this.winner + ' — roue de tirage laveille.ai');
+                window.copyToClipboard('🎯 Tirage : ' + this.winner + ' - roue de tirage laveille.ai', '{{ __("Résultat copié") }}');
             },
             copyHistory: function() {
                 var txt = this.history.map(function(h, i) { return '#' + (i + 1) + ' ' + h.name + ' (' + h.date + ')'; }).join('\n');
-                navigator.clipboard.writeText(txt);
+                window.copyToClipboard(txt, '{{ __("Historique copié") }}');
             },
 
             _headers: function() {
