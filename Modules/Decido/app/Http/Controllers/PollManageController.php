@@ -54,6 +54,22 @@ class PollManageController extends Controller
     {
         $isDateType = $request->input('type') === 'date';
 
+        // SIM_decido0717 (2026-07-17, gate de vérification finale) : "America/Montreal" a été
+        // retiré de la base IANA tzdata en 2014 (fusionné dans America/Toronto, mêmes règles
+        // HNE/HAE) - ce n'est donc plus un identifiant reconnu par timezone_identifiers_list()
+        // sur PHP moderne. Le <select> du formulaire (description-timezone-fields.blade.php)
+        // propose toujours "Montréal (HNE/HAE)" avec value="America/Montreal" (libellé légitime,
+        // conservé pour l'UX et pour ne pas casser la préservation old() - FEAT_010), ce qui
+        // faisait échouer À CHAQUE FOIS la règle de validation 'timezone' ci-dessous ("Le champ
+        // timezone doit être un fuseau horaire valide."), rendant la création d'un sondage
+        // strictement impossible dès que ce choix (le plus naturel sur un site québécois) était
+        // sélectionné. On normalise l'alias historique vers l'identifiant canonique AVANT
+        // validation, plutôt que de toucher au template : la donnée persistée reste toujours un
+        // fuseau IANA valide.
+        if ($request->input('timezone') === 'America/Montreal') {
+            $request->merge(['timezone' => 'America/Toronto']);
+        }
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             // 'max:5000' = round 23 (skill /100) : avant ce fix, `description` n'avait AUCUNE limite

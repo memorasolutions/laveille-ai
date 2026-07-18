@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.109.11] - 2026-07-18
+
+### Fixed
+- **Décido - fuseau horaire "America/Montreal" invalide.** Cet identifiant a été retiré de la base IANA tzdata en 2014 (fusionné dans `America/Toronto`, mêmes règles HNE/HAE) et n'est donc plus reconnu par `timezone_identifiers_list()` sur PHP moderne. La règle de validation Laravel `timezone` rejetait systématiquement toute soumission où "Montréal (HNE/HAE)" était sélectionné dans le formulaire de création (choix le plus naturel sur un site québécois) - rendant la création de sondage strictement impossible avec ce choix. Corrigé par normalisation `America/Montreal` -> `America/Toronto` dans `PollManageController::store()` avant validation, sans toucher au template (préserve la préservation `old()` du round 27). Bug découvert par la simulation E2E complète `/sim` (tâches #1134/#1139), non détecté par 27 rounds de revue adversariale par lecture de code. 86/86 tests Pest Décido verts (378 assertions).
+
 ## [1.109.10] - 2026-07-17
 
 ### Changed

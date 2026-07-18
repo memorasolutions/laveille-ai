@@ -17,6 +17,18 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.109.11 · 2026-07-18 · fix(decido) "America/Montreal" retiré de la base IANA tzdata en 2014
+ *     (fusionné dans America/Toronto, mêmes règles HNE/HAE) - n'est donc plus reconnu par
+ *     timezone_identifiers_list() sur PHP moderne, ce qui faisait échouer À CHAQUE FOIS la règle
+ *     de validation `timezone` dès que "Montréal (HNE/HAE)" (choix le plus naturel sur un site
+ *     québécois) était sélectionné dans le formulaire de création - création de sondage
+ *     strictement impossible avec ce choix. Bug découvert par la simulation E2E complète /sim
+ *     (tâche #1134/#1139), jamais détecté en 27 rounds de revue adversariale par lecture de code
+ *     (nécessitait une soumission réelle du formulaire + connaissance du domaine IANA tzdata).
+ *     Corrigé par normalisation `America/Montreal` -> `America/Toronto` dans
+ *     PollManageController::store() AVANT validation (request merge), plutôt que de toucher au
+ *     template (option écartée : dupliquer la valeur/introduire un champ label risquait de casser
+ *     la préservation old() du round 27). 86/86 tests Pest Décido verts (378 assertions).
  *   1.109.10 · 2026-07-17 · fix(decido) bouton "×" bordé rouge jugé laid (retrait d'une plage
  *     horaire personnalisée, create-date.blade.php) remplacé par une icône corbeille rouge sans
  *     contour - style `.ct-btn-ghost` (transparent, pas de bordure) + `color: var(--c-danger)`,
@@ -1557,7 +1569,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 109;
-$lvPatch = 10;
+$lvPatch = 11;
 
 return [
     'major' => $lvMajor,
