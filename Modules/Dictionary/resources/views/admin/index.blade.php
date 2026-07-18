@@ -29,12 +29,12 @@
                     <td><span class="badge bg-primary bg-opacity-10 text-primary">{{ $term->type === 'acronym' ? __('Acronyme') : ($term->type === 'ai_term' ? __('Terme IA') : __('Vulgarisation')) }}</span></td>
                     <td>{{ $term->category?->name ?? '-' }}</td>
                     <td class="text-end">
-                        <a href="{{ route('dictionary.show', $term->slug) }}" target="_blank" class="btn btn-sm btn-outline-secondary"><i data-lucide="eye" class="icon-sm"></i></a>
-                        <a href="{{ route('admin.dictionary.edit', $term) }}" class="btn btn-sm btn-outline-primary"><i data-lucide="pencil" class="icon-sm"></i></a>
-                        <form action="{{ route('admin.dictionary.destroy', $term) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer ?') }}">
-                            @csrf @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger"><i data-lucide="trash-2" class="icon-sm"></i></button>
-                        </form>
+                        @include('core::components.action-menu', ['actions' => [
+                            ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('dictionary.show', $term->slug), 'target' => '_blank'],
+                            ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.dictionary.edit', $term)],
+                            ['divider' => true],
+                            ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.dictionary.destroy', $term), 'method' => 'DELETE', 'confirm' => __('Supprimer ?'), 'danger' => true],
+                        ]])
                     </td>
                 </tr>
                 @endforeach

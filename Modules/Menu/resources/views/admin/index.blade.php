@@ -43,7 +43,7 @@
                                 @endif
                             </td>
                             <td class="text-end">
-                                @include('core::components.admin-action-menu', ['actions' => [
+                                @include('core::components.action-menu', ['actions' => [
                                     ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.menus.edit', $menu)],
                                     ['divider' => true],
                                     ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.menus.destroy', $menu), 'method' => 'DELETE', 'confirm' => __('Supprimer ce menu ?'), 'danger' => true],

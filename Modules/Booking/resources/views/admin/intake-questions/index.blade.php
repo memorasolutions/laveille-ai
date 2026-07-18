@@ -58,7 +58,7 @@
                                         @endif
                                     </td>
                                     <td class="text-end">
-                                        @include('core::components.admin-action-menu', ['actions' => [
+                                        @include('core::components.action-menu', ['actions' => [
                                             ['label' => 'Modifier', 'icon' => 'pencil', 'url' => route('admin.booking.intake-questions.edit', $question)],
                                             ['divider' => true],
                                             ['label' => 'Supprimer', 'icon' => 'trash-2', 'url' => route('admin.booking.intake-questions.destroy', $question), 'method' => 'DELETE', 'confirm' => 'Supprimer cette question ?', 'danger' => true],

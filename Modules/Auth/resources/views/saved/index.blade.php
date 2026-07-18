@@ -57,7 +57,31 @@
     @else
         <div style="display: flex !important; flex-direction: column !important; gap: 10px;">
             @foreach($items as $item)
-            <div x-show="filter === 'all' || filter === '{{ $item->type }}'" x-transition
+            @php
+                /* Migration vers action-menu (2026-07-18) : le bouton "Supprimer" fait une
+                   suppression AJAX SANS rechargement de page (fetch DELETE + retrait du DOM),
+                   ce que le mode natif 'method'+'confirm' du composant ne fait PAS (il soumet un
+                   vrai formulaire = rechargement de page). On garde donc le mécanisme JS existant
+                   tel quel (même event de confirmation, même endpoint, même méthode DELETE, même
+                   logique de retrait du DOM) et on l'appelle via 'alpineClick' - voir
+                   window.deleteSavedItem() dans @push('scripts') plus bas. */
+                $itemActions = [];
+                if (Route::has('tools.show'))
+                {
+                    $itemActions[] = [
+                        'label' => __('Charger'),
+                        'icon' => 'download',
+                        'url' => route('tools.show', $item->tool_slug) . '?edit=' . $item->public_id,
+                    ];
+                }
+                $itemActions[] = [
+                    'label' => __('Supprimer'),
+                    'icon' => 'trash-2',
+                    'danger' => true,
+                    'alpineClick' => 'open = false; deleteSavedItem(' . json_encode($item->api_path . $item->public_id) . ', ' . json_encode('saved-item-' . $item->public_id) . ')',
+                ];
+            @endphp
+            <div id="saved-item-{{ $item->public_id }}" x-show="filter === 'all' || filter === '{{ $item->type }}'" x-transition
                  style="background: #fff; border: 1px solid #E5E7EB; border-radius: 10px; padding: 14px 18px;">
                 <div style="display: flex !important; align-items: center !important; gap: 12px;">
                     {{-- Icône outil --}}
@@ -75,10 +99,7 @@
                     {{-- Date + actions --}}
                     <div style="flex-shrink: 0; display: flex !important; align-items: center !important; gap: 8px;">
                         <span style="font-size: 11px; color: var(--c-text-muted);">{{ $item->created_at->format('d/m/Y') }}</span>
-                        @if(Route::has('tools.show'))
-                        <a href="{{ route('tools.show', $item->tool_slug) }}?edit={{ $item->public_id }}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; font-size: 11px; padding: 3px 10px;">{{ __('Charger') }}</a>
-                        @endif
-                        <button class="btn btn-sm btn-outline-danger js-delete-saved" data-api="{{ $item->api_path }}{{ $item->public_id }}" style="border-radius: 6px; font-size: 11px; padding: 3px 10px;">{{ __('Supprimer') }}</button>
+                        @include('core::components.action-menu', ['actions' => $itemActions])
                     </div>
                 </div>
             </div>
@@ -90,16 +111,17 @@
 
 @push('scripts')
 <script>
-document.querySelectorAll('.js-delete-saved').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        var el = this;
-        window.dispatchEvent(new CustomEvent('open-confirm-global', { detail: { message: '{{ __("Supprimer cette sauvegarde?") }}', callback: function() {
-            var row = el.closest('[x-show]');
-            fetch(el.dataset.api, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '', 'Accept': 'application/json' } })
-                .then(function() { if (row) row.remove(); });
-        } } }));
-    });
-});
+{{-- Migré depuis un listener .js-delete-saved (querySelectorAll + addEventListener) vers une
+     fonction globale appelée par le mode 'alpineClick' de action-menu (mécanisme de suppression
+     AJAX inchangé : même event de confirmation, même fetch DELETE, mêmes headers, même retrait du
+     DOM au succès - seul le déclencheur change, du fait du nouveau menu compact). --}}
+window.deleteSavedItem = function(apiUrl, rowId) {
+    window.dispatchEvent(new CustomEvent('open-confirm-global', { detail: { message: '{{ __("Supprimer cette sauvegarde?") }}', callback: function() {
+        var row = document.getElementById(rowId);
+        fetch(apiUrl, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '', 'Accept': 'application/json' } })
+            .then(function() { if (row) row.remove(); });
+    } } }));
+};
 </script>
 @endpush
 @endsection

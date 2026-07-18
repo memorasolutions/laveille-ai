@@ -136,7 +136,7 @@
                                     <x-core::button type="button" wire:click="deleteAssignment({{ $assignment->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                                     <x-core::button type="button" wire:click="cancelAssignmentRemoval" variant="ghost" size="sm">Annuler</x-core::button>
                                 @else
-                                    @include('core::components.admin-action-menu', ['actions' => [
+                                    @include('core::components.action-menu', ['actions' => [
                                         ['label' => 'Modifier', 'icon' => 'pencil', 'wireClick' => "editAssignment({$assignment->id})"],
                                         ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmAssignmentRemoval({$assignment->id})", 'danger' => true],
                                     ]])
@@ -181,7 +181,7 @@
                                                                 <x-core::button type="button" wire:click="deleteCriterion({{ $criterion->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                                                                 <x-core::button type="button" wire:click="cancelCriterionRemoval" variant="ghost" size="sm">Annuler</x-core::button>
                                                             @else
-                                                                @include('core::components.admin-action-menu', ['actions' => [
+                                                                @include('core::components.action-menu', ['actions' => [
                                                                     ['label' => 'Modifier', 'icon' => 'pencil', 'wireClick' => "editCriterion({$criterion->id})"],
                                                                     ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmCriterionRemoval({$criterion->id})", 'danger' => true],
                                                                 ]])
@@ -221,7 +221,7 @@
                                                                             <x-core::button type="button" wire:click="deleteLevel({{ $level->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                                                                             <x-core::button type="button" wire:click="cancelLevelRemoval" variant="ghost" size="sm">Annuler</x-core::button>
                                                                         @else
-                                                                            @include('core::components.admin-action-menu', ['actions' => [
+                                                                            @include('core::components.action-menu', ['actions' => [
                                                                                 ['label' => 'Modifier', 'icon' => 'pencil', 'wireClick' => "editLevel({$level->id})"],
                                                                                 ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmLevelRemoval({$level->id})", 'danger' => true],
                                                                             ]])

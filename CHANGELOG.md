@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.114.0] - 2026-07-19
+
+### Added
+- **Menus d'actions kebab (⋮) site-wide.** Le composant `admin-action-menu` (déjà déployé sur 41 pages admin) est renommé `action-menu` et généralisé aux pages utilisateur : remplace les rangées de boutons d'actions inline (ex. "Mes liens courts" : Copier/QR/Stats/Modifier/Prolonger/Supprimer) par un menu compact unique. Positionnement anti-débordement automatique (flip vers le haut + ajustement horizontal si pas de place, `position: fixed` insensible aux ancêtres `overflow:hidden`), fermeture au clavier (Escape) et au défilement de page. Validé Codex (94/100) et Gemini (85/100). 12 pages migrées : ShortUrl "Mes liens courts", Journal "Mes journaux", Tools "Mes grilles de mots croisés", Auth "Mes sauvegardes", Directory "Mes collections" (front-end) ; Directory, Dictionary, FormBuilder, News, AI, Blog, Directory pricing-audit (admin).
+- **Section "Clôturer le sondage" (Décido) clarifiée.** Texte explicatif sur l'effet de l'action, décompte de votes "✓ X oui" affiché à côté de chaque créneau, créneau gagnant pré-sélectionné, bouton renommé "Confirmer et clôturer le sondage" (ne duplique plus le titre de section).
+
+### Fixed
+- **Déclencheur du menu d'actions peu visible.** Caractère unicode ⋮ sur fond transparent (contraste insuffisant hors contexte "Mon espace") remplacé par une icône lucide sur fond rempli, contraste AAA (~10.7:1), cible tactile 44×44px (WCAG 2.2 AAA 2.5.5).
+- **Icônes lucide invisibles sur les pages "Mon espace" nouvellement migrées.** Le layout front-end ne charge pas lucide.js par défaut (contrairement aux layouts admin) ; le composant `action-menu` charge désormais lucide.js lui-même de façon garantie et dédupliquée.
+- **500 sur `/admin/directory` pour un outil sans traduction `slug` en `fr_CA`.** `Tool::getPublicUrl()` plantait (`UrlGenerationException`) pour tout outil dont le champ Translatable `slug` n'était renseigné que pour `fr` (locale de saisie réelle) alors que `app.locale = fr_CA`. Repli manuel ajouté (locale courante → `fr` → première traduction disponible). Bug préexistant (même code que l'ancien template), pas causé par la migration des menus d'actions.
+- **Badges de vote (✓/?/✕) mal alignés verticalement.** Symbole et texte du badge ("✓ 2 oui") ne partageaient pas la même ligne de base selon la police. Corrigé avec `display: inline-flex; align-items: center`.
+- **Menu latéral "Mon espace" absent sur la page de gestion Décido via jeton propriétaire.** Le créateur connecté cliquant "Gérer" depuis "Mes sondages" atterrissait sur un gabarit sans sidebar (partagé avec le lien de délégation anonyme). Le layout bascule désormais vers "Mon espace" uniquement pour le créateur connecté ; le délégué anonyme via jeton conserve le gabarit public inchangé (protections GA4/JSON-LD round 10/12/26 préservées).
+
 ## [1.113.0] - 2026-07-18
 
 ### Added

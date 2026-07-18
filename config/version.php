@@ -17,6 +17,57 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.114.0 · 2026-07-19 · feat(action-menu) menus d'actions kebab (⋮) site-wide (Codex 94/100 +
+ *     Gemini 85/100). Demande utilisateur : sur "Mes liens courts" (capture d'écran), 6 boutons
+ *     inline (Copier/QR/Stats/Modifier/Prolonger/Supprimer) par ligne = "boutons trop petits, on
+ *     les voit presque pas" + confusion visuelle. Veille pp_search (kebab vs inline 2026,
+ *     positionnement anti-débordement, WCAG 2.2 target size) + validation croisée
+ *     Perplexity/Codex/Gemini (navigateur, agy épuisé) : généraliser le composant
+ *     `admin-action-menu` (déjà déployé sur 41 pages admin) plutôt qu'en créer un nouveau (DRY).
+ *     (1) Composant renommé `admin-action-menu` -> `action-menu` (retour Gemini : nom trompeur
+ *     une fois affiché sur des pages utilisateur) - 41 usages existants + composant lui-même
+ *     migrés via renommage global vérifié (0 référence résiduelle à l'ancien nom).
+ *     (2) Déclencheur 38×38px -> 44×44px (WCAG 2.2 AAA 2.5.5) ; icône unicode ⋮ (peu contrastée,
+ *     signalée "on les voit presque pas") remplacée par icône lucide `more-vertical` sur fond
+ *     rempli #F3F4F6 + couleur #374151 (~10.7:1, largement AAA), style entièrement autoporté
+ *     (indépendant des classes Bootstrap/overrides de page).
+ *     (3) Positionnement `position:absolute; right:0; top:100%` fixe -> `position:fixed` avec
+ *     flip vertical (ouvre vers le haut si pas de place en dessous) + shift horizontal, calculé
+ *     via getBoundingClientRect() au clic - `fixed` plutôt que `absolute` (risque #3 signalé par
+ *     Gemini) : insensible à un ancêtre `overflow:hidden`/`position:relative` qui aurait pu
+ *     rogner un `absolute`. Fermeture au clavier (Escape, focus rendu au déclencheur) + au
+ *     défilement de la page (un menu `fixed` resterait sinon visuellement détaché de son bouton).
+ *     (4) Chargement de lucide.js désormais garanti PAR LE COMPOSANT LUI-MÊME (`@assets`
+ *     dédupliqué + `typeof lucide === 'undefined'` avant re-chargement) : bug latent découvert en
+ *     migrant - le layout front-end "Mon espace" (`auth::layouts.user-frontend`) ne charge PAS
+ *     lucide.js par défaut (contrairement aux layouts admin), rendant invisibles les icônes de 2
+ *     pages nouvellement migrées avant ce correctif racine.
+ *     (5) 12 pages migrées vers le composant généralisé : front-end - ShortUrl `user/index`
+ *     (cas complexe : liste rendue côté client par Alpine `x-for`, actions en `alpineClick`
+ *     plutôt qu'en `url` statique), Journal `index`, Tools `crosswords/index`, Auth `saved/index`
+ *     (préserve la suppression AJAX existante via `alpineClick`, pas de réécriture), Directory
+ *     `collections/my` ; admin - Directory `index`, Dictionary `admin/index`, FormBuilder
+ *     `admin/forms/index`, News `admin/sources/index`, AI `admin/channels/index` (bouton Modifier
+ *     ouvrait une modale Bootstrap `data-bs-toggle` - migré en `alpineClick` déclenchant l'API JS
+ *     Bootstrap, modale inchangée), Blog `admin/tags/index`, Directory `admin/pricing-audit/index`
+ *     (actions conditionnelles au statut, confirmation ajoutée sur "Rejeter" qui n'en avait aucune
+ *     - amélioration délibérée, pas juste une préservation à l'identique).
+ *     (6) Bug P0 découvert en testant (500 sur /admin/directory, signalé en direct par
+ *     l'utilisateur) : `Tool::getPublicUrl()` (et `route('directory.show', $tool->slug)` en
+ *     dur) plantait pour tout outil sans traduction 'slug' explicite pour la locale courante
+ *     ('fr_CA' - app.locale - vs 'fr' - où la donnée existe réellement -, aucun repli Spatie
+ *     Translatable configuré). Corrigé dans `getPublicUrl()` (repli manuel locale courante ->
+ *     'fr' -> 1re traduction disponible), vue migrée pour réutiliser cette méthode au lieu de
+ *     dupliquer l'appel `route()`. PRÉEXISTANT (même code que l'ancien template), pas causé par
+ *     cette migration - mais ~30 autres call sites du même pattern site-wide (sitemap, JSON-LD
+ *     SEO, RSS, newsletter, pages publiques) restent à auditer séparément (hors périmètre ce soir).
+ *     (7) Fixes additionnels signalés en cours de route : section "Clôturer le sondage" (Décido)
+ *     clarifiée (texte explicatif + décompte de votes par option + pré-sélection du créneau
+ *     gagnant + libellé de bouton différencié du titre, au lieu d'une simple liste de radios sans
+ *     contexte) ; alignement vertical des badges de vote (✓/?/✕) corrigé (`inline-flex` au lieu
+ *     de dépendre des métriques de police du glyphe) ; layout "Mon espace" de la page de gestion
+ *     Décido via jeton conditionnellement affiché seulement pour le créateur connecté (délégué
+ *     anonyme via jeton = layout public inchangé, sécurité JSON-LD/GA4 round 10/12/26 préservée).
  *   1.113.0 · 2026-07-18 · feat(mon-espace) refonte groupée du menu "Mon espace" (Codex 94/100 +
  *     Gemini 95/100). Demande utilisateur initiale : sur /user/liens/{id}/edit le menu de gauche
  *     ne signalait aucun item actif ("perte de repère") et "Mon espace" perçu comme lourd/on s'y
@@ -1681,7 +1732,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 113;
+$lvMinor = 114;
 $lvPatch = 0;
 
 return [

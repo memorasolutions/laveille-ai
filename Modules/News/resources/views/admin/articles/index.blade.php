@@ -110,7 +110,7 @@
                         </td>
                         <td><small>{{ $a->pub_date?->format('d/m H:i') }}</small></td>
                         <td class="text-end">
-                            @include('core::components.admin-action-menu', ['actions' => [
+                            @include('core::components.action-menu', ['actions' => [
                                 ['label' => __('Voir l\'article'), 'icon' => 'external-link', 'url' => route('news.show', $a), 'target' => '_blank'],
                                 ['label' => __('Modifier'), 'icon' => 'edit', 'url' => route('admin.news.articles.edit', $a)],
                                 ['label' => __('Source originale'), 'icon' => 'link', 'url' => $a->url, 'target' => '_blank'],

@@ -63,17 +63,14 @@
                     <div style="margin-bottom: 18px; margin-top: auto;">
                         <span class="badge" style="background-color: var(--c-primary, #064E5A); color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 12px;">{{ $collection->tools_count }} {{ __('outils') }}</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px; border-top: 1px solid #f0f0f0; padding-top: 15px;">
-                        <a href="{{ route('collections.show', $collection->slug) }}" class="ct-btn ct-btn-primary ct-btn-sm" style="flex: 1; text-align: center;">
-                            <i class="ti-eye" style="margin-right: 4px;"></i> {{ __('Voir') }}
-                        </a>
-                        <form action="{{ route('collections.destroy', $collection) }}" method="POST" data-confirm="{{ __('Supprimer cette collection ?') }}" style="margin: 0;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="ct-btn ct-btn-sm" style="background-color: #fff; color: #e74c3c; border: 1px solid #e74c3c;">
-                                <i class="ti-trash"></i>
-                            </button>
-                        </form>
+                    @php
+                        $collectionActions = [
+                            ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('collections.show', $collection->slug)],
+                            ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('collections.destroy', $collection), 'method' => 'DELETE', 'confirm' => __('Supprimer cette collection ?'), 'danger' => true],
+                        ];
+                    @endphp
+                    <div style="display: flex; align-items: center; justify-content: flex-end; border-top: 1px solid #f0f0f0; padding-top: 15px;">
+                        @include('core::components.action-menu', ['actions' => $collectionActions])
                     </div>
                 </div>
             @endforeach

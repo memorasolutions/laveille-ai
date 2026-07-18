@@ -55,7 +55,7 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    @include('core::components.admin-action-menu', ['actions' => [
+                                    @include('core::components.action-menu', ['actions' => [
                                         ['label' => 'Modifier', 'icon' => 'pencil', 'url' => route('admin.booking.webhooks.edit', $webhook)],
                                         ['divider' => true],
                                         ['label' => 'Supprimer', 'icon' => 'trash-2', 'url' => route('admin.booking.webhooks.destroy', $webhook), 'method' => 'DELETE', 'confirm' => 'Supprimer ce webhook ?', 'danger' => true],

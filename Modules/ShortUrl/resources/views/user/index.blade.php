@@ -3,7 +3,17 @@
 
 @section('user-content')
 
-<div x-data="shortUrlDashboard()" x-cloak>
+{{-- Icônes du menu d'actions (data-lucide) : ce layout front (fronttheme::layouts.master) ne
+     charge PAS lucide.js (contrairement à Auth/layouts/app.blade.php et au thème admin) - même
+     constat et même solution que Modules/Editor/resources/views/components/tiptap.blade.php
+     (@assets = injection Blade native dédupliquée, avant le boot d'Alpine). Sans ça, les icônes
+     du menu ⋮ (copy/qr-code/bar-chart-2/pencil/clock/trash-2) resteraient invisibles. --}}
+@assets
+<script src="{{ asset('build/nobleui/plugins/lucide/lucide.min.js') }}"></script>
+@endassets
+
+<div x-data="shortUrlDashboard()" x-cloak
+     x-effect="filteredLinks.length; $nextTick(() => { if (window.lucide) lucide.createIcons() })">
 
     {{-- Header --}}
     <div style="display: flex !important; justify-content: space-between !important; align-items: center !important; flex-wrap: wrap !important; gap: 12px; margin-bottom: 24px;">
@@ -122,38 +132,62 @@
                         </div>
                     </div>
 
-                    {{-- Actions --}}
-                    <div style="display: flex !important; flex-wrap: wrap !important; gap: 6px; align-items: center !important;">
-                        <a href="javascript:void(0)" @click="copyToClipboard(link.short_url, 'action-' + link.id)"
-                            :style="(copiedId === 'action-' + link.id ? 'background:#10B981;color:#fff;border-color:#10B981;' : 'background:transparent;color:var(--c-dark, #1A1D23);border-color:#D1D5DB;') + 'border: 1px solid #D1D5DB; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; line-height: 1.2; text-decoration: none; display: inline-block;'"
-                            :aria-label="'{{ __('Copier le lien') }}'">
-                            <span x-text="copiedId === 'action-' + link.id ? '{{ __('Copié !') }}' : '{{ __('Copier') }}'"></span>
-                        </a>
-                        <a :href="link.qr_url" target="_blank"
-                            style="border: 1px solid #D1D5DB; color: var(--c-dark, #1A1D23); padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; line-height: 1.2;"
-                            aria-label="{{ __('Voir le QR code') }}">QR</a>
-                        <a :href="link.stats_url"
-                            style="border: 1px solid #D1D5DB; color: var(--c-dark, #1A1D23); padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; line-height: 1.2;"
-                            aria-label="{{ __('Voir les statistiques') }}">{{ __('Stats') }}</a>
-                        <a :href="link.edit_url"
-                            style="background: var(--c-primary, #064E5A); color: #fff; padding: 5px 10px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; line-height: 1.2;"
-                            aria-label="{{ __('Modifier ce lien') }}">{{ __('Modifier') }}</a>
+                    {{-- Actions : menu compact ⋮ (Modules/Core/resources/views/components/action-menu.blade.php).
+                         Cette liste est rendue par Alpine (x-for sur filteredLinks, JSON côté client) et non
+                         par un @foreach Blade - le composant, lui, compile une fois côté serveur. Toutes les
+                         actions passent donc par 'alpineClick' avec des expressions littérales référençant
+                         "link" (résolu par Alpine à l'exécution, dans le scope de CHAQUE itération x-for),
+                         plutôt que par le mode 'url' du composant (statique, incompatible avec des URLs
+                         calculées côté client par item). Prolonger n'étant affiché QUE si link.can_extend,
+                         et cette condition n'étant connue qu'au runtime JS, deux variantes du menu (avec/sans
+                         Prolonger) sont compilées et Alpine choisit laquelle insérer via <template x-if>. --}}
+                    @php
+                        $baseLinkActions = [
+                            [
+                                'label' => __('Copier'),
+                                'icon' => 'copy',
+                                'alpineClick' => "copyToClipboard(link.short_url, 'action-' + link.id)",
+                                'labelExpr' => "(copiedId === 'action-' + link.id ? "
+                                    .\Illuminate\Support\Js::from(__('Copié !'))." : "
+                                    .\Illuminate\Support\Js::from(__('Copier')).")",
+                            ],
+                            [
+                                'label' => 'QR',
+                                'icon' => 'qr-code',
+                                'alpineClick' => "open = false; window.open(link.qr_url, '_blank')",
+                            ],
+                            [
+                                'label' => __('Stats'),
+                                'icon' => 'bar-chart-2',
+                                'alpineClick' => 'open = false; window.location.href = link.stats_url',
+                            ],
+                            [
+                                'label' => __('Modifier'),
+                                'icon' => 'pencil',
+                                'alpineClick' => 'open = false; window.location.href = link.edit_url',
+                            ],
+                        ];
+                        $extendLinkAction = [
+                            'label' => __('Prolonger'),
+                            'icon' => 'clock',
+                            'alpineClick' => "open = false; submitFormPost(link.extend_url, 'POST')",
+                        ];
+                        $deleteLinkAction = [
+                            'label' => __('Supprimer'),
+                            'icon' => 'trash-2',
+                            'danger' => true,
+                            'alpineClick' => "\$dispatch('open-confirm-global', { message: "
+                                .\Illuminate\Support\Js::from(__('Supprimer ce lien ?'))
+                                .", callback: () => submitFormPost(link.delete_url, 'DELETE') })",
+                        ];
+                    @endphp
+                    <div style="flex-shrink: 0;">
                         <template x-if="link.can_extend">
-                            <form :action="link.extend_url" method="POST" style="display: inline;">
-                                @csrf
-                                <button type="submit"
-                                    style="-webkit-appearance:none;background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;line-height:1.2;"
-                                    aria-label="{{ __('Prolonger ce lien') }}">{{ __('Prolonger') }}</button>
-                            </form>
+                            @include('core::components.action-menu', ['actions' => array_merge($baseLinkActions, [['divider' => true], $extendLinkAction, ['divider' => true], $deleteLinkAction])])
                         </template>
-                        <form :action="link.delete_url" method="POST" style="display: inline;" x-data>
-                            @csrf
-                            <input type="hidden" name="_method" value="DELETE">
-                            <button type="button"
-                                @click="$dispatch('open-confirm-global', { message: @js(__('Supprimer ce lien ?')), callback: () => $el.closest('form').submit() })"
-                                style="-webkit-appearance: none; background: transparent; color: #DC2626; border: 1px solid #FECACA; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; line-height: 1.2;"
-                                aria-label="{{ __('Supprimer ce lien') }}">{{ __('Supprimer') }}</button>
-                        </form>
+                        <template x-if="!link.can_extend">
+                            @include('core::components.action-menu', ['actions' => array_merge($baseLinkActions, [['divider' => true], $deleteLinkAction])])
+                        </template>
                     </div>
                 </div>
             </div>
@@ -262,6 +296,32 @@ function shortUrlDashboard() {
                 self.copiedId = id;
                 setTimeout(function() { if (self.copiedId === id) self.copiedId = null; }, 1500);
             });
+        },
+
+        // Soumission POST/DELETE réelle (navigation serveur, comme les <form> qu'elle remplace
+        // dans le menu d'actions) pour les liens "Prolonger"/"Supprimer" : leur URL est calculée
+        // côté client (link.extend_url / link.delete_url), donc pas de <form action="..."> statique
+        // possible avec le composant action-menu ici - on construit et soumet un vrai formulaire.
+        submitFormPost(url, method) {
+            var csrf = document.querySelector('meta[name="csrf-token"]');
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = url;
+            form.style.display = 'none';
+            var tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '_token';
+            tokenInput.value = csrf ? csrf.getAttribute('content') : '';
+            form.appendChild(tokenInput);
+            if (method && method !== 'POST') {
+                var methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                methodInput.value = method;
+                form.appendChild(methodInput);
+            }
+            document.body.appendChild(form);
+            form.submit();
         },
 
         truncateUrl(url, maxLength) {

@@ -55,7 +55,7 @@
                                         @endswitch
                                     </td>
                                     <td class="text-end">
-                                        @include('core::components.admin-action-menu', ['actions' => [
+                                        @include('core::components.action-menu', ['actions' => [
                                             ['label' => __('Voir'), 'icon' => 'bar-chart-3', 'url' => route('admin.newsletter.workflows.show', $workflow)],
                                             ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.newsletter.workflows.edit', $workflow)],
                                             ['divider' => true],

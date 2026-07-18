@@ -39,21 +39,13 @@
                         <td>{{ $source->articles_count ?? 0 }}</td>
                         <td>{{ $source->last_fetched_at ? $source->last_fetched_at->diffForHumans() : __('Jamais') }}</td>
                         <td>
-                            <div class="d-flex gap-1 flex-wrap">
-                                <a href="{{ route('admin.news.sources.edit', $source) }}" class="btn btn-outline-secondary btn-sm">{{ __('Modifier') }}</a>
-                                <form action="{{ route('admin.news.sources.fetch', $source) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="btn btn-outline-primary btn-sm">{{ __('Fetch') }}</button>
-                                </form>
-                                <form action="{{ route('admin.news.sources.toggle', $source) }}" method="POST" class="d-inline">
-                                    @csrf @method('PATCH')
-                                    <button type="submit" class="btn btn-outline-warning btn-sm">{{ $source->active ? __('Désactiver') : __('Activer') }}</button>
-                                </form>
-                                <form action="{{ route('admin.news.sources.destroy', $source) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer cette source et tous ses articles ?') }}">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm">{{ __('Supprimer') }}</button>
-                                </form>
-                            </div>
+                            @include('core::components.action-menu', ['actions' => [
+                                ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.news.sources.edit', $source)],
+                                ['label' => __('Fetch'), 'icon' => 'refresh-cw', 'url' => route('admin.news.sources.fetch', $source), 'method' => 'POST'],
+                                ['label' => $source->active ? __('Désactiver') : __('Activer'), 'icon' => $source->active ? 'pause' : 'play', 'url' => route('admin.news.sources.toggle', $source), 'method' => 'PATCH'],
+                                ['divider' => true],
+                                ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.news.sources.destroy', $source), 'method' => 'DELETE', 'confirm' => __('Supprimer cette source et tous ses articles ?'), 'danger' => true],
+                            ]])
                         </td>
                     </tr>
                     @empty

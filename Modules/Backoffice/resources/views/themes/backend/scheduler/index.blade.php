@@ -290,7 +290,7 @@
                                 @endif
                             </td>
                             <td class="py-3 px-4">
-                                @include('core::components.admin-action-menu', ['actions' => [
+                                @include('core::components.action-menu', ['actions' => [
                                     ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.scheduler.edit', $task)],
                                     ['label' => $task->is_active ? __('Désactiver') : __('Activer'), 'icon' => $task->is_active ? 'toggle-left' : 'toggle-right', 'url' => route('admin.scheduler.toggle', $task), 'method' => 'POST'],
                                     ['divider' => true],

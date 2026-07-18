@@ -38,7 +38,7 @@
                         <td>{{ !$override->all_day ? $override->start_time . ' – ' . $override->end_time : '—' }}</td>
                         <td>{{ Str::limit($override->reason, 40) }}</td>
                         <td>
-                            @include('core::components.admin-action-menu', ['actions' => [
+                            @include('core::components.action-menu', ['actions' => [
                                 ['label' => 'Modifier', 'icon' => 'pencil', 'url' => route('admin.booking.date-overrides.edit', $override)],
                                 ['divider' => true],
                                 ['label' => 'Supprimer', 'icon' => 'trash-2', 'url' => route('admin.booking.date-overrides.destroy', $override), 'method' => 'DELETE', 'confirm' => 'Supprimer ?', 'danger' => true],

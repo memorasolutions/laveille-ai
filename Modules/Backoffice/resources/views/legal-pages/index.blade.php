@@ -30,7 +30,7 @@
                             </td>
                             <td>{{ format_date($page->updated_at, 'datetime') }}</td>
                             <td>
-                                @include('core::components.admin-action-menu', ['actions' => [
+                                @include('core::components.action-menu', ['actions' => [
                                     ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.legal-pages.edit', $page)],
                                 ]])
                             </td>

@@ -82,7 +82,7 @@
                                 </div>
                             @else
                                 <div class="d-flex align-items-center justify-content-center">
-                                    @include('core::components.admin-action-menu', ['actions' => [
+                                    @include('core::components.action-menu', ['actions' => [
                                         ['label' => __('Voir public'), 'icon' => 'eye', 'url' => route('page.show', $page->slug), 'target' => '_blank'],
                                         ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.pages.edit', $page->slug)],
                                         ['divider' => true],

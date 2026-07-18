@@ -53,7 +53,18 @@ class Tool extends Model implements Searchable
 
     public function getPublicUrl(): string
     {
-        return route('directory.show', $this->slug);
+        // 2026-07-19 (P0, signalé par l'utilisateur) : app.locale = 'fr_CA' mais 'slug' (champ
+        // Spatie Translatable) n'est souvent renseigné que sous la clé 'fr' - sans repli, l'accès
+        // à $this->slug pour un outil sans traduction 'fr_CA' explicite renvoyait null, et
+        // route('directory.show', null) levait UrlGenerationException (500 sur /admin/directory,
+        // et potentiellement sur toute page publique appelant cette méthode). config/translatable.php
+        // n'étant pas publié, aucun fallback automatique de spatie/laravel-translatable ne s'applique
+        // - repli manuel explicite ici : locale courante -> 'fr' -> première traduction disponible.
+        $slug = $this->getTranslation('slug', app()->getLocale(), false)
+            ?: $this->getTranslation('slug', 'fr', false)
+            ?: collect($this->getTranslations('slug'))->first();
+
+        return route('directory.show', $slug);
     }
 
     protected array $suggestableFields = [

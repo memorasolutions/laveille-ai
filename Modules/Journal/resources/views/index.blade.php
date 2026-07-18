@@ -22,6 +22,15 @@
 @endpush
 
 @section('user-content')
+
+{{-- Icônes du menu d'actions (data-lucide) : ce layout front (fronttheme::layouts.master) ne
+     charge PAS lucide.js (contrairement à Auth/layouts/app.blade.php et au thème admin) - même
+     constat et même solution que Modules/Editor/resources/views/components/tiptap.blade.php
+     (@assets = injection Blade native dédupliquée, avant le boot d'Alpine). --}}
+@assets
+<script src="{{ asset('build/nobleui/plugins/lucide/lucide.min.js') }}"></script>
+@endassets
+
 <div class="d-flex align-items-center justify-content-between mb-4">
     <h1 class="journal-index-title" style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin: 0;">Mes journaux</h1>
     <x-core::button href="{{ route('journal.create') }}" variant="primary">+ Nouveau journal</x-core::button>
@@ -53,22 +62,37 @@
                     </div>
                 </div>
                 <div class="d-flex gap-2">
-                    <x-core::button href="{{ route('journal.show', $journal) }}" variant="secondary" size="sm">Prévisualiser</x-core::button>
-                    <x-core::button href="{{ route('journal.edit', $journal) }}" variant="secondary" size="sm">Éditer</x-core::button>
-                    <form method="POST" action="{{ route('journal.destroy', $journal) }}" x-data>
-                        @csrf
-                        @method('DELETE')
-                        {{-- @js() (directive Blade) ne se compile pas dans un attribut de balise composant
-                             <x-core::button> (contrairement à un <button> HTML brut) - trouvé par la
-                             vérification visuelle du 2026-07-11 : le HTML rendu contenait "@js(...)" en
-                             texte brut, non compilé. Fix : pré-calculer via {{ }} (echo standard, déjà
-                             utilisé sans problème pour le prop "variant" dynamique ci-dessus). --}}
-                        @php $deleteConfirmMessage = \Illuminate\Support\Js::from('Supprimer définitivement « ' . $journal->title . ' » ?'); @endphp
-                        <x-core::button variant="danger" size="sm" @click="$dispatch('open-confirm-global', { message: {{ $deleteConfirmMessage }}, callback: () => $el.closest('form').submit() })">Supprimer</x-core::button>
-                    </form>
+                    {{-- Migration vers action-menu (kebab ⋮ compact) : remplace la rangée de 3
+                         boutons. Mode routes (Blade classique, @foreach server-side) - 'confirm'
+                         du composant dispatche 'confirm-action', repris par le pont générique de
+                         fronttheme::layouts.master (@confirm-action.window -> open-confirm-global),
+                         donc même modale globale qu'avant, sans dupliquer de logique JS ici. --}}
+                    @php
+                        $journalActions = [
+                            ['label' => __('Prévisualiser'), 'icon' => 'eye', 'url' => route('journal.show', $journal)],
+                            ['label' => __('Éditer'), 'icon' => 'pencil', 'url' => route('journal.edit', $journal)],
+                            ['divider' => true],
+                            [
+                                'label' => __('Supprimer'),
+                                'icon' => 'trash-2',
+                                'url' => route('journal.destroy', $journal),
+                                'method' => 'DELETE',
+                                'danger' => true,
+                                'confirm' => 'Supprimer définitivement « '.$journal->title.' » ?',
+                            ],
+                        ];
+                    @endphp
+                    @include('core::components.action-menu', ['actions' => $journalActions])
                 </div>
             </div>
         @endforeach
     </div>
 @endif
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() { if (window.lucide) lucide.createIcons(); });
+if (document.readyState !== 'loading' && window.lucide) { lucide.createIcons(); }
+</script>
+@endpush
 @endsection

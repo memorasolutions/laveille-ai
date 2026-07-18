@@ -99,7 +99,7 @@
                                 {{ format_date($r->deadline_at) ?: '—' }}
                             </td>
                             <td>
-                                @include('core::components.admin-action-menu', ['actions' => [
+                                @include('core::components.action-menu', ['actions' => [
                                     ['label' => __('Voir les détails'), 'icon' => 'eye', 'url' => route('admin.rights-requests.show', $r)],
                                 ]])
                             </td>

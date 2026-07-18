@@ -47,7 +47,7 @@
                             <span class="badge bg-secondary">{{ __('Brouillon') }}</span>
                         @endif
                     </div>
-                    @include('core::components.admin-action-menu', ['actions' => [
+                    @include('core::components.action-menu', ['actions' => [
                         ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.faqs.edit', $faq)],
                         ['divider' => true],
                         ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.faqs.destroy', $faq), 'method' => 'DELETE', 'confirm' => __('Supprimer cette question ?'), 'danger' => true],

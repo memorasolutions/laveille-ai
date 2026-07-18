@@ -36,7 +36,7 @@
                 <x-core::button type="button" wire:click="deleteCategory({{ $category->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                 <x-core::button type="button" wire:click="cancelCategoryDeletion" variant="ghost" size="sm">Annuler</x-core::button>
             @else
-                @include('core::components.admin-action-menu', ['actions' => [
+                @include('core::components.action-menu', ['actions' => [
                     ['label' => 'Renommer', 'icon' => 'pencil', 'wireClick' => "startRenameCategory({$category->id})"],
                     ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmCategoryDeletion({$category->id})", 'danger' => true],
                 ]])

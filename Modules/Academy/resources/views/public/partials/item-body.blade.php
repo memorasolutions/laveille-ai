@@ -1015,7 +1015,7 @@
                                                     @endforeach
                                                 </dl>
 
-                                                {{-- Consolidation menu kebab (core::admin-action-menu) ÉVALUÉE et écartée ici :
+                                                {{-- Consolidation menu kebab (core::action-menu) ÉVALUÉE et écartée ici :
                                                      (1) zone FRONT-END publique (fiches d'élèves), pas un écran admin - le nom
                                                      du composant ("admin-*") ne correspond pas sémantiquement à ce contexte ;
                                                      (2) ces actions sont des <form method="POST"> classiques (pas wire:click,

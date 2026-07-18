@@ -79,7 +79,7 @@
                             <x-core::button type="button" wire:click="delete({{ $competency->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                             <x-core::button type="button" wire:click="cancelDelete" variant="ghost" size="sm">Annuler</x-core::button>
                         @else
-                            @include('core::components.admin-action-menu', ['actions' => [
+                            @include('core::components.action-menu', ['actions' => [
                                 ['label' => 'Éditer', 'icon' => 'pencil', 'wireClick' => "edit({$competency->id})"],
                                 ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmDelete({$competency->id})", 'danger' => true],
                             ]])

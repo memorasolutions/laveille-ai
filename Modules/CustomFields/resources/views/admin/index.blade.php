@@ -59,7 +59,7 @@
                                 <span class="badge bg-{{ $definition->is_active ? 'success' : 'secondary' }}">{{ $definition->is_active ? __('Oui') : __('Non') }}</span>
                             </td>
                             <td class="text-end">
-                                @include('core::components.admin-action-menu', ['actions' => [
+                                @include('core::components.action-menu', ['actions' => [
                                     ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.custom-fields.edit', $definition)],
                                     ['divider' => true],
                                     ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.custom-fields.destroy', $definition), 'method' => 'DELETE', 'confirm' => __('Supprimer ce champ ?'), 'danger' => true],

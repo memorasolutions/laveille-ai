@@ -37,7 +37,7 @@
                         @endif
                     </td>
                     <td class="text-end">
-                        @include('core::components.admin-action-menu', ['actions' => [
+                        @include('core::components.action-menu', ['actions' => [
                             ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('acronyms.show', $acronym->getTranslation('slug', app()->getLocale())), 'target' => '_blank'],
                             ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.acronyms.edit', $acronym)],
                             ['divider' => true],

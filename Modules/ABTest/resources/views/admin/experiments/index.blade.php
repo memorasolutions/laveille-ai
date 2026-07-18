@@ -49,7 +49,7 @@
                             </td>
                             <td>{{ format_date($experiment->created_at, 'datetime') }}</td>
                             <td>
-                                @include('core::components.admin-action-menu', ['actions' => [
+                                @include('core::components.action-menu', ['actions' => [
                                     ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('admin.experiments.show', $experiment)],
                                     ['divider' => true],
                                     ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.experiments.destroy', $experiment), 'method' => 'DELETE', 'confirm' => __('Supprimer cette expérience ?'), 'danger' => true],

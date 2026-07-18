@@ -79,7 +79,7 @@
                                 <td>{{ $idea->comment_count }}</td>
                                 <td>{{ $idea->user->name ?? __('Anonyme') }}</td>
                                 <td>
-                                    @include('core::components.admin-action-menu', ['actions' => [
+                                    @include('core::components.action-menu', ['actions' => [
                                         ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('admin.roadmap.ideas.show', $idea)],
                                         ['divider' => true],
                                         ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.roadmap.ideas.destroy', $idea), 'method' => 'DELETE', 'confirm' => __('Supprimer cette idée ?'), 'danger' => true],

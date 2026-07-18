@@ -75,7 +75,7 @@
                                         <x-core::button type="button" wire:click="deleteAnnouncement({{ $announcement->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                                         <x-core::button type="button" wire:click="cancelAnnouncementRemoval" variant="ghost" size="sm">Annuler</x-core::button>
                                     @else
-                                        @include('core::components.admin-action-menu', ['actions' => [
+                                        @include('core::components.action-menu', ['actions' => [
                                             ['label' => 'Modifier', 'icon' => 'pencil', 'wireClick' => "editAnnouncement({$announcement->id})"],
                                             $announcement->published_at
                                                 ? ['label' => 'Repasser en brouillon', 'icon' => 'undo-2', 'wireClick' => "unpublishAnnouncement({$announcement->id})"]
@@ -256,7 +256,7 @@
                                                 <x-core::button type="button" wire:click="deleteCohort({{ $cohort->id }})" variant="danger" size="sm">Confirmer</x-core::button>
                                                 <x-core::button type="button" wire:click="cancelCohortRemoval" variant="ghost" size="sm">Annuler</x-core::button>
                                             @else
-                                                @include('core::components.admin-action-menu', ['actions' => [
+                                                @include('core::components.action-menu', ['actions' => [
                                                     ['label' => 'Renommer', 'icon' => 'pencil', 'wireClick' => "startRenameCohort({$cohort->id})"],
                                                     ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmCohortRemoval({$cohort->id})", 'danger' => true],
                                                 ]])

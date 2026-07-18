@@ -141,7 +141,7 @@
                                 @endif
                             </td>
                             <td class="align-middle text-end">
-                                @include('core::components.admin-action-menu', ['actions' => [
+                                @include('core::components.action-menu', ['actions' => [
                                     ['label' => __('Lancer le scraping'), 'icon' => 'refresh-cw', 'url' => route('admin.ai.urls.scrape', $url), 'method' => 'POST', 'confirm' => __('Lancer le scraping de cette URL ?')],
                                     ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.ai.urls.edit', $url)],
                                     ['divider' => true],

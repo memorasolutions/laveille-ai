@@ -63,21 +63,12 @@
                             </td>
                             <td>{{ format_date($form->created_at) }}</td>
                             <td class="text-end">
-                                <div class="d-inline-flex gap-1">
-                                    <a href="{{ route('admin.formbuilder.forms.submissions.index', $form) }}" class="btn btn-sm btn-info text-white" title="Soumissions">
-                                        <i data-lucide="inbox" style="width: 16px; height: 16px;"></i>
-                                    </a>
-                                    <a href="{{ route('admin.formbuilder.forms.edit', $form) }}" class="btn btn-sm btn-warning text-white" title="Modifier">
-                                        <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
-                                    </a>
-                                    <form action="{{ route('admin.formbuilder.forms.destroy', $form) }}" method="POST" class="d-inline-block">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="btn btn-sm btn-danger" onclick="if(confirm('Supprimer ce formulaire et toutes ses soumissions ?')) this.form.submit()">
-                                            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                                @include('core::components.action-menu', ['actions' => [
+                                    ['label' => 'Soumissions', 'icon' => 'inbox', 'url' => route('admin.formbuilder.forms.submissions.index', $form)],
+                                    ['label' => 'Modifier', 'icon' => 'edit', 'url' => route('admin.formbuilder.forms.edit', $form)],
+                                    ['divider' => true],
+                                    ['label' => 'Supprimer', 'icon' => 'trash-2', 'url' => route('admin.formbuilder.forms.destroy', $form), 'method' => 'DELETE', 'confirm' => 'Supprimer ce formulaire et toutes ses soumissions ?', 'danger' => true],
+                                ]])
                             </td>
                         </tr>
                     @empty

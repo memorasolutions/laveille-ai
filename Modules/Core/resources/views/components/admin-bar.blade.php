@@ -71,9 +71,9 @@
             </svg>
         </span>
         <span class="core-admin-bar__label">{{ $barLabel }}</span>
-        @if(count($barActions) && view()->exists('core::components.admin-action-menu'))
+        @if(count($barActions) && view()->exists('core::components.action-menu'))
             <span class="core-admin-bar__separator" aria-hidden="true"></span>
-            @include('core::components.admin-action-menu', ['actions' => $barActions])
+            @include('core::components.action-menu', ['actions' => $barActions])
         @endif
     </div>
 </div>

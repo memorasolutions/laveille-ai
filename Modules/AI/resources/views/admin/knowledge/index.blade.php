@@ -121,7 +121,7 @@
                                 @endif
                             </td>
                             <td class="align-middle text-end">
-                                @include('core::components.admin-action-menu', ['actions' => [
+                                @include('core::components.action-menu', ['actions' => [
                                     ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.ai.knowledge.edit', $document)],
                                     ['divider' => true],
                                     ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.ai.knowledge.destroy', $document), 'method' => 'DELETE', 'confirm' => __('Supprimer ce document de la base de connaissances ?'), 'danger' => true],

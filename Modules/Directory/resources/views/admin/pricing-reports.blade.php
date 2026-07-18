@@ -93,7 +93,7 @@
                                 </td>
                                 <td>
                                     @if($report->status === 'pending')
-                                        @include('core::components.admin-action-menu', ['actions' => [
+                                        @include('core::components.action-menu', ['actions' => [
                                             ['label' => __('Approuver'), 'icon' => 'check', 'url' => route('admin.directory.pricing-reports.approve', $report), 'method' => 'POST', 'confirm' => __('Confirmer l\'approbation de ce signalement ?')],
                                             ['label' => __('Rejeter'), 'icon' => 'x', 'url' => route('admin.directory.pricing-reports.reject', $report), 'method' => 'POST', 'confirm' => __('Confirmer le rejet de ce signalement ?'), 'danger' => true],
                                         ]])

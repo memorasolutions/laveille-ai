@@ -46,7 +46,6 @@
                                 <th>{{ __('Confidence') }}</th>
                                 <th>{{ __('Score') }}</th>
                                 <th>{{ __('Audité le') }}</th>
-                                <th>{{ __('Preuve') }}</th>
                                 <th>{{ __('Statut') }}</th>
                                 <th class="text-end">{{ __('Actions') }}</th>
                             </tr>
@@ -73,14 +72,6 @@
                                     <td>{{ $audit->weighted_score }}/100</td>
                                     <td><small class="text-muted">{{ $audit->audited_at?->isoFormat('LL') }}</small></td>
                                     <td>
-                                        @if($audit->screenshot_path)
-                                            <a href="{{ Storage::url($audit->screenshot_path) }}" target="_blank" class="btn btn-sm btn-outline-secondary" title="{{ __('Screenshot') }}">📷</a>
-                                        @endif
-                                        @if(!empty($audit->evidence['url']))
-                                            <a href="{{ $audit->evidence['url'] }}" target="_blank" class="btn btn-sm btn-outline-info" title="{{ $audit->evidence['quote'] ?? '' }}">🔗</a>
-                                        @endif
-                                    </td>
-                                    <td>
                                         @switch($audit->review_status)
                                             @case('pending') <span class="badge bg-warning text-dark">{{ __('En attente') }}</span> @break
                                             @case('accepted') <span class="badge bg-success">✓ {{ __('Accepté') }}</span> @break
@@ -89,18 +80,33 @@
                                         @endswitch
                                     </td>
                                     <td class="text-end">
-                                        @if($audit->review_status === 'pending')
-                                            <form action="{{ route('admin.directory.pricing-audit.accept', $audit) }}" method="POST" class="d-inline">@csrf
-                                                <button class="btn btn-sm btn-success" {{ ! $diff ? 'disabled title="Aucun changement à appliquer"' : '' }}>✓ {{ __('Accepter') }}</button>
-                                            </form>
-                                            <form action="{{ route('admin.directory.pricing-audit.reject', $audit) }}" method="POST" class="d-inline">@csrf
-                                                <button class="btn btn-sm btn-outline-secondary">✕ {{ __('Rejeter') }}</button>
-                                            </form>
+                                        @php
+                                            $auditActions = [];
+                                            if ($audit->screenshot_path) {
+                                                $auditActions[] = ['label' => __('Screenshot'), 'icon' => 'camera', 'url' => Storage::url($audit->screenshot_path), 'target' => '_blank'];
+                                            }
+                                            if (!empty($audit->evidence['url'])) {
+                                                $auditActions[] = ['label' => __('Évidence'), 'icon' => 'external-link', 'url' => $audit->evidence['url'], 'target' => '_blank'];
+                                            }
+                                            if ($audit->review_status === 'pending') {
+                                                if (count($auditActions) > 0) {
+                                                    $auditActions[] = ['divider' => true];
+                                                }
+                                                if ($diff) {
+                                                    $auditActions[] = ['label' => __('Accepter'), 'icon' => 'check', 'url' => route('admin.directory.pricing-audit.accept', $audit), 'method' => 'POST'];
+                                                } else {
+                                                    $auditActions[] = ['label' => __('Accepter (aucun changement)'), 'icon' => 'check', 'info' => true];
+                                                }
+                                                $auditActions[] = ['label' => __('Rejeter'), 'icon' => 'x', 'url' => route('admin.directory.pricing-audit.reject', $audit), 'method' => 'POST', 'confirm' => __('Rejeter cet audit ?'), 'danger' => true];
+                                            }
+                                        @endphp
+                                        @if(count($auditActions) > 0)
+                                            @include('core::components.action-menu', ['actions' => $auditActions])
                                         @endif
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="9" class="text-center text-muted py-4">{{ __('Aucun audit pour ce filtre.') }}</td></tr>
+                                <tr><td colspan="8" class="text-center text-muted py-4">{{ __('Aucun audit pour ce filtre.') }}</td></tr>
                             @endforelse
                         </tbody>
                     </table>

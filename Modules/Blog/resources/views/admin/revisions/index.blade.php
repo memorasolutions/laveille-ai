@@ -38,7 +38,7 @@
                         <td>{{ format_date($revision->created_at, 'datetime') }}</td>
                         <td>{{ $revision->user->name ?? __('Système') }}</td>
                         <td>
-                            @include('core::components.admin-action-menu', ['actions' => [
+                            @include('core::components.action-menu', ['actions' => [
                                 ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('admin.blog.articles.revisions.show', [$article, $revision])],
                                 ['label' => __('Comparer'), 'icon' => 'git-compare', 'url' => route('admin.blog.articles.revisions.diff', [$article, $revision])],
                                 ['divider' => true],

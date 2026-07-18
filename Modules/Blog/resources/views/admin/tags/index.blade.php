@@ -20,8 +20,11 @@
                     <td>{{ $tag->name }}</td>
                     <td><span class="badge bg-primary">{{ $tag->articles_count }}</span></td>
                     <td>
-                        <a href="{{ route('admin.blog.tags.edit', $tag) }}" class="btn btn-sm btn-outline-primary">{{ __('Modifier') }}</a>
-                        <form action="{{ route('admin.blog.tags.destroy', $tag) }}" method="POST" class="d-inline">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger" onclick="return confirm('{{ __('Supprimer ?') }}')">{{ __('Supprimer') }}</button></form>
+                        @include('core::components.action-menu', ['actions' => [
+                            ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.blog.tags.edit', $tag)],
+                            ['divider' => true],
+                            ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.blog.tags.destroy', $tag), 'method' => 'DELETE', 'confirm' => __('Supprimer ?'), 'danger' => true],
+                        ]])
                     </td>
                 </tr>
             @empty

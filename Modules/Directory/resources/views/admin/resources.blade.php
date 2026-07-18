@@ -54,7 +54,7 @@
                         <td>{{ $r->user->name ?? '-' }}</td>
                         <td>{{ format_date($r->created_at) }}</td>
                         <td class="text-end">
-                            @include('core::components.admin-action-menu', ['actions' => array_filter([
+                            @include('core::components.action-menu', ['actions' => array_filter([
                                 ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.directory.resources.edit', $r->id)],
                                 !$r->is_approved ? ['label' => __('Approuver'), 'icon' => 'check', 'url' => route('admin.directory.moderation.resource.approve', $r->id), 'method' => 'POST'] : null,
                                 ['divider' => true],

@@ -55,23 +55,12 @@
                         </span>
                     </td>
                     <td class="text-end">
-                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editChannelModal{{ $channel->id }}">
-                            <i data-lucide="edit-2" style="width:14px;height:14px;"></i>
-                        </button>
-                        <form method="POST" action="{{ route('admin.ai.channels.toggle', $channel) }}" class="d-inline">
-                            @csrf
-                            @method('PATCH')
-                            <button type="submit" class="btn btn-sm btn-outline-{{ $channel->is_active ? 'warning' : 'success' }}">
-                                <i data-lucide="{{ $channel->is_active ? 'pause' : 'play' }}" style="width:14px;height:14px;"></i>
-                            </button>
-                        </form>
-                        <form method="POST" action="{{ route('admin.ai.channels.destroy', $channel) }}" class="d-inline" data-confirm="{{ __('Supprimer ce canal ?') }}">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
-                            </button>
-                        </form>
+                        @include('core::components.action-menu', ['actions' => [
+                            ['label' => __('Modifier'), 'icon' => 'edit-2', 'alpineClick' => "open = false; bootstrap.Modal.getOrCreateInstance(document.getElementById('editChannelModal{$channel->id}')).show()"],
+                            ['label' => $channel->is_active ? __('Désactiver') : __('Activer'), 'icon' => $channel->is_active ? 'pause' : 'play', 'url' => route('admin.ai.channels.toggle', $channel), 'method' => 'PATCH'],
+                            ['divider' => true],
+                            ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.ai.channels.destroy', $channel), 'method' => 'DELETE', 'confirm' => __('Supprimer ce canal ?'), 'danger' => true],
+                        ]])
                     </td>
                 </tr>
 

@@ -171,7 +171,7 @@
                                             {{-- Éditer / Historique / Supprimer : 3 actions secondaires, consolidées dans le
                                                  menu kebab. La méthode confirmQuestionDeletion gère elle-même sa confirmation
                                                  2-temps (bloc @if ci-dessus) -> wireClick seul, sans wireConfirm. --}}
-                                            @include('core::components.admin-action-menu', ['actions' => [
+                                            @include('core::components.action-menu', ['actions' => [
                                                 ['label' => 'Éditer', 'icon' => 'pencil', 'wireClick' => "editQuestion({$question->id})"],
                                                 ['label' => 'Historique', 'icon' => 'history', 'wireClick' => "showHistory({$question->id})"],
                                                 ['divider' => true],

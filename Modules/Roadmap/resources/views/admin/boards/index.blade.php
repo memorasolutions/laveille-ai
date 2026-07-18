@@ -56,7 +56,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @include('core::components.admin-action-menu', ['actions' => [
+                                    @include('core::components.action-menu', ['actions' => [
                                         ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.roadmap.boards.edit', $board)],
                                         ['divider' => true],
                                         ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.roadmap.boards.destroy', $board), 'method' => 'DELETE', 'confirm' => __('Êtes-vous sûr de vouloir supprimer ce tableau ?'), 'danger' => true],

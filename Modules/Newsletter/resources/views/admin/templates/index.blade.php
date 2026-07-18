@@ -56,7 +56,7 @@
                                         @endif
                                     </td>
                                     <td class="text-end">
-                                        @include('core::components.admin-action-menu', ['actions' => [
+                                        @include('core::components.action-menu', ['actions' => [
                                             ['label' => __('Aperçu'), 'icon' => 'eye', 'url' => route('admin.newsletter.templates.preview', $template), 'target' => '_blank'],
                                             ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.newsletter.templates.edit', $template)],
                                             ['divider' => true],

@@ -142,7 +142,7 @@
                                     <x-core::button type="button" variant="danger" size="sm" wire:click="deleteSession({{ $session->id }})">Confirmer</x-core::button>
                                     <x-core::button type="button" variant="ghost" size="sm" wire:click="cancelDelete">Annuler</x-core::button>
                                 @else
-                                    @include('core::components.admin-action-menu', ['actions' => [
+                                    @include('core::components.action-menu', ['actions' => [
                                         ['label' => 'Modifier', 'icon' => 'pencil', 'wireClick' => "edit({$session->id})"],
                                         ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmDelete({$session->id})", 'danger' => true],
                                     ]])

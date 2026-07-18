@@ -70,12 +70,15 @@
                         @endif
                     </td>
                     <td class="text-end">
-                        <a href="{{ route('directory.show', $tool->slug) }}" target="_blank" class="btn btn-sm btn-outline-secondary"><i data-lucide="eye" class="icon-sm"></i></a>
-                        <a href="{{ route('admin.directory.edit', $tool) }}" class="btn btn-sm btn-outline-primary"><i data-lucide="pencil" class="icon-sm"></i></a>
-                        <form action="{{ route('admin.directory.destroy', $tool) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer ?') }}">
-                            @csrf @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger"><i data-lucide="trash-2" class="icon-sm"></i></button>
-                        </form>
+                        @include('core::components.action-menu', ['actions' => [
+                            {{-- getPublicUrl() (2026-07-19, fix P0) plutôt que route('directory.show', $tool->slug)
+                                 en dur : réutilise le repli de locale déjà centralisé dans le modèle (DRY),
+                                 jamais de UrlGenerationException même si $tool->slug est vide pour la locale courante. --}}
+                            ['label' => __('Voir'), 'icon' => 'eye', 'url' => $tool->getPublicUrl(), 'target' => '_blank'],
+                            ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.directory.edit', $tool)],
+                            ['divider' => true],
+                            ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.directory.destroy', $tool), 'method' => 'DELETE', 'confirm' => __('Supprimer ?'), 'danger' => true],
+                        ]])
                     </td>
                 </tr>
                 @endforeach

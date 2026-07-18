@@ -766,7 +766,7 @@
                                 {{-- Action secondaire/rare : dans le menu kebab. La méthode Livewire
                                      confirmChapterDeletion gère elle-même son état de confirmation 2-temps
                                      (bloc @if ci-dessus), donc wireClick seul, sans wireConfirm. --}}
-                                @include('core::components.admin-action-menu', ['actions' => [
+                                @include('core::components.action-menu', ['actions' => [
                                     ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmChapterDeletion({$chapter->id})", 'danger' => true],
                                 ]])
                             @endif
@@ -857,7 +857,7 @@
                                             @else
                                                 {{-- Action secondaire/rare : dans le menu kebab. Le crayon inline (renommer)
                                                      reste tel quel juste au-dessus, ce n'est pas ce mécanisme qu'on consolide. --}}
-                                                @include('core::components.admin-action-menu', ['actions' => [
+                                                @include('core::components.action-menu', ['actions' => [
                                                     ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmLessonDeletion({$lesson->id})", 'danger' => true],
                                                 ]])
                                             @endif
@@ -933,7 +933,7 @@
                                                                     <x-core::button type="button" wire:click="cancelItemDeletion" variant="ghost" size="sm">Annuler</x-core::button>
                                                                 @else
                                                                     {{-- Actions secondaires/rares : toggle Obligatoire/Facultatif + Supprimer, dans le menu kebab. --}}
-                                                                    @include('core::components.admin-action-menu', ['actions' => [
+                                                                    @include('core::components.action-menu', ['actions' => [
                                                                         ['label' => $item->is_required ? 'Rendre facultatif' : 'Rendre obligatoire', 'icon' => $item->is_required ? 'circle' : 'check-circle', 'wireClick' => "toggleRequired({$item->id})"],
                                                                         ['divider' => true],
                                                                         ['label' => 'Supprimer', 'icon' => 'trash-2', 'wireClick' => "confirmItemDeletion({$item->id})", 'danger' => true],

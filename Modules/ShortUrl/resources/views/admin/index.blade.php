@@ -125,7 +125,7 @@
                             </td>
                             <td>{{ format_date($shortUrl->created_at) }}</td>
                             <td class="text-end">
-                                @include('core::components.admin-action-menu', ['actions' => [
+                                @include('core::components.action-menu', ['actions' => [
                                     ['label' => __('Statistiques'), 'icon' => 'bar-chart-2', 'url' => route('admin.short-urls.show', $shortUrl)],
                                     ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.short-urls.edit', $shortUrl)],
                                     ['label' => $shortUrl->is_active ? __('Désactiver') : __('Activer'), 'icon' => $shortUrl->is_active ? 'eye-off' : 'eye', 'url' => route('admin.short-urls.toggle', $shortUrl), 'method' => 'POST'],

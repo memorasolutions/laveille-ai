@@ -77,7 +77,7 @@
                             {{ format_date($team->created_at) }}
                         </td>
                         <td class="text-end">
-                            @include('core::components.admin-action-menu', ['actions' => [
+                            @include('core::components.action-menu', ['actions' => [
                                 ['label' => __('Voir l\'équipe'), 'icon' => 'eye', 'url' => route('admin.teams.show', $team)],
                                 ['label' => __('Modifier l\'équipe'), 'icon' => 'pencil', 'url' => route('admin.teams.edit', $team)],
                                 ['divider' => true],
