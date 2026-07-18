@@ -17,6 +17,13 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.111.0 · 2026-07-18 · feat(decido) image de couverture sur /outils (featured_image). Générée
+ *     via Gemini (compte stephane@memora.ca, skill /nanobanana) : 3D isométrique teal/orange
+ *     (urne de vote + calendrier + horloge + silhouettes), cohérente avec le style des autres
+ *     outils. Livrée en paire decido.jpg (1200x630, 48 Ko, référence og:image car réseaux sociaux
+ *     refusent WebP) + decido.webp (23 Ko, affichage site). Migration
+ *     2026_07_16_120000_seed_decido_tool_entry.php mise à jour (guard Schema::hasColumn).
+ *
  *   1.110.0 · 2026-07-18 · feat(decido) fuseaux horaires complets (créateur) + adaptation au
  *     fuseau local du votant (page de vote). Demande utilisateur : "que tout les fuseaux horaires
  *     y soit et que la page de réservation ou de sélection tienne compte du fuseau horaire de
@@ -1605,7 +1612,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 110;
+$lvMinor = 111;
 $lvPatch = 0;
 
 return [

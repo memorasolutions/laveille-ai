@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.111.0] - 2026-07-18
+
+### Added
+- **Décido - image de couverture sur /outils (`featured_image`).** Générée via Gemini (compte `stephane@memora.ca`, skill `/nanobanana`) : illustration 3D isométrique dans la palette teal/orange de la charte (urne de vote, calendrier, horloge, silhouettes), sans texte, cohérente avec le style des autres cartons d'outils. Livrée en paire `decido.jpg` (1200×630, ~48 Ko, référence og:image car les réseaux sociaux refusent WebP/AVIF) + `decido.webp` (~23 Ko, affichage site). Migration `2026_07_16_120000_seed_decido_tool_entry.php` mise à jour (guard `Schema::hasColumn`).
+
 ## [1.110.0] - 2026-07-18
 
 ### Added

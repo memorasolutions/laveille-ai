@@ -42,6 +42,10 @@ return new class extends Migration
             $data['is_under_construction'] = true;
         }
 
+        if (Schema::hasColumn('tools', 'featured_image')) {
+            $data['featured_image'] = 'images/tools/decido.jpg';
+        }
+
         DB::table('tools')->updateOrInsert(['slug' => 'decido'], $data);
     }
 
