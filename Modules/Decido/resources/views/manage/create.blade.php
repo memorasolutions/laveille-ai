@@ -6,7 +6,7 @@
 @section('page_noindex', true)
 @section('meta_description', "Crée un sondage Décido pour trouver le bon moment ou le bon choix avec ton équipe, ta famille ou ta communauté.")
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Créer un sondage Décido'])
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Créer un sondage Décido', 'breadcrumbItems' => [__('Outils'), 'Créer un sondage Décido']])
 @endsection
 @section('content')
 <section class="wpo-blog-single-section section-padding">

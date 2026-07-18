@@ -6,7 +6,7 @@
 @section('page_noindex', true)
 @section('meta_description', "Gère tes sondages Décido : crée, consulte et exporte les résultats de tes consultations collectives.")
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Mes sondages Décido'])
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Mes sondages Décido', 'breadcrumbItems' => [__('Outils'), 'Mes sondages Décido']])
 @endsection
 @section('content')
 <section class="wpo-blog-single-section section-padding">

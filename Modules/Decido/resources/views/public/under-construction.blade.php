@@ -2,12 +2,16 @@
 {{-- Squelette calqué sur Modules/Books/resources/views/public/under-construction.blade.php --}}
 @extends(fronttheme_layout())
 
-@section('title', 'Décido - bientôt disponible · ' . config('app.name'))
+@section('title', 'Décido - Sondages collectifs (bientôt disponible) · ' . config('app.name'))
 @section('meta_description', "Décido, l'outil de sondage collectif de La veille de Stef, est en construction. Nous travaillons activement à son lancement public sur laveille.ai.")
 @section('page_noindex', true)
 
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Décido'])
+    {{-- "Décido" seul ne veut rien dire pour un visiteur qui découvre l'outil (demande utilisateur
+         2026-07-18) : la marque reste, mais toujours accompagnée d'un descriptif parlant, ici
+         "Sondages collectifs" (couvre les 2 modes : sondage de dates ET sondage classique par
+         options). --}}
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Décido - Sondages collectifs', 'breadcrumbItems' => [__('Outils'), 'Décido - Sondages collectifs']])
 @endsection
 
 @section('content')

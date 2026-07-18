@@ -19,6 +19,13 @@
 @section('no_ads', '1')
 @section('meta_description', "Résultats du sondage Décido « {$poll->title} » : visualise les votes, clôture le sondage et exporte les données.")
 @section('breadcrumb')
+    {{-- NE JAMAIS ajouter 'breadcrumbItems' ici (verrouillé par un test round 26/skill 100,
+         DecidoPollTest::"la page de gestion (jeton admin dans l'URL) n'expose pas ce jeton via le
+         JSON-LD BreadcrumbList") : cette route contient le jeton admin en clair dans l'URL
+         (/decido/{poll}/gerer/{adminToken}), et fronttheme::partials.breadcrumb utilise
+         url()->current() (sans exclusion) pour le dernier ListItem du BreadcrumbList JSON-LD dès
+         que 'breadcrumbItems' est fourni - une fuite du jeton dans une donnée structurée
+         indexable, indépendante de la balise noindex de la page elle-même. --}}
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Résultats du sondage'])
 @endsection
 @section('content')

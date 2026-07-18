@@ -7,7 +7,7 @@
 @section('page_noindex', true)
 @section('meta_description', "Participe au sondage Décido « {$poll->title} » pour aider à trouver le bon moment ou le bon choix.")
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $poll->title])
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $poll->title, 'breadcrumbItems' => [__('Outils'), $poll->title]])
 @endsection
 @section('content')
 <section class="wpo-blog-single-section section-padding">

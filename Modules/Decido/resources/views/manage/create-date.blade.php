@@ -4,7 +4,7 @@
 @section('page_noindex', true)
 @section('meta_description', "Crée un sondage de dates Décido pour trouver le meilleur moment avec ton équipe, ta famille ou ta communauté.")
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Sondage de dates'])
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Sondage de dates', 'breadcrumbItems' => [__('Outils'), 'Sondage de dates']])
 @endsection
 @section('content')
 <section class="wpo-blog-single-section section-padding">
