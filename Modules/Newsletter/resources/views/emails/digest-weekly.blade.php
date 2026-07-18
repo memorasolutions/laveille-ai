@@ -540,14 +540,14 @@
         <td style="padding:14px 30px 6px;background-color:#f8fafc;border-top:1px solid #e5e7eb;" class="mobile-p">
             <p style="margin:0 0 6px;font-size:12px;font-weight:bold;color:#0B7285;text-transform:uppercase;letter-spacing:1px;">&#x1F527; Outil de la semaine</p>
             <p style="margin:0 0 4px;">
-                <a href="{{ route('directory.show', $toolOfWeek->slug) }}" target="_blank" style="color:#1a1a2e;font-size:15px;font-weight:bold;text-decoration:none;">{{ $toolOfWeek->name }}</a>
+                <a href="{{ $toolOfWeek->getPublicUrl() }}" target="_blank" style="color:#1a1a2e;font-size:15px;font-weight:bold;text-decoration:none;">{{ $toolOfWeek->name }}</a>
                 <span style="display:inline-block;background-color:{{ $pColor }};color:#fff;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:3px;margin-left:6px;vertical-align:middle;">{{ $pLabel }}</span>
             </p>
             <p style="margin:0 0 4px;font-size:13px;color:#555;line-height:1.5;">{{ Str::limit(strip_tags($toolOfWeek->short_description ?? $toolOfWeek->description ?? ''), 120) }}</p>
             @if($tutoCount > 0)
             <p style="margin:0 0 4px;font-size:13px;color:#0B7285;font-weight:bold;">🎓 {{ $tutoCount }} {{ $tutoCount === 1 ? 'tutoriel' : 'tutoriels' }} pour bien démarrer.</p>
             @endif
-            <p style="margin:2px 0 0;"><a href="{{ route('directory.show', $toolOfWeek->slug) }}" target="_blank" style="color:#0B7285;font-weight:bold;font-size:13px;">Découvrir sur laveille.ai &rarr;</a></p>
+            <p style="margin:2px 0 0;"><a href="{{ $toolOfWeek->getPublicUrl() }}" target="_blank" style="color:#0B7285;font-weight:bold;font-size:13px;">Découvrir sur laveille.ai &rarr;</a></p>
         </td>
     </tr>
     @endif

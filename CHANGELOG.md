@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.114.1] - 2026-07-19
+
+### Fixed
+- **21 autres call sites vulnérables au même bug de repli de locale que le P0 v1.114.0.** Audit proactif (`grep` exhaustif site-wide) après le fix du 500 sur `/admin/directory` : le même pattern (`route('directory.show', $tool->slug)` sans repli quand la traduction `fr_CA` du slug est absente) existait encore à 21 endroits — sitemap, JSON-LD, newsletter hebdomadaire (impact le plus large : envoyée à tous les abonnés), page d'accueil, RSS, recherche globale du site, bannière de fin de vie d'outil (bug distinct et plus grave : passait l'objet modèle entier au lieu du slug), contributions utilisateur, vote communautaire, redirections canoniques, comparateur, collections, tarifs éducation, favoris. Tous remplacés par `Tool::getPublicUrl()` (DRY, réutilise le repli déjà corrigé). Régression ciblée : 401 passed, 0 failed.
+
 ## [1.114.0] - 2026-07-19
 
 ### Added

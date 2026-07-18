@@ -104,7 +104,7 @@ class SitemapController
                 $sitemap->add(Url::create(route('directory.education-pricing'))->setPriority(0.8)->setChangeFrequency('weekly'));
             }
             \Modules\Directory\Models\Tool::published()->get()->each(function ($tool) use ($sitemap) {
-                $url = Url::create(route('directory.show', $tool->slug))
+                $url = Url::create($tool->getPublicUrl())
                     ->setLastModificationDate($tool->updated_at)
                     ->setPriority(0.7)
                     ->setChangeFrequency('monthly');

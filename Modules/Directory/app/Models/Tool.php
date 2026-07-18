@@ -392,7 +392,7 @@ class Tool extends Model implements Searchable
 
     public function searchableResultUrl(): string
     {
-        return route('directory.show', $this->slug);
+        return $this->getPublicUrl();
     }
 
     public function adminShareContents(): array

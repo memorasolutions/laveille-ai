@@ -54,7 +54,7 @@
                             @if($type === 'Modules\\Blog\\Models\\Article' && Route::has('blog.show'))
                                 <a href="{{ route('blog.show', $item->slug) }}" style="color: var(--c-primary); font-weight: 600; font-size: 13px;">{{ __('Lire') }} →</a>
                             @elseif($type === 'Modules\\Directory\\Models\\Tool' && Route::has('directory.show'))
-                                <a href="{{ route('directory.show', $item->slug) }}" style="color: var(--c-primary); font-weight: 600; font-size: 13px;">{{ __('Voir') }} →</a>
+                                <a href="{{ $item->getPublicUrl() }}" style="color: var(--c-primary); font-weight: 600; font-size: 13px;">{{ __('Voir') }} →</a>
                             @elseif($type === 'Modules\\Dictionary\\Models\\Term' && Route::has('dictionary.show'))
                                 <a href="{{ route('dictionary.show', $item->slug) }}" style="color: var(--c-primary); font-weight: 600; font-size: 13px;">{{ __('Lire') }} →</a>
                             @elseif($type === 'Modules\\Acronyms\\Models\\Acronym' && Route::has('acronyms.show'))

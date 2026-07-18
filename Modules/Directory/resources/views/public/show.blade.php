@@ -12,7 +12,7 @@
 {{-- Meta AEO/LLM-first 2026 : aide les crawlers IA (GPTBot, ClaudeBot, PerplexityBot) à citer la fiche --}}
 <meta name="llm:summary" content="{{ e($tool->name) }} — {{ e(Str::limit(strip_tags($tool->short_description ?? $tool->description ?? ''), 200)) }} ({{ e(ucfirst((string) ($tool->pricing_type ?? 'outil'))) }})">
 <meta name="llm:keywords" content="{{ e($tool->name) }}, IA, intelligence artificielle, {{ e((string) ($tool->category ?? 'outil IA')) }}, francophone, Québec">
-<meta name="llm:url" content="{{ route('directory.show', $tool->slug) }}">
+<meta name="llm:url" content="{{ $tool->getPublicUrl() }}">
 @endpush
 
 @section('breadcrumb')
@@ -145,7 +145,7 @@
         $shareLines[] = '🔗 Site officiel : ' . $tool->url;
     }
 
-    $shareLines[] = '📚 Fiche complète : ' . route('directory.show', $tool->slug);
+    $shareLines[] = '📚 Fiche complète : ' . $tool->getPublicUrl();
 
     $shareLines[] = '';
     $shareLines[] = 'Via laveille.ai';
@@ -1356,7 +1356,7 @@
                 @foreach($similarTools as $sim)
                 @php $simHost = $sim->url ? parse_url($sim->url, PHP_URL_HOST) : ''; @endphp
                 <div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom: 12px;">
-                    <a href="{{ route('directory.show', $sim->slug) }}" style="display: block; text-align: center; border: 1px solid #E5E7EB; border-radius: var(--r-base); padding: 16px; text-decoration: none; color: inherit; transition: all 0.2s; height: 100%;">
+                    <a href="{{ $sim->getPublicUrl() }}" style="display: block; text-align: center; border: 1px solid #E5E7EB; border-radius: var(--r-base); padding: 16px; text-decoration: none; color: inherit; transition: all 0.2s; height: 100%;">
                         @if($simHost)<x-core::smart-favicon :domain="$simHost" :size="32" class="" />@endif
                         <div style="font-family: var(--f-heading); font-weight: 700; font-size: 0.95rem;">{{ $sim->name }}</div>
                         <span class="rt-badge badge-{{ $sim->pricing }}" style="font-size: 0.6rem; margin-top: 6px;">{{ $pricingLabels[$sim->pricing] ?? ucfirst($sim->pricing) }}</span>

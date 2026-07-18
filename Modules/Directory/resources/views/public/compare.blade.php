@@ -400,7 +400,7 @@
                                 @if($thumbSrc)
                                     <img src="{{ $thumbSrc }}" alt="" class="tool-thumb" loading="lazy" onerror="this.onerror=null; this.src='/images/directory-fallback.svg';">
                                 @endif
-                                <a href="{{ route('directory.show', $tool->slug) }}" class="tool-name">{{ $tool->name }}</a>
+                                <a href="{{ $tool->getPublicUrl() }}" class="tool-name">{{ $tool->name }}</a>
                                 <div class="tool-meta">
                                     <span class="price">{{ $priceLabel }}</span>
                                 </div>

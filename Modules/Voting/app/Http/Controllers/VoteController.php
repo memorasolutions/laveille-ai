@@ -47,7 +47,7 @@ class VoteController extends Controller
             if ($author && $author->id !== auth()->id()) {
                 $title = $item->title ?? $item->name ?? __('votre contenu');
                 $url = match ($type) {
-                    'tool' => route('directory.show', $item->slug ?? $id),
+                    'tool' => method_exists($item, 'getPublicUrl') ? $item->getPublicUrl() : route('directory.show', $item->slug ?? $id),
                     'acronym' => route('acronyms.show', $item->getTranslation('slug', app()->getLocale())),
                     default => url('/'),
                 };

@@ -56,7 +56,7 @@ class UserContributionsController extends Controller
                         'label' => __('Ressource'), 'name' => \Str::limit($r->title, 50),
                         'preview' => ($r->tool->name ?? '—') . ' — ' . $r->type,
                         'status' => $r->is_approved ? 'approved' : 'pending',
-                        'link' => ($r->tool && \Route::has('directory.show')) ? route('directory.show', $r->tool->slug) . '#resources' : null,
+                        'link' => ($r->tool && \Route::has('directory.show')) ? $r->tool->getPublicUrl() . '#resources' : null,
                         'created_at' => $r->created_at, 'raw' => $r,
                     ])
             );
@@ -73,7 +73,7 @@ class UserContributionsController extends Controller
         if (! $suggestion->suggestable) return null;
         $type = class_basename($suggestion->suggestable_type);
         $slug = $suggestion->suggestable->slug ?? '';
-        if ($type === 'Tool' && \Route::has('directory.show')) return route('directory.show', $slug);
+        if ($type === 'Tool' && \Route::has('directory.show')) return $suggestion->suggestable->getPublicUrl();
         if ($type === 'Term' && \Route::has('dictionary.show')) return route('dictionary.show', $slug);
         if ($type === 'Acronym' && \Route::has('acronyms.show')) return route('acronyms.show', $slug);
         return null;

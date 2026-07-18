@@ -103,7 +103,7 @@
                         <span class="edu-badge">Éducation</span>
                     @endif
                 </div>
-                <h3><a href="{{ route('directory.show', $tool->slug) }}">{{ $tool->name }}</a></h3>
+                <h3><a href="{{ $tool->getPublicUrl() }}">{{ $tool->name }}</a></h3>
                 <p>{{ Str::limit($tool->short_description, 140) }}</p>
                 @if($tool->education_verification_required)
                     <span class="edu-verify-pill">⚠ Vérification requise</span>
@@ -122,7 +122,7 @@
                     @if($tool->url)
                         <a href="{{ $tool->url }}" target="_blank" rel="noopener noreferrer" class="edu-btn-primary" aria-label="Visiter {{ $tool->name }}">Visiter</a>
                     @endif
-                    <a href="{{ route('directory.show', $tool->slug) }}" class="edu-btn-secondary" aria-label="Détails de {{ $tool->name }}">Détails</a>
+                    <a href="{{ $tool->getPublicUrl() }}" class="edu-btn-secondary" aria-label="Détails de {{ $tool->name }}">Détails</a>
                 </div>
             </article>
         @endforeach
@@ -143,7 +143,7 @@
 
 @if($tools->isNotEmpty())
 <script type="application/ld+json">
-{"@@context":"https://schema.org","@@type":"ItemList","name":"Outils IA éducation Québec","description":"Outils IA avec tarif préférentiel pour enseignants, étudiants et institutions éducatives au Québec","numberOfItems":{{ $tools->count() }},"itemListElement":[@foreach($tools as $i => $t){"@@type":"ListItem","position":{{ $i+1 }},"item":{"@@type":"Product","name":{!! json_encode($t->name) !!},"description":{!! json_encode($t->short_description ?? '') !!},"url":{!! json_encode(route('directory.show', $t->slug)) !!},"offers":{"@@type":"Offer","audience":{"@@type":"EducationalAudience","educationalRole":"Teacher"}}}}@if(!$loop->last),@endif @endforeach]}
+{"@@context":"https://schema.org","@@type":"ItemList","name":"Outils IA éducation Québec","description":"Outils IA avec tarif préférentiel pour enseignants, étudiants et institutions éducatives au Québec","numberOfItems":{{ $tools->count() }},"itemListElement":[@foreach($tools as $i => $t){"@@type":"ListItem","position":{{ $i+1 }},"item":{"@@type":"Product","name":{!! json_encode($t->name) !!},"description":{!! json_encode($t->short_description ?? '') !!},"url":{!! json_encode($t->getPublicUrl()) !!},"offers":{"@@type":"Offer","audience":{"@@type":"EducationalAudience","educationalRole":"Teacher"}}}}@if(!$loop->last),@endif @endforeach]}
 </script>
 @endif
 @endsection

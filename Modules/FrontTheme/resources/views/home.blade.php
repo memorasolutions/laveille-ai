@@ -336,7 +336,7 @@
                         $pricingColors = ['free' => '#065f46', 'freemium' => '#B45309', 'paid' => '#B91C1C', 'open_source' => '#6366F1'];
                     @endphp
                     <div class="col-md-3 col-sm-6 col-xs-12">
-                        <a href="{{ route('directory.show', $tool->slug) }}" class="hp-card">
+                        <a href="{{ $tool->getPublicUrl() }}" class="hp-card">
                             <div class="hp-card-img" style="{{ $screenshotSrc ? '' : 'background: linear-gradient(135deg, ' . $gradientColors[$gIdx] . ', ' . $gradientColors[($gIdx + 1) % count($gradientColors)] . ');' }}">
                                 @if($screenshotSrc)
                                     <img src="{{ $screenshotSrc }}" alt="{{ $tool->name }}" loading="lazy">

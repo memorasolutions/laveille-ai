@@ -141,7 +141,7 @@ final class JsonLdService
             '@type' => 'SoftwareApplication',
             'name' => $tool->name,
             'description' => $description,
-            'url' => route('directory.show', $tool->slug),
+            'url' => $tool->getPublicUrl(),
             'applicationCategory' => $tool->categories->first()?->name ?? 'UtilitiesApplication',
             'operatingSystem' => 'Web',
             'offers' => [

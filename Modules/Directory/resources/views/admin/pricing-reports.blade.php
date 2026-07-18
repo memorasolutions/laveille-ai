@@ -57,7 +57,7 @@
                             <tr>
                                 <td>
                                     @if($report->tool)
-                                        <a href="{{ route('directory.show', $report->tool->getTranslation('slug', 'fr_CA')) }}" target="_blank" rel="noopener">
+                                        <a href="{{ $report->tool->getPublicUrl() }}" target="_blank" rel="noopener">
                                             {{ $report->tool->name }}
                                         </a>
                                     @else

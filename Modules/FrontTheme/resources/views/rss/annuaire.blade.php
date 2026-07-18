@@ -18,7 +18,7 @@
 
     @foreach($tools as $tool)
         @php
-            $url = route('directory.show', $tool->slug);
+            $url = $tool->getPublicUrl();
             $name = $tool->name;
             $shortRaw = $tool->getTranslation('short_description', 'fr_CA') ?: $tool->getTranslation('short_description', 'fr') ?: '';
             $longRaw = $tool->getTranslation('description', 'fr_CA') ?: $tool->getTranslation('description', 'fr') ?: '';

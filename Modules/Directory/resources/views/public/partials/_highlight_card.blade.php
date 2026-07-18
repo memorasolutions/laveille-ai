@@ -12,7 +12,7 @@
     $gIdx = abs(crc32($tool->name)) % count($gradientColors);
 @endphp
 
-<a href="{{ route('directory.show', $tool->slug) }}" class="rt-hl-card" title="{{ $tool->name }}" style="position:relative;">
+<a href="{{ $tool->getPublicUrl() }}" class="rt-hl-card" title="{{ $tool->name }}" style="position:relative;">
     {{-- 2026-05-05 #135 : badge YouTube rouge tutos sur card highlight --}}
     @if(($tool->tutorials_count ?? 0) > 0)
         <span style="position:absolute;top:6px;right:6px;z-index:3;display:inline-flex;align-items:center;gap:3px;background:#0B7285;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;line-height:1.2;box-shadow:0 1px 3px rgba(0,0,0,.2);" title="{{ $tool->tutorials_count }} {{ $tool->tutorials_count > 1 ? __('tutoriels') : __('tutoriel') }}">

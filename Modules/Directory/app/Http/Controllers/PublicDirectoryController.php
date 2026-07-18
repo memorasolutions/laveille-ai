@@ -154,7 +154,7 @@ class PublicDirectoryController extends Controller
         if ($tool->lifecycle_status === 'archived' && $tool->lifecycle_replacement_tool_id) {
             $canonical = Tool::published()->find($tool->lifecycle_replacement_tool_id);
             if ($canonical && $canonical->lifecycle_status !== 'archived') {
-                return redirect()->route('directory.show', $canonical->slug, 301);
+                return redirect($canonical->getPublicUrl(), 301);
             }
         }
 

@@ -41,7 +41,7 @@
         if ($tool->lifecycle_replacement_url) {
             $replacementUrl = $tool->lifecycle_replacement_url;
         } elseif ($tool->lifecycle_replacement_tool_id && method_exists($tool, 'lifecycleReplacement') && $tool->lifecycleReplacement) {
-            $replacementUrl = route('directory.show', $tool->lifecycleReplacement);
+            $replacementUrl = $tool->lifecycleReplacement->getPublicUrl();
         }
     }
 @endphp

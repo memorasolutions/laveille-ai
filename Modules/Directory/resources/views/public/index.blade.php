@@ -24,7 +24,7 @@
             'categorySlugs' => $tool->categories->pluck('slug')->toArray(),
             'favicon' => $host ? "https://www.google.com/s2/favicons?domain={$host}&sz=64" : '',
             'screenshot' => $tool->screenshot ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.$tool->updated_at->timestamp) : '',
-            'showUrl' => route('directory.show', $tool->slug),
+            'showUrl' => $tool->getPublicUrl(),
             'websiteType' => $tool->website_type ?? 'website',
             'launchYear' => $tool->launch_year ?? 0,
             'createdTs' => $tool->created_at ? $tool->created_at->timestamp : 0,
@@ -865,7 +865,7 @@
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
                 @foreach($featuredTools as $ft)
                 @php $ftHost = $ft->url ? parse_url($ft->url, PHP_URL_HOST) : ''; @endphp
-                <a href="{{ route('directory.show', $ft->slug) }}" x-show="!isEducationContext || {{ $ft->has_education_pricing || $ft->pricing === 'education' ? 'true' : 'false' }}" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,0.04);position:relative;">
+                <a href="{{ $ft->getPublicUrl() }}" x-show="!isEducationContext || {{ $ft->has_education_pricing || $ft->pricing === 'education' ? 'true' : 'false' }}" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,0.04);position:relative;">
                     {{-- 2026-05-05 #135 : badge YouTube rouge avec count tutos (visible coin haut-droit) --}}
                     @if(($ft->tutorials_count ?? 0) > 0)
                         <span style="position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;background:#0B7285;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;line-height:1.3;box-shadow:0 1px 3px rgba(0,0,0,.15);" title="{{ $ft->tutorials_count }} {{ $ft->tutorials_count > 1 ? __('tutoriels disponibles') : __('tutoriel disponible') }}">
@@ -902,7 +902,7 @@
                 <div style="display:flex!important;gap:14px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;">
                     @foreach($topVoted as $tv)
                     @php $tvHost = $tv->url ? parse_url($tv->url, PHP_URL_HOST) : ''; @endphp
-                    <a href="{{ route('directory.show', $tv->slug) }}" style="flex-shrink:0;width:200px;scroll-snap-align:start;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;position:relative;">
+                    <a href="{{ $tv->getPublicUrl() }}" style="flex-shrink:0;width:200px;scroll-snap-align:start;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;position:relative;">
                         {{-- 2026-05-05 #135 : badge YouTube rouge tutos --}}
                         @if(($tv->tutorials_count ?? 0) > 0)
                             <span style="position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:3px;background:#0B7285;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;line-height:1.2;" title="{{ $tv->tutorials_count }} {{ $tv->tutorials_count > 1 ? __('tutoriels') : __('tutoriel') }}">

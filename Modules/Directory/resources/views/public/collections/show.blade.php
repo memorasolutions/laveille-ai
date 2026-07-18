@@ -40,7 +40,7 @@
             return [
                 chr(64).'type' => 'ListItem',
                 'position' => $idx + 1,
-                'url' => route('directory.show', $tool->slug),
+                'url' => $tool->getPublicUrl(),
                 'name' => $tool->name,
                 'description' => \Illuminate\Support\Str::limit(strip_tags($shortDesc), 160),
             ];
@@ -96,7 +96,7 @@
                     <article style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 1px 3px rgba(0,0,0,0.04); transition:transform .25s, box-shadow .25s;"
                              onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 25px -5px rgba(0,0,0,0.1)';"
                              onmouseout="this.style.transform='';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.04)';">
-                        <a href="{{ route('directory.show', $tool->slug) }}" style="display:block; text-decoration:none; color:inherit;">
+                        <a href="{{ $tool->getPublicUrl() }}" style="display:block; text-decoration:none; color:inherit;">
                             @if($screenshotUrl)
                                 <div style="position:relative; height:140px; overflow:hidden;">
                                     <img src="{{ $screenshotUrl }}" alt="{{ $tool->name }}" loading="lazy" style="width:100%; height:140px; object-fit:cover; display:block;"
@@ -122,7 +122,7 @@
                                 @endif
                                 <div style="flex:1; min-width:0;">
                                     <h5 style="margin:0 0 6px 0; font-size:16px; font-weight:700; line-height:1.3;">
-                                        <a href="{{ route('directory.show', $tool->slug) }}" style="color:#1a1a1a; text-decoration:none;">{{ $tool->name }}</a>
+                                        <a href="{{ $tool->getPublicUrl() }}" style="color:#1a1a1a; text-decoration:none;">{{ $tool->name }}</a>
                                     </h5>
                                     <div style="display:flex; gap:6px; flex-wrap:wrap;">
                                         @if($tool->pricing)
@@ -142,7 +142,7 @@
                                 @else
                                     <span>&nbsp;</span>
                                 @endif
-                                <a href="{{ route('directory.show', $tool->slug) }}" style="color:var(--c-primary, #064E5A); text-decoration:none; font-weight:600;">{{ __('Voir') }} →</a>
+                                <a href="{{ $tool->getPublicUrl() }}" style="color:var(--c-primary, #064E5A); text-decoration:none; font-weight:600;">{{ __('Voir') }} →</a>
                             </div>
                         </div>
                     </article>

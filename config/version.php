@@ -17,6 +17,26 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.114.1 · 2026-07-19 · fix(directory) audit proactif + correction des 21 autres call sites
+ *     partageant le bug de repli de locale corrigé en v1.114.0 (P0 500 /admin/directory). Après le
+ *     P0, grep exhaustif `route('directory.show'` site-wide - 21 endroits de plus accédaient
+ *     directement à `$tool->slug` (ou équivalent) sans passer par le repli déjà écrit dans
+ *     `Tool::getPublicUrl()`, exposés au même risque de UrlGenerationException dès qu'un outil n'a
+ *     pas de traduction 'slug' pour la locale courante. Remplacés par `->getPublicUrl()` (DRY,
+ *     aucune logique de repli dupliquée) : `Tool::searchableResultUrl()` (recherche globale du
+ *     site), sitemap (`SitemapController`), JSON-LD (`JsonLdService`), newsletter hebdo
+ *     (`digest-weekly.blade.php` - impact le plus large, envoyée à tous les abonnés), page
+ *     d'accueil, RSS annuaire, bannière lifecycle (bug DISTINCT et plus grave : passait l'objet
+ *     Tool complet à `route()` au lieu du slug, générant une URL avec l'ID au lieu du slug),
+ *     contributions utilisateur, vote communautaire, redirection canonique doublons fusionnés,
+ *     comparateur, collections, tarifs éducation, favoris/marque-pages, page fiche outil (3
+ *     endroits). Exclus délibérément : 5 pages FrontTheme à chaînes littérales codées en dur
+ *     (aucun accès `->slug`, aucun risque), `News/public/show.blade.php` (déjà son propre repli
+ *     manuel). Délégué à un sous-agent Sonnet (21 remplacements précis déjà analysés par Opus,
+ *     jamais de "comprends et corrige" laissé au sous-agent) - `php -l` + compilation Blade
+ *     vérifiées sur les 20 fichiers. Régression ciblée (Directory/Core/FrontTheme/Auth/Voting/
+ *     Blog/Newsletter/SEO) : 401 passed, 0 failed (1891 assertions). Aucun changement DB. Aucune
+ *     nouvelle route. Codename directory-locale-fallback-remediation.
  *   1.114.0 · 2026-07-19 · feat(action-menu) menus d'actions kebab (⋮) site-wide (Codex 94/100 +
  *     Gemini 85/100). Demande utilisateur : sur "Mes liens courts" (capture d'écran), 6 boutons
  *     inline (Copier/QR/Stats/Modifier/Prolonger/Supprimer) par ligne = "boutons trop petits, on
@@ -1733,7 +1753,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 114;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,
