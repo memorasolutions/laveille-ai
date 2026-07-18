@@ -1,4 +1,4 @@
-@extends(fronttheme_layout())
+@extends('auth::layouts.user-frontend')
 
 @section('title', __('Mes commandes'))
 
@@ -14,8 +14,8 @@
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Mes commandes'), 'breadcrumbItems' => [__('Boutique'), __('Mes commandes')]])
 @endsection
 
-@section('content')
-<div class="container sp-container">
+@section('user-content')
+<div class="sp-container">
     <h1 class="sp-page-title" style="margin-bottom: 24px;">{{ __('Mes commandes') }}</h1>
 
     @if($orders->isEmpty())
@@ -68,3 +68,4 @@
     @endif
 </div>
 @endsection
+

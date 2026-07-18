@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.112.0] - 2026-07-18
+## [1.113.0] - 2026-07-18
+
+### Added
+- **"Mon espace" - menu latéral regroupé en accordéon.** Les 17 liens (Tableau de bord, Académie, Mes journaux, Mes liens courts, etc.) sont maintenant organisés en 5 catégories (Vue d'ensemble, Académie, Mon contenu, Mes outils, Mon compte), repliées par défaut sauf la catégorie active, dépliables au clic - sur desktop comme sur mobile. Décido "Mes sondages" ajouté au menu (en était absent).
+- **Fil d'Ariane contextuel sur `/user/liens/{id}/edit`** ("Mon espace > Mes liens courts > Modifier") au lieu du breadcrumb générique hérité.
+
+### Fixed
+- **Bug d'état actif du menu "Mon espace".** Le lien courant ne s'allumait jamais sur les pages create/edit (ex. modification d'un lien court) car la comparaison utilisait le nom exact de la route au lieu d'un préfixe. Corrigé avec des patterns explicites par lien (vérifiés contre chaque module pour éviter toute collision, ex. `collections.my` distinct des pages publiques `collections.*` de l'annuaire) et `aria-current="page"` correctement posé (l'échappement Blade produisait auparavant des guillemets littéraux dans l'attribut).
+- **Sidebar absente sur "Mes journaux", "Mes commandes" et "Mes sondages Décido".** Ces 3 pages héritaient directement du layout du thème au lieu du layout "Mon espace", cassant la navigation au clic depuis le menu.
+- **Menu mobile qui ne se repliait jamais.** Le bouton "Menu de mon espace" affichait le menu complet en permanence sur mobile (poussant tout le contenu utile sous la ligne de flottaison) à cause d'une règle CSS `!important` qui écrasait le contrôle d'affichage géré par Alpine.js.
 
 ### Added
 - **Décido - mise en public.** Feu vert utilisateur explicite après 27 rounds de revue adversariale + simulation E2E complète (#1134-1139). `DECIDO_UNDER_CONSTRUCTION=false` + migration `2026_07_18_180000_decido_publish.php` (retire le badge "Bientôt" sur `/outils`, pattern identique à Minuteur visuel).

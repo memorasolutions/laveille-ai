@@ -17,6 +17,45 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.113.0 · 2026-07-18 · feat(mon-espace) refonte groupée du menu "Mon espace" (Codex 94/100 +
+ *     Gemini 95/100). Demande utilisateur initiale : sur /user/liens/{id}/edit le menu de gauche
+ *     ne signalait aucun item actif ("perte de repère") et "Mon espace" perçu comme lourd/on s'y
+ *     perd. Diagnostic par lecture de code : le check d'état actif comparait le NOM de route à
+ *     un préfixe fragile (`routeIs($route.'*')`) qui ne matchait jamais les sous-routes
+ *     create/edit ; Journal, Shop et Décido "Mes sondages" héritaient directement de
+ *     fronttheme_layout() au lieu de auth::layouts.user-frontend (sidebar absente sur ces 3
+ *     pages, bien que listées/attendues dans le menu) ; Décido "Mes sondages" n'apparaissait même
+ *     pas dans le menu. Veille pp_search + validation croisée Perplexity/Codex/Gemini (via
+ *     compte Google stephane@memora.ca, agy épuisé) sur 4 options - Option B (sidebar groupée
+ *     par intention) retenue et enrichie des retours des 2 reviewers :
+ *     (1) `user-menu-links.blade.php` réécrit : 17 liens regroupés en 5 catégories (Vue
+ *     d'ensemble, Académie, Mon contenu, Mes outils avec Décido désormais inclus, Mon compte),
+ *     `active_patterns` explicites par lien (vérifiés par grep contre chaque module pour éviter
+ *     toute collision de wildcard - ex. `collections.my` seul, PAS `collections.*` qui aurait
+ *     capturé les pages publiques de l'annuaire), `aria-current="page"` robuste.
+ *     (2) Chaque groupe = accordéon Alpine.js (x-show), fermé par défaut sauf le groupe actif,
+ *     ouvert au clic - PAS de `<details>` natif : Chrome masque le contenu d'un `<details>` fermé
+ *     via un mécanisme UA qu'un simple `display:block!important` ne parvient pas à annuler de
+ *     façon fiable (bug constaté en direct : offsetHeight=0 malgré getComputedStyle().display=
+ *     'block'), corrigé en repassant par Alpine où `!important` bat bien le style inline x-show.
+ *     Comportement identique desktop/mobile (demande explicite utilisateur en cours de route :
+ *     "les catégories de menus doivent se refermer si pas utilisé et ouvrir au clique" - annule
+ *     la recommandation initiale Codex/Gemini de forcer les groupes toujours ouverts sur desktop).
+ *     (3) Journal (`index.blade.php`), Shop (`my-orders.blade.php`) et Décido
+ *     (`manage/index.blade.php`) migrés vers `auth::layouts.user-frontend` - sidebar cohérente
+ *     partout désormais.
+ *     (4) Bug PRÉEXISTANT découvert et corrigé en testant : le toggle mobile du menu complet
+ *     ("Menu de mon espace") ne se repliait jamais - même piège CSS `!important` vs style inline
+ *     Alpine que le bug #2 (la classe `.user-space-mobile-only` forçait `display:block!important`
+ *     sur l'instance contrôlée par `x-show`). Retiré cette classe de l'instance mobile-toggle
+ *     (gardée sur le bouton lui-même) - x-cloak+x-show suffisent seuls, sur tous les breakpoints.
+ *     (5) Bug de forme corrigé au passage : `aria-current="page"` était généré via
+ *     `{{ $isActive ? 'aria-current="page"' : '' }}` (double-échappement Blade, guillemets
+ *     littéraux dans l'attribut) - remplacé par `@if($isActive) aria-current="page" @endif`.
+ *     (6) Fil d'Ariane contextuel ajouté sur `ShortUrl/user/edit.blade.php` (héritait du
+ *     breadcrumb générique "Mon espace", affiche désormais Mon espace > Mes liens courts >
+ *     Modifier).
+ *
  *   1.112.0 · 2026-07-18 · feat(decido) mise en public + feat(copier) confirmation toast+bouton
  *     site-wide + feat(decido) slug personnalisé lien court. Trois changements distincts livrés
  *     ensemble (demande utilisateur) :
@@ -1642,7 +1681,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 112;
+$lvMinor = 113;
 $lvPatch = 0;
 
 return [

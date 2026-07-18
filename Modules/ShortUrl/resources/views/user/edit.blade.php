@@ -1,6 +1,10 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('auth::layouts.user-frontend')
 
+@section('breadcrumb')
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Modifier le lien court', 'breadcrumbItems' => [__('Mon espace'), __('Mes liens courts'), __('Modifier')]])
+@endsection
+
 @section('user-content')
 
 {{-- Header --}}

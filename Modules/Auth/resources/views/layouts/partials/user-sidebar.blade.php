@@ -23,11 +23,15 @@
     <div class="list-group" style="margin-bottom: 0;">
         @include('auth::components.user-menu-links', ['variant' => 'sidebar'])
 
+        {{-- Séparation visuelle du bloc utilitaire (hors groupes fonctionnels) --}}
+        <div style="border-top: 1px solid #E5E7EB; margin-top: 8px; padding-top: 8px;">
         @if(Route::has('user.roadmap.ideas'))
-            <a href="{{ route('user.roadmap.ideas') }}" class="list-group-item {{ request()->routeIs('user.roadmap.ideas') ? 'active' : '' }}">
+            @php $isIdeasActive = request()->routeIs('user.roadmap.ideas'); @endphp
+            <a href="{{ route('user.roadmap.ideas') }}" class="list-group-item {{ $isIdeasActive ? 'active' : '' }}" {{ $isIdeasActive ? 'aria-current="page"' : '' }}>
                 💡 {{ __('Idées et suggestions') }}
             </a>
-            <a href="{{ route('user.roadmap.bugs') }}" class="list-group-item {{ request()->routeIs('user.roadmap.bugs') ? 'active' : '' }}" style="color: #d9534f;">
+            @php $isBugsActive = request()->routeIs('user.roadmap.bugs'); @endphp
+            <a href="{{ route('user.roadmap.bugs') }}" class="list-group-item {{ $isBugsActive ? 'active' : '' }}" {{ $isBugsActive ? 'aria-current="page"' : '' }} style="color: #d9534f;">
                 🐛 {{ __('Signaler un bug') }}
             </a>
         @elseif(Route::has('roadmap.boards.index'))
@@ -54,5 +58,6 @@
         <form id="sidebar-logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
             @csrf
         </form>
+        </div>
     </div>
 </div>

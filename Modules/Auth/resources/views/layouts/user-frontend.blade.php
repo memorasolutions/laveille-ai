@@ -26,8 +26,13 @@
             @include('auth::layouts.partials.user-sidebar')
         </div>
 
-        {{-- Sidebar mobile (toggle Alpine.js) --}}
-        <div class="col-xs-12 user-space-mobile-only" x-show="sidebarOpen" x-transition x-cloak>
+        {{-- Sidebar mobile (toggle Alpine.js) — PAS la classe user-space-mobile-only ici : son
+             display:block!important (media query) écrasait le style inline qu'Alpine pose via
+             x-show, empêchant le repli mobile (même bug de fond que les groupes d'accordéon
+             .msp-group, corrigé le 2026-07-18). x-cloak+x-show suffisent seuls à contrôler
+             l'affichage sur tous les breakpoints (fermé par défaut, ouvert au clic du bouton
+             "Menu de mon espace" ci-dessus). --}}
+        <div class="col-xs-12" x-show="sidebarOpen" x-transition x-cloak>
             @include('auth::layouts.partials.user-sidebar')
         </div>
         @endauth
