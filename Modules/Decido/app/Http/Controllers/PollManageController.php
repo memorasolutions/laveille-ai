@@ -19,6 +19,7 @@ use Modules\Decido\Enums\VoteMode;
 use Modules\Decido\Models\Poll;
 use Modules\Decido\Rules\DistinctNormalized;
 use Modules\Decido\Services\SlotGenerationService;
+use Modules\Decido\Services\TimezoneListService;
 
 class PollManageController extends Controller
 {
@@ -40,14 +41,25 @@ class PollManageController extends Controller
     // conditionnel x-show. Réduit le nombre de champs visibles au minimum pertinent par type.
     public function createDate(): ViewContract
     {
-        return View::make('decido::manage.create-date');
+        return View::make('decido::manage.create-date', [
+            'timezones' => $this->timezoneOptions(),
+        ]);
     }
 
     public function createClassic(): ViewContract
     {
         return View::make('decido::manage.create-classic', [
             'voteModes' => VoteMode::cases(),
+            'timezones' => $this->timezoneOptions(),
         ]);
+    }
+
+    /**
+     * @return array<int, array{id: string, label: string, region: string, offset: string}>
+     */
+    private function timezoneOptions(): array
+    {
+        return TimezoneListService::list();
     }
 
     public function store(Request $request): RedirectResponse

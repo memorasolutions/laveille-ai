@@ -17,6 +17,43 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.110.0 · 2026-07-18 · feat(decido) fuseaux horaires complets (créateur) + adaptation au
+ *     fuseau local du votant (page de vote). Demande utilisateur : "que tout les fuseaux horaires
+ *     y soit et que la page de réservation ou de sélection tienne compte du fuseau horaire de
+ *     l'utilisateur qui s'adaptera en fonction du fuseau choisi par le créateur." Veille pp_search
+ *     (NN/g, Calendly, Doodle, W3C/MDN, IANA) + validation croisée Codex (91/100, corrections
+ *     appliquées : source PHP canonique plutôt que Intl.supportedValuesOf, accessibilité ARIA
+ *     complète du combobox, primaire/secondaire plutôt que double affichage permanent, repli
+ *     manuel explicite si détection échoue) - Gemini non obtenu (agy quota épuisé 71h,
+ *     fallback navigateur bloqué sur mot de passe utilisateur, signalé et accepté comme limite).
+ *     Volet A (`Modules/Decido/app/Services/TimezoneListService.php`, nouveau) : ~420 fuseaux IANA
+ *     (`DateTimeZone::listIdentifiers`) + `America/Montreal` réinjecté manuellement (continuité),
+ *     combobox de recherche Alpine.js natif (ARIA combobox/listbox/option, pattern repris de
+ *     search-palette.blade.php) remplaçant le `<select>` à 3 valeurs, détection auto du fuseau
+ *     navigateur pré-sélectionnée, préservation `old()` intacte (FEAT_010), tri alphabétique par
+ *     ville, groupement secondaire par région. Aucun changement de validation backend requis (la
+ *     règle Laravel `timezone` acceptait déjà tout identifiant IANA valide).
+ *     Volet B (`vote.blade.php`) : détection `Intl.DateTimeFormat().resolvedOptions().timeZone`
+ *     côté votant, bascule heure locale (primaire) / heure du sondage (secondaire) si les fuseaux
+ *     diffèrent, aucun changement visuel si identiques, repli manuel (7 fuseaux courants + lien
+ *     IANA complet) si détection échoue, préférence persistée `localStorage`, conversion 100%
+ *     côté client (zéro changement DB/logique de vote).
+ *     BUG RÉEL trouvé et corrigé par la vérification visuelle Playwright (pas par les 92 tests
+ *     Pest, qui ne vérifient que la présence des attributs, pas leur valeur) : l'attribut
+ *     `data-starts-at-utc` calculait `$option->starts_at->toIso8601String()` directement, mais le
+ *     cast Eloquent `datetime` réinterprète à tort la valeur UTC stockée comme si elle était déjà
+ *     en `config('app.timezone')` (America/Toronto) - même cause racine EXACTE que le bug déjà
+ *     corrigé dans `PollExportService::exportIcs()` (v1.107.1) et `results.blade.php` (v1.107.0),
+ *     mais réintroduite ici car le sous-agent qui a écrit ce volet ne connaissait pas ce piège
+ *     spécifique au projet. Effet observé avant fix : écart constant de 4h (le décalage UTC du
+ *     fuseau du VOTANT, pas du sondage) sur l'heure locale secondaire affichée, la date ne
+ *     basculait jamais au jour précédent malgré le passage de minuit. Corrigé en reparsant
+ *     explicitement `$option->starts_at->format('Y-m-d H:i:s')` comme UTC (même pattern que les 2
+ *     fix précédents) avant `toIso8601String()`. Re-vérifié après fix via une vraie requête HTTP
+ *     (pas juste un calcul isolé) : `data-starts-at-utc="2026-08-15T09:00:00+00:00"` (correct,
+ *     avant fix : `...-04:00`, faux). 92/92 tests Pest verts (396 assertions, 86 existants + 6
+ *     nouveaux : combobox présent + liste complète, préservation old(), America/Montreal présent,
+ *     attributs UTC présents sur sondage date/absents sur sondage classique).
  *   1.109.11 · 2026-07-18 · fix(decido) "America/Montreal" retiré de la base IANA tzdata en 2014
  *     (fusionné dans America/Toronto, mêmes règles HNE/HAE) - n'est donc plus reconnu par
  *     timezone_identifiers_list() sur PHP moderne, ce qui faisait échouer À CHAQUE FOIS la règle
@@ -1568,8 +1605,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 109;
-$lvPatch = 11;
+$lvMinor = 110;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

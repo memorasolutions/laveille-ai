@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.110.0] - 2026-07-18
+
+### Added
+- **Décido - fuseaux horaires IANA complets (créateur).** Le sélecteur de fuseau horaire du formulaire de création (limité à 3 valeurs) est remplacé par un combobox de recherche Alpine.js (~420 fuseaux IANA, recherche par ville/région, détection automatique du fuseau navigateur pré-sélectionnée, accessibilité ARIA combobox/listbox complète, préservation `old()` intacte). Nouveau service `TimezoneListService`. Aucun changement de validation backend requis.
+- **Décido - adaptation au fuseau local du votant (page de vote).** La page de vote détecte le fuseau du navigateur du votant et affiche l'heure locale du votant en primaire (avec l'heure du fuseau du sondage en secondaire) si les fuseaux diffèrent, avec bascule et repli manuel si la détection échoue. Conversion 100% côté client, aucun changement à la logique de vote. Veille pp_search (NN/g, Calendly, Doodle, W3C/MDN) + validation croisée Codex (91/100).
+
+### Fixed
+- **Décido - heure locale du votant incorrecte de plusieurs heures.** Bug trouvé par la vérification visuelle Playwright (non détecté par les tests Pest, qui ne vérifiaient que la présence des attributs, pas leur valeur) : `data-starts-at-utc` calculait directement `toIso8601String()` sur la valeur castée par Eloquent, laquelle réinterprète à tort une valeur UTC comme si elle était déjà en `America/Toronto` - même cause racine que les fix `PollExportService::exportIcs()` (v1.107.1) et `results.blade.php` (v1.107.0), réintroduite ici. Corrigé en reparsant explicitement la valeur comme UTC avant conversion. 92/92 tests Pest Décido verts (396 assertions).
+
 ## [1.109.11] - 2026-07-18
 
 ### Fixed

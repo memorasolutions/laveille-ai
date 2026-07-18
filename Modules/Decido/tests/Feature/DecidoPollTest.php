@@ -2367,3 +2367,111 @@ test('Round 27 (bug 3) : voter sans rien cocher (mode oui/non/peut-être) affich
     $expectedMessage = trans('validation.required', ['attribute' => 'votes']);
     $this->assertStringContainsString('<div class="text-danger mt-2">'.$expectedMessage.'</div>', $voteHtml);
 });
+
+// ── Fuseaux horaires complets + adaptation locale (2026-07-18) ─────────────
+
+/**
+ * La liste de fuseaux est embarquée en JSON.parse('...') par Illuminate\Support\Js::from()
+ * (voir description-timezone-fields.blade.php) : REQUIRED_FLAGS de Js inclut JSON_HEX_QUOT, donc
+ * les guillemets deviennent " (pas des guillemets littéraux), et le slash de "America/Montreal"
+ * est doublement échappé par le passage JSON.parse (échappement JSON standard + ré-échappement lors
+ * du wrapping en chaîne JS). Vérifié empiriquement (php artisan tinker, rendu réel de la vue) avant
+ * d'écrire cette extraction plutôt que de deviner le texte brut échappé - une simple recherche de
+ * '"id":"' échouerait silencieusement (zéro correspondance) sur le HTML réellement généré.
+ */
+function decidoExtractTimezonesFromHtml(string $html): array
+{
+    preg_match("/JSON\.parse\('(.+?)'\)/", $html, $matches);
+    if (! isset($matches[1])) {
+        return [];
+    }
+
+    return json_decode(json_decode('"'.$matches[1].'"'), true) ?? [];
+}
+
+test('formulaire de création date contient le combobox de recherche de fuseau et la liste complète IANA', function (): void {
+    $response = $this->actingAs($this->superadmin)->get(route('decido.create.date'));
+    $content = $response->getContent();
+
+    $this->assertStringContainsString('role="combobox"', $content);
+    $this->assertStringContainsString('id="timezone_search"', $content);
+    $this->assertStringContainsString('type="hidden" name="timezone"', $content);
+
+    $timezones = decidoExtractTimezonesFromHtml($content);
+    $this->assertGreaterThan(400, count($timezones));
+});
+
+test('formulaire de création classic contient le combobox de recherche de fuseau et la liste complète IANA', function (): void {
+    $response = $this->actingAs($this->superadmin)->get(route('decido.create.classic'));
+    $content = $response->getContent();
+
+    $this->assertStringContainsString('role="combobox"', $content);
+    $this->assertStringContainsString('id="timezone_search"', $content);
+    $this->assertStringContainsString('type="hidden" name="timezone"', $content);
+
+    $timezones = decidoExtractTimezonesFromHtml($content);
+    $this->assertGreaterThan(400, count($timezones));
+});
+
+test('America/Montreal est bien présent dans les options de fuseau horaire', function (): void {
+    $response = $this->actingAs($this->superadmin)->get(route('decido.create.date'));
+    $timezones = decidoExtractTimezonesFromHtml($response->getContent());
+
+    $ids = array_column($timezones, 'id');
+    $this->assertContains('America/Montreal', $ids);
+});
+
+test('le fuseau horaire soumis est préservé après une erreur de validation', function (): void {
+    $invalidData = [
+        'title' => '', // déclenche une erreur de validation sur 'title', pas sur 'timezone'
+        'type' => 'date',
+        'vote_mode' => 'yes_no_maybe',
+        'timezone' => 'Asia/Tokyo',
+    ];
+
+    $this->actingAs($this->superadmin)
+        ->from(route('decido.create.date'))
+        ->post(route('decido.store'), $invalidData)
+        ->assertSessionHasErrors(['title'])
+        ->assertSessionHasInput('timezone', 'Asia/Tokyo');
+});
+
+test('page de vote date affiche les attributs UTC et charge decidoSlotTimezone', function (): void {
+    config()->set('decido.under_construction', false);
+
+    $poll = decidoCreatePoll([
+        'type' => 'date',
+        'vote_mode' => 'yes_no_maybe',
+        'timezone' => 'America/Toronto',
+    ]);
+
+    PollOption::factory()->create([
+        'poll_id' => $poll->id,
+        'starts_at' => now()->addDays(3)->setTime(14, 0)->utc(),
+        'ends_at' => now()->addDays(3)->setTime(16, 0)->utc(),
+    ]);
+
+    $content = $this->get(route('decido.vote.show', ['slug' => $poll->public_id]))->getContent();
+
+    $this->assertStringContainsString('data-starts-at-utc="', $content);
+    $this->assertStringContainsString('data-ends-at-utc="', $content);
+    $this->assertStringContainsString('function decidoSlotTimezone', $content);
+});
+
+test('page de vote classique n\'affiche ni attributs UTC ni decidoSlotTimezone', function (): void {
+    config()->set('decido.under_construction', false);
+
+    $poll = decidoCreatePoll([
+        'type' => 'classic',
+        'vote_mode' => 'single_choice',
+        'timezone' => 'America/Toronto',
+    ]);
+
+    PollOption::factory()->create(['poll_id' => $poll->id]);
+
+    $content = $this->get(route('decido.vote.show', ['slug' => $poll->public_id]))->getContent();
+
+    $this->assertStringNotContainsString('data-starts-at-utc="', $content);
+    $this->assertStringNotContainsString('data-ends-at-utc="', $content);
+    $this->assertStringNotContainsString('function decidoSlotTimezone', $content);
+});
