@@ -17,6 +17,22 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.115.0 · 2026-07-19 · feat(decido) bouton "Envoyer par courriel" (mailto:) sur le panneau
+ *     Partage et export. Question utilisateur : "le dernier outil (Décido) envoie-t-il des
+ *     courriels ?" - audit confirmait 0 courriel (aucune classe Mail/Notification, aucune colonne
+ *     email sur la table des sondages). Idée user (mailto/fichier pré-formaté) validée : lien
+ *     `mailto:?subject=...&body=...` qui ouvre le client courriel de L'ORGANISATEUR (Gmail/
+ *     Outlook/Mail.app), pré-rempli avec le titre du sondage + le lien public - c'est lui qui
+ *     envoie depuis sa propre adresse, exactement comme le vrai Framadate (jamais un envoi
+ *     serveur pour l'invitation des participants). Choisi plutôt qu'un envoi SMTP serveur car :
+ *     zéro infrastructure (pas de mailer supplémentaire), zéro donnée collectée (aucun email de
+ *     participant stocké côté plateforme -> aucun enjeu Loi 25/RGPD), effort quasi nul. Nouveau
+ *     composant DRY réutilisable `Modules/Core/resources/views/components/mailto-share-btn.blade.php`
+ *     (props subject/body/label, style `.ct-btn` charte) - réutilisable par tout futur outil.
+ *     Inséré dans `Decido/manage/partials/results-content.blade.php` juste après le bouton
+ *     "Copier" du lien public. Vérifié visuellement (Playwright local) : bouton visible, style
+ *     identique au bouton Copier, href mailto contient bien sujet + lien du sondage encodés.
+ *     Régression Decido+Core : 206 passed, 0 failed. Aucun changement DB. Codename decido-mailto-share.
  *   1.114.1 · 2026-07-19 · fix(directory) audit proactif + correction des 21 autres call sites
  *     partageant le bug de repli de locale corrigé en v1.114.0 (P0 500 /admin/directory). Après le
  *     P0, grep exhaustif `route('directory.show'` site-wide - 21 endroits de plus accédaient
@@ -1752,8 +1768,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 114;
-$lvPatch = 1;
+$lvMinor = 115;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

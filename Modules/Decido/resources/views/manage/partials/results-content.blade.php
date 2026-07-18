@@ -273,6 +273,14 @@
 
                 <div class="mt-5 p-3 border rounded">
                     <h3 class="h5 mb-3">Partage et export</h3>
+                    @php
+                        // Décido (2026-07-19, demande utilisateur) : mailto: plutot qu'un envoi serveur -
+                        // ouvre le client courriel de L'ORGANISATEUR (Gmail/Outlook/Mail.app), c'est lui qui
+                        // envoie depuis sa propre adresse. Zéro infrastructure d'envoi, zéro email collecté
+                        // côté plateforme (aucun enjeu Loi 25/RGPD), comportement identique au vrai Framadate.
+                        $mailInviteSubject = 'Sondage : ' . $poll->title;
+                        $mailInviteBody = "Bonjour,\n\nVous êtes invité(e) à répondre à ce sondage :\n" . $poll->title . "\n\n" . $poll->share_url . "\n\nMerci de votre participation !";
+                    @endphp
                     <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
                         <span class="text-muted">Lien public :</span>
                         <code>{{ $poll->share_url }}</code>
@@ -283,6 +291,7 @@
                             <span x-show="!copied">Copier</span>
                             <span x-show="copied" aria-hidden="true">✓ Copié !</span>
                         </button>
+                        <x-core::mailto-share-btn :subject="$mailInviteSubject" :body="$mailInviteBody" label="Envoyer par courriel" />
                     </div>
 
                     @if($poll->getShortUrlString())

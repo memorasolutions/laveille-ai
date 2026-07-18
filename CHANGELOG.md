@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.115.0] - 2026-07-19
+
+### Added
+- **Décido : bouton "Envoyer par courriel" sur le panneau Partage et export.** Ouvre le client courriel de l'organisateur (Gmail/Outlook/Mail.app) avec le titre du sondage et le lien public pré-remplis (`mailto:`) - c'est lui qui envoie depuis sa propre adresse, comme le vrai Framadate. Zéro infrastructure d'envoi, zéro donnée collectée côté plateforme. Nouveau composant réutilisable `x-core::mailto-share-btn`.
+
 ## [1.114.1] - 2026-07-19
 
 ### Fixed
