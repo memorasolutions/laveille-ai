@@ -101,10 +101,15 @@
                 </div>
                 <div class="card-body">
                     @if ($rightsRequest->status !== 'completed')
-                        <form action="{{ route('admin.rights-requests.mark-completed', $rightsRequest) }}" method="POST">
+                        {{-- Confirmation via data-confirm (2026-07-19) : remplace le confirm() JS
+                             natif, interdit sur ce projet, par la modale du thème (délégué global
+                             de master.blade.php sur form[data-confirm]). Action unique de cette
+                             carte, gardée visible (pas de composant action-menu : rien à regrouper
+                             avec). --}}
+                        <form action="{{ route('admin.rights-requests.mark-completed', $rightsRequest) }}" method="POST" data-confirm="Confirmer que cette demande est traitée?">
                             @csrf
                             @method('PATCH')
-                            <button type="submit" class="btn btn-success w-100" onclick="return confirm('Confirmer que cette demande est traitée?')">
+                            <button type="submit" class="btn btn-success w-100">
                                 <i class="bi bi-check-lg"></i> Marquer comme terminée
                             </button>
                         </form>

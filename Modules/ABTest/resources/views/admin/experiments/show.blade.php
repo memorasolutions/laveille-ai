@@ -35,9 +35,14 @@
             <div class="card mb-4">
                 <div class="card-body text-center py-4">
                     <p class="text-muted mb-3">{{ __('Cette expérience est en brouillon. Démarrez-la pour commencer à collecter des données.') }}</p>
-                    <form action="{{ route('admin.experiments.start', $experiment) }}" method="POST">
+                    {{-- Confirmation via data-confirm (2026-07-19) : remplace le confirm() JS
+                         natif, interdit sur ce projet, par la modale du thème (délégué global de
+                         master.blade.php sur form[data-confirm]). Action unique, critique, gardée
+                         visible (pas de composant action-menu : rien à regrouper avec, aucun autre
+                         bouton n'apparaît dans cet état "brouillon"). --}}
+                    <form action="{{ route('admin.experiments.start', $experiment) }}" method="POST" data-confirm="{{ __('Démarrer cette expérience ?') }}">
                         @csrf
-                        <button type="button" class="btn btn-primary btn-lg" onclick="if(confirm('{{ __('Démarrer cette expérience ?') }}')) this.closest('form').submit()"><i data-lucide="play"></i> {{ __('Démarrer l\'expérience') }}</button>
+                        <button type="submit" class="btn btn-primary btn-lg"><i data-lucide="play"></i> {{ __('Démarrer l\'expérience') }}</button>
                     </form>
                 </div>
             </div>
@@ -70,7 +75,12 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">{{ __('Terminer l\'expérience') }}</h5>
-                    <form action="{{ route('admin.experiments.complete', $experiment) }}" method="POST">
+                    {{-- Confirmation via data-confirm (2026-07-19) : remplace le confirm() JS
+                         natif, interdit sur ce projet, par la modale du thème. Le formulaire
+                         contient un champ obligatoire (select "winner") - reste un formulaire
+                         classique, pas un item de action-menu (le composant ne gère pas les
+                         champs). --}}
+                    <form action="{{ route('admin.experiments.complete', $experiment) }}" method="POST" data-confirm="{{ __('Terminer cette expérience ?') }}">
                         @csrf
                         <div class="row align-items-end">
                             <div class="col-md-8 mb-3">
@@ -82,7 +92,7 @@
                                 @error('winner')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-md-4 mb-3">
-                                <button type="button" class="btn btn-success w-100" onclick="if(confirm('{{ __('Terminer cette expérience ?') }}')) this.closest('form').submit()"><i data-lucide="flag"></i> {{ __('Terminer') }}</button>
+                                <button type="submit" class="btn btn-success w-100"><i data-lucide="flag"></i> {{ __('Terminer') }}</button>
                             </div>
                         </div>
                     </form>
@@ -102,9 +112,13 @@
             @endif
             <div class="card">
                 <div class="card-body text-center">
-                    <form action="{{ route('admin.experiments.destroy', $experiment) }}" method="POST">
+                    {{-- Confirmation via data-confirm (2026-07-19) : remplace le confirm() JS
+                         natif, interdit sur ce projet, par la modale du thème. Action destructive
+                         volontairement gardée visible en pleine largeur (pas cachée dans un menu),
+                         seule action de cette carte. --}}
+                    <form action="{{ route('admin.experiments.destroy', $experiment) }}" method="POST" data-confirm="{{ __('Supprimer définitivement cette expérience ?') }}">
                         @csrf @method('DELETE')
-                        <button type="button" class="btn btn-outline-danger" onclick="if(confirm('{{ __('Supprimer définitivement cette expérience ?') }}')) this.closest('form').submit()"><i data-lucide="trash-2"></i> {{ __('Supprimer cette expérience') }}</button>
+                        <button type="submit" class="btn btn-outline-danger"><i data-lucide="trash-2"></i> {{ __('Supprimer cette expérience') }}</button>
                     </form>
                 </div>
             </div>

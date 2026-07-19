@@ -63,16 +63,17 @@
                     </dl>
                 </div>
                 <div class="card-footer">
-                    <a href="mailto:{{ $contactMessage->email }}?subject=Re: {{ urlencode($contactMessage->subject) }}" class="btn btn-primary btn-sm w-100 mb-2">
-                        <i data-lucide="reply"></i> {{ __('Répondre par email') }}
-                    </a>
-                    <form action="{{ route('admin.contact-messages.destroy', $contactMessage) }}" method="POST" data-confirm="{{ __('Supprimer ce message ?') }}">
-                        @csrf
-                        @method('DELETE')
-                        <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="if(confirm('{{ __('Supprimer ce message ?') }}')) this.closest('form').submit()">
-                            <i data-lucide="trash-2"></i> {{ __('Supprimer') }}
-                        </button>
-                    </form>
+                    {{-- Regroupement dans le composant DRY action-menu (2026-07-19). Corrige au
+                         passage un bug de double confirmation : le bouton Supprimer déclenchait un
+                         confirm() JS natif (interdit sur ce projet) PUIS, une fois confirmé,
+                         soumettait le formulaire qui portait AUSSI un data-confirm="..." -
+                         déclenchant une seconde confirmation (cette fois via la modale du thème) à
+                         la suite de la première. Le composant action-menu gère la confirmation en
+                         un seul passage via sa modale (event confirm-action), sans popup native. --}}
+                    @include('core::components.action-menu', ['actions' => [
+                        ['label' => __('Répondre par email'), 'icon' => 'reply', 'url' => 'mailto:' . $contactMessage->email . '?subject=Re: ' . urlencode($contactMessage->subject)],
+                        ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.contact-messages.destroy', $contactMessage), 'method' => 'DELETE', 'confirm' => __('Supprimer ce message ?'), 'danger' => true],
+                    ]])
                 </div>
             </div>
         </div>

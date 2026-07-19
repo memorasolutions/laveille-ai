@@ -17,6 +17,13 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.115.1 · 2026-07-19 · fix(action-menu) page gérer Décido par jeton + 6 autres pages "show"
+ *     n'avaient jamais reçu le menu d'actions unifié (motif : la vue index est migrée mais pas la
+ *     vue show/edit de l'entité individuelle). Regroupement des boutons Partage/export Décido
+ *     (copier lien public/court, options avancées, CSV, ICS) + AI tickets/agent, Newsletter
+ *     workflows, ShortUrl admin show, Backoffice rights-requests + contact-messages. Corrige au
+ *     passage 2 violations confirm() natif (règle projet) et 1 réimplémentation non-DRY de la
+ *     copie presse-papiers. Régression ciblée 135 passed / 0 failed.
  *   1.115.0 · 2026-07-19 · feat(decido) bouton "Envoyer par courriel" (mailto:) sur le panneau
  *     Partage et export. Question utilisateur : "le dernier outil (Décido) envoie-t-il des
  *     courriels ?" - audit confirmait 0 courriel (aucune classe Mail/Notification, aucune colonne
@@ -1769,7 +1776,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 115;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,

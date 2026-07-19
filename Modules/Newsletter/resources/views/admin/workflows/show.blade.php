@@ -106,20 +106,20 @@
 
         <div class="card mt-3">
             <div class="card-header"><h6 class="mb-0">Actions</h6></div>
-            <div class="card-body d-grid gap-2">
-                @if($workflow->status !== 'active')
-                    <form method="POST" action="{{ route('admin.newsletter.workflows.activate', $workflow) }}">
-                        @csrf
-                        <button type="submit" class="btn btn-success btn-sm w-100">Activer</button>
-                    </form>
-                @endif
-                @if($workflow->status === 'active')
-                    <form method="POST" action="{{ route('admin.newsletter.workflows.pause', $workflow) }}">
-                        @csrf
-                        <button type="submit" class="btn btn-warning btn-sm w-100">Mettre en pause</button>
-                    </form>
-                @endif
-                <a href="{{ route('admin.newsletter.workflows.edit', $workflow) }}" class="btn btn-outline-primary btn-sm">Modifier</a>
+            <div class="card-body">
+                @php
+                    // Regroupement dans le composant DRY action-menu (2026-07-19) : mêmes
+                    // conditions @if qu'avant (statut actif/inactif), mêmes routes.
+                    $workflowActions = [];
+                    if ($workflow->status !== 'active') {
+                        $workflowActions[] = ['label' => 'Activer', 'icon' => 'play', 'url' => route('admin.newsletter.workflows.activate', $workflow), 'method' => 'POST'];
+                    }
+                    if ($workflow->status === 'active') {
+                        $workflowActions[] = ['label' => 'Mettre en pause', 'icon' => 'pause', 'url' => route('admin.newsletter.workflows.pause', $workflow), 'method' => 'POST'];
+                    }
+                    $workflowActions[] = ['label' => 'Modifier', 'icon' => 'pencil', 'url' => route('admin.newsletter.workflows.edit', $workflow)];
+                @endphp
+                @include('core::components.action-menu', ['actions' => $workflowActions])
             </div>
         </div>
     </div>

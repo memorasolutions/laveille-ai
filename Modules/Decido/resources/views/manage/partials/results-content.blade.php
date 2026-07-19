@@ -280,40 +280,49 @@
                         // côté plateforme (aucun enjeu Loi 25/RGPD), comportement identique au vrai Framadate.
                         $mailInviteSubject = 'Sondage : ' . $poll->title;
                         $mailInviteBody = "Bonjour,\n\nVous êtes invité(e) à répondre à ce sondage :\n" . $poll->title . "\n\n" . $poll->share_url . "\n\nMerci de votre participation !";
+
+                        // Regroupement dans le composant DRY action-menu (2026-07-19, demande utilisateur) :
+                        // uniquement les actions de copie/téléchargement/navigation, mêmes conditions @if
+                        // qu'avant (rien de la logique métier - routes, adminToken, statut du sondage - n'a
+                        // changé). Restent HORS menu, à dessein : x-core::mailto-share-btn (composant Blade
+                        // dédié avec son propre rendu, pas un simple lien que le menu sait afficher), le
+                        // bouton "Télécharger le QR code" (l'attribut download="" est ce qui force le
+                        // téléchargement du PNG puisque PollManageController::qrCode() répond en
+                        // Content-Disposition: inline - le composant action-menu ne supporte pas cet
+                        // attribut, donc il reste collé à son aperçu image juste en dessous), et le
+                        // formulaire de création de lien court (nécessite un champ texte, pas un simple clic).
+                        $shareActions = [
+                            ['label' => 'Copier le lien public', 'icon' => 'copy', 'alpineClick' => "open = false; copyToClipboard('{$poll->share_url}', 'Lien public copié')"],
+                        ];
+
+                        if ($poll->getShortUrlString()) {
+                            $shareActions[] = ['label' => 'Copier le lien court', 'icon' => 'copy', 'alpineClick' => "open = false; copyToClipboard('{$poll->getShortUrlString()}', 'Lien court copié')"];
+
+                            if (auth()->check() && auth()->id() === $poll->creator_id) {
+                                // Réservé au créateur connecté : UserShortUrlController::edit() vérifie
+                                // la propriété du lien, un token-only delegate n'y aurait pas accès.
+                                $shareActions[] = ['label' => 'Options avancées du lien court', 'icon' => 'external-link', 'url' => route('shorturl.user.edit', ['short_url' => $poll->shortUrl]), 'target' => '_blank'];
+                            }
+                        }
+
+                        $shareActions[] = ['divider' => true];
+                        $shareActions[] = ['label' => 'Télécharger en CSV', 'icon' => 'download', 'url' => route('decido.export.csv', ['poll' => $poll->public_id, 'adminToken' => $adminToken])];
+
+                        if ($poll->status->value === 'closed' && $poll->final_option_id) {
+                            $shareActions[] = ['label' => 'Télécharger en ICS', 'icon' => 'calendar-plus', 'url' => route('decido.export.ics', ['poll' => $poll->public_id, 'adminToken' => $adminToken])];
+                        }
                     @endphp
                     <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
                         <span class="text-muted">Lien public :</span>
                         <code>{{ $poll->share_url }}</code>
-                        <button type="button" class="ct-btn ct-btn-outline ct-btn-sm"
-                                aria-label="Copier le lien public du sondage"
-                                x-data="{ copied: false }"
-                                x-on:click="copyToClipboard('{{ $poll->share_url }}', 'Lien public copié').then(ok => { if (ok) { copied = true; setTimeout(() => copied = false, 2000) } })">
-                            <span x-show="!copied">Copier</span>
-                            <span x-show="copied" aria-hidden="true">✓ Copié !</span>
-                        </button>
                         <x-core::mailto-share-btn :subject="$mailInviteSubject" :body="$mailInviteBody" label="Envoyer par courriel" />
+                        @include('core::components.action-menu', ['actions' => $shareActions])
                     </div>
 
                     @if($poll->getShortUrlString())
                         <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
                             <span class="text-muted">Lien court :</span>
                             <code>{{ $poll->getShortUrlString() }}</code>
-                            <button type="button" class="ct-btn ct-btn-outline ct-btn-sm"
-                                    aria-label="Copier le lien court"
-                                    x-data="{ copied: false }"
-                                    x-on:click="copyToClipboard('{{ $poll->getShortUrlString() }}', 'Lien court copié').then(ok => { if (ok) { copied = true; setTimeout(() => copied = false, 2000) } })">
-                                <span x-show="!copied">Copier</span>
-                                <span x-show="copied" aria-hidden="true">✓ Copié !</span>
-                            </button>
-                            @if(auth()->check() && auth()->id() === $poll->creator_id)
-                                {{-- Réservé au créateur connecté : UserShortUrlController::edit() vérifie
-                                     la propriété du lien, un token-only delegate n'y aurait pas accès. --}}
-                                <a href="{{ route('shorturl.user.edit', ['short_url' => $poll->shortUrl]) }}" target="_blank" rel="noopener"
-                                   class="ct-btn ct-btn-ghost ct-btn-sm" style="white-space:nowrap;">
-                                    Options avancées <span aria-hidden="true">↗</span>
-                                    <span class="visually-hidden">(s'ouvre dans un nouvel onglet)</span>
-                                </a>
-                            @endif
                         </div>
                     @else
                         {{-- Slug personnalisé (demande utilisateur 2026-07-18) : connectés seulement (Décido
@@ -353,18 +362,6 @@
                            class="ct-btn ct-btn-outline ct-btn-sm">
                             Télécharger le QR code
                         </a>
-                    </div>
-
-                    <div class="d-flex flex-wrap gap-2">
-                        <x-core::button :href="route('decido.export.csv', ['poll' => $poll->public_id, 'adminToken' => $adminToken])" variant="secondary">
-                            Télécharger en CSV
-                        </x-core::button>
-
-                        @if($poll->status->value === 'closed' && $poll->final_option_id)
-                            <x-core::button :href="route('decido.export.ics', ['poll' => $poll->public_id, 'adminToken' => $adminToken])" variant="secondary">
-                                Télécharger en ICS
-                            </x-core::button>
-                        @endif
                     </div>
                 </div>
 

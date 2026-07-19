@@ -18,15 +18,12 @@
         {{ $conversation->title ?? __('Conversation') . ' #' . $conversation->id }}
     </h4>
     <div class="d-flex gap-2">
-        <form action="{{ route('admin.ai.tickets.from-conversation', $conversation) }}" method="POST">
-            @csrf
-            <button type="submit" class="btn btn-outline-warning btn-sm">
-                <i data-lucide="ticket" style="width:14px;height:14px;"></i> {{ __('Créer un ticket') }}
-            </button>
-        </form>
-        <a href="{{ route('admin.ai.agent.index') }}" class="btn btn-outline-secondary btn-sm">
-            <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> {{ __('Retour') }}
-        </a>
+        {{-- Regroupement dans le composant DRY action-menu (2026-07-19) : mêmes 2 actions
+             qu'avant (créer un ticket depuis la conversation, retour à la liste), mêmes routes. --}}
+        @include('core::components.action-menu', ['actions' => [
+            ['label' => __('Créer un ticket'), 'icon' => 'ticket', 'url' => route('admin.ai.tickets.from-conversation', $conversation), 'method' => 'POST'],
+            ['label' => __('Retour'), 'icon' => 'arrow-left', 'url' => route('admin.ai.agent.index')],
+        ]])
     </div>
 </div>
 
@@ -84,20 +81,14 @@
                     </div>
                 </form>
 
-                {{-- Quick actions --}}
-                <div class="d-flex justify-content-between mt-2">
-                    <form action="{{ route('admin.ai.agent.release', $conversation) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="btn btn-outline-secondary btn-sm">
-                            <i data-lucide="user-minus" style="width:14px;height:14px;"></i> {{ __('Relâcher') }}
-                        </button>
-                    </form>
-                    <form action="{{ route('admin.ai.agent.close', $conversation) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="btn btn-outline-success btn-sm">
-                            <i data-lucide="check-circle" style="width:14px;height:14px;"></i> {{ __('Fermer la conversation') }}
-                        </button>
-                    </form>
+                {{-- Quick actions - regroupées dans le composant DRY action-menu (2026-07-19) :
+                     mêmes 2 actions qu'avant (relâcher/fermer), mêmes routes, aucune confirmation
+                     ajoutée (il n'y en avait pas avant). --}}
+                <div class="d-flex justify-content-end mt-2">
+                    @include('core::components.action-menu', ['actions' => [
+                        ['label' => __('Relâcher'), 'icon' => 'user-minus', 'url' => route('admin.ai.agent.release', $conversation), 'method' => 'POST'],
+                        ['label' => __('Fermer la conversation'), 'icon' => 'check-circle', 'url' => route('admin.ai.agent.close', $conversation), 'method' => 'POST'],
+                    ]])
                 </div>
             </div>
             @endif

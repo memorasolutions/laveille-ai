@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.115.1] - 2026-07-19
+
+### Fixed
+- **Menu d'actions unifié absent sur la page de gestion Décido par jeton propriétaire et 6 autres pages "fiche".** Motif identifié : plusieurs modules avaient migré leur vue liste (`index`) vers le composant `action-menu` mais pas leur vue fiche individuelle (`show`/`edit`), notamment `Modules/Decido/resources/views/manage/partials/results-content.blade.php` signalée directement par l'utilisateur. Le bloc "Partage et export" regroupe maintenant copier le lien public/court, options avancées, télécharger CSV/ICS dans le menu (le bouton mailto, le QR code et le formulaire de lien court restent volontairement hors menu, justifié en commentaire). Migrées aussi : `Modules/AI` tickets/agent (show), `Modules/Newsletter` workflows (show), `Modules/ShortUrl` admin (show), `Modules/Backoffice` rights-requests + contact-messages (show). Corrige au passage 2 violations `confirm()` JS natif (interdites sur ce projet) sur `Modules/ABTest` experiments et `Modules/Backoffice` rights-requests, ainsi qu'une réimplémentation non-DRY de la copie presse-papiers sur `Modules/ShortUrl` admin (remplacée par `window.copyToClipboard`). Régression ciblée : 135 passed, 0 failed.
+
 ## [1.115.0] - 2026-07-19
 
 ### Added

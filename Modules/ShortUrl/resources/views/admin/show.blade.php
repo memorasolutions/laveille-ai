@@ -19,10 +19,6 @@
         <div class="d-flex align-items-center gap-3 flex-wrap">
             <div>
                 <code class="text-primary fs-5">/s/{{ $shortUrl->slug }}</code>
-                <button type="button" class="btn btn-sm btn-outline-primary ms-2" aria-label="Copier le lien"
-                        onclick="navigator.clipboard.writeText('{{ url('/s/' . $shortUrl->slug) }}');if(window.Livewire){Livewire.dispatch('toast',{type:'success',message:'{{ __('Lien copié') }}'})};this.textContent='Copié !';setTimeout(()=>this.textContent='Copier',1500);">
-                    Copier
-                </button>
             </div>
             <span class="badge {{ $shortUrl->is_active ? 'bg-success' : 'bg-secondary' }}">
                 {{ $shortUrl->is_active ? 'Actif' : 'Inactif' }}
@@ -35,12 +31,28 @@
                 {{ Str::limit($shortUrl->original_url, 60) }}
             </a>
         </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('admin.short-urls.edit', $shortUrl) }}" class="btn btn-primary btn-sm">
-                <i data-lucide="edit" style="width:14px;height:14px;" class="me-1"></i>Modifier
-            </a>
-            <a href="{{ route('admin.short-urls.index') }}" class="btn btn-outline-secondary btn-sm">Retour</a>
-        </div>
+        {{-- Regroupement dans le composant DRY action-menu (2026-07-19) : "Copier" réutilise
+             maintenant window.copyToClipboard (helper global défini dans master.blade.php, déjà
+             utilisé partout ailleurs sur le site) au lieu de réimplémenter navigator.clipboard +
+             un appel Livewire.dispatch('toast', ...) redondant - même résultat visible (toast de
+             confirmation), code non dupliqué. "Modifier" et "Retour" gardent leurs routes
+             identiques. Attention (piège rencontré pendant cette migration) : le tableau ci-dessous
+             est construit avec de la concaténation PHP pure (point suivi de guillemets), jamais avec
+             une expression d'affichage Blade imbriquée dans la chaîne alpineClick - une telle
+             expression, une fois compilée, atterrit à l'intérieur d'une chaîne PHP déjà ouverte et
+             ne s'exécute donc jamais (le texte compilé brut serait copié tel quel au lieu de l'URL
+             réelle). Ce commentaire évite aussi tout mot-clé de directive Blade en toutes lettres :
+             un simple mot ressemblant à une directive de bloc PHP dans un commentaire peut être
+             interprété comme une vraie directive et avaler tout le contenu qui suit jusqu'à la
+             prochaine fermeture correspondante. --}}
+        @php
+            $shortUrlActions = [
+                ['label' => 'Copier le lien', 'icon' => 'copy', 'alpineClick' => "open = false; copyToClipboard('" . url('/s/' . $shortUrl->slug) . "', 'Lien copié')"],
+                ['label' => 'Modifier', 'icon' => 'edit', 'url' => route('admin.short-urls.edit', $shortUrl)],
+                ['label' => 'Retour', 'icon' => 'arrow-left', 'url' => route('admin.short-urls.index')],
+            ];
+        @endphp
+        @include('core::components.action-menu', ['actions' => $shortUrlActions])
     </div>
 </div>
 

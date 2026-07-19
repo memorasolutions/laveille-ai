@@ -142,7 +142,17 @@
     {{-- RIGHT: Status update, SLA, actions --}}
     <div class="col-lg-4">
         <div class="card mb-3">
-            <div class="card-header"><strong>{{ __('Mettre à jour') }}</strong></div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>{{ __('Mettre à jour') }}</strong>
+                {{-- Regroupement dans le composant DRY action-menu (2026-07-19) : les 2 actions
+                     rapides "Marquer comme résolu"/"Fermer le ticket" (simples soumissions POST,
+                     aucune confirmation avant comme après) - la logique métier (routes, méthode)
+                     reste identique. --}}
+                @include('core::components.action-menu', ['actions' => [
+                    ['label' => __('Marquer comme résolu'), 'icon' => 'check-circle', 'url' => route('admin.ai.tickets.resolve', $ticket), 'method' => 'POST'],
+                    ['label' => __('Fermer le ticket'), 'icon' => 'x-circle', 'url' => route('admin.ai.tickets.close', $ticket), 'method' => 'POST'],
+                ]])
+            </div>
             <div class="card-body">
                 <form action="{{ route('admin.ai.tickets.update', $ticket) }}" method="POST">
                     @csrf
@@ -167,23 +177,6 @@
                         <i data-lucide="save" style="width:14px;height:14px;"></i> {{ __('Mettre à jour') }}
                     </button>
                 </form>
-
-                <hr class="my-3">
-
-                <div class="d-grid gap-2">
-                    <form action="{{ route('admin.ai.tickets.resolve', $ticket) }}" method="POST" class="d-grid">
-                        @csrf
-                        <button type="submit" class="btn btn-success">
-                            <i data-lucide="check-circle" style="width:14px;height:14px;"></i> {{ __('Marquer comme résolu') }}
-                        </button>
-                    </form>
-                    <form action="{{ route('admin.ai.tickets.close', $ticket) }}" method="POST" class="d-grid">
-                        @csrf
-                        <button type="submit" class="btn btn-secondary">
-                            <i data-lucide="x-circle" style="width:14px;height:14px;"></i> {{ __('Fermer le ticket') }}
-                        </button>
-                    </form>
-                </div>
             </div>
         </div>
 
