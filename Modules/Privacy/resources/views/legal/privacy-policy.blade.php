@@ -221,6 +221,7 @@
                                         <tr><td>{{ __('Données infolettre') }}</td><td>{{ __('Jusqu\'au désabonnement + 3 ans') }}</td><td>{{ __('LCAP, prescription') }}</td></tr>
                                         <tr><td>{{ __('Contributions UGC') }}</td><td>{{ __('Durée de la relation + 3 ans') }}</td><td>{{ __('Archivage') }}</td></tr>
                                         <tr><td>{{ __('Statistiques liens courts') }}</td><td>{{ __('12 mois') }}</td><td>{{ __('Anonymisation ultérieure') }}</td></tr>
+                                        <tr><td>{{ __('Sondages Décido (dates/options, réponses des participants)') }}</td><td>{{ __('2 à 3 mois selon le type, 30 jours après clôture, prolongeable de 3 mois (max. 2 fois) par le créateur') }}</td><td>{{ __('Minimisation des données - suppression automatique') }}</td></tr>
                                         <tr><td>{{ __('Demandes exercice de droits') }}</td><td>{{ __('Durée traitement + 3 ans') }}</td><td>{{ __('Preuve de traitement') }}</td></tr>
                                     </tbody>
                                 </table>

@@ -57,6 +57,15 @@
                     {{ session('warning') }}
                 </div>
             @endif
+            @if($errors->any())
+                {{-- withErrors() (extend/export/shortlink/slug dans PollManageController, etc.) n'était
+                     jamais rendu par ce layout - échec silencieux découvert par vérification visuelle
+                     (2026-07-19, plafond de prolongations Décido). --}}
+                <div class="alert alert-danger alert-dismissible" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Fermer" style="background:none;border:none;font-size:20px;font-weight:700;color:inherit;opacity:0.5;cursor:pointer;padding:0;float:right;line-height:1;"><span aria-hidden="true">&times;</span></button>
+                    {{ $errors->first() }}
+                </div>
+            @endif
 
             @yield('user-content')
         </div>

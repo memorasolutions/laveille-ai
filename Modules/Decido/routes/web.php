@@ -22,6 +22,11 @@ Route::middleware(DecidoUnderConstruction::class)->group(function () {
 
     Route::get('/decido/{poll}/gerer/{adminToken}', [PollManageController::class, 'manage'])->name('decido.manage');
     Route::post('/decido/{poll}/gerer/{adminToken}/fermer', [PollManageController::class, 'close'])->name('decido.close');
+    // Politique de rétention (2026-07-19) : "Prolonger de 3 mois", déclenché depuis le courriel
+    // d'avertissement J-14 (via la page de gestion) ou depuis le menu d'actions de la page de
+    // gestion elle-même. Même groupe/pattern d'autorisation que fermer/export/lien-court/qr
+    // (authorizeManage : owner connecté OU jeton admin valide).
+    Route::post('/decido/{poll}/gerer/{adminToken}/prolonger', [PollManageController::class, 'extend'])->name('decido.extend');
     Route::get('/decido/{poll}/gerer/{adminToken}/export.csv', [PollManageController::class, 'exportCsv'])->name('decido.export.csv');
     Route::get('/decido/{poll}/gerer/{adminToken}/export.ics', [PollManageController::class, 'exportIcs'])->name('decido.export.ics');
     Route::post('/decido/{poll}/gerer/{adminToken}/lien-court', [PollManageController::class, 'createShortLink'])->name('decido.shortlink');

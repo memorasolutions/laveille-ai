@@ -279,6 +279,10 @@
                     <div class="d-grid">
                         <x-core::button type="submit" variant="primary">Créer le sondage</x-core::button>
                     </div>
+                    {{-- Politique de rétention (2026-07-19) : mention discrète, non intrusive
+                         (pas d'alerte/encadré) - le calcul exact (dernière date candidate + 2 mois)
+                         se fait côté serveur à la création, pas affiché ici avant saisie des dates. --}}
+                    <p class="text-muted small text-center mt-2 mb-0">Ce sondage sera automatiquement supprimé quelque temps après la dernière date proposée, pour protéger tes données.</p>
                 </form>
             </div>
         </div>

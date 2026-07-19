@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.116.0] - 2026-07-19
+
+### Added
+- **Politique de rétention complète des sondages Décido.** Recherche pp_search (limitation de finalité RGPD/Loi 25, pattern d'avertissement) + validation croisée Codex et Gemini (désaccord réel tranché en faveur du système le plus simple, Gemini ayant recalibré une première proposition de 91 à 60/100 car surdimensionnée pour un outil gratuit). Tout sondage a désormais une date d'expiration dès sa création - sondage de type date : dernière date candidate + 2 mois ; classique ou brouillon : création + 3 mois ; sondage clôturé : clôture + 30 jours (au lieu de 6 mois auparavant). Corrige la vraie faille identifiée : un sondage jamais clôturé n'était jamais purgé automatiquement, contournant silencieusement `decido:purge-expired`. Un seul courriel d'avertissement à J-14 avant suppression (pas de cascade intrusive), avec un bouton "Prolonger de 3 mois" plafonné à 2 utilisations - le verrou est appliqué côté serveur (vérifié résistant à un contournement direct de la route, pas seulement dans l'interface). Mention discrète affichée à la création du sondage + ajout de la durée de rétention à la politique de confidentialité du site.
+
+### Fixed
+- **Le layout partagé `auth::layouts.user-frontend` ne rendait jamais les erreurs de validation Laravel (`withErrors()`).** Découvert en vérifiant visuellement le plafond de prolongations Décido : une action refusée par le serveur ne montrait aucun message à l'utilisateur. Ce silence touchait en réalité 4 actions existantes de `PollManageController` (extend, export, shortlink, slug), pas seulement la nouvelle fonctionnalité. Corrigé à la source (layout, un seul endroit) plutôt qu'au cas par cas dans chaque contrôleur.
+
 ## [1.115.1] - 2026-07-19
 
 ### Fixed

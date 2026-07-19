@@ -18,6 +18,7 @@ use InvalidArgumentException;
 use Modules\Decido\Enums\VoteMode;
 use Modules\Decido\Models\Poll;
 use Modules\Decido\Rules\DistinctNormalized;
+use Modules\Decido\Services\PollExpirationService;
 use Modules\Decido\Services\SlotGenerationService;
 use Modules\Decido\Services\TimezoneListService;
 
@@ -330,6 +331,12 @@ class PollManageController extends Controller
                 }
 
                 $poll->status = 'open';
+                // Politique de rétention (2026-07-19) : jusqu'ici expires_at restait NULL tant
+                // que le sondage n'était pas clôturé, contournant silencieusement
+                // decido:purge-expired pour tout sondage jamais clôturé. Calculé APRÈS la
+                // création des options ci-dessus (PollExpirationService::forNewOrUpdatedPoll()
+                // relit poll->options() en base pour le type "date").
+                $poll->expires_at = PollExpirationService::forNewOrUpdatedPoll($poll);
                 $poll->save();
 
                 return [$poll, $plainToken];
@@ -402,13 +409,72 @@ class PollManageController extends Controller
 
         $pollModel->status = 'closed';
         $pollModel->final_option_id = $finalOptionId;
-        $pollModel->expires_at = now()->addMonths(config('decido.expiration_months_after_close', 6));
+        // Politique de rétention (2026-07-19) : 30 jours post-clôture (remplace les 6 mois de
+        // l'ancienne règle expiration_months_after_close) - un sondage clôturé n'a plus besoin
+        // d'être conservé aussi longtemps, la décision finale étant déjà prise et exportable.
+        $pollModel->expires_at = PollExpirationService::forClosure();
         $pollModel->save();
 
         return Redirect::route('decido.manage', [
             'poll' => $pollModel->public_id,
             'adminToken' => $adminToken,
         ])->with('success', 'Le sondage a été clôturé.');
+    }
+
+    /**
+     * "Prolonger de 3 mois" - déclenché depuis le courriel d'avertissement J-14
+     * (Modules\Decido\Mail\PollExpiringSoonMail, via la page de gestion) ou directement depuis le
+     * bouton du menu d'actions sur la page de gestion (results-content.blade.php). Réservé au
+     * créateur du sondage : authorizeManage() (owner connecté OU jeton admin valide) - EXACTEMENT
+     * le même pattern d'autorisation que close()/exportCsv()/exportIcs()/createShortLink()/qrCode()
+     * ci-dessus, qui couvre de facto le cas "creator_id === auth()->id()" (bypass propriétaire)
+     * tout en préservant la délégation à un co-organisateur via le jeton admin, cohérente avec
+     * le reste du module (Décido n'a jamais eu de route de gestion protégée par le seul
+     * middleware 'auth' - le jeton admin EST le mécanisme d'autorisation historique).
+     */
+    public function extend(Request $request, string $poll, string $adminToken): RedirectResponse
+    {
+        $pollModel = Poll::findByShareIdentifier($poll);
+        if (! $pollModel) {
+            abort(404);
+        }
+
+        $this->authorizeManage($pollModel, $adminToken);
+
+        $maxExtensions = (int) config('decido.max_extensions', 2);
+
+        // Verrou + relecture à l'intérieur d'une transaction (même pattern que
+        // Poll::claimShortUrl()) : deux clics rapprochés sur le bouton "Prolonger" ne doivent pas
+        // pouvoir dépasser le plafond en écrivant chacun sur une lecture périmée de
+        // extension_count.
+        $blocked = DB::transaction(function () use ($pollModel, $maxExtensions) {
+            $locked = Poll::whereKey($pollModel->id)->lockForUpdate()->first();
+
+            if (! $locked || $locked->extension_count >= $maxExtensions) {
+                return true;
+            }
+
+            $locked->expires_at = PollExpirationService::forExtension($locked);
+            $locked->extension_count++;
+            // Une prolongation repousse l'échéance : l'avertissement déjà envoyé pour l'ancienne
+            // échéance ne doit pas empêcher un futur avertissement sur la nouvelle.
+            $locked->expiry_warned_at = null;
+            $locked->save();
+
+            return false;
+        });
+
+        if ($blocked) {
+            return Redirect::route('decido.manage', [
+                'poll' => $pollModel->public_id,
+                'adminToken' => $adminToken,
+            ])->withErrors(['extend' => 'Nombre maximal de prolongations atteint.']);
+        }
+
+        return Redirect::route('decido.manage', [
+            'poll' => $pollModel->public_id,
+            'adminToken' => $adminToken,
+        ])->with('success', 'Le sondage a été prolongé de 3 mois.');
     }
 
     public function exportCsv(Request $request, string $poll, string $adminToken): \Symfony\Component\HttpFoundation\Response

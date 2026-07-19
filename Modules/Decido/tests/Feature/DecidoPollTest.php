@@ -13,8 +13,10 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Modules\Decido\Mail\PollExpiringSoonMail;
 use Modules\Decido\Models\Poll;
 use Modules\Decido\Models\PollOption;
 use Modules\Decido\Models\PollVote;
@@ -1458,7 +1460,7 @@ test('aucune route de gestion/vote/résultats Décido ne porte le middleware cac
     // déclare `cacheResponse`. Ce test le fige pour empêcher toute régression future.
     $decidoRouteNames = [
         'decido.index', 'decido.create', 'decido.create.date', 'decido.create.classic', 'decido.store',
-        'decido.manage', 'decido.close', 'decido.export.csv', 'decido.export.ics',
+        'decido.manage', 'decido.close', 'decido.extend', 'decido.export.csv', 'decido.export.ics',
         'decido.shortlink', 'decido.qr', 'decido.vote.show', 'decido.vote.store',
     ];
 
@@ -1753,22 +1755,33 @@ test('un échec en cours de REVOTE (mode approval) ne perd pas les anciens votes
     }
 });
 
-test('decido:purge-expired supprime les sondages clôturés expirés et épargne les autres', function (): void {
-    $expired = decidoCreatePoll(['status' => 'closed']);
-    $expired->expires_at = now()->subDay();
-    $expired->save();
+test('decido:purge-expired supprime les sondages expirés (peu importe le statut) et épargne les autres', function (): void {
+    // Élargi le 2026-07-19 (politique de rétention complète) : avant ce changement, seul un
+    // sondage 'closed' pouvait être purgé (filtre status='closed' retiré). Ce test couvre
+    // désormais explicitement le cas OUVERT expiré, qui devait auparavant survivre
+    // indéfiniment (contournement documenté par le round 5, corrigé ici).
+    $expiredClosed = decidoCreatePoll(['status' => 'closed']);
+    $expiredClosed->expires_at = now()->subDay();
+    $expiredClosed->save();
 
-    $notYetExpired = decidoCreatePoll(['status' => 'closed']);
-    $notYetExpired->expires_at = now()->addMonths(3);
-    $notYetExpired->save();
+    $notYetExpiredClosed = decidoCreatePoll(['status' => 'closed']);
+    $notYetExpiredClosed->expires_at = now()->addMonths(3);
+    $notYetExpiredClosed->save();
 
-    $stillOpen = decidoCreatePoll(['status' => 'open']);
+    $expiredOpen = decidoCreatePoll(['status' => 'open']);
+    $expiredOpen->expires_at = now()->subDay();
+    $expiredOpen->save();
+
+    $stillOpenNoExpiry = decidoCreatePoll(['status' => 'open']);
+    // expires_at reste NULL (helper decidoCreatePoll ne le définit pas par défaut) : ne doit
+    // jamais être purgé (whereNotNull('expires_at') dans PurgeExpiredPollsCommand).
 
     $this->artisan('decido:purge-expired')->assertExitCode(0);
 
-    expect(Poll::find($expired->id))->toBeNull();
-    expect(Poll::find($notYetExpired->id))->not->toBeNull();
-    expect(Poll::find($stillOpen->id))->not->toBeNull();
+    expect(Poll::find($expiredClosed->id))->toBeNull();
+    expect(Poll::find($expiredOpen->id))->toBeNull();
+    expect(Poll::find($notYetExpiredClosed->id))->not->toBeNull();
+    expect(Poll::find($stillOpenNoExpiry->id))->not->toBeNull();
 });
 
 // ── Round 18 (skill /100) : validation du fuseau horaire fourni par l'utilisateur ──────────
@@ -2474,4 +2487,248 @@ test('page de vote classique n\'affiche ni attributs UTC ni decidoSlotTimezone',
     $this->assertStringNotContainsString('data-starts-at-utc="', $content);
     $this->assertStringNotContainsString('data-ends-at-utc="', $content);
     $this->assertStringNotContainsString('function decidoSlotTimezone', $content);
+});
+
+// ── Politique de rétention complète (2026-07-19, recherche pp_search + validation Codex/Gemini,
+//    approuvée par l'utilisateur) : expires_at calculé dès la création (plus seulement à la
+//    clôture), avertissement courriel unique J-14, prolongation plafonnée, purge élargie. ──────
+
+test('la création d\'un sondage de dates fixe expires_at à la dernière date candidate + 2 mois', function (): void {
+    config()->set('decido.under_construction', false);
+    $futureDate1 = now()->addDays(10)->format('Y-m-d');
+    $futureDate2 = now()->addDays(20)->format('Y-m-d');
+
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage rétention date',
+        'type' => 'date',
+        'timezone' => 'America/Toronto',
+        'duration_minutes' => 30,
+        'range_start_time' => '09:00',
+        'range_end_time' => '10:00',
+        'step_minutes' => 30,
+        'candidate_dates' => [$futureDate1, $futureDate2],
+    ]);
+    $response->assertSessionDoesntHaveErrors();
+
+    $poll = Poll::where('title', 'Sondage rétention date')->firstOrFail();
+    expect($poll->expires_at)->not->toBeNull();
+
+    $lastSlotEndsAt = $poll->options()->max('ends_at');
+    $expected = \Carbon\Carbon::parse($lastSlotEndsAt)->addMonths(2);
+
+    expect($poll->expires_at->equalTo($expected))->toBeTrue();
+});
+
+test('la création d\'un sondage classique fixe expires_at à la date de création + 3 mois', function (): void {
+    $response = $this->actingAs($this->superadmin)->post(route('decido.store'), [
+        'title' => 'Sondage rétention classique',
+        'type' => 'classic',
+        'timezone' => 'America/Toronto',
+        'vote_mode' => 'single_choice',
+        'options' => ['Pizza', 'Sushi'],
+    ]);
+    $response->assertSessionDoesntHaveErrors();
+
+    $poll = Poll::where('title', 'Sondage rétention classique')->firstOrFail();
+    expect($poll->expires_at)->not->toBeNull();
+    expect($poll->created_at->addMonths(3)->diffInSeconds($poll->expires_at))->toBeLessThan(2);
+});
+
+test('clôturer un sondage fixe désormais expires_at à clôture + 30 jours (remplace l\'ancienne règle de 6 mois)', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-close-30j']);
+    $option = $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+
+    $this->post(route('decido.close', ['poll' => $poll->public_id, 'adminToken' => 'jeton-close-30j']), [
+        'final_option_id' => $option->id,
+    ]);
+
+    $poll->refresh();
+    expect($poll->status->value)->toBe('closed');
+    expect($poll->expires_at->between(now()->addDays(29), now()->addDays(31)))->toBeTrue();
+    // Contrôle négatif explicite : ne doit plus jamais retomber sur l'ancienne règle des 6 mois.
+    expect($poll->expires_at->lessThan(now()->addMonths(2)))->toBeTrue();
+});
+
+test('"Prolonger de 3 mois" ajoute 3 mois à expires_at, incrémente extension_count et réinitialise expiry_warned_at', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-extend-1']);
+    $originalExpiresAt = now()->addDays(10);
+    $poll->expires_at = $originalExpiresAt;
+    $poll->expiry_warned_at = now()->subDay();
+    $poll->save();
+
+    $response = $this->post(route('decido.extend', ['poll' => $poll->public_id, 'adminToken' => 'jeton-extend-1']));
+    $response->assertRedirect(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-extend-1']));
+    $response->assertSessionHasNoErrors();
+
+    $poll->refresh();
+    expect($poll->extension_count)->toBe(1);
+    expect($poll->expiry_warned_at)->toBeNull();
+    // diffInSeconds (tolérance) plutôt qu'equalTo() : le round-trip DB tronque les microsecondes
+    // de la colonne datetime, une comparaison stricte échouerait sur la précision sub-seconde.
+    expect($poll->expires_at->diffInSeconds($originalExpiresAt->copy()->addMonths(3)))->toBeLessThan(2);
+});
+
+test('le plafond de 2 prolongations est appliqué : la 3e tentative est refusée avec un message clair', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-extend-max']);
+    $poll->expires_at = now()->addDays(10);
+    $poll->extension_count = 2; // plafond déjà atteint (decido.max_extensions par défaut = 2)
+    $poll->save();
+
+    $expiresAtBefore = $poll->expires_at;
+
+    $response = $this->post(route('decido.extend', ['poll' => $poll->public_id, 'adminToken' => 'jeton-extend-max']));
+    $response->assertSessionHasErrors('extend');
+
+    $poll->refresh();
+    expect($poll->extension_count)->toBe(2);
+    expect($poll->expires_at->equalTo($expiresAtBefore))->toBeTrue();
+});
+
+test('prolonger un sondage avec un jeton invalide et sans être le créateur connecté retourne 403', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'le-vrai-jeton-extend']);
+    $poll->expires_at = now()->addDays(10);
+    $poll->save();
+
+    $this->post(route('decido.extend', ['poll' => $poll->public_id, 'adminToken' => 'mauvais-jeton']))
+        ->assertForbidden();
+
+    $poll->refresh();
+    expect($poll->extension_count)->toBe(0);
+});
+
+test('decido:warn-expiring-polls envoie UN SEUL courriel à J-14 et ne le renvoie pas au second appel (idempotence)', function (): void {
+    config()->set('decido.under_construction', false);
+    Mail::fake();
+
+    $creator = User::factory()->create(['email' => 'createur-warn@example.test']);
+    $poll = decidoCreatePoll(['creator_id' => $creator->id, 'admin_token' => 'jeton-warn-1']);
+    $poll->expires_at = now()->addDays(7); // dans la fenêtre J-14
+    $poll->save();
+
+    $hors_fenetre = decidoCreatePoll(['creator_id' => $creator->id, 'admin_token' => 'jeton-warn-2']);
+    $hors_fenetre->expires_at = now()->addDays(30); // hors fenêtre J-14
+    $hors_fenetre->save();
+
+    $this->artisan('decido:warn-expiring-polls')->assertExitCode(0);
+
+    Mail::assertSent(PollExpiringSoonMail::class, 1);
+    $poll->refresh();
+    expect($poll->expiry_warned_at)->not->toBeNull();
+
+    $hors_fenetre->refresh();
+    expect($hors_fenetre->expiry_warned_at)->toBeNull();
+
+    // Second appel (rejeu quotidien du cron) : ne doit RIEN renvoyer pour ce même sondage,
+    // expiry_warned_at étant désormais non-NULL.
+    $this->artisan('decido:warn-expiring-polls')->assertExitCode(0);
+    Mail::assertSent(PollExpiringSoonMail::class, 1);
+});
+
+test('decido:warn-expiring-polls ignore silencieusement un sondage sans créateur (compte supprimé) sans erreur ni envoi', function (): void {
+    config()->set('decido.under_construction', false);
+    Mail::fake();
+
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-warn-orphelin']);
+    $poll->expires_at = now()->addDays(5);
+    $poll->creator_id = null;
+    $poll->save();
+
+    $this->artisan('decido:warn-expiring-polls')->assertExitCode(0);
+
+    Mail::assertNothingSent();
+    $poll->refresh();
+    expect($poll->expiry_warned_at)->toBeNull();
+
+    // Le sondage orphelin (sans avertissement possible) continue néanmoins son cycle de purge
+    // normal - expires_at n'a jamais dépendu de expiry_warned_at.
+    $poll->expires_at = now()->subDay();
+    $poll->save();
+    $this->artisan('decido:purge-expired')->assertExitCode(0);
+    expect(Poll::find($poll->id))->toBeNull();
+});
+
+test('une prolongation remet expiry_warned_at à NULL, permettant un futur avertissement sur la nouvelle échéance', function (): void {
+    config()->set('decido.under_construction', false);
+    Mail::fake();
+
+    $creator = User::factory()->create(['email' => 'createur-reavertissement@example.test']);
+    $poll = decidoCreatePoll(['creator_id' => $creator->id, 'admin_token' => 'jeton-reavertir']);
+    $poll->expires_at = now()->addDays(7);
+    $poll->expiry_warned_at = now()->subDay(); // déjà averti pour l'échéance actuelle
+    $poll->save();
+
+    // Sans prolongation, un second passage du cron ne renverrait rien (idempotence).
+    $this->artisan('decido:warn-expiring-polls');
+    Mail::assertNothingSent();
+
+    $this->post(route('decido.extend', ['poll' => $poll->public_id, 'adminToken' => 'jeton-reavertir']));
+    $poll->refresh();
+    expect($poll->expiry_warned_at)->toBeNull();
+    // La nouvelle échéance (+3 mois) est hors fenêtre J-14 : pas d'avertissement immédiat, mais
+    // le fait que expiry_warned_at soit redevenu NULL prouve qu'un futur avertissement pourra
+    // être émis quand cette nouvelle échéance entrera à son tour dans la fenêtre.
+});
+
+test('le bouton "Prolonger de 3 mois" est visible pour le créateur connecté avec des prolongations restantes, absent au plafond', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['creator_id' => $this->superadmin->id, 'admin_token' => 'jeton-bouton-extend']);
+    $poll->expires_at = now()->addDays(10);
+    $poll->save();
+    PollOption::factory()->create(['poll_id' => $poll->id]);
+
+    $html = $this->actingAs($this->superadmin)
+        ->get(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-bouton-extend']))
+        ->getContent();
+    $this->assertStringContainsString('Prolonger de 3 mois', $html);
+
+    $poll->extension_count = 2; // plafond atteint
+    $poll->save();
+
+    $htmlAuPlafond = $this->actingAs($this->superadmin)
+        ->get(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-bouton-extend']))
+        ->getContent();
+    $this->assertStringNotContainsString('Prolonger de 3 mois', $htmlAuPlafond);
+});
+
+test('le rétro-remplissage de la migration calcule expires_at pour les sondages existants sans en avoir', function (): void {
+    // Simule l'état "avant" (sondages créés sous l'ancienne règle, expires_at NULL tant que non
+    // clôturés) puis rejoue le backfill de la migration
+    // 2026_07_19_120000_add_retention_fields_to_decido_polls directement (les colonnes existent
+    // déjà dans cet environnement de test via RefreshDatabase - les garde-fous hasColumn() du
+    // up() rendent la partie schéma idempotente, seule la partie backfill s'exécute réellement).
+    $classicLegacy = decidoCreatePoll(['type' => 'classic', 'status' => 'open']);
+    $classicLegacy->expires_at = null;
+    $classicLegacy->save();
+
+    $dateLegacy = decidoCreatePoll(['type' => 'date', 'status' => 'open']);
+    $dateLegacy->expires_at = null;
+    $dateLegacy->save();
+    $lastEndsAt = now()->addDays(15);
+    PollOption::factory()->create(['poll_id' => $dateLegacy->id, 'starts_at' => now()->addDays(15)->subHour(), 'ends_at' => $lastEndsAt]);
+    PollOption::factory()->create(['poll_id' => $dateLegacy->id, 'starts_at' => now()->addDays(5)->subHour(), 'ends_at' => now()->addDays(5)]);
+
+    $closedLegacy = decidoCreatePoll(['type' => 'classic', 'status' => 'closed']);
+    $closedLegacy->expires_at = now()->addMonths(6); // ancienne règle déjà fixée : ne doit PAS être touché
+    $closedLegacy->save();
+    $closedExpiresAtBefore = $closedLegacy->expires_at;
+
+    $migration = require base_path('Modules/Decido/database/migrations/2026_07_19_120000_add_retention_fields_to_decido_polls.php');
+    $migration->up();
+
+    $classicLegacy->refresh();
+    expect($classicLegacy->expires_at)->not->toBeNull();
+    expect($classicLegacy->created_at->addMonths(3)->diffInSeconds($classicLegacy->expires_at))->toBeLessThan(2);
+
+    $dateLegacy->refresh();
+    expect($dateLegacy->expires_at)->not->toBeNull();
+    // diffInSeconds (tolérance) : $lastEndsAt est une valeur EN MÉMOIRE (microsecondes incluses)
+    // comparée à une valeur relue depuis la DB (colonne datetime, tronquée à la seconde).
+    expect($dateLegacy->expires_at->diffInSeconds(\Carbon\Carbon::parse($lastEndsAt)->addMonths(2)))->toBeLessThan(2);
+
+    $closedLegacy->refresh();
+    expect($closedLegacy->expires_at->diffInSeconds($closedExpiresAtBefore))->toBeLessThan(2);
 });

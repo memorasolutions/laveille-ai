@@ -55,6 +55,7 @@ class DecidoServiceProvider extends ServiceProvider
     {
         $this->commands([
             \Modules\Decido\Console\PurgeExpiredPollsCommand::class,
+            \Modules\Decido\Console\WarnExpiringPollsCommand::class,
         ]);
     }
 

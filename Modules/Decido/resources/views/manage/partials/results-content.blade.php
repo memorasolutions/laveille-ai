@@ -311,6 +311,25 @@
                         if ($poll->status->value === 'closed' && $poll->final_option_id) {
                             $shareActions[] = ['label' => 'Télécharger en ICS', 'icon' => 'calendar-plus', 'url' => route('decido.export.ics', ['poll' => $poll->public_id, 'adminToken' => $adminToken])];
                         }
+
+                        // Politique de rétention (2026-07-19) : "Prolonger de 3 mois", réservé au
+                        // créateur CONNECTÉ (pas au délégué via jeton seul - auth()->id() ===
+                        // creator_id ici, en plus de l'authorizeManage() côté serveur qui reste
+                        // la garde faisant foi) et seulement s'il reste au moins 1 prolongation
+                        // disponible (plafond dur decido.max_extensions, appliqué aussi
+                        // côté serveur dans PollManageController::extend()). 'confirm' = modale du
+                        // thème (event Alpine confirm-action déjà géré par ce composant), jamais
+                        // un confirm() natif.
+                        if (auth()->check() && auth()->id() === $poll->creator_id && $poll->extension_count < config('decido.max_extensions', 2)) {
+                            $shareActions[] = ['divider' => true];
+                            $shareActions[] = [
+                                'label' => 'Prolonger de 3 mois',
+                                'icon' => 'refresh-cw',
+                                'url' => route('decido.extend', ['poll' => $poll->public_id, 'adminToken' => $adminToken]),
+                                'method' => 'POST',
+                                'confirm' => 'Prolonger ce sondage de 3 mois ? Sa date de suppression automatique sera repoussée d\'autant.',
+                            ];
+                        }
                     @endphp
                     <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
                         <span class="text-muted">Lien public :</span>

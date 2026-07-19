@@ -38,6 +38,8 @@ class Poll extends Model
         'step_minutes',
         'final_option_id',
         'expires_at',
+        'expiry_warned_at',
+        'extension_count',
         'admin_token_hash',
         'custom_slug',
         'short_url_id',
@@ -48,6 +50,8 @@ class Poll extends Model
         'vote_mode' => VoteMode::class,
         'status' => PollStatus::class,
         'expires_at' => 'datetime',
+        'expiry_warned_at' => 'datetime',
+        'extension_count' => 'integer',
     ];
 
     protected $hidden = [

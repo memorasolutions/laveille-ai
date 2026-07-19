@@ -125,7 +125,13 @@ Schedule::command('privacy:purge-expired')->dailyAt('02:30');
 // Short URLs - nettoyage liens expires + avertissements 30j
 Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
 
-// Decido - purge sondages clotures expires (expires_at, round 5 skill /100)
+// Decido - avertissement courriel unique J-14 avant suppression automatique (2026-07-19),
+// planifie AVANT la purge de 06h15 pour qu'un sondage sur le point d'expirer recoive toujours
+// son avertissement avant d'etre potentiellement purge le meme jour.
+Schedule::command('decido:warn-expiring-polls')->dailyAt('06:00')->withoutOverlapping();
+
+// Decido - purge sondages expires, tout statut (expires_at, round 5 skill /100 ; elargi au-dela
+// du seul statut 'closed' le 2026-07-19, voir PurgeExpiredPollsCommand)
 Schedule::command('decido:purge-expired')->dailyAt('06:15');
 
 // Messages de contact - purge de la quarantaine spam de plus de 60 jours (hebdo).

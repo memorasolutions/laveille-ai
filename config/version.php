@@ -17,6 +17,22 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.116.0 · 2026-07-19 · feat(decido) politique de rétention complète des sondages - recherche
+ *     pp_search (limitation de finalité RGPD/Loi 25, pattern d'avertissement) + validation Codex
+ *     ET Gemini (désaccord tranché : Gemini a recalibré le 1er avis de 91 à 60/100, jugé
+ *     surdimensionné pour un outil gratuit - retenu son système plus simple basé sur la date de
+ *     l'événement plutôt que sur l'activité). Tout sondage a désormais une expiration dès sa
+ *     création (date-type : dernière date candidate +2 mois ; classique/brouillon : création +3
+ *     mois ; clôturé : +30 jours au lieu de 6 mois) - corrige la vraie faille trouvée : un
+ *     sondage jamais clôturé n'était JAMAIS purgé (contournait silencieusement decido:purge-
+ *     expired). Un seul courriel d'avertissement à J-14 (pas de cascade intrusive), bouton
+ *     "Prolonger de 3 mois" plafonné à 2 utilisations (vérifié en base au-delà de l'UI, verrou
+ *     serveur confirmé résistant à un contournement direct de la route). Mention discrète à la
+ *     création + ajout à la politique de confidentialité. Fix découvert en vérification visuelle :
+ *     le layout `auth::layouts.user-frontend` ne rendait jamais le sac $errors de Laravel
+ *     (withErrors()) - silence total sur 4 actions déjà existantes (extend/export/shortlink/slug),
+ *     corrigé à la source (layout) plutôt qu'au cas par cas. Tests : 103 passed sur Decido, 179
+ *     passed en régression élargie (Auth+ShortUrl+Decido+Journal, tous consommateurs du layout).
  *   1.115.1 · 2026-07-19 · fix(action-menu) page gérer Décido par jeton + 6 autres pages "show"
  *     n'avaient jamais reçu le menu d'actions unifié (motif : la vue index est migrée mais pas la
  *     vue show/edit de l'entité individuelle). Regroupement des boutons Partage/export Décido
@@ -1775,8 +1791,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 115;
-$lvPatch = 1;
+$lvMinor = 116;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

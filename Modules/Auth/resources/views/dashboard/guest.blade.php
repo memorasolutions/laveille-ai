@@ -11,9 +11,8 @@
     @if(session('status'))
         <div class="alert alert-success" style="border-radius:8px">{{ session('status') }}</div>
     @endif
-    @if(isset($errors) && $errors->any())
-        <div class="alert alert-danger" style="border-radius:8px">{{ $errors->first() }}</div>
-    @endif
+    {{-- $errors->any() désormais rendu globalement par auth::layouts.user-frontend (2026-07-19) -
+         bandeau local retiré pour éviter un double affichage du même message. --}}
 
     <form method="POST" action="{{ route('magic-link.request') }}">
         @csrf

@@ -8,18 +8,24 @@ use Illuminate\Console\Command;
 use Modules\Decido\Models\Poll;
 
 /**
- * Purge les sondages clôturés dont expires_at est dépassé (config('decido.expiration_months_after_close')).
+ * Purge tout sondage Decido (peu importe le statut - ouvert, brouillon ou clôturé) dont
+ * expires_at est dépassé.
  *
- * Le champ expires_at était écrit à la clôture (PollManageController::close()) mais jamais lu
- * nulle part ailleurs dans le module - politique de rétention morte, trouvée par une passe
- * adversariale indépendante (skill /100, round 5). Pattern calqué sur
- * Modules\ShortUrl\Console\CleanupExpiredCommand.
+ * Élargissement de périmètre (2026-07-19, recherche pp_search + validation Codex/Gemini,
+ * approuvée utilisateur) : le champ expires_at n'était écrit qu'à la clôture
+ * (PollManageController::close()) et cette commande ne purgeait donc QUE les sondages
+ * 'closed' - politique de rétention morte pour tout sondage jamais clôturé, trouvée par une
+ * passe adversariale indépendante (skill /100, round 5). Modules\Decido\Services\PollExpirationService
+ * calcule désormais expires_at dès la CRÉATION du sondage (ouvert ou brouillon), quel que soit
+ * son statut final - retirer le filtre status='closed' ici était donc la contrepartie
+ * nécessaire pour que la nouvelle politique de rétention s'applique réellement. Pattern calqué
+ * sur Modules\ShortUrl\Console\CleanupExpiredCommand.
  */
 class PurgeExpiredPollsCommand extends Command
 {
     protected $signature = 'decido:purge-expired';
 
-    protected $description = 'Supprime les sondages Decido clotures dont la date d\'expiration est depassee';
+    protected $description = 'Supprime les sondages Decido (tout statut) dont la date d\'expiration est depassee';
 
     public function handle(): int
     {
@@ -35,8 +41,11 @@ class PurgeExpiredPollsCommand extends Command
         // risquerait de faire fuiter un ->whereNotNull('short_url_id') ajouté pour la première
         // requête dans la seconde, excluant à tort du DELETE les sondages expirés SANS lien court.
         // Reconstruire la requête à l'identique à chaque appel élimine ce risque par construction.
-        $baseConditions = fn () => Poll::where('status', 'closed')
-            ->whereNotNull('expires_at')
+        // Round 27 (skill /100, période close au round 27 - cf. mémoire projet) filtrait sur
+        // status='closed' en plus de expires_at : retiré le 2026-07-19 (élargissement de
+        // périmètre, voir docblock de la classe) - désormais TOUT sondage expiré est purgé,
+        // quel que soit son statut ('open', 'draft' ou 'closed').
+        $baseConditions = fn () => Poll::whereNotNull('expires_at')
             ->where('expires_at', '<', now());
 
         $count = $baseConditions()->count();
