@@ -17,6 +17,23 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.116.9 · 2026-07-20 · fix(auth) 403 en PRODUCTION sur /admin/objectif-video (et
+ *     potentiellement /backoffice/authors, même middleware) pour le vrai compte superadmin.
+ *     Cause racine : Modules/Authors/app/Http/Middleware/EnsureSuperAdmin vérifiait
+ *     hasRole('super-admin') [trait d'union, jamais assigné à personne] ou hasRole('admin')
+ *     [rôle différent], alors que le seed réel (database/seeders/DatabaseSeeder.php) assigne
+ *     'super_admin' [underscore] - la même convention utilisée partout ailleurs sur le site
+ *     (User::isSuperAdmin(), User::homeRoute(), ~150 fichiers). Le repli local id===1 masquait
+ *     le bug en développement (ne s'applique qu'en environnement local/testing, jamais en
+ *     production) - confirmé en tinker local : le compte stephane@memora.ca n'a QUE le rôle
+ *     super_admin, jamais admin ni super-admin. Corrigé en supprimant la logique dupliquée du
+ *     middleware au profit de User::isSuperAdmin() (source unique de vérité, email superadmin +
+ *     rôle super_admin) - DRY, évite toute divergence future entre les deux vérifications. Test
+ *     helper Modules/News/tests/Feature/VideoGoalBuilderTest.php::vgbSuperAdmin() corrigé pour
+ *     refléter la vraie combinaison email+rôle plutôt que le rôle 'admin' qui masquait le bug
+ *     dans les tests aussi. Régression : Modules/News (VideoGoalBuilderTest 8/8), Modules/Authors
+ *     (SuperadminProtectionTest, RbacSidebarTest, S116EnhancementsTest, suite complète 239/239
+ *     avec Modules/Backoffice), aucune casse.
  *   1.116.8 · 2026-07-20 · fix(backoffice) Lien de menu admin manquant pour le Générateur
  *     d'objectif vidéo (/admin/objectif-video, v1.116.7). La page fonctionnait déjà mais
  *     n'apparaissait dans aucun menu de navigation admin - oubli lors de son ajout. Ajout de
@@ -1898,7 +1915,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 116;
-$lvPatch = 8;
+$lvPatch = 9;
 
 return [
     'major' => $lvMajor,

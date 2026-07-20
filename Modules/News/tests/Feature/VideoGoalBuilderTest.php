@@ -52,13 +52,18 @@ function vgbArticle(int $sourceId, array $overrides = []): NewsArticle
 }
 
 /**
- * Superadmin via le rôle 'admin' pré-seedé (RolesAndPermissionsSeeder) — c'est l'un des deux
- * rôles reconnus par Modules\Authors\Http\Middleware\EnsureSuperAdmin::handle().
+ * Superadmin réel : email superadmin (config('app.superadmin_email')) + rôle 'super_admin'
+ * (underscore) — seule combinaison acceptée par User::isSuperAdmin(), source unique de vérité
+ * utilisée par Modules\Authors\Http\Middleware\EnsureSuperAdmin::handle() depuis son correctif
+ * du 403 production (l'ancienne vérification 'super-admin'/'admin' du middleware ne correspondait
+ * à aucun rôle réellement assigné par le seeder, cf. database/seeders/DatabaseSeeder.php).
  */
 function vgbSuperAdmin(): \App\Models\User
 {
-    $user = \App\Models\User::factory()->create();
-    $user->assignRole('admin');
+    $user = \App\Models\User::factory()->create([
+        'email' => config('app.superadmin_email'),
+    ]);
+    $user->assignRole('super_admin');
 
     return $user;
 }

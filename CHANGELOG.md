@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.116.9] - 2026-07-20
+
+### Fixed
+- **403 "Accès non autorisé" en PRODUCTION sur `/admin/objectif-video` pour le vrai compte superadmin.** Cause racine : `Modules/Authors/app/Http/Middleware/EnsureSuperAdmin` vérifiait `hasRole('super-admin')` (trait d'union, jamais assigné à personne) ou `hasRole('admin')` (rôle différent), alors que le seed réel (`database/seeders/DatabaseSeeder.php`) assigne `super_admin` (underscore) - la convention utilisée partout ailleurs sur le site (`User::isSuperAdmin()`, `User::homeRoute()`, ~150 fichiers). Le repli local `id===1` masquait le bug en développement (il ne s'applique qu'en environnement `local`/`testing`, jamais en production) - confirmé en tinker local que le compte `stephane@memora.ca` n'a QUE le rôle `super_admin`. Corrigé en supprimant la logique dupliquée du middleware au profit de `User::isSuperAdmin()` (source unique de vérité) - DRY, évite toute divergence future. Ce même middleware protège aussi `/backoffice/authors`, potentiellement affecté par le même bug avant ce correctif. Test `VideoGoalBuilderTest::vgbSuperAdmin()` corrigé pour refléter la vraie combinaison email+rôle. Régression : 239/239 tests verts (`Modules/News`, `Modules/Authors`, `Modules/Backoffice`).
+
 ## [1.116.8] - 2026-07-20
 
 ### Fixed
