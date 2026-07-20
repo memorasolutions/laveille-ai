@@ -1,6 +1,9 @@
 @extends('backoffice::layouts.admin', ['title' => 'Générateur d\'objectif vidéo', 'subtitle' => 'Sélectionne des actualités et génère un objectif de vidéo pour le Prompteur'])
 
 @push('styles')
+{{-- Composant partagé "sélecteur d'actualités" (recherche/filtres/tri/cluster/couleur),
+     le même que celui utilisé par admin/concentre-builder.blade.php — voir public/assets/admin/. --}}
+<link rel="stylesheet" href="{{ asset('assets/admin/news-article-picker.css') }}?v={{ config('version.semver') }}">
 <style>
     .cb-card { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:18px; margin-bottom:18px; }
     .cb-section-title { font-weight:700; color:#0B7285; font-size:15px; margin-bottom:10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
@@ -11,24 +14,16 @@
     .cb-btn:disabled { background:#6b7280; cursor:not-allowed; }
     .cb-btn-secondary { background:#fff; color:#0B7285; border:1.5px solid #0B7285; }
     .cb-btn-secondary:hover:not(:disabled) { background:#0B7285; color:#fff; }
-    .cb-btn:focus-visible, .cb-btn-secondary:focus-visible, input:focus-visible, textarea:focus-visible, label.vgb-news-item:focus-within {
+    .cb-btn:focus-visible, .cb-btn-secondary:focus-visible, input:focus-visible, textarea:focus-visible {
         outline: 3px solid #064E5A; outline-offset: 2px;
     }
     [x-cloak] { display:none !important; }
 
-    /* Cartes d'actualités sélectionnables (calquées sur .cb-news-item du concentre-builder) */
-    .vgb-news-item {
-        display:flex; gap:12px; padding:12px; border:1px solid #e5e7eb; border-left:6px solid #94a3b8;
-        border-radius:8px; background:#fff; margin-bottom:10px; align-items:flex-start; cursor:pointer;
-        transition:background .15s, border-color .15s; min-height:44px;
-    }
-    .vgb-news-item:hover { background:#f9fafb; }
-    .vgb-news-item.is-selected { border-color:#0B7285; border-left-color:#0B7285; background:#ecfeff; }
-    .vgb-checkbox { width:24px; height:24px; min-width:24px; margin-top:2px; accent-color:#0B7285; cursor:pointer; }
-    .vgb-thumb { width:64px; height:64px; min-width:64px; object-fit:cover; border-radius:6px; background:#e5e7eb; }
-    .vgb-title { font-weight:600; color:#1f2937; font-size:14px; line-height:1.35; }
-    .vgb-meta { font-size:12px; color:#57606f; margin-top:4px; }
-    .vgb-summary { font-size:13px; color:#374151; margin-top:6px; line-height:1.45; }
+    /* Colonne "sélectionnées" simplifiée : réutilise .cb-news-item.is-selected du composant
+       partagé (public/assets/admin/news-article-picker.css) mais sans handle/position-badge —
+       l'ordre n'a pas d'importance pour la synthèse IA, donc pas de glisser-déposer ici. */
+    .vgb-selected-item .cb-actions { margin-top: 0; }
+
     .vgb-pre {
         background:#0f172a; color:#e2e8f0; padding:14px; border-radius:8px; max-height:340px; overflow:auto;
         font-family:'SF Mono','Monaco','Consolas',monospace; font-size:13px; line-height:1.55; white-space:pre-wrap;
@@ -81,42 +76,39 @@
         <div class="vgb-error" role="alert" aria-live="polite" x-show="fetchError" x-cloak x-text="'⚠ ' + fetchError"></div>
     </div>
 
-    {{-- Liste des actualités de la plage --}}
-    <div class="cb-card">
-        <div class="cb-section-title">
-            📋 Actualités de la plage
-            <span class="cb-counter" x-show="hasFetched" x-cloak x-text="newsItems.length + ' trouvée' + (newsItems.length > 1 ? 's' : '')"></span>
-            <span class="cb-counter" style="background:#064E5A;" x-text="selectedIds.length + ' actualité' + (selectedIds.length > 1 ? 's' : '') + ' sélectionnée' + (selectedIds.length > 1 ? 's' : '')"></span>
+    {{-- Sélection d'actualités : même système que /admin/concentre-builder (recherche, filtre
+         langue, filtre couleur, tri, regroupement par acteur) — colonne gauche partagée,
+         colonne droite "sélection" simplifiée (pas de glisser-déposer, l'ordre n'a pas
+         d'importance pour la synthèse IA contrairement au Concentré). --}}
+    <div class="row">
+        <div class="col-md-6">
+            @include('news::admin.partials.news-article-picker')
         </div>
 
-        <div style="max-height:520px; overflow-y:auto;">
-            <template x-for="item in newsItems" :key="item.id">
-                <label class="vgb-news-item" :class="{ 'is-selected': isSelected(item.id) }" :for="'vgb-news-' + item.id">
-                    <input
-                        type="checkbox"
-                        class="vgb-checkbox"
-                        :id="'vgb-news-' + item.id"
-                        :checked="isSelected(item.id)"
-                        @change="toggleSelect(item.id)"
-                        :aria-label="'Sélectionner l\'actualité : ' + item.title"
-                    >
-                    <img :src="item.image_url" x-show="item.image_url" loading="lazy" class="vgb-thumb" alt="" onerror="this.style.display='none'">
-                    <div style="flex:1; min-width:0;">
-                        <div class="vgb-title" x-text="item.title"></div>
-                        <div class="vgb-meta">
-                            <span x-text="item.source_name || 'Source inconnue'"></span> · <span x-text="item.pub_date_short"></span>
-                            <span x-show="item.category_tag" x-cloak> · <span x-text="item.category_tag"></span></span>
+        <div class="col-md-6">
+            <div class="cb-card">
+                <div class="cb-section-title">
+                    🎯 Actualités sélectionnées
+                    <span class="cb-counter" style="background:#064E5A;" x-text="selectedIds.length + ' actualité' + (selectedIds.length > 1 ? 's' : '') + ' sélectionnée' + (selectedIds.length > 1 ? 's' : '')"></span>
+                </div>
+                <div style="max-height:600px; overflow-y:auto;">
+                    <template x-for="id in selectedIds" :key="'sel-' + id">
+                        <div class="cb-news-item is-selected vgb-selected-item" :style="'border-left-color:' + colorForItem(itemById(id))">
+                            <img :src="itemById(id)?.favicon" loading="lazy" class="cb-fav" alt="" onerror="this.style.display='none'">
+                            <div style="flex:1; min-width:0;">
+                                <div class="cb-title" x-text="itemById(id)?.title || '(introuvable)'"></div>
+                                <div class="cb-meta">
+                                    <span x-text="itemById(id)?.source_name"></span> · <span x-text="itemById(id)?.pub_date_short"></span>
+                                </div>
+                            </div>
+                            <a :href="itemById(id)?.site_url" target="_blank" rel="noopener" title="Ouvrir dans un nouvel onglet" style="color:#0B7285; font-size:14px; padding:4px 8px; text-decoration:none;">🔗</a>
+                            <button type="button" @click="removeItem(id)" title="Retirer de la sélection" aria-label="Retirer cette actualité de la sélection" style="background:none; border:none; color:#dc2626; font-size:18px; cursor:pointer; padding:2px 8px; line-height:1; min-height:32px; min-width:32px;">×</button>
                         </div>
-                        <div class="vgb-summary" x-text="item.summary" x-show="item.summary"></div>
-                    </div>
-                </label>
-            </template>
-
-            <div class="cb-empty" x-show="hasFetched && newsItems.length === 0 && !loading.news" x-cloak>
-                Aucune actualité publiée dans cette plage de dates.
-            </div>
-            <div class="cb-empty" x-show="!hasFetched && !loading.news" x-cloak>
-                Choisis une plage de dates puis clique « Charger les actualités ».
+                    </template>
+                </div>
+                <div class="cb-empty" x-show="selectedIds.length === 0" x-cloak>
+                    Aucune actualité sélectionnée. Clique « + Ajouter » dans la colonne de gauche.
+                </div>
             </div>
         </div>
     </div>
@@ -145,15 +137,17 @@
     </div>
 </div>
 
+{{-- Mixin partagé "sélecteur d'actualités" (recherche/filtres/tri/cluster/couleur/sélection),
+     le même que celui utilisé par admin/concentre-builder.blade.php. Chargé AVANT le script
+     inline ci-dessous : window.NewsArticlePicker doit exister avant init(). --}}
+<script src="{{ asset('assets/admin/news-article-picker.js') }}?v={{ config('version.semver') }}" defer></script>
+
 <script>
 function videoGoalBuilder(opts) {
-    return {
+    const state = {
         dateStart: opts.defaultStart,
         dateEnd: opts.defaultEnd,
-        newsItems: [],
-        selectedIds: [],
         hasFetched: false,
-        fetchError: '',
         generateError: '',
         generatedGoal: '',
         loading: { news: false, generate: false },
@@ -165,50 +159,11 @@ function videoGoalBuilder(opts) {
 
         todayDate() { return new Date().toISOString().split('T')[0]; },
 
-        isSelected(id) { return this.selectedIds.includes(id); },
-
-        toggleSelect(id) {
-            if (this.isSelected(id)) {
-                this.selectedIds = this.selectedIds.filter(i => i !== id);
-            } else {
-                this.selectedIds = [...this.selectedIds, id];
-            }
-        },
-
-        async fetchNews() {
-            if (!this.dateStart || !this.dateEnd) return;
-            this.loading.news = true;
-            this.fetchError = '';
-            try {
-                const res = await fetch(this.endpoints.news, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    credentials: 'same-origin',
-                    body: JSON.stringify({ date_start: this.dateStart, date_end: this.dateEnd }),
-                });
-                const data = await res.json();
-                if (!res.ok) {
-                    this.fetchError = data.error || data.message || ('Erreur HTTP ' + res.status);
-                    this.newsItems = [];
-                    this.hasFetched = true;
-                    return;
-                }
-                this.newsItems = data.items || [];
-                this.selectedIds = this.selectedIds.filter(id => this.newsItems.some(n => n.id === id));
-                this.hasFetched = true;
-            } catch (e) {
-                this.fetchError = 'Erreur réseau : ' + e.message;
-                this.newsItems = [];
-                this.hasFetched = true;
-            } finally {
-                this.loading.news = false;
-            }
-        },
+        // fetchNews(), newsItems/selectedIds (état), availableItems/filteredAvailable/
+        // groupedAvailable (getters), recherche/filtres/tri/couleurs, colorForItem()/setColor()/
+        // itemById()/selectItem()/removeItem()/selectAllVisible() proviennent maintenant du mixin
+        // partagé NewsArticlePicker() fusionné ci-dessous (avant le `return`) — DRY avec
+        // admin/concentre-builder.blade.php, voir public/assets/admin/news-article-picker.js.
 
         async generateGoal() {
             if (this.selectedIds.length === 0) return;
@@ -258,6 +213,36 @@ function videoGoalBuilder(opts) {
             }
         },
     };
+
+    // Fusionne le mixin partagé (état + getters + méthodes du sélecteur d'actualités) sur l'objet
+    // AVANT qu'Alpine ne le rende réactif (Alpine.reactive() enveloppe la valeur RETOURNÉE par
+    // cette factory x-data, pas l'objet manipulé après coup). Object.defineProperties (PAS
+    // Object.assign ni spread) préserve les `get xxx() {...}` comme de vrais getters — un spread
+    // les figerait en valeurs statiques et casserait la réactivité.
+    // NOTE IMPORTANTE : fusionner APRÈS coup dans init() (sur `this`, déjà réactif à ce stade) ne
+    // fonctionne PAS de façon fiable avec l'Alpine embarqué par Livewire dans ce projet — vérifié
+    // en local (Playwright) : les propriétés ajoutées via defineProperties sur `this` à l'intérieur
+    // d'init() n'étaient PAS visibles par le reste du template (erreurs "x is not defined"). D'où
+    // la fusion ICI, avant le `return`, sur l'objet encore brut.
+    Object.defineProperties(state, Object.getOwnPropertyDescriptors(NewsArticlePicker({
+        // Objectif Vidéo n'a pas de plage par défaut garantie côté UI (l'utilisateur peut vider
+        // les champs) : on ne fetch que si les deux dates sont renseignées, comme le faisait
+        // l'ancien fetchNews() de cette page (`if (!dateStart || !dateEnd) return;`).
+        shouldFetch: (ctx) => !!(ctx.dateStart && ctx.dateEnd),
+        fetchStrategy: (ctx) => ({
+            method: 'POST',
+            url: ctx.endpoints.news,
+            body: { date_start: ctx.dateStart, date_end: ctx.dateEnd },
+        }),
+        // Purge la sélection des actualités qui ne sont plus dans la nouvelle plage chargée
+        // (même comportement que l'ancien fetchNews() de cette page).
+        onFetchSuccess: (ctx) => {
+            ctx.selectedIds = ctx.selectedIds.filter(id => ctx.newsItems.some(n => n.id === id));
+        },
+        onFetchSettled: (ctx) => { ctx.hasFetched = true; },
+    })));
+
+    return state;
 }
 </script>
 @endsection

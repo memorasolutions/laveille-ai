@@ -1911,11 +1911,42 @@ declare(strict_types=1);
  *     pr-high-contrast-reading). Vérifié visuellement (Playwright local, superadmin) : Clair (non
  *     régressé), Sombre forcé et Système (émulation prefers-color-scheme dark ET light) sur les
  *     3 onglets. Tests Modules/Tools/tests/Feature/PrompteurToolTest.php : 5 passed, 0 failed.
+ *
+ *   1.116.10 · 2026-07-20 · refactor(news-admin) extraction DRY du "sélecteur d'actualités"
+ *     (recherche/filtre langue/filtre couleur/3 modes de tri/regroupement par acteur/pastille
+ *     couleur/favicon/résumé/liens/bouton +Ajouter) hors de concentre-builder.blade.php vers un
+ *     composant partagé réutilisé aussi par video-goal-builder.blade.php (qui avait une liste
+ *     basique checkbox, sans recherche/filtre/tri). Nouveau mixin Alpine
+ *     public/assets/admin/news-article-picker.js (window.NewsArticlePicker(opts), stratégie de
+ *     fetch paramétrable GET query-string pour le Concentré vs POST JSON body pour Objectif
+ *     Vidéo), nouveau partial Modules/News/resources/views/admin/partials/news-article-picker.blade.php
+ *     (colonne "actualités disponibles", @include dans le même scope x-data, aucune prop requise),
+ *     nouveau CSS partagé public/assets/admin/news-article-picker.css. Objectif Vidéo passe de sa
+ *     liste plate à checkbox à la même disposition 2 colonnes que le Concentré (disponibles à
+ *     gauche / sélection simplifiée à droite, SANS glisser-déposer — l'ordre n'a pas d'importance
+ *     pour la synthèse IA contrairement au Concentré). PIÈGE RÉSOLU (vérifié Playwright local) :
+ *     fusionner le mixin via Object.defineProperties(this, Object.getOwnPropertyDescriptors(...))
+ *     À L'INTÉRIEUR de init() casse silencieusement la réactivité Alpine dans ce projet (Alpine
+ *     embarqué par Livewire) — les propriétés ajoutées sur `this` (déjà réactif à ce stade)
+ *     n'étaient pas visibles par le template ("x is not defined" malgré defineProperties qui ne
+ *     lève aucune exception). Corrigé en fusionnant AVANT le `return` de la factory x-data (sur
+ *     l'objet encore brut, avant qu'Alpine ne le rende réactif) — mêmes fonctions defineProperties
+ *     + getOwnPropertyDescriptors (préserve les getters availableItems/filteredAvailable/
+ *     groupedAvailable), juste déplacées hors de init(). Zéro régression du Concentré : recherche,
+ *     filtre langue, filtre couleur, 3 tris, regroupement acteur, pastille couleur (choix+effacer),
+ *     Tout cocher, ajout/retrait, glisser-déposer sélection, tri rapide sélection, URLs manuelles,
+ *     génération prompt + compteur tokens, zone éditoriale, copier, télécharger .txt, historique +
+ *     réutiliser, brouillon localStorage — tous vérifiés visuellement (Playwright, superadmin,
+ *     données de test locales) desktop + mobile 390px. Objectif Vidéo : sélection/retrait/recherche/
+ *     filtres/tri fonctionnels, génération d'objectif opérationnelle (repli gracieux "service IA
+ *     indisponible" testé, comportement du service IA inchangé). Tests
+ *     Modules/News/tests/Feature/VideoGoalBuilderTest.php (8) + ConcentrePromptBuilderTest.php (5) +
+ *     régression complète Modules/News (113/113) : 100% verts.
  */
 
 $lvMajor = 1;
 $lvMinor = 116;
-$lvPatch = 9;
+$lvPatch = 10;
 
 return [
     'major' => $lvMajor,

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.116.10] - 2026-07-20
+
+### Changed
+- **Extraction DRY du "sélecteur d'actualités" (recherche/filtre langue/filtre couleur/3 tris/regroupement par acteur/pastille couleur) du Concentré IA vers un composant partagé, réutilisé par le Générateur d'objectif vidéo.** `/admin/objectif-video` avait une liste basique (checkboxes, pas de recherche/filtre/tri) alors que `/admin/concentre-builder` avait un système riche — au lieu de dupliquer ce système une 2e fois, extraction en 3 fichiers partagés : `public/assets/admin/news-article-picker.js` (mixin Alpine `window.NewsArticlePicker(opts)`, stratégie de fetch paramétrable — GET query-string pour le Concentré, POST JSON body pour Objectif Vidéo), `Modules/News/resources/views/admin/partials/news-article-picker.blade.php` (colonne "actualités disponibles", `@include` dans le scope `x-data` du parent), `public/assets/admin/news-article-picker.css`. Objectif Vidéo passe de sa liste plate à checkbox à la même disposition 2 colonnes que le Concentré (disponibles à gauche / sélection simplifiée à droite, sans glisser-déposer — l'ordre n'a pas d'importance pour la synthèse IA). Piège de réactivité Alpine résolu en cours de route (voir `config/version.php` pour le détail complet) : fusionner le mixin via `Object.defineProperties`/`Object.getOwnPropertyDescriptors` doit se faire AVANT le `return` de la factory `x-data`, pas à l'intérieur de `init()` (l'Alpine embarqué par Livewire dans ce projet ne rend pas visibles au template les propriétés ajoutées après coup sur un objet déjà réactif). Zéro régression du Concentré (recherche, filtres, tris, cluster, couleurs, sélection/glisser-déposer, génération de prompt, historique, brouillon localStorage — vérifié visuellement en local desktop + mobile 390px) ; Objectif Vidéo pleinement fonctionnel avec le nouveau système. Tests `Modules/News/tests/Feature/VideoGoalBuilderTest.php` + `ConcentrePromptBuilderTest.php` + régression complète `Modules/News` : 113/113 verts.
+
 ## [1.116.9] - 2026-07-20
 
 ### Fixed

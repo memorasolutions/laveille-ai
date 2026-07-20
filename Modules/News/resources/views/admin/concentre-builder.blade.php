@@ -1,59 +1,11 @@
 @extends('backoffice::layouts.admin', ['title' => 'Concentré IA — builder de prompt', 'subtitle' => 'Génère le prompt Claude Code CLI hebdomadaire'])
 
 @push('styles')
+{{-- Composant partagé "sélecteur d'actualités" (recherche/filtres/tri/cluster/couleur),
+     réutilisé aussi par admin/video-goal-builder.blade.php — voir public/assets/admin/. --}}
+<link rel="stylesheet" href="{{ asset('assets/admin/news-article-picker.css') }}?v={{ config('version.semver') }}">
 <style>
     .cb-card { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:18px; margin-bottom:18px; }
-    .cb-news-item { display:flex; gap:12px; padding:10px 12px; border:1px solid #e5e7eb; border-left:6px solid #94a3b8; border-radius:8px; background:#fff; margin-bottom:8px; transition:background .15s; align-items:flex-start; position:relative; }
-    /* Color dot trigger : pastille cliquable montrant la couleur actuelle */
-    .cb-color-dot {
-        width:22px; height:22px; min-width:22px; min-height:22px;
-        border-radius:50%; border:2px solid #fff; outline:1px solid #cbd5e1;
-        cursor:pointer; padding:0; flex-shrink:0; box-sizing:border-box;
-        display:inline-flex; align-items:center; justify-content:center;
-        transition:transform .12s, outline .12s;
-        align-self:center;
-    }
-    .cb-color-dot:hover { transform:scale(1.15); outline-color:#064E5A; }
-    .cb-color-dot:focus-visible { outline:2px solid #064E5A; outline-offset:1px; }
-    .cb-color-wrapper { position:relative; display:inline-flex; align-self:center; }
-    /* Popover des choix */
-    .cb-color-popover {
-        position:absolute; top:calc(100% + 6px); right:0;
-        background:#fff; border:1px solid #e5e7eb; border-radius:10px;
-        padding:8px; box-shadow:0 8px 24px rgba(0,0,0,0.12);
-        z-index:1000;
-        display:grid; grid-template-columns:repeat(4, 28px); gap:6px;
-        width:auto;
-    }
-    .cb-color-popover button {
-        width:28px; height:28px; min-width:28px; min-height:28px;
-        border-radius:50%; border:2px solid #fff; outline:1px solid #cbd5e1;
-        cursor:pointer; padding:0; flex-shrink:0; box-sizing:border-box;
-        display:inline-flex; align-items:center; justify-content:center;
-        transition:transform .12s;
-    }
-    .cb-color-popover button:hover { transform:scale(1.18); }
-    .cb-color-popover button.is-active { outline:2.5px solid #064E5A; outline-offset:1px; }
-    .cb-color-popover .cb-clear { background:#fff; color:#dc2626; font-size:14px; font-weight:700; line-height:1; }
-    .cb-news-item:hover { background:#f9fafb; }
-    .cb-news-item.is-selected { border-color:#0B7285; background:#ecfeff; padding:6px 10px; align-items:center; }
-    .cb-news-item.is-selected .cb-title { font-size:13px; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-    .cb-news-item.is-selected .cb-meta { font-size:11px; margin-top:2px; }
-    .cb-drag-ghost { opacity:0.4; background:#fef3c7 !important; }
-    .cb-drag-chosen { box-shadow:0 6px 16px rgba(11,114,133,0.25); }
-    .cb-cluster-divider { font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.6px; padding:8px 4px 4px; border-top:1px dashed #e5e7eb; margin-top:6px; }
-    .cb-cluster-divider:first-child { border-top:none; margin-top:0; padding-top:0; }
-    .cb-news-item .cb-fav { width:24px; height:24px; flex-shrink:0; border-radius:4px; }
-    .cb-news-item .cb-handle { cursor:grab; color:#94a3b8; padding:0 4px; user-select:none; font-size:18px; }
-    .cb-news-item .cb-handle:active { cursor:grabbing; }
-    .cb-news-item .cb-title { font-weight:600; color:#1f2937; font-size:14px; line-height:1.35; }
-    .cb-news-item .cb-meta { font-size:12px; color:#6b7280; margin-top:4px; }
-    .cb-news-item .cb-summary { font-size:13px; color:#374151; margin-top:6px; line-height:1.45; }
-    .cb-news-item .cb-actions { display:flex; gap:6px; align-items:center; }
-    .cb-news-item .cb-actions a { color:#0B7285; text-decoration:none; font-size:12px; padding:4px 8px; border:1px solid #0B7285; border-radius:4px; min-height:32px; display:inline-flex; align-items:center; }
-    .cb-news-item .cb-actions a:hover { background:#0B7285; color:#fff; }
-    .cb-used-badge { background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; }
-    .cb-position-badge { background:#0B7285; color:#fff; font-weight:700; min-width:28px; height:28px; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
     .cb-pre { background:#0f172a; color:#e2e8f0; padding:14px; border-radius:8px; max-height:420px; overflow:auto; font-family:'SF Mono','Monaco','Consolas',monospace; font-size:12px; line-height:1.55; white-space:pre-wrap; word-break:break-word; }
     .cb-pre mark { background:#fde68a; color:#0f172a; padding:0 2px; }
     .cb-btn { background:#0B7285; color:#fff; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-weight:600; min-height:44px; display:inline-flex; align-items:center; gap:6px; }
@@ -130,89 +82,9 @@
     </div>
 
     <div class="row">
-        {{-- Colonne gauche : disponibles --}}
+        {{-- Colonne gauche : disponibles (composant partagé avec admin/video-goal-builder) --}}
         <div class="col-md-6">
-            <div class="cb-card">
-                <div class="cb-section-title">
-                    📰 Actualités disponibles
-                    <span class="cb-counter" x-text="availableItems.length + ' / ' + newsItems.length"></span>
-                </div>
-                <div class="mb-2 d-flex gap-2 align-items-center flex-wrap">
-                    <input type="search" class="form-control form-control-sm" placeholder="🔍 Rechercher dans les titres / résumés…" x-model="searchQuery" style="flex:1; min-width:200px;">
-                    <select class="form-select form-select-sm" x-model="languageFilter" style="width:auto;">
-                        <option value="">🌐 Toutes langues</option>
-                        <option value="fr">🇫🇷 Français</option>
-                        <option value="en">🇬🇧 English</option>
-                    </select>
-                    <select class="form-select form-select-sm" x-model="sortMode" style="width:auto;" title="Mode de tri">
-                        <option value="cluster">🏷 Tri par acteur</option>
-                        <option value="color">🎨 Tri par couleur</option>
-                        <option value="date">📅 Tri par date</option>
-                    </select>
-                    <select class="form-select form-select-sm" x-model="colorFilter" style="width:auto;" title="Filtre par couleur">
-                        <option value="">🎨 Toutes couleurs</option>
-                        <template x-for="c in colorPalette.filter(x => x.value)" :key="c.value">
-                            <option :value="c.value" :style="'color:' + c.value + '; font-weight:700;'" x-text="'● ' + c.label"></option>
-                        </template>
-                    </select>
-                    <button class="cb-btn cb-btn-secondary" type="button" style="font-size:12px; padding:6px 12px;" @click="selectAllVisible()" :disabled="filteredAvailable.length === 0">Tout cocher</button>
-                </div>
-                <div style="max-height:600px; overflow-y:auto;">
-                    <template x-for="group in groupedAvailable" :key="'g-' + (group.cluster || 'none')">
-                        <div>
-                            <div class="cb-cluster-divider" x-show="group.cluster && sortMode === 'cluster'" x-cloak>
-                                <span x-text="'🏷 ' + group.cluster + ' (' + group.items.length + ')'"></span>
-                            </div>
-                            <template x-for="item in group.items" :key="item.id">
-                                <div class="cb-news-item" :style="'border-left-color:' + colorForItem(item)">
-                                    <img :src="item.favicon" loading="lazy" class="cb-fav" alt="" onerror="this.style.display='none'">
-                                    <div style="flex:1; min-width:0;">
-                                        <div class="cb-title" x-text="item.title" :title="item.title_original && item.title_original !== item.title ? 'Titre original : ' + item.title_original : ''"></div>
-                                        <div class="cb-meta">
-                                            <span x-text="item.source_language === 'fr' ? '🇫🇷' : (item.source_language === 'en' ? '🇬🇧' : '🌐')" :title="item.source_language === 'fr' ? 'Français' : (item.source_language === 'en' ? 'Anglais (titre FR si traduit)' : 'Langue inconnue')" style="margin-right:4px;"></span>
-                                            <span x-text="item.source_name || 'Source inconnue'"></span> · <span x-text="item.pub_date_short"></span>
-                                            <template x-if="item.already_used">
-                                                <span class="cb-used-badge ms-1">🔁 déjà utilisée</span>
-                                            </template>
-                                        </div>
-                                        <div class="cb-summary" x-text="item.summary" x-show="item.summary"></div>
-                                        <div class="cb-actions mt-2">
-                                            <a :href="item.site_url" target="_blank" rel="noopener">🔗 Lire sur le site</a>
-                                            <a :href="item.source_url" target="_blank" rel="noopener" x-show="item.source_url">↗ Source</a>
-                                        </div>
-                                    </div>
-                                    <div class="cb-color-wrapper" x-data="{ open: false }" @click.outside="open = false">
-                                        <button type="button" class="cb-color-dot" :style="'background:' + colorForItem(item)" @click="open = !open" :title="'Couleur : ' + (manualColors[item.id] ? 'manuelle' : 'auto cluster')" aria-label="Choisir une couleur"></button>
-                                        <div class="cb-color-popover" x-show="open" x-cloak x-transition.opacity.duration.150ms>
-                                            <template x-for="c in colorPalette" :key="'p-' + item.id + '-' + c.value">
-                                                <button type="button"
-                                                        :class="['cb-color-choice', c.value ? '' : 'cb-clear', (manualColors[item.id] || '') === c.value ? 'is-active' : '']"
-                                                        :style="c.value ? ('background:' + c.value) : ''"
-                                                        :title="c.label"
-                                                        @click="setColor(item.id, c.value); open = false">
-                                                    <span x-show="!c.value">×</span>
-                                                </button>
-                                            </template>
-                                        </div>
-                                    </div>
-                                    <button class="cb-btn" type="button" style="font-size:12px; padding:6px 10px; min-height:32px;" @click="selectItem(item.id)">+ Ajouter</button>
-                                </div>
-                            </template>
-                        </div>
-                    </template>
-                    <div class="cb-empty" x-show="filteredAvailable.length === 0 && !loading.news" x-cloak>
-                        <template x-if="newsItems.length === 0">
-                            <span>Aucune actualité publiée cette semaine.</span>
-                        </template>
-                        <template x-if="newsItems.length > 0 && availableItems.length === 0">
-                            <span>Toutes les actualités sont déjà sélectionnées.</span>
-                        </template>
-                        <template x-if="availableItems.length > 0">
-                            <span>Aucun résultat pour cette recherche.</span>
-                        </template>
-                    </div>
-                </div>
-            </div>
+            @include('news::admin.partials.news-article-picker')
         </div>
 
         {{-- Colonne droite : sélection ordonnée --}}
@@ -335,18 +207,20 @@
 {{-- SortableJS pour drag-drop ordre --}}
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js" defer></script>
 
+{{-- Mixin partagé "sélecteur d'actualités" (recherche/filtres/tri/cluster/couleur/sélection),
+     réutilisé aussi par admin/video-goal-builder.blade.php — voir public/assets/admin/. Chargé
+     AVANT le script inline ci-dessous : window.NewsArticlePicker doit exister avant init(). --}}
+<script src="{{ asset('assets/admin/news-article-picker.js') }}?v={{ config('version.semver') }}" defer></script>
+
 <script>
 function concentreBuilder(opts) {
-    return {
+    const state = {
         weekStart: opts.defaultStart,
         weekEnd: opts.defaultEnd,
         weekStartError: '',
-        fetchError: '',
         draftRestored: false,
         draftRestoredAt: '',
         savedFlash: false,
-        newsItems: [],
-        selectedIds: [],
         manualUrls: '',
         generatedPrompt: '',
         generateError: '',
@@ -402,114 +276,10 @@ function concentreBuilder(opts) {
             this.onWeekStartChange();
         },
 
-        async fetchNews() {
-            this.loading.news = true;
-            this.fetchError = '';
-            try {
-                const url = this.endpoints.news + '?week_start=' + this.weekStart + '&week_end=' + this.weekEnd;
-                const res = await fetch(url, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
-                if (!res.ok) {
-                    let detail = '';
-                    try { const e = await res.json(); detail = e.error || e.message || ''; } catch (_) {}
-                    this.fetchError = 'HTTP ' + res.status + (detail ? ' — ' + detail : '');
-                    this.newsItems = [];
-                    return;
-                }
-                const data = await res.json();
-                this.newsItems = data.items || [];
-            } catch (e) {
-                this.fetchError = 'Erreur réseau : ' + e.message;
-                this.newsItems = [];
-            } finally {
-                this.loading.news = false;
-            }
-        },
-
-        get availableItems() {
-            return this.newsItems.filter(n => !this.selectedIds.includes(n.id));
-        },
-
-        get filteredAvailable() {
-            const q = this.searchQuery?.toLowerCase().trim() || '';
-            const lang = this.languageFilter || '';
-            const colorF = this.colorFilter || '';
-            const filtered = this.availableItems.filter(n => {
-                if (lang && n.source_language !== lang) return false;
-                if (colorF && this.colorForItem(n) !== colorF) return false;
-                if (!q) return true;
-                return (n.title || '').toLowerCase().includes(q)
-                    || (n.title_original || '').toLowerCase().includes(q)
-                    || (n.summary || '').toLowerCase().includes(q);
-            });
-
-            if (this.sortMode === 'color') {
-                // Trie : par couleur (manuel d'abord puis cluster), date desc dans chaque
-                return [...filtered].sort((a, b) => {
-                    const ca = this.colorForItem(a);
-                    const cb = this.colorForItem(b);
-                    if (ca !== cb) return ca.localeCompare(cb);
-                    return (b.pub_date || '').localeCompare(a.pub_date || '');
-                });
-            }
-            if (this.sortMode === 'cluster') {
-                return [...filtered].sort((a, b) => {
-                    const ca = a.actor_cluster || '￿';
-                    const cb = b.actor_cluster || '￿';
-                    if (ca !== cb) return ca.localeCompare(cb);
-                    return (b.pub_date || '').localeCompare(a.pub_date || '');
-                });
-            }
-            return filtered;
-        },
-
-        // Renvoie une map [cluster|null → items[]] selon l'ordre du tri actuel
-        get groupedAvailable() {
-            const items = this.filteredAvailable;
-            if (this.sortMode !== 'cluster') return [{ cluster: null, items }];
-            const groups = [];
-            let last = null;
-            for (const it of items) {
-                const c = it.actor_cluster || 'Autres';
-                if (!last || last.cluster !== c) {
-                    last = { cluster: c, items: [] };
-                    groups.push(last);
-                }
-                last.items.push(it);
-            }
-            return groups;
-        },
-
-        searchQuery: '',
-        languageFilter: '',
-        colorFilter: '',
-        sortMode: 'cluster', // 'cluster' (par défaut, groupage acteur) | 'date' | 'color'
-        manualColors: {}, // { [itemId]: '#hexcolor' }
-        colorPalette: [
-            { label: 'Effacer', value: '' },
-            { label: 'Rouge', value: '#ef4444' },
-            { label: 'Orange', value: '#f97316' },
-            { label: 'Jaune', value: '#eab308' },
-            { label: 'Vert', value: '#22c55e' },
-            { label: 'Bleu', value: '#3b82f6' },
-            { label: 'Violet', value: '#a855f7' },
-        ],
-
-        colorForItem(item) {
-            if (!item) return '#94a3b8';
-            const manual = this.manualColors[item.id];
-            if (manual) return manual;
-            return item.cluster_color || '#94a3b8';
-        },
-
-        setColor(itemId, color) {
-            if (color === '' || color === null) {
-                delete this.manualColors[itemId];
-            } else {
-                this.manualColors[itemId] = color;
-            }
-            this.manualColors = { ...this.manualColors }; // force reactivity
-            this.saveLocal();
-        },
+        // fetchNews(), availableItems/filteredAvailable/groupedAvailable (getters), état
+        // recherche/filtres/tri/couleurs et colorForItem()/setColor() proviennent maintenant du
+        // mixin partagé NewsArticlePicker() fusionné dans init() (voir plus haut) — DRY avec
+        // admin/video-goal-builder.blade.php, voir public/assets/admin/news-article-picker.js.
 
         sortSelected(mode) {
             const ids = [...this.selectedIds];
@@ -538,24 +308,10 @@ function concentreBuilder(opts) {
             this.$nextTick(() => this.initSortable());
         },
 
-        itemById(id) { return this.newsItems.find(n => n.id === id); },
-
-        selectItem(id) {
-            if (!this.selectedIds.includes(id)) {
-                this.selectedIds = [...this.selectedIds, id];
-                this.$nextTick(() => this.initSortable());
-            }
-        },
-
-        removeItem(id) {
-            this.selectedIds = this.selectedIds.filter(i => i !== id);
-        },
-
-        selectAllVisible() {
-            const toAdd = this.filteredAvailable.map(n => n.id).filter(id => !this.selectedIds.includes(id));
-            this.selectedIds = [...this.selectedIds, ...toAdd];
-            this.$nextTick(() => this.initSortable());
-        },
+        // itemById(), selectItem(), removeItem(), selectAllVisible() proviennent du mixin
+        // partagé NewsArticlePicker() (voir commentaire plus haut) — elles ré-invoquent déjà
+        // this.initSortable() après ajout (guard optionnelle, typeof this.initSortable ===
+        // 'function', puisque video-goal-builder n'a pas de drag-drop SortableJS).
 
         initSortable() {
             const el = document.getElementById('cb-sortable');
@@ -732,6 +488,25 @@ function concentreBuilder(opts) {
             } catch (e) {}
         },
     };
+
+    // Fusionne le mixin partagé (état + getters + méthodes du sélecteur d'actualités) sur l'objet
+    // AVANT qu'Alpine ne le rende réactif (Alpine.reactive() enveloppe la valeur RETOURNÉE par
+    // cette factory x-data, pas l'objet manipulé après coup). Object.defineProperties (PAS
+    // Object.assign ni spread) préserve les `get xxx() {...}` comme de vrais getters — un spread
+    // les figerait en valeurs statiques et casserait la réactivité.
+    // NOTE IMPORTANTE : fusionner APRÈS coup dans init() (sur `this`, déjà réactif à ce stade) ne
+    // fonctionne PAS de façon fiable avec l'Alpine embarqué par Livewire dans ce projet — vérifié
+    // en local (Playwright) : les propriétés ajoutées via defineProperties sur `this` à l'intérieur
+    // d'init() n'étaient PAS visibles par le reste du template (erreurs "x is not defined"). D'où
+    // la fusion ICI, avant le `return`, sur l'objet encore brut.
+    Object.defineProperties(state, Object.getOwnPropertyDescriptors(NewsArticlePicker({
+        fetchStrategy: (ctx) => ({
+            method: 'GET',
+            url: ctx.endpoints.news + '?week_start=' + ctx.weekStart + '&week_end=' + ctx.weekEnd,
+        }),
+    })));
+
+    return state;
 }
 </script>
 @endsection
