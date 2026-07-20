@@ -260,7 +260,9 @@
         display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
         padding: 10px 14px;
         border-top: 1px solid #e5e7eb;
-        font-size: 12px; color: #6b7280;
+        /* WCAG 2.2 AAA (1.4.6) : #6b7280 sur blanc = 4.83:1 (< 7:1) — #4b5563 = 7.55:1
+           (même gris que .sp-item__excerpt plus bas, déjà conforme). */
+        font-size: 12px; color: #4b5563;
     }
     .sp-visually-hidden {
         position: absolute; width: 1px; height: 1px;

@@ -41,7 +41,9 @@
 </form>
 
 @if($showNote)
-    <p style="font-size:0.75rem; color:var(--sys-text-muted,#52586a); margin-top:12px;">
+    {{-- WCAG 2.2 AAA (1.4.6) : var(--sys-text-muted,#52586a) sur #F8FAFB = 6.77:1 (< 7:1) —
+         #4b5563 = 7.22:1 (déjà utilisé ailleurs sur le site pour ce même besoin). --}}
+    <p style="font-size:0.75rem; color:#4b5563; margin-top:12px;">
         {{ __('Double opt-in. Loi 25 / RGPD. Désabonnement 1-clic.') }}
     </p>
 @endif

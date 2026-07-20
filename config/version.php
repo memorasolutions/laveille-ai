@@ -17,6 +17,44 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.116.6 · 2026-07-20 · feat(tools) NOUVEL OUTIL PUBLIC GRATUIT « PROMPTEUR »
+ *     (/outils/prompteur). Téléprompteur avec éditeur de script structuré en sections
+ *     (indication visuelle/action + texte à dire, ou grandes lignes au choix), défilement
+ *     synchronisé au débit de l'utilisateur, et générateur de méta-prompt à copier-coller dans
+ *     l'IA de son choix (méthode « apportez votre IA », zéro clé API stockée côté serveur) pour
+ *     générer le contenu automatiquement. Sans compte, 100% dans le navigateur. Comprend :
+ *     éditeur de sections avec import robuste (fichier .json de projet), mode téléprompteur
+ *     plein écran (vitesse, taille de texte, contraste renforcé, mode miroir), panneau de
+ *     personnalisation (thème clair/sombre/système, vue compacte, réduction des animations).
+ *     Migration additive et réversible 2026_07_20_120000_seed_prompteur_tool_entry.php
+ *     (updateOrInsert, pattern calqué sur Minuteur visuel). Gate is_under_construction=true :
+ *     seul un superadmin voit l'outil réel (bypass déjà géré par PublicToolController::show()),
+ *     tout autre visiteur reçoit le placeholder « En construction » - mise en ligne publique =
+ *     décision explicite distincte de l'utilisateur. Audit WCAG 2.2 AAA (8 constats corrigés) :
+ *     rôles ARIA tablist/tab/tabpanel + navigation clavier complète pour les 3 étapes (BYOA,
+ *     éditeur, téléprompteur), aria-label sur tous les boutons icône seule, aria-live
+ *     polite/assertive sur les statuts dynamiques (import, décompte, progression de lecture),
+ *     tailles de cible tactile conformes (2.5.5 AAA), contrastes ≥ 7:1 (1.4.6 AAA) clair/sombre.
+ *     Tests PrompteurToolTest : 5 passed, 0 failed ; régression Modules/Tools : 33/33 verts.
+ *     Testé manuellement avec de vraies IA (Claude.ai, Perplexity, Gemini) via le méta-prompt
+ *     généré. Voir aussi v1.116.1 à v1.116.5 ci-dessous : correctifs de QA visuelle trouvés en
+ *     usage réel après cet audit (défilement, cases à cocher, légende clavier, thème sombre,
+ *     alignement), tous appliqués avant ce premier commit du module.
+ *   1.116.5 · 2026-07-20 · fix(prompteur) désalignement vertical champ/boutons dans l'en-tête de
+ *     carte de section (éditeur de sections, onglet 2). Mesuré via Playwright/getBoundingClientRect :
+ *     en Vue compacte (réglage utilisateur), le champ "Titre de la section" se terminait à 9px
+ *     au-dessus des boutons d'action (↑↓⧉🗑️, alignés en flex-end), le faisant paraître plus court.
+ *     Cause : `.pr-compact .pr-field { margin-bottom: .6rem }` et
+ *     `.pr-section-card__header .pr-field { margin-bottom: 0 }` ont la même spécificité CSS
+ *     (0,2,0) - l'ordre de source (la règle .pr-compact vient après) faisait gagner la marge de
+ *     .6rem, cassant l'alignement flex-end voulu. Fix : spécificité renforcée
+ *     (`#prompteur-app-root .pr-section-card__header .pr-field`) pour que le 0 gagne
+ *     inconditionnellement, quel que soit l'ordre des futures règles utilitaires. Audité les
+ *     autres lignes champ+boutons de l'outil (formulaire BYOA, barre d'actions projet, import,
+ *     panneau réglages) : aucune autre ne partage ce motif. Non reproductible en mode par défaut
+ *     (non-compact) - uniquement quand "Vue compacte" est activée. Tests `PrompteurToolTest` :
+ *     5 passed, 0 failed. Vérifié visuellement avant/après (Playwright), thèmes clair/sombre et
+ *     mobile 390px non régressés.
  *   1.116.0 · 2026-07-19 · feat(decido) politique de rétention complète des sondages - recherche
  *     pp_search (limitation de finalité RGPD/Loi 25, pattern d'avertissement) + validation Codex
  *     ET Gemini (désaccord tranché : Gemini a recalibré le 1er avis de 91 à 60/100, jugé
@@ -1788,11 +1826,51 @@ declare(strict_types=1);
  *   1.1.1 · 2026-05-08 · Fix bounce your@example.com (config/health.php hardcoded)
  *   1.1.0 · 2026-05-08 · Comparateur refonte sticky thead + slider arrows + mismatch detection + 6 outils max
  *   1.0.0 · 2026-05-08 · Initial production release (comparateur multi-outils livré)
+ *
+ *   1.116.1 · 2026-07-20 · fix(prompteur) le défilement auto du téléprompteur (Play) écrivait
+ *     .scrollTop sur #prompteur-reading-area (overflow: hidden, sert juste à clipper les
+ *     fondus/la ligne de guide) au lieu de #prompteur-reading-content (le vrai conteneur
+ *     scrollable, overflow-y: auto) — confirmé en simulation Playwright : la barre de
+ *     progression et le temps restant avançaient normalement jusqu'à 100 % mais le texte à
+ *     l'écran ne bougeait JAMAIS (scrollTop resté à 0 pendant toute la lecture). Corrigé dans
+ *     les 3 endroits concernés (_updateReadingProgress, _resetReadingPosition,
+ *     _applyVoiceScrollPosition).
+ *
+ *   1.116.2 · 2026-07-20 · fix(prompteur) les 3 cases à cocher du panneau Réglages (Contraste
+ *     renforcé, Vue compacte, Réduire les animations) étaient invisibles ET inutilisables
+ *     (display:none hérité du thème global bloggar/style.css, qui attend son propre motif
+ *     input+label:before — motif brisé ici car le label précède l'input en DOM). Réaffichées en
+ *     case native stylée (accent-color), scopé à .pr-settings-row.
+ *
+ *   1.116.3 · 2026-07-20 · fix(prompteur) la légende des raccourcis clavier du téléprompteur
+ *     (Espace/flèches/F/Échap) affichait du texte blanc sur fond quasi blanc dans les <kbd> —
+ *     totalement illisible. Cause : bootstrap.min.css (thème global) fixe `kbd { color:#fff }`,
+ *     et .pr-shortcuts-legend kbd n'écrasait que le fond (clair), pas la couleur héritée.
+ *     Repéré en simulation Playwright mobile 390px. Couleur texte forcée en var(--c-dark).
+ *
+ *   1.116.4 · 2026-07-20 · fix(prompteur) le thème "Sombre"/"Système" du panneau de réglages
+ *     n'avait AUCUN effet visuel : le JS posait déjà data-theme="sombre|clair|systeme" sur
+ *     #prompteur-app-root (prompteur-core.js) mais aucune règle CSS ne consommait cet attribut —
+ *     repéré en QA visuelle Playwright. Ajout d'un jeu complet de règles scopées
+ *     #prompteur-app-root[data-theme="sombre"] (+ variante "systeme" dans
+ *     @media (prefers-color-scheme: dark)) couvrant les 3 onglets (BYOA, éditeur de sections
+ *     2 colonnes Action/Texte, téléprompteur) : cartes, champs, boutons .ct-btn-outline/-ghost
+ *     (invisibles sur fond sombre sans override, bug distinct trouvé en cours de route), colonnes
+ *     Action(bleu)/Voix(orange), badges, kbd, panneau de réglages, combo avec "Contraste renforcé".
+ *     Palette alignée sur public/css/dark.css (thème sombre global du site, déjà vérifié AAA) pour
+ *     rester cohérente avec la charte. Contrastes clés recalculés (sRGB relative luminance) :
+ *     texte #E6E8EC/fond #0F1419 = 15.09:1, muted #A7AEBA/#1A1E25 = 7.57:1, accent #5EEAD4/page =
+ *     12.51:1, colonne visuelle #93C5FD/#16233A = 8.71:1, colonne script #FDBA74/#2E2013 = 9.35:1 —
+ *     tous ≥ 7:1 AAA. La zone de lecture téléprompteur (.pr-reading-area) n'est PAS touchée
+ *     (intentionnellement toujours sombre, indépendante du thème global — distincte de
+ *     pr-high-contrast-reading). Vérifié visuellement (Playwright local, superadmin) : Clair (non
+ *     régressé), Sombre forcé et Système (émulation prefers-color-scheme dark ET light) sur les
+ *     3 onglets. Tests Modules/Tools/tests/Feature/PrompteurToolTest.php : 5 passed, 0 failed.
  */
 
 $lvMajor = 1;
 $lvMinor = 116;
-$lvPatch = 0;
+$lvPatch = 6;
 
 return [
     'major' => $lvMajor,

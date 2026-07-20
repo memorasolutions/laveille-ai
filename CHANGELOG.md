@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.116.6] - 2026-07-20
+
+### Added
+- **Nouvel outil public gratuit « Prompteur » (`/outils/prompteur`).** Téléprompteur avec éditeur de script structuré en sections (indication visuelle/action + texte à dire, ou grandes lignes au choix), défilement synchronisé au débit de l'utilisateur, et générateur de méta-prompt à copier-coller dans l'IA de son choix (méthode « apportez votre IA », zéro clé API stockée côté serveur) pour générer le contenu automatiquement. Sans compte, 100 % dans le navigateur. Comprend : éditeur de sections avec import robuste (fichier `.json` de projet), mode téléprompteur plein écran (vitesse, taille de texte, contraste renforcé, mode miroir), panneau de personnalisation (thème clair/sombre/système, vue compacte, réduction des animations). Migration additive et réversible `2026_07_20_120000_seed_prompteur_tool_entry.php` (`updateOrInsert`, pattern calqué sur Minuteur visuel). **Gate `is_under_construction = true`** : seul un superadmin voit l'outil réel (bypass déjà géré par `PublicToolController::show()`), tout autre visiteur reçoit le placeholder « En construction » — la mise en ligne publique reste une décision explicite distincte de l'utilisateur. Tests `PrompteurToolTest` : 5 passed, 0 failed ; régression `Modules/Tools` : 33/33 verts. Testé manuellement avec de vraies IA (Claude.ai, Perplexity, Gemini) via le méta-prompt généré.
+
+### Fixed
+- **Audit d'accessibilité WCAG 2.2 AAA du nouvel outil Prompteur (8 constats corrigés) avant tout accès superadmin en conditions réelles.** Couvre notamment : motif `role="tablist"`/`"tab"`/`"tabpanel"` avec navigation clavier complète pour les 3 étapes (BYOA, éditeur, téléprompteur), libellés accessibles (`aria-label`) sur l'ensemble des boutons icône seule (déplacer/dupliquer/supprimer une section, plein écran, réglages), zones `aria-live="polite"`/`"assertive"` pour les statuts dynamiques (import, décompte, progression de lecture), tailles de cible tactile conformes (2.5.5 AAA), et contrastes de texte ≥ 7:1 (1.4.6 AAA) sur les états clair et sombre. Vérifié avant les fixes de QA visuelle ultérieurs (v1.116.1 à v1.116.5, ci-dessous), qui ont corrigé des régressions distinctes (défilement, cases à cocher, légende clavier, thème sombre, alignement) trouvées en usage réel après cet audit.
+
+## [1.116.5] - 2026-07-20
+
+### Fixed
+- **Prompteur : désalignement vertical champ/boutons dans l'en-tête de carte de section (éditeur de sections, onglet 2).** Mesuré via Playwright (`getBoundingClientRect`) : en Vue compacte (réglage utilisateur du panneau Réglages), le champ "Titre de la section" se terminait à 9px au-dessus des boutons d'action (↑ ↓ ⧉ 🗑️, alignés en `flex-end`), le faisant paraître plus court que la colonne de boutons. Cause : `.pr-compact .pr-field { margin-bottom: .6rem }` et `.pr-section-card__header .pr-field { margin-bottom: 0 }` ont la même spécificité CSS (0,2,0) - l'ordre de source (la règle `.pr-compact` étant déclarée après) faisait gagner la marge de .6rem, cassant l'alignement `flex-end` voulu pour cette rangée. Corrigé en renforçant la spécificité de la règle de remise à zéro (`#prompteur-app-root .pr-section-card__header .pr-field`) pour qu'elle gagne inconditionnellement, quel que soit l'ordre de déclaration de futures classes utilitaires. Non reproductible en mode par défaut (non-compact) - uniquement quand "Vue compacte" est activée. Audit des autres rangées champ-gauche/boutons-droite de l'outil (formulaire BYOA, barre d'actions projet, import, panneau réglages) : aucune autre ne partage ce motif. Tests `PrompteurToolTest` : 5 passed, 0 failed. Vérifié visuellement avant/après (Playwright), thèmes clair/sombre et mobile 390px non régressés.
+
+## [1.116.4] - 2026-07-20
+
+### Fixed
+- **Prompteur : le thème "Sombre"/"Système" du panneau de réglages n'avait aucun effet visuel.** Le JS posait déjà `data-theme="sombre|clair|systeme"` sur `#prompteur-app-root` mais aucune règle CSS ne consommait cet attribut - repéré en QA visuelle Playwright. Ajout d'un jeu complet de règles scopées `#prompteur-app-root[data-theme="sombre"]` (+ variante "systeme" via `@media (prefers-color-scheme: dark)`) couvrant les 3 onglets (BYOA, éditeur de sections 2 colonnes Action/Texte, téléprompteur) : cartes, champs, boutons `.ct-btn-outline`/`.ct-btn-ghost` (invisibles sur fond sombre sans override, bug distinct trouvé en cours de route), colonnes Action (bleu) / Voix (orange), badges, `<kbd>`, panneau de réglages, combo avec "Contraste renforcé". Palette alignée sur `public/css/dark.css` (thème sombre global du site, déjà vérifié AAA) pour rester cohérente avec la charte. Contrastes clés recalculés (luminance relative sRGB), tous ≥ 7:1 AAA : texte `#E6E8EC`/fond `#0F1419` = 15,09:1, muted `#A7AEBA`/`#1A1E25` = 7,57:1, accent `#5EEAD4`/page = 12,51:1, colonne visuelle `#93C5FD`/`#16233A` = 8,71:1, colonne script `#FDBA74`/`#2E2013` = 9,35:1. La zone de lecture du téléprompteur (`.pr-reading-area`) n'est pas touchée (intentionnellement toujours sombre, indépendante du thème global). Vérifié visuellement (Playwright local) : Clair (non régressé), Sombre forcé et Système (émulation `prefers-color-scheme` dark et light) sur les 3 onglets. Tests `PrompteurToolTest` : 5 passed, 0 failed.
+
+## [1.116.1 à 1.116.3] - 2026-07-20
+
+### Fixed
+- **Prompteur : défilement automatique du téléprompteur inopérant.** Le bouton Lecture écrivait `.scrollTop` sur `#prompteur-reading-area` (conteneur non scrollable, sert juste au clipping des fondus) au lieu de `#prompteur-reading-content` (le vrai conteneur `overflow-y: auto`) - la barre de progression avançait mais le texte à l'écran ne bougeait jamais.
+- **Prompteur : cases à cocher du panneau Réglages invisibles.** `display:none` hérité du thème global (motif `input+label:before` incompatible avec l'ordre DOM label-avant-input de ce panneau) - réaffichées en case native stylée (`accent-color`), scopé à `.pr-settings-row`.
+- **Prompteur : légende des raccourcis clavier illisible.** `bootstrap.min.css` fixe `kbd { color:#fff }` site-wide ; `.pr-shortcuts-legend kbd` n'écrasait que le fond (clair), pas la couleur héritée - texte blanc sur fond quasi blanc. Repéré en simulation Playwright mobile 390px.
+
 ## [1.116.0] - 2026-07-19
 
 ### Added

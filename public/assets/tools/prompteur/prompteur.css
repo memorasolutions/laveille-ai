@@ -1,0 +1,1000 @@
+/* Author: MEMORA solutions, https://memora.solutions ; info@memora.ca */
+/* Prompteur — éditeur de script vidéo structuré (BYOA) + téléprompteur plein écran.
+   3 onglets ARIA (tablist/tab/tabpanel), éditeur de sections 2 colonnes, panneau de
+   personnalisation. Aucune logique ici : structure/présentation seulement, le
+   comportement est branché par prompteur-core.js (Alpine.data('prompteurApp', ...)). */
+
+[x-cloak] { display: none !important; }
+
+.pr-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.pr-wrap { margin: 0 auto; }
+
+.pr-header-row { gap: .5rem; flex-wrap: wrap; }
+
+/* --- Onglets (ARIA tablist) ---
+   Boutons pleine largeur type "pas" numérotés — pattern distinct des ct-btn (propre au
+   Prompteur, comme .mv-style-selector l'est au minuteur) car ce sélecteur porte un
+   numéro d'étape (1/2/3) et doit rester lisible même très étroit (mobile). */
+.pr-tablist {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    margin: 0 0 1.5rem;
+    border-bottom: 2px solid var(--sys-border-subtle, #E5E7EB);
+    padding-bottom: 0;
+}
+.pr-tab {
+    flex: 1 1 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    min-height: 44px;
+    padding: .65rem 1rem;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-family: var(--f-heading);
+    font-weight: 700;
+    font-size: .9rem;
+    color: var(--c-text-muted, #52586a);
+    cursor: pointer;
+    transition: color .15s ease, border-color .15s ease, background-color .15s ease;
+}
+.pr-tab:hover { background: var(--c-surface, #F3F4F6); color: var(--c-dark, #1A1D23); }
+.pr-tab:focus-visible { outline: var(--sys-focus-ring-width, 3px) solid var(--sys-focus-ring, var(--c-accent)); outline-offset: 2px; }
+.pr-tab--active {
+    color: var(--c-primary, #064E5A);
+    border-bottom-color: var(--c-primary, #064E5A);
+}
+.pr-tab__num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border-radius: 50%;
+    background: var(--sys-border-subtle, #E5E7EB);
+    /* WCAG 2.2 AAA (1.4.6) : #52586a sur #E5E7EB = 5.72:1 (< 7:1) — var(--c-dark) = 13.6:1. */
+    color: var(--c-dark, #1A1D23);
+    font-size: .75rem;
+    font-weight: 800;
+}
+.pr-tab--active .pr-tab__num { background: var(--c-primary, #064E5A); color: #fff; }
+
+.pr-panel { padding-top: .25rem; }
+.pr-panel-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .75rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.pr-divider {
+    border: none;
+    border-top: 1px solid var(--sys-border-subtle, #E5E7EB);
+    margin: 1.5rem 0;
+}
+
+/* --- Champs génériques (formulaire BYOA + import + sections) --- */
+.pr-field { margin-bottom: 1rem; }
+.pr-field label,
+.pr-settings-field label,
+.pr-settings-field legend {
+    display: block;
+    font-family: var(--f-heading);
+    font-weight: 700;
+    font-size: .82rem;
+    color: var(--c-dark, #1A1D23);
+    margin-bottom: .35rem;
+}
+.pr-field-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+@media (min-width: 768px) {
+    .pr-field-row { grid-template-columns: 1fr 1fr 1fr; }
+}
+.pr-field--inline { margin-bottom: 0; }
+
+.pr-input,
+.pr-select,
+.pr-textarea {
+    width: 100%;
+    font-family: var(--f-body);
+    font-size: .9rem;
+    color: var(--c-dark, #1A1D23);
+    background: #fff;
+    border: 1.5px solid var(--sys-border-subtle, #E5E7EB);
+    border-radius: var(--r-btn, .5rem);
+    padding: .6rem .75rem;
+    min-height: 44px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+.pr-input--sm { min-height: 40px; }
+.pr-textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+.pr-input:focus-visible,
+.pr-select:focus-visible,
+.pr-textarea:focus-visible {
+    outline: none;
+    border-color: var(--c-primary, #064E5A);
+    box-shadow: 0 0 0 3px rgba(6, 78, 90, .15);
+}
+.mt-1 { margin-top: .5rem; }
+
+.pr-generated-prompt {
+    font-family: 'Consolas', 'Menlo', monospace;
+    font-size: .82rem;
+    background: var(--c-surface, #F9FAFB);
+}
+.pr-copy-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-top: .75rem;
+    flex-wrap: wrap;
+}
+.pr-copy-confirm {
+    font-family: var(--f-heading);
+    font-weight: 700;
+    font-size: .85rem;
+    /* WCAG 2.2 AAA (1.4.6) : #047857 sur #ECFDF5 = 5.21:1 (< 7:1) — #065f46 = 7.29:1. */
+    color: #065f46;
+    background: #ECFDF5;
+    border: 1px solid #A7F3D0;
+    border-radius: 999px;
+    padding: .35rem .8rem;
+}
+
+.pr-byoa-steps {
+    counter-reset: pr-step;
+    list-style: none;
+    margin: 1.5rem 0;
+    padding: 0;
+    display: grid;
+    gap: .75rem;
+}
+.pr-byoa-steps li {
+    position: relative;
+    padding: .75rem 1rem .75rem 3rem;
+    background: var(--c-surface, #F9FAFB);
+    border: 1px solid var(--sys-border-subtle, #E5E7EB);
+    border-radius: var(--r-btn, .5rem);
+    font-size: .9rem;
+    color: var(--c-dark, #1A1D23);
+}
+.pr-byoa-steps li::before {
+    counter-increment: pr-step;
+    content: counter(pr-step);
+    position: absolute;
+    left: .8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--c-primary, #064E5A);
+    color: #fff;
+    font-weight: 800;
+    font-size: .85rem;
+}
+
+/* --- Import (onglet 2) --- */
+.pr-import-actions {
+    display: flex;
+    gap: .75rem;
+    margin-top: .75rem;
+    flex-wrap: wrap;
+}
+.pr-import-status {
+    margin: .6rem 0 0;
+    font-size: .85rem;
+    color: var(--c-primary, #064E5A);
+}
+
+/* --- Gabarits + barre d'actions projet --- */
+.pr-templates,
+.pr-project-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    justify-content: center;
+    margin: 0 0 1.25rem;
+}
+
+/* --- Éditeur de sections --- */
+.pr-sections-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin: 1.25rem 0;
+}
+.pr-sections-empty {
+    text-align: center;
+    color: var(--c-text-muted, #52586a);
+    padding: 2rem 1rem;
+    border: 1px dashed var(--sys-border-subtle, #E5E7EB);
+    border-radius: var(--r-base, .75rem);
+}
+
+.pr-section-card {
+    border: 1.5px solid var(--sys-border-subtle, #E5E7EB);
+    border-radius: var(--r-base, .75rem);
+    overflow: hidden;
+    background: #fff;
+}
+.pr-section-card__header {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: .75rem;
+    padding: .9rem 1rem;
+    background: var(--c-surface, #F9FAFB);
+    border-bottom: 1px solid var(--sys-border-subtle, #E5E7EB);
+}
+.pr-section-card__index {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    border-radius: 50%;
+    background: var(--c-dark, #1A1D23);
+    color: #fff;
+    font-weight: 800;
+    font-size: .9rem;
+    flex-shrink: 0;
+}
+/* Spécificité renforcée (#prompteur-app-root + 2 classes) volontaire : cette règle DOIT
+   toujours gagner sur .pr-compact .pr-field (même spécificité 0,2,0 sinon — l'ordre de
+   source déciderait et .pr-compact réintroduirait 9px de margin-bottom, désalignant le
+   champ par rapport aux boutons d'action à 44px alignés en flex-end — bug constaté et
+   corrigé le 2026-07-20). Sans ce 0 explicite et prioritaire, la marge du .pr-field
+   générique (1rem) fait paraître le champ plus court que la colonne de boutons. */
+#prompteur-app-root .pr-section-card__header .pr-field { flex: 1 1 220px; margin-bottom: 0; }
+.pr-field--duration { flex: 0 1 140px; }
+.pr-section-card__toolbar {
+    display: flex;
+    gap: .35rem;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+/* Boutons icône d'action de section — 44x44 AAA, jamais en-dessous. */
+.pr-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border: 1.5px solid var(--sys-border-subtle, #E5E7EB);
+    border-radius: var(--r-btn, .5rem);
+    background: #fff;
+    color: var(--c-dark, #1A1D23);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color .15s ease, border-color .15s ease;
+}
+.pr-icon-btn:hover:not(:disabled) { background: var(--c-surface, #F3F4F6); border-color: var(--c-primary, #064E5A); }
+.pr-icon-btn:focus-visible { outline: var(--sys-focus-ring-width, 3px) solid var(--sys-focus-ring, var(--c-accent)); outline-offset: 2px; }
+.pr-icon-btn:disabled { opacity: .4; cursor: not-allowed; }
+.pr-icon-btn--danger:hover:not(:disabled) { background: #FEF2F2; border-color: var(--c-danger, #DC2626); color: var(--c-danger, #DC2626); }
+
+/* Deux colonnes clairement distinctes — bordures + fonds différents (jamais la même
+   teinte), c'est le point de repère visuel central de l'outil (« Action » vs « Texte »). */
+.pr-section-card__body {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+}
+@media (min-width: 768px) {
+    .pr-section-card__body { grid-template-columns: 1fr 1fr; }
+}
+.pr-section-col { padding: 1rem; }
+.pr-section-col--visual {
+    background: #EFF6FF;
+    border-bottom: 1px solid #BFDBFE;
+}
+.pr-section-col--script {
+    background: #FDF4EC;
+}
+@media (min-width: 768px) {
+    .pr-section-col--visual { border-bottom: none; border-right: 1px solid #BFDBFE; }
+}
+.pr-section-col__label {
+    font-family: var(--f-heading);
+    font-weight: 700;
+    font-size: .8rem;
+    margin: 0 0 .5rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+}
+.pr-section-col--visual .pr-section-col__label { color: #1D4ED8; }
+.pr-section-col--script .pr-section-col__label { color: #9A2A06; }
+.pr-section-col__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-bottom: .5rem;
+}
+.pr-section-col--visual .pr-textarea,
+.pr-section-col--script .pr-textarea {
+    background: #fff;
+}
+
+/* Toggle "Texte exact" / "Grandes lignes" — segmented control accessible (radios réels,
+   habillage visuel seulement, jamais de <div> cliquable sans sémantique de formulaire). */
+.pr-mode-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    background: #fff;
+    border: 1px solid var(--sys-border-subtle, #E5E7EB);
+    border-radius: 999px;
+    padding: .2rem;
+    font-size: .75rem;
+}
+.pr-mode-toggle input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+.pr-mode-toggle label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: .2rem .6rem;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--c-text-muted, #52586a);
+    margin: 0;
+}
+.pr-mode-toggle input[type="radio"]:checked + label {
+    background: var(--c-accent, #9A2A06);
+    color: #fff;
+}
+.pr-mode-toggle input[type="radio"]:focus-visible + label {
+    outline: var(--sys-focus-ring-width, 3px) solid var(--sys-focus-ring, var(--c-accent));
+    outline-offset: 2px;
+}
+
+/* --- Radio group générique (toggle thème, etc.) --- */
+.pr-radio-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem 1rem;
+}
+.pr-radio-row label { display: inline-flex; align-items: center; font-weight: 500; margin: 0 0 0 .25rem; }
+.pr-radio-row input[type="radio"] { width: 20px; height: 20px; accent-color: var(--c-primary, #064E5A); }
+
+/* --- Onglet 3 : téléprompteur --- */
+.pr-panel--teleprompter { position: relative; }
+
+.pr-countdown {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(4rem, 20vw, 9rem);
+    font-weight: 800;
+    color: #fff;
+    background: rgba(26, 29, 35, .85);
+    font-family: var(--f-heading);
+}
+
+.pr-reading-area {
+    position: relative;
+    height: min(60vh, 620px);
+    overflow: hidden;
+    background: var(--c-dark, #1A1D23);
+    border-radius: var(--r-base, .75rem);
+    isolation: isolate;
+}
+.pr-reading-content {
+    height: 100%;
+    overflow-y: auto;
+    padding: 8rem 1.5rem;
+    scroll-behavior: smooth;
+}
+.pr-reading-fade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 30%;
+    pointer-events: none;
+    z-index: 5;
+}
+.pr-reading-fade--top { top: 0; background: linear-gradient(to bottom, var(--c-dark, #1A1D23) 15%, transparent); }
+.pr-reading-fade--bottom { bottom: 0; background: linear-gradient(to top, var(--c-dark, #1A1D23) 15%, transparent); }
+.pr-reading-guide-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 2px;
+    background: var(--c-accent, #9A2A06);
+    opacity: .55;
+    z-index: 4;
+    pointer-events: none;
+}
+
+.pr-teleprompter-block { margin: 0 0 3rem; max-width: 46rem; margin-left: auto; margin-right: auto; }
+.pr-teleprompter-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: #1D4ED8;
+    color: #fff;
+    border-radius: 999px;
+    padding: .3rem .9rem;
+    font-size: .8rem;
+    font-weight: 700;
+    margin: 0 0 .75rem;
+}
+.pr-teleprompter-script {
+    /* Le thème global définit `p { font-size: 16px; }` (bloggar/style.css) — un sélecteur
+       de type gagne toujours sur l'héritage, même sans cette règle explicite. Sans ce
+       `font-size: inherit`, les boutons +/- (increaseReadingFontSize/decreaseReadingFontSize,
+       qui appliquent la taille en `rem` sur #prompteur-reading-content) n'ont AUCUN effet
+       visuel sur le texte à lire. Bug trouvé et corrigé lors de la vérification 2026-07-20. */
+    font-size: inherit;
+    color: #fff;
+    font-family: var(--f-body);
+    font-weight: 600;
+    line-height: 1.6;
+    margin: 0;
+    text-align: center;
+}
+
+/* Mode miroir : retourne horizontalement la zone de lecture (pas les contrôles). */
+.pr-mirror-mode .pr-reading-area { transform: scaleX(-1); }
+
+/* Contraste renforcé côté lecture (bouton dédié, distinct du panneau de réglages global). */
+.pr-high-contrast-reading .pr-reading-area { background: #000; }
+.pr-high-contrast-reading .pr-teleprompter-script { color: #FFD84D; }
+
+.pr-live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+.pr-teleprompter-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem;
+    margin-top: 1.25rem;
+    justify-content: center;
+}
+.pr-control-group {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .82rem;
+    color: var(--c-text-muted, #52586a);
+}
+.pr-control-group label,
+.pr-control-group__label { font-weight: 600; margin: 0; }
+.pr-control-group input[type="range"] { accent-color: var(--c-primary, #064E5A); }
+
+.pr-badge-experimental {
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    background: #FEF3C7;
+    color: #78350F;
+    border-radius: 999px;
+    padding: .15rem .5rem;
+    margin-left: .35rem;
+}
+
+.pr-progress-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-top: 1rem;
+}
+.pr-progress-bar {
+    flex: 1 1 auto;
+    height: 10px;
+    border-radius: 999px;
+    overflow: hidden;
+    appearance: none;
+}
+.pr-progress-bar::-webkit-progress-bar { background: var(--sys-border-subtle, #E5E7EB); border-radius: 999px; }
+.pr-progress-bar::-webkit-progress-value { background: var(--c-primary, #064E5A); border-radius: 999px; }
+.pr-progress-bar::-moz-progress-bar { background: var(--c-primary, #064E5A); border-radius: 999px; }
+.pr-time-remaining {
+    font-family: 'Consolas', 'Menlo', monospace;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--c-dark, #1A1D23);
+    flex-shrink: 0;
+}
+
+.pr-shortcuts-legend {
+    margin-top: 1.25rem;
+    text-align: center;
+    font-size: .78rem;
+    color: var(--c-text-muted, #52586a);
+}
+.pr-shortcuts-legend__title { font-weight: 700; margin: 0 0 .35rem; }
+.pr-shortcuts-legend ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .3rem 1rem;
+    margin: 0;
+    padding: 0;
+}
+.pr-shortcuts-legend kbd {
+    display: inline-block;
+    padding: .1rem .4rem;
+    border: 1px solid var(--sys-border-subtle, #E5E7EB);
+    border-radius: 4px;
+    background: var(--c-surface, #F9FAFB);
+    /* bootstrap.min.css (thème global) définit `kbd { color:#fff; background-color:#212529 }`
+       — on écrase déjà le fond en clair ci-dessus mais sans écraser la couleur du texte, le
+       blanc hérité de Bootstrap restait : texte blanc sur fond quasi blanc, illisible (confirmé
+       en simulation Playwright mobile 390px, 2026-07-20). */
+    color: var(--c-dark, #1A1D23);
+    font-family: 'Consolas', 'Menlo', monospace;
+    font-size: .75rem;
+}
+
+/* --- Panneau de personnalisation (drawer latéral) --- */
+.pr-settings-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .35);
+    z-index: 9990;
+}
+.pr-settings-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 340px;
+    max-width: 90vw;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -6px 0 24px rgba(0, 0, 0, .18);
+    z-index: 9991;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+.pr-settings-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--sys-border-subtle, #E5E7EB);
+}
+.pr-settings-panel__header h2 {
+    font-family: var(--f-heading);
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--c-dark, #1A1D23);
+    margin: 0;
+}
+.pr-settings-panel__body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    flex: 1 1 auto;
+}
+.pr-settings-field { margin: 0; }
+.pr-settings-field legend { padding: 0; }
+.pr-settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.pr-settings-row label { margin: 0; flex: 1 1 auto; }
+.pr-settings-row input[type="checkbox"] {
+    /* Le thème global (themes/bloggar/sass/style.css) fait `input[type="checkbox"] { display:
+       none }` site-wide et attend le motif input+label:before (input AVANT son label en DOM).
+       Ici le label précède l'input (voir prompteur.blade.php) : ni la case native ni la coche
+       custom du thème ne s'affichaient — case totalement invisible ET inutilisable. Confirmé en
+       simulation Playwright le 2026-07-20 (display:none, rect 0x0). On réaffiche la case native
+       stylée (accent-color) plutôt que de réordonner le DOM, cette sélecteur ayant déjà une
+       spécificité supérieure à la règle du thème. */
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    accent-color: var(--c-primary, #064E5A);
+    flex-shrink: 0;
+}
+.pr-settings-panel__footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--sys-border-subtle, #E5E7EB);
+}
+
+/* --- Vue compacte (réglage utilisateur) : réduit les marges verticales sans rien cacher --- */
+.pr-compact .pr-panel-actions,
+.pr-compact .pr-field,
+.pr-compact .pr-section-card__header,
+.pr-compact .pr-section-col,
+.pr-compact .pr-sections-list { margin-bottom: .6rem; }
+.pr-compact .pr-section-col { padding: .65rem; }
+
+/* --- Taille de texte de base (réglage utilisateur) --- */
+.pr-text-petit { font-size: .92rem; }
+.pr-text-grand { font-size: 1.1rem; }
+
+/* --- Contraste renforcé (réglage global du panneau, distinct du bouton contraste
+   propre à la lecture du téléprompteur ci-dessus) --- */
+.pr-high-contrast .pr-input,
+.pr-high-contrast .pr-select,
+.pr-high-contrast .pr-textarea { border-color: var(--c-dark, #1A1D23); }
+.pr-high-contrast .pr-section-col--visual { background: #DBEAFE; }
+.pr-high-contrast .pr-section-col--script { background: #FBE5D0; }
+
+/* --- prefers-reduced-motion : coupe toute transition/animation --- */
+@media (prefers-reduced-motion: reduce) {
+    .pr-tab,
+    .pr-icon-btn,
+    .pr-input,
+    .pr-select,
+    .pr-textarea,
+    .pr-reading-content,
+    .pr-progress-bar::-webkit-progress-value {
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}
+.pr-reduced-motion .pr-reading-content { scroll-behavior: auto !important; }
+.pr-reduced-motion * { transition: none !important; animation: none !important; }
+
+/* WCAG 2.2 AAA (2.5.5 Target Size Enhanced) : le bouton primaire de copie du prompt mesurait
+   173x40px (.ct-btn de base = 40px, non modifié globalement pour ne pas impacter tous les
+   boutons primaires du site) — override scopé à ce seul bouton pour atteindre 44px. */
+#prompteur-copy-prompt-btn { min-height: 44px; }
+
+@media print {
+    .pr-teleprompter-controls,
+    .pr-settings-backdrop,
+    .pr-settings-panel,
+    #prompteur-settings-toggle-btn { display: none !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THÈME SOMBRE — panneau de réglages (bouton ⚙️), 3 états possibles sur
+   #prompteur-app-root : data-theme="clair" (rien à faire, défaut ci-dessus),
+   "sombre" (forcé) et "systeme" (résolu via prefers-color-scheme). Le JS
+   pose déjà l'attribut (prompteur-core.js) — ici on le CONSOMME.
+   Palette alignée sur public/css/dark.css (thème sombre global du site,
+   S134) pour rester cohérente avec la charte : mêmes tons de fond/texte/
+   accent, déjà vérifiés WCAG AAA. Ne touche jamais .pr-reading-area et
+   consorts (zone de lecture téléprompteur) : cette zone est INTENTIONNELLE-
+   MENT toujours sombre, dans les 2 thèmes, indépendamment de ce bloc (voir
+   commentaire d'origine plus haut sur pr-high-contrast-reading).
+   Contrastes calculés (formule sRGB relative luminance, paires clés) :
+     #E6E8EC sur #0F1419 (page)      = 15.09:1 (AAA)
+     #E6E8EC sur #1A1E25 (surface)   = 13.77:1 (AAA)
+     #A7AEBA (muted) sur #1A1E25     =  7.57:1 (AAA)
+     #5EEAD4 (accent) sur #0F1419    = 12.51:1 (AAA)
+     #93C5FD sur #16233A (colonne visuelle)  = 8.71:1 (AAA)
+     #FDBA74 sur #2E2013 (colonne script)    = 9.35:1 (AAA)
+     #6EE7B7 sur #06281E (succès)    = 10.34:1 (AAA)
+     #FCA5A5 sur #2A1414 (danger)    =  9.16:1 (AAA)
+     #FCD34D sur #2A2008 (avertissement) = 11.14:1 (AAA)
+   ═══════════════════════════════════════════════════════════════════════ */
+#prompteur-app-root[data-theme="sombre"] {
+    --pr-d-page: #0F1419;
+    --pr-d-surface: #1A1E25;
+    --pr-d-surface-sunken: #15181E;
+    --pr-d-border: #3A414E;
+    --pr-d-border-subtle: #2A2F3A;
+    --pr-d-text: #E6E8EC;
+    --pr-d-text-muted: #A7AEBA;
+    --pr-d-accent: #5EEAD4;
+    --pr-d-on-accent: #0F1419;
+    --pr-d-visual-bg: #16233A;
+    --pr-d-visual-bg-hc: #1D3A5C;
+    --pr-d-visual-border: #1E3A5F;
+    --pr-d-visual-text: #93C5FD;
+    --pr-d-script-bg: #2E2013;
+    --pr-d-script-bg-hc: #3A2818;
+    --pr-d-script-border: #4A2E1A;
+    --pr-d-script-text: #FDBA74;
+    --pr-d-success-bg: #06281E;
+    --pr-d-success-text: #6EE7B7;
+    --pr-d-success-border: #14532D;
+    --pr-d-danger-bg: #2A1414;
+    --pr-d-danger-text: #FCA5A5;
+    --pr-d-warning-bg: #2A2008;
+    --pr-d-warning-text: #FCD34D;
+
+    background-color: var(--pr-d-page);
+    color: var(--pr-d-text);
+}
+
+@media (prefers-color-scheme: dark) {
+    #prompteur-app-root[data-theme="systeme"] {
+        --pr-d-page: #0F1419;
+        --pr-d-surface: #1A1E25;
+        --pr-d-surface-sunken: #15181E;
+        --pr-d-border: #3A414E;
+        --pr-d-border-subtle: #2A2F3A;
+        --pr-d-text: #E6E8EC;
+        --pr-d-text-muted: #A7AEBA;
+        --pr-d-accent: #5EEAD4;
+        --pr-d-on-accent: #0F1419;
+        --pr-d-visual-bg: #16233A;
+        --pr-d-visual-bg-hc: #1D3A5C;
+        --pr-d-visual-border: #1E3A5F;
+        --pr-d-visual-text: #93C5FD;
+        --pr-d-script-bg: #2E2013;
+        --pr-d-script-bg-hc: #3A2818;
+        --pr-d-script-border: #4A2E1A;
+        --pr-d-script-text: #FDBA74;
+        --pr-d-success-bg: #06281E;
+        --pr-d-success-text: #6EE7B7;
+        --pr-d-success-border: #14532D;
+        --pr-d-danger-bg: #2A1414;
+        --pr-d-danger-text: #FCA5A5;
+        --pr-d-warning-bg: #2A2008;
+        --pr-d-warning-text: #FCD34D;
+
+        background-color: var(--pr-d-page);
+        color: var(--pr-d-text);
+    }
+}
+
+/* Les 2 blocs ci-dessous (sombre / systeme+media) consomment exactement les
+   mêmes tokens --pr-d-* définis ci-dessus dans chacun des 2 déclencheurs —
+   ils sont donc gardés STRICTEMENT synchronisés (mêmes sélecteurs, mêmes
+   propriétés). Toute correction future doit être répercutée dans les 2. */
+#prompteur-app-root[data-theme="sombre"],
+#prompteur-app-root[data-theme="systeme"] {
+    /* Titre + description en-tête (styles inline color:var(--c-dark) sur le h1 —
+       spécificité inline non contournable sans !important). */
+}
+#prompteur-app-root[data-theme="sombre"] h1 { color: var(--pr-d-text) !important; }
+#prompteur-app-root[data-theme="sombre"] .text-muted { color: var(--pr-d-text-muted); }
+
+/* Coque de la carte (bordure/fond autour du card-body #prompteur-app-root). */
+#prompteur-fullscreen-target:has(#prompteur-app-root[data-theme="sombre"]) {
+    background-color: var(--pr-d-page, #0F1419);
+    border-color: var(--pr-d-border, #3A414E);
+}
+
+/* Onglets */
+#prompteur-app-root[data-theme="sombre"] .pr-tablist { border-bottom-color: var(--pr-d-border-subtle); }
+#prompteur-app-root[data-theme="sombre"] .pr-tab { color: var(--pr-d-text-muted); }
+#prompteur-app-root[data-theme="sombre"] .pr-tab:hover { background: var(--pr-d-surface); color: var(--pr-d-text); }
+#prompteur-app-root[data-theme="sombre"] .pr-tab--active { color: var(--pr-d-accent); border-bottom-color: var(--pr-d-accent); }
+#prompteur-app-root[data-theme="sombre"] .pr-tab__num { background: var(--pr-d-border); color: var(--pr-d-text); }
+#prompteur-app-root[data-theme="sombre"] .pr-tab--active .pr-tab__num { background: var(--pr-d-accent); color: var(--pr-d-on-accent); }
+
+/* Champs génériques (BYOA + import + réglages) */
+#prompteur-app-root[data-theme="sombre"] .pr-field label,
+#prompteur-app-root[data-theme="sombre"] .pr-settings-field label,
+#prompteur-app-root[data-theme="sombre"] .pr-settings-field legend,
+#prompteur-app-root[data-theme="sombre"] .pr-radio-row label { color: var(--pr-d-text); }
+#prompteur-app-root[data-theme="sombre"] .pr-input,
+#prompteur-app-root[data-theme="sombre"] .pr-select,
+#prompteur-app-root[data-theme="sombre"] .pr-textarea {
+    color: var(--pr-d-text);
+    background: var(--pr-d-surface-sunken);
+    border-color: var(--pr-d-border);
+}
+#prompteur-app-root[data-theme="sombre"] .pr-input:focus-visible,
+#prompteur-app-root[data-theme="sombre"] .pr-select:focus-visible,
+#prompteur-app-root[data-theme="sombre"] .pr-textarea:focus-visible {
+    border-color: var(--pr-d-accent);
+    box-shadow: 0 0 0 3px rgba(94, 234, 212, .25);
+}
+#prompteur-app-root[data-theme="sombre"] .pr-generated-prompt { background: var(--pr-d-surface-sunken); }
+#prompteur-app-root[data-theme="sombre"] .pr-copy-confirm {
+    color: var(--pr-d-success-text);
+    background: var(--pr-d-success-bg);
+    border-color: var(--pr-d-success-border);
+}
+#prompteur-app-root[data-theme="sombre"] .pr-byoa-steps li {
+    background: var(--pr-d-surface);
+    border-color: var(--pr-d-border);
+    color: var(--pr-d-text);
+}
+#prompteur-app-root[data-theme="sombre"] .pr-import-status { color: var(--pr-d-accent); }
+
+/* Boutons génériques du site (.ct-btn-*) utilisés dans l'outil — leurs
+   variantes "outline"/"ghost" supposent un fond clair par défaut (texte/
+   bordure en var(--c-primary) ou var(--c-text-muted), trop sombres sur un
+   fond sombre) : la variante "primary/accent/danger" (fond plein + texte
+   blanc) reste inchangée, déjà AAA quel que soit le thème. */
+#prompteur-app-root[data-theme="sombre"] .ct-btn-outline { border-color: var(--pr-d-accent); color: var(--pr-d-accent); }
+#prompteur-app-root[data-theme="sombre"] .ct-btn-ghost { color: var(--pr-d-text-muted); }
+#prompteur-app-root[data-theme="sombre"] .ct-btn-ghost:hover { background: var(--pr-d-surface); color: var(--pr-d-text); }
+
+/* Gabarits + barre d'actions projet : conteneurs flex sans couleur propre,
+   déjà couverts par les overrides .ct-btn-* ci-dessus (aucune règle requise). */
+
+/* Éditeur de sections */
+#prompteur-app-root[data-theme="sombre"] .pr-sections-empty { color: var(--pr-d-text-muted); border-color: var(--pr-d-border); }
+#prompteur-app-root[data-theme="sombre"] .pr-section-card { background: var(--pr-d-surface); border-color: var(--pr-d-border); }
+#prompteur-app-root[data-theme="sombre"] .pr-section-card__header { background: var(--pr-d-surface-sunken); border-bottom-color: var(--pr-d-border); }
+#prompteur-app-root[data-theme="sombre"] .pr-section-card__index { background: var(--pr-d-border); color: var(--pr-d-text); }
+#prompteur-app-root[data-theme="sombre"] .pr-icon-btn { background: var(--pr-d-surface-sunken); border-color: var(--pr-d-border); color: var(--pr-d-text); }
+#prompteur-app-root[data-theme="sombre"] .pr-icon-btn:hover:not(:disabled) { background: var(--pr-d-surface); border-color: var(--pr-d-accent); }
+#prompteur-app-root[data-theme="sombre"] .pr-icon-btn--danger:hover:not(:disabled) { background: var(--pr-d-danger-bg); border-color: var(--pr-d-danger-text); color: var(--pr-d-danger-text); }
+
+/* Deux colonnes Action (bleu) / Texte-Voix (orange) — tons foncés distincts,
+   même logique de distinction que le mode clair (jamais la même teinte). */
+#prompteur-app-root[data-theme="sombre"] .pr-section-col--visual { background: var(--pr-d-visual-bg); border-bottom-color: var(--pr-d-visual-border); }
+#prompteur-app-root[data-theme="sombre"] .pr-section-col--script { background: var(--pr-d-script-bg); }
+@media (min-width: 768px) {
+    #prompteur-app-root[data-theme="sombre"] .pr-section-col--visual { border-right-color: var(--pr-d-visual-border); }
+}
+#prompteur-app-root[data-theme="sombre"] .pr-section-col--visual .pr-section-col__label { color: var(--pr-d-visual-text); }
+#prompteur-app-root[data-theme="sombre"] .pr-section-col--script .pr-section-col__label { color: var(--pr-d-script-text); }
+#prompteur-app-root[data-theme="sombre"] .pr-section-col--visual .pr-textarea,
+#prompteur-app-root[data-theme="sombre"] .pr-section-col--script .pr-textarea { background: var(--pr-d-surface-sunken); }
+
+/* Combo réglage « contraste renforcé » + thème sombre : évite qu'un fond
+   clair (#DBEAFE/#FBE5D0, pensé pour le mode clair) ne reste affiché par-
+   dessus le thème sombre — variante plus saturée mais toujours foncée. */
+#prompteur-app-root[data-theme="sombre"].pr-high-contrast .pr-input,
+#prompteur-app-root[data-theme="sombre"].pr-high-contrast .pr-select,
+#prompteur-app-root[data-theme="sombre"].pr-high-contrast .pr-textarea { border-color: var(--pr-d-accent); }
+#prompteur-app-root[data-theme="sombre"].pr-high-contrast .pr-section-col--visual { background: var(--pr-d-visual-bg-hc); }
+#prompteur-app-root[data-theme="sombre"].pr-high-contrast .pr-section-col--script { background: var(--pr-d-script-bg-hc); }
+
+/* Toggle "Texte exact" / "Grandes lignes" */
+#prompteur-app-root[data-theme="sombre"] .pr-mode-toggle { background: var(--pr-d-surface-sunken); border-color: var(--pr-d-border); }
+#prompteur-app-root[data-theme="sombre"] .pr-mode-toggle label { color: var(--pr-d-text-muted); }
+
+/* Onglet 3 : téléprompteur — la zone de lecture (.pr-reading-area et
+   consorts) N'EST PAS touchée ici, volontairement (toujours sombre, voir
+   en-tête de bloc). Seuls la chrome/contrôles autour changent. */
+#prompteur-app-root[data-theme="sombre"] .pr-control-group { color: var(--pr-d-text-muted); }
+#prompteur-app-root[data-theme="sombre"] .pr-control-group input[type="range"],
+#prompteur-app-root[data-theme="sombre"] .pr-radio-row input[type="radio"],
+#prompteur-app-root[data-theme="sombre"] .pr-settings-row input[type="checkbox"] { accent-color: var(--pr-d-accent); }
+#prompteur-app-root[data-theme="sombre"] .pr-progress-bar::-webkit-progress-bar { background: var(--pr-d-border-subtle); }
+#prompteur-app-root[data-theme="sombre"] .pr-progress-bar::-webkit-progress-value { background: var(--pr-d-accent); }
+#prompteur-app-root[data-theme="sombre"] .pr-progress-bar::-moz-progress-bar { background: var(--pr-d-accent); }
+#prompteur-app-root[data-theme="sombre"] .pr-time-remaining { color: var(--pr-d-text); }
+#prompteur-app-root[data-theme="sombre"] .pr-shortcuts-legend { color: var(--pr-d-text-muted); }
+#prompteur-app-root[data-theme="sombre"] .pr-shortcuts-legend kbd {
+    background: var(--pr-d-surface-sunken);
+    border-color: var(--pr-d-border);
+    color: var(--pr-d-text);
+}
+#prompteur-app-root[data-theme="sombre"] .pr-badge-experimental { background: var(--pr-d-warning-bg); color: var(--pr-d-warning-text); }
+
+/* Panneau de personnalisation (drawer latéral) */
+#prompteur-app-root[data-theme="sombre"] .pr-settings-backdrop { background: rgba(0, 0, 0, .6); }
+#prompteur-app-root[data-theme="sombre"] .pr-settings-panel { background: var(--pr-d-surface); box-shadow: -6px 0 24px rgba(0, 0, 0, .5); }
+#prompteur-app-root[data-theme="sombre"] .pr-settings-panel__header,
+#prompteur-app-root[data-theme="sombre"] .pr-settings-panel__footer { border-color: var(--pr-d-border-subtle); }
+#prompteur-app-root[data-theme="sombre"] .pr-settings-panel__header h2 { color: var(--pr-d-text); }
+
+/* --- Variante "systeme" (résolue via prefers-color-scheme) : mêmes règles,
+   même tokens --pr-d-* (définis plus haut dans le bloc @media dédié). --- */
+@media (prefers-color-scheme: dark) {
+    #prompteur-app-root[data-theme="systeme"] h1 { color: var(--pr-d-text) !important; }
+    #prompteur-app-root[data-theme="systeme"] .text-muted { color: var(--pr-d-text-muted); }
+    #prompteur-fullscreen-target:has(#prompteur-app-root[data-theme="systeme"]) {
+        background-color: var(--pr-d-page, #0F1419);
+        border-color: var(--pr-d-border, #3A414E);
+    }
+    #prompteur-app-root[data-theme="systeme"] .pr-tablist { border-bottom-color: var(--pr-d-border-subtle); }
+    #prompteur-app-root[data-theme="systeme"] .pr-tab { color: var(--pr-d-text-muted); }
+    #prompteur-app-root[data-theme="systeme"] .pr-tab:hover { background: var(--pr-d-surface); color: var(--pr-d-text); }
+    #prompteur-app-root[data-theme="systeme"] .pr-tab--active { color: var(--pr-d-accent); border-bottom-color: var(--pr-d-accent); }
+    #prompteur-app-root[data-theme="systeme"] .pr-tab__num { background: var(--pr-d-border); color: var(--pr-d-text); }
+    #prompteur-app-root[data-theme="systeme"] .pr-tab--active .pr-tab__num { background: var(--pr-d-accent); color: var(--pr-d-on-accent); }
+    #prompteur-app-root[data-theme="systeme"] .pr-field label,
+    #prompteur-app-root[data-theme="systeme"] .pr-settings-field label,
+    #prompteur-app-root[data-theme="systeme"] .pr-settings-field legend,
+    #prompteur-app-root[data-theme="systeme"] .pr-radio-row label { color: var(--pr-d-text); }
+    #prompteur-app-root[data-theme="systeme"] .pr-input,
+    #prompteur-app-root[data-theme="systeme"] .pr-select,
+    #prompteur-app-root[data-theme="systeme"] .pr-textarea {
+        color: var(--pr-d-text);
+        background: var(--pr-d-surface-sunken);
+        border-color: var(--pr-d-border);
+    }
+    #prompteur-app-root[data-theme="systeme"] .pr-input:focus-visible,
+    #prompteur-app-root[data-theme="systeme"] .pr-select:focus-visible,
+    #prompteur-app-root[data-theme="systeme"] .pr-textarea:focus-visible {
+        border-color: var(--pr-d-accent);
+        box-shadow: 0 0 0 3px rgba(94, 234, 212, .25);
+    }
+    #prompteur-app-root[data-theme="systeme"] .pr-generated-prompt { background: var(--pr-d-surface-sunken); }
+    #prompteur-app-root[data-theme="systeme"] .pr-copy-confirm {
+        color: var(--pr-d-success-text);
+        background: var(--pr-d-success-bg);
+        border-color: var(--pr-d-success-border);
+    }
+    #prompteur-app-root[data-theme="systeme"] .pr-byoa-steps li {
+        background: var(--pr-d-surface);
+        border-color: var(--pr-d-border);
+        color: var(--pr-d-text);
+    }
+    #prompteur-app-root[data-theme="systeme"] .pr-import-status { color: var(--pr-d-accent); }
+    #prompteur-app-root[data-theme="systeme"] .ct-btn-outline { border-color: var(--pr-d-accent); color: var(--pr-d-accent); }
+    #prompteur-app-root[data-theme="systeme"] .ct-btn-ghost { color: var(--pr-d-text-muted); }
+    #prompteur-app-root[data-theme="systeme"] .ct-btn-ghost:hover { background: var(--pr-d-surface); color: var(--pr-d-text); }
+    #prompteur-app-root[data-theme="systeme"] .pr-sections-empty { color: var(--pr-d-text-muted); border-color: var(--pr-d-border); }
+    #prompteur-app-root[data-theme="systeme"] .pr-section-card { background: var(--pr-d-surface); border-color: var(--pr-d-border); }
+    #prompteur-app-root[data-theme="systeme"] .pr-section-card__header { background: var(--pr-d-surface-sunken); border-bottom-color: var(--pr-d-border); }
+    #prompteur-app-root[data-theme="systeme"] .pr-section-card__index { background: var(--pr-d-border); color: var(--pr-d-text); }
+    #prompteur-app-root[data-theme="systeme"] .pr-icon-btn { background: var(--pr-d-surface-sunken); border-color: var(--pr-d-border); color: var(--pr-d-text); }
+    #prompteur-app-root[data-theme="systeme"] .pr-icon-btn:hover:not(:disabled) { background: var(--pr-d-surface); border-color: var(--pr-d-accent); }
+    #prompteur-app-root[data-theme="systeme"] .pr-icon-btn--danger:hover:not(:disabled) { background: var(--pr-d-danger-bg); border-color: var(--pr-d-danger-text); color: var(--pr-d-danger-text); }
+    #prompteur-app-root[data-theme="systeme"] .pr-section-col--visual { background: var(--pr-d-visual-bg); border-bottom-color: var(--pr-d-visual-border); }
+    #prompteur-app-root[data-theme="systeme"] .pr-section-col--script { background: var(--pr-d-script-bg); }
+    #prompteur-app-root[data-theme="systeme"] .pr-section-col--visual .pr-section-col__label { color: var(--pr-d-visual-text); }
+    #prompteur-app-root[data-theme="systeme"] .pr-section-col--script .pr-section-col__label { color: var(--pr-d-script-text); }
+    #prompteur-app-root[data-theme="systeme"] .pr-section-col--visual .pr-textarea,
+    #prompteur-app-root[data-theme="systeme"] .pr-section-col--script .pr-textarea { background: var(--pr-d-surface-sunken); }
+    @media (min-width: 768px) {
+        #prompteur-app-root[data-theme="systeme"] .pr-section-col--visual { border-right-color: var(--pr-d-visual-border); }
+    }
+    #prompteur-app-root[data-theme="systeme"].pr-high-contrast .pr-input,
+    #prompteur-app-root[data-theme="systeme"].pr-high-contrast .pr-select,
+    #prompteur-app-root[data-theme="systeme"].pr-high-contrast .pr-textarea { border-color: var(--pr-d-accent); }
+    #prompteur-app-root[data-theme="systeme"].pr-high-contrast .pr-section-col--visual { background: var(--pr-d-visual-bg-hc); }
+    #prompteur-app-root[data-theme="systeme"].pr-high-contrast .pr-section-col--script { background: var(--pr-d-script-bg-hc); }
+    #prompteur-app-root[data-theme="systeme"] .pr-mode-toggle { background: var(--pr-d-surface-sunken); border-color: var(--pr-d-border); }
+    #prompteur-app-root[data-theme="systeme"] .pr-mode-toggle label { color: var(--pr-d-text-muted); }
+    #prompteur-app-root[data-theme="systeme"] .pr-control-group { color: var(--pr-d-text-muted); }
+    #prompteur-app-root[data-theme="systeme"] .pr-control-group input[type="range"],
+    #prompteur-app-root[data-theme="systeme"] .pr-radio-row input[type="radio"],
+    #prompteur-app-root[data-theme="systeme"] .pr-settings-row input[type="checkbox"] { accent-color: var(--pr-d-accent); }
+    #prompteur-app-root[data-theme="systeme"] .pr-progress-bar::-webkit-progress-bar { background: var(--pr-d-border-subtle); }
+    #prompteur-app-root[data-theme="systeme"] .pr-progress-bar::-webkit-progress-value { background: var(--pr-d-accent); }
+    #prompteur-app-root[data-theme="systeme"] .pr-progress-bar::-moz-progress-bar { background: var(--pr-d-accent); }
+    #prompteur-app-root[data-theme="systeme"] .pr-time-remaining { color: var(--pr-d-text); }
+    #prompteur-app-root[data-theme="systeme"] .pr-shortcuts-legend { color: var(--pr-d-text-muted); }
+    #prompteur-app-root[data-theme="systeme"] .pr-shortcuts-legend kbd {
+        background: var(--pr-d-surface-sunken);
+        border-color: var(--pr-d-border);
+        color: var(--pr-d-text);
+    }
+    #prompteur-app-root[data-theme="systeme"] .pr-badge-experimental { background: var(--pr-d-warning-bg); color: var(--pr-d-warning-text); }
+    #prompteur-app-root[data-theme="systeme"] .pr-settings-panel { background: var(--pr-d-surface); box-shadow: -6px 0 24px rgba(0, 0, 0, .5); }
+    #prompteur-app-root[data-theme="systeme"] .pr-settings-panel__header,
+    #prompteur-app-root[data-theme="systeme"] .pr-settings-panel__footer { border-color: var(--pr-d-border-subtle); }
+    #prompteur-app-root[data-theme="systeme"] .pr-settings-panel__header h2 { color: var(--pr-d-text); }
+    #prompteur-app-root[data-theme="systeme"] .pr-settings-backdrop { background: rgba(0, 0, 0, .6); }
+}

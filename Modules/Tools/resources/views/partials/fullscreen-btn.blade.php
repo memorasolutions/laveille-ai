@@ -4,7 +4,7 @@
      Ou passer un targetId: @include('tools::partials.fullscreen-btn', ['targetId' => '#mon-id'])
 --}}
 <button type="button"
-        class="js-tool-fullscreen-btn ct-btn ct-btn-ghost ct-btn-xs"
+        class="js-tool-fullscreen-btn ct-btn ct-btn-ghost ct-btn-icon"
         data-fullscreen-target="{{ $targetId ?? '' }}"
         title="{{ __('Plein écran') }}"
         aria-label="{{ __('Plein écran') }}"

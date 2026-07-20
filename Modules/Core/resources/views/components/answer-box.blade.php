@@ -109,7 +109,12 @@
         <style>
             .lv-answer-box { background-color: #F3F8F9; border-left: 4px solid var(--c-primary, #064E5A); border-radius: 10px; padding: 18px 22px; margin: 0 0 24px; color: #111827; }
             .lv-answer-box__title { color: var(--c-primary, #064E5A); font-weight: 700; margin-bottom: 8px; font-size: 1.25rem; line-height: 1.5; }
-            .lv-answer-box__summary { margin: 0 0 16px; line-height: 1.6; }
+            /* WCAG 2.2 AAA (1.4.6) : la règle globale ".wpo-blog-single-section p" (charte.css,
+               calibrée 7:1 sur fond blanc) a une spécificité plus élevée qu'un simple ".lv-answer-box__summary"
+               et écrase l'héritage de la couleur #111827 ci-dessus dès que ce composant est utilisé dans une
+               page enveloppée par .wpo-blog-single-section (toutes les pages outils/blog) — sur le fond
+               #F3F8F9 de la boîte, ça retombe à 6.54:1 (< 7:1). Override scopé, spécificité supérieure. */
+            .lv-answer-box .lv-answer-box__summary { color: #111827; margin: 0 0 16px; line-height: 1.6; }
             .lv-answer-box__points { padding-left: 20px; margin: 0 0 16px; list-style-type: disc; line-height: 1.6; }
             .lv-answer-box__points li { margin-bottom: 6px; }
             .lv-answer-box__points li:last-child { margin-bottom: 0; }
