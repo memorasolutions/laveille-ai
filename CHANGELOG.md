@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.116.8] - 2026-07-20
+
+### Fixed
+- **Lien de menu admin manquant pour le « Générateur d'objectif vidéo » (`/admin/objectif-video`, ajouté en v1.116.7).** La page fonctionnait déjà et était protégée nativement par `EnsureSuperAdmin`, mais n'apparaissait dans aucun menu de navigation admin - un oubli lors de son ajout initial. Ajout de l'entrée « Objectif vidéo (Prompteur) » (libellé volontairement explicite pour ne jamais être confondu avec l'entrée existante « Concentré IA - builder » - outil distinct qui génère, lui, le prompt du billet de blog hebdo ; `title` HTML en survol : « Génère le texte d'objectif à coller dans le Prompteur ») dans `Modules/Backoffice/resources/views/themes/backend/partials/sidebar.blade.php`, section « Contenu », juste après « Concentré IA - builder » (repère analogue le plus proche, même style de lien sans icône dédiée). L'entrée est gatée `@if(Route::has('admin.news.video-goal.index') && auth()->user()?->isSuperAdmin())` - même restriction que la route elle-même (middleware `EnsureSuperAdmin`), donc un simple admin ne voit jamais ce lien et ne peut pas se heurter au 403 en cliquant dessus. Vérifié visuellement (Playwright, superadmin `stephane@memora.ca`) : lien visible au bon endroit dans le menu, clic mène à la bonne page. Tests `Modules/News` (régression) et `Modules/Backoffice` verts.
+
 ## [1.116.7] - 2026-07-20
 
 ### Added

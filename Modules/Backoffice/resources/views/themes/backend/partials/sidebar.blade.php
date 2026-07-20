@@ -70,6 +70,9 @@
                         @if(Route::has('admin.concentre.index'))
                         <li class="nav-item"><a href="{{ route('admin.concentre.index') }}" class="nav-link {{ request()->routeIs('admin.concentre.*') ? 'active' : '' }}" {{ request()->routeIs('admin.concentre.*') ? 'aria-current=page' : '' }}>{{ __('Concentré IA - builder') }}</a></li>
                         @endif
+                        @if(Route::has('admin.news.video-goal.index') && auth()->user()?->isSuperAdmin())
+                        <li class="nav-item"><a href="{{ route('admin.news.video-goal.index') }}" class="nav-link {{ request()->routeIs('admin.news.video-goal.*') ? 'active' : '' }}" {{ request()->routeIs('admin.news.video-goal.*') ? 'aria-current=page' : '' }} title="{{ __('Génère le texte d\'objectif à coller dans le Prompteur') }}">{{ __('Objectif vidéo (Prompteur)') }}</a></li>
+                        @endif
                         @if(Route::has('admin.pages.index'))
                         @can('view_pages')
                         <li class="nav-item"><a href="{{ route('admin.pages.index') }}" class="nav-link {{ request()->routeIs('admin.pages.*') ? 'active' : '' }}" {{ request()->routeIs('admin.pages.*') ? 'aria-current=page' : '' }}>{{ __('Pages') }}</a></li>

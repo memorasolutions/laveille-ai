@@ -17,6 +17,17 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.116.8 · 2026-07-20 · fix(backoffice) Lien de menu admin manquant pour le Générateur
+ *     d'objectif vidéo (/admin/objectif-video, v1.116.7). La page fonctionnait déjà mais
+ *     n'apparaissait dans aucun menu de navigation admin - oubli lors de son ajout. Ajout de
+ *     l'entrée « Objectif vidéo (Prompteur) » (libellé explicite + title HTML en survol pour ne
+ *     jamais être confondu avec « Concentré IA - builder », outil distinct) dans la sidebar admin
+ *     (Modules/Backoffice/.../sidebar.blade.php), section « Contenu », juste après « Concentré IA
+ *     - builder » (repère analogue le plus proche). Entrée gatée @if(auth()->user()?->isSuperAdmin()) - même restriction que la route
+ *     elle-même (middleware EnsureSuperAdmin) : un simple admin ne voit jamais ce lien, il n'a
+ *     donc aucune occasion de se heurter au 403. Vérifié visuellement (Playwright, superadmin
+ *     stephane@memora.ca) : lien visible au bon endroit, clic mène à la bonne page. Tests
+ *     Modules/News (régression) + Modules/Backoffice verts.
  *   1.116.7 · 2026-07-20 · feat(news) GÉNÉRATEUR D'OBJECTIF VIDÉO depuis les actualités
  *     (/admin/objectif-video, admin superadmin-only, protégé par EnsureSuperAdmin - pas de gate
  *     "en construction" nécessaire). Nouvel outil back-office qui sélectionne des actualités
@@ -1887,7 +1898,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 116;
-$lvPatch = 7;
+$lvPatch = 8;
 
 return [
     'major' => $lvMajor,
