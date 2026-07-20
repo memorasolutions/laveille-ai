@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Core\Http\Middleware\EnsureIsAdmin;
 use Modules\Core\Http\Middleware\SetBackofficeTheme;
 use Modules\News\Http\Controllers\Admin\ConcentreBuilderController;
+use Modules\News\Http\Controllers\Admin\VideoGoalBuilderController;
 use Modules\News\Http\Controllers\AdminNewsController;
 use Modules\News\Http\Controllers\NewsSitemapController;
 use Modules\News\Http\Controllers\PublicNewsController;
@@ -73,4 +74,16 @@ Route::prefix('admin/concentre-builder')
         Route::post('/generate', [ConcentreBuilderController::class, 'generate'])->name('generate');
         Route::post('/upload-image', [ConcentreBuilderController::class, 'uploadImage'])->name('upload-image')->middleware('throttle:10,1');
         Route::get('/runs/{id}', [ConcentreBuilderController::class, 'showRun'])->name('runs.show');
+    });
+
+// ── Générateur d'objectif vidéo (admin, superadmin uniquement) ──
+// Aucune intégration serveur avec le Prompteur public (100% client-side) : le texte généré
+// ici est copié-collé manuellement dans le champ « Objectif de la vidéo » du Prompteur BYOA.
+Route::prefix('admin/objectif-video')
+    ->name('admin.news.video-goal.')
+    ->middleware(['web', 'auth', 'two.factor', \Modules\Authors\Http\Middleware\EnsureSuperAdmin::class, SetBackofficeTheme::class])
+    ->group(function () {
+        Route::get('/', [VideoGoalBuilderController::class, 'index'])->name('index');
+        Route::post('/actualites', [VideoGoalBuilderController::class, 'newsForRange'])->name('news');
+        Route::post('/generer', [VideoGoalBuilderController::class, 'generateGoal'])->name('generate');
     });

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.116.7] - 2026-07-20
+
+### Added
+- **Nouvel outil back-office « Générateur d'objectif vidéo » (`/admin/objectif-video`, superadmin uniquement).** Protégé nativement par `EnsureSuperAdmin` (pas de gate "en construction" nécessaire, l'accès est déjà réservé au rôle). Sélectionne les actualités publiées sur une plage de dates choisie, puis génère (appel IA via le nouveau `NewsVideoGoalAiService`) un texte d'« objectif de la vidéo » prêt à copier-coller dans le champ correspondant du Prompteur public (`/outils/prompteur`) — aucune intégration serveur entre les deux outils, le copier-coller reste manuel et volontaire pour préserver l'approche 100 % BYOA du Prompteur. Nouveau `VideoGoalBuilderController` (`index` : page d'accueil de l'outil ; `newsForRange` : endpoint JSON qui retourne les actualités publiées de la plage sélectionnée ; `generateGoal` : appel au service IA et retour du texte généré) + vue `admin/video-goal-builder.blade.php` (sélection multi-actualités, bouton copier, lien direct vers le Prompteur). 3 nouvelles routes sous `admin/objectif-video` (`index`/`actualites`/`generer`), même chaîne de middleware que le Concentré (`web`, `auth`, `two.factor`, `EnsureSuperAdmin`, `SetBackofficeTheme`). Tests `Modules/News/tests/Feature/VideoGoalBuilderTest.php` : 8 passed, 0 failed (22 assertions — accès superadmin, blocage non-superadmin, redirection invité vers login, validation des IDs d'articles et de la plage de dates, génération réelle). Régression complète du module News : 113/113 tests verts.
+
 ## [1.116.6] - 2026-07-20
 
 ### Added

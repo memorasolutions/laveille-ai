@@ -17,6 +17,23 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.116.7 · 2026-07-20 · feat(news) GÉNÉRATEUR D'OBJECTIF VIDÉO depuis les actualités
+ *     (/admin/objectif-video, admin superadmin-only, protégé par EnsureSuperAdmin - pas de gate
+ *     "en construction" nécessaire). Nouvel outil back-office qui sélectionne des actualités
+ *     publiées sur une plage de dates, puis génère (via NewsVideoGoalAiService, appel IA) un
+ *     texte d'« objectif de la vidéo » prêt à copier-coller dans le champ correspondant du
+ *     Prompteur public (/outils/prompteur, aucune intégration serveur entre les deux outils -
+ *     copier-coller manuel volontaire pour rester 100% BYOA côté Prompteur). Nouveau
+ *     VideoGoalBuilderController (index : liste des actualités de la plage ; newsForRange :
+ *     endpoint JSON de sélection ; generateGoal : appel au service IA et retour du texte
+ *     généré) + vue admin video-goal-builder.blade.php (sélection multi-actualités, bouton
+ *     copier, lien direct vers le Prompteur). 3 nouvelles routes sous admin/objectif-video
+ *     (index/actualites/generer), middleware web+auth+two.factor+EnsureSuperAdmin+
+ *     SetBackofficeTheme, alignées sur le pattern du Concentré (ConcentreBuilderController).
+ *     8/8 tests Modules/News/tests/Feature/VideoGoalBuilderTest.php verts (22 assertions :
+ *     accès superadmin, blocage non-superadmin, redirection invité, validation des IDs
+ *     d'articles et de la plage de dates, génération réelle). Régression complète module News :
+ *     113/113 tests verts. Charte #064E5A, zéro signature IA. Réversible.
  *   1.116.6 · 2026-07-20 · feat(tools) NOUVEL OUTIL PUBLIC GRATUIT « PROMPTEUR »
  *     (/outils/prompteur). Téléprompteur avec éditeur de script structuré en sections
  *     (indication visuelle/action + texte à dire, ou grandes lignes au choix), défilement
@@ -1870,7 +1887,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 116;
-$lvPatch = 6;
+$lvPatch = 7;
 
 return [
     'major' => $lvMajor,
