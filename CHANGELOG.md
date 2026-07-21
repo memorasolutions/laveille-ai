@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.7] - 2026-07-21
+
+### Removed
+- `public/__deploy_oqlf_s83.php` (seeder OQLF ponctuel S83, déjà exécuté et auto-supprimé du serveur) retiré du dépôt — même défaut structurel que les 12 scripts de 1.117.5, avait échappé à l'audit initial. Trouvé par une passe adversariale fraîche.
+
 ## [1.117.6] - 2026-07-21
 
 ### Changed

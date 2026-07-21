@@ -2091,11 +2091,25 @@ declare(strict_types=1);
  *     de l'adresse RGPD demandée ici, à ne pas modifier sans confirmation explicite (pourrait devoir
  *     correspondre à un registre gouvernemental). Vérifié visuellement (Playwright local) : nouvelle
  *     adresse affichée correctement sur /privacy-policy. 28/28 tests Modules/Privacy verts.
+ *
+ *   1.117.7 · 2026-07-21 · fix(cleanup) Script one-shot oublié trouvé par une passe adversariale
+ *     fraîche sur le delta 1.117.5/1.117.6. `public/__deploy_oqlf_s83.php` (seeder OQLF ponctuel de
+ *     la session S83, `feat(glossary) #226`, self-delete `@unlink(__FILE__)`) avait exactement le
+ *     même défaut structurel que les 12 scripts retirés en 1.117.5 (suivi par git = ressuscité à
+ *     chaque déploiement) mais avait échappé à l'audit initial. Déjà absent du serveur (déjà
+ *     auto-supprimé lors de son exécution S83, 404 confirmé) - seul le retrait du dépôt était
+ *     nécessaire pour empêcher toute résurrection future. Aucune référence active ailleurs dans le
+ *     code. 3 sous-agents adversariaux frais lancés sur le delta 1.117.5/1.117.6 (revue code + E2E
+ *     prod + audit sécurité serveur) : 1 seul manque trouvé (celui-ci), les 2 autres verdicts vides.
+ *     Note secondaire non bloquante relevée au passage : `Modules/Menu/resources/views/admin/
+ *     edit.blade.php` a une 3e implémentation de toast (`showToast()`, HTML fabriqué manuellement)
+ *     pour l'action « Enregistrer l'ordre » - préexistante, hors périmètre des correctifs du jour,
+ *     incohérence DRY à traiter dans une passe future si demandé.
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 6;
+$lvPatch = 7;
 
 return [
     'major' => $lvMajor,
