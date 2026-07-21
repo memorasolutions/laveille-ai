@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.0] - 2026-07-21
+
+### Added
+- **Bouton « Envoyer vers Objectif vidéo » sur `/admin/concentre-builder`.** Pousse la sélection d'actualités en cours vers `/admin/objectif-video` en un clic (sans re-choisir de plage de dates ni re-sélectionner les mêmes actualités). Mécanisme 100% client-side (`sessionStorage`, clé `lv_vgb_import` consommée une seule fois), aucune route/contrôleur ajouté - cohérent avec la philosophie "aucune intégration serveur" déjà établie entre ces deux outils. Objectif Vidéo affiche un toast de confirmation et pré-remplit sa sélection (couleurs/clusters préservés) à la place de son chargement par date par défaut.
+
+### Fixed
+- **`x-init="init()"` s'exécutait deux fois sur `/admin/objectif-video`** (morph Alpine/Livewire du layout backoffice au chargement), écrasant silencieusement tout état pré-rempli par un appel synchrone ultérieur à `fetchNews()`. Découvert en développant la fonctionnalité ci-dessus. Corrigé par un flag d'idempotence en tête de `init()`.
+
 ## [1.116.10] - 2026-07-20
 
 ### Changed

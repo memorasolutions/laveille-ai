@@ -35,6 +35,7 @@
         newsEndpoint: @js(route('admin.concentre.news')),
         generateEndpoint: @js(route('admin.concentre.generate')),
         runEndpoint: @js(route('admin.concentre.runs.show', ['id' => 0])),
+        videoGoalUrl: @js(route('admin.news.video-goal.index')),
     })"
     x-init="init()"
 >
@@ -100,6 +101,11 @@
                     <button type="button" class="cb-btn cb-btn-secondary" style="font-size:12px; padding:5px 10px; min-height:32px;" @click="sortSelected('color')" title="Grouper par couleur attribuée">🎨 Couleur</button>
                     <button type="button" class="cb-btn cb-btn-secondary" style="font-size:12px; padding:5px 10px; min-height:32px;" @click="sortSelected('date')" title="Plus récent d'abord">📅 Date</button>
                     <span style="font-size:11px; color:#94a3b8; font-style:italic;">(tu peux ensuite ajuster au drag-drop)</span>
+                </div>
+                <div x-show="selectedIds.length > 0" x-cloak class="mb-2">
+                    <button type="button" class="cb-btn cb-btn-secondary" @click="pushToVideoGoal()" style="font-size:12px; padding:6px 12px; min-height:36px;" title="Envoie la sélection actuelle vers le Générateur d'objectif vidéo">
+                        🎬 Envoyer vers Objectif vidéo
+                    </button>
                 </div>
                 <div id="cb-sortable" style="min-height:80px;">
                     <template x-for="(id, idx) in selectedIds" :key="'sel-' + id">
@@ -228,7 +234,7 @@ function concentreBuilder(opts) {
         estimatedTokens: 0,
         history: opts.history || [],
         loading: { news: false, generate: false },
-        endpoints: { news: opts.newsEndpoint, generate: opts.generateEndpoint, run: opts.runEndpoint },
+        endpoints: { news: opts.newsEndpoint, generate: opts.generateEndpoint, run: opts.runEndpoint, videoGoalUrl: opts.videoGoalUrl },
         sortable: null,
 
         init() {
@@ -415,6 +421,16 @@ function concentreBuilder(opts) {
             } catch (e) {
                 this.generateError = 'Impossible de copier (clipboard API indisponible).';
             }
+        },
+
+        // Envoi de la sélection vers le Générateur d'objectif vidéo : mécanisme 100% client-side
+        // (sessionStorage), aucun appel serveur — cohérent avec la philosophie déjà établie entre
+        // ces deux outils (voir Modules/News/routes/web.php).
+        pushToVideoGoal() {
+            if (this.selectedIds.length === 0) return;
+            const items = this.selectedIds.map(id => this.itemById(id)).filter(Boolean);
+            sessionStorage.setItem('lv_vgb_import', JSON.stringify({ items, selectedIds: this.selectedIds }));
+            window.location.href = this.endpoints.videoGoalUrl;
         },
 
         downloadTxt() {

@@ -153,7 +153,38 @@ function videoGoalBuilder(opts) {
         loading: { news: false, generate: false },
         endpoints: { news: opts.newsEndpoint, generate: opts.generateEndpoint },
 
+        // Consomme un éventuel import poussé depuis /admin/concentre-builder (bouton "Envoyer vers
+        // Objectif vidéo", mécanisme 100% client-side via sessionStorage — voir pushToVideoGoal()
+        // dans concentre-builder.blade.php). Clé lue une seule fois puis retirée immédiatement
+        // (removeItem) : un rafraîchissement de cette page ne redéclenche pas l'import.
+        // Garde d'idempotence (_initDone) : x-init="init()" est appelé DEUX FOIS sur ce layout
+        // (morph Alpine/Livewire au chargement, vérifié en local) — sans cette garde, le 2e appel
+        // retombait sur fetchNews() et écrasait silencieusement l'import qui venait de réussir.
         init() {
+            if (this._initDone) return;
+            this._initDone = true;
+
+            const importData = sessionStorage.getItem('lv_vgb_import');
+            if (importData) {
+                try {
+                    const payload = JSON.parse(importData);
+                    sessionStorage.removeItem('lv_vgb_import');
+
+                    this.newsItems = payload.items || [];
+                    this.selectedIds = payload.selectedIds || [];
+                    this.hasFetched = true;
+
+                    const count = this.selectedIds.length;
+                    const plural = count > 1 ? 's' : '';
+                    const message = `${count} actualité${plural} importée${plural} depuis le Concentré.`;
+                    window.dispatchEvent(new CustomEvent('notification-toast', {
+                        detail: { type: 'success', message }
+                    }));
+                    return;
+                } catch (e) {
+                    // JSON corrompu : on ignore silencieusement et on continue normalement.
+                }
+            }
             this.fetchNews();
         },
 

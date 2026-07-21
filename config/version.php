@@ -1942,11 +1942,28 @@ declare(strict_types=1);
  *     indisponible" testé, comportement du service IA inchangé). Tests
  *     Modules/News/tests/Feature/VideoGoalBuilderTest.php (8) + ConcentrePromptBuilderTest.php (5) +
  *     régression complète Modules/News (113/113) : 100% verts.
+ *
+ *   1.117.0 · 2026-07-21 · feat(News) Bouton « Envoyer vers Objectif vidéo » sur /admin/concentre-builder
+ *     — pousse la sélection en cours (articles déjà chargés + colorés/clusterés côté client) vers
+ *     /admin/objectif-video en un clic, sans avoir à re-choisir la plage de dates ni re-sélectionner
+ *     les mêmes actualités une 2e fois. Mécanisme 100% client-side (sessionStorage, clé `lv_vgb_import`,
+ *     consommée une seule fois puis retirée) — cohérent avec la philosophie déjà établie entre ces
+ *     deux outils ("aucune intégration serveur", voir Modules/News/routes/web.php) : aucune route ni
+ *     contrôleur ajouté. Objectif Vidéo lit la clé dans son init(), pré-remplit newsItems/selectedIds,
+ *     affiche un toast "N actualités importées depuis le Concentré." et saute son fetchNews() par
+ *     défaut dans ce cas. BUG DÉCOUVERT ET CORRIGÉ EN COURS DE ROUTE (vérifié Playwright local) :
+ *     x-init="init()" sur cette page s'exécute DEUX FOIS (morph Alpine/Livewire du layout backoffice
+ *     au chargement) — sans garde, le 2e appel retombait sur fetchNews() et écrasait silencieusement
+ *     l'import qui venait de réussir juste avant. Corrigé par un flag d'idempotence `this._initDone`
+ *     en tête de init() (bénéfice secondaire : évite aussi un double appel réseau au chargement normal
+ *     de la page). Régression complète Modules/News (113/113) : 100% verts. Vérifié visuellement
+ *     bout en bout (Playwright, superadmin local) : sélection réelle sur le Concentré → clic → 2/2
+ *     actualités importées correctement sur Objectif Vidéo avec couleurs/clusters préservés.
  */
 
 $lvMajor = 1;
-$lvMinor = 116;
-$lvPatch = 10;
+$lvMinor = 117;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,
