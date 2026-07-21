@@ -2163,11 +2163,45 @@ declare(strict_types=1);
  *     mes changements - mêmes échecs, ex. `Phase20SaasTest`/`Phase138Test`/`Phase150Test`, modules
  *     SaaS/PWA totalement étrangers à ce fix ; probable artefact d'infrastructure de test sous
  *     `--parallel`, non causé par ce commit). 31/31 tests ciblés (Directory + Tools) verts.
+ *
+ *   1.117.11 · 2026-07-21 · fix(divers) 3e vague de correctifs proactifs, suite à la directive
+ *     explicite « continue et termine tes todos à 100 %, décide du mieux pour la plateforme » -
+ *     traitement des 3 points laissés « signalés, non corrigés » dans le bilan précédent.
+ *
+ *     SÉCURITÉ - `public/_content_upload_receiver_b073bc...045.php` retiré de prod (jamais suivi
+ *     par git, donc aucun diff dans ce commit). Script self-documenté « temporaire - a supprimer
+ *     apres usage », non référencé nulle part dans le code applicatif, offrait un accès lecture/
+ *     écriture brut à `articles.content` (id=16) protégé par un jeton dont la valeur EST le nom du
+ *     fichier lui-même (protection illusoire - quiconque connaît/devine l'URL a plein accès).
+ *     Backup du contenu actuel (article publié « L'enseignement explicite augmenté par l'IA... »,
+ *     76763 octets, md5 `b64c0f372f993fd9201c3b73c4e92fcb`) pris via la propre fonction de lecture
+ *     du script avant suppression (rollback possible si jamais nécessaire). Suppression confirmée
+ *     (404) via script auto-suppressif dédié.
+ *
+ *     FIX - `vite.config.js` : entrée manquante pour `cropperjs` dans le bloc `viteStaticCopy`
+ *     (cause racine du 404 sur `cropper.min.js`/`cropper.css` cassant l'éditeur de recadrage
+ *     d'image de `Modules/Media`). `cropperjs` était bien en dépendance npm et bien installé dans
+ *     `node_modules/`, simplement jamais copié vers `public/build` par le pipeline de build -
+ *     comparé aux 9 autres plugins NobleUI qui suivent tous le même patron `viteStaticCopy`, aucun
+ *     n'incluait cropperjs. Ajout de la 10e entrée (calquée sur `driver`, seul autre plugin à
+ *     copier un `.js` + un `.css`), `npm run build` relancé (confirmé : « 16 items copiés » au
+ *     lieu de 14, dossier `public/build/nobleui/plugins/cropperjs/` créé avec les 2 bons noms de
+ *     fichiers exacts attendus par le Blade). Vérifié localement : `cropper.css`/`cropper.min.js`
+ *     répondent 200 (contenu authentique Cropper.js v1.6.2 confirmé par en-tête). Test interactif
+ *     complet de l'outil de recadrage non concluant (bug Playwright/Livewire sans rapport sur le
+ *     flux d'upload de fichier, pas sur cropperjs) - preuve au niveau asset jugée suffisante.
+ *
+ *     FIX (DRY) - `Modules/Menu/resources/views/admin/edit.blade.php` : 3e mécanisme de toast
+ *     maison (`showToast()`, HTML fabriqué manuellement, type `danger` non reconnu par le thème)
+ *     consolidé vers `Livewire.dispatch('toast', ...)` - le seul mécanisme fonctionnel du thème
+ *     admin, déjà utilisé partout ailleurs sur cette page (ligne 264) et sur les 6 fichiers
+ *     corrigés en 1.117.2/1.117.5/1.117.8/1.117.10. Fonction `showToast()` obsolète supprimée.
+ *     14/14 tests Modules/Menu verts.
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 10;
+$lvPatch = 11;
 
 return [
     'major' => $lvMajor,

@@ -345,26 +345,18 @@ function saveItems() {
         btn.innerHTML = '<i data-lucide="save"></i> Enregistrer l\'ordre';
         lucide.createIcons();
         if (data.success) {
-            showToast('Menu enregistré avec succès.', 'success');
+            Livewire.dispatch('toast', { type: 'success', message: 'Menu enregistré avec succès.' });
             setTimeout(() => location.reload(), 500);
         } else {
-            showToast(data.message || 'Erreur lors de l\'enregistrement.', 'danger');
+            Livewire.dispatch('toast', { type: 'error', message: data.message || 'Erreur lors de l\'enregistrement.' });
         }
     })
     .catch(() => {
         btn.disabled = false;
         btn.innerHTML = '<i data-lucide="save"></i> Enregistrer l\'ordre';
         lucide.createIcons();
-        showToast('Erreur réseau.', 'danger');
+        Livewire.dispatch('toast', { type: 'error', message: 'Erreur réseau.' });
     });
-}
-
-function showToast(message, type) {
-    const html = `<div class="toast align-items-center text-bg-${type} border-0 show" role="alert" style="position:fixed;top:1rem;right:1rem;z-index:9999">
-        <div class="d-flex"><div class="toast-body">${message}</div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>`;
-    document.body.insertAdjacentHTML('beforeend', html);
-    setTimeout(() => document.querySelector('.toast.show:last-child')?.remove(), 3000);
 }
 </script>
 @endpush

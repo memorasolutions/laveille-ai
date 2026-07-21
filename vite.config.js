@@ -61,6 +61,10 @@ export default defineConfig({
                     src: ['node_modules/bootstrap-icons/font/bootstrap-icons.min.css', 'node_modules/bootstrap-icons/font/fonts'],
                     dest: 'nobleui/plugins/bootstrap-icons',
                 },
+                {
+                    src: ['node_modules/cropperjs/dist/cropper.min.js', 'node_modules/cropperjs/dist/cropper.css'],
+                    dest: 'nobleui/plugins/cropperjs',
+                },
             ],
         }),
         VitePWA({

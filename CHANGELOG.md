@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.11] - 2026-07-21
+
+### Security
+- **Retrait d'un script prod donnant un accès lecture/écriture brut à un article**, protégé par un jeton illusoire (valeur = nom du fichier). Non suivi par git, jamais référencé par le code applicatif. Backup du contenu pris avant suppression.
+
+### Fixed
+- **Éditeur de recadrage d'image cassé** (`Modules/Media`) : `vite.config.js` copiait 9 plugins NobleUI vers `public/build` mais oubliait `cropperjs`, causant un 404 sur `cropper.min.js`/`cropper.css`. Entrée ajoutée, build relancé, vérifié (200, contenu authentique).
+- **3e mécanisme de toast maison** (`Modules/Menu/resources/views/admin/edit.blade.php`) consolidé vers `Livewire.dispatch('toast', ...)`, cohérent avec le reste du site (DRY).
+
 ## [1.117.10] - 2026-07-21
 
 ### Fixed
