@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.1] - 2026-07-21
+
+### Fixed
+- **Contraste WCAG AAA insuffisant sur le bouton « Tout cocher » désactivé** (et tout bouton `.cb-btn`/`.cb-btn-secondary` désactivé du sélecteur d'actualités partagé Concentré/Objectif vidéo) - signalé par l'utilisateur via capture d'écran. `#94a3b8` donnait 2.18:1 à 2.56:1 selon le bouton (échec AA 4.5:1 ET AAA 7:1) ; `#6b7280` (Objectif vidéo, couleur différente de l'autre page) donnait 4.83:1 (passait AA, échouait AAA). Corrigé vers `#475569` + texte blanc (7.58:1, AAA) dans les deux pages, avec une règle `.cb-btn-secondary:disabled` explicite ajoutée (absente avant, ce qui laissait la couleur de texte dériver selon la cascade CSS).
+
 ## [1.117.0] - 2026-07-21
 
 ### Added

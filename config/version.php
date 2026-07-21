@@ -1959,11 +1959,21 @@ declare(strict_types=1);
  *     de la page). Régression complète Modules/News (113/113) : 100% verts. Vérifié visuellement
  *     bout en bout (Playwright, superadmin local) : sélection réelle sur le Concentré → clic → 2/2
  *     actualités importées correctement sur Objectif Vidéo avec couleurs/clusters préservés.
+ *
+ *   1.117.1 · 2026-07-21 · fix(WCAG) Contraste AAA du bouton « Tout cocher » désactivé (et de tout
+ *     bouton .cb-btn/.cb-btn-secondary désactivé du sélecteur d'actualités partagé) - signalé par
+ *     l'utilisateur via capture d'écran. Mesuré : #94a3b8 (concentre-builder) donnait 2.18:1 (texte
+ *     teal hérité de .cb-btn-secondary) à 2.56:1 (texte blanc) selon le bouton - échec AA (4.5:1) ET
+ *     AAA (7:1). #6b7280 (video-goal-builder, couleur différente entre les 2 pages) donnait 4.83:1 -
+ *     passait AA mais échouait AAA. Corrigé vers #475569 + texte blanc (7.58:1, AAA) dans LES DEUX
+ *     fichiers, avec une règle .cb-btn-secondary:disabled explicite ajoutée (absente avant, d'où la
+ *     dérive de couleur de texte selon la cascade CSS). Vérifié runtime (Playwright, getComputedStyle)
+ *     sur les 2 pages : rgb(71,85,105)/rgb(255,255,255) confirmé. Régression Modules/News (113/113) verte.
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,

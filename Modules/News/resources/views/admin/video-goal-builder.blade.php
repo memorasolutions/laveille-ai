@@ -11,9 +11,14 @@
     .cb-empty { text-align:center; color:#57606f; padding:24px; font-style:italic; }
     .cb-btn { background:#0B7285; color:#fff; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-weight:600; min-height:44px; min-width:44px; display:inline-flex; align-items:center; gap:6px; justify-content:center; }
     .cb-btn:hover:not(:disabled) { background:#075f6f; }
-    .cb-btn:disabled { background:#6b7280; cursor:not-allowed; }
+    /* WCAG 2.2 AAA : #6b7280 précédent = 4.83:1 (échec AAA, seuil 7:1). #475569 + texte blanc =
+       7.58:1. Même correctif que concentre-builder.blade.php (composant partagé) - règle explicite
+       dupliquée pour .cb-btn-secondary:disabled, sinon le texte teal hérité de .cb-btn-secondary
+       retombe à un contraste insuffisant sur fond gris. */
+    .cb-btn:disabled { background:#475569; color:#fff; cursor:not-allowed; }
     .cb-btn-secondary { background:#fff; color:#0B7285; border:1.5px solid #0B7285; }
     .cb-btn-secondary:hover:not(:disabled) { background:#0B7285; color:#fff; }
+    .cb-btn-secondary:disabled { background:#475569; color:#fff; border-color:#475569; cursor:not-allowed; }
     .cb-btn:focus-visible, .cb-btn-secondary:focus-visible, input:focus-visible, textarea:focus-visible {
         outline: 3px solid #064E5A; outline-offset: 2px;
     }

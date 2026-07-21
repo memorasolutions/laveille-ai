@@ -10,9 +10,14 @@
     .cb-pre mark { background:#fde68a; color:#0f172a; padding:0 2px; }
     .cb-btn { background:#0B7285; color:#fff; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-weight:600; min-height:44px; display:inline-flex; align-items:center; gap:6px; }
     .cb-btn:hover { background:#075f6f; }
-    .cb-btn:disabled { background:#94a3b8; cursor:not-allowed; }
+    /* WCAG 2.2 AAA : #94a3b8 précédent donnait 2.18:1-2.56:1 selon le texte (échec AA et AAA).
+       #475569 + texte blanc = 7.58:1 (AAA, seuil 7:1). Règle explicite dupliquée pour
+       .cb-btn-secondary:disabled ci-dessous - sinon la couleur de texte teal de .cb-btn-secondary
+       (même spécificité, cascade) reste appliquée sur fond gris et retombe à 2.18:1. */
+    .cb-btn:disabled { background:#475569; color:#fff; cursor:not-allowed; }
     .cb-btn-secondary { background:#fff; color:#0B7285; border:1.5px solid #0B7285; }
     .cb-btn-secondary:hover { background:#0B7285; color:#fff; }
+    .cb-btn-secondary:disabled { background:#475569; color:#fff; border-color:#475569; cursor:not-allowed; }
     .cb-section-title { font-weight:700; color:#0B7285; font-size:15px; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
     .cb-counter { background:#0B7285; color:#fff; padding:2px 10px; border-radius:10px; font-size:12px; font-weight:700; }
     .cb-empty { text-align:center; color:#94a3b8; padding:24px; font-style:italic; }
