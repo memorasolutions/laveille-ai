@@ -2105,11 +2105,29 @@ declare(strict_types=1);
  *     edit.blade.php` a une 3e implémentation de toast (`showToast()`, HTML fabriqué manuellement)
  *     pour l'action « Enregistrer l'ordre » - préexistante, hors périmètre des correctifs du jour,
  *     incohérence DRY à traiter dans une passe future si demandé.
+ *
+ *   1.117.8 · 2026-07-21 · fix(directory) Apostrophes manquantes dans le toast d'avertissement de
+ *     capture d'écran - 2e round adversarial (agent E2E frais) sur le delta 1.117.5-1.117.7.
+ *     `Modules/Directory/resources/views/admin/create.blade.php:91` : le message copié tel quel
+ *     depuis l'ancien code cassé lors de la migration `Livewire.dispatch` (1.117.5) affichait
+ *     « Entrez d abord l URL du site. » (les deux apostrophes absentes), en violation directe de la
+ *     règle « français impeccable, accents/apostrophes toujours présents ». Corrigé vers « Entrez
+ *     d'abord l'URL du site. » (apostrophes échappées `\'` dans la chaîne JS). Grep de contrôle sur
+ *     les 5 autres fichiers touchés en 1.117.2/1.117.5 (`l URL`, `d abord`, `d un`, `l ancien`,
+ *     `d une`, `l objectif`, `l article`) : aucune autre occurrence, défaut isolé à ce seul fichier.
+ *     28/28 tests Modules/Directory verts.
+ *     DEUX CONSTATS HORS PÉRIMÈTRE, SIGNALÉS À L'UTILISATEUR (non corrigés, pas de décision
+ *     unilatérale) trouvés par le même round adversarial : (1) `public/build/nobleui/plugins/
+ *     cropperjs/cropper.min.js` et `.css` sont absents du build (404 en prod ET en local, confirmé
+ *     via `find public/build`) - l'outil de recadrage d'image de `Modules/Media/.../image-editor.
+ *     blade.php` est cassé indépendamment du fix toast de 1.117.5 ; (2) confirmation de la note
+ *     secondaire de 1.117.7 sur le 3e mécanisme de toast (`showToast()`) de `Modules/Menu/.../
+ *     edit.blade.php`, toujours non traité (DRY, non bloquant).
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 7;
+$lvPatch = 8;
 
 return [
     'major' => $lvMajor,

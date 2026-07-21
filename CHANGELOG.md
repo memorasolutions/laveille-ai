@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.8] - 2026-07-21
+
+### Fixed
+- **Apostrophes manquantes dans le toast d'avertissement de capture d'écran** (`Modules/Directory/resources/views/admin/create.blade.php:91`) : « Entrez d abord l URL du site. » → « Entrez d'abord l'URL du site. ». Trouvé par un 2e round adversarial (agent E2E frais), défaut hérité du texte d'origine copié tel quel lors de la migration `Livewire.dispatch` en 1.117.5 ; confirmé isolé (grep de contrôle sur les 5 autres fichiers touchés).
+
+### Known issue (signalé, non corrigé)
+- `public/build/nobleui/plugins/cropperjs/cropper.min.js`/`.css` absents du build (404 en prod et en local) — l'outil de recadrage d'image de `Media/image-editor.blade.php` est cassé, indépendamment du fix toast.
+- `Modules/Menu/admin/edit.blade.php` a toujours son 3e mécanisme de toast maison (`showToast()`), non harmonisé — DRY, non bloquant (déjà signalé en 1.117.7).
+
 ## [1.117.7] - 2026-07-21
 
 ### Removed
