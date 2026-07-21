@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.9] - 2026-07-21
+
+### Changed
+- **Désactivation de toutes les automations d'envoi newsletter** — demande explicite et urgente de l'utilisateur (« ne pas envoyer de newsletters avant que je le dise, enlève les automations de la newsletter au cas »). `routes/console.php` : `newsletter:digest --preview`/`--send --force`, `newsletter:remind-pending`, `newsletter:purge-unconfirmed` commentés (réversibles). Confirmé via `artisan schedule:list` : plus aucune tâche `newsletter:*` planifiée. Audit complémentaire : aucun cron cPanel externe ni route HTTP ne peut déclencher un envoi.
+
 ## [1.117.8] - 2026-07-21
 
 ### Fixed

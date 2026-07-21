@@ -96,16 +96,17 @@ if (\Nwidart\Modules\Facades\Module::find('Academy')?->isEnabled()) {
     Schedule::command('academy:tutor-access-remind')->dailyAt('09:00')->withoutOverlapping();
 }
 
-// Newsletter digest (preview mardi, envoi mercredi).
-// PAUSE ESTIVALE 2026 : auto-envoi suspendu jusqu'a la semaine du 17 aout.
-// Le garde ne laisse les planifs s'executer QU'A PARTIR du 2026-08-17 (reprise
-// automatique le mardi 18 preview + mercredi 19 envoi, sans reactivation manuelle).
-$reprisePostPauseEstivale = fn (): bool => now('America/Toronto')->greaterThanOrEqualTo('2026-08-17');
-Schedule::command('newsletter:digest --preview')->weeklyOn(2, '09:00')->when($reprisePostPauseEstivale);
-Schedule::command('newsletter:digest --send --force')->weeklyOn(3, '09:00')->when($reprisePostPauseEstivale);
+// NEWSLETTER - AUTOMATIONS DESACTIVEES (demande explicite utilisateur, 2026-07-21) :
+// "ne pas envoyer de newsletters avant que je le dise, enleve les automations de la
+// newsletter au cas". Les 4 lignes ci-dessous sont commentees intentionnellement -
+// AUCUN envoi/rappel/purge automatique tant que l'utilisateur ne redonne pas le feu
+// vert explicitement. Ne pas reactiver sans demande explicite.
+//
+// Schedule::command('newsletter:digest --preview')->weeklyOn(2, '09:00');
+// Schedule::command('newsletter:digest --send --force')->weeklyOn(3, '09:00');
 // Newsletter double opt-in : rappel J+1 09:00, purge J+7 09:30 (mark unsubscribed_at)
-Schedule::command('newsletter:remind-pending')->dailyAt('09:00')->withoutOverlapping();
-Schedule::command('newsletter:purge-unconfirmed')->dailyAt('09:30')->withoutOverlapping();
+// Schedule::command('newsletter:remind-pending')->dailyAt('09:00')->withoutOverlapping();
+// Schedule::command('newsletter:purge-unconfirmed')->dailyAt('09:30')->withoutOverlapping();
 
 // Queue worker pour jobs newsletter (shared hosting — pas de daemon)
 Schedule::command('queue:work --queue=newsletters --stop-when-empty --max-time=55')->everyMinute();

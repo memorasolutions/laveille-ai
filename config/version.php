@@ -2123,11 +2123,29 @@ declare(strict_types=1);
  *     blade.php` est cassé indépendamment du fix toast de 1.117.5 ; (2) confirmation de la note
  *     secondaire de 1.117.7 sur le 3e mécanisme de toast (`showToast()`) de `Modules/Menu/.../
  *     edit.blade.php`, toujours non traité (DRY, non bloquant).
+ *
+ *   1.117.9 · 2026-07-21 · fix(newsletter) Désactivation de TOUTES les automations d'envoi
+ *     newsletter - demande explicite et urgente de l'utilisateur en cours de session : « ne pas
+ *     envoyer de newsletters avant que je le dise, enlève les automations de la newsletter au cas ».
+ *     `routes/console.php` : 4 entrées `Schedule::command(...)` commentées (pas supprimées -
+ *     réversible en un « go » explicite futur) : `newsletter:digest --preview` (mardi 09h00),
+ *     `newsletter:digest --send --force` (mercredi 09h00, déjà gaté jusqu'au 2026-08-17 par la
+ *     pause estivale - gate retiré avec le reste, plus nécessaire), `newsletter:remind-pending`
+ *     (rappel double opt-in quotidien 09h00), `newsletter:purge-unconfirmed` (purge quotidienne
+ *     09h30). Vérifié `php artisan schedule:list` en prod-équivalent local : plus aucune tâche
+ *     `newsletter:*` planifiée. Audit complémentaire (par précaution, « au cas ») : grep exhaustif
+ *     de tout `crontab -l` cPanel du compte (86 entrées) - aucun cron externe n'appelle
+ *     `newsletter:digest` directement (le seul déclencheur restant aurait été un cron `schedule:run`
+ *     déjà neutralisé ci-dessus) ; grep de tout le repo pour un contrôleur/route HTTP qui
+ *     déclencherait un envoi - aucun trouvé. Le worker `queue:work --queue=newsletters` reste actif
+ *     (il ne fait que traiter une file désormais jamais alimentée automatiquement - inoffensif,
+ *     laissé pour ne pas bloquer un futur envoi manuel explicite depuis l'admin).
+ *
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 8;
+$lvPatch = 9;
 
 return [
     'major' => $lvMajor,
