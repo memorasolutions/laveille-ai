@@ -260,12 +260,12 @@ function healthFix(check, btn) {
             .then(data => {
                 if (data.success) { location.reload(); }
                 else {
-                    window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: data.message, variant: 'danger', duration: 5000 } }));
+                    Livewire.dispatch('toast', { type: 'error', message: data.message });
                     btn.disabled = false; btn.innerHTML = '<i data-lucide="wrench" class="icon-sm"></i> {{ __("Corriger") }}'; lucide.createIcons();
                 }
             })
             .catch(() => {
-                window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(__('Erreur réseau')), variant: 'danger', duration: 5000 } }));
+                Livewire.dispatch('toast', { type: 'error', message: @json(__('Erreur réseau')) });
                 btn.disabled = false;
             });
         }

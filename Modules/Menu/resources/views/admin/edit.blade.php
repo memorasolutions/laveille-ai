@@ -261,7 +261,7 @@ function appendItem(data) {
 function addCustomItem() {
     const title = document.getElementById('addTitle').value.trim();
     const url = document.getElementById('addUrl').value.trim();
-    if (!title) { window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(__('Le titre est requis.')), variant: 'warning', duration: 4000 } })); return; }
+    if (!title) { Livewire.dispatch('toast', { type: 'warning', message: @json(__('Le titre est requis.')) }); return; }
     appendItem({ title, url: url || '#', type: 'custom', target: '_self', enabled: true });
     document.getElementById('addTitle').value = '';
     document.getElementById('addUrl').value = '#';

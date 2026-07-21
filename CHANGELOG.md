@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.5] - 2026-07-21
+
+### Fixed
+- **Extension du correctif de toast (v1.117.2) à 5 pages admin supplémentaires** trouvées par un audit exhaustif de tout le repo : `Backoffice/health`, `Blog/articles/edit`, `Directory/admin/create`, `Media/image-editor`, `Menu/admin/edit`, ainsi que `Newsletter/prompt-builder`. Toutes basculées vers `Livewire.dispatch('toast', ...)`.
+
+### Security
+- **Retrait d'un script accessible publiquement sans authentification qui déclenchait un envoi réel de courriel de test newsletter** (`_run_defi_w18_test.php` + variante `_v2`). One-shot déjà servi, sans référence active.
+
+### Removed
+- 21 scripts PHP de diagnostic déjà neutralisés (stubs 410/404) supprimés de `public/` en production (non suivis par git, résidus indéfinis sinon).
+- 12 scripts jetables suivis par git (`seed-oqlf.php`, 7× `clear-s84-*.php`, `_cleanup_residuals_38.php`, `_cleanup_v2_38.php`, `_run_defi_w18_test(_v2).php`) retirés du dépôt — sans ce retrait, ils étaient ressuscités à chaque déploiement.
+
+### Known issue (signalé, décision laissée à l'utilisateur)
+- `_content_upload_receiver_b073bc...045.php` (prod, hors dépôt git) : script fonctionnel qui écrit en brut dans `articles.content`, protégé par un token dont la valeur est le nom de fichier lui-même (protection illusoire). Besoin actif incertain — non supprimé, à trancher.
+
 ## [1.117.4] - 2026-07-21
 
 ### Fixed

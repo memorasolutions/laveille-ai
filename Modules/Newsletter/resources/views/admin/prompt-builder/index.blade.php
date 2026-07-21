@@ -1134,18 +1134,12 @@ function promptBuilder() {
                 const data = await res.json();
                 if (res.ok && data.prompt) {
                     this.promptText = data.prompt;
-                    window.dispatchEvent(new CustomEvent('toast-show', {
-                        detail: { message: 'Prompt généré !', variant: 'success', duration: 2500 }
-                    }));
+                    Livewire.dispatch('toast', { type: 'success', message: 'Prompt généré !' });
                 } else {
-                    window.dispatchEvent(new CustomEvent('toast-show', {
-                        detail: { message: data.error ?? 'Erreur lors de la génération.', variant: 'danger', duration: 5000 }
-                    }));
+                    Livewire.dispatch('toast', { type: 'error', message: data.error ?? 'Erreur lors de la génération.' });
                 }
             } catch (e) {
-                window.dispatchEvent(new CustomEvent('toast-show', {
-                    detail: { message: 'Erreur réseau.', variant: 'danger', duration: 5000 }
-                }));
+                Livewire.dispatch('toast', { type: 'error', message: 'Erreur réseau.' });
             } finally {
                 this.loading = false;
             }
@@ -1163,18 +1157,12 @@ function promptBuilder() {
                 const data = await res.json();
                 if (res.ok && data.preset) {
                     this.applyBlocks(data.preset.blocks ?? {});
-                    window.dispatchEvent(new CustomEvent('toast-show', {
-                        detail: { message: 'Preset chargé.', variant: 'info', duration: 2500 }
-                    }));
+                    Livewire.dispatch('toast', { type: 'info', message: 'Preset chargé.' });
                 } else {
-                    window.dispatchEvent(new CustomEvent('toast-show', {
-                        detail: { message: 'Erreur lors du chargement.', variant: 'danger', duration: 4000 }
-                    }));
+                    Livewire.dispatch('toast', { type: 'error', message: 'Erreur lors du chargement.' });
                 }
             } catch (e) {
-                window.dispatchEvent(new CustomEvent('toast-show', {
-                    detail: { message: 'Erreur réseau.', variant: 'danger', duration: 4000 }
-                }));
+                Livewire.dispatch('toast', { type: 'error', message: 'Erreur réseau.' });
             }
         },
 
@@ -1182,13 +1170,9 @@ function promptBuilder() {
             if (!this.promptText) return;
             try {
                 await navigator.clipboard.writeText(this.promptText);
-                window.dispatchEvent(new CustomEvent('notification-toast', {
-                    detail: { type: 'success', message: 'Prompt copié dans le presse-papiers !' }
-                }));
+                Livewire.dispatch('toast', { type: 'success', message: 'Prompt copié dans le presse-papiers !' });
             } catch (e) {
-                window.dispatchEvent(new CustomEvent('notification-toast', {
-                    detail: { type: 'warning', message: 'Échec de la copie - sélectionnez le texte manuellement.' }
-                }));
+                Livewire.dispatch('toast', { type: 'warning', message: 'Échec de la copie - sélectionnez le texte manuellement.' });
             }
         },
 

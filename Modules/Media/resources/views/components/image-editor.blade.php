@@ -93,7 +93,7 @@ function imageEditor() {
                 this.modal.hide();
             } catch (e) {
                 console.error('Crop failed:', e);
-                window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Erreur lors du recadrage.', variant: 'danger', duration: 4000 } }));
+                Livewire.dispatch('toast', { type: 'error', message: 'Erreur lors du recadrage.' });
             } finally {
                 this.processing = false;
             }

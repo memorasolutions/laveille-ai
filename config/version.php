@@ -2049,11 +2049,40 @@ declare(strict_types=1);
  *     complètes aujourd'hui (9 sous-agents indépendants au total) : 12 manques réels trouvés et
  *     corrigés sur le travail de la session (bouton "Envoyer vers Objectif vidéo" + fix WCAG + fix
  *     config IA), le tout vérifié bout en bout avec de vraies données de production à chaque ronde.
+ *
+ *   1.117.5 · 2026-07-21 · fix(toast) Extension du correctif Livewire.dispatch à 5 pages admin
+ *     supplémentaires + ménage sécurité. Suite au /100 sur News/Newsletter, audit exhaustif (sous-
+ *     agent frais, remontée complète de la chaîne @extends/@include pour chaque fichier) de TOUT le
+ *     repo pour le même pattern de toast cassé (CustomEvent DOM `notification-toast`/`toast-show`
+ *     sans listener réel) : 21 fichiers trouvés au total, 16 confirmés OK (thème front-end public,
+ *     vrai listener existant), 5 confirmés CASSÉS et corrigés vers `Livewire.dispatch('toast', ...)` :
+ *     `Modules/Backoffice/.../themes/backend/health/index.blade.php`,
+ *     `Modules/Blog/resources/views/admin/articles/edit.blade.php`,
+ *     `Modules/Directory/resources/views/admin/create.blade.php`,
+ *     `Modules/Media/resources/views/components/image-editor.blade.php`,
+ *     `Modules/Menu/resources/views/admin/edit.blade.php`.
+ *     Ménage serveur (audit lecture seule d'un 2e sous-agent) : 21 scripts PHP jetables déjà
+ *     neutralisés (stubs 410/404) supprimés physiquement de `public/` en prod (n'étaient pas suivis
+ *     par git, resteraient orphelins indéfiniment sinon). 12 scripts SUIVIS PAR GIT et donc
+ *     ressuscités à chaque déploiement (`seed-oqlf.php`, 7× `clear-s84-*.php`,
+ *     `_cleanup_residuals_38.php`, `_cleanup_v2_38.php`, `_run_defi_w18_test.php` + `_v2`) retirés du
+ *     dépôt via git rm - tous one-shot déjà servis, aucune référence active ailleurs dans le code.
+ *     RISQUE SÉCURITÉ résolu au passage : `_run_defi_w18_test(_v2).php` déclenchait un envoi RÉEL de
+ *     courriel de test newsletter sans aucune authentification (`artisan newsletter:digest
+ *     --force`), accessible publiquement par quiconque devinait/trouvait l'URL.
+ *     LAISSÉ INTENTIONNELLEMENT EN PLACE, SIGNALÉ À L'UTILISATEUR (pas de décision unilatérale) :
+ *     `_content_upload_receiver_b073bc...045.php` (public/, non suivi par git) - script fonctionnel
+ *     (pas un stub) qui écrit en brut dans `articles.content` (id=16), protégé par un token dont la
+ *     valeur EST le nom de fichier lui-même (protection illusoire) - besoin actif incertain, décision
+ *     de suppression/sécurisation laissée à l'utilisateur plutôt que devinée.
+ *     96/96 tests des 5 modules touchés (Backoffice/Blog/Directory/Media/Menu) + 114/114 Newsletter
+ *     verts. Vérifié visuellement (Playwright local, sans déclencher d'envoi réel) : toast fonctionnel
+ *     sur Newsletter/prompt-builder.
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 4;
+$lvPatch = 5;
 
 return [
     'major' => $lvMajor,
