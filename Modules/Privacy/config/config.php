@@ -16,7 +16,7 @@ return [
     */
     'company' => [
         'name' => env('COMPANY_NAME', 'La veille de Stef'),
-        'address' => env('COMPANY_ADDRESS', '1501, rue Saint-Benoit, L\'Ancienne-Lorette, QC G2E 1P2, Canada'),
+        'address' => env('COMPANY_ADDRESS', 'CP 64021, L\'Ancienne-Lorette RPOST-JAC (QC) G2E 2X0, Canada'),
         'email' => env('COMPANY_EMAIL', 'info@laveille.ai'),
         'dpo_email' => env('DPO_EMAIL', 'politiques@memora.ca'),
         'dpo_name' => env('DPO_NAME', 'Stéphane Lapointe'),
@@ -31,9 +31,9 @@ return [
     */
     'documents' => [
         'privacy_policy' => [
-            'version' => '3.3',
+            'version' => '3.4',
             'url' => '/privacy-policy',
-            'updated_at' => '2026-07-19',
+            'updated_at' => '2026-07-21',
         ],
         'terms' => [
             'version' => '3.1',

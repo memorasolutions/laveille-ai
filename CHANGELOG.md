@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.6] - 2026-07-21
+
+### Changed
+- **Adresse postale RGPD mise à jour** (`Modules/Privacy/config/config.php::company.address`, affichée sur `/privacy-policy` — « Responsable du traitement ») : `CP 64021, L'Ancienne-Lorette RPOST-JAC (QC) G2E 2X0, Canada`. Version du document légal 3.3 → 3.4.
+
+### Known issue (signalé, non modifié)
+- `terms-of-use.blade.php` et `sales-conditions.blade.php` contiennent encore l'ancienne adresse civique, liée à « MEMORA solutions (incorporation) » + NEQ — potentiellement une adresse d'incorporation distincte, à confirmer avant modification.
+
 ## [1.117.5] - 2026-07-21
 
 ### Fixed

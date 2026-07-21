@@ -2078,11 +2078,24 @@ declare(strict_types=1);
  *     96/96 tests des 5 modules touchés (Backoffice/Blog/Directory/Media/Menu) + 114/114 Newsletter
  *     verts. Vérifié visuellement (Playwright local, sans déclencher d'envoi réel) : toast fonctionnel
  *     sur Newsletter/prompt-builder.
+ *
+ *   1.117.6 · 2026-07-21 · fix(privacy) Mise à jour de l'adresse postale RGPD - demande explicite
+ *     utilisateur. `Modules/Privacy/config/config.php::company.address` (utilisée par la politique
+ *     de confidentialité, section « Responsable du traitement ») passe de l'ancienne adresse civique
+ *     à la nouvelle case postale : `CP 64021, L'Ancienne-Lorette RPOST-JAC (QC) G2E 2X0, Canada`.
+ *     Version du document légal bumpée 3.3 → 3.4 (updated_at 2026-07-21), pratique standard pour
+ *     tout changement de contenu d'une politique de confidentialité. PAS TOUCHÉ, signalé à
+ *     l'utilisateur : `terms-of-use.blade.php` (2 occurrences) et `sales-conditions.blade.php`
+ *     (1 occurrence) contiennent encore l'ancienne adresse, mais liée explicitement à « MEMORA
+ *     solutions (incorporation) » + un NEQ - adresse d'incorporation légale potentiellement distincte
+ *     de l'adresse RGPD demandée ici, à ne pas modifier sans confirmation explicite (pourrait devoir
+ *     correspondre à un registre gouvernemental). Vérifié visuellement (Playwright local) : nouvelle
+ *     adresse affichée correctement sur /privacy-policy. 28/28 tests Modules/Privacy verts.
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 5;
+$lvPatch = 6;
 
 return [
     'major' => $lvMajor,
