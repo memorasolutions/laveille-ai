@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.2] - 2026-07-21
+
+### Fixed
+- **Toast de confirmation totalement non fonctionnel sur `/admin/concentre-builder` et `/admin/objectif-video`.** Trouvé par une passe adversariale /100 indépendante. Le code dispatchait un `CustomEvent` DOM `notification-toast`, mais aucun listener n'existe pour cet événement - le layout admin réellement rendu écoute `Livewire.dispatch('toast', {...})`, pas un event DOM. Bug préexistant à cette session (les toasts « copié ! » étaient déjà cassés). Corrigé aux 5 points d'appel des deux fichiers. Vérifié visuellement : le toast s'affiche maintenant réellement.
+- **`pushToVideoGoal()` : désynchronisation possible entre `items` et `selectedIds`** si un id sélectionné n'a plus de correspondance dans `newsItems` au moment du clic. `selectedIds` est maintenant dérivé de `items` après filtrage, garantissant leur cohérence.
+- **`sessionStorage.setItem()` sans gestion d'erreur** dans `pushToVideoGoal()` - échec totalement silencieux (aucune redirection, aucun message) en cas de quota dépassé ou stockage désactivé. Ajout d'un try/catch avec toast d'erreur.
+- **Import sessionStorage sur Objectif Vidéo : `removeItem()` jamais exécuté si le JSON est corrompu** (placé après `JSON.parse()`), laissant la clé bloquée indéfiniment. Déplacé avant le parse.
+- **`SettingsDatabaseSeeder.php` gardait les anciens modèles OpenRouter cassés** comme valeurs par défaut pour 6 réglages `ai.*_model` — alignés sur `openrouter/free`. En corrigeant ce point, découverte que `ai.moderation_model`/`ai.seo_model`/`ai.translation_model` étaient **aussi cassés en production** (même cause que le correctif de 1.117.1, jamais vérifiés à l'époque) — corrigés en direct.
+- Cron cPanel de diagnostic ponctuel résiduel (403 superadmin, déjà servi) retiré du crontab.
+
+### Added
+- Test Pest `ConcentreBuilderIndexTest.php` — aucun test n'exerçait le rendu HTTP de `/admin/concentre-builder` avant (113/113 verts ne couvrait pas cette page).
+
 ## [1.117.1] - 2026-07-21
 
 ### Fixed

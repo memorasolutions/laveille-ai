@@ -418,9 +418,7 @@ function concentreBuilder(opts) {
         async copyToClipboard() {
             try {
                 await navigator.clipboard.writeText(this.generatedPrompt);
-                window.dispatchEvent(new CustomEvent('notification-toast', {
-                    detail: { type: 'success', message: 'Prompt copié dans le presse-papiers !' }
-                }));
+                Livewire.dispatch('toast', { type: 'success', message: 'Prompt copié dans le presse-papiers !' });
                 this.copyOk = true;
                 setTimeout(() => { this.copyOk = false; }, 2500);
             } catch (e) {
@@ -431,11 +429,23 @@ function concentreBuilder(opts) {
         // Envoi de la sélection vers le Générateur d'objectif vidéo : mécanisme 100% client-side
         // (sessionStorage), aucun appel serveur — cohérent avec la philosophie déjà établie entre
         // ces deux outils (voir Modules/News/routes/web.php).
+        // selectedIds est dérivé de items (après filtrage des ids introuvables) plutôt que copié
+        // séparément de this.selectedIds, pour garantir que les deux restent toujours cohérents
+        // (même longueur, mêmes ids) même si une sélection restaurée depuis le brouillon contient
+        // un id qui n'est plus dans newsItems au moment du clic.
         pushToVideoGoal() {
             if (this.selectedIds.length === 0) return;
             const items = this.selectedIds.map(id => this.itemById(id)).filter(Boolean);
-            sessionStorage.setItem('lv_vgb_import', JSON.stringify({ items, selectedIds: this.selectedIds }));
-            window.location.href = this.endpoints.videoGoalUrl;
+            const selectedIds = items.map(item => item.id);
+            try {
+                sessionStorage.setItem('lv_vgb_import', JSON.stringify({ items, selectedIds }));
+                window.location.href = this.endpoints.videoGoalUrl;
+            } catch (error) {
+                Livewire.dispatch('toast', {
+                    type: 'error',
+                    message: 'Impossible de sauvegarder les données. Vérifiez les autorisations de stockage ou essayez en navigation normale.'
+                });
+            }
         },
 
         downloadTxt() {

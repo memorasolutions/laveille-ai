@@ -171,9 +171,12 @@ function videoGoalBuilder(opts) {
 
             const importData = sessionStorage.getItem('lv_vgb_import');
             if (importData) {
+                // removeItem AVANT le parse (consommation unique garantie même si le JSON est
+                // corrompu) - sinon une clé corrompue reste bloquée indéfiniment et re-échoue à
+                // chaque chargement de page jusqu'au prochain pushToVideoGoal().
+                sessionStorage.removeItem('lv_vgb_import');
                 try {
                     const payload = JSON.parse(importData);
-                    sessionStorage.removeItem('lv_vgb_import');
 
                     this.newsItems = payload.items || [];
                     this.selectedIds = payload.selectedIds || [];
@@ -182,9 +185,7 @@ function videoGoalBuilder(opts) {
                     const count = this.selectedIds.length;
                     const plural = count > 1 ? 's' : '';
                     const message = `${count} actualité${plural} importée${plural} depuis le Concentré.`;
-                    window.dispatchEvent(new CustomEvent('notification-toast', {
-                        detail: { type: 'success', message }
-                    }));
+                    Livewire.dispatch('toast', { type: 'success', message });
                     return;
                 } catch (e) {
                     // JSON corrompu : on ignore silencieusement et on continue normalement.
@@ -232,20 +233,18 @@ function videoGoalBuilder(opts) {
         },
 
         // NOTE : window.copyToClipboard (Modules/FrontTheme/.../master.blade.php) n'est PAS chargé
-        // dans le layout backoffice::layouts.admin (ce script n'y est jamais inclus). On reprend
-        // donc le mécanisme de toast déjà utilisé par concentre-builder.blade.php (même layout) :
-        // event window "notification-toast" écouté par backoffice::partials.toast-notifications.
+        // dans le layout backoffice (thème réellement rendu : themes/backend/layouts/admin.blade.php).
+        // Toast géré par ce thème via Livewire.dispatch('toast', {...}) - écouté par
+        // Livewire.on('toast', ...) dans backoffice::themes.backend.partials.toast (PAS un
+        // CustomEvent DOM 'notification-toast' : ce mécanisme, utilisé avant, ne fait rien - aucun
+        // listener DOM n'existe, trouvé lors de la passe adversariale /100 du 2026-07-21).
         async copyGoal() {
             if (!this.generatedGoal) return;
             try {
                 await navigator.clipboard.writeText(this.generatedGoal);
-                window.dispatchEvent(new CustomEvent('notification-toast', {
-                    detail: { type: 'success', message: "Objectif copié dans le presse-papiers !" }
-                }));
+                Livewire.dispatch('toast', { type: 'success', message: "Objectif copié dans le presse-papiers !" });
             } catch (e) {
-                window.dispatchEvent(new CustomEvent('notification-toast', {
-                    detail: { type: 'critical', message: 'Copie impossible - copie le texte manuellement.' }
-                }));
+                Livewire.dispatch('toast', { type: 'error', message: 'Copie impossible - copie le texte manuellement.' });
             }
         },
     };

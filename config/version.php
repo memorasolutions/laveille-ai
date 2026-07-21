@@ -1969,11 +1969,50 @@ declare(strict_types=1);
  *     fichiers, avec une règle .cb-btn-secondary:disabled explicite ajoutée (absente avant, d'où la
  *     dérive de couleur de texte selon la cascade CSS). Vérifié runtime (Playwright, getComputedStyle)
  *     sur les 2 pages : rgb(71,85,105)/rgb(255,255,255) confirmé. Régression Modules/News (113/113) verte.
+ *
+ *   1.117.2 · 2026-07-21 · fix(News) Passe adversariale /100 sur v1.117.0/1.117.1 (3 sous-agents
+ *     indépendants, périmètre : bouton "Envoyer vers Objectif vidéo" + fix WCAG + fix config IA) -
+ *     6 manques réels trouvés et corrigés :
+ *     (1) BUG MAJEUR - le toast de confirmation ne s'affichait JAMAIS sur aucune des 2 pages : le
+ *     code dispatchait un CustomEvent DOM `notification-toast` mais AUCUN listener n'existe pour cet
+ *     event - le layout réellement rendu (`themes/backend/layouts/admin.blade.php`, pas
+ *     `layouts/admin.blade.php`) inclut `themes/backend/partials/toast.blade.php`, qui écoute
+ *     `Livewire.dispatch('toast', {...})` (event Livewire, pas un CustomEvent window). Bug
+ *     préexistant (les toasts "copié !" de copyToClipboard()/copyGoal() étaient déjà cassés avant
+ *     cette session) révélé en marge du nouveau code. Corrigé aux 5 points d'appel dans les 2
+ *     fichiers (`Livewire.dispatch('toast', {type, message})`, type 'critical' renommé 'error' pour
+ *     matcher les types reconnus par le partial). Vérifié visuellement (Playwright local) : toast vert
+ *     "1 actualité importée depuis le Concentré." bien visible en haut à droite après import.
+ *     (2) pushToVideoGoal() : `items` filtrait les ids introuvables via itemById() mais `selectedIds`
+ *     restait une copie non filtrée - désync possible si un id sélectionné (ex. restauré depuis un
+ *     brouillon obsolète) n'a pas de correspondance dans newsItems au moment du clic. Corrigé :
+ *     `selectedIds` est maintenant dérivé de `items` après filtrage (toujours cohérents).
+ *     (3) `sessionStorage.setItem()` sans try/catch dans pushToVideoGoal() - échec silencieux total
+ *     (aucune redirection, aucun message) si quota dépassé/storage désactivé. Ajout try/catch +
+ *     toast d'erreur.
+ *     (4) video-goal-builder init() : `sessionStorage.removeItem()` placé APRÈS `JSON.parse()` -
+ *     jamais exécuté si le JSON est corrompu, laissant la clé bloquée indéfiniment (re-échoue à
+ *     chaque chargement). Déplacé avant le parse (consommation garantie).
+ *     (5) Zéro test Pest n'exerçait le rendu HTTP de /admin/concentre-builder (route
+ *     `admin.concentre.index`) - confirmé par grep exhaustif, 113/113 verts ne couvrait donc PAS
+ *     cette page ni le nouveau binding `videoGoalUrl`. Ajout `ConcentreBuilderIndexTest.php` (guest
+ *     redirigé, admin voit la page sans erreur, route video-goal résolue sans exception).
+ *     (6) `SettingsDatabaseSeeder.php` gardait les anciens modèles OpenRouter cassés
+ *     (`meta-llama/llama-3.3-70b-instruct:free`, `qwen/qwen3-coder:free`) comme valeurs par défaut
+ *     pour 6 réglages `ai.*_model` - un environnement fraîchement seedé aurait hérité du même bug.
+ *     Alignés sur `openrouter/free` (déjà appliqué en prod). EFFET DE BORD DÉCOUVERT EN CORRIGEANT
+ *     CE POINT : `ai.moderation_model`/`ai.seo_model`/`ai.translation_model` étaient AUSSI cassés en
+ *     PROD (même cause que ai.default_model/chatbot_model/content_model corrigés en 1.117.1, jamais
+ *     vérifiés à l'époque) - corrigés en direct sur la table settings prod (vérifié avant/après).
+ *     Hors correctifs de code : un cron cPanel de diagnostic ponctuel (403 superadmin, déjà servi,
+ *     fichier de sortie déjà supprimé) trouvé résiduel et retiré du crontab (jamais nettoyé après
+ *     l'investigation initiale, plus tôt dans cette même session). 115/115 tests Modules/News verts
+ *     (+2 vs 1.117.1). 2e passe adversariale lancée après ces corrections (voir mémoire projet).
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 1;
+$lvPatch = 2;
 
 return [
     'major' => $lvMajor,
