@@ -2139,13 +2139,35 @@ declare(strict_types=1);
  *     déjà neutralisé ci-dessus) ; grep de tout le repo pour un contrôleur/route HTTP qui
  *     déclencherait un envoi - aucun trouvé. Le worker `queue:work --queue=newsletters` reste actif
  *     (il ne fait que traiter une file désormais jamais alimentée automatiquement - inoffensif,
- *     laissé pour ne pas bloquer un futur envoi manuel explicite depuis l'admin).
+ *     laissé pour ne pas bloquer un futur envoi manuel explicite depuis l'admin). AUDIT COMPLÉMENTAIRE
+ *     (3e voie découverte a posteriori) : la table `scheduled_tasks` (planification dynamique en
+ *     DB, module Backoffice, lue en fin de `routes/console.php`) a aussi été vérifiée en prod via
+ *     script diagnostic auto-suppressif - VIDE (0 ligne), aucune tâche newsletter n'y était cachée.
+ *     Les 3 voies possibles d'envoi automatique (scheduler Laravel, cron cPanel externe, DB
+ *     dynamique) sont maintenant toutes confirmées neutralisées ou absentes.
  *
+ *   1.117.10 · 2026-07-21 · fix(tools) 2e bug d'apostrophes trouvé par une vérification
+ *     adversariale fraîche du delta 1.117.8 (mandat élargi : grep exhaustif de la même classe de
+ *     défaut sur TOUT le repo, pas seulement le fichier touché). `Modules/Tools/resources/views/
+ *     public/tools/calculatrice-taxes.blade.php:255,261` (page PUBLIQUE, pas admin) : deux
+ *     info-bulles affichaient « l autre champ se calcule automatiquement » au lieu de « l'autre
+ *     champ ». Défaut préexistant depuis le 2026-05-07 (commit `10abe87cb`, confirmé par
+ *     `git blame`), sans lien avec la session de ce soir, mais même violation directe de la règle
+ *     « français impeccable ». Corrigé (apostrophes échappées `l\'autre`). Ajout de 2 tests de
+ *     non-régression légers (pattern `file_get_contents`+`toContain`, sans dépendance DB/route,
+ *     calqué sur `UrlValidationClientTest`) qui manquaient pour verrouiller ce type de défaut à
+ *     l'avenir : `Modules/Directory/tests/Feature/CreateFormToastContentTest.php` (verrouille le
+ *     fix 1.117.8) et `Modules/Tools/tests/Feature/CalculatriceTaxesContentTest.php` (verrouille ce
+ *     fix-ci). Suite complète relancée (`--parallel`, 5307 passés/224 échecs/490 skip) : les 224
+ *     échecs vérifiés PRÉ-EXISTANTS et SANS LIEN (confirmé par `git stash` + re-run identique sans
+ *     mes changements - mêmes échecs, ex. `Phase20SaasTest`/`Phase138Test`/`Phase150Test`, modules
+ *     SaaS/PWA totalement étrangers à ce fix ; probable artefact d'infrastructure de test sous
+ *     `--parallel`, non causé par ce commit). 31/31 tests ciblés (Directory + Tools) verts.
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 9;
+$lvPatch = 10;
 
 return [
     'major' => $lvMajor,

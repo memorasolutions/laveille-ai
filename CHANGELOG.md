@@ -7,10 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.10] - 2026-07-21
+
+### Fixed
+- **Apostrophes manquantes sur la calculatrice de taxes** (`Modules/Tools/resources/views/public/tools/calculatrice-taxes.blade.php:255,261`, page publique) : « l autre champ » → « l'autre champ » (2 occurrences). Défaut préexistant (2026-05-07), trouvé par une vérification adversariale du fix 1.117.8, sans lien avec cette session.
+
+### Added
+- Tests de non-régression pour verrouiller les 2 fixes d'apostrophes (1.117.8 et 1.117.10) : `Modules/Directory/tests/Feature/CreateFormToastContentTest.php`, `Modules/Tools/tests/Feature/CalculatriceTaxesContentTest.php`.
+
+### Note
+- Suite complète relancée en `--parallel` : 224 échecs pré-existants et sans lien confirmés (via `git stash` + re-run identique), voir `config/version.php` pour le détail.
+
 ## [1.117.9] - 2026-07-21
 
 ### Changed
-- **Désactivation de toutes les automations d'envoi newsletter** — demande explicite et urgente de l'utilisateur (« ne pas envoyer de newsletters avant que je le dise, enlève les automations de la newsletter au cas »). `routes/console.php` : `newsletter:digest --preview`/`--send --force`, `newsletter:remind-pending`, `newsletter:purge-unconfirmed` commentés (réversibles). Confirmé via `artisan schedule:list` : plus aucune tâche `newsletter:*` planifiée. Audit complémentaire : aucun cron cPanel externe ni route HTTP ne peut déclencher un envoi.
+- **Désactivation de toutes les automations d'envoi newsletter** — demande explicite et urgente de l'utilisateur (« ne pas envoyer de newsletters avant que je le dise, enlève les automations de la newsletter au cas »). `routes/console.php` : `newsletter:digest --preview`/`--send --force`, `newsletter:remind-pending`, `newsletter:purge-unconfirmed` commentés (réversibles). Confirmé via `artisan schedule:list` : plus aucune tâche `newsletter:*` planifiée. Audit complémentaire : aucun cron cPanel externe ni route HTTP ne peut déclencher un envoi, et la table `scheduled_tasks` (planification dynamique en DB) est vide en prod — 3 voies possibles toutes vérifiées.
 
 ## [1.117.8] - 2026-07-21
 
