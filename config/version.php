@@ -2032,11 +2032,28 @@ declare(strict_types=1);
  *     1.117.2 dans News - module non touché par cette session, à traiter séparément.
  *     246/247 tests pertinents verts (1 échec préexistant hors scope, voir (1) ci-dessus). 3e ronde
  *     adversariale lancée sur ce delta avant de conclure.
+ *
+ *   1.117.4 · 2026-07-21 · fix(AI) 3e ronde adversariale /100 : dernière occurrence codée en dur.
+ *     `AiService::estimateCost()` gardait une table de tarifs codée en dur référençant encore les
+ *     2 anciens slugs de modèles cassés (`meta-llama/llama-3.3-70b-instruct:free`,
+ *     `qwen/qwen3-coder:free`) - grep exhaustif du fix précédent limité à
+ *     `getAvailableModels()`/`getModelForTask()`, avait raté cette 3e occurrence dans le même fichier.
+ *     CONFIRMÉ SANS IMPACT PRATIQUE : `estimateCost()` n'a aucun appelant dans tout le repo (code
+ *     mort), mais ajout de `openrouter/free => [0.0, 0.0]` en tête de la table par cohérence (les
+ *     anciennes entrées conservées, inoffensives). Cette même ronde a aussi CONFIRMÉ INDÉPENDAMMENT
+ *     (via git log --follow, commit 4855d0bc du 2026-03-14) que l'échec `toHaveCount(27)` de
+ *     Phase161Test.php est bien préexistant à toute la session du jour, pas une régression cachée -
+ *     clôt définitivement ce point d'incertitude laissé ouvert en 1.117.3. 2 sous-agents frais
+ *     (revue code exhaustive + E2E complet nouvelles données réelles) lancés sur ce périmètre :
+ *     1 seul manque trouvé (celui corrigé ici), E2E entièrement propre. 3 rondes adversariales
+ *     complètes aujourd'hui (9 sous-agents indépendants au total) : 12 manques réels trouvés et
+ *     corrigés sur le travail de la session (bouton "Envoyer vers Objectif vidéo" + fix WCAG + fix
+ *     config IA), le tout vérifié bout en bout avec de vraies données de production à chaque ronde.
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 3;
+$lvPatch = 4;
 
 return [
     'major' => $lvMajor,

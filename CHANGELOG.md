@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.4] - 2026-07-21
+
+### Fixed
+- **Dernière occurrence codée en dur des anciens modèles OpenRouter cassés**, dans `AiService::estimateCost()` (table de tarifs). Sans impact pratique (méthode sans appelant, code mort), corrigée par cohérence. Trouvée par une 3e ronde adversariale indépendante.
+- Confirmé indépendamment (via `git log --follow`) que l'échec `Phase161Test::toHaveCount(27)` est préexistant (commit du 2026-03-14), sans rapport avec les correctifs de la session.
+
+Bilan de la journée : 3 rondes adversariales complètes (9 sous-agents indépendants), 12 manques réels trouvés et corrigés sur le bouton « Envoyer vers Objectif vidéo », le fix WCAG et le fix de configuration IA — dont un bug majeur (toast de confirmation totalement non fonctionnel sur les deux pages).
+
 ## [1.117.3] - 2026-07-21
 
 ### Fixed

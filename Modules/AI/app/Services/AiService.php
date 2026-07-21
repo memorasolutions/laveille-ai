@@ -626,6 +626,7 @@ class AiService
     public function estimateCost(int $inputTokens, int $outputTokens, string $model): float
     {
         $rates = [
+            'openrouter/free' => [0.0, 0.0],
             'meta-llama/llama-3.3-70b-instruct:free' => [0.0, 0.0],
             'qwen/qwen3-coder:free' => [0.0, 0.0],
             'deepseek/deepseek-v3.2-20251201' => [0.00025, 0.00038],
