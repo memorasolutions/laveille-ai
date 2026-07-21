@@ -88,11 +88,11 @@ class AiService
     public function getAvailableModels(): array
     {
         return [
-            Setting::get('ai.default_model', 'meta-llama/llama-3.3-70b-instruct:free'),
-            Setting::get('ai.chatbot_model', 'meta-llama/llama-3.3-70b-instruct:free'),
-            Setting::get('ai.content_model', 'qwen/qwen3-coder:free'),
-            Setting::get('ai.moderation_model', 'meta-llama/llama-3.3-70b-instruct:free'),
-            Setting::get('ai.seo_model', 'meta-llama/llama-3.3-70b-instruct:free'),
+            Setting::get('ai.default_model', 'openrouter/free'),
+            Setting::get('ai.chatbot_model', 'openrouter/free'),
+            Setting::get('ai.content_model', 'openrouter/free'),
+            Setting::get('ai.moderation_model', 'openrouter/free'),
+            Setting::get('ai.seo_model', 'openrouter/free'),
         ];
     }
 
@@ -109,7 +109,10 @@ class AiService
 
         $settingKey = $mapping[$task] ?? 'ai.default_model';
 
-        return Setting::get($settingKey, Setting::get('ai.default_model', 'meta-llama/llama-3.3-70b-instruct:free'));
+        // openrouter/free : routeur OpenRouter qui pointe automatiquement vers un modèle
+        // gratuit disponible - plus robuste qu'un slug figé (le catalogue gratuit OpenRouter
+        // tourne régulièrement ; un ancien modèle codé en dur ici finit par répondre 404).
+        return Setting::get($settingKey, Setting::get('ai.default_model', 'openrouter/free'));
     }
 
     /**

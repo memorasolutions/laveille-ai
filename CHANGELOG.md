@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.3] - 2026-07-21
+
+### Fixed
+- **Régression de `tests/Feature/Phase161Test.php`** introduite par le fix de seeder de 1.117.2 (jamais exécuté avant cette livraison — hors `Modules/News`). Mis à jour pour attendre `openrouter/free`.
+- **`Modules/AI/app/Services/AiService.php` : les valeurs de repli PHP codées en dur pointaient encore vers les anciens modèles OpenRouter cassés** — le vrai filet de sécurité exécuté si un réglage est vide n'avait jamais été corrigé (seule la seed l'avait été). Alignées sur `openrouter/free`.
+- **Le menu déroulant admin « Modèle IA » (`/admin/settings`) ne proposait même pas `openrouter/free`** — un admin choisissant un des anciens modèles listés aurait réintroduit le bug. Ajout de l'option en tête de liste.
+
+### Known issue (hors périmètre, signalé et non corrigé)
+- `Modules/Newsletter/resources/views/admin/prompt-builder/index.blade.php` utilise le même mécanisme de toast cassé (CustomEvent DOM sans listener) corrigé en 1.117.2 dans le module News — 8 occurrences, module non touché par cette session.
+- `tests/Feature/Phase161Test.php:114` (`toHaveCount(27)`) échoue avec 32 réels — dérive préexistante sans rapport avec les correctifs de cette session (le seeder déclare toujours 27 clés `ai.*`, avant et après).
+
 ## [1.117.2] - 2026-07-21
 
 ### Fixed

@@ -200,9 +200,12 @@ test('AI settings accessible via Setting::get after seeding', function () {
     $this->seed(\Modules\Settings\Database\Seeders\SettingsDatabaseSeeder::class);
 
     expect(Setting::get('ai.openrouter_api_key'))->not->toBeNull()
-        ->and(Setting::get('ai.default_model'))->toBe('meta-llama/llama-3.3-70b-instruct:free')
-        ->and(Setting::get('ai.chatbot_model'))->toBe('meta-llama/llama-3.3-70b-instruct:free')
-        ->and(Setting::get('ai.content_model'))->toBe('qwen/qwen3-coder:free')
+        // openrouter/free (routeur auto vers un modèle gratuit disponible) depuis le 2026-07-21 :
+        // les anciens modèles :free codés en dur (meta-llama/llama-3.3-70b-instruct, qwen3-coder)
+        // ont été retirés de la liste gratuite d'OpenRouter et faisaient 404 en production.
+        ->and(Setting::get('ai.default_model'))->toBe('openrouter/free')
+        ->and(Setting::get('ai.chatbot_model'))->toBe('openrouter/free')
+        ->and(Setting::get('ai.content_model'))->toBe('openrouter/free')
         ->and(Setting::get('ai.temperature'))->toBe('0.7')
         ->and(Setting::get('ai.chatbot_enabled'))->toBeFalse();
 });

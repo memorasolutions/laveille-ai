@@ -2008,11 +2008,35 @@ declare(strict_types=1);
  *     fichier de sortie déjà supprimé) trouvé résiduel et retiré du crontab (jamais nettoyé après
  *     l'investigation initiale, plus tôt dans cette même session). 115/115 tests Modules/News verts
  *     (+2 vs 1.117.1). 2e passe adversariale lancée après ces corrections (voir mémoire projet).
+ *
+ *   1.117.3 · 2026-07-21 · fix(AI) 2e ronde adversariale /100 : régression + filet de sécurité manquant.
+ *     Un des 3 sous-agents frais de la 2e ronde a trouvé que le commit 1.117.2 (fix seeder modèles
+ *     IA) avait RÉGRESSÉ `tests/Feature/Phase161Test.php` (hors Modules/News, jamais exécuté avant
+ *     livraison - "115/115 verts" ne couvrait que Modules/News). Corrigé :
+ *     (1) `Phase161Test.php` mis à jour pour attendre `openrouter/free` (la nouvelle valeur correcte),
+ *     pas les anciens modèles cassés. Un 2e échec du même test (`toHaveCount(27)` vs 32 réels) est
+ *     PRÉEXISTANT et sans rapport (diff prouve que le seeder déclare toujours 27 clés `ai.*` avant ET
+ *     après ce correctif - les 5 clés en trop viennent d'ailleurs dans le projet, hors périmètre,
+ *     signalé à l'utilisateur plutôt que corrigé à l'aveugle).
+ *     (2) `Modules/AI/app/Services/AiService.php::getAvailableModels()/getModelForTask()` : les
+ *     valeurs de repli PHP codées en dur (2e argument de `Setting::get()`) pointaient ENCORE vers les
+ *     anciens modèles cassés - le vrai filet de sécurité utilisé à l'exécution si un réglage est vide
+ *     n'avait jamais été corrigé (seule la seed l'avait été en 1.117.2). Alignées sur `openrouter/free`.
+ *     (3) `Modules/Backoffice/.../livewire/settings-manager.blade.php` : le menu déroulant admin
+ *     « Modèle IA » ne proposait même pas `openrouter/free` comme option - seuls les anciens slugs
+ *     cassés (et d'autres jamais vérifiés) étaient listés ; un admin choisissant dans ce menu aurait
+ *     réintroduit le bug. Ajout de `openrouter/free` en tête de liste, libellé "Auto (recommandé)".
+ *     TROUVÉ MAIS HORS PÉRIMÈTRE (signalé à l'utilisateur, non corrigé ici) :
+ *     `Modules/Newsletter/resources/views/admin/prompt-builder/index.blade.php` utilise le même
+ *     pattern de toast cassé (CustomEvent DOM sans listener, 8 occurrences) que celui corrigé en
+ *     1.117.2 dans News - module non touché par cette session, à traiter séparément.
+ *     246/247 tests pertinents verts (1 échec préexistant hors scope, voir (1) ci-dessus). 3e ronde
+ *     adversariale lancée sur ce delta avant de conclure.
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 2;
+$lvPatch = 3;
 
 return [
     'major' => $lvMajor,

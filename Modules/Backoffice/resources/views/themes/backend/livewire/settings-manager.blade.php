@@ -269,6 +269,12 @@ $helpTextsData = [
                                                 aria-label="Modèle IA {{ ucwords(str_replace(['ai.', '_'], ['', ' '], $setting->key)) }}">
                                             @php
                                                 $aiModels = [
+                                                    // Routeur OpenRouter : pointe automatiquement vers un modèle gratuit
+                                                    // disponible - recommandé, insensible à la rotation du catalogue
+                                                    // gratuit OpenRouter (les slugs figés ci-dessous finissent par
+                                                    // répondre 404 quand OpenRouter les retire de l'offre gratuite,
+                                                    // cf. incident 2026-07-21).
+                                                    'openrouter/free'                        => __('Auto (gratuit, recommandé - toujours disponible)'),
                                                     'meta-llama/llama-3.3-70b-instruct:free' => __('Llama 3.3 70B (gratuit, polyvalent)'),
                                                     'qwen/qwen3-coder:free'                  => __('Qwen 3 Coder (gratuit, code)'),
                                                     'deepseek/deepseek-r1-0528:free'         => __('DeepSeek R1 (gratuit, raisonnement)'),
