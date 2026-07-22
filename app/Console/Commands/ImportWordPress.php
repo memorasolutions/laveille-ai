@@ -289,7 +289,7 @@ class ImportWordPress extends Command
                         'title' => $title,
                         'slug' => $slug,
                         'content' => Purifier::clean($content, 'article'),
-                        'excerpt' => $excerpt ?: null,
+                        'excerpt' => $excerpt ? Purifier::clean($excerpt, 'article') : null,
                         'status' => $this->statusMap[$wpStatus] ?? 'draft',
                         'user_id' => $fallbackUserId,
                         'meta' => array_merge($postMeta, ['wp_id' => $wpId]),

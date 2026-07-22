@@ -2357,11 +2357,34 @@ declare(strict_types=1);
  *     <noreply@anthropic.com>` dans leur message, en violation de la règle projet non-négociable
  *     #11 (jamais de référence Claude/Anthropic dans le code/commentaires/commits). Ce commit-ci
  *     (v1.117.16) et tous les suivants n'incluent plus cette ligne.
+ *
+ *   1.117.17 · 2026-07-22 · fix(divers) Round 2 de la passe adversariale `/100` sur v1.117.16 -
+ *     même schéma de défaut trouvé à 4 endroits voisins non couverts par le round précédent.
+ *
+ *     RBAC (2 vues supplémentaires) : `themes/backend/users/show.blade.php` et `themes/backend/
+ *     livewire/users-table.blade.php` exposaient « Modifier »/« Supprimer » sans `@can(...)`,
+ *     pendants exacts de `roles/show.blade.php`/`roles-table.blade.php` déjà corrigés. Ajout de
+ *     `@can('update_users')`/`@can('delete_users')`. Vérifié visuellement (Playwright,
+ *     `sim-admin@memora.ca`) : cas positif préservé (admin voit toujours « Modifier », a la
+ *     permission `update_users`), pas de régression.
+ *
+ *     XSS défense en profondeur : `app/Console/Commands/ImportWordPress.php` purifiait `content`
+ *     (v1.117.16) mais pas `excerpt`, provenant du même champ `encoded` de l'export WordPress
+ *     externe. Purifié avec le même profil `article`.
+ *
+ *     Cohérence garde modules désactivables : `Modules/Search/app/Services/SearchService.php`
+ *     n'appliquait `Module::isEnabled()` qu'au cas SaaS (v1.117.16) - Blog/Pages/Category
+ *     n'avaient que `class_exists()`, même classe de bug latente si ces modules étaient un jour
+ *     désactivés avant migration. Garde uniformisée sur les 3 lignes restantes.
+ *
+ *     56/56 tests Backoffice+Search+Blog verts. Le finding « Co-Authored-By » de v1.117.16 reste
+ *     non résolu (nécessite toujours une confirmation explicite utilisateur pour la réécriture
+ *     d'historique git).
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 16;
+$lvPatch = 17;
 
 return [
     'major' => $lvMajor,

@@ -188,10 +188,13 @@
                                        class="dropdown-item d-flex align-items-center gap-2">
                                         <i data-lucide="eye" class="icon-sm text-info"></i> {{ __('Voir') }}
                                     </a>
+                                    @can('update_users')
                                     <a href="{{ route('admin.users.edit', $user) }}"
                                        class="dropdown-item d-flex align-items-center gap-2">
                                         <i data-lucide="pencil" class="icon-sm text-success"></i> {{ __('Modifier') }}
                                     </a>
+                                    @endcan
+                                    @can('delete_users')
                                     @if($user->id !== auth()->id())
                                         <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
                                               data-confirm="{{ __('Confirmer la suppression ?') }}">
@@ -202,6 +205,7 @@
                                             </button>
                                         </form>
                                     @endif
+                                    @endcan
                                     @if(auth()->user()->hasRole('super_admin') && !$user->hasRole('super_admin') && $user->id !== auth()->id())
                                         <form action="{{ route('admin.users.impersonate', $user) }}" method="POST"
                                               data-confirm="{{ __('Impersoner') }} {{ $user->name }} ?">

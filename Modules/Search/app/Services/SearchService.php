@@ -51,14 +51,14 @@ class SearchService
             $results['users'] = User::search($query)->take($limit)->get();
         }
 
-        if (($type === 'all' || $type === 'articles') && class_exists(\Modules\Blog\Models\Article::class)) {
+        if (($type === 'all' || $type === 'articles') && class_exists(\Modules\Blog\Models\Article::class) && \Nwidart\Modules\Facades\Module::find('Blog')?->isEnabled()) {
             $results['articles'] = \Modules\Blog\Models\Article::search($query)
                 ->query(fn ($q) => $q->where('status', 'published'))
                 ->take($limit)
                 ->get();
         }
 
-        if (($type === 'all' || $type === 'pages') && class_exists(\Modules\Pages\Models\StaticPage::class)) {
+        if (($type === 'all' || $type === 'pages') && class_exists(\Modules\Pages\Models\StaticPage::class) && \Nwidart\Modules\Facades\Module::find('Pages')?->isEnabled()) {
             $results['pages'] = \Modules\Pages\Models\StaticPage::search($query)->take($limit)->get();
         }
 
@@ -69,7 +69,7 @@ class SearchService
                 ->get();
         }
 
-        if (($type === 'all' || $type === 'categories') && class_exists(\Modules\Blog\Models\Category::class)) {
+        if (($type === 'all' || $type === 'categories') && class_exists(\Modules\Blog\Models\Category::class) && \Nwidart\Modules\Facades\Module::find('Blog')?->isEnabled()) {
             $results['categories'] = \Modules\Blog\Models\Category::search($query)->take($limit)->get();
         }
 

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.17] - 2026-07-22
+
+### Fixed
+- RBAC : 2 vues supplémentaires (`users/show.blade.php`, `users-table.blade.php`) gardées par `@can(...)`, mêmes pendants que le fix rôles.
+- `ImportWordPress.php` : `excerpt` purifié en plus de `content`.
+- `SearchService.php` : garde `Module::isEnabled()` uniformisée sur Blog/Pages/Category (cohérence avec le fix SaaS).
+
 ## [1.117.16] - 2026-07-22
 
 ### Fixed
