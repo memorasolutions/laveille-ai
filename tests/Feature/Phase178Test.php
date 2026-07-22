@@ -40,6 +40,10 @@ test('admin can export categories CSV', function () {
 });
 
 test('admin can export plans CSV', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     Plan::factory()->count(2)->create();
     $response = $this->actingAs($this->admin)->get(route('admin.export.plans'));
     $response->assertStatus(200);
@@ -94,6 +98,10 @@ test('empty articles export returns valid CSV', function () {
 });
 
 test('empty plans export returns valid CSV', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $response = $this->actingAs($this->admin)->get(route('admin.export.plans'));
     $response->assertStatus(200);
     $response->assertDownload('plans_export.csv');

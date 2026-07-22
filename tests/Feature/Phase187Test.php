@@ -23,6 +23,10 @@ beforeEach(function () {
 });
 
 test('plans create form has form-select for currency', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $this->actingAs($this->admin)
         ->get(route('admin.plans.create'))
         ->assertOk()
@@ -31,6 +35,10 @@ test('plans create form has form-select for currency', function () {
 });
 
 test('plans create form shows currency options', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $this->actingAs($this->admin)
         ->get(route('admin.plans.create'))
         ->assertOk()
@@ -42,6 +50,10 @@ test('plans create form shows currency options', function () {
 });
 
 test('plans edit form has form-select for currency', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $plan = Plan::factory()->create(['currency' => 'CAD']);
 
     $this->actingAs($this->admin)
@@ -52,6 +64,10 @@ test('plans edit form has form-select for currency', function () {
 });
 
 test('plans edit form preserves selected currency', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $plan = Plan::factory()->create(['currency' => 'EUR']);
 
     $this->actingAs($this->admin)
@@ -61,6 +77,10 @@ test('plans edit form preserves selected currency', function () {
 });
 
 test('plans create does not have text input for currency', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $this->actingAs($this->admin)
         ->get(route('admin.plans.create'))
         ->assertOk()

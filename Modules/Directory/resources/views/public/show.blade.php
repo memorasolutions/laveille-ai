@@ -384,6 +384,14 @@
         @endif
     </div>
 
+    {{-- AEO/GEO (audit 2026-07-22) : answer-box "réponse d'abord", TOUJOURS visible (contrairement au
+         panneau .rt-panel#rt-panel-info caché par défaut derrière un onglet x-show/x-cloak, peu favorable
+         aux moteurs de réponse IA). Composant réutilisé tel quel (DRY), déjà utilisé sur blog/show.blade.php. --}}
+    <x-core::answer-box
+        :summary="$tool->short_description ?? null"
+        :updated="$tool->updated_at ? $tool->updated_at->timezone('America/Toronto')->format('Y-m-d') : null"
+    />
+
     {{-- Screenshot ou gradient fallback --}}
     @if($tool->screenshot)
         <div style="margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; border: 1px solid #E5E7EB;">

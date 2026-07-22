@@ -36,11 +36,19 @@ it('has static page model as searchable', function () {
 // --- shouldBeSearchable ---
 
 it('marks active plan as searchable', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $plan = Plan::factory()->create(['is_active' => true]);
     expect($plan->shouldBeSearchable())->toBeTrue();
 });
 
 it('excludes inactive plans from search', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $plan = Plan::factory()->create(['is_active' => false]);
     expect($plan->shouldBeSearchable())->toBeFalse();
 });
@@ -58,6 +66,10 @@ it('excludes draft pages from search', function () {
 // --- toSearchableArray ---
 
 it('plan returns correct searchable array', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $plan = Plan::factory()->create(['name' => 'Premium', 'description' => 'Best plan']);
     $array = $plan->toSearchableArray();
     expect($array)->toHaveKeys(['name', 'description']);
@@ -114,6 +126,10 @@ it('search api validates minimum query length', function () {
 });
 
 it('search api returns results for plans', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $user = \App\Models\User::factory()->create();
     Plan::factory()->create(['name' => 'UniqueTestPlan', 'is_active' => true]);
 
@@ -123,6 +139,10 @@ it('search api returns results for plans', function () {
 });
 
 it('search api filters by model', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $user = \App\Models\User::factory()->create();
     Plan::factory()->create(['name' => 'FilterTestPlan', 'is_active' => true]);
 

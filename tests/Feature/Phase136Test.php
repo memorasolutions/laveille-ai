@@ -45,6 +45,10 @@ test('XSS is escaped in user name display', function () {
 });
 
 test('SQL injection in search parameter is safe', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $this->actingAs($this->admin)
         ->get(route('admin.search', ['q' => "'; DROP TABLE users;--"]))
         ->assertOk();

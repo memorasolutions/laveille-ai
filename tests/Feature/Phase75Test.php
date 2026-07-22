@@ -99,6 +99,10 @@ test('inline non-admin 403', function () {
 
 // 7. 'inline update plan name'
 test('inline update plan name', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $plan = Plan::factory()->create();
     $this->patch(route('admin.inline.update', ['entity' => 'plans', 'id' => $plan->id]), [
         'field' => 'name',
@@ -112,6 +116,10 @@ test('inline update plan name', function () {
 
 // 8. 'inline update plan price'
 test('inline update plan price', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $plan = Plan::factory()->create();
     $this->patch(route('admin.inline.update', ['entity' => 'plans', 'id' => $plan->id]), [
         'field' => 'price',

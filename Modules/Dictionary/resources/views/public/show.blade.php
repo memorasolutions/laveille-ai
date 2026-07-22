@@ -331,16 +331,11 @@
                         </p>
                     @endif
 
-                    {{-- One-sentence answer (AEO) : phrase-réponse ≤40 mots, citée par AI Overviews et LLM --}}
-                    @if(! empty($term->one_sentence_answer))
-                        <div class="gl-section" style="margin-bottom: 22px;">
-                            <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%); border-left: 4px solid var(--c-primary); padding: 18px 24px; border-radius: 6px;">
-                                <p style="font-size: 1.12rem; font-weight: 600; color: var(--c-dark); margin: 0; line-height: 1.55;">
-                                    {!! e($term->one_sentence_answer) !!}
-                                </p>
-                            </div>
-                        </div>
-                    @endif
+                    {{-- One-sentence answer (AEO) : phrase-réponse ≤40 mots, citée par AI Overviews et LLM.
+                         Audit 2026-07-22 : remplacé le bloc maison par le composant réutilisable (DRY,
+                         déjà utilisé sur blog/show.blade.php) - ajoute le balisage sémantique manquant
+                         (itemprop="abstract", titre h2, aria-label) sans changer le champ source de donnée. --}}
+                    <x-core::answer-box :summary="$term->one_sentence_answer ?? null" />
 
                     {{-- Bande dessinée pédagogique (standard « visionneur de BD ») — apparaît si public/bd/{slug}/manifest.json existe --}}
                     @php

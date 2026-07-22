@@ -23,11 +23,19 @@ it('sitemap route returns xml content', function () {
 
 // Checkout auth protection
 it('checkout requires authentication', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $response = $this->post('/checkout');
     $response->assertRedirect('/login');
 });
 
 it('checkout validates plan_id', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)->post('/checkout', ['plan_id' => 99999]);
@@ -35,16 +43,28 @@ it('checkout validates plan_id', function () {
 });
 
 it('billing portal requires authentication', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $response = $this->get('/billing-portal');
     $response->assertRedirect('/login');
 });
 
 it('checkout success page requires authentication', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $response = $this->get('/checkout/success');
     $response->assertRedirect('/login');
 });
 
 it('checkout cancel page requires authentication', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $response = $this->get('/checkout/cancel');
     $response->assertRedirect('/login');
 });
@@ -70,6 +90,10 @@ it('user model uses billable trait', function () {
 
 // Checkout with plan without stripe_price_id
 it('checkout redirects back when plan has no stripe_price_id', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $user = User::factory()->create();
     $plan = Plan::factory()->create([
         'name' => 'Test',

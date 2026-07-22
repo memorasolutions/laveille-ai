@@ -30,6 +30,10 @@ test('setting save clears response cache', function () {
 });
 
 test('plan save clears response cache', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     ResponseCache::spy();
     Plan::factory()->create();
     ResponseCache::shouldHaveReceived('clear')->atLeast()->once();

@@ -65,6 +65,10 @@ test('categories bulk delete works', function () {
 });
 
 test('plans bulk activate works', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $plans = Plan::factory()->count(3)->create(['is_active' => false]);
 
     Livewire::test(PlansTable::class)
@@ -76,6 +80,10 @@ test('plans bulk activate works', function () {
 });
 
 test('plans bulk deactivate works', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $plans = Plan::factory()->count(3)->create(['is_active' => true]);
 
     Livewire::test(PlansTable::class)
@@ -87,6 +95,10 @@ test('plans bulk deactivate works', function () {
 });
 
 test('plans bulk delete works', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $plans = Plan::factory()->count(3)->create();
 
     Livewire::test(PlansTable::class)
@@ -151,6 +163,10 @@ test('categories selectAll populates selected', function () {
 });
 
 test('plans selectAll populates selected', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     Plan::factory()->count(3)->create();
 
     $component = Livewire::test(PlansTable::class)

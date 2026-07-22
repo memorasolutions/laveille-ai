@@ -2253,11 +2253,56 @@ declare(strict_types=1);
  *     `composer audit` et `npm audit` confirment 0 vulnérabilité après correction. Build (`npm run
  *     build`, Vite 7.3.1 → 7.3.6) et `php artisan --version` (Laravel 12.62.0) vérifiés
  *     fonctionnels après mise à jour.
+ *
+ *   1.117.14 · 2026-07-22 · feat(seo)+fix(perf)+fix(tests) 4e vague d'audit `/audit complet` -
+ *     dimensions SEO/AEO/GEO (72/100), performance (64/100), tests-couverture (62/100), 5
+ *     sous-agents parallèles délégués (règle « superviseur, pas exécuteur »).
+ *
+ *     AEO/GEO (priorité #1 déjà validée par 4 sources, 88/100) - `<x-core::answer-box>` (composant
+ *     réutilisable existant, déjà sur blog/show.blade.php) ajouté à `Modules/Directory/resources/
+ *     views/public/show.blade.php` (fiches outils) et `Modules/Dictionary/resources/views/public/
+ *     show.blade.php` (fiches glossaire, remplace un bloc `one_sentence_answer` maison sans
+ *     balisage sémantique par le composant DRY - ajoute `itemprop="abstract"`/titre h2/ARIA).
+ *     AUCUNE migration : les champs `short_description` (Tool) et `one_sentence_answer` (Term)
+ *     existaient déjà. Positionné dans la zone TOUJOURS visible (avant le panneau `.rt-panel`
+ *     caché par défaut derrière un onglet `x-show`/`x-cloak` sur Directory - le sous-agent SEO a
+ *     identifié ce panneau comme peu favorable aux moteurs de réponse IA). Effet démultiplié :
+ *     ~centaines de fiches outils + 456 termes de glossaire en un seul changement de gabarit
+ *     (DRY). Vérifié visuellement (Playwright local, terme `data-privacy-framework`) : rendu
+ *     correct. 39/39 tests Directory+Dictionary + 65/65 FrontTheme verts.
+ *
+ *     PERFORMANCE - `public/auth/images/bg.png` (2,4 Mo, fond CSS non optimisé de la page de
+ *     connexion - porte d'entrée Académie) reconverti en WebP (`bg.webp`, 63 Ko, réduction 97 %,
+ *     PSNR 43-45 dB, qualité visuellement identique). PNG original retiré du dépôt (aucune autre
+ *     référence trouvée). 31/31 tests Auth verts.
+ *
+ *     TESTS - cause racine trouvée pour une part significative des 224 échecs "pré-existants" de
+ *     la nuit précédente : `tests/Pest.php` skip proprement les tests des modules désactivés
+ *     (SaaS/Tenancy) SEULEMENT dans `Modules/<X>/tests/`, jamais les 24 fichiers `tests/Feature/
+ *     *.php` à la racine (reliquats du gabarit `memora/laravel-saas-boilerplate`) qui référencent
+ *     `Plan`/`BillingService`/`Tenant`/`TenantService`. Sous-agent dédié a trié les 24 fichiers un
+ *     par un (lecture complète, pas grep seul) : 6 skip de fichier entier (nouveau bloc
+ *     `$disabledRootTestFiles` dans `tests/Pest.php`, même pattern que l'existant), 12 skip ciblé
+ *     test-par-test (fichiers mixtes avec du contenu non lié à SaaS/Tenancy à préserver), 6 déjà
+ *     protégés/sans échec réel. Résultat mesuré : 112 → 2 échecs sur les 24 fichiers (110
+ *     résolus, transformés en SKIPPED propres) ; les 2 restants sont des bugs RÉELS et SANS LIEN
+ *     laissés délibérément visibles (bug `CloudflareCache` sur `blog.show`, assertion cassée
+ *     `SearchService::searchFront()`) plutôt que masqués par un faux skip. Suite complète
+ *     `tests/Feature/` re-vérifiée après coup : aucune régression sur les 24 fichiers touchés.
+ *
+ *     NON CORRIGÉ CE PATCH, SIGNALÉ POUR SUIVI : token GSC expiré (reconnexion Google requise,
+ *     hors de portée d'un agent) ; CSS de thème hérité (owl-carousel/slick/swiper/fancybox/
+ *     odometer, ~470 Ko) chargé globalement mais 0 usage détecté sur les 4 pages testées -
+ *     nécessite une vérification plus large avant retrait (changement de layout global, risque
+ *     site-wide) ; double pile JS jQuery+Bootstrap (375 Ko) coexistant avec Alpine/Livewire ;
+ *     police d'icônes `tabler-icons.woff2` (761 Ko) chargée en entier sur `/login` pour quelques
+ *     icônes ; registre des incidents de confidentialité absent (Loi 25, nouvelle fonctionnalité
+ *     à concevoir) ; 2 modules critiques sans aucun test (Shop en priorité - paiements, Community).
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 13;
+$lvPatch = 14;
 
 return [
     'major' => $lvMajor,

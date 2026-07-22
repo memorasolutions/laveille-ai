@@ -49,7 +49,7 @@
 
         {{-- Right: Hero image column --}}
         <aside class="relative flex items-end px-4 pb-10 pt-60 sm:pb-16 md:justify-center lg:pb-24 bg-cover bg-center lg:h-screen sm:px-6 lg:px-8" aria-label="{{ __('Présentation') }}"
-               style="background-color:#0c1427;background-image: url('{{ asset('auth/images/bg.png') }}')">
+               style="background-color:#0c1427;background-image: url('{{ asset('auth/images/bg.webp') }}')">
             <div class="absolute inset-0" style="background:linear-gradient(to top,rgba(0,0,0,0.85),rgba(0,0,0,0.3))"></div>
             <div class="relative">
                 <div class="w-full max-w-xl xl:w-full xl:mx-auto xl:pe-24 xl:max-w-xl">

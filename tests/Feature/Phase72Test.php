@@ -28,14 +28,26 @@ beforeEach(function () {
 // === PLANS CRUD ===
 
 test('plans - admin voit la liste', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $this->get(route('admin.plans.index'))->assertOk();
 });
 
 test('plans - admin voit le formulaire de création', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $this->get(route('admin.plans.create'))->assertOk();
 });
 
 test('plans - admin peut créer un plan', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $this->post(route('admin.plans.store'), [
         'name' => 'Plan Pro',
         'slug' => 'plan-pro',
@@ -51,12 +63,20 @@ test('plans - admin peut créer un plan', function () {
 });
 
 test('plans - admin voit le formulaire d\'édition', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $plan = Plan::factory()->create();
 
     $this->get(route('admin.plans.edit', $plan))->assertOk();
 });
 
 test('plans - admin peut modifier un plan', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $plan = Plan::factory()->create(['name' => 'Ancien Nom', 'slug' => 'ancien-nom']);
 
     $this->put(route('admin.plans.update', $plan), [
@@ -72,6 +92,10 @@ test('plans - admin peut modifier un plan', function () {
 });
 
 test('plans - admin peut supprimer un plan', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $plan = Plan::factory()->create();
 
     $this->delete(route('admin.plans.destroy', $plan))
@@ -81,6 +105,10 @@ test('plans - admin peut supprimer un plan', function () {
 });
 
 test('plans - user non-admin est refusé (403)', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $user = User::factory()->create(['is_active' => true]);
 
     $this->actingAs($user)
@@ -91,12 +119,20 @@ test('plans - user non-admin est refusé (403)', function () {
 // === PLANS TABLE LIVEWIRE ===
 
 test('plans table - monte sans erreur', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     Plan::factory()->count(3)->create();
 
     Livewire::test(PlansTable::class)->assertOk();
 });
 
 test('plans table - filtre par recherche (search)', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     Plan::factory()->create(['name' => 'Plan Premium', 'slug' => 'plan-premium']);
     Plan::factory()->create(['name' => 'Plan Basique', 'slug' => 'plan-basique']);
 
@@ -107,6 +143,10 @@ test('plans table - filtre par recherche (search)', function () {
 });
 
 test('plans table - filtre par interval (filterInterval)', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     Plan::factory()->monthly()->create(['name' => 'Plan Mensuel', 'slug' => 'plan-mensuel']);
     Plan::factory()->yearly()->create(['name' => 'Plan Annuel', 'slug' => 'plan-annuel']);
 
@@ -118,6 +158,10 @@ test('plans table - filtre par interval (filterInterval)', function () {
 });
 
 test('plans table - resetFilters remet tout à zéro', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     Livewire::test(PlansTable::class)
         ->set('search', 'test')
         ->set('filterInterval', 'yearly')
@@ -129,6 +173,10 @@ test('plans table - resetFilters remet tout à zéro', function () {
 });
 
 test('plans table - sort() change sortBy et inverse sortDirection', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     Livewire::test(PlansTable::class)
         ->call('sort', 'name')
         ->assertSet('sortBy', 'name')

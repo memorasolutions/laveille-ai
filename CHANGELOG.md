@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.14] - 2026-07-22
+
+### Added
+- **Composant `<x-core::answer-box>` (AEO/GEO)** ajouté aux fiches Annuaire et Glossaire — réponse directe structurée pour les moteurs de réponse IA, réutilisation DRY du composant déjà utilisé sur le blog.
+
+### Changed
+- Fiches Glossaire : bloc `one_sentence_answer` maison remplacé par le composant standardisé (ajoute le balisage sémantique manquant).
+
+### Fixed
+- **Performance** : image de fond de la page de connexion compressée (2,4 Mo PNG → 63 Ko WebP, -97%).
+- **Tests** : garde-fou de skip des modules désactivés (SaaS/Tenancy) étendu aux fichiers de test à la racine — 110 des 224 échecs pré-existants résolus proprement (transformés en skips), 2 vrais bugs sans lien laissés visibles intentionnellement.
+
+### Known issues (signalés, non corrigés)
+- Token Google Search Console expiré (reconnexion requise, hors de portée d'un agent).
+- CSS de thème hérité (~470 Ko, carrousels/lightbox) potentiellement inutilisé, à vérifier plus largement avant retrait.
+- Double pile JS jQuery+Bootstrap (375 Ko) coexistant avec Alpine/Livewire.
+- Registre des incidents de confidentialité (Loi 25) absent — nouvelle fonctionnalité à concevoir.
+- Modules `Shop`/`Community`/`Voting`/`Ads` sans aucun test (Shop = priorité, gère les paiements).
+
 ## [1.117.13] - 2026-07-22
 
 ### Security

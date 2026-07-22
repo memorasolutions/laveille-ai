@@ -26,11 +26,19 @@ beforeEach(function () {
 });
 
 test('admin can view import plans form', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $response = $this->get(route('admin.import.plans'));
     $response->assertOk();
 });
 
 test('admin can import plans CSV', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $csv = "name,price,interval,features\nPro Plan,29.99,monthly,Feature A\nBasic Plan,9.99,yearly,Feature B";
     $file = UploadedFile::fake()->createWithContent('plans.csv', $csv);
     $response = $this->post(route('admin.import.plans.store'), ['file' => $file]);
@@ -42,6 +50,10 @@ test('admin can import plans CSV', function () {
 });
 
 test('plans import skips duplicate slugs', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     Plan::factory()->create(['name' => 'Existing Plan', 'slug' => 'existing-plan']);
     $csv = "name,price,interval,features\nExisting Plan,19.99,monthly,Feature X\nNew Plan,15.99,monthly,Feature Y";
     $file = UploadedFile::fake()->createWithContent('plans.csv', $csv);
@@ -51,6 +63,10 @@ test('plans import skips duplicate slugs', function () {
 });
 
 test('plans import defaults interval to monthly for invalid value', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $csv = "name,price,interval,features\nTest Plan,49.99,invalid,Feature Z";
     $file = UploadedFile::fake()->createWithContent('plans.csv', $csv);
     $this->post(route('admin.import.plans.store'), ['file' => $file]);

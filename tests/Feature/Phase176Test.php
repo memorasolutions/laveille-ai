@@ -35,6 +35,10 @@ test('search page requires authentication', function () {
 });
 
 test('search returns users results', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     User::factory()->create(['name' => 'UniqueSearchName']);
 
     $this->actingAs($this->admin)
@@ -53,6 +57,10 @@ test('search returns articles results', function () {
 });
 
 test('search returns settings results', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     Setting::create(['key' => 'unique_search_key', 'value' => 'test_value']);
 
     $this->actingAs($this->admin)
@@ -62,6 +70,10 @@ test('search returns settings results', function () {
 });
 
 test('search returns plans results', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     Plan::factory()->create(['name' => 'UniqueSearchPlan']);
 
     $this->actingAs($this->admin)
@@ -71,6 +83,10 @@ test('search returns plans results', function () {
 });
 
 test('search filters by type users only', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     User::factory()->create(['name' => 'FilterTestUser']);
     Plan::factory()->create(['name' => 'FilterTestPlan']);
 
@@ -83,6 +99,10 @@ test('search filters by type users only', function () {
 });
 
 test('search shows total count badge', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     $this->actingAs($this->admin)
         ->get(route('admin.search', ['q' => 'admin']))
         ->assertOk()
@@ -112,6 +132,10 @@ test('empty search shows search form only', function () {
 });
 
 test('search returns pages results', function () {
+    if (! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+        $this->markTestSkipped('Module SaaS désactivé dans ce déploiement (dépend indirectement de Modules\\SaaS\\Models\\Plan).');
+    }
+
     StaticPage::factory()->create(['title' => ['fr' => 'Page Unique Recherche']]);
 
     $this->actingAs($this->admin)
