@@ -100,8 +100,8 @@
                         <td class="px-6 py-4">
                             @include('core::components.action-menu', ['actions' => array_filter([
                                 ['label' => 'Voir', 'icon' => 'eye', 'url' => route('admin.users.show', $user)],
-                                ['label' => 'Modifier', 'icon' => 'pencil', 'url' => route('admin.users.edit', $user)],
-                                $user->id !== auth()->id() ? ['label' => 'Supprimer', 'icon' => 'trash-2', 'url' => route('admin.users.destroy', $user), 'method' => 'DELETE', 'confirm' => 'Supprimer cet utilisateur ?', 'danger' => true] : null,
+                                auth()->user()->can('update_users') ? ['label' => 'Modifier', 'icon' => 'pencil', 'url' => route('admin.users.edit', $user)] : null,
+                                auth()->user()->can('delete_users') && $user->id !== auth()->id() ? ['label' => 'Supprimer', 'icon' => 'trash-2', 'url' => route('admin.users.destroy', $user), 'method' => 'DELETE', 'confirm' => 'Supprimer cet utilisateur ?', 'danger' => true] : null,
                             ])])
                         </td>
                     </tr>

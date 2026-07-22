@@ -2380,11 +2380,24 @@ declare(strict_types=1);
  *     56/56 tests Backoffice+Search+Blog verts. Le finding « Co-Authored-By » de v1.117.16 reste
  *     non résolu (nécessite toujours une confirmation explicite utilisateur pour la réécriture
  *     d'historique git).
+ *   1.117.18 · 2026-07-22 · fix(backoffice) Dernier pendant RBAC trouvé par balayage grep
+ *     exhaustif (pattern /100 - boucle jusqu'à tarissement) : `Modules/Backoffice/resources/
+ *     views/livewire/users-table.blade.php` (fichier LEGACY sans préfixe `themes/backend/`,
+ *     confirmé code mort/inatteignable - la résolution de thème donne toujours priorité à la
+ *     version `themes/backend/` déjà corrigée en v1.117.17 pour ce même nom de vue namespacé).
+ *     Corrigé quand même par cohérence DRY/défense en profondeur : liens « Modifier »/« Supprimer »
+ *     gardés par `@can('update_users')`/`@can('delete_users')`. Vérification de convergence :
+ *     grep exhaustif sur `route('admin.users.edit'|'admin.roles.edit'|'admin.users.destroy'|
+ *     'admin.roles.destroy'` dans tout `Modules/Backoffice/resources/views/` ne retourne plus
+ *     aucune occurrence non gardée ; recherche d'un éventuel pendant legacy pour roles-table
+ *     (équivalent non-thémé) confirmée ABSENTE (n'existe pas, contrairement à users-table qui en
+ *     avait un). 42/42 tests Backoffice verts, `php -l` propre. Ce fix clôt le fil RBAC-boutons
+ *     ouvert par la passe adversariale /100 (rounds 1 et 2, v1.117.16/17).
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 17;
+$lvPatch = 18;
 
 return [
     'major' => $lvMajor,

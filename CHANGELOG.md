@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.18] - 2026-07-22
+
+### Fixed
+- RBAC : dernier pendant trouvé par balayage grep exhaustif, `livewire/users-table.blade.php` (fichier legacy, code mort confirmé) gardé par `@can(...)` par cohérence DRY. Clôt le fil RBAC-boutons ouvert par la passe adversariale `/100`.
+
 ## [1.117.17] - 2026-07-22
 
 ### Fixed
