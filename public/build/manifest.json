@@ -1,13 +1,13 @@
 {
-  "_editor-DWpTwHKk.js": {
-    "file": "assets/editor-DWpTwHKk.js",
+  "_editor-7gWdh7uk.js": {
+    "file": "assets/editor-7gWdh7uk.js",
     "name": "editor",
     "imports": [
-      "_vendor-BxpX-Pxt.js"
+      "_vendor-BPma8vfX.js"
     ]
   },
-  "_vendor-BxpX-Pxt.js": {
-    "file": "assets/vendor-BxpX-Pxt.js",
+  "_vendor-BPma8vfX.js": {
+    "file": "assets/vendor-BPma8vfX.js",
     "name": "vendor",
     "isDynamicEntry": true
   },
@@ -381,13 +381,13 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-C4mWjgAc.js",
+    "file": "assets/app-BtFqsZ-o.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
-      "_vendor-BxpX-Pxt.js",
-      "_editor-DWpTwHKk.js",
+      "_vendor-BPma8vfX.js",
+      "_editor-7gWdh7uk.js",
       "resources/js/pwa.js"
     ]
   },
@@ -404,22 +404,22 @@
     "isEntry": true
   },
   "resources/js/pwa.js": {
-    "file": "assets/pwa-BLd3Z5ku.js",
+    "file": "assets/pwa-lg-d6ETn.js",
     "name": "pwa",
     "src": "resources/js/pwa.js",
     "isEntry": true,
     "dynamicImports": [
-      "_vendor-BxpX-Pxt.js"
+      "_vendor-BPma8vfX.js"
     ]
   },
   "resources/js/tiptap-frontend.js": {
-    "file": "assets/tiptap-frontend-DduDk9Ig.js",
+    "file": "assets/tiptap-frontend-DM2uY1c2.js",
     "name": "tiptap-frontend",
     "src": "resources/js/tiptap-frontend.js",
     "isEntry": true,
     "imports": [
-      "_editor-DWpTwHKk.js",
-      "_vendor-BxpX-Pxt.js"
+      "_editor-7gWdh7uk.js",
+      "_vendor-BPma8vfX.js"
     ]
   },
   "resources/sass/nobleui/app.scss": {

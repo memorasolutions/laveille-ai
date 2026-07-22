@@ -19,6 +19,7 @@
         "dedoc/scramble": "^0.13.13",
         "fivefilters/readability.php": "^3.3",
         "google/apiclient": "^2.19",
+        "guzzlehttp/guzzle": "^7.15.1",
         "intervention/image": "^3.0",
         "laravel-notification-channels/webpush": "^10.4",
         "laravel/cashier": "^16.2",
@@ -59,6 +60,7 @@
         "spatie/laravel-webhook-client": "^3.4",
         "spatie/laravel-webhook-server": "^3.9",
         "stancl/tenancy": "^3.9",
+        "web-auth/webauthn-lib": "^5.3.5",
         "willvincent/feeds": "^2.7"
     },
     "require-dev": {

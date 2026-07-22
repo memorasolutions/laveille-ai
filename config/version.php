@@ -2240,11 +2240,24 @@ declare(strict_types=1);
  *     CommunityController.php` (screenshots gatés `view_admin_panel` au lieu d'une capacité
  *     dédiée) ; mot de passe démo sans garde prod sur `Modules/Academy/database/seeders/
  *     AcademyDemoSeeder.php`.
+ *
+ *   1.117.13 · 2026-07-22 · fix(deps) Mise à jour de dépendances vulnérables - trouvé par
+ *     `composer audit`/`npm audit` dans le cadre de l'audit `/audit complet`. Composer : 4 avis
+ *     `guzzlehttp/guzzle` (moyen - fuite de fragment d'URI dans Referer, portée de cookie non
+ *     préservée, DoS cookies illimités, en-tête Proxy-Authorization transmis à l'origine ;
+ *     7.13.1 → `^7.15.1`) + 1 avis `web-auth/webauthn-lib` (bas - génération de fausses
+ *     identifiants prédictible avec secret vide ; 5.2.4 → `^5.3.5`). npm : 27 vulnérabilités
+ *     (2 critiques, 15 hautes, 8 moyennes, 2 basses) sur les devDependencies (Vite, axios,
+ *     concurrently/shell-quote RCE potentiel, ws, form-data...) - toutes corrigées par
+ *     `npm audit fix` (résolutions non-breaking, 9 paquets ajoutés/13 retirés/87 changés).
+ *     `composer audit` et `npm audit` confirment 0 vulnérabilité après correction. Build (`npm run
+ *     build`, Vite 7.3.1 → 7.3.6) et `php artisan --version` (Laravel 12.62.0) vérifiés
+ *     fonctionnels après mise à jour.
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 12;
+$lvPatch = 13;
 
 return [
     'major' => $lvMajor,

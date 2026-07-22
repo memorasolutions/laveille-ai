@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.13] - 2026-07-22
+
+### Security
+- **Mise à jour de dépendances vulnérables** trouvées par `composer audit`/`npm audit`. Composer : `guzzlehttp/guzzle` 7.13.1 → `^7.15.1` (4 avis moyens), `web-auth/webauthn-lib` 5.2.4 → `^5.3.5` (1 avis bas). npm : 27 vulnérabilités (2 critiques, 15 hautes) corrigées via `npm audit fix` (devDependencies uniquement : Vite, axios, concurrently, ws...). 0 vulnérabilité restante confirmée, build vérifié fonctionnel.
+
 ## [1.117.12] - 2026-07-22
 
 ### Security
