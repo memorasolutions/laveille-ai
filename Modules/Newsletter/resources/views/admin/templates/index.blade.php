@@ -13,16 +13,20 @@
         <div class="card">
             <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <h6 class="mb-0">{{ __('Templates marketing') }}</h6>
+                @can('create_campaigns')
                 <a href="{{ route('admin.newsletter.templates.create') }}" class="btn btn-sm btn-primary d-flex align-items-center gap-1">
                     <i data-lucide="plus"></i> {{ __('Nouveau template') }}
                 </a>
+                @endcan
             </div>
             <div class="card-body">
                 @if($templates->isEmpty())
                     <div class="text-center py-5">
                         <i data-lucide="mail" style="width:48px;height:48px" class="text-muted mb-3"></i>
                         <p class="text-muted">Aucun template marketing pour l'instant.</p>
+                        @can('create_campaigns')
                         <a href="{{ route('admin.newsletter.templates.create') }}" class="btn btn-sm btn-outline-primary">Créer un template</a>
+                        @endcan
                     </div>
                 @else
                     <div class="table-responsive">
@@ -56,12 +60,12 @@
                                         @endif
                                     </td>
                                     <td class="text-end">
-                                        @include('core::components.action-menu', ['actions' => [
+                                        @include('core::components.action-menu', ['actions' => array_filter([
                                             ['label' => __('Aperçu'), 'icon' => 'eye', 'url' => route('admin.newsletter.templates.preview', $template), 'target' => '_blank'],
-                                            ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.newsletter.templates.edit', $template)],
-                                            ['divider' => true],
-                                            ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.newsletter.templates.destroy', $template), 'method' => 'DELETE', 'confirm' => __('Supprimer ce template ?'), 'danger' => true],
-                                        ]])
+                                            auth()->user()?->can('update_campaigns') ? ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.newsletter.templates.edit', $template)] : null,
+                                            (auth()->user()?->can('update_campaigns') || auth()->user()?->can('delete_campaigns')) ? ['divider' => true] : null,
+                                            auth()->user()?->can('delete_campaigns') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.newsletter.templates.destroy', $template), 'method' => 'DELETE', 'confirm' => __('Supprimer ce template ?'), 'danger' => true] : null,
+                                        ])])
                                     </td>
                                 </tr>
                                 @endforeach

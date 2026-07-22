@@ -23,20 +23,24 @@
                         <span class="badge bg-primary">{{ $tag->articles_count }}</span>
                     </td>
                     <td class="text-end">
-                        <a href="{{ route('admin.blog.tags.edit', $tag) }}"
-                           class="btn btn-sm btn-outline-primary me-1"
-                           title="{{ __('Modifier') }}">
-                            <i data-lucide="pencil"></i>
-                        </a>
-                        <button
-                            wire:click="deleteTag({{ $tag->id }})"
-                            wire:confirm="{{ __('Supprimer ce tag ?') }}"
-                            type="button"
-                            class="btn btn-sm btn-outline-danger"
-                            title="{{ __('Supprimer') }}"
-                        >
-                            <i data-lucide="trash-2"></i>
-                        </button>
+                        @can('update_articles')
+                            <a href="{{ route('admin.blog.tags.edit', $tag) }}"
+                               class="btn btn-sm btn-outline-primary me-1"
+                               title="{{ __('Modifier') }}">
+                                <i data-lucide="pencil"></i>
+                            </a>
+                        @endcan
+                        @can('delete_articles')
+                            <button
+                                wire:click="deleteTag({{ $tag->id }})"
+                                wire:confirm="{{ __('Supprimer ce tag ?') }}"
+                                type="button"
+                                class="btn btn-sm btn-outline-danger"
+                                title="{{ __('Supprimer') }}"
+                            >
+                                <i data-lucide="trash-2"></i>
+                            </button>
+                        @endcan
                     </td>
                 </tr>
                 @empty

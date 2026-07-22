@@ -65,12 +65,18 @@
                             </span>
                         </td>
                         <td>
-                            <div class="form-check form-switch mb-0">
-                                <input class="form-check-input" type="checkbox" role="switch"
-                                       wire:click="toggleActive({{ $tag->id }})"
-                                       @checked($tag->is_active)
-                                       title="{{ $tag->is_active ? __('Désactiver') : __('Activer') }}">
-                            </div>
+                            @can('update_seo')
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" role="switch"
+                                           wire:click="toggleActive({{ $tag->id }})"
+                                           @checked($tag->is_active)
+                                           title="{{ $tag->is_active ? __('Désactiver') : __('Activer') }}">
+                                </div>
+                            @else
+                                <span class="badge {{ $tag->is_active ? 'bg-success' : 'bg-light text-muted border' }}">
+                                    {{ $tag->is_active ? __('Actif') : __('Inactif') }}
+                                </span>
+                            @endcan
                         </td>
                         <td class="text-end">
                             <div class="position-relative d-inline-block" x-data="{ open: false }" @click.outside="open = false">
@@ -82,18 +88,22 @@
                                 <div x-show="open" x-cloak
                                      class="position-absolute end-0 bg-white border rounded shadow py-1"
                                      style="top:100%;margin-top:4px;min-width:140px;z-index:50;">
-                                    <a href="{{ route('admin.seo.edit', $tag) }}"
-                                       class="d-flex align-items-center gap-2 px-3 py-2 small text-body text-decoration-none">
-                                        <i data-lucide="pencil" class="text-success" style="width:14px;height:14px;"></i> {{ __('Modifier') }}
-                                    </a>
-                                    <form action="{{ route('admin.seo.destroy', $tag) }}" method="POST"
-                                          data-confirm="{{ __('Supprimer ce tag SEO ?') }}">
-                                        @csrf @method('DELETE')
-                                        <button type="submit"
-                                                class="btn btn-link w-100 d-flex align-items-center gap-2 px-3 py-2 small text-danger text-decoration-none text-start">
-                                            <i data-lucide="trash-2" style="width:14px;height:14px;"></i> {{ __('Supprimer') }}
-                                        </button>
-                                    </form>
+                                    @can('update_seo')
+                                        <a href="{{ route('admin.seo.edit', $tag) }}"
+                                           class="d-flex align-items-center gap-2 px-3 py-2 small text-body text-decoration-none">
+                                            <i data-lucide="pencil" class="text-success" style="width:14px;height:14px;"></i> {{ __('Modifier') }}
+                                        </a>
+                                    @endcan
+                                    @can('delete_seo')
+                                        <form action="{{ route('admin.seo.destroy', $tag) }}" method="POST"
+                                              data-confirm="{{ __('Supprimer ce tag SEO ?') }}">
+                                            @csrf @method('DELETE')
+                                            <button type="submit"
+                                                    class="btn btn-link w-100 d-flex align-items-center gap-2 px-3 py-2 small text-danger text-decoration-none text-start">
+                                                <i data-lucide="trash-2" style="width:14px;height:14px;"></i> {{ __('Supprimer') }}
+                                            </button>
+                                        </form>
+                                    @endcan
                                 </div>
                             </div>
                         </td>

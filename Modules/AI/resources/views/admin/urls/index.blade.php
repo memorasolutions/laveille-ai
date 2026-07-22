@@ -21,9 +21,11 @@
             <x-backoffice::help-modal id="helpUrlsModal" :title="__('Sources URL')" icon="link" :buttonLabel="__('Aide')">
                 @include('ai::admin.urls._help')
             </x-backoffice::help-modal>
+            @can('manage_ai')
             <a href="{{ route('admin.ai.urls.create') }}" class="btn btn-primary">
                 <i data-lucide="plus"></i> {{ __('Ajouter une URL') }}
             </a>
+            @endcan
         </div>
     </div>
 
@@ -141,12 +143,14 @@
                                 @endif
                             </td>
                             <td class="align-middle text-end">
+                                @can('manage_ai')
                                 @include('core::components.action-menu', ['actions' => [
                                     ['label' => __('Lancer le scraping'), 'icon' => 'refresh-cw', 'url' => route('admin.ai.urls.scrape', $url), 'method' => 'POST', 'confirm' => __('Lancer le scraping de cette URL ?')],
                                     ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.ai.urls.edit', $url)],
                                     ['divider' => true],
                                     ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.ai.urls.destroy', $url), 'method' => 'DELETE', 'confirm' => __('Supprimer cette source URL et tous ses documents indexés ?'), 'danger' => true],
                                 ]])
+                                @endcan
                             </td>
                         </tr>
                         @endforeach
@@ -163,9 +167,11 @@
                 <i data-lucide="link" class="icon-xl text-muted mb-3"></i>
                 <h5 class="text-muted">{{ __('Aucune source URL configurée') }}</h5>
                 <p class="text-muted mb-4">{{ __('Ajoutez des URLs pour que le chatbot IA puisse indexer leur contenu.') }}</p>
+                @can('manage_ai')
                 <a href="{{ route('admin.ai.urls.create') }}" class="btn btn-primary">
                     <i data-lucide="plus"></i> {{ __('Ajouter une URL') }}
                 </a>
+                @endcan
             </div>
             @endif
         </div>

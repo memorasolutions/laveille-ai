@@ -40,16 +40,18 @@
                             @endif
                         </td>
                         <td class="align-middle text-center">
-                            <button
-                                wire:click="deleteNotification('{{ $notification->id }}')"
-                                wire:confirm="{{ __('Supprimer cette notification ?') }}"
-                                type="button"
-                                class="btn btn-light btn-sm d-inline-flex align-items-center justify-content-center text-danger"
-                                style="width:36px;height:36px;"
-                                title="{{ __('Supprimer') }}"
-                            >
-                                <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
-                            </button>
+                            @can('manage_notifications')
+                                <button
+                                    wire:click="deleteNotification('{{ $notification->id }}')"
+                                    wire:confirm="{{ __('Supprimer cette notification ?') }}"
+                                    type="button"
+                                    class="btn btn-light btn-sm d-inline-flex align-items-center justify-content-center text-danger"
+                                    style="width:36px;height:36px;"
+                                    title="{{ __('Supprimer') }}"
+                                >
+                                    <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+                                </button>
+                            @endcan
                         </td>
                     </tr>
                 @empty

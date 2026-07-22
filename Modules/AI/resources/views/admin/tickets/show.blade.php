@@ -95,6 +95,7 @@
         </div>
 
         {{-- Reply form --}}
+        @can('manage_ai')
         <div class="card">
             <div class="card-header"><strong>{{ __('Répondre') }}</strong></div>
             <div class="card-body">
@@ -137,10 +138,12 @@
                 </form>
             </div>
         </div>
+        @endcan
     </div>
 
     {{-- RIGHT: Status update, SLA, actions --}}
     <div class="col-lg-4">
+        @can('manage_ai')
         <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <strong>{{ __('Mettre à jour') }}</strong>
@@ -179,6 +182,7 @@
                 </form>
             </div>
         </div>
+        @endcan
 
         @if($ticket->slaPolicy)
         <div class="card mb-3">

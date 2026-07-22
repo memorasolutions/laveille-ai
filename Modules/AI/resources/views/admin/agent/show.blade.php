@@ -19,11 +19,19 @@
     </h4>
     <div class="d-flex gap-2">
         {{-- Regroupement dans le composant DRY action-menu (2026-07-19) : mêmes 2 actions
-             qu'avant (créer un ticket depuis la conversation, retour à la liste), mêmes routes. --}}
-        @include('core::components.action-menu', ['actions' => [
-            ['label' => __('Créer un ticket'), 'icon' => 'ticket', 'url' => route('admin.ai.tickets.from-conversation', $conversation), 'method' => 'POST'],
-            ['label' => __('Retour'), 'icon' => 'arrow-left', 'url' => route('admin.ai.agent.index')],
-        ]])
+             qu'avant (créer un ticket depuis la conversation, retour à la liste), mêmes routes.
+             "Créer un ticket" est une action d'écriture (manage_ai) alors que cette page n'est
+             gardée que par view_ai (bug d'affordance corrigé le 2026-07-22) : on ne l'ajoute au
+             menu que si l'utilisateur a réellement le droit de l'exécuter ; "Retour" reste visible
+             pour tous (simple navigation). --}}
+        @php
+            $conversationHeaderActions = [];
+            if (auth()->user()->can('manage_ai')) {
+                $conversationHeaderActions[] = ['label' => __('Créer un ticket'), 'icon' => 'ticket', 'url' => route('admin.ai.tickets.from-conversation', $conversation), 'method' => 'POST'];
+            }
+            $conversationHeaderActions[] = ['label' => __('Retour'), 'icon' => 'arrow-left', 'url' => route('admin.ai.agent.index')];
+        @endphp
+        @include('core::components.action-menu', ['actions' => $conversationHeaderActions])
     </div>
 </div>
 
@@ -70,6 +78,7 @@
 
             {{-- Reply form --}}
             @if($conversation->status->value === 'human_active' && (int)$conversation->agent_id === (int)auth()->id())
+            @can('manage_ai')
             <div class="card-footer">
                 <form action="{{ route('admin.ai.agent.reply', $conversation) }}" method="POST">
                     @csrf
@@ -91,6 +100,7 @@
                     ]])
                 </div>
             </div>
+            @endcan
             @endif
         </div>
     </div>
@@ -151,6 +161,7 @@
                 <p class="text-muted small mb-0">{{ __('Aucune note.') }}</p>
                 @endforelse
             </div>
+            @can('manage_ai')
             <div class="card-footer">
                 <form action="{{ route('admin.ai.agent.note', $conversation) }}" method="POST">
                     @csrf
@@ -162,6 +173,7 @@
                     </div>
                 </form>
             </div>
+            @endcan
         </div>
 
         {{-- Assignment history --}}

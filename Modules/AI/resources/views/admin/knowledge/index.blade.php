@@ -20,9 +20,11 @@
             <x-backoffice::help-modal id="helpKnowledgeModal" :title="__('Base de connaissances IA')" icon="brain" :buttonLabel="__('Aide')">
                 @include('ai::admin.knowledge._help')
             </x-backoffice::help-modal>
+            @can('manage_ai')
             <a href="{{ route('admin.ai.knowledge.create') }}" class="btn btn-primary">
                 <i data-lucide="plus"></i> {{ __('Ajouter un document') }}
             </a>
+            @endcan
             <a href="{{ route('admin.ai.knowledge.index') }}" class="btn btn-outline-secondary" title="{{ __('Synchroniser les sources (FAQ, Pages, Articles)') }}">
                 <i data-lucide="refresh-cw"></i> {{ __('Synchroniser') }}
             </a>
@@ -121,11 +123,13 @@
                                 @endif
                             </td>
                             <td class="align-middle text-end">
+                                @can('manage_ai')
                                 @include('core::components.action-menu', ['actions' => [
                                     ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.ai.knowledge.edit', $document)],
                                     ['divider' => true],
                                     ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.ai.knowledge.destroy', $document), 'method' => 'DELETE', 'confirm' => __('Supprimer ce document de la base de connaissances ?'), 'danger' => true],
                                 ]])
+                                @endcan
                             </td>
                         </tr>
                         @endforeach
@@ -142,9 +146,11 @@
                 <i data-lucide="brain" class="icon-xl text-muted mb-3"></i>
                 <h5 class="text-muted">{{ __('Aucun document dans la base de connaissances') }}</h5>
                 <p class="text-muted mb-4">{{ __('Ajoutez des documents pour alimenter le chatbot IA.') }}</p>
+                @can('manage_ai')
                 <a href="{{ route('admin.ai.knowledge.create') }}" class="btn btn-primary">
                     <i data-lucide="plus"></i> {{ __('Ajouter un document') }}
                 </a>
+                @endcan
             </div>
             @endif
         </div>

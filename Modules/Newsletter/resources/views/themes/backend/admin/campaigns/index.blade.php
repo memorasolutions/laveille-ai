@@ -17,11 +17,13 @@
                 <i data-lucide="send" class="icon-sm text-primary"></i>
                 {{ __('Campagnes newsletter') }}
             </h4>
+            @can('create_campaigns')
             <a href="{{ route('admin.newsletter.campaigns.create') }}"
                class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
                 <i data-lucide="plus" class="icon-sm"></i>
                 {{ __('Nouvelle campagne') }}
             </a>
+            @endcan
         </div>
     </div>
     <div class="p-4">

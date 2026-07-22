@@ -181,6 +181,7 @@
                                 <a href="{{ route('admin.ai.conversations.show', $conversation) }}" class="btn btn-outline-primary" title="{{ __('Voir') }}">
                                     <i data-lucide="eye" style="width:14px;height:14px;"></i>
                                 </a>
+                                @can('manage_ai')
                                 <form action="{{ route('admin.ai.conversations.destroy', $conversation) }}" method="POST" class="d-inline" data-confirm="{{ __('Fermer cette conversation ?') }}">
                                     @csrf
                                     @method('DELETE')
@@ -188,6 +189,7 @@
                                         <i data-lucide="x" style="width:14px;height:14px;"></i>
                                     </button>
                                 </form>
+                                @endcan
                             </div>
                         </td>
                     </tr>

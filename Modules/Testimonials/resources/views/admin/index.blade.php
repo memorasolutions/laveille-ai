@@ -24,12 +24,14 @@
             <x-backoffice::help-modal id="helpTestimonialsModal" :title="__('Avis et témoignages clients')" icon="quote" :buttonLabel="__('Aide')">
                 @include('testimonials::admin._help')
             </x-backoffice::help-modal>
+            @can('create_testimonials')
             <button type="button" class="btn btn-success btn-sm d-none" id="btnSaveOrder" onclick="saveOrder()">
                 <i data-lucide="save" class="me-1"></i> {{ __('Enregistrer l\'ordre') }}
             </button>
             <a href="{{ route('admin.testimonials.create') }}" class="btn btn-primary btn-sm">
                 <i data-lucide="plus" class="me-1"></i> {{ __('Nouveau témoignage') }}
             </a>
+            @endcan
         </div>
     </div>
     <div class="card-body p-0">
@@ -37,9 +39,11 @@
             <div class="text-center py-5">
                 <i data-lucide="message-square" class="icon-xxl text-muted mb-3 d-block mx-auto" style="width:48px;height:48px"></i>
                 <h6 class="text-muted">{{ __('Aucun témoignage pour le moment.') }}</h6>
+                @can('create_testimonials')
                 <a href="{{ route('admin.testimonials.create') }}" class="btn btn-primary btn-sm mt-2">
                     <i data-lucide="plus" class="me-1"></i> {{ __('Ajouter un témoignage') }}
                 </a>
+                @endcan
             </div>
         @else
             <p class="text-muted small px-4 pt-3 mb-2">{{ __('Glissez-déposez pour réorganiser l\'ordre d\'affichage.') }}</p>
@@ -62,11 +66,21 @@
                     <span class="badge bg-{{ $testimonial->is_approved ? 'success' : 'warning' }}">
                         {{ $testimonial->is_approved ? __('Approuvé') : __('En attente') }}
                     </span>
-                    @include('core::components.admin-action-menu', ['actions' => [
-                        ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.testimonials.edit', $testimonial)],
-                        ['divider' => true],
-                        ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.testimonials.destroy', $testimonial), 'method' => 'DELETE', 'confirm' => __('Supprimer ce témoignage ?'), 'danger' => true],
-                    ]])
+                    @php
+                        $testimonialActions = [];
+                        if (auth()->user()?->can('update_testimonials')) {
+                            $testimonialActions[] = ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.testimonials.edit', $testimonial)];
+                        }
+                        if (auth()->user()?->can('delete_testimonials')) {
+                            if (! empty($testimonialActions)) {
+                                $testimonialActions[] = ['divider' => true];
+                            }
+                            $testimonialActions[] = ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.testimonials.destroy', $testimonial), 'method' => 'DELETE', 'confirm' => __('Supprimer ce témoignage ?'), 'danger' => true];
+                        }
+                    @endphp
+                    @if(! empty($testimonialActions))
+                        @include('core::components.action-menu', ['actions' => $testimonialActions])
+                    @endif
                 </div>
                 @endforeach
             </div>

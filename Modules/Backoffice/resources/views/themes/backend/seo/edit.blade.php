@@ -18,6 +18,7 @@
         </h4>
     </div>
     <div class="card-body p-4">
+        @can('update_seo')
         <form method="POST" action="{{ route('admin.seo.update', $metaTag) }}">
             @csrf
             @method('PUT')
@@ -159,7 +160,9 @@
                 <a href="{{ route('admin.seo.index') }}" class="btn btn-light">{{ __('Retour') }}</a>
             </div>
         </form>
+        @endcan
 
+        @can('delete_seo')
         <hr class="my-4">
 
         <form method="POST" action="{{ route('admin.seo.destroy', $metaTag) }}"
@@ -171,6 +174,7 @@
                 {{ __('Supprimer ce tag') }}
             </button>
         </form>
+        @endcan
     </div>
 </div>
 

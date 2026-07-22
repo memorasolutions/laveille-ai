@@ -83,20 +83,26 @@
         </div>
     @endif
 
-    @if(count($selected) > 0)
-        <div class="d-flex flex-wrap align-items-center gap-2 mb-3 px-3 py-2 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
-            <span class="small fw-medium text-body">{{ count($selected) }} {{ __('sélectionné(s)') }}</span>
-            <select wire:model.live="bulkAction" class="form-select form-select-sm w-auto" aria-label="Action groupée">
-                <option value="">{{ __('Choisir une action') }}</option>
-                <option value="resend">{{ __('Renvoyer la confirmation') }}</option>
-                <option value="delete">{{ __('Supprimer') }}</option>
-            </select>
-            <button wire:click="executeBulkAction" wire:confirm="{{ __('Confirmer l\'action en masse ?') }}"
-                    class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
-                <i data-lucide="play-circle" style="width:14px;height:14px;"></i> {{ __('Exécuter') }}
-            </button>
-        </div>
-    @endif
+    @canany(['update_newsletter', 'delete_newsletter'])
+        @if(count($selected) > 0)
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3 px-3 py-2 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
+                <span class="small fw-medium text-body">{{ count($selected) }} {{ __('sélectionné(s)') }}</span>
+                <select wire:model.live="bulkAction" class="form-select form-select-sm w-auto" aria-label="Action groupée">
+                    <option value="">{{ __('Choisir une action') }}</option>
+                    @can('update_newsletter')
+                        <option value="resend">{{ __('Renvoyer la confirmation') }}</option>
+                    @endcan
+                    @can('delete_newsletter')
+                        <option value="delete">{{ __('Supprimer') }}</option>
+                    @endcan
+                </select>
+                <button wire:click="executeBulkAction" wire:confirm="{{ __('Confirmer l\'action en masse ?') }}"
+                        class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
+                    <i data-lucide="play-circle" style="width:14px;height:14px;"></i> {{ __('Exécuter') }}
+                </button>
+            </div>
+        @endif
+    @endcanany
 
     {{-- Filtres --}}
     <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
@@ -164,17 +170,21 @@
                             <div x-show="open" x-cloak
                                  class="position-absolute end-0 bg-white border rounded shadow py-1"
                                  style="top:100%;margin-top:4px;min-width:200px;z-index:50;">
-                                @if(is_null($sub->confirmed_at) && is_null($sub->unsubscribed_at))
-                                <button wire:click="resendConfirmation({{ $sub->id }})" @click="open = false"
-                                        class="btn btn-link w-100 d-flex align-items-center gap-2 px-3 py-2 small text-warning text-decoration-none text-start">
-                                    <i data-lucide="send" style="width:14px;height:14px;"></i> {{ __('Renvoyer la confirmation') }}
-                                </button>
-                                @endif
-                                <button wire:click="delete({{ $sub->id }})"
-                                        wire:confirm="{{ __('Supprimer cet abonné ?') }}"
-                                        class="btn btn-link w-100 d-flex align-items-center gap-2 px-3 py-2 small text-danger text-decoration-none text-start">
-                                    <i data-lucide="trash-2" style="width:14px;height:14px;"></i> {{ __('Supprimer') }}
-                                </button>
+                                @can('update_newsletter')
+                                    @if(is_null($sub->confirmed_at) && is_null($sub->unsubscribed_at))
+                                    <button wire:click="resendConfirmation({{ $sub->id }})" @click="open = false"
+                                            class="btn btn-link w-100 d-flex align-items-center gap-2 px-3 py-2 small text-warning text-decoration-none text-start">
+                                        <i data-lucide="send" style="width:14px;height:14px;"></i> {{ __('Renvoyer la confirmation') }}
+                                    </button>
+                                    @endif
+                                @endcan
+                                @can('delete_newsletter')
+                                    <button wire:click="delete({{ $sub->id }})"
+                                            wire:confirm="{{ __('Supprimer cet abonné ?') }}"
+                                            class="btn btn-link w-100 d-flex align-items-center gap-2 px-3 py-2 small text-danger text-decoration-none text-start">
+                                        <i data-lucide="trash-2" style="width:14px;height:14px;"></i> {{ __('Supprimer') }}
+                                    </button>
+                                @endcan
                             </div>
                         </div>
                     </td>

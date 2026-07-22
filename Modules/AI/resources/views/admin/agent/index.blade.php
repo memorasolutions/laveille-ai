@@ -51,12 +51,14 @@
                         <small class="text-muted">{{ $conv->messages->count() }} {{ __('messages') }}</small>
                         <a href="{{ route('admin.ai.agent.show', $conv) }}" class="btn btn-outline-primary btn-sm ms-2"><i data-lucide="eye" style="width:14px;height:14px;"></i></a>
                     </div>
+                    @can('manage_ai')
                     <form action="{{ route('admin.ai.agent.claim', $conv) }}" method="POST">
                         @csrf
                         <button type="submit" class="btn btn-primary btn-sm">
                             <i data-lucide="user-plus" style="width:14px;height:14px;"></i> {{ __('Prendre en charge') }}
                         </button>
                     </form>
+                    @endcan
                 </div>
             </div>
         </div>
@@ -96,6 +98,7 @@
                 </div>
 
                 {{-- Quick reply --}}
+                @can('manage_ai')
                 <form action="{{ route('admin.ai.agent.reply', $conv) }}" method="POST" class="mb-2">
                     @csrf
                     <div class="input-group input-group-sm">
@@ -118,6 +121,7 @@
                         </button>
                     </form>
                 </div>
+                @endcan
             </div>
         </div>
         @empty

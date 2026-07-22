@@ -16,10 +16,12 @@
         <x-backoffice::help-modal id="helpPlansModal" :title="__('Plans d\'abonnement')" icon="credit-card" :buttonLabel="__('Aide')">
             @include('backoffice::themes.backend.plans._help')
         </x-backoffice::help-modal>
+        @can('create_plans')
         <a href="{{ route('admin.plans.create') }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
             <i data-lucide="plus"></i>
             {{ __('Ajouter') }}
         </a>
+        @endcan
     </div>
 </div>
 

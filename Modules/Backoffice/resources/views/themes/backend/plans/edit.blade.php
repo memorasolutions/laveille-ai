@@ -20,6 +20,7 @@
 
 <div class="card">
     <div class="card-body">
+        @can('update_plans')
         <form action="{{ route('admin.plans.update', $plan) }}" method="POST">
             @csrf
             @method('PUT')
@@ -137,7 +138,9 @@
                 </a>
             </div>
         </form>
+        @endcan
 
+        @can('delete_plans')
         <hr class="my-4">
 
         <form action="{{ route('admin.plans.destroy', $plan) }}" method="POST"
@@ -148,6 +151,7 @@
                 <i data-lucide="trash-2"></i> {{ __('Supprimer ce plan') }}
             </button>
         </form>
+        @endcan
     </div>
 </div>
 

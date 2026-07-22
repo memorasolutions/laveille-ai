@@ -13,16 +13,20 @@
         <div class="card">
             <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <h6 class="mb-0">{{ __('Workflows email') }}</h6>
+                @can('create_workflows')
                 <a href="{{ route('admin.newsletter.workflows.create') }}" class="btn btn-sm btn-primary d-flex align-items-center gap-1">
                     <i data-lucide="plus"></i> {{ __('Nouveau workflow') }}
                 </a>
+                @endcan
             </div>
             <div class="card-body">
                 @if($workflows->isEmpty())
                     <div class="text-center py-5">
                         <i data-lucide="git-branch" style="width:48px;height:48px" class="text-muted mb-3"></i>
                         <p class="text-muted">Aucun workflow pour l'instant.</p>
+                        @can('create_workflows')
                         <a href="{{ route('admin.newsletter.workflows.create') }}" class="btn btn-sm btn-outline-primary">Créer un workflow</a>
+                        @endcan
                     </div>
                 @else
                     <div class="table-responsive">
@@ -55,12 +59,12 @@
                                         @endswitch
                                     </td>
                                     <td class="text-end">
-                                        @include('core::components.action-menu', ['actions' => [
+                                        @include('core::components.action-menu', ['actions' => array_filter([
                                             ['label' => __('Voir'), 'icon' => 'bar-chart-3', 'url' => route('admin.newsletter.workflows.show', $workflow)],
-                                            ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.newsletter.workflows.edit', $workflow)],
-                                            ['divider' => true],
-                                            ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.newsletter.workflows.destroy', $workflow), 'method' => 'DELETE', 'confirm' => __('Supprimer ce workflow ?'), 'danger' => true],
-                                        ]])
+                                            auth()->user()?->can('update_workflows') ? ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.newsletter.workflows.edit', $workflow)] : null,
+                                            (auth()->user()?->can('update_workflows') || auth()->user()?->can('delete_workflows')) ? ['divider' => true] : null,
+                                            auth()->user()?->can('delete_workflows') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.newsletter.workflows.destroy', $workflow), 'method' => 'DELETE', 'confirm' => __('Supprimer ce workflow ?'), 'danger' => true] : null,
+                                        ])])
                                     </td>
                                 </tr>
                                 @endforeach

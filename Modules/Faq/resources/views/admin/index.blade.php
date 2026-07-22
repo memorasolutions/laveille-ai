@@ -15,12 +15,14 @@
             <x-backoffice::help-modal id="helpFaqModal" :title="__('Qu\'est-ce que la FAQ ?')" icon="help-circle" :buttonLabel="__('Aide')">
                 @include('faq::admin._help')
             </x-backoffice::help-modal>
+            @can('create_faqs')
             <button type="button" class="btn btn-success d-none" id="btnSaveOrder" onclick="saveOrder()">
                 <i data-lucide="save"></i> {{ __('Enregistrer l\'ordre') }}
             </button>
             <a href="{{ route('admin.faqs.create') }}" class="btn btn-primary">
                 <i data-lucide="plus"></i> {{ __('Ajouter une question') }}
             </a>
+            @endcan
         </div>
     </div>
 
@@ -47,11 +49,21 @@
                             <span class="badge bg-secondary">{{ __('Brouillon') }}</span>
                         @endif
                     </div>
-                    @include('core::components.action-menu', ['actions' => [
-                        ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.faqs.edit', $faq)],
-                        ['divider' => true],
-                        ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.faqs.destroy', $faq), 'method' => 'DELETE', 'confirm' => __('Supprimer cette question ?'), 'danger' => true],
-                    ]])
+                    @php
+                        $faqActions = [];
+                        if (auth()->user()?->can('update_faqs')) {
+                            $faqActions[] = ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.faqs.edit', $faq)];
+                        }
+                        if (auth()->user()?->can('delete_faqs')) {
+                            if (! empty($faqActions)) {
+                                $faqActions[] = ['divider' => true];
+                            }
+                            $faqActions[] = ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.faqs.destroy', $faq), 'method' => 'DELETE', 'confirm' => __('Supprimer cette question ?'), 'danger' => true];
+                        }
+                    @endphp
+                    @if(! empty($faqActions))
+                        @include('core::components.action-menu', ['actions' => $faqActions])
+                    @endif
                 </div>
                 @endforeach
             </div>
@@ -60,9 +72,11 @@
                 <i data-lucide="help-circle" class="icon-xl text-muted mb-3"></i>
                 <h5 class="text-muted">{{ __('Aucune question FAQ') }}</h5>
                 <p class="text-muted mb-4">{{ __('Créez votre première question pour la page FAQ publique.') }}</p>
+                @can('create_faqs')
                 <a href="{{ route('admin.faqs.create') }}" class="btn btn-primary">
                     <i data-lucide="plus"></i> {{ __('Ajouter une question') }}
                 </a>
+                @endcan
             </div>
             @endif
         </div>

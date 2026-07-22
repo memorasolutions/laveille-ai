@@ -17,10 +17,12 @@
         <x-backoffice::help-modal id="helpShortUrlModal" :title="__('Liens courts – comment ça marche ?')" icon="link" :buttonLabel="__('Aide')">
             @include('shorturl::admin._help')
         </x-backoffice::help-modal>
+        @can('create_short_urls')
         <a href="{{ route('admin.short-urls.create') }}" class="btn btn-primary">
             <i data-lucide="plus" style="width:16px;height:16px;" class="me-1"></i>
             {{ __('Créer un lien') }}
         </a>
+        @endcan
     </div>
 </div>
 
@@ -79,7 +81,9 @@
             <div class="text-center py-5">
                 <i data-lucide="link" style="width:48px;height:48px;color:#adb5bd;" class="mb-3"></i>
                 <p class="text-muted mb-3">Aucun lien court pour le moment.</p>
+                @can('create_short_urls')
                 <a href="{{ route('admin.short-urls.create') }}" class="btn btn-primary btn-sm">Créer votre premier lien</a>
+                @endcan
             </div>
         @else
             <div class="table-responsive">
@@ -125,13 +129,20 @@
                             </td>
                             <td>{{ format_date($shortUrl->created_at) }}</td>
                             <td class="text-end">
-                                @include('core::components.action-menu', ['actions' => [
-                                    ['label' => __('Statistiques'), 'icon' => 'bar-chart-2', 'url' => route('admin.short-urls.show', $shortUrl)],
-                                    ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.short-urls.edit', $shortUrl)],
-                                    ['label' => $shortUrl->is_active ? __('Désactiver') : __('Activer'), 'icon' => $shortUrl->is_active ? 'eye-off' : 'eye', 'url' => route('admin.short-urls.toggle', $shortUrl), 'method' => 'POST'],
-                                    ['divider' => true],
-                                    ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.short-urls.destroy', $shortUrl), 'method' => 'DELETE', 'confirm' => __('Supprimer ce lien court ?'), 'danger' => true],
-                                ]])
+                                @php
+                                    $shortUrlActions = [
+                                        ['label' => __('Statistiques'), 'icon' => 'bar-chart-2', 'url' => route('admin.short-urls.show', $shortUrl)],
+                                    ];
+                                    if (auth()->user()?->can('update_short_urls')) {
+                                        $shortUrlActions[] = ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.short-urls.edit', $shortUrl)];
+                                        $shortUrlActions[] = ['label' => $shortUrl->is_active ? __('Désactiver') : __('Activer'), 'icon' => $shortUrl->is_active ? 'eye-off' : 'eye', 'url' => route('admin.short-urls.toggle', $shortUrl), 'method' => 'POST'];
+                                    }
+                                    if (auth()->user()?->can('delete_short_urls')) {
+                                        $shortUrlActions[] = ['divider' => true];
+                                        $shortUrlActions[] = ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.short-urls.destroy', $shortUrl), 'method' => 'DELETE', 'confirm' => __('Supprimer ce lien court ?'), 'danger' => true];
+                                    }
+                                @endphp
+                                @include('core::components.action-menu', ['actions' => $shortUrlActions])
                             </td>
                         </tr>
                         @endforeach

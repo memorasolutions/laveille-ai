@@ -15,9 +15,11 @@
         <x-backoffice::help-modal id="helpWidgetsModal" :title="__('Qu\'est-ce qu\'un widget ?')" icon="layout-grid" :buttonLabel="__('Aide')">
             @include('widget::admin._help')
         </x-backoffice::help-modal>
+        @can('create_widgets')
         <a href="{{ route('admin.widgets.create') }}" class="btn btn-primary btn-icon-text">
             <i class="btn-icon-prepend" data-lucide="plus"></i> {{ __('Nouveau widget') }}
         </a>
+        @endcan
     </div>
 </div>
 
@@ -53,11 +55,21 @@
                                             <span class="badge bg-info ms-1" style="font-size:10px;">{{ \Modules\Widget\Models\Widget::TYPE_LABELS[$widget->type] ?? $widget->type }}</span>
                                         </div>
                                     </div>
-                                    @include('core::components.admin-action-menu', ['actions' => [
-                                        ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.widgets.edit', $widget)],
-                                        ['divider' => true],
-                                        ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.widgets.destroy', $widget), 'method' => 'DELETE', 'confirm' => __('Supprimer ce widget ?'), 'danger' => true],
-                                    ]])
+                                    @php
+                                        $widgetActions = [];
+                                        if (auth()->user()?->can('update_widgets')) {
+                                            $widgetActions[] = ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.widgets.edit', $widget)];
+                                        }
+                                        if (auth()->user()?->can('delete_widgets')) {
+                                            if (! empty($widgetActions)) {
+                                                $widgetActions[] = ['divider' => true];
+                                            }
+                                            $widgetActions[] = ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.widgets.destroy', $widget), 'method' => 'DELETE', 'confirm' => __('Supprimer ce widget ?'), 'danger' => true];
+                                        }
+                                    @endphp
+                                    @if(! empty($widgetActions))
+                                        @include('core::components.action-menu', ['actions' => $widgetActions])
+                                    @endif
                                 </li>
                             @endforeach
                         </ul>

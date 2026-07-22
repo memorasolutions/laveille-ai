@@ -15,9 +15,11 @@
         <x-backoffice::help-modal id="helpCustomFieldsModal" :title="__('Champs personnalisés')" icon="list-plus" :buttonLabel="__('Aide')">
             @include('customfields::admin._help')
         </x-backoffice::help-modal>
+        @can('manage_settings')
         <a href="{{ route('admin.custom-fields.create') }}" class="btn btn-primary btn-icon-text">
             <i class="btn-icon-prepend" data-lucide="plus"></i> {{ __('Nouveau champ') }}
         </a>
+        @endcan
     </div>
 </div>
 
@@ -59,11 +61,13 @@
                                 <span class="badge bg-{{ $definition->is_active ? 'success' : 'secondary' }}">{{ $definition->is_active ? __('Oui') : __('Non') }}</span>
                             </td>
                             <td class="text-end">
+                                @can('manage_settings')
                                 @include('core::components.action-menu', ['actions' => [
                                     ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.custom-fields.edit', $definition)],
                                     ['divider' => true],
                                     ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.custom-fields.destroy', $definition), 'method' => 'DELETE', 'confirm' => __('Supprimer ce champ ?'), 'danger' => true],
                                 ]])
+                                @endcan
                             </td>
                         </tr>
                     @endforeach
@@ -77,9 +81,11 @@
             <i data-lucide="layers" style="width:48px;height:48px;" class="mb-3 d-block mx-auto"></i>
             <h5>{{ __('Aucun champ personnalisé') }}</h5>
             <p>{{ __('Ajoutez des champs pour enrichir vos articles et pages.') }}</p>
+            @can('manage_settings')
             <a href="{{ route('admin.custom-fields.create') }}" class="btn btn-primary mt-2">
                 <i data-lucide="plus" style="width:16px;height:16px;"></i> {{ __('Créer un champ') }}
             </a>
+            @endcan
         </div>
     </div>
 @endforelse

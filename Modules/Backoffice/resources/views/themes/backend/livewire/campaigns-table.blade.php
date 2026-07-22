@@ -13,19 +13,21 @@
         </div>
     @endif
 
-    @if(count($selected) > 0)
-        <div class="d-flex flex-wrap align-items-center gap-3 mb-3 px-3 py-2 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
-            <span class="fw-medium text-body">{{ count($selected) }} {{ __('sélectionné(s)') }}</span>
-            <select wire:model.live="bulkAction" class="form-select form-select-sm w-auto" aria-label="Action groupée">
-                <option value="">{{ __('Choisir une action') }}</option>
-                <option value="delete">{{ __('Supprimer') }}</option>
-            </select>
-            <button wire:click="executeBulkAction" wire:confirm="{{ __('Confirmer l\'action en masse ?') }}"
-                    class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
-                <i data-lucide="play-circle" class="icon-sm"></i> {{ __('Exécuter') }}
-            </button>
-        </div>
-    @endif
+    @can('delete_campaigns')
+        @if(count($selected) > 0)
+            <div class="d-flex flex-wrap align-items-center gap-3 mb-3 px-3 py-2 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
+                <span class="fw-medium text-body">{{ count($selected) }} {{ __('sélectionné(s)') }}</span>
+                <select wire:model.live="bulkAction" class="form-select form-select-sm w-auto" aria-label="Action groupée">
+                    <option value="">{{ __('Choisir une action') }}</option>
+                    <option value="delete">{{ __('Supprimer') }}</option>
+                </select>
+                <button wire:click="executeBulkAction" wire:confirm="{{ __('Confirmer l\'action en masse ?') }}"
+                        class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
+                    <i data-lucide="play-circle" class="icon-sm"></i> {{ __('Exécuter') }}
+                </button>
+            </div>
+        @endif
+    @endcan
 
     {{-- Filtres --}}
     <div class="border-bottom pb-3 mb-3">
@@ -73,13 +75,17 @@
                     </td>
                     <td class="text-body">{{ $campaign->subject }}</td>
                     <td>
-                        <select wire:change="changeStatus({{ $campaign->id }}, $event.target.value)"
-                                class="form-select form-select-sm w-auto"
-                                aria-label="Changer le statut"
-                                @if($campaign->isSent()) disabled @endif>
-                            <option value="draft" @selected($campaign->status === 'draft')>{{ __('Brouillon') }}</option>
-                            <option value="sent" @selected($campaign->status === 'sent')>{{ __('Envoyé') }}</option>
-                        </select>
+                        @can('update_campaigns')
+                            <select wire:change="changeStatus({{ $campaign->id }}, $event.target.value)"
+                                    class="form-select form-select-sm w-auto"
+                                    aria-label="Changer le statut"
+                                    @if($campaign->isSent()) disabled @endif>
+                                <option value="draft" @selected($campaign->status === 'draft')>{{ __('Brouillon') }}</option>
+                                <option value="sent" @selected($campaign->status === 'sent')>{{ __('Envoyé') }}</option>
+                            </select>
+                        @else
+                            <span class="badge bg-light text-muted border">{{ $campaign->status === 'sent' ? __('Envoyé') : __('Brouillon') }}</span>
+                        @endcan
                     </td>
                     <td class="text-muted">{{ $campaign->recipient_count }}</td>
                     <td class="text-muted">{{ format_date($campaign->sent_at, 'datetime') ?: '–' }}</td>
@@ -93,20 +99,22 @@
                             <div x-show="open" x-cloak
                                  class="dropdown-menu show position-absolute end-0 mt-1 shadow"
                                  style="z-index:50;min-width:140px;">
-                                @if($campaign->isDraft())
-                                    <form method="POST" action="{{ route('admin.newsletter.campaigns.send', $campaign) }}"
-                                          data-confirm="{{ __('Envoyer cette campagne à tous les abonnés actifs ?') }}">
-                                        @csrf
-                                        <button type="submit"
-                                                class="dropdown-item d-flex align-items-center gap-2 text-success">
-                                            <i data-lucide="send" class="icon-sm"></i> {{ __('Envoyer') }}
-                                        </button>
-                                    </form>
-                                @else
-                                    <span class="dropdown-item d-flex align-items-center gap-2 text-muted" style="cursor:not-allowed;opacity:.5;">
-                                        <i data-lucide="send" class="icon-sm"></i> {{ __('Déjà envoyée') }}
-                                    </span>
-                                @endif
+                                @can('update_campaigns')
+                                    @if($campaign->isDraft())
+                                        <form method="POST" action="{{ route('admin.newsletter.campaigns.send', $campaign) }}"
+                                              data-confirm="{{ __('Envoyer cette campagne à tous les abonnés actifs ?') }}">
+                                            @csrf
+                                            <button type="submit"
+                                                    class="dropdown-item d-flex align-items-center gap-2 text-success">
+                                                <i data-lucide="send" class="icon-sm"></i> {{ __('Envoyer') }}
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="dropdown-item d-flex align-items-center gap-2 text-muted" style="cursor:not-allowed;opacity:.5;">
+                                            <i data-lucide="send" class="icon-sm"></i> {{ __('Déjà envoyée') }}
+                                        </span>
+                                    @endif
+                                @endcan
                             </div>
                         </div>
                     </td>

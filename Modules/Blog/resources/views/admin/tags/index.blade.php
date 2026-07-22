@@ -8,7 +8,9 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5>Tags ({{ $tags->total() }})</h5>
+        @can('create_articles')
         <a href="{{ route('admin.blog.tags.create') }}" class="btn btn-sm btn-primary">{{ __('Nouveau tag') }}</a>
+        @endcan
     </div>
     <div class="card-body p-0">
         <table class="table table-hover mb-0">
@@ -20,11 +22,11 @@
                     <td>{{ $tag->name }}</td>
                     <td><span class="badge bg-primary">{{ $tag->articles_count }}</span></td>
                     <td>
-                        @include('core::components.action-menu', ['actions' => [
-                            ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.blog.tags.edit', $tag)],
-                            ['divider' => true],
-                            ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.blog.tags.destroy', $tag), 'method' => 'DELETE', 'confirm' => __('Supprimer ?'), 'danger' => true],
-                        ]])
+                        @include('core::components.action-menu', ['actions' => array_filter([
+                            auth()->user()?->can('update_articles') ? ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.blog.tags.edit', $tag)] : null,
+                            (auth()->user()?->can('update_articles') || auth()->user()?->can('delete_articles')) ? ['divider' => true] : null,
+                            auth()->user()?->can('delete_articles') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.blog.tags.destroy', $tag), 'method' => 'DELETE', 'confirm' => __('Supprimer ?'), 'danger' => true] : null,
+                        ])])
                     </td>
                 </tr>
             @empty

@@ -9,6 +9,7 @@
 
     <div class="row g-4">
         {{-- Formulaire d'ajout --}}
+        @can('manage_webhooks')
         <div class="col-12 col-md-5">
             <div class="border rounded-3">
                 <div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom">
@@ -54,6 +55,7 @@
                 </div>
             </div>
         </div>
+        @endcan
 
         {{-- Liste des webhooks --}}
         <div class="col-12 col-md-7">
@@ -108,11 +110,13 @@
                                             <div x-show="open" x-cloak
                                                  class="position-absolute end-0 mt-1 bg-white border rounded shadow"
                                                  style="z-index:50;min-width:140px;top:100%;">
-                                                <button wire:click="delete({{ $webhook->id }})"
-                                                        wire:confirm="{{ __('Supprimer ce webhook ?') }}"
-                                                        class="btn btn-sm btn-link text-danger d-flex align-items-center gap-2 w-100 px-3 py-2 text-decoration-none">
-                                                    <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
-                                                </button>
+                                                @can('manage_webhooks')
+                                                    <button wire:click="delete({{ $webhook->id }})"
+                                                            wire:confirm="{{ __('Supprimer ce webhook ?') }}"
+                                                            class="btn btn-sm btn-link text-danger d-flex align-items-center gap-2 w-100 px-3 py-2 text-decoration-none">
+                                                        <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
+                                                    </button>
+                                                @endcan
                                             </div>
                                         </div>
                                     </td>

@@ -15,21 +15,27 @@
     @endif
 
     {{-- Bulk Actions Bar --}}
-    @if(count($selected) > 0)
-        <div class="d-flex flex-wrap align-items-center gap-3 mb-3 px-3 py-2 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
-            <span class="fw-medium text-body">{{ count($selected) }} {{ __('sélectionné(s)') }}</span>
-            <select wire:model.live="bulkAction" class="form-select form-select-sm w-auto" aria-label="Action groupée">
-                <option value="">{{ __('Choisir une action') }}</option>
-                <option value="approve">{{ __('Approuver') }}</option>
-                <option value="spam">{{ __('Spam') }}</option>
-                <option value="delete">{{ __('Supprimer') }}</option>
-            </select>
-            <button wire:click="executeBulkAction" wire:confirm="{{ __('Confirmer l\'action en masse ?') }}"
-                    class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
-                <i data-lucide="play-circle" class="icon-sm"></i> {{ __('Exécuter') }}
-            </button>
-        </div>
-    @endif
+    @canany(['update_comments', 'delete_comments'])
+        @if(count($selected) > 0)
+            <div class="d-flex flex-wrap align-items-center gap-3 mb-3 px-3 py-2 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
+                <span class="fw-medium text-body">{{ count($selected) }} {{ __('sélectionné(s)') }}</span>
+                <select wire:model.live="bulkAction" class="form-select form-select-sm w-auto" aria-label="Action groupée">
+                    <option value="">{{ __('Choisir une action') }}</option>
+                    @can('update_comments')
+                        <option value="approve">{{ __('Approuver') }}</option>
+                        <option value="spam">{{ __('Spam') }}</option>
+                    @endcan
+                    @can('delete_comments')
+                        <option value="delete">{{ __('Supprimer') }}</option>
+                    @endcan
+                </select>
+                <button wire:click="executeBulkAction" wire:confirm="{{ __('Confirmer l\'action en masse ?') }}"
+                        class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
+                    <i data-lucide="play-circle" class="icon-sm"></i> {{ __('Exécuter') }}
+                </button>
+            </div>
+        @endif
+    @endcanany
 
     {{-- Filtres --}}
     <div class="border-bottom pb-3 mb-3">
@@ -149,28 +155,37 @@
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Fermer') }}</button>
-                                        <button type="button" wire:click="changeStatus({{ $comment->id }}, 'approved')" class="btn btn-success" data-bs-dismiss="modal">
-                                            <i data-lucide="check-circle" class="icon-sm me-1"></i> {{ __('Approuver') }}
-                                        </button>
-                                        <button type="button" wire:click="changeStatus({{ $comment->id }}, 'spam')" class="btn btn-warning" data-bs-dismiss="modal">
-                                            <i data-lucide="alert-triangle" class="icon-sm me-1"></i> {{ __('Spam') }}
-                                        </button>
-                                        <button type="button" wire:click="delete({{ $comment->id }})" wire:confirm="{{ __('Supprimer définitivement ?') }}" class="btn btn-danger" data-bs-dismiss="modal">
-                                            <i data-lucide="trash-2" class="icon-sm me-1"></i> {{ __('Supprimer') }}
-                                        </button>
+                                        @can('update_comments')
+                                            <button type="button" wire:click="changeStatus({{ $comment->id }}, 'approved')" class="btn btn-success" data-bs-dismiss="modal">
+                                                <i data-lucide="check-circle" class="icon-sm me-1"></i> {{ __('Approuver') }}
+                                            </button>
+                                            <button type="button" wire:click="changeStatus({{ $comment->id }}, 'spam')" class="btn btn-warning" data-bs-dismiss="modal">
+                                                <i data-lucide="alert-triangle" class="icon-sm me-1"></i> {{ __('Spam') }}
+                                            </button>
+                                        @endcan
+                                        @can('delete_comments')
+                                            <button type="button" wire:click="delete({{ $comment->id }})" wire:confirm="{{ __('Supprimer définitivement ?') }}" class="btn btn-danger" data-bs-dismiss="modal">
+                                                <i data-lucide="trash-2" class="icon-sm me-1"></i> {{ __('Supprimer') }}
+                                            </button>
+                                        @endcan
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </td>
                     <td>
-                        <select wire:change="changeStatus({{ $comment->id }}, $event.target.value)"
-                                class="form-select form-select-sm w-auto"
-                                aria-label="Changer le statut">
-                            <option value="pending" @selected($comment->status === 'pending')>{{ __('En attente') }}</option>
-                            <option value="approved" @selected($comment->status === 'approved')>{{ __('Approuvé') }}</option>
-                            <option value="spam" @selected($comment->status === 'spam')>{{ __('Spam') }}</option>
-                        </select>
+                        @can('update_comments')
+                            <select wire:change="changeStatus({{ $comment->id }}, $event.target.value)"
+                                    class="form-select form-select-sm w-auto"
+                                    aria-label="Changer le statut">
+                                <option value="pending" @selected($comment->status === 'pending')>{{ __('En attente') }}</option>
+                                <option value="approved" @selected($comment->status === 'approved')>{{ __('Approuvé') }}</option>
+                                <option value="spam" @selected($comment->status === 'spam')>{{ __('Spam') }}</option>
+                            </select>
+                        @else
+                            @php($badge = ['pending'=>'warning','approved'=>'success','spam'=>'danger','rejected'=>'dark'][$comment->status] ?? 'secondary')
+                            <span class="badge bg-{{ $badge }}">{{ ucfirst((string) $comment->status) }}</span>
+                        @endcan
                     </td>
                     <td class="text-muted small">{{ format_date($comment->created_at, 'datetime') }}</td>
                     <td>
@@ -189,16 +204,22 @@
                                 <i data-lucide="more-vertical" class="icon-md"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width:160px;">
-                                <li><button type="button" wire:click="changeStatus({{ $comment->id }}, 'approved')" class="dropdown-item d-flex align-items-center gap-2 text-success">
-                                    <i data-lucide="check-circle" class="icon-sm"></i> {{ __('Approuver') }}
-                                </button></li>
-                                <li><button type="button" wire:click="changeStatus({{ $comment->id }}, 'spam')" class="dropdown-item d-flex align-items-center gap-2 text-warning">
-                                    <i data-lucide="alert-triangle" class="icon-sm"></i> {{ __('Spam') }}
-                                </button></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><button type="button" wire:click="delete({{ $comment->id }})" wire:confirm="{{ __('Supprimer définitivement ?') }}" class="dropdown-item d-flex align-items-center gap-2 text-danger">
-                                    <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
-                                </button></li>
+                                @can('update_comments')
+                                    <li><button type="button" wire:click="changeStatus({{ $comment->id }}, 'approved')" class="dropdown-item d-flex align-items-center gap-2 text-success">
+                                        <i data-lucide="check-circle" class="icon-sm"></i> {{ __('Approuver') }}
+                                    </button></li>
+                                    <li><button type="button" wire:click="changeStatus({{ $comment->id }}, 'spam')" class="dropdown-item d-flex align-items-center gap-2 text-warning">
+                                        <i data-lucide="alert-triangle" class="icon-sm"></i> {{ __('Spam') }}
+                                    </button></li>
+                                @endcan
+                                @can('delete_comments')
+                                    @can('update_comments')
+                                        <li><hr class="dropdown-divider"></li>
+                                    @endcan
+                                    <li><button type="button" wire:click="delete({{ $comment->id }})" wire:confirm="{{ __('Supprimer définitivement ?') }}" class="dropdown-item d-flex align-items-center gap-2 text-danger">
+                                        <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
+                                    </button></li>
+                                @endcan
                             </ul>
                         </div>
                     </td>

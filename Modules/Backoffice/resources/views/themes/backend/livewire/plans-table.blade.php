@@ -13,21 +13,27 @@
         </div>
     @endif
 
-    @if(count($selected) > 0)
-        <div class="d-flex flex-wrap align-items-center gap-3 mb-3 px-3 py-2 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
-            <span class="fw-medium text-body">{{ count($selected) }} {{ __('sélectionné(s)') }}</span>
-            <select wire:model.live="bulkAction" class="form-select form-select-sm w-auto" aria-label="Action groupée">
-                <option value="">{{ __('Choisir une action') }}</option>
-                <option value="activate">{{ __('Activer') }}</option>
-                <option value="deactivate">{{ __('Désactiver') }}</option>
-                <option value="delete">{{ __('Supprimer') }}</option>
-            </select>
-            <button wire:click="executeBulkAction" wire:confirm="{{ __('Confirmer l\'action en masse ?') }}"
-                    class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
-                <i data-lucide="play-circle" class="icon-sm"></i> {{ __('Exécuter') }}
-            </button>
-        </div>
-    @endif
+    @canany(['update_plans', 'delete_plans'])
+        @if(count($selected) > 0)
+            <div class="d-flex flex-wrap align-items-center gap-3 mb-3 px-3 py-2 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
+                <span class="fw-medium text-body">{{ count($selected) }} {{ __('sélectionné(s)') }}</span>
+                <select wire:model.live="bulkAction" class="form-select form-select-sm w-auto" aria-label="Action groupée">
+                    <option value="">{{ __('Choisir une action') }}</option>
+                    @can('update_plans')
+                        <option value="activate">{{ __('Activer') }}</option>
+                        <option value="deactivate">{{ __('Désactiver') }}</option>
+                    @endcan
+                    @can('delete_plans')
+                        <option value="delete">{{ __('Supprimer') }}</option>
+                    @endcan
+                </select>
+                <button wire:click="executeBulkAction" wire:confirm="{{ __('Confirmer l\'action en masse ?') }}"
+                        class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
+                    <i data-lucide="play-circle" class="icon-sm"></i> {{ __('Exécuter') }}
+                </button>
+            </div>
+        @endif
+    @endcanany
 
     {{-- Filtres --}}
     <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
@@ -126,13 +132,19 @@
                             @endif
                         </td>
                         <td>
-                            <button type="button"
-                                    wire:click="toggleActive({{ $plan->id }})"
-                                    class="badge {{ $plan->is_active ? 'bg-success' : 'bg-danger' }} border-0 px-2 py-1 fw-semibold"
-                                    title="{{ $plan->is_active ? __('Cliquer pour désactiver') : __('Cliquer pour activer') }}"
-                                    style="cursor:pointer;font-size:0.75rem;">
-                                {{ $plan->is_active ? __('Actif') : __('Inactif') }}
-                            </button>
+                            @can('update_plans')
+                                <button type="button"
+                                        wire:click="toggleActive({{ $plan->id }})"
+                                        class="badge {{ $plan->is_active ? 'bg-success' : 'bg-danger' }} border-0 px-2 py-1 fw-semibold"
+                                        title="{{ $plan->is_active ? __('Cliquer pour désactiver') : __('Cliquer pour activer') }}"
+                                        style="cursor:pointer;font-size:0.75rem;">
+                                    {{ $plan->is_active ? __('Actif') : __('Inactif') }}
+                                </button>
+                            @else
+                                <span class="badge {{ $plan->is_active ? 'bg-success' : 'bg-danger' }} border-0 px-2 py-1 fw-semibold" style="font-size:0.75rem;">
+                                    {{ $plan->is_active ? __('Actif') : __('Inactif') }}
+                                </span>
+                            @endcan
                         </td>
                         <td class="text-end">
                             <div class="position-relative d-inline-block" x-data="{ open: false }" @click.outside="open = false">
@@ -144,18 +156,22 @@
                                 <div x-show="open" x-cloak
                                      class="dropdown-menu show position-absolute end-0 mt-1 shadow"
                                      style="z-index:50;min-width:140px;">
-                                    <a href="{{ route('admin.plans.edit', $plan) }}"
-                                       class="dropdown-item d-flex align-items-center gap-2 text-body">
-                                        <i data-lucide="pencil" class="icon-sm text-success"></i> {{ __('Modifier') }}
-                                    </a>
-                                    <form action="{{ route('admin.plans.destroy', $plan) }}" method="POST"
-                                          data-confirm="{{ __('Supprimer ce plan ?') }}">
-                                        @csrf @method('DELETE')
-                                        <button type="submit"
-                                                class="dropdown-item d-flex align-items-center gap-2 text-danger">
-                                            <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
-                                        </button>
-                                    </form>
+                                    @can('update_plans')
+                                        <a href="{{ route('admin.plans.edit', $plan) }}"
+                                           class="dropdown-item d-flex align-items-center gap-2 text-body">
+                                            <i data-lucide="pencil" class="icon-sm text-success"></i> {{ __('Modifier') }}
+                                        </a>
+                                    @endcan
+                                    @can('delete_plans')
+                                        <form action="{{ route('admin.plans.destroy', $plan) }}" method="POST"
+                                              data-confirm="{{ __('Supprimer ce plan ?') }}">
+                                            @csrf @method('DELETE')
+                                            <button type="submit"
+                                                    class="dropdown-item d-flex align-items-center gap-2 text-danger">
+                                                <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
+                                            </button>
+                                        </form>
+                                    @endcan
                                 </div>
                             </div>
                         </td>

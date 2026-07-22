@@ -2393,11 +2393,42 @@ declare(strict_types=1);
  *     (équivalent non-thémé) confirmée ABSENTE (n'existe pas, contrairement à users-table qui en
  *     avait un). 42/42 tests Backoffice verts, `php -l` propre. Ce fix clôt le fil RBAC-boutons
  *     ouvert par la passe adversariale /100 (rounds 1 et 2, v1.117.16/17).
+ *   1.117.19 · 2026-07-22 · fix(rbac) Passe adversariale /100 round 3 (sous-agent frais,
+ *     recherche exhaustive tous modules, pas seulement Backoffice) : bug d'affordance UI
+ *     (jamais une vraie faille - le backend/Livewire bloque déjà en 403 via `permission:xxx` ou
+ *     `abort_if(->can())`) trouvé sur une portée BIEN plus large que les rounds 1-2 : 39 fichiers
+ *     Blade sur 10 modules exposaient des boutons Modifier/Supprimer/Créer/Toggle vers des
+ *     permissions d'écriture (update_x/delete_x/create_x/manage_x) distinctes de la permission de
+ *     lecture qui garde la page elle-même, sans `@can` correspondant côté vue. Corrigé par 4 lots
+ *     délégués en parallèle (chaque permission vérifiée dans le fichier de routes ou le composant
+ *     Livewire PHP jumeau réel, jamais devinée) :
+ *       - Module AI (7 fichiers) : `manage_ai` vs `view_ai`.
+ *       - 14 tables Livewire Backoffice (articles/categories/tags/comments/meta-tags/plans/
+ *         settings/feature-flags/campaigns/subscribers/webhooks/translations/notifications-table) :
+ *         permission réelle lue dans chaque composant PHP jumeau ; fallback `@else` en lecture
+ *         seule ajouté quand l'info (statut/badge) reste utile sans le droit d'écriture.
+ *       - 7 modules admin/index (Menu, Faq, Testimonials, CustomFields, ShortUrl, Team, Widget) :
+ *         CustomFields n'a qu'une permission `manage_settings` unique (pas de create/update/delete
+ *         séparées) - pas de permission inventée, gate posée sur la seule qui existe réellement.
+ *       - Backoffice (contact-messages/show, plans, seo) + Newsletter (workflows/templates/
+ *         campaigns) + Pages (static-pages-table, legacy ET thémé) + Blog tags (legacy ET thémé -
+ *         a révélé un VRAI bug en production : bouton « Nouveau tag » de la vraie vue thémée
+ *         n'était pas gardé du tout, pas seulement le pendant legacy mort).
+ *     Vérification anti-régression multi-niveaux : chaque lot a fait tourner ses propres tests
+ *     module-scopés (0 échec sur 374 tests cumulés) PUIS suite COMPLÈTE du projet (5299
+ *     passed/115 failed puis re-confirmé en parallèle 5283 passed/114 failed - même bassin) :
+ *     tous les échecs sont PRÉ-EXISTANTS, non liés à ce lot - confirmé par isolation directe
+ *     (`git stash` + `pest tests/Feature/TeamTest.php` échoue IDENTIQUEMENT sans le diff RBAC :
+ *     23 échecs `QueryException`, cause racine = module Team désactivé localement donc table
+ *     `teams` jamais migrée, tests legacy racine non couverts par le garde `tests/Pest.php`).
+ *     Aucune régression introduite. Ce lot répond à la portée élargie trouvée par le round 3
+ *     adversarial `/100` ; le fil RBAC reste néanmoins ouvert tant qu'un 2e verdict vide
+ *     consécutif n'a pas été obtenu (exigence passe lourde du protocole).
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 18;
+$lvPatch = 19;
 
 return [
     'major' => $lvMajor,

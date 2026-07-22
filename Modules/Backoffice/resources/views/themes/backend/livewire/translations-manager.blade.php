@@ -13,13 +13,15 @@
         </div>
         {{-- Toolbar: actions primaire + secondaires --}}
         <div class="d-flex flex-wrap align-items-center gap-2">
-            <button type="button"
-                    class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2"
-                    data-bs-toggle="modal" data-bs-target="#addKeyModal"
-                    title="{{ __('Ajouter une nouvelle clé') }}">
-                <i data-lucide="plus" class="icon-sm"></i>
-                {{ __('Ajouter une clé') }}
-            </button>
+            @can('manage_translations')
+                <button type="button"
+                        class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2"
+                        data-bs-toggle="modal" data-bs-target="#addKeyModal"
+                        title="{{ __('Ajouter une nouvelle clé') }}">
+                    <i data-lucide="plus" class="icon-sm"></i>
+                    {{ __('Ajouter une clé') }}
+                </button>
+            @endcan
 
             {{-- Dropdown "Plus" via Alpine.js --}}
             <div class="position-relative" x-data="{ open: false }" @click.outside="open = false">
@@ -32,24 +34,26 @@
                 <div x-show="open" x-cloak
                      class="position-absolute end-0 bg-white border rounded shadow mt-1 py-1"
                      style="z-index:50; min-width:180px;">
-                    <button type="button"
-                            class="dropdown-item d-flex align-items-center gap-2"
-                            wire:click="autoTranslateAll"
-                            wire:loading.attr="disabled"
-                            wire:target="autoTranslateAll"
-                            @click="open = false">
-                        <i data-lucide="wand-2" class="icon-sm text-primary"></i>
-                        <span wire:loading.remove wire:target="autoTranslateAll">{{ __('Traduire tout (IA)') }}</span>
-                        <span wire:loading wire:target="autoTranslateAll">{{ __('Traduction en cours...') }}</span>
-                    </button>
-                    <hr class="dropdown-divider">
-                    <button type="button"
-                            class="dropdown-item d-flex align-items-center gap-2"
-                            data-bs-toggle="modal" data-bs-target="#addLocaleModal"
-                            @click="open = false">
-                        <i data-lucide="globe" class="icon-sm text-info"></i>
-                        {{ __('Ajouter une langue') }}
-                    </button>
+                    @can('manage_translations')
+                        <button type="button"
+                                class="dropdown-item d-flex align-items-center gap-2"
+                                wire:click="autoTranslateAll"
+                                wire:loading.attr="disabled"
+                                wire:target="autoTranslateAll"
+                                @click="open = false">
+                            <i data-lucide="wand-2" class="icon-sm text-primary"></i>
+                            <span wire:loading.remove wire:target="autoTranslateAll">{{ __('Traduire tout (IA)') }}</span>
+                            <span wire:loading wire:target="autoTranslateAll">{{ __('Traduction en cours...') }}</span>
+                        </button>
+                        <hr class="dropdown-divider">
+                        <button type="button"
+                                class="dropdown-item d-flex align-items-center gap-2"
+                                data-bs-toggle="modal" data-bs-target="#addLocaleModal"
+                                @click="open = false">
+                            <i data-lucide="globe" class="icon-sm text-info"></i>
+                            {{ __('Ajouter une langue') }}
+                        </button>
+                    @endcan
                     <button type="button"
                             class="dropdown-item d-flex align-items-center gap-2"
                             wire:click="exportLocale"
@@ -57,11 +61,13 @@
                         <i data-lucide="download" class="icon-sm text-success"></i>
                         {{ __('Exporter') }}
                     </button>
-                    <label class="dropdown-item d-flex align-items-center gap-2 mb-0" role="button">
-                        <i data-lucide="upload" class="icon-sm text-warning"></i>
-                        {{ __('Importer') }}
-                        <input type="file" class="d-none" wire:model="importFile" accept=".json" aria-label="{{ __('Fichier JSON à importer') }}">
-                    </label>
+                    @can('manage_translations')
+                        <label class="dropdown-item d-flex align-items-center gap-2 mb-0" role="button">
+                            <i data-lucide="upload" class="icon-sm text-warning"></i>
+                            {{ __('Importer') }}
+                            <input type="file" class="d-none" wire:model="importFile" accept=".json" aria-label="{{ __('Fichier JSON à importer') }}">
+                        </label>
+                    @endcan
                 </div>
             </div>
         </div>
@@ -151,39 +157,49 @@
                                            aria-label="{{ __('Valeur source FR pour') }} {{ $key }}">
                                 </td>
                                 <td class="py-2 px-3 align-middle" style="max-width: 0; overflow: hidden;">
-                                    <input type="text"
-                                           class="form-control form-control-sm"
-                                           value="{{ $translation['target'] }}"
-                                           wire:blur="updateTranslation('{{ addslashes($key) }}', $event.target.value)"
-                                           aria-label="{{ __('Traduction') }} {{ strtoupper($targetLocale) }} {{ __('pour') }} {{ $key }}">
+                                    @can('manage_translations')
+                                        <input type="text"
+                                               class="form-control form-control-sm"
+                                               value="{{ $translation['target'] }}"
+                                               wire:blur="updateTranslation('{{ addslashes($key) }}', $event.target.value)"
+                                               aria-label="{{ __('Traduction') }} {{ strtoupper($targetLocale) }} {{ __('pour') }} {{ $key }}">
+                                    @else
+                                        <input type="text"
+                                               class="form-control form-control-sm bg-light text-muted"
+                                               value="{{ $translation['target'] }}"
+                                               readonly
+                                               aria-label="{{ __('Traduction') }} {{ strtoupper($targetLocale) }} {{ __('pour') }} {{ $key }}">
+                                    @endcan
                                 </td>
                                 <td class="py-2 px-3 align-middle">
-                                    <div class="d-flex align-items-center justify-content-center gap-1">
-                                        @if($translation['target'] === '')
+                                    @can('manage_translations')
+                                        <div class="d-flex align-items-center justify-content-center gap-1">
+                                            @if($translation['target'] === '')
+                                                <button type="button"
+                                                        class="btn btn-sm btn-primary bg-opacity-10 text-primary border-0 rounded-circle d-flex align-items-center justify-content-center p-0"
+                                                        style="width:32px;height:32px;"
+                                                        wire:click="autoTranslate('{{ addslashes($key) }}')"
+                                                        wire:loading.attr="disabled"
+                                                        wire:target="autoTranslate('{{ addslashes($key) }}')"
+                                                        title="{{ __("Traduire automatiquement avec l'IA") }}">
+                                                    <i data-lucide="wand-2" class="icon-sm"
+                                                       wire:loading.class="d-none"
+                                                       wire:target="autoTranslate('{{ addslashes($key) }}')"></i>
+                                                    <span class="spinner-border spinner-border-sm d-none"
+                                                          wire:loading.class.remove="d-none"
+                                                          wire:target="autoTranslate('{{ addslashes($key) }}')"></span>
+                                                </button>
+                                            @endif
                                             <button type="button"
-                                                    class="btn btn-sm btn-primary bg-opacity-10 text-primary border-0 rounded-circle d-flex align-items-center justify-content-center p-0"
-                                                    style="width:32px;height:32px;"
-                                                    wire:click="autoTranslate('{{ addslashes($key) }}')"
-                                                    wire:loading.attr="disabled"
-                                                    wire:target="autoTranslate('{{ addslashes($key) }}')"
-                                                    title="{{ __("Traduire automatiquement avec l'IA") }}">
-                                                <i data-lucide="wand-2" class="icon-sm"
-                                                   wire:loading.class="d-none"
-                                                   wire:target="autoTranslate('{{ addslashes($key) }}')"></i>
-                                                <span class="spinner-border spinner-border-sm d-none"
-                                                      wire:loading.class.remove="d-none"
-                                                      wire:target="autoTranslate('{{ addslashes($key) }}')"></span>
+                                                    class="btn btn-sm btn-outline-danger d-inline-flex align-items-center justify-content-center p-0 border-0"
+                                                    style="width:24px;height:24px;"
+                                                    wire:click="deleteKey('{{ addslashes($key) }}')"
+                                                    wire:confirm="{{ __('Supprimer cette clé de toutes les langues ?') }}"
+                                                    title="{{ __('Supprimer la clé') }} {{ $key }}">
+                                                <i data-lucide="trash-2" class="icon-sm"></i>
                                             </button>
-                                        @endif
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-danger d-inline-flex align-items-center justify-content-center p-0 border-0"
-                                                style="width:24px;height:24px;"
-                                                wire:click="deleteKey('{{ addslashes($key) }}')"
-                                                wire:confirm="{{ __('Supprimer cette clé de toutes les langues ?') }}"
-                                                title="{{ __('Supprimer la clé') }} {{ $key }}">
-                                            <i data-lucide="trash-2" class="icon-sm"></i>
-                                        </button>
-                                    </div>
+                                        </div>
+                                    @endcan
                                 </td>
                             </tr>
                         @endforeach

@@ -85,18 +85,20 @@
                                 <div x-show="open" x-cloak
                                      class="position-absolute end-0 bg-white border rounded shadow py-1"
                                      style="top:100%;margin-top:4px;min-width:140px;z-index:50;">
-                                    <a href="{{ route('admin.settings.edit', $setting) }}"
-                                       class="d-flex align-items-center gap-2 px-3 py-2 small text-body text-decoration-none">
-                                        <i data-lucide="pencil" class="text-success" style="width:14px;height:14px;"></i> {{ __('Modifier') }}
-                                    </a>
-                                    <form action="{{ route('admin.settings.destroy', $setting) }}" method="POST" x-data>
-                                        @csrf @method('DELETE')
-                                        <button type="button"
-                                                class="btn btn-link w-100 d-flex align-items-center gap-2 px-3 py-2 small text-danger text-decoration-none text-start"
-                                                @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Confirmer la suppression ?')), action: () => $el.closest('form').submit() })">
-                                            <i data-lucide="trash-2" style="width:14px;height:14px;"></i> {{ __('Supprimer') }}
-                                        </button>
-                                    </form>
+                                    @can('manage_settings')
+                                        <a href="{{ route('admin.settings.edit', $setting) }}"
+                                           class="d-flex align-items-center gap-2 px-3 py-2 small text-body text-decoration-none">
+                                            <i data-lucide="pencil" class="text-success" style="width:14px;height:14px;"></i> {{ __('Modifier') }}
+                                        </a>
+                                        <form action="{{ route('admin.settings.destroy', $setting) }}" method="POST" x-data>
+                                            @csrf @method('DELETE')
+                                            <button type="button"
+                                                    class="btn btn-link w-100 d-flex align-items-center gap-2 px-3 py-2 small text-danger text-decoration-none text-start"
+                                                    @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Confirmer la suppression ?')), action: () => $el.closest('form').submit() })">
+                                                <i data-lucide="trash-2" style="width:14px;height:14px;"></i> {{ __('Supprimer') }}
+                                            </button>
+                                        </form>
+                                    @endcan
                                 </div>
                             </div>
                         </td>

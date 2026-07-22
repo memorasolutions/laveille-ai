@@ -19,30 +19,32 @@
         $pendingFeatures = array_diff($knownFeatures, $existingNames);
     @endphp
 
-    @if(count($pendingFeatures) > 0 && !$search)
-        <div class="card border border-dashed mb-3">
-            <div class="card-header border-bottom border-dashed py-2 px-3">
-                <h6 class="text-muted d-flex align-items-center gap-2 fw-medium mb-0 small">
-                    <i data-lucide="flag" class="icon-sm"></i>
-                    {{ __('Features connues (non activées)') }}
-                </h6>
-            </div>
-            <div class="card-body py-2 px-3">
-                <div class="d-flex flex-wrap gap-2">
-                    @foreach($pendingFeatures as $name)
-                        <form action="{{ route('admin.feature-flags.toggle', ['name' => $name]) }}" method="POST">
-                            @csrf
-                            <button type="submit"
-                                    class="btn btn-sm btn-success d-inline-flex align-items-center gap-1">
-                                <i data-lucide="plus-circle" class="icon-sm"></i>
-                                {{ $name }}
-                            </button>
-                        </form>
-                    @endforeach
+    @can('manage_feature_flags')
+        @if(count($pendingFeatures) > 0 && !$search)
+            <div class="card border border-dashed mb-3">
+                <div class="card-header border-bottom border-dashed py-2 px-3">
+                    <h6 class="text-muted d-flex align-items-center gap-2 fw-medium mb-0 small">
+                        <i data-lucide="flag" class="icon-sm"></i>
+                        {{ __('Features connues (non activées)') }}
+                    </h6>
+                </div>
+                <div class="card-body py-2 px-3">
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach($pendingFeatures as $name)
+                            <form action="{{ route('admin.feature-flags.toggle', ['name' => $name]) }}" method="POST">
+                                @csrf
+                                <button type="submit"
+                                        class="btn btn-sm btn-success d-inline-flex align-items-center gap-1">
+                                    <i data-lucide="plus-circle" class="icon-sm"></i>
+                                    {{ $name }}
+                                </button>
+                            </form>
+                        @endforeach
+                    </div>
                 </div>
             </div>
-        </div>
-    @endif
+        @endif
+    @endcan
 
     {{-- Tableau features existantes --}}
     <div class="table-responsive">
@@ -73,6 +75,7 @@
                             <code class="small text-primary bg-primary bg-opacity-10 px-2 py-1 rounded">{{ $feature->name }}</code>
                         </td>
                         <td class="py-2 px-2 align-middle" style="min-width: 280px;">
+                            @can('manage_feature_flags')
                             @if($editingCondition === $feature->name)
                                 {{-- Formulaire d'édition inline --}}
                                 <div class="d-flex flex-column gap-3">
@@ -180,8 +183,19 @@
                                     </button>
                                 </div>
                             @endif
+                            @else
+                                {{-- Lecture seule : affichage sans action d'écriture --}}
+                                @if($condition)
+                                    <span class="badge rounded small fw-medium d-inline-flex align-items-center gap-1 {{ $colorMap[$currentType] ?? 'text-muted bg-light border' }}">
+                                        {{ $availableTypes[$currentType] ?? $currentType }}
+                                    </span>
+                                @else
+                                    <span class="text-muted">{{ __('Aucune condition') }}</span>
+                                @endif
+                            @endcan
                         </td>
                         <td class="py-2 px-2 align-middle">
+                            @can('manage_feature_flags')
                             <form action="{{ route('admin.feature-flags.toggle', ['name' => $feature->name]) }}" method="POST" class="d-inline">
                                 @csrf
                                 <button type="submit" class="badge {{ $isActive ? 'bg-success' : 'bg-danger' }} border-0 px-2 py-1 fw-semibold"
@@ -190,6 +204,11 @@
                                     {{ $isActive ? __('Actif') : __('Inactif') }}
                                 </button>
                             </form>
+                            @else
+                                <span class="badge {{ $isActive ? 'bg-success' : 'bg-danger' }} border-0 px-2 py-1 fw-semibold">
+                                    {{ $isActive ? __('Actif') : __('Inactif') }}
+                                </span>
+                            @endcan
                         </td>
                     </tr>
                 @empty

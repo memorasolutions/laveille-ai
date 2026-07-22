@@ -35,9 +35,11 @@
             <x-backoffice::help-modal id="helpTeamsModal" :title="__('Équipes multi-utilisateurs')" icon="users" :buttonLabel="__('Aide')">
                 @include('team::teams._help')
             </x-backoffice::help-modal>
+            @can('create_teams')
             <a href="{{ route('admin.teams.create') }}" class="btn btn-primary btn-sm">
                 <i data-lucide="plus" class="me-1"></i> {{ __('Nouvelle équipe') }}
             </a>
+            @endcan
         </div>
     </div>
     <div class="card-body p-0">
@@ -77,12 +79,19 @@
                             {{ format_date($team->created_at) }}
                         </td>
                         <td class="text-end">
-                            @include('core::components.action-menu', ['actions' => [
-                                ['label' => __('Voir l\'équipe'), 'icon' => 'eye', 'url' => route('admin.teams.show', $team)],
-                                ['label' => __('Modifier l\'équipe'), 'icon' => 'pencil', 'url' => route('admin.teams.edit', $team)],
-                                ['divider' => true],
-                                ['label' => __('Supprimer l\'équipe'), 'icon' => 'trash-2', 'url' => route('admin.teams.destroy', $team), 'method' => 'DELETE', 'confirm' => __('Supprimer l\'équipe') . ' « ' . $team->name . ' » ? ' . __('Cette action est irréversible.'), 'danger' => true],
-                            ]])
+                            @php
+                                $teamActions = [
+                                    ['label' => __('Voir l\'équipe'), 'icon' => 'eye', 'url' => route('admin.teams.show', $team)],
+                                ];
+                                if (auth()->user()?->can('update_teams')) {
+                                    $teamActions[] = ['label' => __('Modifier l\'équipe'), 'icon' => 'pencil', 'url' => route('admin.teams.edit', $team)];
+                                }
+                                if (auth()->user()?->can('delete_teams')) {
+                                    $teamActions[] = ['divider' => true];
+                                    $teamActions[] = ['label' => __('Supprimer l\'équipe'), 'icon' => 'trash-2', 'url' => route('admin.teams.destroy', $team), 'method' => 'DELETE', 'confirm' => __('Supprimer l\'équipe') . ' « ' . $team->name . ' » ? ' . __('Cette action est irréversible.'), 'danger' => true];
+                                }
+                            @endphp
+                            @include('core::components.action-menu', ['actions' => $teamActions])
                         </td>
                     </tr>
                     @empty
@@ -90,7 +99,9 @@
                         <td colspan="5" class="text-center text-muted py-5">
                             <i data-lucide="users" class="mb-2 d-block mx-auto" style="width:32px;height:32px;opacity:.4"></i>
                             {{ __('Aucune équipe pour le moment.') }}
+                            @can('create_teams')
                             <a href="{{ route('admin.teams.create') }}" class="d-block mt-2">{{ __('Créer la première équipe') }}</a>
+                            @endcan
                         </td>
                     </tr>
                     @endforelse

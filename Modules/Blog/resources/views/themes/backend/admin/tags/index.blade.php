@@ -28,9 +28,11 @@
 <div class="card">
     <div class="card-header py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
         <h5 class="fw-bold mb-0">{{ __('Tags') }}</h5>
+        @can('create_articles')
         <a href="{{ route('admin.blog.tags.create') }}" class="btn btn-primary btn-sm">
             <i data-lucide="plus" class="me-1"></i> {{ __('Nouveau tag') }}
         </a>
+        @endcan
     </div>
     <div class="card-body p-0">
         @livewire('backoffice-tags-table')

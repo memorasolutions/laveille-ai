@@ -18,11 +18,13 @@
                 <x-backoffice::help-modal id="helpSeoModal" :title="__('SEO – Méta tags')" icon="globe" :buttonLabel="__('Aide')">
                     @include('backoffice::themes.backend.seo._help')
                 </x-backoffice::help-modal>
+                @can('create_seo')
                 <a href="{{ route('admin.seo.create') }}"
                    class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
                     <i data-lucide="plus" style="width:16px;height:16px;"></i>
                     {{ __('Ajouter') }}
                 </a>
+                @endcan
             </div>
         </div>
     </div>

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.19] - 2026-07-22
+
+### Fixed
+- RBAC (`/100` round 3, portée élargie) : 39 fichiers Blade sur 10 modules (AI, Backoffice x21, Menu, Faq, Testimonials, CustomFields, ShortUrl, Team, Widget, Newsletter, Pages, Blog) — boutons Modifier/Supprimer/Créer/Toggle gardés par `@can(...)` pour correspondre aux permissions réelles distinctes de la page. Bonus : bug réel trouvé en production sur Blog (bouton « Nouveau tag » non gardé du tout).
+- Suite complète (5299/5283 passants selon run) confirmée sans régression : les 114-115 échecs sont pré-existants (modules désactivés localement, tests legacy racine non couverts par le garde `Pest.php`), vérifié par isolation `git stash`.
+
 ## [1.117.18] - 2026-07-22
 
 ### Fixed

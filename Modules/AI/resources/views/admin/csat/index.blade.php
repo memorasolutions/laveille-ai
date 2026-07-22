@@ -105,6 +105,7 @@
                     </td>
                     <td title="{{ $survey->comment }}">{{ Str::limit($survey->comment, 40) ?: '-' }}</td>
                     <td>
+                        @can('manage_ai')
                         <form action="{{ route('admin.ai.csat.destroy', $survey) }}" method="POST" class="d-inline" data-confirm="{{ __('Êtes-vous sûr ?') }}">
                             @csrf
                             @method('DELETE')
@@ -112,6 +113,7 @@
                                 <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
                             </button>
                         </form>
+                        @endcan
                     </td>
                 </tr>
                 @empty

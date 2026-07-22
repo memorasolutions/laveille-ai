@@ -9,9 +9,11 @@
             <x-backoffice::help-modal id="helpMenuModal" :title="__('Gestion des menus de navigation')" icon="menu" :buttonLabel="__('Aide')">
                 @include('menu::admin._help')
             </x-backoffice::help-modal>
+            @can('create_menus')
             <a href="{{ route('admin.menus.create') }}" class="btn btn-primary">
                 <i data-lucide="plus"></i> {{ __('Créer un menu') }}
             </a>
+            @endcan
         </div>
     </div>
 
@@ -43,11 +45,21 @@
                                 @endif
                             </td>
                             <td class="text-end">
-                                @include('core::components.action-menu', ['actions' => [
-                                    ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.menus.edit', $menu)],
-                                    ['divider' => true],
-                                    ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.menus.destroy', $menu), 'method' => 'DELETE', 'confirm' => __('Supprimer ce menu ?'), 'danger' => true],
-                                ]])
+                                @php
+                                    $menuActions = [];
+                                    if (auth()->user()?->can('update_menus')) {
+                                        $menuActions[] = ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.menus.edit', $menu)];
+                                    }
+                                    if (auth()->user()?->can('delete_menus')) {
+                                        if (! empty($menuActions)) {
+                                            $menuActions[] = ['divider' => true];
+                                        }
+                                        $menuActions[] = ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.menus.destroy', $menu), 'method' => 'DELETE', 'confirm' => __('Supprimer ce menu ?'), 'danger' => true];
+                                    }
+                                @endphp
+                                @if(! empty($menuActions))
+                                    @include('core::components.action-menu', ['actions' => $menuActions])
+                                @endif
                             </td>
                         </tr>
                         @endforeach
@@ -59,9 +71,11 @@
                 <i data-lucide="list" class="icon-xl text-muted mb-3"></i>
                 <h5 class="text-muted">Aucun menu</h5>
                 <p class="text-muted mb-4">Créez votre premier menu pour gérer la navigation du site.</p>
+                @can('create_menus')
                 <a href="{{ route('admin.menus.create') }}" class="btn btn-primary">
                     <i data-lucide="plus"></i> Créer un menu
                 </a>
+                @endcan
             </div>
             @endif
         </div>

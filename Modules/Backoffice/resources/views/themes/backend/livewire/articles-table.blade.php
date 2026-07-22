@@ -15,22 +15,28 @@
     @endif
 
     {{-- Bulk Actions Bar --}}
-    @if(count($selected) > 0)
-        <div class="d-flex flex-wrap align-items-center gap-3 mb-3 px-3 py-2 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
-            <span class="fw-medium text-body">{{ count($selected) }} {{ __('sélectionné(s)') }}</span>
-            <select wire:model.live="bulkAction" class="form-select form-select-sm w-auto" aria-label="Action groupée">
-                <option value="">{{ __('Choisir une action') }}</option>
-                <option value="publish">{{ __('Publier') }}</option>
-                <option value="draft">{{ __('Brouillon') }}</option>
-                <option value="archive">{{ __('Archiver') }}</option>
-                <option value="delete">{{ __('Supprimer') }}</option>
-            </select>
-            <button wire:click="executeBulkAction" wire:confirm="{{ __('Confirmer l\'action en masse ?') }}"
-                    class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
-                <i data-lucide="play-circle" class="icon-sm"></i> {{ __('Exécuter') }}
-            </button>
-        </div>
-    @endif
+    @canany(['update_articles', 'delete_articles'])
+        @if(count($selected) > 0)
+            <div class="d-flex flex-wrap align-items-center gap-3 mb-3 px-3 py-2 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
+                <span class="fw-medium text-body">{{ count($selected) }} {{ __('sélectionné(s)') }}</span>
+                <select wire:model.live="bulkAction" class="form-select form-select-sm w-auto" aria-label="Action groupée">
+                    <option value="">{{ __('Choisir une action') }}</option>
+                    @can('update_articles')
+                        <option value="publish">{{ __('Publier') }}</option>
+                        <option value="draft">{{ __('Brouillon') }}</option>
+                        <option value="archive">{{ __('Archiver') }}</option>
+                    @endcan
+                    @can('delete_articles')
+                        <option value="delete">{{ __('Supprimer') }}</option>
+                    @endcan
+                </select>
+                <button wire:click="executeBulkAction" wire:confirm="{{ __('Confirmer l\'action en masse ?') }}"
+                        class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
+                    <i data-lucide="play-circle" class="icon-sm"></i> {{ __('Exécuter') }}
+                </button>
+            </div>
+        @endif
+    @endcanany
 
     {{-- Filtres --}}
     <div class="border-bottom pb-3 mb-3">
@@ -60,10 +66,12 @@
                     class="btn btn-sm btn-light d-inline-flex align-items-center gap-1">
                 <i data-lucide="x-circle" class="icon-sm"></i> {{ __('Réinitialiser') }}
             </button>
-            <a href="{{ route('admin.blog.articles.create') }}"
-               class="ms-auto btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
-                <i data-lucide="plus" class="icon-sm"></i> {{ __('Ajouter') }}
-            </a>
+            @can('create_articles')
+                <a href="{{ route('admin.blog.articles.create') }}"
+                   class="ms-auto btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
+                    <i data-lucide="plus" class="icon-sm"></i> {{ __('Ajouter') }}
+                </a>
+            @endcan
         </div>
     </div>
 
@@ -121,13 +129,17 @@
                         </td>
                         <td class="fw-medium text-body">{{ $article->title }}</td>
                         <td>
-                            <select wire:change="changeStatus({{ $article->id }}, $event.target.value)"
-                                    class="form-select form-select-sm w-auto"
-                                    aria-label="Changer le statut">
-                                <option value="draft" @selected((string) $article->status === 'draft')>{{ __('Brouillon') }}</option>
-                                <option value="published" @selected((string) $article->status === 'published')>{{ __('Publié') }}</option>
-                                <option value="archived" @selected((string) $article->status === 'archived')>{{ __('Archivé') }}</option>
-                            </select>
+                            @can('update_articles')
+                                <select wire:change="changeStatus({{ $article->id }}, $event.target.value)"
+                                        class="form-select form-select-sm w-auto"
+                                        aria-label="Changer le statut">
+                                    <option value="draft" @selected((string) $article->status === 'draft')>{{ __('Brouillon') }}</option>
+                                    <option value="published" @selected((string) $article->status === 'published')>{{ __('Publié') }}</option>
+                                    <option value="archived" @selected((string) $article->status === 'archived')>{{ __('Archivé') }}</option>
+                                </select>
+                            @else
+                                <span class="badge bg-light text-muted border">{{ ucfirst((string) $article->status) }}</span>
+                            @endcan
                         </td>
                         <td class="text-muted">{{ $article->blogCategory?->name ?? '–' }}</td>
                         <td class="text-muted">{{ $article->user?->name ?? '–' }}</td>
@@ -142,18 +154,22 @@
                                 <div class="dropdown-menu" :class="{ show: open }" x-show="open" x-cloak
                                      @click.outside="open = false"
                                      style="min-width:140px">
-                                    <a href="{{ route('admin.blog.articles.edit', $article) }}"
-                                       class="dropdown-item d-flex align-items-center gap-2">
-                                        <i data-lucide="pencil" class="icon-sm text-success"></i> {{ __('Modifier') }}
-                                    </a>
-                                    <form action="{{ route('admin.blog.articles.destroy', $article) }}" method="POST"
-                                          data-confirm="{{ __('Supprimer cet article ?') }}">
-                                        @csrf @method('DELETE')
-                                        <button type="submit"
-                                                class="dropdown-item d-flex align-items-center gap-2 text-danger">
-                                            <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
-                                        </button>
-                                    </form>
+                                    @can('update_articles')
+                                        <a href="{{ route('admin.blog.articles.edit', $article) }}"
+                                           class="dropdown-item d-flex align-items-center gap-2">
+                                            <i data-lucide="pencil" class="icon-sm text-success"></i> {{ __('Modifier') }}
+                                        </a>
+                                    @endcan
+                                    @can('delete_articles')
+                                        <form action="{{ route('admin.blog.articles.destroy', $article) }}" method="POST"
+                                              data-confirm="{{ __('Supprimer cet article ?') }}">
+                                            @csrf @method('DELETE')
+                                            <button type="submit"
+                                                    class="dropdown-item d-flex align-items-center gap-2 text-danger">
+                                                <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
+                                            </button>
+                                        </form>
+                                    @endcan
                                 </div>
                             </div>
                         </td>
