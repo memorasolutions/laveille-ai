@@ -24,10 +24,12 @@
         <x-backoffice::help-modal id="helpSettingsModal" :title="__('Paramètres')" icon="settings" :buttonLabel="__('Aide')">
             @include('backoffice::themes.backend.settings._help')
         </x-backoffice::help-modal>
-        <a href="{{ route('admin.settings.create') }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
-            <i data-lucide="plus"></i>
-            {{ __('Ajouter un paramètre') }}
-        </a>
+        @can('manage_settings')
+            <a href="{{ route('admin.settings.create') }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
+                <i data-lucide="plus"></i>
+                {{ __('Ajouter un paramètre') }}
+            </a>
+        @endcan
     </div>
 </div>
 

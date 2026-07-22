@@ -8,58 +8,60 @@
     @endif
 
     {{-- Upload drag & drop --}}
-    <div class="border rounded-3 mb-4">
-        <div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom">
-            <i data-lucide="upload-cloud" class="icon-sm text-muted"></i>
-            <h6 class="fw-medium mb-0">{{ __('Uploader un fichier') }}</h6>
-        </div>
-        <div class="p-3">
-            <div x-data="{ dragover: false }"
-                 x-on:dragover.prevent="dragover = true"
-                 x-on:dragleave.prevent="dragover = false"
-                 x-on:drop.prevent="dragover = false; const files = $event.dataTransfer.files; if (files.length) { $refs.fileInput.files = files; $refs.fileInput.dispatchEvent(new Event('change')); }"
-                 x-on:click="$refs.fileInput.click()"
-                 x-bind:class="{ 'border-primary bg-primary bg-opacity-10': dragover, 'border-secondary': !dragover }"
-                 class="d-flex flex-column align-items-center justify-content-center text-center rounded-3 border border-2 border-dashed"
-                 style="min-height:180px;cursor:pointer;">
+    @can('create_media')
+        <div class="border rounded-3 mb-4">
+            <div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom">
+                <i data-lucide="upload-cloud" class="icon-sm text-muted"></i>
+                <h6 class="fw-medium mb-0">{{ __('Uploader un fichier') }}</h6>
+            </div>
+            <div class="p-3">
+                <div x-data="{ dragover: false }"
+                     x-on:dragover.prevent="dragover = true"
+                     x-on:dragleave.prevent="dragover = false"
+                     x-on:drop.prevent="dragover = false; const files = $event.dataTransfer.files; if (files.length) { $refs.fileInput.files = files; $refs.fileInput.dispatchEvent(new Event('change')); }"
+                     x-on:click="$refs.fileInput.click()"
+                     x-bind:class="{ 'border-primary bg-primary bg-opacity-10': dragover, 'border-secondary': !dragover }"
+                     class="d-flex flex-column align-items-center justify-content-center text-center rounded-3 border border-2 border-dashed"
+                     style="min-height:180px;cursor:pointer;">
 
-                <input type="file"
-                       wire:model="file"
-                       x-ref="fileInput"
-                       accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.csv,video/*"
-                       class="d-none">
+                    <input type="file"
+                           wire:model="file"
+                           x-ref="fileInput"
+                           accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.csv,video/*"
+                           class="d-none">
 
-                <i data-lucide="upload-cloud" class="mb-2 text-muted" style="width:40px;height:40px;opacity:.4;"></i>
-                <p class="fw-medium mb-1">{{ __('Glisser-déposer un fichier ici') }}</p>
-                <p class="small text-muted mb-0">{{ __('ou cliquer pour parcourir') }}</p>
-                <p class="small text-muted mt-1 mb-0">{{ __('Images, PDF, Word, Excel, CSV, vidéo. Max 10 Mo.') }}</p>
+                    <i data-lucide="upload-cloud" class="mb-2 text-muted" style="width:40px;height:40px;opacity:.4;"></i>
+                    <p class="fw-medium mb-1">{{ __('Glisser-déposer un fichier ici') }}</p>
+                    <p class="small text-muted mb-0">{{ __('ou cliquer pour parcourir') }}</p>
+                    <p class="small text-muted mt-1 mb-0">{{ __('Images, PDF, Word, Excel, CSV, vidéo. Max 10 Mo.') }}</p>
 
-                <div wire:loading wire:target="file" class="mt-3">
-                    <div class="d-flex align-items-center gap-2 text-muted small">
-                        <div class="spinner-border spinner-border-sm" role="status"></div>
-                        {{ __('Chargement du fichier...') }}
+                    <div wire:loading wire:target="file" class="mt-3">
+                        <div class="d-flex align-items-center gap-2 text-muted small">
+                            <div class="spinner-border spinner-border-sm" role="status"></div>
+                            {{ __('Chargement du fichier...') }}
+                        </div>
                     </div>
+
+                    @error('file')
+                        <p class="text-danger small mt-2">{{ $message }}</p>
+                    @enderror
                 </div>
 
-                @error('file')
-                    <p class="text-danger small mt-2">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <div class="mt-3 d-flex justify-content-end">
-                <button type="button"
-                        wire:click="upload"
-                        wire:loading.attr="disabled"
-                        class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
-                    <span wire:loading wire:target="upload">
-                        <span class="spinner-border spinner-border-sm" role="status"></span>
-                    </span>
-                    <i data-lucide="upload-cloud" class="icon-sm" wire:loading.remove wire:target="upload"></i>
-                    {{ __('Uploader') }}
-                </button>
+                <div class="mt-3 d-flex justify-content-end">
+                    <button type="button"
+                            wire:click="upload"
+                            wire:loading.attr="disabled"
+                            class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
+                        <span wire:loading wire:target="upload">
+                            <span class="spinner-border spinner-border-sm" role="status"></span>
+                        </span>
+                        <i data-lucide="upload-cloud" class="icon-sm" wire:loading.remove wire:target="upload"></i>
+                        {{ __('Uploader') }}
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
+    @endcan
 
     {{-- Filtres --}}
     <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
@@ -181,21 +183,25 @@
                                 <div x-show="open" x-cloak
                                      class="dropdown-menu show position-absolute end-0 mt-1 shadow"
                                      style="z-index:50;min-width:140px;">
-                                    <button wire:click="editMedia({{ $item->id }})"
-                                            class="dropdown-item d-flex align-items-center gap-2">
-                                        <i data-lucide="pencil" class="icon-sm"></i> {{ __('Métadonnées') }}
-                                    </button>
-                                    @if(str_starts_with($item->mime_type, 'image/'))
-                                        <button @click="open=false; window.dispatchEvent(new CustomEvent('open-image-editor', {detail:{id:{{ $item->id }},url:'{{ $item->getUrl() }}',cropUrl:'{{ route('admin.media-api.crop', $item->id) }}'}}))"
+                                    @can('update_media')
+                                        <button wire:click="editMedia({{ $item->id }})"
                                                 class="dropdown-item d-flex align-items-center gap-2">
-                                            <i data-lucide="crop" class="icon-sm"></i> {{ __('Recadrer') }}
+                                            <i data-lucide="pencil" class="icon-sm"></i> {{ __('Métadonnées') }}
                                         </button>
-                                    @endif
-                                    <button wire:click="deleteMedia({{ $item->id }})"
-                                            wire:confirm="{{ __('Supprimer ce fichier définitivement ?') }}"
-                                            class="dropdown-item d-flex align-items-center gap-2 text-danger">
-                                        <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
-                                    </button>
+                                        @if(str_starts_with($item->mime_type, 'image/'))
+                                            <button @click="open=false; window.dispatchEvent(new CustomEvent('open-image-editor', {detail:{id:{{ $item->id }},url:'{{ $item->getUrl() }}',cropUrl:'{{ route('admin.media-api.crop', $item->id) }}'}}))"
+                                                    class="dropdown-item d-flex align-items-center gap-2">
+                                                <i data-lucide="crop" class="icon-sm"></i> {{ __('Recadrer') }}
+                                            </button>
+                                        @endif
+                                    @endcan
+                                    @can('delete_media')
+                                        <button wire:click="deleteMedia({{ $item->id }})"
+                                                wire:confirm="{{ __('Supprimer ce fichier définitivement ?') }}"
+                                                class="dropdown-item d-flex align-items-center gap-2 text-danger">
+                                            <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
+                                        </button>
+                                    @endcan
                                 </div>
                             </div>
                         </td>

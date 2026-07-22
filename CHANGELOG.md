@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.20] - 2026-07-22
+
+### Fixed
+- RBAC (`/100` round 4 + balayage déterministe final) : 24 fichiers sur 8 modules (Tenancy, FormBuilder, Backoffice, Blog, Newsletter, Pages, ABTest) — même correctif `@can(...)` que les rounds précédents.
+- **Plus sérieux** : `Modules/Blog/routes/web.php` — les routes `admin.blog.submissions.*` (index/approve/reject) n'avaient aucun middleware `permission:` (accessible à tout admin peu importe son rôle réel). Ajout de `permission:view_articles`/`permission:update_articles`.
+- Balayage déterministe (117 permissions du projet énumérées et groupées, pas un échantillon) : 1 dernier trou trouvé hors radar (ABTest experiments), tous les autres groupes de permissions confirmés à permission unique (pas de scission possible). Clôture du fil RBAC-affordance.
+
+### Verified
+- Vérification visuelle Playwright en local (code identique à prod) sur le lot v1.117.19 : aucune régression, bug « Nouveau tag » Blog confirmé résolu.
+- 3 exécutions complètes de la suite de tests (114-115 échecs à chaque fois, même bassin pré-existant, écart max = 1 test flaky sans lien).
+
 ## [1.117.19] - 2026-07-22
 
 ### Fixed

@@ -15,9 +15,11 @@
             <x-backoffice::help-modal id="helpTenantsModal" :title="__('Gestion des tenants multi-tenant')" icon="building" :buttonLabel="__('Aide')">
                 @include('tenancy::admin.tenants._help')
             </x-backoffice::help-modal>
+            @can('create_tenants')
             <a href="{{ route('admin.tenants.create') }}" class="btn btn-primary">
                 <i data-lucide="plus"></i> {{ __('Créer un tenant') }}
             </a>
+            @endcan
         </div>
     </div>
 
@@ -57,12 +59,19 @@
                                 @endif
                             </td>
                             <td class="text-end">
-                                @include('core::components.admin-action-menu', ['actions' => [
-                                    ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('admin.tenants.show', $tenant)],
-                                    ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.tenants.edit', $tenant)],
-                                    ['divider' => true],
-                                    ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.tenants.destroy', $tenant), 'method' => 'DELETE', 'confirm' => __('Supprimer ce tenant ?'), 'danger' => true],
-                                ]])
+                                @php
+                                    $tenantActions = [
+                                        ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('admin.tenants.show', $tenant)],
+                                    ];
+                                    if (auth()->user()?->can('update_tenants')) {
+                                        $tenantActions[] = ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.tenants.edit', $tenant)];
+                                    }
+                                    if (auth()->user()?->can('delete_tenants')) {
+                                        $tenantActions[] = ['divider' => true];
+                                        $tenantActions[] = ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.tenants.destroy', $tenant), 'method' => 'DELETE', 'confirm' => __('Supprimer ce tenant ?'), 'danger' => true];
+                                    }
+                                @endphp
+                                @include('core::components.action-menu', ['actions' => $tenantActions])
                             </td>
                         </tr>
                         @endforeach
@@ -77,9 +86,11 @@
                 <i data-lucide="building-2" class="icon-xl text-muted mb-3"></i>
                 <h5 class="text-muted">{{ __('Aucun tenant') }}</h5>
                 <p class="text-muted mb-4">{{ __('Créez votre premier tenant pour activer le multi-tenant.') }}</p>
+                @can('create_tenants')
                 <a href="{{ route('admin.tenants.create') }}" class="btn btn-primary">
                     <i data-lucide="plus"></i> {{ __('Créer un tenant') }}
                 </a>
+                @endcan
             </div>
             @endif
         </div>

@@ -38,12 +38,12 @@
                         <td>{{ format_date($revision->created_at, 'datetime') }}</td>
                         <td>{{ $revision->user->name ?? __('Système') }}</td>
                         <td>
-                            @include('core::components.action-menu', ['actions' => [
+                            @include('core::components.action-menu', ['actions' => array_filter([
                                 ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('admin.blog.articles.revisions.show', [$article, $revision])],
                                 ['label' => __('Comparer'), 'icon' => 'git-compare', 'url' => route('admin.blog.articles.revisions.diff', [$article, $revision])],
-                                ['divider' => true],
-                                ['label' => __('Restaurer'), 'icon' => 'refresh-cw', 'url' => route('admin.blog.articles.revisions.restore', [$article, $revision]), 'method' => 'POST', 'confirm' => __('Restaurer cette version ?')],
-                            ]])
+                                auth()->user()?->can('update_articles') ? ['divider' => true] : null,
+                                auth()->user()?->can('update_articles') ? ['label' => __('Restaurer'), 'icon' => 'refresh-cw', 'url' => route('admin.blog.articles.revisions.restore', [$article, $revision]), 'method' => 'POST', 'confirm' => __('Restaurer cette version ?')] : null,
+                            ])])
                         </td>
                     </tr>
                     @endforeach

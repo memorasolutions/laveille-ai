@@ -18,6 +18,7 @@
 </div>
 
 {{-- Diffuser une alerte système (reste dans le contrôleur via POST) --}}
+@can('manage_notifications')
 <div class="card mb-3">
     <div class="card-header">
         <h5 class="mb-0 fw-semibold">{{ __('Diffuser une alerte système') }}</h5>
@@ -59,6 +60,7 @@
         </form>
     </div>
 </div>
+@endcan
 
 {{-- Liste des notifications --}}
 <div class="card">

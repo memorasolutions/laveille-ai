@@ -32,6 +32,7 @@
         </div>
         <div class="col-md-8">
             @if($experiment->status === 'draft')
+            @can('manage_feature_flags')
             <div class="card mb-4">
                 <div class="card-body text-center py-4">
                     <p class="text-muted mb-3">{{ __('Cette expérience est en brouillon. Démarrez-la pour commencer à collecter des données.') }}</p>
@@ -46,6 +47,7 @@
                     </form>
                 </div>
             </div>
+            @endcan
             @endif
             @if($experiment->status === 'running' || $experiment->status === 'completed')
             <div class="card mb-4">
@@ -72,6 +74,7 @@
             </div>
             @endif
             @if($experiment->status === 'running')
+            @can('manage_feature_flags')
             <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">{{ __('Terminer l\'expérience') }}</h5>
@@ -98,6 +101,7 @@
                     </form>
                 </div>
             </div>
+            @endcan
             @endif
             @if($experiment->status === 'completed')
             <div class="card mb-4">
@@ -110,6 +114,7 @@
                 </div>
             </div>
             @endif
+            @can('manage_feature_flags')
             <div class="card">
                 <div class="card-body text-center">
                     {{-- Confirmation via data-confirm (2026-07-19) : remplace le confirm() JS
@@ -122,6 +127,7 @@
                     </form>
                 </div>
             </div>
+            @endcan
         </div>
     </div>
 </div>

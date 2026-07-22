@@ -2424,11 +2424,48 @@ declare(strict_types=1);
  *     Aucune régression introduite. Ce lot répond à la portée élargie trouvée par le round 3
  *     adversarial `/100` ; le fil RBAC reste néanmoins ouvert tant qu'un 2e verdict vide
  *     consécutif n'a pas été obtenu (exigence passe lourde du protocole).
+ *   1.117.20 · 2026-07-22 · fix(rbac) Round 4 adversarial `/100` (portée élargie, encore) + passe
+ *     finale par balayage DÉTERMINISTE (24 fichiers Blade sur 8 modules au total : Tenancy,
+ *     FormBuilder, Backoffice x6, Blog x6, Newsletter x2, Pages x2, ABTest x2). Même classe de
+ *     bug d'affordance UI (permission d'écriture manquante côté vue, backend déjà protégé) que
+ *     les rounds 1-3, permissions toutes re-vérifiées dans les fichiers de routes/composants
+ *     Livewire réels avant édition. **Distinct et plus sérieux** trouvé dans la même passe :
+ *     `Modules/Blog/routes/web.php` - les 3 routes `admin.blog.submissions.*` (index/approve/
+ *     reject) n'avaient AUCUN middleware `permission:`, contrairement à toutes leurs voisines du
+ *     même fichier (tags/comments) - accessibles à n'importe quel compte admin peu importe son
+ *     rôle réel, pas un simple défaut d'affordance. Corrigé en ajoutant `permission:view_articles`
+ *     (index) et `permission:update_articles` (approve/reject), cohérent avec la sémantique déjà
+ *     en place pour les autres actions de modération d'articles dans ce fichier.
+ *
+ *     APRÈS le round 4, balayage DÉTERMINISTE complet (pas un nouvel échantillonnage probabiliste) :
+ *     extraction de TOUTES les permissions `permission:xxx` déclarées dans tout le projet (117
+ *     permissions distinctes recensées), groupement par ressource de base (view_x vs create/
+ *     update/delete/manage_x), vérification systématique de chaque groupe à scission. A trouvé
+ *     1 dernier trou hors radar des 4 rounds précédents : `Modules/ABTest/resources/views/admin/
+ *     experiments/{index,show}.blade.php` - page gardée par `view_feature_flags` seul, actions
+ *     Créer (`create_feature_flags`), Démarrer/Terminer/Supprimer (`manage_feature_flags`) toutes
+ *     exposées sans `@can`. Corrigé. Tous les autres groupes de permissions du projet (api,
+ *     branding, cookies, exports, imports, incidents, onboarding, roadmap admin, security,
+ *     shortcodes, system, trash, logs, health, storage, documentation) vérifiés à permission
+ *     UNIQUE pour lecture+écriture (pas de scission possible, donc pas de bug de cette classe) -
+ *     confirmé fichier de routes par fichier de routes, pas par échantillon.
+ *
+ *     Vérification anti-régression : 3 exécutions complètes de la suite (5299/5283/5282 passed,
+ *     114-115 failed à chaque fois - même bassin, écart maximal observé = 1 test flaky déjà dans
+ *     un fichier pré-cassé sur 4 autres tests, aucun rapport avec les fichiers touchés) + tests
+ *     module-scopés de chaque lot (0 échec cumulé). Vérification visuelle Playwright en LOCAL
+ *     (même code que prod, évite tout risque sur les identifiants superadmin réels) sur le lot
+ *     v1.117.19 : aucune régression, bug « Nouveau tag » Blog confirmé résolu.
+ *
+ *     Ce balayage déterministe (100% des permissions du projet énumérées et vérifiées, pas un
+ *     échantillon) constitue la clôture du fil RBAC-affordance ouvert par la passe adversariale
+ *     `/100` (rounds 1-4) : plus aucun groupe de permissions à scission connu dans le projet
+ *     n'est sans garde `@can` correspondante côté vue.
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 19;
+$lvPatch = 20;
 
 return [
     'major' => $lvMajor,

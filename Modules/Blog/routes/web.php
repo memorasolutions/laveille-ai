@@ -125,9 +125,9 @@ Route::prefix('admin/blog')
         Route::delete('comments/{comment}', [CommentAdminController::class, 'destroy'])->name('comments.destroy')->middleware('permission:delete_comments');
 
         // Soumissions d'articles (admin review)
-        Route::get('submissions', [\Modules\Blog\Http\Controllers\Admin\SubmissionController::class, 'index'])->name('submissions.index');
-        Route::post('submissions/{article}/approve', [\Modules\Blog\Http\Controllers\Admin\SubmissionController::class, 'approve'])->name('submissions.approve');
-        Route::post('submissions/{article}/reject', [\Modules\Blog\Http\Controllers\Admin\SubmissionController::class, 'reject'])->name('submissions.reject');
+        Route::get('submissions', [\Modules\Blog\Http\Controllers\Admin\SubmissionController::class, 'index'])->name('submissions.index')->middleware('permission:view_articles');
+        Route::post('submissions/{article}/approve', [\Modules\Blog\Http\Controllers\Admin\SubmissionController::class, 'approve'])->name('submissions.approve')->middleware('permission:update_articles');
+        Route::post('submissions/{article}/reject', [\Modules\Blog\Http\Controllers\Admin\SubmissionController::class, 'reject'])->name('submissions.reject')->middleware('permission:update_articles');
     });
 
 // Soumission d'articles par les membres (authentifié)

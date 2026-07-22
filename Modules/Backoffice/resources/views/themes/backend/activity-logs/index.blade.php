@@ -18,6 +18,7 @@
                 @include('backoffice::themes.backend.activity-logs._help')
             </x-backoffice::help-modal>
             <div class="d-flex align-items-center gap-2 flex-wrap">
+                @can('manage_activity_logs')
                 <a href="{{ route('admin.activity-logs.export') }}"
                    class="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-2">
                     <i data-lucide="download" class="icon-sm"></i>
@@ -32,6 +33,7 @@
                         {{ __('Purger (+30j)') }}
                     </button>
                 </form>
+                @endcan
             </div>
         </div>
     </div>

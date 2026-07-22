@@ -17,6 +17,7 @@
         <a href="{{ route('admin.formbuilder.forms.submissions.index', $form) }}" class="btn btn-secondary">
             <i data-lucide="arrow-left" style="width:16px;height:16px;"></i> Retour
         </a>
+        @can('delete_forms')
         <form action="{{ route('admin.formbuilder.forms.submissions.destroy', [$form, $submission]) }}" method="POST">
             @csrf
             @method('DELETE')
@@ -24,6 +25,7 @@
                 <i data-lucide="trash-2" style="width:16px;height:16px;"></i> Supprimer
             </button>
         </form>
+        @endcan
     </div>
 </div>
 

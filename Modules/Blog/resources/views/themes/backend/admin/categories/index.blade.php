@@ -28,9 +28,11 @@
 <div class="card">
     <div class="card-header py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
         <h5 class="fw-bold mb-0">Catégories</h5>
+        @can('create_articles')
         <a href="{{ route('admin.blog.categories.create') }}" class="btn btn-primary btn-sm">
             <i data-lucide="plus" class="me-1"></i> Nouvelle catégorie
         </a>
+        @endcan
     </div>
     <div class="card-body p-4">
         @livewire('backoffice-categories-table')

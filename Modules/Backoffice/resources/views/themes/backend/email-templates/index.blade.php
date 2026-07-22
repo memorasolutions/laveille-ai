@@ -72,11 +72,13 @@
                                     @endif
                                 </td>
                                 <td class="align-middle">
+                                    @can('manage_email_templates')
                                     <a href="{{ route('admin.email-templates.edit', $t) }}"
                                        class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2">
                                         <i data-lucide="pencil"></i>
                                         {{ __('Modifier') }}
                                     </a>
+                                    @endcan
                                 </td>
                             </tr>
                         @endforeach

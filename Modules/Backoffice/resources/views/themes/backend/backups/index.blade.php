@@ -27,6 +27,7 @@
         <x-backoffice::help-modal id="helpBackupsModal" :title="__('Sauvegardes')" icon="hard-drive-download" :buttonLabel="__('Aide')">
             @include('backoffice::themes.backend.backups._help')
         </x-backoffice::help-modal>
+        @can('manage_backups')
         <form action="{{ route('admin.backups.run') }}" method="POST">
             @csrf
             <button type="submit" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2">
@@ -34,9 +35,11 @@
                 {{ __('Lancer une sauvegarde') }}
             </button>
         </form>
+        @endcan
     </div>
 
     {{-- Bulk actions bar --}}
+    @can('manage_backups')
     <div x-show="selected.length > 0" x-cloak
          class="d-flex flex-wrap align-items-center gap-3 mb-3 px-3 py-2 bg-danger bg-opacity-10 border border-danger border-opacity-25 rounded">
         <span class="fw-medium text-body">
@@ -58,6 +61,7 @@
             <i data-lucide="x" class="icon-sm"></i> {{ __('Annuler') }}
         </button>
     </div>
+    @endcan
 
     <div class="card mb-3">
         <div class="card-body p-0">
@@ -103,6 +107,7 @@
                                             <i data-lucide="more-vertical" class="icon-sm"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end" :class="{ show: open }" x-show="open" x-cloak style="min-width:140px">
+                                            @can('manage_backups')
                                             <li>
                                                 <a href="{{ route('admin.backups.download', ['path' => $backup['path']]) }}"
                                                    class="dropdown-item d-flex align-items-center gap-2">
@@ -123,6 +128,7 @@
                                                     </button>
                                                 </form>
                                             </li>
+                                            @endcan
                                         </ul>
                                     </div>
                                 </td>
@@ -135,9 +141,11 @@
         </div>
     </div>
 
+    @can('manage_backups')
     <form id="bulkDeleteForm" method="POST" action="{{ route('admin.backups.bulk-delete') }}" class="d-none">
         @csrf @method('DELETE')
     </form>
+    @endcan
 
 </div>
 

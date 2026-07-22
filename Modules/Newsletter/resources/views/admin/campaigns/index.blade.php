@@ -8,11 +8,13 @@
             <i data-lucide="mail"></i>
             Campagnes newsletter
         </h6>
+        @can('create_campaigns')
         <a href="{{ route('admin.newsletter.campaigns.create') }}"
            class="btn btn-primary btn-sm d-flex align-items-center gap-2">
             <i data-lucide="plus"></i>
             Nouvelle campagne
         </a>
+        @endcan
     </div>
     <div class="card-body p-4">
         @livewire('backoffice-campaigns-table')

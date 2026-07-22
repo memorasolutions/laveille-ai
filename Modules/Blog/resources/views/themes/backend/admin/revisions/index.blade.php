@@ -70,6 +70,7 @@
                                         <i data-lucide="git-compare" class="icon-sm"></i>
                                         {{ __('Comparer') }}
                                     </a>
+                                    @can('update_articles')
                                     <form action="{{ route('admin.blog.articles.revisions.restore', [$article, $revision]) }}" method="POST" class="d-inline" x-data>
                                         @csrf
                                         <button type="button"
@@ -79,6 +80,7 @@
                                             {{ __('Restaurer') }}
                                         </button>
                                     </form>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

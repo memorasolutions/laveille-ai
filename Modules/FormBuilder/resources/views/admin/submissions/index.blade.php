@@ -80,6 +80,7 @@
                                     <a href="{{ route('admin.formbuilder.forms.submissions.show', [$form, $submission]) }}" class="btn btn-sm btn-info text-white" title="Voir">
                                         <i data-lucide="eye" style="width:16px;height:16px;"></i>
                                     </a>
+                                    @can('delete_forms')
                                     <form action="{{ route('admin.formbuilder.forms.submissions.destroy', [$form, $submission]) }}" method="POST" class="d-inline-block">
                                         @csrf
                                         @method('DELETE')
@@ -87,6 +88,7 @@
                                             <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
                                         </button>
                                     </form>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

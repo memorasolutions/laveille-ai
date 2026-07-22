@@ -619,6 +619,7 @@
 
         {{-- ===== BOUTONS PRINCIPAUX ===== --}}
         <div class="d-flex flex-wrap gap-2 mt-4 mb-4">
+            @can('create_newsletter')
             <button
                 type="button"
                 class="btn btn-primary d-flex align-items-center gap-2"
@@ -634,6 +635,7 @@
                     Génération en cours…
                 </span>
             </button>
+            @endcan
             <button
                 type="button"
                 class="btn btn-outline-primary d-flex align-items-center gap-1"
@@ -643,6 +645,7 @@
                 <i data-lucide="copy" style="width:16px;height:16px;"></i>
                 Copier le prompt
             </button>
+            @can('create_newsletter')
             <button
                 type="button"
                 class="btn btn-outline-secondary"
@@ -653,6 +656,7 @@
                 <i data-lucide="save" style="width:16px;height:16px;"></i>
                 Sauvegarder le preset
             </button>
+            @endcan
         </div>
 
     </div>{{-- /col-lg-7 --}}
@@ -683,6 +687,7 @@
                     ></textarea>
                 </div>
                 <div class="card-footer d-flex flex-wrap gap-2">
+                    @can('create_newsletter')
                     <button type="button"
                             class="btn btn-sm btn-primary d-flex align-items-center gap-1"
                             x-on:click="generatePrompt()"
@@ -697,6 +702,7 @@
                             Génération…
                         </span>
                     </button>
+                    @endcan
                     <button type="button"
                             class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
                             x-on:click="copyPrompt()"
@@ -734,6 +740,7 @@
                                                 aria-label="Charger le preset {{ $preset->name }}">
                                             Charger
                                         </button>
+                                        @can('update_newsletter')
                                         @if(!$preset->is_default)
                                             <form method="POST"
                                                   action="{{ route('admin.newsletter.prompt-builder.preset.default', $preset) }}"
@@ -746,6 +753,8 @@
                                                 </button>
                                             </form>
                                         @endif
+                                        @endcan
+                                        @can('delete_newsletter')
                                         <button type="button"
                                                 class="btn btn-sm btn-outline-danger"
                                                 aria-label="Supprimer le preset {{ $preset->name }}"
@@ -769,6 +778,7 @@
                                             @csrf
                                             @method('DELETE')
                                         </form>
+                                        @endcan
                                     </div>
                                 </li>
                             @endforeach

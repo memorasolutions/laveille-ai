@@ -15,10 +15,12 @@
         <x-backoffice::help-modal id="helpFormBuilderFormsModal" :title="__('Formulaires personnalisés')" icon="clipboard-list" :buttonLabel="__('Aide')">
             @include('formbuilder::admin.forms._help')
         </x-backoffice::help-modal>
+        @can('create_forms')
         <a href="{{ route('admin.formbuilder.forms.create') }}" class="btn btn-primary btn-icon-text">
             <i class="btn-icon-prepend" data-lucide="plus"></i>
             {{ __('Nouveau formulaire') }}
         </a>
+        @endcan
     </div>
 </div>
 
@@ -63,12 +65,19 @@
                             </td>
                             <td>{{ format_date($form->created_at) }}</td>
                             <td class="text-end">
-                                @include('core::components.action-menu', ['actions' => [
-                                    ['label' => 'Soumissions', 'icon' => 'inbox', 'url' => route('admin.formbuilder.forms.submissions.index', $form)],
-                                    ['label' => 'Modifier', 'icon' => 'edit', 'url' => route('admin.formbuilder.forms.edit', $form)],
-                                    ['divider' => true],
-                                    ['label' => 'Supprimer', 'icon' => 'trash-2', 'url' => route('admin.formbuilder.forms.destroy', $form), 'method' => 'DELETE', 'confirm' => 'Supprimer ce formulaire et toutes ses soumissions ?', 'danger' => true],
-                                ]])
+                                @php
+                                    $formActions = [
+                                        ['label' => 'Soumissions', 'icon' => 'inbox', 'url' => route('admin.formbuilder.forms.submissions.index', $form)],
+                                    ];
+                                    if (auth()->user()?->can('update_forms')) {
+                                        $formActions[] = ['label' => 'Modifier', 'icon' => 'edit', 'url' => route('admin.formbuilder.forms.edit', $form)];
+                                    }
+                                    if (auth()->user()?->can('delete_forms')) {
+                                        $formActions[] = ['divider' => true];
+                                        $formActions[] = ['label' => 'Supprimer', 'icon' => 'trash-2', 'url' => route('admin.formbuilder.forms.destroy', $form), 'method' => 'DELETE', 'confirm' => 'Supprimer ce formulaire et toutes ses soumissions ?', 'danger' => true];
+                                    }
+                                @endphp
+                                @include('core::components.action-menu', ['actions' => $formActions])
                             </td>
                         </tr>
                     @empty
@@ -78,9 +87,11 @@
                                     <i data-lucide="file-text" style="width:48px;height:48px;" class="mb-3 d-block mx-auto opacity-25"></i>
                                     <h5 class="mb-1">Aucun formulaire</h5>
                                     <p class="mb-3">Créez votre premier formulaire pour collecter des données.</p>
+                                    @can('create_forms')
                                     <a href="{{ route('admin.formbuilder.forms.create') }}" class="btn btn-primary btn-sm">
                                         <i data-lucide="plus" style="width:14px;height:14px;" class="me-1"></i> Créer un formulaire
                                     </a>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

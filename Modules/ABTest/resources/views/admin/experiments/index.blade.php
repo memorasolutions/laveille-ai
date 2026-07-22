@@ -15,9 +15,11 @@
             <x-backoffice::help-modal id="helpExperimentsModal" :title="__('Qu\'est-ce qu\'un test A/B ?')" icon="flask-conical" :buttonLabel="__('Aide')">
                 @include('abtest::admin.experiments._help')
             </x-backoffice::help-modal>
+            @can('create_feature_flags')
             <a href="{{ route('admin.experiments.create') }}" class="btn btn-primary">
                 <i data-lucide="plus"></i> {{ __('Nouvelle expérience') }}
             </a>
+            @endcan
         </div>
     </div>
     <div class="card">
@@ -49,11 +51,16 @@
                             </td>
                             <td>{{ format_date($experiment->created_at, 'datetime') }}</td>
                             <td>
-                                @include('core::components.action-menu', ['actions' => [
-                                    ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('admin.experiments.show', $experiment)],
-                                    ['divider' => true],
-                                    ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.experiments.destroy', $experiment), 'method' => 'DELETE', 'confirm' => __('Supprimer cette expérience ?'), 'danger' => true],
-                                ]])
+                                @php
+                                    $experimentActions = [
+                                        ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('admin.experiments.show', $experiment)],
+                                    ];
+                                    if (auth()->user()?->can('manage_feature_flags')) {
+                                        $experimentActions[] = ['divider' => true];
+                                        $experimentActions[] = ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.experiments.destroy', $experiment), 'method' => 'DELETE', 'confirm' => __('Supprimer cette expérience ?'), 'danger' => true];
+                                    }
+                                @endphp
+                                @include('core::components.action-menu', ['actions' => $experimentActions])
                             </td>
                         </tr>
                         @endforeach
@@ -66,7 +73,9 @@
                 <i data-lucide="flask-conical" class="icon-xl text-muted mb-3"></i>
                 <h5 class="text-muted">{{ __('Aucune expérience') }}</h5>
                 <p class="text-muted mb-4">{{ __('Créez votre première expérience A/B pour optimiser vos conversions.') }}</p>
+                @can('create_feature_flags')
                 <a href="{{ route('admin.experiments.create') }}" class="btn btn-primary"><i data-lucide="plus"></i> {{ __('Nouvelle expérience') }}</a>
+                @endcan
             </div>
             @endif
         </div>

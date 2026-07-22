@@ -21,10 +21,12 @@
     <div class="card-header d-block py-3 px-4 border-bottom">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
             <h4 class="fw-bold mb-0 fs-5">{{ __('Pages statiques') }}</h4>
-            <a href="{{ route('admin.pages.create') }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
-                <i data-lucide="plus" class="icon-sm"></i>
-                {{ __('Nouvelle page') }}
-            </a>
+            @can('create_pages')
+                <a href="{{ route('admin.pages.create') }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
+                    <i data-lucide="plus" class="icon-sm"></i>
+                    {{ __('Nouvelle page') }}
+                </a>
+            @endcan
         </div>
     </div>
     <div class="p-4">

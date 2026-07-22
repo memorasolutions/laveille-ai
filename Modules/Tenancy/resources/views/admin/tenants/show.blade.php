@@ -16,9 +16,11 @@
             <a href="{{ route('admin.tenants.index') }}" class="btn btn-outline-secondary">
                 <i data-lucide="arrow-left"></i> Retour
             </a>
+            @can('update_tenants')
             <a href="{{ route('admin.tenants.edit', $tenant) }}" class="btn btn-primary">
                 <i data-lucide="edit"></i> Modifier
             </a>
+            @endcan
         </div>
     </div>
 
