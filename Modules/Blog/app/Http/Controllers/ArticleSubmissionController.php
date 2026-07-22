@@ -13,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Mews\Purifier\Facades\Purifier;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Category;
 
@@ -50,11 +51,17 @@ class ArticleSubmissionController extends Controller
         // Append sources to content
         $contentWithSources = $validated['content']."\n\n---\n**Sources :**\n".$validated['sources'];
 
+        // Securite (audit 2026-07-22) : soumission publique (n'importe quel utilisateur inscrit,
+        // sans revue prealable) -> purifier AVANT stockage pour neutraliser toute injection HTML/JS
+        // (XSS stocke). Profil 'article' (config/purifier.php) preserve la structure riche legitime
+        // (titres, listes...) tout en bloquant script/gestionnaires d'evenements/URI javascript:.
+        $contentWithSources = Purifier::clean($contentWithSources, 'article');
+
         $article = Article::create([
             'title' => [$locale => $validated['title'], 'fr' => $validated['title']],
             'slug' => [$locale => $slug, 'fr' => $slug],
             'content' => [$locale => $contentWithSources, 'fr' => $contentWithSources],
-            'excerpt' => $validated['excerpt'] ? [$locale => $validated['excerpt'], 'fr' => $validated['excerpt']] : null,
+            'excerpt' => ($validated['excerpt'] ?? null) ? [$locale => $validated['excerpt'], 'fr' => $validated['excerpt']] : null,
             'category_id' => $validated['category_id'],
             'submitted_by' => auth()->id(),
             'submission_status' => 'pending',

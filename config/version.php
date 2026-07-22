@@ -2197,11 +2197,54 @@ declare(strict_types=1);
  *     admin, déjà utilisé partout ailleurs sur cette page (ligne 264) et sur les 6 fichiers
  *     corrigés en 1.117.2/1.117.5/1.117.8/1.117.10. Fonction `showToast()` obsolète supprimée.
  *     14/14 tests Modules/Menu verts.
+ *
+ *   1.117.12 · 2026-07-22 · fix(sécurité CRITIQUE) XSS stockée sur la soumission publique
+ *     d'articles - trouvée par un audit sécurité applicative OWASP Top10 Web+LLM complet lancé
+ *     suite à `/audit complet`. `Modules/Blog/app/Http/Controllers/ArticleSubmissionController.
+ *     php::store()` (route `/proposer-article`, accessible à TOUT utilisateur connecté sans rôle
+ *     admin) stockait le champ `content` du formulaire (simple `<textarea>`, validé seulement
+ *     `string|min:200`, aucune restriction HTML) tel quel en base. La vue publique `blog.show`
+ *     (`Modules/FrontTheme/.../blog/show.blade.php:252,300`) affiche `$article->content` BRUT via
+ *     `@glossarize()` (directive Blade = `echo` non échappé). Un utilisateur inscrit pouvait donc
+ *     injecter `<script>`/`onerror=`/`javascript:` dans un article, le faire approuver par un
+ *     admin qui - ironie du sort - voit une version DÉJÀ PURIFIÉE en revue (accesseur
+ *     `Article::safeContent()`, non utilisée à la publication), pendant que la version BRUTE est
+ *     publiée et mise en cache 1h pour tous les visiteurs. XSS stocké classique, vecteur de
+ *     contournement de la revue humaine.
+ *     Corrigé À LA FRONTIÈRE DE CONFIANCE (soumission), pas au rendu (pipeline de rendu trop
+ *     complexe/fragile pour y toucher sans risque - shortcodes Ads, chunking AEO DOMDocument,
+ *     cadrage Sources par regex, tous appliqués À `$article->content`). Nouveau profil Purifier
+ *     `article` ajouté à `config/purifier.php` (vendor publié : `HTML.Allowed` du profil `default`
+ *     du package - `div,b,strong,i,em,u,a,ul,ol,li,p,br,span,img` - est TROP restrictif, aurait
+ *     supprimé les titres h2-h6 nécessaires au TOC/chunking AEO si utilisé tel quel via l'accesseur
+ *     `safe_content` existant). Le nouveau profil autorise la structure riche légitime d'un article
+ *     (h2-h6, listes, tableaux, citations, figures...) tout en laissant HTMLPurifier bloquer
+ *     intrinsèquement `<script>`, `on*=`, `javascript:` (protection indépendante de la liste
+ *     autorisée). `ArticleSubmissionController::store()` appelle désormais
+ *     `Purifier::clean($contentWithSources, 'article')` avant `Article::create()`. Vérifié en
+ *     tinker : `<script>` totalement supprimé, `onerror=` neutralisé, `href="javascript:..."`
+ *     retiré, `<h2>` préservé ; contenu légitime sans HTML strictement inchangé (no-op, le champ
+ *     est un textarea texte brut, pas un éditeur WYSIWYG). 3 tests de non-régression ajoutés
+ *     (`Modules/Blog/tests/Feature/ArticleSubmissionSecurityTest.php`). Bug de robustesse
+ *     pré-existant et sans lien trouvé au passage (`Undefined array key "excerpt"` si le champ
+ *     optionnel est absent de la requête) - corrigé en une ligne (`??  null`).
+ *     Suite Blog (7/7) + Widget/Directory/Pages (43/43, autres consommateurs de Purifier avec le
+ *     profil `default` inchangé) vertes.
+ *     AUTRES FINDINGS DU MÊME AUDIT, NON CRITIQUES, SIGNALÉS POUR SUIVI (pas corrigés dans ce
+ *     patch, portée volontairement limitée à la faille bloquante) : SSRF potentiel sur
+ *     `Modules/AI/app/Services/WebScraperService.php` (scraping admin sans validation IP privée/
+ *     métadonnées cloud) ; prompt injection indirecte sur `Modules/AI/app/Services/RagService.php`
+ *     (contenu scrappé injecté sans délimiteur de confiance) ; excessive agency sur
+ *     `Modules/AI/app/Observers/CommentModerationObserver.php` (auto-approbation LLM sans revue
+ *     humaine) ; autorisation potentiellement trop large sur `Modules/Directory/.../
+ *     CommunityController.php` (screenshots gatés `view_admin_panel` au lieu d'une capacité
+ *     dédiée) ; mot de passe démo sans garde prod sur `Modules/Academy/database/seeders/
+ *     AcademyDemoSeeder.php`.
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 11;
+$lvPatch = 12;
 
 return [
     'major' => $lvMajor,

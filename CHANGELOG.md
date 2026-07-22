@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.12] - 2026-07-22
+
+### Security
+- **[CRITIQUE] XSS stockée sur la soumission publique d'articles** (`Modules/Blog/app/Http/Controllers/ArticleSubmissionController.php`, route `/proposer-article`) : tout utilisateur connecté pouvait injecter `<script>`/`onerror=`/`javascript:` dans un article, contourner la revue admin (qui voyait une version purifiée alors que la version brute était publiée), et l'exécuter sur tous les visiteurs. Trouvé par un audit sécurité applicative OWASP Top10 Web+LLM. Corrigé à la frontière de soumission via un nouveau profil Purifier `article` (`config/purifier.php`) qui préserve la structure riche légitime (h2-h6, listes, tableaux) tout en bloquant script/gestionnaires d'événements/URI `javascript:`. 3 tests de non-régression ajoutés.
+
+### Fixed
+- Bug de robustesse pré-existant (`Undefined array key "excerpt"` si le champ optionnel absent de la requête).
+
+### Known issues (signalés, non corrigés dans ce patch — portée limitée à la faille bloquante)
+- SSRF potentiel (`Modules/AI/.../WebScraperService.php`), prompt injection indirecte (`RagService.php`), excessive agency LLM (`CommentModerationObserver.php`), autorisation trop large (`Directory/CommunityController.php`), mot de passe démo sans garde prod (`AcademyDemoSeeder.php`). Détail complet dans `config/version.php` v1.117.12.
+
 ## [1.117.11] - 2026-07-21
 
 ### Security
