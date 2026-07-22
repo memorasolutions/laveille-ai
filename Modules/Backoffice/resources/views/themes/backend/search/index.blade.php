@@ -113,12 +113,14 @@
                                 </span>
                             </td>
                             <td class="py-3 px-4 text-center">
+                                @can('update_users')
                                 <a href="{{ route('admin.users.edit', $user) }}"
                                    class="btn btn-sm btn-outline-success d-inline-flex align-items-center justify-content-center rounded-circle"
                                    style="width:32px;height:32px;"
                                    title="{{ __('Modifier') }}">
                                     <i data-lucide="pencil" class="icon-sm"></i>
                                 </a>
+                                @endcan
                             </td>
                         </tr>
                         @endforeach
@@ -160,12 +162,14 @@
                             <td class="py-3 px-4 fw-semibold">{{ $role->name }}</td>
                             <td class="py-3 px-4 text-muted small">{{ $role->guard_name }}</td>
                             <td class="py-3 px-4 text-center">
+                                @can('update_roles')
                                 <a href="{{ route('admin.roles.edit', $role) }}"
                                    class="btn btn-sm btn-outline-success d-inline-flex align-items-center justify-content-center rounded-circle"
                                    style="width:32px;height:32px;"
                                    title="{{ __('Modifier') }}">
                                     <i data-lucide="pencil" class="icon-sm"></i>
                                 </a>
+                                @endcan
                             </td>
                         </tr>
                         @endforeach

@@ -62,7 +62,7 @@ class SearchService
             $results['pages'] = \Modules\Pages\Models\StaticPage::search($query)->take($limit)->get();
         }
 
-        if (($type === 'all' || $type === 'plans') && class_exists(\Modules\SaaS\Models\Plan::class)) {
+        if (($type === 'all' || $type === 'plans') && class_exists(\Modules\SaaS\Models\Plan::class) && \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
             $results['plans'] = \Modules\SaaS\Models\Plan::search($query)
                 ->query(fn ($q) => $q->where('is_active', true))
                 ->take($limit)

@@ -2313,11 +2313,55 @@ declare(strict_types=1);
  *     déjà utilisé pour masquer le menu « Utilisateurs » chez `editor`. Vérifié visuellement
  *     (Playwright, connexion réelle `sim-admin@memora.ca`) : bouton « Ajouter » absent, menu
  *     déroulant réduit à « Voir » seul. 59/59 tests RolesPermissions+Backoffice verts.
+ *
+ *   1.117.16 · 2026-07-22 · fix(divers) 5 correctifs trouvés par une passe adversariale `/100`
+ *     fraîche (3 sous-agents indépendants) sur les commits v1.117.11-15 de ce soir - protocole
+ *     de complétude déclenché par la question explicite de l'utilisateur.
+ *
+ *     FIX (DRY, régression introduite ce soir) - `Modules/Directory/resources/views/public/
+ *     show.blade.php` : `$tool->short_description` était affiché DEUX fois de façon identique
+ *     (paragraphe d'en-tête + nouvelle answer-box ajoutée en v1.117.14), contraire à l'objectif
+ *     SEO/AEO recherché (contenu dupliqué visible sur ~centaines de fiches outils). Paragraphe
+ *     d'en-tête retiré (attribut `data-editable` confirmé orphelin, aucun JS actif ne le
+ *     référence) - l'answer-box, avec un balisage sémantique supérieur, remplit seule ce rôle.
+ *
+ *     FIX (RBAC, complète v1.117.15) - le fix RBAC de ce soir ne couvrait que 2 des 4 vues
+ *     exposant les mêmes actions : `roles/show.blade.php` (bouton « Modifier » non gardé) et
+ *     `search/index.blade.php` (page `/admin/search`, boutons crayon non gardés pour rôles ET
+ *     utilisateurs). Même défaut UI (backend déjà sécurisé, 403 correct) que celui déjà corrigé
+ *     ailleurs - `@can('update_roles')`/`@can('update_users')` ajoutés aux 3 emplacements
+ *     restants. Vérifié visuellement (Playwright, `sim-admin@memora.ca`) : 0 lien Modifier rôle,
+ *     2 liens Modifier utilisateur (cohérent avec les permissions réelles d'admin).
+ *
+ *     FIX (sécurité, défense en profondeur) - `Article::safeContent()` (accesseur utilisé dans
+ *     la revue admin) utilisait le profil Purifier `default` (plus restrictif) au lieu du
+ *     nouveau profil `article` (v1.117.12) utilisé à la publication - incohérence entre ce que
+ *     l'admin voit en revue et ce qui est réellement publié. Aligné sur le même profil.
+ *     `app/Console/Commands/ImportWordPress.php` : le contenu d'un export WordPress externe
+ *     était écrit dans `Article::content` sans purification (2e point d'entrée `Article::create()`
+ *     non couvert par le fix XSS v1.117.12, outil CLI opérateur seulement donc risque bien plus
+ *     faible que la soumission publique, mais corrigé par cohérence/défense en profondeur).
+ *
+ *     FIX (bug pré-existant, sans lien, trouvé en vérifiant le fix RBAC) - `Modules/Search/app/
+ *     Services/SearchService.php::searchAdmin()` : 500 sur TOUTE recherche admin globale
+ *     (`/admin/search`) quand le module SaaS est désactivé - `class_exists(Plan::class)` reste
+ *     vrai (la classe PHP existe) même module désactivé, mais la table `plans` n'a jamais été
+ *     migrée (`SQLSTATE[42S02]`). Garde corrigée avec `Module::find('SaaS')?->isEnabled()`, même
+ *     pattern que le garde-fou de tests de v1.117.14. Confirmé par l'utilisateur en direct sur
+ *     son propre navigateur. Test de non-régression ajouté (`Modules/Search/tests/Feature/
+ *     SearchTest.php`), 7/7 verts.
+ *
+ *     NON CORRIGÉ, SIGNALÉ POUR DÉCISION UTILISATEUR (nécessite une réécriture d'historique git -
+ *     rebase + force-push - action à ne jamais faire sans confirmation explicite) : les 6 commits
+ *     v1.117.11 à v1.117.15 contiennent tous `Co-Authored-By: Claude Sonnet 5
+ *     <noreply@anthropic.com>` dans leur message, en violation de la règle projet non-négociable
+ *     #11 (jamais de référence Claude/Anthropic dans le code/commentaires/commits). Ce commit-ci
+ *     (v1.117.16) et tous les suivants n'incluent plus cette ligne.
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 15;
+$lvPatch = 16;
 
 return [
     'major' => $lvMajor,

@@ -191,7 +191,11 @@ class Article extends Model implements SearchableContract
 
     protected function safeContent(): Attribute
     {
-        return Attribute::get(fn () => Purifier::clean($this->content ?? ''));
+        // Profil 'article' (config/purifier.php) : meme profil que celui applique au contenu
+        // publie (voir ArticleSubmissionController) - la revue admin voit ainsi la structure
+        // reelle (h2-h6, tableaux...) plutot qu'une version sur-purifiee par le profil 'default'
+        // (audit 2026-07-22, incoherence trouvee entre l'apercu admin et le contenu publie).
+        return Attribute::get(fn () => Purifier::clean($this->content ?? '', 'article'));
     }
 
     public function getRouteKeyName(): string

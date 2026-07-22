@@ -351,7 +351,6 @@
                         @include('voting::components.vote-button', ['item' => $tool, 'type' => 'tool'])
                     @endif
                 </div>
-                <p style="color: #4B5563; margin: 6px 0 0; font-size: 1rem;" data-editable="short_description">{{ $tool->short_description }}</p>
                 @if(!empty($tool->description))
                     <button
                         type="button"

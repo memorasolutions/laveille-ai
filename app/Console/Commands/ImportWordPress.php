@@ -14,6 +14,7 @@ use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Mews\Purifier\Facades\Purifier;
 use SimpleXMLElement;
 
 class ImportWordPress extends Command
@@ -281,10 +282,13 @@ class ImportWordPress extends Command
 
                     $fallbackUserId = $userId ?? User::first()?->id ?? 1;
 
+                    // Securite (audit 2026-07-22) : purifier le contenu importe depuis un export
+                    // WordPress externe avant stockage, meme frontiere de confiance que la
+                    // soumission publique d'article (voir ArticleSubmissionController).
                     $article = \Modules\Blog\Models\Article::create([
                         'title' => $title,
                         'slug' => $slug,
-                        'content' => $content,
+                        'content' => Purifier::clean($content, 'article'),
                         'excerpt' => $excerpt ?: null,
                         'status' => $this->statusMap[$wpStatus] ?? 'draft',
                         'user_id' => $fallbackUserId,

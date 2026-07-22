@@ -14,9 +14,11 @@
 <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
     <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="shield" class="icon-md text-primary"></i>{{ __('Rôle :') }} {{ $role->name }}</h4>
     <div class="d-flex gap-2">
+        @can('update_roles')
         <a href="{{ route('admin.roles.edit', $role) }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
             <i data-lucide="pencil"></i> {{ __('Modifier') }}
         </a>
+        @endcan
         <a href="{{ route('admin.roles.index') }}" class="btn btn-sm btn-light d-inline-flex align-items-center gap-2">
             <i data-lucide="arrow-left"></i> {{ __('Retour') }}
         </a>

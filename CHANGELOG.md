@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.16] - 2026-07-22
+
+### Fixed
+- **Contenu dupliqué sur les fiches Annuaire** (régression v1.117.14) : `short_description` affiché deux fois, réduit à l'answer-box seule.
+- **RBAC incomplet** (complète v1.117.15) : `@can(...)` ajoutés sur `roles/show.blade.php` et `search/index.blade.php` (3 emplacements restants).
+- **Incohérence Purifier admin vs publication** : `Article::safeContent()` aligné sur le profil `article`.
+- **XSS défense en profondeur** : `ImportWordPress.php` purifie désormais le contenu importé.
+- **[500] Recherche admin globale cassée quand SaaS désactivé** : `SearchService::searchAdmin()` plantait sur toute recherche (`class_exists()` insuffisant, table `plans` jamais migrée). Corrigé avec vérification `Module::isEnabled()`.
+
+### Known issue (signalé, nécessite confirmation utilisateur)
+- Les commits v1.117.11 à v1.117.15 contiennent une signature `Co-Authored-By: Claude` en violation de la règle projet — corrigible seulement par réécriture d'historique git (force-push), non effectuée sans accord explicite.
+
 ## [1.117.15] - 2026-07-22
 
 ### Fixed

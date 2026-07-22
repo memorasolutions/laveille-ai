@@ -59,3 +59,17 @@ test('search service returns searchable models from config', function () {
     expect($models)->toBeArray();
     expect($models)->toContain(User::class);
 });
+
+test('searchAdmin does not 500 when SaaS module is disabled', function () {
+    // Regression 2026-07-22 : class_exists(Plan::class) est vrai meme module desactive
+    // (la classe PHP existe toujours), mais la table `plans` n'a pas ete migree ->
+    // SQLSTATE 42S02 non gere. searchAdmin() doit degrader proprement (plans vide),
+    // pas planter, quand le module SaaS est desactive dans modules_statuses.json.
+    expect(\Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled())->toBeFalse();
+
+    $service = app(SearchService::class);
+    $results = $service->searchAdmin('admin');
+
+    expect($results)->toHaveKey('plans');
+    expect($results['plans'])->toHaveCount(0);
+});
