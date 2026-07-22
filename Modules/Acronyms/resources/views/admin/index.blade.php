@@ -4,7 +4,9 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="fw-bold mb-0"><i data-lucide="graduation-cap" class="icon-md text-primary"></i> {{ __('Acronymes de l\'éducation') }}</h4>
+    @can('create_acronyms')
     <a href="{{ route('admin.acronyms.create') }}" class="btn btn-primary btn-sm">+ {{ __('Nouvel acronyme') }}</a>
+    @endcan
 </div>
 
 @if(session('success'))
@@ -37,12 +39,19 @@
                         @endif
                     </td>
                     <td class="text-end">
-                        @include('core::components.action-menu', ['actions' => [
-                            ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('acronyms.show', $acronym->getTranslation('slug', app()->getLocale())), 'target' => '_blank'],
-                            ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.acronyms.edit', $acronym)],
-                            ['divider' => true],
-                            ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.acronyms.destroy', $acronym), 'method' => 'DELETE', 'confirm' => __('Supprimer ?'), 'danger' => true],
-                        ]])
+                        @php
+                            $acronymActions = [
+                                ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('acronyms.show', $acronym->getTranslation('slug', app()->getLocale())), 'target' => '_blank'],
+                            ];
+                            if (auth()->user()?->can('update_acronyms')) {
+                                $acronymActions[] = ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.acronyms.edit', $acronym)];
+                            }
+                            if (auth()->user()?->can('delete_acronyms')) {
+                                $acronymActions[] = ['divider' => true];
+                                $acronymActions[] = ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.acronyms.destroy', $acronym), 'method' => 'DELETE', 'confirm' => __('Supprimer ?'), 'danger' => true];
+                            }
+                        @endphp
+                        @include('core::components.action-menu', ['actions' => $acronymActions])
                     </td>
                 </tr>
                 @endforeach

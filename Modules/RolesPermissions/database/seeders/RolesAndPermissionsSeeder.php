@@ -27,6 +27,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'faqs', 'testimonials', 'forms', 'widgets', 'plans', 'seo', 'newsletter',
             'campaigns', 'short_urls', 'teams', 'tenants', 'workflows',
             'products', 'ecommerce_orders', 'coupons',
+            'acronyms', 'dictionary_terms',
         ];
 
         foreach ($patternAEntities as $entity) {
@@ -85,6 +86,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_testimonials', 'create_testimonials', 'update_testimonials',
             'view_forms', 'create_forms', 'update_forms',
             'view_widgets',
+            'view_acronyms', 'create_acronyms', 'update_acronyms',
+            'view_dictionary_terms', 'create_dictionary_terms', 'update_dictionary_terms',
             'view_contacts',
             'view_admin_panel',
             'view_dashboard',

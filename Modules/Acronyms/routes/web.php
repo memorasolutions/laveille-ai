@@ -55,11 +55,15 @@ Route::middleware(['web', 'auth'])->group(function () {
 });
 
 Route::middleware(['web', 'auth'])->prefix('admin/acronyms')->name('admin.acronyms.')->group(function () {
-    Route::get('/', [AcronymAdminController::class, 'index'])->name('index');
-    Route::get('/create', [AcronymAdminController::class, 'create'])->name('create');
-    Route::post('/', [AcronymAdminController::class, 'store'])->name('store');
-    Route::get('/{acronym}/edit', [AcronymAdminController::class, 'edit'])->name('edit');
-    Route::put('/{acronym}', [AcronymAdminController::class, 'update'])->name('update');
-    Route::patch('/{acronym}/autosave', [AcronymAdminController::class, 'autosave'])->name('autosave');
-    Route::delete('/{acronym}', [AcronymAdminController::class, 'destroy'])->name('destroy');
+    Route::get('/', [AcronymAdminController::class, 'index'])->name('index')->middleware('permission:view_acronyms');
+    Route::middleware('permission:create_acronyms')->group(function () {
+        Route::get('/create', [AcronymAdminController::class, 'create'])->name('create');
+        Route::post('/', [AcronymAdminController::class, 'store'])->name('store');
+    });
+    Route::middleware('permission:update_acronyms')->group(function () {
+        Route::get('/{acronym}/edit', [AcronymAdminController::class, 'edit'])->name('edit');
+        Route::put('/{acronym}', [AcronymAdminController::class, 'update'])->name('update');
+        Route::patch('/{acronym}/autosave', [AcronymAdminController::class, 'autosave'])->name('autosave');
+    });
+    Route::delete('/{acronym}', [AcronymAdminController::class, 'destroy'])->name('destroy')->middleware('permission:delete_acronyms');
 });

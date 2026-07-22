@@ -2461,11 +2461,44 @@ declare(strict_types=1);
  *     échantillon) constitue la clôture du fil RBAC-affordance ouvert par la passe adversariale
  *     `/100` (rounds 1-4) : plus aucun groupe de permissions à scission connu dans le projet
  *     n'est sans garde `@can` correspondante côté vue.
+ *   1.117.21 · 2026-07-22 · fix(security) CORRECTIF DE SÉCURITÉ - round 5 adversarial `/100` a
+ *     invalidé la clôture annoncée en v1.117.20 : les modules `Acronyms` (acronymes éducation)
+ *     et `Dictionary` (Glossaire Techno) n'avaient JAMAIS été intégrés au système de permissions
+ *     Spatie du projet. Leurs routes `admin/acronyms/*` et `admin/dictionary/*` (index/create/
+ *     store/edit/update/autosave/destroy) n'étaient protégées que par le middleware générique
+ *     `['web','auth']` - **N'IMPORTE QUEL UTILISATEUR CONNECTÉ** (pas seulement un compte admin)
+ *     pouvait créer/modifier/supprimer des acronymes et des termes de glossaire en naviguant
+ *     directement vers ces URLs. Contrairement à toutes les autres découvertes des rounds 1-4
+ *     (défauts d'affordance UI seuls, le backend bloquait déjà en 403), ceci était une vraie
+ *     faille de contrôle d'accès (OWASP A01 - Broken Access Control), le seul frein résiduel
+ *     étant `Gate::before` (super_admin bypass) qui ne protège PAS les comptes admin/éditeur
+ *     normaux ni les utilisateurs standards.
+ *
+ *     Corrigé : ajout de `acronyms`/`dictionary_terms` au pattern CRUD complet (`view_/create_/
+ *     update_/delete_`) de `Modules/RolesPermissions/database/seeders/RolesAndPermissionsSeeder.php`
+ *     (+ ajout au rôle `editor` : view/create/update, pas delete, cohérent avec les autres entités
+ *     de contenu) ; middleware `permission:xxx` ajouté sur chaque groupe de routes des 2 modules ;
+ *     `@can` ajoutés sur les boutons Créer/Modifier/Supprimer des 2 vues admin (même classe de
+ *     défense en profondeur que les rounds 1-4, en plus du fix serveur qui est le vrai correctif).
+ *     Vérifié à la fois par `->can()` direct ET par test HTTP réel (`assertForbidden()`/
+ *     `assertOk()`) : utilisateur `role:user` → 403 confirmé sur les 2 modules, superadmin →
+ *     accès normal préservé via `Gate::before`. 31/31 tests Acronyms+Dictionary+RolesPermissions
+ *     verts.
+ *
+ *     ACTION REQUISE APRÈS DÉPLOIEMENT (non automatique - le pipeline CI ne lance que `migrate
+ *     --force`, jamais de seeder) : exécuter `php artisan app:sync-permissions` sur le serveur de
+ *     PRODUCTION pour créer effectivement les nouvelles permissions en base et les assigner aux
+ *     rôles existants - commande additive/sûre (`firstOrCreate`, ne supprime jamais de permission
+ *     existante) mais constitue une mutation d'un système externe (prod) au sens des règles du
+ *     projet, donc nécessite l'approbation explicite de l'utilisateur avant exécution. Tant que
+ *     cette commande n'a pas tourné en prod, le code déployé bloque tout le monde SAUF le
+ *     superadmin sur ces 2 modules (fail-safe : ferme la faille immédiatement au lieu de la
+ *     laisser ouverte en attendant la synchronisation).
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 20;
+$lvPatch = 21;
 
 return [
     'major' => $lvMajor,

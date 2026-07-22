@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.21] - 2026-07-22
+
+### Security
+- **CORRECTIF DE SÉCURITÉ** — Modules `Acronyms` et `Dictionary` (Glossaire Techno) jamais intégrés au système de permissions : n'importe quel utilisateur connecté (pas seulement admin) pouvait créer/modifier/supprimer des acronymes et termes de glossaire en naviguant directement vers `/admin/acronyms` ou `/admin/dictionary`. Ajout des permissions `view_/create_/update_/delete_acronyms` et `_dictionary_terms` + middleware sur les routes + `@can` sur les vues. Testé (403 confirmé pour un rôle `user`, accès superadmin préservé).
+- **Action manuelle requise en prod** : `php artisan app:sync-permissions` doit être exécuté sur le serveur pour créer les nouvelles permissions en base (le pipeline CI ne lance que `migrate --force`, pas de seeder). En attendant, le code déployé bloque tout le monde sauf le superadmin sur ces 2 modules (fail-safe).
+
 ## [1.117.20] - 2026-07-22
 
 ### Fixed

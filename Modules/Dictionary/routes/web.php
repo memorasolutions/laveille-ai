@@ -57,11 +57,15 @@ Route::middleware(['web', 'auth'])->group(function () {
 });
 
 Route::middleware(['web', 'auth'])->prefix('admin/dictionary')->name('admin.dictionary.')->group(function () {
-    Route::get('/', [TermAdminController::class, 'index'])->name('index');
-    Route::get('/create', [TermAdminController::class, 'create'])->name('create');
-    Route::post('/', [TermAdminController::class, 'store'])->name('store');
-    Route::get('/{term}/edit', [TermAdminController::class, 'edit'])->name('edit');
-    Route::put('/{term}', [TermAdminController::class, 'update'])->name('update');
-    Route::patch('/{term}/autosave', [TermAdminController::class, 'autosave'])->name('autosave');
-    Route::delete('/{term}', [TermAdminController::class, 'destroy'])->name('destroy');
+    Route::get('/', [TermAdminController::class, 'index'])->name('index')->middleware('permission:view_dictionary_terms');
+    Route::middleware('permission:create_dictionary_terms')->group(function () {
+        Route::get('/create', [TermAdminController::class, 'create'])->name('create');
+        Route::post('/', [TermAdminController::class, 'store'])->name('store');
+    });
+    Route::middleware('permission:update_dictionary_terms')->group(function () {
+        Route::get('/{term}/edit', [TermAdminController::class, 'edit'])->name('edit');
+        Route::put('/{term}', [TermAdminController::class, 'update'])->name('update');
+        Route::patch('/{term}/autosave', [TermAdminController::class, 'autosave'])->name('autosave');
+    });
+    Route::delete('/{term}', [TermAdminController::class, 'destroy'])->name('destroy')->middleware('permission:delete_dictionary_terms');
 });

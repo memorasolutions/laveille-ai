@@ -4,7 +4,9 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="fw-bold mb-0"><i data-lucide="book-open" class="icon-md text-primary"></i> {{ __('Termes du glossaire') }}</h4>
+    @can('create_dictionary_terms')
     <a href="{{ route('admin.dictionary.create') }}" class="btn btn-primary btn-sm">+ {{ __('Nouveau terme') }}</a>
+    @endcan
 </div>
 
 @if(session('success'))
@@ -29,12 +31,19 @@
                     <td><span class="badge bg-primary bg-opacity-10 text-primary">{{ $term->type === 'acronym' ? __('Acronyme') : ($term->type === 'ai_term' ? __('Terme IA') : __('Vulgarisation')) }}</span></td>
                     <td>{{ $term->category?->name ?? '-' }}</td>
                     <td class="text-end">
-                        @include('core::components.action-menu', ['actions' => [
-                            ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('dictionary.show', $term->slug), 'target' => '_blank'],
-                            ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.dictionary.edit', $term)],
-                            ['divider' => true],
-                            ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.dictionary.destroy', $term), 'method' => 'DELETE', 'confirm' => __('Supprimer ?'), 'danger' => true],
-                        ]])
+                        @php
+                            $termActions = [
+                                ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('dictionary.show', $term->slug), 'target' => '_blank'],
+                            ];
+                            if (auth()->user()?->can('update_dictionary_terms')) {
+                                $termActions[] = ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.dictionary.edit', $term)];
+                            }
+                            if (auth()->user()?->can('delete_dictionary_terms')) {
+                                $termActions[] = ['divider' => true];
+                                $termActions[] = ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.dictionary.destroy', $term), 'method' => 'DELETE', 'confirm' => __('Supprimer ?'), 'danger' => true];
+                            }
+                        @endphp
+                        @include('core::components.action-menu', ['actions' => $termActions])
                     </td>
                 </tr>
                 @endforeach
