@@ -80,10 +80,13 @@
                                        class="dropdown-item d-flex align-items-center gap-2">
                                         <i data-lucide="eye" class="icon-sm text-info"></i> {{ __('Voir') }}
                                     </a>
+                                    @can('update_roles')
                                     <a href="{{ route('admin.roles.edit', $role) }}"
                                        class="dropdown-item d-flex align-items-center gap-2">
                                         <i data-lucide="pencil" class="icon-sm text-success"></i> {{ __('Modifier') }}
                                     </a>
+                                    @endcan
+                                    @can('delete_roles')
                                     @unless(in_array($role->name, ['super_admin', 'admin']))
                                         <form action="{{ route('admin.roles.destroy', $role) }}" method="POST"
                                               data-confirm="{{ __('Confirmer la suppression ?') }}">
@@ -94,6 +97,7 @@
                                             </button>
                                         </form>
                                     @endunless
+                                    @endcan
                                 </div>
                             </div>
                         </td>

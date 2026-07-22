@@ -16,10 +16,12 @@
         <x-backoffice::help-modal id="helpRolesModal" :title="__('Rôles et permissions')" icon="shield-check" :buttonLabel="__('Aide')">
             @include('backoffice::themes.backend.roles._help')
         </x-backoffice::help-modal>
+        @can('create_roles')
         <a href="{{ route('admin.roles.create') }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
             <i data-lucide="plus"></i>
             {{ __('Ajouter') }}
         </a>
+        @endcan
     </div>
 </div>
 

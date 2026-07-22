@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.15] - 2026-07-22
+
+### Fixed
+- **Boutons admin de gestion des rôles visibles sans permission** (trouvé par la simulation E2E `/sim`) : « Ajouter »/« Modifier »/« Supprimer » sur `/admin/roles` s'affichaient pour ADMIN alors qu'il n'a pas ces permissions. Backend déjà sécurisé (403), correction purement UI (`@can(...)` ajoutés).
+
 ## [1.117.14] - 2026-07-22
 
 ### Added

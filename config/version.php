@@ -2298,11 +2298,26 @@ declare(strict_types=1);
  *     police d'icônes `tabler-icons.woff2` (761 Ko) chargée en entier sur `/login` pour quelques
  *     icônes ; registre des incidents de confidentialité absent (Loi 25, nouvelle fonctionnalité
  *     à concevoir) ; 2 modules critiques sans aucun test (Shop en priorité - paiements, Community).
+ *
+ *   1.117.15 · 2026-07-22 · fix(rbac) Boutons admin « Ajouter/Modifier/Supprimer un rôle »
+ *     visibles sans la permission - trouvé par la simulation E2E Phase 3 (`/sim`, rôle ADMIN,
+ *     compte `sim-admin@memora.ca`) : le bouton « Ajouter » sur `/admin/roles`
+ *     (`Modules/Backoffice/resources/views/themes/backend/roles/index.blade.php`) et les liens
+ *     « Modifier »/« Supprimer » du menu déroulant par ligne
+ *     (`.../livewire/roles-table.blade.php`) s'affichaient pour ADMIN alors que ce rôle n'a ni
+ *     `create_roles`, ni `update_roles`, ni `delete_roles` (RBAC volontaire, seul `super_admin`
+ *     les possède). Le backend bloquait déjà correctement (403 confirmé par la simulation) -
+ *     AUCUNE faille de sécurité, seulement une affordance UI trompeuse (admin clique un bouton
+ *     visible pour atterrir sur une page d'erreur). Corrigé en 3 `@can(...)` ciblés sur les
+ *     permissions exactes des routes (`create_roles`/`update_roles`/`delete_roles`), même pattern
+ *     déjà utilisé pour masquer le menu « Utilisateurs » chez `editor`. Vérifié visuellement
+ *     (Playwright, connexion réelle `sim-admin@memora.ca`) : bouton « Ajouter » absent, menu
+ *     déroulant réduit à « Voir » seul. 59/59 tests RolesPermissions+Backoffice verts.
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 14;
+$lvPatch = 15;
 
 return [
     'major' => $lvMajor,
