@@ -2593,11 +2593,37 @@ declare(strict_types=1);
  *     Dictionary, Shop) et tous les scaffolds morts identifiables par grep exhaustif sont
  *     traités ; ce qui reste à chaque round est de plus en plus marginal (code mort inerte, pas
  *     une faille active).
+ *   1.117.25 · 2026-07-23 · fix(security) Round 9 adversarial /100, 2 trouvailles :
+ *
+ *     (1) Oubli du round 8 : les fichiers routes/api.php jumeaux d'Export/Translation/Backup
+ *     (nettoyés côté web.php en v1.117.23) avaient le même scaffold apiResource mort, jamais
+ *     touchés puisque le round 8 avait listé 10 AUTRES modules sans revérifier ceux déjà traités
+ *     côté web. Supprimés (Export/Translation actifs en prod, Backup désactivé donc non chargé
+ *     actuellement mais corrigé en prévention).
+ *
+ *     (2) Vrai bug FONCTIONNEL (pas sécurité) trouvé et corrigé : la route de création
+ *     d'expérience A/B (Modules/Backoffice/routes/web.php, groupe experiments.create/store)
+ *     exigeait `permission:create_feature_flags`, une permission qui n'a JAMAIS existé dans le
+ *     seeder (feature_flags suit le Pattern B view_/manage_ uniquement, pas le Pattern A CRUD
+ *     complet - RolesAndPermissionsSeeder.php). Conséquence : la fonctionnalité « Nouvelle
+ *     expérience » était inaccessible à absolument tout le monde sauf superadmin (via
+ *     Gate::before), y compris les rôles admin/éditeur qui devraient normalement y avoir accès.
+ *     Corrigé en alignant la route ET les 2 gardes `@can` de la vue (`Modules/ABTest/resources/
+ *     views/admin/experiments/index.blade.php`) sur `manage_feature_flags`, la permission
+ *     réellement seedée pour cette entité - restaure l'accès normal sans introduire de nouvelle
+ *     permission ni casser le schéma Pattern B établi. Vérifié : `admin->hasPermissionTo(
+ *     'manage_feature_flags')` confirmé vrai après resynchronisation ; `create_feature_flags`
+ *     confirmé absent de la base (n'a jamais dû exister). 55/55 tests verts sur les modules
+ *     touchés (ABTest, Backoffice, Export, Translation, Backup).
+ *
+ *     Fil RBAC toujours ouvert au sens strict (round 9 non-vide), mais nature des trouvailles en
+ *     baisse constante depuis le round 6 : plus aucune vraie faille de contrôle d'accès active,
+ *     seulement du code mort résiduel et un bug d'accès trop restrictif (l'inverse d'une faille).
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 24;
+$lvPatch = 25;
 
 return [
     'major' => $lvMajor,

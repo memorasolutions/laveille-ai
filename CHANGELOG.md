@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.25] - 2026-07-23
+
+### Security
+- Round 9 adversarial `/100` : fichiers `routes/api.php` jumeaux d'Export/Translation/Backup (oubliés au round 8) — même scaffold mort nettoyé.
+
+### Fixed
+- **Bug fonctionnel** (pas sécurité) : la création d'expérience A/B exigeait une permission `create_feature_flags` jamais seedée — inaccessible à tout le monde sauf superadmin. Aligné sur `manage_feature_flags` (permission réellement seedée pour cette entité).
+
 ## [1.117.24] - 2026-07-23
 
 ### Security

@@ -303,7 +303,11 @@ Route::prefix('admin')
                 Route::get('experiments', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'index'])->name('experiments.index');
                 Route::get('experiments/{experiment}', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'show'])->name('experiments.show');
             });
-            Route::middleware('permission:create_feature_flags')->group(function () {
+            // permission:manage_feature_flags (pas create_feature_flags, qui n'existe pas dans
+            // le seeder - feature_flags suit le Pattern B view_/manage_ uniquement, cf.
+            // RolesAndPermissionsSeeder.php - bug fonctionnel trouvé et corrigé au round 9 /100,
+            // 2026-07-23 : la fonctionnalité était inaccessible à tout le monde sauf superadmin).
+            Route::middleware('permission:manage_feature_flags')->group(function () {
                 Route::get('experiments/create', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'create'])->name('experiments.create');
                 Route::post('experiments', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'store'])->name('experiments.store');
             });

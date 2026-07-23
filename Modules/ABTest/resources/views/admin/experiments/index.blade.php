@@ -15,7 +15,7 @@
             <x-backoffice::help-modal id="helpExperimentsModal" :title="__('Qu\'est-ce qu\'un test A/B ?')" icon="flask-conical" :buttonLabel="__('Aide')">
                 @include('abtest::admin.experiments._help')
             </x-backoffice::help-modal>
-            @can('create_feature_flags')
+            @can('manage_feature_flags')
             <a href="{{ route('admin.experiments.create') }}" class="btn btn-primary">
                 <i data-lucide="plus"></i> {{ __('Nouvelle expérience') }}
             </a>
@@ -73,7 +73,7 @@
                 <i data-lucide="flask-conical" class="icon-xl text-muted mb-3"></i>
                 <h5 class="text-muted">{{ __('Aucune expérience') }}</h5>
                 <p class="text-muted mb-4">{{ __('Créez votre première expérience A/B pour optimiser vos conversions.') }}</p>
-                @can('create_feature_flags')
+                @can('manage_feature_flags')
                 <a href="{{ route('admin.experiments.create') }}" class="btn btn-primary"><i data-lucide="plus"></i> {{ __('Nouvelle expérience') }}</a>
                 @endcan
             </div>

@@ -8,9 +8,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Route;
-use Modules\Translation\Http\Controllers\TranslationController;
-
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('translations', TranslationController::class)->names('translation');
-});
+// Scaffold nwidart jamais implémenté (TranslationController vide, aucune méthode d'écriture
+// réelle) - route API supprimée par cohérence sécurité (2026-07-23), même motif que le pendant
+// web.php déjà retiré en v1.117.23 - fichier api.php jumeau oublié au round 8, trouvé au round 9.

@@ -8,9 +8,7 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Route;
-use Modules\Backup\Http\Controllers\BackupController;
-
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('backups', BackupController::class)->names('backup');
-});
+// Scaffold nwidart jamais implémenté (BackupController vide, aucune méthode d'écriture réelle) -
+// route API supprimée par cohérence sécurité (2026-07-23), même motif que le pendant web.php
+// déjà retiré en v1.117.23. Module désactivé (routes non chargées actuellement), corrigé quand
+// même en prévention d'une réactivation future.
