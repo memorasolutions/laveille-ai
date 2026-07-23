@@ -529,18 +529,69 @@
                     return last ? last.trim() : null;
                 },
 
-                // Recherche du dernier objet JSON complet en partant du dernier "{" et en
-                // avançant en comptant les accolades (conscient des guillemets/échappements),
-                // ce qui gère correctement les accolades imbriquées contrairement à un simple
-                // indexOf('{')/lastIndexOf('}').
+                // Recherche l'objet JSON racine du document parmi TOUTES les accolades ouvrantes
+                // du texte (pas seulement la dernière — un JSON multi-sections a autant de "{"
+                // que de sections imbriquées + 1 pour l'objet racine ; partir uniquement de la
+                // DERNIÈRE "{" capture systématiquement la dernière section imbriquée, pas le
+                // document complet). Pour chaque position, on extrait le candidat équilibré
+                // (accolades conscientes des chaînes, via _extractBalancedFrom, inchangée) puis on
+                // le parse à l'essai : le candidat retenu est celui qui contient une clé "sections"
+                // (tableau non vide) avec le PLUS de sections — signe distinctif du document racine
+                // plutôt que d'un fragment de section individuelle. Si aucun candidat n'a de clé
+                // "sections" valide (format de réponse IA vraiment différent), on retombe sur le
+                // comportement historique (dernier "{" en partant de la fin, premier candidat
+                // syntaxiquement équilibré) pour ne rien régresser sur les cas déjà couverts.
                 _lastBalancedJsonObject: function (text) {
+                    var positions = this._openBracePositions(text);
+                    var bestCandidate = null;
+                    var bestSectionCount = 0;
+                    for (var p = 0; p < positions.length; p++) {
+                        var candidate = this._extractBalancedFrom(text, positions[p]);
+                        if (!candidate) continue;
+                        // Parse d'ESSAI, indépendant du parse final fait par importScript() sur le
+                        // candidat choisi (via _cleanJsonCandidate puis JSON.parse) — silencieux en
+                        // cas d'échec, ce n'est qu'une heuristique de sélection du meilleur candidat.
+                        var parsed = null;
+                        try {
+                            parsed = JSON.parse(candidate);
+                        } catch (e) {
+                            parsed = null;
+                        }
+                        if (parsed && typeof parsed === 'object' && Array.isArray(parsed.sections) &&
+                            parsed.sections.length > bestSectionCount) {
+                            bestSectionCount = parsed.sections.length;
+                            bestCandidate = candidate;
+                        }
+                    }
+                    if (bestCandidate) return bestCandidate;
+
+                    // Repli — comportement historique inchangé.
                     var openIdx = text.lastIndexOf('{');
                     while (openIdx !== -1) {
-                        var candidate = this._extractBalancedFrom(text, openIdx);
-                        if (candidate) return candidate;
+                        var fallback = this._extractBalancedFrom(text, openIdx);
+                        if (fallback) return fallback;
                         openIdx = text.lastIndexOf('{', openIdx - 1);
                     }
                     return null;
+                },
+
+                // Positions de toutes les accolades ouvrantes du texte, de la première à la
+                // dernière. Limite à ~150 positions max (sous-échantillon régulier réparti sur
+                // tout le texte si dépassement) pour éviter un coût quadratique excessif sur un
+                // texte pathologiquement long — le cas d'usage réel (réponse d'IA collée, quelques
+                // Ko, dizaines de sections max) ne devrait jamais s'en approcher.
+                _openBracePositions: function (text) {
+                    var all = [];
+                    for (var i = 0; i < text.length; i++) {
+                        if (text[i] === '{') all.push(i);
+                    }
+                    if (all.length <= 150) return all;
+                    var sampled = [];
+                    var step = all.length / 150;
+                    for (var j = 0; j < 150; j++) {
+                        sampled.push(all[Math.floor(j * step)]);
+                    }
+                    return sampled;
                 },
 
                 _extractBalancedFrom: function (text, startIdx) {

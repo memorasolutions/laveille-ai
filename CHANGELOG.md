@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.118.1] - 2026-07-23
+
+### Fixed
+- **Prompteur** : import du script JSON échouait silencieusement quand la réponse de l'IA était collée sans habillage (JSON brut, ni marqueurs ni bloc ```json```) — seule la dernière section était extraite au lieu du document complet. Corrigé (recherche du document racine parmi toutes les accolades ouvrantes, pas seulement la dernière). Signalé par un utilisateur, reproduit, corrigé et vérifié visuellement (8/8 sections importées).
+
 ## [1.118.0] - 2026-07-23
 
 ### Added

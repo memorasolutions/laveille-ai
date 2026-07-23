@@ -2687,11 +2687,31 @@ declare(strict_types=1);
  *     fournisseur OAuth en prénom/nom, `name` conservé tel quel. 31/31 tests Auth verts, aucune
  *     régression. Vérifié par test visuel Playwright : inscription réelle avec Prénom « Jean » +
  *     Nom de famille « Dupont-Test » -> `name` en base confirmé = concaténation exacte des deux.
+ *   1.118.1 · 2026-07-23 · fix(prompteur) Import du script JSON généré par l'IA (onglet éditeur,
+ *     collage de la réponse ChatGPT/Claude/etc.) échouait silencieusement quand la réponse était
+ *     du JSON brut sans habillage (ni les marqueurs internes, ni un bloc ```json``` - cas réel
+ *     signalé par un utilisateur qui avait collé la réponse JSON pure de ChatGPT). Cause racine :
+ *     `_lastBalancedJsonObject()` ne cherchait le document qu'à partir de la DERNIÈRE accolade
+ *     ouvrante du texte - pour un JSON multi-sections, c'est toujours l'accolade de la dernière
+ *     section imbriquée, jamais celle de l'objet racine, donc seule la dernière section (sans sa
+ *     clé `sections`) était extraite et l'import échouait sans retrouver aucune section
+ *     exploitable. Corrigé : la fonction teste maintenant TOUTES les accolades ouvrantes du texte
+ *     (plafonné à 150 positions avec sous-échantillonnage au-delà, anti-coût-quadratique) et
+ *     retient le candidat dont la clé `sections` compte le PLUS d'éléments - le document racine
+ *     complet plutôt qu'un fragment. Repli sur le comportement historique inchangé si aucun
+ *     candidat n'a de clé `sections` valide (aucune régression sur les cas déjà couverts :
+ *     marqueurs internes, bloc fenced, objet à section unique). Reproduit le bug avant correctif
+ *     (candidat = fragment de 116 caractères, 0 section) puis confirmé après (document complet,
+ *     8/8 sections) avec le JSON réel fourni par l'utilisateur ; 5 scénarios de non-régression
+ *     testés (marqueurs, fenced, brut, préambule+brut, section unique) tous corrects ; test de
+ *     charge à 300 sections traité en 3 ms. Vérifié par test visuel Playwright : import réel du
+ *     JSON complet -> message « 8 sections importées avec succès », les 8 vrais titres affichés
+ *     dans l'éditeur (au lieu du gabarit générique à 4 sections observé avant correctif).
  */
 
 $lvMajor = 1;
 $lvMinor = 118;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,
