@@ -44,7 +44,9 @@
                         <small class="text-muted">{{ __('Variable .env : STRIPE_SECRET_KEY') }}</small>
                     </div>
 
+                    @can('manage_shop')
                     <button type="submit" class="btn btn-primary">{{ __('Sauvegarder') }}</button>
+                    @endcan
                 </form>
             </div>
         </div>

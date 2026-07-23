@@ -2494,11 +2494,55 @@ declare(strict_types=1);
  *     cette commande n'a pas tourné en prod, le code déployé bloque tout le monde SAUF le
  *     superadmin sur ces 2 modules (fail-safe : ferme la faille immédiatement au lieu de la
  *     laisser ouverte en attendant la synchronisation).
+ *   1.117.22 · 2026-07-23 · fix(security) CORRECTIF DE SÉCURITÉ #2 - round 6 adversarial `/100`
+ *     (préfixes admin construits dynamiquement via `config()`, invisibles au grep littéral
+ *     `prefix('admin` des rounds précédents) : `Modules/Shop/routes/web.php` exposait TOUT le
+ *     back-office boutique (CRUD produits, consultation/annulation de TOUTES les commandes
+ *     clients, réglages boutique, assistant Gelato) protégé SEULEMENT par `['web','auth']` -
+ *     **n'importe quel utilisateur connecté, même un simple client**, avait un accès admin
+ *     complet à la boutique (module `Shop` actif en prod). Plus grave que le correctif Acronyms/
+ *     Dictionary de v1.117.21 car il touche des données de commerce/commandes clients, pas
+ *     seulement du contenu éditorial.
+ *
+ *     Corrigé en réutilisant des permissions QUI EXISTAIENT DÉJÀ dans le seeder RBAC
+ *     (`view_/create_/update_/delete_products`, `view_/update_ecommerce_orders`) mais n'avaient
+ *     JAMAIS été câblées à aucune route nulle part dans le projet - trouvaille confirmée par
+ *     grep (`view_products` etc. absents de tout `Modules/*/routes/`). Nouvelle entrée `shop`
+ *     ajoutée au pattern B (opérationnel, `view_shop`/`manage_shop`) pour les réglages boutique,
+ *     distincts du CRUD produits. `@can` ajoutés sur les boutons Créer/Modifier/Supprimer/
+ *     Annuler des 3 vues admin concernées (défense en profondeur, en plus du vrai correctif
+ *     serveur). Bonus (même fichiers déjà ouverts) : 2 `confirm()` JS natifs supprimés
+ *     (`Modules/Shop/resources/views/admin/products/index.blade.php` et `admin/orders/
+ *     show.blade.php`), remplacés par l'attribut `data-confirm` (modale du thème, pattern déjà
+ *     établi sur ce projet) - violation de la règle projet §7 trouvée en passant en éditant ces
+ *     mêmes fichiers.
+ *
+ *     Trouvaille secondaire mineure (même round) : `Modules/Authors/routes/web.php` exposait un
+ *     scaffold nwidart par défaut jamais implémenté (`Route::resource('authors', ...)`, méthodes
+ *     store/update/destroy vides, vues create/edit/show inexistantes) sous `['auth','verified']`
+ *     seul - impact fonctionnel nul (aucune écriture DB possible), mais dette de code mort
+ *     supprimée par cohérence plutôt que gardée par permission pour rien. Import inutilisé
+ *     retiré. Le pendant `Modules/Authors/routes/api.php` (même contrôleur, même vide
+ *     fonctionnel, gardé par `auth:sanctum`) laissé tel quel - hors périmètre du round 6, à
+ *     traiter séparément si signalé.
+ *
+ *     Vérifié : test HTTP réel (`assertForbidden()`/`assertOk()`) - rôle `user` → 403 confirmé
+ *     sur products/orders/settings, rôle `admin` ET superadmin → accès normal (via les
+ *     permissions `products`/`ecommerce_orders` déjà présentes dans le rôle admin par défaut,
+ *     `Permission::whereNotIn(['create_roles','update_roles','delete_roles'])`). 197/197 tests
+ *     Authors verts (aucune régression de la suppression du scaffold mort) ; module Shop n'a
+ *     aucune suite de tests dédiée (gap déjà connu, backlog audit antérieur).
+ *
+ *     ACTION REQUISE APRÈS DÉPLOIEMENT (identique à v1.117.21) : exécuter
+ *     `php artisan app:sync-permissions` sur PRODUCTION pour créer `view_shop`/`manage_shop` en
+ *     base et confirmer que `products`/`ecommerce_orders` (déjà seedées historiquement mais
+ *     jamais utilisées) sont bien assignées aux rôles admin/superadmin. Tant que non exécuté,
+ *     fail-safe identique : tout le monde sauf superadmin bloqué sur `/admin/shop/*`.
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 21;
+$lvPatch = 22;
 
 return [
     'major' => $lvMajor,

@@ -7,7 +7,9 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4 class="card-title mb-0">{{ __('Produits') }}</h4>
+                    @can('create_products')
                     <a href="{{ route('admin.shop.products.create') }}" class="btn btn-primary">{{ __('Ajouter un produit') }}</a>
+                    @endcan
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover">
@@ -42,11 +44,15 @@
                                     @endswitch
                                 </td>
                                 <td>
+                                    @can('update_products')
                                     <a href="{{ route('admin.shop.products.edit', $product) }}" class="btn btn-outline-primary btn-sm">{{ __('Modifier') }}</a>
-                                    <form action="{{ route('admin.shop.products.destroy', $product) }}" method="POST" class="d-inline">
+                                    @endcan
+                                    @can('delete_products')
+                                    <form action="{{ route('admin.shop.products.destroy', $product) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer ce produit ?') }}">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('{{ __('Supprimer ce produit ?') }}')">{{ __('Supprimer') }}</button>
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">{{ __('Supprimer') }}</button>
                                     </form>
+                                    @endcan
                                 </td>
                             </tr>
                             @empty

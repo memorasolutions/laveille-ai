@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.22] - 2026-07-23
+
+### Security
+- **CORRECTIF DE SÉCURITÉ #2** — Module `Shop` : le back-office boutique complet (produits, commandes clients, réglages, wizard Gelato) n'était protégé que par `['web','auth']` — n'importe quel client connecté avait un accès admin complet. Réutilisation de permissions déjà présentes dans le seeder (`products`, `ecommerce_orders`) mais jamais câblées à aucune route + nouvelle permission `shop` (réglages). Testé (403 confirmé pour un rôle `user`, admin/superadmin OK).
+- **Action manuelle requise en prod** (identique à v1.117.21) : `php artisan app:sync-permissions` doit tourner sur le serveur.
+- Bonus : suppression de 2 `confirm()` JS natifs (règle projet violée) dans les vues Shop touchées, remplacés par `data-confirm`.
+- Nettoyage : scaffold nwidart mort (`Modules/Authors`, jamais implémenté) supprimé.
+
 ## [1.117.21] - 2026-07-22
 
 ### Security

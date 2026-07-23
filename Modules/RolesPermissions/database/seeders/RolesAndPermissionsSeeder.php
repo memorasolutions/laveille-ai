@@ -44,7 +44,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'cookies', 'onboarding', 'trash', 'notifications', 'webhooks', 'ai', 'api',
             'activity_logs', 'feature_flags', 'branding', 'themes', 'translations', 'settings',
             'contacts', 'storage', 'usage', 'referrals', 'incidents', 'documentation',
-            'booking', 'roadmap', 'ecommerce',
+            'booking', 'roadmap', 'ecommerce', 'shop',
         ];
 
         foreach ($patternBEntities as $entity) {

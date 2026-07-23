@@ -68,12 +68,14 @@
 
                 <div class="mt-3">
                     <a href="{{ route('admin.shop.orders.index') }}" class="btn btn-outline-primary">{{ __('Retour') }}</a>
+                    @can('update_ecommerce_orders')
                     @if(!in_array($order->status, ['shipped', 'delivered', 'cancelled']))
-                        <form action="{{ route('admin.shop.orders.cancel', $order) }}" method="POST" class="d-inline">
+                        <form action="{{ route('admin.shop.orders.cancel', $order) }}" method="POST" class="d-inline" data-confirm="{{ __('Annuler cette commande ?') }}">
                             @csrf
-                            <button type="submit" class="btn btn-danger" onclick="return confirm('{{ __('Annuler cette commande ?') }}')">{{ __('Annuler') }}</button>
+                            <button type="submit" class="btn btn-danger">{{ __('Annuler') }}</button>
                         </form>
                     @endif
+                    @endcan
                 </div>
             </div>
         </div>

@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
-use Modules\Authors\Http\Controllers\AuthorsController;
 use Modules\Authors\Http\Controllers\MiniSiteController;
 use Modules\Authors\Http\Controllers\PostController;
 use Modules\Authors\Http\Controllers\AffiliateController;
@@ -188,7 +187,3 @@ Route::middleware(['signed'])->group(function () {
         ->name('authors.moderation.ban');
 });
 
-// CRUD admin auteurs (legacy nwidart scaffold)
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('authors', AuthorsController::class)->names('authors');
-});
