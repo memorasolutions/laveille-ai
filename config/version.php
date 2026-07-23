@@ -2507,7 +2507,8 @@ declare(strict_types=1);
  *     Corrigé en réutilisant des permissions QUI EXISTAIENT DÉJÀ dans le seeder RBAC
  *     (`view_/create_/update_/delete_products`, `view_/update_ecommerce_orders`) mais n'avaient
  *     JAMAIS été câblées à aucune route nulle part dans le projet - trouvaille confirmée par
- *     grep (`view_products` etc. absents de tout `Modules/*/routes/`). Nouvelle entrée `shop`
+ *     grep (`view_products` etc. absents de tous les fichiers de routes des modules). Nouvelle
+ *     entrée `shop`
  *     ajoutée au pattern B (opérationnel, `view_shop`/`manage_shop`) pour les réglages boutique,
  *     distincts du CRUD produits. `@can` ajoutés sur les boutons Créer/Modifier/Supprimer/
  *     Annuler des 3 vues admin concernées (défense en profondeur, en plus du vrai correctif
