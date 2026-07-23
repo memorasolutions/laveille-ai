@@ -8,9 +8,7 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Route;
-use Modules\Roadmap\Http\Controllers\RoadmapController;
-
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('roadmaps', RoadmapController::class)->names('roadmap');
-});
+// Scaffold nwidart jamais implémenté (RoadmapController vide, aucune méthode d'écriture réelle)
+// - route API supprimée par cohérence sécurité (2026-07-23), même motif que Export/Translation/
+// Backup (v1.117.23). Le vrai module Roadmap (Modules/Roadmap/routes/web.php) est correctement
+// gardé par permission manage_roadmap.

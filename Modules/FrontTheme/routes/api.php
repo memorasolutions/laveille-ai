@@ -8,9 +8,6 @@ declare(strict_types=1);
  * @project memora/laravel-saas-boilerplate
  */
 
-use Illuminate\Support\Facades\Route;
-use Modules\FrontTheme\Http\Controllers\FrontThemeController;
-
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('frontthemes', FrontThemeController::class)->names('fronttheme');
-});
+// Scaffold nwidart jamais implémenté (FrontThemeController vide, aucune méthode d'écriture
+// réelle) - route API supprimée par cohérence sécurité (2026-07-23), même motif que Export/
+// Translation/Backup (v1.117.23).

@@ -8,9 +8,7 @@ declare(strict_types=1);
  * @project memora/laravel-saas-boilerplate
  */
 
-use Illuminate\Support\Facades\Route;
-use Modules\Ads\Http\Controllers\AdsController;
-
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('ads', AdsController::class)->names('ads');
-});
+// Scaffold nwidart jamais implémenté (AdsController vide, aucune méthode d'écriture réelle) -
+// route API supprimée par cohérence sécurité (2026-07-23), même motif que Export/Translation/
+// Backup (v1.117.23) : une apiResource sans permission Spatie est une mine terrestre si le
+// contrôleur est un jour implémenté sans y penser.

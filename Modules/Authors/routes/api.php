@@ -1,8 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Modules\Authors\Http\Controllers\AuthorsController;
-
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('authors', AuthorsController::class)->names('authors');
-});
+// Scaffold nwidart jamais implémenté (AuthorsController vide, aucune méthode d'écriture réelle) -
+// route API supprimée par cohérence sécurité (2026-07-23), même motif que Export/Translation/
+// Backup (v1.117.23) et le pendant web déjà retiré au round 6.

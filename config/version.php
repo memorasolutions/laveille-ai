@@ -2569,11 +2569,35 @@ declare(strict_types=1);
  *     projet) confirme sain - aucun autre manque trouvé. Fil RBAC toujours ouvert (round 7
  *     non-vide au sens strict, même si le manque trouvé est du code mort sans impact réel) ;
  *     compteur des 2 verdicts vides consécutifs repart à zéro pour un éventuel round 8.
+ *   1.117.24 · 2026-07-23 · fix(security) Round 8 adversarial /100 (angle comportemental : IDOR,
+ *     routes API, Artisan::call exposé - aucune de ces trois pistes n'a rien trouvé) : le seul
+ *     manque restant était le même motif de scaffold nwidart mort que le round 7, mais côté
+ *     routes API (routes/api.php, apiResource sous auth:sanctum) plutôt que côté routes web.
+ *     Dix modules actifs concernés (Ads, Authors, Dictionary, News, Roadmap, Community,
+ *     Directory, FrontTheme, Tools, Voting) - chaque contrôleur scaffold a des méthodes
+ *     store/update/destroy totalement vides, donc sévérité actuelle nulle (erreur fatale, pas
+ *     une fuite), mais même mine terrestre déjà neutralisée pour Export/Translation/Backup en
+ *     v1.117.23. Routes apiResource mortes supprimées dans les dix modules, en préservant
+ *     intégralement les routes API réelles et fonctionnelles à côté (ex. Directory : ingestion
+ *     n8n et API publique v1 ; Tools : presets sauvegardés par utilisateur, déjà correctement
+ *     scopés). Vérification de collision de nom de route : les noms génériques partagés avec des
+ *     routes publiques légitimes (dictionary.index, news.show, directory.index, tools.show, etc.)
+ *     référencés dans le code correspondaient déjà tous aux vraies routes publiques, jamais aux
+ *     actions d'écriture propres au scaffold supprimé (create/store/edit/update/destroy) -
+ *     confirmé par grep exhaustif nom par nom avant suppression, aucune référence trouvée. 494
+ *     tests verts sur les dix modules touchés (3 skipped attendus), 0 échec. Balayage
+ *     comportemental complémentaire du round 8 (IDOR sur les ressources utilisateur hors admin,
+ *     endpoints API, commandes Artisan exposées) confirmé sain sur toute la plateforme - aucun
+ *     autre manque trouvé de ce côté. Fil RBAC toujours ouvert au sens strict (round 8 non-vide),
+ *     mais convergence désormais réelle : les deux vraies failles de contrôle d'accès (Acronyms/
+ *     Dictionary, Shop) et tous les scaffolds morts identifiables par grep exhaustif sont
+ *     traités ; ce qui reste à chaque round est de plus en plus marginal (code mort inerte, pas
+ *     une faille active).
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 23;
+$lvPatch = 24;
 
 return [
     'major' => $lvMajor,

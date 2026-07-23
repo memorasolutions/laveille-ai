@@ -5,7 +5,6 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Directory\Http\Controllers\Api\IngestController;
 use Modules\Directory\Http\Controllers\Api\PublicToolsController;
-use Modules\Directory\Http\Controllers\DirectoryController;
 
 // Endpoint n8n / automation — auth par Bearer token (env DIRECTORY_INGEST_TOKEN)
 Route::post('tools/ingest', IngestController::class)->name('api.tools.ingest');
@@ -24,6 +23,7 @@ Route::middleware(['throttle:60,1'])->prefix('v1/directory')->name('api.public.'
         ->name('collections.show');
 });
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('directories', DirectoryController::class)->names('directory');
-});
+// Scaffold nwidart jamais implémenté (DirectoryController vide, aucune méthode d'écriture
+// réelle) - route API supprimée par cohérence sécurité (2026-07-23), même motif que Export/
+// Translation/Backup (v1.117.23). Les vraies routes API Directory (ingest, v1/directory public)
+// ci-dessus ne sont pas affectées.

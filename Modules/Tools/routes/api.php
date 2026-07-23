@@ -10,11 +10,11 @@ use Modules\Tools\Http\Controllers\SavedQrPresetController;
 use Modules\Tools\Http\Controllers\SavedWheelPresetController;
 use Modules\Tools\Http\Controllers\SavedTeamPresetController;
 use Modules\Tools\Http\Controllers\ToolPreferenceController;
-use Modules\Tools\Http\Controllers\ToolsController;
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('tools', ToolsController::class)->names('tools');
-});
+// Scaffold nwidart jamais implémenté (ToolsController vide, aucune méthode d'écriture réelle) -
+// route API supprimée par cohérence sécurité (2026-07-23), même motif que Export/Translation/
+// Backup (v1.117.23). Les vraies routes API Tools (prompts/presets ci-dessous) ne sont pas
+// affectées, déjà correctement scopées par utilisateur.
 
 Route::middleware(['web', 'auth', 'throttle:60,1'])->group(function () {
     Route::get('/prompts', [SavedPromptController::class, 'index'])->name('api.prompts.index');

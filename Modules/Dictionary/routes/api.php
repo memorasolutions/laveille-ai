@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Route;
-use Modules\Dictionary\Http\Controllers\DictionaryController;
-
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('dictionaries', DictionaryController::class)->names('dictionary');
-});
+// Scaffold nwidart jamais implémenté (DictionaryController vide, aucune méthode d'écriture
+// réelle) - route API supprimée par cohérence sécurité (2026-07-23), même motif que Export/
+// Translation/Backup (v1.117.23). Le vrai glossaire (Modules/Dictionary/routes/web.php) est
+// correctement gardé par permission depuis v1.117.21.

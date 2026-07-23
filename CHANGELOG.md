@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.24] - 2026-07-23
+
+### Security
+- Round 8 adversarial `/100` (angle IDOR/API/Artisan — rien trouvé de ce côté) : même motif de scaffold mort que le round 7, cette fois côté `routes/api.php` sur 10 modules (Ads, Authors, Dictionary, News, Roadmap, Community, Directory, FrontTheme, Tools, Voting). Routes `apiResource` mortes supprimées, routes API réelles préservées intactes. 494/494 tests verts.
+
 ## [1.117.23] - 2026-07-23
 
 ### Security
