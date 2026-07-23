@@ -8,9 +8,8 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Route;
-use Modules\Export\Http\Controllers\ExportController;
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('exports', ExportController::class)->names('export');
-});
+// Scaffold nwidart jamais implémenté (ExportController vide, aucune méthode) - route supprimée
+// par cohérence sécurité (2026-07-23), même motif que Modules/Authors (round 6 /100) : une
+// resource route sans permission Spatie est une mine terrestre si le contrôleur est un jour
+// implémenté sans y penser. La fonctionnalité réelle d'export vit dans ExportService, utilisée
+// et gardée (permission:manage_exports) via Modules/Backoffice/routes/web.php.

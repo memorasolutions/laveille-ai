@@ -2538,12 +2538,42 @@ declare(strict_types=1);
  *     `php artisan app:sync-permissions` sur PRODUCTION pour créer `view_shop`/`manage_shop` en
  *     base et confirmer que `products`/`ecommerce_orders` (déjà seedées historiquement mais
  *     jamais utilisées) sont bien assignées aux rôles admin/superadmin. Tant que non exécuté,
- *     fail-safe identique : tout le monde sauf superadmin bloqué sur `/admin/shop/*`.
+ *     fail-safe identique : tout le monde sauf superadmin bloqué sur les routes admin de la
+ *     boutique.
+ *
+ *   HOTFIX (même journée) : le docblock ci-dessus contenait littéralement la séquence de
+ *   fermeture de commentaire PHP dans un chemin en glob, ce qui a cassé le chargement de
+ *   config à l'échelle du site (500 puis 503, environ 8 minutes) - corrigé en reformulant le
+ *   texte pour ne plus jamais placer ces deux caractères l'un à côté de l'autre dans ce
+ *   fichier. Leçon retenue : toujours relancer la vérification de syntaxe PHP après CHAQUE
+ *   modification de ce fichier, sans exception, avant tout commit.
+ *
+ *   1.117.23 · 2026-07-23 · fix(security) Round 7 adversarial /100 (angle prefixes dynamiques +
+ *     resource routes sans permission, aucun nouveau manque de portee - seulement du code mort
+ *     déjà neutralisé par construction) : 3 modules (Export, Translation, Backup) exposaient un
+ *     scaffold nwidart jamais implémenté (contrôleur totalement vide, zéro méthode) via
+ *     Route::resource sous auth+verified seul, sans aucune permission Spatie - même motif exact
+ *     que le scaffold Authors déjà retiré au round 6. Sévérité actuelle nulle (toute requête
+ *     HTTP vers ces routes provoque une erreur fatale méthode introuvable, pas une fuite de
+ *     données ni un accès non autorisé), mais qualifiée de mine terrestre par le round 7 : si un
+ *     jour quelqu'un implémente ces contrôleurs sans repenser à ajouter le middleware
+ *     permission, la faille deviendrait immédiatement active. Routes mortes supprimées par
+ *     cohérence préventive (Export, Translation actifs en prod ; Backup désactivé donc routes
+ *     non chargées actuellement, corrigé quand même en prévision d'une réactivation future). Les
+ *     vraies fonctionnalités (export, traduction, sauvegarde) vivent et restent gardées dans le
+ *     module Backoffice (permission manage_exports / view_translations+manage_translations /
+ *     view_backups+manage_backups), jamais affectées par ce retrait. 13 tests Export+Translation
+ *     verts (couvrent les services réels, jamais les routes mortes retirées), 6 tests Backup
+ *     skipped comme attendu (module désactivé localement). Balayage complémentaire du round 7
+ *     (middleware global sur le préfixe admin, composants Livewire orphelins, routes racine du
+ *     projet) confirme sain - aucun autre manque trouvé. Fil RBAC toujours ouvert (round 7
+ *     non-vide au sens strict, même si le manque trouvé est du code mort sans impact réel) ;
+ *     compteur des 2 verdicts vides consécutifs repart à zéro pour un éventuel round 8.
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 22;
+$lvPatch = 23;
 
 return [
     'major' => $lvMajor,

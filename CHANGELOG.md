@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.23] - 2026-07-23
+
+### Security
+- Round 7 adversarial `/100` : scaffolds nwidart morts (Export, Translation, Backup — contrôleurs vides, zéro méthode) exposés via `Route::resource` sans permission, même motif qu'Authors (round 6). Sévérité nulle actuellement (erreur fatale, pas une fuite), mais routes supprimées par cohérence préventive avant qu'un futur développeur implémente les méthodes sans y repenser.
+- Balayage complémentaire (middleware global `/admin`, composants Livewire orphelins, routes racine) confirmé sain.
+
+### Fixed
+- Hotfix incident v1.117.22 : `config/version.php` contenait un `*/` littéral dans un chemin en glob qui a fermé le docblock prématurément, cassant le chargement de config à l'échelle du site (~8 min de panne). Reformulé pour ne plus jamais juxtaposer ces caractères.
+
 ## [1.117.22] - 2026-07-23
 
 ### Security
