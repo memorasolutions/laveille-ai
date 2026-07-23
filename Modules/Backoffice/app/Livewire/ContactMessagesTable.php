@@ -52,11 +52,12 @@ class ContactMessagesTable extends Component
 
     /**
      * Supprime un message de contact.
-     * Requiert la permission delete_contacts (cohérent avec la route DELETE).
+     * Requiert la permission manage_contacts (Pattern B, contacts n'a pas de permission delete
+     * distincte - bug fantôme delete_contacts corrigé au round 10 /100, 2026-07-23).
      */
     public function deleteMessage(int $id): void
     {
-        abort_if(! auth()->user()?->can('delete_contacts'), 403);
+        abort_if(! auth()->user()?->can('manage_contacts'), 403);
         ContactMessage::findOrFail($id)->delete();
         $this->dispatch('toast', type: 'success', message: __('Message supprimé.'));
     }

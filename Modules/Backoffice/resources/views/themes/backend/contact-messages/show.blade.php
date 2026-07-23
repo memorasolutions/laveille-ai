@@ -72,7 +72,7 @@
                          un seul passage via sa modale (event confirm-action), sans popup native. --}}
                     @include('core::components.action-menu', ['actions' => array_filter([
                         ['label' => __('Répondre par email'), 'icon' => 'reply', 'url' => 'mailto:' . $contactMessage->email . '?subject=Re: ' . urlencode($contactMessage->subject)],
-                        auth()->user()?->can('delete_contacts') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.contact-messages.destroy', $contactMessage), 'method' => 'DELETE', 'confirm' => __('Supprimer ce message ?'), 'danger' => true] : null,
+                        auth()->user()?->can('manage_contacts') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.contact-messages.destroy', $contactMessage), 'method' => 'DELETE', 'confirm' => __('Supprimer ce message ?'), 'danger' => true] : null,
                     ])])
                 </div>
             </div>

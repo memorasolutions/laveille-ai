@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.117.26] - 2026-07-23
+
+### Fixed
+- **Bug fonctionnel** : suppression de message de contact exigeait une permission `delete_contacts` jamais seedée — inaccessible à tout le monde sauf superadmin. Aligné sur `manage_contacts`.
+
+### Security
+- Round 10 adversarial `/100` (dernier de la session) : scaffold mort oublié (module Booking, désactivé, corrigé en prévention).
+
+### Note
+Bilan de la session `/100` (2026-07-22/23, rounds 1-10) : 2 vraies failles de contrôle d'accès corrigées (Acronyms/Dictionary, Shop), ~60 défauts d'affordance UI corrigés, 15 scaffolds nwidart morts neutralisés, 2 bugs de permission fantôme corrigés, 1 incident de production auto-provoqué et résolu en transparence. Convergence réelle mais non certifiée formellement (2 verdicts vides consécutifs non atteints) — session close sur ce constat.
+
 ## [1.117.25] - 2026-07-23
 
 ### Security

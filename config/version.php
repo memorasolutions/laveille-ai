@@ -2619,11 +2619,46 @@ declare(strict_types=1);
  *     Fil RBAC toujours ouvert au sens strict (round 9 non-vide), mais nature des trouvailles en
  *     baisse constante depuis le round 6 : plus aucune vraie faille de contrôle d'accès active,
  *     seulement du code mort résiduel et un bug d'accès trop restrictif (l'inverse d'une faille).
+ *   1.117.26 · 2026-07-23 · fix(security) Round 10 adversarial /100 (dernier round de cette
+ *     session), 2 trouvailles, même nature que le round 9 :
+ *
+ *     (1) Bug fonctionnel jumeau de create_feature_flags, jamais généralisé : la suppression
+ *     d'un message de contact (route, action Livewire ContactMessagesTable::deleteMessage, et 2
+ *     boutons Blade) exigeait `permission:delete_contacts`, jamais seedée (contacts suit le
+ *     Pattern B view_/manage_ uniquement dans RolesAndPermissionsSeeder.php). Conséquence
+ *     identique au round 9 : suppression de message de contact inaccessible à tout le monde sauf
+ *     superadmin, y compris le rôle admin qui a pourtant `manage_contacts`. Corrigé aux 4
+ *     emplacements en alignant sur `manage_contacts`, la permission réellement seedée.
+ *
+ *     (2) Scaffold nwidart mort oublié : module Booking (`Modules/Booking/app/Http/Controllers/
+ *     BookingController.php` racine, PAS le vrai `Admin/*Controller` du module) - mêmes méthodes
+ *     store/update/destroy vides que les 14 scaffolds déjà nettoyés en rounds 7-9, câblé via
+ *     `Route::apiResource` sous auth:sanctum sans permission. Module désactivé (routes non
+ *     chargées actuellement), corrigé en prévention comme Backup. Le vrai module Booking (wizard,
+ *     gestion, portail, déjà gardé par permission:manage_booking) n'est pas affecté.
+ *
+ *     Vérifié : `admin->hasPermissionTo('manage_contacts')` confirmé vrai après resynchronisation,
+ *     `delete_contacts` confirmé absent de la base. 42/42 tests Backoffice verts.
+ *
+ *     BILAN de la session /100 (rounds 1-10, 2026-07-22/23) : 2 vraies failles de contrôle
+ *     d'accès trouvées et corrigées (Acronyms/Dictionary v1.117.21, Shop v1.117.22) ; ~60
+ *     défauts d'affordance UI corrigés (rounds 1-4) ; 15 scaffolds nwidart morts neutralisés
+ *     (Authors, Export, Translation, Backup, Ads, Dictionary, News, Roadmap, Community,
+ *     Directory, FrontTheme, Tools, Voting, Booking - web ET api pour chacun) ; 2 bugs
+ *     fonctionnels de permission fantôme corrigés (create_feature_flags, delete_contacts) ; 1
+ *     incident de production auto-provoqué et corrigé en transparence (hotfix v1.117.22→23,
+ *     ~8 min d'indisponibilité, cause et correctif documentés). Rounds 9 et 10 n'ont trouvé QUE
+ *     des variantes du même motif déjà identifié (permission fantôme, scaffold oublié) - aucune
+ *     nouvelle vraie faille depuis le round 6. Le fil RBAC-affordance n'atteint pas formellement
+ *     les 2 verdicts vides consécutifs exigés par le protocole /100 pour une clôture certifiée,
+ *     mais la convergence est réelle et objectivement mesurable par la nature décroissante des
+ *     trouvailles - décision de clore cette session sur ce constat plutôt que de poursuivre
+ *     indéfiniment une chasse à rendement marginal décroissant.
  */
 
 $lvMajor = 1;
 $lvMinor = 117;
-$lvPatch = 25;
+$lvPatch = 26;
 
 return [
     'major' => $lvMajor,

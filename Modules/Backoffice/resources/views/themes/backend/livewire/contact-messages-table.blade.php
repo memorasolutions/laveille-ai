@@ -119,7 +119,7 @@
                                 @include('core::components.action-menu', ['actions' => array_filter([
                                     ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('admin.contact-messages.show', $msg)],
                                     $msg->isSpam() ? ['label' => __('Marquer comme légitime'), 'icon' => 'shield-check', 'wireClick' => "markLegit({$msg->id})", 'wireConfirm' => __('Marquer ce message comme légitime ?')] : null,
-                                    auth()->user()?->can('delete_contacts') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'wireClick' => "deleteMessage({$msg->id})", 'wireConfirm' => __('Supprimer ce message ?'), 'danger' => true] : null,
+                                    auth()->user()?->can('manage_contacts') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'wireClick' => "deleteMessage({$msg->id})", 'wireConfirm' => __('Supprimer ce message ?'), 'danger' => true] : null,
                                 ])])
                             </td>
                         </tr>

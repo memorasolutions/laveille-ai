@@ -146,7 +146,10 @@ Route::prefix('admin')
             Route::post('contact-messages/{contactMessage}/legit', [ContactMessageController::class, 'markLegit'])->name('contact-messages.legit');
             Route::get('contact-messages/{contactMessage}', [ContactMessageController::class, 'show'])->name('contact-messages.show');
         });
-        Route::delete('contact-messages/{contactMessage}', [ContactMessageController::class, 'destroy'])->name('contact-messages.destroy')->middleware('permission:delete_contacts');
+        // permission:manage_contacts (pas delete_contacts, qui n'existe pas dans le seeder -
+        // contacts suit le Pattern B view_/manage_ uniquement - bug fantôme trouvé et corrigé au
+        // round 10 /100, 2026-07-23, même classe que create_feature_flags du round 9).
+        Route::delete('contact-messages/{contactMessage}', [ContactMessageController::class, 'destroy'])->name('contact-messages.destroy')->middleware('permission:manage_contacts');
 
         // ── FAQ ──
         Route::middleware('permission:view_faqs')->group(function () {
