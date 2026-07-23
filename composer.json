@@ -21,6 +21,7 @@
         "google/apiclient": "^2.19",
         "guzzlehttp/guzzle": "^7.15.1",
         "intervention/image": "^3.0",
+        "jeremykendall/php-domain-parser": "^6.4",
         "laravel-notification-channels/webpush": "^10.4",
         "laravel/cashier": "^16.2",
         "laravel/framework": "^12.0",

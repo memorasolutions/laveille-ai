@@ -1400,6 +1400,8 @@
     </div>
 </div>
 
+@include('directory::public.partials._ecosystem-siblings')
+
 <div class="container">
     @include('directory::public.partials.related-collections')
 </div>

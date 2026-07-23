@@ -9,8 +9,16 @@
 @endsection
 
 @php
-    $toolsJson = $tools->map(function($tool) use ($pricingOptions) {
+    // 2026-07-23 — Regroupement visuel par écosystème (badge "Éditeur · N produits" sur les cartes).
+    // $ecosystemCounts (EcosystemCountService, mise en cache) et $ecosystemLabels (config
+    // ecosystems.labels) sont préparés par PublicDirectoryController::index() et reçus ici tels
+    // quels — jamais recalculés en vue. Matchés en mémoire dans la boucle ci-dessous : jamais de
+    // requête par carte (anti N+1) sur les 433+ outils.
+    $toolsJson = $tools->map(function($tool) use ($pricingOptions, $ecosystemCounts, $ecosystemLabels) {
         $host = $tool->url ? parse_url($tool->url, PHP_URL_HOST) : '';
+        $ecoTag = $tool->ecosystem_tag ?? null;
+        $ecoCount = $ecoTag ? ($ecosystemCounts[$ecoTag] ?? 0) : 0;
+        $ecoLabel = $ecoTag ? ($ecosystemLabels[$ecoTag] ?? ucfirst($ecoTag)) : null;
         return [
             'id' => $tool->id,
             'name' => $tool->name,
@@ -44,6 +52,9 @@
             'isLifecycleActive' => (bool) $tool->is_lifecycle_active,
             'isLifecycleDown' => (bool) $tool->is_lifecycle_down,
             'lifecycleBannerMsg' => $tool->lifecycle_banner_message ?? '',
+            'ecosystemTag' => $ecoTag,
+            // Badge pré-formaté côté serveur (évite la pluralisation en JS) : "OpenAI · 6 produits".
+            'ecosystemBadge' => ($ecoTag && $ecoCount > 0) ? ($ecoLabel . ' · ' . $ecoCount . ' ' . ($ecoCount > 1 ? __('produits') : __('produit'))) : null,
         ];
     })->values();
 
@@ -173,6 +184,100 @@
     .rt-pricing-dropdown button.active { background: var(--c-primary); color: #fff; }
 
     /* Category slider styles: voir partials/_category_slider.blade.php */
+
+    /* ─────────── S135 2026-07-23 : badge écosystème (regroupement par éditeur) ─────────── */
+    /* Contraste vérifié AAA (wcag-mcp) : #3730A3 sur #EEF2FF = 8.88:1 */
+    .rt-badge-eco {
+        display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; min-height: 22px;
+        border-radius: 4px; font-size: 10.5px; font-weight: 700; background: #EEF2FF; color: #3730A3;
+        text-decoration: none; letter-spacing: 0.1px; transition: background-color 0.15s;
+    }
+    .rt-badge-eco:hover { background: #E0E7FF; color: #3730A3; text-decoration: none; }
+    .rt-pill-eco-active { background: #3730A3 !important; color: #fff !important; }
+
+    /* ─────────── S135 : dropdown "Trier par" (remplace la rangée de tabs, desktop) ─────────── */
+    .rt-sort-dropdown-btn {
+        display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 8px 16px;
+        border-radius: var(--r-btn); background: #F3F4F6; color: var(--c-dark); font-weight: 600;
+        font-size: 14px; border: none; cursor: pointer; transition: background-color 0.2s;
+    }
+    .rt-sort-dropdown-btn:hover { background: #E5E7EB; }
+    .rt-sort-dropdown-btn.active { background: var(--c-primary); color: #fff; }
+    .rt-sort-dropdown-menu {
+        position: absolute; top: 100%; left: 0; z-index: 50; background: #fff; border: 1px solid #E5E7EB;
+        border-radius: var(--r-base); box-shadow: 0 8px 25px rgba(0,0,0,0.1); padding: 6px; min-width: 220px; margin-top: 4px;
+    }
+    .rt-sort-dropdown-menu button {
+        display: flex; align-items: center; width: 100%; text-align: left; padding: 8px 12px; min-height: 44px;
+        border: none; background: none; cursor: pointer; font-size: 14px; border-radius: 4px; color: var(--c-dark);
+    }
+    .rt-sort-dropdown-menu button:hover { background: #F3F4F6; }
+    .rt-sort-dropdown-menu button.active { background: var(--c-primary); color: #fff; }
+
+    /* ─────────── S135 : bouton "Filtres/Tri" mobile + tiroir bottom-sheet ─────────── */
+    .rt-mobile-filter-trigger { display: none; margin-bottom: 16px; }
+    .rt-mobile-filter-btn {
+        display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 10px 20px;
+        border-radius: var(--r-btn); background: #fff; border: 1.5px solid var(--c-primary); color: var(--c-primary);
+        font-weight: 700; font-size: 14px; cursor: pointer; width: 100%; justify-content: center;
+    }
+    .rt-mobile-filter-btn.has-active { background: var(--c-primary); color: #fff; }
+    .rt-sheet-overlay {
+        position: fixed; inset: 0; z-index: 9998; background: rgba(17,20,23,0.5);
+        display: flex; align-items: flex-end; justify-content: center;
+    }
+    .rt-sheet {
+        background: #fff; width: 100%; max-height: 85vh; overflow-y: auto; border-radius: 16px 16px 0 0;
+        padding: 14px 20px calc(20px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -8px 30px rgba(0,0,0,0.2);
+    }
+    .rt-sheet-handle { width: 40px; height: 4px; background: #E5E7EB; border-radius: 2px; margin: 0 auto 14px; }
+    .rt-sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .rt-sheet-header h2 { font-family: var(--f-heading); font-size: 1.05rem; font-weight: 700; color: var(--c-dark); margin: 0; }
+    .rt-sheet-close { min-width: 44px; min-height: 44px; background: none; border: none; font-size: 20px; color: #374151; cursor: pointer; border-radius: 8px; }
+    .rt-sheet-close:hover { background: #F3F4F6; }
+    .rt-sheet-section-title { font-weight: 700; color: var(--c-dark); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin: 18px 0 8px; }
+    .rt-sheet-row-btn {
+        display: flex; align-items: center; width: 100%; text-align: left; min-height: 44px; padding: 10px 14px;
+        border-radius: 10px; border: 1.5px solid #E5E7EB; background: #fff; font-size: 14px; font-weight: 600;
+        color: var(--c-dark); cursor: pointer; margin-bottom: 8px;
+    }
+    .rt-sheet-row-btn.active { background: var(--c-primary); color: #fff; border-color: var(--c-primary); }
+    .rt-sheet-cats { display: flex; flex-wrap: wrap; gap: 8px; }
+    .rt-sheet-cat-chip {
+        flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 8px 14px;
+        border-radius: 20px; background: #F3F4F6; color: var(--c-dark); font-weight: 600; font-size: 13px;
+        border: none; cursor: pointer;
+    }
+    .rt-sheet-cat-chip.active { background: var(--c-primary); color: #fff; }
+    .rt-sheet-active-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-bottom: 4px; }
+    .rt-sheet-chip {
+        display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 6px 14px;
+        border-radius: 20px; background: #F0F4F8; color: var(--c-dark); font-weight: 600; font-size: 13px;
+        border: none; cursor: pointer;
+    }
+    .rt-sheet-clear-all {
+        background: none; border: 1.5px solid var(--c-accent); color: var(--c-accent); min-height: 44px;
+        padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer;
+    }
+
+    @media (max-width: 767px) {
+        .rt-desktop-only-filters { display: none !important; }
+        .rt-mobile-filter-trigger { display: block; }
+    }
+
+    .rt-sort-dropdown-btn:focus-visible,
+    .rt-mobile-filter-btn:focus-visible,
+    .rt-sheet-close:focus-visible,
+    .rt-sheet-row-btn:focus-visible,
+    .rt-sheet-cat-chip:focus-visible,
+    .rt-sheet-chip:focus-visible,
+    .rt-sheet-clear-all:focus-visible,
+    .rt-badge-eco:focus-visible,
+    .rt-sort-dropdown-menu button:focus-visible {
+        outline: 3px solid #0B7285;
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
 </style>
 @endpush
 
@@ -181,13 +286,57 @@
     search: '',
     activePricing: '',
     activeCategory: '',
+    // S135 2026-07-23 : filtre \u00e9cosyst\u00e8me (badge \u00e9diteur sur carte). Pr\u00e9-rempli depuis ?ecosystem=
+    // pour un lien partageable/deep-link (ex. depuis la fiche outil, page recharg\u00e9e s\u00e9par\u00e9ment).
+    activeEcosystem: (typeof window !== 'undefined' ? (new URLSearchParams(window.location.search)).get('ecosystem') : null) || '',
     eduFilter: false,
     sortBy: 'all',
     tools: {{ $toolsJson->toJson() }},
     displayCount: 30,
     _lastFilterKey: '',
 
-    get filterKey() { return this.search + '|' + this.activePricing + '|' + this.activeCategory + '|' + this.eduFilter + '|' + this.sortBy; },
+    // Donn\u00e9es pour l'affichage des chips actives (tiroir mobile) \u2014 \u00e9vite la r\u00e9p\u00e9tition PHP inline.
+    categoryNamesBySlug: @js($categoryNamesBySlug),
+    pricingLabelsMap: @js($pricingOptions),
+    ecosystemLabelsMap: @js($ecosystemLabels),
+
+    // S135 : tiroir mobile Filtres/Tri
+    mobileFiltersOpen: false,
+    sortLabels: {
+        all: '{{ __('Tous') }}',
+        rating: '\u2b50 {{ __('Populaires') }}',
+        newest: '\ud83c\udd95 {{ __('R\u00e9cents') }}',
+        free: '\ud83c\udd93 {{ __('Gratuits') }}',
+        edu: '\ud83c\udf93 {{ __('\u00c9ducation') }}',
+    },
+    get sortDropdownKey() {
+        if (this.eduFilter) return 'edu';
+        if (this.activePricing === 'free') return 'free';
+        if (this.sortBy === 'rating') return 'rating';
+        if (this.sortBy === 'newest') return 'newest';
+        return 'all';
+    },
+    get activeFilterCount() {
+        let n = 0;
+        if (this.activeCategory) n++;
+        if (this.activePricing) n++;
+        if (this.activeEcosystem) n++;
+        if (this.eduFilter) n++;
+        if (this.sortBy !== 'all') n++;
+        return n;
+    },
+    // Trap clavier basique du tiroir mobile (Tab boucle entre 1er et dernier \u00e9l\u00e9ment focusable).
+    trapSheetTab(e) {
+        const root = this.$refs.mobileSheet;
+        if (!root) return;
+        const focusables = root.querySelectorAll('button, a[href], input, select, textarea, [tabindex]');
+        if (focusables.length === 0) return;
+        const first = focusables[0], last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    },
+
+    get filterKey() { return this.search + '|' + this.activePricing + '|' + this.activeCategory + '|' + this.activeEcosystem + '|' + this.eduFilter + '|' + this.sortBy; },
 
     get filteredTools() {
         const key = this.filterKey;
@@ -198,8 +347,9 @@
             const matchSearch = !s || norm(t.name).includes(s) || norm(t.shortDesc).includes(s);
             const matchPricing = !this.activePricing || (this.activePricing === 'education' ? t.hasEduPricing : t.pricing === this.activePricing);
             const matchCat = !this.activeCategory || t.categorySlugs.includes(this.activeCategory);
+            const matchEco = !this.activeEcosystem || t.ecosystemTag === this.activeEcosystem;
             const matchEdu = !this.eduFilter || t.hasEduPricing;
-            return matchSearch && matchPricing && matchCat && matchEdu;
+            return matchSearch && matchPricing && matchCat && matchEco && matchEdu;
         });
         if (this.sortBy === 'rating') return [...t].sort((a,b) => b.avgRating - a.avgRating);
         if (this.sortBy === 'newest') return [...t].sort((a,b) => b.createdTs - a.createdTs);
@@ -216,11 +366,12 @@
 
     togglePricing(p) { this.activePricing = this.activePricing === p ? '' : p; },
     toggleCategory(c) { this.activeCategory = this.activeCategory === c ? '' : c; },
+    toggleEcosystem(tag) { this.activeEcosystem = this.activeEcosystem === tag ? '' : tag; },
     setSort(s) {
         if (s === 'free') { this.activePricing = 'free'; this.sortBy = 'all'; }
         else { this.sortBy = s; if (this.activePricing === 'free') this.activePricing = ''; }
     },
-    resetAll() { this.search = ''; this.activePricing = ''; this.activeCategory = ''; this.eduFilter = false; this.sortBy = 'all'; },
+    resetAll() { this.search = ''; this.activePricing = ''; this.activeCategory = ''; this.activeEcosystem = ''; this.eduFilter = false; this.sortBy = 'all'; },
 
     // S84 #27 — Toggle vue cards/list + persistance localStorage
     viewMode: (typeof window !== 'undefined' && localStorage.getItem('directory_view_mode')) || 'cards',
@@ -644,9 +795,9 @@
 
     <div class="container" style="padding-top: 30px; padding-bottom: 40px;">
 
-        {{-- Filters bar : Tous + dropdown pricing + compteur --}}
+        {{-- Filters bar : Tous + dropdown pricing + badge écosystème actif + compteur --}}
         <div class="rt-filter-bar">
-            <button type="button" class="rt-pill" :class="{ active: !activePricing && !activeCategory }" @click="resetAll()">{{ __('Tous') }}</button>
+            <button type="button" class="rt-pill" :class="{ active: !activePricing && !activeCategory && !activeEcosystem }" @click="resetAll()">{{ __('Tous') }}</button>
 
             <div x-data="{ open: false }" @keydown.escape="open = false; $refs.toggle.focus()" style="position: relative; display: inline-block;">
                 <button type="button" class="rt-pill" :class="{ active: activePricing !== '' }" @click="open = !open"
@@ -675,15 +826,108 @@
                 </div>
             </div>
 
+            {{-- S135 : badge écosystème actif (visible seulement si un clic sur un badge carte / lien ?ecosystem= l'a défini) --}}
+            <button type="button" class="rt-pill rt-pill-eco-active" x-show="activeEcosystem" x-cloak
+                    @click="activeEcosystem = ''"
+                    :aria-label="'{{ __('Retirer le filtre éditeur') }} : ' + (ecosystemLabelsMap[activeEcosystem] || activeEcosystem)">
+                <span x-text="ecosystemLabelsMap[activeEcosystem] || activeEcosystem"></span> <i class="ti-close" aria-hidden="true" style="font-size:10px;margin-left:4px;"></i>
+            </button>
+
             <span class="rt-filter-count"><strong x-text="filteredTools.length" style="color: var(--c-primary);"></strong> {{ __('outils') }}</span>
         </div>
 
-        {{-- Category slider (partial réutilisable) --}}
-        @include('directory::public.partials._category_slider', [
-            'categories' => $categories,
-            'currentRoute' => 'index',
-            'activeSlug' => null,
-        ])
+        {{-- S135 2026-07-23 : dropdown "Trier par" + carrousel catégories — masqués sur mobile derrière le bouton "Filtres/Tri" ci-dessous --}}
+        <div class="rt-desktop-only-filters">
+            {{-- Category slider (partial réutilisable) --}}
+            @include('directory::public.partials._category_slider', [
+                'categories' => $categories,
+                'currentRoute' => 'index',
+                'activeSlug' => null,
+            ])
+        </div>
+
+        {{-- S135 : bouton "Filtres/Tri (N)" — mobile uniquement, ouvre le tiroir bottom-sheet --}}
+        <div class="rt-mobile-filter-trigger">
+            <button type="button" class="rt-mobile-filter-btn" :class="{ 'has-active': activeFilterCount > 0 }"
+                    @click="mobileFiltersOpen = true"
+                    x-ref="mobileFilterTrigger"
+                    aria-haspopup="dialog"
+                    :aria-expanded="mobileFiltersOpen.toString()"
+                    aria-controls="rt-mobile-filters-sheet">
+                🔧 {{ __('Filtres/Tri') }} <span x-show="activeFilterCount > 0" x-text="'(' + activeFilterCount + ')'"></span>
+            </button>
+        </div>
+
+        {{-- S135 : tiroir bottom-sheet mobile — regroupe tri + catégories + chips actifs --}}
+        <div x-show="mobileFiltersOpen" x-cloak
+             class="rt-sheet-overlay"
+             @click.self="mobileFiltersOpen = false"
+             @keydown.escape.window="mobileFiltersOpen = false"
+             x-transition.opacity>
+            <div class="rt-sheet"
+                 id="rt-mobile-filters-sheet"
+                 x-ref="mobileSheet"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="rt-mobile-filters-title"
+                 @keydown.tab="trapSheetTab($event)"
+                 x-init="$watch('mobileFiltersOpen', v => { if (v) { $nextTick(() => $refs.mobileSheetClose && $refs.mobileSheetClose.focus()) } else { $refs.mobileFilterTrigger && $refs.mobileFilterTrigger.focus() } })">
+                <div class="rt-sheet-handle" aria-hidden="true"></div>
+                <div class="rt-sheet-header">
+                    <h2 id="rt-mobile-filters-title">{{ __('Filtres et tri') }}</h2>
+                    <button type="button" class="rt-sheet-close" x-ref="mobileSheetClose" @click="mobileFiltersOpen = false" aria-label="{{ __('Fermer') }}">✕</button>
+                </div>
+
+                {{-- Chips actives + tout effacer --}}
+                <div class="rt-sheet-active-chips" x-show="activeFilterCount > 0">
+                    <template x-if="activeCategory">
+                        <button type="button" class="rt-sheet-chip" @click="toggleCategory(activeCategory)">
+                            <span x-text="categoryNamesBySlug[activeCategory] || activeCategory"></span> ✕
+                        </button>
+                    </template>
+                    <template x-if="activePricing">
+                        <button type="button" class="rt-sheet-chip" @click="togglePricing(activePricing)">
+                            <span x-text="pricingLabelsMap[activePricing] || activePricing"></span> ✕
+                        </button>
+                    </template>
+                    <template x-if="activeEcosystem">
+                        <button type="button" class="rt-sheet-chip" @click="toggleEcosystem(activeEcosystem)">
+                            <span x-text="ecosystemLabelsMap[activeEcosystem] || activeEcosystem"></span> ✕
+                        </button>
+                    </template>
+                    <template x-if="eduFilter">
+                        <button type="button" class="rt-sheet-chip" @click="eduFilter = false">🎓 {{ __('Éducation') }} ✕</button>
+                    </template>
+                    <template x-if="sortBy === 'rating'">
+                        <button type="button" class="rt-sheet-chip" @click="setSort('all')">⭐ {{ __('Populaires') }} ✕</button>
+                    </template>
+                    <template x-if="sortBy === 'newest'">
+                        <button type="button" class="rt-sheet-chip" @click="setSort('all')">🆕 {{ __('Récents') }} ✕</button>
+                    </template>
+                    <button type="button" class="rt-sheet-clear-all" @click="resetAll()">{{ __('Tout effacer') }}</button>
+                </div>
+
+                <h3 class="rt-sheet-section-title">{{ __('Trier par') }}</h3>
+                <button type="button" class="rt-sheet-row-btn" :class="{ active: sortDropdownKey === 'all' }" @click="setSort('all')">{{ __('Tous') }}</button>
+                <button type="button" class="rt-sheet-row-btn" :class="{ active: sortDropdownKey === 'rating' }" @click="setSort('rating')">⭐ {{ __('Populaires') }}</button>
+                <button type="button" class="rt-sheet-row-btn" :class="{ active: sortDropdownKey === 'newest' }" @click="setSort('newest')">🆕 {{ __('Récents') }}</button>
+                <button type="button" class="rt-sheet-row-btn" :class="{ active: sortDropdownKey === 'free' }" @click="setSort('free')">🆓 {{ __('Gratuits') }}</button>
+                <button type="button" class="rt-sheet-row-btn" :class="{ active: eduFilter }" @click="eduFilter = !eduFilter">🎓 {{ __('Éducation') }}</button>
+
+                @if($categories->isNotEmpty())
+                <h3 class="rt-sheet-section-title">{{ __('Catégories') }}</h3>
+                <div class="rt-sheet-cats">
+                    @foreach($categories as $cat)
+                        <button type="button" class="rt-sheet-cat-chip"
+                                :class="{ active: activeCategory === '{{ $cat->slug }}' }"
+                                @click="toggleCategory('{{ $cat->slug }}')">
+                            {{ $cat->icon ?? '' }} {{ $cat->name }}
+                        </button>
+                    @endforeach
+                </div>
+                @endif
+            </div>
+        </div>
 
         {{-- S90 #43 Phase 2 — Bouton alerte catégorie réactif (apparaît uniquement quand une catégorie est filtrée).
              Désactivé tant que Phase 3 (cron weekly digest + email Brevo) n'est pas livrée.
@@ -796,13 +1040,31 @@
             </button>
         </div>
 
-        {{-- Sort tabs --}}
-        <div class="rt-sort-bar">
-            <button type="button" class="rt-sort-tab" :class="sortBy === 'all' && activePricing !== 'free' && 'rt-sort-active'" @click="setSort('all')">{{ __('Tous') }}</button>
-            <button type="button" class="rt-sort-tab" :class="sortBy === 'rating' && 'rt-sort-active'" @click="setSort('rating')">⭐ {{ __('Populaires') }}</button>
-            <button type="button" class="rt-sort-tab" :class="sortBy === 'newest' && 'rt-sort-active'" @click="setSort('newest')">🆕 {{ __('Récents') }}</button>
-            <button type="button" class="rt-sort-tab" :class="activePricing === 'free' && 'rt-sort-active'" @click="setSort('free')">🆓 {{ __('Gratuits') }}</button>
-            <button type="button" class="rt-sort-tab" :class="eduFilter && 'rt-sort-active'" @click="eduFilter = !eduFilter" :style="eduFilter ? 'background:#ecfdf5;color:#065f46;border-color:#065f46;' : ''">🎓 {{ __('Éducation') }}</button>
+        {{-- S135 : "Trier par" — dropdown compact (remplace la rangée de 5 onglets), desktop uniquement --}}
+        <div class="rt-sort-bar rt-desktop-only-filters">
+            <div x-data="{ open: false }" @keydown.escape="open = false; $refs.sortToggle.focus()" style="position: relative; display: inline-block;">
+                <button type="button" class="rt-sort-dropdown-btn" :class="{ active: sortDropdownKey !== 'all' }" @click="open = !open"
+                        x-ref="sortToggle"
+                        aria-haspopup="true"
+                        :aria-expanded="open.toString()"
+                        aria-controls="rt-sort-menu">
+                    {{ __('Trier par') }} : <span x-text="sortLabels[sortDropdownKey]"></span> <i class="ti-angle-down" aria-hidden="true"></i>
+                </button>
+                <div x-show="open" @click.outside="open = false" x-cloak
+                     id="rt-sort-menu"
+                     role="menu"
+                     class="rt-sort-dropdown-menu">
+                    <button type="button" role="menuitem" :class="{ active: sortDropdownKey === 'all' }" @click="setSort('all'); open = false; $refs.sortToggle.focus()">{{ __('Tous') }}</button>
+                    <button type="button" role="menuitem" :class="{ active: sortDropdownKey === 'rating' }" @click="setSort('rating'); open = false; $refs.sortToggle.focus()">⭐ {{ __('Populaires') }}</button>
+                    <button type="button" role="menuitem" :class="{ active: sortDropdownKey === 'newest' }" @click="setSort('newest'); open = false; $refs.sortToggle.focus()">🆕 {{ __('Récents') }}</button>
+                    <button type="button" role="menuitem" :class="{ active: sortDropdownKey === 'free' }" @click="setSort('free'); open = false; $refs.sortToggle.focus()">🆓 {{ __('Gratuits') }}</button>
+                    <button type="button" role="menuitem" :class="{ active: sortDropdownKey === 'edu' }" @click="eduFilter = !eduFilter; open = false; $refs.sortToggle.focus()">🎓 {{ __('Éducation') }}</button>
+                </div>
+            </div>
+        </div>
+
+        {{-- Mode sélection + comparer : reste visible desktop ET mobile (fonctionnalité distincte du tri/filtrage) --}}
+        <div class="rt-sort-bar" style="border-bottom:none;margin-bottom:16px;">
             <button type="button"
                     class="rt-sort-tab"
                     x-data
@@ -810,14 +1072,14 @@
                     :class="$store.compare.selectionMode && 'rt-sort-active'"
                     :style="$store.compare.selectionMode ? 'background:rgba(6,78,90,0.08);color:var(--c-primary, #064E5A);border-color:var(--c-primary, #064E5A);' : ''"
                     :aria-pressed="$store.compare.selectionMode ? 'true' : 'false'"
-                    style="margin-left:auto;">🎯 <span x-text="$store.compare.selectionMode ? '{{ __('Sélection active') }}' : '{{ __('Mode sélection') }}'"></span></button>
+                    >🎯 <span x-text="$store.compare.selectionMode ? '{{ __('Sélection active') }}' : '{{ __('Mode sélection') }}'"></span></button>
             @if($categories->isNotEmpty())
                 <a x-show="$store.compare.count >= 2"
                    x-cloak
                    x-transition.opacity
                    :href="$store.compare.compareUrl"
                    class="rt-sort-tab"
-                   style="text-decoration:none!important;background:var(--c-primary,#064E5A);color:#fff;border-radius:8px;padding:8px 16px;font-weight:700;">📊 {{ __('Comparer') }}<span x-text="' (' + $store.compare.count + ')'"></span></a>
+                   style="text-decoration:none!important;background:var(--c-primary,#064E5A);color:#fff;border-radius:8px;padding:8px 16px;font-weight:700;margin-left:auto;">📊 {{ __('Comparer') }}<span x-text="' (' + $store.compare.count + ')'"></span></a>
             @endif
         </div>
 
@@ -1080,7 +1342,18 @@
                             <template x-if="tool.favicon"><img :src="tool.favicon" alt="" aria-hidden="true" class="rt-logo" loading="lazy" width="48" height="48" onerror="this.style.display='none'"></template>
                             <div>
                                 <h3 class="rt-card-name"><a :href="tool.showUrl" x-text="tool.name"></a></h3>
-                                <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                                {{-- S135 2026-07-23 : badge écosystème discret (regroupement par éditeur, ex. "OpenAI · 6 produits").
+                                     Silencieux si l'outil n'a pas d'ecosystem_tag. Comptes pré-agrégés côté serveur (voir @php en tête
+                                     de fichier) : aucune requête par carte. Lien réel (fonctionne sans JS / ouverture nouvel onglet) qui
+                                     bascule le filtre client-side existant (même mécanisme que les catégories/tri, pas de rechargement). --}}
+                                <template x-if="tool.ecosystemBadge">
+                                    <a :href="'{{ route('directory.index') }}?ecosystem=' + tool.ecosystemTag"
+                                       class="rt-badge-eco"
+                                       x-text="tool.ecosystemBadge"
+                                       :aria-label="'{{ __('Voir tous les outils de cet éditeur') }} : ' + tool.ecosystemBadge"
+                                       @click="if (!($event.metaKey || $event.ctrlKey || $event.shiftKey || $event.button === 1)) { $event.preventDefault(); toggleEcosystem(tool.ecosystemTag); }"></a>
+                                </template>
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 4px;">
                                     <span class="rt-badge" :class="'badge-' + tool.pricing" x-text="tool.pricingLabel"></span>
                                     <template x-if="tool.hasEduPricing"><span style="background:#ecfdf5;color:#065f46;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;">🎓 {{ __('Éducation') }}</span></template>
                                     <template x-if="tool.launchYear > 0"><span style="color: #374151; font-size: 0.75rem;" x-text="'🚀 ' + tool.launchYear"></span></template>

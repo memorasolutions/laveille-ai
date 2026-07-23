@@ -19,6 +19,8 @@ use Modules\Directory\Models\Category;
 use Modules\Directory\Models\Tool;
 use Modules\Directory\Models\ToolPricingReport;
 use Modules\Directory\Services\DuplicateDetectorService;
+use Modules\Directory\Services\EcosystemCountService;
+use Modules\Directory\Services\EcosystemResolverService;
 use Modules\Directory\Support\PricingCategories;
 use Modules\Settings\Facades\Settings;
 
@@ -47,6 +49,13 @@ class PublicDirectoryController extends Controller
 
         $categories = Category::orderBy('sort_order')->get();
         $pricingOptions = \Modules\Directory\Support\PricingCategories::optionsWithEducation();
+
+        // 2026-07-23 S135 : comptes agrégés par écosystème (badge "Éditeur · N produits" sur
+        // les cartes) + libellés affichables. Logique métier au contrôleur (pas en vue),
+        // service caché indéfiniment et invalidé par ToolObserver — une seule requête agrégée
+        // par requête HTTP, jamais recalculée dans la vue.
+        $ecosystemCounts = app(EcosystemCountService::class)->counts();
+        $ecosystemLabels = config('ecosystems.labels', []);
 
         // 2026-05-05 #135 : eager-load tutorials_count pour featured + topVoted + recent + popular (DRY closure)
         $tutorialsCountClosure = fn ($q) => $q->where('is_approved', 1)->whereIn('type', ['youtube', 'video', 'tutorial', 'formation']);
@@ -87,7 +96,7 @@ class PublicDirectoryController extends Controller
                 ->get(['id', 'name', 'slug', 'is_public']);
         }
 
-        return view('directory::public.index', compact('tools', 'categories', 'pricingOptions', 'featuredTools', 'recentTools', 'popularTools', 'topVoted', 'userCollections', 'showArchived', 'archivedCount'));
+        return view('directory::public.index', compact('tools', 'categories', 'pricingOptions', 'featuredTools', 'recentTools', 'popularTools', 'topVoted', 'userCollections', 'showArchived', 'archivedCount', 'ecosystemCounts', 'ecosystemLabels'));
     }
 
     public function educationPricing(Request $request): View
@@ -297,6 +306,10 @@ class PublicDirectoryController extends Controller
         $tool->screenshot = $validated['screenshot'] ?? null;
         $tool->is_featured = false;
         $tool->submitted_by = auth()->id();
+
+        // Pré-remplissage auto de l'écosystème (ex. "openai") depuis l'URL soumise — reste
+        // modifiable ensuite via l'admin, ne bloque jamais la soumission si non détecté.
+        $tool->ecosystem_tag = app(EcosystemResolverService::class)->resolve($validated['url']);
 
         $tool->setTranslation('name', $locale, $validated['name']);
         $tool->setTranslation('slug', $locale, Str::slug($validated['name']));

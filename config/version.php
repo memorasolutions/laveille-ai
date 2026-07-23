@@ -2728,11 +2728,58 @@ declare(strict_types=1);
  *     réversible - non testable localement (la base de dev locale n'a pas ce terme, copie
  *     partielle/désynchronisée de prod), mais le garde d'existence (`if (! $prompt) return;`)
  *     rend la migration sûre à déployer même dans ce cas.
+ *   1.119.0 · 2026-07-23 · feat(annuaire) Regroupement par écosystème/éditeur + filtres
+ *     compacts sur /annuaire, proposé après veille croisée (Perplexity + Codex 90-94/100 +
+ *     Gemini 85-95/100) suite à une question de l'utilisateur sur les outils multi-produits
+ *     (ex. OpenAI éparpillé) et des rangées de filtres jugées trop encombrantes. Réutilise la
+ *     colonne `ecosystem_tag` déjà présente sur Tool (migration avril 2026, jamais câblée à
+ *     l'UI) plutôt que `parent_tool_id` (sémantiquement réservé aux variantes de produit, pas
+ *     à l'éditeur - distinction signalée indépendamment par Codex et Gemini).
+ *
+ *     Backend : nouveau package composer `jeremykendall/php-domain-parser` (Public Suffix List
+ *     vendorisée, jamais de fetch réseau à l'exécution) pour extraire le domaine racine réel
+ *     d'une URL (gère les TLD composés type .co.uk, évite le piège du `str_contains` naïf qui
+ *     aurait matché à tort "fakeopenai.com"). `EcosystemResolverService::resolve()` (config
+ *     `config/ecosystems.php`, mapping domaine->tag versionné, 17 écosystèmes amorcés et
+ *     vérifiés par recherche : OpenAI, Google, Anthropic, Midjourney, Perplexity, Mistral,
+ *     Runway, ElevenLabs, Notion, Jasper, Stability AI, Adobe, Microsoft, Meta, DeepSeek, xAI,
+ *     Canva). Commande `directory:backfill-ecosystem-tags --dry-run` (jamais d'écrasement d'un
+ *     tag déjà assigné manuellement) + auto-suggestion à la soumission d'un nouvel outil
+ *     (toujours modifiable en admin). `EcosystemCountService::counts()` : une seule requête
+ *     agrégée `GROUP BY ecosystem_tag` (zéro N+1), mise en cache et invalidée automatiquement
+ *     via ToolObserver sur created/saved/deleted (bug Eloquent trouvé et corrigé au passage :
+ *     `wasChanged()` est toujours vide sur `create()`, hook explicite sur l'event `created()`
+ *     nécessaire en plus de `saved()`).
+ *
+ *     Frontend : badge discret par carte ("OpenAI · 6 produits"), lien cliquable qui filtre la
+ *     grille (`?ecosystem=openai`, même mécanisme que les filtres existants) ; section "Autres
+ *     outils de l'éditeur" sur la fiche détail (pattern App Store, 4 max) ; rangée de tri
+ *     (5 onglets Tous/Populaires/Récents/Gratuits/Éducation) convertie en menu déroulant
+ *     compact ; carrousel de catégories inchangé, seule rangée visible par défaut desktop ;
+ *     sur mobile, tri + catégories + filtre écosystème actif collapsés derrière un bouton
+ *     unique "Filtres/Tri (N)" ouvrant un tiroir plein écran (chips actifs + "Tout effacer",
+ *     `role="dialog"`/`aria-modal`, fermeture Escape avec retour de focus, cibles ≥44px,
+ *     contraste vérifié AAA : badge 8.88:1, pill active 9.93:1).
+ *
+ *     Développement en 3 passes parallèles (sous-agents indépendants backend/frontend puis
+ *     intégration) : le contrôleur ne transmettait pas encore les données agrégées à la vue,
+ *     le premier jet contournait via un bloc `@php` en tête de Blade - déplacé proprement dans
+ *     `PublicDirectoryController::index()` lors de l'intégration finale, aucune duplication de
+ *     requête. Vérifié : 18 nouveaux tests Pest (resolver, commande, cache) + suite complète du
+ *     module Directory verts, ET suite de tests COMPLÈTE du projet relancée (5318 tests passés,
+ *     114 échecs préexistants et sans rapport confirmés - Team/Testimonial/Newsletter/tests
+ *     Phase* historiques, tables sqlite manquantes en base de test, problème environnemental
+ *     antérieur à cette fonctionnalité, zéro échec côté Directory/Ecosystem). Vérification
+ *     visuelle Playwright desktop+mobile combinée (badge, dropdown, tiroir, carrousel de
+ *     catégories non régressé). ACTION REQUISE APRÈS DÉPLOIEMENT : exécuter
+ *     `directory:backfill-ecosystem-tags --dry-run` sur les 433 outils réels, revoir le
+ *     rapport, puis sans `--dry-run` pour peupler `ecosystem_tag` (additif et réversible
+ *     uniquement - ne touche jamais un tag déjà assigné manuellement).
  */
 
 $lvMajor = 1;
-$lvMinor = 118;
-$lvPatch = 2;
+$lvMinor = 119;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

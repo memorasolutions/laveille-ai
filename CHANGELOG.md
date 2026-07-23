@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.119.0] - 2026-07-23
+
+### Added
+- **Annuaire** (`/annuaire`) : regroupement des outils par écosystème/éditeur. Badge discret par carte ("OpenAI · 6 produits"), cliquable pour filtrer la grille ; section "Autres outils de l'éditeur" sur la fiche détail. Détection automatique du domaine racine (Public Suffix List, package `jeremykendall/php-domain-parser`), config `config/ecosystems.php` versionnée (17 écosystèmes amorcés), commande `directory:backfill-ecosystem-tags --dry-run` pour peupler les 433 outils existants sans jamais écraser un tag manuel, auto-suggestion à la soumission d'un nouvel outil.
+- **Annuaire** : filtres compactés. Rangée de 5 onglets de tri remplacée par un menu déroulant compact ; sur mobile, tri + catégories + filtre écosystème actif regroupés derrière un bouton unique "Filtres/Tri (N)" ouvrant un tiroir accessible (chips actifs, "Tout effacer", clavier, focus, contraste AAA).
+
+### Changed
+- **Annuaire** : comptage par écosystème mis en cache (une seule requête agrégée, zéro N+1), invalidé automatiquement à chaque outil créé/modifié/supprimé.
+
 ## [1.118.2] - 2026-07-23
 
 ### Added
