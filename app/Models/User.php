@@ -78,6 +78,8 @@ class User extends Authenticatable implements HasMedia, HasPasskeys, MustVerifyE
      */
     protected $fillable = [
         'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
         'two_factor_secret',

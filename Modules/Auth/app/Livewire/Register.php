@@ -21,7 +21,9 @@ use Modules\Auth\Services\AuthService;
 #[Layout('auth::layouts.guest')]
 class Register extends Component
 {
-    public string $name = '';
+    public string $first_name = '';
+
+    public string $last_name = '';
 
     public string $email = '';
 
@@ -32,13 +34,18 @@ class Register extends Component
     public function register(AuthService $authService): void
     {
         $this->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'confirmed', new PasswordPolicyRule, new PasswordNotCompromisedRule],
         ]);
 
+        $name = trim($this->first_name.' '.$this->last_name);
+
         $user = $authService->register([
-            'name' => $this->name,
+            'name' => $name,
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
             'email' => $this->email,
             'password' => $this->password,
         ]);

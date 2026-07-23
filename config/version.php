@@ -2654,11 +2654,44 @@ declare(strict_types=1);
  *     mais la convergence est réelle et objectivement mesurable par la nature décroissante des
  *     trouvailles - décision de clore cette session sur ce constat plutôt que de poursuivre
  *     indéfiniment une chasse à rendement marginal décroissant.
+ *   1.118.0 · 2026-07-23 · feat(prompteur) Collage HTML -> Markdown automatique dans le champ
+ *     « Objectif de la vidéo » du Prompteur (/outils/prompteur). Quand l'utilisateur colle du
+ *     contenu riche copié depuis une page web (ex. un article de blog avec titres/gras/listes/
+ *     liens), le HTML du presse-papier est converti en Markdown (# titres, ** gras, listes,
+ *     liens) et inséré à la position du curseur, au lieu du texte brut sans formatage que le
+ *     navigateur colle par défaut. Comportement natif préservé si le presse-papier ne contient
+ *     que du texte brut (aucune conversion forcée). Décision validée par recherche + 2 avis IA
+ *     indépendants (~92-94/100) : Turndown.js reste la référence 2026 pour la conversion HTML
+ *     vers Markdown côté navigateur ; vendorisé localement (`public/assets/tools/prompteur/
+ *     turndown.min.js`, licence MIT, attribution en en-tête) plutôt que via CDN, cohérent avec
+ *     l'argument déjà affiché sur cette page (« 100% dans votre navigateur ») et le pattern
+ *     établi sur ce projet (bibliothèques tierces toujours vendorisées, jamais de `<script src=
+ *     "https://cdn...">`, ex. code-qr). Insertion via position du curseur (pas remplacement
+ *     complet du champ), curseur repositionné après conversion, feedback discret via le système
+ *     de notice déjà existant dans ce fichier (pas de popup native, interdite sur ce projet).
+ *     Vérifié par test visuel Playwright : collage HTML de test confirmé converti (titres ##,
+ *     gras **, liens [texte](url), listes) ; collage texte brut confirmé inchangé (comportement
+ *     natif préservé, pas de conversion forcée).
+ *
+ *   1.118.0 (suite) · feat(auth) Prénom et nom de famille séparés à l'inscription (au lieu d'un
+ *     seul champ « Nom complet »), pour permettre une personnalisation plus fine à l'avenir
+ *     (ex. « Bonjour {prénom} » dans les courriels/UI). Architecture additive, ZÉRO breaking
+ *     change : la colonne `name` existante (utilisée dans 47 fichiers de vues à travers tout le
+ *     projet) reste inchangée et continue d'alimenter l'affichage partout - `first_name`/
+ *     `last_name` sont 2 nouvelles colonnes nullable, `name` reste calculée/synchronisée
+ *     automatiquement (`trim("{prénom} {nom}")`) à chaque écriture. Formulaire d'inscription
+ *     (`Modules/Auth/resources/views/livewire/register.blade.php`) : 2 champs côte à côte au
+ *     lieu d'un seul. Édition de profil : mêmes 2 champs ajoutés EN PLUS du champ `name` existant
+ *     (non retiré, rétrocompatibilité totale pour les comptes déjà créés). Connexion sociale
+ *     (Google/Apple/Microsoft/LinkedIn) : split naïf best-effort du nom unique retourné par le
+ *     fournisseur OAuth en prénom/nom, `name` conservé tel quel. 31/31 tests Auth verts, aucune
+ *     régression. Vérifié par test visuel Playwright : inscription réelle avec Prénom « Jean » +
+ *     Nom de famille « Dupont-Test » -> `name` en base confirmé = concaténation exacte des deux.
  */
 
 $lvMajor = 1;
-$lvMinor = 117;
-$lvPatch = 26;
+$lvMinor = 118;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

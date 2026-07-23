@@ -78,8 +78,18 @@ class SocialAuthController extends Controller
             }
         } else {
             // Create new user
+            // Le fournisseur social ne donne généralement qu'un seul champ "name" :
+            // split naïf best-effort en first_name/last_name pour peupler les 2
+            // nouvelles colonnes sans changer le comportement existant de "name".
+            $fullName = $socialUser->getName() ?? $socialUser->getNickname() ?? 'User';
+            $parts = explode(' ', trim($fullName), 2);
+            $firstName = $parts[0] ?? '';
+            $lastName = $parts[1] ?? '';
+
             $user = User::create([
-                'name' => $socialUser->getName() ?? $socialUser->getNickname() ?? 'User',
+                'name' => $fullName,
+                'first_name' => $firstName,
+                'last_name' => $lastName,
                 'email' => $socialUser->getEmail(),
                 'password' => bcrypt(Str::random(32)),
                 'social_provider' => $provider,

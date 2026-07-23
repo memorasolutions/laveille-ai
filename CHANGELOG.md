@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.118.0] - 2026-07-23
+
+### Added
+- **Prompteur** (`/outils/prompteur`) : collage HTML→Markdown automatique dans « Objectif de la vidéo ». Colle le contenu d'un article de blog copié depuis le navigateur, les titres/gras/listes/liens deviennent automatiquement du Markdown (`#`, `**`, etc.). Turndown.js vendorisé localement (MIT), aucune dépendance CDN.
+- **Inscription** : « Nom complet » remplacé par deux champs « Prénom » / « Nom de famille » séparés, pour permettre une personnalisation future plus fine. Architecture additive (aucune donnée existante affectée, `name` reste calculée automatiquement et continue d'alimenter les 47 vues existantes sans modification).
+
 ## [1.117.26] - 2026-07-23
 
 ### Fixed

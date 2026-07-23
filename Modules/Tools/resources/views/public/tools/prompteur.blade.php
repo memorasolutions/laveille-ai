@@ -126,13 +126,15 @@
                              x-show="activeTab === 'byoa'">
 
                             <form id="prompteur-byoa-form" class="pr-byoa-form" @submit.prevent="generatePrompt()">
-                                <div class="pr-field">
+                                <div class="pr-field" id="prompteur-goal-field">
                                     <label for="prompteur-goal-textarea">{{ __('Objectif de la vidéo') }}</label>
                                     <textarea id="prompteur-goal-textarea"
                                               class="pr-textarea"
                                               rows="2"
+                                              x-ref="goalTextarea"
                                               x-model="form.goal"
                                               @input="generatePrompt()"
+                                              @paste="handleGoalPaste($event)"
                                               placeholder="{{ __('Ex. : Expliquer comment configurer une adresse courriel Gmail pour la classe') }}"></textarea>
                                 </div>
                                 <div class="pr-field-row">
@@ -515,5 +517,8 @@
 @endsection
 
 @push('scripts')
+{{-- Turndown (HTML -> Markdown) vendorisé localement : voir en-tête du fichier pour l'attribution
+     (MIT, Dom Christie). Chargé avant prompteur-core.js qui l'utilise dans handleGoalPaste(). --}}
+<script src="{{ asset('assets/tools/prompteur/turndown.min.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/prompteur/prompteur-core.js') }}?v={{ config('version.semver') }}" defer></script>
 @endpush

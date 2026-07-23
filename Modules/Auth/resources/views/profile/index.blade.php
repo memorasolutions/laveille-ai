@@ -78,6 +78,7 @@
                             <label class="control-label">{{ __('Nom complet') }} <span style="color: #d9534f;">*</span></label>
                             <input type="text" name="name" value="{{ old('name', $user->name) }}" required
                                    class="form-control {{ $errors->has('name') ? 'has-error' : '' }}">
+                            <p class="help-block">{{ __('Recalculé automatiquement si Prénom et Nom de famille sont remplis ci-dessous.') }}</p>
                             @if($errors->has('name'))<p class="help-block" style="color: #d9534f;">{{ $errors->first('name') }}</p>@endif
                         </div>
                         <div class="col-sm-6" style="margin-bottom: 15px;">
@@ -85,6 +86,20 @@
                             <input type="email" name="email" value="{{ old('email', $user->email) }}" required autocomplete="email"
                                    class="form-control {{ $errors->has('email') ? 'has-error' : '' }}">
                             @if($errors->has('email'))<p class="help-block" style="color: #d9534f;">{{ $errors->first('email') }}</p>@endif
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6" style="margin-bottom: 15px;">
+                            <label class="control-label">{{ __('Prénom') }}</label>
+                            <input type="text" name="first_name" value="{{ old('first_name', $user->first_name) }}" autocomplete="given-name"
+                                   class="form-control {{ $errors->has('first_name') ? 'has-error' : '' }}">
+                            @if($errors->has('first_name'))<p class="help-block" style="color: #d9534f;">{{ $errors->first('first_name') }}</p>@endif
+                        </div>
+                        <div class="col-sm-6" style="margin-bottom: 15px;">
+                            <label class="control-label">{{ __('Nom de famille') }}</label>
+                            <input type="text" name="last_name" value="{{ old('last_name', $user->last_name) }}" autocomplete="family-name"
+                                   class="form-control {{ $errors->has('last_name') ? 'has-error' : '' }}">
+                            @if($errors->has('last_name'))<p class="help-block" style="color: #d9534f;">{{ $errors->first('last_name') }}</p>@endif
                         </div>
                     </div>
                     <div style="margin-bottom: 15px;">

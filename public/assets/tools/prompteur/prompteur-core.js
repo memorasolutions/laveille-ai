@@ -395,6 +395,52 @@
                     this._showInlineNotice('.pr-copy-row', "Impossible de copier automatiquement. Le texte est sélectionné : utilisez Ctrl+C (ou Cmd+C) pour le copier manuellement.");
                 },
 
+                // Collage riche dans le champ « Objectif de la vidéo » : si le presse-papier
+                // contient du HTML (ex. article de blog copié depuis un navigateur), on le
+                // convertit en Markdown via Turndown (vendorisé, voir turndown.min.js) au lieu
+                // de laisser le navigateur coller du texte brut sans formatage. Le texte brut
+                // simple (aucun HTML dans le presse-papier) n'est JAMAIS passé dans Turndown :
+                // on laisse alors le comportement natif du navigateur agir (pas de preventDefault).
+                handleGoalPaste: function (event) {
+                    var clipboardData = event.clipboardData || window.clipboardData;
+                    if (!clipboardData) return;
+
+                    var html = clipboardData.getData('text/html');
+                    if (!html || !html.trim() || typeof window.TurndownService === 'undefined') {
+                        return; // pas de HTML riche, ou lib absente : comportement natif inchangé
+                    }
+
+                    var markdown = null;
+                    try {
+                        var turndownService = new window.TurndownService({ headingStyle: 'atx' });
+                        markdown = turndownService.turndown(html).trim();
+                    } catch (e) {
+                        markdown = null;
+                    }
+                    if (!markdown) return; // conversion échouée : repli sur le collage natif (texte brut)
+
+                    event.preventDefault();
+
+                    var self = this;
+                    var textarea = this.$refs.goalTextarea;
+                    var currentValue = this.form.goal || '';
+                    var start = (textarea && typeof textarea.selectionStart === 'number') ? textarea.selectionStart : currentValue.length;
+                    var end = (textarea && typeof textarea.selectionEnd === 'number') ? textarea.selectionEnd : currentValue.length;
+
+                    this.form.goal = currentValue.slice(0, start) + markdown + currentValue.slice(end);
+                    var newCursorPos = start + markdown.length;
+
+                    this.$nextTick(function () {
+                        if (textarea && textarea.setSelectionRange) {
+                            textarea.focus();
+                            textarea.setSelectionRange(newCursorPos, newCursorPos);
+                        }
+                        self._showInlineNotice('#prompteur-goal-field', "Collage HTML converti automatiquement en Markdown.");
+                    });
+
+                    this.generatePrompt();
+                },
+
                 // ═══════════════════════════════════ Import (onglet 2) ═══════════════════════════════════
                 pasteFromClipboard: function () {
                     var self = this;

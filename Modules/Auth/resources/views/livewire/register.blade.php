@@ -5,18 +5,33 @@
 
     <form wire:submit="register" class="mt-8">
         <div class="space-y-5">
-            {{-- Nom complet --}}
-            <div>
-                <label for="register-name" class="text-base font-medium text-gray-900">{{ __('Nom complet') }}</label>
-                <div class="mt-2 relative">
-                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                        <i class="ti ti-user text-gray-400 text-xl"></i>
+            {{-- Prénom / Nom de famille --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                    <label for="first_name" class="text-base font-medium text-gray-900">{{ __('Prénom') }}</label>
+                    <div class="mt-2 relative">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                            <i class="ti ti-user text-gray-400 text-xl"></i>
+                        </div>
+                        <input wire:model="first_name" type="text" id="first_name" autocomplete="given-name"
+                               class="block w-full py-4 ps-10 pe-4 text-black placeholder-gray-500 transition-all duration-200 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:border-sky-600 focus:bg-white caret-sky-600"
+                               placeholder="{{ __('Prénom') }}" required autofocus>
                     </div>
-                    <input wire:model="name" type="text" id="register-name" autocomplete="name"
-                           class="block w-full py-4 ps-10 pe-4 text-black placeholder-gray-500 transition-all duration-200 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:border-sky-600 focus:bg-white caret-sky-600"
-                           placeholder="{{ __('Nom complet') }}" required autofocus>
+                    @error('first_name')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                 </div>
-                @error('name')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+
+                <div>
+                    <label for="last_name" class="text-base font-medium text-gray-900">{{ __('Nom de famille') }}</label>
+                    <div class="mt-2 relative">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                            <i class="ti ti-user text-gray-400 text-xl"></i>
+                        </div>
+                        <input wire:model="last_name" type="text" id="last_name" autocomplete="family-name"
+                               class="block w-full py-4 ps-10 pe-4 text-black placeholder-gray-500 transition-all duration-200 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:border-sky-600 focus:bg-white caret-sky-600"
+                               placeholder="{{ __('Nom de famille') }}" required>
+                    </div>
+                    @error('last_name')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                </div>
             </div>
 
             {{-- Courriel --}}

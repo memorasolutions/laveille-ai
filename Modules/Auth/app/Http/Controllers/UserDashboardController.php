@@ -68,6 +68,8 @@ class UserDashboardController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,'.$user->id,
             'bio' => 'nullable|string|max:500',
             'avatar' => 'nullable|image|max:2048',
@@ -78,6 +80,14 @@ class UserDashboardController extends Controller
                 Storage::disk('public')->delete($user->avatar);
             }
             $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        // Si Prénom + Nom de famille sont fournis, name devient la source calculée.
+        // Sinon on garde le comportement existant (champ name saisi directement).
+        $firstName = trim((string) $request->input('first_name'));
+        $lastName = trim((string) $request->input('last_name'));
+        if ($firstName !== '' && $lastName !== '') {
+            $validated['name'] = trim($firstName.' '.$lastName);
         }
 
         $user->update($validated);
