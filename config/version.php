@@ -2707,11 +2707,32 @@ declare(strict_types=1);
  *     charge à 300 sections traité en 3 ms. Vérifié par test visuel Playwright : import réel du
  *     JSON complet -> message « 8 sections importées avec succès », les 8 vrais titres affichés
  *     dans l'éditeur (au lieu du gabarit générique à 4 sections observé avant correctif).
+ *   1.118.2 · 2026-07-23 · feat(glossaire) 4 nouveaux termes (Adobe, Cloudflare, Shutterstock,
+ *     Hub), demandés explicitement par l'utilisateur, angle « rôle dans l'écosystème IA » plutôt
+ *     que fiche corporative générique. Recherche et validation multi-sources (skill /glossaire
+ *     bonifié en section 0 : URLs de sources toujours vérifiées réellement joignables - HEAD
+ *     HTTP 200 - jamais "estimées"/devinées, croisement d'au moins 2 sources indépendantes par
+ *     fait avancé). Images (paire webp+jpg, 1200x669, style isométrique 3D teal/cyan) générées
+ *     via le compte Gemini de l'utilisateur (skill /nanobanana), 4/4 réussies du premier coup.
+ *     Migration réversible testée (down()/up() confirmé). 9/9 tests Dictionary verts. Vérifié
+ *     visuellement (Playwright local) : hero image, définition, bento analogie/exemple, FAQ,
+ *     sources cliquables, JSON-LD complet (DefinedTermSet/DefinedTerm/Person/Article/
+ *     BreadcrumbList/FAQPage) confirmés sur la fiche Adobe.
+ *
+ *     Bug fonctionnel signalé par l'utilisateur, corrigé dans la foulée : le terme « Prompt »
+ *     (seeder original, jamais retouché) n'avait aucun alias, donc « requête »/« requêtes »
+ *     (synonyme courant) n'était jamais auto-lié par GlossaryLinkifier (aucune couche de
+ *     synonymes dans le linkifier - seulement matching exact/morphologique pluriel-casse sur le
+ *     name principal, jamais sur un mot différent, et jamais sur les alias déjà en base). Ajout
+ *     des 2 formes (singulier et pluriel) au tableau aliases du terme prompt via migration
+ *     réversible - non testable localement (la base de dev locale n'a pas ce terme, copie
+ *     partielle/désynchronisée de prod), mais le garde d'existence (`if (! $prompt) return;`)
+ *     rend la migration sûre à déployer même dans ce cas.
  */
 
 $lvMajor = 1;
 $lvMinor = 118;
-$lvPatch = 1;
+$lvPatch = 2;
 
 return [
     'major' => $lvMajor,

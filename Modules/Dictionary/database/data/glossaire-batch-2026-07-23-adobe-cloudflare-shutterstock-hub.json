@@ -1,0 +1,235 @@
+[
+    {
+        "name": "Adobe",
+        "slug": "adobe",
+        "definition": "Adobe est l'éditeur de Creative Cloud qui a structuré son offre d'intelligence artificielle générative autour de trois piliers complémentaires : Firefly, Sensei et Content Credentials/C2PA. Firefly est la famille de modèles génératifs maison d'Adobe (image, vidéo et contenu multimodal), intégrée aux applications comme Photoshop, Illustrator, Premiere Pro, After Effects, Adobe Express, Substance 3D, InDesign, Lightroom et Adobe Stock. Elle génère du contenu et ajoute automatiquement des Content Credentials, des métadonnées normalisées C2PA qui documentent l'origine et les modifications, afin de rendre les créations traçables et prêtes pour un usage commercial. À côté, Adobe Sensei est la couche d'IA historique non générative qui propulse des fonctions comme la sélection intelligente, la retouche assistée et la reconnaissance de contenu, distincte de la génération créative visible de Firefly. Depuis 2025-2026, Adobe positionne Firefly comme une plateforme multi-modèles, combinant ses propres modèles (Firefly Image Model 5) et des intégrations de modèles tiers, avec des assistants IA agentiques et des outils vidéo.",
+        "analogy": "Imagine un studio de création : Firefly fabrique les visuels, Sensei automatise les tâches lourdes, et Content Credentials colle un passeport vérifiable sur chaque œuvre.",
+        "example": "Le 15 avril 2026, Adobe intègre Firefly Video et les modèles Kling 3.0/Omni directement dans Premiere Pro, permettant à un monteur de générer et de postproduire des plans vidéo sans quitter son logiciel de montage.",
+        "did_you_know": "En mars 2026, Adobe élargit Firefly à plus de 30 modèles tiers (dont Google et Runway), tout en continuant d'ajouter automatiquement des Content Credentials C2PA à chaque image générée.",
+        "one_sentence_answer": "Dans l'intelligence artificielle générative, Adobe réunit Firefly pour créer, Sensei pour automatiser et les Content Credentials/C2PA pour prouver l'origine, dans une plateforme multi-modèles intégrée à Creative Cloud et conçue pour un usage commercial sécuritaire.",
+        "faq": [
+            {
+                "question": "Firefly est-il sécuritaire pour un usage commercial ?",
+                "answer": "Oui : depuis février 2026, Adobe positionne Firefly Video et ses modèles comme entraînés sur du contenu sous licence, avec des Content Credentials ajoutés par défaut pour tracer la provenance."
+            },
+            {
+                "question": "Quelle est la différence entre Adobe Sensei et Firefly ?",
+                "answer": "Sensei automatise des tâches non génératives comme la sélection intelligente et la retouche assistée depuis des années ; Firefly génère de nouvelles images, vidéos et contenus directement dans les applications Creative Cloud."
+            },
+            {
+                "question": "Puis-je utiliser d'autres modèles d'IA dans Firefly ?",
+                "answer": "Oui : depuis 2026, Firefly est devenu une plateforme multi-modèles qui prend en charge notamment Gemini, FLUX, Luma AI et GPT Image d'OpenAI, en plus de plus de 30 modèles tiers de référence."
+            }
+        ],
+        "sources": [
+            {
+                "label": "Adobe Firefly: The Next Evolution of Creative AI Is Here",
+                "url": "https://blog.adobe.com/en/publish/2025/04/24/adobe-firefly-next-evolution-creative-ai-is-here",
+                "year": 2025,
+                "author": "Adobe Inc."
+            },
+            {
+                "label": "Putting Ideas in Motion: Redefining AI Video with Adobe Firefly",
+                "url": "https://blog.adobe.com/en/publish/2026/02/25/putting-ideas-in-motion-redefining-ai-video-with-adobe-firefly",
+                "year": 2026,
+                "author": "Adobe Inc."
+            },
+            {
+                "label": "Adobe Firefly Expands Video, Image Creation with New AI Capabilities, Custom Models",
+                "url": "https://blog.adobe.com/en/publish/2026/03/19/adobe-firefly-expands-video-image-creation-with-new-ai-capabilities-custom-models",
+                "year": 2026,
+                "author": "Adobe Inc."
+            },
+            {
+                "label": "Content Credentials et C2PA - vue d'ensemble (aide officielle Adobe)",
+                "url": "https://helpx.adobe.com/fr/creative-cloud/apps/adobe-content-authenticity/content-credentials/overview.html",
+                "year": 2026,
+                "author": "Adobe Inc."
+            }
+        ],
+        "aliases": [
+            "Adobe Inc.",
+            "Adobe Systems",
+            "Adobe Firefly",
+            "Adobe Sensei"
+        ],
+        "icon": "🎨",
+        "difficulty": "intermediate",
+        "type": "explainer",
+        "cat_slug": "intelligence-artificielle",
+        "match_strategy": "loose",
+        "has_image": true,
+        "acronym_full": null,
+        "broader_slugs": [],
+        "narrower_slugs": []
+    },
+    {
+        "name": "Cloudflare",
+        "slug": "cloudflare",
+        "definition": "Cloudflare est une entreprise américaine fondée en 2009 par Matthew Prince, Michelle Zatlyn et Lee Holloway, qui exploite l'un des plus grands réseaux d'infrastructure Internet au monde, avec plus de 330 emplacements de serveurs répartis sur la planète. Elle agit comme un proxy inverse placé entre les visiteurs et les sites web : elle accélère le chargement des pages (réseau de diffusion de contenu ou CDN), gère la résolution des noms de domaine (DNS, dont le résolveur public 1.1.1.1) et protège contre les attaques (pare-feu applicatif, blocage des attaques par déni de service). Depuis juillet 2025, Cloudflare joue un rôle central dans la relation entre le web et l'intelligence artificielle : elle a été la première grande infrastructure Internet à bloquer par défaut les robots d'exploration IA sur tout nouveau site client, sauf autorisation du propriétaire. Cette politique, baptisée « Content Independence Day », s'accompagne du programme expérimental Pay per crawl, qui permet aux éditeurs d'exiger un paiement avant qu'une IA n'explore leurs pages.",
+        "analogy": "Comme un videur et un service de courrier rapide combinés à l'entrée d'un immeuble : Cloudflare filtre les visiteurs indésirables et accélère la livraison du contenu.",
+        "example": "Depuis juillet 2025, un éditeur de presse utilisant Cloudflare peut bloquer automatiquement les robots d'OpenAI ou d'Anthropic sur son nouveau site, sauf s'il choisit explicitement de les autoriser à explorer son contenu.",
+        "did_you_know": "Cloudflare a nommé sa politique de blocage des IA « Content Independence Day » en clin d'oeil au 4 juillet, fête de l'indépendance américaine : la mesure est entrée en vigueur la veille, le 1er juillet 2025.",
+        "one_sentence_answer": "Cloudflare est un réseau mondial de sécurité et de diffusion de contenu (CDN, DNS, protection anti-attaques) qui, depuis juillet 2025, bloque aussi par défaut les robots d'exploration IA sans autorisation ni paiement.",
+        "faq": [
+            {
+                "question": "Pourquoi mon site utilise-t-il Cloudflare ?",
+                "answer": "Parce que Cloudflare accélère le chargement des pages en les servant depuis un serveur proche de vous et bloque une grande partie des attaques et robots malveillants avant qu'ils n'atteignent le site."
+            },
+            {
+                "question": "Cloudflare bloque-t-il les robots des IA comme ChatGPT sur mon site ?",
+                "answer": "Par défaut, oui, pour tout nouveau site créé depuis juillet 2025 : les robots d'exploration IA sont refusés sauf si le propriétaire du site les autorise explicitement ou négocie un paiement via Pay per crawl."
+            },
+            {
+                "question": "Qu'est-ce que le programme Pay per crawl de Cloudflare ?",
+                "answer": "Un système expérimental qui permet à un site web d'exiger qu'une entreprise d'IA paie chaque fois que son robot explore une page, plutôt que de laisser ce contenu être aspiré gratuitement."
+            }
+        ],
+        "sources": [
+            {
+                "label": "Cloudflare Just Changed How AI Crawlers Scrape the Internet-at-Large (communiqué de presse)",
+                "url": "https://www.cloudflare.com/press/press-releases/2025/cloudflare-just-changed-how-ai-crawlers-scrape-the-internet-at-large/",
+                "year": 2025,
+                "author": "Cloudflare, Inc."
+            },
+            {
+                "label": "Content Independence Day: no AI crawl without compensation",
+                "url": "https://blog.cloudflare.com/content-independence-day-no-ai-crawl-without-compensation/",
+                "year": 2025,
+                "author": "Cloudflare, Inc."
+            },
+            {
+                "label": "Web giant Cloudflare to block AI bots from scraping content by default",
+                "url": "https://www.cnbc.com/2025/07/01/cloudflare-to-block-ai-firms-from-scraping-content-without-consent.html",
+                "year": 2025,
+                "author": "CNBC"
+            }
+        ],
+        "aliases": [
+            "Cloudflare Inc."
+        ],
+        "icon": "🛡️",
+        "difficulty": "intermediate",
+        "type": "explainer",
+        "cat_slug": "intelligence-artificielle",
+        "match_strategy": "loose",
+        "has_image": true,
+        "acronym_full": null,
+        "broader_slugs": [],
+        "narrower_slugs": []
+    },
+    {
+        "name": "Shutterstock",
+        "slug": "shutterstock",
+        "definition": "Shutterstock est une banque d'images, de vidéos et de musique fondée en 2003, devenue un acteur clé de l'intelligence artificielle générative en licenciant légalement son immense catalogue pour entraîner des modèles d'IA. Depuis un partenariat signé avec OpenAI en 2022 et élargi en 2023 pour six ans, elle fournit des données d'entraînement à des entreprises comme OpenAI, Meta, Nvidia et LG. Elle exploite aussi son propre Shutterstock AI Image Generator, un outil intégré propulsé par la technologie DALL-E, entraîné exclusivement sur du contenu sous licence afin d'éviter les litiges de droits d'auteur qui touchent des concurrents entraînés sur du contenu scrapé sans autorisation. L'entreprise offre une indemnisation aux clients entreprises contre d'éventuelles poursuites, et redistribue une partie des revenus de licences de données à ses contributeurs via un Contributor Fund. Ce positionnement fait de Shutterstock une alternative dite « sécuritaire » ou « éthique » dans l'écosystème de l'IA générative, misant sur la conformité légale plutôt que sur l'ampleur brute des données d'entraînement.",
+        "analogy": "En termes simples : Shutterstock, c'est comme un fournisseur de matières premières qui vend seulement du bois certifié légal aux fabricants de meubles IA.",
+        "example": "En 2026, une entreprise peut générer des visuels marketing avec le Shutterstock AI Image Generator directement dans son catalogue, sans craindre une poursuite en droits d'auteur grâce à l'indemnisation offerte par Shutterstock.",
+        "did_you_know": "Fondée en 2003 par Jon Oringer avec ses propres photos, Shutterstock a versé plus d'un milliard de dollars US à ses contributeurs, incluant des redevances liées aux licences de données pour l'IA.",
+        "one_sentence_answer": "Shutterstock licencie légalement ses images et vidéos pour entraîner des IA génératives et propose son propre générateur d'images, entraîné exclusivement sur du contenu sous licence pour éviter les litiges de droits d'auteur.",
+        "faq": [
+            {
+                "question": "Pourquoi Shutterstock intéresse-t-il les entreprises d'IA?",
+                "answer": "Parce que son catalogue est entièrement sous licence : les entreprises d'IA peuvent l'utiliser pour entraîner leurs modèles sans risquer une poursuite en droits d'auteur, contrairement au contenu scrapé sur le web."
+            },
+            {
+                "question": "Le générateur d'images de Shutterstock, c'est comme ChatGPT ou Midjourney?",
+                "answer": "Non : il est intégré au site Shutterstock, propulsé par la technologie DALL-E d'OpenAI, et entraîné uniquement sur du contenu sous licence plutôt que sur des images scrapées un peu partout sur le web."
+            },
+            {
+                "question": "Les photographes de Shutterstock sont-ils payés quand leurs photos servent à entraîner une IA?",
+                "answer": "Oui, via le Contributor Fund : Shutterstock leur reverse une partie des revenus tirés des licences de données, en plus des redevances habituelles sur les téléchargements."
+            }
+        ],
+        "sources": [
+            {
+                "label": "Shutterstock to integrate OpenAI's DALL-E 2 and launch fund for contributor artists",
+                "url": "https://techcrunch.com/2022/10/25/shutterstock-openai-dall-e-2/",
+                "year": 2022,
+                "author": "Natasha Lomas, TechCrunch"
+            },
+            {
+                "label": "By adding human review of AI content, Shutterstock expands indemnity to enterprise clients",
+                "url": "https://digiday.com/marketing/by-adding-human-review-of-ai-content-shutterstock-expands-indemnity-to-enterprise-clients/",
+                "year": 2023,
+                "author": "Marty Swant, Digiday"
+            },
+            {
+                "label": "Shutterstock",
+                "url": "https://en.wikipedia.org/wiki/Shutterstock",
+                "year": 2026,
+                "author": "Wikipedia contributors"
+            }
+        ],
+        "aliases": [
+            "Shutterstock, Inc.",
+            "SSTK",
+            "Shutterstock AI Image Generator"
+        ],
+        "icon": "🖼️",
+        "difficulty": "intermediate",
+        "type": "explainer",
+        "cat_slug": "intelligence-artificielle",
+        "match_strategy": "loose",
+        "has_image": true,
+        "acronym_full": null,
+        "broader_slugs": [],
+        "narrower_slugs": []
+    },
+    {
+        "name": "Hub",
+        "slug": "hub",
+        "definition": "Un hub est une plateforme centrale où une communauté partage, découvre et réutilise des ressources numériques. Dans le monde de l'intelligence artificielle, le terme désigne surtout le Hugging Face Hub, le plus grand dépôt public de modèles, de jeux de données (datasets) et d'applications de démonstration (Spaces) pour l'apprentissage automatique. Comparable à un GitHub pour l'IA, il repose sur des dépôts de type Git : chaque modèle possède sa fiche descriptive (model card), son historique de versions et ses outils de collaboration. Chercheurs, entreprises et développeurs y publient leurs modèles entraînés pour que d'autres puissent les télécharger, les tester ou les adapter sans repartir de zéro. À ne pas confondre avec le hub réseau, un appareil matériel qui relie plusieurs ordinateurs sur un réseau local, aujourd'hui remplacé par le commutateur (switch). En 2026, ce hub IA regroupe plus de deux millions de modèles publics, devenu un point de passage incontournable pour quiconque développe avec l'intelligence artificielle.",
+        "analogy": "Un hub, c'est comme une bibliothèque publique universelle : chacun y dépose ses créations et vient en emprunter, gratuitement, prêtes à réutiliser.",
+        "example": "Au printemps 2026, Hugging Face rapporte plus de deux millions de modèles publics et 500 000 jeux de données partagés sur son Hub par des équipes de recherche en IA du monde entier.",
+        "did_you_know": "Le Hugging Face Hub a dépassé les 13 millions d'utilisateurs en 2025, avec un nombre de dépôts publiés qui double presque chaque année, un rythme rare pour une plateforme technologique.",
+        "one_sentence_answer": "Un hub est une plateforme centrale, comme le Hugging Face Hub, où une communauté partage et réutilise des modèles d'intelligence artificielle, des jeux de données et des applications, un peu à la manière d'un GitHub dédié à l'IA.",
+        "faq": [
+            {
+                "question": "Le Hugging Face Hub est-il gratuit ?",
+                "answer": "Oui, l'hébergement public de modèles et de jeux de données est gratuit ; seules certaines options avancées, comme le calcul privé ou les espaces payants, sont facturées."
+            },
+            {
+                "question": "Un hub IA remplace-t-il un hub réseau ?",
+                "answer": "Non, ce sont deux objets différents : le hub réseau est un appareil matériel qui connecte des ordinateurs, alors que le hub IA est une plateforme web de partage de modèles."
+            },
+            {
+                "question": "Qui peut publier sur un hub IA comme Hugging Face ?",
+                "answer": "À peu près tout le monde : chercheurs, entreprises et particuliers peuvent créer un compte gratuit et y publier leurs propres modèles ou jeux de données."
+            }
+        ],
+        "sources": [
+            {
+                "label": "Hugging Face Hub - documentation officielle",
+                "url": "https://huggingface.co/docs/hub/index",
+                "year": 2026,
+                "author": "Hugging Face"
+            },
+            {
+                "label": "What is Hugging Face? - IBM Think",
+                "url": "https://www.ibm.com/think/topics/hugging-face",
+                "year": 2025,
+                "author": "Cole Stryker (IBM)"
+            },
+            {
+                "label": "State of Open Source AI - Spring 2026",
+                "url": "https://huggingface.co/blog/huggingface/state-of-os-hf-spring-2026",
+                "year": 2026,
+                "author": "Hugging Face"
+            }
+        ],
+        "aliases": [
+            "Hugging Face Hub",
+            "hub de modèles IA",
+            "hub IA"
+        ],
+        "icon": "🤗",
+        "difficulty": "intermediate",
+        "type": "explainer",
+        "cat_slug": "intelligence-artificielle",
+        "match_strategy": "loose",
+        "has_image": true,
+        "acronym_full": null,
+        "broader_slugs": [],
+        "narrower_slugs": []
+    }
+]

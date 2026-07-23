@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.118.2] - 2026-07-23
+
+### Added
+- **Glossaire Techno** : 4 nouveaux termes (Adobe, Cloudflare, Shutterstock, Hub), angle « rôle dans l'écosystème IA ». Images générées via Gemini, sources vérifiées (HTTP 200, aucune URL devinée).
+
+### Fixed
+- **Glossaire** : le terme « Prompt » n'avait aucun alias, donc « requête »/« requêtes » n'était jamais auto-lié dans les articles. Ajout des 2 formes comme alias.
+
+### Changed
+- Skill `/glossaire` bonifié : recherche et validation multi-sources désormais obligatoires (section 0), URLs de sources toujours vérifiées réellement joignables.
+
 ## [1.118.1] - 2026-07-23
 
 ### Fixed
