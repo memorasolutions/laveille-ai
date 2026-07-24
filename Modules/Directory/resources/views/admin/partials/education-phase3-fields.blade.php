@@ -82,24 +82,24 @@
             @enderror
         </div>
 
-        {{-- 4. Courbe d apprentissage --}}
+        {{-- 4. Courbe d'apprentissage --}}
         <div style="margin-bottom:1.5rem;">
             <label for="learning_curve" style="display:block;color:#374151;font-weight:600;margin-bottom:0.5rem;">
-                Courbe d apprentissage
+                Courbe d'apprentissage
             </label>
             <select
                 id="learning_curve"
                 name="learning_curve"
                 style="width:100%;min-height:44px;padding:0.5rem 0.75rem;border:1px solid #d1d5db;border-radius:6px;color:#374151;font-size:1rem;box-sizing:border-box;background:#fff;"
             >
-                <option value="">-- Non defini --</option>
+                <option value="">-- Non défini --</option>
                 @php
                     $currentCurve = old('learning_curve', $tool->learning_curve);
                     $curveLabels = [
-                        1 => '1 - Tres intuitive',
+                        1 => '1 - Très intuitive',
                         2 => '2 - Facile',
-                        3 => '3 - Moderee',
-                        4 => '4 - Avancee',
+                        3 => '3 - Modérée',
+                        4 => '4 - Avancée',
                         5 => '5 - Expert',
                     ];
                 @endphp

@@ -17,6 +17,14 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.120.2 · 2026-07-24 · fix(i18n) correction de 5 endroits avec du texte français tapé sans
+ *     accents, trouvés par audit : page de construction Sudoku (public + i18n), description
+ *     JSON-LD de la page de jeu Sudoku (indexée par Google, impact SEO direct), libellés de la
+ *     "Courbe d'apprentissage" dans le formulaire admin Annuaire (Phase 3), texte explicatif
+ *     dupliqué sur la répartition des abonnés newsletter (Modules/Newsletter/admin/stats.blade.php
+ *     et Modules/Backoffice subscribers-table.blade.php), et 2 clés de traduction fr.json/
+ *     fr_CA.json (symlink vers fr.json) pour l'expérience A/B. Zéro changement de structure,
+ *     uniquement le texte français. Vérifié : php -l sur chaque .blade.php modifié, JSON valide.
  *   1.120.1 · 2026-07-24 · fix(securite) mise a jour dompdf/dompdf v3.1.4 -> v3.1.6, corrige
  *     6 avis de securite publies le 2026-07-22 (CVE-2026-59941/59942/59943/56722/55555/55554,
  *     DoS et fuite de fichiers via SVG integre) sur une dependance utilisee en surface publique
@@ -2830,7 +2838,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 120;
-$lvPatch = 1;
+$lvPatch = 2;
 
 return [
     'major' => $lvMajor,

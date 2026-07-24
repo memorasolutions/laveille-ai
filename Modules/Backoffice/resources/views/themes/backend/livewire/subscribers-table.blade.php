@@ -56,7 +56,7 @@
                             <h6 class="fs-4 fw-bold text-body mb-0">{{ $realUnsubscribedCount }}</h6>
                             @if($hygienePurgesCount > 0)
                                 <p class="small text-muted mb-0 mt-1"
-                                   title="{{ __('Non-confirmés purgés automatiquement apres 7 jours — pas de vrais departs') }}">
+                                   title="{{ __('Non-confirmés purgés automatiquement après 7 jours — pas de vrais départs') }}">
                                     + {{ $hygienePurgesCount }} {{ __('purges J+7') }}
                                 </p>
                             @endif

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.120.2] - 2026-07-24
+
+### Fixed
+- **Français sans accents (i18n)** : correction de 5 endroits trouvés par audit où du texte français était tapé sans accents. Page de construction du Sudoku (public + phrases traduites) ; description JSON-LD de la page de jeu Sudoku (indexée par Google, impact SEO direct) ; libellés de la « Courbe d'apprentissage » dans le formulaire admin de l'Annuaire (Phase 3) ; texte explicatif dupliqué sur la répartition des abonnés newsletter (`Modules/Newsletter/admin/stats.blade.php` et `Modules/Backoffice` `subscribers-table.blade.php`) ; 2 valeurs de traduction dans `lang/fr.json` (et `lang/fr_CA.json`, symlink) pour l'expérience A/B. Aucun changement de structure, uniquement le texte.
+
 ## [1.120.1] - 2026-07-24
 
 ### Security

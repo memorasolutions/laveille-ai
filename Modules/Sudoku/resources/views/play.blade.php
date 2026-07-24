@@ -335,7 +335,7 @@
   "@context": "https://schema.org",
   "@type": "Game",
   "name": "Sudoku quotidien",
-  "description": "Sudoku 9x9, 5 niveaux genere a la demande, classements live.",
+  "description": "Sudoku 9x9, 5 niveaux généré à la demande, classements live.",
   "gamePlatform": "Web",
 @endverbatim
   "url": "{{ route('sudoku.play') }}"

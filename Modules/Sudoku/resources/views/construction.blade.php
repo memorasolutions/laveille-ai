@@ -17,10 +17,10 @@
                 </div>
                 <div class="card-body p-4 text-center">
                     <p class="lead mb-3" style="color: #1f2937;">
-                        {{ __('Nous mettons la derniere main aux 5 difficultes, classements et streak quotidien.') }}
+                        {{ __('Nous mettons la dernière main aux 5 difficultés, classements et streak quotidien.') }}
                     </p>
                     <p class="text-muted mb-4">
-                        {{ __('Revenez tres bientot pour jouer la grille du jour.') }}
+                        {{ __('Revenez très bientôt pour jouer la grille du jour.') }}
                     </p>
 
                     <div class="d-flex justify-content-center gap-2 flex-wrap">
@@ -34,7 +34,7 @@
 
                     <hr class="my-4">
                     <small class="text-muted">
-                        {{ __('Vous serez prevenu via la veille hebdo des que c\'est pret.') }}
+                        {{ __('Vous serez prévenu via la veille hebdo dès que c\'est prêt.') }}
                         <a href="{{ url('/') }}#newsletter" class="text-decoration-none">{{ __('S\'abonner') }}</a>
                     </small>
                 </div>

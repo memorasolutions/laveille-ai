@@ -151,14 +151,14 @@
     </div>
 </div>
 
-{{-- ===================== REPARTITION DES ABONNES (table newsletter_subscribers) ===================== --}}
+{{-- ===================== RÉPARTITION DES ABONNÉS (table newsletter_subscribers) ===================== --}}
 <div class="row mb-4">
     <div class="col-12">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-bottom d-flex align-items-center">
                 <h5 class="card-title mb-0">
                     <i data-lucide="users" class="me-2 text-muted" style="width: 18px; height: 18px;"></i>
-                    Repartition des abonnes (base locale)
+                    Répartition des abonnés (base locale)
                 </h5>
             </div>
             <div class="card-body pb-2">
@@ -172,8 +172,8 @@
                                     <h4 class="mb-0 fw-bold text-danger">{{ number_format($global['real_unsubs'], 0, ',', ' ') }}</h4>
                                     <div class="fw-semibold small">Désabonnements réels</div>
                                     <div class="text-muted" style="font-size: 0.78rem;">
-                                        Abonnes confirmes qui ont cliqué « se désabonner ».
-                                        Ce sont de vrais departs a analyser.
+                                        Abonnés confirmés qui ont cliqué « se désabonner ».
+                                        Ce sont de vrais départs à analyser.
                                     </div>
                                 </div>
                             </div>
@@ -186,10 +186,10 @@
                                 <i data-lucide="filter-x" class="text-secondary flex-shrink-0" style="width: 24px; height: 24px;"></i>
                                 <div>
                                     <h4 class="mb-0 fw-bold text-secondary">{{ number_format($global['hygiene_purges'], 0, ',', ' ') }}</h4>
-                                    <div class="fw-semibold small">Purges d'hygiene (J+7)</div>
+                                    <div class="fw-semibold small">Purges d'hygiène (J+7)</div>
                                     <div class="text-muted" style="font-size: 0.78rem;">
-                                        Non-confirmes purges automatiquement apres 7 jours.
-                                        Ils n'ont jamais recu d'infolettre : ce ne sont pas des departs.
+                                        Non-confirmés purgés automatiquement après 7 jours.
+                                        Ils n'ont jamais reçu d'infolettre : ce ne sont pas des départs.
                                     </div>
                                 </div>
                             </div>
@@ -204,7 +204,7 @@
                     <div class="alert alert-warning border-0 d-flex align-items-start gap-2 mt-3 mb-0" role="alert">
                         <i data-lucide="alert-triangle" class="flex-shrink-0 mt-1" style="width: 16px; height: 16px;"></i>
                         <div class="small">
-                            <strong>{{ $hygieneRatio }}&nbsp;% des « désabonnements » sont en fait des purges d'hygiene</strong>
+                            <strong>{{ $hygieneRatio }}&nbsp;% des « désabonnements » sont en fait des purges d'hygiène</strong>
                             ({{ number_format($global['hygiene_purges'], 0, ',', ' ') }} sur {{ number_format($totalUnsubs, 0, ',', ' ') }}).
                             Le chiffre de désabonnements réels a prendre en compte est
                             <strong>{{ number_format($global['real_unsubs'], 0, ',', ' ') }}</strong>.
@@ -220,12 +220,12 @@
     <div class="col-12">
         <div class="alert alert-light border text-muted mb-0" role="alert">
             <i data-lucide="info" class="me-1" style="width: 16px; height: 16px;"></i>
-            <strong>Désabonnements réels</strong> : abonnes confirmes qui ont utilise le lien de désabonnement.
-            <strong>Purges J+7</strong> : inscrits qui n'ont jamais confirme leur courriel, purges automatiquement apres 7 jours par la commande
-            <code>newsletter:purge-unconfirmed</code> — ils n'ont jamais recu d'infolettre et ne representent pas un vrai depart.
+            <strong>Désabonnements réels</strong> : abonnés confirmés qui ont utilisé le lien de désabonnement.
+            <strong>Purges J+7</strong> : inscrits qui n'ont jamais confirmé leur courriel, purgés automatiquement après 7 jours par la commande
+            <code>newsletter:purge-unconfirmed</code> — ils n'ont jamais reçu d'infolettre et ne représentent pas un vrai départ.
             Les cartes « Désabonnements Brevo » (colonne de gauche) proviennent des webhooks
-            (table <code>newsletter_events</code>). Les ouvertures et clics « uniques » par numero sont attribues
-            par appartenance (liste d'envoi) et fenetre temporelle. Heures : Québec (America/Toronto).
+            (table <code>newsletter_events</code>). Les ouvertures et clics « uniques » par numéro sont attribués
+            par appartenance (liste d'envoi) et fenêtre temporelle. Heures : Québec (America/Toronto).
         </div>
     </div>
 </div>
