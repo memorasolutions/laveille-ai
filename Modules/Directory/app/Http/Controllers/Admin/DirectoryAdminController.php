@@ -33,6 +33,12 @@ class DirectoryAdminController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('affiliate') && $request->affiliate === 'yes') {
+            $query->whereNotNull('affiliate_url');
+        } elseif ($request->filled('affiliate') && $request->affiliate === 'no') {
+            $query->whereNull('affiliate_url');
+        }
+
         $statusCounts = [];
         foreach (\Modules\Directory\Enums\ToolStatus::cases() as $statusCase) {
             $statusCounts[$statusCase->value] = Tool::where('status', $statusCase->value)->count();

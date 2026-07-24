@@ -15,9 +15,12 @@
 @endif
 
 <div class="d-flex gap-2 mb-3 flex-wrap">
-    <a href="{{ route('admin.directory.index') }}" class="btn btn-sm {{ !request('source') && !request('status') ? 'btn-primary' : 'btn-outline-secondary' }}">{{ __('Tous') }}</a>
+    <a href="{{ route('admin.directory.index') }}" class="btn btn-sm {{ !request('source') && !request('status') && !request('affiliate') ? 'btn-primary' : 'btn-outline-secondary' }}">{{ __('Tous') }}</a>
     <a href="{{ route('admin.directory.index', ['source' => 'community']) }}" class="btn btn-sm {{ request('source') === 'community' ? 'btn-primary' : 'btn-outline-secondary' }}">👥 {{ __('Soumis par la communauté') }}</a>
     <a href="{{ route('admin.directory.index', ['source' => 'admin']) }}" class="btn btn-sm {{ request('source') === 'admin' ? 'btn-primary' : 'btn-outline-secondary' }}">🛡️ {{ __('Ajoutés par l\'admin') }}</a>
+    <span class="border-start mx-1"></span>
+    <a href="{{ route('admin.directory.index', array_merge(request()->except('affiliate'), ['affiliate' => 'yes'])) }}" class="btn btn-sm {{ request('affiliate') === 'yes' ? 'btn-primary' : 'btn-outline-secondary' }}">💰 {{ __('Avec lien d\'affiliation') }}</a>
+    <a href="{{ route('admin.directory.index', array_merge(request()->except('affiliate'), ['affiliate' => 'no'])) }}" class="btn btn-sm {{ request('affiliate') === 'no' ? 'btn-primary' : 'btn-outline-secondary' }}">{{ __('Sans lien d\'affiliation') }}</a>
     <span class="border-start mx-1"></span>
     @foreach(\Modules\Directory\Enums\ToolStatus::cases() as $statusCase)
         @php

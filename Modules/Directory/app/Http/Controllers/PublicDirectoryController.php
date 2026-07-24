@@ -221,6 +221,32 @@ class PublicDirectoryController extends Controller
     }
 
     /**
+     * Tracking de clic sortant réel (distinct de clicks_count, qui compte les VUES de la fiche
+     * dans show()). Incrémente outbound_clicks_count puis redirige vers getVisitUrl() (URL
+     * d'affiliation si affiliate_url est renseigné, sinon URL directe — fallback automatique
+     * inchangé). Même pattern de résolution du slug que show() (aucun repli de locale non plus
+     * dans show() à ce jour — vérifié avant d'écrire cette méthode).
+     */
+    public function visit(string $slug): RedirectResponse
+    {
+        $tool = Tool::published()
+            ->where('slug->'.app()->getLocale(), $slug)
+            ->firstOrFail();
+
+        $tool->increment('outbound_clicks_count');
+
+        return redirect($tool->getVisitUrl());
+    }
+
+    /**
+     * Page de divulgation des liens d'affiliation — calquée sur TakedownController::policy().
+     */
+    public function affiliationPolicy(): View
+    {
+        return view('directory::public.affiliation-policy');
+    }
+
+    /**
      * API : scrape une URL + detecte doublons (appele en AJAX depuis le wizard).
      */
     public function scrapeAndDetect(Request $request): JsonResponse

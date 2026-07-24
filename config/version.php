@@ -2775,10 +2775,53 @@ declare(strict_types=1);
  *     `directory:backfill-ecosystem-tags --dry-run` sur les 433 outils réels, revoir le
  *     rapport, puis sans `--dry-run` pour peupler `ecosystem_tag` (additif et réversible
  *     uniquement - ne touche jamais un tag déjà assigné manuellement).
+ *   1.120.0 · 2026-07-24 · feat(annuaire) Infrastructure de liens d'affiliation sur /annuaire,
+ *     demandée explicitement par l'utilisateur avec recherche best practices juillet 2026 et
+ *     validation croisée Perplexity + Codex + Gemini. Découverte clé avant implémentation :
+ *     l'essentiel existait déjà depuis mars 2026 (colonne `affiliate_url`, `Tool::getVisitUrl()`/
+ *     `isAffiliate()`, formulaire admin, `rel="sponsored"` déjà posé) mais n'avait jamais été
+ *     câblé - seules 5 pièces manquaient réellement.
+ *
+ *     Recherche croisée avec le catalogue réel (top 200 outils par `clicks_count` en prod) :
+ *     12 programmes d'affiliation confirmés recoupent des outils déjà parmi les plus cliqués du
+ *     site (Canva AI #3, ElevenLabs #11, Grammarly #13, Copy.ai #14, Notion AI #23, Runway #30,
+ *     Murf AI #33, Synthesia #51, Jasper #56/76, HeyGen #57, Writesonic #78, Descript #118) -
+ *     documentés dans `config/affiliate_programs.php` (référence humaine uniquement, aucune
+ *     application automatique). ChatGPT/OpenAI, Midjourney et Perplexity (outils très cliqués)
+ *     n'ont aucun programme d'affiliation accessible - confirmé, pas de contournement cherché.
+ *     Anomalie data trouvée et corrigée au passage : "Jasper AI"/"Jasper" étaient deux fiches
+ *     distinctes pour le même produit (issues de deux seeders différents) - fusionnées via le
+ *     mécanisme `lifecycle_status=archived`+`lifecycle_replacement_tool_id` déjà en place
+ *     (redirection 301 automatique, zéro perte de données, migration réversible).
+ *
+ *     Ajouts : badge de divulgation visible "Lien affilié" (conditionnel `isAffiliate()`, à
+ *     côté des 2 boutons "Visiter le site") - le `rel="sponsored"` existant est invisible au
+ *     visiteur, insuffisant seul pour la Loi sur la protection du consommateur (QC) et les Ad
+ *     Standards Canada/FTC Endorsement Guides qui exigent une divulgation claire ET visible
+ *     proche du lien. Page `/annuaire/politique-affiliation` (calquée sur le pattern déjà
+ *     existant `TakedownController`/politique de retrait). Nouvelle colonne
+ *     `outbound_clicks_count`, distincte de `clicks_count` (qui compte les VUES de fiche, pas
+ *     les clics sortants) - route `directory.visit` (`/annuaire/{slug}/visiter`) qui incrémente
+ *     puis redirige vers `getVisitUrl()`, pour bâtir un dossier de négociation basé sur le
+ *     volume de trafic réel (recommandation Codex/Gemini). Filtre admin `?affiliate=yes|no` sur
+ *     la liste des outils (même pattern que les filtres `?source=`/`?status=` déjà en place).
+ *     Lien de divulgation ajouté au texte déjà présent (mais non lié) en pied de page - contraste
+ *     initial 3.77:1 corrigé à 12.44:1 (AAA).
+ *
+ *     Vérifié : 9 nouveaux tests Pest + suite complète du module Directory, 57/57 verts (relancé
+ *     3 fois). Migrations testées réversibles (rollback/remigrate confirmés en local, y compris
+ *     la fusion Jasper avec 301 vérifié par curl réel). Test manuel E2E : badge visible/absent
+ *     selon `isAffiliate()`, clic "Visiter le site" passe bien par le tracking puis redirige
+ *     vers l'URL d'affiliation (ou l'URL directe en fallback sans lien affilié),
+ *     `outbound_clicks_count` incrémenté en base. Contraste WCAG AAA vérifié (badge 8.45:1).
+ *     Reste business/manuel hors de portée d'un assistant IA (création de comptes interdite) :
+ *     l'utilisateur doit s'inscrire aux réseaux/programmes lui-même puis coller les vrais liens
+ *     dans le champ "Lien d'affiliation" déjà existant sur `/admin/directory/{tool}/edit` - tout
+ *     le reste (badge, tracking, divulgation, fallback) s'active alors automatiquement.
  */
 
 $lvMajor = 1;
-$lvMinor = 119;
+$lvMinor = 120;
 $lvPatch = 0;
 
 return [

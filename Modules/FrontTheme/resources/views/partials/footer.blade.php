@@ -151,7 +151,12 @@
                         <span style="font-size:10px;color:rgba(255,255,255,0.35);margin-left:8px;font-variant-numeric:tabular-nums;" title="{{ __('Version applicative') }}">{{ function_exists('lv_version') ? lv_version(false) : 'v?' }}</span>
                     </p>
                     <p style="font-size:12px;color:rgba(255,255,255,0.55);margin-top:6px;">{{ __('Conçu et hébergé par') }} <a href="https://memora.solutions" target="_blank" rel="nofollow noopener noreferrer" style="color:rgba(255,255,255,0.85);text-decoration:underline;">MEMORA solutions</a> · {{ __('Entreprise canadienne') }} 🍁</p>
-                    <p style="font-size: 10px; color: rgba(255,255,255,0.25); margin-top: 6px;">{{ __('Certains liens sont des liens d\'affiliation. Nous pouvons recevoir une commission sans frais pour vous.') }}</p>
+                    <p style="font-size: 10px; color: rgba(255,255,255,0.25); margin-top: 6px;">
+                        {{ __('Certains liens sont des liens d\'affiliation. Nous pouvons recevoir une commission sans frais pour vous.') }}
+                        @if(Route::has('directory.affiliation.policy'))
+                            <a href="{{ route('directory.affiliation.policy') }}" style="color: rgba(255,255,255,0.85); text-decoration: underline;">{{ __('En savoir plus') }}</a>
+                        @endif
+                    </p>
                 </div>
             </div>
         </div>

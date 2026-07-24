@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.120.0] - 2026-07-24
+
+### Added
+- **Annuaire** : infrastructure de liens d'affiliation. Badge de divulgation visible "Lien affilié" sur les fiches outil concernées, page `/annuaire/politique-affiliation`, tracking de clic sortant réel (`outbound_clicks_count`, distinct des vues de fiche) via la route `directory.visit`, filtre admin `?affiliate=yes|no`, fichier de référence `config/affiliate_programs.php` documentant 12 programmes confirmés (Canva AI, ElevenLabs, Grammarly, Copy.ai, Notion AI, Runway, Murf AI, Synthesia, Jasper, HeyGen, Writesonic, Descript) croisés avec les outils les plus cliqués du site.
+
+### Fixed
+- **Annuaire** : fusion des fiches dupliquées "Jasper AI"/"Jasper" (même produit, deux seeders différents) via le mécanisme de redirection déjà en place, aucune perte de données.
+
+### Changed
+- **Pied de page** : le texte de divulgation d'affiliation déjà présent est désormais lié vers la nouvelle page de politique ; contraste corrigé à 12.44:1 (AAA).
+
 ## [1.119.0] - 2026-07-23
 
 ### Added

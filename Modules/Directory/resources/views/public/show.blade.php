@@ -227,6 +227,11 @@
     .badge-paid { background: #FEF3C7; color: #92400E; }
     .badge-open_source { background: #CCFBF1; color: #115E59; }
     .badge-enterprise { background: #EDE9FE; color: #5B21B6; }
+    {{-- Divulgation liens d'affiliation (loi sur la protection du consommateur QC + FTC/Ad Standards :
+         divulgation claire, visible, proche du lien). Couleur distincte du badge "Sponsorisé"
+         (placement payant, autre concept) pour ne pas les confondre. Contraste vérifié WCAG AAA. --}}
+    .rt-affiliate-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 50px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-decoration: none; background: #FBE4DA; color: #7A2004; border: 1px solid #E8A98A; }
+    .rt-affiliate-badge:hover, .rt-affiliate-badge:focus-visible { text-decoration: underline; text-underline-offset: 2px; }
     .rt-share-btn { display: inline-block; padding: 4px 10px; border: 1px solid #E5E7EB; border-radius: var(--r-btn); color: var(--c-dark); text-decoration: none !important; font-size: 0.75rem; font-weight: 600; }
     .rt-share-btn:hover { background: #F3F4F6; color: var(--c-dark); }
 
@@ -365,7 +370,15 @@
                 </div>
             </div>
             @if($tool->url)
-                <a href="{{ $tool->getVisitUrl() }}" target="_blank" rel="{{ $tool->isAffiliate() ? 'sponsored noopener' : 'noopener noreferrer nofollow' }}" class="rt-visit">{{ __('Visiter le site') }} →</a>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+                    <a href="{{ route('directory.visit', $tool->slug) }}" target="_blank" rel="{{ $tool->isAffiliate() ? 'sponsored noopener' : 'noopener noreferrer nofollow' }}" class="rt-visit">{{ __('Visiter le site') }} →</a>
+                    @if($tool->isAffiliate())
+                        <a href="{{ route('directory.affiliation.policy') }}" class="rt-affiliate-badge" title="{{ __('Ce lien est un lien d\'affiliation — en savoir plus') }}">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 16v-4M12 8h.01" stroke-width="2" stroke-linecap="round"/></svg>
+                            {{ __('Lien affilié') }}
+                        </a>
+                    @endif
+                </div>
             @endif
         </div>
         <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; align-items: center;">
@@ -654,7 +667,15 @@
             @if($tool->url)
             <div style="margin-top: 40px; background: linear-gradient(180deg, #F9FAFB, #F3F4F6); border: 1px solid #E5E7EB; border-radius: 16px; padding: 32px 20px; text-align: center;">
                 <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 20px; font-weight: 800; color: #111827;">{{ __('Envie d\'essayer') }} {{ $tool->name }} ?</h3>
-                <a href="{{ $tool->getVisitUrl() }}" target="_blank" rel="{{ $tool->isAffiliate() ? 'sponsored noopener' : 'noopener noreferrer nofollow' }}" style="display: inline-block; background: var(--c-accent); color: #fff; font-weight: 700; padding: 14px 32px; border-radius: var(--r-btn); text-decoration: none; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s;">{{ __('Visiter le site') }} →</a>
+                <a href="{{ route('directory.visit', $tool->slug) }}" target="_blank" rel="{{ $tool->isAffiliate() ? 'sponsored noopener' : 'noopener noreferrer nofollow' }}" style="display: inline-block; background: var(--c-accent); color: #fff; font-weight: 700; padding: 14px 32px; border-radius: var(--r-btn); text-decoration: none; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s;">{{ __('Visiter le site') }} →</a>
+                @if($tool->isAffiliate())
+                    <div style="margin-top: 10px;">
+                        <a href="{{ route('directory.affiliation.policy') }}" class="rt-affiliate-badge" title="{{ __('Ce lien est un lien d\'affiliation — en savoir plus') }}">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 16v-4M12 8h.01" stroke-width="2" stroke-linecap="round"/></svg>
+                            {{ __('Lien affilié') }}
+                        </a>
+                    </div>
+                @endif
                 <div style="margin-top: 14px; font-size: 13px; color: #059669; font-weight: 600;">✓ {{ __('Vérifié par La veille') }}</div>
                 <div style="margin-top: 16px;">
                     @include('directory::public.partials.collection-button', ['tool' => $tool])

@@ -41,6 +41,11 @@ Route::middleware('web')->group(function () {
     Route::get('/annuaire/retrait/{slug?}', [TakedownController::class, 'create'])->name('directory.takedown.create');
     Route::post('/annuaire/retrait', [TakedownController::class, 'store'])->name('directory.takedown.store')->middleware('throttle:5,60');
     Route::get('/annuaire/politique-retrait', [TakedownController::class, 'policy'])->name('directory.takedown.policy');
+    // Divulgation liens d'affiliation — déclarée AVANT /annuaire/{slug} (sinon capturée par le wildcard).
+    Route::get('/annuaire/politique-affiliation', [PublicDirectoryController::class, 'affiliationPolicy'])->name('directory.affiliation.policy');
+    // Tracking de clic sortant réel (distinct de clicks_count = vues) puis redirection vers getVisitUrl().
+    // Déclarée AVANT /annuaire/{slug} (sinon "visiter" serait interprété comme un slug d'outil).
+    Route::get('/annuaire/{slug}/visiter', [PublicDirectoryController::class, 'visit'])->name('directory.visit');
     Route::get('/annuaire/{slug}', [PublicDirectoryController::class, 'show'])->name('directory.show')->middleware('doNotCacheResponse');
 });
 
