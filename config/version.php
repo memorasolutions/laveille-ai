@@ -17,6 +17,14 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.120.1 · 2026-07-24 · fix(securite) mise a jour dompdf/dompdf v3.1.4 -> v3.1.6, corrige
+ *     6 avis de securite publies le 2026-07-22 (CVE-2026-59941/59942/59943/56722/55555/55554,
+ *     DoS et fuite de fichiers via SVG integre) sur une dependance utilisee en surface publique
+ *     (Modules/Tools mots croises PDF) et Academy (certificats). Trouve pendant l'audit
+ *     plateforme du jour (composer audit --locked). 0 vulnerabilite restante confirmee.
+ *     Suite Pest ciblee (Academy/Decido/Export/Tools, generation PDF) 129/129 verte.
+ *     Nettoyage additionnel : entree stray "Login":"Updated Login" retiree de lang/en.json
+ *     (artefact non commite, pas une vraie traduction).
  *   1.116.9 · 2026-07-20 · fix(auth) 403 en PRODUCTION sur /admin/objectif-video (et
  *     potentiellement /backoffice/authors, même middleware) pour le vrai compte superadmin.
  *     Cause racine : Modules/Authors/app/Http/Middleware/EnsureSuperAdmin vérifiait
@@ -2822,7 +2830,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 120;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,

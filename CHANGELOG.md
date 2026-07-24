@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.120.1] - 2026-07-24
+
+### Security
+- **Dépendances** : mise à jour `dompdf/dompdf` v3.1.4 → v3.1.6, corrige 6 avis de sécurité publiés le 2026-07-22 (déni de service et fuite de fichiers via SVG intégré dans un PDF) sur une dépendance exposée en surface publique (Modules/Tools, génération PDF des grilles de mots croisés) et Académie (certificats). Trouvé pendant l'audit plateforme du jour. `composer audit` confirme 0 vulnérabilité restante. Suite de tests ciblée (Academy, Decido, Export, Tools) 129/129 verte après mise à jour.
+
+### Fixed
+- **Traductions** : retrait d'une entrée résiduelle non intentionnelle (`"Login": "Updated Login"`) dans `lang/en.json`, trouvée pendant l'audit (artefact non commité, pas une vraie traduction).
+
 ## [1.120.0] - 2026-07-24
 
 ### Added
