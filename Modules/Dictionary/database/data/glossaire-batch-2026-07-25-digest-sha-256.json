@@ -1,0 +1,49 @@
+[
+  {
+    "slug": "digest-sha-256",
+    "name": "Digest SHA-256",
+    "definition": "Le digest SHA-256 (SHA-256) est une fonction de hachage cryptographique de la famille SHA-2, conçue par la NSA et publiée par le NIST. Normalisée dans FIPS 180-2 (prépubliée le 30 mai 2001, publiée le 1er août 2002), la version en vigueur est FIPS 180-4 (mars 2012, mise à jour finalisée le 4 août 2015). Elle produit, pour toute entrée, une empreinte déterministe de 256 bits, soit 32 octets ou 64 caractères hexadécimaux. SHA-256 offre un fort effet avalanche, une résistance aux collisions d'environ 128 bits en sécurité générique, et demeure sans collision pratique connue. C'est une fonction à sens unique : on ne peut pas inverser l'empreinte, contrairement au chiffrement qui utilise une clé et est réversible. Usages typiques : vérification d'intégrité de fichiers et de téléchargements, sommes de contrôle de paquets logiciels (npm, Homebrew), signatures numériques et empreintes de certificats, Bitcoin (double SHA-256 pour le hachage des en-têtes de blocs et la preuve de travail), et dérivation de mots de passe avec sel (ex. PBKDF2-SHA256).",
+    "analogy": "Comme un cachet de cire unique : une légère rayure change l'empreinte, mais on ne reconstitue jamais le texte.",
+    "example": "En téléchargeant une image ISO d'une distribution Linux, l'utilisateur compare l'empreinte SHA-256 publiée par l'éditeur au digest calculé localement sur le fichier, et n'installe que si les deux valeurs correspondent exactement.",
+    "did_you_know": "MD5 a des collisions pratiques depuis 2004 ; en février 2017, SHA-1 est cassé (SHAttered, Google Research et CWI Amsterdam). Ils sont remplacés pour la sécurité par SHA-2, dont SHA-256.",
+    "one_sentence_answer": "SHA-256 est une fonction de hachage SHA-2 produisant une empreinte de 256 bits, non réversible, résistante aux collisions connues, pour l'intégrité, les signatures, Bitcoin et la dérivation de mots de passe.",
+    "faq": [
+      {
+        "question": "Quelle est la différence entre hachage (SHA-256) et chiffrement ?",
+        "answer": "Le hachage produit une empreinte fixe, déterministe et non réversible, sans clé. Le chiffrement transforme des données avec une clé et est réversible par déchiffrement."
+      },
+      {
+        "question": "Pourquoi MD5 et SHA-1 sont-ils considérés obsolètes ?",
+        "answer": "MD5 possède des collisions pratiques depuis 2004, et SHA-1 a subi une collision pratique complète en 2017 (SHAttered). Ils sont remplacés pour la sécurité par SHA-2, dont SHA-256."
+      },
+      {
+        "question": "Comment vérifier un fichier téléchargé avec SHA-256 ?",
+        "answer": "Calculer localement l'empreinte SHA-256 du fichier avec un outil de hachage, puis la comparer à l'empreinte publiée par l'éditeur. Installer uniquement si les deux valeurs coïncident exactement."
+      }
+    ],
+    "sources": [
+      {
+        "label": "NIST - FIPS 180-4 Secure Hash Standard",
+        "url": "https://csrc.nist.gov/pubs/fips/180-4/upd1/final",
+        "year": 2015,
+        "author": "NIST (National Institute of Standards and Technology)"
+      },
+      {
+        "label": "NIST CSRC - Résultats de recherche sur les collisions SHA-1",
+        "url": "https://csrc.nist.gov/news/2017/research-results-on-sha-1-collisions",
+        "year": 2017,
+        "author": "NIST (National Institute of Standards and Technology)"
+      }
+    ],
+    "aliases": ["SHA-256", "SHA256", "hash SHA-256"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "🛡️",
+    "type": "concept-cryptographique",
+    "acronym_full": "Secure Hash Algorithm 256-bit",
+    "cat_slug": "securite-et-ethique",
+    "match_strategy": "loose",
+    "has_image": true
+  }
+]

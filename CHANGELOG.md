@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.126.0] - 2026-07-25
+
+### Added
+- **Glossaire : nouveau terme "Digest SHA-256"** (`/glossaire "digest SHA-256"`) — fonction de hachage cryptographique SHA-2 (NSA/NIST), pertinente pour la vérification d'intégrité de fichiers et de paquets logiciels. Recherche `perplexity/sonar-pro` croisée avec Codex (dates exactes : FIPS 180-2 le 1er août 2002, FIPS 180-4 finalisé le 4 août 2015, collision SHAttered de SHA-1 en février 2017). 2 sources officielles NIST vérifiées joignables (curl HTTP 200 : csrc.nist.gov). Image de couverture via `/nanobanana`. Migration réversible.
+
 ## [1.125.0] - 2026-07-25
 
 ### Added

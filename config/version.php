@@ -2882,10 +2882,19 @@ declare(strict_types=1);
  *     laravel-news.com, herd.laravel.com), image hero via /nanobanana (compte Gemini
  *     utilisateur, poste de travail isométrique teal/orange, aucun logo Laravel réel),
  *     migration réversible.
+ *
+ * v1.126.0 = glossaire : ajout du terme "Digest SHA-256" (fonction de hachage cryptographique
+ *     SHA-2, pertinente pour la vérification d'intégrité de fichiers/paquets logiciels) -
+ *     recherche perplexity/sonar-pro croisée avec Codex (dates exactes confirmées : FIPS 180-2
+ *     le 1er août 2002, FIPS 180-4 finalisé le 4 août 2015, collision SHAttered de SHA-1 en
+ *     février 2017 par Google Research/CWI Amsterdam), 2 sources officielles NIST vérifiées
+ *     joignables (curl HTTP 200 : csrc.nist.gov FIPS 180-4 et collisions SHA-1), image hero via
+ *     /nanobanana (compte Gemini utilisateur, empreinte/presse à sceau isométrique teal/orange,
+ *     aucun logo réel), migration réversible.
  */
 
 $lvMajor = 1;
-$lvMinor = 125;
+$lvMinor = 126;
 $lvPatch = 0;
 
 return [
