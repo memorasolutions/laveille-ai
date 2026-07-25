@@ -2856,10 +2856,18 @@ declare(strict_types=1);
  *     privilège). Sources toutes vérifiées joignables (curl HTTP 200) avant écriture. Images
  *     hero via /nanobanana (compte Gemini utilisateur, style isométrique teal/orange, aucun logo
  *     de marque réelle), migrations réversibles.
+ *
+ * v1.123.0 = glossaire : ajout du terme "MITRE ATT&CK" (cadre de référence mondial des tactiques
+ *     et techniques d'attaquants réels, cité dans l'article OpenClaw pour la technique de
+ *     persistance macOS T1569.001) - recherche via perplexity/sonar-pro (pp_search indisponible),
+ *     2 sources officielles vérifiées joignables (curl HTTP 200 sur attack.mitre.org), catégorie
+ *     "securite-et-ethique" résolue dynamiquement, image hero via /nanobanana (compte Gemini
+ *     utilisateur, matrice/grille isométrique teal/orange, aucun logo de marque réelle), migration
+ *     réversible.
  */
 
 $lvMajor = 1;
-$lvMinor = 122;
+$lvMinor = 123;
 $lvPatch = 0;
 
 return [

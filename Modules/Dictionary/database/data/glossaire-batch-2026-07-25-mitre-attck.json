@@ -1,0 +1,30 @@
+[
+  {
+    "slug": "mitre-attck",
+    "name": "MITRE ATT&CK",
+    "definition": "MITRE ATT&CK est une base de connaissances mondiale des comportements adverses, acronyme de Adversarial Tactics, Techniques, and Common Knowledge, créée en 2013 par la MITRE Corporation, un organisme américain à but non lucratif. Elle structure, à partir d'observations terrain, comment les attaquants opèrent : des tactiques décrivant les objectifs stratégiques (ex. Persistance TA0003, Accès initial TA0001), déclinées en techniques puis sous-techniques, chacune avec un identifiant unique normalisé (ex. T1569.001). La matrice Enterprise couvre Windows, macOS, Linux et les environnements cloud. Version 2026 : ATT&CK v19, publiée le 28 avril 2026, recense 15 tactiques, 222 techniques et 475 sous-techniques. Les équipes de threat intelligence, red team et blue team s'en servent pour cartographier détections SIEM et EDR, écrire des hypothèses de chasse, concevoir des émulations et prioriser les contrôles. Contrairement au Cyber Kill Chain de Lockheed Martin, plus linéaire et haut niveau, ATT&CK est granulaire et continuellement mis à jour. Dans l'article, la persistance macOS via LaunchAgents correspond à T1569.001, facilitant l'analyse, le triage et la communication.",
+    "analogy": "Pense à un atlas criminologique informatique : des cartes normalisées des tactiques d'attaque pour s'orienter, comparer, prioriser détection et défense efficacement.",
+    "example": "Dans un SOC, une alerte EDR sur un LaunchAgent macOS est mappée à T1569.001, ce qui aligne règles SIEM, priorise le triage, déclenche un playbook et guide l'éradication post-incident automatisée.",
+    "did_you_know": "La v19 publiée le 28 avril 2026 couvre 15 tactiques, 222 techniques et 475 sous-techniques Enterprise. ATT&CK est référencé par des centaines d'outils et rapports de sécurité mondiaux.",
+    "one_sentence_answer": "Cadre de référence mondial, MITRE ATT&CK cartographie depuis 2013 les tactiques, techniques et sous-techniques d'attaquants réels, avec IDs normalisés, pour aligner détection, chasse, réponse et simulation offensives dans les environnements Enterprise.",
+    "faq": [
+      {"question": "Quelle est la différence entre MITRE ATT&CK et le Cyber Kill Chain ?", "answer": "Le Cyber Kill Chain est un modèle linéaire en 7 phases, haut niveau. ATT&CK est une matrice granulaire de tactiques-techniques avec IDs, continuellement mise à jour et exploitable pour la détection et la chasse."},
+      {"question": "En quoi MITRE ATT&CK diffère-t-il de MITRE D3FEND ?", "answer": "ATT&CK catalogue les comportements offensifs des adversaires. D3FEND catalogue des contre-mesures défensives correspondantes. Ils sont complémentaires : ATT&CK pour comprendre l'attaque, D3FEND pour choisir les mitigations."},
+      {"question": "Comment l'utiliser concrètement dans un SOC ?", "answer": "Mappez alertes et règles SIEM-EDR aux IDs ATT&CK, maintenez une matrice de couverture, taguez la télémétrie, générez des hypothèses de chasse et testez par émulation contrôlée des techniques."}
+    ],
+    "sources": [
+      {"label": "MITRE ATT&CK - site officiel", "url": "https://attack.mitre.org", "year": 2026, "author": "MITRE Corporation"},
+      {"label": "MITRE ATT&CK - journal des mises à jour (v19)", "url": "https://attack.mitre.org/resources/updates/", "year": 2026, "author": "MITRE Corporation"}
+    ],
+    "aliases": ["ATT&CK", "Adversarial Tactics Techniques and Common Knowledge"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "advanced",
+    "icon": "🧭",
+    "type": "cadre-de-reference",
+    "acronym_full": "Adversarial Tactics, Techniques, and Common Knowledge",
+    "cat_slug": "securite-et-ethique",
+    "match_strategy": "exact",
+    "has_image": true
+  }
+]

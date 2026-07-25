@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.123.0] - 2026-07-25
+
+### Added
+- **Glossaire : nouveau terme "MITRE ATT&CK"** (`/glossaire "MITRE ATT&CK"`) — cadre de référence mondial des tactiques, techniques et sous-techniques d'attaquants réels (v19, 15 tactiques, 222 techniques, 475 sous-techniques), cité dans l'article OpenClaw pour la technique de persistance macOS T1569.001. Recherche via `perplexity/sonar-pro` (pp_search indisponible), 2 sources officielles vérifiées joignables (curl HTTP 200, attack.mitre.org). Catégorie "securite-et-ethique" résolue dynamiquement. Image de couverture via `/nanobanana` (compte Gemini de l'utilisateur, matrice/grille isométrique teal/orange, aucun logo de marque réelle). Migration réversible.
+
 ## [1.122.0] - 2026-07-25
 
 ### Added
