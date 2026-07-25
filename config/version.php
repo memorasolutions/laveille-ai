@@ -2864,10 +2864,19 @@ declare(strict_types=1);
  *     "securite-et-ethique" résolue dynamiquement, image hero via /nanobanana (compte Gemini
  *     utilisateur, matrice/grille isométrique teal/orange, aucun logo de marque réelle), migration
  *     réversible.
+ *
+ * v1.124.0 = glossaire : ajout du terme "TCC" (Transparency, Consent, and Control - sous-système
+ *     de sécurité/confidentialité macOS régulant l'accès aux ressources sensibles), pertinent
+ *     pour le contexte de persistance macOS via LaunchAgents de l'article OpenClaw - recherche
+ *     Perplexity/sonar-pro croisée avec Codex (correction de la date d'introduction : OS X
+ *     Mountain Lion 10.8/2012, pas Mavericks 10.9/2013), 2 sources officielles vérifiées
+ *     joignables (curl HTTP 200, developer.apple.com + attack.mitre.org T1548.006), image hero
+ *     via /nanobanana (compte Gemini utilisateur, panneau de contrôle isométrique teal/orange,
+ *     aucun logo Apple réel), migration réversible.
  */
 
 $lvMajor = 1;
-$lvMinor = 123;
+$lvMinor = 124;
 $lvPatch = 0;
 
 return [

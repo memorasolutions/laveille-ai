@@ -1,0 +1,49 @@
+[
+  {
+    "slug": "tcc",
+    "name": "TCC",
+    "definition": "Sur macOS, TCC (Transparency, Consent, and Control) est un sous-système de sécurité et de confidentialité en espace utilisateur qui régule l'accès des applications aux ressources sensibles comme localisation, contacts, calendriers, photos, caméra, microphone, accessibilité, Full Disk Access et enregistrement d'écran. Introduit dans OS X Mountain Lion 10.8 (2012) pour Contacts et la localisation, il s'est considérablement étendu dans macOS Mojave 10.14 (2018) : invites pour caméra, micro, données Mail/Messages et Full Disk Access. Techniquement, le démon tccd consulte des bases SQLite TCC.db (globale et par utilisateur) qui mémorisent des décisions allow/deny par identité cliente (bundle ID, parfois chemin et exigence de signature). Lorsqu'une API protégée est appelée, tccd vérifie s'il existe une décision ; sinon, il affiche un prompt et enregistre la réponse. L'utilisateur peut réinitialiser via tccutil reset. Distinct de Gatekeeper et de SIP, TCC leur est complémentaire. Côté menace, MITRE ATT&CK (T1548.006) documente la manipulation de TCC par des malwares, notamment lors de tentatives de persistance sur macOS.",
+    "analogy": "Comme un vigile tenant un registre d'accès : il vérifie qui entre dans les zones sensibles et note chaque autorisation ou refus.",
+    "example": "Sur macOS Mojave, l'ouverture initiale de Zoom affiche des invites TCC pour caméra et micro ; l'utilisateur accepte. Plus tard, via tccutil reset, il relance ces demandes.",
+    "did_you_know": "Apparu dans OS X 10.8 (2012) pour Contacts et localisation, TCC s'est étendu avec macOS 10.14 (2018) à la caméra, au micro, au Full Disk Access et aux données Mail/Messages.",
+    "one_sentence_answer": "TCC est le mécanisme en espace utilisateur de macOS qui contrôle, via des invites et des décisions stockées, l'accès des applications aux ressources sensibles comme la caméra, le micro, la localisation et l'enregistrement d'écran.",
+    "faq": [
+      {
+        "question": "Quelle est la différence entre TCC, Gatekeeper et SIP ?",
+        "answer": "TCC contrôle à l'exécution l'accès des apps aux ressources sensibles via des invites et des décisions stockées. Gatekeeper vérifie signature/notarisation à la première ouverture. SIP protège les composants système critiques et limite notamment l'écriture dans TCC.db."
+      },
+      {
+        "question": "Concrètement, comment TCC se manifeste-t-il quand j'utilise une app ?",
+        "answer": "Quand une app appelle une API protégée, tccd cherche une décision dans TCC.db (globale ou utilisateur). S'il n'en trouve pas, macOS affiche un prompt et enregistre votre choix. Vous pouvez tout réinitialiser via tccutil reset."
+      },
+      {
+        "question": "Pourquoi des attaquants tentent-ils de manipuler TCC ?",
+        "answer": "Contourner TCC ouvre des accès à des données et capteurs. MITRE ATT&CK (T1548.006) décrit des malwares écrivant dans TCC.db si SIP est contourné/désactivé, ou abusant de processus déjà autorisés pour éviter les invites."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Apple Developer - Requesting Authorization for Media Capture on macOS",
+        "url": "https://developer.apple.com/documentation/bundleresources/requesting-authorization-for-media-capture-on-macos",
+        "year": 2026,
+        "author": "Apple Inc."
+      },
+      {
+        "label": "MITRE ATT&CK - T1548.006 Abuse Elevation Control Mechanism: TCC Manipulation",
+        "url": "https://attack.mitre.org/techniques/T1548/006/",
+        "year": 2026,
+        "author": "MITRE Corporation"
+      }
+    ],
+    "aliases": ["Transparency, Consent, and Control", "TCC.db"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "advanced",
+    "icon": "🔒",
+    "type": "mecanisme-de-securite",
+    "acronym_full": "Transparency, Consent, and Control",
+    "cat_slug": "securite-et-ethique",
+    "match_strategy": "exact",
+    "has_image": true
+  }
+]

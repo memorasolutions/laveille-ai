@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.124.0] - 2026-07-25
+
+### Added
+- **Glossaire : nouveau terme "TCC"** (`/glossaire "TCC"`) — Transparency, Consent, and Control, sous-système de sécurité/confidentialité de macOS régulant l'accès des applications aux ressources sensibles (caméra, micro, localisation, Full Disk Access, etc.), pertinent pour le contexte de persistance macOS via LaunchAgents évoqué dans l'article OpenClaw. Recherche `perplexity/sonar-pro` croisée avec Codex (correction de la date d'introduction : OS X Mountain Lion 10.8/2012, pas Mavericks 10.9/2013). 2 sources officielles vérifiées joignables (curl HTTP 200 : developer.apple.com, attack.mitre.org T1548.006). Image de couverture via `/nanobanana`. Migration réversible.
+
 ## [1.123.0] - 2026-07-25
 
 ### Added
