@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.128.1] - 2026-07-25
+
+### Fixed
+- **Accordéons FAQ d'article : caret/chevron manquant** (`.article-faq-item`, `public/css/components.css`) — le `display: flex` appliqué à `<summary>` (nécessaire à l'alignement du texte) empêchait silencieusement le rendu du `::marker` natif (le marker n'existe que sous `display: list-item`), ce qui rendait la règle `summary::marker { color: var(--c-primary) }` totalement inopérante depuis l'introduction du composant. Bug latent jamais visible en prod : l'article OpenClaw (`comment-installer-openclaw-en-toute-securite-sur-macos`, id=67) est le tout premier à publier une FAQ depuis la mise en place de ce composant. Trouvé par l'utilisateur en révision visuelle. Corrigé en ajoutant un chevron `::after` (glyphe `›`, rotation 90° à l'ouverture, `prefers-reduced-motion` respecté) reprenant exactement le pattern déjà établi par `x-core::accordion`. Vérifié : composant partagé par TOUS les articles avec FAQ publiée (pas spécifique à OpenClaw) ; module Books (`bk-faq-item`) utilise une classe CSS distincte sans cette règle, non affecté.
+
 ## [1.128.0] - 2026-07-25
 
 ### Added

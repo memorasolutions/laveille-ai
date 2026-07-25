@@ -445,15 +445,40 @@ h3.wp-block-heading {
     min-height: 44px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
     line-height: 1.4;
 }
 
+/* display:flex ci-dessus empêche le rendu du ::marker natif (nécessite display:list-item) -
+   chevron de remplacement via ::after, même glyphe que x-core::accordion pour la charte. */
+.article-faq-item summary::-webkit-details-marker,
 .article-faq-item summary::marker {
+    display: none;
+}
+
+.article-faq-item summary::after {
+    content: '›';
+    display: inline-block;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    line-height: 1;
     color: var(--c-primary);
+    transition: transform 0.2s;
 }
 
 .article-faq-item[open] summary {
     color: var(--c-primary);
+}
+
+.article-faq-item[open] summary::after {
+    transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .article-faq-item summary::after {
+        transition: none;
+    }
 }
 
 .article-faq-item summary:focus-visible {
