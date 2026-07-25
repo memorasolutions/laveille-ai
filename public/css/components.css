@@ -246,8 +246,8 @@
     margin: 1.5rem 0;
 }
 
-.wp-block-code code,
-.wp-block-code pre {
+.wp-block-code,
+.wp-block-code code {
     font-family: 'JetBrains Mono', 'Fira Code', monospace;
     font-size: 0.85rem;
     line-height: 1.6;
@@ -331,4 +331,13 @@
     color: var(--c-dark);
     margin-top: 2rem;
     margin-bottom: 1rem;
+}
+
+/* h3 imbriqués sous un h2 (ex. étapes numérotées d'un tutoriel) : séparation visuelle plus
+   marquée que le simple margin-top générique ci-dessus, pour rester lisible même quand
+   plusieurs h3 se suivent avec du code entre chacun (signalé "pas facile à suivre" 2026-07-25). */
+h3.wp-block-heading {
+    margin-top: 2.75rem;
+    padding-top: 1.75rem;
+    border-top: 2px solid #E5E7EB;
 }

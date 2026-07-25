@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.120.4] - 2026-07-24
+## [1.120.5] - 2026-07-25
+
+### Fixed
+- **Police incohérente sur les blocs de code des articles** (signalé par l'utilisateur sur l'article OpenClaw) : le sélecteur CSS `.wp-block-code pre` ne matchait jamais (la classe `wp-block-code` est posée directement sur le `<pre>`, pas sur un wrapper) — seul `.wp-block-code code` s'appliquait, laissant le conteneur `<pre>` retomber sur la police monospace par défaut du navigateur (SFMono/Menlo, taille différente) au lieu de JetBrains Mono. Sélecteur corrigé (`.wp-block-code, .wp-block-code code`).
+- **Sommaire de l'article vérifié** (même signalement) : la hiérarchie h2/h3 du composant `<x-fronttheme::table-of-contents>` s'est avérée techniquement correcte (imbrication propre, pas de bug) - fausse alerte initiale corrigée après re-vérification par méthode de test appropriée.
+
+### Changed
+- **Séparation visuelle des h3 imbriqués sous un h2** (ex. étapes numérotées d'un tutoriel) : bordure supérieure + marge accrue pour rester lisible sur les articles longs à plusieurs sous-étapes consécutives (signalé « pas facile à suivre » sur l'article OpenClaw, 9 étapes). Changement CSS générique site-wide, bénéficie à tout article structuré ainsi.
 
 ### Fixed
 - **Bug systémique : image mise en avant cassée sur tout article (signalé par l'utilisateur)** : deux conventions de stockage incompatibles coexistaient pour `articles.featured_image` - upload admin (`store('articles', 'public')`, chemin sans préfixe `storage/`) vs import WordPress (chemin déjà préfixé `storage/blog/...`). Toutes les vues appelaient `asset($article->featured_image)` directement, ce qui cassait systématiquement l'image de tout article dont l'image a été téléversée via l'admin (pas seulement l'aperçu de l'article en brouillon signalé initialement - impact identique en production sur les articles publiés). Nouvel accesseur unique `Article::getFeaturedImageUrlAttribute()` qui détecte la convention et génère la bonne URL dans les deux cas ; remplace les ~22 appels `asset($x->featured_image)` dans 12 fichiers (admin + thème public + accueil). Suite Blog 45/45 verte après correction.
