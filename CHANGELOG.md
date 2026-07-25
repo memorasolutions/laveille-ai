@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.120.3] - 2026-07-24
+
+### Fixed
+- **Reproductibilité du fix modèles IA prod (durabilité)** : le correctif appliqué le 2026-07-21 sur les 6 clés `ai.*_model` (alignement sur `openrouter/free`, résolvait un "service IA indisponible") avait été fait par une UPDATE SQL manuelle directe sur la table `settings` de production, jamais capturée en migration. Trouvé par une passe de vérification adversariale indépendante : si la table `settings` prod est un jour restaurée depuis un backup antérieur au 21/07, ou qu'un nouvel environnement est provisionné, le bug réapparaît silencieusement car `SettingsDatabaseSeeder` (`firstOrCreate`) n'écrase jamais une ligne déjà existante et n'est de toute façon jamais rejoué en déploiement. Nouvelle migration `2026_07_24_180000_fix_ai_models_openrouter_free.php` (`updateOrInsert`) qui capture le correctif dans le code versionné et le rend reproductible sur tout environnement.
+
 ## [1.120.2] - 2026-07-24
 
 ### Fixed
