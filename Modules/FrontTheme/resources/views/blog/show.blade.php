@@ -185,6 +185,60 @@
                                 </ul>
                             </div>
                             <h1 style="margin: 0 0 12px; font-size: 1.8rem;" data-editable="title">{{ $article->title }}</h1>
+                            @php
+                                $articleContent = $article->content;
+                                if (! ($isPreview ?? false) && class_exists(\Modules\Ads\Services\AdsRenderer::class)) {
+                                    $adsRenderer = app(\Modules\Ads\Services\AdsRenderer::class);
+                                    $articleContent = $adsRenderer->renderShortcodes($articleContent);
+                                    $articleContent = $adsRenderer->injectAfterParagraph($articleContent, 'article-inline', 3);
+                                }
+                                if (function_exists('render_shortcodes')) {
+                                    $articleContent = render_shortcodes($articleContent);
+                                }
+                                // Composants Blade réutilisables (ex. <x-fronttheme::text-generator .../>)
+                                // déjà rendus par PublicPostController::show() AVANT le début du rendu de
+                                // cette vue (Blade::render() ne doit jamais s'exécuter au milieu d'un
+                                // @section actif - corrompt la pile de sections partagée, incident 2026-07-03).
+                                // AEO : sections wrappées, IDs sur headings, itemprop. DOIT précéder le wrap Sources :
+                                // sinon le </div> injecté ferme le wrapper interne de chunkContent (DOMDocument) et la
+                                // section Sources tombe hors $body → disparition silencieuse sur articles publiés (fix 2026-05-25).
+                                if (! ($isPreview ?? false) && class_exists(\App\Helpers\AeoHelper::class)) {
+                                    $articleContent = \App\Helpers\AeoHelper::chunkContent($articleContent);
+                                }
+                                // Encadrement visuel de la section "Sources"/"Références".
+                                $lvSourcesHead = '(?:<(?:strong|b|em)>)?\s*(?:Sources?|Références?)\s*:?\s*(?:<\/(?:strong|b|em)>)?';
+                                $lvSourcesCount = 0;
+                                // Cas publié : chunkContent a produit des <section class="aeo-section"> → simple ajout de
+                                // classe (HTML équilibré, aucun risque de casse au rendu).
+                                $articleContent = preg_replace(
+                                    '/<section class="aeo-section">(\s*<(?:h[2-4])[^>]*>' . $lvSourcesHead . '<\/(?:h[2-4])>)/i',
+                                    '<section class="aeo-section sources-section">$1',
+                                    $articleContent,
+                                    1,
+                                    $lvSourcesCount
+                                );
+                                // Cas preview (chunkContent non exécuté) : encadrement par div dédié.
+                                if ($lvSourcesCount === 0) {
+                                    $articleContent = preg_replace(
+                                        '/(<(?:h[2-4])[^>]*>' . $lvSourcesHead . '<\/(?:h[2-4])>)/i',
+                                        '</div><div class="sources-section">$1',
+                                        $articleContent,
+                                        1
+                                    );
+                                }
+                                // Liens (externes ET internes) du contenu : ouverture dans un nouvel onglet
+                                $articleContent = preg_replace(
+                                    '/<a\b(?![^>]*\btarget=)/i',
+                                    '<a target="_blank" rel="noopener noreferrer"',
+                                    $articleContent
+                                );
+                                // 2026-05-05 #141 : auto-link glossaire/acronymes pour SEO/AEO/GEO. Calculé ICI
+                                // (avant la barre d'action) pour que GlossaryLinkifier::getLastMatchedTerms()
+                                // soit rempli quand le bouton toggle "Glossaire" de la barre d'action se rend
+                                // (2026-07-25 #1358 : le bouton ne s'affichait jamais quand ce calcul se faisait
+                                // après l'include de la barre d'action).
+                                $articleContent = \Modules\Core\Services\GlossaryLinkifier::linkify($articleContent, ['per_section' => true, 'max_occ' => 1]);
+                            @endphp
                             @include('fronttheme::partials.article-action-bar', ['model' => $article, 'modelType' => 'Modules\\Blog\\Models\\Article', 'adminShareItems' => auth()->user()?->isSuperAdmin() ? $article->adminShareContents() : null])
 
                             {{-- Navigation série (détection automatique par slug "-partie-N") --}}
@@ -248,56 +302,8 @@
                             <x-fronttheme::table-of-contents content-selector=".entry-details" />
 
                             <div class="entry-details">
-                                @php
-                                    $articleContent = $article->content;
-                                    if (! ($isPreview ?? false) && class_exists(\Modules\Ads\Services\AdsRenderer::class)) {
-                                        $adsRenderer = app(\Modules\Ads\Services\AdsRenderer::class);
-                                        $articleContent = $adsRenderer->renderShortcodes($articleContent);
-                                        $articleContent = $adsRenderer->injectAfterParagraph($articleContent, 'article-inline', 3);
-                                    }
-                                    if (function_exists('render_shortcodes')) {
-                                        $articleContent = render_shortcodes($articleContent);
-                                    }
-                                    // Composants Blade réutilisables (ex. <x-fronttheme::text-generator .../>)
-                                    // déjà rendus par PublicPostController::show() AVANT le début du rendu de
-                                    // cette vue (Blade::render() ne doit jamais s'exécuter au milieu d'un
-                                    // @section actif - corrompt la pile de sections partagée, incident 2026-07-03).
-                                    // AEO : sections wrappées, IDs sur headings, itemprop. DOIT précéder le wrap Sources :
-                                    // sinon le </div> injecté ferme le wrapper interne de chunkContent (DOMDocument) et la
-                                    // section Sources tombe hors $body → disparition silencieuse sur articles publiés (fix 2026-05-25).
-                                    if (! ($isPreview ?? false) && class_exists(\App\Helpers\AeoHelper::class)) {
-                                        $articleContent = \App\Helpers\AeoHelper::chunkContent($articleContent);
-                                    }
-                                    // Encadrement visuel de la section "Sources"/"Références".
-                                    $lvSourcesHead = '(?:<(?:strong|b|em)>)?\s*(?:Sources?|Références?)\s*:?\s*(?:<\/(?:strong|b|em)>)?';
-                                    $lvSourcesCount = 0;
-                                    // Cas publié : chunkContent a produit des <section class="aeo-section"> → simple ajout de
-                                    // classe (HTML équilibré, aucun risque de casse au rendu).
-                                    $articleContent = preg_replace(
-                                        '/<section class="aeo-section">(\s*<(?:h[2-4])[^>]*>' . $lvSourcesHead . '<\/(?:h[2-4])>)/i',
-                                        '<section class="aeo-section sources-section">$1',
-                                        $articleContent,
-                                        1,
-                                        $lvSourcesCount
-                                    );
-                                    // Cas preview (chunkContent non exécuté) : encadrement par div dédié.
-                                    if ($lvSourcesCount === 0) {
-                                        $articleContent = preg_replace(
-                                            '/(<(?:h[2-4])[^>]*>' . $lvSourcesHead . '<\/(?:h[2-4])>)/i',
-                                            '</div><div class="sources-section">$1',
-                                            $articleContent,
-                                            1
-                                        );
-                                    }
-                                    // Liens (externes ET internes) du contenu : ouverture dans un nouvel onglet
-                                    $articleContent = preg_replace(
-                                        '/<a\b(?![^>]*\btarget=)/i',
-                                        '<a target="_blank" rel="noopener noreferrer"',
-                                        $articleContent
-                                    );
-                                @endphp
-                                {{-- 2026-05-05 #141 : auto-link glossaire/acronymes pour SEO/AEO/GEO --}}
-                                @glossarize($articleContent)
+                                {{-- $articleContent déjà calculé + linkifié plus haut (avant la barre d'action, cf. #1358) --}}
+                                {!! $articleContent !!}
                             </div>
                             @include('core::partials.glossary-jsonld')
                             <script>

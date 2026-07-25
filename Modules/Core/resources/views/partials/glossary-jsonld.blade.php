@@ -14,9 +14,11 @@
             a.glossary-link {
                 position: relative;
                 color: var(--c-primary, #064E5A);
-                text-decoration: underline;
-                text-decoration-style: dotted;
-                text-decoration-thickness: 1px;
+                /* !important : gagne sur .wpo-blog-single-section .entry-details a:not(.btn) (charte.css),
+                   plus spécifique par nombre de classes malgré l'ordre d'apparition plus tardif de ce style. */
+                text-decoration: underline !important;
+                text-decoration-style: dotted !important;
+                text-decoration-thickness: 1px !important;
                 text-underline-offset: 3px;
                 cursor: help;
                 font-weight: 500;
@@ -25,8 +27,8 @@
             a.glossary-link:hover,
             a.glossary-link:focus {
                 color: var(--c-primary-hover, #064E5C);
-                text-decoration-style: solid;
-                text-decoration-thickness: 2px;
+                text-decoration-style: solid !important;
+                text-decoration-thickness: 2px !important;
                 outline: none;
             }
             a.glossary-link:focus-visible {
@@ -134,6 +136,21 @@
                     transition: opacity 0ms;
                 }
             }
+
+            /* 2026-07-25 #1350 : Mode Glossaire OFF - suppression TOTALE de l'interaction (pas
+               seulement le style), recherche pp_search juillet 2026 : "un toggle = une seule promesse
+               claire" (garder un tooltip actif derrière un bouton "désactivé" surprend l'utilisateur et
+               ajoute de la dette accessibilité WCAG 1.4.13 sur une fonctionnalité censée être coupée). */
+            .glossary-off a.glossary-link {
+                color: inherit;
+                text-decoration: none !important;
+                cursor: text;
+                pointer-events: none;
+            }
+            .glossary-off a.glossary-link::after,
+            .glossary-off a.glossary-link::before {
+                display: none !important;
+            }
         </style>
         {{-- 2026-05-05 #154 : JS minimal smart-position tooltip (anti-clipping viewport horizontal) --}}
         <script>
@@ -209,6 +226,43 @@
             window.addEventListener('resize', () => {
                 document.querySelectorAll('a.glossary-link[data-tt-bound]').forEach(positionTooltip);
             }, { passive: true });
+        })();
+        </script>
+        {{-- 2026-07-25 #1350 : Mode Glossaire (toggle actif/désactivé), persistant localStorage,
+             sans compte requis. Effet immédiat, suppression totale de l'interaction quand désactivé
+             (voir .glossary-off ci-dessus) - pas juste le style visuel. --}}
+        <script>
+        (function () {
+            'use strict';
+            const STORAGE_KEY = 'glossary-mode'; // valeurs : 'on' | 'off'
+
+            function getGlossaryMode() {
+                return localStorage.getItem(STORAGE_KEY) === 'off' ? 'off' : 'on';
+            }
+
+            function applyGlossaryMode(mode) {
+                document.documentElement.classList.toggle('glossary-off', mode === 'off');
+            }
+
+            window.getGlossaryMode = getGlossaryMode;
+
+            window.toggleGlossaryMode = function () {
+                const next = getGlossaryMode() === 'on' ? 'off' : 'on';
+                if (next === 'off') {
+                    // Gestion du focus : si un lien glossaire avait le focus clavier au moment du
+                    // switch, on le retire proprement avant de couper l'interaction (évite une
+                    // rupture WCAG de focus perdu, signalé par Gemini lors de la validation croisée).
+                    const active = document.activeElement;
+                    if (active && active.classList && active.classList.contains('glossary-link')) {
+                        active.blur();
+                    }
+                }
+                localStorage.setItem(STORAGE_KEY, next);
+                applyGlossaryMode(next);
+                return next;
+            };
+
+            applyGlossaryMode(getGlossaryMode());
         })();
         </script>
     @endonce

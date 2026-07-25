@@ -26,7 +26,8 @@
     reportDetail: '',
     reportSent: false,
     showJournalMenu: false,
-    journalAdded: false
+    journalAdded: false,
+    glossaryMode: (typeof window.getGlossaryMode === 'function' ? window.getGlossaryMode() : 'on')
 }">
 
     {{-- Sauvegarder --}}
@@ -92,6 +93,19 @@
         <span class="aab-label" x-show="!copied">{{ __('Copier le lien') }}</span>
         <span class="aab-feedback" x-show="copied" x-cloak>{{ __('Copié !') }}</span>
     </button>
+
+    {{-- Mode Glossaire : bascule actif/désactivé des auto-liens glossaire (2026-07-25 #1350).
+         Affiché seulement si l'article contient au moins un terme auto-lié (sinon rien à activer).
+         Pas de badge "Nouveau" ni de hint de découverte : le contenu souligné en pointillé fait
+         déjà office de découverte naturelle (recherche + validation croisée Codex/Gemini). --}}
+    @if(!empty(\Modules\Core\Services\GlossaryLinkifier::getLastMatchedTerms()))
+    <button class="aab-btn" :class="glossaryMode === 'off' && 'aab-btn-active'"
+        @click="if (typeof window.toggleGlossaryMode === 'function') { glossaryMode = window.toggleGlossaryMode() }"
+        :title="glossaryMode === 'off' ? '{{ __('Réactiver les liens de glossaire') }}' : '{{ __('Désactiver les liens de glossaire') }}'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
+        <span class="aab-label" x-text="glossaryMode === 'off' ? '{{ __('Glossaire : Désactivé') }}' : '{{ __('Glossaire : Actif') }}'">{{ __('Glossaire : Actif') }}</span>
+    </button>
+    @endif
 
     {{-- Partage social : utilise la barre flottante globale (master.blade.php)
          Pas de duplication ici — la sidebar gauche (desktop) et la barre bas (mobile)

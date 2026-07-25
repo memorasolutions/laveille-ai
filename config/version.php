@@ -2926,11 +2926,42 @@ declare(strict_types=1);
  *     narrower_slugs relie au terme existant "sudo". Catégorie "outils-et-techniques" résolue
  *     dynamiquement. Image hero via /nanobanana (terminal isométrique stylisé teal/orange, aucun
  *     texte réel, aucun logo de marque). Migration réversible.
+ *
+ * v1.129.0 = glossaire : auto-liens moins agressants visuellement sur les articles de blog +
+ *     Mode Glossaire désactivable (demande explicite de l'utilisateur, veille pp_search croisée
+ *     Codex/claude.ai/Gemini sur 3 volets : agressivité visuelle, découvrabilité, comportement
+ *     désactivé). (1) `GlossaryLinkifier::linkify()`/`walkAndReplace()`/`matchInText()` acceptent
+ *     une option `per_section` (opt-in, défaut false = comportement historique inchangé sur les
+ *     autres call sites Dictionary/Acronyms/annuaire) : namespace la clé `$seen` par index de
+ *     section `<h2>` rencontrée pendant le parcours DOM, donc 1 occurrence par terme PAR SECTION
+ *     au lieu de par article entier. (2) `blog/show.blade.php` passe désormais
+ *     `['per_section' => true, 'max_occ' => 1]` à `@glossarize()` - seul call site changé, tous
+ *     les autres (glossaire, acronymes, actualités, annuaire) inchangés. (3) Nouveau bouton
+ *     "Glossaire : Actif/Désactivé" dans la barre d'action article (`article-action-bar.blade.php`,
+ *     pattern `.aab-btn` existant), état persisté `localStorage` (`glossary-mode`). Désactivé =
+ *     suppression TOTALE de l'interaction (`pointer-events:none` + tooltips forcés `display:none`,
+ *     pas seulement un changement de style, par choix validé lors de la veille). (4) Soulignement
+ *     pointillé déjà conforme (aucun changement requis, vérifié par lecture directe avant modif).
+ *     FIX post-vérification visuelle (3 bugs trouvés par sous-agent Playwright, corrigés avant
+ *     livraison) : (a) le calcul de `$articleContent`/l'appel `linkify()` a été déplacé AVANT
+ *     l'include de la barre d'action dans `blog/show.blade.php` (l'ordre inverse laissait
+ *     `getLastMatchedTerms()` vide au moment du rendu du bouton, qui restait donc invisible) ;
+ *     (b) `!important` ajouté sur `text-decoration`/`-style`/`-thickness` de `.glossary-link` (et
+ *     sur `.glossary-off a.glossary-link`) dans `glossary-jsonld.blade.php`, une règle plus
+ *     spécifique de `charte.css` (`.wpo-blog-single-section .entry-details a:not(.btn)`) écrasait
+ *     le pointillé en soulignement plein ; (c) ajout de `max_occ => 1` manquant à l'appel
+ *     `@glossarize` per_section (sans lui, le plafond restait 10 occurrences/section). 18 tests
+ *     Pest (2 nouveaux `GlossaryLinkifierTest` via Reflection sur `walkAndReplace()`, DB-free).
+ *     188 tests Core+FrontTheme+Blog verts (zéro régression) ; suite complète : 116 échecs
+ *     préexistants dans des modules sans rapport (service worker, lien magique, campagnes
+ *     newsletter, bannière vérification courriel), aucun dans les fichiers touchés. Vérification
+ *     visuelle Playwright complète (bouton visible, pointillé confirmé, 1 lien/section H2, toggle
+ *     ON/OFF fonctionnel avec persistance, aucune régression sur le reste de la page). Réversible.
  */
 
 $lvMajor = 1;
-$lvMinor = 128;
-$lvPatch = 1;
+$lvMinor = 129;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

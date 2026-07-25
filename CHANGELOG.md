@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.129.0] - 2026-07-25
+
+### Added
+- **Mode Glossaire (article de blog) : auto-liens moins agressants + toggle désactivable** — demande explicite de l'utilisateur, veille `pp_search` croisée Codex/claude.ai/Gemini sur 3 volets (agressivité visuelle, découvrabilité, comportement désactivé). `GlossaryLinkifier` accepte une nouvelle option opt-in `per_section` (1 occurrence par terme **par section H2** au lieu de par article entier, défaut `false` = comportement historique inchangé sur les autres call sites glossaire/acronymes/annuaire). Appliqué uniquement sur `blog/show.blade.php` via `@glossarize($articleContent, ['per_section' => true, 'max_occ' => 1])`. Nouveau bouton **"Glossaire : Actif/Désactivé"** dans la barre d'action de l'article (pattern `.aab-btn` existant), état persisté en `localStorage`. Désactivé = suppression **totale** de l'interaction (`pointer-events:none` + tooltips forcés cachés, pas seulement un changement de style visuel).
+
+### Fixed
+- **3 bugs trouvés par vérification visuelle Playwright avant livraison, corrigés le jour même** : (1) le bouton toggle ne s'affichait jamais — l'ordre de rendu Blade appelait la barre d'action AVANT `@glossarize()`, donc `GlossaryLinkifier::getLastMatchedTerms()` était toujours vide au moment du bouton ; déplacé le calcul du contenu linkifié avant l'include de la barre d'action. (2) Le soulignement pointillé de `.glossary-link` était écrasé en soulignement plein par une règle plus spécifique de `charte.css` (`.wpo-blog-single-section .entry-details a:not(.btn)`) — `!important` ajouté sur les propriétés `text-decoration*` concernées. (3) La limite "1 lien par section H2" ne s'appliquait pas réellement (plafond resté à 10/section) faute du paramètre `max_occ => 1` dans l'appel `@glossarize`.
+
+### Verified
+- 18 tests Pest (2 nouveaux sur `walkAndReplace()` via Reflection, sans dépendance DB) ; 188 tests Core+FrontTheme+Blog verts (zéro régression). Suite complète : 116 échecs préexistants dans des modules indépendants (service worker, lien magique, campagnes newsletter, bannière vérification courriel) — aucun dans les fichiers touchés aujourd'hui. Vérification visuelle Playwright complète (bouton visible, pointillé confirmé, 1 lien/section H2, toggle ON/OFF avec persistance, aucune régression sur le reste de la page article).
+
 ## [1.128.1] - 2026-07-25
 
 ### Fixed
