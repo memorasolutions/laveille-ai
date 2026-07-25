@@ -2848,10 +2848,18 @@ declare(strict_types=1);
  *     sur les blocs de code (icône seule, réutilise window.copyToClipboard + toast global,
  *     jamais livré en prod malgré code prêt) + fix espacement des listes ul/ol dans le corps
  *     d'article (line-height 1.6→1.8, marges ajoutées) + migration crosswords vers action-menu.
+ *
+ * v1.122.0 = glossaire : 4 nouveaux termes liés à l'article OpenClaw - "nvm" (gestionnaire de
+ *     versions Node.js), "Node.js" (alias "Node" - une seule fiche, pas 2, en réponse à la
+ *     question de l'utilisateur si les deux sont identiques), "OpenClaw" (CVE-2026-32922
+ *     cross-vérifiée via 4 sources : NVD, GHSA, Snyk, SentinelOne), "sudo" (principe du moindre
+ *     privilège). Sources toutes vérifiées joignables (curl HTTP 200) avant écriture. Images
+ *     hero via /nanobanana (compte Gemini utilisateur, style isométrique teal/orange, aucun logo
+ *     de marque réelle), migrations réversibles.
  */
 
 $lvMajor = 1;
-$lvMinor = 121;
+$lvMinor = 122;
 $lvPatch = 0;
 
 return [

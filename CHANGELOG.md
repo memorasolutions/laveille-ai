@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.122.0] - 2026-07-25
+
+### Added
+- **Glossaire : 4 nouveaux termes** liés à l'article OpenClaw : **"nvm"** (gestionnaire de versions Node.js, sans sudo) ; **"Node.js"** (alias "Node" - une seule fiche plutôt que deux redondantes, en réponse à la question de l'utilisateur "Node et Node.js, est-ce la même chose ?" - réponse : oui, exactement) ; **"OpenClaw"** (CVE-2026-32922 cross-vérifiée via 4 sources indépendantes : NVD, GitHub Security Advisory, Snyk, SentinelOne) ; **"sudo"** (principe du moindre privilège, pourquoi certains outils déconseillent son usage à l'installation). Sources toutes vérifiées joignables (curl HTTP 200) avant écriture. Images de couverture via `/nanobanana` (compte Gemini de l'utilisateur, style isométrique teal/orange, aucun logo de marque réelle). Migrations réversibles.
+
 ## [1.121.0] - 2026-07-25
 
 ### Fixed

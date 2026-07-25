@@ -1,0 +1,31 @@
+[
+  {
+    "slug": "openclaw",
+    "name": "OpenClaw",
+    "definition": "OpenClaw est un agent IA autonome open source sous licence MIT, conçu pour être auto-hébergé et extensible via des modules « skills ». Créé par Peter Steinberger, connu pour PSPDFKit, le projet a été lancé en novembre 2025 sous le nom Clawdbot, renommé Moltbot le 27 janvier 2026 puis OpenClaw trois jours plus tard à la suite d'un conflit de marque avec Anthropic. Agissant comme une passerelle, il relie des LLM tels que Claude, GPT et Gemini à des messageries comme WhatsApp, Telegram et Slack, ainsi qu'à des capacités système comme le shell, les fichiers et le réseau. Cette orchestration permet d'automatiser des tâches, répondre à des messages et déclencher des actions sur vos machines. Une vulnérabilité critique, CVE-2026-32922, permettait une escalade de privilèges via l'appel device.token.rotate, notée CVSS 9,9 et corrigée en 2026.3.11. Son installation est recommandée sans sudo, dans un bac à sable Docker isolé, avec permissions minimales et gestion prudente des secrets.",
+    "analogy": "Comme un répartiteur d'aéroport pour IA, il oriente LLM et messages vers les bons guichets système.",
+    "example": "En déplacement, vous lancez OpenClaw en sandbox Docker pour trier et répondre aux messages WhatsApp et Slack, archiver pièces jointes localement et créer des rappels via un skill calendrier.",
+    "did_you_know": "OpenClaw a changé de nom trois fois en trois mois, passant de Clawdbot à Moltbot puis OpenClaw. La faille CVE-2026-32922, cotée CVSS 9,9, a nécessité une mise à jour urgente.",
+    "one_sentence_answer": "OpenClaw est un agent IA open source auto-hébergé reliant LLM, messageries et outils système, créé par Peter Steinberger, puissant mais à configurer prudemment en raison d'impacts de sécurité connus.",
+    "faq": [
+      {"question": "Que signifie le nom et pourquoi a-t-il eu trois noms?", "answer": "Le projet a débuté comme Clawdbot en novembre 2025, a pris le nom Moltbot le 27 janvier 2026, puis OpenClaw trois jours plus tard à la suite d'un conflit de marque avec Anthropic. « Claw » évoque une pince qui agrège et relie messages, LLM et outils système."},
+      {"question": "Est-ce sécuritaire à installer?", "answer": "Oui, si vous suivez les bonnes pratiques : installez-le sans sudo dans un conteneur Docker isolé, limitez les permissions fichiers et réseau, et gérez les secrets hors du code. Mettez à jour au moins en version 2026.3.11, qui corrige la vulnérabilité critique CVE-2026-32922 d'escalade de privilèges via device.token.rotate."},
+      {"question": "Quelle différence avec un assistant cloud comme Claude ou ChatGPT?", "answer": "OpenClaw est une passerelle et un orchestrateur auto-hébergé qui connecte plusieurs LLM aux messageries et à vos outils système pour exécuter des actions locales. Claude ou ChatGPT sont des assistants cloud gérés qui n'accèdent pas directement à votre shell ou fichiers. OpenClaw offre contrôle et intégrations profondes, au prix d'une configuration et maintenance plus complexes."}
+    ],
+    "sources": [
+      {"label": "National Vulnerability Database - CVE-2026-32922", "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-32922", "year": 2026, "author": "NIST (NVD)"},
+      {"label": "GitHub Security Advisory GHSA-4jpw-hj22-2xmc", "url": "https://github.com/advisories/GHSA-4jpw-hj22-2xmc", "year": 2026, "author": "GitHub Security Advisories"},
+      {"label": "Snyk Vulnerability Database - openclaw", "url": "https://security.snyk.io/vuln/SNYK-JS-OPENCLAW-15523474", "year": 2026, "author": "Snyk"}
+    ],
+    "aliases": ["Clawdbot", "Moltbot"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "advanced",
+    "icon": "🦞",
+    "type": "outil",
+    "acronym_full": null,
+    "cat_slug": "intelligence-artificielle",
+    "match_strategy": "exact",
+    "has_image": true
+  }
+]

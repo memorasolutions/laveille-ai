@@ -1,0 +1,49 @@
+[
+  {
+    "slug": "nvm",
+    "name": "nvm",
+    "definition": "nvm est un gestionnaire de versions Node.js par utilisateur. Créé vers 2010 par Tim Caswell et maintenu aujourd'hui principalement par Jordan Harband, il permet d'installer, de basculer et d'aliaser facilement plusieurs versions de Node.js sur une même machine. L'outil s'installe dans le dossier utilisateur, typiquement ~/.nvm, et s'utilise sans sudo ni accès root. Il ajuste le PATH dans votre shell pour activer la version voulue par session ou par projet, via des commandes simples comme nvm install, nvm use et nvm alias. On peut ainsi faire coexister des environnements distincts pour des applications anciennes et récentes, tout en évitant les conflits de dépendances globales. nvm fonctionne sur les systèmes de type Unix incluant macOS et Linux, ainsi que sous WSL, et constitue l'outil de référence le plus utilisé pour gérer les versions de Node.js. Les projets peuvent aussi épingler une version avec un fichier .nvmrc afin d'automatiser la sélection.",
+    "analogy": "Comme un aiguillage ferroviaire, il oriente instantanément votre shell vers la bonne voie de Node.",
+    "example": "En lançant un nouveau projet, une développeuse passe de Node 18 à Node 24 avec nvm use 24, tandis que ses anciens projets continuent d'employer leurs versions épinglées.",
+    "did_you_know": "nvm n'exige pas sudo car il s'installe dans ~/.nvm sous votre compte. Sur Windows natif, utilisez l'alternative dédiée nvm-windows, adaptée à l'écosystème Windows et maintenue séparément.",
+    "one_sentence_answer": "nvm est l'outil de référence pour installer et basculer, sans sudo, entre plusieurs versions de Node.js par utilisateur sous macOS, Linux et WSL, avec des commandes simples comme nvm install et nvm use.",
+    "faq": [
+      {
+        "question": "Pourquoi ne jamais l'utiliser avec sudo ?",
+        "answer": "Parce que nvm gère des versions par utilisateur. L'exécuter avec sudo installe des fichiers sous root, brise les permissions, mélange l'environnement système et annule l'isolation qui évite les conflits. Vous risqueriez aussi des incohérences de PATH et des droits sur les caches npm. Installez-le dans ~/.nvm et ajoutez l'initialisation à votre shell pour un usage sécurisé."
+      },
+      {
+        "question": "Comment changer de version ?",
+        "answer": "Installez d'abord la version voulue avec nvm install 24 puis activez-la dans le shell courant avec nvm use 24. Pour la rendre par défaut, faites nvm alias default 24. Dans un projet, ajoutez un fichier .nvmrc contenant la version et exécutez nvm use pour sélectionner automatiquement la bonne édition."
+      },
+      {
+        "question": "Existe-t-il pour Windows ?",
+        "answer": "nvm ne fonctionne pas en natif sous Windows. L'alternative recommandée est nvm-windows, un projet distinct maintenu par Corey Butler, qui gère les versions Node.js pour cmd et PowerShell. Les commandes sont proches mais non identiques à nvm. Sous WSL, utilisez plutôt nvm-sh classique, puisqu'il s'exécute comme sur une distribution Linux."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Dépôt officiel nvm-sh/nvm sur GitHub",
+        "url": "https://github.com/nvm-sh/nvm",
+        "year": 2026,
+        "author": "nvm-sh (communauté GitHub)"
+      },
+      {
+        "label": "Dépôt nvm-windows",
+        "url": "https://github.com/coreybutler/nvm-windows",
+        "year": 2026,
+        "author": "Corey Butler"
+      }
+    ],
+    "aliases": ["Node Version Manager"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "🔀",
+    "type": "outil",
+    "acronym_full": "Node Version Manager",
+    "cat_slug": "outils-et-techniques",
+    "match_strategy": "loose",
+    "has_image": true
+  }
+]

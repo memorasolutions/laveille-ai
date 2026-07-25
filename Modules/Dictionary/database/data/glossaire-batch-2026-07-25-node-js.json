@@ -1,0 +1,30 @@
+[
+  {
+    "slug": "node-js",
+    "name": "Node.js",
+    "definition": "Node est le nom court de Node.js, c'est la même chose, pas deux concepts distincts. Node.js est un environnement d'exécution JavaScript côté serveur créé par Ryan Dahl en 2009 et annoncé le 27 mai 2009. Il s'appuie sur le moteur V8 de Chrome pour exécuter du JavaScript à haute performance en dehors du navigateur, et mise sur une boucle d'événements non bloquante pour gérer un grand nombre de connexions concurrentes sans threads lourds. Son modèle I/O asynchrone favorise des microservices, API temps réel, scripts d'automatisation et outillage DevOps. L'écosystème npm, très vaste, fournit bibliothèques et outils pour accélérer le développement. Aujourd'hui, le projet est gouverné par l'OpenJS Foundation, avec des cycles de versions réguliers et une politique LTS claire destinée aux environnements de production. En 2026, la v26 est Current, tandis que les v24 et v22 sont les LTS actives, et une cadence annuelle de sortie est prévue à partir de la v27.",
+    "analogy": "Imagine un centre d'appels automatisé : une seule ligne orchestre des centaines de conversations simultanées grâce à un agenda ultra efficace.",
+    "example": "Une startup à Montréal bâtit un service de livraison en temps réel : API REST en Node.js, WebSocket pour suivi de coursiers, et file Redis pour traiter des milliers d'événements sans blocage.",
+    "did_you_know": "Présenté le 27 mai 2009, Node.js a popularisé l'I/O non bloquante côté serveur et s'appuie sur libuv ; l'écosystème npm réunit des millions de modules maintenus activement par la communauté.",
+    "one_sentence_answer": "Node.js, souvent appelé simplement Node, est un runtime JavaScript côté serveur basé sur V8 et une event loop non bloquante, gouverné par l'OpenJS Foundation pour bâtir des applications concurrentes performantes.",
+    "faq": [
+      {"question": "Node et Node.js, est-ce la même chose ?", "answer": "Oui, exactement la même chose. « Node » est simplement le raccourci familier utilisé pour désigner Node.js dans les conversations et la documentation - ce n'est jamais un produit ou une technologie distincte."},
+      {"question": "À quoi sert Node.js en pratique ?", "answer": "À créer des API et services web performants, du temps réel via WebSocket, des microservices, des scripts CLI et des pipelines DevOps, en profitant d'entrées-sorties asynchrones et de l'écosystème npm."},
+      {"question": "Quelle version choisir en 2026 ?", "answer": "Utilisez une LTS en production : v24 ou v22. La v26 est Current pour tester les nouveautés. À partir de la v27, la cadence de sorties devient annuelle."}
+    ],
+    "sources": [
+      {"label": "Node.js - Previous Releases", "url": "https://nodejs.org/en/about/previous-releases", "year": 2026, "author": "OpenJS Foundation / Node.js"},
+      {"label": "Node.js - Wikipedia", "url": "https://en.wikipedia.org/wiki/Node.js", "year": 2026, "author": "Wikipedia contributors"}
+    ],
+    "aliases": ["Node"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "🟢",
+    "type": "outil",
+    "acronym_full": null,
+    "cat_slug": "outils-et-techniques",
+    "match_strategy": "loose",
+    "has_image": true
+  }
+]

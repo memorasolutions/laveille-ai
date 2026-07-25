@@ -1,0 +1,30 @@
+[
+  {
+    "slug": "sudo",
+    "name": "sudo",
+    "definition": "Sudo est une commande présente sur Unix, Linux et macOS qui permet d'exécuter une commande avec les privilèges d'un autre utilisateur, le plus souvent root. Son comportement et ses autorisations se définissent finement dans le fichier /etc/sudoers, idéalement modifié avec visudo, afin d'appliquer le principe du moindre privilège : accorder uniquement les accès nécessaires, pour des actions précises et vérifiables. En pratique, sudo réduit l'exposition du mot de passe root, centralise la journalisation et facilite l'audit en retraçant qui a lancé quoi et quand. Bien configuré, il limite l'usage des comptes puissants à des tâches ciblées, via des règles, des groupes et des commandes explicites. Toutefois, sudo reste une surface d'attaque significative : des vulnérabilités l'ont déjà touché sur plusieurs systèmes de type Unix. Une configuration faible ou des entrées sudoers trop larges annulent rapidement les bénéfices de sécurité, peuvent permettre l'escalade de privilèges et créer des dérives d'usage, notamment lors d'installations logicielles imprudentes.",
+    "analogy": "Comme une clé temporaire donnée au concierge pour une pièce précise, pas l'immeuble au complet, avec registre des entrées.",
+    "example": "Sur un serveur Ubuntu d'entreprise, l'équipe DevOps peut exécuter sudo apt-get update et sudo systemctl restart nginx, mais ne peut pas installer de paquets ni éditer /etc/shadow sans approbation.",
+    "did_you_know": "Existant depuis plus de 40 ans, sudo est installé par défaut sur la plupart des distributions Linux. L'outil visudo valide la syntaxe pour prévenir des erreurs dangereuses dans /etc/sudoers.",
+    "one_sentence_answer": "Commande qui élève temporairement les privilèges selon /etc/sudoers pour appliquer le moindre privilège et journaliser les usages, à condition d'éviter les règles trop larges et l'installation hasardeuse de logiciels avec sudo.",
+    "faq": [
+      {"question": "Pourquoi certains logiciels comme les gestionnaires de versions ou les agents IA déconseillent-ils sudo à l'installation ?", "answer": "Parce que sudo installe des fichiers sous root, ce qui peut casser les permissions utilisateur, compliquer les mises à jour et la désinstallation, et surtout élargir la surface d'attaque : en cas de compromission, l'attaquant hérite de privilèges élevés."},
+      {"question": "Comment sécuriser /etc/sudoers sans bloquer l'opérationnel ?", "answer": "Éditer avec visudo ; définir des règles par commande et par hôte ; éviter ALL=(ALL) ALL ; réserver NOPASSWD aux actions à faible risque ; verrouiller PATH et les environnements ; journaliser centralement ; réviser périodiquement ; tester d'abord en environnement de test."},
+      {"question": "Quelle est la différence entre sudo et su ?", "answer": "su ouvre une session ou un shell sous un autre compte et requiert son mot de passe, souvent celui de root ; sudo exécute une commande ponctuelle avec une élévation contrôlée par sudoers et consigne précisément l'action."}
+    ],
+    "sources": [
+      {"label": "Sudo Project - documentation officielle", "url": "https://www.sudo.ws/docs/", "year": 2026, "author": "Todd C. Miller (Sudo Project)"},
+      {"label": "OWASP - Principle of Least Privilege", "url": "https://owasp.org/www-community/Access_Control", "year": 2026, "author": "OWASP Foundation"}
+    ],
+    "aliases": [],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "🔑",
+    "type": "commande",
+    "acronym_full": "superuser do",
+    "cat_slug": "outils-et-techniques",
+    "match_strategy": "exact",
+    "has_image": true
+  }
+]
