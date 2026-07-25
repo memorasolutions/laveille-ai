@@ -2839,11 +2839,20 @@ declare(strict_types=1);
  *     risque docker.sock pour agents autonomes) - recherche croisée Perplexity + Codex, 3 sources
  *     réelles vérifiées HTTP 200, image hero via /nanobanana (compte Gemini utilisateur, style
  *     isométrique teal/orange sans logo de marque), migration réversible.
+ *
+ * v1.121.0 = fix accordéon FAQ articles (bug Alpine.js confirmé : le binding :style écrasait tout
+ *     l'attribut style au premier rendu au lieu de le fusionner, effaçant fond/couleur/bordure -
+ *     bug dormant car aucun article n'avait de FAQ publiée avant l'article OpenClaw aujourd'hui).
+ *     Remplacé par le pattern natif details/summary déjà éprouvé dans Modules/Books (zéro JS,
+ *     couleurs alignées charte var(--c-primary)/var(--c-dark)). + déploiement du bouton copier
+ *     sur les blocs de code (icône seule, réutilise window.copyToClipboard + toast global,
+ *     jamais livré en prod malgré code prêt) + fix espacement des listes ul/ol dans le corps
+ *     d'article (line-height 1.6→1.8, marges ajoutées) + migration crosswords vers action-menu.
  */
 
 $lvMajor = 1;
-$lvMinor = 120;
-$lvPatch = 6;
+$lvMinor = 121;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

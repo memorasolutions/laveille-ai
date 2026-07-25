@@ -509,6 +509,41 @@
       };
     })();
     </script>
+    {{-- Bouton copier sur les blocs de code d'articles (option A validee Codex 95/100 + Gemini
+         95/100 : icone seule, aria-label stable, reutilise window.copyToClipboard + toast global
+         ci-dessus - le toast reste la seule annonce aria-live, evite toute double-annonce). --}}
+    <script>
+    (function(){
+      function initCodeCopyButtons(){
+        document.querySelectorAll('.wp-block-code:not([data-copy-ready])').forEach(function(block){
+          block.setAttribute('data-copy-ready', '1');
+          var codeEl = block.tagName === 'CODE' ? block : block.querySelector('code');
+          if (!codeEl) return;
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'code-copy-btn';
+          btn.setAttribute('aria-label', 'Copier le code');
+          btn.innerHTML =
+            '<svg class="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
+            '<svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+          btn.addEventListener('click', function(){
+            window.copyToClipboard(codeEl.textContent, 'Code copié dans le presse-papiers').then(function(ok){
+              if (!ok) return;
+              btn.classList.add('is-copied');
+              setTimeout(function(){ btn.classList.remove('is-copied'); }, 2000);
+            });
+          });
+          block.style.position = block.style.position || 'relative';
+          block.appendChild(btn);
+        });
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCodeCopyButtons);
+      } else {
+        initCodeCopyButtons();
+      }
+    })();
+    </script>
     {{-- Speculation Rules API — prefetch/prerender navigation instantanee --}}
     <script type="speculationrules">
     {

@@ -4,6 +4,17 @@
 @section('meta_description', __('Liste de mes grilles de mots croisés sauvegardées sur laveille.ai.'))
 
 @section('content')
+
+{{-- Icônes du menu d'actions (data-lucide) : ce layout (fronttheme::layouts.master) ne charge PAS
+     lucide.js (contrairement à Auth/layouts/app.blade.php et au thème admin) - même constat et
+     même solution que Modules/Editor/resources/views/components/tiptap.blade.php (@assets =
+     injection Blade native dédupliquée, avant le boot d'Alpine). Les icônes du reste de cette page
+     (bouton "Créer une nouvelle grille", état vide) restent en SVG inline volontairement - seul le
+     nouveau menu d'actions dépend de lucide. --}}
+@assets
+<script src="{{ asset('build/nobleui/plugins/lucide/lucide.min.js') }}"></script>
+@endassets
+
 <style>
 .cw-user-page { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; }
 .cw-user-page h1 { color: #053d4a; font-weight: 800; }
@@ -56,21 +67,37 @@
               @endif
               <span title="{{ $preset->updated_at }}">{{ $preset->updated_at?->diffForHumans() }}</span>
             </div>
+            {{-- Migration vers action-menu (kebab ⋮ compact) : remplace la rangée de 3 boutons.
+                 "Jouer" affiché seulement si is_public (connu côté PHP, @foreach server-side - pas
+                 besoin d'alpineClick ici). "Supprimer" reste en 'alpineClick' pour appeler LA MÊME
+                 fonction confirmDelete() déjà définie plus bas (Alpine.data('userCrosswords', ...)) :
+                 elle gère déjà sa propre confirmation + suppression AJAX (fetch DELETE) + toast +
+                 rechargement - comportement inchangé, seul le déclencheur change. --}}
+            @php
+                $crosswordActions = [];
+                if ($preset->is_public) {
+                    $crosswordActions[] = [
+                        'label' => __('Jouer'),
+                        'icon' => 'play',
+                        'url' => url('/jeumc/'.$preset->public_id),
+                        'target' => '_blank',
+                    ];
+                }
+                $crosswordActions[] = [
+                    'label' => __('Modifier'),
+                    'icon' => 'pencil',
+                    'url' => route('user.crosswords.edit', $preset->public_id),
+                ];
+                $crosswordActions[] = ['divider' => true];
+                $crosswordActions[] = [
+                    'label' => __('Supprimer'),
+                    'icon' => 'trash-2',
+                    'danger' => true,
+                    'alpineClick' => 'confirmDelete(' . json_encode($preset->public_id) . ', ' . json_encode($preset->name) . ')',
+                ];
+            @endphp
             <div class="actions">
-              @if($preset->is_public)
-                <a href="{{ url('/jeumc/'.$preset->public_id) }}" class="ct-btn ct-btn-primary d-inline-flex align-items-center gap-2" target="_blank" rel="noopener" :aria-label="'{{ __('Jouer la grille') }} {{ $preset->name }}'">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
-                  <span>{{ __('Jouer') }}</span>
-                </a>
-              @endif
-              <a href="{{ route('user.crosswords.edit', $preset->public_id) }}" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                <span>{{ __('Modifier') }}</span>
-              </a>
-              <button type="button" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" style="color:#7f1d1d;border-color:#fecaca" @click="confirmDelete('{{ $preset->public_id }}', @js($preset->name))" :aria-label="'{{ __('Supprimer') }} {{ $preset->name }}'">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                <span>{{ __('Supprimer') }}</span>
-              </button>
+                @include('core::components.action-menu', ['actions' => $crosswordActions])
             </div>
           </article>
         @endforeach
@@ -86,6 +113,9 @@
 </section>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() { if (window.lucide) lucide.createIcons(); });
+if (document.readyState !== 'loading' && window.lucide) { lucide.createIcons(); }
+
 document.addEventListener('alpine:init', () => {
   Alpine.data('userCrosswords', () => ({
     confirmDelete(publicId, name) {

@@ -244,6 +244,7 @@
     border-radius: var(--r-base);
     overflow-x: auto;
     margin: 1.5rem 0;
+    position: relative;
 }
 
 .wp-block-code,
@@ -253,6 +254,53 @@
     line-height: 1.6;
     white-space: pre-wrap;
     word-wrap: break-word;
+}
+
+/* Bouton copier sur les blocs de code (option A validée Codex 95/100 + Gemini 95/100 :
+   icone seule, aria-label stable, reutilise window.copyToClipboard + toast global -
+   evite toute double-annonce lecteur d'ecran, cf. CHANGELOG 2026-07-25). */
+.code-copy-btn {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(246, 247, 249, 0.08);
+    border: 1px solid rgba(246, 247, 249, 0.18);
+    border-radius: 6px;
+    color: #F6F7F9;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.code-copy-btn:hover,
+.code-copy-btn:focus-visible {
+    background: rgba(246, 247, 249, 0.18);
+}
+
+.code-copy-btn:focus-visible {
+    outline: 2px solid #F6F7F9;
+    outline-offset: 2px;
+}
+
+.code-copy-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.code-copy-btn .icon-check {
+    display: none;
+}
+
+.code-copy-btn.is-copied .icon-copy {
+    display: none;
+}
+
+.code-copy-btn.is-copied .icon-check {
+    display: block;
 }
 
 /* ── 6. TABLES WP ── */
@@ -340,4 +388,81 @@ h3.wp-block-heading {
     margin-top: 2.75rem;
     padding-top: 1.75rem;
     border-top: 2px solid #E5E7EB;
+}
+
+/* Listes du corps d'article (pas de classe custom) : sans cette regle, ul/ol heritent d'un
+   line-height/margin plus serre que les <p> environnants (1.6 vs 1.8, 0 vs 24px), ce qui rend
+   une enumeration a plusieurs items visuellement compressee - recherche pp_search 2026-07-25 :
+   pour une liste de plusieurs points, garder un interligne aere plutot qu'un encadre complet
+   (reserve a une alerte unique). Confirme Codex 92/100 + Gemini 85/100. */
+.entry-details ul:not([class]),
+.entry-details ol:not([class]) {
+    line-height: 1.8;
+    margin: 1.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.entry-details ul:not([class]) li,
+.entry-details ol:not([class]) li {
+    margin-bottom: 0.75rem;
+}
+
+.entry-details ul:not([class]) li:last-child,
+.entry-details ol:not([class]) li:last-child {
+    margin-bottom: 0;
+}
+
+/* ── 10. FAQ ARTICLE (accordéon natif <details>/<summary>) ──
+   Remplace l'ancien accordéon Alpine.js (bug confirmé 2026-07-25 : le binding
+   :style d'Alpine ECRASE tout l'attribut style au lieu de le fusionner, ce qui
+   effaçait fond/couleur/bordure au premier rendu - bug dormant car aucun autre
+   article n'avait de FAQ publiée avant celui-ci). <details>/<summary> natif =
+   même pattern déjà en prod sur Modules/Books (aucun JS, aucun risque de
+   conflit style/binding), et couleurs alignées charte (var(--c-primary)/
+   var(--c-dark)) plutôt que le gris/bleu générique précédent. */
+.article-faq-section {
+    margin: 3rem 0;
+    padding: 2rem;
+    background: #fff;
+    border-radius: var(--r-base);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.article-faq-item {
+    border-bottom: 1px solid #E5E7EB;
+    padding: 0.85rem 0;
+}
+
+.article-faq-item:last-child {
+    border-bottom: 0;
+}
+
+.article-faq-item summary {
+    font-family: var(--f-heading);
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--c-dark);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    line-height: 1.4;
+}
+
+.article-faq-item summary::marker {
+    color: var(--c-primary);
+}
+
+.article-faq-item[open] summary {
+    color: var(--c-primary);
+}
+
+.article-faq-item summary:focus-visible {
+    outline: 2px solid var(--c-primary);
+    outline-offset: 2px;
+}
+
+.article-faq-item div {
+    padding: 0.75rem 0 0.25rem;
+    color: #4B5563;
+    line-height: 1.6;
 }

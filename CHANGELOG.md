@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.121.0] - 2026-07-25
+
+### Fixed
+- **Accordéon FAQ des articles hors charte graphique** (signalé par l'utilisateur, comparé aux autres articles) : `Modules/FrontTheme/resources/views/blog/partials/faq-accordion.blade.php` posait un attribut `style` statique complet (fond, couleur, bordure) PUIS un binding Alpine.js `:style` qui ne fusionne pas mais **remplace tout l'attribut style** au premier rendu — effaçait donc fond/couleur/bordure/largeur, laissant le style natif du navigateur (bordure noire, fond gris). Bug de fond, dormant depuis sa création (aucun autre article n'avait de FAQ publiée avant l'article OpenClaw). Remplacé par le pattern natif `<details>/<summary>` déjà éprouvé et sans JS dans `Modules/Books` — couleurs alignées charte (`var(--c-primary)`/`var(--c-dark)`) au lieu du gris/bleu générique précédent.
+- **Bouton copier sur les blocs de code jamais livré en production** malgré du code prêt et testé localement (icône seule, réutilise `window.copyToClipboard` + toast global existant) — fichiers modifiés mais jamais commités. Déployé.
+- **Espacement compressé des listes `<ul>/<ol>` du corps d'article** (encadré rouge visuellement différent des autres, signalé par l'utilisateur) : même cause — le CSS correctif (`line-height` 1.6→1.8, marges) était écrit localement mais jamais déployé.
+
+### Changed
+- **Migration `Modules/Tools` crosswords (Mes grilles)** vers le composant DRY `action-menu` (kebab compact), alignement avec le reste du site.
+
 ## [1.120.6] - 2026-07-25
 
 ### Added
