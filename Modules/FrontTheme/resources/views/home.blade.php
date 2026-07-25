@@ -13,7 +13,7 @@
 @endif
 {{-- CWV #238 — preload hero LCP image pour TTFB→LCP < 2.5s --}}
 @if(isset($articles) && $articles->count() > 0)
-@php $heroLcpSrc = $articles[0]->featured_image ? asset($articles[0]->featured_image) : fronttheme_asset('images/hero/img-1.jpg'); @endphp
+@php $heroLcpSrc = $articles[0]->featured_image_url ?: fronttheme_asset('images/hero/img-1.jpg'); @endphp
 <link rel="preload" as="image" href="{{ $heroLcpSrc }}" fetchpriority="high">
 @endif
 @endpush
@@ -32,7 +32,7 @@
                                 @php $hero1 = $articles[0]; @endphp
                                 <div class="grid">
                                     <div class="img-holder">
-                                        <img src="{{ $hero1->featured_image ? asset($hero1->featured_image) : fronttheme_asset('images/hero/img-1.jpg') }}" alt="{{ $hero1->title }}" class="img img-responsive" fetchpriority="high" loading="eager" decoding="async">
+                                        <img src="{{ $hero1->featured_image_url ?: fronttheme_asset('images/hero/img-1.jpg') }}" alt="{{ $hero1->title }}" class="img img-responsive" fetchpriority="high" loading="eager" decoding="async">
                                         <div class="wpo-blog-content">
                                             <div class="thumb">{{ $hero1->blogCategory->name ?? __('Général') }}</div>
                                             <h2><a href="{{ route('blog.show', $hero1->slug) }}">{{ $hero1->title }}</a></h2>
@@ -50,7 +50,7 @@
                                 @php $hero2 = $articles[1]; @endphp
                                 <div class="grid">
                                     <div class="img-holder">
-                                        <img src="{{ $hero2->featured_image ? asset($hero2->featured_image) : fronttheme_asset('images/hero/img-2.jpg') }}" alt="{{ $hero2->title }}" class="img img-responsive" loading="lazy" decoding="async">
+                                        <img src="{{ $hero2->featured_image_url ?: fronttheme_asset('images/hero/img-2.jpg') }}" alt="{{ $hero2->title }}" class="img img-responsive" loading="lazy" decoding="async">
                                         <div class="wpo-blog-content">
                                             <div class="thumb">{{ $hero2->blogCategory->name ?? __('Général') }}</div>
                                             <h2><a href="{{ route('blog.show', $hero2->slug) }}">{{ $hero2->title }}</a></h2>
@@ -66,7 +66,7 @@
                                 <div class="grid s2">
                                     @php $hero3 = $articles[2]; @endphp
                                     <div class="img-holder">
-                                        <img src="{{ $hero3->featured_image ? asset($hero3->featured_image) : fronttheme_asset('images/hero/img-3.jpg') }}" alt="{{ $hero3->title }}" class="img img-responsive" loading="lazy" decoding="async">
+                                        <img src="{{ $hero3->featured_image_url ?: fronttheme_asset('images/hero/img-3.jpg') }}" alt="{{ $hero3->title }}" class="img img-responsive" loading="lazy" decoding="async">
                                         <div class="wpo-blog-content">
                                             <div class="thumb">{{ $hero3->blogCategory->name ?? __('Général') }}</div>
                                             <h2><a href="{{ route('blog.show', $hero3->slug) }}">{{ $hero3->title }}</a></h2>
@@ -79,7 +79,7 @@
                                     @if($articles->count() > 3)
                                     @php $hero4 = $articles[3]; @endphp
                                     <div class="img-holder">
-                                        <img src="{{ $hero4->featured_image ? asset($hero4->featured_image) : fronttheme_asset('images/hero/img-4.jpg') }}" alt="{{ $hero4->title }}" class="img img-responsive" loading="lazy" decoding="async">
+                                        <img src="{{ $hero4->featured_image_url ?: fronttheme_asset('images/hero/img-4.jpg') }}" alt="{{ $hero4->title }}" class="img img-responsive" loading="lazy" decoding="async">
                                         <div class="wpo-blog-content">
                                             <div class="thumb">{{ $hero4->blogCategory->name ?? __('Général') }}</div>
                                             <h2><a href="{{ route('blog.show', $hero4->slug) }}">{{ $hero4->title }}</a></h2>
@@ -149,7 +149,7 @@
                                     <div class="col col-lg-6 col-md-6 col-12">
                                         <div class="wpo-blog-item">
                                             <div class="wpo-blog-img">
-                                                <img src="{{ $highlight->featured_image ? asset($highlight->featured_image) : fronttheme_asset('images/blog/img-' . ($loop->iteration) . '.jpg') }}" alt="{{ $highlight->title }}" loading="lazy">
+                                                <img src="{{ $highlight->featured_image_url ?: fronttheme_asset('images/blog/img-' . ($loop->iteration) . '.jpg') }}" alt="{{ $highlight->title }}" loading="lazy">
                                                 <div class="thumb">{{ $highlight->blogCategory->name ?? __('Général') }}</div>
                                             </div>
                                             <div class="wpo-blog-content">
@@ -184,7 +184,7 @@
                                     <div class="post">
                                         <div class="img-holder">
                                             @if($recent->featured_image)
-                                                <img src="{{ asset($recent->featured_image) }}" alt="{{ $recent->title }}">
+                                                <img src="{{ $recent->featured_image_url }}" alt="{{ $recent->title }}">
                                             @else
                                                 <img src="{{ fronttheme_asset('images/recent-posts/img-' . ($loop->iteration) . '.jpg') }}" alt="{{ $recent->title }}">
                                             @endif
@@ -218,7 +218,7 @@
                                 <div class="col col-xl-3 col-lg-6 col-md-6 col-12">
                                     <div class="wpo-blog-item">
                                         <div class="wpo-blog-img">
-                                            <img src="{{ $sponsored->featured_image ? asset($sponsored->featured_image) : fronttheme_asset('images/sponsord/img-' . ($loop->iteration) . '.jpg') }}" alt="{{ $sponsored->title }}">
+                                            <img src="{{ $sponsored->featured_image_url ?: fronttheme_asset('images/sponsord/img-' . ($loop->iteration) . '.jpg') }}" alt="{{ $sponsored->title }}">
                                             <div class="thumb">{{ $sponsored->blogCategory->name ?? __('Général') }}</div>
                                         </div>
                                         <div class="wpo-blog-content">

@@ -120,7 +120,7 @@
                         </td>
                         <td>
                             @if($article->featured_image)
-                                <img src="{{ asset($article->featured_image) }}" class="rounded object-fit-cover" style="width:48px;height:48px" alt="">
+                                <img src="{{ $article->featured_image_url }}" class="rounded object-fit-cover" style="width:48px;height:48px" alt="">
                             @else
                                 <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:48px;height:48px">
                                     <i data-lucide="image" class="icon-sm text-muted"></i>

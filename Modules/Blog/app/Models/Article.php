@@ -246,6 +246,23 @@ class Article extends Model implements SearchableContract
         return $this->meta['title'] ?? null;
     }
 
+    /**
+     * URL affichable de l'image mise en avant, quelle que soit la convention de stockage
+     * (upload admin: "articles/x.jpg" sans préfixe ; import WordPress: "storage/blog/x.jpg" déjà préfixé).
+     */
+    public function getFeaturedImageUrlAttribute(): ?string
+    {
+        if (empty($this->featured_image)) {
+            return null;
+        }
+
+        if (str_starts_with($this->featured_image, 'http') || str_starts_with($this->featured_image, 'storage/')) {
+            return asset($this->featured_image);
+        }
+
+        return \Illuminate\Support\Facades\Storage::disk('public')->url($this->featured_image);
+    }
+
     public function scopePendingSubmissions($query)
     {
         return $query->where('submission_status', 'pending');

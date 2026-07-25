@@ -212,7 +212,7 @@
                     <h5 class="fw-semibold mb-0">Image mise en avant</h5>
                 </div>
                 <div class="card-body p-4">
-                    <x-core::file-upload name="featured_image" accept="image/*" :max-size="2" help-text="Laissez vide pour conserver l'image actuelle." :current-image="$article->featured_image ? asset($article->featured_image) : null" />
+                    <x-core::file-upload name="featured_image" accept="image/*" :max-size="2" help-text="Laissez vide pour conserver l'image actuelle." :current-image="$article->featured_image_url" />
                 </div>
             </div>
         </div>

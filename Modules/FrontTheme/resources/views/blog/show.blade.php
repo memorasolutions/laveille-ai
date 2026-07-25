@@ -82,7 +82,7 @@
 @endphp
 @endsection
 @if($article->featured_image)
-    @section('og_image', asset($article->featured_image).'?v='.($article->updated_at?->timestamp ?? '0'))
+    @section('og_image', $article->featured_image_url.'?v='.($article->updated_at?->timestamp ?? '0'))
 @endif
 
 @php
@@ -108,7 +108,7 @@
                 'logo' => ['@type' => 'ImageObject', 'url' => asset('images/logo-avatar.png')],
             ],
         'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => url('/blog/' . $article->slug)],
-    ] + ($article->featured_image ? ['image' => asset($article->featured_image)] : []),
+    ] + ($article->featured_image ? ['image' => $article->featured_image_url] : []),
     JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 @endphp
 
@@ -118,7 +118,7 @@
     <meta name="llm:url" content="{{ url('/blog/' . $article->slug) }}">
     {{-- CWV #238 — preload LCP image article + fetchpriority high --}}
     @if($article->featured_image)
-    <link rel="preload" as="image" href="{{ asset($article->featured_image) }}?v={{ $article->updated_at?->timestamp ?? '0' }}" fetchpriority="high">
+    <link rel="preload" as="image" href="{{ $article->featured_image_url }}?v={{ $article->updated_at?->timestamp ?? '0' }}" fetchpriority="high">
     @endif
     <script type="application/ld+json">{!! $schemaJson !!}</script>
     @if($article->faqs->where('is_published', true)->isNotEmpty())
@@ -172,7 +172,7 @@
                         <div class="post format-standard-image">
                             @if($article->featured_image)
                                 <div class="entry-media">
-                                    <img src="{{ asset($article->featured_image) }}?v={{ $article->updated_at?->timestamp ?? time() }}" alt="{{ $article->title }}" fetchpriority="high" loading="eager" decoding="async">
+                                    <img src="{{ $article->featured_image_url }}?v={{ $article->updated_at?->timestamp ?? time() }}" alt="{{ $article->title }}" fetchpriority="high" loading="eager" decoding="async">
                                 </div>
                             @endif
                             <div class="entry-meta">
@@ -419,7 +419,7 @@
                     <div class="panel panel-default" style="border-radius: 8px; overflow: hidden;">
                         @if($related->featured_image)
                             <a href="{{ route('blog.show', $related->slug) }}">
-                                <img src="{{ asset($related->featured_image) }}?v={{ $related->updated_at?->timestamp ?? time() }}" alt="{{ $related->title }}" style="width: 100%; height: 150px; object-fit: cover;">
+                                <img src="{{ $related->featured_image_url }}?v={{ $related->updated_at?->timestamp ?? time() }}" alt="{{ $related->title }}" style="width: 100%; height: 150px; object-fit: cover;">
                             </a>
                         @endif
                         <div class="panel-body">
@@ -446,7 +446,7 @@ $blogPostingJsonLd = json_encode([
     'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => route('blog.show', $article->slug)],
     'headline' => $article->title,
     'description' => Str::limit($article->excerpt ?? strip_tags($article->content), 160),
-    'image' => $article->featured_image ? asset($article->featured_image) : asset('images/og-image.png'),
+    'image' => $article->featured_image_url ?: asset('images/og-image.png'),
     'datePublished' => $article->published_at?->toIso8601String(),
     'dateModified' => $article->updated_at?->toIso8601String(),
     'author' => function_exists('lv_jsonld_author_stephane')

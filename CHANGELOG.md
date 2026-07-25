@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.120.4] - 2026-07-24
+
+### Fixed
+- **Bug systémique : image mise en avant cassée sur tout article (signalé par l'utilisateur)** : deux conventions de stockage incompatibles coexistaient pour `articles.featured_image` - upload admin (`store('articles', 'public')`, chemin sans préfixe `storage/`) vs import WordPress (chemin déjà préfixé `storage/blog/...`). Toutes les vues appelaient `asset($article->featured_image)` directement, ce qui cassait systématiquement l'image de tout article dont l'image a été téléversée via l'admin (pas seulement l'aperçu de l'article en brouillon signalé initialement - impact identique en production sur les articles publiés). Nouvel accesseur unique `Article::getFeaturedImageUrlAttribute()` qui détecte la convention et génère la bonne URL dans les deux cas ; remplace les ~22 appels `asset($x->featured_image)` dans 12 fichiers (admin + thème public + accueil). Suite Blog 45/45 verte après correction.
+
 ## [1.120.3] - 2026-07-24
 
 ### Fixed

@@ -21,7 +21,7 @@
         <div class="row gy-3">
             <div class="col-md-8">
                 @if($article->featured_image)
-                    <img src="{{ asset($article->featured_image) }}" class="img-fluid rounded mb-3 w-100" style="max-height:300px;object-fit:cover;" alt="{{ $article->title }}">
+                    <img src="{{ $article->featured_image_url }}" class="img-fluid rounded mb-3 w-100" style="max-height:300px;object-fit:cover;" alt="{{ $article->title }}">
                 @endif
                 <div class="mb-3">
                     <label class="form-label fw-semibold text-muted text-sm">{{ __('Contenu') }}</label>

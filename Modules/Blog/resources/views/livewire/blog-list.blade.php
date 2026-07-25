@@ -10,7 +10,7 @@
             <article class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition group">
                 @if($article->featured_image)
                 <a href="{{ route('blog.show', $article) }}">
-                    <img src="{{ asset($article->featured_image) }}"
+                    <img src="{{ $article->featured_image_url }}"
                          alt="{{ $article->title }}"
                          class="w-full h-48 object-cover group-hover:opacity-90 transition">
                 </a>
