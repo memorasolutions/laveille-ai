@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.120.6] - 2026-07-25
+
+### Added
+- **Glossaire : nouveau terme "Docker"** — conteneurisation, reproductibilité des environnements dev/IA/ML, usage comme bac à sable pour agents IA autonomes (risque `docker.sock` = accès équivalent root explicitement couvert). Recherche croisée (Perplexity + Codex, recherche web réelle), 3 sources vérifiées joignables (HTTP 200) avant écriture. Image de couverture générée via `/nanobanana` (compte Gemini de l'utilisateur, style isométrique teal/orange, aucun logo Docker réel). Migration réversible.
+
 ## [1.120.5] - 2026-07-25
 
 ### Fixed

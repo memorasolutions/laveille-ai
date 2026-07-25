@@ -1,0 +1,55 @@
+[
+  {
+    "slug": "docker",
+    "name": "Docker",
+    "definition": "Docker est une plateforme de conteneurisation qui empaquette application et dépendances dans des conteneurs légers s'exécutant sur le noyau Linux via namespaces et cgroups; contrairement aux machines virtuelles, il n'émule pas un OS complet, réduisant taille et démarrage. Lancé en 2013 par dotCloud et Solomon Hykes, il a standardisé l'image, le registre et l'exécution isolée. Les équipes de développement, de CI/CD et d'IA/ML l'utilisent pour la reproductibilité des environnements, l'expérimentation traçable et le déploiement cohérent du poste au nuage. Pour les agents IA, Docker sert de bac à sable contrôlé: permissions minimales, réseaux limités, volumes montés sélectivement, politiques de ressources. Bonnes pratiques essentielles: ne jamais exposer le socket docker.sock à des processus non fiables; son accès équivaut à des privilèges root sur l'hôte. Images signées, scans, secrets chiffrés et profils seccomp/AppArmor complètent l'approche défensive. Fonctionne aussi sous Windows et macOS via une VM légère, tout en gardant workflows et API uniformes.",
+    "analogy": "Comme un conteneur d'expédition standardisé: même cargaison, formats communs, transport efficace, peu d'inertie, arrimage contrôlé.",
+    "example": "Une équipe IA exécute un agent RAG dans un conteneur avec GPU, réseau restreint et montages en lecture seule; chaque essai épingle l'image, assurant résultats reproductibles et nettoyage automatisé.",
+    "did_you_know": "Docker Hub dépasse 20 milliards de téléchargements mensuels et 100 millions d'images; Stack Overflow Survey 2025: 71,1 % d'adoption, +17 points; Docker Model Runner en disponibilité générale depuis septembre 2025.",
+    "one_sentence_answer": "Plateforme de conteneurisation lancée en 2013, Docker isole et distribue applications via namespaces/cgroups, accélérant développement et IA/ML, avec reproductibilité élevée; ne jamais exposer docker.sock, car cela donne des privilèges root sur l'hôte.",
+    "faq": [
+      {
+        "question": "Docker est-il gratuit ?",
+        "answer": "Le moteur Docker est open source et gratuit; Docker Desktop est gratuit pour usage personnel, éducation et petites organisations, avec abonnements commerciaux pour équipes et entreprises. Les registres publics comme Docker Hub offrent un palier gratuit avec limites de téléchargement; en production, privilégiez images officielles, miroirs privés et politiques de cache pour maîtriser coûts et conformité."
+      },
+      {
+        "question": "Est-ce dangereux avec des IA ou des agents autonomes ?",
+        "answer": "Les risques viennent surtout des permissions. Ne montez jamais docker.sock pour un agent: cet accès équivaut à root sur l'hôte. Préférez le mode rootless, évitez --privileged, réduisez les capacités, appliquez des profils seccomp/AppArmor, un système de fichiers en lecture seule, des réseaux restreints et des limites de ressources, et gardez les secrets hors de l'image."
+      },
+      {
+        "question": "Quelle est la différence avec une machine virtuelle ?",
+        "answer": "Une machine virtuelle virtualise le matériel et exécute un système d'exploitation complet via un hyperviseur: isolement fort, démarrage plus lent, empreinte lourde. Un conteneur Docker partage le noyau de l'hôte et isole via namespaces/cgroups: images légères, démarrage en secondes, densité élevée, mais dépendance au noyau. Sur Windows et macOS, Docker utilise une VM légère en coulisse."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Docker Engine security - accès protégé",
+        "url": "https://docs.docker.com/engine/security/protect-access/",
+        "year": 2026,
+        "author": "Docker Inc. (documentation officielle)"
+      },
+      {
+        "label": "PyCon US 2013 - The Future of Linux Containers (Solomon Hykes)",
+        "url": "https://pyvideo.org/pycon-us-2013/the-future-of-linux-containers.html",
+        "year": 2013,
+        "author": "PyCon US / Solomon Hykes"
+      },
+      {
+        "label": "Annonce Docker Model Runner en disponibilité générale",
+        "url": "https://www.docker.com/blog/announcing-docker-model-runner-ga/",
+        "year": 2025,
+        "author": "Docker Inc."
+      }
+    ],
+    "aliases": ["conteneurisation Docker", "conteneur Docker"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "🐳",
+    "type": "outil",
+    "acronym_full": null,
+    "cat_slug": "outils-et-techniques",
+    "match_strategy": "loose",
+    "has_image": true
+  }
+]

@@ -2834,11 +2834,16 @@ declare(strict_types=1);
  *     l'utilisateur doit s'inscrire aux réseaux/programmes lui-même puis coller les vrais liens
  *     dans le champ "Lien d'affiliation" déjà existant sur `/admin/directory/{tool}/edit` - tout
  *     le reste (badge, tracking, divulgation, fallback) s'active alors automatiquement.
+ *
+ * v1.120.6 = glossaire : ajout du terme "Docker" (conteneurisation, reproductibilité IA/ML,
+ *     risque docker.sock pour agents autonomes) - recherche croisée Perplexity + Codex, 3 sources
+ *     réelles vérifiées HTTP 200, image hero via /nanobanana (compte Gemini utilisateur, style
+ *     isométrique teal/orange sans logo de marque), migration réversible.
  */
 
 $lvMajor = 1;
 $lvMinor = 120;
-$lvPatch = 5;
+$lvPatch = 6;
 
 return [
     'major' => $lvMajor,
