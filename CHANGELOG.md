@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.128.0] - 2026-07-25
+
+### Added
+- **Glossaire : nouveau terme "Commandes shell"** (`/glossaire "commandes shell"`) — concept général de l'interpréteur de commandes Unix/Linux/macOS/Windows (pas un shell précis). Recherche `perplexity/sonar-pro` croisée avec Codex (précisions : Thompson shell documenté dans le 1er manuel Unix du 3 novembre 1971 ; Bourne shell développé dès 1976, décrit publiquement en 1978, distribué avec Unix V7 en 1979 ; Bash débuté le 10 janvier 1988 par Brian Fox, bêta 0.99 annoncée le 8 juin 1989). 2 sources officielles vérifiées joignables (curl HTTP 200) : POSIX.1-2024 (The Open Group/IEEE) et le man page GNU Bash via man7.org. Relié au terme existant "sudo" (narrower_slugs). Image de couverture via `/nanobanana`. Migration réversible.
+
+## [1.127.0] - 2026-07-25
+
+### Added
+- **Glossaire : 19 nouveaux termes de licences open source** (`/glossaire "de chacune des licences"`) — MIT, BSD 2-Clause, BSD 3-Clause, ISC, zlib, Boost Software License, The Unlicense, CC0 1.0 Universal, Creative Commons (licences de contenu), The PostgreSQL License, SIL Open Font License 1.1, GNU GPL v2, GNU GPL v3, GNU AGPL v3, GNU LGPL, Mozilla Public License 2.0, Eclipse Public License 2.0, CDDL, Artistic License 2.0. Demande explicite de l'utilisateur suite à la liste complète des licences fournie. Le 20e terme prévu, "Apache 2.0", existait déjà en prod depuis un lot antérieur (contenu adéquat, non lié aux licences) — l'anti-doublon a correctement évité toute duplication ; seule son image de couverture a été rafraîchie pour cohérence visuelle avec le reste de la famille. Recherche `perplexity/sonar-pro` par famille de licence, croisée avec Codex (corrections : année exacte ISC 1995, année zlib 1995 confirmée par lecture directe du texte de licence). Sources officielles vérifiées joignables (curl HTTP 200), sauf 3 URLs gnu.org (AGPL/LGPL) non re-vérifiables au moment de la rédaction en raison d'une panne réseau transitoire du domaine (URLs soeurs identiques déjà vérifiées + miroirs OSI équivalents, confiance élevée maintenue). Catégorie "concepts-fondamentaux". 19 nouvelles images de couverture + 1 image rafraîchie via `/nanobanana` (métaphore visuelle dédiée par licence, style isométrique teal/orange cohérent, aucun logo de marque réelle). Migration réversible unique.
+
 ## [1.126.0] - 2026-07-25
 
 ### Added

@@ -1,0 +1,142 @@
+[
+  {
+    "slug": "the-unlicense",
+    "name": "The Unlicense",
+    "definition": "The Unlicense est une dédicace explicite au domaine public pour les logiciels, publiée le 1er janvier 2010 par le développeur Arto Bendiken. Elle vise une renonciation totale au droit d'auteur, sans aucune restriction d'utilisation : exécuter, copier, modifier, distribuer ou vendre, à des fins commerciales ou non. Pour les juridictions où la mise volontaire dans le domaine public n'est pas reconnue, elle prévoit une licence de secours ultra-permissive, de type MIT/X11, sans obligation d'attribution. Cette approche hybride sécurise juridiquement la liberté d'usage partout où la simple renonciation ne suffit pas. The Unlicense a été approuvée comme licence open source par l'Open Source Initiative en juin 2020, confirmant sa compatibilité avec les critères d'ouverture. Elle est souvent choisie par des auteur·rices souhaitant maximiser la réutilisation sans contraintes, tout en restant pragmatiques face aux différences de droit d'auteur selon les pays.",
+    "analogy": "C'est comme offrir un outil à qui veut, sans conditions, avec un petit permis de secours si le don « domaine public » n'est pas reconnu.",
+    "example": "Un développeur publie un utilitaire en 2010 sous The Unlicense. Une startup l'intègre tel quel dans un produit commercial, sans attribution ni publication du code, en toute légalité, y compris dans des pays aux lois différentes.",
+    "did_you_know": "The Unlicense a été rédigée par Arto Bendiken et approuvée par l'OSI en 2020, scellant son statut open source. Elle cible explicitement la dédicace au domaine public, complétée par une clause de secours type MIT/X11.",
+    "one_sentence_answer": "The Unlicense place le code dans le domaine public, avec une licence de secours ultra-permissive type MIT/X11 si nécessaire, sans attribution obligatoire.",
+    "faq": [
+      {"question": "Quelle est la différence entre The Unlicense et CC0 1.0 Universal ?", "answer": "Les deux visent le « domaine public ». The Unlicense cible d'abord les logiciels, tandis que CC0 s'applique aussi au contenu (textes, images, données). Les deux incluent une licence de secours permissive sans attribution."},
+      {"question": "Puis-je utiliser The Unlicense pour un usage commercial sans attribution ?", "answer": "Oui. La renonciation est totale et la licence de secours type MIT/X11 ne requiert pas d'attribution."},
+      {"question": "Pourquoi inclut-elle une licence de secours type MIT/X11 ?", "answer": "Pour rester valide dans les juridictions où la dédicace directe au domaine public n'est pas reconnue, garantissant une permission très large malgré ces limites."}
+    ],
+    "sources": [
+      {"label": "The Unlicense - site officiel", "url": "https://unlicense.org/", "year": 2010, "author": "Arto Bendiken"},
+      {"label": "Open Source Initiative - The Unlicense", "url": "https://opensource.org/license/unlicense/", "year": 2020, "author": "Open Source Initiative"}
+    ],
+    "aliases": ["Unlicense"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "beginner",
+    "icon": "🆓",
+    "type": "licence-logicielle",
+    "acronym_full": null,
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  },
+  {
+    "slug": "cc0-1-0-universal",
+    "name": "CC0 1.0 Universal",
+    "definition": "CC0 1.0 Universal, publiée par Creative Commons en 2009, est une renonciation universelle (« waiver ») à tous les droits d'auteur et droits voisins. Elle s'applique au code et au contenu (textes, images, données, bases de données) et vise à supprimer toute barrière juridique à la réutilisation. Si la renonciation complète n'est pas valable dans une juridiction, CC0 prévoit une licence de secours très permissive, sans attribution obligatoire, pour conférer des droits d'usage, modification, redistribution et exploitation commerciale. Conçue pour combler le vide des systèmes juridiques où la mise volontaire dans le domaine public n'est pas possible, CC0 est devenue un standard pour l'open data, où l'interopérabilité et l'absence d'obligations sont cruciales. Elle simplifie au maximum la réutilisation à grande échelle, favorisant la circulation de données et d'œuvres sans friction.",
+    "analogy": "Un autocollant « zéro droit » collé sur une œuvre, avec un petit permis permissif de secours si l'autocollant n'est pas reconnu localement.",
+    "example": "Une collectivité publie ses données de transport sous CC0 1.0. Des chercheurs, startups et citoyens les combinent librement avec d'autres jeux de données, et les réutilisent commercialement sans attribution, stimulant l'écosystème open data.",
+    "did_you_know": "CC0 a été conçue pour résoudre l'impossibilité, dans certains pays, de placer volontairement une œuvre dans le domaine public. Elle est largement utilisée pour l'open data, où zéro friction juridique est recherché.",
+    "one_sentence_answer": "CC0 1.0 Universal renonce aux droits d'auteur et prévoit une licence de secours permissive, sans attribution, applicable au code et au contenu.",
+    "faq": [
+      {"question": "Quelle est la différence entre CC0 1.0 Universal et The Unlicense ?", "answer": "Les deux visent le « domaine public ». CC0 s'applique au code et au contenu (textes, images, données), tandis que The Unlicense cible d'abord les logiciels."},
+      {"question": "CC0 exige-t-elle une attribution ?", "answer": "Non. Ni la renonciation ni la licence de secours ne requièrent d'attribution obligatoire."},
+      {"question": "CC0 convient-elle aux bases de données et images ?", "answer": "Oui. CC0 s'applique aux textes, images, données et bases de données, ainsi qu'au code."}
+    ],
+    "sources": [
+      {"label": "Creative Commons - CC0 1.0 Universal", "url": "https://creativecommons.org/publicdomain/zero/1.0/", "year": 2009, "author": "Creative Commons"},
+      {"label": "Creative Commons - Foire aux questions", "url": "https://creativecommons.org/faq/", "year": 2009, "author": "Creative Commons"}
+    ],
+    "aliases": ["CC0", "Creative Commons Zero"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "beginner",
+    "icon": "0️⃣",
+    "type": "licence-logicielle",
+    "acronym_full": null,
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  },
+  {
+    "slug": "creative-commons-licences-de-contenu",
+    "name": "Creative Commons (licences de contenu)",
+    "definition": "Creative Commons est un système de licences de contenu lancé en 2002 par l'organisation à but non lucratif Creative Commons. Il propose six licences principales : CC BY (attribution seule, usage commercial permis), CC BY-SA (attribution + partage dans les mêmes conditions), CC BY-NC (attribution + non commercial), CC BY-ND (attribution + pas de modification), CC BY-NC-SA (attribution + non commercial + partage identique), CC BY-NC-ND (la plus restrictive : attribution + non commercial + pas de modification). Ces licences ne sont pas destinées au code, mais aux œuvres comme textes, images, vidéos ou données. Elles rendent lisibles et modulaires des permissions essentielles, en combinant attribution, partage identique, interdiction commerciale et/ou de modification. Exemple emblématique : Wikipédia utilise CC BY-SA pour ses articles, facilitant la réutilisation sous partage identique. Les utilisateurs choisissent la licence selon leurs objectifs de diffusion et de contrôle sur les dérivés.",
+    "analogy": "Un jeu de pictogrammes clairs qui indiquent, comme des panneaux, comment chacun peut réutiliser vos œuvres culturelles sans malentendu.",
+    "example": "Un photographe publie une série d'images sous CC BY-NC-SA. Des enseignants les réutilisent en classe et en ligne, mais un magazine commercial doit demander une autre autorisation pour les vendre.",
+    "did_you_know": "Lancé en 2002, Creative Commons a structuré la réutilisation de contenus en ligne. Wikipédia illustre l'approche CC BY-SA : réutilisation large, à condition de créditer et de partager sous la même licence.",
+    "one_sentence_answer": "Creative Commons est un ensemble de six licences de contenu modulaires, lancé en 2002, permettant d'accorder attribution, partage identique, non commercial et/ou pas de modification.",
+    "faq": [
+      {"question": "Quelle est la différence entre les 6 variantes CC ?", "answer": "Elles combinent quatre éléments : attribution (BY), partage identique (SA), non commercial (NC), pas de modification (ND). CC BY est la plus ouverte ; CC BY-NC-ND est la plus restrictive."},
+      {"question": "Ces licences conviennent-elles au code logiciel ?", "answer": "Non. Les licences Creative Commons ciblent le contenu (textes, images, données), pas le code logiciel."},
+      {"question": "Quel exemple d'usage réel illustre CC BY-SA ?", "answer": "Wikipédia publie ses articles sous CC BY-SA, exigeant attribution et partage dans les mêmes conditions pour toute réutilisation."}
+    ],
+    "sources": [
+      {"label": "Creative Commons - Les licences", "url": "https://creativecommons.org/licenses/", "year": 2002, "author": "Creative Commons"},
+      {"label": "Creative Commons - CC BY-SA 4.0", "url": "https://creativecommons.org/licenses/by-sa/4.0/", "year": 2002, "author": "Creative Commons"}
+    ],
+    "aliases": ["CC BY", "CC BY-SA", "CC BY-NC", "CC BY-ND", "CC BY-NC-SA", "CC BY-NC-ND"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "beginner",
+    "icon": "📄",
+    "type": "licence-de-contenu",
+    "acronym_full": null,
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  },
+  {
+    "slug": "the-postgresql-license",
+    "name": "The PostgreSQL License",
+    "definition": "The PostgreSQL License est une licence permissive de type BSD/MIT, utilisée par le projet PostgreSQL depuis les années 1990 (début du projet). Elle autorise l'usage, la modification et la redistribution, y compris commerciale, sans copyleft. La condition principale est la conservation des avis de copyright et du texte de licence dans les redistributions, assurant la traçabilité tout en minimisant les contraintes. Cette simplicité rapproche ses termes des licences MIT/BSD : un cadre clair et léger, favorable à l'adoption et à l'intégration dans des produits propriétaires ou open source. PostgreSQL lui-même est distribué sous cette licence, illustrant un modèle où l'écosystème peut innover et commercialiser des offres sans obligation de publication des dérivés. Pour les organisations, cela réduit les risques de conformité et facilite l'embarquement de la technologie dans des solutions diverses, tout en respectant l'attribution minimale exigée.",
+    "analogy": "Comme prêter un livre avec une simple note demandant de conserver la page de garde, sans obligation de partager vos annotations ultérieures.",
+    "example": "Une entreprise intègre PostgreSQL sous sa licence dans un service cloud propriétaire, conserve les avis de copyright et le texte de licence, et vend du support sans devoir publier ses modifications.",
+    "did_you_know": "Le projet PostgreSQL adopte cette licence permissive depuis les années 1990. L'absence de copyleft et des obligations limitées ont favorisé son usage dans de multiples contextes commerciaux.",
+    "one_sentence_answer": "The PostgreSQL License est une licence permissive type BSD/MIT, sans copyleft, autorisant l'usage commercial et exigeant la conservation des avis de copyright.",
+    "faq": [
+      {"question": "En quoi diffère-t-elle d'une licence MIT/BSD classique ?", "answer": "Elle est équivalente dans l'esprit : permissive, sans copyleft, avec obligation de conserver avis et texte de licence, tout comme MIT/BSD."},
+      {"question": "Permet-elle une distribution commerciale fermée ?", "answer": "Oui. L'usage, la modification et la redistribution, y compris commerciale et propriétaire, sont permis en conservant les avis appropriés."},
+      {"question": "Impose-t-elle le partage du code modifié (copyleft) ?", "answer": "Non. Elle n'impose pas de copyleft ; publier les modifications n'est pas requis."}
+    ],
+    "sources": [
+      {"label": "PostgreSQL - Licence", "url": "https://www.postgresql.org/about/licence/", "year": 1996, "author": "PostgreSQL Global Development Group"},
+      {"label": "Open Source Initiative - PostgreSQL License", "url": "https://opensource.org/license/postgresql/", "year": 1996, "author": "PostgreSQL Global Development Group"}
+    ],
+    "aliases": ["PostgreSQL License"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "🐘",
+    "type": "licence-logicielle",
+    "acronym_full": null,
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  },
+  {
+    "slug": "sil-open-font-license-1-1",
+    "name": "SIL Open Font License 1.1 (OFL)",
+    "definition": "La SIL Open Font License 1.1 (OFL), publiée par SIL International (première publication en 2005, version 1.1 mise à jour en 2007), s'applique spécifiquement aux polices de caractères. Elle autorise la redistribution et le groupage (bundling) avec d'autres polices, ainsi que les modifications, sous réserve notamment du respect du nom réservé de la police lors de certaines modifications. Les polices sous OFL ne peuvent pas être vendues isolément comme source de valeur principale, mais peuvent être incluses dans des produits plus larges. Cette licence n'est pas une licence logicielle générale : elle adresse des besoins particuliers aux polices (noms réservés, distribution, groupage). L'exemple le plus visible est l'usage massif d'OFL dans Google Fonts, facilitant la diffusion et l'adoption de polices libres dans le web et les applications. La version 1.1 a consolidé ces conditions pour une large interopérabilité.",
+    "analogy": "Comme partager une famille de caractères modifiable, à condition de préserver le nom d'origine et de ne pas la revendre seule comme produit principal.",
+    "example": "Une fonderie publie une police sous OFL 1.1. Un système d'exploitation la préinstalle et un graphiste crée une variante, en changeant le nom réservé conformément aux exigences.",
+    "did_you_know": "La version 1.1 de l'OFL date de 2007, après une première publication en 2005. Elle est largement utilisée, notamment via Google Fonts, pour diffuser des polices libres.",
+    "one_sentence_answer": "La SIL OFL 1.1 est une licence dédiée aux polices, autorisant redistribution et modifications avec nom réservé, sans vente isolée comme valeur principale.",
+    "faq": [
+      {"question": "Pourquoi une licence spécifique aux polices existe-t-elle ?", "answer": "Parce que les polices posent des enjeux particuliers (noms réservés, modifications, groupage) que les licences logicielles générales ne traitent pas spécifiquement."},
+      {"question": "Puis-je vendre une police OFL seule ?", "answer": "Non, pas comme source de valeur principale. Elle peut toutefois être incluse dans des produits plus larges."},
+      {"question": "Puis-je regrouper une police OFL avec d'autres polices ou logiciels ?", "answer": "Oui. L'OFL autorise la redistribution et le groupage avec d'autres polices, sous respect des conditions, notamment sur les noms réservés."}
+    ],
+    "sources": [
+      {"label": "SIL International - Open Font License", "url": "https://scripts.sil.org/OFL", "year": 2007, "author": "SIL International"},
+      {"label": "Open Source Initiative - SIL Open Font License 1.1", "url": "https://opensource.org/license/OFL-1.1/", "year": 2007, "author": "SIL International"}
+    ],
+    "aliases": ["SIL OFL", "OFL 1.1", "Open Font License"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "🔤",
+    "type": "licence-de-contenu",
+    "acronym_full": "SIL Open Font License",
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  }
+]

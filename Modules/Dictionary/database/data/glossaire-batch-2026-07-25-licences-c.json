@@ -1,0 +1,114 @@
+[
+  {
+    "slug": "gnu-gpl-v2",
+    "name": "GNU General Public License v2 (GPL-2.0)",
+    "definition": "La GNU General Public License v2 (GPL-2.0), publiée en 1991 par la Free Software Foundation (FSF), établit un copyleft fort. Concrètement, toute redistribution d'un logiciel dérivé oblige à fournir le code source et à le placer sous la même licence GPL. Elle n'autorise pas l'intégration dans un programme propriétaire, même par simple liaison. En pratique, redistribuer un dérivé sous une autre licence n'est pas permis, et relier du code sous GPL-2.0 à du code propriétaire n'est pas autorisé. Le principe opérationnel est la continuité de licence : tout dérivé redistribué reste sous GPL-2.0, accompagné de son code source. Ce cadre s'applique aux projets qui adoptent la GPL-2.0, y compris le noyau Linux (Linux kernel). Lorsque des versions modifiées sont distribuées, le code source correspondant doit être mis à disposition sous GPL-2.0, sans possibilité d'intégration propriétaire par simple liaison. La FSF publie le texte officiel et les conditions de la licence.",
+    "analogy": "Comme une recette partagée : publiez vos variantes et n'attachez jamais l'ingrédient principal à une sauce propriétaire, même via un simple couplage.",
+    "example": "Le noyau Linux est sous GPL-2.0 : distribuer une version modifiée impose de publier son code source sous GPL-2.0, sans possibilité de lier cette version à des composants propriétaires.",
+    "did_you_know": "Publiée en 1991 par la FSF, la GPL-2.0 a marqué les esprits avec son copyleft fort : redistribuer un dérivé impose le code source sous GPL, sans liaison propriétaire.",
+    "one_sentence_answer": "Licence à copyleft fort publiée en 1991 : tout dérivé redistribué doit fournir son code source sous GPL-2.0 et ne peut pas être intégré à un programme propriétaire, même par simple liaison.",
+    "faq": [
+      {"question": "Puis-je lier du code GPL-2.0 avec un module propriétaire ?", "answer": "Non. La GPL-2.0 n'autorise pas l'intégration dans un programme propriétaire, même par simple liaison."},
+      {"question": "Que dois-je fournir si je redistribue un dérivé sous GPL-2.0 ?", "answer": "Le code source complet, sous la même licence GPL-2.0."},
+      {"question": "En quoi la GPL-2.0 diffère-t-elle de la LGPL ?", "answer": "La GPL-2.0 impose un copyleft fort et n'autorise pas la liaison propriétaire ; la LGPL applique un copyleft faible et permet la liaison avec du code propriétaire sous conditions."}
+    ],
+    "sources": [
+      {"label": "GNU - GPL v2 (texte officiel)", "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.html", "year": 1991, "author": "Free Software Foundation"},
+      {"label": "Open Source Initiative - GPL-2.0", "url": "https://opensource.org/license/gpl-2-0", "year": 1991, "author": "Free Software Foundation"}
+    ],
+    "aliases": ["GPL-2.0", "GNU GPLv2"],
+    "broader_slugs": ["licence-open-source"],
+    "narrower_slugs": [],
+    "difficulty": "advanced",
+    "icon": "🐧",
+    "type": "licence-logicielle",
+    "acronym_full": "GNU General Public License version 2",
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  },
+  {
+    "slug": "gnu-gpl-v3",
+    "name": "GNU General Public License v3 (GPL-3.0)",
+    "definition": "La GNU General Public License v3 (GPL-3.0), publiée en 2007 par la Free Software Foundation (FSF), prolonge le copyleft fort de la v2. Toute redistribution d'un dérivé impose de fournir le code source sous la même licence GPL. La v3 ajoute des dispositions supplémentaires, notamment une protection contre le verrouillage matériel (anti-tivoization) et des clarifications relatives aux brevets. Elle n'inclut toutefois pas la clause réseau/SaaS présente dans l'AGPL. Des projets comme GNU Bash illustrent cette adoption : redistribuer une version modifiée implique la publication du code source sous GPL-3.0, selon les modalités définies par la FSF. La GPL-3.0 formalise ainsi un cadre de copyleft fort, enrichi de précisions ciblées, sans étendre ses obligations aux interactions à distance sur un réseau. Elle reste distincte de l'AGPL-3.0 sur ce point précis.",
+    "analogy": "Comme une recette partagée renforcée : publiez vos variantes, refusez le verrouillage des ustensiles et clarifiez les droits, sans règle supplémentaire pour les repas servis à distance.",
+    "example": "GNU Bash est sous GPL-3.0 : redistribuer une version modifiée oblige à publier le code source sous GPL-3.0 ; la licence ajoute des dispositions anti-verrouillage matériel et des clarifications brevets.",
+    "did_you_know": "La GPL-3.0, publiée en 2007 par la FSF, conserve le copyleft fort et ajoute des dispositions anti-verrouillage matériel et des clarifications brevets, sans clause réseau/SaaS.",
+    "one_sentence_answer": "Licence à copyleft fort publiée en 2007 : ajoute protection anti-verrouillage matériel et clarifications brevets, et n'inclut pas la clause réseau/SaaS de l'AGPL.",
+    "faq": [
+      {"question": "La GPL-3.0 inclut-elle une clause réseau comme l'AGPL-3.0 ?", "answer": "Non. Elle n'inclut pas la clause réseau/SaaS ; cette clause appartient à l'AGPL-3.0."},
+      {"question": "Qu'impose la GPL-3.0 quand je redistribue un dérivé ?", "answer": "De fournir le code source sous la même licence GPL."},
+      {"question": "Que change la v3 par rapport à la v2 ?", "answer": "Elle conserve le copyleft fort et ajoute une protection anti-tivoization/verrouillage matériel et des clarifications brevets."}
+    ],
+    "sources": [
+      {"label": "GNU - GPL v3 (texte officiel)", "url": "https://www.gnu.org/licenses/gpl-3.0.html", "year": 2007, "author": "Free Software Foundation"},
+      {"label": "Open Source Initiative - GPL-3.0", "url": "https://opensource.org/license/gpl-3-0", "year": 2007, "author": "Free Software Foundation"}
+    ],
+    "aliases": ["GPL-3.0", "GNU GPLv3"],
+    "broader_slugs": ["licence-open-source"],
+    "narrower_slugs": [],
+    "difficulty": "advanced",
+    "icon": "🛡️",
+    "type": "licence-logicielle",
+    "acronym_full": "GNU General Public License version 3",
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  },
+  {
+    "slug": "gnu-agpl-v3",
+    "name": "GNU Affero General Public License v3 (AGPL-3.0)",
+    "definition": "La GNU Affero General Public License v3 (AGPL-3.0), publiée en 2007 par la Free Software Foundation (FSF) comme variante de la GPLv3, reprend les règles de la GPLv3 et y ajoute une clause réseau. Concrètement, si des utilisateurs interagissent avec le logiciel à distance sur un réseau (SaaS, API ou serveur web), ils doivent pouvoir recevoir le code source. Cette obligation complète les exigences de redistribution de la GPLv3 en étendant la fourniture du code aux cas d'utilisation à travers un service. L'AGPL-3.0 précise donc que l'accès distant au logiciel déclenche l'obligation de mise à disposition du code source, en plus des conditions de la GPLv3. Des projets comme Mastodon illustrent cette approche : lorsqu'une instance modifiée permet des interactions à distance, le code source correspondant doit être accessible aux utilisateurs. La FSF publie le texte officiel de l'AGPL-3.0, qui explicite l'ajout de cette clause réseau par rapport à la GPLv3.",
+    "analogy": "Comme une cuisine en ligne : si des convives goûtent à distance, vous devez aussi livrer la recette complète, pas seulement la servir au comptoir.",
+    "example": "Mastodon sous AGPL-3.0 : lorsqu'une instance modifiée permet à des utilisateurs d'interagir via le web, ils doivent pouvoir recevoir le code source correspondant.",
+    "did_you_know": "Publiée en 2007 par la FSF, l'AGPL-3.0 est la GPLv3 assortie d'une clause réseau : les utilisateurs distants (SaaS, API, serveur web) doivent pouvoir recevoir le code source.",
+    "one_sentence_answer": "Variante de la GPLv3 publiée en 2007, ajoutant une clause réseau obligeant à fournir le code source aux utilisateurs qui interagissent avec le logiciel à distance (SaaS, API, serveur web).",
+    "faq": [
+      {"question": "En quoi l'AGPL-3.0 diffère-t-elle de la GPL-3.0 ?", "answer": "Elle ajoute une clause réseau : les utilisateurs distants doivent pouvoir recevoir le code source ; la GPL-3.0 n'inclut pas cette clause."},
+      {"question": "Que se passe-t-il si des utilisateurs accèdent au logiciel via un service web ?", "answer": "Ils doivent pouvoir recevoir le code source correspondant."},
+      {"question": "Qui publie l'AGPL-3.0 et quand ?", "answer": "La Free Software Foundation, en 2007."}
+    ],
+    "sources": [
+      {"label": "GNU - AGPL v3 (texte officiel)", "url": "https://www.gnu.org/licenses/agpl-3.0.html", "year": 2007, "author": "Free Software Foundation"},
+      {"label": "Open Source Initiative - AGPL v3", "url": "https://opensource.org/license/agpl-v3", "year": 2007, "author": "Free Software Foundation"}
+    ],
+    "aliases": ["AGPL-3.0", "GNU AGPLv3"],
+    "broader_slugs": ["licence-open-source"],
+    "narrower_slugs": [],
+    "difficulty": "advanced",
+    "icon": "🌐",
+    "type": "licence-logicielle",
+    "acronym_full": "GNU Affero General Public License version 3",
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  },
+  {
+    "slug": "gnu-lgpl",
+    "name": "GNU Lesser General Public License (LGPL, versions 2.1 et 3.0)",
+    "definition": "La GNU Lesser General Public License (LGPL), publiée par la Free Software Foundation (FSF) en deux versions (la v2.1 en 1991 et la v3.0 en 2007), applique un copyleft faible. Le copyleft s'applique surtout à la bibliothèque elle-même : les modifications apportées à la bibliothèque doivent rester libres. En revanche, la LGPL permet le lien avec du code propriétaire, notamment en liaison dynamique, à condition de permettre le remplacement de la bibliothèque par une version modifiée. Ce fonctionnement distingue la LGPL des licences à copyleft fort : la liaison propriétaire est possible sous conditions, tandis que la bibliothèque modifiée demeure sous LGPL. La GNU C Library (glibc) illustre cette approche : les applications peuvent s'y lier tout en conservant leur propre statut, pourvu que le remplacement de la bibliothèque par une version modifiée soit possible. La FSF publie le texte officiel des versions 2.1 et 3.0 de la LGPL, décrivant précisément ces conditions.",
+    "analogy": "Comme une brique interchangeable : connectez-la à des systèmes propriétaires, à condition de pouvoir remplacer la brique par une version modifiée.",
+    "example": "La GNU C Library (glibc) sous LGPL permet à des applications propriétaires de s'y lier, notamment par liaison dynamique, à condition d'autoriser le remplacement par une version modifiée de la bibliothèque.",
+    "did_you_know": "La LGPL existe en versions 2.1 (1991) et 3.0 (2007), publiées par la FSF, appliquant un copyleft faible centré sur la bibliothèque et autorisant la liaison avec du code propriétaire.",
+    "one_sentence_answer": "Licence à copyleft faible : protège la bibliothèque et permet la liaison avec du code propriétaire, notamment en liaison dynamique, à condition d'autoriser le remplacement par une version modifiée.",
+    "faq": [
+      {"question": "Puis-je lier une bibliothèque LGPL à une application propriétaire ?", "answer": "Oui. La LGPL permet la liaison avec du code propriétaire, notamment en liaison dynamique, sous réserve de permettre le remplacement de la bibliothèque par une version modifiée."},
+      {"question": "En quoi la LGPL diffère-t-elle de la GPL ?", "answer": "La LGPL applique un copyleft faible centré sur la bibliothèque et autorise la liaison propriétaire ; la GPL impose un copyleft fort et n'autorise pas l'intégration même par simple liaison."},
+      {"question": "Quelles versions de la LGPL sont concernées et quand ont-elles été publiées ?", "answer": "Les versions 2.1 (1991) et 3.0 (2007), toutes deux publiées par la FSF."}
+    ],
+    "sources": [
+      {"label": "GNU - LGPL v3.0 (texte officiel)", "url": "https://www.gnu.org/licenses/lgpl-3.0.html", "year": 2007, "author": "Free Software Foundation"},
+      {"label": "GNU - LGPL v2.1 (texte officiel)", "url": "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html", "year": 1991, "author": "Free Software Foundation"}
+    ],
+    "aliases": ["LGPL-2.1", "LGPL-3.0", "GNU Lesser GPL"],
+    "broader_slugs": ["licence-open-source"],
+    "narrower_slugs": [],
+    "difficulty": "advanced",
+    "icon": "🧩",
+    "type": "licence-logicielle",
+    "acronym_full": "GNU Lesser General Public License",
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  }
+]

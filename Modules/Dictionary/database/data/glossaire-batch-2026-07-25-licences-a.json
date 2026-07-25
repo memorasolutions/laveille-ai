@@ -1,0 +1,198 @@
+[
+  {
+    "slug": "licence-mit",
+    "name": "Licence MIT",
+    "definition": "La Licence MIT, créée en 1987 par le Massachusetts Institute of Technology, est une licence open source permissive qui autorise l'usage, la copie, la modification, la fusion, la distribution et même la vente de logiciels, y compris pour des usages commerciaux. Elle impose une seule obligation substantielle : conserver la mention de copyright et le texte intégral de la licence dans les distributions ou copies du logiciel. Elle n'inclut aucune clause spécifique relative aux brevets, ce qui la rend simple à comprendre et à appliquer, et facilite l'intégration de code sous Licence MIT dans des projets propriétaires ou open source. Grâce à cette faible friction juridique, elle est devenue l'une des licences les plus couramment adoptées par les développeurs et les entreprises. Des projets emblématiques comme React et Chromium l'utilisent, illustrant sa capacité à soutenir des écosystèmes logiciels vastes, variés et commercialement viables, tout en maintenant une attribution claire aux auteurs d'origine.",
+    "analogy": "Comme un plan partagé librement : vous pouvez le réutiliser et même le vendre, à condition de garder la signature d'origine visible.",
+    "example": "Une startup publie une application basée sur React sous Licence MIT, modifie des composants, et distribue le binaire en conservant les avis de copyright et le texte de la licence.",
+    "did_you_know": "Créée en 1987 au MIT, cette licence ne comporte aucune clause de brevet. Elle est choisie par des projets majeurs, comme React et Chromium, pour sa simplicité et sa permissivité.",
+    "one_sentence_answer": "Une licence permissive minimale (1987) autorisant usage, modification et vente, exigeant seulement la conservation du copyright et du texte de licence, sans clause de brevet.",
+    "faq": [
+      {"question": "Puis-je utiliser un logiciel sous Licence MIT commercialement ?", "answer": "Oui. L'usage, la distribution et la vente, y compris à des fins commerciales, sont permis, sous réserve de conserver le copyright et le texte de licence."},
+      {"question": "Quelles sont les obligations principales de la Licence MIT ?", "answer": "Conserver la mention de copyright et le texte intégral de la licence dans les distributions et copies du logiciel."},
+      {"question": "La Licence MIT contient-elle une clause de brevet ?", "answer": "Non. La Licence MIT n'inclut pas de clause spécifique relative aux brevets."}
+    ],
+    "sources": [
+      {"label": "Open Source Initiative - MIT License", "url": "https://opensource.org/license/mit", "year": 1987, "author": "Massachusetts Institute of Technology"},
+      {"label": "Choose a License - MIT", "url": "https://choosealicense.com/licenses/mit/", "year": 1987, "author": "Massachusetts Institute of Technology"}
+    ],
+    "aliases": [],
+    "broader_slugs": ["licence-open-source"],
+    "narrower_slugs": [],
+    "difficulty": "beginner",
+    "icon": "📜",
+    "type": "licence-logicielle",
+    "acronym_full": null,
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  },
+  {
+    "slug": "licence-apache-2-0",
+    "name": "Licence Apache 2.0",
+    "definition": "Publiée en janvier 2004 par l'Apache Software Foundation, la Licence Apache 2.0 est une licence open source permissive autorisant l'usage, la modification et la distribution, y compris dans des contextes commerciaux. Elle impose de conserver les avis de copyright et le texte de la licence, de documenter les modifications apportées au code, et d'inclure le fichier NOTICE s'il est présent dans le projet d'origine. Elle contient une concession de brevets explicite au bénéfice des utilisateurs, assortie d'une résiliation automatique de cette concession si un utilisateur intente une action en contrefaçon de brevet contre un contributeur. Ce cadre permet une adoption industrielle large tout en protégeant la communauté des contributeurs. Des projets emblématiques tels que le serveur HTTP Apache, Hadoop et Kafka sont distribués sous Apache 2.0, illustrant un équilibre pragmatique entre liberté d'usage et exigences de transparence, d'attribution et de gestion du risque lié aux brevets.",
+    "analogy": "Comme une clé avec mode d'emploi : usage libre, modifications permises, mais conservez l'étiquette, notez vos changements et respectez la promesse de brevets.",
+    "example": "Une entreprise intègre Hadoop sous Apache 2.0 dans une offre cloud, modifie des composants, documente ces changements et redistribue le fichier NOTICE fourni avec le logiciel d'origine.",
+    "did_you_know": "Publiée en janvier 2004, la Licence Apache 2.0 inclut une concession de brevets avec résiliation automatique en cas de poursuite. Elle régit Apache HTTP Server, Hadoop et Kafka.",
+    "one_sentence_answer": "Licence permissive moderne (2004) avec obligations d'avis, documentation des modifications, NOTICE si présent, et concession de brevets résiliable en cas de poursuite.",
+    "faq": [
+      {"question": "Puis-je utiliser la Licence Apache 2.0 dans un produit commercial ?", "answer": "Oui. L'usage, la modification et la distribution commerciale sont permis, sous réserve des obligations d'avis, de documentation des modifications et d'inclusion du fichier NOTICE s'il existe."},
+      {"question": "Quelles obligations particulières impose Apache 2.0 ?", "answer": "Conserver les avis de copyright et de licence, documenter les modifications, et inclure le fichier NOTICE s'il est fourni avec le projet."},
+      {"question": "Que prévoit Apache 2.0 pour les brevets ?", "answer": "Une concession de brevets explicite aux utilisateurs, avec résiliation automatique si une action en contrefaçon est intentée contre un contributeur."}
+    ],
+    "sources": [
+      {"label": "Apache Software Foundation - Licence 2.0", "url": "https://apache.org/licenses/LICENSE-2.0", "year": 2004, "author": "Apache Software Foundation"},
+      {"label": "Open Source Initiative - Apache License 2.0", "url": "https://opensource.org/license/apache-2-0", "year": 2004, "author": "Apache Software Foundation"}
+    ],
+    "aliases": [],
+    "broader_slugs": ["licence-open-source"],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "🪶",
+    "type": "licence-logicielle",
+    "acronym_full": null,
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  },
+  {
+    "slug": "licence-bsd-2-clause",
+    "name": "Licence BSD à 2 clauses (Simplified)",
+    "definition": "La Licence BSD à 2 clauses, issue du projet BSD de l'Université de Californie à Berkeley dans les années 1980-90, est la forme simplifiée de la licence BSD après le retrait en 1999 de la clause publicitaire historique. Elle exige de conserver l'avis de copyright et la liste des conditions lors de la redistribution du code ou des binaires. Aucune clause de brevet n'y figure, ce qui en fait une licence permissive très légère, appréciée pour sa clarté et sa souplesse d'intégration dans des projets variés. Cette concision facilite la réutilisation, y compris dans des environnements propriétaires, tout en maintenant l'attribution des auteurs d'origine. FreeBSD est un exemple connu distribué sous cette licence, qui a contribué à sa diffusion et à sa perception comme une alternative directe aux autres licences permissives minimalistes.",
+    "analogy": "Un mode d'emploi concis : réutilisation libre si vous conservez l'avis et les conditions, sans publicité obligatoire au nom du projet.",
+    "example": "Un fournisseur incorpore du code FreeBSD sous BSD à 2 clauses dans un firmware, puis distribue le produit en conservant l'avis de copyright et la liste des conditions.",
+    "did_you_know": "Issue de Berkeley, sa forme « simplifiée » résulte du retrait, en 1999, de la clause publicitaire. Elle est utilisée notamment par FreeBSD.",
+    "one_sentence_answer": "Une licence Berkeley simplifiée exigeant la conservation du copyright et des conditions, sans clause publicitaire ni brevet, dérivée du projet BSD.",
+    "faq": [
+      {"question": "Qu'est-ce qui distingue la BSD à 2 clauses ?", "answer": "Elle est simplifiée, sans clause publicitaire, et impose surtout de conserver l'avis de copyright et la liste des conditions."},
+      {"question": "Contient-elle une clause de brevet ?", "answer": "Non. La Licence BSD à 2 clauses ne comprend pas de clause relative aux brevets."},
+      {"question": "En quoi diffère-t-elle de la BSD à 3 clauses ?", "answer": "La BSD à 3 clauses ajoute une clause de non-endorsement qui n'existe pas dans la 2 clauses."}
+    ],
+    "sources": [
+      {"label": "Open Source Initiative - BSD 2-Clause License", "url": "https://opensource.org/license/bsd-2-clause", "year": 1999, "author": "University of California, Berkeley"},
+      {"label": "Choose a License - BSD 2-Clause", "url": "https://choosealicense.com/licenses/bsd-2-clause/", "year": 1999, "author": "University of California, Berkeley"}
+    ],
+    "aliases": ["Simplified BSD License", "FreeBSD License"],
+    "broader_slugs": ["licence-open-source"],
+    "narrower_slugs": [],
+    "difficulty": "beginner",
+    "icon": "🧾",
+    "type": "licence-logicielle",
+    "acronym_full": null,
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  },
+  {
+    "slug": "licence-bsd-3-clause",
+    "name": "Licence BSD à 3 clauses (New/Modified)",
+    "definition": "La Licence BSD à 3 clauses, provenant du même projet BSD de l'Université de Californie à Berkeley, ajoute à l'approche permissive de la famille BSD une clause de non-endorsement : il est interdit d'utiliser le nom du projet ou des contributeurs pour promouvoir des produits dérivés sans autorisation préalable. Comme les autres variantes BSD, elle vise une réutilisation aisée du code, avec des obligations légères et une attribution claire des auteurs. Cette précision empêche toute association promotionnelle non autorisée tout en conservant la souplesse qui a fait la réputation des licences BSD. Des projets reconnus comme NetBSD et le code source du moteur PostgreSQL utilisent cette licence, démontrant son adéquation à des bases de code matures et largement déployées.",
+    "analogy": "Libre d'utiliser le contenu, mais pas d'apposer le logo du projet sur votre vitrine sans leur feu vert.",
+    "example": "Une équipe reprend du code sous BSD à 3 clauses de NetBSD pour un dérivé interne et veille à ne pas utiliser le nom du projet pour promouvoir son produit.",
+    "did_you_know": "Appelée « New » ou « Modified », cette variante ajoute une clause de non-endorsement et équipe notamment NetBSD et le code source du moteur PostgreSQL.",
+    "one_sentence_answer": "Une licence BSD qui ajoute une clause de non-endorsement, interdisant toute promotion au nom du projet sans autorisation.",
+    "faq": [
+      {"question": "Quelle est la différence clé avec la BSD à 2 clauses ?", "answer": "La BSD à 3 clauses ajoute une clause de non-endorsement interdisant l'usage du nom du projet ou des contributeurs à des fins promotionnelles sans autorisation."},
+      {"question": "Puis-je citer le projet pour promouvoir mon produit dérivé ?", "answer": "Non, pas sans autorisation explicite, en raison de la clause de non-endorsement."},
+      {"question": "Quels projets utilisent la BSD à 3 clauses ?", "answer": "NetBSD et le code source du moteur PostgreSQL l'utilisent."}
+    ],
+    "sources": [
+      {"label": "Open Source Initiative - BSD 3-Clause License", "url": "https://opensource.org/license/bsd-3-clause", "year": 1999, "author": "University of California, Berkeley"},
+      {"label": "Choose a License - BSD 3-Clause", "url": "https://choosealicense.com/licenses/bsd-3-clause/", "year": 1999, "author": "University of California, Berkeley"}
+    ],
+    "aliases": ["New BSD License", "Modified BSD License"],
+    "broader_slugs": ["licence-open-source"],
+    "narrower_slugs": [],
+    "difficulty": "beginner",
+    "icon": "🏷️",
+    "type": "licence-logicielle",
+    "acronym_full": null,
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  },
+  {
+    "slug": "licence-isc",
+    "name": "Licence ISC",
+    "definition": "Formulée en 1995 par l'Internet Systems Consortium (alors Internet Software Consortium) pour les logiciels BIND et dig, la Licence ISC est une version modernisée et simplifiée des licences MIT et BSD. Elle impose de conserver l'avis de copyright et les conditions associées, tout en offrant une formulation concise et directe. Le texte est très proche de celui de la Licence MIT, mais porte un nom différent, ce qui en fait une option de choix pour les projets recherchant une clarté rédactionnelle et une faible charge de conformité. Cette approche a facilité son adoption dans des logiciels de fondation d'infrastructure, comme BIND 9, serveur DNS largement déployé. La combinaison de simplicité, d'attribution explicite et de flexibilité rend la Licence ISC particulièrement adaptée aux projets qui souhaitent maximiser la réutilisation et la distribution sans complexifier la gestion juridique.",
+    "analogy": "Une fiche d'autorisation courte et lisible : utilisez, adaptez, partagez, en gardant l'avis et les conditions d'origine.",
+    "example": "Un opérateur DNS adapte BIND 9 sous Licence ISC et redistribue des binaires, en conservant l'avis de copyright ainsi que les conditions exigées.",
+    "did_you_know": "Formulée en 1995 par l'Internet Systems Consortium pour moderniser la présentation des licences MIT/BSD, elle équipe notamment le serveur DNS BIND 9.",
+    "one_sentence_answer": "Une licence minimaliste de l'Internet Systems Consortium (1995), proche de MIT/BSD, imposant la conservation de l'avis et des conditions.",
+    "faq": [
+      {"question": "En quoi la Licence ISC diffère-t-elle de la MIT ?", "answer": "Elle en est très proche sur le fond, mais propose une formulation modernisée et un nom différent."},
+      {"question": "Quelles obligations majeures comporte-t-elle ?", "answer": "Conserver l'avis de copyright et les conditions dans les redistributions."},
+      {"question": "Quel logiciel notable l'utilise ?", "answer": "BIND 9, un serveur DNS, est distribué sous la Licence ISC."}
+    ],
+    "sources": [
+      {"label": "Open Source Initiative - ISC License", "url": "https://opensource.org/license/isc", "year": 1995, "author": "Internet Systems Consortium"},
+      {"label": "Choose a License - ISC", "url": "https://choosealicense.com/licenses/isc/", "year": 1995, "author": "Internet Systems Consortium"}
+    ],
+    "aliases": [],
+    "broader_slugs": ["licence-open-source"],
+    "narrower_slugs": [],
+    "difficulty": "beginner",
+    "icon": "🧰",
+    "type": "licence-logicielle",
+    "acronym_full": null,
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  },
+  {
+    "slug": "licence-zlib",
+    "name": "Licence zlib",
+    "definition": "La Licence zlib a été rédigée pour le projet de compression zlib par Jean-loup Gailly et Mark Adler, avec un texte dont le copyright remonte à 1995, date de création du projet. Elle impose des obligations précises lors de la redistribution de versions modifiées : identifier clairement ces versions comme modifiées, ne pas les présenter comme l'original, et ne pas supprimer les avis de copyright. Cette combinaison de liberté d'usage et de règles de transparence garantit que les utilisateurs savent si un code dérivé diffère du code initial et que l'attribution demeure intacte. La licence est volontiers choisie pour des bibliothèques de bas niveau nécessitant une adoption large et sans friction. La bibliothèque zlib elle-même en est l'exemple type, ancrant la licence dans un usage pratique, stable et répandu depuis trois décennies.",
+    "analogy": "Un emballage avec étiquette obligatoire : si vous modifiez le contenu, indiquez-le clairement et laissez l'étiquette d'origine en place.",
+    "example": "Un développeur modifie la bibliothèque zlib pour un jeu et distribue la version modifiée, clairement identifiée comme telle, sans supprimer les avis de copyright d'origine.",
+    "did_you_know": "Le texte de la licence zlib porte un copyright débutant en 1995, année de création du projet par Jean-loup Gailly et Mark Adler.",
+    "one_sentence_answer": "Une licence légère (1995) axée sur la transparence des modifications et la conservation des avis de copyright, conçue pour la bibliothèque zlib.",
+    "faq": [
+      {"question": "Puis-je modifier et redistribuer du code sous Licence zlib ?", "answer": "Oui, à condition d'identifier clairement la version modifiée, de ne pas la présenter comme l'originale, et de conserver les avis de copyright."},
+      {"question": "Quelles sont les obligations clés de la Licence zlib ?", "answer": "Identifier les modifications, éviter toute présentation comme version originale, et ne pas supprimer les avis de copyright."},
+      {"question": "Quel projet l'illustre le mieux ?", "answer": "La bibliothèque de compression zlib elle-même."}
+    ],
+    "sources": [
+      {"label": "Open Source Initiative - zlib License", "url": "https://opensource.org/license/zlib", "year": 1995, "author": "Jean-loup Gailly et Mark Adler"},
+      {"label": "Choose a License - zlib", "url": "https://choosealicense.com/licenses/zlib/", "year": 1995, "author": "Jean-loup Gailly et Mark Adler"}
+    ],
+    "aliases": ["zlib/libpng License"],
+    "broader_slugs": ["licence-open-source"],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "🧪",
+    "type": "licence-logicielle",
+    "acronym_full": null,
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  },
+  {
+    "slug": "licence-boost-software-1-0",
+    "name": "Boost Software License 1.0",
+    "definition": "La Boost Software License 1.0, publiée en 2003 pour le projet Boost C++ Libraries, est conçue pour être très permissive et compatible avec la GPL. Elle impose de conserver le texte intégral de la licence et les avis de copyright dans les distributions, ce qui assure une attribution claire et une conformité simple à vérifier. Cette combinaison de permissivité et d'exigences minimales a permis aux bibliothèques Boost C++ d'être largement adoptées dans des contextes variés. La licence offre une base juridique pragmatique, facilitant l'intégration et la distribution du code, y compris dans des environnements complexes où la compatibilité avec la GPL est déterminante. Les bibliothèques Boost C++ constituent l'exemple de référence, démontrant la capacité de cette licence à soutenir des composants techniques critiques tout en préservant une grande liberté d'usage.",
+    "analogy": "Un passe-partout juridique : très ouvert, avec l'obligation de joindre la notice complète pour garder la traçabilité des auteurs.",
+    "example": "Une équipe intègre Boost C++ Libraries sous Boost Software License 1.0 dans un outil interne et distribue les livrables avec le texte intégral de la licence et les avis de copyright.",
+    "did_you_know": "Publiée en 2003 pour Boost C++ Libraries, cette licence a été pensée très permissive et compatible avec la GPL, favorisant l'adoption des bibliothèques Boost.",
+    "one_sentence_answer": "Une licence très permissive (2003) pour Boost C++ Libraries, exigeant la conservation du texte complet et des avis, compatible avec la GPL.",
+    "faq": [
+      {"question": "Quelles obligations impose la Boost Software License 1.0 ?", "answer": "Conserver le texte intégral de la licence et les avis de copyright dans les distributions."},
+      {"question": "Pourquoi est-elle appréciée des développeurs C++ ?", "answer": "Parce qu'elle est très permissive et compatible avec la GPL, ce qui facilite l'intégration des bibliothèques Boost."},
+      {"question": "Quel projet utilise cette licence ?", "answer": "Les bibliothèques Boost C++ en sont l'exemple de référence."}
+    ],
+    "sources": [
+      {"label": "Open Source Initiative - Boost Software License 1.0", "url": "https://opensource.org/licenses/BSL-1.0", "year": 2003, "author": "Boost.org"},
+      {"label": "Choose a License - Boost Software License 1.0", "url": "https://choosealicense.com/licenses/bsl-1.0/", "year": 2003, "author": "Boost.org"}
+    ],
+    "aliases": [],
+    "broader_slugs": ["licence-open-source"],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "🚀",
+    "type": "licence-logicielle",
+    "acronym_full": null,
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  }
+]

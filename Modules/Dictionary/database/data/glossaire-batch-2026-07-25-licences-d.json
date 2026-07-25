@@ -1,0 +1,114 @@
+[
+  {
+    "slug": "licence-mpl-2-0",
+    "name": "Mozilla Public License 2.0 (MPL-2.0)",
+    "definition": "La Mozilla Public License 2.0 (MPL-2.0) est une licence open source à copyleft faible maintenue par la Mozilla Foundation. Publiée et approuvée le 3 janvier 2012, elle succède à la version 1.0 créée par Netscape en 1998. Son principe clé : le copyleft s'applique au niveau du fichier, pas à l'ensemble du projet. Toute modification d'un fichier sous MPL doit rester sous MPL, mais ces fichiers peuvent côtoyer du code propriétaire placé dans d'autres fichiers du même dépôt. Cette granularité facilite l'adoption industrielle tout en conservant l'obligation de partager les améliorations pertinentes. Concrètement, des projets emblématiques comme Firefox et Thunderbird combinent des fichiers MPL avec d'autres composants selon les besoins. Les équipes peuvent intégrer, modifier ou redistribuer des fichiers MPL sans devoir relicencier leur application entière, à condition de renvoyer les changements effectués dans ces fichiers sous MPL. Cette approche vise un équilibre clair entre collaboration ouverte et intégration en environnement propriétaire.",
+    "analogy": "Comme une pièce détachée marquée : tu peux la mettre dans ta machine, mais cette pièce doit garder son étiquette d'origine.",
+    "example": "Une équipe modifie deux fichiers .cpp de Firefox sous MPL-2.0 pour corriger un bug : elle republie ces fichiers sous MPL, tout en conservant son module propriétaire dans des fichiers séparés.",
+    "did_you_know": "Née chez Netscape en 1998, la MPL a été modernisée en version 2.0 et approuvée le 3 janvier 2012, sous l'égide de la Mozilla Foundation.",
+    "one_sentence_answer": "Licence open source à copyleft faible, la MPL-2.0 impose de publier les modifications fichier par fichier, tout en permettant d'associer ces fichiers à du code propriétaire distinct au sein d'un même projet.",
+    "faq": [
+      {"question": "Que signifie concrètement un copyleft au niveau du fichier sous MPL-2.0 pour un développeur ?", "answer": "Seules les modifications apportées aux fichiers sous MPL doivent rester sous MPL. Le code placé dans d'autres fichiers du même projet peut rester propriétaire."},
+      {"question": "Puis-je combiner des fichiers MPL-2.0 avec du code propriétaire dans le même projet ?", "answer": "Oui. Tant que le code propriétaire reste dans des fichiers séparés, et que les fichiers MPL modifiés demeurent sous MPL, la combinaison est autorisée."},
+      {"question": "Qui maintient la MPL et quand la version 2.0 a-t-elle été approuvée ?", "answer": "La MPL est maintenue par la Mozilla Foundation. La version 2.0 a été publiée et approuvée le 3 janvier 2012, après la version 1.0 créée par Netscape en 1998."}
+    ],
+    "sources": [
+      {"label": "Mozilla Foundation - MPL 2.0", "url": "https://www.mozilla.org/MPL/2.0/", "year": 2012, "author": "Mozilla Foundation"},
+      {"label": "Open Source Initiative - MPL-2.0", "url": "https://opensource.org/licenses/MPL-2.0", "year": 2012, "author": "Mozilla Foundation"}
+    ],
+    "aliases": ["MPL-2.0"],
+    "broader_slugs": ["licence-open-source"],
+    "narrower_slugs": [],
+    "difficulty": "advanced",
+    "icon": "🦊",
+    "type": "licence-logicielle",
+    "acronym_full": null,
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  },
+  {
+    "slug": "licence-epl-2-0",
+    "name": "Eclipse Public License 2.0 (EPL-2.0)",
+    "definition": "L'Eclipse Public License 2.0 (EPL-2.0) est une licence open source à copyleft faible ou limité, maintenue par l'Eclipse Foundation. Sa version 2.0 a été approuvée par l'Open Source Initiative en 2018. Le mécanisme de copyleft de l'EPL se concentre sur le logiciel couvert par l'EPL et ses modifications directes, permettant de le combiner avec du code propriétaire dans des œuvres combinées. L'objectif est d'encourager l'adoption et la contribution autour des composants EPL sans imposer la même licence à des parties indépendantes. En pratique, l'IDE Eclipse illustre ce modèle : le cœur et ses corrections restent sous EPL-2.0, tandis que des plug-ins ou modules propriétaires peuvent s'intégrer comme œuvres distinctes. Les développeurs qui modifient le code EPL conservent l'EPL pour ces changements, mais ne sont pas tenus de placer leur application entière sous EPL. Cette latitude favorise un vaste écosystème d'extensions, industrielles et communautaires, sans brouiller la frontière entre contributions obligatoirement partagées et code indépendant.",
+    "analogy": "Comme une brique standard : tu peux l'encastrer dans un édifice propriétaire, mais les retouches sur la brique restent documentées, toujours.",
+    "example": "Une entreprise développe un plug-in propriétaire pour l'IDE Eclipse : elle maintient le plug-in fermé, tandis que ses corrections au cœur EPL-2.0 restent publiées sous EPL, conformément aux termes de la licence.",
+    "did_you_know": "La version 2.0 de l'EPL a été approuvée par l'OSI en 2018, consolidant les pratiques de l'écosystème Eclipse et clarifiant la combinaison avec des œuvres propriétaires.",
+    "one_sentence_answer": "Licence à copyleft limité centrée sur le logiciel EPL et ses modifications, autorisant des œuvres combinées avec du code propriétaire sous certaines conditions.",
+    "faq": [
+      {"question": "L'EPL-2.0 m'oblige-t-elle à publier tout mon projet si j'utilise du code EPL ?", "answer": "Non. L'obligation se concentre sur le logiciel EPL et ses modifications. Les œuvres combinées peuvent inclure du code propriétaire distinct."},
+      {"question": "Puis-je développer un plug-in propriétaire pour l'IDE Eclipse ?", "answer": "Oui. Le plug-in peut rester propriétaire, tandis que les modifications apportées au code EPL doivent rester sous EPL-2.0."},
+      {"question": "Qui maintient l'EPL-2.0 et quand a-t-elle été approuvée par l'OSI ?", "answer": "L'EPL-2.0 est maintenue par l'Eclipse Foundation. Elle a été approuvée par l'OSI en 2018."}
+    ],
+    "sources": [
+      {"label": "Eclipse Foundation - EPL 2.0", "url": "https://www.eclipse.org/legal/epl-2.0/", "year": 2018, "author": "Eclipse Foundation"},
+      {"label": "Open Source Initiative - EPL-2.0", "url": "https://opensource.org/licenses/EPL-2.0", "year": 2018, "author": "Eclipse Foundation"}
+    ],
+    "aliases": ["EPL-2.0"],
+    "broader_slugs": ["licence-open-source"],
+    "narrower_slugs": [],
+    "difficulty": "advanced",
+    "icon": "🌒",
+    "type": "licence-logicielle",
+    "acronym_full": null,
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  },
+  {
+    "slug": "licence-cddl-1-0-1-1",
+    "name": "Common Development and Distribution License (CDDL-1.0/1.1)",
+    "definition": "La Common Development and Distribution License (CDDL-1.0/1.1) est une licence open source créée par Sun Microsystems. La version 1.0 a été publiée en 2004-2005 et approuvée par l'Open Source Initiative en janvier 2005. Elle adopte un copyleft faible au niveau du fichier, à l'instar de la MPL : si vous modifiez un fichier sous CDDL, ce fichier modifié reste sous CDDL, mais vous pouvez combiner ces fichiers avec du code propriétaire dans d'autres fichiers du même projet. Cette architecture de licence vise à encourager les contributions ciblées sans imposer une relicence globale. Des projets tels qu'OpenSolaris, Illumos et ZFS illustrent cet équilibre : les correctifs aux fichiers CDDL sont partagés, tandis que des composants propriétaires peuvent coexister dans des fichiers distincts. Les équipes peuvent donc intégrer, modifier et redistribuer des fichiers CDDL en respectant cette granularité, tout en préservant l'indépendance de leurs modules propriétaires.",
+    "analogy": "Comme une planche de construction : tu modifies une planche CDDL, tu republies cette planche, mais l'assemblage propriétaire autour reste fermé.",
+    "example": "Un fabricant intègre ZFS sous CDDL-1.0 dans un système : il publie ses changements aux fichiers ZFS modifiés sous CDDL, tout en gardant ses utilitaires d'administration dans des fichiers propriétaires séparés.",
+    "did_you_know": "Conçue par Sun Microsystems, la CDDL 1.0 a été approuvée par l'OSI en janvier 2005, puis adoptée dès ses débuts par OpenSolaris, Illumos et ZFS.",
+    "one_sentence_answer": "Licence à copyleft faible au niveau du fichier, comme la MPL, elle impose de publier les modifications fichier par fichier sans imposer la même licence au reste du projet.",
+    "faq": [
+      {"question": "Qu'est-ce que le copyleft au niveau du fichier signifie concrètement sous la CDDL ?", "answer": "Les changements faits à un fichier CDDL restent sous CDDL. Le code dans d'autres fichiers du projet peut rester propriétaire s'il n'est pas sous CDDL."},
+      {"question": "Puis-je intégrer ZFS sous CDDL avec des composants propriétaires ?", "answer": "Oui. Les modifications des fichiers CDDL doivent rester sous CDDL, mais les composants propriétaires peuvent résider dans des fichiers séparés."},
+      {"question": "Qui a créé la CDDL et quand a-t-elle été approuvée par l'OSI ?", "answer": "La CDDL a été créée par Sun Microsystems. Sa version 1.0 a été approuvée par l'OSI en janvier 2005."}
+    ],
+    "sources": [
+      {"label": "Open Source Initiative - CDDL-1.0", "url": "https://opensource.org/licenses/CDDL-1.0", "year": 2005, "author": "Sun Microsystems"},
+      {"label": "SPDX - CDDL-1.0", "url": "https://spdx.org/licenses/CDDL-1.0.html", "year": 2005, "author": "Sun Microsystems"}
+    ],
+    "aliases": ["CDDL-1.0", "CDDL-1.1"],
+    "broader_slugs": ["licence-open-source"],
+    "narrower_slugs": [],
+    "difficulty": "advanced",
+    "icon": "☀️",
+    "type": "licence-logicielle",
+    "acronym_full": null,
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  },
+  {
+    "slug": "licence-artistic-2-0",
+    "name": "Artistic License 2.0",
+    "definition": "L'Artistic License 2.0 est une modernisation de l'Artistic License originale, historiquement associée au langage Perl. Elle a été approuvée par l'Open Source Initiative en 2006. Son copyleft est faible et conditionnel : il se concentre sur la manière de distribuer et de modifier l'œuvre, et autorise la combinaison avec du code propriétaire sous conditions spécifiques. L'approche vise à préserver une large liberté de structuration des projets tout en encadrant la diffusion et la traçabilité des changements. En pratique, Perl est distribué en double licence avec la GPL, et de nombreuses bibliothèques CPAN utilisent l'Artistic License 2.0. Les développeurs peuvent adapter ou redistribuer des composants sous Artistic 2.0, à condition de respecter les modalités de distribution et de modification prévues. Cette souplesse facilite l'intégration dans des environnements mixtes sans imposer uniformément la même licence à tout le projet. Cette clarification a rendu la licence plus prévisible pour les développeurs et éditeurs.",
+    "analogy": "Comme une partition musicale partagée : tu peux l'arranger et la jouer ailleurs, si tu respectes les règles de diffusion convenues.",
+    "example": "Un éditeur publie un module Perl sous Artistic 2.0 sur CPAN et l'intègre dans une solution propriétaire, en respectant les conditions de distribution et de modification prévues par la licence.",
+    "did_you_know": "Approuvée en 2006, l'Artistic License 2.0 a modernisé l'originale pour l'écosystème Perl, tout en accompagnant la pratique de double licence de Perl avec la GPL et l'usage massif sur CPAN.",
+    "one_sentence_answer": "Licence à copyleft faible et conditionnel, axée sur la distribution et la modification, permettant la combinaison avec du code propriétaire sous conditions spécifiques.",
+    "faq": [
+      {"question": "L'Artistic License 2.0 permet-elle la combinaison avec du code propriétaire ?", "answer": "Oui. Elle autorise la combinaison avec du code propriétaire sous conditions spécifiques de distribution et de modification."},
+      {"question": "Quels projets illustrent l'usage de l'Artistic License 2.0 ?", "answer": "Perl (en double licence avec la GPL) et de nombreuses bibliothèques CPAN utilisent l'Artistic License 2.0."},
+      {"question": "Quand l'Artistic License 2.0 a-t-elle été approuvée par l'OSI ?", "answer": "En 2006."}
+    ],
+    "sources": [
+      {"label": "Open Source Initiative - Artistic License 2.0", "url": "https://opensource.org/licenses/Artistic-2.0", "year": 2006, "author": "The Perl Foundation"},
+      {"label": "SPDX - Artistic-2.0", "url": "https://spdx.org/licenses/Artistic-2.0.html", "year": 2006, "author": "The Perl Foundation"}
+    ],
+    "aliases": ["Artistic-2.0"],
+    "broader_slugs": ["licence-open-source"],
+    "narrower_slugs": [],
+    "difficulty": "advanced",
+    "icon": "🎭",
+    "type": "licence-logicielle",
+    "acronym_full": null,
+    "cat_slug": "concepts-fondamentaux",
+    "match_strategy": "exact",
+    "has_image": true
+  }
+]

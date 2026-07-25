@@ -2891,10 +2891,45 @@ declare(strict_types=1);
  *     joignables (curl HTTP 200 : csrc.nist.gov FIPS 180-4 et collisions SHA-1), image hero via
  *     /nanobanana (compte Gemini utilisateur, empreinte/presse à sceau isométrique teal/orange,
  *     aucun logo réel), migration réversible.
+ *
+ * v1.127.0 = glossaire : ajout de 19 nouveaux termes de licences open source (MIT, BSD
+ *     2/3-Clause, ISC, zlib, Boost, Unlicense, CC0, Creative Commons, PostgreSQL License, SIL
+ *     Open Font License, GNU GPL v2/v3, AGPL v3, LGPL, MPL 2.0, EPL 2.0, CDDL, Artistic License
+ *     2.0), demande explicite de l'utilisateur suite à la liste des licences fournie. NOTE : le
+ *     20e terme prévu, "Apache 2.0", existait déjà en prod (ajouté dans un lot antérieur non lié
+ *     aux licences, contenu adéquat avec sources datées) - l'anti-doublon a correctement empêché
+ *     toute duplication en prod ; seule son image de couverture a été rafraîchie pour cohérence
+ *     visuelle avec le reste de la famille de licences (aucun changement de contenu/texte). Recherche
+ *     perplexity/sonar-pro par famille de licence, croisée avec Codex (corrections : année exacte
+ *     ISC 1995 via source secondaire, année zlib 1995 confirmée par lecture directe du texte de
+ *     licence sur zlib.net) ; sources officielles opensource.org/gnu.org/mozilla.org/eclipse.org/
+ *     creativecommons.org/postgresql.org/scripts.sil.org/unlicense.org/spdx.org vérifiées
+ *     joignables (curl HTTP 200), sauf 3 URLs gnu.org (agpl-3.0, lgpl-3.0, old-licenses/lgpl-2.1)
+ *     non re-vérifiables au moment de la rédaction en raison d'une panne réseau transitoire du
+ *     domaine gnu.org (constatée en direct, curl verbeux montrant "no route to host"/timeout
+ *     répétés) - confiance élevée maintenue via les URLs soeurs identiques déjà vérifiées
+ *     (gpl-2.0.html, gpl-3.0.html) et les miroirs OSI équivalents ; catégorie
+ *     "concepts-fondamentaux" pour les 20 termes ; images hero via /nanobanana (compte Gemini
+ *     utilisateur, style isométrique teal/orange cohérent, métaphore visuelle dédiée par licence,
+ *     aucun logo de marque/organisation réel), migration réversible unique couvrant les 4 lots de
+ *     données (permissives, domaine public/contenu, copyleft fort GNU, copyleft faible).
+ *
+ * v1.128.0 = glossaire : ajout du terme "Commandes shell" (concept général de l'interpréteur de
+ *     commandes Unix/Linux/macOS/Windows, pas un shell précis), demande explicite de l'utilisateur
+ *     - recherche perplexity/sonar-pro croisée avec Codex (précisions apportées : Thompson shell
+ *     documenté dans le 1er manuel Unix du 3 novembre 1971 ; Bourne shell développé dès 1976,
+ *     décrit publiquement en 1978, distribué avec Unix V7 en 1979 ; Bash débuté le 10 janvier 1988
+ *     par Brian Fox, bêta 0.99 annoncée le 8 juin 1989). 2 sources officielles vérifiées joignables
+ *     (curl HTTP 200) : POSIX.1-2024/IEEE Std 1003.1-2024 (Shell Command Language, The Open
+ *     Group/IEEE) et le man page GNU Bash via man7.org (gnu.org lui-même inaccessible au moment de
+ *     la rédaction, même panne réseau transitoire que pour le lot des licences ci-dessus).
+ *     narrower_slugs relie au terme existant "sudo". Catégorie "outils-et-techniques" résolue
+ *     dynamiquement. Image hero via /nanobanana (terminal isométrique stylisé teal/orange, aucun
+ *     texte réel, aucun logo de marque). Migration réversible.
  */
 
 $lvMajor = 1;
-$lvMinor = 126;
+$lvMinor = 128;
 $lvPatch = 0;
 
 return [

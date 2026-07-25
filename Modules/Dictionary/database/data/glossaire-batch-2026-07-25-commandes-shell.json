@@ -1,0 +1,48 @@
+[
+  {
+    "slug": "commandes-shell",
+    "name": "Commandes shell",
+    "icon": "⌨️",
+    "type": "concept-technique",
+    "cat_slug": "outils-et-techniques",
+    "difficulty": "beginner",
+    "aliases": ["ligne de commande", "commandes terminal", "shell commands"],
+    "broader_slugs": [],
+    "narrower_slugs": ["sudo"],
+    "match_strategy": "loose",
+    "has_image": true,
+    "definition": "Les commandes shell sont des instructions textuelles que l’on tape dans un terminal pour interagir directement avec le système d’exploitation: lancer des programmes, naviguer, manipuler des fichiers, automatiser des tâches. Un shell est un interpréteur de commandes en ligne: il lit le texte fourni par l’utilisateur ou un script, l’interprète et exécute l’action correspondante. Historiquement, le premier interpréteur de commandes Unix, attribué à Ken Thompson, est documenté dans le tout premier manuel Unix du 3 novembre 1971. Le Bourne shell (sh), développé par Stephen Bourne à Bell Labs à partir de 1976 et diffusé avec Unix Version 7 en 1979, a popularisé la syntaxe de base encore courante: redirections (>), tuyaux (|), variables. Bash (Bourne Again SHell), initié le 10 janvier 1988 par Brian Fox et annoncé publiquement en bêta le 8 juin 1989, est devenu le défaut de la plupart des distributions Linux et de macOS jusqu’à Catalina, avant zsh. Le langage de commandes portable est normalisé par POSIX IEEE Std 1003.1-2024.",
+    "analogy": "Comme donner des ordres clairs, mot à mot, à un assistant ultra-rigoureux qui exécute exactement ce que vous tapez immédiatement.",
+    "example": "Un développeur déploie un site: cd vers le dépôt, git pull, puis npm run build et sudo systemctl restart nginx pour recharger le service, le tout scripté pour des déploiements répétables.",
+    "did_you_know": "Bash signifie Bourne Again SHell: un jeu de mots sur le Bourne shell. Le tout premier shell Unix de Ken Thompson est décrit dans le manuel du 3 novembre 1971.",
+    "one_sentence_answer": "Les commandes shell sont des instructions textuelles passées à un interpréteur de commandes pour piloter le système: lancer des programmes, parcourir et modifier des fichiers, enchaîner des outils et automatiser des tâches, portable via POSIX ou spécifique au shell.",
+    "faq": [
+      {
+        "question": "Quelle est la différence entre un shell et un terminal?",
+        "answer": "Un terminal est la fenêtre qui vous permet de taper du texte et de voir la sortie; c’est une interface d’entrée-sortie. Le shell, lui, est le programme qui tourne dans ce terminal et fait le vrai travail: il lit le texte que vous tapez, l’interprète, puis exécute l’action correspondante (lancer un programme, manipuler des fichiers, etc.). Vous pouvez donc ouvrir un même terminal et y exécuter différents shells, ou démarrer des scripts sans interface graphique: dans tous les cas, c’est l’interpréteur de commandes qui lit et exécute, tandis que le terminal n’affiche que l’entrée et la sortie."
+      },
+      {
+        "question": "Dois-je apprendre les commandes shell si je ne suis pas développeur?",
+        "answer": "Oui, si vous travaillez souvent avec des fichiers ou devez répéter des actions, apprendre quelques commandes apporte un gain réel de productivité. Avec ls et cd, vous naviguez rapidement; avec grep, vous trouvez du texte en quelques secondes; avec des redirections (>) et des tuyaux (|), vous enchaînez des outils pour traiter des données sans ouvrir d’applications lourdes. Vous pouvez aussi automatiser des tâches récurrentes dans de petits scripts réutilisables. Et quand une action exige des droits administrateur, sudo permet de l’exécuter avec privilèges élevés. Même sans devenir expert, maîtriser une dizaine de commandes courantes accélère le travail quotidien et rend les procédures documentables et reproductibles."
+      },
+      {
+        "question": "Les commandes sont-elles identiques sur Linux, macOS et Windows?",
+        "answer": "Il existe une base commune normalisée par POSIX (IEEE Std 1003.1-2024) dans le chapitre Shell Command Language, qui définit la syntaxe de sh. Chaque shell (par exemple Bash, zsh, PowerShell) peut toutefois ajouter des extensions non POSIX. Bash, créé pour le projet GNU en 1988-1989, est le shell par défaut de la plupart des distributions Linux et l’a été sur macOS jusqu’à Catalina, remplacé ensuite par zsh. Windows propose PowerShell, orienté objets plutôt que texte brut, avec une syntaxe et des commandes différentes. En pratique, beaucoup d’idées se transfèrent, mais certaines commandes, options ou constructions varient selon le shell et le système: consultez toujours la documentation du shell ciblé."
+      }
+    ],
+    "sources": [
+      {
+        "label": "POSIX.1-2024 - Shell Command Language (The Open Group / IEEE)",
+        "url": "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html",
+        "year": 2024,
+        "author": "The Open Group / IEEE"
+      },
+      {
+        "label": "GNU Bash Reference Manual (page man, via man7.org)",
+        "url": "https://www.man7.org/linux/man-pages/man1/bash.1.html",
+        "year": 2025,
+        "author": "Free Software Foundation (Chet Ramey)"
+      }
+    ]
+  }
+]
