@@ -1,0 +1,49 @@
+[
+  {
+    "slug": "laravel-herd",
+    "name": "Laravel Herd",
+    "definition": "Laravel Herd est une application native de bureau, signée Laravel LLC, qui réside dans la barre de menus et installe puis gère localement PHP, nginx et les services requis pour le développement Laravel/PHP, sans passer par Docker. Lancé le 21 juillet 2023 d'abord sur macOS, Herd a ensuite publié Herd for Windows 1.0.0 le 26 mars 2024. Techniquement, il exécute nginx avec PHP-FPM en arrière-plan ; sur macOS, dnsmasq route automatiquement les domaines locaux en .test, tandis que sous Windows Herd ajuste le fichier hosts via un composant nommé HerdHelper. La version gratuite fournit le basculement rapide entre plusieurs versions de PHP, nginx, un DNS local, Node.js et l'isolation de sites par domaine .test. Herd reprend les concepts de Laravel Valet et propose une migration automatique, tout en laissant Valet exister en parallèle. En alternative légère à Docker ou à Laravel Sail, Herd vise la rapidité en local, quand Sail reste pertinent pour reproduire une stack de production conteneurisée.",
+    "analogy": "Comme une borne d'atelier qui fournit électricité, réseau et outils réglés d'avance, pour lancer un projet PHP local instantanément.",
+    "example": "Sur un MacBook, une développeuse bascule de PHP 8.1 à 8.3, crée blog.test, démarre nginx et PHP-FPM, et teste des e-mails via Herd Pro, sans configurer Docker ni bases manuellement.",
+    "did_you_know": "Lancé le 21 juillet 2023 sur macOS, Herd a publié Herd for Windows 1.0.0 le 26 mars 2024 et intègre une migration automatique depuis Laravel Valet, qui continue d'exister séparément.",
+    "one_sentence_answer": "Un environnement de développement local natif pour PHP/Laravel qui gère PHP, nginx, DNS .test et services associés sans Docker, avec options Pro pour debug, e-mails, logs, Expose et bases de données.",
+    "faq": [
+      {
+        "question": "Quelle est la différence entre Herd et Laravel Valet ?",
+        "answer": "Herd est une application graphique de barre de menus qui orchestre nginx, PHP-FPM et le DNS local, et propose une migration automatique depuis Valet. Valet, en CLI macOS, continue d'exister ; Herd n'est pas un remplacement obligatoire."
+      },
+      {
+        "question": "Herd remplace-t-il Docker ou Laravel Sail ?",
+        "answer": "Non. Herd est une alternative plus légère pour un développement local rapide sans conteneurs. Sail reste pertinent pour reproduire une infrastructure proche de la production ou orchestrer plusieurs services conteneurisés."
+      },
+      {
+        "question": "Que débloque Herd Pro par rapport à la version gratuite ?",
+        "answer": "Herd Pro ajoute un inspecteur de dd, un serveur/client mail intégré, une visionneuse de logs, de l'assistance Xdebug (profiling et coverage), un tunnel Expose, des services (MySQL, PostgreSQL, Redis, MongoDB, Meilisearch, MinIO, Reverb) et un support commercial."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Laravel News - Laravel Herd (annonce)",
+        "url": "https://laravel-news.com/laravel-herd",
+        "year": 2023,
+        "author": "Laravel News"
+      },
+      {
+        "label": "Herd - site officiel Laravel",
+        "url": "https://herd.laravel.com",
+        "year": 2026,
+        "author": "Laravel LLC"
+      }
+    ],
+    "aliases": ["Herd"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "🛠️",
+    "type": "outil-developpement",
+    "acronym_full": null,
+    "cat_slug": "outils-et-techniques",
+    "match_strategy": "exact",
+    "has_image": true
+  }
+]

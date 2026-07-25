@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.125.0] - 2026-07-25
+
+### Added
+- **Glossaire : nouveau terme "Laravel Herd"** (`/glossaire "Laravel Herd"`) — environnement de développement local natif pour PHP/Laravel (Laravel LLC), utilisé sur ce projet même. Recherche `perplexity/sonar-pro` croisée avec Codex (date exacte de lancement 21 juillet 2023, Windows 1.0.0 le 26 mars 2024, correction des fonctionnalités Pro : tunnel Expose et non ngrok, Laravel Valet toujours existant en parallèle). 2 sources vérifiées joignables (curl HTTP 200 : laravel-news.com, herd.laravel.com). Image de couverture via `/nanobanana`. Migration réversible.
+
 ## [1.124.0] - 2026-07-25
 
 ### Added

@@ -2873,10 +2873,19 @@ declare(strict_types=1);
  *     joignables (curl HTTP 200, developer.apple.com + attack.mitre.org T1548.006), image hero
  *     via /nanobanana (compte Gemini utilisateur, panneau de contrôle isométrique teal/orange,
  *     aucun logo Apple réel), migration réversible.
+ *
+ * v1.125.0 = glossaire : ajout du terme "Laravel Herd" (environnement de développement local
+ *     natif pour PHP/Laravel, utilisé sur ce projet même) - recherche perplexity/sonar-pro
+ *     croisée avec Codex (date exacte de lancement 21 juillet 2023, Windows 1.0.0 le 26 mars
+ *     2024, corrections sur les fonctionnalités Pro : tunnel Expose et non ngrok, Valet
+ *     toujours existant en parallèle), 2 sources vérifiées joignables (curl HTTP 200 :
+ *     laravel-news.com, herd.laravel.com), image hero via /nanobanana (compte Gemini
+ *     utilisateur, poste de travail isométrique teal/orange, aucun logo Laravel réel),
+ *     migration réversible.
  */
 
 $lvMajor = 1;
-$lvMinor = 124;
+$lvMinor = 125;
 $lvPatch = 0;
 
 return [
