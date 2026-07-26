@@ -11,6 +11,13 @@ document.addEventListener('alpine:init', function() {
         return {
             step: 1,
             resetArmed: false,
+            // Phase 1 (audit 2026-07-26) : entrée par l'intention. selectedTask = id de la carte
+            // choisie à l'étape 1 ; taskCards = taxonomie de tâches → mapping persona/verbe,
+            // injectée par le Blade via window.promptBuilderConfig (même contrat que personas/verbes).
+            selectedTask: '',
+            taskCards: (window.promptBuilderConfig && window.promptBuilderConfig.taskCards) || [],
+            // Phase 2 : divulgation progressive à 2 niveaux — panneau replié par défaut, rien de retiré.
+            showAdvanced: false,
             personaType: 'preset',
             personaPreset: '',
             personaCustom: '',
@@ -59,7 +66,7 @@ document.addEventListener('alpine:init', function() {
                 format: 'Le format guide la structure de la réponse. Une liste à puces est facile à lire, un tableau est bon pour comparer, un plan est idéal pour organiser.',
                 length: 'Indiquer une longueur permet de contrôler si la réponse est concise (pour un résumé) ou détaillée (pour un article complet).',
                 tone: 'Le ton change le style : professionnel pour un rapport, chaleureux pour un courriel client, académique pour un mémoire.',
-                technique: 'Zero-shot : l\'IA répond directement sans exemple. Few-shot : vous donnez 2-3 exemples pour guider l\'IA. Chain of thought : l\'IA raisonne étape par étape (meilleur pour la logique). Itératif : l\'IA valide chaque étape avec vous.',
+                technique: 'Réponse directe : l\'IA répond tout de suite sans exemple. Avec des exemples : vous lui donnez 2-3 modèles à suivre. Réflexion étape par étape : l\'IA détaille son raisonnement avant de conclure (meilleur pour la logique et les calculs). Par étapes : l\'IA valide chaque étape avec vous avant de continuer.',
                 delimiters: 'Les délimiteurs (###) séparent vos instructions de vos données. Utile quand vous analysez un texte spécifique — l\'IA sait où commence le texte à analyser.',
                 constraintAntiAI: 'L\'IA a tendance à produire des textes génériques reconnaissables. Cette option force un style plus naturel, varié et authentiquement humain.',
                 constraintCanvas: 'Canvas (ChatGPT) et artefact (Claude) sont des espaces de travail dédiés où l\'IA crée du contenu que vous pouvez modifier directement.',
@@ -104,6 +111,35 @@ document.addEventListener('alpine:init', function() {
                     if (selectedLabels.length >= 3) { var last = selectedLabels.pop(); return selectedLabels.join(', ') + ' et ' + last; }
                 }
                 return '';
+            },
+
+            get selectedTaskLabel() {
+                for (var i = 0; i < this.taskCards.length; i++) {
+                    if (this.taskCards[i].id === this.selectedTask) return this.taskCards[i].label;
+                }
+                return '';
+            },
+
+            // Aperçu en langage courant (Phase 2) : composé à partir des MÊMES données que le
+            // générateur de prompt ci-dessous, sans dupliquer ni modifier sa logique d'assemblage.
+            get promptSummary() {
+                var parts = [];
+                var actionVerb = this.verbType === 'custom' ? this.verbCustom : this.verb;
+                if (this.personaText) {
+                    var summaryArticle = /^\s*(un |une |des |le |la |l'|d'|du |de )/i.test(this.personaText) ? '' : 'un(e) ';
+                    parts.push('L\'IA va se comporter comme ' + summaryArticle + this.personaText.charAt(0).toLowerCase() + this.personaText.slice(1) + '.');
+                }
+                if (actionVerb && this.taskObject) {
+                    parts.push('Elle va ' + actionVerb.toLowerCase() + ' ' + this.taskObject + '.');
+                } else if (this.taskObject) {
+                    parts.push('Sujet : ' + this.taskObject + '.');
+                }
+                if (this.audienceText) parts.push('Le résultat sera adapté pour : ' + this.audienceText + '.');
+                if (this.tone) parts.push('Ton : ' + this.tone + '.');
+                if (this.format) parts.push('Présenté sous forme de : ' + this.format.toLowerCase() + '.');
+                if (this.length) parts.push('Longueur visée : ' + this.length.toLowerCase() + '.');
+                if (!parts.length) return '';
+                return parts.join(' ');
             },
 
             get prompt() {
@@ -247,7 +283,13 @@ document.addEventListener('alpine:init', function() {
                                     if (p.canvasCustomFormat) self.canvasCustomFormat = p.canvasCustomFormat;
                                     if (p.formatMode) self.formatMode = p.formatMode;
                                     self.saveName = found.name;
-                                    self.step = 4;
+                                    // Prompt existant chargé pour édition : on saute l'étape « objectif »
+                                    // (déjà répondue par un précédent passage) et on ouvre directement
+                                    // les réglages avancés, car un prompt sauvegardé utilise typiquement
+                                    // des valeurs personnalisées qui vivent dans ce panneau.
+                                    self.selectedTask = self.selectedTask || 'autre';
+                                    self.showAdvanced = true;
+                                    self.step = 2;
                                     self._editingId = found.id;
                                 }
                             });
@@ -257,18 +299,24 @@ document.addEventListener('alpine:init', function() {
                 }
             },
 
+            // Phase 1 : clic sur une carte d'objectif → pré-sélection intelligente de la persona et
+            // du verbe (mapping simple, pas d'IA), puis avance à l'étape suivante. Le générateur de
+            // prompt (get prompt()) n'est jamais touché : on ne fait qu'assigner ses entrées en amont.
+            selectTask: function(card) {
+                this.selectedTask = card.id;
+                if (card.personaValue) { this.personaType = 'preset'; this.personaPreset = card.personaValue; }
+                if (card.verb) { this.verbType = 'preset'; this.verb = card.verb; }
+                this.nextStep();
+            },
+
             nextStep: function() {
-                if (this.step === 1 && !this.personaText) { this.showValidation = true; return; }
-                var hasVerb2 = this.verbType === 'custom' ? !!this.verbCustom : !!this.verb;
-                if (this.step === 2 && (!this.taskObject || !hasVerb2)) { this.showValidation = true; return; }
+                if (this.step === 1 && !this.selectedTask) { this.showValidation = true; return; }
                 this.showValidation = false;
-                if (this.step < 4) this.step++;
+                if (this.step < 2) this.step++;
             },
             canGoToStep: function(s) {
                 if (s <= 1) return true;
-                if (s >= 2 && !this.personaText) return false;
-                var stepHasVerb = this.verbType === 'custom' ? !!this.verbCustom : !!this.verb;
-                if (s >= 3 && (!this.taskObject || !stepHasVerb)) return false;
+                if (s >= 2 && !this.selectedTask) return false;
                 return true;
             },
             goToStep: function(s) {

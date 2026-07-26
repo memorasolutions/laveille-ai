@@ -6,7 +6,7 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "test:js": "node tests/js/anonymizer-detect.test.cjs"
+        "test:js": "node tests/js/anonymizer-detect.test.cjs && node tests/js/constructeur-prompts-openin.test.cjs"
     },
     "devDependencies": {
         "@fontsource/inter": "^5.2.8",

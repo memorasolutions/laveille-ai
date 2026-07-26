@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.132.0] - 2026-07-26
+
+### Added
+- **`/outils/constructeur-prompts` : refonte "objectif d'abord" (Phases 1-3 de l'audit, plan validé par Codex/Gemini/claude.ai)** — nouvelle étape 1 par cartes de tâches concrètes (Rédiger, Résumer, Trouver des idées, Analyser, Apprendre, Traduire, Planifier, Coder...) au lieu du concept "Persona" en premier ; wizard simplifié à 2 étapes + panneau unique "Afficher tous les réglages" (divulgation progressive, pas de bascule de mode) ; vocabulaire technique reformulé en langage courant ; aperçu en langage courant avant la vue technique.
+- Nouveau test JS (`constructeur-prompts-openin.test.cjs`, 26/26) validant la génération des 4 liens ChatGPT/Claude/Perplexity/Gemini.
+
+### Changed
+- Script CDN `@alpinejs/intersect` chargé uniquement sur les 4 pages qui en ont réellement besoin (`/blog`, `/annuaire`, `/glossaire`, `/acronymes-education`), version pinnée + intégrité SRI. Cache-Control immutable étendu aux assets du constructeur de prompts.
+
 ## [1.131.0] - 2026-07-26
 
 ### Added

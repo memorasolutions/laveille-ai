@@ -1,0 +1,13 @@
+# Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
+# Audit perf 2026-07-26 (Phase 3, /outils/constructeur-prompts) : ces fichiers ne portent pas de
+# hash Vite dans leur nom, mais sont TOUJOURS chargés avec "?v={{ config('version.semver') }}"
+# (Modules/Tools/resources/views/public/tools/constructeur-prompts.blade.php) — un numéro de
+# version qui change à chaque déploiement (convention SemVer du projet, cf. feedback_versioning_semver_footer).
+# Une URL donnée (fichier + ?v=X) ne sert donc jamais deux contenus différents : on peut la mettre
+# en cache long terme + "immutable", comme /build/.htaccess pour les assets Vite fingerprintés.
+# Portée strictement limitée à ce répertoire.
+<IfModule mod_headers.c>
+    <FilesMatch ".*\.(js|css)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>

@@ -63,6 +63,9 @@
       }
     </script>
     @endif
+    {{-- cdn.jsdelivr.net est aussi utilisé par d'autres pages (mots-croisés, Journal, Académie,
+         mini-sites auteurs, Backoffice) : le hint reste global, seul le <script> intersect
+         ci-dessous (audit perf 2026-07-26) est limité aux pages qui en ont réellement besoin. --}}
     <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="manifest" href="/manifest.webmanifest">
@@ -338,7 +341,13 @@
          Le CORE Alpine n'est volontairement PLUS chargé ici : le double-chargement causait le warning
          « Detected multiple instances of Alpine running ». Les Alpine.data() du site sont tous
          enregistrés via document.addEventListener('alpine:init', …) → compatibles. --}}
-    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
+    {{-- Audit perf 2026-07-26 : version flottante 3.x.x remplacée par un pin exact (compatible
+         avec l'intégrité ci-dessous et un cache navigateur stable) + SRI (hash vérifié contre
+         data.jsdelivr.com le 2026-07-26). Chargé seulement sur les 4 pages avec scroll infini
+         (x-intersect) — inutile ailleurs (ex. page outils), donc retiré du poids des autres pages. --}}
+    @if(request()->is('blog', 'annuaire', 'glossaire', 'acronymes-education'))
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.15.8/dist/cdn.min.js" integrity="sha384-eA6+k1peuuIgxPHwWoQHx6OoDZ7hFJ+SKfMOhop5+zMV4SWR5OWBMatbIdoqA4lZ" crossorigin="anonymous"></script>
+    @endif
     <script>document.querySelectorAll('img:not([loading])').forEach(function(img,i){if(i>0)img.loading='lazy'});</script>
     @stack('scripts')
     {{-- #165 fix : Livewire scripts indispensables pour composants front (commentaires, etc.) --}}

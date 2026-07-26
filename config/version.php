@@ -3037,10 +3037,38 @@ declare(strict_types=1);
  *     inexistante sous SQLite, `Phase46PwaTest` - test attendant un service worker actif alors qu'il
  *     est intentionnellement désactivé) sont sans lien avec les modules touchés par cette release et
  *     préexistaient à ces changements.
+ *
+ * v1.132.0 = feat(outils/constructeur-prompts) Phases 1-3 (audit du 2026-07-26, plan validé par
+ *     Codex/Gemini/claude.ai) : refonte "objectif d'abord" - la 1re étape du wizard passe de
+ *     "Persona" (jargon) à une grille de 9 cartes de tâches concrètes (Rédiger, Résumer, Trouver des
+ *     idées, Analyser/comparer, Apprendre, Traduire, Planifier, Coder, Autre chose), dérivées de la
+ *     taxonomie persona/verbe déjà existante (`PromptBuilderSettingsSeeder.php`, aucune taxonomie
+ *     parallèle inventée) - cliquer une carte présélectionne persona+verbe puis avance. Wizard
+ *     réduit de 4 étapes numérotées à 2 ("Votre objectif" / "Votre demande") + UN panneau
+ *     "Afficher tous les réglages" (divulgation progressive à 2 niveaux, jamais une bascule de mode
+ *     globale - conformément au rejet explicite de l'option "Mode simple/avancé" par 2 des 3
+ *     experts consultés). Jargon reformulé en langage courant partout ("Zero-shot"→"Réponse
+ *     directe", "Few-shot"→"Avec des exemples", coquille "Chaîne of thought"→"Réflexion étape par
+ *     étape"). Aperçu du prompt : résumé en langage courant affiché avant la vue technique brute
+ *     (repliée par défaut). Moteur de génération du prompt non réécrit (mapping tâche→persona/verbe
+ *     additif uniquement, `window.promptBuilderConfig` étendu sans rupture de contrat).
+ *     + perf (Phase 3) : script CDN `@alpinejs/intersect` (utilisé pour le scroll infini) retiré des
+ *     pages qui n'en ont pas besoin - chargé uniquement sur les 4 pages qui utilisent réellement
+ *     `x-intersect` (`/blog`, `/annuaire`, `/glossaire`, `/acronymes-education`, vérifié par grep
+ *     exhaustif des vues), version flottante 3.x.x remplacée par un pin exact 3.15.8 + intégrité SRI
+ *     (hash vérifié). Cache-Control immutable ajouté sur `public/assets/tools/constructeur-prompts/`
+ *     (fichiers non fingerprintés mais toujours servis avec `?v={semver}`, donc sûrs à mettre en
+ *     cache long terme - même logique que `/build/.htaccess`). Nouveau test JS
+ *     (`tests/js/constructeur-prompts-openin.test.cjs`, 26/26 verts) validant la génération des 4
+ *     URLs de destination (ChatGPT/Claude/Perplexity/Gemini) : encodage correct, `noopener`, prompt
+ *     décodé identique à l'original, gestion du prompt trop long et de la cible inconnue.
+ *     Vérification de régression : Modules/Tools (53/53), Modules/FrontTheme+Acronyms+Dictionary+
+ *     Directory+Blog (147/147, modules touchés par le changement de layout partagé) tous verts.
+ *     Vérification visuelle Playwright desktop 1440px + mobile 390px.
  */
 
 $lvMajor = 1;
-$lvMinor = 131;
+$lvMinor = 132;
 $lvPatch = 0;
 
 return [
