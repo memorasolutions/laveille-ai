@@ -3000,10 +3000,47 @@ declare(strict_types=1);
  *     fonctionnel) pour les 5 autres termes déjà correctement casés en prose. Terme socket + fix
  *     déployés directement en prod (les termes concernés existent uniquement en base prod, pas en
  *     local, comme la majorité des ajouts récents du glossaire).
+ *
+ * v1.131.0 = feat(maillage interne) : article OpenClaw relié au reste du site - nouvelle relation
+ *     glossaire broader/narrower Docker↔Socket (migration réversible), liens contextuels ajoutés
+ *     dans le corps de l'article OpenClaw (id=67, prod) vers /outils/anonymiseur, /outils/
+ *     constructeur-prompts et le Concentré qui couvrait déjà l'outil sous son ancien nom "Moltbot/
+ *     Clawdbot", avec liens réciproques depuis l'article "C'est quoi le MCP ?" (id=1) et ce Concentré
+ *     (id=2) vers l'article OpenClaw. Rédaction des phrases de transition via Hermes model_invoke,
+ *     revue et corrigée avant insertion (accents, apostrophes selon le style de chaque article,
+ *     aucun tiret cadratin). Contenu appliqué en prod (les 3 articles concernés n'existent qu'en
+ *     base prod). Tests Modules/Dictionary + Modules/Blog verts, vérification visuelle Playwright
+ *     des 5 nouveaux liens sur les pages réelles.
+ *     + fix(outils/constructeur-prompts) Phase 0 (audit du 2026-07-26) : bandeau de cookies qui
+ *     bloquait le formulaire à chaque étape et dont le bouton "Tout accepter" pouvait sortir du
+ *     viewport sur mobile 390px - corrigé pour TOUT le site (composant partagé Modules/Privacy) via
+ *     une vraie zone de texte défilante + rangée d'actions toujours visible (footer collant), unités
+ *     `dvh`/`env(safe-area-inset-bottom)` pour les navigateurs mobiles réels, et l'attribut `inert`
+ *     pour que la modale fermée ne reste plus exposée au clavier/lecteurs d'écran (explique le
+ *     symptôme "réapparaît en plein milieu du parcours" rapporté par l'audit). Cibles tactiles des
+ *     radios agrandies de 13px à 24px+ (réutilise `accent-color` déjà en place pour les cases à
+ *     cocher). Contrastes non conformes corrigés vers AAA (lien "vos sauvegardes" 2,22:1→11,65:1,
+ *     message de confidentialité 3,02:1→15,89:1), en réutilisant le token `--c-primary-light` déjà
+ *     défini dans la charte. Les ~430 lignes de JS inline extraites vers un fichier externe mis en
+ *     cache (`public/assets/tools/constructeur-prompts/constructeur-prompts-core.js`, même convention
+ *     que les autres outils du module - pas de build Vite pour Modules/Tools), données dynamiques
+ *     transmises via `window.promptBuilderConfig` (même pattern que `window.taxConfig`). Cache-
+ *     Control immutable ajouté sur `/build/` (`public/build/.htaccess`, même convention que
+ *     l'.htaccess déjà existant pour l'outil anonymiseur). Accents manquants corrigés dans
+ *     `PromptBuilderSettingsSeeder.php`. 14 nouveaux tests Feature pour `SavedPromptController`
+ *     (IDOR, validation, auth, soft-delete - contrôleur qui n'avait aucun test). Suite complète du
+ *     module Tools : 53/53 verts. Vérification visuelle Playwright desktop 1440px + mobile 390px
+ *     avant/après (wcag_check_contrast confirmant les nouveaux ratios AAA).
+ *     Vérification de régression : tests ciblés Modules/Privacy (28/28), Modules/Dictionary+Blog
+ *     (20/20), Modules/Tools (53/53) tous verts. Suite complète du site (5313 passés/117 échecs
+ *     pré-existants) : les 117 échecs observés (ex. `Phase175Test` - fonction SQL `DATEDIFF`
+ *     inexistante sous SQLite, `Phase46PwaTest` - test attendant un service worker actif alors qu'il
+ *     est intentionnellement désactivé) sont sans lien avec les modules touchés par cette release et
+ *     préexistaient à ces changements.
  */
 
 $lvMajor = 1;
-$lvMinor = 130;
+$lvMinor = 131;
 $lvPatch = 0;
 
 return [

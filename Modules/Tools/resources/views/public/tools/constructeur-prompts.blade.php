@@ -30,7 +30,7 @@
                         </div>
                         @include('tools::public.partials.tool-geo')
                         {{-- Barre sauvegarde (visible avant les étapes) --}}
-                        <div class="mt-3 mb-3 p-3 rounded" x-show="isAuthenticated" x-cloak style="background: rgba(11,114,133,0.04); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px;">
+                        <div class="mt-3 mb-3 p-3 rounded" x-show="isAuthenticated" x-cloak style="background: var(--c-primary-light); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px;">
                             <div class="d-flex gap-2 align-items-center">
                                 <input type="text" class="form-control form-control-sm flex-fill" x-model="saveName" placeholder="{{ __('Nommer ce prompt pour le retrouver...') }}" aria-label="{{ __('Titre du prompt') }}" style="border-radius: 8px;">
                                 <button class="ct-btn ct-btn-primary ct-btn-sm" @click="addToHistory()" :disabled="!isValid || saving" style="white-space:nowrap;"
@@ -76,10 +76,10 @@
                             <div x-show="showHelp.persona" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;" x-text="helps.persona"></div>
                             <div class="d-flex gap-3 mb-3">
                                 <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 24px; padding: 4px 6px;">
-                                    <input type="radio" name="personaType" value="preset" x-model="personaType"> {{ __('Prédéfinie') }}
+                                    <input type="radio" name="personaType" value="preset" x-model="personaType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfinie') }}
                                 </label>
                                 <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 24px; padding: 4px 6px;">
-                                    <input type="radio" name="personaType" value="custom" x-model="personaType"> {{ __('Personnalisée') }}
+                                    <input type="radio" name="personaType" value="custom" x-model="personaType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisée') }}
                                 </label>
                             </div>
                             <div x-show="personaType === 'preset'" class="form-group mb-3">
@@ -110,10 +110,10 @@
                                 <label class="form-label fw-medium">{{ __('Action principale') }} <span style="color: #DC2626;">*</span></label>
                                 <div class="d-flex gap-3 mb-2">
                                     <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem;">
-                                        <input type="radio" name="verbType" value="preset" x-model="verbType"> {{ __('Prédéfinie') }}
+                                        <input type="radio" name="verbType" value="preset" x-model="verbType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfinie') }}
                                     </label>
                                     <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem;">
-                                        <input type="radio" name="verbType" value="custom" x-model="verbType"> {{ __('Personnalisée') }}
+                                        <input type="radio" name="verbType" value="custom" x-model="verbType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisée') }}
                                     </label>
                                 </div>
                                 <select class="form-control" x-show="verbType === 'preset'" x-model="verb" :aria-required="verbType === 'preset'" aria-label="{{ __('Verbe d\'action') }}">
@@ -125,7 +125,7 @@
                                 <input type="text" class="form-control" x-show="verbType === 'custom'" x-model="verbCustom" :aria-required="verbType === 'custom'" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}" aria-label="{{ __('Verbe personnalisé') }}">
                             </div>
                             <div class="form-group mb-3">
-                                <p class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: rgba(11,114,133,0.05); border-left: 3px solid var(--c-primary); border-radius: 8px;">🔒 {{ __('Ton texte contient un vrai nom, courriel, numéro ou adresse ? Ne mets jamais tes vraies infos dans une IA. Masque-les d\'abord avec le bouton ci-dessous.') }}</p>
+                                <p class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;">🔒 {{ __('Ton texte contient un vrai nom, courriel, numéro ou adresse ? Ne mets jamais tes vraies infos dans une IA. Masque-les d\'abord avec le bouton ci-dessous.') }}</p>
                                 <label class="form-label fw-medium">{{ __('Objet de la tâche') }} <span style="color: #DC2626;">*</span></label>
                                 <textarea id="cpTaskObject" class="form-control" rows="3" x-model="taskObject" aria-required="true" placeholder="{{ __('Ex: un plan marketing pour le lancement d\'une application mobile au Québec') }}" aria-label="{{ __('Description de la tâche') }}"></textarea>
                                 <small class="text-muted">{{ __('Décrivez précisément ce que l\'IA doit produire.') }}</small>
@@ -158,10 +158,10 @@
                             <div x-show="showHelp.audience" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;" x-text="helps.audience"></div>
                             <div class="d-flex gap-3 mb-3">
                                 <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem;">
-                                    <input type="radio" name="audienceType" value="preset" x-model="audienceType"> {{ __('Prédéfinie') }}
+                                    <input type="radio" name="audienceType" value="preset" x-model="audienceType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfinie') }}
                                 </label>
                                 <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem;">
-                                    <input type="radio" name="audienceType" value="custom" x-model="audienceType"> {{ __('Personnalisée') }}
+                                    <input type="radio" name="audienceType" value="custom" x-model="audienceType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisée') }}
                                 </label>
                             </div>
                             <style>
@@ -321,11 +321,11 @@
                                     {{-- 2026-05-05 #104 : toggle universel preset/custom pour les 4 IA --}}
                                     <div class="d-flex gap-3 mb-2" role="radiogroup" aria-label="{{ __('Mode de sélection du format') }}">
                                         <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.8rem;">
-                                            <input type="radio" name="formatMode" value="preset" x-model="formatMode">
+                                            <input type="radio" name="formatMode" value="preset" x-model="formatMode" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;">
                                             <span>{{ __('Format prédéfini') }}</span>
                                         </label>
                                         <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.8rem;">
-                                            <input type="radio" name="formatMode" value="custom" x-model="formatMode">
+                                            <input type="radio" name="formatMode" value="custom" x-model="formatMode" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;">
                                             <span>{{ __('Format personnalisé') }}</span>
                                         </label>
                                     </div>
@@ -526,416 +526,21 @@ $pbVerbs = $pbNormalize($pbVerbs, $defaultVerbs);
 $pbAudiences = $pbNormalize($pbAudiences, $defaultAudiences);
 @endphp
 <script>
-document.addEventListener('alpine:init', function() {
-    Alpine.data('promptBuilder', function() {
-        return {
-            step: 1,
-            resetArmed: false,
-            personaType: 'preset',
-            personaPreset: '',
-            personaCustom: '',
-            personas: @json($pbPersonas),
-            verbType: 'preset',
-            verb: '',
-            verbs: @json($pbVerbs),
-            verbCustom: '',
-            taskObject: '',
-            audienceType: 'preset',
-            audiencePreset: '',
-            audiencePresets: [],
-            audienceCustom: '',
-            audiences: @json($pbAudiences),
-            format: '',
-            length: '',
-            tone: '',
-            language: 'fr',
-            constraintAntiAI: true,
-            constraintTypo: false,
-            constraintCanvas: false,
-            canvasAI: 'chatgpt',
-            canvasFormat: '',
-            canvasCustomFormat: '',
-            // 2026-05-05 #104 : formats officiels mai 2026 (sources Anthropic Oct 2025, OpenAI 2026, Google AI 2025-2026, Mistral)
-            canvasFormatMap: {
-                chatgpt: ['Markdown', 'PDF', 'DOCX (Word)', 'Code (Python/JS/SQL)', 'Tableau interactif', 'Python exécutable'],
-                claude: ['Markdown', 'HTML', 'SVG', 'React (.jsx)', 'Mermaid', 'Code', 'DOCX (Word)', 'PDF', 'XLSX (tableur)', 'PPTX (slides)'],
-                gemini: ['Google Docs', 'Google Slides', 'PDF', 'Code (Colab)', 'App embarquée', 'Quiz/Infographie', 'Markdown'],
-                mistral: ['Markdown', 'HTML', 'Code', 'Diagramme'],
-            },
-            formatMode: 'preset', // 2026-05-05 #104 : 'preset' (liste prédéfinie selon IA) ou 'custom' (champ texte libre universel)
-            get canvasFormats() { return this.canvasFormatMap[this.canvasAI] || []; },
-            constraintChainOfThought: false,
-            constraintAskIfUnclear: false,
-            constraintCustom: '',
-            technique: 'zero-shot',
-            examples: '',
-            useDelimiters: false,
-            showHelp: {},
-            helps: {
-                persona: 'Donner un rôle à l\'IA aide à orienter ses réponses selon une expertise ou un style spécifique. Ex: « Tu es un expert marketing » donnera des réponses plus stratégiques.',
-                verb: 'Choisir un verbe d\'action précise ce que l\'IA doit faire : rédiger, analyser, résumer, créer... Le verbe détermine le type de résultat.',
-                taskObject: 'Décrivez clairement et précisément ce que l\'IA doit produire. Plus vous donnez de contexte et de détails, meilleur sera le résultat.',
-                audience: 'Spécifier le public aide l\'IA à adapter son langage. Un texte pour des débutants sera différent d\'un texte pour des experts.',
-                format: 'Le format guide la structure de la réponse. Une liste à puces est facile à lire, un tableau est bon pour comparer, un plan est idéal pour organiser.',
-                length: 'Indiquer une longueur permet de contrôler si la réponse est concise (pour un résumé) ou détaillée (pour un article complet).',
-                tone: 'Le ton change le style : professionnel pour un rapport, chaleureux pour un courriel client, académique pour un mémoire.',
-                technique: 'Zero-shot : l\'IA répond directement sans exemple. Few-shot : vous donnez 2-3 exemples pour guider l\'IA. Chain of thought : l\'IA raisonne étape par étape (meilleur pour la logique). Itératif : l\'IA valide chaque étape avec vous.',
-                delimiters: 'Les délimiteurs (###) séparent vos instructions de vos données. Utile quand vous analysez un texte spécifique — l\'IA sait où commence le texte à analyser.',
-                constraintAntiAI: 'L\'IA a tendance à produire des textes génériques reconnaissables. Cette option force un style plus naturel, varié et authentiquement humain.',
-                constraintCanvas: 'Canvas (ChatGPT) et artefact (Claude) sont des espaces de travail dédiés où l\'IA crée du contenu que vous pouvez modifier directement.',
-                constraintChainOfThought: 'La chaîne de pensée force l\'IA à montrer son raisonnement, pas juste le résultat. Très utile pour les problèmes complexes, les mathématiques ou la logique.',
-                constraintAskIfUnclear: 'Au lieu de deviner, l\'IA vous posera des questions de clarification. Résultat : des réponses beaucoup plus pertinentes dès le premier essai.'
-            },
-            copied: false,
-            showValidation: false,
-            saveName: '',
-            saving: false,
-            saveError: '',
-            isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
-            hasLocalData: false,
-            _editingId: null,
-            history: [],
-
-            get isValid() {
-                var hasVerb = this.verbType === 'custom' ? !!this.verbCustom : !!this.verb;
-                return this.personaText.length > 0 && this.taskObject.length > 0 && hasVerb;
-            },
-
-            get personaText() {
-                if (this.personaType === 'custom' && this.personaCustom) return this.personaCustom;
-                if (this.personaType === 'preset' && this.personaPreset) {
-                    for (var i = 0; i < this.personas.length; i++) {
-                        if (this.personas[i].value === this.personaPreset) return this.personas[i].label;
-                    }
-                }
-                return '';
-            },
-
-            get audienceText() {
-                if (this.audienceType === 'none') return '';
-                if (this.audienceType === 'custom' && this.audienceCustom) return this.audienceCustom;
-                if (this.audienceType === 'preset' && this.audiencePresets.length > 0) {
-                    var selectedLabels = [];
-                    for (var i = 0; i < this.audiences.length; i++) {
-                        if (this.audiencePresets.includes(this.audiences[i].value)) selectedLabels.push(this.audiences[i].label);
-                    }
-                    if (selectedLabels.length === 1) return selectedLabels[0];
-                    if (selectedLabels.length === 2) return selectedLabels.join(' et ');
-                    if (selectedLabels.length >= 3) { var last = selectedLabels.pop(); return selectedLabels.join(', ') + ' et ' + last; }
-                }
-                return '';
-            },
-
-            get prompt() {
-                var sections = [];
-                var actionVerb = this.verbType === 'custom' ? this.verbCustom : this.verb;
-
-                // === RÔLE (enrichi) ===
-                if (this.personaText) {
-                    var roleArticle = /^\s*(un |une |des |le |la |l'|d'|du |de )/i.test(this.personaText) ? '' : 'un(e) ';
-                    sections.push('Tu es ' + roleArticle + this.personaText + ' avec une expertise approfondie dans ton domaine. Tu communiques de manière claire et efficace, en adaptant ton niveau de langage à ton audience.');
-                }
-
-                // === TÂCHE ===
-                if (actionVerb && this.taskObject) {
-                    sections.push('Ta tâche : ' + actionVerb + ' ' + this.taskObject + '.');
-                } else if (this.taskObject) {
-                    sections.push('Ta tâche : ' + this.taskObject + '.');
-                }
-
-                // === AUDIENCE ===
-                if (this.audienceText) {
-                    sections.push('Audience cible : ' + this.audienceText + '. Adapte ton vocabulaire, tes exemples et ton niveau de détail en conséquence. Assure-toi que le contenu soit pertinent et accessible pour ce public.');
-                }
-
-                // === FORMAT DE SORTIE ===
-                var outputRules = [];
-                if (this.format) outputRules.push('Structure : ' + this.format);
-                if (this.length) outputRules.push('Longueur visée : ' + this.length);
-                if (this.tone) outputRules.push('Ton et style : ' + this.tone);
-                if (this.language === 'en') outputRules.push('Langue de rédaction : anglais');
-                if (this.language === 'es') outputRules.push('Langue de rédaction : espagnol');
-                if (outputRules.length > 0) {
-                    sections.push('Format de la réponse :\n- ' + outputRules.join('\n- '));
-                }
-
-                // === CONTRAINTES ===
-                var constraints = [];
-                if (this.constraintAntiAI) constraints.push('Écriture naturelle et humaine : varie la longueur des phrases, utilise des expressions authentiques et des transitions fluides. Évite les formulations génériques (« dans un monde en constante évolution »), les listes à puces systématiques et les répétitions de structure.');
-                if (this.constraintTypo) constraints.push('Typographie française stricte : majuscules en début de phrase et noms propres uniquement, pas de tiret cadratin (utilise le tiret court), ponctuation correcte, accents toujours présents.');
-                if (this.constraintCanvas) {
-                    var canvasNames = { chatgpt: 'Canvas', claude: 'artefact', gemini: 'espace de travail', mistral: 'espace de travail' };
-                    var canvasName = canvasNames[this.canvasAI] || 'espace de travail';
-                    var canvasLine = 'Crée un nouveau ' + canvasName + ' pour ta réponse.';
-                    // 2026-05-05 #104 : format custom universel (formatMode) - dispo pour les 4 IA
-                    var fmt = this.formatMode === 'custom' ? this.canvasCustomFormat : this.canvasFormat;
-                    if (fmt) canvasLine += ' Format de sortie : ' + fmt + '.';
-                    constraints.push(canvasLine);
-                }
-                if (this.constraintChainOfThought) constraints.push('Montre ton raisonnement complet étape par étape avant de formuler ta réponse finale.');
-                if (this.constraintAskIfUnclear) constraints.push('Si un élément de ma demande est ambigu ou manque de contexte, pose-moi des questions de clarification avant de commencer. Ne devine pas — demande.');
-                if (this.constraintCustom) constraints.push(this.constraintCustom);
-                if (constraints.length > 0) {
-                    sections.push('Contraintes à respecter :\n- ' + constraints.join('\n- '));
-                }
-
-                // === CRITÈRES DE QUALITÉ ===
-                var quality = [];
-                if (this.tone) quality.push('le ton demandé est respecté du début à la fin');
-                if (this.audienceText) quality.push('le contenu est adapté à l\'audience cible');
-                if (this.length) quality.push('la longueur correspond à ce qui est demandé');
-                if (this.constraintAntiAI) quality.push('le texte ne ressemble pas à du contenu généré par IA');
-                if (quality.length > 0) {
-                    sections.push('Avant de finaliser, vérifie que :\n- ' + quality.join('\n- '));
-                }
-
-                // === DÉLIMITEURS ===
-                if (this.useDelimiters) {
-                    sections.push('Utilise des délimiteurs ### pour séparer clairement chaque section de ta réponse.');
-                }
-
-                // === TECHNIQUE ===
-                if (this.technique === 'zero-shot-cot') {
-                    sections.push('Avant de répondre, réfléchis étape par étape à ta stratégie (ne montre pas ce raisonnement dans ta réponse finale).');
-                }
-                if ((this.technique === 'few-shot' || this.technique === 'few-shot-cot') && this.examples) {
-                    sections.push('Voici des exemples pour guider ta réponse :\n\n' + this.examples);
-                    if (this.technique === 'few-shot-cot') {
-                        sections.push('Applique le même type de raisonnement détaillé que dans les exemples ci-dessus.');
-                    }
-                }
-                if (this.technique === 'iterative') {
-                    sections.push('Procède étape par étape. Après chaque étape majeure, présente ton travail et demande ma validation avant de continuer.');
-                }
-
-                return sections.join('\n\n');
-            },
-
-            get wizardParams() {
-                return { personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, audienceType: this.audienceType, audiencePreset: this.audiencePreset, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, format: this.format, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat };
-            },
-            _headers: function() {
-                return { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json', 'Content-Type': 'application/json' };
-            },
-            init: function() {
-                var self = this;
-                if (this.isAuthenticated) {
-                    fetch('/api/prompts', { headers: this._headers() })
-                        .then(function(r) { return r.json(); })
-                        .then(function(data) {
-                            self.history = (data.data || []).map(function(item) {
-                                return { id: item.public_id || item.id, prompt: item.prompt_text, name: item.name, date: new Date(item.created_at).toLocaleString('fr-CA'), params: item.params };
-                            });
-                            if (localStorage.getItem('pb_history')) self.hasLocalData = true;
-                        })
-                        .catch(function() {
-                            try { self.history = JSON.parse(localStorage.getItem('pb_history') || '[]'); } catch(e) { self.history = []; }
-                        });
-                    // Charger un prompt existant pour edition (?edit=ID)
-                    var editId = new URLSearchParams(window.location.search).get('edit');
-                    if (editId) {
-                        fetch('/api/prompts', { headers: self._headers() })
-                            .then(function(r) { return r.json(); })
-                            .then(function(data) {
-                                var found = (data.data || []).find(function(p) { return (p.public_id || p.id) == editId; });
-                                if (found && found.params) {
-                                    var p = found.params;
-                                    if (p.personaType) self.personaType = p.personaType;
-                                    if (p.personaPreset) self.personaPreset = p.personaPreset;
-                                    if (p.personaCustom) { self.personaCustom = p.personaCustom; self.personaType = 'custom'; }
-                                    if (p.verbType) self.verbType = p.verbType;
-                                    if (p.verb) self.verb = p.verb;
-                                    if (p.verbCustom) { self.verbCustom = p.verbCustom; self.verbType = 'custom'; }
-                                    if (p.taskObject) self.taskObject = p.taskObject;
-                                    if (p.audienceType) self.audienceType = p.audienceType;
-                                    if (Array.isArray(p.audiencePresets)) { self.audiencePresets = p.audiencePresets; } else if (p.audiencePreset) { self.audiencePresets = [p.audiencePreset]; }
-                                    if (p.audiencePreset) self.audiencePreset = p.audiencePreset;
-                                    if (p.audienceCustom) { self.audienceCustom = p.audienceCustom; self.audienceType = 'custom'; }
-                                    if (p.format) self.format = p.format;
-                                    if (p.length) self.length = p.length;
-                                    if (p.tone) self.tone = p.tone;
-                                    if (p.language) self.language = p.language;
-                                    if (p.technique) self.technique = p.technique;
-                                    if (p.constraintAntiAI !== undefined) self.constraintAntiAI = p.constraintAntiAI;
-                                    if (p.constraintCanvas) self.constraintCanvas = p.constraintCanvas;
-                                    if (p.canvasAI) {
-                                        // 2026-05-05 #104 : migration anciens prompts canvasAI='custom' → canvasAI='chatgpt' + formatMode='custom'
-                                        if (p.canvasAI === 'custom') { self.canvasAI = 'chatgpt'; self.formatMode = 'custom'; }
-                                        else self.canvasAI = p.canvasAI;
-                                    }
-                                    if (p.canvasFormat) self.canvasFormat = p.canvasFormat;
-                                    if (p.canvasCustomFormat) self.canvasCustomFormat = p.canvasCustomFormat;
-                                    if (p.formatMode) self.formatMode = p.formatMode;
-                                    self.saveName = found.name;
-                                    self.step = 4;
-                                    self._editingId = found.id;
-                                }
-                            });
-                    }
-                } else {
-                    try { this.history = JSON.parse(localStorage.getItem('pb_history') || '[]'); } catch(e) { this.history = []; }
-                }
-            },
-
-            nextStep: function() {
-                if (this.step === 1 && !this.personaText) { this.showValidation = true; return; }
-                var hasVerb2 = this.verbType === 'custom' ? !!this.verbCustom : !!this.verb;
-                if (this.step === 2 && (!this.taskObject || !hasVerb2)) { this.showValidation = true; return; }
-                this.showValidation = false;
-                if (this.step < 4) this.step++;
-            },
-            canGoToStep: function(s) {
-                if (s <= 1) return true;
-                if (s >= 2 && !this.personaText) return false;
-                var stepHasVerb = this.verbType === 'custom' ? !!this.verbCustom : !!this.verb;
-                if (s >= 3 && (!this.taskObject || !stepHasVerb)) return false;
-                return true;
-            },
-            goToStep: function(s) {
-                if (this.canGoToStep(s)) { this.showValidation = false; this.step = s; }
-                else { this.showValidation = true; }
-            },
-            prevStep: function() { if (this.step > 1) this.step--; },
-
-            copy: function() {
-                var self = this;
-                navigator.clipboard.writeText(this.prompt);
-                this.track('prompt_copy', { tool: 'constructeur-prompts' });
-                this.copied = true;
-                try { window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Prompt copié !', variant: 'success', duration: 2000 } })); } catch (e) {}
-                setTimeout(function() { self.copied = false; }, 2000);
-            },
-
-            track: function(event, params) {
-                try {
-                    if (typeof window.gtag === 'function') {
-                        window.gtag('event', event, params || {});
-                    }
-                } catch (e) {}
-            },
-
-            openIn: function(target) {
-                if (!this.prompt) return;
-                try {
-                    navigator.clipboard.writeText(this.prompt);
-                } catch (e) {}
-                var baseUrl = '';
-                switch (target) {
-                    case 'chatgpt':
-                        baseUrl = 'https://chatgpt.com/?q=';
-                        break;
-                    case 'claude':
-                        baseUrl = 'https://claude.ai/new?q=';
-                        break;
-                    case 'perplexity':
-                        baseUrl = 'https://www.perplexity.ai/search?q=';
-                        break;
-                    case 'gemini':
-                        baseUrl = 'https://gemini.google.com/app';
-                        break;
-                    default:
-                        return;
-                }
-                var encodedPrompt = encodeURIComponent(this.prompt);
-                var url = baseUrl;
-                var msg = 'Prompt copié — ouverture de la conversation…';
-                if (target === 'gemini') {
-                    // Gemini ne pré-remplit pas via URL → on ouvre l'app, le prompt est copié.
-                    msg = 'Prompt copié — colle-le dans Gemini (Ctrl/Cmd + V).';
-                } else if (encodedPrompt.length <= 4000) {
-                    url += encodedPrompt;
-                } else {
-                    msg = 'Prompt trop long pour le lien : il est copié, colle-le (Ctrl/Cmd + V).';
-                }
-                try { window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: msg, variant: 'info', duration: 3500 } })); } catch (e) {}
-                this.track('prompt_open_in', { tool: 'constructeur-prompts', target: target });
-                window.open(url, '_blank', 'noopener');
-            },
-
-            copyText: function(text) { window.copyToClipboard(text, '{{ __("Prompt copié") }}'); },
-
-            armReset: function() {
-                if (this.resetArmed) { this.resetAll(); return; }
-                this.resetArmed = true;
-                var self = this;
-                setTimeout(function() { self.resetArmed = false; }, 4000);
-            },
-            resetAll: function() { window.location.href = window.location.pathname; },
-
-            addToHistory: function() {
-                if (this.saving) return;
-                var self = this;
-                var title = this.saveName.trim() || this.personaText || 'Prompt';
-                if (this.isAuthenticated) {
-                    this.saving = true;
-                    var isEdit = !!this._editingId;
-                    var url = isEdit ? '/api/prompts/' + this._editingId : '/api/prompts';
-                    var method = isEdit ? 'PUT' : 'POST';
-                    fetch(url, {
-                        method: method, headers: this._headers(),
-                        body: JSON.stringify({ name: title, prompt_text: this.prompt, params: this.wizardParams })
-                    })
-                    .then(function(r) { return r.json(); })
-                    .then(function(data) {
-                        if (isEdit) {
-                            var pid = data.public_id || data.id;
-                            var idx = self.history.findIndex(function(h) { return h.id == pid; });
-                            if (idx >= 0) self.history[idx] = { id: pid, prompt: data.prompt_text, name: data.name, date: new Date(data.updated_at).toLocaleString('fr-CA'), params: data.params };
-                            self._editingId = null;
-                        } else {
-                            self.history.unshift({ id: data.public_id || data.id, prompt: data.prompt_text, name: data.name, date: new Date(data.created_at).toLocaleString('fr-CA'), params: data.params });
-                        }
-                        self.saveName = '';
-                        self.saving = false;
-                        window.dispatchEvent(new CustomEvent('toast', { detail: { message: '{{ __("Prompt sauvegardé") }}' } }));
-                    })
-                    .catch(function() { self.saving = false; self.saveError = '{{ __("Erreur de sauvegarde. Réessayez.") }}'; setTimeout(function() { self.saveError = ''; }, 4000); });
-                } else {
-                    this.$dispatch('open-auth-modal');
-                }
-            },
-            deletePrompt: function(id, index) {
-                var self = this;
-                if (this.isAuthenticated && id) {
-                    fetch('/api/prompts/' + id, { method: 'DELETE', headers: this._headers() })
-                        .then(function() { self.history.splice(index, 1); })
-                        .catch(console.error);
-                } else {
-                    this.history.splice(index, 1);
-                    localStorage.setItem('pb_history', JSON.stringify(this.history));
-                }
-            },
-            importLocalStorage: function() {
-                var self = this;
-                var local = [];
-                try { local = JSON.parse(localStorage.getItem('pb_history') || '[]'); } catch(e) { return; }
-                var promises = local.map(function(item) {
-                    return fetch('/api/prompts', {
-                        method: 'POST', headers: self._headers(),
-                        body: JSON.stringify({ name: item.name || 'Prompt importé', prompt_text: item.prompt, params: {} })
-                    }).then(function(r) { return r.json(); });
-                });
-                Promise.all(promises).then(function(results) {
-                    results.forEach(function(data) {
-                        self.history.push({ id: data.id, prompt: data.prompt_text, name: data.name, date: new Date(data.created_at).toLocaleString('fr-CA'), params: data.params });
-                    });
-                    localStorage.removeItem('pb_history');
-                    self.hasLocalData = false;
-                });
-            },
-            clearHistory: function() { this.history = []; if (!this.isAuthenticated) localStorage.removeItem('pb_history'); },
-
-            exportPrompt: function() {
-                var blob = new Blob([this.prompt], { type: 'text/plain' });
-                var a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = 'prompt.txt';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            }
-        };
-    });
-});
+// Injection des données dynamiques (personas/verbes/audiences configurables via Settings + i18n)
+// pour le fichier JS externe ci-dessous — même pattern que window.taxConfig (calculatrice-taxes).
+// Le JS de logique du wizard est désormais un fichier externe mis en cache par le navigateur
+// (Phase 0 audit 2026-07-26 : ~430 lignes de JS inline jamais cachées auparavant).
+window.promptBuilderConfig = {
+    personas: @json($pbPersonas),
+    verbs: @json($pbVerbs),
+    audiences: @json($pbAudiences),
+    isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
+    i18n: {
+        promptCopied: @json(__('Prompt copié')),
+        promptSaved: @json(__('Prompt sauvegardé')),
+        saveError: @json(__('Erreur de sauvegarde. Réessayez.'))
+    }
+};
 </script>
+<script src="{{ asset('assets/tools/constructeur-prompts/constructeur-prompts-core.js') }}?v={{ config('version.semver') }}" defer></script>
 @endpush

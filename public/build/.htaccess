@@ -1,0 +1,12 @@
+# Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
+# Assets Vite fingerprintés (/build/) : le nom de chaque fichier change dès que son contenu
+# change (hash Vite dans le nom), donc une URL /build/... donnée ne sert JAMAIS deux contenus
+# différents. On peut donc les mettre en cache le plus longtemps possible côté navigateur/CDN,
+# avec "immutable" pour éviter toute revalidation inutile (304) sur des fichiers qui ne changeront
+# jamais. Portée strictement limitée à ce répertoire (n'affecte pas le reste du site — voir
+# public/.htaccess pour la politique de cache générale ExpiresByType).
+<IfModule mod_headers.c>
+    <FilesMatch ".*">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>

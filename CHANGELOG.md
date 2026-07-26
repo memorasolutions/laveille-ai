@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.131.0] - 2026-07-26
+
+### Added
+- **Maillage interne : article OpenClaw relié au reste du site** — relation glossaire broader/narrower Docker↔Socket ; liens contextuels ajoutés dans l'article OpenClaw vers l'Anonymiseur, le Constructeur de prompts et le Concentré qui couvrait déjà l'outil sous son ancien nom "Moltbot/Clawdbot" ; liens réciproques depuis l'article "C'est quoi le MCP ?" et ce Concentré vers l'article OpenClaw.
+
+### Fixed
+- **`/outils/constructeur-prompts` Phase 0 (audit du 2026-07-26)** : bandeau de cookies (site-wide) qui bloquait le formulaire et dont le bouton "Tout accepter" pouvait sortir du viewport mobile — corrigé avec footer d'actions toujours visible, unités `dvh`/`env(safe-area-inset-bottom)`, et attribut `inert` sur la modale fermée. Cibles tactiles des radios agrandies (13px→24px+). Contrastes corrigés vers AAA (lien "vos sauvegardes" 2,22:1→11,65:1 ; message de confidentialité 3,02:1→15,89:1). JS inline (~430 lignes) extrait vers un fichier externe mis en cache navigateur, `Cache-Control` immutable ajouté sur `/build/`. Accents corrigés dans le seeder de configuration. 14 nouveaux tests Feature pour `SavedPromptController` (IDOR, validation, auth, soft-delete).
+
 ## [1.130.0] - 2026-07-26
 
 ### Added

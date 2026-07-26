@@ -52,9 +52,17 @@
     #cc-host { font-family: system-ui, -apple-system, sans-serif; line-height: 1.5; }
     .cc-backdrop { position: fixed; inset: 0; background: var(--cc-overlay); z-index: 9998; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     .cc-backdrop.cc-open { opacity: 1; pointer-events: auto; }
-    .cc-modal { position: fixed; bottom: 20px; left: 20px; right: auto; max-width: 420px; width: calc(100vw - 40px); background: var(--cc-bg); color: var(--cc-text); z-index: 9999; padding: 1.5rem; box-shadow: 0 12px 40px rgba(0,0,0,0.18); transform: translateY(120%); transition: transform 0.3s ease-out; max-height: min(90vh, 640px); overflow-y: auto; border: 1px solid var(--cc-border); border-radius: 16px; }
+    /* #Phase0 constructeur-prompts (2026-07-26) : bug mobile 390px — le bouton "Tout accepter"
+       pouvait sortir de la zone visible car (a) 90vh ne suit pas la barre d'adresse mobile
+       (le "vh" historique = grande fenêtre, pas la fenêtre visuelle réelle) et (b) rien ne
+       garantissait que la rangée de boutons reste visible si le texte s'allonge. Fix : la
+       modale devient une colonne flex avec une zone de texte défilante (.cc-scroll) et les
+       actions TOUJOURS visibles hors du scroll (pattern "footer collant"), + dvh (fallback vh)
+       + coussin d'encoche (safe-area-inset-bottom) sur la position fixed. */
+    .cc-modal { position: fixed; bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 12px)); left: 20px; right: auto; max-width: 420px; width: calc(100vw - 40px); background: var(--cc-bg); color: var(--cc-text); z-index: 9999; padding: 1.5rem; box-shadow: 0 12px 40px rgba(0,0,0,0.18); transform: translateY(120%); transition: transform 0.3s ease-out; max-height: min(90vh, 640px); max-height: min(85dvh, 640px); overflow: hidden; border: 1px solid var(--cc-border); border-radius: 16px; display: flex; flex-direction: column; }
     .cc-modal.cc-open { transform: translateY(0); }
-    .cc-title { font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem 0; }
+    .cc-scroll { overflow-y: auto; flex: 1 1 auto; min-height: 0; }
+    .cc-title { font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem 0; flex-shrink: 0; }
     .cc-text { font-size: 0.9rem; margin: 0 0 1rem 0; opacity: 0.9; }
     .cc-link { color: inherit; text-decoration: underline; }
     .cc-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
@@ -64,7 +72,10 @@
     .cc-btn-primary { background: var(--cc-btn-primary); color: var(--cc-btn-primary-text); }
     .cc-btn-secondary { background: var(--cc-btn-secondary); color: var(--cc-btn-secondary-text); }
     .cc-details { display: none; margin-top: 1rem; border-top: 1px solid var(--cc-border); padding-top: 1rem; }
-    .cc-details.cc-show { display: block; }
+    /* .cc-show en flex column : le bouton "Retour" + la liste de catégories se répartissent,
+       la liste seule défile (overflow-y) si les catégories sont nombreuses, pour que le bouton
+       "Enregistrer mes choix" (dans le form, en dernier) reste lui aussi toujours atteignable. */
+    .cc-details.cc-show { display: flex; flex-direction: column; min-height: 0; overflow-y: auto; }
     .cc-switch-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; padding: 0.5rem 0; }
     .cc-switch-label { display: flex; flex-direction: column; }
     .cc-cat-name { font-weight: 600; font-size: 0.95rem; }
@@ -75,7 +86,7 @@
     input:checked + .cc-slider { background-color: var(--cc-toggle-active); }
     input:checked + .cc-slider::before { transform: translateX(20px); }
     input:disabled + .cc-slider { opacity: 0.5; cursor: not-allowed; }
-    .cc-fab { position: fixed; bottom: 0; left: 20px; width: auto; height: auto; border-radius: 14px 14px 0 0; background: var(--cc-bg); color: var(--cc-text); border: 1px solid var(--cc-border); border-bottom: none; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); cursor: pointer; z-index: 9990; display: flex; align-items: center; gap: 6px; padding: 8px 14px; transform: translateY(calc(100% - 22px)); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .cc-fab { position: fixed; bottom: 0; left: 20px; width: auto; height: auto; border-radius: 14px 14px 0 0; background: var(--cc-bg); color: var(--cc-text); border: 1px solid var(--cc-border); border-bottom: none; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); cursor: pointer; z-index: 9990; display: flex; align-items: center; gap: 6px; padding: 8px 14px; padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); transform: translateY(calc(100% - 22px)); transition: transform 0.3s ease, box-shadow 0.3s ease; }
     .cc-fab:hover, .cc-fab:focus-visible { transform: translateY(0); box-shadow: 0 -6px 20px rgba(0,0,0,0.12); }
     .cc-fab:focus-visible { outline: var(--sys-focus-ring-width, 3px) solid var(--sys-focus-ring, #9A2A06); outline-offset: 2px; }
     .cc-fab svg { width: 16px; height: 16px; fill: currentColor; }
@@ -105,11 +116,15 @@
 
     {{-- Banniere modale --}}
     <div id="cc-modal" class="cc-modal {{ $hasCookie ? '' : 'cc-open' }}" role="dialog" aria-modal="true" aria-labelledby="cc-title" aria-describedby="cc-desc">
-        <h2 id="cc-title" class="cc-title">{{ $text['title'] }}</h2>
-        <p id="cc-desc" class="cc-text">
-            {{ $text['intro'] }}
-            <a href="{{ $policyUrl }}" class="cc-link">{{ $text['policy_link'] }}</a>
-        </p>
+        {{-- #Phase0 : titre + texte défilent si besoin, mais les actions (footer) restent
+             TOUJOURS visibles dans la hauteur de la modale (flex column, cf. .cc-scroll). --}}
+        <div class="cc-scroll">
+            <h2 id="cc-title" class="cc-title">{{ $text['title'] }}</h2>
+            <p id="cc-desc" class="cc-text">
+                {{ $text['intro'] }}
+                <a href="{{ $policyUrl }}" class="cc-link">{{ $text['policy_link'] }}</a>
+            </p>
+        </div>
 
         {{-- Actions principales --}}
         <div id="cc-main-actions" class="cc-actions">
@@ -206,6 +221,14 @@
         els.fab.classList.add('cc-hidden');
         els.details.classList.remove('cc-show');
         els.mainActions.classList.remove('cc-hidden');
+        // #Phase0 (2026-07-26) : la modale fermée n'était masquée que par un transform CSS —
+        // ses boutons restaient dans l'ordre de tabulation et le rôle dialog/aria-modal restait
+        // exposé aux lecteurs d'écran même invisible. Résultat rapporté par l'audit : la
+        // bannière « réapparaît » au clavier/AT en plein milieu du parcours du formulaire.
+        // `inert` (natif, supporté partout où le site est testé) retire proprement le focus et
+        // les lecteurs d'écran tant que la modale n'est pas réellement ouverte.
+        els.modal.removeAttribute('inert');
+        els.backdrop.removeAttribute('inert');
         initFocusTrap();
     }
 
@@ -213,6 +236,8 @@
         els.modal.classList.remove('cc-open');
         els.backdrop.classList.remove('cc-open');
         els.fab.classList.remove('cc-hidden');
+        els.modal.setAttribute('inert', '');
+        els.backdrop.setAttribute('inert', '');
         // Retirer le handler ESC pour éviter les fuites mémoire
         if (_escHandler) { document.removeEventListener('keydown', _escHandler); _escHandler = null; }
     }
