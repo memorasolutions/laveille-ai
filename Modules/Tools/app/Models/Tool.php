@@ -29,6 +29,7 @@ class Tool extends Model
         'featured_image',
         'is_active',
         'is_under_construction',
+        'construction_mode',
         'sort_order',
         'category',
         'views_count',

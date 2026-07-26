@@ -1,9 +1,46 @@
 @extends('fronttheme::layouts.master')
 
-@section('title', $tool->name . ' — En construction · La veille de Stef')
-@section('meta_description', $tool->name . ' est en construction. Nous travaillons activement à son lancement public sur laveille.ai.')
+@section('title', $tool->construction_mode === 'revision'
+    ? $tool->name . ' fait peau neuve · La veille de Stef'
+    : $tool->name . ' — En construction · La veille de Stef')
+@section('meta_description', $tool->construction_mode === 'revision'
+    ? $tool->name . ' est temporairement hors ligne le temps d\'une mise à jour importante. Vos prompts sauvegardés sont intacts.'
+    : $tool->name . ' est en construction. Nous travaillons activement à son lancement public sur laveille.ai.')
 
 @section('content')
+@if($tool->construction_mode === 'revision')
+<section class="lv-under-construction lv-under-construction--revision" aria-labelledby="uc-title">
+    <div class="lv-uc__card" role="region" aria-label="Outil temporairement hors ligne pour mise à jour">
+        <div class="lv-uc__mascot">
+            <x-tools::octopus variant="confident" size="160" />
+        </div>
+
+        <p class="lv-uc__badge">
+            <span aria-hidden="true">✨</span>
+            <span>{{ __('Mise à jour en cours') }}</span>
+        </p>
+
+        <h1 id="uc-title" class="lv-uc__title">{{ __('Le :name fait peau neuve', ['name' => $tool->name]) }}</h1>
+
+        <p class="lv-uc__lead">
+            {{ __("Le :name est temporairement hors ligne, le temps d'une mise à jour importante. Vos commentaires ont mis en lumière plusieurs irritants - nous retravaillons les réglages avancés, la bibliothèque de prompts et la compatibilité avec les derniers formats (ChatGPT Canvas, Claude Artifacts).", ['name' => $tool->name]) }}
+        </p>
+
+        <div class="lv-uc__reassurance" role="note">
+            <span class="lv-uc__reassurance-icon" aria-hidden="true">💾</span>
+            <span><strong>{{ __('Vos prompts déjà sauvegardés sont intacts et vous seront accessibles dès le retour de l\'outil.') }}</strong></span>
+        </div>
+
+        <div class="lv-uc__actions">
+            <a href="{{ route('tools.index') }}"
+               class="lv-uc__btn lv-uc__btn--primary"
+               aria-label="Découvrir nos autres outils">
+                {{ __('Découvrir nos autres outils') }}
+            </a>
+        </div>
+    </div>
+</section>
+@else
 <section class="lv-under-construction" aria-labelledby="uc-title">
     <div class="lv-uc__card" role="region" aria-label="Outil en construction">
         <div class="lv-uc__mascot">
@@ -12,29 +49,29 @@
 
         <p class="lv-uc__badge">
             <span aria-hidden="true">🚧</span>
-            <span>En construction</span>
+            <span>{{ __('En construction') }}</span>
         </p>
 
         <h1 id="uc-title" class="lv-uc__title">{{ $tool->name }}</h1>
 
         <p class="lv-uc__lead">
-            Cet outil est en construction. Nous travaillons activement à son lancement public.
+            {{ __('Cet outil est en construction. Nous travaillons activement à son lancement public.') }}
         </p>
 
         <div class="lv-uc__timeline" aria-label="Étapes du développement">
-            <h2 class="lv-uc__timeline-title">Avancement prévu</h2>
+            <h2 class="lv-uc__timeline-title">{{ __('Avancement prévu') }}</h2>
             <ul class="lv-uc__steps">
                 <li class="lv-uc__step lv-uc__step--done">
                     <span class="lv-uc__step-icon" aria-hidden="true">✓</span>
-                    <span class="lv-uc__step-label"><strong>Conception</strong> — Terminée</span>
+                    <span class="lv-uc__step-label"><strong>{{ __('Conception') }}</strong> — {{ __('Terminée') }}</span>
                 </li>
                 <li class="lv-uc__step lv-uc__step--current">
                     <span class="lv-uc__step-icon" aria-hidden="true">🚧</span>
-                    <span class="lv-uc__step-label"><strong>Développement</strong> — En cours</span>
+                    <span class="lv-uc__step-label"><strong>{{ __('Développement') }}</strong> — {{ __('En cours') }}</span>
                 </li>
                 <li class="lv-uc__step lv-uc__step--upcoming">
                     <span class="lv-uc__step-icon" aria-hidden="true">🎯</span>
-                    <span class="lv-uc__step-label"><strong>Lancement public</strong> — À venir</span>
+                    <span class="lv-uc__step-label"><strong>{{ __('Lancement public') }}</strong> — {{ __('À venir') }}</span>
                 </li>
             </ul>
         </div>
@@ -43,16 +80,17 @@
             <a href="{{ route('tools.index') }}"
                class="lv-uc__btn lv-uc__btn--primary"
                aria-label="Voir tous les outils disponibles">
-                Voir tous les outils disponibles
+                {{ __('Voir tous les outils disponibles') }}
             </a>
             <a href="{{ route('tools.index') }}"
                class="lv-uc__btn lv-uc__btn--ghost"
                aria-label="Retour aux outils">
-                ← Retour aux outils
+                ← {{ __('Retour aux outils') }}
             </a>
         </div>
     </div>
 </section>
+@endif
 
 <style>
 .lv-under-construction {
@@ -166,5 +204,38 @@
 .lv-uc__btn--ghost:hover, .lv-uc__btn--ghost:focus { background: #E6F7F5; }
 .lv-uc__btn:focus-visible { outline: 3px solid var(--uc-accent); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .lv-uc__btn { transition: none; } }
+
+/* #325 : mode "revision" (outil retiré temporairement, jamais "construction" neuf) — indigo/ambre,
+   zéro rouge, aucune iconographie d'erreur. Réutilise les MÊMES classes .lv-uc__* que le mode
+   "construction" (DRY) : seules les variables CSS scopées changent + 2 règles ciblées (badge/reassurance). */
+.lv-under-construction--revision {
+    --uc-primary: #4338CA;
+    --uc-primary-hover: #3730A3;
+    --uc-accent: #78350F;
+    --uc-dark: #1A1D23;
+    --uc-bg: #EEF2FF;
+    --uc-card-bg: #FFFFFF;
+    --uc-border: rgba(67, 56, 202, 0.18);
+}
+.lv-under-construction--revision .lv-uc__badge {
+    background: #FEF3C7;
+    border-color: #FDE68A;
+}
+.lv-uc__reassurance {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-radius: var(--uc-radius);
+    padding: 1rem 1.25rem;
+    margin: 0 auto 2rem;
+    max-width: 56ch;
+    text-align: left;
+    color: #78350F;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+.lv-uc__reassurance-icon { flex-shrink: 0; font-size: 1.25rem; line-height: 1; }
 </style>
 @endsection

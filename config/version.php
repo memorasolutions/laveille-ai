@@ -3065,10 +3065,27 @@ declare(strict_types=1);
  *     Vérification de régression : Modules/Tools (53/53), Modules/FrontTheme+Acronyms+Dictionary+
  *     Directory+Blog (147/147, modules touchés par le changement de layout partagé) tous verts.
  *     Vérification visuelle Playwright desktop 1440px + mobile 390px.
+ *
+ * v1.133.0 = feat(outils) système de message "indisponible" à 2 modes (`tools.construction_mode`,
+ *     migration réversible) : (1) mode `construction` (défaut, comportement existant inchangé pour
+ *     tous les autres outils gatés) - ton anticipation, "Cet outil arrive bientôt" ; (2) mode
+ *     `revision` (nouveau) - ton transparence/confiance pour un outil déjà public retiré
+ *     temporairement, "Le [Nom] fait peau neuve" avec un encadré de réassurance en emphase sur la
+ *     conservation des données ("Vos prompts déjà sauvegardés sont intacts"). Recherche pp_search
+ *     (2 volets) + validation croisée Codex/claude.ai/Gemini : confirme HTTP 200 sans noindex comme
+ *     bon choix SEO pour une révision de plusieurs jours/semaines (503+Retry-After réservé aux
+ *     interruptions <72h) - aucun changement de code HTTP nécessaire, uniquement le contenu. Palette
+ *     indigo/ambre douce pour le mode révision, zéro rouge, réutilise l'octopus `confident` déjà
+ *     existant (aucune nouvelle illustration). `constructeur-prompts` basculé en mode `revision`
+ *     suite au signalement utilisateur (régressions perçues sur la refonte v1.131-1.132 : options
+ *     moins découvrables, sauvegarde non réutilisable via l'UI) - outil remis en révision le temps
+ *     d'une refonte plus poussée (Option 4+, voir prochaine entrée). Tests Modules/Tools 53/53 verts,
+ *     vérification visuelle Playwright (les 2 modes, desktop+mobile), contraste WCAG AAA validé sur
+ *     toutes les combinaisons de couleurs (ratios ≥7:1).
  */
 
 $lvMajor = 1;
-$lvMinor = 132;
+$lvMinor = 133;
 $lvPatch = 0;
 
 return [

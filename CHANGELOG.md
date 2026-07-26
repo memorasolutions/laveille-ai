@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.133.0] - 2026-07-26
+
+### Added
+- **Message "indisponible" à 2 modes pour les outils** (`tools.construction_mode`) — mode "construction" (nouvel outil, ton anticipation) et mode "révision" (outil retiré temporairement pour amélioration, ton transparence + réassurance explicite sur la conservation des données sauvegardées). Palette indigo/ambre pour la révision, zéro rouge.
+
+### Changed
+- `/outils/constructeur-prompts` remis en révision (superadmin seulement) le temps d'une refonte plus poussée, suite aux retours de l'utilisateur sur la découvrabilité des options et la réutilisation des prompts sauvegardés.
+
 ## [1.132.0] - 2026-07-26
 
 ### Added
