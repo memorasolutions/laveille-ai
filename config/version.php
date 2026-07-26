@@ -2976,11 +2976,35 @@ declare(strict_types=1);
  *     en prod et le champ `featured_image` corrigé pour chacun vers la convention qui fonctionne
  *     (`storage/blog/{fichier}.jpg`, au lieu de `images/blog/...` qui n'a jamais existé). Aucune
  *     migration de schéma (correction de données ciblée par id, aucune suppression).
+ *
+ * v1.130.0 = glossaire : ajout du terme "Socket" (point de communication logiciel réseau/Unix,
+ *     demande explicite de l'utilisateur) + fix(glossaire) bug systémique match_strategy invalide
+ *     sur 25 termes. Recherche perplexity/sonar-pro croisée avec Codex (précisions : Berkeley
+ *     sockets = 4.2BSD, UC Berkeley, rapport Leffler/Fabry/Joy du 27 juillet 1983 ; distinction
+ *     protocole TCP/UDP vs type de socket SOCK_STREAM/SOCK_DGRAM vs famille d'adresses AF_INET/
+ *     AF_UNIX). 2 sources officielles vérifiées (UC Berkeley 1983, POSIX.1 The Open Group 2024).
+ *     Image hero via /nanobanana (connecteurs isométriques teal/orange qui s'emboîtent, particules
+ *     de données). Catégorie "outils-et-techniques". Migration réversible.
+ *     BUG DÉCOUVERT en investiguant un signalement utilisateur ("licence MIT" non soulignée dans
+ *     l'article OpenClaw malgré le terme existant) : 25 termes ajoutés entre le 2026-07-21 et le
+ *     2026-07-25 (les 20 licences open source + openclaw, sudo, mitre-attck, tcc, laravel-herd) ont
+ *     `match_strategy = 'exact'`, une valeur INVALIDE non reconnue par
+ *     `GlossaryLinkifier::matchInText()` (seules 'loose'/'case_sensitive'/'partial_case_sensitive'/
+ *     'exact_phrase'/'never_auto' sont gérées) - le code tombe alors dans la branche par défaut
+ *     (comportement identique à 'case_sensitive', correspondance stricte à la casse EXACTE). Pour
+ *     les 20 licences, dont le nom commence par le mot français commun "Licence" (majuscule), la
+ *     prose naturelle écrit presque toujours "licence" en minuscule en milieu de phrase - ces 20
+ *     termes ne se sont donc JAMAIS auto-liés correctement depuis leur création. Fix (migration
+ *     réversible) : 'loose' (insensible à la casse, sûr - aucune collision STOP_LIST_FR) pour les 20
+ *     licences ; 'case_sensitive' (normalisation, comportement identique à 'exact', no-op
+ *     fonctionnel) pour les 5 autres termes déjà correctement casés en prose. Terme socket + fix
+ *     déployés directement en prod (les termes concernés existent uniquement en base prod, pas en
+ *     local, comme la majorité des ajouts récents du glossaire).
  */
 
 $lvMajor = 1;
-$lvMinor = 129;
-$lvPatch = 1;
+$lvMinor = 130;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

@@ -1,0 +1,45 @@
+[
+  {
+    "slug": "socket",
+    "cat_slug": "outils-et-techniques",
+    "name": "Socket",
+    "definition": "Une socket est un point de terminaison logiciel permettant la communication bidirectionnelle entre deux processus, localement ou via un réseau. Pour le réseau Internet, elle associe une adresse IP et un numéro de port (selon RFC 9293 pour TCP). Pour une communication locale (Unix domain socket), elle se lie à un chemin du système de fichiers ou à un espace de noms abstrait. L'API POSIX socket() crée ce point via int socket(int domain, int type, int protocol), retournant un descripteur de fichier. Les sockets de type SOCK_STREAM s'appuient sur TCP pour établir une connexion fiable, orientée flux, avec contrôle d'erreurs et d'ordre, idéale pour HTTP/HTTPS. À l'inverse, SOCK_DGRAM utilise souvent UDP pour échanger des datagrammes sans connexion, sans garantie de livraison ni d'ordre, utile pour DNS ou la voix sur IP. Les Unix domain sockets servent à la communication interprocessus locale avec des permissions du système de fichiers et un surcoût moindre que TCP/IP, tout en offrant des modes flux ou datagramme.",
+    "analogy": "L'adresse IP est l'adresse d'une maison, le port est le numéro d'appartement, et la socket est la prise de contact entre les deux.",
+    "example": "Un navigateur ouvre une socket TCP vers le port 443 d'un serveur pour charger un site en HTTPS ; le daemon Docker, lui, écoute sur un socket Unix local (/var/run/docker.sock).",
+    "did_you_know": "Les Berkeley sockets proviennent de 4.2BSD, développé à l'Université de Californie à Berkeley ; le rapport \"A 4.2BSD Interprocess Communication Primer\" de Leffler, Fabry et Joy fut publié le 27 juillet 1983.",
+    "one_sentence_answer": "Une socket est un point logiciel qui relie deux processus via une adresse IP et un port, ou un chemin local, pour échanger des données en mode flux (TCP) ou datagramme (UDP).",
+    "faq": [
+      {
+        "question": "Quelle est la différence entre une socket et un port ?",
+        "answer": "Une socket et un port ne sont pas la même chose : le port est simplement un numéro (0 à 65535) associé à un protocole de transport sur une machine, servant à identifier un service (par exemple 443 pour HTTPS). La socket, elle, est l'extrémité logicielle concrète qu'un processus crée et manipule via l'API (un descripteur de fichier), avec un domaine (AF_INET, AF_INET6, AF_UNIX), un type (SOCK_STREAM, SOCK_DGRAM), un protocole, et souvent une paire adresse IP:port locale, parfois aussi l'extrémité distante pour une connexion TCP. Un même port peut être partageable selon l'option SO_REUSEPORT, alors que chaque socket reste un objet distinct avec ses propres tampons et états. En résumé, le port est une coordonnée ; la socket est l'outil logiciel qui l'exploite pour communiquer."
+      },
+      {
+        "question": "Une socket TCP et une socket UDP, est-ce pareil ?",
+        "answer": "Non. Une socket TCP (type SOCK_STREAM) établit une connexion et fournit un flux fiable et ordonné, avec retransmissions et contrôle de congestion ; elle utilise des appels comme connect/accept et send/recv orientés flux. Une socket UDP (type SOCK_DGRAM) est sans connexion : chaque datagramme est livré au mieux, peut être perdu, dupliqué ou réordonné, mais les limites de message sont préservées ; on emploie sendto/recvfrom et on gère soi-même les pertes. Dans les deux cas, TCP et UDP sont des protocoles de transport, la socket n'étant que le point de communication configuré par le système d'exploitation. Le choix entre les deux dépend des besoins de fiabilité, de latence et de surcharge de l'application."
+      }
+    ],
+    "sources": [
+      {
+        "label": "A 4.2BSD Interprocess Communication Primer",
+        "url": "https://www2.eecs.berkeley.edu/Pubs/TechRpts/1983/5451.html",
+        "year": 1983,
+        "author": "Leffler, Fabry, Joy - UC Berkeley"
+      },
+      {
+        "label": "socket(3p) - POSIX Programmer's Manual",
+        "url": "https://pubs.opengroup.org/onlinepubs/9699919799/functions/socket.html",
+        "year": 2024,
+        "author": "The Open Group / IEEE"
+      }
+    ],
+    "aliases": [],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "🔌",
+    "type": "technique",
+    "acronym_full": null,
+    "match_strategy": "loose",
+    "has_image": true
+  }
+]

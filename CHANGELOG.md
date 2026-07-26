@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.130.0] - 2026-07-26
+
+### Added
+- **Glossaire : nouveau terme "Socket"** (`/glossaire "socket"`) — point de communication logiciel réseau (IP:port) ou local (Unix domain socket). Recherche `perplexity/sonar-pro` croisée avec Codex (Berkeley sockets = 4.2BSD, UC Berkeley, rapport Leffler/Fabry/Joy du 27 juillet 1983 ; distinction protocole TCP/UDP vs type de socket vs famille d'adresses). 2 sources officielles vérifiées (UC Berkeley, POSIX.1 The Open Group). Image de couverture via `/nanobanana`. Migration réversible.
+
+### Fixed
+- **Bug systémique : `match_strategy` invalide sur 25 termes du glossaire empêchait l'auto-lien** — découvert en investiguant un signalement utilisateur (« licence MIT » non soulignée dans l'article OpenClaw malgré le terme existant). 25 termes ajoutés entre le 21 et le 25 juillet 2026 (les 20 licences open source + OpenClaw, sudo, MITRE ATT&CK, TCC, Laravel Herd) avaient `match_strategy = 'exact'`, une valeur **invalide** non reconnue par `GlossaryLinkifier::matchInText()` — le code retombait alors sur une correspondance stricte à la casse exacte du nom du terme. Pour les 20 licences, dont le nom commence par le mot français commun « Licence » (majuscule), la prose naturelle écrit presque toujours « licence » en minuscule en milieu de phrase : ces 20 termes ne se sont **jamais** auto-liés correctement depuis leur création. Corrigé vers `'loose'` (insensible à la casse) pour les 20 licences, `'case_sensitive'` (normalisation sans changement de comportement) pour les 5 autres. Migration réversible.
+
 ## [1.129.1] - 2026-07-25
 
 ### Fixed
