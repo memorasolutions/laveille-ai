@@ -2957,11 +2957,30 @@ declare(strict_types=1);
  *     newsletter, bannière vérification courriel), aucun dans les fichiers touchés. Vérification
  *     visuelle Playwright complète (bouton visible, pointillé confirmé, 1 lien/section H2, toggle
  *     ON/OFF fonctionnel avec persistance, aucune régression sur le reste de la page). Réversible.
+ *
+ * v1.129.1 = fix(Blog) featured_image_url ne vérifiait jamais l'existence physique du fichier
+ *     avant de générer l'URL - une valeur DB pointant vers un fichier jamais réellement
+ *     téléversé (12 articles "Concentré IA hebdo" avec un chemin fantôme `images/blog/...jpg`
+ *     écrit par le script de publication mais jamais uploadé, 3 d'entre eux partageant même la
+ *     même valeur copiée-collée) produisait silencieusement une balise `<img>` cassée sur la
+ *     page publiée, sans jamais lever d'erreur. `Modules\Blog\Models\Article::
+ *     getFeaturedImageUrlAttribute()` vérifie maintenant `file_exists()`/`Storage::disk('public')
+ *     ->exists()` selon la convention de chemin, et retombe sur `images/og-image.png` (déjà
+ *     utilisée comme fallback og:image ailleurs sur le site) si le fichier est absent - défense
+ *     en profondeur qui prévient toute récurrence de ce type de bug, quelle qu'en soit la cause
+ *     future. 4 nouveaux tests Pest (`ArticleFeaturedImageUrlTest`, DB-free sauf le cas disque
+ *     réel testé via `Storage::fake`), 11/11 tests Modules/Blog verts. Les 12 articles concernés
+ *     ont aussi reçu de VRAIES images de couverture générées via `/nanobanana` (Gemini Playwright,
+ *     compte utilisateur), au style photo établi des Concentrés existants (bureau vitré nocturne,
+ *     gratte-ciel en fond, panneau holographique bleu/teal, texte "La veille de Stef"), téléversées
+ *     en prod et le champ `featured_image` corrigé pour chacun vers la convention qui fonctionne
+ *     (`storage/blog/{fichier}.jpg`, au lieu de `images/blog/...` qui n'a jamais existé). Aucune
+ *     migration de schéma (correction de données ciblée par id, aucune suppression).
  */
 
 $lvMajor = 1;
 $lvMinor = 129;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,

@@ -256,11 +256,25 @@ class Article extends Model implements SearchableContract
             return null;
         }
 
-        if (str_starts_with($this->featured_image, 'http') || str_starts_with($this->featured_image, 'storage/')) {
+        if (str_starts_with($this->featured_image, 'http')) {
             return asset($this->featured_image);
         }
 
-        return \Illuminate\Support\Facades\Storage::disk('public')->url($this->featured_image);
+        // 2026-07-25 #1298 : vérifier l'existence physique avant de générer l'URL - une valeur
+        // DB pointant vers un fichier jamais réellement téléversé (ex. 12 articles Concentré
+        // hebdo avec un chemin `images/blog/...` fantôme, jamais uploadé par le script de
+        // publication) rendait silencieusement une <img> cassée sur la page publiée. Repli sur
+        // l'image par défaut du site (déjà utilisée comme fallback og:image ailleurs) plutôt que
+        // de propager une URL 404.
+        if (str_starts_with($this->featured_image, 'storage/')) {
+            return file_exists(public_path($this->featured_image))
+                ? asset($this->featured_image)
+                : asset('images/og-image.png');
+        }
+
+        return \Illuminate\Support\Facades\Storage::disk('public')->exists($this->featured_image)
+            ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->featured_image)
+            : asset('images/og-image.png');
     }
 
     public function scopePendingSubmissions($query)

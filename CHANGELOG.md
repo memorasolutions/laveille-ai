@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.129.1] - 2026-07-25
+
+### Fixed
+- **Bug racine : featured_image cassé silencieusement sans repli** (`Modules\Blog\Models\Article::getFeaturedImageUrlAttribute()`) — l'accesseur générait toujours une URL à partir de la valeur DB sans jamais vérifier que le fichier existait physiquement. 12 articles "Concentré IA hebdo" avaient un `featured_image` pointant vers un chemin fantôme (`images/blog/concentre-hebdo-...jpg`, jamais réellement téléversé par le script de publication — 3 d'entre eux partageaient même par erreur la même valeur copiée-collée), produisant une balise `<img>` cassée sans jamais lever d'erreur. Ajout d'une vérification `file_exists()`/`Storage::disk('public')->exists()` selon la convention de chemin, avec repli sur l'image par défaut du site (`images/og-image.png`, déjà utilisée comme fallback og:image ailleurs) — défense en profondeur qui empêche toute récurrence de ce type de bug, peu importe sa cause future. 4 nouveaux tests Pest (`Modules/Blog/tests/Unit/ArticleFeaturedImageUrlTest.php`), 11/11 tests du module Blog verts.
+- **Données** : les 12 articles concernés ont reçu de vraies images de couverture générées via `/nanobanana` (Gemini Playwright, compte utilisateur), reproduisant fidèlement le style photo déjà établi des Concentrés existants (bureau vitré nocturne, gratte-ciel en fond, panneau holographique bleu/teal, texte "La veille de Stef"), téléversées en production et `featured_image` corrigé pour chacun vers la convention qui fonctionne réellement (`storage/blog/{fichier}.jpg`).
+
 ## [1.129.0] - 2026-07-25
 
 ### Added
