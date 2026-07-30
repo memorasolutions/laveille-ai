@@ -273,16 +273,28 @@ class AnonymizerUI {
       if (btnEdit) btnEdit.textContent = '👁️ Voir les annotations';
     } else {
       // Lire AVANT de masquer l'éditeur (innerText='' si display:none)
-      if (source) { this.sourceHtml = source.innerHTML; this.sourceText = this.richText(source); }
+      this._ingestSource();
       if (wrap) { wrap.classList.remove('mode-edit'); wrap.classList.add('mode-annotate'); }
       this.renderAnnotated();
       if (btnEdit) btnEdit.textContent = '✏️ Modifier le texte';
     }
   }
 
-  detect(silent) {
+  // Lit #anonSource et remplit sourceHtml + sourceText. Extraite au round 137 (2026-07-30) :
+  // la même paire d'affectations était écrite deux fois à l'identique, et anonymizeValue() ne
+  // l'appelait nulle part - c'est exactement ce qui rendait le masquage invisible quand on
+  // anonymisait un passage sans avoir lancé de détection.
+  // Retourne true si du texte non vide a été ingéré.
+  _ingestSource() {
     const source = document.getElementById('anonSource');
-    if (source) { this.sourceHtml = source.innerHTML; this.sourceText = this.richText(source); }
+    if (!source) return false;
+    this.sourceHtml = source.innerHTML;
+    this.sourceText = this.richText(source);
+    return !!this.sourceText.trim();
+  }
+
+  detect(silent) {
+    this._ingestSource();
     if (!this.sourceText.trim()) { this.toast('Collez d\'abord votre texte.', 'warning'); return; }
     const entities = window.AnonymizerCore.detectEntities(this.sourceText);
     const existing = new Set(this.rules.map(r => _norm(r.original)));
@@ -304,6 +316,14 @@ class AnonymizerUI {
   }
 
   anonymizeValue(value, category) {
+    // Round 137 : sans ceci, anonymiser un passage sélectionné dans le volet source AVANT toute
+    // détection créait bien la règle et affichait « Passage anonymisé », mais sourceText était
+    // encore vide - donc renderAnnotated() et updateOutput() n'avaient aucun texte sur lequel
+    // travailler et RIEN ne changeait à l'écran. Un succès annoncé mais invisible, pire qu'une
+    // erreur franche. Volontairement conditionnel : le chemin de détection vient déjà d'ingérer
+    // la source juste avant d'appeler cette méthode, on ne veut pas réécrire son état en route.
+    if (!this.sourceText.trim()) this._ingestSource();
+
     const newRules = window.AnonymizerCore.buildRules([{ value, category }], { mode: this.anonMode, existing: this.rules });
     const normNew = new Set(newRules.map(r => _norm(r.original)));
     this.rules = [...this.rules.filter(r => !normNew.has(_norm(r.original))), ...newRules];
@@ -522,54 +542,134 @@ class AnonymizerUI {
     });
   }
 
-  bindSelectionBubble() {
-    const $ = id => document.getElementById(id);
-    const bubble = $('anonSelBubble');
-    const btn = $('anonSelBubbleBtn');
-    const annotated = $('anonAnnotated');
-    if (!bubble || !btn || !annotated) return;
-    const showBubble = (rect) => {
-      let top = rect.top - 44;
-      if (top < 8) top = rect.bottom + 8;
-      bubble.style.left = (rect.left + rect.width / 2) + 'px';
-      bubble.style.top = top + 'px';
-      bubble.classList.remove('hidden');
-    };
-    const hideBubble = () => bubble.classList.add('hidden');
+  // Brique réutilisable : pose sur UN volet les écouteurs de sélection et relaie le résultat.
+  // Extraite au round 137 (2026-07-30) parce que la même logique de capture était écrite trois
+  // fois dans ce fichier - et que les trois copies avaient divergé, ce qui est précisément
+  // l'origine du défaut corrigé ci-dessous. onSelect reçoit (texte, rect, volet), ou
+  // (null, null, volet) quand la sélection est vide ou sort du volet.
+  _bindPaneSelection(pane, onSelect) {
     const handleSelection = () => {
       const sel = window.getSelection();
       const txt = (sel.toString() || '').trim();
-      if (txt && sel.rangeCount && annotated.contains(sel.anchorNode)) {
-        this.lastSelection = txt;
-        btn.textContent = '🕵️ Anonymiser « ' + (txt.length > 22 ? txt.slice(0, 22) + '…' : txt) + ' »';
-        const cust = $('anonSelBubbleCustom'); if (cust) cust.classList.add('hidden');
-        showBubble(sel.getRangeAt(0).getBoundingClientRect());
+      if (txt && sel.rangeCount && pane.contains(sel.anchorNode)) {
+        onSelect(txt, sel.getRangeAt(0).getBoundingClientRect(), pane);
       } else {
-        hideBubble();
+        onSelect(null, null, pane);
       }
     };
-    annotated.addEventListener('mouseup', handleSelection);
-    annotated.addEventListener('keyup', () => setTimeout(handleSelection, 0));
-    // Cmd/Ctrl+A : confiner la sélection au champ annoté (sinon le navigateur sélectionne toute la page)
-    annotated.addEventListener('keydown', (e) => {
+
+    pane.addEventListener('mouseup', handleSelection);
+    pane.addEventListener('keyup', () => setTimeout(handleSelection, 0));
+    // Cmd/Ctrl+A : confiner la sélection au volet (sinon le navigateur sélectionne toute la page)
+    pane.addEventListener('keydown', (e) => {
       if ((e.metaKey || e.ctrlKey) && (e.key === 'a' || e.key === 'A')) {
         e.preventDefault();
         const r = document.createRange();
-        r.selectNodeContents(annotated);
+        r.selectNodeContents(pane);
         const s = window.getSelection();
         s.removeAllRanges();
         s.addRange(r);
         handleSelection();
       }
     });
+  }
+
+  bindSelectionBubble() {
+    const $ = id => document.getElementById(id);
+    const bubble = $('anonSelBubble');
+    const btn = $('anonSelBubbleBtn');
+    if (!bubble || !btn) return;
+
+    // Round 137 (2026-07-30) : la bulle est branchée sur les DEUX volets, plus seulement sur
+    // l'annoté. Avant, sélectionner un passage dans « Votre texte » (#anonSource) ne produisait
+    // rien du tout, en silence : aucune bulle, aucun message. Or #anonAnnotated reste vide tant
+    // qu'aucune détection n'a tourné, et la consigne affichée en haut du panneau promet, dès le
+    // premier écran, « Sélectionnez un passage, surlignez, anonymisez ». L'utilisateur qui suivait
+    // la consigne à la lettre se heurtait donc à une fonction muette. Le menu d'actions, lui,
+    // capturait déjà depuis les deux volets : le patron existait, la bulle ne l'avait jamais suivi.
+    const panes = ['anonAnnotated', 'anonSource'].map($).filter(Boolean);
+    if (panes.length === 0) return;
+
+    const showBubble = (rect) => {
+      let top = rect.top - 44;
+      if (top < 8) top = rect.bottom + 8;
+
+      // Round 137 : on démasque AVANT de mesurer. Un élément en display:none a une largeur de 0,
+      // donc mesurer d'abord donnerait un bornage faux.
+      bubble.classList.remove('hidden');
+
+      // `left` désigne le CENTRE de la bulle (le CSS lui applique translateX(-50%)). Sans bornage,
+      // une sélection près du bord gauche poussait ce centre trop à gauche et le début du libellé
+      // sortait de l'écran : mesuré à left: -64px en 390 px de large.
+      var half = bubble.getBoundingClientRect().width / 2;
+      var minCenter = half + 8;
+      var maxCenter = window.innerWidth - half - 8;
+      var center = rect.left + rect.width / 2;
+
+      // Bulle plus large que la fenêtre : les deux bornes s'inversent, on recentre plutôt que de
+      // laisser le bornage la repousser hors cadre.
+      if (maxCenter < minCenter) center = window.innerWidth / 2;
+      else center = Math.min(Math.max(center, minCenter), maxCenter);
+
+      bubble.style.left = center + 'px';
+      bubble.style.top = top + 'px';
+    };
+    const hideBubble = () => bubble.classList.add('hidden');
+
+    const handlePaneSelection = (text, rect) => {
+      if (text !== null) {
+        this.lastSelection = text;
+        btn.textContent = '🕵️ Anonymiser « ' + (text.length > 22 ? text.slice(0, 22) + '…' : text) + ' »';
+        const cust = $('anonSelBubbleCustom'); if (cust) cust.classList.add('hidden');
+        showBubble(rect);
+      } else {
+        hideBubble();
+      }
+    };
+
+    panes.forEach(pane => this._bindPaneSelection(pane, handlePaneSelection));
+
     btn.addEventListener('click', () => {
-      if (this.lastSelection) { this.anonymizeValue(this.lastSelection, this.guessCategory(this.lastSelection)); this.lastSelection = ''; }
+      // Round 143 : passe par le point d'entrée unique, qui bascule aussi la vue. Le message de
+      // succès n'est plus inconditionnel : il ne s'affiche que si un passage a réellement été traité.
+      const traite = this.anonymizeSelectedPassage(this.lastSelection);
       window.getSelection().removeAllRanges();
       hideBubble();
-      this.toast('Passage anonymisé.', 'success');
+      if (!traite) this.toast('Sélectionnez d\'abord un passage dans votre texte, puis cliquez.', 'warning');
     });
-    document.addEventListener('mousedown', (e) => { if (!bubble.contains(e.target) && !annotated.contains(e.target)) hideBubble(); });
+    document.addEventListener('mousedown', (e) => {
+      if (!bubble.contains(e.target) && !panes.some(pane => pane.contains(e.target))) hideBubble();
+    });
     window.addEventListener('scroll', () => hideBubble(), { capture: true });
+  }
+
+  // Round 143 (2026-07-30, vérification navigateur) : POINT D'ENTRÉE UNIQUE pour « anonymiser le
+  // passage sélectionné ». Ce geste existait en DEUX exemplaires - le bouton « Anonymiser la
+  // sélection » et le bouton de la bulle flottante - et un seul des deux basculait l'éditeur en
+  // mode annoté. Celui de la bulle ne le faisait pas.
+  //
+  // Ce que la personne voyait : elle surligne un passage dans « Votre texte », clique la bulle,
+  // reçoit un message « Passage anonymisé » ... et RIEN ne change à l'écran. Ce qui se passait
+  // vraiment : la règle était bien créée et le volet annoté bien mis à jour, mais ce volet est en
+  // display:none tant qu'on reste en mode édition. Le travail était fait, invisible. Seul un clic
+  // sur « Détecter et anonymiser » faisait apparaître le résultat, ce qui donnait l'impression que
+  // la bulle ne servait à rien.
+  //
+  // Renvoie false si aucun passage n'est fourni, pour que l'appelant avertisse au lieu d'annoncer
+  // un succès qui n'a pas eu lieu.
+  anonymizeSelectedPassage(text) {
+    const passage = (text || '').trim();
+    if (!passage) return false;
+
+    // setMode('annotate') ingère la source PUIS rend le volet annoté : c'est lui qui rend le
+    // résultat visible. Sans cette bascule, tout se passe dans un volet masqué.
+    const wrap = document.getElementById('anonEditorWrap');
+    if (wrap && wrap.classList.contains('mode-edit')) this.setMode('annotate');
+
+    this.anonymizeValue(passage, this.guessCategory(passage));
+    this.lastSelection = '';
+    this.toast('Passage anonymisé.', 'success');
+    return true;
   }
 
   anonymizeCustom(value, replacement) {
@@ -600,19 +700,47 @@ class AnonymizerUI {
       bubbleInput.focus();
       bubbleInput.select();
     });
+    // Round 144 (2026-07-30, passe adversariale) : ce chemin « Ma valeur » traînait les deux
+    // défauts corrigés au round 143 sur son jumeau, le bouton « Anonymiser » de la bulle.
+    // (a) Le message de succès partait de façon INCONDITIONNELLE : vider le champ proposé puis
+    //     valider ne créait aucune règle, mais annonçait quand même « Remplacé par votre valeur ».
+    // (b) Aucune bascule en mode annoté : depuis le mode édition, le remplacement était appliqué
+    //     dans un volet en display:none. Rien ne changeait à l'écran.
     const confirm = () => {
       const v = bubbleInput.value.trim();
-      if (this.lastSelection && v) {
-        this.anonymizeCustom(this.lastSelection, v);
-        this.lastSelection = '';
-        if (window.getSelection) window.getSelection().removeAllRanges();
+      if (!this.lastSelection || !v) {
+        this.toast('Sélectionnez un passage et saisissez une valeur de remplacement.', 'warning');
+        bubble.classList.add('hidden');
+        bubbleCustom.classList.add('hidden');
+        return;
       }
+
+      // setMode('annotate') ingère la source PUIS rend le volet annoté : c'est lui qui rend le
+      // résultat visible.
+      const wrap = document.getElementById('anonEditorWrap');
+      if (wrap && wrap.classList.contains('mode-edit')) this.setMode('annotate');
+
+      this.anonymizeCustom(this.lastSelection, v);
+      this.lastSelection = '';
+      if (window.getSelection) window.getSelection().removeAllRanges();
       bubble.classList.add('hidden');
       bubbleCustom.classList.add('hidden');
       this.toast('Remplacé par votre valeur.', 'success');
     };
     bubbleConfirm.addEventListener('click', confirm);
-    bubbleInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); confirm(); } });
+    // Round 144 : Échap referme la sous-bulle et rend le focus au bouton qui l'a ouverte. Elle
+    // contient un champ et un bouton, mais n'offrait aucune sortie au clavier : une personne qui
+    // navigue sans souris y restait piégée, seule la touche Entrée ayant un effet.
+    bubbleInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        confirm();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        bubbleCustom.classList.add('hidden');
+        bubbleCustomBtn.focus();
+      }
+    });
   }
 
   bindActionMenu() {
@@ -620,23 +748,17 @@ class AnonymizerUI {
     const openMenu = () => { const b = $('btnActionsMenu'), mu = $('actionsMenu'); if (b) b.setAttribute('aria-expanded', 'true'); if (mu) mu.classList.remove('hidden'); };
     const closeMenu = () => { const b = $('btnActionsMenu'), mu = $('actionsMenu'); if (b) b.setAttribute('aria-expanded', 'false'); if (mu) mu.classList.add('hidden'); };
 
-    // Capture continue de la sélection (corrige : le clic d'un bouton efface la sélection avant lecture)
-    const annotated = $('anonAnnotated');
-    if (annotated) {
-      const cap = () => { const s = (window.getSelection().toString() || '').trim(); if (s) this.lastSelection = s; };
-      annotated.addEventListener('mouseup', cap);
-      annotated.addEventListener('keyup', cap);
-    }
-    const source = $('anonSource');
-    if (source) {
-      const cap = () => {
-        const sel = window.getSelection();
-        const v = (sel.toString() || '').trim();
-        if (v && sel.rangeCount && source.contains(sel.anchorNode)) this.lastSelection = v;
-      };
-      source.addEventListener('mouseup', cap);
-      source.addEventListener('keyup', cap);
-    }
+    // Capture continue de la sélection (corrige : le clic d'un bouton efface la sélection avant
+    // lecture). Round 137 : troisième et dernière copie de cette logique, ramenée sur la brique
+    // commune _bindPaneSelection. Au passage, le volet annoté vérifie enfin l'appartenance de la
+    // sélection (l'ancienne version ne le faisait que pour le volet source, donc une sélection
+    // faite AILLEURS dans la page pouvait alimenter lastSelection).
+    // Nuance volontairement conservée : ici on ne vide PAS lastSelection quand la sélection est
+    // nulle. Le menu doit encore connaître le dernier passage au moment où l'utilisateur clique un
+    // de ses boutons, geste qui efface justement la sélection du navigateur.
+    ['anonAnnotated', 'anonSource'].map($).filter(Boolean).forEach(pane => {
+      this._bindPaneSelection(pane, (text) => { if (text) this.lastSelection = text; });
+    });
 
     const btn = $('btnActionsMenu'), menu = $('actionsMenu');
     if (btn) btn.addEventListener('click', (e) => { e.stopPropagation(); (menu && menu.classList.contains('hidden')) ? openMenu() : closeMenu(); });
@@ -687,14 +809,12 @@ class AnonymizerUI {
     on('btnAnonymizeSelection', 'click', () => {
       // Lit la sélection courante, sinon la dernière sélection captée (le clic l'a effacée)
       let selText = (window.getSelection().toString() || '').trim();
-      const source = document.getElementById('anonSource');
       if (!selText) selText = this.lastSelection || '';
-      if (!selText) { this.toast('Sélectionnez d\'abord un passage dans votre texte, puis cliquez.', 'warning'); return; }
-      const wrap = document.getElementById('anonEditorWrap');
-      if (wrap && wrap.classList.contains('mode-edit') && source) { this.sourceHtml = source.innerHTML; this.sourceText = this.richText(source); this.setMode('annotate'); }
-      this.anonymizeValue(selText, this.guessCategory(selText));
-      this.lastSelection = '';
-      this.toast('Passage anonymisé.', 'success');
+      // Round 143 : même point d'entrée que la bulle. L'ingestion de #anonSource n'est plus
+      // recopiée ici : setMode('annotate') appelle déjà _ingestSource().
+      if (!this.anonymizeSelectedPassage(selText)) {
+        this.toast('Sélectionnez d\'abord un passage dans votre texte, puis cliquez.', 'warning');
+      }
     });
 
     on('btnAnonymizeAll', 'click', () => {

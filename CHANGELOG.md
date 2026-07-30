@@ -5,7 +5,113 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.133.1] - 2026-07-30
+
+> Livraison ciblée et volontairement étroite : uniquement l'éditeur d'anonymisation partagé
+> (`anonymizer-ui.js`), parce que `/outils/anonymiseur` est PUBLIC et déjà en ligne, alors que le
+> constructeur de prompts reste gaté en mode « révision ». Le reste du lot attend la fin de la
+> boucle adversariale (voir [Unreleased], cible 1.134.0).
+
+### Fixed
+
+- **La bulle « Anonymiser ce passage » ne montrait rien.** Sélectionner un passage puis cliquer la
+  bulle créait bien la règle et affichait « Passage anonymisé », mais l'éditeur restait en mode
+  édition, où le volet annoté est en `display: none`. Rien ne changeait à l'écran, et il fallait
+  cliquer « Détecter et anonymiser » pour voir le résultat, ce qui donnait l'impression que la
+  bulle ne servait à rien. Le geste existait en DEUX exemplaires - la bulle et le bouton
+  « Anonymiser la sélection » - et un seul basculait la vue ; les deux passent maintenant par un
+  point d'entrée unique.
+- **La bulle félicitait même quand elle n'avait rien fait** : le message de succès partait de façon
+  inconditionnelle. Sans sélection, l'outil avertit désormais au lieu de confirmer.
+- **Valeur de remplacement personnalisée (« Ma valeur »)** : mêmes deux défauts sur ce chemin
+  jumeau. Vider le champ proposé puis valider ne créait aucune règle mais annonçait quand même
+  « Remplacé par votre valeur » ; et depuis le mode édition, le remplacement s'appliquait dans un
+  volet masqué.
+- **Sous-bulle « Ma valeur » sans sortie au clavier** : elle contient un champ et un bouton, mais
+  seule la touche Entrée avait un effet - une personne naviguant sans souris y restait piégée.
+  Échap la referme et rend le focus au bouton qui l'a ouverte.
+- **La bulle ignorait le volet « Votre texte »** : elle n'était branchée que sur le volet annoté,
+  qui reste vide tant qu'aucune détection n'a tourné. Suivre la consigne affichée dès le premier
+  écran - « sélectionnez un passage, surlignez, anonymisez » - ne produisait donc rien du tout, en
+  silence.
+- **Anonymisation sans détection préalable sans effet à l'écran** : la règle était créée et le
+  message annonçait « Passage anonymisé », mais la source n'avait jamais été ingérée, donc le rendu
+  n'avait aucun texte sur lequel travailler.
+- **Bulle tronquée sur mobile** : sa position horizontale est bornée dans la fenêtre (elle sortait
+  de l'écran, mesurée à `left: -64px` sur une largeur de 390 px).
+
+Chaque correctif a été vérifié geste par geste dans le navigateur sur l'outil réel, pas seulement
+par lecture de code. Régression : 718 tests Pest verts, 30 fichiers de tests JS verts.
+
 ## [Unreleased]
+
+> Cible : 1.134.0. Publication conditionnée à deux verdicts adversariaux consécutifs sans manque
+> (gate /100). Le constructeur de prompts reste gaté en mode « révision » jusque-là.
+
+### Added
+
+- **Message d'insertion contextuel** : le toast nomme le champ réellement visé au lieu d'annoncer
+  « la tâche » quelle que soit la destination.
+- **Badge « Mise à jour en cours »** sur la carte /outils d'un outil en révision, distinct du
+  « Bientôt » réservé aux outils jamais lancés.
+- **Pack de contexte de génération de tests** (`.claude/refs/test-generation-context.md`) : bloc
+  unique rappelé dans chaque délégation, avec les chemins réels du dépôt, la règle d'indexation
+  des traductions par la chaîne source française, le harnais CommonJS des tests JS et
+  l'obligation du contrôle négatif. Protégé par son propre méta-test.
+
+### Fixed
+
+- **Cible d'insertion figée** : après un passage par le bandeau anti-données-personnelles depuis
+  un champ autre que la tâche, toutes les insertions suivantes atterrissaient dans ce champ
+  périmé, sans aucune indication à l'écran.
+- **Cible effacée par l'ouverture du panneau** : le clic synthétique qui déplie le panneau
+  exécutait le handler d'ouverture manuelle et réinitialisait la cible avant usage. Le texte
+  anonymisé partait dans la tâche pendant que la donnée personnelle restait en place dans le
+  champ qui avait déclenché l'alerte.
+- **Texte anonymisé perdu en silence** : si le panneau d'édition d'une carte était refermé entre le
+  moment où l'on choisissait « Masquer mes infos » et le clic sur « Insérer », le texte partait dans
+  un champ qui n'existait plus à l'écran, avec un message de succès par-dessus. L'outil dit
+  maintenant clairement que le champ n'est plus affiché et n'insère rien, plutôt que d'écrire
+  ailleurs (ce qui recopierait la donnée personnelle au lieu de la masquer).
+- **Le parcours guidé « Masquer mes infos » ne masquait rien** (défaut de confidentialité, présent en
+  production). Deux causes cumulées : l'ouverture automatique déclenchait « Détecter seulement », qui
+  souligne les données repérées sans créer la moindre règle de masquage ; et l'insertion AJOUTAIT le
+  résultat à la suite du champ au lieu de le remplacer, alors que ce champ contient précisément la
+  donnée personnelle. Le champ finissait avec le vrai courriel ET sa copie, le tout sous un message
+  « Texte anonymisé inséré ». Vérifié au navigateur avant et après correction.
+- **Prompt importé impossible à supprimer** de l'historique avant un rechargement de page :
+  l'identifiant public n'était pas utilisé sur ce seul chemin, contrairement à la sauvegarde
+  ordinaire.
+- **Interface anglaise** : quatre libellés de l'outil s'affichaient en français, dont le nom du
+  champ à l'intérieur de l'alerte de données personnelles.
+- **Bouton « Insérer » sans effet visible** : après avoir masqué ses infos depuis un champ autre
+  que la tâche, cliquer sur « Insérer » ne produisait plus aucun message et laissait le panneau
+  ouvert, alors que le texte avait bel et bien été inséré. Une fonction utilitaire de libellé
+  était déclarée dans un bloc inaccessible depuis l'insertion, ce qui interrompait le traitement
+  juste après l'écriture du texte et laissait aussi la cible d'insertion bloquée sur ce champ.
+- **Bulle tronquée sur mobile** : position horizontale bornée dans la fenêtre (mesurée à
+  `left: -64px` en 390 px de large).
+- **Texte d'aide trompeur** : le gabarit de carte ne « pré-remplit » plus automatiquement depuis
+  le correctif de préservation du texte saisi ; le libellé le dit maintenant.
+- **Lien du wizard** vers la bibliothèque dédiée « Mes prompts » au lieu de la page générique.
+- **Outil gaté** : `noindex` sur la page placeholder et exclusion du sitemap, alignés sur le
+  patron déjà appliqué par les deux autres modules gatés.
+- **Focus perdu** après Supprimer et Dupliquer, y compris depuis le menu ⋮ (composant partagé par
+  six modules).
+- **Champ Exemples** désormais surveillé par le garde-fou de données personnelles.
+- **Destination Mistral** : boutons « Ouvrir dans » présents dans les deux rangées.
+- **Accessibilité** : `aria-required` sur les champs persona, bannière de validité annoncée et
+  reliée aux trois boutons qu'elle explique.
+
+### Changed
+
+- **Suite de tests JS** : `npm run test:js` énumère automatiquement `tests/js/*.test.cjs`. La
+  liste était écrite à la main, donc tout nouveau test était silencieusement ignoré.
+- **Cache de vues compilées isolé par worker Paratest** : supprime 26 faux échecs intermittents
+  causés par une course entre workers sur `storage/framework/views`.
+- **Capture de sélection factorisée** dans l'éditeur d'anonymisation : trois copies divergentes
+  de la même logique ramenées à une brique unique. C'est leur divergence qui avait produit le
+  défaut d'origine.
 
 ## [1.133.0] - 2026-07-26
 

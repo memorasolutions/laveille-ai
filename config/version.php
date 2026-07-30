@@ -17,6 +17,22 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.133.1 · 2026-07-30 · fix(outils/anonymiseur) l'éditeur d'anonymisation partagé
+ *     (public/assets/tools/anonymiseur/anonymizer-ui.js), utilisé par /outils/anonymiseur qui est
+ *     PUBLIC, corrigeait mal deux gestes qui promettaient plus qu'ils ne faisaient.
+ *     (1) La bulle « Anonymiser ce passage » créait bien la règle, mais l'éditeur restait en mode
+ *     édition, où le volet annoté est en display:none : rien ne changeait à l'écran et il fallait
+ *     cliquer « Détecter et anonymiser » pour voir le résultat. Le geste existait en DEUX
+ *     exemplaires (bulle + bouton « Anonymiser la sélection ») et un seul basculait la vue ; les
+ *     deux passent désormais par un point d'entrée unique anonymizeSelectedPassage().
+ *     (2) Le chemin « Ma valeur » traînait les deux mêmes défauts : message de succès
+ *     inconditionnel (afficher « Remplacé par votre valeur » même sans sélection ni valeur) et
+ *     aucune bascule de vue. Il avertit maintenant au lieu de féliciter, et rend le résultat
+ *     visible. La sous-bulle se ferme aussi avec Échap, en rendant le focus au bouton qui l'a
+ *     ouverte (elle contient un champ et un bouton, mais n'offrait aucune sortie au clavier).
+ *     Vérifié au navigateur, geste par geste, sur l'outil réel. Le bump de PATCH est ce qui casse
+ *     le cache-buster ?v= : sans lui, les navigateurs garderaient l'ancien JS (Cache-Control
+ *     immutable). Régression : 718 tests Pest verts, 30 fichiers JS verts.
  *   1.120.2 · 2026-07-24 · fix(i18n) correction de 5 endroits avec du texte français tapé sans
  *     accents, trouvés par audit : page de construction Sudoku (public + i18n), description
  *     JSON-LD de la page de jeu Sudoku (indexée par Google, impact SEO direct), libellés de la
@@ -3086,7 +3102,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 133;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,
