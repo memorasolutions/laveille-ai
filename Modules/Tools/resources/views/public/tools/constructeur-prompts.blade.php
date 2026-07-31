@@ -461,7 +461,7 @@
                                         </select>
                                     </div>
                                     <div x-show="personaType === 'custom'" class="form-group mb-0">
-                                        <input type="text" id="cpPersonaCustom" class="form-control" x-model="personaCustom" autocomplete="off" :aria-required="personaType === 'custom'" placeholder="{{ __('Ex: un expert en cybersécurité spécialisé en PME québécoises') }}" aria-label="{{ __('Rôle personnalisé') }}">
+                                        <input type="text" id="cpPersonaCustom" class="form-control" x-model="personaCustom" :aria-required="personaType === 'custom'" autocomplete="off" placeholder="{{ __('Ex: un expert en cybersécurité spécialisé en PME québécoises') }}" aria-label="{{ __('Rôle personnalisé') }}">
                                     </div>
                                 </div>
                             </div>

@@ -114,8 +114,31 @@ function detectEntities(text) {
   // 5. Numéro de permis / matricule (avec contexte)
   const permit = /(?:permis|oiiq|matricule|n[°o]\s*de\s*permis)[^\d]{0,15}(\d{5,})/gi;
   while ((m = permit.exec(text))) push(m[1], 'id', 'Numéro de permis', 0.9);
-  // 6. Adresse civique
-  const address = /\b\d{1,5},?\s+(?:rue|avenue|av\.?|boulevard|boul\.?|chemin|ch\.?|rang|montée|place|impasse)\s+[A-Za-zÀ-ÿ'’\-]+(?:\s+(?:Est|Ouest|Nord|Sud))?/gi;
+  // 6. Adresse civique — capture l'article optionnel (de, du, des, de la, de l') ET le nom de voie
+  // COMPLET, qui peut compter plusieurs mots (« rue de la Grande Allée », « avenue des Pins Ouest »,
+  // « boulevard René-Lévesque Est »). L'ancien motif ne capturait qu'UN SEUL mot après le type de
+  // voie : tout nom de rue québécois introduit par un article laissait le dernier mot survivre en
+  // clair (fuite prouvée par exécution : « 1234 rue des Érables » ne masquait que « rue », et
+  // « Érables » restait visible tel quel dans le texte anonymisé).
+  // Le drapeau global insensible-casse (gi) est volontairement abandonné ici : la répétition
+  // multi-mots du nom de voie s'appuie sur la MAJUSCULE initiale de chaque mot pour savoir où
+  // s'arrêter (sans cette contrainte, elle continuerait d'avaler des mots minuscules suivants et
+  // déborderait sur le reste de la phrase). Les types de voie restent tolérants à la casse réelle
+  // grâce à une alternance explicite Majuscule/minuscule sur leur première lettre.
+  // MOT_VOIE utilise \p{Lu}/\p{Ll} (propriétés Unicode « lettre majuscule »/« lettre minuscule »)
+  // plutôt que la plage littérale [A-ZÀ-Ÿ] utilisée ailleurs dans ce fichier : cette plage inclut
+  // numériquement des MINUSCULES accentuées (à, é, ê…), ce qui aurait permis à un mot minuscule
+  // suivant le nom de voie de se faire passer pour un nouveau mot capitalisé et de faire déborder
+  // la répétition multi-mots sur le reste de la phrase. \p{Lu} exige une vraie majuscule.
+  const ARTICLE_ADRESSE = "(?:de\\s+la\\s+|de\\s+l['’]|du\\s+|des\\s+|de\\s+)";
+  const TYPE_VOIE = "(?:[Rr]ue|[Aa]venue|[Aa]v\\.?|[Bb]oulevard|[Bb]oul\\.?|[Cc]hemin|[Cc]h\\.?|[Rr]ang|[Mm]ont[ée]e|[Pp]lace|[Ii]mpasse)";
+  const MOT_VOIE = "\\p{Lu}(?:\\p{Ll}+|(?=['’]))(?:['’]\\p{Lu}?\\p{Ll}*)*(?:-\\p{Lu}?\\p{Ll}*)*";
+  const address = new RegExp(
+    '\\b\\d{1,5},?\\s+' + TYPE_VOIE + '\\s+' +
+    '(?:' + ARTICLE_ADRESSE + ')?' +
+    MOT_VOIE + '(?:\\s+' + MOT_VOIE + ')*',
+    'gu'
+  );
   while ((m = address.exec(text))) push(m[0], 'address', 'Adresse', 0.85);
   // 4. Code postal canadien
   const postal = /\b[A-Z]\d[A-Z]\s?\d[A-Z]\d\b/g;
@@ -168,20 +191,88 @@ function detectEntities(text) {
   // 14. Nom abrégé après titre de civilité (initiale + nom : « Mme L. Gagnon », « Dr. A. Roy »)
   const titledAbbrev = /\b(?:Dr\.?|M\.?|Mme\.?|Me|Pr|Mr)[^\S\r\n]+([A-ZÀ-Ÿ]\.?[^\S\r\n]+[A-ZÀ-Ÿ][a-zà-ÿ'’\-]+)/g;
   while ((m = titledAbbrev.exec(text))) push(m[1], 'name', 'Nom complet', 0.8);
-  // 2. Noms sans titre (deux mots capitalisés, hors stopwords)
-  const name = /(?<![A-Za-zÀ-ÿ])([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)[^\S\r\n]+([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)(?![A-Za-zÀ-ÿ])/g;
+  // 2. Noms sans titre — élargi pour fermer 4 classes de fuites prouvées par exécution : les
+  // particules (« Jean de La Fontaine », « Pieter van der Berg »), les noms avec apostrophe suivie
+  // d'une MAJUSCULE (« Patrick O'Neil », « Patrick D'Astous », apostrophe droite ou typographique),
+  // les prénoms composés séparés par un espace (« Marie Ève Tremblay »), et les noms tout en
+  // MAJUSCULES (« JEAN TREMBLAY ») ou inversés par une virgule (« Tremblay, Marc »).
+  // Arbitrage retenu pour ce moteur : sur-masquer légèrement plutôt que sous-détecter — une
+  // sous-détection est invisible pour la personne qui copie le texte anonymisé, donc plus
+  // dangereuse pour sa vie privée qu'un faux positif occasionnel sur une expression figée en tête
+  // de phrase (ex. « Le Centre… »). MOTS_IGNORES_SUPPLEMENTAIRES et estMotIgnore (déjà définis plus
+  // haut dans ce fichier) sont réutilisés tels quels ci-dessous, jamais dupliqués.
+  //
+  // Jeton « nom » générique : Majuscule initiale, puis lettres, puis segments optionnels
+  // d'apostrophe (« O'Neil » : apostrophe + Majuscule optionnelle + lettres) et de trait d'union
+  // (« Saint-Pierre », « René-Lévesque »). Construit avec \p{Lu}/\p{Ll} (propriétés Unicode) plutôt
+  // qu'avec la plage littérale [A-ZÀ-Ÿ] utilisée ailleurs dans ce fichier : cette plage inclut
+  // numériquement des MINUSCULES accentuées (à, é, ê…), ce qui laissait un simple « à » isolé se
+  // faire passer pour un second mot capitalisé (faux positif détecté en test : « Contactez-moi à
+  // jean.tremblay@... » masquait « Contactez-moi à » en entier). \p{Lu} exige une vraie majuscule ;
+  // le premier segment exige soit une minuscule après (mot normal), soit une apostrophe immédiate
+  // (« O' », « D' »), jamais une majuscule isolée sans suite.
+  const NAME_WORD = "\\p{Lu}(?:\\p{Ll}+|(?=['’]))(?:['’]\\p{Lu}?\\p{Ll}*)*(?:-\\p{Lu}?\\p{Ll}*)*";
+  // Particules courantes (françaises et néerlandaises/germaniques) pouvant relier un prénom à un nom
+  // de famille sans casser la détection. Les alternatives multi-mots sont placées EN PREMIER
+  // (van der/van den/von der avant van/von seuls) : sinon l'alternance s'arrête au premier mot et
+  // « der »/« den » restent orphelins hors de la capture.
+  const PARTICULE_NOM = "(?:van\\s+der|van\\s+den|von\\s+der|de\\s+la|des|du|de|van|von|di|dos|das|der|le|la)";
+  const name = new RegExp(
+    '(?<![A-Za-zÀ-ÿ])(' + NAME_WORD + ')' +               // g1 : premier mot (prénom)
+    '((?:[^\\S\\r\\n]+' + PARTICULE_NOM + ')*)' +           // g2 : particule(s) minuscule(s) optionnelle(s)
+    '((?:[^\\S\\r\\n]+' + NAME_WORD + '){1,2})' +           // g3 : 1 ou 2 mots majuscules finaux (nom, ou prénom composé + nom)
+    '(?![A-Za-zÀ-ÿ])',
+    'gu'
+  );
   while ((m = name.exec(text))) {
+    const suite = m[3].trim().split(/\s+/); // mots capitalisés de g3, hors particules de g2
     // estMotIgnore() couvre STOPWORDS + MOTS_IGNORES_SUPPLEMENTAIRES (verbes d'introduction,
-    // salutations…) : un mot ignoré ne doit JAMAIS voler la fenêtre d'appariement à deux mots,
-    // sinon le vrai nom de famille qui suit reste orphelin et n'est plus jamais détecté.
-    const w1Ignore = estMotIgnore(m[1], STOPWORDS), w2Ignore = estMotIgnore(m[2], STOPWORDS);
+    // salutations…) : un mot ignoré ne doit JAMAIS voler la fenêtre d'appariement, sinon le vrai
+    // nom de famille qui suit reste orphelin et n'est plus jamais détecté.
+    const w1Ignore = estMotIgnore(m[1], STOPWORDS);
+    const w2Ignore = suite.some((w) => estMotIgnore(w, STOPWORDS));
     if (w1Ignore && !w2Ignore) {
       // 1er mot = mot courant (« Patient », « Concernant », « Appelle »…) : ne PAS consommer
-      // le 2e mot, rembobiner pour capter le vrai nom complet qui le suit (« Marc Tremblay »).
+      // la suite, rembobiner pour capter le vrai nom complet qui la suit (« Marc Tremblay »).
       name.lastIndex = m.index + m[1].length;
       continue;
     }
-    if (!w1Ignore && !w2Ignore) push(`${m[1]} ${m[2]}`, 'name', 'Nom complet', 0.8);
+    if (!w1Ignore && !w2Ignore) {
+      const valeur = (m[1] + m[2] + m[3]).replace(/\s+/g, ' ').trim();
+      push(valeur, 'name', 'Nom complet', 0.8);
+    }
+  }
+  // 2b. Noms tout en MAJUSCULES (« JEAN TREMBLAY ») — fréquent dans les lignes d'identification des
+  // lettres administratives/médicales québécoises. Longueur minimale de 2 lettres consécutives par
+  // mot (évite de confondre une simple initiale avec un nom ; le motif titré ci-dessus gère déjà
+  // « M. Tremblay »). \p{Lu}{2,} (propriété Unicode) plutôt que [A-ZÀ-Ÿ]{2,} pour la même raison
+  // que NAME_WORD ci-dessus : la plage littérale inclut aussi des minuscules accentuées.
+  const NAME_WORD_MAJ = "\\p{Lu}{2,}(?:['’]\\p{Lu}+)?(?:-\\p{Lu}{2,})*";
+  const nameAllCaps = new RegExp(
+    '(?<![A-Za-zÀ-ÿ])(' + NAME_WORD_MAJ + ')[^\\S\\r\\n]+(' + NAME_WORD_MAJ + ')(?![A-Za-zÀ-ÿ])',
+    'gu'
+  );
+  while ((m = nameAllCaps.exec(text))) {
+    const w1Ignore = estMotIgnore(m[1], STOPWORDS), w2Ignore = estMotIgnore(m[2], STOPWORDS);
+    if (w1Ignore && !w2Ignore) { nameAllCaps.lastIndex = m.index + m[1].length; continue; }
+    if (!w1Ignore && !w2Ignore) push(`${m[1]} ${m[2]}`, 'name', 'Nom complet', 0.75);
+  }
+  // 2c. Inversion « Nom, Prénom » (fréquente dans les tableaux/listes triées alphabétiquement). Les
+  // deux composantes sont poussées séparément (firstName/lastName) plutôt que le span complet avec
+  // la virgule : chaque mot est alors remplacé indépendamment à sa position, la virgule reste
+  // intacte, et la logique existante de buildRules()/nameMap (déjà écrite pour firstName/lastName)
+  // s'applique sans code additionnel à dupliquer. FAKE_DATA.cities est réutilisé (jamais dupliqué)
+  // comme liste d'exclusion : sans elle, « Trois-Rivières, Québec » serait pris pour un nom inversé.
+  const VILLES_CONNUES = new Set(FAKE_DATA.cities.map(normalize));
+  const nameInverted = new RegExp(
+    '(?<![A-Za-zÀ-ÿ])(' + NAME_WORD + '),[^\\S\\r\\n]+(' + NAME_WORD + ')(?![A-Za-zÀ-ÿ])',
+    'gu'
+  );
+  while ((m = nameInverted.exec(text))) {
+    if (VILLES_CONNUES.has(normalize(m[1])) || VILLES_CONNUES.has(normalize(m[2]))) continue;
+    const w1Ignore = estMotIgnore(m[1], STOPWORDS), w2Ignore = estMotIgnore(m[2], STOPWORDS);
+    if (!w1Ignore) push(m[1], 'lastName', 'Nom de famille', 0.75);
+    if (!w2Ignore) push(m[2], 'firstName', 'Prénom', 0.75);
   }
   // 15. Prénoms / noms de famille VRAIMENT ISOLÉS des noms complets déjà détectés — couvre le mode
   //     jetons et les occurrences seules (« Geneviève » seul après « Geneviève Côté-Pelletier »).
