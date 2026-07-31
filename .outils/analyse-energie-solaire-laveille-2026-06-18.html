@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analyse : intégrer l'énergie solaire à laveille.ai ?</title>
+  <style>
+    :root {
+      --c-primary: #064E5A;
+      --c-accent: #0B7285;
+      --c-bg: #F8FAFB;
+      --c-text: #1A1D23;
+      --c-card: #FFFFFF;
+      --c-shadow: rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: var(--c-bg);
+      color: var(--c-text);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container { max-width: 960px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+
+    h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--c-primary); }
+
+    .subtitle { font-size: 1.125rem; color: var(--c-text); opacity: 0.85; }
+
+    .verdict-box {
+      background-color: var(--c-card);
+      border-left: 4px solid var(--c-accent);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 8px var(--c-shadow);
+    }
+
+    .verdict-title { font-weight: 700; font-size: 1.5rem; color: var(--c-primary); margin-bottom: 0.75rem; }
+
+    .verdict-text { font-size: 1.125rem; line-height: 1.6; }
+
+    section { margin-bottom: 2.5rem; scroll-margin-top: 2rem; }
+
+    h2 { font-size: 1.5rem; font-weight: 700; color: var(--c-primary); margin-bottom: 1.25rem; }
+
+    h3 { font-size: 1.125rem; font-weight: 600; margin: 1.25rem 0 0.75rem; }
+
+    p { margin-bottom: 1rem; }
+
+    ul, ol { padding-left: 1.25rem; margin-bottom: 1.25rem; }
+
+    li { margin-bottom: 0.5rem; }
+
+    .audience-diagram { display: flex; flex-direction: column; gap: 1rem; margin: 1.5rem 0; }
+
+    .audience-bar { display: flex; flex-direction: column; }
+
+    .audience-label { font-size: 0.95rem; margin-bottom: 0.375rem; font-weight: 600; }
+
+    .bar-container { height: 24px; background-color: #eef5f6; border-radius: 12px; overflow: hidden; }
+
+    .bar-fill { height: 100%; background: var(--c-accent); border-radius: 12px; }
+
+    .bar-fill.segment-c { background-color: var(--c-primary); }
+    .bar-fill.segment-a { background-color: var(--c-accent); }
+    .bar-fill.segment-b { background-color: #66c2a5; }
+
+    .options-list { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .option-card { background-color: var(--c-card); padding: 1.25rem; border-radius: 0.75rem; box-shadow: 0 2px 6px var(--c-shadow); }
+
+    .option-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; gap: 0.75rem; }
+
+    .option-title { font-weight: 600; font-size: 1.125rem; flex: 1; }
+
+    .option-score-badge { background-color: var(--c-accent); color: white; padding: 0.25rem 0.625rem; border-radius: 20px; font-weight: 700; font-size: 0.95rem; min-width: 64px; text-align: center; }
+
+    .option-score-90 .option-score-badge { background-color: #095a67; }
+    .option-score-82 .option-score-badge { background-color: #0B7285; }
+    .option-score-78 .option-score-badge { background-color: #10899d; }
+    .option-score-45 .option-score-badge { background-color: #d9534f; }
+
+    .option-bar { height: 12px; background-color: #eef5f6; border-radius: 6px; overflow: hidden; margin-top: 0.5rem; }
+
+    .option-bar-fill { height: 100%; background: var(--c-accent); border-radius: 6px; }
+
+    .option-score-90 .option-bar-fill { background-color: #095a67; }
+    .option-score-82 .option-bar-fill { background-color: #0B7285; }
+    .option-score-78 .option-bar-fill { background-color: #10899d; }
+    .option-score-45 .option-bar-fill { background-color: #d9534f; }
+
+    .footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #e0e6e8; font-size: 0.95rem; color: #555; text-align: center; }
+
+    @media (max-width: 600px) {
+      body { padding: 1.5rem 0.75rem; }
+      h1 { font-size: 1.875rem; }
+      .subtitle { font-size: 1rem; }
+      .verdict-text { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Faut-il intégrer l'énergie solaire à laveille.ai ?</h1>
+      <div class="subtitle">Analyse complète + verdict — 18 juin 2026</div>
+    </header>
+
+    <div class="verdict-box">
+      <div class="verdict-title">Verdict</div>
+      <div class="verdict-text">« Oui, mais de façon ÉTROITE. » → NON à un hub « énergie solaire » général sous laveille (dilution + risque de page morte). OUI à un angle ciblé « IA × énergie solaire », qui reste dans ton cœur techno, n'attaque pas ton trafic actuel et peut même attirer un nouveau public tech. Ton collègue contribue son EXPERTISE (expert cité/co-auteur), pas un blogue à tenir.</div>
+    </div>
+
+    <section id="question">
+      <h2>1 — La question</h2>
+      <p>Un collègue spécialiste du solaire (qui ne veut pas blogguer) ; le solaire est-il « assez techno » pour laveille ? Est-ce que ça cannibalise le public actuel ou ça en amène un nouveau ? Comment bien le faire ?</p>
+    </section>
+
+    <section id="recherche">
+      <h2>2 — Ce que dit la recherche (juin 2026)</h2>
+      <p>4 constats :</p>
+      <ul>
+        <li><strong>(1) Solaire au Québec = niche en décollage :</strong> Hydro-Québec vise ~125 000 autoproducteurs solaires d'ici 2035 (~3 % des clients) ; subventions fortes (LogisVert 1 000 $/kW jusqu'à 40 % du coût + crédit fédéral 30 % jusqu'en 2034, cumul jusqu'à ~64 % du CAPEX). Public : propriétaires (maison 5-10 kW), PME/ICI, agriculteurs, municipalités. [Sources : Hydro-Québec, installationsolairequebec, brancheqc]</li>
+        <li><strong>(2) IA × solaire = sujet techno crédible :</strong> prévision de production, optimisation d'autoconsommation, dimensionnement, maintenance prédictive, jumeaux numériques ; angle « double révolution » (l'IA a besoin d'énergie ET optimise le solaire ; solaire pour datacenters). [Sources : icgeai, solar-display, minesparis.psl]</li>
+        <li><strong>(3) Dilution de l'autorité :</strong> on PEUT ajouter une verticale cleantech SANS tuer l'autorité IA SI elle est encapsulée comme un cluster bien délimité et LIÉ au cœur. La dilution arrive quand le volume hors-cœur explose, avec des pages orphelines et peu de maillage. Un cluster cleantech LIÉ à l'IA augmente même le potentiel de citations par les IA. [Sources : routinezero, h1site, natural-net]</li>
+        <li><strong>(4) Chevauchement d'audience :</strong> pas d'étude directe, mais déductible. 3 segments — A « tech-first climate-aware » (devs, ingénieurs énergie : « optimiser le solaire avec l'IA », « empreinte énergétique de l'IA »), B « cleantech-first » (installateurs, proprios PV : « monitoring PV », « prévision production »), C « IA généraliste » (= le public ACTUEL de laveille : enseignants, secteur public). L'overlap fort est en A ; faible entre B et le public actuel C. [Sources : arcep/credoc, cleantech, solora]</li>
+      </ul>
+    </section>
+
+    <section id="cannibalisation">
+      <h2>3 — Cannibalisation ou expansion ?</h2>
+      <div class="audience-diagram">
+        <div class="audience-bar">
+          <div class="audience-label">Segment C (public actuel) — affinité avec le contenu actuel de laveille : 95 %</div>
+          <div class="bar-container"><div class="bar-fill segment-c" style="width: 95%;"></div></div>
+        </div>
+        <div class="audience-bar">
+          <div class="audience-label">Segment A (tech-climat) — affinité avec le contenu actuel de laveille : 55 %</div>
+          <div class="bar-container"><div class="bar-fill segment-a" style="width: 55%;"></div></div>
+        </div>
+        <div class="audience-bar">
+          <div class="audience-label">Segment B (installateurs/proprios) — affinité avec le contenu actuel de laveille : 20 %</div>
+          <div class="bar-container"><div class="bar-fill segment-b" style="width: 20%;"></div></div>
+        </div>
+      </div>
+      <p>Pas de cannibalisation (intentions de recherche différentes, le solaire ne vole pas ton trafic IA) ; mais faible synergie sauf au pont IA×énergie (segment A). Donc le solaire général amène un public DIFFÉRENT et peu engagé par ton contenu actuel ; l'angle IA×solaire amène un public qui PEUT aussi aimer ton cœur.</p>
+    </section>
+
+    <section id="options">
+      <h2>4 — Options notées sur 100</h2>
+      <div class="options-list">
+        <div class="option-card option-score-82">
+          <div class="option-header">
+            <div class="option-title">A. Ne rien ajouter (garder le focus IA)</div>
+            <div class="option-score-badge">82/100</div>
+          </div>
+          <p>Protège l'autorité et évite un 2e « blog construction » mort ; mais on perd l'expertise du collègue et un angle techno réel.</p>
+          <div class="option-bar"><div class="option-bar-fill" style="width: 82%;"></div></div>
+        </div>
+
+        <div class="option-card option-score-45">
+          <div class="option-header">
+            <div class="option-title">B. Hub « énergie solaire » général sous laveille (marque unique)</div>
+            <div class="option-score-badge">45/100</div>
+          </div>
+          <p>Dilution si le volume hors-cœur grossit, audience peu alignée, et comme le collègue ne veut pas écrire → risque élevé de section orpheline/morte (précédent : le blog « construction » jamais déployé).</p>
+          <div class="option-bar"><div class="option-bar-fill" style="width: 45%;"></div></div>
+        </div>
+
+        <div class="option-card option-score-90">
+          <div class="option-header">
+            <div class="option-title">C. Angle ÉTROIT « IA × énergie solaire » (cluster on-brand lié au cœur)</div>
+            <div class="option-score-badge">90/100</div>
+          </div>
+          <p>⭐ RECOMMANDÉ : reste dans le cœur IA/techno (étend l'autorité au lieu de la diluer, hausse le potentiel de citations IA), ne cannibalise pas, touche le segment A + une partie du public actuel ; le collègue est expert cité (faits, 1 à 3 contenus), pas blogueur.</p>
+          <div class="option-bar"><div class="option-bar-fill" style="width: 90%;"></div></div>
+        </div>
+
+        <div class="option-card option-score-78">
+          <div class="option-header">
+            <div class="option-title">D. Site/sous-domaine séparé pour le collègue, cross-linké</div>
+            <div class="option-score-badge">78/100</div>
+          </div>
+          <p>Propre si le collègue veut une vraie présence solaire complète (zéro dilution de laveille), il en est l'auteur ; MAIS s'il ne s'engage pas à produire, un site séparé meurt aussi ; sous-domaine = autorité moins partagée.</p>
+          <div class="option-bar"><div class="option-bar-fill" style="width: 78%;"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="plan">
+      <h2>5 — Comment bien le faire (plan recommandé, option C)</h2>
+      <ol>
+        <li><strong>1 à 3 contenus ciblés sous l'angle techno :</strong> « Comment l'IA optimise la production solaire », « L'empreinte énergétique de l'IA et le rôle du solaire », « Prévoir sa production solaire avec l'IA ».</li>
+        <li><strong>Le collègue = EXPERT cité / co-signataire</strong> (E-E-A-T : crédibilité, faits vérifiés), sans tenir de blogue.</li>
+        <li><strong>Maillage vers le cœur</strong> (glossaire IA, annuaire, constructeur de prompts) ; garder le ratio solaire &lt;&lt; IA (rester « site IA avec un angle énergie », jamais « magazine généraliste »).</li>
+        <li><strong>Structure GEO/AEO</strong> (H2 en questions, réponse-d'abord, FAQ).</li>
+        <li><strong>Mesurer dans GA4 avant d'investir plus</strong> ; si l'angle marche, envisager D (site dédié) pour un vrai projet solaire.</li>
+      </ol>
+    </section>
+
+    <section id="garde-fous">
+      <h2>6 — Garde-fous</h2>
+      <p>Ne pas refaire l'erreur du blog « construction » (hors-cœur, jamais déployé) ; un contenu sans auteur engagé meurt ; ne pas laisser le solaire dépasser l'IA en volume ; décision finale = brainstorm avec l'utilisateur.</p>
+    </section>
+
+    <footer class="footer">
+      <p>Rapport généré pour brainstorm — aucune modification du site effectuée. laveille.ai — 18 juin 2026.</p>
+    </footer>
+  </div>
+</body>
+</html>

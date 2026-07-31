@@ -1,0 +1,70 @@
+# Platform card - Simulation E2E "Module Journal personnel" (laveille.ai)
+# Genere par /sim - Phase 0 cadrage. Defauts appliques faute de reponse explicite,
+# revisables au gate Phase 2.5 (plan-simulation.html) avant tout "go".
+
+run_id: JOURNAL-2026-07-11
+
+environment:
+  mode: local
+  url: https://laveilledestef.test
+  server: Herd
+  db: mysql (la_veille_de_stef_v2)
+  mail: log driver (storage/logs/laravel.log - OTP lus en local, aucun envoi reel)
+  rationale: >
+    Zero casse : le module Journal vient d'etre deploye en prod (v1.103.0) avec un
+    seul utilisateur reel (stephane@memora.ca). Toute simulation en prod risquerait
+    de creer des journaux/signalements visibles publiquement. Local uniquement pour
+    toute action d'ecriture ; prod = hors scope de cette simulation.
+
+scope:
+  module: Modules/Journal (constructeur, blocs, integrations, moderation)
+  inclus:
+    - Constructeur Journal (JournalBuilder Livewire) - reglages, blocs texte/image/video/source, reorder, publish toggle
+    - Pages publiques (index "Mes journaux", show, create, edit)
+    - Points d'integration externes ("+ Ajouter a mon journal" sur Actualites/Glossaire/Annuaire)
+    - Signaler (Report) + moderation admin + avis-et-avis (takedown)
+    - Permissions/IDOR (proprietaire seul peut editer/supprimer, visibilite publie vs prive)
+  exclus:
+    - Reste du site (Academy, Tools, News CRUD, etc.) - deja simule/teste ailleurs
+    - Paiements/Stripe (hors scope, gele)
+
+roles:
+  - id: guest
+    label: Invite non connecte
+    account: aucun
+  - id: owner
+    label: Proprietaire de journal (compte reel existant)
+    account: stephane@memora.ca
+    notes: seul utilisateur reel de la base ; aussi superadmin (couvre le role admin)
+  - id: other_user
+    label: Second utilisateur (test frontieres de propriete / anti-IDOR)
+    account: SIM_JOURNAL-2026-07-11_user2@memora.ca
+    notes: >
+      Compte synthetique local uniquement, cree via tinker, connexion OTP via log
+      mail (aucun envoi reel). Sert a prouver qu'un utilisateur ne peut PAS
+      editer/supprimer/voir-en-brouillon le journal d'un autre.
+  - id: admin
+    label: Moderateur / superadmin
+    account: stephane@memora.ca
+    notes: meme compte que owner - capacite testee separement (page moderation /admin/community)
+
+test_data_prefix: "SIM_JOURNAL-2026-07-11"
+
+success_criteria:
+  - 100% des FEAT_xxx couverts (frontend + backend prouve)
+  - 0 regression apres tout correctif (regression complete relancee)
+  - 0 popup navigateur native (alert/confirm/prompt)
+  - 0 erreur console JS non attendue
+  - Permissions IDOR verifiees (positif + negatif) pour owner/other_user/guest/admin
+
+risky_actions: none (donnees synthetiques locales uniquement, aucun paiement)
+
+gates_phase0:
+  wcag: true
+  console_reseau: true
+  regression_visuelle: informative
+  dast: informative
+  reproductibilite: true
+  determinisme: true
+  flakiness: true
+  autres: defauts standard skill /simulation (voir references/gates-phase0.md)

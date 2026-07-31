@@ -4,6 +4,11 @@
 <div style="position:relative; display:inline-block;" x-data="{
     feedback: null,
     busy: false,
+    i18n: {
+        shared: {{ \Illuminate\Support\Js::from(__('Partagé')) }},
+        copied: {{ \Illuminate\Support\Js::from(__('Copié dans le presse-papier')) }},
+        error: {{ \Illuminate\Support\Js::from(__('Erreur de partage')) }}
+    },
     share() {
         if (this.busy) return;
         this.busy = true;
@@ -54,8 +59,8 @@
         style="border-radius:50%; width:44px; height:44px; min-width:44px; min-height:44px; padding:0; line-height:1; flex-shrink:0;"
         @click="share()"
         :disabled="busy"
-        aria-label="Partager {{ e($tool->name) }} sur les reseaux sociaux"
-        title="Partager {{ e($tool->name) }}">
+        aria-label="{{ __('Partager :name sur les réseaux sociaux', ['name' => $tool->name]) }}"
+        title="{{ __('Partager :name', ['name' => $tool->name]) }}">
         <svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;" aria-hidden="true" focusable="false">
             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
             <polyline points="16 6 12 2 8 6"></polyline>
@@ -72,7 +77,7 @@
         aria-live="polite"
         aria-atomic="true"
         x-bind:style="'position:fixed; bottom:20px; right:20px; z-index:9999; padding:12px 16px; border-radius:8px; color:#ffffff; font-size:0.9rem; font-weight:500; box-shadow:0 4px 12px rgba(0,0,0,0.2); background-color:' + (feedback === 'error' ? '#991b1b' : '#065f46')">
-        <span x-text="feedback === 'shared' ? 'Partage' : feedback === 'copied' ? 'Copie dans le presse-papier' : 'Erreur de partage'"></span>
+        <span x-text="feedback === 'shared' ? i18n.shared : feedback === 'copied' ? i18n.copied : i18n.error"></span>
     </div>
 </div>
 

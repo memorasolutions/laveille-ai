@@ -1,0 +1,1832 @@
+- generic [ref=e2]:
+  - dialog "Configurons vos services" [ref=e2805]:
+    - button "Ignorer" [ref=e5] [cursor=pointer]:
+      - img [ref=e463]
+    - generic [ref=e8]:
+      - banner [ref=e2278]:
+        - heading "Configurons vos services" [level=2] [ref=e2806]
+      - generic [ref=e2810]:
+        - generic [ref=e2811]:
+          - generic [ref=e2812]:
+            - paragraph [ref=e2814]: "* Indique un champ obligatoire"
+            - generic [ref=e2815]:
+              - img [ref=e2816]
+              - paragraph [ref=e2818]: Vos services ne sont plus publiés. Modifiez et publiez à nouveau vos services pour les ajouter à votre profil.
+          - generic [ref=e2819]:
+            - generic [ref=e2820]:
+              - paragraph [ref=e2821]: Services fournis
+              - paragraph [ref=e2822]: Ajouter jusqu’à 10 services*
+            - generic [ref=e2824]:
+              - button "Services fournis, Ajoutez jusqu’à 10 services, requis, Supprimer Cybersécurité" [active] [ref=e2825] [cursor=pointer]:
+                - generic "Services fournis, Ajoutez jusqu’à 10 services, requis, Supprimer Cybersécurité" [ref=e2826]:
+                  - checkbox "Cybersécurité"
+                  - generic [ref=e2827]:
+                    - text: Cybersécurité
+                    - img [ref=e2828]
+              - button "Services fournis, Ajoutez jusqu’à 10 services, requis, Supprimer Développement SaaS" [ref=e2830] [cursor=pointer]:
+                - generic "Services fournis, Ajoutez jusqu’à 10 services, requis, Supprimer Développement SaaS" [ref=e2831]:
+                  - checkbox "Développement SaaS"
+                  - generic [ref=e2832]:
+                    - text: Développement SaaS
+                    - img [ref=e2833]
+              - button "Services fournis, Ajoutez jusqu’à 10 services, requis, Supprimer Sécurité de l'information" [ref=e2835] [cursor=pointer]:
+                - generic "Services fournis, Ajoutez jusqu’à 10 services, requis, Supprimer Sécurité de l'information" [ref=e2836]:
+                  - checkbox "Sécurité de l'information"
+                  - generic [ref=e2837]:
+                    - text: Sécurité de l'information
+                    - img [ref=e2838]
+              - button "Services fournis, Ajoutez jusqu’à 10 services, requis, Supprimer Développement de logiciels personnalisés" [ref=e2840] [cursor=pointer]:
+                - generic "Services fournis, Ajoutez jusqu’à 10 services, requis, Supprimer Développement de logiciels personnalisés" [ref=e2841]:
+                  - checkbox "Développement de logiciels personnalisés"
+                  - generic [ref=e2842]:
+                    - text: Développement de logiciels personnalisés
+                    - img [ref=e2843]
+              - button "Services fournis, Ajoutez jusqu’à 10 services, requis, Supprimer Conception web" [ref=e2845] [cursor=pointer]:
+                - generic "Services fournis, Ajoutez jusqu’à 10 services, requis, Supprimer Conception web" [ref=e2846]:
+                  - checkbox "Conception web"
+                  - generic [ref=e2847]:
+                    - text: Conception web
+                    - img [ref=e2848]
+              - button "Services fournis, Ajoutez jusqu’à 10 services, requis, Supprimer Développement web" [ref=e2850] [cursor=pointer]:
+                - generic "Services fournis, Ajoutez jusqu’à 10 services, requis, Supprimer Développement web" [ref=e2851]:
+                  - checkbox "Développement web"
+                  - generic [ref=e2852]:
+                    - text: Développement web
+                    - img [ref=e2853]
+            - link "Services fournis, Ajoutez jusqu’à 10 services, requis, Bouton Ajouter des services" [ref=e2855] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/services/page/lapointestephane/edit/
+              - generic [ref=e2857]: + Ajouter des services
+            - generic [ref=e2912]:
+              - img [ref=e2913]
+              - paragraph [ref=e2915]: Vous pouvez sélectionner jusqu’à 10 services. Vous devez en ajouter au moins 1.
+          - generic [ref=e2858]:
+            - button [ref=e2859] [cursor=pointer]:
+              - group [ref=e2860]:
+                - paragraph [ref=e2861]: À propos
+                - paragraph [ref=e2862]: Parlez-nous de vos services, de votre expérience et de ce qui vous distingue des autres.
+            - generic [ref=e2863]:
+              - generic [ref=e2865]: Ajouter une description
+              - textbox "À propos, Modifier plusieurs lignes de la description, Parlez-nous de vos services, de votre expérience et de ce qui vous distingue des autres." [ref=e2866]:
+                - /placeholder: "Exemple : plus de 10 ans d’expérience dans la conception de marques pour des startups et des petites entreprises."
+                - text: "Je crée des sites web et applications sur mesure (Laravel/PHP) avec CRM, facturation, prise de rendez-vous et IA générative, adaptés à vos besoins. Preuve de compétence : j'ai bâti laveille.ai, plateforme de veille technologique et IA, qui démontre mon savoir-faire en SEO, UX et IA. Conformité Loi 25 et RGPD intégrée dès la conception. Basé à L'Ancienne-Lorette, je travaille à distance. Pas de templates, du sur mesure pour votre croissance. Contactez-moi pour en parler."
+              - paragraph [ref=e2868]:
+                - text: 474/500
+                - generic [ref=e2869]: 474 sur 500 caractères
+          - generic [ref=e2870]:
+            - generic [ref=e2871]:
+              - paragraph [ref=e2872]: Lieu de travail
+              - paragraph [ref=e2873]: Sélectionnez toutes les réponses pertinentes*
+            - generic [ref=e2874]:
+              - checkbox "Regroupement des lieux de travail, Sélectionnez toutes les réponses pertinentes, requis, L'Ancienne-Lorette, Québec" [checked] [ref=e2875] [cursor=pointer]:
+                - generic [ref=e2876]:
+                  - generic [ref=e2877]:
+                    - img
+                  - paragraph [ref=e2879]: L'Ancienne-Lorette, Québec
+              - checkbox "Regroupement des lieux de travail, Sélectionnez toutes les réponses pertinentes, requis, Je suis disponible pour travailler à distance" [checked] [ref=e2880] [cursor=pointer]:
+                - generic [ref=e2881]:
+                  - generic [ref=e2882]:
+                    - img
+                  - paragraph [ref=e2884]: Je suis disponible pour travailler à distance
+          - generic [ref=e2885]:
+            - generic [ref=e2886]:
+              - paragraph [ref=e2887]: Tarifs
+              - paragraph [ref=e2888]:
+                - text: Choisissez comment vous voulez afficher les informations sur les prix de votre Page.
+                - link "En savoir plus" [ref=e2889] [cursor=pointer]:
+                  - /url: https://www.linkedin.com/help/linkedin/answer/a569554/
+                  - strong [ref=e2890]: En savoir plus
+              - paragraph [ref=e2891]: Sélectionnez une option*
+            - radiogroup
+          - generic [ref=e2892]:
+            - generic [ref=e2893]:
+              - paragraph [ref=e2894]: Messages
+              - paragraph [ref=e2895]:
+                - text: Ceci mettra vos préférences à jour pour Open Profile et vos InMails.
+                - link "En savoir plus" [ref=e2896] [cursor=pointer]:
+                  - /url: https://www.linkedin.com/help/linkedin/answer/a545663/
+                  - strong [ref=e2897]: En savoir plus
+            - checkbox "Autorisez les membres de LinkedIn qui ne font pas partie de vos relations à vous envoyer des messages gratuitement via Open Profile" [checked] [ref=e2898] [cursor=pointer]:
+              - generic [ref=e2899]:
+                - generic [ref=e2900]:
+                  - checkbox [checked]
+                  - img
+                - paragraph [ref=e2903]: Autorisez les membres de LinkedIn qui ne font pas partie de vos relations à vous envoyer des messages gratuitement via Open Profile
+        - generic [ref=e2906]:
+          - paragraph [ref=e2907]: Vos services seront visibles sur votre profil et sur votre Page de services.
+          - button "Publier" [ref=e2908] [cursor=pointer]:
+            - generic [ref=e2910]: Publier
+    - heading "0 notification" [level=2] [ref=e2911]
+  - generic [ref=e30]:
+    - generic:
+      - generic "Ignorer le menu de navigation":
+        - generic [ref=e31]:
+          - button "Passer au contenu principal" [ref=e32] [cursor=pointer]:
+            - generic [ref=e34]: Passer au contenu principal
+          - button "Skip to contenu principal" [ref=e35] [cursor=pointer]:
+            - generic [ref=e37]: Skip to contenu principal
+          - button "Skip to de côté" [ref=e38] [cursor=pointer]:
+            - generic [ref=e40]: Skip to de côté
+          - button "Skip to pied de page" [ref=e41] [cursor=pointer]:
+            - generic [ref=e43]: Skip to pied de page
+          - button "Fermer le menu de navigation" [ref=e45] [cursor=pointer]:
+            - img [ref=e504]
+    - generic [ref=e48]:
+      - banner [ref=e50]:
+        - generic [ref=e53]:
+          - button "LinkedIn" [ref=e506] [cursor=pointer]:
+            - img "LinkedIn" [ref=e507]
+          - generic [ref=e56]:
+            - button "Rechercher" [ref=e59]:
+              - generic [ref=e60]:
+                - img [ref=e509]
+                - paragraph [ref=e63]: Rechercher
+            - dialog [ref=e64]:
+              - generic [ref=e67]:
+                - status [ref=e68]
+                - generic [ref=e69]:
+                  - search [ref=e71]:
+                    - generic [ref=e72]:
+                      - img [ref=e511]
+                      - textbox "Rechercher" [ref=e75]
+                  - button "Rechercher" [disabled] [ref=e77]:
+                    - generic:
+                      - img
+          - generic [ref=e79]:
+            - figure [ref=e618]
+            - navigation [ref=e83]:
+              - list [ref=e84]:
+                - listitem [ref=e85]:
+                  - button "Accueil, 1 nouvelle notification" [ref=e86] [cursor=pointer]:
+                    - img [ref=e88]
+                    - generic [ref=e92]: Accueil
+                - listitem [ref=e93]:
+                  - link "Réseau, 0 nouvelle notification" [ref=e94] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/mynetwork
+                    - img [ref=e96]
+                    - generic [ref=e99]: Mon réseau
+                - listitem [ref=e100]:
+                  - link "Offres d’emploi, 0 nouvelle notification" [ref=e101] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/jobs/
+                    - img [ref=e103]
+                    - generic [ref=e106]: Emplois
+                - listitem [ref=e107]:
+                  - link "Messages, 0 nouvelle notification" [ref=e108] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/messaging/
+                    - img [ref=e110]
+                    - generic [ref=e113]: Messagerie
+                - listitem [ref=e114]:
+                  - link "Notifications, 1 nouvelle notification" [ref=e115] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/notifications/
+                    - img [ref=e117]
+                    - generic [ref=e121]: Notifications
+                - listitem [ref=e122]:
+                  - button "Vous" [ref=e123] [cursor=pointer]:
+                    - figure [ref=e125]
+                    - generic [ref=e127]:
+                      - text: Vous
+                      - img [ref=e619]
+            - navigation [ref=e131]:
+              - list [ref=e132]:
+                - listitem [ref=e133]:
+                  - button "Pour les entreprises" [ref=e134] [cursor=pointer]:
+                    - img [ref=e136]
+                    - generic [ref=e139]:
+                      - text: Pour les entreprises
+                      - img [ref=e621]
+                - listitem [ref=e141]:
+                  - link "Faire de la publicité, 0 nouvelle notification" [ref=e142] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/campaignmanager/accounts/
+                    - img [ref=e623]
+                    - generic [ref=e146]: Faire de la publicité
+      - generic [ref=e148]:
+        - toolbar [ref=e149]:
+          - generic [ref=e153]:
+            - link "Stephane Lapointe" [ref=e154] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/lapointestephane/
+              - generic "Stephane Lapointe" [ref=e155]:
+                - figure [ref=e156]
+                - generic [ref=e157]:
+                  - paragraph [ref=e158]: Stephane Lapointe
+                  - paragraph [ref=e160]: "Fondateur de MEMORA : Au carrefour de la pédagogie, de l’IA et des solutions numériques sur mesure (Laravel/Web)"
+            - generic [ref=e161]:
+              - button "Ressources" [ref=e163] [cursor=pointer]:
+                - generic [ref=e165]: Ressources
+              - button "Améliorer le profil" [ref=e167] [cursor=pointer]:
+                - generic [ref=e169]: Améliorer le profil
+              - link "Ajouter une section" [ref=e171] [cursor=pointer]:
+                - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                - generic [ref=e173]: Ajouter une section
+              - button "Mes objectifs" [ref=e175] [cursor=pointer]:
+                - generic [ref=e177]: Mes objectifs
+        - main [ref=e178]:
+          - generic [ref=e180]:
+            - region "Contenu principal" [ref=e181]:
+              - generic [ref=e183]:
+                - generic [ref=e188]:
+                  - generic [ref=e189]:
+                    - generic [ref=e190]:
+                      - button [ref=e192] [cursor=pointer]:
+                        - figure [ref=e193]:
+                          - img "Photo de couverture" [ref=e194]
+                      - button "Modifier l’image d’arrière-plan" [ref=e198] [cursor=pointer]:
+                        - img [ref=e626]
+                    - link "Photo de profil" [ref=e201] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                      - generic "Photo de profil" [ref=e202]:
+                        - figure [ref=e203]
+                    - generic [ref=e204]:
+                      - link "Stephane est un membre Premium" [ref=e628] [cursor=pointer]:
+                        - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                        - img "Stephane est un membre Premium" [ref=e629]
+                      - link "Modifier le profil" [ref=e208] [cursor=pointer]:
+                        - /url: https://www.linkedin.com/in/lapointestephane/edit/intro/
+                        - img [ref=e631]
+                  - generic [ref=e211]:
+                    - generic [ref=e212]:
+                      - generic [ref=e214]:
+                        - link "Stephane Lapointe Voir les vérifications de Stephane" [ref=e633] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                          - generic [ref=e220]:
+                            - heading "Stephane Lapointe" [level=2] [ref=e221]
+                            - img "Voir les vérifications de Stephane" [ref=e634]
+                        - paragraph [ref=e223]: "Fondateur de MEMORA : Au carrefour de la pédagogie, de l’IA et des solutions numériques sur mesure (Laravel/Web)"
+                        - generic [ref=e224]:
+                          - paragraph [ref=e225]: L'Ancienne-Lorette, Québec, Canada
+                          - paragraph [ref=e226]: ·
+                          - paragraph [ref=e227]:
+                            - link "Coordonnées" [ref=e228] [cursor=pointer]:
+                              - /url: "#"
+                      - generic [ref=e230]:
+                        - button "MEMORA solutions" [ref=e231] [cursor=pointer]:
+                          - generic [ref=e232]:
+                            - figure [ref=e233]:
+                              - img [ref=e636]
+                            - paragraph [ref=e237]: MEMORA solutions
+                        - button "Université de Sherbrooke" [ref=e238] [cursor=pointer]:
+                          - generic [ref=e239]:
+                            - figure [ref=e240]
+                            - paragraph [ref=e244]: Université de Sherbrooke
+                    - button "MEMORA solutions" [ref=e245]:
+                      - link "MEMORA solutions" [ref=e246] [cursor=pointer]:
+                        - /url: https://www.linkedin.com/safety/go/?url=https%3A%2F%2Fmemora%2Esolutions&urlhash=7CjE&mt=7ndoUSOBxPqXXDsnLYiTSTPzzutWjA-tvllTFnwyupZ_9AfDuWlcX-HrYTQLP_y-h1QHeNozsyFQrHrTs2P5Ng2_190&isSdui=true
+                        - text: MEMORA solutions
+                        - img [ref=e642]
+                    - link "Plus de 500 relations" [ref=e249] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/mynetwork/invite-connect/connections/
+                      - paragraph [ref=e250]: Plus de 500 relations
+                    - generic [ref=e254]:
+                      - button "Mes objectifs" [ref=e256] [cursor=pointer]:
+                        - generic [ref=e258]: Mes objectifs
+                      - link "Ajouter une section" [ref=e260] [cursor=pointer]:
+                        - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                        - generic [ref=e262]: Ajouter une section
+                      - button "Améliorer le profil" [ref=e264] [cursor=pointer]:
+                        - generic [ref=e266]: Améliorer le profil
+                      - button "Ressources" [ref=e268] [cursor=pointer]:
+                        - generic [ref=e270]: Ressources
+                  - generic [ref=e273]:
+                    - list [ref=e275]:
+                      - listitem [ref=e276]:
+                        - generic [ref=e277]:
+                          - link "À l’écoute de nouvelles opportunités · Recruteurs uniquement L'Ancienne-Lorette, QC | Sur site · Hybride · À distance Afficher les détails" [ref=e278] [cursor=pointer]:
+                            - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                            - generic [ref=e279]:
+                              - paragraph [ref=e281]:
+                                - strong [ref=e283]: À l’écoute de nouvelles opportunités · Recruteurs uniquement
+                              - paragraph [ref=e285]: L'Ancienne-Lorette, QC | Sur site · Hybride · À distance
+                              - paragraph [ref=e287]: Afficher les détails
+                          - button "Modifier" [ref=e288] [cursor=pointer]:
+                            - img [ref=e644]
+                      - listitem [ref=e291]:
+                        - generic [ref=e292]:
+                          - link "Indiquez que vous recrutez et attirez des candidats qualifiés. Commencer" [ref=e293] [cursor=pointer]:
+                            - /url: /in/lapointestephane/opportunities/hiring-opportunities/onboarding/
+                            - generic [ref=e294]:
+                              - paragraph [ref=e295]:
+                                - strong [ref=e296]: Indiquez que vous recrutez
+                                - text: et attirez des candidats qualifiés.
+                              - paragraph [ref=e298]: Commencer
+                          - button "Fermer" [ref=e299] [cursor=pointer]:
+                            - img [ref=e646]
+                      - listitem [ref=e302]:
+                        - generic [ref=e304]:
+                          - link "Présentez vos services sous la forme d’une section dans votre profil pour que les utilisateurs trouvent facilement votre offre. Ajouter des services" [ref=e305] [cursor=pointer]:
+                            - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/education/
+                            - generic [ref=e306]:
+                              - paragraph [ref=e307]:
+                                - strong [ref=e308]: Présentez vos services
+                                - text: sous la forme d’une section dans votre profil pour que les utilisateurs trouvent facilement votre offre.
+                              - paragraph [ref=e310]: Ajouter des services
+                          - button "Fermer" [ref=e311] [cursor=pointer]:
+                            - img [ref=e648]
+                    - button "Suivant" [ref=e314] [cursor=pointer]:
+                      - img [ref=e650]
+                - generic [ref=e653]:
+                  - generic [ref=e657]:
+                    - generic [ref=e659]:
+                      - heading "Suggestions personnalisées" [level=2] [ref=e660]
+                      - generic [ref=e661]:
+                        - img [ref=e662]
+                        - paragraph [ref=e664]: Privé
+                    - list [ref=e670]:
+                      - listitem [ref=e671]:
+                        - generic [ref=e675]:
+                          - generic [ref=e676]:
+                            - generic [ref=e677]:
+                              - figure [ref=e678]:
+                                - img [ref=e679]
+                              - paragraph [ref=e685]: Votre intitulé de poste actuel est-il Fondateur chez MEMORA solutions ?
+                            - paragraph [ref=e686]: Il est important de tenir votre profil à jour pour que les autres utilisateurs puissent vous trouver
+                            - link "Confirmer le poste actuel" [ref=e687] [cursor=pointer]:
+                              - /url: https://www.linkedin.com/in/lapointestephane/edit/forms/position/2712398587/
+                              - generic [ref=e689]: Confirmer le poste actuel
+                          - button "Ignorer la confirmation du poste actuel" [ref=e690] [cursor=pointer]:
+                            - img [ref=e692]
+                      - listitem [ref=e694]:
+                        - generic [ref=e698]:
+                          - generic [ref=e699]:
+                            - generic [ref=e700]:
+                              - img [ref=e701]
+                              - paragraph [ref=e707]: Ajoutez des projets qui mettent en valeur vos compétences
+                            - paragraph [ref=e708]: Montrez aux recruteurs comment vous utilisez vos compétences en ajoutant des projets à votre profil.
+                            - link "Ajouter un projet" [ref=e709] [cursor=pointer]:
+                              - /url: https://www.linkedin.com/in/lapointestephane/edit/forms/project/new/
+                              - generic [ref=e711]: Ajouter un projet
+                          - button "Ignorer Ajouter un projet" [ref=e712] [cursor=pointer]:
+                            - img [ref=e714]
+                  - generic [ref=e718]:
+                    - generic [ref=e720]:
+                      - heading "Statistiques" [level=2] [ref=e721]
+                      - generic [ref=e722]:
+                        - img [ref=e723]
+                        - paragraph [ref=e725]: Privé
+                    - generic [ref=e726]:
+                      - generic [ref=e729]:
+                        - link "81 vues du profil Découvrez qui a consulté votre profil." [ref=e730] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/analytics/profile-views/
+                          - generic [ref=e731]:
+                            - img [ref=e732]
+                            - generic [ref=e734]:
+                              - paragraph [ref=e735]: 81 vues du profil
+                              - paragraph [ref=e736]: Découvrez qui a consulté votre profil.
+                        - link "1 430 impressions de post Découvrez qui interagit avec vos posts. Les 7 derniers jours" [ref=e737] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/analytics/creator/content/?timeRange=past_7_days&dimension=INDUSTRY&metricType=IMPRESSIONS
+                          - generic [ref=e738]:
+                            - img [ref=e739]
+                            - generic [ref=e741]:
+                              - paragraph [ref=e742]: 1 430 impressions de post
+                              - paragraph [ref=e743]: Découvrez qui interagit avec vos posts.
+                              - paragraph [ref=e744]: Les 7 derniers jours
+                        - link "14 apparitions dans les recherches Découvrez la fréquence à laquelle vous apparaissez dans les résultats de recherche." [ref=e745] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/analytics/search-appearances/
+                          - generic [ref=e746]:
+                            - img [ref=e747]
+                            - generic [ref=e749]:
+                              - paragraph [ref=e750]: 14 apparitions dans les recherches
+                              - paragraph [ref=e751]: Découvrez la fréquence à laquelle vous apparaissez dans les résultats de recherche.
+                      - link "Voir toutes les statistiques" [ref=e753] [cursor=pointer]:
+                        - /url: https://www.linkedin.com/dashboard/
+                        - generic [ref=e754]:
+                          - img [ref=e755]
+                          - generic [ref=e757]: Tout afficher
+                  - generic [ref=e762]:
+                    - generic [ref=e763]:
+                      - heading "Infos" [level=2] [ref=e764]
+                      - link "Modifier les infos" [ref=e766] [cursor=pointer]:
+                        - /url: https://www.linkedin.com/in/lapointestephane/edit/forms/summary/new/
+                        - img [ref=e768]
+                    - paragraph [ref=e771]:
+                      - generic [ref=e772]:
+                        - text: "Je m'appelle Stéphane Lapointe. J'ai fondé MEMORA solutions, une entreprise québécoise qui aide les PME à intégrer l'intelligence artificielle, le développement web avec Laravel et la téléphonie IP. Mon objectif est simple : rendre ces outils accessibles et utiles, sans jargon inutile."
+                        - text: Avant l'IA, j'ai obtenu un baccalauréat en enseignement à l'Université de Sherbrooke (2005-2011). Cette formation m'a appris à vulgariser, à structurer des contenus et à accompagner des apprentissages concrets. C'est ce même réflexe pédagogique que j'applique aujourd'hui dans tout ce que je fais autour de l'IA.
+                        - text: J'ai créé laveille.ai, une plateforme de veille en intelligence artificielle conçue pour le monde francophone. On y trouve un glossaire, des actualités, des outils gratuits et une académie de formation. L'idée est de donner à chacun les moyens de comprendre et d'utiliser l'IA, sans se perdre dans le bruit.
+                        - text: "J'ai aussi écrit deux livres pratiques. Le premier, « L'IA sans se faire poursuivre », est un guide de conformité pour les PME : Loi 25, RGPD, AI Act. Le second, « L'IA pour les parents », s'adresse aux familles francophones et aborde l'IA générative, les deepfakes et la santé mentale. Ce sont des essais concrets, pas des romans."
+                        - text: Pour rester cohérent avec ce que je prône, je suis actuellement aux études en intelligence artificielle à l'Université du Québec à Rimouski (UQAR), depuis décembre 2025. Il s'agit d'une formation courte, un certificat, pas un doctorat. Je continue à apprendre pour mieux outiller les autres.
+                        - text: Je me définis comme un catalyseur de compétences IA. Mon rôle n'est pas de faire de la théorie, mais de bâtir des ponts entre la technologie et les besoins réels des gens.
+                        - text: Si vous travaillez dans une PME, si vous cherchez à comprendre l'IA sans vous faire vendre du rêve, ou si vous voulez simplement échanger sur le sujet, je suis ouvert à la discussion.
+                        - button:
+                          - generic [ref=e775] [cursor=pointer]: … plus
+                  - generic [ref=e780]:
+                    - generic [ref=e781]:
+                      - heading "Sélection" [level=2] [ref=e782]
+                      - generic [ref=e783]:
+                        - button "Menu de débordement de la sélection" [ref=e785] [cursor=pointer]:
+                          - img [ref=e787]
+                        - link "Voir l’écran des détails de la sélection" [ref=e789] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/lapointestephane/details/featured/
+                          - img [ref=e791]
+                    - list [ref=e796]:
+                      - listitem [ref=e797]:
+                        - listitem [ref=e798]:
+                          - 'link "Lien L''IA pour les parents: Protéger tes enfants, encadrer les écrans, apprivoiser l''intelligence artificielle à la maison https://www.amazon.ca/dp/B0H7CN9QG5" [ref=e801] [cursor=pointer]':
+                            - /url: https://www.linkedin.com/safety/go/?url=https%3A%2F%2Fwww%2Eamazon%2Eca%2Fdp%2FB0H7CN9QG5&urlhash=8XeZ&mt=Wk0FJ6kvR1d3O9HY-6Yvl4k9QCsdUxKQbQeM3dXPVo5OvNJK7IybFHG2lIzF8e6tsMMRBFcR1dSfFV01snEYnXeW1Uo&isSdui=true
+                            - generic [ref=e802]:
+                              - button "Lien" [ref=e803]
+                              - generic [ref=e804]:
+                                - figure [ref=e806]
+                                - generic [ref=e807]:
+                                  - paragraph [ref=e809]: "L'IA pour les parents: Protéger tes enfants, encadrer les écrans, apprivoiser l'intelligence artificielle à la maison"
+                                  - paragraph [ref=e810]: https://www.amazon.ca/dp/B0H7CN9QG5
+                      - listitem [ref=e811]:
+                        - listitem [ref=e812]:
+                          - 'link "Lien L''IA sans se faire poursuivre: Le guide pratique pour PME et professionnels https://www.amazon.ca/dp/B0H11T6XZL" [ref=e815] [cursor=pointer]':
+                            - /url: https://www.linkedin.com/safety/go/?url=https%3A%2F%2Fwww%2Eamazon%2Eca%2Fdp%2FB0H11T6XZL&urlhash=wMWz&mt=U-BT6338i81CtP9gnmLa2pxfw7j0IFtLA86l_ZQBpKB_W4KPfgQk7YjEOPHc1cphVhs02XKqx6rlkWXqSUbdjY_36tw&isSdui=true
+                            - generic [ref=e816]:
+                              - button "Lien" [ref=e817]
+                              - generic [ref=e818]:
+                                - figure [ref=e820]
+                                - generic [ref=e821]:
+                                  - paragraph [ref=e823]: "L'IA sans se faire poursuivre: Le guide pratique pour PME et professionnels"
+                                  - paragraph [ref=e824]: https://www.amazon.ca/dp/B0H11T6XZL
+                      - listitem [ref=e825]:
+                        - listitem [ref=e826]:
+                          - 'link "Lien La veille — Veille IA, technologies et transformation numérique au Québec La veille La plateforme francophone que j''ai créée pour rendre l''IA accessible : glossaire, actualités, outils gratuits et académie de formation." [ref=e829] [cursor=pointer]':
+                            - /url: https://www.linkedin.com/safety/go/?url=https%3A%2F%2Flaveille%2Eai&urlhash=0caH&mt=FtX1TokgjfS-npXTzHBUZowvbWccP4MbyB7q6XMjYbKEiGa1Gph3WcgQH-_98olHtHVICVPTgy0qGVvwObQnz-oU_9w&isSdui=true
+                            - generic [ref=e830]:
+                              - button "Lien" [ref=e831]
+                              - generic [ref=e832]:
+                                - figure [ref=e834]
+                                - generic [ref=e835]:
+                                  - paragraph [ref=e837]: La veille — Veille IA, technologies et transformation numérique au Québec
+                                  - paragraph [ref=e838]: La veille
+                                  - paragraph [ref=e839]: "La plateforme francophone que j'ai créée pour rendre l'IA accessible : glossaire, actualités, outils gratuits et académie de formation."
+                - generic [ref=e844]:
+                  - generic [ref=e845]:
+                    - generic [ref=e846]:
+                      - heading "Activité" [level=2] [ref=e847]
+                      - link "662 abonnés" [ref=e849] [cursor=pointer]:
+                        - /url: https://www.linkedin.com/feed/followers/
+                        - paragraph [ref=e850]: 662 abonnés
+                    - generic [ref=e851]:
+                      - link "Créer un post" [ref=e852] [cursor=pointer]:
+                        - /url: /preload/sharebox/
+                        - generic [ref=e854]: Créer un post
+                      - link "Modifier l’activité par défaut" [ref=e855] [cursor=pointer]:
+                        - /url: https://www.linkedin.com/in/lapointestephane/edit/forms/content-collections-star-pill/new/
+                        - img [ref=e857]
+                  - generic [ref=e859]:
+                    - radio "Posts" [checked] [ref=e860] [cursor=pointer]:
+                      - generic [ref=e861]:
+                        - checkbox "Posts" [checked]
+                        - generic [ref=e862]: Posts
+                    - radio "Commentaires" [ref=e863] [cursor=pointer]:
+                      - generic [ref=e864]:
+                        - checkbox "Commentaires"
+                        - generic [ref=e865]: Commentaires
+                    - radio "Images" [ref=e866] [cursor=pointer]:
+                      - generic [ref=e867]:
+                        - checkbox "Images"
+                        - generic [ref=e868]: Images
+                    - radio "Documents" [ref=e869] [cursor=pointer]:
+                      - generic [ref=e870]:
+                        - checkbox "Documents"
+                        - generic [ref=e871]: Documents
+                  - generic [ref=e873]:
+                    - generic [ref=e879]:
+                      - list [ref=e880]:
+                        - list [ref=e881]:
+                          - listitem [ref=e882]:
+                            - listitem [ref=e884]:
+                              - generic [ref=e885]:
+                                - generic [ref=e886]:
+                                  - link [ref=e887] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/
+                                    - figure [ref=e888]:
+                                      - img "Voir le profil de Stephane Lapointe" [ref=e889]
+                                  - generic [ref=e891]:
+                                    - link "Stephane Lapointe Profil Premium Vous" [ref=e894] [cursor=pointer]:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                      - generic "Stephane Lapointe Profil Premium Vous" [ref=e896]:
+                                        - paragraph [ref=e899]: Stephane Lapointe
+                                        - paragraph [ref=e901]:
+                                          - generic [ref=e902]:
+                                            - img [ref=e904]
+                                            - text: • Vous
+                                    - paragraph [ref=e907]: "Fondateur de MEMORA : Au carrefour de la pédagogie, de l’IA et des solutions numériques sur mesure (Laravel/Web)"
+                                    - paragraph [ref=e909]:
+                                      - generic [ref=e910]:
+                                        - text: 1 h •
+                                        - 'img "Visibilité : mondiale" [ref=e911]'
+                                    - link:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                  - button "Ouvrir le menu de commandes pour le post de Stephane Lapointe" [ref=e913] [cursor=pointer]:
+                                    - img [ref=e915]
+                                - 'link "Refik Anadol a cofondé Dataland, le premier musée d''art IA au monde, attirant 10 000 visiteurs en deux semaines. En clair : Refik Anadol ouvre Dataland, premier musée d''art IA à Los Angeles, avec l''exposition ''Machine Dreams: Rainforest'' utilisant 5 pétaoctets de données et des modèles IA interactifs. 👉 Dataland a accueilli plus de 10 000 visiteurs lors de son ouverture en deux semaines. Toi, t''en penses quoi ? 👇 #IA #IAGenerative #Québec #VeilleIA" [ref=e917] [cursor=pointer]':
+                                  - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481437097770512384/
+                                  - paragraph [ref=e918]:
+                                    - generic [ref=e919]:
+                                      - text: Refik Anadol a cofondé Dataland, le premier musée d'art IA au monde, attirant 10 000 visiteurs en deux semaines.
+                                      - text: "En clair : Refik Anadol ouvre Dataland, premier musée d'art IA à Los Angeles, avec l'exposition 'Machine Dreams: Rainforest' utilisant 5 pétaoctets de données et des modèles IA interactifs."
+                                      - text: 👉 Dataland a accueilli plus de 10 000 visiteurs lors de son ouverture en deux semaines.
+                                      - text: Toi, t'en penses quoi ? 👇
+                                      - link "#IA" [ref=e921]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23ia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e923]: "#IA"
+                                      - link "#IAGenerative" [ref=e924]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23iagenerative&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e926]: "#IAGenerative"
+                                      - link "#Québec" [ref=e927]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23qu%C3%A9bec&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e929]: "#Québec"
+                                      - link "#VeilleIA" [ref=e930]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23veilleia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e932]: "#VeilleIA"
+                                      - button:
+                                        - generic [ref=e934]: … plus
+                                - generic [ref=e935]:
+                                  - link [ref=e936] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481437097770512384/
+                                    - figure [ref=e937]:
+                                      - img "Voir la photo" [ref=e938]
+                                  - button "Cette image contient une certification de contenu." [ref=e939] [cursor=pointer]:
+                                    - figure [ref=e941]:
+                                      - img [ref=e942]
+                              - generic [ref=e945]:
+                                - generic [ref=e946]:
+                                  - generic [ref=e947]:
+                                    - 'button "État du bouton de réaction : aucune réaction" [ref=e950] [cursor=pointer]':
+                                      - img [ref=e952]
+                                    - button "Ouvrir le menu des réactions":
+                                      - img [ref=e955] [cursor=pointer]
+                                  - link "Commenter" [ref=e957] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481437097770512384/
+                                    - img [ref=e959]
+                                  - button "Republier" [ref=e961] [cursor=pointer]:
+                                    - img [ref=e963]
+                                  - link "Envoyer" [ref=e965] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                                    - img [ref=e967]
+                                - link "Voir les statistiques" [ref=e969] [cursor=pointer]:
+                                  - /url: https://www.linkedin.com/analytics/post-summary/urn:li:activity:7481437097770512384/
+                                  - generic "Voir les statistiques" [ref=e970]:
+                                    - generic "Statistiques sur le contenu" [ref=e971]:
+                                      - img "Analytics Icon" [ref=e972]
+                                      - paragraph [ref=e974]: 5 impressions
+                                    - paragraph [ref=e975]:
+                                      - generic [ref=e976]: Voir les statistiques
+                                      - text: Voir les statistiques
+                          - listitem [ref=e977]:
+                            - listitem [ref=e979]:
+                              - generic [ref=e980]:
+                                - generic [ref=e981]:
+                                  - link [ref=e982] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/
+                                    - figure [ref=e983]:
+                                      - img "Voir le profil de Stephane Lapointe" [ref=e984]
+                                  - generic [ref=e986]:
+                                    - link "Stephane Lapointe Profil Premium Vous" [ref=e989] [cursor=pointer]:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                      - generic "Stephane Lapointe Profil Premium Vous" [ref=e991]:
+                                        - paragraph [ref=e994]: Stephane Lapointe
+                                        - paragraph [ref=e996]:
+                                          - generic [ref=e997]:
+                                            - img [ref=e999]
+                                            - text: • Vous
+                                    - paragraph [ref=e1002]: "Fondateur de MEMORA : Au carrefour de la pédagogie, de l’IA et des solutions numériques sur mesure (Laravel/Web)"
+                                    - paragraph [ref=e1004]:
+                                      - generic [ref=e1005]:
+                                        - text: 2 h •
+                                        - 'img "Visibilité : mondiale" [ref=e1006]'
+                                    - link:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                  - button "Ouvrir le menu de commandes pour le post de Stephane Lapointe" [ref=e1008] [cursor=pointer]:
+                                    - img [ref=e1010]
+                                - 'link "OpenAI introduit la publicité dans ChatGPT en France, suivant le modèle déployé aux États-Unis en février 2026. En clair : OpenAI lance la publicité dans ChatGPT en France après les États-Unis, visant 62% du marché publicitaire européen avec des formats innovants. 👉 62% du marché publicitaire européen est visé en priorité. Toi, t''en penses quoi ? 👇 #IA #IAGenerative #Québec #VeilleIA" [ref=e1012] [cursor=pointer]':
+                                  - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481421996900143104/
+                                  - paragraph [ref=e1013]:
+                                    - generic [ref=e1014]:
+                                      - text: OpenAI introduit la publicité dans ChatGPT en France, suivant le modèle déployé aux États-Unis en février 2026.
+                                      - text: "En clair : OpenAI lance la publicité dans ChatGPT en France après les États-Unis, visant 62% du marché publicitaire européen avec des formats innovants."
+                                      - text: 👉 62% du marché publicitaire européen est visé en priorité.
+                                      - text: Toi, t'en penses quoi ? 👇
+                                      - link "#IA" [ref=e1016]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23ia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1018]: "#IA"
+                                      - link "#IAGenerative" [ref=e1019]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23iagenerative&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1021]: "#IAGenerative"
+                                      - link "#Québec" [ref=e1022]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23qu%C3%A9bec&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1024]: "#Québec"
+                                      - link "#VeilleIA" [ref=e1025]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23veilleia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1027]: "#VeilleIA"
+                                      - button:
+                                        - generic [ref=e1029]: … plus
+                                - generic [ref=e1030]:
+                                  - link [ref=e1031] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481421996900143104/
+                                    - figure [ref=e1032]:
+                                      - img "Voir la photo" [ref=e1033]
+                                  - button "Cette image contient une certification de contenu." [ref=e1034] [cursor=pointer]:
+                                    - figure [ref=e1036]:
+                                      - img [ref=e1037]
+                              - generic [ref=e1040]:
+                                - generic [ref=e1041]:
+                                  - generic [ref=e1042]:
+                                    - 'button "État du bouton de réaction : aucune réaction" [ref=e1045] [cursor=pointer]':
+                                      - img [ref=e1047]
+                                    - button "Ouvrir le menu des réactions":
+                                      - img [ref=e1050] [cursor=pointer]
+                                  - link "Commenter" [ref=e1052] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481421996900143104/
+                                    - img [ref=e1054]
+                                  - button "Republier" [ref=e1056] [cursor=pointer]:
+                                    - img [ref=e1058]
+                                  - link "Envoyer" [ref=e1060] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                                    - img [ref=e1062]
+                                - link "Voir les statistiques" [ref=e1064] [cursor=pointer]:
+                                  - /url: https://www.linkedin.com/analytics/post-summary/urn:li:activity:7481421996900143104/
+                                  - generic "Voir les statistiques" [ref=e1065]:
+                                    - generic "Statistiques sur le contenu" [ref=e1066]:
+                                      - img "Analytics Icon" [ref=e1067]
+                                      - paragraph [ref=e1069]: 7 impressions
+                                    - paragraph [ref=e1070]:
+                                      - generic [ref=e1071]: Voir les statistiques
+                                      - text: Voir les statistiques
+                          - listitem [ref=e1072]:
+                            - listitem [ref=e1074]:
+                              - generic [ref=e1075]:
+                                - generic [ref=e1076]:
+                                  - link [ref=e1077] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/
+                                    - figure [ref=e1078]:
+                                      - img "Voir le profil de Stephane Lapointe" [ref=e1079]
+                                  - generic [ref=e1081]:
+                                    - link "Stephane Lapointe Profil Premium Vous" [ref=e1084] [cursor=pointer]:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                      - generic "Stephane Lapointe Profil Premium Vous" [ref=e1086]:
+                                        - paragraph [ref=e1089]: Stephane Lapointe
+                                        - paragraph [ref=e1091]:
+                                          - generic [ref=e1092]:
+                                            - img [ref=e1094]
+                                            - text: • Vous
+                                    - paragraph [ref=e1097]: "Fondateur de MEMORA : Au carrefour de la pédagogie, de l’IA et des solutions numériques sur mesure (Laravel/Web)"
+                                    - paragraph [ref=e1099]:
+                                      - generic [ref=e1100]:
+                                        - text: 3 h •
+                                        - 'img "Visibilité : mondiale" [ref=e1101]'
+                                    - link:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                  - button "Ouvrir le menu de commandes pour le post de Stephane Lapointe" [ref=e1103] [cursor=pointer]:
+                                    - img [ref=e1105]
+                                - 'link "DuckDuckGo a annoncé que son navigateur bloque désormais la majorité des publicités sur YouTube, y compris celles avant et pendant les vidéos. En clair : DuckDuckGo permet désormais de regarder YouTube sans publicités gratuitement via son navigateur, en bloquant la majorité des annonces vidéo sans configuration requise. 👉 DuckDuckGo bloque la majorité des annonces vidéo sur YouTube, y compris avant et pendant la lecture. Toi, t''en penses quoi ? 👇 #IA #Autre #Québec #VeilleIA" [ref=e1107] [cursor=pointer]':
+                                  - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481406900065026048/
+                                  - paragraph [ref=e1108]:
+                                    - generic [ref=e1109]:
+                                      - text: DuckDuckGo a annoncé que son navigateur bloque désormais la majorité des publicités sur YouTube, y compris celles avant et pendant les vidéos.
+                                      - text: "En clair : DuckDuckGo permet désormais de regarder YouTube sans publicités gratuitement via son navigateur, en bloquant la majorité des annonces vidéo sans configuration requise."
+                                      - text: 👉 DuckDuckGo bloque la majorité des annonces vidéo sur YouTube, y compris avant et pendant la lecture.
+                                      - text: Toi, t'en penses quoi ? 👇
+                                      - link "#IA" [ref=e1110]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23ia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1112]: "#IA"
+                                      - link "#Autre" [ref=e1113]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23autre&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1115]: "#Autre"
+                                      - link "#Québec" [ref=e1116]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23qu%C3%A9bec&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1118]: "#Québec"
+                                      - link "#VeilleIA" [ref=e1119]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23veilleia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1121]: "#VeilleIA"
+                                      - button:
+                                        - generic [ref=e1123]: … plus
+                                - generic [ref=e1124]:
+                                  - link [ref=e1125] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481406900065026048/
+                                    - figure [ref=e1126]:
+                                      - img "Voir la photo" [ref=e1127]
+                                  - button "Cette image contient une certification de contenu." [ref=e1128] [cursor=pointer]:
+                                    - figure [ref=e1130]:
+                                      - img [ref=e1131]
+                              - generic [ref=e1134]:
+                                - generic [ref=e1135]:
+                                  - generic [ref=e1136]:
+                                    - 'button "État du bouton de réaction : aucune réaction" [ref=e1139] [cursor=pointer]':
+                                      - img [ref=e1141]
+                                    - button "Ouvrir le menu des réactions":
+                                      - img [ref=e1144] [cursor=pointer]
+                                  - link "Commenter" [ref=e1146] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481406900065026048/
+                                    - img [ref=e1148]
+                                  - button "Republier" [ref=e1150] [cursor=pointer]:
+                                    - img [ref=e1152]
+                                  - link "Envoyer" [ref=e1154] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                                    - img [ref=e1156]
+                                - link "Voir les statistiques" [ref=e1158] [cursor=pointer]:
+                                  - /url: https://www.linkedin.com/analytics/post-summary/urn:li:activity:7481406900065026048/
+                                  - generic "Voir les statistiques" [ref=e1159]:
+                                    - generic "Statistiques sur le contenu" [ref=e1160]:
+                                      - img "Analytics Icon" [ref=e1161]
+                                      - paragraph [ref=e1163]: 12 impressions
+                                    - paragraph [ref=e1164]:
+                                      - generic [ref=e1165]: Voir les statistiques
+                                      - text: Voir les statistiques
+                          - listitem [ref=e1166]:
+                            - listitem [ref=e1168]:
+                              - generic [ref=e1169]:
+                                - generic [ref=e1170]:
+                                  - link [ref=e1171] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/
+                                    - figure [ref=e1172]:
+                                      - img "Voir le profil de Stephane Lapointe" [ref=e1173]
+                                  - generic [ref=e1175]:
+                                    - link "Stephane Lapointe Profil Premium Vous" [ref=e1178] [cursor=pointer]:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                      - generic "Stephane Lapointe Profil Premium Vous" [ref=e1180]:
+                                        - paragraph [ref=e1183]: Stephane Lapointe
+                                        - paragraph [ref=e1185]:
+                                          - generic [ref=e1186]:
+                                            - img [ref=e1188]
+                                            - text: • Vous
+                                    - paragraph [ref=e1191]: "Fondateur de MEMORA : Au carrefour de la pédagogie, de l’IA et des solutions numériques sur mesure (Laravel/Web)"
+                                    - paragraph [ref=e1193]:
+                                      - generic [ref=e1194]:
+                                        - text: 4 h •
+                                        - 'img "Visibilité : mondiale" [ref=e1195]'
+                                    - link:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                  - button "Ouvrir le menu de commandes pour le post de Stephane Lapointe" [ref=e1197] [cursor=pointer]:
+                                    - img [ref=e1199]
+                                - 'link "Amazon développe Moonraker, un projet à plus de 100 millions de dollars pour doter Alexa de capacités agentiques, comme exécuter des chaînes de… En clair : Amazon investit plus de 100 millions de dollars dans Moonraker, un projet pour améliorer Alexa avec des capacités agentiques, comme gérer des chaînes de tâches complexes via une seule commande vocale. 👉 Moonraker vise à doter Alexa de capacités agentiques, comme gérer des chaînes de tâches complexes. Toi, t''en penses quoi ? 👇 #IA #IAGenerative #Québec #VeilleIA" [ref=e1201] [cursor=pointer]':
+                                  - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481391804416778256/
+                                  - paragraph [ref=e1202]:
+                                    - generic [ref=e1203]:
+                                      - text: Amazon développe Moonraker, un projet à plus de 100 millions de dollars pour doter Alexa de capacités agentiques, comme exécuter des chaînes de…
+                                      - text: "En clair : Amazon investit plus de 100 millions de dollars dans Moonraker, un projet pour améliorer Alexa avec des capacités agentiques, comme gérer des chaînes de tâches complexes via une seule commande vocale."
+                                      - text: 👉 Moonraker vise à doter Alexa de capacités agentiques, comme gérer des chaînes de tâches complexes.
+                                      - text: Toi, t'en penses quoi ? 👇
+                                      - link "#IA" [ref=e1204]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23ia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1206]: "#IA"
+                                      - link "#IAGenerative" [ref=e1207]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23iagenerative&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1209]: "#IAGenerative"
+                                      - link "#Québec" [ref=e1210]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23qu%C3%A9bec&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1212]: "#Québec"
+                                      - link "#VeilleIA" [ref=e1213]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23veilleia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1215]: "#VeilleIA"
+                                      - button:
+                                        - generic [ref=e1217]: … plus
+                                - generic [ref=e1218]:
+                                  - link [ref=e1219] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481391804416778256/
+                                    - figure [ref=e1220]:
+                                      - img "Voir la photo" [ref=e1221]
+                                  - button "Cette image contient une certification de contenu." [ref=e1222] [cursor=pointer]:
+                                    - figure [ref=e1224]:
+                                      - img [ref=e1225]
+                              - generic [ref=e1228]:
+                                - generic [ref=e1229]:
+                                  - generic [ref=e1230]:
+                                    - 'button "État du bouton de réaction : aucune réaction" [ref=e1233] [cursor=pointer]':
+                                      - img [ref=e1235]
+                                    - button "Ouvrir le menu des réactions":
+                                      - img [ref=e1238] [cursor=pointer]
+                                  - link "Commenter" [ref=e1240] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481391804416778256/
+                                    - img [ref=e1242]
+                                  - button "Republier" [ref=e1244] [cursor=pointer]:
+                                    - img [ref=e1246]
+                                  - link "Envoyer" [ref=e1248] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                                    - img [ref=e1250]
+                                - link "Voir les statistiques" [ref=e1252] [cursor=pointer]:
+                                  - /url: https://www.linkedin.com/analytics/post-summary/urn:li:activity:7481391804416778256/
+                                  - generic "Voir les statistiques" [ref=e1253]:
+                                    - generic "Statistiques sur le contenu" [ref=e1254]:
+                                      - img "Analytics Icon" [ref=e1255]
+                                      - paragraph [ref=e1257]: 8 impressions
+                                    - paragraph [ref=e1258]:
+                                      - generic [ref=e1259]: Voir les statistiques
+                                      - text: Voir les statistiques
+                          - listitem [ref=e1260]:
+                            - listitem [ref=e1262]:
+                              - generic [ref=e1263]:
+                                - generic [ref=e1264]:
+                                  - link [ref=e1265] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/
+                                    - figure [ref=e1266]:
+                                      - img "Voir le profil de Stephane Lapointe" [ref=e1267]
+                                  - generic [ref=e1269]:
+                                    - link "Stephane Lapointe Profil Premium Vous" [ref=e1272] [cursor=pointer]:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                      - generic "Stephane Lapointe Profil Premium Vous" [ref=e1274]:
+                                        - paragraph [ref=e1277]: Stephane Lapointe
+                                        - paragraph [ref=e1279]:
+                                          - generic [ref=e1280]:
+                                            - img [ref=e1282]
+                                            - text: • Vous
+                                    - paragraph [ref=e1285]: "Fondateur de MEMORA : Au carrefour de la pédagogie, de l’IA et des solutions numériques sur mesure (Laravel/Web)"
+                                    - paragraph [ref=e1287]:
+                                      - generic [ref=e1288]:
+                                        - text: 5 h •
+                                        - 'img "Visibilité : mondiale" [ref=e1289]'
+                                    - link:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                  - button "Ouvrir le menu de commandes pour le post de Stephane Lapointe" [ref=e1291] [cursor=pointer]:
+                                    - img [ref=e1293]
+                                - 'link "Itération (entraînement). Tu vois ce mot passer partout en IA… mais tu sais vraiment ce que ça veut dire ? 🤔 En clair : Une itération est une seule mise à jour des poids du modèle, effectuée après le traitement d''un lot d''exemples. 👉 Beaucoup d''outils d''entraînement raisonnent en « steps » (itérations) plutôt qu''en époques, car c''est l''itération — et non l''époque — qui correspond au moment précis où les poids… Tu le savais, toi ? Dis-le-moi en commentaire 👇 #IA #IterationEntrainement #Glossaire #Québec" [ref=e1295] [cursor=pointer]':
+                                  - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481376747071143936/
+                                  - paragraph [ref=e1296]:
+                                    - generic [ref=e1297]:
+                                      - text: Itération (entraînement). Tu vois ce mot passer partout en IA… mais tu sais vraiment ce que ça veut dire ? 🤔
+                                      - text: "En clair : Une itération est une seule mise à jour des poids du modèle, effectuée après le traitement d'un lot d'exemples."
+                                      - text: 👉 Beaucoup d'outils d'entraînement raisonnent en « steps » (itérations) plutôt qu'en époques, car c'est l'itération — et non l'époque — qui correspond au moment précis où les poids…
+                                      - text: Tu le savais, toi ? Dis-le-moi en commentaire 👇
+                                      - link "#IA" [ref=e1299]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23ia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1301]: "#IA"
+                                      - link "#IterationEntrainement" [ref=e1302]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23iterationentrainement&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1304]: "#IterationEntrainement"
+                                      - link "#Glossaire" [ref=e1305]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23glossaire&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1307]: "#Glossaire"
+                                      - link "#Québec" [ref=e1308]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23qu%C3%A9bec&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1310]: "#Québec"
+                                      - button:
+                                        - generic [ref=e1312]: … plus
+                                - link [ref=e1314] [cursor=pointer]:
+                                  - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481376747071143936/
+                                  - figure [ref=e1315]:
+                                    - img "Voir la photo" [ref=e1316]
+                              - generic [ref=e1317]:
+                                - generic [ref=e1318]:
+                                  - generic [ref=e1319]:
+                                    - 'button "État du bouton de réaction : aucune réaction" [ref=e1322] [cursor=pointer]':
+                                      - img [ref=e1324]
+                                    - button "Ouvrir le menu des réactions":
+                                      - img [ref=e1327] [cursor=pointer]
+                                  - link "Commenter" [ref=e1329] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481376747071143936/
+                                    - img [ref=e1331]
+                                  - button "Republier" [ref=e1333] [cursor=pointer]:
+                                    - img [ref=e1335]
+                                  - link "Envoyer" [ref=e1337] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                                    - img [ref=e1339]
+                                - link "Voir les statistiques" [ref=e1341] [cursor=pointer]:
+                                  - /url: https://www.linkedin.com/analytics/post-summary/urn:li:activity:7481376747071143936/
+                                  - generic "Voir les statistiques" [ref=e1342]:
+                                    - generic "Statistiques sur le contenu" [ref=e1343]:
+                                      - img "Analytics Icon" [ref=e1344]
+                                      - paragraph [ref=e1346]: 16 impressions
+                                    - paragraph [ref=e1347]:
+                                      - generic [ref=e1348]: Voir les statistiques
+                                      - text: Voir les statistiques
+                          - listitem [ref=e1349]:
+                            - listitem [ref=e1351]:
+                              - generic [ref=e1352]:
+                                - generic [ref=e1353]:
+                                  - link [ref=e1354] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/
+                                    - figure [ref=e1355]:
+                                      - img "Voir le profil de Stephane Lapointe" [ref=e1356]
+                                  - generic [ref=e1358]:
+                                    - link "Stephane Lapointe Profil Premium Vous" [ref=e1361] [cursor=pointer]:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                      - generic "Stephane Lapointe Profil Premium Vous" [ref=e1363]:
+                                        - paragraph [ref=e1366]: Stephane Lapointe
+                                        - paragraph [ref=e1368]:
+                                          - generic [ref=e1369]:
+                                            - img [ref=e1371]
+                                            - text: • Vous
+                                    - paragraph [ref=e1374]: "Fondateur de MEMORA : Au carrefour de la pédagogie, de l’IA et des solutions numériques sur mesure (Laravel/Web)"
+                                    - paragraph [ref=e1376]:
+                                      - generic [ref=e1377]:
+                                        - text: 6 h •
+                                        - 'img "Visibilité : mondiale" [ref=e1378]'
+                                    - link:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                  - button "Ouvrir le menu de commandes pour le post de Stephane Lapointe" [ref=e1380] [cursor=pointer]:
+                                    - img [ref=e1382]
+                                - 'link "Le sommet AI for Good de l''ONU, organisé par l''UIT, se concentre sur l''utilisation responsable de l''IA pour résoudre les problèmes mondiaux. En clair : Le sommet AI for Good de l''ONU, dans sa 10e édition, réunit secteurs public et privé pour discuter des bénéfices de l''IA face aux défis mondiaux, malgré les critiques sur son déploiement inégal. 👉 Le sommet AI for Good est organisé par l''UIT et en est à sa 10e édition. Toi, t''en penses quoi ? 👇 #IA #Autre #Québec #VeilleIA" [ref=e1384] [cursor=pointer]':
+                                  - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481361662244163584/
+                                  - paragraph [ref=e1385]:
+                                    - generic [ref=e1386]:
+                                      - text: Le sommet AI for Good de l'ONU, organisé par l'UIT, se concentre sur l'utilisation responsable de l'IA pour résoudre les problèmes mondiaux.
+                                      - text: "En clair : Le sommet AI for Good de l'ONU, dans sa 10e édition, réunit secteurs public et privé pour discuter des bénéfices de l'IA face aux défis mondiaux, malgré les critiques sur son déploiement inégal."
+                                      - text: 👉 Le sommet AI for Good est organisé par l'UIT et en est à sa 10e édition.
+                                      - text: Toi, t'en penses quoi ? 👇
+                                      - link "#IA" [ref=e1388]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23ia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1390]: "#IA"
+                                      - link "#Autre" [ref=e1391]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23autre&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1393]: "#Autre"
+                                      - link "#Québec" [ref=e1394]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23qu%C3%A9bec&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1396]: "#Québec"
+                                      - link "#VeilleIA" [ref=e1397]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23veilleia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1399]: "#VeilleIA"
+                                      - button:
+                                        - generic [ref=e1401]: … plus
+                                - generic [ref=e1402]:
+                                  - link [ref=e1403] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481361662244163584/
+                                    - figure [ref=e1404]:
+                                      - img "Voir la photo" [ref=e1405]
+                                  - button "Cette image contient une certification de contenu." [ref=e1406] [cursor=pointer]:
+                                    - figure [ref=e1408]:
+                                      - img [ref=e1409]
+                              - generic [ref=e1412]:
+                                - generic [ref=e1413]:
+                                  - generic [ref=e1414]:
+                                    - 'button "État du bouton de réaction : aucune réaction" [ref=e1417] [cursor=pointer]':
+                                      - img [ref=e1419]
+                                    - button "Ouvrir le menu des réactions":
+                                      - img [ref=e1422] [cursor=pointer]
+                                  - link "Commenter" [ref=e1424] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481361662244163584/
+                                    - img [ref=e1426]
+                                  - button "Republier" [ref=e1428] [cursor=pointer]:
+                                    - img [ref=e1430]
+                                  - link "Envoyer" [ref=e1432] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                                    - img [ref=e1434]
+                                - link "Voir les statistiques" [ref=e1436] [cursor=pointer]:
+                                  - /url: https://www.linkedin.com/analytics/post-summary/urn:li:activity:7481361662244163584/
+                                  - generic "Voir les statistiques" [ref=e1437]:
+                                    - generic "Statistiques sur le contenu" [ref=e1438]:
+                                      - img "Analytics Icon" [ref=e1439]
+                                      - paragraph [ref=e1441]: 6 impressions
+                                    - paragraph [ref=e1442]:
+                                      - generic [ref=e1443]: Voir les statistiques
+                                      - text: Voir les statistiques
+                          - listitem [ref=e1444]:
+                            - listitem [ref=e1446]:
+                              - generic [ref=e1447]:
+                                - generic [ref=e1448]:
+                                  - link [ref=e1449] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/
+                                    - figure [ref=e1450]:
+                                      - img "Voir le profil de Stephane Lapointe" [ref=e1451]
+                                  - generic [ref=e1453]:
+                                    - link "Stephane Lapointe Profil Premium Vous" [ref=e1456] [cursor=pointer]:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                      - generic "Stephane Lapointe Profil Premium Vous" [ref=e1458]:
+                                        - paragraph [ref=e1461]: Stephane Lapointe
+                                        - paragraph [ref=e1463]:
+                                          - generic [ref=e1464]:
+                                            - img [ref=e1466]
+                                            - text: • Vous
+                                    - paragraph [ref=e1469]: "Fondateur de MEMORA : Au carrefour de la pédagogie, de l’IA et des solutions numériques sur mesure (Laravel/Web)"
+                                    - paragraph [ref=e1471]:
+                                      - generic [ref=e1472]:
+                                        - text: 7 h •
+                                        - 'img "Visibilité : mondiale" [ref=e1473]'
+                                    - link:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                  - button "Ouvrir le menu de commandes pour le post de Stephane Lapointe" [ref=e1475] [cursor=pointer]:
+                                    - img [ref=e1477]
+                                - 'link "Meta commencera à produire en septembre ses nouvelles puces IA MTIA, développées avec Broadcom et fabriquées par TSMC. 👉 Meta produira ses puces IA MTIA à partir de septembre 2024. Toi, t''en penses quoi ? 👇 #IA #IAGenerative #Québec #VeilleIA" [ref=e1479] [cursor=pointer]':
+                                  - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481346552200994816/
+                                  - paragraph [ref=e1480]:
+                                    - generic [ref=e1481]:
+                                      - text: Meta commencera à produire en septembre ses nouvelles puces IA MTIA, développées avec Broadcom et fabriquées par TSMC.
+                                      - text: 👉 Meta produira ses puces IA MTIA à partir de septembre 2024.
+                                      - text: Toi, t'en penses quoi ? 👇
+                                      - link "#IA" [ref=e1483]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23ia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1485]: "#IA"
+                                      - link "#IAGenerative" [ref=e1486]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23iagenerative&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1488]: "#IAGenerative"
+                                      - link "#Québec" [ref=e1489]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23qu%C3%A9bec&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1491]: "#Québec"
+                                      - link "#VeilleIA" [ref=e1492]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23veilleia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1494]: "#VeilleIA"
+                                      - button:
+                                        - generic [ref=e1496]: … plus
+                                - generic [ref=e1497]:
+                                  - link [ref=e1498] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481346552200994816/
+                                    - figure [ref=e1499]:
+                                      - img "Voir la photo" [ref=e1500]
+                                  - button "Cette image contient une certification de contenu." [ref=e1501] [cursor=pointer]:
+                                    - figure [ref=e1503]:
+                                      - img [ref=e1504]
+                              - generic [ref=e1507]:
+                                - generic [ref=e1508]:
+                                  - generic [ref=e1509]:
+                                    - 'button "État du bouton de réaction : aucune réaction" [ref=e1512] [cursor=pointer]':
+                                      - img [ref=e1514]
+                                    - button "Ouvrir le menu des réactions":
+                                      - img [ref=e1517] [cursor=pointer]
+                                  - link "Commenter" [ref=e1519] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481346552200994816/
+                                    - img [ref=e1521]
+                                  - button "Republier" [ref=e1523] [cursor=pointer]:
+                                    - img [ref=e1525]
+                                  - link "Envoyer" [ref=e1527] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                                    - img [ref=e1529]
+                                - link "Voir les statistiques" [ref=e1531] [cursor=pointer]:
+                                  - /url: https://www.linkedin.com/analytics/post-summary/urn:li:activity:7481346552200994816/
+                                  - generic "Voir les statistiques" [ref=e1532]:
+                                    - generic "Statistiques sur le contenu" [ref=e1533]:
+                                      - img "Analytics Icon" [ref=e1534]
+                                      - paragraph [ref=e1536]: 8 impressions
+                                    - paragraph [ref=e1537]:
+                                      - generic [ref=e1538]: Voir les statistiques
+                                      - text: Voir les statistiques
+                          - listitem [ref=e1539]:
+                            - listitem [ref=e1541]:
+                              - generic [ref=e1542]:
+                                - generic [ref=e1543]:
+                                  - link [ref=e1544] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/
+                                    - figure [ref=e1545]:
+                                      - img "Voir le profil de Stephane Lapointe" [ref=e1546]
+                                  - generic [ref=e1548]:
+                                    - link "Stephane Lapointe Profil Premium Vous" [ref=e1551] [cursor=pointer]:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                      - generic "Stephane Lapointe Profil Premium Vous" [ref=e1553]:
+                                        - paragraph [ref=e1556]: Stephane Lapointe
+                                        - paragraph [ref=e1558]:
+                                          - generic [ref=e1559]:
+                                            - img [ref=e1561]
+                                            - text: • Vous
+                                    - paragraph [ref=e1564]: "Fondateur de MEMORA : Au carrefour de la pédagogie, de l’IA et des solutions numériques sur mesure (Laravel/Web)"
+                                    - paragraph [ref=e1566]:
+                                      - generic [ref=e1567]:
+                                        - text: 7 h •
+                                        - 'img "Visibilité : mondiale" [ref=e1568]'
+                                    - link:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                  - button "Ouvrir le menu de commandes pour le post de Stephane Lapointe" [ref=e1570] [cursor=pointer]:
+                                    - img [ref=e1572]
+                                - 'link "SVP, faites attention. Pour vous aider: https://lnkd.in/gsJNrBrq" [ref=e1574] [cursor=pointer]':
+                                  - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481345801953103872/
+                                  - paragraph [ref=e1575]:
+                                    - generic [ref=e1576]:
+                                      - text: SVP, faites attention.
+                                      - text: "Pour vous aider:"
+                                      - link "https://lnkd.in/gsJNrBrq" [ref=e1577]:
+                                        - /url: https://www.linkedin.com/safety/go/?url=https%3A%2F%2Flnkd%2Ein%2FgsJNrBrq&urlhash=mju4&mt=eV17wN7GE3hgrO5UMh0pMof65D1MAlRWmgJFvPloC5jYdplqL64mu9Ca2D2FACSugJKASTex5PldUYIBHKdstzdyoBPiDRcyJcnw3JjIP7mylNypRTS579e7ug&isSdui=true
+                                        - strong [ref=e1579]: https://lnkd.in/gsJNrBrq
+                                - generic [ref=e1580]:
+                                  - generic [ref=e1581]:
+                                    - link [ref=e1582] [cursor=pointer]:
+                                      - /url: https://www.linkedin.com/in/brunoguglielminetti/
+                                      - figure [ref=e1583]:
+                                        - img "Voir le profil de Bruno Guglielminetti" [ref=e1584]
+                                    - generic [ref=e1586]:
+                                      - link "Bruno Guglielminetti Profil Vérifié 1er" [ref=e1589] [cursor=pointer]:
+                                        - /url: https://www.linkedin.com/in/brunoguglielminetti/
+                                        - generic "Bruno Guglielminetti Profil Vérifié 1er" [ref=e1591]:
+                                          - paragraph [ref=e1594]: Bruno Guglielminetti
+                                          - paragraph [ref=e1596]:
+                                            - generic [ref=e1597]:
+                                              - img [ref=e1599]
+                                              - text: • 1er
+                                      - paragraph [ref=e1602]: Analyste / Conférencier / Réalisateur -> MonCarnet.com
+                                      - paragraph [ref=e1604]:
+                                        - generic [ref=e1605]:
+                                          - text: 7 h •
+                                          - 'img "Visibilité : mondiale" [ref=e1606]'
+                                      - link:
+                                        - /url: https://www.linkedin.com/in/brunoguglielminetti/
+                                  - 'link "Quand l’IA imite votre enfant au téléphone Une nouvelle arnaque exploite la pire peur des parents : entendre leur enfant pleurer ou appeler à l’aide. Grâce au clonage vocal par IA, des fraudeurs peuvent imiter la voix d’un proche à partir de quelques secondes d’audio trouvé en ligne. https://lnkd.in/gWYwbyH6" [ref=e1608] [cursor=pointer]':
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:share:7481341470357094400/
+                                    - paragraph [ref=e1609]:
+                                      - generic [ref=e1610]:
+                                        - text: Quand l’IA imite votre enfant au téléphone
+                                        - text: "Une nouvelle arnaque exploite la pire peur des parents : entendre leur enfant pleurer ou appeler à l’aide. Grâce au clonage vocal par IA, des fraudeurs peuvent imiter la voix d’un proche à partir de quelques secondes d’audio trouvé en ligne."
+                                        - link "https://lnkd.in/gWYwbyH6" [ref=e1611]:
+                                          - /url: https://www.linkedin.com/safety/go/?url=https%3A%2F%2Flnkd%2Ein%2FgWYwbyH6&urlhash=hKbl&mt=6jwcNg5xRbAwVi3rivmmsX31pPOfK-mEGkvBqkpZCzXpe87v1aLC0xU3EA7qLuljROi5ihKXKKqD_3pXA-h233dpN0CBqNas1WbBMTvtO14mZ2UIn4x0OA&isSdui=true
+                                          - strong [ref=e1613]: https://lnkd.in/gWYwbyH6
+                                        - button:
+                                          - generic [ref=e1615]: … plus
+                                  - link [ref=e1617] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:share:7481341470357094400/
+                                    - figure [ref=e1618]:
+                                      - img "Voir la photo" [ref=e1619]
+                              - generic [ref=e1620]:
+                                - generic [ref=e1621]:
+                                  - generic [ref=e1622]:
+                                    - 'button "État du bouton de réaction : aucune réaction" [ref=e1625] [cursor=pointer]':
+                                      - img [ref=e1627]
+                                    - button "Ouvrir le menu des réactions":
+                                      - img [ref=e1630] [cursor=pointer]
+                                  - link "Commenter" [ref=e1632] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481345801953103872/
+                                    - img [ref=e1634]
+                                  - button "Republier" [ref=e1636] [cursor=pointer]:
+                                    - img [ref=e1638]
+                                  - link "Envoyer" [ref=e1640] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                                    - img [ref=e1642]
+                                - link "Voir les statistiques" [ref=e1644] [cursor=pointer]:
+                                  - /url: https://www.linkedin.com/analytics/post-summary/urn:li:activity:7481345801953103872/
+                                  - generic "Voir les statistiques" [ref=e1645]:
+                                    - generic "Statistiques sur le contenu" [ref=e1646]:
+                                      - img "Analytics Icon" [ref=e1647]
+                                      - paragraph [ref=e1649]: 32 impressions
+                                    - paragraph [ref=e1650]:
+                                      - generic [ref=e1651]: Voir les statistiques
+                                      - text: Voir les statistiques
+                          - listitem [ref=e1652]:
+                            - listitem [ref=e1654]:
+                              - generic [ref=e1655]:
+                                - generic [ref=e1656]:
+                                  - link [ref=e1657] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/
+                                    - figure [ref=e1658]:
+                                      - img "Voir le profil de Stephane Lapointe" [ref=e1659]
+                                  - generic [ref=e1661]:
+                                    - link "Stephane Lapointe Profil Premium Vous" [ref=e1664] [cursor=pointer]:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                      - generic "Stephane Lapointe Profil Premium Vous" [ref=e1666]:
+                                        - paragraph [ref=e1669]: Stephane Lapointe
+                                        - paragraph [ref=e1671]:
+                                          - generic [ref=e1672]:
+                                            - img [ref=e1674]
+                                            - text: • Vous
+                                    - paragraph [ref=e1677]: "Fondateur de MEMORA : Au carrefour de la pédagogie, de l’IA et des solutions numériques sur mesure (Laravel/Web)"
+                                    - paragraph [ref=e1679]:
+                                      - generic [ref=e1680]:
+                                        - text: 8 h •
+                                        - 'img "Visibilité : mondiale" [ref=e1681]'
+                                    - link:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                  - button "Ouvrir le menu de commandes pour le post de Stephane Lapointe" [ref=e1683] [cursor=pointer]:
+                                    - img [ref=e1685]
+                                - 'link "1X a révélé les détails des mains à cinq doigts de son robot Neo, conçues pour imiter les tendons humains avec 25 degrés de liberté de mouvement. En clair : 1X, une entreprise norvégo-américaine, dévoile les mains ultra-déxtres de son robot Neo, capables de 25 degrés de liberté de mouvement, presque autant qu''une main humaine, pour des tâches domestiques… 👉 Les mains de Neo ont 25 degrés de liberté de mouvement, proches des 27 degrés humains. Toi, t''en penses quoi ? 👇 #IA #Robotique #Québec #VeilleIA" [ref=e1687] [cursor=pointer]':
+                                  - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481331401053659136/
+                                  - paragraph [ref=e1688]:
+                                    - generic [ref=e1689]:
+                                      - text: 1X a révélé les détails des mains à cinq doigts de son robot Neo, conçues pour imiter les tendons humains avec 25 degrés de liberté de mouvement.
+                                      - text: "En clair : 1X, une entreprise norvégo-américaine, dévoile les mains ultra-déxtres de son robot Neo, capables de 25 degrés de liberté de mouvement, presque autant qu'une main humaine, pour des tâches domestiques…"
+                                      - text: 👉 Les mains de Neo ont 25 degrés de liberté de mouvement, proches des 27 degrés humains.
+                                      - text: Toi, t'en penses quoi ? 👇
+                                      - link "#IA" [ref=e1690]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23ia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1692]: "#IA"
+                                      - link "#Robotique" [ref=e1693]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23robotique&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1695]: "#Robotique"
+                                      - link "#Québec" [ref=e1696]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23qu%C3%A9bec&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1698]: "#Québec"
+                                      - link "#VeilleIA" [ref=e1699]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23veilleia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1701]: "#VeilleIA"
+                                      - button:
+                                        - generic [ref=e1703]: … plus
+                                - generic [ref=e1704]:
+                                  - link [ref=e1705] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481331401053659136/
+                                    - figure [ref=e1706]:
+                                      - img "Voir la photo" [ref=e1707]
+                                  - button "Cette image contient une certification de contenu." [ref=e1708] [cursor=pointer]:
+                                    - figure [ref=e1710]:
+                                      - img [ref=e1711]
+                              - generic [ref=e1714]:
+                                - generic [ref=e1715]:
+                                  - generic [ref=e1716]:
+                                    - 'button "État du bouton de réaction : aucune réaction" [ref=e1719] [cursor=pointer]':
+                                      - img [ref=e1721]
+                                    - button "Ouvrir le menu des réactions":
+                                      - img [ref=e1724] [cursor=pointer]
+                                  - link "Commenter" [ref=e1726] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481331401053659136/
+                                    - img [ref=e1728]
+                                  - button "Republier" [ref=e1730] [cursor=pointer]:
+                                    - img [ref=e1732]
+                                  - link "Envoyer" [ref=e1734] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                                    - img [ref=e1736]
+                                - link "Voir les statistiques" [ref=e1738] [cursor=pointer]:
+                                  - /url: https://www.linkedin.com/analytics/post-summary/urn:li:activity:7481331401053659136/
+                                  - generic "Voir les statistiques" [ref=e1739]:
+                                    - generic "Statistiques sur le contenu" [ref=e1740]:
+                                      - img "Analytics Icon" [ref=e1741]
+                                      - paragraph [ref=e1743]: 9 impressions
+                                    - paragraph [ref=e1744]:
+                                      - generic [ref=e1745]: Voir les statistiques
+                                      - text: Voir les statistiques
+                          - listitem [ref=e1746]:
+                            - listitem [ref=e1748]:
+                              - generic [ref=e1749]:
+                                - generic [ref=e1750]:
+                                  - link [ref=e1751] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/
+                                    - figure [ref=e1752]:
+                                      - img "Voir le profil de Stephane Lapointe" [ref=e1753]
+                                  - generic [ref=e1755]:
+                                    - link "Stephane Lapointe Profil Premium Vous" [ref=e1758] [cursor=pointer]:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                      - generic "Stephane Lapointe Profil Premium Vous" [ref=e1760]:
+                                        - paragraph [ref=e1763]: Stephane Lapointe
+                                        - paragraph [ref=e1765]:
+                                          - generic [ref=e1766]:
+                                            - img [ref=e1768]
+                                            - text: • Vous
+                                    - paragraph [ref=e1771]: "Fondateur de MEMORA : Au carrefour de la pédagogie, de l’IA et des solutions numériques sur mesure (Laravel/Web)"
+                                    - paragraph [ref=e1773]:
+                                      - generic [ref=e1774]:
+                                        - text: 1 j •
+                                        - 'img "Visibilité : mondiale" [ref=e1775]'
+                                    - link:
+                                      - /url: https://www.linkedin.com/in/lapointestephane/
+                                  - button "Ouvrir le menu de commandes pour le post de Stephane Lapointe" [ref=e1777] [cursor=pointer]:
+                                    - img [ref=e1779]
+                                - 'link "Databricks a choisi GLM 5.2, un modèle open-source chinois, comme moteur de codage par défaut après des tests montrant qu''il égalait Opus 4. En clair : Databricks adopte GLM 5.2 comme moteur de codage par défaut après avoir égalé Opus à moindre coût, réduisant les dépenses tout en maintenant la performance. 👉 GLM 5.2 coûte 1,28$ par tâche contre 1,94$ pour Opus 4.8. Toi, t''en penses quoi ? 👇 #IA #IAGenerative #Québec #VeilleIA" [ref=e1781] [cursor=pointer]':
+                                  - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481059616399728640/
+                                  - paragraph [ref=e1782]:
+                                    - generic [ref=e1783]:
+                                      - text: Databricks a choisi GLM 5.2, un modèle open-source chinois, comme moteur de codage par défaut après des tests montrant qu'il égalait Opus 4.
+                                      - text: "En clair : Databricks adopte GLM 5.2 comme moteur de codage par défaut après avoir égalé Opus à moindre coût, réduisant les dépenses tout en maintenant la performance."
+                                      - text: 👉 GLM 5.2 coûte 1,28$ par tâche contre 1,94$ pour Opus 4.8.
+                                      - text: Toi, t'en penses quoi ? 👇
+                                      - link "#IA" [ref=e1784]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23ia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1786]: "#IA"
+                                      - link "#IAGenerative" [ref=e1787]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23iagenerative&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1789]: "#IAGenerative"
+                                      - link "#Québec" [ref=e1790]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23qu%C3%A9bec&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1792]: "#Québec"
+                                      - link "#VeilleIA" [ref=e1793]:
+                                        - /url: https://www.linkedin.com/search/results/all/?keywords=%23veilleia&origin=HASH_TAG_FROM_FEED
+                                        - strong [ref=e1795]: "#VeilleIA"
+                                      - button:
+                                        - generic [ref=e1797]: … plus
+                                - generic [ref=e1798]:
+                                  - link [ref=e1799] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481059616399728640/
+                                    - figure [ref=e1800]:
+                                      - img "Voir la photo" [ref=e1801]
+                                  - button "Cette image contient une certification de contenu." [ref=e1802] [cursor=pointer]:
+                                    - figure [ref=e1804]:
+                                      - img [ref=e1805]
+                              - generic [ref=e1808]:
+                                - generic [ref=e1809]:
+                                  - generic [ref=e1810]:
+                                    - 'button "État du bouton de réaction : aucune réaction" [ref=e1813] [cursor=pointer]':
+                                      - img [ref=e1815]
+                                    - button "Ouvrir le menu des réactions":
+                                      - img [ref=e1818] [cursor=pointer]
+                                  - link "Commenter" [ref=e1820] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/feed/update/urn:li:activity:7481059616399728640/
+                                    - img [ref=e1822]
+                                  - button "Republier" [ref=e1824] [cursor=pointer]:
+                                    - img [ref=e1826]
+                                  - link "Envoyer" [ref=e1828] [cursor=pointer]:
+                                    - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                                    - img [ref=e1830]
+                                - link "Voir les statistiques" [ref=e1832] [cursor=pointer]:
+                                  - /url: https://www.linkedin.com/analytics/post-summary/urn:li:activity:7481059616399728640/
+                                  - generic "Voir les statistiques" [ref=e1833]:
+                                    - generic "Statistiques sur le contenu" [ref=e1834]:
+                                      - img "Analytics Icon" [ref=e1835]
+                                      - paragraph [ref=e1837]: 8 impressions
+                                    - paragraph [ref=e1838]:
+                                      - generic [ref=e1839]: Voir les statistiques
+                                      - text: Voir les statistiques
+                      - button "Suivant" [ref=e1840] [cursor=pointer]:
+                        - img [ref=e1842]
+                    - link "Afficher tous les posts" [ref=e1845] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/lapointestephane/recent-activity/all/
+                      - generic [ref=e1846]:
+                        - img [ref=e1847]
+                        - generic [ref=e1849]: Afficher tous les posts
+            - complementary "De côté" [ref=e372]:
+              - generic [ref=e373]:
+                - generic [ref=e374]:
+                  - generic [ref=e378]:
+                    - generic [ref=e379]:
+                      - heading "Langue du profil" [level=2] [ref=e380]
+                      - link "Modifier la langue du profil" [ref=e382] [cursor=pointer]:
+                        - /url: https://www.linkedin.com/in/lapointestephane/edit/secondary-language/
+                        - img [ref=e1850]
+                    - paragraph [ref=e386]: Français
+                    - generic [ref=e387]:
+                      - heading "Profil public et URL" [level=2] [ref=e388]
+                      - link "Modifier le profil public et l’URL" [ref=e390] [cursor=pointer]:
+                        - /url: https://www.linkedin.com/public-profile/settings/?trk=d_flagship3_profile_self_view_public_profile
+                        - img [ref=e1852]
+                    - paragraph [ref=e394]: www.linkedin.com/in/lapointestephane
+                  - iframe [ref=e397]:
+                    - generic [ref=f23e2]:
+                      - generic [ref=f23e3]: Pub
+                      - img "overflow-web-small" [ref=f23e6] [cursor=pointer]
+                      - link "LinkedIn for Marketing" [ref=f23e10] [cursor=pointer]:
+                        - /url: https://www.linkedin.com/li/tscp/sct?destinationUrl=https%3A%2F%2Fbusiness.linkedin.com%2Fadvertise%2Fads%2Fsponsored-content%2Fthought-leader-ads%3Fmcid%3D7442181440588435456%26src%3Dli-dynamic%26li_fat_id%3Db6500dae-e7fa-46de-a19e-fe397a329c95&trackingEvent=%5B%7B%22eventInfo%22%3A%7B%22appId%22%3A%22com.linkedin.ads.rendering.d_web%22%2C%22eventName%22%3A%22SponsoredRightRailContentActionEvent%22%2C%22topicName%22%3A%22SponsoredRightRailContentActionEvent%22%7D%2C%22eventBody%22%3A%7B%22sponsoredEventHeader%22%3A%7B%22encryptedTrackingData%22%3A%22CwEAAAGfTfEZCOKuBRwXhD8orNGhu3a4JaCostm10UhQudN7igGCJ9EZiDrcFKuKL10lTd9Met-Fs1l98ygdNESHwqdqOD9ltdY10O_JirFEo9Qi4ppdAJzhpCRzEy5wi3LKVrfSiPZ4PyabfeL2l-UCOvZ7NvtmSGpGpfJE8q3ZiYK1mnRGCG1ejwDC3QJj-Vd9_KYQ179IkBA6yBHS0mu6aDoIzZxRxhs_eUann2RoGlhv3j3xT9Phf3aeO9j7gd-jIIZw-0Tr8u692DVpZoLeT-iQsNuoSOw3O72bFXfS4YiSOQLIEjIdnZCXDeQC7xa_4GvK3U9Z9K9CPjT_JZeiaPGtW50hubQbMpPL0Eq8zXQ0Br9td-n3LhhPb1tbMU76wo_ZwMKgIOgJRpsnLUb__8v2sW09WoT7fnbgSEVqiFnbb_yc-f5cpMLEYs92AeJjDqtSndNwoP5EYgthc2DsGSyc9v0Ai-uwllA8W7r02SgG3GD_BwFh0NWjGQDY-xMnVZA7nc5aWxOREMdL2k64VWk_rAoEf8sFvtgH7Vo2CQORNwzYCtXnC8ajFrv_Bx1QIQnTmDYIwT69NyYbbv8rgFIO_lmWoH_aeia4_RspYuYdDU8J0xmLCy2d8c7Bvrt-vaHEhVr_rYxCcOdpLVmBeJQ2Sfe4uyqVnUDBu3hKdF90C0hO3xusqL2gvwRMUYczMTojB1lNfFSUbpyok_mLC4LJWWnxjSsOI14sfPpvkLo2yu9j-EN1ssm8AUHk29FeA7hmbEgkGtlhwfoCCh3g_q_t0iantOcxWbZzJL6fBtfxL8nxfv-D0hh_7b1txNwVSLmEANXGP2eyDBeVnjMMaGWE6aPd8UPskWJ3SSb7jZ_EYTSj_AM5WDQByGjImo6nnP4ZCVygXfj0J-cK0RYYPlT2n1V_7f-rSON57c0A-BIhh5ySy4GfoesOEcuHP8EsFXV1jZ9o-DAzQ-7P_QzB33_aEaMZ2dw_PJw3A_SQ9IgPIXMH_VpZuMZsikwkNrEqyigjbur4s6HeEVABIxHKyyd68mN5nLCQsgO-D1PNciQGjppgKcZZ2s5U2nSeH8U3aQum0YF3_XrwpZTJ47BUJK0t8tJcyrnihHSp6HQsOA_3Sh28_oIlZz3HBAR9a6cAV3wDztZ9fu3VNXCUSY1XGD7UoPsGn12Yf9zC9l4DQVDiUCDlAQpiZ2uwB3QdhtJV%22%7D%2C%22header%22%3A%7B%22pageInstance%22%3A%7B%22pageUrn%22%3A%22urn%3Ali%3Apage%3Ad_flagship3_profile_self_add_services_add_service%22%2C%22trackingId%22%3A%22778b286c-a5da-4cf1-86cf-5655f54c2171%22%7D%2C%22time%22%3A1783719074010%2C%22version%22%3A%220.0.0%22%7D%2C%22requestHeader%22%3A%7B%22pageKey%22%3A%22d_flagship3_profile_self_add_services_add_service%22%2C%22interfaceLocale%22%3A%22fr-FR%22%7D%7D%7D%5D&csrfToken=ajax%3A1496306820692615422
+                      - generic [ref=f23e11]:
+                        - heading "Boost engagement 2x with authentic employee voices" [level=2] [ref=f23e14]
+                        - generic [ref=f23e15]:
+                          - generic [ref=f23e16]:
+                            - img "Stephane" [ref=f23e17]
+                            - generic [ref=f23e18]:
+                              - link "LinkedIn for Marketing" [ref=f23e19] [cursor=pointer]:
+                                - /url: https://www.linkedin.com/li/tscp/sct?destinationUrl=https%3A%2F%2Fbusiness.linkedin.com%2Fadvertise%2Fads%2Fsponsored-content%2Fthought-leader-ads%3Fmcid%3D7442181440588435456%26src%3Dli-dynamic%26li_fat_id%3Db6500dae-e7fa-46de-a19e-fe397a329c95&trackingEvent=%5B%7B%22eventInfo%22%3A%7B%22appId%22%3A%22com.linkedin.ads.rendering.d_web%22%2C%22eventName%22%3A%22SponsoredRightRailContentActionEvent%22%2C%22topicName%22%3A%22SponsoredRightRailContentActionEvent%22%7D%2C%22eventBody%22%3A%7B%22sponsoredEventHeader%22%3A%7B%22encryptedTrackingData%22%3A%22CwEAAAGfTfEZCOKuBRwXhD8orNGhu3a4JaCostm10UhQudN7igGCJ9EZiDrcFKuKL10lTd9Met-Fs1l98ygdNESHwqdqOD9ltdY10O_JirFEo9Qi4ppdAJzhpCRzEy5wi3LKVrfSiPZ4PyabfeL2l-UCOvZ7NvtmSGpGpfJE8q3ZiYK1mnRGCG1ejwDC3QJj-Vd9_KYQ179IkBA6yBHS0mu6aDoIzZxRxhs_eUann2RoGlhv3j3xT9Phf3aeO9j7gd-jIIZw-0Tr8u692DVpZoLeT-iQsNuoSOw3O72bFXfS4YiSOQLIEjIdnZCXDeQC7xa_4GvK3U9Z9K9CPjT_JZeiaPGtW50hubQbMpPL0Eq8zXQ0Br9td-n3LhhPb1tbMU76wo_ZwMKgIOgJRpsnLUb__8v2sW09WoT7fnbgSEVqiFnbb_yc-f5cpMLEYs92AeJjDqtSndNwoP5EYgthc2DsGSyc9v0Ai-uwllA8W7r02SgG3GD_BwFh0NWjGQDY-xMnVZA7nc5aWxOREMdL2k64VWk_rAoEf8sFvtgH7Vo2CQORNwzYCtXnC8ajFrv_Bx1QIQnTmDYIwT69NyYbbv8rgFIO_lmWoH_aeia4_RspYuYdDU8J0xmLCy2d8c7Bvrt-vaHEhVr_rYxCcOdpLVmBeJQ2Sfe4uyqVnUDBu3hKdF90C0hO3xusqL2gvwRMUYczMTojB1lNfFSUbpyok_mLC4LJWWnxjSsOI14sfPpvkLo2yu9j-EN1ssm8AUHk29FeA7hmbEgkGtlhwfoCCh3g_q_t0iantOcxWbZzJL6fBtfxL8nxfv-D0hh_7b1txNwVSLmEANXGP2eyDBeVnjMMaGWE6aPd8UPskWJ3SSb7jZ_EYTSj_AM5WDQByGjImo6nnP4ZCVygXfj0J-cK0RYYPlT2n1V_7f-rSON57c0A-BIhh5ySy4GfoesOEcuHP8EsFXV1jZ9o-DAzQ-7P_QzB33_aEaMZ2dw_PJw3A_SQ9IgPIXMH_VpZuMZsikwkNrEqyigjbur4s6HeEVABIxHKyyd68mN5nLCQsgO-D1PNciQGjppgKcZZ2s5U2nSeH8U3aQum0YF3_XrwpZTJ47BUJK0t8tJcyrnihHSp6HQsOA_3Sh28_oIlZz3HBAR9a6cAV3wDztZ9fu3VNXCUSY1XGD7UoPsGn12Yf9zC9l4DQVDiUCDlAQpiZ2uwB3QdhtJV%22%7D%2C%22header%22%3A%7B%22pageInstance%22%3A%7B%22pageUrn%22%3A%22urn%3Ali%3Apage%3Ad_flagship3_profile_self_add_services_add_service%22%2C%22trackingId%22%3A%22778b286c-a5da-4cf1-86cf-5655f54c2171%22%7D%2C%22time%22%3A1783719074010%2C%22version%22%3A%220.0.0%22%7D%2C%22requestHeader%22%3A%7B%22pageKey%22%3A%22d_flagship3_profile_self_add_services_add_service%22%2C%22interfaceLocale%22%3A%22fr-FR%22%7D%7D%7D%5D&csrfToken=ajax%3A1496306820692615422
+                                - img "LinkedIn for Marketing" [ref=f23e20]
+                              - tooltip "LinkedIn for Marketing" [ref=f23e21]
+                          - img [ref=f23e22]
+                        - generic [ref=f23e23]:
+                          - heading "Hey Stephane, launch your Thought Leader Ad" [level=2] [ref=f23e26]
+                          - link "Learn More" [ref=f23e28] [cursor=pointer]:
+                            - /url: https://www.linkedin.com/li/tscp/sct?destinationUrl=https%3A%2F%2Fbusiness.linkedin.com%2Fadvertise%2Fads%2Fsponsored-content%2Fthought-leader-ads%3Fmcid%3D7442181440588435456%26src%3Dli-dynamic%26li_fat_id%3Db6500dae-e7fa-46de-a19e-fe397a329c95&trackingEvent=%5B%7B%22eventInfo%22%3A%7B%22appId%22%3A%22com.linkedin.ads.rendering.d_web%22%2C%22eventName%22%3A%22SponsoredRightRailContentActionEvent%22%2C%22topicName%22%3A%22SponsoredRightRailContentActionEvent%22%7D%2C%22eventBody%22%3A%7B%22sponsoredEventHeader%22%3A%7B%22encryptedTrackingData%22%3A%22CwEAAAGfTfEZCOKuBRwXhD8orNGhu3a4JaCostm10UhQudN7igGCJ9EZiDrcFKuKL10lTd9Met-Fs1l98ygdNESHwqdqOD9ltdY10O_JirFEo9Qi4ppdAJzhpCRzEy5wi3LKVrfSiPZ4PyabfeL2l-UCOvZ7NvtmSGpGpfJE8q3ZiYK1mnRGCG1ejwDC3QJj-Vd9_KYQ179IkBA6yBHS0mu6aDoIzZxRxhs_eUann2RoGlhv3j3xT9Phf3aeO9j7gd-jIIZw-0Tr8u692DVpZoLeT-iQsNuoSOw3O72bFXfS4YiSOQLIEjIdnZCXDeQC7xa_4GvK3U9Z9K9CPjT_JZeiaPGtW50hubQbMpPL0Eq8zXQ0Br9td-n3LhhPb1tbMU76wo_ZwMKgIOgJRpsnLUb__8v2sW09WoT7fnbgSEVqiFnbb_yc-f5cpMLEYs92AeJjDqtSndNwoP5EYgthc2DsGSyc9v0Ai-uwllA8W7r02SgG3GD_BwFh0NWjGQDY-xMnVZA7nc5aWxOREMdL2k64VWk_rAoEf8sFvtgH7Vo2CQORNwzYCtXnC8ajFrv_Bx1QIQnTmDYIwT69NyYbbv8rgFIO_lmWoH_aeia4_RspYuYdDU8J0xmLCy2d8c7Bvrt-vaHEhVr_rYxCcOdpLVmBeJQ2Sfe4uyqVnUDBu3hKdF90C0hO3xusqL2gvwRMUYczMTojB1lNfFSUbpyok_mLC4LJWWnxjSsOI14sfPpvkLo2yu9j-EN1ssm8AUHk29FeA7hmbEgkGtlhwfoCCh3g_q_t0iantOcxWbZzJL6fBtfxL8nxfv-D0hh_7b1txNwVSLmEANXGP2eyDBeVnjMMaGWE6aPd8UPskWJ3SSb7jZ_EYTSj_AM5WDQByGjImo6nnP4ZCVygXfj0J-cK0RYYPlT2n1V_7f-rSON57c0A-BIhh5ySy4GfoesOEcuHP8EsFXV1jZ9o-DAzQ-7P_QzB33_aEaMZ2dw_PJw3A_SQ9IgPIXMH_VpZuMZsikwkNrEqyigjbur4s6HeEVABIxHKyyd68mN5nLCQsgO-D1PNciQGjppgKcZZ2s5U2nSeH8U3aQum0YF3_XrwpZTJ47BUJK0t8tJcyrnihHSp6HQsOA_3Sh28_oIlZz3HBAR9a6cAV3wDztZ9fu3VNXCUSY1XGD7UoPsGn12Yf9zC9l4DQVDiUCDlAQpiZ2uwB3QdhtJV%22%7D%2C%22header%22%3A%7B%22pageInstance%22%3A%7B%22pageUrn%22%3A%22urn%3Ali%3Apage%3Ad_flagship3_profile_self_add_services_add_service%22%2C%22trackingId%22%3A%22778b286c-a5da-4cf1-86cf-5655f54c2171%22%7D%2C%22time%22%3A1783719074010%2C%22version%22%3A%220.0.0%22%7D%2C%22requestHeader%22%3A%7B%22pageKey%22%3A%22d_flagship3_profile_self_add_services_add_service%22%2C%22interfaceLocale%22%3A%22fr-FR%22%7D%7D%7D%5D&csrfToken=ajax%3A1496306820692615422
+                  - generic [ref=e1858]:
+                    - generic [ref=e1860]:
+                      - img "Premium" [ref=e1861]
+                      - heading "Autres pages consultées par vos visiteurs" [level=3] [ref=e1867]
+                      - paragraph [ref=e1868]: Privé
+                    - generic [ref=e1870]:
+                      - generic [ref=e1872]:
+                        - link "Philippe Fauteux · 1er Enseignant - électricité chez Émoicq" [ref=e1875] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/philippe-fauteux-294025154/
+                          - generic [ref=e1876]:
+                            - figure [ref=e1877]
+                            - generic [ref=e1878]:
+                              - generic [ref=e1879]:
+                                - paragraph [ref=e1881]:
+                                  - link "Philippe Fauteux" [ref=e1883]:
+                                    - /url: https://www.linkedin.com/in/philippe-fauteux-294025154/
+                                - paragraph [ref=e1884]: · 1er
+                              - paragraph [ref=e1886]: Enseignant - électricité chez Émoicq
+                        - link "Envoyer un message à Philippe Fauteux" [ref=e1890] [cursor=pointer]:
+                          - /url: /messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAACUFxVABhpr1Q6UZMx2XXba8DxsBgQDWWA4&recipient=ACoAACUFxVABhpr1Q6UZMx2XXba8DxsBgQDWWA4&screenContext=NON_SELF_PROFILE_VIEW&interop=msgOverlay
+                          - generic [ref=e1891]:
+                            - img [ref=e1892]
+                            - generic [ref=e1894]: Message
+                      - generic [ref=e1896]:
+                        - link "Jean-Felix Giguère Groulx · 1er M.ÉD Technopedagogue et concepteur pédagogique" [ref=e1899] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/jean-felix-gigu%C3%A8re-groulx-70a76b64/
+                          - generic [ref=e1900]:
+                            - figure [ref=e1901]
+                            - generic [ref=e1902]:
+                              - generic [ref=e1903]:
+                                - paragraph [ref=e1905]:
+                                  - link "Jean-Felix Giguère Groulx" [ref=e1907]:
+                                    - /url: https://www.linkedin.com/in/jean-felix-gigu%C3%A8re-groulx-70a76b64/
+                                - paragraph [ref=e1908]: · 1er
+                              - paragraph [ref=e1910]: M.ÉD Technopedagogue et concepteur pédagogique
+                        - link "Envoyer un message à Jean-Felix Giguère Groulx" [ref=e1914] [cursor=pointer]:
+                          - /url: /messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAAA2jiDoBRbvwNqgDcUeyHI4Bp3xk8DmVGIc&recipient=ACoAAA2jiDoBRbvwNqgDcUeyHI4Bp3xk8DmVGIc&screenContext=NON_SELF_PROFILE_VIEW&interop=msgOverlay
+                          - generic [ref=e1915]:
+                            - img [ref=e1916]
+                            - generic [ref=e1918]: Message
+                      - generic [ref=e1920]:
+                        - link "Nicole Munoz-Guzman Vérifié · 1er Conseillère pédagogique au service de l’éducation des adultes, de la formation professionnelle et aux entreprises" [ref=e1923] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/nicole-munoz-guzman-070071102/
+                          - generic [ref=e1924]:
+                            - figure [ref=e1925]
+                            - generic [ref=e1926]:
+                              - generic [ref=e1927]:
+                                - paragraph [ref=e1929]:
+                                  - link "Nicole Munoz-Guzman Vérifié" [ref=e1931]:
+                                    - /url: https://www.linkedin.com/in/nicole-munoz-guzman-070071102/
+                                    - text: Nicole Munoz-Guzman
+                                    - img "Vérifié" [ref=e1932]:
+                                      - img [ref=e1933]
+                                - paragraph [ref=e1935]: · 1er
+                              - paragraph [ref=e1937]: Conseillère pédagogique au service de l’éducation des adultes, de la formation professionnelle et aux entreprises
+                        - link "Envoyer un message à Nicole Munoz-Guzman" [ref=e1941] [cursor=pointer]:
+                          - /url: /messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAABn-XhQBBIhfyQcDWHf4mD-sfRj74Sj-TOI&recipient=ACoAABn-XhQBBIhfyQcDWHf4mD-sfRj74Sj-TOI&screenContext=NON_SELF_PROFILE_VIEW&interop=msgOverlay
+                          - generic [ref=e1942]:
+                            - img [ref=e1943]
+                            - generic [ref=e1945]: Message
+                      - generic [ref=e1947]:
+                        - link "Marc-André Girard Vérifié · 1er Professeur | Chercheur | Docteur en Gestion de l’éducation | Ancien directeur d’école | Ancien conseiller au RÉCIT national des gestionnaires scolaires" [ref=e1950] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/emagirard/
+                          - generic [ref=e1951]:
+                            - figure [ref=e1952]
+                            - generic [ref=e1953]:
+                              - generic [ref=e1954]:
+                                - paragraph [ref=e1956]:
+                                  - link "Marc-André Girard Vérifié" [ref=e1958]:
+                                    - /url: https://www.linkedin.com/in/emagirard/
+                                    - text: Marc-André Girard
+                                    - img "Vérifié" [ref=e1959]:
+                                      - img [ref=e1960]
+                                - paragraph [ref=e1962]: · 1er
+                              - paragraph [ref=e1964]: Professeur | Chercheur | Docteur en Gestion de l’éducation | Ancien directeur d’école | Ancien conseiller au RÉCIT national des gestionnaires scolaires
+                        - link "Envoyer un message à Marc-André Girard" [ref=e1968] [cursor=pointer]:
+                          - /url: /messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAABRx5mkBUmIfOxu0D6k8ckq8kmxBKfosAAM&recipient=ACoAABRx5mkBUmIfOxu0D6k8ckq8kmxBKfosAAM&screenContext=NON_SELF_PROFILE_VIEW&interop=msgOverlay
+                          - generic [ref=e1969]:
+                            - img [ref=e1970]
+                            - generic [ref=e1972]: Message
+                      - generic [ref=e1974]:
+                        - link "Jean Remy Ruben · 2e Jean Remy" [ref=e1977] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/jean-remy-ruben-0976785a/
+                          - generic [ref=e1978]:
+                            - figure [ref=e1979]:
+                              - img "Jean Remy Ruben est à l’écoute de nouvelles opportunités" [ref=e1980]
+                            - generic [ref=e1981]:
+                              - generic [ref=e1982]:
+                                - paragraph [ref=e1984]:
+                                  - link "Jean Remy Ruben" [ref=e1986]:
+                                    - /url: https://www.linkedin.com/in/jean-remy-ruben-0976785a/
+                                - paragraph [ref=e1987]: · 2e
+                              - paragraph [ref=e1989]: Jean Remy
+                        - button "Inviter Jean Remy Ruben à rejoindre votre réseau" [ref=e1995] [cursor=pointer]:
+                          - generic [ref=e1996]:
+                            - img [ref=e1997]
+                            - generic [ref=e2000]: Se connecter
+                    - 'link "Afficher tout : “Autres profils consultés”" [ref=e2002] [cursor=pointer]':
+                      - /url: https://www.linkedin.com/in/lapointestephane/overlay/browsemap-recommendations/
+                      - generic [ref=e2003]:
+                        - img [ref=e2004]
+                        - generic [ref=e2006]: Tout afficher
+                  - generic [ref=e2011]:
+                    - generic [ref=e2013]:
+                      - heading "Personnes que vous pourriez connaître" [level=2] [ref=e2014]
+                      - paragraph [ref=e2015]: De votre école
+                    - generic [ref=e2017]:
+                      - generic [ref=e2019]:
+                        - link "Francis Roy Premium · 2e Directeur général chez Collège Durocher Saint-Lambert" [ref=e2021] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/francis-roy-825467a1/
+                          - generic [ref=e2022]:
+                            - figure [ref=e2023]
+                            - generic [ref=e2024]:
+                              - generic [ref=e2025]:
+                                - paragraph [ref=e2027]:
+                                  - link "Francis Roy Premium" [ref=e2029]:
+                                    - /url: https://www.linkedin.com/in/francis-roy-825467a1/
+                                    - text: Francis Roy
+                                    - img "Premium" [ref=e2030]:
+                                      - img [ref=e2031]
+                                - paragraph [ref=e2033]: · 2e
+                              - paragraph [ref=e2035]: Directeur général chez Collège Durocher Saint-Lambert
+                        - button "Inviter Francis Roy à rejoindre votre réseau" [ref=e2039] [cursor=pointer]:
+                          - generic [ref=e2040]:
+                            - img [ref=e2041]
+                            - generic [ref=e2044]: Se connecter
+                      - generic [ref=e2046]:
+                        - link "SEGUI EVE ARIANE GRAH · 3e et + Étudiant(e) à Université de Sherbrooke" [ref=e2048] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/segui-eve-ariane-grah-258986419/
+                          - generic [ref=e2049]:
+                            - figure [ref=e2050]:
+                              - img [ref=e2051]
+                            - generic [ref=e2057]:
+                              - generic [ref=e2058]:
+                                - paragraph [ref=e2060]:
+                                  - link "SEGUI EVE ARIANE GRAH" [ref=e2062]:
+                                    - /url: https://www.linkedin.com/in/segui-eve-ariane-grah-258986419/
+                                - paragraph [ref=e2063]: · 3e et +
+                              - paragraph [ref=e2065]: Étudiant(e) à Université de Sherbrooke
+                        - button "Inviter SEGUI EVE ARIANE GRAH à rejoindre votre réseau" [ref=e2069] [cursor=pointer]:
+                          - generic [ref=e2070]:
+                            - img [ref=e2071]
+                            - generic [ref=e2074]: Se connecter
+                      - generic [ref=e2076]:
+                        - link "Isabelle Senécal Vérifié · 2e Directrice générale, secondaire Dorval et co-directrice du centre d’innovation et d’expertise, Collège Sainte-Anne" [ref=e2078] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/isabelle-sen%C3%A9cal-85b14070/
+                          - generic [ref=e2079]:
+                            - figure [ref=e2080]
+                            - generic [ref=e2081]:
+                              - generic [ref=e2082]:
+                                - paragraph [ref=e2084]:
+                                  - link "Isabelle Senécal Vérifié" [ref=e2086]:
+                                    - /url: https://www.linkedin.com/in/isabelle-sen%C3%A9cal-85b14070/
+                                    - text: Isabelle Senécal
+                                    - img "Vérifié" [ref=e2087]:
+                                      - img [ref=e2088]
+                                - paragraph [ref=e2090]: · 2e
+                              - paragraph [ref=e2092]: Directrice générale, secondaire Dorval et co-directrice du centre d’innovation et d’expertise, Collège Sainte-Anne
+                        - button "Inviter Isabelle Senécal à rejoindre votre réseau" [ref=e2096] [cursor=pointer]:
+                          - generic [ref=e2097]:
+                            - img [ref=e2098]
+                            - generic [ref=e2101]: Se connecter
+                      - generic [ref=e2103]:
+                        - link "Hibaae undefined · 3e et + Étudiant(e) à Université de Sherbrooke" [ref=e2105] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/hibaae-undefined-b5964641a/
+                          - generic [ref=e2106]:
+                            - figure [ref=e2107]:
+                              - img [ref=e2108]
+                            - generic [ref=e2114]:
+                              - generic [ref=e2115]:
+                                - paragraph [ref=e2117]:
+                                  - link "Hibaae undefined" [ref=e2119]:
+                                    - /url: https://www.linkedin.com/in/hibaae-undefined-b5964641a/
+                                - paragraph [ref=e2120]: · 3e et +
+                              - paragraph [ref=e2122]: Étudiant(e) à Université de Sherbrooke
+                        - button "Inviter Hibaae undefined à rejoindre votre réseau" [ref=e2126] [cursor=pointer]:
+                          - generic [ref=e2127]:
+                            - img [ref=e2128]
+                            - generic [ref=e2131]: Se connecter
+                      - generic [ref=e2133]:
+                        - link "Lucien Maltais · 2e PDG de l'Institut national d'excellence en éducation" [ref=e2135] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/in/lucien-maltais-30a14916a/
+                          - generic [ref=e2136]:
+                            - figure [ref=e2137]
+                            - generic [ref=e2138]:
+                              - generic [ref=e2139]:
+                                - paragraph [ref=e2141]:
+                                  - link "Lucien Maltais" [ref=e2143]:
+                                    - /url: https://www.linkedin.com/in/lucien-maltais-30a14916a/
+                                - paragraph [ref=e2144]: · 2e
+                              - paragraph [ref=e2146]: PDG de l'Institut national d'excellence en éducation
+                        - button "Inviter Lucien Maltais à rejoindre votre réseau" [ref=e2150] [cursor=pointer]:
+                          - generic [ref=e2151]:
+                            - img [ref=e2152]
+                            - generic [ref=e2155]: Se connecter
+                    - link "Afficher toutes les personnes que vous pourriez connaître" [ref=e2157] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                      - generic [ref=e2158]:
+                        - img [ref=e2159]
+                        - generic [ref=e2161]: Tout afficher
+                  - generic [ref=e2166]:
+                    - generic [ref=e2168]:
+                      - heading "Vous aimerez peut-être" [level=2] [ref=e2169]
+                      - paragraph [ref=e2170]: Pages pour vous
+                    - generic [ref=e2172]:
+                      - generic [ref=e2175]:
+                        - link "Mila - Institut québécois d'intelligence artificielle Enseignement supérieur 107 449 abonnés" [ref=e2176] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/school/mila-quebec/
+                          - generic [ref=e2177]:
+                            - figure [ref=e2178]
+                            - generic [ref=e2179]:
+                              - paragraph [ref=e2182]:
+                                - generic [ref=e2183]:
+                                  - text: Mila - Institut québécois d'intelligence artificielle
+                                  - img [ref=e2185]
+                              - paragraph [ref=e2188]: Enseignement supérieur
+                              - paragraph [ref=e2189]: 107 449 abonnés
+                        - generic [ref=e2190]:
+                          - link "Paulette et 91 autres relations suivent cette page" [ref=e2191] [cursor=pointer]:
+                            - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                            - generic [ref=e2192]:
+                              - figure [ref=e2193]
+                              - paragraph [ref=e2195]:
+                                - link "Paulette et 91 autres relations suivent cette page" [ref=e2197]:
+                                  - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                          - button "Suivre Mila - Institut québécois d'intelligence artificielle" [ref=e2200] [cursor=pointer]:
+                            - generic [ref=e2201]:
+                              - img [ref=e2202]
+                              - generic [ref=e2204]: Suivre
+                      - generic [ref=e2207]:
+                        - link "Master.dev (Formerly Frontend Masters) Technologie, information et Internet 147 033 abonnés" [ref=e2208] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/company/masterdotdev/
+                          - generic [ref=e2209]:
+                            - figure [ref=e2210]
+                            - generic [ref=e2211]:
+                              - paragraph [ref=e2214]: Master.dev (Formerly Frontend Masters)
+                              - paragraph [ref=e2216]: Technologie, information et Internet
+                              - paragraph [ref=e2217]: 147 033 abonnés
+                        - button "Suivre Master.dev (Formerly Frontend Masters)" [ref=e2221] [cursor=pointer]:
+                          - generic [ref=e2222]:
+                            - img [ref=e2223]
+                            - generic [ref=e2225]: Suivre
+                    - link "Afficher toutes les pages qui pourraient vous plaire" [ref=e2227] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/lapointestephane/opportunities/services/onboarding/
+                      - generic [ref=e2228]:
+                        - img [ref=e2229]
+                        - generic [ref=e2231]: Tout afficher
+                - iframe [ref=e2236]:
+                  - generic [ref=f24e3]:
+                    - banner [ref=f24e4]:
+                      - generic [ref=f24e5]:
+                        - link "Sponsorisé" [ref=f24e6] [cursor=pointer]:
+                          - /url: https://www.linkedin.com/ads/start?src=en-all-ad-li-ads_by_li&trk=ads_by_li&utm_medium=ad&utm_source=li&utm_campaign=ads_by_li
+                        - button [ref=f24e7] [cursor=pointer]:
+                          - img [ref=f24e8]
+                    - generic [ref=f24e13]:
+                      - link "Image de la publicité 817 543 396 Full Courses. Instantly. Create Ready-to-Deliver Courses Instantly. Try It For FREE Now!" [ref=f24e14] [cursor=pointer]:
+                        - /url: https://www.linkedin.com/li/tscp/sct?destinationUrl=https%3A%2F%2Faicoursecreator.eskilled.io%2F%3Futm_source%3Dlinkedin%26utm_medium%3Dtext-ads%26utm_campaign%3Daicc_sidebar-feb26-reg-ed-ca-v1%26li_fat_id%3Db6500dae-e7fa-46de-a19e-fe397a329c95&trackingEvent=%5B%7B%22eventInfo%22%3A%7B%22appId%22%3A%22com.linkedin.ads.rendering.d_web%22%2C%22eventName%22%3A%22SponsoredRightRailContentActionEvent%22%2C%22topicName%22%3A%22SponsoredRightRailContentActionEvent%22%7D%2C%22eventBody%22%3A%7B%22sponsoredEventHeader%22%3A%7B%22encryptedTrackingData%22%3A%22CwEAAAGfTfEY5F_TPGY2qZ-qo_viDFWZF2vu4lDWegHcHIDCyBaVpkpszSsIuE0tG8FOHj-QG5DV8lStDf-BlfA0ravg05lNtfwpA24Qt2oy0VtE6hpbQ052Hei3tActyCg5JEyJAoC5HAnbu7OoaGOBjAT56FpIh5BtMDxDivOqZ4EEbBipZnB7lpELaiY-3KIDOI59YyVjlZ5o0MykIsNSkl4ws_XxHp691KU90qtSisSRUBvpeywi9IGOy3178WJsZ9cDPTovEALB99NARbrNJrkabIT5XMCn1VwosAaYpFWrNZvActF3DSf8c5JfxezG_b1XE10N2lF93ly2av3d164OyL8H_Ve7Mdb3QFXo-tpG_IbEcyMbnI3gWKz03GDVjjd3jyR9hHIHOTE-R2cGF3DjZ4FdUjTfryDDJIGW67o1wmpPdOXzqcn1ImReGqIEyzpTwoL0zjbYnFhn2p2SGOCmFurgYq1wg-smdPBaO0XCWMXDsueLB7FYRFWHrh6xy1xAXlQQgnKG-Z4qYVRTcJYu2JmKZghZ9RZTb4XT12G8zVRmbg4aQqYI7vgxSzM0Zqhd2Nz4FVEHD9PUcSt37RsGAqVKjZrRWFgkZhvU-HMOOQ3Pw7GERrlALrWanbgCketAPCyyInorsfL87rj7U73fyeZmBEf70EWSwEfl3cNexcWny8wWRvqZgHLNokcjFIYECm52BU46n-q5GPgthB-XYmtCv4MRhysviHmAF2cO9-1KWMR7IWRQ9QuhRyCT0mgna3BrZ0Q9_OaHz8RszqOM2Q0IA6B0D1xctVHZK4KbhZKZHAfLarAJMhzCCgN3JkXWg3JAFm79Qp47LjTqOmRXQ11jy9ZdHPMQezMBR_YtX4P99lGnMgxMnCo4wSQiVaVxCeZBJ9Gn-60RwqUEG3P-YzBycUgsQR8Z_IjfcxaDYj0-hKnG7LVc68nXl7GPWKhH5NdbAFwmQZYdg9IPlhykdcMSiwuXT7dso0oKAITurUhLucF-pdDVU9uyw1LvxVs_hVJS3nmJcDyyI40mxRPFxSHtiv1dDSAwhvH8DoLF4zk2Jw%22%7D%2C%22header%22%3A%7B%22pageInstance%22%3A%7B%22pageUrn%22%3A%22urn%3Ali%3Apage%3Ad_flagship3_profile_self_add_services_add_service%22%2C%22trackingId%22%3A%22780a27c6-724c-4f53-95d3-44b2a42f8176%22%7D%2C%22time%22%3A1783719074019%2C%22version%22%3A%220.0.0%22%7D%2C%22requestHeader%22%3A%7B%22pageKey%22%3A%22d_flagship3_profile_self_add_services_add_service%22%2C%22interfaceLocale%22%3A%22fr-FR%22%7D%7D%7D%5D&csrfToken=ajax%3A1496306820692615422
+                        - img "Image de la publicité 817 543 396" [ref=f24e16]
+                        - generic [ref=f24e17]:
+                          - heading "Full Courses. Instantly." [level=4] [ref=f24e18]
+                          - paragraph [ref=f24e19]: Create Ready-to-Deliver Courses Instantly. Try It For FREE Now!
+                      - link "Image de la publicité 52 509 884 Osstem Dental Implants FDA CE,100% Compatible Osstem TS3 Implants. Register get 50% Off, Only $70" [ref=f24e20] [cursor=pointer]:
+                        - /url: https://www.linkedin.com/li/tscp/sct?destinationUrl=https%3A%2F%2Fwww.gobuydental.com%2Fm-dental-implant-osstem%2F%3Futm_medium%3Dpaid-social%26utm_id%3D131295194%26utm_source%3Dlinkedin&trackingEvent=%5B%7B%22eventInfo%22%3A%7B%22appId%22%3A%22com.linkedin.ads.rendering.d_web%22%2C%22eventName%22%3A%22SponsoredRightRailContentActionEvent%22%2C%22topicName%22%3A%22SponsoredRightRailContentActionEvent%22%7D%2C%22eventBody%22%3A%7B%22sponsoredEventHeader%22%3A%7B%22encryptedTrackingData%22%3A%22CwEAAAGfTfEY5L_K4gyo68TPS5mbt5FJK3Im8W97TNboaMrYxEyTyXwrH3fxk0F_5YVVhBnWs-X-4B6vuz1zum-Sl3YVZaAo7mIF0-bAbhfqqPWeW0_0Ju4YeQASnlZIVHdadHbr0yOKr89K4pR3mm2zTrozHv9b5an99TL9vecO56vSojiWzz1GiASPgzNRdTEgs2M8TSR5ig1MR9_MBlU0_T3OXQyoNaZjaXG2sOMOP9BVMbSThfOqPKdylsNZ81tIltm1Re_LzKqnJp4kt8jEn9NFRtn25MXq8qZaDD4MIK_nPvtZozjg9_nZeCQC1_-qsWm1ri6UE1XRI92Wf3wIDMJDuljHxyKYuTwHupfY7YaudAs4pb0qUYf8jYITdr71RR8Cko-6YUUPscrIS4xu79UZSgqQw3dmQEWZDCWFlp74ARg3otokluJSIT6wQZgpgAbwI4MCE1NlOQeTeM_62KnX2Y-4mZXOaA_4pW3c6iPjqGsVmN-L1GaDxv1kMsZ4FdteLB-nK-aWlJYNexEgUxRbwNArXxR5xYvKU8CWWVjxS99OjsT4OjBUjWF3JsW0lp6KEvJHxwcBLhYbRGDOtEF9frfPjPlx3uT8mcYXgUnhug4KOS3EeR777YFsccw6tZHURqX-zTg4jg71hBNFzqrIpc31TDiHzb6LwGttcMV-RjJCes4MYS7YSgzsbAYq7JW6mxLkY3afgB6nMJXkWFBvoesGL9T34WbUKUbgVUXi9RH9oRLzio3aVZ9b58vRz30DAdDu7Ciz25bKYXyvG7UItDRJBa3uYXAILjxGv6M_Ro0kzoa6zYBQmz4k_Tj6_VI5Wl4hdJhbGPxEjk88TGwJcHo9S5OweL-aiVXsEPaAE0XNijp1mxdTF1fbd6AKQQlIGgOp-fNij1uSC3en3ouhJnqvDWvlRWnjncSeB4y6rYQFHUN0SDGMEmgkUbYwKC213GF5M-dJz-f7XH0u0AngMzHgBQxJahqJIkAMx1X-57EZL4PUqC2bB_zbPgcviBht0do%22%7D%2C%22header%22%3A%7B%22pageInstance%22%3A%7B%22pageUrn%22%3A%22urn%3Ali%3Apage%3Ad_flagship3_profile_self_add_services_add_service%22%2C%22trackingId%22%3A%22d5cfdc51-c46c-42b2-9e68-d68611d99734%22%7D%2C%22time%22%3A1783719074020%2C%22version%22%3A%220.0.0%22%7D%2C%22requestHeader%22%3A%7B%22pageKey%22%3A%22d_flagship3_profile_self_add_services_add_service%22%2C%22interfaceLocale%22%3A%22fr-FR%22%7D%7D%7D%5D&csrfToken=ajax%3A1496306820692615422
+                        - img "Image de la publicité 52 509 884" [ref=f24e22]
+                        - generic [ref=f24e23]:
+                          - heading "Osstem Dental Implants" [level=4] [ref=f24e24]
+                          - paragraph [ref=f24e25]: FDA CE,100% Compatible Osstem TS3 Implants. Register get 50% Off, Only $70
+                      - link "Image de la publicité 1 300 396 973 AGCI | AI & Software AI & Software Engineering firm here to guide your AI Transformation" [ref=f24e26] [cursor=pointer]:
+                        - /url: https://www.linkedin.com/li/tscp/sct?destinationUrl=https%3A%2F%2Fwww.agcinnovations.com&trackingEvent=%5B%7B%22eventInfo%22%3A%7B%22appId%22%3A%22com.linkedin.ads.rendering.d_web%22%2C%22eventName%22%3A%22SponsoredRightRailContentActionEvent%22%2C%22topicName%22%3A%22SponsoredRightRailContentActionEvent%22%7D%2C%22eventBody%22%3A%7B%22sponsoredEventHeader%22%3A%7B%22encryptedTrackingData%22%3A%22CwEAAAGfTfEY5Sm2XwW87X42VSKE3XnAQD18778yu5bUykULpUUE-DL2HZEe3ezmzHf_fCCDJGiUnDE-Xu9gqDS7sBKymdjeK7jdb0VIxPoEkwRWvWoNr0DvR6C5frUVTukpjrU18qvIeq6QQODypEUVPOt1FIxrMqBliPI8LO7Kc9uT5bUQ_vA2CPzEIA7WX56iD3RaJELbBPWNUEVVbvgbFV5YRX3OQhR7p4C-mbGApjK_Cm8SNlT-JXJ8g7neNeohiXajLd4tiShIhVl0pvGc738gpeMwUNiuGFH0JgHjeMlQnEAHR0QjXED1fLgs8tHN8QuXEMo4bV4ubtpdK8qALykl8--opOn7BHqak9jNMI6k2aVtrQuhcbhZTOYeD8asgXy00iFcSy0Ld7onYV2mVYdAJcR5zjck9gZi3p5ceMP0VlCY7E3M_uA7ikL3Wv9dZq59WQFdaKB2iXEfNyVDnWAV16Ff9eiki29sSTMRpU4Aqe_nyAqpdyNzUdPKCjwDgFEBm0i1mzcPQV-kmcjv0vkHLa0ZGjy7VTly_H1QC3oqEr31XAwC3zbvAcckCDAUl9kGcLaD_mNK5ksHPRKajZao4e68etMHY_M5qHGnBA5Gj5gP4Eil2iOqsIHdwm_E64havDJcs5AB2VOW4Egogcw4J6laTJbjOasA4gVEo2a-d5RNXomt2JG-ym71fDbx97B4P23WwAWxCOyXQfyLgHYSy6Mxs2Eb7gC1sh5YgjHY-XP3g8fBnYebttcdEA75pbE-RyUMg7EKmp8Pd539-ze4DnA7JC6-Ztku8wsFlylYqrR0OOeqIWWSsQFHxRY_i6RVTWmh5uRoL10GTFXNdpD4Y28B-CbdW1A7ADBfrQ9HSZuUDy-nqOUiY0SXc_ahCarSG0gM_ZBQphxvgy147fsFrG1TigmUkBekmhYo6OZjhZItIBjlczitl8TdXh0OL-Sjr9N53DiGoI91rAdGqU3-L1xvDr6cgh3OxqoqK8d4sP2SWSOUJ1_2D4KEWMXuiBIrLjr9XQ%22%7D%2C%22header%22%3A%7B%22pageInstance%22%3A%7B%22pageUrn%22%3A%22urn%3Ali%3Apage%3Ad_flagship3_profile_self_add_services_add_service%22%2C%22trackingId%22%3A%22e5c94dfe-bc6f-441d-b98a-82dd2aae6907%22%7D%2C%22time%22%3A1783719074021%2C%22version%22%3A%220.0.0%22%7D%2C%22requestHeader%22%3A%7B%22pageKey%22%3A%22d_flagship3_profile_self_add_services_add_service%22%2C%22interfaceLocale%22%3A%22fr-FR%22%7D%7D%7D%5D&csrfToken=ajax%3A1496306820692615422
+                        - img "Image de la publicité 1 300 396 973" [ref=f24e28]
+                        - generic [ref=f24e29]:
+                          - heading "AGCI | AI & Software" [level=4] [ref=f24e30]
+                          - paragraph [ref=f24e31]: AI & Software Engineering firm here to guide your AI Transformation
+            - generic "Pied de page" [ref=e398]:
+              - generic [ref=e401]:
+                - generic [ref=e402]:
+                  - navigation [ref=e403]:
+                    - link "À propos" [ref=e404] [cursor=pointer]:
+                      - /url: https://about.linkedin.com/
+                      - paragraph [ref=e405]: À propos
+                    - link "Accessibilité" [ref=e406] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/accessibility/
+                      - paragraph [ref=e407]: Accessibilité
+                    - link "Talent Solutions" [ref=e408] [cursor=pointer]:
+                      - /url: https://business.linkedin.com/talent-solutions?trk=flagship_nav&veh=li-footer-lts-control&src=li-footer
+                      - paragraph [ref=e409]: Talent Solutions
+                    - link "Directives de la communauté" [ref=e410] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/legal/professional-community-policies/
+                      - paragraph [ref=e411]: Directives de la communauté
+                    - link "Carrières" [ref=e412] [cursor=pointer]:
+                      - /url: https://careers.linkedin.com/
+                      - paragraph [ref=e413]: Carrières
+                    - link "Marketing Solutions" [ref=e414] [cursor=pointer]:
+                      - /url: https://business.linkedin.com/advertise?trk=n_nav_lms_f&src=li-footer
+                      - paragraph [ref=e415]: Marketing Solutions
+                    - button "Conditions générales et confidentialité" [ref=e416] [cursor=pointer]:
+                      - generic [ref=e417]:
+                        - paragraph [ref=e418]: Conditions générales et confidentialité
+                        - img [ref=e2237]
+                    - link "Préférences Pubs" [ref=e420] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/help/linkedin/answer/62931/
+                      - paragraph [ref=e421]: Préférences Pubs
+                    - link "Publicité" [ref=e422] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/ad/start/?trk=n_nav_ads_rr
+                      - paragraph [ref=e423]: Publicité
+                    - link "Sales Solutions" [ref=e424] [cursor=pointer]:
+                      - /url: https://business.linkedin.com/sales-solutions?trk=flagship_nav&veh=li-footer-lss-control&src=li-footer
+                      - paragraph [ref=e425]: Sales Solutions
+                    - link "Mobile" [ref=e426] [cursor=pointer]:
+                      - /url: https://mobile.linkedin.com/
+                      - paragraph [ref=e427]: Mobile
+                    - link "Petites entreprises" [ref=e428] [cursor=pointer]:
+                      - /url: https://business.linkedin.com/grow?src=li-footer
+                      - paragraph [ref=e429]: Petites entreprises
+                    - link "Centre de sécurité" [ref=e430] [cursor=pointer]:
+                      - /url: https://safety.linkedin.com/
+                      - paragraph [ref=e431]: Centre de sécurité
+                  - paragraph [ref=e433]: LinkedIn Corporation © 2026
+                - generic [ref=e434]:
+                  - list [ref=e435]:
+                    - listitem [ref=e436]:
+                      - generic [ref=e437]:
+                        - img [ref=e2239]
+                        - generic [ref=e439]:
+                          - link "Des questions ?" [ref=e440] [cursor=pointer]:
+                            - /url: https://www.linkedin.com/help/linkedin/
+                            - paragraph [ref=e441]: Des questions ?
+                          - paragraph [ref=e442]: Consultez notre assistance clientèle.
+                    - listitem [ref=e443]:
+                      - generic [ref=e444]:
+                        - img [ref=e2241]
+                        - generic [ref=e446]:
+                          - link "Gérez votre compte et votre confidentialité" [ref=e447] [cursor=pointer]:
+                            - /url: https://www.linkedin.com/mypreferences/d/
+                            - paragraph [ref=e448]: Gérez votre compte et votre confidentialité
+                          - paragraph [ref=e449]: Accédez à vos préférences.
+                    - listitem [ref=e450]:
+                      - generic [ref=e451]:
+                        - img [ref=e2243]
+                        - generic [ref=e453]:
+                          - link "Transparence des recommandations" [ref=e454] [cursor=pointer]:
+                            - /url: https://www.linkedin.com/help/linkedin/answer/a1339724/
+                            - paragraph [ref=e455]: Transparence des recommandations
+                          - paragraph [ref=e456]: En savoir plus sur le contenu recommandé.
+                  - generic [ref=e458]:
+                    - paragraph [ref=e460]: Choisir une langue
+                    - generic [ref=e461]:
+                      - combobox "Choisir une langue" [ref=e462] [cursor=pointer]:
+                        - option "العربية (Arabe)"
+                        - option "বাংলা (Bengali)"
+                        - option "Čeština (Tchèque)"
+                        - option "Dansk (Danois)"
+                        - option "Deutsch (Allemand)"
+                        - option "Ελληνικά (Grec)"
+                        - option "English (Anglais)"
+                        - option "Español (Espagnol)"
+                        - option "فارسی (Perse)"
+                        - option "Suomi (Finnois)"
+                        - option "Français (Français)" [selected]
+                        - option "हिंदी (Hindi)"
+                        - option "Magyar (Hongrois)"
+                        - option "Bahasa Indonesia (Indonésien)"
+                        - option "Italiano (Italien)"
+                        - option "עברית (Hébreu)"
+                        - option "日本語 (Japonais)"
+                        - option "한국어 (Coréen)"
+                        - option "मराठी (Marathi)"
+                        - option "Bahasa Malaysia (Malaisien)"
+                        - option "Nederlands (Néerlandais)"
+                        - option "Norsk (Norvégien)"
+                        - option "ਪੰਜਾਬੀ (Penjabi)"
+                        - option "Polski (Polonais)"
+                        - option "Português (Portugais)"
+                        - option "Română (Roumain)"
+                        - option "Русский (Russe)"
+                        - option "Svenska (Suédois)"
+                        - option "తెలుగు (Télougou)"
+                        - option "ภาษาไทย (Thaï)"
+                        - option "Tagalog (Tagalog)"
+                        - option "Türkçe (Turc)"
+                        - option "Українська (Ukrainien)"
+                        - option "Tiạng Viạt (Vietnamien)"
+                        - option "简体中文 (Chinois simplifié)"
+                        - option "正體中文 (Chinois traditionnel)"
+                      - img
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - complementary:
+            - generic [ref=e2245]:
+              - generic [ref=e2246]:
+                - generic [ref=e2248] [cursor=pointer]:
+                  - generic [ref=e2249]:
+                    - img "Stephane Lapointe" [ref=e2250]
+                    - generic [ref=e2252]: "Le statut est : en ligne"
+                  - button "Vous êtes dans la fenêtre de messagerie. Appuyez sur Entrée pour ouvrir la liste de conversations." [ref=e2253]:
+                    - generic [ref=e2254]:
+                      - generic [ref=e2255]: Messagerie
+                      - generic [ref=e2256]: Vous êtes dans la fenêtre de messagerie. Appuyez sur Entrée pour ouvrir la liste de conversations.
+                - generic [ref=e2257]:
+                  - button "Ouvrir le menu déroulant de la messagerie" [ref=e2259] [cursor=pointer]:
+                    - img "Ouvrir le menu déroulant de la messagerie" [ref=e2260]
+                  - button "Rédiger un message" [ref=e2263] [cursor=pointer]:
+                    - img [ref=e2264]
+                    - generic [ref=e2266]: Rédiger un message
+                  - button "Vous êtes dans la fenêtre de messagerie. Appuyez sur Entrée pour ouvrir la liste de conversations." [ref=e2267] [cursor=pointer]:
+                    - img [ref=e2268]
+                    - generic [ref=e2270]: Vous êtes dans la fenêtre de messagerie. Appuyez sur Entrée pour ouvrir la liste de conversations.
+              - link "Photo de MEMORA solutions MEMORA solutions" [ref=e2271] [cursor=pointer]:
+                - /url: https://www.linkedin.com/company/110428482/admin/inbox
+                - img "Photo de MEMORA solutions" [ref=e2272]
+                - generic [ref=e2273]: MEMORA solutions
+                - img [ref=e2274]
+          - complementary "Assistant géré par l’IA pour obtenir de l’aide en lien avec votre carrière, vos offres d’emploi, etc."
+  - iframe [ref=e2276]:
+    - generic [active] [ref=f25e1]:
+      - generic:
+        - region "Message de notification":
+          - heading "0 notification au total" [level=2] [ref=f25e3]
+          - alert
+      - region [ref=f25e4]
+      - generic [ref=f25e5]:
+        - generic [ref=f25e7]:
+          - button "Accéder à la recherche" [ref=f25e8] [cursor=pointer]:
+            - generic [ref=f25e9]: Accéder à la recherche
+          - button "Passer au contenu principal" [ref=f25e10] [cursor=pointer]:
+            - generic [ref=f25e11]: Passer au contenu principal
+          - button "Raccourcis clavier" [ref=f25e12] [cursor=pointer]:
+            - generic [ref=f25e13]: Raccourcis clavier
+          - button "Fermer le menu de navigation" [ref=f25e14] [cursor=pointer]:
+            - img [ref=f25e15]
+            - generic [ref=f25e17]: Fermer le menu de navigation
+        - banner "Navigateur global" [ref=f25e18]:
+          - generic [ref=f25e19]:
+            - link "LinkedIn" [ref=f25e20] [cursor=pointer]:
+              - /url: https://www.linkedin.com/feed/
+              - img "LinkedIn" [ref=f25e23]:
+                - img [ref=f25e24]
+            - generic [ref=f25e28]:
+              - combobox "Recherche" [ref=f25e29]
+              - generic:
+                - img
+            - navigation "Navigateur principal" [ref=f25e30]:
+              - list [ref=f25e31]:
+                - listitem [ref=f25e32]:
+                  - link "nouvelles du fil d’actualité nouvelles notifications Accueil" [ref=f25e33] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/feed/
+                    - generic [ref=f25e34]:
+                      - generic [ref=f25e37]: nouvelles du fil d’actualité nouvelles notifications
+                      - img [ref=f25e41]
+                    - generic "Accueil" [ref=f25e43]
+                - listitem [ref=f25e44]:
+                  - link "Réseau" [ref=f25e45] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/mynetwork/?
+                    - img [ref=f25e49]
+                    - generic "Réseau" [ref=f25e51]
+                - listitem [ref=f25e52]:
+                  - link "Emplois" [ref=f25e53] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/jobs/?
+                    - img [ref=f25e57]
+                    - generic "Emplois" [ref=f25e59]
+                - listitem [ref=f25e60]:
+                  - link "Messagerie" [ref=f25e61] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/messaging/?
+                    - img [ref=f25e65]
+                    - generic "Messagerie" [ref=f25e67]
+                - listitem [ref=f25e68]:
+                  - link "Notifications" [ref=f25e122] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/notifications/?
+                    - img [ref=f25e126]
+                    - generic "Notifications" [ref=f25e79]
+                - listitem [ref=f25e80]:
+                  - button "Stephane Lapointe Vous" [ref=f25e82] [cursor=pointer]:
+                    - img "Stephane Lapointe" [ref=f25e83]
+                    - generic [ref=f25e84]:
+                      - text: Vous
+                      - img [ref=f25e85]
+                - listitem [ref=f25e87]:
+                  - button "Pour les entreprises" [ref=f25e89] [cursor=pointer]:
+                    - img [ref=f25e93]
+                    - generic "Pour les entreprises" [ref=f25e95]:
+                      - text: Pour les entreprises
+                      - img [ref=f25e96]
+                - listitem [ref=f25e98]:
+                  - link "Faire de la publicité" [ref=f25e99] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/campaignmanager/accounts?
+                    - img [ref=f25e103]
+                    - generic "Faire de la publicité" [ref=f25e106]

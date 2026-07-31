@@ -127,4 +127,41 @@ class Tool extends Model
             ['label' => 'Légende Instagram', 'icon' => '📸', 'text' => $instagram],
         ];
     }
+
+    /**
+     * Round 12 (2026-07-27) : logique DRY du gate is_under_construction, jusqu'ici dupliquée
+     * dans UserSavedController - à réutiliser par tout consommateur hors du middleware
+     * EnsureToolNotUnderConstruction (routes satellites qui agrègent des données de l'outil
+     * sans passer par ses propres routes, ex. /user/saved, exports RGPD).
+     *
+     * $tool (round 22, 2026-07-27) : passer le modèle déjà chargé quand l'appelant l'a - évite
+     * une requête Tool redondante (trouvé par la passe adversariale sur PublicToolController::show(),
+     * qui charge $tool puis relançait une 2e requête identique via cette méthode, sur la page la
+     * plus visitée du site). Callers sans modèle en main (middleware, exports, menu) passent null.
+     */
+    private static ?bool $gateColumnExistsCache = null;
+
+    public static function isAccessibleTo(string $slug, $user, ?self $tool = null): bool
+    {
+        // Round 33 (2026-07-27) : Schema::hasTable()/hasColumn() relancent 2 requêtes
+        // information_schema à CHAQUE appel (jamais mises en cache par Laravel) - trouvé par
+        // la passe adversariale sur la page la plus visitée du site, où cette méthode est
+        // appelée plusieurs fois par requête (contrôleur + composant menu). Le schéma ne change
+        // qu'au déploiement d'une migration, jamais en cours de vie du worker - un cache
+        // statique par process est donc sûr et élimine ces requêtes redondantes.
+        self::$gateColumnExistsCache ??= \Illuminate\Support\Facades\Schema::hasTable('tools')
+            && \Illuminate\Support\Facades\Schema::hasColumn('tools', 'is_under_construction');
+
+        if (! self::$gateColumnExistsCache) {
+            return true;
+        }
+
+        if ($user && method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) {
+            return true;
+        }
+
+        $tool = $tool ?? static::where('slug', $slug)->first();
+
+        return ! $tool || ! $tool->is_under_construction;
+    }
 }

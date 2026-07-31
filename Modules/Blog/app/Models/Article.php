@@ -46,7 +46,17 @@ class Article extends Model implements SearchableContract
 
     public function getPublicUrl(): string
     {
-        return url('/blog/' . $this->slug);
+        // Round 74 (2026-07-27, passe adversariale) : même pattern que Tool::getPublicUrl()
+        // (Modules/Directory, P0 2026-07-19) - $this->slug pour la locale courante peut être une
+        // chaîne vide si l'article n'a de traduction 'slug' que pour une autre locale (ex. 'fr_CA'
+        // seulement, visiteur en 'en'). config/translatable.php n'étant pas publié, aucun repli
+        // automatique de spatie/laravel-translatable ne s'applique - repli manuel explicite :
+        // locale courante -> 'fr_CA' -> 1re traduction disponible.
+        $slug = $this->getTranslation('slug', app()->getLocale(), false)
+            ?: $this->getTranslation('slug', 'fr_CA', false)
+            ?: collect($this->getTranslations('slug'))->first();
+
+        return url('/blog/' . $slug);
     }
 
     public array $translatable = ['title', 'slug', 'content', 'excerpt'];

@@ -1,16 +1,23 @@
 @extends('fronttheme::layouts.master')
 
 @section('title', $tool->construction_mode === 'revision'
-    ? $tool->name . ' fait peau neuve · La veille de Stef'
-    : $tool->name . ' — En construction · La veille de Stef')
+    ? __(':name fait peau neuve · La veille de Stef', ['name' => $tool->name])
+    : __(':name : en construction · La veille de Stef', ['name' => $tool->name]))
 @section('meta_description', $tool->construction_mode === 'revision'
-    ? $tool->name . ' est temporairement hors ligne le temps d\'une mise à jour importante. Vos prompts sauvegardés sont intacts.'
-    : $tool->name . ' est en construction. Nous travaillons activement à son lancement public sur laveille.ai.')
+    ? __(':name est temporairement hors ligne le temps d\'une mise à jour importante. Vos prompts sauvegardés sont intacts.', ['name' => $tool->name])
+    : __(':name est en construction. Nous travaillons activement à son lancement public sur laveille.ai.', ['name' => $tool->name]))
+
+{{-- Round 136 (2026-07-30, passe adversariale) : cette page répond 200 OK alors que l'outil est
+     inaccessible au public. Sans cette section, le layout retombe sur « index, follow » et les
+     moteurs indexent une page que personne ne peut utiliser. Les deux autres modules qui gatent un
+     outil (Decido, Books) posent déjà cette section : c'est le patron du projet, ce module l'avait
+     simplement manqué. Vaut pour les DEUX modes - construction comme révision. --}}
+@section('page_noindex', true)
 
 @section('content')
 @if($tool->construction_mode === 'revision')
 <section class="lv-under-construction lv-under-construction--revision" aria-labelledby="uc-title">
-    <div class="lv-uc__card" role="region" aria-label="Outil temporairement hors ligne pour mise à jour">
+    <div class="lv-uc__card" role="region" aria-label="{{ __('Outil temporairement hors ligne pour mise à jour') }}">
         <div class="lv-uc__mascot">
             <x-tools::octopus variant="confident" size="160" />
         </div>
@@ -34,7 +41,7 @@
         <div class="lv-uc__actions">
             <a href="{{ route('tools.index') }}"
                class="lv-uc__btn lv-uc__btn--primary"
-               aria-label="Découvrir nos autres outils">
+               aria-label="{{ __('Découvrir nos autres outils') }}">
                 {{ __('Découvrir nos autres outils') }}
             </a>
         </div>
@@ -42,7 +49,7 @@
 </section>
 @else
 <section class="lv-under-construction" aria-labelledby="uc-title">
-    <div class="lv-uc__card" role="region" aria-label="Outil en construction">
+    <div class="lv-uc__card" role="region" aria-label="{{ __('Outil en construction') }}">
         <div class="lv-uc__mascot">
             <x-tools::octopus variant="thinking" size="160" />
         </div>
@@ -58,20 +65,20 @@
             {{ __('Cet outil est en construction. Nous travaillons activement à son lancement public.') }}
         </p>
 
-        <div class="lv-uc__timeline" aria-label="Étapes du développement">
+        <div class="lv-uc__timeline" aria-label="{{ __('Étapes du développement') }}">
             <h2 class="lv-uc__timeline-title">{{ __('Avancement prévu') }}</h2>
             <ul class="lv-uc__steps">
                 <li class="lv-uc__step lv-uc__step--done">
                     <span class="lv-uc__step-icon" aria-hidden="true">✓</span>
-                    <span class="lv-uc__step-label"><strong>{{ __('Conception') }}</strong> — {{ __('Terminée') }}</span>
+                    <span class="lv-uc__step-label"><strong>{{ __('Conception') }}</strong> : {{ __('Terminée') }}</span>
                 </li>
                 <li class="lv-uc__step lv-uc__step--current">
                     <span class="lv-uc__step-icon" aria-hidden="true">🚧</span>
-                    <span class="lv-uc__step-label"><strong>{{ __('Développement') }}</strong> — {{ __('En cours') }}</span>
+                    <span class="lv-uc__step-label"><strong>{{ __('Développement') }}</strong> : {{ __('En cours') }}</span>
                 </li>
                 <li class="lv-uc__step lv-uc__step--upcoming">
                     <span class="lv-uc__step-icon" aria-hidden="true">🎯</span>
-                    <span class="lv-uc__step-label"><strong>{{ __('Lancement public') }}</strong> — {{ __('À venir') }}</span>
+                    <span class="lv-uc__step-label"><strong>{{ __('Lancement public') }}</strong> : {{ __('À venir') }}</span>
                 </li>
             </ul>
         </div>
@@ -79,12 +86,12 @@
         <div class="lv-uc__actions">
             <a href="{{ route('tools.index') }}"
                class="lv-uc__btn lv-uc__btn--primary"
-               aria-label="Voir tous les outils disponibles">
+               aria-label="{{ __('Voir tous les outils disponibles') }}">
                 {{ __('Voir tous les outils disponibles') }}
             </a>
             <a href="{{ route('tools.index') }}"
                class="lv-uc__btn lv-uc__btn--ghost"
-               aria-label="Retour aux outils">
+               aria-label="{{ __('Retour aux outils') }}">
                 ← {{ __('Retour aux outils') }}
             </a>
         </div>

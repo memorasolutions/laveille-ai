@@ -16,8 +16,18 @@ document.addEventListener('alpine:init', function() {
             // injectée par le Blade via window.promptBuilderConfig (même contrat que personas/verbes).
             selectedTask: '',
             taskCards: (window.promptBuilderConfig && window.promptBuilderConfig.taskCards) || [],
-            // Phase 2 : divulgation progressive à 2 niveaux — panneau replié par défaut, rien de retiré.
-            showAdvanced: false,
+            // Round 64 (2026-07-27) : vrai dès le démarrage si ?edit=ID est présent (avant même que
+            // init() ne lance le fetch) - bloque selectTask() tant que le prompt existant n'a pas
+            // fini de charger. Sans ce flag, un clic sur une carte d'objectif pendant que le GET
+            // /api/prompts/{id} est en vol était écrasé silencieusement par la réponse tardive
+            // (personaPreset/verb/taskObject/... réécrits avec les valeurs de l'ANCIEN prompt),
+            // sauf selectedTask lui-même - désynchronisant le badge affiché des champs réels.
+            editLoading: !!(new URLSearchParams(window.location.search).get('edit')),
+            // Phase 2 (audit 2026-07-26) : divulgation progressive CONTEXTUELLE - chaque section
+            // logique du formulaire a sa propre petite divulgation locale, repliée par défaut,
+            // au lieu d'un panneau global unique (ex-showAdvanced). Objet partagé (plutôt qu'un
+            // x-data imbriqué par section) pour rester pilotable depuis init() lors d'un ?edit=ID.
+            openSections: { role: false, verb: false, format: false, technique: false, contraintes: false },
             personaType: 'preset',
             personaPreset: '',
             personaCustom: '',
@@ -51,6 +61,22 @@ document.addEventListener('alpine:init', function() {
             },
             formatMode: 'preset', // 2026-05-05 #104 : 'preset' (liste prédéfinie selon IA) ou 'custom' (champ texte libre universel)
             get canvasFormats() { return this.canvasFormatMap[this.canvasAI] || []; },
+            // Phase 2 (audit 2026-07-26) : « Destination » (OÙ la réponse doit apparaître) séparée
+            // visuellement de « Format attendu » (QUOI, la structure du contenu) - décision d'architecture
+            // d'info validée par 3 IA. Getter/setter calculé qui pilote constraintCanvas + canvasAI SANS
+            // renommer ces clés internes (compatibilité de reload d'un prompt déjà sauvegardé, ?edit=ID).
+            get destination() { return this.constraintCanvas ? this.canvasAI : ''; },
+            set destination(value) {
+                if (!value) { this.constraintCanvas = false; return; }
+                this.constraintCanvas = true;
+                // Round 55 (2026-07-27) : canvasFormat est une liste PRÉDÉFINIE propre à chaque IA
+                // (canvasFormatMap). Changer d'IA sans réinitialiser laissait une valeur périmée
+                // injectée silencieusement dans le prompt final (getter prompt, section canvasLine)
+                // alors que le <select> canvasFormat s'affichait vide (aucune option ne matchait
+                // plus dans la nouvelle liste) - incohérence invisible pour l'utilisateur.
+                if (value !== this.canvasAI) { this.canvasFormat = ''; }
+                this.canvasAI = value;
+            },
             constraintChainOfThought: false,
             constraintAskIfUnclear: false,
             constraintCustom: '',
@@ -58,7 +84,10 @@ document.addEventListener('alpine:init', function() {
             examples: '',
             useDelimiters: false,
             showHelp: {},
-            helps: {
+            // Round 77 (2026-07-27, passe adversariale) : repli français en dur, mais valeur réelle
+            // toujours prise dans window.promptBuilderConfig.helps (injecté par le Blade via __(),
+            // même pattern que i18n.* juste au-dessus) - donc traduit en EN/ES quand la locale change.
+            helps: (window.promptBuilderConfig && window.promptBuilderConfig.helps) || {
                 persona: 'Donner un rôle à l\'IA aide à orienter ses réponses selon une expertise ou un style spécifique. Ex: « Tu es un expert marketing » donnera des réponses plus stratégiques.',
                 verb: 'Choisir un verbe d\'action précise ce que l\'IA doit faire : rédiger, analyser, résumer, créer... Le verbe détermine le type de résultat.',
                 taskObject: 'Décrivez clairement et précisément ce que l\'IA doit produire. Plus vous donnez de contexte et de détails, meilleur sera le résultat.',
@@ -67,13 +96,31 @@ document.addEventListener('alpine:init', function() {
                 length: 'Indiquer une longueur permet de contrôler si la réponse est concise (pour un résumé) ou détaillée (pour un article complet).',
                 tone: 'Le ton change le style : professionnel pour un rapport, chaleureux pour un courriel client, académique pour un mémoire.',
                 technique: 'Réponse directe : l\'IA répond tout de suite sans exemple. Avec des exemples : vous lui donnez 2-3 modèles à suivre. Réflexion étape par étape : l\'IA détaille son raisonnement avant de conclure (meilleur pour la logique et les calculs). Par étapes : l\'IA valide chaque étape avec vous avant de continuer.',
-                delimiters: 'Les délimiteurs (###) séparent vos instructions de vos données. Utile quand vous analysez un texte spécifique — l\'IA sait où commence le texte à analyser.',
+                delimiters: 'Les délimiteurs (###) séparent vos instructions de vos données. Utile quand vous analysez un texte spécifique : l\'IA sait où commence le texte à analyser.',
                 constraintAntiAI: 'L\'IA a tendance à produire des textes génériques reconnaissables. Cette option force un style plus naturel, varié et authentiquement humain.',
                 constraintCanvas: 'Canvas (ChatGPT) et artefact (Claude) sont des espaces de travail dédiés où l\'IA crée du contenu que vous pouvez modifier directement.',
                 constraintChainOfThought: 'La chaîne de pensée force l\'IA à montrer son raisonnement, pas juste le résultat. Très utile pour les problèmes complexes, les mathématiques ou la logique.',
                 constraintAskIfUnclear: 'Au lieu de deviner, l\'IA vous posera des questions de clarification. Résultat : des réponses beaucoup plus pertinentes dès le premier essai.'
             },
+            // Phase 2 (audit 2026-07-26) : micro-explication d'une ligne par option de la section
+            // « Comment l'IA doit réfléchir » (labels renommés par usage, pas par jargon). Défini en
+            // JS (pas en x-text inline dans le Blade) pour éviter tout conflit d'apostrophes françaises
+            // avec la syntaxe des chaînes JS - un objet littéral inline avait cassé Alpine (bug trouvé
+            // en vérification visuelle : "L'IA" contient une apostrophe qui ferme la chaîne JS '...').
+            // Round 77 : même pattern que `helps` ci-dessus - repli français, valeur réelle via config.
+            techniqueHints: (window.promptBuilderConfig && window.promptBuilderConfig.techniqueHints) || {
+                'zero-shot': "L'IA répond directement, sans exemple ni étape intermédiaire.",
+                'zero-shot-cot': "L'IA réfléchit en interne avant de répondre, sans montrer ce raisonnement.",
+                'few-shot': "Vous donnez 2-3 exemples du résultat attendu pour guider l'IA.",
+                'few-shot-cot': "Exemples fournis, puis raisonnement détaillé appliqué au même modèle.",
+                'iterative': "L'IA avance étape par étape et attend votre accord avant de continuer."
+            },
             copied: false,
+            // "Améliorer avec mon IA" (Option 3 hybride, 2026-07-26 — validation croisée
+            // Codex/Gemini/claude.ai) : AUCUN appel réseau backend, zéro coût serveur (posture
+            // BYOA stricte). Le panneau ne fait qu'afficher les mêmes boutons "Ouvrir dans"/
+            // "Copier" déjà existants, reparamétrés avec un méta-prompt généré côté client.
+            metaPromptShown: false,
             showValidation: false,
             saveName: '',
             saving: false,
@@ -82,6 +129,64 @@ document.addEventListener('alpine:init', function() {
             hasLocalData: false,
             _editingId: null,
             history: [],
+            // Round 63 (2026-07-27) : même garde que customCardsLoaded (round 41) - self.history
+            // est écrasé sans merci par le GET initial (voir init()) dès qu'il résout. Sans ce flag,
+            // addToHistory()/deletePrompt()/importLocalStorage() pouvaient résoudre AVANT ce GET
+            // (ex. ?edit=ID saute directement à l'étape 2, bouton Enregistrer immédiatement
+            // cliquable) - l'écho tardif du GET (snapshot antérieur à la mutation) effaçait alors
+            // silencieusement le prompt pourtant confirmé sauvegardé de l'écran.
+            historyLoaded: false,
+            // Round 36 (2026-07-27) : gardes anti double-soumission (double-clic/double-tap) -
+            // trouvé par la passe adversariale : sans elles, importLocalStorage() poste chaque
+            // item en double (duplication réelle en base) et deletePrompt() renvoie un 404
+            // trompeur sur le 2e clic alors que la suppression a déjà réussi.
+            importing: false,
+            _deletingIds: [],
+
+            // Cartes de démarrage personnalisées (Option D, 2026-07-26) : jusqu'à 10 cartes en
+            // plus des 9 cartes système (taskCards, jamais modifiées ici). Connecté = persistées
+            // via tool_preferences->custom_cards (même contrôleur que minuteur-visuel) ; invité =
+            // localStorage versionné (cp_custom_cards). Import geste explicite au login, jamais
+            // de fusion silencieuse (voir importLocalCustomCards).
+            customCards: [],
+            // Round 41 (2026-07-27) : tant que le GET initial de _loadCustomCards() n'a pas résolu
+            // (ou échoué), customCards vaut encore [] - un addCustomCard() déclenché avant cette
+            // résolution poussait dans ce tableau vide, puis persistCustomCards() envoyait ce
+            // tableau en REMPLACEMENT COMPLET côté serveur (pas une fusion, nécessaire pour que la
+            // suppression de carte fonctionne), écrasant silencieusement les cartes déjà
+            // sauvegardées. Guette la fin du chargement avant d'autoriser addCustomCard().
+            customCardsLoaded: false,
+            taskNotice: '',
+            _taskNoticeTimer: null,
+            // Round 118 (2026-07-27, passe adversariale) : vrai quand le chargement des cartes
+            // serveur a échoué - pilote l'avertissement persistant + le bouton « Réessayer ».
+            customCardsLoadFailed: false,
+            // Round 37 (2026-07-27) : file d'attente sérialisant les appels à persistCustomCards()
+            // - sans elle, 2 mutations rapprochées (ex. ajout puis réordonnancement) déclenchent 2
+            // POST concurrents ; le serveur fait un lecture-modification-écriture non atomique
+            // (ToolPreferenceController::update()) et la réponse arrivée en dernier écrase
+            // silencieusement l'autre mutation (perte de donnée, pas juste un doublon visible).
+            _cardsPersistQueue: Promise.resolve(),
+            editingCardId: null,
+            // Round 45 (2026-07-27) : x-model="c.title" est un lien direct (live two-way binding)
+            // sur l'objet partagé du tableau customCards - sans ce snapshot, Escape ne pouvait que
+            // fermer l'input (editingCardId = null) sans jamais restaurer la valeur pré-édition, et
+            // le titre partiel/corrompu tapé restait en mémoire jusqu'à la prochaine mutation
+            // quelconque (réordonner, icône, ajout/suppression d'une AUTRE carte), qui l'aurait
+            // alors silencieusement persisté via persistCustomCards() (remplacement intégral du tableau).
+            editingCardTitleSnapshot: '',
+            editingCardPanelId: null,
+            // Round 46 (2026-07-27) : même risque que editingCardTitleSnapshot ci-dessus, pour le
+            // textarea query_template du panneau d'édition (x-model direct sur l'objet partagé).
+            editingCardPanelSnapshot: '',
+            iconPickerOpenId: null,
+            customCardsImportAvailable: false,
+            // Round 97 (2026-07-27, passe adversariale) : garde de ré-entrance sur
+            // importLocalCustomCards() - même pattern que `importing` (round 36) - un double-clic
+            // sans elle créait de vrais doublons persistés en base (id différent, contenu identique).
+            importingCards: false,
+            _localCardsToImport: [],
+            emojiChoices: ['✍️', '📝', '💡', '🔍', '🎓', '🌐', '🗂️', '💻', '🧩', '📊', '📈', '📚', '🧠', '🎨', '📣', '🛠️', '🧾', '📅', '✅', '🔔', '🤖', '🧵', '📖', '🗒️', '🧪', '📐', '🎯', '💬', '📌', '🔧'],
 
             get isValid() {
                 var hasVerb = this.verbType === 'custom' ? !!this.verbCustom : !!this.verb;
@@ -117,27 +222,47 @@ document.addEventListener('alpine:init', function() {
                 for (var i = 0; i < this.taskCards.length; i++) {
                     if (this.taskCards[i].id === this.selectedTask) return this.taskCards[i].label;
                 }
-                return '';
+                for (var j = 0; j < this.customCards.length; j++) {
+                    if (this.customCards[j].id === this.selectedTask) return this.customCards[j].title;
+                }
+                // Round 127 (2026-07-30, passe adversariale) : référence pendante. Supprimer une
+                // carte de démarrage personnalisée ne touche PAS les prompts déjà enregistrés qui
+                // la référencent (deleteCustomCard ne nettoie que la session en cours), et la
+                // restauration via ?edit=ID recopie l'identifiant stocké sans le valider. Le badge
+                // « Objectif choisi : » restait donc affiché avec un contenu vide.
+                //
+                // La garde sur customCardsLoaded est le point CRITIQUE : les cartes arrivent par un
+                // appel réseau, donc sans elle un identifiant parfaitement valide serait déclaré
+                // supprimé pendant le chargement, puis se corrigerait tout seul - un clignotement
+                // qui accuserait à tort. Ce drapeau reste aussi à faux si le chargement a ÉCHOUÉ
+                // (round 118), cas où un avertissement est déjà affiché : mieux vaut se taire que
+                // d'annoncer une suppression qui n'a pas eu lieu.
+                if (!this.customCardsLoaded) return '';
+
+                var i18nLabel = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+
+                return i18nLabel.taskCardDeleted || 'Objectif supprimé';
             },
 
             // Aperçu en langage courant (Phase 2) : composé à partir des MÊMES données que le
             // générateur de prompt ci-dessous, sans dupliquer ni modifier sa logique d'assemblage.
             get promptSummary() {
+                var i18nSummary = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
                 var parts = [];
                 var actionVerb = this.verbType === 'custom' ? this.verbCustom : this.verb;
                 if (this.personaText) {
-                    var summaryArticle = /^\s*(un |une |des |le |la |l'|d'|du |de )/i.test(this.personaText) ? '' : 'un(e) ';
-                    parts.push('L\'IA va se comporter comme ' + summaryArticle + this.personaText.charAt(0).toLowerCase() + this.personaText.slice(1) + '.');
+                    var defaultArticle = /^\s*(un |une |des |le |la |l'|d'|du |de )/i.test(this.personaText) ? '' : (i18nSummary.summaryRoleArticle !== undefined ? i18nSummary.summaryRoleArticle : 'un(e) ');
+                    parts.push((i18nSummary.summaryRole || 'L\'IA va se comporter comme ') + defaultArticle + this.personaText.charAt(0).toLowerCase() + this.personaText.slice(1) + '.');
                 }
                 if (actionVerb && this.taskObject) {
-                    parts.push('Elle va ' + actionVerb.toLowerCase() + ' ' + this.taskObject + '.');
+                    parts.push((i18nSummary.summaryAction || 'Elle va ') + actionVerb.toLowerCase() + ' ' + this.taskObject + '.');
                 } else if (this.taskObject) {
-                    parts.push('Sujet : ' + this.taskObject + '.');
+                    parts.push((i18nSummary.summarySubject || 'Sujet : ') + this.taskObject + '.');
                 }
-                if (this.audienceText) parts.push('Le résultat sera adapté pour : ' + this.audienceText + '.');
-                if (this.tone) parts.push('Ton : ' + this.tone + '.');
-                if (this.format) parts.push('Présenté sous forme de : ' + this.format.toLowerCase() + '.');
-                if (this.length) parts.push('Longueur visée : ' + this.length.toLowerCase() + '.');
+                if (this.audienceText) parts.push((i18nSummary.summaryAudience || 'Le résultat sera adapté pour : ') + this.audienceText + '.');
+                if (this.tone) parts.push((i18nSummary.summaryTone || 'Ton : ') + this.tone + '.');
+                if (this.format) parts.push((i18nSummary.summaryFormat || 'Présenté sous forme de : ') + this.format.toLowerCase() + '.');
+                if (this.length) parts.push((i18nSummary.summaryLength || 'Longueur visée : ') + this.length.toLowerCase() + '.');
                 if (!parts.length) return '';
                 return parts.join(' ');
             },
@@ -180,16 +305,19 @@ document.addEventListener('alpine:init', function() {
                 if (this.constraintAntiAI) constraints.push('Écriture naturelle et humaine : varie la longueur des phrases, utilise des expressions authentiques et des transitions fluides. Évite les formulations génériques (« dans un monde en constante évolution »), les listes à puces systématiques et les répétitions de structure.');
                 if (this.constraintTypo) constraints.push('Typographie française stricte : majuscules en début de phrase et noms propres uniquement, pas de tiret cadratin (utilise le tiret court), ponctuation correcte, accents toujours présents.');
                 if (this.constraintCanvas) {
-                    var canvasNames = { chatgpt: 'Canvas', claude: 'artefact', gemini: 'espace de travail', mistral: 'espace de travail' };
-                    var canvasName = canvasNames[this.canvasAI] || 'espace de travail';
-                    var canvasLine = 'Crée un nouveau ' + canvasName + ' pour ta réponse.';
+                    // Phase 2 (audit 2026-07-26) : Destination (OÙ) nommée explicitement + Format
+                    // attendu (QUOI) rattaché - les deux doivent apparaître clairement dans le prompt
+                    // final assemblé (exigence de la refonte, validée par 3 IA en juillet 2026).
+                    var canvasNames = { chatgpt: 'Canvas de ChatGPT', claude: 'artefact de Claude', gemini: 'Canvas de Gemini', mistral: 'espace de travail de Mistral' };
+                    var canvasName = canvasNames[this.canvasAI] || 'espace de travail dédié';
+                    var canvasLine = 'Destination : crée un nouveau ' + canvasName + ' pour ta réponse (pas dans le fil de conversation).';
                     // 2026-05-05 #104 : format custom universel (formatMode) - dispo pour les 4 IA
                     var fmt = this.formatMode === 'custom' ? this.canvasCustomFormat : this.canvasFormat;
-                    if (fmt) canvasLine += ' Format de sortie : ' + fmt + '.';
+                    if (fmt) canvasLine += ' Format attendu dans cet espace : ' + fmt + '.';
                     constraints.push(canvasLine);
                 }
                 if (this.constraintChainOfThought) constraints.push('Montre ton raisonnement complet étape par étape avant de formuler ta réponse finale.');
-                if (this.constraintAskIfUnclear) constraints.push('Si un élément de ma demande est ambigu ou manque de contexte, pose-moi des questions de clarification avant de commencer. Ne devine pas — demande.');
+                if (this.constraintAskIfUnclear) constraints.push('Si un élément de ma demande est ambigu ou manque de contexte, pose-moi des questions de clarification avant de commencer. Ne devine pas, demande.');
                 if (this.constraintCustom) constraints.push(this.constraintCustom);
                 if (constraints.length > 0) {
                     sections.push('Contraintes à respecter :\n- ' + constraints.join('\n- '));
@@ -227,11 +355,72 @@ document.addEventListener('alpine:init', function() {
                 return sections.join('\n\n');
             },
 
+            // Diagnostic rapide (Option 3 hybride, Partie A) : détection par règles simples,
+            // ZÉRO IA et zéro appel réseau, des manques les plus fréquents d'un prompt. Chaque
+            // manque pointe vers la section « Réglages avancés » correspondante (openSections)
+            // via openDiagnosticSection() pour que l'utilisateur complète en un clic.
+            get diagnostic() {
+                // Round 77 (2026-07-27, passe adversariale) : messages traduits via
+                // window.promptBuilderConfig.i18n.diagnostic* (repli français en dur si absent).
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var issues = [];
+                // Round 14 (2026-07-27) : pas de check "verbe manquant" ici - le panneau entier n'est
+                // affiché que si isValid (qui exige déjà un verbe), rendant ce diagnostic inatteignable.
+                // Le cas "verbe manquant" est couvert par l'alerte x-show="!isValid" juste en dessous.
+                if (!this.format && !this.length) {
+                    issues.push({ key: 'format', message: i18n.diagnosticFormat || 'Aucun format de sortie ni longueur précisée pour la réponse.' });
+                }
+                if (!this.audienceText) {
+                    issues.push({ key: 'audience', message: i18n.diagnosticAudience || 'Aucun contexte ni audience précisé(e) pour qui recevra la réponse.' });
+                }
+                var hasConstraint = this.constraintAntiAI || this.constraintTypo || this.constraintCanvas
+                    || this.constraintChainOfThought || this.constraintAskIfUnclear || !!this.constraintCustom;
+                if (!hasConstraint) {
+                    issues.push({ key: 'contraintes', message: i18n.diagnosticContraintes || 'Aucune contrainte cochée dans la section « Contraintes et destination ».' });
+                }
+                return { ok: issues.length === 0, issues: issues };
+            },
+
+            // Méta-prompt BYOA (Option 3 hybride, Partie B) : généré 100% côté client, aucune
+            // donnée envoyée à un serveur MEMORA. Pousse l'utilisateur vers SA propre IA (déjà
+            // connectée dans un autre onglet) plutôt que de payer un appel IA côté serveur.
+            get metaPrompt() {
+                if (!this.prompt) return '';
+                return "Tu es un expert en ingénierie de prompt. Améliore le prompt suivant pour le rendre plus clair, "
+                    + "plus précis et plus efficace pour un LLM, SANS changer l'intention de l'utilisateur. Retourne "
+                    + "UNIQUEMENT le prompt amélioré, sans commentaire ni explication.\n\n"
+                    + "Prompt à améliorer :\n« " + this.prompt + " »";
+            },
+
             get wizardParams() {
-                return { personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, audienceType: this.audienceType, audiencePreset: this.audiencePreset, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, format: this.format, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat };
+                // Round 42 (2026-07-27) : constraintTypo/constraintChainOfThought/constraintAskIfUnclear/
+                // constraintCustom/useDelimiters/examples influencent bel et bien le texte final (get
+                // prompt()) mais n'étaient jamais inclus ici - le round-trip sauvegarde→"Réutiliser"
+                // (?edit=ID) les réinitialisait silencieusement à leurs valeurs par défaut, et un
+                // "Enregistrer" ultérieur écrasait la version en base avec ces champs perdus.
+                // Round 101 (2026-07-27, passe adversariale) : selectedTask (id de la carte
+                // d'objectif choisie à l'étape 1) n'était jamais inclus ici - un prompt rouvert en
+                // édition (?edit=ID) retombait donc TOUJOURS sur le badge "Autre chose" (repli 'autre'
+                // ligne ~484), quelle que soit la carte réellement utilisée à la création.
+                return { selectedTask: this.selectedTask, personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, audienceType: this.audienceType, audiencePreset: this.audiencePreset, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, format: this.format, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintTypo: this.constraintTypo, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat, constraintChainOfThought: this.constraintChainOfThought, constraintAskIfUnclear: this.constraintAskIfUnclear, constraintCustom: this.constraintCustom, useDelimiters: this.useDelimiters, examples: this.examples };
             },
             _headers: function() {
                 return { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json', 'Content-Type': 'application/json' };
+            },
+            // Round 128 : notice NEUTRE (pas une erreur - saveError s'affiche en rouge). Sert à
+            // dire à l'utilisateur que son texte a été conservé, pour qu'il ne croie pas la carte
+            // cassée quand le gabarit ne s'applique pas.
+            _showTaskNotice: function(msg) {
+                var self = this;
+                clearTimeout(this._taskNoticeTimer);
+                this.taskNotice = msg || (window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.taskTextKept) || 'Votre texte a été conservé.';
+                this._taskNoticeTimer = setTimeout(function() { self.taskNotice = ''; }, 4000);
+            },
+            _showSaveError: function(msg) {
+                var self = this;
+                clearTimeout(this._saveErrorTimer);
+                this.saveError = msg || (window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.saveError) || 'Erreur de sauvegarde. Réessayez.';
+                this._saveErrorTimer = setTimeout(function() { self.saveError = ''; }, 4000);
             },
             init: function() {
                 var self = this;
@@ -242,37 +431,131 @@ document.addEventListener('alpine:init', function() {
                             self.history = (data.data || []).map(function(item) {
                                 return { id: item.public_id || item.id, prompt: item.prompt_text, name: item.name, date: new Date(item.created_at).toLocaleString('fr-CA'), params: item.params };
                             });
-                            if (localStorage.getItem('pb_history')) self.hasLocalData = true;
+                            // Round 65 (2026-07-27) : localStorage.getItem() peut lever (mode privé
+                            // Safari, storage désactivé par politique) - sans ce try/catch, l'exception
+                            // rejetait ce .then() et tombait dans le .catch() suivant, qui ÉCRASAIT
+                            // self.history (déjà rempli avec les vraies données serveur ci-dessus) par
+                            // le contenu (périmé ou vide) de localStorage.
+                            // Round 90 (2026-07-27, passe adversariale) : testait uniquement la
+                            // présence de la clé, jamais son contenu réel. deletePrompt() (invité)
+                            // écrit littéralement la chaîne '[]' quand le dernier item local est
+                            // supprimé - non-vide donc truthy en JS - ce qui laissait hasLocalData
+                            // bloqué à true (bannière/bouton "Importer" affichés en permanence,
+                            // sans jamais rien à importer, même à la connexion suivante).
+                            try {
+                                var _lh = JSON.parse(localStorage.getItem('pb_history') || '[]');
+                                if (Array.isArray(_lh) && _lh.length > 0) self.hasLocalData = true;
+                            } catch (e) {}
+                            self.historyLoaded = true;
                         })
                         .catch(function() {
                             try { self.history = JSON.parse(localStorage.getItem('pb_history') || '[]'); } catch(e) { self.history = []; }
+                            self.historyLoaded = true;
                         });
                     // Charger un prompt existant pour edition (?edit=ID)
                     var editId = new URLSearchParams(window.location.search).get('edit');
                     if (editId) {
-                        fetch('/api/prompts', { headers: self._headers() })
-                            .then(function(r) { return r.json(); })
-                            .then(function(data) {
-                                var found = (data.data || []).find(function(p) { return (p.public_id || p.id) == editId; });
+                        fetch('/api/prompts/' + encodeURIComponent(editId), { headers: self._headers() })
+                            .then(function(r) { if (!r.ok) throw new Error('http_' + r.status); return r.json(); })
+                            .then(function(found) {
                                 if (found && found.params) {
                                     var p = found.params;
                                     if (p.personaType) self.personaType = p.personaType;
                                     if (p.personaPreset) self.personaPreset = p.personaPreset;
-                                    if (p.personaCustom) { self.personaCustom = p.personaCustom; self.personaType = 'custom'; }
+                                    // Round 110 (2026-07-27, passe adversariale) : cette assignation Alpine
+                                    // directe ne déclenche jamais l'événement 'input' natif sur #cpPersonaCustom -
+                                    // le garde-fou anti-données-personnelles (prompt-anon-panel.js,
+                                    // checkEntities()) ne s'exécutait donc jamais après une restauration
+                                    // ?edit=ID, même si la description restaurée contient un nom/courriel/tel.
+                                    if (p.personaCustom) {
+                                        self.personaCustom = p.personaCustom;
+                                        self.personaType = 'custom';
+                                        self.$nextTick(function() {
+                                            var el = document.getElementById('cpPersonaCustom');
+                                            if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+                                        });
+                                    }
                                     if (p.verbType) self.verbType = p.verbType;
                                     if (p.verb) self.verb = p.verb;
-                                    if (p.verbCustom) { self.verbCustom = p.verbCustom; self.verbType = 'custom'; }
-                                    if (p.taskObject) self.taskObject = p.taskObject;
+                                    // Round 110 (2026-07-27, passe adversariale) : cette assignation Alpine
+                                    // directe ne déclenche jamais l'événement 'input' natif sur #cpVerbCustom -
+                                    // le garde-fou anti-données-personnelles (prompt-anon-panel.js,
+                                    // checkEntities()) ne s'exécutait donc jamais après une restauration
+                                    // ?edit=ID, même si la description restaurée contient un nom/courriel/tel.
+                                    if (p.verbCustom) {
+                                        self.verbCustom = p.verbCustom;
+                                        self.verbType = 'custom';
+                                        self.$nextTick(function() {
+                                            var el = document.getElementById('cpVerbCustom');
+                                            if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+                                        });
+                                    }
+                                    // Round 100 (2026-07-27, passe adversariale) : cette assignation Alpine
+                                    // directe ne déclenche jamais l'événement 'input' natif sur #cpTaskObject -
+                                    // le garde-fou anti-données-personnelles (prompt-anon-panel.js,
+                                    // checkEntities()) ne s'exécutait donc jamais après une restauration
+                                    // ?edit=ID, même si la description restaurée contient un nom/courriel/tel.
+                                    if (p.taskObject) {
+                                        self.taskObject = p.taskObject;
+                                        self.$nextTick(function() {
+                                            var el = document.getElementById('cpTaskObject');
+                                            if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+                                        });
+                                    }
                                     if (p.audienceType) self.audienceType = p.audienceType;
                                     if (Array.isArray(p.audiencePresets)) { self.audiencePresets = p.audiencePresets; } else if (p.audiencePreset) { self.audiencePresets = [p.audiencePreset]; }
                                     if (p.audiencePreset) self.audiencePreset = p.audiencePreset;
-                                    if (p.audienceCustom) { self.audienceCustom = p.audienceCustom; self.audienceType = 'custom'; }
+                                    // Round 110 (2026-07-27, passe adversariale) : cette assignation Alpine
+                                    // directe ne déclenche jamais l'événement 'input' natif sur #cpAudienceCustom -
+                                    // le garde-fou anti-données-personnelles (prompt-anon-panel.js,
+                                    // checkEntities()) ne s'exécutait donc jamais après une restauration
+                                    // ?edit=ID, même si la description restaurée contient un nom/courriel/tel.
+                                    if (p.audienceCustom) {
+                                        self.audienceCustom = p.audienceCustom;
+                                        self.audienceType = 'custom';
+                                        self.$nextTick(function() {
+                                            var el = document.getElementById('cpAudienceCustom');
+                                            if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+                                        });
+                                    }
                                     if (p.format) self.format = p.format;
                                     if (p.length) self.length = p.length;
                                     if (p.tone) self.tone = p.tone;
                                     if (p.language) self.language = p.language;
                                     if (p.technique) self.technique = p.technique;
                                     if (p.constraintAntiAI !== undefined) self.constraintAntiAI = p.constraintAntiAI;
+                                    // Round 42 (2026-07-27) : ces 6 champs manquaient à la restauration
+                                    // ?edit=ID - le prompt rouvrait avec ces options réinitialisées,
+                                    // et un "Enregistrer" ultérieur écrasait silencieusement la version
+                                    // en base (perte de donnée, ex. constraintCustom peut contenir des
+                                    // instructions longues, examples rend "few-shot" non fonctionnel une
+                                    // fois vidé).
+                                    if (p.constraintTypo !== undefined) self.constraintTypo = p.constraintTypo;
+                                    if (p.constraintChainOfThought !== undefined) self.constraintChainOfThought = p.constraintChainOfThought;
+                                    if (p.constraintAskIfUnclear !== undefined) self.constraintAskIfUnclear = p.constraintAskIfUnclear;
+                                    // Round 110 (2026-07-27, passe adversariale) : cette assignation Alpine
+                                    // directe ne déclenche jamais l'événement 'input' natif sur #cpConstraintCustom -
+                                    // le garde-fou anti-données-personnelles (prompt-anon-panel.js,
+                                    // checkEntities()) ne s'exécutait donc jamais après une restauration
+                                    // ?edit=ID, même si la description restaurée contient un nom/courriel/tel.
+                                    if (p.constraintCustom) {
+                                        self.constraintCustom = p.constraintCustom;
+                                        self.$nextTick(function() {
+                                            var el = document.getElementById('cpConstraintCustom');
+                                            if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+                                        });
+                                    }
+                                    if (p.useDelimiters !== undefined) self.useDelimiters = p.useDelimiters;
+                                    if (p.examples) {
+                                        self.examples = p.examples;
+                                        // Round 125 : à la ré-hydratation d'un prompt existant, Alpine remplit la valeur sans
+                                        // déclencher d'événement 'input', donc le garde-fou ne re-scanne pas le contenu restauré.
+                                        // Sans cet appel, une fuite déjà enregistrée ne serait jamais signalée à la réouverture.
+                                        self.$nextTick(function() {
+                                            var el = document.getElementById('cpExamples');
+                                            if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+                                        });
+                                    }
                                     if (p.constraintCanvas) self.constraintCanvas = p.constraintCanvas;
                                     if (p.canvasAI) {
                                         // 2026-05-05 #104 : migration anciens prompts canvasAI='custom' → canvasAI='chatgpt' + formatMode='custom'
@@ -285,27 +568,138 @@ document.addEventListener('alpine:init', function() {
                                     self.saveName = found.name;
                                     // Prompt existant chargé pour édition : on saute l'étape « objectif »
                                     // (déjà répondue par un précédent passage) et on ouvre directement
-                                    // les réglages avancés, car un prompt sauvegardé utilise typiquement
-                                    // des valeurs personnalisées qui vivent dans ce panneau.
+                                    // toutes les divulgations locales (Phase 2 : ex-showAdvanced unique),
+                                    // car un prompt sauvegardé utilise typiquement des valeurs
+                                    // personnalisées qui vivent dans ces sections repliées par défaut.
+                                    // Round 101 (2026-07-27, passe adversariale) : restaure la vraie
+                                    // carte d'objectif si elle a été sauvegardée (voir wizardParams
+                                    // ci-dessus) - le repli 'autre' ne s'applique plus qu'aux prompts
+                                    // sauvegardés AVANT ce fix (jamais de selectedTask en base).
+                                    if (p.selectedTask) self.selectedTask = p.selectedTask;
                                     self.selectedTask = self.selectedTask || 'autre';
-                                    self.showAdvanced = true;
+                                    self.openSections = { role: true, verb: true, format: true, technique: true, contraintes: true };
                                     self.step = 2;
-                                    self._editingId = found.id;
+                                    self._editingId = found.public_id || found.id;
                                 }
+                                self.editLoading = false;
+                            })
+                            .catch(function() {
+                                self.editLoading = false;
+                                // Round 6 (2026-07-26) : le throw ajouté round 5 sur !r.ok n'avait
+                                // aucun .catch() - échec silencieux (prompt supprimé/IDOR/réseau),
+                                // le wizard restait vierge sans jamais informer l'utilisateur.
+                                self._showSaveError((window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.loadError) || 'Impossible de charger ce prompt pour édition.');
                             });
+                    } else {
+                        // Round 40 (2026-07-27) : "Mon profil" (/user/prompts) sauvegardait
+                        // profile_role/profile_style/profile_constraints avec un message de succès
+                        // annonçant que ça "pré-remplit vos futurs prompts", mais le wizard ne lisait
+                        // jamais cette clé - promesse non tenue. Uniquement pour un NOUVEAU prompt
+                        // (pas ?edit=ID, traité ci-dessus) et seulement si les champs sont encore
+                        // vierges, pour ne jamais écraser un choix déjà fait par l'utilisateur.
+                        fetch('/api/tool-preferences/constructeur-prompts', { headers: self._headers() })
+                            .then(function(r) { return r.ok ? r.json() : null; })
+                            .then(function(data) {
+                                var profile = data && data.preferences && data.preferences.prompt_profile;
+                                if (!profile) return;
+                                // Round 43 (2026-07-27) : la garde ne vérifiait que personaCustom==='' et
+                                // personaType==='preset' - si l'utilisateur avait déjà cliqué une carte
+                                // d'objectif associée à une persona preset (selectTask() met personaType=
+                                // 'preset' + personaPreset=valeur, SANS jamais passer par 'custom') avant
+                                // que ce fetch ne résolve, le profil écrasait silencieusement ce choix
+                                // explicite (personaType→'custom', personaPreset orphelin, jamais réinitialisé).
+                                // Round 111 (2026-07-27, passe adversariale) : assignation depuis le profil "Mon profil" doit déclencher 'input' pour activer le garde-fou anti-PII
+                                if (profile.profile_role && self.personaCustom === '' && self.personaType === 'preset' && self.personaPreset === '') {
+                                    self.personaCustom = profile.profile_role;
+                                    self.personaType = 'custom';
+                                    self.$nextTick(function() {
+                                        var el = document.getElementById('cpPersonaCustom');
+                                        if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+                                    });
+                                }
+                                var extra = [];
+                                if (profile.profile_style) extra.push('Style d\'écriture préféré : ' + profile.profile_style);
+                                if (profile.profile_constraints) extra.push(profile.profile_constraints);
+                                // Round 111 (2026-07-27, passe adversariale) : assignation depuis le profil "Mon profil" doit déclencher 'input' pour activer le garde-fou anti-PII
+                                if (extra.length > 0 && self.constraintCustom === '') {
+                                    self.constraintCustom = extra.join('\n');
+                                    self.$nextTick(function() {
+                                        var el = document.getElementById('cpConstraintCustom');
+                                        if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+                                    });
+                                }
+                            })
+                            .catch(function() {});
                     }
                 } else {
                     try { this.history = JSON.parse(localStorage.getItem('pb_history') || '[]'); } catch(e) { this.history = []; }
+                    this.historyLoaded = true;
                 }
+                this._loadCustomCards();
+            },
+
+            // Diagnostic rapide : ouvre la section « Réglages avancés » correspondante (même
+            // pattern openSections que les boutons "+" existants) puis fait défiler jusqu'à elle.
+            // 'audience' n'a pas de section repliable (champ toujours visible à l'étape 2) : on
+            // se contente d'y faire défiler la page.
+            openDiagnosticSection: function(key) {
+                if (this.step !== 2) this.step = 2;
+                var targetId = key === 'audience' ? 'cpAudienceBlock' : ('cpSection' + key.charAt(0).toUpperCase() + key.slice(1));
+                if (key !== 'audience') this.openSections[key] = true;
+                this.$nextTick(function() {
+                    var el = document.getElementById(targetId);
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
             },
 
             // Phase 1 : clic sur une carte d'objectif → pré-sélection intelligente de la persona et
             // du verbe (mapping simple, pas d'IA), puis avance à l'étape suivante. Le générateur de
             // prompt (get prompt()) n'est jamais touché : on ne fait qu'assigner ses entrées en amont.
             selectTask: function(card) {
+                // Round 64 (2026-07-27) : bloque tant que le chargement ?edit=ID est en vol - sinon
+                // ce clic était écrasé silencieusement par la réponse tardive du GET
+                // /api/prompts/{id} (voir editLoading ci-dessus).
+                if (this.editLoading) return;
                 this.selectedTask = card.id;
                 if (card.personaValue) { this.personaType = 'preset'; this.personaPreset = card.personaValue; }
                 if (card.verb) { this.verbType = 'preset'; this.verb = card.verb; }
+                // Cartes personnalisées (Option D) : le gabarit de requête pré-remplit directement
+                // la demande - pas de mapping persona/verbe (les cartes perso n'en ont pas).
+                // Le garde extérieur reste indispensable : les cartes SYSTÈME n'ont pas de
+                // query_template, et sans lui on écraserait le champ avec undefined.
+                if (card.query_template) {
+                    // Round 128 (2026-07-30, passe adversariale) : l'affectation était directe, donc
+                    // revenir à l'étape 1 et recliquer une carte (volontairement ou par erreur)
+                    // détruisait TOUT le texte rédigé à l'étape 2 - parfois des centaines de mots
+                    // collés par l'utilisateur - sans avertissement ni annulation possible.
+                    //
+                    // On ne remplace donc que si le champ ne contient aucun travail : vide, ou
+                    // strictement égal au gabarit d'une carte connue (= gabarit jamais retouché,
+                    // le remplacer ne détruit rien). Dès que l'utilisateur a écrit son propre
+                    // texte, on le CONSERVE et on le dit, plutôt que d'effacer en silence.
+                    var current = (this.taskObject || '').trim();
+                    var knownCards = this.customCards.concat(this.taskCards);
+                    var isUntouchedTemplate = current === '';
+
+                    for (var k = 0; !isUntouchedTemplate && k < knownCards.length; k++) {
+                        if (knownCards[k].query_template && knownCards[k].query_template.trim() === current) {
+                            isUntouchedTemplate = true;
+                        }
+                    }
+
+                    if (isUntouchedTemplate) {
+                        // Round 100 (2026-07-27, passe adversariale) : même garde-fou que la restauration
+                        // ?edit=ID ci-dessus - déclenche 'input' pour que checkEntities() (prompt-anon-panel.js)
+                        // s'exécute sur le contenu du gabarit, même sans interaction clavier de l'utilisateur.
+                        this.taskObject = card.query_template;
+                        this.$nextTick(function() {
+                            var el = document.getElementById('cpTaskObject');
+                            if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+                        });
+                    } else {
+                        this._showTaskNotice();
+                    }
+                }
                 this.nextStep();
             },
 
@@ -327,11 +721,18 @@ document.addEventListener('alpine:init', function() {
 
             copy: function() {
                 var self = this;
-                navigator.clipboard.writeText(this.prompt);
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
                 this.track('prompt_copy', { tool: 'constructeur-prompts' });
-                this.copied = true;
-                try { window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Prompt copié !', variant: 'success', duration: 2000 } })); } catch (e) {}
-                setTimeout(function() { self.copied = false; }, 2000);
+                // Round 94 (2026-07-27, passe adversariale) : copied=true (bouton "Copié !") et le
+                // toast de succès ne s'affichent plus QUE si l'écriture presse-papiers a RÉELLEMENT
+                // réussi - window.copyToClipboard() attend la Promise réelle (échec = toast d'erreur
+                // explicite déjà géré par le helper), au lieu du try/catch synchrone précédent qui
+                // n'interceptait jamais un rejet asynchrone et affichait "Copié !" à tort.
+                window.copyToClipboard(this.prompt, i18n.promptCopied || 'Prompt copié').then(function(ok) {
+                    if (!ok) return;
+                    self.copied = true;
+                    setTimeout(function() { self.copied = false; }, 2000);
+                });
             },
 
             track: function(event, params) {
@@ -342,11 +743,13 @@ document.addEventListener('alpine:init', function() {
                 } catch (e) {}
             },
 
-            openIn: function(target) {
-                if (!this.prompt) return;
-                try {
-                    navigator.clipboard.writeText(this.prompt);
-                } catch (e) {}
+            // DRY (Option 3 hybride, Partie B) : mécanisme unique "ouvrir dans une IA", réutilisé
+            // tel quel pour le prompt normal (appel sans 2e argument) ET pour le méta-prompt
+            // "Améliorer avec mon IA" (appel avec text = this.metaPrompt). Rien n'est dupliqué.
+            openIn: function(target, text) {
+                var payload = text || this.prompt;
+                if (!payload) return;
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
                 var baseUrl = '';
                 switch (target) {
                     case 'chatgpt':
@@ -361,23 +764,42 @@ document.addEventListener('alpine:init', function() {
                     case 'gemini':
                         baseUrl = 'https://gemini.google.com/app';
                         break;
+                    // Round 126 (2026-07-30, passe adversariale) : Mistral était proposé comme
+                    // « Destination » du prompt (le texte généré dit « crée un nouveau espace de
+                    // travail de Mistral ») sans qu'aucun bouton ne permette d'y aller. Toutes les
+                    // autres destinations avaient le leur. L'absence de pré-remplissage par URL
+                    // n'était pas le motif : Gemini est dans le même cas et a quand même son bouton.
+                    case 'mistral':
+                        baseUrl = 'https://chat.mistral.ai/chat';
+                        break;
                     default:
                         return;
                 }
-                var encodedPrompt = encodeURIComponent(this.prompt);
+                var encodedPrompt = encodeURIComponent(payload);
                 var url = baseUrl;
-                var msg = 'Prompt copié — ouverture de la conversation…';
+                var msg = i18n.openInGeneric || 'Prompt copié : ouverture de la conversation…';
                 if (target === 'gemini') {
                     // Gemini ne pré-remplit pas via URL → on ouvre l'app, le prompt est copié.
-                    msg = 'Prompt copié — colle-le dans Gemini (Ctrl/Cmd + V).';
+                    msg = i18n.openInGemini || 'Prompt copié : colle-le dans Gemini (Ctrl/Cmd + V).';
+                } else if (target === 'mistral') {
+                    // Même cas que Gemini : pas de pré-remplissage par URL, donc on ouvre le chat
+                    // et on annonce explicitement qu'il faut coller - jamais un « ouverture de la
+                    // conversation » trompeur qui laisserait croire que le prompt est déjà là.
+                    msg = i18n.openInMistral || 'Prompt copié : colle-le dans Mistral (Ctrl/Cmd + V).';
                 } else if (encodedPrompt.length <= 4000) {
                     url += encodedPrompt;
                 } else {
-                    msg = 'Prompt trop long pour le lien : il est copié, colle-le (Ctrl/Cmd + V).';
+                    msg = i18n.openInTooLong || 'Prompt trop long pour le lien : il est copié, colle-le (Ctrl/Cmd + V).';
                 }
-                try { window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: msg, variant: 'info', duration: 3500 } })); } catch (e) {}
-                this.track('prompt_open_in', { tool: 'constructeur-prompts', target: target });
+                this.track('prompt_open_in', { tool: 'constructeur-prompts', target: target, meta: !!text });
+                // Round 94 (2026-07-27, passe adversariale) : window.open() reste synchrone, dans la
+                // même pile d'appel que le clic (jamais dans un .then()) pour ne jamais risquer un
+                // blocage popup. Seul le message affiché attend désormais la résolution RÉELLE de la
+                // copie presse-papiers via window.copyToClipboard() (succès = message contextuel
+                // "openInGeneric/openInGemini/openInTooLong" ci-dessus ; échec = toast d'erreur déjà
+                // géré par le helper), au lieu d'annoncer "Prompt copié" à tort sur un rejet silencieux.
                 window.open(url, '_blank', 'noopener');
+                window.copyToClipboard(payload, msg);
             },
 
             copyText: function(text) { window.copyToClipboard(text, (window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.promptCopied) || 'Prompt copié'); },
@@ -391,7 +813,10 @@ document.addEventListener('alpine:init', function() {
             resetAll: function() { window.location.href = window.location.pathname; },
 
             addToHistory: function() {
-                if (this.saving) return;
+                // Round 63 (2026-07-27) : bloque toute sauvegarde tant que l'historique initial
+                // (GET /api/prompts dans init()) n'a pas résolu - sinon l'écho tardif de ce GET
+                // écrasait le prompt fraîchement sauvegardé (voir historyLoaded ci-dessus).
+                if (this.saving || !this.historyLoaded) return;
                 var self = this;
                 var title = this.saveName.trim() || this.personaText || 'Prompt';
                 if (this.isAuthenticated) {
@@ -403,64 +828,577 @@ document.addEventListener('alpine:init', function() {
                         method: method, headers: this._headers(),
                         body: JSON.stringify({ name: title, prompt_text: this.prompt, params: this.wizardParams })
                     })
-                    .then(function(r) { return r.json(); })
+                    .then(function(r) {
+                        if (!r.ok) {
+                            // Round 35 (2026-07-27) : lire le corps JSON de l'erreur AVANT de rejeter
+                            // - sinon le message précis (ex. "params trop volumineux", round 34)
+                            // n'atteint jamais l'utilisateur, qui ne voit qu'un message générique.
+                            // `serverMessage` distingue un message serveur légitime (à afficher tel
+                            // quel) d'une simple erreur réseau/JS (toujours repli générique).
+                            // Round 82 (2026-07-27) : restreint à 422 (validation applicative, seul
+                            // cas aujourd'hui traduit via __()) - un 429 (throttle) renvoie le texte
+                            // anglais fixe du framework Laravel ("Too Many Attempts.", jamais
+                            // traduit), qui ne doit jamais être affiché tel quel à un utilisateur FR.
+                            return r.json().catch(function() { return {}; }).then(function(body) {
+                                var err = new Error((body && body.message) || ('http_' + r.status));
+                                err.serverMessage = r.status === 422 && !!(body && body.message);
+                                throw err;
+                            });
+                        }
+                        return r.json();
+                    })
                     .then(function(data) {
                         if (isEdit) {
                             var pid = data.public_id || data.id;
                             var idx = self.history.findIndex(function(h) { return h.id == pid; });
                             if (idx >= 0) self.history[idx] = { id: pid, prompt: data.prompt_text, name: data.name, date: new Date(data.updated_at).toLocaleString('fr-CA'), params: data.params };
-                            self._editingId = null;
+                            // Round 98 (2026-07-27, passe adversariale) : remettre _editingId à null
+                            // ici faisait basculer un 2e clic sur "Sauvegarder" (sans recharger/
+                            // revenir à ?edit=ID) vers un POST au lieu d'un PUT - un vrai doublon du
+                            // prompt était créé en base au lieu de mettre à jour l'enregistrement déjà
+                            // édité. En restant sur pid (écho serveur), le mode "mise à jour" persiste
+                            // tant que l'utilisateur reste sur cette session d'édition.
+                            self._editingId = pid;
                         } else {
                             self.history.unshift({ id: data.public_id || data.id, prompt: data.prompt_text, name: data.name, date: new Date(data.created_at).toLocaleString('fr-CA'), params: data.params });
                         }
                         self.saveName = '';
                         self.saving = false;
-                        window.dispatchEvent(new CustomEvent('toast', { detail: { message: (window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.promptSaved) || 'Prompt sauvegardé' } }));
+                        if (typeof window.toast === 'function') {
+                            window.toast((window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.promptSaved) || 'Prompt sauvegardé', 'success');
+                        }
                     })
-                    .catch(function() { self.saving = false; self.saveError = (window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.saveError) || 'Erreur de sauvegarde. Réessayez.'; setTimeout(function() { self.saveError = ''; }, 4000); });
+                    .catch(function(err) {
+                        self.saving = false;
+                        self._showSaveError(err && err.serverMessage ? err.message : undefined);
+                    });
                 } else {
                     this.$dispatch('open-auth-modal');
                 }
             },
             deletePrompt: function(id, index) {
                 var self = this;
+                // Round 63 (2026-07-27) : défense en profondeur - avec addToHistory()/
+                // importLocalStorage() désormais bloqués tant que !historyLoaded, cette garde est
+                // redondante en pratique (self.history ne peut pas contenir d'item avant le
+                // chargement initial), mais protège contre tout futur point d'entrée qui peuplerait
+                // history plus tôt.
+                if (!this.historyLoaded) return;
                 if (this.isAuthenticated && id) {
+                    // Round 36 (2026-07-27) : sans cette garde, un double-clic envoie 2 DELETE -
+                    // le 1er réussit (204), le 2e tombe sur un id déjà supprimé (404) et affichait
+                    // une erreur trompeuse pour une suppression qui avait pourtant pleinement réussi.
+                    if (this._deletingIds.indexOf(id) !== -1) return;
+                    this._deletingIds.push(id);
                     fetch('/api/prompts/' + id, { method: 'DELETE', headers: this._headers() })
-                        .then(function() { self.history.splice(index, 1); })
-                        .catch(console.error);
+                        .then(function(r) {
+                            if (!r.ok) throw new Error('http_' + r.status);
+                            self.history.splice(index, 1);
+                        })
+                        .catch(function() {
+                            // Round 9 (2026-07-26) : retirait la carte de l'UI même sur échec
+                            // serveur (403/404/500), sans jamais notifier l'utilisateur.
+                            self._showSaveError((window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.deleteError) || 'Erreur lors de la suppression. Réessayez.');
+                        })
+                        .finally(function() {
+                            self._deletingIds = self._deletingIds.filter(function(dId) { return dId !== id; });
+                        });
                 } else {
                     this.history.splice(index, 1);
-                    localStorage.setItem('pb_history', JSON.stringify(this.history));
+                    // Round 66 (2026-07-27) : même risque que les sites déjà protégés au round 65 -
+                    // localStorage.setItem() non protégé faisait lever une exception non interceptée
+                    // (mode privé, quota dépassé) APRÈS que l'item ait déjà disparu visuellement
+                    // (splice ci-dessus), sans jamais persister réellement la suppression.
+                    try { localStorage.setItem('pb_history', JSON.stringify(this.history)); } catch (e) {}
                 }
             },
             importLocalStorage: function() {
                 var self = this;
+                // Round 36 (2026-07-27) : sans cette garde, un double-clic/double-tap sur
+                // « Importer » relit le même tableau localStorage et poste chaque item une 2e
+                // fois - aucune contrainte d'unicité en base, donc duplication réelle des prompts.
+                // Round 63 (2026-07-27) : même garde historyLoaded qu'addToHistory() - sinon l'écho
+                // tardif du GET initial (init()) écrasait les prompts importés avant qu'il résolve.
+                if (this.importing || !this.historyLoaded) return;
                 var local = [];
                 try { local = JSON.parse(localStorage.getItem('pb_history') || '[]'); } catch(e) { return; }
-                var promises = local.map(function(item) {
+                // Round 90 (2026-07-27, passe adversariale) : défense en profondeur - si
+                // hasLocalData était resté bloqué à true par erreur (cf. fix init() ci-dessus),
+                // ce retour anticipé le laissait bloqué indéfiniment sans jamais atteindre le
+                // .then() qui le remet à jour (ligne ~783).
+                if (local.length === 0) { this.hasLocalData = false; return; }
+                this.importing = true;
+                // Round 8 (2026-07-26) : Promise.all était all-or-nothing - un seul échec sur N
+                // rejetait tout SANS retirer les items déjà importés avec succès de localStorage,
+                // donc un nouvel essai les repostait en double. Chaque item est traité
+                // indépendamment (allSettled) : seuls les items encore en échec restent en local.
+                var i18nImport = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var settlements = local.map(function(item) {
                     return fetch('/api/prompts', {
                         method: 'POST', headers: self._headers(),
-                        body: JSON.stringify({ name: item.name || 'Prompt importé', prompt_text: item.prompt, params: {} })
-                    }).then(function(r) { return r.json(); });
+                        body: JSON.stringify({ name: item.name || i18nImport.importedPromptName || 'Prompt importé', prompt_text: item.prompt, params: {} })
+                    })
+                    .then(function(r) { if (!r.ok) throw new Error('http_' + r.status); return r.json(); })
+                    .then(function(data) { return { ok: true, data: data }; })
+                    .catch(function() { return { ok: false, item: item }; });
                 });
-                Promise.all(promises).then(function(results) {
-                    results.forEach(function(data) {
-                        self.history.push({ id: data.id, prompt: data.prompt_text, name: data.name, date: new Date(data.created_at).toLocaleString('fr-CA'), params: data.params });
+                Promise.all(settlements).then(function(results) {
+                    var remaining = [];
+                    var anyFailed = false;
+                    results.forEach(function(res) {
+                        if (res.ok) {
+                            // Round 142 (2026-07-30) : public_id d'abord. L'API supprime par public_id (SavedPromptController
+                            // ::destroy), jamais par id interne. Le chemin de sauvegarde ordinaire le faisait déjà ;
+                            // seul l'import avait gardé res.data.id, si bien qu'un prompt importé ne pouvait pas être
+                            // supprimé de l'historique avant un rechargement complet de la page.
+                            self.history.push({ id: res.data.public_id || res.data.id, prompt: res.data.prompt_text, name: res.data.name, date: new Date(res.data.created_at).toLocaleString('fr-CA'), params: res.data.params });
+                        } else {
+                            remaining.push(res.item);
+                            anyFailed = true;
+                        }
                     });
-                    localStorage.removeItem('pb_history');
-                    self.hasLocalData = false;
+                    // Round 65 (2026-07-27) : localStorage.setItem/removeItem peuvent lever (storage
+                    // plein/indisponible) - sans ce try/catch, l'exception interrompait ce callback
+                    // AVANT self.importing = false, bloquant le bouton "Importer" en permanence même
+                    // si tous les imports avaient déjà réussi côté serveur (fetch déjà résolus ok).
+                    try {
+                        if (remaining.length > 0) {
+                            localStorage.setItem('pb_history', JSON.stringify(remaining));
+                        } else {
+                            localStorage.removeItem('pb_history');
+                        }
+                    } catch (e) {}
+                    self.hasLocalData = remaining.length > 0;
+                    self.importing = false;
+                    if (anyFailed) {
+                        self._showSaveError((window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.importError) || "Erreur lors de l'importation. Réessayez.");
+                    }
                 });
             },
-            clearHistory: function() { this.history = []; if (!this.isAuthenticated) localStorage.removeItem('pb_history'); },
+            // Round 66 (2026-07-27) : même risque que deletePrompt() ci-dessus - removeItem() non
+            // protégé faisait lever une exception non interceptée APRÈS que history ait déjà été
+            // vidé visuellement, sans jamais persister réellement le vidage côté navigateur.
+            clearHistory: function() { this.history = []; if (!this.isAuthenticated) { try { localStorage.removeItem('pb_history'); } catch (e) {} } },
+
+            // === Cartes de démarrage personnalisées (Option D, 2026-07-26) ===
+            // Même contrat de persistance que minuteur-visuel (custom_colors/custom_durations) :
+            // GET au chargement, POST à chaque mutation, retour serveur = source de vérité (le
+            // contrôleur peut tronquer/filtrer - on réaffiche toujours ce qu'il a réellement gardé).
+            _genCardId: function() {
+                return 'custom_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+            },
+
+            _readLocalCustomCards: function() {
+                try {
+                    var raw = JSON.parse(localStorage.getItem('cp_custom_cards') || 'null');
+                    if (raw && raw.version === 1 && Array.isArray(raw.cards)) return raw.cards;
+                } catch (e) {}
+                return [];
+            },
+
+            _saveLocalCustomCards: function() {
+                try { localStorage.setItem('cp_custom_cards', JSON.stringify({ version: 1, cards: this.customCards })); } catch (e) {}
+            },
+
+            // Round 118 (2026-07-27, passe adversariale) : ce point réseau était le SEUL du fichier
+            // à ne jamais signaler son échec (les 7 autres appellent _showSaveError). Sur 401/403/
+            // 429/500, `r.ok` était faux mais la chaîne continuait avec data=null : customCards
+            // retombait à [] et customCardsLoaded passait quand même à true. L'utilisateur croyait
+            // simplement n'avoir aucune carte, ajoutait la sienne (addCustomCard ne teste que
+            // !customCardsLoaded), et persistCustomCards envoyait custom_cards = [1 seule carte].
+            // Côté serveur, ToolPreferenceController::update() fait array_merge(..., [$key => $value])
+            // = remplacement COMPLET de la clé, pas une fusion élément par élément : toutes les
+            // cartes déjà enregistrées étaient écrasées et perdues, sans qu'aucune erreur n'ait
+            // jamais été affichée. On lève désormais sur !r.ok, et en cas d'échec customCardsLoaded
+            // reste FALSE (le bouton « Ajouter une carte » demeure désactivé, donc aucune écriture
+            // destructrice possible) avec un avertissement persistant + réessai.
+            _loadCustomCards: function() {
+                var self = this;
+                if (this.isAuthenticated) {
+                    this.customCardsLoadFailed = false;
+                    fetch('/api/tool-preferences/constructeur-prompts', { headers: this._headers() })
+                        .then(function(r) {
+                            if (!r.ok) { throw new Error('HTTP ' + r.status); }
+                            return r.json();
+                        })
+                        .then(function(data) {
+                            var serverCards = (data && data.preferences && Array.isArray(data.preferences.custom_cards)) ? data.preferences.custom_cards : [];
+                            self.customCards = serverCards;
+                            // Offre d'import UNIQUEMENT si le compte n'a encore aucune carte perso ET
+                            // qu'il existe des cartes invité locales - geste explicite requis, jamais
+                            // de fusion automatique silencieuse (demande utilisateur 2026-07-26).
+                            if (serverCards.length === 0) {
+                                var local = self._readLocalCustomCards();
+                                if (local.length > 0) {
+                                    self._localCardsToImport = local;
+                                    self.customCardsImportAvailable = true;
+                                }
+                            }
+                            self.customCardsLoaded = true;
+                        })
+                        .catch(function() {
+                            // customCardsLoaded reste volontairement FALSE : c'est LUI qui garde
+                            // addCustomCard() et le bouton « Ajouter une carte ». Tant qu'on ignore
+                            // ce que le serveur détient, on n'écrit rien.
+                            self.customCardsLoadFailed = true;
+                        });
+                } else {
+                    this.customCards = this._readLocalCustomCards();
+                    this.customCardsLoaded = true;
+                }
+            },
+
+            // Round 118 (2026-07-27, passe adversariale) : réessai explicite depuis l'avertissement.
+            retryLoadCustomCards: function() {
+                this.customCardsLoadFailed = false;
+                this._loadCustomCards();
+            },
+
+            persistCustomCards: function() {
+                if (this.isAuthenticated) {
+                    var self = this;
+                    // Round 37 (2026-07-27) : chaîner sur _cardsPersistQueue sérialise les appels -
+                    // un seul POST en vol à la fois, chacun capturant l'état customCards le plus
+                    // récent au moment de son envoi (jamais un snapshot obsolète en file d'attente).
+                    this._cardsPersistQueue = this._cardsPersistQueue.then(function() {
+                        // Round 61 (2026-07-27) : snapshot de l'état ENVOYÉ, pris ici (pas relu plus
+                        // tard) - sert à détecter si l'utilisateur a continué de taper (title/
+                        // query_template, x-model direct) pendant que ce POST était en vol.
+                        var sentSnapshot = JSON.stringify(self.customCards);
+                        return fetch('/api/tool-preferences/constructeur-prompts', {
+                            method: 'POST', headers: self._headers(),
+                            body: JSON.stringify({ key: 'custom_cards', value: self.customCards })
+                        })
+                        .then(function(r) { if (!r.ok) throw new Error('http_' + r.status); return r.json(); })
+                        .then(function(data) {
+                            if (data && data.preferences && Array.isArray(data.preferences.custom_cards)) {
+                                // N'appliquer l'écho serveur QUE si rien n'a changé localement depuis
+                                // l'envoi - sinon la frappe en cours serait écrasée silencieusement par
+                                // une valeur périmée (ex. addCustomCard() focus le titre immédiatement
+                                // après ce POST, l'utilisateur tape pendant qu'il est en vol).
+                                if (JSON.stringify(self.customCards) === sentSnapshot) {
+                                    self.customCards = data.preferences.custom_cards;
+                                }
+                            }
+                        })
+                        .catch(function() {
+                            // Round 8 (2026-07-26) : seul point d'écriture de toute mutation de carte
+                            // (ajout/suppression/réordonnancement/édition) - un échec silencieux ici
+                            // laissait croire la modification sauvegardée alors qu'elle ne l'était pas.
+                            self._showSaveError();
+                        });
+                    });
+                } else {
+                    this._saveLocalCustomCards();
+                }
+            },
+
+            addCustomCard: function() {
+                if (!this.customCardsLoaded || this.customCards.length >= 10) return;
+                var self = this;
+                // Round 78 (2026-07-27, passe adversariale) : titre traduit via i18n, repli français.
+                var i18nNewCard = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var card = { id: this._genCardId(), title: i18nNewCard.newCardTitle || 'Nouvelle carte', icon: '⭐', query_template: '', hidden: false };
+                this.customCards.push(card);
+                // Round 7 (2026-07-26) : le bandeau d'import écrase custom_cards en entier (pas un
+                // merge) - une carte ajoutée ici serait silencieusement perdue si l'utilisateur
+                // cliquait ensuite "Importer mes cartes locales" avec un snapshot figé plus ancien.
+                this.customCardsImportAvailable = false;
+                this.persistCustomCards();
+                this.editingCardTitleSnapshot = card.title;
+                this.editingCardId = card.id;
+                this.$nextTick(function() {
+                    var el = document.getElementById('cpCardTitleInput-' + card.id);
+                    if (el) el.focus();
+                });
+            },
+
+            startEditCardTitle: function(card) {
+                this.editingCardTitleSnapshot = card.title;
+                this.editingCardId = card.id;
+                this.$nextTick(function() {
+                    var el = document.getElementById('cpCardTitleInput-' + card.id);
+                    if (el) el.focus();
+                });
+            },
+
+            commitCardTitle: function(card) {
+                var t = (card.title || '').trim();
+                var i18nUntitled = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                card.title = t === '' ? (i18nUntitled.untitledCard || 'Carte sans titre') : t;
+                this.editingCardId = null;
+                this.persistCustomCards();
+                this._restoreFocusIfLost('cpCardTitleBtn-' + card.id);
+            },
+
+            cancelEditCardTitle: function(card) {
+                card.title = this.editingCardTitleSnapshot;
+                this.editingCardId = null;
+                this._restoreFocusIfLost('cpCardTitleBtn-' + card.id);
+            },
+
+            // Round 105 (2026-07-27, passe adversariale) : commitCardTitle/cancelEditCardTitle/
+            // setCardIcon/cancelEditCardPanel retirent du DOM (x-if, pas x-show) l'élément qui a le
+            // focus clavier au moment de l'action (Enter/Escape sur l'input titre ou le textarea du
+            // gabarit, clic sur une icône) - le focus tombait silencieusement sur <body>, échec WCAG
+            // 2.4.3. Mirroir du pattern déjà établi dans action-menu.blade.php:101
+            // ($refs.trigger.focus() après Escape) : ne restaure le focus QUE si document.activeElement
+            // est bien tombé sur <body> (perte réelle) - si l'utilisateur a cliqué ailleurs
+            // volontairement (cas du @blur qui appelle aussi commitCardTitle), le nouveau focus a déjà
+            // été posé avant ce code et ne doit jamais être écrasé.
+            _restoreFocusIfLost: function(elementId) {
+                this.$nextTick(function() {
+                    if (document.activeElement === document.body) {
+                        var el = document.getElementById(elementId);
+                        if (el) el.focus();
+                    }
+                });
+            },
+
+            toggleIconPicker: function(cardId) {
+                this.iconPickerOpenId = this.iconPickerOpenId === cardId ? null : cardId;
+            },
+
+            // Round 106 (2026-07-27, passe adversariale) : le sélecteur d'icône (.ct-emoji-grid,
+            // template x-if) se fermait aussi via @keydown.escape.window sur le conteneur racine
+            // (assignation Alpine inline directe, hors setCardIcon()) - un 5e chemin qui contournait
+            // entièrement _restoreFocusIfLost() (round 105), laissant le focus tomber sur <body>
+            // quand Échap est pressé pendant qu'un bouton emoji a le focus. Fixé : ce handler global
+            // appelle désormais closeIconPicker() qui réutilise _restoreFocusIfLost() déjà établie.
+            closeIconPicker: function() {
+                if (!this.iconPickerOpenId) return;
+                var id = this.iconPickerOpenId;
+                this.iconPickerOpenId = null;
+                this._restoreFocusIfLost('cpCardIconBtn-' + id);
+            },
+
+            setCardIcon: function(card, icon) {
+                card.icon = icon;
+                this.iconPickerOpenId = null;
+                this.persistCustomCards();
+                this._restoreFocusIfLost('cpCardIconBtn-' + card.id);
+            },
+
+            toggleCardPanel: function(card) {
+                if (this.editingCardPanelId === card.id) {
+                    this.editingCardPanelId = null;
+                } else {
+                    this.editingCardPanelSnapshot = card.query_template;
+                    this.editingCardPanelId = card.id;
+                }
+            },
+
+            cancelEditCardPanel: function(card) {
+                card.query_template = this.editingCardPanelSnapshot;
+                this.editingCardPanelId = null;
+                this._restoreFocusIfLost('cpCardPanelBtn-' + card.id);
+            },
+
+            // Round 95 (2026-07-27, passe adversariale) : rafraîchit le snapshot d'annulation à
+            // CHAQUE blur du textarea (pas seulement à l'OUVERTURE du panneau via toggleCardPanel).
+            // Le panneau reste ouvert après un blur (editingCardPanelId n'est remis à null que par
+            // toggleCardPanel()/cancelEditCardPanel()) - un clic sur un autre bouton de la MÊME
+            // carte (↑/↓/👁️/🗑️) pendant l'édition déclenche un blur intermédiaire qui persiste la
+            // valeur courante côté serveur SANS jamais rafraîchir editingCardPanelSnapshot. Un
+            // Échap ultérieur restaurait alors le snapshot pris à l'ouverture (plus ancien que ce
+            // qui est réellement persisté) - désync client/serveur silencieuse.
+            commitCardPanelBlur: function(card) {
+                this.editingCardPanelSnapshot = card.query_template;
+                this.persistCustomCards();
+            },
+
+            toggleCardHidden: function(card) {
+                card.hidden = !card.hidden;
+                this.persistCustomCards();
+            },
+
+            // Confirmation 2 temps via le pattern global du site (jamais de confirm() natif) :
+            // clic sur 🗑️ ouvre la modale globale, le clic "Confirmer" dans la modale déclenche
+            // le callback ci-dessous - voir Modules/FrontTheme master.blade.php.
+            confirmDeleteCard: function(card) {
+                var self = this;
+                var i18nDelete = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                this.$dispatch('open-confirm-global', {
+                    message: i18nDelete.deleteCardConfirm || 'Supprimer cette carte ?',
+                    callback: function() { self.deleteCustomCard(card.id); }
+                });
+            },
+
+            deleteCustomCard: function(cardId) {
+                var idx = this.customCards.findIndex(function(c) { return c.id === cardId; });
+                if (idx === -1) return;
+                this.customCards.splice(idx, 1);
+                if (this.selectedTask === cardId) this.selectedTask = '';
+                this.persistCustomCards();
+            },
+
+            // Réordonnancement : boutons ↑/↓ (alternative clavier WCAG 2.2 obligatoire au
+            // glisser-déposer ci-dessous) - direction -1 = plus tôt, +1 = plus tard.
+            moveCustomCard: function(card, direction) {
+                var idx = this.customCards.findIndex(function(c) { return c.id === card.id; });
+                var newIdx = idx + direction;
+                if (idx === -1 || newIdx < 0 || newIdx >= this.customCards.length) return;
+                var tmp = this.customCards[idx];
+                this.customCards[idx] = this.customCards[newIdx];
+                this.customCards[newIdx] = tmp;
+                this.persistCustomCards();
+            },
+
+            // Glisser-déposer natif HTML5 (même pattern léger que generateur-equipes.blade.php -
+            // aucune bibliothèque tierce ajoutée, DRY avec l'existant sur ce site).
+            // Round 53 (2026-07-27) : l'ancienne version gardait l'id de la carte glissée dans
+            // _draggedCardId (état JS mutable) - un self-drop (carte déposée sur elle-même)
+            // retournait tôt SANS jamais réinitialiser cette variable, et aucun handler dragend
+            // ne la nettoyait sur un drag annulé. N'importe quel drag-and-drop natif SANS
+            // RAPPORT déposé plus tard sur une carte (texte sélectionné, image, lien) déclenchait
+            // alors un réordonnancement silencieux basé sur cet id périmé, persisté au serveur.
+            // Fix : plus aucun état JS entre le début et la fin du drag - dataTransfer (avec un
+            // type MIME propre à l'app, jamais posé par un drag natif non lié) est la SEULE
+            // source de vérité, lue directement dans dropOnCustomCard().
+            dragStartCustomCard: function(event, card) {
+                try { event.dataTransfer.setData('application/x-cp-custom-card-id', card.id); } catch (e) {}
+            },
+
+            dropOnCustomCard: function(event, targetCard) {
+                event.preventDefault();
+                var draggedId = '';
+                try { draggedId = event.dataTransfer.getData('application/x-cp-custom-card-id'); } catch (e) {}
+                if (!draggedId || draggedId === targetCard.id) return;
+                var fromIdx = this.customCards.findIndex(function(c) { return c.id === draggedId; });
+                var toIdx = this.customCards.findIndex(function(c) { return c.id === targetCard.id; });
+                if (fromIdx === -1 || toIdx === -1) return;
+                var moved = this.customCards.splice(fromIdx, 1)[0];
+                this.customCards.splice(toIdx, 0, moved);
+                this.persistCustomCards();
+            },
+
+            // Import invité → compte (geste explicite uniquement, voir _loadCustomCards) : envoie
+            // les cartes locales au backend via le MÊME endpoint que persistCustomCards, puis vide
+            // le localStorage et affiche un toast (window.toast, helper global du site).
+            importLocalCustomCards: function() {
+                var self = this;
+                var local = this._localCardsToImport || [];
+                // Round 97 (2026-07-27, passe adversariale) : sans cette garde, un double-clic sur
+                // "Importer mes X cartes locales" déclenchait 2 appels concurrents - le 2e capturait
+                // la même liste `local` (fermeture non rafraîchie avant résolution du 1er) et la
+                // fusionnait à nouveau avec l'écho serveur du 1er, créant de VRAIS doublons persistés
+                // en base (sanitizeCustomCards() génère un nouvel id sur collision au lieu de rejeter).
+                if (this.importingCards || local.length === 0) return;
+                this.importingCards = true;
+                // Round 38 (2026-07-27) : ce fetch écrivait directement (hors _cardsPersistQueue,
+                // round 37) vers le MÊME endpoint/clé que persistCustomCards() ET remplaçait
+                // aveuglément custom_cards par `local` seul - un clic concurrent sur "Ajouter une
+                // carte" (les deux boutons sont actifs en même temps quand customCards est vide)
+                // perdait silencieusement l'une des deux mutations selon l'ordre de résolution
+                // réseau. Chaîner sur la file d'attente ET fusionner avec l'état courant (au lieu
+                // d'écraser) élimine les deux pertes : la carte ajoutée pendant l'attente ET les
+                // cartes importées restent toutes présentes, plafonnées à 10 (limite d'addCustomCard).
+                this._cardsPersistQueue = this._cardsPersistQueue.then(function() {
+                    // Round 49 (2026-07-27) : nombre de cartes locales RÉELLEMENT conservées après le
+                    // plafond de 10 (customCards.length peut déjà être > 0 si une carte a été ajoutée
+                    // pendant que cet import était en file d'attente, round 38) - calculé AVANT l'appel
+                    // réseau pour refléter fidèlement ce qui sera vraiment envoyé/persisté.
+                    var spaceAvailable = Math.max(0, 10 - self.customCards.length);
+                    var importedCount = Math.min(local.length, spaceAvailable);
+                    var truncatedCount = local.length - importedCount;
+                    var merged = self.customCards.concat(local).slice(0, 10);
+                    // Round 62 (2026-07-27) : même risque que round 61 (persistCustomCards) - si
+                    // l'utilisateur clique "Ajouter une carte" (addCustomCard(), mutation SYNCHRONE
+                    // et immédiate de customCards) pendant que CE fetch d'import est en vol, appliquer
+                    // l'écho serveur sans vérifier écrasait silencieusement la carte fraîchement
+                    // ajoutée - elle disparaissait de l'écran, puis le persistCustomCards() suivant en
+                    // file d'attente re-persistait cet état déjà amputé (perte définitive, sans erreur).
+                    var sentSnapshot = JSON.stringify(self.customCards);
+                    return fetch('/api/tool-preferences/constructeur-prompts', {
+                        method: 'POST', headers: self._headers(),
+                        body: JSON.stringify({ key: 'custom_cards', value: merged })
+                    })
+                    .then(function(r) { if (!r.ok) throw new Error('http_' + r.status); return r.json(); })
+                    .then(function(data) {
+                        // N'applique l'écho serveur à customCards que si rien n'a changé localement
+                        // depuis l'envoi - sinon on garde l'état local (plus récent, ex. une carte
+                        // ajoutée entre-temps) et on laisse le persistCustomCards() suivant (déjà en
+                        // file d'attente) le re-synchroniser côté serveur normalement. Le reste du
+                        // traitement (troncature, localStorage, toast) continue dans tous les cas :
+                        // l'import a bel et bien réussi côté serveur avec la valeur envoyée.
+                        if (JSON.stringify(self.customCards) === sentSnapshot) {
+                            self.customCards = (data.preferences && data.preferences.custom_cards) || [];
+                        }
+                        // Round 49 : si le plafond de 10 a tronqué certaines cartes locales, elles
+                        // restent en attente d'import (jamais effacées silencieusement) - l'utilisateur
+                        // peut supprimer une carte existante puis relancer l'import pour les récupérer.
+                        if (truncatedCount > 0) {
+                            self._localCardsToImport = local.slice(importedCount);
+                            self.customCardsImportAvailable = self._localCardsToImport.length > 0;
+                            // Round 54 (2026-07-27) : cp_custom_cards est TOUJOURS stocké sous la forme
+                            // enveloppée {version:1, cards:[...]} (voir _readLocalCustomCards/
+                            // _saveLocalCustomCards), jamais un tableau brut. L'ancien code lisait un
+                            // tableau brut et appelait .slice() dessus - TypeError silencieusement
+                            // avalé par le catch, le trim n'avait donc JAMAIS lieu en pratique : les
+                            // cartes déjà importées avec succès restaient dupliquées en localStorage.
+                            try {
+                                localStorage.setItem('cp_custom_cards', JSON.stringify({ version: 1, cards: self._localCardsToImport }));
+                            } catch (e) {}
+                        } else {
+                            // Round 65 (2026-07-27) : même risque que la branche if ci-dessus (round 54,
+                            // déjà protégée) - removeItem() non protégé faisait échouer ce .then() sur
+                            // storage indisponible, tombant dans le .catch() qui affiche un toast
+                            // d'ERREUR trompeur alors que l'import a réellement réussi côté serveur.
+                            try { localStorage.removeItem('cp_custom_cards'); } catch (e) {}
+                            self.customCardsImportAvailable = false;
+                            self._localCardsToImport = [];
+                        }
+                        try {
+                            var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                            if (importedCount === 0) {
+                                window.toast(i18n.customCardsImportLimitReached || 'Limite de 10 cartes atteinte - aucune carte importée. Supprimez-en une puis réessayez.', 'warning', 5000);
+                            } else if (truncatedCount > 0) {
+                                var partialMsg = (i18n.customCardsImportedPartial || '{imported} carte(s) importée(s) - {remaining} en attente (limite de 10 atteinte).')
+                                    .replace('{imported}', importedCount).replace('{remaining}', truncatedCount);
+                                window.toast(partialMsg, 'warning', 5000);
+                            } else {
+                                // Round 25 (2026-07-27) : accord singulier/pluriel - l'ancien template unique
+                                // "{count} cartes importées" restait au pluriel même pour 1 carte ("1 cartes importées").
+                                var msg = importedCount === 1
+                                    ? (i18n.customCardsImportedOne || '1 carte importée')
+                                    : (i18n.customCardsImportedMany || '{count} cartes importées').replace('{count}', importedCount);
+                                window.toast(msg, 'success', 3000);
+                            }
+                        } catch (e) {}
+                        self.importingCards = false;
+                    })
+                    .catch(function() {
+                        // Round 9 (2026-07-26) : même endpoint que persistCustomCards (fix round 8),
+                        // mais sur échec HTTP non-ok le localStorage était quand même vidé et un toast
+                        // "succès" affiché malgré la perte réelle des cartes locales - jamais corrigé ici.
+                        // Le snapshot local (_localCardsToImport) et cp_custom_cards restent intacts,
+                        // rien n'est effacé tant que le serveur n'a pas confirmé.
+                        self.importingCards = false;
+                        self._showSaveError((window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.importError) || "Erreur lors de l'importation. Réessayez.");
+                    });
+                });
+            },
 
             exportPrompt: function() {
-                var blob = new Blob([this.prompt], { type: 'text/plain' });
-                var a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = 'prompt.txt';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                try {
+                    var blob = new Blob([this.prompt], { type: 'text/plain' });
+                    var a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'prompt.txt';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    this.track('prompt_export', { tool: 'constructeur-prompts' });
+                } catch (e) {
+                    this._showSaveError((window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.exportError) || "Impossible d'exporter le fichier. Réessayez.");
+                }
+            },
+
+            // Affiche/masque le panneau "Améliorer avec mon IA" (Option 3 hybride, Partie B) —
+            // aucun appel réseau : ne fait qu'afficher les boutons "Ouvrir dans"/"Copier"
+            // reparamétrés avec le méta-prompt (get metaPrompt() ci-dessus).
+            toggleMetaPrompt: function() {
+                this.metaPromptShown = !this.metaPromptShown;
             }
         };
     });

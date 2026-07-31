@@ -44,12 +44,11 @@ class PublicToolController extends Controller
         $tool = Tool::where('slug', $slug)->where('is_active', true)->firstOrFail();
 
         // #313 P0.2 : placeholder admin-only si is_under_construction (vue tools::public.under-construction)
-        if (Schema::hasColumn('tools', 'is_under_construction') && $tool->is_under_construction) {
-            $user = request()->user();
-            $isAdmin = $user && method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin();
-            if (! $isAdmin) {
-                return view('tools::public.under-construction', compact('tool'));
-            }
+        // Round 21 (2026-07-27) : réutilise Tool::isAccessibleTo() au lieu de dupliquer la logique.
+        // Round 22 : $tool passé en 3e argument - $tool est déjà chargé ci-dessus, évite une
+        // requête Tool redondante à chaque chargement de page (page la plus visitée du site).
+        if (! Tool::isAccessibleTo($slug, request()->user(), $tool)) {
+            return view('tools::public.under-construction', compact('tool'));
         }
 
         // #190 : increment views_count (ignore HEAD + bots)

@@ -6,6 +6,8 @@
 <button type="button"
         class="js-tool-fullscreen-btn ct-btn ct-btn-ghost ct-btn-icon"
         data-fullscreen-target="{{ $targetId ?? '' }}"
+        data-i18n-fullscreen="{{ __('Plein écran') }}"
+        data-i18n-exit-fullscreen="{{ __('Quitter le plein écran') }}"
         title="{{ __('Plein écran') }}"
         aria-label="{{ __('Plein écran') }}"
         style="display:inline-flex;align-items:center;justify-content:center;">
@@ -53,7 +55,14 @@
             document.querySelectorAll('.js-tool-fullscreen-btn').forEach(function(btn) {
                 btn.querySelector('.icon-expand').style.display = 'block';
                 btn.querySelector('.icon-compress').style.display = 'none';
-                btn.title = 'Plein écran';
+                // Round 69 (2026-07-27) : lu depuis data-i18n-fullscreen (posé par Blade via __())
+                // au lieu d'un texte français en dur - restait figé en FR quelle que soit la locale.
+                // Round 70 (2026-07-27) : aria-label doit AUSSI être remis à jour, pas seulement
+                // title - aria-label prime sur title dans le calcul du nom accessible (WCAG 4.1.2),
+                // sinon un lecteur d'écran annonce "Plein écran" même une fois le mode activé.
+                var fullscreenLabel = btn.getAttribute('data-i18n-fullscreen') || 'Plein écran';
+                btn.title = fullscreenLabel;
+                btn.setAttribute('aria-label', fullscreenLabel);
             });
             document.querySelectorAll('.tool-fullscreen-target').forEach(function(el) {
                 el.classList.remove('is-fullscreen');
@@ -64,7 +73,9 @@
                 if (activeBtn) {
                     activeBtn.querySelector('.icon-expand').style.display = 'none';
                     activeBtn.querySelector('.icon-compress').style.display = 'block';
-                    activeBtn.title = 'Quitter le plein écran';
+                    var exitLabel = activeBtn.getAttribute('data-i18n-exit-fullscreen') || 'Quitter le plein écran';
+                    activeBtn.title = exitLabel;
+                    activeBtn.setAttribute('aria-label', exitLabel);
                 }
             }
         }

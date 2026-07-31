@@ -21,7 +21,7 @@ class UserSavedController extends Controller
         // Collecter les sauvegardes de chaque outil avec un type identifiant
         $items = collect();
 
-        if (class_exists(\Modules\Tools\Models\SavedPrompt::class)) {
+        if (class_exists(\Modules\Tools\Models\SavedPrompt::class) && \Modules\Tools\Models\Tool::isAccessibleTo('constructeur-prompts', $user)) {
             $items = $items->merge(
                 \Modules\Tools\Models\SavedPrompt::forUser($user->id)->latest()->get()
                     ->map(fn ($p) => (object) ['id' => $p->id, 'public_id' => $p->public_id, 'type' => 'prompt', 'name' => $p->name, 'preview' => \Str::limit($p->prompt_text, 80), 'tool_name' => __('Constructeur de prompts'), 'tool_slug' => 'constructeur-prompts', 'tool_icon' => '✨', 'tool_color' => '#8B5CF6', 'api_path' => '/api/prompts/', 'created_at' => $p->created_at])
@@ -82,7 +82,7 @@ class UserSavedController extends Controller
                             'id' => $p->id,
                             'public_id' => (string) $p->id,
                             'type' => 'sudoku',
-                            'name' => __('Sudoku').' '.$difficultyLabel.' — '.$puzzleDate,
+                            'name' => __('Sudoku').' '.$difficultyLabel.' - '.$puzzleDate,
                             'preview' => $pct.'% '.__('rempli').' · '.$timeStr.' · '.((int) $p->errors_count).' '.__('erreurs').' · '.((int) $p->hints_used).' '.__('indices'),
                             'tool_name' => __('Sudoku quotidien'),
                             'tool_slug' => 'sudoku',

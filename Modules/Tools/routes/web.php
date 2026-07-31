@@ -16,6 +16,7 @@ use Modules\Tools\Http\Controllers\PublicQtController;
 use Modules\Tools\Http\Controllers\PublicToolController;
 use Modules\Tools\Http\Controllers\UserCrosswordController;
 use Modules\Tools\Http\Middleware\EnsureCrosswordTester;
+use Modules\Tools\Http\Middleware\EnsureToolNotUnderConstruction;
 
 Route::middleware('web')->group(function () {
     Route::get('/outils', [PublicToolController::class, 'index'])->name('tools.index')->middleware('cacheResponse:600');
@@ -162,6 +163,14 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/user/mots-croises/{publicId}/toggle-public', [UserCrosswordController::class, 'togglePublic'])
         ->where('publicId', '[a-zA-Z0-9_-]+')
         ->name('user.crosswords.toggle-public');
+
+    // 2026-07-26 : "Mes prompts" - bibliothèque des prompts sauvegardés (constructeur-prompts),
+    // recherche/tags/favoris, intégrée à la navigation "Mon espace" existante.
+    // Gate ajoutée après passe adversariale (2026-07-26) : cette page satellite n'était pas
+    // couverte par le gate is_under_construction de /outils/constructeur-prompts lui-même.
+    Route::get('/user/prompts', [\Modules\Tools\Http\Controllers\UserPromptController::class, 'index'])
+        ->middleware(EnsureToolNotUnderConstruction::class.':constructeur-prompts')
+        ->name('user.prompts.index');
 });
 
 Route::middleware(['web', 'auth', \Modules\Core\Http\Middleware\EnsureIsAdmin::class])->prefix('admin')->name('admin.')->group(function () {

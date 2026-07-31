@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr-CA">
+<head>
+<meta charset="utf-8">
+<title>Synthèse audit site-wide — laveille.ai (2026-07-03)</title>
+<style>
+  :root{--teal:#0B7285;--teal-d:#064E5C;--bg:#F8FAFB;--card:#fff;--border:#E5E7EB;--text:#1A1D23;--muted:#52586a;--warn:#C2410C;--warn-bg:#FDF5ED;--good:#166534;--good-bg:#DCFCE7;--crit:#B91C1C;--crit-bg:#FEE2E2;}
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);margin:0;line-height:1.6}
+  header{background:var(--teal-d);color:#fff;padding:2rem}
+  header h1{margin:0 0 .3rem;font-size:1.5rem}
+  main{max-width:1050px;margin:0 auto;padding:2rem}
+  section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin-bottom:1.4rem}
+  section h2{margin-top:0;color:var(--teal-d);font-size:1.15rem}
+  .score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:1rem 0}
+  .score-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+  .score-card b{display:block;font-size:1.6rem;color:var(--teal-d)}
+  .score-card span{font-size:.8rem;color:var(--muted)}
+  table{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:.5rem}
+  th,td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--border);vertical-align:top}
+  th{background:var(--bg)}
+  .fixed{background:var(--good-bg);color:var(--good);padding:.15rem .5rem;border-radius:6px;font-size:.78rem;font-weight:700}
+  .noted{background:var(--warn-bg);color:var(--warn);padding:.15rem .5rem;border-radius:6px;font-size:.78rem;font-weight:700}
+  .version-chip{display:inline-block;background:#ECEEF2;border-radius:6px;padding:.15rem .55rem;font-size:.8rem;font-family:monospace}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Synthèse — Audit site-wide laveille.ai</h1>
+  <p>2026-07-03 · Découverte autonome + remédiation (hors Académie, déjà auditée le même jour) · Versions déployées : <span class="version-chip">v1.76.1 → v1.76.4</span></p>
+</header>
+
+<main>
+
+<section>
+  <h2>Vue d'ensemble</h2>
+  <div class="score-grid">
+    <div class="score-card"><b>70/100</b><span>Sécurité infra</span></div>
+    <div class="score-card"><b>A / A+</b><span>Headers / SSL</span></div>
+    <div class="score-card"><b>2 corrigées</b><span>Vulnérabilités réelles</span></div>
+    <div class="score-card"><b>1240→</b><span>Impressions récupérables (SEO)</span></div>
+    <div class="score-card"><b>4</b><span>Déploiements du jour</span></div>
+  </div>
+  <p>Audit déclenché en autonomie (décision de continuer à améliorer la plateforme sans instruction précise à chaque étape). 5 dimensions couvertes : sécurité infra, sécurité applicative (OWASP), SEO, performance, accessibilité.</p>
+</section>
+
+<section>
+  <h2>Corrigé et déployé aujourd'hui</h2>
+  <table>
+    <tr><th>Version</th><th>Correctif</th><th>Preuve</th></tr>
+    <tr>
+      <td><span class="version-chip">v1.76.3</span></td>
+      <td><span class="fixed">Sécurité</span> Défense en profondeur — 14 composants Livewire Backoffice + Pages + Community sans revérification de permission granulaire (le rôle admin générique suffisait à muter/supprimer). Devenait un risque réel dès qu'un rôle personnalisé « lecture seule » est composé via l'interface RolesPermissions.</td>
+      <td>336 tests verts + test négatif permanent ajouté (admin sans <code>update_users</code> réellement bloqué 403, vérifié en direct)</td>
+    </tr>
+    <tr>
+      <td><span class="version-chip">v1.76.3</span></td>
+      <td><span class="fixed">Sécurité</span> Route <code>admin/community/moderate</code> n'avait que le middleware <code>auth</code> — tout utilisateur connecté pouvait modérer commentaires/avis.</td>
+      <td>Aligné sur <code>EnsureIsAdmin</code>, pattern standard du site</td>
+    </tr>
+    <tr>
+      <td><span class="version-chip">v1.76.3</span></td>
+      <td><span class="fixed">Sécurité</span> ChatBot IA : défense en profondeur ajoutée (non exploitable en pratique — Livewire signe les snapshots HMAC — mais bonne pratique).</td>
+      <td>117 tests Modules/AI verts</td>
+    </tr>
+    <tr>
+      <td><span class="version-chip">v1.76.4</span></td>
+      <td><span class="fixed">SEO</span> Meta descriptions coupées en plein mot (<code>Str::limit()</code> ne respecte pas les limites de mots) — cause racine confirmée d'un CTR de 0,65 % malgré 1240 impressions sur un terme de glossaire. Nouveau helper réutilisable <code>safe_excerpt()</code> appliqué à 9 gabarits (glossaire, acronymes, annuaire, pages, blog, auteurs, actualités, légal, boutique).</td>
+      <td>Vérifié en direct : meta description se termine maintenant sur un mot complet</td>
+    </tr>
+    <tr>
+      <td><span class="version-chip">v1.76.1-2</span></td>
+      <td><span class="fixed">UX</span> Dashboard « Mon espace » Académie — sommaire par ancres, titres unifiés, accordéon progression, suggestions de cours (détail dans le rapport de critique design séparé du même jour).</td>
+      <td>1482 tests Academy verts, vérifié objectivement (<code>getComputedStyle</code>)</td>
+    </tr>
+  </table>
+</section>
+
+<section>
+  <h2>Documenté mais non corrigé (décisions justifiées)</h2>
+  <table>
+    <tr><th>Sujet</th><th>Pourquoi non corrigé maintenant</th></tr>
+    <tr>
+      <td><span class="noted">Authors</span> Composants du dashboard auteur (<code>AuthorDashboard</code>, <code>AuthorEditor</code>, etc.) acceptent un <code>authorProfileId</code> sans vérifier la propriété</td>
+      <td>Vérifié : la route de production réelle est cassée/non câblée aujourd'hui (seuls des points de test gated <code>environment('local')</code> existent). Pas exploitable en prod actuellement — <strong>à corriger avant tout branchement du vrai dashboard</strong>.</td>
+    </tr>
+    <tr>
+      <td><span class="noted">Dépendances</span> 36 avis <code>composer audit</code> sur 17 paquets, dont <code>dedoc/scramble</code> (CVE, déjà mitigé par gating prod), <code>spatie/laravel-medialibrary</code>, <code>laravel/framework</code></td>
+      <td>Mises à jour de dépendances existantes (pas de nouvelle dépendance) mais risque de changements cassants — nécessite une fenêtre de test dédiée plutôt qu'une mise à jour à la volée.</td>
+    </tr>
+    <tr>
+      <td><span class="noted">Performance</span> Article de blog FCP ~3,9s (TTFB serveur), fiche annuaire charge un bundle éditeur ~208 Ko même en public, vignettes annuaire jusqu'à 149 Ko non compressées</td>
+      <td>Findings réels mais secondaires (pas de perte de trafic démontrée comme pour le SEO) — à traiter dans un prochain passage dédié performance.</td>
+    </tr>
+    <tr>
+      <td><span class="noted">ShortUrl</span> Open redirect par conception (raccourcisseur public accepte n'importe quelle URL externe)</td>
+      <td>Comportement assumé d'un outil de raccourcissement d'URL — surface d'abus phishing réelle mais inhérente au produit, pas un bug.</td>
+    </tr>
+    <tr>
+      <td><span class="noted">Permissions</span> <code>manage_media</code>/<code>manage_seo</code>/<code>manage_newsletter</code> référencées par des routes HTTP existantes n'existent dans aucun seeder</td>
+      <td>Bug préexistant distinct découvert en cours d'audit, signalé plutôt que corrigé silencieusement (hors du périmètre de la tâche en cours).</td>
+    </tr>
+  </table>
+</section>
+
+<section>
+  <h2>Accessibilité WCAG (hors Académie)</h2>
+  <p>Audit rapide sur 4 pages (accueil, glossaire, constructeur de prompts, +1 tronquée par limite technique). Un faux positif majeur identifié et écarté (l'outil signalait un contraste « blanc sur blanc » sur les bandeaux à fond foncé — vérifié manuellement : 15,41:1 réel, largement conforme AAA). Findings réels restants, mineurs : fil d'Ariane sans <code>aria-label="breadcrumb"</code>, 3 champs requis du constructeur de prompts sans <code>aria-required</code>, quelques badges sous le seuil AAA 7:1 (probablement conformes AA) — non corrigés, priorité basse.</p>
+</section>
+
+<section>
+  <h2>Méthode</h2>
+  <p>Grille dynamique via <code>pp_search</code> (5 piliers 2026 : technique/perf, SEO/AEO, sécurité, accessibilité, conformité/UX). Délégation systématique aux MCP/sous-agents (audit code en lecture seule d'abord, correctifs seulement après confirmation que le problème est réel). Chaque correctif : tests ciblés + régression élargie + preuve négative concrète quand pertinent + déploiement + vérification en production avant de passer au suivant.</p>
+</section>
+
+</main>
+
+</body>
+</html>

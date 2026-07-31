@@ -41,6 +41,10 @@
             // routes/web.php. Le gate superadmin réel reste DecidoUnderConstruction.
             'show_url' => $t->slug === 'decido' ? route('decido.index') : route('tools.show', $t->slug),
             'under_construction' => (bool) ($t->is_under_construction ?? false),
+            // Round 135 (2026-07-30, passe adversariale) : sans ce champ, la carte ne pouvait
+            // PAS distinguer un outil jamais lancé d'un outil retiré temporairement - la
+            // distinction même que la migration #325 a introduite et que la page dédiée honore.
+            'construction_mode' => $t->construction_mode ?? 'construction',
             'trending' => $isTrending,
             'new' => $isNew,
         ];
@@ -140,9 +144,17 @@
                                         <span x-show="tool.new"
                                               class="tools-badge tools-badge-new"
                                               x-cloak>✨ {{ __('Nouveau') }}</span>
+                                        {{-- Round 135 : « Bientôt » signifie « jamais lancé » sur toutes les autres
+                                             cartes du site. L'afficher sur un outil RETIRÉ TEMPORAIREMENT laissait croire
+                                             à un utilisateur revenant après quelques jours que son travail sauvegardé
+                                             avait disparu - exactement ce que le mode révision, et sa bannière « Vos
+                                             prompts déjà sauvegardés sont intacts », existent pour éviter. Le libellé
+                                             reprend mot pour mot celui de la page dédiée, pour que l'utilisateur lise
+                                             la même chose aux deux endroits. --}}
                                         <span x-show="tool.under_construction"
-                                              class="tools-badge tools-badge-construction"
-                                              x-cloak>🚧 {{ __('Bientôt') }}</span>
+                                              :class="tool.construction_mode === 'revision' ? 'tools-badge tools-badge-revision' : 'tools-badge tools-badge-construction'"
+                                              x-cloak
+                                              x-text="tool.construction_mode === 'revision' ? '✨ {{ __('Mise à jour en cours') }}' : '🚧 {{ __('Bientôt') }}'"></span>
                                     </div>
 
                                     <template x-if="tool.image">
@@ -269,6 +281,7 @@
             .tools-badge-trending { background: #DC2626; color: #fff; }
             .tools-badge-new { background: #065F46; color: #fff; } /* #217 S83 Lot 7 WCAG AAA 7.68:1 (avant #059669 3.77:1 FAIL) */
             .tools-badge-construction { background: var(--c-accent, #9A2A06); color: #fff; } /* « Bientôt » — accent orange marque, blanc AAA */
+            .tools-badge-revision { background: #3730A3; color: #fff; } /* « Mise à jour en cours » : indigo profond, blanc AAA (8,9:1) - volontairement distinct de l'orange « Bientôt » */
             .tools-card { transition: transform .2s ease, box-shadow .2s ease; }
             .tools-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.08) !important; }
             #tools-search:focus { border-color: #053D4A; box-shadow: 0 0 0 3px rgba(5, 61, 74, .15); }

@@ -16,19 +16,21 @@
     ];
     $variant = in_array($variant, $allowedVariants, true) ? $variant : 'intro';
 
+    // Round 75 (2026-07-27, passe adversariale) : aria-label passés par __() - jamais traduits
+    // auparavant, composant DRY réutilisé site-wide (pages d'erreur, under-construction, etc.).
     $defaultLabels = [
-        'intro'       => "Octopus curieux, mascotte des Sentiers de l'IA",
-        'neutral'     => "Octopus, mascotte des Sentiers de l'IA",
-        'celebrating' => "Octopus célèbre une réussite",
-        'explorer'    => "Octopus explore avec des outils",
-        'share'       => "Octopus partage une découverte",
-        'confident'   => "Octopus, prêt pour le défi",
-        'confused'    => "Octopus perplexe, cherche dans les courants",
-        'thinking'    => "Octopus réfléchit",
-        'sleeping'    => "Octopus se repose",
-        'surprised'   => "Octopus surpris",
-        'happy'       => "Octopus content",
-        'loved'       => "Octopus avec des yeux en cœur",
+        'intro'       => __("Octopus curieux, mascotte des Sentiers de l'IA"),
+        'neutral'     => __("Octopus, mascotte des Sentiers de l'IA"),
+        'celebrating' => __("Octopus célèbre une réussite"),
+        'explorer'    => __("Octopus explore avec des outils"),
+        'share'       => __("Octopus partage une découverte"),
+        'confident'   => __("Octopus, prêt pour le défi"),
+        'confused'    => __("Octopus perplexe, cherche dans les courants"),
+        'thinking'    => __("Octopus réfléchit"),
+        'sleeping'    => __("Octopus se repose"),
+        'surprised'   => __("Octopus surpris"),
+        'happy'       => __("Octopus content"),
+        'loved'       => __("Octopus avec des yeux en cœur"),
     ];
     $ariaLabel = $label ?? $defaultLabels[$variant];
 

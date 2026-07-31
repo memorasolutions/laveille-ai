@@ -1,0 +1,270 @@
+- main [ref=e11]:
+  - generic [ref=e13]:
+    - link "Nouveau clavardage" [ref=e14] [cursor=pointer]:
+      - /url: /
+      - img [ref=e16]
+      - generic [ref=e17]: Gemini
+    - text: side_nav_expand
+  - generic [ref=e20]:
+    - link "Mettre à niveau" [ref=e23]:
+      - generic [ref=e24]:
+        - img [ref=e25]: spark
+        - generic [ref=e26]: Mettre à niveau
+    - generic [ref=e29]:
+      - generic: play_arrow
+      - button "Ouvrir le menu pour les actions de conversation." [ref=e477] [cursor=pointer]:
+        - img [ref=e479]: more_vert
+  - generic [ref=e38]:
+    - navigation "Barre de navigation latérale" [ref=e39]:
+      - generic [ref=e41]:
+        - button "Fermer la barre latérale" [ref=e214] [cursor=pointer]:
+          - img [ref=e216]: side_nav
+        - generic [ref=e42]:
+          - generic [ref=e43]:
+            - navigation "Menu d'actions principales" [ref=e44]:
+              - link "Nouveau clavardage" [ref=e46] [cursor=pointer]:
+                - /url: /app
+                - img [ref=e49]: gemini_chat
+                - generic [ref=e53]: Nouveau clavardage
+              - link "Rechercher des clavardages" [ref=e55] [cursor=pointer]:
+                - /url: /search
+                - img [ref=e58]: search
+                - generic [ref=e62]: Rechercher des clavardages
+            - text: image_create movie library gems
+          - generic [ref=e63]:
+            - navigation "Menu d'actions supplémentaires" [ref=e64]:
+              - link "Images" [ref=e66] [cursor=pointer]:
+                - /url: /images
+                - img [ref=e69]: image_create
+                - generic [ref=e73]: Images
+              - link "Vidéos" [ref=e75] [cursor=pointer]:
+                - /url: /videos
+                - img [ref=e78]: movie
+                - generic [ref=e82]: Vidéos
+              - link "Bibliothèque" [ref=e84] [cursor=pointer]:
+                - /url: library
+                - img [ref=e87]: library
+                - generic [ref=e91]: Bibliothèque
+              - link "Gems" [ref=e220] [cursor=pointer]:
+                - /url: /gems/view
+                - img [ref=e223]: gems
+                - generic [ref=e227]: Gems
+            - generic [ref=e228]:
+              - button "Activer/Désactiver Récents" [expanded] [ref=e229] [cursor=pointer]:
+                - generic [ref=e230]: Récents
+                - img [ref=e232]: keyboard_arrow_down
+              - navigation [ref=e238]:
+                - link "_réponses LinkedIn" [ref=e240] [cursor=pointer]:
+                  - /url: /app/85a938420c343c0a
+                  - generic [ref=e244]: _réponses LinkedIn
+                  - img [ref=e248]: push_pin
+                - link "Présentation 1 IA volet 2" [ref=e250] [cursor=pointer]:
+                  - /url: /app/b08a8c7e133870b4
+                  - generic [ref=e254]: Présentation 1 IA volet 2
+                  - img [ref=e258]: push_pin
+                - 'link "Avis Technique UX Laravel : Presse-papiers et Liens Courts" [ref=e555] [cursor=pointer]':
+                  - /url: /app/b3715a821bd2b3c0
+                  - generic [ref=e556]: "Avis Technique UX Laravel : Presse-papiers et Liens Courts"
+                - link "Collective Voting And Scheduling Icon" [ref=e260] [cursor=pointer]:
+                  - /url: /app/28b20b64b320f866
+                  - generic [ref=e264]: Collective Voting And Scheduling Icon
+                - 'link "Validation OAuth Google : Problèmes et Solutions" [ref=e266] [cursor=pointer]':
+                  - /url: /app/48e7fa28442cdf03
+                  - generic [ref=e270]: "Validation OAuth Google : Problèmes et Solutions"
+                - link "Évaluation des styles de CV pour cadre" [ref=e272] [cursor=pointer]:
+                  - /url: /app/18ebf20b0b979392
+                  - generic [ref=e276]: Évaluation des styles de CV pour cadre
+                - link "Optimisation CV IA pour Cadre" [ref=e278] [cursor=pointer]:
+                  - /url: /app/8b99c7b2e11e7d3b
+                  - generic [ref=e282]: Optimisation CV IA pour Cadre
+                - link "Vidéo Tutoriel sur les Diodes" [ref=e284] [cursor=pointer]:
+                  - /url: /app/6da2a46154290476
+                  - generic [ref=e288]: Vidéo Tutoriel sur les Diodes
+                - link "WordPress Business Suite OS Vision" [ref=e290] [cursor=pointer]:
+                  - /url: /app/664046cf8b022a36
+                  - generic [ref=e294]: WordPress Business Suite OS Vision
+                - link "WordPress Business OS Architecture & Dev" [ref=e296] [cursor=pointer]:
+                  - /url: /app/736d3cedee0b342e
+                  - generic [ref=e300]: WordPress Business OS Architecture & Dev
+                - link "AI News Illustration Generation" [ref=e302] [cursor=pointer]:
+                  - /url: /app/88898afde0d55e64
+                  - generic [ref=e306]: AI News Illustration Generation
+                - link "Cuisson Saucisses BBQ Convection" [ref=e308] [cursor=pointer]:
+                  - /url: /app/1d9894415b3b533d
+                  - generic [ref=e312]: Cuisson Saucisses BBQ Convection
+                - 'link "IA pour parents : mise à jour exercices" [ref=e314] [cursor=pointer]':
+                  - /url: /app/cc0ba2949e5a8d66
+                  - generic [ref=e318]: "IA pour parents : mise à jour exercices"
+                - link "Digital Regulation Illustration Request" [ref=e320] [cursor=pointer]:
+                  - /url: /app/bc7ac175819977d5
+                  - generic [ref=e324]: Digital Regulation Illustration Request
+                - link "Neural Network Computation Graph Illustration" [ref=e326] [cursor=pointer]:
+                  - /url: /app/1c9af058d16a1ab6
+                  - generic [ref=e330]: Neural Network Computation Graph Illustration
+                - link "Glowing CPU/GPU Tech Illustration" [ref=e332] [cursor=pointer]:
+                  - /url: /app/815a90fb5b028cde
+                  - generic [ref=e336]: Glowing CPU/GPU Tech Illustration
+                - link "Advanced Semiconductor Fab Illustration" [ref=e338] [cursor=pointer]:
+                  - /url: /app/906de613e103b810
+                  - generic [ref=e342]: Advanced Semiconductor Fab Illustration
+                - 'link "Tech Illustration: Data Center Network" [ref=e344] [cursor=pointer]':
+                  - /url: /app/967ba115c1e54203
+                  - generic [ref=e348]: "Tech Illustration: Data Center Network"
+                - link "AI Chip Illustration Request" [ref=e350] [cursor=pointer]:
+                  - /url: /app/033ae8544baa735a
+                  - generic [ref=e354]: AI Chip Illustration Request
+                - link "Octopus Reading Corner Comic Panel" [ref=e356] [cursor=pointer]:
+                  - /url: /app/e6d93709d26776a1
+                  - generic [ref=e360]: Octopus Reading Corner Comic Panel
+                - link "Comic Panel Generation With Background Issues" [ref=e362] [cursor=pointer]:
+                  - /url: /app/62ca2cc0f2d50a19
+                  - generic [ref=e366]: Comic Panel Generation With Background Issues
+                - link "Octopus Completes Study Task" [ref=e368] [cursor=pointer]:
+                  - /url: /app/b9bd43a51a43053a
+                  - generic [ref=e372]: Octopus Completes Study Task
+                - link "Comic Panel Generation Request" [ref=e374] [cursor=pointer]:
+                  - /url: /app/8d3f4ffb14b9d1b2
+                  - generic [ref=e378]: Comic Panel Generation Request
+                - link "Comic Panel Generation Request" [ref=e380] [cursor=pointer]:
+                  - /url: /app/e0bca7fb39ccb319
+                  - generic [ref=e384]: Comic Panel Generation Request
+                - link "Octopus Meets Giant Book" [ref=e386] [cursor=pointer]:
+                  - /url: /app/4bf3fc6397adaf1c
+                  - generic [ref=e390]: Octopus Meets Giant Book
+                - link "SEO Timing Editorial Illustration Request" [ref=e392] [cursor=pointer]:
+                  - /url: /app/8a0809c6feefaa84
+                  - generic [ref=e396]: SEO Timing Editorial Illustration Request
+                - link "Abstract Medical AI Illustration Request" [ref=e398] [cursor=pointer]:
+                  - /url: /app/fa72f55f7a57aca6
+                  - generic [ref=e402]: Abstract Medical AI Illustration Request
+                - link "Croissance normale en hydroponie après 12 jours" [ref=e404] [cursor=pointer]:
+                  - /url: /app/ce7aeb8f9d9085aa
+                  - generic [ref=e408]: Croissance normale en hydroponie après 12 jours
+                - link "Alternatives à \"Expert Pédagogue\" LinkedIn" [ref=e410] [cursor=pointer]:
+                  - /url: /app/2ec7990d551122b9
+                  - generic [ref=e414]: Alternatives à "Expert Pédagogue" LinkedIn
+                - link "Comic Panel Illustration Request" [ref=e416] [cursor=pointer]:
+                  - /url: /app/b6357df57ef7a110
+                  - generic [ref=e420]: Comic Panel Illustration Request
+                - link [ref=e422] [cursor=pointer]:
+                  - /url: /app/444324a98000c8ea
+                  - generic [ref=e426]: "Using the attached reference images: the second image is the Octopus mascot from an existing comic page - use its EXACT teal-blue color, proportions, round head, big eyes, bold black outlines, flat cartoon comic style for Octopus in the new scene (ignore the first image's darker sticker-style shading - use it ONLY as an inspiration for a joyful, triumphant, winking/celebrating facial expression, not for color or style). Generate a single comic panel illustration, 1263x1053 px, landscape scene (no other panel, no frame, no border, no gutter - a single standalone illustration). OCTOPUS (same exact teal-blue color and proportions as the reference comic page image, flat cartoon style, bold black outlines) alone in the foreground, celebrating triumphantly and joyfully (tentacles raised in a victory pose, big happy smile), standing next to a large shield icon with a checkmark on it. Ambiance is triumphant and positive - the happy ending. Scene: fully painted golden/yellow background, warm celebratory colors. Clean comic book style, bold outlines, flat colors, teal/wood/orange/gold harmonious palette, matching the exact same Octopus character design as the reference comic page image provided (same teal-blue color, same proportions). NO SPEECH BUBBLES AT ALL - do NOT draw any speech bubble, balloon shape (even empty), or thought cloud, anywhere. Octopus must leave CLEAR FREE SPACE (plain painted background) at the TOP third of the panel. NO PANEL BORDER, NO FRAME: the illustration fills the entire canvas edge to edge. FULLY PAINTED BACKGROUND edge to edge including the top - NO white, blank, empty or pale area anywhere. NO CAPTION BAND, NO TEXT BOX of any kind. FOOTROOM: frame Octopus FULLY INSIDE the canvas, never cropped/cut off, tentacles raised but still fitting inside the frame. Bottom ~15-20% visible ground/decor only. no text, no lettering, no signage, no labels, no logo, no brand, icons only, no watermark, no AI artifacts. Educational tone."
+                - link "Comic Panel Generation Request" [ref=e428] [cursor=pointer]:
+                  - /url: /app/1023f476b4dbcd12
+                  - generic [ref=e432]: Comic Panel Generation Request
+                - link "Octopus Comic Panel Generation Request" [ref=e434] [cursor=pointer]:
+                  - /url: /app/fc472af1964acc95
+                  - generic [ref=e438]: Octopus Comic Panel Generation Request
+                - link "Comic Panel Illustration Request" [ref=e440] [cursor=pointer]:
+                  - /url: /app/db3a963b6dcf8ffe
+                  - generic [ref=e444]: Comic Panel Illustration Request
+                - link "Octopus Reacts To Pirate's Viral Video" [ref=e446] [cursor=pointer]:
+                  - /url: /app/f0c578d7cd6ddae6
+                  - generic [ref=e450]: Octopus Reacts To Pirate's Viral Video
+                - link "Comic Panel Generation With Artifacts" [ref=e452] [cursor=pointer]:
+                  - /url: /app/cdbeadaf7b5df47c
+                  - generic [ref=e456]: Comic Panel Generation With Artifacts
+          - group [ref=e126]:
+            - generic [ref=e128]:
+              - 'link "Compte Google : Stephane Lapointe (stephane@memora.ca)" [ref=e129] [cursor=pointer]':
+                - /url: https://accounts.google.com/SignOutOptions?continue=https://gemini.google.com
+                - img [ref=e131]
+                - generic [ref=e132]:
+                  - generic [ref=e133]: Stephane Lapointe
+                  - generic [ref=e134]:
+                    - generic [ref=e135]: Professionnel
+                    - generic [ref=e136]: •
+                    - generic [ref=e137]: Pro
+              - button "Paramètres" [ref=e140] [cursor=pointer]:
+                - img [ref=e142]: settings
+    - generic [ref=e149]:
+      - generic [ref=e150]:
+        - heading "Conversation avec Gemini" [level=1] [ref=e151]
+        - generic [ref=e486]:
+          - generic [ref=e490]:
+            - generic [ref=e492] [cursor=pointer]:
+              - heading [level=2] [ref=e494]:
+                - generic [ref=e495]: Vous avez dit
+                - paragraph [ref=e496]: Je te soumets une décision UX/technique pour un site Laravel (laveille.ai), déjà validée par un autre outil (Codex, 95/100 et 94/100). Donne un 2e avis indépendant, court et critique en français (max 250 mots), cherche des angles morts qu'un ingénieur senior signalerait avant implémentation.
+                - paragraph [ref=e497]
+                - paragraph [ref=e498]: "SUJET 1 - Confirmation copie presse-papiers (partout sur le site) : le bouton \"Copier\" change visuellement en \"Copié !\" (aria-hidden=\"true\", visuel seulement, pas d'annonce screen-reader propre) ET un toast global (déjà existant site-wide, role=\"status\" persistant dans le DOM depuis le chargement de la page) est la SEULE source d'annonce aria-live, pour éviter la double-annonce screen-reader. Fallback \"Copie impossible\" en cas d'échec (ex: permission navigateur refusée)."
+                - paragraph [ref=e499]
+                - paragraph [ref=e500]: "SUJET 2 - Lien court dans un outil de sondage collectif (Decido) : champ slug personnalisé minimal inline pour utilisateurs connectés (réutilise exactement la validation du module ShortUrl existant du site : alpha_dash, unique en base, liste de mots réservés), auto-génère un slug aléatoire de 6 caractères si le champ est laissé vide, PLUS un lien \"Options avancées\" qui renvoie vers l'outil Raccourcisseur d'URL déjà existant du site (/raccourcir) pour éditer tags/UTM/expiration/mot de passe après coup. Domaine : affiché en texte fixe discret (pas de menu déroulant), car 0 domaine secondaire n'est configuré actuellement en base sur ce site (un seul domaine réel existe) - le sélecteur de domaine sera ajouté seulement si/quand des domaines secondaires existent réellement."
+                - paragraph [ref=e501]
+                - paragraph [ref=e502]: Es-tu d'accord avec ces 2 décisions ? Vois-tu un risque ou un angle mort ?
+              - button "Développer" [ref=e503]:
+                - img [ref=e506]: expand_more
+            - generic [ref=e509]:
+              - button "Copier la requête" [ref=e511] [cursor=pointer]:
+                - img [ref=e513]: copy
+              - button "Modifier" [ref=e557] [cursor=pointer]:
+                - img [ref=e559]: edit
+          - generic [ref=e519]:
+            - generic [ref=e522]:
+              - heading "Gemini a dit" [level=2] [ref=e540]
+              - generic [ref=e562]:
+                - paragraph [ref=e563]: Voici une analyse critique pour lever les derniers angles morts avant l'implémentation. Les décisions sont globalement saines, mais le diable se cache dans les détails.
+                - heading "SUJET 1 – Presse-papiers" [level=3] [ref=e564]
+                - list [ref=e565]:
+                  - listitem [ref=e566]:
+                    - paragraph [ref=e567]:
+                      - text: "Nom accessible du bouton : Si le texte interne change et passe en"
+                      - code [ref=e568]: aria-hidden="true"
+                      - text: ", assure-toi que le bouton possède un"
+                      - code [ref=e569]: aria-label="Copier le lien"
+                      - text: immuable. Sinon, son nom accessible devient vide ou incohérent pendant l'état "Copié !".
+                  - listitem [ref=e570]:
+                    - paragraph [ref=e571]:
+                      - text: "Réactivité du Toast : Mettre à jour le texte d'un"
+                      - code [ref=e572]: role="status"
+                      - text: persistant fonctionne, mais si l'utilisateur clique frénétiquement, les lecteurs d'écran ignorent souvent les annonces identiques successives. Il faut vider le nœud textuel une fraction de seconde avant d'injecter le nouveau message pour forcer l'annonce.
+                - heading "SUJET 2 – Lien court (Decido)" [level=3] [ref=e573]
+                - list [ref=e574]:
+                  - listitem [ref=e575]:
+                    - paragraph [ref=e576]:
+                      - text: "Rupture UX (Majeur) : Rediriger l'utilisateur vers"
+                      - code [ref=e577]: /raccourcir
+                      - text: après la création pour éditer les UTM ou le mot de passe brise complètement le flux de création du sondage. L'utilisateur quitte son contexte et doit revenir en arrière. Une modale ou un accordéon inline est indispensable pour ne pas détruire la rétention.
+                  - listitem [ref=e578]:
+                    - paragraph [ref=e579]:
+                      - text: "Condition de concurrence (Race Condition) : La validation"
+                      - code [ref=e580]: unique
+                      - text: de Laravel vérifie la base avant l'insertion. Entre la vérification et l'écriture, un autre utilisateur peut réserver le même slug. Attrape la
+                      - code [ref=e581]: QueryException
+                      - text: SQL au niveau du contrôleur pour gérer proprement cet échec, notamment lors de la génération des 6 caractères aléatoires.
+                  - listitem [ref=e582]:
+                    - paragraph [ref=e583]: "Dette UI : Passer d'un texte fixe à un menu déroulant pour les domaines cassera l'alignement de ton champ minimaliste. Anticipe l'espace CSS dès aujourd'hui."
+            - generic [ref=e587]:
+              - button "Bonne réponse" [ref=e590] [cursor=pointer]:
+                - img [ref=e592]: thumb_up
+              - button "Mauvaise réponse" [ref=e596] [cursor=pointer]:
+                - img [ref=e598]: thumb_down
+              - button "Rétablir" [ref=e603] [cursor=pointer]:
+                - img [ref=e605]: refresh
+              - button "Copier" [ref=e609] [cursor=pointer]:
+                - img [ref=e611]: copy
+              - button "Afficher plus d'options" [ref=e617] [cursor=pointer]:
+                - img [ref=e619]: more_horiz
+      - generic [ref=e168]:
+        - group [ref=e169]:
+          - generic [ref=e172]:
+            - textbox "Saisir une requête pour Gemini" [active] [ref=e178]:
+              - text: Demandez à Gemini
+              - paragraph [ref=e550]
+              - text: encrypted
+            - button "Téléversement et outils" [ref=e185] [cursor=pointer]:
+              - img [ref=e187]: plus
+            - generic [ref=e189]:
+              - group [ref=e192]:
+                - button "Ouvrir le sélecteur de mode, actuellement Réflexion" [ref=e193]:
+                  - generic [ref=e195]:
+                    - generic [ref=e196]: Réflexion
+                    - img [ref=e198]: keyboard_arrow_down
+              - button "Microphone" [ref=e206] [cursor=pointer]:
+                - img [ref=e208]: mic
+        - paragraph [ref=e552]:
+          - text: Vos clavardages avec MEMORA ne sont pas utilisés pour améliorer nos modèles. Gemini est une IA et peut se tromper.
+          - link "Votre confidentialité et Gemini S'ouvre dans une nouvelle fenêtre" [ref=e553] [cursor=pointer]:
+            - /url: https://support.google.com/gemini/answer/14620100
+            - text: Votre confidentialité et Gemini
+            - generic [ref=e554]: S'ouvre dans une nouvelle fenêtre

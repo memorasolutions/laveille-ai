@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.134.0] - 2026-07-31
+
+### Ajouté
+- **Constructeur de prompts - une seule surface d'écriture pour l'anonymisation.** Le panneau
+  « Masquer mes infos » et le champ « Sur quoi porte votre demande ? » formaient deux zones de
+  saisie pour une même intention. Le champ principal s'efface maintenant pendant que le panneau
+  travaille, et un bouton « ← Modifier ma demande » offre une sortie explicite.
+- **Pré-remplissage des deux portes d'entrée.** Il n'existait que dans le chemin du bandeau
+  anti-données-personnelles ; le bouton « Masquer mes infos » ouvrait un panneau vide. Les deux
+  portes partagent désormais la même fonction (DRY).
+
+### Corrigé
+- **L'insertion remplace au lieu d'ajouter à la suite.** Le texte d'origine ne subsiste plus à côté
+  de sa version masquée : la donnée personnelle disparaît réellement du champ.
+- **Le comportement ne dépend plus de la provenance de l'événement.** L'ouverture manuelle et
+  l'ouverture programmatique se distinguaient par `evt.isTrusted` - un signal implicite qui rendait
+  le comportement invérifiable en test automatisé et fragile à tout traitement différé. Elles se
+  distinguent maintenant par un paramètre d'intention passé par l'appelant, et `.click()` n'est plus
+  utilisé comme API interne (revue croisée Codex 92/100, Gemini 30/100 - Gemini retenu sur le fond).
+
 ## [1.133.1] - 2026-07-30
 
 > Livraison ciblée et volontairement étroite : uniquement l'éditeur d'anonymisation partagé

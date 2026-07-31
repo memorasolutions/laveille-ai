@@ -69,7 +69,12 @@ class SitemapController
             $sitemap->add(Url::create(route('tools.index'))->setPriority(0.9)->setChangeFrequency('weekly'));
 
             if (Route::has('tools.show')) {
-                \Modules\Tools\Models\Tool::active()->ordered()->get()->each(function ($tool) use ($sitemap) {
+                // Round 136 (2026-07-30, passe adversariale) : scopeActive() ne filtre QUE is_active,
+                // si bien qu'un outil gaté (construction ou révision) était annoncé aux moteurs avec la
+                // même priorité 0.8 hebdomadaire qu'un outil pleinement fonctionnel. Le filtre est posé
+                // ICI et non dans scopeActive() : ce scope est partagé avec la liste /outils, qui doit
+                // justement continuer d'afficher les outils gatés (avec leur badge) aux superadmins.
+                \Modules\Tools\Models\Tool::active()->where('is_under_construction', false)->ordered()->get()->each(function ($tool) use ($sitemap) {
                     $sitemap->add(
                         Url::create(route('tools.show', $tool->slug))
                             ->setLastModificationDate($tool->updated_at)

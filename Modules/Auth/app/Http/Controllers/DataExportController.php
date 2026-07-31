@@ -32,7 +32,11 @@ class DataExportController extends Controller
         ];
 
         try {
-            if (class_exists(\Modules\Tools\Models\SavedPrompt::class)) {
+            // Round 12 (2026-07-27) : ce contrôleur exposait le texte COMPLET des prompts
+            // (pas un aperçu tronqué comme /user/saved) sans passer par le même gate que le
+            // fix round 11 - le seul point d'accès restant aux prompts pendant la révision
+            // de constructeur-prompts, via accès direct à l'URL (route non liée depuis l'UI).
+            if (class_exists(\Modules\Tools\Models\SavedPrompt::class) && \Modules\Tools\Models\Tool::isAccessibleTo('constructeur-prompts', $user)) {
                 $data['saved_prompts'] = \Modules\Tools\Models\SavedPrompt::forUser($user->id)
                     ->get(['name', 'prompt_text', 'params', 'created_at'])
                     ->toArray();

@@ -3082,6 +3082,16 @@ declare(strict_types=1);
  *     Directory+Blog (147/147, modules touchés par le changement de layout partagé) tous verts.
  *     Vérification visuelle Playwright desktop 1440px + mobile 390px.
  *
+ * v1.134.0 = feat(outils/constructeur-prompts) une seule surface d'écriture pour l'anonymisation.
+ *     Le panneau « Masquer mes infos » et le champ « Sur quoi porte votre demande ? » formaient deux
+ *     zones de saisie pour une seule intention : on pouvait écrire son texte deux fois, ou dans la
+ *     mauvaise. Désormais le champ principal s'efface pendant que le panneau travaille, la zone de
+ *     travail est pré-remplie depuis la demande déjà écrite, l'insertion REMPLACE le texte d'origine
+ *     (la donnée personnelle ne subsiste plus à côté de sa version masquée) et un bouton
+ *     « ← Modifier ma demande » offre une sortie explicite. Recherche pp_search + validation croisée
+ *     Codex (92/100) et Gemini (30/100, en désaccord) : Gemini retenu sur le fond - le comportement
+ *     ne dépend plus d'un signal implicite (evt.isTrusted, puis un drapeau de module) mais d'un
+ *     paramètre d'intention passé par l'appelant, et `.click()` cesse d'être une API interne.
  * v1.133.0 = feat(outils) système de message "indisponible" à 2 modes (`tools.construction_mode`,
  *     migration réversible) : (1) mode `construction` (défaut, comportement existant inchangé pour
  *     tous les autres outils gatés) - ton anticipation, "Cet outil arrive bientôt" ; (2) mode
@@ -3101,8 +3111,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 133;
-$lvPatch = 1;
+$lvMinor = 134;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

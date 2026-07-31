@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Audit — Constructeur de prompts (laveille.ai)</title>
+  <style>
+    :root {
+      --c-primary: #064E5A; --c-accent: #0B7285; --c-bg: #F8FAFB; --c-text: #1A1D23;
+      --c-card-bg: #FFFFFF; --c-shadow: rgba(0,0,0,0.08);
+      --c-success: #2E7D32; --c-warning: #B7791F; --c-error: #C0392B;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--c-bg); color: var(--c-text); line-height: 1.6; margin: 0; padding: 0; }
+    .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    header { text-align: center; margin-bottom: 2.5rem; }
+    h1 { font-size: 2.25rem; color: var(--c-primary); margin-bottom: 0.5rem; }
+    .subtitle { font-size: 1.125rem; opacity: 0.85; }
+    .note-globale { background: var(--c-card-bg); border-left: 4px solid var(--c-accent); padding: 1.5rem; margin-bottom: 2.5rem; border-radius: 0.5rem; box-shadow: 0 2px 8px var(--c-shadow); text-align: center; }
+    .note-globale h2 { font-size: 2rem; margin: 0 0 1rem; color: var(--c-primary); }
+    .note-globale p { margin: 0.5rem 0; }
+    .section { background: var(--c-card-bg); padding: 1.75rem; margin-bottom: 2rem; border-radius: 0.75rem; box-shadow: 0 2px 8px var(--c-shadow); }
+    .section h2 { color: var(--c-primary); margin-top: 0; font-size: 1.5rem; }
+    .section ul { padding-left: 1.25rem; margin: 1rem 0; }
+    .section li { margin-bottom: 0.5rem; }
+    .badge { display: inline-flex; align-items: center; justify-content: center; padding: 0.25rem 0.5rem; border-radius: 999px; font-weight: bold; font-size: 0.875rem; margin-right: 0.5rem; }
+    .badge.success { background: #E8F5E9; color: var(--c-success); }
+    .badge.warning { background: #FFF8E1; color: var(--c-warning); }
+    .badge.error { background: #FFEBEE; color: var(--c-error); }
+    .score-bar { margin: 0.75rem 0; }
+    .score-bar-header { display: flex; justify-content: space-between; margin-bottom: 0.375rem; font-size: 0.9375rem; gap: 12px; }
+    .score-bar-track { background: #eef5f6; border-radius: 6px; overflow: hidden; }
+    .score-bar-fill { height: 12px; background: var(--c-accent); border-radius: 6px; }
+    footer { text-align: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #eee; opacity: 0.85; font-size: 0.9375rem; }
+    @media print { body { background: white; } .container { max-width: 100%; padding: 1rem; } .section, .note-globale { box-shadow: none; border: 1px solid #ddd; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Audit complet — Constructeur de prompts</h1>
+      <div class="subtitle">laveille.ai/outils/constructeur-prompts · 18 juin 2026 · version 1.65.260</div>
+    </header>
+
+    <div class="note-globale">
+      <h2>88/100 — Outil solide, complet et à jour.</h2>
+      <p>3 bugs trouvés et CORRIGÉS pendant l'audit, 2 améliorations ajoutées, sans aucune régression (test E2E 5/5 PASS).</p>
+      <p>Méthode : recherche pp_search best practices 2026 + cartographie du code + test E2E live (Playwright).</p>
+    </div>
+
+    <section class="section">
+      <h2>1 — Ce qui a été testé et FONCTIONNE ✅</h2>
+      <ul>
+        <li>Assistant en 4 étapes (persona, tâche + verbe, audience, options avancées)</li>
+        <li>Format / longueur / ton / langue</li>
+        <li>Technique (zero-shot, zero-shot + chaîne de pensée, few-shot, few-shot + CoT, itératif)</li>
+        <li>Délimiteurs ###</li>
+        <li>Contraintes (écriture naturelle anti-IA, typographie FR, Canvas/artefact multi-IA ChatGPT/Claude/Gemini/Mistral, raisonnement étape par étape, poser des questions, contraintes libres)</li>
+        <li>Aperçu du prompt en temps réel + compteur caractères/mots</li>
+        <li>Sauvegarde/historique (connecté en BDD, non connecté en localStorage)</li>
+        <li>Export .txt</li>
+        <li>Anonymiseur intégré (100 % local)</li>
+        <li>Aides « ? » par section</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>2 — Bugs trouvés ET corrigés (v1.65.259, vérifiés 5/5 PASS)</h2>
+      <ul>
+        <li><span class="badge error">❌→✅</span> « Ouvrir dans ChatGPT/Claude/Perplexity » ne transmettait presque jamais le prompt : le garde-fou de longueur (1800 caractères) se déclenchait sur la plupart des prompts générés (souvent longs) et ouvrait l'IA sans le texte. Corrigé : seuil relevé à 4000 (les formats ?q= sont corrects et pré-remplissent bien en 2026, vérifié) + message indiquant que le prompt est copié.</li>
+        <li><span class="badge error">❌→✅</span> Double article « Tu es un(e) un vulgarisateur… » quand la persona personnalisée commence par un article. Corrigé : détection d'article (l'article un(e) reste pour les personas sans article).</li>
+        <li><span class="badge warning">⚠️→✅</span> Confirmation de copie peu visible. Corrigé : message « Prompt copié ! » clair.</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>3 — Améliorations ajoutées</h2>
+      <ul>
+        <li><span class="badge success">✅</span> Encadré « ✦ En bref » repliable (accordéon natif, accessible clavier, replié sur demande) — sans aucune régression sur les articles (le même composant reste figé ailleurs).</li>
+        <li><span class="badge success">✅</span> Menus déroulants enrichis pour enseignants/PME : +5 formats (Questionnaire/QCM avec corrigé, Grille d'évaluation/rubrique, Fiche pratique, Modèle réutilisable, FAQ structurée), +3 tons (Neutre et factuel, Empathique et bienveillant, Motivant et inspirant), +5 personas (Concepteur pédagogique, Gestionnaire de médias sociaux, Rédacteur publicitaire, Formateur en entreprise, Adjoint administratif).</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>4 — Conformité aux meilleures pratiques 2026</h2>
+      <div class="score-bar"><div class="score-bar-header"><span>Blocs de prompt (rôle, contexte, tâche, format, contraintes, few-shot)</span><span>95</span></div><div class="score-bar-track"><div class="score-bar-fill" style="width:95%;"></div></div></div>
+      <div class="score-bar"><div class="score-bar-header"><span>Support multi-modèles (Canvas par IA)</span><span>90</span></div><div class="score-bar-track"><div class="score-bar-fill" style="width:90%;"></div></div></div>
+      <div class="score-bar"><div class="score-bar-header"><span>Deep-links « Ouvrir dans l'IA »</span><span>92 (réparé)</span></div><div class="score-bar-track"><div class="score-bar-fill" style="width:92%;"></div></div></div>
+      <div class="score-bar"><div class="score-bar-header"><span>Aide contextuelle « ? » pour novices</span><span>88</span></div><div class="score-bar-track"><div class="score-bar-fill" style="width:88%;"></div></div></div>
+      <div class="score-bar"><div class="score-bar-header"><span>Structure GEO/AEO + Schema.org</span><span>90</span></div><div class="score-bar-track"><div class="score-bar-fill" style="width:90%;"></div></div></div>
+      <div class="score-bar"><div class="score-bar-header"><span>Accessibilité (WCAG)</span><span>78</span></div><div class="score-bar-track"><div class="score-bar-fill" style="width:78%;"></div></div></div>
+      <div class="score-bar"><div class="score-bar-header"><span>Boucle de test (éditer → tester → comparer)</span><span>70</span></div><div class="score-bar-track"><div class="score-bar-fill" style="width:70%;"></div></div></div>
+      <div class="score-bar"><div class="score-bar-header"><span>Bibliothèque de modèles par métier</span><span>40 (manquant)</span></div><div class="score-bar-track"><div class="score-bar-fill" style="width:40%;background:#B7791F;"></div></div></div>
+      <div class="score-bar"><div class="score-bar-header"><span>Comparaison multi-modèles / variantes</span><span>30 (manquant)</span></div><div class="score-bar-track"><div class="score-bar-fill" style="width:30%;background:#C0392B;"></div></div></div>
+    </section>
+
+    <section class="section">
+      <h2>5 — Recommandations restantes, notées sur 100</h2>
+      <div class="score-bar"><div class="score-bar-header"><span>Bibliothèque de modèles prêts à l'emploi par métier (enseignant, PME, RH…)</span><span>95</span></div><div class="score-bar-track"><div class="score-bar-fill" style="width:95%;"></div></div></div>
+      <div class="score-bar"><div class="score-bar-header"><span>Couche pédagogique « pourquoi ce prompt marche » + exemples avant/après</span><span>88</span></div><div class="score-bar-track"><div class="score-bar-fill" style="width:88%;"></div></div></div>
+      <div class="score-bar"><div class="score-bar-header"><span>Corriger le piège de focus de la modale d'aide (aria-hidden + focus à la fermeture)</span><span>85</span></div><div class="score-bar-track"><div class="score-bar-fill" style="width:85%;"></div></div></div>
+      <div class="score-bar"><div class="score-bar-header"><span>Réactiver le bouton Partager sur mobile + le rendre cohérent</span><span>75</span></div><div class="score-bar-track"><div class="score-bar-fill" style="width:75%;"></div></div></div>
+      <div class="score-bar"><div class="score-bar-header"><span>Comparaison multi-modèles / génération de variantes</span><span>70 (plus complexe)</span></div><div class="score-bar-track"><div class="score-bar-fill" style="width:70%;"></div></div></div>
+    </section>
+
+    <section class="section">
+      <h2>6 — Verdict</h2>
+      <p>Le Constructeur de prompts est un outil mature et conforme aux pratiques 2026, désormais sans bug majeur et enrichi pour le public enseignant/PME. Le prochain saut de valeur = une <strong>bibliothèque de modèles par métier</strong>.</p>
+      <p>2 chantiers connexes notés et en file (hors de cet outil) : (1) admin « scroll infini » sur /admin/users ; (2) annuaire — tutoriels étiquetés « FR » mais en anglais (détection de langue à corriger).</p>
+    </section>
+
+    <footer>
+      <p>Audit réalisé en supervision (recherche pp_search, code délégué à Hermes, tests Playwright). Correctifs déployés en production (v1.65.259-260) et vérifiés. laveille.ai — 18 juin 2026.</p>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,349 @@
+- generic [active] [ref=e1]:
+  - toolbar "Outils admin" [ref=e2]:
+    - generic [ref=e3]:
+      - img [ref=e5]
+      - generic [ref=e7]: Terme admin
+      - button "Actions" [ref=e10] [cursor=pointer]: ⋮
+  - link "Skip to main content — Aller au contenu principal" [ref=e11] [cursor=pointer]:
+    - /url: "#main-content"
+    - text: Aller au contenu principal
+  - region "Bandeau infolettre" [ref=e12]:
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]: ▸
+        - generic [ref=e16]: Veille IA
+        - generic [ref=e17]: "Veille IA sans buzz : pour stratèges québécois."
+      - generic [ref=e18]:
+        - button "Ouvrir le formulaire d'inscription à l'infolettre hebdomadaire" [ref=e19] [cursor=pointer]: Recevoir hebdo →
+        - button "Fermer le bandeau infolettre" [ref=e20] [cursor=pointer]: ×
+  - generic [ref=e21]:
+    - banner [ref=e26]:
+      - generic [ref=e29]:
+        - list [ref=e32]:
+          - listitem [ref=e33]:
+            - link "Actualités" [ref=e34] [cursor=pointer]:
+              - /url: https://laveilledestef.test/actualites
+              - generic [ref=e35]: Actualités
+          - listitem [ref=e36]:
+            - link "J'ai créé mon IA en local sur mon MAC (partie 3) — Le virage MCP" [ref=e37] [cursor=pointer]:
+              - /url: https://laveilledestef.test/blog/jai-cree-mon-ia-en-local-sur-mon-mac-partie-3
+        - list [ref=e39]:
+          - listitem [ref=e40]:
+            - link "Facebook" [ref=e41] [cursor=pointer]:
+              - /url: https://www.facebook.com/LaVeilleAI
+              - generic [ref=e42]: 
+          - listitem [ref=e43]:
+            - link "Messenger" [ref=e44] [cursor=pointer]:
+              - /url: https://m.me/LaVeilleAI
+              - generic [ref=e45]: 
+          - listitem [ref=e46]:
+            - link "LinkedIn" [ref=e47] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/lapointestephane/
+              - generic [ref=e48]: 
+      - navigation [ref=e49]:
+        - generic [ref=e51]:
+          - link "La veille" [ref=e54] [cursor=pointer]:
+            - /url: https://laveilledestef.test
+            - img "La veille" [ref=e55]
+          - generic [ref=e57]:
+            - text: 
+            - list [ref=e58]:
+              - listitem [ref=e59]:
+                - link "Accueil" [ref=e60] [cursor=pointer]:
+                  - /url: https://laveilledestef.test
+              - listitem [ref=e61]:
+                - link "Outils" [ref=e62] [cursor=pointer]:
+                  - /url: https://laveilledestef.test/outils
+              - listitem [ref=e63]:
+                - link "Annuaire" [ref=e64] [cursor=pointer]:
+                  - /url: https://laveilledestef.test/annuaire
+              - listitem [ref=e65]:
+                - link "Apprendre" [ref=e66] [cursor=pointer]:
+                  - /url: https://laveilledestef.test/blog
+              - listitem [ref=e67]:
+                - link "Académie" [ref=e68] [cursor=pointer]:
+                  - /url: https://laveilledestef.test/academie
+          - generic [ref=e70]:
+            - button "Ouvrir la recherche (Ctrl+K)" [ref=e73] [cursor=pointer]:
+              - generic [ref=e74]: 
+            - button "S" [ref=e76] [cursor=pointer]:
+              - generic [ref=e77]: S
+    - generic [ref=e82]:
+      - heading "Data Privacy Framework" [level=2] [ref=e83]
+      - navigation "Fil d'Ariane" [ref=e84]:
+        - list [ref=e85]:
+          - listitem [ref=e86]:
+            - link "Accueil" [ref=e87] [cursor=pointer]:
+              - /url: https://laveilledestef.test
+            - text: /
+          - listitem [ref=e88]:
+            - link "Glossaire Techno" [ref=e89] [cursor=pointer]:
+              - /url: https://laveilledestef.test/glossaire
+            - text: /
+          - listitem [ref=e90]: Data Privacy Framework
+    - main [ref=e91]:
+      - generic [ref=e93]:
+        - link "Retour au glossaire" [ref=e96] [cursor=pointer]:
+          - /url: https://laveilledestef.test/glossaire
+          - img [ref=e97]
+          - text: Retour au glossaire
+        - button "✏️ Suggérer une modification" [ref=e100] [cursor=pointer]
+        - article [ref=e103]:
+          - img "Data Privacy Framework" [ref=e106]
+          - heading "Data Privacy Framework ✏️" [level=1] [ref=e107] [cursor=pointer]
+          - generic [ref=e108]:
+            - button "Sauvegarder" [ref=e109] [cursor=pointer]:
+              - img [ref=e110]
+              - generic [ref=e112]: Sauvegarder
+            - button "Ajouter à mon journal" [ref=e114] [cursor=pointer]:
+              - img [ref=e115]
+              - generic [ref=e118]: Ajouter à mon journal
+            - button "Copier le lien" [ref=e119] [cursor=pointer]:
+              - img [ref=e120]
+              - generic [ref=e123]: Copier le lien
+            - button "Signaler" [ref=e125] [cursor=pointer]:
+              - img [ref=e126]
+              - generic [ref=e128]: Signaler
+            - button "Actions admin (copier dans le presse-papier)" [ref=e131] [cursor=pointer]:
+              - generic [ref=e132]: ⚙️
+              - text: Admin
+          - paragraph [ref=e133]: "Aussi appelé : DPF · EU-US Data Privacy Framework · Cadre de protection des données UE-É.-U."
+          - generic [ref=e134]:
+            - generic [ref=e135]: Terme
+            - generic [ref=e136]: Intermédiaire
+          - paragraph [ref=e137]:
+            - text: Mis à jour le
+            - time [ref=e138]: 6 juillet 2026
+          - paragraph [ref=e141]: Le Data Privacy Framework est le cadre juridique actuel permettant les transferts de données personnelles de l'UE vers les États-Unis, sous conditions de certification et de recours.
+          - generic [ref=e143]:
+            - heading "📖 Définition" [level=2] [ref=e144]
+            - generic [ref=e145]: Le Data Privacy Framework (DPF) est le troisième mécanisme de transfert transatlantique de données personnelles entre l'Union européenne et les États-Unis, après Safe Harbor et Privacy Shield, tous deux annulés par la Cour de justice de l'UE (arrêts Schrems I et II). Adopté par la Commission européenne le 10 juillet 2023 au titre de l'article 45 du RGPD, il combine l'auto-certification des entreprises américaines - surveillée par la Federal Trade Commission - avec les garanties du décret présidentiel Executive Order 14086, qui limite l'accès du renseignement américain aux données européennes. Les plaintes passent d'abord par le Civil Liberties Protection Officer, puis par la Data Protection Review Court, une cour indépendante aux décisions contraignantes. Étendu à l'Espace économique européen et à la Suisse en 2024, le cadre a résisté à un recours en annulation devant le Tribunal de l'UE en septembre 2025, mais un pourvoi reste pendant devant la CJUE. En juillet 2026, une décision de la Cour suprême américaine sur l'indépendance de la FTC (Trump v. Slaughter) relance les doutes sur sa stabilité à long terme.
+          - generic [ref=e146]:
+            - generic [ref=e148]:
+              - heading "💬 En termes simples" [level=2] [ref=e149]
+              - paragraph [ref=e150]: C'est un pont transatlantique pour données, avec certification obligatoire, surveillance de la FTC et un tribunal indépendant pour les recours.
+            - generic [ref=e152]:
+              - heading "🎯 Exemple concret" [level=2] [ref=e153]
+              - paragraph [ref=e154]: Un fournisseur de services cloud américain certifié DPF peut recevoir des données personnelles d'une entreprise européenne sans clauses contractuelles types supplémentaires.
+            - generic [ref=e156]:
+              - heading "💡 Le saviez-vous ?" [level=2] [ref=e157]
+              - paragraph [ref=e158]: En juillet 2026, la décision Trump v. Slaughter de la Cour suprême américaine a remis en cause l'indépendance de la FTC, créant des doutes sur la stabilité du DPF.
+            - generic [ref=e160]:
+              - heading "❓ Questions fréquentes" [level=2] [ref=e161]
+              - group [ref=e162]:
+                - generic "Est-ce que le DPF remplace Privacy Shield?" [ref=e163] [cursor=pointer]
+              - group [ref=e164]:
+                - generic "Qui peut utiliser le DPF?" [ref=e165] [cursor=pointer]
+              - group [ref=e166]:
+                - generic "Que faire si mes données sont mal traitées sous le DPF?" [ref=e167] [cursor=pointer]
+            - generic [ref=e169]:
+              - heading "📚 Sources" [level=2] [ref=e170]
+              - list [ref=e171]:
+                - listitem [ref=e172]:
+                  - link "Wikipedia - EU-US Data Privacy Framework" [ref=e173] [cursor=pointer]:
+                    - /url: https://en.wikipedia.org/wiki/EU%E2%80%93US_Data_Privacy_Framework
+                  - text: (Wikipedia, 2026)
+                - listitem [ref=e174]:
+                  - link "Hunton Andrews Kurth - U.S. Supreme Court FTC Ruling Prompts Fresh Scrutiny of EU-U.S. Data Privacy Framework" [ref=e175] [cursor=pointer]:
+                    - /url: https://www.hunton.com/privacy-and-cybersecurity-law-blog/u-s-supreme-court-ftc-ruling-prompts-fresh-scrutiny-of-eu-u-s-data-privacy-framework
+                  - text: (Hunton Andrews Kurth, 2026)
+            - generic [ref=e177]:
+              - heading "🔗 Termes liés" [level=2] [ref=e178]
+              - generic [ref=e179]:
+                - paragraph [ref=e180]: 🌿 Sous-termes
+                - link "Voir la définition de Noyb" [ref=e182] [cursor=pointer]:
+                  - /url: https://laveilledestef.test/glossaire/noyb
+                  - generic [ref=e183]: 🛡️
+                  - generic [ref=e184]: Noyb
+        - heading "Termes associés" [level=2] [ref=e187]
+        - generic [ref=e188]:
+          - link "Lire la définition de Doctolib" [ref=e190] [cursor=pointer]:
+            - /url: https://laveilledestef.test/glossaire/doctolib
+            - generic [ref=e191]: 🏥 Doctolib
+            - paragraph [ref=e192]: Doctolib est une plateforme française de santé en ligne qui permet la prise de r...
+            - generic [ref=e193]: Lire la définition →
+          - link "Lire la définition de Noyb" [ref=e195] [cursor=pointer]:
+            - /url: https://laveilledestef.test/glossaire/noyb
+            - generic [ref=e196]: 🛡️ Noyb
+            - paragraph [ref=e197]: Noyb (acronyme de « None Of Your Business », soit « Ça ne te regarde pas ») est...
+            - generic [ref=e198]: Lire la définition →
+          - link "Lire la définition de IWF" [ref=e200] [cursor=pointer]:
+            - /url: https://laveilledestef.test/glossaire/iwf
+            - generic [ref=e201]: 🔍 IWF
+            - paragraph [ref=e202]: L'Internet Watch Foundation (IWF) est une organisation britannique à but non luc...
+            - generic [ref=e203]: Lire la définition →
+          - link "Lire la définition de NCA" [ref=e205] [cursor=pointer]:
+            - /url: https://laveilledestef.test/glossaire/nca
+            - generic [ref=e206]: 🚔 NCA
+            - paragraph [ref=e207]: La National Crime Agency (NCA) est l'agence nationale britannique chargée de la...
+            - generic [ref=e208]: Lire la définition →
+          - link "Lire la définition de Kernels" [ref=e210] [cursor=pointer]:
+            - /url: https://laveilledestef.test/glossaire/kernels
+            - generic [ref=e211]: ⚡ Kernels
+            - paragraph [ref=e212]: Les Kernels sont des noyaux de calcul précompilés pour GPU et CPU, optimisés au...
+            - generic [ref=e213]: Lire la définition →
+    - contentinfo [ref=e214]:
+      - generic [ref=e217]:
+        - generic [ref=e219]:
+          - generic [ref=e220]:
+            - img "La veille"
+          - paragraph [ref=e221]: Votre plateforme d'information dédiée à l'intelligence artificielle, aux technologies innovantes et à la transformation numérique. Profitez de nos outils gratuits et recevez des analyses, actualités et ressources exclusives.
+        - generic [ref=e223]:
+          - heading "Ressources" [level=3] [ref=e225]
+          - list [ref=e226]:
+            - listitem [ref=e227]:
+              - link "Toutes les ressources" [ref=e228] [cursor=pointer]:
+                - /url: https://laveilledestef.test/ressources
+                - strong [ref=e229]: Toutes les ressources
+            - listitem [ref=e230]:
+              - link "Blog" [ref=e231] [cursor=pointer]:
+                - /url: https://laveilledestef.test/blog
+            - listitem [ref=e232]:
+              - link "Glossaire Techno" [ref=e233] [cursor=pointer]:
+                - /url: https://laveilledestef.test/glossaire
+            - listitem [ref=e234]:
+              - link "Répertoire techno" [ref=e235] [cursor=pointer]:
+                - /url: https://laveilledestef.test/annuaire
+            - listitem [ref=e236]:
+              - link "IA pour les PME québécoises" [ref=e237] [cursor=pointer]:
+                - /url: https://laveilledestef.test/ia-pme-quebec
+            - listitem [ref=e238]:
+              - link "IA en éducation (Québec)" [ref=e239] [cursor=pointer]:
+                - /url: https://laveilledestef.test/ia-education-quebec
+            - listitem [ref=e240]:
+              - link "IA pour développeurs (Québec)" [ref=e241] [cursor=pointer]:
+                - /url: https://laveilledestef.test/ia-developpeurs-quebec
+            - listitem [ref=e242]:
+              - link "Faire sa veille IA (Québec)" [ref=e243] [cursor=pointer]:
+                - /url: https://laveilledestef.test/veille-ia-quebec
+            - listitem [ref=e244]:
+              - link "IA générative" [ref=e245] [cursor=pointer]:
+                - /url: https://laveilledestef.test/ia-generative-quebec
+            - listitem [ref=e246]:
+              - link "Actualités" [ref=e247] [cursor=pointer]:
+                - /url: https://laveilledestef.test/actualites
+            - listitem [ref=e248]:
+              - link "Acronymes éducation" [ref=e249] [cursor=pointer]:
+                - /url: https://laveilledestef.test/acronymes-education
+            - listitem [ref=e250]:
+              - link "Outils gratuits" [ref=e251] [cursor=pointer]:
+                - /url: https://laveilledestef.test/outils
+            - listitem [ref=e252]:
+              - link "Raccourcir un lien" [ref=e253] [cursor=pointer]:
+                - /url: https://laveilledestef.test/raccourcir
+            - listitem [ref=e254]:
+              - link "📡 RSS — Concentré IA" [ref=e255] [cursor=pointer]:
+                - /url: https://laveilledestef.test/rss/concentres.xml
+            - listitem [ref=e256]:
+              - link "📡 RSS — Nouveaux outils" [ref=e257] [cursor=pointer]:
+                - /url: https://laveilledestef.test/rss/annuaire.xml
+            - listitem [ref=e258]:
+              - link "🔌 API publique" [ref=e259] [cursor=pointer]:
+                - /url: https://laveilledestef.test/api
+            - listitem [ref=e260]:
+              - link "📊 Statistiques" [ref=e261] [cursor=pointer]:
+                - /url: https://laveilledestef.test/stats
+        - generic [ref=e263]:
+          - heading "À propos" [level=3] [ref=e265]
+          - list [ref=e266]:
+            - listitem [ref=e267]:
+              - link "À propos" [ref=e268] [cursor=pointer]:
+                - /url: https://laveilledestef.test/page/a-propos
+            - listitem [ref=e269]:
+              - link "FAQ" [ref=e270] [cursor=pointer]:
+                - /url: https://laveilledestef.test/faq
+            - listitem [ref=e271]:
+              - link "Méthodologie" [ref=e272] [cursor=pointer]:
+                - /url: https://laveilledestef.test/methodologie
+            - listitem [ref=e273]:
+              - link "Contact" [ref=e274] [cursor=pointer]:
+                - /url: https://laveilledestef.test/contact
+            - listitem [ref=e275]:
+              - link "Statut des services" [ref=e276] [cursor=pointer]:
+                - /url: https://laveilledestef.test/statut
+            - listitem [ref=e277]:
+              - link "Confidentialité" [ref=e278] [cursor=pointer]:
+                - /url: https://laveilledestef.test/privacy-policy
+            - listitem [ref=e279]:
+              - link "Conditions d'utilisation" [ref=e280] [cursor=pointer]:
+                - /url: https://laveilledestef.test/terms-of-use
+            - listitem [ref=e281]:
+              - link "Conditions de vente" [ref=e282] [cursor=pointer]:
+                - /url: https://laveilledestef.test/conditions-de-vente
+            - listitem [ref=e283]:
+              - link "Cookies" [ref=e284] [cursor=pointer]:
+                - /url: https://laveilledestef.test/cookie-policy
+            - listitem [ref=e285]:
+              - link "Demande de retrait" [ref=e286] [cursor=pointer]:
+                - /url: https://laveilledestef.test/annuaire/retrait
+            - listitem [ref=e287]:
+              - link "Gérer les témoins" [ref=e288] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e289]:
+              - link "Plan du site" [ref=e290] [cursor=pointer]:
+                - /url: https://laveilledestef.test/plan-du-site
+        - generic [ref=e292]:
+          - heading "Communauté" [level=3] [ref=e294]
+          - list [ref=e295]:
+            - listitem [ref=e296]:
+              - link "Facebook Facebook" [ref=e297] [cursor=pointer]:
+                - /url: https://www.facebook.com/LaVeilleAI
+                - generic:
+                  - img "Facebook"
+                - text: Facebook
+            - listitem [ref=e298]:
+              - link "Messenger" [ref=e299] [cursor=pointer]:
+                - /url: https://m.me/LaVeilleAI
+                - img [ref=e301]
+                - text: Messenger
+            - listitem [ref=e304]:
+              - link "LinkedIn" [ref=e305] [cursor=pointer]:
+                - /url: https://www.linkedin.com/in/lapointestephane/
+                - img [ref=e307]
+                - text: LinkedIn
+          - listitem [ref=e309]:
+            - link "ADMIN Administration" [ref=e310] [cursor=pointer]:
+              - /url: https://laveilledestef.test/admin
+              - generic [ref=e311]: ADMIN
+              - text: Administration
+          - listitem [ref=e312]:
+            - link "📋 Modération" [ref=e313] [cursor=pointer]:
+              - /url: https://laveilledestef.test/admin/directory/moderation
+      - generic [ref=e317]:
+        - paragraph [ref=e318]: Copyright © 2026 La veille. Tous droits réservés. v1.104.1
+        - paragraph [ref=e319]:
+          - text: Conçu et hébergé par
+          - link "MEMORA solutions" [ref=e320] [cursor=pointer]:
+            - /url: https://memora.solutions
+          - text: · Entreprise canadienne 🍁
+        - paragraph [ref=e321]: Certains liens sont des liens d'affiliation. Nous pouvons recevoir une commission sans frais pour vous.
+  - generic:
+    - button "Gérer les témoins" [ref=e322] [cursor=pointer]:
+      - img "Gérer les témoins" [ref=e323]
+      - generic [ref=e324]: Gérer les témoins
+    - dialog "Paramètres de confidentialité" [ref=e325]:
+      - heading "Paramètres de confidentialité" [level=2] [ref=e326]
+      - paragraph [ref=e327]:
+        - text: Nous utilisons des témoins (cookies) pour assurer le bon fonctionnement du site, analyser le trafic et personnaliser le contenu. Vous pouvez gérer vos préférences ci-dessous.
+        - link "Politique de confidentialité" [ref=e328] [cursor=pointer]:
+          - /url: /privacy-policy
+      - generic [ref=e329]:
+        - button "Tout refuser" [ref=e330] [cursor=pointer]
+        - button "Personnaliser" [ref=e331] [cursor=pointer]
+        - button "Tout accepter" [ref=e332] [cursor=pointer]
+  - generic [ref=e333]:
+    - link "Partager sur Facebook" [ref=e334] [cursor=pointer]:
+      - /url: https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Flaveilledestef.test%2Fglossaire%2Fdata-privacy-framework&quote=C%27est+un+pont+transatlantique+pour+donn%C3%A9es%2C+avec+certification+obligatoire%2C+surveillance+de+la+FTC+et+un+tribunal+ind%C3%A9pendant+pour+les+recours.
+      - img [ref=e335]
+    - link "Partager sur X" [ref=e337] [cursor=pointer]:
+      - /url: https://twitter.com/intent/tweet?url=https%3A%2F%2Flaveilledestef.test%2Fglossaire%2Fdata-privacy-framework&text=C%27est+un+pont+transatlantique+pour+donn%C3%A9es%2C+avec+certification+obligatoire%2C+surveillance+de+la+FTC+et+un+tribunal+ind%C3%A9pendant+pour+les+recours.+%E2%80%94+Actualit%C3%A9s+en+continu+sur+laveille.ai
+      - img [ref=e338]
+    - link "Partager sur LinkedIn" [ref=e340] [cursor=pointer]:
+      - /url: https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Flaveilledestef.test%2Fglossaire%2Fdata-privacy-framework&summary=C%27est+un+pont+transatlantique+pour+donn%C3%A9es%2C+avec+certification+obligatoire%2C+surveillance+de+la+FTC+et+un+tribunal+ind%C3%A9pendant+pour+les+recours.
+      - img [ref=e341]
+    - link "Envoyer via Messenger" [ref=e343] [cursor=pointer]:
+      - /url: https://m.me/LaVeilleAI
+      - img [ref=e344]
+    - button "Copier le contenu enrichi" [ref=e346] [cursor=pointer]:
+      - img [ref=e347]
+  - text: 

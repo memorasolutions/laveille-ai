@@ -119,7 +119,25 @@ window.deleteSavedItem = function(apiUrl, rowId) {
     window.dispatchEvent(new CustomEvent('open-confirm-global', { detail: { message: '{{ __("Supprimer cette sauvegarde?") }}', callback: function() {
         var row = document.getElementById(rowId);
         fetch(apiUrl, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '', 'Accept': 'application/json' } })
-            .then(function() { if (row) row.remove(); });
+            .then(function(r) {
+                // Round 39 (2026-07-27) : ne retirait jamais la ligne du DOM SEULEMENT au succès -
+                // fetch() ne rejette que sur erreur réseau, donc un 403/404/429 (throttle)/500
+                // faisait quand même disparaître la ligne alors que la suppression avait échoué
+                // côté serveur. Même classe de bug déjà corrigée round 9 dans deletePrompt() du
+                // wizard et dans user/prompts/index.blade.php - jamais appliquée ici.
+                if (r.ok) {
+                    if (row) row.remove();
+                } else {
+                    if (typeof window.toast === 'function') {
+                        window.toast('{{ __("Erreur lors de la suppression. Réessayez.") }}', 'danger');
+                    }
+                }
+            })
+            .catch(function() {
+                if (typeof window.toast === 'function') {
+                    window.toast('{{ __("Erreur lors de la suppression. Réessayez.") }}', 'danger');
+                }
+            });
     } } }));
 };
 </script>

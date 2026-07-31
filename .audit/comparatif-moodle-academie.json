@@ -1,0 +1,50 @@
+{
+  "tableau_comparatif": [
+    {"categorie": "Gestion de cours", "academie_statut": "équivalent", "détail": "Structure hiérarchique complète (chapitres/leçons/items), éditeur front-end drag&drop, drip content, pré-requis, cours-gabarits. Manque : catégories multi-niveaux (codé mais désactivé), actions par lot (dupliquer/déplacer en masse)."},
+    {"categorie": "Évaluation/Quiz", "academie_statut": "équivalent", "détail": "Banque de questions réutilisable, feedback immédiat, historique des tentatives, rubriques. Moodle ajoute des modes de comportement adaptatif et la re-notation sélective de questions."},
+    {"categorie": "Certification/Badges", "academie_statut": "supérieur", "détail": "Certificats vérifiables PDF et Open Badges 3.0/Verifiable Credentials natifs et actifs en prod. Moodle nécessite des plugins tiers pour l'équivalent."},
+    {"categorie": "Social/Collaboratif", "academie_statut": "équivalent", "détail": "Forum par leçon, wiki, base de données collaborative, sondages, commentaires notés. Manque réel : messagerie interne (codée, désactivée), webconférence embarquée type BigBlueButton (Academy = liens externes planifiés seulement)."},
+    {"categorie": "Interopérabilité", "academie_statut": "inférieur", "détail": "SCORM/LTI/xAPI/SSO tous codés mais désactivés en prod. Même activés, limitations réelles : LTI consumer seulement (jamais provider, pas de Deep Linking/AGS/NRPS), SCORM single-SCO (1.2 complet, 2004 basique sans séquencement IMS SS)."},
+    {"categorie": "Mobile", "academie_statut": "absent", "détail": "Aucune application mobile native, pas d'accès hors-ligne aux contenus de cours (le PWA global du site existe hors-Academy, non spécifique au module)."},
+    {"categorie": "IA pédagogique", "academie_statut": "supérieur", "détail": "Tuteur IA ancré au cours (RAG), feedback IA, authoring IA, traduction IA, TTS - tous actifs en production. Moodle 5.2 n'a que des fournisseurs IA génériques (Ollama/ChatGPT) sans tuteur pédagogique intégré au core."},
+    {"categorie": "Admin/Gestion", "academie_statut": "inférieur", "détail": "Dashboard role-aware, analytics par cours, rapports CSV existent. Manque : MFA, intégration LDAP native, rapports personnalisés partageables par rôle/cohorte, calendrier global (codé, désactivé)."},
+    {"categorie": "Gamification", "academie_statut": "supérieur", "détail": "XP/niveaux/classement natifs et actifs, scopés par cohorte (opt-out Loi 25). Moodle dépend entièrement de plugins tiers pour l'équivalent."}
+  ],
+  "ce_qui_manque_reellement": [
+    {"item": "Application mobile native (Android/iOS) avec accès hors-ligne", "priorite": "moyenne", "raison": "Non codé du tout (le PWA du site est hors-périmètre Academy) - Moodle a une app officielle mature", "effort_estime": "élevé"},
+    {"item": "LTI comme fournisseur d'outils (provider) + Deep Linking/AGS/NRPS", "priorite": "basse", "raison": "Academy n'est consumer que jamais provider ; même le flag activé, l'implémentation LTI Advantage reste incomplète face à Moodle", "effort_estime": "élevé"},
+    {"item": "SCORM 2004 complet (séquencement IMS SS) + multi-SCO", "priorite": "basse", "raison": "Implémentation actuelle limitée à single-SCO ; réel manque fonctionnel même une fois le flag scorm_enabled activé", "effort_estime": "élevé"},
+    {"item": "Banque de questions partagée à l'échelle de l'organisation (institution-wide)", "priorite": "moyenne", "raison": "Banque actuellement owner-scopée par formateur ; Moodle permet le partage inter-cours à l'échelle de l'établissement", "effort_estime": "moyen"},
+    {"item": "MFA (authentification multi-facteurs)", "priorite": "moyenne", "raison": "Non mentionné dans l'inventaire du code Academy ; standard attendu en 2026, notamment pour les organismes de formation", "effort_estime": "moyen"},
+    {"item": "Webconférence embarquée (type BigBlueButton intégré)", "priorite": "basse", "raison": "Academy gère des liens Zoom/Meet/Teams planifiés, pas une salle de classe virtuelle intégrée dans la page", "effort_estime": "élevé"},
+    {"item": "Actions par lot (dupliquer/déplacer/supprimer plusieurs éléments en une fois)", "priorite": "basse", "raison": "Non trouvé dans l'inventaire ; confort d'édition pour les formateurs gérant beaucoup de contenu", "effort_estime": "faible"},
+    {"item": "Intégration LDAP native pour les inscriptions", "priorite": "basse", "raison": "Non codé ; pertinent seulement pour un futur usage institutionnel/entreprise (lié aux paliers d'abonnement, aussi désactivés)", "effort_estime": "moyen"}
+  ],
+  "ce_qui_est_code_mais_desactive_pas_un_manque": [
+    "scorm_enabled - SCORM 1.2/2004 basique déjà implémenté, juste éteint",
+    "moodle_import_enabled - import .mbz déjà implémenté (MVP page/resource/label)",
+    "xapi_enabled - émission de statements xAPI déjà implémentée",
+    "competency_graph_enabled - graphe de compétences pondéré déjà implémenté",
+    "diploma_editor_enabled - éditeur visuel Konva.js de diplômes déjà implémenté",
+    "video_discussion_enabled - discussion sociale horodatée déjà implémentée (réutilise le forum)",
+    "direct_messaging_enabled - messagerie directe formateur-apprenant déjà implémentée",
+    "subscription_tiers_enabled - paliers freemium/pro/organisation déjà implémentés (sans Stripe live)",
+    "lti_enabled - LTI 1.3 consumer déjà implémenté",
+    "kiosk_mode_enabled - mode kiosque anti-triche déjà implémenté",
+    "course_categories_enabled - taxonomie de catégories déjà implémentée",
+    "global_calendar_enabled - agrégation multi-cours déjà implémentée",
+    "notifications.enabled - transport courriel déjà implémenté (préférences opt-in/out)",
+    "google_meet_autocreate_enabled - auto-création de lien Meet déjà implémentée",
+    "sso_enabled - SAML 2.0 + provisioning SCIM 2.0 déjà implémentés (module Sso séparé)"
+  ],
+  "blocage_critique_prealable": "config('academy.under_construction') = TRUE en production : l'Académie entière est actuellement invisible au public (503 pour tout visiteur non-superadmin). Peu importe le nombre de fonctionnalités codées ou activées, AUCUN utilisateur réel n'y accède actuellement. C'est le seul blocage qui prime sur toute discussion de fonctionnalités manquantes.",
+  "avantages_academie_vs_moodle": [
+    "Tuteur IA ancré au cours (RAG, zéro hallucination revendiqué) - Moodle n'a rien d'équivalent nativement",
+    "Certificats + Open Badges 3.0/Verifiable Credentials natifs sans dépendance à un plugin tiers",
+    "Gamification native scopée par cohorte avec opt-out Loi 25 (protection renseignements personnels dès la conception)",
+    "Export/import de cours en JSON portable (vs le format .mbz propriétaire de Moodle)",
+    "Éditeur de cours front-end unifié (pas de séparation admin/front comme sur Moodle)",
+    "Répétition espacée (SRS, SM-2) et test de positionnement adaptatif (CAT) natifs - fonctionnalités avancées absentes du core Moodle",
+    "Analytiques prédictifs (score de risque d'abandon) + nudges comportementaux natifs"
+  ]
+}

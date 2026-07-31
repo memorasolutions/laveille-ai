@@ -1,0 +1,1134 @@
+# ============================================================
+# .platform-card-academy.yaml — Module Academy, Simulation E2E
+# runId   : 20260619a
+# auteur  : Claude Sonnet 4.6 (Phase 1 — inventaire + plan)
+# date    : 2026-06-19
+# branche : feat/academy-module
+# ============================================================
+
+cadrage:
+  runId       : "20260619a"
+  env         : local
+  url         : "https://laveilledestef.test"
+  db          : la_veille_de_stef_v2
+  module      : Academy
+  statut_avant_sim : disabled   # modules_statuses.json Academy:false — à activer pour sim
+  branche     : feat/academy-module
+
+  roles:
+    visiteur:
+      label    : Visiteur anonyme (non connecté)
+      compte   : null
+    membre:
+      label    : Apprenant enrôlé
+      email    : SIM_20260619a_member@memora.ca
+      password : SIM_20260619a_Mbr!2026
+      permissions : ["academy.view", "academy.enroll"]
+    admin:
+      label    : Administrateur Academy
+      email    : SIM_20260619a_admin@memora.ca
+      password : SIM_20260619a_Adm!2026
+      permissions : ["academy.manage", "academy.reports.view", "academy.courses.create",
+                     "academy.courses.update", "academy.courses.publish",
+                     "academy.lessons.manage", "academy.enrollments.manage",
+                     "academy.certificates.issue"]
+    instructeur:
+      label    : Instructeur (course_roles.role=instructor)
+      email    : SIM_20260619a_instructor@memora.ca
+      password : SIM_20260619a_Ins!2026
+      note     : "Rôle via course_roles, PAS une permission Spatie globale"
+
+  fixtures_requises:
+    cours_gratuit:
+      title       : "SIM_20260619a — IA pour débutants (GRATUIT)"
+      slug        : sim-20260619a-ia-debutants-gratuit
+      access_type : free
+      status      : published
+      visibility  : public
+      level       : intro
+      chapitres   :
+        - title   : "Chapitre 1 — Introduction"
+          lecons  :
+            - title     : "Leçon 1.1 — Vidéo intro"
+              items     :
+                - type       : video
+                  title      : "Présentation IA"
+                  player_url : "https://share.screenpal.com/player/SIM_TEST_001"
+                  is_required: true
+            - title     : "Leçon 1.2 — Document"
+              items     :
+                - type       : doc
+                  title      : "Glossaire IA"
+                  is_required: true
+        - title   : "Chapitre 2 — Quiz"
+          lecons  :
+            - title     : "Leçon 2.1 — Quiz QCM"
+              items     :
+                - type          : quiz
+                  title         : "Quiz QCM"
+                  qt_bank_key   : "qt-questions"
+                  passing_score : 60
+                  is_required   : true
+            - title     : "Leçon 2.2 — Quiz Appariement"
+              items     :
+                - type             : quiz
+                  title            : "Quiz appariement"
+                  qt_bank_key      : "qt-questions"
+                  passing_score    : 60
+                  attempts_allowed : 2
+                  is_required      : true
+    cours_payant:
+      title       : "SIM_20260619a — IA avancée (PAYANT)"
+      slug        : sim-20260619a-ia-avancee-payant
+      access_type : paid_one_time
+      price_cents : 4900
+      currency    : CAD
+      stripe_price_id : "price_SIM_test_only"
+      status      : published
+      visibility  : public
+      level       : avance
+      chapitres   :
+        - title   : "Chapitre 1 — LLM"
+          lecons  :
+            - title     : "Leçon 1.1 — Vidéo LLM"
+              items     :
+                - type       : video
+                  title      : "Introduction LLM"
+                  player_url : "https://share.screenpal.com/player/SIM_TEST_002"
+                  is_required: true
+    cours_brouillon:
+      title       : "SIM_20260619a — Cours brouillon (INVISIBLE)"
+      slug        : sim-20260619a-brouillon
+      access_type : free
+      status      : draft
+      visibility  : public
+
+  stripe:
+    mode           : test
+    debit_reel     : false
+    carte_test     : "4242 4242 4242 4242"
+    expiry_test    : "12/29"
+    cvc_test       : "123"
+    zip_test       : "H1A 1A1"
+    note           : "Aucun débit réel — mode test Stripe uniquement"
+
+  gates_et_seuils:
+    progression_certificat : 100   # percent requis pour émettre le certificat (CertificateService)
+    passing_score_defaut   : 60    # QuizController::submitQuiz fallback
+    quiz_attempts_default  : null  # null = illimité sauf si payload['attempts_allowed'] défini
+    enrollment_status_actif: active
+    publication_cours      : "status=published ET visibility=public"
+    video_gating           : "auth + enrollment.status=active OU payload[preview]=true"
+
+  actions_risquees:
+    - action : "Activation module (modules_statuses.json Academy:true)"
+      risque  : "Impact global si ServiceProvider ou migration échoue"
+      garde   : "Tester migrations localement avant activation"
+    - action  : "Paiement Stripe checkout"
+      risque  : "Débit réel si clé LIVE utilisée par erreur"
+      garde   : "Vérifier STRIPE_KEY commence par sk_test_ avant sim"
+    - action  : "Stripe webhook listener"
+      risque  : "Enrôlement fantôme si metadata course_id/user_id incorrects"
+      garde   : "Idempotent via firstOrCreate"
+    - action  : "Export CSV (academy.reports.view)"
+      risque  : "Fuite données PII si permission mal attribuée"
+      garde   : "Vérifier que membre ordinaire reçoit 403"
+
+  notes_techniques:
+    - "CSP header : Content-Security-Policy injecté par AcademyCsp middleware sur TOUTES les routes /academie/*"
+    - "frame-src : screenpal.com autorisé — tester avec URL SIM player_url synthétique"
+    - "Filigrane vidéo : CSS/Alpine, pas de JS externe — visible si auth()->user() existe"
+    - "player_url NE DOIT PAS apparaître dans le DOM si non inscrit (vérifier source HTML)"
+    - "CertificateService::issueFor() appelée depuis lesson.blade quand progress.percent = 100 (idempotent)"
+    - "QuizService::buildRound() délègue à QtService::newRound() — banque qt-questions.php doit exister"
+    - "EnrollmentService::enrollFree() : idempotent (firstOrCreate), lève CourseNotFreeException si payant"
+    - "StripeWebhookListener : écoute cashier WebhookHandled, ignore events sans metadata course_id/user_id"
+    - "Exports CSV : BOM UTF-8 inclus, cursor() pour mémoire, filtres course_id/date_from/date_to"
+    - "Politique d'archivage : archive ONLY (pas de suppression réelle côté cours)"
+
+# ============================================================
+# INVENTAIRE FONCTIONNEL EXHAUSTIF
+# ============================================================
+inventaire:
+
+  # ── Pages publiques ──────────────────────────────────────
+  - id        : FEAT_001
+    libelle   : "Page liste des cours (/academie)"
+    role      : visiteur
+    criticite : P0
+    couche    : frontend
+    route     : "GET /academie  [academy.index]"
+    preuve    :
+      http    : 200
+      dom     : "grille de cartes .card ; zéro erreur console"
+
+  - id        : FEAT_002
+    libelle   : "Recherche de cours par mot-clé (?q=)"
+    role      : visiteur
+    criticite : P1
+    couche    : full-stack
+    route     : "GET /academie?q=SIM  [academy.index]"
+    preuve    :
+      http    : 200
+      backend : "Course::search() via Scout ou fallback LIKE ; résultats filtrés"
+
+  - id        : FEAT_003
+    libelle   : "Filtre Gratuit / Payant (?filter=free|paid)"
+    role      : visiteur
+    criticite : P1
+    couche    : frontend
+    route     : "GET /academie?filter=free  [academy.index]"
+    preuve    :
+      dom     : "Seuls les cours access_type=free apparaissent ; pill 'Gratuit' active"
+
+  - id        : FEAT_004
+    libelle   : "Filtre niveau (?level=intro|inter|avance)"
+    role      : visiteur
+    criticite : P1
+    couche    : frontend
+    route     : "GET /academie?level=intro  [academy.index]"
+    preuve    :
+      dom     : "Seuls les cours level=intro apparaissent"
+
+  - id        : FEAT_005
+    libelle   : "Lien 'Réinitialiser les filtres' (si filtre actif, zéro résultat)"
+    role      : visiteur
+    criticite : P2
+    couche    : frontend
+    route     : "GET /academie (zéro résultat après filtre)"
+    preuve    :
+      dom     : "Lien 'Réinitialiser les filtres' visible"
+
+  - id        : FEAT_006
+    libelle   : "Page de cours — affichage public (/academie/courses/{slug})"
+    role      : visiteur
+    criticite : P0
+    couche    : frontend
+    route     : "GET /academie/courses/sim-20260619a-ia-debutants-gratuit  [academy.courses.show]"
+    preuve    :
+      http    : 200
+      dom     : "Titre h1, syllabus accordéon, badges niveau/accès, sidebar prix"
+
+  - id        : FEAT_007
+    libelle   : "Accordéon syllabus accessible au clavier"
+    role      : visiteur
+    criticite : P2
+    couche    : frontend
+    route     : "GET /academie/courses/{slug}"
+    preuve    :
+      dom     : "Boutons accordion-button avec data-bs-toggle=collapse, Tab+Entrée fonctionnel"
+
+  - id        : FEAT_008
+    libelle   : "JSON-LD Course dans <head> de la page cours"
+    role      : visiteur
+    criticite : P1
+    couche    : frontend
+    route     : "GET /academie/courses/{slug}"
+    preuve    :
+      dom     : "script[type='application/ld+json'] contient @type=Course, name, url, provider"
+
+  - id        : FEAT_009
+    libelle   : "CTA 'Se connecter pour s'inscrire' (visiteur non-auth)"
+    role      : visiteur
+    criticite : P0
+    couche    : frontend
+    route     : "GET /academie/courses/{slug} (non-auth)"
+    preuve    :
+      dom     : "Lien 'Se connecter pour s'inscrire' → href route('login')"
+
+  - id        : FEAT_010
+    libelle   : "CTA 'S'inscrire gratuitement' (membre connecté, non-inscrit, cours gratuit)"
+    role      : membre
+    criticite : P0
+    couche    : frontend
+    route     : "GET /academie/courses/{slug} (auth, !enrolled, free)"
+    preuve    :
+      dom     : "Formulaire form[method=POST] action=academy.courses.enroll"
+
+  - id        : FEAT_011
+    libelle   : "CTA 'Acheter ce cours' (membre connecté, non-inscrit, cours payant)"
+    role      : membre
+    criticite : P0
+    couche    : frontend
+    route     : "GET /academie/courses/{slug} (auth, !enrolled, paid)"
+    preuve    :
+      dom     : "Lien a[href=academy.courses.purchase]"
+
+  - id        : FEAT_012
+    libelle   : "CTA 'Continuer le cours' (membre inscrit)"
+    role      : membre
+    criticite : P1
+    couche    : frontend
+    route     : "GET /academie/courses/{slug} (auth, enrolled)"
+    preuve    :
+      dom     : "Bouton 'Continuer le cours →' bg-D1FAE5"
+
+  - id        : FEAT_013
+    libelle   : "Cours brouillon/non-publié retourne 404"
+    role      : visiteur
+    criticite : P0
+    couche    : backend
+    route     : "GET /academie/courses/sim-20260619a-brouillon"
+    preuve    :
+      http    : 404
+
+  # ── Enrôlement ───────────────────────────────────────────
+  - id        : FEAT_014
+    libelle   : "Enrôlement gratuit (POST enroll)"
+    role      : membre
+    criticite : P0
+    couche    : full-stack
+    route     : "POST /academie/courses/{course}/enroll  [academy.courses.enroll]"
+    preuve    :
+      db      : "enrollments.status=active, source=free, enrolled_at non-null"
+      redirect: "academy.index avec flash success"
+      log     : "activity_log : academy.enrolled"
+
+  - id        : FEAT_015
+    libelle   : "Enrôlement gratuit idempotent (double soumission)"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "POST /academie/courses/{course}/enroll (2e appel)"
+    preuve    :
+      db      : "1 seule ligne enrollments pour user+course"
+
+  - id        : FEAT_016
+    libelle   : "Enrôlement refusé si cours payant (CourseNotFreeException)"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "POST /academie/courses/{cours_payant}/enroll"
+    preuve    :
+      redirect: "back() avec flash error"
+      db      : "Aucune ligne enrollments créée"
+
+  - id        : FEAT_017
+    libelle   : "Enrôlement refusé si non-authentifié (redirect login)"
+    role      : visiteur
+    criticite : P0
+    couche    : backend
+    route     : "POST /academie/courses/{course}/enroll (sans auth)"
+    preuve    :
+      redirect: "route('login')"
+
+  # ── Lecteur de leçon ─────────────────────────────────────
+  - id        : FEAT_018
+    libelle   : "Page leçon accessible sans auth (HTTP 200)"
+    role      : visiteur
+    criticite : P0
+    couche    : frontend
+    route     : "GET /academie/courses/{slug}/lessons/{id}  [academy.lessons.show]"
+    preuve    :
+      http    : 200
+      dom     : "Titre leçon h1, sidebar nav, panneau gating visible"
+
+  - id        : FEAT_019
+    libelle   : "Gating vidéo CRITIQUE : player_url ABSENTE du HTML si non-inscrit"
+    role      : visiteur
+    criticite : P0
+    couche    : backend
+    route     : "GET /academie/courses/{slug}/lessons/{id} (non-auth, item video)"
+    preuve    :
+      dom     : "Aucune occurrence 'screenpal.com' ni 'player_url' dans le source HTML"
+
+  - id        : FEAT_020
+    libelle   : "Gating vidéo : panneau overlay + CTA approprié (connecté, non-inscrit)"
+    role      : membre
+    criticite : P0
+    couche    : frontend
+    route     : "GET /academie/.../lessons/{id} (auth, !enrolled, item video)"
+    preuve    :
+      dom     : "div.academy-gated-panel, gated-title 'Inscrivez-vous pour accéder'"
+
+  - id        : FEAT_021
+    libelle   : "Lecteur vidéo (iframe ScreenPal) affiché si inscrit actif"
+    role      : membre
+    criticite : P0
+    couche    : frontend
+    route     : "GET /academie/courses/{slug}/lessons/{id} (auth, enrolled, item video)"
+    preuve    :
+      dom     : "iframe[src*='screenpal'] présent dans le DOM"
+
+  - id        : FEAT_022
+    libelle   : "Filigrane CSS visible sur iframe vidéo (div.academy-watermark)"
+    role      : membre
+    criticite : P1
+    couche    : frontend
+    route     : "GET /academie/.../lessons/{id} (auth, enrolled, item video)"
+    preuve    :
+      dom     : "div.academy-watermark[aria-hidden='true'][style*='pointer-events:none']"
+
+  - id        : FEAT_023
+    libelle   : "Filigrane contient nom utilisateur + horodatage (Alpine x-text)"
+    role      : membre
+    criticite : P1
+    couche    : frontend
+    route     : "GET /academie/.../lessons/{id} (auth, enrolled)"
+    preuve    :
+      dom     : "spans[x-text='wLabel'] populés par Alpine après init"
+
+  - id        : FEAT_024
+    libelle   : "Rendu item de type doc (payload rich_text)"
+    role      : membre
+    criticite : P1
+    couche    : frontend
+    route     : "GET /academie/.../lessons/{id} (item doc)"
+    preuve    :
+      dom     : "div.prose avec contenu visible ou 'Contenu du document à venir'"
+
+  - id        : FEAT_025
+    libelle   : "Navigation latérale (sidebar) avec toutes les leçons du cours"
+    role      : membre
+    criticite : P1
+    couche    : frontend
+    route     : "GET /academie/courses/{slug}/lessons/{id}"
+    preuve    :
+      dom     : "nav.academy-lesson-sidebar, a.sidebar-lesson-link.is-active sur leçon courante"
+
+  - id        : FEAT_026
+    libelle   : "Navigation précédente / suivante (div.academy-lesson-nav)"
+    role      : membre
+    criticite : P1
+    couche    : frontend
+    route     : "GET /academie/courses/{slug}/lessons/{id}"
+    preuve    :
+      dom     : "Liens nav-prev et nav-next présents (ou 'Retour au cours' si 1re/dernière leçon)"
+
+  - id        : FEAT_027
+    libelle   : "Leçon hors cours retourne 404"
+    role      : visiteur
+    criticite : P0
+    couche    : backend
+    route     : "GET /academie/courses/{slug}/lessons/{id_autre_cours}"
+    preuve    :
+      http    : 404
+
+  - id        : FEAT_028
+    libelle   : "Leçon de cours non-publié retourne 404"
+    role      : visiteur
+    criticite : P0
+    couche    : backend
+    route     : "GET /academie/courses/sim-20260619a-brouillon/lessons/{id}"
+    preuve    :
+      http    : 404
+
+  # ── CSP ──────────────────────────────────────────────────
+  - id        : FEAT_029
+    libelle   : "Header CSP présent sur toutes les pages /academie/*"
+    role      : visiteur
+    criticite : P1
+    couche    : backend
+    route     : "GET /academie (middleware AcademyCsp)"
+    preuve    :
+      header  : "Content-Security-Policy présent dans la réponse HTTP"
+
+  - id        : FEAT_030
+    libelle   : "CSP frame-src inclut screenpal.com"
+    role      : visiteur
+    criticite : P1
+    couche    : backend
+    route     : "GET /academie/courses/{slug}/lessons/{id}"
+    preuve    :
+      header  : "Content-Security-Policy: ...frame-src 'self' https://screenpal.com..."
+
+  - id        : FEAT_031
+    libelle   : "CSP frame-ancestors protège contre le clickjacking"
+    role      : visiteur
+    criticite : P1
+    couche    : backend
+    route     : "GET /academie/*"
+    preuve    :
+      header  : "frame-ancestors 'self' https://laveille.ai https://*.laveille.ai"
+
+  - id        : FEAT_032
+    libelle   : "Zéro violation CSP dans la console navigateur (iframe vidéo)"
+    role      : membre
+    criticite : P1
+    couche    : frontend
+    route     : "GET /academie/.../lessons/{id} (auth, enrolled, item video)"
+    preuve    :
+      console : "Aucune erreur CSP dans la console navigateur"
+
+  # ── Quiz ─────────────────────────────────────────────────
+  - id        : FEAT_033
+    libelle   : "Quiz player : panneau de démarrage (inscrit, pas de session active)"
+    role      : membre
+    criticite : P0
+    couche    : frontend
+    route     : "GET /academie/.../lessons/{id} (item quiz, enrolled, no session)"
+    preuve    :
+      dom     : "Div bg-F0F9FF, score requis visible, form POST academy.quiz.start"
+
+  - id        : FEAT_034
+    libelle   : "Quiz gating : panneau 'Inscrivez-vous' si non-inscrit"
+    role      : visiteur
+    criticite : P0
+    couche    : frontend
+    route     : "GET /academie/.../lessons/{id} (item quiz, !enrolled)"
+    preuve    :
+      dom     : "div.academy-gated-panel visible, iframe quiz absent"
+
+  - id        : FEAT_035
+    libelle   : "Démarrage quiz (POST quiz.start) — session stockée côté serveur"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "POST /academie/courses/{slug}/lessons/{id}/items/{itemId}/quiz/start"
+    preuve    :
+      session : "Clé academy.quiz.{itemId} présente côté serveur"
+      redirect: "academy.lessons.show#item-{itemId}"
+
+  - id        : FEAT_036
+    libelle   : "Questions quiz ABSENTES du HTML source (protection anti-triche)"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "GET /academie/.../lessons/{id} (quiz actif en session)"
+    preuve    :
+      dom     : "Valeurs 'correct' ou réponses attendues absentes du HTML"
+
+  - id        : FEAT_037
+    libelle   : "Rendu quiz QCM (radio buttons par choix)"
+    role      : membre
+    criticite : P0
+    couche    : frontend
+    route     : "GET .../lessons/{id} (quiz actif, type qcm)"
+    preuve    :
+      dom     : "input[type=radio][name='answers[N]'] pour chaque choix"
+
+  - id        : FEAT_038
+    libelle   : "Rendu quiz Vrai/Faux (2 radio buttons)"
+    role      : membre
+    criticite : P1
+    couche    : frontend
+    route     : "GET .../lessons/{id} (quiz actif, type vraifaux)"
+    preuve    :
+      dom     : "2 radio buttons (Vrai / Faux)"
+
+  - id        : FEAT_039
+    libelle   : "Rendu quiz Réponse courte (input text)"
+    role      : membre
+    criticite : P1
+    couche    : frontend
+    route     : "GET .../lessons/{id} (quiz actif, type court)"
+    preuve    :
+      dom     : "input[type=text][name='answers[N]']"
+
+  - id        : FEAT_040
+    libelle   : "Rendu quiz Appariement (select avec aria-label par terme)"
+    role      : membre
+    criticite : P1
+    couche    : frontend
+    route     : "GET .../lessons/{id} (quiz actif, type appariement)"
+    preuve    :
+      dom     : "select[name='answers[N][]'][aria-label] pour chaque terme"
+
+  - id        : FEAT_041
+    libelle   : "Soumission quiz réussi (score >= passing_score)"
+    role      : membre
+    criticite : P0
+    couche    : full-stack
+    route     : "POST /academie/.../items/{itemId}/quiz/submit"
+    preuve    :
+      db      : "completions.status=completed, score non-null pour user+lesson_item_id"
+      flash   : "academy.quiz_result.passed=true, percent affiché"
+      dom     : "Panneau vert '✅ Quiz Réussi !' avec bouton Continuer"
+
+  - id        : FEAT_042
+    libelle   : "Soumission quiz échoué (score < passing_score)"
+    role      : membre
+    criticite : P0
+    couche    : full-stack
+    route     : "POST /academie/.../items/{itemId}/quiz/submit"
+    preuve    :
+      db      : "Aucune completion.status=completed créée"
+      flash   : "academy.quiz_result.passed=false"
+      dom     : "Panneau jaune '⚠️ Non réussi' avec bouton Réessayer"
+
+  - id        : FEAT_043
+    libelle   : "Limite de tentatives (attempts_allowed) — quiz bloqué après N"
+    role      : membre
+    criticite : P1
+    couche    : backend
+    route     : "POST .../quiz/start (N+1e tentative)"
+    preuve    :
+      redirect: "back() avec flash error 'Nombre de tentatives maximum atteint'"
+      db      : "completions.count(user+item) = attempts_allowed"
+
+  - id        : FEAT_044
+    libelle   : "Quiz refusé si non-inscrit (403)"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "POST .../quiz/start (enrolled=false)"
+    preuve    :
+      http    : 403
+
+  - id        : FEAT_045
+    libelle   : "Session quiz expirée — message d'erreur"
+    role      : membre
+    criticite : P1
+    couche    : backend
+    route     : "POST .../quiz/submit (session absente)"
+    preuve    :
+      redirect: "back() avec flash error 'Session de quiz expirée. Recommencez le quiz'"
+
+  # ── Complétion manuelle ──────────────────────────────────
+  - id        : FEAT_046
+    libelle   : "Bouton 'Marquer comme terminé' visible (video/doc, inscrit, non-complété)"
+    role      : membre
+    criticite : P0
+    couche    : frontend
+    route     : "GET /academie/.../lessons/{id} (item video|doc, enrolled, !completed)"
+    preuve    :
+      dom     : "form[method=POST][action*=complete], bouton '✓ Marquer comme terminé'"
+
+  - id        : FEAT_047
+    libelle   : "Complétion manuelle (POST complete)"
+    role      : membre
+    criticite : P0
+    couche    : full-stack
+    route     : "POST /academie/courses/{slug}/lessons/{id}/items/{itemId}/complete"
+    preuve    :
+      db      : "completions.status=completed, completed_at non-null"
+      log     : "activity_log : academy.item.completed"
+      redirect: "academy.lessons.show#item-{itemId} avec flash success"
+
+  - id        : FEAT_048
+    libelle   : "Complétion idempotente (double POST complete)"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "POST .../complete (2e appel, item déjà completed)"
+    preuve    :
+      db      : "Toujours 1 ligne completions.status=completed"
+
+  - id        : FEAT_049
+    libelle   : "Item complété : affiche '✅ Terminé' sans bouton"
+    role      : membre
+    criticite : P1
+    couche    : frontend
+    route     : "GET /academie/.../lessons/{id} (item completed)"
+    preuve    :
+      dom     : "Texte '✅ Terminé' présent, formulaire POST complete absent"
+
+  - id        : FEAT_050
+    libelle   : "Complétion d'un quiz via bouton 'Marquer terminé' rejetée"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "POST .../items/{itemId_quiz}/complete"
+    preuve    :
+      redirect: "back() avec flash error 'Les quiz doivent être complétés via le formulaire'"
+
+  - id        : FEAT_051
+    libelle   : "Complétion refusée si non-inscrit (403)"
+    role      : visiteur
+    criticite : P0
+    couche    : backend
+    route     : "POST .../complete (sans enrollment actif)"
+    preuve    :
+      http    : 403
+
+  # ── Progression ──────────────────────────────────────────
+  - id        : FEAT_052
+    libelle   : "Barre de progression affichée si inscrit avec ≥1 completion"
+    role      : membre
+    criticite : P0
+    couche    : frontend
+    route     : "GET /academie/.../lessons/{id} (enrolled, progress > 0)"
+    preuve    :
+      dom     : "div.progress-bar, aria-valuenow non-nul, texte 'X% complété'"
+
+  - id        : FEAT_053
+    libelle   : "Pourcentage recalculé après chaque complétion"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "POST .../complete → ProgressService::recalculate()"
+    preuve    :
+      db      : "progresses.percent = round(required_completed/required_total*100)"
+
+  - id        : FEAT_054
+    libelle   : "Bouton 'Reprendre' pointe vers 1re leçon non complétée"
+    role      : membre
+    criticite : P1
+    couche    : frontend
+    route     : "GET /academie/.../lessons/{id} (progress.resumeLesson != null)"
+    preuve    :
+      dom     : "Lien 'Reprendre →' href = route(academy.lessons.show, [course, resumeLesson])"
+
+  - id        : FEAT_055
+    libelle   : "CTA 'Commencer le cours' (inscrit, progress=null)"
+    role      : membre
+    criticite : P1
+    couche    : frontend
+    route     : "GET /academie/.../lessons/{id} (enrolled, progress=null)"
+    preuve    :
+      dom     : "Lien 'Commencer le cours →' vers 1re leçon"
+
+  - id        : FEAT_056
+    libelle   : "Isolation progression : user B ne voit pas progression de user A"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "GET /academie/.../lessons/{id} (user B)"
+    preuve    :
+      db      : "progresses WHERE user_id=userB — user A non visible"
+
+  # ── Paiement Stripe ──────────────────────────────────────
+  - id        : FEAT_057
+    libelle   : "Redirection Stripe Checkout (cours payant, membre non-inscrit)"
+    role      : membre
+    criticite : P0
+    couche    : full-stack
+    route     : "GET /academie/courses/{slug}/purchase  [academy.courses.purchase]"
+    preuve    :
+      redirect: "URL checkout.stripe.com avec session en mode test"
+      db      : "Pas encore d'enrollment à ce stade"
+
+  - id        : FEAT_058
+    libelle   : "Checkout bloqué si déjà inscrit"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "GET /academie/courses/{slug}/purchase (enrolled=true)"
+    preuve    :
+      redirect: "course.show avec flash error 'Déjà inscrit'"
+
+  - id        : FEAT_059
+    libelle   : "Checkout bloqué si cours gratuit"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "GET /academie/courses/sim-cours-gratuit/purchase"
+    preuve    :
+      redirect: "course.show avec flash error 'Le cours est gratuit'"
+
+  - id        : FEAT_060
+    libelle   : "Webhook Stripe checkout.session.completed → enrollment actif"
+    role      : systeme
+    criticite : P0
+    couche    : backend
+    route     : "POST /stripe/webhook (Cashier, event checkout.session.completed)"
+    preuve    :
+      db      : "enrollments.status=active, source=purchase, cashier_id et amount_cents renseignés"
+      log     : "Aucun Log::error dans laravel.log"
+
+  - id        : FEAT_061
+    libelle   : "Webhook Stripe idempotent (event dupliqué)"
+    role      : systeme
+    criticite : P0
+    couche    : backend
+    route     : "POST /stripe/webhook (même event 2 fois)"
+    preuve    :
+      db      : "1 seule ligne enrollments pour user+course"
+
+  - id        : FEAT_062
+    libelle   : "Webhook Stripe ignoré si pas de metadata academy"
+    role      : systeme
+    criticite : P1
+    couche    : backend
+    route     : "POST /stripe/webhook (event sans course_id/user_id)"
+    preuve    :
+      db      : "Aucune inscription créée"
+      log     : "Pas de Log::error"
+
+  # ── Certificat ───────────────────────────────────────────
+  - id        : FEAT_063
+    libelle   : "Certificat émis automatiquement à 100% (ProgressService → CertificateService)"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "POST .../complete (dernier item requis) → ProgressService::recalculate()"
+    preuve    :
+      db      : "certificates_issued : serial ACAD-*, public_url_slug cert-*, issued_at non-null"
+
+  - id        : FEAT_064
+    libelle   : "Bloc 'Félicitations' + lien certificat dans lesson.blade (progress=100%)"
+    role      : membre
+    criticite : P0
+    couche    : frontend
+    route     : "GET /academie/.../lessons/{id} (progress.percent=100)"
+    preuve    :
+      dom     : "Div bg-ECFDF5, texte 'Félicitations ! Tu as complété ce cours à 100 %', lien certificat"
+
+  - id        : FEAT_065
+    libelle   : "Page certificat publique (sans authentification)"
+    role      : visiteur
+    criticite : P0
+    couche    : frontend
+    route     : "GET /academie/certificats/{public_url_slug}  [academy.certificates.show]"
+    preuve    :
+      http    : 200
+      dom     : "certificate-name, certificate-course-title, certificate-serial (ACAD-…)"
+
+  - id        : FEAT_066
+    libelle   : "JSON-LD EducationalOccupationalCredential dans <head> du certificat"
+    role      : visiteur
+    criticite : P1
+    couche    : frontend
+    route     : "GET /academie/certificats/{slug}"
+    preuve    :
+      dom     : "script[type='application/ld+json'] avec @type=EducationalOccupationalCredential, holder, about"
+
+  - id        : FEAT_067
+    libelle   : "Bouton 'Imprimer / Exporter en PDF' (window.print)"
+    role      : membre
+    criticite : P2
+    couche    : frontend
+    route     : "GET /academie/certificats/{slug}"
+    preuve    :
+      dom     : "button[onclick='window.print()'], CSS @media print masque .no-print"
+
+  - id        : FEAT_068
+    libelle   : "Certificat 404 si slug inconnu"
+    role      : visiteur
+    criticite : P0
+    couche    : backend
+    route     : "GET /academie/certificats/slug-inexistant"
+    preuve    :
+      http    : 404
+
+  - id        : FEAT_069
+    libelle   : "Certificat idempotent (2 passages à 100% → 1 seul certificat)"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "2e appel CertificateService::issueFor()"
+    preuve    :
+      db      : "1 seule ligne certificates_issued pour user+course"
+
+  # ── Exports CSV ──────────────────────────────────────────
+  - id        : FEAT_070
+    libelle   : "Export CSV enrollments (admin avec academy.reports.view)"
+    role      : admin
+    criticite : P1
+    couche    : backend
+    route     : "GET /academie/admin/export/enrollments  [academy.admin.export.enrollments]"
+    preuve    :
+      http    : 200
+      header  : "Content-Type: text/csv; charset=UTF-8, Content-Disposition: attachment"
+      contenu : "BOM UTF-8 + en-têtes colonnes ID/Utilisateur/Courriel/Cours/Statut/Source/Inscrit le"
+
+  - id        : FEAT_071
+    libelle   : "Export CSV completions (admin)"
+    role      : admin
+    criticite : P1
+    couche    : backend
+    route     : "GET /academie/admin/export/completions"
+    preuve    :
+      contenu : "Colonnes ID/Utilisateur/Courriel/Cours/Item/Statut/Score/Complété le"
+
+  - id        : FEAT_072
+    libelle   : "Export CSV progress (admin)"
+    role      : admin
+    criticite : P1
+    couche    : backend
+    route     : "GET /academie/admin/export/progress"
+    preuve    :
+      contenu : "Colonnes ID/Utilisateur/Courriel/Cours/Pourcentage/Dernière activité"
+
+  - id        : FEAT_073
+    libelle   : "Export CSV filtrable (course_id, date_from, date_to)"
+    role      : admin
+    criticite : P2
+    couche    : backend
+    route     : "GET /academie/admin/export/enrollments?course_id=1&date_from=2026-01-01"
+    preuve    :
+      contenu : "Uniquement les lignes correspondant aux filtres"
+
+  - id        : FEAT_074
+    libelle   : "Export CSV refusé sans permission academy.reports.view (403)"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "GET /academie/admin/export/enrollments (sans permission)"
+    preuve    :
+      http    : 403
+
+  # ── Admin CRUD Cours ─────────────────────────────────────
+  - id        : FEAT_075
+    libelle   : "Admin : liste des cours (/admin/academy/courses)"
+    role      : admin
+    criticite : P0
+    couche    : frontend
+    route     : "GET /admin/academy/courses  [admin.academy.courses.index]"
+    preuve    :
+      http    : 200
+      dom     : "Tableau Titre/Statut/Accès/Prix/Chapitres/Créé le/Actions, lien '+ Nouveau cours'"
+
+  - id        : FEAT_076
+    libelle   : "Admin : formulaire de création de cours"
+    role      : admin
+    criticite : P0
+    couche    : frontend
+    route     : "GET /admin/academy/courses/create  [admin.academy.courses.create]"
+    preuve    :
+      http    : 200
+      dom     : "Champs title, level (select intro|inter|avance), access_type, visibility, status"
+
+  - id        : FEAT_077
+    libelle   : "Admin : création cours valide (POST store)"
+    role      : admin
+    criticite : P0
+    couche    : full-stack
+    route     : "POST /admin/academy/courses  [admin.academy.courses.store]"
+    preuve    :
+      db      : "courses.slug = Str::slug(title), created_by = admin.id"
+      redirect: "admin.academy.courses.index avec flash 'Cours créé avec succès'"
+
+  - id        : FEAT_078
+    libelle   : "Admin : création cours payant sans prix rejetée"
+    role      : admin
+    criticite : P0
+    couche    : backend
+    route     : "POST /admin/academy/courses (paid_one_time, price_cents=0)"
+    preuve    :
+      redirect: "back() avec erreur validation 'Un prix supérieur à zéro est requis'"
+
+  - id        : FEAT_079
+    libelle   : "Admin : formulaire modification cours (GET edit)"
+    role      : admin
+    criticite : P0
+    couche    : frontend
+    route     : "GET /admin/academy/courses/{course}/edit  [admin.academy.courses.edit]"
+    preuve    :
+      http    : 200
+      dom     : "Sections formulaire principal + structure cours + instructeurs"
+
+  - id        : FEAT_080
+    libelle   : "Admin : modification cours (PUT update)"
+    role      : admin
+    criticite : P0
+    couche    : full-stack
+    route     : "PUT /admin/academy/courses/{course}  [admin.academy.courses.update]"
+    preuve    :
+      db      : "courses.updated_by = admin.id, champs modifiés enregistrés"
+      redirect: "admin.academy.courses.index avec flash success"
+
+  - id        : FEAT_081
+    libelle   : "Admin : toggle statut cours (publier / dépublier)"
+    role      : admin
+    criticite : P0
+    couche    : full-stack
+    route     : "POST /admin/academy/courses/{course}/toggle-status"
+    preuve    :
+      db      : "status bascule published↔draft ; published_at = now() si passage à published"
+
+  - id        : FEAT_082
+    libelle   : "Admin : archivage cours"
+    role      : admin
+    criticite : P1
+    couche    : full-stack
+    route     : "POST /admin/academy/courses/{course}/archive"
+    preuve    :
+      db      : "courses.status=archived"
+      dom     : "Boutons Publier/Archiver absents dans la liste pour cours archivé"
+
+  - id        : FEAT_083
+    libelle   : "Admin : routes protégées par can:academy.manage (403 si absent)"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "GET /admin/academy/courses (membre sans academy.manage)"
+    preuve    :
+      http    : 403
+
+  # ── Admin Structure ──────────────────────────────────────
+  - id        : FEAT_084
+    libelle   : "Admin : ajout d'un chapitre"
+    role      : admin
+    criticite : P0
+    couche    : full-stack
+    route     : "POST /admin/academy/courses/{course}/chapters  [admin.academy.chapters.store]"
+    preuve    :
+      db      : "chapters.position = max+1, course_id correct, title non-vide"
+      redirect: "back() avec flash 'Chapitre ajouté avec succès'"
+
+  - id        : FEAT_085
+    libelle   : "Admin : modification d'un chapitre"
+    role      : admin
+    criticite : P1
+    couche    : full-stack
+    route     : "PUT /admin/academy/chapters/{chapter}  [admin.academy.chapters.update]"
+    preuve    :
+      db      : "chapters.title mis à jour"
+
+  - id        : FEAT_086
+    libelle   : "Admin : suppression d'un chapitre"
+    role      : admin
+    criticite : P1
+    couche    : full-stack
+    route     : "DELETE /admin/academy/chapters/{chapter}  [admin.academy.chapters.destroy]"
+    preuve    :
+      db      : "Ligne chapters supprimée"
+
+  - id        : FEAT_087
+    libelle   : "Admin : ajout d'une leçon dans un chapitre"
+    role      : admin
+    criticite : P0
+    couche    : full-stack
+    route     : "POST /admin/academy/chapters/{chapter}/lessons  [admin.academy.lessons.store]"
+    preuve    :
+      db      : "lessons.slug = Str::slug(title), chapter_id correct, position max+1"
+
+  - id        : FEAT_088
+    libelle   : "Admin : page édition leçon + liste items"
+    role      : admin
+    criticite : P0
+    couche    : frontend
+    route     : "GET /admin/academy/lessons/{lesson}/edit  [admin.academy.lessons.edit]"
+    preuve    :
+      http    : 200
+      dom     : "Formulaire leçon (title/slug/summary/position), tableau items, formulaire ajout item"
+
+  - id        : FEAT_089
+    libelle   : "Admin : mise à jour d'une leçon"
+    role      : admin
+    criticite : P1
+    couche    : full-stack
+    route     : "PUT /admin/academy/lessons/{lesson}  [admin.academy.lessons.update]"
+    preuve    :
+      db      : "lessons.title/slug/position mis à jour"
+      redirect: "admin.academy.lessons.edit avec flash success"
+
+  - id        : FEAT_090
+    libelle   : "Admin : suppression d'une leçon"
+    role      : admin
+    criticite : P1
+    couche    : full-stack
+    route     : "DELETE /admin/academy/lessons/{lesson}  [admin.academy.lessons.destroy]"
+    preuve    :
+      db      : "Ligne lessons supprimée"
+      redirect: "admin.academy.courses.edit avec flash success"
+
+  - id        : FEAT_091
+    libelle   : "Admin : ajout item vidéo (player_url requis)"
+    role      : admin
+    criticite : P0
+    couche    : full-stack
+    route     : "POST /admin/academy/lessons/{lesson}/items (type=video)  [admin.academy.lesson-items.store]"
+    preuve    :
+      db      : "lesson_items.payload['player_url'] non-null, type=video"
+
+  - id        : FEAT_092
+    libelle   : "Admin : ajout item quiz (qt_bank_key + passing_score requis)"
+    role      : admin
+    criticite : P0
+    couche    : full-stack
+    route     : "POST .../items (type=quiz)"
+    preuve    :
+      db      : "lesson_items.payload['qt_bank_key'] et payload['passing_score'] non-null"
+
+  - id        : FEAT_093
+    libelle   : "Admin : ajout item doc (content)"
+    role      : admin
+    criticite : P1
+    couche    : full-stack
+    route     : "POST .../items (type=doc)"
+    preuve    :
+      db      : "lesson_items.payload['content'] enregistré"
+
+  - id        : FEAT_094
+    libelle   : "Admin : ajout item vidéo sans player_url rejeté (validation)"
+    role      : admin
+    criticite : P0
+    couche    : backend
+    route     : "POST .../items (type=video, player_url absent)"
+    preuve    :
+      redirect: "back() avec erreur validation player_url required|url"
+
+  - id        : FEAT_095
+    libelle   : "Admin : mise à jour d'un item"
+    role      : admin
+    criticite : P1
+    couche    : full-stack
+    route     : "PUT /admin/academy/items/{item}  [admin.academy.lesson-items.update]"
+    preuve    :
+      db      : "lesson_items mis à jour"
+
+  - id        : FEAT_096
+    libelle   : "Admin : suppression d'un item"
+    role      : admin
+    criticite : P1
+    couche    : full-stack
+    route     : "DELETE /admin/academy/items/{item}  [admin.academy.lesson-items.destroy]"
+    preuve    :
+      db      : "Ligne lesson_items supprimée"
+
+  # ── Admin Instructeurs ───────────────────────────────────
+  - id        : FEAT_097
+    libelle   : "Admin : assignation instructeur/assistant/éditeur à un cours"
+    role      : admin
+    criticite : P1
+    couche    : full-stack
+    route     : "POST /admin/academy/courses/{course}/roles  [admin.academy.course-roles.store]"
+    preuve    :
+      db      : "course_roles.role in [instructor|assistant|editor], user_id correct"
+      redirect: "back() avec flash 'Rôle assigné avec succès'"
+
+  - id        : FEAT_098
+    libelle   : "Admin : assignation doublon rejetée"
+    role      : admin
+    criticite : P1
+    couche    : backend
+    route     : "POST .../roles (même user_id déjà présent)"
+    preuve    :
+      redirect: "back() avec erreur 'Cet utilisateur a déjà un rôle dans ce cours'"
+
+  - id        : FEAT_099
+    libelle   : "Admin : retrait rôle instructeur (non-owner)"
+    role      : admin
+    criticite : P1
+    couche    : full-stack
+    route     : "DELETE /admin/academy/roles/{courseRole}  [admin.academy.course-roles.destroy]"
+    preuve    :
+      db      : "Ligne course_roles supprimée"
+      redirect: "back() avec flash 'Rôle retiré avec succès'"
+
+  - id        : FEAT_100
+    libelle   : "Admin : retrait rôle owner impossible"
+    role      : admin
+    criticite : P1
+    couche    : backend
+    route     : "DELETE /admin/academy/roles/{courseRole_owner}"
+    preuve    :
+      redirect: "back() avec flash error 'Impossible de retirer le rôle owner'"
+      db      : "Ligne course_roles owner conservée"
+
+  # ── Sécurité / Isolation ─────────────────────────────────
+  - id        : FEAT_101
+    libelle   : "IDOR : user B ne peut pas soumettre quiz au nom de user A"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "POST .../quiz/submit (user B, enrollment absent)"
+    preuve    :
+      http    : 403
+      note    : "authorizeAccess() vérifie Enrollment WHERE user_id=Auth::id()"
+
+  - id        : FEAT_102
+    libelle   : "IDOR : complétion d'un item isolée par user_id"
+    role      : membre
+    criticite : P0
+    couche    : backend
+    route     : "GET .../lessons/{id} (user B, user A a complété l'item)"
+    preuve    :
+      dom     : "Bouton 'Marquer terminé' visible pour user B"
+      db      : "Completion WHERE user_id=userB = 0"
+
+  - id        : FEAT_103
+    libelle   : "Accès leçon cours non-publié retourne 404"
+    role      : visiteur
+    criticite : P0
+    couche    : backend
+    route     : "GET /academie/courses/brouillon/lessons/{id}"
+    preuve    :
+      http    : 404
+
+# ── Statistiques inventaire ───────────────────────────────
+# Total FEAT : 103
+# P0 : 52  |  P1 : 40  |  P2 : 11  (5 FEAT à role systeme comptés en P0)
+# Couches : frontend=28, backend=37, full-stack=38

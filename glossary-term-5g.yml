@@ -1,0 +1,343 @@
+- generic [active] [ref=e1]:
+  - toolbar "Outils admin" [ref=e2]:
+    - generic [ref=e3]:
+      - img [ref=e5]
+      - generic [ref=e7]: Terme admin
+      - button "Actions" [ref=e10] [cursor=pointer]: ⋮
+  - button "Basculer entre mode lecture et mode édition" [pressed] [ref=e11] [cursor=pointer]:
+    - generic [ref=e12]: ✏️ Édition
+  - status [ref=e13]:
+    - generic [ref=e14]: 📝
+    - generic [ref=e15]: Modifié il y a 1 heure
+  - link "Skip to main content — Aller au contenu principal" [ref=e16] [cursor=pointer]:
+    - /url: "#main-content"
+    - text: Aller au contenu principal
+  - region "Bandeau infolettre" [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]: ▸
+        - generic [ref=e21]: Veille IA
+        - generic [ref=e22]: "Veille IA sans buzz : pour stratèges québécois."
+      - generic [ref=e23]:
+        - button "Ouvrir le formulaire d'inscription à l'infolettre hebdomadaire" [ref=e24] [cursor=pointer]: Recevoir hebdo →
+        - button "Fermer le bandeau infolettre" [ref=e25] [cursor=pointer]: ×
+  - generic [ref=e26]:
+    - banner [ref=e27]:
+      - generic [ref=e30]:
+        - list [ref=e33]:
+          - listitem [ref=e34]:
+            - link "Actualités" [ref=e35] [cursor=pointer]:
+              - /url: https://laveilledestef.test/actualites
+              - generic [ref=e36]: Actualités
+          - listitem [ref=e37]:
+            - link "J'ai créé mon IA en local sur mon MAC (partie 3) — Le virage MCP" [ref=e38] [cursor=pointer]:
+              - /url: https://laveilledestef.test/blog/jai-cree-mon-ia-en-local-sur-mon-mac-partie-3
+        - list [ref=e40]:
+          - listitem [ref=e41]:
+            - link "Facebook" [ref=e42] [cursor=pointer]:
+              - /url: https://www.facebook.com/LaVeilleAI
+              - generic [ref=e43]: 
+          - listitem [ref=e44]:
+            - link "Messenger" [ref=e45] [cursor=pointer]:
+              - /url: https://m.me/LaVeilleAI
+              - generic [ref=e46]: 
+          - listitem [ref=e47]:
+            - link "LinkedIn" [ref=e48] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/lapointestephane/
+              - generic [ref=e49]: 
+      - navigation [ref=e50]:
+        - generic [ref=e52]:
+          - link "La veille" [ref=e55] [cursor=pointer]:
+            - /url: https://laveilledestef.test
+            - img "La veille" [ref=e56]
+          - generic [ref=e58]:
+            - text: 
+            - list [ref=e59]:
+              - listitem [ref=e60]:
+                - link "Accueil" [ref=e61] [cursor=pointer]:
+                  - /url: https://laveilledestef.test
+              - listitem [ref=e62]:
+                - link "Outils" [ref=e63] [cursor=pointer]:
+                  - /url: https://laveilledestef.test/outils
+              - listitem [ref=e64]:
+                - link "Annuaire" [ref=e65] [cursor=pointer]:
+                  - /url: https://laveilledestef.test/annuaire
+              - listitem [ref=e66]:
+                - link "Apprendre" [ref=e67] [cursor=pointer]:
+                  - /url: https://laveilledestef.test/blog
+              - listitem [ref=e68]:
+                - link "Académie" [ref=e69] [cursor=pointer]:
+                  - /url: https://laveilledestef.test/academie
+          - generic [ref=e71]:
+            - button "Ouvrir la recherche (Ctrl+K)" [ref=e74] [cursor=pointer]:
+              - generic [ref=e75]: 
+            - button "S" [ref=e77] [cursor=pointer]:
+              - generic [ref=e78]: S
+    - generic [ref=e83]:
+      - heading "5G" [level=2] [ref=e84]
+      - navigation "Fil d'Ariane" [ref=e85]:
+        - list [ref=e86]:
+          - listitem [ref=e87]:
+            - link "Accueil" [ref=e88] [cursor=pointer]:
+              - /url: https://laveilledestef.test
+            - text: /
+          - listitem [ref=e89]:
+            - link "Glossaire Techno" [ref=e90] [cursor=pointer]:
+              - /url: https://laveilledestef.test/glossaire
+            - text: /
+          - listitem [ref=e91]: 5G
+    - main [ref=e92]:
+      - generic [ref=e94]:
+        - link "Retour au glossaire" [ref=e97] [cursor=pointer]:
+          - /url: https://laveilledestef.test/glossaire
+          - img [ref=e98]
+          - text: Retour au glossaire
+        - button "✏️ Suggérer une modification" [ref=e101] [cursor=pointer]
+        - article [ref=e104]:
+          - img "5G" [ref=e107]
+          - heading "5G ✏️" [level=1] [ref=e108] [cursor=pointer]
+          - generic [ref=e109]:
+            - button "Sauvegarder" [ref=e110] [cursor=pointer]:
+              - img [ref=e111]
+              - generic [ref=e113]: Sauvegarder
+            - button "Ajouter à mon journal" [ref=e115] [cursor=pointer]:
+              - img [ref=e116]
+              - generic [ref=e119]: Ajouter à mon journal
+            - button "Copier le lien" [ref=e120] [cursor=pointer]:
+              - img [ref=e121]
+              - generic [ref=e124]: Copier le lien
+            - button "Signaler" [ref=e126] [cursor=pointer]:
+              - img [ref=e127]
+              - generic [ref=e129]: Signaler
+            - button "Actions admin (copier dans le presse-papier)" [ref=e132] [cursor=pointer]:
+              - generic [ref=e133]: ⚙️
+              - text: Admin
+          - paragraph [ref=e134]: "Aussi appelé : cinquième génération"
+          - generic [ref=e135]:
+            - generic [ref=e136]: Terme
+            - generic [ref=e137]: Débutant
+            - generic [ref=e138]: 📚 Concepts fondamentaux
+          - paragraph [ref=e139]:
+            - text: Mis à jour le
+            - time [ref=e140]: 11 juillet 2026
+          - paragraph [ref=e143]: "La 5G est la cinquième génération de réseau mobile : plus rapide et plus réactive que la 4G, elle est idéale pour le streaming, le jeu en ligne et l'Internet des objets."
+          - generic [ref=e145]:
+            - heading "📖 Définition" [level=2] [ref=e146]
+            - generic [ref=e147]:
+              - text: La 5G est la cinquième génération des réseaux de téléphonie mobile, déployée commercialement à partir de 2019-2020. Elle succède à la 4G LTE et transforme la connectivité sans fil. Concrètement, la 5G offre des débits de téléchargement nettement plus rapides que la 4G, ce qui permet de télécharger un film en haute définition en quelques secondes. Mais son vrai atout, c'est la
+              - link "Latence — voir glossaire (nouvel onglet)" [ref=e148]:
+                - /url: /glossaire/latence
+                - text: latence
+              - text: ultra-faible (le temps de réponse entre l'envoi et la réception d'un signal), qui peut descendre sous la milliseconde dans les meilleures conditions, contre plusieurs dizaines de millisecondes pour la 4G. Cette réactivité est cruciale pour des applications comme la chirurgie à distance, les voitures autonomes ou le jeu vidéo en nuage sans décalage. La 5G peut aussi connecter un très grand nombre d'objets simultanément sur une même zone, ce qui la rend incontournable pour l'Internet des objets (IoT) et les villes intelligentes. Pour y arriver, elle utilise plusieurs bandes de fréquences, dont les ondes millimétriques (très hautes fréquences) qui transportent beaucoup de données mais sur de courtes distances, d'où le besoin d'installer plus d'antennes. La couverture n'est pas encore universelle, surtout en dehors des grands centres.
+          - generic [ref=e149]:
+            - generic [ref=e151]:
+              - heading "💬 En termes simples" [level=2] [ref=e152]
+              - paragraph [ref=e153]: Imagine la 4G comme une autoroute à deux voies, fluide mais sujette aux bouchons. La 5G, c'est une autoroute à voies multiples où chaque véhicule file sans jamais freiner.
+            - generic [ref=e155]:
+              - heading "🎯 Exemple concret" [level=2] [ref=e156]
+              - paragraph [ref=e157]: Quand tu regardes un match en direct sur ton cellulaire en 5G, l'image reste fluide même dans un stade bondé où des milliers de personnes utilisent leur téléphone en même temps.
+            - generic [ref=e159]:
+              - heading "💡 Le saviez-vous ?" [level=2] [ref=e160]
+              - paragraph [ref=e161]: Le nom technique officiel de la 5G est « IMT-2020 », car ses spécifications ont été coordonnées par l'Union internationale des télécommunications, avec une finalisation visée pour 2020.
+            - generic [ref=e163]:
+              - heading "❓ Questions fréquentes" [level=2] [ref=e164]
+              - group [ref=e165]:
+                - generic "Est-ce que la 5G est dangereuse pour la santé ?" [ref=e166] [cursor=pointer]
+              - group [ref=e167]:
+                - generic "Mon cellulaire 4G fonctionne-t-il avec la 5G ?" [ref=e168] [cursor=pointer]
+            - generic [ref=e170]:
+              - heading "📚 Sources" [level=2] [ref=e171]
+              - list [ref=e172]:
+                - listitem [ref=e173]:
+                  - link "5G — Wikipédia" [ref=e174] [cursor=pointer]:
+                    - /url: https://fr.wikipedia.org/wiki/5G
+        - heading "Termes associés" [level=2] [ref=e177]
+        - generic [ref=e178]:
+          - link "Lire la définition de Rétropropagation" [ref=e180] [cursor=pointer]:
+            - /url: https://laveilledestef.test/glossaire/retropropagation
+            - generic [ref=e181]: 🔁 Rétropropagation
+            - paragraph [ref=e182]: La rétropropagation est un algorithme fondamental de l'apprentissage profond qui...
+            - generic [ref=e183]: Lire la définition →
+          - link "Lire la définition de Descente de gradient" [ref=e185] [cursor=pointer]:
+            - /url: https://laveilledestef.test/glossaire/descente-de-gradient
+            - generic [ref=e186]: 📉 Descente de gradient
+            - paragraph [ref=e187]: La descente de gradient est une méthode d'optimisation itérative qui ajuste les...
+            - generic [ref=e188]: Lire la définition →
+          - link "Lire la définition de Fonction de perte" [ref=e190] [cursor=pointer]:
+            - /url: https://laveilledestef.test/glossaire/fonction-de-perte
+            - generic [ref=e191]: 🎯 Fonction de perte
+            - paragraph [ref=e192]: La fonction de perte (ou fonction de coût) mesure la performance d'un modèle en...
+            - generic [ref=e193]: Lire la définition →
+          - link "Lire la définition de Sous-apprentissage" [ref=e195] [cursor=pointer]:
+            - /url: https://laveilledestef.test/glossaire/sous-apprentissage
+            - generic [ref=e196]: 🫤 Sous-apprentissage
+            - paragraph [ref=e197]: Le sous-apprentissage (underfitting) survient lorsqu'un modèle est trop simple p...
+            - generic [ref=e198]: Lire la définition →
+          - link "Lire la définition de Généralisation" [ref=e200] [cursor=pointer]:
+            - /url: https://laveilledestef.test/glossaire/generalisation
+            - generic [ref=e201]: 🧩 Généralisation
+            - paragraph [ref=e202]: La généralisation désigne la capacité d'un modèle d'apprentissage automatique à...
+            - generic [ref=e203]: Lire la définition →
+    - contentinfo [ref=e204]:
+      - generic [ref=e207]:
+        - generic [ref=e209]:
+          - img "La veille" [ref=e211]
+          - paragraph [ref=e212]: Votre plateforme d'information dédiée à l'intelligence artificielle, aux technologies innovantes et à la transformation numérique. Profitez de nos outils gratuits et recevez des analyses, actualités et ressources exclusives.
+        - generic [ref=e214]:
+          - heading "Ressources" [level=3] [ref=e216]
+          - list [ref=e217]:
+            - listitem [ref=e218]:
+              - link "Toutes les ressources" [ref=e219] [cursor=pointer]:
+                - /url: https://laveilledestef.test/ressources
+                - strong [ref=e220]: Toutes les ressources
+            - listitem [ref=e221]:
+              - link "Blog" [ref=e222] [cursor=pointer]:
+                - /url: https://laveilledestef.test/blog
+            - listitem [ref=e223]:
+              - link "Glossaire Techno" [ref=e224] [cursor=pointer]:
+                - /url: https://laveilledestef.test/glossaire
+            - listitem [ref=e225]:
+              - link "Répertoire techno" [ref=e226] [cursor=pointer]:
+                - /url: https://laveilledestef.test/annuaire
+            - listitem [ref=e227]:
+              - link "IA pour les PME québécoises" [ref=e228] [cursor=pointer]:
+                - /url: https://laveilledestef.test/ia-pme-quebec
+            - listitem [ref=e229]:
+              - link "IA en éducation (Québec)" [ref=e230] [cursor=pointer]:
+                - /url: https://laveilledestef.test/ia-education-quebec
+            - listitem [ref=e231]:
+              - link "IA pour développeurs (Québec)" [ref=e232] [cursor=pointer]:
+                - /url: https://laveilledestef.test/ia-developpeurs-quebec
+            - listitem [ref=e233]:
+              - link "Faire sa veille IA (Québec)" [ref=e234] [cursor=pointer]:
+                - /url: https://laveilledestef.test/veille-ia-quebec
+            - listitem [ref=e235]:
+              - link "IA générative" [ref=e236] [cursor=pointer]:
+                - /url: https://laveilledestef.test/ia-generative-quebec
+            - listitem [ref=e237]:
+              - link "Actualités" [ref=e238] [cursor=pointer]:
+                - /url: https://laveilledestef.test/actualites
+            - listitem [ref=e239]:
+              - link "Acronymes éducation" [ref=e240] [cursor=pointer]:
+                - /url: https://laveilledestef.test/acronymes-education
+            - listitem [ref=e241]:
+              - link "Outils gratuits" [ref=e242] [cursor=pointer]:
+                - /url: https://laveilledestef.test/outils
+            - listitem [ref=e243]:
+              - link "Raccourcir un lien" [ref=e244] [cursor=pointer]:
+                - /url: https://laveilledestef.test/raccourcir
+            - listitem [ref=e245]:
+              - link "📡 RSS — Concentré IA" [ref=e246] [cursor=pointer]:
+                - /url: https://laveilledestef.test/rss/concentres.xml
+            - listitem [ref=e247]:
+              - link "📡 RSS — Nouveaux outils" [ref=e248] [cursor=pointer]:
+                - /url: https://laveilledestef.test/rss/annuaire.xml
+            - listitem [ref=e249]:
+              - link "🔌 API publique" [ref=e250] [cursor=pointer]:
+                - /url: https://laveilledestef.test/api
+            - listitem [ref=e251]:
+              - link "📊 Statistiques" [ref=e252] [cursor=pointer]:
+                - /url: https://laveilledestef.test/stats
+        - generic [ref=e254]:
+          - heading "À propos" [level=3] [ref=e256]
+          - list [ref=e257]:
+            - listitem [ref=e258]:
+              - link "À propos" [ref=e259] [cursor=pointer]:
+                - /url: https://laveilledestef.test/page/a-propos
+            - listitem [ref=e260]:
+              - link "FAQ" [ref=e261] [cursor=pointer]:
+                - /url: https://laveilledestef.test/faq
+            - listitem [ref=e262]:
+              - link "Méthodologie" [ref=e263] [cursor=pointer]:
+                - /url: https://laveilledestef.test/methodologie
+            - listitem [ref=e264]:
+              - link "Contact" [ref=e265] [cursor=pointer]:
+                - /url: https://laveilledestef.test/contact
+            - listitem [ref=e266]:
+              - link "Statut des services" [ref=e267] [cursor=pointer]:
+                - /url: https://laveilledestef.test/statut
+            - listitem [ref=e268]:
+              - link "Confidentialité" [ref=e269] [cursor=pointer]:
+                - /url: https://laveilledestef.test/privacy-policy
+            - listitem [ref=e270]:
+              - link "Conditions d'utilisation" [ref=e271] [cursor=pointer]:
+                - /url: https://laveilledestef.test/terms-of-use
+            - listitem [ref=e272]:
+              - link "Conditions de vente" [ref=e273] [cursor=pointer]:
+                - /url: https://laveilledestef.test/conditions-de-vente
+            - listitem [ref=e274]:
+              - link "Cookies" [ref=e275] [cursor=pointer]:
+                - /url: https://laveilledestef.test/cookie-policy
+            - listitem [ref=e276]:
+              - link "Demande de retrait" [ref=e277] [cursor=pointer]:
+                - /url: https://laveilledestef.test/annuaire/retrait
+            - listitem [ref=e278]:
+              - link "Gérer les témoins" [ref=e279] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e280]:
+              - link "Plan du site" [ref=e281] [cursor=pointer]:
+                - /url: https://laveilledestef.test/plan-du-site
+        - generic [ref=e283]:
+          - heading "Communauté" [level=3] [ref=e285]
+          - list [ref=e286]:
+            - listitem [ref=e287]:
+              - link "Facebook Facebook" [ref=e288] [cursor=pointer]:
+                - /url: https://www.facebook.com/LaVeilleAI
+                - img "Facebook" [ref=e290]
+                - text: Facebook
+            - listitem [ref=e291]:
+              - link "Messenger" [ref=e292] [cursor=pointer]:
+                - /url: https://m.me/LaVeilleAI
+                - img [ref=e294]
+                - text: Messenger
+            - listitem [ref=e297]:
+              - link "LinkedIn" [ref=e298] [cursor=pointer]:
+                - /url: https://www.linkedin.com/in/lapointestephane/
+                - img [ref=e300]
+                - text: LinkedIn
+          - listitem [ref=e302]:
+            - link "ADMIN Administration" [ref=e303] [cursor=pointer]:
+              - /url: https://laveilledestef.test/admin
+              - generic [ref=e304]: ADMIN
+              - text: Administration
+          - listitem [ref=e305]:
+            - link "📋 Modération" [ref=e306] [cursor=pointer]:
+              - /url: https://laveilledestef.test/admin/directory/moderation
+      - generic [ref=e310]:
+        - paragraph [ref=e311]: Copyright © 2026 La veille. Tous droits réservés. v1.103.0
+        - paragraph [ref=e312]:
+          - text: Conçu et hébergé par
+          - link "MEMORA solutions" [ref=e313] [cursor=pointer]:
+            - /url: https://memora.solutions
+          - text: · Entreprise canadienne 🍁
+        - paragraph [ref=e314]: Certains liens sont des liens d'affiliation. Nous pouvons recevoir une commission sans frais pour vous.
+  - generic:
+    - button "Gérer les témoins" [ref=e315] [cursor=pointer]:
+      - img "Gérer les témoins" [ref=e316]
+      - generic [ref=e317]: Gérer les témoins
+    - dialog "Paramètres de confidentialité" [ref=e318]:
+      - heading "Paramètres de confidentialité" [level=2] [ref=e319]
+      - paragraph [ref=e320]:
+        - text: Nous utilisons des témoins (cookies) pour assurer le bon fonctionnement du site, analyser le trafic et personnaliser le contenu. Vous pouvez gérer vos préférences ci-dessous.
+        - link "Politique de confidentialité" [ref=e321] [cursor=pointer]:
+          - /url: /privacy-policy
+      - generic [ref=e322]:
+        - button "Tout refuser" [ref=e323] [cursor=pointer]
+        - button "Personnaliser" [ref=e324] [cursor=pointer]
+        - button "Tout accepter" [ref=e325] [cursor=pointer]
+  - generic [ref=e326]:
+    - link "Partager sur Facebook" [ref=e327] [cursor=pointer]:
+      - /url: https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Flaveilledestef.test%2Fglossaire%2F5g&quote=Imagine+la+4G+comme+une+autoroute+%C3%A0+deux+voies%2C+fluide+mais+sujette+aux+bouchons.+La+5G%2C+c%27est+une+autoroute+%C3%A0+voies+multiples+o%C3%B9+chaque+v%C3%A9hicule+file+sans...
+      - img [ref=e328]
+    - link "Partager sur X" [ref=e330] [cursor=pointer]:
+      - /url: https://twitter.com/intent/tweet?url=https%3A%2F%2Flaveilledestef.test%2Fglossaire%2F5g&text=Imagine+la+4G+comme+une+autoroute+%C3%A0+deux+voies%2C+fluide+mais+sujette+aux+bouchons.+La+5G%2C+c%27est+une+autoroute+%C3%A0+voies+multiples+o%C3%B9+chaque+v%C3%A9hicule+file+sans...+%E2%80%94+Actualit%C3%A9s+en+continu+sur+laveille.ai
+      - img [ref=e331]
+    - link "Partager sur LinkedIn" [ref=e333] [cursor=pointer]:
+      - /url: https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Flaveilledestef.test%2Fglossaire%2F5g&summary=Imagine+la+4G+comme+une+autoroute+%C3%A0+deux+voies%2C+fluide+mais+sujette+aux+bouchons.+La+5G%2C+c%27est+une+autoroute+%C3%A0+voies+multiples+o%C3%B9+chaque+v%C3%A9hicule+file+sans...
+      - img [ref=e334]
+    - link "Envoyer via Messenger" [ref=e336] [cursor=pointer]:
+      - /url: https://m.me/LaVeilleAI
+      - img [ref=e337]
+    - button "Copier le contenu enrichi" [ref=e339] [cursor=pointer]:
+      - img [ref=e340]
+  - text: 

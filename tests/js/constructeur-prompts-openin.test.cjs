@@ -1,6 +1,8 @@
 // tests/js/constructeur-prompts-openin.test.cjs
-// Garde-fou de non-régression pour les 4 boutons « Ouvrir dans » du Constructeur de prompts
-// (ChatGPT / Claude / Perplexity / Gemini) — Phase 3 audit perf 2026-07-26.
+// Garde-fou de non-régression pour les 5 boutons « Ouvrir dans » du Constructeur de prompts
+// (ChatGPT / Claude / Perplexity / Gemini / Mistral) - Phase 3 audit perf 2026-07-26,
+// Mistral ajouté au round 126 (2026-07-30) : il était proposé comme « Destination » du prompt
+// sans qu'aucun bouton ne permette d'y aller, contrairement à toutes les autres destinations.
 // Vérifie que openIn() construit une URL bien formée et correctement encodée pour chaque
 // destination IA, sans dépendre d'un vrai navigateur (mêmes stubs minimaux que
 // anonymizer-detect.test.cjs pour document/Alpine/window/navigator).
@@ -18,13 +20,28 @@ function loadPromptBuilder() {
     global.document = { addEventListener: (evt, cb) => { if (evt === 'alpine:init') cb(); } };
     global.Alpine = { data: (name, f) => { factory = f; } };
     global.window = {
+        location: { search: '' },
         promptBuilderConfig: { personas: [], verbs: [], audiences: [], taskCards: [], isAuthenticated: false, i18n: {} },
         dispatchEvent: (evt) => dispatched.push(evt),
         open: (...args) => openCalls.push(args),
+        toast: () => {},
     };
     // Node 21+ expose un `navigator` global natif en lecture seule (pas de setter) : on ne peut
     // pas remplacer `global.navigator` entièrement, mais `navigator.clipboard` est assignable.
-    global.navigator.clipboard = { writeText: (text) => clipboardWrites.push(text) };
+    global.navigator.clipboard = { writeText: (text) => { clipboardWrites.push(text); return Promise.resolve(); } };
+    // Round 94 (2026-07-27, passe adversariale) : openIn() délègue désormais à
+    // window.copyToClipboard() (au lieu d'appeler navigator.clipboard.writeText() directement),
+    // reproduction fidèle du helper réel (master.blade.php:510-518) pour que ce test continue
+    // d'exercer le vrai chemin d'exécution.
+    global.window.copyToClipboard = function (text, successMessage) {
+        return navigator.clipboard.writeText(text).then(function () {
+            global.window.toast(successMessage || 'Copié dans le presse-papiers', 'success', 2500);
+            return true;
+        }).catch(function () {
+            global.window.toast('Copie impossible - copiez le texte manuellement.', 'error', 4000);
+            return false;
+        });
+    };
     global.CustomEvent = class { constructor(type, opts) { this.type = type; this.detail = opts && opts.detail; } };
 
     new Function(src)();
@@ -41,6 +58,9 @@ const destinations = [
     { target: 'claude', base: 'https://claude.ai/new?q=', hasPrompt: true },
     { target: 'perplexity', base: 'https://www.perplexity.ai/search?q=', hasPrompt: true },
     { target: 'gemini', base: 'https://gemini.google.com/app', hasPrompt: false },
+    // hasPrompt=false : comme Gemini, Mistral ne pré-remplit pas via URL, donc l'URL ne doit
+    // JAMAIS porter le prompt - il est copié dans le presse-papiers et l'app est ouverte.
+    { target: 'mistral', base: 'https://chat.mistral.ai/chat', hasPrompt: false },
 ];
 
 destinations.forEach(function (dest) {
@@ -86,7 +106,7 @@ destinations.forEach(function (dest) {
     component.verbType = 'preset';
     component.verb = 'Rédige';
     component.taskObject = 'test';
-    component.openIn('mistral-non-supporte');
+    component.openIn('destination-inexistante');
     assert(openCalls.length === 0, "cible IA non reconnue : aucune fenêtre ouverte");
 }
 

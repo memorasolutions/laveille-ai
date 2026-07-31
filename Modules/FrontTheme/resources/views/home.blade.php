@@ -35,11 +35,11 @@
                                         <img src="{{ $hero1->featured_image_url ?: fronttheme_asset('images/hero/img-1.jpg') }}" alt="{{ $hero1->title }}" class="img img-responsive" fetchpriority="high" loading="eager" decoding="async">
                                         <div class="wpo-blog-content">
                                             <div class="thumb">{{ $hero1->blogCategory->name ?? __('Général') }}</div>
-                                            <h2><a href="{{ route('blog.show', $hero1->slug) }}">{{ $hero1->title }}</a></h2>
+                                            <h2><a href="{{ $hero1->getPublicUrl() }}">{{ $hero1->title }}</a></h2>
                                             <p>{{ Str::limit($hero1->excerpt ?? strip_tags($hero1->content), 120) }}</p>
                                             <ul>
                                                 <li><img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}" style="width:30px;height:30px;border-radius:50%;"></li>
-                                                <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero1->slug) }}">{{ $hero1->getAuthorName() }}</a></li>
+                                                <li>{{ __('Par') }} <a href="{{ $hero1->getPublicUrl() }}">{{ $hero1->getAuthorName() }}</a></li>
                                                 <li>{{ $hero1->published_at?->translatedFormat('d M Y') }}</li>
                                             </ul>
                                         </div>
@@ -53,9 +53,9 @@
                                         <img src="{{ $hero2->featured_image_url ?: fronttheme_asset('images/hero/img-2.jpg') }}" alt="{{ $hero2->title }}" class="img img-responsive" loading="lazy" decoding="async">
                                         <div class="wpo-blog-content">
                                             <div class="thumb">{{ $hero2->blogCategory->name ?? __('Général') }}</div>
-                                            <h2><a href="{{ route('blog.show', $hero2->slug) }}">{{ $hero2->title }}</a></h2>
+                                            <h2><a href="{{ $hero2->getPublicUrl() }}">{{ $hero2->title }}</a></h2>
                                             <ul>
-                                                <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero2->slug) }}">{{ $hero2->getAuthorName() }}</a></li>
+                                                <li>{{ __('Par') }} <a href="{{ $hero2->getPublicUrl() }}">{{ $hero2->getAuthorName() }}</a></li>
                                                 <li>{{ $hero2->published_at?->translatedFormat('d M Y') }}</li>
                                             </ul>
                                         </div>
@@ -69,9 +69,9 @@
                                         <img src="{{ $hero3->featured_image_url ?: fronttheme_asset('images/hero/img-3.jpg') }}" alt="{{ $hero3->title }}" class="img img-responsive" loading="lazy" decoding="async">
                                         <div class="wpo-blog-content">
                                             <div class="thumb">{{ $hero3->blogCategory->name ?? __('Général') }}</div>
-                                            <h2><a href="{{ route('blog.show', $hero3->slug) }}">{{ $hero3->title }}</a></h2>
+                                            <h2><a href="{{ $hero3->getPublicUrl() }}">{{ $hero3->title }}</a></h2>
                                             <ul>
-                                                <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero3->slug) }}">{{ $hero3->getAuthorName() }}</a></li>
+                                                <li>{{ __('Par') }} <a href="{{ $hero3->getPublicUrl() }}">{{ $hero3->getAuthorName() }}</a></li>
                                                 <li>{{ $hero3->published_at?->translatedFormat('d M Y') }}</li>
                                             </ul>
                                         </div>
@@ -82,9 +82,9 @@
                                         <img src="{{ $hero4->featured_image_url ?: fronttheme_asset('images/hero/img-4.jpg') }}" alt="{{ $hero4->title }}" class="img img-responsive" loading="lazy" decoding="async">
                                         <div class="wpo-blog-content">
                                             <div class="thumb">{{ $hero4->blogCategory->name ?? __('Général') }}</div>
-                                            <h2><a href="{{ route('blog.show', $hero4->slug) }}">{{ $hero4->title }}</a></h2>
+                                            <h2><a href="{{ $hero4->getPublicUrl() }}">{{ $hero4->title }}</a></h2>
                                             <ul>
-                                                <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero4->slug) }}">{{ $hero4->getAuthorName() }}</a></li>
+                                                <li>{{ __('Par') }} <a href="{{ $hero4->getPublicUrl() }}">{{ $hero4->getAuthorName() }}</a></li>
                                                 <li>{{ $hero4->published_at?->translatedFormat('d M Y') }}</li>
                                             </ul>
                                         </div>
@@ -153,7 +153,7 @@
                                                 <div class="thumb">{{ $highlight->blogCategory->name ?? __('Général') }}</div>
                                             </div>
                                             <div class="wpo-blog-content">
-                                                <h2><a href="{{ route('blog.show', $highlight->slug) }}">{{ $highlight->title }}</a></h2>
+                                                <h2><a href="{{ $highlight->getPublicUrl() }}">{{ $highlight->title }}</a></h2>
                                                 <div class="card-meta-compact">
                                                     <time class="card-meta-compact-date" datetime="{{ $highlight->published_at?->toIso8601String() }}">{{ $highlight->published_at?->translatedFormat('d M Y') }}</time>
                                                 </div>
@@ -191,7 +191,7 @@
                                         </div>
                                         <div class="details">
                                             <span class="date">{{ $recent->published_at?->translatedFormat('d M Y') }}</span>
-                                            <h4><a href="{{ route('blog.show', $recent->slug) }}">{{ $recent->title }}</a></h4>
+                                            <h4><a href="{{ $recent->getPublicUrl() }}">{{ $recent->title }}</a></h4>
                                         </div>
                                     </div>
                                     @endforeach
@@ -222,7 +222,7 @@
                                             <div class="thumb">{{ $sponsored->blogCategory->name ?? __('Général') }}</div>
                                         </div>
                                         <div class="wpo-blog-content">
-                                            <h2><a href="{{ route('blog.show', $sponsored->slug) }}">{{ $sponsored->title }}</a></h2>
+                                            <h2><a href="{{ $sponsored->getPublicUrl() }}">{{ $sponsored->title }}</a></h2>
                                             <div class="card-meta-compact">
                                                 <time class="card-meta-compact-date" datetime="{{ $sponsored->published_at?->toIso8601String() }}">{{ $sponsored->published_at?->translatedFormat('d M Y') }}</time>
                                             </div>

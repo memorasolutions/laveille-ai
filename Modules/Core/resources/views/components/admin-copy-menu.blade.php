@@ -24,6 +24,10 @@
      x-data="{
         open: false,
         copied: null,
+        i18n: {
+            copiedToast: {{ \Illuminate\Support\Js::from(__('Copié dans le presse-papiers')) }},
+            copiedLabel: {{ \Illuminate\Support\Js::from(__('Copié ✓')) }}
+        },
         async copy(i, ref, trackUrl) {
             const el = this.$refs[ref];
             const text = el.value;
@@ -36,7 +40,7 @@
                 el.setAttribute('hidden', '');
             }
             this.copied = i;
-            if (window.toast) { window.toast('Copié dans le presse-papiers', 'success', 2000); }
+            if (window.toast) { window.toast(this.i18n.copiedToast, 'success', 2000); }
             setTimeout(() => { this.copied = null; }, 1500);
 
             // Tracking optionnel (clé 'track_url' par item, ignorée si absente — zéro impact
@@ -65,7 +69,7 @@
     <button type="button" class="ct-acm-trigger"
             x-on:click="open = !open"
             aria-haspopup="menu" :aria-expanded="open"
-            aria-label="Actions admin (copier dans le presse-papier)">
+            aria-label="{{ __('Actions admin (copier dans le presse-papier)') }}">
         <span aria-hidden="true">⚙️</span> {{ $label }}
     </button>
 
@@ -75,7 +79,7 @@
                     :class="{ 'is-copied': copied === {{ $i }} }"
                     x-on:click="copy({{ $i }}, 'acmsrc{{ $i }}', @js($item['track_url'] ?? null))">
                 <span aria-hidden="true">{{ $item['icon'] ?? '📋' }}</span>
-                <span x-text="copied === {{ $i }} ? 'Copié ✓' : @js($item['label'])"></span>
+                <span x-text="copied === {{ $i }} ? i18n.copiedLabel : @js($item['label'])"></span>
             </button>
             <textarea x-ref="acmsrc{{ $i }}" class="ct-acm-src" hidden readonly>{{ $item['text'] }}</textarea>
         @endforeach

@@ -10,7 +10,7 @@
                     <div class="contact-intro">
                         <ul>
                             <li class="update"><a href="{{ route('news.index') }}" style="color:inherit;text-decoration:none;"><span>{{ __('Actualités') }}</span></a></li>
-                            <li>@if(isset($latestNewsArticle) && $latestNewsArticle)<a href="{{ route('news.show', $latestNewsArticle) }}" style="color:inherit;text-decoration:none;">{{ $latestNewsArticle->seo_title ?? $latestNewsArticle->title }}</a>@elseif(isset($latestArticle))<a href="{{ route('blog.show', $latestArticle->slug) }}" style="color:inherit;text-decoration:none;">{{ $latestArticle->title }}</a>@else{{ __('Veille IA et technologie') }}@endif</li>
+                            <li>@if(isset($latestNewsArticle) && $latestNewsArticle)<a href="{{ route('news.show', $latestNewsArticle) }}" style="color:inherit;text-decoration:none;">{{ $latestNewsArticle->seo_title ?? $latestNewsArticle->title }}</a>@elseif(isset($latestArticle) && $latestArticle)<a href="{{ $latestArticle->getPublicUrl() }}" style="color:inherit;text-decoration:none;">{{ $latestArticle->title }}</a>@else{{ __('Veille IA et technologie') }}@endif</li>
                         </ul>
                     </div>
                 </div>
@@ -205,7 +205,7 @@
                                 </div>
                                 {{-- Fallback sub-menu mobile --}}
                                 <ul class="sub-menu">
-                                    <li><a href="{{ route('directory.index') }}">🔍 {{ __('Tous les outils ('.$directoryCount.')') }}</a></li>
+                                    <li><a href="{{ route('directory.index') }}">🔍 {{ __('Tous les outils (:count)', ['count' => $directoryCount]) }}</a></li>
                                     @foreach($directoryStars as $star)<li><a href="{{ url('/annuaire/'.$star['slug']) }}">{{ $star['name'] }}</a></li>@endforeach
                                     @if(Route::has('directory.leaderboard') && config('directory.leaderboard.enabled', false))<li><a href="{{ route('directory.leaderboard') }}">🏆 {{ __('Classement') }}</a></li>@endif
                                     @if(Route::has('collections.index'))<li><a href="{{ route('collections.index') }}">📁 {{ __('Collections') }}</a></li>@endif
@@ -609,7 +609,7 @@
                                         <div class="widget link-widget">
                                             <div class="widget-title"><h3>{{ __('Annuaire') }}</h3></div>
                                             <ul>
-                                                <li><a href="{{ route('directory.index') }}">🔍 <strong>{{ __('Tous les outils ('.$directoryCount.')') }}</strong></a></li>
+                                                <li><a href="{{ route('directory.index') }}">🔍 <strong>{{ __('Tous les outils (:count)', ['count' => $directoryCount]) }}</strong></a></li>
                                                 @foreach($directoryStars as $star)<li><a href="{{ url('/annuaire/'.$star['slug']) }}">{{ $star['name'] }}</a></li>@endforeach
                                                 @if(Route::has('directory.leaderboard') && config('directory.leaderboard.enabled', false))<li><a href="{{ route('directory.leaderboard') }}">🏆 {{ __('Classement') }}</a></li>@endif
                                                 @if(Route::has('collections.index'))<li><a href="{{ route('collections.index') }}">📁 {{ __('Collections') }}</a></li>@endif
@@ -622,7 +622,7 @@
                                             <ul>
                                                 @if(Route::has('news.index'))<li><a href="{{ route('news.index') }}">📰 {{ __('Actualités') }}</a></li>@endif
                                                 @if(Route::has('blog.index'))<li><a href="{{ route('blog.index') }}">✍️ {{ __('Blog') }}</a></li>@endif
-                                                @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">📚 {{ __('Glossaire Techno ('.$dictionaryCount.')') }}</a></li>@endif
+                                                @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">📚 {{ __('Glossaire Techno (:count)', ['count' => $dictionaryCount]) }}</a></li>@endif
                                                 @if(Route::has('acronyms.index'))<li><a href="{{ route('acronyms.index') }}">🔤 {{ __('Acronymes') }}</a></li>@endif
                                                 @if(Route::has('faq.index'))<li><a href="{{ route('faq.index') }}">❓ {{ __('FAQ') }}</a></li>@endif
                                                 @if(Route::has('shop.index') && ! config('shop.maintenance', false))<li><a href="{{ route('shop.index') }}">🛍️ {{ __('Boutique') }}</a></li>@endif

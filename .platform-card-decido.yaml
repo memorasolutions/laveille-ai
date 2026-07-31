@@ -1,0 +1,111 @@
+meta:
+  run_id: SIM_decido0719
+  date_america_toronto: "2026-07-19"
+  target: Décido (Modules/Decido) — outil de sondages collectifs type Framadate
+  environment: LOCAL uniquement (https://laveilledestef.test, Herd) — jamais prod
+  prod_url: https://laveille.ai (lecture seule)
+  local_gate_state: "DECIDO_UNDER_CONSTRUCTION=false en dur dans .env local ET en prod (gate levé définitivement le 2026-07-19, tâche #1159 - Décido est un outil public normal, plus de bypass superadmin requis)"
+  context: "Run précédent (SIM_decido0717, 2026-07-17) = gate de vérification finale avant mise en public. Ce run (SIM_decido0719) re-vérifie l'outil maintenant PUBLIC après 2 ajouts majeurs du 2026-07-19 : (1) politique de rétention complète (v1.116.0), (2) menu d'actions unifié sur la page de gestion par jeton propriétaire."
+
+changements_depuis_2026-07-17:
+  - id: retention_v1.116.0
+    description: >
+      Tout sondage a désormais une expiration dès sa création (date-type : dernière date
+      candidate +2 mois ; classique/brouillon : création +3 mois ; clôturé : +30 jours au lieu
+      de 6 mois). Un courriel unique J-14 (Modules/Decido/app/Mail/PollExpiringSoonMail.php),
+      bouton "Prolonger de 3 mois" plafonné à 2 utilisations (route decido.extend, verrou
+      serveur lockForUpdate()). Calcul centralisé : Modules/Decido/app/Services/PollExpirationService.php.
+      Commandes artisan : decido:warn-expiring-polls (06h00), decido:purge-expired (06h15,
+      élargie à tout statut, plus seulement 'closed').
+    fichiers_cles:
+      - Modules/Decido/app/Services/PollExpirationService.php
+      - Modules/Decido/app/Console/WarnExpiringPollsCommand.php
+      - Modules/Decido/app/Console/PurgeExpiredPollsCommand.php
+      - Modules/Decido/app/Mail/PollExpiringSoonMail.php
+      - Modules/Decido/routes/web.php:29 (decido.extend)
+    fix_associe: >
+      Layout partagé auth::layouts.user-frontend.blade.php ne rendait jamais $errors de
+      Laravel (withErrors()) - un refus serveur (ex. plafond de 2 extensions atteint) ne
+      montrait AUCUN message. Corrigé au niveau du layout (impact : aussi export/shortlink/slug
+      de PollManageController, pas seulement extend).
+  - id: action_menu_gerer_jeton
+    description: >
+      Le composant DRY action-menu (kebab ⋮) a été ajouté à la page de gestion par jeton
+      propriétaire (results-content.blade.php) : regroupe copier lien public/court, options
+      avancées, CSV, ICS, et maintenant "Prolonger de 3 mois". Le bouton "Confirmer et clôturer
+      le sondage" reste volontairement HORS menu (action critique visible séparément).
+
+environment_droits:
+  browser: Playwright visuel (non-headless, obligatoire)
+  navigation: uniquement via labels/rôles, URL racine seule autorisée au démarrage
+  comptes_test:
+    - email: stephane@memora.ca
+      role: superadmin
+      note: compte réel, mot de passe local temporaire déjà en place (DecidoVerifTemp2026!)
+    - email: sim_decido0719_creator@memora.ca
+      role: créateur (utilisateur standard, non-superadmin)
+      password: SimDecido2026!
+      note: créé pour ce run, à supprimer en teardown
+    - email: sim_decido0719_voter@memora.ca
+      role: votant connecté (utilisateur standard, non-superadmin)
+      password: SimDecido2026!
+      note: créé pour ce run, à supprimer en teardown
+    - role: votant anonyme
+      note: aucun compte — navigation non authentifiée, cookie decido_voter_{public_id}
+
+roles:
+  - id: superadmin
+    description: Bypass total du gate under_construction, accès à toutes les routes Décido
+  - id: createur_connecte
+    description: Utilisateur standard connecté, peut créer/gérer ses sondages via lien+jeton admin
+  - id: votant_anonyme
+    description: Visiteur non authentifié qui vote via un lien de sondage partagé
+  - id: votant_connecte
+    description: Utilisateur standard connecté qui vote (le vote reste cookie-based, pas lié au compte)
+
+gates_phase0:
+  wcag: true (wcag-mcp sur create-date, create-classic, vote, results)
+  console_reseau: true (zéro erreur JS bloquante attendue)
+  cwv: informatif (local, pas de valeur absolue comparable à prod)
+  dast_passif: true (security MCP, headers sur routes publiques)
+  i18n: non applicable (site unilingue FR)
+  reproductibilite: true (seed déterministe, comptes SIM_ prefixés)
+  determinisme: true
+  feature_gap: true (comparer avec le code source pour détecter tout FEAT non testé)
+  autres: informatif / non applicable (pas de LLM dans Décido, pas de paiement, pas de contract testing externe)
+
+rbac_matrix:
+  # ressource: route(s) | positif attendu | négatif attendu
+  - ressource: decido.index (Mes sondages)
+    createur_connecte: "200 - liste ses propres sondages"
+    votant_anonyme: "redirect login (middleware auth)"
+    votant_connecte: "200 - liste vide (n'a créé aucun sondage) OU ses propres sondages si il en crée"
+  - ressource: decido.create.date / decido.create.classic
+    createur_connecte: "200 - formulaire affiché"
+    votant_anonyme: "redirect login"
+  - ressource: decido.store (POST création)
+    createur_connecte: "302 vers decido.manage avec jeton admin, poll créé en DB"
+    votant_anonyme: "redirect login"
+    throttle: "10/min/utilisateur — 11e requête bloquée 429"
+  - ressource: decido.manage (gestion, lien+jeton)
+    proprietaire_avec_bon_jeton: "200 - page de gestion"
+    autre_utilisateur_sans_jeton: "403"
+    superadmin_sans_jeton: "403 (le superadmin n'a PAS de passe-droit ici — seul le owner ou le porteur du jeton)"
+  - ressource: decido.close / decido.export.csv / decido.export.ics / decido.shortlink / decido.qr
+    proprietaire_avec_bon_jeton: "200/302 selon action"
+    sans_bon_jeton: "403"
+  - ressource: "decido.extend (NOUVEAU 2026-07-19, POST /decido/{poll}/gerer/{adminToken}/prolonger)"
+    proprietaire_avec_bon_jeton_extension_count_lt_2: "302 + message succès, expires_at +3 mois, extension_count+1"
+    proprietaire_avec_bon_jeton_extension_count_eq_2: "302 + message d'erreur VISIBLE 'Nombre maximal de prolongations atteint' (fix layout $errors du 2026-07-19 - à re-vérifier visuellement que ça s'affiche bien)"
+    sans_bon_jeton: "403"
+  - ressource: "decido:warn-expiring-polls (NOUVEAU, commande artisan, non-UI)"
+    verification: "manuelle via php artisan decido:warn-expiring-polls en local ; crée un sondage de test avec expires_at dans 13 jours, lance la commande, vérifie email envoyé (log mailer ou Mailtrap local) + expiry_warned_at rempli en DB ; relance la commande, vérifie AUCUN 2e envoi (idempotence)"
+  - ressource: "decido:purge-expired (élargie 2026-07-19, commande artisan, non-UI)"
+    verification: "manuelle : créer un sondage OUVERT (jamais clôturé) avec expires_at dans le passé (via tinker), lancer la commande, vérifier qu'il est bien supprimé (avant le fix, seul un sondage 'closed' l'était)"
+  - ressource: decido.vote.show / decido.vote.store (page publique de vote)
+    votant_anonyme: "200 (show) / 302+cookie (store)"
+    votant_connecte: "200 (show) / 302+cookie (store) — comportement IDENTIQUE à anonyme, le vote n'est jamais lié au compte utilisateur"
+    throttle: "20/min/IP sur le vote — 21e requête bloquée 429"
+  - ressource: "gate DECIDO_UNDER_CONSTRUCTION (quand=true, hors simulation)"
+    superadmin: "200 - accès normal"
+    tous_les_autres: "503 - page under-construction"

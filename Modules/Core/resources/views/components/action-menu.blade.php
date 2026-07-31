@@ -131,8 +131,8 @@
                      l'utilisateur voir l'état changer avant de fermer lui-même. --}}
                 <button type="button"
                         @click="{{ $action['alpineClick'] }}"
-                        style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 14px; border: none; background: none; cursor: pointer; font-size: 13px; color: #374151; text-align: left;"
-                        onmouseover="this.style.background='#F9FAFB'"
+                        style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 14px; min-height: 44px; box-sizing: border-box; border: none; background: none; cursor: pointer; font-size: 13px; color: {{ isset($action['danger']) && $action['danger'] ? '#991B1B' : '#374151' }}; text-align: left;"
+                        onmouseover="this.style.background='{{ isset($action['danger']) && $action['danger'] ? '#FEF2F2' : '#F9FAFB' }}'"
                         onmouseout="this.style.background='transparent'">
                     @if(isset($action['icon']))<i data-lucide="{{ $action['icon'] }}" style="width: 14px; height: 14px;"></i>@endif
                     @if(isset($action['labelExpr']))<span x-text="{{ $action['labelExpr'] }}"></span>@else{{ $action['label'] }}@endif
@@ -144,7 +144,7 @@
                         @else
                             wire:click="{{ $action['wireClick'] }}" @click="open = false"
                         @endif
-                        style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 14px; border: none; background: none; cursor: pointer; font-size: 13px; color: {{ isset($action['danger']) && $action['danger'] ? '#DC2626' : '#374151' }}; text-align: left;"
+                        style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 14px; min-height: 44px; box-sizing: border-box; border: none; background: none; cursor: pointer; font-size: 13px; color: {{ isset($action['danger']) && $action['danger'] ? '#991B1B' : '#374151' }}; text-align: left;"
                         onmouseover="this.style.background='{{ isset($action['danger']) && $action['danger'] ? '#FEF2F2' : '#F9FAFB' }}'"
                         onmouseout="this.style.background='transparent'">
                     @if(isset($action['icon']))<i data-lucide="{{ $action['icon'] }}" style="width: 14px; height: 14px;"></i>@endif
@@ -156,7 +156,7 @@
                     @if($action['method'] !== 'POST') @method($action['method']) @endif
                     <button type="{{ isset($action['confirm']) ? 'button' : 'submit' }}"
                             @if(isset($action['confirm'])) @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js($action['confirm']), action: () => $el.closest('form').submit() })" @endif
-                            style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 14px; border: none; background: none; cursor: pointer; font-size: 13px; color: {{ isset($action['danger']) && $action['danger'] ? '#DC2626' : '#374151' }}; text-align: left;"
+                            style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 14px; min-height: 44px; box-sizing: border-box; border: none; background: none; cursor: pointer; font-size: 13px; color: {{ isset($action['danger']) && $action['danger'] ? '#991B1B' : '#374151' }}; text-align: left;"
                             onmouseover="this.style.background='{{ isset($action['danger']) && $action['danger'] ? '#FEF2F2' : '#F9FAFB' }}'"
                             onmouseout="this.style.background='transparent'">
                         @if(isset($action['icon']))<i data-lucide="{{ $action['icon'] }}" style="width: 14px; height: 14px;"></i>@endif
@@ -166,8 +166,8 @@
             @else
                 <a href="{{ $action['url'] }}"
                    @if(isset($action['target'])) target="{{ $action['target'] }}" rel="noopener" @endif
-                   style="display: flex; align-items: center; gap: 8px; padding: 8px 14px; font-size: 13px; color: {{ isset($action['danger']) && $action['danger'] ? '#DC2626' : '#374151' }}; text-decoration: none;"
-                   onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                   style="display: flex; align-items: center; gap: 8px; padding: 8px 14px; min-height: 44px; box-sizing: border-box; font-size: 13px; color: {{ isset($action['danger']) && $action['danger'] ? '#991B1B' : '#374151' }}; text-decoration: none;"
+                   onmouseover="this.style.background='{{ isset($action['danger']) && $action['danger'] ? '#FEF2F2' : '#F9FAFB' }}'" onmouseout="this.style.background='transparent'">
                     @if(isset($action['icon']))<i data-lucide="{{ $action['icon'] }}" style="width: 14px; height: 14px;"></i>@endif
                     {{ $action['label'] }}
                 </a>

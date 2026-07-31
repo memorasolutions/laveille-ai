@@ -68,7 +68,10 @@ it('le mode wireClick applique la couleur danger comme le mode route', function 
         ]]
     );
 
-    expect($html)->toContain('#DC2626');
+    // Round 103 (2026-07-27, passe adversariale constructeur-prompts) : #DC2626 (~4,83:1 sur blanc,
+    // AA seulement) remplacé par #991B1B (~8,3:1, AAA - token établi charte.css:1009 .alert-danger)
+    // dans les 4 branches du composant. Voir Modules/Tools/tests/Feature/Round103AdversarialFixesTest.php.
+    expect($html)->toContain('#991B1B');
 });
 
 it('non-régression : le mode route GET simple génère toujours un lien <a href>', function () {
