@@ -35,16 +35,22 @@ const R139_PANEL_JS = 'public/assets/tools/constructeur-prompts/prompt-anon-pane
 it('only clears the target on a genuine user gesture (round 139)', function () {
     $js = file_get_contents(base_path(R139_PANEL_JS));
 
-    // Ré-ancré au round 146. L'invariant protégé est IDENTIQUE : seule une ouverture MANUELLE
-    // relâche la cible. Ce qui a changé, c'est la façon de le savoir - avant un signal implicite
-    // (evt.isTrusted), désormais un paramètre explicite passé par l'appelant. Le test suit le
-    // comportement, pas le mécanisme abandonné.
-    expect($js)->toContain('function basculerPanneau(ouvertureManuelle) {');
-    expect($js)->toContain('if (ouvertureManuelle) {');
-    // Le clic humain déclare une ouverture manuelle...
-    expect($js)->toContain('basculerPanneau(true);');
-    // ...et l'ouverture programmatique déclare l'inverse.
-    expect($js)->toContain('basculerPanneau(false);');
+    // Ré-ancré au round 148 (2026-07-31, refonte « anonymisation en place »). Le round 139
+    // protégeait une AMBIGUÏTÉ entre deux appelants de basculerPanneau() : un clic humain sur
+    // #cpAnonToggle (ouverture manuelle, devait relâcher la cible) et l'ouverture programmatique
+    // via openAnonWithTask() (devait la conserver). Le round 148 a supprimé cette ambiguïté à la
+    // RACINE plutôt que de la re-signaler autrement : #cpAnonToggle n'appelle plus du tout ce
+    // panneau (il masque désormais #cpTaskObject directement, voir maskTaskFieldInPlace()) - il
+    // n'existe donc plus qu'UN SEUL appelant possible de basculerPanneau(), et le paramètre qui
+    // servait à les distinguer (ouvertureManuelle) a disparu avec l'ambiguïté elle-même. L'invariant
+    // protégé reste le même en esprit (jamais de rechute vers un signal implicite comme
+    // evt.isTrusted) mais s'exprime maintenant par l'ABSENCE de tout mécanisme de distinction,
+    // puisqu'il n'y a plus rien à distinguer.
+    expect($js)->toContain('function basculerPanneau() {');
+    expect($js)->not->toContain('ouvertureManuelle');
+    // #cpAnonToggle ne pilote plus ce panneau : aucun handler ne doit plus l'attacher à
+    // basculerPanneau (round 148). S'il revenait, l'ambiguïté round 139 reviendrait avec lui.
+    expect($js)->not->toContain("toggleBtn.addEventListener('click', function () { basculerPanneau");
     // Le signal implicite ne doit pas revenir par la porte arrière.
     expect($js)->not->toContain('evt.isTrusted');
 });
@@ -52,18 +58,21 @@ it('only clears the target on a genuine user gesture (round 139)', function () {
 it('memorises the target AFTER opening the panel, not before (round 139)', function () {
     $js = file_get_contents(base_path(R139_PANEL_JS));
 
-    // Ré-ancré au round 146 : l'ouverture programmatique n'est plus un clic simulé mais un appel
-    // direct déclarant son intention. L'invariant d'ORDRE protégé ici est inchangé.
-    $clickPos = strpos($js, 'basculerPanneau(false);');
+    // Ré-ancré au round 148 : basculerPanneau() ne prend plus de paramètre (l'ouverture manuelle
+    // qui le justifiait a disparu, voir le test ci-dessus), mais l'invariant d'ORDRE protégé ici -
+    // la cible est mémorisée APRÈS l'ouverture du panneau, jamais avant - reste identique et tout
+    // aussi nécessaire : openAnonWithTask() reste le seul appelant, et un clic synthétique sur un
+    // éventuel bouton resterait synchrone.
+    $clickPos = strpos($js, 'basculerPanneau();');
     // Ré-ancré au round 141 : l'affectation passe désormais par setActiveField().
     // L'invariant protégé est IDENTIQUE (l'ordre), seul le nom de l'appel a changé.
     $assignPos = strpos($js, 'setActiveField(field);');
 
-    expect($clickPos)->not->toBeFalse('Le clic programmatique d\'ouverture a disparu.');
+    expect($clickPos)->not->toBeFalse('L\'ouverture programmatique du panneau a disparu.');
     expect($assignPos)->not->toBeFalse('La mémorisation de la cible a disparu.');
 
-    // C'est CET ordre qui constitue la seconde protection. S'il s'inverse, le clic synthétique
-    // effacerait de nouveau la cible et le défaut du round 139 reviendrait.
+    // C'est CET ordre qui constitue la seconde protection. S'il s'inverse, un futur appel
+    // synthétique effacerait de nouveau la cible et le défaut du round 139 reviendrait.
     expect($assignPos)->toBeGreaterThan($clickPos);
 });
 

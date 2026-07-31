@@ -3082,6 +3082,18 @@ declare(strict_types=1);
  *     Directory+Blog (147/147, modules touchés par le changement de layout partagé) tous verts.
  *     Vérification visuelle Playwright desktop 1440px + mobile 390px.
  *
+ * v1.136.0 = fix(outils/constructeur-prompts) le champ de saisie ne disparait plus, l'anonymisation
+ *     se fait EN PLACE. Cliquer « Masquer mes infos personnelles d'abord » faisait disparaitre le champ
+ *     « Sur quoi porte votre demande ? » et ouvrait un editeur en mode Split affichant DEUX zones :
+ *     la personne passait de 1 zone visible a 2 et perdait son champ de vue. L'intention du round 145
+ *     etait « une seule surface d'ecriture » ; l'effet obtenu etait exactement l'inverse. Constat
+ *     rapporte par l'utilisateur, captures a l'appui.
+ *     Desormais le champ reste TOUJOURS visible, qu'on anonymise ou non. Le bouton n'ouvre plus rien :
+ *     il masque directement dans le champ, affiche un recapitulatif de ce qui a ete remplace et un
+ *     bouton « Annuler le masquage » bien visible. Panel : Perplexity (garder le contexte visible),
+ *     Gemini 95/100 pour l'anonymisation en place, Codex 82/100 avec une reserve sur le sentiment de
+ *     perte de controle - reserve levee par le recapitulatif et l'annulation franche. Le mode Split,
+ *     juge « complexite d'expert », sort de ce parcours. L'anonymiseur complet reste accessible.
  * v1.135.0 = fix(outils/anonymiseur) le nom de famille survivait a l'anonymisation.
  *     « Appelle Marc Tremblay » devenait « Manon Pelletier Tremblay » : le vrai nom de famille
  *     restait en clair. Cause reelle (reproduite avec le moteur) : la detection appariait DEUX mots
@@ -3122,7 +3134,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 135;
+$lvMinor = 136;
 $lvPatch = 0;
 
 return [

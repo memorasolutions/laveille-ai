@@ -1,12 +1,19 @@
 // prompt-anon-panel.js — pont du panneau « Anonymiser » du constructeur de prompts.
 // L'ÉDITEUR COMPLET (barre d'outils, bulle de sélection, surlignage, modes) est fourni par
 // <x-tools::anonymizer-editor> + window.lvAnonUI (anonymizer-core/rich/ui.js, 100% local) —
-// AUCUNE duplication. Ce script ne fait QUE :
-//   1) le toggle du panneau (progressive disclosure),
-//   2) l'insertion du texte anonymisé (lvAnonUI.anonPlain) dans le champ actif (en AJOUT, pas en écrasement),
-//   3) le handoff sessionStorage depuis l'anonymiseur (compat. ascendante),
-//   4) un garde-fou proactif : si window.AnonymizerCore détecte des infos perso dans un des champs
-//      de texte libre du wizard, un bandeau doux invite à les masquer d'abord (réutilise
+// AUCUNE duplication. Ce script fait :
+//   1) le MASQUAGE EN PLACE du champ principal #cpTaskObject (bouton #cpAnonToggle) : détecte les
+//      infos perso via window.AnonymizerCore (detectEntities/buildRules/anonymize, DÉJÀ utilisés
+//      ailleurs, aucune duplication du moteur) et REMPLACE directement le contenu du champ - il
+//      n'ouvre plus jamais le panneau ni ne masque le champ (round 148, 2026-07-31, refonte
+//      « anonymisation en place »). Voir maskTaskFieldInPlace() plus bas.
+//   2) le toggle du panneau partagé (progressive disclosure), réservé désormais au garde-fou
+//      proactif des AUTRES champs de texte libre du wizard (persona, audience, verbe, contraintes,
+//      exemples, gabarits de carte),
+//   3) l'insertion du texte anonymisé (lvAnonUI.anonPlain) dans le champ actif de CE panneau,
+//   4) le handoff sessionStorage depuis l'anonymiseur (compat. ascendante),
+//   5) le garde-fou proactif lui-même : si window.AnonymizerCore détecte des infos perso dans un
+//      des champs de texte libre du wizard, un bandeau doux invite à les masquer d'abord (réutilise
 //      l'anonymiseur déjà chargé, jamais d'erreur sinon).
 // Auteur : MEMORA solutions, https://memora.solutions
 (function () {
@@ -32,6 +39,10 @@
     // libellé invite pourtant explicitement à coller de vrais échanges (« Entrée : ... »), et son
     // contenu part verbatim dans le prompt final ET est persisté en base.
     const examplesField = document.getElementById('cpExamples');
+    // Round 148 (2026-07-31) : éléments du récapitulatif de masquage EN PLACE du champ principal.
+    const recapBox = document.getElementById('cpAnonRecap');
+    const recapText = document.getElementById('cpAnonRecapText');
+    const undoBtn = document.getElementById('cpAnonUndo');
 
     const showToast = (message, variant) => window.dispatchEvent(
       new CustomEvent('toast-show', { detail: { message, variant: variant || 'info', duration: 3000 } })
@@ -61,62 +72,22 @@
       return true;
     }
 
-    // Toggle du panneau (progressive disclosure).
-    //
-    // Round 146 : la logique vit dans une fonction qui reçoit l'INTENTION en paramètre. Avant, elle
-    // vivait dans le handler de clic, et les deux portes d'entrée se distinguaient par un signal
-    // implicite (la provenance de l'événement, puis un drapeau de module). Ces approches faisaient dépendre
-    // une règle métier de l'environnement d'exécution plutôt que de l'appelant : fragile face à
-    // tout traitement différé, et invérifiable en test automatisé. Ici, chaque appelant DÉCLARE ce
-    // qu'il fait, et `.click()` cesse d'être une API interne.
-    function basculerPanneau(ouvertureManuelle) {
-      if (!toggleBtn || !panel) return;
-      const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-      toggleBtn.setAttribute('aria-expanded', String(!expanded));
+    // Toggle du panneau partagé (progressive disclosure) - RÉSERVÉ depuis le round 148
+    // (2026-07-31) au garde-fou proactif des AUTRES champs (persona, audience, verbe, contraintes,
+    // exemples, gabarits de carte). #cpAnonToggle ne l'appelle plus du tout : il agit directement
+    // sur #cpTaskObject sans jamais ouvrir ce panneau (voir maskTaskFieldInPlace plus bas). Cette
+    // fonction ne masque plus non plus #cpTaskField : décision tranchée « anonymisation en place »
+    // (panel Perplexity/Gemini 95, Codex 82) - le champ principal reste TOUJOURS visible, quel que
+    // soit le champ concerné par ce panneau.
+    function basculerPanneau() {
+      if (!panel) return;
+      const expanded = panel.getAttribute('aria-hidden') === 'false';
       panel.style.display = expanded ? 'none' : 'block';
       panel.setAttribute('aria-hidden', String(expanded));
-
-      // Round 145 : UNE SEULE surface d'écriture visible à la fois. Le champ principal s'efface
-      // pendant que le panneau travaille, et revient à la fermeture. Le masquage s'applique aux
-      // DEUX portes d'entrée, y compris à l'ouverture déclenchée par le bandeau d'alerte.
-      const taskBlock = document.getElementById('cpTaskField');
-      if (taskBlock) taskBlock.style.display = expanded ? '' : 'none';
-
       if (!expanded) {
         const src = document.getElementById('anonSource');
         if (src) src.focus();
-        // Round 138/139 : une ouverture MANUELLE n'est rattachée à aucun champ, la cible repart
-        // donc sur la tâche. Ce reset ne doit SURTOUT PAS s'appliquer à une ouverture programmatique :
-        // openAnonWithTask() mémorise le champ qui a déclenché le garde-fou, et l'écraser ferait
-        // atterrir le texte masqué dans la Tâche en laissant la donnée personnelle en place dans le
-        // champ qui avait pourtant déclenché l'alerte - le garde-fou recopierait la fuite.
-        if (ouvertureManuelle) {
-          // Round 145 : si la demande est déjà écrite, on la recopie dans la zone de travail et on
-          // vise ce champ - donc l'insertion REMPLACERA au lieu d'ajouter à la suite. Sans ce
-          // second point, pré-remplir laisserait le texte original ET sa copie masquée dans le
-          // même champ : la duplication de données personnelles corrigée au round 144, recréée
-          // par l'autre porte.
-          if (taskField && taskField.value.trim() !== '') {
-            prefillSourceFrom(taskField);
-            setActiveField(taskField);
-          } else {
-            setActiveField(null);
-          }
-        }
       }
-    }
-
-    if (toggleBtn && panel) {
-      toggleBtn.addEventListener('click', function () { basculerPanneau(true); });
-    }
-
-    // Round 145 : sortie explicite vers le champ principal. Refermer le panneau le réaffiche, et le
-    // travail de masquage déjà fait n'est pas perdu (les règles vivent dans l'éditeur, pas ici).
-    const backToTaskBtn = document.getElementById('cpAnonBackToTask');
-    if (backToTaskBtn) {
-      backToTaskBtn.addEventListener('click', function () {
-        basculerPanneau(true);
-      });
     }
 
     // Round 109 : mémorise le champ qui a déclenché le garde-fou (null = usage manuel du
@@ -243,15 +214,9 @@
           .replace('%s', labelFor(targetField.id));
       }
       showToast(insertMsg, 'success');
-      if (toggleBtn && panel) {
-        toggleBtn.setAttribute('aria-expanded', 'false');
+      if (panel) {
         panel.style.display = 'none';
         panel.setAttribute('aria-hidden', 'true');
-        // Round 145 : cette fermeture court-circuite le handler du toggle, donc elle doit
-        // RÉAFFICHER le champ principal elle-même. Sans cette ligne, insérer faisait disparaître
-        // le champ : le texte masqué arrivait dans une zone devenue invisible.
-        const taskBlockAfterInsert = document.getElementById('cpTaskField');
-        if (taskBlockAfterInsert) taskBlockAfterInsert.style.display = '';
       }
       targetField.scrollIntoView({ behavior: 'smooth', block: 'center' });
       targetField.focus();
@@ -263,6 +228,177 @@
       setActiveField(null);
     }
     if (insertBtn) insertBtn.addEventListener('click', insertIntoTask);
+
+    // ===== MASQUAGE EN PLACE DU CHAMP PRINCIPAL (round 148, 2026-07-31) =====
+    // Avant cette refonte, cliquer #cpAnonToggle FAISAIT DISPARAÎTRE #cpTaskField et ouvrait ce
+    // même panneau en mode Split (« Votre texte » / « Texte anonymisé ») : la personne passait
+    // d'une seule zone visible à deux pour une seule intention, et perdait de vue son champ.
+    // Décision tranchée (recherche + panel Perplexity/Gemini 95/100, Codex 82/100, 2026-07-31) :
+    // ANONYMISATION EN PLACE. Le bouton agit maintenant DIRECTEMENT sur le contenu de
+    // #cpTaskObject, qui reste TOUJOURS visible - ce panneau n'est plus jamais sollicité par ce
+    // chemin (il continue de servir le garde-fou proactif des autres champs, plus bas).
+
+    // Texte d'origine gardé UNIQUEMENT en mémoire JS (jamais en stockage persistant, jamais dans
+    // le DOM) pour permettre l'annulation. Réinitialisé à chaque nouveau masquage réussi ou à
+    // l'annulation elle-même.
+    let previousTaskValue = null;
+
+    function hideRecap() {
+      if (recapBox) recapBox.style.display = 'none';
+      if (recapText) recapText.textContent = '';
+      if (undoBtn) undoBtn.style.display = 'none';
+    }
+
+    // Écrit `newValue` dans `field` en préservant l'annuler/refaire NATIF du navigateur (Ctrl+Z).
+    // Même pattern que anonymizer-ui.js (bindRichEditor, collage) : document.execCommand()
+    // conservé VOLONTAIREMENT (déprécié mais seul mécanisme, en 2026, qui laisse le navigateur
+    // gérer lui-même l'historique d'annulation d'un champ de formulaire - une écriture directe
+    // sur .value casse cet historique. Repli sur .value si execCommand échoue ou n'est pas
+    // supporté (navigateur minoritaire, environnement de test).
+    function ecrireEnPreservantAnnuler(field, newValue) {
+      field.focus();
+      try { field.select(); } catch (e1) {
+        try { field.setSelectionRange(0, field.value.length); } catch (e2) { /* repli plus bas */ }
+      }
+      let ok = false;
+      try { ok = document.execCommand('insertText', false, newValue); } catch (e) { ok = false; }
+      if (!ok || field.value !== newValue) {
+        field.value = newValue;
+      }
+      field.dispatchEvent(new Event('input', { bubbles: true })); // met à jour Alpine x-model
+    }
+
+    // Avise le composant Alpine racine, s'il expose purgerCopieLocaleDesCartes() (referme la même
+    // fuite que le round 147 : une copie locale pré-masquage pourrait autrement survivre dans le
+    // navigateur). Silencieux si Alpine, le composant ou la méthode sont indisponibles.
+    function purgerCopieLocaleSiPossible() {
+      try {
+        const root = taskField && taskField.closest ? taskField.closest('[x-data]') : null;
+        if (!root || !window.Alpine || typeof window.Alpine.$data !== 'function') return;
+        const composant = window.Alpine.$data(root);
+        if (composant && typeof composant.purgerCopieLocaleDesCartes === 'function') {
+          composant.purgerCopieLocaleDesCartes();
+        }
+      } catch (e) { /* purge optionnelle : aucune erreur ne doit remonter */ }
+    }
+
+    // Construit le récapitulatif humain (« 2 noms et 1 numéro de téléphone ont été masqués. »)
+    // à partir des CATÉGORIES RÉELLES retournées par le moteur (entity.label), en français
+    // correct (accord singulier/pluriel par catégorie ET accord du verbe final).
+    function resumerMasquage(entities) {
+      const pluralLabels = i18n.anonPluralLabels || {};
+      const counts = new Map();
+      const order = [];
+      entities.forEach(function (ent) {
+        const key = ent.label || ent.category || 'donnée personnelle';
+        if (!counts.has(key)) { counts.set(key, 0); order.push(key); }
+        counts.set(key, counts.get(key) + 1);
+      });
+      const parts = order.map(function (key) {
+        const n = counts.get(key);
+        const forms = pluralLabels[key];
+        const mot = forms
+          ? (n > 1 ? forms[1] : forms[0])
+          : (n > 1 ? (key.toLowerCase() + 's') : key.toLowerCase());
+        return n + ' ' + mot;
+      });
+      let joined = parts[0];
+      if (parts.length > 1) {
+        joined = parts.slice(0, -1).join(', ') + ' ' + (i18n.anonAnd || 'et') + ' ' + parts[parts.length - 1];
+      }
+      // Accord du verbe : singulier UNIQUEMENT si une seule catégorie avec un seul élément - tout
+      // le reste (plusieurs catégories jointes par « et », ou une catégorie répétée) est pluriel.
+      const singulier = order.length === 1 && entities.length === 1;
+      const verbe = singulier
+        ? (i18n.anonMaskedSingular || 'a été masqué')
+        : (i18n.anonMaskedPlural || 'ont été masqués');
+      return joined.charAt(0).toUpperCase() + joined.slice(1) + ' ' + verbe + '.';
+    }
+
+    function maskTaskFieldInPlace() {
+      if (!taskField) return;
+      const currentValue = taskField.value;
+
+      // Efface tout récapitulatif/bouton Annuler PÉRIMÉ dès le clic, avant tout autre traitement -
+      // si la personne a effacé son texte à la main après un masquage précédent, le récapitulatif
+      // ne doit pas rester affiché pour un contenu qui n'existe plus.
+      hideRecap();
+
+      // Règle 1 : champ vide -> message doux, rien à masquer, aucun panneau.
+      if (currentValue.trim() === '') {
+        showToast(
+          i18n.anonEmptyField || 'Écrivez d\'abord votre demande, puis cliquez à nouveau pour masquer vos informations personnelles.',
+          'info'
+        );
+        return;
+      }
+
+      if (!window.AnonymizerCore) {
+        showToast(i18n.anonUnavailable || 'Le masquage automatique n\'est pas disponible pour le moment.', 'warning');
+        return;
+      }
+
+      let entities = [];
+      try { entities = window.AnonymizerCore.detectEntities(currentValue) || []; } catch (e) { entities = []; }
+
+      if (entities.length === 0) {
+        if (recapBox && recapText) {
+          recapText.textContent = i18n.anonNoneDetected || 'Aucune information personnelle détectée dans votre texte.';
+          recapBox.style.display = '';
+        }
+        return;
+      }
+
+      let rules = [];
+      try {
+        rules = window.AnonymizerCore.buildRules(
+          entities.map(function (e) { return { value: e.value, category: e.category }; })
+        );
+      } catch (e) { rules = []; }
+
+      let masked = currentValue;
+      try { masked = window.AnonymizerCore.anonymize(currentValue, rules) || currentValue; } catch (e) { masked = currentValue; }
+
+      if (masked === currentValue) {
+        // Entités détectées mais aucune substitution réelle (cas limite) : même honnêteté que
+        // « rien détecté » plutôt qu'annoncer un masquage qui n'a rien changé.
+        if (recapBox && recapText) {
+          recapText.textContent = i18n.anonNoneDetected || 'Aucune information personnelle détectée dans votre texte.';
+          recapBox.style.display = '';
+        }
+        return;
+      }
+
+      // Mémorise le texte d'origine AVANT de le remplacer (règle 5 : annulation en mémoire JS).
+      previousTaskValue = currentValue;
+      ecrireEnPreservantAnnuler(taskField, masked);
+
+      if (recapBox && recapText) {
+        recapText.textContent = resumerMasquage(entities);
+        recapBox.style.display = '';
+      }
+      if (undoBtn) undoBtn.style.display = '';
+
+      // Règle 7 : purge la copie locale des gabarits de carte si le composant l'expose.
+      purgerCopieLocaleSiPossible();
+
+      showToast(i18n.anonMaskedInField || 'Informations personnelles masquées dans le champ.', 'success');
+    }
+
+    if (toggleBtn) toggleBtn.addEventListener('click', maskTaskFieldInPlace);
+
+    // Règle 6 : après annulation, le récapitulatif disparaît et #cpAnonToggle redevient disponible
+    // (il n'a jamais été désactivé - un nouveau clic relance simplement une détection sur le texte
+    // restauré).
+    if (undoBtn) {
+      undoBtn.addEventListener('click', function () {
+        if (previousTaskValue === null || !taskField) return;
+        ecrireEnPreservantAnnuler(taskField, previousTaskValue);
+        previousTaskValue = null;
+        hideRecap();
+        showToast(i18n.anonUndone || 'Masquage annulé : votre texte d\'origine est restauré.', 'info');
+      });
+    }
 
     // GARDE-FOU PROACTIF : alerte douce si des infos perso sont détectées dans un des champs
     // surveillés. Silencieux si AnonymizerCore n'est pas chargé (ne crée jamais d'erreur).
@@ -401,12 +537,12 @@
             const field = warnBanner.nextElementSibling;
             if (!field || !isWatched(field)) return;
 
-            // (ii) ouvrir le panneau s'il est replié
-            if (toggleBtn && toggleBtn.getAttribute('aria-expanded') !== 'true') {
-              // Round 146 : appel DIRECT en déclarant l'intention (false = pas un geste manuel),
-              // au lieu de simuler un clic. Plus de signal implicite à interpréter : la cible
-              // mémorisée juste après ne peut plus être écrasée par le handler.
-              basculerPanneau(false);
+            // (ii) ouvrir le panneau s'il est replié. Round 148 : la source de vérité de l'état
+            // ouvert/fermé est maintenant le panneau lui-même (panel.style.display), plus
+            // toggleBtn - #cpAnonToggle ne pilote plus ce panneau du tout depuis la refonte
+            // « anonymisation en place » (il agit directement sur #cpTaskObject).
+            if (panel && panel.style.display !== 'block') {
+              basculerPanneau();
             }
 
             // (ii bis) Round 139 - défense en profondeur : la cible est mémorisée APRÈS l'ouverture.

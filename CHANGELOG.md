@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.136.0] - 2026-07-31
+
+### Corrigé
+- **Le champ de saisie ne disparaît plus : l'anonymisation se fait EN PLACE.** Cliquer « Masquer mes
+  infos personnelles d'abord » faisait disparaître le champ « Sur quoi porte votre demande ? » et
+  ouvrait un éditeur en mode Split affichant DEUX zones. La personne passait de 1 zone visible à 2 et
+  perdait son champ de vue - l'inverse exact de l'intention « une seule surface d'écriture ».
+  Le champ reste maintenant TOUJOURS visible, qu'on anonymise ou non. Le bouton n'ouvre plus rien :
+  il masque directement dans le champ.
+
+### Ajouté
+- **Récapitulatif de ce qui a été masqué** après l'opération, annoncé aux lecteurs d'écran.
+- **Bouton « Annuler le masquage »** bien visible, qui restaure le texte d'origine. Le texte original
+  ne vit qu'en mémoire, jamais dans un stockage persistant.
+
+### Retiré
+- Le mode Split de ce parcours, jugé « complexité d'expert » par la revue croisée : comparer deux
+  versions est un réflexe de développeur, pas un besoin de la personne qui veut juste un texte
+  sécuritaire. L'anonymiseur complet reste accessible pour les cas complexes.
+- Le bouton « ← Modifier ma demande », devenu inutile puisque le champ ne disparaît plus.
+
 ## [1.135.0] - 2026-07-31
 
 ### Corrigé
