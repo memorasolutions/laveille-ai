@@ -327,7 +327,7 @@
       // Règle 1 : champ vide -> message doux, rien à masquer, aucun panneau.
       if (currentValue.trim() === '') {
         showToast(
-          i18n.anonEmptyField || 'Écrivez d\'abord votre demande, puis cliquez à nouveau pour masquer vos informations personnelles.',
+          i18n.anonEmptyField || 'Écrivez d\'abord votre demande dans le champ ci-dessus, puis cliquez de nouveau sur ce bouton pour masquer vos informations personnelles.',
           'info'
         );
         return;
@@ -343,7 +343,7 @@
 
       if (entities.length === 0) {
         if (recapBox && recapText) {
-          recapText.textContent = i18n.anonNoneDetected || 'Aucune information personnelle détectée dans votre texte.';
+          recapText.textContent = i18n.anonNoneDetected || 'Aucune information personnelle trouvée dans votre texte. Vous pouvez continuer.';
           recapBox.style.display = '';
         }
         return;
@@ -363,7 +363,7 @@
         // Entités détectées mais aucune substitution réelle (cas limite) : même honnêteté que
         // « rien détecté » plutôt qu'annoncer un masquage qui n'a rien changé.
         if (recapBox && recapText) {
-          recapText.textContent = i18n.anonNoneDetected || 'Aucune information personnelle détectée dans votre texte.';
+          recapText.textContent = i18n.anonNoneDetected || 'Aucune information personnelle trouvée dans votre texte. Vous pouvez continuer.';
           recapBox.style.display = '';
         }
         return;
@@ -382,7 +382,7 @@
       // Règle 7 : purge la copie locale des gabarits de carte si le composant l'expose.
       purgerCopieLocaleSiPossible();
 
-      showToast(i18n.anonMaskedInField || 'Informations personnelles masquées dans le champ.', 'success');
+      showToast(i18n.anonMaskedInField || 'Vos informations personnelles ont été masquées, directement sur votre ordinateur.', 'success');
     }
 
     if (toggleBtn) toggleBtn.addEventListener('click', maskTaskFieldInPlace);
@@ -396,7 +396,7 @@
         ecrireEnPreservantAnnuler(taskField, previousTaskValue);
         previousTaskValue = null;
         hideRecap();
-        showToast(i18n.anonUndone || 'Masquage annulé : votre texte d\'origine est restauré.', 'info');
+        showToast(i18n.anonUndone || 'Votre texte de départ est revenu, tel que vous l\'aviez écrit.', 'info');
       });
     }
 

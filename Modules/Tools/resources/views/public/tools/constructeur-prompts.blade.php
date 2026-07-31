@@ -346,8 +346,8 @@
                                  comme point d'ancrage stable pour le récapitulatif de masquage ci-dessous. --}}
                             <div class="form-group mb-3" id="cpTaskField">
                                 <label class="form-label fw-medium">{{ __('Sur quoi porte votre demande ?') }} <span style="color: #991B1B;">*</span></label>
-                                <p class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;">🔒 {{ __('Votre texte contient un vrai nom, courriel, numéro ou adresse ? Ne mettez jamais vos vraies infos dans une IA. Masquez-les d\'abord avec le bouton ci-dessous.') }}</p>
-                                <textarea id="cpTaskObject" class="form-control" rows="3" x-model="taskObject" aria-required="true" placeholder="{{ __('Ex: un plan marketing pour le lancement d\'une application mobile au Québec') }}" aria-label="{{ __('Description de la demande') }}"></textarea>
+                                <p class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;">🔒 {{ __('Il y a un vrai nom, un courriel, un numéro de téléphone ou une adresse dans votre texte ? Cachez-les d\'abord avec le bouton ci-dessous. Tout se passe directement sur votre ordinateur : rien n\'est envoyé ni enregistré nulle part.') }}</p>
+                                <textarea id="cpTaskObject" class="form-control" rows="3" x-model="taskObject" autocomplete="off" aria-required="true" placeholder="{{ __('Ex: un plan marketing pour le lancement d\'une application mobile au Québec') }}" aria-label="{{ __('Description de la demande') }}"></textarea>
                                 <small class="text-muted">{{ __('Décrivez précisément ce que vous voulez obtenir.') }}</small>
                             </div>
 
@@ -356,7 +356,7 @@
                                  champ ci-dessus (voir maskTaskFieldInPlace() dans prompt-anon-panel.js).
                                  aria-expanded/aria-controls retirés : ce bouton ne pilote plus #cpAnonPanel. --}}
                             <div class="form-group mb-3">
-                                <button id="cpAnonToggle" type="button" class="ct-btn ct-btn-outline ct-btn-sm" style="min-height:44px;">🛡️ {{ __('Masquer mes infos personnelles d\'abord') }}</button>
+                                <button id="cpAnonToggle" type="button" class="ct-btn ct-btn-outline ct-btn-sm" style="min-height:44px;">🛡️ {{ __('Masquer mes informations personnelles') }}</button>
                                 <a href="/outils/anonymiseur" class="ct-btn ct-btn-ghost ct-btn-sm ms-1" style="min-height:44px;" title="{{ __('Ouvrir l\'anonymiseur complet (restauration des réponses IA)') }}">↗ {{ __('Anonymiseur complet') }}</a>
 
                                 {{-- Récapitulatif du masquage en place + annulation. aria-live="polite" +
@@ -365,7 +365,7 @@
                                      le bouton ci-dessus. --}}
                                 <div id="cpAnonRecap" class="mt-2" style="display:none;" role="status" aria-live="polite">
                                     <p id="cpAnonRecapText" class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;"></p>
-                                    <button type="button" id="cpAnonUndo" class="ct-btn ct-btn-outline ct-btn-sm" style="display:none; min-height:44px;">↺ {{ __('Annuler le masquage') }}</button>
+                                    <button type="button" id="cpAnonUndo" class="ct-btn ct-btn-outline ct-btn-sm" style="display:none; min-height:44px;">↺ {{ __('Revenir à mon texte de départ') }}</button>
                                 </div>
 
                                 <div id="cpAnonPanel" class="anon-wrap" style="display:none; border:1px solid var(--anon-line,#e2e6ea); border-radius:12px; padding:1rem; margin-top:.75rem; background:#f8fafb;" aria-hidden="true">
@@ -411,7 +411,7 @@
                                 </div>
                                 <div class="col-md-6 mb-2" x-show="audienceType === 'custom'">
                                     <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Pour qui ?') }}</label>
-                                    <input type="text" id="cpAudienceCustom" class="form-control" x-model="audienceCustom" placeholder="{{ __('Ex: enseignants du secondaire au Québec') }}" aria-label="{{ __('Audience personnalisée') }}">
+                                    <input type="text" id="cpAudienceCustom" class="form-control" x-model="audienceCustom" autocomplete="off" placeholder="{{ __('Ex: enseignants du secondaire au Québec') }}" aria-label="{{ __('Audience personnalisée') }}">
                                 </div>
                                 <div class="col-md-6 mb-2">
                                     <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Ton général souhaité') }}</label>
@@ -461,7 +461,7 @@
                                         </select>
                                     </div>
                                     <div x-show="personaType === 'custom'" class="form-group mb-0">
-                                        <input type="text" id="cpPersonaCustom" class="form-control" x-model="personaCustom" :aria-required="personaType === 'custom'" placeholder="{{ __('Ex: un expert en cybersécurité spécialisé en PME québécoises') }}" aria-label="{{ __('Rôle personnalisé') }}">
+                                        <input type="text" id="cpPersonaCustom" class="form-control" x-model="personaCustom" autocomplete="off" :aria-required="personaType === 'custom'" placeholder="{{ __('Ex: un expert en cybersécurité spécialisé en PME québécoises') }}" aria-label="{{ __('Rôle personnalisé') }}">
                                     </div>
                                 </div>
                             </div>
@@ -487,7 +487,7 @@
                                             <option :value="v" x-text="v"></option>
                                         </template>
                                     </select>
-                                    <input type="text" id="cpVerbCustom" class="form-control" x-show="verbType === 'custom'" x-model="verbCustom" :aria-required="verbType === 'custom'" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}" aria-label="{{ __('Verbe personnalisé') }}">
+                                    <input type="text" id="cpVerbCustom" class="form-control" x-show="verbType === 'custom'" x-model="verbCustom" autocomplete="off" :aria-required="verbType === 'custom'" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}" aria-label="{{ __('Verbe personnalisé') }}">
                                 </div>
                             </div>
 
@@ -576,7 +576,7 @@
                                     </div>
                                     <div x-show="technique === 'few-shot' || technique === 'few-shot-cot'" class="form-group mb-0">
                                         <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Exemples (2-3 recommandés)') }}</label>
-                                        <textarea id="cpExamples" class="form-control form-control-sm" rows="4" x-model="examples" placeholder="{{ __('Exemple 1 :\nEntrée : ...\nSortie : ...\n\nExemple 2 :\nEntrée : ...\nSortie : ...') }}" aria-label="{{ __('Exemples à donner à l\'IA') }}"></textarea>
+                                        <textarea id="cpExamples" class="form-control form-control-sm" rows="4" x-model="examples" autocomplete="off" placeholder="{{ __('Exemple 1 :\nEntrée : ...\nSortie : ...\n\nExemple 2 :\nEntrée : ...\nSortie : ...') }}" aria-label="{{ __('Exemples à donner à l\'IA') }}"></textarea>
                                         <small class="text-muted">{{ __('Donnez 2-3 exemples du résultat attendu pour guider l\'IA.') }}</small>
                                     </div>
                                 </div>
@@ -660,7 +660,7 @@
                                     </div>
                                     <div class="form-group mb-0">
                                         <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Contraintes spécifiques') }}</label>
-                                        <textarea id="cpConstraintCustom" class="form-control form-control-sm" rows="2" x-model="constraintCustom" placeholder="{{ __('Ex: éviter le jargon technique, inclure des exemples concrets') }}" aria-label="{{ __('Contraintes personnalisées') }}"></textarea>
+                                        <textarea id="cpConstraintCustom" class="form-control form-control-sm" rows="2" x-model="constraintCustom" autocomplete="off" placeholder="{{ __('Ex: éviter le jargon technique, inclure des exemples concrets') }}" aria-label="{{ __('Contraintes personnalisées') }}"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -1046,10 +1046,10 @@ window.promptBuilderConfig = {
         // Round 148 (2026-07-31, refonte « anonymisation en place ») : messages du masquage EN
         // PLACE du champ principal (bouton #cpAnonToggle - voir maskTaskFieldInPlace() dans
         // prompt-anon-panel.js).
-        anonEmptyField: @json(__('Écrivez d\'abord votre demande, puis cliquez à nouveau pour masquer vos informations personnelles.')),
-        anonNoneDetected: @json(__('Aucune information personnelle détectée dans votre texte.')),
-        anonMaskedInField: @json(__('Informations personnelles masquées dans le champ.')),
-        anonUndone: @json(__('Masquage annulé : votre texte d\'origine est restauré.')),
+        anonEmptyField: @json(__('Écrivez d\'abord votre demande dans le champ ci-dessus, puis cliquez de nouveau sur ce bouton pour masquer vos informations personnelles.')),
+        anonNoneDetected: @json(__('Aucune information personnelle trouvée dans votre texte. Vous pouvez continuer.')),
+        anonMaskedInField: @json(__('Vos informations personnelles ont été masquées, directement sur votre ordinateur.')),
+        anonUndone: @json(__('Votre texte de départ est revenu, tel que vous l\'aviez écrit.')),
         anonUnavailable: @json(__('Le masquage automatique n\'est pas disponible pour le moment.')),
         anonAnd: @json(__('et')),
         anonMaskedSingular: @json(__('a été masqué')),

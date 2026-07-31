@@ -149,7 +149,7 @@ domReady();
   assert(fields.cpAnonPanel.style.display === 'none', 'sans PII : le panneau partagé reste fermé');
   assert(fields.cpAnonRecap.style.display === '', 'sans PII : le récapitulatif s\'affiche quand même (honnêteté)');
   assert(
-    fields.cpAnonRecapText.textContent === 'Aucune information personnelle détectée dans votre texte.',
+    fields.cpAnonRecapText.textContent === 'Aucune information personnelle trouvée dans votre texte. Vous pouvez continuer.',
     'sans PII : le récapitulatif dit clairement qu\'aucune info personnelle n\'a été détectée'
   );
   assert(fields.cpAnonUndo.style.display === 'none', 'sans PII : aucun bouton "Annuler" - rien n\'a été modifié');
