@@ -21,20 +21,23 @@ precacheAndRoute(self.__WB_MANIFEST);
 // POST ci-dessous -> latence perçue à chaque clic (ex. sélection multiple sur
 // /admin/users). Ces 3 routes DOIVENT rester AVANT les routes de cache (Workbox
 // utilise la première route qui matche).
-registerRoute(
-    ({ url }) => url.pathname.startsWith('/admin'),
-    new NetworkOnly()
-);
+//
+// IMPORTANT : Workbox classe les routes par méthode HTTP (registerRoute sans 3e
+// argument n'enregistre la route que pour GET). Sans le enregistrement explicite
+// ci-dessous pour POST, une requête POST vers /admin, /livewire/ ou un domaine
+// externe ne matchait AUCUNE de ces 3 exclusions et tombait dans la route
+// générique "POST -> background sync" plus bas, qui la mettait en file d'attente
+// pour rejeu automatique en cas d'échec réseau (jamais l'intention voulue pour
+// ces requêtes). On enregistre donc chaque exclusion pour GET et POST.
+const isAdminRequest = ({ url }) => url.pathname.startsWith('/admin');
+const isLivewireRequest = ({ url }) => url.pathname.startsWith('/livewire/');
+const isCrossOriginRequest = ({ url }) => url.origin !== self.location.origin;
 
-registerRoute(
-    ({ url }) => url.pathname.startsWith('/livewire/'),
-    new NetworkOnly()
-);
-
-registerRoute(
-    ({ url }) => url.origin !== self.location.origin,
-    new NetworkOnly()
-);
+for (const method of ['GET', 'POST']) {
+    registerRoute(isAdminRequest, new NetworkOnly(), method);
+    registerRoute(isLivewireRequest, new NetworkOnly(), method);
+    registerRoute(isCrossOriginRequest, new NetworkOnly(), method);
+}
 
 // --- Stratégies de cache runtime ---
 
