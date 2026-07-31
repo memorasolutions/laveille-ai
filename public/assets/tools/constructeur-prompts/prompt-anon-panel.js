@@ -229,24 +229,42 @@
     }
     if (insertBtn) insertBtn.addEventListener('click', insertIntoTask);
 
-    // ===== MASQUAGE EN PLACE DU CHAMP PRINCIPAL (round 148, 2026-07-31) =====
-    // Avant cette refonte, cliquer #cpAnonToggle FAISAIT DISPARAÎTRE #cpTaskField et ouvrait ce
-    // même panneau en mode Split (« Votre texte » / « Texte anonymisé ») : la personne passait
+    // ===== MASQUAGE EN PLACE (round 148, généralisé round 149, 2026-07-31) =====
+    // Avant le round 148, cliquer #cpAnonToggle FAISAIT DISPARAÎTRE #cpTaskField et ouvrait le
+    // panneau partagé en mode Split (« Votre texte » / « Texte anonymisé ») : la personne passait
     // d'une seule zone visible à deux pour une seule intention, et perdait de vue son champ.
     // Décision tranchée (recherche + panel Perplexity/Gemini 95/100, Codex 82/100, 2026-07-31) :
-    // ANONYMISATION EN PLACE. Le bouton agit maintenant DIRECTEMENT sur le contenu de
-    // #cpTaskObject, qui reste TOUJOURS visible - ce panneau n'est plus jamais sollicité par ce
-    // chemin (il continue de servir le garde-fou proactif des autres champs, plus bas).
+    // ANONYMISATION EN PLACE. Le round 148 ne l'avait câblée que sur #cpTaskObject - défaut #2
+    // trouvé en passe adversariale (round 149) : les 5 AUTRES champs surveillés passaient encore
+    // par l'ancien flux à 2 zones (panneau + « Insérer dans le champ »), sans récapitulatif ni
+    // possibilité de revenir en arrière. maskFieldInPlace() ci-dessous est la fonction UNIQUE,
+    // paramétrée par le champ, qui sert maintenant les 6 champs (voir son appel par #cpAnonToggle
+    // plus bas, et par le bandeau anti-PII pour les 5 autres, tout en bas de ce fichier) - DRY
+    // strict, aucune des 6 copies n'existe. Seuls les gabarits de carte personnalisée
+    // (cpCardTemplate-*) restent volontairement sur l'ancien panneau : ce sont des champs créés/
+    // détruits dynamiquement par Alpine (x-if dans x-for), hors du périmètre des 6 champs statiques
+    // de cette unification, et un récapitulatif ancré sur #cpAnonRecap y serait fragile (le noeud
+    // peut disparaître entre le masquage et le clic Annuler - même classe de défaut que le round
+    // 142, déjà corrigé pour l'insertion via resolveTargetField()).
 
-    // Texte d'origine gardé UNIQUEMENT en mémoire JS (jamais en stockage persistant, jamais dans
-    // le DOM) pour permettre l'annulation. Réinitialisé à chaque nouveau masquage réussi ou à
-    // l'annulation elle-même.
-    let previousTaskValue = null;
+    // État du dernier masquage EN PLACE, par CHAMP (id) : texte d'origine ET texte masqué gardés
+    // UNIQUEMENT en mémoire JS (jamais en stockage persistant, jamais dans le DOM). `masked` sert à
+    // détecter si le champ a été modifié depuis le masquage (voir le handler d'Annuler plus bas -
+    // défaut #1, round 149) : sans cette comparaison, un clic sur « Revenir à mon texte de départ »
+    // réécrivait toujours la valeur MÉMORISÉE AVANT masquage, même si la personne avait complété ou
+    // modifié son texte depuis - perte de données silencieuse et prouvée (texte ajouté après le
+    // masquage disparaissait sans le moindre avertissement).
+    const maskState = new Map(); // fieldId -> { previous: string, masked: string }
+    // Champ actuellement décrit par le bloc récapitulatif UNIQUE (#cpAnonRecap) - permet au handler
+    // d'Annuler de savoir quel champ restaurer sans dépendre d'une référence DOM qui pourrait être
+    // périmée.
+    let currentRecapFieldId = null;
 
     function hideRecap() {
       if (recapBox) recapBox.style.display = 'none';
       if (recapText) recapText.textContent = '';
       if (undoBtn) undoBtn.style.display = 'none';
+      currentRecapFieldId = null;
     }
 
     // Écrit `newValue` dans `field` en préservant l'annuler/refaire NATIF du navigateur (Ctrl+Z).
@@ -285,6 +303,12 @@
     // Construit le récapitulatif humain (« 2 noms et 1 numéro de téléphone ont été masqués. »)
     // à partir des CATÉGORIES RÉELLES retournées par le moteur (entity.label), en français
     // correct (accord singulier/pluriel par catégorie ET accord du verbe final).
+    // Round 149 (2026-07-31, défaut #3) : le verbe était figé au masculin (« une adresse a été
+    // masqué ») même pour des catégories féminines (adresse, adresse IP, date). Le 3e élément de
+    // chaque entrée d'anonPluralLabels (voir $anonPluralLabels côté blade) porte maintenant le
+    // genre réel de la catégorie. Règle d'accord : une seule catégorie (répétée ou non) -> accord
+    // du GENRE réel de cette catégorie ; plusieurs catégories DIFFÉRENTES jointes par « et » ->
+    // masculin pluriel générique (règle grammaticale française standard pour un groupe mixte).
     function resumerMasquage(entities) {
       const pluralLabels = i18n.anonPluralLabels || {};
       const counts = new Map();
@@ -306,18 +330,44 @@
       if (parts.length > 1) {
         joined = parts.slice(0, -1).join(', ') + ' ' + (i18n.anonAnd || 'et') + ' ' + parts[parts.length - 1];
       }
-      // Accord du verbe : singulier UNIQUEMENT si une seule catégorie avec un seul élément - tout
-      // le reste (plusieurs catégories jointes par « et », ou une catégorie répétée) est pluriel.
-      const singulier = order.length === 1 && entities.length === 1;
-      const verbe = singulier
-        ? (i18n.anonMaskedSingular || 'a été masqué')
-        : (i18n.anonMaskedPlural || 'ont été masqués');
+      const singleCategory = order.length === 1;
+      const singulier = singleCategory && entities.length === 1;
+      const formsUniques = singleCategory ? pluralLabels[order[0]] : null;
+      const feminin = !!(formsUniques && formsUniques[2]);
+      let verbe;
+      if (singulier) {
+        verbe = feminin
+          ? (i18n.anonMaskedSingularFeminine || 'a été masquée')
+          : (i18n.anonMaskedSingular || 'a été masqué');
+      } else if (singleCategory) {
+        verbe = feminin
+          ? (i18n.anonMaskedPluralFeminine || 'ont été masquées')
+          : (i18n.anonMaskedPlural || 'ont été masqués');
+      } else {
+        verbe = i18n.anonMaskedPlural || 'ont été masqués';
+      }
       return joined.charAt(0).toUpperCase() + joined.slice(1) + ' ' + verbe + '.';
     }
 
-    function maskTaskFieldInPlace() {
-      if (!taskField) return;
-      const currentValue = taskField.value;
+    // Round 149 (2026-07-31) : positionne le bloc récapitulatif UNIQUE (#cpAnonRecap) juste après
+    // le champ concerné - même pattern DRY que le bandeau anti-PII plus bas (UN SEUL élément DOM
+    // déplacé, jamais dupliqué 6 fois). Progressive enhancement : si le DOM ne fournit pas
+    // parentNode (jamais le cas en navigateur réel - seulement dans un faux DOM de test), on
+    // continue sans repositionner plutôt que de lever une exception.
+    function positionRecapNear(field) {
+      try {
+        if (recapBox && field && field.parentNode && typeof field.parentNode.insertBefore === 'function') {
+          field.parentNode.insertBefore(recapBox, field.nextSibling);
+        }
+      } catch (e) { /* positionnement optionnel : le récapitulatif reste fonctionnel sans */ }
+    }
+
+    // Fonction UNIQUE de masquage en place, paramétrée par le champ (round 149 - défaut #2 : DRY,
+    // remplace les 6 copies qu'aurait exigées une extraction naïve). Appelée par #cpAnonToggle pour
+    // #cpTaskObject, et par le bandeau anti-PII pour les 5 autres champs surveillés (plus bas).
+    function maskFieldInPlace(field) {
+      if (!field) return;
+      const currentValue = field.value;
 
       // Efface tout récapitulatif/bouton Annuler PÉRIMÉ dès le clic, avant tout autre traitement -
       // si la personne a effacé son texte à la main après un masquage précédent, le récapitulatif
@@ -343,8 +393,10 @@
 
       if (entities.length === 0) {
         if (recapBox && recapText) {
+          positionRecapNear(field);
           recapText.textContent = i18n.anonNoneDetected || 'Aucune information personnelle trouvée dans votre texte. Vous pouvez continuer.';
           recapBox.style.display = '';
+          currentRecapFieldId = field.id || null;
         }
         return;
       }
@@ -363,19 +415,25 @@
         // Entités détectées mais aucune substitution réelle (cas limite) : même honnêteté que
         // « rien détecté » plutôt qu'annoncer un masquage qui n'a rien changé.
         if (recapBox && recapText) {
+          positionRecapNear(field);
           recapText.textContent = i18n.anonNoneDetected || 'Aucune information personnelle trouvée dans votre texte. Vous pouvez continuer.';
           recapBox.style.display = '';
+          currentRecapFieldId = field.id || null;
         }
         return;
       }
 
-      // Mémorise le texte d'origine AVANT de le remplacer (règle 5 : annulation en mémoire JS).
-      previousTaskValue = currentValue;
-      ecrireEnPreservantAnnuler(taskField, masked);
+      // Mémorise le texte d'origine ET le texte masqué qu'on s'apprête à écrire (règle 5 :
+      // annulation en mémoire JS - `masked` sert à la comparaison anti-perte de données du handler
+      // d'Annuler, plus bas).
+      if (field.id) maskState.set(field.id, { previous: currentValue, masked: masked });
+      ecrireEnPreservantAnnuler(field, masked);
 
       if (recapBox && recapText) {
+        positionRecapNear(field);
         recapText.textContent = resumerMasquage(entities);
         recapBox.style.display = '';
+        currentRecapFieldId = field.id || null;
       }
       if (undoBtn) undoBtn.style.display = '';
 
@@ -385,18 +443,51 @@
       showToast(i18n.anonMaskedInField || 'Vos informations personnelles ont été masquées, directement sur votre ordinateur.', 'success');
     }
 
+    // Alias conservé pour lisibilité aux points d'appel : agit sur le champ Tâche.
+    function maskTaskFieldInPlace() { maskFieldInPlace(taskField); }
+
     if (toggleBtn) toggleBtn.addEventListener('click', maskTaskFieldInPlace);
 
-    // Règle 6 : après annulation, le récapitulatif disparaît et #cpAnonToggle redevient disponible
-    // (il n'a jamais été désactivé - un nouveau clic relance simplement une détection sur le texte
-    // restauré).
+    // Règle 6 : après annulation, le récapitulatif disparaît et le bouton de masquage redevient
+    // disponible (il n'a jamais été désactivé - un nouveau clic relance simplement une détection
+    // sur le texte restauré).
     if (undoBtn) {
       undoBtn.addEventListener('click', function () {
-        if (previousTaskValue === null || !taskField) return;
-        ecrireEnPreservantAnnuler(taskField, previousTaskValue);
-        previousTaskValue = null;
-        hideRecap();
-        showToast(i18n.anonUndone || 'Votre texte de départ est revenu, tel que vous l\'aviez écrit.', 'info');
+        if (!currentRecapFieldId) return;
+        const field = document.getElementById(currentRecapFieldId);
+        const state = maskState.get(currentRecapFieldId);
+        if (!field || !state) { hideRecap(); return; }
+
+        const fieldIdAuMomentDuClic = currentRecapFieldId;
+        function restaurer() {
+          ecrireEnPreservantAnnuler(field, state.previous);
+          maskState.delete(fieldIdAuMomentDuClic);
+          hideRecap();
+          showToast(i18n.anonUndone || 'Votre texte de départ est revenu, tel que vous l\'aviez écrit.', 'info');
+        }
+
+        // Round 149 (2026-07-31, défaut #1 - PERTE DE DONNÉES prouvée) : avant, ce handler
+        // réécrivait toujours le champ avec la valeur MÉMORISÉE AVANT masquage, sans jamais la
+        // comparer au contenu ACTUEL. Séquence prouvée : masquage -> la personne COMPLÈTE son
+        // texte (ex. ajoute « Merci de traiter ce dossier avant vendredi. ») -> clic Annuler ->
+        // l'ajout disparaissait silencieusement, sans le moindre avertissement.
+        // On compare maintenant le contenu courant à ce qu'on a ÉCRIT au moment du masquage
+        // (state.masked) : identique -> rien n'a changé depuis, restauration directe, comportement
+        // inchangé pour le cas normal ; différent -> le champ a été modifié depuis le masquage, on
+        // demande confirmation AVANT d'écraser quoi que ce soit (modale du thème
+        // x-core::confirm-modal, montée une seule fois dans master.blade.php sous name="global" -
+        // JAMAIS confirm() natif, interdit par la charte du projet).
+        if (field.value === state.masked) {
+          restaurer();
+          return;
+        }
+
+        window.dispatchEvent(new CustomEvent('open-confirm-global', {
+          detail: {
+            message: i18n.anonUndoConfirm || 'Vous avez modifié ce texte depuis le masquage. Revenir en arrière effacera ce que vous avez écrit depuis. Continuer quand même ?',
+            callback: restaurer
+          }
+        }));
       });
     }
 
@@ -529,8 +620,14 @@
           warnBanner.style.display = 'none';
         });
 
-        // « Masquer mes infos → » : ouvre le panneau, pré-remplit la source avec le champ
-        // concerné, lance la détection, et retient ce champ comme cible de l'insertion.
+        // « Masquer mes infos → » sur un GABARIT DE CARTE (cpCardTemplate-*) UNIQUEMENT depuis le
+        // round 149 (2026-07-31) : ouvre le panneau partagé, pré-remplit la source avec le champ
+        // concerné, lance la détection, et retient ce champ comme cible de l'insertion. Les 5
+        // autres champs surveillés (Exemples, Rôle/Audience/Verbe/Contraintes personnalisés) sont
+        // passés au masquage EN PLACE (voir handleMaskBannerClick plus bas) - ce parcours à 2 zones
+        // reste réservé aux gabarits de carte, créés/détruits dynamiquement par Alpine, hors du
+        // périmètre des 6 champs statiques unifiés (voir la justification au-dessus de
+        // maskFieldInPlace()).
         function openAnonWithTask() {
           try {
             // (i) identifier le champ concerné (celui juste après le bandeau dans le DOM).
@@ -569,7 +666,23 @@
             warnBanner.style.display = 'none';
           } catch (e) { /* élément manquant : on ignore */ }
         }
-        anonBtn.addEventListener('click', openAnonWithTask);
+        // Round 149 (2026-07-31, défaut #2) : point d'entrée UNIQUE du bandeau, qui branche vers le
+        // bon mécanisme selon le champ concerné - masquage EN PLACE (uniforme avec #cpAnonToggle)
+        // pour les 6 champs statiques, ancien panneau à 2 zones conservé pour les seuls gabarits de
+        // carte (justification ci-dessus, à l'appel d'openAnonWithTask()).
+        function handleMaskBannerClick() {
+          try {
+            const field = warnBanner.nextElementSibling;
+            if (!field || !isWatched(field)) return;
+            if (isCardTemplateField(field)) {
+              openAnonWithTask();
+              return;
+            }
+            warnBanner.style.display = 'none';
+            maskFieldInPlace(field);
+          } catch (e) { /* garde-fou optionnel : aucune erreur ne doit remonter */ }
+        }
+        anonBtn.addEventListener('click', handleMaskBannerClick);
 
         // Déclencheurs : input débounce ~600ms + blur immédiat, sur CHAQUE champ surveillé.
         watchedFields.forEach(function (field) {

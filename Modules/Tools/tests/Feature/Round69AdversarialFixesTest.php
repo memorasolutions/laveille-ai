@@ -38,7 +38,12 @@ it('has English translations for the fullscreen button and anon-panel strings (r
         "Anonymisez d'abord un texte (bouton « Détecter et anonymiser »).",
         "Texte anonymisé importé de l'anonymiseur.",
         'Texte anonymisé inséré dans la tâche.',
-        "On dirait qu'il y a des infos personnelles (un nom; un courriel; un numéro…). Pour ta sécurité, masque-les avant de copier ton prompt.",
+        // Round 149 (2026-07-31) : la clé anonPiiWarning ("...un nom; un courriel; un numéro...")
+        // a été retirée du blade et de en.json - elle était morte (remplacée par anonPiiWarningField,
+        // le message PAR CHAMP, plus aucune référence JS depuis le round 109). On vérifie ici la clé
+        // RÉELLEMENT utilisée par le bandeau anti-PII à la place, même esprit du test (une chaîne du
+        // bandeau doit avoir sa traduction anglaise), sans tester du code mort.
+        "On dirait qu'il y a des infos personnelles dans « %s ». Pour ta sécurité, masque-les avant de copier ton prompt.",
         'Masquer mes infos →',
     ];
 

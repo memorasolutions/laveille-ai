@@ -74,9 +74,15 @@ function makeField(id) {
 }
 
 // Éléments réellement résolus par getElementById dans prompt-anon-panel.js.
+// Round 149 (2026-07-31) : cpExamples RETIRÉ de ce test. Le masquage en place généralisé (défaut
+// #2, voir tests/js/constructeur-prompts-uniform-inplace-masking.test.cjs) fait que cpExamples et
+// les 4 autres champs personnalisés ne passent PLUS JAMAIS par ce panneau à 2 zones - seuls les
+// gabarits de carte (cpCardTemplate-*) l'utilisent encore (justification documentée dans
+// prompt-anon-panel.js). Les protections round 140/141/142 que ce fichier vérifie (portée de
+// labelFor, libellé dynamique du bouton, relâchement de la cible, noeud démonté) restent
+// nécessaires pour CE parcours - seul le champ représentatif change, pas ce qui est protégé.
 const fields = {
   cpTaskObject: makeField('cpTaskObject'),
-  cpExamples: makeField('cpExamples'),
   cpAnonToggle: makeField('cpAnonToggle'),
   cpAnonPanel: makeField('cpAnonPanel'),
   cpAnonInsert: makeField('cpAnonInsert'),
@@ -121,12 +127,17 @@ const sourcePath = path.join(__dirname, '../../public/assets/tools/constructeur-
 new Function(fs.readFileSync(sourcePath, 'utf8'))();
 domReady();
 
-// (a) L'utilisateur écrit une vraie information personnelle dans « Exemples » puis quitte le champ.
-fields.cpExamples.value = 'Écris à jean.dupont@gmail.com';
-fields.cpExamples.fire('blur');
+// (a) L'utilisateur écrit une vraie information personnelle dans un GABARIT DE CARTE puis quitte
+// le champ. Round 149 (2026-07-31) : champ représentatif changé de cpExamples à un gabarit de
+// carte (voir la note au-dessus de `fields`) - c'est désormais le SEUL champ qui emprunte encore
+// ce parcours à 2 zones.
+const carteInitiale = makeField('cpCardTemplate-init001');
+carteInitiale.value = 'Écris à jean.dupont@gmail.com';
+const surBlurCarte = document.listeners.blur || [];
+surBlurCarte.forEach((cb) => cb({ target: carteInitiale }));
 assert(
-  fields.cpExamples.nextElementSibling === null || created.length > 0,
-  'round 140 : le garde-fou anti-PII est bien monté sur le champ « Exemples »'
+  carteInitiale.nextElementSibling === null || created.length > 0,
+  'round 140 : le garde-fou anti-PII est bien monté sur les gabarits de carte (seul consommateur restant de ce panneau)'
 );
 
 // (b) Il clique « Masquer mes infos → ». Ce bouton se reconnaît à sa signature d'effet unique :
@@ -141,13 +152,13 @@ for (const el of created) {
     break;
   }
 }
-assert(masquerTrouve, 'round 140 : le bouton « Masquer mes infos » ouvre le panneau et pré-remplit la source avec le champ concerné');
+assert(masquerTrouve, 'round 140 : le bouton « Masquer mes infos » ouvre le panneau et pré-remplit la source avec le gabarit de carte concerné');
 
 // Round 141 : le LIBELLÉ DU BOUTON annonce le champ réellement visé, AVANT le clic. C'est ce que
 // la personne lit pour décider ; le round 138 n'avait corrigé que le message affiché après coup.
 assert(
-  fields.cpAnonInsertLabel.textContent === 'Insérer dans « Exemples pour guider l\'IA »',
-  'round 141 : le bouton annonce « Insérer dans « Exemples... » » et non plus « dans la tâche » (lu AVANT le clic)'
+  fields.cpAnonInsertLabel.textContent === 'Insérer dans « Gabarit de requête de cette carte »',
+  'round 141 : le bouton annonce « Insérer dans « le gabarit... » » et non plus « dans la tâche » (lu AVANT le clic)'
 );
 
 // (c) Il clique « Insérer ». C'est ici que le ReferenceError se produisait.
@@ -162,46 +173,46 @@ try {
 
 assert(leveeException === null, 'round 140 : l\'insertion ne lève AUCUNE exception (c\'est le ReferenceError sur labelFor qui cassait tout)');
 assert(
-  fields.cpExamples.value.indexOf('[COURRIEL]') !== -1,
-  'round 140 : le texte anonymisé est bien écrit dans « Exemples » (le champ qui contenait la fuite)'
+  carteInitiale.value.indexOf('[COURRIEL]') !== -1,
+  'round 140 : le texte anonymisé est bien écrit dans le gabarit de carte (le champ qui contenait la fuite)'
 );
 // Round 146 : l'assertion ci-dessus est TAUTOLOGIQUE si elle reste seule. Vérifier la présence du
 // jeton masqué ne prouve rien : la donnée personnelle d'origine peut très bien subsister JUSTE À
 // CÔTÉ de lui. Preuve par mutation : en réintroduisant une concaténation au lieu d'un remplacement,
 // le champ contenait « Écris à jean.dupont@gmail.com\nBonjour [NOM]... » et le test restait vert.
 assert(
-  fields.cpExamples.value.indexOf('jean.dupont@gmail.com') === -1,
+  carteInitiale.value.indexOf('jean.dupont@gmail.com') === -1,
   'round 146 : la donnée personnelle d\'origine a bien DISPARU du champ, pas seulement le jeton présent'
 );
 // L'égalité STRICTE est le garde-fou le plus robuste : elle échoue automatiquement sur toute
 // concaténation résiduelle, sans avoir à énumérer chaque donnée personnelle imaginable.
 assert(
-  fields.cpExamples.value === 'Bonjour [NOM], contactez [COURRIEL]',
+  carteInitiale.value === 'Bonjour [NOM], contactez [COURRIEL]',
   'round 146 : le champ contient EXACTEMENT le texte masqué (égalité stricte, pas une sous-chaîne)'
 );
 
 const succes = toasts.filter((t) => t.type === 'toast-show' && t.detail && t.detail.variant === 'success');
 assert(succes.length === 1, 'round 140 : un message de confirmation est réellement émis (il était avorté par l\'exception)');
 assert(
-  succes.length === 1 && succes[0].detail.message.indexOf('Exemples') !== -1,
-  'round 140 : le message NOMME le champ visé (« Exemples »), il n\'annonce plus « la tâche » à tort'
+  succes.length === 1 && succes[0].detail.message.indexOf('Gabarit de requête de cette carte') !== -1,
+  'round 140 : le message NOMME le champ visé (le gabarit de carte), il n\'annonce plus « la tâche » à tort'
 );
 assert(fields.cpAnonPanel.style.display === 'none', 'round 140 : le panneau se referme après l\'insertion');
 
 // (d) Preuve que la cible a été relâchée : `activeField = null` est la DERNIÈRE ligne de
 // insertIntoTask(), donc la première victime de l'exception. Sans elle, cette seconde insertion
-// repartirait dans « Exemples » au lieu de la Tâche.
+// repartirait dans le gabarit de carte au lieu de la Tâche.
 window.lvAnonUI.anonPlain = 'Deuxième texte anonymisé';
 fields.cpTaskObject.value = '';
-const exemplesAvant = fields.cpExamples.value;
+const carteAvant = carteInitiale.value;
 fields.cpAnonInsert.click();
 assert(
   fields.cpTaskObject.value.indexOf('Deuxième texte') !== -1,
   'round 140 : une insertion suivante retombe sur la Tâche (la cible a bien été relâchée)'
 );
 assert(
-  fields.cpExamples.value === exemplesAvant,
-  'round 140 : cette insertion suivante n\'écrit PAS une seconde fois dans « Exemples » (plus de cible périmée)'
+  carteInitiale.value === carteAvant,
+  'round 140 : cette insertion suivante n\'écrit PAS une seconde fois dans le gabarit de carte (plus de cible périmée)'
 );
 
 assert(
@@ -233,19 +244,13 @@ setTimeout(() => {
   // Le textarea d'un gabarit de carte vit dans un <template x-if>, donc refermer le panneau de la
   // carte détruit le noeud. Sans garde, l'écriture partait dans ce noeud détaché : texte perdu,
   // message de succès affiché quand même.
+  // Round 149 : le « champ témoin » utilisé pour prouver l'absence de redirection en douce est
+  // maintenant `carteInitiale` (établie plus haut) - cpExamples n'ouvre plus jamais ce panneau,
+  // elle ne peut plus servir de témoin ici.
   const carteDemontee = makeField('cpCardTemplate-ccc');
-  fields.cpExamples.value = 'jean.dupont@gmail.com';
-  fields.cpExamples.fire('blur');
-  for (const el of created) {
-    if (!el.listeners || !el.listeners.click) continue;
-    fields.anonSource.textContent = '';
-    el.click();
-    if (fields.anonSource.textContent === 'jean.dupont@gmail.com') break;
-  }
-  // On simule l'ouverture depuis la carte, puis sa destruction par Alpine.
   window.lvAnonUI.anonPlain = 'Texte masqué pour la carte';
   fields.cpTaskObject.value = '';
-  const exemplesAvantCarte = fields.cpExamples.value;
+  const carteInitialeAvant = carteInitiale.value;
   carteDemontee.isConnected = false; // Alpine a retiré le noeud du document
   fields['cpCardTemplate-ccc'] = null; // et getElementById ne le retrouve plus
   toasts.length = 0;
@@ -271,7 +276,7 @@ setTimeout(() => {
   );
   assert(
     fields.cpTaskObject.value.indexOf('Texte masqué pour la carte') === -1 &&
-    fields.cpExamples.value === exemplesAvantCarte,
+    carteInitiale.value === carteInitialeAvant,
     'round 142 : le texte n\'est PAS redirigé en douce vers un autre champ (ce serait dupliquer la fuite)'
   );
   assert(
