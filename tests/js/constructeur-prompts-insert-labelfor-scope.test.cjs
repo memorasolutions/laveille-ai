@@ -165,6 +165,20 @@ assert(
   fields.cpExamples.value.indexOf('[COURRIEL]') !== -1,
   'round 140 : le texte anonymisé est bien écrit dans « Exemples » (le champ qui contenait la fuite)'
 );
+// Round 146 : l'assertion ci-dessus est TAUTOLOGIQUE si elle reste seule. Vérifier la présence du
+// jeton masqué ne prouve rien : la donnée personnelle d'origine peut très bien subsister JUSTE À
+// CÔTÉ de lui. Preuve par mutation : en réintroduisant une concaténation au lieu d'un remplacement,
+// le champ contenait « Écris à jean.dupont@gmail.com\nBonjour [NOM]... » et le test restait vert.
+assert(
+  fields.cpExamples.value.indexOf('jean.dupont@gmail.com') === -1,
+  'round 146 : la donnée personnelle d\'origine a bien DISPARU du champ, pas seulement le jeton présent'
+);
+// L'égalité STRICTE est le garde-fou le plus robuste : elle échoue automatiquement sur toute
+// concaténation résiduelle, sans avoir à énumérer chaque donnée personnelle imaginable.
+assert(
+  fields.cpExamples.value === 'Bonjour [NOM], contactez [COURRIEL]',
+  'round 146 : le champ contient EXACTEMENT le texte masqué (égalité stricte, pas une sous-chaîne)'
+);
 
 const succes = toasts.filter((t) => t.type === 'toast-show' && t.detail && t.detail.variant === 'success');
 assert(succes.length === 1, 'round 140 : un message de confirmation est réellement émis (il était avorté par l\'exception)');
