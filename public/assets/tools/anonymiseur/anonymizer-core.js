@@ -59,9 +59,11 @@ function buildAccentInsensitiveUnboundedRegex(str) {
 // jamais détecté (ex. « Appelle Marc Tremblay » → seul « Appelle Marc » est capté).
 const MOTS_IGNORES_SUPPLEMENTAIRES = ['appelle', 'appelez', 'contacte', 'contactez', 'informe', 'informez', 'joins', 'joignez', 'rejoins', 'rejoignez', 'veuillez', 'prière', 'écris', 'écrivez', 'envoie', 'envoyez', 'demande', 'demandez', 'rappelle', 'rappelez', 'préviens', 'prévenez', 'transmets', 'transmettez', 'remercie', 'remerciez', 'salue', 'saluez', 'bonjour', 'bonsoir', 'merci', 'cordialement', 'salutations', 'objet', 'sujet', 'note', 'attention', 'urgent', 'important', 'voici', 'voilà', 'ensuite', 'ainsi', 'donc', 'cependant', 'toutefois', 'aussi', 'enfin', 'bref'];
 
+// Normalisation partagée : casse, accents ET apostrophes (droite ' ou typographique ')
+// retirées, pour que « Rue des Érables » == « rue des erables » == « D'Amours » == « D’Amours ».
 function normaliserMot(mot) {
   if (!mot) return '';
-  return mot.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  return mot.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/['’ʼ`´]/g, '');
 }
 
 // Vérifie si un mot doit être ignoré comme candidat nom propre : combine les stopwords déjà
@@ -295,6 +297,34 @@ function detectEntities(text) {
 
 function getRandomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
+// Tire un substitut dans une pioche en garantissant qu'il ne redevient jamais la valeur réelle
+// (insensible casse/accents/apostrophes via normaliserMot). Boucle BORNÉE (jamais infinie) :
+// après maxEssais tirages aléatoires infructueux, repli déterministe = premier élément de la
+// pioche qui diffère réellement de la valeur réelle (garanti tant que la pioche a >1 entrée
+// distincte, ce qui est toujours le cas ici) ; en dernier recours seulement (pioche à une seule
+// valeur), on suffixe pour forcer la différence plutôt que de renvoyer un doublon.
+function tirerSubstitutDistinct(pioche, valeurReelle, maxEssais = 12) {
+  const reelleNorm = normaliserMot(valeurReelle);
+  let candidat = getRandomItem(pioche);
+  let essais = 0;
+  while (normaliserMot(candidat) === reelleNorm && essais < maxEssais) {
+    candidat = getRandomItem(pioche);
+    essais++;
+  }
+  if (normaliserMot(candidat) === reelleNorm) {
+    const repli = pioche.find((item) => normaliserMot(item) !== reelleNorm);
+    candidat = repli !== undefined ? repli : `${candidat}_x`;
+  }
+  return candidat;
+}
+
+// Isole le nom de la voie (type + nom, ex. « rue des Érables ») en retirant le numéro civique de
+// tête, pour comparer uniquement la voie — le numéro n'a pas à différer de l'original (règle
+// métier : seule la collision sur le nom de la voie doit être évitée, pas sur le numéro).
+function extraireVoieAdresse(original) {
+  return String(original || '').replace(/^\s*\d{1,5}\s*,?\s*/, '').trim();
+}
+
 function generateFake(category, original) {
   switch (category) {
     case 'dossier': {
@@ -315,11 +345,24 @@ function generateFake(category, original) {
         return `${rl()}${rd()}${rl()} ${rd()}${rl()}${rd()}`;
       }
       const num = Math.floor(Math.random() * 990) + 10;
-      return `${num} ${getRandomItem(FAKE_DATA.streets)}`;
+      // La collision porte sur le nom de la voie, jamais sur le numéro civique (règle métier).
+      const street = tirerSubstitutDistinct(FAKE_DATA.streets, extraireVoieAdresse(original));
+      return `${num} ${street}`;
     }
-    case 'name': return `${getRandomItem([...FAKE_DATA.firstNamesM, ...FAKE_DATA.firstNamesF])} ${getRandomItem(FAKE_DATA.lastNames)}`;
-    case 'firstName': return getRandomItem([...FAKE_DATA.firstNamesM, ...FAKE_DATA.firstNamesF]);
-    case 'lastName': return getRandomItem(FAKE_DATA.lastNames);
+    case 'name': {
+      // Nom composé (particules « de », « La »… éventuelles) : seuls le premier mot (prénom réel)
+      // et le dernier mot (nom de famille réel) comptent pour l'anti-collision, chacun comparé
+      // séparément à sa propre pioche (une collision partielle, ex. faux prénom == vrai prénom
+      // avec un faux nom différent, doit être bloquée tout autant qu'une collision totale).
+      const mots = String(original || '').trim().split(/\s+/).filter(Boolean);
+      const premierMotReel = mots[0] || '';
+      const dernierMotReel = mots[mots.length - 1] || '';
+      const fakeFirst = tirerSubstitutDistinct([...FAKE_DATA.firstNamesM, ...FAKE_DATA.firstNamesF], premierMotReel);
+      const fakeLast = tirerSubstitutDistinct(FAKE_DATA.lastNames, dernierMotReel);
+      return `${fakeFirst} ${fakeLast}`;
+    }
+    case 'firstName': return tirerSubstitutDistinct([...FAKE_DATA.firstNamesM, ...FAKE_DATA.firstNamesF], original);
+    case 'lastName': return tirerSubstitutDistinct(FAKE_DATA.lastNames, original);
     case 'amount': return '$' + ((Math.floor(Math.random() * 9000) + 100)) + ',00';
     case 'date': {
       const year = Math.floor(Math.random() * (2024 - 1950 + 1)) + 1950;
@@ -341,17 +384,18 @@ function generateFake(category, original) {
   }
 }
 
-// Garde-fou anti-fuite : garantit que le faux n'égale jamais l'original (insensible casse/accents)
+// Garde-fou anti-fuite : garantit que le faux n'égale jamais l'original (insensible
+// casse/accents/apostrophes — réutilise normaliserMot, ne duplique pas la normalisation).
 function safeFake(category, original) {
-  const norm = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-  const no = norm(original);
+  const no = normaliserMot(original);
   let result = generateFake(category, original), attempts = 0;
-  while (norm(result) === no && attempts < 8) { result = generateFake(category, original); attempts++; }
-  return norm(result) === no ? result + '_x' : result;
+  while (normaliserMot(result) === no && attempts < 8) { result = generateFake(category, original); attempts++; }
+  return normaliserMot(result) === no ? result + '_x' : result;
 }
 
-// Unicité globale : aucun faux n'égale un original ni un autre faux déjà utilisé (réversibilité garantie)
-const _normU = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+// Unicité globale : aucun faux n'égale un original ni un autre faux déjà utilisé (réversibilité
+// garantie). Alias de normaliserMot (DRY) : même règle d'insensibilité que le reste du moteur.
+const _normU = normaliserMot;
 function uniqueFake(category, original, used) {
   let result = safeFake(category, original), attempts = 0;
   while (used.has(_normU(result)) && attempts < 12) { result = safeFake(category, original); attempts++; }
