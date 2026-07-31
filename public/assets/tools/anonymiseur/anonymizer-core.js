@@ -52,6 +52,37 @@ function buildAccentInsensitiveUnboundedRegex(str) {
   return new RegExp(pattern, 'gi');
 }
 
+// Mots courants (verbes d'introduction, salutations, connecteurs) qui précèdent souvent un vrai
+// nom propre dans une phrase et qui, capitalisés en début de phrase, se font passer pour un prénom
+// par la regex de détection des noms composés. Sans les exclure, le mot ignoré VOLE la fenêtre
+// d'appariement à deux mots consécutifs et le vrai nom de famille qui suit reste orphelin, donc
+// jamais détecté (ex. « Appelle Marc Tremblay » → seul « Appelle Marc » est capté).
+const MOTS_IGNORES_SUPPLEMENTAIRES = ['appelle', 'appelez', 'contacte', 'contactez', 'informe', 'informez', 'joins', 'joignez', 'rejoins', 'rejoignez', 'veuillez', 'prière', 'écris', 'écrivez', 'envoie', 'envoyez', 'demande', 'demandez', 'rappelle', 'rappelez', 'préviens', 'prévenez', 'transmets', 'transmettez', 'remercie', 'remerciez', 'salue', 'saluez', 'bonjour', 'bonsoir', 'merci', 'cordialement', 'salutations', 'objet', 'sujet', 'note', 'attention', 'urgent', 'important', 'voici', 'voilà', 'ensuite', 'ainsi', 'donc', 'cependant', 'toutefois', 'aussi', 'enfin', 'bref'];
+
+function normaliserMot(mot) {
+  if (!mot) return '';
+  return mot.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+// Vérifie si un mot doit être ignoré comme candidat nom propre : combine les stopwords déjà
+// connus du site d'appel (Set ou tableau) avec MOTS_IGNORES_SUPPLEMENTAIRES, insensible
+// casse/accents. Utilisé pour empêcher un mot courant de « voler » la fenêtre d'appariement
+// d'un nom composé (voir commentaire de MOTS_IGNORES_SUPPLEMENTAIRES ci-dessus).
+function estMotIgnore(mot, stopwordsExistants) {
+  if (!mot) return true;
+  const motNormalise = normaliserMot(mot);
+  let ensemble;
+  if (stopwordsExistants && typeof stopwordsExistants.has === 'function') {
+    ensemble = new Set([...stopwordsExistants].map(normaliserMot));
+  } else if (Array.isArray(stopwordsExistants)) {
+    ensemble = new Set(stopwordsExistants.map(normaliserMot));
+  } else {
+    ensemble = new Set();
+  }
+  MOTS_IGNORES_SUPPLEMENTAIRES.forEach(function (m) { ensemble.add(normaliserMot(m)); });
+  return ensemble.has(motNormalise);
+}
+
 function detectEntities(text) {
   const STOPWORDS = new Set([
     'bonjour', 'bonsoir', 'salut', 'merci', 'cordialement', 'madame', 'monsieur',
@@ -140,14 +171,17 @@ function detectEntities(text) {
   // 2. Noms sans titre (deux mots capitalisés, hors stopwords)
   const name = /(?<![A-Za-zÀ-ÿ])([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)[^\S\r\n]+([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)(?![A-Za-zÀ-ÿ])/g;
   while ((m = name.exec(text))) {
-    const w1 = normalize(m[1]), w2 = normalize(m[2]);
-    if (STOPWORDS.has(w1) && !STOPWORDS.has(w2)) {
-      // 1er mot = mot courant (« Patient », « Concernant »…) : ne PAS consommer le 2e mot,
-      // rembobiner pour capter le vrai nom complet qui le suit (« Louise Gagnon »).
+    // estMotIgnore() couvre STOPWORDS + MOTS_IGNORES_SUPPLEMENTAIRES (verbes d'introduction,
+    // salutations…) : un mot ignoré ne doit JAMAIS voler la fenêtre d'appariement à deux mots,
+    // sinon le vrai nom de famille qui suit reste orphelin et n'est plus jamais détecté.
+    const w1Ignore = estMotIgnore(m[1], STOPWORDS), w2Ignore = estMotIgnore(m[2], STOPWORDS);
+    if (w1Ignore && !w2Ignore) {
+      // 1er mot = mot courant (« Patient », « Concernant », « Appelle »…) : ne PAS consommer
+      // le 2e mot, rembobiner pour capter le vrai nom complet qui le suit (« Marc Tremblay »).
       name.lastIndex = m.index + m[1].length;
       continue;
     }
-    if (!STOPWORDS.has(w1) && !STOPWORDS.has(w2)) push(`${m[1]} ${m[2]}`, 'name', 'Nom complet', 0.8);
+    if (!w1Ignore && !w2Ignore) push(`${m[1]} ${m[2]}`, 'name', 'Nom complet', 0.8);
   }
   // 15. Prénoms / noms de famille VRAIMENT ISOLÉS des noms complets déjà détectés — couvre le mode
   //     jetons et les occurrences seules (« Geneviève » seul après « Geneviève Côté-Pelletier »).
@@ -459,6 +493,43 @@ function relinkEmails(rules) {
   return rules;
 }
 
-const AnonymizerCore = { detectEntities, generateFake, buildRules, anonymize, restore, relinkEmails, buildAccentInsensitiveBoundedRegex, buildAccentInsensitiveUnboundedRegex };
+// Filet de sécurité anti-fuite résiduelle : cette fonction NE CORRIGE RIEN, elle SIGNALE. Après
+// l'anonymisation, un mot-source (venant d'une règle) peut encore survivre tel quel dans le texte
+// (ex. règle « Marc Tremblay » → « Luc Fortin » détectée, mais un « Tremblay » isolé ailleurs dans
+// le texte n'était couvert par aucune règle et reste en clair). On la lance en dernier recours pour
+// avertir la personne AVANT qu'elle copie un texte incomplètement masqué, jamais pour bloquer.
+function detecterFuitesResiduelles(texteAnonymise, regles) {
+  if (!texteAnonymise || !Array.isArray(regles) || regles.length === 0) return [];
+  function echapperRegex(chaine) { return chaine.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  const motsSubstituts = new Set();
+  regles.forEach(function (regle) {
+    if (regle && regle.replacement) {
+      String(regle.replacement).split(/[^\p{L}\p{N}]+/u).filter(Boolean).forEach(function (mot) {
+        motsSubstituts.add(normaliserMot(mot));
+      });
+    }
+  });
+  const resultat = [];
+  const dejaVus = new Set();
+  regles.forEach(function (regle) {
+    // Compatible avec les deux formes de règles du fichier : les sélections brutes (.value) et
+    // les règles produites par buildRules()/utilisées par anonymize() (.original).
+    const valeurSource = regle && (regle.original != null ? regle.original : regle.value);
+    if (!regle || !valeurSource) return;
+    String(valeurSource).split(/[^\p{L}\p{N}]+/u).filter(Boolean).forEach(function (mot) {
+      if (mot.length < 3) return;
+      const norm = normaliserMot(mot);
+      if (motsSubstituts.has(norm) || dejaVus.has(norm)) return;
+      const motif = new RegExp('(?<![\\p{L}\\p{N}])' + echapperRegex(mot) + '(?![\\p{L}\\p{N}])', 'iu');
+      if (motif.test(texteAnonymise)) {
+        dejaVus.add(norm);
+        resultat.push({ fragment: mot, source: valeurSource });
+      }
+    });
+  });
+  return resultat;
+}
+
+const AnonymizerCore = { detectEntities, generateFake, buildRules, anonymize, restore, relinkEmails, detecterFuitesResiduelles, buildAccentInsensitiveBoundedRegex, buildAccentInsensitiveUnboundedRegex };
 if (typeof module !== 'undefined' && module.exports) module.exports = AnonymizerCore;
 if (typeof window !== 'undefined') window.AnonymizerCore = AnonymizerCore;

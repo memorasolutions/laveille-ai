@@ -3082,6 +3082,17 @@ declare(strict_types=1);
  *     Directory+Blog (147/147, modules touchés par le changement de layout partagé) tous verts.
  *     Vérification visuelle Playwright desktop 1440px + mobile 390px.
  *
+ * v1.135.0 = fix(outils/anonymiseur) le nom de famille survivait a l'anonymisation.
+ *     « Appelle Marc Tremblay » devenait « Manon Pelletier Tremblay » : le vrai nom de famille
+ *     restait en clair. Cause reelle (reproduite avec le moteur) : la detection appariait DEUX mots
+ *     capitalises consecutifs et captait « Appelle Marc » - « Appelle », majuscule de debut de
+ *     phrase, n'etait pas un mot ignore. « Tremblay » restait alors orphelin et n'etait JAMAIS
+ *     detecte. Ce n'etait pas un probleme de chevauchement : anonymize() gere deja tres bien les
+ *     intervalles non chevauchants. Ajout d'une liste de verbes de sollicitation frequents en tete
+ *     de phrase, d'une comparaison insensible aux accents, et d'un filet de securite generique
+ *     (detecterFuitesResiduelles) qui SIGNALE tout fragment d'une donnee source survivant dans la
+ *     sortie - garde-fou contre la sous-detection, le risque le plus invisible pour l'utilisateur.
+ *     Verifie au navigateur : « Marc Tremblay » detecte en entier, « Tremblay » absent de la sortie.
  * v1.134.0 = feat(outils/constructeur-prompts) une seule surface d'écriture pour l'anonymisation.
  *     Le panneau « Masquer mes infos » et le champ « Sur quoi porte votre demande ? » formaient deux
  *     zones de saisie pour une seule intention : on pouvait écrire son texte deux fois, ou dans la
@@ -3111,7 +3122,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 134;
+$lvMinor = 135;
 $lvPatch = 0;
 
 return [

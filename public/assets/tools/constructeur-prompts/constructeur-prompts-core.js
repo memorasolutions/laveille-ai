@@ -1000,6 +1000,22 @@ document.addEventListener('alpine:init', function() {
                 try { localStorage.setItem('cp_custom_cards', JSON.stringify({ version: 1, cards: this.customCards })); } catch (e) {}
             },
 
+            // Referme une fuite réelle : le gabarit d'une carte (query_template) peut contenir des
+            // données personnelles en clair, écrites dans le stockage local au moment du blur, donc
+            // AVANT tout masquage (commitCardPanelBlur -> persistCustomCards -> _saveLocalCustomCards
+            // pour les invités). Quand le panneau « Anonymiser » réinjecte ensuite le texte masqué
+            // dans ce même champ, seul le modèle Alpine est mis à jour (événement input) - sans
+            // réécriture explicite, la version en clair précédemment sauvegardée survit dans le
+            // navigateur alors que la personne croit avoir masqué ses informations. Câblée sur
+            // l'événement dédié 'cp-card-masked' (voir prompt-anon-panel.js) : on ne supprime rien
+            // d'autre, on réécrit simplement la copie locale avec l'état courant (déjà masqué).
+            purgerCopieLocaleDesCartes: function() {
+                try {
+                    if (!Array.isArray(this.customCards)) return;
+                    localStorage.setItem('cp_custom_cards', JSON.stringify({ version: 1, cards: this.customCards }));
+                } catch (e) { /* stockage local indisponible (navigation privée) : sans effet, jamais d'exception */ }
+            },
+
             // Round 118 (2026-07-27, passe adversariale) : ce point réseau était le SEUL du fichier
             // à ne jamais signaler son échec (les 7 autres appellent _showSaveError). Sur 401/403/
             // 429/500, `r.ok` était faux mais la chaîne continuait avec data=null : customCards

@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.135.0] - 2026-07-31
+
+### Corrigé
+- **Anonymiseur : le nom de famille survivait au masquage.** « Appelle Marc Tremblay » devenait
+  « Manon Pelletier Tremblay » - le vrai nom de famille restait en clair dans un texte que la
+  personne croyait anonymisé. La détection appariait deux mots capitalisés consécutifs et captait
+  « Appelle Marc », laissant « Tremblay » orphelin, donc jamais détecté. Une liste de verbes de
+  sollicitation fréquents en tête de phrase (appelle, contactez, veuillez, écrivez...) empêche
+  désormais ce vol d'appariement, avec une comparaison insensible aux accents.
+- **Service worker : les exclusions ne couvraient que les requêtes GET.** Les routes d'exclusion
+  (/admin, /livewire/, cross-origin) étaient enregistrées sans méthode explicite ; Workbox range
+  les routes par méthode et utilise GET par défaut. Tout POST vers l'administration ou un composant
+  Livewire tombait donc dans le rejeu automatique en arrière-plan, ce qui n'a jamais été voulu.
+
+### Ajouté
+- **Filet de sécurité contre la sous-détection** (`detecterFuitesResiduelles`). Après masquage, il
+  signale tout fragment d'une donnée source qui survivrait littéralement dans la sortie. Il ne
+  corrige rien : il avertit avant que la personne copie un texte incomplètement masqué. La
+  sous-détection est le risque le plus dangereux de ce type d'outil, parce qu'elle est invisible.
+
+### Tests
+- Le test d'insertion anonymisée était **tautologique** : il vérifiait la présence du jeton masqué
+  et restait vert alors que la vraie adresse courriel subsistait à côté. Renforcé par une assertion
+  de disparition et une égalité stricte, qui échoue sur toute concaténation résiduelle.
+
 ## [1.134.0] - 2026-07-31
 
 ### Ajouté

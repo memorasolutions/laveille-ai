@@ -232,7 +232,12 @@
                                                          et réinjecté dans de futurs prompts. Id dynamique (même convention que
                                                          cpCardTitleInput-<id>) + écoute déléguée côté JS, car ces cartes sont créées et
                                                          détruites dynamiquement (x-if dans x-for). --}}
-                                                    <textarea :id="'cpCardTemplate-' + c.id" class="form-control form-control-sm" rows="3" x-model="c.query_template" @blur="commitCardPanelBlur(c)" @keydown.escape="cancelEditCardPanel(c)" maxlength="500" placeholder="{{ __('Ex: Corrige les fautes et améliore la clarté de ce texte...') }}" aria-label="{{ __('Gabarit de requête de cette carte') }}"></textarea>
+                                                    {{-- @cp-card-masked : signal dédié envoyé par prompt-anon-panel.js juste après avoir
+                                                         réinjecté un gabarit masqué dans ce champ (événement input, pas de blur). Sans lui,
+                                                         la copie en clair déjà écrite dans localStorage au blur précédent survivrait tant
+                                                         qu'aucun nouveau blur ne se produit - purgerCopieLocaleDesCartes() réécrit
+                                                         immédiatement la copie locale avec l'état courant (déjà masqué). --}}
+                                                    <textarea :id="'cpCardTemplate-' + c.id" class="form-control form-control-sm" rows="3" x-model="c.query_template" @blur="commitCardPanelBlur(c)" @keydown.escape="cancelEditCardPanel(c)" @cp-card-masked="purgerCopieLocaleDesCartes()" maxlength="500" placeholder="{{ __('Ex: Corrige les fautes et améliore la clarté de ce texte...') }}" aria-label="{{ __('Gabarit de requête de cette carte') }}"></textarea>
                                                     <small class="text-muted d-block mt-1" style="font-size:0.7rem;">{{ __('Ce texte remplira votre demande si elle est encore vide. Si vous avez déjà écrit quelque chose, rien ne sera écrasé.') }}</small>
                                                 </div>
                                             </template>

@@ -220,6 +220,19 @@
         }
       }
       targetField.dispatchEvent(new Event('input', { bubbles: true })); // Alpine x-model
+      // Round 147 (2026-07-30) : referme une fuite réelle. Le gabarit d'une carte peut avoir été
+      // écrit en clair dans localStorage par un blur ANTÉRIEUR (avant tout masquage) -
+      // commitCardPanelBlur -> persistCustomCards -> _saveLocalCustomCards pour les invités.
+      // L'événement 'input' ci-dessus met x-model à jour (card.query_template = texte masqué)
+      // mais ne déclenche PAS de blur : sans ce signal dédié, la copie locale pré-masquage
+      // survivrait dans le navigateur jusqu'au prochain blur, ou indéfiniment si l'onglet se ferme
+      // avant. On avise le composant Alpine (purgerCopieLocaleDesCartes(), câblé sur ce même
+      // textarea via @cp-card-masked) pour réécrire immédiatement la copie locale avec l'état
+      // courant, déjà masqué. Ne s'applique qu'aux gabarits de carte (seule surface confirmée
+      // persistée en localStorage en clair) - jamais d'effet sur les autres champs surveillés.
+      if (targetField.id && targetField.id.indexOf(CARD_TEMPLATE_PREFIX) === 0) {
+        targetField.dispatchEvent(new CustomEvent('cp-card-masked'));
+      }
       // Round 138 (2026-07-30) : le message NOMME le champ réellement visé. Il annonçait « la
       // tâche » quoi qu'il arrive, y compris quand l'insertion partait ailleurs.
       var insertMsg;
