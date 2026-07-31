@@ -6,13 +6,29 @@ const FAKE_DATA = {
   lastNames: ['Tremblay', 'Gagnon', 'Bouchard', 'Gauthier', 'Morin', 'Lavoie', 'Fortin', 'Gagné', 'Pelletier', 'Bélanger'],
   streets: ['rue Principale', 'avenue du Parc', 'boulevard Saint-Joseph', 'chemin de la Rivière', 'rue des Érables', 'avenue Laurier', 'boulevard René-Lévesque', 'rue Saint-Denis', 'chemin Sainte-Foy', 'rue de la Gauchetière'],
   cities: ['Montréal', 'Québec', 'Laval', 'Gatineau', 'Longueuil', 'Sherbrooke', 'Saguenay', 'Lévis', 'Trois-Rivières', 'Terrebonne'],
-  domains: ['gmail.com', 'hotmail.com', 'yahoo.ca', 'videotron.ca', 'bell.net'],
+  // Domaines RÉSERVÉS À LA DOCUMENTATION/AUX EXEMPLES par la RFC 2606 (example.com/.net/.org) :
+  // jamais attribuables à une vraie boîte courriel, contrairement aux anciens domaines listés ici
+  // (gmail.com, hotmail.com, yahoo.ca, videotron.ca, bell.net sont de VRAIS domaines actifs — un
+  // faux courriel généré avec l'un d'eux pouvait désigner une boîte réelle). Corrige D6.
+  domains: ['example.com', 'example.net', 'example.org'],
   companies: ['Constructions Boréal inc.', 'Groupe Solva', 'Entreprises Lemay-Côté', 'Gestion Riverin', 'Atelier Norjak', 'Services Permafort', 'Coopérative Verdelis', 'Industries Cap-Vert', 'Groupe Makila', 'Solutions Drakkar']
 };
 
 function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+// Fragments d'adresse partagés entre la détection (detectEntities) et la génération de faux
+// (generateFake/extraireNomVoieSeul) : hissés au niveau du module pour ne jamais les dupliquer
+// (DRY). ARTICLE_ADRESSE = article optionnel entre le type de voie et le nom (« de la », « du »…).
+// TYPE_VOIE = types de voie québécois reconnus, tolérants à la casse via alternance explicite.
+// MOT_VOIE = un mot de nom de voie capitalisé (apostrophe/trait d'union gérés).
+const ARTICLE_ADRESSE = "(?:de\\s+la\\s+|de\\s+l['’]|du\\s+|des\\s+|de\\s+)";
+const TYPE_VOIE = "(?:[Rr]ue|[Aa]venue|[Aa]v\\.?|[Bb]oulevard|[Bb]oul\\.?|[Cc]hemin|[Cc]h\\.?|[Rr]ang|[Mm]ont[ée]e|[Pp]lace|[Ii]mpasse)";
+const MOT_VOIE = "\\p{Lu}(?:\\p{Ll}+|(?=['’]))(?:['’]\\p{Lu}?\\p{Ll}*)*(?:-\\p{Lu}?\\p{Ll}*)*";
+// Ordinal québécois (« 12e », « 5e », « 1er », « 2e »…) précédant le type de voie dans le motif
+// très courant « NUMÉRO, ORDINALe TYPE » (« 300, 12e Avenue », « 42, 5e Rue »). Corrige D2.
+const ORDINAL_VOIE = "\\d{1,3}(?:er|re|e)";
 
 function getAccentClass(char) {
   const base = char.toLowerCase();
@@ -132,13 +148,18 @@ function detectEntities(text) {
   // numériquement des MINUSCULES accentuées (à, é, ê…), ce qui aurait permis à un mot minuscule
   // suivant le nom de voie de se faire passer pour un nouveau mot capitalisé et de faire déborder
   // la répétition multi-mots sur le reste de la phrase. \p{Lu} exige une vraie majuscule.
-  const ARTICLE_ADRESSE = "(?:de\\s+la\\s+|de\\s+l['’]|du\\s+|des\\s+|de\\s+)";
-  const TYPE_VOIE = "(?:[Rr]ue|[Aa]venue|[Aa]v\\.?|[Bb]oulevard|[Bb]oul\\.?|[Cc]hemin|[Cc]h\\.?|[Rr]ang|[Mm]ont[ée]e|[Pp]lace|[Ii]mpasse)";
-  const MOT_VOIE = "\\p{Lu}(?:\\p{Ll}+|(?=['’]))(?:['’]\\p{Lu}?\\p{Ll}*)*(?:-\\p{Lu}?\\p{Ll}*)*";
+  // ARTICLE_ADRESSE/TYPE_VOIE/MOT_VOIE/ORDINAL_VOIE sont définis au niveau du module (voir haut de
+  // fichier) pour être réutilisés tels quels par generateFake()/extraireNomVoieSeul() — DRY.
+  // Deux formes reconnues, alternées : la forme classique « TYPE [article] NOM » (« rue des
+  // Érables ») et la forme ordinale très courante au Québec « NUMÉRO, ORDINALe TYPE » (« 300, 12e
+  // Avenue », « 42, 5e Rue »), qui manquait entièrement à l'ancien motif (fuite 300/300 prouvée par
+  // exécution). Corrige D2.
   const address = new RegExp(
-    '\\b\\d{1,5},?\\s+' + TYPE_VOIE + '\\s+' +
-    '(?:' + ARTICLE_ADRESSE + ')?' +
-    MOT_VOIE + '(?:\\s+' + MOT_VOIE + ')*',
+    '\\b\\d{1,5},?\\s+(?:' +
+    ORDINAL_VOIE + '\\s+' + TYPE_VOIE + '(?:\\s+' + MOT_VOIE + ')*' +
+    '|' +
+    TYPE_VOIE + '\\s+(?:' + ARTICLE_ADRESSE + ')?' + MOT_VOIE + '(?:\\s+' + MOT_VOIE + ')*' +
+    ')',
     'gu'
   );
   while ((m = address.exec(text))) push(m[0], 'address', 'Adresse', 0.85);
@@ -213,7 +234,17 @@ function detectEntities(text) {
   // jean.tremblay@... » masquait « Contactez-moi à » en entier). \p{Lu} exige une vraie majuscule ;
   // le premier segment exige soit une minuscule après (mot normal), soit une apostrophe immédiate
   // (« O' », « D' »), jamais une majuscule isolée sans suite.
-  const NAME_WORD = "\\p{Lu}(?:\\p{Ll}+|(?=['’]))(?:['’]\\p{Lu}?\\p{Ll}*)*(?:-\\p{Lu}?\\p{Ll}*)*";
+  // Deux ajouts corrigent D3 et D4 (fuites 300/300 prouvées par exécution) :
+  // - préfixe élidé minuscule optionnel (?:d['’])? : couvre la particule « de » élidée devant une
+  //   voyelle et restée minuscule, très fréquente dans les patronymes québécois (« d'Astous »,
+  //   « d'Amours », « d'Anjou »). La forme majuscule (« D'Astous ») fonctionnait déjà via le
+  //   segment apostrophe existant ; seule la forme minuscule manquait.
+  // - segment interne (?:\\p{Lu}\\p{Ll}*)* : autorise une ou plusieurs majuscules COLLÉES à
+  //   l'intérieur du même mot, sans apostrophe ni trait d'union (« MacDonald », « McDonald »,
+  //   « DiCaprio », « LeBlanc »). Le premier segment \\p{Ll}* devient optionnel (zéro ou plus,
+  //   au lieu d'exiger au moins une lettre) pour rester compatible avec « O' » (zéro lettre avant
+  //   l'apostrophe) sans plus avoir besoin du lookahead séparé.
+  const NAME_WORD = "(?:d['’])?\\p{Lu}\\p{Ll}*(?:\\p{Lu}\\p{Ll}*)*(?:['’]\\p{Lu}?\\p{Ll}*)*(?:-\\p{Lu}?\\p{Ll}*)*";
   // Particules courantes (françaises et néerlandaises/germaniques) pouvant relier un prénom à un nom
   // de famille sans casser la détection. Les alternatives multi-mots sont placées EN PREMIER
   // (van der/van den/von der avant van/von seuls) : sinon l'alternance s'arrête au premier mot et
@@ -297,22 +328,51 @@ function detectEntities(text) {
 
 function getRandomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
+// Détecte le genre grammatical d'un prénom réel en le cherchant (insensible casse/accents) dans
+// les deux dictionnaires de référence déjà présents dans FAKE_DATA — jamais de nouvelle liste, on
+// réutilise l'existant (DRY). Renvoie 'M', 'F', ou null si le prénom n'est dans aucune des deux
+// listes (comportement alors neutre et documenté : voir generateFake, corrige D1 sans deviner).
+function detectGenrePrenom(prenom) {
+  const cible = normaliserMot(prenom);
+  if (!cible) return null;
+  if (FAKE_DATA.firstNamesF.some((p) => normaliserMot(p) === cible)) return 'F';
+  if (FAKE_DATA.firstNamesM.some((p) => normaliserMot(p) === cible)) return 'M';
+  return null;
+}
+
+// Isole le nom de voie SEUL (sans le type ni l'article), ex. « rang Saint-Joseph » → « Saint-
+// Joseph ». Réutilise ARTICLE_ADRESSE/TYPE_VOIE (définis au niveau du module, jamais dupliqués).
+// Sert à comparer uniquement le NOM propre de la voie pour l'anti-collision (corrige D5) : avant
+// cette extraction, un faux « boulevard Saint-Joseph » n'était jamais reconnu comme collision avec
+// le vrai « rang Saint-Joseph » puisque les DEUX chaînes complètes (type + nom) différaient, alors
+// que le nom de voie qui fuite réellement au lecteur est le même.
+function extraireNomVoieSeul(voieAvecType) {
+  const chaine = String(voieAvecType || '').trim();
+  const re = new RegExp('^' + TYPE_VOIE + '\\s+(?:' + ARTICLE_ADRESSE + ')?', 'u');
+  return chaine.replace(re, '').trim();
+}
+
 // Tire un substitut dans une pioche en garantissant qu'il ne redevient jamais la valeur réelle
 // (insensible casse/accents/apostrophes via normaliserMot). Boucle BORNÉE (jamais infinie) :
 // après maxEssais tirages aléatoires infructueux, repli déterministe = premier élément de la
 // pioche qui diffère réellement de la valeur réelle (garanti tant que la pioche a >1 entrée
 // distincte, ce qui est toujours le cas ici) ; en dernier recours seulement (pioche à une seule
 // valeur), on suffixe pour forcer la différence plutôt que de renvoyer un doublon.
-function tirerSubstitutDistinct(pioche, valeurReelle, maxEssais = 12) {
-  const reelleNorm = normaliserMot(valeurReelle);
+// extracteur (optionnel) : fonction appliquée AUX DEUX côtés (candidat ET valeur réelle) avant
+// comparaison — permet de comparer sur un sous-ensemble de la valeur plutôt que sur la chaîne
+// entière (ex. extraireNomVoieSeul pour ne comparer que le nom de voie, jamais le type ; corrige
+// D5). Par défaut, identité (comportement historique inchangé pour prénoms/noms de famille).
+function tirerSubstitutDistinct(pioche, valeurReelle, maxEssais = 12, extracteur) {
+  const extraire = typeof extracteur === 'function' ? extracteur : (x) => x;
+  const reelleNorm = normaliserMot(extraire(valeurReelle));
   let candidat = getRandomItem(pioche);
   let essais = 0;
-  while (normaliserMot(candidat) === reelleNorm && essais < maxEssais) {
+  while (normaliserMot(extraire(candidat)) === reelleNorm && essais < maxEssais) {
     candidat = getRandomItem(pioche);
     essais++;
   }
-  if (normaliserMot(candidat) === reelleNorm) {
-    const repli = pioche.find((item) => normaliserMot(item) !== reelleNorm);
+  if (normaliserMot(extraire(candidat)) === reelleNorm) {
+    const repli = pioche.find((item) => normaliserMot(extraire(item)) !== reelleNorm);
     candidat = repli !== undefined ? repli : `${candidat}_x`;
   }
   return candidat;
@@ -335,7 +395,18 @@ function generateFake(category, original) {
     case 'email': {
       return `${getRandomItem(FAKE_DATA.firstNamesM).toLowerCase()}.${getRandomItem(FAKE_DATA.lastNames).toLowerCase()}@${getRandomItem(FAKE_DATA.domains)}`;
     }
-    case 'phone': return original.replace(/\d/g, () => Math.floor(Math.random() * 10).toString());
+    // Échangeur 555 forcé (réservé à la fiction en Amérique du Nord, jamais attribué à un abonné
+    // réel) : seuls l'indicatif régional et le numéro d'abonné restent randomisés, l'échangeur
+    // (3 chiffres du milieu) est toujours « 555 ». La ponctuation d'origine (parenthèses, tirets,
+    // points, espaces) est préservée telle quelle pour ne pas dénaturer le format saisi. Corrige D6.
+    case 'phone': {
+      const m2 = String(original || '').match(/^(\(?\d{3}\)?)([^\d]*)(\d{3})([^\d]*)(\d{4})$/);
+      if (!m2) return original.replace(/\d/g, () => Math.floor(Math.random() * 10).toString());
+      const randDigits = (n) => Array.from({ length: n }, () => Math.floor(Math.random() * 10)).join('');
+      const zoneAvecParens = /^\(\d{3}\)$/.test(m2[1]);
+      const zone = zoneAvecParens ? `(${randDigits(3)})` : randDigits(3);
+      return `${zone}${m2[2]}555${m2[4]}${randDigits(4)}`;
+    }
     case 'address': {
       const canadianPostalCode = /^[A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d$/;
       if (original.trim().match(canadianPostalCode)) {
@@ -345,8 +416,12 @@ function generateFake(category, original) {
         return `${rl()}${rd()}${rl()} ${rd()}${rl()}${rd()}`;
       }
       const num = Math.floor(Math.random() * 990) + 10;
-      // La collision porte sur le nom de la voie, jamais sur le numéro civique (règle métier).
-      const street = tirerSubstitutDistinct(FAKE_DATA.streets, extraireVoieAdresse(original));
+      // La collision porte sur le NOM DE VOIE SEUL (extraireNomVoieSeul), jamais sur le numéro
+      // civique ni sur le type de voie (règle métier) : sans cet extracteur, un faux « boulevard
+      // Saint-Joseph » n'était jamais reconnu comme collision avec le vrai « rang Saint-Joseph »
+      // puisque les chaînes complètes type+nom différaient (fuite 23-36/300 prouvée par exécution,
+      // corrige D5).
+      const street = tirerSubstitutDistinct(FAKE_DATA.streets, extraireVoieAdresse(original), 12, extraireNomVoieSeul);
       return `${num} ${street}`;
     }
     case 'name': {
@@ -354,14 +429,31 @@ function generateFake(category, original) {
       // et le dernier mot (nom de famille réel) comptent pour l'anti-collision, chacun comparé
       // séparément à sa propre pioche (une collision partielle, ex. faux prénom == vrai prénom
       // avec un faux nom différent, doit être bloquée tout autant qu'une collision totale).
+      // Le faux prénom est tiré dans la MÊME liste de genre que le prénom réel (detectGenrePrenom,
+      // dictionnaire = FAKE_DATA.firstNamesM/F déjà existants, jamais dupliqués) : un prénom
+      // reconnu féminin reçoit un faux prénom féminin, et inversement — corrige D1 (152/300
+      // substituts masculins pour un prénom féminin avant ce correctif). Un prénom INCONNU des
+      // deux listes garde le comportement neutre historique (pioche combinée M+F), documenté :
+      // on ne devine jamais le genre d'un prénom absent du dictionnaire.
       const mots = String(original || '').trim().split(/\s+/).filter(Boolean);
       const premierMotReel = mots[0] || '';
       const dernierMotReel = mots[mots.length - 1] || '';
-      const fakeFirst = tirerSubstitutDistinct([...FAKE_DATA.firstNamesM, ...FAKE_DATA.firstNamesF], premierMotReel);
+      const genre = detectGenrePrenom(premierMotReel);
+      const pisteFirst = genre === 'F' ? FAKE_DATA.firstNamesF
+        : genre === 'M' ? FAKE_DATA.firstNamesM
+        : [...FAKE_DATA.firstNamesM, ...FAKE_DATA.firstNamesF];
+      const fakeFirst = tirerSubstitutDistinct(pisteFirst, premierMotReel);
       const fakeLast = tirerSubstitutDistinct(FAKE_DATA.lastNames, dernierMotReel);
       return `${fakeFirst} ${fakeLast}`;
     }
-    case 'firstName': return tirerSubstitutDistinct([...FAKE_DATA.firstNamesM, ...FAKE_DATA.firstNamesF], original);
+    case 'firstName': {
+      // Même règle de genre que pour 'name' ci-dessus (DRY : detectGenrePrenom réutilisé tel quel).
+      const genre = detectGenrePrenom(original);
+      const piste = genre === 'F' ? FAKE_DATA.firstNamesF
+        : genre === 'M' ? FAKE_DATA.firstNamesM
+        : [...FAKE_DATA.firstNamesM, ...FAKE_DATA.firstNamesF];
+      return tirerSubstitutDistinct(piste, original);
+    }
     case 'lastName': return tirerSubstitutDistinct(FAKE_DATA.lastNames, original);
     case 'amount': return '$' + ((Math.floor(Math.random() * 9000) + 100)) + ',00';
     case 'date': {
