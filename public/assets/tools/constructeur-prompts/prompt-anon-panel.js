@@ -255,16 +255,128 @@
     // modifié son texte depuis - perte de données silencieuse et prouvée (texte ajouté après le
     // masquage disparaissait sans le moindre avertissement).
     const maskState = new Map(); // fieldId -> { previous: string, masked: string }
-    // Champ actuellement décrit par le bloc récapitulatif UNIQUE (#cpAnonRecap) - permet au handler
-    // d'Annuler de savoir quel champ restaurer sans dépendre d'une référence DOM qui pourrait être
-    // périmée.
-    let currentRecapFieldId = null;
 
-    function hideRecap() {
-      if (recapBox) recapBox.style.display = 'none';
-      if (recapText) recapText.textContent = '';
-      if (undoBtn) undoBtn.style.display = 'none';
-      currentRecapFieldId = null;
+    // Round 150 (2026-07-31, passe adversariale) : PERTE DE DONNÉES PROUVÉE PAR EXÉCUTION.
+    // Avant ce correctif, #cpAnonRecap/#cpAnonUndo étaient un bloc UNIQUE, repositionné dynamiquement
+    // et piloté par UNE SEULE variable globale (`currentRecapFieldId`). Séquence prouvée : masquer la
+    // Tâche (#cpTaskObject) PUIS masquer le Rôle personnalisé (#cpPersonaCustom) déplaçait ce bloc
+    // unique vers le Rôle - le récapitulatif et le bouton Annuler de la Tâche disparaissaient
+    // purement et simplement, alors que son texte d'origine (avec les vraies infos personnelles)
+    // restait piégé dans le champ masqué, SANS PLUS AUCUN MOYEN d'y revenir depuis l'interface.
+    // Correctif : un contrôleur récapitulatif INDÉPENDANT par champ (`recapControllers`), plusieurs
+    // blocs actifs simultanément - chaque champ masqué garde son propre bouton « Revenir », quel que
+    // soit le nombre d'autres champs masqués entre-temps. DRY strict : UNE SEULE fabrique
+    // (getOrCreateRecapController, plus bas) pour les 6 champs. Le champ Tâche réutilise le bloc
+    // STATIQUE déjà rendu par Blade (#cpAnonRecap/#cpAnonRecapText/#cpAnonUndo, zéro élément créé
+    // pour le cas le plus fréquent) ; les 5 autres champs surveillés obtiennent chacun un bloc bâti
+    // dynamiquement par cette même fabrique, sur le MÊME gabarit visuel - jamais un bloc dupliqué
+    // 6 fois dans le gabarit Blade.
+    const recapControllers = new Map(); // fieldId -> { root, textEl, undo }
+
+    // Positionne `el` juste après `field` dans le DOM - même pattern DRY que le bandeau anti-PII
+    // plus bas (élément déplacé, jamais dupliqué). Progressive enhancement : si le DOM ne fournit pas
+    // parentNode (jamais le cas en navigateur réel - seulement dans un faux DOM de test minimal), on
+    // continue sans repositionner plutôt que de lever une exception.
+    function positionElementNear(el, field) {
+      try {
+        if (el && field && field.parentNode && typeof field.parentNode.insertBefore === 'function') {
+          field.parentNode.insertBefore(el, field.nextSibling);
+        }
+      } catch (e) { /* positionnement optionnel : le récapitulatif reste fonctionnel sans */ }
+    }
+
+    // Masque et vide un contrôleur récapitulatif (texte + bouton Annuler), sans le détruire - il
+    // reste réutilisable pour un futur masquage du même champ. N'affecte QUE ce contrôleur : les
+    // contrôleurs des AUTRES champs ne sont jamais touchés (coeur du correctif round 150).
+    function hideController(ctl) {
+      if (!ctl) return;
+      ctl.root.style.display = 'none';
+      if (ctl.textEl) ctl.textEl.textContent = '';
+      if (ctl.undo) ctl.undo.style.display = 'none';
+    }
+
+    // Fabrique UNIQUE du contrôleur récapitulatif d'un champ (texte + bouton « Revenir »). Appelée
+    // une fois par champ qui en a besoin (le résultat est mémorisé dans `recapControllers`, jamais
+    // reconstruit) : le bouton Annuler d'un champ garde ainsi le même gestionnaire de clic, capturé
+    // sur le bon `fieldId`, pendant toute la session - c'est ce qui permet à plusieurs champs
+    // masqués de rester chacun indépendamment annulables en même temps.
+    function getOrCreateRecapController(field) {
+      const fieldId = field.id;
+      let ctl = recapControllers.get(fieldId);
+      if (ctl) return ctl;
+
+      if (field === taskField && recapBox && recapText && undoBtn) {
+        // Réutilise le bloc STATIQUE déjà rendu par Blade pour le champ Tâche : zéro élément
+        // supplémentaire créé pour le cas le plus fréquent.
+        ctl = { root: recapBox, textEl: recapText, undo: undoBtn };
+      } else {
+        // Bloc DYNAMIQUE, construit sur le MÊME gabarit visuel (mêmes classes/styles) que le bloc
+        // statique ci-dessus, pour les champs qui n'ont pas leur propre markup Blade dédié - DRY :
+        // une seule fabrique, jamais 5 copies de markup ajoutées au gabarit.
+        const root = document.createElement('div');
+        root.className = 'mt-2';
+        root.style.display = 'none';
+        root.setAttribute('role', 'status');
+        root.setAttribute('aria-live', 'polite');
+        root.setAttribute('data-anon-recap-for', fieldId || '');
+
+        const textEl = document.createElement('p');
+        textEl.className = 'small mb-2 p-2 rounded';
+        textEl.style.fontSize = '0.82rem';
+        textEl.style.color = 'var(--c-dark)';
+        textEl.style.background = 'var(--c-primary-light)';
+        textEl.style.borderLeft = '3px solid var(--c-primary)';
+        textEl.style.borderRadius = '8px';
+
+        const undo = document.createElement('button');
+        undo.type = 'button';
+        undo.className = 'ct-btn ct-btn-outline ct-btn-sm';
+        undo.style.display = 'none';
+        undo.style.minHeight = '44px';
+        undo.textContent = '↺ ' + (i18n.anonUndoLabel || 'Revenir à mon texte de départ');
+
+        root.appendChild(textEl);
+        root.appendChild(undo);
+
+        ctl = { root: root, textEl: textEl, undo: undo };
+      }
+
+      if (ctl.undo) ctl.undo.addEventListener('click', function () { handleUndoClick(fieldId); });
+      recapControllers.set(fieldId, ctl);
+      return ctl;
+    }
+
+    // Handler d'Annuler, PAR CHAMP (`fieldId` capturé à la création du bouton dans
+    // getOrCreateRecapController - plus jamais une seule variable globale). Round 149 (2026-07-31,
+    // défaut #1 - perte de données prouvée) conservé à l'identique : compare le contenu ACTUEL du
+    // champ à ce qu'on a ÉCRIT au moment du masquage (state.masked) avant de restaurer - identique ->
+    // restauration directe ; différent -> la personne a modifié le champ depuis le masquage, on
+    // demande confirmation AVANT d'écraser quoi que ce soit (modale du thème x-core::confirm-modal,
+    // JAMAIS confirm() natif, interdit par la charte du projet).
+    function handleUndoClick(fieldId) {
+      const field = document.getElementById(fieldId);
+      const state = maskState.get(fieldId);
+      const ctl = recapControllers.get(fieldId);
+      if (!field || !state) { hideController(ctl); return; }
+
+      function restaurer() {
+        ecrireEnPreservantAnnuler(field, state.previous);
+        maskState.delete(fieldId);
+        hideController(ctl);
+        showToast(i18n.anonUndone || 'Votre texte de départ est revenu, tel que vous l\'aviez écrit.', 'info');
+      }
+
+      if (field.value === state.masked) {
+        restaurer();
+        return;
+      }
+
+      window.dispatchEvent(new CustomEvent('open-confirm-global', {
+        detail: {
+          message: i18n.anonUndoConfirm || 'Vous avez modifié ce texte depuis le masquage. Revenir en arrière effacera ce que vous avez écrit depuis. Continuer quand même ?',
+          callback: restaurer
+        }
+      }));
     }
 
     // Écrit `newValue` dans `field` en préservant l'annuler/refaire NATIF du navigateur (Ctrl+Z).
@@ -349,30 +461,22 @@
       return joined.charAt(0).toUpperCase() + joined.slice(1) + ' ' + verbe + '.';
     }
 
-    // Round 149 (2026-07-31) : positionne le bloc récapitulatif UNIQUE (#cpAnonRecap) juste après
-    // le champ concerné - même pattern DRY que le bandeau anti-PII plus bas (UN SEUL élément DOM
-    // déplacé, jamais dupliqué 6 fois). Progressive enhancement : si le DOM ne fournit pas
-    // parentNode (jamais le cas en navigateur réel - seulement dans un faux DOM de test), on
-    // continue sans repositionner plutôt que de lever une exception.
-    function positionRecapNear(field) {
-      try {
-        if (recapBox && field && field.parentNode && typeof field.parentNode.insertBefore === 'function') {
-          field.parentNode.insertBefore(recapBox, field.nextSibling);
-        }
-      } catch (e) { /* positionnement optionnel : le récapitulatif reste fonctionnel sans */ }
-    }
-
     // Fonction UNIQUE de masquage en place, paramétrée par le champ (round 149 - défaut #2 : DRY,
     // remplace les 6 copies qu'aurait exigées une extraction naïve). Appelée par #cpAnonToggle pour
     // #cpTaskObject, et par le bandeau anti-PII pour les 5 autres champs surveillés (plus bas).
+    // Round 150 : chaque champ obtient désormais son PROPRE contrôleur récapitulatif
+    // (getOrCreateRecapController) - masquer un champ n'efface plus jamais le récapitulatif d'un
+    // AUTRE champ déjà masqué (voir le correctif plus haut, sur `recapControllers`).
     function maskFieldInPlace(field) {
       if (!field) return;
       const currentValue = field.value;
+      const ctl = getOrCreateRecapController(field);
 
-      // Efface tout récapitulatif/bouton Annuler PÉRIMÉ dès le clic, avant tout autre traitement -
-      // si la personne a effacé son texte à la main après un masquage précédent, le récapitulatif
-      // ne doit pas rester affiché pour un contenu qui n'existe plus.
-      hideRecap();
+      // Efface le récapitulatif/bouton Annuler PÉRIMÉ de CE champ (et de lui seul) dès le clic,
+      // avant tout autre traitement - si la personne a effacé son texte à la main après un
+      // masquage précédent, le récapitulatif ne doit pas rester affiché pour un contenu qui n'existe
+      // plus. Les récapitulatifs des AUTRES champs, eux, restent intacts et actifs.
+      hideController(ctl);
 
       // Règle 1 : champ vide -> message doux, rien à masquer, aucun panneau.
       if (currentValue.trim() === '') {
@@ -392,12 +496,9 @@
       try { entities = window.AnonymizerCore.detectEntities(currentValue) || []; } catch (e) { entities = []; }
 
       if (entities.length === 0) {
-        if (recapBox && recapText) {
-          positionRecapNear(field);
-          recapText.textContent = i18n.anonNoneDetected || 'Aucune information personnelle trouvée dans votre texte. Vous pouvez continuer.';
-          recapBox.style.display = '';
-          currentRecapFieldId = field.id || null;
-        }
+        positionElementNear(ctl.root, field);
+        ctl.textEl.textContent = i18n.anonNoneDetected || 'Aucune information personnelle trouvée dans votre texte. Vous pouvez continuer.';
+        ctl.root.style.display = '';
         return;
       }
 
@@ -414,28 +515,22 @@
       if (masked === currentValue) {
         // Entités détectées mais aucune substitution réelle (cas limite) : même honnêteté que
         // « rien détecté » plutôt qu'annoncer un masquage qui n'a rien changé.
-        if (recapBox && recapText) {
-          positionRecapNear(field);
-          recapText.textContent = i18n.anonNoneDetected || 'Aucune information personnelle trouvée dans votre texte. Vous pouvez continuer.';
-          recapBox.style.display = '';
-          currentRecapFieldId = field.id || null;
-        }
+        positionElementNear(ctl.root, field);
+        ctl.textEl.textContent = i18n.anonNoneDetected || 'Aucune information personnelle trouvée dans votre texte. Vous pouvez continuer.';
+        ctl.root.style.display = '';
         return;
       }
 
       // Mémorise le texte d'origine ET le texte masqué qu'on s'apprête à écrire (règle 5 :
       // annulation en mémoire JS - `masked` sert à la comparaison anti-perte de données du handler
-      // d'Annuler, plus bas).
+      // d'Annuler, voir handleUndoClick plus haut).
       if (field.id) maskState.set(field.id, { previous: currentValue, masked: masked });
       ecrireEnPreservantAnnuler(field, masked);
 
-      if (recapBox && recapText) {
-        positionRecapNear(field);
-        recapText.textContent = resumerMasquage(entities);
-        recapBox.style.display = '';
-        currentRecapFieldId = field.id || null;
-      }
-      if (undoBtn) undoBtn.style.display = '';
+      positionElementNear(ctl.root, field);
+      ctl.textEl.textContent = resumerMasquage(entities);
+      ctl.root.style.display = '';
+      if (ctl.undo) ctl.undo.style.display = '';
 
       // Règle 7 : purge la copie locale des gabarits de carte si le composant l'expose.
       purgerCopieLocaleSiPossible();
@@ -450,46 +545,10 @@
 
     // Règle 6 : après annulation, le récapitulatif disparaît et le bouton de masquage redevient
     // disponible (il n'a jamais été désactivé - un nouveau clic relance simplement une détection
-    // sur le texte restauré).
-    if (undoBtn) {
-      undoBtn.addEventListener('click', function () {
-        if (!currentRecapFieldId) return;
-        const field = document.getElementById(currentRecapFieldId);
-        const state = maskState.get(currentRecapFieldId);
-        if (!field || !state) { hideRecap(); return; }
-
-        const fieldIdAuMomentDuClic = currentRecapFieldId;
-        function restaurer() {
-          ecrireEnPreservantAnnuler(field, state.previous);
-          maskState.delete(fieldIdAuMomentDuClic);
-          hideRecap();
-          showToast(i18n.anonUndone || 'Votre texte de départ est revenu, tel que vous l\'aviez écrit.', 'info');
-        }
-
-        // Round 149 (2026-07-31, défaut #1 - PERTE DE DONNÉES prouvée) : avant, ce handler
-        // réécrivait toujours le champ avec la valeur MÉMORISÉE AVANT masquage, sans jamais la
-        // comparer au contenu ACTUEL. Séquence prouvée : masquage -> la personne COMPLÈTE son
-        // texte (ex. ajoute « Merci de traiter ce dossier avant vendredi. ») -> clic Annuler ->
-        // l'ajout disparaissait silencieusement, sans le moindre avertissement.
-        // On compare maintenant le contenu courant à ce qu'on a ÉCRIT au moment du masquage
-        // (state.masked) : identique -> rien n'a changé depuis, restauration directe, comportement
-        // inchangé pour le cas normal ; différent -> le champ a été modifié depuis le masquage, on
-        // demande confirmation AVANT d'écraser quoi que ce soit (modale du thème
-        // x-core::confirm-modal, montée une seule fois dans master.blade.php sous name="global" -
-        // JAMAIS confirm() natif, interdit par la charte du projet).
-        if (field.value === state.masked) {
-          restaurer();
-          return;
-        }
-
-        window.dispatchEvent(new CustomEvent('open-confirm-global', {
-          detail: {
-            message: i18n.anonUndoConfirm || 'Vous avez modifié ce texte depuis le masquage. Revenir en arrière effacera ce que vous avez écrit depuis. Continuer quand même ?',
-            callback: restaurer
-          }
-        }));
-      });
-    }
+    // sur le texte restauré). Le gestionnaire de clic du bouton « Revenir » est câblé UNE SEULE FOIS
+    // par champ, à l'intérieur de getOrCreateRecapController (voir handleUndoClick plus haut) - il
+    // n'y a plus de câblage global ici, ce qui est précisément ce qui permettait au bug round 150
+    // (bouton unique partagé) de se produire.
 
     // GARDE-FOU PROACTIF : alerte douce si des infos perso sont détectées dans un des champs
     // surveillés. Silencieux si AnonymizerCore n'est pas chargé (ne crée jamais d'erreur).

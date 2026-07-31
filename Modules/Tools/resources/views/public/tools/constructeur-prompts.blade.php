@@ -357,17 +357,25 @@
                                  aria-expanded/aria-controls retirés : ce bouton ne pilote plus #cpAnonPanel.
                                  Round 149 (2026-07-31) : le même mécanisme (récapitulatif + retour) sert
                                  maintenant aussi les 5 autres champs surveillés du wizard (Exemples, Rôle,
-                                 Audience, Verbe, Contraintes personnalisés) via le bandeau anti-PII -
-                                 #cpAnonRecap/#cpAnonUndo sont un bloc UNIQUE repositionné dynamiquement
-                                 près du champ concerné, jamais dupliqué. --}}
+                                 Audience, Verbe, Contraintes personnalisés) via le bandeau anti-PII.
+                                 Round 150 (2026-07-31, PERTE DE DONNÉES corrigée) : #cpAnonRecap/#cpAnonUndo
+                                 ci-dessous ne servent plus QUE le champ Tâche - un bloc PARTAGÉ entre les 6
+                                 champs faisait perdre l'accès au texte d'origine d'un champ dès qu'un AUTRE
+                                 champ était masqué ensuite (le bloc unique se déplaçait vers le dernier
+                                 champ masqué). Les 5 autres champs obtiennent désormais chacun leur PROPRE
+                                 bloc récapitulatif, bâti dynamiquement par la même fabrique JS
+                                 (getOrCreateRecapController() dans prompt-anon-panel.js) sur le même
+                                 gabarit visuel que celui-ci - DRY strict, toujours aucun bloc dupliqué dans
+                                 CE fichier Blade. --}}
                             <div class="form-group mb-3">
                                 <button id="cpAnonToggle" type="button" class="ct-btn ct-btn-outline ct-btn-sm" style="min-height:44px;">🛡️ {{ __('Masquer mes informations personnelles') }}</button>
                                 <a href="/outils/anonymiseur" class="ct-btn ct-btn-ghost ct-btn-sm ms-1" style="min-height:44px;" title="{{ __('Ouvrir l\'anonymiseur complet (restauration des réponses IA)') }}">↗ {{ __('Anonymiseur complet') }}</a>
 
-                                {{-- Récapitulatif du masquage en place + annulation. aria-live="polite" +
+                                {{-- Récapitulatif du masquage en place (champ Tâche uniquement, voir la
+                                     note round 150 ci-dessus) + annulation. aria-live="polite" +
                                      role="status" : annoncé aux lecteurs d'écran sans interrompre leur
                                      lecture en cours. Masqué par défaut, affiché par JS après un clic sur
-                                     le bouton ci-dessus (ou sur « Masquer mes infos → » d'un autre champ). --}}
+                                     le bouton ci-dessus. --}}
                                 <div id="cpAnonRecap" class="mt-2" style="display:none;" role="status" aria-live="polite">
                                     <p id="cpAnonRecapText" class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;"></p>
                                     <button type="button" id="cpAnonUndo" class="ct-btn ct-btn-outline ct-btn-sm" style="display:none; min-height:44px;">↺ {{ __('Revenir à mon texte de départ') }}</button>
@@ -1059,6 +1067,12 @@ window.promptBuilderConfig = {
         anonNoneDetected: @json(__('Aucune information personnelle trouvée dans votre texte. Vous pouvez continuer.')),
         anonMaskedInField: @json(__('Vos informations personnelles ont été masquées, directement sur votre ordinateur.')),
         anonUndone: @json(__('Votre texte de départ est revenu, tel que vous l\'aviez écrit.')),
+        // Round 150 (2026-07-31) : libellé du bouton « Revenir à mon texte de départ » construit
+        // dynamiquement par prompt-anon-panel.js pour les récapitulatifs créés en JS (5 champs sans
+        // markup Blade dédié - voir getOrCreateRecapController()). Réutilise la MÊME clé de
+        // traduction que le bouton statique rendu ci-dessus pour le champ Tâche : zéro nouvelle
+        // chaîne, zéro divergence possible entre les deux boutons.
+        anonUndoLabel: @json(__('Revenir à mon texte de départ')),
         // Round 149 (2026-07-31, défaut #1 - PERTE DE DONNÉES prouvée) : le clic sur « Revenir à
         // mon texte de départ » réécrivait toujours la valeur d'AVANT masquage sans jamais vérifier
         // si la personne avait modifié le champ depuis (ex. complété sa phrase après le masquage) -
