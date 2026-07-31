@@ -186,7 +186,318 @@ document.addEventListener('alpine:init', function() {
             // sans elle créait de vrais doublons persistés en base (id différent, contenu identique).
             importingCards: false,
             _localCardsToImport: [],
-            emojiChoices: ['✍️', '📝', '💡', '🔍', '🎓', '🌐', '🗂️', '💻', '🧩', '📊', '📈', '📚', '🧠', '🎨', '📣', '🛠️', '🧾', '📅', '✅', '🔔', '🤖', '🧵', '📖', '🗒️', '🧪', '📐', '🎯', '💬', '📌', '🔧'],
+            // Sélecteur d'icônes des cartes de démarrage (enrichi 2026-07-31) : catalogue classé en
+            // 12 catégories nommées en français, chaque entrée { c: emoji, m: [mots-clés] } cherchable.
+            // Les 30 emojis d'origine (Option D, 2026-07-26) sont TOUS conservés dans ce catalogue -
+            // aucune carte déjà enregistrée ne peut perdre son icône. Chaque emoji tient sous 8 octets
+            // UTF-8 : ToolPreferenceController::update() tronque l'icône via Str::limit(icon, 8, '') -
+            // un emoji composé (jointeur de largeur nulle, modificateur de teinte, drapeau) dépassant
+            // cette taille serait corrompu au stockage. Vérifié par un script jetable (Buffer.byteLength)
+            // avant livraison ; aucun emoji du catalogue n'a été retiré (les 199 tenaient déjà sous 8 octets).
+            iconCatalog: [
+                { category: 'Écriture', icons: [
+                    { c: '✍️', m: ['ecrire', 'ecriture', 'redaction', 'redige', 'main'] },
+                    { c: '📝', m: ['note', 'memo', 'notes', 'rediger'] },
+                    { c: '📄', m: ['document', 'page', 'feuille', 'texte'] },
+                    { c: '📃', m: ['document', 'feuille', 'page', 'recto'] },
+                    { c: '📜', m: ['parchemin', 'texte', 'manuscrit', 'rouleau'] },
+                    { c: '✒️', m: ['plume', 'encre', 'ecrire', 'signature'] },
+                    { c: '🖊️', m: ['stylo', 'ecrire', 'bille'] },
+                    { c: '🖋️', m: ['stylo', 'plume', 'ecrire', 'signature'] },
+                    { c: '✏️', m: ['crayon', 'ecrire', 'brouillon', 'esquisse'] },
+                    { c: '📓', m: ['carnet', 'cahier', 'notes'] },
+                    { c: '📔', m: ['carnet', 'journal', 'cahier'] },
+                    { c: '📒', m: ['registre', 'cahier', 'comptes'] },
+                    { c: '🗒️', m: ['bloc-notes', 'notes', 'memo'] },
+                    { c: '🗞️', m: ['journal', 'actualites', 'presse'] },
+                    { c: '📰', m: ['journal', 'presse', 'nouvelles', 'actualites'] },
+                    { c: '🔤', m: ['alphabet', 'lettres', 'texte', 'langue'] }
+                ] },
+                { category: 'Analyse et données', icons: [
+                    { c: '🔍', m: ['recherche', 'loupe', 'analyser', 'chercher'] },
+                    { c: '🔎', m: ['recherche', 'loupe', 'examiner'] },
+                    { c: '📊', m: ['graphique', 'statistiques', 'donnees', 'barres'] },
+                    { c: '📈', m: ['tendance', 'hausse', 'croissance', 'graphique'] },
+                    { c: '📉', m: ['tendance', 'baisse', 'declin', 'graphique'] },
+                    { c: '💡', m: ['idee', 'ampoule', 'inspiration', 'eureka'] },
+                    { c: '🧪', m: ['experience', 'test', 'laboratoire', 'science'] },
+                    { c: '🔬', m: ['microscope', 'science', 'laboratoire', 'recherche'] },
+                    { c: '🧮', m: ['calcul', 'calculatrice', 'comptage', 'abaque'] },
+                    { c: '🗃️', m: ['archives', 'classement', 'fiches', 'boite'] },
+                    { c: '🗄️', m: ['classeur', 'archives', 'dossiers', 'rangement'] },
+                    { c: '📇', m: ['fiches', 'contacts', 'rolodex'] },
+                    { c: '🧭', m: ['boussole', 'orientation', 'direction', 'exploration'] },
+                    { c: '🔢', m: ['chiffres', 'nombres', 'numeros'] },
+                    { c: '➗', m: ['division', 'calcul', 'mathematiques'] },
+                    { c: '➕', m: ['addition', 'plus', 'calcul', 'ajouter'] },
+                    { c: '➖', m: ['soustraction', 'moins', 'calcul', 'retirer'] },
+                    { c: '✖️', m: ['multiplication', 'fois', 'calcul'] }
+                ] },
+                { category: 'Apprentissage', icons: [
+                    { c: '🎓', m: ['diplome', 'graduation', 'etude', 'universite'] },
+                    { c: '📚', m: ['livres', 'bibliotheque', 'etude', 'lecture'] },
+                    { c: '📖', m: ['livre', 'lecture', 'etude', 'ouvert'] },
+                    { c: '📗', m: ['livre', 'manuel', 'vert'] },
+                    { c: '📘', m: ['livre', 'manuel', 'bleu'] },
+                    { c: '📙', m: ['livre', 'manuel', 'orange'] },
+                    { c: '📕', m: ['livre', 'manuel', 'rouge'] },
+                    { c: '🏫', m: ['ecole', 'etablissement', 'classe'] },
+                    { c: '🧠', m: ['cerveau', 'intelligence', 'reflexion', 'memoire'] },
+                    { c: '🎒', m: ['sac a dos', 'rentree', 'ecolier'] },
+                    { c: '🔖', m: ['signet', 'reference', 'marque-page'] },
+                    { c: '📑', m: ['onglets', 'reference', 'classement'] },
+                    { c: '🏛️', m: ['universite', 'institution', 'savoir', 'academie'] },
+                    { c: '🌱', m: ['croissance', 'apprentissage', 'developpement', 'debutant'] }
+                ] },
+                { category: 'Communication', icons: [
+                    { c: '📣', m: ['annonce', 'megaphone', 'promouvoir', 'communiquer'] },
+                    { c: '💬', m: ['discussion', 'message', 'bulle', 'chat'] },
+                    { c: '🗨️', m: ['discussion', 'bulle', 'conversation'] },
+                    { c: '🗯️', m: ['reaction', 'colere', 'exclamation'] },
+                    { c: '🗣️', m: ['parler', 'discours', 'prise de parole'] },
+                    { c: '📢', m: ['annonce', 'alerte', 'haut-parleur'] },
+                    { c: '📧', m: ['courriel', 'email', 'message'] },
+                    { c: '✉️', m: ['lettre', 'courrier', 'enveloppe'] },
+                    { c: '📨', m: ['message recu', 'courriel', 'enveloppe'] },
+                    { c: '📩', m: ['message envoye', 'courriel', 'enveloppe'] },
+                    { c: '📤', m: ['envoi', 'sortant', 'partager'] },
+                    { c: '📥', m: ['reception', 'entrant', 'recevoir'] },
+                    { c: '☎️', m: ['telephone', 'appel', 'contact'] },
+                    { c: '📞', m: ['appel', 'telephone', 'contact'] },
+                    { c: '📱', m: ['cellulaire', 'telephone', 'mobile'] },
+                    { c: '🔔', m: ['notification', 'alerte', 'cloche', 'rappel'] },
+                    { c: '🔕', m: ['silence', 'desactive', 'muet'] },
+                    { c: '🧵', m: ['fil', 'discussion', 'sujet', 'thread'] },
+                    { c: '📡', m: ['diffusion', 'signal', 'reseau', 'antenne'] }
+                ] },
+                { category: 'Travail et organisation', icons: [
+                    { c: '🗂️', m: ['classeur', 'dossiers', 'organisation', 'classement'] },
+                    { c: '🎯', m: ['objectif', 'cible', 'but', 'viser'] },
+                    { c: '📌', m: ['epingle', 'important', 'marquer', 'punaise'] },
+                    { c: '📋', m: ['liste', 'taches', 'presse-papiers'] },
+                    { c: '🧰', m: ['boite a outils', 'materiel', 'equipement'] },
+                    { c: '🗑️', m: ['corbeille', 'supprimer', 'effacer'] },
+                    { c: '📎', m: ['trombone', 'attache', 'joindre'] },
+                    { c: '🖇️', m: ['lien', 'attache', 'trombones'] },
+                    { c: '✂️', m: ['couper', 'editer', 'ciseaux'] },
+                    { c: '🗝️', m: ['cle', 'acces', 'ancienne'] },
+                    { c: '🔑', m: ['cle', 'acces', 'mot de passe'] },
+                    { c: '🔒', m: ['verrouille', 'securite', 'prive'] },
+                    { c: '🔓', m: ['deverrouille', 'ouvert', 'accessible'] },
+                    { c: '📁', m: ['dossier', 'classement', 'fichiers'] },
+                    { c: '📂', m: ['dossier ouvert', 'fichiers', 'classement'] },
+                    { c: '☑️', m: ['case cochee', 'tache faite', 'complete'] }
+                ] },
+                { category: 'Technique et code', icons: [
+                    { c: '💻', m: ['ordinateur', 'portable', 'developpement', 'code'] },
+                    { c: '🖥️', m: ['ordinateur', 'poste de travail', 'ecran'] },
+                    { c: '⌨️', m: ['clavier', 'saisie', 'frappe'] },
+                    { c: '🖱️', m: ['souris', 'clic', 'pointeur'] },
+                    { c: '🧩', m: ['puzzle', 'module', 'integration', 'piece'] },
+                    { c: '🤖', m: ['robot', 'intelligence artificielle', 'automatisation', 'ia'] },
+                    { c: '🌐', m: ['web', 'internet', 'reseau', 'site', 'mondial'] },
+                    { c: '🛠️', m: ['outils', 'developpement', 'reparation', 'technique'] },
+                    { c: '🔧', m: ['cle', 'outil', 'reparer', 'configurer'] },
+                    { c: '⚙️', m: ['parametres', 'engrenage', 'configuration', 'reglages'] },
+                    { c: '🔩', m: ['assemblage', 'technique', 'boulon'] },
+                    { c: '🖨️', m: ['imprimante', 'impression'] },
+                    { c: '💾', m: ['sauvegarde', 'disquette', 'enregistrer'] },
+                    { c: '💿', m: ['disque', 'cd', 'stockage'] },
+                    { c: '📀', m: ['disque', 'dvd', 'stockage'] },
+                    { c: '🔌', m: ['branchement', 'connexion', 'prise'] },
+                    { c: '🔋', m: ['batterie', 'energie', 'charge'] },
+                    { c: '🛰️', m: ['satellite', 'technologie', 'orbite'] },
+                    { c: '🕹️', m: ['manette', 'jeu', 'controle'] },
+                    { c: '📶', m: ['signal', 'reseau', 'antenne', 'connexion'] },
+                    { c: '🛡️', m: ['securite', 'protection', 'bouclier'] },
+                    { c: '🔐', m: ['securite', 'chiffrement', 'verrouille'] }
+                ] },
+                { category: 'Création et design', icons: [
+                    { c: '🎨', m: ['palette', 'art', 'design', 'creativite'] },
+                    { c: '📐', m: ['geometrie', 'plan', 'equerre', 'precision'] },
+                    { c: '📏', m: ['regle', 'mesure', 'precision'] },
+                    { c: '🖌️', m: ['pinceau', 'peindre', 'art'] },
+                    { c: '🖍️', m: ['crayon de cire', 'couleur', 'dessin'] },
+                    { c: '🎭', m: ['theatre', 'performance', 'art', 'masques'] },
+                    { c: '🎬', m: ['cinema', 'video', 'production', 'tournage'] },
+                    { c: '📷', m: ['photo', 'image', 'appareil'] },
+                    { c: '📸', m: ['photo', 'flash', 'appareil'] },
+                    { c: '🎥', m: ['video', 'tournage', 'cinema'] },
+                    { c: '🖼️', m: ['cadre', 'image', 'tableau', 'illustration'] },
+                    { c: '🎼', m: ['musique', 'partition', 'composition'] },
+                    { c: '🎵', m: ['musique', 'note', 'melodie'] },
+                    { c: '🎶', m: ['musique', 'notes', 'melodie'] },
+                    { c: '🎹', m: ['piano', 'musique', 'clavier'] },
+                    { c: '🎸', m: ['guitare', 'musique'] },
+                    { c: '🌈', m: ['couleurs', 'creativite', 'arc-en-ciel'] },
+                    { c: '✨', m: ['etincelles', 'magie', 'nouveaute', 'effet'] },
+                    { c: '💎', m: ['precieux', 'qualite', 'valeur', 'diamant'] }
+                ] },
+                { category: 'Santé', icons: [
+                    { c: '🩺', m: ['medecine', 'sante', 'diagnostic', 'stethoscope'] },
+                    { c: '💊', m: ['medicament', 'pilule', 'traitement'] },
+                    { c: '🏥', m: ['hopital', 'clinique', 'soins'] },
+                    { c: '🧬', m: ['genetique', 'biologie', 'adn'] },
+                    { c: '🦷', m: ['dentaire', 'dent', 'soins'] },
+                    { c: '🩹', m: ['premiers soins', 'pansement', 'blessure'] },
+                    { c: '🌡️', m: ['temperature', 'fievre', 'thermometre'] },
+                    { c: '🧴', m: ['soins', 'hygiene', 'lotion'] },
+                    { c: '🧘', m: ['meditation', 'bien-etre', 'relaxation', 'calme'] },
+                    { c: '💪', m: ['force', 'forme', 'sport', 'muscle'] },
+                    { c: '🏃', m: ['course', 'sport', 'activite', 'courir'] },
+                    { c: '🥗', m: ['alimentation', 'nutrition', 'sante', 'salade'] },
+                    { c: '💤', m: ['sommeil', 'repos', 'fatigue'] },
+                    { c: '❤️', m: ['coeur', 'sante', 'bien-etre', 'amour'] }
+                ] },
+                { category: 'Commerce', icons: [
+                    { c: '🧾', m: ['recu', 'facture', 'ticket', 'depense'] },
+                    { c: '💰', m: ['argent', 'budget', 'sac'] },
+                    { c: '💵', m: ['argent', 'billet', 'prix'] },
+                    { c: '💳', m: ['carte', 'paiement', 'achat'] },
+                    { c: '🛒', m: ['achats', 'panier', 'magasinage'] },
+                    { c: '🛍️', m: ['sacs', 'achats', 'boutique'] },
+                    { c: '🏪', m: ['commerce', 'boutique', 'depanneur'] },
+                    { c: '🏬', m: ['magasin', 'commerce', 'grand magasin'] },
+                    { c: '📦', m: ['colis', 'livraison', 'produit', 'boite'] },
+                    { c: '🚚', m: ['livraison', 'transport', 'camion'] },
+                    { c: '💹', m: ['marche', 'bourse', 'croissance'] },
+                    { c: '🤝', m: ['partenariat', 'accord', 'entente', 'poignee de main'] },
+                    { c: '💼', m: ['affaires', 'travail', 'entreprise', 'mallette'] },
+                    { c: '🏷️', m: ['etiquette', 'prix', 'promotion', 'rabais'] }
+                ] },
+                { category: 'Lieux et voyage', icons: [
+                    { c: '🌍', m: ['monde', 'planete', 'international', 'globe'] },
+                    { c: '🗺️', m: ['carte', 'geographie', 'itineraire'] },
+                    { c: '📍', m: ['localisation', 'endroit', 'position', 'marqueur'] },
+                    { c: '🏠', m: ['maison', 'domicile', 'residence'] },
+                    { c: '🏢', m: ['bureau', 'entreprise', 'immeuble'] },
+                    { c: '✈️', m: ['avion', 'voyage', 'vol'] },
+                    { c: '🚗', m: ['voiture', 'deplacement', 'conduite'] },
+                    { c: '🚆', m: ['train', 'transport', 'rail'] },
+                    { c: '🚢', m: ['bateau', 'transport', 'navire'] },
+                    { c: '🏔️', m: ['montagne', 'nature', 'sommet'] },
+                    { c: '🏙️', m: ['ville', 'urbain', 'gratte-ciel'] },
+                    { c: '🌆', m: ['ville', 'urbain', 'crepuscule'] },
+                    { c: '🏞️', m: ['paysage', 'nature', 'parc'] },
+                    { c: '🧳', m: ['valise', 'voyage', 'bagage'] }
+                ] },
+                { category: 'Temps et planification', icons: [
+                    { c: '📅', m: ['calendrier', 'date', 'agenda', 'planification'] },
+                    { c: '🗓️', m: ['agenda', 'planification', 'calendrier'] },
+                    { c: '⏰', m: ['reveil', 'alarme', 'heure'] },
+                    { c: '⏱️', m: ['chronometre', 'minuterie', 'temps'] },
+                    { c: '⏲️', m: ['minuteur', 'compte a rebours'] },
+                    { c: '⌛', m: ['sablier', 'attente', 'delai'] },
+                    { c: '⏳', m: ['temps qui passe', 'en cours', 'patience'] },
+                    { c: '🕐', m: ['heure', 'horloge', 'temps'] },
+                    { c: '📆', m: ['date', 'calendrier', 'jour'] },
+                    { c: '⏸️', m: ['pause', 'en attente', 'arret temporaire'] },
+                    { c: '▶️', m: ['demarrer', 'lancer', 'jouer'] },
+                    { c: '⏹️', m: ['arreter', 'fin', 'stop'] },
+                    { c: '🔁', m: ['repetition', 'cycle', 'recurrence'] },
+                    { c: '🔄', m: ['actualiser', 'rafraichir', 'mise a jour'] }
+                ] },
+                { category: 'Symboles et statuts', icons: [
+                    { c: '✅', m: ['fait', 'coche', 'valide', 'termine'] },
+                    { c: '✔️', m: ['valide', 'correct', 'coche'] },
+                    { c: '❌', m: ['erreur', 'refuse', 'incorrect'] },
+                    { c: '⚠️', m: ['attention', 'avertissement', 'prudence'] },
+                    { c: '❗', m: ['important', 'urgent', 'exclamation'] },
+                    { c: '❓', m: ['question', 'inconnu', 'interrogation'] },
+                    { c: 'ℹ️', m: ['information', 'renseignement', 'aide'] },
+                    { c: '⭐', m: ['favori', 'important', 'qualite', 'etoile'] },
+                    { c: '🌟', m: ['excellence', 'remarquable', 'brillant'] },
+                    { c: '🔥', m: ['tendance', 'populaire', 'urgent', 'feu'] },
+                    { c: '💯', m: ['parfait', 'excellent', 'complet', 'cent'] },
+                    { c: '🏆', m: ['victoire', 'reussite', 'recompense', 'trophee'] },
+                    { c: '🥇', m: ['premier', 'gagnant', 'medaille'] },
+                    { c: '🎉', m: ['celebration', 'succes', 'felicitations'] },
+                    { c: '🚀', m: ['lancement', 'croissance', 'rapide', 'decollage'] },
+                    { c: '🆕', m: ['nouveau', 'recent'] },
+                    { c: '🔴', m: ['urgent', 'actif', 'alerte', 'rouge'] },
+                    { c: '🟢', m: ['actif', 'succes', 'disponible', 'vert'] },
+                    { c: '🟡', m: ['attention', 'en attente', 'jaune'] }
+                ] }
+            ],
+            iconSearchQuery: '',
+
+            // Normalisation factorisée (recherche insensible aux accents ET à la casse) - NFD +
+            // retrait des diacritiques, appliquée des DEUX côtés de la comparaison (mot-clé ET saisie).
+            _normalizeIconText: function(str) {
+                return (str || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            },
+
+            // Regroupé par catégorie quand aucune recherche n'est active ; à plat (une seule
+            // « catégorie » sans titre) dès qu'une recherche filtre les résultats.
+            get iconSearchGroups() {
+                var q = this._normalizeIconText(this.iconSearchQuery);
+                if (!q) return this.iconCatalog;
+                var flat = [];
+                for (var i = 0; i < this.iconCatalog.length; i++) {
+                    var icons = this.iconCatalog[i].icons;
+                    for (var j = 0; j < icons.length; j++) {
+                        var icon = icons[j];
+                        for (var k = 0; k < icon.m.length; k++) {
+                            if (this._normalizeIconText(icon.m[k]).indexOf(q) !== -1) { flat.push(icon); break; }
+                        }
+                    }
+                }
+                return [{ category: null, icons: flat }];
+            },
+
+            get iconSearchResultsCount() {
+                var groups = this.iconSearchGroups;
+                var n = 0;
+                for (var i = 0; i < groups.length; i++) n += groups[i].icons.length;
+                return n;
+            },
+
+            // Zone aria-live polie : ne parle QUE pendant une recherche active (silencieuse à
+            // l'ouverture du sélecteur, pour ne pas annoncer inutilement ~200 icônes groupées).
+            get iconResultsAnnouncement() {
+                if (!this.iconSearchQuery) return '';
+                var i18nIcon = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var n = this.iconSearchResultsCount;
+                if (n === 0) return i18nIcon.iconSearchEmpty || 'Aucune icône ne correspond à cette recherche.';
+                var template = n === 1
+                    ? (i18nIcon.iconSearchResultOne || '1 icône trouvée')
+                    : (i18nIcon.iconSearchResultMany || '{count} icônes trouvées');
+                return template.replace('{count}', n);
+            },
+
+            iconAriaLabel: function(icon) {
+                var i18nIcon = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var label = icon.m && icon.m[0] ? icon.m[0] : icon.c;
+                label = label.charAt(0).toUpperCase() + label.slice(1);
+                return (i18nIcon.iconLabelPrefix || 'Icône : ') + label;
+            },
+
+            // Navigation clavier réelle dans la grille d'icônes (WCAG 2.2 AAA) : les flèches
+            // déplacent le focus (Haut/Bas sautent d'une colonne entière selon la largeur d'écran
+            // réelle - 5 colonnes en bureau, 4 en mobile, cohérent avec .ct-emoji-grid), Début/Fin
+            // vont au premier/dernier bouton visible. Entrée/Espace restent gérés nativement par le
+            // <button> HTML ; Échap reste géré par @keydown.escape.window="closeIconPicker()" déjà
+            // branché sur le conteneur racine.
+            handleIconGridKeydown: function(event, cardId) {
+                var key = event.key;
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].indexOf(key) === -1) return;
+                var grid = document.getElementById('cpEmojiGrid-' + cardId);
+                if (!grid) return;
+                var buttons = Array.prototype.slice.call(grid.querySelectorAll('button[data-icon-idx]'));
+                if (buttons.length === 0) return;
+                event.preventDefault();
+                var current = buttons.indexOf(document.activeElement);
+                if (current === -1) current = 0;
+                var cols = window.matchMedia('(max-width: 575.98px)').matches ? 4 : 5;
+                var next = current;
+                if (key === 'ArrowRight') next = Math.min(current + 1, buttons.length - 1);
+                else if (key === 'ArrowLeft') next = Math.max(current - 1, 0);
+                else if (key === 'ArrowDown') next = Math.min(current + cols, buttons.length - 1);
+                else if (key === 'ArrowUp') next = Math.max(current - cols, 0);
+                else if (key === 'Home') next = 0;
+                else if (key === 'End') next = buttons.length - 1;
+                buttons[next].focus();
+            },
 
             get isValid() {
                 var hasVerb = this.verbType === 'custom' ? !!this.verbCustom : !!this.verb;
@@ -1171,8 +1482,22 @@ document.addEventListener('alpine:init', function() {
                 });
             },
 
+            // Enrichissement 2026-07-31 : la recherche (iconSearchQuery) est un état partagé - un
+            // seul sélecteur d'icône peut être ouvert à la fois (iconPickerOpenId est un id unique),
+            // donc pas de risque de fuite entre cartes. Réinitialisée à CHAQUE ouverture/fermeture
+            // pour ne jamais rouvrir un sélecteur avec une recherche périmée d'une autre carte. Le
+            // focus part directement dans le champ de recherche à l'ouverture (pattern combobox
+            // standard) pour permettre de taper immédiatement au clavier.
             toggleIconPicker: function(cardId) {
-                this.iconPickerOpenId = this.iconPickerOpenId === cardId ? null : cardId;
+                var opening = this.iconPickerOpenId !== cardId;
+                this.iconPickerOpenId = opening ? cardId : null;
+                this.iconSearchQuery = '';
+                if (opening) {
+                    this.$nextTick(function() {
+                        var el = document.getElementById('cpIconSearch-' + cardId);
+                        if (el) el.focus();
+                    });
+                }
             },
 
             // Round 106 (2026-07-27, passe adversariale) : le sélecteur d'icône (.ct-emoji-grid,
@@ -1185,12 +1510,14 @@ document.addEventListener('alpine:init', function() {
                 if (!this.iconPickerOpenId) return;
                 var id = this.iconPickerOpenId;
                 this.iconPickerOpenId = null;
+                this.iconSearchQuery = '';
                 this._restoreFocusIfLost('cpCardIconBtn-' + id);
             },
 
             setCardIcon: function(card, icon) {
                 card.icon = icon;
                 this.iconPickerOpenId = null;
+                this.iconSearchQuery = '';
                 this.persistCustomCards();
                 this._restoreFocusIfLost('cpCardIconBtn-' + card.id);
             },

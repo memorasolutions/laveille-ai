@@ -118,7 +118,21 @@
                         .ct-custom-card__title-input{width:100%;font-weight:700;font-size:0.9rem;padding:2px 4px;border-radius:6px;border:1px solid var(--c-primary);}
                         .ct-custom-card__select{display:flex;align-items:center;width:100%;text-align:left;background:none;border:none;padding:0;margin-top:2px;font-size:0.78rem;color:var(--c-text-muted);cursor:pointer;min-height:44px;}
                         .ct-task-card--on .ct-custom-card__select{color:rgba(255,255,255,0.85);}
-                        .ct-emoji-grid{position:absolute;z-index:5;top:40px;left:50%;transform:translateX(-50%);display:grid;grid-template-columns:repeat(5,44px);gap:4px;background:#fff;border:1px solid #d1d5db;border-radius:10px;padding:8px;box-shadow:0 6px 18px rgba(0,0,0,0.15);}
+                        {{-- Enrichissement 2026-07-31 (accès à plus d'icônes + recherche) : la popover
+                             .ct-icon-picker (recherche + catégories, scrollable) enveloppe désormais un
+                             ou plusieurs .ct-emoji-grid (la grille de boutons proprement dite, un par
+                             catégorie affichée, ou un seul groupe à plat pendant une recherche). Les
+                             règles .ct-emoji-grid ci-dessous restent VOLONTAIREMENT identiques à
+                             l'existant (cibles 44×44px, 5 colonnes bureau / 4 mobile - round 16 et round
+                             91) : seule la positionnement/le fond/l'ombre de la popover ont été déplacés
+                             vers .ct-icon-picker pour laisser la place au champ de recherche et aux
+                             en-têtes de catégorie. --}}
+                        .ct-icon-picker{position:absolute;z-index:5;top:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:6px;width:280px;max-width:calc(100vw - 24px);max-height:340px;overflow-y:auto;background:#fff;border:1px solid #d1d5db;border-radius:10px;padding:8px;box-shadow:0 6px 18px rgba(0,0,0,0.15);}
+                        .ct-icon-picker__search{width:100%;box-sizing:border-box;padding:0.4rem 0.6rem;border:1px solid #d1d5db;border-radius:8px;font-size:0.85rem;min-height:44px;}
+                        .ct-icon-picker__search:focus-visible{outline:2px solid var(--c-primary);outline-offset:1px;}
+                        .ct-icon-picker__category{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:var(--c-text-muted);margin:6px 2px 2px;}
+                        .ct-icon-picker__empty{font-size:0.8rem;color:var(--c-text-muted);padding:8px 4px;margin:0;}
+                        .ct-emoji-grid{display:grid;grid-template-columns:repeat(5,44px);gap:4px;}
                         .ct-emoji-grid button{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:8px;background:#fff;font-size:1.2rem;cursor:pointer;}
                         @media (max-width: 575.98px) {
                             /* Round 16 (2026-07-27) : left:0 débordait hors viewport pour les cartes de la
@@ -127,6 +141,7 @@
                                échouer la cible tactile WCAG 2.2 AAA SC 2.5.5 (44×44). La réduction à 4
                                colonnes suffit déjà à éviter le débordement (188px de large + padding) -
                                les boutons restent à 44px. */
+                            .ct-icon-picker{width:252px;}
                             .ct-emoji-grid{grid-template-columns:repeat(4,44px);}
                         }
                         .ct-emoji-grid button:hover,.ct-emoji-grid button:focus-visible{border-color:var(--c-primary);outline:2px solid var(--c-primary);outline-offset:1px;}
@@ -215,11 +230,35 @@
                                             </template>
                                             <button type="button" class="ct-custom-card__select" :disabled="c.hidden || editLoading" @click="selectTask(c)">{{ __('Utiliser cette carte') }} →</button>
 
+                                            {{-- Enrichissement 2026-07-31 : catalogue classé (12 catégories, ~200 icônes) +
+                                                 recherche par mot-clé français insensible aux accents/casse (factorisée
+                                                 dans _normalizeIconText côté JS). Regroupé par catégorie sans recherche,
+                                                 à plat pendant une recherche (iconSearchGroups). Navigation clavier réelle
+                                                 (flèches/Début/Fin) via handleIconGridKeydown ; Entrée/Espace = natif au
+                                                 <button> ; Échap = @keydown.escape.window déjà branché sur closeIconPicker()
+                                                 au niveau du conteneur racine. --}}
                                             <template x-if="iconPickerOpenId === c.id">
-                                                <div class="ct-emoji-grid" role="group" aria-label="{{ __('Choisir une icône') }}">
-                                                    <template x-for="e in emojiChoices" :key="e">
-                                                        <button type="button" @click="setCardIcon(c, e)" :aria-label="'{{ __('Icône') }} ' + e" x-text="e"></button>
+                                                <div class="ct-icon-picker" role="group" aria-label="{{ __('Choisir une icône') }}">
+                                                    <label class="visually-hidden" :for="'cpIconSearch-' + c.id">{{ __('Rechercher une icône') }}</label>
+                                                    <input type="text" :id="'cpIconSearch-' + c.id" class="ct-icon-picker__search" x-model="iconSearchQuery" autocomplete="off" placeholder="{{ __('Rechercher une icône...') }}">
+                                                    <div class="visually-hidden" role="status" aria-live="polite" x-text="iconResultsAnnouncement"></div>
+                                                    <template x-if="iconSearchQuery && iconSearchResultsCount === 0">
+                                                        <p class="ct-icon-picker__empty">{{ __('Aucune icône ne correspond à cette recherche.') }}</p>
                                                     </template>
+                                                    <div :id="'cpEmojiGrid-' + c.id" @keydown="handleIconGridKeydown($event, c.id)">
+                                                        <template x-for="group in iconSearchGroups" :key="group.category || 'resultats'">
+                                                            <div>
+                                                                <template x-if="group.category">
+                                                                    <p class="ct-icon-picker__category" x-text="group.category"></p>
+                                                                </template>
+                                                                <div class="ct-emoji-grid" role="group" :aria-label="group.category || '{{ __('Résultats de recherche') }}'">
+                                                                    <template x-for="icon in group.icons" :key="icon.c">
+                                                                        <button type="button" data-icon-idx @click="setCardIcon(c, icon.c)" :aria-label="iconAriaLabel(icon)" x-text="icon.c"></button>
+                                                                    </template>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
                                                 </div>
                                             </template>
 
@@ -980,7 +1019,13 @@ window.promptBuilderConfig = {
         summaryAudience: @json(__('Le résultat sera adapté pour : ')),
         summaryTone: @json(__('Ton : ')),
         summaryFormat: @json(__('Présenté sous forme de : ')),
-        summaryLength: @json(__('Longueur visée : '))
+        summaryLength: @json(__('Longueur visée : ')),
+        // Enrichissement 2026-07-31 : sélecteur d'icônes classé + recherche (accès à plus d'icônes,
+        // bien classifiées, recherche par mot-clé français).
+        iconSearchEmpty: @json(__('Aucune icône ne correspond à cette recherche.')),
+        iconSearchResultOne: @json(__('1 icône trouvée')),
+        iconSearchResultMany: @json(__('{count} icônes trouvées')),
+        iconLabelPrefix: @json(__('Icône : '))
     }
 };
 </script>

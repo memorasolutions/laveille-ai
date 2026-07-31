@@ -3902,5 +3902,12 @@
     "Objectif supprimé": "Goal deleted",
     "Exemples pour guider l'IA": "Examples to guide the AI",
     "Insérer dans « %s »": "Insert into “%s”",
-    "Ce champ n'est plus affiché. Rouvrez-le, puis réessayez : rien n'a été inséré.": "This field is no longer displayed. Reopen it, then try again: nothing was inserted."
+    "Ce champ n'est plus affiché. Rouvrez-le, puis réessayez : rien n'a été inséré.": "This field is no longer displayed. Reopen it, then try again: nothing was inserted.",
+    "Rechercher une icône": "Search for an icon",
+    "Rechercher une icône...": "Search for an icon...",
+    "Résultats de recherche": "Search results",
+    "Aucune icône ne correspond à cette recherche.": "No icon matches this search.",
+    "1 icône trouvée": "1 icon found",
+    "{count} icônes trouvées": "{count} icons found",
+    "Icône : ": "Icon: "
 }

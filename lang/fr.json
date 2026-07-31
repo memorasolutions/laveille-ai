@@ -3573,5 +3573,12 @@
     "🔄 Recommencer": "🔄 Recommencer",
     "Retrouvez-les dans": "Retrouvez-les dans",
     "Texte anonymisé inséré dans « %s ».": "Texte anonymisé inséré dans « %s ».",
-    "Ce texte remplira votre demande si elle est encore vide. Si vous avez déjà écrit quelque chose, rien ne sera écrasé.": "Ce texte remplira votre demande si elle est encore vide. Si vous avez déjà écrit quelque chose, rien ne sera écrasé."
+    "Ce texte remplira votre demande si elle est encore vide. Si vous avez déjà écrit quelque chose, rien ne sera écrasé.": "Ce texte remplira votre demande si elle est encore vide. Si vous avez déjà écrit quelque chose, rien ne sera écrasé.",
+    "Rechercher une icône": "Rechercher une icône",
+    "Rechercher une icône...": "Rechercher une icône...",
+    "Résultats de recherche": "Résultats de recherche",
+    "Aucune icône ne correspond à cette recherche.": "Aucune icône ne correspond à cette recherche.",
+    "1 icône trouvée": "1 icône trouvée",
+    "{count} icônes trouvées": "{count} icônes trouvées",
+    "Icône : ": "Icône : "
 }
