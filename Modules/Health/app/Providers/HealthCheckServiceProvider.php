@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Modules\Health\Providers;
 
 use Modules\Core\Providers\BaseModuleServiceProvider;
+use Modules\Health\Checks\OpcacheCheck;
 use Spatie\Health\Checks\Checks\CacheCheck;
 use Spatie\Health\Checks\Checks\DatabaseCheck;
 use Spatie\Health\Checks\Checks\DebugModeCheck;
@@ -30,7 +31,7 @@ class HealthCheckServiceProvider extends BaseModuleServiceProvider
     {
         $this->bootModule();
 
-        Health::checks([
+        $checks = [
             DatabaseCheck::new(),
             UsedDiskSpaceCheck::new()->warnWhenUsedSpaceIsAbovePercentage(70)->failWhenUsedSpaceIsAbovePercentage(90),
             DebugModeCheck::new(),
@@ -38,6 +39,12 @@ class HealthCheckServiceProvider extends BaseModuleServiceProvider
             CacheCheck::new(),
             OptimizedAppCheck::new(),
             ScheduleCheck::new()->heartbeatMaxAgeInMinutes(2),
-        ]);
+        ];
+
+        if ((bool) config('health.opcache.enabled', false)) {
+            $checks[] = OpcacheCheck::new();
+        }
+
+        Health::checks($checks);
     }
 }

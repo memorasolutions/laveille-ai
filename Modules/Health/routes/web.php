@@ -9,11 +9,14 @@
 declare(strict_types=1);
 
 use Modules\Health\Http\Controllers\Admin\IncidentController;
+use Modules\Health\Http\Controllers\OpcacheStatusController;
 use Modules\Health\Http\Controllers\StatusPageController;
 use Spatie\Health\Http\Controllers\HealthCheckResultsController;
 
 Route::get('/health', HealthCheckResultsController::class);
 Route::get('/status', [StatusPageController::class, 'index'])->name('status.index');
+Route::get('/'.trim((string) config('health.opcache.path', '_sante/opcache'), '/'), OpcacheStatusController::class)
+    ->name('health.opcache.status');
 
 Route::middleware(['auth', 'verified'])
     ->prefix('admin/health')

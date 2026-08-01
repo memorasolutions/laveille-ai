@@ -17,6 +17,21 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.139.0 · 2026-08-01 · feat(sante) surveillance OPcache branchee sur Spatie Health, avec un
+ *     courriel d'alerte lisible. Contexte : l'OPcache partage de ea-php84 a ete porte de 1024 Mo
+ *     a 3584 Mo, de 20000 a 130987 cles et de 128 Mo a 640 Mo de chaines internees, JIT desactive.
+ *     Avant l'operation, le cache etait plein (32531 cles sur 32531) et refusait des scripts en
+ *     continu : 758909 rates pour 19120 scripts en cache, soit 739789 refus purs. Apres : cache
+ *     non plein et ecart rates moins scripts ramene a 23, donc zero refus.
+ *     Le check interroge un point d'entree HTTP protege par jeton parce que le CLI et PHP-FPM sont
+ *     deux SAPI distincts avec deux caches differents : opcache_get_status() en ligne de commande
+ *     ne voit pas le cache servi au web. Le jeton voyage par en-tete et jamais dans l'URL, pour ne
+ *     pas atterrir dans les journaux d'acces. Quatre signaux independants sont surveilles - cles,
+ *     memoire, chaines internees, et progression des refus - parce qu'un seuil unique n'aurait rien
+ *     detecte : le cache etait sature en cles alors que 285 Mo de memoire restaient libres.
+ *     Aucun nouveau cron : health:check est deja planifie a la minute, avec battement de coeur.
+ *     La notification d'echec de Spatie est remplacee par une version francaise lisible, forcee sur
+ *     le mailer workspace, jamais Brevo qui reste reserve a l'infolettre.
  *   1.138.1 · 2026-08-01 · fix(perf/accueil) index composite (is_published, pub_date) sur
  *     news_articles. La page d'accueil coûtait 1745 ms de temps serveur, dont 1710 ms de SQL, et
  *     une seule requête en représentait 1642 ms, soit 94 pour cent du total : « select ... from
@@ -3195,8 +3210,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 138;
-$lvPatch = 1;
+$lvMinor = 139;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

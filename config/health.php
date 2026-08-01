@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
+declare(strict_types=1);
+
 return [
     /*
      * A result store is responsible for saving the results of the checks. The
@@ -38,7 +46,7 @@ return [
         'enabled' => false,
 
         'notifications' => [
-            Spatie\Health\Notifications\CheckFailedNotification::class => ['mail'],
+            Modules\Health\Notifications\CheckFailedNotification::class => ['mail'],
         ],
 
         /*
@@ -153,6 +161,22 @@ return [
      * You can specify a secret token that needs to be sent in the X-Secret-Token for secured access.
      */
     'secret_token' => env('HEALTH_SECRET_TOKEN'),
+
+    'opcache' => [
+        'enabled' => env('HEALTH_OPCACHE_ENABLED', false),
+        'path' => env('HEALTH_OPCACHE_PATH', '_sante/opcache'),
+        'token' => env('HEALTH_OPCACHE_TOKEN', ''),
+        'timeout' => env('HEALTH_OPCACHE_TIMEOUT', 5),
+        'warn_keys_percent' => env('HEALTH_OPCACHE_WARN_KEYS_PERCENT', 75),
+        'fail_keys_percent' => env('HEALTH_OPCACHE_FAIL_KEYS_PERCENT', 90),
+        'warn_memory_percent' => env('HEALTH_OPCACHE_WARN_MEMORY_PERCENT', 75),
+        'fail_memory_percent' => env('HEALTH_OPCACHE_FAIL_MEMORY_PERCENT', 90),
+        'warn_interned_percent' => env('HEALTH_OPCACHE_WARN_INTERNED_PERCENT', 80),
+        'fail_interned_percent' => env('HEALTH_OPCACHE_FAIL_INTERNED_PERCENT', 95),
+        'warn_refusals_delta' => env('HEALTH_OPCACHE_WARN_REFUSALS_DELTA', 100),
+        'fail_refusals_delta' => env('HEALTH_OPCACHE_FAIL_REFUSALS_DELTA', 1000),
+        'refusals_cache_key' => env('HEALTH_OPCACHE_REFUSALS_CACHE_KEY', 'health:opcache:refusals'),
+    ],
 
 /**
  * By default, conditionally skipped health checks are treated as failures.

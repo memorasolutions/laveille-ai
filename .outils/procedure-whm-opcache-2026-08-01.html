@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Procédure corrigée de redimensionnement d’OPcache PHP 8.4</title>
+  <style>
+    :root{--teal:#064e5a;--teal-dark:#03343d;--orange:#9a2a06;--ink:#172126;--muted:#39474d;--paper:#f7faf9;--card:#fff;--line:#9bb8b5;--code:#102a30;--danger-bg:#fff1ec;--gold:#f5c451}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:18px/1.62 system-ui,-apple-system,"Segoe UI",sans-serif}header>div,main,footer{width:min(1000px,calc(100% - 32px));margin:auto}header{background:var(--teal-dark);color:#fff;padding:42px 0}h1{font-size:clamp(1.9rem,5vw,3rem);line-height:1.15;margin:0 0 12px}h2,h3{line-height:1.25;color:var(--teal-dark)}h2{font-size:1.55rem;margin:0}h3{font-size:1.12rem;margin:28px 0 10px}p{margin:10px 0 16px}.lead{font-size:1.1rem;margin:0}.alert,.intro,.rollback,.schedule{border:3px solid var(--orange);background:#fff7f3;padding:22px;border-radius:10px;margin:28px 0}.alert h2,.intro h2,.rollback h2{color:#6b1c04}.step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:28px;margin:26px 0}.step-head{display:flex;align-items:center;gap:16px;margin-bottom:18px}.number{display:grid;place-items:center;flex:0 0 64px;height:64px;border-radius:10px;background:var(--teal);color:#fff;font-weight:900;font-size:1.35rem}.command{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;margin:14px 0 8px;border-radius:8px;overflow:hidden;background:var(--code)}pre{margin:0;padding:17px;overflow-x:auto;white-space:pre;color:#fff;font:15px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}button{border:0;border-left:2px solid #fff;background:var(--gold);color:#171717;font:700 15px system-ui;padding:0 18px;cursor:pointer;min-width:94px}button:hover,button:focus-visible{background:#fff;outline:3px solid var(--gold);outline-offset:-4px}button:disabled{opacity:1}.explain{color:var(--muted);font-size:.96rem}.checkpoint{border:4px solid var(--orange)}.checkpoint .number,.rollback .number{background:var(--orange)}.stop{color:#741e04;background:#fff0ea;border-left:7px solid var(--orange);padding:14px 16px;font-weight:900}.rollback{border-width:6px;box-shadow:0 0 0 4px #fff,0 0 0 7px var(--orange)}.optional{border-style:dashed;background:#eff7f6}.badge{display:inline-block;background:var(--teal-dark);color:#fff;padding:4px 10px;border-radius:99px;font-size:.8rem;font-weight:800;letter-spacing:.04em}.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}.fact{background:#e5f0ef;padding:14px;border-radius:8px}.fact strong{display:block;color:var(--teal-dark)}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}table{width:100%;border-collapse:collapse;margin:16px 0}th,td{border:1px solid #718b89;padding:11px;text-align:left;vertical-align:top}th{background:var(--teal-dark);color:#fff}caption{text-align:left;font-weight:800;margin-bottom:8px;color:#6b1c04}footer{padding:22px 0 40px;color:var(--muted);text-align:center;font-size:.9rem}@media(max-width:680px){body{font-size:16px}.step,.alert,.intro,.rollback,.schedule{padding:19px 15px}.facts{grid-template-columns:1fr}.command{grid-template-columns:1fr}button{border-left:0;border-top:2px solid #fff;padding:12px}.step-head{align-items:flex-start}.number{flex-basis:54px;height:54px;font-size:1.05rem}table{font-size:.9rem}}
+  </style>
+</head>
+<body>
+<header><div><h1>Redimensionnement d’OPcache PHP 8.4</h1><p class="lead">Procédure corrigée pour le maître PHP-FPM commun aux sites en ea-php84.</p></div></header>
+<main>
+  <section class="alert" aria-labelledby="avertissement"><h2 id="avertissement">Avertissement</h2><p>Cette procédure redimensionne l’OPcache partagé, augmente le nombre de clés et la mémoire des chaînes internées, puis désactive le JIT. Son application exige un redémarrage qui coupe brièvement <strong>tous les sites en PHP 8.4</strong> et vide leur cache commun. Faites-la uniquement pendant le créneau de maintenance recommandé.</p><p><strong>La version précédente de ce document visait le mauvais fichier. Elle a été corrigée le 2026-08-01.</strong> Le fichier à modifier est <code>/opt/cpanel/ea-php84/root/etc/php.d/11-opcache-memora.ini</code>, avec un accès root. L’éditeur INI de WHM ne modifie que le <code>php.ini</code> principal et n’a donc aucun effet sur ces réglages OPcache.</p></section>
+
+  <section class="intro" aria-labelledby="avant"><h2 id="avant">À lire avant tout</h2><p>Cette intervention corrige un sous-dimensionnement réel et remplace un garde-fou disparu : un script qui purgeait l’OPcache lorsque la mémoire libre passait sous 100 Mo a été supprimé entre la mi-juin et le 26 juillet 2026. Elle bénéficie à <strong>tous les sites du serveur</strong>.</p><p>Elle <strong>ne corrige pas</strong> la lenteur de la page d’accueil de laveille.ai. Cette cause a été mesurée séparément : une requête SQL de 1 642 ms représentait 94 pour cent du temps de la page. Un index ajouté le même jour a ramené le temps mesuré de 1 745 ms à 49 ms.</p></section>
+
+  <section class="schedule" aria-labelledby="avancement"><h2 id="avancement">Avancement au 2026-08-01</h2>
+    <table>
+      <tr><th>Étape</th><th>État</th><th>Ce qui a été constaté</th></tr>
+      <tr><td><strong>0 — Diagnostic</strong></td><td>✔ FAIT</td><td>Fait par sonde HTTP en lecture seule, auto-supprimée. Confirme que <code>11-opcache-memora.ini</code> gouverne bien les valeurs actives. Révèle aussi que le <code>php.ini</code> principal contient <code>opcache.memory_consumption=512</code> — valeur écrasée deux fois, donc morte : la preuve que l’éditeur INI de WHM n’aurait servi à rien.</td></tr>
+      <tr><td><strong>1 — Sauvegarde</strong></td><td>✔ FAIT</td><td><code>11-opcache-memora.ini.backup-20260801-152210</code>, 407 octets, taille identique à l’original.</td></tr>
+      <tr><td><strong>2 — Appliquer</strong></td><td>✔ FAIT</td><td>Les sept directives sont en place. <code>save_comments=1</code> et <code>revalidate_freq=2</code> ont bien survécu.</td></tr>
+      <tr><td><strong>3 — Test</strong></td><td>✔ FAIT</td><td><code>code de sortie = 0</code>, sortie de PHP vide, <code>VERDICT : OK</code>. PHP 8.4 charge la nouvelle configuration sans aucun avertissement.</td></tr>
+      <tr><td><strong>4 — Redémarrer</strong></td><td>✔ FAIT</td><td>Fait en journée plutôt qu’au créneau de 03h00, sur décision, parce que la dégradation s’aggravait d’heure en heure. <code>/scripts/restartsrv_apache_php_fpm --restart</code> : les cinq maîtres FPM (8.0, 8.1, 8.2, 8.3, 8.4) ont redémarré sans erreur.</td></tr>
+      <tr><td><strong>5 — Vérifier côté web</strong></td><td>✔ FAIT</td><td>Sonde HTTP en SAPI <code>fpm-fcgi</code> : valeurs actives 3584 / 130987 / 640 / <code>disable</code> / 0, segment total mesuré à 3584,00 Mo exactement. <code>cache_full = NON</code>, et <code>misses</code> égal au nombre de scripts en cache, donc zéro refus.</td></tr>
+    </table>
+    <p><strong>Rien n’est encore engagé.</strong> Le fichier a changé, mais PHP-FPM tourne toujours avec son ancienne configuration chargée en mémoire. Aucun site n’est affecté tant que l’étape 4 n’a pas été exécutée.</p>
+  </section>
+
+  <div class="facts"><div class="fact"><strong>Serveur</strong>125,28 Go de RAM, 113,02 Go disponibles</div><div class="fact"><strong>Processeur</strong>32 cœurs, charge 1,16</div><div class="fact"><strong>PHP</strong>8.4.21, SAPI fpm-fcgi</div></div>
+  <p>Un seul maître PHP-FPM existe par version de PHP. Tous les sites en ea-php84 partagent donc le même OPcache : laveille.ai, tvhr9.com, nexuspress.ai, memora.solutions, monate, lucidnest, writeafrica, portail, planifize, matomo et emoicq.</p>
+  <p>État mesuré le 2026-08-01 en fin de journée : 32 531 clés sur 32 531, <code>cache_full = OUI</code>; 128,00 Mo de chaînes internées utilisés sur 128, soit 0,00 Mo libre; taux de succès de 94,92 pour cent, avec 3 301 605 succès et 176 666 ratés; aucun redémarrage OOM, hash ou manuel. Après le redémarrage du maître FPM, les ratés sont passés de 17 528 à midi à 176 666 en fin de journée. Le cache s’est donc resaturé en quelques heures et refuse désormais des scripts en continu.</p>
+
+  <section class="step"><div class="step-head"><span class="number">0</span><h2>Diagnostic préalable</h2></div>
+    <h3>Voir les réglages de toutes les versions PHP installées</h3>
+    <div class="command"><pre><code>for d in /opt/cpanel/ea-php*/root/etc; do [ -d "$d" ] || continue; printf '\n=== %s ===\n' "$d"; grep -RHE '^[[:space:]]*;?[[:space:]]*opcache\.(memory_consumption|max_accelerated_files|interned_strings_buffer|jit|jit_buffer_size|validate_timestamps|revalidate_freq)[[:space:]]*=' "$d/php.ini" "$d/php.d" 2&gt;/dev/null || printf 'Aucun réglage trouvé\n'; done</code></pre><button type="button">Copier</button></div>
+    <p class="explain">Cette lecture seule parcourt toutes les versions ea-php installées et affiche le fichier source de chaque réglage. Elle permet de repérer immédiatement un ancien réglage posé sur une version qui ne sert plus.</p>
+    <h3>Lire le bon fichier de surcharge</h3>
+    <div class="command"><pre><code>sed -n '1,240p' /opt/cpanel/ea-php84/root/etc/php.d/11-opcache-memora.ini</code></pre><button type="button">Copier</button></div>
+    <p class="explain">Cette commande affiche le contenu actuel du fichier qui gouverne réellement OPcache. Il est chargé après le <code>php.ini</code> principal et après <code>10-opcache.ini</code>. Le préfixe <code>11-</code> gagne. Ne modifiez jamais <code>10-opcache.ini</code> : cPanel le régénère lors de ses mises à jour.</p>
+    <p>Si <code>11-opcache-memora.ini</code> n’existe pas, créez-le avec ce contenu complet type :</p>
+    <div class="command"><pre><code>install -m 0644 /dev/null /opt/cpanel/ea-php84/root/etc/php.d/11-opcache-memora.ini &amp;&amp; printf '%s\n' 'opcache.memory_consumption=3584' 'opcache.max_accelerated_files=130987' 'opcache.interned_strings_buffer=640' 'opcache.revalidate_freq=2' 'opcache.save_comments=1' 'opcache.jit=disable' 'opcache.jit_buffer_size=0' &gt; /opt/cpanel/ea-php84/root/etc/php.d/11-opcache-memora.ini</code></pre><button type="button">Copier</button></div>
+    <p class="explain">Cette commande crée le fichier avec les permissions 0644, puis y écrit les cinq valeurs cibles. Ne l’utilisez que si le fichier est absent, car la redirection remplace son contenu.</p>
+  </section>
+
+  <section class="step"><div class="step-head"><span class="number">1</span><h2>Sauvegarde horodatée</h2></div>
+    <div class="command"><pre><code>cp /opt/cpanel/ea-php84/root/etc/php.d/11-opcache-memora.ini /opt/cpanel/ea-php84/root/etc/php.d/11-opcache-memora.ini.backup-$(date +%Y%m%d-%H%M%S)</code></pre><button type="button">Copier</button></div>
+    <p class="explain">Cette commande copie le bon fichier en ajoutant la date et l’heure au nom de la sauvegarde. Elle rend le rollback immédiat possible.</p>
+  </section>
+
+  <section class="step"><div class="step-head"><span class="number">2</span><h2>Appliquer les cinq valeurs</h2></div>
+    <p>Collez ce bloc unique. Pour chaque directive, il remplace une ligne existante, même commentée par un point-virgule, ou ajoute la directive si elle est absente. Il relit ensuite le fichier. L’objectif est d’éliminer le scénario « le sed n’a rien trouvé et il ne s’est rien passé ».</p>
+    <div class="command"><pre><code>( set -eu
+FILE=/opt/cpanel/ea-php84/root/etc/php.d/11-opcache-memora.ini
+[ -f "$FILE" ] || { echo "Fichier absent : $FILE" &gt;&amp;2; exit 1; }
+set_ini() {
+  key=$1
+  value=$2
+  if grep -Eq "^[[:space:]]*;?[[:space:]]*${key//./\\.}[[:space:]]*=" "$FILE"; then
+    sed -i -E "s|^[[:space:]]*;?[[:space:]]*${key//./\\.}[[:space:]]*=.*|${key}=${value}|" "$FILE"
+  else
+    printf '%s=%s\n' "$key" "$value" &gt;&gt; "$FILE"
+  fi
+}
+set_ini opcache.memory_consumption 3584
+set_ini opcache.max_accelerated_files 130987
+set_ini opcache.interned_strings_buffer 640
+set_ini opcache.jit disable
+set_ini opcache.jit_buffer_size 0
+printf '\n--- contenu final ---\n'
+cat "$FILE" )</code></pre><button type="button">Copier</button></div>
+    <p class="explain">Le garde <code>set -eu</code> arrête le script à la première erreur. Il est enfermé dans un sous-shell <code>( … )</code> : sans cette parenthèse, <code>set -eu</code> resterait actif dans votre session WHM et la moindre erreur de frappe ensuite la fermerait. Le test d’existence évite de créer accidentellement un fichier au mauvais endroit. La dernière commande affiche le fichier ENTIER, pas seulement les valeurs modifiées, pour confirmer que <code>opcache.save_comments=1</code> et <code>opcache.revalidate_freq=2</code> ont bien survécu.</p>
+    <p class="stop">La sortie doit contenir SEPT directives. Si <code>opcache.save_comments=1</code> a disparu, restaurez la sauvegarde immédiatement : Laravel lit les docblocks et les attributs, son absence casse des paquets.</p>
+    <details><summary><strong>Variante de repli : édition manuelle avec nano</strong></summary>
+      <div class="command"><pre><code>nano /opt/cpanel/ea-php84/root/etc/php.d/11-opcache-memora.ini</code></pre><button type="button">Copier</button></div>
+      <p class="explain">Cette commande ouvre le fichier dans nano. Remplacez son contenu par le bloc final ci-dessous, enregistrez avec Ctrl+O puis Entrée, et quittez avec Ctrl+X.</p>
+      <div class="command"><pre><code>opcache.memory_consumption=3584
+opcache.max_accelerated_files=130987
+opcache.interned_strings_buffer=640
+opcache.revalidate_freq=2
+opcache.save_comments=1
+opcache.jit=disable
+opcache.jit_buffer_size=0</code></pre><button type="button">Copier</button></div>
+      <p class="explain">Voici le contenu final attendu, <strong>les sept directives</strong>. <code>opcache.save_comments=1</code> et <code>opcache.revalidate_freq=2</code> sont déjà présents dans le fichier actuel et doivent être conservés : <code>save_comments</code> est indispensable à Laravel, qui lit les docblocks et les attributs. Les omettre casserait des paquets. N’ajoutez pas <code>validate_timestamps</code> : sa valeur par défaut est déjà 1.</p>
+    </details>
+    <p><strong>Dimensionnement mesuré le 2026-08-01 depuis une requête web réelle</strong> (SAPI <code>fpm-fcgi</code>, pas la ligne de commande) : 19 120 scripts occupaient 732,49 Mo, dont 365,54 Mo de bytecode, 128,00 Mo de chaînes internées et 238,95 Mo de structures internes. Le coût réel est donc de <strong>31,6 Ko par script hors chaînes internées</strong>, et le ratio est de <strong>1,70 clé par script</strong>.</p><p>Le plafond de 130 987 clés autorise environ 77 050 scripts. Le budget se répartit ainsi : 3 584 − 640 = 2 944 Mo pour le bytecode, soit une capacité d’environ 95 400 scripts. <strong>La table de clés sature donc bien avant la mémoire, avec 24 pour cent de marge</strong> — et c’est voulu : le mur que l’on doit atteindre en premier est celui des clés, pas celui de la mémoire.</p><p><strong>Correction importante par rapport à la version précédente de cette procédure :</strong> le tampon de chaînes internées est alloué <em>à l’intérieur</em> de <code>memory_consumption</code>, pas en plus (vérifié dans <code>/proc/self/smaps</code> : un seul mapping partagé de 1 024 Mo, aucun second mapping de 128 Mo). Il faut donc lui faire une place explicite dans le segment, et non l’ajouter par-dessus. La mémoire partagée totale devient <strong>3 584 Mo, soit 2,8 pour cent de la RAM du serveur</strong> — et non 3 328 Mo comme annoncé précédemment.</p><p><strong>Pourquoi 640 Mo de chaînes internées et non 256 :</strong> le tampon actuel est saturé à 100 pour cent (807 913 chaînes, 0,00 Mo libre) avec seulement 19 120 scripts. Le ratio de 6,86 Ko par script qu’on en déduit est donc un <em>plancher</em>, pas la demande réelle : PHP a cessé d’y ajouter des chaînes une fois plein. Deux extrapolations indépendantes donnent 516 Mo (par le volume) et 541 Mo (par le nombre de chaînes) à 77 000 scripts — et ce sont elles aussi des planchers. 512 Mo serait déjà au taquet le jour de la mise en service; 640 Mo laisse environ 20 pour cent au-dessus du plancher estimé. Quand ce tampon déborde, PHP ne s’arrête pas : il alloue les chaînes dans la mémoire <em>privée de chaque worker</em>, la consommation RAM grimpe alors sans qu’aucun compteur d’OPcache ne le signale.</p><p><strong>La vraie valeur ne sera connue qu’après ce redémarrage.</strong> C’est seulement quand le tampon aura de la place qu’il révélera sa demande réelle. Relever <code>interned_strings_usage</code> une fois le cache regarni permettra d’ajuster 640 Mo à la hausse ou à la baisse sur une mesure, plus sur une extrapolation.</p><p>La marge actuelle est inférieure à une application : chaque site Laravel du parc consomme entre 1 200 et 2 400 scripts, et il ne reste qu’environ 1 250 scripts de marge.</p><p><strong>Ne touchez pas</strong> à <code>opcache.validate_timestamps=1</code> ni à <code>opcache.revalidate_freq=2</code>. Avec un déploiement par rsync non atomique, <code>validate_timestamps=1</code> est le seul filet contre du code à moitié copié.</p>
+  </section>
+
+  <section class="step checkpoint"><div class="step-head"><span class="number">3</span><h2>Point de non-retour : tester avant tout redémarrage</h2></div>
+    <div class="command"><pre><code>( set -o pipefail
+OUT=$(PHP_INI_SCAN_DIR=/opt/cpanel/ea-php84/root/etc/php.d /opt/cpanel/ea-php84/root/usr/bin/php -c /opt/cpanel/ea-php84/root/etc/php.ini -r 'exit(0);' 2&gt;&amp;1)
+STATUS=$?
+printf 'code de sortie = %s\n' "$STATUS"
+printf 'sortie de PHP  = [%s]\n' "$OUT"
+if [ "$STATUS" -eq 0 ] &amp;&amp; ! printf '%s' "$OUT" | grep -Eiq '(warning|error|failed|syntax)'; then
+  echo 'VERDICT : OK - la configuration est valide'
+else
+  echo 'VERDICT : ECHEC - NE PAS REDEMARRER, restaurer la sauvegarde'
+fi )&lt;/dev/null</code></pre><button type="button">Copier</button></div>
+    <p class="explain">Cette commande force PHP 8.4 à charger le <code>php.ini</code> et tout le répertoire <code>php.d</code>, donc le fichier modifié, puis à sortir immédiatement. Elle ne touche à rien : OPcache ne s’initialise même pas en ligne de commande, <code>enable_cli</code> valant 0. Comme à l’étape 2, <code>set -o pipefail</code> est enfermé dans un sous-shell <code>( … )</code> pour qu’il ne reste pas actif dans votre session. Le verdict est affiché en clair plutôt que laissé à un silence à interpréter.</p>
+    <p><strong>Attendu :</strong> <code>code de sortie = 0</code>, <code>sortie de PHP = []</code> (vide), et <code>VERDICT : OK</code>.</p>
+    <p class="stop">Si cette étape renvoie la moindre erreur, NE PAS redémarrer. Allez directement au rollback de l’étape 6.</p>
+  </section>
+
+  <section class="step"><div class="step-head"><span class="number">4</span><h2>Redémarrer PHP-FPM</h2></div>
+    <p>Il faut un <strong>RESTART, pas un reload</strong>. La mémoire partagée d’OPcache ne se redimensionne pas à chaud.</p>
+    <div class="command"><pre><code>/scripts/restartsrv_apache_php_fpm --restart</code></pre><button type="button">Copier</button></div>
+    <p class="explain">Cette commande cPanel redémarre les maîtres PHP-FPM. Elle coupe brièvement les sites concernés et recrée leur mémoire partagée avec les nouvelles dimensions.</p>
+    <p>Variante directe pour PHP 8.4 :</p>
+    <div class="command"><pre><code>systemctl restart ea-php84-php-fpm</code></pre><button type="button">Copier</button></div>
+    <p class="explain">Cette variante systemd redémarre uniquement le service PHP-FPM de ea-php84. Utilisez-la si la commande cPanel n’est pas disponible.</p>
+  </section>
+
+  <section class="step"><div class="step-head"><span class="number">5</span><h2>Vérifier côté web</h2></div>
+    <p>Le CLI et PHP-FPM sont deux SAPI distincts avec deux caches différents. Un <code>php -i</code> en ligne de commande ne prouve <strong>rien</strong> sur le web.</p><p>La vérification côté web sera faite par l’équipe technique avec une sonde HTTP dédiée. Deux signaux confirment le succès : les valeurs actives lues côté web doivent être 3 584, 130 987, 640, <code>disable</code> et 0; le robot de surveillance externe Robotalp de tvhr9, identifiant 91534366, doit repasser au vert de lui-même.</p><p><strong>Si Robotalp reste rouge, c’est le signal que les valeurs n’ont pas été appliquées au bon endroit.</strong></p>
+  </section>
+
+  <section class="rollback" aria-labelledby="retour"><div class="step-head"><span class="number">6</span><h2 id="retour">Rollback en une commande</h2></div>
+    <p><strong>Il y a deux rollbacks différents. Choisissez selon que l’étape 4 a été exécutée ou non.</strong></p>
+    <h3>Cas A — AVANT le redémarrage (étape 4 pas encore faite)</h3>
+    <p>C’est la situation actuelle. Aucun site n’a été affecté, il suffit de remettre le fichier en place. <strong>Ne redémarrez rien</strong> : ce serait justement appliquer les valeurs que vous cherchez à annuler.</p>
+    <div class="command"><pre><code>cp /opt/cpanel/ea-php84/root/etc/php.d/11-opcache-memora.ini.backup-20260801-152210 /opt/cpanel/ea-php84/root/etc/php.d/11-opcache-memora.ini &amp;&amp; cat /opt/cpanel/ea-php84/root/etc/php.d/11-opcache-memora.ini</code></pre><button type="button">Copier</button></div>
+    <p class="explain">Restaure la sauvegarde du 2026-08-01 à 15h22 et réaffiche le fichier pour confirmer le retour aux anciennes valeurs (1024, 128, 20000, <code>tracing</code>, 128M). Zéro coupure, zéro impact.</p>
+    <h3>Cas B — APRÈS le redémarrage (étape 4 déjà faite)</h3>
+    <div class="command"><pre><code>FILE=/opt/cpanel/ea-php84/root/etc/php.d/11-opcache-memora.ini; BACKUP=$(ls -1t "${FILE}".backup-* 2&gt;/dev/null | head -n 1); [ -n "$BACKUP" ] &amp;&amp; cp "$BACKUP" "$FILE" &amp;&amp; /scripts/restartsrv_apache_php_fpm --restart</code></pre><button type="button">Copier</button></div>
+    <p class="explain">Choisit la sauvegarde horodatée la plus récente, la restaure au bon emplacement, puis redémarre PHP-FPM pour rétablir les anciennes valeurs. Cette variante-là coupe brièvement les sites, puisqu’il faut un second redémarrage pour défaire le premier.</p>
+  </section>
+
+  <section class="schedule" aria-labelledby="horaire"><h2 id="horaire">Horaire de maintenance</h2><p><strong>Créneau recommandé : 03h00 Québec (07:00 UTC).</strong></p>
+    <table><caption>Fenêtres à éviter absolument</caption><thead><tr><th>Heure</th><th>Raison</th></tr></thead><tbody>
+      <tr><td>00h00 à 00h45 Québec (04:00 à 04:45 UTC)</td><td>tvhr9 publie son horaire du jour à 00h25 Québec (04:25 UTC). Ce mécanisme est critique.</td></tr>
+      <tr><td>02h30 Québec (06:30 UTC)</td><td>Sauvegarde de la base vers le Mac.</td></tr>
+      <tr><td>04h50 Québec (08:50 UTC)</td><td>Sauvegarde des fichiers.</td></tr>
+      <tr><td>Après 06h30 Québec (après 10:30 UTC)</td><td>Reprise des tâches du matin.</td></tr>
+    </tbody></table>
+  </section>
+
+  <section class="step"><div class="step-head"><span class="number">M</span><h2>Maintenance après une mise à jour serveur</h2></div>
+    <p>Une mise à jour cPanel peut régénérer <code>10-opcache.ini</code>. Le fichier <code>11-opcache-memora.ini</code> persiste et garde la priorité, mais les valeurs actives côté web doivent être revérifiées après chaque mise à jour serveur avec la sonde HTTP de l’équipe.</p>
+    <div class="command"><pre><code>grep -H -E '^[[:space:]]*;?[[:space:]]*opcache\.(memory_consumption|max_accelerated_files|interned_strings_buffer|jit|jit_buffer_size|validate_timestamps|revalidate_freq)[[:space:]]*=' /opt/cpanel/ea-php84/root/etc/php.d/10-opcache.ini /opt/cpanel/ea-php84/root/etc/php.d/11-opcache-memora.ini</code></pre><button type="button">Copier</button></div>
+    <p class="explain">Cette vérification rapide et sans modification affiche les valeurs sur disque ainsi que leur fichier d’origine. Elle confirme que le fichier <code>11-</code> contient toujours les surcharges attendues; la sonde HTTP confirme ensuite les valeurs réellement actives dans FPM.</p>
+  </section>
+
+  <section class="step optional"><span class="badge">SECTION OPTIONNELLE</span><div class="step-head"><span class="number">+</span><h2>Activer le slowlog PHP-FPM</h2></div>
+    <p>Le slowlog capture la pile PHP complète de toute requête dépassant 800 ms. En français simple, il montre exactement où PHP passe son temps lorsqu’une page ralentit. C’est l’outil de diagnostic le plus puissant et sans risque : il observe sans modifier le traitement de l’application. Il exige lui aussi un redémarrage.</p><p>Ajoutez ces directives dans la configuration du pool PHP-FPM du domaine à diagnostiquer, en adaptant le chemin du journal au domaine :</p>
+    <div class="command"><pre><code>request_slowlog_timeout = 800ms
+slowlog = /var/log/php-fpm/laveille.ai-slow.log</code></pre><button type="button">Copier</button></div>
+    <p class="explain">La première directive fixe le seuil de capture à 800 ms. La seconde indique où écrire les piles PHP; le dossier doit exister et être accessible au service.</p>
+    <div class="command"><pre><code>/scripts/restartsrv_apache_php_fpm --restart</code></pre><button type="button">Copier</button></div>
+    <p class="explain">Cette commande applique la configuration du pool par un redémarrage. Elle entraîne la même brève interruption que l’étape 4.</p>
+  </section>
+</main>
+<footer>MEMORA solutions, 2026-08-01, version corrigée</footer>
+<script>
+  (function () {
+    function legacyCopy(text) {
+      var area = document.createElement('textarea');
+      area.value = text;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      var ok = document.execCommand('copy');
+      document.body.removeChild(area);
+      return ok ? Promise.resolve() : Promise.reject();
+    }
+    document.querySelectorAll('.command button').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var text = button.closest('.command').querySelector('code').textContent;
+        var operation = navigator.clipboard && window.isSecureContext ? navigator.clipboard.writeText(text) : legacyCopy(text);
+        operation.then(function () {
+          button.textContent = 'Copié';
+          button.disabled = true;
+          setTimeout(function () { button.textContent = 'Copier'; button.disabled = false; }, 2000);
+        }).catch(function () {
+          button.textContent = 'Échec';
+          setTimeout(function () { button.textContent = 'Copier'; }, 2000);
+        });
+      });
+    });
+  }());
+</script>
+</body>
+</html>

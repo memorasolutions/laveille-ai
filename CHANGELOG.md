@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.0] - 2026-08-01
+
+### Ajouté
+
+- **Surveillance OPcache branchée sur Spatie Health**, avec un courriel d'alerte lisible plutôt que
+  technique. Aucun nouveau cron : `health:check` est déjà planifié à la minute et dispose déjà d'un
+  battement de coeur (`health:schedule-check-heartbeat`).
+- Point d'entrée HTTP protégé par jeton (`Modules/Health/app/Http/Controllers/OpcacheStatusController.php`).
+  Le check DOIT passer par HTTP : le CLI et PHP-FPM sont deux SAPI distincts avec deux caches
+  différents, et `opcache_get_status()` en ligne de commande ne voit pas le cache servi au web.
+  Le jeton voyage par en-tête `X-Sante-Jeton` et jamais dans l'URL, pour ne pas atterrir dans les
+  journaux d'accès du serveur web ni du réseau de diffusion.
+- **Quatre signaux indépendants** (`Modules/Health/app/Checks/OpcacheCheck.php`) : occupation des
+  clés, de la mémoire, du tampon de chaînes internées, et **progression des refus** (`misses` moins
+  `num_cached_scripts`). Ce quatrième signal est le plus important : le 2026-08-01, le cache était
+  saturé à 100 % des clés alors que 285 Mo de mémoire restaient libres. Un seuil unique sur la
+  mémoire n'aurait jamais sonné.
+- Le check échoue explicitement s'il ne parvient pas à mesurer (connexion refusée, JSON incomplet).
+  Un contrôle qui ne peut pas mesurer ne renvoie jamais « tout va bien ».
+- Notification `CheckFailedNotification` en français lisible, forcée sur le mailer `workspace`.
+  Brevo reste réservé à l'infolettre. Elle profite à **tous** les contrôles de santé, pas seulement
+  à OPcache.
+- Tout est activable et désactivable par configuration, sans valeur en dur.
+
+### Contexte
+
+L'OPcache partagé de ea-php84 a été porté de 1024 Mo à **3584 Mo**, de 20000 à **130987 clés** et de
+128 Mo à **640 Mo** de chaînes internées, JIT désactivé. Avant : 758 909 ratés pour 19 120 scripts en
+cache, soit **739 789 refus purs**, et `cache_full = OUI` pendant des heures sans aucun redémarrage
+automatique. Après : `cache_full = NON` et un écart ratés-scripts de **23**, donc zéro refus.
+
 ## [1.138.1] - 2026-08-01
 
 ### Correctif - Performance de la page d'accueil (index composite manquant)
