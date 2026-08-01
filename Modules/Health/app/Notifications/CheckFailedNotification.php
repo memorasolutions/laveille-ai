@@ -57,7 +57,11 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
                 $mail->line($ligne);
             }
 
-            if (strtolower($result->check->getLabel()) === 'opcache') {
+            // La marche a suivre ne s'affiche que pour le controle qui va REELLEMENT mal.
+            // Sans ce garde, un courriel declenche par un autre controle affichait quand meme
+            // « augmentez la directive saturee » sous un OPcache annonce « aucune action
+            // requise » : une consigne contradictoire, donc une consigne qu'on apprend a ignorer.
+            if (strtolower($result->check->getLabel()) === 'opcache' && ! $result->status->equals(Status::ok())) {
                 foreach ($this->marcheASuivreOpcache() as $ligne) {
                     $mail->line($ligne);
                 }

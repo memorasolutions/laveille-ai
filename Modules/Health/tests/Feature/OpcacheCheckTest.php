@@ -196,6 +196,26 @@ it('rend un courriel lisible, sans flottant brut, avec la marche à suivre', fun
         ->toContain('TOUS les sites PHP du serveur');
 });
 
+it('n ajoute PAS la marche à suivre quand OPcache va bien', function () {
+    // Constaté en production le 2026-08-01 a 16h29 Quebec (20:29 UTC) : un courriel declenche
+    // par l'echec d'un AUTRE controle affichait quand meme les 5 etapes « augmentez la directive
+    // saturee », juste sous un OPcache annoncant « aucune action requise ». Une consigne
+    // contradictoire est une consigne qu'on apprend a ignorer.
+    Http::fake(['*' => Http::response(opcachePayload())]);
+
+    $check = OpcacheCheck::new();
+    $result = $check->run();
+    $result->check = $check;
+
+    $courriel = implode("\n", (new CheckFailedNotification([$result]))->toMail()->introLines);
+
+    expect($result->status->equals(Status::ok()))->toBeTrue()
+        ->and($courriel)
+        ->not->toContain('Marche à suivre')
+        ->not->toContain('restartsrv_apache_php_fpm')
+        ->toContain('Table des clés occupée : 20,0 %');
+});
+
 it('signale une progression des refus quand le cache EST sous pression', function () {
     $sousPression = ['opcache_statistics' => ['num_cached_keys' => 110000]];
 

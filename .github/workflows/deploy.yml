@@ -102,6 +102,18 @@ jobs:
         run: |
           ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan optimize:clear; php artisan responsecache:clear" || true
 
+      - name: Réamorcer le battement de coeur du planificateur
+        # ACTION: reposer immediatement le heartbeat efface par optimize:clear.
+        # MCP: SELF (diff < 5 lignes)
+        # RAISON: optimize:clear vide le cache, donc la marque de passage du planificateur.
+        #   Le controle de sante suivant (il tourne chaque minute) voyait « The schedule did
+        #   not run yet » et envoyait une alerte URGENT a CHAQUE mise en ligne. Constate en
+        #   production le 2026-08-01 a 16h29 Quebec (20:29 UTC), deux minutes apres un deploy.
+        #   Une alerte qui sonne a chaque deploiement finit par etre ignoree le jour ou elle
+        #   signale un vrai arret du planificateur.
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan health:schedule-check-heartbeat" || true
+
       - name: Build caches prod (route+event+view — JAMAIS config:cache)
         # ACTION: caches sûrs uniquement, on retire config:cache (php artisan optimize).
         # MCP: SELF (diff < 5 lignes)

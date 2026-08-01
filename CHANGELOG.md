@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.4] - 2026-08-01
+
+### Corrigé
+
+- **La marche à suivre OPcache ne s'affiche plus quand OPcache va bien.** Le courriel déclenché
+  par l'échec d'un **autre** contrôle annonçait « OPcache dispose d'une capacité suffisante,
+  aucune action requise » puis listait quand même « augmentez la directive saturée ». Une
+  consigne contradictoire est une consigne qu'on apprend à ignorer. Elle est désormais
+  conditionnée au statut réel du contrôle, et un test le verrouille.
+- **Fin du faux URGENT à chaque mise en ligne.** Le déploiement lance `optimize:clear`, qui vide
+  le cache et donc la marque de passage du planificateur ; le contrôle suivant, une minute plus
+  tard, la trouvait absente et envoyait « The schedule did not run yet » en **URGENT**. Constaté
+  en production à 16h29 Québec (20:29 UTC), deux minutes après un déploiement. Le workflow repose
+  maintenant le battement de cœur juste après avoir vidé les caches. Une alerte qui sonne à
+  chaque déploiement finit ignorée le jour où le planificateur s'arrête vraiment.
+
 ## [1.139.3] - 2026-08-01
 
 ### Corrigé

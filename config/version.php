@@ -17,6 +17,18 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.139.4 · 2026-08-01 · fix(sante) deux faux signaux corriges, trouves en lisant les vrais
+ *     courriels recus a 16h29 et 16h30 Quebec (20:29 et 20:30 UTC).
+ *     (1) La marche a suivre OPcache s'affichait meme quand OPcache allait bien : le courriel
+ *     declenche par l'echec d'un AUTRE controle disait « aucune action requise » puis listait
+ *     « augmentez la directive saturee ». Une consigne contradictoire est une consigne qu'on
+ *     apprend a ignorer. Elle est desormais conditionnee au statut reel du controle.
+ *     (2) « The schedule did not run yet » sonnait en URGENT a CHAQUE mise en ligne : le
+ *     deploiement lance optimize:clear, qui vide le cache et donc la marque de passage du
+ *     planificateur ; le controle suivant, une minute plus tard, la trouvait absente. Le
+ *     deploiement repose maintenant le battement de coeur juste apres avoir vide les caches.
+ *     Une alerte qui sonne a chaque deploiement finit ignoree le jour ou le planificateur
+ *     s'arrete vraiment.
  *   1.139.3 · 2026-08-01 · fix(sante) le courriel d'alerte devient lisible et actionnable.
  *     Corrige APRES avoir lu le premier courriel reellement recu (16h16 Quebec, 20:16 UTC), pas
  *     apres l'avoir imagine. Il contenait deux defauts que seul le message reel revele :
@@ -3245,7 +3257,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 3;
+$lvPatch = 4;
 
 return [
     'major' => $lvMajor,
