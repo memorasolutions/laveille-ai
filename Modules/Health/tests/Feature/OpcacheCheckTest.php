@@ -141,6 +141,34 @@ it('ne déclenche aucun signal sous les seuils', function () {
         ->and($result->shortSummary)->toContain('clés 20.0 %');
 });
 
+it('n envoie AUCUN courriel quand tout va bien', function () {
+    // Spatie envoie une notification pour tout resultat dont getNotificationMessage() n'est
+    // pas vide, QUEL QUE SOIT son statut (RunHealthChecksCommand ligne 116) : le filtrage sur
+    // l'echec n'intervient que si only_on_failure est vrai, et il est volontairement faux ici.
+    // Un message pose sur un ok() suffisait donc a envoyer un courriel « AVERTISSEMENT »
+    // dont le contenu disait « aucune action requise ». Recu en production le 2026-08-01
+    // avec des clés a 34,4 %, une mémoire a 33,5 % et zéro refus.
+    Http::fake(['*' => Http::response(opcachePayload())]);
+
+    $result = OpcacheCheck::new()->run();
+
+    expect($result->status->equals(Status::ok()))->toBeTrue()
+        ->and($result->getNotificationMessage())->toBeEmpty();
+});
+
+it('porte un message dès qu il y a vraiment quelque chose à signaler', function () {
+    // Le pendant du test precedent : le silence quand tout va bien ne doit pas devenir
+    // un silence quand ça va mal.
+    Http::fake(['*' => Http::response(opcachePayload([
+        'opcache_statistics' => ['num_cached_keys' => 8000],
+    ]))]);
+
+    $result = OpcacheCheck::new()->run();
+
+    expect($result->status->equals(Status::warning()))->toBeTrue()
+        ->and($result->getNotificationMessage())->not->toBeEmpty();
+});
+
 it('calcule la progression des refus entre deux passages', function () {
     Http::fakeSequence()
         ->push(opcachePayload(), 200)

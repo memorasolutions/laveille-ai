@@ -17,6 +17,16 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.139.5 · 2026-08-01 · fix(sante) plus de courriel quand tout va bien. Un message intitule
+ *     « AVERTISSEMENT » arrivait alors que son seul contenu disait « capacite suffisante, aucune
+ *     action requise » (cles 34,4 %, memoire 33,5 %, zero refus). Cause : Spatie notifie pour
+ *     TOUT controle dont le message n'est pas vide, quel que soit son statut
+ *     (RunHealthChecksCommand ligne 116) ; le filtrage sur l'echec n'intervient que si
+ *     only_on_failure est vrai, volontairement faux ici pour etre prevenu des les avertissements.
+ *     J'avais ecrit ok('OPcache dispose...') : ce simple message suffisait a declencher l'envoi.
+ *     Tous les controles Spatie natifs retournent ok() SANS message, d'ou leur silence. Le
+ *     controle se tait desormais quand tout va bien ; son etat reste lisible sur /health via le
+ *     resume chiffre. Deux tests verrouillent les deux sens.
  *   1.139.4 · 2026-08-01 · fix(sante) deux faux signaux corriges, trouves en lisant les vrais
  *     courriels recus a 16h29 et 16h30 Quebec (20:29 et 20:30 UTC).
  *     (1) La marche a suivre OPcache s'affichait meme quand OPcache allait bien : le courriel
@@ -3257,7 +3267,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 4;
+$lvPatch = 5;
 
 return [
     'major' => $lvMajor,

@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.5] - 2026-08-01
+
+### Corrigé
+
+- **Plus de courriel quand tout va bien.** Un message intitulé « AVERTISSEMENT » arrivait alors
+  que son seul contenu disait « OPcache dispose d'une capacité suffisante. Aucune action
+  requise » - clés 34,4 %, mémoire 33,5 %, zéro refus. Cause : Spatie envoie une notification
+  pour **tout contrôle dont le message n'est pas vide, quel que soit son statut**
+  (`RunHealthChecksCommand` ligne 116) ; le filtrage sur l'échec n'intervient que si
+  `only_on_failure` est vrai, et il est volontairement faux ici pour être prévenu dès les
+  avertissements. J'avais écrit `ok('OPcache dispose…')` : ce simple message suffisait à
+  déclencher l'envoi. Tous les contrôles Spatie natifs retournent `ok()` **sans** message -
+  c'est pour cette raison qu'eux ne produisaient rien. Le contrôle est désormais silencieux
+  quand tout va bien ; son état reste lisible sur `/health` via le résumé chiffré.
+  Deux tests verrouillent les deux sens : silence quand c'est sain, message dès qu'il y a
+  vraiment quelque chose à signaler.
+
 ## [1.139.4] - 2026-08-01
 
 ### Corrigé

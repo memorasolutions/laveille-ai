@@ -115,7 +115,14 @@ class OpcacheCheck extends Check
             return $result->warning(implode(' ', $warnings));
         }
 
-        return $result->ok('OPcache dispose d’une capacité suffisante et ne refuse pas de nouveaux scripts. Aucune action requise.');
+        // ok() SANS message, volontairement. Spatie envoie une notification pour tout resultat
+        // dont getNotificationMessage() n'est pas vide, QUEL QUE SOIT son statut
+        // (RunHealthChecksCommand ligne 116) : le filtrage sur l'echec n'intervient que si
+        // only_on_failure est vrai, ce qu'on ne veut pas puisqu'on tient a etre prevenu des
+        // les avertissements. Un message pose ici suffisait donc a declencher un courriel
+        // « AVERTISSEMENT » disant « aucune action requise ». Constate en production le
+        // 2026-08-01. L'etat sain reste lisible sur /health via shortSummary (les pourcentages).
+        return $result->ok();
     }
 
     private function endpointUrl(): string
