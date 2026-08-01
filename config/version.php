@@ -17,6 +17,19 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.139.3 · 2026-08-01 · fix(sante) le courriel d'alerte devient lisible et actionnable.
+ *     Corrige APRES avoir lu le premier courriel reellement recu (16h16 Quebec, 20:16 UTC), pas
+ *     apres l'avoir imagine. Il contenait deux defauts que seul le message reel revele :
+ *     (1) json_encode dumpait les mesures brutes, donc des flottants a precision machine
+ *     (29.39999999999999857891452847979962825775146484375 pour 29,4) et un pave JSON de 900
+ *     caracteres, dans un courriel cense etre clair pour un humain non technicien ;
+ *     (2) la ligne annoncait « marche a suivre » sans en donner aucune : ni fichier a ouvrir,
+ *     ni directive a augmenter, ni commande pour appliquer.
+ *     Desormais : mesures traduites en libelles francais (« Table des cles occupee : 29,4 % »),
+ *     et un bloc de 5 etapes concretes propre a OPcache, avec le chemin du .ini, la sauvegarde
+ *     prealable, la directive a augmenter selon ce qui sature, la commande de redemarrage, et
+ *     l'avertissement qu'elle touche TOUS les sites PHP du serveur. Un test verrouille les deux
+ *     corrections : absence de flottant brut, presence de la marche a suivre.
  *   1.139.2 · 2026-08-01 · fix(sante) les notifications de sante peuvent enfin partir. Deux
  *     defauts trouves en VERIFIANT LA BOITE DE RECEPTION au lieu de supposer l'envoi.
  *     (1) config/health.php avait 'enabled' => false fige en dur : le controle pouvait tourner
@@ -3232,7 +3245,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 2;
+$lvPatch = 3;
 
 return [
     'major' => $lvMajor,

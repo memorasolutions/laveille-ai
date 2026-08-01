@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.3] - 2026-08-01
+
+### Corrigé
+
+- **Le courriel d'alerte devient lisible et actionnable.** Corrigé après avoir lu le premier
+  courriel réellement reçu (16h16 Québec, 20:16 UTC), pas après l'avoir imaginé. Deux défauts que
+  seul le message réel révèle : `json_encode` dumpait les mesures brutes, donc des flottants à
+  précision machine (`29.39999999999999857891452847979962825775146484375` pour 29,4) et un pavé
+  JSON de 900 caractères dans un courriel censé être clair pour un lecteur non technicien ; et la
+  ligne annonçait « marche à suivre » sans en donner aucune. Désormais : mesures traduites en
+  libellés français (« Table des clés occupée : 29,4 % ») et un bloc de 5 étapes concrètes propre
+  à OPcache - chemin du `.ini`, sauvegarde préalable, directive à augmenter selon ce qui sature,
+  commande de redémarrage, et l'avertissement qu'elle touche **tous** les sites PHP du serveur.
+  Un test verrouille les deux corrections.
+
 ## [1.139.2] - 2026-08-01
 
 ### Corrigé

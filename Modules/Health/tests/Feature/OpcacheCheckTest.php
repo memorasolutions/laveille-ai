@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Modules\Health\Checks\OpcacheCheck;
 use Modules\Health\Http\Controllers\OpcacheStatusController;
+use Modules\Health\Notifications\CheckFailedNotification;
 use Spatie\Health\Enums\Status;
 
 uses(Tests\TestCase::class, RefreshDatabase::class);
@@ -166,6 +167,33 @@ it('ignore une progression des refus quand le cache n est PAS sous pression', fu
 
     expect($second->meta['refusals_delta'])->toBe(201)
         ->and($second->status->equals(Status::ok()))->toBeTrue();
+});
+
+it('rend un courriel lisible, sans flottant brut, avec la marche à suivre', function () {
+    // Verrouille le correctif du 2026-08-01 : la premiere alerte reellement recue
+    // contenait « 29.39999999999999857891452847979962825775146484375 » et un pave JSON,
+    // dans un courriel cense etre comprehensible par un humain non technicien.
+    Http::fake(['*' => Http::response(opcachePayload([
+        'opcache_statistics' => ['num_cached_keys' => 8000],
+    ]))]);
+
+    // Spatie renseigne ->check au moment d'executer la commande de sante, pas dans run().
+    $check = OpcacheCheck::new();
+    $result = $check->run();
+    $result->check = $check;
+
+    $lignes = (new CheckFailedNotification([$result]))->toMail()->introLines;
+    $courriel = implode("\n", $lignes);
+
+    expect($courriel)
+        ->not->toContain('999999999')
+        ->not->toContain('{"')
+        ->toContain('Table des clés occupée : 80,0 %')
+        ->toContain('Cache déclaré plein : non')
+        ->toContain('Marche à suivre (accès root WHM requis) :')
+        ->toContain('11-opcache-memora.ini')
+        ->toContain('/scripts/restartsrv_apache_php_fpm --restart')
+        ->toContain('TOUS les sites PHP du serveur');
 });
 
 it('signale une progression des refus quand le cache EST sous pression', function () {
