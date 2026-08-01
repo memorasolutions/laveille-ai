@@ -159,7 +159,7 @@
                              l'outil a ajouté (plus discret = du gabarit, pas le propos de la personne). --}}
                         .ct-seg-user{background:#FEF3C7;color:#5b4a1f;border-radius:4px;padding:0 2px;font-weight:600;}
                         .ct-seg-tool{background:var(--c-primary-light);color:var(--c-dark);border-radius:4px;}
-                        {{-- Round 152 (2026-08-02, écran 3) : 5 blocs TOUJOURS visibles, zéro accordéon
+                        {{-- Round 152 (2026-08-01, écran 3) : 5 blocs TOUJOURS visibles, zéro accordéon
                              interne (x-tools::prompt-block) + carte cliquable réutilisable
                              (x-tools::prompt-card). L'état sélectionné n'est JAMAIS indiqué par la seule
                              couleur : la coche .ct-card__mark (visibility, pas juste une teinte) est
@@ -484,7 +484,7 @@
                                  modèle), plus jamais un accordéon à ouvrir/fermer à l'intérieur. Ne pas
                                  confondre avec « ✨ Améliorer avec mon IA » plus bas (fonction BYOA
                                  distincte et déjà existante, conservée telle quelle).
-                                 Round 152 (2026-08-02) : ce bouton RESTE - un seul clic révèle les 5
+                                 Round 152 (2026-08-01) : ce bouton RESTE - un seul clic révèle les 5
                                  blocs une fois pour toutes (rien à rouvrir/refermer ensuite), ce n'est
                                  pas l'accordéon critiqué par le propriétaire (« le nombre d'accordéons
                                  crée de la friction... et surtout les ouvrir et fermer à chaque fois »
@@ -944,7 +944,7 @@
         // séparément si souhaité).
         'name' => __('Constructeur de prompts IA'),
         'alternateName' => ['Prompt Builder', 'Générateur de prompts ChatGPT', 'Constructeur de prompts'],
-        // Round 152 (2026-08-02) : « repliés par défaut » retiré (trouvé par la passe adversariale)
+        // Round 152 (2026-08-01) : « repliés par défaut » retiré (trouvé par la passe adversariale)
         // - les réglages avancés sont désormais des blocs TOUJOURS visibles, plus un accordéon replié.
         'description' => __('Outil gratuit et interactif pour créer des prompts optimisés en partant de votre objectif (rédiger, résumer, analyser, apprendre...), avec réglages avancés en blocs toujours visibles (rôle de l\'IA, audience, format de sortie). Compatible ChatGPT, Claude, Gemini, Mistral et tous les LLMs. Sauvegarde compte ou navigateur, partage natif, mode plein écran.'),
         'url' => url()->current(),
@@ -962,7 +962,7 @@
         ],
         'featureList' => [
             __('Cartes d\'objectifs cliquables (rédiger, résumer, analyser, apprendre...) pour démarrer sans jargon'),
-            // Round 152 (2026-08-02) : cette entrée décrivait encore l'ancien accordéon
+            // Round 152 (2026-08-01) : cette entrée décrivait encore l'ancien accordéon
             // (« repliés par défaut ») après son retrait - trouvé par la passe adversariale, pas
             // par les tests. Mise à jour pour refléter la réalité (5 blocs toujours visibles) ;
             // Round78AdversarialFixesTest.php mis à jour en conséquence pour la même raison.
@@ -1051,7 +1051,7 @@ $defaultTaskCards = [
     ['id' => 'coder', 'icon' => '💻', 'label' => __('Écrire ou déboguer du code'), 'description' => __('Créer, corriger ou expliquer du code...'), 'personaValue' => 'developpeur', 'verb' => 'Développe'],
     ['id' => 'autre', 'icon' => '✨', 'label' => __('Autre chose'), 'description' => __('Je préfère tout choisir moi-même'), 'personaValue' => '', 'verb' => ''],
 ];
-// Round 152 (2026-08-02, écran 3) : formats/longueurs/tons/techniques/langues/profils déplacés de
+// Round 152 (2026-08-01, écran 3) : formats/longueurs/tons/techniques/langues/profils déplacés de
 // listes <option> statiques vers des tableaux {value,label} (même contrat que $pbPersonas/
 // $pbAudiences ci-dessus) pour être rendus en CARTES cliquables (x-tools::prompt-card) via x-for,
 // sans dupliquer leur contenu entre ce fichier Blade et le JS (DRY). `value` reste TOUJOURS en
@@ -1260,7 +1260,7 @@ window.promptBuilderConfig = {
         iconSearchResultOne: @json(__('1 icône trouvée')),
         iconSearchResultMany: @json(__('{count} icônes trouvées')),
         iconLabelPrefix: @json(__('Icône : ')),
-        // Round 152 (2026-08-02, écran 3) : lignes « Ajouté : ... » (voir feedbackAudience et les
+        // Round 152 (2026-08-01, écran 3) : lignes « Ajouté : ... » (voir feedbackAudience et les
         // 4 autres getters feedback* de constructeur-prompts-core.js) - même convention que
         // summary* plus haut : préfixe traduit, valeur brute (déjà en français, non traduite par
         // convention - personas/verbes/audiences/formats/longueurs/tons/techniques) concaténée telle

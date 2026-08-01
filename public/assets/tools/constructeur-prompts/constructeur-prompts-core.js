@@ -23,15 +23,29 @@ document.addEventListener('alpine:init', function() {
             // (personaPreset/verb/taskObject/... réécrits avec les valeurs de l'ANCIEN prompt),
             // sauf selectedTask lui-même - désynchronisant le badge affiché des champs réels.
             editLoading: !!(new URLSearchParams(window.location.search).get('edit')),
-            // Phase 2 (audit 2026-07-26) : divulgation progressive CONTEXTUELLE - chaque section
-            // logique du formulaire a sa propre petite divulgation locale, repliée par défaut,
-            // au lieu d'un panneau global unique (ex-showAdvanced). Objet partagé (plutôt qu'un
-            // x-data imbriqué par section) pour rester pilotable depuis init() lors d'un ?edit=ID.
-            openSections: { role: false, verb: false, format: false, technique: false, contraintes: false },
-            // Round 151 (2026-08-01, écran 2) : panneau « Affiner » qui enveloppe les 5 divulgations
-            // ci-dessus (pour qui, rôle, verbe, format, technique, contraintes) - remplace l'ancien
-            // écran 2 « Votre demande » comme point d'entrée unique vers les réglages existants.
+            // Round 152 (2026-08-01, écran 3) : les 5 accordéons imbriqués « + Réglages avancés »
+            // (openSections.role/verb/format/technique/contraintes) sont RETIRÉS - le proprétaire a
+            // été explicite (« les ouvrir et fermer à chaque fois... ark ! »). Les mêmes réglages
+            // vivent maintenant dans 5 blocs TOUJOURS VISIBLES (voir x-tools::prompt-block dans le
+            // Blade). affinerOpen (ci-dessous) reste : ce n'est pas un accordéon au sens critiqué -
+            // un SEUL clic révèle les 5 blocs une fois pour toutes, rien à rouvrir/refermer ensuite.
             affinerOpen: false,
+            // Round 152 : profils de règles conditionnels (section 7 du plan). Aucune IA dans l'outil :
+            // ce n'est PAS de la « compréhension », seulement une correspondance par mots-clés qui
+            // pré-sélectionne un profil TOUJOURS visible et corrigeable d'un clic (voir
+            // _autoDetectProfile ci-dessous, appelé une fois à la transition écran 1 → écran 2, jamais
+            // ensuite tant que la personne n'a pas choisi elle-même un profil).
+            profile: 'texte',
+            profileTouched: false,
+            profiles: (window.promptBuilderConfig && window.promptBuilderConfig.profiles) || [
+                { value: 'texte', label: 'Texte', hint: 'Écriture humaine, typographie française, ton.' },
+                { value: 'programmation', label: 'Programmation', hint: 'Aucune règle de style français ; ajoute la mise en forme du code.' },
+                { value: 'traduction', label: 'Traduction', hint: 'Aucune règle de français du Québec appliquée au résultat.' },
+            ],
+            // Round 152 : réglages sans mode preset/custom avant cette refonte (contrairement à
+            // personaType/verbType/audienceType) - petit état d'UI LOCAL (jamais persisté, jamais
+            // injecté dans le prompt) qui révèle un champ libre quand la carte « Autre » est cliquée.
+            customOpen: { tone: false, format: false, length: false },
             personaType: 'preset',
             personaPreset: '',
             personaCustom: '',
@@ -51,6 +65,16 @@ document.addEventListener('alpine:init', function() {
             audiencePresets: [],
             audienceCustom: '',
             audiences: (window.promptBuilderConfig && window.promptBuilderConfig.audiences) || [],
+            // Round 152 (2026-08-01, écran 3) : formats/longueurs/tons/techniques/langues - même
+            // contrat {value,label} que personas/audiences ci-dessus, injectés par le Blade
+            // (window.promptBuilderConfig) pour éviter de dupliquer leur contenu entre ce fichier et
+            // le Blade (DRY). Repli français en dur si le Blade n'a pas encore injecté sa config
+            // (même garde que partout ailleurs dans ce fichier).
+            formats: (window.promptBuilderConfig && window.promptBuilderConfig.formats) || [],
+            lengths: (window.promptBuilderConfig && window.promptBuilderConfig.lengths) || [],
+            tones: (window.promptBuilderConfig && window.promptBuilderConfig.tones) || [],
+            techniques: (window.promptBuilderConfig && window.promptBuilderConfig.techniques) || [],
+            languages: (window.promptBuilderConfig && window.promptBuilderConfig.languages) || [],
             format: '',
             length: '',
             tone: '',
@@ -552,6 +576,91 @@ document.addEventListener('alpine:init', function() {
                 return '';
             },
 
+            // Round 152 (2026-08-01) : petit doublon volontaire de la ligne déjà répétée dans
+            // promptSummary/promptSegments (this.verbType === 'custom' ? this.verbCustom : this.verb)
+            // - un getter partagé aurait fallu toucher promptSegments (source unique du texte
+            // réellement copié, protégée par des dizaines de rounds adversariaux) pour un gain
+            // cosmétique. Utilisé seulement par les 4 lignes « Ajouté : » ci-dessous.
+            get verbText() {
+                return this.verbType === 'custom' ? this.verbCustom : this.verb;
+            },
+
+            // === Lignes « Ajouté : ... » (écran 3, round 152) ===
+            // La version utile de l'aperçu : au lieu de réafficher tout le prompt en boucle, chaque
+            // bloc explique en une phrase ce que le DERNIER choix vient de produire. Lecture seule -
+            // ne touchent jamais promptSegments (source unique déjà établie au round 151).
+            get feedbackAudience() {
+                if (!this.audienceText) return '';
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var txt = this.audienceText.charAt(0).toLowerCase() + this.audienceText.slice(1);
+                return (i18n.addedAudience || 'Ajouté : niveau de langage adapté à ') + txt + '.';
+            },
+            get feedbackResultat() {
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var parts = [];
+                if (this.verbText) parts.push((i18n.fragVerb || 'verbe ') + '« ' + this.verbText + ' »');
+                if (this.format) parts.push((i18n.fragFormat || 'format ') + this.format.toLowerCase());
+                if (this.length) parts.push((i18n.fragLength || 'longueur ') + this.length.toLowerCase());
+                if (!parts.length) return '';
+                return (i18n.addedPrefix || 'Ajouté : ') + parts.join(', ') + '.';
+            },
+            get feedbackTon() {
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var parts = [];
+                if (this.personaText) parts.push((i18n.fragRole || 'rôle ') + '« ' + this.personaText + ' »');
+                if (this.tone) parts.push((i18n.fragTone || 'ton ') + this.tone.toLowerCase());
+                if (!parts.length) return '';
+                return (i18n.addedPrefix || 'Ajouté : ') + parts.join(', ') + '.';
+            },
+            // Round 152 (2026-08-01) : même condition EXACTE que `stylistRulesApply` dans
+            // get promptSegments() (variable locale à cette autre fonction, donc dupliquée ici en
+            // toute petite ligne plutôt que de complexifier une signature déjà chargée). Sans ce
+            // garde-fou, la ligne « Ajouté : écriture naturelle anti-IA » mentait quand Cadre strict
+            // était désactivé ou que le profil Programmation/Traduction supprimait réellement la
+            // règle du prompt final - trouvé en vérification visuelle (case cochée par défaut,
+            // ligne affichée, mais absente de l'aperçu colorisé une fois le profil changé).
+            get _stylistRulesApply() {
+                return this.cadreStrict && this.profile !== 'programmation' && this.profile !== 'traduction';
+            },
+            get feedbackLimites() {
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var parts = [];
+                if (this.constraintTypo && this._stylistRulesApply) parts.push(i18n.fragTypo || 'typographie française stricte');
+                if (this.constraintAntiAI && this._stylistRulesApply) parts.push(i18n.fragAntiAI || 'écriture naturelle anti-IA');
+                if (this.constraintChainOfThought) parts.push(i18n.fragCot || 'raisonnement affiché');
+                if (this.constraintAskIfUnclear) parts.push(i18n.fragAsk || 'questions de clarification si besoin');
+                if (this.constraintCanvas) parts.push((i18n.fragCanvas || 'document modifiable') + ' (' + this.canvasAI + ')');
+                if (this.language === 'en') parts.push(i18n.fragLangEn || 'réponse en anglais');
+                if (this.language === 'es') parts.push(i18n.fragLangEs || 'réponse en espagnol');
+                if (this.constraintCustom) parts.push(i18n.fragCustom || 'vos contraintes personnalisées');
+                if (!parts.length) return '';
+                return (i18n.addedPrefix || 'Ajouté : ') + parts.join(', ') + '.';
+            },
+            get feedbackModele() {
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var parts = [];
+                var techniqueFrags = {
+                    'zero-shot-cot': i18n.fragZeroShotCot || 'réflexion visible',
+                    'few-shot': i18n.fragFewShot || 'des exemples',
+                    'few-shot-cot': i18n.fragFewShotCot || 'des exemples et une réflexion visible',
+                    'iterative': i18n.fragIterative || 'une validation à chaque étape'
+                };
+                if (techniqueFrags[this.technique]) parts.push(techniqueFrags[this.technique]);
+                if (this.useDelimiters) parts.push(i18n.fragDelimiters || 'délimiteurs ###');
+                if (!parts.length) return '';
+                return (i18n.addedPrefix || 'Ajouté : ') + parts.join(', ') + '.';
+            },
+            get feedbackProfile() {
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                if (this.profile === 'programmation') {
+                    return i18n.profileFeedbackProgrammation || "Vous avez choisi Programmation : j'ajoute les règles de mise en forme du code, je retire les règles de français du Québec.";
+                }
+                if (this.profile === 'traduction') {
+                    return i18n.profileFeedbackTraduction || 'Vous avez choisi Traduction : je retire les règles de français du Québec du résultat.';
+                }
+                return i18n.profileFeedbackTexte || "Vous avez choisi Texte : les règles d'écriture humaine et de typographie s'appliquent selon vos cases cochées.";
+            },
+
             get selectedTaskLabel() {
                 for (var i = 0; i < this.taskCards.length; i++) {
                     if (this.taskCards[i].id === this.selectedTask) return this.taskCards[i].label;
@@ -678,8 +787,17 @@ document.addEventListener('alpine:init', function() {
                 // Round 151 : les 2 règles de style automatiques passent sous le contrôle de
                 // « Cadre strict » (cadreStrict) - désactivé, elles disparaissent du prompt quelle
                 // que soit la position des cases à cocher, sans jamais y toucher elles-mêmes.
-                if (this.cadreStrict && this.constraintAntiAI) constraintSegs.push([{ t: 'tool', s: 'Écriture naturelle et humaine : varie la longueur des phrases, utilise des expressions authentiques et des transitions fluides. Évite les formulations génériques (« dans un monde en constante évolution »), les listes à puces systématiques et les répétitions de structure.' }]);
-                if (this.cadreStrict && this.constraintTypo) constraintSegs.push([{ t: 'tool', s: 'Typographie française stricte : majuscules en début de phrase et noms propres uniquement, pas de tiret cadratin (utilise le tiret court), ponctuation correcte, accents toujours présents.' }]);
+                // Round 152 (2026-08-01) : PROFIL - un texte destiné à du code ou à une traduction ne
+                // doit pas hériter des règles de style français (Gemini + claude.ai ont convergé
+                // indépendamment : dégrade le résultat ~1 fois sur 5, voir SPEC section 7). Gate
+                // ADDITIONNELLE au-dessus de Cadre strict, jamais à la place : Cadre strict coupe TOUT
+                // (quel que soit le profil), le profil ne coupe que ces 2 règles de style.
+                var stylistRulesApply = this.profile !== 'programmation' && this.profile !== 'traduction';
+                if (this.cadreStrict && this.constraintAntiAI && stylistRulesApply) constraintSegs.push([{ t: 'tool', s: 'Écriture naturelle et humaine : varie la longueur des phrases, utilise des expressions authentiques et des transitions fluides. Évite les formulations génériques (« dans un monde en constante évolution »), les listes à puces systématiques et les répétitions de structure.' }]);
+                if (this.cadreStrict && this.constraintTypo && stylistRulesApply) constraintSegs.push([{ t: 'tool', s: 'Typographie française stricte : majuscules en début de phrase et noms propres uniquement, pas de tiret cadratin (utilise le tiret court), ponctuation correcte, accents toujours présents.' }]);
+                // Round 152 : règle AUTOMATIQUE propre au profil Programmation (section 7 du plan),
+                // coupée par Cadre strict comme les 2 règles ci-dessus (même interrupteur, même logique).
+                if (this.cadreStrict && this.profile === 'programmation') constraintSegs.push([{ t: 'tool', s: 'Respecte les conventions de mise en forme du code : indentation cohérente, noms de variables explicites, commentaires seulement quand ils aident à comprendre, blocs de code entourés de triples accents graves avec le langage précisé.' }]);
                 if (this.constraintCanvas) {
                     // Phase 2 (audit 2026-07-26) : Destination (OÙ) nommée explicitement + Format
                     // attendu (QUOI) rattaché - les deux doivent apparaître clairement dans le prompt
@@ -714,7 +832,7 @@ document.addEventListener('alpine:init', function() {
                     if (this.tone) quality.push('le ton demandé est respecté du début à la fin');
                     if (this.audienceText) quality.push('le contenu est adapté à l\'audience cible');
                     if (this.length) quality.push('la longueur correspond à ce qui est demandé');
-                    if (this.constraintAntiAI) quality.push('le texte ne ressemble pas à du contenu généré par IA');
+                    if (this.constraintAntiAI && stylistRulesApply) quality.push('le texte ne ressemble pas à du contenu généré par IA');
                     if (quality.length > 0) {
                         startSection();
                         tool('Avant de finaliser, vérifie que :\n- ' + quality.join('\n- '));
@@ -755,8 +873,8 @@ document.addEventListener('alpine:init', function() {
 
             // Diagnostic rapide (Option 3 hybride, Partie A) : détection par règles simples,
             // ZÉRO IA et zéro appel réseau, des manques les plus fréquents d'un prompt. Chaque
-            // manque pointe vers la section « Réglages avancés » correspondante (openSections)
-            // via openDiagnosticSection() pour que l'utilisateur complète en un clic.
+            // manque pointe vers le bloc de l'écran 3 correspondant (toujours visible depuis le
+            // round 152) via openDiagnosticSection() pour que l'utilisateur complète en un clic.
             get diagnostic() {
                 // Round 77 (2026-07-27, passe adversariale) : messages traduits via
                 // window.promptBuilderConfig.i18n.diagnostic* (repli français en dur si absent).
@@ -803,7 +921,11 @@ document.addEventListener('alpine:init', function() {
                 // Round 151 (2026-08-01) : `audiencePreset` (singulier) retiré de la sérialisation -
                 // champ mort à l'écriture (voir déclaration d'état plus haut). `cadreStrict` ajouté
                 // pour que le réglage survive à une réédition (?edit=ID) comme tous les autres.
-                return { selectedTask: this.selectedTask, personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, audienceType: this.audienceType, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, format: this.format, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintTypo: this.constraintTypo, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat, constraintChainOfThought: this.constraintChainOfThought, constraintAskIfUnclear: this.constraintAskIfUnclear, constraintCustom: this.constraintCustom, useDelimiters: this.useDelimiters, examples: this.examples, cadreStrict: this.cadreStrict };
+                // Round 152 (2026-08-01) : `profile` ajouté - sans lui, rouvrir un prompt sauvegardé
+                // en Programmation/Traduction (?edit=ID) retomberait silencieusement sur le profil
+                // Texte par défaut, réinjectant des règles de style français que la personne avait
+                // délibérément coupées.
+                return { selectedTask: this.selectedTask, personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, audienceType: this.audienceType, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, format: this.format, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintTypo: this.constraintTypo, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat, constraintChainOfThought: this.constraintChainOfThought, constraintAskIfUnclear: this.constraintAskIfUnclear, constraintCustom: this.constraintCustom, useDelimiters: this.useDelimiters, examples: this.examples, cadreStrict: this.cadreStrict, profile: this.profile };
             },
             _headers: function() {
                 return { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json', 'Content-Type': 'application/json' };
@@ -933,6 +1055,11 @@ document.addEventListener('alpine:init', function() {
                                     // comme les autres réglages, sinon rouvrir un prompt sauvegardé avec
                                     // le cadre désactivé le réactiverait silencieusement (repli à `true`).
                                     if (p.cadreStrict !== undefined) self.cadreStrict = p.cadreStrict;
+                                    // Round 152 (2026-08-01) : restaure le profil sauvegardé ET marque
+                                    // profileTouched - un prompt déjà sauvegardé porte un choix DÉJÀ FAIT
+                                    // par la personne, la détection par mots-clés ne doit plus jamais
+                                    // l'écraser (même règle que les autres champs "custom" restaurés ici).
+                                    if (p.profile) { self.profile = p.profile; self.profileTouched = true; }
                                     // Round 42 (2026-07-27) : ces 6 champs manquaient à la restauration
                                     // ?edit=ID - le prompt rouvrait avec ces options réinitialisées,
                                     // et un "Enregistrer" ultérieur écrasait silencieusement la version
@@ -986,10 +1113,9 @@ document.addEventListener('alpine:init', function() {
                                     // sauvegardés AVANT ce fix (jamais de selectedTask en base).
                                     if (p.selectedTask) self.selectedTask = p.selectedTask;
                                     self.selectedTask = self.selectedTask || 'autre';
-                                    self.openSections = { role: true, verb: true, format: true, technique: true, contraintes: true };
-                                    // Round 151 (2026-08-01) : le panneau « Affiner » (écran 2) doit
-                                    // s'ouvrir directement lui aussi - sinon les 5 divulgations ci-dessus
-                                    // s'ouvrent dans un panneau parent resté fermé, invisible malgré elles.
+                                    // Round 152 (2026-08-01) : les 5 blocs de l'écran 3 sont désormais
+                                    // TOUJOURS visibles dès que le panneau « Affiner » est ouvert (plus
+                                    // d'accordéons internes à rouvrir un par un) - un seul flag suffit.
                                     self.affinerOpen = true;
                                     self.step = 2;
                                     self._editingId = found.public_id || found.id;
@@ -1051,22 +1177,36 @@ document.addEventListener('alpine:init', function() {
                 this._loadCustomCards();
             },
 
-            // Diagnostic rapide : ouvre la section « Réglages avancés » correspondante (même
-            // pattern openSections que les boutons "+" existants) puis fait défiler jusqu'à elle.
-            // 'audience' n'a pas de section repliable (champ toujours visible à l'étape 2) : on
-            // se contente d'y faire défiler la page.
+            // Diagnostic rapide : fait défiler jusqu'au bloc écran 3 correspondant. Round 152
+            // (2026-08-01) : plus d'accordéon à ouvrir - les 5 blocs sont TOUJOURS visibles dès que
+            // le panneau « Affiner » l'est, donc il ne reste qu'à révéler ce panneau puis défiler.
             openDiagnosticSection: function(key) {
                 if (this.step !== 2) this.step = 2;
-                // Round 151 (2026-08-01) : cpAudienceBlock et les 5 sections cpSection* vivent toutes
-                // désormais DANS le panneau « Affiner » (x-show="affinerOpen") - sans cette ligne, la
-                // section ciblée s'ouvrirait dans un panneau parent resté fermé, donc invisible.
                 this.affinerOpen = true;
                 var targetId = key === 'audience' ? 'cpAudienceBlock' : ('cpSection' + key.charAt(0).toUpperCase() + key.slice(1));
-                if (key !== 'audience') this.openSections[key] = true;
                 this.$nextTick(function() {
                     var el = document.getElementById(targetId);
                     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 });
+            },
+
+            // Round 152 (2026-08-01, section 7 du plan) : correspondance par MOTS-CLÉS, jamais de
+            // « compréhension » (aucune IA dans l'outil) - pré-sélectionne un profil TOUJOURS
+            // corrigeable d'un clic (voir profileTouched). Les cartes système « coder »/« traduire »
+            // (écran 1) sont un signal plus fort que les mots-clés et priment sur eux.
+            _detectProfileFromText: function(text) {
+                var t = (text || '').toLowerCase();
+                var traductionKeywords = ['traduire', 'traduction', 'translate', 'version anglaise', 'version espagnole', 'en anglais', 'en espagnol', 'en français'];
+                for (var i = 0; i < traductionKeywords.length; i++) { if (t.indexOf(traductionKeywords[i]) !== -1) return 'traduction'; }
+                var programmationKeywords = ['code', 'coder', 'fonction', 'script', 'bug', 'débogu', 'debogu', 'programme', 'api', 'sql', 'python', 'javascript', 'algorithme', 'classe', 'variable', 'régression', 'framework'];
+                for (var j = 0; j < programmationKeywords.length; j++) { if (t.indexOf(programmationKeywords[j]) !== -1) return 'programmation'; }
+                return 'texte';
+            },
+            _autoDetectProfile: function() {
+                if (this.profileTouched) return;
+                if (this.selectedTask === 'coder') { this.profile = 'programmation'; return; }
+                if (this.selectedTask === 'traduire') { this.profile = 'traduction'; return; }
+                this.profile = this._detectProfileFromText(this.taskObject);
             },
 
             // Phase 1 : clic sur une carte d'objectif → pré-sélection intelligente de la persona et
@@ -1123,6 +1263,11 @@ document.addEventListener('alpine:init', function() {
             nextStep: function() {
                 if (this.step === 1 && !this.selectedTask) { this.showValidation = true; return; }
                 this.showValidation = false;
+                // Round 152 (2026-08-01) : pré-sélection du profil à la SEULE transition écran 1 →
+                // écran 2 (taskObject est déjà rempli à ce moment, que ce soit par une carte système
+                // ou par la personne elle-même) - jamais ensuite, pour ne pas écraser une correction
+                // manuelle pendant que la personne tape encore (voir profileTouched).
+                if (this.step === 1) this._autoDetectProfile();
                 if (this.step < 2) this.step++;
             },
             canGoToStep: function(s) {
