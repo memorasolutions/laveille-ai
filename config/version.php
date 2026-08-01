@@ -17,6 +17,20 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.138.1 · 2026-08-01 · fix(perf/accueil) index composite (is_published, pub_date) sur
+ *     news_articles. La page d'accueil coûtait 1745 ms de temps serveur, dont 1710 ms de SQL, et
+ *     une seule requête en représentait 1642 ms, soit 94 pour cent du total : « select ... from
+ *     news_articles where is_published = ? order by pub_date desc limit 8 » (HomeController
+ *     lignes 74 à 79). EXPLAIN mesuré en production : type=ALL, key=NULL, « Using where; Using
+ *     filesort », 19 863 lignes balayées puis triées pour n'en garder que 8, sur une table de
+ *     293,95 Mo (30 084 lignes, ligne moyenne de 15 517 octets). Aucun index n'existait sur
+ *     is_published ni sur pub_date. Mesure de contrôle : requête complète 1660,22 ms contre
+ *     colonnes ciblées 1655,96 ms, soit 4,26 ms d'écart seulement - la sélection de toutes les
+ *     colonnes n'était donc PAS en cause, seul l'index manquait. Pour comparaison, /blog rendait
+ *     en 36,83 ms avec un temps hors SQL identique (29 ms contre 35 ms) : ni l'amorçage Laravel
+ *     ni la saturation OPcache n'expliquaient l'écart, contrairement à l'hypothèse de départ.
+ *     Migration réversible et idempotente (garde sur le pilote MySQL + vérification dans
+ *     information_schema) ; cycle migration, rollback puis re-migration prouvé en local.
  *   1.138.0 · 2026-08-02 · feat(outils/constructeur-prompts) écran 3 : cinq blocs toujours
  *     visibles, zéro accordéon interne. Remplace les 5 accordéons imbriqués « + Réglages avancés »
  *     (le proprétaire : « le nombre d'accordéons crée de la friction... et surtout les ouvrir et
@@ -3182,7 +3196,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 138;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,

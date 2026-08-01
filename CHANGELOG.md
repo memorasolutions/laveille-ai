@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.138.1] - 2026-08-01
+
+### Correctif - Performance de la page d'accueil (index composite manquant)
+
+La page d'accueil coûtait **1 745 ms** de temps serveur, dont **1 710 ms de SQL**. Une seule
+requête en représentait **1 642 ms**, soit **94 % du total** :
+
+```sql
+select ... from `news_articles` where `is_published` = ? order by `pub_date` desc limit 8
+```
+
+Origine : `Modules/FrontTheme/app/Http/Controllers/HomeController.php` lignes 74 à 79.
+
+**Plan d'exécution mesuré en production avant correction** : `type=ALL`, `key=NULL`,
+`Using where; Using filesort`, **19 863 lignes balayées** puis triées par date pour n'en garder
+que 8. Table de **293,95 Mo** (30 084 lignes, dont 5 236 publiées, ligne moyenne de 15 517
+octets). **Aucun index n'existait sur `is_published` ni sur `pub_date`.**
+
+**Mesure de contrôle** : requête complète **1 660,22 ms** contre colonnes ciblées seulement
+**1 655,96 ms**, soit **4,26 ms d'écart**. La sélection de toutes les colonnes n'était donc pas
+en cause malgré les colonnes `text` et `longtext` de la table : seul l'index manquait.
+
+**Point de comparaison** : `/blog` rendait en **36,83 ms**, avec un temps hors SQL quasi
+identique à celui de l'accueil (29,05 ms contre 35,36 ms). Ni l'amorçage de Laravel, ni les 196
+fournisseurs de services, ni la saturation de l'OPcache n'expliquaient donc l'écart, contrairement
+à l'hypothèse de départ : la totalité du facteur 16 tenait dans cette requête.
+
+### Ajouté
+
+- Migration `2026_08_01_000000_add_is_published_pub_date_index_to_news_articles` : index composite
+  `news_articles_is_published_pub_date_index` sur `(is_published, pub_date)`.
+- Migration **réversible et idempotente** : garde sur le pilote MySQL, `Schema::hasTable`, et
+  vérification de l'existence de l'index via `information_schema` avant d'agir. Elle ne peut pas
+  échouer si elle est rejouée.
+- Aucune donnée modifiée : un index est une structure d'accès. Le retour arrière est un simple
+  retrait d'index, prouvé en local par un cycle complet migration, rollback, re-migration.
+
 ## [1.138.0] - 2026-08-02
 
 ### Feature - Constructeur de prompts, ecran 3 (blocs toujours visibles)
