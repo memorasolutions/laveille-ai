@@ -32,11 +32,12 @@ class DataExportController extends Controller
         ];
 
         try {
-            // Round 12 (2026-07-27) : ce contrôleur exposait le texte COMPLET des prompts
-            // (pas un aperçu tronqué comme /user/saved) sans passer par le même gate que le
-            // fix round 11 - le seul point d'accès restant aux prompts pendant la révision
-            // de constructeur-prompts, via accès direct à l'URL (route non liée depuis l'UI).
-            if (class_exists(\Modules\Tools\Models\SavedPrompt::class) && \Modules\Tools\Models\Tool::isAccessibleTo('constructeur-prompts', $user)) {
+            // Round 106 (2026-08-01) : le gate is_under_construction de constructeur-prompts
+            // excluait les prompts sauvegardés de l'export RGPD tant que l'outil était en
+            // révision - un droit d'accès aux données personnelles (Loi 25/RGPD) ne peut jamais
+            // dépendre de la disponibilité d'une fonctionnalité. L'export reste TOUJOURS complet,
+            // que l'outil soit en révision ou non ; seule la page/l'usage de l'outil est gaté.
+            if (class_exists(\Modules\Tools\Models\SavedPrompt::class)) {
                 $data['saved_prompts'] = \Modules\Tools\Models\SavedPrompt::forUser($user->id)
                     ->get(['name', 'prompt_text', 'params', 'created_at'])
                     ->toArray();

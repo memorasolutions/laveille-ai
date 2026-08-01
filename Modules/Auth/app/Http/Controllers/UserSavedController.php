@@ -21,7 +21,11 @@ class UserSavedController extends Controller
         // Collecter les sauvegardes de chaque outil avec un type identifiant
         $items = collect();
 
-        if (class_exists(\Modules\Tools\Models\SavedPrompt::class) && \Modules\Tools\Models\Tool::isAccessibleTo('constructeur-prompts', $user)) {
+        // Round 106 (2026-08-01) : le gate is_under_construction de constructeur-prompts masquait
+        // les prompts déjà sauvegardés sur cette page pendant la révision - la personne ne pouvait
+        // même plus VOIR qu'elle avait des données confiées à la plateforme. Le gate ne doit
+        // protéger que la page/l'usage de l'outil, jamais la consultation de ses propres données.
+        if (class_exists(\Modules\Tools\Models\SavedPrompt::class)) {
             $items = $items->merge(
                 \Modules\Tools\Models\SavedPrompt::forUser($user->id)->latest()->get()
                     ->map(fn ($p) => (object) ['id' => $p->id, 'public_id' => $p->public_id, 'type' => 'prompt', 'name' => $p->name, 'preview' => \Str::limit($p->prompt_text, 80), 'tool_name' => __('Constructeur de prompts'), 'tool_slug' => 'constructeur-prompts', 'tool_icon' => '✨', 'tool_color' => '#8B5CF6', 'api_path' => '/api/prompts/', 'created_at' => $p->created_at])

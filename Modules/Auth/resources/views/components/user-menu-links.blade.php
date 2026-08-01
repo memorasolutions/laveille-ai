@@ -18,13 +18,6 @@
     $variant = $variant ?? 'sidebar';
     $unreadNotifications = $unreadNotifications ?? (auth()->check() ? auth()->user()->unreadNotifications()->count() : 0);
 
-    // Mémoïsé par requête (once()) : ce composant est inclus jusqu'à 3x par page (header + sidebar
-    // desktop/mobile) - évite 3 requêtes identiques. Round 17 (2026-07-27) : réutilise
-    // Tool::isAccessibleTo() (extrait round 12) au lieu de dupliquer la logique du gate.
-    $constructeurPromptsAccessible = once(function () {
-        return \Modules\Tools\Models\Tool::isAccessibleTo('constructeur-prompts', auth()->user());
-    });
-
     $groups = [
         'apercu' => [
             'label' => __('Vue d\'ensemble'),
@@ -60,8 +53,11 @@
                 ['route' => 'shorturl.user.index', 'label' => __('Mes liens courts'), 'icon' => 'fa-link', 'emoji' => '🔗', 'active_patterns' => ['shorturl.user.*']],
                 // decido.* couvre aussi decido.vote.* (vote public sur un sondage) : même module/feature, pas de collision avec un autre outil.
                 ['route' => 'decido.index', 'label' => __('Mes sondages'), 'icon' => 'fa-bar-chart', 'emoji' => '🗳️', 'active_patterns' => ['decido.*']],
-                // Mes prompts (constructeur-prompts) : masqué pendant la révision (is_under_construction), sauf superadmin - même pattern que le lien Académie ci-dessus.
-                ['route' => 'user.prompts.index', 'label' => __('Mes prompts'), 'icon' => 'fa-magic', 'emoji' => '✨', 'active_patterns' => ['user.prompts.index'], 'show' => $constructeurPromptsAccessible],
+                // Mes prompts (constructeur-prompts) : round 106 (2026-08-01) - toujours visible pour
+                // un utilisateur connecté, même pendant la révision de l'outil. C'est la bibliothèque
+                // de LECTURE des prompts déjà sauvegardés (droit d'accès à ses propres données), plus
+                // jamais gatée par is_under_construction - seule la page de l'outil (wizard) l'est encore.
+                ['route' => 'user.prompts.index', 'label' => __('Mes prompts'), 'icon' => 'fa-magic', 'emoji' => '✨', 'active_patterns' => ['user.prompts.index']],
             ],
         ],
         'compte' => [

@@ -24,14 +24,22 @@ use Modules\Tools\Http\Middleware\EnsureToolNotUnderConstruction;
 // actif ailleurs sur le site pouvait épuiser silencieusement son quota et recevoir un 429 inattendu ici
 // (autosave des cartes, chargement du profil). Préfixe dédié = bucket isolé pour Modules/Tools.
 Route::middleware(['web', 'auth', 'throttle:60,1,tools-api'])->group(function () {
-    // Gate ajoutée après passe adversariale (2026-07-26) : ces routes n'étaient pas couvertes
-    // par le gate is_under_construction de /outils/constructeur-prompts lui-même.
+    // Round 106 (2026-08-01) : le gate de révision (passe adversariale 2026-07-26) protégeait
+    // TOUTES les routes /api/prompts*, y compris la lecture et la suppression - un utilisateur
+    // ayant sauvegardé des prompts avant la mise en révision ne pouvait plus ni les consulter ni
+    // les effacer (droit à l'effacement bloqué). Le gate ne doit couvrir que l'UTILISATION de
+    // l'outil (créer/modifier/dupliquer du contenu), jamais l'accès à ses propres données déjà
+    // confiées. Anti-IDOR inchangé dans les deux groupes : chaque action reste scopée par
+    // `user_id = auth()->id()` dans SavedPromptController (voir §9.5 SPEC-COMPLETE-constructeur).
+    Route::get('/prompts', [SavedPromptController::class, 'index'])->name('api.prompts.index');
+    Route::get('/prompts/{id}', [SavedPromptController::class, 'show'])->name('api.prompts.show');
+    Route::delete('/prompts/{id}', [SavedPromptController::class, 'destroy'])->name('api.prompts.destroy');
+
+    // Création/modification/duplication de contenu = utilisation de l'outil : reste gatée pendant
+    // la révision (seul un superadmin peut créer/modifier/dupliquer un prompt via cet outil).
     Route::middleware(EnsureToolNotUnderConstruction::class.':constructeur-prompts')->group(function () {
-        Route::get('/prompts', [SavedPromptController::class, 'index'])->name('api.prompts.index');
-        Route::get('/prompts/{id}', [SavedPromptController::class, 'show'])->name('api.prompts.show');
         Route::post('/prompts', [SavedPromptController::class, 'store'])->name('api.prompts.store');
         Route::put('/prompts/{id}', [SavedPromptController::class, 'update'])->name('api.prompts.update');
-        Route::delete('/prompts/{id}', [SavedPromptController::class, 'destroy'])->name('api.prompts.destroy');
         Route::post('/prompts/{id}/duplicate', [SavedPromptController::class, 'duplicate'])->name('api.prompts.duplicate');
     });
 

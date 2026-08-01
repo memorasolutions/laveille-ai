@@ -16,7 +16,6 @@ use Modules\Tools\Http\Controllers\PublicQtController;
 use Modules\Tools\Http\Controllers\PublicToolController;
 use Modules\Tools\Http\Controllers\UserCrosswordController;
 use Modules\Tools\Http\Middleware\EnsureCrosswordTester;
-use Modules\Tools\Http\Middleware\EnsureToolNotUnderConstruction;
 
 Route::middleware('web')->group(function () {
     Route::get('/outils', [PublicToolController::class, 'index'])->name('tools.index')->middleware('cacheResponse:600');
@@ -166,10 +165,13 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     // 2026-07-26 : "Mes prompts" - bibliothèque des prompts sauvegardés (constructeur-prompts),
     // recherche/tags/favoris, intégrée à la navigation "Mon espace" existante.
-    // Gate ajoutée après passe adversariale (2026-07-26) : cette page satellite n'était pas
-    // couverte par le gate is_under_construction de /outils/constructeur-prompts lui-même.
+    // Round 106 (2026-08-01) : gate de révision RETIRÉE de cette route - c'est une LECTURE des
+    // données déjà confiées par la personne (accès à ses propres données), pas une utilisation
+    // de l'outil. Le gate ne doit protéger que la page de l'outil et la création de nouveau
+    // contenu (voir Modules/Tools/routes/api.php, groupe `store`/`update`/`duplicate`).
+    // UserPromptController::index() scope déjà par SavedPrompt::forUser(auth()->id()) - aucune
+    // fuite IDOR possible en retirant ce gate.
     Route::get('/user/prompts', [\Modules\Tools\Http\Controllers\UserPromptController::class, 'index'])
-        ->middleware(EnsureToolNotUnderConstruction::class.':constructeur-prompts')
         ->name('user.prompts.index');
 });
 
