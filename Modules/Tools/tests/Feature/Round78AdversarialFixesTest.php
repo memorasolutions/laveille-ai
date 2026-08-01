@@ -58,14 +58,19 @@ it('has English translations for the JS custom-card strings (round 78)', functio
     expect($en['Supprimer cette carte ?'])->toBe('Delete this card?');
 });
 
-it('has English translations for the JSON-LD SoftwareApplication name/description/featureList (round 78)', function () {
+// Round 152 (2026-08-02, passe adversariale) : les 2 chaînes JSON-LD ci-dessous décrivaient encore
+// l'ancien accordéon (« repliés par défaut ») après son retrait au round 152 - le texte de vitrine
+// (SEO/AEO) avait divergé de la réalité de l'interface. Mises à jour dans le Blade pour dire « en
+// blocs toujours visibles » ; ce test re-ancré sur les nouvelles chaînes, même exigence (traduction
+// anglaise réelle, pas une clé identique).
+it('has English translations for the JSON-LD SoftwareApplication name/description/featureList (round 78, re-ancré round 152)', function () {
     $en = json_decode(file_get_contents(lang_path('en.json')), true);
 
     $keys = [
         'Constructeur de prompts IA',
-        "Outil gratuit et interactif pour créer des prompts optimisés en partant de votre objectif (rédiger, résumer, analyser, apprendre...), avec réglages avancés repliés par défaut (rôle de l'IA, audience, format de sortie). Compatible ChatGPT, Claude, Gemini, Mistral et tous les LLMs. Sauvegarde compte ou navigateur, partage natif, mode plein écran.",
+        "Outil gratuit et interactif pour créer des prompts optimisés en partant de votre objectif (rédiger, résumer, analyser, apprendre...), avec réglages avancés en blocs toujours visibles (rôle de l'IA, audience, format de sortie). Compatible ChatGPT, Claude, Gemini, Mistral et tous les LLMs. Sauvegarde compte ou navigateur, partage natif, mode plein écran.",
         "Cartes d'objectifs cliquables (rédiger, résumer, analyser, apprendre...) pour démarrer sans jargon",
-        "Réglages avancés repliés par défaut (rôle de l'IA, verbe, format, exemples, contraintes)",
+        "Réglages utiles regroupés en blocs toujours visibles (rôle de l'IA, verbe, format, exemples, contraintes)",
         'Sauvegarde locale (navigateur) ou compte utilisateur',
         'Partage natif (Web Share API) et copier-coller',
         'Mode plein écran sans distraction',

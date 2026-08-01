@@ -944,7 +944,9 @@
         // séparément si souhaité).
         'name' => __('Constructeur de prompts IA'),
         'alternateName' => ['Prompt Builder', 'Générateur de prompts ChatGPT', 'Constructeur de prompts'],
-        'description' => __('Outil gratuit et interactif pour créer des prompts optimisés en partant de votre objectif (rédiger, résumer, analyser, apprendre...), avec réglages avancés repliés par défaut (rôle de l\'IA, audience, format de sortie). Compatible ChatGPT, Claude, Gemini, Mistral et tous les LLMs. Sauvegarde compte ou navigateur, partage natif, mode plein écran.'),
+        // Round 152 (2026-08-02) : « repliés par défaut » retiré (trouvé par la passe adversariale)
+        // - les réglages avancés sont désormais des blocs TOUJOURS visibles, plus un accordéon replié.
+        'description' => __('Outil gratuit et interactif pour créer des prompts optimisés en partant de votre objectif (rédiger, résumer, analyser, apprendre...), avec réglages avancés en blocs toujours visibles (rôle de l\'IA, audience, format de sortie). Compatible ChatGPT, Claude, Gemini, Mistral et tous les LLMs. Sauvegarde compte ou navigateur, partage natif, mode plein écran.'),
         'url' => url()->current(),
         'applicationCategory' => 'BusinessApplication',
         'applicationSubCategory' => 'ProductivityApplication',
@@ -960,7 +962,11 @@
         ],
         'featureList' => [
             __('Cartes d\'objectifs cliquables (rédiger, résumer, analyser, apprendre...) pour démarrer sans jargon'),
-            __('Réglages avancés repliés par défaut (rôle de l\'IA, verbe, format, exemples, contraintes)'),
+            // Round 152 (2026-08-02) : cette entrée décrivait encore l'ancien accordéon
+            // (« repliés par défaut ») après son retrait - trouvé par la passe adversariale, pas
+            // par les tests. Mise à jour pour refléter la réalité (5 blocs toujours visibles) ;
+            // Round78AdversarialFixesTest.php mis à jour en conséquence pour la même raison.
+            __('Réglages utiles regroupés en blocs toujours visibles (rôle de l\'IA, verbe, format, exemples, contraintes)'),
             __('Sauvegarde locale (navigateur) ou compte utilisateur'),
             __('Partage natif (Web Share API) et copier-coller'),
             __('Mode plein écran sans distraction'),

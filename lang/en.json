@@ -2667,7 +2667,6 @@
     "Réglages avancés : format, longueur et langue": "Advanced settings: format, length and language",
     "Réglages avancés : rôle de l'IA": "Advanced settings: AI role",
     "Réglages avancés : verbe d'action": "Advanced settings: action verb",
-    "Réglages avancés repliés par défaut (rôle de l'IA, verbe, format, exemples, contraintes)": "Advanced settings collapsed by default (AI role, verb, format, examples, constraints)",
     "Régénérer le SEO": "Regenerate SEO",
     "Régénérer les codes": "Regenerate Codes",
     "Réindexation": "Reindexing",
@@ -4022,5 +4021,7 @@
     "Facultatif": "Optional",
     "Ex: Sonnet, script vidéo, fiche produit...": "Ex: Sonnet, video script, product sheet...",
     "Ex: 1000 mots exactement": "Ex: exactly 1000 words",
-    "Longueur personnalisée": "Custom length"
+    "Longueur personnalisée": "Custom length",
+    "Réglages utiles regroupés en blocs toujours visibles (rôle de l'IA, verbe, format, exemples, contraintes)": "Useful settings grouped into always-visible blocks (AI role, verb, format, examples, constraints)",
+    "Outil gratuit et interactif pour créer des prompts optimisés en partant de votre objectif (rédiger, résumer, analyser, apprendre...), avec réglages avancés en blocs toujours visibles (rôle de l'IA, audience, format de sortie). Compatible ChatGPT, Claude, Gemini, Mistral et tous les LLMs. Sauvegarde compte ou navigateur, partage natif, mode plein écran.": "Free, interactive tool to build optimised prompts starting from your goal (write, summarise, analyse, learn...), with advanced settings in always-visible blocks (AI role, audience, output format). Works with ChatGPT, Claude, Gemini, Mistral and every LLM. Saves to your account or browser, native sharing, full-screen mode."
 }
