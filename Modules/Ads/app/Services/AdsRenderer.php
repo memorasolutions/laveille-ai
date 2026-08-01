@@ -18,7 +18,12 @@ class AdsRenderer
 {
     public function render(string $key): ?string
     {
-        return Cache::remember("ad_placement:{$key}", 600, function () use ($key) {
+        // Le jour (America/Toronto) entre dans la clé de cache : sans lui, la rotation
+        // des encarts livres serait figée par ce cache et n'avancerait jamais. Une
+        // entrée par emplacement et par jour, ce qui reste négligeable.
+        $day = now()->timezone('America/Toronto')->format('Y-z');
+
+        return Cache::remember("ad_placement:{$key}:{$day}", 600, function () use ($key) {
             $ad = AdPlacement::active()->byKey($key)->first();
 
             if (! $ad) {
@@ -32,10 +37,24 @@ class AdsRenderer
             // (ex. <x-fronttheme::book-promo />). Sinon, HTML brut comme avant.
             if (is_string($html) && str_contains($html, '<x-')) {
                 try {
+                    // Contexte de rotation : chaque emplacement reçoit son propre rang
+                    // (l'identifiant de la ligne), ce qui garantit que deux encarts
+                    // d'une même page n'affichent pas le même livre. Le compteur de
+                    // requête de BookPromoRotator ne suffirait pas ici : chaque
+                    // emplacement est mis en cache séparément et n'est donc pas rendu
+                    // dans la même requête que son voisin.
+                    if (class_exists(\Modules\Books\Services\BookPromoRotator::class)) {
+                        \Modules\Books\Services\BookPromoRotator::setContext($key, (int) $ad->id);
+                    }
+
                     $html = Blade::render($html);
                 } catch (\Throwable $e) {
                     \Log::warning("AdsRenderer: Blade::render échec pour {$key}", ['error' => $e->getMessage()]);
                     // fallback : laisser le HTML brut
+                } finally {
+                    if (class_exists(\Modules\Books\Services\BookPromoRotator::class)) {
+                        \Modules\Books\Services\BookPromoRotator::clearContext();
+                    }
                 }
             }
 

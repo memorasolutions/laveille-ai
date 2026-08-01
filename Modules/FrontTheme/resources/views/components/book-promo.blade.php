@@ -1,8 +1,16 @@
 {{-- Composant promo livre réutilisable — DRY pattern pub/encart livre auteur. --}}
 {{-- Usage : <x-fronttheme::book-promo /> (props ci-dessous, valeurs par défaut = livre courant). --}}
 {{-- WCAG 2.2 AA — tokens charte Memora — Schema.org Book JSON-LD. --}}
+{{-- Rotation (2026-08-01) : sans prop explicite, le livre affiché vient de la table
+     books via BookPromoRotator - source unique partagée avec /livres (DRY). La
+     rotation avance d'un cran par jour et deux encarts d'une même page ne montrent
+     jamais le même livre. Avant ce changement, un article affichait DEUX FOIS le
+     même livre (constaté en production le 2026-08-01).
+     Le module Books reste optionnel : class_exists() garde le composant fonctionnel
+     avec ses valeurs par défaut si le module est désactivé ou retiré. --}}
 @props([
-    'title'             => "L'IA sans se faire poursuivre",
+    'book'              => null,
+    'title'             => null,
     'subtitle'          => 'Le guide pratique pour PME et professionnels — Édition 2026',
     'author'            => 'Stéphane Lapointe',
     'author_role'       => 'Fondateur MEMORA solutions',
@@ -23,7 +31,33 @@
     'variant'           => 'card', // 'card' | 'inline'
 ])
 @php
-    $descLong = $description_full ?? ("Vous utilisez l'IA en entreprise — mais êtes-vous vraiment en conformité ? Depuis 2022, la Loi 25 du Québec impose de nouvelles obligations strictes en matière de protection des renseignements personnels. Les sanctions peuvent atteindre 25 millions de dollars canadiens ou 4 % du chiffre d'affaires mondial. Parallèlement, le RGPD en Europe punit les manquements jusqu'à 20 millions d'euros ou 4 % du CA mondial, et l'AI Act européen prévoit des amendes allant jusqu'à 35 millions d'euros ou 7 % du chiffre d'affaires mondial. Pour les PME francophones de 10 à 250 employés, naviguer entre ces cadres juridiques complexes devient un impératif opérationnel. 25 chapitres clairs et 18 annexes immédiatement utilisables : modèle EFVP, registre incidents IA, runbook crise IA, clauses contractuelles fournisseurs IA, fiches droit à l'image et deepfakes. Appuyé sur ISO/IEC 42001 et NIST AI RMF, 18 cas concrets terrain québécois et européen.");
+    // La prop `title` vaut null par défaut : c'est le signal « l'appelant n'impose
+    // aucun livre ». On ne peut PAS s'appuyer sur $attributes->has('title') ici, car
+    // @props retire les props déclarées du sac d'attributs - le test serait toujours
+    // faux. Un appel avec title="..." explicite garde donc exactement le comportement
+    // d'avant, sans rotation et sans régression possible.
+    $rotated = [];
+    if ($title === null && class_exists(\Modules\Books\Services\BookPromoRotator::class)) {
+        $rotated = \Modules\Books\Services\BookPromoRotator::props(
+            $book ?? \Modules\Books\Services\BookPromoRotator::resolveDistinct()
+        );
+    }
+    foreach (['title', 'subtitle', 'description_short', 'cover_url_webp', 'cover_url_webp_2x',
+              'cover_url_jpg', 'cover_url_300', 'og_image', 'cover_alt', 'cta_url',
+              'date_published'] as $k) {
+        if (! empty($rotated[$k])) {
+            ${$k} = $rotated[$k];
+        }
+    }
+    // Repli si la rotation n'a rien donné (module Books absent, livre non publié,
+    // images manquantes) : on retombe sur le livre historique, jamais sur du vide.
+    $title = $title ?? "L'IA sans se faire poursuivre";
+
+    // Le texte long décrit le PREMIER livre : ne jamais le réutiliser pour un autre
+    // titre, sinon l'encart décrirait le mauvais ouvrage sous « Voir les détails ».
+    $descLong = $rotated !== []
+        ? ($description_full ?? $description_short)
+        : ($description_full ?? ("Vous utilisez l'IA en entreprise — mais êtes-vous vraiment en conformité ? Depuis 2022, la Loi 25 du Québec impose de nouvelles obligations strictes en matière de protection des renseignements personnels. Les sanctions peuvent atteindre 25 millions de dollars canadiens ou 4 % du chiffre d'affaires mondial. Parallèlement, le RGPD en Europe punit les manquements jusqu'à 20 millions d'euros ou 4 % du CA mondial, et l'AI Act européen prévoit des amendes allant jusqu'à 35 millions d'euros ou 7 % du chiffre d'affaires mondial. Pour les PME francophones de 10 à 250 employés, naviguer entre ces cadres juridiques complexes devient un impératif opérationnel. 25 chapitres clairs et 18 annexes immédiatement utilisables : modèle EFVP, registre incidents IA, runbook crise IA, clauses contractuelles fournisseurs IA, fiches droit à l'image et deepfakes. Appuyé sur ISO/IEC 42001 et NIST AI RMF, 18 cas concrets terrain québécois et européen."));
     $uid = 'bookpromo-' . substr(md5($title . $cta_url), 0, 8);
     $absOg = url($og_image);
 @endphp
