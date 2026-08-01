@@ -16,7 +16,6 @@ use Spatie\Health\Checks\Checks\CacheCheck;
 use Spatie\Health\Checks\Checks\DatabaseCheck;
 use Spatie\Health\Checks\Checks\DebugModeCheck;
 use Spatie\Health\Checks\Checks\EnvironmentCheck;
-use Spatie\Health\Checks\Checks\OptimizedAppCheck;
 use Spatie\Health\Checks\Checks\ScheduleCheck;
 use Spatie\Health\Checks\Checks\UsedDiskSpaceCheck;
 use Spatie\Health\Facades\Health;
@@ -37,9 +36,16 @@ class HealthCheckServiceProvider extends BaseModuleServiceProvider
             DebugModeCheck::new(),
             EnvironmentCheck::new(),
             CacheCheck::new(),
-            OptimizedAppCheck::new(),
             ScheduleCheck::new()->heartbeatMaxAgeInMinutes(2),
         ];
+
+        // OptimizedAppCheck est volontairement RETIRE. Il exige que la configuration soit mise
+        // en cache, or `config:cache` est INTERDIT sur ce projet : des env() sont lus au moment
+        // de l'execution et la mise en cache ferme /academie (decision du 2026-06-30). Ce
+        // controle serait donc rouge en PERMANENCE, par conception, et enverrait une alerte
+        // pour une condition volontaire. Un controle qui ne peut jamais passer n'alerte de
+        // rien : il apprend seulement a ignorer le tableau de bord. A remettre le jour ou la
+        // dette des env() au runtime sera resorbee.
 
         if ((bool) config('health.opcache.enabled', false)) {
             $checks[] = OpcacheCheck::new();

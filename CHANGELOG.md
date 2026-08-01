@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.2] - 2026-08-01
+
+### Corrigé
+
+- **Les notifications de santé peuvent enfin partir.** `config/health.php` avait
+  `'enabled' => false` figé en dur : le contrôle pouvait tourner et échouer, **aucun courriel ne
+  partait jamais**. Toute la chaîne de notification était morte depuis l'installation du paquet.
+  Trouvé en **vérifiant la boîte de réception** plutôt qu'en supposant l'envoi — le contrôle avait
+  bien produit son avertissement sur `/health`, mais rien n'était arrivé, ni en réception, ni en
+  spam. Désormais piloté par `HEALTH_NOTIFICATIONS_ENABLED`, à `false` par défaut.
+- **`OptimizedAppCheck` retiré.** Il exige une configuration mise en cache, or `config:cache` est
+  **interdit sur ce projet** : des `env()` sont lus au moment de l'exécution et la mise en cache
+  ferme `/academie` (décision du 2026-06-30). Ce contrôle était donc **rouge en permanence, par
+  conception**. Allumer les notifications sans le retirer aurait envoyé une alerte pour une
+  condition volontaire, dès le premier passage. Un contrôle qui ne peut jamais passer n'alerte de
+  rien : il apprend seulement à ignorer le tableau de bord. À remettre le jour où la dette des
+  `env()` au runtime sera résorbée (tâche #1469).
+
+## [1.139.1] - 2026-08-01
+
+### Corrigé
+
+- **Le signal de refus n'est plus évalué qu'en situation de pression réelle.** Défaut trouvé en
+  mesurant la production dix minutes après le déploiement de 1.139.0 : l'écart `misses` moins
+  `num_cached_scripts` était passé de 23 à 436 alors que le cache n'était rempli qu'à 28,7 %. La
+  cause n'était pas un refus mais le déploiement lui-même — avec `validate_timestamps=1`, chaque
+  fichier modifié est invalidé puis recompilé. Le seuil d'avertissement étant à 100, l'alerte
+  aurait sonné à **chaque mise en ligne**. Deux tests verrouillent le comportement dans les deux
+  sens.
+
 ## [1.139.0] - 2026-08-01
 
 ### Ajouté

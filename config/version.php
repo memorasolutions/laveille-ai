@@ -17,6 +17,18 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.139.2 · 2026-08-01 · fix(sante) les notifications de sante peuvent enfin partir. Deux
+ *     defauts trouves en VERIFIANT LA BOITE DE RECEPTION au lieu de supposer l'envoi.
+ *     (1) config/health.php avait 'enabled' => false fige en dur : le controle pouvait tourner
+ *     et echouer, AUCUN courriel ne partait jamais. Toute la chaine de notification etait morte
+ *     depuis l'installation du paquet. Desormais pilote par HEALTH_NOTIFICATIONS_ENABLED, avec
+ *     false par defaut pour ne rien activer a l'insu d'une autre installation.
+ *     (2) OptimizedAppCheck est retire. Il exige une configuration mise en cache, or
+ *     config:cache est INTERDIT ici (des env() sont lus au runtime et la mise en cache ferme
+ *     /academie, decision du 2026-06-30). Ce controle etait donc rouge en permanence PAR
+ *     CONCEPTION : allumer les notifications sans le retirer aurait envoye une alerte pour une
+ *     condition volontaire, des le premier passage. Un controle qui ne peut jamais passer
+ *     n'alerte de rien, il apprend seulement a ignorer le tableau de bord.
  *   1.139.1 · 2026-08-01 · fix(sante) le signal de refus ne se declenche plus qu'en situation de
  *     pression reelle. Defaut trouve en mesurant la production juste apres le deploiement de
  *     1.139.0 : l'ecart rates moins scripts est passe de 23 a 436 alors que le cache n'etait
@@ -3220,7 +3232,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 1;
+$lvPatch = 2;
 
 return [
     'major' => $lvMajor,

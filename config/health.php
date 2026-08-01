@@ -42,8 +42,13 @@ return [
     'notifications' => [
         /*
          * Notifications will only get sent if this option is set to `true`.
+         *
+         * Pilote par variable d'environnement pour rester desactivable sans toucher au code.
+         * Etait fige a false, ce qui rendait TOUTE notification de sante impossible : le
+         * controle pouvait tourner et echouer, aucun courriel ne partait jamais. Constate le
+         * 2026-08-01 en verifiant la boite de reception plutot qu'en supposant l'envoi.
          */
-        'enabled' => false,
+        'enabled' => (bool) env('HEALTH_NOTIFICATIONS_ENABLED', false),
 
         'notifications' => [
             Modules\Health\Notifications\CheckFailedNotification::class => ['mail'],
