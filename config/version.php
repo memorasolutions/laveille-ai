@@ -17,6 +17,36 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.138.0 · 2026-08-02 · feat(outils/constructeur-prompts) écran 3 : cinq blocs toujours
+ *     visibles, zéro accordéon interne. Remplace les 5 accordéons imbriqués « + Réglages avancés »
+ *     (le proprétaire : « le nombre d'accordéons crée de la friction... et surtout les ouvrir et
+ *     fermer à chaque fois... ark ! ») par cinq blocs (Pour qui / Le résultat / Le ton / Les
+ *     limites / Un modèle) affichés en même temps derrière le bouton « Affiner » (qui, lui, reste
+ *     - un seul clic révèle tout, rien à rouvrir/refermer ensuite). Chaque bloc porte une question
+ *     en langage humain, un exemple concret, la mention « Facultatif » et une ligne « Ajouté :
+ *     ... » qui explique ce que le dernier choix vient de produire (nouveaux getters feedback*).
+ *     Cartes cliquables (nouveau composant x-tools::prompt-card) = VRAIS boutons radio/case à
+ *     cocher, jamais un <div> : coche non-couleur en plus du remplissage (exigence explicite du
+ *     panel), cible tactile >= 44px. Audiences/rôles/verbes/formats/longueurs/tons/techniques/
+ *     langues rendus en cartes plutôt qu'en <select> (nouveau composant x-tools::prompt-block pour
+ *     le conteneur de bloc, DRY strict). Trois profils de règles conditionnels (Texte/
+ *     Programmation/Traduction), pré-sélectionnés par mots-clés simples (zéro IA dans l'outil,
+ *     jamais « j'ai compris que... » - toujours « Vous avez choisi X, j'ajoute donc Y. »),
+ *     toujours corrigeables d'un clic : Programmation coupe les 2 règles de style français et
+ *     ajoute une règle de mise en forme du code ; Traduction coupe les mêmes 2 règles. Bug trouvé
+ *     en vérification visuelle (pas dans les tests) : la ligne « Ajouté : écriture naturelle
+ *     anti-IA » mentait quand Cadre strict était désactivé ou qu'un profil supprimait réellement
+ *     la règle - corrigé par un getter `_stylistRulesApply` qui reproduit exactement la condition
+ *     de get promptSegments(). Les sept fonctions existantes (typographie, écriture anti-IA,
+ *     technique zero-shot/few-shot/itératif, poser des questions, réflexion étape par étape,
+ *     exemples, délimiteurs) restent toutes atteignables, markup déplacé verbatim (mêmes id,
+ *     mêmes attributs) pour les 5 champs surveillés par le garde-fou anti-données-personnelles.
+ *     2 assertions Round130 re-ancrées avec justification (aria-required reporté du <select>
+ *     retiré vers le role="radiogroup" qui le remplace - attribut valide sur ce rôle, aucun
+ *     affaiblissement). Vérifié : Pest Modules/Tools 393 passed (1654 assertions, compte
+ *     identique à avant), tests JS 36 fichiers 0 échec, fr.json/en.json synchronisés (46 clés
+ *     ajoutées). Validation visuelle réelle desktop + mobile (375x812), profil auto-détecté par
+ *     mots-clés confirmé en direct, coche non-couleur confirmée par capture.
  *   1.137.1 · 2026-08-01 · fix(fronttheme) en-tête mobile : loupe de recherche qui chevauchait le
  *     logo + bouton hamburger hors charte. (1) La colonne Bootstrap du logo (.col-6) ne fait que
  *     ~136px de contenu utile en mobile (375px), mais l'image du logo portait un style inline
@@ -3151,8 +3181,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 137;
-$lvPatch = 1;
+$lvMinor = 138;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

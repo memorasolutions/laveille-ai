@@ -2,6 +2,48 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.138.0] - 2026-08-02
+
+### Feature - Constructeur de prompts, ecran 3 (blocs toujours visibles)
+
+Remplace les 5 accordeons imbriques "+ Reglages avances" derriere le bouton "Affiner" par cinq
+blocs affiches EN MEME TEMPS, zero mecanisme d'ouverture/fermeture a l'interieur : Pour qui / Le
+resultat / Le ton / Les limites / Un modele. Chaque bloc porte une question en langage humain, un
+exemple concret, la mention "Facultatif" et une ligne "Ajoute : ..." qui explique ce que le
+dernier choix vient de produire.
+
+- Nouveau composant `x-tools::prompt-card` : vrai bouton radio ou case a cocher (jamais un `<div>`
+  qui imite un bouton), coche visible en plus de la couleur pour l'etat selectionne (exigence
+  explicite du panel), cible tactile >= 44px.
+- Nouveau composant `x-tools::prompt-block` : conteneur reutilise 5 fois (DRY strict, le gabarit
+  ne grossit pas de cinq blocs copies-colles).
+- Audiences, roles, verbes, formats, longueurs, tons, techniques et langues rendus en cartes
+  cliquables plutot qu'en menus deroulants.
+- Trois profils de regles conditionnels (Texte / Programmation / Traduction), pre-selectionnes
+  par correspondance de mots-cles simples (zero IA dans l'outil - jamais "j'ai compris que...",
+  toujours "Vous avez choisi X, j'ajoute donc Y."), toujours corrigeables d'un clic. Programmation
+  et Traduction coupent les regles de style francais (ecriture anti-IA, typographie) et
+  Programmation ajoute une regle de mise en forme du code.
+- Bug trouve en verification visuelle (pas dans les tests) : la ligne "Ajoute : ecriture naturelle
+  anti-IA" restait affichee meme quand Cadre strict etait desactive ou qu'un profil supprimait
+  reellement la regle du prompt final. Corrige par un getter `_stylistRulesApply` qui reproduit
+  exactement la condition deja utilisee dans `get promptSegments()`.
+- Les sept fonctions existantes (typographie francaise, ecriture naturelle anti-IA, technique
+  zero-shot/few-shot/iterative, poser des questions, reflexion etape par etape, exemples,
+  delimiteurs) restent toutes atteignables - deplacees, jamais retirees. Markup des 5 champs
+  surveilles par le garde-fou anti-donnees-personnelles deplace VERBATIM (memes id, memes
+  attributs).
+- 2 assertions Round130AdversarialFixesTest re-ancrees avec justification explicite dans le
+  fichier : l'obligation ARIA du <select> retire est reportee vers le `role="radiogroup"` qui le
+  remplace (attribut valide sur ce role selon WAI-ARIA), aucun affaiblissement.
+
+Verifie : Pest Modules/Tools 393 passed (1654 assertions, compte identique a avant cette passe),
+tests JS 36 fichiers 0 echec, fr.json/en.json synchronises (46 cles ajoutees, toutes les cles
+fr.json existent dans en.json). Validation visuelle reelle desktop et mobile (375x812) :
+profil auto-detecte par mots-cles confirme en direct (carte "Ecrire ou deboguer du code" ->
+profil Programmation, regle de code injectee, regles de style francais absentes de l'apercu),
+coche non-couleur confirmee par capture, aucun accordeon residuel (grep).
+
 ## [1.137.1] - 2026-08-01
 
 ### Fixed - En-tete mobile (logo + hamburger)

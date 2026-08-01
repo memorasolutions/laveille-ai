@@ -159,6 +159,30 @@
                              l'outil a ajouté (plus discret = du gabarit, pas le propos de la personne). --}}
                         .ct-seg-user{background:#FEF3C7;color:#5b4a1f;border-radius:4px;padding:0 2px;font-weight:600;}
                         .ct-seg-tool{background:var(--c-primary-light);color:var(--c-dark);border-radius:4px;}
+                        {{-- Round 152 (2026-08-02, écran 3) : 5 blocs TOUJOURS visibles, zéro accordéon
+                             interne (x-tools::prompt-block) + carte cliquable réutilisable
+                             (x-tools::prompt-card). L'état sélectionné n'est JAMAIS indiqué par la seule
+                             couleur : la coche .ct-card__mark (visibility, pas juste une teinte) est
+                             l'exigence explicite du panel qui a revu ce plan. --}}
+                        .ct-block{margin-bottom:1.5rem;padding:1rem 1.1rem;border:1px solid #e5e7eb;border-radius:12px;background:#fff;}
+                        .ct-block__head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:0.25rem;}
+                        .ct-block__title{font-family:var(--f-heading);font-weight:700;color:var(--c-dark);font-size:1rem;margin:0;}
+                        .ct-block__optional{font-size:0.72rem;font-weight:600;color:var(--c-text-muted);background:#f3f4f6;border-radius:999px;padding:2px 8px;white-space:nowrap;}
+                        .ct-block__example{font-size:0.78rem;color:var(--c-text-muted);margin:0 0 0.75rem;font-style:italic;}
+                        .ct-block__added{font-size:0.8rem;color:var(--c-dark);background:var(--c-primary-light);border-left:3px solid var(--c-primary);border-radius:6px;padding:0.45rem 0.65rem;margin:0.75rem 0 0;font-weight:600;}
+                        .ct-card-grid{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.5rem;}
+                        .ct-card{position:relative;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0.5rem 0.9rem;border:2px solid #d1d5db;border-radius:9999px;background:#fff;color:#374151;font-size:0.85rem;font-weight:500;cursor:pointer;transition:all .15s ease;}
+                        .ct-card:hover{border-color:var(--c-primary);color:var(--c-primary);}
+                        .ct-card--on{background:var(--c-primary);border-color:var(--c-primary);color:#fff;}
+                        .ct-card--on:hover{color:#fff;}
+                        .ct-card__input{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+                        .ct-card:focus-within{outline:2px solid var(--c-primary);outline-offset:2px;z-index:1;}
+                        .ct-card__mark{display:inline-block;width:12px;font-weight:800;visibility:hidden;}
+                        .ct-card--on .ct-card__mark{visibility:visible;}
+                        .ct-block__field{margin-bottom:0.75rem;}
+                        .ct-block__field:last-child{margin-bottom:0;}
+                        .ct-profile-strip{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem 0.65rem;margin-bottom:1.25rem;padding:0.85rem 1rem;border:1px dashed rgba(11,114,133,0.35);border-radius:12px;background:var(--c-primary-light);}
+                        .ct-profile-strip__title{font-weight:700;color:var(--c-dark);font-size:0.85rem;flex-basis:100%;margin:0 0 0.15rem;}
                         </style>
 
                         {{-- Round 151 (2026-08-01, refonte écrans 1-2, PLAN-FINAL-constructeur-2026-07-31.md) :
@@ -455,109 +479,76 @@
                                 <p class="small mb-0" style="font-size: 0.75rem; color: var(--c-text-muted);" x-text="(openTarget === 'gemini' || openTarget === 'mistral') ? &quot;{{ __('Le prompt sera copié : à coller manuellement dans cette IA.') }}&quot; : &quot;{{ __('Le prompt s\'ouvrira pré-rempli dans cette IA.') }}&quot;"></p>
                             </div>
 
-                            {{-- « Affiner » (mission écran 2) : révèle les réglages déjà existants (pour
-                                 qui, rôle, verbe, format, technique, contraintes) - mène à l'écran 3 à
-                                 venir, pour l'instant ce bouton se contente de les rendre visibles. Ne pas
+                            {{-- « Affiner » (mission écran 2, round 151) : révèle l'écran 3 - 5 blocs
+                                 TOUJOURS visibles (pour qui, le résultat, le ton, les limites, un
+                                 modèle), plus jamais un accordéon à ouvrir/fermer à l'intérieur. Ne pas
                                  confondre avec « ✨ Améliorer avec mon IA » plus bas (fonction BYOA
-                                 distincte et déjà existante, conservée telle quelle). --}}
+                                 distincte et déjà existante, conservée telle quelle).
+                                 Round 152 (2026-08-02) : ce bouton RESTE - un seul clic révèle les 5
+                                 blocs une fois pour toutes (rien à rouvrir/refermer ensuite), ce n'est
+                                 pas l'accordéon critiqué par le propriétaire (« le nombre d'accordéons
+                                 crée de la friction... et surtout les ouvrir et fermer à chaque fois »
+                                 visait les 5 sous-sections imbriquées ci-dessous, retirées). --}}
                             <button type="button" class="ct-advanced-toggle mb-3" @click="affinerOpen = !affinerOpen" :aria-expanded="affinerOpen.toString()" aria-controls="cpAffinerPanel">
-                                <span><span x-text="affinerOpen ? '{{ __('Masquer') }}' : '+'"></span> {{ __('Affiner (qui, rôle, verbe, format, technique, contraintes)') }}</span>
+                                <span><span x-text="affinerOpen ? '{{ __('Masquer') }}' : '+'"></span> {{ __('Affiner (pour qui, le résultat, le ton, les limites, un modèle)') }}</span>
                                 <span class="ct-chevron" aria-hidden="true">▾</span>
                             </button>
                             <div id="cpAffinerPanel" x-show="affinerOpen" x-transition x-cloak>
-                            <div class="row mb-3" id="cpAudienceBlock">
+
+                            {{-- Profils de règles conditionnels (section 7 du plan, round 152) : PAS de
+                                 « compréhension » (aucune IA dans l'outil) - une correspondance par
+                                 mots-clés pré-sélectionne un profil, TOUJOURS visible et corrigeable
+                                 d'un clic. Jamais « j'ai compris que... » (mensonge), toujours « Vous
+                                 avez choisi X, j'ajoute donc Y. » --}}
+                            <div class="ct-profile-strip" role="radiogroup" aria-label="{{ __('Type de demande') }}">
+                                <p class="ct-profile-strip__title">{{ __('Type de demande') }}</p>
+                                <div class="ct-card-grid" style="margin-bottom:0;">
+                                    <template x-for="p in profiles" :key="p.value">
+                                        <x-tools::prompt-card type="radio" name="profile" value="p.value" model="profile" onChange="profileTouched = true">
+                                            <span x-text="p.label"></span>
+                                        </x-tools::prompt-card>
+                                    </template>
+                                </div>
+                                <p class="ct-block__added" style="flex-basis:100%;margin:0.5rem 0 0;" x-text="feedbackProfile" role="status" aria-live="polite"></p>
+                            </div>
+
+                            {{-- Bloc « Pour qui » --}}
+                            <x-tools::prompt-block id="cpAudienceBlock" :question="__('Qui va lire ça ?')" :example="__('Ex. : des élèves du secondaire, ma direction, mes collègues techniques.')" added="feedbackAudience">
                                 {{-- Round 60 (2026-07-27) : le toggle preset/custom avait disparu lors de la
                                      refonte v1.132.0 « objectif d'abord » - personaType et verbType ont
                                      chacun conservé le leur, mais audienceType n'a jamais été réintroduit,
                                      rendant audienceCustom (champ + logique JS/serveur toujours en place)
                                      définitivement inatteignable pour tout nouveau prompt (sauf via ?edit=ID
-                                     d'un ancien prompt déjà en mode custom). --}}
-                                <div class="col-12 mb-1">
-                                    <div class="d-flex gap-3" role="radiogroup" aria-label="{{ __('Mode de sélection de l\'audience') }}">
-                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
-                                            <input type="radio" name="audienceType" value="preset" x-model="audienceType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfinie') }}
-                                        </label>
-                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
-                                            <input type="radio" name="audienceType" value="custom" x-model="audienceType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisée') }}
-                                        </label>
-                                    </div>
+                                     d'un ancien prompt déjà en mode custom). Toggle et champ CONSERVÉS
+                                     verbatim au round 152 - seul l'affichage "preset" passe de <select>/
+                                     .ct-pill à de vraies cartes .ct-card (coche non-couleur, round 152). --}}
+                                <div class="d-flex gap-3 mb-2" role="radiogroup" aria-label="{{ __('Mode de sélection de l\'audience') }}">
+                                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
+                                        <input type="radio" name="audienceType" value="preset" x-model="audienceType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfinie') }}
+                                    </label>
+                                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
+                                        <input type="radio" name="audienceType" value="custom" x-model="audienceType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisée') }}
+                                    </label>
                                 </div>
-                                <div class="col-md-6 mb-2" x-show="audienceType === 'preset'" role="group" aria-label="{{ __('Choisir une ou plusieurs audiences') }}">
-                                    <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Pour qui ?') }} <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.audience = !showHelp.audience" style="border-radius:50%;width:20px;height:20px;padding:0;line-height:20px;">?</button></label>
-                                    <div x-show="showHelp.audience" x-transition class="alert alert-info small mb-2 p-2" style="font-size: 0.78rem;" x-text="helps.audience"></div>
-                                    <div class="d-flex flex-wrap gap-2" style="gap:0.5rem;">
+                                <div class="ct-block__field" x-show="audienceType === 'preset'" role="group" aria-label="{{ __('Choisir une ou plusieurs audiences') }}">
+                                    <div class="ct-card-grid">
                                         <template x-for="a in audiences" :key="a.value">
-                                            <label class="ct-pill" :class="{ 'ct-pill--on': audiencePresets.includes(a.value) }">
-                                                <input type="checkbox" class="ct-pill__input" :value="a.value" x-model="audiencePresets">
+                                            <x-tools::prompt-card type="checkbox" value="a.value" model="audiencePresets">
                                                 <span x-text="a.label"></span>
-                                            </label>
+                                            </x-tools::prompt-card>
                                         </template>
                                     </div>
                                 </div>
-                                <div class="col-md-6 mb-2" x-show="audienceType === 'custom'">
-                                    <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Pour qui ?') }}</label>
+                                <div class="ct-block__field" x-show="audienceType === 'custom'">
                                     <input type="text" id="cpAudienceCustom" class="form-control" x-model="audienceCustom" autocomplete="off" placeholder="{{ __('Ex: enseignants du secondaire au Québec') }}" aria-label="{{ __('Audience personnalisée') }}">
                                 </div>
-                                <div class="col-md-6 mb-2">
-                                    <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Ton général souhaité') }}</label>
-                                    <select class="form-control form-control-sm" x-model="tone" aria-label="{{ __('Ton de la réponse') }}">
-                                        <option value="">{{ __('-- Aucun --') }}</option>
-                                        <option value="Professionnel">{{ __('Professionnel') }}</option>
-                                        <option value="Accessible et pédagogique">{{ __('Accessible et pédagogique') }}</option>
-                                        <option value="Technique et précis">{{ __('Technique et précis') }}</option>
-                                        <option value="Chaleureux et engageant">{{ __('Chaleureux et engageant') }}</option>
-                                        <option value="Académique">{{ __('Académique') }}</option>
-                                        <option value="Créatif et dynamique">{{ __('Créatif et dynamique') }}</option>
-                                        <option value="Conversationnel">{{ __('Conversationnel') }}</option>
-                                        <option value="Persuasif">{{ __('Persuasif') }}</option>
-                                        <option value="Neutre et factuel">{{ __('Neutre et factuel') }}</option>
-                                        <option value="Empathique et bienveillant">{{ __('Empathique et bienveillant') }}</option>
-                                        <option value="Motivant et inspirant">{{ __('Motivant et inspirant') }}</option>
-                                    </select>
-                                </div>
-                            </div>
+                            </x-tools::prompt-block>
 
-                            {{-- Divulgation progressive CONTEXTUELLE (Phase 2, recherche validée juillet 2026) :
-                                 chaque section a sa PROPRE petite divulgation locale repliée par défaut,
-                                 au lieu d'un panneau global unique. Pattern DRY réutilisé 5x : x-data="{ open:false }"
-                                 imbriqué (accède aux données du parent promptBuilder()) + bouton .ct-advanced-toggle. --}}
-
-                            {{-- Section : Rôle (requis) --}}
-                            <div class="mb-3">
-                                <button type="button" class="ct-advanced-toggle" @click="openSections.role = !openSections.role" :aria-expanded="openSections.role.toString()" aria-controls="cpSectionRole">
-                                    <span><span x-text="openSections.role ? '{{ __('Masquer') }}' : '+'"></span> {{ __('Réglages avancés : rôle de l\'IA') }} <span style="color: #991B1B;">*</span></span>
-                                    <span class="ct-chevron" aria-hidden="true">▾</span>
-                                </button>
-                                <div id="cpSectionRole" x-show="openSections.role" x-transition x-cloak class="p-3 mt-2 rounded" style="border: 1px solid #e5e7eb; border-radius: 10px;">
-                                    <div class="d-flex gap-3 mb-2">
-                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
-                                            <input type="radio" name="personaType" value="preset" x-model="personaType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfini') }}
-                                        </label>
-                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
-                                            <input type="radio" name="personaType" value="custom" x-model="personaType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisé') }}
-                                        </label>
-                                    </div>
-                                    <div x-show="personaType === 'preset'" class="form-group mb-0">
-                                        <select class="form-control" x-model="personaPreset" :aria-required="personaType === 'preset'" aria-label="{{ __('Choisir un rôle') }}">
-                                            <option value="">{{ __('-- Sélectionnez un rôle --') }}</option>
-                                            <template x-for="p in personas" :key="p.value">
-                                                <option :value="p.value" x-text="p.label"></option>
-                                            </template>
-                                        </select>
-                                    </div>
-                                    <div x-show="personaType === 'custom'" class="form-group mb-0">
-                                        <input type="text" id="cpPersonaCustom" class="form-control" x-model="personaCustom" :aria-required="personaType === 'custom'" autocomplete="off" placeholder="{{ __('Ex: un expert en cybersécurité spécialisé en PME québécoises') }}" aria-label="{{ __('Rôle personnalisé') }}">
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Section : Verbe d'action (requis) --}}
-                            <div class="mb-3">
-                                <button type="button" class="ct-advanced-toggle" @click="openSections.verb = !openSections.verb" :aria-expanded="openSections.verb.toString()" aria-controls="cpSectionVerb">
-                                    <span><span x-text="openSections.verb ? '{{ __('Masquer') }}' : '+'"></span> {{ __('Réglages avancés : verbe d\'action') }} <span style="color: #991B1B;">*</span></span>
-                                    <span class="ct-chevron" aria-hidden="true">▾</span>
-                                </button>
-                                <div id="cpSectionVerb" x-show="openSections.verb" x-transition x-cloak class="p-3 mt-2 rounded" style="border: 1px solid #e5e7eb; border-radius: 10px;">
+                            {{-- Bloc « Le résultat » : verbe d'action (requis) + format + longueur.
+                                 id="cpSectionFormat" CONSERVÉ - c'est la cible de openDiagnosticSection('format'). --}}
+                            <x-tools::prompt-block id="cpSectionFormat" :question="__('Vous voulez quoi au juste ?')" :example="__('Ex. : un texte de 300 mots avec une liste à puces, un plan détaillé, un tableau comparatif.')" added="feedbackResultat">
+                                <div class="ct-block__field">
+                                    <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Verbe d\'action') }} <span style="color: #991B1B;">*</span></label>
                                     <div class="d-flex gap-3 mb-2">
                                         <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
                                             <input type="radio" name="verbType" value="preset" x-model="verbType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfini') }}
@@ -566,189 +557,195 @@
                                             <input type="radio" name="verbType" value="custom" x-model="verbType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisé') }}
                                         </label>
                                     </div>
-                                    <select class="form-control" x-show="verbType === 'preset'" x-model="verb" :aria-required="verbType === 'preset'" aria-label="{{ __('Verbe d\'action') }}">
-                                        <option value="">{{ __('-- Sélectionnez un verbe --') }}</option>
+                                    {{-- Round 130 (2026-07-30) : l'obligation ARIA suit le mode ACTIF, jamais figée -
+                                         reportée du <select> retiré au round 152 vers le role="radiogroup" qui le
+                                         remplace (attribut valide sur ce rôle, cible correcte pour un GROUPE de
+                                         boutons radio plutôt qu'un seul champ). --}}
+                                    <div class="ct-card-grid" x-show="verbType === 'preset'" role="radiogroup" :aria-required="verbType === 'preset'" aria-label="{{ __('Verbe d\'action') }}">
                                         <template x-for="v in verbs" :key="v">
-                                            <option :value="v" x-text="v"></option>
+                                            <x-tools::prompt-card type="radio" name="verbPreset" value="v" model="verb">
+                                                <span x-text="v"></span>
+                                            </x-tools::prompt-card>
                                         </template>
-                                    </select>
+                                    </div>
                                     <input type="text" id="cpVerbCustom" class="form-control" x-show="verbType === 'custom'" x-model="verbCustom" autocomplete="off" :aria-required="verbType === 'custom'" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}" aria-label="{{ __('Verbe personnalisé') }}">
                                 </div>
-                            </div>
-
-                            {{-- Section : Format, longueur et langue --}}
-                            <div class="mb-3">
-                                <button type="button" class="ct-advanced-toggle" @click="openSections.format = !openSections.format" :aria-expanded="openSections.format.toString()" aria-controls="cpSectionFormat">
-                                    <span><span x-text="openSections.format ? '{{ __('Masquer') }}' : '+'"></span> {{ __('Réglages avancés : format, longueur et langue') }}</span>
-                                    <span class="ct-chevron" aria-hidden="true">▾</span>
-                                </button>
-                                <div id="cpSectionFormat" x-show="openSections.format" x-transition x-cloak class="p-3 mt-2 rounded" style="border: 1px solid #e5e7eb; border-radius: 10px;">
-                                    <div class="row mb-0">
-                                        <div class="col-md-4 mb-2">
-                                            <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Format de sortie') }}</label>
-                                            <select class="form-control form-control-sm" x-model="format" aria-label="{{ __('Format de sortie') }}">
-                                                <option value="">{{ __('-- Aucun --') }}</option>
-                                                <option value="Liste à puces">{{ __('Liste à puces') }}</option>
-                                                <option value="Paragraphes détaillés">{{ __('Paragraphes détaillés') }}</option>
-                                                <option value="Tableau structuré">{{ __('Tableau structuré') }}</option>
-                                                <option value="Plan hiérarchisé">{{ __('Plan hiérarchisé') }}</option>
-                                                <option value="Étapes numérotées">{{ __('Étapes numérotées') }}</option>
-                                                <option value="Format JSON">{{ __('Format JSON') }}</option>
-                                                <option value="Diagramme Mermaid">{{ __('Diagramme Mermaid') }}</option>
-                                                <option value="Questionnaire / QCM avec corrigé">{{ __('Questionnaire / QCM avec corrigé') }}</option>
-                                                <option value="Grille d'évaluation (rubrique)">{{ __('Grille d\'évaluation (rubrique)') }}</option>
-                                                <option value="Fiche pratique (1 page)">{{ __('Fiche pratique (1 page)') }}</option>
-                                                <option value="Modèle réutilisable (gabarit)">{{ __('Modèle réutilisable (gabarit)') }}</option>
-                                                <option value="FAQ structurée">{{ __('FAQ structurée') }}</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4 mb-2">
-                                            <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Longueur précise') }}</label>
-                                            <select class="form-control form-control-sm" x-model="length" aria-label="{{ __('Longueur souhaitée') }}">
-                                                <option value="">{{ __('-- Aucune --') }}</option>
-                                                <option value="Concis (100-200 mots)">{{ __('Concis (100-200 mots)') }}</option>
-                                                <option value="Modéré (300-500 mots)">{{ __('Modéré (300-500 mots)') }}</option>
-                                                <option value="Détaillé (500-800 mots)">{{ __('Détaillé (500-800 mots)') }}</option>
-                                                <option value="Exhaustif (800+ mots)">{{ __('Exhaustif (800+ mots)') }}</option>
-                                                <option value="3 à 5 points clés">{{ __('3 à 5 points clés') }}</option>
-                                                <option value="5 à 10 points clés">{{ __('5 à 10 points clés') }}</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4 mb-2">
-                                            <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Langue de réponse') }}</label>
-                                            <select class="form-control form-control-sm" x-model="language" aria-label="{{ __('Langue') }}">
-                                                <option value="fr">{{ __('Français') }}</option>
-                                                <option value="en">English</option>
-                                                <option value="es">Español</option>
-                                            </select>
-                                        </div>
+                                <div class="ct-block__field">
+                                    <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Format de sortie') }}</label>
+                                    <div class="ct-card-grid" role="radiogroup" aria-label="{{ __('Format de sortie') }}">
+                                        <template x-for="fmt in formats" :key="fmt.value">
+                                            <x-tools::prompt-card type="radio" name="formatChoice" value="fmt.value" model="format">
+                                                <span x-text="fmt.label"></span>
+                                            </x-tools::prompt-card>
+                                        </template>
+                                        {{-- « Autre » systématique (round 152) : même mécanique que le ton
+                                             ci-dessous - case booléenne (customOpen.format) qui révèle un
+                                             champ libre, sans toucher au modèle `format` tant qu'on n'y
+                                             écrit rien. --}}
+                                        <x-tools::prompt-card type="checkbox" model="customOpen.format">{{ __('Autre') }}</x-tools::prompt-card>
                                     </div>
+                                    <input type="text" x-show="customOpen.format" x-model="format" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: Sonnet, script vidéo, fiche produit...') }}" aria-label="{{ __('Format personnalisé') }}">
                                 </div>
-                            </div>
-
-                            {{-- Section : Technique de réflexion --}}
-                            <div class="mb-3">
-                                <button type="button" class="ct-advanced-toggle" @click="openSections.technique = !openSections.technique" :aria-expanded="openSections.technique.toString()" aria-controls="cpSectionTechnique">
-                                    <span><span x-text="openSections.technique ? '{{ __('Masquer') }}' : '+'"></span> {{ __('Réglages avancés : comment l\'IA doit réfléchir') }}</span>
-                                    <span class="ct-chevron" aria-hidden="true">▾</span>
-                                </button>
-                                <div id="cpSectionTechnique" x-show="openSections.technique" x-transition x-cloak class="p-3 mt-2 rounded" style="border: 1px solid #e5e7eb; border-radius: 10px;">
-                                    <div class="d-flex align-items-center gap-2 mb-2">
-                                        <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.technique = !showHelp.technique" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;flex-shrink:0;">?</button>
-                                        <span class="small text-muted">{{ __('Une micro-explication apparaît pour chaque méthode.') }}</span>
+                                <div class="ct-block__field">
+                                    <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Longueur précise') }}</label>
+                                    <div class="ct-card-grid" role="radiogroup" aria-label="{{ __('Longueur souhaitée') }}">
+                                        <template x-for="len in lengths" :key="len.value">
+                                            <x-tools::prompt-card type="radio" name="lengthChoice" value="len.value" model="length">
+                                                <span x-text="len.label"></span>
+                                            </x-tools::prompt-card>
+                                        </template>
+                                        <x-tools::prompt-card type="checkbox" model="customOpen.length">{{ __('Autre') }}</x-tools::prompt-card>
                                     </div>
-                                    <div x-show="showHelp.technique" x-transition class="alert alert-info small mb-2 p-2" style="font-size: 0.8rem;" x-text="helps.technique"></div>
-                                    <div class="row mb-0">
-                                        <div class="col-md-6 mb-2">
-                                            <select class="form-control form-control-sm" x-model="technique" aria-label="{{ __('Méthode de réflexion de l\'IA') }}">
-                                                <option value="zero-shot">{{ __('Réponse directe (par défaut)') }}</option>
-                                                <option value="zero-shot-cot">{{ __('Réponse directe + réflexion étape par étape') }}</option>
-                                                <option value="few-shot">{{ __('Avec des exemples') }}</option>
-                                                <option value="few-shot-cot">{{ __('Avec des exemples + réflexion étape par étape') }}</option>
-                                                <option value="iterative">{{ __('Par étapes, avec votre validation à chaque fois') }}</option>
-                                            </select>
-                                            <small class="text-muted d-block mt-1" style="font-size: 0.72rem;" x-text="techniqueHints[technique] || ''"></small>
-                                        </div>
-                                        <div class="col-md-6 mb-2">
-                                            {{-- Round 88 (2026-07-27, passe adversariale) : min-height:44px + padding ajoutés
-                                                 - cible tactile WCAG 2.2 AAA SC 2.5.5, cohérent avec les labels radio du même
-                                                 fichier (déjà à min-height: 44px depuis les rounds précédents). --}}
-                                            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
-                                                <input type="checkbox" x-model="useDelimiters" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
-                                                <span>{{ __('Séparer clairement les données du reste (délimiteurs ###)') }}</span>
+                                    <input type="text" x-show="customOpen.length" x-model="length" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: 1000 mots exactement') }}" aria-label="{{ __('Longueur personnalisée') }}">
+                                </div>
+                            </x-tools::prompt-block>
+
+                            {{-- Bloc « Le ton » : rôle de l'IA (requis) + ton général. --}}
+                            <x-tools::prompt-block :question="__('Sur quel ton l\'IA doit-elle répondre ?')" :example="__('Ex. : professionnel, chaleureux et engageant, académique.')" added="feedbackTon">
+                                <div class="ct-block__field">
+                                    <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Rôle de l\'IA') }} <span style="color: #991B1B;">*</span></label>
+                                    <div class="d-flex gap-3 mb-2">
+                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
+                                            <input type="radio" name="personaType" value="preset" x-model="personaType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfini') }}
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
+                                            <input type="radio" name="personaType" value="custom" x-model="personaType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisé') }}
+                                        </label>
+                                    </div>
+                                    {{-- Round 130 (2026-07-30) : même report que le verbe ci-dessus (obligation
+                                         ARIA liée au mode actif, voir commentaire). --}}
+                                    <div class="ct-card-grid" x-show="personaType === 'preset'" role="radiogroup" :aria-required="personaType === 'preset'" aria-label="{{ __('Choisir un rôle') }}">
+                                        <template x-for="p in personas" :key="p.value">
+                                            <x-tools::prompt-card type="radio" name="personaPresetChoice" value="p.value" model="personaPreset">
+                                                <span x-text="p.label"></span>
+                                            </x-tools::prompt-card>
+                                        </template>
+                                    </div>
+                                    <input type="text" id="cpPersonaCustom" class="form-control" x-show="personaType === 'custom'" x-model="personaCustom" :aria-required="personaType === 'custom'" autocomplete="off" placeholder="{{ __('Ex: un expert en cybersécurité spécialisé en PME québécoises') }}" aria-label="{{ __('Rôle personnalisé') }}">
+                                </div>
+                                <div class="ct-block__field">
+                                    <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Ton général souhaité') }}</label>
+                                    <div class="ct-card-grid" role="radiogroup" aria-label="{{ __('Ton de la réponse') }}">
+                                        <template x-for="t in tones" :key="t.value">
+                                            <x-tools::prompt-card type="radio" name="toneChoice" value="t.value" model="tone">
+                                                <span x-text="t.label"></span>
+                                            </x-tools::prompt-card>
+                                        </template>
+                                        <x-tools::prompt-card type="checkbox" model="customOpen.tone">{{ __('Autre') }}</x-tools::prompt-card>
+                                    </div>
+                                    <input type="text" x-show="customOpen.tone" x-model="tone" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: Ironique et léger') }}" aria-label="{{ __('Ton personnalisé') }}">
+                                </div>
+                            </x-tools::prompt-block>
+
+                            {{-- Bloc « Les limites » : contraintes, typographie, écriture anti-IA,
+                                 réflexion affichée, questions de clarification, document modifiable
+                                 (ex-Destination/Canvas), langue de réponse. id="cpSectionContraintes"
+                                 CONSERVÉ - c'est la cible de openDiagnosticSection('contraintes'). --}}
+                            <x-tools::prompt-block id="cpSectionContraintes" :question="__('Quelque chose à respecter ?')" :example="__('Ex. : pas de jargon technique, respecter la typographie française, garder un raisonnement visible.')" added="feedbackLimites">
+                                <div class="ct-block__field">
+                                    <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Contraintes spécifiques') }}</label>
+                                    <textarea id="cpConstraintCustom" class="form-control form-control-sm" rows="2" x-model="constraintCustom" autocomplete="off" placeholder="{{ __('Ex: éviter le jargon technique, inclure des exemples concrets') }}" aria-label="{{ __('Contraintes personnalisées') }}"></textarea>
+                                </div>
+                                <div class="d-flex flex-column gap-2 mb-3">
+                                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
+                                        <input type="checkbox" x-model="constraintAntiAI" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
+                                        <span><strong>{{ __('Écriture naturelle (anti-IA)') }}</strong> : {{ __('style humain, phrases variées, pas de formulations génériques') }}</span>
+                                    </label>
+                                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
+                                        <input type="checkbox" x-model="constraintTypo" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
+                                        <span><strong>{{ __('Règles typographiques') }}</strong> : {{ __('majuscules en début de phrase, pas de tiret cadratin') }}</span>
+                                    </label>
+                                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
+                                        <input type="checkbox" x-model="constraintChainOfThought" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
+                                        <span><strong>{{ __('Réflexion étape par étape') }}</strong> : {{ __('utile pour les calculs et les problèmes complexes') }}</span>
+                                    </label>
+                                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
+                                        <input type="checkbox" x-model="constraintAskIfUnclear" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
+                                        <span><strong>{{ __('Poser des questions') }}</strong> : {{ __('demander des précisions si nécessaire') }}</span>
+                                    </label>
+                                </div>
+                                {{-- Destination (OÙ) et Format attendu (QUOI) : 2 champs distincts mais liés
+                                     (décision d'architecture d'info validée Codex/claude.ai/Gemini, juillet 2026).
+                                     État interne inchangé : constraintCanvas + canvasAI pilotés par le getter/setter
+                                     `destination` (voir constructeur-prompts-core.js) pour zéro régression au reload.
+                                     Renommé « Créer un document modifiable » (section 6 du plan). --}}
+                                <div class="ct-block__field p-2 rounded" style="background: #f0f9ff; border: 1px solid rgba(11,114,133,0.18); border-radius: 10px;">
+                                    <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Créer un document modifiable') }}</label>
+                                    <p class="small text-muted mb-2" style="font-size: 0.75rem;">{{ __('Où la réponse doit-elle apparaître : la conversation normale, ou un espace de travail dédié d\'une IA précise ?') }}</p>
+                                    <select class="form-control form-control-sm" x-model="destination" style="max-width: 280px;" aria-label="{{ __('Destination de la réponse') }}">
+                                        <option value="">{{ __('Conversation standard') }}</option>
+                                        <option value="chatgpt">{{ __('Canvas ChatGPT') }}</option>
+                                        <option value="claude">{{ __('Artefact Claude') }}</option>
+                                        <option value="gemini">{{ __('Canvas Gemini') }}</option>
+                                        <option value="mistral">{{ __('Espace de travail Mistral') }}</option>
+                                    </select>
+
+                                    <div x-show="destination" x-transition x-cloak class="mt-2 pt-2" style="border-top: 1px dashed rgba(11,114,133,0.3);">
+                                        <label class="form-label fw-medium mb-1" style="font-size: 0.8rem;">{{ __('Format attendu') }}</label>
+                                        <p class="small text-muted mb-2" style="font-size: 0.72rem;">{{ __('La structure du contenu généré à l\'intérieur de cet espace de travail.') }}</p>
+                                        <div class="d-flex gap-3 mb-2" role="radiogroup" aria-label="{{ __('Mode de sélection du format') }}">
+                                            <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.8rem; min-height: 44px; padding: 4px 6px;">
+                                                <input type="radio" name="formatMode" value="preset" x-model="formatMode" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;">
+                                                <span>{{ __('Format prédéfini') }}</span>
+                                            </label>
+                                            <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.8rem; min-height: 44px; padding: 4px 6px;">
+                                                <input type="radio" name="formatMode" value="custom" x-model="formatMode" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;">
+                                                <span>{{ __('Format personnalisé') }}</span>
                                             </label>
                                         </div>
-                                    </div>
-                                    <div x-show="technique === 'few-shot' || technique === 'few-shot-cot'" class="form-group mb-0">
-                                        <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Exemples (2-3 recommandés)') }}</label>
-                                        <textarea id="cpExamples" class="form-control form-control-sm" rows="4" x-model="examples" autocomplete="off" placeholder="{{ __('Exemple 1 :\nEntrée : ...\nSortie : ...\n\nExemple 2 :\nEntrée : ...\nSortie : ...') }}" aria-label="{{ __('Exemples à donner à l\'IA') }}"></textarea>
-                                        <small class="text-muted">{{ __('Donnez 2-3 exemples du résultat attendu pour guider l\'IA.') }}</small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Section : Contraintes (inclut Destination + Format attendu, séparés visuellement) --}}
-                            <div class="mb-3">
-                                <button type="button" class="ct-advanced-toggle" @click="openSections.contraintes = !openSections.contraintes" :aria-expanded="openSections.contraintes.toString()" aria-controls="cpSectionContraintes">
-                                    <span><span x-text="openSections.contraintes ? '{{ __('Masquer') }}' : '+'"></span> {{ __('Réglages avancés : contraintes et destination') }}</span>
-                                    <span class="ct-chevron" aria-hidden="true">▾</span>
-                                </button>
-                                <div id="cpSectionContraintes" x-show="openSections.contraintes" x-transition x-cloak class="p-3 mt-2 rounded" style="border: 1px solid #e5e7eb; border-radius: 10px;">
-                                    <div class="d-flex align-items-center gap-2 mb-2">
-                                        <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.constraints = !showHelp.constraints" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;flex-shrink:0;">?</button>
-                                        <span class="small text-muted">{{ __('Cochez celles qui correspondent à votre besoin.') }}</span>
-                                    </div>
-                                    <div x-show="showHelp.constraints" x-transition class="alert alert-info small mb-2 p-2" style="font-size: 0.8rem;">
-                                        {{ __('Les contraintes limitent ou orientent le comportement de l\'IA. Elles seront ajoutées automatiquement au prompt.') }}
-                                    </div>
-                                    <div class="d-flex flex-column gap-2 mb-3">
-                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
-                                            <input type="checkbox" x-model="constraintAntiAI" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
-                                            <span><strong>{{ __('Écriture naturelle (anti-IA)') }}</strong> : {{ __('style humain, phrases variées, pas de formulations génériques') }}</span>
-                                        </label>
-                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
-                                            <input type="checkbox" x-model="constraintTypo" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
-                                            <span><strong>{{ __('Règles typographiques') }}</strong> : {{ __('majuscules en début de phrase, pas de tiret cadratin') }}</span>
-                                        </label>
-
-                                        {{-- Destination (OÙ) et Format attendu (QUOI) : 2 champs distincts mais liés
-                                             (décision d'architecture d'info validée Codex/claude.ai/Gemini, juillet 2026).
-                                             État interne inchangé : constraintCanvas + canvasAI pilotés par le getter/setter
-                                             `destination` (voir constructeur-prompts-core.js) pour zéro régression au reload. --}}
-                                        <div class="p-2 rounded" style="background: #f0f9ff; border: 1px solid rgba(11,114,133,0.18); border-radius: 10px;">
-                                            <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Destination') }}</label>
-                                            <p class="small text-muted mb-2" style="font-size: 0.75rem;">{{ __('Où la réponse doit-elle apparaître : la conversation normale, ou un espace de travail dédié d\'une IA précise ?') }}</p>
-                                            <select class="form-control form-control-sm" x-model="destination" style="max-width: 280px;" aria-label="{{ __('Destination de la réponse') }}">
-                                                <option value="">{{ __('Conversation standard') }}</option>
-                                                <option value="chatgpt">{{ __('Canvas ChatGPT') }}</option>
-                                                <option value="claude">{{ __('Artefact Claude') }}</option>
-                                                <option value="gemini">{{ __('Canvas Gemini') }}</option>
-                                                <option value="mistral">{{ __('Espace de travail Mistral') }}</option>
+                                        <div x-show="formatMode === 'preset'">
+                                            <select class="form-control form-control-sm" x-model="canvasFormat" style="max-width: 280px;" aria-label="{{ __('Format attendu prédéfini') }}">
+                                                <option value="">{{ __('-- Aucun --') }}</option>
+                                                <template x-for="f in canvasFormats" :key="f">
+                                                    <option :value="f" x-text="f"></option>
+                                                </template>
                                             </select>
-
-                                            <div x-show="destination" x-transition x-cloak class="mt-2 pt-2" style="border-top: 1px dashed rgba(11,114,133,0.3);">
-                                                <label class="form-label fw-medium mb-1" style="font-size: 0.8rem;">{{ __('Format attendu') }}</label>
-                                                <p class="small text-muted mb-2" style="font-size: 0.72rem;">{{ __('La structure du contenu généré à l\'intérieur de cet espace de travail.') }}</p>
-                                                <div class="d-flex gap-3 mb-2" role="radiogroup" aria-label="{{ __('Mode de sélection du format') }}">
-                                                    <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.8rem; min-height: 44px; padding: 4px 6px;">
-                                                        <input type="radio" name="formatMode" value="preset" x-model="formatMode" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;">
-                                                        <span>{{ __('Format prédéfini') }}</span>
-                                                    </label>
-                                                    <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.8rem; min-height: 44px; padding: 4px 6px;">
-                                                        <input type="radio" name="formatMode" value="custom" x-model="formatMode" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;">
-                                                        <span>{{ __('Format personnalisé') }}</span>
-                                                    </label>
-                                                </div>
-                                                <div x-show="formatMode === 'preset'">
-                                                    <select class="form-control form-control-sm" x-model="canvasFormat" style="max-width: 280px;" aria-label="{{ __('Format attendu prédéfini') }}">
-                                                        <option value="">{{ __('-- Aucun --') }}</option>
-                                                        <template x-for="f in canvasFormats" :key="f">
-                                                            <option :value="f" x-text="f"></option>
-                                                        </template>
-                                                    </select>
-                                                </div>
-                                                <div x-show="formatMode === 'custom'">
-                                                    <input type="text" class="form-control form-control-sm" x-model="canvasCustomFormat" placeholder="{{ __('Ex: LaTeX, YAML, BibTeX, AsciiDoc, Apache config, MJML email...') }}" style="max-width: 380px;" aria-label="{{ __('Format personnalisé libre') }}">
-                                                    <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">{{ __('Décrivez le format souhaité dans vos propres mots : disponible pour les 4 IA.') }}</small>
-                                                </div>
-                                            </div>
                                         </div>
-
-                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
-                                            <input type="checkbox" x-model="constraintChainOfThought" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
-                                            <span><strong>{{ __('Réflexion étape par étape') }}</strong> : {{ __('utile pour les calculs et les problèmes complexes') }}</span>
-                                        </label>
-                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
-                                            <input type="checkbox" x-model="constraintAskIfUnclear" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
-                                            <span><strong>{{ __('Poser des questions') }}</strong> : {{ __('demander des précisions si nécessaire') }}</span>
-                                        </label>
-                                    </div>
-                                    <div class="form-group mb-0">
-                                        <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Contraintes spécifiques') }}</label>
-                                        <textarea id="cpConstraintCustom" class="form-control form-control-sm" rows="2" x-model="constraintCustom" autocomplete="off" placeholder="{{ __('Ex: éviter le jargon technique, inclure des exemples concrets') }}" aria-label="{{ __('Contraintes personnalisées') }}"></textarea>
+                                        <div x-show="formatMode === 'custom'">
+                                            <input type="text" class="form-control form-control-sm" x-model="canvasCustomFormat" placeholder="{{ __('Ex: LaTeX, YAML, BibTeX, AsciiDoc, Apache config, MJML email...') }}" style="max-width: 380px;" aria-label="{{ __('Format personnalisé libre') }}">
+                                            <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">{{ __('Décrivez le format souhaité dans vos propres mots : disponible pour les 4 IA.') }}</small>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                                <div class="ct-block__field">
+                                    <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Langue de réponse') }}</label>
+                                    <div class="ct-card-grid" role="radiogroup" aria-label="{{ __('Langue') }}">
+                                        <template x-for="l in languages" :key="l.value">
+                                            <x-tools::prompt-card type="radio" name="languageChoice" value="l.value" model="language">
+                                                <span x-text="l.label"></span>
+                                            </x-tools::prompt-card>
+                                        </template>
+                                    </div>
+                                </div>
+                            </x-tools::prompt-block>
+
+                            {{-- Bloc « Un modèle » : comment l'IA doit s'y prendre (technique) + exemples
+                                 (few-shot) + délimiteurs. --}}
+                            <x-tools::prompt-block :question="__('Un exemple à imiter ?')" :example="__('Ex. : donnez 2-3 exemples du résultat attendu, ou laissez l\'IA répondre directement.')" added="feedbackModele">
+                                <div class="ct-block__field">
+                                    <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Comment l\'IA doit-elle s\'y prendre ?') }}</label>
+                                    <div class="ct-card-grid" role="radiogroup" aria-label="{{ __('Méthode de réflexion de l\'IA') }}">
+                                        <template x-for="tq in techniques" :key="tq.value">
+                                            <x-tools::prompt-card type="radio" name="techniqueChoice" value="tq.value" model="technique">
+                                                <span x-text="tq.label"></span>
+                                            </x-tools::prompt-card>
+                                        </template>
+                                    </div>
+                                    <small class="text-muted d-block mt-1" style="font-size: 0.72rem;" x-text="techniqueHints[technique] || ''"></small>
+                                </div>
+                                <div class="ct-block__field" x-show="technique === 'few-shot' || technique === 'few-shot-cot'">
+                                    <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Exemples (2-3 recommandés)') }}</label>
+                                    <textarea id="cpExamples" class="form-control form-control-sm" rows="4" x-model="examples" autocomplete="off" placeholder="{{ __('Exemple 1 :\nEntrée : ...\nSortie : ...\n\nExemple 2 :\nEntrée : ...\nSortie : ...') }}" aria-label="{{ __('Exemples à donner à l\'IA') }}"></textarea>
+                                    <small class="text-muted">{{ __('Donnez 2-3 exemples du résultat attendu pour guider l\'IA.') }}</small>
+                                </div>
+                                <div class="ct-block__field">
+                                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
+                                        <input type="checkbox" x-model="useDelimiters" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
+                                        <span>{{ __('Séparer clairement les données du reste (délimiteurs ###)') }}</span>
+                                    </label>
+                                </div>
+                            </x-tools::prompt-block>
+
                             </div>
                             {{-- /#cpAffinerPanel --}}
                         </div>
@@ -1048,6 +1045,65 @@ $defaultTaskCards = [
     ['id' => 'coder', 'icon' => '💻', 'label' => __('Écrire ou déboguer du code'), 'description' => __('Créer, corriger ou expliquer du code...'), 'personaValue' => 'developpeur', 'verb' => 'Développe'],
     ['id' => 'autre', 'icon' => '✨', 'label' => __('Autre chose'), 'description' => __('Je préfère tout choisir moi-même'), 'personaValue' => '', 'verb' => ''],
 ];
+// Round 152 (2026-08-02, écran 3) : formats/longueurs/tons/techniques/langues/profils déplacés de
+// listes <option> statiques vers des tableaux {value,label} (même contrat que $pbPersonas/
+// $pbAudiences ci-dessus) pour être rendus en CARTES cliquables (x-tools::prompt-card) via x-for,
+// sans dupliquer leur contenu entre ce fichier Blade et le JS (DRY). `value` reste TOUJOURS en
+// français, non traduit - c'est le texte injecté tel quel dans le prompt généré (même règle que
+// personas/verbes/audiences, voir le commentaire à leur définition) ; seul `label` (affiché) passe
+// par __().
+$defaultFormats = [
+    ['value' => 'Liste à puces', 'label' => __('Liste à puces')],
+    ['value' => 'Paragraphes détaillés', 'label' => __('Paragraphes détaillés')],
+    ['value' => 'Tableau structuré', 'label' => __('Tableau structuré')],
+    ['value' => 'Plan hiérarchisé', 'label' => __('Plan hiérarchisé')],
+    ['value' => 'Étapes numérotées', 'label' => __('Étapes numérotées')],
+    ['value' => 'Format JSON', 'label' => __('Format JSON')],
+    ['value' => 'Diagramme Mermaid', 'label' => __('Diagramme Mermaid')],
+    ['value' => 'Questionnaire / QCM avec corrigé', 'label' => __('Questionnaire / QCM avec corrigé')],
+    ['value' => 'Grille d\'évaluation (rubrique)', 'label' => __('Grille d\'évaluation (rubrique)')],
+    ['value' => 'Fiche pratique (1 page)', 'label' => __('Fiche pratique (1 page)')],
+    ['value' => 'Modèle réutilisable (gabarit)', 'label' => __('Modèle réutilisable (gabarit)')],
+    ['value' => 'FAQ structurée', 'label' => __('FAQ structurée')],
+];
+$defaultLengths = [
+    ['value' => 'Concis (100-200 mots)', 'label' => __('Concis (100-200 mots)')],
+    ['value' => 'Modéré (300-500 mots)', 'label' => __('Modéré (300-500 mots)')],
+    ['value' => 'Détaillé (500-800 mots)', 'label' => __('Détaillé (500-800 mots)')],
+    ['value' => 'Exhaustif (800+ mots)', 'label' => __('Exhaustif (800+ mots)')],
+    ['value' => '3 à 5 points clés', 'label' => __('3 à 5 points clés')],
+    ['value' => '5 à 10 points clés', 'label' => __('5 à 10 points clés')],
+];
+$defaultTones = [
+    ['value' => 'Professionnel', 'label' => __('Professionnel')],
+    ['value' => 'Accessible et pédagogique', 'label' => __('Accessible et pédagogique')],
+    ['value' => 'Technique et précis', 'label' => __('Technique et précis')],
+    ['value' => 'Chaleureux et engageant', 'label' => __('Chaleureux et engageant')],
+    ['value' => 'Académique', 'label' => __('Académique')],
+    ['value' => 'Créatif et dynamique', 'label' => __('Créatif et dynamique')],
+    ['value' => 'Conversationnel', 'label' => __('Conversationnel')],
+    ['value' => 'Persuasif', 'label' => __('Persuasif')],
+    ['value' => 'Neutre et factuel', 'label' => __('Neutre et factuel')],
+    ['value' => 'Empathique et bienveillant', 'label' => __('Empathique et bienveillant')],
+    ['value' => 'Motivant et inspirant', 'label' => __('Motivant et inspirant')],
+];
+$defaultTechniques = [
+    ['value' => 'zero-shot', 'label' => __('Réponse directe (par défaut)')],
+    ['value' => 'zero-shot-cot', 'label' => __('Réponse directe + réflexion étape par étape')],
+    ['value' => 'few-shot', 'label' => __('Avec des exemples')],
+    ['value' => 'few-shot-cot', 'label' => __('Avec des exemples + réflexion étape par étape')],
+    ['value' => 'iterative', 'label' => __('Par étapes, avec votre validation à chaque fois')],
+];
+$defaultLanguages = [
+    ['value' => 'fr', 'label' => __('Français')],
+    ['value' => 'en', 'label' => 'English'],
+    ['value' => 'es', 'label' => 'Español'],
+];
+$defaultProfiles = [
+    ['value' => 'texte', 'label' => __('Texte'), 'hint' => __('Écriture humaine, typographie française, ton.')],
+    ['value' => 'programmation', 'label' => __('Programmation'), 'hint' => __('Aucune règle de style français ; ajoute la mise en forme du code.')],
+    ['value' => 'traduction', 'label' => __('Traduction'), 'hint' => __('Aucune règle de français du Québec appliquée au résultat.')],
+];
 // Round 148 (2026-07-31) : formes singulier/pluriel des catégories RÉELLES retournées par
 // AnonymizerCore.detectEntities() (entity.label), pour le récapitulatif humain du masquage en
 // place (« 2 noms et 1 numéro de téléphone ont été masqués. »). Construit en variable PHP plutôt
@@ -1091,6 +1147,12 @@ window.promptBuilderConfig = {
     verbs: @json($pbVerbs),
     audiences: @json($pbAudiences),
     taskCards: @json($defaultTaskCards),
+    formats: @json($defaultFormats),
+    lengths: @json($defaultLengths),
+    tones: @json($defaultTones),
+    techniques: @json($defaultTechniques),
+    languages: @json($defaultLanguages),
+    profiles: @json($defaultProfiles),
     isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
     // Round 77 (2026-07-27, passe adversariale) : texte d'aide contextuelle pur (jamais injecté
     // dans le prompt généré) resté en dur en français dans constructeur-prompts-core.js malgré
@@ -1191,7 +1253,35 @@ window.promptBuilderConfig = {
         iconSearchEmpty: @json(__('Aucune icône ne correspond à cette recherche.')),
         iconSearchResultOne: @json(__('1 icône trouvée')),
         iconSearchResultMany: @json(__('{count} icônes trouvées')),
-        iconLabelPrefix: @json(__('Icône : '))
+        iconLabelPrefix: @json(__('Icône : ')),
+        // Round 152 (2026-08-02, écran 3) : lignes « Ajouté : ... » (voir feedbackAudience et les
+        // 4 autres getters feedback* de constructeur-prompts-core.js) - même convention que
+        // summary* plus haut : préfixe traduit, valeur brute (déjà en français, non traduite par
+        // convention - personas/verbes/audiences/formats/longueurs/tons/techniques) concaténée telle
+        // quelle.
+        addedPrefix: @json(__('Ajouté : ')),
+        addedAudience: @json(__('Ajouté : niveau de langage adapté à ')),
+        fragVerb: @json(__('verbe ')),
+        fragFormat: @json(__('format ')),
+        fragLength: @json(__('longueur ')),
+        fragRole: @json(__('rôle ')),
+        fragTone: @json(__('ton ')),
+        fragTypo: @json(__('typographie française stricte')),
+        fragAntiAI: @json(__('écriture naturelle anti-IA')),
+        fragCot: @json(__('raisonnement affiché')),
+        fragAsk: @json(__('questions de clarification si besoin')),
+        fragCanvas: @json(__('document modifiable')),
+        fragLangEn: @json(__('réponse en anglais')),
+        fragLangEs: @json(__('réponse en espagnol')),
+        fragCustom: @json(__('vos contraintes personnalisées')),
+        fragFewShot: @json(__('des exemples')),
+        fragFewShotCot: @json(__('des exemples et une réflexion visible')),
+        fragZeroShotCot: @json(__('réflexion visible')),
+        fragIterative: @json(__('une validation à chaque étape')),
+        fragDelimiters: @json(__('délimiteurs ###')),
+        profileFeedbackTexte: @json(__("Vous avez choisi Texte : les règles d'écriture humaine et de typographie s'appliquent selon vos cases cochées.")),
+        profileFeedbackProgrammation: @json(__("Vous avez choisi Programmation : j'ajoute les règles de mise en forme du code, je retire les règles de français du Québec.")),
+        profileFeedbackTraduction: @json(__('Vous avez choisi Traduction : je retire les règles de français du Québec du résultat.'))
     }
 };
 </script>
