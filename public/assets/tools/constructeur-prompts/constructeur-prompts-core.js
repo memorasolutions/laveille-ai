@@ -687,6 +687,43 @@ document.addEventListener('alpine:init', function() {
                 return i18nLabel.taskCardDeleted || 'Objectif supprimé';
             },
 
+            // Round 153 (2026-08-01, trouvé en preuve navigateur) : le générateur préfixait la
+            // tâche par le verbe d'action sans regarder si la personne avait elle-même commencé
+            // sa demande par ce verbe. Résultat visible dans le prompt : « Ta tâche : Rédige
+            // rédige un courriel ». On compare MOT À MOT et non par index de caractères : la
+            // normalisation NFD change le nombre d'unités de code, donc toute découpe
+            // positionnelle serait fausse sur un texte saisi en forme décomposée.
+            _taskWithoutLeadingVerb: function (verb, task) {
+                if (!verb || !task) return task;
+
+                var normalize = function (s) {
+                    return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+                };
+                var stripTrailingPunct = function (word) {
+                    return String(word).replace(/[,:.!?;]+$/, '');
+                };
+
+                var verbNorm = normalize(stripTrailingPunct(String(verb).trim()));
+                var trimmed = String(task).replace(/^\s+/, '');
+                var words = trimmed.split(/\s+/);
+                var firstWordNorm = normalize(stripTrailingPunct(words[0]));
+
+                // words.length > 1 : si la demande se réduit AU verbe seul, on la laisse
+                // intacte, sinon la tâche perdrait son objet et le prompt serait vide de sens.
+                if (verbNorm !== '' && firstWordNorm === verbNorm && words.length > 1) {
+                    // On découpe la chaîne D'ORIGINE (jamais la version normalisée) après le
+                    // premier mot, et on ne retire ensuite que les espaces et tabulations. Un
+                    // simple words.slice(1).join(' ') écraserait les retours à la ligne d'une
+                    // demande multiligne et détruirait sa mise en forme.
+                    // Le séparateur immédiat après le verbe est absorbé, y compris s'il
+                    // s'agit d'UN seul retour à la ligne ; les sauts de ligne suivants, eux,
+                    // font partie de la mise en forme voulue et sont conservés tels quels.
+                    return trimmed.slice(words[0].length).replace(/^[ \t]*\n?[ \t]*/, '');
+                }
+
+                return task;
+            },
+
             // Aperçu en langage courant (Phase 2) : composé à partir des MÊMES données que le
             // générateur de prompt ci-dessous, sans dupliquer ni modifier sa logique d'assemblage.
             get promptSummary() {
@@ -698,7 +735,7 @@ document.addEventListener('alpine:init', function() {
                     parts.push((i18nSummary.summaryRole || 'L\'IA va se comporter comme ') + defaultArticle + this.personaText.charAt(0).toLowerCase() + this.personaText.slice(1) + '.');
                 }
                 if (actionVerb && this.taskObject) {
-                    parts.push((i18nSummary.summaryAction || 'Elle va ') + actionVerb.toLowerCase() + ' ' + this.taskObject + '.');
+                    parts.push((i18nSummary.summaryAction || 'Elle va ') + actionVerb.toLowerCase() + ' ' + this._taskWithoutLeadingVerb(actionVerb, this.taskObject) + '.');
                 } else if (this.taskObject) {
                     parts.push((i18nSummary.summarySubject || 'Sujet : ') + this.taskObject + '.');
                 }
@@ -749,7 +786,9 @@ document.addEventListener('alpine:init', function() {
                     tool('Ta tâche : ');
                     if (actionVerbIsUser) { user(actionVerb); } else { tool(actionVerb); }
                     tool(' ');
-                    user(this.taskObject);
+                    // Sans ce retrait, une demande commençant déjà par le verbe donnait
+                    // « Ta tâche : Rédige rédige un courriel » dans le prompt envoyé à l'IA.
+                    user(this._taskWithoutLeadingVerb(actionVerb, this.taskObject));
                     tool('.');
                 } else if (this.taskObject) {
                     startSection();
