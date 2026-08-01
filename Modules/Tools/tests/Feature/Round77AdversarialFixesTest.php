@@ -127,20 +127,20 @@ it('the JS file falls back to window.promptBuilderConfig for helps and technique
     expect($js)->toContain('i18n.diagnosticContraintes ||');
 });
 
-it('the step indicator is keyboard-accessible with proper size and ARIA (round 77)', function () {
+// Round 151 (2026-08-01, refonte écrans 1-2) : les 2 tests ci-dessous verrouillaient
+// l'accessibilité clavier de l'indicateur d'étapes numéroté (cercles "1"/"2"). Cet indicateur a
+// été RETIRÉ dans son ensemble - consigne explicite de la refonte : « aucune numérotation
+// d'étapes ». L'accessibilité clavier qu'ils protégeaient est sans objet (l'élément n'existe
+// plus). Les 4 autres tests de ce fichier (i18n newsletter-widget + helps/techniqueHints/
+// diagnostic) restent inchangés et continuent de protéger des invariants réels.
+
+it('no longer renders the numbered step indicator (round 151, replaces round 77 keyboard-access checks)', function () {
     $blade = file_get_contents(base_path('Modules/Tools/resources/views/public/tools/constructeur-prompts.blade.php'));
 
-    expect($blade)->toContain('class="ct-step-circle"');
-    expect($blade)->toContain('role="button"');
-    expect($blade)->toContain('tabindex="0"');
-    expect($blade)->toContain('@keydown.enter.prevent="goToStep(s)"');
-    expect($blade)->toContain('@keydown.space.prevent="goToStep(s)"');
-    expect($blade)->toContain(':aria-current="step === s ? \'step\' : false"');
-    expect($blade)->toContain('.ct-step-circle{cursor:pointer;margin:0 auto;width:44px;height:44px;');
-    expect($blade)->toContain('.ct-step-circle:focus-visible{outline:2px solid var(--c-primary);outline-offset:2px;}');
+    expect($blade)->not->toContain('class="ct-step-circle"');
 });
 
-it('renders the step indicator with keyboard accessibility attributes on the real page (round 77)', function () {
+it('renders the wizard without the step indicator on the real page (round 151)', function () {
     Tool::firstOrCreate(['slug' => 'constructeur-prompts'], [
         'name' => 'Constructeur de prompts',
         'description' => 'Test',
@@ -154,7 +154,5 @@ it('renders the step indicator with keyboard accessibility attributes on the rea
 
     $html = $this->actingAs($user)->get('/outils/constructeur-prompts')->assertOk()->getContent();
 
-    expect($html)->toContain('class="ct-step-circle"');
-    expect($html)->toContain('role="button"');
-    expect($html)->toContain('tabindex="0"');
+    expect($html)->not->toContain('class="ct-step-circle"');
 });

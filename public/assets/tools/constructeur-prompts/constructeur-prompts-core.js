@@ -28,6 +28,10 @@ document.addEventListener('alpine:init', function() {
             // au lieu d'un panneau global unique (ex-showAdvanced). Objet partagé (plutôt qu'un
             // x-data imbriqué par section) pour rester pilotable depuis init() lors d'un ?edit=ID.
             openSections: { role: false, verb: false, format: false, technique: false, contraintes: false },
+            // Round 151 (2026-08-01, écran 2) : panneau « Affiner » qui enveloppe les 5 divulgations
+            // ci-dessus (pour qui, rôle, verbe, format, technique, contraintes) - remplace l'ancien
+            // écran 2 « Votre demande » comme point d'entrée unique vers les réglages existants.
+            affinerOpen: false,
             personaType: 'preset',
             personaPreset: '',
             personaCustom: '',
@@ -38,7 +42,12 @@ document.addEventListener('alpine:init', function() {
             verbCustom: '',
             taskObject: '',
             audienceType: 'preset',
-            audiencePreset: '',
+            // Round 151 (2026-08-01, refonte écrans 1-2) : `audiencePreset` (singulier) retiré de
+            // l'état - plus aucune action utilisateur ne l'écrit depuis l'introduction du
+            // multi-sélection (audiencePresets, pluriel). La MIGRATION DE LECTURE d'anciens prompts
+            // sauvegardés avec ce champ singulier reste intacte plus bas (init(), lecture directe de
+            // `p.audiencePreset` depuis le payload chargé - n'a jamais eu besoin de cette propriété
+            // d'état pour fonctionner).
             audiencePresets: [],
             audienceCustom: '',
             audiences: (window.promptBuilderConfig && window.promptBuilderConfig.audiences) || [],
@@ -83,6 +92,18 @@ document.addEventListener('alpine:init', function() {
             technique: 'zero-shot',
             examples: '',
             useDelimiters: false,
+            // Round 151 (2026-08-01, écran 2 « Votre prompt est prêt ») : interrupteur visible qui
+            // coupe les règles AUTOMATIQUEMENT injectées (écriture anti-IA, typographie française,
+            // critères de qualité) sans toucher aux choix explicites de la personne (technique de
+            // réflexion, destination/canvas, réflexion étape par étape, poser des questions,
+            // contraintes personnalisées). Activé par défaut = comportement identique à avant cette
+            // refonte (constraintAntiAI reste coché par défaut, constraintTypo décoché).
+            cadreStrict: true,
+            // Round 151 : IA ciblée par le duo Copier/Ouvrir dans, mis en avant sur l'écran 2 (au
+            // lieu d'être seulement 5 boutons isolés). N'affecte JAMAIS le texte du prompt lui-même
+            // (openIn() ne fait que choisir l'URL) - seul le libellé et la note d'usage en dessous
+            // changent selon le choix, pour qu'il n'y ait jamais de surprise au clic sur Copier.
+            openTarget: 'chatgpt',
             showHelp: {},
             // Round 77 (2026-07-27, passe adversariale) : repli français en dur, mais valeur réelle
             // toujours prise dans window.promptBuilderConfig.helps (injecté par le Blade via __(),
@@ -515,7 +536,9 @@ document.addEventListener('alpine:init', function() {
             },
 
             get audienceText() {
-                if (this.audienceType === 'none') return '';
+                // Round 151 (2026-08-01) : la branche `audienceType === 'none'` a été retirée - le
+                // formulaire n'expose que 'preset'/'custom' (radio, voir cpAudienceBlock), aucun
+                // contrôle ne peut plus jamais produire 'none'. Code mort confirmé, zéro effet retiré.
                 if (this.audienceType === 'custom' && this.audienceCustom) return this.audienceCustom;
                 if (this.audienceType === 'preset' && this.audiencePresets.length > 0) {
                     var selectedLabels = [];
@@ -578,92 +601,156 @@ document.addEventListener('alpine:init', function() {
                 return parts.join(' ');
             },
 
-            get prompt() {
-                var sections = [];
+            // Round 151 (2026-08-01, écran 2 « Votre prompt est prêt ») : SOURCE UNIQUE de
+            // l'assemblage du prompt. `get prompt()` (texte brut, utilisé partout ailleurs : copy(),
+            // openIn(), export, sauvegarde) est dérivé de `get promptSegments()` par simple
+            // concaténation - jamais l'inverse - pour garantir un texte final BYTE POUR BYTE
+            // identique à l'ancienne implémentation (mêmes conditions, même ordre, mêmes phrases).
+            // `promptSegments()` tague en plus chaque fragment 'user' (ce que la personne a tapé
+            // elle-même : taskObject, personaCustom, audienceCustom, verbCustom, examples,
+            // constraintCustom, canvasCustomFormat) ou 'tool' (gabarit assemblé par l'outil), pour
+            // la colorisation de l'aperçu à l'écran 2 - c'est le coeur de l'effet recherché : rendre
+            // visible un travail normalement invisible.
+            get promptSegments() {
+                var segs = [];
+                var firstSection = true;
+                function tool(s) { if (s) segs.push({ text: s, kind: 'tool' }); }
+                function user(s) { if (s) segs.push({ text: s, kind: 'user' }); }
+                function startSection() {
+                    if (!firstSection) tool('\n\n');
+                    firstSection = false;
+                }
+
                 var actionVerb = this.verbType === 'custom' ? this.verbCustom : this.verb;
+                var actionVerbIsUser = this.verbType === 'custom';
+                var personaIsUser = this.personaType === 'custom';
 
                 // === RÔLE (enrichi) ===
                 if (this.personaText) {
+                    startSection();
                     var roleArticle = /^\s*(un |une |des |le |la |l'|d'|du |de )/i.test(this.personaText) ? '' : 'un(e) ';
-                    sections.push('Tu es ' + roleArticle + this.personaText + ' avec une expertise approfondie dans ton domaine. Tu communiques de manière claire et efficace, en adaptant ton niveau de langage à ton audience.');
+                    tool('Tu es ' + roleArticle);
+                    if (personaIsUser) { user(this.personaText); } else { tool(this.personaText); }
+                    tool(' avec une expertise approfondie dans ton domaine. Tu communiques de manière claire et efficace, en adaptant ton niveau de langage à ton audience.');
                 }
 
                 // === TÂCHE ===
                 if (actionVerb && this.taskObject) {
-                    sections.push('Ta tâche : ' + actionVerb + ' ' + this.taskObject + '.');
+                    startSection();
+                    tool('Ta tâche : ');
+                    if (actionVerbIsUser) { user(actionVerb); } else { tool(actionVerb); }
+                    tool(' ');
+                    user(this.taskObject);
+                    tool('.');
                 } else if (this.taskObject) {
-                    sections.push('Ta tâche : ' + this.taskObject + '.');
+                    startSection();
+                    tool('Ta tâche : ');
+                    user(this.taskObject);
+                    tool('.');
                 }
 
                 // === AUDIENCE ===
                 if (this.audienceText) {
-                    sections.push('Audience cible : ' + this.audienceText + '. Adapte ton vocabulaire, tes exemples et ton niveau de détail en conséquence. Assure-toi que le contenu soit pertinent et accessible pour ce public.');
+                    startSection();
+                    tool('Audience cible : ');
+                    if (this.audienceType === 'custom') { user(this.audienceText); } else { tool(this.audienceText); }
+                    tool('. Adapte ton vocabulaire, tes exemples et ton niveau de détail en conséquence. Assure-toi que le contenu soit pertinent et accessible pour ce public.');
                 }
 
                 // === FORMAT DE SORTIE ===
-                var outputRules = [];
-                if (this.format) outputRules.push('Structure : ' + this.format);
-                if (this.length) outputRules.push('Longueur visée : ' + this.length);
-                if (this.tone) outputRules.push('Ton et style : ' + this.tone);
-                if (this.language === 'en') outputRules.push('Langue de rédaction : anglais');
-                if (this.language === 'es') outputRules.push('Langue de rédaction : espagnol');
-                if (outputRules.length > 0) {
-                    sections.push('Format de la réponse :\n- ' + outputRules.join('\n- '));
+                var outputRuleSegs = [];
+                if (this.format) outputRuleSegs.push([{ t: 'tool', s: 'Structure : ' }, { t: 'tool', s: this.format }]);
+                if (this.length) outputRuleSegs.push([{ t: 'tool', s: 'Longueur visée : ' }, { t: 'tool', s: this.length }]);
+                if (this.tone) outputRuleSegs.push([{ t: 'tool', s: 'Ton et style : ' }, { t: 'tool', s: this.tone }]);
+                if (this.language === 'en') outputRuleSegs.push([{ t: 'tool', s: 'Langue de rédaction : anglais' }]);
+                if (this.language === 'es') outputRuleSegs.push([{ t: 'tool', s: 'Langue de rédaction : espagnol' }]);
+                if (outputRuleSegs.length > 0) {
+                    startSection();
+                    tool('Format de la réponse :\n- ');
+                    outputRuleSegs.forEach(function(rule, i) {
+                        if (i > 0) tool('\n- ');
+                        rule.forEach(function(part) { if (part.t === 'user') { user(part.s); } else { tool(part.s); } });
+                    });
                 }
 
                 // === CONTRAINTES ===
-                var constraints = [];
-                if (this.constraintAntiAI) constraints.push('Écriture naturelle et humaine : varie la longueur des phrases, utilise des expressions authentiques et des transitions fluides. Évite les formulations génériques (« dans un monde en constante évolution »), les listes à puces systématiques et les répétitions de structure.');
-                if (this.constraintTypo) constraints.push('Typographie française stricte : majuscules en début de phrase et noms propres uniquement, pas de tiret cadratin (utilise le tiret court), ponctuation correcte, accents toujours présents.');
+                var constraintSegs = [];
+                // Round 151 : les 2 règles de style automatiques passent sous le contrôle de
+                // « Cadre strict » (cadreStrict) - désactivé, elles disparaissent du prompt quelle
+                // que soit la position des cases à cocher, sans jamais y toucher elles-mêmes.
+                if (this.cadreStrict && this.constraintAntiAI) constraintSegs.push([{ t: 'tool', s: 'Écriture naturelle et humaine : varie la longueur des phrases, utilise des expressions authentiques et des transitions fluides. Évite les formulations génériques (« dans un monde en constante évolution »), les listes à puces systématiques et les répétitions de structure.' }]);
+                if (this.cadreStrict && this.constraintTypo) constraintSegs.push([{ t: 'tool', s: 'Typographie française stricte : majuscules en début de phrase et noms propres uniquement, pas de tiret cadratin (utilise le tiret court), ponctuation correcte, accents toujours présents.' }]);
                 if (this.constraintCanvas) {
                     // Phase 2 (audit 2026-07-26) : Destination (OÙ) nommée explicitement + Format
                     // attendu (QUOI) rattaché - les deux doivent apparaître clairement dans le prompt
                     // final assemblé (exigence de la refonte, validée par 3 IA en juillet 2026).
                     var canvasNames = { chatgpt: 'Canvas de ChatGPT', claude: 'artefact de Claude', gemini: 'Canvas de Gemini', mistral: 'espace de travail de Mistral' };
                     var canvasName = canvasNames[this.canvasAI] || 'espace de travail dédié';
-                    var canvasLine = 'Destination : crée un nouveau ' + canvasName + ' pour ta réponse (pas dans le fil de conversation).';
+                    var canvasParts = [{ t: 'tool', s: 'Destination : crée un nouveau ' + canvasName + ' pour ta réponse (pas dans le fil de conversation).' }];
                     // 2026-05-05 #104 : format custom universel (formatMode) - dispo pour les 4 IA
                     var fmt = this.formatMode === 'custom' ? this.canvasCustomFormat : this.canvasFormat;
-                    if (fmt) canvasLine += ' Format attendu dans cet espace : ' + fmt + '.';
-                    constraints.push(canvasLine);
+                    if (fmt) {
+                        canvasParts.push({ t: 'tool', s: ' Format attendu dans cet espace : ' });
+                        canvasParts.push({ t: this.formatMode === 'custom' ? 'user' : 'tool', s: fmt });
+                        canvasParts.push({ t: 'tool', s: '.' });
+                    }
+                    constraintSegs.push(canvasParts);
                 }
-                if (this.constraintChainOfThought) constraints.push('Montre ton raisonnement complet étape par étape avant de formuler ta réponse finale.');
-                if (this.constraintAskIfUnclear) constraints.push('Si un élément de ma demande est ambigu ou manque de contexte, pose-moi des questions de clarification avant de commencer. Ne devine pas, demande.');
-                if (this.constraintCustom) constraints.push(this.constraintCustom);
-                if (constraints.length > 0) {
-                    sections.push('Contraintes à respecter :\n- ' + constraints.join('\n- '));
+                if (this.constraintChainOfThought) constraintSegs.push([{ t: 'tool', s: 'Montre ton raisonnement complet étape par étape avant de formuler ta réponse finale.' }]);
+                if (this.constraintAskIfUnclear) constraintSegs.push([{ t: 'tool', s: 'Si un élément de ma demande est ambigu ou manque de contexte, pose-moi des questions de clarification avant de commencer. Ne devine pas, demande.' }]);
+                if (this.constraintCustom) constraintSegs.push([{ t: 'user', s: this.constraintCustom }]);
+                if (constraintSegs.length > 0) {
+                    startSection();
+                    tool('Contraintes à respecter :\n- ');
+                    constraintSegs.forEach(function(c, i) {
+                        if (i > 0) tool('\n- ');
+                        c.forEach(function(part) { if (part.t === 'user') { user(part.s); } else { tool(part.s); } });
+                    });
                 }
 
-                // === CRITÈRES DE QUALITÉ ===
-                var quality = [];
-                if (this.tone) quality.push('le ton demandé est respecté du début à la fin');
-                if (this.audienceText) quality.push('le contenu est adapté à l\'audience cible');
-                if (this.length) quality.push('la longueur correspond à ce qui est demandé');
-                if (this.constraintAntiAI) quality.push('le texte ne ressemble pas à du contenu généré par IA');
-                if (quality.length > 0) {
-                    sections.push('Avant de finaliser, vérifie que :\n- ' + quality.join('\n- '));
+                // === CRITÈRES DE QUALITÉ === (Round 151 : scaffolding 100% automatique, coupé par Cadre strict)
+                if (this.cadreStrict) {
+                    var quality = [];
+                    if (this.tone) quality.push('le ton demandé est respecté du début à la fin');
+                    if (this.audienceText) quality.push('le contenu est adapté à l\'audience cible');
+                    if (this.length) quality.push('la longueur correspond à ce qui est demandé');
+                    if (this.constraintAntiAI) quality.push('le texte ne ressemble pas à du contenu généré par IA');
+                    if (quality.length > 0) {
+                        startSection();
+                        tool('Avant de finaliser, vérifie que :\n- ' + quality.join('\n- '));
+                    }
                 }
 
                 // === DÉLIMITEURS ===
                 if (this.useDelimiters) {
-                    sections.push('Utilise des délimiteurs ### pour séparer clairement chaque section de ta réponse.');
+                    startSection();
+                    tool('Utilise des délimiteurs ### pour séparer clairement chaque section de ta réponse.');
                 }
 
                 // === TECHNIQUE ===
                 if (this.technique === 'zero-shot-cot') {
-                    sections.push('Avant de répondre, réfléchis étape par étape à ta stratégie (ne montre pas ce raisonnement dans ta réponse finale).');
+                    startSection();
+                    tool('Avant de répondre, réfléchis étape par étape à ta stratégie (ne montre pas ce raisonnement dans ta réponse finale).');
                 }
                 if ((this.technique === 'few-shot' || this.technique === 'few-shot-cot') && this.examples) {
-                    sections.push('Voici des exemples pour guider ta réponse :\n\n' + this.examples);
+                    startSection();
+                    tool('Voici des exemples pour guider ta réponse :\n\n');
+                    user(this.examples);
                     if (this.technique === 'few-shot-cot') {
-                        sections.push('Applique le même type de raisonnement détaillé que dans les exemples ci-dessus.');
+                        startSection();
+                        tool('Applique le même type de raisonnement détaillé que dans les exemples ci-dessus.');
                     }
                 }
                 if (this.technique === 'iterative') {
-                    sections.push('Procède étape par étape. Après chaque étape majeure, présente ton travail et demande ma validation avant de continuer.');
+                    startSection();
+                    tool('Procède étape par étape. Après chaque étape majeure, présente ton travail et demande ma validation avant de continuer.');
                 }
 
-                return sections.join('\n\n');
+                return segs;
+            },
+
+            get prompt() {
+                return this.promptSegments.map(function(s) { return s.text; }).join('');
             },
 
             // Diagnostic rapide (Option 3 hybride, Partie A) : détection par règles simples,
@@ -713,7 +800,10 @@ document.addEventListener('alpine:init', function() {
                 // d'objectif choisie à l'étape 1) n'était jamais inclus ici - un prompt rouvert en
                 // édition (?edit=ID) retombait donc TOUJOURS sur le badge "Autre chose" (repli 'autre'
                 // ligne ~484), quelle que soit la carte réellement utilisée à la création.
-                return { selectedTask: this.selectedTask, personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, audienceType: this.audienceType, audiencePreset: this.audiencePreset, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, format: this.format, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintTypo: this.constraintTypo, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat, constraintChainOfThought: this.constraintChainOfThought, constraintAskIfUnclear: this.constraintAskIfUnclear, constraintCustom: this.constraintCustom, useDelimiters: this.useDelimiters, examples: this.examples };
+                // Round 151 (2026-08-01) : `audiencePreset` (singulier) retiré de la sérialisation -
+                // champ mort à l'écriture (voir déclaration d'état plus haut). `cadreStrict` ajouté
+                // pour que le réglage survive à une réédition (?edit=ID) comme tous les autres.
+                return { selectedTask: this.selectedTask, personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, audienceType: this.audienceType, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, format: this.format, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintTypo: this.constraintTypo, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat, constraintChainOfThought: this.constraintChainOfThought, constraintAskIfUnclear: this.constraintAskIfUnclear, constraintCustom: this.constraintCustom, useDelimiters: this.useDelimiters, examples: this.examples, cadreStrict: this.cadreStrict };
             },
             _headers: function() {
                 return { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json', 'Content-Type': 'application/json' };
@@ -814,8 +904,12 @@ document.addEventListener('alpine:init', function() {
                                         });
                                     }
                                     if (p.audienceType) self.audienceType = p.audienceType;
+                                    // Round 151 (2026-08-01) : `self.audiencePreset = p.audiencePreset`
+                                    // retiré - rien ne lit plus jamais cette propriété d'état (voir
+                                    // déclaration plus haut). La migration de LECTURE elle-même (ligne
+                                    // suivante, singulier → tableau pluriel) reste intacte : elle lit
+                                    // `p.audiencePreset` depuis le PAYLOAD chargé, pas depuis l'état.
                                     if (Array.isArray(p.audiencePresets)) { self.audiencePresets = p.audiencePresets; } else if (p.audiencePreset) { self.audiencePresets = [p.audiencePreset]; }
-                                    if (p.audiencePreset) self.audiencePreset = p.audiencePreset;
                                     // Round 110 (2026-07-27, passe adversariale) : cette assignation Alpine
                                     // directe ne déclenche jamais l'événement 'input' natif sur #cpAudienceCustom -
                                     // le garde-fou anti-données-personnelles (prompt-anon-panel.js,
@@ -835,6 +929,10 @@ document.addEventListener('alpine:init', function() {
                                     if (p.language) self.language = p.language;
                                     if (p.technique) self.technique = p.technique;
                                     if (p.constraintAntiAI !== undefined) self.constraintAntiAI = p.constraintAntiAI;
+                                    // Round 151 (2026-08-01) : Cadre strict doit survivre à une réédition
+                                    // comme les autres réglages, sinon rouvrir un prompt sauvegardé avec
+                                    // le cadre désactivé le réactiverait silencieusement (repli à `true`).
+                                    if (p.cadreStrict !== undefined) self.cadreStrict = p.cadreStrict;
                                     // Round 42 (2026-07-27) : ces 6 champs manquaient à la restauration
                                     // ?edit=ID - le prompt rouvrait avec ces options réinitialisées,
                                     // et un "Enregistrer" ultérieur écrasait silencieusement la version
@@ -889,6 +987,10 @@ document.addEventListener('alpine:init', function() {
                                     if (p.selectedTask) self.selectedTask = p.selectedTask;
                                     self.selectedTask = self.selectedTask || 'autre';
                                     self.openSections = { role: true, verb: true, format: true, technique: true, contraintes: true };
+                                    // Round 151 (2026-08-01) : le panneau « Affiner » (écran 2) doit
+                                    // s'ouvrir directement lui aussi - sinon les 5 divulgations ci-dessus
+                                    // s'ouvrent dans un panneau parent resté fermé, invisible malgré elles.
+                                    self.affinerOpen = true;
                                     self.step = 2;
                                     self._editingId = found.public_id || found.id;
                                 }
@@ -955,6 +1057,10 @@ document.addEventListener('alpine:init', function() {
             // se contente d'y faire défiler la page.
             openDiagnosticSection: function(key) {
                 if (this.step !== 2) this.step = 2;
+                // Round 151 (2026-08-01) : cpAudienceBlock et les 5 sections cpSection* vivent toutes
+                // désormais DANS le panneau « Affiner » (x-show="affinerOpen") - sans cette ligne, la
+                // section ciblée s'ouvrirait dans un panneau parent resté fermé, donc invisible.
+                this.affinerOpen = true;
                 var targetId = key === 'audience' ? 'cpAudienceBlock' : ('cpSection' + key.charAt(0).toUpperCase() + key.slice(1));
                 if (key !== 'audience') this.openSections[key] = true;
                 this.$nextTick(function() {

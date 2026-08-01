@@ -39,16 +39,23 @@ it('does not contain the unreachable step-2 validation message spans (round 85)'
     expect($blade)->toContain('showValidation && step === 1 && !selectedTask');
 });
 
-it('does not use the low-contrast #6c757d/#e9ecef or #adb5bd colors on the step indicator anymore (round 85)', function () {
+// Round 151 (2026-08-01, refonte écrans 1-2, PLAN-FINAL-constructeur-2026-07-31.md) : les 2 tests
+// ci-dessous verrouillaient les couleurs AAA de l'indicateur d'étapes numéroté (cercles "1"/"2").
+// Cet indicateur a été RETIRÉ dans son ensemble - consigne explicite de la refonte : « aucune
+// numérotation d'étapes (« 1 sur 3 » serait mensonger puisque la suite est facultative) ». Le
+// contraste qu'ils protégeaient est donc sans objet (l'élément n'existe plus, donc ne peut plus
+// échouer AAA). Retrait assumé, pas un affaiblissement furtif : le 1er test de ce fichier (spans
+// de validation inatteignables) reste inchangé et continue de protéger un invariant réel.
+
+it('no longer renders a numbered step indicator (round 151, replaces round 85 contrast checks)', function () {
     $blade = file_get_contents(base_path('Modules/Tools/resources/views/public/tools/constructeur-prompts.blade.php'));
 
+    expect($blade)->not->toContain('class="ct-step-circle"');
     expect($blade)->not->toContain('#e9ecef; color: #6c757d;');
     expect($blade)->not->toContain('color: #adb5bd;');
-    expect($blade)->toContain('#e9ecef; color: var(--c-dark, #1A1D23);');
-    expect($blade)->toContain('color: var(--c-text-muted, #52586A);');
 });
 
-it('renders the step indicator with AAA-compliant colors on the real page (round 85)', function () {
+it('renders the wizard without a numbered step indicator on the real page (round 151)', function () {
     Tool::firstOrCreate(['slug' => 'constructeur-prompts'], [
         'name' => 'Constructeur de prompts',
         'description' => 'Test',
@@ -62,6 +69,6 @@ it('renders the step indicator with AAA-compliant colors on the real page (round
 
     $html = $this->actingAs($user)->get('/outils/constructeur-prompts')->assertOk()->getContent();
 
-    expect($html)->toContain('var(--c-dark, #1A1D23)');
+    expect($html)->not->toContain('class="ct-step-circle"');
     expect($html)->not->toContain('#e9ecef; color: #6c757d;');
 });

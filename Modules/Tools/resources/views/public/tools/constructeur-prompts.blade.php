@@ -150,40 +150,99 @@
                         .ct-add-card-btn:hover:not(:disabled){border-color:var(--c-primary);color:var(--c-primary);}
                         .ct-add-card-btn:disabled{opacity:0.5;cursor:not-allowed;}
                         .ct-add-card-btn:focus-visible{outline:2px solid var(--c-primary);outline-offset:2px;}
+                        {{-- Round 151 (2026-08-01, écran 2 « Votre prompt est prêt ») : colorisation de
+                             l'aperçu. Réutilise 2 paires de couleurs DÉJÀ établies (AAA) ailleurs dans ce
+                             même fichier plutôt que d'en inventer de nouvelles : #5b4a1f sur #FEF3C7 (bandeau
+                             d'avertissement round 118, ligne ~302 de ce fichier) pour « votre texte » (plus
+                             visible = ce qui vient de la personne) ; var(--c-dark) sur var(--c-primary-light)
+                             (badge « Objectif choisi », déjà utilisé partout dans ce fichier) pour ce que
+                             l'outil a ajouté (plus discret = du gabarit, pas le propos de la personne). --}}
+                        .ct-seg-user{background:#FEF3C7;color:#5b4a1f;border-radius:4px;padding:0 2px;font-weight:600;}
+                        .ct-seg-tool{background:var(--c-primary-light);color:var(--c-dark);border-radius:4px;}
                         </style>
 
-                        {{-- Indicateur d'étapes (2 étapes : objectif d'abord, puis la demande) --}}
-                        {{-- Round 77 (2026-07-27, passe adversariale) : cercles cliquables à la souris
-                             mais inatteignables au clavier (échec WCAG 2.1.1) - ajout role/tabindex/
-                             gestionnaires clavier/aria-current/aria-label + cible 44px (cohérent avec
-                             la règle WCAG 2.2 AAA SC 2.5.5 déjà appliquée ailleurs dans ce fichier). --}}
-                        <style>
-                        .ct-step-circle{cursor:pointer;margin:0 auto;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;transition:all 0.2s;}
-                        .ct-step-circle:focus-visible{outline:2px solid var(--c-primary);outline-offset:2px;}
-                        </style>
-                        <div class="d-flex justify-content-between mb-4" style="position: relative;">
-                            <template x-for="s in [1,2]" :key="s">
-                                <div class="text-center" style="flex: 1; position: relative; z-index: 1;">
-                                    {{-- Round 85 (2026-07-27, passe adversariale) : #6c757d/#e9ecef (3,95:1)
-                                         et #adb5bd/blanc (2,07:1) échouaient même le seuil AA (4,5:1),
-                                         a fortiori l'AAA 7:1 de la charte. Remplacés par les tokens de
-                                         charte déjà utilisés dans ce fichier : var(--c-dark) sur
-                                         #e9ecef = 14,24:1 AAA ; var(--c-text-muted) sur blanc =
-                                         7,09:1 AAA (déjà confirmé round 82). --}}
-                                    <div class="ct-step-circle" @click="goToStep(s)" @keydown.enter.prevent="goToStep(s)" @keydown.space.prevent="goToStep(s)" role="button" tabindex="0" :aria-current="step === s ? 'step' : false" :aria-label="'{{ __('Étape') }} ' + s + ' : ' + (s === 1 ? '{{ __('Votre objectif') }}' : '{{ __('Votre demande') }}')" :style="step >= s ? 'background: var(--c-primary); color: #fff;' : 'background: #e9ecef; color: var(--c-dark, #1A1D23);'" x-text="s"></div>
-                                    <small class="d-block mt-1" style="font-size: 0.7rem;" :style="step >= s ? 'color: var(--c-primary); font-weight: 600;' : 'color: var(--c-text-muted, #52586A);'" x-text="s === 1 ? '{{ __('Votre objectif') }}' : '{{ __('Votre demande') }}'"></small>
-                                </div>
-                            </template>
-                        </div>
+                        {{-- Round 151 (2026-08-01, refonte écrans 1-2, PLAN-FINAL-constructeur-2026-07-31.md) :
+                             l'indicateur d'étapes numéroté (cercles « 1 »/« 2 » cliquables) a été retiré.
+                             Consigne explicite de la refonte : « aucune numérotation d'étapes (« 1 sur 3 »
+                             serait mensonger puisque la suite est facultative) ». L'écran 1 (ci-dessous)
+                             porte maintenant la demande ET les cartes de départ ensemble ; l'écran 2 (plus
+                             bas, x-show="step === 2") est le résultat « Votre prompt est prêt ». Les tests
+                             Round77/Round85 qui verrouillaient cet indicateur ont été mis à jour en
+                             conséquence (voir Round77AdversarialFixesTest.php et
+                             Round85AdversarialFixesTest.php). --}}
 
-                        {{-- Étape 1 : Objectif (entrée par l'intention, pas par la persona) --}}
+                        {{-- Écran 1 : la demande (un seul champ + cartes de départ en raccourci) --}}
                         <div x-show="step === 1" x-transition>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('Que voulez-vous faire ?') }}</h2>
+                                <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('Que voulez-vous demander à l\'IA ?') }}</h2>
                                 <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.persona = !showHelp.persona" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;">?</button>
                             </div>
-                            <p class="text-muted small mb-3">{{ __('Choisissez la carte la plus proche de votre besoin. On pré-remplit le reste pour vous, tout reste modifiable ensuite.') }}</p>
+                            <p class="text-muted small mb-3">{{ __('Décrivez votre demande dans vos mots. Les cartes ci-dessous sont des raccourcis facultatifs.') }}</p>
                             <div x-show="showHelp.persona" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;" x-text="helps.persona"></div>
+
+                            {{-- Round 151 (2026-08-01) : champ Tâche + masquage des renseignements
+                                 personnels, déménagés depuis l'ancien écran 2 - mission explicite : « le
+                                 masquage des renseignements personnels reste attaché au champ de l'écran 1 ».
+                                 Bloc déplacé TEL QUEL (mêmes id/attributs), rien de son comportement JS
+                                 (prompt-anon-panel.js résout ces éléments par getElementById, indifférent
+                                 à leur position dans le DOM) n'a changé. --}}
+                            {{-- Round 89 (2026-07-27, passe adversariale) : les 3 astérisques de champ
+                                 requis utilisaient #DC2626 (contraste ~4,55-4,83:1 selon le fond, AA
+                                 seulement) - portés à #991B1B comme au round 88 (~8,3:1 AAA). --}}
+                            {{-- Round 148 (2026-07-31, refonte « anonymisation en place ») : ce champ ne
+                                 doit plus JAMAIS être masqué, même pendant une anonymisation - décision
+                                 tranchée (panel Perplexity/Gemini 95/100, Codex 82/100). L'`id` reste utile
+                                 comme point d'ancrage stable pour le récapitulatif de masquage ci-dessous. --}}
+                            <div class="form-group mb-3" id="cpTaskField">
+                                <label class="form-label fw-medium">{{ __('Sur quoi porte votre demande ?') }} <span style="color: #991B1B;">*</span></label>
+                                <p class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;">🔒 {{ __('Il y a un vrai nom, un courriel, un numéro de téléphone ou une adresse dans votre texte ? Cachez-les d\'abord avec le bouton ci-dessous. Tout se passe directement sur votre ordinateur : rien n\'est envoyé ni enregistré nulle part.') }}</p>
+                                <textarea id="cpTaskObject" class="form-control" rows="3" x-model="taskObject" autocomplete="off" aria-required="true" placeholder="{{ __('Ex: un plan marketing pour le lancement d\'une application mobile au Québec') }}" aria-label="{{ __('Description de la demande') }}"></textarea>
+                                <small class="text-muted">{{ __('Décrivez précisément ce que vous voulez obtenir.') }}</small>
+                            </div>
+
+                            {{-- Round 148 (2026-07-31) : MASQUAGE EN PLACE. Ce bouton n'ouvre plus le
+                                 panneau d'anonymisation - il détecte et remplace directement le contenu du
+                                 champ ci-dessus (voir maskFieldInPlace() dans prompt-anon-panel.js).
+                                 aria-expanded/aria-controls retirés : ce bouton ne pilote plus #cpAnonPanel.
+                                 Round 149 (2026-07-31) : le même mécanisme (récapitulatif + retour) sert
+                                 maintenant aussi les 5 autres champs surveillés du wizard (Exemples, Rôle,
+                                 Audience, Verbe, Contraintes personnalisés) via le bandeau anti-PII.
+                                 Round 150 (2026-07-31, PERTE DE DONNÉES corrigée) : #cpAnonRecap/#cpAnonUndo
+                                 ci-dessous ne servent plus QUE le champ Tâche - un bloc PARTAGÉ entre les 6
+                                 champs faisait perdre l'accès au texte d'origine d'un champ dès qu'un AUTRE
+                                 champ était masqué ensuite (le bloc unique se déplaçait vers le dernier
+                                 champ masqué). Les 5 autres champs obtiennent désormais chacun leur PROPRE
+                                 bloc récapitulatif, bâti dynamiquement par la même fabrique JS
+                                 (getOrCreateRecapController() dans prompt-anon-panel.js) sur le même
+                                 gabarit visuel que celui-ci - DRY strict, toujours aucun bloc dupliqué dans
+                                 CE fichier Blade. --}}
+                            <div class="form-group mb-3">
+                                <button id="cpAnonToggle" type="button" class="ct-btn ct-btn-outline ct-btn-sm" style="min-height:44px;">🛡️ {{ __('Masquer mes informations personnelles') }}</button>
+                                <a href="/outils/anonymiseur" class="ct-btn ct-btn-ghost ct-btn-sm ms-1" style="min-height:44px;" title="{{ __('Ouvrir l\'anonymiseur complet (restauration des réponses IA)') }}">↗ {{ __('Anonymiseur complet') }}</a>
+
+                                {{-- Récapitulatif du masquage en place (champ Tâche uniquement, voir la
+                                     note round 150 ci-dessus) + annulation. aria-live="polite" +
+                                     role="status" : annoncé aux lecteurs d'écran sans interrompre leur
+                                     lecture en cours. Masqué par défaut, affiché par JS après un clic sur
+                                     le bouton ci-dessus. --}}
+                                <div id="cpAnonRecap" class="mt-2" style="display:none;" role="status" aria-live="polite">
+                                    <p id="cpAnonRecapText" class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;"></p>
+                                    <button type="button" id="cpAnonUndo" class="ct-btn ct-btn-outline ct-btn-sm" style="display:none; min-height:44px;">↺ {{ __('Revenir à mon texte de départ') }}</button>
+                                </div>
+
+                                <div id="cpAnonPanel" class="anon-wrap" style="display:none; border:1px solid var(--anon-line,#e2e6ea); border-radius:12px; padding:1rem; margin-top:.75rem; background:#f8fafb;" aria-hidden="true">
+                                    <p style="font-size:.85rem; color:#52586a; margin:0 0 .5rem;">🔒 {{ __('100 % local : aucune donnée ne quitte votre navigateur. Sélectionnez un passage, surlignez, anonymisez, puis insérez le texte masqué dans votre tâche.') }}</p>
+                                    {{-- Éditeur d'anonymisation RÉUTILISABLE (même UX que /outils/anonymiseur) --}}
+                                    <x-tools::anonymizer-editor>
+                                        <x-slot:previewActions>
+                                            <button type="button" id="btnCopyAnon" class="anon-btn secondary">📋 {{ __('Copier') }}</button>
+                                            <button type="button" id="cpAnonInsert" class="anon-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true" focusable="false" style="vertical-align:-2px;margin-right:5px;flex-shrink:0;"><path d="M12 5v14M5 12h14"/></svg><span id="cpAnonInsertLabel">{{ __('Insérer dans la tâche') }}</span></button>
+                                        </x-slot:previewActions>
+                                    </x-tools::anonymizer-editor>
+                                </div>
+                            </div>
+
+                            <h3 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 0.95rem; margin: 0 0 0.5rem;">{{ __('Ou partez d\'une carte') }}</h3>
                             {{-- Round 65 (2026-07-27) : annonce ARIA pendant le chargement d'un prompt en
                                  édition (?edit=ID) - sans ça, les cartes désactivées par editLoading ne
                                  s'expliquaient pas aux technologies d'assistance. --}}
@@ -328,71 +387,84 @@
                             </template>
                         </div>
 
-                        {{-- Étape 2 : Votre demande (essentiel visible, réglages avancés repliés) --}}
+                        {{-- Écran 2 : le prompt est prêt (Round 151, 2026-08-01). Le champ Tâche + le
+                             masquage des renseignements personnels (#cpTaskField, #cpAnonToggle...)
+                             ont déménagé sur l'écran 1 ci-dessus - mission explicite : « le masquage des
+                             renseignements personnels reste attaché au champ de l'écran 1 ». --}}
                         <div x-show="step === 2" x-transition>
-                            <div class="d-flex align-items-center gap-2 mb-2 flex-wrap" x-show="selectedTask">
+                            <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.25rem; margin: 0 0 0.75rem;">{{ __('Votre prompt est prêt.') }}</h2>
+                            <div class="d-flex align-items-center gap-2 mb-3 flex-wrap" x-show="selectedTask">
                                 <span class="small p-2 rounded" style="background: var(--c-primary-light); border-left: 3px solid var(--c-primary); color: var(--c-dark);">
                                     {{ __('Objectif choisi :') }} <strong x-text="selectedTaskLabel"></strong>
                                 </span>
                                 <button type="button" class="ct-btn ct-btn-ghost ct-btn-xs" @click="goToStep(1)">{{ __('Changer d\'objectif') }}</button>
                             </div>
 
-                            {{-- Round 89 (2026-07-27, passe adversariale) : les 3 astérisques de champ
-                                 requis utilisaient #DC2626 (contraste ~4,55-4,83:1 selon le fond, AA
-                                 seulement) - portés à #991B1B comme au round 88 (~8,3:1 AAA). --}}
-                            {{-- Round 148 (2026-07-31, refonte « anonymisation en place ») : ce champ ne
-                                 doit plus JAMAIS être masqué, même pendant une anonymisation - décision
-                                 tranchée (panel Perplexity/Gemini 95/100, Codex 82/100). L'`id` reste utile
-                                 comme point d'ancrage stable pour le récapitulatif de masquage ci-dessous. --}}
-                            <div class="form-group mb-3" id="cpTaskField">
-                                <label class="form-label fw-medium">{{ __('Sur quoi porte votre demande ?') }} <span style="color: #991B1B;">*</span></label>
-                                <p class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;">🔒 {{ __('Il y a un vrai nom, un courriel, un numéro de téléphone ou une adresse dans votre texte ? Cachez-les d\'abord avec le bouton ci-dessous. Tout se passe directement sur votre ordinateur : rien n\'est envoyé ni enregistré nulle part.') }}</p>
-                                <textarea id="cpTaskObject" class="form-control" rows="3" x-model="taskObject" autocomplete="off" aria-required="true" placeholder="{{ __('Ex: un plan marketing pour le lancement d\'une application mobile au Québec') }}" aria-label="{{ __('Description de la demande') }}"></textarea>
-                                <small class="text-muted">{{ __('Décrivez précisément ce que vous voulez obtenir.') }}</small>
+                            {{-- Aperçu colorisé (coeur de la refonte écran 2) : ce que la personne a écrit
+                                 (surbrillance ambre, .ct-seg-user) face à ce que l'outil a ajouté
+                                 automatiquement (fond teal pâle, .ct-seg-tool). Segments produits par
+                                 get promptSegments() (constructeur-prompts-core.js), SOURCE UNIQUE aussi
+                                 utilisée par get prompt() - donc toujours rigoureusement synchronisé avec
+                                 le texte réellement copié/exporté/ouvert dans une IA. --}}
+                            <p class="small mb-2" style="font-size: 0.8rem; color: var(--c-text-muted);">
+                                <span class="ct-seg-user">{{ __('votre texte') }}</span>
+                                {{ __('= ce que vous avez écrit.') }}
+                                <span class="ct-seg-tool">{{ __('ajout') }}</span>
+                                {{ __('= ce que l\'outil a ajouté automatiquement pour renforcer votre prompt.') }}
+                            </p>
+                            <div class="p-3 rounded mb-3" style="background:#fff; border: 1.5px solid var(--c-primary); border-radius: var(--r-base); white-space: pre-wrap; font-size: 0.92rem; line-height: 1.75; color: var(--c-dark);" aria-label="{{ __('Aperçu coloré du prompt') }}">
+                                <template x-if="!promptSegments.length">
+                                    <span class="text-muted">{{ __('Complétez votre demande (écran précédent) pour voir le prompt apparaître ici.') }}</span>
+                                </template>
+                                <template x-for="(seg, segIdx) in promptSegments" :key="segIdx">
+                                    <span :class="seg.kind === 'user' ? 'ct-seg-user' : 'ct-seg-tool'" x-text="seg.text"></span>
+                                </template>
                             </div>
 
-                            {{-- Round 148 (2026-07-31) : MASQUAGE EN PLACE. Ce bouton n'ouvre plus le
-                                 panneau d'anonymisation - il détecte et remplace directement le contenu du
-                                 champ ci-dessus (voir maskFieldInPlace() dans prompt-anon-panel.js).
-                                 aria-expanded/aria-controls retirés : ce bouton ne pilote plus #cpAnonPanel.
-                                 Round 149 (2026-07-31) : le même mécanisme (récapitulatif + retour) sert
-                                 maintenant aussi les 5 autres champs surveillés du wizard (Exemples, Rôle,
-                                 Audience, Verbe, Contraintes personnalisés) via le bandeau anti-PII.
-                                 Round 150 (2026-07-31, PERTE DE DONNÉES corrigée) : #cpAnonRecap/#cpAnonUndo
-                                 ci-dessous ne servent plus QUE le champ Tâche - un bloc PARTAGÉ entre les 6
-                                 champs faisait perdre l'accès au texte d'origine d'un champ dès qu'un AUTRE
-                                 champ était masqué ensuite (le bloc unique se déplaçait vers le dernier
-                                 champ masqué). Les 5 autres champs obtiennent désormais chacun leur PROPRE
-                                 bloc récapitulatif, bâti dynamiquement par la même fabrique JS
-                                 (getOrCreateRecapController() dans prompt-anon-panel.js) sur le même
-                                 gabarit visuel que celui-ci - DRY strict, toujours aucun bloc dupliqué dans
-                                 CE fichier Blade. --}}
-                            <div class="form-group mb-3">
-                                <button id="cpAnonToggle" type="button" class="ct-btn ct-btn-outline ct-btn-sm" style="min-height:44px;">🛡️ {{ __('Masquer mes informations personnelles') }}</button>
-                                <a href="/outils/anonymiseur" class="ct-btn ct-btn-ghost ct-btn-sm ms-1" style="min-height:44px;" title="{{ __('Ouvrir l\'anonymiseur complet (restauration des réponses IA)') }}">↗ {{ __('Anonymiseur complet') }}</a>
+                            {{-- Interrupteur « Cadre strict » : coupe les règles automatiquement injectées
+                                 (écriture anti-IA, typographie française, critères de qualité) sans toucher
+                                 aux choix explicites de la personne (voir cadreStrict, constructeur-prompts-core.js). --}}
+                            <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+                                <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
+                                    <input type="checkbox" x-model="cadreStrict" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
+                                    <span><strong>{{ __('Cadre strict') }}</strong> : <span x-text="cadreStrict ? '{{ __('activé') }}' : '{{ __('désactivé') }}'"></span></span>
+                                </label>
+                                <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.cadreStrict = !showHelp.cadreStrict" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;">?</button>
+                            </div>
+                            <div x-show="showHelp.cadreStrict" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;">{{ __('Activé (par défaut), l\'outil ajoute l\'écriture naturelle anti-IA, la typographie française et un rappel de qualité. Désactivé, votre prompt reste au plus près de ce que vous avez écrit.') }}</div>
 
-                                {{-- Récapitulatif du masquage en place (champ Tâche uniquement, voir la
-                                     note round 150 ci-dessus) + annulation. aria-live="polite" +
-                                     role="status" : annoncé aux lecteurs d'écran sans interrompre leur
-                                     lecture en cours. Masqué par défaut, affiché par JS après un clic sur
-                                     le bouton ci-dessus. --}}
-                                <div id="cpAnonRecap" class="mt-2" style="display:none;" role="status" aria-live="polite">
-                                    <p id="cpAnonRecapText" class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;"></p>
-                                    <button type="button" id="cpAnonUndo" class="ct-btn ct-btn-outline ct-btn-sm" style="display:none; min-height:44px;">↺ {{ __('Revenir à mon texte de départ') }}</button>
+                            {{-- Destination + Copier : le choix de l'IA visée est ICI, à côté du bouton
+                                 principal, et le libellé/l'aperçu ci-dessus se mettent à jour au clic -
+                                 jamais d'injection surprise au moment de copier. Les 5 boutons « Ouvrir
+                                 dans » plus bas restent disponibles pour un accès direct à une IA précise. --}}
+                            <div class="mb-2">
+                                <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Destination') }}</label>
+                                <div class="d-flex flex-wrap gap-2 mb-1" role="radiogroup" aria-label="{{ __('IA de destination') }}">
+                                    <template x-for="ai in [['chatgpt','ChatGPT'],['claude','Claude'],['perplexity','Perplexity'],['gemini','Gemini'],['mistral','Mistral']]" :key="ai[0]">
+                                        <label class="ct-pill" :class="{ 'ct-pill--on': openTarget === ai[0] }">
+                                            <input type="radio" name="openTarget" class="ct-pill__input" :value="ai[0]" x-model="openTarget">
+                                            <span x-text="ai[1]"></span>
+                                        </label>
+                                    </template>
                                 </div>
-
-                                <div id="cpAnonPanel" class="anon-wrap" style="display:none; border:1px solid var(--anon-line,#e2e6ea); border-radius:12px; padding:1rem; margin-top:.75rem; background:#f8fafb;" aria-hidden="true">
-                                    <p style="font-size:.85rem; color:#52586a; margin:0 0 .5rem;">🔒 {{ __('100 % local : aucune donnée ne quitte votre navigateur. Sélectionnez un passage, surlignez, anonymisez, puis insérez le texte masqué dans votre tâche.') }}</p>
-                                    {{-- Éditeur d'anonymisation RÉUTILISABLE (même UX que /outils/anonymiseur) --}}
-                                    <x-tools::anonymizer-editor>
-                                        <x-slot:previewActions>
-                                            <button type="button" id="btnCopyAnon" class="anon-btn secondary">📋 {{ __('Copier') }}</button>
-                                            <button type="button" id="cpAnonInsert" class="anon-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true" focusable="false" style="vertical-align:-2px;margin-right:5px;flex-shrink:0;"><path d="M12 5v14M5 12h14"/></svg><span id="cpAnonInsertLabel">{{ __('Insérer dans la tâche') }}</span></button>
-                                        </x-slot:previewActions>
-                                    </x-tools::anonymizer-editor>
-                                </div>
+                                {{-- Round 151 (2026-08-01) : guillemets DOUBLES autour des 2 chaînes JS ci-dessous,
+                                     pas simples - « s'ouvrira » contient une apostrophe qui, une fois déséchappée
+                                     par le navigateur depuis l'entité HTML produite par {{ }}, casserait une chaîne
+                                     JS entre guillemets simples (piège déjà documenté pour techniqueHints, voir
+                                     constructeur-prompts-core.js). --}}
+                                <p class="small mb-0" style="font-size: 0.75rem; color: var(--c-text-muted);" x-text="(openTarget === 'gemini' || openTarget === 'mistral') ? &quot;{{ __('Le prompt sera copié : à coller manuellement dans cette IA.') }}&quot; : &quot;{{ __('Le prompt s\'ouvrira pré-rempli dans cette IA.') }}&quot;"></p>
                             </div>
 
+                            {{-- « Affiner » (mission écran 2) : révèle les réglages déjà existants (pour
+                                 qui, rôle, verbe, format, technique, contraintes) - mène à l'écran 3 à
+                                 venir, pour l'instant ce bouton se contente de les rendre visibles. Ne pas
+                                 confondre avec « ✨ Améliorer avec mon IA » plus bas (fonction BYOA
+                                 distincte et déjà existante, conservée telle quelle). --}}
+                            <button type="button" class="ct-advanced-toggle mb-3" @click="affinerOpen = !affinerOpen" :aria-expanded="affinerOpen.toString()" aria-controls="cpAffinerPanel">
+                                <span><span x-text="affinerOpen ? '{{ __('Masquer') }}' : '+'"></span> {{ __('Affiner (qui, rôle, verbe, format, technique, contraintes)') }}</span>
+                                <span class="ct-chevron" aria-hidden="true">▾</span>
+                            </button>
+                            <div id="cpAffinerPanel" x-show="affinerOpen" x-transition x-cloak>
                             <div class="row mb-3" id="cpAudienceBlock">
                                 {{-- Round 60 (2026-07-27) : le toggle preset/custom avait disparu lors de la
                                      refonte v1.132.0 « objectif d'abord » - personaType et verbType ont
@@ -677,6 +749,8 @@
                                     </div>
                                 </div>
                             </div>
+                            </div>
+                            {{-- /#cpAffinerPanel --}}
                         </div>
 
                         {{-- Navigation --}}
@@ -693,8 +767,10 @@
                         <div class="d-flex justify-content-between mb-4">
                             <button class="ct-btn ct-btn-outline" @click="prevStep()" x-show="step > 1" style="min-height:44px;">{{ __('Précédent') }}</button>
                             <div x-show="step === 1"></div>
+                            {{-- Round 151 (2026-08-01) : libellé « Créer mon prompt » (mission écran 1 -
+                                 UN SEUL bouton, sans jargon de wizard). Comportement inchangé : nextStep(). --}}
                             <button class="ct-btn ct-btn-primary" @click="nextStep()" x-show="step < 2" style="min-height:44px;">
-{{ __('Suivant') }}</button>
+{{ __('Créer mon prompt') }}</button>
                         </div>
 
                         {{-- Prévisualisation en langage courant (Phase 2 : toujours avant la vue technique) --}}
@@ -743,7 +819,7 @@
                              « polite » et non « assertive » : elle apparaît et disparaît au fil de la frappe,
                              une annonce assertive interromprait le lecteur d'écran à chaque bascule. --}}
                         <div x-show="!isValid" id="cpValidityHint" role="status" aria-live="polite" class="alert alert-warning small p-2 mb-2" style="font-size: 0.8rem;">
-                            {{ __('Choisissez un objectif (étape 1) et décrivez votre demande (étape 2) pour générer votre prompt.') }}
+                            {{ __('Choisissez une carte de démarrage (ou complétez le rôle et le verbe dans « Affiner ») pour générer votre prompt.') }}
                         </div>
                         <div class="d-flex gap-2 mb-4 flex-wrap">
                             <button class="ct-btn ct-btn-accent flex-fill" @click="copy()" :disabled="!isValid" aria-describedby="cpValidityHint" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'"
@@ -829,12 +905,12 @@
                 <button type="button" onclick="jQuery('#promptHelpModal').modal('hide')" style="background: none; border: none; color: #fff !important; opacity: 1; font-size: 1.5rem; font-weight: 700; cursor: pointer; float: right; min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center;">&times;</button>
             </div>
             <div class="modal-body" style="padding: 2rem;">
-                <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem;">{{ __('La méthode en 2 étapes') }}</h4>
+                <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem;">{{ __('Comment ça marche') }}</h4>
                 <ul>
-                    <li><strong>{{ __('Votre objectif') }}</strong> : {{ __('choisissez la carte qui correspond à ce que vous voulez faire (rédiger, résumer, apprendre...)') }}</li>
-                    <li><strong>{{ __('Votre demande') }}</strong> : {{ __('précisez le sujet, à qui ça s\'adresse et le ton ; chaque réglage avancé (rôle de l\'IA, verbe, format, technique, contraintes) reste replié par défaut, à un clic via son propre bouton « + Réglages avancés »') }}</li>
+                    <li><strong>{{ __('Votre objectif') }}</strong> : {{ __('écrivez votre demande dans vos mots, ou partez d\'une carte (rédiger, résumer, apprendre...) qui pré-remplit le reste pour vous') }}</li>
+                    <li><strong>{{ __('Votre demande') }}</strong> : {{ __('votre prompt s\'affiche aussitôt, colorisé pour montrer ce que vous avez écrit et ce que l\'outil a ajouté ; le bouton « Affiner » révèle au besoin le rôle de l\'IA, le verbe, le format, la technique et les contraintes') }}</li>
                 </ul>
-                <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">{{ __('Les contraintes utiles (réglages avancés)') }}</h4>
+                <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">{{ __('Les contraintes utiles (dans « Affiner »)') }}</h4>
                 <ul>
                     <li><strong>{{ __('Écriture naturelle') }}</strong> : {{ __('évite le style « robotique » typique de l\'IA') }}</li>
                     <li><strong>{{ __('Destination') }}</strong> : {{ __('choisissez si la réponse doit s\'afficher dans la conversation normale ou dans un espace de travail dédié (Canvas ChatGPT, Artefact Claude, Canvas Gemini, Mistral) ; le « Format attendu » qui suit précise alors la structure du contenu généré dans cet espace') }}</li>
