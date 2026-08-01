@@ -687,6 +687,21 @@ select:focus {
 .wpo-site-header .header-right .header-right-menu-wrapper .header-right-menu-wrap .project-widget .post h4 a:hover { color: var(--c-primary); }
 .wpo-site-header #navbar > ul li a:focus { color: var(--c-primary); }
 
+/* Bouton hamburger mobile (.wpo-site-header .mobail-menu button) — fond bleu-violet #3756f7 du thème
+   (public/themes/bloggar/sass/style.css ligne 2273) remplacé par le teal de la charte.
+   Contraste barres blanches (#fff) sur #064E5A = 9.35:1 (AAA). */
+.wpo-site-header .mobail-menu button { background-color: var(--c-primary) !important; }
+
+/* Logo mobile qui chevauchait la loupe de recherche — la colonne .col-6 du logo ne fait que
+   ~136px de contenu en mobile, mais l'image avait un style inline max-width:200px (pensé pour le
+   desktop) qui débordait de ~64px par-dessus le bouton recherche. Le thème avait DÉJÀ une règle
+   d'override à cette même brèche (sass/style.css ligne ~2430, max-width:170px) mais un style
+   inline gagne toujours sur une règle externe sans !important : elle ne s'appliquait jamais.
+   On répare ici avec !important, borné au même point de rupture que le thème (991px). */
+@media (max-width: 991px) {
+    .wpo-site-header .navbar-header .navbar-brand img { max-width: calc(100% - 10px) !important; }
+}
+
 /* Panneau lateral droit — contraste WCAG AA (liens blancs sur fond #292932) */
 .header-right-menu-wrap { color: #FFFFFF !important; }
 .header-right-menu-wrap a,

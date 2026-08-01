@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.137.1] - 2026-08-01
+
+### Fixed - En-tete mobile (logo + hamburger)
+
+- Loupe de recherche qui chevauchait le logo en mobile (375px) : la colonne du logo (~136px de
+  contenu) etait plus etroite que le style inline `max-width:200px` de l'image, qui debordait de
+  ~64px par-dessus le bouton de recherche. Chevauchement mesure a 0px apres correctif (contre
+  44px avant), desktop 1440px inchange au pixel pres (200px).
+- Bouton hamburger mobile avec un fond bleu-violet (#3756f7, defaut du theme) hors charte,
+  remplace par le teal de la charte (var(--c-primary), #064E5A). Contraste des barres blanches
+  mesure a 9.35:1 (WCAG AAA).
+
 ## [1.137.0] - 2026-08-01
 
 ### Confidentialite - anonymiseur (outil public deja en ligne)

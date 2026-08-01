@@ -17,6 +17,23 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.137.1 · 2026-08-01 · fix(fronttheme) en-tête mobile : loupe de recherche qui chevauchait le
+ *     logo + bouton hamburger hors charte. (1) La colonne Bootstrap du logo (.col-6) ne fait que
+ *     ~136px de contenu utile en mobile (375px), mais l'image du logo portait un style inline
+ *     max-width:200px pensé pour le desktop (Modules/FrontTheme/resources/views/partials/
+ *     header.blade.php) qui débordait de ~64px par-dessus le bouton de recherche
+ *     (.search-toggle-btn). Le thème avait déjà une règle d'override à cette même brèche
+ *     (public/themes/bloggar/sass/style.css ~ligne 2430, max-width:170px) mais un style inline
+ *     gagne toujours sur une règle externe sans !important : elle ne s'appliquait jamais. Réparé
+ *     par une règle mobile !important dans public/css/charte.css (même point de rupture 991px que
+ *     le thème), chevauchement mesuré à 0px après correctif (contre 44px avant), desktop 1440px
+ *     inchangé au pixel près (200px). (2) Le bouton hamburger (.wpo-site-header .mobail-menu
+ *     button) affichait le bleu-violet par défaut du thème #3756f7 (même fichier, ligne 2273),
+ *     jamais surchargé malgré une section « OVERRIDES COMPLETS #3756f7 » déjà dédiée à ce genre de
+ *     fuite dans charte.css — cette brèche précise n'y figurait simplement pas. Fond remplacé par
+ *     var(--c-primary) (teal #064E5A), contraste barres blanches mesuré à 9.35:1 (WCAG AAA,
+ *     mcp__wcag-mcp__wcag_check_contrast). Tests Modules/FrontTheme + Modules/Core 181/181 verts,
+ *     vérification visuelle Playwright mobile (375×812) et desktop (1440×900) avant/après.
  *   1.133.1 · 2026-07-30 · fix(outils/anonymiseur) l'éditeur d'anonymisation partagé
  *     (public/assets/tools/anonymiseur/anonymizer-ui.js), utilisé par /outils/anonymiseur qui est
  *     PUBLIC, corrigeait mal deux gestes qui promettaient plus qu'ils ne faisaient.
@@ -3135,7 +3152,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 137;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,
