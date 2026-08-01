@@ -2,6 +2,62 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.137.0] - 2026-08-01
+
+### Confidentialite - anonymiseur (outil public deja en ligne)
+
+Sept classes de fuites fermees, chacune prouvee par execution sur 300 passages avant et apres.
+Le tirage etant aleatoire, une seule execution ne prouve rien : tous les chiffres ci-dessous
+sont des taux mesures.
+
+| Cas | Avant | Apres |
+|---|---|---|
+| Nom de famille apres un verbe (« Appelle Marc Tremblay ») | fuite | 0/300 |
+| « 1234 rue des Erables » (article de voie) | fuite | 0/300 |
+| « Patrick O'Neil » (apostrophe puis majuscule) | non detecte | 0/300 |
+| « JEAN TREMBLAY » (tout en majuscules) | non detecte | 0/300 |
+| « Tremblay, Marc » (inversion) | non detecte | 0/300 |
+| « 300, 12e Avenue » (adresse ordinale quebecoise) | 300/300 | 0/300 |
+| « Patrick d'Astous » (elision minuscule) | 300/300 | 0/300 |
+| « Sophie MacDonald » (majuscule interne) | 300/300 | 0/300 |
+| « rang Saint-Joseph » (collision partielle de voie) | 27/300 | 0/300 |
+| Substitut identique a la vraie valeur | 20/300 | 0/300 |
+| Prenom feminin remplace par un prenom masculin | 152/300 | 0/300 |
+
+Le genre merite d'etre nomme : « Marie Tremblay » devenait un prenom masculin une fois sur deux.
+L'IA accordait alors au masculin pour une femme, et la reponse restait inutilisable meme apres
+restauration des vraies donnees. Le genre est desormais lu dans les catalogues deja presents et
+le substitut vient de la meme liste.
+
+Les fausses valeurs ne peuvent plus designer quelqu'un de reel : domaines reserves RFC 2606 au
+lieu de gmail.com et videotron.ca, echangeur telephonique force a 555, la plage nord-americaine
+reservee a la fiction.
+
+### Perte de donnees - constructeur de prompts
+
+Avec deux champs masques, le bouton de retour ne restaurait que le dernier. Le premier restait
+masque sans aucun moyen d'y revenir : le texte d'origine survivait en memoire mais devenait
+inaccessible. Chaque champ dispose maintenant de son propre controleur de retour, construit par
+une fabrique unique - aucun bloc duplique dans le gabarit.
+
+Le champ de saisie ne disparait plus quand on masque : le remplacement se fait en place, avec un
+recapitulatif et un retour possible.
+
+### Tests
+
+Un filet de securite manquait : aucun test ne protegeait les classes de fuites fermees. Deux
+nouveaux bancs d'essai couvrent desormais les classes historiques en non-regression, les defauts
+corriges, l'anti-collision et la coherence des substituts. Chaque correctif a ete casse
+volontairement un par un pour verifier que les tests echouent bien.
+
+Tests JS 411/411 sur 36 fichiers. Pest Modules/Tools 382 passed (1633 assertions).
+
+### Connu, signale plutot que masque
+
+Autoriser la majuscule interne pour capter « MacDonald » fait aussi masquer « MacBook Pro » comme
+un nom de personne. Arbitrage assume : sur-masquer legerement plutot que laisser fuir, la
+sous-detection etant invisible donc plus dangereuse.
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
