@@ -149,6 +149,35 @@ it('calcule la progression des refus entre deux passages', function () {
     $second = OpcacheCheck::new()->run();
 
     expect($first->meta['refusals_delta'])->toBe(0)
-        ->and($second->meta['refusals_delta'])->toBe(201)
-        ->and($second->status->equals(Status::warning()))->toBeTrue();
+        ->and($second->meta['refusals_delta'])->toBe(201);
+});
+
+it('ignore une progression des refus quand le cache n est PAS sous pression', function () {
+    // Un déploiement invalide puis recompile des centaines de fichiers : les ratés
+    // grimpent sans qu'aucun script ne soit refusé. Constaté en production le
+    // 2026-08-01, écart passé de 23 à 436 avec un cache rempli à 28,7 pour cent.
+    // Sans ce garde, l'alerte sonnerait à chaque mise en ligne.
+    Http::fakeSequence()
+        ->push(opcachePayload(), 200)
+        ->push(opcachePayload(['opcache_statistics' => ['misses' => 1211]]), 200);
+
+    OpcacheCheck::new()->run();
+    $second = OpcacheCheck::new()->run();
+
+    expect($second->meta['refusals_delta'])->toBe(201)
+        ->and($second->status->equals(Status::ok()))->toBeTrue();
+});
+
+it('signale une progression des refus quand le cache EST sous pression', function () {
+    $sousPression = ['opcache_statistics' => ['num_cached_keys' => 110000]];
+
+    Http::fakeSequence()
+        ->push(opcachePayload($sousPression), 200)
+        ->push(opcachePayload(['opcache_statistics' => ['num_cached_keys' => 110000, 'misses' => 1211]]), 200);
+
+    OpcacheCheck::new()->run();
+    $second = OpcacheCheck::new()->run();
+
+    expect($second->meta['refusals_delta'])->toBe(201)
+        ->and($second->status->equals(Status::failed()))->toBeTrue();
 });

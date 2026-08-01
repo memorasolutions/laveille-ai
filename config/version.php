@@ -17,6 +17,15 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.139.1 · 2026-08-01 · fix(sante) le signal de refus ne se declenche plus qu'en situation de
+ *     pression reelle. Defaut trouve en mesurant la production juste apres le deploiement de
+ *     1.139.0 : l'ecart rates moins scripts est passe de 23 a 436 alors que le cache n'etait
+ *     rempli qu'a 28,7 pour cent. La cause n'etait pas un refus mais le deploiement lui-meme :
+ *     avec validate_timestamps=1, chaque fichier modifie est invalide puis recompile, ce qui
+ *     gonfle les rates sans qu'aucun script ne soit refuse. Le seuil d'avertissement etant a 100,
+ *     l'alerte aurait sonne a CHAQUE mise en ligne, et on aurait appris a l'ignorer. Le signal
+ *     n'est desormais evalue que si cache_full est vrai, ou si les cles ou la memoire depassent
+ *     deja leur seuil d'avertissement. Deux tests verrouillent le comportement dans les deux sens.
  *   1.139.0 · 2026-08-01 · feat(sante) surveillance OPcache branchee sur Spatie Health, avec un
  *     courriel d'alerte lisible. Contexte : l'OPcache partage de ea-php84 a ete porte de 1024 Mo
  *     a 3584 Mo, de 20000 a 130987 cles et de 128 Mo a 640 Mo de chaines internees, JIT desactive.
@@ -3211,7 +3220,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,

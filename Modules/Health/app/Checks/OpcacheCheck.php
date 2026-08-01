@@ -89,10 +89,20 @@ class OpcacheCheck extends Check
         $this->evaluatePercent($memoryPercent, 'memory', 'la mémoire', $failures, $warnings);
         $this->evaluatePercent($internedPercent, 'interned', 'le tampon des chaînes internées', $failures, $warnings);
 
-        if ($refusalsDelta > (int) config('health.opcache.fail_refusals_delta', 1000)) {
-            $failures[] = "OPcache a refusé {$refusalsDelta} scripts supplémentaires : augmentez la capacité adaptée, puis redémarrez PHP-FPM pendant une fenêtre contrôlée.";
-        } elseif ($refusalsDelta > (int) config('health.opcache.warn_refusals_delta', 100)) {
-            $warnings[] = "OPcache a refusé {$refusalsDelta} scripts supplémentaires : surveillez la progression et préparez une augmentation de capacité.";
+        // La progression de l'écart n'est un signe de REFUS que si le cache est deja sous
+        // pression. Avec validate_timestamps=1, un deploiement invalide puis recompile des
+        // centaines de fichiers : cela gonfle les ratés sans qu'aucun script ne soit refusé.
+        // Sans ce garde, l'alerte sonnerait a chaque mise en ligne et on apprendrait a
+        // l'ignorer. Constaté en production le 2026-08-01 : écart passé de 23 a 436 apres
+        // un simple deploiement, alors que le cache n'etait rempli qu'a 28,7 pour cent.
+        $sousPression = (bool) $payload['cache_full']
+            || $keysPercent > (float) config('health.opcache.warn_keys_percent')
+            || $memoryPercent > (float) config('health.opcache.warn_memory_percent');
+
+        if ($sousPression && $refusalsDelta > (int) config('health.opcache.fail_refusals_delta', 1000)) {
+            $failures[] = "OPcache a refusé {$refusalsDelta} scripts supplémentaires alors qu'il est déjà sous pression : augmentez la capacité adaptée, puis redémarrez PHP-FPM pendant une fenêtre contrôlée.";
+        } elseif ($sousPression && $refusalsDelta > (int) config('health.opcache.warn_refusals_delta', 100)) {
+            $warnings[] = "OPcache a refusé {$refusalsDelta} scripts supplémentaires alors qu'il approche de ses limites : surveillez la progression et préparez une augmentation de capacité.";
         }
 
         $result->shortSummary($summary)->meta($meta);
