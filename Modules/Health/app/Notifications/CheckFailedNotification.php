@@ -71,6 +71,12 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
                     $mail->line($ligne);
                 }
             }
+
+            if (strtolower($result->check->getLabel()) === 'schedule' && ! $result->status->equals(Status::ok())) {
+                foreach ($this->marcheASuivreSchedule() as $ligne) {
+                    $mail->line($ligne);
+                }
+            }
         }
 
         return $mail;
@@ -153,6 +159,26 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
             "2. Si le site répond, il s'agit probablement d'une surcharge PONCTUELLE du serveur PHP-FPM partagé (plusieurs sites y exécutent des tâches chaque minute) : aucune action n'est requise si l'alerte ne se répète pas.",
             "3. Si l'alerte se répète, vérifier la charge du serveur (WHM > Server Status) au moment exact de l'alerte.",
             '4. En dernier recours seulement : redémarrer PHP-FPM via /scripts/restartsrv_apache_php_fpm --restart (touche TOUS les sites du serveur).',
+        ];
+    }
+
+    /**
+     * Marche a suivre pour un echec du controle Schedule (le battement de coeur du
+     * planificateur Laravel n'a pas ete rafraichi a temps). Donnee de production (30 jours,
+     * 43 631 passages, 2026-08-02) : 290 echecs, tous des blips de 1-2 minutes qui se
+     * resolvent seuls des le passage suivant - la meme surcharge ponctuelle du pool PHP-FPM
+     * partage par des dizaines de crons d'autres sites que celle deja identifiee pour OPcache.
+     *
+     * @return array<int, string>
+     */
+    private function marcheASuivreSchedule(): array
+    {
+        return [
+            'Marche à suivre (accès WHM ou hébergeur requis) :',
+            '1. Vérifier que https://laveille.ai répond normalement dans un navigateur.',
+            "2. Si le site répond, il s'agit très probablement d'une surcharge PONCTUELLE du serveur PHP-FPM partagé (plusieurs sites y exécutent des tâches chaque minute) : le planificateur reprendra de lui-même dès le passage suivant, aucune action n'est requise si l'alerte ne se répète pas.",
+            "3. Si l'alerte se répète PLUSIEURS FOIS DE SUITE (pas seulement isolée dans la journée), vérifier que la ligne de cron 'artisan schedule:run' existe toujours dans cPanel > Cron Jobs pour laveille.ai.",
+            '4. En dernier recours seulement : vérifier la charge du serveur (WHM > Server Status) au moment exact de l\'alerte.',
         ];
     }
 }

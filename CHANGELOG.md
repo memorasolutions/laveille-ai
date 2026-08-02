@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.7] - 2026-08-02
+
+### Corrigé
+
+- **Courriel Schedule sans marche à suivre + seuil trop sensible.** Incident réel le 2026-08-02 à
+  10h41-10h42 UTC : un courriel **URGENT** « The schedule did not run yet » sans une seule ligne
+  de marche à suivre (contrairement à OPcache) - et c'était le premier courriel Schedule jamais
+  reçu, les notifications n'étant actives que depuis la veille (v1.139.2). Vérifié via
+  l'historique des 43 631 passages sur 30 jours : 290 échecs (0,66 %), tous des blips de 1-2
+  minutes auto-résolus - même surcharge ponctuelle du pool PHP-FPM partagé que celle déjà
+  identifiée pour OPcache, jamais une séquence prolongée. Deux correctifs : le seuil de tolérance
+  du battement de cœur passe de 2 à 5 minutes (tolère un blip isolé, détecte toujours un vrai
+  arrêt du planificateur rapidement), et une marche à suivre concrète a été ajoutée. Deux tests
+  verrouillent la présence/absence de la marche à suivre selon le statut.
+
 ## [1.139.6] - 2026-08-02
 
 ### Corrigé

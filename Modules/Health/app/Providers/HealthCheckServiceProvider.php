@@ -36,7 +36,13 @@ class HealthCheckServiceProvider extends BaseModuleServiceProvider
             DebugModeCheck::new(),
             EnvironmentCheck::new(),
             CacheCheck::new(),
-            ScheduleCheck::new()->heartbeatMaxAgeInMinutes(2),
+            // heartbeatMaxAgeInMinutes(5), pas 2 (defaut Spatie) : incident reel du 2026-08-02
+            // 10h41-10h42 UTC, auto-resolu des le passage suivant. Donnee de production (30 jours,
+            // 43 631 passages) : 290 echecs isoles (0,66 %), tous des blips de 1-2 minutes qui
+            // se resolvent seuls - la meme surcharge ponctuelle du pool PHP-FPM partage par des
+            // dizaines de crons d'autres sites que celle deja identifiee pour OPcache (v1.139.6).
+            // 5 minutes reste largement suffisant pour detecter un VRAI arret du scheduler.
+            ScheduleCheck::new()->heartbeatMaxAgeInMinutes(5),
         ];
 
         // OptimizedAppCheck est volontairement RETIRE. Il exige que la configuration soit mise

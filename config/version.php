@@ -17,6 +17,18 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.139.7 · 2026-08-02 · fix(sante) courriel Schedule sans marche a suivre + seuil trop
+ *     sensible. Incident reel : 2026-08-02 10h41-10h42 UTC, courriel URGENT « The schedule did
+ *     not run yet » sans une seule ligne de marche a suivre (contrairement a OPcache) - et
+ *     c'etait le PREMIER courriel Schedule jamais recu, les notifications n'etant actives que
+ *     depuis la veille 20h13 UTC (v1.139.2). Verifie via l'historique des 43 631 passages sur 30
+ *     jours : 290 echecs (0,66 %), tous des blips de 1-2 minutes auto-resolus - meme surcharge
+ *     ponctuelle du pool PHP-FPM partage que celle deja identifiee pour OPcache, jamais une
+ *     sequence prolongee. Deux correctifs : (1) heartbeatMaxAgeInMinutes porte de 2 a 5 minutes
+ *     (tolere un blip isole tout en detectant un vrai arret du planificateur en temps raisonnable)
+ *     ; (2) marche a suivre ajoutee (verifier que le site repond, verifier le cron si l'alerte se
+ *     repete plusieurs fois de suite, charge serveur en dernier recours). Deux tests verrouillent
+ *     la presence/absence de la marche a suivre selon le statut.
  *   1.139.6 · 2026-08-02 · fix(sante) marche a suivre erronee sur un timeout de mesure. Incident
  *     reel : le 2026-08-01 21h11 Quebec, un timeout cURL (5001 ms) contre le point de controle
  *     interne a produit un courriel URGENT affichant quand meme la procedure « augmentez
@@ -3278,7 +3290,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 6;
+$lvPatch = 7;
 
 return [
     'major' => $lvMajor,
