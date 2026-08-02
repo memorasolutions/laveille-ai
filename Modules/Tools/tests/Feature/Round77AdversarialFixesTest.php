@@ -64,68 +64,12 @@ it('renders the newsletter-widget translated in EN locale (round 77)', function 
     expect($html)->not->toContain('Inscrivez-vous pour recevoir nos derniers articles.');
 });
 
-it('has English translations for the constructeur-prompts JS help/technique-hint/diagnostic strings (round 77)', function () {
-    $en = json_decode(file_get_contents(lang_path('en.json')), true);
-
-    $keys = [
-        "Donner un rôle à l'IA aide à orienter ses réponses selon une expertise ou un style spécifique. Ex: « Tu es un expert marketing » donnera des réponses plus stratégiques.",
-        "Choisir un verbe d'action précise ce que l'IA doit faire : rédiger, analyser, résumer, créer... Le verbe détermine le type de résultat.",
-        "Décrivez clairement et précisément ce que l'IA doit produire. Plus vous donnez de contexte et de détails, meilleur sera le résultat.",
-        "Spécifier le public aide l'IA à adapter son langage. Un texte pour des débutants sera différent d'un texte pour des experts.",
-        'Le format guide la structure de la réponse. Une liste à puces est facile à lire, un tableau est bon pour comparer, un plan est idéal pour organiser.',
-        'Indiquer une longueur permet de contrôler si la réponse est concise (pour un résumé) ou détaillée (pour un article complet).',
-        'Le ton change le style : professionnel pour un rapport, chaleureux pour un courriel client, académique pour un mémoire.',
-        "Les délimiteurs (###) séparent vos instructions de vos données. Utile quand vous analysez un texte spécifique : l'IA sait où commence le texte à analyser.",
-        "L'IA a tendance à produire des textes génériques reconnaissables. Cette option force un style plus naturel, varié et authentiquement humain.",
-        "Canvas (ChatGPT) et artefact (Claude) sont des espaces de travail dédiés où l'IA crée du contenu que vous pouvez modifier directement.",
-        "La chaîne de pensée force l'IA à montrer son raisonnement, pas juste le résultat. Très utile pour les problèmes complexes, les mathématiques ou la logique.",
-        "Au lieu de deviner, l'IA vous posera des questions de clarification. Résultat : des réponses beaucoup plus pertinentes dès le premier essai.",
-        "L'IA répond directement, sans exemple ni étape intermédiaire.",
-        "L'IA réfléchit en interne avant de répondre, sans montrer ce raisonnement.",
-        "Vous donnez 2-3 exemples du résultat attendu pour guider l'IA.",
-        'Exemples fournis, puis raisonnement détaillé appliqué au même modèle.',
-        "L'IA avance étape par étape et attend votre accord avant de continuer.",
-        'Aucun format de sortie ni longueur précisée pour la réponse.',
-        'Aucun contexte ni audience précisé(e) pour qui recevra la réponse.',
-        'Aucune contrainte cochée dans la section « Contraintes et destination ».',
-    ];
-
-    foreach ($keys as $key) {
-        expect($en)->toHaveKey($key);
-        expect($en[$key])->not->toBe($key);
-    }
-});
-
-it('injects helps/techniqueHints/diagnostic i18n translated into window.promptBuilderConfig on the real page in EN locale (round 77)', function () {
-    Tool::firstOrCreate(['slug' => 'constructeur-prompts'], [
-        'name' => 'Constructeur de prompts',
-        'description' => 'Test',
-        'icon' => '✨',
-        'is_active' => true,
-        'is_under_construction' => false,
-        'category' => 'productivite',
-    ]);
-
-    $user = User::factory()->create();
-
-    $html = $this->actingAs($user)->withSession(['locale' => 'en'])->get('/outils/constructeur-prompts')->assertOk()->getContent();
-
-    expect($html)->toContain('Assigning a role to the AI helps guide its responses');
-    expect($html)->toContain('The AI responds directly, without examples or intermediate steps.');
-    expect($html)->toContain('diagnosticFormat');
-    expect($html)->toContain('No output format or response length specified.');
-    expect($html)->not->toContain("Donner un rôle à l'IA aide");
-});
-
-it('the JS file falls back to window.promptBuilderConfig for helps and techniqueHints (round 77)', function () {
-    $js = file_get_contents(public_path('assets/tools/constructeur-prompts/constructeur-prompts-core.js'));
-
-    expect($js)->toContain('helps: (window.promptBuilderConfig && window.promptBuilderConfig.helps) ||');
-    expect($js)->toContain('techniqueHints: (window.promptBuilderConfig && window.promptBuilderConfig.techniqueHints) ||');
-    expect($js)->toContain('i18n.diagnosticFormat ||');
-    expect($js)->toContain('i18n.diagnosticAudience ||');
-    expect($js)->toContain('i18n.diagnosticContraintes ||');
-});
+// Étape 9 (2026-08-02, réécriture complète) : les 3 tests qui verrouillaient les objets JS `helps`
+// (aide contextuelle "?"), `techniqueHints` et le panneau "Diagnostic rapide" ont été retirés - ces
+// 3 mécanismes appartenaient aux « 5 blocs de réglages avancés » explicitement retirés par le plan
+// (.outils/PLAN-CONSTRUCTEUR-PROMPTS-ULTRA-2026-08-02.md, section 3) et n'existent plus dans
+// constructeur-prompts-core.js (plus de window.promptBuilderConfig du tout). Les tests
+// newsletter-widget (composant partagé) ci-dessus restent valides tels quels.
 
 // Round 151 (2026-08-01, refonte écrans 1-2) : les 2 tests ci-dessous verrouillaient
 // l'accessibilité clavier de l'indicateur d'étapes numéroté (cercles "1"/"2"). Cet indicateur a

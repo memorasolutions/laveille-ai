@@ -26,20 +26,13 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 //    et remplacement de #DC2626 par #991B1B (contraste ~8,3:1 AAA, token déjà utilisé pour texte
 //    danger sur fond clair ailleurs dans le projet, charte.css:1009 .alert-danger).
 
-it('has WCAG AAA 44px touch targets on the 5 constraint checkboxes in constructeur-prompts (round 88)', function () {
-    $blade = file_get_contents(base_path('Modules/Tools/resources/views/public/tools/constructeur-prompts.blade.php'));
-
-    foreach (['useDelimiters', 'constraintAntiAI', 'constraintTypo', 'constraintChainOfThought', 'constraintAskIfUnclear'] as $model) {
-        $pos = strpos($blade, 'x-model="'.$model.'"');
-        expect($pos)->not->toBeFalse();
-
-        // Le <label> ouvrant précède l'input de quelques dizaines de caractères.
-        $labelStart = strrpos(substr($blade, 0, $pos), '<label style="');
-        $labelTag = substr($blade, $labelStart, $pos - $labelStart);
-
-        expect($labelTag)->toContain('min-height: 44px; padding: 4px 6px;');
-    }
-});
+// Étape 9 (2026-08-02, réécriture complète) : le test qui verrouillait les 5 cases à cocher de
+// contrainte (useDelimiters, constraintAntiAI, constraintTypo, constraintChainOfThought,
+// constraintAskIfUnclear) a été retiré - ces contraintes faisaient partie des « 5 blocs de
+// réglages avancés » explicitement retirés par le plan (section 3, "Retirer") : le comportement
+// de qualité (typographie française, formulation naturelle) est désormais PAR DÉFAUT, non
+// désactivable, sans interrupteur visible. Les tests sur "Effacer les filtres" (/user/prompts,
+// page inchangée) ci-dessous restent valides tels quels.
 
 it('has WCAG AAA-contrast and 44px "Effacer les filtres" links in Mes prompts (round 88)', function () {
     $blade = file_get_contents(base_path('Modules/Tools/resources/views/user/prompts/index.blade.php'));
@@ -53,23 +46,6 @@ it('has WCAG AAA-contrast and 44px "Effacer les filtres" links in Mes prompts (r
     expect($blade)->toContain($effacerFiltresTag);
     expect($effacerFiltresTag)->not->toContain('#DC2626');
     expect($blade)->toContain('color: var(--c-primary, #064E5A); font-weight: 600; min-height: 44px; padding: 4px 6px;');
-});
-
-it('renders the constraint checkboxes with 44px min-height on the real page (round 88)', function () {
-    Tool::firstOrCreate(['slug' => 'constructeur-prompts'], [
-        'name' => 'Constructeur de prompts',
-        'description' => 'Test',
-        'icon' => '✨',
-        'is_active' => true,
-        'is_under_construction' => false,
-        'category' => 'productivite',
-    ]);
-
-    $user = User::factory()->create();
-
-    $html = $this->actingAs($user)->get('/outils/constructeur-prompts')->assertOk()->getContent();
-
-    expect(substr_count($html, 'min-height: 44px; padding: 4px 6px;'))->toBeGreaterThanOrEqual(13);
 });
 
 it('renders the "Effacer les filtres" links with AAA contrast and 44px target on the real page (round 88)', function () {

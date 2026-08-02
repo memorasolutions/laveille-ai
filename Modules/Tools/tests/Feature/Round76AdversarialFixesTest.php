@@ -146,29 +146,9 @@ it('renders the shared sidebar translated in EN locale (round 76)', function () 
     expect($html)->not->toContain("Votre veille sur l'IA");
 });
 
-it('has an English translation for the constructeur-prompts examples textarea placeholder (round 76)', function () {
-    $en = json_decode(file_get_contents(lang_path('en.json')), true);
-
-    $key = "Exemple 1 :\nEntrée : ...\nSortie : ...\n\nExemple 2 :\nEntrée : ...\nSortie : ...";
-
-    expect($en)->toHaveKey($key);
-    expect($en[$key])->toBe("Example 1:\nInput: ...\nOutput: ...\n\nExample 2:\nInput: ...\nOutput: ...");
-});
-
-it('renders the examples textarea placeholder translated in EN locale on the real constructeur-prompts form (round 76)', function () {
-    Tool::firstOrCreate(['slug' => 'constructeur-prompts'], [
-        'name' => 'Constructeur de prompts',
-        'description' => 'Test',
-        'icon' => '✨',
-        'is_active' => true,
-        'is_under_construction' => false,
-        'category' => 'productivite',
-    ]);
-
-    $user = User::factory()->create();
-
-    $html = $this->actingAs($user)->withSession(['locale' => 'en'])->get('/outils/constructeur-prompts')->assertOk()->getContent();
-
-    expect($html)->toContain("Example 1:\nInput: ...\nOutput: ...");
-    expect($html)->not->toContain("Exemple 1 :\nEntrée : ...\nSortie : ...");
-});
+// Étape 9 (2026-08-02) : les 2 tests qui verrouillaient la traduction du placeholder de l'ancien
+// champ "Exemples" (few-shot) ont été retirés - ce champ n'existe plus dans la réécriture complète
+// du Constructeur de prompts (plan section 10.1 : le few-shot préempli générique a été identifié
+// comme un piège qui dégrade la qualité du prompt, retiré des 9 nouveaux gabarits). Les tests
+// header/footer/sidebar/search-palette ci-dessus restent valides tels quels (composants partagés,
+// non affectés par la réécriture).

@@ -27,41 +27,18 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 // Copier (historique), ✕ suppression (historique), et Enregistrer/Annuler (édition tags,
 // page Mes prompts).
 
-it('has WCAG AAA 44px touch targets on all ct-btn-sm/ct-btn-xs buttons in constructeur-prompts.blade.php (round 86)', function () {
-    $blade = file_get_contents(base_path('Modules/Tools/resources/views/public/tools/constructeur-prompts.blade.php'));
-
-    // Les 4 boutons "Ouvrir dans" de la section principale (round 86 finding #1).
-    expect(substr_count($blade, "@click=\"openIn('chatgpt')\""))->toBe(1);
-    expect($blade)->toContain("'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')");
-
-    // Le bouton ✕ de suppression (round 86 finding #2) : min-width en plus de min-height (icône seule).
-    expect($blade)->toContain('min-height:44px; min-width:44px; padding:1px 5px;');
-
-    // Échantillon des autres boutons corrigés (round 86 finding #3).
-    expect(substr_count($blade, 'min-height:44px'))->toBeGreaterThanOrEqual(15);
-});
+// Étape 9 (2026-08-02, réécriture complète) : le test qui comptait >= 15 boutons min-height:44px
+// et verrouillait le bouton openIn('chatgpt') de l'ancienne interface a été retiré - la nouvelle
+// page, radicalement plus simple (plan section 1, "un seul écran"), n'a plus qu'une poignée de
+// boutons d'action (Copier, Ouvrir dans, Masquer mes infos, Effacer l'historique), tous avec
+// style="min-height:44px;" (voir constructeur-prompts.blade.php) mais en nombre bien inférieur à
+// l'ancien plancher de 15 - ce compte n'est plus un signal utile. Le test sur /user/prompts
+// (page inchangée) ci-dessous reste valide tel quel.
 
 it('has WCAG AAA 44px touch targets on the tag-edit buttons in Mes prompts (round 86)', function () {
     $blade = file_get_contents(base_path('Modules/Tools/resources/views/user/prompts/index.blade.php'));
 
     expect(substr_count($blade, 'min-height:44px'))->toBeGreaterThanOrEqual(2);
-});
-
-it('renders the "open in" buttons with 44px min-height on the real page regardless of validity state (round 86)', function () {
-    Tool::firstOrCreate(['slug' => 'constructeur-prompts'], [
-        'name' => 'Constructeur de prompts',
-        'description' => 'Test',
-        'icon' => '✨',
-        'is_active' => true,
-        'is_under_construction' => false,
-        'category' => 'productivite',
-    ]);
-
-    $user = User::factory()->create();
-
-    $html = $this->actingAs($user)->get('/outils/constructeur-prompts')->assertOk()->getContent();
-
-    expect(substr_count($html, 'min-height:44px'))->toBeGreaterThanOrEqual(15);
 });
 
 it('renders the tag-edit buttons with 44px min-height on the real page (round 86)', function () {

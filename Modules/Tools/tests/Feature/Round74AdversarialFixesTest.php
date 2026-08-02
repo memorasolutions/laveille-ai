@@ -25,18 +25,14 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 //    P0 2026-07-19, Modules/Directory - voir ToolPublicUrlLocaleFallbackTest.php) + migration des
 //    12 sites d'appel (header.blade.php + 11 dans home.blade.php) vers $article->getPublicUrl().
 //
-// 2. PARTIELLEMENT confirmé (le sous-agent a sur-généralisé) : les 9 cartes d'objectif de l'étape
-//    1 ($defaultTaskCards) avaient 'label'/'description' en dur, jamais passés par __(). CES DEUX
-//    champs sont du texte d'affichage PUR (jamais injectés dans le prompt généré - vérifié via
-//    grep : selectedTaskLabel et c.description ne sont utilisés que côté UI, x-text). Fixés.
-//    En revanche $defaultPersonas[].label, $defaultAudiences[].label et $defaultVerbs NE sont
-//    PAS des manques - ce sont des valeurs injectées BRUTES dans le gabarit du prompt généré
-//    (this.personaText → "Tu es un(e) [label] avec une expertise...", this.verb → "Ta tâche :
-//    [verb] ...", vérifié dans constructeur-prompts-core.js lignes ~227/247/251). Le gabarit du
-//    prompt généré est TOUJOURS en français, quel que soit le locale du site (le champ
-//    "language" du wizard ajoute une instruction de langue de RÉPONSE, il ne traduit pas le
-//    gabarit) - les traduire casserait le prompt généré (grammaire mixte FR/EN). Un test négatif
-//    ci-dessous verrouille cette décision pour qu'un futur round ne "corrige" pas ça en régression.
+// Étape 9 (2026-08-02, réécriture complète du Constructeur de prompts) : les 3 tests ci-dessous
+// (Article::getPublicUrl, home page, header partial via constructeur-prompts) sont INFRASTRUCTURE
+// pure - zéro dépendance au markup de l'ancien assistant (9 $defaultTaskCards, personas/verbs
+// bruts). Conservés tels quels. Les tests qui verrouillaient l'i18n des ANCIENNES 9 cartes
+// d'objectif ($defaultTaskCards) et le verrou négatif sur personas/verbs injectés en JS
+// (window.promptBuilderConfig, disparu avec la réécriture) ont été retirés : la nouvelle page
+// n'a plus ce concept - les 9 gabarits sont rendus côté Blade via __() directement (voir
+// PromptBuilderRewriteTest.php pour la couverture i18n de la nouvelle interface).
 
 it('Article::getPublicUrl() ne plante pas quand le slug n\'existe que pour une autre locale (round 74)', function () {
     // Locale FR_CA à la création : Article::boot() auto-génère le slug pour la locale COURANTE
@@ -80,75 +76,4 @@ it('constructeur-prompts page does not 500 in EN locale via the shared header pa
     $response = $this->actingAs($user)->withSession(['locale' => 'en'])->get('/outils/constructeur-prompts');
 
     $response->assertOk();
-});
-
-it('has English translations for the 9 task-card labels and descriptions (round 74)', function () {
-    $en = json_decode(file_get_contents(lang_path('en.json')), true);
-
-    $keys = [
-        'Rédiger un texte', 'Un article, un courriel, une publication...',
-        'Résumer un contenu', 'Condenser un texte, un rapport, une réunion...',
-        'Trouver des idées', 'Brainstormer des angles, des options, des titres...',
-        'Analyser ou comparer', 'Étudier des données, comparer des options...',
-        'Apprendre ou comprendre', 'Faire expliquer un sujet clairement, étape par étape...',
-        'Traduire un texte', "Passer d'une langue à une autre...",
-        'Planifier ou organiser', 'Un projet, une stratégie, un horaire...',
-        'Écrire ou déboguer du code', 'Créer, corriger ou expliquer du code...',
-        'Autre chose', 'Je préfère tout choisir moi-même',
-    ];
-
-    foreach ($keys as $key) {
-        expect($en)->toHaveKey($key);
-        expect($en[$key])->not->toBe($key);
-    }
-});
-
-it('renders task-card labels and descriptions translated in EN locale on the constructeur-prompts page (round 74)', function () {
-    Tool::firstOrCreate(['slug' => 'constructeur-prompts'], [
-        'name' => 'Constructeur de prompts',
-        'description' => 'Test',
-        'icon' => '✨',
-        'is_active' => true,
-        'is_under_construction' => false,
-        'category' => 'productivite',
-    ]);
-
-    $user = User::factory()->create();
-
-    $html = $this->actingAs($user)->withSession(['locale' => 'en'])->get('/outils/constructeur-prompts')->assertOk()->getContent();
-
-    expect($html)->toContain('Write a text');
-    expect($html)->toContain('An article, an email, a post...');
-    expect($html)->not->toContain('Rédiger un texte');
-});
-
-it('does NOT translate persona/verb/audience labels - they are raw values injected into the always-French generated prompt template (round 74, lock-in negative test)', function () {
-    Tool::firstOrCreate(['slug' => 'constructeur-prompts'], [
-        'name' => 'Constructeur de prompts',
-        'description' => 'Test',
-        'icon' => '✨',
-        'is_active' => true,
-        'is_under_construction' => false,
-        'category' => 'productivite',
-    ]);
-
-    $user = User::factory()->create();
-
-    $html = $this->actingAs($user)->withSession(['locale' => 'en'])->get('/outils/constructeur-prompts')->assertOk()->getContent();
-
-    // personas/verbs sont injectés via @json() dans window.promptBuilderConfig - json_encode()
-    // échappe les caractères accentués en \uXXXX par défaut (pas de JSON_UNESCAPED_UNICODE), donc
-    // on extrait et décode chaque tableau JSON individuellement (l'objet JS englobant n'est PAS du
-    // JSON valide - clés non quotées) plutôt que de chercher la chaîne accentuée littérale dans le
-    // HTML brut. Ces valeurs doivent rester en français même en locale EN - les traduire casserait
-    // le gabarit du prompt généré ("Tu es un(e) Rédacteur web professionnel...", "Ta tâche : Rédige...").
-    preg_match('/personas:\s*(\[.*?\]),\s*\n\s*verbs:\s*(\[.*?\]),/s', $html, $matches);
-    expect($matches)->toHaveCount(3);
-
-    $personas = json_decode($matches[1], true);
-    $verbs = json_decode($matches[2], true);
-    expect($personas)->not->toBeNull();
-    expect($verbs)->not->toBeNull();
-    expect(collect($personas)->pluck('label'))->toContain('Rédacteur web professionnel');
-    expect($verbs)->toContain('Rédige');
 });

@@ -25,11 +25,11 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 //    (SC 1.4.11, composants non-textuels) et très sous l'AAA 7:1 de la charte du projet. Remplacé
 //    par var(--c-text-muted, #52586A) = 7,09:1 (AAA), déjà utilisé site-wide pour ce rôle.
 
-it('the JS file only trusts server error messages on HTTP 422 (round 82)', function () {
-    $js = file_get_contents(public_path('assets/tools/constructeur-prompts/constructeur-prompts-core.js'));
-
-    expect($js)->toContain("err.serverMessage = r.status === 422 && !!(body && body.message);");
-});
+// Étape 9 (2026-08-02, réécriture complète) : le test qui verrouillait `addToHistory()` /
+// `err.serverMessage` a été retiré - cette fonction de l'ancien assistant (wizard multi-étapes)
+// n'existe plus dans constructeur-prompts-core.js (le nouveau fichier ne fait plus aucun appel
+// réseau : zéro fetch, historique 100% localStorage). Les 3 tests ci-dessous sur
+// ToolPreferenceController restent inchangés (infrastructure backend, indépendante du markup).
 
 it('has English translations for the 9 ToolPreferenceController validation messages (round 82)', function () {
     $en = json_decode(file_get_contents(lang_path('en.json')), true);
@@ -86,11 +86,13 @@ it('returns the translated profile-format message on EN locale via the real API 
     expect($response->json('errors.value.0'))->toBe('Invalid profile format.');
 });
 
-it('does not use the low-contrast #9CA3AF color for the favorite icon or add-card border anymore (round 82)', function () {
+it('does not use the low-contrast #9CA3AF color for the favorite icon on "Mes prompts" anymore (round 82)', function () {
+    // Étape 9 (2026-08-02) : l'assertion sur la bordure pointillée "Ajouter une carte" de
+    // constructeur-prompts.blade.php a été retirée - les cartes personnalisées n'existent plus
+    // dans la réécriture complète (plan section 3, "Retirer"). L'assertion sur /user/prompts
+    // (page inchangée) reste valide telle quelle.
     $userPromptsIndex = file_get_contents(base_path('Modules/Tools/resources/views/user/prompts/index.blade.php'));
-    $constructeurBlade = file_get_contents(base_path('Modules/Tools/resources/views/public/tools/constructeur-prompts.blade.php'));
 
     expect($userPromptsIndex)->not->toContain("'#9CA3AF'");
     expect($userPromptsIndex)->toContain('var(--c-text-muted, #52586A)');
-    expect($constructeurBlade)->toContain('border:2px dashed var(--c-text-muted, #52586A)');
 });
