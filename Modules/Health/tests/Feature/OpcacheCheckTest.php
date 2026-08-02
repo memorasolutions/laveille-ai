@@ -102,6 +102,30 @@ it('échoue lorsque la requête HTTP échoue', function () {
         ->and($result->getNotificationMessage())->toContain('Impossible de mesurer OPcache');
 });
 
+it('affiche la marche à suivre "mesure impossible", jamais la procédure de capacité, sur un timeout', function () {
+    // Incident reel du 2026-08-01 21h11 Quebec : un timeout cURL (mesure impossible, aucun
+    // pourcentage disponible) affichait quand meme « augmentez la directive saturee », une
+    // consigne fausse pour ce cas puisqu'aucune capacite n'a pu etre mesuree.
+    Http::fake(function () {
+        throw new \Illuminate\Http\Client\ConnectionException('cURL error 28: Operation timed out');
+    });
+
+    $check = OpcacheCheck::new();
+    $result = $check->run();
+    $result->check = $check;
+
+    expect($result->status->equals(Status::failed()))->toBeTrue()
+        ->and($result->meta)->not->toHaveKey('keys_percent');
+
+    $courriel = implode("\n", (new CheckFailedNotification([$result]))->toMail()->introLines);
+
+    expect($courriel)
+        ->toContain('Marche à suivre (accès WHM ou hébergeur requis)')
+        ->toContain('surcharge PONCTUELLE')
+        ->not->toContain('opcache.max_accelerated_files')
+        ->not->toContain('Ouvrir /opt/cpanel/ea-php84');
+});
+
 it('avertit lorsque les clés dépassent seules leur seuil', function () {
     Http::fake(['*' => Http::response(opcachePayload([
         'opcache_statistics' => ['num_cached_keys' => 8000],

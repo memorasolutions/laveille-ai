@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.6] - 2026-08-02
+
+### Corrigé
+
+- **Marche à suivre erronée sur un timeout de mesure.** Incident réel le 2026-08-01 à 21h11
+  Québec : un timeout cURL (5001 ms) contre le point de contrôle interne a produit un courriel
+  **URGENT** affichant quand même « augmentez `opcache.max_accelerated_files`, redémarrez
+  PHP-FPM » - une consigne fausse puisqu'aucune capacité n'a pu être mesurée. Vérifié via
+  l'historique des 304 474 passages en base : incident isolé (1 seul depuis le 2026-08-01
+  15h57), cohérent avec une surcharge ponctuelle du pool PHP-FPM **partagé par des dizaines de
+  scripts cron d'autres sites** sur ce serveur mutualisé - pas un problème récurrent.
+  La marche à suivre se choisit désormais selon la présence de mesures réelles : capacité
+  saturée → la procédure d'augmentation existante ; mesure impossible → une nouvelle procédure
+  de diagnostic de charge, sans toucher à OPcache. Deux tests verrouillent chaque cas.
+
 ## [1.139.5] - 2026-08-01
 
 ### Corrigé

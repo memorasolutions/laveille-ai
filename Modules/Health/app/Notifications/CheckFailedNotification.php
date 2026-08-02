@@ -57,12 +57,17 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
                 $mail->line($ligne);
             }
 
-            // La marche a suivre ne s'affiche que pour le controle qui va REELLEMENT mal.
-            // Sans ce garde, un courriel declenche par un autre controle affichait quand meme
-            // « augmentez la directive saturee » sous un OPcache annonce « aucune action
-            // requise » : une consigne contradictoire, donc une consigne qu'on apprend a ignorer.
+            // La marche a suivre ne s'affiche que pour le controle qui va REELLEMENT mal, et se
+            // choisit selon le TYPE d'echec : incident constate le 2026-08-01 21h11 Quebec, un
+            // timeout cURL (mesure impossible, aucun pourcentage disponible) affichait quand
+            // meme la procedure « augmentez la directive saturee », fausse pour ce cas - le
+            // probleme n'etait pas une capacite pleine mais une surcharge PHP-FPM passagere.
             if (strtolower($result->check->getLabel()) === 'opcache' && ! $result->status->equals(Status::ok())) {
-                foreach ($this->marcheASuivreOpcache() as $ligne) {
+                $lignes = array_key_exists('keys_percent', $result->meta ?? [])
+                    ? $this->marcheASuivreOpcache()
+                    : $this->marcheASuivreMesureImpossible();
+
+                foreach ($lignes as $ligne) {
                     $mail->line($ligne);
                 }
             }
@@ -130,6 +135,24 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
             '3. Augmenter la directive saturée : opcache.max_accelerated_files pour les clés, opcache.memory_consumption pour la mémoire, opcache.interned_strings_buffer pour les chaînes.',
             '4. Appliquer : /scripts/restartsrv_apache_php_fpm --restart (un simple reload ne redimensionne PAS la mémoire partagée).',
             '5. Attention : ce redémarrage touche TOUS les sites PHP du serveur, pas seulement celui-ci.',
+        ];
+    }
+
+    /**
+     * Marche a suivre quand OPcache n'a pas pu etre MESURE (timeout, HTTP non-2xx, JSON
+     * incomplet) : distincte de marcheASuivreOpcache(), qui suppose une capacite saturee -
+     * une hypothese fausse ici, puisqu'aucun pourcentage n'a pu etre calcule.
+     *
+     * @return array<int, string>
+     */
+    private function marcheASuivreMesureImpossible(): array
+    {
+        return [
+            'Marche à suivre (accès WHM ou hébergeur requis) :',
+            '1. Vérifier que https://laveille.ai répond normalement dans un navigateur.',
+            "2. Si le site répond, il s'agit probablement d'une surcharge PONCTUELLE du serveur PHP-FPM partagé (plusieurs sites y exécutent des tâches chaque minute) : aucune action n'est requise si l'alerte ne se répète pas.",
+            "3. Si l'alerte se répète, vérifier la charge du serveur (WHM > Server Status) au moment exact de l'alerte.",
+            '4. En dernier recours seulement : redémarrer PHP-FPM via /scripts/restartsrv_apache_php_fpm --restart (touche TOUS les sites du serveur).',
         ];
     }
 }

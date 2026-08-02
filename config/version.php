@@ -17,6 +17,17 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.139.6 · 2026-08-02 · fix(sante) marche a suivre erronee sur un timeout de mesure. Incident
+ *     reel : le 2026-08-01 21h11 Quebec, un timeout cURL (5001 ms) contre le point de controle
+ *     interne a produit un courriel URGENT affichant quand meme la procedure « augmentez
+ *     opcache.max_accelerated_files, redemarrez PHP-FPM » - une consigne fausse puisqu'aucune
+ *     capacite n'a pu etre mesuree (0 pourcentage disponible). Verifie via l'historique des 304
+ *     474 passages en base : incident isole (1 seul depuis le 2026-08-01 15h57), coherent avec
+ *     une surcharge ponctuelle du pool PHP-FPM partage par des dizaines de crons d'autres sites
+ *     sur ce serveur mutualise, pas un probleme recurrent. La marche a suivre se choisit
+ *     desormais selon la presence de mesures reelles (cle keys_percent) : capacite saturee ->
+ *     procedure d'augmentation existante ; mesure impossible -> nouvelle procedure de diagnostic
+ *     de charge, sans toucher a OPcache. Un test verrouille chaque cas.
  *   1.139.5 · 2026-08-01 · fix(sante) plus de courriel quand tout va bien. Un message intitule
  *     « AVERTISSEMENT » arrivait alors que son seul contenu disait « capacite suffisante, aucune
  *     action requise » (cles 34,4 %, memoire 33,5 %, zero refus). Cause : Spatie notifie pour
@@ -3267,7 +3278,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 5;
+$lvPatch = 6;
 
 return [
     'major' => $lvMajor,
