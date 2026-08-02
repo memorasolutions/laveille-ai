@@ -68,6 +68,12 @@ document.addEventListener('alpine:init', function () {
             notifyKept: false,
             flashSlots: {},
 
+            // Divulgation progressive des 9 cartes sur mobile (<640px, voir CSS .cp-cards--peek) :
+            // les 5 dernières cartes restent dans le DOM (radios natifs, jamais retirées) mais sont
+            // masquées tant que showAllCards est faux. Sans effet sur desktop (≥640px), où la
+            // grille des 9 cartes est toujours affichée en entier via media query.
+            showAllCards: false,
+
             historyEnabled: false,
             historyItems: [],
 
@@ -257,6 +263,23 @@ document.addEventListener('alpine:init', function () {
                     parts.push('Trous non remplis : ' + summary.emptySlots.join(', ') + '.');
                 }
                 return parts.join(' ');
+            },
+
+            // Statut simple affiché EN PREMIER (avant les détails) : rassure d'un coup d'oeil quand
+            // rien n'est repéré, ou chiffre le nombre d'éléments à vérifier sinon. La détection
+            // elle-même ne change pas (verifierSummary() reste la seule source), seule la
+            // hiérarchie d'affichage change.
+            verifierStatusText: function () {
+                var summary = this.verifierSummary();
+                if (!summary) return '';
+                var n = summary.entities.length;
+                if (!n) return 'Rien détecté.';
+                return n + (n > 1 ? ' éléments à vérifier.' : ' élément à vérifier.');
+            },
+
+            verifierHasFindings: function () {
+                var summary = this.verifierSummary();
+                return !!(summary && summary.entities.length);
             },
 
             verifierCaption: function () { return VERIFIER_CAPTION; },

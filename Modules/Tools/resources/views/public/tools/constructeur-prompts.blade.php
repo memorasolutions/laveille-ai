@@ -271,7 +271,8 @@
                         @media (min-width: 380px) { .cp-cards--grid { grid-template-columns: repeat(3, 1fr); } }
                         .cp-cards--collapsed { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: .5rem; padding-bottom: .3rem; -webkit-overflow-scrolling: touch; }
 
-                        .cp-card { position: relative; display: flex; flex-direction: column; gap: 2px; min-height: 76px; padding: .7rem .8rem; border: 2px solid #d1d5db; border-radius: 12px; background: #fff; color: var(--c-dark); cursor: pointer; transition: border-color .15s ease, background .15s ease; }
+                        .cp-card { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; min-height: 76px; padding: .7rem .8rem; border: 2px solid #d1d5db; border-radius: 12px; background: #fff; color: var(--c-dark); cursor: pointer; transition: border-color .15s ease, background .15s ease; }
+                        .cp-card__title, .cp-card__example { overflow-wrap: break-word; word-break: break-word; }
                         .cp-card:hover { border-color: var(--c-primary); }
                         .cp-card.is-checked { background: var(--c-primary); border-color: var(--c-primary); color: #fff; }
                         .cp-card.is-checked .cp-card__example { color: rgba(255,255,255,.85); }
@@ -286,6 +287,18 @@
                         .cp-cards--collapsed .cp-card__example { display: none; }
                         .cp-cards--collapsed .cp-card__title { font-size: .85rem; }
 
+                        /* Divulgation progressive sur mobile (<640px) : les 5 dernières cartes
+                           (5e label et suivants, comptés hors <legend> via :nth-of-type) restent
+                           dans le DOM mais sont masquées tant que showAllCards est faux. Sur
+                           desktop (≥640px), aucun effet : les 9 cartes restent visibles. */
+                        @media (max-width: 639.98px) {
+                            .cp-cards--peek > label:nth-of-type(n+5) { display: none; }
+                        }
+                        .cp-cards__more-btn { display: none; margin: -.2rem 0 1rem; }
+                        @media (max-width: 639.98px) {
+                            .cp-cards__more-btn { display: inline-flex; }
+                        }
+
                         .cp-selected-pill { display: inline-flex; align-items: center; gap: .4rem; padding: .35rem .7rem; margin-bottom: .6rem; border-radius: 9999px; background: var(--c-primary-light); border: 1px solid rgba(6,78,90,0.25); color: var(--c-primary); font-weight: 700; font-size: .88rem; }
                         .cp-selected-pill__reset { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--c-primary); font-size: 1rem; cursor: pointer; border-radius: 6px; }
                         .cp-selected-pill__reset:hover { background: rgba(6,78,90,0.12); }
@@ -293,11 +306,27 @@
 
                         .cp-kept-note { font-size: .8rem; color: var(--c-primary); margin: 0 0 .5rem; }
 
+                        .cp-intro-note { font-size: .88rem; color: var(--c-text-secondary); margin: 0 0 .7rem; }
+
+                        /* Sur desktop (≥1024px), la phrase à trous (gauche) et l'aperçu + le
+                           vérificateur (droite) sont visibles côte à côte, sans défiler. Sous
+                           1024px, empilement vertical inchangé (chaque bloc garde son propre
+                           x-show, la grille n'ajoute qu'une mise en page). */
+                        @media (min-width: 1024px) {
+                            .cp-builder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; align-items: start; }
+                            .cp-builder-grid .cp-phrase { margin-bottom: 0; height: 100%; }
+                        }
+
                         .cp-phrase { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .35rem .5rem; padding: .9rem 1rem; background: var(--c-surface); border-radius: 12px; margin-bottom: .75rem; }
                         .cp-slot { display: inline-flex; flex-direction: column; gap: 2px; }
-                        .cp-slot__label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--c-text-muted); }
+                        .cp-slot__label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--c-text-muted); display: inline-flex; align-items: center; }
+                        .cp-slot__empty-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--c-accent); margin-left: 4px; flex-shrink: 0; }
                         .cp-slot__input { min-height: 40px; padding: .35rem .55rem; border: 2px solid #d1d5db; border-radius: 8px; font-family: var(--f-body); font-size: .9rem; color: var(--c-dark); background: #fff; }
                         .cp-slot__input:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 1px; border-color: var(--c-primary); }
+                        /* Repère visuel PERMANENT (pas seulement au clic Copier) sur un champ vide -
+                           s'appuie sur l'attribut data-cp-empty déjà réactif (Alpine), aucun nouvel
+                           état JS nécessaire. */
+                        .cp-slot__input[data-cp-empty="true"] { border-color: var(--c-accent); }
                         .cp-slot__textarea { min-width: 240px; max-width: 100%; resize: vertical; field-sizing: content; min-height: 40px; max-height: 320px; }
                         input.cp-slot__input { min-width: 160px; }
                         select.cp-slot__select { min-width: 140px; }
@@ -317,8 +346,14 @@
                         .cp-preview__legend-dot--tool { background: var(--c-primary); }
 
                         .cp-verifier { padding: .7rem .9rem; background: #F3F4F6; border-radius: 10px; margin-bottom: .8rem; }
-                        .cp-verifier__caption { font-size: .78rem; color: var(--c-text-muted); margin: 0 0 .3rem; }
-                        .cp-verifier__result { font-size: .85rem; color: var(--c-dark); margin: 0; font-weight: 600; }
+                        /* Statut simple en premier (rassurant si rien n'est repéré, chiffré sinon) -
+                           les détails (caption + liste d'entités) suivent en plus petit et en
+                           couleur atténuée, secondaires à la lecture. */
+                        .cp-verifier__status { font-size: .95rem; font-weight: 700; margin: 0 0 .35rem; }
+                        .cp-verifier__status.cp-verifier__status--ok { color: var(--c-primary); }
+                        .cp-verifier__status.cp-verifier__status--warning { color: var(--c-accent); }
+                        .cp-verifier__caption { font-size: .74rem; color: var(--c-text-muted); margin: 0 0 .25rem; }
+                        .cp-verifier__result { font-size: .76rem; color: var(--c-text-muted); margin: 0; font-weight: 500; }
 
                         .cp-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; margin-bottom: .5rem; }
                         .cp-open-group { display: inline-flex; align-items: center; gap: .4rem; }
@@ -342,7 +377,8 @@
                         </style>
 
                         {{-- ===== État A / B : 9 cartes, radios natifs, jamais retirées du DOM ===== --}}
-                        <fieldset class="cp-cards" :class="selectedCard ? 'cp-cards--collapsed' : 'cp-cards--grid'">
+                        <fieldset class="cp-cards"
+                                  :class="selectedCard ? 'cp-cards--collapsed' : (showAllCards ? 'cp-cards--grid' : 'cp-cards--grid cp-cards--peek')">
                             <legend>{{ __('Qu\'est-ce que vous voulez faire aujourd\'hui ?') }}</legend>
                             @foreach ($gabarits as $g)
                                 <label class="cp-card" :class="{ 'is-checked': selectedCard === '{{ $g['key'] }}' }">
@@ -361,6 +397,20 @@
                             @endforeach
                         </fieldset>
 
+                        {{-- Divulgation progressive mobile (<640px, section CSS .cp-cards--peek) :
+                             les 5 dernières cartes restent des radios natifs dans le DOM, seulement
+                             masquées en CSS - ce bouton ne fait que lever le masquage. --}}
+                        <button type="button"
+                                class="ct-btn ct-btn-outline cp-cards__more-btn"
+                                style="min-height:44px;"
+                                x-show="!selectedCard && !showAllCards"
+                                x-cloak
+                                @click="showAllCards = true"
+                                :aria-expanded="showAllCards ? 'true' : 'false'"
+                                aria-label="{{ __('Afficher les 5 options supplémentaires : Expliquer simplement, Trouver des idées, Préparer une activité ou un questionnaire, Traduire, Autre chose') }}">
+                            {{ __('Voir toutes les options (5)') }}
+                        </button>
+
                         {{-- Pastille de la carte choisie, en tête de la phrase - permet de revenir à
                              l'écran des 9 choix sans perdre le texte déjà saisi (trous canoniques
                              persistés dans `values`, section 4 du plan). --}}
@@ -371,69 +421,89 @@
 
                         <p class="cp-kept-note" x-show="notifyKept" x-cloak role="status" aria-live="polite">{{ __('Votre texte a été conservé.') }}</p>
 
-                        {{-- ===== Phrase à trous (état B) ===== --}}
-                        <div class="cp-phrase" x-show="selectedCard" x-cloak x-ref="phraseArea">
-                            <template x-for="f in (currentTemplate() ? currentTemplate().fields : [])" :key="f.slot">
-                                <span class="cp-slot" :class="{ 'cp-slot--flash': flashSlots[f.slot] }">
-                                    <label :for="'cpField-' + f.slot" class="cp-slot__label" x-text="f.label"></label>
+                        <p class="cp-intro-note" x-show="selectedCard" x-cloak>
+                            {{ __('Répondez à ces quelques questions : votre prompt se construira automatiquement ci-dessous.') }}
+                        </p>
 
-                                    <template x-if="f.type === 'text'">
-                                        <input type="text"
-                                               :id="'cpField-' + f.slot"
-                                               class="cp-slot__input"
-                                               x-model.trim="values[f.slot]"
-                                               :placeholder="f.placeholder"
-                                               :data-cp-empty="(!values[f.slot]) ? 'true' : 'false'">
-                                    </template>
+                        {{-- Sur desktop (≥1024px), formulaire et aperçu+vérificateur sont côte à
+                             côte pour voir l'aperçu se mettre à jour sans défiler. Sous 1024px,
+                             empilement vertical inchangé. --}}
+                        <div class="cp-builder-grid" x-show="selectedCard" x-cloak>
+                            <div class="cp-builder-col-form">
+                                {{-- ===== Phrase à trous (état B) ===== --}}
+                                <div class="cp-phrase" x-ref="phraseArea">
+                                    <template x-for="f in (currentTemplate() ? currentTemplate().fields : [])" :key="f.slot">
+                                        <span class="cp-slot" :class="{ 'cp-slot--flash': flashSlots[f.slot] }">
+                                            <label :for="'cpField-' + f.slot" class="cp-slot__label">
+                                                <span x-text="f.label"></span>
+                                                <span class="cp-slot__empty-dot" x-show="!values[f.slot]" aria-hidden="true"></span>
+                                            </label>
 
-                                    <template x-if="f.type === 'textarea'">
-                                        <textarea :id="'cpField-' + f.slot"
-                                                  class="cp-slot__input cp-slot__textarea"
-                                                  x-model.trim="values[f.slot]"
-                                                  :placeholder="f.placeholder"
-                                                  rows="1"
-                                                  @input="autoGrow($event.target)"
-                                                  :data-cp-empty="(!values[f.slot]) ? 'true' : 'false'"></textarea>
-                                    </template>
-
-                                    <template x-if="f.type === 'select'">
-                                        <select :id="'cpField-' + f.slot"
-                                                class="cp-slot__input cp-slot__select"
-                                                x-model="values[f.slot]"
-                                                :data-cp-empty="(!values[f.slot]) ? 'true' : 'false'">
-                                            <option value="">{{ __('Choisir...') }}</option>
-                                            <template x-for="opt in f.options" :key="opt.value">
-                                                <option :value="opt.value" x-text="opt.label"></option>
+                                            <template x-if="f.type === 'text'">
+                                                <input type="text"
+                                                       :id="'cpField-' + f.slot"
+                                                       class="cp-slot__input"
+                                                       x-model.trim="values[f.slot]"
+                                                       :placeholder="f.placeholder"
+                                                       :data-cp-empty="(!values[f.slot]) ? 'true' : 'false'">
                                             </template>
-                                        </select>
+
+                                            <template x-if="f.type === 'textarea'">
+                                                <textarea :id="'cpField-' + f.slot"
+                                                          class="cp-slot__input cp-slot__textarea"
+                                                          x-model.trim="values[f.slot]"
+                                                          :placeholder="f.placeholder"
+                                                          rows="1"
+                                                          @input="autoGrow($event.target)"
+                                                          :data-cp-empty="(!values[f.slot]) ? 'true' : 'false'"></textarea>
+                                            </template>
+
+                                            <template x-if="f.type === 'select'">
+                                                <select :id="'cpField-' + f.slot"
+                                                        class="cp-slot__input cp-slot__select"
+                                                        x-model="values[f.slot]"
+                                                        :data-cp-empty="(!values[f.slot]) ? 'true' : 'false'">
+                                                    <option value="">{{ __('Choisir...') }}</option>
+                                                    <template x-for="opt in f.options" :key="opt.value">
+                                                        <option :value="opt.value" x-text="opt.label"></option>
+                                                    </template>
+                                                </select>
+                                            </template>
+                                        </span>
                                     </template>
-                                </span>
-                            </template>
-                        </div>
+                                </div>
+                            </div>
 
-                        {{-- ===== Aperçu du prompt en direct ===== --}}
-                        <div class="cp-preview" x-show="selectedCard" x-cloak aria-live="polite">
-                            <p class="cp-preview__label">{{ __('Aperçu du prompt (se construit en direct)') }}</p>
-                            <p class="cp-preview__text">
-                                <template x-for="(seg, i) in previewSegments()" :key="i">
-                                    <span :class="{
-                                            'cp-preview__literal': seg.type === 'literal',
-                                            'cp-preview__user': seg.type === 'user',
-                                            'cp-preview__placeholder': seg.type === 'placeholder'
-                                          }"
-                                          x-text="seg.text"></span>
-                                </template>
-                            </p>
-                            <p class="cp-preview__legend">
-                                <span><span class="cp-preview__legend-dot cp-preview__legend-dot--user" aria-hidden="true"></span>{{ __('vos mots') }}</span>
-                                <span><span class="cp-preview__legend-dot cp-preview__legend-dot--tool" aria-hidden="true"></span>{{ __("ajouté par l'outil") }}</span>
-                            </p>
-                        </div>
+                            <div class="cp-builder-col-preview">
+                                {{-- ===== Aperçu du prompt en direct ===== --}}
+                                <div class="cp-preview" aria-live="polite">
+                                    <p class="cp-preview__label">{{ __('Aperçu du prompt (se construit en direct)') }}</p>
+                                    <p class="cp-preview__text">
+                                        <template x-for="(seg, i) in previewSegments()" :key="i">
+                                            <span :class="{
+                                                    'cp-preview__literal': seg.type === 'literal',
+                                                    'cp-preview__user': seg.type === 'user',
+                                                    'cp-preview__placeholder': seg.type === 'placeholder'
+                                                  }"
+                                                  x-text="seg.text"></span>
+                                        </template>
+                                    </p>
+                                    <p class="cp-preview__legend">
+                                        <span><span class="cp-preview__legend-dot cp-preview__legend-dot--user" aria-hidden="true"></span>{{ __('vos mots') }}</span>
+                                        <span><span class="cp-preview__legend-dot cp-preview__legend-dot--tool" aria-hidden="true"></span>{{ __("ajouté par l'outil") }}</span>
+                                    </p>
+                                </div>
 
-                        {{-- ===== Vérificateur déterministe local - jamais un état "propre"/vert ===== --}}
-                        <div class="cp-verifier" x-show="selectedCard" x-cloak role="status" aria-live="polite">
-                            <p class="cp-verifier__caption" x-text="verifierCaption()"></p>
-                            <p class="cp-verifier__result" x-text="verifierResultText()"></p>
+                                {{-- ===== Vérificateur déterministe local - statut simple d'abord,
+                                     détails ensuite - jamais un état "propre"/vert sur les détails ===== --}}
+                                <div class="cp-verifier" role="status" aria-live="polite">
+                                    <p class="cp-verifier__status"
+                                       :class="verifierHasFindings() ? 'cp-verifier__status--warning' : 'cp-verifier__status--ok'"
+                                       x-text="verifierStatusText()"></p>
+                                    <p class="cp-verifier__caption" x-text="verifierCaption()"></p>
+                                    <p class="cp-verifier__result" x-text="verifierResultText()"></p>
+                                </div>
+                            </div>
                         </div>
 
                         {{-- ===== Actions : copier / ouvrir dans une IA ===== --}}

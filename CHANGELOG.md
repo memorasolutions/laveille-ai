@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.9] - 2026-08-02
+
+### Corrigé
+
+- **5 améliorations d'ergonomie (Constructeur de prompts).** Trouvées par un audit réel (marche à
+  pied superadmin dans l'outil + club des sages, verdict Codex "réel" sur chacune) :
+  vérificateur PII avec statut simple d'abord (teal/orange) et détails en secondaire ; repère
+  visuel permanent (bordure + point orange) sur les champs vides ; phrase d'intro expliquant la
+  construction automatique du prompt ; formulaire et aperçu côte à côte dès 1024px ; divulgation
+  progressive des 9 cartes sur mobile (4 prioritaires + bouton "Voir toutes les options", les 9
+  radios natifs restent en permanence dans le DOM). Bug de rendu trouvé et corrigé en cours de
+  route : le statut du vérificateur restait gris (règle globale de charte plus spécifique) -
+  corrigé par une classe CSS composée. 265/265 tests verts, vérification navigateur réelle sur
+  chaque point, zéro régression.
+
 ## [1.139.8] - 2026-08-02
 
 ### Corrigé

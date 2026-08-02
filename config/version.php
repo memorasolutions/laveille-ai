@@ -17,6 +17,21 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.139.9 · 2026-08-02 · fix(constructeur-prompts) 5 ameliorations ergonomie trouvees par audit
+ *     reel (marche a pied superadmin + club des sages, verdict Codex "reel" sur chacune) :
+ *     (1) verificateur PII affiche un statut simple d'abord ("Rien detecte."/"N element(s) a
+ *     verifier.", teal/orange), details en secondaire ; (2) champs vides ont un repere visuel
+ *     permanent (bordure + point orange sur le champ, pas seulement une liste texte) ;
+ *     (3) phrase d'intro expliquant que le formulaire construit le prompt automatiquement ;
+ *     (4) formulaire et apercu cote a cote des 1024px (empile en dessous, inchange) ;
+ *     (5) divulgation progressive des 9 cartes sur mobile <640px (4 prioritaires + bouton
+ *     "Voir toutes les options (5)", les 9 radios natifs restent en permanence dans le DOM).
+ *     Bug trouve et corrige en cours de route : le statut du verificateur restait gris malgre le
+ *     CSS teal/orange - regle globale de charte .wpo-blog-single-section p plus specifique
+ *     l'ecrasait ; corrige par double-classe .cp-verifier__status.cp-verifier__status--ok/warning.
+ *     265/265 tests Modules/Tools verts, verification navigateur reelle (Playwright) sur chacun
+ *     des 6 points, zero regression sur le comportement existant.
+ *
  *   1.139.8 · 2026-08-02 · fix(constructeur-prompts) cible tactile AAA sur le bouton de reset de
  *     la pastille selectionnee. Trouve par la verification visuelle Playwright de l'etape 10 (plan
  *     .outils/PLAN-CONSTRUCTEUR-PROMPTS-ULTRA-2026-08-02.md) : .cp-selected-pill__reset mesurait
@@ -3298,7 +3313,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 8;
+$lvPatch = 9;
 
 return [
     'major' => $lvMajor,
