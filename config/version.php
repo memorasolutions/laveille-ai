@@ -17,6 +17,14 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.139.8 · 2026-08-02 · fix(constructeur-prompts) cible tactile AAA sur le bouton de reset de
+ *     la pastille selectionnee. Trouve par la verification visuelle Playwright de l'etape 10 (plan
+ *     .outils/PLAN-CONSTRUCTEUR-PROMPTS-ULTRA-2026-08-02.md) : .cp-selected-pill__reset mesurait
+ *     32x32px, sous le standard AAA 44px deja applique aux autres boutons de l'outil. Portee a
+ *     44x44px. Aucun autre probleme bloquant trouve par la verification (desktop, mobile 390px,
+ *     zoom 200%, clavier seul, console, contraste AAA 5/5 elements testes >=7:1, ordre synchrone
+ *     iOS Safari confirme par lecture de code sur copyPrompt()/openInAI()).
+ *
  *   1.139.7 · 2026-08-02 · fix(sante) courriel Schedule sans marche a suivre + seuil trop
  *     sensible. Incident reel : 2026-08-02 10h41-10h42 UTC, courriel URGENT « The schedule did
  *     not run yet » sans une seule ligne de marche a suivre (contrairement a OPcache) - et
@@ -3290,7 +3298,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 7;
+$lvPatch = 8;
 
 return [
     'major' => $lvMajor,

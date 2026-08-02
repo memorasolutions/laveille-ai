@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.8] - 2026-08-02
+
+### Corrigé
+
+- **Cible tactile AAA sur le bouton de reset de la pastille sélectionnée (Constructeur de
+  prompts).** Trouvé par la vérification visuelle Playwright de l'étape 10 du plan de refonte :
+  `.cp-selected-pill__reset` mesurait 32×32px, sous le standard AAA 44px déjà appliqué aux autres
+  boutons de l'outil. Porté à 44×44px. Aucun autre problème bloquant trouvé par la vérification
+  (desktop, mobile 390px, zoom 200%, clavier seul, console, contraste AAA 5/5 éléments testés
+  ≥7:1, ordre synchrone iOS Safari confirmé par lecture de code).
+
 ## [1.139.7] - 2026-08-02
 
 ### Corrigé

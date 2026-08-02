@@ -287,7 +287,7 @@
                         .cp-cards--collapsed .cp-card__title { font-size: .85rem; }
 
                         .cp-selected-pill { display: inline-flex; align-items: center; gap: .4rem; padding: .35rem .7rem; margin-bottom: .6rem; border-radius: 9999px; background: var(--c-primary-light); border: 1px solid rgba(6,78,90,0.25); color: var(--c-primary); font-weight: 700; font-size: .88rem; }
-                        .cp-selected-pill__reset { min-width: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--c-primary); font-size: 1rem; cursor: pointer; border-radius: 6px; }
+                        .cp-selected-pill__reset { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--c-primary); font-size: 1rem; cursor: pointer; border-radius: 6px; }
                         .cp-selected-pill__reset:hover { background: rgba(6,78,90,0.12); }
                         .cp-selected-pill__reset:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 1px; }
 
