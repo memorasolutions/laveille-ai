@@ -17,6 +17,19 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.139.10 · 2026-08-02 · fix(constructeur-prompts) 4 derniers quick wins du conseil des sages
+ *     final (Codex, Gemini, claude.ai, DeepSeek sur le produit fini + captures reelles) :
+ *     (1) confirmation avant de changer de carte SI des champs sont deja remplis (message honnete
+ *     - les donnees sont en realite conservees en interne, jamais perdues, verifie par lecture de
+ *     code) ; (2) distinction visuelle claire hover/focus (bordure grise + ombre legere) vs carte
+ *     selectionnee (fond teal plein), qui se ressemblaient trop auparavant ; (3) region
+ *     aria-live="polite" annoncant le passage grille -> formulaire aux lecteurs d'ecran ;
+ *     (4) aria-label sur les icones seules deja verifie present. Le libelle du fieldset
+ *     "Qu'est-ce que vous voulez faire aujourd'hui ?" a ete verifie non affecte par un grid
+ *     blowout (hors du flux grid par specification CSS des <legend>, aucune correction requise).
+ *     265/265 tests Modules/Tools verts, verification navigateur reelle sur les 5 points, zero
+ *     regression. Le conseil des sages juge desormais le produit pret pour les etapes 11/12.
+ *
  *   1.139.9 · 2026-08-02 · fix(constructeur-prompts) 5 ameliorations ergonomie trouvees par audit
  *     reel (marche a pied superadmin + club des sages, verdict Codex "reel" sur chacune) :
  *     (1) verificateur PII affiche un statut simple d'abord ("Rien detecte."/"N element(s) a
@@ -3313,7 +3326,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 9;
+$lvPatch = 10;
 
 return [
     'major' => $lvMajor,

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.10] - 2026-08-02
+
+### Corrigé
+
+- **4 derniers quick wins du conseil des sages final (Constructeur de prompts).** Consultation
+  finale (Codex, Gemini, claude.ai, DeepSeek) sur le produit fini avec captures réelles : confirmation
+  avant de changer de carte si des champs sont déjà remplis (message honnête, les données sont en
+  réalité toujours conservées) ; distinction visuelle claire entre survol/focus (bordure grise +
+  ombre légère) et carte sélectionnée (fond teal plein), qui se ressemblaient trop ; région
+  `aria-live="polite"` annonçant le passage grille → formulaire aux lecteurs d'écran. Le libellé du
+  fieldset a été vérifié non affecté par le grid blowout déjà corrigé. 265/265 tests verts,
+  vérification navigateur réelle sur les 5 points, zéro régression. Le conseil des sages juge le
+  produit prêt pour les étapes 11 (test enseignants) et 12 (mise en public).
+
 ## [1.139.9] - 2026-08-02
 
 ### Corrigé

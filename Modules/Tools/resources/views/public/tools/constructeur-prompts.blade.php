@@ -273,11 +273,14 @@
 
                         .cp-card { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; min-height: 76px; padding: .7rem .8rem; border: 2px solid #d1d5db; border-radius: 12px; background: #fff; color: var(--c-dark); cursor: pointer; transition: border-color .15s ease, background .15s ease; }
                         .cp-card__title, .cp-card__example { overflow-wrap: break-word; word-break: break-word; }
-                        .cp-card:hover { border-color: var(--c-primary); }
+                        /* Hover/focus volontairement DISTINCTS de la sélection (fond teal plein,
+                           .is-checked) : ombre douce + bordure neutre, jamais le même traitement teal
+                           qu'une carte sélectionnée (audit ergonomie 2026-08-02, point 3). */
+                        .cp-card:hover { border-color: var(--c-text-muted); box-shadow: 0 3px 10px rgba(6,78,90,.15); }
                         .cp-card.is-checked { background: var(--c-primary); border-color: var(--c-primary); color: #fff; }
                         .cp-card.is-checked .cp-card__example { color: rgba(255,255,255,.85); }
                         .cp-card:focus-within { outline: 3px solid var(--c-accent); outline-offset: 2px; }
-                        .cp-card__input { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+                        .cp-card__input, .cp-sr-announce { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
                         .cp-card__body { display: flex; flex-direction: column; gap: 2px; }
                         .cp-card__icon { font-size: 1.1rem; line-height: 1; }
                         .cp-card__title { font-weight: 700; font-size: .92rem; }
@@ -396,6 +399,13 @@
                                 </label>
                             @endforeach
                         </fieldset>
+
+                        {{-- Annonce vocale (lecteur d'écran) du passage à l'écran du formulaire lors
+                             d'une sélection de carte - TOUJOURS dans le DOM (jamais x-show) pour que la
+                             région aria-live soit déjà enregistrée avant le premier changement de texte.
+                             Visuellement masquée via le même procédé que .cp-card__input ci-dessus
+                             (audit ergonomie 2026-08-02, point 4). --}}
+                        <div class="cp-sr-announce" role="status" aria-live="polite" x-text="cardAnnouncement"></div>
 
                         {{-- Divulgation progressive mobile (<640px, section CSS .cp-cards--peek) :
                              les 5 dernières cartes restent des radios natifs dans le DOM, seulement

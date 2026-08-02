@@ -67,6 +67,10 @@ document.addEventListener('alpine:init', function () {
 
             notifyKept: false,
             flashSlots: {},
+            // Annonce lecteur d'écran (aria-live="polite", .cp-sr-announce dans le Blade) du passage
+            // cartes -> formulaire (audit ergonomie 2026-08-02, point 4) - région toujours montée dans
+            // le DOM, seul ce texte change.
+            cardAnnouncement: '',
 
             // Divulgation progressive des 9 cartes sur mobile (<640px, voir CSS .cp-cards--peek) :
             // les 5 dernières cartes restent dans le DOM (radios natifs, jamais retirées) mais sont
@@ -103,6 +107,11 @@ document.addEventListener('alpine:init', function () {
             onCardSelected: function () {
                 var self = this;
                 var tpl = this.currentTemplate();
+                // Annonce lecteur d'écran (aria-live="polite", cp-sr-announce dans le Blade) - vidée
+                // puis réécrite au prochain tick (même $nextTick que le focus ci-dessous) pour
+                // garantir une ré-annonce même si le libellé est identique à la sélection précédente.
+                this.cardAnnouncement = '';
+                var announceLabel = tpl ? tpl.label : '';
                 this.notifyKept = !!(tpl && tpl.fields.some(function (f) { return (self.values[f.slot] || '').toString().trim() !== ''; }));
                 if (this.notifyKept) {
                     setTimeout(function () { self.notifyKept = false; }, 4000);
@@ -110,6 +119,7 @@ document.addEventListener('alpine:init', function () {
                 this.openInstructionVisible = false;
                 this.openFallbackUrl = '';
                 this.$nextTick(function () {
+                    self.cardAnnouncement = announceLabel ? ('Formulaire ' + announceLabel + ' affiché.') : '';
                     if (!self.$refs.phraseArea) return;
                     // Auto-grandissement immédiat des textarea déjà remplies par migration.
                     self.$refs.phraseArea.querySelectorAll('.cp-slot__textarea').forEach(function (el) { self.autoGrow(el); });
@@ -126,12 +136,34 @@ document.addEventListener('alpine:init', function () {
             },
 
             // Revient à l'état A (grille des 9 cartes). Les 9 radios restent dans le DOM en tout
-            // temps (jamais retirées) : on décoche seulement le groupe en vidant selectedCard.
+            // temps (jamais retirées) : on décoche seulement le groupe en vidant selectedCard. Les
+            // valeurs (`values`) ne sont JAMAIS effacées ici - objet partagé entre gabarits, elles
+            // réapparaissent si la même carte est resélectionnée. Une confirmation est tout de même
+            // demandée quand au moins un champ de la carte courante est rempli (audit ergonomie
+            // 2026-08-02, point 2), pour éviter la fausse impression de perte - même pattern
+            // CustomEvent que clearHistory() plus bas, jamais réinventé.
             resetSelection: function () {
-                this.selectedCard = null;
-                this.notifyKept = false;
-                this.openInstructionVisible = false;
-                this.openFallbackUrl = '';
+                var self = this;
+                var tpl = this.currentTemplate();
+                var hasFilledFields = !!(tpl && tpl.fields.some(function (f) {
+                    return (self.values[f.slot] || '').toString().trim() !== '';
+                }));
+                var doReset = function () {
+                    self.selectedCard = null;
+                    self.notifyKept = false;
+                    self.openInstructionVisible = false;
+                    self.openFallbackUrl = '';
+                };
+                if (!hasFilledFields) {
+                    doReset();
+                    return;
+                }
+                window.dispatchEvent(new CustomEvent('open-confirm-global', {
+                    detail: {
+                        message: 'Changer de type de tâche ? Vos réponses actuelles pour « ' + tpl.label + ' » seront conservées si vous y revenez.',
+                        callback: doReset
+                    }
+                }));
             },
 
             // ===== Champs de texte auto-extensibles (jamais contenteditable, section 4 du plan) =====
