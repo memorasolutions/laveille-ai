@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.11] - 2026-08-02
+
+### Corrigé
+
+- **Fiches outils `/annuaire/{slug}` : 5-7 secondes de temps de réponse.** Mesure directe en
+  production (probes auto-suppressibles avec `DB::enableQueryLog`) : 24 ms de SQL cumulé sur 81
+  requêtes contre 6,6 secondes de temps total - la lenteur entière était hors base de données,
+  dans `@glossarize()` (`GlossaryLinkifier::linkify()`), qui boucle une comparaison par terme
+  (glossaire + acronymes + ~465 outils + tous leurs alias/variantes) sur chaque nœud de texte du
+  contenu, pour chaque visite. Seule la LISTE des termes était mise en cache (1h), jamais le
+  résultat du matching. Le résultat est maintenant caché (limité au premier appel par page, pour
+  ne rien changer aux pages qui appellent la fonction plusieurs fois), invalidé automatiquement
+  quand le glossaire ou les outils changent. Cette fonction est utilisée sur les fiches d'outils,
+  les articles de blog, les actualités et le glossaire lui-même - l'amélioration profite à tout le
+  site, pas seulement à l'annuaire.
+
 ## [1.139.10] - 2026-08-02
 
 ### Corrigé

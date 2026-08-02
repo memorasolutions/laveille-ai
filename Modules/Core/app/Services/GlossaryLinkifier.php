@@ -28,6 +28,9 @@ class GlossaryLinkifier
 {
     public const CACHE_KEY = 'glossary.terms.v9.'; // #164 bump : ajout de la 3e source (outils de l'annuaire)
     public const CACHE_TTL = 3600; // 1h
+    // 2026-08-02 #1526 : compteur d'epoch pour invalider le cache du RÉSULTAT linkify() (voir linkify()
+    // et flushCache()) sans avoir à énumérer des clés — un seul Cache::forever() invalide tout d'un coup.
+    public const TERMS_EPOCH_KEY = 'glossary.terms.epoch';
     public const MIN_LENGTH = 3; // #153 bump : 4→3 pour permettre TPU/GPU/NPU. Garde 2 chars rejetés via acronyme tout-cap check
     public const MAX_LINKS_PER_PAGE = 120; // #158 bump 60→120 : articles longs (S90 concentré 20 URLs) saturent à 60. 120 couvre 80%+ occurrences
     public const MAX_OCCURRENCES_PER_TERM = 10; // #158 wrap jusqu'à 10× le même terme par page (vs 1× avant)
@@ -99,6 +102,38 @@ class GlossaryLinkifier
 
         // Tracking cumulatif inter-appels (par requête HTTP)
 
+        // 2026-08-02 #1526 : mesure en prod (probes) = 5-7s par rendu de /annuaire/{slug} entièrement
+        // dans cette boucle de matching (24ms de SQL cumulé sur 81 requêtes, donc pas la BD). On cache
+        // le RÉSULTAT (HTML final + état matched/seen/linkCount) UNIQUEMENT pour le 1er appel @glossarize()
+        // de la requête : le docblock de tracking cumulatif ci-dessus (self::$seenThisRequest) prouve
+        // qu'un appel qui n'est PAS le premier dépend de l'état laissé par les appels précédents sur la
+        // MÊME page (hook, key_points, why_important...) — donc pas cache-able en isolation. Le cas
+        // dominant (Directory/show.blade.php : 1 seul appel @glossarize()) profite pleinement du cache.
+        $cacheEligible = empty(self::$seenThisRequest) && self::$linkCountThisRequest === 0;
+        $resultCacheKey = null;
+        if ($cacheEligible) {
+            $resultCacheKey = 'glossary.linkify.result.'.md5(implode('|', [
+                $html,
+                (string) $skipSlug,
+                (string) $maxLinks,
+                (string) $maxOcc,
+                $perSection ? '1' : '0',
+                app()->getLocale() ?: 'fr_CA',
+                (string) self::currentTermsEpoch(),
+            ]));
+
+            $cached = Cache::get($resultCacheKey);
+            if (is_array($cached) && array_key_exists('html', $cached) && array_key_exists('seen', $cached) && array_key_exists('linkCount', $cached) && array_key_exists('matched', $cached)) {
+                self::$seenThisRequest = $cached['seen'];
+                self::$linkCountThisRequest = $cached['linkCount'];
+                foreach ($cached['matched'] as $slug => $term) {
+                    self::$matchedThisRequest[$slug] = $term;
+                }
+
+                return $cached['html'];
+            }
+        }
+
         try {
             $dom = new \DOMDocument;
             // Charset trick: force UTF-8 + suppress HTML5 warnings
@@ -122,6 +157,17 @@ class GlossaryLinkifier
         $output = '';
         foreach ($root->childNodes as $child) {
             $output .= $dom->saveHTML($child);
+        }
+
+        // 2026-08-02 #1526 : écrit le cache résultat (voir bloc de lecture plus haut) uniquement si cet
+        // appel était éligible (1er appel de la requête) — sinon on figerait un état partiel/cumulatif faux.
+        if ($cacheEligible && $resultCacheKey !== null) {
+            Cache::put($resultCacheKey, [
+                'html' => $output,
+                'seen' => self::$seenThisRequest,
+                'linkCount' => self::$linkCountThisRequest,
+                'matched' => self::$matchedThisRequest,
+            ], self::CACHE_TTL);
         }
 
         return $output;
@@ -577,6 +623,15 @@ class GlossaryLinkifier
     }
 
     /**
+     * 2026-08-02 #1526 : epoch courant du cache de RÉSULTAT linkify() (voir linkify()/flushCache()).
+     * Défaut 0 tant que flushCache() n'a jamais tourné depuis le déploiement de ce compteur.
+     */
+    protected static function currentTermsEpoch(): int
+    {
+        return (int) Cache::get(self::TERMS_EPOCH_KEY, 0);
+    }
+
+    /**
      * Invalidation cache (appelée par Model events sur Term + Acronym).
      */
     public static function flushCache(): void
@@ -591,6 +646,11 @@ class GlossaryLinkifier
             Cache::forget('glossary.terms.v3.'.$loc);
             Cache::forget('glossary.terms.v2.'.$loc);
         }
+
+        // 2026-08-02 #1526 : incrémente l'epoch pour invalider tout résultat linkify() caché précédemment
+        // (les clés de cache résultat incluent cet epoch, voir linkify()). Cache::increment() n'est pas
+        // garanti atomique sur le driver 'file' (CACHE_STORE=file en prod) → lecture puis forever() explicite.
+        Cache::forever(self::TERMS_EPOCH_KEY, self::currentTermsEpoch() + 1);
     }
 
     /**

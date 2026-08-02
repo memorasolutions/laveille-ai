@@ -17,6 +17,26 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.139.11 · 2026-08-02 · fix(perf) fiches outils /annuaire/{slug} 5-7s -> cache du resultat
+ *     GlossaryLinkifier::linkify(). Mesure directe en prod (probes auto-suppressibles, requete
+ *     dispatchee dans le vrai kernel HTTP avec DB::enableQueryLog) : 24ms de SQL cumule sur 81
+ *     requetes contre 6593-6660ms de temps total - la totalite du temps hors SQL etait dans
+ *     @glossarize() (Modules/Core/app/Services/GlossaryLinkifier.php), qui boucle un preg_match
+ *     par terme (glossaire + acronymes + ~465 outils + tous leurs alias/variantes morphologiques,
+ *     potentiellement des milliers d'entrees) sur CHAQUE noeud de texte du DOM, avec recursion sur
+ *     les fragments avant/apres a chaque match. Seule la LISTE des termes etait cachee (1h), jamais
+ *     le RESULTAT du matching. Correctif : cache du HTML final + etat matched/seen/linkCount,
+ *     limite au 1er appel @glossarize() de la requete (le docblock de la classe documente un
+ *     tracking cumulatif inter-appels sur une meme page - un appel qui n'est pas le premier depend
+ *     de l'etat laisse par les precedents, donc pas cache-able en isolation ; le cas dominant,
+ *     Directory/show.blade.php, n'appelle @glossarize() qu'une seule fois). Invalidation via un
+ *     epoch incremente dans flushCache() (deja cable sur les events Term/Acronym/Tool) - aucune
+ *     enumeration de cle necessaire. getLastMatchedTerms() reste correctement alimente en cas de
+ *     cache-hit (fusion, pas ecrasement) pour ne pas casser le JSON-LD DefinedTermSet genere sur
+ *     toutes les pages qui utilisent @glossarize() (Blog, Actualites, Glossaire, Annuaire). Tests
+ *     Modules/Core+Directory+Dictionary+News+FrontTheme+Acronyms verts (verifie deux fois,
+ *     independamment du sous-agent qui a implemente le correctif).
+ *
  *   1.139.10 · 2026-08-02 · fix(constructeur-prompts) 4 derniers quick wins du conseil des sages
  *     final (Codex, Gemini, claude.ai, DeepSeek sur le produit fini + captures reelles) :
  *     (1) confirmation avant de changer de carte SI des champs sont deja remplis (message honnete
@@ -3326,7 +3346,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 10;
+$lvPatch = 11;
 
 return [
     'major' => $lvMajor,
