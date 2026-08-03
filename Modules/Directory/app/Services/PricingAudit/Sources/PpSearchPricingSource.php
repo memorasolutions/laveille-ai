@@ -58,7 +58,7 @@ class PpSearchPricingSource extends AbstractPricingSource
         }
 
         // 2) Mode direct via OpenRouter Sonar Pro.
-        $apiKey = config('directory.openrouter_api_key') ?: env('OPENROUTER_API_KEY');
+        $apiKey = config('directory.openrouter_api_key');
         if (! $apiKey) {
             return new PricingSourceResult(
                 sourceName: $this->name(),

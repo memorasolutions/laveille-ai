@@ -46,7 +46,7 @@ class OpenRouterService
 
     private function call(string $model, array $messages, int $maxRetries = 2): string
     {
-        $apiKey = config('directory.openrouter_api_key') ?: env('OPENROUTER_API_KEY');
+        $apiKey = config('directory.openrouter_api_key');
         if (! $apiKey) {
             Log::warning('OpenRouterService : clé API manquante');
 

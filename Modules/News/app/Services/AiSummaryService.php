@@ -44,7 +44,7 @@ class AiSummaryService
      */
     public function scoreAndSummarize(string $title, string $text, string $language = 'fr'): ?array
     {
-        $apiKey = config('services.openrouter.api_key', env('OPENROUTER_API_KEY'));
+        $apiKey = config('services.openrouter.api_key');
         if (! $apiKey) {
             Log::warning('OPENROUTER_API_KEY non configurée.');
             return null;

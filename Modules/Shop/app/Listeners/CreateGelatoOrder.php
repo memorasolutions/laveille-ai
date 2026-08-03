@@ -98,7 +98,7 @@ class CreateGelatoOrder implements ShouldQueue
      */
     private function notifyAdminInvalidConfig(Order $order, array $reasons): void
     {
-        $adminEmail = config('shop.admin_email') ?: config('mail.from.address') ?: env('ADMIN_EMAIL');
+        $adminEmail = config('shop.admin_email') ?: config('mail.from.address');
         if (! $adminEmail) {
             Log::warning("notifyAdminInvalidConfig : aucun ADMIN_EMAIL configure");
             return;

@@ -167,7 +167,7 @@ class HealthCheckReportCommand extends Command
             return self::SUCCESS;
         }
 
-        $adminEmail = config('app.superadmin_email') ?: config('app.admin_email') ?: env('ADMIN_EMAIL') ?: env('MAIL_FROM_ADDRESS');
+        $adminEmail = config('app.superadmin_email') ?: config('app.admin_email') ?: config('mail.from.address');
         if (! $adminEmail) {
             $this->error('Pas d\'email admin configuré (app.superadmin_email / ADMIN_EMAIL / MAIL_FROM_ADDRESS).');
             return self::FAILURE;

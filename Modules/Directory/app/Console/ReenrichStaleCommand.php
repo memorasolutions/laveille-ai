@@ -29,7 +29,7 @@ class ReenrichStaleCommand extends Command
             return self::SUCCESS;
         }
 
-        $apiKey = config('directory.openrouter_api_key') ?: env('OPENROUTER_API_KEY');
+        $apiKey = config('directory.openrouter_api_key');
         if (empty($apiKey)) {
             $this->error('OPENROUTER_API_KEY non configurée.');
 
