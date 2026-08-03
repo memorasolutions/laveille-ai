@@ -14,11 +14,10 @@ class SavedWheelPreset extends Model
 
     protected $table = 'saved_wheel_presets';
 
-    protected $fillable = ['user_id', 'name', 'config_text', 'params', 'is_public'];
+    protected $fillable = ['user_id', 'name', 'config_text', 'params'];
 
     protected $casts = [
         'params' => 'array',
-        'is_public' => 'boolean',
     ];
 
     protected static function booted(): void
@@ -41,10 +40,5 @@ class SavedWheelPreset extends Model
     public function scopeForUser($query, int $userId)
     {
         return $query->where('user_id', $userId);
-    }
-
-    public function scopePublic($query)
-    {
-        return $query->where('is_public', true);
     }
 }
