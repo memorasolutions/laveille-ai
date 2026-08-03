@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.14] - 2026-08-03
+
+### Modifié
+
+- **Constructeur de prompts : retour au formulaire à 3 écrans, sur demande explicite de
+  l'utilisateur.** La réécriture en cartes visuelles + phrase à trous (livrée hier) s'est révélée
+  plus difficile à utiliser en pratique que l'ancien formulaire. L'outil revient à sa version
+  précédente : écran 1 (objectif en texte libre), écran 2 (réglages en blocs dépliés), écran 3
+  (aperçu + Copier/Ouvrir dans une IA) - sans cartes ni phrase à trous.
+
 ## [1.139.13] - 2026-08-03
 
 ### Corrigé

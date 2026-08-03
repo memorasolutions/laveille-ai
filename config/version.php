@@ -3378,11 +3378,25 @@ declare(strict_types=1);
  *     retrait de 'noopener' de l'appel + `newTab.opener = null` fait manuellement juste apres (meme
  *     garantie de securite anti reverse-tabnabbing, mais la reference reste utilisable). Suite
  *     Modules/Tools (35 tests, filtre Constructeur) verte, aucune regression.
+ *
+ *   1.139.14 · 2026-08-03 · revert(constructeur-prompts) l'utilisateur a juge la refonte en
+ *     cartes + phrase-a-trous (v1.139.0 a v1.139.13) plus difficile a utiliser que l'ancien
+ *     formulaire ("je preferais la version d'origine avec le formulaire, plus facile a
+ *     utiliser") - demande explicite de restauration, confirmee via AskUserQuestion (formulaire
+ *     a 3 ecrans plutot que le tres ancien formulaire a menus deroulants de mi-juin). Restauration
+ *     precise de la vue + du JS core au commit ee4df866 (etat juste avant 3e55d5b0, la reecriture
+ *     "page blanche - 9 gabarits phrase-a-trous"), suppression de prompt-verifier-rules.js (ajoute
+ *     par cette reecriture, non utilise ailleurs - verifie par grep), restauration des tests
+ *     RoundNN correspondants et retrait de PromptBuilderRewriteTest.php (n'existait pas avant).
+ *     charte.css NON touche (le fix outline:0 de v1.139.12 est un correctif global site-wide, sans
+ *     lien avec cette refonte). Tag git backup-avant-revert-constructeur-2026-08-03 pose sur HEAD
+ *     avant toute modification (rollback garanti). Suite complete Modules/Tools verifiee : 396
+ *     passed, 1661 assertions, 0 failed.
  */
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 13;
+$lvPatch = 14;
 
 return [
     'major' => $lvMajor,
