@@ -3392,11 +3392,21 @@ declare(strict_types=1);
  *     lien avec cette refonte). Tag git backup-avant-revert-constructeur-2026-08-03 pose sur HEAD
  *     avant toute modification (rollback garanti). Suite complete Modules/Tools verifiee : 396
  *     passed, 1661 assertions, 0 failed.
+ *
+ *   1.139.15 · 2026-08-03 · fix(constructeur-prompts) le revert v1.139.14 restaurait bien le code
+ *     du formulaire a 3 ecrans, mais la colonne `tools.is_under_construction` (activee le
+ *     2026-08-02 pendant la refonte cartes+phrase-a-trous, tache #1391) etait restee a `true` :
+ *     tout visiteur non-superadmin recevait encore la page de gate "fait peau neuve" au lieu du
+ *     formulaire restaure - trouve en verifiant la page reelle en invite (Playwright, session
+ *     sans cookie) apres le deploiement du code, pas seulement en verifiant l'asset JS servi.
+ *     Le gate n'avait de raison d'etre que pendant la refonte cassee, desormais annulee. Flag
+ *     leve en base (`is_under_construction = false`), cache applicatif + ResponseCache vides,
+ *     rendu reel reverifie en navigateur invite avant de considerer la restauration livree.
  */
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 14;
+$lvPatch = 15;
 
 return [
     'major' => $lvMajor,

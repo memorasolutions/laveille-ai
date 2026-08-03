@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.15] - 2026-08-03
+
+### Corrigé
+
+- **Constructeur de prompts : le formulaire restauré (v1.139.14) était invisible pour tout
+  visiteur non-superadmin.** Le drapeau « en révision » activé pendant la refonte cassée était
+  resté actif en base après le retour à la version stable - un vrai visiteur recevait encore la
+  page « fait peau neuve » au lieu du formulaire à 3 écrans. Drapeau levé, cache applicatif vidé,
+  rendu réel revérifié en navigateur en tant qu'invité (sans session) : le formulaire s'affiche
+  maintenant correctement, zéro erreur console.
+
 ## [1.139.14] - 2026-08-03
 
 ### Modifié
