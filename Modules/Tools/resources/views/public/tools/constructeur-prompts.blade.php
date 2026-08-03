@@ -187,76 +187,32 @@
 
                         {{-- Round 151 (2026-08-01, refonte écrans 1-2, PLAN-FINAL-constructeur-2026-07-31.md) :
                              l'indicateur d'étapes numéroté (cercles « 1 »/« 2 » cliquables) a été retiré.
-                             Restauré en assistant séquentiel à 4 étapes (2026-08-03, sur demande explicite
-                             de l'utilisateur : « je veux l'ancien outil, celui où on pouvait aussi choisir
-                             zero-shot, few-shot, etc. » - fidélité à la version pré-refonte du 26 juillet
-                             2026, commit bf422878). Tous les champs et TOUTE la logique de confidentialité
-                             (anti-PII), de sauvegarde et de partage restent ceux du code actuel - seule la
-                             RÉPARTITION en 4 étapes change. Les 9 cartes de démarrage (n'existaient pas
-                             dans la version restaurée) sont retirées de cette page. --}}
+                             Consigne explicite de la refonte : « aucune numérotation d'étapes (« 1 sur 3 »
+                             serait mensonger puisque la suite est facultative) ». L'écran 1 (ci-dessous)
+                             porte maintenant la demande ET les cartes de départ ensemble ; l'écran 2 (plus
+                             bas, x-show="step === 2") est le résultat « Votre prompt est prêt ». Les tests
+                             Round77/Round85 qui verrouillaient cet indicateur ont été mis à jour en
+                             conséquence (voir Round77AdversarialFixesTest.php et
+                             Round85AdversarialFixesTest.php). --}}
 
-                        {{-- Indicateur d'étapes, cliquable (retour à une étape déjà validée) --}}
-                        <div class="d-flex align-items-center justify-content-between mb-3" role="tablist" aria-label="{{ __('Étapes du constructeur') }}">
-                            <template x-for="s in [[1,'{{ __('Persona') }}'],[2,'{{ __('Tâche') }}'],[3,'{{ __('Audience') }}'],[4,'{{ __('Options') }}']]" :key="s[0]">
-                                <button type="button" class="ct-btn ct-btn-ghost ct-btn-xs" :class="{ 'ct-step--on': step === s[0] }" :style="'min-height:44px;flex:1;' + (step === s[0] ? 'font-weight:700;color:var(--c-primary);' : '')" @click="goToStep(s[0])" role="tab" :aria-selected="(step === s[0]).toString()">
-                                    <span aria-hidden="true" x-text="s[0]"></span>. <span x-text="s[1]"></span>
-                                </button>
-                            </template>
-                        </div>
-
-                        {{-- Étape 1 : Persona --}}
+                        {{-- Écran 1 : la demande (un seul champ + cartes de départ en raccourci) --}}
                         <div x-show="step === 1" x-transition>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('Sur quel ton l\'IA doit-elle répondre ?') }}</h2>
+                                <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('Que voulez-vous demander à l\'IA ?') }}</h2>
                                 <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.persona = !showHelp.persona" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;">?</button>
                             </div>
+                            <p class="text-muted small mb-3">{{ __('Décrivez votre demande dans vos mots. Les cartes ci-dessous sont des raccourcis facultatifs.') }}</p>
                             <div x-show="showHelp.persona" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;" x-text="helps.persona"></div>
-                            <div class="ct-block__field">
-                                <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Rôle de l\'IA') }} <span style="color: #991B1B;">*</span></label>
-                                <div class="d-flex gap-3 mb-2">
-                                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
-                                        <input type="radio" name="personaType" value="preset" x-model="personaType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfini') }}
-                                    </label>
-                                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
-                                        <input type="radio" name="personaType" value="custom" x-model="personaType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisé') }}
-                                    </label>
-                                </div>
-                                <div class="ct-card-grid" x-show="personaType === 'preset'" role="radiogroup" :aria-required="personaType === 'preset'" aria-label="{{ __('Choisir un rôle') }}">
-                                    <template x-for="p in personas" :key="p.value">
-                                        <x-tools::prompt-card type="radio" name="personaPresetChoice" value="p.value" model="personaPreset">
-                                            <span x-text="p.label"></span>
-                                        </x-tools::prompt-card>
-                                    </template>
-                                </div>
-                                <input type="text" id="cpPersonaCustom" class="form-control" x-show="personaType === 'custom'" x-model="personaCustom" :aria-required="personaType === 'custom'" autocomplete="off" placeholder="{{ __('Ex: un expert en cybersécurité spécialisé en PME québécoises') }}" aria-label="{{ __('Rôle personnalisé') }}">
-                            </div>
-                        </div>
 
-                        {{-- Étape 2 : Tâche (verbe d'action + description + masquage anti-PII) --}}
-                        <div x-show="step === 2" x-transition>
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('Que voulez-vous demander à l\'IA ?') }}</h2>
-                            </div>
-                            <div class="ct-block__field mb-3">
-                                <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Verbe d\'action') }} <span style="color: #991B1B;">*</span></label>
-                                <div class="d-flex gap-3 mb-2">
-                                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
-                                        <input type="radio" name="verbType" value="preset" x-model="verbType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfini') }}
-                                    </label>
-                                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
-                                        <input type="radio" name="verbType" value="custom" x-model="verbType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisé') }}
-                                    </label>
-                                </div>
-                                <div class="ct-card-grid" x-show="verbType === 'preset'" role="radiogroup" :aria-required="verbType === 'preset'" aria-label="{{ __('Verbe d\'action') }}">
-                                    <template x-for="v in verbs" :key="v">
-                                        <x-tools::prompt-card type="radio" name="verbPreset" value="v" model="verb">
-                                            <span x-text="v"></span>
-                                        </x-tools::prompt-card>
-                                    </template>
-                                </div>
-                                <input type="text" id="cpVerbCustom" class="form-control" x-show="verbType === 'custom'" x-model="verbCustom" autocomplete="off" :aria-required="verbType === 'custom'" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}" aria-label="{{ __('Verbe personnalisé') }}">
-                            </div>
-
+                            {{-- Round 151 (2026-08-01) : champ Tâche + masquage des renseignements
+                                 personnels, déménagés depuis l'ancien écran 2 - mission explicite : « le
+                                 masquage des renseignements personnels reste attaché au champ de l'écran 1 ».
+                                 Bloc déplacé TEL QUEL (mêmes id/attributs), rien de son comportement JS
+                                 (prompt-anon-panel.js résout ces éléments par getElementById, indifférent
+                                 à leur position dans le DOM) n'a changé. --}}
+                            {{-- Round 89 (2026-07-27, passe adversariale) : les 3 astérisques de champ
+                                 requis utilisaient #DC2626 (contraste ~4,55-4,83:1 selon le fond, AA
+                                 seulement) - portés à #991B1B comme au round 88 (~8,3:1 AAA). --}}
                             {{-- Round 148 (2026-07-31, refonte « anonymisation en place ») : ce champ ne
                                  doit plus JAMAIS être masqué, même pendant une anonymisation - décision
                                  tranchée (panel Perplexity/Gemini 95/100, Codex 82/100). L'`id` reste utile
@@ -271,12 +227,28 @@
                             {{-- Round 148 (2026-07-31) : MASQUAGE EN PLACE. Ce bouton n'ouvre plus le
                                  panneau d'anonymisation - il détecte et remplace directement le contenu du
                                  champ ci-dessus (voir maskFieldInPlace() dans prompt-anon-panel.js).
-                                 Round 149-150 : récapitulatif dédié par champ, via getOrCreateRecapController()
-                                 dans prompt-anon-panel.js - DRY strict, aucun bloc dupliqué dans ce fichier. --}}
+                                 aria-expanded/aria-controls retirés : ce bouton ne pilote plus #cpAnonPanel.
+                                 Round 149 (2026-07-31) : le même mécanisme (récapitulatif + retour) sert
+                                 maintenant aussi les 5 autres champs surveillés du wizard (Exemples, Rôle,
+                                 Audience, Verbe, Contraintes personnalisés) via le bandeau anti-PII.
+                                 Round 150 (2026-07-31, PERTE DE DONNÉES corrigée) : #cpAnonRecap/#cpAnonUndo
+                                 ci-dessous ne servent plus QUE le champ Tâche - un bloc PARTAGÉ entre les 6
+                                 champs faisait perdre l'accès au texte d'origine d'un champ dès qu'un AUTRE
+                                 champ était masqué ensuite (le bloc unique se déplaçait vers le dernier
+                                 champ masqué). Les 5 autres champs obtiennent désormais chacun leur PROPRE
+                                 bloc récapitulatif, bâti dynamiquement par la même fabrique JS
+                                 (getOrCreateRecapController() dans prompt-anon-panel.js) sur le même
+                                 gabarit visuel que celui-ci - DRY strict, toujours aucun bloc dupliqué dans
+                                 CE fichier Blade. --}}
                             <div class="form-group mb-3">
                                 <button id="cpAnonToggle" type="button" class="ct-btn ct-btn-outline ct-btn-sm" style="min-height:44px;">🛡️ {{ __('Masquer mes informations personnelles') }}</button>
                                 <a href="/outils/anonymiseur" class="ct-btn ct-btn-ghost ct-btn-sm ms-1" style="min-height:44px;" title="{{ __('Ouvrir l\'anonymiseur complet (restauration des réponses IA)') }}">↗ {{ __('Anonymiseur complet') }}</a>
 
+                                {{-- Récapitulatif du masquage en place (champ Tâche uniquement, voir la
+                                     note round 150 ci-dessus) + annulation. aria-live="polite" +
+                                     role="status" : annoncé aux lecteurs d'écran sans interrompre leur
+                                     lecture en cours. Masqué par défaut, affiché par JS après un clic sur
+                                     le bouton ci-dessus. --}}
                                 <div id="cpAnonRecap" class="mt-2" style="display:none;" role="status" aria-live="polite">
                                     <p id="cpAnonRecapText" class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;"></p>
                                     <button type="button" id="cpAnonUndo" class="ct-btn ct-btn-outline ct-btn-sm" style="display:none; min-height:44px;">↺ {{ __('Revenir à mon texte de départ') }}</button>
@@ -284,6 +256,7 @@
 
                                 <div id="cpAnonPanel" class="anon-wrap" style="display:none; border:1px solid var(--anon-line,#e2e6ea); border-radius:12px; padding:1rem; margin-top:.75rem; background:#f8fafb;" aria-hidden="true">
                                     <p style="font-size:.85rem; color:#52586a; margin:0 0 .5rem;">🔒 {{ __('100 % local : aucune donnée ne quitte votre navigateur. Sélectionnez un passage, surlignez, anonymisez, puis insérez le texte masqué dans votre tâche.') }}</p>
+                                    {{-- Éditeur d'anonymisation RÉUTILISABLE (même UX que /outils/anonymiseur) --}}
                                     <x-tools::anonymizer-editor>
                                         <x-slot:previewActions>
                                             <button type="button" id="btnCopyAnon" class="anon-btn secondary">📋 {{ __('Copier') }}</button>
@@ -292,38 +265,311 @@
                                     </x-tools::anonymizer-editor>
                                 </div>
                             </div>
+
+                            <h3 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 0.95rem; margin: 0 0 0.5rem;">{{ __('Ou partez d\'une carte') }}</h3>
+                            {{-- Round 65 (2026-07-27) : annonce ARIA pendant le chargement d'un prompt en
+                                 édition (?edit=ID) - sans ça, les cartes désactivées par editLoading ne
+                                 s'expliquaient pas aux technologies d'assistance. --}}
+                            <span class="visually-hidden" role="status" x-text="editLoading ? '{{ __('Chargement du prompt en édition en cours...') }}' : ''"></span>
+                            <div class="row g-2 mb-2" role="group" aria-label="{{ __('Choisir un objectif') }}" :aria-busy="editLoading ? 'true' : 'false'">
+                                <template x-for="c in taskCards" :key="c.id">
+                                    <div class="col-6 col-md-4">
+                                        <button type="button" class="ct-task-card" :class="{ 'ct-task-card--on': selectedTask === c.id }" :disabled="editLoading" :title="editLoading ? '{{ __('Chargement du prompt en édition en cours...') }}' : null" @click="selectTask(c)" :aria-pressed="selectedTask === c.id">
+                                            <span aria-hidden="true" style="font-size:1.3rem;" x-text="c.icon"></span>
+                                            <span class="ct-task-card__title" x-text="c.label"></span>
+                                            <span class="ct-task-card__desc" x-text="c.description"></span>
+                                        </button>
+                                    </div>
+                                </template>
+
+                                {{-- Cartes personnalisées (Option D, 2026-07-26) : ajoutées par le membre,
+                                     réordonnables par glisser-déposer OU par les boutons ↑/↓ (alternative
+                                     clavier obligatoire WCAG 2.2). Les 9 cartes système ci-dessus restent
+                                     intactes, non éditables, non réordonnables. --}}
+                                <template x-for="(c, cIdx) in customCards" :key="c.id">
+                                    <div class="col-6 col-md-4">
+                                        <div class="ct-task-card ct-task-card--custom" :class="{ 'ct-task-card--on': selectedTask === c.id, 'ct-task-card--hidden-card': c.hidden }"
+                                             role="group" :aria-label="c.title"
+                                             draggable="true" @dragstart="dragStartCustomCard($event, c)" @dragover.prevent @drop="dropOnCustomCard($event, c)">
+                                            <div class="ct-custom-card__head">
+                                                <button type="button" :id="'cpCardIconBtn-' + c.id" class="ct-custom-card__icon-btn" @click="toggleIconPicker(c.id)" aria-haspopup="true" :aria-expanded="iconPickerOpenId === c.id ? 'true' : 'false'" :aria-label="'{{ __('Icône de la carte') }} : ' + c.title">
+                                                    <span aria-hidden="true" style="font-size:1.2rem;" x-text="c.icon"></span>
+                                                </button>
+                                                <div class="ct-custom-card__actions">
+                                                    <button type="button" class="ct-custom-card__icon-action" @click="moveCustomCard(c, -1)" :disabled="cIdx === 0" aria-label="{{ __('Déplacer plus tôt') }}" title="{{ __('Déplacer plus tôt') }}">↑</button>
+                                                    <button type="button" class="ct-custom-card__icon-action" @click="moveCustomCard(c, 1)" :disabled="cIdx === customCards.length - 1" aria-label="{{ __('Déplacer plus tard') }}" title="{{ __('Déplacer plus tard') }}">↓</button>
+                                                    <button type="button" class="ct-custom-card__icon-action" @click="toggleCardHidden(c)" :aria-label="c.hidden ? '{{ __('Afficher cette carte') }}' : '{{ __('Masquer cette carte') }}'" :title="c.hidden ? '{{ __('Afficher cette carte') }}' : '{{ __('Masquer cette carte') }}'" x-text="c.hidden ? '🚫' : '👁️'"></button>
+                                                    <button type="button" :id="'cpCardPanelBtn-' + c.id" class="ct-custom-card__icon-action" @click="toggleCardPanel(c)" aria-label="{{ __('Éditer le gabarit de requête') }}" title="{{ __('Éditer') }}" :aria-expanded="editingCardPanelId === c.id ? 'true' : 'false'">✏️</button>
+                                                    <button type="button" class="ct-custom-card__icon-action" @click="confirmDeleteCard(c)" aria-label="{{ __('Supprimer cette carte') }}" title="{{ __('Supprimer') }}">🗑️</button>
+                                                </div>
+                                            </div>
+                                            <template x-if="editingCardId === c.id">
+                                                <input type="text" :id="'cpCardTitleInput-' + c.id" class="ct-custom-card__title-input" x-model="c.title" maxlength="60" @blur="commitCardTitle(c)" @keydown.enter.prevent="commitCardTitle(c)" @keydown.escape="cancelEditCardTitle(c)" aria-label="{{ __('Titre de la carte') }}">
+                                            </template>
+                                            <template x-if="editingCardId !== c.id">
+                                                <button type="button" :id="'cpCardTitleBtn-' + c.id" class="ct-custom-card__title-btn" @click="startEditCardTitle(c)" :aria-label="'{{ __('Modifier le titre') }} : ' + c.title">
+                                                    <span x-text="c.title"></span>
+                                                </button>
+                                            </template>
+                                            <button type="button" class="ct-custom-card__select" :disabled="c.hidden || editLoading" @click="selectTask(c)">{{ __('Utiliser cette carte') }} →</button>
+
+                                            {{-- Enrichissement 2026-07-31 : catalogue classé (12 catégories, ~200 icônes) +
+                                                 recherche par mot-clé français insensible aux accents/casse (factorisée
+                                                 dans _normalizeIconText côté JS). Regroupé par catégorie sans recherche,
+                                                 à plat pendant une recherche (iconSearchGroups). Navigation clavier réelle
+                                                 (flèches/Début/Fin) via handleIconGridKeydown ; Entrée/Espace = natif au
+                                                 <button> ; Échap = @keydown.escape.window déjà branché sur closeIconPicker()
+                                                 au niveau du conteneur racine. --}}
+                                            <template x-if="iconPickerOpenId === c.id">
+                                                <div class="ct-icon-picker" role="group" aria-label="{{ __('Choisir une icône') }}">
+                                                    <label class="visually-hidden" :for="'cpIconSearch-' + c.id">{{ __('Rechercher une icône') }}</label>
+                                                    <input type="text" :id="'cpIconSearch-' + c.id" class="ct-icon-picker__search" x-model="iconSearchQuery" autocomplete="off" placeholder="{{ __('Rechercher une icône...') }}">
+                                                    <div class="visually-hidden" role="status" aria-live="polite" x-text="iconResultsAnnouncement"></div>
+                                                    <template x-if="iconSearchQuery && iconSearchResultsCount === 0">
+                                                        <p class="ct-icon-picker__empty">{{ __('Aucune icône ne correspond à cette recherche.') }}</p>
+                                                    </template>
+                                                    <div :id="'cpEmojiGrid-' + c.id" @keydown="handleIconGridKeydown($event, c.id)">
+                                                        <template x-for="group in iconSearchGroups" :key="group.category || 'resultats'">
+                                                            <div>
+                                                                <template x-if="group.category">
+                                                                    <p class="ct-icon-picker__category" x-text="group.category"></p>
+                                                                </template>
+                                                                <div class="ct-emoji-grid" role="group" :aria-label="group.category || '{{ __('Résultats de recherche') }}'">
+                                                                    <template x-for="icon in group.icons" :key="icon.c">
+                                                                        <button type="button" data-icon-idx @click="setCardIcon(c, icon.c)" :aria-label="iconAriaLabel(icon)" x-text="icon.c"></button>
+                                                                    </template>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </template>
+
+                                            <template x-if="editingCardPanelId === c.id">
+                                                <div class="ct-custom-card__panel">
+                                                    <label class="form-label fw-medium mb-1" style="font-size:0.78rem;">{{ __('Gabarit de requête') }}</label>
+                                                    {{-- Round 119 (2026-07-27, passe adversariale) : ce textarea n'avait AUCUN id, donc
+                                                         le garde-fou anti-PII (qui résout ses champs par getElementById) ne pouvait
+                                                         structurellement pas le surveiller - alors que son contenu est persisté en base
+                                                         et réinjecté dans de futurs prompts. Id dynamique (même convention que
+                                                         cpCardTitleInput-<id>) + écoute déléguée côté JS, car ces cartes sont créées et
+                                                         détruites dynamiquement (x-if dans x-for). --}}
+                                                    {{-- @cp-card-masked : signal dédié envoyé par prompt-anon-panel.js juste après avoir
+                                                         réinjecté un gabarit masqué dans ce champ (événement input, pas de blur). Sans lui,
+                                                         la copie en clair déjà écrite dans localStorage au blur précédent survivrait tant
+                                                         qu'aucun nouveau blur ne se produit - purgerCopieLocaleDesCartes() réécrit
+                                                         immédiatement la copie locale avec l'état courant (déjà masqué). --}}
+                                                    <textarea :id="'cpCardTemplate-' + c.id" class="form-control form-control-sm" rows="3" x-model="c.query_template" @blur="commitCardPanelBlur(c)" @keydown.escape="cancelEditCardPanel(c)" @cp-card-masked="purgerCopieLocaleDesCartes()" maxlength="500" placeholder="{{ __('Ex: Corrige les fautes et améliore la clarté de ce texte...') }}" aria-label="{{ __('Gabarit de requête de cette carte') }}"></textarea>
+                                                    <small class="text-muted d-block mt-1" style="font-size:0.7rem;">{{ __('Ce texte remplira votre demande si elle est encore vide. Si vous avez déjà écrit quelque chose, rien ne sera écrasé.') }}</small>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <div class="col-6 col-md-4">
+                                    <button type="button" class="ct-add-card-btn" @click="addCustomCard()" :disabled="!customCardsLoaded || customCards.length >= 10">
+                                        <span aria-hidden="true" style="font-size:1.3rem;">＋</span>
+                                        <span>{{ __('Ajouter une carte') }}</span>
+                                    </button>
+                                </div>
+                            </div>
+                            {{-- Round 118 (2026-07-27, passe adversariale) : le chargement des cartes
+                                 serveur échouait en SILENCE (customCards vidé, bouton d'ajout resté
+                                 actif) et la première carte ajoutée écrasait toutes les cartes déjà
+                                 enregistrées. L'ajout est maintenant bloqué tant que le chargement
+                                 n'a pas réussi ; cet avertissement persistant explique pourquoi et
+                                 offre le réessai (un toast à 4 s ne suffisait pas : le bouton reste
+                                 désactivé bien après sa disparition). --}}
+                            <template x-if="isAuthenticated && customCardsLoadFailed">
+                                <div role="alert" class="small mb-2 p-2 rounded" style="font-size:0.78rem; background: #FEF3C7; border: 1px solid #B7791F; color: #5b4a1f; border-radius: 8px;">
+                                    {{ __('Impossible de charger vos cartes personnalisées pour le moment. L\'ajout est désactivé afin de ne pas écraser celles déjà enregistrées.') }}
+                                    <button type="button" class="ct-btn ct-btn-outline ct-btn-xs ms-1" style="min-height:44px;" @click="retryLoadCustomCards()">{{ __('Réessayer') }}</button>
+                                </div>
+                            </template>
+                            <template x-if="customCards.length >= 10">
+                                <p class="small mb-2" style="font-size:0.78rem;color:var(--c-text-muted);" aria-live="polite">{{ __('10/10 cartes - supprimez-en une pour en ajouter une autre.') }}</p>
+                            </template>
+                            <template x-if="!isAuthenticated && customCards.length > 0">
+                                <div class="small mb-2 p-2 rounded" style="font-size:0.78rem; background: rgba(11,114,133,0.06); border: 1px solid rgba(11,114,133,0.15); border-radius: 8px;">
+                                    {{ __('Connectez-vous pour sauvegarder vos cartes en permanence.') }}
+                                    <button type="button" class="ct-btn ct-btn-primary ct-btn-xs ms-1" style="min-height:44px;" @click="$dispatch('open-auth-modal')">{{ __('Se connecter') }}</button>
+                                </div>
+                            </template>
+                            <template x-if="isAuthenticated && customCardsImportAvailable">
+                                <div class="small mb-2 p-2 rounded" style="font-size:0.78rem; background: var(--c-primary-light); border: 1px solid rgba(11,114,133,0.2); border-radius: 8px;">
+                                    {{ __('Des cartes personnalisées enregistrées dans ce navigateur ont été trouvées.') }}
+                                    {{-- Round 97 (2026-07-27, passe adversariale) : :disabled empêche le
+                                         double-clic qui créait de vrais doublons persistés en base
+                                         (voir importingCards, constructeur-prompts-core.js).
+                                         Round 104 (2026-07-27, passe adversariale) : accord singulier/pluriel
+                                         manquant - affichait "Importer mes 1 cartes locales" quand une seule
+                                         carte invité existait. Mirroir du pattern déjà établi au round 25
+                                         pour le toast de succès (customCardsImportedOne/Many, lignes 887-888). --}}
+                                    <button type="button" class="ct-btn ct-btn-outline ct-btn-xs ms-1" style="min-height:44px;" @click="importLocalCustomCards()" :disabled="importingCards" x-text="(_localCardsToImport && _localCardsToImport.length === 1) ? '{{ __('Importer 1 carte locale') }}' : '{{ __('Importer mes') }} ' + (_localCardsToImport ? _localCardsToImport.length : 0) + ' {{ __('cartes locales') }}'"></button>
+                                </div>
+                            </template>
                         </div>
 
-                        {{-- Étape 3 : Audience (optionnelle) --}}
-                        <div id="cpAudienceBlock" x-show="step === 3" x-transition>
-                            <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0 0 0.75rem;">{{ __('Qui va lire ça ?') }}</h2>
-                            <div class="d-flex gap-3 mb-2" role="radiogroup" aria-label="{{ __('Mode de sélection de l\'audience') }}">
-                                <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
-                                    <input type="radio" name="audienceType" value="preset" x-model="audienceType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfinie') }}
-                                </label>
-                                <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
-                                    <input type="radio" name="audienceType" value="custom" x-model="audienceType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisée') }}
-                                </label>
+                        {{-- Écran 2 : le prompt est prêt (Round 151, 2026-08-01). Le champ Tâche + le
+                             masquage des renseignements personnels (#cpTaskField, #cpAnonToggle...)
+                             ont déménagé sur l'écran 1 ci-dessus - mission explicite : « le masquage des
+                             renseignements personnels reste attaché au champ de l'écran 1 ». --}}
+                        <div x-show="step === 2" x-transition>
+                            <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.25rem; margin: 0 0 0.75rem;">{{ __('Votre prompt est prêt.') }}</h2>
+                            <div class="d-flex align-items-center gap-2 mb-3 flex-wrap" x-show="selectedTask">
+                                <span class="small p-2 rounded" style="background: var(--c-primary-light); border-left: 3px solid var(--c-primary); color: var(--c-dark);">
+                                    {{ __('Objectif choisi :') }} <strong x-text="selectedTaskLabel"></strong>
+                                </span>
+                                <button type="button" class="ct-btn ct-btn-ghost ct-btn-xs" @click="goToStep(1)">{{ __('Changer d\'objectif') }}</button>
                             </div>
-                            <div class="ct-block__field" x-show="audienceType === 'preset'" role="group" aria-label="{{ __('Choisir une ou plusieurs audiences') }}">
-                                <div class="ct-card-grid">
-                                    <template x-for="a in audiences" :key="a.value">
-                                        <x-tools::prompt-card type="checkbox" value="a.value" model="audiencePresets">
-                                            <span x-text="a.label"></span>
+
+                            {{-- Aperçu colorisé (coeur de la refonte écran 2) : ce que la personne a écrit
+                                 (surbrillance ambre, .ct-seg-user) face à ce que l'outil a ajouté
+                                 automatiquement (fond teal pâle, .ct-seg-tool). Segments produits par
+                                 get promptSegments() (constructeur-prompts-core.js), SOURCE UNIQUE aussi
+                                 utilisée par get prompt() - donc toujours rigoureusement synchronisé avec
+                                 le texte réellement copié/exporté/ouvert dans une IA. --}}
+                            <p class="small mb-2" style="font-size: 0.8rem; color: var(--c-text-muted);">
+                                <span class="ct-seg-user">{{ __('votre texte') }}</span>
+                                {{ __('= ce que vous avez écrit.') }}
+                                <span class="ct-seg-tool">{{ __('ajout') }}</span>
+                                {{ __('= ce que l\'outil a ajouté automatiquement pour renforcer votre prompt.') }}
+                            </p>
+                            <div class="p-3 rounded mb-3" style="background:#fff; border: 1.5px solid var(--c-primary); border-radius: var(--r-base); white-space: pre-wrap; font-size: 0.92rem; line-height: 1.75; color: var(--c-dark);" aria-label="{{ __('Aperçu coloré du prompt') }}">
+                                <template x-if="!promptSegments.length">
+                                    <span class="text-muted">{{ __('Complétez votre demande (écran précédent) pour voir le prompt apparaître ici.') }}</span>
+                                </template>
+                                <template x-for="(seg, segIdx) in promptSegments" :key="segIdx">
+                                    <span :class="seg.kind === 'user' ? 'ct-seg-user' : 'ct-seg-tool'" x-text="seg.text"></span>
+                                </template>
+                            </div>
+
+                            {{-- Interrupteur « Cadre strict » : coupe les règles automatiquement injectées
+                                 (écriture anti-IA, typographie française, critères de qualité) sans toucher
+                                 aux choix explicites de la personne (voir cadreStrict, constructeur-prompts-core.js). --}}
+                            <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+                                <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
+                                    <input type="checkbox" x-model="cadreStrict" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
+                                    <span><strong>{{ __('Cadre strict') }}</strong> : <span x-text="cadreStrict ? '{{ __('activé') }}' : '{{ __('désactivé') }}'"></span></span>
+                                </label>
+                                <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.cadreStrict = !showHelp.cadreStrict" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;">?</button>
+                            </div>
+                            <div x-show="showHelp.cadreStrict" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;">{{ __('Activé (par défaut), l\'outil ajoute l\'écriture naturelle anti-IA, la typographie française et un rappel de qualité. Désactivé, votre prompt reste au plus près de ce que vous avez écrit.') }}</div>
+
+                            {{-- Destination + Copier : le choix de l'IA visée est ICI, à côté du bouton
+                                 principal, et le libellé/l'aperçu ci-dessus se mettent à jour au clic -
+                                 jamais d'injection surprise au moment de copier. Les 5 boutons « Ouvrir
+                                 dans » plus bas restent disponibles pour un accès direct à une IA précise. --}}
+                            <div class="mb-2">
+                                <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Destination') }}</label>
+                                <div class="d-flex flex-wrap gap-2 mb-1" role="radiogroup" aria-label="{{ __('IA de destination') }}">
+                                    <template x-for="ai in [['chatgpt','ChatGPT'],['claude','Claude'],['perplexity','Perplexity'],['gemini','Gemini'],['mistral','Mistral']]" :key="ai[0]">
+                                        <label class="ct-pill" :class="{ 'ct-pill--on': openTarget === ai[0] }">
+                                            <input type="radio" name="openTarget" class="ct-pill__input" :value="ai[0]" x-model="openTarget">
+                                            <span x-text="ai[1]"></span>
+                                        </label>
+                                    </template>
+                                </div>
+                                {{-- Round 151 (2026-08-01) : guillemets DOUBLES autour des 2 chaînes JS ci-dessous,
+                                     pas simples - « s'ouvrira » contient une apostrophe qui, une fois déséchappée
+                                     par le navigateur depuis l'entité HTML produite par {{ }}, casserait une chaîne
+                                     JS entre guillemets simples (piège déjà documenté pour techniqueHints, voir
+                                     constructeur-prompts-core.js). --}}
+                                <p class="small mb-0" style="font-size: 0.75rem; color: var(--c-text-muted);" x-text="(openTarget === 'gemini' || openTarget === 'mistral') ? &quot;{{ __('Le prompt sera copié : à coller manuellement dans cette IA.') }}&quot; : &quot;{{ __('Le prompt s\'ouvrira pré-rempli dans cette IA.') }}&quot;"></p>
+                            </div>
+
+                            {{-- « Affiner » (mission écran 2, round 151) : révèle l'écran 3 - 5 blocs
+                                 TOUJOURS visibles (pour qui, le résultat, le ton, les limites, un
+                                 modèle), plus jamais un accordéon à ouvrir/fermer à l'intérieur. Ne pas
+                                 confondre avec « ✨ Améliorer avec mon IA » plus bas (fonction BYOA
+                                 distincte et déjà existante, conservée telle quelle).
+                                 Round 152 (2026-08-01) : ce bouton RESTE - un seul clic révèle les 5
+                                 blocs une fois pour toutes (rien à rouvrir/refermer ensuite), ce n'est
+                                 pas l'accordéon critiqué par le propriétaire (« le nombre d'accordéons
+                                 crée de la friction... et surtout les ouvrir et fermer à chaque fois »
+                                 visait les 5 sous-sections imbriquées ci-dessous, retirées). --}}
+                            <button type="button" class="ct-advanced-toggle mb-3" @click="affinerOpen = !affinerOpen" :aria-expanded="affinerOpen.toString()" aria-controls="cpAffinerPanel">
+                                <span><span x-text="affinerOpen ? '{{ __('Masquer') }}' : '+'"></span> {{ __('Affiner (pour qui, le résultat, le ton, les limites, un modèle)') }}</span>
+                                <span class="ct-chevron" aria-hidden="true">▾</span>
+                            </button>
+                            <div id="cpAffinerPanel" x-show="affinerOpen" x-transition x-cloak>
+
+                            {{-- Profils de règles conditionnels (section 7 du plan, round 152) : PAS de
+                                 « compréhension » (aucune IA dans l'outil) - une correspondance par
+                                 mots-clés pré-sélectionne un profil, TOUJOURS visible et corrigeable
+                                 d'un clic. Jamais « j'ai compris que... » (mensonge), toujours « Vous
+                                 avez choisi X, j'ajoute donc Y. » --}}
+                            <div class="ct-profile-strip" role="radiogroup" aria-label="{{ __('Type de demande') }}">
+                                <p class="ct-profile-strip__title">{{ __('Type de demande') }}</p>
+                                <div class="ct-card-grid" style="margin-bottom:0;">
+                                    <template x-for="p in profiles" :key="p.value">
+                                        <x-tools::prompt-card type="radio" name="profile" value="p.value" model="profile" onChange="profileTouched = true">
+                                            <span x-text="p.label"></span>
                                         </x-tools::prompt-card>
                                     </template>
                                 </div>
+                                <p class="ct-block__added" style="flex-basis:100%;margin:0.5rem 0 0;" x-text="feedbackProfile" role="status" aria-live="polite"></p>
                             </div>
-                            <div class="ct-block__field" x-show="audienceType === 'custom'">
-                                <input type="text" id="cpAudienceCustom" class="form-control" x-model="audienceCustom" autocomplete="off" placeholder="{{ __('Ex: enseignants du secondaire au Québec') }}" aria-label="{{ __('Audience personnalisée') }}">
-                            </div>
-                        </div>
 
-                        {{-- Étape 4 : Options avancées (tout optionnel) --}}
-                        <div x-show="step === 4" x-transition>
-                            <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0 0 0.75rem;">{{ __('Options avancées') }}</h2>
+                            {{-- Bloc « Pour qui » --}}
+                            <x-tools::prompt-block id="cpAudienceBlock" :question="__('Qui va lire ça ?')" :example="__('Ex. : des élèves du secondaire, ma direction, mes collègues techniques.')" added="feedbackAudience">
+                                {{-- Round 60 (2026-07-27) : le toggle preset/custom avait disparu lors de la
+                                     refonte v1.132.0 « objectif d'abord » - personaType et verbType ont
+                                     chacun conservé le leur, mais audienceType n'a jamais été réintroduit,
+                                     rendant audienceCustom (champ + logique JS/serveur toujours en place)
+                                     définitivement inatteignable pour tout nouveau prompt (sauf via ?edit=ID
+                                     d'un ancien prompt déjà en mode custom). Toggle et champ CONSERVÉS
+                                     verbatim au round 152 - seul l'affichage "preset" passe de <select>/
+                                     .ct-pill à de vraies cartes .ct-card (coche non-couleur, round 152). --}}
+                                <div class="d-flex gap-3 mb-2" role="radiogroup" aria-label="{{ __('Mode de sélection de l\'audience') }}">
+                                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
+                                        <input type="radio" name="audienceType" value="preset" x-model="audienceType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfinie') }}
+                                    </label>
+                                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
+                                        <input type="radio" name="audienceType" value="custom" x-model="audienceType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisée') }}
+                                    </label>
+                                </div>
+                                <div class="ct-block__field" x-show="audienceType === 'preset'" role="group" aria-label="{{ __('Choisir une ou plusieurs audiences') }}">
+                                    <div class="ct-card-grid">
+                                        <template x-for="a in audiences" :key="a.value">
+                                            <x-tools::prompt-card type="checkbox" value="a.value" model="audiencePresets">
+                                                <span x-text="a.label"></span>
+                                            </x-tools::prompt-card>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div class="ct-block__field" x-show="audienceType === 'custom'">
+                                    <input type="text" id="cpAudienceCustom" class="form-control" x-model="audienceCustom" autocomplete="off" placeholder="{{ __('Ex: enseignants du secondaire au Québec') }}" aria-label="{{ __('Audience personnalisée') }}">
+                                </div>
+                            </x-tools::prompt-block>
 
+                            {{-- Bloc « Le résultat » : verbe d'action (requis) + format + longueur.
+                                 id="cpSectionFormat" CONSERVÉ - c'est la cible de openDiagnosticSection('format'). --}}
                             <x-tools::prompt-block id="cpSectionFormat" :question="__('Vous voulez quoi au juste ?')" :example="__('Ex. : un texte de 300 mots avec une liste à puces, un plan détaillé, un tableau comparatif.')" added="feedbackResultat">
+                                <div class="ct-block__field">
+                                    <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Verbe d\'action') }} <span style="color: #991B1B;">*</span></label>
+                                    <div class="d-flex gap-3 mb-2">
+                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
+                                            <input type="radio" name="verbType" value="preset" x-model="verbType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfini') }}
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
+                                            <input type="radio" name="verbType" value="custom" x-model="verbType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisé') }}
+                                        </label>
+                                    </div>
+                                    {{-- Round 130 (2026-07-30) : l'obligation ARIA suit le mode ACTIF, jamais figée -
+                                         reportée du <select> retiré au round 152 vers le role="radiogroup" qui le
+                                         remplace (attribut valide sur ce rôle, cible correcte pour un GROUPE de
+                                         boutons radio plutôt qu'un seul champ). --}}
+                                    <div class="ct-card-grid" x-show="verbType === 'preset'" role="radiogroup" :aria-required="verbType === 'preset'" aria-label="{{ __('Verbe d\'action') }}">
+                                        <template x-for="v in verbs" :key="v">
+                                            <x-tools::prompt-card type="radio" name="verbPreset" value="v" model="verb">
+                                                <span x-text="v"></span>
+                                            </x-tools::prompt-card>
+                                        </template>
+                                    </div>
+                                    <input type="text" id="cpVerbCustom" class="form-control" x-show="verbType === 'custom'" x-model="verbCustom" autocomplete="off" :aria-required="verbType === 'custom'" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}" aria-label="{{ __('Verbe personnalisé') }}">
+                                </div>
                                 <div class="ct-block__field">
                                     <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Format de sortie') }}</label>
                                     <div class="ct-card-grid" role="radiogroup" aria-label="{{ __('Format de sortie') }}">
@@ -332,6 +578,10 @@
                                                 <span x-text="fmt.label"></span>
                                             </x-tools::prompt-card>
                                         </template>
+                                        {{-- « Autre » systématique (round 152) : même mécanique que le ton
+                                             ci-dessous - case booléenne (customOpen.format) qui révèle un
+                                             champ libre, sans toucher au modèle `format` tant qu'on n'y
+                                             écrit rien. --}}
                                         <x-tools::prompt-card type="checkbox" model="customOpen.format">{{ __('Autre') }}</x-tools::prompt-card>
                                     </div>
                                     <input type="text" x-show="customOpen.format" x-model="format" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: Sonnet, script vidéo, fiche produit...') }}" aria-label="{{ __('Format personnalisé') }}">
@@ -350,7 +600,29 @@
                                 </div>
                             </x-tools::prompt-block>
 
+                            {{-- Bloc « Le ton » : rôle de l'IA (requis) + ton général. --}}
                             <x-tools::prompt-block :question="__('Sur quel ton l\'IA doit-elle répondre ?')" :example="__('Ex. : professionnel, chaleureux et engageant, académique.')" added="feedbackTon">
+                                <div class="ct-block__field">
+                                    <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Rôle de l\'IA') }} <span style="color: #991B1B;">*</span></label>
+                                    <div class="d-flex gap-3 mb-2">
+                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
+                                            <input type="radio" name="personaType" value="preset" x-model="personaType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfini') }}
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
+                                            <input type="radio" name="personaType" value="custom" x-model="personaType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisé') }}
+                                        </label>
+                                    </div>
+                                    {{-- Round 130 (2026-07-30) : même report que le verbe ci-dessus (obligation
+                                         ARIA liée au mode actif, voir commentaire). --}}
+                                    <div class="ct-card-grid" x-show="personaType === 'preset'" role="radiogroup" :aria-required="personaType === 'preset'" aria-label="{{ __('Choisir un rôle') }}">
+                                        <template x-for="p in personas" :key="p.value">
+                                            <x-tools::prompt-card type="radio" name="personaPresetChoice" value="p.value" model="personaPreset">
+                                                <span x-text="p.label"></span>
+                                            </x-tools::prompt-card>
+                                        </template>
+                                    </div>
+                                    <input type="text" id="cpPersonaCustom" class="form-control" x-show="personaType === 'custom'" x-model="personaCustom" :aria-required="personaType === 'custom'" autocomplete="off" placeholder="{{ __('Ex: un expert en cybersécurité spécialisé en PME québécoises') }}" aria-label="{{ __('Rôle personnalisé') }}">
+                                </div>
                                 <div class="ct-block__field">
                                     <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Ton général souhaité') }}</label>
                                     <div class="ct-card-grid" role="radiogroup" aria-label="{{ __('Ton de la réponse') }}">
@@ -364,17 +636,6 @@
                                     <input type="text" x-show="customOpen.tone" x-model="tone" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: Ironique et léger') }}" aria-label="{{ __('Ton personnalisé') }}">
                                 </div>
                             </x-tools::prompt-block>
-
-                            {{-- Interrupteur « Cadre strict » : coupe les règles automatiquement injectées
-                                 aux choix explicites de la personne (voir cadreStrict, constructeur-prompts-core.js). --}}
-                            <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
-                                <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
-                                    <input type="checkbox" x-model="cadreStrict" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
-                                    <span><strong>{{ __('Cadre strict') }}</strong> : <span x-text="cadreStrict ? '{{ __('activé') }}' : '{{ __('désactivé') }}'"></span></span>
-                                </label>
-                                <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.cadreStrict = !showHelp.cadreStrict" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;">?</button>
-                            </div>
-                            <div x-show="showHelp.cadreStrict" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;">{{ __('Activé (par défaut), l\'outil ajoute l\'écriture naturelle anti-IA, la typographie française et un rappel de qualité. Désactivé, votre prompt reste au plus près de ce que vous avez écrit.') }}</div>
 
                             {{-- Bloc « Les limites » : contraintes, typographie, écriture anti-IA,
                                  réflexion affichée, questions de clarification, document modifiable
@@ -484,19 +745,29 @@
                                     </label>
                                 </div>
                             </x-tools::prompt-block>
+
+                            </div>
+                            {{-- /#cpAffinerPanel --}}
                         </div>
 
-                        {{-- Navigation du wizard 4 étapes (restauré 2026-08-03) --}}
-                        <div x-show="showValidation && step === 1" x-transition class="alert alert-danger small p-2 mb-2" style="font-size: 0.85rem;" role="alert" aria-live="assertive">
-                            {{ __('Choisissez un rôle (ou saisissez-en un personnalisé) avant de continuer.') }}
-                        </div>
-                        <div x-show="showValidation && step === 2" x-transition class="alert alert-danger small p-2 mb-2" style="font-size: 0.85rem;" role="alert" aria-live="assertive">
-                            {{ __('Le verbe d\'action et la description de votre demande sont requis avant de continuer.') }}
+                        {{-- Navigation --}}
+                        {{-- Round 85 (2026-07-27, passe adversariale) : les spans spécifiques à l'étape 2
+                             (verbe/demande manquants) étaient du code mort - showValidation ne devient
+                             JAMAIS true tant que step===2 (nextStep()/canGoToStep() ne testent que
+                             selectedTask, jamais taskObject/verb). Conforme à la décision déjà
+                             documentée au Round 14 (constructeur-prompts-core.js:342-344) : le cas
+                             "verbe manquant" est intentionnellement couvert par l'alerte générique
+                             x-show="!isValid" plus bas, pas ici. Retrait des spans inatteignables. --}}
+                        <div x-show="showValidation && step === 1 && !selectedTask" x-transition class="alert alert-danger small p-2 mb-2" style="font-size: 0.85rem;" role="alert" aria-live="assertive">
+                            {{ __('Veuillez choisir une carte avant de continuer.') }}
                         </div>
                         <div class="d-flex justify-content-between mb-4">
                             <button class="ct-btn ct-btn-outline" @click="prevStep()" x-show="step > 1" style="min-height:44px;">{{ __('Précédent') }}</button>
                             <div x-show="step === 1"></div>
-                            <button class="ct-btn ct-btn-primary" @click="nextStep()" x-show="step < 4" style="min-height:44px;">{{ __('Suivant') }}</button>
+                            {{-- Round 151 (2026-08-01) : libellé « Créer mon prompt » (mission écran 1 -
+                                 UN SEUL bouton, sans jargon de wizard). Comportement inchangé : nextStep(). --}}
+                            <button class="ct-btn ct-btn-primary" @click="nextStep()" x-show="step < 2" style="min-height:44px;">
+{{ __('Créer mon prompt') }}</button>
                         </div>
 
                         {{-- Prévisualisation en langage courant (Phase 2 : toujours avant la vue technique) --}}

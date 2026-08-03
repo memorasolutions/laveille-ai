@@ -3403,29 +3403,19 @@ declare(strict_types=1);
  *     leve en base (`is_under_construction = false`), cache applicatif + ResponseCache vides,
  *     rendu reel reverifie en navigateur invite avant de considerer la restauration livree.
  *
- *   1.139.16 · 2026-08-03 · fix(constructeur-prompts) le formulaire a 3 ecrans restaure au
- *     1.139.15 n'etait toujours pas ce que l'utilisateur voulait retrouver - demande explicite de
- *     revenir a l'assistant 4 etapes (Persona/Tache/Audience/Options) fidele a la version de
- *     mi-juin, celle avec le selecteur de technique de prompting (zero-shot/zero-shot+CoT/
- *     few-shot/few-shot+CoT/iteratif) a l'etape 4. Reconstruction MANUELLE (3 tentatives de
- *     delegation a des sous-agents ont echoue - 2 sont restees bloquees plus d'une heure sans
- *     ecrire un seul fichier) apres avoir decouvert que les champs de l'ancien assistant
- *     n'avaient jamais ete supprimes par les refontes intermediaires, seulement deplaces dans un
- *     panneau "Affiner" repliable : reorganisation du Blade existant en 4 blocs `x-show="step
- *     === N"`, pas une reecriture - tout le code de confidentialite (masquage anti-PII, panneau
- *     d'anonymisation) et le backend (prompts sauvegardes, partage, "Ouvrir dans" 5 IA) deja
- *     durcis restent inchanges. 11 echecs de tests attendus corriges : 5 fichiers Round104/105/
- *     118/119/65 entierement obsoletes (testaient l'UI de cartes personnalisees supprimee)
- *     purges ; Round85/92/138 chacun un seul test obsolete retire (validation liee a
- *     `selectedTask`, seuil de navigation 2 ecrans, texte d'aide du gabarit de carte) ; Round60
- *     revele une vraie regression (id="cpAudienceBlock" perdu pendant la reorganisation) corrigee
- *     en 1 ligne. Verification visuelle Playwright complete : formulaire jusqu'a l'etape 4,
- *     champ technique confirme present et fonctionnel.
+ *   1.139.17 · 2026-08-03 · revert(constructeur-prompts) le v1.139.16 (assistant 4 etapes fidele
+ *     a mi-juin) n'etait finalement pas non plus ce qui etait demande - retour explicite au
+ *     formulaire a 3 ecrans (v1.139.14/15). Revert propre via `git revert` du commit ac9b7a26 : le
+ *     seul commit ayant touche ces fichiers depuis fad32772 (le revert precedent), donc aucun
+ *     conflit, aucune perte du travail de confidentialite/backend deja durci (tout ce travail
+ *     precede fad32772 et n'a jamais ete touche par le detour du 4 etapes). Les 7 fichiers de
+ *     tests RoundNN purges au 1.139.16 (104/105/118/119/65/95/97) sont automatiquement restaures
+ *     par le revert.
  */
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 16;
+$lvPatch = 17;
 
 return [
     'major' => $lvMajor,

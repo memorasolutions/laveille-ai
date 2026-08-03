@@ -1299,24 +1299,19 @@ document.addEventListener('alpine:init', function() {
                 this.nextStep();
             },
 
-            // Restauré en wizard 4 étapes (2026-08-03, fidélité à la version pré-refonte du
-            // 26 juillet 2026, sur demande explicite de l'utilisateur). Validation par étape :
-            // 1=Persona (personaText requis), 2=Tâche (verbe + taskObject requis), 3=Audience
-            // (optionnelle), 4=Options avancées (tout optionnel, dernière étape).
             nextStep: function() {
-                var hasVerb = this.verbType === 'custom' ? !!this.verbCustom : !!this.verb;
-                if (this.step === 1 && !this.personaText) { this.showValidation = true; return; }
-                if (this.step === 2 && (!hasVerb || !this.taskObject)) { this.showValidation = true; return; }
+                if (this.step === 1 && !this.selectedTask) { this.showValidation = true; return; }
                 this.showValidation = false;
-                if (this.step === 2) this._autoDetectProfile();
-                if (this.step < 4) this.step++;
+                // Round 152 (2026-08-01) : pré-sélection du profil à la SEULE transition écran 1 →
+                // écran 2 (taskObject est déjà rempli à ce moment, que ce soit par une carte système
+                // ou par la personne elle-même) - jamais ensuite, pour ne pas écraser une correction
+                // manuelle pendant que la personne tape encore (voir profileTouched).
+                if (this.step === 1) this._autoDetectProfile();
+                if (this.step < 2) this.step++;
             },
             canGoToStep: function(s) {
-                var hasVerb = this.verbType === 'custom' ? !!this.verbCustom : !!this.verb;
                 if (s <= 1) return true;
-                if (!this.personaText) return false;
-                if (s <= 2) return true;
-                if (!hasVerb || !this.taskObject) return false;
+                if (s >= 2 && !this.selectedTask) return false;
                 return true;
             },
             goToStep: function(s) {
