@@ -29,15 +29,13 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 //    var(--c-text-muted, #52586A) sur blanc = 7,09:1 AAA (libellé, même token déjà utilisé au
 //    round 82 pour l'icône favori et la bordure "Ajouter une carte").
 
-it('does not contain the unreachable step-2 validation message spans (round 85)', function () {
-    $blade = file_get_contents(base_path('Modules/Tools/resources/views/public/tools/constructeur-prompts.blade.php'));
-
-    expect($blade)->not->toContain("step === 2 && verbType === 'preset' && !verb");
-    expect($blade)->not->toContain("step === 2 && verbType === 'custom' && !verbCustom");
-    expect($blade)->not->toContain('step === 2 && (verbType === \'custom\' ? !!verbCustom : !!verb) && !taskObject');
-    // Le seul cas réellement atteignable (étape 1, carte non choisie) doit rester.
-    expect($blade)->toContain('showValidation && step === 1 && !selectedTask');
-});
+// Round 2026-08-03 (restauration du wizard 4 étapes fidèle à mi-juin, sur demande explicite de
+// l'utilisateur) : le test round 85 ci-dessus assertait `showValidation && step === 1 &&
+// !selectedTask`, un invariant lié à la sélection de carte système (étape 1 = choix d'une carte
+// objectif). L'étape 1 du wizard restauré est « Persona » (personaText), le concept `selectedTask`
+// n'existe plus dans la validation du wizard. Retiré : le comportement qu'il protégeait (pas de
+// message de validation inatteignable) est désormais garanti par la nouvelle validation par étape
+// dans constructeur-prompts-core.js (nextStep/canGoToStep), testée ailleurs.
 
 // Round 151 (2026-08-01, refonte écrans 1-2, PLAN-FINAL-constructeur-2026-07-31.md) : les 2 tests
 // ci-dessous verrouillaient les couleurs AAA de l'indicateur d'étapes numéroté (cercles "1"/"2").

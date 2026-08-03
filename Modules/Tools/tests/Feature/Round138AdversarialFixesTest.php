@@ -72,12 +72,13 @@ it('exposes the new i18n key to the page (round 138)', function () {
     expect($blade)->toContain('Texte anonymisé inséré dans « %s ».');
 });
 
-it('stops promising an automatic prefill (round 138)', function () {
-    $blade = file_get_contents(base_path(R138_WIZARD_BLADE));
-
-    expect($blade)->not->toContain('pré-remplira automatiquement');
-    expect($blade)->toContain('Ce texte remplira votre demande si elle est encore vide');
-});
+// Round 2026-08-03 (restauration du wizard 4 étapes fidèle à mi-juin) : le test round 138
+// « stops promising an automatic prefill » vérifiait le texte d'aide du gabarit de carte
+// personnalisée (« Ce texte remplira votre demande si elle est encore vide »). Ce gabarit de
+// carte n'existe plus dans le wizard restauré (l'UI de cartes personnalisées a été retirée sur
+// demande explicite de l'utilisateur) - le texte qu'il protégeait n'a plus d'emplacement où
+// vivre. La logique JS conditionnelle qu'il référençait (isUntouchedTemplate/_showTaskNotice)
+// reste couverte par le test suivant, toujours valide.
 
 it('keeps the conditional prefill logic that made the old wording false (round 138)', function () {
     // Si cette logique conditionnelle du round 128 disparaissait un jour, le nouveau libellé

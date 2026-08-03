@@ -29,9 +29,10 @@ it('gives every plain .ct-btn button a 44px min-height floor (round 92)', functi
     // Sauvegarder/Mettre à jour (ligne ~36)
     expect($blade)->toContain('style="white-space:nowrap; min-height:44px;"');
 
-    // Précédent/Suivant (wizard nav)
+    // Précédent/Suivant (wizard nav) - seuil "step < 4" depuis la restauration du wizard 4 étapes
+    // (2026-08-03) ; le plancher 44px lui-même, protégé par ce test, est inchangé.
     expect($blade)->toContain('@click="prevStep()" x-show="step > 1" style="min-height:44px;"');
-    expect($blade)->toContain('@click="nextStep()" x-show="step < 2" style="min-height:44px;"');
+    expect($blade)->toContain('@click="nextStep()" x-show="step < 4" style="min-height:44px;"');
 
     // Améliorer avec mon IA / Exporter .txt : binding :style dynamique étendu (pattern round 86)
     expect($blade)->toContain(":style=\"'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')\"");

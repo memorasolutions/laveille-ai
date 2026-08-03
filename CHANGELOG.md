@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.16] - 2026-08-03
+
+### Corrigé
+
+- **Constructeur de prompts : retour à l'assistant 4 étapes (Persona/Tâche/Audience/Options),
+  fidèle à la version de mi-juin, sur demande explicite de l'utilisateur.** Le formulaire à 3
+  écrans restauré au 1.139.14/15 n'était toujours pas ce qui était attendu - l'utilisateur voulait
+  retrouver précisément l'assistant avec le sélecteur de technique de prompting (zero-shot,
+  zero-shot + réflexion étape par étape, avec exemples, avec exemples + réflexion étape par étape,
+  itératif avec validation) présent à la dernière étape. Découverte clé : les champs de l'ancien
+  assistant n'avaient jamais été supprimés par les refontes intermédiaires, seulement déplacés
+  dans un panneau « Affiner » repliable - la reconstruction a donc consisté à réorganiser le code
+  déjà existant en 4 étapes visibles, pas à réécrire quoi que ce soit. Tout le travail de
+  confidentialité déjà livré (masquage anti-PII, panneau d'anonymisation) et le backend (prompts
+  sauvegardés, partage, ouverture directe dans 5 IA) restent intacts et inchangés. Vérifié
+  visuellement en navigateur invité jusqu'à l'étape 4 : le sélecteur de technique s'affiche et
+  fonctionne.
+
 ## [1.139.15] - 2026-08-03
 
 ### Corrigé
