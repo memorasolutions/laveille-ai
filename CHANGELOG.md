@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.13] - 2026-08-03
+
+### Corrigé
+
+- **Constructeur de prompts : triple anneau de focus sur les champs Sujet/Ton/Longueur/Destiné à.**
+  Trouvé en simulant réellement un usage humain sur le site : le correctif précédent (v1.139.12)
+  avait bien réglé le problème global du site, mais un style propre à cet outil rajoutait encore
+  son propre anneau par-dessus - trois contours superposés au lieu d'un. Un seul contour maintenant.
+- **Constructeur de prompts : le bouton "Ouvrir dans ChatGPT/Claude/Gemini/Perplexity" ne
+  fonctionnait jamais réellement.** À chaque clic, un message trompeur "la fenêtre a été bloquée"
+  s'affichait et un onglet vide restait ouvert, alors que rien n'avait vraiment été bloqué - un
+  détail technique de l'appel d'ouverture de fenêtre empêchait systématiquement la navigation
+  directe vers l'IA choisie. Le bouton ouvre maintenant vraiment l'IA cible dans le nouvel onglet.
+
 ## [1.139.12] - 2026-08-02
 
 ### Corrigé

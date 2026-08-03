@@ -323,7 +323,7 @@
                         .cp-slot__label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--c-text-muted); display: inline-flex; align-items: center; }
                         .cp-slot__empty-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--c-accent); margin-left: 4px; flex-shrink: 0; }
                         .cp-slot__input { min-height: 40px; padding: .35rem .55rem; border: 2px solid #d1d5db; border-radius: 8px; font-family: var(--f-body); font-size: .9rem; color: var(--c-dark); background: #fff; }
-                        .cp-slot__input:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 1px; border-color: var(--c-primary); }
+                        .cp-slot__input:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 1px; border-color: var(--c-primary); box-shadow: none; }
                         /* Repère visuel PERMANENT (pas seulement au clic Copier) sur un champ vide -
                            s'appuie sur l'attribut data-cp-empty déjà réactif (Alpine), aucun nouvel
                            état JS nécessaire. */

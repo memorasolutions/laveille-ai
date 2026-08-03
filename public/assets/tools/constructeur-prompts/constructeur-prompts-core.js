@@ -363,9 +363,17 @@ document.addEventListener('alpine:init', function () {
             // Codex/claude.ai/Gemini) : (1) onglet ouvert en PREMIER, de façon synchrone, avant tout
             // await ; (2) copie presse-papiers ; (3) réassignation de l'onglet déjà ouvert. Inverser
             // cet ordre perd le geste utilisateur et se fait bloquer par Safari iOS.
+            //
+            // IMPORTANT (fix 2026-08-03, trouvé en simulation humaine réelle) : le feature 'noopener'
+            // fait que window.open() retourne TOUJOURS null par spécification (MDN) - le `if (newTab)`
+            // ci-dessous était donc systématiquement faux en navigateur réel, affichant à chaque clic
+            // le message trompeur "fenêtre bloquée" et laissant un onglet about:blank orphelin. On
+            // obtient la même protection anti reverse-tabnabbing SANS perdre la référence en ouvrant
+            // sans 'noopener' puis en mettant newTab.opener à null nous-mêmes juste après.
             openInAI: function () {
                 var self = this;
-                var newTab = window.open('about:blank', '_blank', 'noopener'); // (1) synchrone, avant tout
+                var newTab = window.open('about:blank', '_blank'); // (1) synchrone, avant tout
+                if (newTab) { try { newTab.opener = null; } catch (e) { /* best-effort */ } }
                 var text = this.finalCleanText();
                 // (2) best-effort, mais on ne ment pas sur le resultat : voir copyPrompt() pour
                 // l'explication du .then()/.catch() sur la promesse (le try/catch seul ne capte

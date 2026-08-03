@@ -3358,11 +3358,31 @@ declare(strict_types=1);
  *     d'une refonte plus poussée (Option 4+, voir prochaine entrée). Tests Modules/Tools 53/53 verts,
  *     vérification visuelle Playwright (les 2 modes, desktop+mobile), contraste WCAG AAA validé sur
  *     toutes les combinaisons de couleurs (ratios ≥7:1).
+ *
+ *   1.139.13 · 2026-08-03 · fix(constructeur-prompts) 2 bugs trouves en simulant un humain reel EN
+ *     DIRECT sur la prod (superadmin, /outils/constructeur-prompts), suite au constat utilisateur
+ *     "des CHAMPS actifs" (pluriel) apres le fix v1.139.12 - la simulation a confirme que le pluriel
+ *     visait bien PLUSIEURS bugs distincts, pas un seul deja corrige :
+ *     (1) constructeur-prompts.blade.php:326 - .cp-slot__input:focus-visible posait son propre
+ *     outline+border-color SANS neutraliser le box-shadow GLOBAL de charte.css (celui ajoute par le
+ *     fix v1.139.12 lui-meme) -> triple anneau au focus (outline + border-color + box-shadow tous
+ *     actifs simultanement), confirme par getComputedStyle() en prod avant/apres. Ajout de
+ *     `box-shadow: none;` sur cette regle, seule ligne modifiee.
+ *     (2) constructeur-prompts-core.js:openInAI() - window.open('about:blank','_blank','noopener')
+ *     retourne TOUJOURS null par specification web (MDN) des que 'noopener' est utilise, donc le
+ *     `if (newTab)` etait systematiquement faux en navigateur reel : CHAQUE clic sur "Ouvrir dans
+ *     ChatGPT/Claude/Gemini/Perplexity" (un des boutons principaux de l'outil) affichait le message
+ *     trompeur "La fenetre a ete bloquee par votre navigateur" (rien n'etait bloque) et laissait un
+ *     onglet about:blank orphelin ouvert, au lieu de naviguer vers l'IA cible. Confirme en cliquant
+ *     reellement le bouton en prod avant le fix (tab reste blank + fallback affiche a tort). Fix :
+ *     retrait de 'noopener' de l'appel + `newTab.opener = null` fait manuellement juste apres (meme
+ *     garantie de securite anti reverse-tabnabbing, mais la reference reste utilisable). Suite
+ *     Modules/Tools (35 tests, filtre Constructeur) verte, aucune regression.
  */
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 12;
+$lvPatch = 13;
 
 return [
     'major' => $lvMajor,
