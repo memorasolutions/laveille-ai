@@ -621,6 +621,7 @@ a:hover { color: var(--c-primary); }
 input:focus,
 textarea:focus,
 select:focus {
+    outline: 0;
     border-color: var(--c-primary);
     box-shadow: 0 0 0 0.2rem rgba(11, 114, 133, 0.15);
 }

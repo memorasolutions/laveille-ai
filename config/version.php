@@ -17,6 +17,22 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.139.12 · 2026-08-02 · fix(constructeur-prompts+charte) 2 vrais correctifs apres un signalement
+ *     utilisateur direct (les taches #1516/#1517/#1523 avaient ete cochees "terminees" sans corriger
+ *     le vrai bug - Fake Done confirme via un repro HTML/CSS local pixel-pres) :
+ *     (1) constructeur-prompts.blade.php : l'etat "carte choisie" passait le fieldset des 9 cartes
+ *     en `.cp-cards--collapsed` (rangee flex qui deborde, `<legend>` devenu un item de la rangee) au
+ *     lieu de le masquer completement - le docblock du fichier documente pourtant l'intention d'origine
+ *     ("elle se reduit en pastille", une SEULE pastille, pas une rangee de 9). Correctif : le fieldset
+ *     passe en x-show="!selectedCard" (reste dans le DOM, radios toujours accessibles - jamais x-if qui
+ *     romprait le suivi Alpine documente), classe --collapsed et son CSS retires (code mort). La
+ *     pastille .cp-selected-pill deja existante devient le seul indicateur visuel post-selection.
+ *     (2) charte.css:620 : .form-control:focus/input:focus/textarea:focus/select:focus posait un
+ *     box-shadow SANS neutraliser l'outline natif du navigateur -> double bordure au focus sur tout
+ *     champ sans classe .form-control (signale par l'utilisateur, verifie site-wide). Ajout de
+ *     `outline: 0` sur la meme regle, aucun autre style touche. Verifie par repro HTML/CSS local
+ *     (capture avant/apres) + suite Modules/Tools+Core 384 tests verts (aucune regression).
+ *
  *   1.139.11 · 2026-08-02 · fix(perf) fiches outils /annuaire/{slug} 5-7s -> cache du resultat
  *     GlossaryLinkifier::linkify(). Mesure directe en prod (probes auto-suppressibles, requete
  *     dispatchee dans le vrai kernel HTTP avec DB::enableQueryLog) : 24ms de SQL cumule sur 81
@@ -3346,7 +3362,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 11;
+$lvPatch = 12;
 
 return [
     'major' => $lvMajor,

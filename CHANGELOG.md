@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.12] - 2026-08-02
+
+### Corrigé
+
+- **Constructeur de prompts : la barre de défilement horizontale des 9 cartes n'avait jamais
+  vraiment disparu.** Les correctifs précédents (v1.139.8/1.139.9) n'avaient retouché que
+  l'apparence de la rangée défilante, sans jamais la retirer - une fois une carte choisie, le
+  fieldset des 9 cartes se transforme maintenant en une seule pastille (comme prévu à l'origine),
+  la rangée qui débordait et coupait des cartes a disparu.
+- **Double bordure sur les champs de formulaire au focus, site-wide.** L'anneau de mise en
+  évidence (`box-shadow`) s'ajoutait par-dessus le contour natif du navigateur au lieu de le
+  remplacer - un seul anneau visible désormais sur tout champ actif.
+
 ## [1.139.11] - 2026-08-02
 
 ### Corrigé

@@ -263,13 +263,15 @@
                         <style>
                         /* ===== Constructeur de prompts - réécriture 2026-08-02 (préfixe cp- dédié) ===== */
 
-                        /* Groupe des 9 cartes - état A : grille ; état B : rangée de pastilles scrollable.
-                           Les 9 <input type="radio"> restent TOUJOURS dans le DOM (jamais retirés). */
+                        /* Groupe des 9 cartes - état A : grille visible ; état B : fieldset masqué
+                           (x-show) au profit de .cp-selected-pill, seul indicateur visuel restant.
+                           Les 9 <input type="radio"> restent TOUJOURS dans le DOM (jamais retirés,
+                           x-show plutôt que x-if - préserve l'état Alpine et évite un remount qui
+                           perdrait le focus pour un lecteur d'écran). */
                         .cp-cards { border: none; padding: 0; margin: 0 0 1rem; }
                         .cp-cards legend { font-weight: 700; color: var(--c-dark); margin-bottom: .6rem; padding: 0; font-size: 1rem; }
                         .cp-cards--grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .6rem; }
                         @media (min-width: 380px) { .cp-cards--grid { grid-template-columns: repeat(3, 1fr); } }
-                        .cp-cards--collapsed { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: .5rem; padding-bottom: .3rem; -webkit-overflow-scrolling: touch; }
 
                         .cp-card { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; min-height: 76px; padding: .7rem .8rem; border: 2px solid #d1d5db; border-radius: 12px; background: #fff; color: var(--c-dark); cursor: pointer; transition: border-color .15s ease, background .15s ease; }
                         .cp-card__title, .cp-card__example { overflow-wrap: break-word; word-break: break-word; }
@@ -285,10 +287,6 @@
                         .cp-card__icon { font-size: 1.1rem; line-height: 1; }
                         .cp-card__title { font-weight: 700; font-size: .92rem; }
                         .cp-card__example { font-size: .76rem; color: var(--c-text-muted); }
-
-                        .cp-cards--collapsed .cp-card { flex: 0 0 auto; min-height: 44px; flex-direction: row; align-items: center; gap: .4rem; padding: .5rem .8rem; white-space: nowrap; }
-                        .cp-cards--collapsed .cp-card__example { display: none; }
-                        .cp-cards--collapsed .cp-card__title { font-size: .85rem; }
 
                         /* Divulgation progressive sur mobile (<640px) : les 5 dernières cartes
                            (5e label et suivants, comptés hors <legend> via :nth-of-type) restent
@@ -381,7 +379,9 @@
 
                         {{-- ===== État A / B : 9 cartes, radios natifs, jamais retirées du DOM ===== --}}
                         <fieldset class="cp-cards"
-                                  :class="selectedCard ? 'cp-cards--collapsed' : (showAllCards ? 'cp-cards--grid' : 'cp-cards--grid cp-cards--peek')">
+                                  x-show="!selectedCard"
+                                  x-cloak
+                                  :class="showAllCards ? 'cp-cards--grid' : 'cp-cards--grid cp-cards--peek'">
                             <legend>{{ __('Qu\'est-ce que vous voulez faire aujourd\'hui ?') }}</legend>
                             @foreach ($gabarits as $g)
                                 <label class="cp-card" :class="{ 'is-checked': selectedCard === '{{ $g['key'] }}' }">
