@@ -32,13 +32,30 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 //    au lieu de chercher le caractère littéral. Fixé : échappement + clause ESCAPE explicite
 //    (portable MySQL + SQLite).
 
-// Étape 9 (2026-08-02, réécriture complète) : les 2 tests qui verrouillaient l'accessibilité de
-// la modale d'aide #promptHelpModal ont été retirés - cette modale n'existe plus (écran unique,
-// plan section 4). Les 2 tests ci-dessous restent en revanche pleinement pertinents :
-// sanitizeCustomCards() reste un vrai comportement backend du contrôleur ToolPreferenceController
-// (custom_cards persiste en base pour compatibilité, plan section 5 : "tool_preferences reste en
-// base pour compatibilité" - toujours atteignable via l'API même si la nouvelle page n'écrit plus
-// custom_cards), et scopeSearch() est une règle de sécurité applicative indépendante du markup.
+it('associates the help modal title to the dialog via aria-labelledby (round 93)', function () {
+    $blade = file_get_contents(base_path('Modules/Tools/resources/views/public/tools/constructeur-prompts.blade.php'));
+
+    expect($blade)->toContain('id="promptHelpModal" tabindex="-1" role="dialog" aria-labelledby="promptHelpModalLabel"');
+    expect($blade)->toContain('id="promptHelpModalLabel"');
+});
+
+it('renders the help modal with aria-labelledby wired to its title id on the real page (round 93)', function () {
+    Tool::firstOrCreate(['slug' => 'constructeur-prompts'], [
+        'name' => 'Constructeur de prompts',
+        'description' => 'Test',
+        'icon' => '✨',
+        'is_active' => true,
+        'is_under_construction' => false,
+        'category' => 'productivite',
+    ]);
+
+    $user = User::factory()->create();
+
+    $html = $this->actingAs($user)->get('/outils/constructeur-prompts')->assertOk()->getContent();
+
+    expect($html)->toContain('aria-labelledby="promptHelpModalLabel"');
+    expect($html)->toContain('id="promptHelpModalLabel"');
+});
 
 it('deduplicates custom card ids instead of persisting silent duplicates (round 93)', function () {
     $user = User::factory()->create();

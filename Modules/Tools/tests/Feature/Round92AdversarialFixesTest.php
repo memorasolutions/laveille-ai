@@ -23,11 +23,26 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 // 3. user/prompts/index.blade.php : les chips de tag AFFICHÉES DANS CHAQUE CARTE (distinctes de
 //    la barre de filtres globale déjà corrigée au round 88 - ce sont 2 emplacements différents).
 
-// Étape 9 (2026-08-02, réécriture complète) : le test qui verrouillait le plancher 44px de ~8
-// boutons de l'ancien assistant (navigation wizard prevStep/nextStep, modale d'aide "Compris !",
-// "Améliorer avec mon IA") a été retiré - ce sont exactement les écrans/boutons remplacés par
-// l'écran unique de la réécriture (plan section 4). Les tests sur prompt-anon-panel.js et
-// /user/prompts (inchangés) ci-dessous restent valides.
+it('gives every plain .ct-btn button a 44px min-height floor (round 92)', function () {
+    $blade = file_get_contents(base_path('Modules/Tools/resources/views/public/tools/constructeur-prompts.blade.php'));
+
+    // Sauvegarder/Mettre à jour (ligne ~36)
+    expect($blade)->toContain('style="white-space:nowrap; min-height:44px;"');
+
+    // Précédent/Suivant (wizard nav)
+    expect($blade)->toContain('@click="prevStep()" x-show="step > 1" style="min-height:44px;"');
+    expect($blade)->toContain('@click="nextStep()" x-show="step < 2" style="min-height:44px;"');
+
+    // Améliorer avec mon IA / Exporter .txt : binding :style dynamique étendu (pattern round 86)
+    expect($blade)->toContain(":style=\"'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')\"");
+
+    // Recommencer (armReset)
+    expect($blade)->toContain('@click="armReset()" aria-live="assertive" style="min-height:44px;"');
+
+    // Modale aide : × de fermeture (auto-découvert) + "Compris !" (signalé)
+    expect($blade)->toContain('min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center;">&times;</button>');
+    expect($blade)->toContain('onclick="jQuery(\'#promptHelpModal\').modal(\'hide\')" style="min-height:44px;">{{ __(\'Compris !\') }}</button>');
+});
 
 it('gives the dynamically-created anonBtn a 44px touch target (round 92)', function () {
     $js = file_get_contents(public_path('assets/tools/constructeur-prompts/prompt-anon-panel.js'));
@@ -42,3 +57,20 @@ it('gives in-card tag chips a 44px touch target, distinct from the filter bar ch
     expect($blade)->toContain("background: #E0F2F1; color: #053D4A; padding: 2px 10px; border-radius: 999px; font-weight: 600; font-size: 11px; text-decoration: none; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center;");
 });
 
+it('renders the constructeur-prompts page with all round 92 button fixes present (real page)', function () {
+    Tool::firstOrCreate(['slug' => 'constructeur-prompts'], [
+        'name' => 'Constructeur de prompts',
+        'description' => 'Test',
+        'icon' => '✨',
+        'is_active' => true,
+        'is_under_construction' => false,
+        'category' => 'productivite',
+    ]);
+
+    $user = User::factory()->create();
+
+    $html = $this->actingAs($user)->get('/outils/constructeur-prompts')->assertOk()->getContent();
+
+    expect($html)->toContain('style="white-space:nowrap; min-height:44px;"');
+    expect($html)->toContain('min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center;">&times;</button>');
+});

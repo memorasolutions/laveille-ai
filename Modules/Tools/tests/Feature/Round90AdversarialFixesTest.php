@@ -22,11 +22,13 @@ uses(Tests\TestCase::class);
 //    Fixé : min-width:44px, min-height:44px, display:flex/align-items/justify-content:center
 //    ajoutés en style inline (cohérent avec le pattern déjà utilisé sur anonBtn juste au-dessus).
 
-// Étape 9 (2026-08-02, réécriture complète) : le test qui verrouillait `pb_history`/hasLocalData
-// dans constructeur-prompts-core.js a été retiré - ce mécanisme d'import localStorage de l'ancien
-// assistant (bibliothèque "Mes prompts" côté wizard) n'existe plus (plan section 3, "Retirer" :
-// remplacé par un historique local léger et distinct, désactivé par défaut). prompt-anon-panel.js
-// reste inchangé et toujours utilisé par /user/prompts - le test ci-dessous reste valide.
+it('checks pb_history content (not just presence) before setting hasLocalData (round 90)', function () {
+    $js = file_get_contents(base_path('public/assets/tools/constructeur-prompts/constructeur-prompts-core.js'));
+
+    expect($js)->not->toContain("if (localStorage.getItem('pb_history')) self.hasLocalData = true;");
+    expect($js)->toContain('if (Array.isArray(_lh) && _lh.length > 0) self.hasLocalData = true;');
+    expect($js)->toContain('if (local.length === 0) { this.hasLocalData = false; return; }');
+});
 
 it('has a WCAG AAA 44px touch target on the PII warning dismiss button (round 90)', function () {
     $js = file_get_contents(base_path('public/assets/tools/constructeur-prompts/prompt-anon-panel.js'));

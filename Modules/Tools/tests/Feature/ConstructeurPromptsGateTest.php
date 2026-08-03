@@ -115,11 +115,101 @@ it('does not affect another tool (minuteur-visuel) not under construction', func
     ])->assertOk();
 });
 
-// Deux tests retires ici le 2026-08-02 (etape 9 de la refonte, .outils/PLAN-CONSTRUCTEUR-PROMPTS-
-// ULTRA-2026-08-02.md) : ils verrouillaient l'i18n de window.promptBuilderConfig (n'existe plus)
-// et de chaines retirees par le plan (« Ajouter une carte », « Verbe d'action », « Ameliorer avec
-// mon IA »). Meme categorie RETIRE que les fichiers RoundNN purges - fonctionnalites disparues,
-// pas un simple changement de markup.
+it('renders all 12 window.promptBuilderConfig.i18n keys as real localized HTML on the constructeur-prompts page (round 28 covered 2/12, round 29, 2026-07-27, étend aux 10 restantes - dont 5 messages d\'erreur critiques saveError/loadError/exportError/deleteError/importError - jamais exercées par un test de rendu HTTP réel dans les 2 langues)', function () {
+    Tool::where('slug', 'constructeur-prompts')->update(['is_under_construction' => false]);
+
+    $user = User::factory()->create();
+
+    // Note : @json() échappe unicode/apostrophe/slash de façon non triviale (JSON_HEX_APOS
+    // notamment) - plutôt que de figer un format d'échappement exact et fragile, on normalise
+    // le HTML rendu (dé-échappe é, ’, …, ', \/) avant de chercher le texte
+    // clair attendu - robuste peu importe la forme d'échappement réellement produite.
+    $normalize = fn (string $html): string => str_replace(
+        [
+            chr(92) . 'u00e9',
+            chr(92) . 'u2019',
+            chr(92) . 'u2026',
+            chr(92) . 'u0027',
+            chr(92) . '/',
+        ],
+        ['é', "'", '…', "'", '/'],
+        $html
+    );
+
+    $fr = $normalize($this->actingAs($user)->withSession(['locale' => 'fr'])
+        ->get('/outils/constructeur-prompts')
+        ->assertOk()
+        ->getContent());
+
+    expect($fr)
+        ->toContain('promptCopied: "Prompt copié"')
+        ->toContain('promptSaved: "Prompt sauvegardé"')
+        ->toContain('saveError: "Erreur de sauvegarde. Réessayez."')
+        ->toContain('loadError: "Impossible de charger ce prompt pour édition."')
+        ->toContain('exportError: "Impossible d\'exporter le fichier. Réessayez."')
+        ->toContain('deleteError: "Erreur lors de la suppression. Réessayez."')
+        ->toContain('importError: "Erreur lors de l\'importation. Réessayez."')
+        ->toContain('openInGeneric: "Prompt copié : ouverture de la conversation…"')
+        ->toContain('openInGemini: "Prompt copié : colle-le dans Gemini (Ctrl/Cmd + V)."')
+        ->toContain('openInTooLong: "Prompt trop long pour le lien : il est copié, colle-le (Ctrl/Cmd + V)."')
+        ->toContain('1 carte importée')
+        ->toContain('{count} cartes importées');
+
+    $en = $normalize($this->actingAs($user)->withSession(['locale' => 'en'])
+        ->get('/outils/constructeur-prompts')
+        ->assertOk()
+        ->getContent());
+
+    expect($en)
+        ->toContain('promptCopied: "Prompt copied"')
+        ->toContain('promptSaved: "Prompt saved"')
+        ->toContain('saveError: "Save error. Please try again."')
+        ->toContain('loadError: "Unable to load this prompt for editing."')
+        ->toContain('exportError: "Unable to export the file. Please try again."')
+        ->toContain('deleteError: "Error deleting. Please try again."')
+        ->toContain('importError: "Error importing. Please try again."')
+        ->toContain('openInGeneric: "Prompt copied: opening the conversation…"')
+        ->toContain('openInGemini: "Prompt copied: paste it into Gemini (Ctrl/Cmd + V)."')
+        ->toContain('openInTooLong: "Prompt too long for the link: it\'s copied, paste it (Ctrl/Cmd + V)."')
+        ->toContain('1 card imported')
+        ->toContain('{count} cards imported');
+});
+
+it('renders the constructeur-prompts Blade-level UI text as real localized HTML in both languages (round 30, 2026-07-27: 184 des 209 chaînes __() de cette page - tout le wizard hors i18n JS - étaient absentes des 2 fichiers lang, un visiteur anglophone voyait une page presque entièrement en français)', function () {
+    Tool::where('slug', 'constructeur-prompts')->update(['is_under_construction' => false]);
+
+    $user = User::factory()->create();
+
+    // Échantillon représentatif réparti sur toute la page (gestion de cartes, objectif,
+    // demande, ton, réglages avancés, actions de sortie, aide) - pas les 184 clés une à une,
+    // mais assez pour détecter une régression systémique. Rendu via {{ __() }} Blade classique
+    // (pas @json()), donc aucun souci d'échappement unicode ici - assertSee direct suffit.
+    $this->actingAs($user)->withSession(['locale' => 'fr'])
+        ->get('/outils/constructeur-prompts')
+        ->assertOk()
+        ->assertSee('Ajouter une carte', escape: false)
+        ->assertSee('Diagnostic rapide', escape: false)
+        ->assertSee('Votre objectif', escape: false)
+        ->assertSee('Description de la demande', escape: false)
+        ->assertSee('Ton de la réponse', escape: false)
+        ->assertSee('Verbe d&#039;action', escape: false)
+        ->assertSee('Améliorer avec mon IA', escape: false)
+        ->assertSee('Comment créer un bon prompt', escape: false)
+        ->assertSee('Historique', escape: false);
+
+    $this->actingAs($user)->withSession(['locale' => 'en'])
+        ->get('/outils/constructeur-prompts')
+        ->assertOk()
+        ->assertSee('Add a card', escape: false)
+        ->assertSee('Quick check', escape: false)
+        ->assertSee('Your goal', escape: false)
+        ->assertSee('Prompt description', escape: false)
+        ->assertSee('Response tone', escape: false)
+        ->assertSee('Action verb', escape: false)
+        ->assertSee('Improve with my AI', escape: false)
+        ->assertSee('How to create a good prompt', escape: false)
+        ->assertSee('History', escape: false);
+});
 
 it('shows the "Mes prompts" menu link to a non-admin while the tool is under revision (round 106, 2026-08-01 : la bibliothèque de lecture est accessible, le lien doit donc l\'être aussi - round 4 le masquait à tort)', function () {
     $user = User::factory()->create();
