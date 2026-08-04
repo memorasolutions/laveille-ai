@@ -181,9 +181,10 @@
                         .ct-card--on .ct-card__mark{visibility:visible;}
                         .ct-block__field{margin-bottom:0.75rem;}
                         .ct-block__field:last-child{margin-bottom:0;}
-                        .ct-profile-strip{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem 0.65rem;margin-bottom:1.25rem;padding:0.85rem 1rem;border:1px dashed rgba(11,114,133,0.35);border-radius:12px;background:var(--c-primary-light);}
-                        .ct-profile-strip__title{font-weight:700;color:var(--c-dark);font-size:0.85rem;flex-basis:100%;margin:0 0 0.15rem;}
                         </style>
+                        {{-- .ct-profile-strip / .ct-profile-strip__title retirés le 2026-08-04 :
+                             classes jamais utilisées dans ce fichier (CSS orphelin), aucun effet
+                             visuel à leur suppression. --}}
 
                         {{-- Round 151 (2026-08-01, refonte écrans 1-2, PLAN-FINAL-constructeur-2026-07-31.md) :
                              l'indicateur d'étapes numéroté (cercles « 1 »/« 2 » cliquables) a été retiré.
@@ -255,6 +256,37 @@
                                     </template>
                                 </select>
                                 <input type="text" id="cpVerbCustom" class="form-control" x-show="verbType === 'custom'" x-model="verbCustom" autocomplete="off" :aria-required="verbType === 'custom'" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}" aria-label="{{ __('Verbe personnalisé') }}">
+                            </div>
+
+                            {{-- Deuxième tâche optionnelle (2026-08-04, club des sages 5/5 unanime) :
+                                 bornée à 2 tâches maximum, séquence explicite dans le prompt généré -
+                                 jamais un multi-select libre (déjà essayé et rejeté 2 fois cette année). --}}
+                            <div class="ct-block__field mb-3">
+                                <button type="button" x-show="!secondTaskEnabled" @click="secondTaskEnabled = true" style="display: inline-flex; align-items: center; min-height: 44px; padding: 4px 6px; border: 0; background: transparent; color: var(--c-primary); font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                                    {{ __('+ Ajouter une deuxième tâche (optionnel)') }}
+                                </button>
+                                <div x-show="secondTaskEnabled" x-transition>
+                                    <p class="small mb-2" style="font-size: 0.8rem; color: var(--c-dark);">{{ __('Cette deuxième tâche sera réalisée à partir du résultat de la première.') }}</p>
+                                    <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Verbe d\'action de la deuxième tâche') }}</label>
+                                    <div class="d-flex gap-3 mb-2">
+                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
+                                            <input type="radio" name="verbType2" value="preset" x-model="verbType2" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfini') }}
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
+                                            <input type="radio" name="verbType2" value="custom" x-model="verbType2" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisé') }}
+                                        </label>
+                                    </div>
+                                    <select class="form-control" x-show="verbType2 === 'preset'" x-model="verb2" aria-label="{{ __('Verbe d\'action de la deuxième tâche') }}">
+                                        <option value="">{{ __('-- Sélectionnez un verbe --') }}</option>
+                                        <template x-for="v in verbs" :key="'second-' + v">
+                                            <option :value="v" x-text="v"></option>
+                                        </template>
+                                    </select>
+                                    <input type="text" id="cpVerbCustom2" class="form-control" x-show="verbType2 === 'custom'" x-model="verbCustom2" autocomplete="off" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}" aria-label="{{ __('Verbe personnalisé de la deuxième tâche') }}">
+                                    <button type="button" @click="secondTaskEnabled = false; verbType2 = 'preset'; verb2 = ''; verbCustom2 = '';" style="display: inline-flex; align-items: center; min-height: 44px; margin-top: 6px; padding: 4px 6px; border: 0; background: transparent; color: #991B1B; font-size: 0.8rem; font-weight: 600; cursor: pointer;">
+                                        {{ __('✕ Retirer la deuxième tâche') }}
+                                    </button>
+                                </div>
                             </div>
 
                             {{-- Retrait du panneau de masquage intégré (2026-08-04, demande explicite de

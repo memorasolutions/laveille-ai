@@ -3507,11 +3507,36 @@ declare(strict_types=1);
  *     0 echec (hors 1 fichier Node pre-existant et hors-perimetre, deja en echec avant ce retrait -
  *     tests/js/prompt-verifier-rules-detect.test.cjs attend un moteur non encore livre par un
  *     chantier distinct, .outils/PLAN-CONSTRUCTEUR-PROMPTS-ULTRA-2026-08-02.md).
+ *
+ *   1.140.0 · 2026-08-04 · feat(constructeur-prompts) refonte UX ciblee apres consultation du
+ *     club des sages (5 IA : Perplexity, Codex, DeepSeek, Gemini, claude.ai - unanimite 5/5) :
+ *     NON aux cartes pour les 7 champs a choix unique (deja essaye et rejete 2x cette annee sur
+ *     cet outil, dernier retour aux <select> natifs le jour meme, v1.139.21), NON a la selection
+ *     multiple libre sur la tache. (1) Defauts intelligents format/longueur/ton (core.js) :
+ *     partaient vides et declenchaient a tort le "Diagnostic rapide" pour tout utilisateur qui ne
+ *     touchait jamais l'etape Options - desormais "Paragraphes detailles" / "Modere (300-500
+ *     mots)" / "Professionnel", modifiables, rien retire. (2) Option "deuxieme tache" bornee a 2,
+ *     jamais un multi-select : lien discret sur l'etape Tache, 2e select verbe optionnel, le
+ *     prompt genere exprime une sequence explicite numerotee ("Ta tache comporte deux etapes...
+ *     1) X : ... 2) Y, a partir du resultat de l'etape precedente.") au lieu d'une juxtaposition
+ *     ambigue. Comportement a une seule tache strictement inchange si l'option n'est pas activee
+ *     (verifie par comparaison de chaines). (3) Nettoyage : etat mort affinerOpen (ecrit 2x,
+ *     jamais lu, vestige de l'ancienne numerotation d'etapes) + CSS orphelin .ct-profile-strip
+ *     retires. BONUS trouve en creusant affinerOpen : openDiagnosticSection() forcait TOUJOURS
+ *     step=2 (bug latent depuis la restauration du wizard 4 etapes le 2026-08-03, jamais corrige
+ *     lors de la renumerotation) - le clic "Completer" d'un diagnostic n'atteignait donc jamais le
+ *     bon bloc ; corrige pour cibler step=3 (audience) ou step=4 (format/contraintes) selon la
+ *     cle, verifie en direct (composant Alpine lu dans le DOM : step passe bien a 3 apres clic).
+ *     Les 7 select natifs et les cartes Audience restent visuellement identiques - garde-fou
+ *     explicite du plan, aucune regression. Verifie : 343 tests Pest Modules/Tools + 26 bancs
+ *     Node tests/js (dont le nouveau constructeur-prompts-secondtask.test.cjs, 6/6) passants, 0
+ *     echec ; verification visuelle Playwright reelle desktop+mobile (prompt genere lu en direct
+ *     dans le DOM, pas seulement les tests).
  */
 
 $lvMajor = 1;
-$lvMinor = 139;
-$lvPatch = 22;
+$lvMinor = 140;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

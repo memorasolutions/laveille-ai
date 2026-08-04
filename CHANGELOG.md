@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.140.0] - 2026-08-04
+
+### Ajouté
+
+- **Constructeur de prompts : option « deuxième tâche » bornée à 2, en séquence explicite.**
+  Remplace un multi-select libre écarté après consultation du club des sages (5 IA - Perplexity,
+  Codex, DeepSeek, Gemini, claude.ai - unanimité). Sur l'étape Tâche, un lien discret « + Ajouter
+  une deuxième tâche (optionnel) » révèle un second menu déroulant verbe. Le prompt généré exprime
+  une séquence numérotée (« Ta tâche comporte deux étapes... 1) X : ... 2) Y, à partir du résultat
+  de l'étape précédente. ») plutôt qu'une simple juxtaposition ambiguë. Comportement à une seule
+  tâche strictement inchangé si l'option n'est pas activée.
+- **Défauts intelligents pour format/longueur/ton.** Ces trois champs partaient vides, ce qui
+  déclenchait à tort le « Diagnostic rapide » pour quiconque ne visitait jamais l'étape Options -
+  désormais pré-remplis (« Paragraphes détaillés » / « Modéré (300-500 mots) » / « Professionnel »),
+  toujours modifiables.
+
+### Corrigé
+
+- **Bug latent trouvé en creusant le nettoyage ci-dessous : `openDiagnosticSection()` forçait
+  toujours l'étape 2**, peu importe le diagnostic cliqué - reliquat de l'ancienne numérotation
+  jamais mis à jour lors de la restauration du wizard 4 étapes (2026-08-03). Le clic « Compléter »
+  n'atteignait donc jamais le bon bloc (audience = étape 3, format/contraintes = étape 4). Corrigé
+  et vérifié en direct.
+
+### Nettoyé
+
+- État Alpine mort `affinerOpen` (écrit deux fois, jamais lu nulle part) et CSS orphelin
+  `.ct-profile-strip` retirés du constructeur de prompts - aucun effet visuel.
+
+**Décision de conception explicite (club des sages 5/5 + historique du projet)** : aucune carte
+introduite pour les champs à choix unique, aucune sélection multiple libre sur la tâche - ces deux
+options ont déjà été essayées et rejetées deux fois cette année sur cet outil. Les 7 menus
+déroulants natifs et les cartes Audience (multi-sélection) restent visuellement identiques.
+
 ## [1.139.22] - 2026-08-04
 
 ### Retiré

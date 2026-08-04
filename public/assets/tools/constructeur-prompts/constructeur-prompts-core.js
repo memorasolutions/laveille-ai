@@ -27,9 +27,9 @@ document.addEventListener('alpine:init', function() {
             // (openSections.role/verb/format/technique/contraintes) sont RETIRÉS - le proprétaire a
             // été explicite (« les ouvrir et fermer à chaque fois... ark ! »). Les mêmes réglages
             // vivent maintenant dans 5 blocs TOUJOURS VISIBLES (voir x-tools::prompt-block dans le
-            // Blade). affinerOpen (ci-dessous) reste : ce n'est pas un accordéon au sens critiqué -
-            // un SEUL clic révèle les 5 blocs une fois pour toutes, rien à rouvrir/refermer ensuite.
-            affinerOpen: false,
+            // Blade). L'ancien flag affinerOpen (un seul clic pour les révéler) a été retiré le
+            // 2026-08-04 : jamais lu nulle part (ni Blade ni JS), les blocs étant déjà toujours
+            // visibles depuis ce round 152 - le flag n'avait plus aucun effet.
             // Round 152 : profils de règles conditionnels (section 7 du plan). Aucune IA dans l'outil :
             // ce n'est PAS de la « compréhension », seulement une correspondance par mots-clés qui
             // pré-sélectionne un profil TOUJOURS visible et corrigeable d'un clic (voir
@@ -55,6 +55,14 @@ document.addEventListener('alpine:init', function() {
             verbs: (window.promptBuilderConfig && window.promptBuilderConfig.verbs) || [],
             verbCustom: '',
             taskObject: '',
+            // Deuxième tâche optionnelle (2026-08-04, club des sages 5/5 unanime) : bornée à 2
+            // tâches maximum, jamais de sélection multiple libre - la version cartes/multi-select
+            // a déjà été essayée et rejetée 2 fois cette année sur cet outil. Le prompt généré
+            // exprime une séquence explicite ("D'abord X, ensuite Y"), jamais une juxtaposition.
+            secondTaskEnabled: false,
+            verbType2: 'preset',
+            verb2: '',
+            verbCustom2: '',
             audienceType: 'preset',
             // Round 151 (2026-08-01, refonte écrans 1-2) : `audiencePreset` (singulier) retiré de
             // l'état - plus aucune action utilisateur ne l'écrit depuis l'introduction du
@@ -75,9 +83,14 @@ document.addEventListener('alpine:init', function() {
             tones: (window.promptBuilderConfig && window.promptBuilderConfig.tones) || [],
             techniques: (window.promptBuilderConfig && window.promptBuilderConfig.techniques) || [],
             languages: (window.promptBuilderConfig && window.promptBuilderConfig.languages) || [],
-            format: '',
-            length: '',
-            tone: '',
+            // Défauts intelligents (2026-08-04, club des sages 5/5 + veille) : vides auparavant,
+            // ce qui déclenchait systématiquement l'avertissement "Diagnostic rapide" (voir plus
+            // bas) pour quiconque ne touchait jamais à l'écran 4 - l'outil créait lui-même le
+            // problème qu'il signalait ensuite. Valeurs parmi les options existantes (formats/
+            // lengths/tones ci-dessus), toujours modifiables, rien n'est retiré.
+            format: 'Paragraphes détaillés',
+            length: 'Modéré (300-500 mots)',
+            tone: 'Professionnel',
             language: 'fr',
             constraintAntiAI: true,
             constraintTypo: false,
@@ -785,6 +798,10 @@ document.addEventListener('alpine:init', function() {
 
                 var actionVerb = this.verbType === 'custom' ? this.verbCustom : this.verb;
                 var actionVerbIsUser = this.verbType === 'custom';
+                // Deuxième tâche optionnelle (2026-08-04) : mêmes deux variables miroir que
+                // actionVerb/actionVerbIsUser ci-dessus, jamais lues si secondTaskEnabled est faux.
+                var secondActionVerb = this.verbType2 === 'custom' ? this.verbCustom2 : this.verb2;
+                var secondActionVerbIsUser = this.verbType2 === 'custom';
                 var personaIsUser = this.personaType === 'custom';
 
                 // === RÔLE (enrichi) ===
@@ -797,7 +814,21 @@ document.addEventListener('alpine:init', function() {
                 }
 
                 // === TÂCHE ===
-                if (actionVerb && this.taskObject) {
+                // Deuxième tâche optionnelle (2026-08-04) : séquence explicite en 2 étapes
+                // numérotées, jamais une simple juxtaposition - décision du club des sages (5 IA,
+                // unanimité) après que le multi-select libre ait été jugé source d'ambiguïté.
+                // Le comportement à une seule tâche (branches suivantes) reste inchangé tant que
+                // secondTaskEnabled est faux ou qu'aucun verbe 2 valide n'est renseigné.
+                if (this.secondTaskEnabled && secondActionVerb && actionVerb && this.taskObject) {
+                    startSection();
+                    tool('Ta tâche comporte deux étapes, à réaliser dans l\'ordre :\n1) ');
+                    if (actionVerbIsUser) { user(actionVerb); } else { tool(actionVerb); }
+                    tool(' : ');
+                    user(this._taskWithoutLeadingVerb(actionVerb, this.taskObject));
+                    tool('.\n2) ');
+                    if (secondActionVerbIsUser) { user(secondActionVerb); } else { tool(secondActionVerb); }
+                    tool(', à partir du résultat de l\'étape précédente.');
+                } else if (actionVerb && this.taskObject) {
                     startSection();
                     tool('Ta tâche : ');
                     if (actionVerbIsUser) { user(actionVerb); } else { tool(actionVerb); }
@@ -1111,9 +1142,7 @@ document.addEventListener('alpine:init', function() {
                                     if (p.selectedTask) self.selectedTask = p.selectedTask;
                                     self.selectedTask = self.selectedTask || 'autre';
                                     // Round 152 (2026-08-01) : les 5 blocs de l'écran 3 sont désormais
-                                    // TOUJOURS visibles dès que le panneau « Affiner » est ouvert (plus
-                                    // d'accordéons internes à rouvrir un par un) - un seul flag suffit.
-                                    self.affinerOpen = true;
+                                    // TOUJOURS visibles - plus d'accordéons internes à rouvrir un par un.
                                     self.step = 2;
                                     self._editingId = found.public_id || found.id;
                                 }
@@ -1164,12 +1193,15 @@ document.addEventListener('alpine:init', function() {
                 this._loadCustomCards();
             },
 
-            // Diagnostic rapide : fait défiler jusqu'au bloc écran 3 correspondant. Round 152
-            // (2026-08-01) : plus d'accordéon à ouvrir - les 5 blocs sont TOUJOURS visibles dès que
-            // le panneau « Affiner » l'est, donc il ne reste qu'à révéler ce panneau puis défiler.
+            // Diagnostic rapide : fait défiler jusqu'au bloc correspondant. Bug trouvé et corrigé
+            // le 2026-08-04 en retirant affinerOpen : cette fonction forçait TOUJOURS step=2
+            // (« Tâche »), un reliquat de l'ancienne numérotation « écran 3 » (Round 152) jamais
+            // mis à jour lors de la restauration du wizard à 4 étapes (2026-08-03) - le clic sur
+            // un diagnostic n'atteignait donc jamais le bon bloc. 'audience' vit à l'étape 3,
+            // 'format'/'contraintes' à l'étape 4 (voir x-tools::prompt-block dans le Blade).
             openDiagnosticSection: function(key) {
-                if (this.step !== 2) this.step = 2;
-                this.affinerOpen = true;
+                var targetStep = key === 'audience' ? 3 : 4;
+                if (this.step !== targetStep) this.step = targetStep;
                 var targetId = key === 'audience' ? 'cpAudienceBlock' : ('cpSection' + key.charAt(0).toUpperCase() + key.slice(1));
                 this.$nextTick(function() {
                     var el = document.getElementById(targetId);
