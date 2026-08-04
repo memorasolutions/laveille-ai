@@ -239,7 +239,10 @@
                             <div class="d-flex align-items-center gap-2 mb-1">
                                 <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('Que voulez-vous demander à l\'IA ?') }}</h2>
                             </div>
-                            <div class="ct-block__field mb-3">
+                            <div class="ct-block__field mb-3" :style="secondTaskEnabled ? 'border: 1px solid var(--c-primary); border-radius: 10px; padding: 10px;' : ''">
+                                <template x-if="secondTaskEnabled">
+                                    <span aria-hidden="true" style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-right: 6px; border-radius: 50%; background: var(--c-primary); color: #FFFFFF; font-size: 0.75rem; font-weight: 700; line-height: 1;">1</span>
+                                </template>
                                 <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Verbe d\'action') }} <span style="color: #991B1B;">*</span></label>
                                 <div class="d-flex gap-3 mb-2">
                                     <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
@@ -260,13 +263,19 @@
 
                             {{-- Deuxième tâche optionnelle (2026-08-04, club des sages 5/5 unanime) :
                                  bornée à 2 tâches maximum, séquence explicite dans le prompt généré -
-                                 jamais un multi-select libre (déjà essayé et rejeté 2 fois cette année). --}}
+                                 jamais un multi-select libre (déjà essayé et rejeté 2 fois cette année).
+                                 Badges numérotés + bouton "Inverser l'ordre" (2026-08-04, round 2 du
+                                 club des sages 5/5) : alternative 100% accessible aux pills réordonnables
+                                 par glisser-déposer, rejetées car non conformes WCAG AAA (critères 2.1.1
+                                 et 2.5.7 - le drag-and-drop pur exige un équivalent clavier/pointeur simple
+                                 que 2 select natifs + 1 bouton natif offrent déjà nativement). --}}
                             <div class="ct-block__field mb-3">
                                 <button type="button" x-show="!secondTaskEnabled" @click="secondTaskEnabled = true" style="display: inline-flex; align-items: center; min-height: 44px; padding: 4px 6px; border: 0; background: transparent; color: var(--c-primary); font-size: 0.85rem; font-weight: 600; cursor: pointer;">
                                     {{ __('+ Ajouter une deuxième tâche (optionnel)') }}
                                 </button>
-                                <div x-show="secondTaskEnabled" x-transition>
+                                <div x-show="secondTaskEnabled" x-transition style="border: 1px solid var(--c-primary); border-radius: 10px; padding: 10px;">
                                     <p class="small mb-2" style="font-size: 0.8rem; color: var(--c-dark);">{{ __('Cette deuxième tâche sera réalisée à partir du résultat de la première.') }}</p>
+                                    <span aria-hidden="true" style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-right: 6px; border-radius: 50%; background: var(--c-primary); color: #FFFFFF; font-size: 0.75rem; font-weight: 700; line-height: 1;">2</span>
                                     <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Verbe d\'action de la deuxième tâche') }}</label>
                                     <div class="d-flex gap-3 mb-2">
                                         <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
@@ -283,9 +292,14 @@
                                         </template>
                                     </select>
                                     <input type="text" id="cpVerbCustom2" class="form-control" x-show="verbType2 === 'custom'" x-model="verbCustom2" autocomplete="off" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}" aria-label="{{ __('Verbe personnalisé de la deuxième tâche') }}">
-                                    <button type="button" @click="secondTaskEnabled = false; verbType2 = 'preset'; verb2 = ''; verbCustom2 = '';" style="display: inline-flex; align-items: center; min-height: 44px; margin-top: 6px; padding: 4px 6px; border: 0; background: transparent; color: #991B1B; font-size: 0.8rem; font-weight: 600; cursor: pointer;">
-                                        {{ __('✕ Retirer la deuxième tâche') }}
-                                    </button>
+                                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 6px;">
+                                        <button type="button" @click="swapTaskOrder()" style="display: inline-flex; align-items: center; min-height: 44px; padding: 4px 6px; border: 0; background: transparent; color: var(--c-primary); font-size: 0.8rem; font-weight: 600; cursor: pointer;">
+                                            {{ __('⇅ Inverser l\'ordre') }}
+                                        </button>
+                                        <button type="button" @click="secondTaskEnabled = false; verbType2 = 'preset'; verb2 = ''; verbCustom2 = '';" style="display: inline-flex; align-items: center; min-height: 44px; padding: 4px 6px; border: 0; background: transparent; color: #991B1B; font-size: 0.8rem; font-weight: 600; cursor: pointer;">
+                                            {{ __('✕ Retirer la deuxième tâche') }}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 

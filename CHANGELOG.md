@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.141.0] - 2026-08-04
+
+### Ajouté
+
+- **Constructeur de prompts : bouton « Inverser l'ordre » pour la séquence à deux tâches.** Suite
+  d'un round 2 de consultation du club des sages (5 IA - unanimité) sur des pills réordonnables par
+  glisser-déposer : rejetées pour non-conformité WCAG AAA (2.1.1 Clavier + 2.5.7 Mouvements de
+  glissement, aucun équivalent clavier/pointeur simple sans reconstruire tout le pattern). La
+  séquence étant bornée à 2 tâches (2 permutations possibles), un simple bouton « ⇅ Inverser
+  l'ordre » (proposé indépendamment par 2 des 5 oracles) suffit - accessible nativement, zéro
+  pattern à construire.
+- **Restylisation légère : badges numérotés (①②) + bordure arrondie teal** autour des 2 blocs
+  verbe quand la deuxième tâche est active. Contraste vérifié 9,35:1 (AAA).
+
+### Corrigé
+
+- **Bug trouvé en vérification visuelle (pas dans les tests) : le badge « 1 » ne s'affichait pas
+  en cercle plein comme le badge « 2 ».** Le span utilisait `x-show` sur lui-même ; Alpine reprend
+  le contrôle de la propriété `display` au show/hide et écrasait le `display: inline-flex` du
+  style inline, ne laissant qu'un span `display: inline` sans dimensions ni fond. Corrigé avec
+  `<template x-if>` : l'élément n'existe simplement pas dans le DOM quand caché, le style inline
+  complet s'applique intact dès l'insertion.
+
+Comportement à une seule tâche et les 7 `<select>` natifs + cartes Audience strictement inchangés.
+Vérifié : 343 tests Pest Modules/Tools + 10 bancs Node (dont les 2 nouveaux tests `swapTaskOrder`)
+passants, 0 échec ; vérification visuelle Playwright desktop+mobile en direct (badges identiques,
+inversion fonctionnelle confirmée dans le DOM, retrait de la 2e tâche revient à l'état initial sans
+résidu visuel).
+
 ## [1.140.0] - 2026-08-04
 
 ### Ajouté

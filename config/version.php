@@ -3532,10 +3532,30 @@ declare(strict_types=1);
  *     Node tests/js (dont le nouveau constructeur-prompts-secondtask.test.cjs, 6/6) passants, 0
  *     echec ; verification visuelle Playwright reelle desktop+mobile (prompt genere lu en direct
  *     dans le DOM, pas seulement les tests).
+ *
+ *   1.141.0 · 2026-08-04 · feat(constructeur-prompts) round 2 du club des sages (5 IA, unanimite) :
+ *     pills reordonnables par glisser-deposer rejetees (WCAG AAA 2.1.1 Clavier + 2.5.7 Mouvements
+ *     de glissement - aucun equivalent clavier/pointeur simple sans reconstruire tout le pattern
+ *     accessible). Alternative retenue, proposee independamment par 2 des 5 oracles (Gemini ET
+ *     claude.ai) : la sequence est bornee a 2 taches (2 permutations possibles), donc un simple
+ *     bouton "Inverser l'ordre" (swap complet verbeType/verbe/verbeCustom entre tache 1 et 2)
+ *     suffit - clavier/pointeur natif, zero pattern a construire. Restylisation legere : badges
+ *     numerotes ronds (1/2) + bordure arrondie teal autour des 2 blocs verbe quand la 2e tache est
+ *     active, contraste verifie 9.35:1 (blanc sur --c-primary #064E5A, AAA). Piege trouve en
+ *     verification visuelle (pas dans les tests) : le badge "1" utilisait x-show sur le span
+ *     lui-meme - Alpine reprend le controle de la propriete display au show/hide et ecrase le
+ *     display:inline-flex du style inline, ne laissant qu'un span display:inline sans les
+ *     dimensions/le fond du cercle. Corrige avec <template x-if> (l'element n'existe simplement
+ *     pas dans le DOM quand cache, le style inline complet s'applique intact des l'insertion).
+ *     Comportement a une seule tache et les 7 select natifs + cartes Audience strictement
+ *     inchanges. Verifie : 343 tests Pest Modules/Tools + 10 bancs Node (dont les 2 nouveaux tests
+ *     swapTaskOrder) passants, 0 echec ; verification visuelle Playwright desktop+mobile en direct
+ *     (badges identiques teal/blanc, inversion fonctionnelle confirmee dans le DOM, retrait de la
+ *     2e tache revient a l'etat initial sans residu visuel).
  */
 
 $lvMajor = 1;
-$lvMinor = 140;
+$lvMinor = 141;
 $lvPatch = 0;
 
 return [

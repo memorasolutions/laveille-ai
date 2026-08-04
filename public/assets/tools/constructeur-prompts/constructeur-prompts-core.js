@@ -1193,6 +1193,25 @@ document.addEventListener('alpine:init', function() {
                 this._loadCustomCards();
             },
 
+            // 2026-08-04, round 2 du club des sages (5 IA, unanimité) : alternative 100% accessible
+            // au réordonnancement par glisser-déposer des 2 tâches, rejeté car non conforme WCAG AAA
+            // (critères 2.1.1 Clavier et 2.5.7 Mouvements de glissement). Ce bouton natif, utilisable
+            // au clavier sans équivalent supplémentaire à construire, suffit pour une séquence bornée
+            // à 2 éléments (2 permutations possibles).
+            swapTaskOrder: function() {
+                var currentVerbType = this.verbType;
+                var currentVerb = this.verb;
+                var currentVerbCustom = this.verbCustom;
+
+                this.verbType = this.verbType2;
+                this.verb = this.verb2;
+                this.verbCustom = this.verbCustom2;
+
+                this.verbType2 = currentVerbType;
+                this.verb2 = currentVerb;
+                this.verbCustom2 = currentVerbCustom;
+            },
+
             // Diagnostic rapide : fait défiler jusqu'au bloc correspondant. Bug trouvé et corrigé
             // le 2026-08-04 en retirant affinerOpen : cette fonction forçait TOUJOURS step=2
             // (« Tâche »), un reliquat de l'ancienne numérotation « écran 3 » (Round 152) jamais

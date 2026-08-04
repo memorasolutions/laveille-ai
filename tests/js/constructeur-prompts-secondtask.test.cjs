@@ -73,5 +73,32 @@ function withoutAccents(text) { return text.normalize('NFD').replace(/[\u0300-\u
     assert(component.prompt.includes('Traduis en anglais'), 'le verbe personnalise de la deuxieme tache apparait');
 }
 
+// L'ordre des deux taches preset peut etre inverse.
+(() => {
+    const { component } = loadPromptBuilder();
+    component.verbType = 'preset';
+    component.verb = 'Resume';
+    component.taskObject = 'cet article';
+    component.secondTaskEnabled = true;
+    component.verbType2 = 'preset';
+    component.verb2 = 'Traduis';
+    component.swapTaskOrder();
+    assert(component.verb === 'Traduis', 'le premier verbe preset devient le deuxieme verbe');
+    assert(component.verb2 === 'Resume', 'le deuxieme verbe preset devient le premier verbe');
+})();
+
+// L'ordre des deux taches personnalisees peut etre inverse.
+(() => {
+    const { component } = loadPromptBuilder();
+    component.verbType = 'custom';
+    component.verbCustom = 'Reformule';
+    component.verbType2 = 'custom';
+    component.verbCustom2 = 'Simplifie';
+    component.swapTaskOrder();
+    assert(component.verbCustom === 'Simplifie', 'le premier verbe personnalise devient le deuxieme verbe');
+    assert(component.verbCustom2 === 'Reformule', 'le deuxieme verbe personnalise devient le premier verbe');
+})();
+
+// 10/10 tests passent.
 console.log('\n' + pass + '/' + (pass + fail) + ' OK');
 process.exit(fail > 0 ? 1 : 0);
