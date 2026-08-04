@@ -47,29 +47,33 @@ it('has a shared _reloadWithoutPage() helper that strips the page param, and sav
         'tags' => ['urgent'],
     ]);
 
-    $html = $this->actingAs($user)->get('/user/prompts')->assertOk()->getContent();
+    $this->actingAs($user)->get('/user/prompts')->assertOk();
+
+    // Tâche #1416 (2026-08-02) : cette logique vit désormais dans le fichier extrait
+    // public/assets/tools/user-prompts/user-prompts-core.js (Alpine.data), plus dans le HTML rendu.
+    $js = file_get_contents(public_path('assets/tools/user-prompts/user-prompts-core.js'));
 
     // Le helper partagé doit exister et retirer "page" de l'URL avant de naviguer.
-    $helperPos = strpos($html, '_reloadWithoutPage() {');
+    $helperPos = strpos($js, '_reloadWithoutPage() {');
     expect($helperPos)->not->toBeFalse();
-    $helperEndPos = strpos($html, '_reloadIfListEmpty() {', $helperPos) ?: strlen($html);
-    $helperBody = substr($html, $helperPos, $helperEndPos - $helperPos);
+    $helperEndPos = strpos($js, '_reloadIfListEmpty() {', $helperPos) ?: strlen($js);
+    $helperBody = substr($js, $helperPos, $helperEndPos - $helperPos);
     expect($helperBody)->toContain('new URL(window.location.href)');
     expect($helperBody)->toContain("url.searchParams.delete('page')");
     expect($helperBody)->toContain('window.location.href = url.toString()');
 
     // _reloadIfListEmpty() doit maintenant déléguer à _reloadWithoutPage() (pas de duplication).
-    $reloadIfEmptyPos = strpos($html, '_reloadIfListEmpty() {');
+    $reloadIfEmptyPos = strpos($js, '_reloadIfListEmpty() {');
     expect($reloadIfEmptyPos)->not->toBeFalse();
-    $reloadIfEmptyEndPos = strpos($html, 'async saveProfile()', $reloadIfEmptyPos) ?: strlen($html);
-    $reloadIfEmptyBody = substr($html, $reloadIfEmptyPos, $reloadIfEmptyEndPos - $reloadIfEmptyPos);
+    $reloadIfEmptyEndPos = strpos($js, 'async saveProfile()', $reloadIfEmptyPos) ?: strlen($js);
+    $reloadIfEmptyBody = substr($js, $reloadIfEmptyPos, $reloadIfEmptyEndPos - $reloadIfEmptyPos);
     expect($reloadIfEmptyBody)->toContain('this._reloadWithoutPage.bind(this)');
 
     // saveTags() doit utiliser le helper partagé, pas un window.location.reload() cru.
-    $saveTagsPos = strpos($html, 'async saveTags(publicId, tagsInput)');
+    $saveTagsPos = strpos($js, 'async saveTags(publicId, tagsInput)');
     expect($saveTagsPos)->not->toBeFalse();
-    $saveTagsEndPos = strpos($html, 'async duplicatePrompt(publicId)', $saveTagsPos) ?: strlen($html);
-    $saveTagsBody = substr($html, $saveTagsPos, $saveTagsEndPos - $saveTagsPos);
+    $saveTagsEndPos = strpos($js, 'async duplicatePrompt(publicId)', $saveTagsPos) ?: strlen($js);
+    $saveTagsBody = substr($js, $saveTagsPos, $saveTagsEndPos - $saveTagsPos);
     expect($saveTagsBody)->toContain('this._reloadWithoutPage.bind(this)');
     expect($saveTagsBody)->not->toContain('window.location.reload()');
 });

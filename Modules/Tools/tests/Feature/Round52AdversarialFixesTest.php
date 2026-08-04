@@ -44,13 +44,17 @@ it('reloads the page when the last card is removed via deletePrompt, so the empt
         'public_id' => 'r52delete123',
     ]);
 
-    $html = $this->actingAs($user)->get('/user/prompts')->assertOk()->getContent();
+    $this->actingAs($user)->get('/user/prompts')->assertOk();
+
+    // Tâche #1416 (2026-08-02) : cette logique vit désormais dans le fichier extrait
+    // public/assets/tools/user-prompts/user-prompts-core.js (Alpine.data), plus dans le HTML rendu.
+    $js = file_get_contents(public_path('assets/tools/user-prompts/user-prompts-core.js'));
 
     // _reloadIfListEmpty() doit exister et être appelée dans deletePrompt(), après card.remove().
-    $helperDefPos = strpos($html, '_reloadIfListEmpty() {');
-    $deleteFnPos = strpos($html, 'async deletePrompt(publicId)');
-    $cardRemovePos = strpos($html, 'if (card) card.remove();', $deleteFnPos);
-    $reloadCallPos = strpos($html, 'this._reloadIfListEmpty();', $cardRemovePos);
+    $helperDefPos = strpos($js, '_reloadIfListEmpty() {');
+    $deleteFnPos = strpos($js, 'async deletePrompt(publicId)');
+    $cardRemovePos = strpos($js, 'if (card) card.remove();', $deleteFnPos);
+    $reloadCallPos = strpos($js, 'this._reloadIfListEmpty();', $cardRemovePos);
 
     expect($helperDefPos)->not->toBeFalse();
     expect($deleteFnPos)->not->toBeFalse();
@@ -60,7 +64,7 @@ it('reloads the page when the last card is removed via deletePrompt, so the empt
     expect($reloadCallPos)->toBeGreaterThan($cardRemovePos);
 
     // Le helper vérifie le DOM (aucune carte restante) avant de recharger.
-    expect($html)->toContain('document.querySelector(\'article[id^="prompt-card-"]\')');
+    expect($js)->toContain('document.querySelector(\'article[id^="prompt-card-"]\')');
 });
 
 it('reloads the page when the last favorite card is removed under the ?favorite=1 filter (round 52)', function () {
@@ -74,12 +78,16 @@ it('reloads the page when the last favorite card is removed under the ?favorite=
         'is_favorite' => true,
     ]);
 
-    $html = $this->actingAs($user)->get('/user/prompts')->assertOk()->getContent();
+    $this->actingAs($user)->get('/user/prompts')->assertOk();
+
+    // Tâche #1416 (2026-08-02) : cette logique vit désormais dans le fichier extrait
+    // public/assets/tools/user-prompts/user-prompts-core.js (Alpine.data), plus dans le HTML rendu.
+    $js = file_get_contents(public_path('assets/tools/user-prompts/user-prompts-core.js'));
 
     // this._reloadIfListEmpty() doit être appelée après favCard.remove() dans le chemin de
     // retrait sous filtre (round 51), pas ailleurs dans le fichier.
-    $favRemovePos = strpos($html, 'if (favCard) favCard.remove();');
-    $reloadCallPos = strpos($html, 'this._reloadIfListEmpty();', $favRemovePos);
+    $favRemovePos = strpos($js, 'if (favCard) favCard.remove();');
+    $reloadCallPos = strpos($js, 'this._reloadIfListEmpty();', $favRemovePos);
 
     expect($favRemovePos)->not->toBeFalse();
     expect($reloadCallPos)->not->toBeFalse();

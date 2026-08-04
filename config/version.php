@@ -3411,11 +3411,22 @@ declare(strict_types=1);
  *     precede fad32772 et n'a jamais ete touche par le detour du 4 etapes). Les 7 fichiers de
  *     tests RoundNN purges au 1.139.16 (104/105/118/119/65/95/97) sont automatiquement restaures
  *     par le revert.
+ *
+ *   1.139.18 · 2026-08-03 · fix(sim) : 6 bugs trouves durant la vague GUEST de la simulation E2E
+ *     complete du site. Decido : copie marketing trompeuse "sans compte requis" corrigee (voter est
+ *     bien sans compte, mais creer un sondage exige un compte). Constructeur de prompts : point final
+ *     double dans le prompt genere corrige (verbe deja a l'imperatif) et accord fautif "Elle va
+ *     redige" corrige en renommant la cle i18n vers un libelle qui n'exige plus de conjuguer le
+ *     verbe utilisateur. Oscilloscope RLC : la sidebar de partage fixe (52px) chevauchait le panneau
+ *     de gauche en desktop >= 992px, corrige par un padding-left cible sur .app-main. Complete aussi
+ *     la tache #1416 laissee en chantier : extraction du script inline de /user/prompts vers un
+ *     asset dedie (meme pattern que constructeur-prompts-core.js) + banc d'essai comportemental
+ *     Node (17 tests). 396 tests Pest Modules/Tools passants, 0 echec.
  */
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 17;
+$lvPatch = 18;
 
 return [
     'major' => $lvMajor,

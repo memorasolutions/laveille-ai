@@ -32,38 +32,44 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 // conservée telle quelle en défense en profondeur.
 
 it('enforces the per-tag length client-side before sending (round 120)', function () {
-    $blade = file_get_contents(base_path('Modules/Tools/resources/views/user/prompts/index.blade.php'));
+    // Tâche #1416 (2026-08-02) : saveTags() vit désormais dans le fichier extrait
+    // public/assets/tools/user-prompts/user-prompts-core.js (Alpine.data), plus dans le Blade.
+    $js = file_get_contents(public_path('assets/tools/user-prompts/user-prompts-core.js'));
 
-    expect($blade)->toContain('var MAX_TAG_LENGTH = 30;');
-    expect($blade)->toContain('return tag.length > MAX_TAG_LENGTH;');
+    expect($js)->toContain('var MAX_TAG_LENGTH = 30;');
+    expect($js)->toContain('return tag.length > MAX_TAG_LENGTH;');
     // La garde doit précéder l'appel réseau DE CETTE MÉTHODE : on ne part pas chercher un 422
     // évitable. L'ancrage part de saveTags() car 3 autres méthodes de la page appellent le même
     // endpoint /api/prompts/{id} - un strpos global pointerait sur le premier d'entre eux.
-    $posMethod = strpos($blade, 'async saveTags(publicId, tagsInput) {');
+    $posMethod = strpos($js, 'async saveTags(publicId, tagsInput) {');
     expect($posMethod)->not->toBeFalse();
 
-    $posGuard = strpos($blade, 'if (tagsTooLong.length > 0)', $posMethod);
-    $posFetch = strpos($blade, "await fetch('/api/prompts/' + publicId", $posMethod);
+    $posGuard = strpos($js, 'if (tagsTooLong.length > 0)', $posMethod);
+    $posFetch = strpos($js, "await fetch('/api/prompts/' + publicId", $posMethod);
     expect($posGuard)->not->toBeFalse();
     expect($posFetch)->not->toBeFalse();
     expect($posGuard)->toBeLessThan($posFetch);
 });
 
 it('names the offending tags instead of a generic message (round 120)', function () {
-    $blade = file_get_contents(base_path('Modules/Tools/resources/views/user/prompts/index.blade.php'));
+    // Tâche #1416 (2026-08-02) : saveTags() vit désormais dans le fichier extrait
+    // public/assets/tools/user-prompts/user-prompts-core.js (Alpine.data), plus dans le Blade.
+    $js = file_get_contents(public_path('assets/tools/user-prompts/user-prompts-core.js'));
     $en = json_decode(file_get_contents(lang_path('en.json')), true);
 
-    expect($blade)->toContain("msgTooLong.replace(':tags', invalidTags.join(', '))");
+    expect($js)->toContain("msgTooLong.replace(':tags', invalidTags.join(', '))");
     // Tronqué pour l'affichage : un tag de 200 caractères ne doit pas noyer le toast.
-    expect($blade)->toContain("tag.length > 20 ? tag.slice(0, 20) + '…' : tag");
+    expect($js)->toContain("tag.length > 20 ? tag.slice(0, 20) + '…' : tag");
     expect($en)->toHaveKey("Ces étiquettes dépassent 30 caractères : :tags. Raccourcissez-les avant d'enregistrer.");
 });
 
 it('keeps the existing dedupe and 5-tag cap untouched (round 120 non-regression)', function () {
-    $blade = file_get_contents(base_path('Modules/Tools/resources/views/user/prompts/index.blade.php'));
+    // Tâche #1416 (2026-08-02) : saveTags() vit désormais dans le fichier extrait
+    // public/assets/tools/user-prompts/user-prompts-core.js (Alpine.data), plus dans le Blade.
+    $js = file_get_contents(public_path('assets/tools/user-prompts/user-prompts-core.js'));
 
-    expect($blade)->toContain('if (seen[key]) return false;');
-    expect($blade)->toContain('.slice(0, 5);');
+    expect($js)->toContain('if (seen[key]) return false;');
+    expect($js)->toContain('.slice(0, 5);');
 });
 
 it('keeps the server-side rule as defence in depth (round 120)', function () {

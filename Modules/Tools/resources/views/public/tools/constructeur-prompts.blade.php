@@ -1248,7 +1248,7 @@ window.promptBuilderConfig = {
         importedPromptName: @json(__('Prompt importé')),
         summaryRole: @json(__('L\'IA va se comporter comme ')),
         summaryRoleArticle: @json(__('un(e) ')),
-        summaryAction: @json(__('Elle va ')),
+        summaryAction: @json(__('Tâche demandée : ')),
         summarySubject: @json(__('Sujet : ')),
         summaryAudience: @json(__('Le résultat sera adapté pour : ')),
         summaryTone: @json(__('Ton : ')),

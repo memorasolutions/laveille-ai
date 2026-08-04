@@ -44,20 +44,24 @@ it('guards duplicatePrompt() against concurrent double-invocation via a _duplica
         'public_id' => 'r56dup123',
     ]);
 
-    $html = $this->actingAs($user)->get('/user/prompts')->assertOk()->getContent();
+    $this->actingAs($user)->get('/user/prompts')->assertOk();
+
+    // Tâche #1416 (2026-08-02) : cette logique vit désormais dans le fichier extrait
+    // public/assets/tools/user-prompts/user-prompts-core.js (Alpine.data), plus dans le HTML rendu.
+    $js = file_get_contents(public_path('assets/tools/user-prompts/user-prompts-core.js'));
 
     // _duplicatingIds doit être déclaré comme état du composant.
-    $stateDeclPos = strpos($html, '_duplicatingIds: new Set()');
+    $stateDeclPos = strpos($js, '_duplicatingIds: new Set()');
     expect($stateDeclPos)->not->toBeFalse();
 
     // La fonction duplicatePrompt() doit vérifier le Set AVANT tout appel réseau, puis y ajouter
     // l'id, dans cet ordre exact (guard -> add -> fetch).
-    $fnPos = strpos($html, 'async duplicatePrompt(publicId)');
+    $fnPos = strpos($js, 'async duplicatePrompt(publicId)');
     expect($fnPos)->not->toBeFalse();
 
-    $guardPos = strpos($html, 'if (this._duplicatingIds.has(publicId)) return;', $fnPos);
-    $addPos = strpos($html, 'this._duplicatingIds.add(publicId);', $fnPos);
-    $fetchPos = strpos($html, "fetch('/api/prompts/' + publicId + '/duplicate'", $fnPos);
+    $guardPos = strpos($js, 'if (this._duplicatingIds.has(publicId)) return;', $fnPos);
+    $addPos = strpos($js, 'this._duplicatingIds.add(publicId);', $fnPos);
+    $fetchPos = strpos($js, "fetch('/api/prompts/' + publicId + '/duplicate'", $fnPos);
 
     expect($guardPos)->not->toBeFalse();
     expect($addPos)->not->toBeFalse();
@@ -68,7 +72,7 @@ it('guards duplicatePrompt() against concurrent double-invocation via a _duplica
     // En cas d'échec (réseau ou statut non-201), l'id doit être retiré du Set pour permettre
     // une nouvelle tentative légitime de l'utilisateur.
     $deleteCount = substr_count(
-        substr($html, $fnPos, (strpos($html, 'async deletePrompt(publicId)', $fnPos) ?: strlen($html)) - $fnPos),
+        substr($js, $fnPos, (strpos($js, 'async deletePrompt(publicId)', $fnPos) ?: strlen($js)) - $fnPos),
         'this._duplicatingIds.delete(publicId);'
     );
     expect($deleteCount)->toBe(2); // 1x branche "else" (statut != 201), 1x branche catch (erreur réseau)

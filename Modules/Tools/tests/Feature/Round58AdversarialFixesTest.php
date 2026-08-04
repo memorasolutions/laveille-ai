@@ -45,20 +45,24 @@ it('guards deletePrompt() against concurrent double-invocation via a _deletingId
         'public_id' => 'r58del123',
     ]);
 
-    $html = $this->actingAs($user)->get('/user/prompts')->assertOk()->getContent();
+    $this->actingAs($user)->get('/user/prompts')->assertOk();
+
+    // Tâche #1416 (2026-08-02) : cette logique vit désormais dans le fichier extrait
+    // public/assets/tools/user-prompts/user-prompts-core.js (Alpine.data), plus dans le HTML rendu.
+    $js = file_get_contents(public_path('assets/tools/user-prompts/user-prompts-core.js'));
 
     // _deletingIds doit être déclaré comme état du composant.
-    $stateDeclPos = strpos($html, '_deletingIds: new Set()');
+    $stateDeclPos = strpos($js, '_deletingIds: new Set()');
     expect($stateDeclPos)->not->toBeFalse();
 
     // La fonction deletePrompt() doit vérifier le Set AVANT tout appel réseau, puis y ajouter
     // l'id, dans cet ordre exact (guard -> add -> fetch).
-    $fnPos = strpos($html, 'async deletePrompt(publicId)');
+    $fnPos = strpos($js, 'async deletePrompt(publicId)');
     expect($fnPos)->not->toBeFalse();
 
-    $guardPos = strpos($html, 'if (this._deletingIds.has(publicId)) return;', $fnPos);
-    $addPos = strpos($html, 'this._deletingIds.add(publicId);', $fnPos);
-    $fetchPos = strpos($html, "fetch('/api/prompts/' + publicId, {", $fnPos);
+    $guardPos = strpos($js, 'if (this._deletingIds.has(publicId)) return;', $fnPos);
+    $addPos = strpos($js, 'this._deletingIds.add(publicId);', $fnPos);
+    $fetchPos = strpos($js, "fetch('/api/prompts/' + publicId, {", $fnPos);
 
     expect($guardPos)->not->toBeFalse();
     expect($addPos)->not->toBeFalse();
@@ -67,8 +71,9 @@ it('guards deletePrompt() against concurrent double-invocation via a _deletingId
     expect($fetchPos)->toBeGreaterThan($addPos);
 
     // En cas d'échec (réseau ou statut non-204), l'id doit être retiré du Set pour permettre
-    // une nouvelle tentative légitime de l'utilisateur.
-    $fnEndPos = strpos($html, '_reloadIfListEmpty() {') ?: strlen($html);
-    $deleteCount = substr_count(substr($html, $fnPos, $fnEndPos - $fnPos), 'this._deletingIds.delete(publicId);');
+    // une nouvelle tentative légitime de l'utilisateur. Tâche #1416 : deletePrompt() est la
+    // DERNIÈRE méthode du fichier extrait (même ordre que l'original) - borner à la fin du
+    // fichier est donc exact, plus besoin d'un marqueur de méthode suivante.
+    $deleteCount = substr_count(substr($js, $fnPos), 'this._deletingIds.delete(publicId);');
     expect($deleteCount)->toBe(2); // 1x branche "else" (statut != 204), 1x branche catch (erreur réseau)
 });

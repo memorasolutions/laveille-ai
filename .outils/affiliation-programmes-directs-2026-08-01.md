@@ -133,3 +133,55 @@ Cette recherche documente uniquement l'état des programmes ; **aucune inscripti
 3. **Mettre à jour `config/affiliate_programs.php`** une fois les inscriptions faites, en corrigeant les écarts identifiés en Partie 1 (Canva, Notion, Runway en particulier - ces trois lignes sont aujourd'hui trompeuses telles qu'écrites).
 4. **Saisir les `affiliate_url` réels** dans le champ admin de chaque fiche outil concernée une fois les liens de parrainage obtenus (l'infrastructure - colonne, badge de divulgation, `rel="sponsored"`, page de politique, suivi des clics - est déjà en place, confirmé par la mission).
 5. **Décider si Wondershare Filmora et Semrush** valent la peine malgré les incohérences trouvées (réseau ambigu pour l'un, absence de récurrence pour l'autre) - jugement d'affaires, pas une question de recherche.
+
+---
+
+## Passe 2 : croisée avec le trafic réel (1er août 2026)
+
+Cette section répond à la demande de croiser la recherche avec les vraies statistiques de production obtenues par le commanditaire (2316 outils en base, 489 publiés, `affiliate_url` rempli sur **0** fiche - l'infrastructure n'a jamais servi). Le vrai top 20 par `clicks_count` invalide une partie du ciblage de la Partie 2 : plusieurs très gros outils par vues de fiche (FLUX, ChatGPT, Poe, Claude Design, Claude, Wooclap, NotebookLM, Gemini, Copilot) n'avaient pas encore été vérifiés.
+
+### Note méthodologique - incident `pp_search`
+
+À partir de la recherche sur NotebookLM, `pp_search` a échoué de façon répétée (délai > 60 s puis échec immédiat après un `ia-sync` de reprise - session Perplexity non ré-authentifiée malgré l'injection de cookies). Conformément à la procédure de repli prévue, les recherches suivantes (NotebookLM, Copilot, Suno, Ideogram, Rytr, DeepL, Lovable, MagicSchool AI) ont été faites via `mcp__openrouter__chat_with_model` avec le modèle `perplexity/sonar-pro`, en demandant explicitement des citations de sources officielles. Cette bascule est signalée pour transparence ; les réponses restent sourcées mais n'ont pas eu la double lecture Perplexity Pro habituelle.
+
+### Outils du vrai top déjà couverts en Partie 1/2 (pas re-recherchés)
+
+Rappel sans nouvelle recherche : **ElevenLabs**, **Grammarly**, **Copy.ai**, **Notion AI**, **Perplexity**, **Midjourney**, **Runway**, **Leonardo AI** (fermé depuis le 7 avril 2026), **Jasper AI**, **Semrush**, **QuillBot**, **Gamma** - voir Parties 1 et 2 ci-dessus pour le détail déjà vérifié.
+
+### Nouveaux outils du top réel vérifiés
+
+| Outil (rang réel) | Programme trouvé ? | Détails | Score /100 |
+|---|---|---|---|
+| **FLUX / Black Forest Labs** (#1) | **Aucun** | Page officielle `bfl.ai` ne montre aucun programme d'affiliation. Un « Flux Affiliate Program » (20 % à vie) trouvé en ligne appartient à un produit tiers sans lien avec Black Forest Labs - à ne pas confondre. [1 source, prudence de marque] | N/A |
+| **ChatGPT / OpenAI** (#2) | **Aucun** (reconfirmé) | Aucun changement depuis la passe 1. Le « OpenAI Partner Network » est un programme B2B de revendeurs/intégrateurs, pas un programme de commission pour créateurs. | N/A |
+| **Poe (Quora)** (#3) | **Aucun programme d'affiliation classique** | Seul un programme de monétisation de « bot creator » existe (jusqu'à 20 $/nouvel abonné selon des sources tierces, non officiellement confirmé), payé sur l'activité d'un bot publié sur Poe - pas un lien de parrainage standard exploitable par un annuaire. [1 source tierce sur le montant] | N/A |
+| **Claude Design** (#5) | **Aucun** | Même politique qu'Anthropic/Claude ci-dessous (même entreprise). | N/A |
+| **Claude** (#10) | **Aucun programme public individuel** | Anthropic a un « Claude Partner Network » (juin 2026) réservé aux entreprises d'implémentation, et un crédit de parrainage utilisateur-à-utilisateur (crédit, pas commission). Aucun taux de commission publique trouvé pour un site tiers. | N/A |
+| **Wooclap** (#6) | **Aucun trouvé** | Recherche ciblée en français (« ambassadeur », « partenaire », « affiliation ») et en anglais (« reseller », « partner ») : aucune page publique Wooclap ne documente un programme rémunéré. Seule confirmation : gratuité pour les enseignants du primaire/secondaire en France et Belgique (pas un programme de recommandation payé). Recherche faite via `pp_search` (avant l'incident de session). | N/A |
+| **AI Media Buyer by Creatify** (#7) | **Oui** | Direct via **Rewardful** : 25 % récurrent sur abonnements admissibles, palier bonus +5 % (30 % total) au-delà de 5000 $ US de ventes mensuelles. Page officielle `creatify.ai/affiliate`. [confirmé par la page officielle, cookie/seuil de paiement non publiés] | **70** |
+| **AIVA** (#8) | **Non confirmé** | Pages officielles de tarification/licence trouvées, aucune page d'affiliation officielle. Une seule source tierce non officielle mentionne 20 % récurrent, cookie 60 j - **à ne pas traiter comme un fait**. | N/A |
+| **3PL Hub** (#9) | **Aucun, par choix explicite** | Le site officiel affiche littéralement « No Commissions. Ever. » - modèle d'affaires délibérément sans parrainage rémunéré. | N/A |
+| **Adobe Firefly** (#11) | **Partiel** | Programme Firefly dédié : **liste d'attente seulement**, aucun taux publié. Mais Firefly est accessible via le programme d'affiliation Adobe général (réseau **Partnerize**) qui verse **85 % du premier mois** pour les abonnements Creative Cloud/Document Cloud admissibles - utilisable dès maintenant pour une fiche Adobe/Firefly, mais ce n'est pas un programme Firefly autonome. | **60** |
+| **NotebookLM (Google)** (#14) | **Aucun** | Recherché via le repli sonar-pro (incident pp_search). Aucun programme d'affiliation ou de parrainage public trouvé pour NotebookLM ni, plus largement, pour les produits IA Google individuels. | N/A |
+| **Gemini (Google)** (#18) | **Aucun** | Même politique Google que NotebookLM ci-dessus - pas de programme de commission par produit IA individuel. | N/A |
+| **Copilot (Microsoft)** (#19) | **Aucun programme public payant** | Recherché via sonar-pro. Les seuls mécanismes trouvés sont des incitatifs pour partenaires CSP (revendeurs entreprise) et un programme « Student Ambassador » sélectif (candidature, jusqu'à 1500 $ **forfaitaires** à la fin du programme, pas une commission par référence). Aucun des deux n'est un programme de parrainage exploitable par un annuaire. | N/A |
+| **Suno** (#« notable », 503 clics) | **Existe mais inadapté** | Programme « Growth Ambassador » sur invitation (candidature via `sunocreators.hbportal.co`), mais exige **15 à 30 vidéos courtes par mois** en plus d'un partage de revenu affilié de 25 % (récurrence non précisée). Modèle de créateur de contenu actif, pas un lien de parrainage passif utilisable par un annuaire. [2 sources tierces concordantes, formulaire officiel non entièrement visible] | **30** |
+| **Ideogram** (#« notable », 457 clics) | **Existe mais fermé/discrétionnaire** | Programme d'affiliation officiel confirmé dans les CGU (`ideogram.ai`), mais accès réservé aux membres approuvés du « Creators Club » (créateurs de contenu YouTube/X/Instagram/TikTok), acceptation « à la seule discrétion » d'Ideogram, **aucun taux de commission publié**. | **35** |
+| **Rytr** (#« notable », 457 clics) | **Oui** | Direct sur domaine propre (`affiliates.rytr.me`) : **30 % récurrent 12 mois**, cookie **60 jours**, seuil de paiement 100 $, aucun minimum de trafic officiel trouvé. Confirmé par 3 pages officielles concordantes (page d'affiliation, CGU, centre d'aide). | **75** |
+| **DeepL** (#« notable », 425 clics) | **Aucun programme grand public** | Seule offre officielle trouvée : un « partner ecosystem » B2B pour entreprises, pas un programme d'affiliation avec taux public. | N/A |
+| **Lovable** (#« notable », 422 clics) | **Oui, mais limité** | Programme officiel direct sur plateforme propre : **jusqu'à 100 $ par nouvel abonné** (semble être un montant unique par vente, pas un pourcentage récurrent confirmé), inscription sur candidature/approbation. | **55** |
+| **MagicSchool AI** (#« notable », 422 clics) | **Existe en construction, pas encore monétisable** | Système à deux paliers : programme « AI Pioneers » (candidature, sans rémunération) puis « Ambassador » (nécessite le statut Pioneer au préalable). Un **programme de parrainage rémunéré est annoncé « bientôt disponible »**, sans taux ni structure de commission publiés à ce jour. À surveiller - fort potentiel pour le public enseignant francophone une fois lancé, mais **rien à inscrire aujourd'hui**. [confirmé par 2 pages officielles + réseaux sociaux officiels de la marque] | **25 (potentiel futur, pas actionnable maintenant)** |
+
+### Outils sans AUCUN programme trouvé (à ne pas re-vérifier inutilement)
+
+FLUX / Black Forest Labs, ChatGPT/OpenAI, Poe (au sens parrainage classique), Claude, Claude Design, Wooclap, AIVA (non confirmé), 3PL Hub (refus explicite), NotebookLM, Gemini, Copilot (au sens commission par référence), DeepL (au sens grand public).
+
+### Réponse au point 4 - quelle part du vrai top 20 est réellement monétisable ?
+
+En croisant les 20 premières fiches par `clicks_count` avec l'ensemble des recherches faites (passes 1 et 2) :
+
+- **Programmes réellement rejoignables aujourd'hui, sans blocage connu** (5/20 = **25 %**) : AI Media Buyer by Creatify (#7), Adobe Firefly via le réseau Adobe/Partnerize (#11), ElevenLabs (#12), Grammarly (#13), Copy.ai (#15).
+- **Programmes qui existent mais sont actuellement fermés ou gatekept** (2/20 = 10 %) : Canva AI (#4, remplacé par un programme sur invitation depuis janvier 2024), Notion AI (#20, candidatures PartnerStack auto-refusées en ce moment).
+- **Aucun programme trouvé, point final** (13/20 = 65 %) : FLUX (#1), ChatGPT (#2), Poe (#3), Claude Design (#5), Wooclap (#6), AIVA (#8), 3PL Hub (#9), Claude (#10), NotebookLM (#14), Perplexity (#16), Midjourney (#17), Gemini (#18), Copilot (#19).
+
+**Conclusion honnête** : sur le vrai top 20 de laveille.ai, **seulement 25 % (5 fiches sur 20)** ont un programme de parrainage direct ou en réseau réellement accessible aujourd'hui. Les quatre géants Anthropic/OpenAI/Google/Microsoft occupent à eux seuls 6 des 20 premières places (ChatGPT, Claude Design, Claude, NotebookLM, Gemini, Copilot, soit 30 % du top 20 par trafic) et **aucun des six** n'offre de programme de commission exploitable - ce sont structurellement des entreprises qui n'ont pas besoin d'un canal d'affiliation grand public pour croître. Concrètement, cela signifie que les outils les PLUS consultés sur laveille.ai (position 1, 2, 3, 5, 10, 14, 16, 17, 18, 19 - soit la moitié du top 20) ne généreront jamais de revenu d'affiliation, quel que soit l'effort de recherche ou de démarchage. Le potentiel de revenu réel se trouve dans la moitié restante du top 20 et surtout dans les candidats de la Partie 2 (Systeme.io, Beehiiv, Framer, Tidio) qui, eux, n'apparaissent pas encore dans le top 20 par trafic mais offrent des conditions bien supérieures. Le fossé entre « ce qui est populaire dans l'annuaire » et « ce qui est monétisable » est donc réel et structurel, pas un simple problème de recherche insuffisante.

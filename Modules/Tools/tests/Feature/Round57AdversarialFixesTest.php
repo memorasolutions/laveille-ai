@@ -49,25 +49,29 @@ it('strips the page query param before reloading in _reloadIfListEmpty(), so a s
         'public_id' => 'r57reload123',
     ]);
 
-    $html = $this->actingAs($user)->get('/user/prompts')->assertOk()->getContent();
+    $this->actingAs($user)->get('/user/prompts')->assertOk();
+
+    // Tâche #1416 (2026-08-02) : cette logique vit désormais dans le fichier extrait
+    // public/assets/tools/user-prompts/user-prompts-core.js (Alpine.data), plus dans le HTML rendu.
+    $js = file_get_contents(public_path('assets/tools/user-prompts/user-prompts-core.js'));
 
     // Round 59 : la logique de retrait de "page" vit maintenant dans _reloadWithoutPage()
     // (partagée avec saveTags()) ; _reloadIfListEmpty() y délègue au lieu de la dupliquer.
-    $sharedHelperPos = strpos($html, '_reloadWithoutPage() {');
+    $sharedHelperPos = strpos($js, '_reloadWithoutPage() {');
     expect($sharedHelperPos)->not->toBeFalse();
-    $sharedHelperEndPos = strpos($html, '_reloadIfListEmpty() {', $sharedHelperPos) ?: strlen($html);
-    $sharedHelperBody = substr($html, $sharedHelperPos, $sharedHelperEndPos - $sharedHelperPos);
+    $sharedHelperEndPos = strpos($js, '_reloadIfListEmpty() {', $sharedHelperPos) ?: strlen($js);
+    $sharedHelperBody = substr($js, $sharedHelperPos, $sharedHelperEndPos - $sharedHelperPos);
     expect($sharedHelperBody)->toContain('new URL(window.location.href)');
     expect($sharedHelperBody)->toContain("url.searchParams.delete('page')");
     expect($sharedHelperBody)->toContain('window.location.href = url.toString()');
 
-    $helperPos = strpos($html, '_reloadIfListEmpty() {');
+    $helperPos = strpos($js, '_reloadIfListEmpty() {');
     expect($helperPos)->not->toBeFalse();
 
     // _reloadIfListEmpty() ne doit plus contenir un simple window.location.reload() (round 52,
     // buggé sur la dernière page) : il doit déléguer à _reloadWithoutPage().
-    $nextFnPos = strpos($html, 'async saveProfile()', $helperPos) ?: (strlen($html));
-    $helperBody = substr($html, $helperPos, $nextFnPos - $helperPos);
+    $nextFnPos = strpos($js, 'async saveProfile()', $helperPos) ?: (strlen($js));
+    $helperBody = substr($js, $helperPos, $nextFnPos - $helperPos);
 
     expect($helperBody)->toContain('this._reloadWithoutPage.bind(this)');
     expect($helperBody)->not->toContain('window.location.reload()');

@@ -262,6 +262,19 @@ body {
     margin: 0 auto;
 }
 
+/* Simulation E2E 2026-08-03 : cette page est en plein-bleed volontaire (oscilloscope-rlc.blade.php,
+   .oscilloscope-wrapper margin negatif + .container-fluid sans padding), donc .app-main peut
+   toucher le bord gauche reel du navigateur. La barre de partage flottante site-wide
+   (.share-sidebar, master.blade.php) occupe left:12px + 40px de large = jusqu'a 52px, visible a
+   partir de 992px (meme seuil qu'elle). Sans marge de securite, "Facteur de puissance" (premiere
+   carte du panneau gauche) se retrouvait sous les icones. Decale le panneau gauche, jamais le
+   canvas central (2e colonne), pour ne rien perdre du rendu plein-bleed voulu. */
+@media (min-width: 992px) {
+    .app-main {
+        padding-left: calc(var(--spacing-md) + 52px);
+    }
+}
+
 /* ========== SIDEBARS ========== */
 .sidebar {
     display: flex;

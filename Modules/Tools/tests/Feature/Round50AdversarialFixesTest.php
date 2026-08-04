@@ -75,10 +75,14 @@ it('derives the current favorite state from the DOM instead of a fixed parameter
         'public_id' => 'r50fn123',
     ]);
 
-    $html = $this->actingAs($user)->get('/user/prompts')->assertOk()->getContent();
+    $this->actingAs($user)->get('/user/prompts')->assertOk();
+
+    // Tâche #1416 (2026-08-02) : la fonction toggleFavorite() vit désormais dans le fichier extrait
+    // public/assets/tools/user-prompts/user-prompts-core.js (Alpine.data), plus dans le HTML rendu.
+    $js = file_get_contents(public_path('assets/tools/user-prompts/user-prompts-core.js'));
 
     // Round 50 : la fonction toggleFavorite() doit lire son état courant depuis buttonEl
     // (aria-pressed), pas depuis un paramètre - sinon le bug se reproduit sous une autre forme.
-    expect($html)->toContain("async toggleFavorite(publicId, buttonEl) {");
-    expect($html)->toContain("buttonEl.getAttribute('aria-pressed') === 'true'");
+    expect($js)->toContain("async toggleFavorite(publicId, buttonEl) {");
+    expect($js)->toContain("buttonEl.getAttribute('aria-pressed') === 'true'");
 });

@@ -31,11 +31,13 @@ it('gives the tags-save button an async IIFE that only closes the panel on succe
 });
 
 it('makes saveTags() return a boolean and surface the precise 422 server message (round 96)', function () {
-    $blade = file_get_contents(base_path('Modules/Tools/resources/views/user/prompts/index.blade.php'));
+    // Tâche #1416 (2026-08-02) : saveTags() vit désormais dans le fichier extrait
+    // public/assets/tools/user-prompts/user-prompts-core.js (Alpine.data), plus dans le Blade.
+    $js = file_get_contents(public_path('assets/tools/user-prompts/user-prompts-core.js'));
 
-    expect($blade)->toContain('return true;');
-    expect($blade)->toContain("if (res.status === 422 && body.message) {");
-    expect($blade)->toContain('this._toast(body.message, \'danger\');');
+    expect($js)->toContain('return true;');
+    expect($js)->toContain("if (res.status === 422 && body.message) {");
+    expect($js)->toContain('this._toast(body.message, \'danger\');');
 });
 
 it('mentions the 30-character per-tag limit in the tags label (round 96)', function () {

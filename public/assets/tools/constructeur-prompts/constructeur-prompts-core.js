@@ -694,7 +694,17 @@ document.addEventListener('alpine:init', function() {
             // normalisation NFD change le nombre d'unités de code, donc toute découpe
             // positionnelle serait fausse sur un texte saisi en forme décomposée.
             _taskWithoutLeadingVerb: function (verb, task) {
-                if (!verb || !task) return task;
+                // Round 156 (2026-08-03, simulation E2E) : tous les appelants concatènent un
+                // '.' littéral juste après ce retour (ex. "Ta tâche : Rédige " + retour + ".").
+                // Si la demande de l'utilisateur se terminait déjà par un point, le résultat
+                // affichait « ...au Québec.. » (point double). On retire donc UN SEUL point
+                // final ici, au point de sortie commun aux deux branches, plutôt que de dupliquer
+                // ce nettoyage dans chaque appelant.
+                var stripOneTrailingPeriod = function (s) {
+                    return String(s).replace(/\.$/, '');
+                };
+
+                if (!verb || !task) return stripOneTrailingPeriod(task);
 
                 var normalize = function (s) {
                     return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -718,10 +728,10 @@ document.addEventListener('alpine:init', function() {
                     // Le séparateur immédiat après le verbe est absorbé, y compris s'il
                     // s'agit d'UN seul retour à la ligne ; les sauts de ligne suivants, eux,
                     // font partie de la mise en forme voulue et sont conservés tels quels.
-                    return trimmed.slice(words[0].length).replace(/^[ \t]*\n?[ \t]*/, '');
+                    return stripOneTrailingPeriod(trimmed.slice(words[0].length).replace(/^[ \t]*\n?[ \t]*/, ''));
                 }
 
-                return task;
+                return stripOneTrailingPeriod(task);
             },
 
             // Aperçu en langage courant (Phase 2) : composé à partir des MÊMES données que le
@@ -735,7 +745,13 @@ document.addEventListener('alpine:init', function() {
                     parts.push((i18nSummary.summaryRole || 'L\'IA va se comporter comme ') + defaultArticle + this.personaText.charAt(0).toLowerCase() + this.personaText.slice(1) + '.');
                 }
                 if (actionVerb && this.taskObject) {
-                    parts.push((i18nSummary.summaryAction || 'Elle va ') + actionVerb.toLowerCase() + ' ' + this._taskWithoutLeadingVerb(actionVerb, this.taskObject) + '.');
+                    // Round 156 (2026-08-03, simulation E2E) : "Elle va " + verbe déjà à
+                    // l'impératif (ex. "Rédige") donnait "Elle va rédige..." - faute d'accord.
+                    // Les verbes proposés sont à l'impératif partout ailleurs dans l'outil (ex.
+                    // "Ta tâche : Rédige ..." dans le prompt reel) - on garde donc cette forme au
+                    // lieu de tenter une conjugaison a l'infinitif (peu fiable sur un verbe
+                    // personnalise saisi librement par l'utilisateur, actionVerbIsUser).
+                    parts.push((i18nSummary.summaryAction || 'Tâche demandée : ') + actionVerb + ' ' + this._taskWithoutLeadingVerb(actionVerb, this.taskObject) + '.');
                 } else if (this.taskObject) {
                     parts.push((i18nSummary.summarySubject || 'Sujet : ') + this.taskObject + '.');
                 }
