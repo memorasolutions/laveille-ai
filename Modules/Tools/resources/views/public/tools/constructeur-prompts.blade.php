@@ -221,12 +221,13 @@
                                         <input type="radio" name="personaType" value="custom" x-model="personaType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisé') }}
                                     </label>
                                 </div>
-                                <div class="ct-card-grid" x-show="personaType === 'preset'" role="radiogroup" :aria-required="personaType === 'preset'" aria-label="{{ __('Choisir un rôle') }}">
-                                    <template x-for="p in personas" :key="p.value">
-                                        <x-tools::prompt-card type="radio" name="personaPresetChoice" value="p.value" model="personaPreset">
-                                            <span x-text="p.label"></span>
-                                        </x-tools::prompt-card>
-                                    </template>
+                                <div class="form-group mb-0" x-show="personaType === 'preset'">
+                                    <select class="form-control" x-model="personaPreset" :aria-required="personaType === 'preset'" aria-label="{{ __('Choisir un rôle') }}">
+                                        <option value="">{{ __('-- Sélectionnez un rôle --') }}</option>
+                                        <template x-for="p in personas" :key="p.value">
+                                            <option :value="p.value" x-text="p.label"></option>
+                                        </template>
+                                    </select>
                                 </div>
                                 <input type="text" id="cpPersonaCustom" class="form-control" x-show="personaType === 'custom'" x-model="personaCustom" :aria-required="personaType === 'custom'" autocomplete="off" placeholder="{{ __('Ex: un expert en cybersécurité spécialisé en PME québécoises') }}" aria-label="{{ __('Rôle personnalisé') }}">
                             </div>
@@ -247,13 +248,12 @@
                                         <input type="radio" name="verbType" value="custom" x-model="verbType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisé') }}
                                     </label>
                                 </div>
-                                <div class="ct-card-grid" x-show="verbType === 'preset'" role="radiogroup" :aria-required="verbType === 'preset'" aria-label="{{ __('Verbe d\'action') }}">
+                                <select class="form-control" x-show="verbType === 'preset'" x-model="verb" :aria-required="verbType === 'preset'" aria-label="{{ __('Verbe d\'action') }}">
+                                    <option value="">{{ __('-- Sélectionnez un verbe --') }}</option>
                                     <template x-for="v in verbs" :key="v">
-                                        <x-tools::prompt-card type="radio" name="verbPreset" value="v" model="verb">
-                                            <span x-text="v"></span>
-                                        </x-tools::prompt-card>
+                                        <option :value="v" x-text="v"></option>
                                     </template>
-                                </div>
+                                </select>
                                 <input type="text" id="cpVerbCustom" class="form-control" x-show="verbType === 'custom'" x-model="verbCustom" autocomplete="off" :aria-required="verbType === 'custom'" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}" aria-label="{{ __('Verbe personnalisé') }}">
                             </div>
 
@@ -326,26 +326,28 @@
                             <x-tools::prompt-block id="cpSectionFormat" :question="__('Vous voulez quoi au juste ?')" :example="__('Ex. : un texte de 300 mots avec une liste à puces, un plan détaillé, un tableau comparatif.')" added="feedbackResultat">
                                 <div class="ct-block__field">
                                     <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Format de sortie') }}</label>
-                                    <div class="ct-card-grid" role="radiogroup" aria-label="{{ __('Format de sortie') }}">
+                                    <select class="form-control form-control-sm" x-model="format" aria-label="{{ __('Format de sortie') }}">
+                                        <option value="">{{ __('-- Aucun --') }}</option>
                                         <template x-for="fmt in formats" :key="fmt.value">
-                                            <x-tools::prompt-card type="radio" name="formatChoice" value="fmt.value" model="format">
-                                                <span x-text="fmt.label"></span>
-                                            </x-tools::prompt-card>
+                                            <option :value="fmt.value" x-text="fmt.label"></option>
                                         </template>
-                                        <x-tools::prompt-card type="checkbox" model="customOpen.format">{{ __('Autre') }}</x-tools::prompt-card>
-                                    </div>
+                                    </select>
+                                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.8rem; min-height: 44px; padding: 4px 6px;">
+                                        <input type="checkbox" x-model="customOpen.format" style="width:18px;height:18px;accent-color:var(--c-primary);margin:0;flex-shrink:0;"> {{ __('Autre (format personnalisé)') }}
+                                    </label>
                                     <input type="text" x-show="customOpen.format" x-model="format" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: Sonnet, script vidéo, fiche produit...') }}" aria-label="{{ __('Format personnalisé') }}">
                                 </div>
                                 <div class="ct-block__field">
                                     <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Longueur précise') }}</label>
-                                    <div class="ct-card-grid" role="radiogroup" aria-label="{{ __('Longueur souhaitée') }}">
+                                    <select class="form-control form-control-sm" x-model="length" aria-label="{{ __('Longueur souhaitée') }}">
+                                        <option value="">{{ __('-- Aucune --') }}</option>
                                         <template x-for="len in lengths" :key="len.value">
-                                            <x-tools::prompt-card type="radio" name="lengthChoice" value="len.value" model="length">
-                                                <span x-text="len.label"></span>
-                                            </x-tools::prompt-card>
+                                            <option :value="len.value" x-text="len.label"></option>
                                         </template>
-                                        <x-tools::prompt-card type="checkbox" model="customOpen.length">{{ __('Autre') }}</x-tools::prompt-card>
-                                    </div>
+                                    </select>
+                                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.8rem; min-height: 44px; padding: 4px 6px;">
+                                        <input type="checkbox" x-model="customOpen.length" style="width:18px;height:18px;accent-color:var(--c-primary);margin:0;flex-shrink:0;"> {{ __('Autre (longueur personnalisée)') }}
+                                    </label>
                                     <input type="text" x-show="customOpen.length" x-model="length" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: 1000 mots exactement') }}" aria-label="{{ __('Longueur personnalisée') }}">
                                 </div>
                             </x-tools::prompt-block>
@@ -353,14 +355,15 @@
                             <x-tools::prompt-block :question="__('Sur quel ton l\'IA doit-elle répondre ?')" :example="__('Ex. : professionnel, chaleureux et engageant, académique.')" added="feedbackTon">
                                 <div class="ct-block__field">
                                     <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Ton général souhaité') }}</label>
-                                    <div class="ct-card-grid" role="radiogroup" aria-label="{{ __('Ton de la réponse') }}">
+                                    <select class="form-control form-control-sm" x-model="tone" aria-label="{{ __('Ton de la réponse') }}">
+                                        <option value="">{{ __('-- Aucun --') }}</option>
                                         <template x-for="t in tones" :key="t.value">
-                                            <x-tools::prompt-card type="radio" name="toneChoice" value="t.value" model="tone">
-                                                <span x-text="t.label"></span>
-                                            </x-tools::prompt-card>
+                                            <option :value="t.value" x-text="t.label"></option>
                                         </template>
-                                        <x-tools::prompt-card type="checkbox" model="customOpen.tone">{{ __('Autre') }}</x-tools::prompt-card>
-                                    </div>
+                                    </select>
+                                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.8rem; min-height: 44px; padding: 4px 6px;">
+                                        <input type="checkbox" x-model="customOpen.tone" style="width:18px;height:18px;accent-color:var(--c-primary);margin:0;flex-shrink:0;"> {{ __('Autre (ton personnalisé)') }}
+                                    </label>
                                     <input type="text" x-show="customOpen.tone" x-model="tone" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: Ironique et léger') }}" aria-label="{{ __('Ton personnalisé') }}">
                                 </div>
                             </x-tools::prompt-block>
@@ -448,13 +451,11 @@
                                 </div>
                                 <div class="ct-block__field">
                                     <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Langue de réponse') }}</label>
-                                    <div class="ct-card-grid" role="radiogroup" aria-label="{{ __('Langue') }}">
+                                    <select class="form-control form-control-sm" x-model="language" aria-label="{{ __('Langue') }}">
                                         <template x-for="l in languages" :key="l.value">
-                                            <x-tools::prompt-card type="radio" name="languageChoice" value="l.value" model="language">
-                                                <span x-text="l.label"></span>
-                                            </x-tools::prompt-card>
+                                            <option :value="l.value" x-text="l.label"></option>
                                         </template>
-                                    </div>
+                                    </select>
                                 </div>
                             </x-tools::prompt-block>
 
@@ -463,13 +464,11 @@
                             <x-tools::prompt-block :question="__('Un exemple à imiter ?')" :example="__('Ex. : donnez 2-3 exemples du résultat attendu, ou laissez l\'IA répondre directement.')" added="feedbackModele">
                                 <div class="ct-block__field">
                                     <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Comment l\'IA doit-elle s\'y prendre ?') }}</label>
-                                    <div class="ct-card-grid" role="radiogroup" aria-label="{{ __('Méthode de réflexion de l\'IA') }}">
+                                    <select class="form-control form-control-sm" x-model="technique" aria-label="{{ __('Méthode de réflexion de l\'IA') }}">
                                         <template x-for="tq in techniques" :key="tq.value">
-                                            <x-tools::prompt-card type="radio" name="techniqueChoice" value="tq.value" model="technique">
-                                                <span x-text="tq.label"></span>
-                                            </x-tools::prompt-card>
+                                            <option :value="tq.value" x-text="tq.label"></option>
                                         </template>
-                                    </div>
+                                    </select>
                                     <small class="text-muted d-block mt-1" style="font-size: 0.72rem;" x-text="techniqueHints[technique] || ''"></small>
                                 </div>
                                 <div class="ct-block__field" x-show="technique === 'few-shot' || technique === 'few-shot-cot'">

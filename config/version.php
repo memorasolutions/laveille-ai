@@ -3462,11 +3462,29 @@ declare(strict_types=1);
  *     restructuration en 4 etapes, donc automatiquement preserves. Seuls CHANGELOG.md et ce
  *     fichier avaient un conflit (entrees narratives independantes), resolus manuellement en
  *     conservant l'historique complet des deux branches.
+ *
+ *   1.139.21 · 2026-08-04 · fix(constructeur-prompts) le 1.139.20 restait un malentendu : le
+ *     wizard 4 etapes restaure ("fidele a mi-juin") utilisait des cartes cliquables pour le role/
+ *     persona, jamais le vrai <select> HTML que l'utilisateur decrivait explicitement ("menu
+ *     deroulant pour le persona ou personnalise... on pouvait aussi changer les contenus des
+ *     menus deroulants"). Archeologie git precise : le vrai select existait en continu depuis
+ *     v1.65.260 (juin) jusqu'a fb55854e (2026-08-01, "ecrans 1 et 2"), remplace par des cartes
+ *     seulement a 3e55d5b0 (2026-08-02, refonte "page blanche") - TOUTES les tentatives de
+ *     restauration depuis (ac9b7a26, 17b14ca6, 1.139.20) descendent de cette refonte a cartes,
+ *     aucune n'avait donc jamais restaure le vrai select. Changement chirurgical : conservation
+ *     integrale de la structure 4 etapes (Persona/Tache/Audience/Options) et du backend deja
+ *     durci (Settings admin-editable via PromptBuilderSettingsSeeder, panneau anti-PII, "Ouvrir
+ *     dans" 5 IA) - seul le WIDGET change de cartes vers <select> pour les 7 champs a choix
+ *     unique : role, verbe d'action, format de sortie, longueur, ton, technique de prompting,
+ *     langue. Audience volontairement laissee en cartes (multi-selection par checkboxes, pas un
+ *     choix unique - hors perimetre de la demande). Verifie visuellement : selection d'un role
+ *     dans le menu deroulant met a jour l'apercu du prompt en temps reel. 368 tests Pest Modules/
+ *     Tools passants, 0 echec (identique au compte d'avant refonte, aucune regression).
  */
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 20;
+$lvPatch = 21;
 
 return [
     'major' => $lvMajor,

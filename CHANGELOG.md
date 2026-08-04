@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.21] - 2026-08-04
+
+### Corrigé
+
+- **Constructeur de prompts : le vrai menu déroulant restauré pour le rôle/persona et 6 autres
+  champs.** Le 1.139.20 restait un malentendu : le wizard 4 étapes « fidèle à mi-juin » utilisait
+  des cartes cliquables pour le rôle, jamais le vrai `<select>` HTML décrit explicitement par
+  l'utilisateur (« menu déroulant pour le persona ou personnalisé... on pouvait aussi changer les
+  contenus des menus déroulants »). Recherche git précise : le vrai menu déroulant a existé sans
+  interruption de juin (v1.65.260) jusqu'au 2026-08-01 (`fb55854e`), remplacé par des cartes
+  seulement à la refonte « page blanche » du 2026-08-02 - toutes les tentatives de restauration
+  depuis en descendaient, donc aucune n'avait jamais réellement ramené le select. Changement
+  chirurgical : structure 4 étapes et backend (préférences admin-éditables, panneau anti-PII,
+  « Ouvrir dans » 5 IA) intégralement conservés - seul le widget change de cartes vers `<select>`
+  pour les 7 champs à choix unique (rôle, verbe, format, longueur, ton, technique de prompting,
+  langue). Audience laissée en cartes (multi-sélection, hors périmètre de la demande). 368 tests
+  Pest `Modules/Tools` passants, 0 échec (identique au compte d'avant refonte).
+
 ## [1.139.20] - 2026-08-04
 
 ### Modifié
