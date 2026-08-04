@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.20] - 2026-08-04
+
+### Modifié
+
+- **Constructeur de prompts : 2e retour à l'assistant 4 étapes (Persona/Tâche/Audience/Options),
+  sur confirmation explicite via question posée directement à l'utilisateur.** L'assistant 4
+  étapes (v1.139.16) avait déjà été essayé puis reverté le 2026-08-03 (v1.139.17, retour au
+  formulaire 3 écrans). Avant de relancer ce cycle, l'historique complet a été présenté à
+  l'utilisateur (dates, citations exactes de ses choix précédents) ; il a confirmé vouloir
+  précisément cette version malgré ce contexte. Revert propre (`git revert` de 17b14ca6, qui
+  réapplique le commit ac9b7a26) : aucun conflit sur le Blade ni sur le JS, les correctifs du
+  1.139.18 (point final double, accord « Tâche demandée : ») vivent dans une zone du fichier
+  jamais touchée par la restructuration en 4 étapes et sont donc automatiquement préservés.
+
 ## [1.139.19] - 2026-08-03
 
 ### Sécurité
@@ -40,6 +54,24 @@ All notable changes to this project will be documented in this file.
   n'avait touché ces fichiers entretemps, donc aucun conflit et aucune perte du travail de
   confidentialité (anti-PII) déjà en place, qui précède ce détour et n'a jamais été affecté par
   lui.
+
+## [1.139.16] - 2026-08-03
+
+### Corrigé
+
+- **Constructeur de prompts : retour à l'assistant 4 étapes (Persona/Tâche/Audience/Options),
+  fidèle à la version de mi-juin, sur demande explicite de l'utilisateur.** Le formulaire à 3
+  écrans restauré au 1.139.14/15 n'était toujours pas ce qui était attendu - l'utilisateur voulait
+  retrouver précisément l'assistant avec le sélecteur de technique de prompting (zero-shot,
+  zero-shot + réflexion étape par étape, avec exemples, avec exemples + réflexion étape par étape,
+  itératif avec validation) présent à la dernière étape. Découverte clé : les champs de l'ancien
+  assistant n'avaient jamais été supprimés par les refontes intermédiaires, seulement déplacés
+  dans un panneau « Affiner » repliable - la reconstruction a donc consisté à réorganiser le code
+  déjà existant en 4 étapes visibles, pas à réécrire quoi que ce soit. Tout le travail de
+  confidentialité déjà livré (masquage anti-PII, panneau d'anonymisation) et le backend (prompts
+  sauvegardés, partage, ouverture directe dans 5 IA) restent intacts et inchangés. Vérifié
+  visuellement en navigateur invité jusqu'à l'étape 4 : le sélecteur de technique s'affiche et
+  fonctionne.
 
 ## [1.139.15] - 2026-08-03
 
