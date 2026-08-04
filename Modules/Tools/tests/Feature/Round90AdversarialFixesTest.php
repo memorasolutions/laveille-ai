@@ -30,9 +30,6 @@ it('checks pb_history content (not just presence) before setting hasLocalData (r
     expect($js)->toContain('if (local.length === 0) { this.hasLocalData = false; return; }');
 });
 
-it('has a WCAG AAA 44px touch target on the PII warning dismiss button (round 90)', function () {
-    $js = file_get_contents(base_path('public/assets/tools/constructeur-prompts/prompt-anon-panel.js'));
-
-    expect($js)->toContain("dismissBtn.style.minWidth = '44px';");
-    expect($js)->toContain("dismissBtn.style.minHeight = '44px';");
-});
+// Test du bouton dismissBtn (prompt-anon-panel.js) retiré le 2026-08-04 : le panneau
+// d'anonymisation intégré au constructeur de prompts a été retiré (demande explicite de
+// l'utilisateur, séparation des deux outils) - prompt-anon-panel.js n'existe plus.

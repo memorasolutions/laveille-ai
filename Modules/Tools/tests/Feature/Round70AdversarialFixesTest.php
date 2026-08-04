@@ -55,8 +55,6 @@ it('updates the fullscreen button aria-label (not just title) when toggling full
     expect(substr_count($js, "setAttribute('aria-label'"))->toBe(2);
 });
 
-it('reads the anon-panel dismiss button aria-label from i18n.close instead of a hardcoded string (round 70)', function () {
-    $js = file_get_contents(public_path('assets/tools/constructeur-prompts/prompt-anon-panel.js'));
-
-    expect($js)->toContain("dismissBtn.setAttribute('aria-label', i18n.close || 'Fermer')");
-});
+// Test du point 3 (aria-label du bandeau PII de prompt-anon-panel.js) retiré le 2026-08-04 :
+// le panneau d'anonymisation intégré au constructeur de prompts a été retiré (demande explicite
+// de l'utilisateur, séparation des deux outils) - prompt-anon-panel.js n'existe plus.

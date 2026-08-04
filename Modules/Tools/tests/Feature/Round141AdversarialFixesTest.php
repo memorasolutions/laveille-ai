@@ -32,14 +32,14 @@ it('translates every prompt-builder string that is surfaced to English visitors'
 
     expect($en)->toBeArray();
 
-    // Les 4 chaînes trouvées au round 141, plus le libellé dynamique du bouton d'insertion ajouté
-    // par ce même round (il aurait sinon reproduit exactement le même défaut).
+    // Les 4 chaînes trouvées au round 141. Retrait du 2026-08-04 (demande explicite de
+    // l'utilisateur, séparation constructeur/anonymiseur) : les 2 chaînes du bandeau anti-PII
+    // intégré ("Exemples pour guider l'IA", "Insérer dans « %s »") ont été retirées avec le
+    // panneau d'anonymisation intégré au constructeur de prompts - elles ne sont plus surfacées.
     $chainesSources = [
         'Votre texte a été conservé. Effacez-le si vous voulez repartir du gabarit de cette carte.',
         'Prompt copié : colle-le dans Mistral (Ctrl/Cmd + V).',
         'Objectif supprimé',
-        "Exemples pour guider l'IA",
-        'Insérer dans « %s »',
     ];
 
     foreach ($chainesSources as $source) {
@@ -73,8 +73,4 @@ it('renders the page after the round 141 fixes (real page)', function () {
 
     $reponse = $this->get('/outils/constructeur-prompts');
     $reponse->assertOk();
-
-    // Le libellé du bouton doit être dans un élément identifiable, sinon le JS du round 141 ne peut
-    // pas le mettre à jour et le bouton retombe silencieusement sur sa promesse figée.
-    $reponse->assertSee('id="cpAnonInsertLabel"', false);
 });

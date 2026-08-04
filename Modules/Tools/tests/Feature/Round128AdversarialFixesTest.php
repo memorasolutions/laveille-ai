@@ -86,16 +86,9 @@ it('announces the preserved text without dressing it as an error (round 128)', f
     expect($blade)->toContain('x-text="saveError" role="alert" aria-live="assertive"');
 });
 
-it('keeps the round 100 PII rescan on the applied template (round 128 non-regression)', function () {
-    $js = file_get_contents(public_path('assets/tools/constructeur-prompts/constructeur-prompts-core.js'));
-
-    $pos = strpos($js, 'selectTask: function');
-    $body = substr($js, $pos, 3200);
-
-    // Le gabarit appliqué doit toujours être scanné par le garde-fou anti-PII.
-    expect($body)->toContain("document.getElementById('cpTaskObject')");
-    expect($body)->toContain("dispatchEvent(new Event('input', { bubbles: true }))");
-});
+// Test du re-scan anti-PII (round 100) sur le gabarit appliqué retiré le 2026-08-04 : le panneau
+// d'anonymisation intégré au constructeur de prompts a été retiré (demande explicite de
+// l'utilisateur, séparation des deux outils) - il n'y a plus de garde-fou anti-PII à re-déclencher.
 
 it('renders the wizard after the round 128 fix (real page)', function () {
     Tool::firstOrCreate(['slug' => 'constructeur-prompts'], [

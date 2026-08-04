@@ -29,22 +29,17 @@ uses(Tests\TestCase::class);
 // éviter 2+ virgules dans une parenthèse à l'intérieur d'un argument @json(__(...)) - utiliser des
 // points-virgules ou reformuler.
 
-it('has English translations for the fullscreen button and anon-panel strings (round 69)', function () {
+it('has English translations for the fullscreen button strings (round 69)', function () {
     $en = json_decode(file_get_contents(lang_path('en.json')), true);
 
+    // Retrait du 2026-08-04 (demande explicite de l'utilisateur, séparation constructeur/
+    // anonymiseur) : les 4 clés du bandeau anti-PII intégré (anonNeedTextFirst, anonImported,
+    // anonInserted, anonPiiWarningField, anonMaskButton) ont été retirées avec le panneau
+    // d'anonymisation intégré au constructeur de prompts - ce test ne vérifiait plus qu'un code
+    // mort. Ne reste ici que ce qui est encore réellement rendu : le bouton plein écran.
     $keys = [
         'Plein écran',
         'Quitter le plein écran',
-        "Anonymisez d'abord un texte (bouton « Détecter et anonymiser »).",
-        "Texte anonymisé importé de l'anonymiseur.",
-        'Texte anonymisé inséré dans la tâche.',
-        // Round 149 (2026-07-31) : la clé anonPiiWarning ("...un nom; un courriel; un numéro...")
-        // a été retirée du blade et de en.json - elle était morte (remplacée par anonPiiWarningField,
-        // le message PAR CHAMP, plus aucune référence JS depuis le round 109). On vérifie ici la clé
-        // RÉELLEMENT utilisée par le bandeau anti-PII à la place, même esprit du test (une chaîne du
-        // bandeau doit avoir sa traduction anglaise), sans tester du code mort.
-        "On dirait qu'il y a des infos personnelles dans « %s ». Pour ta sécurité, masque-les avant de copier ton prompt.",
-        'Masquer mes infos →',
     ];
 
     foreach ($keys as $key) {

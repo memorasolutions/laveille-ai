@@ -25,13 +25,14 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 // assignations, sans toucher à la logique de garde existante (personaType==='preset' &&
 // personaPreset==='' ; constraintCustom==='').
 
-it('dispatches a native input event when "Mon profil" autofills personaCustom/constraintCustom, mirroring the round 100/110 fixes (round 111)', function () {
+// Test du dispatch d'événement 'input' (garde-fou anti-PII) retiré le 2026-08-04 : le panneau
+// d'anonymisation intégré au constructeur de prompts a été retiré (demande explicite de
+// l'utilisateur, séparation des deux outils), avec lui le seul écouteur qui consommait cet
+// événement synthétique. La logique de garde elle-même (ne jamais écraser un choix explicite de
+// persona/contraintes) reste intacte et inchangée dans constructeur-prompts-core.js.
+it('keeps the "Mon profil" autofill guard intact (never overwrites an explicit choice)', function () {
     $js = file_get_contents(public_path('assets/tools/constructeur-prompts/constructeur-prompts-core.js'));
 
-    expect($js)->toContain('// Round 111 (2026-07-27, passe adversariale)');
-    // Le compte total passe de 6 (round 110) à 8 (round 111 ajoute 2 nouveaux dispatch).
-    expect(substr_count($js, "if (el) el.dispatchEvent(new Event('input', { bubbles: true }));"))->toBeGreaterThanOrEqual(8);
-    // La logique de garde d'origine reste intacte (ne jamais écraser un choix explicite).
     expect($js)->toContain("if (profile.profile_role && self.personaCustom === '' && self.personaType === 'preset' && self.personaPreset === '') {");
     expect($js)->toContain("if (extra.length > 0 && self.constraintCustom === '') {");
 });

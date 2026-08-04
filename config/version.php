@@ -3480,11 +3480,38 @@ declare(strict_types=1);
  *     choix unique - hors perimetre de la demande). Verifie visuellement : selection d'un role
  *     dans le menu deroulant met a jour l'apercu du prompt en temps reel. 368 tests Pest Modules/
  *     Tools passants, 0 echec (identique au compte d'avant refonte, aucune regression).
+ *
+ *   1.139.22 · 2026-08-04 · retrait(constructeur-prompts) le panneau d'anonymisation integre
+ *     (bouton "Masquer mes informations personnelles" + editeur riche embarque via
+ *     <x-tools::anonymizer-editor>) est retire du constructeur-prompts.blade.php, sur demande
+ *     explicite de l'utilisateur : les deux outils doivent rester separes, l'anonymisation ne
+ *     vivant plus QUE dans l'outil dedie /outils/anonymiseur (jamais touche par ce retrait, ni ses
+ *     fichiers propres anonymizer-core/ui/rich.js, anon-v2.css, ni le composant reutilisable
+ *     anonymizer-editor.blade.php). Retrait chirurgical en 3 couches : (1) blade - panneau/bouton/
+ *     recapitulatif/lien retires, message de confidentialite du champ Tache reoriente vers un
+ *     lien discret vers /outils/anonymiseur, @include('tools::partials.anonymizer-scripts'),
+ *     <script prompt-anon-panel.js> et <link anon-v2.css> retires (aucune autre classe .anon-* du
+ *     fichier n'en dependait), 22 cles i18n dediees au masquage integre + le tableau PHP
+ *     $anonPluralLabels retires du bloc window.promptBuilderConfig ; (2) JS - prompt-anon-panel.js
+ *     (785 lignes, 100% dedie au pont) supprime entierement ; dans constructeur-prompts-core.js,
+ *     les 8 sites qui dispatchaient un evenement 'input' synthetique pour reveiller le garde-fou
+ *     anti-PII du fichier supprime sont retires (logique d'assignation elle-meme intacte), ainsi
+ *     que purgerCopieLocaleDesCartes() (cablee uniquement sur l'evenement cp-card-masked du
+ *     fichier supprime, plus aucun appelant) ; (3) tests - 5 fichiers Feature supprimes entierement
+ *     (Round100/109/110/125/139, exclusivement dedies au pont supprime) + 8 fichiers Feature
+ *     mixtes coupes chirurgicalement (Round69/70/90/92/111/128/138/141, assertions retirees, reste
+ *     inchange) ; cote Node,
+ *     7 fichiers tests/js/*.test.cjs qui chargeaient prompt-anon-panel.js via new Function()
+ *     supprimes. Le garde profile-anon-guard.js (page /user/prompts, integration distincte et non
+ *     demandee) n'est pas touche. 343 tests Pest Modules/Tools + 29 bancs Node tests/js passants,
+ *     0 echec (hors 1 fichier Node pre-existant et hors-perimetre, deja en echec avant ce retrait -
+ *     tests/js/prompt-verifier-rules-detect.test.cjs attend un moteur non encore livre par un
+ *     chantier distinct, .outils/PLAN-CONSTRUCTEUR-PROMPTS-ULTRA-2026-08-02.md).
  */
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 21;
+$lvPatch = 22;
 
 return [
     'major' => $lvMajor,

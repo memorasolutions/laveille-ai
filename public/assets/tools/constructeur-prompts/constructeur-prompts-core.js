@@ -1040,46 +1040,17 @@ document.addEventListener('alpine:init', function() {
                                     var p = found.params;
                                     if (p.personaType) self.personaType = p.personaType;
                                     if (p.personaPreset) self.personaPreset = p.personaPreset;
-                                    // Round 110 (2026-07-27, passe adversariale) : cette assignation Alpine
-                                    // directe ne déclenche jamais l'événement 'input' natif sur #cpPersonaCustom -
-                                    // le garde-fou anti-données-personnelles (prompt-anon-panel.js,
-                                    // checkEntities()) ne s'exécutait donc jamais après une restauration
-                                    // ?edit=ID, même si la description restaurée contient un nom/courriel/tel.
                                     if (p.personaCustom) {
                                         self.personaCustom = p.personaCustom;
                                         self.personaType = 'custom';
-                                        self.$nextTick(function() {
-                                            var el = document.getElementById('cpPersonaCustom');
-                                            if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
-                                        });
                                     }
                                     if (p.verbType) self.verbType = p.verbType;
                                     if (p.verb) self.verb = p.verb;
-                                    // Round 110 (2026-07-27, passe adversariale) : cette assignation Alpine
-                                    // directe ne déclenche jamais l'événement 'input' natif sur #cpVerbCustom -
-                                    // le garde-fou anti-données-personnelles (prompt-anon-panel.js,
-                                    // checkEntities()) ne s'exécutait donc jamais après une restauration
-                                    // ?edit=ID, même si la description restaurée contient un nom/courriel/tel.
                                     if (p.verbCustom) {
                                         self.verbCustom = p.verbCustom;
                                         self.verbType = 'custom';
-                                        self.$nextTick(function() {
-                                            var el = document.getElementById('cpVerbCustom');
-                                            if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
-                                        });
                                     }
-                                    // Round 100 (2026-07-27, passe adversariale) : cette assignation Alpine
-                                    // directe ne déclenche jamais l'événement 'input' natif sur #cpTaskObject -
-                                    // le garde-fou anti-données-personnelles (prompt-anon-panel.js,
-                                    // checkEntities()) ne s'exécutait donc jamais après une restauration
-                                    // ?edit=ID, même si la description restaurée contient un nom/courriel/tel.
-                                    if (p.taskObject) {
-                                        self.taskObject = p.taskObject;
-                                        self.$nextTick(function() {
-                                            var el = document.getElementById('cpTaskObject');
-                                            if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
-                                        });
-                                    }
+                                    if (p.taskObject) self.taskObject = p.taskObject;
                                     if (p.audienceType) self.audienceType = p.audienceType;
                                     // Round 151 (2026-08-01) : `self.audiencePreset = p.audiencePreset`
                                     // retiré - rien ne lit plus jamais cette propriété d'état (voir
@@ -1087,18 +1058,9 @@ document.addEventListener('alpine:init', function() {
                                     // suivante, singulier → tableau pluriel) reste intacte : elle lit
                                     // `p.audiencePreset` depuis le PAYLOAD chargé, pas depuis l'état.
                                     if (Array.isArray(p.audiencePresets)) { self.audiencePresets = p.audiencePresets; } else if (p.audiencePreset) { self.audiencePresets = [p.audiencePreset]; }
-                                    // Round 110 (2026-07-27, passe adversariale) : cette assignation Alpine
-                                    // directe ne déclenche jamais l'événement 'input' natif sur #cpAudienceCustom -
-                                    // le garde-fou anti-données-personnelles (prompt-anon-panel.js,
-                                    // checkEntities()) ne s'exécutait donc jamais après une restauration
-                                    // ?edit=ID, même si la description restaurée contient un nom/courriel/tel.
                                     if (p.audienceCustom) {
                                         self.audienceCustom = p.audienceCustom;
                                         self.audienceType = 'custom';
-                                        self.$nextTick(function() {
-                                            var el = document.getElementById('cpAudienceCustom');
-                                            if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
-                                        });
                                     }
                                     if (p.format) self.format = p.format;
                                     if (p.length) self.length = p.length;
@@ -1124,29 +1086,9 @@ document.addEventListener('alpine:init', function() {
                                     if (p.constraintTypo !== undefined) self.constraintTypo = p.constraintTypo;
                                     if (p.constraintChainOfThought !== undefined) self.constraintChainOfThought = p.constraintChainOfThought;
                                     if (p.constraintAskIfUnclear !== undefined) self.constraintAskIfUnclear = p.constraintAskIfUnclear;
-                                    // Round 110 (2026-07-27, passe adversariale) : cette assignation Alpine
-                                    // directe ne déclenche jamais l'événement 'input' natif sur #cpConstraintCustom -
-                                    // le garde-fou anti-données-personnelles (prompt-anon-panel.js,
-                                    // checkEntities()) ne s'exécutait donc jamais après une restauration
-                                    // ?edit=ID, même si la description restaurée contient un nom/courriel/tel.
-                                    if (p.constraintCustom) {
-                                        self.constraintCustom = p.constraintCustom;
-                                        self.$nextTick(function() {
-                                            var el = document.getElementById('cpConstraintCustom');
-                                            if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
-                                        });
-                                    }
+                                    if (p.constraintCustom) self.constraintCustom = p.constraintCustom;
                                     if (p.useDelimiters !== undefined) self.useDelimiters = p.useDelimiters;
-                                    if (p.examples) {
-                                        self.examples = p.examples;
-                                        // Round 125 : à la ré-hydratation d'un prompt existant, Alpine remplit la valeur sans
-                                        // déclencher d'événement 'input', donc le garde-fou ne re-scanne pas le contenu restauré.
-                                        // Sans cet appel, une fuite déjà enregistrée ne serait jamais signalée à la réouverture.
-                                        self.$nextTick(function() {
-                                            var el = document.getElementById('cpExamples');
-                                            if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
-                                        });
-                                    }
+                                    if (p.examples) self.examples = p.examples;
                                     if (p.constraintCanvas) self.constraintCanvas = p.constraintCanvas;
                                     if (p.canvasAI) {
                                         // 2026-05-05 #104 : migration anciens prompts canvasAI='custom' → canvasAI='chatgpt' + formatMode='custom'
@@ -1202,25 +1144,15 @@ document.addEventListener('alpine:init', function() {
                                 // 'preset' + personaPreset=valeur, SANS jamais passer par 'custom') avant
                                 // que ce fetch ne résolve, le profil écrasait silencieusement ce choix
                                 // explicite (personaType→'custom', personaPreset orphelin, jamais réinitialisé).
-                                // Round 111 (2026-07-27, passe adversariale) : assignation depuis le profil "Mon profil" doit déclencher 'input' pour activer le garde-fou anti-PII
                                 if (profile.profile_role && self.personaCustom === '' && self.personaType === 'preset' && self.personaPreset === '') {
                                     self.personaCustom = profile.profile_role;
                                     self.personaType = 'custom';
-                                    self.$nextTick(function() {
-                                        var el = document.getElementById('cpPersonaCustom');
-                                        if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
-                                    });
                                 }
                                 var extra = [];
                                 if (profile.profile_style) extra.push('Style d\'écriture préféré : ' + profile.profile_style);
                                 if (profile.profile_constraints) extra.push(profile.profile_constraints);
-                                // Round 111 (2026-07-27, passe adversariale) : assignation depuis le profil "Mon profil" doit déclencher 'input' pour activer le garde-fou anti-PII
                                 if (extra.length > 0 && self.constraintCustom === '') {
                                     self.constraintCustom = extra.join('\n');
-                                    self.$nextTick(function() {
-                                        var el = document.getElementById('cpConstraintCustom');
-                                        if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
-                                    });
                                 }
                             })
                             .catch(function() {});
@@ -1300,14 +1232,7 @@ document.addEventListener('alpine:init', function() {
                     }
 
                     if (isUntouchedTemplate) {
-                        // Round 100 (2026-07-27, passe adversariale) : même garde-fou que la restauration
-                        // ?edit=ID ci-dessus - déclenche 'input' pour que checkEntities() (prompt-anon-panel.js)
-                        // s'exécute sur le contenu du gabarit, même sans interaction clavier de l'utilisateur.
                         this.taskObject = card.query_template;
-                        this.$nextTick(function() {
-                            var el = document.getElementById('cpTaskObject');
-                            if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
-                        });
                     } else {
                         this._showTaskNotice();
                     }
@@ -1620,22 +1545,6 @@ document.addEventListener('alpine:init', function() {
 
             _saveLocalCustomCards: function() {
                 try { localStorage.setItem('cp_custom_cards', JSON.stringify({ version: 1, cards: this.customCards })); } catch (e) {}
-            },
-
-            // Referme une fuite réelle : le gabarit d'une carte (query_template) peut contenir des
-            // données personnelles en clair, écrites dans le stockage local au moment du blur, donc
-            // AVANT tout masquage (commitCardPanelBlur -> persistCustomCards -> _saveLocalCustomCards
-            // pour les invités). Quand le panneau « Anonymiser » réinjecte ensuite le texte masqué
-            // dans ce même champ, seul le modèle Alpine est mis à jour (événement input) - sans
-            // réécriture explicite, la version en clair précédemment sauvegardée survit dans le
-            // navigateur alors que la personne croit avoir masqué ses informations. Câblée sur
-            // l'événement dédié 'cp-card-masked' (voir prompt-anon-panel.js) : on ne supprime rien
-            // d'autre, on réécrit simplement la copie locale avec l'état courant (déjà masqué).
-            purgerCopieLocaleDesCartes: function() {
-                try {
-                    if (!Array.isArray(this.customCards)) return;
-                    localStorage.setItem('cp_custom_cards', JSON.stringify({ version: 1, cards: this.customCards }));
-                } catch (e) { /* stockage local indisponible (navigation privée) : sans effet, jamais d'exception */ }
             },
 
             // Round 118 (2026-07-27, passe adversariale) : ce point réseau était le SEUL du fichier

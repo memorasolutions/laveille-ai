@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.22] - 2026-08-04
+
+### Retiré
+
+- **Constructeur de prompts : panneau d'anonymisation intégré retiré, sur demande explicite de
+  l'utilisateur.** Le bouton « Masquer mes informations personnelles » et l'éditeur riche embarqué
+  (`<x-tools::anonymizer-editor>`) sont retirés de `constructeur-prompts.blade.php` : les deux
+  outils doivent rester séparés, l'anonymisation ne vivant plus QUE dans l'outil dédié
+  `/outils/anonymiseur` (jamais touché par ce retrait, ni ses fichiers propres
+  `anonymizer-core/ui/rich.js`, `anon-v2.css`, ni le composant réutilisable
+  `anonymizer-editor.blade.php`). Le message de confidentialité du champ « Tâche » pointe
+  désormais vers un lien discret vers l'Anonymiseur plutôt que vers le panneau disparu.
+  `prompt-anon-panel.js` (785 lignes, 100% dédié au pont) est supprimé entièrement ; dans
+  `constructeur-prompts-core.js`, les 8 sites qui déclenchaient un événement `input` synthétique
+  pour réveiller le garde-fou anti-PII du fichier supprimé sont retirés (la logique d'assignation
+  elle-même reste intacte), ainsi que `purgerCopieLocaleDesCartes()` (câblée uniquement sur cet
+  événement, plus aucun appelant). 5 fichiers de tests Feature et 7 bancs Node dédiés exclusivement
+  à cette intégration sont supprimés ; 8 fichiers de tests Feature mixtes sont ajustés (assertions
+  concernées retirées, reste inchangé). Le garde `profile-anon-guard.js` (page `/user/prompts`,
+  intégration distincte et non demandée) n'est pas touché. 343 tests Pest `Modules/Tools` + 29
+  bancs Node `tests/js` passants, 0 échec.
+
 ## [1.139.21] - 2026-08-04
 
 ### Corrigé

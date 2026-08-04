@@ -45,12 +45,9 @@ it('gives every plain .ct-btn button a 44px min-height floor (round 92)', functi
     expect($blade)->toContain('onclick="jQuery(\'#promptHelpModal\').modal(\'hide\')" style="min-height:44px;">{{ __(\'Compris !\') }}</button>');
 });
 
-it('gives the dynamically-created anonBtn a 44px touch target (round 92)', function () {
-    $js = file_get_contents(public_path('assets/tools/constructeur-prompts/prompt-anon-panel.js'));
-
-    expect($js)->toContain("anonBtn.style.minHeight = '44px';");
-    expect($js)->toContain("anonBtn.style.minWidth = '44px';");
-});
+// Test du bouton anonBtn (prompt-anon-panel.js) retiré le 2026-08-04 : le panneau d'anonymisation
+// intégré au constructeur de prompts a été retiré (demande explicite de l'utilisateur, séparation
+// des deux outils) - prompt-anon-panel.js n'existe plus.
 
 it('gives in-card tag chips a 44px touch target, distinct from the filter bar chips (round 92)', function () {
     $blade = file_get_contents(base_path('Modules/Tools/resources/views/user/prompts/index.blade.php'));

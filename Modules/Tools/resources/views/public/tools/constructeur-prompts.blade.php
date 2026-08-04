@@ -233,7 +233,7 @@
                             </div>
                         </div>
 
-                        {{-- Étape 2 : Tâche (verbe d'action + description + masquage anti-PII) --}}
+                        {{-- Étape 2 : Tâche (verbe d'action + description) --}}
                         <div x-show="step === 2" x-transition>
                             <div class="d-flex align-items-center gap-2 mb-1">
                                 <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('Que voulez-vous demander à l\'IA ?') }}</h2>
@@ -257,40 +257,15 @@
                                 <input type="text" id="cpVerbCustom" class="form-control" x-show="verbType === 'custom'" x-model="verbCustom" autocomplete="off" :aria-required="verbType === 'custom'" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}" aria-label="{{ __('Verbe personnalisé') }}">
                             </div>
 
-                            {{-- Round 148 (2026-07-31, refonte « anonymisation en place ») : ce champ ne
-                                 doit plus JAMAIS être masqué, même pendant une anonymisation - décision
-                                 tranchée (panel Perplexity/Gemini 95/100, Codex 82/100). L'`id` reste utile
-                                 comme point d'ancrage stable pour le récapitulatif de masquage ci-dessous. --}}
+                            {{-- Retrait du panneau de masquage intégré (2026-08-04, demande explicite de
+                                 l'utilisateur) : l'anonymisation vit désormais UNIQUEMENT à l'outil séparé
+                                 /outils/anonymiseur (jamais touché par ce retrait). L'`id` de ce champ est
+                                 conservé comme ancre stable pour openDiagnosticSection() et le futur. --}}
                             <div class="form-group mb-3" id="cpTaskField">
                                 <label class="form-label fw-medium">{{ __('Sur quoi porte votre demande ?') }} <span style="color: #991B1B;">*</span></label>
-                                <p class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;">🔒 {{ __('Il y a un vrai nom, un courriel, un numéro de téléphone ou une adresse dans votre texte ? Cachez-les d\'abord avec le bouton ci-dessous. Tout se passe directement sur votre ordinateur : rien n\'est envoyé ni enregistré nulle part.') }}</p>
+                                <p class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;">🔒 {{ __('Il y a un vrai nom, un courriel, un numéro de téléphone ou une adresse dans votre texte ? Cachez-les d\'abord avec l\'') }}<a href="/outils/anonymiseur" style="color: #0A3A42; font-weight: 600; text-decoration: underline;">{{ __('Anonymiseur') }}</a>{{ __(', puis collez le résultat ici. Rien n\'est envoyé ni enregistré nulle part.') }}</p>
                                 <textarea id="cpTaskObject" class="form-control" rows="3" x-model="taskObject" autocomplete="off" aria-required="true" placeholder="{{ __('Ex: un plan marketing pour le lancement d\'une application mobile au Québec') }}" aria-label="{{ __('Description de la demande') }}"></textarea>
                                 <small class="text-muted">{{ __('Décrivez précisément ce que vous voulez obtenir.') }}</small>
-                            </div>
-
-                            {{-- Round 148 (2026-07-31) : MASQUAGE EN PLACE. Ce bouton n'ouvre plus le
-                                 panneau d'anonymisation - il détecte et remplace directement le contenu du
-                                 champ ci-dessus (voir maskFieldInPlace() dans prompt-anon-panel.js).
-                                 Round 149-150 : récapitulatif dédié par champ, via getOrCreateRecapController()
-                                 dans prompt-anon-panel.js - DRY strict, aucun bloc dupliqué dans ce fichier. --}}
-                            <div class="form-group mb-3">
-                                <button id="cpAnonToggle" type="button" class="ct-btn ct-btn-outline ct-btn-sm" style="min-height:44px;">🛡️ {{ __('Masquer mes informations personnelles') }}</button>
-                                <a href="/outils/anonymiseur" class="ct-btn ct-btn-ghost ct-btn-sm ms-1" style="min-height:44px;" title="{{ __('Ouvrir l\'anonymiseur complet (restauration des réponses IA)') }}">↗ {{ __('Anonymiseur complet') }}</a>
-
-                                <div id="cpAnonRecap" class="mt-2" style="display:none;" role="status" aria-live="polite">
-                                    <p id="cpAnonRecapText" class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;"></p>
-                                    <button type="button" id="cpAnonUndo" class="ct-btn ct-btn-outline ct-btn-sm" style="display:none; min-height:44px;">↺ {{ __('Revenir à mon texte de départ') }}</button>
-                                </div>
-
-                                <div id="cpAnonPanel" class="anon-wrap" style="display:none; border:1px solid var(--anon-line,#e2e6ea); border-radius:12px; padding:1rem; margin-top:.75rem; background:#f8fafb;" aria-hidden="true">
-                                    <p style="font-size:.85rem; color:#52586a; margin:0 0 .5rem;">🔒 {{ __('100 % local : aucune donnée ne quitte votre navigateur. Sélectionnez un passage, surlignez, anonymisez, puis insérez le texte masqué dans votre tâche.') }}</p>
-                                    <x-tools::anonymizer-editor>
-                                        <x-slot:previewActions>
-                                            <button type="button" id="btnCopyAnon" class="anon-btn secondary">📋 {{ __('Copier') }}</button>
-                                            <button type="button" id="cpAnonInsert" class="anon-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true" focusable="false" style="vertical-align:-2px;margin-right:5px;flex-shrink:0;"><path d="M12 5v14M5 12h14"/></svg><span id="cpAnonInsertLabel">{{ __('Insérer dans la tâche') }}</span></button>
-                                        </x-slot:previewActions>
-                                    </x-tools::anonymizer-editor>
-                                </div>
                             </div>
                         </div>
 
@@ -654,8 +629,6 @@
 @endsection
 
 @push('head')
-{{-- CSS de l'éditeur d'anonymisation réutilisable (panneau « Anonymiser un texte ») --}}
-<link rel="stylesheet" href="{{ asset('assets/tools/anonymiseur/anon-v2.css') }}?v={{ config('version.semver') }}">
 {{-- 2026-05-27 #310 : Schema.org SoftwareApplication pour AEO/GEO. Outil top page 403 PV /30j. --}}
 @php
     $_swApp = [
@@ -710,10 +683,6 @@
 @endpush
 
 @push('scripts')
-{{-- Liaison anonymiseur : éditeur RÉUTILISABLE partagé (100% local, même UX que /outils/anonymiseur) --}}
-@include('tools::partials.anonymizer-scripts')
-{{-- Pont spécifique au constructeur : toggle du panneau + insertion du texte anonymisé dans la tâche --}}
-<script src="{{ asset('assets/tools/constructeur-prompts/prompt-anon-panel.js') }}?v={{ config('version.semver') }}" defer></script>
 @php
 $defaultPersonas = [['value'=>'expert_marketing','label'=>'Expert en marketing digital'],['value'=>'redacteur_web','label'=>'Rédacteur web professionnel'],['value'=>'enseignant','label'=>'Enseignant pédagogue'],['value'=>'developpeur','label'=>'Développeur senior'],['value'=>'consultant','label'=>'Consultant en stratégie'],['value'=>'graphiste','label'=>'Graphiste créatif'],['value'=>'analyste','label'=>'Analyste de données'],['value'=>'gestionnaire','label'=>'Gestionnaire de projet'],['value'=>'coach','label'=>'Coach professionnel'],['value'=>'journaliste','label'=>'Journaliste d\'investigation'],['value'=>'chercheur','label'=>'Chercheur scientifique'],['value'=>'rh','label'=>'Spécialiste en ressources humaines'],['value'=>'concepteur_pedagogique','label'=>'Concepteur pédagogique'],['value'=>'community_manager','label'=>'Gestionnaire de médias sociaux'],['value'=>'copywriter','label'=>'Rédacteur publicitaire (copywriter)'],['value'=>'formateur','label'=>'Formateur en entreprise'],['value'=>'adjoint_admin','label'=>'Adjoint administratif']];
 $defaultVerbs = ['Rédige','Analyse','Crée','Génère','Explique','Compare','Résume','Traduis','Optimise','Évalue','Développe','Conçois','Planifie','Diagnostique'];
@@ -838,38 +807,6 @@ $defaultProfiles = [
     ['value' => 'programmation', 'label' => __('Programmation'), 'hint' => __('Aucune règle de style français ; ajoute la mise en forme du code.')],
     ['value' => 'traduction', 'label' => __('Traduction'), 'hint' => __('Aucune règle de français du Québec appliquée au résultat.')],
 ];
-// Round 148 (2026-07-31) : formes singulier/pluriel des catégories RÉELLES retournées par
-// AnonymizerCore.detectEntities() (entity.label), pour le récapitulatif humain du masquage en
-// place (« 2 noms et 1 numéro de téléphone ont été masqués. »). Construit en variable PHP plutôt
-// qu'en tableau littéral inline dans @json() : le directive @json() de cette version de Blade ne
-// gère pas correctement plusieurs sous-tableaux successifs au même niveau d'imbrication (bug de
-// comptage de parenthèses du compilateur - vérifié : @json(['a'=>[...],'b'=>[...]]) tronque la
-// sortie). Les clés reprennent les libellés EXACTS du moteur (anonymizer-core.js) : ce ne sont que
-// des clés de correspondance, jamais affichées telles quelles - seules leurs VALEURS (traduisibles
-// via __()) le sont.
-// Round 149 (2026-07-31, défaut #3) : 3e élément de chaque entrée = accord FÉMININ (bool). Le
-// récapitulatif disait « une adresse a été masqué » (masculin figé) même pour des catégories
-// féminines - voir resumerMasquage() dans prompt-anon-panel.js. Catégories réellement féminines au
-// singulier : Adresse, Adresse IP, Date. Toutes les autres commencent par « un/le » (numéro de...,
-// nom, prénom, courriel, montant...) et restent masculines.
-$anonPluralLabels = [
-    'Nom complet' => [__('nom complet'), __('noms complets'), false],
-    'Nom de famille' => [__('nom de famille'), __('noms de famille'), false],
-    'Prénom' => [__('prénom'), __('prénoms'), false],
-    'RAMQ' => [__('numéro d\'assurance maladie (RAMQ)'), __('numéros d\'assurance maladie (RAMQ)'), false],
-    'Numéro de permis' => [__('numéro de permis'), __('numéros de permis'), false],
-    'Adresse' => [__('adresse'), __('adresses'), true],
-    'Code postal' => [__('code postal'), __('codes postaux'), false],
-    'Courriel' => [__('courriel'), __('courriels'), false],
-    'Carte bancaire' => [__('numéro de carte bancaire'), __('numéros de carte bancaire'), false],
-    'IBAN' => [__('numéro IBAN'), __('numéros IBAN'), false],
-    'Adresse IP' => [__('adresse IP'), __('adresses IP'), true],
-    'Téléphone' => [__('numéro de téléphone'), __('numéros de téléphone'), false],
-    'Numéro de dossier' => [__('numéro de dossier'), __('numéros de dossier'), false],
-    'Montant' => [__('montant'), __('montants'), false],
-    'Date' => [__('date'), __('dates'), true],
-    'NAS' => [__('numéro d\'assurance sociale (NAS)'), __('numéros d\'assurance sociale (NAS)'), false],
-];
 @endphp
 <script>
 // Injection des données dynamiques (personas/verbes/audiences configurables via Settings + i18n)
@@ -916,59 +853,6 @@ window.promptBuilderConfig = {
         customCardsImportedMany: @json(__('{count} cartes importées')),
         customCardsImportLimitReached: @json(__('Limite de 10 cartes atteinte - aucune carte importée. Supprimez-en une puis réessayez.')),
         customCardsImportedPartial: @json(__('{imported} carte(s) importée(s) - {remaining} en attente (limite de 10 atteinte).')),
-        anonImported: @json(__('Texte anonymisé importé de l\'anonymiseur.')),
-        anonNeedTextFirst: @json(__('Anonymisez d\'abord un texte (bouton « Détecter et anonymiser »).')),
-        anonInserted: @json(__('Texte anonymisé inséré dans la tâche.')),
-        anonInsertedInField: @json(__('Texte anonymisé inséré dans « %s ».')),
-        // Round 141 : libellé du BOUTON d'insertion, recalculé selon le champ réellement visé.
-        // Le round 138 n'avait corrigé que le message affiché APRÈS le clic ; le bouton, lui,
-        // promettait toujours « Insérer dans la tâche » avant même que la personne clique.
-        anonInsertInTask: @json(__('Insérer dans la tâche')),
-        anonInsertInField: @json(__('Insérer dans « %s »')),
-        // Round 142 : le champ visé a été démonté entre la mémorisation et le clic (panneau de carte
-        // refermé). On le dit au lieu d'écrire dans un noeud détaché ou de rediriger vers la tâche.
-        anonTargetGone: @json(__('Ce champ n\'est plus affiché. Rouvrez-le, puis réessayez : rien n\'a été inséré.')),
-        anonPiiWarningField: @json(__('On dirait qu\'il y a des infos personnelles dans « %s ». Pour ta sécurité, masque-les avant de copier ton prompt.')),
-        anonFieldCardTemplate: @json(__('Gabarit de requête de cette carte')),
-        anonFieldExamples: @json(__('Exemples pour guider l\'IA')),
-        anonMaskButton: @json(__('Masquer mes infos →')),
-        // Round 148 (2026-07-31, refonte « anonymisation en place ») : messages du masquage EN
-        // PLACE, généralisé au round 149 aux 6 champs surveillés (voir maskFieldInPlace() dans
-        // prompt-anon-panel.js).
-        anonEmptyField: @json(__('Écrivez d\'abord votre demande dans le champ ci-dessus, puis cliquez de nouveau sur ce bouton pour masquer vos informations personnelles.')),
-        anonNoneDetected: @json(__('Aucune information personnelle trouvée dans votre texte. Vous pouvez continuer.')),
-        anonMaskedInField: @json(__('Vos informations personnelles ont été masquées, directement sur votre ordinateur.')),
-        anonUndone: @json(__('Votre texte de départ est revenu, tel que vous l\'aviez écrit.')),
-        // Round 150 (2026-07-31) : libellé du bouton « Revenir à mon texte de départ » construit
-        // dynamiquement par prompt-anon-panel.js pour les récapitulatifs créés en JS (5 champs sans
-        // markup Blade dédié - voir getOrCreateRecapController()). Réutilise la MÊME clé de
-        // traduction que le bouton statique rendu ci-dessus pour le champ Tâche : zéro nouvelle
-        // chaîne, zéro divergence possible entre les deux boutons.
-        anonUndoLabel: @json(__('Revenir à mon texte de départ')),
-        // Round 149 (2026-07-31, défaut #1 - PERTE DE DONNÉES prouvée) : le clic sur « Revenir à
-        // mon texte de départ » réécrivait toujours la valeur d'AVANT masquage sans jamais vérifier
-        // si la personne avait modifié le champ depuis (ex. complété sa phrase après le masquage) -
-        // l'ajout disparaissait sans avertissement. Ce message n'apparaît QUE dans ce cas précis,
-        // via la modale de confirmation du thème (jamais confirm() natif).
-        anonUndoConfirm: @json(__('Vous avez modifié ce texte depuis le masquage. Revenir en arrière effacera ce que vous avez écrit depuis. Continuer quand même ?')),
-        anonUnavailable: @json(__('Le masquage automatique n\'est pas disponible pour le moment.')),
-        anonAnd: @json(__('et')),
-        // Round 149 (2026-07-31, défaut #3) : accord du verbe selon le GENRE réel de la catégorie
-        // masquée (voir resumerMasquage() dans prompt-anon-panel.js et le 3e élément de chaque
-        // entrée de $anonPluralLabels ci-dessus). « a été masqué »/« ont été masqués » restent les
-        // formes MASCULINES (catégories masculines, ou plusieurs catégories mixtes jointes par
-        // « et » - règle du masculin générique) ; les formes *Feminine ci-dessous ne s'appliquent
-        // qu'à une SEULE catégorie féminine (adresse, adresse IP, date).
-        anonMaskedSingular: @json(__('a été masqué')),
-        anonMaskedSingularFeminine: @json(__('a été masquée')),
-        anonMaskedPlural: @json(__('ont été masqués')),
-        anonMaskedPluralFeminine: @json(__('ont été masquées')),
-        // Formes singulier/pluriel des catégories RÉELLES retournées par AnonymizerCore.detectEntities()
-        // (entity.label) - sert à construire le récapitulatif humain (« 2 noms et 1 numéro de
-        // téléphone ont été masqués. »). Les clés reprennent les libellés EXACTS du moteur
-        // (anonymizer-core.js) : ce ne sont que des clés de correspondance, jamais affichées telles
-        // quelles - seules leurs VALEURS (traduisibles) le sont.
-        anonPluralLabels: @json($anonPluralLabels),
         close: @json(__('Fermer')),
         newCardTitle: @json(__('Nouvelle carte')),
         untitledCard: @json(__('Carte sans titre')),

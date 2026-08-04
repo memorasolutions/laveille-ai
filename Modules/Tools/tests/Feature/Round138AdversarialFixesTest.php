@@ -26,51 +26,12 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 // connu intact ; sinon le texte de l'utilisateur est préservé et un simple avis s'affiche. Le
 // comportement a changé, la phrase affichée n'a pas suivi.
 
-const R138_PANEL_JS = 'public/assets/tools/constructeur-prompts/prompt-anon-panel.js';
-const R138_WIZARD_BLADE = 'Modules/Tools/resources/views/public/tools/constructeur-prompts.blade.php';
-
-it('releases the insertion target instead of keeping it stuck (round 138)', function () {
-    $js = file_get_contents(base_path(R138_PANEL_JS));
-
-    // Ré-ancré au round 141. Cette assertion comptait les occurrences littérales de
-    // « activeField = null; ». Le round 141 a factorisé les trois affectations dans un point
-    // d'entrée unique, setActiveField(), qui met AUSSI le libellé du bouton à jour : le décompte
-    // littéral n'a donc plus de sens, alors que le comportement protégé est inchangé.
-    //
-    // Le nouvel invariant est PLUS FORT que l'ancien : plus aucune affectation directe n'est
-    // tolérée hors du point d'entrée. Une future écriture sauvage de `activeField` contournerait
-    // la mise à jour du libellé et ferait mentir le bouton - c'est exactement ce qu'on interdit.
-    // La libération effective après insertion est prouvée à l'exécution par
-    // tests/js/constructeur-prompts-insert-labelfor-scope.test.cjs.
-    // Exactement 2 écritures de `activeField` sont attendues : la déclaration initiale, et
-    // l'unique affectation à l'intérieur de setActiveField(). Toute 3e écriture serait une
-    // affectation sauvage qui contournerait la mise à jour du libellé.
-    // (`setActiveField` porte un A majuscule, il n'est donc jamais capté par ce motif.)
-    $ecritures = preg_match_all('/activeField\s*=\s*[^=]/', $js);
-
-    expect($ecritures)->toBe(2, 'Une écriture directe de activeField contourne setActiveField() : le libellé du bouton peut alors mentir.');
-    // Round 142 : SEUIL, pas égalité. Un 3e site de libération légitime est apparu (le cas « champ
-    // démonté »). Compter à l'exact rendait ce test cassant à chaque ajout honnête, exactement le
-    // travers qui avait déjà fait tomber ce fichier au round 141. L'invariant FORT reste celui de
-    // la ligne au-dessus : une seule écriture de `activeField`, donc aucun contournement possible.
-    expect(substr_count($js, 'setActiveField(null)'))->toBeGreaterThanOrEqual(2);
-});
-
-it('names the field actually targeted in the toast (round 138)', function () {
-    $js = file_get_contents(base_path(R138_PANEL_JS));
-
-    expect($js)->toContain('if (targetField === taskField) {');
-    expect($js)->toContain('i18n.anonInsertedInField');
-    // Le message « la tâche » ne doit plus partir de façon inconditionnelle.
-    expect($js)->not->toContain('showToast(i18n.anonInserted ||');
-});
-
-it('exposes the new i18n key to the page (round 138)', function () {
-    $blade = file_get_contents(base_path(R138_WIZARD_BLADE));
-
-    expect($blade)->toContain('anonInsertedInField: @json(__(');
-    expect($blade)->toContain('Texte anonymisé inséré dans « %s ».');
-});
+// Retrait du 2026-08-04 (demande explicite de l'utilisateur, séparation constructeur/anonymiseur) :
+// les 3 tests DÉFAUT A/B ci-dessus (« releases the insertion target », « names the field actually
+// targeted », « exposes the new i18n key ») testaient prompt-anon-panel.js et la clé i18n
+// anonInsertedInField, tous deux retirés avec le panneau d'anonymisation intégré. Les tests
+// restants ci-dessous (logique de non-écrasement du gabarit, tests de non-régression généraux)
+// ne dépendaient pas de cette intégration et restent valides tels quels.
 
 // Round 2026-08-03 (restauration du wizard 4 étapes fidèle à mi-juin) : le test round 138
 // « stops promising an automatic prefill » vérifiait le texte d'aide du gabarit de carte
