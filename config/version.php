@@ -3422,11 +3422,21 @@ declare(strict_types=1);
  *     la tache #1416 laissee en chantier : extraction du script inline de /user/prompts vers un
  *     asset dedie (meme pattern que constructeur-prompts-core.js) + banc d'essai comportemental
  *     Node (17 tests). 396 tests Pest Modules/Tools passants, 0 echec.
+ *
+ *   1.139.19 · 2026-08-03 · fix(securite) : faille RBAC reproduite en direct durant la vague
+ *     ADMIN de la simulation E2E - le role editor (view_admin_panel=true, sans moderate_tools)
+ *     pouvait supprimer/modifier n'importe quelle fiche de l'annuaire via admin/directory/*, ce
+ *     groupe de routes ne verifiant que EnsureIsAdmin. Fix : ajout de 'can:moderate_tools' au
+ *     middleware du groupe (Modules/Directory/routes/web.php:89). Effet de bord decouvert par le
+ *     test de regression : le role directory_moderator, seede sans view_admin_panel, ne pouvait
+ *     lui-meme jamais atteindre ces routes - corrige en ajoutant cette permission au seeder
+ *     (DirectoryModeratorRoleSeeder). 4 tests Pest neufs (positif/negatif x2), 61/61 Modules/
+ *     Directory + 17/17 Modules/RolesPermissions passants, 0 echec.
  */
 
 $lvMajor = 1;
 $lvMinor = 139;
-$lvPatch = 18;
+$lvPatch = 19;
 
 return [
     'major' => $lvMajor,

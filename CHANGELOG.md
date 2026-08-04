@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.139.19] - 2026-08-03
+
+### Sécurité
+
+- **Faille RBAC corrigée : le rôle `editor` pouvait supprimer/modifier n'importe quelle fiche de
+  l'annuaire.** Trouvée et reproduite en direct durant la vague ADMIN de la simulation E2E : le
+  groupe de routes `admin/directory/*` ne vérifiait que la permission `view_admin_panel`
+  (`EnsureIsAdmin`), que le rôle éditeur possède aussi pour accéder au panneau admin. Corrigé en
+  ajoutant `can:moderate_tools` au middleware du groupe de routes. Effet de bord découvert par le
+  test de régression : le rôle `directory_moderator`, seedé sans `view_admin_panel`, ne pouvait
+  lui-même jamais atteindre ces routes malgré ses permissions - corrigé dans le seeder. 4 tests
+  Pest neufs, 61/61 `Modules/Directory` + 17/17 `Modules/RolesPermissions` passants.
+
+## [1.139.18] - 2026-08-03
+
+### Corrigé
+
+- **6 bugs trouvés durant la vague GUEST de la simulation E2E complète du site.** Décido : copie
+  marketing trompeuse « sans compte requis » corrigée (voter est bien sans compte, mais créer un
+  sondage exige un compte gratuit). Constructeur de prompts : point final double dans le prompt
+  généré corrigé (le verbe est déjà à l'impératif) ; accord fautif type « Elle va rédige »
+  corrigé en renommant la clé i18n vers un libellé qui n'exige plus de conjuguer le verbe choisi
+  par l'utilisateur. Oscilloscope RLC : la sidebar de partage fixe chevauchait le panneau gauche
+  de l'outil en desktop (≥ 992px), corrigé par un padding-left ciblé.
+- Complète la tâche laissée en chantier avant une compaction de contexte : extraction du script
+  inline de `/user/prompts` vers un asset dédié (même pattern que `constructeur-prompts-core.js`)
+  + banc d'essai comportemental Node (17 tests). 396 tests Pest `Modules/Tools` passants.
+
 ## [1.139.17] - 2026-08-03
 
 ### Modifié

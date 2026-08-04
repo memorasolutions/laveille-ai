@@ -19,6 +19,10 @@ class DirectoryModeratorRoleSeeder extends Seeder
             'moderate_tools',
             'approve_tools',
             'reject_tools',
+            // Round 1541 (2026-08-03) : sans view_admin_panel, EnsureIsAdmin bloquait
+            // directory_moderator AVANT même que 'can:moderate_tools' ne soit évalué -
+            // le rôle ne pouvait jamais atteindre /admin/directory/* malgré ses permissions.
+            'view_admin_panel',
         ];
 
         foreach ($permissions as $permission) {
