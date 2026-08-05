@@ -812,7 +812,10 @@ document.addEventListener('alpine:init', function() {
                     startSection();
                     var roleArticle = /^\s*(un |une |des |le |la |l'|d'|du |de )/i.test(this.personaText) ? '' : 'un(e) ';
                     tool('Tu es ' + roleArticle);
-                    if (personaIsUser) { user(this.personaText); } else { tool(this.personaText); }
+                    // Même normalisation que promptSummary (ligne ~761) : "Tu es un(e) Rédacteur..."
+                    // était grammaticalement incorrect avec la majuscule des libellés prédéfinis.
+                    var personaLower = this.personaText.charAt(0).toLowerCase() + this.personaText.slice(1);
+                    if (personaIsUser) { user(personaLower); } else { tool(personaLower); }
                     tool(' avec une expertise approfondie dans ton domaine. Tu communiques de manière claire et efficace, en adaptant ton niveau de langage à ton audience.');
                 }
 
@@ -951,6 +954,13 @@ document.addEventListener('alpine:init', function() {
                 if (this.technique === 'iterative') {
                     startSection();
                     tool('Procède étape par étape. Après chaque étape majeure, présente ton travail et demande ma validation avant de continuer.');
+                }
+
+                // Phrase de clôture actionnable (audit UX 2026-08-05) : sans elle, le prompt
+                // s'arrêtait net après la checklist qualité, ambigu pour certains modèles.
+                if (segs.length > 0) {
+                    startSection();
+                    tool('Réponds maintenant à cette demande.');
                 }
 
                 return segs;

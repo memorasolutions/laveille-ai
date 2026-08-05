@@ -17,6 +17,21 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.142.2 · 2026-08-05 · fix(constructeur-prompts) 5 correctifs issus d'un audit UX/qualité dédié
+ *     (#1590/#1591), vérifiés un à un par Playwright après le fix : (1) message d'erreur d'étape 1/2
+ *     figé - x-show n'était désactivé qu'au prochain clic "Suivant", jamais quand le champ redevenait
+ *     valide (ajout de la condition de validité directement dans x-show, réactif) ; (2) 3 références
+ *     mortes à "carte d'objectif" (alerte de validité, modale d'aide, featureList JSON-LD) qui
+ *     pointaient vers un mécanisme de cartes retiré depuis la restauration du menu déroulant
+ *     (#1546->#1549) - reformulées pour décrire le vrai flux (rôle étape 1, tâche étape 2) ; en.json/
+ *     fr.json mis à jour en cascade, Round78AdversarialFixesTest re-ancré sur le nouveau texte ;
+ *     (3) faute de français dans TOUS les prompts à persona prédéfinie ("Tu es un(e) Rédacteur...",
+ *     majuscule non abaissée en milieu de phrase dans promptSegments(), déjà corrigé dans
+ *     promptSummary() mais jamais dans le texte technique réellement envoyé) ; (4) prompt généré sans
+ *     phrase de clôture actionnable (s'arrêtait net après la checklist qualité). 351 tests Pest
+ *     Modules/Tools verts (aucune régression). Reste hors périmètre (#1593, backlog) : champ
+ *     "Contexte additionnel" distinct de la tâche, variables réutilisables {{sujet}}.
+ *
  *   1.139.12 · 2026-08-02 · fix(constructeur-prompts+charte) 2 vrais correctifs apres un signalement
  *     utilisateur direct (les taches #1516/#1517/#1523 avaient ete cochees "terminees" sans corriger
  *     le vrai bug - Fake Done confirme via un repro HTML/CSS local pixel-pres) :
@@ -3594,7 +3609,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 142;
-$lvPatch = 1;
+$lvPatch = 2;
 
 return [
     'major' => $lvMajor,

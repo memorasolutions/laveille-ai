@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.142.2] - 2026-08-05
+
+### Corrigé
+
+- **Constructeur de prompts : 5 correctifs issus d'un audit UX/qualité dédié (#1590/#1591).**
+  Vérifiés un à un par Playwright après le fix :
+  1. Message d'erreur d'étape 1/2 figé - l'alerte de validation ne se cachait qu'au prochain clic
+     sur « Suivant », jamais quand le champ redevenait valide entre-temps (ex. sélection d'un
+     rôle après un premier clic sur « Suivant » sans rien remplir). L'alerte disparaît maintenant
+     automatiquement dès que le champ redevient valide.
+  2. 3 références mortes à « carte d'objectif » (alerte de validité, modale d'aide, featureList
+     JSON-LD) - régression de la correction 1.142.1 : ce vocabulaire était juste au moment de son
+     ajout (wizard à cartes v1.139.x) mais est redevenu périmé après la restauration du menu
+     déroulant pour le persona (#1546→#1549). Reformulées pour décrire le vrai flux (rôle à
+     l'étape 1, tâche à l'étape 2).
+  3. Faute de français dans tous les prompts générés à persona prédéfinie (« Tu es un(e)
+     Rédacteur... ») - la majuscule du libellé n'était jamais abaissée en milieu de phrase dans le
+     texte technique réellement envoyé à l'IA, alors que l'aperçu en langage courant le faisait
+     déjà correctement.
+  4. Prompt généré sans phrase de clôture actionnable - s'arrêtait net après la checklist qualité.
+  Ajout de « Réponds maintenant à cette demande. » en fin de texte.
+  351 tests Pest `Modules/Tools` verts (aucune régression). Hors périmètre de ce lot (backlog
+  #1593) : champ « Contexte additionnel » distinct de la tâche, variables réutilisables
+  `{{sujet}}`.
+
 ## [1.142.1] - 2026-08-05
 
 ### Corrigé

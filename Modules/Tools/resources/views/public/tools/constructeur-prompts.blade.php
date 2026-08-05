@@ -507,10 +507,10 @@
                         </div>
 
                         {{-- Navigation du wizard 4 étapes (restauré 2026-08-03) --}}
-                        <div x-show="showValidation && step === 1" x-transition class="alert alert-danger small p-2 mb-2" style="font-size: 0.85rem;" role="alert" aria-live="assertive">
+                        <div x-show="showValidation && step === 1 && !personaText" x-transition class="alert alert-danger small p-2 mb-2" style="font-size: 0.85rem;" role="alert" aria-live="assertive">
                             {{ __('Choisissez un rôle (ou saisissez-en un personnalisé) avant de continuer.') }}
                         </div>
-                        <div x-show="showValidation && step === 2" x-transition class="alert alert-danger small p-2 mb-2" style="font-size: 0.85rem;" role="alert" aria-live="assertive">
+                        <div x-show="showValidation && step === 2 && (!(verbType === 'custom' ? verbCustom : verb) || !taskObject)" x-transition class="alert alert-danger small p-2 mb-2" style="font-size: 0.85rem;" role="alert" aria-live="assertive">
                             {{ __('Le verbe d\'action et la description de votre demande sont requis avant de continuer.') }}
                         </div>
                         <div class="d-flex justify-content-between mb-4">
@@ -565,7 +565,7 @@
                              « polite » et non « assertive » : elle apparaît et disparaît au fil de la frappe,
                              une annonce assertive interromprait le lecteur d'écran à chaque bascule. --}}
                         <div x-show="!isValid" id="cpValidityHint" role="status" aria-live="polite" class="alert alert-warning small p-2 mb-2" style="font-size: 0.8rem;">
-                            {{ __('Choisissez une carte d\'objectif (ou complétez votre demande, le rôle de l\'IA et le verbe dans les réglages ci-dessus) pour générer votre prompt.') }}
+                            {{ __('Complétez le rôle de l\'IA (étape 1) et votre tâche avec un verbe d\'action (étape 2) pour générer votre prompt.') }}
                         </div>
                         <div class="d-flex gap-2 mb-4 flex-wrap">
                             <button class="ct-btn ct-btn-accent flex-fill" @click="copy()" :disabled="!isValid" aria-describedby="cpValidityHint" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'"
@@ -653,7 +653,7 @@
             <div class="modal-body" style="padding: 2rem;">
                 <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem;">{{ __('Comment ça marche') }}</h4>
                 <ul>
-                    <li><strong>{{ __('Votre objectif') }}</strong> : {{ __('écrivez votre demande dans vos mots, ou partez d\'une carte (rédiger, résumer, apprendre...) qui pré-remplit le reste pour vous') }}</li>
+                    <li><strong>{{ __('Votre objectif') }}</strong> : {{ __('choisissez un rôle pour l\'IA (étape 1), puis décrivez votre tâche avec un verbe d\'action (étape 2) - l\'aperçu se met à jour à mesure que vous complétez chaque étape') }}</li>
                     <li><strong>{{ __('Votre demande') }}</strong> : {{ __('votre prompt s\'affiche aussitôt, colorisé pour montrer ce que vous avez écrit et ce que l\'outil a ajouté ; les réglages toujours visibles permettent d\'ajuster au besoin le rôle de l\'IA, le verbe, le format, la technique et les contraintes') }}</li>
                 </ul>
                 <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">{{ __('Les contraintes utiles (dans les réglages)') }}</h4>
@@ -708,7 +708,7 @@
             'availability' => 'https://schema.org/OnlineOnly',
         ],
         'featureList' => [
-            __('Cartes d\'objectifs cliquables (rédiger, résumer, analyser, apprendre...) pour démarrer sans jargon'),
+            __('Assistant guidé en 4 étapes (rôle, tâche, audience, réglages avancés) pour démarrer sans jargon'),
             // Round 152 (2026-08-01) : cette entrée décrivait encore l'ancien accordéon
             // (« repliés par défaut ») après son retrait - trouvé par la passe adversariale, pas
             // par les tests. Mise à jour pour refléter la réalité (5 blocs toujours visibles) ;
