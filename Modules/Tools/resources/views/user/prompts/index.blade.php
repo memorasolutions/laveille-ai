@@ -68,6 +68,10 @@ window.promptProfileGuardI18n = {
             'duplicateError' => __('Erreur lors de la duplication.'),
             'deleted' => __('Prompt supprimé.'),
             'deleteError' => __('Erreur lors de la suppression.'),
+            // Phase 1 permalien public (2026-08-05) : toasts du panneau de partage inline.
+            'madePublic' => __('Prompt rendu public.'),
+            'madePrivate' => __('Prompt rendu privé.'),
+            'publicToggleError' => __('Erreur lors de la mise à jour du partage.'),
         ],
     ];
 @endphp
@@ -219,6 +223,11 @@ window.promptProfileGuardI18n = {
                         // NB : commentaire PHP (//) et non Blade ({{-- --}}) - on est DANS un bloc
                         // @php, où un commentaire Blade produirait une ParseError.
                         ['label' => __('Modifier les tags'), 'icon' => 'tag', 'alpineClick' => 'open = false; openTagsEditor($el)'],
+                        // Phase 1 permalien public (2026-08-05) : ouvre le panneau de partage
+                        // inline (avertissement PII + lien AVANT toute activation) - jamais une
+                        // bascule directe depuis le menu. Réutilise le PUT /api/prompts/{id}
+                        // existant (is_public), aucun nouvel endpoint de bascule.
+                        ['label' => $prompt->is_public ? __('Gérer le partage public') : __('Rendre public'), 'icon' => 'share-2', 'alpineClick' => 'open = false; sharingOpen = true'],
                         ['divider' => true],
                         ['label' => __('Dupliquer'), 'icon' => 'copy', 'alpineClick' => 'open = false; duplicatePrompt('.json_encode($prompt->public_id).')'],
                         ['label' => __('Réutiliser'), 'icon' => 'rotate-ccw', 'url' => route('tools.show', ['slug' => 'constructeur-prompts', 'edit' => $prompt->public_id])],
@@ -232,7 +241,7 @@ window.promptProfileGuardI18n = {
                      focus clavier vers <body> silencieusement. Ne restaure vers le bouton ⋮ de la
                      carte QUE si le focus est réellement tombé sur <body> (jamais écrasé si l'utilisateur
                      a déjà cliqué ailleurs volontairement). --}}
-                <article id="prompt-card-{{ $prompt->public_id }}" x-data="{ editingTags: false, tagsInput: {{ Illuminate\Support\Js::from($tagsCsv) }}, openTagsEditor(el) { this.editingTags = true; this.$nextTick(() => { var t = el.closest('article').querySelector('input[id^=tags-input-]'); if (t) t.focus(); }); }, restoreFocusIfLost(el) { this.$nextTick(() => { if (document.activeElement === document.body) { var t = el.closest('article').querySelector('[x-ref=trigger]'); if (t) t.focus(); } }); } }"
+                <article id="prompt-card-{{ $prompt->public_id }}" x-data="{ editingTags: false, tagsInput: {{ Illuminate\Support\Js::from($tagsCsv) }}, sharingOpen: false, isPublic: {{ $prompt->is_public ? 'true' : 'false' }}, openTagsEditor(el) { this.editingTags = true; this.$nextTick(() => { var t = el.closest('article').querySelector('input[id^=tags-input-]'); if (t) t.focus(); }); }, restoreFocusIfLost(el) { this.$nextTick(() => { if (document.activeElement === document.body) { var t = el.closest('article').querySelector('[x-ref=trigger]'); if (t) t.focus(); } }); } }"
                          style="background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px 18px; transition: box-shadow .15s;">
                     <div style="display: flex !important; justify-content: space-between !important; align-items: flex-start !important; gap: 10px;">
                         <h2 style="font-size: 1rem; font-weight: 700; color: var(--c-dark, #1A1D23); margin: 0 0 6px; word-break: break-word;">{{ $prompt->name }}</h2>
@@ -283,6 +292,38 @@ window.promptProfileGuardI18n = {
                             <button type="button" @click="tagsInput = {{ Illuminate\Support\Js::from($tagsCsv) }}; editingTags = false; restoreFocusIfLost($el)"
                                     class="ct-btn ct-btn-ghost ct-btn-sm" style="min-height:44px;">{{ __('Annuler') }}</button>
                         </div>
+                    </div>
+
+                    {{-- Partage public (Phase 1 permalien /p/{public_id}, 2026-08-05) : avertissement
+                         PII + lien public TOUJOURS affichés AVANT toute activation (demande explicite
+                         du plan approuvé) - jamais une bascule ON/OFF directe sans ce détour. Réutilise
+                         le PUT /api/prompts/{id} existant (is_public), aucun nouvel endpoint de bascule. --}}
+                    <div x-show="sharingOpen" x-cloak x-transition style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #F3F4F6;">
+                        <template x-if="!isPublic">
+                            <div>
+                                <div class="p-2 rounded mb-2" role="note" style="background: #FEF3C7; border-left: 3px solid #92400E; border-radius: 8px; font-size: 12px; color: #5b4a1f;">
+                                    🔒 {{ __('Une fois public, ce prompt sera accessible à quiconque possède le lien. Ne partage jamais de renseignements personnels dans un prompt que tu rends public.') }}
+                                </div>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <button type="button" @click="(async () => { if (await togglePublic({{ json_encode($prompt->public_id) }}, true)) { isPublic = true; } })()"
+                                            class="ct-btn ct-btn-primary ct-btn-sm" style="min-height:44px;">{{ __('Confirmer et rendre public') }}</button>
+                                    <button type="button" @click="sharingOpen = false; restoreFocusIfLost($el)"
+                                            class="ct-btn ct-btn-ghost ct-btn-sm" style="min-height:44px;">{{ __('Annuler') }}</button>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="isPublic">
+                            <div>
+                                <label style="display: block; font-size: 12px; font-weight: 600; color: var(--c-dark, #1A1D23); margin-bottom: 4px;">{{ __('Lien public') }}</label>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 8px;">
+                                    <code style="flex: 1; min-width: 180px; word-break: break-all; font-size: 12px; background: #F3F4F6; padding: 6px 8px; border-radius: 6px;">{{ url('/p/'.$prompt->public_id) }}</code>
+                                    <button type="button" @click="window.copyToClipboard({{ \Illuminate\Support\Js::from(url('/p/'.$prompt->public_id)) }}, {{ \Illuminate\Support\Js::from(__('Lien public copié.')) }})"
+                                            class="ct-btn ct-btn-outline ct-btn-sm" style="min-height:44px;">{{ __('Copier') }}</button>
+                                </div>
+                                <button type="button" @click="(async () => { if (await togglePublic({{ json_encode($prompt->public_id) }}, false)) { isPublic = false; } })()"
+                                        class="ct-btn ct-btn-ghost ct-btn-sm" style="min-height:44px; color:#991B1B;">{{ __('Rendre privé') }}</button>
+                            </div>
+                        </template>
                     </div>
                 </article>
             @endforeach

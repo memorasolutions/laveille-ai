@@ -29,7 +29,11 @@ it('adds restoreFocusIfLost() to the per-card Alpine scope and calls it from bot
 
     expect($blade)->toContain('restoreFocusIfLost(el)');
     expect($blade)->toContain("if (document.activeElement === document.body)");
-    expect(substr_count($blade, 'restoreFocusIfLost($el)'))->toBe(2);
+    // 2026-08-05 (Phase 1 permalien public + remix) : 2 -> 3. Le panneau de partage public ajouté
+    // par cette phase (bouton "Annuler" du sous-panneau "!isPublic") réutilise EXACTEMENT le même
+    // restoreFocusIfLost($el) que les boutons Enregistrer/Annuler du panneau de tags - 3e usage
+    // légitime du même correctif round 107, pas une régression du bug qu'il corrige.
+    expect(substr_count($blade, 'restoreFocusIfLost($el)'))->toBe(3);
 });
 
 it('renders /user/prompts (Mes prompts) correctly after the round 107 fix (real page, no regression)', function () {

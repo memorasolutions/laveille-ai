@@ -22,7 +22,10 @@ document.addEventListener('alpine:init', function() {
             // /api/prompts/{id} est en vol était écrasé silencieusement par la réponse tardive
             // (personaPreset/verb/taskObject/... réécrits avec les valeurs de l'ANCIEN prompt),
             // sauf selectedTask lui-même - désynchronisant le badge affiché des champs réels.
-            editLoading: !!(new URLSearchParams(window.location.search).get('edit')),
+            // 2026-08-05 (Phase 1 permalien public + remix) : le flag doit aussi bloquer
+            // selectTask() pendant le chargement de ?remix=ID (voir init() plus bas), même
+            // garde-fou anti-race-condition que ?edit=ID ci-dessus (round 64).
+            editLoading: !!(new URLSearchParams(window.location.search).get('edit') || new URLSearchParams(window.location.search).get('remix')),
             // Round 152 (2026-08-01, écran 3) : les 5 accordéons imbriqués « + Réglages avancés »
             // (openSections.role/verb/format/technique/contraintes) sont RETIRÉS - le proprétaire a
             // été explicite (« les ouvrir et fermer à chaque fois... ark ! »). Les mêmes réglages
@@ -1190,6 +1193,97 @@ document.addEventListener('alpine:init', function() {
                     try { this.history = JSON.parse(localStorage.getItem('pb_history') || '[]'); } catch(e) { this.history = []; }
                     this.historyLoaded = true;
                 }
+
+                // Erreur de partage public (?share_error=notfound) - Phase 1 permalien public
+                // (2026-08-05). Posé par PublicPromptController::show() quand /p/{publicId} est
+                // invalide/privé. Contourne délibérément le flash de session ->with('error', ...)
+                // du contrôleur (inutile ici : cette page passe par cacheResponse:600, la réponse
+                // HTML est un snapshot en cache qui ne "voit" jamais le flash) - lu depuis l'URL
+                // à CHAQUE chargement, cache ou non. history.replaceState nettoie l'URL ensuite
+                // pour qu'un refresh ou un retour arrière ne réaffiche pas le message.
+                var shareError = new URLSearchParams(window.location.search).get('share_error');
+                if (shareError === 'notfound') {
+                    this._showSaveError((window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.shareNotFoundError) || "Ce prompt n'existe pas ou n'est plus public.");
+                    history.replaceState(null, '', window.location.pathname + window.location.hash);
+                }
+
+                // Charger un prompt PUBLIC pour remix (?remix=ID) - Phase 1 permalien public
+                // (2026-08-05). Contrairement au bloc ?edit=ID ci-dessus (à l'intérieur du
+                // if (this.isAuthenticated), réservé aux connectés propriétaires via GET
+                // /api/prompts/{id}), ce bloc tourne pour TOUT visiteur, connecté ou non - c'est
+                // un permalien public accessible sans compte. Source de données différente : GET
+                // /p/{publicId}/remix-data (PublicPromptController::remixData, jamais scopé par
+                // user_id, uniquement is_public=true - IDOR impossible). Logique de mapping
+                // params → formulaire copiée 1:1 depuis le bloc ?edit=ID. Différence volontaire :
+                // self._editingId n'est JAMAIS renseigné ici - un "Enregistrer" après un remix
+                // crée toujours un NOUVEAU prompt, jamais une mise à jour du prompt original (qui
+                // peut appartenir à quelqu'un d'autre).
+                var remixId = new URLSearchParams(window.location.search).get('remix');
+                if (remixId) {
+                    this.editLoading = true;
+                    fetch('/p/' + encodeURIComponent(remixId) + '/remix-data', { headers: { 'Accept': 'application/json' } })
+                        .then(function(r) { if (!r.ok) throw new Error('http_' + r.status); return r.json(); })
+                        .then(function(found) {
+                            if (found && found.params) {
+                                var p = found.params;
+                                if (p.personaType) self.personaType = p.personaType;
+                                if (p.personaPreset) self.personaPreset = p.personaPreset;
+                                if (p.personaCustom) {
+                                    self.personaCustom = p.personaCustom;
+                                    self.personaType = 'custom';
+                                }
+                                if (p.verbType) self.verbType = p.verbType;
+                                if (p.verb) self.verb = p.verb;
+                                if (p.verbCustom) {
+                                    self.verbCustom = p.verbCustom;
+                                    self.verbType = 'custom';
+                                }
+                                if (p.taskObject) self.taskObject = p.taskObject;
+                                if (p.audienceType) self.audienceType = p.audienceType;
+                                if (Array.isArray(p.audiencePresets)) { self.audiencePresets = p.audiencePresets; } else if (p.audiencePreset) { self.audiencePresets = [p.audiencePreset]; }
+                                if (p.audienceCustom) {
+                                    self.audienceCustom = p.audienceCustom;
+                                    self.audienceType = 'custom';
+                                }
+                                if (p.format) self.format = p.format;
+                                if (p.length) self.length = p.length;
+                                if (p.tone) self.tone = p.tone;
+                                if (p.language) self.language = p.language;
+                                if (p.technique) self.technique = p.technique;
+                                if (p.constraintAntiAI !== undefined) self.constraintAntiAI = p.constraintAntiAI;
+                                if (p.cadreStrict !== undefined) self.cadreStrict = p.cadreStrict;
+                                if (p.profile) { self.profile = p.profile; self.profileTouched = true; }
+                                if (p.constraintTypo !== undefined) self.constraintTypo = p.constraintTypo;
+                                if (p.constraintChainOfThought !== undefined) self.constraintChainOfThought = p.constraintChainOfThought;
+                                if (p.constraintAskIfUnclear !== undefined) self.constraintAskIfUnclear = p.constraintAskIfUnclear;
+                                if (p.constraintCustom) self.constraintCustom = p.constraintCustom;
+                                if (p.useDelimiters !== undefined) self.useDelimiters = p.useDelimiters;
+                                if (p.examples) self.examples = p.examples;
+                                if (p.constraintCanvas) self.constraintCanvas = p.constraintCanvas;
+                                if (p.canvasAI) {
+                                    if (p.canvasAI === 'custom') { self.canvasAI = 'chatgpt'; self.formatMode = 'custom'; }
+                                    else self.canvasAI = p.canvasAI;
+                                }
+                                if (p.canvasFormat) self.canvasFormat = p.canvasFormat;
+                                if (p.canvasCustomFormat) self.canvasCustomFormat = p.canvasCustomFormat;
+                                if (p.formatMode) self.formatMode = p.formatMode;
+                                // Décision de conception (non précisée dans le plan approuvé) :
+                                // préfixe "Remix de " sur le nom repris, pour que la personne sache
+                                // d'où vient ce brouillon avant de l'enregistrer sous son propre nom.
+                                self.saveName = found.name ? ('Remix de ' + found.name) : self.saveName;
+                                if (p.selectedTask) self.selectedTask = p.selectedTask;
+                                self.selectedTask = self.selectedTask || 'autre';
+                                self.step = 2;
+                                // self._editingId volontairement NON renseigné : voir commentaire ci-dessus.
+                            }
+                            self.editLoading = false;
+                        })
+                        .catch(function() {
+                            self.editLoading = false;
+                            self._showSaveError((window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.loadError) || 'Impossible de charger ce prompt à remixer.');
+                        });
+                }
+
                 this._loadCustomCards();
             },
 

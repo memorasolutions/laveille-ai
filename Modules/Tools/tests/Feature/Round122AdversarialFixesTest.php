@@ -71,7 +71,10 @@ it('guards the restore behind an actual focus loss (round 122, no side effect)',
 it('keeps the rounds 107 and 121 focus fixes untouched (round 122 non-regression)', function () {
     $blade = file_get_contents(base_path('Modules/Tools/resources/views/user/prompts/index.blade.php'));
 
-    expect(substr_count($blade, 'restoreFocusIfLost($el)'))->toBe(2);
+    // 2026-08-05 (Phase 1 permalien public + remix) : 2 -> 3, même 3e usage légitime documenté au
+    // round 107 (voir Round107AdversarialFixesTest.php) - le panneau de partage public réutilise
+    // le même correctif, il ne le contourne pas.
+    expect(substr_count($blade, 'restoreFocusIfLost($el)'))->toBe(3);
     expect($blade)->toContain('openTagsEditor(el) { this.editingTags = true;');
 });
 

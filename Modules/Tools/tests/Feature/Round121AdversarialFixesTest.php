@@ -45,7 +45,10 @@ it('keeps the round 107 close-path fix untouched (round 121 non-regression)', fu
     // Les 2 appels de FERMETURE (Enregistrer / Annuler) doivent rester exactement tels quels :
     // le round 121 ajoute le sens ouverture, il ne remplace pas le sens fermeture.
     expect($blade)->toContain('restoreFocusIfLost(el)');
-    expect(substr_count($blade, 'restoreFocusIfLost($el)'))->toBe(2);
+    // 2026-08-05 (Phase 1 permalien public + remix) : 2 -> 3, même 3e usage légitime documenté au
+    // round 107 (voir Round107AdversarialFixesTest.php) - le panneau de partage public réutilise
+    // le même correctif, il ne le contourne pas.
+    expect(substr_count($blade, 'restoreFocusIfLost($el)'))->toBe(3);
 });
 
 it('confirms the menu container really hides the clicked button (round 121 root cause)', function () {

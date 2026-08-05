@@ -246,6 +246,30 @@ document.addEventListener('alpine:init', function () {
                 }
             },
 
+            // Phase 1 permalien public (2026-08-05) : bascule is_public via le PUT /api/prompts/{id}
+            // DÉJÀ EXISTANT (SavedPromptController::update) - aucun nouvel endpoint de bascule.
+            // L'avertissement PII + le lien public sont affichés par le Blade AVANT l'appel de
+            // cette méthode (panneau sharingOpen, x-show="!isPublic"/"isPublic") : cette fonction
+            // ne fait que la mutation serveur + le toast, jamais l'UI de confirmation elle-même.
+            async togglePublic(publicId, nextValue) {
+                try {
+                    var res = await fetch('/api/prompts/' + publicId, {
+                        method: 'PUT',
+                        headers: this._headers(),
+                        body: JSON.stringify({ is_public: nextValue }),
+                    });
+                    if (res.ok) {
+                        this._toast(nextValue ? (i18n.madePublic || 'Prompt rendu public.') : (i18n.madePrivate || 'Prompt rendu privé.'), 'success');
+                        return true;
+                    }
+                    this._toast(i18n.publicToggleError || 'Erreur lors de la mise à jour du partage.', 'danger');
+                    return false;
+                } catch (e) {
+                    this._toast(i18n.networkError || 'Erreur réseau.', 'danger');
+                    return false;
+                }
+            },
+
             async duplicatePrompt(publicId) {
                 if (this._duplicatingIds.has(publicId)) return;
                 this._duplicatingIds.add(publicId);

@@ -354,6 +354,21 @@
     @livewireScripts
     @include('fronttheme::partials.toast')
 
+    {{-- Toast générique session('error')/session('success') (2026-08-05) : ces clés de flash sont
+         posées par plusieurs contrôleurs (ex. PublicPromptController::show) mais n'étaient captées
+         par aucun listener de ce layout - le message restait dans la session sans jamais s'afficher,
+         l'utilisateur atterrissant silencieusement sur la page de redirection. Réutilise le même
+         event 'toast-show' que le bloc newsletter juste en dessous (<x-core::alert-toast /> déjà
+         inclus plus haut). Ne PAS dupliquer ce bloc pour d'autres clés de session : toute future
+         redirection avec message doit utiliser session('error')/session('success'), pas une clé dédiée. --}}
+    @if(session('error') || session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(session('error') ?? session('success')), variant: @json(session('error') ? 'error' : 'success'), duration: 6000 } }));
+        });
+    </script>
+    @endif
+
     @if(session('newsletter_success') || session('newsletter_confirmed') || session('newsletter_unsubscribed'))
     @php
         $newsletterMsg = session('newsletter_success') ?? session('newsletter_confirmed') ?? session('newsletter_unsubscribed');

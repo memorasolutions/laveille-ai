@@ -2,6 +2,61 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.142.0] - 2026-08-05
+
+### Ajouté
+
+- **Constructeur de prompts : permalien public + bouton « Remixer » (Phase 1 du plan de croissance/popularité).**
+  Nouveau plan approuvé après un club des sages relancé (4/5 oracles - Perplexity, Codex,
+  DeepSeek, claude.ai ; Gemini indisponible ce round, quota `agy` épuisé + session navigateur
+  déconnectée, signalé explicitement plutôt que de prétendre à l'unanimité). Nouvelle route
+  publique `GET /p/{publicId}` (`PublicPromptController::show`), calquée sur le pattern déjà
+  éprouvé en production de `PublicCrosswordController::play()` (mots-croisés, `/jeumc/{identifier}`)
+  - **zéro nouvelle migration** : `public_id` et `is_public` existaient déjà sur `saved_prompts`,
+  simplement jamais exposés publiquement. La bascule public/privé réutilise le `PUT
+  /api/prompts/{id}` déjà existant (`SavedPromptController::update`), aucun nouvel endpoint dédié.
+- Page `/p/{publicId}` : lecture seule du prompt, avertissement explicite avant partage (« ne
+  partage jamais de renseignements personnels »), bouton **Remixer** qui préremplit l'étape Tâche
+  du constructeur (`?remix={publicId}` → nouvel endpoint public `GET
+  /p/{publicId}/remix-data`), boutons Copier (réutilisant le composant DRY
+  `window.copyToClipboard` du layout maître FrontTheme) et widgets de partage LinkedIn/X. `noindex`
+  par défaut.
+- Panneau « Mes prompts » : bascule public/privé inline, avertissement PII affiché **avant** toute
+  activation (jamais après), lien public copiable une fois actif.
+
+### Sécurité
+
+- **Fuite d'information trouvée et corrigée en gate qualité, avant livraison** : le nouvel
+  endpoint `remix-data` renvoyait initialement le modèle `SavedPrompt` complet
+  (`response()->json($prompt)`), exposant `id`/`user_id`/timestamps à tout visiteur anonyme
+  possédant un lien public, alors que le JS ne lit que `name`/`params`. Corrigé : réponse
+  restreinte à `public_id`/`name`/`prompt_text`/`params` (les deux premiers champs sont déjà
+  publics via la page elle-même, `user_id` et `id` ne le sont pas). Test IDOR explicite ajouté
+  (un prompt privé ne peut jamais fuiter via `remix-data`, quel que soit l'appelant).
+
+### Corrigé
+
+- **Message d'erreur invisible sur lien de partage invalide** : trouvé lors de la vérification
+  visuelle de cette même phase (pas un régression signalée par l'utilisateur). Visiter `/p/{id}`
+  avec un `public_id` inexistant/privé redirigeait bien vers `/outils/constructeur-prompts` avec
+  `->with('error', ...)`, mais ce flash de session ne s'affichait **jamais** : cette route passe
+  par `cacheResponse:600` (Spatie ResponseCache), qui sert un snapshot HTML entier en cache -
+  invisible au flash posé APRÈS la mise en cache. Corrigé par un paramètre de requête
+  `?share_error=notfound`, lu côté client par `constructeur-prompts-core.js` (s'exécute à chaque
+  chargement, cache ou non) et affiché via le mécanisme toast déjà existant (`_showSaveError`),
+  puis nettoyé de l'URL via `history.replaceState`. Le flash de session est conservé en parallèle
+  (utile hors cache). Vérifié en direct (Playwright) : toast affiché avec le bon message, URL
+  nettoyée après coup. Ajout collatéral, plus général : `Modules/FrontTheme/resources/views/
+  layouts/master.blade.php` déclenche désormais un toast générique sur tout `session('error')`/
+  `session('success')` (jusqu'ici silencieusement ignorés sur les pages non cachées).
+
+Vérifié : 351 tests Pest `Modules/Tools` verts (dont 8 `PublicPromptControllerTest`) ;
+vérification visuelle Playwright réelle (page publique, avertissement PII, flux Remixer
+préremplissant bien l'étape Tâche dans le DOM, toast d'erreur sur lien invalide). Phases 2
+(galerie éditorialisée par métier québécois) et 3 (rétention locale pour les invités) du plan
+approuvé restent à faire, chacune avec
+son propre cycle veille→club des sages avant implémentation - pas de gros-bang.
+
 ## [1.141.0] - 2026-08-04
 
 ### Ajouté

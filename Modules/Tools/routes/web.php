@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Tools\Http\Controllers\Admin\ToolAdminController;
 use Modules\Tools\Http\Controllers\PublicCrosswordController;
 use Modules\Tools\Http\Controllers\PublicMotdleController;
+use Modules\Tools\Http\Controllers\PublicPromptController;
 use Modules\Tools\Http\Controllers\PublicQtController;
 use Modules\Tools\Http\Controllers\PublicToolController;
 use Modules\Tools\Http\Controllers\UserCrosswordController;
@@ -86,6 +87,21 @@ Route::middleware('web')->group(function () {
     // Backward compatibility : ancien path /jeu/{identifier} -> redirect 301 vers /jeumc/ (S79+ libère /jeu/ pour outils interactifs futurs)
     Route::get('/jeu/{identifier}', fn (string $identifier) => redirect('/jeumc/'.$identifier, 301))
         ->where('identifier', '[a-zA-Z0-9_-]+');
+
+    // Constructeur de prompts — permalien public de partage + remix (Phase 1, plan approuvé 2026-08-05).
+    // Pattern répliqué de /jeumc/{identifier} (PublicCrosswordController::play, déjà éprouvé en
+    // production) : SavedPrompt n'a pas de custom_slug (uniquement public_id), donc pas de logique
+    // de redirection canonique ici. Vérifié : aucune autre route à un seul segment ne commence par /p/.
+    Route::get('/p/{publicId}', [PublicPromptController::class, 'show'])
+        ->where('publicId', '[a-zA-Z0-9_-]+')
+        ->middleware('throttle:60,1')
+        ->name('tools.prompts.share');
+    // Endpoint PUBLIC (sans authentification) consommé par ?remix={publicId} du constructeur
+    // (constructeur-prompts-core.js) — jamais scopé par user_id, uniquement is_public=true.
+    Route::get('/p/{publicId}/remix-data', [PublicPromptController::class, 'remixData'])
+        ->where('publicId', '[a-zA-Z0-9_-]+')
+        ->middleware('throttle:60,1')
+        ->name('tools.prompts.remix-data');
 
     // #177 Avatar tool — admin-only durant construction (page "En construction" sinon)
     Route::get('/outils/avatar', [\Modules\Tools\Http\Controllers\AvatarController::class, 'index'])

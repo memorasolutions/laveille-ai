@@ -3552,10 +3552,39 @@ declare(strict_types=1);
  *     swapTaskOrder) passants, 0 echec ; verification visuelle Playwright desktop+mobile en direct
  *     (badges identiques teal/blanc, inversion fonctionnelle confirmee dans le DOM, retrait de la
  *     2e tache revient a l'etat initial sans residu visuel).
+ *
+ *   1.142.0 · 2026-08-05 · feat(constructeur-prompts) Phase 1 du plan de croissance/popularité
+ *     approuvé (club des sages relancé, 4/5 oracles - Perplexity, Codex, DeepSeek, claude.ai ;
+ *     Gemini indisponible ce round, quota agy + session navigateur déconnectée) : permalien public
+ *     + bouton « Remixer ». Nouveau PublicPromptController::show()/remixData(), route publique
+ *     GET /p/{publicId}, calqué sur le pattern PublicCrosswordController::play() déjà éprouvé en
+ *     production (/jeumc/{identifier}) - zéro nouvelle migration (public_id/is_public déjà
+ *     présents sur saved_prompts). La bascule public/privé réutilise le PUT /api/prompts/{id}
+ *     existant (SavedPromptController::update), aucun nouvel endpoint dédié. Correctif de gate
+ *     qualité avant livraison : remixData() renvoyait le modèle SavedPrompt complet, exposant
+ *     inutilement id/user_id/timestamps à tout visiteur anonyme (le JS ne lit que name/params) -
+ *     réponse restreinte à public_id/name/prompt_text/params (prompt_text et public_id sont déjà
+ *     publics via la page /p/ elle-même, id/user_id ne le sont pas). Avertissement PII affiché
+ *     AVANT toute activation du partage (page publique ET panneau inline « Mes prompts »).
+ *     Page /p/{publicId} noindex par défaut, widgets de partage LinkedIn/X, bouton Copier
+ *     réutilisant le composant DRY window.copyToClipboard du layout maître FrontTheme (aucune
+ *     réimplémentation). 351 tests Pest Modules/Tools verts (dont 8 nouveaux
+ *     PublicPromptControllerTest, incluant un test IDOR explicite - un prompt privé ne fuite
+ *     jamais via remix-data, quel que soit l'appelant). Vérification visuelle Playwright réelle :
+ *     page publique (avertissement PII, prompt, boutons) + flux Remixer préremplissant l'étape
+ *     Tâche du constructeur (?remix=publicId → GET /p/{publicId}/remix-data). Correctif trouvé en
+ *     vérification (pas une régression signalée) : le message d'erreur sur lien invalide
+ *     n'apparaissait jamais - la cible /outils/constructeur-prompts passe par cacheResponse:600
+ *     (Spatie ResponseCache), qui sert un snapshot HTML aveugle au flash de session posé après.
+ *     Corrigé via ?share_error=notfound lu côté client (constructeur-prompts-core.js) + toast
+ *     générique session('error')/session('success') ajouté à master.blade.php (utile hors cache).
+ *     Vérifié en direct (Playwright) : toast affiché, URL nettoyée via history.replaceState.
+ *     Phases 2 (galerie éditorialisée par métier) et 3 (rétention locale invités) prévues
+ *     séparément, chacune avec son propre cycle veille→club des sages, comme prévu au plan approuvé.
  */
 
 $lvMajor = 1;
-$lvMinor = 141;
+$lvMinor = 142;
 $lvPatch = 0;
 
 return [
