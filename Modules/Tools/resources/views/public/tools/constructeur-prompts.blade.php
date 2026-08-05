@@ -565,7 +565,7 @@
                              « polite » et non « assertive » : elle apparaît et disparaît au fil de la frappe,
                              une annonce assertive interromprait le lecteur d'écran à chaque bascule. --}}
                         <div x-show="!isValid" id="cpValidityHint" role="status" aria-live="polite" class="alert alert-warning small p-2 mb-2" style="font-size: 0.8rem;">
-                            {{ __('Choisissez une carte de démarrage (ou complétez le rôle et le verbe dans « Affiner ») pour générer votre prompt.') }}
+                            {{ __('Choisissez une carte d\'objectif (ou complétez votre demande, le rôle de l\'IA et le verbe dans les réglages ci-dessus) pour générer votre prompt.') }}
                         </div>
                         <div class="d-flex gap-2 mb-4 flex-wrap">
                             <button class="ct-btn ct-btn-accent flex-fill" @click="copy()" :disabled="!isValid" aria-describedby="cpValidityHint" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'"
@@ -654,9 +654,9 @@
                 <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem;">{{ __('Comment ça marche') }}</h4>
                 <ul>
                     <li><strong>{{ __('Votre objectif') }}</strong> : {{ __('écrivez votre demande dans vos mots, ou partez d\'une carte (rédiger, résumer, apprendre...) qui pré-remplit le reste pour vous') }}</li>
-                    <li><strong>{{ __('Votre demande') }}</strong> : {{ __('votre prompt s\'affiche aussitôt, colorisé pour montrer ce que vous avez écrit et ce que l\'outil a ajouté ; le bouton « Affiner » révèle au besoin le rôle de l\'IA, le verbe, le format, la technique et les contraintes') }}</li>
+                    <li><strong>{{ __('Votre demande') }}</strong> : {{ __('votre prompt s\'affiche aussitôt, colorisé pour montrer ce que vous avez écrit et ce que l\'outil a ajouté ; les réglages toujours visibles permettent d\'ajuster au besoin le rôle de l\'IA, le verbe, le format, la technique et les contraintes') }}</li>
                 </ul>
-                <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">{{ __('Les contraintes utiles (dans « Affiner »)') }}</h4>
+                <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">{{ __('Les contraintes utiles (dans les réglages)') }}</h4>
                 <ul>
                     <li><strong>{{ __('Écriture naturelle') }}</strong> : {{ __('évite le style « robotique » typique de l\'IA') }}</li>
                     <li><strong>{{ __('Destination') }}</strong> : {{ __('choisissez si la réponse doit s\'afficher dans la conversation normale ou dans un espace de travail dédié (Canvas ChatGPT, Artefact Claude, Canvas Gemini, Mistral) ; le « Format attendu » qui suit précise alors la structure du contenu généré dans cet espace') }}</li>

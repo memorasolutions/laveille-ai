@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.142.1] - 2026-08-05
+
+### Corrigé
+
+- **Constructeur de prompts : aide périmée.** La modale « Comment créer un bon prompt » et
+  l'indice de validité du formulaire référençaient encore une « carte de démarrage » et un bouton
+  « Affiner » retirés lors de refontes antérieures (les réglages rôle de l'IA/verbe/format/
+  contraintes sont désormais des blocs toujours visibles, pas un panneau replié derrière un
+  bouton nommé). 3 chaînes corrigées pour refléter le vocabulaire réel de l'UI (« carte
+  d'objectif », « réglages »). 30 tests Pest `ConstructeurPromptsGateTest` verts, dont celui qui
+  vérifie le rendu texte réel du Blade.
+
 ## [1.142.0] - 2026-08-05
 
 ### Ajouté

@@ -3581,11 +3581,20 @@ declare(strict_types=1);
  *     Vérifié en direct (Playwright) : toast affiché, URL nettoyée via history.replaceState.
  *     Phases 2 (galerie éditorialisée par métier) et 3 (rétention locale invités) prévues
  *     séparément, chacune avec son propre cycle veille→club des sages, comme prévu au plan approuvé.
+ *
+ *   1.142.1 · 2026-08-05 · fix(constructeur-prompts) aide périmée : la modale "Comment créer un
+ *     bon prompt" et l'indice de validité du formulaire référençaient encore une "carte de
+ *     démarrage" et un bouton « Affiner » retirés lors de refontes antérieures (les réglages
+ *     rôle/verbe/format/contraintes sont désormais des blocs toujours visibles, pas un panneau
+ *     replié derrière un bouton nommé). 3 chaînes corrigées (indice de validité + 2 paragraphes de
+ *     la modale d'aide) pour refléter le vocabulaire réel de l'UI ("carte d'objectif", "réglages").
+ *     30 tests Pest ConstructeurPromptsGateTest verts (dont le test qui vérifie le rendu texte réel
+ *     du Blade), aucune assertion sur les anciennes chaînes.
  */
 
 $lvMajor = 1;
 $lvMinor = 142;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,
