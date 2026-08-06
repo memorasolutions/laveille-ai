@@ -20,6 +20,10 @@
                 un radio, le modèle lui-même pour une case booléenne sans "value")
     - onChange: expression Alpine BRUTE optionnelle exécutée au changement (ex. marquer un profil
                 "touché" pour désactiver la pré-sélection automatique par mots-clés)
+    - disabled : expression Alpine BRUTE optionnelle pour l'état désactivé (LOT 1, 2026-08-06,
+                garde-fous multi-sélection format). Pose un vrai attribut HTML `disabled` (clavier
+                et lecteur d'écran l'annoncent nativement) + une classe visuelle .ct-card--disabled.
+                Omise par défaut (comportement des autres appelants inchangé).
 --}}
 @props([
     'type' => 'checkbox',
@@ -28,6 +32,7 @@
     'model' => null,
     'selected' => null,
     'onChange' => null,
+    'disabled' => null,
 ])
 @php
     if ($selected !== null) {
@@ -40,12 +45,13 @@
         $selectedExpr = "({$model}) === ({$value})";
     }
 @endphp
-<label {{ $attributes->class(['ct-card']) }} :class="{ 'ct-card--on': {{ $selectedExpr }} }">
+<label {{ $attributes->class(['ct-card']) }} :class="{ 'ct-card--on': {{ $selectedExpr }}, 'ct-card--disabled': {{ $disabled ?? 'false' }} }">
     <input type="{{ $type }}"
            @if($name) name="{{ $name }}" @endif
            class="ct-card__input"
            @if($value !== null) :value="{{ $value }}" @endif
            x-model="{{ $model }}"
+           @if($disabled) :disabled="{{ $disabled }}" @endif
            @if($onChange) @change="{{ $onChange }}" @endif>
     <span class="ct-card__mark" aria-hidden="true">✓</span>
     <span class="ct-card__label">{{ $slot }}</span>

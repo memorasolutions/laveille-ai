@@ -77,7 +77,10 @@ async function flush() {
     {
         const savedParams = {
             personaType: 'preset', personaPreset: 'expert', verbType: 'preset', verb: 'rédiger',
-            taskObject: 'un rapport', audienceType: 'preset', format: 'liste', length: 'moyen',
+            // LOT 1 (2026-08-06) : `formats` (tableau) est la forme moderne écrite par
+            // wizardParams depuis ce lot ; voir Test 3 plus bas pour la migration de l'ANCIEN
+            // scalaire `format` (prompts sauvegardés avant ce lot).
+            taskObject: 'un rapport', audienceType: 'preset', formats: ['Liste à puces'], formatCustom: '', length: 'moyen',
             tone: 'professionnel', language: 'fr', technique: 'few-shot',
             constraintAntiAI: true, constraintCanvas: false, canvasAI: 'chatgpt', formatMode: 'preset',
             constraintTypo: true,
@@ -103,11 +106,97 @@ async function flush() {
         assert(component.constraintCustom === 'Toujours citer une source', 'round 42 : ?edit=ID restaure constraintCustom');
         assert(component.useDelimiters === true, 'round 42 : ?edit=ID restaure useDelimiters');
         assert(component.examples === 'Exemple A\nExemple B', 'round 42 : ?edit=ID restaure examples');
+        assert(Array.isArray(component.formatsSelected) && component.formatsSelected.length === 1 && component.formatsSelected[0] === 'Liste à puces', 'LOT 1 : ?edit=ID restaure formatsSelected depuis le tableau `formats` moderne');
 
         // Ré-enregistrer (PUT implicite via wizardParams) ne doit PAS perdre ces champs.
         var reSaved = component.wizardParams;
         assert(reSaved.constraintCustom === 'Toujours citer une source', 'round 42 : un ré-enregistrement après édition conserve constraintCustom (pas de perte au round-trip complet)');
         assert(reSaved.examples === 'Exemple A\nExemple B', 'round 42 : un ré-enregistrement après édition conserve examples');
+        assert(Array.isArray(reSaved.formats) && reSaved.formats[0] === 'Liste à puces', 'LOT 1 : wizardParams sérialise bien `formats` (tableau), pas un scalaire `format`');
+    }
+
+    // --- Test 3 (LOT 1, 2026-08-06) : migration de l'ANCIEN scalaire `format` (prompt sauvegardé
+    //     avant ce lot) vers le nouveau tableau formatsSelected, aux 2 chemins de restauration ---
+    {
+        const legacyParams = {
+            personaType: 'preset', personaPreset: 'expert', verbType: 'preset', verb: 'rédiger',
+            taskObject: 'un rapport', audienceType: 'preset', format: 'Tableau structuré', length: 'moyen',
+            tone: 'professionnel', language: 'fr', technique: 'zero-shot',
+        };
+        const component = loadPromptBuilder(function (url) {
+            if (url.indexOf('/api/prompts/') === 0) {
+                return Promise.resolve({ ok: true, json: () => Promise.resolve({ public_id: 'legacy1', name: 'Ancien prompt', params: legacyParams }) });
+            }
+            return Promise.resolve({ ok: true, json: () => Promise.resolve({ data: [] }) });
+        }, '?edit=legacy1');
+
+        component.init();
+        await flush();
+
+        assert(Array.isArray(component.formatsSelected) && component.formatsSelected.length === 1 && component.formatsSelected[0] === 'Tableau structuré', 'LOT 1 : migration scalaire → tableau - un ancien prompt avec `format` (chaîne) restaure formatsSelected = [ancienne valeur]');
+    }
+
+    // --- Test 4 (LOT 1) : prompt généré à 2 formats de STRUCTURE ---
+    {
+        const component = loadPromptBuilder(function () {
+            return Promise.resolve({ ok: true, json: () => Promise.resolve({ data: [] }) });
+        }, '');
+        component.personaType = 'custom';
+        component.personaCustom = 'un expert';
+        component.verbType = 'custom';
+        component.verbCustom = 'Rédige';
+        component.taskObject = 'un rapport trimestriel';
+        component.formatsSelected = ['Liste à puces', 'Tableau structuré'];
+
+        assert(component.prompt.indexOf('Structure principale : Liste à puces. En complément, intègre : Tableau structuré.') !== -1, 'LOT 1 : 2 formats de structure produisent bien "Structure principale : ... En complément, intègre : ..."');
+    }
+
+    // --- Test 5 (LOT 1) : JSON exclusif - cocher "Format JSON" désactive/déselectionne le reste ---
+    {
+        const component = loadPromptBuilder(function () {
+            return Promise.resolve({ ok: true, json: () => Promise.resolve({ data: [] }) });
+        }, '');
+        component.formatsSelected = ['Liste à puces', 'Format JSON'];
+        component.handleFormatChange('Format JSON');
+
+        assert(component.formatsSelected.length === 1 && component.formatsSelected[0] === 'Format JSON', 'LOT 1 : handleFormatChange() réduit la sélection au seul format exclusif coché');
+        assert(component.isFormatDisabled('Tableau structuré') === true, 'LOT 1 : les autres cartes sont désactivées tant qu\'un format exclusif est actif');
+        assert(component.isFormatDisabled('Diagramme Mermaid') === true, 'LOT 1 : les 2 formats exclusifs sont exclusifs ENTRE EUX aussi');
+        assert(component.formatDisabledReason('Tableau structuré').length > 0, 'LOT 1 : une raison de désactivation est bien retournée');
+    }
+
+    // --- Test 6 (LOT 1) : garde-fou maximum 3 formats ---
+    {
+        const component = loadPromptBuilder(function () {
+            return Promise.resolve({ ok: true, json: () => Promise.resolve({ data: [] }) });
+        }, '');
+        component.formatsSelected = ['Liste à puces', 'Paragraphes détaillés', 'Tableau structuré'];
+
+        assert(component.isFormatDisabled('Plan hiérarchisé') === true, 'LOT 1 : au-delà de 3 sélections, les cartes restantes sont désactivées');
+        assert(component.isFormatDisabled('Liste à puces') === false, 'LOT 1 : une carte déjà cochée reste cliquable (pour la décocher) même au maximum');
+    }
+
+    // --- Test 7 (LOT 3, 2026-08-06) : les 3 nouvelles stratégies génèrent bien leur instruction ---
+    {
+        const cases = [
+            ['reformulation', 'Commence par reformuler en 2 ou 3 phrases ce que tu as compris de la demande'],
+            ['auto-verification', 'relis-la, repère les erreurs ou les oublis'],
+            ['variantes-comparees', 'Produis 2 ou 3 propositions distinctes'],
+        ];
+        cases.forEach(function ([technique, expectedFragment]) {
+            const component = loadPromptBuilder(function () {
+                return Promise.resolve({ ok: true, json: () => Promise.resolve({ data: [] }) });
+            }, '');
+            component.personaType = 'custom';
+            component.personaCustom = 'un expert';
+            component.verbType = 'custom';
+            component.verbCustom = 'Rédige';
+            component.taskObject = 'un rapport';
+            component.technique = technique;
+
+            assert(component.prompt.indexOf(expectedFragment) !== -1, 'LOT 3 : la stratégie "' + technique + '" génère bien son instruction dans le prompt final');
+            assert(component.wizardParams.technique === technique, 'LOT 3 : la stratégie "' + technique + '" est bien sérialisée dans wizardParams');
+        });
     }
 
     console.log('\n' + pass + '/' + (pass + fail) + ' OK');

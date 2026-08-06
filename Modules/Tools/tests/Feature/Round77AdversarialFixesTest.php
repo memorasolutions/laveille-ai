@@ -80,11 +80,19 @@ it('has English translations for the constructeur-prompts JS help/technique-hint
         "Canvas (ChatGPT) et artefact (Claude) sont des espaces de travail dédiés où l'IA crée du contenu que vous pouvez modifier directement.",
         "La chaîne de pensée force l'IA à montrer son raisonnement, pas juste le résultat. Très utile pour les problèmes complexes, les mathématiques ou la logique.",
         "Au lieu de deviner, l'IA vous posera des questions de clarification. Résultat : des réponses beaucoup plus pertinentes dès le premier essai.",
-        "L'IA répond directement, sans exemple ni étape intermédiaire.",
-        "L'IA réfléchit en interne avant de répondre, sans montrer ce raisonnement.",
-        "Vous donnez 2-3 exemples du résultat attendu pour guider l'IA.",
-        'Exemples fournis, puis raisonnement détaillé appliqué au même modèle.',
-        "L'IA avance étape par étape et attend votre accord avant de continuer.",
+        // LOT 3 (2026-08-06) : les 5 anciennes clés techniqueHints ont été remplacées par des
+        // variantes préfixées « (Méthode : ...) » (nom de la méthode en petit gris, voir
+        // constructeur-prompts.blade.php ~471) - 3 nouvelles méthodes ajoutées au passage. Les
+        // anciennes clés (sans le préfixe) ont été retirées de fr.json/en.json (orphelines,
+        // plus aucun __() ne les appelle) plutôt que dupliquées.
+        "(Méthode : zero-shot) L'IA répond directement, sans exemple ni étape intermédiaire.",
+        "(Méthode : chaîne de pensée) L'IA réfléchit en interne avant de répondre, sans montrer ce raisonnement.",
+        "(Méthode : few-shot) Vous donnez 2-3 exemples du résultat attendu pour guider l'IA.",
+        '(Méthode : few-shot + chaîne de pensée) Exemples fournis, puis raisonnement détaillé appliqué au même modèle.',
+        "(Méthode : décomposition guidée) L'IA avance étape par étape et attend votre accord avant de continuer.",
+        "(Méthode : reformulation) L'IA reformule d'abord ta demande dans ses mots, puis répond.",
+        "(Méthode : auto-vérification) L'IA relit sa réponse, corrige ses erreurs et ses oublis avant de te la livrer.",
+        "(Méthode : variantes comparées) L'IA propose 2 ou 3 versions différentes et recommande la meilleure.",
         "Tu n'as pas indiqué la forme de la réponse attendue (texte court, liste, tableau...) ni sa longueur.",
         "Tu n'as pas indiqué à qui s'adresse la réponse (par exemple : tes élèves, des parents, des collègues). L'IA adaptera mieux son ton si elle le sait.",
         "Tu n'as coché aucune règle à faire respecter (par exemple : éviter le style trop « IA », poser une question si la demande est floue).",
@@ -111,7 +119,9 @@ it('injects helps/techniqueHints/diagnostic i18n translated into window.promptBu
     $html = $this->actingAs($user)->withSession(['locale' => 'en'])->get('/outils/constructeur-prompts')->assertOk()->getContent();
 
     expect($html)->toContain('Assigning a role to the AI helps guide its responses');
-    expect($html)->toContain('The AI responds directly, without examples or intermediate steps.');
+    // LOT 3 (2026-08-06) : nouvelle formulation « (Méthode : zero-shot) ... » - voir le test
+    // précédent pour le contexte du remplacement des 5 anciennes clés techniqueHints.
+    expect($html)->toContain('(Method: zero-shot) The AI responds directly, without examples or intermediate steps.');
     expect($html)->toContain('diagnosticFormat');
     expect($html)->toContain("You haven't specified the expected response format (short text, list, table...) or its length.");
     expect($html)->not->toContain("Donner un rôle à l'IA aide");

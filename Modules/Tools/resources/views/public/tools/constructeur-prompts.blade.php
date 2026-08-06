@@ -181,6 +181,20 @@
                         .ct-card--on .ct-card__mark{visibility:visible;}
                         .ct-block__field{margin-bottom:0.75rem;}
                         .ct-block__field:last-child{margin-bottom:0;}
+                        {{-- LOT 1 (2026-08-06, garde-fous multi-sélection format) : carte désactivée
+                             (maximum 3 atteint, ou règle d'exclusivité JSON/Mermaid active) - opacité +
+                             curseur, hover neutralisé pour ne pas suggérer une interaction possible.
+                             .ct-format-card-wrap empile la carte et son motif d'explication (raison de
+                             la désactivation) sans casser le flex-wrap de .ct-card-grid. --}}
+                        .ct-card--disabled{opacity:0.45;cursor:not-allowed;}
+                        .ct-card--disabled:hover{border-color:#d1d5db;color:#374151;}
+                        .ct-format-card-wrap{display:flex;flex-direction:column;gap:2px;max-width:220px;}
+                        .ct-card-hint{font-size:0.68rem;color:var(--c-text-muted);line-height:1.3;}
+                        {{-- LOT 2 (2026-08-06, champs conditionnels invisibles) : conteneur accentué
+                             qui enveloppe une case "Autre (...)" et son champ de saisie révélé - rend
+                             visible que ces cases ouvrent une zone de saisie secondaire, cohérent avec
+                             la teinte déjà utilisée ailleurs (var(--c-primary-light), voir round 151). --}}
+                        .ct-conditional-block{margin-top:0.5rem;padding:0.5rem 0.65rem;background:var(--c-primary-light);border-left:3px solid var(--c-primary);border-radius:8px;}
                         {{-- Correctifs UX incrémentaux wizard 4 étapes (2026-08-05, club des sages) :
                              6 évolutions ciblées du gabarit existant, aucune refonte d'écrans - voir
                              CLAUDE.md « pas de big-bang » (3 refontes annulées par l'utilisateur en 2026). --}}
@@ -270,7 +284,7 @@
                         <div x-show="step === 1" x-transition>
                             <div class="d-flex align-items-center gap-2 mb-1">
                                 <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('Sur quel ton l\'IA doit-elle répondre ?') }}</h2>
-                                <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.persona = !showHelp.persona" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;">?</button>
+                                <button class="ct-btn ct-btn-outline ct-btn-xs" @click="showHelp.persona = !showHelp.persona" :aria-expanded="showHelp.persona.toString()" aria-label="{{ __('Aide') }}" title="{{ __('Aide') }}" style="border-radius:50%;width:24px;height:24px;min-width:24px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;border:2px solid var(--c-primary);color:var(--c-primary);font-weight:700;">?</button>
                             </div>
                             <div x-show="showHelp.persona" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;" x-text="helps.persona"></div>
                             <div class="ct-block__field">
@@ -418,16 +432,32 @@
                                 <x-tools::prompt-block id="cpSectionFormat" :question="__('Vous voulez quoi au juste ?')" :example="__('Ex. : un texte de 300 mots avec une liste à puces, un plan détaillé, un tableau comparatif.')" added="feedbackResultat">
                                     <div class="ct-block__field">
                                         <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Format de sortie') }}</label>
-                                        <select class="form-control form-control-sm" x-model="format" aria-label="{{ __('Format de sortie') }}">
-                                            <option value="">{{ __('-- Aucun --') }}</option>
+                                        {{-- LOT 1 (2026-08-06) : cartes-checkbox multi-sélection (remplace l'ancien
+                                             <select> à valeur unique). État séparé formatsSelected[] + formatCustom
+                                             (auparavant partagés dans une seule chaîne `format`, voir migration de
+                                             lecture dans init()). Garde-fous appliqués via isFormatDisabled()/
+                                             handleFormatChange() (constructeur-prompts-core.js) : maximum 3
+                                             sélections, et « Format JSON »/« Diagramme Mermaid » exclusifs entre eux
+                                             et avec tout le reste. --}}
+                                        <p class="small text-muted mb-2" style="font-size: 0.75rem;">{{ __('Choisis 1 à 3 formats compatibles.') }}</p>
+                                        <div class="ct-card-grid" role="group" aria-label="{{ __('Choisir un ou plusieurs formats de sortie') }}">
                                             <template x-for="fmt in formats" :key="fmt.value">
-                                                <option :value="fmt.value" x-text="fmt.label"></option>
+                                                <div class="ct-format-card-wrap">
+                                                    <x-tools::prompt-card type="checkbox" value="fmt.value" model="formatsSelected" onChange="handleFormatChange(fmt.value)" disabled="isFormatDisabled(fmt.value)">
+                                                        <span x-text="fmt.label"></span>
+                                                    </x-tools::prompt-card>
+                                                    <small class="ct-card-hint" x-show="isFormatDisabled(fmt.value)" x-text="formatDisabledReason(fmt.value)"></small>
+                                                </div>
                                             </template>
-                                        </select>
-                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.8rem; min-height: 44px; padding: 4px 6px;">
-                                            <input type="checkbox" x-model="customOpen.format" style="width:18px;height:18px;accent-color:var(--c-primary);margin:0;flex-shrink:0;"> {{ __('Autre (format personnalisé)') }}
-                                        </label>
-                                        <input type="text" x-show="customOpen.format" x-model="format" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: Sonnet, script vidéo, fiche produit...') }}" aria-label="{{ __('Format personnalisé') }}">
+                                        </div>
+                                        <div class="ct-conditional-block">
+                                            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.8rem; min-height: 44px; padding: 4px 6px;">
+                                                <input type="checkbox" x-model="customOpen.format" style="width:18px;height:18px;accent-color:var(--c-primary);margin:0;flex-shrink:0;"> {{ __('Autre (format personnalisé)') }}
+                                            </label>
+                                            <div x-show="customOpen.format" x-transition>
+                                                <input type="text" x-model="formatCustom" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: Sonnet, script vidéo, fiche produit...') }}" aria-label="{{ __('Format personnalisé') }}">
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="ct-block__field">
                                         <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Longueur précise') }}</label>
@@ -437,15 +467,25 @@
                                                 <option :value="len.value" x-text="len.label"></option>
                                             </template>
                                         </select>
-                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.8rem; min-height: 44px; padding: 4px 6px;">
-                                            <input type="checkbox" x-model="customOpen.length" style="width:18px;height:18px;accent-color:var(--c-primary);margin:0;flex-shrink:0;"> {{ __('Autre (longueur personnalisée)') }}
-                                        </label>
-                                        <input type="text" x-show="customOpen.length" x-model="length" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: 1000 mots exactement') }}" aria-label="{{ __('Longueur personnalisée') }}">
+                                        {{-- LOT 2 (2026-08-06) : conteneur accentué autour de la case "Autre" +
+                                             son champ - voir .ct-conditional-block (style ci-dessus). --}}
+                                        <div class="ct-conditional-block">
+                                            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.8rem; min-height: 44px; padding: 4px 6px;">
+                                                <input type="checkbox" x-model="customOpen.length" style="width:18px;height:18px;accent-color:var(--c-primary);margin:0;flex-shrink:0;"> {{ __('Autre (longueur personnalisée)') }}
+                                            </label>
+                                            <div x-show="customOpen.length" x-transition>
+                                                <input type="text" x-model="length" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: 1000 mots exactement') }}" aria-label="{{ __('Longueur personnalisée') }}">
+                                            </div>
+                                        </div>
                                     </div>
                                 </x-tools::prompt-block>
 
                                 {{-- Bloc « Un modèle » : comment l'IA doit s'y prendre (technique) + exemples
-                                     (few-shot) + délimiteurs. --}}
+                                     (few-shot) + délimiteurs. LOT 3 (2026-08-06) : le nom technique de chaque
+                                     méthode (zero-shot, chaîne de pensée, few-shot...) apparaît désormais en
+                                     petit texte gris SOUS le sélecteur (techniqueHints, déjà l'emplacement de
+                                     l'explication d'une ligne) plutôt que dans le libellé principal - un <select>
+                                     natif ne permet pas de styliser une partie du texte d'une <option>. --}}
                                 <x-tools::prompt-block :question="__('Un exemple à imiter ?')" :example="__('Ex. : donnez 2-3 exemples du résultat attendu, ou laissez l\'IA répondre directement.')" added="feedbackModele">
                                     <div class="ct-block__field">
                                         <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Comment l\'IA doit-elle s\'y prendre ?') }}</label>
@@ -464,8 +504,16 @@
                                     <div class="ct-block__field">
                                         <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
                                             <input type="checkbox" x-model="useDelimiters" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
-                                            <span>{{ __('Séparer clairement les données du reste (délimiteurs ###)') }}</span>
+                                            {{-- LOT 4 (2026-08-06, trouvaille Codex) : l'ancien libellé « Séparer
+                                                 clairement les données du reste » laissait croire que l'option
+                                                 séparait les DONNÉES fournies par l'utilisateur, alors qu'elle
+                                                 sépare les PARTIES de la réponse générée (voir l'instruction
+                                                 réellement injectée, inchangée, constructeur-prompts-core.js
+                                                 ~944-948 : "Utilise des délimiteurs ### pour séparer clairement
+                                                 chaque section de ta réponse."). --}}
+                                            <span>{{ __('Séparer clairement les parties de la réponse') }}</span>
                                         </label>
+                                        <small class="text-muted d-block mt-1" style="font-size: 0.72rem;">{{ __('L\'IA insérera des repères ### entre les sections.') }}</small>
                                     </div>
                                 </x-tools::prompt-block>
                             </fieldset>
@@ -481,10 +529,16 @@
                                                 <option :value="t.value" x-text="t.label"></option>
                                             </template>
                                         </select>
-                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.8rem; min-height: 44px; padding: 4px 6px;">
-                                            <input type="checkbox" x-model="customOpen.tone" style="width:18px;height:18px;accent-color:var(--c-primary);margin:0;flex-shrink:0;"> {{ __('Autre (ton personnalisé)') }}
-                                        </label>
-                                        <input type="text" x-show="customOpen.tone" x-model="tone" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: Ironique et léger') }}" aria-label="{{ __('Ton personnalisé') }}">
+                                        {{-- LOT 2 (2026-08-06) : conteneur accentué autour de la case "Autre" +
+                                             son champ - voir .ct-conditional-block (style ci-dessus). --}}
+                                        <div class="ct-conditional-block">
+                                            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.8rem; min-height: 44px; padding: 4px 6px;">
+                                                <input type="checkbox" x-model="customOpen.tone" style="width:18px;height:18px;accent-color:var(--c-primary);margin:0;flex-shrink:0;"> {{ __('Autre (ton personnalisé)') }}
+                                            </label>
+                                            <div x-show="customOpen.tone" x-transition>
+                                                <input type="text" x-model="tone" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: Ironique et léger') }}" aria-label="{{ __('Ton personnalisé') }}">
+                                            </div>
+                                        </div>
                                     </div>
                                 </x-tools::prompt-block>
                             </fieldset>
@@ -498,7 +552,7 @@
                                         <input type="checkbox" x-model="cadreStrict" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
                                         <span><strong>{{ __('Cadre strict') }}</strong> : <span x-text="cadreStrict ? '{{ __('activé') }}' : '{{ __('désactivé') }}'"></span></span>
                                     </label>
-                                    <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.cadreStrict = !showHelp.cadreStrict" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;">?</button>
+                                    <button class="ct-btn ct-btn-outline ct-btn-xs" @click="showHelp.cadreStrict = !showHelp.cadreStrict" :aria-expanded="showHelp.cadreStrict.toString()" aria-label="{{ __('Aide') }}" title="{{ __('Aide') }}" style="border-radius:50%;width:24px;height:24px;min-width:24px;padding:0;line-height:22px;flex-shrink:0;border:2px solid var(--c-primary);color:var(--c-primary);font-weight:700;">?</button>
                                 </div>
                                 <div x-show="showHelp.cadreStrict" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;">{{ __('Activé (par défaut), l\'outil ajoute l\'écriture naturelle anti-IA, la typographie française et un rappel de qualité. Désactivé, votre prompt reste au plus près de ce que vous avez écrit.') }}</div>
 
@@ -754,7 +808,7 @@
 
 {{-- Modale aide --}}
 <div class="modal fade" id="promptHelpModal" tabindex="-1" role="dialog" aria-labelledby="promptHelpModalLabel">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content" style="border-radius: var(--r-base);">
             <div class="modal-header" style="background: var(--c-primary); border-radius: var(--r-base) var(--r-base) 0 0;">
                 <h4 class="modal-title" id="promptHelpModalLabel" style="color: #fff; font-family: var(--f-heading); font-weight: 700;">{{ __('Comment créer un bon prompt') }}</h4>
@@ -877,12 +931,20 @@ $pbHelps = [
     'constraintChainOfThought' => __('La chaîne de pensée force l\'IA à montrer son raisonnement, pas juste le résultat. Très utile pour les problèmes complexes, les mathématiques ou la logique.'),
     'constraintAskIfUnclear' => __('Au lieu de deviner, l\'IA vous posera des questions de clarification. Résultat : des réponses beaucoup plus pertinentes dès le premier essai.'),
 ];
+// LOT 3 (2026-08-06, pédagogie Perplexity : effet concret en libellé principal, nom technique
+// discret) : chaque texte d'aide commence désormais par le nom de la méthode entre parenthèses,
+// affiché en petit gris SOUS le sélecteur (voir techniqueHints dans le Blade, ~471) - jamais dans
+// le libellé principal de l'<option> elle-même (un <select> natif ne permet pas de styliser une
+// partie du texte d'une option, d'où ce choix d'emplacement).
 $pbTechniqueHints = [
-    'zero-shot' => __("L'IA répond directement, sans exemple ni étape intermédiaire."),
-    'zero-shot-cot' => __("L'IA réfléchit en interne avant de répondre, sans montrer ce raisonnement."),
-    'few-shot' => __("Vous donnez 2-3 exemples du résultat attendu pour guider l'IA."),
-    'few-shot-cot' => __("Exemples fournis, puis raisonnement détaillé appliqué au même modèle."),
-    'iterative' => __("L'IA avance étape par étape et attend votre accord avant de continuer."),
+    'zero-shot' => __("(Méthode : zero-shot) L'IA répond directement, sans exemple ni étape intermédiaire."),
+    'zero-shot-cot' => __("(Méthode : chaîne de pensée) L'IA réfléchit en interne avant de répondre, sans montrer ce raisonnement."),
+    'few-shot' => __("(Méthode : few-shot) Vous donnez 2-3 exemples du résultat attendu pour guider l'IA."),
+    'few-shot-cot' => __("(Méthode : few-shot + chaîne de pensée) Exemples fournis, puis raisonnement détaillé appliqué au même modèle."),
+    'iterative' => __("(Méthode : décomposition guidée) L'IA avance étape par étape et attend votre accord avant de continuer."),
+    'reformulation' => __("(Méthode : reformulation) L'IA reformule d'abord ta demande dans ses mots, puis répond."),
+    'auto-verification' => __("(Méthode : auto-vérification) L'IA relit sa réponse, corrige ses erreurs et ses oublis avant de te la livrer."),
+    'variantes-comparees' => __("(Méthode : variantes comparées) L'IA propose 2 ou 3 versions différentes et recommande la meilleure."),
 ];
 // Phase 1 (audit 2026-07-26) : taxonomie de tâches concrètes pour l'étape 1 « objectif d'abord ».
 // Mapping simple (pas d'IA) vers les personas/verbes existants ci-dessus — dérivé des mêmes valeurs,
@@ -956,6 +1018,11 @@ $defaultTechniques = [
     ['value' => 'few-shot', 'label' => __('Avec des exemples')],
     ['value' => 'few-shot-cot', 'label' => __('Avec des exemples + réflexion étape par étape')],
     ['value' => 'iterative', 'label' => __('Par étapes, avec votre validation à chaque fois')],
+    // LOT 3 (2026-08-06, 3 nouvelles méthodes) : instructions générées dans get prompt()
+    // (constructeur-prompts-core.js, section === TECHNIQUE ===).
+    ['value' => 'reformulation', 'label' => __('Reformuler la demande avant de répondre')],
+    ['value' => 'auto-verification', 'label' => __('Vérifier et corriger sa réponse avant de la donner')],
+    ['value' => 'variantes-comparees', 'label' => __('Proposer 2 ou 3 versions et recommander la meilleure')],
 ];
 $defaultLanguages = [
     ['value' => 'fr', 'label' => __('Français')],
@@ -1057,6 +1124,15 @@ window.promptBuilderConfig = {
         fragZeroShotCot: @json(__('réflexion visible')),
         fragIterative: @json(__('une validation à chaque étape')),
         fragDelimiters: @json(__('délimiteurs ###')),
+        // LOT 3 (2026-08-06) : fragments « Ajouté : ... » pour les 3 nouvelles méthodes (voir
+        // feedbackModele, constructeur-prompts-core.js).
+        fragReformulation: @json(__('une reformulation de la demande')),
+        fragAutoVerification: @json(__('une vérification finale')),
+        fragVariantesComparees: @json(__('plusieurs versions comparées')),
+        // LOT 1 (2026-08-06) : raisons affichées sous une carte de format désactivée (garde-fous
+        // multi-sélection - voir formatDisabledReason, constructeur-prompts-core.js).
+        formatMaxReason: @json(__('Maximum 3 formats.')),
+        formatExclusiveReason: @json(__('Ce format technique doit être utilisé seul.')),
         profileFeedbackTexte: @json(__("Vous avez choisi Texte : les règles d'écriture humaine et de typographie s'appliquent selon vos cases cochées.")),
         profileFeedbackProgrammation: @json(__("Vous avez choisi Programmation : j'ajoute les règles de mise en forme du code, je retire les règles de français du Québec.")),
         profileFeedbackTraduction: @json(__('Vous avez choisi Traduction : je retire les règles de français du Québec du résultat.'))

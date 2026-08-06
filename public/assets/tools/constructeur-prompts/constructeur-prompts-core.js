@@ -91,7 +91,24 @@ document.addEventListener('alpine:init', function() {
             // bas) pour quiconque ne touchait jamais à l'écran 4 - l'outil créait lui-même le
             // problème qu'il signalait ensuite. Valeurs parmi les options existantes (formats/
             // lengths/tones ci-dessus), toujours modifiables, rien n'est retiré.
-            format: 'Paragraphes détaillés',
+            // LOT 1 (2026-08-06, verdict Codex) : le format de sortie est désormais une
+            // multi-sélection de cartes (max 3, JSON/Mermaid exclusifs entre eux et avec le
+            // reste - voir isFormatDisabled()/handleFormatChange() plus bas) au lieu d'un
+            // <select> à valeur unique. `format` (scalaire) est retiré de l'état ; formatsSelected
+            // (tableau de valeurs de window.promptBuilderConfig.formats) et formatCustom (texte
+            // libre, séparé - avant ce lot les deux partageaient la même variable `format`)
+            // le remplacent. Défaut identique au comportement précédent (1 format présélectionné,
+            // « défauts intelligents » round 140).
+            formatsSelected: ['Paragraphes détaillés'],
+            formatCustom: '',
+            // Classement des 12 valeurs de $defaultFormats (Blade) utilisé par formatBulletText()
+            // pour choisir la formulation du prompt généré (règle unique / structure multiple /
+            // livrables multiples / mélange) - copie volontaire des `value` (jamais les `label`,
+            // traduits) pour rester la source de vérité du TEXTE injecté dans le prompt, comme
+            // partout ailleurs dans ce fichier (personas/verbes/audiences non traduits).
+            _formatStructureValues: ['Liste à puces', 'Paragraphes détaillés', 'Tableau structuré', 'Plan hiérarchisé', 'Étapes numérotées'],
+            _formatDeliverableValues: ['Questionnaire / QCM avec corrigé', 'Grille d\'évaluation (rubrique)', 'Fiche pratique (1 page)', 'Modèle réutilisable (gabarit)', 'FAQ structurée'],
+            _formatExclusiveValues: ['Format JSON', 'Diagramme Mermaid'],
             length: 'Modéré (300-500 mots)',
             tone: 'Professionnel',
             language: 'fr',
@@ -169,12 +186,18 @@ document.addEventListener('alpine:init', function() {
             // avec la syntaxe des chaînes JS - un objet littéral inline avait cassé Alpine (bug trouvé
             // en vérification visuelle : "L'IA" contient une apostrophe qui ferme la chaîne JS '...').
             // Round 77 : même pattern que `helps` ci-dessus - repli français, valeur réelle via config.
+            // LOT 3 (2026-08-06) : nom de la méthode entre parenthèses en tête de chaque texte -
+            // seul emplacement possible pour l'afficher en petit gris (voir commentaire à
+            // window.promptBuilderConfig.techniqueHints côté Blade, même liste de 8 clés).
             techniqueHints: (window.promptBuilderConfig && window.promptBuilderConfig.techniqueHints) || {
-                'zero-shot': "L'IA répond directement, sans exemple ni étape intermédiaire.",
-                'zero-shot-cot': "L'IA réfléchit en interne avant de répondre, sans montrer ce raisonnement.",
-                'few-shot': "Vous donnez 2-3 exemples du résultat attendu pour guider l'IA.",
-                'few-shot-cot': "Exemples fournis, puis raisonnement détaillé appliqué au même modèle.",
-                'iterative': "L'IA avance étape par étape et attend votre accord avant de continuer."
+                'zero-shot': "(Méthode : zero-shot) L'IA répond directement, sans exemple ni étape intermédiaire.",
+                'zero-shot-cot': "(Méthode : chaîne de pensée) L'IA réfléchit en interne avant de répondre, sans montrer ce raisonnement.",
+                'few-shot': "(Méthode : few-shot) Vous donnez 2-3 exemples du résultat attendu pour guider l'IA.",
+                'few-shot-cot': "(Méthode : few-shot + chaîne de pensée) Exemples fournis, puis raisonnement détaillé appliqué au même modèle.",
+                'iterative': "(Méthode : décomposition guidée) L'IA avance étape par étape et attend votre accord avant de continuer.",
+                'reformulation': "(Méthode : reformulation) L'IA reformule d'abord ta demande dans ses mots, puis répond.",
+                'auto-verification': "(Méthode : auto-vérification) L'IA relit sa réponse, corrige ses erreurs et ses oublis avant de te la livrer.",
+                'variantes-comparees': "(Méthode : variantes comparées) L'IA propose 2 ou 3 versions différentes et recommande la meilleure."
             },
             copied: false,
             // "Améliorer avec mon IA" (Option 3 hybride, 2026-07-26 — validation croisée
@@ -570,6 +593,92 @@ document.addEventListener('alpine:init', function() {
                 buttons[next].focus();
             },
 
+            // === Format de sortie multi-sélection (LOT 1, 2026-08-06) ===
+            // formatExclusiveActive : la valeur EXCLUSIVE (Format JSON / Diagramme Mermaid)
+            // actuellement sélectionnée, ou null. Le garde-fou d'exclusivité ne peut jamais
+            // sélectionner les DEUX exclusifs à la fois (handleFormatChange les réduit à 1 seul).
+            get formatExclusiveActive() {
+                for (var i = 0; i < this.formatsSelected.length; i++) {
+                    if (this._formatExclusiveValues.indexOf(this.formatsSelected[i]) !== -1) return this.formatsSelected[i];
+                }
+                return null;
+            },
+            // isFormatDisabled : une carte déjà cochée reste TOUJOURS cliquable (pour la
+            // décocher) - seules les cartes NON cochées peuvent devenir indisponibles, soit
+            // parce qu'un format exclusif est actif, soit parce que le maximum de 3 est atteint.
+            isFormatDisabled: function (value) {
+                if (this.formatsSelected.indexOf(value) !== -1) return false;
+                if (this.formatExclusiveActive) return true;
+                if (this.formatsSelected.length >= 3) return true;
+                return false;
+            },
+            formatDisabledReason: function (value) {
+                if (!this.isFormatDisabled(value)) return '';
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                if (this.formatExclusiveActive) return i18n.formatExclusiveReason || 'Ce format technique doit être utilisé seul.';
+                return i18n.formatMaxReason || 'Maximum 3 formats.';
+            },
+            // handleFormatChange : appelé APRÈS qu'Alpine ait déjà ajouté/retiré `value` de
+            // formatsSelected (x-model natif sur un tableau de cases à cocher). Si la carte qui
+            // vient d'être cochée est un format exclusif (JSON/Mermaid), on réduit la sélection à
+            // elle seule - les autres cartes, déjà cochées avant ce clic, sont retirées.
+            handleFormatChange: function (value) {
+                if (this._formatExclusiveValues.indexOf(value) !== -1 && this.formatsSelected.indexOf(value) !== -1) {
+                    this.formatsSelected = [value];
+                }
+            },
+            // formatSelectionAll / formatText : représentation texte plate (formats prédéfinis +
+            // format personnalisé) utilisée par feedbackResultat et promptSummary - jamais par le
+            // générateur de prompt final (get prompt()), qui a sa propre logique de formulation
+            // (voir formatBulletText plus bas).
+            get formatSelectionAll() {
+                var arr = this.formatsSelected.slice();
+                if (this.formatCustom) arr.push(this.formatCustom);
+                return arr;
+            },
+            get formatText() {
+                return this.formatSelectionAll.join(', ');
+            },
+            // formatBulletText : la ligne « Structure : ... » du prompt final. Un seul format
+            // (prédéfini ou personnalisé seul) → comportement inchangé depuis l'origine de cette
+            // fonctionnalité. Plusieurs formats de STRUCTURE (liste à puces, paragraphes, tableau,
+            // plan, étapes numérotées) → une structure principale + des compléments. Plusieurs
+            // LIVRABLES (questionnaire, grille, fiche, gabarit, FAQ) → une séquence numérotée.
+            // Mélange structure + livrable(s) → le ou les livrables deviennent le format
+            // principal, la structure devient une précision « à l'intérieur ». formatCustom
+            // s'ajoute toujours en dernier, quelle que soit la composition ci-dessus.
+            get formatBulletText() {
+                var structs = [], delivs = [], exclusive = null;
+                for (var i = 0; i < this.formatsSelected.length; i++) {
+                    var v = this.formatsSelected[i];
+                    if (this._formatExclusiveValues.indexOf(v) !== -1) exclusive = v;
+                    else if (this._formatStructureValues.indexOf(v) !== -1) structs.push(v);
+                    else delivs.push(v);
+                }
+                var predefinedCount = structs.length + delivs.length + (exclusive ? 1 : 0);
+                var numbered = function (list) { return list.map(function (item, idx) { return (idx + 1) + ') ' + item; }).join(', '); };
+                var main = '';
+                var usePrefix = false;
+                if (predefinedCount === 0) {
+                    usePrefix = true;
+                } else if (predefinedCount === 1) {
+                    main = exclusive || structs[0] || delivs[0];
+                    usePrefix = true;
+                } else if (delivs.length === 0) {
+                    main = 'Structure principale : ' + structs[0] + '. En complément, intègre : ' + structs.slice(1).join(', ') + '.';
+                } else if (structs.length === 0) {
+                    main = 'Produis successivement : ' + numbered(delivs) + '.';
+                } else {
+                    var livrablePart = delivs.length === 1 ? delivs[0] : ('Produis successivement : ' + numbered(delivs));
+                    main = livrablePart + '. à l\'intérieur, utilise ' + structs.join(', ') + '.';
+                }
+                if (this.formatCustom) {
+                    main = main ? (main + (/[.!?]$/.test(main) ? '' : '.') + ' ' + this.formatCustom) : this.formatCustom;
+                }
+                if (!main) return '';
+                return usePrefix ? ('Structure : ' + main) : main;
+            },
+
             get isValid() {
                 var hasVerb = this.verbType === 'custom' ? !!this.verbCustom : !!this.verb;
                 return this.personaText.length > 0 && this.taskObject.length > 0 && hasVerb;
@@ -625,7 +734,7 @@ document.addEventListener('alpine:init', function() {
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
                 var parts = [];
                 if (this.verbText) parts.push((i18n.fragVerb || 'verbe ') + '« ' + this.verbText + ' »');
-                if (this.format) parts.push((i18n.fragFormat || 'format ') + this.format.toLowerCase());
+                if (this.formatText) parts.push((i18n.fragFormat || 'format ') + this.formatText.toLowerCase());
                 if (this.length) parts.push((i18n.fragLength || 'longueur ') + this.length.toLowerCase());
                 if (!parts.length) return '';
                 return (i18n.addedPrefix || 'Ajouté : ') + parts.join(', ') + '.';
@@ -669,7 +778,11 @@ document.addEventListener('alpine:init', function() {
                     'zero-shot-cot': i18n.fragZeroShotCot || 'réflexion visible',
                     'few-shot': i18n.fragFewShot || 'des exemples',
                     'few-shot-cot': i18n.fragFewShotCot || 'des exemples et une réflexion visible',
-                    'iterative': i18n.fragIterative || 'une validation à chaque étape'
+                    'iterative': i18n.fragIterative || 'une validation à chaque étape',
+                    // LOT 3 (2026-08-06) : 3 nouvelles méthodes.
+                    'reformulation': i18n.fragReformulation || 'une reformulation de la demande',
+                    'auto-verification': i18n.fragAutoVerification || 'une vérification finale',
+                    'variantes-comparees': i18n.fragVariantesComparees || 'plusieurs versions comparées'
                 };
                 if (techniqueFrags[this.technique]) parts.push(techniqueFrags[this.technique]);
                 if (this.useDelimiters) parts.push(i18n.fragDelimiters || 'délimiteurs ###');
@@ -783,7 +896,7 @@ document.addEventListener('alpine:init', function() {
                 }
                 if (this.audienceText) parts.push((i18nSummary.summaryAudience || 'Le résultat sera adapté pour : ') + this.audienceText + '.');
                 if (this.tone) parts.push((i18nSummary.summaryTone || 'Ton : ') + this.tone + '.');
-                if (this.format) parts.push((i18nSummary.summaryFormat || 'Présenté sous forme de : ') + this.format.toLowerCase() + '.');
+                if (this.formatText) parts.push((i18nSummary.summaryFormat || 'Présenté sous forme de : ') + this.formatText.toLowerCase() + '.');
                 if (this.length) parts.push((i18nSummary.summaryLength || 'Longueur visée : ') + this.length.toLowerCase() + '.');
                 if (!parts.length) return '';
                 return parts.join(' ');
@@ -869,8 +982,12 @@ document.addEventListener('alpine:init', function() {
                 }
 
                 // === FORMAT DE SORTIE ===
+                // LOT 1 (2026-08-06) : formatBulletText() encapsule les règles de composition
+                // multi-format (1 format inchangé / plusieurs structures / plusieurs livrables /
+                // mélange) - voir sa définition plus haut, juste avant get isValid().
                 var outputRuleSegs = [];
-                if (this.format) outputRuleSegs.push([{ t: 'tool', s: 'Structure : ' }, { t: 'tool', s: this.format }]);
+                var formatBullet = this.formatBulletText;
+                if (formatBullet) outputRuleSegs.push([{ t: 'tool', s: formatBullet }]);
                 if (this.length) outputRuleSegs.push([{ t: 'tool', s: 'Longueur visée : ' }, { t: 'tool', s: this.length }]);
                 if (this.tone) outputRuleSegs.push([{ t: 'tool', s: 'Ton et style : ' }, { t: 'tool', s: this.tone }]);
                 if (this.language === 'en') outputRuleSegs.push([{ t: 'tool', s: 'Langue de rédaction : anglais' }]);
@@ -965,6 +1082,19 @@ document.addEventListener('alpine:init', function() {
                     startSection();
                     tool('Procède étape par étape. Après chaque étape majeure, présente ton travail et demande ma validation avant de continuer.');
                 }
+                // LOT 3 (2026-08-06, Perplexity pédagogie) : 3 nouvelles méthodes.
+                if (this.technique === 'reformulation') {
+                    startSection();
+                    tool('Commence par reformuler en 2 ou 3 phrases ce que tu as compris de la demande, puis produis ta réponse.');
+                }
+                if (this.technique === 'auto-verification') {
+                    startSection();
+                    tool('Avant de livrer ta réponse finale, relis-la, repère les erreurs ou les oublis par rapport à la demande, et corrige-les.');
+                }
+                if (this.technique === 'variantes-comparees') {
+                    startSection();
+                    tool('Produis 2 ou 3 propositions distinctes, compare-les brièvement selon la demande, et recommande la meilleure.');
+                }
 
                 // Phrase de clôture actionnable (audit UX 2026-08-05) : sans elle, le prompt
                 // s'arrêtait net après la checklist qualité, ambigu pour certains modèles.
@@ -998,7 +1128,7 @@ document.addEventListener('alpine:init', function() {
                 // = étape 3, format/contraintes = étape 4). On ne signale un manque QUE si l'étape
                 // courante a déjà atteint celle du champ concerné - sinon un utilisateur encore à
                 // l'étape 2 (Tâche) se fait reprocher des champs d'étapes qu'il n'a pas encore vues.
-                if (this.step >= 4 && !this.format && !this.length) {
+                if (this.step >= 4 && this.formatSelectionAll.length === 0 && !this.length) {
                     issues.push({ key: 'format', message: i18n.diagnosticFormat || "Tu n'as pas indiqué la forme de la réponse attendue (texte court, liste, tableau...) ni sa longueur." });
                 }
                 if (this.step >= 3 && !this.audienceText) {
@@ -1040,7 +1170,11 @@ document.addEventListener('alpine:init', function() {
                 // en Programmation/Traduction (?edit=ID) retomberait silencieusement sur le profil
                 // Texte par défaut, réinjectant des règles de style français que la personne avait
                 // délibérément coupées.
-                return { selectedTask: this.selectedTask, personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, audienceType: this.audienceType, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, format: this.format, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintTypo: this.constraintTypo, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat, constraintChainOfThought: this.constraintChainOfThought, constraintAskIfUnclear: this.constraintAskIfUnclear, constraintCustom: this.constraintCustom, useDelimiters: this.useDelimiters, examples: this.examples, cadreStrict: this.cadreStrict, profile: this.profile };
+                // LOT 1 (2026-08-06) : `format` (scalaire) remplacé par `formats` (tableau,
+                // formatsSelected) + `formatCustom` (séparé). Migration de LECTURE des anciens
+                // prompts sauvegardés avec le scalaire `format` : voir init() (?edit=ID et
+                // ?remix=ID) - piège round 42 (tout champ oublié ici se perd à la réouverture).
+                return { selectedTask: this.selectedTask, personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, audienceType: this.audienceType, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, formats: this.formatsSelected, formatCustom: this.formatCustom, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintTypo: this.constraintTypo, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat, constraintChainOfThought: this.constraintChainOfThought, constraintAskIfUnclear: this.constraintAskIfUnclear, constraintCustom: this.constraintCustom, useDelimiters: this.useDelimiters, examples: this.examples, cadreStrict: this.cadreStrict, profile: this.profile };
             },
             _headers: function() {
                 return { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json', 'Content-Type': 'application/json' };
@@ -1122,7 +1256,12 @@ document.addEventListener('alpine:init', function() {
                                         self.audienceCustom = p.audienceCustom;
                                         self.audienceType = 'custom';
                                     }
-                                    if (p.format) self.format = p.format;
+                                    // LOT 1 (2026-08-06) : migration de l'ancien scalaire `format`
+                                    // (prompts sauvegardés avant ce lot) vers le nouveau tableau
+                                    // formatsSelected - Array.isArray(p.formats) couvre les
+                                    // prompts DÉJÀ migrés (ré-enregistrés depuis ce lot).
+                                    if (Array.isArray(p.formats)) { self.formatsSelected = p.formats; } else if (p.format) { self.formatsSelected = [p.format]; }
+                                    if (p.formatCustom) self.formatCustom = p.formatCustom;
                                     if (p.length) self.length = p.length;
                                     if (p.tone) self.tone = p.tone;
                                     if (p.language) self.language = p.language;
@@ -1271,7 +1410,10 @@ document.addEventListener('alpine:init', function() {
                                     self.audienceCustom = p.audienceCustom;
                                     self.audienceType = 'custom';
                                 }
-                                if (p.format) self.format = p.format;
+                                // LOT 1 (2026-08-06) : même migration scalaire → tableau que le
+                                // bloc ?edit=ID ci-dessus.
+                                if (Array.isArray(p.formats)) { self.formatsSelected = p.formats; } else if (p.format) { self.formatsSelected = [p.format]; }
+                                if (p.formatCustom) self.formatCustom = p.formatCustom;
                                 if (p.length) self.length = p.length;
                                 if (p.tone) self.tone = p.tone;
                                 if (p.language) self.language = p.language;

@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.145.0] - 2026-08-06
+
+### Ajouté
+
+- **Constructeur de prompts : format de sortie multi-sélection avec garde-fous (#1618).** Cartes à
+  cocher (même pattern que l'audience), maximum 3 formats, JSON et Mermaid utilisables seuls (raison
+  affichée), prompt composé intelligemment (« Structure principale : X. En complément, intègre : Y » ;
+  livrables multiples produits en sections numérotées). Migration transparente des prompts déjà
+  sauvegardés (ancien format scalaire converti à la lecture, réédition et remix préservés).
+- **3 nouvelles méthodes dans « Comment l'IA doit-elle s'y prendre ? » (#1620)** : reformuler la
+  demande avant de répondre, vérifier et corriger sa réponse avant de la donner, proposer 2 ou 3
+  versions et recommander la meilleure. Chaque option affiche désormais le nom pédagogique de sa
+  méthode en second plan discret (zero-shot, chaîne de pensée, few-shot, décomposition guidée...).
+
+### Corrigé
+
+- **Champs « Autre (longueur / ton / format personnalisé) » invisibles (#1619)** : bloc accentué
+  (fond teinté, barre latérale de couleur) avec apparition animée - constat utilisateur « je ne
+  l'ai pas vu la première fois », option notée 94/100 par le panel.
+- **Libellé mensonger « Séparer clairement les données du reste (délimiteurs ###) » (#1621)** :
+  l'option sépare en réalité les sections de la réponse - nouveau libellé « Séparer clairement les
+  parties de la réponse » + aide technique dessous.
+- **Boutons d'aide « ? » invisibles comme boutons (#1622)** : vraie apparence de bouton circulaire
+  (bordure couleur charte, 28 px, aria-label et aria-expanded) sur persona et cadre strict.
+- **Modale d'aide collée en haut de l'écran (#1623)** : centrage vertical (modal-dialog-centered).
+
 ## [1.144.2] - 2026-08-06
 
 ### Corrigé
