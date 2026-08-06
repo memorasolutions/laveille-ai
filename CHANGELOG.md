@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.144.1] - 2026-08-06
+
+### Corrigé
+
+- **Constructeur de prompts : le panneau « Vérifications » parlait en jargon (#1615).** Signalement
+  utilisateur : « Aucun contexte ni audience précisé(e) pour qui recevra la réponse. Compléter »
+  était incompréhensible. Les 3 messages de diagnostic, le sous-titre et le bouton sont réécrits en
+  langage néophyte, orienté action avec exemples concrets (« Tu n'as pas indiqué à qui s'adresse la
+  réponse (par exemple : tes élèves, des parents, des collègues)... ») ; « Compléter » devient
+  « Ajouter cette info ». Textes seulement, aucune modification de structure. Prouvé par capture
+  Playwright et 52 tests / 217 assertions.
+
 ## [1.144.0] - 2026-08-06
 
 ### Ajouté

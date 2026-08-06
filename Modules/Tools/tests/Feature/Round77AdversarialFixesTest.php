@@ -85,9 +85,9 @@ it('has English translations for the constructeur-prompts JS help/technique-hint
         "Vous donnez 2-3 exemples du résultat attendu pour guider l'IA.",
         'Exemples fournis, puis raisonnement détaillé appliqué au même modèle.',
         "L'IA avance étape par étape et attend votre accord avant de continuer.",
-        'Aucun format de sortie ni longueur précisée pour la réponse.',
-        'Aucun contexte ni audience précisé(e) pour qui recevra la réponse.',
-        'Aucune contrainte cochée dans la section « Contraintes et destination ».',
+        "Tu n'as pas indiqué la forme de la réponse attendue (texte court, liste, tableau...) ni sa longueur.",
+        "Tu n'as pas indiqué à qui s'adresse la réponse (par exemple : tes élèves, des parents, des collègues). L'IA adaptera mieux son ton si elle le sait.",
+        "Tu n'as coché aucune règle à faire respecter (par exemple : éviter le style trop « IA », poser une question si la demande est floue).",
     ];
 
     foreach ($keys as $key) {
@@ -113,7 +113,7 @@ it('injects helps/techniqueHints/diagnostic i18n translated into window.promptBu
     expect($html)->toContain('Assigning a role to the AI helps guide its responses');
     expect($html)->toContain('The AI responds directly, without examples or intermediate steps.');
     expect($html)->toContain('diagnosticFormat');
-    expect($html)->toContain('No output format or response length specified.');
+    expect($html)->toContain("You haven't specified the expected response format (short text, list, table...) or its length.");
     expect($html)->not->toContain("Donner un rôle à l'IA aide");
 });
 

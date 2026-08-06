@@ -639,7 +639,7 @@
                                 🔎 {{ __('Vérifications') }}
                             </button>
                             <div id="cpChecksPanel" class="ct-disclosure__panel" x-show="checksOpen" x-transition>
-                                <p class="small mb-2" style="color: var(--c-text-muted);">{{ __('Points à valider pour un prompt plus efficace.') }}</p>
+                                <p class="small mb-2" style="color: var(--c-text-muted);">{{ __("Ton prompt fonctionne déjà. Ces précisions le rendraient encore meilleur :") }}</p>
                                 <div aria-live="polite">
                                     <template x-if="diagnostic.ok">
                                         <p class="mb-0 small" style="color: var(--c-dark);">✓ {{ __('Votre prompt contient les éléments essentiels.') }}</p>
@@ -649,7 +649,7 @@
                                             <template x-for="issue in diagnostic.issues" :key="issue.key">
                                                 <li class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-2 small" style="color: var(--c-dark);">
                                                     <span x-text="issue.message"></span>
-                                                    <button type="button" class="ct-btn ct-btn-outline ct-btn-xs" style="min-height:44px;" @click="openDiagnosticSection(issue.key)">{{ __('Compléter') }}</button>
+                                                    <button type="button" class="ct-btn ct-btn-outline ct-btn-xs" style="min-height:44px;" @click="openDiagnosticSection(issue.key)">{{ __('Ajouter cette info') }}</button>
                                                 </li>
                                             </template>
                                         </ul>
@@ -991,9 +991,9 @@ window.promptBuilderConfig = {
         saveError: @json(__('Erreur de sauvegarde. Réessayez.')),
         taskTextKept: @json(__('Votre texte a été conservé. Effacez-le si vous voulez repartir du gabarit de cette carte.')),
         loadError: @json(__('Impossible de charger ce prompt pour édition.')),
-        diagnosticFormat: @json(__('Aucun format de sortie ni longueur précisée pour la réponse.')),
-        diagnosticAudience: @json(__('Aucun contexte ni audience précisé(e) pour qui recevra la réponse.')),
-        diagnosticContraintes: @json(__('Aucune contrainte cochée dans la section « Contraintes et destination ».')),
+        diagnosticFormat: @json(__("Tu n'as pas indiqué la forme de la réponse attendue (texte court, liste, tableau...) ni sa longueur.")),
+        diagnosticAudience: @json(__("Tu n'as pas indiqué à qui s'adresse la réponse (par exemple : tes élèves, des parents, des collègues). L'IA adaptera mieux son ton si elle le sait.")),
+        diagnosticContraintes: @json(__("Tu n'as coché aucune règle à faire respecter (par exemple : éviter le style trop « IA », poser une question si la demande est floue).")),
         exportError: @json(__('Impossible d\'exporter le fichier. Réessayez.')),
         deleteError: @json(__('Erreur lors de la suppression. Réessayez.')),
         importError: @json(__('Erreur lors de l\'importation. Réessayez.')),

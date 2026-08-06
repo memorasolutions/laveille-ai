@@ -2183,7 +2183,6 @@
     "Plus": "Plus",
     "Plus de 100 enregistrements éligibles, action immédiate recommandée.": "Plus de 100 enregistrements éligibles, action immédiate recommandée.",
     "Plus...": "Plus...",
-    "Points à valider pour un prompt plus efficace.": "Points à valider pour un prompt plus efficace.",
     "Police du corps": "Police du corps",
     "Police du corps, taille, graisse, espacement": "Police du corps, taille, graisse, espacement",
     "Politique de confidentialité": "Politique de confidentialité",
@@ -3707,5 +3706,10 @@
     "– vous seriez vous-même exclu du site.": "– vous seriez vous-même exclu du site.",
     "– évolution des inscriptions sur les 12 derniers mois": "– évolution des inscriptions sur les 12 derniers mois",
     "⚠️ Confirmer la réinitialisation": "⚠️ Confirmer la réinitialisation",
-    "🔄 Recommencer": "🔄 Recommencer"
+    "🔄 Recommencer": "🔄 Recommencer",
+    "Ton prompt fonctionne déjà. Ces précisions le rendraient encore meilleur :": "Ton prompt fonctionne déjà. Ces précisions le rendraient encore meilleur :",
+    "Tu n'as pas indiqué la forme de la réponse attendue (texte court, liste, tableau...) ni sa longueur.": "Tu n'as pas indiqué la forme de la réponse attendue (texte court, liste, tableau...) ni sa longueur.",
+    "Tu n'as pas indiqué à qui s'adresse la réponse (par exemple : tes élèves, des parents, des collègues). L'IA adaptera mieux son ton si elle le sait.": "Tu n'as pas indiqué à qui s'adresse la réponse (par exemple : tes élèves, des parents, des collègues). L'IA adaptera mieux son ton si elle le sait.",
+    "Tu n'as coché aucune règle à faire respecter (par exemple : éviter le style trop « IA », poser une question si la demande est floue).": "Tu n'as coché aucune règle à faire respecter (par exemple : éviter le style trop « IA », poser une question si la demande est floue).",
+    "Ajouter cette info": "Ajouter cette info"
 }

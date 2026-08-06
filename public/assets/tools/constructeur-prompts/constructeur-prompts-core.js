@@ -993,15 +993,15 @@ document.addEventListener('alpine:init', function() {
                 // affiché que si isValid (qui exige déjà un verbe), rendant ce diagnostic inatteignable.
                 // Le cas "verbe manquant" est couvert par l'alerte x-show="!isValid" juste en dessous.
                 if (!this.format && !this.length) {
-                    issues.push({ key: 'format', message: i18n.diagnosticFormat || 'Aucun format de sortie ni longueur précisée pour la réponse.' });
+                    issues.push({ key: 'format', message: i18n.diagnosticFormat || "Tu n'as pas indiqué la forme de la réponse attendue (texte court, liste, tableau...) ni sa longueur." });
                 }
                 if (!this.audienceText) {
-                    issues.push({ key: 'audience', message: i18n.diagnosticAudience || 'Aucun contexte ni audience précisé(e) pour qui recevra la réponse.' });
+                    issues.push({ key: 'audience', message: i18n.diagnosticAudience || "Tu n'as pas indiqué à qui s'adresse la réponse (par exemple : tes élèves, des parents, des collègues). L'IA adaptera mieux son ton si elle le sait." });
                 }
                 var hasConstraint = this.constraintAntiAI || this.constraintTypo || this.constraintCanvas
                     || this.constraintChainOfThought || this.constraintAskIfUnclear || !!this.constraintCustom;
                 if (!hasConstraint) {
-                    issues.push({ key: 'contraintes', message: i18n.diagnosticContraintes || 'Aucune contrainte cochée dans la section « Contraintes et destination ».' });
+                    issues.push({ key: 'contraintes', message: i18n.diagnosticContraintes || "Tu n'as coché aucune règle à faire respecter (par exemple : éviter le style trop « IA », poser une question si la demande est floue)." });
                 }
                 return { ok: issues.length === 0, issues: issues };
             },

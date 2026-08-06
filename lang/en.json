@@ -366,10 +366,8 @@
     "Aucun commentaire": "No comments",
     "Aucun commentaire dans la corbeille.": "No comments in the trash.",
     "Aucun commentaire.": "No comments.",
-    "Aucun contexte ni audience précisé(e) pour qui recevra la réponse.": "No context or intended audience specified for the recipient of the response.",
     "Aucun coupon.": "No coupons.",
     "Aucun déclencheur configuré.": "No triggers configured.",
-    "Aucun format de sortie ni longueur précisée pour la réponse.": "No output format or response length specified.",
     "Aucun incident enregistré": "No incidents recorded",
     "Aucun membre dans cette équipe.": "No members in this team.",
     "Aucun message utilisateur.": "No user messages.",
@@ -410,7 +408,6 @@
     "Aucune commande pour le moment.": "No orders yet.",
     "Aucune commande.": "No orders.",
     "Aucune condition": "No condition",
-    "Aucune contrainte cochée dans la section « Contraintes et destination ».": "No constraints selected in the \"Constraints and destination\" section.",
     "Aucune description renseignée.": "No description provided.",
     "Aucune donnee collectee pour le moment.": "No data collected yet.",
     "Aucune donnée pour cette période.": "No data for this period.",
@@ -2394,7 +2391,6 @@
     "Plus d'actions": "More actions",
     "Plus de 100 enregistrements éligibles, action immédiate recommandée.": "More than 100 eligible records, immediate action recommended.",
     "Plus...": "More...",
-    "Points à valider pour un prompt plus efficace.": "Points to check for a more effective prompt.",
     "Police du corps": "Body font",
     "Police du corps, taille, graisse, espacement": "Body font, size, weight, spacing",
     "Politique de confidentialité": "Privacy Policy",
@@ -4034,5 +4030,10 @@
     "⚠️ Confirmer la réinitialisation": "⚠️ Confirm reset",
     "🔄 Recommencer": "🔄 Start over",
     "Finaliser votre inscription": "Finish creating your account",
-    "Vous êtes sur le point de créer un compte avec l'adresse :email.": "You are about to create an account with the email address :email."
+    "Vous êtes sur le point de créer un compte avec l'adresse :email.": "You are about to create an account with the email address :email.",
+    "Ton prompt fonctionne déjà. Ces précisions le rendraient encore meilleur :": "Your prompt already works. These details would make it even better:",
+    "Tu n'as pas indiqué la forme de la réponse attendue (texte court, liste, tableau...) ni sa longueur.": "You haven't specified the expected response format (short text, list, table...) or its length.",
+    "Tu n'as pas indiqué à qui s'adresse la réponse (par exemple : tes élèves, des parents, des collègues). L'IA adaptera mieux son ton si elle le sait.": "You haven't specified who the response is for (for example: your students, parents, colleagues). The AI will adapt its tone better if it knows.",
+    "Tu n'as coché aucune règle à faire respecter (par exemple : éviter le style trop « IA », poser une question si la demande est floue).": "You haven't checked any rule to enforce (for example: avoiding an overly \"AI\" style, asking a question if the request is unclear).",
+    "Ajouter cette info": "Add this info"
 }
