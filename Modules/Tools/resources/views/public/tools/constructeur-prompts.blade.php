@@ -160,38 +160,24 @@
                         .ct-seg-user{background:#FEF3C7;color:#5b4a1f;border-radius:4px;padding:0 2px;font-weight:600;}
                         .ct-seg-tool{background:var(--c-primary-light);color:var(--c-dark);border-radius:4px;}
                         {{-- Round 152 (2026-08-01, écran 3) : 5 blocs TOUJOURS visibles, zéro accordéon
-                             interne (x-tools::prompt-block) + carte cliquable réutilisable
-                             (x-tools::prompt-card). L'état sélectionné n'est JAMAIS indiqué par la seule
-                             couleur : la coche .ct-card__mark (visibility, pas juste une teinte) est
-                             l'exigence explicite du panel qui a revu ce plan. --}}
+                             interne (x-tools::prompt-block). Les grilles de cartes cliquables
+                             (x-tools::prompt-card) des multi-sélections ont été remplacées le 2026-08-06
+                             (demande explicite : « garder l'ancien menu déroulant, mais chaque sélection
+                             devient une pastille ») par le pattern select + pastilles amovibles ci-dessous
+                             (.ct-chip) - les garde-fous formats (max 3, exclusivité JSON/Mermaid) restent
+                             appliqués via :disabled sur les <option>. --}}
                         .ct-block{margin-bottom:1.5rem;padding:1rem 1.1rem;border:1px solid #e5e7eb;border-radius:12px;background:#fff;}
                         .ct-block__head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:0.25rem;}
                         .ct-block__title{font-family:var(--f-heading);font-weight:700;color:var(--c-dark);font-size:1rem;margin:0;}
                         .ct-block__optional{font-size:0.72rem;font-weight:600;color:var(--c-text-muted);background:#f3f4f6;border-radius:999px;padding:2px 8px;white-space:nowrap;}
                         .ct-block__example{font-size:0.78rem;color:var(--c-text-muted);margin:0 0 0.75rem;font-style:italic;}
                         .ct-block__added{font-size:0.8rem;color:var(--c-dark);background:var(--c-primary-light);border-left:3px solid var(--c-primary);border-radius:6px;padding:0.45rem 0.65rem;margin:0.75rem 0 0;font-weight:600;}
-                        .ct-card-grid{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.5rem;}
-                        .ct-card{position:relative;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0.5rem 0.9rem;border:2px solid #d1d5db;border-radius:9999px;background:#fff;color:#374151;font-size:0.85rem;font-weight:500;cursor:pointer;transition:all .15s ease;}
-                        .ct-card:hover{border-color:var(--c-primary);color:var(--c-primary);}
-                        .ct-card--on{background:var(--c-primary);border-color:var(--c-primary);color:#fff;}
-                        .ct-card--on:hover{color:#fff;}
-                        .ct-card__input{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
-                        .ct-card:focus-within{outline:2px solid var(--c-primary);outline-offset:2px;z-index:1;}
-                        {{-- La coche n'occupe l'espace QUE sélectionnée : sinon ses 12px + le gap
-                             décentrent le libellé de 18px dans la pastille (signalement 2026-08-06). --}}
-                        .ct-card__mark{display:none;width:12px;font-weight:800;}
-                        .ct-card--on .ct-card__mark{display:inline-block;}
                         .ct-block__field{margin-bottom:0.75rem;}
                         .ct-block__field:last-child{margin-bottom:0;}
-                        {{-- LOT 1 (2026-08-06, garde-fous multi-sélection format) : carte désactivée
-                             (maximum 3 atteint, ou règle d'exclusivité JSON/Mermaid active) - opacité +
-                             curseur, hover neutralisé pour ne pas suggérer une interaction possible.
-                             .ct-format-card-wrap empile la carte et son motif d'explication (raison de
-                             la désactivation) sans casser le flex-wrap de .ct-card-grid. --}}
-                        .ct-card--disabled{opacity:0.45;cursor:not-allowed;}
-                        .ct-card--disabled:hover{border-color:#d1d5db;color:#374151;}
-                        .ct-format-card-wrap{display:flex;flex-direction:column;gap:2px;max-width:220px;}
-                        .ct-card-hint{font-size:0.68rem;color:var(--c-text-muted);line-height:1.3;}
+                        .ct-chip-row{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.5rem;}
+                        .ct-chip{display:inline-flex;align-items:center;gap:4px;border:2px solid var(--c-primary);border-radius:9999px;background:var(--c-primary);color:#fff;padding:0.25rem 0.5rem 0.25rem 0.75rem;font-size:0.8rem;font-weight:500;}
+                        .ct-chip__x{background:transparent;border:0;color:inherit;font-size:1rem;line-height:1;cursor:pointer;min-width:24px;min-height:24px;padding:0;}
+                        .ct-chip__x:focus-visible{outline:2px solid #fff;outline-offset:1px;border-radius:50%;}
                         {{-- LOT 2 (2026-08-06, champs conditionnels invisibles) : conteneur accentué
                              qui enveloppe une case "Autre (...)" et son champ de saisie révélé - rend
                              visible que ces cases ouvrent une zone de saisie secondaire, cohérent avec
@@ -403,12 +389,19 @@
                                     <input type="radio" name="audienceType" value="custom" x-model="audienceType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisée') }}
                                 </label>
                             </div>
-                            <div class="ct-block__field" x-show="audienceType === 'preset'" role="group" aria-label="{{ __('Choisir une ou plusieurs audiences') }}">
-                                <div class="ct-card-grid">
+                            <div class="ct-block__field" x-show="audienceType === 'preset'">
+                                <select id="cpAudienceSelect" class="form-control form-control-sm" @change="addAudienceFromSelect($event.target.value); $event.target.value=''" aria-label="{{ __('Ajouter un lecteur prédéfini') }}">
+                                    <option value="">{{ __('-- Ajouter un lecteur --') }}</option>
                                     <template x-for="a in audiences" :key="a.value">
-                                        <x-tools::prompt-card type="checkbox" value="a.value" model="audiencePresets">
-                                            <span x-text="a.label"></span>
-                                        </x-tools::prompt-card>
+                                        <option :value="a.value" x-text="a.label" :disabled="audiencePresets.includes(a.value)"></option>
+                                    </template>
+                                </select>
+                                <div class="ct-chip-row" role="list" aria-label="{{ __('Lecteurs choisis') }}">
+                                    <template x-for="v in audiencePresets" :key="v">
+                                        <span class="ct-chip" role="listitem">
+                                            <span x-text="audienceLabel(v)"></span>
+                                            <button type="button" class="ct-chip__x" :aria-label="'{{ __('Retirer') }} ' + audienceLabel(v)" @click="removeAudience(v)">&times;</button>
+                                        </span>
                                     </template>
                                 </div>
                             </div>
@@ -442,14 +435,18 @@
                                              sélections, et « Format JSON »/« Diagramme Mermaid » exclusifs entre eux
                                              et avec tout le reste. --}}
                                         <p class="small text-muted mb-2" style="font-size: 0.75rem;">{{ __('Choisis 1 à 3 formats compatibles.') }}</p>
-                                        <div class="ct-card-grid" role="group" aria-label="{{ __('Choisir un ou plusieurs formats de sortie') }}">
+                                        <select id="cpFormatSelect" class="form-control form-control-sm" @change="addFormatFromSelect($event.target.value); $event.target.value=''" aria-label="{{ __('Ajouter un format de sortie') }}">
+                                            <option value="">{{ __('-- Ajouter un format --') }}</option>
                                             <template x-for="fmt in formats" :key="fmt.value">
-                                                <div class="ct-format-card-wrap">
-                                                    <x-tools::prompt-card type="checkbox" value="fmt.value" model="formatsSelected" onChange="handleFormatChange(fmt.value)" disabled="isFormatDisabled(fmt.value)">
-                                                        <span x-text="fmt.label"></span>
-                                                    </x-tools::prompt-card>
-                                                    <small class="ct-card-hint" x-show="isFormatDisabled(fmt.value)" x-text="formatDisabledReason(fmt.value)"></small>
-                                                </div>
+                                                <option :value="fmt.value" x-text="fmt.label" :disabled="isFormatDisabled(fmt.value) || formatsSelected.includes(fmt.value)"></option>
+                                            </template>
+                                        </select>
+                                        <div class="ct-chip-row" role="list" aria-label="{{ __('Formats choisis') }}">
+                                            <template x-for="v in formatsSelected" :key="v">
+                                                <span class="ct-chip" role="listitem">
+                                                    <span x-text="formatLabel(v)"></span>
+                                                    <button type="button" class="ct-chip__x" :aria-label="'{{ __('Retirer') }} ' + formatLabel(v)" @click="removeFormat(v)">&times;</button>
+                                                </span>
                                             </template>
                                         </div>
                                         <div class="ct-conditional-block">

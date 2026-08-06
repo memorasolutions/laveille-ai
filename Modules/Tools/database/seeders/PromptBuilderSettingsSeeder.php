@@ -45,14 +45,19 @@ class PromptBuilderSettingsSeeder extends Seeder
             [
                 'group' => 'tools',
                 'key' => 'tools.prompt_builder.audiences',
+                // Liste recalibrée sur l'audience réelle du site (consensus panel Codex/DeepSeek/
+                // Perplexity 2026-08-06, tâche 1633) : public scolaire d'abord, familles MEQ.
+                // Les anciennes valeurs (pro/debutants/entrepreneurs/techniques) sont remappées
+                // côté JS à la restauration (migrateAudienceValues, constructeur-prompts-core.js).
                 'value' => json_encode([
-                    ['value' => 'pro', 'label' => 'Professionnels du secteur'],
-                    ['value' => 'debutants', 'label' => 'Débutants'],
-                    ['value' => 'entrepreneurs', 'label' => 'Entrepreneurs et dirigeants'],
-                    ['value' => 'etudiants', 'label' => 'Étudiants universitaires'],
+                    ['value' => 'eleves_primaire', 'label' => 'Élèves du primaire'],
+                    ['value' => 'eleves_secondaire', 'label' => 'Élèves du secondaire'],
+                    ['value' => 'etudiants', 'label' => 'Étudiants'],
+                    ['value' => 'parents', 'label' => 'Parents'],
+                    ['value' => 'collegues', 'label' => 'Collègues de travail'],
+                    ['value' => 'direction', 'label' => 'Direction ou gestionnaires'],
+                    ['value' => 'clients', 'label' => 'Clients'],
                     ['value' => 'grand_public', 'label' => 'Grand public'],
-                    ['value' => 'techniques', 'label' => 'Collègues techniques'],
-                    ['value' => 'direction', 'label' => 'Direction générale'],
                 ], JSON_UNESCAPED_UNICODE),
                 'type' => 'json',
                 'description' => 'Audiences prédéfinies du constructeur de prompts',

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.147.0] - 2026-08-06
+
+### Modifié
+- **Constructeur de prompts** : « Format de sortie » et les lecteurs prédéfinis de « Qui va lire ça ? » reviennent au menu déroulant - chaque sélection s'ajoute maintenant comme pastille amovible sous le champ (demande explicite du 2026-08-06, remplace les rangées de boutons). Les garde-fous du format (maximum 3, exclusivité Format JSON/Diagramme Mermaid) restent appliqués via la désactivation des options du menu.
+
+### Corrigé
+- **Constructeur de prompts** : la liste d'audiences recalibrée en v1.146.0 restait invisible en production - l'ancienne liste, figée en base de données par le seeder du 2026-07-26, primait sur le nouveau défaut du code. Une migration réversible met à jour la valeur stockée et purge son cache.
+
 ## [1.146.0] - 2026-08-06
 
 ### Modifié

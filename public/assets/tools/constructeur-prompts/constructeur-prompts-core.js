@@ -648,6 +648,40 @@ document.addEventListener('alpine:init', function() {
                     this.formatsSelected = [value];
                 }
             },
+            // ACTION: pattern select + pastilles amovibles (2026-08-06, demande explicite :
+            // « garder l'ancien menu déroulant, mais chaque sélection devient une pastille »)
+            // MCP: openrouter→deepseek-v4-flash, validé par Opus
+            // RAISON: remplace les grilles de cartes-checkbox pour Format de sortie et audiences.
+            addFormatFromSelect: function (value) {
+                if (!value) return;
+                if (this.isFormatDisabled(value)) return;
+                if (this.formatsSelected.indexOf(value) === -1) {
+                    this.formatsSelected.push(value);
+                    this.handleFormatChange(value);
+                }
+            },
+            removeFormat: function (value) {
+                var index = this.formatsSelected.indexOf(value);
+                if (index !== -1) this.formatsSelected.splice(index, 1);
+            },
+            formatLabel: function (value) {
+                var found = this.formats.find(function (f) { return f.value === value; });
+                return found ? found.label : value;
+            },
+            addAudienceFromSelect: function (value) {
+                if (!value) return;
+                if (this.audiencePresets.indexOf(value) === -1) {
+                    this.audiencePresets.push(value);
+                }
+            },
+            removeAudience: function (value) {
+                var index = this.audiencePresets.indexOf(value);
+                if (index !== -1) this.audiencePresets.splice(index, 1);
+            },
+            audienceLabel: function (value) {
+                var found = this.audiences.find(function (a) { return a.value === value; });
+                return found ? found.label : value;
+            },
             // formatSelectionAll / formatText : représentation texte plate (formats prédéfinis +
             // format personnalisé) utilisée par feedbackResultat et promptSummary - jamais par le
             // générateur de prompt final (get prompt()), qui a sa propre logique de formulation
