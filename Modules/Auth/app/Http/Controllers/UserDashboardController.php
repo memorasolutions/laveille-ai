@@ -191,8 +191,48 @@ class UserDashboardController extends Controller
             'tokens' => $user->tokens()
                 ->get(['name', 'created_at', 'last_used_at'])
                 ->toArray(),
-            'exported_at' => now()->toDateTimeString(),
         ];
+
+        // Round 2026-08-05 (audit conformité) : saved_prompts/bookmarks/newsletter/consents
+        // manquaient de l'export lié dans l'UI (/user/export-data) alors qu'ils étaient déjà
+        // couverts par /user/data-export (DataExportController::export) - un droit d'accès
+        // RGPD art. 20/Loi 25 ne doit jamais dépendre de quel bouton l'utilisateur a cliqué.
+        try {
+            if (class_exists(\Modules\Tools\Models\SavedPrompt::class)) {
+                $data['saved_prompts'] = \Modules\Tools\Models\SavedPrompt::forUser($userId)
+                    ->get(['name', 'prompt_text', 'params', 'created_at'])
+                    ->toArray();
+            }
+        } catch (\Throwable) {}
+
+        try {
+            if (class_exists(\Modules\Core\Models\Bookmark::class)) {
+                $data['bookmarks'] = \Modules\Core\Models\Bookmark::where('user_id', $userId)
+                    ->get(['bookmarkable_type', 'bookmarkable_id', 'created_at'])
+                    ->toArray();
+            }
+        } catch (\Throwable) {}
+
+        try {
+            if (class_exists(\Modules\Newsletter\Models\Subscriber::class)) {
+                $subscriber = \Modules\Newsletter\Models\Subscriber::where('email', $user->email)->first();
+                $data['newsletter'] = $subscriber ? [
+                    'subscribed' => !$subscriber->unsubscribed_at,
+                    'confirmed_at' => $subscriber->confirmed_at?->toDateTimeString(),
+                    'unsubscribed_at' => $subscriber->unsubscribed_at?->toDateTimeString(),
+                ] : ['subscribed' => false];
+            }
+        } catch (\Throwable) {}
+
+        try {
+            if (class_exists(\Modules\Privacy\Models\UserConsent::class)) {
+                $data['consents'] = \Modules\Privacy\Models\UserConsent::where('ip_hash', hash('sha256', request()->ip()))
+                    ->get(['choices', 'jurisdiction', 'created_at'])
+                    ->toArray();
+            }
+        } catch (\Throwable) {}
+
+        $data['exported_at'] = now()->toDateTimeString();
 
         return response()->streamDownload(
             function () use ($data) {

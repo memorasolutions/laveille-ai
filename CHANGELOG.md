@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.143.0] - 2026-08-05
+
+### Ajouté
+
+- **Constructeur de prompts : 6 correctifs du document de rétroaction « Modifications à faire - 001 » (#1594-#1599).**
+  Évolution incrémentale du wizard 4 étapes (jamais de refonte structurelle), prouvée par Playwright
+  (contraste stepper 8,2:1 AAA, cibles 44 px) et 63 tests / 284 assertions :
+  1. Espacement des boutons de navigation d'étapes (`.ct-step-nav`).
+  2. Stepper restylé : cercles, connecteurs, `aria-current="step"`.
+  3. Aperçu et vérifications repliés par défaut (disclosures `previewOpen`/`checksOpen`).
+  4. Panneau d'actions atténué tant que l'étape n'est pas valide (`.ct-actions-panel`).
+  5. Coches ✓ de complétion par étape (`stepComplete()`).
+  6. « Diagnostic rapide » renommé « Vérifications » + étape 4 regroupée en 3 fieldsets
+     (« Apparence de la réponse », « Voix et niveau de langage », « Règles à respecter »).
+
+### Corrigé
+
+- **Export RGPD `/user/export-data` : 4 catégories manquantes (#1603).** L'export du tableau de bord
+  utilisateur omettait `saved_prompts`, `bookmarks`, `newsletter` et `consents` (présentes dans
+  l'export du module Privacy mais pas dans celui du dashboard). Alignement sur
+  `DataExportController`, prouvé par `GdprDataExportTest` (8/8).
+
 ## [1.142.2] - 2026-08-05
 
 ### Corrigé

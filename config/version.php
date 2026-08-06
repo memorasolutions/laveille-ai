@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.143.0 · 2026-08-05 · feat(constructeur-prompts) 6 correctifs doc 001 (stepper, disclosures, fieldsets, coches) + fix export RGPD
  *   1.142.2 · 2026-08-05 · fix(constructeur-prompts) 5 correctifs issus d'un audit UX/qualité dédié
  *     (#1590/#1591), vérifiés un à un par Playwright après le fix : (1) message d'erreur d'étape 1/2
  *     figé - x-show n'était désactivé qu'au prochain clic "Suivant", jamais quand le champ redevenait
@@ -3608,8 +3609,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 142;
-$lvPatch = 2;
+$lvMinor = 143;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

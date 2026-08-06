@@ -182,6 +182,16 @@ document.addEventListener('alpine:init', function() {
             // BYOA stricte). Le panneau ne fait qu'afficher les mêmes boutons "Ouvrir dans"/
             // "Copier" déjà existants, reparamétrés avec un méta-prompt généré côté client.
             metaPromptShown: false,
+            // Correctif #3 (2026-08-05, allègement charge cognitive, club des sages) : l'aperçu et
+            // le bloc « Vérifications » sont désormais des disclosures repliées par défaut - l'état
+            // vit ici (persistant pendant la session Alpine, jamais en localStorage : pur confort
+            // d'affichage, aucun impact sur le prompt généré).
+            previewOpen: false,
+            checksOpen: false,
+            // Correctif #4 (2026-08-05) : étape 4 (Options avancées) est toujours optionnelle, donc
+            // "complète" seulement une fois visitée au moins une fois (voir stepComplete() et
+            // nextStep()/goToStep() plus bas qui arment ce drapeau).
+            step4Visited: false,
             showValidation: false,
             saveName: '',
             saving: false,
@@ -1325,6 +1335,7 @@ document.addEventListener('alpine:init', function() {
             openDiagnosticSection: function(key) {
                 var targetStep = key === 'audience' ? 3 : 4;
                 if (this.step !== targetStep) this.step = targetStep;
+                if (targetStep === 4) this.step4Visited = true;
                 var targetId = key === 'audience' ? 'cpAudienceBlock' : ('cpSection' + key.charAt(0).toUpperCase() + key.slice(1));
                 this.$nextTick(function() {
                     var el = document.getElementById(targetId);
@@ -1405,7 +1416,7 @@ document.addEventListener('alpine:init', function() {
                 if (this.step === 2 && (!hasVerb || !this.taskObject)) { this.showValidation = true; return; }
                 this.showValidation = false;
                 if (this.step === 2) this._autoDetectProfile();
-                if (this.step < 4) this.step++;
+                if (this.step < 4) { this.step++; if (this.step === 4) this.step4Visited = true; }
             },
             canGoToStep: function(s) {
                 var hasVerb = this.verbType === 'custom' ? !!this.verbCustom : !!this.verb;
@@ -1416,10 +1427,23 @@ document.addEventListener('alpine:init', function() {
                 return true;
             },
             goToStep: function(s) {
-                if (this.canGoToStep(s)) { this.showValidation = false; this.step = s; }
+                if (this.canGoToStep(s)) { this.showValidation = false; this.step = s; if (s === 4) this.step4Visited = true; }
                 else { this.showValidation = true; }
             },
             prevStep: function() { if (this.step > 1) this.step--; },
+            // Correctif #4 (2026-08-05, indicateur de complétion par étape) : 1=Persona (rôle choisi),
+            // 2=Tâche (verbe + description remplis), 3=Audience (optionnelle - complète dès qu'une
+            // audience est choisie), 4=Options avancées (tout optionnel - complète dès la 1re visite,
+            // voir step4Visited armé par nextStep()/goToStep() ci-dessus). Affiché en coche ✓ dans le
+            // cercle du stepper (voir .ct-stepper__btn--done, Blade).
+            stepComplete: function(n) {
+                var hasVerb = this.verbType === 'custom' ? !!this.verbCustom : !!this.verb;
+                if (n === 1) return !!this.personaText;
+                if (n === 2) return hasVerb && !!this.taskObject;
+                if (n === 3) return !!this.audienceText;
+                if (n === 4) return !!this.step4Visited;
+                return false;
+            },
 
             copy: function() {
                 var self = this;

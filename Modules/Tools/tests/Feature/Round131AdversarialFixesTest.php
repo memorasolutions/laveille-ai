@@ -61,8 +61,10 @@ it('confirms the diagnostic panel cannot serve as the fallback (round 131 root c
 
     // C'est CE x-show qui rend le panneau détaillé inutilisable comme explication du blocage :
     // il n'apparaît qu'une fois le formulaire déjà valide. Si ce contrat change un jour, le
-    // correctif du round 131 mérite d'être réévalué.
-    expect($blade)->toContain('<div x-show="isValid" x-cloak class="p-3 rounded mb-3"');
+    // correctif du round 131 mérite d'être réévalué. Markup mis à jour au correctif #3/#5
+    // (2026-08-05, disclosure « Vérifications » ex-« Diagnostic rapide ») : même x-show="isValid"
+    // x-cloak, désormais sur le wrapper .ct-disclosure au lieu du style inline d'origine.
+    expect($blade)->toContain('<div class="ct-disclosure" x-show="isValid" x-cloak>');
 });
 
 it('keeps the sibling alerts untouched (round 131 non-regression)', function () {
