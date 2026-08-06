@@ -512,7 +512,10 @@
                                                  chaque section de ta réponse."). --}}
                                             <span>{{ __('Séparer clairement les parties de la réponse') }}</span>
                                         </label>
-                                        <small class="text-muted d-block mt-1" style="font-size: 0.72rem;">{{ __('L\'IA insérera des repères ### entre les sections.') }}</small>
+                                        {{-- Signalement 2026-08-06 (tâche 1636) : « ### » ne parle qu'à qui connaît le
+                                             Markdown - l'explication décrit maintenant l'EFFET concret, sans jargon.
+                                             L'instruction réellement injectée dans le prompt reste inchangée. --}}
+                                        <small class="text-muted d-block mt-1" style="font-size: 0.72rem;">{{ __('Chaque partie de la réponse sera précédée d\'une ligne de séparation bien visible, pour voir d\'un coup d\'oeil où une section commence et où elle finit.') }}</small>
                                     </div>
                                 </x-tools::prompt-block>
                             </fieldset>

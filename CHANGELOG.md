@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.147.2] - 2026-08-06
+
+### Corrigé
+- **Constructeur de prompts** : l'explication « L'IA insérera des repères ### entre les sections » supposait de connaître le Markdown. Elle décrit maintenant l'effet concret : « Chaque partie de la réponse sera précédée d'une ligne de séparation bien visible... ». L'instruction envoyée à l'IA reste inchangée.
+
 ## [1.147.1] - 2026-08-06
 
 ### Corrigé
