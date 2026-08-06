@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.147.5 · 2026-08-06 · fix(constructeur-prompts) bouton d'aide bonifié après avis du panel (zone tactile 40 px, survol/focus visibles) + dimensions inline (un CSS du thème écrasait la hauteur du cercle)
  *   1.147.4 · 2026-08-06 · fix(constructeur-prompts) « ? » des boutons d'aide centré via le composant DRY x-tools::help-btn (centrage flexbox, remplace 3 blocs inline dupliqués)
  *   1.147.3 · 2026-08-06 · fix(constructeur-prompts) cocher « Autre » masque le menu Longueur/Ton et vide sa valeur (les deux contrôles partageaient la même donnée, signalement utilisateur) ; format multi conservé et documenté
  *   1.147.2 · 2026-08-06 · fix(constructeur-prompts) explication « repères ### » réécrite sans jargon Markdown (effet concret décrit, signalement utilisateur)
@@ -3620,7 +3621,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 147;
-$lvPatch = 4;
+$lvPatch = 5;
 
 return [
     'major' => $lvMajor,

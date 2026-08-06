@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.147.5] - 2026-08-06
+
+### Modifié
+- **Constructeur de prompts** : bouton d'aide « ? » bonifié suivant l'avis du panel (Codex + DeepSeek) - zone cliquable invisible portée à 40 px (cercle visuel inchangé), états survol et focus clavier visibles. Correctif au passage : un style global du thème écrasait la hauteur du cercle (32x22) - les dimensions passent en inline, prioritaires partout.
+
 ## [1.147.4] - 2026-08-06
 
 ### Corrigé
