@@ -25,7 +25,7 @@
                             <div class="d-flex gap-1">
                                 @include('tools::partials.fullscreen-btn')
                                 @include('tools::partials.share-btn', ['tool' => $tool])
-                                <button class="ct-btn ct-btn-primary ct-btn-icon" @click="jQuery('#promptHelpModal').modal('show')" style="border-radius:50%;width:32px;height:32px;padding:0;line-height:32px;flex-shrink:0;" title="{{ __('Aide') }}">?</button>
+                                <x-tools::help-btn click="jQuery('#promptHelpModal').modal('show')" :size="32" />
                             </div>
                         </div>
                         @include('tools::public.partials.tool-geo')
@@ -272,7 +272,7 @@
                         <div x-show="step === 1" x-transition>
                             <div class="d-flex align-items-center gap-2 mb-1">
                                 <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('Sur quel ton l\'IA doit-elle répondre ?') }}</h2>
-                                <button class="ct-btn ct-btn-outline ct-btn-xs" @click="showHelp.persona = !showHelp.persona" :aria-expanded="showHelp.persona.toString()" aria-label="{{ __('Aide') }}" title="{{ __('Aide') }}" style="border-radius:50%;width:24px;height:24px;min-width:24px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;border:2px solid var(--c-primary);color:var(--c-primary);font-weight:700;">?</button>
+                                <x-tools::help-btn toggle="showHelp.persona" style="margin-left:4px;" />
                             </div>
                             <div x-show="showHelp.persona" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;" x-text="helps.persona"></div>
                             <div class="ct-block__field">
@@ -562,7 +562,7 @@
                                         <input type="checkbox" x-model="cadreStrict" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
                                         <span><strong>{{ __('Cadre strict') }}</strong> : <span x-text="cadreStrict ? '{{ __('activé') }}' : '{{ __('désactivé') }}'"></span></span>
                                     </label>
-                                    <button class="ct-btn ct-btn-outline ct-btn-xs" @click="showHelp.cadreStrict = !showHelp.cadreStrict" :aria-expanded="showHelp.cadreStrict.toString()" aria-label="{{ __('Aide') }}" title="{{ __('Aide') }}" style="border-radius:50%;width:24px;height:24px;min-width:24px;padding:0;line-height:22px;flex-shrink:0;border:2px solid var(--c-primary);color:var(--c-primary);font-weight:700;">?</button>
+                                    <x-tools::help-btn toggle="showHelp.cadreStrict" />
                                 </div>
                                 <div x-show="showHelp.cadreStrict" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;">{{ __('Activé (par défaut), l\'outil ajoute l\'écriture naturelle anti-IA, la typographie française et un rappel de qualité. Désactivé, votre prompt reste au plus près de ce que vous avez écrit.') }}</div>
 

@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.147.4] - 2026-08-06
+
+### Corrigé
+- **Constructeur de prompts** : le « ? » des boutons d'aide n'était pas centré dans son cercle (centrage par line-height, fragile). Nouveau composant réutilisable x-tools::help-btn avec centrage flexbox exact - les 3 boutons dupliqués inline passent par ce bloc unique. Mesuré : 0 px d'écart horizontal et vertical.
+
 ## [1.147.3] - 2026-08-06
 
 ### Corrigé
