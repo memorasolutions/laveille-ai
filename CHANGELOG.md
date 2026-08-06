@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.146.0] - 2026-08-06
+
+### Modifié
+- **Constructeur de prompts** : audiences prédéfinies de « Qui va lire ça ? » recalibrées sur le public réel du site (consensus panel Codex/DeepSeek/Perplexity, familles du guide MEQ) : Élèves du primaire, Élèves du secondaire, Étudiants, Parents, Collègues de travail, Direction ou gestionnaires, Clients, Grand public. Les prompts déjà sauvegardés avec les anciennes catégories sont automatiquement remappés à la restauration.
+
+### Corrigé
+- **Constructeur de prompts** : le libellé des pastilles de sélection (audiences, personas, formats...) est de nouveau centré. La coche « ✓ » réservait 18 px invisibles à gauche du texte même sur les pastilles non sélectionnées ; elle n'occupe désormais l'espace que lorsqu'elle est affichée (pastille sélectionnée), avec la transition existante.
+
 ## [1.145.0] - 2026-08-06
 
 ### Ajouté

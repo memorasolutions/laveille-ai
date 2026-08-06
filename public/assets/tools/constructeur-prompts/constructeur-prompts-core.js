@@ -7,6 +7,27 @@
 // Fichier servi tel quel (pas de build Vite pour Modules/Tools — même convention que
 // minuteur-visuel-core.js, anonymizer-core.js, etc.) : cache-busting via ?v={semver} en query string.
 document.addEventListener('alpine:init', function() {
+    // ACTION: remapper les anciennes valeurs d'audience (liste pré-2026-08-06) vers les nouvelles
+    // MCP: openrouter→deepseek-v4-flash (Hermes indisponible), validé par Opus
+    // RAISON: les prompts sauvegardés avec pro/debutants/entrepreneurs/techniques doivent rester restaurables
+    const migrateAudienceValues = (values) => {
+        if (!Array.isArray(values)) return [];
+        const mapping = {
+            'pro': 'collegues',
+            'debutants': 'grand_public',
+            'entrepreneurs': 'direction',
+            'techniques': 'collegues'
+        };
+        const seen = new Set();
+        return values.reduce((acc, val) => {
+            const mapped = mapping[val] ?? val;
+            if (!seen.has(mapped)) {
+                seen.add(mapped);
+                acc.push(mapped);
+            }
+            return acc;
+        }, []);
+    };
     Alpine.data('promptBuilder', function() {
         return {
             step: 1,
@@ -1251,7 +1272,7 @@ document.addEventListener('alpine:init', function() {
                                     // déclaration plus haut). La migration de LECTURE elle-même (ligne
                                     // suivante, singulier → tableau pluriel) reste intacte : elle lit
                                     // `p.audiencePreset` depuis le PAYLOAD chargé, pas depuis l'état.
-                                    if (Array.isArray(p.audiencePresets)) { self.audiencePresets = p.audiencePresets; } else if (p.audiencePreset) { self.audiencePresets = [p.audiencePreset]; }
+                                    if (Array.isArray(p.audiencePresets)) { self.audiencePresets = migrateAudienceValues(p.audiencePresets); } else if (p.audiencePreset) { self.audiencePresets = migrateAudienceValues([p.audiencePreset]); }
                                     if (p.audienceCustom) {
                                         self.audienceCustom = p.audienceCustom;
                                         self.audienceType = 'custom';
@@ -1405,7 +1426,7 @@ document.addEventListener('alpine:init', function() {
                                 }
                                 if (p.taskObject) self.taskObject = p.taskObject;
                                 if (p.audienceType) self.audienceType = p.audienceType;
-                                if (Array.isArray(p.audiencePresets)) { self.audiencePresets = p.audiencePresets; } else if (p.audiencePreset) { self.audiencePresets = [p.audiencePreset]; }
+                                if (Array.isArray(p.audiencePresets)) { self.audiencePresets = migrateAudienceValues(p.audiencePresets); } else if (p.audiencePreset) { self.audiencePresets = migrateAudienceValues([p.audiencePreset]); }
                                 if (p.audienceCustom) {
                                     self.audienceCustom = p.audienceCustom;
                                     self.audienceType = 'custom';

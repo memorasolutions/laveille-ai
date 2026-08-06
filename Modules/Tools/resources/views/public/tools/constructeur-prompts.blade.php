@@ -177,8 +177,10 @@
                         .ct-card--on:hover{color:#fff;}
                         .ct-card__input{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
                         .ct-card:focus-within{outline:2px solid var(--c-primary);outline-offset:2px;z-index:1;}
-                        .ct-card__mark{display:inline-block;width:12px;font-weight:800;visibility:hidden;}
-                        .ct-card--on .ct-card__mark{visibility:visible;}
+                        {{-- La coche n'occupe l'espace QUE sélectionnée : sinon ses 12px + le gap
+                             décentrent le libellé de 18px dans la pastille (signalement 2026-08-06). --}}
+                        .ct-card__mark{display:none;width:12px;font-weight:800;}
+                        .ct-card--on .ct-card__mark{display:inline-block;}
                         .ct-block__field{margin-bottom:0.75rem;}
                         .ct-block__field:last-child{margin-bottom:0;}
                         {{-- LOT 1 (2026-08-06, garde-fous multi-sélection format) : carte désactivée
@@ -900,7 +902,10 @@
 @php
 $defaultPersonas = [['value'=>'expert_marketing','label'=>'Expert en marketing digital'],['value'=>'redacteur_web','label'=>'Rédacteur web professionnel'],['value'=>'enseignant','label'=>'Enseignant pédagogue'],['value'=>'developpeur','label'=>'Développeur senior'],['value'=>'consultant','label'=>'Consultant en stratégie'],['value'=>'graphiste','label'=>'Graphiste créatif'],['value'=>'analyste','label'=>'Analyste de données'],['value'=>'gestionnaire','label'=>'Gestionnaire de projet'],['value'=>'coach','label'=>'Coach professionnel'],['value'=>'journaliste','label'=>'Journaliste d\'investigation'],['value'=>'chercheur','label'=>'Chercheur scientifique'],['value'=>'rh','label'=>'Spécialiste en ressources humaines'],['value'=>'concepteur_pedagogique','label'=>'Concepteur pédagogique'],['value'=>'community_manager','label'=>'Gestionnaire de médias sociaux'],['value'=>'copywriter','label'=>'Rédacteur publicitaire (copywriter)'],['value'=>'formateur','label'=>'Formateur en entreprise'],['value'=>'adjoint_admin','label'=>'Adjoint administratif']];
 $defaultVerbs = ['Rédige','Analyse','Crée','Génère','Explique','Compare','Résume','Traduis','Optimise','Évalue','Développe','Conçois','Planifie','Diagnostique'];
-$defaultAudiences = [['value'=>'pro','label'=>'Professionnels du secteur'],['value'=>'debutants','label'=>'Débutants'],['value'=>'entrepreneurs','label'=>'Entrepreneurs et dirigeants'],['value'=>'etudiants','label'=>'Étudiants universitaires'],['value'=>'grand_public','label'=>'Grand public'],['value'=>'techniques','label'=>'Collègues techniques'],['value'=>'direction','label'=>'Direction générale']];
+// Liste recalibrée sur l'audience réelle du site (consensus panel Codex/DeepSeek/Perplexity
+// 2026-08-06, tâche 1633 : public scolaire d'abord, familles MEQ) ; les anciennes valeurs
+// (pro/debutants/entrepreneurs/techniques) sont remappées côté JS à la restauration.
+$defaultAudiences = [['value'=>'eleves_primaire','label'=>'Élèves du primaire'],['value'=>'eleves_secondaire','label'=>'Élèves du secondaire'],['value'=>'etudiants','label'=>'Étudiants'],['value'=>'parents','label'=>'Parents'],['value'=>'collegues','label'=>'Collègues de travail'],['value'=>'direction','label'=>'Direction ou gestionnaires'],['value'=>'clients','label'=>'Clients'],['value'=>'grand_public','label'=>'Grand public']];
 $pbPersonas = class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('tools.prompt_builder.personas', $defaultPersonas) : $defaultPersonas;
 $pbVerbs = class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('tools.prompt_builder.verbs', $defaultVerbs) : $defaultVerbs;
 $pbAudiences = class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('tools.prompt_builder.audiences', $defaultAudiences) : $defaultAudiences;
