@@ -79,7 +79,10 @@
 
                             <h3 id="controller">{{ __('2. Responsable du traitement') }}</h3>
                             <p>
-                                <strong>{{ $company['name'] }}</strong><br>
+                                <strong>{{ $company['name'] }}</strong>{{ !empty($company['legal_name']) ? ', '.__('dénomination commerciale de').' '.$company['legal_name'] : '' }} ({{ __('NEQ') }}&nbsp;{{ $company['neq'] }})<br>
+                                @if(!empty($company['brand']))
+                                    {{ __('Exploitant de la plateforme') }} {{ $company['brand'] }} (laveille.ai)<br>
+                                @endif
                                 {{ $company['address'] }}<br>
                                 {{ __('Délégué à la protection des données (DPO)') }}&nbsp;: {{ $company['dpo_name'] }}<br>
                                 {{ __('Courriel') }}&nbsp;: <a href="mailto:{{ $company['dpo_email'] }}">{{ $company['dpo_email'] }}</a>
@@ -214,12 +217,12 @@
                                 <table class="table table-bordered table-striped" style="font-size: 13px;">
                                     <thead><tr><th>{{ __('Type de donnée') }}</th><th>{{ __('Durée') }}</th><th>{{ __('Justification') }}</th></tr></thead>
                                     <tbody>
-                                        <tr><td>{{ __('Données du compte') }}</td><td>{{ __('Durée de la relation + 3 ans') }}</td><td>{{ __('Prescription civile') }}</td></tr>
+                                        <tr><td>{{ __('Données du compte') }}</td><td>{{ __('Effacées immédiatement à la suppression du compte') }}</td><td>{{ __('Sauf obligation légale (ex. pièces de facturation), conservées pour la durée exigée par la loi') }}</td></tr>
                                         <tr><td>{{ __('Logs de connexion') }}</td><td>{{ __('12 mois') }}</td><td>{{ __('Sécurité et audit') }}</td></tr>
                                         <tr><td>{{ __('Cookies analytics') }}</td><td>{{ __('14 mois max') }}</td><td>{{ __('Recommandation CNIL') }}</td></tr>
                                         <tr><td>{{ __('Preuves de consentement') }}</td><td>{{ __('5 ans') }}</td><td>{{ __('RGPD art. 7') }}</td></tr>
                                         <tr><td>{{ __('Données infolettre') }}</td><td>{{ __('Jusqu\'au désabonnement + 3 ans') }}</td><td>{{ __('LCAP, prescription') }}</td></tr>
-                                        <tr><td>{{ __('Contributions UGC') }}</td><td>{{ __('Durée de la relation + 3 ans') }}</td><td>{{ __('Archivage') }}</td></tr>
+                                        <tr><td>{{ __('Contributions UGC') }}</td><td>{{ __('Anonymisées (non supprimées) à la suppression du compte') }}</td><td>{{ __('Continuité des échanges publics') }}</td></tr>
                                         <tr><td>{{ __('Statistiques liens courts') }}</td><td>{{ __('12 mois') }}</td><td>{{ __('Anonymisation ultérieure') }}</td></tr>
                                         <tr><td>{{ __('Sondages Décido (dates/options, réponses des participants)') }}</td><td>{{ __('2 à 3 mois selon le type, 30 jours après clôture, prolongeable de 3 mois (max. 2 fois) par le créateur') }}</td><td>{{ __('Minimisation des données - suppression automatique') }}</td></tr>
                                         <tr><td>{{ __('Demandes exercice de droits') }}</td><td>{{ __('Durée traitement + 3 ans') }}</td><td>{{ __('Preuve de traitement') }}</td></tr>

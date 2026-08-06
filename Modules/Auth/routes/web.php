@@ -83,6 +83,10 @@ Route::middleware('auth')->group(function () {
 Route::middleware('guest')->group(function () {
     Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('social.redirect');
     Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])->name('social.callback');
+
+    // Finalisation de l'inscription sociale : attestation d'âge obligatoire avant création du compte
+    Route::get('/auth/finalize', [SocialAuthController::class, 'showFinalize'])->name('social.finalize');
+    Route::post('/auth/finalize', [SocialAuthController::class, 'storeFinalize'])->name('social.finalize.submit');
 });
 
 // Email verification

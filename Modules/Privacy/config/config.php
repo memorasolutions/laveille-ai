@@ -14,11 +14,21 @@ return [
     | Company Information
     |--------------------------------------------------------------------------
     */
+    // Decision utilisateur 2026-08-05 : l'entite juridiquement responsable est MEMORA solutions
+    // pour TOUTES les pages legales (Loi 25 : le responsable du traitement doit etre identifiable
+    // sans ambiguite). « La veille de Stef » redevient ce qu'elle est : une marque exploitee par
+    // MEMORA solutions -> cle 'brand', jamais presentee comme l'entite responsable.
     'company' => [
-        'name' => env('COMPANY_NAME', 'La veille de Stef'),
-        'address' => env('COMPANY_ADDRESS', 'CP 64021, L\'Ancienne-Lorette RPOST-JAC (QC) G2E 2X0, Canada'),
+        // Dénomination sociale immatriculée au REQ pour le NEQ 1170260492 (vérifiée 2026-08-05) :
+        // « MEMORA solutions » est un autre nom déclaré (en vigueur depuis 2021-04-09), pas la
+        // dénomination sociale elle-même -> les pages légales doivent pouvoir citer les deux.
+        'legal_name' => env('COMPANY_LEGAL_NAME', '9307-6719 Québec inc.'),
+        'name' => env('COMPANY_NAME', 'MEMORA solutions'),
+        'brand' => env('COMPANY_BRAND', 'La veille de Stef'),
+        'neq' => env('COMPANY_NEQ', '1170260492'),
+        'address' => env('COMPANY_ADDRESS', '1501, rue Saint-Benoit, L\'Ancienne-Lorette (Québec) G2E 1P2, Canada'),
         'email' => env('COMPANY_EMAIL', 'info@laveille.ai'),
-        'dpo_email' => env('DPO_EMAIL', 'politiques@memora.ca'),
+        'dpo_email' => env('DPO_EMAIL', 'confidentialite@laveille.ai'),
         'dpo_name' => env('DPO_NAME', 'Stéphane Lapointe'),
         'phone' => env('COMPANY_PHONE', ''),
         'country' => env('COMPANY_COUNTRY', 'CA'),
@@ -31,19 +41,24 @@ return [
     */
     'documents' => [
         'privacy_policy' => [
-            'version' => '3.4',
+            'version' => '3.5',
             'url' => '/privacy-policy',
-            'updated_at' => '2026-07-21',
+            'updated_at' => '2026-08-05',
         ],
         'terms' => [
-            'version' => '3.1',
+            'version' => '4.0',
             'url' => '/terms-of-use',
-            'updated_at' => '2026-05-29',
+            'updated_at' => '2026-08-05',
         ],
         'cookie_policy' => [
-            'version' => '2.1',
+            'version' => '2.2',
             'url' => '/cookie-policy',
-            'updated_at' => '2026-05-29',
+            'updated_at' => '2026-08-05',
+        ],
+        'sales_conditions' => [
+            'version' => '2.0',
+            'url' => '/conditions-de-vente',
+            'updated_at' => '2026-08-05',
         ],
     ],
 
@@ -260,7 +275,9 @@ return [
             'withdrawal',
         ],
         'response_delay_days' => 30,
-        'notification_email' => env('PRIVACY_DPO_EMAIL', 'dpo@yourcompany.com'),
+        // Défaut aligné sur le DPO réellement affiché aux pages légales (jamais un placeholder :
+        // une demande de droits notifiée à une adresse fantôme = délai de 30 jours brûlé en silence).
+        'notification_email' => env('PRIVACY_DPO_EMAIL', env('DPO_EMAIL', 'confidentialite@laveille.ai')),
     ],
 
     /*

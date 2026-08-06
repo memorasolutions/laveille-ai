@@ -31,12 +31,14 @@ class RightsRequest extends Model
         'jurisdiction',
         'deadline_at',
         'responded_at',
+        'reminded_at',
         'admin_notes',
     ];
 
     protected $casts = [
         'deadline_at' => 'datetime',
         'responded_at' => 'datetime',
+        'reminded_at' => 'datetime',
     ];
 
     public function scopePending($query)

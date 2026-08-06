@@ -18,7 +18,7 @@ uses(RefreshDatabase::class);
 test('retention settings have default values after seeding', function () {
     Artisan::call('db:seed', ['--class' => 'Modules\\Settings\\Database\\Seeders\\SettingsDatabaseSeeder']);
 
-    expect((int) Setting::get('retention.login_attempts_days', 90))->toBe(90);
+    expect((int) Setting::get('retention.login_attempts_days', 365))->toBe(365);
     expect((int) Setting::get('retention.sent_emails_days', 90))->toBe(90);
     expect((int) Setting::get('retention.activity_log_days', 180))->toBe(180);
     expect((int) Setting::get('retention.blocked_ips_days', 365))->toBe(365);
@@ -32,7 +32,7 @@ test('retention settings can be updated', function () {
 
 test('cleanup command removes old login attempts', function () {
     DB::table('login_attempts')->insert([
-        ['email' => 'old@test.com', 'ip_address' => '1.1.1.1', 'status' => 'failed', 'logged_in_at' => now()->subDays(100), 'created_at' => now()->subDays(100), 'updated_at' => now()->subDays(100)],
+        ['email' => 'old@test.com', 'ip_address' => '1.1.1.1', 'status' => 'failed', 'logged_in_at' => now()->subDays(400), 'created_at' => now()->subDays(400), 'updated_at' => now()->subDays(400)],
         ['email' => 'new@test.com', 'ip_address' => '2.2.2.2', 'status' => 'success', 'logged_in_at' => now()->subDays(10), 'created_at' => now()->subDays(10), 'updated_at' => now()->subDays(10)],
     ]);
 

@@ -1,4 +1,8 @@
 {{-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca --}}
+@php
+    $doc = config('privacy.documents.sales_conditions');
+    $company = config('privacy.company');
+@endphp
 @extends(fronttheme_layout())
 
 @section('title', __('Conditions de vente') . ' - ' . config('app.name'))
@@ -17,7 +21,8 @@
                     <div class="post">
                         <h2>{{ __('Conditions générales de vente') }}</h2>
                         <p style="color: #999; font-size: 13px;">
-                            <strong>{{ __('Date d\'entrée en vigueur') }}&nbsp;:</strong> {{ __('29 mai 2026') }}
+                            <strong>{{ __('Version') }}&nbsp;:</strong> {{ $doc['version'] }}<br>
+                            <strong>{{ __('Date d\'entrée en vigueur') }}&nbsp;:</strong> {{ \Carbon\Carbon::parse($doc['updated_at'])->translatedFormat('d F Y') }}
                         </p>
 
                         <div class="entry-details" style="line-height: 1.8;">
@@ -28,12 +33,11 @@
                             <h3 id="identification">{{ __('1. Identification du commerçant') }}</h3>
                             <p>{{ __('Le site laveille.ai est exploité par :') }}</p>
                             <ul>
-                                <li><strong>{{ __('Entreprise') }} :</strong> MEMORA solutions (incorporation)</li>
-                                <li><strong>{{ __('Site') }} :</strong> laveille.ai</li>
-                                <li><strong>{{ __('Adresse') }} :</strong> 1501, rue Saint-Benoit, L'Ancienne-Lorette (Québec) G2E 1P2, Canada</li>
+                                <li><strong>{{ __('Entreprise') }} :</strong> {{ $company['name'] }}{{ !empty($company['legal_name']) ? ', '.__('dénomination commerciale de').' '.$company['legal_name'] : '' }} ({{ __('NEQ') }}&nbsp;{{ $company['neq'] }})</li>
+                                <li><strong>{{ __('Plateforme') }} :</strong> {{ $company['brand'] ?? 'La veille de Stef' }} (laveille.ai)</li>
+                                <li><strong>{{ __('Adresse') }} :</strong> {{ $company['address'] }}</li>
                                 <li><strong>{{ __('Téléphone') }} :</strong> 418-800-6656 / {{ __('sans frais') }} : 1-833-363-6672</li>
-                                <li><strong>{{ __('Courriel') }} :</strong> <a href="mailto:politiques@memora.ca">politiques@memora.ca</a></li>
-                                <li><strong>NEQ :</strong> 1170260492</li>
+                                <li><strong>{{ __('Courriel') }} :</strong> <a href="mailto:{{ $company['dpo_email'] }}">{{ $company['dpo_email'] }}</a></li>
                                 <li><strong>TPS :</strong> 839145984 RT0001</li>
                                 <li><strong>TVQ :</strong> 1221788059 TQ0001</li>
                             </ul>
@@ -49,7 +53,7 @@
 
                             {{-- 3. Livraison --}}
                             <h3 id="livraison">{{ __('3. Livraison') }}</h3>
-                            <p>{{ __('Nous livrons nos produits dans plus de 200 pays. La disponibilité de la livraison pour votre adresse est vérifiée au moment de finaliser votre commande.') }}</p>
+                            <p>{{ __('Nous livrons nos produits dans les pays proposés au moment de la commande. La disponibilité de la livraison pour votre adresse est vérifiée au moment de finaliser votre commande.') }}</p>
                             <table class="table" style="margin-bottom: 16px;">
                                 <thead><tr><th>{{ __('Zone') }}</th><th>{{ __('Délai estimé (jours ouvrables)') }}</th></tr></thead>
                                 <tbody>
@@ -140,7 +144,7 @@
                             <h3 id="contact">{{ __('19. Contact') }}</h3>
                             <p>{{ __('Pour toute question concernant ces conditions ou une commande :') }}</p>
                             <ul>
-                                <li><strong>{{ __('Courriel') }} :</strong> <a href="mailto:politiques@memora.ca">politiques@memora.ca</a></li>
+                                <li><strong>{{ __('Courriel') }} :</strong> <a href="mailto:{{ $company['email'] }}">{{ $company['email'] }}</a></li>
                                 <li><strong>{{ __('Téléphone') }} :</strong> 418-800-6656</li>
                                 <li><strong>{{ __('Sans frais') }} :</strong> 1-833-363-6672</li>
                             </ul>

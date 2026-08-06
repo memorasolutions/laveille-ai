@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.144.0] - 2026-08-06
+
+### Ajouté
+
+- **Socle légal validé par un panel de 5 IA (Perplexity, Codex, DeepSeek, claude.ai, Gemini) puis corrigé
+  selon leurs réfutations (#1600/#1602/#1610).**
+  - Identification exacte de l'entité sur les 5 pages légales : « MEMORA solutions, dénomination
+    commerciale de 9307-6719 Québec inc. (NEQ 1170260492) », vérifiée contre la fiche du Registraire
+    des entreprises ; « La veille de Stef » présentée comme plateforme, jamais comme nom d'affaires.
+  - Responsable de la protection des renseignements personnels nommé sur les 5 pages, avec courriel
+    du même domaine (confidentialite@laveille.ai, transfert créé et vérifié).
+  - Attestation obligatoire « 16 ans ou plus » à l'inscription : formulaire web ET inscription
+    sociale Google/GitHub (nouvel écran « Finaliser votre inscription » - le contournement social
+    avait été détecté par Codex). Aucune date de naissance stockée.
+  - Rappel automatique au DPO des demandes de droits approchant le délai de 30 jours
+    (privacy:remind-overdue-requests, quotidien, idempotent).
+  - Courriel de confirmation de commande : référence versionnée aux conditions de vente (art. 54.7 LPC).
+  - Lien « Exercer mes droits » au pied de page + séparateur des liens du bandeau cookies.
+
+### Corrigé
+
+- **Concordance code↔promesses publiées** : journaux de connexion réellement conservés 12 mois
+  (défaut ET valeur en base, migration incluse) ; preuve de consentement conservée 5 ans ; purge des
+  statistiques de clics de liens courts à 12 mois (les liens ne sont jamais touchés) ; libellés de
+  purge honnêtes (« suppression définitive ») ; rétention des comptes décrite selon le comportement
+  réel ; courriel des ventes distinct du courriel du DPO ; « plus de 200 pays » remplacé par « les
+  pays proposés au moment de la commande » ; versions et dates des documents légaux incrémentées.
+
+### Notes
+
+- Les amendements de clauses CGV/CGU (14 blocs) sont volontairement NON publiés : réécrits en
+  brouillon v2 selon les réfutations du panel et mis en attente de validation juridique.
+
 ## [1.143.0] - 2026-08-05
 
 ### Ajouté

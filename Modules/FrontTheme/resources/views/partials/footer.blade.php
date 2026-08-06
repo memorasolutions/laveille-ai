@@ -102,6 +102,9 @@
                             @if(Route::has('legal.cookies'))
                                 <li><a href="{{ route('legal.cookies') }}">{{ __('Cookies') }}</a></li>
                             @endif
+                            @if(Route::has('legal.rights'))
+                                <li><a href="{{ route('legal.rights') }}">{{ __('Exercer mes droits') }}</a></li>
+                            @endif
                             @if(Route::has('directory.takedown.create'))
                                 <li><a href="{{ route('directory.takedown.create') }}">{{ __('Demande de retrait') }}</a></li>
                             @endif

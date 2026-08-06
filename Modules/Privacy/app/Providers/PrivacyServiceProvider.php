@@ -23,6 +23,7 @@ class PrivacyServiceProvider extends BaseModuleServiceProvider
         $this->bootModule();
         $this->commands([
             \Modules\Privacy\Console\PurgeExpiredDataCommand::class,
+            \Modules\Privacy\Console\RemindOverdueRequestsCommand::class,
         ]);
     }
 

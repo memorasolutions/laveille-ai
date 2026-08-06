@@ -65,7 +65,7 @@
 
                             {{-- SECTION 1 : ACCEPTATION --}}
                             <h3 id="acceptation">{{ __('1. Acceptation des conditions') }}</h3>
-                            <p>{{ __('En accédant au site laveille.ai (ci-après le « Service »), vous acceptez d\'être lié par les présentes conditions d\'utilisation. Si vous n\'acceptez pas ces conditions, vous ne devez pas utiliser le Service. Le Service est exploité par MEMORA solutions (incorporation), 1501, rue Saint-Benoit, L\'Ancienne-Lorette (Québec) G2E 1P2, Canada (ci-après l\'« exploitant »). NEQ : 1170260492.') }}</p>
+                            <p>{{ __('En accédant au site laveille.ai (ci-après le « Service »), vous acceptez d\'être lié par les présentes conditions d\'utilisation. Si vous n\'acceptez pas ces conditions, vous ne devez pas utiliser le Service. Le Service (la plateforme') }} {{ $company['brand'] ?? 'La veille de Stef' }}, laveille.ai) {{ __('est exploité par') }} {{ $company['name'] }}{{ !empty($company['legal_name']) ? ', '.__('dénomination commerciale de').' '.$company['legal_name'] : '' }} ({{ __('NEQ') }}&nbsp;{{ $company['neq'] }}), {{ $company['address'] }} ({{ __('ci-après l\'« exploitant »') }}).</p>
 
                             {{-- SECTION 2 : DESCRIPTION DU SERVICE --}}
                             <h3 id="service">{{ __('2. Description du service') }}</h3>
@@ -233,9 +233,9 @@
                             <h3 id="contact">{{ __('31. Coordonnées') }}</h3>
                             <p>{{ __('Pour toute question concernant ces conditions :') }}</p>
                             <ul>
-                                <li><strong>MEMORA solutions</strong> ({{ __('exploitation') }} : laveille.ai)</li>
-                                <li>1501, rue Saint-Benoit, L'Ancienne-Lorette (Québec) G2E 1P2, Canada</li>
-                                <li>{{ __('Courriel') }}&nbsp;: <a href="mailto:politiques@memora.ca">politiques@memora.ca</a></li>
+                                <li><strong>{{ $company['name'] }}</strong>{{ !empty($company['legal_name']) ? ', '.__('dénomination commerciale de').' '.$company['legal_name'] : '' }} ({{ __('NEQ') }}&nbsp;{{ $company['neq'] }}) - {{ __('exploitant de la plateforme') }} {{ $company['brand'] ?? 'La veille de Stef' }} (laveille.ai)</li>
+                                <li>{{ $company['address'] }}</li>
+                                <li>{{ __('Courriel') }}&nbsp;: <a href="mailto:{{ $company['dpo_email'] }}">{{ $company['dpo_email'] }}</a></li>
                                 <li>{{ __('Téléphone') }}&nbsp;: 418-800-6656 / {{ __('sans frais') }} : 1-833-363-6672</li>
                             </ul>
 

@@ -149,9 +149,9 @@
                             <h3 id="contact">{{ __('12. Contact') }}</h3>
                             <p>{{ __('Pour toute question concernant cette politique des cookies :') }}</p>
                             <p>
-                                <strong>{{ $company['name'] }}</strong><br>
-                                {{ __('Délégué à la protection des données') }}<br>
-                                <a href="mailto:{{ $company['dpo_email'] }}">{{ $company['dpo_email'] }}</a>
+                                <strong>{{ $company['name'] }}</strong>{{ !empty($company['legal_name']) ? ', '.__('dénomination commerciale de').' '.$company['legal_name'] : '' }} ({{ __('NEQ') }}&nbsp;{{ $company['neq'] }})<br>
+                                {{ __('Délégué à la protection des données (DPO)') }}&nbsp;: {{ $company['dpo_name'] }}<br>
+                                {{ __('Courriel') }}&nbsp;: <a href="mailto:{{ $company['dpo_email'] }}">{{ $company['dpo_email'] }}</a>
                             </p>
 
                             <hr>

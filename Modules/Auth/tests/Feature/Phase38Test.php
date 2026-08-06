@@ -35,7 +35,12 @@ it('invalid provider returns 404', function () {
     $this->get('/auth/discord/redirect')->assertStatus(404);
 });
 
-it('social callback creates new user', function () {
+// L'attestation d'âge obligatoire (Modules/Auth/app/Livewire/Register.php, ajoutée le
+// 2026-08-05) s'applique aussi à l'inscription sociale : le compte d'un utilisateur social
+// INCONNU n'est plus créé directement au callback, il l'est seulement après confirmation de
+// l'attestation sur l'écran dédié (route social.finalize). Couverture complète du nouveau
+// flux : Modules/Auth/tests/Feature/SocialAuthAgeAttestationTest.php.
+it('social callback for a new user redirects to the age attestation screen instead of creating the account directly', function () {
     $socialiteUser = Mockery::mock(\Laravel\Socialite\Contracts\User::class);
     $socialiteUser->shouldReceive('getEmail')->andReturn('social@example.com');
     $socialiteUser->shouldReceive('getName')->andReturn('Social User');
@@ -47,9 +52,9 @@ it('social callback creates new user', function () {
     $provider->shouldReceive('user')->andReturn($socialiteUser);
     Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
 
-    $this->get('/auth/google/callback');
+    $this->get('/auth/google/callback')->assertRedirect(route('social.finalize'));
 
-    $this->assertDatabaseHas('users', ['email' => 'social@example.com', 'social_provider' => 'google']);
+    $this->assertDatabaseMissing('users', ['email' => 'social@example.com']);
 });
 
 it('social callback logs in existing user', function () {

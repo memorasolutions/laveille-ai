@@ -27,8 +27,11 @@ class PurgeExpiredDataCommand extends Command
         // 1. login_attempts > 12 mois
         $summary['login_attempts'] = $this->purgeTable('login_attempts', 'created_at', now()->subMonths(12), $dryRun);
 
-        // 2. user_consents expires
-        $summary['user_consents'] = $this->purgeTable('user_consents', 'expires_at', now(), $dryRun, '<');
+        // 2. user_consents : la PREUVE du consentement est conservee proof_retention_years (5 ans,
+        // promesse de la politique de confidentialite) meme apres expiration du consentement -
+        // le bandeau redemande le choix, la preuve elle reste (concordance Loi 25, 2026-08-05).
+        $proofYears = (int) config('privacy.consent.proof_retention_years', 5);
+        $summary['user_consents'] = $this->purgeTable('user_consents', 'created_at', now()->subYears($proofYears), $dryRun);
 
         // 3. newsletter_subscribers desabonnes > 3 ans
         if (Schema::hasTable('newsletter_subscribers')) {
@@ -46,7 +49,7 @@ class PurgeExpiredDataCommand extends Command
             $summary['newsletter_subscribers'] = $count;
         }
 
-        // 4. rights_requests repondues > 3 ans → soft delete
+        // 4. rights_requests repondues > 3 ans → suppression definitive
         if (Schema::hasTable('rights_requests')) {
             $count = DB::table('rights_requests')
                 ->whereNotNull('responded_at')
@@ -58,7 +61,7 @@ class PurgeExpiredDataCommand extends Command
                     ->where('responded_at', '<', now()->subYears(3))
                     ->delete();
             }
-            $this->logAction('rights_requests (repondues > 3 ans, soft delete)', $count, $dryRun);
+            $this->logAction('rights_requests (repondues > 3 ans, suppression definitive)', $count, $dryRun);
             $summary['rights_requests'] = $count;
         }
 

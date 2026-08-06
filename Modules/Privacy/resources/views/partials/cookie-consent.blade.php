@@ -5,6 +5,7 @@
     $cookieName = config('privacy.consent.cookie_name', 'consent_v1');
     $policyVersion = config('privacy.documents.privacy_policy.version', '1.0');
     $policyUrl = config('privacy.documents.privacy_policy.url', '/privacy-policy');
+    $cookiePolicyUrl = config('privacy.documents.cookie_policy.url', '/cookie-policy');
     $locale = app()->getLocale();
     $isFr = str_starts_with($locale, 'fr');
     $hasCookie = false; // Toujours false côté serveur — le JS gère l'état via le cookie client
@@ -20,6 +21,7 @@
         'save' => $isFr ? 'Enregistrer mes choix' : 'Save preferences',
         'back' => $isFr ? 'Retour' : 'Back',
         'policy_link' => $isFr ? 'Politique de confidentialité' : 'Privacy policy',
+        'cookie_policy_link' => $isFr ? 'Politique de cookies' : 'Cookie policy',
         'fab_label' => $isFr ? 'Gérer les témoins' : 'Manage cookies',
     ];
 @endphp
@@ -122,7 +124,7 @@
             <h2 id="cc-title" class="cc-title">{{ $text['title'] }}</h2>
             <p id="cc-desc" class="cc-text">
                 {{ $text['intro'] }}
-                <a href="{{ $policyUrl }}" class="cc-link">{{ $text['policy_link'] }}</a>
+                <a href="{{ $policyUrl }}" class="cc-link">{{ $text['policy_link'] }}</a><span aria-hidden="true"> · </span><a href="{{ $cookiePolicyUrl }}" class="cc-link">{{ $text['cookie_policy_link'] }}</a>
             </p>
         </div>
 

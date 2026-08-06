@@ -53,6 +53,14 @@
         </div>
 
         <p style="font-size:12px; color:#94a3b8; text-align:center;">Sur votre relevé bancaire : MEMORA* LAVEILLE.AI</p>
+
+        {{-- Référence contractuelle (art. 54.7 LPC) --}}
+        <p style="font-size:13px; color:#64748b; margin-top:24px; padding-top:16px; border-top:1px solid #e2e8f0;">
+            Cette commande est régie par nos
+            <a href="{{ url('/conditions-de-vente') }}" style="color:#0B7285; text-decoration:underline;">conditions de vente</a>
+            (version {{ config('privacy.documents.sales_conditions.version') }} du {{ \Illuminate\Support\Carbon::parse(config('privacy.documents.sales_conditions.updated_at'))->locale('fr_CA')->translatedFormat('d F Y') }}).
+            Conservez ce courriel : il tient lieu de confirmation de votre contrat.
+        </p>
     </div>
 
     {{-- Footer --}}

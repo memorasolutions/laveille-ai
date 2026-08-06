@@ -123,6 +123,10 @@ Schedule::command('ai:scrape-urls --all')->dailyAt('05:00');
 // Privacy - purge donnees expirees (Loi 25 / RGPD retention)
 Schedule::command('privacy:purge-expired')->dailyAt('02:30');
 
+// Privacy - rappel au DPO des demandes de droits en approche du delai de reponse de 30 jours
+// (promesse publiee dans la politique de confidentialite). Idempotent via reminded_at.
+Schedule::command('privacy:remind-overdue-requests')->dailyAt('08:00')->withoutOverlapping();
+
 // Short URLs - nettoyage liens expires + avertissements 30j
 Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
 

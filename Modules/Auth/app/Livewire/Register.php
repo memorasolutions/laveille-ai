@@ -31,6 +31,10 @@ class Register extends Component
 
     public string $password_confirmation = '';
 
+    // Attestation d'age (CGU : compte reserve aux 16 ans et plus, config privacy.minors.eu_age).
+    // Booleen uniquement, jamais de date de naissance stockee (minimisation des donnees).
+    public bool $age_attested = false;
+
     public function register(AuthService $authService): void
     {
         $this->validate([
@@ -38,6 +42,7 @@ class Register extends Component
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'confirmed', new PasswordPolicyRule, new PasswordNotCompromisedRule],
+            'age_attested' => ['required', 'accepted'],
         ]);
 
         $name = trim($this->first_name.' '.$this->last_name);

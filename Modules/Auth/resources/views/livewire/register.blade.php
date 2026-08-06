@@ -3,6 +3,12 @@
     <h1 class="text-3xl font-bold leading-tight text-black mt-2">{{ __('Créer un compte') }}</h1>
     <p class="mt-2 text-base text-gray-600">{{ __('Entrez vos informations pour commencer') }}</p>
 
+    @if(session('error'))
+        <div class="bg-red-50 border border-red-200 text-red-800 p-3 rounded-md text-sm mb-4 mt-4" role="alert">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <form wire:submit="register" class="mt-8">
         <div class="space-y-5">
             {{-- Prénom / Nom de famille --}}
@@ -100,6 +106,17 @@
                            class="block w-full py-4 ps-10 pe-4 text-black placeholder-gray-500 transition-all duration-200 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:border-sky-600 focus:bg-white caret-sky-600"
                            placeholder="{{ __('Confirmer le mot de passe') }}" required>
                 </div>
+            </div>
+
+            {{-- Attestation d'age (compte reserve aux personnes de :age ans ou plus) --}}
+            <div>
+                <label class="flex items-start gap-3">
+                    <input wire:model="age_attested" type="checkbox" id="age_attested"
+                           class="mt-1 h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-600"
+                           required>
+                    <span class="text-sm text-gray-700">{{ __("J'atteste avoir :age ans ou plus", ['age' => config('privacy.minors.eu_age', 16)]) }}</span>
+                </label>
+                @error('age_attested')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
             </div>
 
             {{-- Submit --}}

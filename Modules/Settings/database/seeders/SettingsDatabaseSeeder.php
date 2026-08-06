@@ -88,7 +88,9 @@ class SettingsDatabaseSeeder extends Seeder
             ['group' => 'blog', 'key' => 'blog.revision_auto_cleanup', 'value' => 'true', 'type' => 'boolean', 'description' => 'Nettoyage automatique des anciennes révisions'],
 
             // Rétention des données
-            ['group' => 'retention', 'key' => 'retention.login_attempts_days', 'value' => '90', 'type' => 'number', 'description' => 'Durée de conservation des tentatives de connexion (jours)'],
+            // 365 j (et non 90) : concordance avec la politique de confidentialité ("12 mois")
+            // et privacy:purge-expired qui applique déjà 12 mois (audit concordance 2026-08-05).
+            ['group' => 'retention', 'key' => 'retention.login_attempts_days', 'value' => '365', 'type' => 'number', 'description' => 'Durée de conservation des tentatives de connexion (jours)'],
             ['group' => 'retention', 'key' => 'retention.sent_emails_days', 'value' => '90', 'type' => 'number', 'description' => 'Durée de conservation des emails envoyés (jours)'],
             ['group' => 'retention', 'key' => 'retention.activity_log_days', 'value' => '180', 'type' => 'number', 'description' => 'Durée de conservation des logs d\'activité (jours)'],
             ['group' => 'retention', 'key' => 'retention.blocked_ips_days', 'value' => '365', 'type' => 'number', 'description' => 'Durée de conservation des IPs bloquées expirées (jours)'],

@@ -144,7 +144,7 @@ it('cleanup command deletes old login attempts', function () {
         'email' => 'old@test.com',
         'ip_address' => '1.2.3.4',
         'status' => 'failed',
-        'logged_in_at' => now()->subDays(100),
+        'logged_in_at' => now()->subDays(400),
     ]);
 
     LoginAttempt::create([

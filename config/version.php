@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.144.0 · 2026-08-06 · feat(legal) socle légal validé panel 5 IA : entité 9307-6719 Québec inc./MEMORA solutions, DPO nommé, rétentions concordantes, attestation 16 ans (web + social)
  *   1.143.0 · 2026-08-05 · feat(constructeur-prompts) 6 correctifs doc 001 (stepper, disclosures, fieldsets, coches) + fix export RGPD
  *   1.142.2 · 2026-08-05 · fix(constructeur-prompts) 5 correctifs issus d'un audit UX/qualité dédié
  *     (#1590/#1591), vérifiés un à un par Playwright après le fix : (1) message d'erreur d'étape 1/2
@@ -3609,7 +3610,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 143;
+$lvMinor = 144;
 $lvPatch = 0;
 
 return [
