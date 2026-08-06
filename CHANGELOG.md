@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.147.3] - 2026-08-06
+
+### Corrigé
+- **Constructeur de prompts** : cocher « Autre (longueur personnalisée) » ou « Autre (ton personnalisé) » laissait le menu déroulant visible alors que les deux contrôles pilotent la même valeur - on croyait pouvoir en choisir deux. Le menu se masque maintenant quand « Autre » est coché (et la valeur repart à zéro au basculement). Le format de sortie reste volontairement cumulatif (multi-sélection + format personnalisé).
+
 ## [1.147.2] - 2026-08-06
 
 ### Corrigé

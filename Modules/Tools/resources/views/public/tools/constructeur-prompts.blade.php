@@ -449,6 +449,9 @@
                                                 </span>
                                             </template>
                                         </div>
+                                        {{-- Tâche 1637 : contrairement à Longueur/Ton, le format personnalisé
+                                             (formatCustom) S'AJOUTE aux formats choisis (multi-sélection voulue,
+                                             tâche 1618) - le menu reste donc visible ici, c'est intentionnel. --}}
                                         <div class="ct-conditional-block">
                                             <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.8rem; min-height: 44px; padding: 4px 6px;">
                                                 <input type="checkbox" x-model="customOpen.format" style="width:18px;height:18px;accent-color:var(--c-primary);margin:0;flex-shrink:0;"> {{ __('Autre (format personnalisé)') }}
@@ -460,7 +463,10 @@
                                     </div>
                                     <div class="ct-block__field">
                                         <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Longueur précise') }}</label>
-                                        <select class="form-control form-control-sm" x-model="length" aria-label="{{ __('Longueur souhaitée') }}">
+                                        {{-- Tâche 1637 (2026-08-06) : le select et le champ « Autre » pilotent la MÊME
+                                             valeur `length` - affichés ensemble, ils laissaient croire qu'on peut en
+                                             choisir deux. Cocher « Autre » masque le menu et remet la valeur à zéro. --}}
+                                        <select class="form-control form-control-sm" x-show="!customOpen.length" x-transition x-model="length" aria-label="{{ __('Longueur souhaitée') }}">
                                             <option value="">{{ __('-- Aucune --') }}</option>
                                             <template x-for="len in lengths" :key="len.value">
                                                 <option :value="len.value" x-text="len.label"></option>
@@ -470,7 +476,7 @@
                                              son champ - voir .ct-conditional-block (style ci-dessus). --}}
                                         <div class="ct-conditional-block">
                                             <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.8rem; min-height: 44px; padding: 4px 6px;">
-                                                <input type="checkbox" x-model="customOpen.length" style="width:18px;height:18px;accent-color:var(--c-primary);margin:0;flex-shrink:0;"> {{ __('Autre (longueur personnalisée)') }}
+                                                <input type="checkbox" x-model="customOpen.length" @change="length = ''" style="width:18px;height:18px;accent-color:var(--c-primary);margin:0;flex-shrink:0;"> {{ __('Autre (longueur personnalisée)') }}
                                             </label>
                                             <div x-show="customOpen.length" x-transition>
                                                 <input type="text" x-model="length" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: 1000 mots exactement') }}" aria-label="{{ __('Longueur personnalisée') }}">
@@ -525,7 +531,9 @@
                                 <x-tools::prompt-block :question="__('Sur quel ton l\'IA doit-elle répondre ?')" :example="__('Ex. : professionnel, chaleureux et engageant, académique.')" added="feedbackTon">
                                     <div class="ct-block__field">
                                         <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Ton général souhaité') }}</label>
-                                        <select class="form-control form-control-sm" x-model="tone" aria-label="{{ __('Ton de la réponse') }}">
+                                        {{-- Tâche 1637 (2026-08-06) : même logique que la longueur - select et champ
+                                             « Autre » partagent la valeur `tone`, donc un seul des deux visible. --}}
+                                        <select class="form-control form-control-sm" x-show="!customOpen.tone" x-transition x-model="tone" aria-label="{{ __('Ton de la réponse') }}">
                                             <option value="">{{ __('-- Aucun --') }}</option>
                                             <template x-for="t in tones" :key="t.value">
                                                 <option :value="t.value" x-text="t.label"></option>
@@ -535,7 +543,7 @@
                                              son champ - voir .ct-conditional-block (style ci-dessus). --}}
                                         <div class="ct-conditional-block">
                                             <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.8rem; min-height: 44px; padding: 4px 6px;">
-                                                <input type="checkbox" x-model="customOpen.tone" style="width:18px;height:18px;accent-color:var(--c-primary);margin:0;flex-shrink:0;"> {{ __('Autre (ton personnalisé)') }}
+                                                <input type="checkbox" x-model="customOpen.tone" @change="tone = ''" style="width:18px;height:18px;accent-color:var(--c-primary);margin:0;flex-shrink:0;"> {{ __('Autre (ton personnalisé)') }}
                                             </label>
                                             <div x-show="customOpen.tone" x-transition>
                                                 <input type="text" x-model="tone" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: Ironique et léger') }}" aria-label="{{ __('Ton personnalisé') }}">
