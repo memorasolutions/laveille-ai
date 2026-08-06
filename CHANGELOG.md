@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.147.1] - 2026-08-06
+
+### Corrigé
+- **Constructeur de prompts** : les lignes de résumé des blocs d'options commençaient par « Ajouté : » sans dire qui ajoutait quoi - un utilisateur croyait à une erreur en voyant « Ajouté : verbe « Analyse », longueur modéré (300-500 mots) » (valeurs pré-remplies automatiquement). Reformulé en « Sera inclus dans ton prompt : ... ».
+
 ## [1.147.0] - 2026-08-06
 
 ### Modifié

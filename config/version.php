@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.147.1 · 2026-08-06 · fix(constructeur-prompts) libellé « Ajouté : » reformulé « Sera inclus dans ton prompt : » (provenance des défauts intelligents incomprise, signalement utilisateur)
  *   1.147.0 · 2026-08-06 · feat(constructeur-prompts) Format de sortie et lecteurs en menu déroulant + pastilles amovibles (demande explicite) + migration settings audiences recalibrées (la liste v1.146.0 était masquée par l'override DB du seeder)
  *   1.146.0 · 2026-08-06 · feat(constructeur-prompts) audiences prédéfinies recalibrées public réel (consensus panel : élèves primaire/secondaire, parents, collègues, direction, clients) avec remap des anciennes valeurs + fix libellé des pastilles recentré (coche 18px)
  *   1.145.0 · 2026-08-06 · feat(constructeur-prompts) format multi-sélection avec garde-fous, 3 nouvelles méthodes, champs conditionnels accentués, libellé délimiteurs exact, boutons d'aide visibles, modale centrée
@@ -3616,7 +3617,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 147;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,

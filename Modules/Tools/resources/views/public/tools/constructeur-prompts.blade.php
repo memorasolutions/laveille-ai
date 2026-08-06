@@ -1106,8 +1106,8 @@ window.promptBuilderConfig = {
         // summary* plus haut : préfixe traduit, valeur brute (déjà en français, non traduite par
         // convention - personas/verbes/audiences/formats/longueurs/tons/techniques) concaténée telle
         // quelle.
-        addedPrefix: @json(__('Ajouté : ')),
-        addedAudience: @json(__('Ajouté : niveau de langage adapté à ')),
+        addedPrefix: @json(__('Sera inclus dans ton prompt : ')),
+        addedAudience: @json(__('Sera inclus dans ton prompt : un niveau de langage adapté à ')),
         fragVerb: @json(__('verbe ')),
         fragFormat: @json(__('format ')),
         fragLength: @json(__('longueur ')),

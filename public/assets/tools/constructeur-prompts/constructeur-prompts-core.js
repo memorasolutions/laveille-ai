@@ -783,7 +783,7 @@ document.addEventListener('alpine:init', function() {
                 if (!this.audienceText) return '';
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
                 var txt = this.audienceText.charAt(0).toLowerCase() + this.audienceText.slice(1);
-                return (i18n.addedAudience || 'Ajouté : niveau de langage adapté à ') + txt + '.';
+                return (i18n.addedAudience || 'Sera inclus dans ton prompt : un niveau de langage adapté à ') + txt + '.';
             },
             get feedbackResultat() {
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
@@ -792,7 +792,7 @@ document.addEventListener('alpine:init', function() {
                 if (this.formatText) parts.push((i18n.fragFormat || 'format ') + this.formatText.toLowerCase());
                 if (this.length) parts.push((i18n.fragLength || 'longueur ') + this.length.toLowerCase());
                 if (!parts.length) return '';
-                return (i18n.addedPrefix || 'Ajouté : ') + parts.join(', ') + '.';
+                return (i18n.addedPrefix || 'Sera inclus dans ton prompt : ') + parts.join(', ') + '.';
             },
             get feedbackTon() {
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
@@ -800,7 +800,7 @@ document.addEventListener('alpine:init', function() {
                 if (this.personaText) parts.push((i18n.fragRole || 'rôle ') + '« ' + this.personaText + ' »');
                 if (this.tone) parts.push((i18n.fragTone || 'ton ') + this.tone.toLowerCase());
                 if (!parts.length) return '';
-                return (i18n.addedPrefix || 'Ajouté : ') + parts.join(', ') + '.';
+                return (i18n.addedPrefix || 'Sera inclus dans ton prompt : ') + parts.join(', ') + '.';
             },
             // Round 152 (2026-08-01) : même condition EXACTE que `stylistRulesApply` dans
             // get promptSegments() (variable locale à cette autre fonction, donc dupliquée ici en
@@ -824,7 +824,7 @@ document.addEventListener('alpine:init', function() {
                 if (this.language === 'es') parts.push(i18n.fragLangEs || 'réponse en espagnol');
                 if (this.constraintCustom) parts.push(i18n.fragCustom || 'vos contraintes personnalisées');
                 if (!parts.length) return '';
-                return (i18n.addedPrefix || 'Ajouté : ') + parts.join(', ') + '.';
+                return (i18n.addedPrefix || 'Sera inclus dans ton prompt : ') + parts.join(', ') + '.';
             },
             get feedbackModele() {
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
@@ -842,7 +842,7 @@ document.addEventListener('alpine:init', function() {
                 if (techniqueFrags[this.technique]) parts.push(techniqueFrags[this.technique]);
                 if (this.useDelimiters) parts.push(i18n.fragDelimiters || 'délimiteurs ###');
                 if (!parts.length) return '';
-                return (i18n.addedPrefix || 'Ajouté : ') + parts.join(', ') + '.';
+                return (i18n.addedPrefix || 'Sera inclus dans ton prompt : ') + parts.join(', ') + '.';
             },
             get feedbackProfile() {
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
