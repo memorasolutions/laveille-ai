@@ -397,7 +397,8 @@
                                 </div>
                             </div>
                             <div class="ct-block__field" x-show="audienceType === 'custom'">
-                                <input type="text" id="cpAudienceCustom" class="form-control" x-model="audienceCustom" autocomplete="off" placeholder="{{ __('Ex: enseignants du secondaire au Québec') }}" aria-label="{{ __('Audience personnalisée') }}">
+                                <input type="text" id="cpAudienceCustom" class="form-control" x-model="audienceCustom" autocomplete="off" placeholder="{{ __('Ex : mes élèves de 5e année, leurs parents') }}" aria-label="{{ __('Audience personnalisée') }}" aria-describedby="cpAudienceCustomHelp">
+                                <small id="cpAudienceCustomHelp" style="display:block; margin-top:4px; color:var(--c-muted, #5a6b6f); font-size:0.8rem;">{{ __('Tu peux nommer plusieurs lecteurs, séparés par des virgules.') }}</small>
                             </div>
                         </div>
 
@@ -632,8 +633,14 @@
                              correctif #5, 2026-08-05 ; Option 3 hybride, Partie A — 2026-07-26) :
                              détection par règles simples, ZÉRO IA, ZÉRO appel réseau. Chaque manque
                              pointe vers la section « Réglages avancés » correspondante en un clic.
-                             Disclosure repliée par défaut (correctif #3), rouvrable en 1 clic. --}}
-                        <div class="ct-disclosure" x-show="isValid" x-cloak>
+                             Disclosure repliée par défaut (correctif #3), rouvrable en 1 clic.
+                             Correctif étape prématurée (2026-08-06) : diagnostic.issues est maintenant
+                             filtré par étape (voir get diagnostic() dans le JS) - le panneau ne doit donc
+                             jamais s'ouvrir vide. Le message « tout est beau » (diagnostic.ok) n'a de sens
+                             qu'une fois toutes les étapes atteintes, donc réservé à l'étape 4 (dernière) ;
+                             avant, un diagnostic.ok = true signifie seulement « rien à signaler POUR
+                             L'INSTANT », pas « prompt complet » - le panneau reste caché dans ce cas. --}}
+                        <div class="ct-disclosure" x-show="isValid && (diagnostic.issues.length > 0 || (diagnostic.ok && step === 4))" x-cloak>
                             <button type="button" class="ct-disclosure__toggle" @click="checksOpen = !checksOpen" :aria-expanded="checksOpen.toString()" aria-controls="cpChecksPanel">
                                 <span class="ct-disclosure__chevron" :class="{ 'ct-disclosure__chevron--open': checksOpen }" aria-hidden="true">▸</span>
                                 🔎 {{ __('Vérifications') }}

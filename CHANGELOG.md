@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.144.2] - 2026-08-06
+
+### Corrigé
+
+- **Constructeur de prompts : les Vérifications ne reprochent plus des étapes pas encore atteintes
+  (#1616).** Le panneau signalait l'audience (étape 3) et le format/contraintes (étape 4) dès
+  l'étape 2 - un premier utilisateur croyait avoir mal fait. Chaque suggestion n'apparaît plus
+  qu'à partir de l'étape de son champ ; le panneau reste masqué tant qu'il n'a rien d'utile à dire,
+  et l'état « tout est beau » est réservé à la dernière étape. Prouvé par captures Playwright aux
+  étapes 2 (absent) et 4 (présent) + 52 tests / 217 assertions.
+- **Audience personnalisée : l'aide « plusieurs lecteurs » manquait (#1617).** Le champ « Qui va
+  lire ça ? » acceptait déjà plusieurs lecteurs mais rien ne le disait ; nouveau placeholder
+  (« Ex : mes élèves de 5e année, leurs parents ») + ligne d'aide « Tu peux nommer plusieurs
+  lecteurs, séparés par des virgules. »
+
 ## [1.144.1] - 2026-08-06
 
 ### Corrigé

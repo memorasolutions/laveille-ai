@@ -4035,5 +4035,7 @@
     "Tu n'as pas indiqué la forme de la réponse attendue (texte court, liste, tableau...) ni sa longueur.": "You haven't specified the expected response format (short text, list, table...) or its length.",
     "Tu n'as pas indiqué à qui s'adresse la réponse (par exemple : tes élèves, des parents, des collègues). L'IA adaptera mieux son ton si elle le sait.": "You haven't specified who the response is for (for example: your students, parents, colleagues). The AI will adapt its tone better if it knows.",
     "Tu n'as coché aucune règle à faire respecter (par exemple : éviter le style trop « IA », poser une question si la demande est floue).": "You haven't checked any rule to enforce (for example: avoiding an overly \"AI\" style, asking a question if the request is unclear).",
-    "Ajouter cette info": "Add this info"
+    "Ajouter cette info": "Add this info",
+    "Ex : mes élèves de 5e année, leurs parents": "E.g.: my 5th grade students, their parents",
+    "Tu peux nommer plusieurs lecteurs, séparés par des virgules.": "You can name several readers, separated by commas."
 }

@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.144.2 · 2026-08-06 · fix(constructeur-prompts) Vérifications limitées aux étapes atteintes + aide multi-lecteurs sur l'audience personnalisée
  *   1.144.1 · 2026-08-06 · fix(constructeur-prompts) messages du panneau Vérifications réécrits en langage néophyte + bouton « Ajouter cette info »
  *   1.144.0 · 2026-08-06 · feat(legal) socle légal validé panel 5 IA : entité 9307-6719 Québec inc./MEMORA solutions, DPO nommé, rétentions concordantes, attestation 16 ans (web + social)
  *   1.143.0 · 2026-08-05 · feat(constructeur-prompts) 6 correctifs doc 001 (stepper, disclosures, fieldsets, coches) + fix export RGPD
@@ -3612,7 +3613,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 144;
-$lvPatch = 1;
+$lvPatch = 2;
 
 return [
     'major' => $lvMajor,

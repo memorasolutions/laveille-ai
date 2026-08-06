@@ -992,15 +992,21 @@ document.addEventListener('alpine:init', function() {
                 // Round 14 (2026-07-27) : pas de check "verbe manquant" ici - le panneau entier n'est
                 // affiché que si isValid (qui exige déjà un verbe), rendant ce diagnostic inatteignable.
                 // Le cas "verbe manquant" est couvert par l'alerte x-show="!isValid" juste en dessous.
-                if (!this.format && !this.length) {
+                //
+                // Correctif étape prématurée (2026-08-06) : chaque suggestion pointe vers le bloc de
+                // l'étape qui la contient (même mapping que openDiagnosticSection() plus bas : audience
+                // = étape 3, format/contraintes = étape 4). On ne signale un manque QUE si l'étape
+                // courante a déjà atteint celle du champ concerné - sinon un utilisateur encore à
+                // l'étape 2 (Tâche) se fait reprocher des champs d'étapes qu'il n'a pas encore vues.
+                if (this.step >= 4 && !this.format && !this.length) {
                     issues.push({ key: 'format', message: i18n.diagnosticFormat || "Tu n'as pas indiqué la forme de la réponse attendue (texte court, liste, tableau...) ni sa longueur." });
                 }
-                if (!this.audienceText) {
+                if (this.step >= 3 && !this.audienceText) {
                     issues.push({ key: 'audience', message: i18n.diagnosticAudience || "Tu n'as pas indiqué à qui s'adresse la réponse (par exemple : tes élèves, des parents, des collègues). L'IA adaptera mieux son ton si elle le sait." });
                 }
                 var hasConstraint = this.constraintAntiAI || this.constraintTypo || this.constraintCanvas
                     || this.constraintChainOfThought || this.constraintAskIfUnclear || !!this.constraintCustom;
-                if (!hasConstraint) {
+                if (this.step >= 4 && !hasConstraint) {
                     issues.push({ key: 'contraintes', message: i18n.diagnosticContraintes || "Tu n'as coché aucune règle à faire respecter (par exemple : éviter le style trop « IA », poser une question si la demande est floue)." });
                 }
                 return { ok: issues.length === 0, issues: issues };
