@@ -76,8 +76,11 @@ class PublicDirectoryController extends Controller
             ->withCount(['resources as tutorials_count' => $tutorialsCountClosure])
             ->whereNotIn('id', $recentIds)->orderByDesc('clicks_count')->distinct()->limit((int) Settings::get('directory.popular_tools_limit', 6))->get();
 
-        // 2026-05-05 #137 : count des outils archived pour afficher dans le toggle
-        $archivedCount = Tool::published()->where('lifecycle_status', 'archived')->count();
+        // 2026-05-05 #137 : count des outils archived pour afficher dans le toggle.
+        // 2026-08-06 #1645 : 0 pour le public - la vue masque alors le lien « Voir les X outils archivés ».
+        $archivedCount = ($request->user()?->can('moderate_tools') ?? false)
+            ? Tool::published()->where('lifecycle_status', 'archived')->count()
+            : 0;
 
         // Plus votés par la communauté (si module Voting actif)
         $topVoted = collect();

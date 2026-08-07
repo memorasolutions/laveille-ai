@@ -11,6 +11,12 @@ test('le toggle show_archived est réservé aux modérateurs', function () {
     expect($content)->toContain("can('moderate_tools')");
 });
 
+test('le compteur archivedCount est nul pour le public (le lien « Voir les X outils archivés » disparaît)', function () {
+    $content = file_get_contents(base_path('Modules/Directory/app/Http/Controllers/PublicDirectoryController.php'));
+    expect($content)->toContain("? Tool::published()->where('lifecycle_status', 'archived')->count()");
+    expect($content)->toContain(': 0;');
+});
+
 test('la fiche archivée sans remplaçant renvoie 404 au public', function () {
     $content = file_get_contents(base_path('Modules/Directory/app/Http/Controllers/PublicDirectoryController.php'));
     expect($content)->toContain('abort(404)');

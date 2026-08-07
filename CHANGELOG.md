@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.147.7] - 2026-08-06
+
+### Corrigé
+- **Annuaire** : le lien « 🗄️ Voir les X outils archivés » restait visible pour tous (la v1.147.6 avait réservé le toggle aux modérateurs mais pas le compteur qui pilote l'affichage du lien) - le compteur est désormais nul pour le public, le lien disparaît.
+- **Sitemap** : `/sitemap.xml` répondait HTTP 500 par épuisement de la mémoire PHP (128 Mo) - les neuf requêtes de génération chargeaient les modèles complets (contenus intégraux des actualités, descriptions, définitions), un poids qui grossissait chaque jour et que le cache masquait jusqu'à la purge du soir. Chaque requête ne sélectionne plus que les colonnes utiles (id, slug, date, image) ; trouvé grâce au journal Laravel prod (FatalError 20h15 Québec), GSC lisait encore le sitemap sans erreur à 09h46.
+
 ## [1.147.6] - 2026-08-06
 
 ### Corrigé

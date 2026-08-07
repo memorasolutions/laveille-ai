@@ -41,7 +41,7 @@ class SitemapController
         }
 
         // Articles publiés (avec images)
-        Article::where('status', 'published')->whereNotNull('published_at')->get()->each(function ($article) use ($sitemap) {
+        Article::where('status', 'published')->whereNotNull('published_at')->select(['id', 'slug', 'updated_at', 'featured_image'])->get()->each(function ($article) use ($sitemap) {
             $url = Url::create(url('/blog/'.$article->slug))
                 ->setLastModificationDate($article->updated_at)
                 ->setPriority(0.8)
@@ -55,7 +55,7 @@ class SitemapController
         });
 
         // Pages statiques publiées
-        StaticPage::where('status', 'published')->get()->each(function ($page) use ($sitemap) {
+        StaticPage::where('status', 'published')->select(['id', 'slug', 'updated_at'])->get()->each(function ($page) use ($sitemap) {
             $sitemap->add(
                 Url::create(route('page.show', $page->slug))
                     ->setLastModificationDate($page->updated_at)
@@ -74,7 +74,7 @@ class SitemapController
                 // même priorité 0.8 hebdomadaire qu'un outil pleinement fonctionnel. Le filtre est posé
                 // ICI et non dans scopeActive() : ce scope est partagé avec la liste /outils, qui doit
                 // justement continuer d'afficher les outils gatés (avec leur badge) aux superadmins.
-                \Modules\Tools\Models\Tool::active()->where('is_under_construction', false)->ordered()->get()->each(function ($tool) use ($sitemap) {
+                \Modules\Tools\Models\Tool::active()->where('is_under_construction', false)->ordered()->select(['id', 'slug', 'updated_at', 'sort_order'])->get()->each(function ($tool) use ($sitemap) {
                     $sitemap->add(
                         Url::create(route('tools.show', $tool->slug))
                             ->setLastModificationDate($tool->updated_at)
@@ -88,7 +88,7 @@ class SitemapController
         // Glossaire (si module Dictionary actif)
         if (Route::has('dictionary.index') && class_exists(\Modules\Dictionary\Models\Term::class)) {
             $sitemap->add(Url::create(route('dictionary.index'))->setPriority(0.8)->setChangeFrequency('weekly'));
-            \Modules\Dictionary\Models\Term::published()->get()->each(function ($term) use ($sitemap) {
+            \Modules\Dictionary\Models\Term::published()->select(['id', 'slug', 'updated_at', 'hero_image'])->get()->each(function ($term) use ($sitemap) {
                 $url = Url::create(route('dictionary.show', $term->slug))
                     ->setLastModificationDate($term->updated_at)
                     ->setPriority(0.7)
@@ -109,7 +109,7 @@ class SitemapController
                 $sitemap->add(Url::create(route('directory.education-pricing'))->setPriority(0.8)->setChangeFrequency('weekly'));
             }
             // 2026-08-06 #1645 : les fiches archivées (contenu crawlé à tort) ne doivent plus être indexées.
-            \Modules\Directory\Models\Tool::published()->notArchived()->get()->each(function ($tool) use ($sitemap) {
+            \Modules\Directory\Models\Tool::published()->notArchived()->select(['id', 'slug', 'updated_at', 'screenshot', 'lifecycle_status'])->get()->each(function ($tool) use ($sitemap) {
                 $url = Url::create($tool->getPublicUrl())
                     ->setLastModificationDate($tool->updated_at)
                     ->setPriority(0.7)
@@ -127,7 +127,7 @@ class SitemapController
         // Collections publiques (si module Directory actif)
         if (Route::has('collections.index') && class_exists(\Modules\Directory\Models\ToolCollection::class)) {
             $sitemap->add(Url::create(route('collections.index'))->setPriority(0.7)->setChangeFrequency('weekly'));
-            \Modules\Directory\Models\ToolCollection::public()->get()->each(function ($collection) use ($sitemap) {
+            \Modules\Directory\Models\ToolCollection::public()->select(['id', 'slug', 'updated_at'])->get()->each(function ($collection) use ($sitemap) {
                 $sitemap->add(
                     Url::create(route('collections.show', $collection->slug))
                         ->setLastModificationDate($collection->updated_at)
@@ -140,7 +140,7 @@ class SitemapController
         // Acronymes éducation (si module Acronyms actif)
         if (Route::has('acronyms.index') && class_exists(\Modules\Acronyms\Models\Acronym::class)) {
             $sitemap->add(Url::create(route('acronyms.index'))->setPriority(0.8)->setChangeFrequency('weekly'));
-            \Modules\Acronyms\Models\Acronym::published()->get()->each(function ($acronym) use ($sitemap) {
+            \Modules\Acronyms\Models\Acronym::published()->select(['id', 'slug', 'updated_at'])->get()->each(function ($acronym) use ($sitemap) {
                 $sitemap->add(
                     Url::create(route('acronyms.show', $acronym->getTranslation('slug', app()->getLocale())))
                         ->setLastModificationDate($acronym->updated_at)
@@ -155,7 +155,7 @@ class SitemapController
             $sitemap->add(Url::create(route('shop.index'))->setPriority(0.7)->setChangeFrequency('weekly'));
 
             if (Route::has('shop.show')) {
-                \Modules\Shop\Models\Product::published()->get()->each(function ($product) use ($sitemap) {
+                \Modules\Shop\Models\Product::published()->select(['id', 'slug', 'updated_at', 'images'])->get()->each(function ($product) use ($sitemap) {
                     $tag = Url::create(route('shop.show', $product))
                         ->setLastModificationDate($product->updated_at)
                         ->setPriority(0.7)
@@ -203,7 +203,7 @@ class SitemapController
         if (Route::has('news.index')) {
             $sitemap->add(Url::create(route('news.index'))->setPriority(0.7)->setChangeFrequency('daily'));
             if (class_exists(\Modules\News\Models\NewsArticle::class)) {
-                \Modules\News\Models\NewsArticle::where('is_published', true)->where('seo_status', 'index')->get()->each(function ($article) use ($sitemap) {
+                \Modules\News\Models\NewsArticle::where('is_published', true)->where('seo_status', 'index')->select(['id', 'slug', 'updated_at', 'image_url'])->get()->each(function ($article) use ($sitemap) {
                     $url = Url::create(url('/actualites/'.$article->slug))
                         ->setLastModificationDate($article->updated_at)
                         ->setPriority(0.6)
