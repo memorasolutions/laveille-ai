@@ -2,7 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', __('Conditions d\'utilisation') . ' - ' . config('app.name'))
-@section('meta_description', __('Conditions d\'utilisation de laveille.ai — veille technologique et intelligence artificielle.'))
+@section('meta_description', __('Conditions d\'utilisation de laveille.ai : veille technologique et intelligence artificielle.'))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Conditions d\'utilisation')])
@@ -37,6 +37,7 @@
                                     <li><a href="#avis-pro">{{ __('Avis de non-responsabilité professionnelle') }}</a></li>
                                     <li><a href="#shorturl">{{ __('Raccourcisseur d\'URL (veille.la, go3.ca et tout autre domaine exploité)') }}</a></li>
                                     <li><a href="#outils">{{ __('Outils interactifs') }}</a></li>
+                                    <li><a href="#repertoire">{{ __("Répertoire d'outils tiers") }}</a></li>
                                     <li><a href="#rss">{{ __('Agrégation RSS et contenu tiers') }}</a></li>
                                     <li><a href="#affiliation">{{ __('Liens d\'affiliation') }}</a></li>
                                     <li><a href="#propriete">{{ __('Propriété intellectuelle') }}</a></li>
@@ -112,8 +113,12 @@
 
                             {{-- SECTION 8 : OUTILS INTERACTIFS --}}
                             <h3 id="outils">{{ __('8. Outils interactifs') }}</h3>
-                            <p>{{ __('laveille.ai met à la disposition de ses utilisateurs divers outils interactifs — notamment des calculatrices, des générateurs de mots de passe, des compteurs et d\'autres utilitaires — fournis « tels quels » et « selon la disponibilité », à des fins informatives et éducatives uniquement, sans aucune garantie de précision, d\'exhaustivité, de fiabilité ou d\'adéquation à un usage particulier. Les résultats produits par ces outils ne constituent en aucun cas un conseil professionnel de quelque nature que ce soit, y compris, sans s\'y limiter, un conseil fiscal, juridique, financier, technique ou médical, et ne sauraient se substituer à la consultation d\'un professionnel qualifié. L\'exploitant décline toute responsabilité à l\'égard de tout dommage direct, indirect, accessoire ou consécutif pouvant découler de l\'utilisation de ces outils ou de la confiance accordée à leurs résultats.') }}</p>
+                            <p>{{ __('laveille.ai met à la disposition de ses utilisateurs divers outils interactifs, notamment des calculatrices, des générateurs de mots de passe, des compteurs et d\'autres utilitaires, fournis « tels quels » et « selon la disponibilité », à des fins informatives et éducatives uniquement, sans aucune garantie de précision, d\'exhaustivité, de fiabilité ou d\'adéquation à un usage particulier. Les résultats produits par ces outils ne constituent en aucun cas un conseil professionnel de quelque nature que ce soit, y compris, sans s\'y limiter, un conseil fiscal, juridique, financier, technique ou médical, et ne sauraient se substituer à la consultation d\'un professionnel qualifié. L\'exploitant décline toute responsabilité à l\'égard de tout dommage direct, indirect, accessoire ou consécutif pouvant découler de l\'utilisation de ces outils ou de la confiance accordée à leurs résultats.') }}</p>
                             <p>{{ __('Rien dans la présente section n\'a pour effet d\'exclure ou de limiter la responsabilité qui ne peut l\'être en vertu de la loi, notamment en cas de préjudice corporel ou moral, de faute lourde ou intentionnelle (article 1474 du Code civil du Québec), ni les garanties et droits impératifs conférés au consommateur par la Loi sur la protection du consommateur.') }}</p>
+
+                            {{-- SECTION 8.1 : RÉPERTOIRE D'OUTILS TIERS --}}
+                            <h3 id="repertoire">{{ __("8.1 Répertoire d'outils tiers") }}</h3>
+                            <p>{{ __("Les fiches du répertoire décrivent des produits et services offerts par des tiers. La date de dernière vérification d'une fiche est mentionnée lorsqu'elle est disponible. Les informations provenant de tiers qui y figurent, notamment les prix, les fonctionnalités, la disponibilité et les liens, sont fournies à titre indicatif, peuvent changer sans préavis et doivent être vérifiées auprès du fournisseur concerné. La réserve qui précède se limite aux contenus et aux changements imputables aux tiers. L'exploitant demeure responsable de ses propres représentations, sélections et omissions. Les liens sortants, y compris les liens d'affiliation décrits dans notre politique de divulgation, mènent vers des sites tiers dont l'exploitant ne contrôle pas le contenu, sous réserve des responsabilités qui ne peuvent être exclues par la loi.") }}</p>
 
                             {{-- SECTION 9 : RSS --}}
                             <h3 id="rss">{{ __('9. Agrégation RSS et contenu tiers') }}</h3>
@@ -187,7 +192,7 @@
                             <h3 id="responsabilite">{{ __('20. Limitation de responsabilité et plafond de dommages') }}</h3>
                             <p>{{ __('Étant donné la nature gratuite du service, la responsabilité totale et cumulative de l\'exploitant, de ses employés ou représentants, pour toute réclamation découlant des présentes ou de l\'utilisation du site, est limitée à un montant maximal de cent dollars canadiens (100,00 $ CAN). En aucun cas l\'exploitant ne sera responsable des dommages indirects, spéciaux, punitifs, accessoires ou consécutifs, incluant notamment la perte de profits, la perte de données, l\'interruption des affaires ou les dommages réputationnels.') }}</p>
                             <p>{{ __('Toute réclamation découlant de l\'utilisation du Service doit être formulée avec diligence. Les délais de prescription prévus par la loi s\'appliquent, notamment celui de trois (3) ans prévu à l\'article 2925 du Code civil du Québec. Aucune disposition des présentes conditions ne modifie la durée légale de la prescription, conformément à l\'article 2884 du Code civil du Québec.') }}</p>
-                            <p>{{ __('Malgré ce qui précède, aucune disposition n\'exclut ni ne limite la responsabilité de l\'exploitant pour le préjudice corporel ou moral causé à autrui, pour sa faute lourde ou intentionnelle (article 1474 du Code civil du Québec), ni pour toute responsabilité qui ne peut être limitée en vertu de la loi applicable.') }}</p>
+                            <p>{{ __('Les exclusions et limitations du présent article s\'appliquent dans la mesure maximale permise par la loi. Conformément à l\'article 1474 C.c.Q., elles n\'excluent ni ne limitent la réparation du préjudice matériel causé par une faute intentionnelle ou une faute lourde; elles n\'excluent ni ne limitent la réparation du préjudice corporel ou moral, quel que soit le degré de faute. Le plafond et les exclusions du présent article ne s\'appliquent pas aux réclamations d\'un consommateur au sens de la Loi sur la protection du consommateur résultant du fait personnel de l\'exploitant ou de son représentant (art. 10 LPC). Ils ne s\'appliquent pas non plus aux obligations impératives des lois sur la protection des renseignements personnels.') }}</p>
 
                             {{-- SECTION 21 : FORCE MAJEURE --}}
                             <h3 id="force-majeure">{{ __('21. Force majeure') }}</h3>

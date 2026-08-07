@@ -25,7 +25,7 @@
                         </p>
                         <h3 style="color:var(--c-dark);">3. Notre engagement d'indépendance éditoriale</h3>
                         <p style="color:var(--c-text-secondary);">
-                            Le choix des outils présentés dans notre annuaire, leur description, leur classement et nos avis ne sont jamais influencés par l'existence ou l'absence d'une commission d'affiliation. Un outil sans programme d'affiliation a exactement les mêmes chances d'être recommandé, mis en vedette ou bien noté qu'un outil avec lequel nous avons une entente commerciale. Nos critères de sélection restent la qualité, l'utilité et la pertinence de l'outil pour nos lecteurs.
+                            Nos évaluations et sélections sont réalisées de façon indépendante : l'existence ou non d'un programme d'affiliation ne fait pas partie de nos critères de sélection.
                         </p>
                         <h3 style="color:var(--c-dark);">4. Pourquoi des liens d'affiliation</h3>
                         <p style="color:var(--c-text-secondary);">

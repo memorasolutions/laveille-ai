@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.151.0] - 2026-08-07
+
+### Corrigé
+- **Politique de confidentialité (v3.6) : l'information sur l'hébergement était matériellement fausse** - la page affirmait « serveur - Canada - décision d'adéquation » alors que le serveur de production est situé aux États-Unis (vérifié par whois le 7 août 2026). Le tableau des transferts indique désormais la destination réelle et l'état honnête (« évaluation en cours conformément à l'article 17 de la Loi 25, encadrement contractuel »). La promesse d'une copie intégrale de l'ÉFVP sur demande est remplacée par un résumé non sensible, et la phrase affirmant que les clauses contractuelles types « garantissent » la protection adéquate est reformulée honnêtement (avec sa traduction anglaise, qui manquait).
+
+### Amélioré
+- **Conditions d'utilisation (v4.1) : clauses de responsabilité renforcées et rendues conformes** - la clause de sauvegarde distingue désormais expressément les deux règles de l'article 1474 du Code civil (préjudice matériel par faute intentionnelle ou lourde ; préjudice corporel ou moral quel que soit le degré de faute) et exclut expressément du plafond les réclamations d'un consommateur pour le fait personnel de l'exploitant (article 10 de la Loi sur la protection du consommateur). Nouvelle clause 8.1 pour le répertoire d'outils (contenus tiers indicatifs, responsabilité de l'exploitant préservée pour ses propres représentations).
+- **Pages secondaires calibrées** : la méthodologie passe d'une promesse ferme (« traitée sous 7 jours ») à un engagement de moyens ; la politique d'affiliation remplace « jamais influencés » par une formulation d'indépendance défendable ; la politique de retrait ne s'auto-disqualifie plus ; la FAQ affiche un renvoi « à titre informatif, sans valeur contractuelle » vers les Conditions d'utilisation. Le tout validé par une boucle de réfutation multi-IA en 3 rounds (4 réviseurs convergents), avec traductions anglaises alignées.
+
 ## [1.150.1] - 2026-08-07
 
 ### Corrigé

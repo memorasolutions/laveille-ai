@@ -13,7 +13,7 @@
                     <div class="post">
                         <h2 style="color:var(--c-dark);">Politique de retrait de contenu</h2>
                         <div style="background:var(--c-primary-light,#F0FAFB);border:1px solid #cfe9ee;border-radius:8px;padding:14px 18px;margin-bottom:24px;color:var(--c-dark);">
-                            ⚠️ « Ce document décrit notre processus de traitement des demandes de retrait. Il ne constitue pas un avis juridique et sera revu par un conseiller juridique. »
+                            ⚠️ « Cette procédure est fournie de bonne foi pour faciliter le traitement des demandes ; elle ne constitue pas un avis juridique et ne limite aucun droit prévu par la loi. »
                         </div>
                         <h3 style="color:var(--c-dark);">1. Objet</h3>
                         <p style="color:var(--c-text-secondary);">

@@ -2,7 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', __('Politique de confidentialité') . ' - ' . config('app.name'))
-@section('meta_description', __('Politique de confidentialité de laveille.ai — RGPD, Loi 25, LPRPDE.'))
+@section('meta_description', __('Politique de confidentialité de laveille.ai : RGPD, Loi 25, LPRPDE.'))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Politique de confidentialité')])
@@ -45,7 +45,7 @@
                                     <li><a href="#introduction">{{ __('Introduction et lois applicables') }}</a></li>
                                     <li><a href="#controller">{{ __('Responsable du traitement') }}</a></li>
                                     <li><a href="#data-collected">{{ __('Données personnelles collectées') }}</a></li>
-                                    <li><a href="#outils-locaux">{{ __('Outils interactifs — traitement local (côté client)') }}</a></li>
+                                    <li><a href="#outils-locaux">{{ __('Outils interactifs : traitement local (côté client)') }}</a></li>
                                     <li><a href="#legal-bases">{{ __('Fondements juridiques') }}</a></li>
                                     <li><a href="#purposes">{{ __('Finalités du traitement') }}</a></li>
                                     <li><a href="#contributions">{{ __('Contributions des membres') }}</a></li>
@@ -71,10 +71,10 @@
                             <h3 id="introduction">{{ __('1. Introduction et lois applicables') }}</h3>
                             <p>{{ __('Cette politique explique la façon dont nous collectons, utilisons et protégeons vos données personnelles, conformément aux lois suivantes :') }}</p>
                             <ul>
-                                <li>{{ __('RGPD — Règlement (UE) 2016/679 (Règlement général sur la protection des données)') }}</li>
-                                <li>{{ __('Loi 25 — Loi modernisant des dispositions législatives en matière de protection des renseignements personnels (2021, c. 25, Québec)') }}</li>
-                                <li>{{ __('LPRPDE / PIPEDA — Loi sur la protection des renseignements personnels et les documents électroniques (L.C. 2000, ch. 5)') }}</li>
-                                <li>{{ __('Directive ePrivacy — Directive 2002/58/CE (protection de la vie privée dans le secteur des communications électroniques)') }}</li>
+                                <li>{{ __('RGPD : Règlement (UE) 2016/679 (Règlement général sur la protection des données)') }}</li>
+                                <li>{{ __('Loi 25 : Loi modernisant des dispositions législatives en matière de protection des renseignements personnels (2021, c. 25, Québec)') }}</li>
+                                <li>{{ __('LPRPDE / PIPEDA : Loi sur la protection des renseignements personnels et les documents électroniques (L.C. 2000, ch. 5)') }}</li>
+                                <li>{{ __('Directive ePrivacy : Directive 2002/58/CE (protection de la vie privée dans le secteur des communications électroniques)') }}</li>
                             </ul>
 
                             <h3 id="controller">{{ __('2. Responsable du traitement') }}</h3>
@@ -96,8 +96,8 @@
                                 <li>{{ __('Données de consentement et choix de cookies') }}</li>
                             </ul>
 
-                            <h3 id="outils-locaux">{{ __('3b. Outils interactifs — traitement local (côté client)') }}</h3>
-                            <p>{{ __('Certains outils interactifs de la plateforme — notamment l\'anonymiseur de texte, les calculatrices et les générateurs — fonctionnent entièrement dans votre navigateur (traitement « côté client »). Les données que vous y saisissez (texte, valeurs, règles) sont traitées localement sur votre appareil : elles ne sont ni transmises, ni consultées, ni conservées sur les serveurs de l\'exploitant. L\'exploitant ne collecte donc aucun de ces renseignements et n\'en assume pas la conservation.') }}</p>
+                            <h3 id="outils-locaux">{{ __('3b. Outils interactifs : traitement local (côté client)') }}</h3>
+                            <p>{{ __('Certains outils interactifs de la plateforme, notamment l\'anonymiseur de texte, les calculatrices et les générateurs, fonctionnent entièrement dans votre navigateur (traitement « côté client »). Les données que vous y saisissez (texte, valeurs, règles) sont traitées localement sur votre appareil : elles ne sont ni transmises, ni consultées, ni conservées sur les serveurs de l\'exploitant. L\'exploitant ne collecte donc aucun de ces renseignements et n\'en assume pas la conservation.') }}</p>
                             <p>{{ __('Lorsqu\'un outil enregistre des données pour votre commodité (par exemple vos règles d\'anonymisation ou un brouillon de texte), celles-ci demeurent uniquement dans le stockage de votre navigateur (localStorage ou sessionStorage), sous votre seul contrôle. Vous pouvez les effacer à tout moment au moyen des fonctions « Effacer » ou « Tout réinitialiser » de l\'outil, ou en vidant les données de votre navigateur ; le brouillon de texte est de toute façon effacé à la fermeture de l\'onglet. Les fichiers que vous exportez sont gérés par vous seul(e). Sur un appareil partagé, pensez à effacer vos données après usage.') }}</p>
 
                             <h3 id="legal-bases">{{ __('4. Fondements juridiques') }}</h3>
@@ -205,7 +205,7 @@
                                         <tr><td>Brevo</td><td>{{ __('Infolettre') }}</td><td>{{ __('Union européenne') }}</td><td>{{ __('Décision d\'adéquation') }}</td></tr>
                                         <tr><td>OpenRouter / Google</td><td>{{ __('Résumés IA') }}</td><td>{{ __('États-Unis') }}</td><td>{{ __('Clauses contractuelles types (SCC)') }}</td></tr>
                                         <tr><td>Cloudflare</td><td>{{ __('CDN, sécurité') }}</td><td>{{ __('Global') }}</td><td>{{ __('DPF UE-US') }}</td></tr>
-                                        <tr><td>cPanel / serveur</td><td>{{ __('Hébergement') }}</td><td>{{ __('Canada') }}</td><td>{{ __('Décision d\'adéquation') }}</td></tr>
+                                        <tr><td>HostPapa</td><td>{{ __('Hébergement') }}</td><td>{{ __('États-Unis') }}</td><td>{{ __('Évaluation en cours conformément à l\'article 17 de la Loi 25, encadrement contractuel') }}</td></tr>
                                         <tr><td>Google Analytics 4</td><td>{{ __('Analyse d\'audience') }}</td><td>{{ __('États-Unis') }}</td><td>{{ __('SCC + mode consentement v2') }}</td></tr>
                                     </tbody>
                                 </table>
@@ -255,7 +255,7 @@
 
                             <h3 id="eu">{{ __('17. Dispositions spécifiques visiteurs européens') }}</h3>
                             <p>{{ __('Les visiteurs issus de l\'Union européenne bénéficient des droits prévus par le RGPD, notamment : le droit d\'accès, de rectification, d\'effacement (« droit à l\'oubli »), de portabilité de leurs données, d\'opposition au traitement, de limitation du traitement, ainsi que le droit de retirer leur consentement à tout moment. Ils ont également le droit d\'introduire une réclamation auprès d\'une autorité de contrôle compétente (par exemple, la CNIL en France).') }}</p>
-                            <p>{{ __('Les transferts de données hors de l\'Union européenne sont encadrés par des clauses contractuelles types (SCC) garantissant un niveau de protection adéquat.') }}</p>
+                            <p>{{ __('Lorsque des données sont transférées hors de l\'Union européenne, nous nous appuyons sur les mécanismes reconnus applicables, notamment les clauses contractuelles types (SCC) de nos fournisseurs, et nous évaluons ces transferts conformément aux lois applicables (voir la section sur les transferts hors Québec).') }}</p>
                             <p>{{ __('Le site laveille.ai ne procède pas à un profilage des utilisateurs produisant des effets juridiques les concernant ou les affectant de manière significative.') }}</p>
 
                             <h3 id="lia">{{ __('18. Intérêt légitime') }}</h3>
@@ -293,12 +293,12 @@
                                 <li>{{ __('La consultation de la Commission d\'accès à l\'information (CAI) lorsqu\'un risque élevé est identifié') }}</li>
                             </ul>
                             <p>
-                                {{ __('Une copie de l\'EFVP est disponible sur demande auprès de notre responsable de la protection des renseignements personnels à l\'adresse :') }}
+                                {{ __('Un résumé non sensible de nos évaluations relatives aux communications hors Québec peut être obtenu sur demande écrite au responsable de la protection des renseignements personnels à l\'adresse :') }}
                                 <a href="mailto:{{ $company['dpo_email'] }}">{{ $company['dpo_email'] }}</a>.
                             </p>
 
                             <h3 id="minors">{{ __('21. Mineurs') }}</h3>
-                            <p>{{ __('Notre service n\'est pas destiné aux enfants. Conformément à l\'article 14 de la Loi sur la protection des renseignements personnels dans le secteur privé (RLRQ, c. P-39.1), le consentement au traitement des renseignements personnels d\'un mineur de moins de 14 ans doit être donné par le titulaire de l\'autorité parentale ou le tuteur; à partir de 14 ans, le mineur peut consentir lui-même. Toutefois, nos conditions d\'utilisation prévoient qu\'il faut avoir au moins 16 ans pour créer un compte sur notre site, et au moins 18 ans — ou détenir l\'autorisation d\'un parent ou tuteur — pour effectuer un achat dans notre boutique en ligne. Nous ne recueillons pas sciemment de renseignements personnels auprès d\'un mineur n\'ayant pas atteint l\'âge requis sans le consentement parental exigé par la loi, et nous supprimerons promptement tout renseignement ainsi recueilli dès que nous en serons informés.') }}</p>
+                            <p>{{ __('Notre service n\'est pas destiné aux enfants. Conformément à l\'article 14 de la Loi sur la protection des renseignements personnels dans le secteur privé (RLRQ, c. P-39.1), le consentement au traitement des renseignements personnels d\'un mineur de moins de 14 ans doit être donné par le titulaire de l\'autorité parentale ou le tuteur; à partir de 14 ans, le mineur peut consentir lui-même. Toutefois, nos conditions d\'utilisation prévoient qu\'il faut avoir au moins 16 ans pour créer un compte sur notre site, et au moins 18 ans, ou détenir l\'autorisation d\'un parent ou tuteur, pour effectuer un achat dans notre boutique en ligne. Nous ne recueillons pas sciemment de renseignements personnels auprès d\'un mineur n\'ayant pas atteint l\'âge requis sans le consentement parental exigé par la loi, et nous supprimerons promptement tout renseignement ainsi recueilli dès que nous en serons informés.') }}</p>
 
                             <h3 id="contact">{{ __('22. Contact, DPO et autorités de contrôle') }}</h3>
                             <p>{{ __('Pour toute question ou exercice de vos droits :') }}</p>

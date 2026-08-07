@@ -139,7 +139,7 @@
                     {{ __("Une erreur ou un outil obsolète ? Tout retour est bienvenu via la page Contact ou le bouton de signalement présent sur chaque fiche outil. Les corrections importantes sont datées dans une section de mise à jour visible.") }}
                 </p>
                 <p>
-                    {{ __("Engagement : toute correction d'erreur factuelle est traitée sous 7 jours ouvrables.") }}
+                    {{ __("Nous nous efforçons de traiter toute demande de correction d'erreur factuelle dans un délai indicatif de 7 jours ouvrables.") }}
                 </p>
                 <p>
                     <a href="{{ route('contact') }}" style="color: var(--c-primary, #064E5A); font-weight: 600; text-decoration: underline;">→ {{ __('Signaler une erreur ou suggérer un outil') }}</a>

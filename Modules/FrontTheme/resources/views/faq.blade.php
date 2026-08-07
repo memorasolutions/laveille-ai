@@ -43,6 +43,10 @@
                     @empty
                         <div class="alert alert-info">{{ __('Aucune question pour le moment.') }}</div>
                     @endforelse
+                    <p class="mt-4 text-muted">
+                        {{ __("Les réponses de cette FAQ sont fournies à titre informatif et n'ont pas de valeur contractuelle ; voir nos") }}
+                        <a href="{{ route('legal.terms') }}">{{ __("Conditions d'utilisation") }}</a>.
+                    </p>
                 </div>
             </div>
         </div>

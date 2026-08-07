@@ -41,14 +41,14 @@ return [
     */
     'documents' => [
         'privacy_policy' => [
-            'version' => '3.5',
+            'version' => '3.6',
             'url' => '/privacy-policy',
-            'updated_at' => '2026-08-05',
+            'updated_at' => '2026-08-07',
         ],
         'terms' => [
-            'version' => '4.0',
+            'version' => '4.1',
             'url' => '/terms-of-use',
-            'updated_at' => '2026-08-05',
+            'updated_at' => '2026-08-07',
         ],
         'cookie_policy' => [
             'version' => '2.2',
@@ -250,7 +250,7 @@ return [
     'scripts' => [
         // GA4 is now loaded in the <head> with Consent Mode v2 (master.blade.php)
         // Consent update is handled via updateGtagConsent() in cookie-consent.blade.php
-        // No need to inject gtag.js again here — would cause double tracking
+        // No need to inject gtag.js again here, as this would cause double tracking
         [
             'category' => 'marketing',
             'name' => 'Facebook Pixel',
