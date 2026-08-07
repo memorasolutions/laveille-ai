@@ -68,7 +68,8 @@ it('has English translations for the constructeur-prompts JS help/technique-hint
     $en = json_decode(file_get_contents(lang_path('en.json')), true);
 
     $keys = [
-        "Donner un rôle à l'IA aide à orienter ses réponses selon une expertise ou un style spécifique. Ex: « Tu es un expert marketing » donnera des réponses plus stratégiques.",
+        // Reformulée (tâche 1649, panel 5/5) : un rôle oriente le style, pas l'exactitude.
+        "Donner un rôle à l'IA oriente le ton, le style et le vocabulaire de sa réponse - mais ne la rend ni plus experte ni plus fiable. Ex: « Tu es un expert marketing » donnera un ton plus stratégique ; pour la justesse, donnez du contexte et des consignes précises.",
         "Choisir un verbe d'action précise ce que l'IA doit faire : rédiger, analyser, résumer, créer... Le verbe détermine le type de résultat.",
         "Décrivez clairement et précisément ce que l'IA doit produire. Plus vous donnez de contexte et de détails, meilleur sera le résultat.",
         "Spécifier le public aide l'IA à adapter son langage. Un texte pour des débutants sera différent d'un texte pour des experts.",
@@ -118,13 +119,13 @@ it('injects helps/techniqueHints/diagnostic i18n translated into window.promptBu
 
     $html = $this->actingAs($user)->withSession(['locale' => 'en'])->get('/outils/constructeur-prompts')->assertOk()->getContent();
 
-    expect($html)->toContain('Assigning a role to the AI helps guide its responses');
+    expect($html)->toContain('Assigning a role to the AI shapes the tone');
     // LOT 3 (2026-08-06) : nouvelle formulation « (Méthode : zero-shot) ... » - voir le test
     // précédent pour le contexte du remplacement des 5 anciennes clés techniqueHints.
     expect($html)->toContain('(Method: zero-shot) The AI responds directly, without examples or intermediate steps.');
     expect($html)->toContain('diagnosticFormat');
     expect($html)->toContain("You haven't specified the expected response format (short text, list, table...) or its length.");
-    expect($html)->not->toContain("Donner un rôle à l'IA aide");
+    expect($html)->not->toContain("Donner un rôle à l'IA oriente");
 });
 
 it('the JS file falls back to window.promptBuilderConfig for helps and techniqueHints (round 77)', function () {

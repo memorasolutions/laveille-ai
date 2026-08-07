@@ -995,7 +995,9 @@ $pbAudiences = $pbNormalize($pbAudiences, $defaultAudiences);
 // Blade tronque silencieusement/plante sur un @json(__(...)) contenant plusieurs parenthèses et
 // virgules imbriquées (piège documenté depuis le round 69 de cette passe adversariale).
 $pbHelps = [
-    'persona' => __('Donner un rôle à l\'IA aide à orienter ses réponses selon une expertise ou un style spécifique. Ex: « Tu es un expert marketing » donnera des réponses plus stratégiques.'),
+    // Reformulé (tâche 1649, panel 5/5 unanime + EMNLP 2024/Wharton 2025) : un rôle oriente
+    // ton/style/vocabulaire, il n'améliore ni l'expertise ni l'exactitude - l'ancien texte surpromettait.
+    'persona' => __('Donner un rôle à l\'IA oriente le ton, le style et le vocabulaire de sa réponse - mais ne la rend ni plus experte ni plus fiable. Ex: « Tu es un expert marketing » donnera un ton plus stratégique ; pour la justesse, donnez du contexte et des consignes précises.'),
     'verb' => __('Choisir un verbe d\'action précise ce que l\'IA doit faire : rédiger, analyser, résumer, créer... Le verbe détermine le type de résultat.'),
     'taskObject' => __('Décrivez clairement et précisément ce que l\'IA doit produire. Plus vous donnez de contexte et de détails, meilleur sera le résultat. Astuce : écrivez {{sujet}} (ou tout autre mot entre deux accolades) pour créer un espace à remplir plus tard, juste avant de copier votre prompt.'),
     // #1593a (2026-08-07) : contexte additionnel, distinct de la tâche - même emplacement/pattern

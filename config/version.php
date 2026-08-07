@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.148.3 · 2026-08-07 · fix(outils) constructeur : aide du persona reformulée (panel 5 IA unanime, EMNLP 2024/Wharton 2025) - un rôle oriente ton/style/vocabulaire mais n'améliore ni l'expertise ni l'exactitude ; l'ancien texte surpromettait (« réponses plus stratégiques ») ; FR (blade + fallback JS) et EN (en.json) alignés
  *   1.148.2 · 2026-08-07 · fix(outils) constructeur : « ? » des boutons d'aide enfin optiquement centré (round 2) - cause double mesurée : font-size du composant écrasé par le thème (11,25 px rendus au lieu de 13,9) → taille en inline ; glyphe sans jambage de DM Sans perché dans sa boîte de ligne → correction optique translateY(0.07em) ; preuve au pixel : écart 0,0 px sur les deux axes
  *   1.148.1 · 2026-08-07 · fix(outils) constructeur : l'objet Alpine showHelp était vide alors que la vue référence 3 clés (persona, contextInfo, cadreStrict) - 3 TypeError console à chaque chargement (2 préexistants, 1 introduit par le champ contexte) ; clés initialisées à false
  *   1.148.0 · 2026-08-07 · feat(outils+confidentialite) constructeur : champ « Contexte additionnel », variables réutilisables {{sujet}} avec zone de remplissage, historique local des invités (10 derniers prompts, navigateur seulement) ; rétention des prompts supprimés (corbeille purgée après 30 jours, réglable en admin, politique de confidentialité à jour) ; queue:restart au déploiement (workers périmés = erreurs « force option » toutes les 15 min) ; git prod réaligné ; BD locale annuaire re-seedée depuis la prod
@@ -3626,7 +3627,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 148;
-$lvPatch = 2;
+$lvPatch = 3;
 
 return [
     'major' => $lvMajor,

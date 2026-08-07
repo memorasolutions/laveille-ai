@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.148.3] - 2026-08-07
+
+### Corrigé
+- **Constructeur de prompts : l'aide du champ « rôle » (persona) ne surpromet plus** - vérification par un panel de 5 IA (Perplexity, Codex, claude.ai, Gemini, DeepSeek), verdict unanime appuyé sur les recherches 2024-2026 (EMNLP 2024, Wharton 2025) : donner un rôle à l'IA oriente le ton, le style et le vocabulaire, mais n'améliore ni l'expertise ni l'exactitude des faits. L'ancien texte (« donnera des réponses plus stratégiques ») laissait croire le contraire ; le nouveau le dit clairement et conseille de miser sur le contexte et des consignes précises pour la justesse. Français et anglais alignés.
+
 ## [1.148.2] - 2026-08-07
 
 ### Corrigé

@@ -1018,7 +1018,7 @@
     "Disque": "Disk",
     "Documents": "Documents",
     "Domaine": "Domain",
-    "Donner un rôle à l'IA aide à orienter ses réponses selon une expertise ou un style spécifique. Ex: « Tu es un expert marketing » donnera des réponses plus stratégiques.": "Assigning a role to the AI helps guide its responses according to a specific expertise or style. For example, \"You are a marketing expert\" will yield more strategic answers.",
+    "Donner un rôle à l'IA oriente le ton, le style et le vocabulaire de sa réponse - mais ne la rend ni plus experte ni plus fiable. Ex: « Tu es un expert marketing » donnera un ton plus stratégique ; pour la justesse, donnez du contexte et des consignes précises.": "Assigning a role to the AI shapes the tone, style and vocabulary of its response - but does not make it more expert or more reliable. For example, \"You are a marketing expert\" will yield a more strategic tone; for accuracy, provide context and precise instructions.",
     "Donnez 2-3 exemples du résultat attendu pour guider l'IA.": "Provide 2-3 examples of the expected output to guide the AI.",
     "Donnez un nom et une description à votre équipe.": "Give a name and description to your team.",
     "Donnez-lui un nom clair et mémorable.": "Give it a clear and memorable name.",
