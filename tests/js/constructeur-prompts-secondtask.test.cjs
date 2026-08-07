@@ -47,7 +47,9 @@ function withoutAccents(text) { return text.normalize('NFD').replace(/[\u0300-\u
     const normalized = withoutAccents(prompt).toLowerCase();
     assert(prompt.includes('1)') && prompt.includes('2)'), 'les deux etapes sont numerotees');
     assert(prompt.indexOf('Resume') < prompt.indexOf('Critique'), 'les deux verbes sont presents dans le bon ordre');
-    assert(normalized.includes("a partir du resultat de l'etape precedente"), 'la deuxieme etape part du resultat de la premiere');
+    // gabarits v2 (tache 1653, panel multi-IA 2026-08-07) : heritage explicite de l'etape 2 sur
+    // l'etape 1 (meme lecteur, meme esprit), remplace l'ancien "a partir du resultat precedent".
+    assert(normalized.includes("le resultat de l'etape 1, pour le meme lecteur et dans le meme esprit"), 'la deuxieme etape herite explicitement de la premiere (meme lecteur, meme esprit)');
 }
 
 // Deuxieme tache activee sans verbe : repli strict sur le prompt a une tache.

@@ -194,8 +194,8 @@ document.addEventListener('alpine:init', function() {
             helps: (window.promptBuilderConfig && window.promptBuilderConfig.helps) || {
                 persona: 'Donner un rôle à l\'IA oriente le ton, le style et le vocabulaire de sa réponse - mais ne la rend ni plus experte ni plus fiable. Ex: « Tu es un expert marketing » donnera un ton plus stratégique ; pour la justesse, donnez du contexte et des consignes précises.',
                 verb: 'Choisir un verbe d\'action précise ce que l\'IA doit faire : rédiger, analyser, résumer, créer... Le verbe détermine le type de résultat.',
-                taskObject: 'Décrivez clairement et précisément ce que l\'IA doit produire. Plus vous donnez de contexte et de détails, meilleur sera le résultat. Astuce : écrivez {{sujet}} (ou tout autre mot entre deux accolades) pour créer un espace à remplir plus tard, juste avant de copier votre prompt.',
-                contextInfo: 'Informations de fond utiles que l\'IA doit connaître sans qu\'elles fassent partie de la demande elle-même : ce qui a déjà été essayé, des contraintes, le contexte du projet... Vous pouvez aussi y écrire {{sujet}} pour créer un espace à remplir plus tard.',
+                taskObject: 'Décrivez clairement et précisément ce que l\'IA doit produire. Plus vous donnez de détails, meilleur sera le résultat. Astuce : un mot entre doubles accolades, comme {{sujet}}, crée un espace à remplir. Ex. : « un courriel aux parents sur {{sujet}} » - au moment de copier, l\'outil vous demande le sujet du jour et le reste du prompt ne change pas. Idéal pour réutiliser le même prompt chaque semaine.',
+                contextInfo: 'Informations de fond utiles que l\'IA doit connaître sans qu\'elles fassent partie de la demande elle-même : ce qui a déjà été essayé, des contraintes, le contexte du projet... Ici aussi, un mot entre doubles accolades, comme {{niveau}}, crée un espace que l\'outil vous fera remplir au moment de copier - pratique pour changer un seul détail sans réécrire le prompt.',
                 audience: 'Spécifier le public aide l\'IA à adapter son langage. Un texte pour des débutants sera différent d\'un texte pour des experts.',
                 format: 'Le format guide la structure de la réponse. Une liste à puces est facile à lire, un tableau est bon pour comparer, un plan est idéal pour organiser.',
                 length: 'Indiquer une longueur permet de contrôler si la réponse est concise (pour un résumé) ou détaillée (pour un article complet).',
@@ -1013,7 +1013,10 @@ document.addEventListener('alpine:init', function() {
                     // était grammaticalement incorrect avec la majuscule des libellés prédéfinis.
                     var personaLower = this.personaText.charAt(0).toLowerCase() + this.personaText.slice(1);
                     if (personaIsUser) { user(personaLower); } else { tool(personaLower); }
-                    tool(' avec une expertise approfondie dans ton domaine. Tu communiques de manière claire et efficace, en adaptant ton niveau de langage à ton audience.');
+                    // G1 (gabarits v2, tâche 1653, panel multi-IA 2026-08-07) : le boilerplate
+                    // "expertise approfondie / communiques de manière claire et efficace" ne disait
+                    // rien de concret à l'IA - remplacé par une consigne courte et actionnable.
+                    tool('. Écris de façon claire, précise et adaptée à ton lecteur.');
                 }
 
                 // === TÂCHE ===
@@ -1030,7 +1033,10 @@ document.addEventListener('alpine:init', function() {
                     user(this._taskWithoutLeadingVerb(actionVerb, this.taskObject));
                     tool('.\n2) ');
                     if (secondActionVerbIsUser) { user(secondActionVerb); } else { tool(secondActionVerb); }
-                    tool(', à partir du résultat de l\'étape précédente.');
+                    // G2 (gabarits v2, tâche 1653, panel multi-IA 2026-08-07) : héritage EXPLICITE
+                    // de l'étape 2 sur l'étape 1 (même lecteur, même esprit), au lieu d'un simple
+                    // "à partir du résultat" qui ne précisait rien sur la continuité attendue.
+                    tool(' le résultat de l\'étape 1, pour le même lecteur et dans le même esprit, sauf indication contraire dans le contexte.');
                 } else if (actionVerb && this.taskObject) {
                     startSection();
                     tool('Ta tâche : ');
@@ -1054,8 +1060,13 @@ document.addEventListener('alpine:init', function() {
                 // contexte qui l'entoure.
                 if (this.contextInfo) {
                     startSection();
-                    tool('Contexte : ');
+                    // G3 (gabarits v2, tâche 1653, panel multi-IA 2026-08-07) : le contexte est
+                    // balisé comme DONNÉES (""" ... """), pas comme des consignes - et le prompt
+                    // demande explicitement de signaler une contradiction plutôt que de trancher
+                    // en silence.
+                    tool('Contexte (informations de fond, à ne pas confondre avec les consignes) :\n"""\n');
                     user(this.contextInfo);
+                    tool('\n"""\nTiens-en compte dans tes choix de rédaction ; si un élément du contexte contredit une consigne ci-dessous, signale-le au lieu de trancher en silence.');
                 }
 
                 // === AUDIENCE ===
@@ -1063,7 +1074,10 @@ document.addEventListener('alpine:init', function() {
                     startSection();
                     tool('Audience cible : ');
                     if (this.audienceType === 'custom') { user(this.audienceText); } else { tool(this.audienceText); }
-                    tool('. Adapte ton vocabulaire, tes exemples et ton niveau de détail en conséquence. Assure-toi que le contenu soit pertinent et accessible pour ce public.');
+                    // G4 (gabarits v2, tâche 1653, panel multi-IA 2026-08-07) : phrase raccourcie -
+                    // "assure-toi que le contenu soit pertinent" ne disait rien de plus que l'adaptation
+                    // déjà demandée juste avant, retirée.
+                    tool('. Adapte ton vocabulaire, tes exemples et ton niveau de détail à ce lecteur.');
                 }
 
                 // === FORMAT DE SORTIE ===
@@ -1073,7 +1087,13 @@ document.addEventListener('alpine:init', function() {
                 var outputRuleSegs = [];
                 var formatBullet = this.formatBulletText;
                 if (formatBullet) outputRuleSegs.push([{ t: 'tool', s: formatBullet }]);
-                if (this.length) outputRuleSegs.push([{ t: 'tool', s: 'Longueur visée : ' }, { t: 'tool', s: this.length }]);
+                // G5 (gabarits v2, tâche 1653, panel multi-IA 2026-08-07) : avec 2 tâches, "Longueur
+                // visée" est ambiguë (étape 1 ou 2 ?) - précisé "pour le livrable principal" quand
+                // la 2e tâche est RÉELLEMENT active (même condition que le bloc TÂCHE plus haut : un
+                // interrupteur activé sans verbe 2 valide reste, comme avant, un prompt à une tâche).
+                var secondTaskActive = this.secondTaskEnabled && secondActionVerb && actionVerb && this.taskObject;
+                if (this.length && secondTaskActive) outputRuleSegs.push([{ t: 'tool', s: 'Longueur visée : ' }, { t: 'tool', s: this.length }, { t: 'tool', s: ' (pour le livrable principal)' }]);
+                else if (this.length) outputRuleSegs.push([{ t: 'tool', s: 'Longueur visée : ' }, { t: 'tool', s: this.length }]);
                 if (this.tone) outputRuleSegs.push([{ t: 'tool', s: 'Ton et style : ' }, { t: 'tool', s: this.tone }]);
                 if (this.language === 'en') outputRuleSegs.push([{ t: 'tool', s: 'Langue de rédaction : anglais' }]);
                 if (this.language === 'es') outputRuleSegs.push([{ t: 'tool', s: 'Langue de rédaction : espagnol' }]);
@@ -1097,7 +1117,10 @@ document.addEventListener('alpine:init', function() {
                 // ADDITIONNELLE au-dessus de Cadre strict, jamais à la place : Cadre strict coupe TOUT
                 // (quel que soit le profil), le profil ne coupe que ces 2 règles de style.
                 var stylistRulesApply = this.profile !== 'programmation' && this.profile !== 'traduction';
-                if (this.cadreStrict && this.constraintAntiAI && stylistRulesApply) constraintSegs.push([{ t: 'tool', s: 'Écriture naturelle et humaine : varie la longueur des phrases, utilise des expressions authentiques et des transitions fluides. Évite les formulations génériques (« dans un monde en constante évolution »), les listes à puces systématiques et les répétitions de structure.' }]);
+                // G6a (gabarits v2, tâche 1653, panel multi-IA 2026-08-07) : consigne anti-IA rendue
+                // concrète (voix active, verbe plutôt que substantif) - sans amorce à citer ni
+                // interdiction générale des listes, qui produisaient parfois l'effet inverse.
+                if (this.cadreStrict && this.constraintAntiAI && stylistRulesApply) constraintSegs.push([{ t: 'tool', s: 'Écriture naturelle : varie la longueur des phrases, préfère la voix active et le verbe au substantif, va droit au but. Aucune formule d\'ouverture creuse, aucun jargon générique.' }]);
                 if (this.cadreStrict && this.constraintTypo && stylistRulesApply) constraintSegs.push([{ t: 'tool', s: 'Typographie française stricte : majuscules en début de phrase et noms propres uniquement, pas de tiret cadratin (utilise le tiret court), ponctuation correcte, accents toujours présents.' }]);
                 // Round 152 : règle AUTOMATIQUE propre au profil Programmation (section 7 du plan),
                 // coupée par Cadre strict comme les 2 règles ci-dessus (même interrupteur, même logique).
@@ -1118,7 +1141,12 @@ document.addEventListener('alpine:init', function() {
                     }
                     constraintSegs.push(canvasParts);
                 }
-                if (this.constraintChainOfThought) constraintSegs.push([{ t: 'tool', s: 'Montre ton raisonnement complet étape par étape avant de formuler ta réponse finale.' }]);
+                // G6e/G9b (gabarits v2, tâche 1653, panel multi-IA 2026-08-07) : VERROU - la
+                // contrainte « chaîne de pensée » et la technique « zero-shot-cot » disaient la même
+                // chose deux fois quand les deux étaient actives ; si les deux sont actives, une
+                // SEULE instruction est émise ici et celle de la technique (plus bas) est coupée.
+                var cotLock = this.constraintChainOfThought && this.technique === 'zero-shot-cot';
+                if (this.constraintChainOfThought) constraintSegs.push([{ t: 'tool', s: cotLock ? 'Réfléchis étape par étape et montre ton raisonnement avant ta réponse finale.' : 'Montre ton raisonnement complet étape par étape avant de formuler ta réponse finale.' }]);
                 if (this.constraintAskIfUnclear) constraintSegs.push([{ t: 'tool', s: 'Si un élément de ma demande est ambigu ou manque de contexte, pose-moi des questions de clarification avant de commencer. Ne devine pas, demande.' }]);
                 if (this.constraintCustom) constraintSegs.push([{ t: 'user', s: this.constraintCustom }]);
                 if (constraintSegs.length > 0) {
@@ -1130,27 +1158,45 @@ document.addEventListener('alpine:init', function() {
                     });
                 }
 
-                // === CRITÈRES DE QUALITÉ === (Round 151 : scaffolding 100% automatique, coupé par Cadre strict)
+                // === CRITÈRES DE QUALITÉ === (Round 151 : scaffolding 100% automatique, coupé par
+                // Cadre strict) G7 (gabarits v2, tâche 1653, panel multi-IA 2026-08-07) : reformulé
+                // en critères de réussite nommant les valeurs réelles (ton/audience/longueur), avec
+                // consigne explicite si un critère ne peut pas être satisfait, et vérification
+                // silencieuse avant livraison (jamais affichée dans la réponse).
                 if (this.cadreStrict) {
-                    var quality = [];
-                    if (this.tone) quality.push('le ton demandé est respecté du début à la fin');
-                    if (this.audienceText) quality.push('le contenu est adapté à l\'audience cible');
-                    if (this.length) quality.push('la longueur correspond à ce qui est demandé');
-                    if (this.constraintAntiAI && stylistRulesApply) quality.push('le texte ne ressemble pas à du contenu généré par IA');
-                    if (quality.length > 0) {
+                    var qualitySegs = [];
+                    if (this.tone) qualitySegs.push([{ t: 'tool', s: 'le ton ' + this.tone + ' est tenu du début à la fin' }]);
+                    if (this.audienceText) {
+                        var audienceQualityParts = [{ t: 'tool', s: 'elle est directement utilisable par ' }];
+                        audienceQualityParts.push({ t: this.audienceType === 'custom' ? 'user' : 'tool', s: this.audienceText });
+                        qualitySegs.push(audienceQualityParts);
+                    }
+                    if (this.length) qualitySegs.push([{ t: 'tool', s: 'la longueur visée (' + this.length + ') est respectée' }]);
+                    if (this.constraintAntiAI && stylistRulesApply) qualitySegs.push([{ t: 'tool', s: 'elle se lit comme un texte écrit par un humain attentif, sans formules toutes faites' }]);
+                    if (qualitySegs.length > 0) {
                         startSection();
-                        tool('Avant de finaliser, vérifie que :\n- ' + quality.join('\n- '));
+                        tool('La réponse est réussie si :\n- ');
+                        qualitySegs.forEach(function (q, i) {
+                            if (i > 0) tool('\n- ');
+                            q.forEach(function (part) { if (part.t === 'user') { user(part.s); } else { tool(part.s); } });
+                        });
+                        tool('\nSi tu ne peux pas satisfaire un critère, dis-le explicitement au lieu de le contourner.\nAvant de livrer, vérifie silencieusement ta réponse contre ces critères et corrige ce qui ne passe pas ; n\'affiche pas cette vérification.');
                     }
                 }
 
                 // === DÉLIMITEURS ===
                 if (this.useDelimiters) {
                     startSection();
-                    tool('Utilise des délimiteurs ### pour séparer clairement chaque section de ta réponse.');
+                    // G8 (gabarits v2, tâche 1653, panel multi-IA 2026-08-07) : instruction précisée
+                    // (où placer le ###, avec un titre court) plutôt qu'une consigne générique.
+                    tool('Dans ta réponse, sépare chaque grande section par une ligne ### suivie d\'un titre court.');
                 }
 
                 // === TECHNIQUE ===
-                if (this.technique === 'zero-shot-cot') {
+                // G9b (gabarits v2, tâche 1653, panel multi-IA 2026-08-07) : coupée par le VERROU
+                // cotLock défini plus haut - si la contrainte « chaîne de pensée » est aussi active,
+                // l'instruction unique est déjà émise dans les Contraintes, on ne la répète pas ici.
+                if (this.technique === 'zero-shot-cot' && !cotLock) {
                     startSection();
                     tool('Avant de répondre, réfléchis étape par étape à ta stratégie (ne montre pas ce raisonnement dans ta réponse finale).');
                 }
@@ -1183,9 +1229,31 @@ document.addEventListener('alpine:init', function() {
 
                 // Phrase de clôture actionnable (audit UX 2026-08-05) : sans elle, le prompt
                 // s'arrêtait net après la checklist qualité, ambigu pour certains modèles.
+                // G10 (gabarits v2, tâche 1653, panel multi-IA 2026-08-07) : ancrage final qui
+                // redit le livrable attendu (verbe + objet tronqué à ~80 caractères, coupé au
+                // dernier mot entier), pour qu'un modèle ne perde pas le fil sur un prompt long.
+                // VERROU anti-contradiction : si constraintAskIfUnclear est actif, l'ancrage ne peut
+                // pas dire "produis maintenant" sans condition - il devient conditionnel à la clarté.
                 if (segs.length > 0) {
                     startSection();
-                    tool('Réponds maintenant à cette demande.');
+                    var truncateAtWord = function (text, maxLen) {
+                        if (!text || text.length <= maxLen) return text;
+                        var cut = text.slice(0, maxLen);
+                        var lastSpace = cut.lastIndexOf(' ');
+                        return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut) + '…';
+                    };
+                    var livrableVerb = actionVerb ? (actionVerb.charAt(0).toLowerCase() + actionVerb.slice(1)) : '';
+                    var livrableObject = this.taskObject ? truncateAtWord(this._taskWithoutLeadingVerb(actionVerb, this.taskObject), 80) : '';
+                    var hasLivrable = !!(livrableVerb && livrableObject);
+                    tool(this.constraintAskIfUnclear ? 'Si tout est clair, produis maintenant : ' : 'Produis maintenant : ');
+                    if (hasLivrable) {
+                        if (actionVerbIsUser) { user(livrableVerb); } else { tool(livrableVerb); }
+                        tool(' ');
+                        user(livrableObject);
+                    } else {
+                        tool('la demande ci-dessus');
+                    }
+                    tool(this.constraintAskIfUnclear ? '. Sinon, pose d\'abord tes questions de clarification, groupées en un seul message.' : '.');
                 }
 
                 return segs;

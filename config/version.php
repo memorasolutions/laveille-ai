@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.149.0 · 2026-08-07 · feat(outils) constructeur : gabarits v2 du prompt généré (panel 5 IA + pratiques 2026) - critères de réussite dérivés des choix, ancrage final avec rappel du livrable, contexte balisé comme données, 2 verrous anti-contradiction (chaîne de pensée montrée/cachée, clarification vs « produis maintenant »), rôle sans boilerplate, consigne anti-IA concrète sans exemple amorce, héritage explicite de la 2e tâche ; aides {{sujet}} réécrites avec exemple concret
  *   1.148.3 · 2026-08-07 · fix(outils) constructeur : aide du persona reformulée (panel 5 IA unanime, EMNLP 2024/Wharton 2025) - un rôle oriente ton/style/vocabulaire mais n'améliore ni l'expertise ni l'exactitude ; l'ancien texte surpromettait (« réponses plus stratégiques ») ; FR (blade + fallback JS) et EN (en.json) alignés
  *   1.148.2 · 2026-08-07 · fix(outils) constructeur : « ? » des boutons d'aide enfin optiquement centré (round 2) - cause double mesurée : font-size du composant écrasé par le thème (11,25 px rendus au lieu de 13,9) → taille en inline ; glyphe sans jambage de DM Sans perché dans sa boîte de ligne → correction optique translateY(0.07em) ; preuve au pixel : écart 0,0 px sur les deux axes
  *   1.148.1 · 2026-08-07 · fix(outils) constructeur : l'objet Alpine showHelp était vide alors que la vue référence 3 clés (persona, contextInfo, cadreStrict) - 3 TypeError console à chaque chargement (2 préexistants, 1 introduit par le champ contexte) ; clés initialisées à false
@@ -3626,7 +3627,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 148;
+$lvMinor = 149;
 $lvPatch = 3;
 
 return [

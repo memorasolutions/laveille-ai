@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.149.0] - 2026-08-07
+
+### Amélioré
+- **Constructeur de prompts : le prompt généré passe aux gabarits v2**, conçus avec un panel de 5 IA (Perplexity, Codex, claude.ai, Gemini, DeepSeek) contre les meilleures pratiques d'août 2026. Chaque choix de l'utilisateur produit maintenant un fragment plus performant : critères de réussite observables dérivés des réglages (« La réponse est réussie si... »), ancrage final qui rappelle le livrable exact (« Produis maintenant : ... »), contexte balisé comme données (""") avec consigne de signaler les conflits, rôle en une phrase utile au lieu du boilerplate, consigne d'écriture naturelle concrète (sans l'exemple négatif qui amorçait la formule interdite), héritage explicite de la 2e tâche, vérification silencieuse contre les critères. Deux verrous logiques empêchent désormais les combinaisons contradictoires : chaîne de pensée montrée ET cachée (une seule instruction fusionnée), et « pose des questions » ET « réponds maintenant » (clôture conditionnelle).
+- **Aides des variables {{sujet}} réécrites avec un exemple concret** (courriel aux parents dont seul le sujet change à chaque réutilisation) - la formule abstraite « espace à remplir plus tard » n'était pas comprise ; traductions anglaises ajoutées (elles manquaient).
+
 ## [1.148.3] - 2026-08-07
 
 ### Corrigé

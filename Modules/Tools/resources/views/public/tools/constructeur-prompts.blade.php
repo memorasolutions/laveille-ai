@@ -999,10 +999,12 @@ $pbHelps = [
     // ton/style/vocabulaire, il n'améliore ni l'expertise ni l'exactitude - l'ancien texte surpromettait.
     'persona' => __('Donner un rôle à l\'IA oriente le ton, le style et le vocabulaire de sa réponse - mais ne la rend ni plus experte ni plus fiable. Ex: « Tu es un expert marketing » donnera un ton plus stratégique ; pour la justesse, donnez du contexte et des consignes précises.'),
     'verb' => __('Choisir un verbe d\'action précise ce que l\'IA doit faire : rédiger, analyser, résumer, créer... Le verbe détermine le type de résultat.'),
-    'taskObject' => __('Décrivez clairement et précisément ce que l\'IA doit produire. Plus vous donnez de contexte et de détails, meilleur sera le résultat. Astuce : écrivez {{sujet}} (ou tout autre mot entre deux accolades) pour créer un espace à remplir plus tard, juste avant de copier votre prompt.'),
+    // Aides {{...}} réécrites avec un exemple concret (tâche 1655 - la formule abstraite
+    // « espace à remplir plus tard » n'était pas comprise, même par le fondateur).
+    'taskObject' => __('Décrivez clairement et précisément ce que l\'IA doit produire. Plus vous donnez de détails, meilleur sera le résultat. Astuce : un mot entre doubles accolades, comme {{sujet}}, crée un espace à remplir. Ex. : « un courriel aux parents sur {{sujet}} » - au moment de copier, l\'outil vous demande le sujet du jour et le reste du prompt ne change pas. Idéal pour réutiliser le même prompt chaque semaine.'),
     // #1593a (2026-08-07) : contexte additionnel, distinct de la tâche - même emplacement/pattern
     // que les autres clés de $pbHelps ci-dessus (toutes injectées via window.promptBuilderConfig.helps).
-    'contextInfo' => __('Informations de fond utiles que l\'IA doit connaître sans qu\'elles fassent partie de la demande elle-même : ce qui a déjà été essayé, des contraintes, le contexte du projet... Vous pouvez aussi y écrire {{sujet}} pour créer un espace à remplir plus tard.'),
+    'contextInfo' => __('Informations de fond utiles que l\'IA doit connaître sans qu\'elles fassent partie de la demande elle-même : ce qui a déjà été essayé, des contraintes, le contexte du projet... Ici aussi, un mot entre doubles accolades, comme {{niveau}}, crée un espace que l\'outil vous fera remplir au moment de copier - pratique pour changer un seul détail sans réécrire le prompt.'),
     'audience' => __('Spécifier le public aide l\'IA à adapter son langage. Un texte pour des débutants sera différent d\'un texte pour des experts.'),
     'format' => __('Le format guide la structure de la réponse. Une liste à puces est facile à lire, un tableau est bon pour comparer, un plan est idéal pour organiser.'),
     'length' => __('Indiquer une longueur permet de contrôler si la réponse est concise (pour un résumé) ou détaillée (pour un article complet).'),
