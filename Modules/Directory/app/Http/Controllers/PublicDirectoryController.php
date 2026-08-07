@@ -28,8 +28,9 @@ class PublicDirectoryController extends Controller
 {
     public function index(Request $request): View
     {
-        // 2026-05-05 #137 : cache outils archived par defaut (S43 cleanup HN/blog/video crawler errone). Toggle ?show_archived=1 pour les afficher.
-        $showArchived = $request->boolean('show_archived');
+        // 2026-05-05 #137 : cache outils archived par defaut (S43 cleanup HN/blog/video crawler errone).
+        // 2026-08-06 #1645 : toggle ?show_archived=1 reserve aux moderateurs - le public ne voit jamais les archives.
+        $showArchived = $request->boolean('show_archived') && ($request->user()?->can('moderate_tools') ?? false);
 
         $query = Tool::published()->with('categories', 'tags')
             ->when(! $showArchived, fn ($q) => $q->notArchived())
@@ -165,6 +166,12 @@ class PublicDirectoryController extends Controller
             if ($canonical && $canonical->lifecycle_status !== 'archived') {
                 return redirect($canonical->getPublicUrl(), 301);
             }
+        }
+
+        // 2026-08-06 #1645 : fiche archivée sans remplaçant valide = invisible au public (404),
+        // seuls les modérateurs peuvent encore la consulter (les données restent intactes en base).
+        if ($tool->lifecycle_status === 'archived' && ! (request()->user()?->can('moderate_tools') ?? false)) {
+            abort(404);
         }
 
         $tool->increment('clicks_count');

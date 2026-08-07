@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.147.6] - 2026-08-06
+
+### Corrigé
+- **Annuaire** : les outils archivés (contenu HN/blog/vidéo crawlé à tort, nettoyage d'avril 2026) ne sont plus visibles au public. Le toggle `?show_archived=1` et le lien « Voir les X outils archivés » sont réservés aux modérateurs ; les fiches archivées sans outil de remplacement répondent désormais 404 au public (25 d'entre elles étaient servies en 200) ; le sitemap ne les référence plus (elles étaient proposées à l'indexation Google). Aucune donnée supprimée - les modérateurs conservent l'accès complet.
+
 ## [1.147.5] - 2026-08-06
 
 ### Modifié

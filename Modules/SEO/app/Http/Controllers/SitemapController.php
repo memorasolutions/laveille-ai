@@ -108,7 +108,8 @@ class SitemapController
             if (Route::has('directory.education-pricing')) {
                 $sitemap->add(Url::create(route('directory.education-pricing'))->setPriority(0.8)->setChangeFrequency('weekly'));
             }
-            \Modules\Directory\Models\Tool::published()->get()->each(function ($tool) use ($sitemap) {
+            // 2026-08-06 #1645 : les fiches archivées (contenu crawlé à tort) ne doivent plus être indexées.
+            \Modules\Directory\Models\Tool::published()->notArchived()->get()->each(function ($tool) use ($sitemap) {
                 $url = Url::create($tool->getPublicUrl())
                     ->setLastModificationDate($tool->updated_at)
                     ->setPriority(0.7)
