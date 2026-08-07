@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.148.2] - 2026-08-07
+
+### Corrigé
+- **Constructeur de prompts : le « ? » des boutons d'aide est enfin optiquement centré** - deux causes mesurées : la taille du texte du composant était écrasée par un style du thème (glyphe rendu trop petit), et le « ? » de la police DM Sans, sans jambage, se perchait dans le haut de sa boîte de ligne. Taille passée en style direct et correction optique proportionnelle ; centrage vérifié au pixel (écart nul sur les deux axes).
+
 ## [1.148.1] - 2026-08-07
 
 ### Corrigé

@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.148.2 · 2026-08-07 · fix(outils) constructeur : « ? » des boutons d'aide enfin optiquement centré (round 2) - cause double mesurée : font-size du composant écrasé par le thème (11,25 px rendus au lieu de 13,9) → taille en inline ; glyphe sans jambage de DM Sans perché dans sa boîte de ligne → correction optique translateY(0.07em) ; preuve au pixel : écart 0,0 px sur les deux axes
  *   1.148.1 · 2026-08-07 · fix(outils) constructeur : l'objet Alpine showHelp était vide alors que la vue référence 3 clés (persona, contextInfo, cadreStrict) - 3 TypeError console à chaque chargement (2 préexistants, 1 introduit par le champ contexte) ; clés initialisées à false
  *   1.148.0 · 2026-08-07 · feat(outils+confidentialite) constructeur : champ « Contexte additionnel », variables réutilisables {{sujet}} avec zone de remplissage, historique local des invités (10 derniers prompts, navigateur seulement) ; rétention des prompts supprimés (corbeille purgée après 30 jours, réglable en admin, politique de confidentialité à jour) ; queue:restart au déploiement (workers périmés = erreurs « force option » toutes les 15 min) ; git prod réaligné ; BD locale annuaire re-seedée depuis la prod
  *   1.147.7 · 2026-08-06 · fix(annuaire+seo) suites de la vérification prod v1.147.6 : (1) le lien « Voir les X outils archivés » restait visible au public (le compteur n'était pas gaté, seul le toggle l'était) - compteur à 0 pour les non-modérateurs ; (2) sitemap.xml en HTTP 500 par épuisement mémoire 128 Mo (les 9 requêtes chargeaient les modèles COMPLETS, contenus d'actualités inclus - la purge cache a exposé un poids qui grossissait chaque jour) - select() minimal (id, slug, updated_at, image) sur chacune
@@ -3625,7 +3626,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 148;
-$lvPatch = 1;
+$lvPatch = 2;
 
 return [
     'major' => $lvMajor,

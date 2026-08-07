@@ -17,6 +17,10 @@
 .ct-help-btn::after{content:"";position:absolute;top:50%;left:50%;width:40px;height:40px;transform:translate(-50%,-50%);border-radius:50%;}
 .ct-help-btn:hover{background:var(--c-primary-light);}
 .ct-help-btn:focus-visible{outline:2px solid var(--c-primary);outline-offset:2px;}
+/* Correction OPTIQUE (tâche 1647) : le « ? » de DM Sans n'a pas de jambage, sa boîte de
+   ligne garde ~20 % de vide sous la ligne de base - centré mathématiquement, le dessin
+   paraît trop haut. On redescend le glyphe seul, proportionnellement à la taille. */
+.ct-help-btn__glyphe{display:inline-block;transform:translateY(0.07em);}
 </style>
 @endonce
 <button type="button"
@@ -26,5 +30,7 @@
     @if($toggle) @click="{{ $toggle }} = !{{ $toggle }}" :aria-expanded="({{ $toggle }}).toString()" @elseif($click) @click="{{ $click }}" @endif
     {{-- Dimensions en inline (gagnent sur tout sélecteur du thème - mesuré : un CSS
          global écrasait la hauteur du cercle à 22px quand elles vivaient en classe). --}}
-    style="--hb-size:{{ (int) $size }}px;width:{{ (int) $size }}px;height:{{ (int) $size }}px;min-width:{{ (int) $size }}px;{{ $attributes->get('style') }}"
-    aria-label="{{ __('Aide') }}" title="{{ __('Aide') }}">?</button>
+    {{-- font-size/line-height aussi en inline (round 2, tâche 1647 - mesuré en prod :
+         le thème écrasait le font-size de la classe à 11,25 px, glyphe trop petit). --}}
+    style="--hb-size:{{ (int) $size }}px;width:{{ (int) $size }}px;height:{{ (int) $size }}px;min-width:{{ (int) $size }}px;font-size:{{ round($size * 0.58, 2) }}px;line-height:1;{{ $attributes->get('style') }}"
+    aria-label="{{ __('Aide') }}" title="{{ __('Aide') }}"><span class="ct-help-btn__glyphe" aria-hidden="true">?</span></button>
