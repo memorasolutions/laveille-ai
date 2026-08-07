@@ -1058,7 +1058,9 @@ document.addEventListener('alpine:init', function() {
                         var matched = null;
                         for (var k = 0; k < spaceTexts.length; k++) {
                             var t = spaceTexts[k];
-                            if (t && str.substr(i, t.length) === t) { matched = t; break; }
+                            // Frontières de mots aux 2 bords (round adversarial DeepSeek 2026-08-07) :
+                            // « son » ne matche jamais au milieu de « maison ».
+                            if (t && str.substr(i, t.length) === t && self._isSpaceBoundary(str, i - 1) && self._isSpaceBoundary(str, i + t.length)) { matched = t; break; }
                         }
                         if (matched) {
                             if (buffer) { user(buffer); buffer = ''; }
@@ -2726,9 +2728,64 @@ document.addEventListener('alpine:init', function() {
                 var combined = (this.taskObject || '') + '\n' + (this.contextInfo || '');
                 var cache = {};
                 for (var i = 0; i < this.spaces.length; i++) {
-                    cache[this.spaces[i].text] = combined.indexOf(this.spaces[i].text) === -1;
+                    // Même règle de frontières de mots que le découpage des segments (round
+                    // adversarial DeepSeek 2026-08-07) : « son » présent uniquement DANS « maison »
+                    // est bien « non retrouvé » - sinon la pastille dirait le contraire d'un
+                    // remplacement qui n'aura jamais lieu.
+                    cache[this.spaces[i].text] = !this._hasBoundedOccurrence(combined, this.spaces[i].text);
                 }
                 this.spaceMissingCache = cache;
+            },
+            // Vrai si `needle` apparaît dans `source` avec des FRONTIÈRES DE MOTS aux deux bords
+            // (caractère adjacent ni lettre ni chiffre Unicode). Balayage indexOf - jamais de regex
+            // construite depuis un texte utilisateur.
+            _hasBoundedOccurrence: function(source, needle) {
+                if (!source || !needle) return false;
+                var index = source.indexOf(needle);
+                while (index !== -1) {
+                    if (this._isSpaceBoundary(source, index - 1) && this._isSpaceBoundary(source, index + needle.length)) return true;
+                    index = source.indexOf(needle, index + 1);
+                }
+                return false;
+            },
+            // Frontière de mot Unicode : vrai hors bornes, ou si le caractère (paire de substitution
+            // gérée) n'est ni une lettre ni un chiffre. Repli latin-1 si \p{} n'est pas supporté.
+            _isSpaceBoundary: function(str, index) {
+                if (index < 0 || index >= str.length) return true;
+                var character = str.charAt(index);
+                var code = str.charCodeAt(index);
+                if (code >= 0xDC00 && code <= 0xDFFF && index > 0) {
+                    var previousCode = str.charCodeAt(index - 1);
+                    if (previousCode >= 0xD800 && previousCode <= 0xDBFF) character = str.substr(index - 1, 2);
+                } else if (code >= 0xD800 && code <= 0xDBFF && index + 1 < str.length) {
+                    var nextCode = str.charCodeAt(index + 1);
+                    if (nextCode >= 0xDC00 && nextCode <= 0xDFFF) character = str.substr(index, 2);
+                }
+                try {
+                    return !(new RegExp('[\\p{L}\\p{N}]', 'u')).test(character);
+                } catch (e) {
+                    return !/[A-Za-z0-9À-ÖØ-öø-ÿ]/.test(character);
+                }
+            },
+            // Remplacement aux frontières de mots (les 2 bords) - balayage indexOf, jamais de regex
+            // construite depuis un texte utilisateur. Une occurrence collée à une lettre (« son »
+            // dans « maison ») est laissée intacte.
+            _replaceWithBoundaries: function(source, oldText, newText) {
+                if (!source || !oldText || oldText === newText) return source;
+                var result = '';
+                var cursor = 0;
+                var index = source.indexOf(oldText, cursor);
+                while (index !== -1) {
+                    if (this._isSpaceBoundary(source, index - 1) && this._isSpaceBoundary(source, index + oldText.length)) {
+                        result += source.slice(cursor, index) + newText;
+                        cursor = index + oldText.length;
+                    } else {
+                        result += source.slice(cursor, index + 1);
+                        cursor = index + 1;
+                    }
+                    index = source.indexOf(oldText, cursor);
+                }
+                return result + source.slice(cursor);
             },
             spaceMissing: function(space) {
                 return !!this.spaceMissingCache[space.text];
@@ -2847,7 +2904,17 @@ document.addEventListener('alpine:init', function() {
                 if (!space || !space.pending) return;
                 var newText = (space.draftText || '').trim();
                 if (!newText) { space.draftText = space.text; return; }
-                if (newText !== space.text) { this._renameSpaceOccurrences(space.text, newText); space.text = newText; }
+                if (newText !== space.text) {
+                    this._renameSpaceOccurrences(space.text, newText);
+                    // Même règle de fusion que commitRenameSpace : renommer un pending vers le
+                    // texte d'un espace déjà confirmé ne crée jamais de pastille en double.
+                    if (this._findOtherSpaceIndex(idx, newText) !== -1) {
+                        this.spaces.splice(idx, 1);
+                        this._refreshSpaceMissing();
+                        return;
+                    }
+                    space.text = newText;
+                }
                 space.pending = false;
                 delete space.draftText;
                 this._refreshSpaceMissing();
@@ -2878,8 +2945,22 @@ document.addEventListener('alpine:init', function() {
                 this.spaceEditingIndex = null;
                 if (!space || !newText || newText === space.text) return;
                 this._renameSpaceOccurrences(space.text, newText);
-                space.text = newText;
+                // Renommage vers le texte d'un AUTRE espace existant : fusion (les occurrences
+                // pointent déjà sur la même chaîne, un doublon de pastille serait ambigu) - round
+                // adversarial DeepSeek 2026-08-07.
+                if (this._findOtherSpaceIndex(idx, newText) !== -1) {
+                    this.spaces.splice(idx, 1);
+                } else {
+                    space.text = newText;
+                }
                 this._refreshSpaceMissing();
+            },
+            // Index d'un espace (différent de exceptIdx) portant exactement ce texte, sinon -1.
+            _findOtherSpaceIndex: function(exceptIdx, text) {
+                for (var i = 0; i < this.spaces.length; i++) {
+                    if (i !== exceptIdx && this.spaces[i].text === text) return i;
+                }
+                return -1;
             },
             cancelRenameSpace: function() {
                 this.spaceEditingIndex = null;
@@ -2892,10 +2973,13 @@ document.addEventListener('alpine:init', function() {
             // perdre une réponse déjà donnée à cause d'un simple renommage.
             _renameSpaceOccurrences: function(oldText, newText) {
                 if (!oldText || oldText === newText) return;
-                this.taskObject = (this.taskObject || '').split(oldText).join(newText);
-                this.contextInfo = (this.contextInfo || '').split(oldText).join(newText);
+                this.taskObject = this._replaceWithBoundaries(this.taskObject || '', oldText, newText);
+                this.contextInfo = this._replaceWithBoundaries(this.contextInfo || '', oldText, newText);
                 if (Object.prototype.hasOwnProperty.call(this.spaceValues, oldText)) {
-                    this.spaceValues[newText] = this.spaceValues[oldText];
+                    // Ne jamais écraser une valeur déjà saisie sous la clé cible (cas de fusion).
+                    if (!Object.prototype.hasOwnProperty.call(this.spaceValues, newText) || String(this.spaceValues[newText] || '').trim() === '') {
+                        this.spaceValues[newText] = this.spaceValues[oldText];
+                    }
                     delete this.spaceValues[oldText];
                 }
             },

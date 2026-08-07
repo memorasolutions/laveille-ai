@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.150.1] - 2026-08-07
+
+### Corrigé
+- **Constructeur de prompts (espaces à remplir) : frontières de mots** - un espace créé sur « son » ne touche plus jamais le « son » caché dans « maison » : le remplissage, le renommage et le statut « non retrouvé » exigent maintenant que le mot soit entier (défaut trouvé par la boucle adversariale multi-IA post-lancement, DeepSeek). Renommer un espace vers le nom d'un espace déjà existant fusionne les deux au lieu de créer une pastille en double (la valeur déjà saisie est conservée).
+
+### Amélioré
+- **Constructeur de prompts (espaces à remplir) : petits polis visuels** issus du panel (Gemini) - le nom de l'espace est mis en évidence dans le bloc « Remplis tes espaces » (le concept « texte à trous » se lit mieux), et le bouton « + Ajouter un espace à remplir » est rapproché de sa bande de pastilles.
+
 ## [1.150.0] - 2026-08-07
 
 ### Ajouté

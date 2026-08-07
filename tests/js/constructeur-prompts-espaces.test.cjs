@@ -267,6 +267,47 @@ function fillBaseFields(component) {
     assert(component.spaceMissing(component.spaces[0]) === false, '_refreshSpaceMissing() a bien tourné après restauration (espace retrouvé)');
 }
 
+// 11. Frontières de mots (round adversarial DeepSeek 2026-08-07) : un espace « son » ne matche
+//     JAMAIS au milieu de « maison » - ni au remplissage, ni au renommage, ni au statut missing.
+(function () {
+    const { component } = loadPromptBuilder();
+    fillBaseFields(component);
+    component.taskObject = 'Analyse le son de la maison.';
+    component.spaceBubble = { show: true, text: 'son', fieldId: 'cpTaskObject' };
+    component.createSpaceFromSelection();
+    assert(component.spaces.length === 1 && component.spaces[0].text === 'son', 'espace « son » créé');
+    component.spaceValues['son'] = 'bruit';
+    assert(component.promptFilled.indexOf('bruit de la maison') !== -1, 'remplissage : « son » isolé remplacé');
+    assert(component.promptFilled.indexOf('maison') !== -1 && component.promptFilled.indexOf('maibruit') === -1, 'remplissage : « maison » jamais corrompu');
+    component.spaceEditingIndex = 0;
+    component.spaceEditingText = 'tempo';
+    component.commitRenameSpace(0);
+    assert(component.taskObject === 'Analyse le tempo de la maison.', 'renommage : occurrence isolée renommée, « maison » intact');
+    // Statut missing cohérent avec les frontières : « son » présent uniquement DANS « maison ».
+    component.spaces[0].text = 'son';
+    component.taskObject = 'Décris la maison.';
+    component._refreshSpaceMissing();
+    assert(component.spaceMissing(component.spaces[0]) === true, 'missing : « son » dans « maison » seulement = non retrouvé');
+}());
+
+// 12. Fusion au renommage vers le texte d'un AUTRE espace (jamais de pastille en double).
+(function () {
+    const { component } = loadPromptBuilder();
+    fillBaseFields(component);
+    component.taskObject = 'Compare le chat et le chien.';
+    component.spaceBubble = { show: true, text: 'chat', fieldId: 'cpTaskObject' };
+    component.createSpaceFromSelection();
+    component.spaceBubble = { show: true, text: 'chien', fieldId: 'cpTaskObject' };
+    component.createSpaceFromSelection();
+    component.spaceValues['chien'] = 'le loup';
+    component.spaceEditingIndex = 0;
+    component.spaceEditingText = 'chien';
+    component.commitRenameSpace(0);
+    assert(component.spaces.length === 1 && component.spaces[0].text === 'chien', 'fusion : un seul espace « chien » après renommage de « chat »');
+    assert(component.taskObject === 'Compare le chien et le chien.', 'fusion : les occurrences de « chat » sont devenues « chien »');
+    assert(component.spaceValues['chien'] === 'le loup', 'fusion : la valeur déjà saisie sous « chien » est conservée (jamais écrasée)');
+}());
+
 // 10. Mémoire lastValues (localStorage cpSpaceLastValues_v1) : mise à jour au moment de
 //     copier/ouvrir (valeurs non vides seulement), jamais à chaque frappe.
 (async function () {

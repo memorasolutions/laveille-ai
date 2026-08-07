@@ -439,8 +439,9 @@
                             {{-- Geste B (spec §UI - création, point B) : bouton d'insertion au curseur.
                                  Raccord ajouté au QC visuel (la méthode addSpaceAtCursor existait au
                                  moteur mais aucun bouton ne l'appelait). Toujours visible à l'étape 2 :
-                                 c'est LA porte d'entrée découvrable de la fonctionnalité. --}}
-                            <div class="mb-2">
+                                 c'est LA porte d'entrée découvrable de la fonctionnalité. mb-1 (panel
+                                 round 2, Gemini) : resserre le groupe visuel bouton → bande. --}}
+                            <div class="mb-1">
                                 <button type="button" class="ct-btn ct-btn-outline ct-btn-xs" style="min-height:44px;" @click="addSpaceAtCursor()">
                                     {{ __('+ Ajouter un espace à remplir') }}
                                 </button>
@@ -827,7 +828,10 @@
                                 <p class="small mb-2" style="color: var(--c-text-muted); font-size: 0.8rem;">{{ __('Ton prompt contient des espaces à remplir. Complète-les ici : la copie et « Ouvrir dans » utiliseront automatiquement tes réponses (les champs laissés vides gardent le mot de départ).') }}</p>
                                 <template x-for="(sp, spIdx) in fillableSpaces" :key="sp.text">
                                     <div class="mb-2">
-                                        <label class="form-label fw-medium mb-1 d-block" style="font-size: 0.82rem;" :for="'cpSpaceFill-' + spIdx">
+                                        {{-- Nom en évidence (panel round 2, Gemini) : l'étiquette porte le
+                                             concept « texte à trous » pour un néophyte - graisse forte +
+                                             couleur charte, plus proéminente que le champ. --}}
+                                        <label class="form-label mb-1 d-block" style="font-size: 0.86rem; font-weight: 700; color: var(--c-dark);" :for="'cpSpaceFill-' + spIdx">
                                             <span x-text="sp.text.length > 24 ? sp.text.slice(0, 24) + '…' : sp.text" :title="sp.text"></span>
                                         </label>
                                         <input type="text" :id="'cpSpaceFill-' + spIdx" class="form-control form-control-sm" x-model="spaceValues[sp.text]" :placeholder="sp.text" autocomplete="off" :aria-label="sp.text"
