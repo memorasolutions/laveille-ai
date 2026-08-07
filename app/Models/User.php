@@ -145,8 +145,30 @@ class User extends Authenticatable implements HasMedia, HasPasskeys, MustVerifyE
     {
         return Attribute::get(fn () => $this->avatar
             ? asset('storage/'.$this->avatar)
-            : 'https://www.gravatar.com/avatar/'.md5(strtolower(trim($this->email))).'?d=mp&s=150'
+            : $this->defaultAvatarDataUri()
         );
+    }
+
+    private function defaultAvatarDataUri(): string
+    {
+        $initials = '?';
+        $name = trim((string) $this->name);
+
+        if ($name !== '') {
+            $words = preg_split('/\s+/', $name);
+            $initials = mb_strtoupper(mb_substr($words[0] ?? '', 0, 1).mb_substr($words[1] ?? '', 0, 1));
+        }
+
+        $initials = htmlspecialchars($initials, ENT_QUOTES);
+        $palette = ['#064E5A', '#0B5D46', '#5A2A64', '#7A3B10', '#1F3A5F', '#5C1F33'];
+        $color = $palette[abs(crc32((string) $this->email)) % count($palette)];
+
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150">'
+            .'<circle cx="75" cy="75" r="75" fill="'.$color.'"/>'
+            .'<text x="75" y="78" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="60" font-weight="600" fill="#FFFFFF">'.$initials.'</text>'
+            .'</svg>';
+
+        return 'data:image/svg+xml;utf8,'.rawurlencode($svg);
     }
 
     public function hasEnabledTwoFactor(): bool

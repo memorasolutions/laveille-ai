@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.152.0] - 2026-08-07
+
+### Amélioré
+- **Confidentialité : les avatars par défaut sont désormais générés localement** - les utilisateurs sans photo de profil recevaient un avatar Gravatar, ce qui transmettait le hachage MD5 de leur courriel et l'adresse IP des visiteurs à un fournisseur américain (Automattic). L'avatar par défaut est maintenant un SVG local d'initiales (couleur déterministe de la charte, contraste AAA), sans aucune requête externe. Recommandation issue de l'évaluation des transferts hors Québec (Loi 25, art. 17).
+
 ## [1.151.0] - 2026-08-07
 
 ### Corrigé

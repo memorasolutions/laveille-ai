@@ -61,11 +61,13 @@ it('static page has content_password', function () {
     expect($page->isPasswordProtected())->toBeTrue();
 });
 
-// --- User Gravatar ---
+// --- Avatar par défaut local (aucune requête externe) ---
 
-it('user avatar_url returns gravatar when no avatar', function () {
-    $user = User::factory()->create(['avatar' => null]);
-    expect($user->avatar_url)->toContain('gravatar.com');
+it('user avatar_url returns a local svg data uri when no avatar', function () {
+    $user = User::factory()->create(['avatar' => null, 'name' => 'Marie Tremblay']);
+    expect($user->avatar_url)->toStartWith('data:image/svg+xml;utf8,')
+        ->not->toContain('gravatar.com');
+    expect(rawurldecode($user->avatar_url))->toContain('>MT<');
 });
 
 it('user avatar_url returns storage path when avatar set', function () {
