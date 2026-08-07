@@ -27,7 +27,10 @@ uses(Tests\TestCase::class);
 it('makes copy() delegate to window.copyToClipboard() instead of a fire-and-forget writeText() (round 94)', function () {
     $js = file_get_contents(base_path('public/assets/tools/constructeur-prompts/constructeur-prompts-core.js'));
 
-    expect($js)->toContain("window.copyToClipboard(this.prompt, i18n.promptCopied || 'Prompt copié').then(function(ok) {");
+    // #1593b (2026-08-07) : copy() copie désormais promptFilled (variables {{...}} substituées
+    // quand remplies, voir get promptFilled()) plutôt que le prompt brut - même mécanisme
+    // window.copyToClipboard()/.then(ok) inchangé, seul l'argument a changé de nom.
+    expect($js)->toContain("window.copyToClipboard(this.promptFilled, i18n.promptCopied || 'Prompt copié').then(function(ok) {");
     expect($js)->toContain('if (!ok) return;');
 });
 

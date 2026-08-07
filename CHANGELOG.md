@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.148.0] - 2026-08-07
+
+### Ajouté
+- **Constructeur de prompts : champ « Contexte additionnel »** - un espace facultatif pour donner à l'IA les informations de fond (ce qui a déjà été essayé, contraintes, contexte du projet), distinct de la tâche, intégré au prompt final, aux sauvegardes, au permalien et au remix.
+- **Constructeur de prompts : variables réutilisables** - écrire `{{sujet}}` dans un champ crée automatiquement une zone « Remplis tes variables » sous l'aperçu ; la copie et « Ouvrir dans [IA] » utilisent le texte complété, et les prompts sauvegardés conservent leurs variables pour réutilisation.
+- **Constructeur de prompts : historique local pour les visiteurs non connectés** - les 10 derniers prompts générés sont conservés uniquement dans le navigateur (jamais envoyés au serveur), rechargeables et effaçables en un clic.
+- **Rétention des prompts supprimés** - les prompts mis à la corbeille par leur propriétaire sont désormais définitivement effacés après 30 jours (réglable dans l'écran admin « Rétention des données », mentionné dans la politique de confidentialité). Auparavant, la suppression laissait la donnée en base indéfiniment.
+
+### Corrigé
+- **Files d'attente : workers périmés** - le déploiement redémarre maintenant les workers de queue (`queue:restart`) ; les workers gardaient l'ancien code en mémoire, ce qui provoquait l'erreur « The force option does not exist » toutes les 15 minutes dans le journal de prod.
+
+### Maintenance
+- Suivi git de production réaligné sur origin/master (HEAD retardait de 7 semaines, aucun fichier touché).
+- Base de données locale de développement : tables de l'annuaire re-seedées depuis les données publiques de production (2334 outils).
+
 ## [1.147.7] - 2026-08-06
 
 ### Corrigé

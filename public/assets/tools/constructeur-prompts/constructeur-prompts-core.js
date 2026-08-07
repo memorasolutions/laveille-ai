@@ -169,6 +169,11 @@ document.addEventListener('alpine:init', function() {
             constraintCustom: '',
             technique: 'zero-shot',
             examples: '',
+            // Contexte additionnel (#1593a, 2026-08-07) : champ facultatif DISTINCT de la tâche
+            // (taskObject), sur le même modèle qu'examples ci-dessus - informations de fond
+            // (ce qui a déjà été essayé, contraintes, contexte du projet...) plutôt que la
+            // demande elle-même. Voir la section CONTEXTE ADDITIONNEL de get promptSegments().
+            contextInfo: '',
             useDelimiters: false,
             // Round 151 (2026-08-01, écran 2 « Votre prompt est prêt ») : interrupteur visible qui
             // coupe les règles AUTOMATIQUEMENT injectées (écriture anti-IA, typographie française,
@@ -189,7 +194,8 @@ document.addEventListener('alpine:init', function() {
             helps: (window.promptBuilderConfig && window.promptBuilderConfig.helps) || {
                 persona: 'Donner un rôle à l\'IA aide à orienter ses réponses selon une expertise ou un style spécifique. Ex: « Tu es un expert marketing » donnera des réponses plus stratégiques.',
                 verb: 'Choisir un verbe d\'action précise ce que l\'IA doit faire : rédiger, analyser, résumer, créer... Le verbe détermine le type de résultat.',
-                taskObject: 'Décrivez clairement et précisément ce que l\'IA doit produire. Plus vous donnez de contexte et de détails, meilleur sera le résultat.',
+                taskObject: 'Décrivez clairement et précisément ce que l\'IA doit produire. Plus vous donnez de contexte et de détails, meilleur sera le résultat. Astuce : écrivez {{sujet}} (ou tout autre mot entre deux accolades) pour créer un espace à remplir plus tard, juste avant de copier votre prompt.',
+                contextInfo: 'Informations de fond utiles que l\'IA doit connaître sans qu\'elles fassent partie de la demande elle-même : ce qui a déjà été essayé, des contraintes, le contexte du projet... Vous pouvez aussi y écrire {{sujet}} pour créer un espace à remplir plus tard.',
                 audience: 'Spécifier le public aide l\'IA à adapter son langage. Un texte pour des débutants sera différent d\'un texte pour des experts.',
                 format: 'Le format guide la structure de la réponse. Une liste à puces est facile à lire, un tableau est bon pour comparer, un plan est idéal pour organiser.',
                 length: 'Indiquer une longueur permet de contrôler si la réponse est concise (pour un résumé) ou détaillée (pour un article complet).',
@@ -244,6 +250,19 @@ document.addEventListener('alpine:init', function() {
             hasLocalData: false,
             _editingId: null,
             history: [],
+            // Variables réutilisables {{...}} (#1593b, 2026-08-07) : valeurs saisies pour remplir
+            // les motifs {{nom}} détectés dans le prompt (voir get promptVariables()/get
+            // promptFilled() plus bas). Clé = nom exact de la variable détectée (espaces/accents
+            // acceptés), valeur = texte saisi. Jamais persisté séparément : les {{...}} restent
+            // tels quels dans le prompt sauvegardé (aucune modification du schéma DB voulue).
+            varValues: {},
+            // Rétention locale invités (#1580, 2026-08-07) : historique AUTOMATIQUE des derniers
+            // prompts générés, pour les visiteurs NON connectés uniquement (les connectés ont déjà
+            // « Mes prompts » en base). Clé localStorage DISTINCTE et versionnée (cpGuestHistory_v1,
+            // voir _guestHistoryKey plus bas) - volontairement séparée du tableau `history`/
+            // `pb_history` ci-dessus, qui reste lié au bouton "Sauvegarder" (exige un compte, voir
+            // addToHistory()) et n'est jamais alimenté automatiquement pour un invité.
+            guestHistory: [],
             // Round 63 (2026-07-27) : même garde que customCardsLoaded (round 41) - self.history
             // est écrasé sans merci par le GET initial (voir init()) dès qu'il résout. Sans ce flag,
             // addToHistory()/deletePrompt()/importLocalStorage() pouvaient résoudre AVANT ce GET
@@ -1028,6 +1047,17 @@ document.addEventListener('alpine:init', function() {
                     tool('.');
                 }
 
+                // === CONTEXTE ADDITIONNEL === (#1593a, 2026-08-07) : informations de fond
+                // (ce qui a déjà été essayé, contraintes, contexte du projet...) distinctes de la
+                // tâche elle-même - jamais mélangées au bloc TÂCHE ci-dessus, sous un intitulé
+                // séparé pour que l'IA fasse clairement la différence entre la demande et le
+                // contexte qui l'entoure.
+                if (this.contextInfo) {
+                    startSection();
+                    tool('Contexte : ');
+                    user(this.contextInfo);
+                }
+
                 // === AUDIENCE ===
                 if (this.audienceText) {
                     startSection();
@@ -1165,6 +1195,40 @@ document.addEventListener('alpine:init', function() {
                 return this.promptSegments.map(function(s) { return s.text; }).join('');
             },
 
+            // Variables réutilisables {{...}} (#1593b, 2026-08-07) : détection PAR RÈGLES, zéro IA,
+            // des motifs {{nom}} présents dans le prompt généré (ex: {{sujet}}, {{ date limite }}).
+            // Dédupliquée, ordre d'apparition conservé. Aucune modification du schéma DB : le
+            // prompt sauvegardé garde les {{...}} tels quels (voir wizardParams) - la zone de
+            // remplissage se recalcule simplement à chaque affichage, y compris à la réouverture
+            // d'un prompt déjà sauvegardé.
+            get promptVariables() {
+                var text = this.prompt;
+                if (!text) return [];
+                var re = /\{\{\s*([\p{L}0-9_ -]+)\s*\}\}/gu;
+                var out = [];
+                var m;
+                while ((m = re.exec(text)) !== null) {
+                    var name = m[1].trim();
+                    if (name && out.indexOf(name) === -1) out.push(name);
+                }
+                return out;
+            },
+
+            // Prompt avec les variables remplies (utilisé par copy()/openIn() ci-dessous, jamais
+            // par l'aperçu technique qui doit continuer à montrer le gabarit tel quel). Une
+            // variable non remplie (valeur vide/absente) reste affichée telle quelle ({{nom}}),
+            // exactement comme demandé - le prompt reste réutilisable sans jamais bloquer la copie.
+            get promptFilled() {
+                var text = this.prompt;
+                if (!text) return text;
+                var self = this;
+                return text.replace(/\{\{\s*([\p{L}0-9_ -]+)\s*\}\}/gu, function(match, rawName) {
+                    var name = rawName.trim();
+                    var val = self.varValues ? self.varValues[name] : undefined;
+                    return (val !== undefined && val !== null && String(val).trim() !== '') ? val : match;
+                });
+            },
+
             // Diagnostic rapide (Option 3 hybride, Partie A) : détection par règles simples,
             // ZÉRO IA et zéro appel réseau, des manques les plus fréquents d'un prompt. Chaque
             // manque pointe vers le bloc de l'écran 3 correspondant (toujours visible depuis le
@@ -1229,7 +1293,10 @@ document.addEventListener('alpine:init', function() {
                 // formatsSelected) + `formatCustom` (séparé). Migration de LECTURE des anciens
                 // prompts sauvegardés avec le scalaire `format` : voir init() (?edit=ID et
                 // ?remix=ID) - piège round 42 (tout champ oublié ici se perd à la réouverture).
-                return { selectedTask: this.selectedTask, personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, audienceType: this.audienceType, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, formats: this.formatsSelected, formatCustom: this.formatCustom, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintTypo: this.constraintTypo, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat, constraintChainOfThought: this.constraintChainOfThought, constraintAskIfUnclear: this.constraintAskIfUnclear, constraintCustom: this.constraintCustom, useDelimiters: this.useDelimiters, examples: this.examples, cadreStrict: this.cadreStrict, profile: this.profile };
+                // #1593a (2026-08-07) : `contextInfo` ajouté au même titre que les autres champs
+                // texte - même piège round 42 documenté ci-dessus (tout champ oublié ici se perd
+                // à la réouverture).
+                return { selectedTask: this.selectedTask, personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, contextInfo: this.contextInfo, audienceType: this.audienceType, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, formats: this.formatsSelected, formatCustom: this.formatCustom, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintTypo: this.constraintTypo, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat, constraintChainOfThought: this.constraintChainOfThought, constraintAskIfUnclear: this.constraintAskIfUnclear, constraintCustom: this.constraintCustom, useDelimiters: this.useDelimiters, examples: this.examples, cadreStrict: this.cadreStrict, profile: this.profile };
             },
             _headers: function() {
                 return { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json', 'Content-Type': 'application/json' };
@@ -1300,6 +1367,10 @@ document.addEventListener('alpine:init', function() {
                                         self.verbType = 'custom';
                                     }
                                     if (p.taskObject) self.taskObject = p.taskObject;
+                                    // #1593a (2026-08-07) : contexte additionnel, même piège round 42
+                                    // que les autres champs texte restaurés ici (constraintCustom,
+                                    // examples...) - un oubli le perd silencieusement à la réédition.
+                                    if (p.contextInfo) self.contextInfo = p.contextInfo;
                                     if (p.audienceType) self.audienceType = p.audienceType;
                                     // Round 151 (2026-08-01) : `self.audiencePreset = p.audiencePreset`
                                     // retiré - rien ne lit plus jamais cette propriété d'état (voir
@@ -1412,6 +1483,10 @@ document.addEventListener('alpine:init', function() {
                 } else {
                     try { this.history = JSON.parse(localStorage.getItem('pb_history') || '[]'); } catch(e) { this.history = []; }
                     this.historyLoaded = true;
+                    // Rétention locale invités (#1580, 2026-08-07) : charge cpGuestHistory_v1,
+                    // uniquement pour un visiteur non connecté (cette branche else n'est atteinte
+                    // que si !isAuthenticated, voir plus haut).
+                    this._loadGuestHistory();
                 }
 
                 // Erreur de partage public (?share_error=notfound) - Phase 1 permalien public
@@ -1459,6 +1534,8 @@ document.addEventListener('alpine:init', function() {
                                     self.verbType = 'custom';
                                 }
                                 if (p.taskObject) self.taskObject = p.taskObject;
+                                // #1593a (2026-08-07) : même restauration que le bloc ?edit=ID ci-dessus.
+                                if (p.contextInfo) self.contextInfo = p.contextInfo;
                                 if (p.audienceType) self.audienceType = p.audienceType;
                                 if (Array.isArray(p.audiencePresets)) { self.audiencePresets = migrateAudienceValues(p.audiencePresets); } else if (p.audiencePreset) { self.audiencePresets = migrateAudienceValues([p.audiencePreset]); }
                                 if (p.audienceCustom) {
@@ -1657,9 +1734,15 @@ document.addEventListener('alpine:init', function() {
                 // réussi - window.copyToClipboard() attend la Promise réelle (échec = toast d'erreur
                 // explicite déjà géré par le helper), au lieu du try/catch synchrone précédent qui
                 // n'interceptait jamais un rejet asynchrone et affichait "Copié !" à tort.
-                window.copyToClipboard(this.prompt, i18n.promptCopied || 'Prompt copié').then(function(ok) {
+                // #1593b (2026-08-07) : promptFilled (variables {{...}} substituées quand
+                // remplies) plutôt que prompt brut - une variable non remplie reste affichée
+                // telle quelle (voir get promptFilled()).
+                window.copyToClipboard(this.promptFilled, i18n.promptCopied || 'Prompt copié').then(function(ok) {
                     if (!ok) return;
                     self.copied = true;
+                    // #1580 (2026-08-07) : enregistre ce prompt dans l'historique local invité
+                    // (no-op si connecté ou si le prompt n'est pas valide, voir _recordGuestHistory()).
+                    self._recordGuestHistory();
                     setTimeout(function() { self.copied = false; }, 2000);
                 });
             },
@@ -1676,7 +1759,10 @@ document.addEventListener('alpine:init', function() {
             // tel quel pour le prompt normal (appel sans 2e argument) ET pour le méta-prompt
             // "Améliorer avec mon IA" (appel avec text = this.metaPrompt). Rien n'est dupliqué.
             openIn: function(target, text) {
-                var payload = text || this.prompt;
+                // #1593b (2026-08-07) : payload par défaut = promptFilled (variables {{...}}
+                // substituées) - seul le méta-prompt "Améliorer avec mon IA" (appel avec `text`
+                // explicite) échappe à ce remplacement, il embarque déjà this.prompt tel quel.
+                var payload = text || this.promptFilled;
                 if (!payload) return;
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
                 var baseUrl = '';
@@ -1729,6 +1815,9 @@ document.addEventListener('alpine:init', function() {
                 // géré par le helper), au lieu d'annoncer "Prompt copié" à tort sur un rejet silencieux.
                 window.open(url, '_blank', 'noopener');
                 window.copyToClipboard(payload, msg);
+                // #1580 (2026-08-07) : seul le prompt principal (pas le méta-prompt, `text` non
+                // fourni ici) alimente l'historique local invité.
+                if (!text) { this._recordGuestHistory(); }
             },
 
             copyText: function(text) { window.copyToClipboard(text, (window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.promptCopied) || 'Prompt copié'); },
@@ -1908,6 +1997,93 @@ document.addEventListener('alpine:init', function() {
             // protégé faisait lever une exception non interceptée APRÈS que history ait déjà été
             // vidé visuellement, sans jamais persister réellement le vidage côté navigateur.
             clearHistory: function() { this.history = []; if (!this.isAuthenticated) { try { localStorage.removeItem('pb_history'); } catch (e) {} } },
+
+            // === Rétention locale invités (#1580, 2026-08-07) ===
+            // Historique AUTOMATIQUE (max 10) des derniers prompts générés par un visiteur NON
+            // connecté, dans une clé localStorage DISTINCTE et versionnée - jamais mélangée au
+            // tableau `history`/`pb_history` ci-dessus (lié au bouton "Sauvegarder", qui exige un
+            // compte). Rien n'est envoyé au serveur : lecture/écriture 100% locales, mêmes gardes
+            // try/catch que le reste de ce fichier (mode privé, quota plein, storage désactivé).
+            _guestHistoryKey: 'cpGuestHistory_v1',
+            _loadGuestHistory: function() {
+                try {
+                    var raw = localStorage.getItem(this._guestHistoryKey);
+                    var list = raw ? JSON.parse(raw) : [];
+                    this.guestHistory = Array.isArray(list) ? list : [];
+                } catch (e) { this.guestHistory = []; }
+            },
+            // Appelé au moment de la génération/copie (copy(), openIn() pour le prompt principal
+            // uniquement) - jamais à chaque frappe. Anti-doublon CONSÉCUTIF : si le prompt généré
+            // est identique (même état sérialisé) à la dernière entrée déjà en tête de liste, on
+            // n'ajoute rien (évite de spammer l'historique quand on clique Copier deux fois de suite
+            // sans rien changer).
+            _recordGuestHistory: function() {
+                if (this.isAuthenticated || !this.isValid) return;
+                try {
+                    var stateNow = this.wizardParams;
+                    var stateJson = JSON.stringify(stateNow);
+                    var list = Array.isArray(this.guestHistory) ? this.guestHistory.slice() : [];
+                    if (list.length > 0 && list[0] && JSON.stringify(list[0].state) === stateJson) return;
+                    var title = (this.taskObject || '').trim().slice(0, 60) || 'Prompt';
+                    list.unshift({ date: new Date().toISOString(), title: title, state: stateNow });
+                    if (list.length > 10) list = list.slice(0, 10);
+                    localStorage.setItem(this._guestHistoryKey, JSON.stringify(list));
+                    this.guestHistory = list;
+                } catch (e) {}
+            },
+            // Recharge une entrée dans le wizard - même liste de champs que la désérialisation
+            // ?edit=ID/?remix=ID (init() plus haut), mais fonction dédiée et volontairement séparée
+            // (doctrine incrémentale du projet : on n'a pas touché aux blocs ?edit=ID/?remix=ID
+            // stabilisés par des dizaines de rounds adversariaux pour en extraire un helper partagé).
+            loadGuestHistoryEntry: function(index) {
+                var entry = this.guestHistory && this.guestHistory[index];
+                if (!entry || !entry.state) return;
+                var p = entry.state;
+                var self = this;
+                if (p.selectedTask) self.selectedTask = p.selectedTask;
+                if (p.personaType) self.personaType = p.personaType;
+                if (p.personaPreset) self.personaPreset = p.personaPreset;
+                if (p.personaCustom) self.personaCustom = p.personaCustom;
+                if (p.verbType) self.verbType = p.verbType;
+                if (p.verb) self.verb = p.verb;
+                if (p.verbCustom) self.verbCustom = p.verbCustom;
+                if (p.taskObject) self.taskObject = p.taskObject;
+                if (p.contextInfo) self.contextInfo = p.contextInfo;
+                if (p.audienceType) self.audienceType = p.audienceType;
+                if (Array.isArray(p.audiencePresets)) self.audiencePresets = migrateAudienceValues(p.audiencePresets);
+                if (p.audienceCustom) self.audienceCustom = p.audienceCustom;
+                if (Array.isArray(p.formats)) self.formatsSelected = p.formats;
+                if (p.formatCustom) self.formatCustom = p.formatCustom;
+                if (p.length) self.length = p.length;
+                if (p.tone) self.tone = p.tone;
+                if (p.language) self.language = p.language;
+                if (p.technique) self.technique = p.technique;
+                if (p.constraintAntiAI !== undefined) self.constraintAntiAI = p.constraintAntiAI;
+                if (p.constraintTypo !== undefined) self.constraintTypo = p.constraintTypo;
+                if (p.constraintCanvas) self.constraintCanvas = p.constraintCanvas;
+                if (p.canvasAI) self.canvasAI = p.canvasAI;
+                if (p.canvasFormat) self.canvasFormat = p.canvasFormat;
+                if (p.canvasCustomFormat) self.canvasCustomFormat = p.canvasCustomFormat;
+                if (p.formatMode) self.formatMode = p.formatMode;
+                if (p.constraintChainOfThought !== undefined) self.constraintChainOfThought = p.constraintChainOfThought;
+                if (p.constraintAskIfUnclear !== undefined) self.constraintAskIfUnclear = p.constraintAskIfUnclear;
+                if (p.constraintCustom) self.constraintCustom = p.constraintCustom;
+                if (p.useDelimiters !== undefined) self.useDelimiters = p.useDelimiters;
+                if (p.examples) self.examples = p.examples;
+                if (p.cadreStrict !== undefined) self.cadreStrict = p.cadreStrict;
+                if (p.profile) { self.profile = p.profile; self.profileTouched = true; }
+                self.step = 2;
+                self.previewOpen = true;
+            },
+            deleteGuestHistoryEntry: function(index) {
+                if (!Array.isArray(this.guestHistory)) return;
+                this.guestHistory.splice(index, 1);
+                try { localStorage.setItem(this._guestHistoryKey, JSON.stringify(this.guestHistory)); } catch (e) {}
+            },
+            clearGuestHistory: function() {
+                this.guestHistory = [];
+                try { localStorage.removeItem(this._guestHistoryKey); } catch (e) {}
+            },
 
             // === Cartes de démarrage personnalisées (Option D, 2026-07-26) ===
             // Même contrat de persistance que minuteur-visuel (custom_colors/custom_durations) :

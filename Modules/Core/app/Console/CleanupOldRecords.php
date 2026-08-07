@@ -52,6 +52,19 @@ class CleanupOldRecords extends Command
             $this->cleanTable('short_url_clicks', 'clicked_at', $daysShortUrlClicks, $dryRun, chunkSize: 5000);
         }
 
+        // Prompts sauvegardes supprimes (corbeille) - SavedPromptController::destroy() ne fait
+        // qu'un soft delete (SoftDeletes sur saved_prompts) jamais purge (mission #1414,
+        // 2026-08-07). `WHERE deleted_at < X` exclut naturellement les prompts actifs
+        // (deleted_at NULL n'est jamais comparable avec '<' en SQL) : seule la corbeille plus
+        // vieille que N jours est visee, jamais un prompt actif. DB::table()->delete() est un
+        // DELETE physique (equivalent forceDelete), pas un Eloquent SoftDeletes::delete().
+        // Schema::hasTable() garde le module Tools desactivable sans casser app:cleanup (meme
+        // patron que short_url_clicks ci-dessus).
+        if (Schema::hasTable('saved_prompts')) {
+            $daysSavedPromptsTrashed = (int) $this->getSetting('retention.saved_prompts_trashed_days', 30);
+            $this->cleanTable('saved_prompts', 'deleted_at', $daysSavedPromptsTrashed, $dryRun, chunkSize: 5000);
+        }
+
         $countTokens = DB::table('magic_login_tokens')->where('expires_at', '<', now())->count();
         if (! $dryRun) {
             DB::table('magic_login_tokens')->where('expires_at', '<', now())->delete();

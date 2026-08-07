@@ -55,6 +55,13 @@ class DataRetentionController extends Controller
                 'setting' => null,
                 'default' => 0,
             ],
+            [
+                'table' => 'saved_prompts',
+                'label' => 'Prompts supprimés (corbeille)',
+                'column' => 'deleted_at',
+                'setting' => 'retention.saved_prompts_trashed_days',
+                'default' => 30,
+            ],
         ];
 
         $stats = [];

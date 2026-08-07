@@ -376,6 +376,21 @@
                                 <textarea id="cpTaskObject" class="form-control" rows="3" x-model="taskObject" autocomplete="off" aria-required="true" placeholder="{{ __('Ex: un plan marketing pour le lancement d\'une application mobile au Québec') }}" aria-label="{{ __('Description de la demande') }}"></textarea>
                                 <small class="text-muted">{{ __('Décrivez précisément ce que vous voulez obtenir.') }}</small>
                             </div>
+
+                            {{-- Contexte additionnel (#1593a, 2026-08-07) : champ facultatif DISTINCT
+                                 de la tâche ci-dessus - sur le même modèle que le champ "Exemples"
+                                 (few-shot) plus bas (bouton d'aide « ? », x-model direct, textarea).
+                                 Apparaît dans le prompt final sous « Contexte : » (voir la section
+                                 CONTEXTE ADDITIONNEL de get promptSegments(), constructeur-prompts-core.js). --}}
+                            <div class="form-group mb-3" id="cpContextField">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <label class="form-label fw-medium mb-0" for="cpContextInfo">{{ __('Contexte additionnel (facultatif)') }}</label>
+                                    <x-tools::help-btn toggle="showHelp.contextInfo" style="margin-left:4px;" />
+                                </div>
+                                <div x-show="showHelp.contextInfo" x-transition class="alert alert-info small mb-2 p-2" style="font-size: 0.8rem;" x-text="helps.contextInfo"></div>
+                                <textarea id="cpContextInfo" class="form-control" rows="3" x-model="contextInfo" autocomplete="off" placeholder="{{ __('Ex: on a déjà essayé une version plus formelle qui n\'a pas fonctionné ; le budget est limité à 500$...') }}" aria-label="{{ __('Contexte additionnel') }}"></textarea>
+                                <small class="text-muted">{{ __('Informations de fond utiles : ce qui a déjà été essayé, des contraintes, le contexte du projet...') }}</small>
+                            </div>
                         </div>
 
                         {{-- Étape 3 : Audience (optionnelle) --}}
@@ -693,6 +708,28 @@
                             </div>
                         </div>
 
+                        {{-- Variables réutilisables {{...}} (#1593b, 2026-08-07) : zone de remplissage
+                             affichée SOUS l'aperçu dès que le prompt généré contient au moins un motif
+                             {{nom}} (get promptVariables(), détection par règles - zéro IA). Un champ
+                             texte par variable détectée, réactif (apparaît/disparaît selon le contenu
+                             du prompt). La copie et « Ouvrir dans » utilisent automatiquement les
+                             valeurs saisies (get promptFilled()) ; une variable laissée vide reste telle
+                             quelle dans le prompt copié - jamais bloquant. --}}
+                        <div class="mb-3" x-show="promptVariables.length > 0" x-cloak>
+                            <div class="p-3 rounded" style="background: var(--c-primary-light); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px;">
+                                <h3 style="font-family: var(--f-heading); font-weight: 700; font-size: 0.95rem; color: var(--c-dark); margin: 0 0 0.35rem;">{{ __('Remplis tes variables') }}</h3>
+                                <p class="small mb-2" style="color: var(--c-text-muted); font-size: 0.8rem;">{{ __('Ton prompt contient des espaces à remplir entre accolades. Complète-les ici : la copie et « Ouvrir dans » utiliseront automatiquement tes réponses (les cases laissées vides restent telles quelles dans le prompt).') }}</p>
+                                <template x-for="v in promptVariables" :key="v">
+                                    <div class="mb-2">
+                                        <label class="form-label fw-medium mb-1 d-block" style="font-size: 0.82rem;">
+                                            <span x-text="v"></span>
+                                            <input type="text" class="form-control form-control-sm mt-1" x-model="varValues[v]" autocomplete="off">
+                                        </label>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
                         {{-- Vérifications (ex-« Diagnostic rapide », renommé + sous-titre explicatif au
                              correctif #5, 2026-08-05 ; Option 3 hybride, Partie A — 2026-07-26) :
                              détection par règles simples, ZÉRO IA, ZÉRO appel réseau. Chaque manque
@@ -804,6 +841,34 @@
                                         <div class="d-flex gap-1 ms-2">
                                             <button class="ct-btn ct-btn-outline ct-btn-xs" style="min-height:44px;" @click="copyText(h.prompt)">{{ __('Copier') }}</button>
                                             <button class="ct-btn ct-btn-outline-danger ct-btn-xs" @click.stop="deletePrompt(h.id, i)" :disabled="_deletingIds.includes(h.id)" style="min-height:44px; min-width:44px; padding:1px 5px;">✕</button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        {{-- Rétention locale invités (#1580, 2026-08-07) : historique AUTOMATIQUE
+                             (max 10) des derniers prompts générés, pour les visiteurs NON connectés
+                             uniquement - bloc DISTINCT de « Historique » ci-dessus (lié au bouton
+                             "Sauvegarder", qui exige un compte et n'enregistre donc jamais rien pour
+                             un invité). Clé localStorage séparée et versionnée (cpGuestHistory_v1,
+                             voir constructeur-prompts-core.js). --}}
+                        <template x-if="!isAuthenticated && guestHistory.length > 0">
+                            <div class="mt-3 pt-3 border-top">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <h3 style="font-family: var(--f-heading); font-weight: 700; margin: 0; font-size: 1rem;">{{ __('Mes derniers prompts (sur cet appareil)') }} (<span x-text="guestHistory.length"></span>)</h3>
+                                    <button class="ct-btn ct-btn-outline-danger ct-btn-xs" style="min-height:44px;" @click="clearGuestHistory()">{{ __('Tout effacer') }}</button>
+                                </div>
+                                <p class="small mb-2" style="color: var(--c-text-muted); font-size: 0.75rem;">🔒 {{ __('Conservés uniquement dans ton navigateur, jamais envoyés au serveur.') }}</p>
+                                <template x-for="(g, gi) in guestHistory" :key="g.date + '_' + gi">
+                                    <div class="d-flex justify-content-between align-items-center p-2 mb-1 rounded" style="background: #f8f9fa; font-size: 0.8rem;">
+                                        <div class="flex-fill" style="cursor: pointer;" @click="loadGuestHistoryEntry(gi)">
+                                            <strong x-text="g.title"></strong>
+                                            <div class="text-muted" x-text="new Date(g.date).toLocaleString('fr-CA')"></div>
+                                        </div>
+                                        <div class="d-flex gap-1 ms-2">
+                                            <button class="ct-btn ct-btn-outline ct-btn-xs" style="min-height:44px;" @click="loadGuestHistoryEntry(gi)">{{ __('Recharger') }}</button>
+                                            <button class="ct-btn ct-btn-outline-danger ct-btn-xs" @click.stop="deleteGuestHistoryEntry(gi)" style="min-height:44px; min-width:44px; padding:1px 5px;">✕</button>
                                         </div>
                                     </div>
                                 </template>
@@ -932,7 +997,10 @@ $pbAudiences = $pbNormalize($pbAudiences, $defaultAudiences);
 $pbHelps = [
     'persona' => __('Donner un rôle à l\'IA aide à orienter ses réponses selon une expertise ou un style spécifique. Ex: « Tu es un expert marketing » donnera des réponses plus stratégiques.'),
     'verb' => __('Choisir un verbe d\'action précise ce que l\'IA doit faire : rédiger, analyser, résumer, créer... Le verbe détermine le type de résultat.'),
-    'taskObject' => __('Décrivez clairement et précisément ce que l\'IA doit produire. Plus vous donnez de contexte et de détails, meilleur sera le résultat.'),
+    'taskObject' => __('Décrivez clairement et précisément ce que l\'IA doit produire. Plus vous donnez de contexte et de détails, meilleur sera le résultat. Astuce : écrivez {{sujet}} (ou tout autre mot entre deux accolades) pour créer un espace à remplir plus tard, juste avant de copier votre prompt.'),
+    // #1593a (2026-08-07) : contexte additionnel, distinct de la tâche - même emplacement/pattern
+    // que les autres clés de $pbHelps ci-dessus (toutes injectées via window.promptBuilderConfig.helps).
+    'contextInfo' => __('Informations de fond utiles que l\'IA doit connaître sans qu\'elles fassent partie de la demande elle-même : ce qui a déjà été essayé, des contraintes, le contexte du projet... Vous pouvez aussi y écrire {{sujet}} pour créer un espace à remplir plus tard.'),
     'audience' => __('Spécifier le public aide l\'IA à adapter son langage. Un texte pour des débutants sera différent d\'un texte pour des experts.'),
     'format' => __('Le format guide la structure de la réponse. Une liste à puces est facile à lire, un tableau est bon pour comparer, un plan est idéal pour organiser.'),
     'length' => __('Indiquer une longueur permet de contrôler si la réponse est concise (pour un résumé) ou détaillée (pour un article complet).'),

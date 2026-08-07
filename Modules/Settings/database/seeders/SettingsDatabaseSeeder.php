@@ -94,6 +94,9 @@ class SettingsDatabaseSeeder extends Seeder
             ['group' => 'retention', 'key' => 'retention.sent_emails_days', 'value' => '90', 'type' => 'number', 'description' => 'Durée de conservation des emails envoyés (jours)'],
             ['group' => 'retention', 'key' => 'retention.activity_log_days', 'value' => '180', 'type' => 'number', 'description' => 'Durée de conservation des logs d\'activité (jours)'],
             ['group' => 'retention', 'key' => 'retention.blocked_ips_days', 'value' => '365', 'type' => 'number', 'description' => 'Durée de conservation des IPs bloquées expirées (jours)'],
+            // Mission #1414 (2026-08-07) : les prompts supprimés par leurs propriétaires
+            // (soft delete sur saved_prompts) n'étaient jamais purgés définitivement.
+            ['group' => 'retention', 'key' => 'retention.saved_prompts_trashed_days', 'value' => '30', 'type' => 'number', 'description' => 'Prompts supprimés (corbeille) - suppression définitive après N jours'],
 
             // Intelligence artificielle (OpenRouter)
             ['group' => 'ai', 'key' => 'ai.openrouter_api_key', 'value' => '', 'type' => 'string', 'description' => 'Clé API OpenRouter'],

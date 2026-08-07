@@ -1,19 +1,16 @@
-name: Maintenance ponctuelle 2026-08-07 (repair git + export annuaire)
+name: Maintenance ponctuelle 2026-08-07 (preuve journal prod)
 
-# ACTION: workflow TEMPORAIRE (a retirer apres usage) - deux operations de maintenance
-#   qui exigent l'acces SSH des runners (port 22 filtre depuis les postes locaux).
-# RAISON: (1) le HEAD git de prod est bloque a la mi-juin alors que l'arbre de travail
-#   est a jour (deploiement par rsync) - realignement SANS toucher aux fichiers
-#   (fetch + reset --mixed, l'arbre de travail n'est jamais modifie, reflog = rollback) ;
-#   (2) la base locale de dev n'a plus aucune donnee d'annuaire - export des tables
-#   directory_* (contenu public) en artefact pour re-seeder le poste local.
+# ACTION: workflow TEMPORAIRE (a retirer apres usage) - lit la fin du journal Laravel prod
+#   pour prouver que l'erreur « The force option does not exist » (workers de queue perimes)
+#   a cesse apres l'ajout de queue:restart au deploiement.
+# RAISON: le port SSH est filtre depuis les postes locaux, seuls les runners y accedent.
 
 on:
   workflow_dispatch:
 
 jobs:
-  maintenance:
-    name: Repair git prod + export directory
+  check:
+    name: Preuve journal prod
     runs-on: ubuntu-latest
 
     steps:
@@ -24,23 +21,6 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H server.memora.pro >> ~/.ssh/known_hosts
 
-      - name: Backup refs git (rollback garanti)
+      - name: Occurrences de l erreur force (avant vs apres 13h58 UTC)
         run: |
-          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && cp .git/HEAD /tmp/git-HEAD.bak-20260807 && git rev-parse HEAD > /tmp/git-sha-avant.bak-20260807 && cat /tmp/git-sha-avant.bak-20260807"
-
-      - name: Realigner HEAD sur origin/master (sans toucher aux fichiers)
-        run: |
-          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && git fetch origin master && git reset --mixed origin/master && echo '--- HEAD apres ---' && git log --oneline -1 && echo '--- ecart worktree vs HEAD (attendu: fichiers generes/gitignores seulement) ---' && git status --short | head -30 && git status --short | wc -l"
-
-      - name: Export des tables directory_* (donnees publiques d annuaire)
-        run: |
-          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && DB_NAME=\$(grep '^DB_DATABASE=' .env | cut -d= -f2) && DB_USER=\$(grep '^DB_USERNAME=' .env | cut -d= -f2) && DB_PASS=\$(grep '^DB_PASSWORD=' .env | cut -d= -f2- | tr -d '\"') && TABLES=\$(MYSQL_PWD=\"\$DB_PASS\" mysql -u \"\$DB_USER\" \"\$DB_NAME\" -N -e \"SHOW TABLES LIKE 'directory%'\" | tr '\n' ' ') && echo \"Tables: \$TABLES\" && MYSQL_PWD=\"\$DB_PASS\" mysqldump -u \"\$DB_USER\" --no-tablespaces --single-transaction \"\$DB_NAME\" \$TABLES | gzip > /tmp/directory-export-20260807.sql.gz && ls -lh /tmp/directory-export-20260807.sql.gz"
-          scp gmemora@server.memora.pro:/tmp/directory-export-20260807.sql.gz ./directory-export.sql.gz
-          ssh gmemora@server.memora.pro "rm -f /tmp/directory-export-20260807.sql.gz"
-
-      - name: Publier l export en artefact
-        uses: actions/upload-artifact@v4
-        with:
-          name: directory-export
-          path: directory-export.sql.gz
-          retention-days: 1
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && echo '--- dernieres occurrences (heure UTC) ---' && grep -n 'force.*option does not exist' storage/logs/laravel.log | tail -5 && echo '--- fin du journal (3 dernieres lignes horodatees) ---' && grep -oE '^\[[0-9T:. -]+\]' storage/logs/laravel.log | tail -3 && echo '--- heure serveur ---' && date -u"
