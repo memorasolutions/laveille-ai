@@ -55,30 +55,67 @@ it('renders the additional context field, distinct from the task field, with its
     expect($html)->toContain('helps.contextInfo');
 });
 
-it('exposes the contextInfo help text via window.promptBuilderConfig.helps, mentioning {{variable}}', function () {
+it('exposes the contextInfo help text via window.promptBuilderConfig.helps, mentioning the "En faire un espace à remplir" gesture', function () {
     makePromptBuilderTool();
     $user = User::factory()->create();
 
     $html = $this->actingAs($user)->get('/outils/constructeur-prompts')->assertOk()->getContent();
 
     expect($html)->toContain('contextInfo');
-    // Les deux textes d'aide (taskObject ET contextInfo) mentionnent la syntaxe {{sujet}} -
-    // c'est le canal d'apprentissage de la fonctionnalité "variables réutilisables" (#1593b).
-    expect(substr_count($html, '{{sujet}}'))->toBeGreaterThanOrEqual(1);
+    // Espaces à remplir (tâches 1660-1665, 2026-08-07) : les 2 textes d'aide (taskObject ET
+    // contextInfo) mentionnaient auparavant la syntaxe {{sujet}} (#1593b) - remplacée par le geste
+    // de sélection, conforme à la RÈGLE D'OR de cette fonctionnalité (jamais de syntaxe visible).
+    // Les {{...}} restent fonctionnels mais ne sont plus mis de l'avant dans l'aide.
+    expect(substr_count($html, 'En faire un espace à remplir'))->toBeGreaterThanOrEqual(2);
+    expect($html)->not->toContain('{{sujet}}');
 });
 
 // === #1593b : variables réutilisables {{...}} ===
 
-it('renders the "Remplis tes variables" fill-in panel, reactive on promptVariables', function () {
+it('renders the "Remplis tes espaces" fill-in panel (ex-"Remplis tes variables", extended tâches 1660-1665), reactive on fillableSpaces and promptVariables', function () {
     makePromptBuilderTool();
     $user = User::factory()->create();
 
     $html = $this->actingAs($user)->get('/outils/constructeur-prompts')->assertOk()->getContent();
 
-    expect($html)->toContain('x-show="promptVariables.length > 0"');
+    // Le bloc a été RENOMMÉ (tâches 1660-1665) : il liste désormais les espaces à remplir
+    // (fillableSpaces) AVANT les variables {{...}} historiques, jamais l'inverse - mécanique
+    // {{}} intacte (x-for/x-model inchangés).
+    expect($html)->toContain('x-show="fillableSpaces.length > 0 || promptVariables.length > 0"');
+    expect($html)->toContain('x-for="(sp, spIdx) in fillableSpaces"');
     expect($html)->toContain('x-for="v in promptVariables"');
     expect($html)->toContain('x-model="varValues[v]"');
-    expect($html)->toContain('Remplis tes variables');
+    expect($html)->toContain('Remplis tes espaces');
+    expect($html)->not->toContain('Remplis tes variables');
+});
+
+// === Espaces à remplir (tâches 1660-1665, panel multi-IA 5 rounds, 2026-08-07) ===
+
+it('renders the space creation gesture (selection bubble + "+" button) on both cpTaskObject and cpContextInfo', function () {
+    makePromptBuilderTool();
+    $user = User::factory()->create();
+
+    $html = $this->actingAs($user)->get('/outils/constructeur-prompts')->assertOk()->getContent();
+
+    // Geste A (sélection) : bulle inline sous chaque champ, filtrée par fieldId.
+    expect($html)->toContain("handleSpaceFieldSelect(\$event)");
+    expect($html)->toContain("createSpaceFromSelection()");
+    expect($html)->toContain("spaceBubble.fieldId === 'cpTaskObject'");
+    expect($html)->toContain("spaceBubble.fieldId === 'cpContextInfo'");
+    expect($html)->toContain('En faire un espace à remplir');
+});
+
+it('renders the "Tu pourras changer" band of space pills below the context field, tracking every space entry', function () {
+    makePromptBuilderTool();
+    $user = User::factory()->create();
+
+    $html = $this->actingAs($user)->get('/outils/constructeur-prompts')->assertOk()->getContent();
+
+    expect($html)->toContain('Tu pourras changer :');
+    expect($html)->toContain('x-for="(sp, spIdx) in spaces"');
+    expect($html)->toContain('removeSpace(spIdx)');
+    expect($html)->toContain('startRenameSpace(spIdx)');
+    expect($html)->toContain('commitPendingSpaceRename(spIdx)');
 });
 
 // === #1580 : rétention locale invités ===

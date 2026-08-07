@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.150.0] - 2026-08-07
+
+### Ajouté
+- **Constructeur de prompts : « Espaces à remplir » sans aucune syntaxe** - conçu en 5 rounds de panel multi-IA (Perplexity, Codex, claude.ai, Gemini, DeepSeek) pour remplacer l'astuce `{{sujet}}` jugée trop technique. Deux gestes en français normal, zéro symbole : sélectionner un mot de sa phrase et cliquer « En faire un espace à remplir », ou insérer « information à préciser » au curseur avec le bouton « + Ajouter un espace à remplir ». Chaque espace apparaît en pastille sous le champ (« Tu pourras changer : »), se renomme en place (le mot est remplacé partout dans le texte), et se remplit dans le bloc « Remplis tes espaces » sous l'aperçu - l'aperçu se met à jour en direct, la copie et « Ouvrir dans [IA] » utilisent la valeur saisie, et un espace laissé vide garde simplement le mot de départ (le prompt reste toujours grammatical). Un mot disparu du texte devient une pastille grise « non retrouvé », jamais une corruption. Les espaces sont conservés dans les prompts sauvegardés et l'historique, et les dernières valeurs saisies sont proposées en un clic à la réutilisation. Les variables `{{...}}` existantes continuent de fonctionner.
+
+### Corrigé
+- **Constructeur de prompts : l'infobulle « ce mot n'a pas été retrouvé » ne se rendait pas** - l'apostrophe française cassait l'expression du gabarit (erreur console à chaque visite de la page) ; échappement corrigé.
+
 ## [1.149.0] - 2026-08-07
 
 ### Amélioré

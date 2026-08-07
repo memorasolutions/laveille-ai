@@ -178,6 +178,23 @@
                         .ct-chip{display:inline-flex;align-items:center;gap:4px;border:2px solid var(--c-primary);border-radius:9999px;background:var(--c-primary);color:#fff;padding:0.25rem 0.5rem 0.25rem 0.75rem;font-size:0.8rem;font-weight:500;}
                         .ct-chip__x{background:transparent;border:0;color:inherit;font-size:1rem;line-height:1;cursor:pointer;min-width:24px;min-height:24px;padding:0;}
                         .ct-chip__x:focus-visible{outline:2px solid #fff;outline-offset:1px;border-radius:50%;}
+                        {{-- Espaces à remplir (tâches 1660-1665, 2026-08-07) : pastilles pending/
+                             missing en gris #4b5563 (contraste AAA mesuré à 7,57:1 sur blanc, valeur
+                             déjà établie ailleurs dans ce fichier - jamais une nouvelle teinte
+                             inventée) au lieu du teal vif des pastilles confirmées (.ct-chip), pour
+                             signaler visuellement un état transitoire/à corriger. --}}
+                        .ct-chip--pending,.ct-chip--missing{background:#4b5563;border-color:#4b5563;}
+                        .ct-chip__label{background:transparent;border:0;color:inherit;font:inherit;font-weight:500;cursor:pointer;padding:0;min-height:24px;}
+                        .ct-chip__label:focus-visible{outline:2px solid #fff;outline-offset:1px;border-radius:4px;}
+                        .ct-chip__input{background:#fff;border:1px solid var(--c-primary);border-radius:6px;color:var(--c-dark);font-size:0.8rem;padding:2px 6px;min-width:90px;max-width:180px;min-height:24px;}
+                        .ct-chip__badge{font-size:0.7rem;opacity:0.9;white-space:nowrap;}
+                        {{-- Aperçu colorisé des espaces (Intégration au moteur, point 3) : réutilise
+                             la paire déjà établie #5b4a1f sur #FEF3C7 (round 151, « votre texte »)
+                             plutôt que d'inventer une nouvelle teinte - pointillé = non rempli, plein
+                             = rempli, halo = champ de remplissage actuellement focalisé. --}}
+                        .ct-seg-space-empty{background:#FEF3C7;color:#5b4a1f;border-radius:4px;padding:0 2px;font-weight:600;border-bottom:2px dashed #5b4a1f;}
+                        .ct-seg-space-filled{background:#FEF3C7;color:#5b4a1f;border-radius:4px;padding:0 2px;font-weight:600;border-bottom:2px solid #5b4a1f;}
+                        .ct-seg-space-active{outline:2px solid var(--c-primary);outline-offset:1px;}
                         {{-- LOT 2 (2026-08-06, champs conditionnels invisibles) : conteneur accentué
                              qui enveloppe une case "Autre (...)" et son champ de saisie révélé - rend
                              visible que ces cases ouvrent une zone de saisie secondaire, cohérent avec
@@ -373,8 +390,19 @@
                             <div class="form-group mb-3" id="cpTaskField">
                                 <label class="form-label fw-medium">{{ __('Sur quoi porte votre demande ?') }} <span style="color: #991B1B;">*</span></label>
                                 <p class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;">🔒 {{ __('Il y a un vrai nom, un courriel, un numéro de téléphone ou une adresse dans votre texte ? Cachez-les d\'abord avec l\'') }}<a href="/outils/anonymiseur" style="color: #0A3A42; font-weight: 600; text-decoration: underline;">{{ __('Anonymiseur') }}</a>{{ __(', puis collez le résultat ici. Rien n\'est envoyé ni enregistré nulle part.') }}</p>
-                                <textarea id="cpTaskObject" class="form-control" rows="3" x-model="taskObject" autocomplete="off" aria-required="true" placeholder="{{ __('Ex: un plan marketing pour le lancement d\'une application mobile au Québec') }}" aria-label="{{ __('Description de la demande') }}"></textarea>
+                                <textarea id="cpTaskObject" class="form-control" rows="3" x-model="taskObject" autocomplete="off" aria-required="true" placeholder="{{ __('Ex: un plan marketing pour le lancement d\'une application mobile au Québec') }}" aria-label="{{ __('Description de la demande') }}"
+                                    @focus="handleSpaceFieldFocus('cpTaskObject')" @select="handleSpaceFieldSelect($event)" @mouseup="handleSpaceFieldSelect($event)" @keyup="handleSpaceFieldSelect($event)" @blur="handleSpaceFieldBlur()"></textarea>
                                 <small class="text-muted">{{ __('Décrivez précisément ce que vous voulez obtenir.') }}</small>
+                                {{-- Espaces à remplir (tâches 1660-1665, geste A) : bulle inline sous le
+                                     champ dès qu'une sélection valide existe - « près du champ », pas une
+                                     bulle positionnée en pixels (plus robuste, même esprit que la spec).
+                                     @mousedown.prevent évite la course avec le blur du textarea (le clic
+                                     sur ce bouton ne doit jamais faire perdre la sélection avant l'action). --}}
+                                <div x-show="spaceBubble.show && spaceBubble.fieldId === 'cpTaskObject'" x-cloak class="mt-2">
+                                    <button type="button" role="button" class="ct-btn ct-btn-outline ct-btn-xs" style="min-height:44px;" @mousedown.prevent="createSpaceFromSelection()">
+                                        <span x-text="'{{ __('En faire un espace à remplir') }} : « ' + spaceBubble.text + ' »'"></span>
+                                    </button>
+                                </div>
                             </div>
 
                             {{-- Contexte additionnel (#1593a, 2026-08-07) : champ facultatif DISTINCT
@@ -388,8 +416,66 @@
                                     <x-tools::help-btn toggle="showHelp.contextInfo" style="margin-left:4px;" />
                                 </div>
                                 <div x-show="showHelp.contextInfo" x-transition class="alert alert-info small mb-2 p-2" style="font-size: 0.8rem;" x-text="helps.contextInfo"></div>
-                                <textarea id="cpContextInfo" class="form-control" rows="3" x-model="contextInfo" autocomplete="off" placeholder="{{ __('Ex: on a déjà essayé une version plus formelle qui n\'a pas fonctionné ; le budget est limité à 500$...') }}" aria-label="{{ __('Contexte additionnel') }}"></textarea>
+                                <textarea id="cpContextInfo" class="form-control" rows="3" x-model="contextInfo" autocomplete="off" placeholder="{{ __('Ex: on a déjà essayé une version plus formelle qui n\'a pas fonctionné ; le budget est limité à 500$...') }}" aria-label="{{ __('Contexte additionnel') }}"
+                                    @focus="handleSpaceFieldFocus('cpContextInfo')" @select="handleSpaceFieldSelect($event)" @mouseup="handleSpaceFieldSelect($event)" @keyup="handleSpaceFieldSelect($event)" @blur="handleSpaceFieldBlur()"></textarea>
                                 <small class="text-muted">{{ __('Informations de fond utiles : ce qui a déjà été essayé, des contraintes, le contexte du projet...') }}</small>
+                                {{-- Espaces à remplir (tâches 1660-1665, geste A) : même bulle que le
+                                     champ ci-dessus, filtrée sur ce champ (fieldId). --}}
+                                <div x-show="spaceBubble.show && spaceBubble.fieldId === 'cpContextInfo'" x-cloak class="mt-2">
+                                    <button type="button" role="button" class="ct-btn ct-btn-outline ct-btn-xs" style="min-height:44px;" @mousedown.prevent="createSpaceFromSelection()">
+                                        <span x-text="'{{ __('En faire un espace à remplir') }} : « ' + spaceBubble.text + ' »'"></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {{-- Bande de repérage (UI - repérage, tâches 1660-1665) : une pastille par
+                                 espace créé, visible en fin d'étape 2 (spec : « sinon étape 2 seulement »
+                                 - choix retenu pour éviter de dupliquer ce bloc à l'étape 4). Pastille
+                                 pending : champ de renommage ouvert nativement (sp.draftText) + suffixe
+                                 « à préciser ». Pastille confirmée : clic sur le nom → renommage inline
+                                 (remplace TOUTES les occurrences dans les 2 textareas). Pastille
+                                 "non retrouvée" : grise, infobulle, × la retire - AUCUNE corruption
+                                 possible (rien n'est jamais retiré du texte lui-même). --}}
+                            {{-- Geste B (spec §UI - création, point B) : bouton d'insertion au curseur.
+                                 Raccord ajouté au QC visuel (la méthode addSpaceAtCursor existait au
+                                 moteur mais aucun bouton ne l'appelait). Toujours visible à l'étape 2 :
+                                 c'est LA porte d'entrée découvrable de la fonctionnalité. --}}
+                            <div class="mb-2">
+                                <button type="button" class="ct-btn ct-btn-outline ct-btn-xs" style="min-height:44px;" @click="addSpaceAtCursor()">
+                                    {{ __('+ Ajouter un espace à remplir') }}
+                                </button>
+                            </div>
+                            <div class="mb-2" x-show="spaces.length > 0" x-cloak>
+                                <p class="small mb-1" style="font-size:0.8rem; color:var(--c-text-muted);">{{ __('Tu pourras changer :') }}</p>
+                                <div class="ct-chip-row" role="list" aria-label="{{ __('Espaces à remplir créés') }}">
+                                    <template x-for="(sp, spIdx) in spaces" :key="spIdx">
+                                        <span class="ct-chip" :class="{ 'ct-chip--pending': sp.pending, 'ct-chip--missing': spaceMissingCache[sp.text] }" role="listitem">
+                                            <template x-if="sp.pending">
+                                                <input type="text" :id="'cpSpacePendingInput-' + spIdx" x-model="sp.draftText" autocomplete="off" class="ct-chip__input"
+                                                    :aria-label="'{{ __('Nommer cet espace à remplir') }}'"
+                                                    @keydown.enter.prevent="commitPendingSpaceRename(spIdx)" @keydown.escape.prevent="removeSpace(spIdx)" @blur="commitPendingSpaceRename(spIdx)">
+                                            </template>
+                                            <template x-if="sp.pending">
+                                                <span class="ct-chip__badge">{{ __('à préciser') }}</span>
+                                            </template>
+                                            <template x-if="!sp.pending && spaceEditingIndex === spIdx">
+                                                <input type="text" :id="'cpSpaceRename-' + spIdx" x-model="spaceEditingText" autocomplete="off" class="ct-chip__input"
+                                                    :aria-label="'{{ __('Renommer') }} ' + sp.text"
+                                                    @keydown.enter.prevent="commitRenameSpace(spIdx)" @keydown.escape.prevent="cancelRenameSpace()" @blur="commitRenameSpace(spIdx)">
+                                            </template>
+                                            <template x-if="!sp.pending && spaceEditingIndex !== spIdx">
+                                                <button type="button" class="ct-chip__label" @click="startRenameSpace(spIdx)"
+                                                    {{-- @js() : l'apostrophe de « n'a » cassait l'expression Alpine en quotes simples
+                                                         (SyntaxError console, title/aria jamais rendus - trouvé au QC visuel). --}}
+                                                    :aria-label="(spaceMissingCache[sp.text] ? @js(__('ce mot n\'a pas été retrouvé dans ton texte : ')) : '') + sp.text"
+                                                    :title="spaceMissingCache[sp.text] ? @js(__('Ce mot n\'a pas été retrouvé dans ton texte.')) : sp.text">
+                                                    <span x-text="sp.text"></span>
+                                                </button>
+                                            </template>
+                                            <button type="button" class="ct-chip__x" :aria-label="'{{ __('Retirer') }} ' + sp.text" @click="removeSpace(spIdx)">&times;</button>
+                                        </span>
+                                    </template>
+                                </div>
                             </div>
                         </div>
 
@@ -698,7 +784,26 @@
                                 </div>
                                 <details class="mb-0">
                                     <summary class="small" style="cursor:pointer; color: var(--c-text-muted); user-select:none;">{{ __('Voir le texte exact envoyé à l\'IA (technique)') }}</summary>
-                                    <div class="p-3 rounded mt-2" style="background: var(--c-primary-light); white-space: pre-wrap; font-family: monospace; font-size: 0.9rem; min-height: 60px; line-height: 1.6;" x-text="prompt || '{{ __('Remplissez les étapes ci-dessus...') }}'"></div>
+                                    {{-- Aperçu colorisé = MIROIR (Intégration au moteur, point 3, tâches
+                                         1660-1665) : rendu segment par segment de get promptSegments() -
+                                         seuls les segments 'space' reçoivent un traitement visuel
+                                         (pointillé = non rempli, plein = rempli, halo = champ de
+                                         remplissage actuellement focalisé) ; 'tool'/'user' restent du
+                                         texte brut, comportement visuel IDENTIQUE à avant cette
+                                         fonctionnalité (zéro régression sur l'existant). --}}
+                                    <div class="p-3 rounded mt-2" style="background: var(--c-primary-light); white-space: pre-wrap; font-family: monospace; font-size: 0.9rem; min-height: 60px; line-height: 1.6;">
+                                        <template x-if="!prompt">
+                                            <span>{{ __('Remplissez les étapes ci-dessus...') }}</span>
+                                        </template>
+                                        <template x-if="prompt">
+                                            <template x-for="(seg, segIdx) in promptSegments" :key="segIdx">
+                                                <span
+                                                    x-text="seg.kind === 'space' ? (spaceValues[seg.spaceRef] || seg.text) : seg.text"
+                                                    :class="seg.kind === 'space' ? ((spaceValues[seg.spaceRef] ? 'ct-seg-space-filled' : 'ct-seg-space-empty') + (focusedSpaceText === seg.spaceRef ? ' ct-seg-space-active' : '')) : ''"
+                                                ></span>
+                                            </template>
+                                        </template>
+                                    </div>
                                     <div class="d-flex justify-content-end gap-3 mt-1" style="font-size: 0.8rem;">
                                         <span class="text-muted" x-text="prompt.length + ' {{ __('caractères') }}'"></span>
                                         <span class="text-muted" x-text="'~' + Math.ceil(prompt.length / 4) + ' {{ __('unités de traitement IA (tokens)') }}'"></span>
@@ -708,17 +813,30 @@
                             </div>
                         </div>
 
-                        {{-- Variables réutilisables {{...}} (#1593b, 2026-08-07) : zone de remplissage
-                             affichée SOUS l'aperçu dès que le prompt généré contient au moins un motif
-                             {{nom}} (get promptVariables(), détection par règles - zéro IA). Un champ
-                             texte par variable détectée, réactif (apparaît/disparaît selon le contenu
-                             du prompt). La copie et « Ouvrir dans » utilisent automatiquement les
-                             valeurs saisies (get promptFilled()) ; une variable laissée vide reste telle
-                             quelle dans le prompt copié - jamais bloquant. --}}
-                        <div class="mb-3" x-show="promptVariables.length > 0" x-cloak>
+                        {{-- Remplis tes espaces (ex-« Remplis tes variables », étendu tâches 1660-1665,
+                             2026-08-07) : zone de remplissage affichée SOUS l'aperçu, listant D'ABORD
+                             les espaces créés par sélection/bouton (fillableSpaces - les "non
+                             retrouvés" en sont exclus, seule action possible pour eux = le × de la
+                             bande), PUIS les variables {{...}} historiques (promptVariables,
+                             mécanique {{}} totalement inchangée - #1593b). La copie et « Ouvrir dans »
+                             utilisent automatiquement les valeurs saisies (get promptFilled()) ; un
+                             champ laissé vide garde le mot de départ - jamais bloquant. --}}
+                        <div class="mb-3" x-show="fillableSpaces.length > 0 || promptVariables.length > 0" x-cloak>
                             <div class="p-3 rounded" style="background: var(--c-primary-light); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px;">
-                                <h3 style="font-family: var(--f-heading); font-weight: 700; font-size: 0.95rem; color: var(--c-dark); margin: 0 0 0.35rem;">{{ __('Remplis tes variables') }}</h3>
-                                <p class="small mb-2" style="color: var(--c-text-muted); font-size: 0.8rem;">{{ __('Ton prompt contient des espaces à remplir entre accolades. Complète-les ici : la copie et « Ouvrir dans » utiliseront automatiquement tes réponses (les cases laissées vides restent telles quelles dans le prompt).') }}</p>
+                                <h3 style="font-family: var(--f-heading); font-weight: 700; font-size: 0.95rem; color: var(--c-dark); margin: 0 0 0.35rem;">{{ __('Remplis tes espaces') }}</h3>
+                                <p class="small mb-2" style="color: var(--c-text-muted); font-size: 0.8rem;">{{ __('Ton prompt contient des espaces à remplir. Complète-les ici : la copie et « Ouvrir dans » utiliseront automatiquement tes réponses (les champs laissés vides gardent le mot de départ).') }}</p>
+                                <template x-for="(sp, spIdx) in fillableSpaces" :key="sp.text">
+                                    <div class="mb-2">
+                                        <label class="form-label fw-medium mb-1 d-block" style="font-size: 0.82rem;" :for="'cpSpaceFill-' + spIdx">
+                                            <span x-text="sp.text.length > 24 ? sp.text.slice(0, 24) + '…' : sp.text" :title="sp.text"></span>
+                                        </label>
+                                        <input type="text" :id="'cpSpaceFill-' + spIdx" class="form-control form-control-sm" x-model="spaceValues[sp.text]" :placeholder="sp.text" autocomplete="off" :aria-label="sp.text"
+                                            @focus="focusedSpaceText = sp.text" @blur="focusedSpaceText = ''">
+                                        <button type="button" class="ct-btn ct-btn-outline ct-btn-xs mt-1" style="min-height:44px;" x-show="spaceLastValues[sp.text] && spaceLastValues[sp.text] !== spaceValues[sp.text]" @click="spaceValues[sp.text] = spaceLastValues[sp.text]">
+                                            <span x-text="'{{ __('Reprendre :') }} ' + spaceLastValues[sp.text]"></span>
+                                        </button>
+                                    </div>
+                                </template>
                                 <template x-for="v in promptVariables" :key="v">
                                     <div class="mb-2">
                                         <label class="form-label fw-medium mb-1 d-block" style="font-size: 0.82rem;">
@@ -780,6 +898,10 @@
                         <div x-show="!isValid" id="cpValidityHint" role="status" aria-live="polite" class="alert alert-warning small p-2 mb-2" style="font-size: 0.8rem;">
                             {{ __('Complétez le rôle de l\'IA (étape 1) et votre tâche avec un verbe d\'action (étape 2) pour générer votre prompt.') }}
                         </div>
+                        {{-- Espaces à remplir (tâches 1660-1665, point 5) : mention discrète, UNIQUEMENT
+                             si au moins un espace remplissable est resté vide - jamais bloquant, le
+                             prompt copié garde le mot de départ. --}}
+                        <p x-show="isValid && unfilledSpacesCount > 0" x-cloak role="status" aria-live="polite" class="small mb-2" style="color: var(--c-text-muted); font-size: 0.78rem;" x-text="unfilledSpacesMessage"></p>
                         <div class="d-flex gap-2 mb-3 flex-wrap">
                             <button class="ct-btn ct-btn-accent flex-fill" @click="copy()" :disabled="!isValid" aria-describedby="cpValidityHint" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'"
                                     x-text="copied ? '{{ __('Copié !') }}' : '{{ __('Copier le prompt') }}'"></button>
@@ -999,12 +1121,15 @@ $pbHelps = [
     // ton/style/vocabulaire, il n'améliore ni l'expertise ni l'exactitude - l'ancien texte surpromettait.
     'persona' => __('Donner un rôle à l\'IA oriente le ton, le style et le vocabulaire de sa réponse - mais ne la rend ni plus experte ni plus fiable. Ex: « Tu es un expert marketing » donnera un ton plus stratégique ; pour la justesse, donnez du contexte et des consignes précises.'),
     'verb' => __('Choisir un verbe d\'action précise ce que l\'IA doit faire : rédiger, analyser, résumer, créer... Le verbe détermine le type de résultat.'),
-    // Aides {{...}} réécrites avec un exemple concret (tâche 1655 - la formule abstraite
-    // « espace à remplir plus tard » n'était pas comprise, même par le fondateur).
-    'taskObject' => __('Décrivez clairement et précisément ce que l\'IA doit produire. Plus vous donnez de détails, meilleur sera le résultat. Astuce : un mot entre doubles accolades, comme {{sujet}}, crée un espace à remplir. Ex. : « un courriel aux parents sur {{sujet}} » - au moment de copier, l\'outil vous demande le sujet du jour et le reste du prompt ne change pas. Idéal pour réutiliser le même prompt chaque semaine.'),
+    // Aides « espace à remplir » réécrites en geste (tâches 1660-1665, panel multi-IA 5 rounds,
+    // 2026-08-07) : l'astuce {{sujet}} (accolades visibles) est remplacée par le geste de sélection,
+    // conforme à la RÈGLE D'OR de cette fonctionnalité - l'utilisateur ne doit jamais voir de
+    // syntaxe. Les {{...}} restent fonctionnels (mécanique #1593b intacte) mais ne sont plus mis
+    // de l'avant dans cette aide.
+    'taskObject' => __('Décrivez clairement et précisément ce que l\'IA doit produire. Plus vous donnez de détails, meilleur sera le résultat. Astuce : sélectionnez un mot de votre texte et cliquez sur « En faire un espace à remplir » - à chaque réutilisation, l\'outil vous demandera la nouvelle valeur (par exemple le sujet de la semaine) sans que vous ayez à réécrire le reste.'),
     // #1593a (2026-08-07) : contexte additionnel, distinct de la tâche - même emplacement/pattern
     // que les autres clés de $pbHelps ci-dessus (toutes injectées via window.promptBuilderConfig.helps).
-    'contextInfo' => __('Informations de fond utiles que l\'IA doit connaître sans qu\'elles fassent partie de la demande elle-même : ce qui a déjà été essayé, des contraintes, le contexte du projet... Ici aussi, un mot entre doubles accolades, comme {{niveau}}, crée un espace que l\'outil vous fera remplir au moment de copier - pratique pour changer un seul détail sans réécrire le prompt.'),
+    'contextInfo' => __('Informations de fond utiles que l\'IA doit connaître sans qu\'elles fassent partie de la demande elle-même : ce qui a déjà été essayé, des contraintes, le contexte du projet... Ici aussi, vous pouvez sélectionner un mot et cliquer sur « En faire un espace à remplir » pour pouvoir le changer facilement la prochaine fois.'),
     'audience' => __('Spécifier le public aide l\'IA à adapter son langage. Un texte pour des débutants sera différent d\'un texte pour des experts.'),
     'format' => __('Le format guide la structure de la réponse. Une liste à puces est facile à lire, un tableau est bon pour comparer, un plan est idéal pour organiser.'),
     'length' => __('Indiquer une longueur permet de contrôler si la réponse est concise (pour un résumé) ou détaillée (pour un article complet).'),
@@ -1220,7 +1345,14 @@ window.promptBuilderConfig = {
         formatExclusiveReason: @json(__('Ce format technique doit être utilisé seul.')),
         profileFeedbackTexte: @json(__("Vous avez choisi Texte : les règles d'écriture humaine et de typographie s'appliquent selon vos cases cochées.")),
         profileFeedbackProgrammation: @json(__("Vous avez choisi Programmation : j'ajoute les règles de mise en forme du code, je retire les règles de français du Québec.")),
-        profileFeedbackTraduction: @json(__('Vous avez choisi Traduction : je retire les règles de français du Québec du résultat.'))
+        profileFeedbackTraduction: @json(__('Vous avez choisi Traduction : je retire les règles de français du Québec du résultat.')),
+        // Espaces à remplir (tâches 1660-1665, panel multi-IA 5 rounds, 2026-08-07) : messages
+        // JS dynamiques (toasts, mention "non rempli") - même pont i18n que le reste de ce fichier.
+        spaceTooShort: @json(__('Choisis un mot plus précis pour éviter les remplacements imprévus.')),
+        spaceAlreadyExists: @json(__('Cet espace existe déjà.')),
+        spaceNewLabel: @json(__('information à préciser')),
+        spaceUnfilledOne: @json(__('1 espace non rempli, on garde le mot de départ.')),
+        spaceUnfilledMany: @json(__('{count} espaces non remplis, on garde les mots de départ.'))
     }
 };
 </script>

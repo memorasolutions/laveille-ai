@@ -194,8 +194,8 @@ document.addEventListener('alpine:init', function() {
             helps: (window.promptBuilderConfig && window.promptBuilderConfig.helps) || {
                 persona: 'Donner un rôle à l\'IA oriente le ton, le style et le vocabulaire de sa réponse - mais ne la rend ni plus experte ni plus fiable. Ex: « Tu es un expert marketing » donnera un ton plus stratégique ; pour la justesse, donnez du contexte et des consignes précises.',
                 verb: 'Choisir un verbe d\'action précise ce que l\'IA doit faire : rédiger, analyser, résumer, créer... Le verbe détermine le type de résultat.',
-                taskObject: 'Décrivez clairement et précisément ce que l\'IA doit produire. Plus vous donnez de détails, meilleur sera le résultat. Astuce : un mot entre doubles accolades, comme {{sujet}}, crée un espace à remplir. Ex. : « un courriel aux parents sur {{sujet}} » - au moment de copier, l\'outil vous demande le sujet du jour et le reste du prompt ne change pas. Idéal pour réutiliser le même prompt chaque semaine.',
-                contextInfo: 'Informations de fond utiles que l\'IA doit connaître sans qu\'elles fassent partie de la demande elle-même : ce qui a déjà été essayé, des contraintes, le contexte du projet... Ici aussi, un mot entre doubles accolades, comme {{niveau}}, crée un espace que l\'outil vous fera remplir au moment de copier - pratique pour changer un seul détail sans réécrire le prompt.',
+                taskObject: 'Décrivez clairement et précisément ce que l\'IA doit produire. Plus vous donnez de détails, meilleur sera le résultat. Astuce : sélectionnez un mot de votre texte et cliquez sur « En faire un espace à remplir » - à chaque réutilisation, l\'outil vous demandera la nouvelle valeur (par exemple le sujet de la semaine) sans que vous ayez à réécrire le reste.',
+                contextInfo: 'Informations de fond utiles que l\'IA doit connaître sans qu\'elles fassent partie de la demande elle-même : ce qui a déjà été essayé, des contraintes, le contexte du projet... Ici aussi, vous pouvez sélectionner un mot et cliquer sur « En faire un espace à remplir » pour pouvoir le changer facilement la prochaine fois.',
                 audience: 'Spécifier le public aide l\'IA à adapter son langage. Un texte pour des débutants sera différent d\'un texte pour des experts.',
                 format: 'Le format guide la structure de la réponse. Une liste à puces est facile à lire, un tableau est bon pour comparer, un plan est idéal pour organiser.',
                 length: 'Indiquer une longueur permet de contrôler si la réponse est concise (pour un résumé) ou détaillée (pour un article complet).',
@@ -256,6 +256,48 @@ document.addEventListener('alpine:init', function() {
             // acceptés), valeur = texte saisi. Jamais persisté séparément : les {{...}} restent
             // tels quels dans le prompt sauvegardé (aucune modification du schéma DB voulue).
             varValues: {},
+            // Espaces à remplir (tâches 1660-1665, design panel 2026-08-07) : ancrage PAR CHAÎNE
+            // EXACTE, aucune position stockée (voir spec §Modèle de données). `spaces` alimente la
+            // bande de repérage (étape 2) ET le bloc de remplissage ; `text` est à la fois le nom
+            // affiché, l'exemple et la valeur de repli - renommer une pastille remplace la chaîne
+            // dans les textareas eux-mêmes (voir _renameSpaceOccurrences). `pending: true` = espace
+            // tout juste inséré par le bouton « + Ajouter un espace à remplir », dont le nom n'a pas
+            // encore été précisé (pastille « à préciser »).
+            spaces: [],
+            // Valeurs de remplissage de la SESSION en cours seulement - jamais persistées avec le
+            // prompt (contrairement à `spaces`, qui ne stocke que les chaînes ancrées, pas les
+            // réponses). Clé = space.text exact.
+            spaceValues: {},
+            // Cache « espace non retrouvé dans le texte » - recalculé au blur des 2 textareas et
+            // juste avant copie/ouverture (JAMAIS à chaque frappe, pour éviter un clignotement des
+            // pastilles pendant la rédaction - voir _refreshSpaceMissing()).
+            spaceMissingCache: {},
+            // Renommage inline (UI - création, point C) : un seul espace CONFIRMÉ (non pending) en
+            // édition à la fois - les espaces `pending`, eux, portent chacun leur propre champ
+            // ouvert nativement (sp.draftText), pas besoin de cet index partagé pour eux.
+            spaceEditingIndex: null,
+            spaceEditingText: '',
+            // Bulle de sélection (geste A, desktop + mobile) : état pur, indépendant du DOM réel -
+            // testable sans navigateur. `fieldId` distingue #cpTaskObject de #cpContextInfo pour
+            // afficher la bulle au bon endroit (une bulle inline sous chaque champ, jamais une bulle
+            // positionnée en pixels - plus robuste, même esprit que « près du champ » de la spec).
+            spaceBubble: { show: false, text: '', fieldId: '' },
+            // Dernier textarea focalisé parmi les 2 champs concernés - sert de défaut au bouton
+            // « + Ajouter un espace à remplir » (spec : insère au curseur du dernier focalisé,
+            // repli taskObject si aucun focus).
+            _lastFocusedSpaceField: 'cpTaskObject',
+            // Éclaire dans l'aperçu les segments correspondant au champ actuellement en train d'être
+            // rempli (voir le bloc « Remplis tes espaces » plus bas, @focus/@blur).
+            focusedSpaceText: '',
+            // Mots-outils français trop courts/ambigus pour servir d'ancrage fiable (spec §UI -
+            // création, point A) - comparaison sur le texte EXACT trimé, jamais une recherche de
+            // sous-chaîne (« de » dans « demande » ne doit jamais être refusé).
+            _spaceStopWords: ['le', 'la', 'les', 'un', 'une', 'des', 'et', 'ou', 'à', 'de', 'du', 'ce', 'ça'],
+            // Mémoire inter-sessions (spec §UI - remplissage) : dernière valeur saisie par espace,
+            // pour le bouton « Reprendre : ... ». Distincte de spaceValues (session en cours) et de
+            // `spaces` (jamais de valeurs de remplissage dans le prompt sauvegardé).
+            _spaceLastValuesKey: 'cpSpaceLastValues_v1',
+            spaceLastValues: {},
             // Rétention locale invités (#1580, 2026-08-07) : historique AUTOMATIQUE des derniers
             // prompts générés, pour les visiteurs NON connectés uniquement (les connectés ont déjà
             // « Mes prompts » en base). Clé localStorage DISTINCTE et versionnée (cpGuestHistory_v1,
@@ -987,6 +1029,7 @@ document.addEventListener('alpine:init', function() {
             // la colorisation de l'aperçu à l'écran 2 - c'est le coeur de l'effet recherché : rendre
             // visible un travail normalement invisible.
             get promptSegments() {
+                var self = this;
                 var segs = [];
                 var firstSection = true;
                 function tool(s) { if (s) segs.push({ text: s, kind: 'tool' }); }
@@ -994,6 +1037,39 @@ document.addEventListener('alpine:init', function() {
                 function startSection() {
                     if (!firstSection) tool('\n\n');
                     firstSection = false;
+                }
+                // Espaces à remplir (tâches 1660-1665) : les segments 'user' issus de taskObject et
+                // contextInfo sont SOUS-DÉCOUPÉS - toute occurrence EXACTE d'un spaces[].text devient
+                // un segment de type 'space' distinct, le reste reste 'user'. Découpage par balayage
+                // de chaîne à CHAQUE rendu (réactif, aucune position mémorisée) - restreint donc
+                // naturellement le remplacement aux champs de la personne, jamais aux gabarits de
+                // l'outil (qui passent par tool(), jamais par userSpace()). Les textes les plus longs
+                // sont testés en premier pour qu'un espace court ne masque jamais un espace plus long
+                // dont il est une sous-chaîne (ex. « fractions » vs « les fractions »).
+                var spaceTexts = (self.spaces || [])
+                    .map(function(sp) { return sp.text; })
+                    .filter(function(t) { return !!t; })
+                    .sort(function(a, b) { return b.length - a.length; });
+                function userSpace(str) {
+                    if (!str) return;
+                    if (spaceTexts.length === 0) { user(str); return; }
+                    var i = 0, buffer = '';
+                    while (i < str.length) {
+                        var matched = null;
+                        for (var k = 0; k < spaceTexts.length; k++) {
+                            var t = spaceTexts[k];
+                            if (t && str.substr(i, t.length) === t) { matched = t; break; }
+                        }
+                        if (matched) {
+                            if (buffer) { user(buffer); buffer = ''; }
+                            segs.push({ text: matched, kind: 'space', spaceRef: matched });
+                            i += matched.length;
+                        } else {
+                            buffer += str.charAt(i);
+                            i += 1;
+                        }
+                    }
+                    if (buffer) user(buffer);
                 }
 
                 var actionVerb = this.verbType === 'custom' ? this.verbCustom : this.verb;
@@ -1030,7 +1106,7 @@ document.addEventListener('alpine:init', function() {
                     tool('Ta tâche comporte deux étapes, à réaliser dans l\'ordre :\n1) ');
                     if (actionVerbIsUser) { user(actionVerb); } else { tool(actionVerb); }
                     tool(' : ');
-                    user(this._taskWithoutLeadingVerb(actionVerb, this.taskObject));
+                    userSpace(this._taskWithoutLeadingVerb(actionVerb, this.taskObject));
                     tool('.\n2) ');
                     if (secondActionVerbIsUser) { user(secondActionVerb); } else { tool(secondActionVerb); }
                     // G2 (gabarits v2, tâche 1653, panel multi-IA 2026-08-07) : héritage EXPLICITE
@@ -1044,12 +1120,12 @@ document.addEventListener('alpine:init', function() {
                     tool(' ');
                     // Sans ce retrait, une demande commençant déjà par le verbe donnait
                     // « Ta tâche : Rédige rédige un courriel » dans le prompt envoyé à l'IA.
-                    user(this._taskWithoutLeadingVerb(actionVerb, this.taskObject));
+                    userSpace(this._taskWithoutLeadingVerb(actionVerb, this.taskObject));
                     tool('.');
                 } else if (this.taskObject) {
                     startSection();
                     tool('Ta tâche : ');
-                    user(this.taskObject);
+                    userSpace(this.taskObject);
                     tool('.');
                 }
 
@@ -1065,7 +1141,7 @@ document.addEventListener('alpine:init', function() {
                     // demande explicitement de signaler une contradiction plutôt que de trancher
                     // en silence.
                     tool('Contexte (informations de fond, à ne pas confondre avec les consignes) :\n"""\n');
-                    user(this.contextInfo);
+                    userSpace(this.contextInfo);
                     tool('\n"""\nTiens-en compte dans tes choix de rédaction ; si un élément du contexte contredit une consigne ci-dessous, signale-le au lieu de trancher en silence.');
                 }
 
@@ -1249,7 +1325,7 @@ document.addEventListener('alpine:init', function() {
                     if (hasLivrable) {
                         if (actionVerbIsUser) { user(livrableVerb); } else { tool(livrableVerb); }
                         tool(' ');
-                        user(livrableObject);
+                        userSpace(livrableObject);
                     } else {
                         tool('la demande ci-dessus');
                     }
@@ -1282,14 +1358,23 @@ document.addEventListener('alpine:init', function() {
                 return out;
             },
 
-            // Prompt avec les variables remplies (utilisé par copy()/openIn() ci-dessous, jamais
-            // par l'aperçu technique qui doit continuer à montrer le gabarit tel quel). Une
-            // variable non remplie (valeur vide/absente) reste affichée telle quelle ({{nom}}),
-            // exactement comme demandé - le prompt reste réutilisable sans jamais bloquer la copie.
+            // Prompt avec les variables ET les espaces à remplir remplis (utilisé par copy()/
+            // openIn() ci-dessous, jamais par l'aperçu technique qui doit continuer à montrer le
+            // gabarit tel quel). Espaces à remplir (tâches 1660-1665) : chaque segment 'space' est
+            // remplacé par spaceValues[text], ou par le mot d'origine (text) si laissé vide - le
+            // prompt reste TOUJOURS grammatical, jamais bloquant (spec §Intégration au moteur,
+            // point 4-5). Variables {{...}} : une variable non remplie (valeur vide/absente) reste
+            // affichée telle quelle ({{nom}}), comportement inchangé.
             get promptFilled() {
-                var text = this.prompt;
-                if (!text) return text;
                 var self = this;
+                var text = this.promptSegments.map(function(s) {
+                    if (s.kind === 'space') {
+                        var spaceVal = self.spaceValues ? self.spaceValues[s.spaceRef] : undefined;
+                        return (spaceVal !== undefined && spaceVal !== null && String(spaceVal).trim() !== '') ? spaceVal : s.text;
+                    }
+                    return s.text;
+                }).join('');
+                if (!text) return text;
                 return text.replace(/\{\{\s*([\p{L}0-9_ -]+)\s*\}\}/gu, function(match, rawName) {
                     var name = rawName.trim();
                     var val = self.varValues ? self.varValues[name] : undefined;
@@ -1364,7 +1449,11 @@ document.addEventListener('alpine:init', function() {
                 // #1593a (2026-08-07) : `contextInfo` ajouté au même titre que les autres champs
                 // texte - même piège round 42 documenté ci-dessus (tout champ oublié ici se perd
                 // à la réouverture).
-                return { selectedTask: this.selectedTask, personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, contextInfo: this.contextInfo, audienceType: this.audienceType, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, formats: this.formatsSelected, formatCustom: this.formatCustom, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintTypo: this.constraintTypo, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat, constraintChainOfThought: this.constraintChainOfThought, constraintAskIfUnclear: this.constraintAskIfUnclear, constraintCustom: this.constraintCustom, useDelimiters: this.useDelimiters, examples: this.examples, cadreStrict: this.cadreStrict, profile: this.profile };
+                // Espaces à remplir (tâches 1660-1665) : `spaces` sérialise UNIQUEMENT les chaînes
+                // ancrées ({text}) - jamais `pending` (état de création transitoire, sans objet une
+                // fois le prompt sauvegardé) ni spaceValues (valeurs de remplissage, jamais
+                // persistées avec le prompt, voir spec §Persistance).
+                return { selectedTask: this.selectedTask, personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, contextInfo: this.contextInfo, spaces: this.spaces.map(function(s) { return { text: s.text }; }), audienceType: this.audienceType, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, formats: this.formatsSelected, formatCustom: this.formatCustom, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintTypo: this.constraintTypo, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat, constraintChainOfThought: this.constraintChainOfThought, constraintAskIfUnclear: this.constraintAskIfUnclear, constraintCustom: this.constraintCustom, useDelimiters: this.useDelimiters, examples: this.examples, cadreStrict: this.cadreStrict, profile: this.profile };
             },
             _headers: function() {
                 return { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json', 'Content-Type': 'application/json' };
@@ -1386,6 +1475,10 @@ document.addEventListener('alpine:init', function() {
             },
             init: function() {
                 var self = this;
+                // Espaces à remplir (tâches 1660-1665) : mémoire des dernières valeurs saisies,
+                // indépendante du compte (invité ou connecté - c'est un confort de navigateur, pas
+                // une donnée de compte). Voir _loadSpaceLastValues()/_recordSpaceLastValues().
+                this._loadSpaceLastValues();
                 if (this.isAuthenticated) {
                     fetch('/api/prompts', { headers: this._headers() })
                         .then(function(r) { return r.json(); })
@@ -1439,6 +1532,10 @@ document.addEventListener('alpine:init', function() {
                                     // que les autres champs texte restaurés ici (constraintCustom,
                                     // examples...) - un oubli le perd silencieusement à la réédition.
                                     if (p.contextInfo) self.contextInfo = p.contextInfo;
+                                    // Espaces à remplir (tâches 1660-1665) : restaure UNIQUEMENT les
+                                    // chaînes ancrées, jamais pending (toujours faux à la réouverture
+                                    // - la personnalisation a déjà eu lieu lors de la sauvegarde).
+                                    if (Array.isArray(p.spaces)) { self.spaces = p.spaces.map(function(s) { return { text: s.text, pending: false }; }); self._refreshSpaceMissing(); }
                                     if (p.audienceType) self.audienceType = p.audienceType;
                                     // Round 151 (2026-08-01) : `self.audiencePreset = p.audiencePreset`
                                     // retiré - rien ne lit plus jamais cette propriété d'état (voir
@@ -1604,6 +1701,9 @@ document.addEventListener('alpine:init', function() {
                                 if (p.taskObject) self.taskObject = p.taskObject;
                                 // #1593a (2026-08-07) : même restauration que le bloc ?edit=ID ci-dessus.
                                 if (p.contextInfo) self.contextInfo = p.contextInfo;
+                                // Espaces à remplir (tâches 1660-1665) : même restauration que le bloc
+                                // ?edit=ID ci-dessus.
+                                if (Array.isArray(p.spaces)) { self.spaces = p.spaces.map(function(s) { return { text: s.text, pending: false }; }); self._refreshSpaceMissing(); }
                                 if (p.audienceType) self.audienceType = p.audienceType;
                                 if (Array.isArray(p.audiencePresets)) { self.audiencePresets = migrateAudienceValues(p.audiencePresets); } else if (p.audiencePreset) { self.audiencePresets = migrateAudienceValues([p.audiencePreset]); }
                                 if (p.audienceCustom) {
@@ -1797,6 +1897,11 @@ document.addEventListener('alpine:init', function() {
                 var self = this;
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
                 this.track('prompt_copy', { tool: 'constructeur-prompts' });
+                // Espaces à remplir (tâches 1660-1665) : recalcule "non retrouvé" et mémorise les
+                // valeurs de remplissage AVANT copie (spec : évaluée au blur des textareas ET avant
+                // copie, jamais à chaque frappe).
+                this._refreshSpaceMissing();
+                this._recordSpaceLastValues();
                 // Round 94 (2026-07-27, passe adversariale) : copied=true (bouton "Copié !") et le
                 // toast de succès ne s'affichent plus QUE si l'écriture presse-papiers a RÉELLEMENT
                 // réussi - window.copyToClipboard() attend la Promise réelle (échec = toast d'erreur
@@ -1830,6 +1935,9 @@ document.addEventListener('alpine:init', function() {
                 // #1593b (2026-08-07) : payload par défaut = promptFilled (variables {{...}}
                 // substituées) - seul le méta-prompt "Améliorer avec mon IA" (appel avec `text`
                 // explicite) échappe à ce remplacement, il embarque déjà this.prompt tel quel.
+                // Espaces à remplir (tâches 1660-1665) : même rafraîchissement "non retrouvé" +
+                // mémorisation des valeurs qu'avant copy() ci-dessus (jamais pour le méta-prompt).
+                if (!text) { this._refreshSpaceMissing(); this._recordSpaceLastValues(); }
                 var payload = text || this.promptFilled;
                 if (!payload) return;
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
@@ -2117,6 +2225,9 @@ document.addEventListener('alpine:init', function() {
                 if (p.verbCustom) self.verbCustom = p.verbCustom;
                 if (p.taskObject) self.taskObject = p.taskObject;
                 if (p.contextInfo) self.contextInfo = p.contextInfo;
+                // Espaces à remplir (tâches 1660-1665) : même restauration que le bloc ?edit=ID
+                // dans init().
+                if (Array.isArray(p.spaces)) { self.spaces = p.spaces.map(function(s) { return { text: s.text, pending: false }; }); self._refreshSpaceMissing(); }
                 if (p.audienceType) self.audienceType = p.audienceType;
                 if (Array.isArray(p.audiencePresets)) self.audiencePresets = migrateAudienceValues(p.audiencePresets);
                 if (p.audienceCustom) self.audienceCustom = p.audienceCustom;
@@ -2588,6 +2699,273 @@ document.addEventListener('alpine:init', function() {
             // reparamétrés avec le méta-prompt (get metaPrompt() ci-dessus).
             toggleMetaPrompt: function() {
                 this.metaPromptShown = !this.metaPromptShown;
+            },
+
+            // === Espaces à remplir (tâches 1660-1665, design panel 2026-08-07, panel multi-IA
+            // 5 rounds approuvé par le fondateur) - RÈGLE D'OR : l'utilisateur ne voit jamais de
+            // syntaxe (aucune accolade/crochet visible ici), on n'ajoute jamais de symbole à son
+            // texte, seulement du français normal sur geste explicite. ===
+
+            // Refuse une sélection trop courte ou réduite à un mot-outil (comparaison sur le texte
+            // EXACT trimé, jamais une recherche de sous-chaîne).
+            _isValidSpaceSelection: function(text) {
+                var t = (text || '').trim();
+                if (t.length < 3) return false;
+                return this._spaceStopWords.indexOf(t.toLowerCase()) === -1;
+            },
+
+            _findSpaceByText: function(text) {
+                for (var i = 0; i < this.spaces.length; i++) { if (this.spaces[i].text === text) return this.spaces[i]; }
+                return null;
+            },
+
+            // Recalcule la liste des espaces « non retrouvés » (spec §Modèle de données, point
+            // spaceMissing) - appelé au blur des 2 textareas et juste avant copie/ouverture,
+            // JAMAIS à chaque frappe (évite le clignotement des pastilles pendant la rédaction).
+            _refreshSpaceMissing: function() {
+                var combined = (this.taskObject || '') + '\n' + (this.contextInfo || '');
+                var cache = {};
+                for (var i = 0; i < this.spaces.length; i++) {
+                    cache[this.spaces[i].text] = combined.indexOf(this.spaces[i].text) === -1;
+                }
+                this.spaceMissingCache = cache;
+            },
+            spaceMissing: function(space) {
+                return !!this.spaceMissingCache[space.text];
+            },
+
+            // Au blur d'un des 2 textareas concernés : rafraîchit le cache "non retrouvé" ET retire
+            // SILENCIEUSEMENT tout espace encore `pending` dont le texte inséré ("information à
+            // préciser"...) a disparu SANS avoir été renommé via la pastille - règle simple retenue
+            // par le panel (détecter "quel nouveau mot a remplacé le fragment" a été jugé trop
+            // fragile, voir spec §UI - création, point B). Un espace CONFIRMÉ (non pending) qui
+            // devient introuvable n'est JAMAIS retiré automatiquement : il devient "missing"
+            // (pastille grise), retrait laissé au geste explicite de la personne (le ×).
+            handleSpaceFieldBlur: function() {
+                var combined = (this.taskObject || '') + '\n' + (this.contextInfo || '');
+                this.spaces = this.spaces.filter(function(sp) {
+                    return !(sp.pending && combined.indexOf(sp.text) === -1);
+                });
+                this._refreshSpaceMissing();
+            },
+
+            // Geste A (sélection) : suit le champ le plus récemment focalisé/sélectionné - sert de
+            // repli au bouton « + Ajouter un espace à remplir » (spec : insère au curseur du
+            // dernier textarea focalisé, taskObject par défaut si aucun focus).
+            handleSpaceFieldFocus: function(fieldId) {
+                this._lastFocusedSpaceField = fieldId;
+            },
+            // Sur select/mouseup/keyup des 2 textareas : affiche la bulle « En faire un espace à
+            // remplir » si une sélection non vide existe. État pur (indépendant du DOM réel au-delà
+            // de selectionStart/selectionEnd déjà exposés nativement par l'événement) - testable
+            // sans navigateur réel via createSpaceFromSelection() directement.
+            handleSpaceFieldSelect: function(event) {
+                var el = event && event.target;
+                this._lastFocusedSpaceField = (el && el.id) || this._lastFocusedSpaceField;
+                if (!el || typeof el.selectionStart !== 'number') return;
+                var start = el.selectionStart, end = el.selectionEnd;
+                if (end <= start) { this.spaceBubble.show = false; return; }
+                var text = el.value.substring(start, end).trim();
+                if (!text) { this.spaceBubble.show = false; return; }
+                this.spaceBubble = { show: true, text: text, fieldId: el.id };
+            },
+            hideSpaceBubble: function() {
+                this.spaceBubble.show = false;
+            },
+            // Crée l'espace depuis la bulle de sélection - dédoublonné (texte identique déjà
+            // présent : toast doux, aucune 2e entrée) ; refuse toute sélection trop courte ou
+            // réduite à un mot-outil (toast doux, action refusée, LE TEXTE DU CHAMP NE CHANGE PAS).
+            createSpaceFromSelection: function() {
+                var text = (this.spaceBubble.text || '').trim();
+                this.spaceBubble.show = false;
+                if (!text) return;
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                if (!this._isValidSpaceSelection(text)) {
+                    if (typeof window.toast === 'function') window.toast(i18n.spaceTooShort || 'Choisis un mot plus précis pour éviter les remplacements imprévus.', 'warning', 4000);
+                    return;
+                }
+                if (this._findSpaceByText(text)) {
+                    if (typeof window.toast === 'function') window.toast(i18n.spaceAlreadyExists || 'Cet espace existe déjà.', 'info', 3000);
+                    return;
+                }
+                this.spaces.push({ text: text, pending: false });
+                this._refreshSpaceMissing();
+            },
+
+            // Geste B (bouton) : insère « information à préciser » (suffixé « 2 », « 3 »... si
+            // plusieurs coexistent déjà) au curseur du dernier textarea focalisé, crée l'espace
+            // `pending`, et pré-sélectionne le fragment inséré - la première frappe l'écrase. Sur
+            // pointeur tactile (mobile), ouvre directement le renommage dans la pastille plutôt que
+            // de dépendre d'une sélection tactile.
+            addSpaceAtCursor: function() {
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var baseLabel = i18n.spaceNewLabel || 'information à préciser';
+                var label = baseLabel;
+                var n = 2;
+                while (this._findSpaceByText(label)) { label = baseLabel + ' ' + n; n++; }
+
+                var fieldId = this._lastFocusedSpaceField === 'cpContextInfo' ? 'cpContextInfo' : 'cpTaskObject';
+                var el = (typeof document !== 'undefined' && document.getElementById) ? document.getElementById(fieldId) : null;
+                var self = this;
+                var newSpace = { text: label, pending: true, draftText: label };
+
+                if (el && typeof el.selectionStart === 'number') {
+                    var start = el.selectionStart, end = el.selectionEnd;
+                    var current = fieldId === 'cpContextInfo' ? this.contextInfo : this.taskObject;
+                    var nextValue = current.slice(0, start) + label + current.slice(end);
+                    if (fieldId === 'cpContextInfo') { this.contextInfo = nextValue; } else { this.taskObject = nextValue; }
+                    this.spaces.push(newSpace);
+                    var isCoarsePointer = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+                    if (typeof this.$nextTick === 'function') {
+                        this.$nextTick(function() {
+                            if (isCoarsePointer) {
+                                var idx = self.spaces.indexOf(newSpace);
+                                var input = document.getElementById('cpSpacePendingInput-' + idx);
+                                if (input) input.focus();
+                            } else if (el.setSelectionRange) {
+                                el.focus();
+                                el.setSelectionRange(start, start + label.length);
+                            }
+                        });
+                    }
+                } else {
+                    // Aucun textarea focalisé (ou environnement sans DOM, ex. tests) : ajoute à la
+                    // fin de taskObject, repli explicitement voulu par la spec.
+                    var sep = this.taskObject && !/\s$/.test(this.taskObject) ? ' ' : '';
+                    this.taskObject = this.taskObject + sep + label;
+                    this.spaces.push(newSpace);
+                }
+                this._refreshSpaceMissing();
+            },
+
+            // Valide le renommage d'un espace ENCORE pending (champ ouvert nativement dans sa
+            // pastille, voir sp.draftText) - remplace toutes les occurrences du placeholder inséré
+            // par le nouveau nom dans les 2 textareas, puis lève le drapeau pending. Un champ laissé
+            // vide ne commit rien (l'espace reste pending, retirable par le blur du textarea ou le ×).
+            commitPendingSpaceRename: function(idx) {
+                var space = this.spaces[idx];
+                if (!space || !space.pending) return;
+                var newText = (space.draftText || '').trim();
+                if (!newText) { space.draftText = space.text; return; }
+                if (newText !== space.text) { this._renameSpaceOccurrences(space.text, newText); space.text = newText; }
+                space.pending = false;
+                delete space.draftText;
+                this._refreshSpaceMissing();
+            },
+
+            // Renommage par pastille (UI - création, point C) : clic sur le nom d'un espace
+            // CONFIRMÉ (non pending) → champ texte inline dans la bande.
+            startRenameSpace: function(idx) {
+                var space = this.spaces[idx];
+                if (!space || space.pending) return;
+                this.spaceEditingIndex = idx;
+                this.spaceEditingText = space.text;
+                var self = this;
+                if (typeof this.$nextTick === 'function') {
+                    this.$nextTick(function() {
+                        var el = (typeof document !== 'undefined' && document.getElementById) ? document.getElementById('cpSpaceRename-' + idx) : null;
+                        if (el) el.focus();
+                    });
+                }
+            },
+            // Valider = remplacer TOUTES les occurrences de l'ancien texte par le nouveau dans les
+            // 2 textareas (seul cas où l'outil modifie le texte de la personne - un renommage
+            // explicitement demandé) + mettre à jour l'espace. Échap/blur vide (ou inchangé) = annule.
+            commitRenameSpace: function(idx) {
+                if (this.spaceEditingIndex !== idx) return;
+                var space = this.spaces[idx];
+                var newText = (this.spaceEditingText || '').trim();
+                this.spaceEditingIndex = null;
+                if (!space || !newText || newText === space.text) return;
+                this._renameSpaceOccurrences(space.text, newText);
+                space.text = newText;
+                this._refreshSpaceMissing();
+            },
+            cancelRenameSpace: function() {
+                this.spaceEditingIndex = null;
+                this.spaceEditingText = '';
+            },
+            // Remplacement EXACT (split/join, jamais une regex construite depuis un texte
+            // utilisateur) de toutes les occurrences de l'ancien texte par le nouveau dans les 2
+            // textareas - comportement « mail merge » (spec §Modèle de données). Propage aussi la
+            // valeur de remplissage déjà saisie (spaceValues) sous la nouvelle clé, pour ne jamais
+            // perdre une réponse déjà donnée à cause d'un simple renommage.
+            _renameSpaceOccurrences: function(oldText, newText) {
+                if (!oldText || oldText === newText) return;
+                this.taskObject = (this.taskObject || '').split(oldText).join(newText);
+                this.contextInfo = (this.contextInfo || '').split(oldText).join(newText);
+                if (Object.prototype.hasOwnProperty.call(this.spaceValues, oldText)) {
+                    this.spaceValues[newText] = this.spaceValues[oldText];
+                    delete this.spaceValues[oldText];
+                }
+            },
+
+            // Retrait en 1 clic (pastille × - fonctionne pour un espace confirmé, pending ou
+            // "non retrouvé") - AUCUNE corruption possible : rien n'est retiré du texte lui-même.
+            removeSpace: function(idx) {
+                var space = this.spaces[idx];
+                if (!space) return;
+                this.spaces.splice(idx, 1);
+                delete this.spaceValues[space.text];
+                delete this.spaceMissingCache[space.text];
+                if (this.spaceEditingIndex === idx) { this.spaceEditingIndex = null; this.spaceEditingText = ''; }
+            },
+
+            // Liste affichée dans le bloc « Remplis tes espaces » (UI - remplissage) : uniquement
+            // les espaces NON "non retrouvés" - un espace missing n'a nulle part où être rempli, sa
+            // seule action possible reste le × de la pastille dans la bande.
+            get fillableSpaces() {
+                var self = this;
+                return this.spaces.filter(function(sp) { return !self.spaceMissingCache[sp.text]; });
+            },
+            // Nombre d'espaces remplissables laissés vides - alimente la mention discrète
+            // « N espace(s) non rempli(s), on garde le(s) mot(s) de départ » (spec point 5, affichée
+            // uniquement si > 0).
+            get unfilledSpacesCount() {
+                var self = this;
+                var count = 0;
+                for (var i = 0; i < this.spaces.length; i++) {
+                    var sp = this.spaces[i];
+                    if (self.spaceMissingCache[sp.text]) continue;
+                    var val = self.spaceValues[sp.text];
+                    if (val === undefined || val === null || String(val).trim() === '') count++;
+                }
+                return count;
+            },
+            get unfilledSpacesMessage() {
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var n = this.unfilledSpacesCount;
+                if (n === 0) return '';
+                var template = n === 1
+                    ? (i18n.spaceUnfilledOne || '1 espace non rempli, on garde le mot de départ.')
+                    : (i18n.spaceUnfilledMany || '{count} espaces non remplis, on garde les mots de départ.');
+                return template.replace('{count}', n);
+            },
+
+            // Mémoire inter-sessions (localStorage cpSpaceLastValues_v1, spec §UI - remplissage) :
+            // même garde try/catch que le reste du fichier (rounds 65-66, mode privé/quota plein).
+            _loadSpaceLastValues: function() {
+                try {
+                    var raw = localStorage.getItem(this._spaceLastValuesKey);
+                    var parsed = raw ? JSON.parse(raw) : {};
+                    this.spaceLastValues = (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : {};
+                } catch (e) { this.spaceLastValues = {}; }
+            },
+            // Mise à jour au moment de copier/ouvrir (valeurs non vides seulement) - jamais à chaque
+            // frappe.
+            _recordSpaceLastValues: function() {
+                if (!this.spaces || this.spaces.length === 0) return;
+                var changed = false;
+                for (var i = 0; i < this.spaces.length; i++) {
+                    var sp = this.spaces[i];
+                    var val = this.spaceValues[sp.text];
+                    if (val !== undefined && val !== null && String(val).trim() !== '') {
+                        this.spaceLastValues[sp.text] = val;
+                        changed = true;
+                    }
+                }
+                if (!changed) return;
+                try { localStorage.setItem(this._spaceLastValuesKey, JSON.stringify(this.spaceLastValues)); } catch (e) {}
             }
         };
     });

@@ -71,9 +71,11 @@ it('has English translations for the constructeur-prompts JS help/technique-hint
         // Reformulée (tâche 1649, panel 5/5) : un rôle oriente le style, pas l'exactitude.
         "Donner un rôle à l'IA oriente le ton, le style et le vocabulaire de sa réponse - mais ne la rend ni plus experte ni plus fiable. Ex: « Tu es un expert marketing » donnera un ton plus stratégique ; pour la justesse, donnez du contexte et des consignes précises.",
         "Choisir un verbe d'action précise ce que l'IA doit faire : rédiger, analyser, résumer, créer... Le verbe détermine le type de résultat.",
-        // Aides {{...}} réécrites avec exemple concret (tâche 1655) + clé contextInfo couverte.
-        "Décrivez clairement et précisément ce que l'IA doit produire. Plus vous donnez de détails, meilleur sera le résultat. Astuce : un mot entre doubles accolades, comme {{sujet}}, crée un espace à remplir. Ex. : « un courriel aux parents sur {{sujet}} » - au moment de copier, l'outil vous demande le sujet du jour et le reste du prompt ne change pas. Idéal pour réutiliser le même prompt chaque semaine.",
-        "Informations de fond utiles que l'IA doit connaître sans qu'elles fassent partie de la demande elle-même : ce qui a déjà été essayé, des contraintes, le contexte du projet... Ici aussi, un mot entre doubles accolades, comme {{niveau}}, crée un espace que l'outil vous fera remplir au moment de copier - pratique pour changer un seul détail sans réécrire le prompt.",
+        // Aides « espace à remplir » réécrites en geste (tâches 1660-1665, 2026-08-07) - l'astuce
+        // {{sujet}} (accolades visibles) a été remplacée par le geste de sélection ; ancien texte
+        // (tâche 1655) retiré de $pbHelps/helps JS, donc retiré ici aussi.
+        "Décrivez clairement et précisément ce que l'IA doit produire. Plus vous donnez de détails, meilleur sera le résultat. Astuce : sélectionnez un mot de votre texte et cliquez sur « En faire un espace à remplir » - à chaque réutilisation, l'outil vous demandera la nouvelle valeur (par exemple le sujet de la semaine) sans que vous ayez à réécrire le reste.",
+        "Informations de fond utiles que l'IA doit connaître sans qu'elles fassent partie de la demande elle-même : ce qui a déjà été essayé, des contraintes, le contexte du projet... Ici aussi, vous pouvez sélectionner un mot et cliquer sur « En faire un espace à remplir » pour pouvoir le changer facilement la prochaine fois.",
         "Spécifier le public aide l'IA à adapter son langage. Un texte pour des débutants sera différent d'un texte pour des experts.",
         'Le format guide la structure de la réponse. Une liste à puces est facile à lire, un tableau est bon pour comparer, un plan est idéal pour organiser.',
         'Indiquer une longueur permet de contrôler si la réponse est concise (pour un résumé) ou détaillée (pour un article complet).',
