@@ -100,7 +100,7 @@ jobs:
 
       - name: Clear caches on server
         run: |
-          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan optimize:clear; php artisan responsecache:clear" || true
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan optimize:clear; php artisan responsecache:clear; php artisan queue:restart" || true
 
       - name: Réamorcer le battement de coeur du planificateur
         # ACTION: reposer immediatement le heartbeat efface par optimize:clear.
