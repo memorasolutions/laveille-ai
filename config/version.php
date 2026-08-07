@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.148.1 · 2026-08-07 · fix(outils) constructeur : l'objet Alpine showHelp était vide alors que la vue référence 3 clés (persona, contextInfo, cadreStrict) - 3 TypeError console à chaque chargement (2 préexistants, 1 introduit par le champ contexte) ; clés initialisées à false
  *   1.148.0 · 2026-08-07 · feat(outils+confidentialite) constructeur : champ « Contexte additionnel », variables réutilisables {{sujet}} avec zone de remplissage, historique local des invités (10 derniers prompts, navigateur seulement) ; rétention des prompts supprimés (corbeille purgée après 30 jours, réglable en admin, politique de confidentialité à jour) ; queue:restart au déploiement (workers périmés = erreurs « force option » toutes les 15 min) ; git prod réaligné ; BD locale annuaire re-seedée depuis la prod
  *   1.147.7 · 2026-08-06 · fix(annuaire+seo) suites de la vérification prod v1.147.6 : (1) le lien « Voir les X outils archivés » restait visible au public (le compteur n'était pas gaté, seul le toggle l'était) - compteur à 0 pour les non-modérateurs ; (2) sitemap.xml en HTTP 500 par épuisement mémoire 128 Mo (les 9 requêtes chargeaient les modèles COMPLETS, contenus d'actualités inclus - la purge cache a exposé un poids qui grossissait chaque jour) - select() minimal (id, slug, updated_at, image) sur chacune
  *   1.147.6 · 2026-08-06 · fix(annuaire) outils archivés réellement invisibles au public : toggle ?show_archived=1 et lien « Voir les X outils archivés » réservés aux modérateurs, fiche archivée sans remplaçant en 404 public (25 fiches de contenu crawlé à tort répondaient 200), sitemap filtré par notArchived (elles étaient indexées)
@@ -3624,7 +3625,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 148;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,

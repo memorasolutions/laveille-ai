@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.148.1] - 2026-08-07
+
+### Corrigé
+- **Constructeur de prompts : erreurs console au chargement** - l'objet Alpine `showHelp` était déclaré vide alors que la vue référence trois clés (persona, contexte additionnel, cadre strict), ce qui levait trois TypeError à chaque visite (deux préexistants, un introduit par le champ contexte) ; les clés sont désormais initialisées.
+
 ## [1.148.0] - 2026-08-07
 
 ### Ajouté

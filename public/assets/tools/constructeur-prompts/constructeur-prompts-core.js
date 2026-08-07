@@ -187,7 +187,7 @@ document.addEventListener('alpine:init', function() {
             // (openIn() ne fait que choisir l'URL) - seul le libellé et la note d'usage en dessous
             // changent selon le choix, pour qu'il n'y ait jamais de surprise au clic sur Copier.
             openTarget: 'chatgpt',
-            showHelp: {},
+            showHelp: { persona: false, contextInfo: false, cadreStrict: false },
             // Round 77 (2026-07-27, passe adversariale) : repli français en dur, mais valeur réelle
             // toujours prise dans window.promptBuilderConfig.helps (injecté par le Blade via __(),
             // même pattern que i18n.* juste au-dessus) - donc traduit en EN/ES quand la locale change.
