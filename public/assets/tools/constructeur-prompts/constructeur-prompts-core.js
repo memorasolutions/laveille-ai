@@ -166,6 +166,12 @@ document.addEventListener('alpine:init', function() {
             },
             constraintChainOfThought: false,
             constraintAskIfUnclear: false,
+            // Bonification « QCM forcé » / « Répéter pour ma liste » (2026-08-07, Options avancées) :
+            // 2 cases indépendantes, chacune ajoute UN segment fixe en TOUTE FIN du prompt généré
+            // (après l'ancrage « Produis maintenant », voir get promptSegments() plus bas) - ordre
+            // documenté : répéter-pour-liste avant QCM forcé si les deux sont cochées.
+            constraintForceQcm: false,
+            constraintRepeatList: false,
             constraintCustom: '',
             technique: 'zero-shot',
             examples: '',
@@ -187,6 +193,15 @@ document.addEventListener('alpine:init', function() {
             // (openIn() ne fait que choisir l'URL) - seul le libellé et la note d'usage en dessous
             // changent selon le choix, pour qu'il n'y ait jamais de surprise au clic sur Copier.
             openTarget: 'chatgpt',
+            // IA préférée mémorisée (2026-08-07) : dernier choix réel d'« Ouvrir dans » persisté en
+            // localStorage (clé versionnée, même garde try/catch que le reste du fichier - voir
+            // _loadOpenTargetPref()/_recordOpenTargetPref() plus bas). openTargetHasPref distingue le
+            // tout premier passage (aucune préférence enregistrée : 5 boutons à plat, comportement
+            // inchangé) du passage suivant (bouton principal + "Autres choix" replié, voir Blade).
+            _openTargetPrefKey: 'cpOpenTargetPref_v1',
+            openTargetHasPref: false,
+            openTargetNames: { chatgpt: 'ChatGPT', claude: 'Claude', perplexity: 'Perplexity', gemini: 'Gemini', mistral: 'Mistral' },
+            get openTargetLabel() { return this.openTargetNames[this.openTarget] || 'ChatGPT'; },
             showHelp: { persona: false, contextInfo: false, cadreStrict: false },
             // Round 77 (2026-07-27, passe adversariale) : repli français en dur, mais valeur réelle
             // toujours prise dans window.promptBuilderConfig.helps (injecté par le Blade via __(),
@@ -1334,6 +1349,21 @@ document.addEventListener('alpine:init', function() {
                     tool(this.constraintAskIfUnclear ? '. Sinon, pose d\'abord tes questions de clarification, groupées en un seul message.' : '.');
                 }
 
+                // Bonification « Répéter pour ma liste » / « QCM forcé » (2026-08-07, Options
+                // avancées) : TOUJOURS les tout derniers segments du prompt généré, après l'ancrage
+                // « Produis maintenant » ci-dessus - voulu et documenté par la recherche (une
+                // consigne de méthode/format placée en toute fin est celle que le modèle applique le
+                // plus fidèlement). Ordre fixe si les deux cases sont cochées : répéter-pour-liste
+                // avant QCM forcé.
+                if (this.constraintRepeatList) {
+                    startSection();
+                    tool('Applique la même demande séparément à chaque élément de la liste fournie : produis un résultat distinct par élément, clairement séparé des autres.');
+                }
+                if (this.constraintForceQcm) {
+                    startSection();
+                    tool('Avant de produire ta réponse finale : propose-moi d\'abord 3 pistes ou approches possibles sous forme de liste numérotée (1, 2, 3), puis attends que je te réponde par un chiffre avant de rédiger le résultat complet.');
+                }
+
                 return segs;
             },
 
@@ -1481,6 +1511,8 @@ document.addEventListener('alpine:init', function() {
                 // indépendante du compte (invité ou connecté - c'est un confort de navigateur, pas
                 // une donnée de compte). Voir _loadSpaceLastValues()/_recordSpaceLastValues().
                 this._loadSpaceLastValues();
+                // IA préférée mémorisée (2026-08-07) : voir _loadOpenTargetPref() plus bas.
+                this._loadOpenTargetPref();
                 if (this.isAuthenticated) {
                     fetch('/api/prompts', { headers: this._headers() })
                         .then(function(r) { return r.json(); })
@@ -1939,7 +1971,7 @@ document.addEventListener('alpine:init', function() {
                 // explicite) échappe à ce remplacement, il embarque déjà this.prompt tel quel.
                 // Espaces à remplir (tâches 1660-1665) : même rafraîchissement "non retrouvé" +
                 // mémorisation des valeurs qu'avant copy() ci-dessus (jamais pour le méta-prompt).
-                if (!text) { this._refreshSpaceMissing(); this._recordSpaceLastValues(); }
+                if (!text) { this._refreshSpaceMissing(); this._recordSpaceLastValues(); this._recordOpenTargetPref(target); }
                 var payload = text || this.promptFilled;
                 if (!payload) return;
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
@@ -3026,17 +3058,37 @@ document.addEventListener('alpine:init', function() {
                 return template.replace('{count}', n);
             },
 
-            // Mémoire inter-sessions (localStorage cpSpaceLastValues_v1, spec §UI - remplissage) :
-            // même garde try/catch que le reste du fichier (rounds 65-66, mode privé/quota plein).
+            // Mémoire inter-sessions (localStorage cpSpaceLastValues_v1, spec §UI - remplissage).
+            // Pastilles du déjà-dit (bonification 2026-08-07) : jusqu'à 3 valeurs par espace (plus
+            // récente en premier), au lieu d'une seule auparavant. Rétrocompatible : une ancienne
+            // entrée v1 (chaîne simple) est migrée SILENCIEUSEMENT en tableau à 1 élément dès la
+            // lecture, et ré-écrite au prochain enregistrement - même garde try/catch que le reste du
+            // fichier (rounds 65-66, mode privé/quota plein).
             _loadSpaceLastValues: function() {
                 try {
                     var raw = localStorage.getItem(this._spaceLastValuesKey);
                     var parsed = raw ? JSON.parse(raw) : {};
-                    this.spaceLastValues = (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : {};
+                    var result = {};
+                    var migrated = false;
+                    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                        for (var key in parsed) {
+                            if (!Object.prototype.hasOwnProperty.call(parsed, key)) continue;
+                            var v = parsed[key];
+                            if (Array.isArray(v)) {
+                                result[key] = v.filter(function(x) { return typeof x === 'string' && x.trim() !== ''; }).slice(0, 3);
+                            } else if (typeof v === 'string' && v.trim() !== '') {
+                                result[key] = [v];
+                                migrated = true;
+                            }
+                        }
+                    }
+                    this.spaceLastValues = result;
+                    if (migrated) { try { localStorage.setItem(this._spaceLastValuesKey, JSON.stringify(this.spaceLastValues)); } catch (e2) {} }
                 } catch (e) { this.spaceLastValues = {}; }
             },
             // Mise à jour au moment de copier/ouvrir (valeurs non vides seulement) - jamais à chaque
-            // frappe.
+            // frappe. Déduplication : une valeur déjà présente est retirée puis replacée en tête
+            // (plus récente en premier), tableau plafonné à 3 entrées.
             _recordSpaceLastValues: function() {
                 if (!this.spaces || this.spaces.length === 0) return;
                 var changed = false;
@@ -3044,12 +3096,37 @@ document.addEventListener('alpine:init', function() {
                     var sp = this.spaces[i];
                     var val = this.spaceValues[sp.text];
                     if (val !== undefined && val !== null && String(val).trim() !== '') {
-                        this.spaceLastValues[sp.text] = val;
+                        var list = this.spaceLastValues[sp.text];
+                        if (!Array.isArray(list)) list = list ? [list] : [];
+                        var idx = list.indexOf(val);
+                        if (idx !== -1) list.splice(idx, 1);
+                        list.unshift(val);
+                        if (list.length > 3) list = list.slice(0, 3);
+                        this.spaceLastValues[sp.text] = list;
                         changed = true;
                     }
                 }
                 if (!changed) return;
                 try { localStorage.setItem(this._spaceLastValuesKey, JSON.stringify(this.spaceLastValues)); } catch (e) {}
+            },
+            // IA préférée mémorisée (localStorage cpOpenTargetPref_v1, bonification 2026-08-07) :
+            // même garde try/catch que le reste du fichier. openTargetHasPref reste faux tant
+            // qu'aucune préférence valide n'a été trouvée - premier passage = comportement inchangé
+            // (voir Blade, bloc « Ouvrir dans »).
+            _loadOpenTargetPref: function() {
+                try {
+                    var stored = localStorage.getItem(this._openTargetPrefKey);
+                    if (stored && Object.prototype.hasOwnProperty.call(this.openTargetNames, stored)) {
+                        this.openTarget = stored;
+                        this.openTargetHasPref = true;
+                    }
+                } catch (e) {}
+            },
+            _recordOpenTargetPref: function(target) {
+                if (!target || !Object.prototype.hasOwnProperty.call(this.openTargetNames, target)) return;
+                this.openTarget = target;
+                this.openTargetHasPref = true;
+                try { localStorage.setItem(this._openTargetPrefKey, target); } catch (e) {}
             }
         };
     });

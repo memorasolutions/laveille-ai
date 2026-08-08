@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.153.0] - 2026-08-07
+
+### Ajouté
+- **Constructeur de prompts : vague 1 de bonifications (boucle de 5 IA en 3 rounds, zéro coût récurrent - tout est texte statique et mémoire locale du navigateur)** :
+  - case « Laisser l'IA me proposer des choix avant de répondre » - le prompt demande à l'IA de présenter 3 pistes numérotées et d'attendre un choix avant de rédiger (consigne placée en fin de prompt, position documentée comme la plus fiable) ;
+  - case « Répéter pour chaque élément de ma liste » - l'IA traite chaque élément de la liste collée séparément ;
+  - bouton « Ouvrir dans mon IA habituelle » - la destination préférée est mémorisée localement, les autres se replient sous « Autres choix » ;
+  - pastilles du déjà-dit - sous chaque espace à remplir, les trois dernières valeurs utilisées se remettent en un clic (extension du rappel existant, migration silencieuse) ;
+  - relances de secours - trois relances prêtes à copier sous le bouton Copier (« C'est trop long... », « C'est trop vague... », « Le ton ne convient pas... »), pour le moment où la première réponse déçoit.
+- La sixième proposition de la boucle (cartes de démarrage à trous prénommés) a été écartée à la vérification : les cartes de démarrage ne sont plus affichées depuis le retour à l'assistant 4 étapes - aucun code mort conservé.
+
 ## [1.152.0] - 2026-08-07
 
 ### Amélioré

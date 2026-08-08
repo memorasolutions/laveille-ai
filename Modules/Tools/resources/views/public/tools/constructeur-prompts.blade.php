@@ -694,6 +694,20 @@
                                             <input type="checkbox" x-model="constraintAskIfUnclear" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
                                             <span><strong>{{ __('Poser des questions') }}</strong> : {{ __('demander des précisions si nécessaire') }}</span>
                                         </label>
+                                        {{-- Bonification « QCM forcé » (2026-08-07) : ajoute UN segment fixe en
+                                             toute fin du prompt généré (voir get promptSegments(),
+                                             constructeur-prompts-core.js) qui fait attendre l'IA avant sa
+                                             réponse finale - jamais d'appel réseau, texte statique. --}}
+                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
+                                            <input type="checkbox" x-model="constraintForceQcm" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
+                                            <span><strong>{{ __('Laisser l\'IA me proposer des choix avant de répondre') }}</strong> : {{ __('L\'IA présentera d\'abord 3 pistes numérotées ; vous répondez 1, 2 ou 3.') }}</span>
+                                        </label>
+                                        {{-- Bonification « Répéter pour ma liste » (2026-08-07) : même mécanisme,
+                                             segment fixe placé avant celui du QCM forcé si les deux sont cochées. --}}
+                                        <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
+                                            <input type="checkbox" x-model="constraintRepeatList" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
+                                            <span><strong>{{ __('Répéter pour chaque élément de ma liste') }}</strong> : {{ __('Collez votre liste dans le champ de contexte ; l\'IA traitera chaque élément séparément.') }}</span>
+                                        </label>
                                     </div>
                                     {{-- Destination (OÙ) et Format attendu (QUOI) : 2 champs distincts mais liés
                                          (décision d'architecture d'info validée Codex/claude.ai/Gemini, juillet 2026).
@@ -836,9 +850,18 @@
                                         </label>
                                         <input type="text" :id="'cpSpaceFill-' + spIdx" class="form-control form-control-sm" x-model="spaceValues[sp.text]" :placeholder="sp.text" autocomplete="off" :aria-label="sp.text"
                                             @focus="focusedSpaceText = sp.text" @blur="focusedSpaceText = ''">
-                                        <button type="button" class="ct-btn ct-btn-outline ct-btn-xs mt-1" style="min-height:44px;" x-show="spaceLastValues[sp.text] && spaceLastValues[sp.text] !== spaceValues[sp.text]" @click="spaceValues[sp.text] = spaceLastValues[sp.text]">
-                                            <span x-text="'{{ __('Reprendre :') }} ' + spaceLastValues[sp.text]"></span>
-                                        </button>
+                                        {{-- Pastilles du déjà-dit (bonification 2026-08-07) : jusqu'à 3
+                                             dernières valeurs saisies pour cet espace (la plus récente en
+                                             premier, voir spaceLastValues/_recordSpaceLastValues() dans
+                                             constructeur-prompts-core.js), discret - aucune pastille si
+                                             aucune valeur passée. Un clic remplit le champ. --}}
+                                        <div class="d-flex flex-wrap gap-1 mt-1" x-show="(spaceLastValues[sp.text] || []).length > 0">
+                                            <template x-for="lv in (spaceLastValues[sp.text] || []).filter(function(v){ return v !== spaceValues[sp.text]; })" :key="lv">
+                                                <button type="button" class="ct-btn ct-btn-outline ct-btn-xs" style="min-height:44px;" @click="spaceValues[sp.text] = lv" :aria-label="'{{ __('Reprendre :') }} ' + lv">
+                                                    <span x-text="lv.length > 28 ? lv.slice(0, 28) + '…' : lv"></span>
+                                                </button>
+                                            </template>
+                                        </div>
                                     </div>
                                 </template>
                                 <template x-for="v in promptVariables" :key="v">
@@ -939,7 +962,15 @@
                                 <button type="button" class="ct-btn ct-btn-accent" style="min-height:44px;" @click="copyText(metaPrompt)">{{ __('Copier le méta-prompt') }}</button>
                             </div>
                         </template>
-                        {{-- #166 GEO/UX : ouvrir le prompt directement dans une IA (le prompt est aussi copié) --}}
+                        {{-- #166 GEO/UX : ouvrir le prompt directement dans une IA (le prompt est aussi copié).
+                             IA préférée mémorisée (bonification 2026-08-07) : tant qu'aucun choix réel n'a
+                             été mémorisé (openTargetHasPref faux, voir _loadOpenTargetPref()/
+                             _recordOpenTargetPref() dans constructeur-prompts-core.js), comportement
+                             INCHANGÉ - 5 boutons à plat. Dès qu'un choix a été fait (cette session ou une
+                             précédente, via localStorage), UN bouton principal « Ouvrir dans {IA} » prend le
+                             dessus et les 4 autres destinations se replient derrière <details> « Autres
+                             choix » (cible tactile 44px conservée). --}}
+                        <template x-if="!openTargetHasPref">
                         <div class="d-flex gap-2 mb-0 flex-wrap align-items-center">
                             <span class="text-muted small">{{ __('Ouvrir dans') }} :</span>
                             <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')" @click="openIn('chatgpt')">ChatGPT</button>
@@ -947,6 +978,39 @@
                             <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')" @click="openIn('perplexity')">Perplexity</button>
                             <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')" @click="openIn('gemini')">Gemini</button>
                             <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')" @click="openIn('mistral')">Mistral</button>
+                        </div>
+                        </template>
+                        <template x-if="openTargetHasPref">
+                        <div class="d-flex gap-2 mb-0 flex-wrap align-items-center">
+                            <button class="ct-btn ct-btn-primary" :disabled="!isValid" :style="'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')" @click="openIn(openTarget)" :aria-label="'{{ __('Ouvrir dans') }} ' + openTargetLabel" x-text="'{{ __('Ouvrir dans') }} ' + openTargetLabel"></button>
+                            <details>
+                                <summary class="small" style="cursor:pointer; color: var(--c-text-muted); min-height:44px; display:inline-flex; align-items:center; padding: 4px 6px;">{{ __('Autres choix') }}</summary>
+                                <div class="d-flex gap-2 mt-2 flex-wrap align-items-center">
+                                    <template x-for="t in ['chatgpt','claude','perplexity','gemini','mistral'].filter(function(x){ return x !== openTarget; })" :key="t">
+                                        <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')" @click="openIn(t)" x-text="openTargetNames[t]"></button>
+                                    </template>
+                                </div>
+                            </details>
+                        </div>
+                        </template>
+                        @php
+                            // Relances de secours (bonification 2026-08-07) : textes EXACTS demandés,
+                            // définis UNE seule fois (DRY) - servent à la fois de libellé affiché et de
+                            // contenu copié via copyText() (composant copier+toast DRY déjà existant,
+                            // aucun nouvel appel réseau).
+                            $followUpPrompts = [
+                                __("C'est trop long : refais la même chose en moitié moins de mots."),
+                                __("C'est trop vague : reprends avec des exemples concrets."),
+                                __("Le ton ne convient pas : réécris le même contenu sur un ton plus simple et chaleureux."),
+                            ];
+                        @endphp
+                        <div class="mt-3 pt-3" style="border-top: 1px dashed rgba(11,114,133,0.25);" x-show="isValid" x-cloak>
+                            <p class="small mb-2" style="color: var(--c-text-muted); font-size: 0.8rem;"><strong>{{ __('Si la réponse déçoit, collez une relance :') }}</strong></p>
+                            <div class="d-flex flex-column gap-2">
+                                @foreach ($followUpPrompts as $followUp)
+                                <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" style="min-height:44px; text-align:left; white-space:normal;" @click="copyText(@js($followUp))">{{ $followUp }}</button>
+                                @endforeach
+                            </div>
                         </div>
                         </div>
                         <div class="mb-4"></div>

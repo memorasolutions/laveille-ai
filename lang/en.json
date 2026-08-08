@@ -4079,5 +4079,14 @@
     "Lorsque des données sont transférées hors de l'Union européenne, nous nous appuyons sur les mécanismes reconnus applicables, notamment les clauses contractuelles types (SCC) de nos fournisseurs, et nous évaluons ces transferts conformément aux lois applicables (voir la section sur les transferts hors Québec).": "When data is transferred outside the European Union, we rely on the applicable recognized mechanisms, including our providers' standard contractual clauses (SCCs), and we assess these transfers in accordance with applicable laws (see the section on transfers outside Quebec).",
     "Panne majeure — service indisponible": "Major outage - service unavailable",
     "Service dégradé — certains systèmes rencontrent des problèmes": "Degraded service - some systems are experiencing issues",
-    "Vous avez renommé une page ou modifié son slug — redirigez l'ancienne adresse.": "You renamed a page or changed its slug - redirect the old address."
+    "Vous avez renommé une page ou modifié son slug — redirigez l'ancienne adresse.": "You renamed a page or changed its slug - redirect the old address.",
+    "Laisser l'IA me proposer des choix avant de répondre": "Let the AI suggest options before answering",
+    "L'IA présentera d'abord 3 pistes numérotées ; vous répondez 1, 2 ou 3.": "The AI will first present 3 numbered options; you reply with 1, 2 or 3.",
+    "Répéter pour chaque élément de ma liste": "Repeat for each item in my list",
+    "Collez votre liste dans le champ de contexte ; l'IA traitera chaque élément séparément.": "Paste your list into the context field; the AI will process each item separately.",
+    "Autres choix": "Other choices",
+    "Si la réponse déçoit, collez une relance :": "If the answer falls short, paste a follow-up:",
+    "C'est trop long : refais la même chose en moitié moins de mots.": "This is too long: redo the same thing in half as many words.",
+    "C'est trop vague : reprends avec des exemples concrets.": "This is too vague: redo it with concrete examples.",
+    "Le ton ne convient pas : réécris le même contenu sur un ton plus simple et chaleureux.": "The tone is off: rewrite the same content in a simpler, warmer tone."
 }

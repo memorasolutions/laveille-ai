@@ -321,8 +321,10 @@ function fillBaseFields(component) {
     assert(component.spaceLastValues['fractions'] === undefined, 'aucune mémoire avant la copie/ouverture');
     component.copy();
     await Promise.resolve(); await Promise.resolve();
-    assert(component.spaceLastValues['fractions'] === 'les probabilités', 'copy() mémorise la valeur saisie dans spaceLastValues');
-    assert(JSON.parse(global.localStorage.getItem('cpSpaceLastValues_v1'))['fractions'] === 'les probabilités', 'persisté dans localStorage sous la clé versionnée cpSpaceLastValues_v1');
+    // Pastilles du déjà-dit (bonification 2026-08-07) : jusqu'à 3 valeurs par espace (tableau,
+    // plus récente en premier) au lieu d'une seule chaîne auparavant.
+    assert(Array.isArray(component.spaceLastValues['fractions']) && component.spaceLastValues['fractions'][0] === 'les probabilités', 'copy() mémorise la valeur saisie dans spaceLastValues (tableau, plus récente en tête)');
+    assert(JSON.parse(global.localStorage.getItem('cpSpaceLastValues_v1'))['fractions'][0] === 'les probabilités', 'persisté dans localStorage sous la clé versionnée cpSpaceLastValues_v1');
 
     // Une 2e session (même stockage navigateur - sharedStore) recharge cette mémoire. Appel direct
     // de _loadSpaceLastValues() (ce que init() ferait automatiquement dans un vrai navigateur -
@@ -334,7 +336,34 @@ function fillBaseFields(component) {
     component2.taskObject = 'Rédige un autre texte sur fractions.';
     component2.spaceBubble = { show: true, text: 'fractions', fieldId: 'cpTaskObject' };
     component2.createSpaceFromSelection();
-    assert(component2.spaceLastValues['fractions'] === 'les probabilités', '_loadSpaceLastValues() recharge la mémoire au démarrage d\'une nouvelle session');
+    assert(Array.isArray(component2.spaceLastValues['fractions']) && component2.spaceLastValues['fractions'][0] === 'les probabilités', '_loadSpaceLastValues() recharge la mémoire au démarrage d\'une nouvelle session');
+
+    // Bonification 2026-08-07 : jusqu'à 3 valeurs, dédoublonnées, plus récente en premier.
+    component.spaceValues['fractions'] = 'les statistiques';
+    component.copy();
+    await Promise.resolve(); await Promise.resolve();
+    assert(component.spaceLastValues['fractions'][0] === 'les statistiques' && component.spaceLastValues['fractions'][1] === 'les probabilités', 'une 2e valeur distincte est ajoutée en tête, la précédente reste en 2e position');
+    component.spaceValues['fractions'] = 'les intégrales';
+    component.copy();
+    await Promise.resolve(); await Promise.resolve();
+    assert(component.spaceLastValues['fractions'].length === 3, 'une 3e valeur distincte porte le tableau à 3 entrées');
+    component.spaceValues['fractions'] = 'les dérivées';
+    component.copy();
+    await Promise.resolve(); await Promise.resolve();
+    assert(component.spaceLastValues['fractions'].length === 3 && component.spaceLastValues['fractions'].indexOf('les probabilités') === -1, 'une 4e valeur distincte plafonne à 3 entrées, la plus ancienne est évincée');
+    component.spaceValues['fractions'] = 'les statistiques';
+    component.copy();
+    await Promise.resolve(); await Promise.resolve();
+    assert(component.spaceLastValues['fractions'][0] === 'les statistiques' && component.spaceLastValues['fractions'].length === 3, 'une valeur déjà présente est dédoublonnée et remontée en tête, sans grossir le tableau');
+
+    // Migration silencieuse du format v1 (chaîne simple) vers le format à 3 valeurs (tableau) :
+    // stockage pré-rempli AVANT construction du composant (loadPromptBuilder ré-assigne
+    // global.localStorage à partir du store fourni - jamais après, comme les autres tests de ce
+    // fichier suivant le même patron `sharedStore`).
+    const migratedStore = { cpSpaceLastValues_v1: JSON.stringify({ ancien: 'valeur v1' }) };
+    const { component: component3 } = loadPromptBuilder(migratedStore);
+    component3._loadSpaceLastValues();
+    assert(Array.isArray(component3.spaceLastValues['ancien']) && component3.spaceLastValues['ancien'][0] === 'valeur v1', 'une ancienne entrée v1 (chaîne) est migrée silencieusement en tableau à 1 élément');
 })();
 
 setTimeout(function () {
