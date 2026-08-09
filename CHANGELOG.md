@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.157.0] - 2026-08-09
+
+### Ajouté
+- **Constructeur de prompts : enveloppe visuelle des groupes de l'étape « Options » (« quoi va avec quoi »)** (demande du fondateur, convergente avec les propositions spontanées de Gemini et DeepSeek au panel intuitivité ; option A retenue à 94-95/100 par le club des sages contre barre d'accent, carte par groupe, espacement seul et code couleur). Chaque groupe (« Apparence de la réponse », « Voix et niveau de langage », « Règles à respecter ») reçoit un fond teal très pâle (3,5 %) à coins arrondis qui englobe ses cartes blanches - la frontière entre thèmes devient visible d'un coup d'œil, sans rien cacher ni retirer, cibles tactiles intactes. Garde-fous appliqués : fond extrêmement pâle (pas d'air « désactivé »), un seul signal de délimitation, marge inter-groupes réduite en compensation (+3 % de hauteur seulement). Preuves : captures desktop et mobile, 30 tests Pest, 73/73 tests JS.
+
 ## [1.156.1] - 2026-08-09
 
 ### Modifié

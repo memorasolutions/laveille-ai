@@ -278,8 +278,11 @@
                         }
 
                         {{-- #6 étape 4 regroupée en 3 intentions, sans déplacer ni retirer un champ. --}}
-                        .ct-group{border:0;padding:0;margin:0 0 1.25rem;min-width:0;}
+                        /* ACTION: enveloppe visuelle des groupes (« quoi va avec quoi ») - MCP: openrouter→deepseek-v4-flash - RAISON: option A validée par le club des sages 2026-08-09 (Codex 94, Gemini 95), fond très pâle sans hauteur ajoutée */
+                        .ct-group{background:rgba(6,78,90,0.035);border-radius:14px;padding:0.75rem 0.75rem 0.85rem;margin:0 0 1rem;min-width:0;border:0;}
                         .ct-group:last-child{margin-bottom:0;}
+                        .ct-group>:last-child{margin-bottom:0;}
+                        .ct-group .ct-group__legend{padding:0 0 0.4rem;margin:0 0 0.75rem;}
                         .ct-group__legend{width:100%;font-family:var(--f-heading);font-weight:700;color:var(--c-dark);font-size:0.95rem;padding:0 0 0.4rem;margin:0 0 0.85rem;border-bottom:2px solid var(--c-primary);}
                         </style>
                         {{-- .ct-profile-strip / .ct-profile-strip__title retirés le 2026-08-04 :
