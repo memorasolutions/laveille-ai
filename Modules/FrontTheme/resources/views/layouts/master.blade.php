@@ -523,13 +523,49 @@
       // lecteur d'écran. Retourne une Promise<boolean> pour que l'appelant pilote son propre état
       // visuel local (x-data="{ copied: false }").
       window.copyToClipboard = function(text, successMessage){
-        return navigator.clipboard.writeText(text).then(function(){
-          window.toast(successMessage || 'Copié dans le presse-papiers', 'success', 2500);
-          return true;
-        }).catch(function(){
+        // Garde : navigator.clipboard est absent en contexte non sécurisé (HTTP) - sans elle,
+        // l'exception partait AVANT la Promise et aucun toast n'apparaissait.
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          return navigator.clipboard.writeText(text).then(function(){
+            window.toast(successMessage || 'Copié dans le presse-papiers', 'success', 2500);
+            return true;
+          }).catch(function(){
+            window.toast('Copie impossible - copiez le texte manuellement.', 'error', 4000);
+            return false;
+          });
+        }
+        // Repli : textarea temporaire + execCommand (même contrat Promise<boolean>, mêmes toasts).
+        try {
+          var textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.style.position = 'fixed';
+          textarea.style.left = '-9999px';
+          textarea.style.top = '-9999px';
+          textarea.style.opacity = '0';
+          textarea.setAttribute('aria-hidden', 'true');
+          textarea.setAttribute('readonly', '');
+          var activeElement = document.activeElement;
+          document.body.appendChild(textarea);
+          textarea.focus();
+          textarea.select();
+          var success = document.execCommand('copy');
+          if (activeElement && typeof activeElement.focus === 'function') {
+            activeElement.focus();
+          }
+          document.body.removeChild(textarea);
+          if (success) {
+            window.toast(successMessage || 'Copié dans le presse-papiers', 'success', 2500);
+            return Promise.resolve(true);
+          }
           window.toast('Copie impossible - copiez le texte manuellement.', 'error', 4000);
-          return false;
-        });
+          return Promise.resolve(false);
+        } catch (e) {
+          if (textarea && textarea.parentNode) {
+            document.body.removeChild(textarea);
+          }
+          window.toast('Copie impossible - copiez le texte manuellement.', 'error', 4000);
+          return Promise.resolve(false);
+        }
       };
     })();
     </script>

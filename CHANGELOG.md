@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.154.1] - 2026-08-09
+
+### Corrigé
+- **Bouton Copier : repli quand le presse-papiers est indisponible** - la fonction partagée `copyToClipboard()` appelait l'API moderne du presse-papiers sans vérifier sa présence ; en contexte non sécurisé (HTTP, environnements restreints), l'appel échouait avant même d'afficher un message : ni copie, ni toast. Une garde vérifie maintenant la disponibilité de l'API et bascule sur la méthode classique (`execCommand`) avec les mêmes messages de confirmation ou d'erreur. Invisible en production (HTTPS), mais tous les boutons Copier du site deviennent robustes dans tout contexte. Prouvé en navigateur : la copie et son toast fonctionnent désormais là où ils échouaient silencieusement.
+
 ## [1.154.0] - 2026-08-09
 
 ### Ajouté
