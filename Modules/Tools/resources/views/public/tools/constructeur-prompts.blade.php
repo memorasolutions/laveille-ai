@@ -178,16 +178,29 @@
                         .ct-chip{display:inline-flex;align-items:center;gap:4px;border:2px solid var(--c-primary);border-radius:9999px;background:var(--c-primary);color:#fff;padding:0.25rem 0.5rem 0.25rem 0.75rem;font-size:0.8rem;font-weight:500;}
                         .ct-chip__x{background:transparent;border:0;color:inherit;font-size:1rem;line-height:1;cursor:pointer;min-width:24px;min-height:24px;padding:0;}
                         .ct-chip__x:focus-visible{outline:2px solid #fff;outline-offset:1px;border-radius:50%;}
-                        {{-- Espaces à remplir (tâches 1660-1665, 2026-08-07) : pastilles pending/
-                             missing en gris #4b5563 (contraste AAA mesuré à 7,57:1 sur blanc, valeur
-                             déjà établie ailleurs dans ce fichier - jamais une nouvelle teinte
-                             inventée) au lieu du teal vif des pastilles confirmées (.ct-chip), pour
-                             signaler visuellement un état transitoire/à corriger. --}}
-                        .ct-chip--pending,.ct-chip--missing{background:#4b5563;border-color:#4b5563;}
+                        {{-- Espaces à remplir (tâches 1660-1665, 2026-08-07) : pastille pending en
+                             gris #4b5563 (contraste AAA mesuré à 7,57:1 sur blanc, valeur déjà
+                             établie ailleurs dans ce fichier - jamais une nouvelle teinte inventée)
+                             au lieu du teal vif des pastilles confirmées (.ct-chip), pour signaler
+                             visuellement un état transitoire/à corriger. --}}
+                        .ct-chip--pending{background:#4b5563;border-color:#4b5563;}
+                        {{-- Correctif UX « orpheline visible » (2026-08-09, capture fondateur) :
+                             .ct-chip--missing réutilise la paire ambre #5b4a1f sur #FEF3C7 déjà
+                             établie (AAA, 7,72:1 - voir round 151 ligne ~155) plutôt qu'une nouvelle
+                             teinte, pour distinguer visuellement « à préciser » (gris, transitoire)
+                             de « introuvable » (ambre, à corriger). Le focus visible des boutons
+                             internes (× et libellé) passait par un contour blanc conçu pour un fond
+                             sombre - invisible sur ce fond clair (1,11:1), d'où l'override ciblé. --}}
+                        .ct-chip--missing{background:#FEF3C7;border-color:#5b4a1f;color:#5b4a1f;}
+                        .ct-chip--missing .ct-chip__x:focus-visible,.ct-chip--missing .ct-chip__label:focus-visible{outline-color:#5b4a1f;}
                         .ct-chip__label{background:transparent;border:0;color:inherit;font:inherit;font-weight:500;cursor:pointer;padding:0;min-height:24px;}
                         .ct-chip__label:focus-visible{outline:2px solid #fff;outline-offset:1px;border-radius:4px;}
                         .ct-chip__input{background:#fff;border:1px solid var(--c-primary);border-radius:6px;color:var(--c-dark);font-size:0.8rem;padding:2px 6px;min-width:90px;max-width:180px;min-height:24px;}
                         .ct-chip__badge{font-size:0.7rem;opacity:0.9;white-space:nowrap;}
+                        {{-- Correctif UX « lien persistant pendant le nommage » (2026-08-09) : flèche
+                             purement décorative en ::before (ignorée par les lecteurs d'écran),
+                             jamais dans x-text pour ne pas polluer l'annonce aria-live. --}}
+                        .ct-space-pending-hint::before{content:'↑ ';}
                         {{-- Aperçu colorisé des espaces (Intégration au moteur, point 3) : réutilise
                              la paire déjà établie #5b4a1f sur #FEF3C7 (round 151, « votre texte »)
                              plutôt que d'inventer une nouvelle teinte - pointillé = non rempli, plein
@@ -388,6 +401,12 @@
                                  /outils/anonymiseur (jamais touché par ce retrait). L'`id` de ce champ est
                                  conservé comme ancre stable pour openDiagnosticSection() et le futur. --}}
                             <div class="form-group mb-3" id="cpTaskField">
+                                {{-- C2-4 (couche 2, tâches 1660-1665, 2026-08-09) : promesse en une ligne
+                                     au-dessus du champ principal - discrète, même classe de note que le
+                                     reste du formulaire (voir <small class="text-muted"> ligne ~408 juste
+                                     en dessous). Fait le pont entre ce champ et les espaces à remplir
+                                     décrits plus bas dans cette même étape. --}}
+                                <small class="text-muted d-block mb-1">{{ __('Écris ta demande une fois - réutilise-la en changeant seulement quelques mots.') }}</small>
                                 <label class="form-label fw-medium">{{ __('Sur quoi porte votre demande ?') }} <span style="color: #991B1B;">*</span></label>
                                 <p class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;">🔒 {{ __('Il y a un vrai nom, un courriel, un numéro de téléphone ou une adresse dans votre texte ? Cachez-les d\'abord avec l\'') }}<a href="/outils/anonymiseur" style="color: #0A3A42; font-weight: 600; text-decoration: underline;">{{ __('Anonymiseur') }}</a>{{ __(', puis collez le résultat ici. Rien n\'est envoyé ni enregistré nulle part.') }}</p>
                                 <textarea id="cpTaskObject" class="form-control" rows="3" x-model="taskObject" autocomplete="off" aria-required="true" placeholder="{{ __('Ex: un plan marketing pour le lancement d\'une application mobile au Québec') }}" aria-label="{{ __('Description de la demande') }}"
@@ -445,12 +464,27 @@
                                 <button type="button" class="ct-btn ct-btn-outline ct-btn-xs" style="min-height:44px;" @click="addSpaceAtCursor()">
                                     {{ __('+ Ajouter un espace à remplir') }}
                                 </button>
+                                {{-- Correctif UX « note accents » (2026-08-09, capture fondateur) :
+                                     l'utilisateur s'attendait à des noms de variables sans accents -
+                                     lever l'ambiguïté avant le clic, même style discret que les autres
+                                     sous-textes du formulaire (voir <small class="text-muted"> ligne
+                                     ~421 de ce fichier, champ Contexte additionnel). --}}
+                                <div><small class="text-muted">{{ __('Un espace est un bout de phrase normal - accents et espaces bienvenus.') }}</small></div>
                             </div>
                             <div class="mb-2" x-show="spaces.length > 0" x-cloak>
-                                <p class="small mb-1" style="font-size:0.8rem; color:var(--c-text-muted);">{{ __('Tu pourras changer :') }}</p>
+                                {{-- Correctif UX « libellé clair » (2026-08-09, capture fondateur) :
+                                     « Tu pourras changer : » ne disait pas QUOI ni son lien avec le
+                                     texte - reformulé pour nommer explicitement le lien pastille ↔
+                                     texte de la demande. --}}
+                                <p class="small mb-1" style="font-size:0.8rem; color:var(--c-text-muted);">{{ __("Tes espaces à remplir - chaque pastille est un bout de texte de ta demande :") }}</p>
                                 <div class="ct-chip-row" role="list" aria-label="{{ __('Espaces à remplir créés') }}">
                                     <template x-for="(sp, spIdx) in spaces" :key="spIdx">
-                                        <span class="ct-chip" :class="{ 'ct-chip--pending': sp.pending, 'ct-chip--missing': spaceMissingCache[sp.text] }" role="listitem">
+                                        {{-- Couche 2 (canonKey, 2026-08-09) : spaceMissing(sp) remplace l'ancien
+                                             accès direct spaceMissingCache[sp.text] partout dans ce bloc -
+                                             même résultat visible, mais résout la pastille même si son texte
+                                             contient une apostrophe courbe ou un espace insécable (voir
+                                             spaceMissing() dans constructeur-prompts-core.js). --}}
+                                        <span class="ct-chip" :class="{ 'ct-chip--pending': sp.pending, 'ct-chip--missing': spaceMissing(sp) }" role="listitem">
                                             <template x-if="sp.pending">
                                                 <input type="text" :id="'cpSpacePendingInput-' + spIdx" x-model="sp.draftText" autocomplete="off" class="ct-chip__input"
                                                     :aria-label="'{{ __('Nommer cet espace à remplir') }}'"
@@ -468,15 +502,31 @@
                                                 <button type="button" class="ct-chip__label" @click="startRenameSpace(spIdx)"
                                                     {{-- @js() : l'apostrophe de « n'a » cassait l'expression Alpine en quotes simples
                                                          (SyntaxError console, title/aria jamais rendus - trouvé au QC visuel). --}}
-                                                    :aria-label="(spaceMissingCache[sp.text] ? @js(__('ce mot n\'a pas été retrouvé dans ton texte : ')) : '') + sp.text"
-                                                    :title="spaceMissingCache[sp.text] ? @js(__('Ce mot n\'a pas été retrouvé dans ton texte.')) : sp.text">
+                                                    :aria-label="(spaceMissing(sp) ? @js(__('ce mot n\'a pas été retrouvé dans ton texte : ')) : '') + sp.text"
+                                                    :title="spaceMissing(sp) ? @js(__('Ce mot n\'a pas été retrouvé dans ton texte.')) : sp.text">
                                                     <span x-text="sp.text"></span>
                                                 </button>
+                                            </template>
+                                            {{-- Correctif UX « orpheline visible » (2026-08-09) : le
+                                                 title/aria "non retrouvé" existant n'était visible qu'au
+                                                 survol/lecteur d'écran - libellé EN CLAIR dans la
+                                                 pastille pour les personnes qui ne survolent jamais. --}}
+                                            <template x-if="!sp.pending && spaceMissing(sp)">
+                                                <span class="ct-chip__badge">{{ __('introuvable dans le texte') }}</span>
                                             </template>
                                             <button type="button" class="ct-chip__x" :aria-label="'{{ __('Retirer') }} ' + sp.text" @click="removeSpace(spIdx)">&times;</button>
                                         </span>
                                     </template>
                                 </div>
+                                {{-- Correctif UX « lien persistant pendant le nommage » (2026-08-09,
+                                     capture fondateur) : un oracle UX a réfuté le toast (éphémère) -
+                                     cette ligne reste affichée tant qu'au moins une pastille est
+                                     `pending`, et pointe vers le texte qui vient d'être inséré
+                                     au-dessus. Une seule ligne même si plusieurs pending coexistent
+                                     (la plus récente, voir mostRecentPendingSpaceText). Même patron
+                                     que unfilledSpacesMessage (role="status" aria-live="polite") -
+                                     voir ligne ~944 de ce fichier. --}}
+                                <p class="ct-space-pending-hint small mb-0 mt-1" x-show="mostRecentPendingSpaceText" x-cloak role="status" aria-live="polite" style="color: var(--c-text-muted); font-size: 0.78rem;" x-text="spacePendingHintMessage"></p>
                             </div>
                         </div>
 
@@ -812,9 +862,13 @@
                                         </template>
                                         <template x-if="prompt">
                                             <template x-for="(seg, segIdx) in promptSegments" :key="segIdx">
+                                                {{-- Couche 2 (canonKey, 2026-08-09) : spaceValueForText(seg.spaceRef)
+                                                     remplace l'accès direct spaceValues[seg.spaceRef] - la clé de
+                                                     recherche est canonique (voir constructeur-prompts-core.js),
+                                                     jamais implémentée ici dans la vue. --}}
                                                 <span
-                                                    x-text="seg.kind === 'space' ? (spaceValues[seg.spaceRef] || seg.text) : seg.text"
-                                                    :class="seg.kind === 'space' ? ((spaceValues[seg.spaceRef] ? 'ct-seg-space-filled' : 'ct-seg-space-empty') + (focusedSpaceText === seg.spaceRef ? ' ct-seg-space-active' : '')) : ''"
+                                                    x-text="seg.kind === 'space' ? (spaceValueForText(seg.spaceRef) || seg.text) : seg.text"
+                                                    :class="seg.kind === 'space' ? ((spaceValueForText(seg.spaceRef) ? 'ct-seg-space-filled' : 'ct-seg-space-empty') + (focusedSpaceText === seg.spaceRef ? ' ct-seg-space-active' : '')) : ''"
                                                 ></span>
                                             </template>
                                         </template>
@@ -848,16 +902,21 @@
                                         <label class="form-label mb-1 d-block" style="font-size: 0.86rem; font-weight: 700; color: var(--c-dark);" :for="'cpSpaceFill-' + spIdx">
                                             <span x-text="sp.text.length > 24 ? sp.text.slice(0, 24) + '…' : sp.text" :title="sp.text"></span>
                                         </label>
-                                        <input type="text" :id="'cpSpaceFill-' + spIdx" class="form-control form-control-sm" x-model="spaceValues[sp.text]" :placeholder="sp.text" autocomplete="off" :aria-label="sp.text"
+                                        {{-- Couche 2 (canonKey, 2026-08-09) : :value/@input remplace
+                                             x-model="spaceValues[sp.text]" - un renommage fusionné peut écrire la
+                                             valeur sous une clé canonique différente de la forme littérale exacte
+                                             de sp.text (voir spaceValueFor()/setSpaceValue() dans
+                                             constructeur-prompts-core.js), jamais implémenté ici dans la vue. --}}
+                                        <input type="text" :id="'cpSpaceFill-' + spIdx" class="form-control form-control-sm" :value="spaceValueFor(sp)" @input="setSpaceValue(sp, $event.target.value)" :placeholder="sp.text" autocomplete="off" :aria-label="sp.text"
                                             @focus="focusedSpaceText = sp.text" @blur="focusedSpaceText = ''">
                                         {{-- Pastilles du déjà-dit (bonification 2026-08-07) : jusqu'à 3
                                              dernières valeurs saisies pour cet espace (la plus récente en
                                              premier, voir spaceLastValues/_recordSpaceLastValues() dans
                                              constructeur-prompts-core.js), discret - aucune pastille si
                                              aucune valeur passée. Un clic remplit le champ. --}}
-                                        <div class="d-flex flex-wrap gap-1 mt-1" x-show="(spaceLastValues[sp.text] || []).length > 0">
-                                            <template x-for="lv in (spaceLastValues[sp.text] || []).filter(function(v){ return v !== spaceValues[sp.text]; })" :key="lv">
-                                                <button type="button" class="ct-btn ct-btn-outline ct-btn-xs" style="min-height:44px;" @click="spaceValues[sp.text] = lv" :aria-label="'{{ __('Reprendre :') }} ' + lv">
+                                        <div class="d-flex flex-wrap gap-1 mt-1" x-show="spaceLastValuesFor(sp).length > 0">
+                                            <template x-for="lv in spaceLastValuesFor(sp).filter(function(v){ return v !== spaceValueFor(sp); })" :key="lv">
+                                                <button type="button" class="ct-btn ct-btn-outline ct-btn-xs" style="min-height:44px;" @click="setSpaceValue(sp, lv)" :aria-label="'{{ __('Reprendre :') }} ' + lv">
                                                     <span x-text="lv.length > 28 ? lv.slice(0, 28) + '…' : lv"></span>
                                                 </button>
                                             </template>
@@ -929,6 +988,13 @@
                              si au moins un espace remplissable est resté vide - jamais bloquant, le
                              prompt copié garde le mot de départ. --}}
                         <p x-show="isValid && unfilledSpacesCount > 0" x-cloak role="status" aria-live="polite" class="small mb-2" style="color: var(--c-text-muted); font-size: 0.78rem;" x-text="unfilledSpacesMessage"></p>
+                        {{-- C2-3 (couche 2, tâches 1660-1665, 2026-08-09) : avis d'orphelines à la copie -
+                             ligne discrète NON bloquante près des boutons d'action, LECTURE SEULE (aucune
+                             mutation, la copie part quand même). Réutilise spaceMissingCache/pastille
+                             introuvable de la couche 1 (voir orphanSpacesCount/orphanSpacesMessage dans
+                             constructeur-prompts-core.js). Même patron que unfilledSpacesMessage juste
+                             au-dessus (role="status" aria-live="polite"). --}}
+                        <p x-show="isValid && orphanSpacesCount > 0" x-cloak role="status" aria-live="polite" class="small mb-2" style="color: var(--c-text-muted); font-size: 0.78rem;" x-text="orphanSpacesMessage"></p>
                         <div class="d-flex gap-2 mb-3 flex-wrap">
                             <button class="ct-btn ct-btn-accent flex-fill" @click="copy()" :disabled="!isValid" aria-describedby="cpValidityHint" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'"
                                     x-text="copied ? '{{ __('Copié !') }}' : '{{ __('Copier le prompt') }}'"></button>
@@ -1103,6 +1169,16 @@
         </div>
     </div>
 </div>
+
+{{-- Garde-fou fusion au renommage (C2-2, couche 2, tâches 1660-1665, 2026-08-09) : confirmation
+     UNIQUE non punitive avant de fusionner un espace vers un texte déjà présent ailleurs - jamais
+     de confirm() natif (règle 7), réutilise le mécanisme de dialogue MODAL du thème (voir
+     Modules/Core/resources/views/components/confirm-modal.blade.php, déjà utilisé tel quel par
+     confirmDeleteCard() plus haut dans ce fichier via open-confirm-global). Instance DÉDIÉE
+     (variante "info", icône neutre) distincte de la modale "global" (variante "danger", réservée
+     aux suppressions) : ce n'est pas une suppression, rien n'est perdu si on annule. Déclenchée
+     par _confirmRenameMergeIfNeeded() dans constructeur-prompts-core.js. --}}
+<x-core::confirm-modal name="cp-rename-merge" :confirm-label="__('Confirmer la fusion')" variant="info" icon="🔗" />
 
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'constructeur-prompts'])
 @endsection
@@ -1420,7 +1496,18 @@ window.promptBuilderConfig = {
         spaceAlreadyExists: @json(__('Cet espace existe déjà.')),
         spaceNewLabel: @json(__('information à préciser')),
         spaceUnfilledOne: @json(__('1 espace non rempli, on garde le mot de départ.')),
-        spaceUnfilledMany: @json(__('{count} espaces non remplis, on garde les mots de départ.'))
+        spaceUnfilledMany: @json(__('{count} espaces non remplis, on garde les mots de départ.')),
+        // Correctif UX « lien persistant pendant le nommage » (2026-08-09) : même patron
+        // {placeholder} que spaceUnfilledMany ci-dessus, consommé par get spacePendingHintMessage()
+        // dans constructeur-prompts-core.js.
+        spacePendingHint: @json(__("Le texte « {text} » vient d'être ajouté dans ta demande ci-dessus - donne-lui un nom parlant.")),
+        // Couche 2 (tâches 1660-1665, boucle 5 oracles 2026-08-09) : C2-2 (garde-fou de fusion au
+        // renommage, voir _confirmRenameMergeIfNeeded()) et C2-3 (avis d'orphelines à la copie, voir
+        // orphanSpacesMessage()) dans constructeur-prompts-core.js.
+        spaceRenameMergeOne: @json(__('Ce texte apparaît déjà 1 fois dans ta demande - toutes les occurrences seront remplies ensemble.')),
+        spaceRenameMergeMany: @json(__('Ce texte apparaît déjà {count} fois dans ta demande - toutes les occurrences seront remplies ensemble.')),
+        spaceOrphanOne: @json(__("1 espace à remplir n'est plus dans ton texte.")),
+        spaceOrphanMany: @json(__('{count} espaces à remplir ne sont plus dans ton texte.'))
     }
 };
 </script>

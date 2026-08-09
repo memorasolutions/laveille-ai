@@ -51,7 +51,13 @@ function loadPromptBuilder(sharedStore) {
     new Function(src)();
     const component = factory();
     component.$nextTick = function (cb) { cb(); };
-    return { component, getLastCopied: () => lastCopied, getLastToast: () => lastToast, store };
+    // Couche 2 (C2-2, 2026-08-09) : stub minimal du magic Alpine $dispatch() - même patron que
+    // confirmDeleteCard() (déjà dans core.js, jamais testé avant) et le garde-fou de fusion au
+    // renommage (_confirmRenameMergeIfNeeded). Enregistre le dernier dispatch pour que le test
+    // puisse simuler le clic "Confirmer la fusion" en invoquant detail.callback() lui-même.
+    let lastDispatch = null;
+    component.$dispatch = function (name, detail) { lastDispatch = { name, detail }; };
+    return { component, getLastCopied: () => lastCopied, getLastToast: () => lastToast, getLastDispatch: () => lastDispatch, store };
 }
 
 let pass = 0, fail = 0;
@@ -291,8 +297,12 @@ function fillBaseFields(component) {
 }());
 
 // 12. Fusion au renommage vers le texte d'un AUTRE espace (jamais de pastille en double).
+//     Couche 2 (C2-2, 2026-08-09) : la fusion est désormais gardée par une confirmation UNIQUE
+//     non punitive (mécanisme de dialogue modal du thème, jamais confirm() natif) - la fusion
+//     réelle n'a PAS lieu tant que le callback n'a pas été invoqué (simule le clic "Confirmer la
+//     fusion" dans la modale).
 (function () {
-    const { component } = loadPromptBuilder();
+    const { component, getLastDispatch } = loadPromptBuilder();
     fillBaseFields(component);
     component.taskObject = 'Compare le chat et le chien.';
     component.spaceBubble = { show: true, text: 'chat', fieldId: 'cpTaskObject' };
@@ -303,7 +313,12 @@ function fillBaseFields(component) {
     component.spaceEditingIndex = 0;
     component.spaceEditingText = 'chien';
     component.commitRenameSpace(0);
-    assert(component.spaces.length === 1 && component.spaces[0].text === 'chien', 'fusion : un seul espace « chien » après renommage de « chat »');
+    assert(component.spaces.length === 2 && component.spaces[0].text === 'chat', 'fusion différée : rien n\'est encore fusionné tant que la confirmation n\'a pas eu lieu');
+    const dispatch = getLastDispatch();
+    assert(!!dispatch && dispatch.name === 'open-confirm-cp-rename-merge', 'une confirmation de fusion est demandée via la modale du thème (jamais confirm() natif)');
+    assert(dispatch.detail.message.indexOf('1') !== -1, 'le message mentionne le nombre d\'occurrences déjà présentes ("chien" apparaît 1 fois)');
+    dispatch.detail.callback();
+    assert(component.spaces.length === 1 && component.spaces[0].text === 'chien', 'fusion : un seul espace « chien » après confirmation du renommage de « chat »');
     assert(component.taskObject === 'Compare le chien et le chien.', 'fusion : les occurrences de « chat » sont devenues « chien »');
     assert(component.spaceValues['chien'] === 'le loup', 'fusion : la valeur déjà saisie sous « chien » est conservée (jamais écrasée)');
 }());

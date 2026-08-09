@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.154.0] - 2026-08-09
+
+### Ajouté
+- **Constructeur de prompts : espaces à remplir rendus robustes et plus intuitifs (boucle de 5 IA en 3 rounds - la question « faut-il un identifiant caché sans accents ? » a été tranchée : non, à l'unanimité ; le vrai risque était la forme invisible des caractères, pas les accents)** :
+  - normalisation des comparaisons - un texte collé depuis Word avec une apostrophe courbe, un espace insécable ou un accent encodé différemment est maintenant reconnu comme identique au texte tapé : les pastilles ne deviennent plus « introuvables » pour une différence invisible à l'œil (le texte tapé et le prompt copié restent intacts au caractère près - seule la comparaison est tolérante) ; les valeurs déjà mémorisées migrent sans perte (en cas de doublon entre deux formes du même texte, la forme encore présente dans la demande gagne, sinon la plus récente - rien n'est écrasé) ;
+  - garde-fou à la fusion - renommer une pastille vers un texte déjà présent ailleurs dans la demande affiche une confirmation claire (« Ce texte apparaît déjà N fois - toutes les occurrences seront remplies ensemble ») au lieu de fusionner en silence ; le compte respecte les mots entiers (« client » ne compte pas « clientèle ») ;
+  - avis au moment de copier - si un espace à remplir n'existe plus dans le texte (parce que la phrase a été retouchée), une ligne discrète le signale près du bouton Copier, sans rien bloquer ;
+  - promesse d'usage en une ligne au-dessus du champ principal (« Écris ta demande une fois - réutilise-la en changeant seulement quelques mots. »).
+- **Clarté du parcours des espaces (couche complémentaire)** : chaque pastille est présentée comme « un bout de texte de ta demande », note explicite « accents et espaces bienvenus », pastille orpheline signalée en clair (« introuvable dans le texte ») et message persistant après l'insertion d'un espace (lisible aussi par les lecteurs d'écran).
+
 ## [1.153.0] - 2026-08-07
 
 ### Ajouté

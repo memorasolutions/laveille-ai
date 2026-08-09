@@ -4088,5 +4088,15 @@
     "Si la réponse déçoit, collez une relance :": "If the answer falls short, paste a follow-up:",
     "C'est trop long : refais la même chose en moitié moins de mots.": "This is too long: redo the same thing in half as many words.",
     "C'est trop vague : reprends avec des exemples concrets.": "This is too vague: redo it with concrete examples.",
-    "Le ton ne convient pas : réécris le même contenu sur un ton plus simple et chaleureux.": "The tone is off: rewrite the same content in a simpler, warmer tone."
+    "Le ton ne convient pas : réécris le même contenu sur un ton plus simple et chaleureux.": "The tone is off: rewrite the same content in a simpler, warmer tone.",
+    "introuvable dans le texte": "not found in your text",
+    "Tes espaces à remplir - chaque pastille est un bout de texte de ta demande :": "Your fill-in blanks - each pill is a piece of text from your request:",
+    "Un espace est un bout de phrase normal - accents et espaces bienvenus.": "A blank is just a normal piece of text - accents and spaces welcome.",
+    "Le texte « {text} » vient d'être ajouté dans ta demande ci-dessus - donne-lui un nom parlant.": "The text « {text} » was just added to your request above - give it a clear name.",
+    "Écris ta demande une fois - réutilise-la en changeant seulement quelques mots.": "Write your request once - reuse it by changing just a few words.",
+    "Confirmer la fusion": "Confirm the merge",
+    "Ce texte apparaît déjà 1 fois dans ta demande - toutes les occurrences seront remplies ensemble.": "This text already appears once in your request - all occurrences will be filled in together.",
+    "Ce texte apparaît déjà {count} fois dans ta demande - toutes les occurrences seront remplies ensemble.": "This text already appears {count} times in your request - all occurrences will be filled in together.",
+    "1 espace à remplir n'est plus dans ton texte.": "1 fill-in blank is no longer in your text.",
+    "{count} espaces à remplir ne sont plus dans ton texte.": "{count} fill-in blanks are no longer in your text."
 }

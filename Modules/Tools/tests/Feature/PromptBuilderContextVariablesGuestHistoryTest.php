@@ -111,7 +111,7 @@ it('renders the "Tu pourras changer" band of space pills below the context field
 
     $html = $this->actingAs($user)->get('/outils/constructeur-prompts')->assertOk()->getContent();
 
-    expect($html)->toContain('Tu pourras changer :');
+    expect($html)->toContain("Tes espaces à remplir - chaque pastille est un bout de texte de ta demande :");
     expect($html)->toContain('x-for="(sp, spIdx) in spaces"');
     expect($html)->toContain('removeSpace(spIdx)');
     expect($html)->toContain('startRenameSpace(spIdx)');

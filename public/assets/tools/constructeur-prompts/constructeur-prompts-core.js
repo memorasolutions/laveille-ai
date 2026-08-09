@@ -1065,21 +1065,36 @@ document.addEventListener('alpine:init', function() {
                     .map(function(sp) { return sp.text; })
                     .filter(function(t) { return !!t; })
                     .sort(function(a, b) { return b.length - a.length; });
+                // Couche 2 (canonKey, 2026-08-09) : forme canonique de RECHERCHE précalculée pour
+                // chaque espace - remplacement 1:1 en longueur (voir _canonSearchText), donc les
+                // indices restent valides sur `str` (texte BRUT) à chaque position testée ci-dessous.
+                // Un collage d'apostrophe courbe ou d'espace insécable dans le texte de la personne
+                // matche désormais le même espace créé avec l'apostrophe droite/l'espace simple.
+                var canonSpaceTexts = spaceTexts.map(function(t) { return self._canonSearchText(t); });
                 function userSpace(str) {
                     if (!str) return;
                     if (spaceTexts.length === 0) { user(str); return; }
+                    var canonStr = self._canonSearchText(str);
                     var i = 0, buffer = '';
                     while (i < str.length) {
                         var matched = null;
                         for (var k = 0; k < spaceTexts.length; k++) {
                             var t = spaceTexts[k];
+                            var ct = canonSpaceTexts[k];
                             // Frontières de mots aux 2 bords (round adversarial DeepSeek 2026-08-07) :
-                            // « son » ne matche jamais au milieu de « maison ».
-                            if (t && str.substr(i, t.length) === t && self._isSpaceBoundary(str, i - 1) && self._isSpaceBoundary(str, i + t.length)) { matched = t; break; }
+                            // « son » ne matche jamais au milieu de « maison ». Comparaison sur la
+                            // forme canonique (ct, même longueur que t) - la frontière se vérifie
+                            // toujours sur `str` brut, aux mêmes indices.
+                            if (t && canonStr.substr(i, ct.length) === ct && self._isSpaceBoundary(str, i - 1) && self._isSpaceBoundary(str, i + t.length)) { matched = t; break; }
                         }
                         if (matched) {
                             if (buffer) { user(buffer); buffer = ''; }
-                            segs.push({ text: matched, kind: 'space', spaceRef: matched });
+                            // RÈGLE D'OR : le segment affiché/copié garde le texte RAW réellement tapé
+                            // par la personne à cette position (byte pour byte - garantie core.js
+                            // ~1038-1040), jamais la forme canonique du dictionnaire. Seul `spaceRef`
+                            // (clé de recherche dans spaceValues, via spaceValueForText()) référence la
+                            // forme canonique de l'espace.
+                            segs.push({ text: str.substr(i, matched.length), kind: 'space', spaceRef: matched });
                             i += matched.length;
                         } else {
                             buffer += str.charAt(i);
@@ -1401,7 +1416,7 @@ document.addEventListener('alpine:init', function() {
                 var self = this;
                 var text = this.promptSegments.map(function(s) {
                     if (s.kind === 'space') {
-                        var spaceVal = self.spaceValues ? self.spaceValues[s.spaceRef] : undefined;
+                        var spaceVal = self.spaceValueForText(s.spaceRef);
                         return (spaceVal !== undefined && spaceVal !== null && String(spaceVal).trim() !== '') ? spaceVal : s.text;
                     }
                     return s.text;
@@ -2740,6 +2755,36 @@ document.addEventListener('alpine:init', function() {
             // syntaxe (aucune accolade/crochet visible ici), on n'ajoute jamais de symbole à son
             // texte, seulement du français normal sur geste explicite. ===
 
+            // Couche 2 (canonKey, tâches 1660-1665, boucle 5 oracles 2026-08-09, spec TR15
+            // unicode.org) : normalisation de COMPARAISON UNIQUEMENT - le texte tapé par la
+            // personne n'est JAMAIS modifié (ni ici ni ailleurs), seules les ÉGALITÉS et
+            // RECHERCHES passent par ces 2 fonctions. RÈGLE D'OR : `_canonKey()` (avec NFC) sert
+            // aux égalités strictes de dictionnaire (créer/renommer/fusionner un espace, clés des
+            // caches spaceValues/spaceMissingCache/spaceLastValues) - NFC peut changer la longueur
+            // d'une chaîne, donc jamais utilisée pour indexer une position. `_canonSearchText()`
+            // (sans NFC, remplacement 1:1 en longueur) sert aux RECHERCHES DE POSITION dans le
+            // texte de la personne (indexOf/substr) - les indices trouvés restent valides tels
+            // quels sur le texte BRUT. Cas NFD (collage décomposé, rare) : la recherche de
+            // position peut manquer une occurrence dans ce cas précis - limite documentée et
+            // acceptée (arbitrage du panel), l'égalité de dictionnaire (_canonKey, avec NFC) la
+            // couvre malgré tout.
+            _canonSearchText: function(str) {
+                // Remplacement 1:1 en LONGUEUR (aucune composition/decomposition Unicode) :
+                // apostrophe courbe U+2019 et apostrophe modificative U+02BC -> apostrophe droite ;
+                // espace insecable U+00A0 et espace insecable etroit U+202F -> espace simple.
+                // RIEN d'autre (pas de casse, pas d'accents - preserves tels quels). Echappe en
+                // \u pour eviter tout risque d'alteration silencieuse par un editeur/encodage futur
+                // (les caracteres insecables sont visuellement indiscernables d'un espace normal).
+                return (str == null ? '' : String(str)).replace(/[\u2019\u02BC]/g, '\'').replace(/[\u00A0\u202F]/g, ' ');
+            },
+            _canonKey: function(str) {
+                var s = str == null ? '' : String(str);
+                if (typeof s.normalize === 'function') {
+                    try { s = s.normalize('NFC'); } catch (e) {}
+                }
+                return this._canonSearchText(s);
+            },
+
             // Refuse une sélection trop courte ou réduite à un mot-outil (comparaison sur le texte
             // EXACT trimé, jamais une recherche de sous-chaîne).
             _isValidSpaceSelection: function(text) {
@@ -2749,7 +2794,8 @@ document.addEventListener('alpine:init', function() {
             },
 
             _findSpaceByText: function(text) {
-                for (var i = 0; i < this.spaces.length; i++) { if (this.spaces[i].text === text) return this.spaces[i]; }
+                var key = this._canonKey(text);
+                for (var i = 0; i < this.spaces.length; i++) { if (this._canonKey(this.spaces[i].text) === key) return this.spaces[i]; }
                 return null;
             },
 
@@ -2763,20 +2809,29 @@ document.addEventListener('alpine:init', function() {
                     // Même règle de frontières de mots que le découpage des segments (round
                     // adversarial DeepSeek 2026-08-07) : « son » présent uniquement DANS « maison »
                     // est bien « non retrouvé » - sinon la pastille dirait le contraire d'un
-                    // remplacement qui n'aura jamais lieu.
-                    cache[this.spaces[i].text] = !this._hasBoundedOccurrence(combined, this.spaces[i].text);
+                    // remplacement qui n'aura jamais lieu. Couche 2 (canonKey, 2026-08-09) : clé du
+                    // cache canonique (voir spaceMissing()/removeSpace() ci-dessous, lecture/écriture
+                    // toujours symétriques) - l'affichage garde sp.text brut, jamais cette clé.
+                    cache[this._canonKey(this.spaces[i].text)] = !this._hasBoundedOccurrence(combined, this.spaces[i].text);
                 }
                 this.spaceMissingCache = cache;
             },
             // Vrai si `needle` apparaît dans `source` avec des FRONTIÈRES DE MOTS aux deux bords
             // (caractère adjacent ni lettre ni chiffre Unicode). Balayage indexOf - jamais de regex
-            // construite depuis un texte utilisateur.
+            // construite depuis un texte utilisateur. Couche 2 (canonKey, 2026-08-09) : comparaison
+            // sur la forme canonique de RECHERCHE (_canonSearchText, jamais NFC - voir RÈGLE D'OR
+            // ci-dessus), mais toute POSITION reste calculée/retournée sur `source` BRUT - le
+            // remplacement est 1:1 en longueur, donc les indices trouvés dans la version canonique
+            // restent valides tels quels sur `source`.
             _hasBoundedOccurrence: function(source, needle) {
                 if (!source || !needle) return false;
-                var index = source.indexOf(needle);
+                var canonSource = this._canonSearchText(source);
+                var canonNeedle = this._canonSearchText(needle);
+                if (!canonNeedle) return false;
+                var index = canonSource.indexOf(canonNeedle);
                 while (index !== -1) {
                     if (this._isSpaceBoundary(source, index - 1) && this._isSpaceBoundary(source, index + needle.length)) return true;
-                    index = source.indexOf(needle, index + 1);
+                    index = canonSource.indexOf(canonNeedle, index + 1);
                 }
                 return false;
             },
@@ -2801,12 +2856,19 @@ document.addEventListener('alpine:init', function() {
             },
             // Remplacement aux frontières de mots (les 2 bords) - balayage indexOf, jamais de regex
             // construite depuis un texte utilisateur. Une occurrence collée à une lettre (« son »
-            // dans « maison ») est laissée intacte.
+            // dans « maison ») est laissée intacte. Couche 2 (canonKey, 2026-08-09) : les
+            // OCCURRENCES sont repérées sur la forme canonique de recherche (une apostrophe courbe
+            // ou un espace insécable tapés par la personne matchent quand même `oldText`), mais le
+            // texte réellement inséré est TOUJOURS `newText` tel que fourni - aucune trace de la
+            // forme canonique n'est jamais écrite dans le texte de la personne.
             _replaceWithBoundaries: function(source, oldText, newText) {
                 if (!source || !oldText || oldText === newText) return source;
+                var canonSource = this._canonSearchText(source);
+                var canonOld = this._canonSearchText(oldText);
+                if (!canonOld) return source;
                 var result = '';
                 var cursor = 0;
-                var index = source.indexOf(oldText, cursor);
+                var index = canonSource.indexOf(canonOld, cursor);
                 while (index !== -1) {
                     if (this._isSpaceBoundary(source, index - 1) && this._isSpaceBoundary(source, index + oldText.length)) {
                         result += source.slice(cursor, index) + newText;
@@ -2815,12 +2877,40 @@ document.addEventListener('alpine:init', function() {
                         result += source.slice(cursor, index + 1);
                         cursor = index + 1;
                     }
-                    index = source.indexOf(oldText, cursor);
+                    index = canonSource.indexOf(canonOld, cursor);
                 }
                 return result + source.slice(cursor);
             },
+            // Couche 2 (canonKey, 2026-08-09) : lecture du cache "non retrouvé" par clé canonique -
+            // symétrique de l'écriture dans _refreshSpaceMissing() ci-dessus. Réutilisé tel quel par
+            // le Blade (voir constructeur-prompts.blade.php) à la place de l'ancien accès direct
+            // spaceMissingCache[sp.text], qui pouvait rater un espace dont le texte contient une
+            // apostrophe courbe ou un espace insécable.
             spaceMissing: function(space) {
-                return !!this.spaceMissingCache[space.text];
+                return !!(space && this.spaceMissingCache[this._canonKey(space.text)]);
+            },
+            // Couche 2 (canonKey, 2026-08-09) : helpers d'accès canonique à spaceValues/
+            // spaceLastValues EXPOSÉS pour le Blade (constructeur-prompts.blade.php) - le template
+            // n'y implémente jamais la normalisation lui-même (aucun _canonKey inline dans la vue),
+            // il appelle ces méthodes. Nécessaires car une fusion au renommage (voir
+            // _renameSpaceOccurrences plus bas) peut écrire sous une clé canonique différente de la
+            // forme littérale exacte de sp.text pour cette même pastille (2 formes Unicode
+            // équivalentes du même texte) - un accès brut spaceValues[sp.text] raterait alors la
+            // valeur. `spaceValueFor`/`setSpaceValue` remplacent x-model="spaceValues[sp.text]" par
+            // :value/@input (voir Blade) ; `spaceValueForText` sert à l'aperçu colorisé où seul
+            // seg.spaceRef (une chaîne) est disponible, pas l'objet sp.
+            spaceValueForText: function(text) {
+                return this.spaceValues[this._canonKey(text)];
+            },
+            spaceValueFor: function(sp) {
+                return sp ? this.spaceValueForText(sp.text) : undefined;
+            },
+            setSpaceValue: function(sp, val) {
+                if (!sp) return;
+                this.spaceValues[this._canonKey(sp.text)] = val;
+            },
+            spaceLastValuesFor: function(sp) {
+                return (sp && this.spaceLastValues[this._canonKey(sp.text)]) || [];
             },
 
             // Au blur d'un des 2 textareas concernés : rafraîchit le cache "non retrouvé" ET retire
@@ -2832,8 +2922,10 @@ document.addEventListener('alpine:init', function() {
             // (pastille grise), retrait laissé au geste explicite de la personne (le ×).
             handleSpaceFieldBlur: function() {
                 var combined = (this.taskObject || '') + '\n' + (this.contextInfo || '');
+                var canonCombined = this._canonSearchText(combined);
+                var self = this;
                 this.spaces = this.spaces.filter(function(sp) {
-                    return !(sp.pending && combined.indexOf(sp.text) === -1);
+                    return !(sp.pending && canonCombined.indexOf(self._canonSearchText(sp.text)) === -1);
                 });
                 this._refreshSpaceMissing();
             },
@@ -2931,22 +3023,37 @@ document.addEventListener('alpine:init', function() {
             // pastille, voir sp.draftText) - remplace toutes les occurrences du placeholder inséré
             // par le nouveau nom dans les 2 textareas, puis lève le drapeau pending. Un champ laissé
             // vide ne commit rien (l'espace reste pending, retirable par le blur du textarea ou le ×).
+            // Garde-fou fusion (C2-2, couche 2, 2026-08-09) : voir _confirmRenameMergeIfNeeded() -
+            // si le nouveau texte existe déjà ailleurs, la fusion réelle attend la confirmation.
             commitPendingSpaceRename: function(idx) {
                 var space = this.spaces[idx];
                 if (!space || !space.pending) return;
                 var newText = (space.draftText || '').trim();
                 if (!newText) { space.draftText = space.text; return; }
-                if (newText !== space.text) {
-                    this._renameSpaceOccurrences(space.text, newText);
-                    // Même règle de fusion que commitRenameSpace : renommer un pending vers le
-                    // texte d'un espace déjà confirmé ne crée jamais de pastille en double.
-                    if (this._findOtherSpaceIndex(idx, newText) !== -1) {
-                        this.spaces.splice(idx, 1);
-                        this._refreshSpaceMissing();
-                        return;
-                    }
-                    space.text = newText;
+                if (newText === space.text) {
+                    space.pending = false;
+                    delete space.draftText;
+                    this._refreshSpaceMissing();
+                    return;
                 }
+                var self = this;
+                this._confirmRenameMergeIfNeeded(newText, function() { self._applyPendingRenameSpace(space, newText); });
+            },
+            // Applique réellement le renommage d'un espace pending (après confirmation de fusion si
+            // nécessaire) - relocalise l'espace par RÉFÉRENCE (jamais par idx figé, qui peut avoir
+            // dérivé pendant l'attente d'une confirmation asynchrone).
+            _applyPendingRenameSpace: function(space, newText) {
+                var idx = this.spaces.indexOf(space);
+                if (idx === -1) return;
+                this._renameSpaceOccurrences(space.text, newText);
+                // Même règle de fusion que commitRenameSpace : renommer un pending vers le
+                // texte d'un espace déjà confirmé ne crée jamais de pastille en double.
+                if (this._findOtherSpaceIndex(idx, newText) !== -1) {
+                    this.spaces.splice(idx, 1);
+                    this._refreshSpaceMissing();
+                    return;
+                }
+                space.text = newText;
                 space.pending = false;
                 delete space.draftText;
                 this._refreshSpaceMissing();
@@ -2970,12 +3077,21 @@ document.addEventListener('alpine:init', function() {
             // Valider = remplacer TOUTES les occurrences de l'ancien texte par le nouveau dans les
             // 2 textareas (seul cas où l'outil modifie le texte de la personne - un renommage
             // explicitement demandé) + mettre à jour l'espace. Échap/blur vide (ou inchangé) = annule.
+            // Garde-fou fusion (C2-2, couche 2, 2026-08-09) : voir _confirmRenameMergeIfNeeded().
             commitRenameSpace: function(idx) {
                 if (this.spaceEditingIndex !== idx) return;
                 var space = this.spaces[idx];
                 var newText = (this.spaceEditingText || '').trim();
                 this.spaceEditingIndex = null;
                 if (!space || !newText || newText === space.text) return;
+                var self = this;
+                this._confirmRenameMergeIfNeeded(newText, function() { self._applyRenameSpace(space, newText); });
+            },
+            // Applique réellement le renommage d'un espace confirmé (après confirmation de fusion si
+            // nécessaire) - relocalise l'espace par RÉFÉRENCE (jamais par idx figé).
+            _applyRenameSpace: function(space, newText) {
+                var idx = this.spaces.indexOf(space);
+                if (idx === -1) return;
                 this._renameSpaceOccurrences(space.text, newText);
                 // Renommage vers le texte d'un AUTRE espace existant : fusion (les occurrences
                 // pointent déjà sur la même chaîne, un doublon de pastille serait ambigu) - round
@@ -2987,10 +3103,12 @@ document.addEventListener('alpine:init', function() {
                 }
                 this._refreshSpaceMissing();
             },
-            // Index d'un espace (différent de exceptIdx) portant exactement ce texte, sinon -1.
+            // Index d'un espace (différent de exceptIdx) portant exactement ce texte (comparaison
+            // canonique - couche 2, canonKey), sinon -1.
             _findOtherSpaceIndex: function(exceptIdx, text) {
+                var key = this._canonKey(text);
                 for (var i = 0; i < this.spaces.length; i++) {
-                    if (i !== exceptIdx && this.spaces[i].text === text) return i;
+                    if (i !== exceptIdx && this._canonKey(this.spaces[i].text) === key) return i;
                 }
                 return -1;
             },
@@ -2998,21 +3116,71 @@ document.addEventListener('alpine:init', function() {
                 this.spaceEditingIndex = null;
                 this.spaceEditingText = '';
             },
+            // Texte combiné des 2 champs concernés par les espaces à remplir (DRY - même combinaison
+            // que _refreshSpaceMissing()/handleSpaceFieldBlur() ci-dessus).
+            _combinedSpaceFieldsText: function() {
+                return (this.taskObject || '') + '\n' + (this.contextInfo || '');
+            },
+            // Nombre d'occurrences BORNÉES de `needle` dans `source` (même logique de frontières que
+            // _hasBoundedOccurrence, jamais un indexOf naïf - « client » ne compte jamais
+            // « clientèle ») - alimente le garde-fou de fusion C2-2 ci-dessous.
+            _countBoundedOccurrences: function(source, needle) {
+                if (!source || !needle) return 0;
+                var canonSource = this._canonSearchText(source);
+                var canonNeedle = this._canonSearchText(needle);
+                if (!canonNeedle) return 0;
+                var count = 0;
+                var index = canonSource.indexOf(canonNeedle);
+                while (index !== -1) {
+                    if (this._isSpaceBoundary(source, index - 1) && this._isSpaceBoundary(source, index + needle.length)) count++;
+                    index = canonSource.indexOf(canonNeedle, index + 1);
+                }
+                return count;
+            },
+            // Garde-fou de fusion au renommage (C2-2, couche 2, tâches 1660-1665, boucle 5 oracles
+            // 2026-08-09) : le renommage FUSIONNE silencieusement toutes les occurrences existantes
+            // du nouveau texte avec la pastille renommée (comportement « mail merge » déjà en place,
+            // voir _applyRenameSpace/_applyPendingRenameSpace ci-dessus) - si ce nouveau texte a déjà
+            // au moins une occurrence BORNÉE ailleurs dans les 2 champs, ce serait une surprise. Une
+            // confirmation UNIQUE et non punitive est demandée via le mécanisme de dialogue MODAL du
+            // thème (jamais confirm() natif - règle 7, voir Modules/Core/resources/views/components/
+            // confirm-modal.blade.php et son instance dédiée <x-core::confirm-modal
+            // name="cp-rename-merge"> dans constructeur-prompts.blade.php) avant de procéder ; sans
+            // occurrence existante, `onProceed` est appelé immédiatement et SYNCHRONE (comportement
+            // inchangé, zéro interruption).
+            _confirmRenameMergeIfNeeded: function(newText, onProceed) {
+                var n = this._countBoundedOccurrences(this._combinedSpaceFieldsText(), newText);
+                if (n === 0) { onProceed(); return; }
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var template = n === 1
+                    ? (i18n.spaceRenameMergeOne || 'Ce texte apparaît déjà 1 fois dans ta demande - toutes les occurrences seront remplies ensemble.')
+                    : (i18n.spaceRenameMergeMany || 'Ce texte apparaît déjà {count} fois dans ta demande - toutes les occurrences seront remplies ensemble.');
+                this.$dispatch('open-confirm-cp-rename-merge', {
+                    message: template.replace('{count}', n),
+                    callback: onProceed
+                });
+            },
             // Remplacement EXACT (split/join, jamais une regex construite depuis un texte
             // utilisateur) de toutes les occurrences de l'ancien texte par le nouveau dans les 2
             // textareas - comportement « mail merge » (spec §Modèle de données). Propage aussi la
             // valeur de remplissage déjà saisie (spaceValues) sous la nouvelle clé, pour ne jamais
-            // perdre une réponse déjà donnée à cause d'un simple renommage.
+            // perdre une réponse déjà donnée à cause d'un simple renommage. Couche 2 (canonKey,
+            // 2026-08-09) : la clé cible (newText) peut différer littéralement de la forme Unicode
+            // du texte tapé dans le champ de renommage - passer par _canonKey() garantit que la
+            // valeur atterrit sous la MÊME clé que celle lue par spaceValueFor()/spaceValueForText()
+            // pour l'espace survivant.
             _renameSpaceOccurrences: function(oldText, newText) {
                 if (!oldText || oldText === newText) return;
                 this.taskObject = this._replaceWithBoundaries(this.taskObject || '', oldText, newText);
                 this.contextInfo = this._replaceWithBoundaries(this.contextInfo || '', oldText, newText);
-                if (Object.prototype.hasOwnProperty.call(this.spaceValues, oldText)) {
+                var oldKey = this._canonKey(oldText);
+                var newKey = this._canonKey(newText);
+                if (Object.prototype.hasOwnProperty.call(this.spaceValues, oldKey)) {
                     // Ne jamais écraser une valeur déjà saisie sous la clé cible (cas de fusion).
-                    if (!Object.prototype.hasOwnProperty.call(this.spaceValues, newText) || String(this.spaceValues[newText] || '').trim() === '') {
-                        this.spaceValues[newText] = this.spaceValues[oldText];
+                    if (!Object.prototype.hasOwnProperty.call(this.spaceValues, newKey) || String(this.spaceValues[newKey] || '').trim() === '') {
+                        this.spaceValues[newKey] = this.spaceValues[oldKey];
                     }
-                    delete this.spaceValues[oldText];
+                    delete this.spaceValues[oldKey];
                 }
             },
 
@@ -3022,8 +3190,9 @@ document.addEventListener('alpine:init', function() {
                 var space = this.spaces[idx];
                 if (!space) return;
                 this.spaces.splice(idx, 1);
-                delete this.spaceValues[space.text];
-                delete this.spaceMissingCache[space.text];
+                var key = this._canonKey(space.text);
+                delete this.spaceValues[key];
+                delete this.spaceMissingCache[key];
                 if (this.spaceEditingIndex === idx) { this.spaceEditingIndex = null; this.spaceEditingText = ''; }
             },
 
@@ -3032,7 +3201,7 @@ document.addEventListener('alpine:init', function() {
             // seule action possible reste le × de la pastille dans la bande.
             get fillableSpaces() {
                 var self = this;
-                return this.spaces.filter(function(sp) { return !self.spaceMissingCache[sp.text]; });
+                return this.spaces.filter(function(sp) { return !self.spaceMissing(sp); });
             },
             // Nombre d'espaces remplissables laissés vides - alimente la mention discrète
             // « N espace(s) non rempli(s), on garde le(s) mot(s) de départ » (spec point 5, affichée
@@ -3042,8 +3211,8 @@ document.addEventListener('alpine:init', function() {
                 var count = 0;
                 for (var i = 0; i < this.spaces.length; i++) {
                     var sp = this.spaces[i];
-                    if (self.spaceMissingCache[sp.text]) continue;
-                    var val = self.spaceValues[sp.text];
+                    if (self.spaceMissing(sp)) continue;
+                    var val = self.spaceValueFor(sp);
                     if (val === undefined || val === null || String(val).trim() === '') count++;
                 }
                 return count;
@@ -3056,6 +3225,49 @@ document.addEventListener('alpine:init', function() {
                     ? (i18n.spaceUnfilledOne || '1 espace non rempli, on garde le mot de départ.')
                     : (i18n.spaceUnfilledMany || '{count} espaces non remplis, on garde les mots de départ.');
                 return template.replace('{count}', n);
+            },
+            // C2-3 (couche 2, tâches 1660-1665, 2026-08-09) : avis de LECTURE SEULE affiché près des
+            // boutons Copier/« Ouvrir dans » (voir constructeur-prompts.blade.php) - réutilise
+            // spaceMissingCache (couche 1, rafraîchi au blur ET juste avant copie/ouverture, voir
+            // copy()/openIn() plus haut). AUCUNE mutation ici, la copie part quand même même si des
+            // pastilles sont orphelines - purement informatif.
+            get orphanSpacesCount() {
+                var self = this;
+                var count = 0;
+                for (var i = 0; i < this.spaces.length; i++) {
+                    if (self.spaceMissing(self.spaces[i])) count++;
+                }
+                return count;
+            },
+            get orphanSpacesMessage() {
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var n = this.orphanSpacesCount;
+                if (n === 0) return '';
+                var template = n === 1
+                    ? (i18n.spaceOrphanOne || "1 espace à remplir n'est plus dans ton texte.")
+                    : (i18n.spaceOrphanMany || '{count} espaces à remplir ne sont plus dans ton texte.');
+                return template.replace('{count}', n);
+            },
+
+            // Correctif UX « lien persistant pendant le nommage » (2026-08-09, capture fondateur) :
+            // le plus récent espace encore `pending` (fin du tableau - addSpaceAtCursor() pousse
+            // toujours en fin), alimente la ligne persistante affichée juste sous la bande de
+            // pastilles. Une seule ligne même si plusieurs pending coexistent (spec : la plus
+            // récente). PAS un toast (éphémère, réfuté par un oracle UX) : le lien reste visible
+            // tant que le nommage n'est pas fait, disparaît uniquement quand plus aucune pastille
+            // n'est pending (getter réévalué à chaque rendu Alpine, aucun état à synchroniser).
+            get mostRecentPendingSpaceText() {
+                for (var i = this.spaces.length - 1; i >= 0; i--) {
+                    if (this.spaces[i].pending) return this.spaces[i].text;
+                }
+                return null;
+            },
+            get spacePendingHintMessage() {
+                var text = this.mostRecentPendingSpaceText;
+                if (!text) return '';
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var template = i18n.spacePendingHint || 'Le texte « {text} » vient d\'être ajouté dans ta demande ci-dessus - donne-lui un nom parlant.';
+                return template.replace('{text}', text);
             },
 
             // Mémoire inter-sessions (localStorage cpSpaceLastValues_v1, spec §UI - remplissage).
@@ -3082,7 +3294,55 @@ document.addEventListener('alpine:init', function() {
                             }
                         }
                     }
-                    this.spaceLastValues = result;
+                    // Couche 2 (canonKey, 2026-08-09) : regroupe les clés RAW par forme canonique -
+                    // une même valeur logique enregistrée sous 2 formes Unicode différentes
+                    // (apostrophe courbe une fois, apostrophe droite une autre) formait 2 entrées
+                    // localStorage distinctes avant ce correctif. Migration ADDITIVE, jamais
+                    // destructrice : aucune clé pleine n'est jamais écrasée par une clé vide ; en
+                    // collision réelle (2 formes du même texte), la variante dont la forme LITTÉRALE
+                    // existe ENCORE dans le texte courant l'emporte, sinon la plus récente (ordre de
+                    // l'objet d'origine fait foi - JS préserve l'ordre d'insertion des clés string).
+                    var combinedText = this._combinedSpaceFieldsText();
+                    var canonResult = {};
+                    var canonRawKey = {};
+                    for (var rawKey in result) {
+                        if (!Object.prototype.hasOwnProperty.call(result, rawKey)) continue;
+                        var ck = this._canonKey(rawKey);
+                        var candidateList = result[rawKey];
+                        if (!Object.prototype.hasOwnProperty.call(canonResult, ck)) {
+                            canonResult[ck] = candidateList;
+                            canonRawKey[ck] = rawKey;
+                            continue;
+                        }
+                        migrated = true;
+                        var existingList = canonResult[ck];
+                        var existingRawKey = canonRawKey[ck];
+                        var existingEmpty = !existingList || existingList.length === 0;
+                        var candidateEmpty = !candidateList || candidateList.length === 0;
+                        var candidateWins;
+                        if (existingEmpty && !candidateEmpty) {
+                            candidateWins = true;
+                        } else if (!existingEmpty && candidateEmpty) {
+                            candidateWins = false;
+                        } else {
+                            // IMPORTANT : comparaison LITTÉRALE (indexOf brut, PAS _canonSearchText)
+                            // - existingRawKey et rawKey sont par définition canoniquement égaux (ils
+                            // ont collisionné sur `ck` ci-dessus) ; une comparaison canonique donnerait
+                            // donc TOUJOURS le même résultat pour les 2 et ne distinguerait jamais
+                            // « quelle forme précise est encore là ».
+                            var existingPresent = combinedText.indexOf(existingRawKey) !== -1;
+                            var candidatePresent = combinedText.indexOf(rawKey) !== -1;
+                            // La plus récente l'emporte par défaut (ordre d'itération = ordre
+                            // d'origine, le candidat rencontré en 2e est réputé plus récent) - sauf
+                            // si SEULE l'existante est encore présente littéralement dans le texte.
+                            candidateWins = !(existingPresent && !candidatePresent);
+                        }
+                        if (candidateWins) {
+                            canonResult[ck] = candidateList;
+                            canonRawKey[ck] = rawKey;
+                        }
+                    }
+                    this.spaceLastValues = canonResult;
                     if (migrated) { try { localStorage.setItem(this._spaceLastValuesKey, JSON.stringify(this.spaceLastValues)); } catch (e2) {} }
                 } catch (e) { this.spaceLastValues = {}; }
             },
@@ -3094,15 +3354,16 @@ document.addEventListener('alpine:init', function() {
                 var changed = false;
                 for (var i = 0; i < this.spaces.length; i++) {
                     var sp = this.spaces[i];
-                    var val = this.spaceValues[sp.text];
+                    var val = this.spaceValueFor(sp);
                     if (val !== undefined && val !== null && String(val).trim() !== '') {
-                        var list = this.spaceLastValues[sp.text];
+                        var ck = this._canonKey(sp.text);
+                        var list = this.spaceLastValues[ck];
                         if (!Array.isArray(list)) list = list ? [list] : [];
                         var idx = list.indexOf(val);
                         if (idx !== -1) list.splice(idx, 1);
                         list.unshift(val);
                         if (list.length > 3) list = list.slice(0, 3);
-                        this.spaceLastValues[sp.text] = list;
+                        this.spaceLastValues[ck] = list;
                         changed = true;
                     }
                 }
