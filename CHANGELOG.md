@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.157.1] - 2026-08-09
+
+### Corrigé
+- **Faux courriel « The schedule did not run yet » à chaque déploiement : cause racine structurelle éliminée** (2 alertes le 2026-08-09, une par déploiement, malgré le correctif du 2026-08-01). La vraie cause : dans le planificateur, `health:check` (qui vérifie et notifie) était enregistré AVANT `health:schedule-check-heartbeat` (qui écrit le témoin) - à la première minute suivant l'`optimize:clear` du déploiement, le contrôle lisait un témoin absent et envoyait le courriel avant que la réécriture du pipeline (étape SSH séparée, quelques secondes plus tard) n'arrive. Double correctif : (1) ordre inversé dans routes/console.php - le témoin est reposé dans la même passe du planificateur, avant la vérification ; (2) le heartbeat est aussi exécuté dans la même commande SSH qu'`optimize:clear` dans le pipeline (fenêtre réduite à néant), l'étape dédiée existante restant en filet.
+
 ## [1.157.0] - 2026-08-09
 
 ### Ajouté

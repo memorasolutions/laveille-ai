@@ -31,10 +31,13 @@ Schedule::command('tools:expire-featured')->dailyAt('02:45')->withoutOverlapping
 // Audit images screenshot annuaire (hebdo dimanche 04:30 UTC) — log les 404, fix manuel via --auto-fix
 Schedule::command('tools:check-images')->weeklyOn(0, '04:30')->withoutOverlapping();
 
-// Health checks
-Schedule::command('health:check')->everyMinute();
-// Heartbeat Spatie pour le ScheduleCheck (sinon le check « Schedule » reste rouge malgré le cron actif)
+// Health checks - ORDRE CRITIQUE : le heartbeat DOIT être enregistré AVANT health:check.
+// Sinon, à la première minute après un optimize:clear (déploiement), health:check lit un
+// témoin absent et envoie un faux courriel « The schedule did not run yet » (2 occurrences
+// le 2026-08-09, une par déploiement). Le heartbeat en premier repose le témoin dans la
+// même passe du scheduler, avant la vérification.
 Schedule::command('health:schedule-check-heartbeat')->everyMinute();
+Schedule::command('health:check')->everyMinute();
 
 // Telescope cleanup (48h — skip si package non installé OU désactivé en prod)
 if (class_exists(\Laravel\Telescope\Telescope::class)) {
