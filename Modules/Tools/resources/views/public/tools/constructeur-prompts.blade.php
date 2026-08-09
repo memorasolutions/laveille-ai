@@ -1486,6 +1486,7 @@ window.promptBuilderConfig = {
         // JS dynamiques (toasts, mention "non rempli") - même pont i18n que le reste de ce fichier.
         spaceTooShort: @json(__('Choisis un mot plus précis pour éviter les remplacements imprévus.')),
         spaceAlreadyExists: @json(__('Cet espace existe déjà.')),
+        spaceMultiOccurrences: @json(__('Ce texte apparaît :count fois : chaque endroit sera remplacé par ta réponse.')),
         spaceNewLabel: @json(__('information à préciser')),
         spaceUnfilledOne: @json(__('1 espace non rempli, on garde le mot de départ.')),
         spaceUnfilledMany: @json(__('{count} espaces non remplis, on garde les mots de départ.')),

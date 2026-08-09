@@ -2991,6 +2991,12 @@ document.addEventListener('alpine:init', function() {
                 }
                 this.spaces.push({ text: text, pending: false });
                 this._refreshSpaceMissing();
+                // Signalement 2026-08-09 (#1697) : le remplacement est volontairement global (publipostage).
+                // Si le texte choisi apparaît plusieurs fois, on l'annonce - information, jamais un blocage.
+                var occ = this._countBoundedOccurrences(this.taskObject || '', text) + this._countBoundedOccurrences(this.contextInfo || '', text);
+                if (occ > 1 && typeof window.toast === 'function') {
+                    window.toast((i18n.spaceMultiOccurrences || 'Ce texte apparaît :count fois : chaque endroit sera remplacé par ta réponse.').replace(':count', occ), 'info', 5000);
+                }
             },
 
             // Geste B (bouton) : insère « information à préciser » (suffixé « 2 », « 3 »... si

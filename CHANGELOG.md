@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.154.4] - 2026-08-09
+
+### Ajouté
+- **Constructeur de prompts : avis à la création d'un espace dont le texte apparaît plusieurs fois** (question du 2026-08-09 : « "Mon nom" sera toujours remplacé partout ? »). Le remplacement global (publipostage) est le comportement voulu et conservé ; l'outil affiche désormais un toast informatif au moment de créer l'espace : « Ce texte apparaît N fois : chaque endroit sera remplacé par ta réponse. » - information, jamais un blocage. Réutilise le comptage borné existant (`_countBoundedOccurrences`). Preuves : capture navigateur du toast (2 occurrences), 70/70 tests JS espaces, 366 Pest Tools, TranslationTest 28/28.
+
 ## [1.154.3] - 2026-08-09
 
 ### Corrigé

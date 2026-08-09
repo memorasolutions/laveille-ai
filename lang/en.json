@@ -1102,6 +1102,7 @@
     "Ton prompt contient des espaces à remplir. Complète-les ici : la copie et « Ouvrir dans » utiliseront automatiquement tes réponses (les champs laissés vides gardent le mot de départ).": "Your prompt contains fill-in blanks. Complete them here: copying and \"Open in\" will automatically use your answers (fields left blank keep the original word).",
     "Reprendre :": "Reuse:",
     "Choisis un mot plus précis pour éviter les remplacements imprévus.": "Choose a more precise word to avoid unexpected replacements.",
+    "Ce texte apparaît :count fois : chaque endroit sera remplacé par ta réponse.": "This text appears :count times: each spot will be replaced by your answer.",
     "Cet espace existe déjà.": "This fill-in blank already exists.",
     "information à préciser": "detail to specify",
     "1 espace non rempli, on garde le mot de départ.": "1 fill-in blank left empty - keeping the original word.",
