@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.156.0] - 2026-08-09
+
+### Modifié
+- **Constructeur de prompts : l'étape « Options » est plus compacte, sans rien cacher ni retirer** (go du fondateur sur le verdict unanime de la boucle 3 rounds : compaction plutôt qu'accordéons, onglets ou 5e étape, tous rejetés). Sur ordinateur, les 6 cases à cocher des règles passent en 2 colonnes et les champs « Format de sortie » et « Longueur précise » partagent la largeur ; les marges entre blocs sont resserrées (l'espacement entre groupes reste supérieur à l'espacement interne, exigence du panel). Sur mobile, disposition inchangée (1 colonne). Cibles tactiles >= 44 px intactes, aucun texte du prompt touché. Mesure réelle : la carte passe de 2919 à 2579 px, la zone des trois groupes d'options de ~1960 à ~1622 px (-17 %). Preuves : captures desktop et mobile, 366 tests Pest, 73/73 tests JS.
+
 ## [1.155.0] - 2026-08-09
 
 ### Ajouté

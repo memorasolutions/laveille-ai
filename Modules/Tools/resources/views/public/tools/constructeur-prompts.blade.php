@@ -166,11 +166,13 @@
                              devient une pastille ») par le pattern select + pastilles amovibles ci-dessous
                              (.ct-chip) - les garde-fous formats (max 3, exclusivité JSON/Mermaid) restent
                              appliqués via :disabled sur les <option>. --}}
-                        .ct-block{margin-bottom:1.5rem;padding:1rem 1.1rem;border:1px solid #e5e7eb;border-radius:12px;background:#fff;}
+                        {{-- Compaction étape 4 (tâche 1701) : marges intergroupes resserrées - l'espacement
+                             ENTRE groupes reste supérieur à l'espacement DANS un groupe (exigence du panel). --}}
+                        .ct-block{margin-bottom:1rem;padding:0.85rem 1rem;border:1px solid #e5e7eb;border-radius:12px;background:#fff;}
                         .ct-block__head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:0.25rem;}
                         .ct-block__title{font-family:var(--f-heading);font-weight:700;color:var(--c-dark);font-size:1rem;margin:0;}
                         .ct-block__optional{font-size:0.72rem;font-weight:600;color:var(--c-text-muted);background:#f3f4f6;border-radius:999px;padding:2px 8px;white-space:nowrap;}
-                        .ct-block__example{font-size:0.78rem;color:var(--c-text-muted);margin:0 0 0.75rem;font-style:italic;}
+                        .ct-block__example{font-size:0.78rem;color:var(--c-text-muted);margin:0 0 0.5rem;font-style:italic;}
                         .ct-block__added{font-size:0.8rem;color:var(--c-dark);background:var(--c-primary-light);border-left:3px solid var(--c-primary);border-radius:6px;padding:0.45rem 0.65rem;margin:0.75rem 0 0;font-weight:600;}
                         .ct-block__field{margin-bottom:0.75rem;}
                         .ct-block__field:last-child{margin-bottom:0;}
@@ -178,6 +180,19 @@
                         .ct-chip{display:inline-flex;align-items:center;gap:4px;border:2px solid var(--c-primary);border-radius:9999px;background:var(--c-primary);color:#fff;padding:0.25rem 0.5rem 0.25rem 0.75rem;font-size:0.8rem;font-weight:500;}
                         .ct-chip__x{background:transparent;border:0;color:inherit;font-size:1rem;line-height:1;cursor:pointer;min-width:24px;min-height:24px;padding:0;}
                         .ct-chip__x:focus-visible{outline:2px solid #fff;outline-offset:1px;border-radius:50%;}
+                        {{-- Compaction étape 4 (tâche 1701, verdict boucle 3 rounds 2026-08-09 : réduire les
+                             vides, jamais cacher) : les cases à cocher passent en 2 colonnes sur ordinateur,
+                             1 colonne inchangée sur mobile ; les labels gardent leur min-height 44 px (cible
+                             tactile WCAG intacte - on resserre les espaces ENTRE les cases, pas les cases). --}}
+                        .ct-check-grid{display:flex;flex-direction:column;gap:0.5rem;}
+                        @media (min-width: 768px){.ct-check-grid{display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:0.15rem 1.25rem;align-items:start;}}
+                        {{-- Même mandat (champs COURTS côte à côte) : les deux champs du bloc Format
+                             (« Format de sortie » et « Longueur précise ») partagent la largeur sur
+                             ordinateur - CSS pur, aucun champ déplacé ni retiré du markup. --}}
+                        @media (min-width: 768px){
+                            #cpSectionFormat{display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:0 1.25rem;align-items:start;}
+                            #cpSectionFormat > .ct-block__head, #cpSectionFormat > .ct-block__example, #cpSectionFormat > .ct-block__added{grid-column:1 / -1;}
+                        }
                         {{-- Espaces à remplir (tâches 1660-1665, 2026-08-07) : pastille pending en
                              gris #4b5563 (contraste AAA mesuré à 7,57:1 sur blanc, valeur déjà
                              établie ailleurs dans ce fichier - jamais une nouvelle teinte inventée)
@@ -263,7 +278,7 @@
                         }
 
                         {{-- #6 étape 4 regroupée en 3 intentions, sans déplacer ni retirer un champ. --}}
-                        .ct-group{border:0;padding:0;margin:0 0 1.75rem;min-width:0;}
+                        .ct-group{border:0;padding:0;margin:0 0 1.25rem;min-width:0;}
                         .ct-group:last-child{margin-bottom:0;}
                         .ct-group__legend{width:100%;font-family:var(--f-heading);font-weight:700;color:var(--c-dark);font-size:0.95rem;padding:0 0 0.4rem;margin:0 0 0.85rem;border-bottom:2px solid var(--c-primary);}
                         </style>
@@ -727,7 +742,7 @@
                                         <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Contraintes spécifiques') }}</label>
                                         <textarea id="cpConstraintCustom" class="form-control form-control-sm" rows="2" x-model="constraintCustom" autocomplete="off" placeholder="{{ __('Ex: éviter le jargon technique, inclure des exemples concrets') }}" aria-label="{{ __('Contraintes personnalisées') }}"></textarea>
                                     </div>
-                                    <div class="d-flex flex-column gap-2 mb-3">
+                                    <div class="ct-check-grid mb-3">
                                         <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
                                             <input type="checkbox" x-model="constraintAntiAI" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">
                                             <span><strong>{{ __('Écriture naturelle (anti-IA)') }}</strong> : {{ __('style humain, phrases variées, pas de formulations génériques') }}</span>
