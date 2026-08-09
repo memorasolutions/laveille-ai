@@ -185,7 +185,10 @@
                              1 colonne inchangée sur mobile ; les labels gardent leur min-height 44 px (cible
                              tactile WCAG intacte - on resserre les espaces ENTRE les cases, pas les cases). --}}
                         .ct-check-grid{display:flex;flex-direction:column;gap:0.5rem;}
-                        @media (min-width: 768px){.ct-check-grid{display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:0.15rem 1.25rem;align-items:start;}}
+                        {{-- Multicol (pas grid) : lecture VERTICALE par colonnes, condition de validité de
+                             l'exception « groupes de cases homogènes » à la règle 1 colonne (panel 5 oracles
+                             2026-08-09, claude.ai + Baymard) - le flux grid en Z faisait lire 1-2 / 3-4 / 5-6. --}}
+                        @media (min-width: 768px){.ct-check-grid{display:block;columns:2;column-gap:1.25rem;}.ct-check-grid>label{break-inside:avoid;width:100%;margin-bottom:0.15rem;}}
                         {{-- Même mandat (champs COURTS côte à côte) : les deux champs du bloc Format
                              (« Format de sortie » et « Longueur précise ») partagent la largeur sur
                              ordinateur - CSS pur, aucun champ déplacé ni retiré du markup. --}}

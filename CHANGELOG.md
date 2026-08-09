@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.158.1] - 2026-08-09
+
+### Corrigé
+- **Constructeur de prompts, étape 4 : lecture verticale des cases à cocher sur desktop**. Le panel de 5 oracles sur l'intuitivité de la compaction (verdict : neutre, l'orientation s'améliore mais pas la compréhension) a livré une condition de validité précise : l'exception « groupes de cases homogènes » à la règle « une colonne » des formulaires (Baymard/NN/g) ne vaut que si la lecture se fait de haut en bas par colonnes. Or la grille CSS plaçait les 6 options en flux Z (1-2 / 3-4 / 5-6). Passage de `grid` à `columns:2` (multicolonnes) : options 1-3 en colonne gauche, 4-6 à droite, aucune case coupée entre colonnes (`break-inside:avoid`), cibles >= 44 px conservées, mobile inchangé (1 colonne).
+
 ## [1.158.0] - 2026-08-09
 
 ### Modifié
