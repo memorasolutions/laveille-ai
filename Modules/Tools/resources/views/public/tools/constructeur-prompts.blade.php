@@ -856,23 +856,15 @@
                                          remplissage actuellement focalisé) ; 'tool'/'user' restent du
                                          texte brut, comportement visuel IDENTIQUE à avant cette
                                          fonctionnalité (zéro régression sur l'existant). --}}
-                                    <div class="p-3 rounded mt-2" style="background: var(--c-primary-light); white-space: pre-wrap; font-family: monospace; font-size: 0.9rem; min-height: 60px; line-height: 1.6;">
-                                        <template x-if="!prompt">
-                                            <span>{{ __('Remplissez les étapes ci-dessus...') }}</span>
-                                        </template>
-                                        <template x-if="prompt">
-                                            <template x-for="(seg, segIdx) in promptSegments" :key="segIdx">
-                                                {{-- Couche 2 (canonKey, 2026-08-09) : spaceValueForText(seg.spaceRef)
-                                                     remplace l'accès direct spaceValues[seg.spaceRef] - la clé de
-                                                     recherche est canonique (voir constructeur-prompts-core.js),
-                                                     jamais implémentée ici dans la vue. --}}
-                                                <span
-                                                    x-text="seg.kind === 'space' ? (spaceValueForText(seg.spaceRef) || seg.text) : seg.text"
-                                                    :class="seg.kind === 'space' ? ((spaceValueForText(seg.spaceRef) ? 'ct-seg-space-filled' : 'ct-seg-space-empty') + (focusedSpaceText === seg.spaceRef ? ' ct-seg-space-active' : '')) : ''"
-                                                ></span>
-                                            </template>
-                                        </template>
-                                    </div>
+                                    {{-- Couche 2 (canonKey, 2026-08-09) : spaceValueForText(seg.spaceRef)
+                                         remplace l'accès direct spaceValues[seg.spaceRef] - la clé de
+                                         recherche est canonique (voir constructeur-prompts-core.js),
+                                         jamais implémentée ici dans la vue. --}}
+                                    {{-- Balisage volontairement COMPACT à l'intérieur de ce div : il est en
+                                         white-space pre-wrap, donc toute indentation du gabarit deviendrait des
+                                         espaces visibles dans l'aperçu du prompt (capture 2026-08-09_13-48-08 :
+                                         grand vide avant « Tu es... » + décalages entre segments). --}}
+                                    <div class="p-3 rounded mt-2" style="background: var(--c-primary-light); white-space: pre-wrap; font-family: monospace; font-size: 0.9rem; min-height: 60px; line-height: 1.6;"><template x-if="!prompt"><span>{{ __('Remplissez les étapes ci-dessus...') }}</span></template><template x-if="prompt"><template x-for="(seg, segIdx) in promptSegments" :key="segIdx"><span x-text="seg.kind === 'space' ? (spaceValueForText(seg.spaceRef) || seg.text) : seg.text" :class="seg.kind === 'space' ? ((spaceValueForText(seg.spaceRef) ? 'ct-seg-space-filled' : 'ct-seg-space-empty') + (focusedSpaceText === seg.spaceRef ? ' ct-seg-space-active' : '')) : ''"></span></template></template></div>
                                     <div class="d-flex justify-content-end gap-3 mt-1" style="font-size: 0.8rem;">
                                         <span class="text-muted" x-text="prompt.length + ' {{ __('caractères') }}'"></span>
                                         <span class="text-muted" x-text="'~' + Math.ceil(prompt.length / 4) + ' {{ __('unités de traitement IA (tokens)') }}'"></span>

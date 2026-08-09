@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.154.2] - 2026-08-09
+
+### Corrigé
+- **Constructeur de prompts : le panneau « Voir le texte exact envoyé à l'IA » affichait des espaces parasites** - un grand vide avant la première phrase et des décalages entre les segments (signalement avec capture). Le prompt réel copié et envoyé à l'IA a toujours été propre (le compteur de caractères était le bon) : le panneau, qui préserve les espaces pour afficher fidèlement le texte, rendait aussi l'indentation de son propre gabarit. Le balisage interne du panneau est maintenant compact : le texte affiché est identique caractère pour caractère au prompt réel (prouvé en navigateur : 1024 = 1024 caractères).
+
 ## [1.154.1] - 2026-08-09
 
 ### Corrigé
