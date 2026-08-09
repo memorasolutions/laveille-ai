@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.158.0] - 2026-08-09
+
+### Modifié
+- **Élagage SEO des actualités : recalibré et enfin actif (préparation du réexamen AdSense)**. L'audit pré-réexamen a mesuré que 80 % des URL indexables (5588 fiches d'actualités sur 7017) sont des résumés courts (~350 mots) de nouvelles externes - le profil exact du refus AdSense « contenu à faible valeur » d'avril, alors que le reste du site est riche (articles ~4000 mots, annuaire 1500-4000, glossaire, outils). Le système d'élagage réversible existait (noindex,follow + auto-guérison + exclusion du sitemap) mais était calibré 12 mois/30 vues sur un site de 7 mois : 0 fiche élaguée depuis sa création. Recalibrage mesuré : fenêtre de fraîcheur 2 mois / 300 vues (médiane réelle à 2 mois : 237 vues) - ~3497 fiches périmées sortiront de l'index, les populaires et les récentes restent. Planification passée de mensuelle à quotidienne (02h10 Québec) dans le module News. Perte SEO mesurée négligeable (1 à 12 clics Google par fiche sur 28 jours). Validé par Codex (critère âge + popularité plutôt que nombre de mots ; attendre le recrawl 1-3 semaines avant de redemander l'examen AdSense).
+
 ## [1.157.1] - 2026-08-09
 
 ### Corrigé

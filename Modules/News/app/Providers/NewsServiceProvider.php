@@ -77,10 +77,13 @@ class NewsServiceProvider extends ServiceProvider
     {
         $this->app->booted(function () {
             $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
-            // Élagage SEO mensuel des vieilles actualités peu vues (1er du mois, 04:00 heure Québec).
+            // Élagage SEO QUOTIDIEN des actualités périmées (02:10 heure Québec) - fenêtre de
+            // fraîcheur, cf. Modules/News/config/seo_prune.php. Passé de mensuel à quotidien le
+            // 2026-08-09 : avec le flux quotidien d'actualités, un passage mensuel laissait des
+            // centaines de fiches périmées indexées entre deux passages (refus AdSense).
             // Réversible (flag DB) ; piloté par config('news.seo_prune').
             $schedule->command('news:prune-seo')
-                ->monthlyOn(1, '04:00')
+                ->dailyAt('02:10')
                 ->timezone('America/Toronto')
                 ->onOneServer();
         });
