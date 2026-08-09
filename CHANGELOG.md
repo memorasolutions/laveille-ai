@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.155.0] - 2026-08-09
+
+### Ajouté
+- **Constructeur de prompts : l'étape courante est reflétée dans l'URL** (demande du 2026-08-09 : « quand on est à l'étape x dans l'outil, le mettre dans le slug pour si on rafraîchit »). L'URL porte maintenant `#etape-2` à `#etape-4` selon l'étape active (via `history.replaceState` : zéro pollution de l'historique de navigation, zéro impact serveur ou cache) ; à l'étape 1 le hash est retiré. Au chargement, l'étape du hash est restaurée SEULEMENT si les prérequis des étapes précédentes sont remplis - jamais de saut arbitraire vers un formulaire vide. Limite assumée : un rafraîchissement complet vide aussi les champs (aucun brouillon automatique n'existe), la restauration bénéficie donc surtout aux parcours où l'état persiste (retour arrière, partage d'un lien pendant la session). Preuves : 3 assertions JS dédiées (73/73), 366 Pest Tools, navigateur réel (étape 2 → `#etape-2`, retour étape 1 → hash retiré).
+
 ## [1.154.4] - 2026-08-09
 
 ### Ajouté

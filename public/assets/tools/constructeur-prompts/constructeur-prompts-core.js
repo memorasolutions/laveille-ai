@@ -1528,6 +1528,20 @@ document.addEventListener('alpine:init', function() {
                 this._loadSpaceLastValues();
                 // IA préférée mémorisée (2026-08-07) : voir _loadOpenTargetPref() plus bas.
                 this._loadOpenTargetPref();
+                // Tâche #1699 : reflète l'étape courante dans l'URL (hash, replaceState = zéro
+                // pollution de l'historique de navigation, zéro impact serveur ou cache).
+                this._applyStepFromHash();
+                if (typeof this.$watch === 'function') {
+                    this.$watch('step', function(s) {
+                        if (typeof history !== 'undefined' && history.replaceState && typeof window !== 'undefined' && window.location) {
+                            if (s > 1) {
+                                history.replaceState(null, '', '#etape-' + s);
+                            } else {
+                                history.replaceState(null, '', window.location.pathname + window.location.search);
+                            }
+                        }
+                    });
+                }
                 if (this.isAuthenticated) {
                     fetch('/api/prompts', { headers: this._headers() })
                         .then(function(r) { return r.json(); })
@@ -1928,6 +1942,26 @@ document.addEventListener('alpine:init', function() {
                 else { this.showValidation = true; }
             },
             prevStep: function() { if (this.step > 1) this.step--; },
+
+            // Tâche #1699 (2026-08-09) : au chargement, restaure l'étape du hash (#etape-2 à 4)
+            // seulement si les prérequis des étapes précédentes sont remplis - jamais de saut
+            // arbitraire.
+            _applyStepFromHash: function() {
+                var hash = '';
+                if (typeof window !== 'undefined' && window.location && typeof window.location.hash === 'string') {
+                    hash = window.location.hash;
+                }
+                var match = hash.match(/^#etape-([2-4])$/);
+                if (match) {
+                    var n = parseInt(match[1], 10);
+                    if (this.canGoToStep(n)) {
+                        this.step = n;
+                        if (n === 4) {
+                            this.step4Visited = true;
+                        }
+                    }
+                }
+            },
             // Correctif #4 (2026-08-05, indicateur de complétion par étape) : 1=Persona (rôle choisi),
             // 2=Tâche (verbe + description remplis), 3=Audience (optionnelle - complète dès qu'une
             // audience est choisie), 4=Options avancées (tout optionnel - complète dès la 1re visite,

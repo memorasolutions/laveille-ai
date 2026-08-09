@@ -394,6 +394,21 @@ function fillBaseFields(component) {
         assert(c1698.promptSummary.indexOf('Stéphane') !== -1 && c1698.promptSummary.indexOf('Mon nom') === -1, 'espace rempli : l\'aperçu résumé affiche la valeur, plus le texte d\'origine');
         assert(c1698._fillSpacesInText('Monsieur, Mon nomade reste.') === 'Monsieur, Mon nomade reste.', '_fillSpacesInText respecte les frontières de mots (Mon nomade intact)');
     }
+
+    // Tâche #1699 (2026-08-09) : restauration de l'étape depuis le hash, jamais de saut sans prérequis.
+    {
+        const { component: c1699 } = loadPromptBuilder();
+        global.window.location.hash = '#etape-2';
+        c1699._applyStepFromHash();
+        assert(c1699.step === 1, 'hash #etape-2 SANS persona : on reste à l\'étape 1 (prérequis manquant)');
+        fillBaseFields(c1699);
+        c1699._applyStepFromHash();
+        assert(c1699.step === 2, 'hash #etape-2 AVEC persona : l\'étape 2 est restaurée');
+        global.window.location.hash = '#etape-9';
+        c1699.step = 1;
+        c1699._applyStepFromHash();
+        assert(c1699.step === 1, 'hash invalide (#etape-9) : ignoré sans erreur');
+    }
 })();
 
 setTimeout(function () {
