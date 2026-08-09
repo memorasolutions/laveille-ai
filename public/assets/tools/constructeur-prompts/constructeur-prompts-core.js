@@ -1021,9 +1021,9 @@ document.addEventListener('alpine:init', function() {
                     // "Ta tâche : Rédige ..." dans le prompt reel) - on garde donc cette forme au
                     // lieu de tenter une conjugaison a l'infinitif (peu fiable sur un verbe
                     // personnalise saisi librement par l'utilisateur, actionVerbIsUser).
-                    parts.push((i18nSummary.summaryAction || 'Tâche demandée : ') + actionVerb + ' ' + this._taskWithoutLeadingVerb(actionVerb, this.taskObject) + '.');
+                    parts.push((i18nSummary.summaryAction || 'Tâche demandée : ') + actionVerb + ' ' + this._fillSpacesInText(this._taskWithoutLeadingVerb(actionVerb, this.taskObject)) + '.');
                 } else if (this.taskObject) {
-                    parts.push((i18nSummary.summarySubject || 'Sujet : ') + this.taskObject + '.');
+                    parts.push((i18nSummary.summarySubject || 'Sujet : ') + this._fillSpacesInText(this.taskObject) + '.');
                 }
                 if (this.audienceText) parts.push((i18nSummary.summaryAudience || 'Le résultat sera adapté pour : ') + this.audienceText + '.');
                 if (this.tone) parts.push((i18nSummary.summaryTone || 'Ton : ') + this.tone + '.');
@@ -2880,6 +2880,26 @@ document.addEventListener('alpine:init', function() {
                     index = canonSource.indexOf(canonOld, cursor);
                 }
                 return result + source.slice(cursor);
+            },
+            // Utilisé par promptSummary pour que l'aperçu « Voici ce qui sera envoyé à l'IA »
+            // reflète les valeurs remplies (mêmes règles de frontières et de priorité que le
+            // prompt copié). Signalement du 2026-08-09.
+            _fillSpacesInText: function(str) {
+                if (!str || !this.spaces || this.spaces.length === 0) {
+                    return str;
+                }
+                var sortedSpaces = this.spaces.slice().sort(function(a, b) {
+                    return b.text.length - a.text.length;
+                });
+                var result = str;
+                for (var i = 0; i < sortedSpaces.length; i++) {
+                    var space = sortedSpaces[i];
+                    var value = this.spaceValueForText(space.text);
+                    if (value) {
+                        result = this._replaceWithBoundaries(result, space.text, value);
+                    }
+                }
+                return result;
             },
             // Couche 2 (canonKey, 2026-08-09) : lecture du cache "non retrouvé" par clé canonique -
             // symétrique de l'écriture dans _refreshSpaceMissing() ci-dessus. Réutilisé tel quel par

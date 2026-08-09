@@ -379,6 +379,21 @@ function fillBaseFields(component) {
     const { component: component3 } = loadPromptBuilder(migratedStore);
     component3._loadSpaceLastValues();
     assert(Array.isArray(component3.spaceLastValues['ancien']) && component3.spaceLastValues['ancien'][0] === 'valeur v1', 'une ancienne entrée v1 (chaîne) est migrée silencieusement en tableau à 1 élément');
+
+    // Fix 2026-08-09 (#1698) : l'aperçu résumé promptSummary reflète les valeurs remplies.
+    // Placé DANS cette IIFE (après ses await) : un loadPromptBuilder() dans une IIFE parallèle
+    // écraserait les globals (window/localStorage) pendant les await des tests précédents.
+    {
+        const { component: c1698 } = loadPromptBuilder();
+        fillBaseFields(c1698);
+        c1698.taskObject = 'Rédige un courriel aux parents sur Mon nom.';
+        c1698.spaceBubble = { show: true, text: 'Mon nom', fieldId: 'cpTaskObject' };
+        c1698.createSpaceFromSelection();
+        assert(c1698.promptSummary.indexOf('Mon nom') !== -1, 'espace non rempli : l\'aperçu résumé garde le texte d\'origine');
+        c1698.spaceValues['Mon nom'] = 'Stéphane';
+        assert(c1698.promptSummary.indexOf('Stéphane') !== -1 && c1698.promptSummary.indexOf('Mon nom') === -1, 'espace rempli : l\'aperçu résumé affiche la valeur, plus le texte d\'origine');
+        assert(c1698._fillSpacesInText('Monsieur, Mon nomade reste.') === 'Monsieur, Mon nomade reste.', '_fillSpacesInText respecte les frontières de mots (Mon nomade intact)');
+    }
 })();
 
 setTimeout(function () {

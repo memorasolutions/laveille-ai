@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.154.3] - 2026-08-09
+
+### Corrigé
+- **Constructeur de prompts : l'aperçu « Voici ce qui sera envoyé à l'IA » ignorait les valeurs remplies des espaces** (signalement avec capture) - la tâche affichait toujours le mot de départ (« Mon nom ») même après avoir rempli l'espace (« Stéphane »), alors que le prompt copié était, lui, correct. L'aperçu résumé passe maintenant par les mêmes règles de remplacement que le prompt final (frontières de mots, priorité aux textes longs) : nouvelle méthode `_fillSpacesInText()` branchée sur les deux branches de `promptSummary`. Preuves : 3 assertions JS dédiées (70/70 vertes), 366 tests Pest du module Tools verts, capture navigateur montrant « Stéphane » dans l'aperçu.
+
 ## [1.154.2] - 2026-08-09
 
 ### Corrigé
