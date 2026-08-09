@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>laveille.ai - Journal de communication</title>
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MiA1MiIgd2lkdGg9IjUyIiBoZWlnaHQ9IjUyIj4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0LCA0KSI+CiAgICA8cGF0aCBkPSJNMCAyMiBRMjIgMCA0NCAyMiBRMjIgNDQgMCAyMiBaIiBmaWxsPSIjMEI3Mjg1IiBvcGFjaXR5PSIwLjEiLz4KICAgIDxwYXRoIGQ9Ik0wIDIyIFEyMiAwIDQ0IDIyIFEyMiA0NCAwIDIyIFoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzBCNzI4NSIgc3Ryb2tlLXdpZHRoPSIyLjIiLz4KICAgIDxjaXJjbGUgY3g9IjIyIiBjeT0iMjIiIHI9IjkiIGZpbGw9IiMwQjcyODUiLz4KICAgIDxjaXJjbGUgY3g9IjI1IiBjeT0iMTkiIHI9IjMuMiIgZmlsbD0iI0U2N0UyMiIvPgogIDwvZz4KPC9zdmc+Cg==">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff;
+    --card-bg: #ffffff;
+    --text: #1e1e1e;
+    --text-secondary: #555;
+    --border: #e0e0e0;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --badge-bg: #f0f0f0;
+    --link: #0057b3;
+    --accent: #0057b3;
+    --search-bg: #f5f5f5;
+    --btn-bg: #e8e8e8;
+    --btn-hover: #d0d0d0;
+    --btn-active: #0057b3;
+    --btn-active-text: #fff;
+    --highlight: #fff9c4;
+    --code-bg: #f5f2f0;
+    --pastille-size: 12px;
+  }
+  [data-theme="dark"] {
+    --bg: #121212;
+    --card-bg: #1e1e1e;
+    --text: #e0e0e0;
+    --text-secondary: #aaa;
+    --border: #333;
+    --shadow: 0 2px 8px rgba(0,0,0,0.4);
+    --badge-bg: #2a2a2a;
+    --link: #8ab4f8;
+    --accent: #8ab4f8;
+    --search-bg: #2a2a2a;
+    --btn-bg: #333;
+    --btn-hover: #444;
+    --btn-active: #8ab4f8;
+    --btn-active-text: #000;
+    --highlight: #5c4a00;
+    --code-bg: #2a2a2a;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    padding: 16px;
+    transition: background 0.3s, color 0.3s;
+  }
+  .container { max-width: 900px; margin: 0 auto; }
+  header { margin-bottom: 24px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; }
+  header h1 { font-size: 1.6rem; font-weight: 600; margin-right: auto; }
+  .logo-projet { height: 34px; width: auto; vertical-align: middle; margin-right: 10px; background: #fff; border-radius: 6px; padding: 3px; }
+  header .subtitle { width: 100%; color: var(--text-secondary); font-size: 0.9rem; margin-top: -8px; }
+  header .meta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 8px; width: 100%; }
+  .badge-attente {
+    background: #d32f2f; color: #fff; padding: 2px 12px; border-radius: 12px;
+    font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;
+  }
+  .badge-attente.hidden { display: none; }
+  .derniere-maj { font-size: 0.85rem; color: var(--text-secondary); }
+  .theme-toggle {
+    background: var(--btn-bg); border: 1px solid var(--border); color: var(--text);
+    padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer;
+    transition: background 0.2s; margin-left: auto;
+  }
+  .theme-toggle:hover { background: var(--btn-hover); }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; align-items: center; }
+  .search-box {
+    flex: 1 1 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 24px;
+    background: var(--search-bg); color: var(--text); font-size: 0.95rem; outline: none; transition: border 0.2s;
+  }
+  .search-box:focus { border-color: var(--accent); }
+  .filter-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .filter-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-right: 4px; }
+  .filter-btn {
+    background: var(--btn-bg); border: 1px solid var(--border); color: var(--text);
+    padding: 4px 12px; border-radius: 16px; font-size: 0.8rem; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .filter-btn:hover { background: var(--btn-hover); }
+  .filter-btn.active { background: var(--btn-active); color: var(--btn-active-text); border-color: var(--btn-active); }
+  .filter-btn.attente-only { background: #f57c00; color: #fff; border-color: #f57c00; }
+  .filter-btn.attente-only.active { background: #e65100; }
+  .count-bar { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px; }
+  .cards-container { display: flex; flex-direction: column; gap: 12px; }
+  .card {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px; box-shadow: var(--shadow); position: relative;
+    transition: box-shadow 0.2s, background 0.3s; scroll-margin-top: 16px;
+  }
+  .card.highlight { box-shadow: 0 0 0 3px var(--accent), var(--shadow); }
+  .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .pastille { width: var(--pastille-size); height: var(--pastille-size); border-radius: 50%; flex-shrink: 0; }
+  .type-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+  .card-sujet { font-weight: 600; font-size: 1rem; margin-bottom: 4px; word-break: break-word; }
+  .card-horodatage {
+    font-size: 0.8rem; color: var(--text-secondary); display: flex; gap: 8px;
+    align-items: center; margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .card-horodatage .utc { font-size: 0.7rem; opacity: 0.7; }
+  .card-contenu { margin-bottom: 10px; word-break: break-word; }
+  .card-contenu p { margin-bottom: 0.5em; }
+  .card-contenu ul { margin-left: 1.2em; }
+  .card-contenu code { background: var(--code-bg); padding: 1px 4px; border-radius: 4px; font-size: 0.9em; }
+  .card-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+  .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.75rem;
+    font-weight: 500; background: var(--badge-bg); color: var(--text);
+  }
+  .badge.statut { font-weight: 600; }
+  .badge.statut.en-attente { background: #ffa000; color: #000; }
+  .badge.statut.repondu { background: #388e3c; color: #fff; }
+  .badge.statut.clos { background: #757575; color: #fff; }
+  .badge.statut.info { background: #1976d2; color: #fff; }
+  .badge.priorite.haute { background: #d32f2f; color: #fff; }
+  .badge.priorite.normale { background: #f57c00; color: #fff; }
+  .badge.priorite.basse { background: #6d6d6d; color: #fff; }
+  .card-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .card-links a { color: var(--link); font-size: 0.85rem; text-decoration: underline; }
+  .card-todo { font-size: 0.8rem; background: var(--badge-bg); padding: 2px 8px; border-radius: 8px; display: inline-block; }
+  .card-actions { margin-top: 10px; display: flex; gap: 8px; }
+  .btn-copy-link {
+    background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
+    padding: 4px 10px; border-radius: 16px; font-size: 0.75rem; cursor: pointer; transition: background 0.2s;
+  }
+  .btn-copy-link:hover { background: var(--btn-bg); }
+  .no-results { text-align: center; padding: 40px 20px; color: var(--text-secondary); font-size: 1.1rem; }
+  @media (max-width: 600px) {
+    body { padding: 12px; }
+    header h1 { font-size: 1.3rem; }
+    .card { padding: 12px; }
+    .filter-btn { font-size: 0.75rem; padding: 3px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MiA1MiIgd2lkdGg9IjUyIiBoZWlnaHQ9IjUyIj4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0LCA0KSI+CiAgICA8cGF0aCBkPSJNMCAyMiBRMjIgMCA0NCAyMiBRMjIgNDQgMCAyMiBaIiBmaWxsPSIjMEI3Mjg1IiBvcGFjaXR5PSIwLjEiLz4KICAgIDxwYXRoIGQ9Ik0wIDIyIFEyMiAwIDQ0IDIyIFEyMiA0NCAwIDIyIFoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzBCNzI4NSIgc3Ryb2tlLXdpZHRoPSIyLjIiLz4KICAgIDxjaXJjbGUgY3g9IjIyIiBjeT0iMjIiIHI9IjkiIGZpbGw9IiMwQjcyODUiLz4KICAgIDxjaXJjbGUgY3g9IjI1IiBjeT0iMTkiIHI9IjMuMiIgZmlsbD0iI0U2N0UyMiIvPgogIDwvZz4KPC9zdmc+Cg==" alt="Logo laveille.ai" class="logo-projet" onerror="this.style.display='none'"> laveille.ai - Journal de communication</h1>
+    <div class="subtitle">MEMORA solutions - toutes les questions, réponses et indications, horodatées (heure du Québec)</div>
+    <div class="meta">
+      <span class="badge-attente" id="badgeAttente">0 en attente</span>
+      <span class="derniere-maj" id="derniereMaj">Dernière mise à jour : -</span>
+      <button class="theme-toggle" id="themeToggle" aria-label="Basculer le thème">Thème sombre</button>
+    </div>
+  </header>
+
+  <div class="controls">
+    <input type="text" class="search-box" id="searchInput" placeholder="Rechercher un ou plusieurs mots (sujet, contenu, type, statut...)" autocomplete="off">
+    <div class="filter-group" id="filterTypes">
+      <label>Type :</label>
+      <button class="filter-btn active" data-filter="type" data-value="tous">Tous</button>
+      <button class="filter-btn" data-filter="type" data-value="question-pour-stephane">Question pour Stéphane</button>
+      <button class="filter-btn" data-filter="type" data-value="reponse-de-stephane">Réponse de Stéphane</button>
+      <button class="filter-btn" data-filter="type" data-value="reponse-de-claude">Réponse de Claude</button>
+      <button class="filter-btn" data-filter="type" data-value="indication">Indication</button>
+      <button class="filter-btn" data-filter="type" data-value="decision-requise">Décision requise</button>
+      <button class="filter-btn" data-filter="type" data-value="note">Note</button>
+    </div>
+    <div class="filter-group" id="filterStatuts">
+      <label>Statut :</label>
+      <button class="filter-btn active" data-filter="statut" data-value="tous">Tous</button>
+      <button class="filter-btn" data-filter="statut" data-value="en-attente">En attente</button>
+      <button class="filter-btn" data-filter="statut" data-value="repondu">Répondu</button>
+      <button class="filter-btn" data-filter="statut" data-value="clos">Clos</button>
+      <button class="filter-btn" data-filter="statut" data-value="info">Info</button>
+    </div>
+    <div class="filter-group" id="filterPriorites">
+      <label>Priorité :</label>
+      <button class="filter-btn active" data-filter="priorite" data-value="tous">Toutes</button>
+      <button class="filter-btn" data-filter="priorite" data-value="haute">Haute</button>
+      <button class="filter-btn" data-filter="priorite" data-value="normale">Normale</button>
+      <button class="filter-btn" data-filter="priorite" data-value="basse">Basse</button>
+    </div>
+    <button class="filter-btn attente-only" id="btnAttenteOnly">⏳ En attente seulement</button>
+  </div>
+
+  <div class="count-bar" id="countBar">Aucune entrée affichée</div>
+  <div class="cards-container" id="cardsContainer"></div>
+</div>
+
+<script>
+// ===DEBUT-ENTREES=== (ne pas modifier cette ligne - les nouvelles entrées s'ajoutent juste avant FIN)
+const ENTREES = [
+  { id: 1, quand_quebec: "2026-08-06 11h28 Québec", quand_utc: "2026-08-06T15:28Z", type: "note", sujet: "Journal créé", contenu: "<p>Première entrée du journal de communication du projet laveille.ai (La veille de Stef). Toutes les questions, réponses et indications entre Stéphane et Claude vivent ici, horodatées.</p>", statut: "info", priorite: "normale", todo: null, liens: [] },
+  { id: 2, quand_quebec: "2026-08-06 11h28 Québec", quand_utc: "2026-08-06T15:28Z", type: "note", sujet: "Migration depuis le tableau suivi-demandes.html", contenu: "<p>Ce journal remplace le tableau provisoire <code>.outils/suivi-demandes.html</code> créé plus tôt aujourd'hui : la convention officielle (un seul fichier <code>QUESTIONS-CLAUDE.html</code> par projet, toutes sessions confondues) est apparue en cours de session. L'ancien fichier reste consultable mais n'est plus mis à jour ; tout l'historique du jour est repris dans les entrées ci-dessous.</p>", statut: "info", priorite: "normale", todo: 1626, liens: [{titre: "Ancien tableau (archivé)", href: "file:///Users/stephanelapointe/__IA__/_____SERVEUR_____/site_internet/la-veille-de-stef-v2/.outils/suivi-demandes.html"}] },
+  { id: 3, quand_quebec: "2026-08-05 21h07 Québec", quand_utc: "2026-08-06T01:07Z", type: "reponse-de-claude", sujet: "Document « Modifications à faire - 001 » : 6 correctifs livrés (v1.143.0)", contenu: "<p>Stepper restylé, aperçu et vérifications repliés, panneau d'actions atténué, coches de complétion, « Vérifications » renommé, étape 4 en 3 sections nommées. Prouvé Playwright (contraste AAA, cibles 44 px) et vérifié en production.</p>", statut: "clos", priorite: "normale", todo: 1599, liens: [] },
+  { id: 4, quand_quebec: "2026-08-06 09h17 Québec", quand_utc: "2026-08-06T13:17Z", type: "reponse-de-claude", sujet: "Batch légal « confirme avec les IA » : socle déployé (v1.144.0), clauses CGV/CGU parquées juriste", contenu: "<p>Le panel 5 IA a réfuté les 14 blocs CGV/CGU tels quels (réécrits en brouillon v2, niveau juriste requis). Socle factuel déployé : entité « MEMORA solutions, dénomination commerciale de 9307-6719 Québec inc. (NEQ 1170260492) », DPO nommé (confidentialite@laveille.ai), attestation 16 ans (formulaire web ET Google/GitHub), rétentions concordantes. 107 tests verts, contenu vérifié dans la page servie après purge du cache Cloudflare.</p>", statut: "clos", priorite: "normale", todo: 1613, liens: [] },
+  { id: 5, quand_quebec: "2026-08-06 09h57 Québec", quand_utc: "2026-08-06T13:57Z", type: "reponse-de-claude", sujet: "Constructeur : Vérifications réécrites pour néophytes + filtrées par étape + aide multi-lecteurs (v1.144.1 et v1.144.2)", contenu: "<p>Messages du panneau Vérifications réécrits en langage simple avec exemples (« Compléter » devenu « Ajouter cette info »). La vérification est une simple liste de conditions dans ton navigateur : zéro IA, zéro appel réseau, zéro coût. Le panneau n'apparaît plus avant l'étape concernée, et le champ « Qui va lire ça ? » indique qu'on peut nommer plusieurs lecteurs séparés par des virgules.</p>", statut: "clos", priorite: "normale", todo: 1617, liens: [] },
+  { id: 6, quand_quebec: "2026-08-06 11h17 Québec", quand_utc: "2026-08-06T15:17Z", type: "reponse-de-claude", sujet: "Grand lot v1.145.0 : 6 améliorations du constructeur EN LIGNE et prouvées", contenu: "<p><strong>1.</strong> Format de sortie multi-sélection (cartes à cocher, max 3, garde-fous JSON/Mermaid, prompts sauvegardés migrés automatiquement). <strong>2.</strong> Champs « Autre (longueur/ton/format) » en bloc accentué animé. <strong>3.</strong> Nom pédagogique de chaque méthode de prompting + 3 nouvelles méthodes (reformulation, auto-vérification, variantes comparées). <strong>4.</strong> Libellé « délimiteurs ### » corrigé en « Séparer clairement les parties de la réponse ». <strong>5.</strong> Boutons d'aide « ? » en vrais boutons bordés charte. <strong>6.</strong> Modales centrées verticalement.</p><p>Contretemps : le 1er déploiement a échoué sur un raté réseau transitoire (étape SSH du pipeline, rien à voir avec le code) ; relancé à 11h12, vert à 11h16, cache purgé, les 6 changements vérifiés dans la page réellement servie. 351/351 tests Pest, 26 suites JS, 8 captures Playwright.</p>", statut: "clos", priorite: "normale", todo: 1623, liens: [] },
+  { id: 7, quand_quebec: "2026-08-06 09h17 Québec", quand_utc: "2026-08-06T13:17Z", type: "decision-requise", sujet: "Volet légal - 3 actions de ton côté", contenu: "<p><strong>1.</strong> Remettre à ton juriste le brouillon v2 des clauses CGV/CGU (<code>.outils/brouillon-amendements-CGV-CGU-2026-08-05.md</code>) + la question des transferts hors Québec (art. 17 Loi 25). <strong>2.</strong> Déclarer « La veille de Stef » et « laveille.ai » comme autres noms au Registraire des entreprises - absents de la fiche du NEQ (vérifié sur la fiche réelle). <strong>3.</strong> Optionnel : ajouter la purge du cache Cloudflare au pipeline de déploiement (secret API requis côté GitHub Actions).</p>", statut: "en-attente", priorite: "haute", todo: 1614, liens: [{titre: "Brouillon v2 CGV/CGU", href: "file:///Users/stephanelapointe/__IA__/_____SERVEUR_____/site_internet/la-veille-de-stef-v2/.outils/brouillon-amendements-CGV-CGU-2026-08-05.md"}] },
+  { id: 8, quand_quebec: "2026-08-06 11h58 Québec", quand_utc: "2026-08-06T15:58Z", type: "reponse-de-claude", sujet: "Journal : onglet qui débute par le nom du projet + logo laveille.ai (entête et favicon)", contenu: "<p>Suite à ta demande : l'onglet Chrome affiche maintenant « laveille.ai - Journal de communication » (le nom du projet d'abord, pour t'y retrouver quand plusieurs journaux sont ouverts), et le logo « oeil » de laveille.ai apparaît dans l'entête ET comme icône d'onglet. Le logo est intégré directement dans le fichier (aucune dépendance externe). Le template officiel du module journal portait déjà la même convention pour tous les futurs projets.</p>", statut: "clos", priorite: "normale", todo: 1628, liens: [] },
+  { id: 9, quand_quebec: "2026-08-06 14h27 Québec", quand_utc: "2026-08-06T18:27Z", type: "decision-requise", sujet: "Académie : activer les paiements réels (Stripe live) ?", contenu: "<p>La structure de code des paliers d'abonnement est prête depuis juillet, mais rien n'est branché sur le compte Stripe LIVE (zone argent = jamais sans ton accord explicite). Dis-moi quand tu veux activer, et avec quels prix.</p>", statut: "en-attente", priorite: "normale", todo: 874, liens: [] },
+  { id: 10, quand_quebec: "2026-08-06 14h27 Québec", quand_utc: "2026-08-06T18:27Z", type: "decision-requise", sujet: "Infolettre : lancer la stratégie de croissance validée ?", contenu: "<p>La stratégie (acquisition, cadence, contenu) a été recherchée et validée par le panel en juillet, mais tu as posé un gate explicite : rien ne s'exécute sans ta demande. Toujours en pause tant que tu ne donnes pas le feu vert.</p>", statut: "en-attente", priorite: "basse", todo: 1041, liens: [] },
+  { id: 11, quand_quebec: "2026-08-06 14h27 Québec", quand_utc: "2026-08-06T18:27Z", type: "decision-requise", sujet: "Constructeur : politique de rétention des prompts supprimés", contenu: "<p>Quand un utilisateur supprime un prompt sauvegardé : suppression immédiate et définitive, ou corbeille avec délai de récupération ? Question posée au round 123, jamais tranchée. Sans réponse, le comportement actuel (suppression immédiate) reste en place.</p>", statut: "en-attente", priorite: "basse", todo: 1414, liens: [] },
+  { id: 12, quand_quebec: "2026-08-06 14h27 Québec", quand_utc: "2026-08-06T18:27Z", type: "decision-requise", sujet: "Anonymiseur refondu : test avec de vrais enseignants + bascule publique", contenu: "<p>La refonte (écran unique, phrases à trous) est terminée et vérifiée, mais deux étapes t'appartiennent : <strong>1.</strong> le test d'usabilité avec 5 enseignants réels (je ne peux pas recruter des humains) ; <strong>2.</strong> la décision de bascule publique de la nouvelle version.</p>", statut: "en-attente", priorite: "normale", todo: 1510, liens: [] },
+  { id: 13, quand_quebec: "2026-08-06 14h27 Québec", quand_utc: "2026-08-06T18:27Z", type: "decision-requise", sujet: "Prod : remettre le suivi git en phase (HEAD ancien vs code récent)", contenu: "<p>Sur le serveur, le dépôt git pointe sur un ancien commit alors que les fichiers réels sont à jour (le déploiement passe par rsync, pas par git). Aucun impact visiteur, mais toute commande git sur prod serait trompeuse. Options possibles au choix : réaligner le HEAD, ou retirer le dépôt git de prod. J'attends ta préférence.</p>", statut: "en-attente", priorite: "basse", todo: 1548, liens: [] },
+  { id: 14, quand_quebec: "2026-08-06 14h27 Québec", quand_utc: "2026-08-06T18:27Z", type: "decision-requise", sujet: "BD locale de développement : repeupler la table des outils de l'annuaire ?", contenu: "<p>La table <code>directory_tools</code> est vide dans ma base LOCALE de développement (la prod est intacte, 2194 outils). Non-bloquant, mais certains tests locaux de l'annuaire tournent à vide. Veux-tu que j'importe une copie des données de prod en local ?</p>", statut: "en-attente", priorite: "basse", todo: 1550, liens: [] },
+  { id: 15, quand_quebec: "2026-08-06 14h27 Québec", quand_utc: "2026-08-06T18:27Z", type: "question-pour-stephane", sujet: "Raspberry Pi forge : le Pi est-il flashé et branché ?", contenu: "<p>La carte SD est prête à flasher (config Imager livrée, clé SSH générée). Dès que le Pi est branché au réseau, je peux le découvrir, confirmer l'accès SSH et installer Tailscale. Dis-moi quand c'est fait.</p>", statut: "en-attente", priorite: "normale", todo: 1563, liens: [] },
+  { id: 16, quand_quebec: "2026-08-06 14h27 Québec", quand_utc: "2026-08-06T18:27Z", type: "note", sujet: "Travaux en file de mon côté (aucune décision requise)", contenu: "<p>Pour ta vue d'ensemble, trois chantiers restent en file côté Claude, sans rien attendre de toi : <strong>1.</strong> l'exemple RPG Maker MZ (dialogue + énigme + combat, tâche 1566) ; <strong>2.</strong> la rétention locale des prompts pour visiteurs non connectés (tâche 1580, priorité basse) ; <strong>3.</strong> le champ « Contexte additionnel » + variables réutilisables du constructeur (tâche 1593). Je les reprendrai selon la priorité que tu donnes, sinon dans cet ordre.</p>", statut: "info", priorite: "basse", todo: 1566, liens: [] },
+// ===FIN-ENTREES=== (les nouvelles entrées s'insèrent juste AVANT cette ligne, qui reste À L'INTÉRIEUR du tableau)
+];
+
+const TYPE_COLORS = {
+  "question-pour-stephane": "#ff6d00",
+  "decision-requise": "#d50000",
+  "reponse-de-claude": "#2962ff",
+  "reponse-de-stephane": "#2e7d32",
+  "indication": "#7b1fa2",
+  "note": "#546e7a"
+};
+
+const TYPE_LABELS = {
+  "question-pour-stephane": "Question pour Stéphane",
+  "decision-requise": "Décision requise",
+  "reponse-de-claude": "Réponse de Claude",
+  "reponse-de-stephane": "Réponse de Stéphane",
+  "indication": "Indication",
+  "note": "Note"
+};
+
+const STATUT_LABELS = {
+  "en-attente": "En attente",
+  "repondu": "Répondu",
+  "clos": "Clos",
+  "info": "Info"
+};
+
+const PRIORITE_LABELS = {
+  "haute": "Haute",
+  "normale": "Normale",
+  "basse": "Basse"
+};
+
+let filters = { type: 'tous', statut: 'tous', priorite: 'tous', attenteOnly: false, search: '' };
+
+const container = document.getElementById('cardsContainer');
+const countBar = document.getElementById('countBar');
+const badgeAttente = document.getElementById('badgeAttente');
+const derniereMaj = document.getElementById('derniereMaj');
+const searchInput = document.getElementById('searchInput');
+const themeToggle = document.getElementById('themeToggle');
+const btnAttenteOnly = document.getElementById('btnAttenteOnly');
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  themeToggle.textContent = theme === 'dark' ? 'Thème clair' : 'Thème sombre';
+  localStorage.setItem('journal-theme', theme);
+}
+const storedTheme = localStorage.getItem('journal-theme');
+if (storedTheme) {
+  applyTheme(storedTheme);
+} else {
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(prefersDark ? 'dark' : 'light');
+}
+themeToggle.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+});
+
+function normalize(str) {
+  return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
+function updateMeta() {
+  const enAttente = ENTREES.filter(e => e.statut === 'en-attente').length;
+  if (enAttente > 0) {
+    badgeAttente.classList.remove('hidden');
+    badgeAttente.textContent = enAttente + ' en attente';
+  } else {
+    badgeAttente.classList.add('hidden');
+  }
+  if (ENTREES.length > 0) {
+    const last = ENTREES.reduce((max, e) => e.id > max.id ? e : max, ENTREES[0]);
+    derniereMaj.textContent = 'Dernière mise à jour : ' + last.quand_quebec;
+  }
+}
+
+function render() {
+  // Recherche multi-mots : chaque mot tapé doit apparaître quelque part dans l'entrée, peu importe l'ordre.
+  const searchTerms = normalize(filters.search).split(/\s+/).filter(Boolean);
+  const filtered = ENTREES.filter(e => {
+    if (filters.type !== 'tous' && e.type !== filters.type) return false;
+    if (filters.statut !== 'tous' && e.statut !== filters.statut) return false;
+    if (filters.priorite !== 'tous' && e.priorite !== filters.priorite) return false;
+    if (filters.attenteOnly && e.statut !== 'en-attente') return false;
+    if (searchTerms.length) {
+      const sujet = normalize(e.sujet);
+      const contenu = normalize(e.contenu.replace(/<[^>]*>/g, ''));
+      const type = normalize(TYPE_LABELS[e.type] || e.type);
+      const statut = normalize(STATUT_LABELS[e.statut] || e.statut);
+      const combined = sujet + ' ' + contenu + ' ' + type + ' ' + statut;
+      if (!searchTerms.every(t => combined.includes(t))) return false;
+    }
+    return true;
+  });
+
+  const sorted = [...filtered].sort((a, b) => b.id - a.id);
+  countBar.textContent = sorted.length + ' entrée' + (sorted.length > 1 ? 's' : '') + ' affichée' + (sorted.length > 1 ? 's' : '') + ' sur ' + ENTREES.length;
+
+  if (sorted.length === 0) {
+    container.innerHTML = '<div class="no-results">Aucune entrée ne correspond aux filtres sélectionnés.</div>';
+    return;
+  }
+
+  let html = '';
+  for (const e of sorted) {
+    const color = TYPE_COLORS[e.type] || '#999';
+    const typeLabel = TYPE_LABELS[e.type] || e.type;
+    const statutLabel = STATUT_LABELS[e.statut] || e.statut;
+    const prioriteLabel = PRIORITE_LABELS[e.priorite] || e.priorite;
+    const liensHtml = e.liens && e.liens.length > 0
+      ? e.liens.map(l => '<a href="' + l.href + '" target="_blank">' + l.titre + '</a>').join('')
+      : '';
+    const todoHtml = e.todo ? '<span class="card-todo">tâche #' + e.todo + '</span>' : '';
+    const statutClass = e.statut;
+
+    html += '<div class="card" id="e' + e.id + '">'
+      + '<div class="card-header">'
+      + '<span class="pastille" style="background:' + color + ';"></span>'
+      + '<span class="type-label" style="color:' + color + ';">' + typeLabel + '</span>'
+      + '</div>'
+      + '<div class="card-sujet">' + e.sujet + '</div>'
+      + '<div class="card-horodatage"><span>' + e.quand_quebec + '</span><span class="utc">(' + e.quand_utc + ')</span></div>'
+      + '<div class="card-contenu">' + e.contenu + '</div>'
+      + '<div class="card-badges">'
+      + '<span class="badge statut ' + statutClass + '">' + statutLabel + '</span>'
+      + '<span class="badge priorite ' + e.priorite + '">' + prioriteLabel + '</span>'
+      + todoHtml
+      + '</div>'
+      + (liensHtml ? '<div class="card-links">' + liensHtml + '</div>' : '')
+      + '<div class="card-actions"><button class="btn-copy-link" data-id="' + e.id + '">Copier le lien</button></div>'
+      + '</div>';
+  }
+  container.innerHTML = html;
+
+  document.querySelectorAll('.btn-copy-link').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = this.dataset.id;
+      const url = window.location.href.split('#')[0] + '#e' + id;
+      const self = this;
+      function done() {
+        self.textContent = 'Copié !';
+        setTimeout(() => { self.textContent = 'Copier le lien'; }, 1500);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(done).catch(() => fallbackCopy(url, done));
+      } else {
+        fallbackCopy(url, done);
+      }
+    });
+  });
+
+  if (window.location.hash) {
+    const target = document.querySelector(window.location.hash);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('highlight');
+      setTimeout(() => { target.classList.remove('highlight'); }, 2000);
+    }
+  }
+}
+
+function fallbackCopy(text, done) {
+  const input = document.createElement('input');
+  input.value = text;
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand('copy');
+  document.body.removeChild(input);
+  done();
+}
+
+document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const filter = this.dataset.filter;
+    const value = this.dataset.value;
+    const group = this.closest('.filter-group');
+    group.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    filters[filter] = value;
+    render();
+  });
+});
+
+btnAttenteOnly.addEventListener('click', function() {
+  filters.attenteOnly = !filters.attenteOnly;
+  this.classList.toggle('active');
+  render();
+});
+
+searchInput.addEventListener('input', function() {
+  filters.search = this.value;
+  render();
+});
+
+updateMeta();
+render();
+
+window.addEventListener('hashchange', function() {
+  document.querySelectorAll('.card.highlight').forEach(c => c.classList.remove('highlight'));
+  if (window.location.hash) {
+    const target = document.querySelector(window.location.hash);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('highlight');
+      setTimeout(() => { target.classList.remove('highlight'); }, 2000);
+    }
+  }
+});
+</script>
+</body>
+</html>

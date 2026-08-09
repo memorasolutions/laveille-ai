@@ -1,0 +1,389 @@
+- generic [ref=e3]:
+  - generic [ref=e7]:
+    - complementary "Barre latérale" [ref=e9]:
+      - separator "Redimensionner la barre latérale" [ref=e11]
+      - generic:
+        - generic: Cliquer pour réduire⌘B
+        - generic: Glisser pour redimensionner
+      - generic [ref=e13]:
+        - link "Accueil" [ref=e15] [cursor=pointer]:
+          - /url: /new
+          - img "Claude" [ref=e16]
+        - button "Collapse sidebar" [ref=e19] [cursor=pointer]:
+          - generic [ref=e22]: 
+        - button "Rechercher" [ref=e24] [cursor=pointer]:
+          - generic [ref=e27]: 
+      - generic [ref=e28]:
+        - group "Mode" [ref=e29]:
+          - button "Accueil" [ref=e30] [cursor=pointer]:
+            - generic [ref=e31]: 
+            - generic [ref=e32]: Accueil
+          - button "Code" [ref=e33] [cursor=pointer]:
+            - generic [ref=e34]: 
+            - generic [ref=e35]: Code
+        - generic [ref=e36]:
+          - generic [ref=e38]:
+            - generic [ref=e39]:
+              - button "Nouveau" [ref=e40] [cursor=pointer]:
+                - generic [ref=e43]: 
+                - generic [ref=e44]: Nouveau
+                - generic [ref=e45]: ⇧⌘O
+              - button "Tâche rapide":
+                - generic:
+                  - generic: 
+            - button "Discussions et tâches" [ref=e46] [cursor=pointer]:
+              - generic [ref=e48]: 
+              - generic [ref=e50]: Discussions et tâches
+            - button "Projets" [ref=e51] [cursor=pointer]:
+              - generic [ref=e53]: 
+              - generic [ref=e55]: Projets
+            - button "Artéfacts" [ref=e56] [cursor=pointer]:
+              - generic [ref=e58]: 
+              - generic [ref=e60]: Artéfacts
+            - button "Programmé" [ref=e61] [cursor=pointer]:
+              - img [ref=e63]
+              - generic [ref=e67]: Programmé
+            - button "Personnaliser" [ref=e68] [cursor=pointer]:
+              - generic [ref=e70]: 
+              - generic [ref=e72]: Personnaliser
+          - generic [ref=e77]:
+            - generic [ref=e78]:
+              - button "Épinglé" [expanded] [ref=e81] [cursor=pointer]:
+                - generic [ref=e82]: Épinglé
+                - generic [ref=e83]: 
+              - generic [ref=e86]:
+                - link "LFC construction - Plan d'affaires" [ref=e87] [cursor=pointer]:
+                  - /url: /chat/f1d1cc75-1c52-4e83-ada0-a0c0caabf377
+                  - generic [ref=e90]: 
+                  - generic [ref=e93]: LFC construction - Plan d'affaires
+                - generic:
+                  - button "Plus d'options pour LFC construction - Plan d'affaires":
+                    - generic:
+                      - generic: 
+            - generic [ref=e95]:
+              - generic [ref=e97]:
+                - button "Récents" [expanded] [ref=e98] [cursor=pointer]:
+                  - generic [ref=e99]: Récents
+                  - generic [ref=e100]: 
+                - generic [ref=e101]:
+                  - button "View all" [ref=e102] [cursor=pointer]:
+                    - generic [ref=e105]: 
+                  - button "Filter and group recents" [ref=e106] [cursor=pointer]:
+                    - generic [ref=e109]: 
+              - generic [ref=e110]:
+                - generic [ref=e434]:
+                  - link "Critique adversarial du redesign laveille.ai" [ref=e435] [cursor=pointer]:
+                    - /url: /chat/b00341c6-e8fe-4e1a-baac-4ed76ecf3024
+                    - generic [ref=e438]: 
+                    - generic [ref=e441]: Critique adversarial du redesign laveille.ai
+                  - generic:
+                    - button "Plus d'options pour Critique adversarial du redesign laveille.ai":
+                      - generic:
+                        - generic: 
+                - generic [ref=e113]:
+                  - link "Refonte du constructeur de prompts laveille.ai pour 2026" [ref=e114] [cursor=pointer]:
+                    - /url: /chat/e5cef6ce-4225-477d-ba6b-f5f217e64366
+                    - generic [ref=e117]: 
+                    - generic [ref=e120]: Refonte du constructeur de prompts laveille.ai pour 2026
+                  - generic:
+                    - button "Plus d'options pour Refonte du constructeur de prompts laveille.ai pour 2026":
+                      - generic:
+                        - generic: 
+                - generic [ref=e123]:
+                  - link "Architecture d'ingestion d'emails pour LucidNest" [ref=e124] [cursor=pointer]:
+                    - /url: /chat/6afedca9-4b30-4314-a6aa-5a382f9fc116
+                    - generic [ref=e127]: 
+                    - generic [ref=e130]: Architecture d'ingestion d'emails pour LucidNest
+                  - generic:
+                    - button "Plus d'options pour Architecture d'ingestion d'emails pour LucidNest":
+                      - generic:
+                        - generic: 
+                - generic [ref=e133]:
+                  - link "Choisir entre formulaire minimal et phrase à trous" [ref=e134] [cursor=pointer]:
+                    - /url: /chat/d5b7b542-dc11-4145-8b11-be0b1a428a82
+                    - generic [ref=e137]: 
+                    - generic [ref=e140]: Choisir entre formulaire minimal et phrase à trous
+                  - generic:
+                    - button "Plus d'options pour Choisir entre formulaire minimal et phrase à trous":
+                      - generic:
+                        - generic: 
+                - generic [ref=e143]:
+                  - link "Vérification du branding Google OAuth bloquée" [ref=e144] [cursor=pointer]:
+                    - /url: /chat/8430e2f9-ccec-474b-8f32-1c19ce0ca19e
+                    - generic [ref=e147]: 
+                    - generic [ref=e150]: Vérification du branding Google OAuth bloquée
+                  - generic:
+                    - button "Plus d'options pour Vérification du branding Google OAuth bloquée":
+                      - generic:
+                        - generic: 
+                - generic [ref=e153]:
+                  - 'link "Diagnostic de performance Laravel 12 en production : authentification vs démarrage PHP" [ref=e154] [cursor=pointer]':
+                    - /url: /chat/0420faa8-0a2f-4611-a983-c788157f3001
+                    - generic [ref=e157]: 
+                    - generic [ref=e160]: "Diagnostic de performance Laravel 12 en production : authentification vs démarrage PHP"
+                  - generic:
+                    - 'button "Plus d''options pour Diagnostic de performance Laravel 12 en production : authentification vs démarrage PHP"':
+                      - generic:
+                        - generic: 
+                - generic [ref=e163]:
+                  - link "Audit design clinique podologique pour seniors" [ref=e164] [cursor=pointer]:
+                    - /url: /chat/30cba7fd-2ff3-4b40-b628-6a2bdf741cd5
+                    - generic [ref=e167]: 
+                    - generic [ref=e170]: Audit design clinique podologique pour seniors
+                  - generic:
+                    - button "Plus d'options pour Audit design clinique podologique pour seniors":
+                      - generic:
+                        - generic: 
+                - generic [ref=e173]:
+                  - link "Stratégie d'audit et grants pour LucidNest" [ref=e174] [cursor=pointer]:
+                    - /url: /chat/6b89e818-f13e-422e-95fb-7b95959e6d9d
+                    - generic [ref=e177]: 
+                    - generic [ref=e180]: Stratégie d'audit et grants pour LucidNest
+                  - generic:
+                    - button "Plus d'options pour Stratégie d'audit et grants pour LucidNest":
+                      - generic:
+                        - generic: 
+                - generic [ref=e183]:
+                  - link "Cohérence pricing et billing pour SaaS TDA/H" [ref=e184] [cursor=pointer]:
+                    - /url: /chat/dc1e70a5-7122-4f7c-92d9-4f70f52b9768
+                    - generic [ref=e187]: 
+                    - generic [ref=e190]: Cohérence pricing et billing pour SaaS TDA/H
+                  - generic:
+                    - button "Plus d'options pour Cohérence pricing et billing pour SaaS TDA/H":
+                      - generic:
+                        - generic: 
+                - generic [ref=e193]:
+                  - link "Critique sévère du plan de refonte du constructeur de prompts" [ref=e194] [cursor=pointer]:
+                    - /url: /chat/e98e2a0a-5987-4878-b157-1543e8b5a416
+                    - generic [ref=e197]: 
+                    - generic [ref=e200]: Critique sévère du plan de refonte du constructeur de prompts
+                  - generic:
+                    - button "Plus d'options pour Critique sévère du plan de refonte du constructeur de prompts":
+                      - generic:
+                        - generic: 
+                - generic [ref=e203]:
+                  - link "Simplifier le gating de features Laravel monolithe" [ref=e204] [cursor=pointer]:
+                    - /url: /chat/83cd20b4-036c-461f-a37d-8e458f20aa49
+                    - generic [ref=e207]: 
+                    - generic [ref=e210]: Simplifier le gating de features Laravel monolithe
+                  - generic:
+                    - button "Plus d'options pour Simplifier le gating de features Laravel monolithe":
+                      - generic:
+                        - generic: 
+                - generic [ref=e213]:
+                  - 'link "Anonymisation de prompts : choix entre C et F" [ref=e214] [cursor=pointer]':
+                    - /url: /chat/ff41f16c-4f56-4597-9599-c28d62d2063b
+                    - generic [ref=e217]: 
+                    - generic [ref=e220]: "Anonymisation de prompts : choix entre C et F"
+                  - generic:
+                    - 'button "Plus d''options pour Anonymisation de prompts : choix entre C et F"':
+                      - generic:
+                        - generic: 
+                - generic [ref=e223]:
+                  - link "Permanent cost discipline for Claude Code workflows" [ref=e224] [cursor=pointer]:
+                    - /url: /chat/06a902bb-ab85-4a93-917f-6daf41e66b04
+                    - generic [ref=e227]: 
+                    - generic [ref=e230]: Permanent cost discipline for Claude Code workflows
+                  - generic:
+                    - button "Plus d'options pour Permanent cost discipline for Claude Code workflows":
+                      - generic:
+                        - generic: 
+                - generic [ref=e233]:
+                  - link "Optimizing Claude token usage with external model offloading" [ref=e234] [cursor=pointer]:
+                    - /url: /chat/bef4f0d3-b0f7-4edc-8f81-8890693ad23e
+                    - generic [ref=e237]: 
+                    - generic [ref=e240]: Optimizing Claude token usage with external model offloading
+                  - generic:
+                    - button "Plus d'options pour Optimizing Claude token usage with external model offloading":
+                      - generic:
+                        - generic: 
+                - generic [ref=e243]:
+                  - link "GPT-5.6 Luna integration strategy for LLM routing" [ref=e244] [cursor=pointer]:
+                    - /url: /chat/703a10f9-c09a-4300-a984-4d2d97916993
+                    - generic [ref=e247]: 
+                    - generic [ref=e250]: GPT-5.6 Luna integration strategy for LLM routing
+                  - generic:
+                    - button "Plus d'options pour GPT-5.6 Luna integration strategy for LLM routing":
+                      - generic:
+                        - generic: 
+                - generic [ref=e253]:
+                  - link "Bidirectional Laravel-Google Tasks sync architecture" [ref=e254] [cursor=pointer]:
+                    - /url: /chat/d331f06b-cdd9-4c80-948a-f7c0cd067dfa
+                    - generic [ref=e257]: 
+                    - generic [ref=e260]: Bidirectional Laravel-Google Tasks sync architecture
+                  - generic:
+                    - button "Plus d'options pour Bidirectional Laravel-Google Tasks sync architecture":
+                      - generic:
+                        - generic: 
+                - generic [ref=e263]:
+                  - link "Stratégie de routage LLM pour génération de tests fiables" [ref=e264] [cursor=pointer]:
+                    - /url: /chat/a5caa14f-43d5-4164-9730-ec70a03ae287
+                    - generic [ref=e267]: 
+                    - generic [ref=e270]: Stratégie de routage LLM pour génération de tests fiables
+                  - generic:
+                    - button "Plus d'options pour Stratégie de routage LLM pour génération de tests fiables":
+                      - generic:
+                        - generic: 
+                - generic [ref=e273]:
+                  - link "Migration Tiptap pour l'éditeur d'anonymisation" [ref=e274] [cursor=pointer]:
+                    - /url: /chat/c86dd884-9c71-44da-82cc-44f47e0449db
+                    - generic [ref=e277]: 
+                    - generic [ref=e280]: Migration Tiptap pour l'éditeur d'anonymisation
+                  - generic:
+                    - button "Plus d'options pour Migration Tiptap pour l'éditeur d'anonymisation":
+                      - generic:
+                        - generic: 
+                - generic [ref=e283]:
+                  - 'link "Architecture d''images pour LucidNest : évaluation technique complète" [ref=e284] [cursor=pointer]':
+                    - /url: /chat/4bd67495-33ce-4bd9-bf54-349c3ea5dd18
+                    - generic [ref=e287]: 
+                    - generic [ref=e290]: "Architecture d'images pour LucidNest : évaluation technique complète"
+                  - generic:
+                    - 'button "Plus d''options pour Architecture d''images pour LucidNest : évaluation technique complète"':
+                      - generic:
+                        - generic: 
+                - generic [ref=e293]:
+                  - link "Architecture de stockage d'images pour SaaS Laravel privé" [ref=e294] [cursor=pointer]:
+                    - /url: /chat/d8573616-cfa1-4212-9b98-caae448abde7
+                    - generic [ref=e297]: 
+                    - generic [ref=e300]: Architecture de stockage d'images pour SaaS Laravel privé
+                  - generic:
+                    - button "Plus d'options pour Architecture de stockage d'images pour SaaS Laravel privé":
+                      - generic:
+                        - generic: 
+                - button "Tout afficher" [ref=e312] [cursor=pointer]: Tout afficher
+        - generic [ref=e314]:
+          - button "Design Labs" [ref=e319] [cursor=pointer]:
+            - generic [ref=e321]: 
+            - generic [ref=e322]:
+              - generic [ref=e323]: Design
+              - generic [ref=e324]:
+                - generic [ref=e325]: 
+                - text: Labs
+            - generic [ref=e327]: 
+          - generic [ref=e328]:
+            - button "Stephane Lapointe Stephane Max" [ref=e330] [cursor=pointer]:
+              - img "Stephane Lapointe" [ref=e332]: SL
+              - generic [ref=e333]:
+                - generic [ref=e334]: Stephane
+                - generic [ref=e335]: ·
+                - generic [ref=e336]: Max
+              - generic [ref=e337]: 
+            - button "Obtenir des applications et extensions" [ref=e340] [cursor=pointer]:
+              - generic [ref=e343]: 
+    - main [ref=e344]:
+      - generic [ref=e445]:
+        - generic [ref=e446]:
+          - generic [ref=e449]:
+            - button "Critique adversarial du redesign laveille.ai, renommer le chat" [ref=e450]:
+              - generic [ref=e453]: Critique adversarial du redesign laveille.ai
+            - button "Plus d'options pour Critique adversarial du redesign laveille.ai" [ref=e454] [cursor=pointer]:
+              - generic [ref=e457]: 
+          - button "Partager" [ref=e596] [cursor=pointer]:
+            - generic [ref=e598]: Partager
+        - generic [ref=e461]:
+          - status [ref=e462]: Claude a terminé la réponse.
+          - generic [ref=e463]:
+            - feed "Messages de la conversation" [ref=e464]:
+              - paragraph [ref=e465]: Utilisez les touches fléchées haut et bas pour naviguer entre les messages.
+              - generic [ref=e466]:
+                - article "Message 1 sur 2" [ref=e468]:
+                  - generic [ref=e471]:
+                    - 'heading "Vous avez dit : Tu es un critique adversarial." [level=2] [ref=e472]'
+                    - generic [ref=e473]:
+                      - generic [ref=e476]:
+                        - paragraph [ref=e478]: "Tu es un critique adversarial. Voici un plan de refonte d'un outil web gratuit (générateur de prompts IA pour enseignants/éducateurs, Québec, laveille.ai) : Écran UNIQUE combinant 9 cartes de situation (Rédiger, Résumer un document, Expliquer simplement, Corriger et améliorer un texte, Trouver des idées, Préparer une activité ou un questionnaire, Traduire ou adapter le ton, Analyser ou comparer, Autre chose) qui se réduisent en pastille après sélection, révélant une PHRASE À TROUS éditable (3-5 trous max : ton, longueur, destinataire, format). Aperçu du prompt en direct qui distingue visuellement les mots de l'utilisateur des ajouts de l'outil. Vérificateur déterministe LOCAL (zéro appel IA) qui signale trous vides et données personnelles non masquées. Copier + Ouvrir dans une IA (ChatGPT/Claude/Gemini) - copie presse-papiers comme mécanisme PRINCIPAL (préremplissage URL jugé fragile). Historique/favoris et partage via localStorage/URL, SANS compte ni base de données (remplace une bibliothèque de prompts sauvegardés jamais adoptée : 13 prompts/7 utilisateurs en 3 mois). RETIRÉS : cartes personnalisées, catalogue de 200 icônes, méta-prompt \"améliorer avec mon IA\", interrupteur \"cadre strict\", 5 blocs de réglages avancés (18 groupes de champs). HORS SCOPE : toute API IA tierce même gratuite, comptes obligatoires, sélecteur multi-modèle. Objectif mesurable : un néophyte copie un premier prompt utile en moins de 60 secondes. Ancien outil (4304 lignes, 87 options) actuellement gaté/invisible au public (zéro risque de casse pendant la réécriture). CHERCHE LES FAILLES : risque oublié, incohérence, hypothèse non vérifiée, fonctionnalité qui se contredit, complexité encore excessive. Note le plan /100. Réponds en français, concis (250 mots max), sans tiret cadratin."
+                        - button "Afficher plus" [ref=e479] [cursor=pointer]
+                      - toolbar "Actions du message" [ref=e482]:
+                        - generic [ref=e483]: 09:00
+                        - generic [ref=e484]:
+                          - button "Réessayer" [ref=e599] [cursor=pointer]:
+                            - generic [ref=e602]: 
+                          - button "Modifier" [ref=e485] [cursor=pointer]:
+                            - generic [ref=e488]: 
+                        - button "Copier" [ref=e489] [cursor=pointer]:
+                          - generic [ref=e492]:
+                            - generic [ref=e493]: 
+                            - generic [ref=e494]: 
+                - article "Message 2 sur 2" [ref=e603]:
+                  - generic [ref=e498]:
+                    - generic [ref=e500]:
+                      - 'heading "Claude a répondu : Failles majeures" [level=2] [ref=e604]'
+                      - generic [ref=e503]:
+                        - generic [ref=e506]:
+                          - button "Identifié contradictions majeures, complexité déplacée, risques conformité graves" [ref=e605] [cursor=pointer]:
+                            - img [ref=e606]
+                            - generic [ref=e608]:
+                              - generic [ref=e609]: Identifié contradictions majeures, complexité déplacée, risques conformité graves
+                              - generic [ref=e611]: 
+                          - status [ref=e520]: Identifié contradictions majeures, complexité déplacée, risques conformité graves
+                        - generic [ref=e616]:
+                          - paragraph [ref=e617]:
+                            - strong [ref=e618]: Failles majeures
+                          - paragraph [ref=e619]: "Le diagnostic est peut‑être faux. L'ancien outil est gaté et invisible : 13 prompts en 3 mois peut refléter l'absence de trafic, pas l'excès d'options. Vous refondez sur une hypothèse non testée."
+                          - paragraph [ref=e620]: Le vérificateur de données personnelles est votre risque numéro un. Détecter « Mathis » ou « la mère de Léa » sans IA est impossible. Un vérificateur qui passe au vert donne une fausse assurance sur des renseignements d'élèves, ce qui est pire que rien en contexte Loi 25. Cadrez‑le comme rappel, jamais comme validation.
+                          - paragraph [ref=e621]: Le partage par URL encode potentiellement ces mêmes données dans un lien journalisé par tous les intermédiaires. Contradiction directe avec la posture de protection.
+                          - paragraph [ref=e622]: "localStorage sur postes scolaires partagés, sessions gérées, iPad de classe : historique et favoris s'évaporeront. Vous reproduisez l'échec d'adoption que vous cherchez à corriger."
+                          - paragraph [ref=e623]:
+                            - strong [ref=e624]: Incohérences
+                          - paragraph [ref=e625]: Neuf cartes, ce n'est pas simple. « Autre chose » réintroduit la saisie libre que vous venez de retirer avec les cartes personnalisées. Cinq ou six cartes suffiraient.
+                          - paragraph [ref=e626]: Neuf situations multipliées par des trous contextuels égalent trente à quarante gabarits à rédiger, tester et maintenir. La complexité est déplacée vers vous, pas éliminée.
+                          - paragraph [ref=e627]: "« Objectif mesurable : moins de 60 secondes » sans compte, sans base et sans télémétrie décrite : mesuré comment ?"
+                          - paragraph [ref=e628]: Zéro appel IA signifie que l'utilisateur ne voit jamais si le prompt fonctionne. « Utile » reste invérifiable.
+                          - paragraph [ref=e629]:
+                            - strong [ref=e630]: Angles morts
+                          - paragraph [ref=e631]: Presse‑papiers iOS Safari hors geste direct. Aucun plan de redirection ni de SEO pour l'ancienne page.
+                          - paragraph [ref=e632]:
+                            - strong [ref=e633]: "Note : 63/100."
+                            - text: Direction juste, exécution encore optimiste sur trois points critiques.
+                    - toolbar "Actions du message" [ref=e636]:
+                      - button "Copier" [ref=e637] [cursor=pointer]:
+                        - generic [ref=e640]:
+                          - generic [ref=e641]: 
+                          - generic [ref=e642]: 
+                      - button "Lire à voix haute" [ref=e643] [cursor=pointer]:
+                        - generic [ref=e646]: 
+                      - button "Bonne réponse" [ref=e647] [cursor=pointer]:
+                        - generic [ref=e650]: 
+                      - button "Mauvaise réponse" [ref=e651] [cursor=pointer]:
+                        - generic [ref=e654]: 
+                      - button "Réessayer" [ref=e656] [cursor=pointer]:
+                        - generic [ref=e659]: 
+            - img [ref=e663]
+          - generic [ref=e529]:
+            - button "Défiler vers le bas" [ref=e665] [cursor=pointer]:
+              - img [ref=e667]
+            - group [ref=e534]:
+              - status [ref=e536]:
+                - generic [ref=e540]:
+                  - generic [ref=e541]: Souhaitez-vous être averti lorsque Claude répond ?
+                  - generic [ref=e542]:
+                    - button "Notifier" [ref=e543] [cursor=pointer]:
+                      - generic [ref=e545]: Notifier
+                    - button "Ignorer" [ref=e546] [cursor=pointer]:
+                      - generic [ref=e547]: 
+              - status
+              - generic [ref=e550]:
+                - generic [ref=e552]:
+                  - textbox "Écrivez votre invite à Claude." [active] [ref=e553]:
+                    - paragraph [ref=e554]: Écrire un message…
+                  - status [ref=e555]
+                - generic [ref=e556]:
+                  - button "Ajouter des fichiers, des connecteurs et plus" [ref=e559] [cursor=pointer]:
+                    - generic [ref=e562]: 
+                  - 'button "Modèle : Opus 5 Élevé" [ref=e566] [cursor=pointer]':
+                    - generic [ref=e568]:
+                      - generic [ref=e570]: Opus 5 Élevé
+                      - generic [ref=e572]: 
+                  - generic [ref=e574]:
+                    - button "Paramètres" [ref=e576] [cursor=pointer]:
+                      - generic [ref=e578]: 
+                    - button "Appuyez et maintenez pour enregistrer" [ref=e579] [cursor=pointer]:
+                      - generic [ref=e581]: 
+                  - button "Utiliser le mode vocal" [ref=e671] [cursor=pointer]:
+                    - img [ref=e674]
+            - note [ref=e592]:
+              - link "Claude est une IA et peut faire des erreurs. Veuillez vérifier les réponses." [ref=e593] [cursor=pointer]:
+                - /url: https://support.anthropic.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on
+  - region "Notifications (F8)":
+    - list

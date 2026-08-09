@@ -742,6 +742,10 @@
                                         <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Contraintes spécifiques') }}</label>
                                         <textarea id="cpConstraintCustom" class="form-control form-control-sm" rows="2" x-model="constraintCustom" autocomplete="off" placeholder="{{ __('Ex: éviter le jargon technique, inclure des exemples concrets') }}" aria-label="{{ __('Contraintes personnalisées') }}"></textarea>
                                     </div>
+                                    {{-- ACTION: consigne multi-sélection au-dessus de la grille 2 colonnes --}}
+                                    {{-- SELF: 1 ligne --}}
+                                    {{-- RAISON: verdict club des sages 2026-08-09 (Codex + NN/g checkboxes-design-guidelines) : clarifier « coche tout ce qui s'applique » pour les néophytes --}}
+                                    <p class="mb-2" style="font-size: 0.8rem; color: var(--c-text-muted);">{{ __('Facultatif : coche toutes les options utiles.') }}</p>
                                     <div class="ct-check-grid mb-3">
                                         <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
                                             <input type="checkbox" x-model="constraintAntiAI" style="display:inline-block !important; width:18px; height:18px; accent-color: var(--c-primary); margin: 0; flex-shrink: 0;">

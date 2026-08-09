@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>laveille.ai - Suivi des demandes de Stéphane</title>
+<style>
+  :root { --teal:#064E5A; --orange:#9A2A06; --ok:#1a7f4b; --wait:#8a6d00; --queue:#5a6b6f; --bg:#F8FAFB; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,"Segoe UI",Roboto,sans-serif; margin:0; background:var(--bg); color:#1c2b2e; line-height:1.55; }
+  header { background:var(--teal); color:#fff; padding:18px 28px; }
+  header h1 { margin:0; font-size:1.35rem; }
+  header p { margin:4px 0 0; opacity:.85; font-size:.85rem; }
+  .toolbar { position:sticky; top:0; z-index:10; background:#fff; border-bottom:1px solid #dde5e7; padding:10px 16px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; max-width:100%; }
+  .toolbar input[type="search"] { flex:1 1 260px; padding:9px 14px; border:2px solid var(--teal); border-radius:8px; font-size:.95rem; }
+  .fbtn { border:2px solid var(--queue); background:#fff; color:#1c2b2e; border-radius:999px; padding:6px 14px; font-size:.82rem; font-weight:700; cursor:pointer; }
+  .fbtn.active { background:var(--teal); border-color:var(--teal); color:#fff; }
+  main { max-width:960px; margin:0 auto; padding:20px 16px 60px; }
+  h2 { color:var(--teal); border-bottom:2px solid var(--teal); padding-bottom:6px; font-size:1.05rem; margin-top:34px; }
+  .card { background:#fff; border:1px solid #dde5e7; border-left:4px solid var(--teal); border-radius:8px; padding:14px 16px; margin:12px 0; }
+  .card.done { border-left-color:var(--ok); }
+  .card.encours { border-left-color:var(--wait); }
+  .card.file { border-left-color:var(--queue); }
+  .card.decision { border-left-color:var(--orange); }
+  .meta { font-size:.78rem; color:#5a6b6f; margin-bottom:4px; }
+  .badge { display:inline-block; font-size:.72rem; font-weight:700; padding:2px 10px; border-radius:999px; color:#fff; vertical-align:middle; }
+  .badge.done { background:var(--ok); } .badge.encours { background:var(--wait); }
+  .badge.file { background:var(--queue); } .badge.decision { background:var(--orange); }
+  .q { font-weight:700; margin:2px 0 6px; }
+  .rep { font-size:.9rem; margin:0; }
+  .rep b { color:var(--teal); }
+  .maj { font-size:.75rem; color:#5a6b6f; font-style:italic; margin-top:8px; border-top:1px dashed #dde5e7; padding-top:6px; }
+  code { background:#eef3f4; padding:1px 5px; border-radius:4px; font-size:.85em; }
+  .vide { display:none; text-align:center; color:#5a6b6f; padding:30px 0; }
+</style>
+</head>
+<body>
+<div style="background:#9A2A06;color:#fff;padding:12px 28px;font-weight:700;">⚠️ ARCHIVÉ (2026-08-06, 11h28 Québec) - ce tableau n'est plus mis à jour. Le journal officiel du projet est maintenant : <a href="file:///Users/stephanelapointe/__IA__/_____SERVEUR_____/site_internet/la-veille-de-stef-v2/QUESTIONS-CLAUDE.html" style="color:#ffd9a8;">QUESTIONS-CLAUDE.html</a> (à la racine du projet).</div>
+<header>
+  <h1>laveille.ai - Suivi des demandes de Stéphane</h1>
+  <p>Projet : site laveille.ai (La veille de Stef) - focus actuel : constructeur de prompts et volet légal. Tenu par l'assistant, mis à jour à chaque événement. Dernière mise à jour : <strong>11h17 Québec (15:17 UTC), 2026-08-06</strong>. Toutes les heures en heure du Québec.</p>
+</header>
+
+<div class="toolbar">
+  <input type="search" id="rech" placeholder="🔍 Rechercher dans les demandes (ex. : format, modale, légal...)" aria-label="Rechercher">
+  <button class="fbtn active" data-f="tous">Tous</button>
+  <button class="fbtn" data-f="encours">🟡 En cours</button>
+  <button class="fbtn" data-f="file">⏭️ En file</button>
+  <button class="fbtn" data-f="done">✅ Livré</button>
+  <button class="fbtn" data-f="decision">🔶 À toi</button>
+</div>
+
+<main>
+<p class="vide" id="vide">Aucune carte ne correspond à ta recherche.</p>
+
+<h2 data-sect>🟡 En cours</h2>
+
+<div class="card encours" data-s="encours">
+  <div class="meta">En ce moment · <span class="badge encours">RIEN EN COURS</span></div>
+  <div class="q">Aucune demande en traitement - tout le lot du matin est livré (voir ci-dessous)</div>
+  <p class="rep">Prochain événement attendu : tes retours, ou les décisions de la section « À toi ».</p>
+</div>
+
+<h2 data-sect>✅ Livré (prouvé en production)</h2>
+
+<div class="card done" data-s="done">
+  <div class="meta">Demandes de 09h35 à 09h50, livré et prouvé en prod à 11h17 (v1.145.0) · <span class="badge done">LIVRÉ</span> · tâches #1618-#1623</div>
+  <div class="q">Le grand lot v1.145.0 - 6 améliorations ensemble</div>
+  <p class="rep">
+    <b>1. Format de sortie multi-sélection</b> : cartes à cocher, maximum 3, JSON/Mermaid seuls, prompt composé (« Structure principale : X. En complément : Y ») - prouvé par capture du prompt réel généré avec 2 formats. Tes prompts déjà sauvegardés migrent tout seuls.<br>
+    <b>2. Champs « Autre (longueur/ton/format) »</b> : bloc accentué animé - plus moyen de les rater.<br>
+    <b>3. Méthodes de prompting</b> : nom pédagogique affiché discrètement (« Méthode : chaîne de pensée ») + 3 NOUVELLES méthodes : reformuler la demande d'abord, s'auto-vérifier, proposer 2-3 versions comparées.<br>
+    <b>4. Libellé « délimiteurs ### »</b> : corrigé en « Séparer clairement les parties de la réponse » (l'ancien libellé mentait sur l'effet réel - découverte de Codex).<br>
+    <b>5. Boutons d'aide « ? »</b> : vraie apparence de bouton (cercle bordé couleur charte, 28 px, accessibles).<br>
+    <b>6. Modale d'aide</b> : centrée verticalement (ta capture de 09h54 le montrait collée en haut).
+  </p>
+  <div class="maj">11h17 : EN LIGNE et prouvé. Petit contretemps : le 1er déploiement a échoué sur un raté réseau transitoire (rien à voir avec le code) ; relancé à 11h12, vert à 11h16. Cache purgé, puis vérifié dans la page réellement servie : les 6 changements y sont (multi-format, blocs accentués, noms de méthodes, nouveau libellé, boutons ?, modale centrée).</div>
+</div>
+
+<div class="card done" data-s="done">
+  <div class="meta">Demandé à 10h10, livré à 10h17 · <span class="badge done">LIVRÉ</span> · tâches #1624-#1625</div>
+  <div class="q">« Fait-moi un html local pour toutes mes questions » + « avec filtre et recherche, titre clair »</div>
+  <p class="rep">Ce fichier même. Recherche libre en haut, filtres par statut, titre de projet clair, tout horodaté. Consigne mémorisée durablement : je le mets à jour à chaque événement et je te redonne le lien à chaque fois.</p>
+</div>
+
+<div class="card done" data-s="done">
+  <div class="meta">Demandé vers 09h45, livré à 09h57 (v1.144.2) · <span class="badge done">LIVRÉ</span> · tâches #1616-#1617</div>
+  <div class="q">« Les Vérifications apparaissent à l'étape 2 mais parlent des étapes suivantes » + « Qui va lire ça ? : dire qu'on peut en mettre plusieurs »</div>
+  <p class="rep">Le panneau Vérifications n'apparaît plus avant l'étape concernée. Le champ audience dit : « Tu peux nommer plusieurs lecteurs, séparés par des virgules » (ça marchait déjà, l'indication manquait). Preuves : captures aux 2 étapes, 52 tests, contenu vérifié en prod.</p>
+</div>
+
+<div class="card done" data-s="done">
+  <div class="meta">Demandé vers 09h15, livré à 09h32 (v1.144.1) · <span class="badge done">LIVRÉ</span> · tâche #1615</div>
+  <div class="q">« Aucun contexte ni audience précisé(e)... je ne comprends pas cette partie »</div>
+  <p class="rep">Messages du panneau réécrits en langage simple avec exemples ; « Compléter » devenu « Ajouter cette info ». Et la vérification = simple liste de conditions dans ton navigateur : zéro IA, zéro appel réseau, zéro coût.</p>
+</div>
+
+<div class="card done" data-s="done">
+  <div class="meta">Nuit du 5 au 6 août, livré à 09h17 (v1.144.0) · <span class="badge done">LIVRÉ</span> · tâches #1600-#1613</div>
+  <div class="q">« Confirme avec les IA » (batch légal)</div>
+  <p class="rep">Le panel 5 IA a réfuté les clauses CGV/CGU telles quelles (réécrites en brouillon v2, niveau juriste). Socle déployé : entité exacte « MEMORA solutions, dénomination commerciale de 9307-6719 Québec inc. (NEQ 1170260492) », DPO nommé (confidentialite@laveille.ai), attestation 16 ans (web ET Google/GitHub), rétentions concordantes. 107 tests verts.</p>
+</div>
+
+<div class="card done" data-s="done">
+  <div class="meta">Demandé le 5 août en soirée, livré à 21h07 le 2026-08-05 (v1.143.0) · <span class="badge done">LIVRÉ</span> · tâches #1594-#1599</div>
+  <div class="q">Document « Modifications à faire - 001 » (6 correctifs du wizard)</div>
+  <p class="rep">Stepper restylé, aperçu/vérifications repliés, panneau d'actions atténué, coches ✓, « Vérifications » renommé, étape 4 en 3 sections nommées. Prouvé Playwright (contraste AAA, cibles 44 px).</p>
+</div>
+
+<h2 data-sect>🔶 Décisions qui t'attendent (rien ne bloque le site)</h2>
+
+<div class="card decision" data-s="decision">
+  <div class="meta">Depuis le 6 août, 09h17 · <span class="badge decision">À TOI</span> · tâches #1608, #1614 + brouillon v2</div>
+  <div class="q">Volet légal - 3 actions de ton côté</div>
+  <p class="rep">
+    <b>1.</b> Remettre à ton juriste le brouillon v2 des clauses CGV/CGU (<code>.outils/brouillon-amendements-CGV-CGU-2026-08-05.md</code>) + la question des transferts hors Québec (art. 17 Loi 25).<br>
+    <b>2.</b> Déclarer « La veille de Stef » (et laveille.ai) comme autre nom au Registraire des entreprises - absents de la fiche du NEQ (vérifié).<br>
+    <b>3.</b> Optionnel : ajouter la purge du cache Cloudflare au pipeline de déploiement (secret API requis dans le runner).
+  </p>
+</div>
+
+</main>
+<script>
+(function(){
+  var filtre = 'tous';
+  var champ = document.getElementById('rech');
+  var vide = document.getElementById('vide');
+  function applique(){
+    var q = champ.value.trim().toLowerCase();
+    var visibles = 0;
+    document.querySelectorAll('.card').forEach(function(c){
+      var okF = (filtre === 'tous') || (c.dataset.s === filtre);
+      var okQ = !q || c.textContent.toLowerCase().indexOf(q) !== -1;
+      c.style.display = (okF && okQ) ? '' : 'none';
+      if (okF && okQ) visibles++;
+    });
+    document.querySelectorAll('[data-sect]').forEach(function(h){
+      var suivant = h.nextElementSibling, unVisible = false;
+      while (suivant && !suivant.hasAttribute('data-sect')) {
+        if (suivant.classList && suivant.classList.contains('card') && suivant.style.display !== 'none') unVisible = true;
+        suivant = suivant.nextElementSibling;
+      }
+      h.style.display = unVisible ? '' : 'none';
+    });
+    vide.style.display = visibles ? 'none' : 'block';
+  }
+  champ.addEventListener('input', applique);
+  document.querySelectorAll('.fbtn').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.fbtn').forEach(function(x){ x.classList.remove('active'); });
+      b.classList.add('active');
+      filtre = b.dataset.f;
+      applique();
+    });
+  });
+})();
+</script>
+</body>
+</html>

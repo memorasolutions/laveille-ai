@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.156.1] - 2026-08-09
+
+### Modifié
+- **Constructeur de prompts : consigne « Facultatif : coche toutes les options utiles. » au-dessus de la grille des règles** (verdict de la consultation du club des sages sur l'intuitivité de la compaction, appuyé sur NN/g checkboxes-design-guidelines : pour des novices, expliciter la multi-sélection est la condition qui rend une grille de cases à cocher aussi claire qu'une colonne unique). Clé i18n ajoutée dans lang/en.json.
+
 ## [1.156.0] - 2026-08-09
 
 ### Modifié

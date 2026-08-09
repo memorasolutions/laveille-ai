@@ -1,0 +1,414 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content — Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+    - text: Aller au contenu principal
+  - region "Bandeau infolettre" [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: ▸
+        - generic [ref=e7]: Veille IA
+        - generic [ref=e8]: "Veille IA sans buzz : pour stratèges québécois."
+      - generic [ref=e9]:
+        - button "Ouvrir le formulaire d'inscription à l'infolettre hebdomadaire" [ref=e10] [cursor=pointer]: Recevoir hebdo →
+        - button "Fermer le bandeau infolettre" [ref=e11] [cursor=pointer]: ×
+  - generic [ref=e12]:
+    - banner [ref=e13]:
+      - generic [ref=e16]:
+        - list [ref=e19]:
+          - listitem [ref=e20]:
+            - link "Actualités" [ref=e21] [cursor=pointer]:
+              - /url: https://laveille.ai/actualites
+              - generic [ref=e22]: Actualités
+          - listitem [ref=e23]:
+            - link "OpenAI stoppe une escroquerie utilisant ChatGPT" [ref=e24] [cursor=pointer]:
+              - /url: https://laveille.ai/actualites/disrupting-a-criminal-scam-operation
+        - list [ref=e26]:
+          - listitem [ref=e27]:
+            - link "Facebook" [ref=e28] [cursor=pointer]:
+              - /url: https://www.facebook.com/LaVeilleAI
+              - generic [ref=e29]: 
+          - listitem [ref=e30]:
+            - link "Messenger" [ref=e31] [cursor=pointer]:
+              - /url: https://m.me/LaVeilleAI
+              - generic [ref=e32]: 
+          - listitem [ref=e33]:
+            - link "LinkedIn" [ref=e34] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/lapointestephane/
+              - generic [ref=e35]: 
+      - navigation [ref=e36]:
+        - generic [ref=e38]:
+          - link "La veille" [ref=e41] [cursor=pointer]:
+            - /url: https://laveille.ai
+            - img "La veille" [ref=e42]
+          - generic [ref=e44]:
+            - text: 
+            - list [ref=e45]:
+              - listitem [ref=e46]:
+                - link "Accueil" [ref=e47] [cursor=pointer]:
+                  - /url: https://laveille.ai
+              - listitem [ref=e48]:
+                - link "Outils" [ref=e49] [cursor=pointer]:
+                  - /url: https://laveille.ai/outils
+              - listitem [ref=e50]:
+                - link "Annuaire" [ref=e51] [cursor=pointer]:
+                  - /url: https://laveille.ai/annuaire
+              - listitem [ref=e52]:
+                - link "Apprendre" [ref=e53] [cursor=pointer]:
+                  - /url: https://laveille.ai/blog
+          - generic [ref=e55]:
+            - button "Ouvrir la recherche (Ctrl+K)" [ref=e58] [cursor=pointer]:
+              - generic [ref=e59]: 
+            - button "Se connecter" [ref=e61] [cursor=pointer]:
+              - img [ref=e63]
+    - generic [ref=e70]:
+      - heading "Outils gratuits" [level=2] [ref=e71]
+      - navigation "Fil d'Ariane" [ref=e72]:
+        - list [ref=e73]:
+          - listitem [ref=e74]:
+            - link "Accueil" [ref=e75] [cursor=pointer]:
+              - /url: https://laveille.ai
+            - text: /
+          - listitem [ref=e76]: Outils gratuits
+    - main [ref=e77]:
+      - generic [ref=e81]:
+        - generic [ref=e82]:
+          - heading "Outils gratuits" [level=2] [ref=e83]
+          - paragraph [ref=e84]: Des outils pratiques pour votre quotidien numérique. 18 outils disponibles
+        - generic [ref=e86]:
+          - generic [ref=e87]:
+            - generic [ref=e88]:
+              - generic [ref=e89]: Rechercher un outil
+              - generic [ref=e90]:
+                - generic [ref=e91]: 🔍
+                - searchbox "Rechercher un outil" [ref=e92]
+            - generic [ref=e93]:
+              - generic [ref=e94]: Trier par
+              - combobox "Trier par" [ref=e95]:
+                - 'option "Trier : Popularité (+ utilisés)" [selected]'
+                - 'option "Trier : Alphabétique (A → Z)"'
+                - 'option "Trier : Plus récents"'
+          - group "Filtrer par catégorie" [ref=e96]:
+            - button "Tous 18" [pressed] [ref=e97] [cursor=pointer]:
+              - text: Tous
+              - generic [ref=e98]: "18"
+            - button "🎮 Jeux 3" [ref=e99] [cursor=pointer]:
+              - text: 🎮 Jeux
+              - generic [ref=e100]: "3"
+            - button "✨ Génération 3" [ref=e101] [cursor=pointer]:
+              - text: ✨ Génération
+              - generic [ref=e102]: "3"
+            - button "🧮 Calcul 3" [ref=e103] [cursor=pointer]:
+              - text: 🧮 Calcul
+              - generic [ref=e104]: "3"
+            - button "💬 Communication 4" [ref=e105] [cursor=pointer]:
+              - text: 💬 Communication
+              - generic [ref=e106]: "4"
+            - button "🔒 Sécurité 2" [ref=e107] [cursor=pointer]:
+              - text: 🔒 Sécurité
+              - generic [ref=e108]: "2"
+        - generic [ref=e109]:
+          - generic [ref=e111]:
+            - generic [ref=e113]: 🔥 Tendance
+            - img "Constructeur de prompts" [ref=e114]
+            - generic [ref=e115]:
+              - heading "Constructeur de prompts" [level=3] [ref=e116]
+              - paragraph [ref=e117]: "Créez des prompts IA optimisés pour ChatGPT, Claude, Gemini et Mistral : choisissez persona, tâche, audience, format et techniques avancées (few-shot, chaîne de pensée). Gratuit, sans inscription."
+              - link "Utiliser" [ref=e118] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/constructeur-prompts
+          - generic [ref=e120]:
+            - generic [ref=e122]: 🔥 Tendance
+            - img "Générateur de mots croisés" [ref=e123]
+            - generic [ref=e124]:
+              - heading "Générateur de mots croisés" [level=3] [ref=e125]
+              - paragraph [ref=e126]: Créez gratuitement vos grilles de mots croisés. Ajoutez vos mots et leurs indices, générez la grille automatiquement, imprimez ou partagez en ligne.
+              - link "Utiliser" [ref=e127] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/mots-croises
+          - generic [ref=e129]:
+            - generic [ref=e131]: 🔥 Tendance
+            - img "Brain Dump 2026" [ref=e132]
+            - generic [ref=e133]:
+              - heading "Brain Dump 2026" [level=3] [ref=e134]
+              - paragraph [ref=e135]: Décharge mentale par écriture manuscrite + IA en 5 étapes. 100% privé, validé scientifiquement.
+              - link "Utiliser" [ref=e136] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/brain-dump
+          - generic [ref=e138]:
+            - img "Générateur de code QR" [ref=e139]
+            - generic [ref=e140]:
+              - heading "Générateur de code QR" [level=3] [ref=e141]
+              - paragraph [ref=e142]: Créez des codes QR pour vos URLs, textes et contacts.
+              - link "Utiliser" [ref=e143] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/code-qr
+          - generic [ref=e145]:
+            - img "Simulateur fiscal" [ref=e146]
+            - generic [ref=e147]:
+              - heading "Simulateur fiscal" [level=3] [ref=e148]
+              - paragraph [ref=e149]: Simulez vos impôts et visualisez la répartition avec des graphiques.
+              - link "Utiliser" [ref=e150] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/simulateur-fiscal
+          - generic [ref=e152]:
+            - img "Anonymiseur de texte" [ref=e153]
+            - generic [ref=e154]:
+              - heading "Anonymiseur de texte" [level=3] [ref=e155]
+              - paragraph [ref=e156]: "Anonymise tes textes avant de les coller dans une IA. Tout se passe dans ton navigateur : tes données ne quittent jamais ton ordinateur, rien n'est envoyé sur nos serveurs. Conforme à la Loi 25 et au RGPD."
+              - link "Utiliser" [ref=e157] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/anonymiseur
+          - generic [ref=e159]:
+            - img "Calculatrice de taxes" [ref=e160]
+            - generic [ref=e161]:
+              - heading "Calculatrice de taxes" [level=3] [ref=e162]
+              - paragraph [ref=e163]: Calculez la TPS et la TVQ sur vos achats au Québec.
+              - link "Utiliser" [ref=e164] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/calculatrice-taxes
+          - generic [ref=e166]:
+            - img "Générateur de mots de passe" [ref=e167]
+            - generic [ref=e168]:
+              - heading "Générateur de mots de passe" [level=3] [ref=e169]
+              - paragraph [ref=e170]: Générez des mots de passe sécurisés et personnalisables.
+              - link "Utiliser" [ref=e171] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/generateur-mots-passe
+          - generic [ref=e173]:
+            - img "Générateur d'équipes" [ref=e174]
+            - generic [ref=e175]:
+              - heading "Générateur d'équipes" [level=3] [ref=e176]
+              - paragraph [ref=e177]: Créez des équipes aléatoires à partir d'une liste de participants.
+              - link "Utiliser" [ref=e178] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/generateur-equipes
+          - generic [ref=e180]:
+            - img "Liens Google" [ref=e181]
+            - generic [ref=e182]:
+              - heading "Liens Google" [level=3] [ref=e183]
+              - paragraph [ref=e184]: Générez des liens Google personnalisés (recherche, maps, traduction).
+              - link "Utiliser" [ref=e185] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/liens-google
+          - generic [ref=e187]:
+            - img "Tirage de présentations" [ref=e188]
+            - generic [ref=e189]:
+              - heading "Tirage de présentations" [level=3] [ref=e190]
+              - paragraph [ref=e191]: Tirez au sort l'ordre des présentations.
+              - link "Utiliser" [ref=e192] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/tirage-presentations
+          - generic [ref=e194]:
+            - img "Roue de tirage" [ref=e195]
+            - generic [ref=e196]:
+              - heading "Roue de tirage" [level=3] [ref=e197]
+              - paragraph [ref=e198]: Une roue de la fortune interactive pour vos tirages au sort.
+              - link "Utiliser" [ref=e199] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/roue-tirage
+          - generic [ref=e201]:
+            - img "Oscilloscope RLC" [ref=e202]
+            - generic [ref=e203]:
+              - heading "Oscilloscope RLC" [level=3] [ref=e204]
+              - paragraph [ref=e205]: Simulateur d'oscilloscope pour visualiser les signaux dans les circuits RLC (résistance, inductance, capacitance).
+              - link "Utiliser" [ref=e206] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/oscilloscope-rlc
+          - generic [ref=e208]:
+            - img "Minuteur visuel" [ref=e209]
+            - generic [ref=e210]:
+              - heading "Minuteur visuel" [level=3] [ref=e211]
+              - paragraph [ref=e212]: Minuteur visuel gratuit avec 5 styles animés (disque TimeTimer, sablier, anneau, chiffres, feu de circulation), présélections rapides et alertes sonores. Sans compte, sans installation.
+              - link "Utiliser" [ref=e213] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/minuteur-visuel
+          - generic [ref=e215]:
+            - generic [ref=e217]: ✨ Nouveau
+            - img "Décido" [ref=e218]
+            - generic [ref=e219]:
+              - heading "Décido" [level=3] [ref=e220]
+              - paragraph [ref=e221]: Organisez un sondage collectif gratuit pour choisir une date ou une option en groupe, sans compte requis. Export CSV/ICS, lien court et code QR inclus.
+              - link "Utiliser" [ref=e222] [cursor=pointer]:
+                - /url: https://laveille.ai/decido
+          - generic [ref=e224]:
+            - generic [ref=e225]:
+              - generic [ref=e226]: ✨ Nouveau
+              - generic [ref=e227]: 🚧 Bientôt
+            - img "Prompteur" [ref=e228]
+            - generic [ref=e229]:
+              - heading "Prompteur" [level=3] [ref=e230]
+              - paragraph [ref=e231]: Téléprompteur gratuit avec éditeur de script structuré en sections (indication visuelle/action + texte à dire ou grandes lignes, au choix), défilement synchronisé à votre débit et générateur de méta-prompt à copier dans l'IA de votre choix pour créer le contenu automatiquement. Sans compte, 100 % dans le navigateur.
+              - link "Utiliser" [ref=e232] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/prompteur
+          - generic [ref=e234]:
+            - img "Sudoku quotidien" [ref=e235]
+            - generic [ref=e236]:
+              - heading "Sudoku quotidien" [level=3] [ref=e237]
+              - paragraph [ref=e238]: 5 niveaux générés à la demande, gratuitement, en quelques millisecondes. Classements live et streak quotidien.
+              - link "Utiliser" [ref=e239] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/sudoku
+          - generic [ref=e241]:
+            - img "QT — Quotient Techno" [ref=e242]
+            - generic [ref=e243]:
+              - heading "QT — Quotient Techno" [level=3] [ref=e244]
+              - paragraph [ref=e245]: "Teste ta culture techno et découvre ton Quotient Techno : 10 questions sur l'IA, le numérique et la cybersécurité, score façon QI."
+              - link "Utiliser" [ref=e246] [cursor=pointer]:
+                - /url: https://laveille.ai/outils/qt
+      - region "Infolettre" [ref=e247]:
+        - heading "Cet outil vous a été utile ?" [level=2] [ref=e248]
+        - paragraph [ref=e249]: Recevez chaque semaine notre concentré de l'actualité IA et nos nouveaux outils — sans bruit, en quelques minutes de lecture.
+        - generic [ref=e250]:
+          - textbox [ref=e251]
+          - generic [ref=e252]:
+            - textbox "Votre adresse courriel" [ref=e253]:
+              - /placeholder: Votre courriel
+            - button "S’inscrire" [ref=e254] [cursor=pointer]
+        - paragraph [ref=e255]: Double opt-in. Loi 25 / RGPD. Désabonnement 1-clic.
+    - contentinfo [ref=e256]:
+      - generic [ref=e259]:
+        - generic [ref=e261]:
+          - img "La veille" [ref=e263]
+          - paragraph [ref=e264]: Votre plateforme d'information dédiée à l'intelligence artificielle, aux technologies innovantes et à la transformation numérique. Profitez de nos outils gratuits et recevez des analyses, actualités et ressources exclusives.
+        - generic [ref=e266]:
+          - heading "Ressources" [level=3] [ref=e268]
+          - list [ref=e269]:
+            - listitem [ref=e270]:
+              - link "Toutes les ressources" [ref=e271] [cursor=pointer]:
+                - /url: https://laveille.ai/ressources
+                - strong [ref=e272]: Toutes les ressources
+            - listitem [ref=e273]:
+              - link "Blog" [ref=e274] [cursor=pointer]:
+                - /url: https://laveille.ai/blog
+            - listitem [ref=e275]:
+              - link "Glossaire Techno" [ref=e276] [cursor=pointer]:
+                - /url: https://laveille.ai/glossaire
+            - listitem [ref=e277]:
+              - link "Répertoire techno" [ref=e278] [cursor=pointer]:
+                - /url: https://laveille.ai/annuaire
+            - listitem [ref=e279]:
+              - link "IA pour les PME québécoises" [ref=e280] [cursor=pointer]:
+                - /url: https://laveille.ai/ia-pme-quebec
+            - listitem [ref=e281]:
+              - link "IA en éducation (Québec)" [ref=e282] [cursor=pointer]:
+                - /url: https://laveille.ai/ia-education-quebec
+            - listitem [ref=e283]:
+              - link "IA pour développeurs (Québec)" [ref=e284] [cursor=pointer]:
+                - /url: https://laveille.ai/ia-developpeurs-quebec
+            - listitem [ref=e285]:
+              - link "Faire sa veille IA (Québec)" [ref=e286] [cursor=pointer]:
+                - /url: https://laveille.ai/veille-ia-quebec
+            - listitem [ref=e287]:
+              - link "IA générative" [ref=e288] [cursor=pointer]:
+                - /url: https://laveille.ai/ia-generative-quebec
+            - listitem [ref=e289]:
+              - link "Actualités" [ref=e290] [cursor=pointer]:
+                - /url: https://laveille.ai/actualites
+            - listitem [ref=e291]:
+              - link "Acronymes éducation" [ref=e292] [cursor=pointer]:
+                - /url: https://laveille.ai/acronymes-education
+            - listitem [ref=e293]:
+              - link "Outils gratuits" [ref=e294] [cursor=pointer]:
+                - /url: https://laveille.ai/outils
+            - listitem [ref=e295]:
+              - link "Raccourcir un lien" [ref=e296] [cursor=pointer]:
+                - /url: https://laveille.ai/raccourcir
+            - listitem [ref=e297]:
+              - link "📡 RSS — Concentré IA" [ref=e298] [cursor=pointer]:
+                - /url: https://laveille.ai/rss/concentres.xml
+            - listitem [ref=e299]:
+              - link "📡 RSS — Nouveaux outils" [ref=e300] [cursor=pointer]:
+                - /url: https://laveille.ai/rss/annuaire.xml
+            - listitem [ref=e301]:
+              - link "🔌 API publique" [ref=e302] [cursor=pointer]:
+                - /url: https://laveille.ai/api
+            - listitem [ref=e303]:
+              - link "📊 Statistiques" [ref=e304] [cursor=pointer]:
+                - /url: https://laveille.ai/stats
+        - generic [ref=e306]:
+          - heading "À propos" [level=3] [ref=e308]
+          - list [ref=e309]:
+            - listitem [ref=e310]:
+              - link "À propos" [ref=e311] [cursor=pointer]:
+                - /url: https://laveille.ai/page/a-propos
+            - listitem [ref=e312]:
+              - link "FAQ" [ref=e313] [cursor=pointer]:
+                - /url: https://laveille.ai/faq
+            - listitem [ref=e314]:
+              - link "Méthodologie" [ref=e315] [cursor=pointer]:
+                - /url: https://laveille.ai/methodologie
+            - listitem [ref=e316]:
+              - link "Contact" [ref=e317] [cursor=pointer]:
+                - /url: https://laveille.ai/contact
+            - listitem [ref=e318]:
+              - link "Statut des services" [ref=e319] [cursor=pointer]:
+                - /url: https://laveille.ai/statut
+            - listitem [ref=e320]:
+              - link "Confidentialité" [ref=e321] [cursor=pointer]:
+                - /url: https://laveille.ai/privacy-policy
+            - listitem [ref=e322]:
+              - link "Conditions d'utilisation" [ref=e323] [cursor=pointer]:
+                - /url: https://laveille.ai/terms-of-use
+            - listitem [ref=e324]:
+              - link "Conditions de vente" [ref=e325] [cursor=pointer]:
+                - /url: https://laveille.ai/conditions-de-vente
+            - listitem [ref=e326]:
+              - link "Cookies" [ref=e327] [cursor=pointer]:
+                - /url: https://laveille.ai/cookie-policy
+            - listitem [ref=e328]:
+              - link "Demande de retrait" [ref=e329] [cursor=pointer]:
+                - /url: https://laveille.ai/annuaire/retrait
+            - listitem [ref=e330]:
+              - link "Gérer les témoins" [ref=e331] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e332]:
+              - link "Plan du site" [ref=e333] [cursor=pointer]:
+                - /url: https://laveille.ai/plan-du-site
+        - generic [ref=e335]:
+          - heading "Communauté" [level=3] [ref=e337]
+          - list [ref=e338]:
+            - listitem [ref=e339]:
+              - link "Facebook Facebook" [ref=e340] [cursor=pointer]:
+                - /url: https://www.facebook.com/LaVeilleAI
+                - img "Facebook" [ref=e342]
+                - text: Facebook
+            - listitem [ref=e343]:
+              - link "Messenger" [ref=e344] [cursor=pointer]:
+                - /url: https://m.me/LaVeilleAI
+                - img [ref=e346]
+                - text: Messenger
+            - listitem [ref=e349]:
+              - link "LinkedIn" [ref=e350] [cursor=pointer]:
+                - /url: https://www.linkedin.com/in/lapointestephane/
+                - img [ref=e352]
+                - text: LinkedIn
+            - listitem [ref=e354]:
+              - link "🔑 Se connecter" [ref=e355] [cursor=pointer]:
+                - /url: https://laveille.ai/login
+      - generic [ref=e359]:
+        - paragraph [ref=e360]: Copyright © 2026 La veille. Tous droits réservés. v1.139.17
+        - paragraph [ref=e361]:
+          - text: Conçu et hébergé par
+          - link "MEMORA solutions" [ref=e362] [cursor=pointer]:
+            - /url: https://memora.solutions
+          - text: · Entreprise canadienne 🍁
+        - paragraph [ref=e363]:
+          - text: Certains liens sont des liens d'affiliation. Nous pouvons recevoir une commission sans frais pour vous.
+          - link "En savoir plus" [ref=e364] [cursor=pointer]:
+            - /url: https://laveille.ai/annuaire/politique-affiliation
+  - generic:
+    - button "Gérer les témoins" [ref=e365] [cursor=pointer]:
+      - img "Gérer les témoins" [ref=e366]
+      - generic [ref=e367]: Gérer les témoins
+    - dialog "Paramètres de confidentialité" [ref=e368]:
+      - generic [ref=e369]:
+        - heading "Paramètres de confidentialité" [level=2] [ref=e370]
+        - paragraph [ref=e371]:
+          - text: Nous utilisons des témoins (cookies) pour assurer le bon fonctionnement du site, analyser le trafic et personnaliser le contenu. Vous pouvez gérer vos préférences ci-dessous.
+          - link "Politique de confidentialité" [ref=e372] [cursor=pointer]:
+            - /url: /privacy-policy
+      - generic [ref=e373]:
+        - button "Tout refuser" [ref=e374] [cursor=pointer]
+        - button "Personnaliser" [ref=e375] [cursor=pointer]
+        - button "Tout accepter" [ref=e376] [cursor=pointer]
+  - generic [ref=e377]:
+    - link "Partager sur Facebook" [ref=e378] [cursor=pointer]:
+      - /url: https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Flaveille.ai%2Foutils&quote=Des+outils+gratuits+pour+votre+quotidien+num%C3%A9rique+%3A+calculatrice+de+taxes%2C+g%C3%A9n%C3%A9rateur+de+mots+de+passe%2C+code+QR%2C+simulateur+fiscal%2C+roue+de+tirage+et+plus.
+      - img [ref=e379]
+    - link "Partager sur X" [ref=e381] [cursor=pointer]:
+      - /url: https://twitter.com/intent/tweet?url=https%3A%2F%2Flaveille.ai%2Foutils&text=Des+outils+gratuits+pour+votre+quotidien+num%C3%A9rique+%3A+calculatrice+de+taxes%2C+g%C3%A9n%C3%A9rateur+de+mots+de+passe%2C+code+QR%2C+simulateur+fiscal%2C+roue+de+tirage+et+plus.+%E2%80%94+Actualit%C3%A9s+en+continu+sur+laveille.ai
+      - img [ref=e382]
+    - link "Partager sur LinkedIn" [ref=e384] [cursor=pointer]:
+      - /url: https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Flaveille.ai%2Foutils&summary=Des+outils+gratuits+pour+votre+quotidien+num%C3%A9rique+%3A+calculatrice+de+taxes%2C+g%C3%A9n%C3%A9rateur+de+mots+de+passe%2C+code+QR%2C+simulateur+fiscal%2C+roue+de+tirage+et+plus.
+      - img [ref=e385]
+    - link "Envoyer via Messenger" [ref=e387] [cursor=pointer]:
+      - /url: https://m.me/LaVeilleAI
+      - img [ref=e388]
+    - button "Copier le contenu enrichi" [ref=e390] [cursor=pointer]:
+      - img [ref=e391]
+  - text: 

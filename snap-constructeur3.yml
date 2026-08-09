@@ -1,0 +1,893 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content — Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+    - text: Aller au contenu principal
+  - region "Bandeau infolettre" [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: ▸
+        - generic [ref=e7]: Veille IA
+        - generic [ref=e8]: "Veille IA sans buzz : pour stratèges québécois."
+      - generic [ref=e9]:
+        - button "Ouvrir le formulaire d'inscription à l'infolettre hebdomadaire" [ref=e10] [cursor=pointer]: Recevoir hebdo →
+        - button "Fermer le bandeau infolettre" [ref=e11] [cursor=pointer]: ×
+  - generic [ref=e12]:
+    - banner [ref=e17]:
+      - generic [ref=e20]:
+        - list [ref=e23]:
+          - listitem [ref=e24]:
+            - link "Actualités" [ref=e25] [cursor=pointer]:
+              - /url: https://laveille.ai/actualites
+              - generic [ref=e26]: Actualités
+          - listitem [ref=e27]:
+            - link "OpenAI stoppe une escroquerie utilisant ChatGPT" [ref=e28] [cursor=pointer]:
+              - /url: https://laveille.ai/actualites/disrupting-a-criminal-scam-operation
+        - list [ref=e30]:
+          - listitem [ref=e31]:
+            - link "Facebook" [ref=e32] [cursor=pointer]:
+              - /url: https://www.facebook.com/LaVeilleAI
+              - generic [ref=e33]: 
+          - listitem [ref=e34]:
+            - link "Messenger" [ref=e35] [cursor=pointer]:
+              - /url: https://m.me/LaVeilleAI
+              - generic [ref=e36]: 
+          - listitem [ref=e37]:
+            - link "LinkedIn" [ref=e38] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/lapointestephane/
+              - generic [ref=e39]: 
+      - navigation [ref=e40]:
+        - generic [ref=e42]:
+          - link "La veille" [ref=e45] [cursor=pointer]:
+            - /url: https://laveille.ai
+            - img "La veille" [ref=e46]
+          - generic [ref=e48]:
+            - text: 
+            - list [ref=e49]:
+              - listitem [ref=e50]:
+                - link "Accueil" [ref=e51] [cursor=pointer]:
+                  - /url: https://laveille.ai
+              - listitem [ref=e52]:
+                - link "Outils" [ref=e53] [cursor=pointer]:
+                  - /url: https://laveille.ai/outils
+              - listitem [ref=e54]:
+                - link "Annuaire" [ref=e55] [cursor=pointer]:
+                  - /url: https://laveille.ai/annuaire
+              - listitem [ref=e56]:
+                - link "Apprendre" [ref=e57] [cursor=pointer]:
+                  - /url: https://laveille.ai/blog
+          - generic [ref=e59]:
+            - button "Ouvrir la recherche (Ctrl+K)" [ref=e62] [cursor=pointer]:
+              - generic [ref=e63]: 
+            - button "Se connecter" [ref=e65] [cursor=pointer]:
+              - img [ref=e67]
+    - main [ref=e70]:
+      - generic [ref=e76]:
+        - generic [ref=e78]:
+          - img "Comment installer OpenClaw en toute sécurité sur macOS ?" [ref=e79]
+          - generic [ref=e80]:
+            - generic [ref=e81]: INTELLIGENCE ARTIFICIELLE
+            - heading "Comment installer OpenClaw en toute sécurité sur macOS ?" [level=2] [ref=e82]:
+              - link "Comment installer OpenClaw en toute sécurité sur macOS ?" [ref=e83] [cursor=pointer]:
+                - /url: https://laveille.ai/blog/comment-installer-openclaw-en-toute-securite-sur-macos
+            - paragraph [ref=e84]: "Guide complet et vérifié pour installer OpenClaw sur macOS sans risque : configuration verrouillée, bac à sable Docker i..."
+            - list [ref=e85]:
+              - listitem [ref=e86]:
+                - img "La veille" [ref=e87]
+              - listitem [ref=e88]:
+                - text: Par
+                - link "Stephane Lapointe" [ref=e89] [cursor=pointer]:
+                  - /url: https://laveille.ai/blog/comment-installer-openclaw-en-toute-securite-sur-macos
+              - listitem [ref=e90]: 26 juil. 2026
+        - generic [ref=e92]:
+          - img "Concentré IA — semaine du 13 au 19 juillet 2026" [ref=e93]
+          - generic [ref=e94]:
+            - generic [ref=e95]: LE CONCENTRÉ
+            - heading "Concentré IA — semaine du 13 au 19 juillet 2026" [level=2] [ref=e96]:
+              - link "Concentré IA — semaine du 13 au 19 juillet 2026" [ref=e97] [cursor=pointer]:
+                - /url: https://laveille.ai/blog/concentre-ia-semaine-13-19-juillet-2026
+            - list [ref=e98]:
+              - listitem [ref=e99]:
+                - text: Par
+                - link "Stephane Lapointe" [ref=e100] [cursor=pointer]:
+                  - /url: https://laveille.ai/blog/concentre-ia-semaine-13-19-juillet-2026
+              - listitem [ref=e101]: 20 juil. 2026
+        - generic [ref=e102]:
+          - generic [ref=e103]:
+            - img "Concentré IA - semaine du 6 au 12 juillet 2026" [ref=e104]
+            - generic [ref=e105]:
+              - generic [ref=e106]: LE CONCENTRÉ
+              - heading "Concentré IA - semaine du 6 au 12 juillet 2026" [level=2] [ref=e107]:
+                - link "Concentré IA - semaine du 6 au 12 juillet 2026" [ref=e108] [cursor=pointer]:
+                  - /url: https://laveille.ai/blog/concentre-ia-semaine-6-12-juillet-2026
+              - list [ref=e109]:
+                - listitem [ref=e110]:
+                  - text: Par
+                  - link "Stephane Lapointe" [ref=e111] [cursor=pointer]:
+                    - /url: https://laveille.ai/blog/concentre-ia-semaine-6-12-juillet-2026
+                - listitem [ref=e112]: 13 juil. 2026
+          - generic [ref=e113]:
+            - img "Concentré IA - semaine du 29 juin au 5 juillet 2026" [ref=e114]
+            - generic [ref=e115]:
+              - generic [ref=e116]: LE CONCENTRÉ
+              - heading "Concentré IA - semaine du 29 juin au 5 juillet 2026" [level=2] [ref=e117]:
+                - link "Concentré IA - semaine du 29 juin au 5 juillet 2026" [ref=e118] [cursor=pointer]:
+                  - /url: https://laveille.ai/blog/concentre-ia-semaine-29-5-juillet-2026
+              - list [ref=e119]:
+                - listitem [ref=e120]:
+                  - text: Par
+                  - link "Stephane Lapointe" [ref=e121] [cursor=pointer]:
+                    - /url: https://laveille.ai/blog/concentre-ia-semaine-29-5-juillet-2026
+                - listitem [ref=e122]: 05 juil. 2026
+      - generic [ref=e125]:
+        - generic [ref=e127]: Dernières actualités
+        - generic [ref=e130]:
+          - generic [ref=e132]:
+            - 'img "Siri AI : Améliorations majeures dans iOS 27" [ref=e134]'
+            - generic [ref=e135]:
+              - text: il y a 5 heures
+              - 'heading "Siri AI : Améliorations majeures dans iOS 27" [level=3] [ref=e136]':
+                - 'link "Siri AI : Améliorations majeures dans iOS 27" [ref=e137] [cursor=pointer]':
+                  - /url: https://laveille.ai/actualites/apple-finally-fixed-siri-so-why-does-it-feel-anticlimactic
+          - generic [ref=e139]:
+            - 'img "UE : nouvelles règles de transparence pour l''IA" [ref=e141]'
+            - generic [ref=e142]:
+              - text: il y a 6 heures
+              - 'heading "UE : nouvelles règles de transparence pour l''IA" [level=3] [ref=e143]':
+                - 'link "UE : nouvelles règles de transparence pour l''IA" [ref=e144] [cursor=pointer]':
+                  - /url: https://laveille.ai/actualites/europes-ai-labeling-and-transparency-rules-are-now-in-effect
+          - generic [ref=e146]:
+            - 'img "ChatGPT : l''outil IA préféré du Congrès américain" [ref=e148]'
+            - generic [ref=e149]:
+              - text: il y a 7 heures
+              - 'heading "ChatGPT : l''outil IA préféré du Congrès américain" [level=3] [ref=e150]':
+                - 'link "ChatGPT : l''outil IA préféré du Congrès américain" [ref=e151] [cursor=pointer]':
+                  - /url: https://laveille.ai/actualites/congresss-favorite-ai-tool-chatgpt
+          - generic [ref=e153]:
+            - img "Alibaba lance Qwen3.8-Max, son modèle d'IA le plus puissant" [ref=e155]
+            - generic [ref=e156]:
+              - text: il y a 13 heures
+              - heading "Alibaba lance Qwen3.8-Max, son modèle d'IA le plus puissant" [level=3] [ref=e157]:
+                - link "Alibaba lance Qwen3.8-Max, son modèle d'IA le plus puissant" [ref=e158] [cursor=pointer]:
+                  - /url: https://laveille.ai/actualites/chinas-alibaba-takes-another-swipe-at-americas-ai-supremacy
+          - generic [ref=e160]:
+            - img "OpenAI stoppe une escroquerie utilisant ChatGPT" [ref=e162]
+            - generic [ref=e163]:
+              - text: il y a 11 minutes
+              - heading "OpenAI stoppe une escroquerie utilisant ChatGPT" [level=3] [ref=e164]:
+                - link "OpenAI stoppe une escroquerie utilisant ChatGPT" [ref=e165] [cursor=pointer]:
+                  - /url: https://laveille.ai/actualites/disrupting-a-criminal-scam-operation
+          - generic [ref=e167]:
+            - 'img "Controverse musicale : Fenix Flexin accusé d''utiliser l''IA pour ''Rubberz''" [ref=e169]'
+            - generic [ref=e170]:
+              - text: il y a 1 heure
+              - 'heading "Controverse musicale : Fenix Flexin accusé d''utiliser l''IA pour ''Rubberz''" [level=3] [ref=e171]':
+                - 'link "Controverse musicale : Fenix Flexin accusé d''utiliser l''IA pour ''Rubberz''" [ref=e172] [cursor=pointer]':
+                  - /url: https://laveille.ai/actualites/did-an-ai-music-app-just-snitch-on-the-song-of-the-summer
+          - generic [ref=e174]:
+            - img "Superblocks et AWS révolutionnent le vibe-coding sécurisé" [ref=e176]
+            - generic [ref=e177]:
+              - text: il y a 4 heures
+              - heading "Superblocks et AWS révolutionnent le vibe-coding sécurisé" [level=3] [ref=e178]:
+                - link "Superblocks et AWS révolutionnent le vibe-coding sécurisé" [ref=e179] [cursor=pointer]:
+                  - /url: https://laveille.ai/actualites/aws-is-helping-vibe-coding-startup-superblocks-and-the-implications-are-big
+          - generic [ref=e181]:
+            - img "Intelligence lève 7,9M$ pour améliorer l'IA" [ref=e183]
+            - generic [ref=e184]:
+              - text: il y a 4 heures
+              - heading "Intelligence lève 7,9M$ pour améliorer l'IA" [level=3] [ref=e185]:
+                - link "Intelligence lève 7,9M$ pour améliorer l'IA" [ref=e186] [cursor=pointer]:
+                  - /url: https://laveille.ai/actualites/designarena-creators-raise-79-million-to-bring-taste-to-ai-models
+          - generic [ref=e188]:
+            - 'img "Siri AI : Améliorations majeures dans iOS 27" [ref=e190]'
+            - generic [ref=e191]:
+              - text: il y a 5 heures
+              - 'heading "Siri AI : Améliorations majeures dans iOS 27" [level=3] [ref=e192]':
+                - 'link "Siri AI : Améliorations majeures dans iOS 27" [ref=e193] [cursor=pointer]':
+                  - /url: https://laveille.ai/actualites/apple-finally-fixed-siri-so-why-does-it-feel-anticlimactic
+          - generic [ref=e195]:
+            - 'img "UE : nouvelles règles de transparence pour l''IA" [ref=e197]'
+            - generic [ref=e198]:
+              - text: il y a 6 heures
+              - 'heading "UE : nouvelles règles de transparence pour l''IA" [level=3] [ref=e199]':
+                - 'link "UE : nouvelles règles de transparence pour l''IA" [ref=e200] [cursor=pointer]':
+                  - /url: https://laveille.ai/actualites/europes-ai-labeling-and-transparency-rules-are-now-in-effect
+          - generic [ref=e202]:
+            - 'img "ChatGPT : l''outil IA préféré du Congrès américain" [ref=e204]'
+            - generic [ref=e205]:
+              - text: il y a 7 heures
+              - 'heading "ChatGPT : l''outil IA préféré du Congrès américain" [level=3] [ref=e206]':
+                - 'link "ChatGPT : l''outil IA préféré du Congrès américain" [ref=e207] [cursor=pointer]':
+                  - /url: https://laveille.ai/actualites/congresss-favorite-ai-tool-chatgpt
+          - generic [ref=e209]:
+            - img "Alibaba lance Qwen3.8-Max, son modèle d'IA le plus puissant" [ref=e211]
+            - generic [ref=e212]:
+              - text: il y a 13 heures
+              - heading "Alibaba lance Qwen3.8-Max, son modèle d'IA le plus puissant" [level=3] [ref=e213]:
+                - link "Alibaba lance Qwen3.8-Max, son modèle d'IA le plus puissant" [ref=e214] [cursor=pointer]:
+                  - /url: https://laveille.ai/actualites/chinas-alibaba-takes-another-swipe-at-americas-ai-supremacy
+          - generic [ref=e216]:
+            - img "OpenAI stoppe une escroquerie utilisant ChatGPT" [ref=e218]
+            - generic [ref=e219]:
+              - text: il y a 11 minutes
+              - heading "OpenAI stoppe une escroquerie utilisant ChatGPT" [level=3] [ref=e220]:
+                - link "OpenAI stoppe une escroquerie utilisant ChatGPT" [ref=e221] [cursor=pointer]:
+                  - /url: https://laveille.ai/actualites/disrupting-a-criminal-scam-operation
+          - generic [ref=e223]:
+            - 'img "Controverse musicale : Fenix Flexin accusé d''utiliser l''IA pour ''Rubberz''" [ref=e225]'
+            - generic [ref=e226]:
+              - text: il y a 1 heure
+              - 'heading "Controverse musicale : Fenix Flexin accusé d''utiliser l''IA pour ''Rubberz''" [level=3] [ref=e227]':
+                - 'link "Controverse musicale : Fenix Flexin accusé d''utiliser l''IA pour ''Rubberz''" [ref=e228] [cursor=pointer]':
+                  - /url: https://laveille.ai/actualites/did-an-ai-music-app-just-snitch-on-the-song-of-the-summer
+          - generic [ref=e230]:
+            - img "Superblocks et AWS révolutionnent le vibe-coding sécurisé" [ref=e232]
+            - generic [ref=e233]:
+              - text: il y a 4 heures
+              - heading "Superblocks et AWS révolutionnent le vibe-coding sécurisé" [level=3] [ref=e234]:
+                - link "Superblocks et AWS révolutionnent le vibe-coding sécurisé" [ref=e235] [cursor=pointer]:
+                  - /url: https://laveille.ai/actualites/aws-is-helping-vibe-coding-startup-superblocks-and-the-implications-are-big
+          - generic [ref=e237]:
+            - img "Intelligence lève 7,9M$ pour améliorer l'IA" [ref=e239]
+            - generic [ref=e240]:
+              - text: il y a 4 heures
+              - heading "Intelligence lève 7,9M$ pour améliorer l'IA" [level=3] [ref=e241]:
+                - link "Intelligence lève 7,9M$ pour améliorer l'IA" [ref=e242] [cursor=pointer]:
+                  - /url: https://laveille.ai/actualites/designarena-creators-raise-79-million-to-bring-taste-to-ai-models
+      - generic [ref=e244]:
+        - heading "Articles à la une" [level=2] [ref=e246]
+        - generic [ref=e247]:
+          - generic [ref=e251]:
+            - generic [ref=e253]:
+              - generic [ref=e254]:
+                - img "Comment installer OpenClaw en toute sécurité sur macOS ?" [ref=e255]
+                - generic [ref=e256]: INTELLIGENCE ARTIFICIELLE
+              - generic [ref=e257]:
+                - heading "Comment installer OpenClaw en toute sécurité sur macOS ?" [level=2] [ref=e258]:
+                  - link "Comment installer OpenClaw en toute sécurité sur macOS ?" [ref=e259] [cursor=pointer]:
+                    - /url: https://laveille.ai/blog/comment-installer-openclaw-en-toute-securite-sur-macos
+                - time [ref=e261]: 26 juil. 2026
+                - paragraph [ref=e262]: "Guide complet et vérifié pour installer OpenClaw sur macOS sans risque : configuration verrouillée,..."
+            - generic [ref=e264]:
+              - generic [ref=e265]:
+                - img "Concentré IA — semaine du 13 au 19 juillet 2026" [ref=e266]
+                - generic [ref=e267]: LE CONCENTRÉ
+              - generic [ref=e268]:
+                - heading "Concentré IA — semaine du 13 au 19 juillet 2026" [level=2] [ref=e269]:
+                  - link "Concentré IA — semaine du 13 au 19 juillet 2026" [ref=e270] [cursor=pointer]:
+                    - /url: https://laveille.ai/blog/concentre-ia-semaine-13-19-juillet-2026
+                - time [ref=e272]: 20 juil. 2026
+                - paragraph [ref=e273]: La semaine du 13 au 19 juillet 2026 a été marquée par la guerre des prix entre laboratoires d'IA, la...
+            - generic [ref=e275]:
+              - generic [ref=e276]:
+                - img "Concentré IA - semaine du 6 au 12 juillet 2026" [ref=e277]
+                - generic [ref=e278]: LE CONCENTRÉ
+              - generic [ref=e279]:
+                - heading "Concentré IA - semaine du 6 au 12 juillet 2026" [level=2] [ref=e280]:
+                  - link "Concentré IA - semaine du 6 au 12 juillet 2026" [ref=e281] [cursor=pointer]:
+                    - /url: https://laveille.ai/blog/concentre-ia-semaine-6-12-juillet-2026
+                - time [ref=e283]: 13 juil. 2026
+                - paragraph [ref=e284]: "Cette semaine : AWS réduit de 87% les cycles de recherche pharmaceutique, Anthropic lance Claude Cod..."
+            - generic [ref=e286]:
+              - generic [ref=e287]:
+                - img "Concentré IA - semaine du 29 juin au 5 juillet 2026" [ref=e288]
+                - generic [ref=e289]: LE CONCENTRÉ
+              - generic [ref=e290]:
+                - heading "Concentré IA - semaine du 29 juin au 5 juillet 2026" [level=2] [ref=e291]:
+                  - link "Concentré IA - semaine du 29 juin au 5 juillet 2026" [ref=e292] [cursor=pointer]:
+                    - /url: https://laveille.ai/blog/concentre-ia-semaine-29-5-juillet-2026
+                - time [ref=e294]: 05 juil. 2026
+                - paragraph [ref=e295]: Anthropic multiplie les annonces (Fable 5, Claude Sonnet 5, Claude Science), Google consolide Gemini...
+            - generic [ref=e297]:
+              - generic [ref=e298]:
+                - img "Concentré IA — semaine du 8 au 14 juin 2026" [ref=e299]
+                - generic [ref=e300]: LE CONCENTRÉ
+              - generic [ref=e301]:
+                - heading "Concentré IA — semaine du 8 au 14 juin 2026" [level=2] [ref=e302]:
+                  - link "Concentré IA — semaine du 8 au 14 juin 2026" [ref=e303] [cursor=pointer]:
+                    - /url: https://laveille.ai/blog/concentre-ia-semaine-8-14-juin-2026
+                - time [ref=e305]: 15 juin 2026
+                - paragraph [ref=e306]: "Notre concentré de la semaine du 8 au 14 juin 2026 : financements records (Prometheus de Jeff Bezos,..."
+            - generic [ref=e308]:
+              - generic [ref=e309]:
+                - img "Concentré IA — semaine du 1 au 7 juin 2026" [ref=e310]
+                - generic [ref=e311]: LE CONCENTRÉ
+              - generic [ref=e312]:
+                - heading "Concentré IA — semaine du 1 au 7 juin 2026" [level=2] [ref=e313]:
+                  - link "Concentré IA — semaine du 1 au 7 juin 2026" [ref=e314] [cursor=pointer]:
+                    - /url: https://laveille.ai/blog/concentre-ia-semaine-1-7-juin-2026
+                - time [ref=e316]: 07 juin 2026
+                - paragraph [ref=e317]: "Notre concentré de la semaine du 1er au 7 juin 2026 : la bataille des assistants (Siri avec Gemini,..."
+          - generic [ref=e319]:
+            - generic [ref=e320]:
+              - heading "Catégories" [level=3] [ref=e321]
+              - list [ref=e322]:
+                - listitem [ref=e323]:
+                  - link " ACTUALITÉS TECHNO (23)" [ref=e324] [cursor=pointer]:
+                    - /url: https://laveille.ai/categorie/actualites-techno
+                    - text:  ACTUALITÉS TECHNO
+                    - generic [ref=e325]: (23)
+                - listitem [ref=e326]:
+                  - link " Divers (02)" [ref=e327] [cursor=pointer]:
+                    - /url: https://laveille.ai/categorie/divers
+                    - text:  Divers
+                    - generic [ref=e328]: (02)
+                - listitem [ref=e329]:
+                  - link " FRÉQUENCE NUMÉRIQUE (PODCAST) (08)" [ref=e330] [cursor=pointer]:
+                    - /url: https://laveille.ai/categorie/frequence-numerique
+                    - text:  FRÉQUENCE NUMÉRIQUE (PODCAST)
+                    - generic [ref=e331]: (08)
+                - listitem [ref=e332]:
+                  - link " GUIDES & TUTORIELS (12)" [ref=e333] [cursor=pointer]:
+                    - /url: https://laveille.ai/categorie/guides-tutoriels
+                    - text:  GUIDES & TUTORIELS
+                    - generic [ref=e334]: (12)
+                - listitem [ref=e335]:
+                  - link " INTELLIGENCE ARTIFICIELLE (03)" [ref=e336] [cursor=pointer]:
+                    - /url: https://laveille.ai/categorie/intelligence-artificielle
+                    - text:  INTELLIGENCE ARTIFICIELLE
+                    - generic [ref=e337]: (03)
+                - listitem [ref=e338]:
+                  - link " LE CONCENTRÉ (15)" [ref=e339] [cursor=pointer]:
+                    - /url: https://laveille.ai/categorie/le-concentre
+                    - text:  LE CONCENTRÉ
+                    - generic [ref=e340]: (15)
+                - listitem [ref=e341]:
+                  - link " OUTILS & RESSOURCES (01)" [ref=e342] [cursor=pointer]:
+                    - /url: https://laveille.ai/categorie/outils-ressources
+                    - text:  OUTILS & RESSOURCES
+                    - generic [ref=e343]: (01)
+                - listitem [ref=e344]:
+                  - link " PÉDAGOGIE NUMÉRIQUE (01)" [ref=e345] [cursor=pointer]:
+                    - /url: https://laveille.ai/categorie/pedagogie-numerique
+                    - text:  PÉDAGOGIE NUMÉRIQUE
+                    - generic [ref=e346]: (01)
+            - generic [ref=e347]:
+              - heading "Articles populaires" [level=3] [ref=e348]
+              - generic [ref=e349]:
+                - generic [ref=e350]:
+                  - img "Comment installer OpenClaw en toute sécurité sur macOS ?" [ref=e352]
+                  - generic [ref=e353]:
+                    - text: 26 juil. 2026
+                    - heading "Comment installer OpenClaw en toute sécurité sur macOS ?" [level=4] [ref=e354]:
+                      - link "Comment installer OpenClaw en toute sécurité sur macOS ?" [ref=e355] [cursor=pointer]:
+                        - /url: https://laveille.ai/blog/comment-installer-openclaw-en-toute-securite-sur-macos
+                - generic [ref=e356]:
+                  - img "Concentré IA — semaine du 13 au 19 juillet 2026" [ref=e358]
+                  - generic [ref=e359]:
+                    - text: 20 juil. 2026
+                    - heading "Concentré IA — semaine du 13 au 19 juillet 2026" [level=4] [ref=e360]:
+                      - link "Concentré IA — semaine du 13 au 19 juillet 2026" [ref=e361] [cursor=pointer]:
+                        - /url: https://laveille.ai/blog/concentre-ia-semaine-13-19-juillet-2026
+                - generic [ref=e362]:
+                  - img "Concentré IA - semaine du 6 au 12 juillet 2026" [ref=e364]
+                  - generic [ref=e365]:
+                    - text: 13 juil. 2026
+                    - heading "Concentré IA - semaine du 6 au 12 juillet 2026" [level=4] [ref=e366]:
+                      - link "Concentré IA - semaine du 6 au 12 juillet 2026" [ref=e367] [cursor=pointer]:
+                        - /url: https://laveille.ai/blog/concentre-ia-semaine-6-12-juillet-2026
+                - generic [ref=e368]:
+                  - img "Concentré IA - semaine du 29 juin au 5 juillet 2026" [ref=e370]
+                  - generic [ref=e371]:
+                    - text: 05 juil. 2026
+                    - heading "Concentré IA - semaine du 29 juin au 5 juillet 2026" [level=4] [ref=e372]:
+                      - link "Concentré IA - semaine du 29 juin au 5 juillet 2026" [ref=e373] [cursor=pointer]:
+                        - /url: https://laveille.ai/blog/concentre-ia-semaine-29-5-juillet-2026
+      - generic [ref=e375]:
+        - heading "Articles antérieurs" [level=2] [ref=e377]
+        - generic [ref=e381]:
+          - generic [ref=e383]:
+            - generic [ref=e384]:
+              - img "Concentré IA — semaine du 25 au 31 mai 2026" [ref=e385]
+              - generic [ref=e386]: LE CONCENTRÉ
+            - generic [ref=e387]:
+              - heading "Concentré IA — semaine du 25 au 31 mai 2026" [level=2] [ref=e388]:
+                - link "Concentré IA — semaine du 25 au 31 mai 2026" [ref=e389] [cursor=pointer]:
+                  - /url: https://laveille.ai/blog/concentre-ia-semaine-25-31-mai-2026
+              - time [ref=e391]: 31 mai 2026
+          - generic [ref=e393]:
+            - generic [ref=e394]:
+              - 'img "La Déclaration de Montréal : Pourquoi cette boussole éthique compte pour vous en 2026 ?" [ref=e395]'
+              - generic [ref=e396]: Général
+            - generic [ref=e397]:
+              - 'heading "La Déclaration de Montréal : Pourquoi cette boussole éthique compte pour vous en 2026 ?" [level=2] [ref=e398]':
+                - 'link "La Déclaration de Montréal : Pourquoi cette boussole éthique compte pour vous en 2026 ?" [ref=e399] [cursor=pointer]':
+                  - /url: https://laveille.ai/blog/declaration-montreal-ia-responsable
+              - time [ref=e401]: 25 mai 2026
+          - generic [ref=e403]:
+            - generic [ref=e404]:
+              - 'img "Concentré IA : la semaine du 18 au 24 mai 2026" [ref=e405]'
+              - generic [ref=e406]: LE CONCENTRÉ
+            - generic [ref=e407]:
+              - 'heading "Concentré IA : la semaine du 18 au 24 mai 2026" [level=2] [ref=e408]':
+                - 'link "Concentré IA : la semaine du 18 au 24 mai 2026" [ref=e409] [cursor=pointer]':
+                  - /url: https://laveille.ai/blog/concentre-ia-semaine-18-24-mai-2026
+              - time [ref=e411]: 25 mai 2026
+          - generic [ref=e413]:
+            - generic [ref=e414]:
+              - img "Concentré IA — semaine du 11 au 17 mai 2026" [ref=e415]
+              - generic [ref=e416]: LE CONCENTRÉ
+            - generic [ref=e417]:
+              - heading "Concentré IA — semaine du 11 au 17 mai 2026" [level=2] [ref=e418]:
+                - link "Concentré IA — semaine du 11 au 17 mai 2026" [ref=e419] [cursor=pointer]:
+                  - /url: https://laveille.ai/blog/concentre-ia-semaine-11-17-mai-2026
+              - time [ref=e421]: 18 mai 2026
+      - generic [ref=e423]:
+        - generic [ref=e424]:
+          - generic [ref=e425]:
+            - heading "📰 Dernières actualités" [level=2] [ref=e426]
+            - generic [ref=e427]: Veille quotidienne IA et technologie
+          - link "Voir tout →" [ref=e428] [cursor=pointer]:
+            - /url: https://laveille.ai/actualites
+        - generic [ref=e429]:
+          - link "OpenAI stoppe une escroquerie utilisant ChatGPT OpenAI stoppe une escroquerie utilisant ChatGPT OpenAI a interrompu les activités d'une organisation criminelle cambodgienne exploitant Ch... OpenAI Blog il y a 11 minutes" [ref=e431] [cursor=pointer]:
+            - /url: https://laveille.ai/actualites/disrupting-a-criminal-scam-operation
+            - img "OpenAI stoppe une escroquerie utilisant ChatGPT" [ref=e433]
+            - generic [ref=e434]:
+              - heading "OpenAI stoppe une escroquerie utilisant ChatGPT" [level=3] [ref=e435]
+              - paragraph [ref=e436]: OpenAI a interrompu les activités d'une organisation criminelle cambodgienne exploitant Ch...
+              - generic [ref=e437]:
+                - generic [ref=e438]: OpenAI Blog
+                - generic [ref=e439]: il y a 11 minutes
+          - 'link "Controverse musicale : Fenix Flexin accusé d''utiliser l''IA pour ''Rubberz'' Controverse musicale : Fenix Flexin accusé d''utiliser l''IA pour ''... Fenix Flexin et Tyga sont au cœur d''une controverse après que l''application Treblo a détec... Wired AI il y a 1 heure" [ref=e441] [cursor=pointer]':
+            - /url: https://laveille.ai/actualites/did-an-ai-music-app-just-snitch-on-the-song-of-the-summer
+            - 'img "Controverse musicale : Fenix Flexin accusé d''utiliser l''IA pour ''Rubberz''" [ref=e443]'
+            - generic [ref=e444]:
+              - 'heading "Controverse musicale : Fenix Flexin accusé d''utiliser l''IA pour ''..." [level=3] [ref=e445]'
+              - paragraph [ref=e446]: Fenix Flexin et Tyga sont au cœur d'une controverse après que l'application Treblo a détec...
+              - generic [ref=e447]:
+                - generic [ref=e448]: Wired AI
+                - generic [ref=e449]: il y a 1 heure
+          - link "Superblocks et AWS révolutionnent le vibe-coding sécurisé Superblocks et AWS révolutionnent le vibe-coding sécurisé Superblocks, une startup spécialisée dans le vibe-coding, a conclu un partenariat avec AWS... TechCrunch AI il y a 4 heures" [ref=e451] [cursor=pointer]:
+            - /url: https://laveille.ai/actualites/aws-is-helping-vibe-coding-startup-superblocks-and-the-implications-are-big
+            - img "Superblocks et AWS révolutionnent le vibe-coding sécurisé" [ref=e453]
+            - generic [ref=e454]:
+              - heading "Superblocks et AWS révolutionnent le vibe-coding sécurisé" [level=3] [ref=e455]
+              - paragraph [ref=e456]: Superblocks, une startup spécialisée dans le vibe-coding, a conclu un partenariat avec AWS...
+              - generic [ref=e457]:
+                - generic [ref=e458]: TechCrunch AI
+                - generic [ref=e459]: il y a 4 heures
+          - link "Intelligence lève 7,9M$ pour améliorer l'IA Intelligence lève 7,9M$ pour améliorer l'IA Intelligence a annoncé une levée de fonds de 7,9 millions de dollars pour son outil Design... TechCrunch AI il y a 4 heures" [ref=e461] [cursor=pointer]:
+            - /url: https://laveille.ai/actualites/designarena-creators-raise-79-million-to-bring-taste-to-ai-models
+            - img "Intelligence lève 7,9M$ pour améliorer l'IA" [ref=e463]
+            - generic [ref=e464]:
+              - heading "Intelligence lève 7,9M$ pour améliorer l'IA" [level=3] [ref=e465]
+              - paragraph [ref=e466]: Intelligence a annoncé une levée de fonds de 7,9 millions de dollars pour son outil Design...
+              - generic [ref=e467]:
+                - generic [ref=e468]: TechCrunch AI
+                - generic [ref=e469]: il y a 4 heures
+          - 'link "Siri AI : Améliorations majeures dans iOS 27 Siri AI : Améliorations majeures dans iOS 27 Siri AI, lancé dans la version bêta d''iOS 27 en juillet, offre des conversations naturelle... TechCrunch AI il y a 5 heures" [ref=e471] [cursor=pointer]':
+            - /url: https://laveille.ai/actualites/apple-finally-fixed-siri-so-why-does-it-feel-anticlimactic
+            - 'img "Siri AI : Améliorations majeures dans iOS 27" [ref=e473]'
+            - generic [ref=e474]:
+              - 'heading "Siri AI : Améliorations majeures dans iOS 27" [level=3] [ref=e475]'
+              - paragraph [ref=e476]: Siri AI, lancé dans la version bêta d'iOS 27 en juillet, offre des conversations naturelle...
+              - generic [ref=e477]:
+                - generic [ref=e478]: TechCrunch AI
+                - generic [ref=e479]: il y a 5 heures
+          - 'link "UE : nouvelles règles de transparence pour l''IA UE : nouvelles règles de transparence pour l''IA Depuis le 2 août 2023, l''UE exige que les entreprises divulguent les interactions avec des... The Verge AI il y a 6 heures" [ref=e481] [cursor=pointer]':
+            - /url: https://laveille.ai/actualites/europes-ai-labeling-and-transparency-rules-are-now-in-effect
+            - 'img "UE : nouvelles règles de transparence pour l''IA" [ref=e483]'
+            - generic [ref=e484]:
+              - 'heading "UE : nouvelles règles de transparence pour l''IA" [level=3] [ref=e485]'
+              - paragraph [ref=e486]: Depuis le 2 août 2023, l'UE exige que les entreprises divulguent les interactions avec des...
+              - generic [ref=e487]:
+                - generic [ref=e488]: The Verge AI
+                - generic [ref=e489]: il y a 6 heures
+          - 'link "ChatGPT : l''outil IA préféré du Congrès américain ChatGPT : l''outil IA préféré du Congrès américain ChatGPT d''OpenAI est l''outil d''IA préféré du Congrès américain, représentant 90% des dépen... TechCrunch AI il y a 7 heures" [ref=e491] [cursor=pointer]':
+            - /url: https://laveille.ai/actualites/congresss-favorite-ai-tool-chatgpt
+            - 'img "ChatGPT : l''outil IA préféré du Congrès américain" [ref=e493]'
+            - generic [ref=e494]:
+              - 'heading "ChatGPT : l''outil IA préféré du Congrès américain" [level=3] [ref=e495]'
+              - paragraph [ref=e496]: ChatGPT d'OpenAI est l'outil d'IA préféré du Congrès américain, représentant 90% des dépen...
+              - generic [ref=e497]:
+                - generic [ref=e498]: TechCrunch AI
+                - generic [ref=e499]: il y a 7 heures
+          - link "Alibaba lance Qwen3.8-Max, son modèle d'IA le plus puissant Alibaba lance Qwen3.8-Max, son modèle d'IA le plus puissant Alibaba a dévoilé Qwen3.8-Max, son modèle d'IA le plus performant, affirmant qu'il rivalis... The Verge AI il y a 13 heures" [ref=e501] [cursor=pointer]:
+            - /url: https://laveille.ai/actualites/chinas-alibaba-takes-another-swipe-at-americas-ai-supremacy
+            - img "Alibaba lance Qwen3.8-Max, son modèle d'IA le plus puissant" [ref=e503]
+            - generic [ref=e504]:
+              - heading "Alibaba lance Qwen3.8-Max, son modèle d'IA le plus puissant" [level=3] [ref=e505]
+              - paragraph [ref=e506]: Alibaba a dévoilé Qwen3.8-Max, son modèle d'IA le plus performant, affirmant qu'il rivalis...
+              - generic [ref=e507]:
+                - generic [ref=e508]: The Verge AI
+                - generic [ref=e509]: il y a 13 heures
+      - generic [ref=e511]:
+        - generic [ref=e512]:
+          - generic [ref=e513]:
+            - heading "🔍 Outils IA populaires" [level=2] [ref=e514]
+            - generic [ref=e515]: Les solutions les plus utilisées par la communauté
+          - link "Voir tout →" [ref=e516] [cursor=pointer]:
+            - /url: https://laveille.ai/annuaire
+        - generic [ref=e517]:
+          - link "/mission for Claude Code /mission for Claude Code /mission for Claude Code est une initiative d’Anthropic visant à positionner Cla... Freemium" [ref=e519] [cursor=pointer]:
+            - /url: https://laveille.ai/annuaire/mission-for-claude-code
+            - img "/mission for Claude Code" [ref=e521]
+            - generic [ref=e522]:
+              - heading "/mission for Claude Code" [level=3] [ref=e523]
+              - paragraph [ref=e524]: /mission for Claude Code est une initiative d’Anthropic visant à positionner Cla...
+              - generic [ref=e526]: Freemium
+          - link "/monitor by Firecrawl /monitor by Firecrawl /monitor by Firecrawl est une fonctionnalité de surveillance web conçue spécifiq... Freemium" [ref=e528] [cursor=pointer]:
+            - /url: https://laveille.ai/annuaire/monitor-by-firecrawl
+            - img "/monitor by Firecrawl" [ref=e530]
+            - generic [ref=e531]:
+              - heading "/monitor by Firecrawl" [level=3] [ref=e532]
+              - paragraph [ref=e533]: /monitor by Firecrawl est une fonctionnalité de surveillance web conçue spécifiq...
+              - generic [ref=e535]: Freemium
+          - link "3PL Hub 3PL Hub 3PL Hub (https ://www.3plhub.co) se positionne comme une plateforme d’orchestrat... Enterprise" [ref=e537] [cursor=pointer]:
+            - /url: https://laveille.ai/annuaire/3pl-hub
+            - img "3PL Hub" [ref=e539]
+            - generic [ref=e540]:
+              - heading "3PL Hub" [level=3] [ref=e541]
+              - paragraph [ref=e542]: 3PL Hub (https ://www.3plhub.co) se positionne comme une plateforme d’orchestrat...
+              - generic [ref=e544]: Enterprise
+          - link "AI Media Buyer By Creatify AI Media Buyer By Creatify AI Media Buyer by Creatify est un agent d’achat média alimenté par l’intelligenc... Freemium" [ref=e546] [cursor=pointer]:
+            - /url: https://laveille.ai/annuaire/ai-media-buyer-by-creatify
+            - img "AI Media Buyer By Creatify" [ref=e548]
+            - generic [ref=e549]:
+              - heading "AI Media Buyer By Creatify" [level=3] [ref=e550]
+              - paragraph [ref=e551]: AI Media Buyer by Creatify est un agent d’achat média alimenté par l’intelligenc...
+              - generic [ref=e553]: Freemium
+      - region "Comparez 6 outils IA côte à côte" [ref=e554]:
+        - generic [ref=e557]:
+          - generic [ref=e558]:
+            - paragraph [ref=e559]: Nouveau · 2026
+            - heading "Comparez 6 outils IA côte à côte" [level=2] [ref=e560]
+            - paragraph [ref=e561]: "Sélectionnez vos candidats dans l'annuaire et obtenez un tableau comparatif instantané : pricing, programme éducation, fonctionnalités clés, alternatives. Idéal pour choisir la bonne stack avant d'engager des budgets."
+            - generic [ref=e562]:
+              - link "🔀 Ouvrir le comparateur" [ref=e563] [cursor=pointer]:
+                - /url: https://laveille.ai/annuaire
+              - link "📚 21 collections & stacks curatés" [ref=e564] [cursor=pointer]:
+                - /url: https://laveille.ai/collections
+          - generic [ref=e565]:
+            - link "🎓 Stack enseignants" [ref=e566] [cursor=pointer]:
+              - /url: https://laveille.ai/collections/stack-enseignant-primaire-quebec
+            - link "🚀 Stack startup SaaS" [ref=e567] [cursor=pointer]:
+              - /url: https://laveille.ai/collections/stack-startup-saas-quebec
+            - link "📖 Stack étudiant" [ref=e568] [cursor=pointer]:
+              - /url: https://laveille.ai/collections/stack-etudiant-universitaire-quebec
+            - link "💻 Stack développeur" [ref=e569] [cursor=pointer]:
+              - /url: https://laveille.ai/collections/stack-developpeur-full-stack-2026
+            - link "📣 Stack marketeur PME" [ref=e570] [cursor=pointer]:
+              - /url: https://laveille.ai/collections/stack-marketeur-pme-quebec
+            - link "🎨 Images & illustrations" [ref=e571] [cursor=pointer]:
+              - /url: https://laveille.ai/collections/ia-creation-images-illustrations
+      - generic [ref=e573]:
+        - generic [ref=e574]:
+          - generic [ref=e575]:
+            - heading "🎮 Outils interactifs gratuits" [level=2] [ref=e576]
+            - generic [ref=e577]: Apprenez en jouant — engagement record sur la plateforme
+          - link "Voir tous les outils →" [ref=e578] [cursor=pointer]:
+            - /url: https://laveille.ai/outils
+        - generic [ref=e579]:
+          - link "Aperçu Sudoku quotidien Sudoku quotidien 5 niveaux générés à la demande, classements live, série quotidienne. Engagement record sur la plateforme. Gratuit Mini-jeu" [ref=e581] [cursor=pointer]:
+            - /url: https://laveille.ai/outils/sudoku
+            - img "Aperçu Sudoku quotidien" [ref=e583]
+            - generic [ref=e584]:
+              - heading "Sudoku quotidien" [level=3] [ref=e585]
+              - paragraph [ref=e586]: 5 niveaux générés à la demande, classements live, série quotidienne. Engagement record sur la plateforme.
+              - generic [ref=e587]:
+                - generic [ref=e588]: Gratuit
+                - generic [ref=e589]: Mini-jeu
+          - link "Aperçu Générateur de mots croisés Générateur de mots croisés Créez vos propres grilles personnalisées avec l'IA. Export PDF, partage, jouer en ligne. Gratuit IA générative" [ref=e591] [cursor=pointer]:
+            - /url: https://laveille.ai/outils/mots-croises
+            - img "Aperçu Générateur de mots croisés" [ref=e593]
+            - generic [ref=e594]:
+              - heading "Générateur de mots croisés" [level=3] [ref=e595]
+              - paragraph [ref=e596]: Créez vos propres grilles personnalisées avec l'IA. Export PDF, partage, jouer en ligne.
+              - generic [ref=e597]:
+                - generic [ref=e598]: Gratuit
+                - generic [ref=e599]: IA générative
+          - link "Aperçu Constructeur de prompts Constructeur de prompts Composez des prompts IA professionnels en un clic. Modèles testés, formats variés, copier-coller direct. Gratuit Productivité" [ref=e601] [cursor=pointer]:
+            - /url: https://laveille.ai/outils/constructeur-prompts
+            - img "Aperçu Constructeur de prompts" [ref=e603]
+            - generic [ref=e604]:
+              - heading "Constructeur de prompts" [level=3] [ref=e605]
+              - paragraph [ref=e606]: Composez des prompts IA professionnels en un clic. Modèles testés, formats variés, copier-coller direct.
+              - generic [ref=e607]:
+                - generic [ref=e608]: Gratuit
+                - generic [ref=e609]: Productivité
+      - generic [ref=e611]:
+        - generic [ref=e612]:
+          - generic [ref=e613]:
+            - heading "📚 Termes IA à découvrir" [level=2] [ref=e614]
+            - generic [ref=e615]: Enrichissez votre vocabulaire technique
+          - link "Voir tout →" [ref=e616] [cursor=pointer]:
+            - /url: https://laveille.ai/glossaire
+        - generic [ref=e617]:
+          - link "Socket Socket Intermédiaire Une socket est un point de terminaison logiciel permettant la communication bidi..." [ref=e619] [cursor=pointer]:
+            - /url: https://laveille.ai/glossaire/socket
+            - img "Socket" [ref=e621]
+            - generic [ref=e622]:
+              - generic [ref=e623]:
+                - heading "Socket" [level=3] [ref=e624]
+                - generic [ref=e625]: Intermédiaire
+              - paragraph [ref=e626]: Une socket est un point de terminaison logiciel permettant la communication bidi...
+          - link "Licence BSD à 2 clauses (Simplified) Licence BSD à 2 clauses (Simplified) Débutant La Licence BSD à 2 clauses, issue du projet BSD de l'Université de Californie à..." [ref=e628] [cursor=pointer]:
+            - /url: https://laveille.ai/glossaire/licence-bsd-2-clause
+            - img "Licence BSD à 2 clauses (Simplified)" [ref=e630]
+            - generic [ref=e631]:
+              - generic [ref=e632]:
+                - heading "Licence BSD à 2 clauses (Simplified)" [level=3] [ref=e633]
+                - generic [ref=e634]: Débutant
+              - paragraph [ref=e635]: La Licence BSD à 2 clauses, issue du projet BSD de l'Université de Californie à...
+          - link "Licence BSD à 3 clauses (New/Modified) Licence BSD à 3 clauses (New/Modified) Débutant La Licence BSD à 3 clauses, provenant du même projet BSD de l'Université de Cali..." [ref=e637] [cursor=pointer]:
+            - /url: https://laveille.ai/glossaire/licence-bsd-3-clause
+            - img "Licence BSD à 3 clauses (New/Modified)" [ref=e639]
+            - generic [ref=e640]:
+              - generic [ref=e641]:
+                - heading "Licence BSD à 3 clauses (New/Modified)" [level=3] [ref=e642]
+                - generic [ref=e643]: Débutant
+              - paragraph [ref=e644]: La Licence BSD à 3 clauses, provenant du même projet BSD de l'Université de Cali...
+          - link "Licence ISC Licence ISC Débutant Formulée en 1995 par l'Internet Systems Consortium (alors Internet Software Cons..." [ref=e646] [cursor=pointer]:
+            - /url: https://laveille.ai/glossaire/licence-isc
+            - img "Licence ISC" [ref=e648]
+            - generic [ref=e649]:
+              - generic [ref=e650]:
+                - heading "Licence ISC" [level=3] [ref=e651]
+                - generic [ref=e652]: Débutant
+              - paragraph [ref=e653]: Formulée en 1995 par l'Internet Systems Consortium (alors Internet Software Cons...
+          - link "Licence zlib Licence zlib Intermédiaire La Licence zlib a été rédigée pour le projet de compression zlib par Jean-loup G..." [ref=e655] [cursor=pointer]:
+            - /url: https://laveille.ai/glossaire/licence-zlib
+            - img "Licence zlib" [ref=e657]
+            - generic [ref=e658]:
+              - generic [ref=e659]:
+                - heading "Licence zlib" [level=3] [ref=e660]
+                - generic [ref=e661]: Intermédiaire
+              - paragraph [ref=e662]: La Licence zlib a été rédigée pour le projet de compression zlib par Jean-loup G...
+          - link "Boost Software License 1.0 Boost Software License 1.0 Intermédiaire La Boost Software License 1.0, publiée en 2003 pour le projet Boost C++ Librarie..." [ref=e664] [cursor=pointer]:
+            - /url: https://laveille.ai/glossaire/licence-boost-software-1-0
+            - img "Boost Software License 1.0" [ref=e666]
+            - generic [ref=e667]:
+              - generic [ref=e668]:
+                - heading "Boost Software License 1.0" [level=3] [ref=e669]
+                - generic [ref=e670]: Intermédiaire
+              - paragraph [ref=e671]: La Boost Software License 1.0, publiée en 2003 pour le projet Boost C++ Librarie...
+      - generic [ref=e673]:
+        - generic [ref=e674]:
+          - generic [ref=e675]:
+            - heading "🎓 Acronymes éducation au Québec" [level=2] [ref=e676]
+            - generic [ref=e677]: Comprendre le jargon du milieu éducatif québécois
+          - link "Voir tout →" [ref=e678] [cursor=pointer]:
+            - /url: https://laveille.ai/acronymes-education
+        - generic [ref=e679]:
+          - link "A ATE Autres Tâches Éducatives Formation générale et diplômes" [ref=e681] [cursor=pointer]:
+            - /url: https://laveille.ai/acronymes-education/ate-2
+            - generic [ref=e682]:
+              - generic [ref=e683]:
+                - generic [ref=e684]: A
+                - heading "ATE" [level=3] [ref=e685]
+              - paragraph [ref=e686]: Autres Tâches Éducatives
+              - generic [ref=e687]: Formation générale et diplômes
+          - link "A ATP Assistance Technique en Pharmacie Formation professionnelle et technique" [ref=e689] [cursor=pointer]:
+            - /url: https://laveille.ai/acronymes-education/atp-2
+            - generic [ref=e690]:
+              - generic [ref=e691]:
+                - generic [ref=e692]: A
+                - heading "ATP" [level=3] [ref=e693]
+              - paragraph [ref=e694]: Assistance Technique en Pharmacie
+              - generic [ref=e695]: Formation professionnelle et technique
+          - link "D DGA Difficultés Graves d'Apprentissage Services aux élèves et adaptation" [ref=e697] [cursor=pointer]:
+            - /url: https://laveille.ai/acronymes-education/dga-2
+            - generic [ref=e698]:
+              - generic [ref=e699]:
+                - generic [ref=e700]: D
+                - heading "DGA" [level=3] [ref=e701]
+              - paragraph [ref=e702]: Difficultés Graves d'Apprentissage
+              - generic [ref=e703]: Services aux élèves et adaptation
+          - link "E EPI Équipement de Protection Individuelle Gestion et administration scolaire" [ref=e705] [cursor=pointer]:
+            - /url: https://laveille.ai/acronymes-education/epi-2
+            - generic [ref=e706]:
+              - generic [ref=e707]:
+                - generic [ref=e708]: E
+                - heading "EPI" [level=3] [ref=e709]
+              - paragraph [ref=e710]: Équipement de Protection Individuelle
+              - generic [ref=e711]: Gestion et administration scolaire
+      - generic [ref=e713]:
+        - generic [ref=e714]:
+          - generic [ref=e715]:
+            - heading "🛠️ Outils gratuits" [level=2] [ref=e716]
+            - generic [ref=e717]: Des utilitaires interactifs à votre disposition
+          - link "Voir tout →" [ref=e718] [cursor=pointer]:
+            - /url: https://laveille.ai/outils
+        - generic [ref=e719]:
+          - link "⚡ Brain Dump 2026 Décharge mentale par écriture manuscrite + IA en 5 étapes. 1..." [ref=e721] [cursor=pointer]:
+            - /url: https://laveille.ai/outils/brain-dump
+            - generic [ref=e723]: ⚡
+            - generic [ref=e724]:
+              - heading "Brain Dump 2026" [level=3] [ref=e725]
+              - paragraph [ref=e726]: Décharge mentale par écriture manuscrite + IA en 5 étapes. 1...
+          - link "🧮 Calculatrice de taxes Calculez la TPS et la TVQ sur vos achats au Québec." [ref=e728] [cursor=pointer]:
+            - /url: https://laveille.ai/outils/calculatrice-taxes
+            - generic [ref=e730]: 🧮
+            - generic [ref=e731]:
+              - heading "Calculatrice de taxes" [level=3] [ref=e732]
+              - paragraph [ref=e733]: Calculez la TPS et la TVQ sur vos achats au Québec.
+          - link "🔐 Générateur de mots de passe Générez des mots de passe sécurisés et personnalisables." [ref=e735] [cursor=pointer]:
+            - /url: https://laveille.ai/outils/generateur-mots-passe
+            - generic [ref=e737]: 🔐
+            - generic [ref=e738]:
+              - heading "Générateur de mots de passe" [level=3] [ref=e739]
+              - paragraph [ref=e740]: Générez des mots de passe sécurisés et personnalisables.
+          - link "👥 Générateur d'équipes Créez des équipes aléatoires à partir d'une liste de partici..." [ref=e742] [cursor=pointer]:
+            - /url: https://laveille.ai/outils/generateur-equipes
+            - generic [ref=e744]: 👥
+            - generic [ref=e745]:
+              - heading "Générateur d'équipes" [level=3] [ref=e746]
+              - paragraph [ref=e747]: Créez des équipes aléatoires à partir d'une liste de partici...
+      - generic [ref=e750]:
+        - generic [ref=e751]:
+          - heading "Ne manquez aucune mise à jour !" [level=3] [ref=e752]
+          - paragraph [ref=e753]: Recevez les dernières nouvelles et mises à jour directement dans votre boîte courriel.
+        - generic [ref=e755]:
+          - textbox [ref=e756]
+          - generic [ref=e757]:
+            - textbox "Adresse courriel pour l'infolettre" [ref=e758]:
+              - /placeholder: Entrez votre courriel
+            - button "  S'inscrire" [ref=e759] [cursor=pointer]:
+              - text: 
+              - generic [ref=e760]: 
+              - text: S'inscrire
+    - contentinfo [ref=e761]:
+      - generic [ref=e764]:
+        - generic [ref=e766]:
+          - generic [ref=e767]:
+            - img "La veille"
+          - paragraph [ref=e768]: Votre plateforme d'information dédiée à l'intelligence artificielle, aux technologies innovantes et à la transformation numérique. Profitez de nos outils gratuits et recevez des analyses, actualités et ressources exclusives.
+        - generic [ref=e770]:
+          - heading "Ressources" [level=3] [ref=e772]
+          - list [ref=e773]:
+            - listitem [ref=e774]:
+              - link "Toutes les ressources" [ref=e775] [cursor=pointer]:
+                - /url: https://laveille.ai/ressources
+                - strong [ref=e776]: Toutes les ressources
+            - listitem [ref=e777]:
+              - link "Blog" [ref=e778] [cursor=pointer]:
+                - /url: https://laveille.ai/blog
+            - listitem [ref=e779]:
+              - link "Glossaire Techno" [ref=e780] [cursor=pointer]:
+                - /url: https://laveille.ai/glossaire
+            - listitem [ref=e781]:
+              - link "Répertoire techno" [ref=e782] [cursor=pointer]:
+                - /url: https://laveille.ai/annuaire
+            - listitem [ref=e783]:
+              - link "IA pour les PME québécoises" [ref=e784] [cursor=pointer]:
+                - /url: https://laveille.ai/ia-pme-quebec
+            - listitem [ref=e785]:
+              - link "IA en éducation (Québec)" [ref=e786] [cursor=pointer]:
+                - /url: https://laveille.ai/ia-education-quebec
+            - listitem [ref=e787]:
+              - link "IA pour développeurs (Québec)" [ref=e788] [cursor=pointer]:
+                - /url: https://laveille.ai/ia-developpeurs-quebec
+            - listitem [ref=e789]:
+              - link "Faire sa veille IA (Québec)" [ref=e790] [cursor=pointer]:
+                - /url: https://laveille.ai/veille-ia-quebec
+            - listitem [ref=e791]:
+              - link "IA générative" [ref=e792] [cursor=pointer]:
+                - /url: https://laveille.ai/ia-generative-quebec
+            - listitem [ref=e793]:
+              - link "Actualités" [ref=e794] [cursor=pointer]:
+                - /url: https://laveille.ai/actualites
+            - listitem [ref=e795]:
+              - link "Acronymes éducation" [ref=e796] [cursor=pointer]:
+                - /url: https://laveille.ai/acronymes-education
+            - listitem [ref=e797]:
+              - link "Outils gratuits" [ref=e798] [cursor=pointer]:
+                - /url: https://laveille.ai/outils
+            - listitem [ref=e799]:
+              - link "Raccourcir un lien" [ref=e800] [cursor=pointer]:
+                - /url: https://laveille.ai/raccourcir
+            - listitem [ref=e801]:
+              - link "📡 RSS — Concentré IA" [ref=e802] [cursor=pointer]:
+                - /url: https://laveille.ai/rss/concentres.xml
+            - listitem [ref=e803]:
+              - link "📡 RSS — Nouveaux outils" [ref=e804] [cursor=pointer]:
+                - /url: https://laveille.ai/rss/annuaire.xml
+            - listitem [ref=e805]:
+              - link "🔌 API publique" [ref=e806] [cursor=pointer]:
+                - /url: https://laveille.ai/api
+            - listitem [ref=e807]:
+              - link "📊 Statistiques" [ref=e808] [cursor=pointer]:
+                - /url: https://laveille.ai/stats
+        - generic [ref=e810]:
+          - heading "À propos" [level=3] [ref=e812]
+          - list [ref=e813]:
+            - listitem [ref=e814]:
+              - link "À propos" [ref=e815] [cursor=pointer]:
+                - /url: https://laveille.ai/page/a-propos
+            - listitem [ref=e816]:
+              - link "FAQ" [ref=e817] [cursor=pointer]:
+                - /url: https://laveille.ai/faq
+            - listitem [ref=e818]:
+              - link "Méthodologie" [ref=e819] [cursor=pointer]:
+                - /url: https://laveille.ai/methodologie
+            - listitem [ref=e820]:
+              - link "Contact" [ref=e821] [cursor=pointer]:
+                - /url: https://laveille.ai/contact
+            - listitem [ref=e822]:
+              - link "Statut des services" [ref=e823] [cursor=pointer]:
+                - /url: https://laveille.ai/statut
+            - listitem [ref=e824]:
+              - link "Confidentialité" [ref=e825] [cursor=pointer]:
+                - /url: https://laveille.ai/privacy-policy
+            - listitem [ref=e826]:
+              - link "Conditions d'utilisation" [ref=e827] [cursor=pointer]:
+                - /url: https://laveille.ai/terms-of-use
+            - listitem [ref=e828]:
+              - link "Conditions de vente" [ref=e829] [cursor=pointer]:
+                - /url: https://laveille.ai/conditions-de-vente
+            - listitem [ref=e830]:
+              - link "Cookies" [ref=e831] [cursor=pointer]:
+                - /url: https://laveille.ai/cookie-policy
+            - listitem [ref=e832]:
+              - link "Demande de retrait" [ref=e833] [cursor=pointer]:
+                - /url: https://laveille.ai/annuaire/retrait
+            - listitem [ref=e834]:
+              - link "Gérer les témoins" [ref=e835] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e836]:
+              - link "Plan du site" [ref=e837] [cursor=pointer]:
+                - /url: https://laveille.ai/plan-du-site
+        - generic [ref=e839]:
+          - heading "Communauté" [level=3] [ref=e841]
+          - list [ref=e842]:
+            - listitem [ref=e843]:
+              - link "Facebook Facebook" [ref=e844] [cursor=pointer]:
+                - /url: https://www.facebook.com/LaVeilleAI
+                - generic:
+                  - img "Facebook"
+                - text: Facebook
+            - listitem [ref=e845]:
+              - link "Messenger" [ref=e846] [cursor=pointer]:
+                - /url: https://m.me/LaVeilleAI
+                - img [ref=e848]
+                - text: Messenger
+            - listitem [ref=e851]:
+              - link "LinkedIn" [ref=e852] [cursor=pointer]:
+                - /url: https://www.linkedin.com/in/lapointestephane/
+                - img [ref=e854]
+                - text: LinkedIn
+            - listitem [ref=e856]:
+              - link "🔑 Se connecter" [ref=e857] [cursor=pointer]:
+                - /url: https://laveille.ai/login
+      - generic [ref=e861]:
+        - paragraph [ref=e862]: Copyright © 2026 La veille. Tous droits réservés. v1.139.17
+        - paragraph [ref=e863]:
+          - text: Conçu et hébergé par
+          - link "MEMORA solutions" [ref=e864] [cursor=pointer]:
+            - /url: https://memora.solutions
+          - text: · Entreprise canadienne 🍁
+        - paragraph [ref=e865]:
+          - text: Certains liens sont des liens d'affiliation. Nous pouvons recevoir une commission sans frais pour vous.
+          - link "En savoir plus" [ref=e866] [cursor=pointer]:
+            - /url: https://laveille.ai/annuaire/politique-affiliation
+  - generic:
+    - button "Gérer les témoins" [ref=e867] [cursor=pointer]:
+      - img "Gérer les témoins" [ref=e868]
+      - generic [ref=e869]: Gérer les témoins
+    - dialog "Paramètres de confidentialité" [ref=e870]:
+      - generic [ref=e871]:
+        - heading "Paramètres de confidentialité" [level=2] [ref=e872]
+        - paragraph [ref=e873]:
+          - text: Nous utilisons des témoins (cookies) pour assurer le bon fonctionnement du site, analyser le trafic et personnaliser le contenu. Vous pouvez gérer vos préférences ci-dessous.
+          - link "Politique de confidentialité" [ref=e874] [cursor=pointer]:
+            - /url: /privacy-policy
+      - generic [ref=e875]:
+        - button "Tout refuser" [ref=e876] [cursor=pointer]
+        - button "Personnaliser" [ref=e877] [cursor=pointer]
+        - button "Tout accepter" [ref=e878] [cursor=pointer]
+  - generic [ref=e879]:
+    - link "Partager sur Facebook" [ref=e880] [cursor=pointer]:
+      - /url: https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Flaveille.ai&quote=Veille+IA+au+Qu%C3%A9bec+par+St%C3%A9phane+Lapointe.+Actualit%C3%A9s%2C+outils%2C+glossaire+et+concentr%C3%A9s+hebdomadaires+sur+l%27intelligence+artificielle%2C+la+conformit%C3%A9+Loi+25+et+la+transformation+num%C3%A9rique+pour+les+organ
+      - img [ref=e881]
+    - link "Partager sur X" [ref=e883] [cursor=pointer]:
+      - /url: https://twitter.com/intent/tweet?url=https%3A%2F%2Flaveille.ai&text=Veille+IA+au+Qu%C3%A9bec+par+St%C3%A9phane+Lapointe.+Actualit%C3%A9s%2C+outils%2C+glossaire+et+concentr%C3%A9s+hebdomadaires+sur+l%27intelligence+artificielle%2C+la+conformit%C3%A9+Loi+25+et+la+transformation+num%C3%A9rique+pour+les+organ+%E2%80%94+Actualit%C3%A9s+en+continu+sur+laveille.ai
+      - img [ref=e884]
+    - link "Partager sur LinkedIn" [ref=e886] [cursor=pointer]:
+      - /url: https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Flaveille.ai&summary=Veille+IA+au+Qu%C3%A9bec+par+St%C3%A9phane+Lapointe.+Actualit%C3%A9s%2C+outils%2C+glossaire+et+concentr%C3%A9s+hebdomadaires+sur+l%27intelligence+artificielle%2C+la+conformit%C3%A9+Loi+25+et+la+transformation+num%C3%A9rique+pour+les+organ
+      - img [ref=e887]
+    - link "Envoyer via Messenger" [ref=e889] [cursor=pointer]:
+      - /url: https://m.me/LaVeilleAI
+      - img [ref=e890]
+    - button "Copier le contenu enrichi" [ref=e892] [cursor=pointer]:
+      - img [ref=e893]
+  - text: 

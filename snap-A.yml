@@ -1,0 +1,329 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content — Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+    - text: Aller au contenu principal
+  - region "Bandeau infolettre" [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: ▸
+        - generic [ref=e7]: Veille IA
+        - generic [ref=e8]: "Veille IA sans buzz : pour stratèges québécois."
+      - generic [ref=e9]:
+        - button "Ouvrir le formulaire d'inscription à l'infolettre hebdomadaire" [ref=e10] [cursor=pointer]: Recevoir hebdo →
+        - button "Fermer le bandeau infolettre" [ref=e11] [cursor=pointer]: ×
+  - generic [ref=e12]:
+    - banner [ref=e13]:
+      - generic [ref=e16]:
+        - list [ref=e19]:
+          - listitem [ref=e20]:
+            - link "Actualités" [ref=e21] [cursor=pointer]:
+              - /url: https://laveille.ai/actualites
+              - generic [ref=e22]: Actualités
+          - listitem [ref=e23]:
+            - link "OpenAI stoppe une escroquerie utilisant ChatGPT" [ref=e24] [cursor=pointer]:
+              - /url: https://laveille.ai/actualites/disrupting-a-criminal-scam-operation
+        - list [ref=e26]:
+          - listitem [ref=e27]:
+            - link "Facebook" [ref=e28] [cursor=pointer]:
+              - /url: https://www.facebook.com/LaVeilleAI
+              - generic [ref=e29]: 
+          - listitem [ref=e30]:
+            - link "Messenger" [ref=e31] [cursor=pointer]:
+              - /url: https://m.me/LaVeilleAI
+              - generic [ref=e32]: 
+          - listitem [ref=e33]:
+            - link "LinkedIn" [ref=e34] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/lapointestephane/
+              - generic [ref=e35]: 
+      - navigation [ref=e36]:
+        - generic [ref=e38]:
+          - link "La veille" [ref=e41] [cursor=pointer]:
+            - /url: https://laveille.ai
+            - img "La veille" [ref=e42]
+          - generic [ref=e44]:
+            - text: 
+            - list [ref=e45]:
+              - listitem [ref=e46]:
+                - link "Accueil" [ref=e47] [cursor=pointer]:
+                  - /url: https://laveille.ai
+              - listitem [ref=e48]:
+                - link "Outils" [ref=e49] [cursor=pointer]:
+                  - /url: https://laveille.ai/outils
+              - listitem [ref=e50]:
+                - link "Annuaire" [ref=e51] [cursor=pointer]:
+                  - /url: https://laveille.ai/annuaire
+              - listitem [ref=e52]:
+                - link "Apprendre" [ref=e53] [cursor=pointer]:
+                  - /url: https://laveille.ai/blog
+          - generic [ref=e55]:
+            - button "Ouvrir la recherche (Ctrl+K)" [ref=e58] [cursor=pointer]:
+              - generic [ref=e59]: 
+            - button "Se connecter" [ref=e61] [cursor=pointer]:
+              - img [ref=e63]
+    - generic [ref=e70]:
+      - heading "Constructeur de prompts" [level=2] [ref=e71]
+      - navigation "Fil d'Ariane" [ref=e72]:
+        - list [ref=e73]:
+          - listitem [ref=e74]:
+            - link "Accueil" [ref=e75] [cursor=pointer]:
+              - /url: https://laveille.ai
+            - text: /
+          - listitem [ref=e76]:
+            - link "Outils" [ref=e77] [cursor=pointer]:
+              - /url: https://laveille.ai/outils
+            - text: /
+          - listitem [ref=e78]: Constructeur de prompts
+    - main [ref=e79]:
+      - generic [ref=e85]:
+        - generic [ref=e86]:
+          - generic [ref=e87]:
+            - heading "Constructeur de prompts" [level=1] [ref=e88]
+            - paragraph [ref=e89]: Créez des prompts optimisés pour ChatGPT, Claude, Gemini et autres IA.
+          - generic [ref=e90]:
+            - button "Plein écran" [ref=e91] [cursor=pointer]:
+              - img [ref=e92]
+            - button "Partager Constructeur de prompts sur les réseaux sociaux" [ref=e96] [cursor=pointer]:
+              - img [ref=e97]
+            - button "?" [ref=e100] [cursor=pointer]
+        - region "Réponse rapide" [ref=e101]:
+          - group [ref=e102]:
+            - generic "En bref" [ref=e103] [cursor=pointer]:
+              - generic [ref=e104]: ✦ En bref
+              - generic [ref=e105]: ▼
+        - generic [ref=e106]:
+          - strong [ref=e107]: Connectez-vous
+          - text: pour sauvegarder vos prompts et les retrouver sur tous vos appareils.
+          - button "Se connecter" [ref=e108] [cursor=pointer]
+        - generic [ref=e109]:
+          - generic [ref=e110]:
+            - heading "Que voulez-vous demander à l'IA ?" [level=2] [ref=e111]
+            - button "?" [ref=e112] [cursor=pointer]
+          - paragraph [ref=e113]: Décrivez votre demande dans vos mots. Les cartes ci-dessous sont des raccourcis facultatifs.
+          - generic [ref=e114]:
+            - generic [ref=e115]: Sur quoi porte votre demande ? *
+            - paragraph [ref=e116]: "🔒 Il y a un vrai nom, un courriel, un numéro de téléphone ou une adresse dans votre texte ? Cachez-les d'abord avec le bouton ci-dessous. Tout se passe directement sur votre ordinateur : rien n'est envoyé ni enregistré nulle part."
+            - textbox "Description de la demande" [ref=e117]:
+              - /placeholder: "Ex: un plan marketing pour le lancement d'une application mobile au Québec"
+            - text: Décrivez précisément ce que vous voulez obtenir.
+          - generic [ref=e118]:
+            - button "🛡️ Masquer mes informations personnelles" [ref=e119] [cursor=pointer]
+            - link "↗ Anonymiseur complet" [ref=e120] [cursor=pointer]:
+              - /url: /outils/anonymiseur
+            - text: Collez ou écrivez votre texte ici…
+          - heading "Ou partez d'une carte" [level=3] [ref=e121]
+          - status [ref=e122]
+          - group "Choisir un objectif" [ref=e123]:
+            - button "Rédiger un texte Un article, un courriel, une publication..." [ref=e125] [cursor=pointer]:
+              - generic [ref=e126]: ✍️
+              - generic [ref=e127]: Rédiger un texte
+              - generic [ref=e128]: Un article, un courriel, une publication...
+            - button "Résumer un contenu Condenser un texte, un rapport, une réunion..." [ref=e130] [cursor=pointer]:
+              - generic [ref=e131]: 📝
+              - generic [ref=e132]: Résumer un contenu
+              - generic [ref=e133]: Condenser un texte, un rapport, une réunion...
+            - button "Trouver des idées Brainstormer des angles, des options, des titres..." [ref=e135] [cursor=pointer]:
+              - generic [ref=e136]: 💡
+              - generic [ref=e137]: Trouver des idées
+              - generic [ref=e138]: Brainstormer des angles, des options, des titres...
+            - button "Analyser ou comparer Étudier des données, comparer des options..." [ref=e140] [cursor=pointer]:
+              - generic [ref=e141]: 🔍
+              - generic [ref=e142]: Analyser ou comparer
+              - generic [ref=e143]: Étudier des données, comparer des options...
+            - button "Apprendre ou comprendre Faire expliquer un sujet clairement, étape par étape..." [ref=e145] [cursor=pointer]:
+              - generic [ref=e146]: 🎓
+              - generic [ref=e147]: Apprendre ou comprendre
+              - generic [ref=e148]: Faire expliquer un sujet clairement, étape par étape...
+            - button "Traduire un texte Passer d'une langue à une autre..." [ref=e150] [cursor=pointer]:
+              - generic [ref=e151]: 🌐
+              - generic [ref=e152]: Traduire un texte
+              - generic [ref=e153]: Passer d'une langue à une autre...
+            - button "Planifier ou organiser Un projet, une stratégie, un horaire..." [ref=e155] [cursor=pointer]:
+              - generic [ref=e156]: 🗂️
+              - generic [ref=e157]: Planifier ou organiser
+              - generic [ref=e158]: Un projet, une stratégie, un horaire...
+            - button "Écrire ou déboguer du code Créer, corriger ou expliquer du code..." [ref=e160] [cursor=pointer]:
+              - generic [ref=e161]: 💻
+              - generic [ref=e162]: Écrire ou déboguer du code
+              - generic [ref=e163]: Créer, corriger ou expliquer du code...
+            - button "Autre chose Je préfère tout choisir moi-même" [ref=e165] [cursor=pointer]:
+              - generic [ref=e166]: ✨
+              - generic [ref=e167]: Autre chose
+              - generic [ref=e168]: Je préfère tout choisir moi-même
+            - button "Ajouter une carte" [ref=e170] [cursor=pointer]:
+              - generic [ref=e171]: ＋
+              - generic [ref=e172]: Ajouter une carte
+        - button "Créer mon prompt" [ref=e174] [cursor=pointer]
+        - group [ref=e175]:
+          - generic "Voir le texte exact envoyé à l'IA (technique)" [ref=e176] [cursor=pointer]
+        - status [ref=e177]: Choisissez une carte de démarrage (ou complétez le rôle et le verbe dans « Affiner ») pour générer votre prompt.
+        - generic [ref=e178]:
+          - button "Copier le prompt" [disabled] [ref=e179]
+          - button "✨ Améliorer avec mon IA" [disabled] [ref=e180]
+          - button "Exporter .txt" [disabled] [ref=e181]
+          - button "🔄 Recommencer" [ref=e182] [cursor=pointer]
+        - generic [ref=e183]:
+          - generic [ref=e184]: "Ouvrir dans :"
+          - button "ChatGPT" [disabled] [ref=e185]
+          - button "Claude" [disabled] [ref=e186]
+          - button "Perplexity" [disabled] [ref=e187]
+          - button "Gemini" [disabled] [ref=e188]
+          - button "Mistral" [disabled] [ref=e189]
+      - region "Infolettre" [ref=e190]:
+        - heading "Cet outil vous a été utile ?" [level=2] [ref=e191]
+        - paragraph [ref=e192]: Recevez chaque semaine notre concentré de l'actualité IA et nos nouveaux outils — sans bruit, en quelques minutes de lecture.
+        - generic [ref=e193]:
+          - textbox [ref=e194]
+          - generic [ref=e195]:
+            - textbox "Votre adresse courriel" [ref=e196]:
+              - /placeholder: Votre courriel
+            - button "S’inscrire" [ref=e197] [cursor=pointer]
+        - paragraph [ref=e198]: Double opt-in. Loi 25 / RGPD. Désabonnement 1-clic.
+    - contentinfo [ref=e199]:
+      - generic [ref=e202]:
+        - generic [ref=e204]:
+          - generic [ref=e205]:
+            - img "La veille"
+          - paragraph [ref=e206]: Votre plateforme d'information dédiée à l'intelligence artificielle, aux technologies innovantes et à la transformation numérique. Profitez de nos outils gratuits et recevez des analyses, actualités et ressources exclusives.
+        - generic [ref=e208]:
+          - heading "Ressources" [level=3] [ref=e210]
+          - list [ref=e211]:
+            - listitem [ref=e212]:
+              - link "Toutes les ressources" [ref=e213] [cursor=pointer]:
+                - /url: https://laveille.ai/ressources
+                - strong [ref=e214]: Toutes les ressources
+            - listitem [ref=e215]:
+              - link "Blog" [ref=e216] [cursor=pointer]:
+                - /url: https://laveille.ai/blog
+            - listitem [ref=e217]:
+              - link "Glossaire Techno" [ref=e218] [cursor=pointer]:
+                - /url: https://laveille.ai/glossaire
+            - listitem [ref=e219]:
+              - link "Répertoire techno" [ref=e220] [cursor=pointer]:
+                - /url: https://laveille.ai/annuaire
+            - listitem [ref=e221]:
+              - link "IA pour les PME québécoises" [ref=e222] [cursor=pointer]:
+                - /url: https://laveille.ai/ia-pme-quebec
+            - listitem [ref=e223]:
+              - link "IA en éducation (Québec)" [ref=e224] [cursor=pointer]:
+                - /url: https://laveille.ai/ia-education-quebec
+            - listitem [ref=e225]:
+              - link "IA pour développeurs (Québec)" [ref=e226] [cursor=pointer]:
+                - /url: https://laveille.ai/ia-developpeurs-quebec
+            - listitem [ref=e227]:
+              - link "Faire sa veille IA (Québec)" [ref=e228] [cursor=pointer]:
+                - /url: https://laveille.ai/veille-ia-quebec
+            - listitem [ref=e229]:
+              - link "IA générative" [ref=e230] [cursor=pointer]:
+                - /url: https://laveille.ai/ia-generative-quebec
+            - listitem [ref=e231]:
+              - link "Actualités" [ref=e232] [cursor=pointer]:
+                - /url: https://laveille.ai/actualites
+            - listitem [ref=e233]:
+              - link "Acronymes éducation" [ref=e234] [cursor=pointer]:
+                - /url: https://laveille.ai/acronymes-education
+            - listitem [ref=e235]:
+              - link "Outils gratuits" [ref=e236] [cursor=pointer]:
+                - /url: https://laveille.ai/outils
+            - listitem [ref=e237]:
+              - link "Raccourcir un lien" [ref=e238] [cursor=pointer]:
+                - /url: https://laveille.ai/raccourcir
+            - listitem [ref=e239]:
+              - link "📡 RSS — Concentré IA" [ref=e240] [cursor=pointer]:
+                - /url: https://laveille.ai/rss/concentres.xml
+            - listitem [ref=e241]:
+              - link "📡 RSS — Nouveaux outils" [ref=e242] [cursor=pointer]:
+                - /url: https://laveille.ai/rss/annuaire.xml
+            - listitem [ref=e243]:
+              - link "🔌 API publique" [ref=e244] [cursor=pointer]:
+                - /url: https://laveille.ai/api
+            - listitem [ref=e245]:
+              - link "📊 Statistiques" [ref=e246] [cursor=pointer]:
+                - /url: https://laveille.ai/stats
+        - generic [ref=e248]:
+          - heading "À propos" [level=3] [ref=e250]
+          - list [ref=e251]:
+            - listitem [ref=e252]:
+              - link "À propos" [ref=e253] [cursor=pointer]:
+                - /url: https://laveille.ai/page/a-propos
+            - listitem [ref=e254]:
+              - link "FAQ" [ref=e255] [cursor=pointer]:
+                - /url: https://laveille.ai/faq
+            - listitem [ref=e256]:
+              - link "Méthodologie" [ref=e257] [cursor=pointer]:
+                - /url: https://laveille.ai/methodologie
+            - listitem [ref=e258]:
+              - link "Contact" [ref=e259] [cursor=pointer]:
+                - /url: https://laveille.ai/contact
+            - listitem [ref=e260]:
+              - link "Statut des services" [ref=e261] [cursor=pointer]:
+                - /url: https://laveille.ai/statut
+            - listitem [ref=e262]:
+              - link "Confidentialité" [ref=e263] [cursor=pointer]:
+                - /url: https://laveille.ai/privacy-policy
+            - listitem [ref=e264]:
+              - link "Conditions d'utilisation" [ref=e265] [cursor=pointer]:
+                - /url: https://laveille.ai/terms-of-use
+            - listitem [ref=e266]:
+              - link "Conditions de vente" [ref=e267] [cursor=pointer]:
+                - /url: https://laveille.ai/conditions-de-vente
+            - listitem [ref=e268]:
+              - link "Cookies" [ref=e269] [cursor=pointer]:
+                - /url: https://laveille.ai/cookie-policy
+            - listitem [ref=e270]:
+              - link "Demande de retrait" [ref=e271] [cursor=pointer]:
+                - /url: https://laveille.ai/annuaire/retrait
+            - listitem [ref=e272]:
+              - link "Gérer les témoins" [ref=e273] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e274]:
+              - link "Plan du site" [ref=e275] [cursor=pointer]:
+                - /url: https://laveille.ai/plan-du-site
+        - generic [ref=e277]:
+          - heading "Communauté" [level=3] [ref=e279]
+          - list [ref=e280]:
+            - listitem [ref=e281]:
+              - link "Facebook Facebook" [ref=e282] [cursor=pointer]:
+                - /url: https://www.facebook.com/LaVeilleAI
+                - generic:
+                  - img "Facebook"
+                - text: Facebook
+            - listitem [ref=e283]:
+              - link "Messenger" [ref=e284] [cursor=pointer]:
+                - /url: https://m.me/LaVeilleAI
+                - img [ref=e286]
+                - text: Messenger
+            - listitem [ref=e289]:
+              - link "LinkedIn" [ref=e290] [cursor=pointer]:
+                - /url: https://www.linkedin.com/in/lapointestephane/
+                - img [ref=e292]
+                - text: LinkedIn
+            - listitem [ref=e294]:
+              - link "🔑 Se connecter" [ref=e295] [cursor=pointer]:
+                - /url: https://laveille.ai/login
+      - generic [ref=e299]:
+        - paragraph [ref=e300]: Copyright © 2026 La veille. Tous droits réservés. v1.139.17
+        - paragraph [ref=e301]:
+          - text: Conçu et hébergé par
+          - link "MEMORA solutions" [ref=e302] [cursor=pointer]:
+            - /url: https://memora.solutions
+          - text: · Entreprise canadienne 🍁
+        - paragraph [ref=e303]:
+          - text: Certains liens sont des liens d'affiliation. Nous pouvons recevoir une commission sans frais pour vous.
+          - link "En savoir plus" [ref=e304] [cursor=pointer]:
+            - /url: https://laveille.ai/annuaire/politique-affiliation
+  - generic [ref=e317]:
+    - link "Partager sur Facebook" [ref=e318] [cursor=pointer]:
+      - /url: https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Flaveille.ai%2Foutils%2Fconstructeur-prompts&quote=Cr%C3%A9ez+des+prompts+IA+optimis%C3%A9s+pour+ChatGPT%2C+Claude%2C+Gemini+et+Mistral+%3A+choisissez+persona%2C+t%C3%A2che%2C+audience%2C+format+et+techniques+avanc%C3%A9es+%28few-shot%2C+cha%C3%AEne+de+pens%C3%A9e%29.+Gratuit%2C+sans+inscription.
+      - img [ref=e319]
+    - link "Partager sur X" [ref=e321] [cursor=pointer]:
+      - /url: https://twitter.com/intent/tweet?url=https%3A%2F%2Flaveille.ai%2Foutils%2Fconstructeur-prompts&text=Cr%C3%A9ez+des+prompts+IA+optimis%C3%A9s+pour+ChatGPT%2C+Claude%2C+Gemini+et+Mistral+%3A+choisissez+persona%2C+t%C3%A2che%2C+audience%2C+format+et+techniques+avanc%C3%A9es+%28few-shot%2C+cha%C3%AEne+de+pens%C3%A9e%29.+Gratuit%2C+sans+inscription.+%E2%80%94+Actualit%C3%A9s+en+continu+sur+laveille.ai
+      - img [ref=e322]
+    - link "Partager sur LinkedIn" [ref=e324] [cursor=pointer]:
+      - /url: https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Flaveille.ai%2Foutils%2Fconstructeur-prompts&summary=Cr%C3%A9ez+des+prompts+IA+optimis%C3%A9s+pour+ChatGPT%2C+Claude%2C+Gemini+et+Mistral+%3A+choisissez+persona%2C+t%C3%A2che%2C+audience%2C+format+et+techniques+avanc%C3%A9es+%28few-shot%2C+cha%C3%AEne+de+pens%C3%A9e%29.+Gratuit%2C+sans+inscription.
+      - img [ref=e325]
+    - link "Envoyer via Messenger" [ref=e327] [cursor=pointer]:
+      - /url: https://m.me/LaVeilleAI
+      - img [ref=e328]
+    - button "Copier le contenu enrichi" [ref=e330] [cursor=pointer]:
+      - img [ref=e331]
+  - text: 
