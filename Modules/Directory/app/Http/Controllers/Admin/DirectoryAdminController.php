@@ -14,6 +14,7 @@ use Modules\Core\Services\ScreenshotUploadService;
 use Modules\Directory\Models\Category;
 use Modules\Directory\Models\Tool;
 use Modules\Directory\Models\ToolPricingReport;
+use Modules\Directory\Services\ScreenshotFocalService;
 use Modules\Directory\Services\ScreenshotService;
 use Modules\Settings\Facades\Settings;
 
@@ -110,7 +111,16 @@ class DirectoryAdminController extends Controller
     {
         $categories = Category::orderBy('sort_order')->get();
 
-        return view('directory::admin.edit', compact('tool', 'categories'));
+        // ACTION: presence du master calculee ici (jamais dans la vue) pour piloter le bloc
+        // "Repositionner la vignette" (brique 1) - simple lecture disque, pas de nouvelle colonne.
+        // MCP: SELF (< 5 lignes)
+        // RAISON: design doc 2026-08-10, brique 1, section UI admin.
+        $slug = $tool->getTranslation('slug', 'fr_CA') ?: $tool->slug;
+        $screenshotMasterRelative = $slug ? "screenshots/masters/{$slug}.jpg" : null;
+        $hasScreenshotMaster = $screenshotMasterRelative && \Illuminate\Support\Facades\File::exists(public_path($screenshotMasterRelative));
+        $screenshotMasterUrl = $hasScreenshotMaster ? asset($screenshotMasterRelative) : null;
+
+        return view('directory::admin.edit', compact('tool', 'categories', 'hasScreenshotMaster', 'screenshotMasterUrl'));
     }
 
     public function update(Request $request, Tool $tool): RedirectResponse
@@ -215,18 +225,29 @@ class DirectoryAdminController extends Controller
         $slug = $tool->getTranslation('slug', 'fr_CA') ?: $tool->slug;
         $filePath = "screenshots/{$slug}.jpg";
 
+        // ACTION: derivation d'un master a partir du fichier source brut, AVANT l'appel au
+        // service partage (qui reste, lui, strictement inchange - contrat News).
+        // MCP: SELF (orchestration, logique dans deriveMasterFromUpload())
+        // RAISON: design doc 2026-08-10, brique 1, upload manuel.
+        $this->deriveMasterFromUpload($request->file('screenshot'), $slug);
+
         $result = $uploader->upload(
             $request->file('screenshot'),
             $filePath,
             $tool,
             'screenshot',
             prefixSlash: false,
-            postUpload: fn ($model, $fullPath, $rel) => $this->purgeCloudflareScreenshot($rel),
+            postUpload: fn ($model, $fullPath, $rel) => ScreenshotService::purgeCloudflareFile($rel),
         );
 
         if ($result['ok']) {
             // Verrouille le screenshot manuel : la régénération automatique ne doit jamais l'écraser.
+            // ACTION: remise à zéro du point focal - un nouveau master vient d'être dérivé, un
+            // ancien focal pointerait dans le vide (même décision que pour la capture automatique).
+            // MCP: SELF (<5 lignes)
+            // RAISON: cohérence avec ScreenshotService::capture() (design doc, brique 1).
             $tool->screenshot_locked = true;
+            $tool->screenshot_focal_y = 0;
             $tool->saveQuietly();
 
             return $wantsJson
@@ -239,22 +260,66 @@ class DirectoryAdminController extends Controller
             : back()->with('error', $result['message']);
     }
 
-    private function purgeCloudflareScreenshot(string $filePath): void
+    /**
+     * Brique 1 (design doc 2026-08-10) - derive un master pour le point focal a partir du fichier
+     * uploade brut, uniquement si sa hauteur depasse 630px (sinon aucun master ne serait utile :
+     * la vignette existante occuperait deja toute la hauteur disponible). Largeur ramenee a 1200
+     * (cover horizontal, aspect conserve), hauteur plafonnee a 1400px maximum. N'affecte JAMAIS
+     * ScreenshotUploadService::upload() (contrat partage avec News, laisse strictement inchange).
+     */
+    private function deriveMasterFromUpload(\Illuminate\Http\UploadedFile $file, string $slug): void
     {
         try {
-            $zoneId = config('services.cloudflare.zone_id');
-            $apiToken = config('services.cloudflare.api_token');
-            if (empty($zoneId) || empty($apiToken)) {
-                return;
+            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            $source = $manager->read($file->getRealPath());
+
+            if ($source->height() <= 630) {
+                return; // pas assez de hauteur pour justifier un master, focal indisponible (comme aujourd'hui)
             }
-            \Illuminate\Support\Facades\Http::timeout(8)
-                ->withToken($apiToken)
-                ->post("https://api.cloudflare.com/client/v4/zones/{$zoneId}/purge_cache", [
-                    'files' => [config('app.url').'/'.ltrim($filePath, '/')],
-                ]);
+
+            $scaled = $source->scale(width: 1200);
+            if ($scaled->height() > 1400) {
+                $scaled = $scaled->crop(1200, 1400, 0, 0);
+            }
+
+            $mastersDir = public_path('screenshots/masters');
+            if (! \Illuminate\Support\Facades\File::isDirectory($mastersDir)) {
+                \Illuminate\Support\Facades\File::makeDirectory($mastersDir, 0755, true);
+            }
+
+            file_put_contents("{$mastersDir}/{$slug}.jpg", $scaled->toJpeg(85)->toString());
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning('Cloudflare purge failed: '.$e->getMessage());
+            \Illuminate\Support\Facades\Log::warning("deriveMasterFromUpload: echec pour {$slug} - {$e->getMessage()}");
         }
+    }
+
+    /**
+     * Brique 1 (design doc 2026-08-10) - applique un nouveau point focal vertical sur le master
+     * existant et redirige/renvoie la nouvelle URL cache-bustee de la vignette derivee.
+     */
+    public function setFocal(Request $request, Tool $tool, ScreenshotFocalService $focalService): \Illuminate\Http\JsonResponse
+    {
+        $request->validate(['focal_y' => 'required|integer']);
+
+        // ACTION: clamp systematique cote serveur, jamais confiance dans la valeur brute du formulaire
+        // MCP: SELF (< 5 lignes)
+        // RAISON: design doc 2026-08-10, section 6 (securite), CA-2 - meme si l'UI JS applique deja
+        // une borne cote client, le serveur ne lui fait jamais confiance.
+        $tool->screenshot_focal_y = max(0, min((int) $request->input('focal_y'), 770));
+
+        if (! $focalService->deriveThumbnail($tool)) {
+            return response()->json([
+                'ok' => false,
+                'message' => __("Recadrage impossible (master introuvable ou illisible). Une nouvelle capture est nécessaire."),
+            ], 422);
+        }
+
+        return response()->json([
+            'ok' => true,
+            'message' => __('Cadrage appliqué.'),
+            'screenshot_url' => asset($tool->screenshot).'?v='.$tool->updated_at->timestamp,
+            'focal_y' => $tool->screenshot_focal_y,
+        ]);
     }
 
     public function setMainScreenshot(Tool $tool, int $screenshotId): RedirectResponse

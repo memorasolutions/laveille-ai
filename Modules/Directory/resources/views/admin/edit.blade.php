@@ -185,13 +185,130 @@
                     @if($tool->screenshot)
                         <div class="mt-2">
                             @if(str_starts_with($tool->screenshot, 'http'))
-                                <img src="{{ $tool->screenshot }}" alt="Screenshot" style="max-height: 120px; border-radius: 6px; border: 1px solid #dee2e6;">
+                                <img src="{{ $tool->screenshot }}" alt="Screenshot" class="js-screenshot-current-preview" style="max-height: 120px; border-radius: 6px; border: 1px solid #dee2e6;">
                             @else
-                                <img src="{{ asset($tool->screenshot) }}" alt="Screenshot" style="max-height: 120px; border-radius: 6px; border: 1px solid #dee2e6;">
+                                <img src="{{ asset($tool->screenshot) }}" alt="Screenshot" class="js-screenshot-current-preview" style="max-height: 120px; border-radius: 6px; border: 1px solid #dee2e6;">
                             @endif
                         </div>
                     @endif
                     @error('screenshot')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+
+                {{-- Brique 1 (design doc 2026-08-10) : point focal vertical sur l'image maître. --}}
+                <div
+                    class="mb-3 p-3"
+                    style="background:#f8f9fa;border-radius:8px;border:1px solid #e5e7eb;"
+                    x-data="{
+                        focalY: {{ (int) ($tool->screenshot_focal_y ?? 0) }},
+                        maxFocalY: 770,
+                        saving: false,
+                        dragging: false,
+                        _dragStartY: 0,
+                        _dragStartFocal: 0,
+                        percent() {
+                            return this.maxFocalY > 0 ? Math.round((this.focalY / this.maxFocalY) * 100) : 0;
+                        },
+                        nudge(delta) {
+                            this.focalY = Math.max(0, Math.min(this.maxFocalY, this.focalY + delta));
+                        },
+                        startDrag(e) {
+                            this.dragging = true;
+                            this._dragStartY = e.touches ? e.touches[0].clientY : e.clientY;
+                            this._dragStartFocal = this.focalY;
+                        },
+                        onDrag(e) {
+                            if (!this.dragging) return;
+                            const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+                            const deltaScreenPx = currentY - this._dragStartY;
+                            const frameHeight = this.$refs.previewFrame ? this.$refs.previewFrame.offsetHeight : 630;
+                            const scale = frameHeight > 0 ? (this.maxFocalY + 630) / frameHeight : 1;
+                            const deltaFocal = -deltaScreenPx * scale;
+                            this.focalY = Math.max(0, Math.min(this.maxFocalY, Math.round(this._dragStartFocal + deltaFocal)));
+                        },
+                        stopDrag() { this.dragging = false; },
+                        async apply() {
+                            this.saving = true;
+                            try {
+                                const response = await fetch('{{ route('admin.directory.set-focal', $tool) }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                        'Accept': 'application/json',
+                                    },
+                                    body: JSON.stringify({ focal_y: this.focalY }),
+                                });
+                                const data = await response.json();
+                                if (data.ok) {
+                                    document.querySelectorAll('.js-screenshot-current-preview').forEach((el) => { el.src = data.screenshot_url; });
+                                    if (window.Livewire) { Livewire.dispatch('toast', { type: 'success', message: data.message || '{{ __('Cadrage appliqué.') }}' }); }
+                                } else {
+                                    if (window.Livewire) { Livewire.dispatch('toast', { type: 'error', message: data.message || '{{ __('Erreur lors du recadrage.') }}' }); }
+                                }
+                            } catch (e) {
+                                if (window.Livewire) { Livewire.dispatch('toast', { type: 'error', message: '{{ __('Erreur réseau lors du recadrage.') }}' }); }
+                            } finally {
+                                this.saving = false;
+                            }
+                        },
+                    }"
+                >
+                    <h6 class="mb-2">{{ __('Repositionner la vignette') }}</h6>
+                    @if($hasScreenshotMaster)
+                        <p class="text-muted small mb-2">{{ __('Choisissez quelle partie de la capture complète apparaît dans la vignette 1200×630 affichée publiquement.') }}</p>
+                        <div class="d-flex flex-column flex-md-row gap-3 align-items-start">
+                            <div
+                                x-ref="previewFrame"
+                                class="position-relative"
+                                style="width:100%;max-width:420px;aspect-ratio:1200/630;overflow:hidden;border-radius:6px;border:1px solid #dee2e6;cursor:grab;touch-action:none;"
+                                role="group"
+                                aria-label="{{ __('Cadre de prévisualisation - glissez verticalement pour repositionner') }}"
+                                @mousedown="startDrag($event)"
+                                @touchstart="startDrag($event)"
+                                @mousemove.window="onDrag($event)"
+                                @mouseup.window="stopDrag()"
+                                @touchmove.window="onDrag($event)"
+                                @touchend.window="stopDrag()"
+                            >
+                                <img
+                                    src="{{ $screenshotMasterUrl }}"
+                                    alt="{{ __('Capture complète du site - glissez pour choisir le cadrage') }}"
+                                    style="width:100%;height:100%;object-fit:cover;user-select:none;pointer-events:none;"
+                                    x-bind:style="{ 'object-position': '50% ' + percent() + '%' }"
+                                    draggable="false"
+                                >
+                            </div>
+                            <div class="flex-grow-1" style="min-width:220px;">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <button type="button" class="btn btn-outline-secondary" style="min-width:44px;min-height:44px;" @click="nudge(-20)" aria-label="{{ __('Déplacer le cadrage vers le haut') }}">
+                                        <i data-lucide="chevron-up" aria-hidden="true"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" style="min-width:44px;min-height:44px;" @click="nudge(20)" aria-label="{{ __('Déplacer le cadrage vers le bas') }}">
+                                        <i data-lucide="chevron-down" aria-hidden="true"></i>
+                                    </button>
+                                    <span class="text-muted small" aria-hidden="true" x-text="focalY + ' px'"></span>
+                                </div>
+                                <label for="screenshot_focal_range" class="form-label small">{{ __('Position verticale du cadrage') }}</label>
+                                <input
+                                    type="range"
+                                    class="form-range"
+                                    id="screenshot_focal_range"
+                                    min="0"
+                                    x-bind:max="maxFocalY"
+                                    x-model.number="focalY"
+                                    aria-label="{{ __('Position verticale du cadrage, de 0 (haut) à 770 (bas)') }}"
+                                >
+                                <button type="button" class="btn btn-primary btn-sm mt-2" style="min-height:44px;" @click="apply()" x-bind:disabled="saving">
+                                    <span x-show="!saving">{{ __('Appliquer ce cadrage') }}</span>
+                                    <span x-show="saving" x-cloak>
+                                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>{{ __('Application…') }}
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    @else
+                        <p class="text-muted small mb-0">{{ __('Recapture nécessaire pour activer le repositionnement (aucune image maître disponible pour cet outil) - utilisez le bouton « Capturer screenshot (Puppeteer) » ci-dessous, ou uploadez une image plus haute que 630 px.') }}</p>
+                    @endif
                 </div>
 
                 <div class="mb-3">

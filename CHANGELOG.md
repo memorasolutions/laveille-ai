@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.160.0] - 2026-08-10
+
+### Ajouté
+- **Annuaire : vignettes bien cadrées + point focal réglable (boucle des 5 IA en 3 rounds, design doc docs/specs/2026-08-10-screenshots-annuaire-design.md)**. Réponse au problème des captures mal positionnées (titre du héro coupé, grands vides). Quatre briques : (1) chaque capture conserve désormais une **image maître** du viewport complet (1200x1400, public/screenshots/masters/) et la vignette 1200x630 en est **dérivée d'un point focal vertical réglable** - dans l'admin, un nouveau bloc « Repositionner la vignette » permet de glisser l'image (souris, clavier et curseur, WCAG AAA) puis d'appliquer le cadrage en un clic, de façon non destructive et corrigeable à volonté ; (2) **capture automatique stabilisée** : animations gelées par CSS injecté, masquage géométrique des bandeaux plein écran (borné à 1,5 s, jamais un header ou un héro légitime contenant un h1/nav), statut de navigation explicite, attente de stabilité bornée - le cadrage par défaut du premier écran est bon du premier coup (vérifié en conditions réelles sur wondering.com) ; (3) **fallback og:image normalisé** : recadré en 1200x630 (cover, ou contain sur fond flouté pour les logos carrés et bannières très larges - zéro contenu coupé) avec garde anti-bombe (10 Mo / 8000 px) au lieu d'être écrit brut ; (4) **mort du garde-fou anti-écrasement par octets** (hérité de l'incident S79) qui rendait une mauvaise vignette lourde irremplaçable : remplacé par le verrou humain screenshot_locked + une validation de contenu (image décodable, dimensions exactes, non quasi uniforme, rejet des pages bloquées) + un backup .bak avant chaque remplacement. Migration additive (screenshot_focal_y), contrat News (ScreenshotUploadService) strictement intact, purge Cloudflare ciblée mutualisée (DRY). Revue adversariale passée (7 angles, 3 correctifs appliqués), 216 tests Directory+News verts, dérivation focale prouvée pixel par pixel.
+
+### Corrigé
+- Recapture d'un même outil : la date de mise à jour avance désormais même quand aucun champ ne change, pour que le cache-bust `?v=` serve toujours la nouvelle image (défaut préexistant relevé par la revue adversariale).
+
 ## [1.159.1] - 2026-08-09
 
 ### Corrigé

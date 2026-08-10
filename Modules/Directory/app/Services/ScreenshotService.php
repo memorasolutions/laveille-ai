@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Modules\Directory\Services;
 
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
+use Intervention\Image\Drivers\Gd\Driver as ImageGdDriver;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Interfaces\ImageInterface;
 use Modules\Directory\Models\Tool;
 use Throwable;
 
@@ -42,7 +46,6 @@ class ScreenshotService
 
         $filename = "{$slug}.jpg";
         $absolutePath = "{$outputDir}/{$filename}";
-        $existingSize = File::exists($absolutePath) ? File::size($absolutePath) : 0;
 
         try {
             // Capturer dans un fichier temporaire pour ne pas ecraser l'existant
@@ -83,34 +86,82 @@ class ScreenshotService
                 return false;
             }
 
-            $newSize = File::size($tempPath);
             $method = $json['method'] ?? 'screenshot';
 
-            // Protection #1 : ne pas ecraser un bon screenshot (> 20 KB) par un plus petit (méthode existante)
-            // (sauf si method=og:image car fallback intentionnel lorsque Puppeteer rend page vide/popup)
-            if ($method !== 'og:image' && $existingSize > 20000 && $newSize < $existingSize * 0.5) {
-                Log::warning("Screenshot {$slug}: nouveau fichier ({$newSize}) beaucoup plus petit que l'existant ({$existingSize}) - conserve l'ancien");
+            // ACTION: Brique 4 - rejet defensif si le script a deja signale un blocage, meme en
+            // cas de succes apparent (le script actuel ne combine jamais success=true et
+            // blocked=true, mais ce garde-fou protege contre une future evolution du script).
+            // MCP: SELF (< 5 lignes de logique de garde)
+            // RAISON: design doc 2026-08-10, brique 4, critere (b), CA-4.
+            if (($json['blocked'] ?? false) === true) {
+                Log::warning("Screenshot {$slug}: rejet - blocage signale par le script malgre success=true");
+                @unlink($tempPath);
+                self::cleanupMasterTempFile($json);
+
+                return false;
+            }
+
+            // ACTION: Brique 3 - normalisation du fallback og:image (garde anti-bombe puis
+            // cover/contain flouté) AVANT toute validation de contenu, uniquement pour ce chemin.
+            // MCP: SELF (orchestration, la logique lourde vit dans normalizeOgImageFallback())
+            // RAISON: design doc 2026-08-10, brique 3, CA-6, CA-8.
+            if ($method === 'og:image' && ! self::normalizeOgImageFallback($tempPath)) {
+                Log::warning("Screenshot {$slug}: og:image rejetee (anti-bombe ou decodage impossible)");
                 @unlink($tempPath);
 
                 return false;
             }
 
-            // Protection #2 (S84 #23 — renforcement user) : JAMAIS écraser une vraie capture (≥ 50KB)
-            // par autre chose < 90% de sa taille. Garantit qu'aucune miniature de qualité n'est perdue.
-            if ($existingSize >= 50000 && $newSize < $existingSize * 0.9) {
-                Log::info("Screenshot {$slug}: PRÉSERVE vraie capture existante ({$existingSize}b) — nouveau ({$newSize}b) trop petit");
+            // ACTION: Brique 4 - validation de contenu de la NOUVELLE image, remplace les deux
+            // anciennes protections par octets (S79) devenues source de faux positifs.
+            // MCP: SELF (orchestration, logique lourde dans isValidScreenshotContent())
+            // RAISON: design doc 2026-08-10, brique 4, critere (b), CA-4.
+            if (! self::isValidScreenshotContent($tempPath, $method)) {
+                Log::warning("Screenshot {$slug}: nouvelle image invalide (contenu) - conserve l'existant");
                 @unlink($tempPath);
+                self::cleanupMasterTempFile($json);
 
                 return false;
+            }
+
+            // ACTION: Brique 4 - backup .bak avant tout remplacement, etendu de l'upload manuel a
+            // la capture automatique. Un seul niveau, ecrase a chaque remplacement.
+            // MCP: SELF (< 5 lignes)
+            // RAISON: design doc 2026-08-10, brique 4, rollback a chaud sans redeploiement.
+            if (File::exists($absolutePath)) {
+                @copy($absolutePath, $absolutePath.'.bak');
             }
 
             // Remplacer le fichier
             File::move($tempPath, $absolutePath);
 
             $tool->screenshot = "screenshots/{$filename}";
+            // ACTION: Brique 1 - reinitialisation du focal a chaque nouvelle capture automatique
+            // (un ancien focal pointerait dans le vide sur un nouveau master, decision assumee du
+            // panel : repartir de 0 plutot qu'appliquer un focal obsolete).
+            // MCP: SELF (< 5 lignes)
+            // RAISON: design doc 2026-08-10, brique 1, CA-3 ; log explicite exige (revue
+            // adversariale post-livraison) - ce comportement voulu ne doit plus rester silencieux.
+            $previousFocalY = (int) ($tool->screenshot_focal_y ?? 0);
+            if ($previousFocalY !== 0) {
+                Log::info("Screenshot {$slug}: focal reinitialise de {$previousFocalY} a 0 suite a une nouvelle capture");
+            }
+            $tool->screenshot_focal_y = 0;
+            // ACTION: force le rafraîchissement du cache-bust ?v= même quand aucun attribut ne
+            // change (recapture du même outil : chemin identique, focal déjà à 0 = rien de
+            // « dirty », aucun UPDATE, donc ?v= servait l'ancienne image en cache).
+            // MCP: SELF (<5 lignes)
+            // RAISON: défaut préexistant relevé par la revue adversariale - le fichier physique
+            // change à chaque capture, la date de mise à jour doit suivre.
+            $tool->updated_at = now();
             $tool->saveQuietly();
 
-            Log::info("Screenshot {$slug}: OK via {$method} (".round($newSize / 1024).' KB)');
+            // ACTION: Brique 1 - deplacement atomique du master vers public/screenshots/masters/.
+            // MCP: SELF (orchestration, logique dans persistMasterFile())
+            // RAISON: design doc 2026-08-10, brique 1, section 3.
+            self::persistMasterFile($json, $slug);
+
+            Log::info("Screenshot {$slug}: OK via {$method} (".round(File::size($absolutePath) / 1024).' KB)');
 
             return true;
         } catch (Throwable $e) {
@@ -259,6 +310,192 @@ class ScreenshotService
     {
         return file_exists(config('services.browsershot.node_path', '/usr/local/bin/node'))
             && file_exists(base_path('scripts/capture-screenshot.cjs'));
+    }
+
+    /**
+     * Deplace le master temporaire (produit par capture-screenshot.cjs, champ master_path du
+     * JSON) vers son emplacement final public/screenshots/masters/{slug}.jpg (brique 1). Absent
+     * du JSON pour un fallback og:image ou un ancien format de script - aucune erreur, le focal
+     * reste simplement indisponible pour cet outil (comportement documente du design doc).
+     */
+    private static function persistMasterFile(array $json, string $slug): void
+    {
+        $masterTempPath = $json['master_path'] ?? null;
+        if (! is_string($masterTempPath) || $masterTempPath === '' || ! File::exists($masterTempPath)) {
+            return;
+        }
+
+        $mastersDir = public_path('screenshots/masters');
+        if (! File::isDirectory($mastersDir)) {
+            File::makeDirectory($mastersDir, 0755, true);
+        }
+
+        $masterAbsolutePath = "{$mastersDir}/{$slug}.jpg";
+
+        try {
+            File::move($masterTempPath, $masterAbsolutePath);
+        } catch (Throwable $e) {
+            Log::warning("persistMasterFile: deplacement master {$slug} echoue - {$e->getMessage()}");
+            @unlink($masterTempPath);
+        }
+    }
+
+    /**
+     * Nettoie un master temporaire orphelin lorsque la capture est finalement rejetee apres coup
+     * (blocage signale, contenu invalide) - evite d'accumuler des fichiers _tmp_*.master.jpg.
+     */
+    private static function cleanupMasterTempFile(array $json): void
+    {
+        $masterTempPath = $json['master_path'] ?? null;
+        if (is_string($masterTempPath) && $masterTempPath !== '' && File::exists($masterTempPath)) {
+            @unlink($masterTempPath);
+        }
+    }
+
+    /**
+     * Brique 3 - normalise un fallback og:image telecharge tel quel par le script Node en une
+     * image 1200x630 sans jamais couper le sujet : garde anti-bombe AVANT tout decodage complet,
+     * puis cover(1200,630) si le ratio est proche d'un format capture (1.2-3.0), sinon composition
+     * contain sur un fond agrandi + floute (zero contenu coupe). Retourne false = rejet, le
+     * fichier temporaire n'est pas modifie mais doit etre considere invalide par l'appelant.
+     */
+    private static function normalizeOgImageFallback(string $tempPath): bool
+    {
+        $maxBytes = 10 * 1024 * 1024; // 10 Mo - garde anti-bombe (CA-8)
+        $maxDimensionPx = 8000;
+
+        if (! File::exists($tempPath) || File::size($tempPath) > $maxBytes) {
+            return false;
+        }
+
+        // Lecture d'en-tete seule (getimagesize), jamais de decodage complet des pixels ici.
+        $declared = @getimagesize($tempPath);
+        if ($declared === false || $declared[0] > $maxDimensionPx || $declared[1] > $maxDimensionPx) {
+            return false;
+        }
+
+        try {
+            $manager = new ImageManager(new ImageGdDriver());
+            $image = $manager->read($tempPath);
+            $width = $image->width();
+            $height = $image->height();
+            if ($width <= 0 || $height <= 0) {
+                return false;
+            }
+
+            $ratio = $width / $height;
+
+            if ($ratio >= 1.2 && $ratio <= 3.0) {
+                $normalized = $image->cover(1200, 630);
+            } else {
+                // Fond agrandi + floute (jamais un fond uni) puis sujet complet centre dessus,
+                // sans jamais depasser 1200x630 - convergence explicite du panel « zero contenu coupe ».
+                $background = (clone $image)->cover(1200, 630)->blur(20);
+                $foreground = (clone $image)->scale(width: 1200, height: 630);
+                $normalized = $background->place($foreground, 'center');
+            }
+
+            file_put_contents($tempPath, $normalized->toJpeg(85)->toString());
+
+            return true;
+        } catch (Throwable $e) {
+            Log::warning('normalizeOgImageFallback: exception - '.$e->getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * Brique 4 (b) - valide le contenu de la NOUVELLE image avant tout remplacement : decodable,
+     * dimensions exactement 1200x630 pour une vraie capture Puppeteer, non quasi-uniforme
+     * (page blanche/erreur). Remplace les deux anciennes protections par octets.
+     */
+    private static function isValidScreenshotContent(string $tempPath, string $method): bool
+    {
+        try {
+            $manager = new ImageManager(new ImageGdDriver());
+            $image = $manager->read($tempPath);
+        } catch (Throwable $e) {
+            Log::warning('isValidScreenshotContent: image non decodable - '.$e->getMessage());
+
+            return false;
+        }
+
+        if ($method === 'screenshot' && ($image->width() !== 1200 || $image->height() !== 630)) {
+            Log::warning("isValidScreenshotContent: dimensions inattendues ({$image->width()}x{$image->height()}) pour une capture Puppeteer");
+
+            return false;
+        }
+
+        if (self::isQuasiUniformImage($image)) {
+            Log::warning('isValidScreenshotContent: image quasi-uniforme detectee (page blanche/erreur probable)');
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Echantillonnage en grille reguliere (10x10 par defaut) : si plus de 98% des points tombent
+     * dans une teinte proche (tolerance +/-12 par canal RGB), l'image est consideree comme une
+     * page blanche/erreur/placeholder plutot qu'une vraie capture.
+     */
+    private static function isQuasiUniformImage(ImageInterface $image, int $grid = 10, float $uniformThreshold = 0.98): bool
+    {
+        $width = $image->width();
+        $height = $image->height();
+        if ($width < $grid || $height < $grid) {
+            return false; // trop petit pour un echantillonnage fiable, ne pas rejeter a tort
+        }
+
+        $tolerance = 12;
+        $samples = [];
+        for ($gx = 0; $gx < $grid; $gx++) {
+            for ($gy = 0; $gy < $grid; $gy++) {
+                $x = min((int) floor(($gx + 0.5) * $width / $grid), $width - 1);
+                $y = min((int) floor(($gy + 0.5) * $height / $grid), $height - 1);
+                $rgb = $image->pickColor($x, $y)->toArray();
+                $samples[] = [$rgb[0] ?? 0, $rgb[1] ?? 0, $rgb[2] ?? 0];
+            }
+        }
+
+        if ($samples === []) {
+            return false;
+        }
+
+        [$refR, $refG, $refB] = $samples[0];
+        $matching = 0;
+        foreach ($samples as [$r, $g, $b]) {
+            if (abs($r - $refR) <= $tolerance && abs($g - $refG) <= $tolerance && abs($b - $refB) <= $tolerance) {
+                $matching++;
+            }
+        }
+
+        return ($matching / count($samples)) >= $uniformThreshold;
+    }
+
+    /**
+     * Purge Cloudflare ciblee d'un seul fichier (jamais un purge_everything). Extraite du
+     * controleur (DirectoryAdminController::purgeCloudflareScreenshot, DRY brique 1) pour etre
+     * reutilisee aussi par ScreenshotFocalService.
+     */
+    public static function purgeCloudflareFile(string $relativePath): void
+    {
+        try {
+            $zoneId = config('services.cloudflare.zone_id');
+            $apiToken = config('services.cloudflare.api_token');
+            if (empty($zoneId) || empty($apiToken)) {
+                return;
+            }
+            Http::timeout(8)
+                ->withToken($apiToken)
+                ->post("https://api.cloudflare.com/client/v4/zones/{$zoneId}/purge_cache", [
+                    'files' => [config('app.url').'/'.ltrim($relativePath, '/')],
+                ]);
+        } catch (Throwable $e) {
+            Log::warning('Cloudflare purge failed: '.$e->getMessage());
+        }
     }
 
     /**

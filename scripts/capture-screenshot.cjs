@@ -139,6 +139,105 @@ function downloadFile(fileUrl, destPath) {
     });
 }
 
+// ACTION: CSS anti-instabilite injectee avant capture (design doc 2026-08-10, brique 2)
+// SELF: neutralise animations/transitions/curseur clignotant qui font "trembler" les mesures de
+// stabilite du DOM et le rendu final capture.
+// RAISON IMPORTANTE - volontairement SANS "transform: none" global : un transform en !important
+// casserait les mises en page qui positionnent des elements par transform (carrousels, sticky
+// headers via translate3d, etc.) - risque de regression visuelle plus grand que le benefice de
+// stabilite. NE JAMAIS l'ajouter sans discussion prealable (voir design doc, brique 2).
+async function injectStabilityCss(page) {
+    try {
+        await page.addStyleTag({
+            content: '* { animation: none !important; transition: none !important; caret-color: transparent !important; }',
+        });
+    } catch (e) { /* non bloquant */ }
+}
+
+// Attente bornee des polices (brique 2) : evite une capture avec police de fallback qui decale
+// les hauteurs de texte au moment du screenshot. Bornee a 3s pour ne jamais bloquer indefiniment
+// sur un site qui charge des polices lentement.
+async function waitForFontsReady(page) {
+    try {
+        await Promise.race([
+            page.evaluate(function () {
+                if (!document.fonts || !document.fonts.ready) { return true; }
+                return document.fonts.ready.then(function () { return true; });
+            }),
+            new Promise(function (resolve) { setTimeout(resolve, 3000); }),
+        ]);
+    } catch (e) { /* non bloquant */ }
+}
+
+// Mesure de stabilite du rendu (brique 2) : hauteur du DOM + progression du chargement des images.
+async function measureLayoutMetrics(page) {
+    try {
+        return await page.evaluate(function () {
+            var imgs = document.images || [];
+            var complete = 0;
+            for (var i = 0; i < imgs.length; i++) {
+                if (imgs[i].complete) { complete++; }
+            }
+            return {
+                height: document.body ? document.body.scrollHeight : 0,
+                imageCount: imgs.length,
+                completeImages: complete,
+            };
+        });
+    } catch (e) {
+        return { height: -1, imageCount: -1, completeImages: -1 };
+    }
+}
+
+// Masquage geometrique generique (brique 2) : attrape les bandeaux plein ecran non couverts par
+// les selecteurs codes en dur (COOKIE_HIDE/POPUP_HIDE) - fixed/sticky touchant un bord du
+// viewport, couvrant plus de 20% de sa surface, avec z-index >= 100. Seuil de 20% choisi pour ne
+// JAMAIS masquer un header de hero legitime (souvent < 15% de la surface d'un viewport 1200x1400).
+// ACTION: budget de temps explicite + exclusion header/hero legitime (revue adversariale post-livraison)
+// SELF: querySelectorAll('body *') + getComputedStyle par element est non borne sur un DOM enorme ;
+// un header+hero sticky de 300px z-index 999 contenant un h1/nav serait sinon masque a tort.
+// RAISON: budget ~1500ms verifie periodiquement dans la boucle (cout de Date.now() amorti tous les
+// 200 elements) ; exclusion deterministe et simple (h1 ou nav avec texte substantiel a l'interieur).
+async function hideFullscreenOverlays(page) {
+    try {
+        await page.evaluate(function () {
+            try {
+                var vw = window.innerWidth;
+                var vh = window.innerHeight;
+                var viewportArea = vw * vh;
+                if (viewportArea <= 0) { return; }
+                var budgetMs = 1500;
+                var deadline = Date.now() + budgetMs;
+                var els = document.querySelectorAll('body *');
+                for (var i = 0; i < els.length; i++) {
+                    if (i % 200 === 0 && Date.now() > deadline) { break; } // budget de temps atteint, on arrete proprement
+                    var el = els[i];
+                    try {
+                        var style = window.getComputedStyle(el);
+                        if (style.position !== 'fixed' && style.position !== 'sticky') { continue; }
+                        var zIndex = parseInt(style.zIndex, 10);
+                        if (isNaN(zIndex) || zIndex < 100) { continue; }
+                        var rect = el.getBoundingClientRect();
+                        if (rect.width <= 0 || rect.height <= 0) { continue; }
+                        var touchesEdge = rect.top <= 0 || rect.bottom >= vh;
+                        if (!touchesEdge) { continue; }
+                        var area = rect.width * rect.height;
+                        if (area / viewportArea <= 0.2) { continue; }
+                        // Exclusion header/hero legitime : jamais masquer un element qui CONTIENT un
+                        // h1 ou un nav avec du texte substantiel (ex. header+hero sticky 300px z-index 999).
+                        var h1 = el.querySelector('h1');
+                        var hasSubstantialH1 = !!h1 && (h1.textContent || '').trim().length >= 3;
+                        var nav = el.querySelector('nav');
+                        var hasSubstantialNav = !!nav && (nav.textContent || '').trim().length >= 10;
+                        if (hasSubstantialH1 || hasSubstantialNav) { continue; }
+                        el.style.setProperty('visibility', 'hidden', 'important');
+                    } catch (elErr) { /* skip cet element */ }
+                }
+            } catch (evalErr) { /* non bloquant */ }
+        });
+    } catch (e) { /* non bloquant */ }
+}
+
 (async function () {
     var browser = null;
     try {
@@ -169,26 +268,47 @@ function downloadFile(fileUrl, destPath) {
             });
         });
 
-        // Navigate (catch timeout gracefully)
+        // Navigate (catch timeout gracefully) - le statut reel est desormais logue explicitement
+        // (brique 2) au lieu d'etre avale silencieusement par le try/catch.
+        var gotoStatus = 'loaded';
         try {
             await page.goto(url, { timeout: 30000, waitUntil: 'networkidle2' });
-        } catch (e) { /* continue with partial load */ }
+        } catch (e) { gotoStatus = 'timeout-partial'; /* continue with partial load */ }
+
+        await injectStabilityCss(page);
+        await waitForFontsReady(page);
 
         // Dismiss cookies (2 passes + ESC + localStorage pré-accept)
         await dismissCookies(page);
 
-        // Wait 5s pour popups déclenchés 2-5s après load (BP 2026 #C timing)
-        await new Promise(function (r) { setTimeout(r, 5000); });
-
-        // Dismiss popups + text-based cookie banners + retry 3x (BP 2026 #A+#C + React styled-components)
-        await dismissPopups(page);
-        await dismissByText(page);
-        for (var _retry = 0; _retry < 3; _retry++) {
-            await new Promise(function (r) { setTimeout(r, 1500); });
-            await dismissCookies(page);
+        // Attente de stabilite bornee (brique 2) : remplace les sleeps fixes 5000ms + 3x1500ms
+        // (budget total 9500ms conserve a l'identique, jamais depasse) par une mesure repetee de
+        // la hauteur du DOM + des images chargees, espacee de 700ms. Deux mesures identiques
+        // consecutives = rendu stable = capture anticipee (gain de temps). Sinon, la cascade de
+        // dismiss continue jusqu'au delai maximal d'aujourd'hui (aucune lenteur ajoutee).
+        var STABILITY_BUDGET_MS = 9500;
+        var STABILITY_STEP_MS = 700;
+        var stabilityDeadline = Date.now() + STABILITY_BUDGET_MS;
+        var prevMetrics = null;
+        for (;;) {
             await dismissPopups(page);
             await dismissByText(page);
+            await dismissCookies(page);
+            var metrics = await measureLayoutMetrics(page);
+            if (prevMetrics && metrics.height === prevMetrics.height
+                && metrics.imageCount === prevMetrics.imageCount
+                && metrics.completeImages === prevMetrics.completeImages) {
+                break; // deux mesures stables espacees de STABILITY_STEP_MS : capture anticipee
+            }
+            prevMetrics = metrics;
+            if (Date.now() + STABILITY_STEP_MS >= stabilityDeadline) {
+                break; // budget bientot epuise : ne pas attendre au-dela du delai maximal actuel
+            }
+            await new Promise(function (r) { setTimeout(r, STABILITY_STEP_MS); });
         }
+
+        // Masquage geometrique generique (brique 2), apres la cascade de dismiss ci-dessus.
+        await hideFullscreenOverlays(page);
 
         // DETECTION : page bloquee?
         var blocked = false;
@@ -209,6 +329,10 @@ function downloadFile(fileUrl, destPath) {
         }
 
         if (blocked) {
+            // Statut goto_status ecrase par le diagnostic de blocage (plus specifique que
+            // loaded/timeout-partial - brique 2).
+            gotoStatus = 'blocked';
+
             // FALLBACK : og:image
             var ogImage = null;
             try {
@@ -225,23 +349,35 @@ function downloadFile(fileUrl, destPath) {
                 try {
                     var bytes = await downloadFile(ogImage, outputPath);
                     if (bytes >= MIN_OG_SIZE) {
-                        console.log(JSON.stringify({ success: true, path: outputPath, method: 'og:image', size: bytes, ogUrl: ogImage }));
+                        console.log(JSON.stringify({ success: true, path: outputPath, method: 'og:image', size: bytes, ogUrl: ogImage, goto_status: gotoStatus }));
                     } else {
-                        console.log(JSON.stringify({ success: false, error: 'og:image trop petite (' + Math.round(bytes / 1024) + ' KB)', blocked: true, tooSmall: true }));
+                        console.log(JSON.stringify({ success: false, error: 'og:image trop petite (' + Math.round(bytes / 1024) + ' KB)', blocked: true, tooSmall: true, goto_status: gotoStatus }));
                     }
                 } catch (dlErr) {
-                    console.log(JSON.stringify({ success: false, error: 'Bloque + og:image download echoue: ' + dlErr.message, blocked: true }));
+                    console.log(JSON.stringify({ success: false, error: 'Bloque + og:image download echoue: ' + dlErr.message, blocked: true, goto_status: gotoStatus }));
                 }
             } else {
-                console.log(JSON.stringify({ success: false, error: 'Page bloquee (Cloudflare/CAPTCHA), pas d og:image', blocked: true }));
+                console.log(JSON.stringify({ success: false, error: 'Page bloquee (Cloudflare/CAPTCHA), pas d og:image', blocked: true, goto_status: gotoStatus }));
             }
         } else {
             // CAPTURE NORMALE
+            // Master (brique 1) : capture complete du viewport 1200x1400, temp path derive du
+            // outputPath - PHP se charge du deplacement atomique final vers
+            // public/screenshots/masters/{slug}.jpg (design doc section 3, brique 1).
+            var masterTempPath = outputPath.replace(/\.jpg$/i, '') + '.master.jpg';
+            var masterWritten = false;
+            try {
+                await page.screenshot({ path: masterTempPath, type: 'jpeg', quality: 85, fullPage: false, clip: { x: 0, y: 0, width: 1200, height: 1400 } });
+                masterWritten = true;
+            } catch (masterErr) { masterWritten = false; }
+
             await page.screenshot({ path: outputPath, type: 'jpeg', quality: 85, fullPage: false, clip: { x: 0, y: 0, width: 1200, height: 630 } });
 
             // VALIDATION : taille fichier
             var fileSize = fs.statSync(outputPath).size;
             if (fileSize < MIN_FILE_SIZE) {
+                // Pas de master pour un fallback og:image (brique 3) : nettoyage du temp master.
+                if (masterWritten) { try { fs.unlinkSync(masterTempPath); } catch (cleanupErr) {} }
                 // Screenshot trop petit → tenter og:image fallback avant de fermer le browser
                 var ogImage = null;
                 try {
@@ -262,19 +398,21 @@ function downloadFile(fileUrl, destPath) {
                         var ogSize = fs.statSync(outputPath).size;
                         if (ogSize >= MIN_OG_SIZE) {
                             ogSuccess = true;
-                            console.log(JSON.stringify({ success: true, path: outputPath, method: 'og:image', size: ogSize, ogUrl: ogImage }));
+                            console.log(JSON.stringify({ success: true, path: outputPath, method: 'og:image', size: ogSize, ogUrl: ogImage, goto_status: gotoStatus }));
                         }
                     } catch (e) {
                         ogSuccess = false;
                     }
                 }
                 if (!ogSuccess) {
-                    console.log(JSON.stringify({ success: false, error: 'Screenshot trop petit (' + Math.round(fileSize / 1024) + ' KB)', tooSmall: true, path: outputPath }));
+                    console.log(JSON.stringify({ success: false, error: 'Screenshot trop petit (' + Math.round(fileSize / 1024) + ' KB)', tooSmall: true, path: outputPath, goto_status: gotoStatus }));
                 }
             } else {
                 await browser.close();
                 browser = null;
-                console.log(JSON.stringify({ success: true, path: outputPath, method: 'screenshot', size: fileSize }));
+                var normalOutput = { success: true, path: outputPath, method: 'screenshot', size: fileSize, goto_status: gotoStatus };
+                if (masterWritten) { normalOutput.master_path = masterTempPath; }
+                console.log(JSON.stringify(normalOutput));
             }
         }
     } catch (error) {
