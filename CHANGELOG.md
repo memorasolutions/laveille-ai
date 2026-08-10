@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.160.1] - 2026-08-10
+
+### Corrigé
+- **Bruit prod éliminé : « The "force" option does not exist » toutes les 15 minutes** (tools:dispatch-enrichment, deux tâches planifiées). Cause racine : le trait HasKillSwitch lisait l'option --force sans vérifier que la commande la définit - or DispatchEnrichmentCommand ne la déclare pas, donc CHAQUE passage du planificateur levait une InvalidArgumentException (110 occurrences le 10 août, kill switch cron.ai-enrich-dispatch inactif). Correctif : hasOption('force') vérifié avant lecture (défensif, couvre toute future commande utilisant le trait sans --force). Preuve : flag désactivé en local, la commande sort désormais en avertissement propre (exit 0).
+
 ## [1.160.0] - 2026-08-10
 
 ### Ajouté
