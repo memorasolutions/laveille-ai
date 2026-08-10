@@ -28,6 +28,30 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 
 // ── Helpers locaux (préfixés Nfus pour éviter tout conflit inter-fichiers) ────
 
+// ── Correctif 2026-08-09 : borne mémoire de la file (news.fetch_backlog_hours) ────
+
+it('borne de 48 h : un article plus vieux que la fenetre n est plus retraite par news:fetch', function () {
+    config(['news.fusion.enabled' => false, 'news.fetch_backlog_hours' => 48]);
+    nfusBindFakeRssFetcher();
+    nfusFakeOpenRouterSuccess();
+
+    $source = nfusSource('SourceBacklog');
+    $recent = nfusArticle($source, 'backlog-recent', 'OpenAI annonce un nouveau modele IA generative pour le grand public');
+    $vieux = nfusArticle($source, 'backlog-vieux', 'Ancienne annonce IA generative jamais traitee par le pipeline');
+    $vieux->timestamps = false;
+    $vieux->forceFill(['created_at' => now()->subDays(3)])->saveQuietly();
+
+    $this->artisan('news:fetch')->assertSuccessful();
+
+    $recent->refresh();
+    $vieux->refresh();
+
+    expect($recent->structured_summary)->not->toBeNull()
+        ->and($vieux->structured_summary)->toBeNull()
+        ->and($vieux->summary)->toBeNull();
+    Http::assertSentCount(1);
+});
+
 function nfusSource(string $name): NewsSource
 {
     return NewsSource::create([

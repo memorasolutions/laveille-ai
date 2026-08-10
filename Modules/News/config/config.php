@@ -25,4 +25,15 @@ return [
     | Désactiver temporairement si la déduplication est trop agressive.
     */
     'dedup_skip_enabled' => (bool) env('NEWS_DEDUP_SKIP_ENABLED', true),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Fenêtre de traitement des articles récupérés
+    |--------------------------------------------------------------------------
+    | news:fetch ne (re)traite que les articles créés dans cette fenêtre. Sans
+    | cette borne, les articles sautés par quota s'accumulent indéfiniment dans
+    | la file (12 436 mesurés le 2026-08-09, ~43 Mo de texte) et le cron horaire
+    | meurt en épuisement mémoire (128 Mo CLI) à chaque exécution.
+    */
+    'fetch_backlog_hours' => (int) env('NEWS_FETCH_BACKLOG_HOURS', 48),
 ];

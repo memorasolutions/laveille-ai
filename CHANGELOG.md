@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.159.1] - 2026-08-09
+
+### Corrigé
+- **news:fetch mourait en épuisement mémoire à CHAQUE exécution horaire depuis des jours (bug préexistant, découvert pendant l'activation contrôlée d'Actus 2.0)**. Les logs prod montrent ~20-22 « Allowed memory size of 134217728 bytes exhausted » par jour depuis au moins le 6 août, un à chaque cron de XX:15. Cause racine mesurée : la file « articles sans résumé structuré et non publiés » n'avait aucune borne temporelle - les articles sautés par quota s'y accumulaient indéfiniment (12 436 articles, ~43 Mo de texte brut, rechargés intégralement en mémoire à chaque exécution). Correctif : news:fetch ne (re)traite plus que les articles créés dans la fenêtre `news.fetch_backlog_hours` (48 h par défaut, surchargeable via NEWS_FETCH_BACKLOG_HOURS) - une actualité plus vieille n'a plus vocation à être résumée. Nouveau test de non-régression (un article de 3 jours n'est plus retraité ni ne déclenche d'appel IA). Suite News : 134 tests verts (353 assertions).
+
 ## [1.159.0] - 2026-08-09
 
 ### Ajouté

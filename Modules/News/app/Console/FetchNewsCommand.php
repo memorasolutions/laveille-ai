@@ -79,9 +79,15 @@ class FetchNewsCommand extends Command
 
             $feedType = $this->detectFeedType($source);
 
+            // ACTION: borne la file aux articles récents - sans elle, les articles sautés par
+            // quota s'accumulent sans fin (12 436 rechargés par run mesurés le 2026-08-09) et le
+            // cron horaire meurt en épuisement mémoire (128 Mo CLI) à chaque exécution.
+            // MCP: SELF (<5 lignes)
+            // RAISON: une actualité créée il y a plus de 48 h n'a plus vocation à être résumée.
             $toProcess = NewsArticle::where('news_source_id', $source->id)
                 ->whereNull('structured_summary')
                 ->where('is_published', false)
+                ->where('created_at', '>=', now()->subHours((int) config('news.fetch_backlog_hours', 48)))
                 ->get();
 
             foreach ($toProcess as $article) {
