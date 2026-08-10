@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.159.0] - 2026-08-09
+
+### Ajouté
+- **Actus 2.0 : fusion multi-sources des actualités (derrière un drapeau, désactivé par défaut)**. Chantier issu de la boucle des 5 oracles (3 rounds) et d'un design doc complet (docs/specs/2026-08-09-actus-fusion-design.md) : au lieu de 15 fiches isolées par jour, les articles couvrant le même sujet sont regroupés (clustering déterministe par similarité de titres et d'entités, zéro API externe) et produisent UNE fiche comparative croisant les sources - divergences entre médias, mémoire de nos archives (« ce qui a changé depuis »), angle canadien seulement quand une donnée vérifiable existe, chaque source citée avec son auteur (art. 29.1/29.2 LDA). Quota fixe d'indexation quotidien (défaut 5) : au-delà, les fiches naissent noindex (réutilise le mécanisme d'élagage réversible). Un appel IA par GROUPE au lieu d'un par article = coût réduit. Réutilise l'infrastructure de déduplication d'avril 2026 (is_potential_duplicate_of, news_dedup_log) - une seule colonne ajoutée. Revue adversariale passée : 2 failles corrigées avant livraison (le contournement du DEDUP-SKIP qui aurait laissé publier des republications en doublon ; les effets de bord d'observer sur les membres absorbés) + garde anti-injection de prompt dans les deux prompts IA. Tout le comportement est inerte tant que NEWS_FUSION_ENABLED n'est pas activé : drapeau éteint = pipeline strictement identique (critère testé). 133 tests News verts (348 assertions), rendu vérifié visuellement (fiche comparative + bandeau des pages membres).
+
 ## [1.158.1] - 2026-08-09
 
 ### Corrigé

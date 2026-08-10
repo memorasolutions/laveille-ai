@@ -1,6 +1,12 @@
 @extends(fronttheme_layout())
 
-@php $ss = $article->structured_summary; @endphp
+@php
+    $ss = $article->structured_summary;
+    // Actus 2.0 : $isDigest calculée une fois ici (à côté de $ss), consommée par tous les
+    // blocs conditionnels ci-dessous (design doc section 7).
+    $isDigest = (bool) ($article->is_comparative_digest ?? false);
+    $fusionDigestArticle = method_exists($article, 'fusionDigest') ? $article->fusionDigest() : null;
+@endphp
 
 {{-- Élagage SEO : vieille actualité peu vue → noindex,follow (le layout master lit cette section). --}}
 @if(($article->seo_status ?? 'index') === 'noindex')
@@ -11,7 +17,7 @@
 @section('meta_description', $article->meta_description ?? safe_excerpt($article->summary ?? strip_tags($article->description), 155))
 @section('share_text')
 @php
-    // Refonte share_text News — pattern viral 2026 aligné Blog (sonar-pro hybride #3+#1+#5)
+    // Refonte share_text News - pattern viral 2026 aligné Blog (sonar-pro hybride #3+#1+#5)
     $ss = $article->structured_summary ?? [];
     $clean = fn($str) => str_replace('\'', "\u{2019}", trim(strip_tags($str ?? '')));
     $title = $clean($article->seo_title ?? $article->title);
@@ -104,7 +110,7 @@
 
 {{-- Meta AEO/LLM-first 2026 + Schema.org NewsArticle + FAQPage --}}
 @push('head')
-<meta name="llm:summary" content="{{ e($article->seo_title ?? $article->title) }} — {{ e(Str::limit(strip_tags($article->meta_description ?? $article->summary ?? $article->description ?? ''), 200)) }} ({{ e($article->source->name ?? 'Actualité IA') }})">
+<meta name="llm:summary" content="{{ e($article->seo_title ?? $article->title) }} - {{ e(Str::limit(strip_tags($article->meta_description ?? $article->summary ?? $article->description ?? ''), 200)) }} ({{ e($article->source->name ?? 'Actualité IA') }})">
 <meta name="llm:keywords" content="actualité IA, {{ e($article->source->name ?? 'IA') }}, intelligence artificielle, francophone, Québec">
 <meta name="llm:url" content="{{ route('news.show', $article) }}">
 @if($ss && isset($ss['faq_question']))
@@ -176,7 +182,7 @@
         border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.75rem;
     }
     .nw-summary-fallback p { margin: 0; color: #1a365d; line-height: 1.6; }
-    /* R4 — Bloc TL;DR Speakable (AEO 2026 : answer-first paragraph 30-40 mots) */
+    /* R4 - Bloc TL;DR Speakable (AEO 2026 : answer-first paragraph 30-40 mots) */
     .nw-tldr {
         background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%);
         border-left: 4px solid var(--c-primary); border-radius: 8px;
@@ -190,7 +196,7 @@
         border-radius: 4px;
     }
     .nw-tldr p { margin: 0; font-size: 1rem; line-height: 1.6; color: #134e4a; font-weight: 500; }
-    /* R10 — Citation source extracted (rendu si quote présent) */
+    /* R10 - Citation source extracted (rendu si quote présent) */
     .nw-quote {
         border-left: 3px solid #94a3b8; background: #f8fafc;
         padding: 0.875rem 1.25rem; margin: 1.25rem 0;
@@ -200,6 +206,22 @@
     .nw-stat { display: inline-block; background: var(--c-primary); color: #fff; padding: 0.125rem 0.5rem; border-radius: 4px; font-weight: 700; font-size: 0.875rem; }
     .nw-expert { font-size: 0.875rem; color: #475569; margin: 0.5rem 0 0; }
     .nw-expert strong { color: var(--c-dark); }
+    /* Actus 2.0 - bandeau page membre (design doc section 7) */
+    .nw-fusion-banner {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem;
+        background: #f0f9fa; border: 1.5px solid var(--c-primary); border-radius: 8px;
+        padding: 0.75rem 1.125rem; margin-bottom: 1.25rem; font-size: 0.9375rem; color: #134e4a;
+    }
+    .nw-fusion-banner a { color: var(--c-primary); font-weight: 700; text-decoration: none; white-space: nowrap; }
+    .nw-fusion-banner a:hover { text-decoration: underline; }
+    /* Actus 2.0 - liste des sources d'une fiche comparative */
+    .nw-sources-list { list-style: none; padding: 0; margin: 0 0 1.75rem; }
+    .nw-sources-list li { padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb; font-size: 0.9375rem; color: #374151; }
+    .nw-sources-list li:last-child { border-bottom: none; }
+    .nw-sources-list a { color: var(--c-primary); font-weight: 600; text-decoration: none; }
+    .nw-sources-list a:hover { text-decoration: underline; }
+    .nw-sources-author { color: #6b7280; }
+    .nw-sources-angle { color: #4b5563; }
 </style>
 @endpush
 
@@ -210,7 +232,19 @@
             <div class="col-lg-8">
                 <div class="nw-show">
 
-                    {{-- Point rouge "déjà publié" (superadmin only) — composant partagé, même gate
+                    {{-- Actus 2.0 - page d'un article MEMBRE (design doc section 7) : le bloc
+                         noindex existant (ci-dessus, déjà conditionné sur seo_status) s'applique
+                         sans modification. Bandeau VISIBLE en plus (pas seulement une meta
+                         invisible) pour ne pas laisser un visiteur humain sans porte de sortie
+                         sur une page volontairement appauvrie. --}}
+                    @if($fusionDigestArticle)
+                        <div class="nw-fusion-banner" role="note">
+                            <span>{{ __('Cette actualité fait partie d\'une fiche comparative plus complète.') }}</span>
+                            <a href="{{ route('news.show', $fusionDigestArticle) }}">{{ __('Voir la fiche comparative') }} &rarr;</a>
+                        </div>
+                    @endif
+
+                    {{-- Point rouge "déjà publié" (superadmin only) - composant partagé, même gate
                          que le menu de partage admin plus bas (isSuperAdmin()). Voir
                          components/admin-shared-dot.blade.php pour le détail du contrat. --}}
                     <h1 class="nw-show-title" data-editable="title">
@@ -281,12 +315,12 @@
                         <img src="{{ $article->image_url }}{{ str_contains($article->image_url, 'http') ? '' : '?v='.($article->updated_at?->timestamp ?? time()) }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-hero" loading="lazy">
                     @endif
 
-                    {{-- Bande dessinée pédagogique (standard « visionneur de BD ») — apparaît si public/bd/{slug}/manifest.json existe. 100 % réutilisé du glossaire (ComicLibrary + comic-viewer), zéro logique dupliquée. --}}
+                    {{-- Bande dessinée pédagogique (standard « visionneur de BD ») - apparaît si public/bd/{slug}/manifest.json existe. 100 % réutilisé du glossaire (ComicLibrary + comic-viewer), zéro logique dupliquée. --}}
                     @if(class_exists(\Modules\Dictionary\Support\ComicLibrary::class) && \Modules\Dictionary\Support\ComicLibrary::hasComic((string) $article->slug))
                         <x-dictionary::comic-viewer :comic="\Modules\Dictionary\Support\ComicLibrary::forSlug((string) $article->slug)" />
                     @endif
 
-                    {{-- R4 — TL;DR aside Speakable (AEO 2026 : answer-first 30-40 mots) --}}
+                    {{-- R4 - TL;DR aside Speakable (AEO 2026 : answer-first 30-40 mots) --}}
                     @if($ss && !empty($ss['tldr']))
                         <aside class="nw-tldr" aria-label="{{ __('Résumé en bref') }}">
                             <p>@glossarize(e($ss['tldr']))</p>
@@ -298,14 +332,34 @@
                         <p class="nw-lead">@glossarize(e($ss['hook']))</p>
                     @endif
 
-                    {{-- R10 — Citation verbatim extraite de la source externe (R7 AiSummary) --}}
+                    {{-- R10 - Citation verbatim extraite de la source externe (R7 AiSummary) --}}
                     @if($ss && !empty($ss['quote']))
                         <blockquote class="nw-quote" @if(!empty($article->resolved_url ?? $article->url)) cite="{{ $article->resolved_url ?? $article->url }}" @endif>
                             « @glossarize(e($ss['quote'])) »
                             @if(!empty($article->source?->name))
-                                <cite>— {{ $article->source->name }}</cite>
+                                <cite>- {{ $article->source->name }}</cite>
                             @endif
                         </blockquote>
+                    @endif
+
+                    {{-- Actus 2.0 - Sources (design doc section 7) : liste « Sources » pour une
+                         fiche comparative uniquement, remplace le bloc à source unique plus bas
+                         (@unless($isDigest) ajouté autour de ce bloc, aucune suppression). --}}
+                    @if($isDigest && !empty($ss['sources']))
+                        <h2 class="nw-section-heading">{{ __('Sources') }}</h2>
+                        <ul class="nw-sources-list">
+                            @foreach($ss['sources'] as $src)
+                                <li>
+                                    <a href="{{ $src['url'] ?? '#' }}" target="_blank" rel="noopener">{{ $src['source_name'] ?? __('Source') }}</a>
+                                    @if(!empty($src['author']))
+                                        <span class="nw-sources-author"> &mdash; {{ $src['author'] }}</span>
+                                    @endif
+                                    @if(!empty($src['angle']))
+                                        <span class="nw-sources-angle"> : @glossarize(e($src['angle']))</span>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
                     @endif
 
                     {{-- Résumé structuré --}}
@@ -327,6 +381,39 @@
                                 <p style="margin-top: 0.75rem; margin-bottom: 0;"><span class="nw-stat">{{ $ss['key_stat'] }}</span></p>
                             @endif
                         </div>
+                        @endif
+
+                        {{-- Actus 2.0 - divergences entre sources (design doc section 7). --}}
+                        @if(!empty($ss['divergences']))
+                        <h2 class="nw-section-heading">{{ __('Ce que disent les sources différemment') }}</h2>
+                        <ul class="nw-key-list">
+                            {{-- Garde défensive : un modèle IA peut renvoyer une chaîne au lieu du tableau contractuel. --}}
+                            @foreach((is_array($ss['divergences']) ? $ss['divergences'] : [$ss['divergences']]) as $divergence)
+                                <li>@glossarize(e($divergence))</li>
+                            @endforeach
+                        </ul>
+                        @endif
+
+                        {{-- Actus 2.0 - contexte d'archives, uniquement si pertinent (jamais une liste factice). --}}
+                        @if(is_array($ss['archive_context'] ?? null) && !empty($ss['archive_context']['summary']))
+                        <h2 class="nw-section-heading">{{ __('Ce qui a changé') }}</h2>
+                        <div class="nw-why">
+                            <p>@glossarize(e($ss['archive_context']['summary']))</p>
+                            @if(!empty($ss['archive_context']['related']))
+                                <ul class="nw-key-list" style="margin-top: 0.75rem; margin-bottom: 0;">
+                                    @foreach($ss['archive_context']['related'] as $relatedArchive)
+                                        @if(!empty($relatedArchive['url']))
+                                            <li><a href="{{ $relatedArchive['url'] }}">{{ $relatedArchive['title'] ?? $relatedArchive['url'] }}</a></li>
+                                        @endif
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </div>
+                        @endif
+
+                        {{-- Actus 2.0 - angle québécois/canadien, jamais affiché si absent/nul (jamais forcé côté prompt). --}}
+                        @if(!empty($ss['angle_qc_ca']))
+                        <p class="nw-expert">🇨🇦 @glossarize(e($ss['angle_qc_ca']))</p>
                         @endif
 
                         @if(!empty($ss['expert_name']))
@@ -365,6 +452,9 @@
                         $externalUrl = $article->resolved_url ?: $article->url;
                         $isGoogleNewsUnresolved = str_contains(parse_url($externalUrl, PHP_URL_HOST) ?? '', 'news.google.com');
                     @endphp
+                    {{-- Actus 2.0 : bloc à source unique remplacé par la liste « Sources » plus
+                         haut pour une fiche comparative (design doc section 7), aucune suppression. --}}
+                    @unless($isDigest)
                     @if(! $isGoogleNewsUnresolved)
                     <div style="text-align: center; margin: 2rem 0; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
                         <a href="{{ $externalUrl }}" target="_blank" rel="noopener" class="nw-cta">{{ __('Voir l\'article original') }} &rarr;</a>
@@ -377,6 +467,7 @@
                         {{ __('Source :') }} <strong>{{ $article->source?->name ?? __('Google News') }}</strong>
                     </div>
                     @endif
+                    @endunless
 
                     {{-- Navigation précédent/suivant --}}
                     @if($previousArticle || $nextArticle)
@@ -444,7 +535,7 @@
 
                     @include('fronttheme::partials.evergreen-related', ['haystack' => \Illuminate\Support\Str::lower(($article->title ?? '').' '.($article->category_tag ?? '').' '.strip_tags((string) ($article->summary ?? $article->meta_description ?? '')))])
 
-                    {{-- Commentaires — 2026-05-27 #312 DÉSACTIVÉS sur actualités (décision user).
+                    {{-- Commentaires - 2026-05-27 #312 DÉSACTIVÉS sur actualités (décision user).
                          Pour réactiver : retirer le `&& false` ci-dessous OU basculer flag config('news.comments_enabled', false). --}}
                     @if(class_exists(\Modules\Community\Livewire\CommentsThread::class) && config('news.comments_enabled', false))
                         <div class="mt-4 pt-4 border-top">

@@ -193,6 +193,62 @@ final class DedupService
         ];
     }
 
+    /**
+     * ACTION : clustering déterministe Actus 2.0 - « est-ce le même sujet couvert par des
+     * sources différentes ? », question distincte de isLikelyDuplicate() (« est-ce une
+     * republication quasi identique ? »). Réutilise jaccardKeywords()/keyEntitiesIntersectionCount()
+     * tel quel (DRY), avec des seuils volontairement plus permissifs sur les entités mais toujours
+     * conservateurs (voir design doc section 9, risque R1 : en cas de doute, singleton, jamais
+     * l'inverse).
+     * MCP: SELF (<5 lignes de logique nouvelle, réutilisation quasi totale)
+     * RAISON: méthode distincte demandée explicitement (section 9) pour ne pas fusionner deux
+     * seuils qui répondent à deux questions différentes.
+     *
+     * @return array{is_same_cluster: bool, score: float, reason: string, signals: array<string, bool>}
+     */
+    public static function isSameStoryCluster(array $a, array $b, array &$signals = []): array
+    {
+        $signals = [];
+
+        $titleA = $a['title'] ?? '';
+        $titleB = $b['title'] ?? '';
+
+        if ($titleA === '' || $titleB === '') {
+            return ['is_same_cluster' => false, 'score' => 0.0, 'reason' => 'none', 'signals' => $signals];
+        }
+
+        $jaccardThreshold = (float) config('news.fusion.jaccard_threshold', 0.30);
+        $minEntityOverlap = (int) config('news.fusion.min_entity_overlap', 2);
+
+        $jaccard = self::jaccardKeywords($titleA, $titleB);
+        $entityOverlap = self::keyEntitiesIntersectionCount($titleA, $titleB);
+
+        if ($jaccard >= $jaccardThreshold) {
+            $signals['jaccard_high'] = true;
+        }
+        if ($entityOverlap >= $minEntityOverlap) {
+            $signals['key_entities_match'] = true;
+        }
+
+        $isSameCluster = isset($signals['jaccard_high']) || isset($signals['key_entities_match']);
+
+        $reason = 'none';
+        if (isset($signals['jaccard_high']) && isset($signals['key_entities_match'])) {
+            $reason = 'multi_core';
+        } elseif (isset($signals['jaccard_high'])) {
+            $reason = 'jaccard_high';
+        } elseif (isset($signals['key_entities_match'])) {
+            $reason = 'key_entities_match';
+        }
+
+        return [
+            'is_same_cluster' => $isSameCluster,
+            'score' => $jaccard,
+            'reason' => $reason,
+            'signals' => $signals,
+        ];
+    }
+
     private static function stripAccents(string $s): string
     {
         return Str::ascii($s);

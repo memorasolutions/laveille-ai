@@ -38,8 +38,9 @@ class NewsArticle extends Model implements Searchable
         'relevance_score', 'score_justification', 'structured_summary',
         'category_tag', 'impact_level', 'feed_type', 'seo_title', 'meta_description',
         'short_url_id', 'views_count', 'canonical_url', 'is_potential_duplicate_of', 'dedup_score', 'dedup_reason',
-        'seo_status', // index | noindex | gone — élagage SEO réversible des vieilles news peu vues
+        'seo_status', // index | noindex | gone - élagage SEO réversible des vieilles news peu vues
         'linkedin_shared_at', 'facebook_shared_at', // tracking "déjà publié" (admin, point rouge)
+        'is_comparative_digest', // Actus 2.0 : fiche comparative issue de la fusion multi-sources
     ];
 
     protected $casts = [
@@ -51,6 +52,7 @@ class NewsArticle extends Model implements Searchable
         'dedup_score' => 'float',
         'linkedin_shared_at' => 'datetime',
         'facebook_shared_at' => 'datetime',
+        'is_comparative_digest' => 'boolean',
     ];
 
     protected static function booted(): void
@@ -113,6 +115,31 @@ class NewsArticle extends Model implements Searchable
     public function duplicates(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(self::class, 'is_potential_duplicate_of');
+    }
+
+    /**
+     * ACTION : Actus 2.0 - fiche comparative de cet article MEMBRE, ou null. Nommée
+     * explicitement plutôt que de réinterpréter silencieusement originalArticle() : un ancien
+     * enregistrement DEDUP-SKIP hypothétique (jamais écrit en prod à ce jour) ne doit jamais
+     * être confondu avec un vrai groupe Actus 2.0.
+     * MCP: SELF (<5 lignes)
+     * RAISON: garde de cohérence explicite demandée par le design doc section 4.3.
+     */
+    public function fusionDigest(): ?self
+    {
+        $original = $this->originalArticle;
+
+        return ($original && $original->is_comparative_digest) ? $original : null;
+    }
+
+    /**
+     * ACTION : Actus 2.0 - membres de CETTE fiche comparative (vide si $this n'en est pas une).
+     * MCP: SELF (<5 lignes)
+     * RAISON: même garde de cohérence que fusionDigest(), design doc section 4.3.
+     */
+    public function fusionMembers(): \Illuminate\Support\Collection
+    {
+        return $this->is_comparative_digest ? $this->duplicates : collect();
     }
 
     public function shortUrl(): ?BelongsTo
@@ -191,7 +218,7 @@ class NewsArticle extends Model implements Searchable
      * 2026-07-04 : aplatit le résumé structuré IA (hook + points clés + pourquoi important) en
      * texte brut. Centralise cette concaténation pour éviter la duplication entre le calcul du
      * temps de lecture (article-card.blade.php, show.blade.php) et la détection automatique
-     * d'outils (NewsToolSyncAction::suggest()) — cette dernière ignorait jusqu'ici entièrement
+     * d'outils (NewsToolSyncAction::suggest()) - cette dernière ignorait jusqu'ici entièrement
      * structured_summary, qui porte pourtant le gros du contenu réel de l'actualité (description
      * et summary sont souvent vides quand structured_summary est renseigné, cf. show.blade.php
      * ligne 333 : le résumé brut n'est affiché QUE en absence de résumé structuré).

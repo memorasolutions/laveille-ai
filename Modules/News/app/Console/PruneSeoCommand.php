@@ -54,9 +54,16 @@ class PruneSeoCommand extends Command
         $protectCats = array_values(array_filter((array) ($config['protect_categories'] ?? [])));
 
         // Requêtes de base (réutilisées pour compte ET application).
+        // ACTION: exclusion des membres Actus 2.0 (R3, design doc section 9) - un membre de
+        // groupe passé noindex à la création NE DOIT JAMAIS être ré-indexé par auto-guérison,
+        // même s'il redevient populaire, sinon il concurrence sa propre fiche comparative.
+        // MCP: SELF (<5 lignes)
+        // RAISON: mitigation obligatoire (pas optionnelle) du risque R3, incluse dans le
+        // périmètre de ce chantier plutôt que laissée pour plus tard.
         $reindexBase = fn () => DB::table($table)
             ->where('seo_status', 'noindex')
-            ->where('views_count', '>=', $maxViews);
+            ->where('views_count', '>=', $maxViews)
+            ->whereNull('is_potential_duplicate_of');
 
         $noindexBase = fn () => DB::table($table)
             ->where('is_published', true)
@@ -126,7 +133,7 @@ class PruneSeoCommand extends Command
             }
         }
 
-        // 5) Journalisation (traçabilité — le cron est muet sinon).
+        // 5) Journalisation (traçabilité - le cron est muet sinon).
         Log::info('[news:prune-seo] '.json_encode(['reindexed' => $reindexed, 'noindexed' => $noindexed, 'gone' => $gone], JSON_UNESCAPED_UNICODE));
         $this->info("Élagage SEO : {$reindexed} ré-indexés, {$noindexed} noindex".($goneEnabled ? ", {$gone} gone" : '').'.');
 
