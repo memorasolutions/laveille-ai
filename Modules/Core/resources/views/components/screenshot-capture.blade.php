@@ -3,11 +3,16 @@
     'label' => '🎬 Capture assistée (Screen Capture API)',
     'helpText' => 'Ouvre le site cible dans un autre onglet, accepte les cookies et cadre. Reviens ici puis clique Capturer. Le navigateur demandera quel onglet partager.',
     'enabled' => true,
+    {{-- Design doc 2026-08-10 (recadrage frontend), volet C - opt-in STRICT. Defaut false =
+         comportement inchange (News, Directory admin edit). setFocalUrl requis uniquement quand
+         framingMode=true (seule instance : FAB de Modules/Directory/resources/views/public/show.blade.php). --}}
+    'framingMode' => false,
+    'setFocalUrl' => null,
 ])
 
 @if($enabled)
 <div
-    x-data="screenshotCaptureComponent({ uploadUrl: @js($uploadUrl) })"
+    x-data="screenshotCaptureComponent({ uploadUrl: @js($uploadUrl), framingMode: @js($framingMode), setFocalUrl: @js($setFocalUrl) })"
     style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:16px;margin-bottom:16px;"
 >
     <h6 class="mb-2">{{ $label }}</h6>
@@ -50,6 +55,8 @@ if (!window.__screenshotCaptureComponentRegistered) {
     window.screenshotCaptureComponent = function(config) {
         return {
             uploadUrl: config.uploadUrl,
+            framingMode: config.framingMode || false,
+            setFocalUrl: config.setFocalUrl || null,
             status: 'idle',
             message: '',
             supported: false,
@@ -102,6 +109,35 @@ if (!window.__screenshotCaptureComponentRegistered) {
 
                     const canvas = this.$refs.canvas;
                     const ctx = canvas.getContext('2d');
+
+                    // ACTION: branche opt-in "mode cadrage" (Porte 1, design doc 2026-08-10) - AVANT
+                    // le crop centre existant, avec retour anticipe si assez de hauteur. Quand
+                    // framingMode est false (defaut, toutes les autres pages : News, Directory admin
+                    // edit), ce bloc est totalement inerte et le code original ci-dessous s'execute
+                    // exactement comme avant, octet pour octet.
+                    // MCP: SELF (orchestration UI locale, aucune logique metier > 5 lignes)
+                    // RAISON: design doc 2026-08-10 (recadrage frontend), volet C.
+                    if (this.framingMode) {
+                        const scale = 1200 / bitmap.width;
+                        const scaledH = Math.round(bitmap.height * scale);
+                        const normalizedH = Math.min(scaledH, 1400);
+
+                        if (normalizedH > 630) {
+                            canvas.width = 1200;
+                            canvas.height = normalizedH;
+                            ctx.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height, 0, 0, 1200, scaledH);
+                            bitmap.close();
+                            stream.getTracks().forEach(t => t.stop());
+
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                            this.status = 'idle';
+                            this.openFramingCropper(dataUrl, normalizedH);
+                            return;
+                        }
+
+                        this.message = 'Fenêtre trop courte pour le cadrage - vignette centrée appliquée.';
+                    }
+
                     const targetW = 1200;
                     const targetH = 630;
                     canvas.width = targetW;
@@ -154,6 +190,90 @@ if (!window.__screenshotCaptureComponentRegistered) {
                 } catch (_) {}
                 try { window.focus(); } catch (_) {}
                 setTimeout(() => { window.location.reload(); }, 1500);
+            },
+
+            // Design doc 2026-08-10 (recadrage frontend), volet C - ouvre le focal-cropper partage
+            // (x-core::focal-cropper) sur l'image normalisee (jamais un crop centre impose). Le
+            // cropper ne fait aucune requete lui-meme : onSave() declenche l'unique enchainement
+            // reseau (upload puis set-focal), chaine ici.
+            openFramingCropper(dataUrl, normalizedH) {
+                if (!window.FocalCropper) {
+                    this.status = 'error';
+                    this.message = 'Composant de recadrage indisponible.';
+                    return;
+                }
+
+                window.FocalCropper.open({
+                    imageSrc: dataUrl,
+                    initialFocal: 0,
+                    maxHauteurMaster: normalizedH,
+                    onSave: (focalY) => this.uploadFramedAndSetFocal(dataUrl, focalY),
+                });
+            },
+
+            async uploadFramedAndSetFocal(dataUrl, focalY) {
+                this.status = 'uploading';
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+                let uploadPayload = null;
+                try {
+                    const blob = await (await fetch(dataUrl)).blob();
+                    const formData = new FormData();
+                    formData.append('screenshot', new File([blob], 'capture.jpg', { type: 'image/jpeg' }));
+                    if (csrfToken) formData.append('_token', csrfToken);
+
+                    const uploadResponse = await fetch(this.uploadUrl, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'Accept': 'application/json, text/html',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrfToken || '',
+                        },
+                    });
+                    try { uploadPayload = await uploadResponse.json(); } catch (_) {}
+                } catch (err) {
+                    this.status = 'error';
+                    this.message = err.message || 'Erreur réseau lors de l\'upload.';
+                    return { ok: false, message: this.message };
+                }
+
+                if (!uploadPayload || uploadPayload.ok !== true) {
+                    this.status = 'error';
+                    this.message = (uploadPayload && (uploadPayload.message || uploadPayload.error)) || 'Erreur serveur lors de l\'upload.';
+                    return { ok: false, message: this.message };
+                }
+
+                if (!this.setFocalUrl) {
+                    this.status = 'success';
+                    this.message = 'Capture enregistrée. Rechargement dans 2 s…';
+                    this.finishAndReload();
+                    return { ok: true };
+                }
+
+                try {
+                    const focalResponse = await fetch(this.setFocalUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken || '',
+                        },
+                        body: JSON.stringify({ focal_y: focalY }),
+                    });
+                    const focalPayload = await focalResponse.json();
+
+                    if (focalPayload && focalPayload.ok) {
+                        this.status = 'success';
+                        this.message = (focalPayload.message || 'Cadrage appliqué.') + ' Rechargement dans 2 s…';
+                        this.finishAndReload();
+                        return { ok: true };
+                    }
+                } catch (_) {}
+
+                this.status = 'error';
+                this.message = 'Cadrage non enregistré - réessayez via le bouton Recadrer sur la fiche.';
+                return { ok: false, message: this.message };
             },
 
             async upload(blob) {

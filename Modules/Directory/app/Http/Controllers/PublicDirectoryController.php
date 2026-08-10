@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -227,7 +228,21 @@ class PublicDirectoryController extends Controller
             }
         }
 
-        return view('directory::public.show', compact('tool', 'similarTools', 'resources', 'relatedCollections', 'toolNewsArticles', 'hasMoreNews'));
+        // ACTION: expose la presence du master + sa hauteur reelle pour le bouton public "Recadrer"
+        // (volet B, focal-cropper). Meme lecture disque que DirectoryAdminController::edit() -
+        // jamais de nouvelle colonne, jamais de requete supplementaire hors getimagesize().
+        // MCP: SELF (< 5 lignes utiles, simple lecture disque)
+        // RAISON: design doc 2026-08-10 (recadrage frontend), volet B - le master ne doit JAMAIS
+        // etre charge par un visiteur, ces variables restent gatees @can('moderate_tools') en vue.
+        $slug = $tool->getTranslation('slug', 'fr_CA') ?: $tool->slug;
+        $screenshotMasterRelative = $slug ? "screenshots/masters/{$slug}.jpg" : null;
+        $hasScreenshotMaster = $screenshotMasterRelative && File::exists(public_path($screenshotMasterRelative));
+        $screenshotMasterUrl = $hasScreenshotMaster ? asset($screenshotMasterRelative) : null;
+        $screenshotMasterHeight = $hasScreenshotMaster
+            ? (int) (@getimagesize(public_path($screenshotMasterRelative))[1] ?? 630)
+            : 630;
+
+        return view('directory::public.show', compact('tool', 'similarTools', 'resources', 'relatedCollections', 'toolNewsArticles', 'hasMoreNews', 'hasScreenshotMaster', 'screenshotMasterUrl', 'screenshotMasterHeight'));
     }
 
     /**

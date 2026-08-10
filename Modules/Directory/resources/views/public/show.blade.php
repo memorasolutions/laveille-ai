@@ -172,6 +172,15 @@
         :enabled="\Modules\Settings\Facades\Settings::get('directory.assisted_screenshot_enabled', true)"
         label=""
         helpText="Ouvre le site cible dans un autre onglet, accepte les cookies, cadre. Reviens ici et clique Capturer. Upload auto 1200×630."
+        {{-- Correctif revue adversariale 2026-08-10 (Codex) #1 : le FAB est visible sous
+             view_admin_panel (@can plus haut) mais x-core::focal-cropper n'est rendu que sous
+             moderate_tools (permission requise par set-focal cote serveur). Un "editor" (view_admin_panel
+             sans moderate_tools) qui active framingMode aboutirait a "composant indisponible" sans
+             upload - regression du comportement actuel pour ce role. framingMode n'est donc active
+             QUE pour un utilisateur ayant reellement moderate_tools ; un editor garde le crop
+             centre + upload existant (comportement inchange pour lui). --}}
+        :framingMode="auth()->user()?->can('moderate_tools') ?? false"
+        :setFocalUrl="route('admin.directory.set-focal', $tool)"
     />
 </dialog>
 <style>
@@ -186,6 +195,51 @@
     @media (max-width: 767px) { .core-capture-fab { bottom: 16px; right: 16px; width: 44px; height: 44px; } }
     @media print { .core-capture-fab, .core-capture-dialog { display: none !important; } }
 </style>
+@endcan
+{{-- Design doc 2026-08-10 (recadrage frontend), volet B : composant de recadrage inclus UNE
+     SEULE FOIS, jamais rendu pour un visiteur (gate moderate_tools - meme permission que la route
+     admin.directory.set-focal, routes/web.php:89-99). Le master n'est injecte qu'a l'ouverture
+     (window.FocalCropper.open()), jamais dans ce markup statique (CA-5). --}}
+@can('moderate_tools')
+<x-core::focal-cropper />
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var btn = document.getElementById('rt-focal-recadrer-btn');
+    if (!btn || !window.FocalCropper) return;
+
+    btn.addEventListener('click', function () {
+        window.FocalCropper.open({
+            imageSrc: @js($screenshotMasterUrl),
+            initialFocal: @js((int) ($tool->screenshot_focal_y ?? 0)),
+            maxHauteurMaster: @js($screenshotMasterHeight),
+            onSave: function (focalY) {
+                var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+                return fetch(@js(route('admin.directory.set-focal', $tool)), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken || '',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ focal_y: focalY }),
+                })
+                    .then(function (response) { return response.json(); })
+                    .then(function (data) {
+                        if (data && data.ok) {
+                            document.querySelectorAll('.js-rt-screenshot-img').forEach(function (el) {
+                                el.src = data.screenshot_url;
+                            });
+                            if (window.toast) window.toast(data.message || @js(__('Cadrage appliqué.')), 'success');
+                        }
+
+                        return data;
+                    });
+            },
+        });
+    });
+});
+</script>
 @endcan
 @include('core::components.admin-bar', [
     'label' => __('Outil admin'),
@@ -406,10 +460,32 @@
 
     {{-- Screenshot ou gradient fallback --}}
     @if($tool->screenshot)
-        <div style="margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; border: 1px solid #E5E7EB;">
+        <div style="position: relative; margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; border: 1px solid #E5E7EB;">
             @php $__ssUrl = str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.$tool->updated_at->timestamp; @endphp
-            <img src="{{ $__ssUrl }}" alt="{{ __('Capture d\'écran de') }} {{ $tool->name }}" loading="lazy" style="width: 100%; max-height: 400px; object-fit: cover; display: block;"
+            <img src="{{ $__ssUrl }}" alt="{{ __('Capture d\'écran de') }} {{ $tool->name }}" loading="lazy" class="js-rt-screenshot-img" style="width: 100%; max-height: 400px; object-fit: cover; display: block;"
                  onerror="this.onerror=null; this.src='/images/directory-fallback.svg';">
+            {{-- Design doc 2026-08-10 (recadrage frontend), volet B : bouton "Recadrer" (master
+                 disponible) ou lien "Cadrage indisponible" (aucun master) - jamais les deux, jamais
+                 rendu pour un visiteur ni pour un moderateur sans permission moderate_tools. --}}
+            @can('moderate_tools')
+                @if($hasScreenshotMaster)
+                    <button
+                        type="button"
+                        id="rt-focal-recadrer-btn"
+                        aria-label="{{ __('Recadrer la vignette de') }} {{ $tool->name }}"
+                        style="position:absolute; top:10px; right:10px; min-height:36px; padding:0 12px; display:inline-flex; align-items:center; gap:6px; background:rgba(6,78,90,0.92); color:#fff; border:none; border-radius:8px; font-size:0.8rem; font-weight:700; cursor:pointer;"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
+                        {{ __('Recadrer') }}
+                    </button>
+                @else
+                    <button
+                        type="button"
+                        onclick="document.getElementById('core-capture-dialog')?.showModal()"
+                        style="position:absolute; top:10px; right:10px; min-height:28px; padding:2px 10px; background:rgba(17,24,39,0.75); color:#E5E7EB; border:none; border-radius:6px; font-size:0.7rem; text-decoration:underline; text-underline-offset:2px; cursor:pointer;"
+                    >{{ __('Cadrage indisponible - capturer d\'abord') }}</button>
+                @endif
+            @endcan
         </div>
     @else
         <div style="margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; max-height: 400px; height: 280px; background: linear-gradient(135deg, var(--c-primary), var(--c-dark)); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px;">

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.161.0] - 2026-08-10
+
+### Ajouté
+- **Annuaire : recadrage des vignettes directement sur la fiche publique (pattern Canva/Facebook, design validé par la boucle multi-IA + intégration de la capture assistée existante demandée par le fondateur)**. Nouveau composant réutilisable x-core::focal-cropper : surcouche plein écran où l'image entière est visible, les zones hors cadre estompées, un cadre net au ratio exact 1200x630 avec grille des tiers - on glisse l'image verticalement (souris, tactile, flèches du clavier), « Enregistrer le cadrage » / « Annuler » (Échap), tout l'aperçu est calculé dans le navigateur et un seul enchaînement réseau part à l'enregistrement. Deux portes sur la fiche /annuaire/{slug} : (1) la capture assistée (bouton caméra flottant) passe en mode cadrage pour les modérateurs - fini le découpage aveugle du centre, la capture complète s'affiche et on choisit le cadre (l'image devient l'image maître, le cadrage est appliqué dans la foulée) ; (2) un bouton « Recadrer » sur la vignette (modérateurs seulement, image maître chargée à l'ouverture seulement - jamais pour les visiteurs) pour ajuster sans recapturer, avec état explicite « Cadrage indisponible » quand aucune image maître n'existe. Moteur de calcul pur (public/assets/directory/focal-cropper-math.js, jamais de borne en dur) répliquant exactement la normalisation serveur - ce qu'on voit dans le cadre est ce qui est publié, au pixel près. Le composant partagé de capture (News, back-office) est strictement inchangé hors de la fiche publique (option désactivée par défaut).
+
+### Corrigé
+- Revue adversariale du chantier (4 correctifs avant mise en ligne) : cohérence des permissions entre le bouton de capture et le recadrage (un éditeur sans droit de modération garde le comportement historique) ; suppression de l'image maître périmée quand une nouvelle capture trop courte ne peut pas en produire (le recadrage ne travaille plus jamais sur une vieille image) ; la règle « assez haute pour recadrer » est évaluée après mise à l'échelle, côté serveur comme côté client (une source étroite mais haute donne maintenant une image maître valide) ; le dialogue ne peut plus se fermer pendant un enregistrement en cours.
+
 ## [1.160.1] - 2026-08-10
 
 ### Corrigé

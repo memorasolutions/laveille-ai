@@ -262,22 +262,41 @@ class DirectoryAdminController extends Controller
 
     /**
      * Brique 1 (design doc 2026-08-10) - derive un master pour le point focal a partir du fichier
-     * uploade brut, uniquement si sa hauteur depasse 630px (sinon aucun master ne serait utile :
-     * la vignette existante occuperait deja toute la hauteur disponible). Largeur ramenee a 1200
-     * (cover horizontal, aspect conserve), hauteur plafonnee a 1400px maximum. N'affecte JAMAIS
+     * uploade brut. Largeur ramenee a 1200 (cover horizontal, aspect conserve) EN PREMIER, puis
+     * la hauteur RESULTANTE (apres scale) est testee - jamais la hauteur brute de la source. Une
+     * source etroite mais haute (ex. 600x900) devient donc un master valide une fois mise a
+     * l'echelle a 1200 de large, exactement comme le client (screenshot-capture.blade.php mode
+     * cadrage, meme regle scale-puis-teste). Hauteur plafonnee a 1400px maximum. N'affecte JAMAIS
      * ScreenshotUploadService::upload() (contrat partage avec News, laisse strictement inchange).
+     *
+     * Correctifs revue adversariale 2026-08-10 (Codex) :
+     * - #3 (WYSIWYG) : test de hauteur deplace APRES scale(width:1200), plus avant.
+     * - #2 (master perime) : si la hauteur resultante ne depasse pas 630, un master EXISTANT est
+     *   supprime (jamais laisse en place) - c'est un artefact derive regenerable, pas une donnee
+     *   utilisateur, et un master perime ferait travailler "Recadrer" sur l'ancienne image.
      */
     private function deriveMasterFromUpload(\Illuminate\Http\UploadedFile $file, string $slug): void
     {
+        $masterPath = public_path("screenshots/masters/{$slug}.jpg");
+
         try {
             $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
             $source = $manager->read($file->getRealPath());
 
-            if ($source->height() <= 630) {
-                return; // pas assez de hauteur pour justifier un master, focal indisponible (comme aujourd'hui)
+            $scaled = $source->scale(width: 1200);
+
+            if ($scaled->height() <= 630) {
+                // Pas assez de hauteur resultante pour justifier un master (focal indisponible,
+                // comme aujourd'hui) - mais un master d'une capture PRECEDENTE peut encore exister
+                // pour ce slug : le laisser en place le rendrait perime (le bouton "Recadrer"
+                // travaillerait sur l'ancienne image et l'ecraserait). On le supprime.
+                if (\Illuminate\Support\Facades\File::exists($masterPath)) {
+                    \Illuminate\Support\Facades\File::delete($masterPath);
+                }
+
+                return;
             }
 
-            $scaled = $source->scale(width: 1200);
             if ($scaled->height() > 1400) {
                 $scaled = $scaled->crop(1200, 1400, 0, 0);
             }
@@ -287,7 +306,7 @@ class DirectoryAdminController extends Controller
                 \Illuminate\Support\Facades\File::makeDirectory($mastersDir, 0755, true);
             }
 
-            file_put_contents("{$mastersDir}/{$slug}.jpg", $scaled->toJpeg(85)->toString());
+            file_put_contents($masterPath, $scaled->toJpeg(85)->toString());
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning("deriveMasterFromUpload: echec pour {$slug} - {$e->getMessage()}");
         }
