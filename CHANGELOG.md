@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.164.4] - 2026-08-11
+
+### Corrigé
+- Constructeur de prompts : rafraîchir une page ouverte sur une étape précise (adresse terminée par #etape-2, #etape-3 ou #etape-4) ramenait à l'étape 1. Régression introduite le jour même par la v1.164.2 : la restauration de l'étape vérifie que les étapes précédentes sont remplies, or les champs du brouillon n'étaient plus appliqués qu'après le premier rendu - au moment du contrôle, le formulaire semblait encore vierge et l'étape était refusée. L'étape est désormais appliquée une seconde fois, après la restauration des champs. La règle d'origine reste intacte : sans les prérequis, aucun saut d'étape n'est autorisé.
+
 ## [1.164.3] - 2026-08-11
 
 ### Corrigé

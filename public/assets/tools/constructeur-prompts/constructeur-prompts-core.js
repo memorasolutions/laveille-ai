@@ -40,6 +40,7 @@ document.addEventListener('alpine:init', function() {
             _draftMaxAgeMs: 24 * 60 * 60 * 1000,
             _draftSaveTimer: null,
             _draftDisabled: false,
+            _hashStepApplied: false,
             draftRestored: false,
             // Correctif régression prod (2026-08-11) : instantané JSON de wizardParams pris sur le
             // formulaire VIERGE, tout au début d'init() (voir plus bas) - AVANT _loadDraft() et avant
@@ -1942,7 +1943,16 @@ document.addEventListener('alpine:init', function() {
             // Tâche #1699 (2026-08-09) : au chargement, restaure l'étape du hash (#etape-2 à 4)
             // seulement si les prérequis des étapes précédentes sont remplis - jamais de saut
             // arbitraire.
+            // REGRESSION CORRIGEE v1.164.4 (2026-08-11) : cette fonction s'appuie sur
+            // canGoToStep(), qui lit les CHAMPS (personaText, verbe, taskObject). Or depuis
+            // v1.164.2 la restauration du brouillon est reportee a $nextTick : au moment de
+            // l'appel synchrone d'init(), les champs sont encore vides, canGoToStep() refuse,
+            // et #etape-N etait perdu a chaque rafraichissement. D'ou _hashStepApplied : tant
+            // que l'etape n'a pas ete APPLIQUEE, _loadDraft() peut retenter une fois les champs
+            // en place. Le drapeau n'est pose qu'en cas de succes - un echec laisse la porte
+            // ouverte a la seconde tentative, jamais a un saut d'etape plus tard.
             _applyStepFromHash: function() {
+                if (this._hashStepApplied) return;
                 var hash = '';
                 if (typeof window !== 'undefined' && window.location && typeof window.location.hash === 'string') {
                     hash = window.location.hash;
@@ -1952,6 +1962,7 @@ document.addEventListener('alpine:init', function() {
                     var n = parseInt(match[1], 10);
                     if (this.canGoToStep(n)) {
                         this.step = n;
+                        this._hashStepApplied = true;
                         if (n === 4) {
                             this.step4Visited = true;
                         }
@@ -3540,9 +3551,17 @@ document.addEventListener('alpine:init', function() {
                             // plus 24h avant, toujours au schéma courant (même raisonnement que
                             // loadGuestHistoryEntry() ci-dessus, voir _applyWizardParams()).
                             self._applyWizardParams(draft.params, { legacy: false });
+                            // Regression v1.164.4 : seconde (et derniere) tentative d'application
+                            // de #etape-N, MAINTENANT que les champs du brouillon sont en place.
+                            // L'appel synchrone d'init() a forcement echoue sur canGoToStep() quand
+                            // le formulaire etait encore vierge - c'est ce qui renvoyait a l'etape 1
+                            // a chaque rafraichissement. Sans effet si l'etape a deja ete appliquee
+                            // (drapeau _hashStepApplied) ou si l'URL ne porte aucun fragment.
+                            self._applyStepFromHash();
                         });
                     } else {
                         this._applyWizardParams(draft.params, { legacy: false });
+                        this._applyStepFromHash();
                     }
                     if (typeof draft.step === 'number' && draft.step >= 1 && draft.step <= 4) {
                         this.step = draft.step;

@@ -394,6 +394,49 @@ function assert(cond, label) { if (cond) { pass++; console.log('  OK ' + label);
         assert(/if\s*\(this\._draftDisabled\)\s*return;/.test(schedule), '_scheduleDraftSave() honore le verrou');
     }
 
+    // --- Test 14 : #etape-N survit au rafraichissement quand un brouillon le permet ---
+    // Regression v1.164.2 -> v1.164.4 signalee par Stephane : sur .../#etape-2, rafraichir
+    // renvoyait a l'etape 1. Cause : _applyStepFromHash() s'appuie sur canGoToStep(), qui lit
+    // personaText - or depuis le report en $nextTick, les champs du brouillon n'etaient pas
+    // encore appliques au moment de l'appel synchrone d'init(). Ce test rejoue la sequence
+    // reelle (appel synchrone AVANT les champs, puis $nextTick).
+    {
+        const component = loadPromptBuilder({ isAuthenticated: false, search: '' });
+        // canGoToStep(2) exige personaText, un getter qui resout personaPreset via la liste
+        // `personas` (vide dans ce harnais par defaut) - on la peuple donc comme en production,
+        // sinon le test echouerait pour une raison etrangere a ce qu'il mesure.
+        component.personas = [{ value: 'enseignant', label: 'Enseignant pedagogue' }];
+        global.window.location.hash = '#etape-2';
+
+        let nextTickQueue = [];
+        component.$nextTick = function (cb) { nextTickQueue.push(cb); };
+
+        const draft = { v: 1, savedAt: Date.now(), step: 1, params: { personaType: 'preset', personaPreset: 'enseignant' } };
+        localStorage.setItem('cpDraft_v1', JSON.stringify(draft));
+
+        component._loadDraft();
+        component._applyStepFromHash();   // appel synchrone d'init() : champs encore vierges
+
+        assert(component.step === 1, 'avant le $nextTick, l\'etape ne peut pas encore etre appliquee (formulaire vierge) - etat intermediaire attendu');
+
+        nextTickQueue.forEach(function (cb) { cb(); }); // champs restaures PUIS 2e tentative
+
+        assert(component.personaPreset === 'enseignant', 'les champs du brouillon sont bien restaures');
+        assert(component.step === 2, '#etape-2 est applique APRES la restauration des champs (sans ce rattrapage, retour a l\'etape 1 a chaque rafraichissement)');
+        global.window.location.hash = '';
+    }
+
+    // --- Test 15 : le fragment ne permet jamais un saut d'etape non merite ---
+    {
+        const component = loadPromptBuilder({ isAuthenticated: false, search: '' });
+        global.window.location.hash = '#etape-4';
+        component.$nextTick = function (cb) { cb(); };
+        component._loadDraft();          // aucun brouillon : rien a restaurer
+        component._applyStepFromHash();
+        assert(component.step === 1, 'formulaire vierge + #etape-4 : reste a l\'etape 1 (aucun saut arbitraire, regle de la tache #1699 preservee)');
+        global.window.location.hash = '';
+    }
+
     console.log('\n' + pass + '/' + (pass + fail) + ' OK');
     process.exit(fail > 0 ? 1 : 0);
 })();
