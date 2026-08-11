@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.163.0] - 2026-08-11
+
+### Modifié
+- **Constructeur de prompts - modale « Comment l'IA doit-elle s'y prendre ? » restructurée en 3 groupes d'intention** (verdict d'un panel de 5 IA en 2 rounds, go du fondateur). La liste unique des 8 techniques (94 % de la hauteur d'écran, 77 % du texte caché sur mobile) devient 3 onglets d'intention (« Répondre directement », « Imiter vos exemples », « Garder le contrôle ») avec cartes compactes : titre, badge de la technique et « Quand l'utiliser » toujours visibles, explication complète repliée sous « Pourquoi ça fonctionne » (element details natif), rien de supprimé. Chaque carte cite la phrase REELLEMENT injectée dans le prompt par ce choix (extraite des gabarits v2) et porte un bouton « Utiliser cette approche » qui sélectionne le choix et ferme la modale. À l'ouverture, l'onglet du choix courant s'active et sa carte est marquée « Votre choix actuel ». Mesures : contenu mobile réduit de 58 % sur l'onglet courant, défilement desktop quasi éliminé. Intro compactée à une phrase.
+
 ## [1.162.0] - 2026-08-11
 
 ### Ajouté

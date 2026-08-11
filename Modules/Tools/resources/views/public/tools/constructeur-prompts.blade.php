@@ -287,6 +287,28 @@
                         .ct-group>:last-child{margin-bottom:0;}
                         .ct-group .ct-group__legend{padding:0 0 0.4rem;margin:0 0 0.75rem;}
                         .ct-group__legend{width:100%;font-family:var(--f-heading);font-weight:700;color:var(--c-dark);font-size:0.95rem;padding:0 0 0.4rem;margin:0 0 0.85rem;border-bottom:2px solid var(--c-primary);}
+
+                        {{-- Modale techniques #techniquesHelpModal (3 onglets + cartes, 2026-08-11) : tokens de
+                             charte réutilisés tels quels (var(--c-primary) #064E5A AAA 9.35:1 sur blanc,
+                             var(--c-primary-light), var(--c-primary-badge), var(--c-dark), var(--c-text-muted)),
+                             zéro nouvelle teinte inventée. --}}
+                        .cp-tech-tabs.nav-tabs{border-bottom:2px solid var(--c-primary-light);flex-wrap:wrap;margin-bottom:1rem;}
+                        .cp-tech-tabs.nav-tabs .nav-link{min-height:44px;display:flex;align-items:center;font-weight:600;color:var(--c-dark);border:0;border-bottom:3px solid transparent;border-radius:0;padding:0.6rem 0.9rem;}
+                        .cp-tech-tabs.nav-tabs .nav-link:hover{color:var(--c-primary);border-bottom-color:rgba(6,78,90,0.35);}
+                        .cp-tech-tabs.nav-tabs .nav-link.active{color:var(--c-primary);background:var(--c-primary-light);border-bottom-color:var(--c-primary);}
+                        .cp-tech-tabs.nav-tabs .nav-link:focus-visible{outline:2px solid var(--c-primary);outline-offset:2px;}
+                        .cp-tech-card{border:1px solid #e5e7eb;border-radius:12px;padding:0.85rem 1rem;margin-bottom:0.85rem;background:#fff;}
+                        .cp-tech-card:last-child{margin-bottom:0;}
+                        .cp-tech-card__quand{font-size:0.85rem;color:var(--c-dark);margin:0.4rem 0 0;}
+                        .cp-tech-card__details{margin-top:0.5rem;}
+                        .cp-tech-card__details summary{cursor:pointer;font-weight:600;font-size:0.82rem;color:var(--c-primary);min-height:44px;display:flex;align-items:center;}
+                        .cp-tech-card__details summary:focus-visible{outline:2px solid var(--c-primary);outline-offset:2px;}
+                        .cp-tech-card__explication{font-size:0.85rem;color:var(--c-text-muted);margin:0.4rem 0 0;}
+                        .cp-tech-card__phrase{font-size:0.8rem;font-style:italic;color:var(--c-primary);background:var(--c-primary-light);border-radius:6px;padding:0.4rem 0.6rem;margin:0.6rem 0 0;}
+                        .cp-tech-card__foot{display:flex;justify-content:flex-end;margin-top:0.65rem;}
+                        {{-- Pré-rendu masqué par défaut (voir commentaire sur la modale plus bas) - JAMAIS
+                             d'innerHTML, seul le display est basculé par le script de la modale. --}}
+                        .cp-tech-current-badge{display:none;margin-left:6px;padding:2px 8px;border-radius:999px;background:var(--c-primary);color:#fff;font-size:0.72rem;font-weight:600;white-space:nowrap;}
                         </style>
                         {{-- .ct-profile-strip / .ct-profile-strip__title retirés le 2026-08-04 :
                              classes jamais utilisées dans ce fichier (CSS orphelin), aucun effet
@@ -676,7 +698,12 @@
                                             <label class="form-label fw-medium mb-0" style="font-size: 0.85rem;">{{ __('Comment l\'IA doit-elle s\'y prendre ?') }}</label>
                                             <x-tools::help-btn click="jQuery('#techniquesHelpModal').modal('show')" />
                                         </div>
-                                        <select class="form-control form-control-sm" x-model="technique" aria-label="{{ __('Méthode de réflexion de l\'IA') }}">
+                                        {{-- id="cpTechnique" (2026-08-11) : cible fixe utilisée par le script de la
+                                             modale #techniquesHelpModal plus bas (lecture du choix courant à
+                                             l'ouverture + écriture depuis le bouton « Utiliser cette approche »),
+                                             en plus du binding Alpine x-model existant - x-model reste la seule
+                                             source de vérité, cet id ne fait que le rendre adressable en JS/jQuery. --}}
+                                        <select id="cpTechnique" class="form-control form-control-sm" x-model="technique" aria-label="{{ __('Méthode de réflexion de l\'IA') }}">
                                             <template x-for="tq in techniques" :key="tq.value">
                                                 <option :value="tq.value" x-text="tq.label"></option>
                                             </template>
@@ -1207,81 +1234,139 @@
 </div>
 
 @php
-    // Modale pédagogique #techniquesHelpModal (signalement fondateur, 2026-08-11) : contrairement
-    // à $pbTechniqueHints (défini plus bas dans @push('head'), un seul texte - celui du choix
+    // Modale pédagogique #techniquesHelpModal (signalement fondateur, 2026-08-11 ; restructurée en
+    // 3 onglets d'intention + cartes le même jour, verdict d'un panel de 5 IA) : contrairement à
+    // $pbTechniqueHints (défini plus bas dans @push('head'), un seul texte - celui du choix
     // COURANT, affiché en petit gris sous le sélecteur), cette structure alimente une VUE
     // D'ENSEMBLE des 8 techniques à la fois. Doit être calculée ICI, dans le corps de la page
-    // (avant @endsection) et non aux côtés de $pbTechniqueHints/$defaultTechniques : ce bloc PHP
+    // (avant @endsection) et non aux côtés de $pbTechniqueHints/$defaultTechniques : ce bloc
     // s'exécute AVANT le @foreach de la modale ci-dessous, alors que $pbTechniqueHints vit dans
     // @push('head'), évalué APRÈS le corps - y référencer $pbTechniquesOverview aurait levé une
     // variable indéfinie. Même ordre que $defaultTechniques, mêmes chaînes __() de libellé
-    // (réutilisées telles quelles, donc déjà présentes dans lang/fr.json et lang/en.json, zéro
-    // doublon de clé) et même nom de méthode que $pbTechniqueHints (repris entre parenthèses,
-    // cohérence terminologique). 'texte' est nouveau : 2-3 phrases pédagogiques + un « Quand
-    // l'utiliser » concret côté enseignant/pro, jamais injecté dans le prompt généré (texte
-    // d'affichage pur, comme 'label'/'description' des tâches - round 74 applique la même règle).
+    // (réutilisées telles quelles) et même nom de méthode que $pbTechniqueHints (repris entre
+    // parenthèses, cohérence terminologique).
+    //
+    // 'groupe' (DRY, tâche 2026-08-11) : rattache chaque technique à l'un des 3 onglets d'intention
+    // ci-dessous ($pbTechniqueGroups) SANS dupliquer les données de $pbTechniquesOverview - un
+    // simple regroupement au rendu (collect(...)->groupBy('groupe')).
+    //
+    // 'explication' / 'quand' (round 2026-08-11) : l'ancienne clé unique 'texte' mélangeait
+    // l'explication pédagogique et le « Quand l'utiliser » concret dans une seule chaîne. Scindée en
+    // 2 au même point de coupure (« Quand l'utiliser : »), phrase pour phrase IDENTIQUE à l'ancien
+    // 'texte' (aucun contenu réécrit) : 'quand' reste TOUJOURS visible sur la carte (la partie la
+    // plus actionnable pour décider), 'explication' se replie sous <details> (« Pourquoi ça
+    // fonctionne »).
+    //
+    // 'phraseInjectee' (round 2026-08-11) : citation STATIQUE, vérifiée à la main le 2026-08-11
+    // contre get promptSegments() (section « === TECHNIQUE === », constructeur-prompts-core.js) -
+    // fichier verrouillé par des tests littéraux, jamais lu dynamiquement d'ici. Chaque fragment est
+    // repris MOT POUR MOT (tool(...) littéraux de cette section) ; tableau vide pour zero-shot, qui
+    // n'ajoute aucune instruction de technique au prompt. Comme 'value'/'verb' des personas/verbes
+    // plus haut dans ce fichier, ces fragments ne passent JAMAIS par __() : ils s'injectent tels
+    // quels dans le méta-prompt, qui reste TOUJOURS en français quel que soit le locale du site -
+    // les traduire romprait le gabarit réellement envoyé à l'IA. Si core.js change un jour ces
+    // libellés, cette citation doit être mise à jour manuellement (aucun lien automatique).
     $pbTechniquesOverview = [
         [
             'value' => 'zero-shot',
+            'groupe' => 'direct',
             'label' => __('Réponse directe (par défaut)'),
             'methode' => __('zero-shot'),
-            'texte' => __("L'IA répond directement à votre demande, sans exemple ni raisonnement affiché : la technique la plus rapide, adaptée aux tâches simples et bien définies. Quand l'utiliser : vous demandez de rédiger un courriel de rappel de réunion à l'équipe - la tâche est claire, un exemple ou une réflexion étape par étape n'ajouterait rien."),
+            'explication' => __("L'IA répond directement à votre demande, sans exemple ni raisonnement affiché : la technique la plus rapide, adaptée aux tâches simples et bien définies."),
+            'quand' => __("Quand l'utiliser : vous demandez de rédiger un courriel de rappel de réunion à l'équipe - la tâche est claire, un exemple ou une réflexion étape par étape n'ajouterait rien."),
+            'phraseInjectee' => [],
         ],
         [
             'value' => 'zero-shot-cot',
+            'groupe' => 'direct',
             'label' => __('Réponse directe + réflexion étape par étape'),
             'methode' => __('chaîne de pensée'),
-            'texte' => __("L'IA réfléchit en plusieurs étapes en interne avant de vous donner sa réponse finale, sans exemple fourni. Cette méthode réduit les erreurs de logique et de calcul. Quand l'utiliser : vous demandez de convertir la note d'un élève sur 20 vers une échelle sur 100 selon plusieurs critères pondérés - un raisonnement en plusieurs étapes limite les erreurs de calcul."),
+            'explication' => __("L'IA réfléchit en plusieurs étapes en interne avant de vous donner sa réponse finale, sans exemple fourni. Cette méthode réduit les erreurs de logique et de calcul."),
+            'quand' => __("Quand l'utiliser : vous demandez de convertir la note d'un élève sur 20 vers une échelle sur 100 selon plusieurs critères pondérés - un raisonnement en plusieurs étapes limite les erreurs de calcul."),
+            'phraseInjectee' => ['Avant de répondre, réfléchis étape par étape à ta stratégie (ne montre pas ce raisonnement dans ta réponse finale).'],
         ],
         [
             'value' => 'few-shot',
+            'groupe' => 'exemples',
             'label' => __('Avec des exemples'),
             'methode' => __('few-shot'),
-            'texte' => __("Vous fournissez 2 ou 3 exemples du résultat attendu (dans le champ « Exemples » plus bas) et l'IA imite leur style, leur structure ou leur ton. Quand l'utiliser : vous voulez des commentaires de bulletin dans votre style habituel - donnez à l'IA 2-3 commentaires que vous avez déjà écrits comme modèles."),
+            'explication' => __("Vous fournissez 2 ou 3 exemples du résultat attendu (dans le champ « Exemples » plus bas) et l'IA imite leur style, leur structure ou leur ton."),
+            'quand' => __("Quand l'utiliser : vous voulez des commentaires de bulletin dans votre style habituel - donnez à l'IA 2-3 commentaires que vous avez déjà écrits comme modèles."),
+            'phraseInjectee' => ['Voici des exemples pour guider ta réponse :'],
         ],
         [
             'value' => 'few-shot-cot',
+            'groupe' => 'exemples',
             'label' => __('Avec des exemples + réflexion étape par étape'),
             'methode' => __('few-shot + chaîne de pensée'),
-            'texte' => __('Combine les deux méthodes précédentes : l\'IA suit vos exemples ET détaille son raisonnement avant de conclure. Utile pour les tâches à la fois stylées et complexes. Quand l\'utiliser : vous voulez des corrections d\'examens détaillées, dans votre grille habituelle (les exemples), avec le raisonnement justifiant chaque point retiré (la chaîne de pensée).'),
+            'explication' => __('Combine les deux méthodes précédentes : l\'IA suit vos exemples ET détaille son raisonnement avant de conclure. Utile pour les tâches à la fois stylées et complexes.'),
+            'quand' => __('Quand l\'utiliser : vous voulez des corrections d\'examens détaillées, dans votre grille habituelle (les exemples), avec le raisonnement justifiant chaque point retiré (la chaîne de pensée).'),
+            'phraseInjectee' => ['Voici des exemples pour guider ta réponse :', 'Applique le même type de raisonnement détaillé que dans les exemples ci-dessus.'],
         ],
         [
             'value' => 'iterative',
+            'groupe' => 'controle',
             'label' => __('Par étapes, avec votre validation à chaque fois'),
             'methode' => __('décomposition guidée'),
-            'texte' => __('L\'IA découpe la tâche en étapes et attend votre accord avant de passer à la suivante, plutôt que de tout livrer d\'un coup. Idéal pour les projets longs où vous voulez garder le contrôle. Quand l\'utiliser : vous concevez une séquence pédagogique de plusieurs semaines - vous validez chaque semaine avant que l\'IA propose la suivante, pour ajuster en cours de route.'),
+            'explication' => __('L\'IA découpe la tâche en étapes et attend votre accord avant de passer à la suivante, plutôt que de tout livrer d\'un coup. Idéal pour les projets longs où vous voulez garder le contrôle.'),
+            'quand' => __('Quand l\'utiliser : vous concevez une séquence pédagogique de plusieurs semaines - vous validez chaque semaine avant que l\'IA propose la suivante, pour ajuster en cours de route.'),
+            'phraseInjectee' => ['Procède étape par étape. Après chaque étape majeure, présente ton travail et demande ma validation avant de continuer.'],
         ],
         [
             'value' => 'reformulation',
+            'groupe' => 'controle',
             'label' => __('Reformuler la demande avant de répondre'),
             'methode' => __('reformulation'),
-            'texte' => __('L\'IA reformule d\'abord votre demande dans ses propres mots avant d\'y répondre, ce qui révèle si elle a bien compris ce que vous vouliez. Quand l\'utiliser : votre demande est un peu complexe ou ambiguë (par exemple un plan de cours multi-niveaux) - la reformulation permet de corriger un malentendu avant que l\'IA ne parte dans la mauvaise direction.'),
+            'explication' => __('L\'IA reformule d\'abord votre demande dans ses propres mots avant d\'y répondre, ce qui révèle si elle a bien compris ce que vous vouliez.'),
+            'quand' => __('Quand l\'utiliser : votre demande est un peu complexe ou ambiguë (par exemple un plan de cours multi-niveaux) - la reformulation permet de corriger un malentendu avant que l\'IA ne parte dans la mauvaise direction.'),
+            'phraseInjectee' => ['Commence par reformuler en 2 ou 3 phrases ce que tu as compris de la demande, puis produis ta réponse.'],
         ],
         [
             'value' => 'auto-verification',
+            'groupe' => 'controle',
             'label' => __('Vérifier et corriger sa réponse avant de la donner'),
             'methode' => __('auto-vérification'),
-            'texte' => __('L\'IA relit sa propre réponse, cherche ses erreurs ou ses oublis, puis vous livre une version corrigée. Réduit les approximations et les affirmations inexactes. Quand l\'utiliser : vous demandez un résumé de dates ou de faits pour une capsule d\'actualité - l\'auto-vérification diminue le risque d\'erreur factuelle avant publication.'),
+            'explication' => __('L\'IA relit sa propre réponse, cherche ses erreurs ou ses oublis, puis vous livre une version corrigée. Réduit les approximations et les affirmations inexactes.'),
+            'quand' => __('Quand l\'utiliser : vous demandez un résumé de dates ou de faits pour une capsule d\'actualité - l\'auto-vérification diminue le risque d\'erreur factuelle avant publication.'),
+            'phraseInjectee' => ['Avant de livrer ta réponse finale, relis-la, repère les erreurs ou les oublis par rapport à la demande, et corrige-les.'],
         ],
         [
             'value' => 'variantes-comparees',
+            'groupe' => 'controle',
             'label' => __('Proposer 2 ou 3 versions et recommander la meilleure'),
             'methode' => __('variantes comparées'),
-            'texte' => __('L\'IA génère 2 ou 3 versions différentes de sa réponse, puis indique celle qu\'elle recommande et pourquoi. Utile quand le ton ou l\'angle est difficile à trancher d\'avance. Quand l\'utiliser : vous rédigez un courriel délicat à un parent - voir 3 tons différents (ferme, empathique, neutre) avec une recommandation aide à choisir en connaissance de cause.'),
+            'explication' => __('L\'IA génère 2 ou 3 versions différentes de sa réponse, puis indique celle qu\'elle recommande et pourquoi. Utile quand le ton ou l\'angle est difficile à trancher d\'avance.'),
+            'quand' => __('Quand l\'utiliser : vous rédigez un courriel délicat à un parent - voir 3 tons différents (ferme, empathique, neutre) avec une recommandation aide à choisir en connaissance de cause.'),
+            'phraseInjectee' => ['Produis 2 ou 3 propositions distinctes, compare-les brièvement selon la demande, et recommande la meilleure.'],
         ],
     ];
+    // 3 onglets d'intention (verdict panel 5 IA, 2026-08-11) : regroupent les 8 techniques par
+    // INTENTION plutôt que de les lister à plat - un néophyte choisit d'abord « ce qu'il veut »,
+    // pas le nom d'une technique de prompt engineering qu'il ne connaît pas encore.
+    $pbTechniqueGroups = [
+        ['key' => 'direct', 'label' => __('Répondre directement')],
+        ['key' => 'exemples', 'label' => __('Imiter vos exemples')],
+        ['key' => 'controle', 'label' => __('Garder le contrôle')],
+    ];
+    $pbTechniquesByGroup = collect($pbTechniquesOverview)->groupBy('groupe');
 @endphp
 
 {{-- Modale pédagogique « Comment l'IA doit-elle s'y prendre ? » (signalement fondateur,
-     2026-08-11) : calquée directement sur #promptHelpModal ci-dessus - même structure Bootstrap
-     (modal fade > modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable > modal-
-     content), mêmes boutons de fermeture (× dans l'en-tête + « Compris ! » au pied, cible tactile
-     44px, fermable clavier via le focus trap natif de Bootstrap modal + la touche Échap), donc
-     hérite du même centrage vertical/horizontal et du même comportement WCAG AAA. Ouverte par
-     x-tools::help-btn plus haut (~ligne 677, bloc « Un exemple à imiter ? »). Contenu : les 8
-     choix du sélecteur `technique`, dans le MÊME ORDRE que $defaultTechniques (bloc PHP plus bas
-     dans @push('head')), chacun avec son libellé affiché tel quel, le nom de sa technique de prompting (même
-     terminologie que $pbTechniqueHints), et 2-3 phrases pédagogiques + un exemple concret. --}}
+     2026-08-11 ; restructurée en 3 onglets d'intention + cartes le même jour, verdict d'un panel de
+     5 IA) : calquée sur la structure Bootstrap de #promptHelpModal ci-dessus (modal fade > modal-
+     dialog modal-lg modal-dialog-centered modal-dialog-scrollable > modal-content), mêmes boutons
+     de fermeture (× dans l'en-tête + « Compris ! » au pied, cible tactile 44px, fermable clavier
+     via le focus trap natif de Bootstrap modal + la touche Échap). Ouverte par x-tools::help-btn
+     plus haut (~ligne 677, bloc « Un exemple à imiter ? »).
+     Onglets : nav nav-tabs + data-toggle="tab" Bootstrap 4 NATIFS (rôles ARIA gérés par le plugin
+     lui-même) - aucun tablist maison, aucune lib ajoutée. Les 3 groupes viennent de
+     $pbTechniqueGroups, les cartes de $pbTechniquesByGroup (regroupement de $pbTechniquesOverview
+     par 'groupe', calculé plus haut - zéro duplication de données entre les 3 onglets).
+     Chaque carte : libellé + badge méthode (styles repris tels quels de l'ancienne modale à plat),
+     le « Quand l'utiliser » toujours visible, le reste du texte pédagogique replié sous un
+     <details><summary> natif (aucun JS, aucune lib), la citation statique de la phrase injectée
+     dans le prompt (voir le commentaire sur 'phraseInjectee' dans le bloc PHP plus haut), et un
+     bouton « Utiliser cette approche » qui écrit directement dans le sélecteur réel du formulaire. --}}
 <div class="modal fade" id="techniquesHelpModal" tabindex="-1" role="dialog" aria-labelledby="techniquesHelpModalLabel">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content" style="border-radius: var(--r-base);">
@@ -1290,17 +1375,56 @@
                 <button type="button" onclick="jQuery('#techniquesHelpModal').modal('hide')" aria-label="{{ __('Fermer') }}" style="background: none; border: none; color: #fff !important; opacity: 1; font-size: 1.5rem; font-weight: 700; cursor: pointer; float: right; min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center;">&times;</button>
             </div>
             <div class="modal-body" style="padding: 2rem;">
-                <p class="mb-3">{{ __('Chaque choix de ce menu correspond à une technique reconnue de formulation de prompts (« prompt engineering ») : cela ne change pas ce que vous demandez, mais la façon dont l\'IA s\'y prend pour y répondre. Voici à quoi correspond chacun des 8 choix.') }}</p>
-                <ol class="mb-3" style="padding-left: 1.25rem;">
-                    @foreach ($pbTechniquesOverview as $pbTo)
-                    <li class="mb-3">
-                        <strong>{{ $pbTo['label'] }}</strong>
-                        <span style="display:inline-block; margin-left:6px; padding:2px 8px; border-radius:999px; background: var(--c-primary-badge); color: var(--c-primary); font-size:0.72rem; font-weight:600; white-space:nowrap;">{{ $pbTo['methode'] }}</span>
-                        <p class="mb-0 mt-1" style="font-size: 0.9rem; color: var(--c-text-muted);">{{ $pbTo['texte'] }}</p>
+                <p class="mb-3">{{ __('Chaque choix correspond à une technique reconnue de formulation de prompts : elle change la façon dont l\'IA s\'y prend, pas ce que vous demandez.') }}</p>
+
+                <ul class="nav nav-tabs cp-tech-tabs" id="cpTechniqueGroupTabs" role="tablist">
+                    @foreach ($pbTechniqueGroups as $pbGi => $pbGrp)
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link {{ $pbGi === 0 ? 'active' : '' }}" id="cpTgt-{{ $pbGrp['key'] }}-tab" data-toggle="tab" href="#cpTgt-{{ $pbGrp['key'] }}" role="tab" aria-controls="cpTgt-{{ $pbGrp['key'] }}" aria-selected="{{ $pbGi === 0 ? 'true' : 'false' }}">{{ $pbGrp['label'] }}</a>
                     </li>
                     @endforeach
-                </ol>
-                <p class="small mb-0" style="color: var(--c-text-muted); border-top: 1px dashed rgba(11,114,133,0.25); padding-top: 0.75rem;">{{ __('À noter : le champ « Exemples (2-3 recommandés) », qui apparaît quand vous choisissez « Avec des exemples » ou « Avec des exemples + réflexion étape par étape », est le carburant de la technique few-shot - plus vos exemples sont représentatifs, plus l\'IA imite fidèlement votre style.') }}</p>
+                </ul>
+
+                <div class="tab-content" id="cpTechniqueGroupTabsContent">
+                    @foreach ($pbTechniqueGroups as $pbGi => $pbGrp)
+                    <div class="tab-pane fade {{ $pbGi === 0 ? 'show active' : '' }}" id="cpTgt-{{ $pbGrp['key'] }}" role="tabpanel" aria-labelledby="cpTgt-{{ $pbGrp['key'] }}-tab">
+                        @foreach ($pbTechniquesByGroup[$pbGrp['key']] ?? [] as $pbTo)
+                        <div class="cp-tech-card" data-technique="{{ $pbTo['value'] }}">
+                            <div>
+                                <strong>{{ $pbTo['label'] }}</strong>
+                                <span style="display:inline-block; margin-left:6px; padding:2px 8px; border-radius:999px; background: var(--c-primary-badge); color: var(--c-primary); font-size:0.72rem; font-weight:600; white-space:nowrap;">{{ $pbTo['methode'] }}</span>
+                                {{-- Pré-rendu MASQUÉ (display:none via .cp-tech-current-badge), jamais d'innerHTML -
+                                     affiché par jQuery au shown.bs.modal si ce choix est le choix courant du formulaire
+                                     (script en fin de fichier). --}}
+                                <span class="cp-tech-current-badge">{{ __('Votre choix actuel') }}</span>
+                            </div>
+                            <p class="cp-tech-card__quand mb-0">{{ $pbTo['quand'] }}</p>
+                            <details class="cp-tech-card__details">
+                                <summary>{{ __('Pourquoi ça fonctionne') }}</summary>
+                                <p class="cp-tech-card__explication mb-0">{{ $pbTo['explication'] }}</p>
+                            </details>
+                            @if (count($pbTo['phraseInjectee']) > 0)
+                            <p class="cp-tech-card__phrase mb-0">
+                                <strong>{{ __('Ce choix ajoutera au prompt') }}</strong> :
+                                @foreach ($pbTo['phraseInjectee'] as $pbFrag)
+                                « {{ $pbFrag }} »
+                                @endforeach
+                            </p>
+                            @else
+                            <p class="cp-tech-card__phrase mb-0">{{ __("Ce choix n'ajoute aucune consigne supplémentaire : le prompt reste tel quel.") }}</p>
+                            @endif
+                            <div class="cp-tech-card__foot">
+                                <button type="button" class="ct-btn ct-btn-primary ct-btn-sm cp-technique-use-btn" data-technique="{{ $pbTo['value'] }}" style="min-height:44px;">{{ __('Utiliser cette approche') }}</button>
+                            </div>
+                        </div>
+                        @endforeach
+
+                        @if ($pbGrp['key'] === 'exemples')
+                        <p class="small mb-0" style="color: var(--c-text-muted); border-top: 1px dashed rgba(11,114,133,0.25); padding-top: 0.75rem;">{{ __('À noter : le champ « Exemples (2-3 recommandés) », qui apparaît quand vous choisissez « Avec des exemples » ou « Avec des exemples + réflexion étape par étape », est le carburant de la technique few-shot - plus vos exemples sont représentatifs, plus l\'IA imite fidèlement votre style.') }}</p>
+                        @endif
+                    </div>
+                    @endforeach
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="ct-btn ct-btn-primary" onclick="jQuery('#techniquesHelpModal').modal('hide')" style="min-height:44px;">{{ __('Compris !') }}</button>
@@ -1308,6 +1432,49 @@
         </div>
     </div>
 </div>
+{{-- Comportements JS de la modale techniques (signalement fondateur, 2026-08-11) : petit script
+     inline dédié, volontairement hors de constructeur-prompts-core.js (verrouillé par des tests
+     littéraux) - jQuery/Bootstrap déjà chargés partout ailleurs sur cette page.
+     1) shown.bs.modal : lit la valeur courante du sélecteur réel du formulaire (id="cpTechnique",
+        x-model="technique" plus haut ~ligne 679) et, si elle correspond à une carte, affiche son
+        badge « Votre choix actuel » (masqué par défaut, jamais d'innerHTML) et active l'onglet du
+        groupe correspondant ; sinon (valeur introuvable), reste sur le premier onglet.
+     2) clic sur .cp-technique-use-btn : écrit la valeur choisie dans le sélecteur réel puis
+        déclenche 'input' et 'change' avec bubbles:true pour qu'Alpine (x-model) se resynchronise,
+        avant de fermer la modale. --}}
+<script>
+// jQuery est chargé en PIED de page par le layout : ce script du corps s'exécute avant lui,
+// d'où l'attente du chargement complet (window load) avant de brancher les écouteurs.
+window.addEventListener('load', function () {
+    jQuery(document).on('shown.bs.modal', '#techniquesHelpModal', function () {
+        var $modal = jQuery(this);
+        $modal.find('.cp-tech-current-badge').css('display', 'none');
+        var select = document.getElementById('cpTechnique');
+        var current = select ? select.value : '';
+        var $match = current ? $modal.find('[data-technique="' + current + '"]') : jQuery();
+        if ($match.length) {
+            $match.find('.cp-tech-current-badge').css('display', 'inline-block');
+            var $pane = $match.closest('.tab-pane');
+            if ($pane.length && !$pane.hasClass('active')) {
+                jQuery('a[href="#' + $pane.attr('id') + '"]').tab('show');
+            }
+        } else {
+            jQuery('#cpTechniqueGroupTabs a.nav-link').first().tab('show');
+        }
+    });
+
+    jQuery(document).on('click', '.cp-technique-use-btn', function () {
+        var value = jQuery(this).data('technique');
+        var select = document.getElementById('cpTechnique');
+        if (select && value) {
+            select.value = String(value);
+            select.dispatchEvent(new Event('input', { bubbles: true }));
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        jQuery('#techniquesHelpModal').modal('hide');
+    });
+});
+</script>
 
 {{-- Garde-fou fusion au renommage (C2-2, couche 2, tâches 1660-1665, 2026-08-09) : confirmation
      UNIQUE non punitive avant de fusionner un espace vers un texte déjà présent ailleurs - jamais

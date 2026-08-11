@@ -209,7 +209,7 @@ it('renders the constructeur-prompts Blade-level UI text as real localized HTML 
         ->assertSee('History', escape: false);
 });
 
-it('renders the technique help button and its educational overview modal covering the 8 prompting techniques (signalement fondateur, 2026-08-11 : le petit texte gris sous le sélecteur ne montrait que le choix courant, aucune vue d\'ensemble pour un néophyte avant cette modale)', function () {
+it('renders the technique help button and its educational overview modal covering the 8 prompting techniques (signalement fondateur, 2026-08-11 : le petit texte gris sous le sélecteur ne montrait que le choix courant, aucune vue d\'ensemble pour un néophyte avant cette modale ; restructurée le même jour en 3 onglets d\'intention + cartes compactes, verdict d\'un panel de 5 IA)', function () {
     Tool::where('slug', 'constructeur-prompts')->update(['is_under_construction' => false]);
 
     $user = User::factory()->create();
@@ -236,6 +236,35 @@ it('renders the technique help button and its educational overview modal coverin
 
     // Le lien pédagogique explicite vers le champ "Exemples" (technique few-shot).
     $response->assertSee('est le carburant de la technique few-shot', escape: false);
+
+    // Les 3 onglets d'intention Bootstrap 4 natifs (nav-tabs + data-toggle="tab"), aucun tablist
+    // maison. Rôles ARIA gérés par le plugin Bootstrap lui-même.
+    $response->assertSee('data-toggle="tab"', escape: false);
+    $response->assertSee('id="cpTechniqueGroupTabs"', escape: false);
+    $response->assertSee('Répondre directement', escape: false);
+    $response->assertSee('Imiter vos exemples', escape: false);
+    $response->assertSee('Garder le contrôle', escape: false);
+
+    // Chaque carte replie son explication pédagogique sous un <details><summary> natif (aucun JS,
+    // aucune lib) - le "Quand l'utiliser" reste hors du <details>, toujours visible.
+    $response->assertSee('<details class="cp-tech-card__details">', escape: false);
+    $response->assertSee('Pourquoi ça fonctionne', escape: false);
+
+    // La phrase EXACTE injectée dans le prompt (citation statique de promptSegments(), section
+    // TECHNIQUE, constructeur-prompts-core.js) est affichée sur chaque carte.
+    $response->assertSee('Ce choix ajoutera au prompt', escape: false);
+    $response->assertSee('Avant de répondre, réfléchis étape par étape à ta stratégie', escape: false);
+    $response->assertSee('Procède étape par étape. Après chaque étape majeure', escape: false);
+
+    // Bouton "Utiliser cette approche" (écrit dans le sélecteur réel + ferme la modale) et badge
+    // pré-rendu masqué "Votre choix actuel" (jamais d'innerHTML, affiché par JS au shown.bs.modal).
+    $response->assertSee('cp-technique-use-btn', escape: false);
+    $response->assertSee('Utiliser cette approche', escape: false);
+    $response->assertSee('cp-tech-current-badge', escape: false);
+    $response->assertSee('Votre choix actuel', escape: false);
+
+    // Sélecteur réel adressable en JS (id="cpTechnique") - cible du script de la modale.
+    $response->assertSee('id="cpTechnique"', escape: false);
 });
 
 it('shows the "Mes prompts" menu link to a non-admin while the tool is under revision (round 106, 2026-08-01 : la bibliothèque de lecture est accessible, le lien doit donc l\'être aussi - round 4 le masquait à tort)', function () {
