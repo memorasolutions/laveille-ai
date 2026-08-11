@@ -79,6 +79,17 @@
                             <div class="alert alert-danger small p-1 mt-2 mb-0" style="font-size: 0.8rem; border-radius: 6px;" x-text="saveError" role="alert" aria-live="assertive"></div>
                         </template>
 
+                        {{-- Brouillon local (2026-08-11) : bannière discrète NON bloquante (même patron
+                             role=status/aria-live=polite que taskNotice ci-dessus) annonçant qu'un
+                             brouillon précédent a été repris - voir _loadDraft()/_applyWizardParams()
+                             dans constructeur-prompts-core.js. Renvoie vers le bouton "Recommencer"
+                             existant (armReset(), visible à l'étape 2) - aucun second bouton créé ici. --}}
+                        <template x-if="draftRestored">
+                            <div class="alert alert-info small p-1 mt-2 mb-0" style="font-size: 0.8rem; border-radius: 6px;" role="status" aria-live="polite">
+                                {{ __('Nous avons repris votre brouillon précédent. Pour repartir de zéro, utilisez le bouton « Recommencer ».') }}
+                            </div>
+                        </template>
+
                         <style>
                         .ct-pill{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0.5rem 1rem;border:2px solid #d1d5db;border-radius:9999px;background:#fff;color:#374151;font-size:0.875rem;font-weight:500;cursor:pointer;transition:all .15s ease;position:relative;}
                         .ct-pill:hover{border-color:var(--c-primary);color:var(--c-primary);}

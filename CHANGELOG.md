@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.164.0] - 2026-08-11
+
+### Ajouté
+- Constructeur de prompts : le formulaire en cours est désormais conservé dans le navigateur (clé `cpDraft_v1`) et repris automatiquement après un rafraîchissement ou une fermeture d'onglet. Durée de vie de 24 heures, aucune écriture si le formulaire est vierge, bannière discrète annonçant la reprise. Motif : chaque rechargement faisait perdre le travail en cours.
+
+### Modifié
+- Constructeur : extraction de `_applyWizardParams()`, brique commune aux quatre chemins de restauration de l'état du wizard (ouverture d'un prompt enregistré, remix, historique invité, brouillon local). Les trois chemins existants appliquaient déjà les mêmes 35 champs ; le drapeau `legacy` préserve à l'identique les filets de rétrocompatibilité réservés aux données serveur anciennes.
+- Constructeur : le bouton « Recommencer » purge désormais le brouillon local avant de recharger la page. Sans cette purge, l'ajout de la persistance aurait rendu ce bouton inopérant.
+
 ## [1.163.1] - 2026-08-11
 
 ### Corrigé

@@ -32,6 +32,14 @@ document.addEventListener('alpine:init', function() {
         return {
             step: 1,
             resetArmed: false,
+            // Brouillon local (2026-08-11) : persiste le wizard en cours dans localStorage
+            // (cpDraft_v1) pour survivre à une fermeture accidentelle d'onglet - voir
+            // _loadDraft()/_saveDraftNow()/_scheduleDraftSave() plus bas. draftRestored pilote la
+            // bannière discrète du Blade (template x-if="draftRestored").
+            _draftKey: 'cpDraft_v1',
+            _draftMaxAgeMs: 24 * 60 * 60 * 1000,
+            _draftSaveTimer: null,
+            draftRestored: false,
             // Phase 1 (audit 2026-07-26) : entrée par l'intention. selectedTask = id de la carte
             // choisie à l'étape 1 ; taskCards = taxonomie de tâches → mapping persona/verbe,
             // injectée par le Blade via window.promptBuilderConfig (même contrat que personas/verbes).
@@ -1502,6 +1510,97 @@ document.addEventListener('alpine:init', function() {
                 // persistées avec le prompt, voir spec §Persistance).
                 return { selectedTask: this.selectedTask, personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, contextInfo: this.contextInfo, spaces: this.spaces.map(function(s) { return { text: s.text }; }), audienceType: this.audienceType, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, formats: this.formatsSelected, formatCustom: this.formatCustom, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintTypo: this.constraintTypo, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat, constraintChainOfThought: this.constraintChainOfThought, constraintAskIfUnclear: this.constraintAskIfUnclear, constraintCustom: this.constraintCustom, useDelimiters: this.useDelimiters, examples: this.examples, cadreStrict: this.cadreStrict, profile: this.profile };
             },
+            // Extraction DRY (2026-08-11) : les TROIS points de restauration de l'état du wizard
+            // (?edit=ID, ?remix=ID, loadGuestHistoryEntry() pour l'historique invité) appliquaient
+            // le même bloc de ~35 lignes en trois exemplaires - risque de divergence à chaque futur
+            // champ ajouté à wizardParams (voir piège round 42 documenté sur le getter ci-dessus).
+            // `p` = objet params (même contrat que wizardParams). `opts.legacy` (vrai par défaut)
+            // active les filets de rétrocompatibilité utiles à des données SERVEUR potentiellement
+            // anciennes (?edit=ID/?remix=ID) : scalaire `audiencePreset`, scalaire `format`,
+            // correctifs de cohérence type/valeur (personaType/verbType/audienceType forcés à
+            // 'custom' si le champ *Custom associé est rempli, au cas où d'anciennes données
+            // n'auraient pas le type en phase avec la valeur custom), migration
+            // canvasAI='custom'→'chatgpt', et repli selectedTask→'autre'. loadGuestHistoryEntry()
+            // appelle avec `legacy:false` : vérifié champ par champ contre l'ancien bloc dédié
+            // (jamais ces filets) - l'historique invité est écrit par CE MÊME code (wizardParams)
+            // l'instant d'avant, donc toujours au schéma courant et déjà cohérent, aucun filet
+            // n'y était appliqué.
+            _applyWizardParams: function (p, opts) {
+                var self = this;
+                var legacy = !opts || opts.legacy !== false;
+                if (p.selectedTask) self.selectedTask = p.selectedTask;
+                if (p.personaType) self.personaType = p.personaType;
+                if (p.personaPreset) self.personaPreset = p.personaPreset;
+                if (p.personaCustom) {
+                    self.personaCustom = p.personaCustom;
+                    if (legacy) self.personaType = 'custom';
+                }
+                if (p.verbType) self.verbType = p.verbType;
+                if (p.verb) self.verb = p.verb;
+                if (p.verbCustom) {
+                    self.verbCustom = p.verbCustom;
+                    if (legacy) self.verbType = 'custom';
+                }
+                if (p.taskObject) self.taskObject = p.taskObject;
+                // #1593a (2026-08-07) : contexte additionnel, même piège round 42 que les autres
+                // champs texte restaurés ici (constraintCustom, examples...) - un oubli le perd
+                // silencieusement à la réouverture.
+                if (p.contextInfo) self.contextInfo = p.contextInfo;
+                // Espaces à remplir (tâches 1660-1665) : restaure UNIQUEMENT les chaînes ancrées,
+                // jamais pending (toujours faux à la réouverture - la personnalisation a déjà eu
+                // lieu lors de la sauvegarde).
+                if (Array.isArray(p.spaces)) { self.spaces = p.spaces.map(function(s) { return { text: s.text, pending: false }; }); self._refreshSpaceMissing(); }
+                if (p.audienceType) self.audienceType = p.audienceType;
+                // Round 151 (2026-08-01) : migration de LECTURE de l'ancien scalaire `audiencePreset`
+                // vers le tableau `audiencePresets` - filet legacy, voir opts.legacy ci-dessus.
+                if (Array.isArray(p.audiencePresets)) { self.audiencePresets = migrateAudienceValues(p.audiencePresets); } else if (legacy && p.audiencePreset) { self.audiencePresets = migrateAudienceValues([p.audiencePreset]); }
+                if (p.audienceCustom) {
+                    self.audienceCustom = p.audienceCustom;
+                    if (legacy) self.audienceType = 'custom';
+                }
+                // LOT 1 (2026-08-06) : migration de l'ancien scalaire `format` vers le tableau
+                // formatsSelected - filet legacy, voir opts.legacy ci-dessus.
+                if (Array.isArray(p.formats)) { self.formatsSelected = p.formats; } else if (legacy && p.format) { self.formatsSelected = [p.format]; }
+                if (p.formatCustom) self.formatCustom = p.formatCustom;
+                if (p.length) self.length = p.length;
+                if (p.tone) self.tone = p.tone;
+                if (p.language) self.language = p.language;
+                if (p.technique) self.technique = p.technique;
+                if (p.constraintAntiAI !== undefined) self.constraintAntiAI = p.constraintAntiAI;
+                // Round 151 (2026-08-01) : Cadre strict doit survivre à une réédition comme les
+                // autres réglages, sinon rouvrir un prompt sauvegardé avec le cadre désactivé le
+                // réactiverait silencieusement (repli à `true`).
+                if (p.cadreStrict !== undefined) self.cadreStrict = p.cadreStrict;
+                // Round 152 (2026-08-01) : restaure le profil sauvegardé ET marque profileTouched -
+                // un prompt déjà sauvegardé porte un choix DÉJÀ FAIT par la personne, la détection
+                // par mots-clés ne doit plus jamais l'écraser.
+                if (p.profile) { self.profile = p.profile; self.profileTouched = true; }
+                // Round 42 (2026-07-27) : ces champs manquaient à la restauration - le prompt
+                // rouvrait avec ces options réinitialisées, et un "Enregistrer" ultérieur écrasait
+                // silencieusement la version en base (perte de donnée, ex. constraintCustom peut
+                // contenir des instructions longues, examples rend "few-shot" non fonctionnel une
+                // fois vidé).
+                if (p.constraintTypo !== undefined) self.constraintTypo = p.constraintTypo;
+                if (p.constraintChainOfThought !== undefined) self.constraintChainOfThought = p.constraintChainOfThought;
+                if (p.constraintAskIfUnclear !== undefined) self.constraintAskIfUnclear = p.constraintAskIfUnclear;
+                if (p.constraintCustom) self.constraintCustom = p.constraintCustom;
+                if (p.useDelimiters !== undefined) self.useDelimiters = p.useDelimiters;
+                if (p.examples) self.examples = p.examples;
+                if (p.constraintCanvas) self.constraintCanvas = p.constraintCanvas;
+                if (p.canvasAI) {
+                    // 2026-05-05 #104 : migration anciens prompts canvasAI='custom' → canvasAI='chatgpt'
+                    // + formatMode='custom' - filet legacy, voir opts.legacy ci-dessus.
+                    if (legacy && p.canvasAI === 'custom') { self.canvasAI = 'chatgpt'; self.formatMode = 'custom'; }
+                    else self.canvasAI = p.canvasAI;
+                }
+                if (p.canvasFormat) self.canvasFormat = p.canvasFormat;
+                if (p.canvasCustomFormat) self.canvasCustomFormat = p.canvasCustomFormat;
+                if (p.formatMode) self.formatMode = p.formatMode;
+                // Round 101 (2026-07-27, passe adversariale) : le repli 'autre' ne s'applique
+                // qu'aux prompts sauvegardés AVANT l'ajout de selectedTask à wizardParams - filet
+                // legacy, voir opts.legacy ci-dessus.
+                if (legacy) self.selectedTask = self.selectedTask || 'autre';
+            },
             _headers: function() {
                 return { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json', 'Content-Type': 'application/json' };
             },
@@ -1528,6 +1627,11 @@ document.addEventListener('alpine:init', function() {
                 this._loadSpaceLastValues();
                 // IA préférée mémorisée (2026-08-07) : voir _loadOpenTargetPref() plus bas.
                 this._loadOpenTargetPref();
+                // Brouillon local (2026-08-11) : restaure AVANT _applyStepFromHash() ci-dessous -
+                // si l'URL porte un hash #etape-N, il doit primer sur l'étape mémorisée dans le
+                // brouillon (même principe que ?edit=/?remix= : l'URL est toujours prioritaire).
+                // _loadDraft() se retire elle-même si ?edit=/?remix= est présent dans l'URL.
+                this._loadDraft();
                 // Tâche #1699 : reflète l'étape courante dans l'URL (hash, replaceState = zéro
                 // pollution de l'historique de navigation, zéro impact serveur ou cache).
                 this._applyStepFromHash();
@@ -1541,6 +1645,12 @@ document.addEventListener('alpine:init', function() {
                             }
                         }
                     });
+                    // Brouillon local : ré-écriture anti-rebond (~600 ms, voir _scheduleDraftSave())
+                    // à chaque changement d'un champ du wizard. Expression évaluée (pas un simple nom
+                    // de propriété) - Alpine.js le permet, $watch() évalue son 1er argument comme les
+                    // autres directives (x-text, x-if...), voir wizardParams ci-dessus pour la liste
+                    // des champs couverts.
+                    this.$watch('JSON.stringify(wizardParams)', function() { self._scheduleDraftSave(); });
                 }
                 if (this.isAuthenticated) {
                     fetch('/api/prompts', { headers: this._headers() })
@@ -1577,92 +1687,13 @@ document.addEventListener('alpine:init', function() {
                             .then(function(r) { if (!r.ok) throw new Error('http_' + r.status); return r.json(); })
                             .then(function(found) {
                                 if (found && found.params) {
-                                    var p = found.params;
-                                    if (p.personaType) self.personaType = p.personaType;
-                                    if (p.personaPreset) self.personaPreset = p.personaPreset;
-                                    if (p.personaCustom) {
-                                        self.personaCustom = p.personaCustom;
-                                        self.personaType = 'custom';
-                                    }
-                                    if (p.verbType) self.verbType = p.verbType;
-                                    if (p.verb) self.verb = p.verb;
-                                    if (p.verbCustom) {
-                                        self.verbCustom = p.verbCustom;
-                                        self.verbType = 'custom';
-                                    }
-                                    if (p.taskObject) self.taskObject = p.taskObject;
-                                    // #1593a (2026-08-07) : contexte additionnel, même piège round 42
-                                    // que les autres champs texte restaurés ici (constraintCustom,
-                                    // examples...) - un oubli le perd silencieusement à la réédition.
-                                    if (p.contextInfo) self.contextInfo = p.contextInfo;
-                                    // Espaces à remplir (tâches 1660-1665) : restaure UNIQUEMENT les
-                                    // chaînes ancrées, jamais pending (toujours faux à la réouverture
-                                    // - la personnalisation a déjà eu lieu lors de la sauvegarde).
-                                    if (Array.isArray(p.spaces)) { self.spaces = p.spaces.map(function(s) { return { text: s.text, pending: false }; }); self._refreshSpaceMissing(); }
-                                    if (p.audienceType) self.audienceType = p.audienceType;
-                                    // Round 151 (2026-08-01) : `self.audiencePreset = p.audiencePreset`
-                                    // retiré - rien ne lit plus jamais cette propriété d'état (voir
-                                    // déclaration plus haut). La migration de LECTURE elle-même (ligne
-                                    // suivante, singulier → tableau pluriel) reste intacte : elle lit
-                                    // `p.audiencePreset` depuis le PAYLOAD chargé, pas depuis l'état.
-                                    if (Array.isArray(p.audiencePresets)) { self.audiencePresets = migrateAudienceValues(p.audiencePresets); } else if (p.audiencePreset) { self.audiencePresets = migrateAudienceValues([p.audiencePreset]); }
-                                    if (p.audienceCustom) {
-                                        self.audienceCustom = p.audienceCustom;
-                                        self.audienceType = 'custom';
-                                    }
-                                    // LOT 1 (2026-08-06) : migration de l'ancien scalaire `format`
-                                    // (prompts sauvegardés avant ce lot) vers le nouveau tableau
-                                    // formatsSelected - Array.isArray(p.formats) couvre les
-                                    // prompts DÉJÀ migrés (ré-enregistrés depuis ce lot).
-                                    if (Array.isArray(p.formats)) { self.formatsSelected = p.formats; } else if (p.format) { self.formatsSelected = [p.format]; }
-                                    if (p.formatCustom) self.formatCustom = p.formatCustom;
-                                    if (p.length) self.length = p.length;
-                                    if (p.tone) self.tone = p.tone;
-                                    if (p.language) self.language = p.language;
-                                    if (p.technique) self.technique = p.technique;
-                                    if (p.constraintAntiAI !== undefined) self.constraintAntiAI = p.constraintAntiAI;
-                                    // Round 151 (2026-08-01) : Cadre strict doit survivre à une réédition
-                                    // comme les autres réglages, sinon rouvrir un prompt sauvegardé avec
-                                    // le cadre désactivé le réactiverait silencieusement (repli à `true`).
-                                    if (p.cadreStrict !== undefined) self.cadreStrict = p.cadreStrict;
-                                    // Round 152 (2026-08-01) : restaure le profil sauvegardé ET marque
-                                    // profileTouched - un prompt déjà sauvegardé porte un choix DÉJÀ FAIT
-                                    // par la personne, la détection par mots-clés ne doit plus jamais
-                                    // l'écraser (même règle que les autres champs "custom" restaurés ici).
-                                    if (p.profile) { self.profile = p.profile; self.profileTouched = true; }
-                                    // Round 42 (2026-07-27) : ces 6 champs manquaient à la restauration
-                                    // ?edit=ID - le prompt rouvrait avec ces options réinitialisées,
-                                    // et un "Enregistrer" ultérieur écrasait silencieusement la version
-                                    // en base (perte de donnée, ex. constraintCustom peut contenir des
-                                    // instructions longues, examples rend "few-shot" non fonctionnel une
-                                    // fois vidé).
-                                    if (p.constraintTypo !== undefined) self.constraintTypo = p.constraintTypo;
-                                    if (p.constraintChainOfThought !== undefined) self.constraintChainOfThought = p.constraintChainOfThought;
-                                    if (p.constraintAskIfUnclear !== undefined) self.constraintAskIfUnclear = p.constraintAskIfUnclear;
-                                    if (p.constraintCustom) self.constraintCustom = p.constraintCustom;
-                                    if (p.useDelimiters !== undefined) self.useDelimiters = p.useDelimiters;
-                                    if (p.examples) self.examples = p.examples;
-                                    if (p.constraintCanvas) self.constraintCanvas = p.constraintCanvas;
-                                    if (p.canvasAI) {
-                                        // 2026-05-05 #104 : migration anciens prompts canvasAI='custom' → canvasAI='chatgpt' + formatMode='custom'
-                                        if (p.canvasAI === 'custom') { self.canvasAI = 'chatgpt'; self.formatMode = 'custom'; }
-                                        else self.canvasAI = p.canvasAI;
-                                    }
-                                    if (p.canvasFormat) self.canvasFormat = p.canvasFormat;
-                                    if (p.canvasCustomFormat) self.canvasCustomFormat = p.canvasCustomFormat;
-                                    if (p.formatMode) self.formatMode = p.formatMode;
+                                    self._applyWizardParams(found.params, { legacy: true });
                                     self.saveName = found.name;
                                     // Prompt existant chargé pour édition : on saute l'étape « objectif »
                                     // (déjà répondue par un précédent passage) et on ouvre directement
                                     // toutes les divulgations locales (Phase 2 : ex-showAdvanced unique),
                                     // car un prompt sauvegardé utilise typiquement des valeurs
                                     // personnalisées qui vivent dans ces sections repliées par défaut.
-                                    // Round 101 (2026-07-27, passe adversariale) : restaure la vraie
-                                    // carte d'objectif si elle a été sauvegardée (voir wizardParams
-                                    // ci-dessus) - le repli 'autre' ne s'applique plus qu'aux prompts
-                                    // sauvegardés AVANT ce fix (jamais de selectedTask en base).
-                                    if (p.selectedTask) self.selectedTask = p.selectedTask;
-                                    self.selectedTask = self.selectedTask || 'autre';
                                     // Round 152 (2026-08-01) : les 5 blocs de l'écran 3 sont désormais
                                     // TOUJOURS visibles - plus d'accordéons internes à rouvrir un par un.
                                     self.step = 2;
@@ -1748,62 +1779,11 @@ document.addEventListener('alpine:init', function() {
                         .then(function(r) { if (!r.ok) throw new Error('http_' + r.status); return r.json(); })
                         .then(function(found) {
                             if (found && found.params) {
-                                var p = found.params;
-                                if (p.personaType) self.personaType = p.personaType;
-                                if (p.personaPreset) self.personaPreset = p.personaPreset;
-                                if (p.personaCustom) {
-                                    self.personaCustom = p.personaCustom;
-                                    self.personaType = 'custom';
-                                }
-                                if (p.verbType) self.verbType = p.verbType;
-                                if (p.verb) self.verb = p.verb;
-                                if (p.verbCustom) {
-                                    self.verbCustom = p.verbCustom;
-                                    self.verbType = 'custom';
-                                }
-                                if (p.taskObject) self.taskObject = p.taskObject;
-                                // #1593a (2026-08-07) : même restauration que le bloc ?edit=ID ci-dessus.
-                                if (p.contextInfo) self.contextInfo = p.contextInfo;
-                                // Espaces à remplir (tâches 1660-1665) : même restauration que le bloc
-                                // ?edit=ID ci-dessus.
-                                if (Array.isArray(p.spaces)) { self.spaces = p.spaces.map(function(s) { return { text: s.text, pending: false }; }); self._refreshSpaceMissing(); }
-                                if (p.audienceType) self.audienceType = p.audienceType;
-                                if (Array.isArray(p.audiencePresets)) { self.audiencePresets = migrateAudienceValues(p.audiencePresets); } else if (p.audiencePreset) { self.audiencePresets = migrateAudienceValues([p.audiencePreset]); }
-                                if (p.audienceCustom) {
-                                    self.audienceCustom = p.audienceCustom;
-                                    self.audienceType = 'custom';
-                                }
-                                // LOT 1 (2026-08-06) : même migration scalaire → tableau que le
-                                // bloc ?edit=ID ci-dessus.
-                                if (Array.isArray(p.formats)) { self.formatsSelected = p.formats; } else if (p.format) { self.formatsSelected = [p.format]; }
-                                if (p.formatCustom) self.formatCustom = p.formatCustom;
-                                if (p.length) self.length = p.length;
-                                if (p.tone) self.tone = p.tone;
-                                if (p.language) self.language = p.language;
-                                if (p.technique) self.technique = p.technique;
-                                if (p.constraintAntiAI !== undefined) self.constraintAntiAI = p.constraintAntiAI;
-                                if (p.cadreStrict !== undefined) self.cadreStrict = p.cadreStrict;
-                                if (p.profile) { self.profile = p.profile; self.profileTouched = true; }
-                                if (p.constraintTypo !== undefined) self.constraintTypo = p.constraintTypo;
-                                if (p.constraintChainOfThought !== undefined) self.constraintChainOfThought = p.constraintChainOfThought;
-                                if (p.constraintAskIfUnclear !== undefined) self.constraintAskIfUnclear = p.constraintAskIfUnclear;
-                                if (p.constraintCustom) self.constraintCustom = p.constraintCustom;
-                                if (p.useDelimiters !== undefined) self.useDelimiters = p.useDelimiters;
-                                if (p.examples) self.examples = p.examples;
-                                if (p.constraintCanvas) self.constraintCanvas = p.constraintCanvas;
-                                if (p.canvasAI) {
-                                    if (p.canvasAI === 'custom') { self.canvasAI = 'chatgpt'; self.formatMode = 'custom'; }
-                                    else self.canvasAI = p.canvasAI;
-                                }
-                                if (p.canvasFormat) self.canvasFormat = p.canvasFormat;
-                                if (p.canvasCustomFormat) self.canvasCustomFormat = p.canvasCustomFormat;
-                                if (p.formatMode) self.formatMode = p.formatMode;
+                                self._applyWizardParams(found.params, { legacy: true });
                                 // Décision de conception (non précisée dans le plan approuvé) :
                                 // préfixe "Remix de " sur le nom repris, pour que la personne sache
                                 // d'où vient ce brouillon avant de l'enregistrer sous son propre nom.
                                 self.saveName = found.name ? ('Remix de ' + found.name) : self.saveName;
-                                if (p.selectedTask) self.selectedTask = p.selectedTask;
-                                self.selectedTask = self.selectedTask || 'autre';
                                 self.step = 2;
                                 // self._editingId volontairement NON renseigné : voir commentaire ci-dessus.
                             }
@@ -2087,7 +2067,10 @@ document.addEventListener('alpine:init', function() {
                 var self = this;
                 setTimeout(function() { self.resetArmed = false; }, 4000);
             },
-            resetAll: function() { window.location.href = window.location.pathname; },
+            // Brouillon local (2026-08-11) : purge cpDraft_v1 AVANT le rechargement - sinon
+            // _loadDraft() (voir init()) restaurerait au prochain chargement le brouillon que ce
+            // bouton est censé effacer (piège central de la persistance de formulaire).
+            resetAll: function() { try { localStorage.removeItem(this._draftKey); } catch (e) {} window.location.href = window.location.pathname; },
 
             addToHistory: function() {
                 // Round 63 (2026-07-27) : bloque toute sauvegarde tant que l'historique initial
@@ -2299,41 +2282,10 @@ document.addEventListener('alpine:init', function() {
                 if (!entry || !entry.state) return;
                 var p = entry.state;
                 var self = this;
-                if (p.selectedTask) self.selectedTask = p.selectedTask;
-                if (p.personaType) self.personaType = p.personaType;
-                if (p.personaPreset) self.personaPreset = p.personaPreset;
-                if (p.personaCustom) self.personaCustom = p.personaCustom;
-                if (p.verbType) self.verbType = p.verbType;
-                if (p.verb) self.verb = p.verb;
-                if (p.verbCustom) self.verbCustom = p.verbCustom;
-                if (p.taskObject) self.taskObject = p.taskObject;
-                if (p.contextInfo) self.contextInfo = p.contextInfo;
-                // Espaces à remplir (tâches 1660-1665) : même restauration que le bloc ?edit=ID
-                // dans init().
-                if (Array.isArray(p.spaces)) { self.spaces = p.spaces.map(function(s) { return { text: s.text, pending: false }; }); self._refreshSpaceMissing(); }
-                if (p.audienceType) self.audienceType = p.audienceType;
-                if (Array.isArray(p.audiencePresets)) self.audiencePresets = migrateAudienceValues(p.audiencePresets);
-                if (p.audienceCustom) self.audienceCustom = p.audienceCustom;
-                if (Array.isArray(p.formats)) self.formatsSelected = p.formats;
-                if (p.formatCustom) self.formatCustom = p.formatCustom;
-                if (p.length) self.length = p.length;
-                if (p.tone) self.tone = p.tone;
-                if (p.language) self.language = p.language;
-                if (p.technique) self.technique = p.technique;
-                if (p.constraintAntiAI !== undefined) self.constraintAntiAI = p.constraintAntiAI;
-                if (p.constraintTypo !== undefined) self.constraintTypo = p.constraintTypo;
-                if (p.constraintCanvas) self.constraintCanvas = p.constraintCanvas;
-                if (p.canvasAI) self.canvasAI = p.canvasAI;
-                if (p.canvasFormat) self.canvasFormat = p.canvasFormat;
-                if (p.canvasCustomFormat) self.canvasCustomFormat = p.canvasCustomFormat;
-                if (p.formatMode) self.formatMode = p.formatMode;
-                if (p.constraintChainOfThought !== undefined) self.constraintChainOfThought = p.constraintChainOfThought;
-                if (p.constraintAskIfUnclear !== undefined) self.constraintAskIfUnclear = p.constraintAskIfUnclear;
-                if (p.constraintCustom) self.constraintCustom = p.constraintCustom;
-                if (p.useDelimiters !== undefined) self.useDelimiters = p.useDelimiters;
-                if (p.examples) self.examples = p.examples;
-                if (p.cadreStrict !== undefined) self.cadreStrict = p.cadreStrict;
-                if (p.profile) { self.profile = p.profile; self.profileTouched = true; }
+                // Voir _applyWizardParams() (getter wizardParams ci-dessus, doctrine incrémentale) -
+                // legacy:false car cet état a été sérialisé par CE code l'instant d'avant, jamais de
+                // données anciennes ici.
+                self._applyWizardParams(p, { legacy: false });
                 self.step = 2;
                 self.previewOpen = true;
             },
@@ -3448,6 +3400,88 @@ document.addEventListener('alpine:init', function() {
                 this.openTarget = target;
                 this.openTargetHasPref = true;
                 try { localStorage.setItem(this._openTargetPrefKey, target); } catch (e) {}
+            },
+
+            // === Brouillon local (2026-08-11) ===
+            // Persiste l'état complet du wizard (cpDraft_v1, localStorage) pour survivre à une
+            // fermeture accidentelle d'onglet ou de navigateur - AUCUNE des 5 clés localStorage déjà
+            // existantes (pb_history, cpGuestHistory_v1, cp_custom_cards, cpSpaceLastValues_v1,
+            // cpOpenTargetPref_v1) ne couvrait ce cas : un formulaire en cours de rédaction, jamais
+            // copié ni sauvegardé, était perdu. Durée de vie bornée à 24h et purge à l'écriture d'un
+            // formulaire redevenu vierge : ce poste sert aussi des écoles (postes partagés), le
+            // brouillon ne doit jamais devenir une fuite de contexte personnel qui traîne.
+            //
+            // Ne détermine PAS si le formulaire est vierge en testant wizardParams au complet (trop
+            // de champs ont des valeurs par défaut non vides, ex. length/tone/technique) - seuls les
+            // champs qu'une personne renseigne explicitement comptent comme un signal d'engagement
+            // réel. spaceValues/cpSpaceLastValues_v1 (mémoire de remplissage) restent HORS champ,
+            // déjà couverts par leur propre clé - pas de duplication ici (cf. DRY).
+            _hasSignificantDraftContent: function () {
+                var hasText = function (v) { return typeof v === 'string' && v.trim() !== ''; };
+                if (hasText(this.taskObject)) return true;
+                if (hasText(this.contextInfo)) return true;
+                if (hasText(this.personaCustom)) return true;
+                if (hasText(this.verbCustom)) return true;
+                if (hasText(this.audienceCustom)) return true;
+                if (hasText(this.formatCustom)) return true;
+                if (hasText(this.constraintCustom)) return true;
+                if (hasText(this.examples)) return true;
+                if (this.selectedTask) return true;
+                if (Array.isArray(this.spaces) && this.spaces.some(function (s) { return hasText(s && s.text); })) return true;
+                return false;
+            },
+            // Anti-rebond ~600 ms (voir $watch('JSON.stringify(wizardParams)', ...) dans init()) -
+            // jamais une écriture localStorage à chaque frappe.
+            _scheduleDraftSave: function () {
+                var self = this;
+                clearTimeout(this._draftSaveTimer);
+                this._draftSaveTimer = setTimeout(function () { self._saveDraftNow(); }, 600);
+            },
+            _saveDraftNow: function () {
+                try {
+                    if (!this._hasSignificantDraftContent()) {
+                        // Formulaire vierge (jamais rempli, ou revenu vierge après effacement manuel) :
+                        // rien à laisser derrière soi - et on purge un brouillon déjà présent, sinon un
+                        // visiteur qui vide son formulaire resterait piégé par l'ancien contenu au
+                        // prochain chargement.
+                        localStorage.removeItem(this._draftKey);
+                        return;
+                    }
+                    var payload = { v: 1, savedAt: Date.now(), step: this.step, params: this.wizardParams };
+                    localStorage.setItem(this._draftKey, JSON.stringify(payload));
+                } catch (e) {}
+            },
+            // Lue une seule fois, dans init(), et UNIQUEMENT si ni ?edit= ni ?remix= n'est présent
+            // dans l'URL - l'URL est toujours prioritaire sur le brouillon (même règle que pour la
+            // restauration ?edit=ID/?remix=ID plus bas). Un brouillon corrompu ou trop vieux (> 24h)
+            // est purgé et ignoré, jamais laissé bloquer le chargement de la page.
+            _loadDraft: function () {
+                try {
+                    var params = new URLSearchParams(window.location.search);
+                    if (params.get('edit') || params.get('remix')) return;
+                    var raw = localStorage.getItem(this._draftKey);
+                    if (!raw) return;
+                    var draft = JSON.parse(raw);
+                    if (!draft || draft.v !== 1 || !draft.params || typeof draft.params !== 'object') {
+                        localStorage.removeItem(this._draftKey);
+                        return;
+                    }
+                    var savedAt = Number(draft.savedAt);
+                    if (!isFinite(savedAt) || (Date.now() - savedAt) > this._draftMaxAgeMs) {
+                        localStorage.removeItem(this._draftKey);
+                        return;
+                    }
+                    // legacy:false - ce brouillon a été écrit par CE MÊME code (wizardParams) au plus
+                    // 24h avant, toujours au schéma courant (même raisonnement que loadGuestHistoryEntry()
+                    // ci-dessus, voir _applyWizardParams()).
+                    this._applyWizardParams(draft.params, { legacy: false });
+                    if (typeof draft.step === 'number' && draft.step >= 1 && draft.step <= 4) {
+                        this.step = draft.step;
+                    }
+                    this.draftRestored = true;
+                } catch (e) {
+                    try { localStorage.removeItem(this._draftKey); } catch (e2) {}
+                }
             }
         };
     });
