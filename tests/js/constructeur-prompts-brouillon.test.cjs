@@ -318,6 +318,62 @@ function assert(cond, label) { if (cond) { pass++; console.log('  OK ' + label);
         assert(localStorage.getItem('cpDraft_v1') === null, 'un brouillon sans `params` est purgé');
     }
 
+    // --- Test 12 : propagation RÉELLE au <select> après restauration (2e défaut de production,
+    //     2026-08-11). Les tests 5/9/11 ci-dessus ne vérifient QUE l'état interne Alpine
+    //     (component.personaPreset === ...) - insuffisant : c'est exactement ce qui restait correct
+    //     en production pendant que le <select> à l'écran restait bloqué sur
+    //     "-- Sélectionnez un rôle --". Un <select x-model="personaPreset"> dont les <option> sont
+    //     peuplées par <template x-for="p in personas"> (constructeur-prompts.blade.php ~L373-377)
+    //     n'accepte une valeur que si l'<option> correspondante existe DÉJÀ dans le DOM - Alpine
+    //     initialise x-model sur un noeud AVANT de descendre dans ses enfants, donc AVANT que x-for
+    //     ait inséré ses <option>. Ce test rejoue cet ordre avec un <select> natif minimal (fakeSelect,
+    //     n'accepte une valeur que si elle est dans `options`) et un effet x-model qui ne se
+    //     redéclenche QUE si personaPreset change RÉELLEMENT depuis le dernier passage (comme la
+    //     réactivité Alpine/Vue - un set sans changement ne redéclenche rien). Le harnais par défaut
+    //     (loadPromptBuilder(), $nextTick synchrone ligne ~54) est volontairement remplacé ici par une
+    //     file d'attente : c'est la seule façon de distinguer "affecté avant la fin du walk DOM" (bug)
+    //     de "affecté après" (correctif), donc de représenter la propagation plutôt que le seul état
+    //     interne. Contre l'ANCIEN code (affectation synchrone dans _loadDraft(), sans $nextTick), ce
+    //     test échoue sur fakeSelect.value - preuve qu'il détecte bien le défaut signalé. ---
+    {
+        const component = loadPromptBuilder({ isAuthenticated: false, search: '' });
+
+        // <select> natif minimal : n'accepte une valeur que si une <option> correspondante existe
+        // déjà (comme le vrai DOM), sinon l'ignore silencieusement et garde sa valeur précédente.
+        const fakeSelect = { value: '', options: [] };
+        function xModelEffect() {
+            var v = component.personaPreset;
+            if (v === '' || fakeSelect.options.indexOf(v) !== -1) fakeSelect.value = v;
+        }
+        var lastSeenValue;
+        function registerXModel() { lastSeenValue = component.personaPreset; xModelEffect(); }
+        function rerunIfChanged() {
+            if (component.personaPreset !== lastSeenValue) { lastSeenValue = component.personaPreset; xModelEffect(); }
+        }
+
+        let nextTickQueue = [];
+        component.$nextTick = function (cb) { nextTickQueue.push(cb); };
+
+        const draft = { v: 1, savedAt: Date.now(), step: 1, params: { personaType: 'preset', personaPreset: 'expert-marketing' } };
+        localStorage.setItem('cpDraft_v1', JSON.stringify(draft));
+
+        // (1) init() : c'est ICI, dans le vrai Alpine, que _loadDraft() tourne - avant tout walk DOM.
+        component.init();
+
+        // (2) walk Alpine simulé du <select> : x-model s'initialise AVANT que x-for peuple les
+        //     <option> (ordre réel confirmé dans le code source Alpine - les directives d'un noeud
+        //     s'exécutent avant la descente dans ses enfants).
+        registerXModel();
+        fakeSelect.options.push('expert-marketing'); // x-for peuple les <option>, juste après
+
+        // (3) $nextTick : le walk initial complet (x-for compris) est terminé.
+        nextTickQueue.forEach(function (cb) { cb(); });
+        rerunIfChanged(); // ne fait rien si personaPreset n'a pas changé depuis (2)
+
+        assert(component.personaPreset === 'expert-marketing', 'l\'état interne Alpine contient bien la valeur restaurée');
+        assert(fakeSelect.value === 'expert-marketing', 'le <select> DOM affiche RÉELLEMENT la valeur restaurée (pas seulement l\'état interne) - détecte le 2e défaut de production');
+    }
+
     console.log('\n' + pass + '/' + (pass + fail) + ' OK');
     process.exit(fail > 0 ? 1 : 0);
 })();

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.164.2] - 2026-08-11
+
+### Corrigé
+- Constructeur de prompts : le brouillon était bien relu, mais les menus déroulants restaient vides à l'écran (« Sélectionnez un rôle » alors qu'un rôle était mémorisé) - pour la personne devant l'écran, indiscernable d'une absence de sauvegarde. Cause : la restauration s'exécutait pendant l'initialisation d'Alpine, avant que la liste des options ne soit insérée dans la page ; l'affectation échouait alors en silence, et l'affichage n'était jamais resynchronisé ensuite. La restauration est désormais reportée après le premier rendu complet.
+- L'étape indiquée dans l'adresse (#etape-N) continue de primer sur celle du brouillon : ce point n'a pas été déplacé et reste couvert par les tests existants.
+
 ## [1.164.1] - 2026-08-11
 
 ### Corrigé

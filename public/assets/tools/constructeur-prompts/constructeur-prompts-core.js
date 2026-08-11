@@ -3469,6 +3469,7 @@ document.addEventListener('alpine:init', function() {
             // restauration ?edit=ID/?remix=ID plus bas). Un brouillon corrompu ou trop vieux (> 24h)
             // est purgé et ignoré, jamais laissé bloquer le chargement de la page.
             _loadDraft: function () {
+                var self = this;
                 try {
                     var params = new URLSearchParams(window.location.search);
                     if (params.get('edit') || params.get('remix')) return;
@@ -3484,10 +3485,44 @@ document.addEventListener('alpine:init', function() {
                         localStorage.removeItem(this._draftKey);
                         return;
                     }
-                    // legacy:false - ce brouillon a été écrit par CE MÊME code (wizardParams) au plus
-                    // 24h avant, toujours au schéma courant (même raisonnement que loadGuestHistoryEntry()
-                    // ci-dessus, voir _applyWizardParams()).
-                    this._applyWizardParams(draft.params, { legacy: false });
+                    // Correctif 2e défaut de prod (2026-08-11) : `_applyWizardParams()` est reporté à
+                    // $nextTick() - la restauration synchrone (avant ce correctif) affectait
+                    // personaPreset/verb/tone/technique/... AVANT qu'Alpine ait fini son walk initial
+                    // du DOM. Un <select x-model="personaPreset"> dont les <option> sont peuplées par
+                    // <template x-for="p in personas"> (constructeur-prompts.blade.php ~L373-377, même
+                    // motif pour verb/length/tone/technique/canvasFormat/...) initialise son binding
+                    // x-model AVANT de descendre dans ses enfants - donc AVANT que x-for ait inséré les
+                    // <option> correspondantes. Assigner personaPreset='enseignant' à ce moment-là fait
+                    // que le <select> tente `.value = 'enseignant'` alors qu'aucune <option> de cette
+                    // valeur n'existe encore dans le DOM : le navigateur ignore silencieusement
+                    // l'affectation (repli sur ""), et plus rien ne la resynchronise ensuite - l'effet
+                    // x-model ne se redéclenche que si la valeur RECHANGE réellement, jamais sur un
+                    // nouvel appel avec la même valeur. Résultat observé : l'état interne Alpine était
+                    // correct (personaPreset === 'enseignant', bannière affichée) mais le <select> à
+                    // l'écran restait sur "-- Sélectionnez un rôle --". $nextTick() place cette
+                    // affectation APRÈS la fin du walk initial complet d'Alpine (x-for compris, qui fait
+                    // partie du MÊME walk synchrone que x-model, donc déjà terminé) : personaPreset
+                    // passe alors RÉELLEMENT de sa valeur par défaut ('') à la valeur du brouillon, ce
+                    // qui redéclenche l'effet x-model - et cette fois l'<option> existe déjà, donc le
+                    // <select> se met correctement à jour. Couvre uniformément tous les champs à
+                    // sélection (menus déroulants, pastilles, cases à cocher) puisqu'ils passent tous
+                    // par cette même fonction _applyWizardParams().
+                    // `this.step` (juste en dessous) N'EST PAS concerné par ce report : il reste
+                    // affecté ICI, en synchrone, car _applyStepFromHash() (appelée juste après
+                    // _loadDraft() dans init()) doit pouvoir l'écraser si #etape-N est présent dans
+                    // l'URL - la priorité de l'URL sur l'étape mémorisée du brouillon (voir init())
+                    // dépend de cet ordre synchrone exact ; la reporter aussi à $nextTick casserait
+                    // cette priorité (le brouillon écraserait alors #etape-N après coup).
+                    if (typeof self.$nextTick === 'function') {
+                        self.$nextTick(function () {
+                            // legacy:false - ce brouillon a été écrit par CE MÊME code (wizardParams) au
+                            // plus 24h avant, toujours au schéma courant (même raisonnement que
+                            // loadGuestHistoryEntry() ci-dessus, voir _applyWizardParams()).
+                            self._applyWizardParams(draft.params, { legacy: false });
+                        });
+                    } else {
+                        this._applyWizardParams(draft.params, { legacy: false });
+                    }
                     if (typeof draft.step === 'number' && draft.step >= 1 && draft.step <= 4) {
                         this.step = draft.step;
                     }
