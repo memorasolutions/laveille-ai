@@ -22,10 +22,27 @@
                                 <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0;">{{ $tool->name }}</h1>
                                 <p class="text-muted mb-0">{{ __('Créez des prompts optimisés pour ChatGPT, Claude, Gemini et autres IA.') }}</p>
                             </div>
+                            {{-- Barre d'action harmonisée (signalement fondateur, 2026-08-11) : les 3
+                                 boutons-icônes partagent désormais la même famille visuelle - cercles de
+                                 44px (.ct-btn-icon, public/css/charte.css), même épaisseur de bordure
+                                 (2px, .ct-btn-outline). Partager reste l'action mise en avant (variante
+                                 pleine .ct-btn-primary) mais au MÊME diamètre que ses voisins. Le bouton
+                                 Aide utilise directement la famille .ct-btn-icon plutôt que le composant
+                                 x-tools::help-btn (pensé pour les petits « ? » inline à côté des libellés
+                                 de champs, cf. les 4 autres usages plus bas dans cette page) : au format
+                                 44px de la barre d'action, il rejoint le même patron déjà en place sur les
+                                 barres d'action d'autres outils (roue-tirage, code-qr, liens-google...). --}}
                             <div class="d-flex gap-1">
-                                @include('tools::partials.fullscreen-btn')
+                                @include('tools::partials.fullscreen-btn', ['variant' => 'circle-outline'])
                                 @include('tools::partials.share-btn', ['tool' => $tool])
-                                <x-tools::help-btn click="jQuery('#promptHelpModal').modal('show')" :size="32" />
+                                <button type="button"
+                                        class="ct-btn ct-btn-outline ct-btn-icon"
+                                        style="border-radius:50%;"
+                                        @click="jQuery('#promptHelpModal').modal('show')"
+                                        title="{{ __('Aide') }}"
+                                        aria-label="{{ __('Aide') }}">
+                                    <span aria-hidden="true" style="display:inline-block;transform:translateY(0.07em);">?</span>
+                                </button>
                             </div>
                         </div>
                         @include('tools::public.partials.tool-geo')

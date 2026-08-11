@@ -2,15 +2,21 @@
      Usage: @include('tools::partials.fullscreen-btn')
      Le bouton doit être DANS un élément avec la classe "tool-fullscreen-target"
      Ou passer un targetId: @include('tools::partials.fullscreen-btn', ['targetId' => '#mon-id'])
+     Variante optionnelle : @include('tools::partials.fullscreen-btn', ['variant' => 'circle-outline'])
+     rend un cercle à contour (même famille que le bouton Aide) au lieu de l'icône nue
+     par défaut - réservé aux barres d'action où plusieurs boutons-icônes doivent
+     partager le même diamètre (2026-08-11, harmonisation constructeur-prompts).
+     Défaut inchangé partout ailleurs (rétrocompatible, zéro régression).
 --}}
+@php $isCircle = ($variant ?? null) === 'circle-outline'; @endphp
 <button type="button"
-        class="js-tool-fullscreen-btn ct-btn ct-btn-ghost ct-btn-icon"
+        class="js-tool-fullscreen-btn ct-btn {{ $isCircle ? 'ct-btn-outline' : 'ct-btn-ghost' }} ct-btn-icon"
         data-fullscreen-target="{{ $targetId ?? '' }}"
         data-i18n-fullscreen="{{ __('Plein écran') }}"
         data-i18n-exit-fullscreen="{{ __('Quitter le plein écran') }}"
         title="{{ __('Plein écran') }}"
         aria-label="{{ __('Plein écran') }}"
-        style="display:inline-flex;align-items:center;justify-content:center;">
+        style="display:inline-flex;align-items:center;justify-content:center;{{ $isCircle ? 'border-radius:50%;' : '' }}">
     <svg class="icon-expand" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false" style="display:block;width:16px;height:16px;flex-shrink:0;">
         <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
     </svg>

@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.165.0] - 2026-08-11
+
+### Modifié
+- Constructeur de prompts : les trois boutons de la barre d'action (plein écran, partage, aide) avaient trois tailles et trois styles différents - une icône nue, un gros cercle plein, un petit cercle à contour. Ils partagent maintenant le même gabarit : cercles de 44 px, même épaisseur de bordure, mêmes couleurs de la charte. Le partage reste l'action mise en avant (cercle plein), mais au même diamètre que les autres, pour garder la hiérarchie sans casser l'alignement.
+
+### Nettoyé
+- Le style du bouton d'aide était défini en double, dans deux composants différents, avec un risque de divergence sur toute page combinant les deux. Il n'existe désormais qu'une seule définition, centralisée dans la charte et paramétrable en taille - aucune copie à maintenir. Le rendu retenu est celui qui gagnait déjà l'affichage en production : les écrans qui utilisent ce bouton (minuteur, calculatrice de taxes, mots croisés...) sont inchangés.
+- La zone cliquable invisible du bouton d'aide passe de 40 à 44 px, conformément au seuil d'accessibilité appliqué partout ailleurs sur le site.
+
 ## [1.164.4] - 2026-08-11
 
 ### Corrigé

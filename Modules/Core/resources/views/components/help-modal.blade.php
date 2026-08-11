@@ -14,18 +14,10 @@
 .ct-modal-body p:last-child { margin-bottom: 0; }
 .ct-modal-body ul { margin: 0 0 0.75rem; padding-left: 1.25rem; }
 .ct-modal-body li { margin-bottom: 0.25rem; }
-.ct-help-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 22px; height: 22px; margin-left: 6px; padding: 0;
-    border: 1.5px solid var(--c-primary, #064E5A); border-radius: 50%;
-    background: transparent; color: var(--c-primary, #064E5A);
-    font-size: 0.75rem; font-weight: 700; cursor: pointer;
-    transition: background 0.15s, color 0.15s; line-height: 1; vertical-align: middle;
-}
-.ct-help-btn:hover, .ct-help-btn:focus-visible {
-    background: var(--c-primary, #064E5A); color: #fff;
-    outline: 2px solid var(--c-primary, #064E5A); outline-offset: 2px;
-}
+{{-- .ct-help-btn (fusion DRY 2026-08-11) : vit désormais en UN seul endroit,
+     public/css/charte.css - elle était dupliquée ici et dans
+     Modules/Tools/.../help-btn.blade.php, avec un risque de cascade divergente
+     sur toute page combinant les deux composants. --}}
 </style>
 
 <script>

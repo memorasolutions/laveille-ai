@@ -53,10 +53,13 @@
         }, 2500);
     }
 }">
+    {{-- Cercle 44px : déjà fourni par .ct-btn-icon (public/css/charte.css) - seul
+         border-radius:50% reste nécessaire en inline pour transformer le carré en
+         cercle (le reste des dimensions serait une redite de la classe, DRY). --}}
     <button
         type="button"
         class="ct-btn ct-btn-primary ct-btn-icon"
-        style="border-radius:50%; width:44px; height:44px; min-width:44px; min-height:44px; padding:0; line-height:1; flex-shrink:0;"
+        style="border-radius:50%;"
         @click="share()"
         :disabled="busy"
         aria-label="{{ __('Partager :name sur les réseaux sociaux', ['name' => $tool->name]) }}"

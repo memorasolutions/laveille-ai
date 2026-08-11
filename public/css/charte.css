@@ -1232,6 +1232,64 @@ article h3 {
 }
 
 /* ═══════════════════════════════════════════════════
+   24bis. BOUTON D'AIDE - .ct-help-btn (définition UNIQUE)
+   Fusion DRY (2026-08-11) : cette classe était définie deux fois
+   (Modules/Tools/.../help-btn.blade.php ET Modules/Core/.../help-modal.blade.php),
+   avec un risque de cascade divergente sur toute page combinant les deux
+   composants. La version de Core gagnait déjà la cascade en production
+   (chargée après le contenu, dans master.blade.php) : son habillage visuel
+   (bordure 1,5px, remplissage plein au survol/focus) est donc repris ici
+   tel quel pour zéro régression sur les usages existants (motdle,
+   calculatrice-taxes...). Taille paramétrable par --hb-size (défaut 22px,
+   comportement historique des usages « nus » ; le composant x-tools::help-btn
+   redéfinit --hb-size en style inline selon sa prop :size).
+   ═══════════════════════════════════════════════════ */
+.ct-help-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--hb-size, 22px);
+    height: var(--hb-size, 22px);
+    min-width: var(--hb-size, 22px);
+    margin-left: 6px;
+    padding: 0;
+    border: 1.5px solid var(--c-primary, #064E5A);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--c-primary, #064E5A);
+    font-weight: 700;
+    font-size: 0.75rem;
+    line-height: 1;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+/* Zone cliquable invisible agrandie à 40px (AAA cible tactile) sans agrandir
+   le cercle visuel - utile pour les usages compacts (22-24px). */
+.ct-help-btn::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+}
+.ct-help-btn:hover,
+.ct-help-btn:focus-visible {
+    background: var(--c-primary, #064E5A);
+    color: #fff;
+    outline: 2px solid var(--c-primary, #064E5A);
+    outline-offset: 2px;
+}
+/* Correction optique : le « ? »/« ⓘ » de la police du thème n'a pas de
+   jambage, sa boîte de ligne garde du vide sous la ligne de base - centré
+   mathématiquement, le glyphe paraît trop haut. On le redescend légèrement. */
+.ct-help-btn__glyphe { display: inline-block; transform: translateY(0.07em); }
+
+/* ═══════════════════════════════════════════════════
    23. IMPRESSION (@media print)
    Masquer les éléments UI non pertinents à l'impression
    ═══════════════════════════════════════════════════ */
