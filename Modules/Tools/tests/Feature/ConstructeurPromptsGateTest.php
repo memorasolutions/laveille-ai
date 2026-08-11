@@ -237,9 +237,13 @@ it('renders the technique help button and its educational overview modal coverin
     // Le lien pédagogique explicite vers le champ "Exemples" (technique few-shot).
     $response->assertSee('est le carburant de la technique few-shot', escape: false);
 
-    // Les 3 onglets d'intention Bootstrap 4 natifs (nav-tabs + data-toggle="tab"), aucun tablist
-    // maison. Rôles ARIA gérés par le plugin Bootstrap lui-même.
-    $response->assertSee('data-toggle="tab"', escape: false);
+    // Les 3 onglets d'intention, en syntaxe Bootstrap 5 (data-bs-*). Le thème public charge
+    // Bootstrap v5.0.1 : la syntaxe Bootstrap 4 (data-toggle) ne branche AUCUN écouteur de clic,
+    // les onglets restent muets à la souris même si l'API jQuery les pilote encore. Régression
+    // vécue en production le 2026-08-11 : ces 3 assertions la rendent impossible à répéter.
+    $response->assertSee('data-bs-toggle="tab"', escape: false);
+    $response->assertSee('data-bs-target="#cpTgt-', escape: false);
+    $response->assertDontSee('data-toggle="tab"', escape: false);
     $response->assertSee('id="cpTechniqueGroupTabs"', escape: false);
     $response->assertSee('Répondre directement', escape: false);
     $response->assertSee('Imiter vos exemples', escape: false);

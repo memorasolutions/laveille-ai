@@ -293,7 +293,7 @@
                              var(--c-primary-light), var(--c-primary-badge), var(--c-dark), var(--c-text-muted)),
                              zéro nouvelle teinte inventée. --}}
                         .cp-tech-tabs.nav-tabs{border-bottom:2px solid var(--c-primary-light);flex-wrap:wrap;margin-bottom:1rem;}
-                        .cp-tech-tabs.nav-tabs .nav-link{min-height:44px;display:flex;align-items:center;font-weight:600;color:var(--c-dark);border:0;border-bottom:3px solid transparent;border-radius:0;padding:0.6rem 0.9rem;}
+                        .cp-tech-tabs.nav-tabs .nav-link{min-height:44px;display:flex;align-items:center;font-weight:600;color:var(--c-dark);background:transparent;border:0;border-bottom:3px solid transparent;border-radius:0;padding:0.6rem 0.9rem;}
                         .cp-tech-tabs.nav-tabs .nav-link:hover{color:var(--c-primary);border-bottom-color:rgba(6,78,90,0.35);}
                         .cp-tech-tabs.nav-tabs .nav-link.active{color:var(--c-primary);background:var(--c-primary-light);border-bottom-color:var(--c-primary);}
                         .cp-tech-tabs.nav-tabs .nav-link:focus-visible{outline:2px solid var(--c-primary);outline-offset:2px;}
@@ -1358,8 +1358,13 @@
      de fermeture (× dans l'en-tête + « Compris ! » au pied, cible tactile 44px, fermable clavier
      via le focus trap natif de Bootstrap modal + la touche Échap). Ouverte par x-tools::help-btn
      plus haut (~ligne 677, bloc « Un exemple à imiter ? »).
-     Onglets : nav nav-tabs + data-toggle="tab" Bootstrap 4 NATIFS (rôles ARIA gérés par le plugin
-     lui-même) - aucun tablist maison, aucune lib ajoutée. Les 3 groupes viennent de
+     Onglets : nav nav-tabs + BOUTONS data-bs-toggle="tab" / data-bs-target - le thème public charge
+     Bootstrap 5 (public/themes/bloggar/js/bootstrap.bundle.min.js, « Bootstrap v5.0.1 »), qui
+     n'écoute QUE le préfixe data-bs-*. La syntaxe Bootstrap 4 (data-toggle) ne branche aucun
+     écouteur : le clic reste sans effet, alors que l'API jQuery ($.fn.tab, exposée par le pont
+     jQuery de Bootstrap 5) fonctionne quand même - d'où un pilotage par script trompeur. Pattern
+     identique aux onglets déjà en service ailleurs (Backoffice branding/roles). Aucun tablist
+     maison, aucune lib ajoutée : rôles ARIA + clavier gérés par le plugin. Les 3 groupes viennent de
      $pbTechniqueGroups, les cartes de $pbTechniquesByGroup (regroupement de $pbTechniquesOverview
      par 'groupe', calculé plus haut - zéro duplication de données entre les 3 onglets).
      Chaque carte : libellé + badge méthode (styles repris tels quels de l'ancienne modale à plat),
@@ -1380,7 +1385,7 @@
                 <ul class="nav nav-tabs cp-tech-tabs" id="cpTechniqueGroupTabs" role="tablist">
                     @foreach ($pbTechniqueGroups as $pbGi => $pbGrp)
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link {{ $pbGi === 0 ? 'active' : '' }}" id="cpTgt-{{ $pbGrp['key'] }}-tab" data-toggle="tab" href="#cpTgt-{{ $pbGrp['key'] }}" role="tab" aria-controls="cpTgt-{{ $pbGrp['key'] }}" aria-selected="{{ $pbGi === 0 ? 'true' : 'false' }}">{{ $pbGrp['label'] }}</a>
+                        <button type="button" class="nav-link {{ $pbGi === 0 ? 'active' : '' }}" id="cpTgt-{{ $pbGrp['key'] }}-tab" data-bs-toggle="tab" data-bs-target="#cpTgt-{{ $pbGrp['key'] }}" role="tab" aria-controls="cpTgt-{{ $pbGrp['key'] }}" aria-selected="{{ $pbGi === 0 ? 'true' : 'false' }}">{{ $pbGrp['label'] }}</button>
                     </li>
                     @endforeach
                 </ul>

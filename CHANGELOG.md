@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.163.1] - 2026-08-11
+
+### Corrigé
+- **Constructeur de prompts - les onglets de la modale des techniques ne réagissaient pas au clic** (signalé en production). Cause racine : le thème public charge Bootstrap v5.0.1, qui n'écoute que les attributs `data-bs-*` ; les onglets avaient été écrits en syntaxe Bootstrap 4 (`data-toggle="tab"`), donc aucun écouteur de clic n'était branché. Le défaut avait échappé à la vérification parce que l'API jQuery de Bootstrap 5 (`$.fn.tab`) fonctionne malgré tout : piloter les onglets par script donnait un faux positif. Correctif : boutons `data-bs-toggle="tab"` + `data-bs-target`, alignés sur le pattern des onglets déjà en service ailleurs dans le projet. Trois assertions ajoutées au test de la modale (dont une assertion négative sur `data-toggle`) verrouillent la régression.
+
 ## [1.163.0] - 2026-08-11
 
 ### Modifié
