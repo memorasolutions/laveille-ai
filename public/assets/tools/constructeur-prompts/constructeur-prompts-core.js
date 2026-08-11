@@ -39,6 +39,7 @@ document.addEventListener('alpine:init', function() {
             _draftKey: 'cpDraft_v1',
             _draftMaxAgeMs: 24 * 60 * 60 * 1000,
             _draftSaveTimer: null,
+            _draftDisabled: false,
             draftRestored: false,
             // Correctif régression prod (2026-08-11) : instantané JSON de wizardParams pris sur le
             // formulaire VIERGE, tout au début d'init() (voir plus bas) - AVANT _loadDraft() et avant
@@ -2085,7 +2086,23 @@ document.addEventListener('alpine:init', function() {
             // Brouillon local (2026-08-11) : purge cpDraft_v1 AVANT le rechargement - sinon
             // _loadDraft() (voir init()) restaurerait au prochain chargement le brouillon que ce
             // bouton est censé effacer (piège central de la persistance de formulaire).
-            resetAll: function() { try { localStorage.removeItem(this._draftKey); } catch (e) {} window.location.href = window.location.pathname; },
+            // 3e defaut de prod (2026-08-11) : « Recommencer » ne remettait rien a zero.
+            // Deux causes cumulees, corrigees ensemble :
+            // (1) `window.location.href = pathname` depuis une URL portant un fragment
+            //     (#etape-N, ajoute en v1.155.0) ne recharge PAS le document - le navigateur
+            //     se contente de retirer le fragment. L'etat Alpine survivait donc intact.
+            // (2) L'anti-rebond de 600 ms etait toujours arme : meme purgee, la cle etait
+            //     reecrite juste apres par le watcher, avec l'etat inchange.
+            // D'ou l'ordre : desarmer la sauvegarde, purger, nettoyer le fragment SANS
+            // navigation (replaceState), puis forcer un vrai rechargement.
+            resetAll: function () {
+                this._draftDisabled = true;
+                clearTimeout(this._draftSaveTimer);
+                this._draftSaveTimer = null;
+                try { localStorage.removeItem(this._draftKey); } catch (e) {}
+                try { window.history.replaceState(null, '', window.location.pathname); } catch (e) {}
+                window.location.reload();
+            },
 
             addToHistory: function() {
                 // Round 63 (2026-07-27) : bloque toute sauvegarde tant que l'historique initial
@@ -3446,11 +3463,15 @@ document.addEventListener('alpine:init', function() {
             // Anti-rebond ~600 ms (voir $watch('JSON.stringify(wizardParams)', ...) dans init()) -
             // jamais une écriture localStorage à chaque frappe.
             _scheduleDraftSave: function () {
+                // Verrou pose par resetAll() : entre le clic sur « Recommencer » et le
+                // rechargement effectif, plus aucune ecriture ne doit ressusciter le brouillon.
+                if (this._draftDisabled) return;
                 var self = this;
                 clearTimeout(this._draftSaveTimer);
                 this._draftSaveTimer = setTimeout(function () { self._saveDraftNow(); }, 600);
             },
             _saveDraftNow: function () {
+                if (this._draftDisabled) return;
                 try {
                     if (!this._hasSignificantDraftContent()) {
                         // Formulaire vierge (jamais rempli, ou revenu vierge après effacement manuel) :

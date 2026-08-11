@@ -33,7 +33,8 @@ function loadPromptBuilder(opts) {
     global.Alpine = { data: (name, f) => { factory = f; } };
     global.window = {
         promptBuilderConfig: { personas: [], verbs: [], audiences: [], taskCards: [], isAuthenticated: !!opts.isAuthenticated, i18n: {} },
-        location: { search: opts.search || '', hash: '', pathname: '/outils/constructeur-prompts' },
+        location: { search: opts.search || '', hash: '', pathname: '/outils/constructeur-prompts', reload: () => {} },
+        history: { replaceState: () => {} },
         dispatchEvent: () => {},
     };
     global.history = { replaceState: () => {} };
@@ -372,6 +373,25 @@ function assert(cond, label) { if (cond) { pass++; console.log('  OK ' + label);
 
         assert(component.personaPreset === 'expert-marketing', 'l\'état interne Alpine contient bien la valeur restaurée');
         assert(fakeSelect.value === 'expert-marketing', 'le <select> DOM affiche RÉELLEMENT la valeur restaurée (pas seulement l\'état interne) - détecte le 2e défaut de production');
+    }
+
+    // --- Test 13 : « Recommencer » doit VRAIMENT remettre a zero (3e defaut de production) ---
+    // Le clic purgeait la cle, mais (a) l'anti-rebond la reecrivait aussitot et (b) l'ancienne
+    // navigation ne rechargeait pas la page quand l'URL portait un fragment #etape-N.
+    {
+        const src = fs.readFileSync(path.join(__dirname, '../../public/assets/tools/constructeur-prompts/constructeur-prompts-core.js'), 'utf8');
+        const resetBody = src.slice(src.indexOf('resetAll: function'), src.indexOf('addToHistory: function'));
+
+        assert(/_draftDisabled\s*=\s*true/.test(resetBody), 'resetAll() arme le verrou _draftDisabled (empeche toute reecriture avant le rechargement)');
+        assert(/clearTimeout\(this\._draftSaveTimer\)/.test(resetBody), 'resetAll() desarme le minuteur anti-rebond en attente');
+        assert(/removeItem\(this\._draftKey\)/.test(resetBody), 'resetAll() purge bien la cle du brouillon');
+        assert(/window\.location\.reload\(\)/.test(resetBody), 'resetAll() force un VRAI rechargement (reload), jamais une simple reaffectation de href');
+        assert(!/location\.href\s*=\s*window\.location\.pathname/.test(resetBody), 'resetAll() n\'utilise plus location.href = pathname (inoperant depuis un fragment #etape-N)');
+
+        const saveNow = src.slice(src.indexOf('_saveDraftNow: function'), src.indexOf('_loadDraft: function'));
+        const schedule = src.slice(src.indexOf('_scheduleDraftSave: function'), src.indexOf('_saveDraftNow: function'));
+        assert(/if\s*\(this\._draftDisabled\)\s*return;/.test(saveNow), '_saveDraftNow() honore le verrou');
+        assert(/if\s*\(this\._draftDisabled\)\s*return;/.test(schedule), '_scheduleDraftSave() honore le verrou');
     }
 
     console.log('\n' + pass + '/' + (pass + fail) + ' OK');

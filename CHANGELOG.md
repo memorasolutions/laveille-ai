@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.164.3] - 2026-08-11
+
+### Corrigé
+- Constructeur de prompts : le bouton « Recommencer » ne remettait rien à zéro - le formulaire revenait intact, brouillon compris. Deux causes cumulées, découvertes en vérifiant le bouton en production : (1) la page n'était pas rechargée du tout, parce que réaffecter l'adresse sans son repère d'étape (#etape-N) ne provoque qu'un changement d'ancre, jamais un rechargement ; (2) la sauvegarde différée restait armée et réécrivait le brouillon dans la seconde suivante, avec l'état inchangé. Le bouton désarme désormais la sauvegarde, purge le brouillon, nettoie le repère d'étape et force un vrai rechargement.
+
 ## [1.164.2] - 2026-08-11
 
 ### Corrigé
