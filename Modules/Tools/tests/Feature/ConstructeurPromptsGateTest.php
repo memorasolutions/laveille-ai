@@ -209,6 +209,35 @@ it('renders the constructeur-prompts Blade-level UI text as real localized HTML 
         ->assertSee('History', escape: false);
 });
 
+it('renders the technique help button and its educational overview modal covering the 8 prompting techniques (signalement fondateur, 2026-08-11 : le petit texte gris sous le sélecteur ne montrait que le choix courant, aucune vue d\'ensemble pour un néophyte avant cette modale)', function () {
+    Tool::where('slug', 'constructeur-prompts')->update(['is_under_construction' => false]);
+
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->withSession(['locale' => 'fr'])
+        ->get('/outils/constructeur-prompts');
+
+    $response->assertOk();
+
+    // Le bouton d'aide (composant DRY x-tools::help-btn) ouvre la modale via jQuery/Bootstrap,
+    // même mécanisme que #promptHelpModal déjà présent sur la page. Rendu HTML-échappé par le
+    // composant (echo e($click)) - même comportement que le bouton d'aide de l'en-tête existant.
+    $response->assertSee('jQuery(&#039;#techniquesHelpModal&#039;).modal(&#039;show&#039;)', escape: false);
+
+    // La modale elle-même, calquée sur #promptHelpModal (structure Bootstrap, bouton "Compris !").
+    $response->assertSee('id="techniquesHelpModal"', escape: false);
+    $response->assertSee('id="techniquesHelpModalLabel"', escape: false);
+
+    // Au moins 3 des 8 noms de technique (badges), repris tels quels de $pbTechniqueHints.
+    $response->assertSee('chaîne de pensée', escape: false);
+    $response->assertSee('décomposition guidée', escape: false);
+    $response->assertSee('auto-vérification', escape: false);
+    $response->assertSee('variantes comparées', escape: false);
+
+    // Le lien pédagogique explicite vers le champ "Exemples" (technique few-shot).
+    $response->assertSee('est le carburant de la technique few-shot', escape: false);
+});
+
 it('shows the "Mes prompts" menu link to a non-admin while the tool is under revision (round 106, 2026-08-01 : la bibliothèque de lecture est accessible, le lien doit donc l\'être aussi - round 4 le masquait à tort)', function () {
     $user = User::factory()->create();
 

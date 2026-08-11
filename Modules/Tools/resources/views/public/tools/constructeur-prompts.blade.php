@@ -666,7 +666,16 @@
                                      natif ne permet pas de styliser une partie du texte d'une <option>. --}}
                                 <x-tools::prompt-block :question="__('Un exemple à imiter ?')" :example="__('Ex. : donnez 2-3 exemples du résultat attendu, ou laissez l\'IA répondre directement.')" added="feedbackModele">
                                     <div class="ct-block__field">
-                                        <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Comment l\'IA doit-elle s\'y prendre ?') }}</label>
+                                        {{-- Bouton d'aide pédagogique (signalement fondateur, 2026-08-11) : le petit
+                                             texte gris sous le sélecteur (techniqueHints) ne montre que le choix
+                                             COURANT - un néophyte n'a aucune vue d'ensemble des 8 techniques avant
+                                             de les essayer une à une. La modale #techniquesHelpModal ci-dessous
+                                             (calquée sur #promptHelpModal, même composant DRY x-tools::help-btn,
+                                             même mécanisme jQuery Bootstrap modal('show')) les détaille toutes. --}}
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <label class="form-label fw-medium mb-0" style="font-size: 0.85rem;">{{ __('Comment l\'IA doit-elle s\'y prendre ?') }}</label>
+                                            <x-tools::help-btn click="jQuery('#techniquesHelpModal').modal('show')" />
+                                        </div>
                                         <select class="form-control form-control-sm" x-model="technique" aria-label="{{ __('Méthode de réflexion de l\'IA') }}">
                                             <template x-for="tq in techniques" :key="tq.value">
                                                 <option :value="tq.value" x-text="tq.label"></option>
@@ -1063,8 +1072,18 @@
                             <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')" @click="openIn('mistral')">Mistral</button>
                         </div>
                         </template>
+                        {{-- Correctif alignement (signalement fondateur, capture jointe) : le bouton
+                             principal était vertical-centré (align-items-center) contre TOUT le bloc
+                             <details>, qui grandit d'une ligne (summary) à deux lignes (summary + rangée
+                             Claude/Perplexity/Gemini/Mistral, mt-2) une fois ouvert. Centré sur un bloc
+                             plus haut = le bouton flottait au-dessus de la rangée secondaire, son sommet
+                             à hauteur du libellé « Autres choix ». align-items-end aligne les BAS des deux
+                             enfants du flex : fermé, bas du bouton = bas du résumé (inchangé) ; ouvert, bas
+                             du bouton = bas de la rangée de boutons secondaires (le libellé reste au-dessus
+                             de sa rangée, comme demandé). flex-wrap déjà présent gère le mobile (passage à
+                             la ligne, pas de colonne forcée nécessaire ici). --}}
                         <template x-if="openTargetHasPref">
-                        <div class="d-flex gap-2 mb-0 flex-wrap align-items-center">
+                        <div class="d-flex gap-2 mb-0 flex-wrap align-items-end">
                             <button class="ct-btn ct-btn-primary" :disabled="!isValid" :style="'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')" @click="openIn(openTarget)" :aria-label="'{{ __('Ouvrir dans') }} ' + openTargetLabel" x-text="'{{ __('Ouvrir dans') }} ' + openTargetLabel"></button>
                             <details>
                                 <summary class="small" style="cursor:pointer; color: var(--c-text-muted); min-height:44px; display:inline-flex; align-items:center; padding: 4px 6px;">{{ __('Autres choix') }}</summary>
@@ -1182,6 +1201,109 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="ct-btn ct-btn-primary" onclick="jQuery('#promptHelpModal').modal('hide')" style="min-height:44px;">{{ __('Compris !') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@php
+    // Modale pédagogique #techniquesHelpModal (signalement fondateur, 2026-08-11) : contrairement
+    // à $pbTechniqueHints (défini plus bas dans @push('head'), un seul texte - celui du choix
+    // COURANT, affiché en petit gris sous le sélecteur), cette structure alimente une VUE
+    // D'ENSEMBLE des 8 techniques à la fois. Doit être calculée ICI, dans le corps de la page
+    // (avant @endsection) et non aux côtés de $pbTechniqueHints/$defaultTechniques : ce bloc PHP
+    // s'exécute AVANT le @foreach de la modale ci-dessous, alors que $pbTechniqueHints vit dans
+    // @push('head'), évalué APRÈS le corps - y référencer $pbTechniquesOverview aurait levé une
+    // variable indéfinie. Même ordre que $defaultTechniques, mêmes chaînes __() de libellé
+    // (réutilisées telles quelles, donc déjà présentes dans lang/fr.json et lang/en.json, zéro
+    // doublon de clé) et même nom de méthode que $pbTechniqueHints (repris entre parenthèses,
+    // cohérence terminologique). 'texte' est nouveau : 2-3 phrases pédagogiques + un « Quand
+    // l'utiliser » concret côté enseignant/pro, jamais injecté dans le prompt généré (texte
+    // d'affichage pur, comme 'label'/'description' des tâches - round 74 applique la même règle).
+    $pbTechniquesOverview = [
+        [
+            'value' => 'zero-shot',
+            'label' => __('Réponse directe (par défaut)'),
+            'methode' => __('zero-shot'),
+            'texte' => __("L'IA répond directement à votre demande, sans exemple ni raisonnement affiché : la technique la plus rapide, adaptée aux tâches simples et bien définies. Quand l'utiliser : vous demandez de rédiger un courriel de rappel de réunion à l'équipe - la tâche est claire, un exemple ou une réflexion étape par étape n'ajouterait rien."),
+        ],
+        [
+            'value' => 'zero-shot-cot',
+            'label' => __('Réponse directe + réflexion étape par étape'),
+            'methode' => __('chaîne de pensée'),
+            'texte' => __("L'IA réfléchit en plusieurs étapes en interne avant de vous donner sa réponse finale, sans exemple fourni. Cette méthode réduit les erreurs de logique et de calcul. Quand l'utiliser : vous demandez de convertir la note d'un élève sur 20 vers une échelle sur 100 selon plusieurs critères pondérés - un raisonnement en plusieurs étapes limite les erreurs de calcul."),
+        ],
+        [
+            'value' => 'few-shot',
+            'label' => __('Avec des exemples'),
+            'methode' => __('few-shot'),
+            'texte' => __("Vous fournissez 2 ou 3 exemples du résultat attendu (dans le champ « Exemples » plus bas) et l'IA imite leur style, leur structure ou leur ton. Quand l'utiliser : vous voulez des commentaires de bulletin dans votre style habituel - donnez à l'IA 2-3 commentaires que vous avez déjà écrits comme modèles."),
+        ],
+        [
+            'value' => 'few-shot-cot',
+            'label' => __('Avec des exemples + réflexion étape par étape'),
+            'methode' => __('few-shot + chaîne de pensée'),
+            'texte' => __('Combine les deux méthodes précédentes : l\'IA suit vos exemples ET détaille son raisonnement avant de conclure. Utile pour les tâches à la fois stylées et complexes. Quand l\'utiliser : vous voulez des corrections d\'examens détaillées, dans votre grille habituelle (les exemples), avec le raisonnement justifiant chaque point retiré (la chaîne de pensée).'),
+        ],
+        [
+            'value' => 'iterative',
+            'label' => __('Par étapes, avec votre validation à chaque fois'),
+            'methode' => __('décomposition guidée'),
+            'texte' => __('L\'IA découpe la tâche en étapes et attend votre accord avant de passer à la suivante, plutôt que de tout livrer d\'un coup. Idéal pour les projets longs où vous voulez garder le contrôle. Quand l\'utiliser : vous concevez une séquence pédagogique de plusieurs semaines - vous validez chaque semaine avant que l\'IA propose la suivante, pour ajuster en cours de route.'),
+        ],
+        [
+            'value' => 'reformulation',
+            'label' => __('Reformuler la demande avant de répondre'),
+            'methode' => __('reformulation'),
+            'texte' => __('L\'IA reformule d\'abord votre demande dans ses propres mots avant d\'y répondre, ce qui révèle si elle a bien compris ce que vous vouliez. Quand l\'utiliser : votre demande est un peu complexe ou ambiguë (par exemple un plan de cours multi-niveaux) - la reformulation permet de corriger un malentendu avant que l\'IA ne parte dans la mauvaise direction.'),
+        ],
+        [
+            'value' => 'auto-verification',
+            'label' => __('Vérifier et corriger sa réponse avant de la donner'),
+            'methode' => __('auto-vérification'),
+            'texte' => __('L\'IA relit sa propre réponse, cherche ses erreurs ou ses oublis, puis vous livre une version corrigée. Réduit les approximations et les affirmations inexactes. Quand l\'utiliser : vous demandez un résumé de dates ou de faits pour une capsule d\'actualité - l\'auto-vérification diminue le risque d\'erreur factuelle avant publication.'),
+        ],
+        [
+            'value' => 'variantes-comparees',
+            'label' => __('Proposer 2 ou 3 versions et recommander la meilleure'),
+            'methode' => __('variantes comparées'),
+            'texte' => __('L\'IA génère 2 ou 3 versions différentes de sa réponse, puis indique celle qu\'elle recommande et pourquoi. Utile quand le ton ou l\'angle est difficile à trancher d\'avance. Quand l\'utiliser : vous rédigez un courriel délicat à un parent - voir 3 tons différents (ferme, empathique, neutre) avec une recommandation aide à choisir en connaissance de cause.'),
+        ],
+    ];
+@endphp
+
+{{-- Modale pédagogique « Comment l'IA doit-elle s'y prendre ? » (signalement fondateur,
+     2026-08-11) : calquée directement sur #promptHelpModal ci-dessus - même structure Bootstrap
+     (modal fade > modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable > modal-
+     content), mêmes boutons de fermeture (× dans l'en-tête + « Compris ! » au pied, cible tactile
+     44px, fermable clavier via le focus trap natif de Bootstrap modal + la touche Échap), donc
+     hérite du même centrage vertical/horizontal et du même comportement WCAG AAA. Ouverte par
+     x-tools::help-btn plus haut (~ligne 677, bloc « Un exemple à imiter ? »). Contenu : les 8
+     choix du sélecteur `technique`, dans le MÊME ORDRE que $defaultTechniques (bloc PHP plus bas
+     dans @push('head')), chacun avec son libellé affiché tel quel, le nom de sa technique de prompting (même
+     terminologie que $pbTechniqueHints), et 2-3 phrases pédagogiques + un exemple concret. --}}
+<div class="modal fade" id="techniquesHelpModal" tabindex="-1" role="dialog" aria-labelledby="techniquesHelpModalLabel">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+        <div class="modal-content" style="border-radius: var(--r-base);">
+            <div class="modal-header" style="background: var(--c-primary); border-radius: var(--r-base) var(--r-base) 0 0;">
+                <h4 class="modal-title" id="techniquesHelpModalLabel" style="color: #fff; font-family: var(--f-heading); font-weight: 700;">{{ __('Comment l\'IA doit-elle s\'y prendre ?') }}</h4>
+                <button type="button" onclick="jQuery('#techniquesHelpModal').modal('hide')" aria-label="{{ __('Fermer') }}" style="background: none; border: none; color: #fff !important; opacity: 1; font-size: 1.5rem; font-weight: 700; cursor: pointer; float: right; min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 2rem;">
+                <p class="mb-3">{{ __('Chaque choix de ce menu correspond à une technique reconnue de formulation de prompts (« prompt engineering ») : cela ne change pas ce que vous demandez, mais la façon dont l\'IA s\'y prend pour y répondre. Voici à quoi correspond chacun des 8 choix.') }}</p>
+                <ol class="mb-3" style="padding-left: 1.25rem;">
+                    @foreach ($pbTechniquesOverview as $pbTo)
+                    <li class="mb-3">
+                        <strong>{{ $pbTo['label'] }}</strong>
+                        <span style="display:inline-block; margin-left:6px; padding:2px 8px; border-radius:999px; background: var(--c-primary-badge); color: var(--c-primary); font-size:0.72rem; font-weight:600; white-space:nowrap;">{{ $pbTo['methode'] }}</span>
+                        <p class="mb-0 mt-1" style="font-size: 0.9rem; color: var(--c-text-muted);">{{ $pbTo['texte'] }}</p>
+                    </li>
+                    @endforeach
+                </ol>
+                <p class="small mb-0" style="color: var(--c-text-muted); border-top: 1px dashed rgba(11,114,133,0.25); padding-top: 0.75rem;">{{ __('À noter : le champ « Exemples (2-3 recommandés) », qui apparaît quand vous choisissez « Avec des exemples » ou « Avec des exemples + réflexion étape par étape », est le carburant de la technique few-shot - plus vos exemples sont représentatifs, plus l\'IA imite fidèlement votre style.') }}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="ct-btn ct-btn-primary" onclick="jQuery('#techniquesHelpModal').modal('hide')" style="min-height:44px;">{{ __('Compris !') }}</button>
             </div>
         </div>
     </div>

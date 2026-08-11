@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.162.0] - 2026-08-11
+
+### Ajouté
+- **Constructeur de prompts : modale éducative des techniques de prompting**. Un bouton « ? » à côté de « Comment l'IA doit-elle s'y prendre ? » ouvre une vue d'ensemble pédagogique des 8 choix du sélecteur : chaque choix y est présenté avec le nom de la technique reconnue (zero-shot, chaîne de pensée, few-shot, few-shot + chaîne de pensée, décomposition guidée, reformulation, auto-vérification, variantes comparées), une explication en langage simple et un exemple concret « Quand l'utiliser » ancré dans le quotidien d'un enseignant, plus une note reliant le champ « Exemples (2-3 recommandés) » à la technique few-shot. Réutilise le composant d'aide et le gabarit de modale existants (aucun nouveau composant), textes traduits fr/en.
+
+### Corrigé
+- Constructeur : le bouton principal « Ouvrir dans ChatGPT » flottait plus haut que la rangée « Autres choix » (Claude, Perplexity, Gemini, Mistral). Cause : le centrage vertical se faisait contre un bloc dépliable dont la hauteur change une fois ouvert. Les bas des boutons sont maintenant alignés sur une même ligne, le libellé « Autres choix » restant au-dessus de sa rangée (vérifié fermé, ouvert et en mobile).
+
 ## [1.161.0] - 2026-08-10
 
 ### Ajouté
