@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.164.1] - 2026-08-11
+
+### Corrigé
+- Constructeur de prompts : le brouillon ne se sauvegardait pas quand l'utilisateur faisait uniquement des choix dans les menus déroulants (rôle, verbe, audience, format, longueur, ton, méthode) ou cochait des cases. Le test « le formulaire est-il vide ? » n'inspectait que les champs de texte libre, si bien que choisir un rôle à l'étape 1 - le geste le plus courant - ne déclenchait aucune sauvegarde. Signalé en production.
+- Le critère repose désormais sur une comparaison avec l'état du formulaire à son ouverture : toute différence, saisie ou sélection, déclenche la sauvegarde. Cette approche couvre aussi les champs qui seront ajoutés plus tard, là où une liste codée en dur laissait passer les oublis (quatre incidents de ce type sont déjà documentés dans ce fichier).
+
 ## [1.164.0] - 2026-08-11
 
 ### Ajouté

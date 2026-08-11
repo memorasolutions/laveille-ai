@@ -40,6 +40,15 @@ document.addEventListener('alpine:init', function() {
             _draftMaxAgeMs: 24 * 60 * 60 * 1000,
             _draftSaveTimer: null,
             draftRestored: false,
+            // Correctif régression prod (2026-08-11) : instantané JSON de wizardParams pris sur le
+            // formulaire VIERGE, tout au début d'init() (voir plus bas) - AVANT _loadDraft() et avant
+            // toute restauration (?edit=/?remix=). _hasSignificantDraftContent() compare l'état courant
+            // à cet instantané plutôt que d'énumérer des champs à la main : la liste codée en dur
+            // (taskObject/contextInfo/personaCustom/...) ignorait tous les champs à SÉLECTION
+            // (personaPreset, verb, tone, technique, formats, cases à cocher...) - un rôle choisi au
+            // menu déroulant de l'étape 1 sans texte tapé était donc jugé "rien à sauvegarder" et perdu
+            // au refresh. Reste null tant qu'init() n'a pas tourné (garde défensive ci-dessous).
+            _draftDefaultSnapshot: null,
             // Phase 1 (audit 2026-07-26) : entrée par l'intention. selectedTask = id de la carte
             // choisie à l'étape 1 ; taskCards = taxonomie de tâches → mapping persona/verbe,
             // injectée par le Blade via window.promptBuilderConfig (même contrat que personas/verbes).
@@ -1621,6 +1630,12 @@ document.addEventListener('alpine:init', function() {
             },
             init: function() {
                 var self = this;
+                // Correctif régression prod (2026-08-11) : instantané pris EN PREMIER, avant tout
+                // chargement (_loadSpaceLastValues/_loadOpenTargetPref/_loadDraft ci-dessous, et avant
+                // les restaurations ?edit=/?remix= plus bas dans cette fonction) - sinon l'instantané
+                // refléterait un formulaire déjà restauré au lieu du formulaire vierge, et plus rien
+                // ne serait jamais considéré comme "significatif". Voir _hasSignificantDraftContent().
+                try { this._draftDefaultSnapshot = JSON.stringify(this.wizardParams); } catch (e) {}
                 // Espaces à remplir (tâches 1660-1665) : mémoire des dernières valeurs saisies,
                 // indépendante du compte (invité ou connecté - c'est un confort de navigateur, pas
                 // une donnée de compte). Voir _loadSpaceLastValues()/_recordSpaceLastValues().
@@ -3411,24 +3426,22 @@ document.addEventListener('alpine:init', function() {
             // formulaire redevenu vierge : ce poste sert aussi des écoles (postes partagés), le
             // brouillon ne doit jamais devenir une fuite de contexte personnel qui traîne.
             //
-            // Ne détermine PAS si le formulaire est vierge en testant wizardParams au complet (trop
-            // de champs ont des valeurs par défaut non vides, ex. length/tone/technique) - seuls les
-            // champs qu'une personne renseigne explicitement comptent comme un signal d'engagement
-            // réel. spaceValues/cpSpaceLastValues_v1 (mémoire de remplissage) restent HORS champ,
-            // déjà couverts par leur propre clé - pas de duplication ici (cf. DRY).
+            // Ne détermine PAS si le formulaire est vierge par une énumération codée en dur des
+            // champs "texte libre" (ancien code, régression prod 2026-08-11) : cette liste ignorait
+            // silencieusement tout champ à SÉLECTION (personaPreset, verb, tone, technique, formats,
+            // cases à cocher constraintAntiAI/constraintTypo/...) - choisir un rôle au menu déroulant
+            // de l'étape 1 sans taper de texte était jugé "rien à sauvegarder", et un refresh perdait
+            // ce choix. Comparaison à l'instantané du formulaire vierge à la place (_draftDefaultSnapshot,
+            // capturé tout au début d'init(), avant _loadDraft() et avant ?edit=/?remix=) : couvre
+            // AUTOMATIQUEMENT tout champ actuel ET tout champ ajouté plus tard à wizardParams - même
+            // contrat que le getter déjà utilisé pour la sauvegarde en base. Si l'instantané n'a pas pu
+            // être pris (init() pas encore passé, ou JSON.stringify a levé) : repli conservateur sur
+            // false, jamais d'écriture localStorage sans base de comparaison fiable.
             _hasSignificantDraftContent: function () {
-                var hasText = function (v) { return typeof v === 'string' && v.trim() !== ''; };
-                if (hasText(this.taskObject)) return true;
-                if (hasText(this.contextInfo)) return true;
-                if (hasText(this.personaCustom)) return true;
-                if (hasText(this.verbCustom)) return true;
-                if (hasText(this.audienceCustom)) return true;
-                if (hasText(this.formatCustom)) return true;
-                if (hasText(this.constraintCustom)) return true;
-                if (hasText(this.examples)) return true;
-                if (this.selectedTask) return true;
-                if (Array.isArray(this.spaces) && this.spaces.some(function (s) { return hasText(s && s.text); })) return true;
-                return false;
+                if (this._draftDefaultSnapshot === null || this._draftDefaultSnapshot === undefined) return false;
+                var current;
+                try { current = JSON.stringify(this.wizardParams); } catch (e) { return false; }
+                return current !== this._draftDefaultSnapshot;
             },
             // Anti-rebond ~600 ms (voir $watch('JSON.stringify(wizardParams)', ...) dans init()) -
             // jamais une écriture localStorage à chaque frappe.

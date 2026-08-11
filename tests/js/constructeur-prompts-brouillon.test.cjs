@@ -4,7 +4,11 @@
 //      _scheduleDraftSave()/_saveDraftNow() - jamais d'écriture avant l'échéance, et des appels
 //      répétés repoussent bien l'échéance (une seule écriture au final, pas une par appel).
 //   2. Formulaire vierge : _saveDraftNow() n'écrit RIEN (et purge un brouillon déjà présent si le
-//      formulaire redevient vierge après avoir été rempli).
+//      formulaire redevient vierge après avoir été rempli). Depuis le correctif du 2026-08-11,
+//      "significatif" = tout écart entre wizardParams et l'instantané du formulaire vierge
+//      (_draftDefaultSnapshot, pris au tout début d'init()) - ça inclut désormais les champs à
+//      SÉLECTION (personaPreset, tone, technique, formats...), pas seulement le texte libre :
+//      régression prod corrigée, un rôle choisi au menu déroulant sans texte tapé était perdu.
 //   3. init() restaure le brouillon (champs + étape) quand ni ?edit= ni ?remix= n'est présent.
 //   4. ?edit=ID / ?remix=ID priment toujours sur le brouillon local (_loadDraft() se retire).
 //   5. resetAll() purge cpDraft_v1 AVANT le rechargement - sinon le bouton "Recommencer"
@@ -49,6 +53,14 @@ function loadPromptBuilder(opts) {
     const component = factory();
     component.$nextTick = function (cb) { cb(); };
     component.customCardsLoaded = true;
+    // Correctif régression prod (2026-08-11) : _hasSignificantDraftContent() compare désormais
+    // wizardParams à un instantané du formulaire vierge (_draftDefaultSnapshot), capturé en
+    // production tout au début d'init() - AVANT toute mutation de champ. Ce harnais de test
+    // instancie le composant SANS appeler init() dans la plupart des cas (pour rester ciblé sur
+    // _scheduleDraftSave()/_saveDraftNow()/_loadDraft() sans déclencher les fetch de init()) : on
+    // reproduit donc ici la même capture, au même moment logique (juste après la création du
+    // composant, avant que le test ne touche à un champ) - identique à ce que ferait init().
+    component._draftDefaultSnapshot = JSON.stringify(component.wizardParams);
     return component;
 }
 
@@ -135,11 +147,49 @@ function assert(cond, label) { if (cond) { pass++; console.log('  OK ' + label);
         component._saveDraftNow();
         assert(localStorage.getItem('cpDraft_v1') === null, 'un formulaire vierge (aucun champ significatif) n\'écrit rien');
 
-        // Un champ non "significatif" (valeur par défaut modifiée mais hors liste de suivi) n'écrit
-        // rien non plus.
-        component.tone = 'Amical';
+        // Re-sauvegarder sans avoir rien changé (mêmes valeurs par défaut) n'écrit toujours rien -
+        // seul un ÉCART avec l'instantané du formulaire vierge déclenche une écriture.
         component._saveDraftNow();
-        assert(localStorage.getItem('cpDraft_v1') === null, 'modifier un champ non significatif (tone) n\'écrit toujours rien');
+        assert(localStorage.getItem('cpDraft_v1') === null, 'ré-appeler _saveDraftNow() sans changement n\'écrit toujours rien');
+    }
+
+    // --- Test 3c : régression prod (2026-08-11) - sélectionner UNIQUEMENT un rôle prédéfini
+    //     (personaPreset), sans taper aucun texte, doit déclencher l'écriture du brouillon. Ce cas
+    //     ÉCHOUAIT avec l'ancien code (liste de champs "texte libre" codée en dur, qui ignorait tous
+    //     les champs à sélection) : un rôle choisi au menu déroulant de l'étape 1 était perdu au
+    //     refresh - c'est le bug signalé en production que ce correctif règle. ---
+    {
+        const component = loadPromptBuilder({ isAuthenticated: false });
+        component.personaType = 'preset';
+        component.personaPreset = 'expert-marketing';
+        component._saveDraftNow();
+        assert(localStorage.getItem('cpDraft_v1') !== null, 'personaPreset seul (aucun texte tapé) suffit à déclencher une écriture');
+        const draft = JSON.parse(localStorage.getItem('cpDraft_v1'));
+        assert(draft.params.personaPreset === 'expert-marketing', 'le brouillon écrit contient bien le personaPreset choisi');
+    }
+
+    // --- Test 3d : sélection seule - changement de `tone` (menu déroulant étape 3) ---
+    {
+        const component = loadPromptBuilder({ isAuthenticated: false });
+        component.tone = 'Académique';
+        component._saveDraftNow();
+        assert(localStorage.getItem('cpDraft_v1') !== null, 'un changement de tone seul (sans texte tapé) suffit à déclencher une écriture');
+    }
+
+    // --- Test 3e : sélection seule - changement de `technique` (menu déroulant étape 3) ---
+    {
+        const component = loadPromptBuilder({ isAuthenticated: false });
+        component.technique = 'few-shot';
+        component._saveDraftNow();
+        assert(localStorage.getItem('cpDraft_v1') !== null, 'un changement de technique seul (sans texte tapé) suffit à déclencher une écriture');
+    }
+
+    // --- Test 3f : sélection seule - ajout d'un format dans `formats` (cases à cocher étape 3) ---
+    {
+        const component = loadPromptBuilder({ isAuthenticated: false });
+        component.formatsSelected = component.formatsSelected.concat(['Liste à puces']);
+        component._saveDraftNow();
+        assert(localStorage.getItem('cpDraft_v1') !== null, 'ajouter un format seul (sans texte tapé) suffit à déclencher une écriture');
     }
 
     // --- Test 3b : un formulaire rempli PUIS revidé purge le brouillon déjà écrit ---
