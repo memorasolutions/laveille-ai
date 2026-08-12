@@ -34,6 +34,18 @@
     .nw-card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
     .nw-card:hover .nw-card-img { transform: scale(1.03); }
     .nw-card-placeholder { color: rgba(255,255,255,0.3); font-size: 2.5rem; font-weight: 700; font-family: var(--f-heading); }
+    /* Actus 2.0 - badge « fiche comparative » (design doc section 7) : identifie dans le fil
+       une fiche issue de la fusion multi-sources, sinon indiscernable d'une actualité normale.
+       Tailles/ombre reprises de .nw-source-pill et .nw-bd-flag (même fichier, aucune valeur inventée). */
+    .nw-digest-badge {
+        position: absolute; top: 8px; left: 8px; z-index: 2;
+        display: inline-flex; align-items: center; max-width: calc(100% - 16px);
+        padding: 4px 10px; border-radius: 999px;
+        background: var(--c-primary); color: #fff;
+        font-size: 0.6875rem; font-weight: 700; line-height: 1.3;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    }
     /* Indicateur « BD disponible » (standard visionneur de BD) : picto Octopus discret en coin */
     .nw-bd-flag {
         position: absolute; top: 8px; right: 8px; z-index: 2;
@@ -90,6 +102,10 @@
 @php
     /** @var \Modules\News\Models\NewsArticle $article */
     $ss          = $article->structured_summary;
+    // Actus 2.0 : $isDigest calculée à partir de la colonne déjà chargée avec la carte
+    // (aucune requête additionnelle - même expression que show.blade.php).
+    $isDigest    = (bool) ($article->is_comparative_digest ?? false);
+    $digestSourcesCount = $isDigest && is_array($ss) ? count($ss['sources'] ?? []) : 0;
     $score       = $article->relevance_score ?? 0;
     $dotClass    = $score >= 8 ? 'nw-dot-high' : ($score >= 6 ? 'nw-dot-mid' : 'nw-dot-low');
     $impactClass = match($article->impact_level ?? '') {
@@ -107,6 +123,13 @@
 <article class="nw-card nw-impact-bar {{ $impactClass }}">
     <a href="{{ route('news.show', $article) }}" class="nw-card-link">
         <div class="nw-card-img-wrap">
+            {{-- Actus 2.0 - badge « fiche comparative » : seule condition d'affichage, sinon rien
+                 (aucune régression visuelle sur une actualité normale). --}}
+            @if($isDigest)
+                <span class="nw-digest-badge" title="{{ __('Cette fiche compare et regroupe plusieurs sources sur le même sujet') }}">
+                    {{ __('Fiche comparative') }}{{ $digestSourcesCount > 0 ? ' - ' . trans_choice(':count source|:count sources', $digestSourcesCount, ['count' => $digestSourcesCount]) : '' }}
+                </span>
+            @endif
             @if($article->image_url)
                 <img src="{{ $article->image_url }}{{ str_contains($article->image_url, 'http') ? '' : '?v='.($article->updated_at?->timestamp ?? time()) }}"
                      alt="{{ $article->seo_title ?? $article->title }}"

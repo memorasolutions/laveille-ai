@@ -163,10 +163,10 @@ class FetchNewsCommand extends Command
 
                                 if ($absorbInto) {
                                     $this->absorbFusionMember($article, $absorbInto, $feedType);
-                                    Log::info(sprintf('FUSION-ABSORB (DEDUP-SKIP): article #%d "%s" rattaché à la fiche comparative #%d via republication détectée', $article->id, mb_substr($article->title, 0, 60), $absorbInto->id));
+                                    Log::channel('fusion')->info(sprintf('FUSION-ABSORB (DEDUP-SKIP): article #%d "%s" rattaché à la fiche comparative #%d via republication détectée', $article->id, mb_substr($article->title, 0, 60), $absorbInto->id));
                                     $this->line("  ⊕ Republication absorbée dans la fiche comparative : {$article->title}");
                                 } else {
-                                    Log::info(sprintf('DEDUP-SKIP: article #%d "%s" doublon de #%d (score=%.3f, reason=%s) [IA evitee]', $article->id, mb_substr($article->title, 0, 60), $cand->id, $check['score'], $check['reason']));
+                                    Log::channel('fusion')->info(sprintf('DEDUP-SKIP: article #%d "%s" doublon de #%d (score=%.3f, reason=%s) [IA evitee]', $article->id, mb_substr($article->title, 0, 60), $cand->id, $check['score'], $check['reason']));
                                     $article->update(['is_published' => false, 'summary' => '[doublon detecte - IA evitee]', 'feed_type' => $feedType]);
                                     $this->line("  ⊕ Doublon skip IA : {$article->title}");
                                     $totalFiltered++;
@@ -176,7 +176,7 @@ class FetchNewsCommand extends Command
                             }
                         }
                     } catch (\Throwable $e) {
-                        Log::warning('DEDUP-SKIP error: ' . $e->getMessage());
+                        Log::channel('fusion')->warning('DEDUP-SKIP error: ' . $e->getMessage());
                     }
                     if ($isDuplicate) { continue; }
                 }
@@ -298,7 +298,7 @@ class FetchNewsCommand extends Command
             foreach ($absorption['members'] as $member) {
                 $this->absorbFusionMember($member, $digest, $feedTypeByArticleId[$member->id] ?? 'techno');
             }
-            Log::info(sprintf(
+            Log::channel('fusion')->info(sprintf(
                 'FUSION-ABSORB: %d article(s) rattaché(s) à la fiche comparative existante #%d "%s"',
                 count($absorption['members']),
                 $digest->id,
@@ -461,7 +461,7 @@ class FetchNewsCommand extends Command
                 $this->line("  ⊘ [{$score}/10] Groupe non pertinent : {$digestArticle->title}");
             }
 
-            Log::info(sprintf(
+            Log::channel('fusion')->info(sprintf(
                 'FUSION-GROUP: fiche comparative #%d "%s" créée depuis %d source(s), score=%d, publiée=%s, indexée=%s',
                 $digestArticle->id,
                 mb_substr((string) $digestArticle->title, 0, 60),
@@ -472,7 +472,50 @@ class FetchNewsCommand extends Command
             ));
         }
 
+        $this->logFusionRunSynthesis(count($fusionCandidates), $clusters);
+
         return [$totalPublished, $totalFiltered];
+    }
+
+    /**
+     * ACTION : Actus 2.0 - trace de synthèse de CHAQUE exécution du clustering (une ligne),
+     * puis au plus 3 lignes de « quasi-regroupements » (paires/absorptions refusées dont le
+     * score était proche du seuil - déjà bornées à 3 par ArticleClusteringService::cluster()).
+     * MCP: SELF (<5 lignes utiles, formatage de log)
+     * RAISON: rend le clustering observable en prod (canal 'fusion', voir config/logging.php)
+     * sans jamais journaliser une ligne par paire comparée - volume borné, indépendant du nombre
+     * d'articles traités (voir docblock de ArticleClusteringService::cluster()).
+     *
+     * @param  array{new_groups: array<int, array<int, NewsArticle>>, singletons: array<int, NewsArticle>, absorptions: array<int, array{digest: NewsArticle, members: array<int, NewsArticle>}>, near_misses: array{total: int, top: array<int, array<string, mixed>>}}  $clusters
+     */
+    private function logFusionRunSynthesis(int $totalArticles, array $clusters): void
+    {
+        $absorbedCount = array_sum(array_map(
+            static fn (array $absorption) => count($absorption['members']),
+            $clusters['absorptions']
+        ));
+
+        Log::channel('fusion')->info(sprintf(
+            'FUSION-SYNTHESE: %d article(s) fenêtre, %d groupe(s), %d singleton(s), %d absorption(s), %d quasi-regroupement(s)',
+            $totalArticles,
+            count($clusters['new_groups']),
+            count($clusters['singletons']),
+            $absorbedCount,
+            $clusters['near_misses']['total']
+        ));
+
+        foreach ($clusters['near_misses']['top'] as $nearMiss) {
+            Log::channel('fusion')->info(sprintf(
+                'FUSION-QUASI: "%s" vs "%s" - jaccard=%.3f/%.2f, entités=%d/%d, motif=%s',
+                $nearMiss['title_a'],
+                $nearMiss['title_b'],
+                $nearMiss['jaccard'],
+                $nearMiss['jaccard_threshold'],
+                $nearMiss['entity_overlap'],
+                $nearMiss['entity_threshold'],
+                $nearMiss['reason']
+            ));
+        }
     }
 
     /**

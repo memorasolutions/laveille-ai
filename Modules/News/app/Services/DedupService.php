@@ -204,7 +204,16 @@ final class DedupService
      * RAISON: méthode distincte demandée explicitement (section 9) pour ne pas fusionner deux
      * seuils qui répondent à deux questions différentes.
      *
-     * @return array{is_same_cluster: bool, score: float, reason: string, signals: array<string, bool>}
+     * ACTION (observabilité Actus 2.0, 2026-08-11) : la clé 'entity_overlap' expose la valeur
+     * NUMÉRIQUE du chevauchement d'entités (déjà calculée ci-dessous, jusqu'ici jetée - seul le
+     * booléen 'key_entities_match' des signals survivait). Ajout de clé pur, signature publique
+     * inchangée, aucun appelant existant ne fait de count()/itération stricte sur ce tableau
+     * (tous accèdent par clé nommée - vérifié par grep sur les 4 appels du projet).
+     * MCP: SELF (<5 lignes)
+     * RAISON: permet à ArticleClusteringService de journaliser les quasi-regroupements (score
+     * proche du seuil) sans recalculer l'intersection d'entités une deuxième fois (DRY).
+     *
+     * @return array{is_same_cluster: bool, score: float, reason: string, signals: array<string, bool>, entity_overlap: int}
      */
     public static function isSameStoryCluster(array $a, array $b, array &$signals = []): array
     {
@@ -214,7 +223,7 @@ final class DedupService
         $titleB = $b['title'] ?? '';
 
         if ($titleA === '' || $titleB === '') {
-            return ['is_same_cluster' => false, 'score' => 0.0, 'reason' => 'none', 'signals' => $signals];
+            return ['is_same_cluster' => false, 'score' => 0.0, 'reason' => 'none', 'signals' => $signals, 'entity_overlap' => 0];
         }
 
         $jaccardThreshold = (float) config('news.fusion.jaccard_threshold', 0.30);
@@ -246,6 +255,7 @@ final class DedupService
             'score' => $jaccard,
             'reason' => $reason,
             'signals' => $signals,
+            'entity_overlap' => $entityOverlap,
         ];
     }
 

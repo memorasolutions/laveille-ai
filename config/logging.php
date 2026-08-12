@@ -90,6 +90,19 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Actus 2.0 (2026-08-11) - canal dédié à la fusion/clustering d'actualités
+        // (FetchNewsCommand + ArticleClusteringService). 'level' fixé en dur à 'info',
+        // volontairement INDÉPENDANT de LOG_LEVEL (env('LOG_LEVEL')='error' en prod filtre sinon
+        // ces lignes avant écriture - c'est la cause racine du regroupement invisible en prod).
+        // Rétention alignée sur le canal 'daily' existant du projet (même variable LOG_DAILY_DAYS).
+        'fusion' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/fusion.log'),
+            'level' => 'info',
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

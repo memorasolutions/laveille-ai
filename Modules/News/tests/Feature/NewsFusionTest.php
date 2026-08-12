@@ -433,6 +433,80 @@ it('news prune-seo ne reindexe jamais un membre meme si son views_count est elev
     expect($member->fresh()->seo_status)->toBe('noindex');
 });
 
+// ── Observabilité Actus 2.0 (2026-08-11) : canal 'fusion' dédié + volume borné ─────
+
+/** Chemin du fichier daily du jour pour le canal 'fusion' (voir config/logging.php). */
+function nfusFusionLogPath(): string
+{
+    return storage_path('logs/fusion-'.now()->format('Y-m-d').'.log');
+}
+
+/** Repart d'un fichier de log 'fusion' vide pour isoler le contenu produit par CE test. */
+function nfusResetFusionLog(): void
+{
+    @unlink(nfusFusionLogPath());
+}
+
+it('le canal fusion recoit la ligne de synthese meme avec un niveau de log global tres restrictif', function () {
+    // Simule la config de PRODUCTION diagnostiquée (LOG_LEVEL=error) : les canaux par défaut du
+    // projet sont réglés au niveau le plus restrictif possible (emergency), pour prouver que
+    // SEUL le hard-code 'level' => 'info' du canal 'fusion' (config/logging.php) rend la ligne
+    // de synthèse observable - indépendamment de tout réglage global.
+    config([
+        'logging.channels.daily.level' => 'emergency',
+        'logging.channels.single.level' => 'emergency',
+        'news.fusion.enabled' => true,
+    ]);
+    nfusResetFusionLog();
+    nfusBindFakeRssFetcher();
+    nfusFakeOpenRouterSuccess(['sources' => [
+        ['source_name' => 'SourceA', 'author' => null, 'url' => 'https://exemple.com/obs-a', 'angle' => null],
+        ['source_name' => 'SourceB', 'author' => null, 'url' => 'https://exemple.com/obs-b', 'angle' => null],
+    ]]);
+
+    $sourceA = nfusSource('SourceObsA');
+    $sourceB = nfusSource('SourceObsB');
+    nfusArticle($sourceA, 'obs-a', 'Microsoft lance un agent IA generative pour Word et Excel', now()->subHours(2));
+    nfusArticle($sourceB, 'obs-b', 'Microsoft devoile un agent IA generative integre a Word', now()->subHour());
+
+    $this->artisan('news:fetch')->assertSuccessful();
+
+    expect(file_exists(nfusFusionLogPath()))->toBeTrue();
+    $content = file_get_contents(nfusFusionLogPath());
+    expect($content)->toContain('FUSION-SYNTHESE');
+});
+
+it('le volume de lignes fusion reste borne meme avec beaucoup de candidats rejetes dans la fenetre', function () {
+    config(['news.fusion.enabled' => true]);
+    nfusResetFusionLog();
+    nfusBindFakeRssFetcher();
+    nfusFakeOpenRouterSuccess();
+
+    // 6 articles qui ne partagent quasiment rien entre eux sauf, pour certains, une entite
+    // isolee ("Google") : peu ou pas de groupe formé, mais de nombreuses paires (C(6,2)=15)
+    // sont évaluées et plusieurs sont de vrais quasi-regroupements bruyants.
+    $source = nfusSource('SourceVolume');
+    nfusArticle($source, 'vol-1', 'Google publie une mise a jour majeure pour ses services cloud', now()->subHours(6));
+    nfusArticle($source, 'vol-2', 'Google investit dans un nouveau centre de recherche universitaire', now()->subHours(5));
+    nfusArticle($source, 'vol-3', 'Google embauche des experts en robotique pour son laboratoire', now()->subHours(4));
+    nfusArticle($source, 'vol-4', 'Google collabore avec des hopitaux pour un projet de sante', now()->subHours(3));
+    nfusArticle($source, 'vol-5', 'Tesla devoile une nouvelle usine de batteries au Nevada', now()->subHours(2));
+    nfusArticle($source, 'vol-6', 'Amazon annonce un nouveau centre de donnees au Canada', now()->subHour());
+
+    $this->artisan('news:fetch')->assertSuccessful();
+
+    $content = file_exists(nfusFusionLogPath()) ? file_get_contents(nfusFusionLogPath()) : '';
+    $lines = array_filter(explode(PHP_EOL, trim($content)));
+
+    $synthesisLines = array_filter($lines, static fn ($l) => str_contains($l, 'FUSION-SYNTHESE'));
+    $quasiLines = array_filter($lines, static fn ($l) => str_contains($l, 'FUSION-QUASI'));
+
+    // UNE seule ligne de synthèse par exécution, et AU PLUS 3 lignes de quasi-regroupement,
+    // quel que soit le nombre de paires (15 ici) réellement comparées par la boucle quadratique.
+    expect($synthesisLines)->toHaveCount(1);
+    expect(count($quasiLines))->toBeLessThanOrEqual(3);
+});
+
 // ── Critère 10 : désactiver le drapeau après usage ne supprime/modifie rien ─────
 
 it('desactiver le drapeau apres usage ne supprime ni ne modifie une fiche deja publiee', function () {

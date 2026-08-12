@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.166.0] - 2026-08-11
+
+### Ajouté
+- **Actualités : les fiches comparatives sont enfin identifiables dans le fil.** Une pastille « Fiche comparative - N sources » s'affiche sur la vignette des articles issus d'un regroupement multi-sources (`Modules/News/resources/views/public/partials/article-card.blade.php`). Jusqu'ici, le marqueur `is_comparative_digest` n'était exploité que sur la page de détail : une fiche comparative était donc indiscernable d'une actualité ordinaire dans la liste, et la fonctionnalité passait inaperçue. Le décompte est lu dans une colonne déjà chargée avec la ligne : zéro requête supplémentaire (6 requêtes liées aux actualités avant comme après, vérifié par `DB::listen`), verrouillé par un test anti-N+1.
+- **Canal de journalisation dédié à la fusion d'actualités** (`config/logging.php`, canal `fusion`, niveau fixé en dur, fichier quotidien distinct). Cause racine corrigée : la production tourne avec `LOG_LEVEL=error`, ce qui écartait avant écriture les 5 lignes `FUSION-GROUP` / `FUSION-ABSORB` / `DEDUP-SKIP` émises en `info`. Les regroupements étaient donc invisibles alors qu'ils avaient bien lieu.
+- **Trace du motif de rejet des regroupements** : une ligne de synthèse par exécution (articles dans la fenêtre, groupes retenus, singletons, absorptions, quasi-regroupements) et au plus 3 lignes détaillant les paires proches du seuil, avec le score obtenu face au seuil requis et le chevauchement d'entités obtenu face au seuil requis. Volume borné à environ 96 lignes par jour quel que soit le nombre d'articles traités. Sans cette trace, la calibration des seuils était impossible autrement qu'à l'aveugle.
+
+### Modifié
+- `DedupService::isSameStoryCluster()` retourne désormais la valeur numérique du chevauchement d'entités (auparavant calculée puis jetée, seul un booléen survivait). Ajout d'une clé au tableau de retour, sans changement de signature ni d'appelant.
+- `ArticleClusteringService` conserve les meilleurs candidats rejetés (plafond de 3, accumulation en mémoire, aucune requête ajoutée dans les boucles de comparaison).
+
+### Note
+- Le comportement de regroupement lui-même est **inchangé** : aucun seuil de `Modules/News/config/fusion.php` n'a été touché. Cette version rend le mécanisme visible et mesurable, elle ne le modifie pas. La calibration des seuils suivra, sur la base des mesures réelles.
+
 ## [1.165.0] - 2026-08-11
 
 ### Modifié
