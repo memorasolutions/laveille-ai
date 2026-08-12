@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.168.3] - 2026-08-12
+
+### Corrigé
+- **Titres SEO des actualités : le générateur inventait des années.** Un article publié le 12 août 2026 portait le titre « AI Act : ce qui change vraiment en 2024 », alors que son corps mentionnait 2026 quatorze fois. Cause : les deux prompts d'`AiSummaryService` demandaient un `seo_title` sans jamais donner de date de référence au modèle ; privé de repère temporel, celui-ci comblait avec une année de ses données d'entraînement. L'année fausse se propageait au H1, à la balise `<title>`, aux métadonnées de partage et au JSON-LD.
+- Correctif appliqué aux **deux** méthodes (`scoreAndSummarize` et `scoreAndSummarizeGroup`, cette dernière alimentant les fiches comparatives) : la date du jour en fuseau America/Toronto est injectée dans le prompt comme seule référence temporelle fiable, et deux règles interdisent désormais d'écrire une année qui ne figure pas littéralement dans le texte source. Dans le doute, le titre n'est pas daté : un titre sans année ne vieillit pas.
+- Ce service n'avait aucune couverture de test. Ajout d'`AiSummaryPromptDateTest`, qui intercepte la requête réellement envoyée au fournisseur et recalcule la date attendue au lieu de la coder en dur, pour rester valide les années suivantes.
+
 ## [1.168.2] - 2026-08-12
 
 ### Corrigé
