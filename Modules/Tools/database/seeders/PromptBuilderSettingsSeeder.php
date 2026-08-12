@@ -38,7 +38,10 @@ class PromptBuilderSettingsSeeder extends Seeder
             [
                 'group' => 'tools',
                 'key' => 'tools.prompt_builder.verbs',
-                'value' => json_encode(['Rédige', 'Analyse', 'Crée', 'Génère', 'Explique', 'Compare', 'Résume', 'Traduis', 'Optimise', 'Évalue', 'Développe', 'Conçois', 'Planifie', 'Diagnostique'], JSON_UNESCAPED_UNICODE),
+                // 3 verbes de recherche ajoutés en fin de liste (tâche 2026-08-12) - jamais de
+                // retrait ni de réordonnancement des 14 existants (même contrat que le Blade,
+                // voir $defaultVerbs).
+                'value' => json_encode(['Rédige', 'Analyse', 'Crée', 'Génère', 'Explique', 'Compare', 'Résume', 'Traduis', 'Optimise', 'Évalue', 'Développe', 'Conçois', 'Planifie', 'Diagnostique', 'Recherche', 'Recherche sur Internet, en priorisant les sites officiels et pertinents', 'Recherche en profondeur, Internet inclus'], JSON_UNESCAPED_UNICODE),
                 'type' => 'json',
                 'description' => 'Verbes d\'action du constructeur de prompts',
             ],

@@ -467,6 +467,41 @@
                                 </div>
                             </div>
 
+                            {{-- Zones géographiques (tâche 2026-08-12, verbes de recherche Internet) : champ
+                                 CONDITIONNEL, visible uniquement quand un des 3 verbes de recherche est
+                                 choisi (verbe 1 ou verbe 2, mode Prédéfini seulement - voir
+                                 isSearchVerbActive, constructeur-prompts-core.js). Réutilise TEL QUEL le
+                                 pattern de pastille .ct-chip déjà établi (Format de sortie / Audience
+                                 ci-dessus) - aucun troisième style de pastille créé. Champ texte + bouton
+                                 « Ajouter » explicite (verdict convergent de 4 IA consultées) : la touche
+                                 Entrée est un raccourci du même geste et appelle IMPÉRATIVEMENT
+                                 preventDefault (sinon elle soumettrait le formulaire et ferait perdre le
+                                 prompt en cours - piège nommé par Gemini). Le collage d'une liste séparée
+                                 par virgules/points-virgules est découpé automatiquement (@paste) ; un
+                                 ajout MANUEL (bouton ou Entrée) n'est JAMAIS découpé - compromis retenu
+                                 pour qu'un nom contenant une virgule légitime (« Washington, D.C. ») reste
+                                 intact quand il est tapé ou ajouté à la pièce, documenté dans le rapport
+                                 de la tâche. --}}
+                            <div class="ct-block__field" x-show="isSearchVerbActive" x-cloak>
+                                <label class="form-label fw-medium mb-1" for="cpZoneInput" style="font-size: 0.85rem;">{{ __('Zones géographiques à couvrir (optionnel)') }}</label>
+                                <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                                    <input type="text" id="cpZoneInput" class="form-control form-control-sm" style="flex:1; min-width:180px;" x-model="zoneInput" autocomplete="off"
+                                        placeholder="{{ __('Ex : Québec, France, Belgique...') }}" aria-label="{{ __('Ajouter une zone géographique') }}"
+                                        @keydown.enter.prevent="addZoneFromInput()" @paste="handleZonePaste($event)">
+                                    <button type="button" class="ct-btn ct-btn-outline ct-btn-xs" style="min-height:44px;" @click="addZoneFromInput()">{{ __('Ajouter') }}</button>
+                                </div>
+                                <small class="text-muted d-block mt-1">{{ __('Tapez un nom puis « Ajouter » ou Entrée ; ou collez une liste séparée par des virgules - jusqu\'à 5 zones.') }}</small>
+                                <p class="small mb-0 mt-1" style="color:#991B1B;" x-show="zoneLimitMessage" x-cloak>{{ __('Limite de 5 zones atteinte. Retirez-en une pour en ajouter une nouvelle.') }}</p>
+                                <div class="ct-chip-row" role="list" aria-label="{{ __('Zones géographiques ajoutées') }}" x-show="zones.length > 0" x-cloak>
+                                    <template x-for="(z, zIdx) in zones" :key="zIdx">
+                                        <span class="ct-chip" role="listitem">
+                                            <span x-text="z"></span>
+                                            <button type="button" class="ct-chip__x" :aria-label="'{{ __('Retirer') }} ' + z" @click="removeZone(zIdx)">&times;</button>
+                                        </span>
+                                    </template>
+                                </div>
+                            </div>
+
                             {{-- Retrait du panneau de masquage intégré (2026-08-04, demande explicite de
                                  l'utilisateur) : l'anonymisation vit désormais UNIQUEMENT à l'outil séparé
                                  /outils/anonymiseur (jamais touché par ce retrait). L'`id` de ce champ est
@@ -1579,7 +1614,12 @@ window.addEventListener('load', function () {
 @push('scripts')
 @php
 $defaultPersonas = [['value'=>'expert_marketing','label'=>'Expert en marketing digital'],['value'=>'redacteur_web','label'=>'Rédacteur web professionnel'],['value'=>'enseignant','label'=>'Enseignant pédagogue'],['value'=>'developpeur','label'=>'Développeur senior'],['value'=>'consultant','label'=>'Consultant en stratégie'],['value'=>'graphiste','label'=>'Graphiste créatif'],['value'=>'analyste','label'=>'Analyste de données'],['value'=>'gestionnaire','label'=>'Gestionnaire de projet'],['value'=>'coach','label'=>'Coach professionnel'],['value'=>'journaliste','label'=>'Journaliste d\'investigation'],['value'=>'chercheur','label'=>'Chercheur scientifique'],['value'=>'rh','label'=>'Spécialiste en ressources humaines'],['value'=>'concepteur_pedagogique','label'=>'Concepteur pédagogique'],['value'=>'community_manager','label'=>'Gestionnaire de médias sociaux'],['value'=>'copywriter','label'=>'Rédacteur publicitaire (copywriter)'],['value'=>'formateur','label'=>'Formateur en entreprise'],['value'=>'adjoint_admin','label'=>'Adjoint administratif']];
-$defaultVerbs = ['Rédige','Analyse','Crée','Génère','Explique','Compare','Résume','Traduis','Optimise','Évalue','Développe','Conçois','Planifie','Diagnostique'];
+// Tâche 2026-08-12 : 3 verbes de recherche ajoutés EN FIN de liste (les 14 existants ne sont
+// jamais retirés ni réordonnés - contrat verrouillé par Round74AdversarialFixesTest.php, aucun
+// libellé ne contient le caractère ']'). Ces 3 valeurs sont aussi copiées TELLES QUELLES dans
+// constructeur-prompts-core.js (constantes SEARCH_VERB_*) : le verbe choisi (ou le 2e verbe)
+// déclenche la phrase de date (verbes 2 et 3 seulement) et le champ Zones géographiques (les 3).
+$defaultVerbs = ['Rédige','Analyse','Crée','Génère','Explique','Compare','Résume','Traduis','Optimise','Évalue','Développe','Conçois','Planifie','Diagnostique','Recherche','Recherche sur Internet, en priorisant les sites officiels et pertinents','Recherche en profondeur, Internet inclus'];
 // Liste recalibrée sur l'audience réelle du site (consensus panel Codex/DeepSeek/Perplexity
 // 2026-08-06, tâche 1633 : public scolaire d'abord, familles MEQ) ; les anciennes valeurs
 // (pro/debutants/entrepreneurs/techniques) sont remappées côté JS à la restauration.
@@ -1745,6 +1785,14 @@ window.promptBuilderConfig = {
     languages: @json($defaultLanguages),
     profiles: @json($defaultProfiles),
     isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
+    // Date du jour (tâche 2026-08-12, verbes de recherche « Internet ») : rendue par le SERVEUR à
+    // CHAQUE chargement de page (jamais l'horloge du poste client) via le helper DRY central
+    // format_date() (app/Helpers/dates.php, timezone America/Toronto). Lue par
+    // get isDatedSearchVerbActive → get promptSegments() (constructeur-prompts-core.js) à CHAQUE
+    // accès du getter - jamais copiée dans this.verb ni dans wizardParams, donc jamais figée dans
+    // un brouillon (24h) ni dans un prompt sauvegardé rouvert (?edit=ID, durée indéfinie) : chaque
+    // rechargement de la page réinjecte la date réelle de ce jour-là.
+    today: { long: @json(format_date(now(), 'long')), iso: @json(now()->toDateString()) },
     // Round 77 (2026-07-27, passe adversariale) : texte d'aide contextuelle pur (jamais injecté
     // dans le prompt généré) resté en dur en français dans constructeur-prompts-core.js malgré
     // l'extraction du JS en fichier externe cachable (contrairement à i18n.* déjà pontés).

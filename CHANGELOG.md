@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.167.0] - 2026-08-12
+
+### Ajouté
+- **Constructeur de prompts : trois verbes d'action orientés recherche** dans le champ « Verbe d'action » de l'étape 2 - « Recherche », « Recherche sur Internet, en priorisant les sites officiels et pertinents », « Recherche en profondeur, Internet inclus ».
+- **La date du jour est inscrite dans le prompt** pour les deux verbes « Internet » : « Nous sommes le 12 août 2026 (2026-08-12). Utilise les informations les plus récentes disponibles à cette date et signale explicitement si une source te semble périmée. » Raison : les modèles ont une date de coupure et répondent volontiers avec des données périmées en croyant être à jour ; l'inscrire noir sur blanc force la fraîcheur. Date rendue par le SERVEUR (`format_date()`, America/Toronto) plutôt que lue sur l'horloge du poste, et **recalculée à chaque génération** - jamais figée dans l'état sauvegardé, sans quoi un prompt rouvert des mois plus tard porterait la date de sa création.
+- **Champ « Zones géographiques à couvrir » conditionnel** : n'apparaît que pour un verbe de recherche. Saisie par champ texte + bouton « Ajouter » visible (mode principal), touche Entrée acceptée en raccourci avec neutralisation de la soumission du formulaire, et collage d'une liste séparée par virgules découpé automatiquement. Chaque zone devient une pastille amovible, en réutilisant le composant déjà en place pour « Format de sortie » et « Qui va lire ça ». Plafond de 5 zones, dédoublonnage insensible à la casse et aux accents, libellé conservé tel que saisi.
+- **Phrase multi-zones en sections distinctes** : au-delà d'une zone, le prompt demande explicitement une section par zone plutôt qu'un traitement global, ce qui évite que le modèle mélange les contextes juridiques et culturels et réponde de façon générique.
+- **Migration idempotente et réversible** pour propager les 3 verbes en production.
+
+### Note technique
+- La liste des verbes vit à DEUX endroits et c'est la base de données qui gagne : `Settings::get('tools.prompt_builder.verbs')` ignore le tableau de repli de la vue dès que la ligne existe. Or le pipeline de déploiement exécute `migrate` mais PAS `db:seed`. Sans la migration, la production aurait gardé les 14 anciens verbes et les 3 nouveaux seraient restés invisibles en ligne malgré un code correct. Cycle vérifié en local : 17 -> 17 (idempotence), 17 -> 14 (retrait, ordre et accents préservés), 14 -> 17 (réapplication).
+
+### Décision de conception
+- Mode de saisie retenu après consultation de quatre IA (Perplexity, Codex, Gemini, DeepSeek ; claude.ai n'a pas répondu). Convergence sur le bouton explicite plutôt que la touche Entrée seule, qu'un néophyte ne devine pas. Divergence consignée : deux oracles jugeaient le champ peu utile en général, un troisième signalait que plusieurs zones dégradent la réponse - d'où le caractère conditionnel, optionnel, et le traitement en sections distinctes.
+
 ## [1.166.0] - 2026-08-11
 
 ### Ajouté
