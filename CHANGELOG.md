@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.168.0] - 2026-08-12
+
+### Corrigé
+- **P0 - le JavaScript de la v1.167.0 n'avait jamais été livré.** La vue déployée appelait sept fonctions (`addZoneFromInput`, `handleZonePaste`, `removeZone`, `isSearchVerbActive`, `isDatedSearchVerbActive`, la collection `zones`) absentes du fichier servi en ligne : le champ des zones géographiques était donc inerte en production. Cause : le fichier vit dans `public/assets/`, hors des chemins listés au moment de préparer le commit précédent, et le suivi de version de l'asset (`?v=` dérivé du SemVer) changeait malgré tout, ce qui donnait toutes les apparences d'un déploiement réussi. Leçon retenue : vérifier le CONTENU du fichier réellement servi, jamais le seul numéro de version de son URL.
+
+### Modifié
+- **Constructeur de prompts : la confirmation du bouton « Recommencer » passe en modale centrée.** L'ancien mécanisme demandait de cliquer une seconde fois sur le bouton dans un délai de 4 secondes, le libellé se transformant en « Confirmer la réinitialisation » - un geste que rien n'annonce, invisible pour qui ne relit pas le bouton, et perdu si l'utilisateur hésite trop longtemps. La modale énonce maintenant ce qui sera effacé (les réponses ET le brouillon conservé dans le navigateur), précise que les prompts déjà enregistrés dans le compte ne sont pas touchés, et place « Annuler » avant l'action destructrice.
+- Détail d'implémentation à connaître avant toute retouche : les modales Bootstrap de cette page vivent **hors** du composant Alpine. Le bouton de confirmation ne peut donc pas appeler `resetAll()` directement ; il émet l'évènement `cp-reset-confirmed` sur `window`, capté par `@cp-reset-confirmed.window` sur le div porteur de `x-data`. Ce pont est verrouillé par un test.
+
 ## [1.167.0] - 2026-08-12
 
 ### Ajouté

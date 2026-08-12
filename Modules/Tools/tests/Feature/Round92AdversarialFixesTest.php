@@ -37,8 +37,13 @@ it('gives every plain .ct-btn button a 44px min-height floor (round 92)', functi
     // Améliorer avec mon IA / Exporter .txt : binding :style dynamique étendu (pattern round 86)
     expect($blade)->toContain(":style=\"'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')\"");
 
-    // Recommencer (armReset)
-    expect($blade)->toContain('@click="armReset()" aria-live="assertive" style="min-height:44px;"');
+    // Recommencer : depuis le 2026-08-12, ouvre une modale de confirmation (#resetConfirmModal)
+    // au lieu de l'ancienne double confirmation par re-clic (armReset, retirée).
+    expect($blade)->toContain('@click="jQuery(\'#resetConfirmModal\').modal(\'show\')"');
+    expect($blade)->toContain('id="resetConfirmModal"');
+    // Pont événementiel Alpine (le point de rupture le plus probable d'une future régression) :
+    // la modale vit hors du scope x-data="promptBuilder()", cet écouteur est ce qui la relie.
+    expect($blade)->toContain('@cp-reset-confirmed.window="resetAll()"');
 
     // Modale aide : × de fermeture (auto-découvert) + "Compris !" (signalé)
     expect($blade)->toContain('min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center;">&times;</button>');

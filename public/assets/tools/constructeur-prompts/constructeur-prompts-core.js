@@ -28,10 +28,20 @@ document.addEventListener('alpine:init', function() {
             return acc;
         }, []);
     };
+    // Zones géographiques / verbes de recherche (tâche 2026-08-12) : les 3 valeurs LITTÉRALES
+    // injectées dans le prompt (this.verb / this.verb2) qui déclenchent la phrase de date et/ou le
+    // champ Zones - copie volontaire des `value` de $defaultVerbs (Blade), jamais les labels (même
+    // convention que _formatExclusiveValues/_formatStructureValues plus bas dans ce fichier : une
+    // valeur qui pilote un comportement spécial du gabarit de prompt garde sa propre copie ici,
+    // jamais une dépendance runtime au Blade).
+    const SEARCH_VERB_PLAIN = 'Recherche';
+    const SEARCH_VERB_WEB = 'Recherche sur Internet, en priorisant les sites officiels et pertinents';
+    const SEARCH_VERB_DEEP = 'Recherche en profondeur, Internet inclus';
+    const SEARCH_VERBS_ALL = [SEARCH_VERB_PLAIN, SEARCH_VERB_WEB, SEARCH_VERB_DEEP];
+    const SEARCH_VERBS_DATED = [SEARCH_VERB_WEB, SEARCH_VERB_DEEP];
     Alpine.data('promptBuilder', function() {
         return {
             step: 1,
-            resetArmed: false,
             // Brouillon local (2026-08-11) : persiste le wizard en cours dans localStorage
             // (cpDraft_v1) pour survivre à une fermeture accidentelle d'onglet - voir
             // _loadDraft()/_saveDraftNow()/_scheduleDraftSave() plus bas. draftRestored pilote la
@@ -199,6 +209,16 @@ document.addEventListener('alpine:init', function() {
             // (ce qui a déjà été essayé, contraintes, contexte du projet...) plutôt que la
             // demande elle-même. Voir la section CONTEXTE ADDITIONNEL de get promptSegments().
             contextInfo: '',
+            // Zones géographiques (tâche 2026-08-12, verbes de recherche Internet) : champ
+            // conditionnel, visible et injecté dans le prompt uniquement quand un verbe de
+            // recherche est choisi (voir isSearchVerbActive/isDatedSearchVerbActive plus bas).
+            // Plafond de 5 - au-delà, un prompt à sections multiples devient long à lire pour peu
+            // de gain réel ; message d'atteinte de plafond affiché via zoneLimitMessage (voir
+            // _addZoneEntries/removeZone plus bas).
+            zones: [],
+            zoneInput: '',
+            zoneLimitMessage: false,
+            _zonesMax: 5,
             useDelimiters: false,
             // Round 151 (2026-08-01, écran 2 « Votre prompt est prêt ») : interrupteur visible qui
             // coupe les règles AUTOMATIQUEMENT injectées (écriture anti-IA, typographie française,
@@ -777,6 +797,77 @@ document.addEventListener('alpine:init', function() {
                 var found = this.audiences.find(function (a) { return a.value === value; });
                 return found ? found.label : value;
             },
+            // Zones géographiques (tâche 2026-08-12) : clé de DÉDOUBLONNAGE normalisée (minuscules,
+            // accents retirés, espaces réduits) - jamais utilisée pour l'affichage, seulement pour
+            // comparer. Le libellé EXACTEMENT tel que saisi par la personne reste dans `zones`.
+            // Réutilise _normalizeIconText (DRY, déjà défini plus haut pour la recherche d'icônes -
+            // même besoin exact : comparaison insensible aux accents et à la casse) plutôt que de
+            // dupliquer une 3e fois la logique NFD/diacritiques déjà présente 2 fois dans ce fichier
+            // (voir aussi _taskWithoutLeadingVerb) ; seul l'espace réduit est ajouté par-dessus, ce
+            // que _normalizeIconText ne fait pas (pas nécessaire à la recherche d'icônes).
+            _normalizeZoneKey: function (str) {
+                return this._normalizeIconText(str).trim().replace(/\s+/g, ' ');
+            },
+            // Ajout interne partagé par addZoneFromInput() (une seule entrée, jamais découpée) et
+            // handleZonePaste() (plusieurs entrées, déjà découpées sur virgule/point-virgule) -
+            // applique le plafond (_zonesMax) et le dédoublonnage (clé normalisée) une seule fois.
+            _addZoneEntries: function (rawList) {
+                var self = this;
+                var added = 0;
+                (rawList || []).forEach(function (raw) {
+                    var text = String(raw == null ? '' : raw).trim();
+                    if (!text) return;
+                    if (self.zones.length >= self._zonesMax) { self.zoneLimitMessage = true; return; }
+                    var key = self._normalizeZoneKey(text);
+                    var exists = self.zones.some(function (z) { return self._normalizeZoneKey(z) === key; });
+                    if (exists) return;
+                    self.zones.push(text);
+                    added++;
+                });
+                return added;
+            },
+            // Ajout MANUEL (bouton « Ajouter » ou touche Entrée) : jamais découpé sur la virgule -
+            // permet de saisir un nom contenant une virgule légitime (ex. « Washington, D.C. »,
+            // « Montréal, Québec ») sans le casser. Voir handleZonePaste ci-dessous pour le seul cas
+            // où la virgule sépare (collage d'une liste) - compromis documenté dans le rapport.
+            addZoneFromInput: function () {
+                if (!this.zoneInput || !this.zoneInput.trim()) return;
+                this._addZoneEntries([this.zoneInput]);
+                this.zoneInput = '';
+            },
+            // Collage d'une liste séparée par virgules/points-virgules : découpage automatique
+            // UNIQUEMENT si le texte collé contient au moins un de ces séparateurs (un collage sans
+            // virgule se comporte comme une saisie normale, non intercepté). preventDefault()
+            // seulement dans ce cas - le collage normal (une seule valeur) n'est jamais bloqué.
+            handleZonePaste: function (event) {
+                var clip = event.clipboardData || window.clipboardData;
+                var text = clip ? clip.getData('text') : '';
+                if (text && /[,;]/.test(text)) {
+                    event.preventDefault();
+                    this._addZoneEntries(text.split(/[,;]+/));
+                    this.zoneInput = '';
+                }
+            },
+            removeZone: function (idx) {
+                var wasAtLimit = this.zones.length >= this._zonesMax;
+                this.zones.splice(idx, 1);
+                if (wasAtLimit) this.zoneLimitMessage = false;
+            },
+            _isSearchVerbValue: function (v) { return SEARCH_VERBS_ALL.indexOf(v) !== -1; },
+            _isDatedSearchVerbValue: function (v) { return SEARCH_VERBS_DATED.indexOf(v) !== -1; },
+            // Pilote la visibilité du champ Zones (Blade, x-show) ET l'injection dans le prompt
+            // (get promptSegments()) - un verbe personnalisé (verbType==='custom') n'est jamais
+            // reconnu comme verbe de recherche, seul un verbe PRÉDÉFINI l'est.
+            get isSearchVerbActive() {
+                return this._isSearchVerbValue(this.verbType === 'preset' ? this.verb : '') ||
+                    (this.secondTaskEnabled && this._isSearchVerbValue(this.verbType2 === 'preset' ? this.verb2 : ''));
+            },
+            // Pilote la phrase de date (get promptSegments()) - sous-ensemble d'isSearchVerbActive
+            // (verbes 2 et 3 seulement, jamais le verbe 1 "Recherche" seul).
+            get isDatedSearchVerbActive() {
+                return this._isDatedSearchVerbValue(this.verbType === 'preset' ? this.verb : '') ||
+                    (this.secondTaskEnabled && this._isDatedSearchVerbValue(this.verbType2 === 'preset' ? this.verb2 : ''));
+            },
             // formatSelectionAll / formatText : représentation texte plate (formats prédéfinis +
             // format personnalisé) utilisée par feedbackResultat et promptSummary - jamais par le
             // générateur de prompt final (get prompt()), qui a sa propre logique de formulation
@@ -1180,6 +1271,46 @@ document.addEventListener('alpine:init', function() {
                     tool('.');
                 }
 
+                // === RECHERCHE INTERNET : DATE DU JOUR === (tâche 2026-08-12, verbes de recherche
+                // datés seulement - voir isDatedSearchVerbActive). La date est TOUJOURS relue depuis
+                // window.promptBuilderConfig.today À CHAQUE accès de ce getter - jamais copiée dans
+                // this.verb ni dans wizardParams (voir _applyWizardParams : verb reste le libellé
+                // statique du verbe). EXIGENCE CRITIQUE (prouvée) : _applyWizardParams() restaure
+                // `verb` tel quel aussi bien pour le brouillon local (24h) que pour un prompt
+                // SAUVEGARDÉ rouvert via ?edit= (durée indéfinie) - une date figée dans l'un ou
+                // l'autre réapparaîtrait périmée des mois plus tard. Puisque window.promptBuilderConfig
+                // est réinjecté par le SERVEUR à CHAQUE chargement de page (jamais mis en cache dans
+                // l'état du composant), rouvrir la page un autre jour relit automatiquement la date de
+                // ce jour-là.
+                if (this.isDatedSearchVerbActive) {
+                    var todayCfg = (window.promptBuilderConfig && window.promptBuilderConfig.today) || {};
+                    if (todayCfg.long && todayCfg.iso) {
+                        startSection();
+                        tool('Nous sommes le ' + todayCfg.long + ' (' + todayCfg.iso + '). Utilise les informations les plus récentes disponibles à cette date et signale explicitement si une source te semble périmée.');
+                    }
+                }
+
+                // === RECHERCHE INTERNET : ZONES GÉOGRAPHIQUES === (tâche 2026-08-12, champ
+                // conditionnel - voir isSearchVerbActive, les 3 verbes de recherche). Une seule zone :
+                // phrase courte. Plusieurs zones : SECTIONS DISTINCTES exigées explicitement, pour
+                // éviter qu'un modèle mélange les contextes juridiques/culturels de plusieurs zones
+                // dans une réponse générique (risque documenté dans la tâche).
+                if (this.isSearchVerbActive && this.zones.length > 0) {
+                    startSection();
+                    if (this.zones.length === 1) {
+                        tool('Concentre ta recherche sur : ');
+                        user(this.zones[0]);
+                        tool('.');
+                    } else {
+                        tool('Couvre les zones suivantes dans des sections distinctes : ');
+                        this.zones.forEach(function (z, i) {
+                            if (i > 0) tool(', ');
+                            user(z);
+                        });
+                        tool('. Pour chacune, adapte le contenu à ses spécificités locales.');
+                    }
+                }
+
                 // === CONTEXTE ADDITIONNEL === (#1593a, 2026-08-07) : informations de fond
                 // (ce qui a déjà été essayé, contraintes, contexte du projet...) distinctes de la
                 // tâche elle-même - jamais mélangées au bloc TÂCHE ci-dessus, sous un intitulé
@@ -1519,7 +1650,7 @@ document.addEventListener('alpine:init', function() {
                 // ancrées ({text}) - jamais `pending` (état de création transitoire, sans objet une
                 // fois le prompt sauvegardé) ni spaceValues (valeurs de remplissage, jamais
                 // persistées avec le prompt, voir spec §Persistance).
-                return { selectedTask: this.selectedTask, personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, contextInfo: this.contextInfo, spaces: this.spaces.map(function(s) { return { text: s.text }; }), audienceType: this.audienceType, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, formats: this.formatsSelected, formatCustom: this.formatCustom, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintTypo: this.constraintTypo, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat, constraintChainOfThought: this.constraintChainOfThought, constraintAskIfUnclear: this.constraintAskIfUnclear, constraintCustom: this.constraintCustom, useDelimiters: this.useDelimiters, examples: this.examples, cadreStrict: this.cadreStrict, profile: this.profile };
+                return { selectedTask: this.selectedTask, personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, contextInfo: this.contextInfo, spaces: this.spaces.map(function(s) { return { text: s.text }; }), audienceType: this.audienceType, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, formats: this.formatsSelected, formatCustom: this.formatCustom, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintTypo: this.constraintTypo, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat, constraintChainOfThought: this.constraintChainOfThought, constraintAskIfUnclear: this.constraintAskIfUnclear, constraintCustom: this.constraintCustom, useDelimiters: this.useDelimiters, examples: this.examples, cadreStrict: this.cadreStrict, profile: this.profile, zones: this.zones.slice() };
             },
             // Extraction DRY (2026-08-11) : les TROIS points de restauration de l'état du wizard
             // (?edit=ID, ?remix=ID, loadGuestHistoryEntry() pour l'historique invité) appliquaient
@@ -1607,6 +1738,9 @@ document.addEventListener('alpine:init', function() {
                 if (p.canvasFormat) self.canvasFormat = p.canvasFormat;
                 if (p.canvasCustomFormat) self.canvasCustomFormat = p.canvasCustomFormat;
                 if (p.formatMode) self.formatMode = p.formatMode;
+                // Zones géographiques (tâche 2026-08-12) : restaure les libellés TELS QUE saisis,
+                // jamais la phrase datée (celle-ci n'est jamais persistée - voir get promptSegments()).
+                if (Array.isArray(p.zones)) self.zones = p.zones.slice();
                 // Round 101 (2026-07-27, passe adversariale) : le repli 'autre' ne s'applique
                 // qu'aux prompts sauvegardés AVANT l'ajout de selectedTask à wizardParams - filet
                 // legacy, voir opts.legacy ci-dessus.
@@ -2088,12 +2222,9 @@ document.addEventListener('alpine:init', function() {
 
             copyText: function(text) { window.copyToClipboard(text, (window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.promptCopied) || 'Prompt copié'); },
 
-            armReset: function() {
-                if (this.resetArmed) { this.resetAll(); return; }
-                this.resetArmed = true;
-                var self = this;
-                setTimeout(function() { self.resetArmed = false; }, 4000);
-            },
+            // La double confirmation par re-clic (armReset) a été remplacée le 2026-08-12 par
+            // une modale centrée (#resetConfirmModal dans la vue), qui dispatche l'évènement
+            // cp-reset-confirmed sur window pour déclencher resetAll() ci-dessous.
             // Brouillon local (2026-08-11) : purge cpDraft_v1 AVANT le rechargement - sinon
             // _loadDraft() (voir init()) restaurerait au prochain chargement le brouillon que ce
             // bouton est censé effacer (piège central de la persistance de formulaire).

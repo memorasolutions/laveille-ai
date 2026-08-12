@@ -16,7 +16,8 @@
         <div class="row justify-content-center">
             <div class="col-lg-10 col-12">
                 <div class="card shadow-sm tool-fullscreen-target" style="border-radius: var(--r-base);">
-                    <div class="card-body p-4 p-md-5" x-data="promptBuilder()" x-init="init()" @keydown.escape.window="closeIconPicker()">
+                    {{-- Écouteur ajouté car la modale #resetConfirmModal vit hors du scope Alpine (elle est placée après </section>, comme les autres modales Bootstrap de cette page) --}}
+                    <div class="card-body p-4 p-md-5" x-data="promptBuilder()" x-init="init()" @keydown.escape.window="closeIconPicker()" @cp-reset-confirmed.window="resetAll()">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0;">{{ $tool->name }}</h1>
@@ -1123,7 +1124,7 @@
                             <button class="ct-btn ct-btn-outline" @click="toggleMetaPrompt()" :disabled="!isValid" aria-describedby="cpValidityHint" :style="'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')"
                                     :aria-expanded="metaPromptShown.toString()" aria-controls="cpMetaPromptPanel">✨ {{ __('Améliorer avec mon IA') }}</button>
                             <button class="ct-btn ct-btn-outline" @click="exportPrompt()" :disabled="!isValid" aria-describedby="cpValidityHint" :style="'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')">{{ __('Exporter .txt') }}</button>
-                            <button class="ct-btn ct-btn-outline-danger" @click="armReset()" aria-live="assertive" style="min-height:44px;" x-text="resetArmed ? '{{ __('⚠️ Confirmer la réinitialisation') }}' : '{{ __('🔄 Recommencer') }}'"></button>
+                            <button type="button" class="ct-btn ct-btn-outline-danger" @click="jQuery('#resetConfirmModal').modal('show')" style="min-height:44px;">{{ __('🔄 Recommencer') }}</button>
                         </div>
                         <template x-if="metaPromptShown && isValid">
                             <div id="cpMetaPromptPanel" class="mb-3 p-3 rounded" style="border: 1.5px solid var(--c-primary); border-radius: var(--r-base); background:#fff;" aria-live="polite">
@@ -1291,6 +1292,27 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="ct-btn ct-btn-primary" onclick="jQuery('#promptHelpModal').modal('hide')" style="min-height:44px;">{{ __('Compris !') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modale de confirmation « Recommencer » (remplace le 2026-08-12 la double confirmation par
+     re-clic sur le bouton, calquée sur la structure Bootstrap de #promptHelpModal ci-dessus) --}}
+<div class="modal fade" id="resetConfirmModal" tabindex="-1" role="dialog" aria-labelledby="resetConfirmModalLabel">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="border-radius: var(--r-base);">
+            <div class="modal-header" style="background: var(--c-primary); border-radius: var(--r-base) var(--r-base) 0 0;">
+                <h4 class="modal-title" id="resetConfirmModalLabel" style="color: #fff; font-family: var(--f-heading); font-weight: 700;">{{ __('Tout recommencer ?') }}</h4>
+                <button type="button" onclick="jQuery('#resetConfirmModal').modal('hide')" aria-label="{{ __('Fermer') }}" style="background: none; border: none; color: #fff !important; opacity: 1; font-size: 1.5rem; font-weight: 700; cursor: pointer; float: right; min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 2rem;">
+                <p>{{ __('Toutes vos réponses seront effacées et le formulaire repartira de zéro, à la première étape.') }}</p>
+                <p>{{ __('Cette action est définitive : le brouillon enregistré dans ce navigateur sera lui aussi supprimé. Vos prompts déjà sauvegardés dans votre compte ne sont pas touchés.') }}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="ct-btn ct-btn-outline-secondary" onclick="jQuery('#resetConfirmModal').modal('hide')" style="min-height:44px;">{{ __('Annuler') }}</button>
+                <button type="button" class="ct-btn ct-btn-danger" style="min-height:44px;" onclick="jQuery('#resetConfirmModal').modal('hide'); window.dispatchEvent(new CustomEvent('cp-reset-confirmed'));">{{ __('Oui, tout effacer') }}</button>
             </div>
         </div>
     </div>
