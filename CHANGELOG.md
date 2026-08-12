@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.168.2] - 2026-08-12
+
+### Corrigé
+- **Champ « Zones géographiques » : hauteur relevée à 44 px.** Mesuré en production sur mobile (390 px) : le champ faisait 29 px de haut contre 44 px pour le bouton « Ajouter » juste à côté - sous le seuil de cible tactile retenu par le projet, et visuellement désaligné sur la même ligne. La classe `form-control-sm` de Bootstrap impose cette hauteur réduite ; elle est relevée par un `min-height` explicite, comme pour les autres champs du site alignés sur un bouton.
+- Trouvé en bouclant la vérification par gestes réels et à 390 px, après que la première passe de vérification (pilotée par l'état interne du composant, à 1200 px seulement) l'ait manqué.
+
 ## [1.168.1] - 2026-08-12
 
 ### Corrigé

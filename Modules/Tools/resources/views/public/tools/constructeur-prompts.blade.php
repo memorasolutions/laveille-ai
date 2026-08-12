@@ -486,7 +486,11 @@
                             <div class="ct-block__field" x-show="isSearchVerbActive" x-cloak>
                                 <label class="form-label fw-medium mb-1" for="cpZoneInput" style="font-size: 0.85rem;">{{ __('Zones géographiques à couvrir (optionnel)') }}</label>
                                 <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-                                    <input type="text" id="cpZoneInput" class="form-control form-control-sm" style="flex:1; min-width:180px;" x-model="zoneInput" autocomplete="off"
+                                    {{-- min-height 44px : mesuré à 29 px en production le 2026-08-12, contre 44 px pour le
+                                         bouton « Ajouter » juste à côté - donc sous le seuil tactile du projet ET visuellement
+                                         désaligné sur la même ligne. La classe form-control-sm de Bootstrap impose une hauteur
+                                         réduite qu'il faut relever ici, comme pour les autres champs alignés sur un bouton. --}}
+                                    <input type="text" id="cpZoneInput" class="form-control form-control-sm" style="flex:1; min-width:180px; min-height:44px;" x-model="zoneInput" autocomplete="off"
                                         placeholder="{{ __('Ex : Québec, France, Belgique...') }}" aria-label="{{ __('Ajouter une zone géographique') }}"
                                         @keydown.enter.prevent="addZoneFromInput()" @paste="handleZonePaste($event)">
                                     <button type="button" class="ct-btn ct-btn-outline ct-btn-xs" style="min-height:44px;" @click="addZoneFromInput()">{{ __('Ajouter') }}</button>
