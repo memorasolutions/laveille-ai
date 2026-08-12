@@ -509,6 +509,7 @@
     "Ce choix n'ajoute aucune consigne supplémentaire : le prompt reste tel quel.": "Ce choix n'ajoute aucune consigne supplémentaire : le prompt reste tel quel.",
     "Ce format technique doit être utilisé seul.": "Ce format technique doit être utilisé seul.",
     "Ce journal est conservé à des fins d'audit et ne se vide pas automatiquement.": "Ce journal est conservé à des fins d'audit et ne se vide pas automatiquement.",
+    "Ce prompt dépasse la limite de préremplissage automatique : pour ChatGPT, Claude et Perplexity, il sera copié dans le presse-papiers plutôt que collé automatiquement (Ctrl\/Cmd + V à faire toi-même).": "Ce prompt dépasse la limite de préremplissage automatique : pour ChatGPT, Claude et Perplexity, il sera copié dans le presse-papiers plutôt que collé automatiquement (Ctrl\/Cmd + V à faire toi-même).",
     "Ce que vous surveillez": "Ce que vous surveillez",
     "Ce texte remplira votre demande si elle est encore vide. Si vous avez déjà écrit quelque chose, rien ne sera écrasé.": "Ce texte remplira votre demande si elle est encore vide. Si vous avez déjà écrit quelque chose, rien ne sera écrasé.",
     "Centre de confidentialité": "Centre de confidentialité",

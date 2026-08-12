@@ -558,6 +558,7 @@
     "Ce format technique doit être utilisé seul.": "This technical format must be used alone.",
     "Ce journal est conservé à des fins d'audit et ne se vide pas automatiquement.": "This log is kept for audit purposes and is not emptied automatically.",
     "Ce mot n'a pas été retrouvé dans ton texte.": "This word was not found in your text.",
+    "Ce prompt dépasse la limite de préremplissage automatique : pour ChatGPT, Claude et Perplexity, il sera copié dans le presse-papiers plutôt que collé automatiquement (Ctrl\/Cmd + V à faire toi-même).": "This prompt exceeds the automatic prefill limit: for ChatGPT, Claude and Perplexity, it will be copied to the clipboard instead of being pasted automatically (Ctrl\/Cmd + V yourself).",
     "Ce que vous surveillez": "What you are monitoring",
     "Ce texte apparaît :count fois : chaque endroit sera remplacé par ta réponse.": "This text appears :count times: each spot will be replaced by your answer.",
     "Ce texte apparaît déjà 1 fois dans ta demande - toutes les occurrences seront remplies ensemble.": "This text already appears once in your request - all occurrences will be filled in together.",

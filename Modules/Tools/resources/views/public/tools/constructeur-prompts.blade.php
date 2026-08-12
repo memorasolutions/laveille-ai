@@ -1166,6 +1166,11 @@
                             <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')" @click="openIn('gemini')">Gemini</button>
                             <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')" @click="openIn('mistral')">Mistral</button>
                         </div>
+                        {{-- Correctif transparence 2026-08-12 (audit multi-IA) : prévenir AVANT le clic.
+                             Au-delà du seuil, ChatGPT/Claude/Perplexity basculaient silencieusement du
+                             préremplissage d'URL vers la copie presse-papiers, sans que l'utilisateur
+                             comprenne pourquoi une IA se remplissait et pas une autre. --}}
+                        <p class="alert alert-info small p-2 mt-2 mb-0" role="status" x-show="promptExceedsPrefillLimit" x-cloak x-text="openInLongPromptNotice"></p>
                         </template>
                         {{-- Correctif alignement (signalement fondateur, capture jointe) : le bouton
                              principal était vertical-centré (align-items-center) contre TOUT le bloc
@@ -1843,6 +1848,7 @@ window.promptBuilderConfig = {
         openInMistral: @json(__('Prompt copié : colle-le dans Mistral (Ctrl/Cmd + V).')),
         taskCardDeleted: @json(__('Objectif supprimé')),
         openInTooLong: @json(__('Prompt trop long pour le lien : il est copié, colle-le (Ctrl/Cmd + V).')),
+        openInLongPromptNotice: @json(__('Ce prompt dépasse la limite de préremplissage automatique : pour ChatGPT, Claude et Perplexity, il sera copié dans le presse-papiers plutôt que collé automatiquement (Ctrl/Cmd + V à faire toi-même).')),
         customCardsImportedOne: @json(__('1 carte importée')),
         customCardsImportedMany: @json(__('{count} cartes importées')),
         customCardsImportLimitReached: @json(__('Limite de 10 cartes atteinte - aucune carte importée. Supprimez-en une puis réessayez.')),

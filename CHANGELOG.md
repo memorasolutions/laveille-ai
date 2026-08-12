@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.169.0] - 2026-08-12
+
+### Ajouté
+- **Constructeur de prompts : avertissement de seuil AVANT le clic.** Les boutons « Ouvrir dans ChatGPT / Claude / Perplexity » préremplissent la conversation par l’URL, mais uniquement si le prompt encodé tient dans 4000 caractères ; au-delà, l’outil bascule en copie vers le presse-papiers. L’utilisateur ne découvrait ce changement de comportement qu’APRÈS avoir cliqué. Un avis apparaît désormais dès que le seuil est franchi. Ordre de grandeur mesuré sur un vrai prompt français généré par l’outil (ratio d’encodage 1,535) : 4000 caractères encodés valent environ 2600 caractères bruts, soit à peu près 400 mots.
+
+### Modifié
+- **Frontière instruction/donnée : le texte collé n’est plus confondable avec une consigne.** Le champ « Contexte additionnel » était inséré dans le prompt final entre des triples guillemets `"""` qui n’étaient jamais échappés. Le jour où un utilisateur y colle un vrai document (un courriel de client, un rapport reçu), une phrase impérative contenue dans ce document pouvait être lue par le modèle comme une consigne venant de l’utilisateur : c’est le mécanisme classique de l’injection de prompt. Le texte collé est maintenant entouré d’un délimiteur unique tiré au hasard à chaque génération, de la forme `⟦DONNEES-a3f9⟧ … ⟦/DONNEES-a3f9⟧` : le contenu collé ne peut pas refermer une balise dont il ignore le suffixe. Une instruction accompagne le bloc et énonce que ce qui s’y trouve est de la donnée à traiter, jamais une consigne à exécuter. Cela réduit fortement le risque sans prétendre l’annuler : aucun délimiteur ne rend un modèle immunisé.
+- **Verbe de recherche : un séparateur neutre au lieu de deux impératifs accolés.** Choisir un verbe de recherche collait celui-ci directement devant la tâche, ce qui produisait « Recherche sur Internet, en priorisant les sites officiels Compare les offres… » : deux impératifs sans lien syntaxique, à charge pour le modèle de deviner s’il s’agit d’une tâche ou de deux. Les deux parties sont désormais reliées par un séparateur neutre.
+
 ## [1.168.3] - 2026-08-12
 
 ### Corrigé
