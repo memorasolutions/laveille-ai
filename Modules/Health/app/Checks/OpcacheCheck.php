@@ -29,6 +29,22 @@ class OpcacheCheck extends Check
                 ->withHeaders(['X-Sante-Jeton' => (string) config('health.opcache.token')])
                 ->get($this->endpointUrl());
 
+            // Faux signal recurrent (2026-08-12) : le pipeline de deploiement execute
+            // `php artisan down --retry=15` avant le rsync et `php artisan up` a la fin
+            // (.github/workflows/deploy.yml). Pendant cette fenetre, Laravel repond 503 a
+            // TOUTES les requetes, ce point de controle inclus - et le cron de sante qui
+            // tombe dedans envoyait une alerte « intervention rapide » alors que rien
+            // n'est casse. C'est la meme classe de faux signal que le temoin du
+            // planificateur efface par optimize:clear, corrige en juillet 2026.
+            //
+            // Le mode maintenance de Laravel accompagne son 503 d'un en-tete Retry-After
+            // (pose par --retry=15) ; une VRAIE saturation de PHP-FPM, elle, n'en met pas.
+            // C'est donc cet en-tete - et lui seul - qui distingue une indisponibilite
+            // VOULUE d'une panne. Ne jamais elargir ce silence a tous les 503.
+            if ($response->status() === 503 && $response->header('Retry-After') !== '') {
+                return $result->ok('Mesure OPcache ignoree : le site est en mode maintenance (deploiement en cours). Aucune action requise.');
+            }
+
             if (! $response->successful()) {
                 return $result->failed(
                     "Impossible de mesurer OPcache : le point de contrôle HTTP a répondu {$response->status()}. Vérifiez l’URL interne, le jeton et PHP-FPM."

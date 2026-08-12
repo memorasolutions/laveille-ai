@@ -102,6 +102,27 @@ it('échoue lorsque la requête HTTP échoue', function () {
         ->and($result->getNotificationMessage())->toContain('Impossible de mesurer OPcache');
 });
 
+it('reste silencieux quand le 503 vient du mode maintenance (deploiement en cours)', function () {
+    // Faux signal reel du 2026-08-12 : le deploiement execute `php artisan down --retry=15`,
+    // donc Laravel repond 503 a TOUT pendant le rsync - point de controle inclus. Le cron de
+    // sante tombe dedans et alertait « intervention rapide » alors que rien n'est casse.
+    // L'en-tete Retry-After (pose par --retry) est la signature d'une indisponibilite VOULUE.
+    Http::fake(['*' => Http::response('En maintenance', 503, ['Retry-After' => '15'])]);
+
+    $result = OpcacheCheck::new()->run();
+
+    expect($result->status->equals(Status::ok()))->toBeTrue()
+        ->and($result->getNotificationMessage())->toContain('maintenance');
+});
+
+it('alerte quand même sur un 503 SANS Retry-After (vraie saturation PHP-FPM)', function () {
+    // Verrou du correctif precedent : le silence doit rester borne au SEUL cas maintenance.
+    // Une saturation reelle de PHP-FPM renvoie un 503 nu - elle doit continuer d'alerter.
+    Http::fake(['*' => Http::response('Service Unavailable', 503)]);
+
+    expect(OpcacheCheck::new()->run()->status->equals(Status::failed()))->toBeTrue();
+});
+
 it('affiche la marche à suivre "mesure impossible", jamais la procédure de capacité, sur un timeout', function () {
     // Incident reel du 2026-08-01 21h11 Quebec : un timeout cURL (mesure impossible, aucun
     // pourcentage disponible) affichait quand meme « augmentez la directive saturee », une

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.168.1] - 2026-08-12
+
+### Corrigé
+- **Alerte de santé OPcache : fin d'un faux signal récurrent déclenché par nos propres déploiements.** Le pipeline exécute `php artisan down --retry=15` avant le transfert et `php artisan up` à la fin ; pendant cette fenêtre, Laravel répond 503 à toutes les requêtes, le point de contrôle de santé compris. Le cron qui tombait dedans envoyait un courriel « intervention rapide » alors que rien n'était cassé - c'est ce qui s'est produit quelques minutes après la livraison de v1.168.0, et c'est la même classe de faux signal que le témoin du planificateur effacé par `optimize:clear`, corrigé plus tôt cet été.
+- Le contrôle distingue désormais les deux situations par le seul signe qui les sépare vraiment : le mode maintenance de Laravel accompagne son 503 d'un en-tête `Retry-After` (posé par `--retry`), alors qu'une saturation réelle de PHP-FPM renvoie un 503 nu. Un 503 **avec** cet en-tête est traité comme une indisponibilité voulue et ne déclenche plus d'alerte ; un 503 **sans** continue d'alerter exactement comme avant. Deux tests verrouillent les deux moitiés de cette règle, pour que le silence ne puisse jamais être élargi par inadvertance à tous les 503.
+
 ## [1.168.0] - 2026-08-12
 
 ### Corrigé
