@@ -1166,11 +1166,6 @@
                             <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')" @click="openIn('gemini')">Gemini</button>
                             <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')" @click="openIn('mistral')">Mistral</button>
                         </div>
-                        {{-- Correctif transparence 2026-08-12 (audit multi-IA) : prévenir AVANT le clic.
-                             Au-delà du seuil, ChatGPT/Claude/Perplexity basculaient silencieusement du
-                             préremplissage d'URL vers la copie presse-papiers, sans que l'utilisateur
-                             comprenne pourquoi une IA se remplissait et pas une autre. --}}
-                        <p class="alert alert-info small p-2 mt-2 mb-0" role="status" x-show="promptExceedsPrefillLimit" x-cloak x-text="openInLongPromptNotice"></p>
                         </template>
                         {{-- Correctif alignement (signalement fondateur, capture jointe) : le bouton
                              principal était vertical-centré (align-items-center) contre TOUT le bloc
@@ -1195,6 +1190,14 @@
                             </details>
                         </div>
                         </template>
+                        {{-- Correctif transparence 2026-08-12 (audit multi-IA), corrigé le même jour :
+                             prévenir AVANT le clic. Au-delà du seuil, ChatGPT/Claude/Perplexity basculent
+                             silencieusement du préremplissage d'URL vers la copie presse-papiers.
+                             CET AVIS VIT HORS DES DEUX <template x-if> : Alpine ne clone QUE le premier
+                             enfant racine d'un x-if, donc l'avis placé à l'intérieur n'était jamais rendu
+                             (code mort, prouvé en production) ; et le seuil vaut pour les deux dispositions
+                             de boutons, pas seulement pour celle du visiteur sans préférence mémorisée. --}}
+                        <p class="alert alert-info small p-2 mt-2 mb-0" role="status" x-show="promptExceedsPrefillLimit" x-cloak x-text="openInLongPromptNotice"></p>
                         @php
                             // Relances de secours (bonification 2026-08-07) : textes EXACTS demandés,
                             // définis UNE seule fois (DRY) - servent à la fois de libellé affiché et de

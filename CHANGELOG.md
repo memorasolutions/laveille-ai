@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.169.1] - 2026-08-12
+
+### Corrigé
+- **L'avertissement de seuil livré une heure plus tôt n'était jamais affiché.** Vérification par gestes réels en production : avec un contexte de 4233 caractères (prompt final de 5842), l'état réactif `promptExceedsPrefillLimit` valait bien `true`, mais le paragraphe d'avis n'existait dans la page à aucun moment. Cause : il avait été écrit À L'INTÉRIEUR d'un `<template x-if>`, en second enfant racine à côté du bloc de boutons. Alpine ne clone que le PREMIER enfant racine d'un `x-if` et abandonne les suivants en silence : l'avis était du code mort, quelle que soit la longueur du prompt. Il vit désormais hors des deux gabarits, donc visible dans les deux dispositions de boutons (avec ou sans destination mémorisée) et non plus dans une seule. Deux vérifications automatiques verrouillent la position, et elles échouent bien contre la version fautive.
+- **L'aperçu « Voici ce qui sera envoyé à l'IA » montrait autre chose que ce qui partait vraiment.** Le correctif de sécurité de v1.169.0 n'avait été appliqué qu'au texte transmis ; l'aperçu à l'écran conservait les anciens triples guillemets. Un écran qui affirme montrer ce qui sera envoyé doit le montrer : l'aperçu porte maintenant le même balisage de données et la même instruction anti-injection, ce qui rend la protection visible à celui qu'elle protège. Seule différence assumée, expliquée en commentaire dans le code : le suffixe du délimiteur est fixe à l'écran, alors que le texte réellement transmis en tire un au hasard à chaque génération - afficher le vrai le ferait changer à chaque frappe dans un aperçu réactif. Au passage, les deux rédactions parallèles (une pour l'écran, une pour l'envoi) sont fusionnées en une seule.
+
 ## [1.169.0] - 2026-08-12
 
 ### Ajouté
