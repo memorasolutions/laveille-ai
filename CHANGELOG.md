@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.169.2] - 2026-08-12
+
+### Corrigé
+- **Tâche en deux étapes : la dernière phrase du prompt perdait l'étape 2.** Signalé par Stéphane sur un prompt réellement généré (rôle enseignant, étape 1 « Recherche sur Internet », étape 2 « Explique le résultat de l'étape 1 »). Le prompt annonçait bien la séquence en haut, mais son ancrage final disait « Produis maintenant : recherche sur Internet… Voici ce qu'il faut trouver : … », sans un mot sur l'étape 2. Cause : le livrable de l'ancrage était bâti sur le seul verbe de la première tâche. C'est le pire endroit possible pour une omission - une consigne placée en toute fin est celle que le modèle suit le plus fidèlement, si bien que l'IA pouvait livrer la recherche et sauter l'explication demandée. En mode deux étapes, l'ancrage renvoie désormais à la séquence complète ; le mode à une seule tâche est strictement inchangé, et une case cochée sans deuxième verbe retombe sur ce comportement d'origine.
+- Trois cas de non-régression ajoutés (deux étapes, une étape, case cochée sans verbe), vérifiés EN ÉCHEC contre le code fautif avant d'être acceptés.
+
 ## [1.169.1] - 2026-08-12
 
 ### Corrigé

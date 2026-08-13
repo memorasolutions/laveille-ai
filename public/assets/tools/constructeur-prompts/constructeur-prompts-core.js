@@ -1554,8 +1554,16 @@ document.addEventListener('alpine:init', function() {
                     var livrableVerb = actionVerb ? (actionVerb.charAt(0).toLowerCase() + actionVerb.slice(1)) : '';
                     var livrableObject = this.taskObject ? truncateAtWord(this._taskWithoutLeadingVerb(actionVerb, this.taskObject), 80) : '';
                     var hasLivrable = !!(livrableVerb && livrableObject);
+                    // Correctif 2026-08-12 (signalement fondateur) : en mode DEUX ÉTAPES, l'ancrage
+                    // ne reprenait que l'étape 1 (livrableVerb/livrableObject sont bâtis sur le seul
+                    // actionVerb). Or c'est la DERNIÈRE phrase du prompt, celle que le modèle suit le
+                    // plus fidèlement : il livrait la recherche et sautait l'explication demandée en
+                    // étape 2. On renvoie donc à la séquence complète plutôt qu'à sa première moitié.
+                    var twoStepTask = !!(this.secondTaskEnabled && secondActionVerb && actionVerb && this.taskObject);
                     tool(this.constraintAskIfUnclear ? 'Si tout est clair, produis maintenant : ' : 'Produis maintenant : ');
-                    if (hasLivrable) {
+                    if (twoStepTask) {
+                        tool('les deux étapes ci-dessus, dans l\'ordre');
+                    } else if (hasLivrable) {
                         if (actionVerbIsUser) { user(livrableVerb); } else { tool(livrableVerb); }
                         // Correctif qualité 2026-08-12 : même séparateur que le bloc TÂCHE plus haut,
                         // pour rester cohérent sur la même paire verbe/objet (voir SEARCH_VERBS_DATED
