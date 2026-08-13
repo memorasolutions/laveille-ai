@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.170.0] - 2026-08-12
+
+### Ajouté
+- **Recherche : l'IA doit maintenant donner ses sources.** Jusqu'ici, choisir un verbe de recherche demandait de « prioriser les sites officiels » sans jamais réclamer les liens : la personne recevait des affirmations invérifiables. Une consigne courte est désormais ajoutée automatiquement dès qu'un verbe mentionnant Internet est choisi. Aucune case à cocher, aucune option de plus à l'écran - l'étape des options venait d'être compactée et le fait de rester très simple prime.
+- Trois pièges ont été tranchés avant d'écrire la phrase, plutôt qu'après. **Un** : une étude de 2026 (Davis et al., proceedings.mlr.press/v318/davis26a) montre qu'une contrainte de citation plus stricte, sans porte de sortie, AUGMENTE le nombre de références invalides. La consigne autorise donc explicitement le modèle à dire qu'il n'a eu accès à aucune source, au lieu d'en fabriquer une - ce qui compte pour Mistral et pour tous les modes sans accès web. **Deux** : ne pas exiger une citation par affirmation. Cette granularité indéterminée pousse à rattacher une source générale à un fait précis qu'elle ne soutient pas, et noie le texte sous les liens ; les sources sont donc regroupées en une courte liste à la fin, ce qui protège aussi la longueur visée du livrable. **Trois** : écarter « la source que tu as réellement consultée », formulation anthropomorphique - un modèle ne distingue pas toujours une page ouverte d'un extrait que son moteur lui a transmis, et la question l'invite à une fausse déclaration. La consigne s'ancre donc sur ce que la recherche lui a FOURNI.
+- Le verbe « Recherche » simple, qui n'implique pas Internet, reste volontairement à l'écart : quatre cas de non-régression verrouillent cette frontière, tous vérifiés en échec contre le code d'avant.
+
 ## [1.169.2] - 2026-08-12
 
 ### Corrigé

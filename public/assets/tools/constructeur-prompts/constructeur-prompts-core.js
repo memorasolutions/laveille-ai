@@ -1335,6 +1335,28 @@ document.addEventListener('alpine:init', function() {
                     }
                 }
 
+                // === RECHERCHE INTERNET : SOURCES === (tâche 1786, 2026-08-12, décision de
+                // Stéphane « l'outil doit rester très simple » : AUTOMATIQUE avec les verbes de
+                // recherche qui mentionnent Internet, PAS de case à cocher, aucune option ajoutée à
+                // l'écran). Trois pièges tranchés par la veille et la réfutation Codex :
+                //  1. Ne PAS exiger une citation par affirmation. Une étude de 2026 (Davis et al.,
+                //     proceedings.mlr.press/v318/davis26a) montre qu'une contrainte de citation plus
+                //     stricte, sans issue licite, AUGMENTE les références invalides ; et « pour chaque
+                //     information importante » a une granularité indéterminée qui pousse à rattacher
+                //     une source générale à une affirmation précise qu'elle ne soutient pas.
+                //     D'où une COURTE LISTE EN FIN de réponse plutôt qu'un lien après chaque phrase -
+                //     ce qui protège aussi la longueur visée du livrable principal.
+                //  2. Éviter « la source que tu as réellement consultée » : formulation
+                //     anthropomorphique (le modèle ne distingue pas toujours une page ouverte d'un
+                //     extrait fourni par le moteur), qui invite à une fausse déclaration. On ancre
+                //     donc sur ce que la recherche a FOURNI.
+                //  3. Autoriser explicitement l'aveu d'absence de source : Mistral et certains modes
+                //     n'ont aucun accès web et inventeraient des liens sans cette porte de sortie.
+                if (this.isDatedSearchVerbActive) {
+                    startSection();
+                    tool('Termine par une courte liste des sources utilisées (titre et lien), limitée à celles que ta recherche t\'a fournies. N\'invente aucune référence : si tu n\'as eu accès à aucune source, écris-le clairement à la place.');
+                }
+
                 // === RECHERCHE INTERNET : ZONES GÉOGRAPHIQUES === (tâche 2026-08-12, champ
                 // conditionnel - voir isSearchVerbActive, les 3 verbes de recherche). Une seule zone :
                 // phrase courte. Plusieurs zones : SECTIONS DISTINCTES exigées explicitement, pour
