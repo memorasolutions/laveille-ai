@@ -5,6 +5,10 @@ declare(strict_types=1);
 use Modules\News\Services\DedupService;
 use Modules\News\Services\RssFetcherService;
 
+// DedupService lit ses listes de mots vides depuis config('news.fusion.*') depuis le
+// 2026-08-13 (elles étaient codées en dur) : le conteneur Laravel est donc requis ici.
+uses(Tests\TestCase::class);
+
 test('RssFetcherService class exists', function () {
     expect(class_exists(RssFetcherService::class))->toBeTrue();
 });

@@ -59,11 +59,17 @@ final class DedupService
         return round($percent / 100, 3);
     }
 
+    /**
+     * Similarité de Jaccard sur les mots significatifs de deux titres.
+     *
+     * Les mots vides vivent dans Modules/News/config/fusion.php ('stop_words') depuis le
+     * 2026-08-13 : ils étaient codés en dur ici, et il y manquait « ai » et « ia ».
+     */
     public static function jaccardKeywords(string $a, string $b): float
     {
         $tokens = function (string $s): array {
             $clean = strtolower(preg_replace('/[^\p{L}\p{N}\s]/u', ' ', Str::ascii($s)));
-            $stop = ['le','la','les','un','une','des','de','du','dans','pour','sur','et','ou','a','au','aux','en','par','avec','sans','ses','sa','son','ce','cette','que','qui','est','sont','the','a','an','to','of','in','on','for','and','or','is','are','was','were','be','by','with','from','as','it','its','this','that','these','those','can','will','has','have','had','new','newest','says','say','just','now','today','tomorrow'];
+            $stop = (array) config('news.fusion.stop_words', []);
             return array_values(array_unique(array_diff(array_filter(explode(' ', $clean)), $stop)));
         };
         $tokA = $tokens($a);
@@ -76,14 +82,23 @@ final class DedupService
         return count($union) > 0 ? round(count($inter) / count($union), 3) : 0.0;
     }
 
+    /**
+     * Entités nommées distinctives d'un titre (capitalisées, ou acronymes techniques connus).
+     *
+     * Les trois listes vivent dans Modules/News/config/fusion.php depuis le 2026-08-13.
+     * « IA » et « AI » y figuraient parmi les acronymes connus, ce qui leur faisait contourner
+     * à la fois le minimum de 4 caractères et le filtre des mots vides : ils sont désormais
+     * dans 'generic_acronyms', reconnus mais jamais comptés.
+     */
     public static function extractKeyEntities(string $title): array
     {
         $tokens = preg_split('/\s+/', trim($title));
         if (!is_array($tokens)) {
             return [];
         }
-        $knownAcronyms = ['IA', 'AI', 'API', 'GPT', 'LLM', 'ML', 'NLP', 'OCR', 'RAG', 'CPU', 'GPU', 'IoT', 'SaaS', 'SDK', '5G', '6G'];
-        $stopEntities = ['the','this','that','these','those','from','with','for','and','or','but','is','are','was','were','be','been','been','being','have','has','had','do','does','did','can','could','will','would','should','may','might','must','shall','to','of','in','on','at','by','as','it','its','his','her','their','our','your','my','we','they','he','she','you','an','any','some','all','each','every','no','not','only','also','just','race','keep','running','wild','credit','cards','simple','models','evolution','encoders','more','most','less','least','very','really','quite','still','again','always','never','today','tomorrow','yesterday','now','then','here','there','where','when','what','who','why','how','introducing','new','launches','launch','announces','reveals','says','wants','puts','keeps','takes','gets','make','makes','made','goes','going','le','la','les','un','une','des','du','dans','pour','sur','et','ou','mais','sa','son','ses','cette','par','avec','sans','au','aux','si','que','qui','comment','pourquoi'];
+        $knownAcronyms = (array) config('news.fusion.known_acronyms', []);
+        $genericAcronyms = (array) config('news.fusion.generic_acronyms', []);
+        $stopEntities = (array) config('news.fusion.stop_entities', []);
         $entities = [];
         foreach ($tokens as $tok) {
             $clean = preg_replace('/[^\p{L}\p{N}]/u', '', $tok);
@@ -92,6 +107,11 @@ final class DedupService
             }
             $upper = mb_strtoupper($clean);
             $lower = mb_strtolower(Str::ascii($clean));
+            // Acronyme trop générique pour identifier quoi que ce soit sur un site de veille en
+            // intelligence artificielle : reconnu, mais jamais compté comme entité distinctive.
+            if (in_array($upper, $genericAcronyms, true)) {
+                continue;
+            }
             if (in_array($upper, $knownAcronyms, true)) {
                 $entities[] = $upper;
                 continue;

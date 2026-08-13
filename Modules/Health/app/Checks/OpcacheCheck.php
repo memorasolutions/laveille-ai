@@ -25,6 +25,18 @@ class OpcacheCheck extends Check
 
         try {
             $response = Http::timeout((int) config('health.opcache.timeout', 5))
+                // Reprise UNIQUEMENT sur une erreur de connexion (contention transitoire de
+                // PHP-FPM). Surtout pas sur les reponses d'erreur HTTP : un 503 doit remonter
+                // INTACT jusqu'au bloc qui distingue le mode maintenance d'une vraie panne, et
+                // `throw: false` empeche Laravel de lever sur la derniere tentative echouee.
+                // Sans ces deux precautions, ce correctif cassait la detection du deploiement
+                // en cours - attrape par les tests avant livraison.
+                ->retry(
+                    (int) config('health.opcache.retry_times', 2),
+                    (int) config('health.opcache.retry_sleep_ms', 500),
+                    fn (Throwable $exception): bool => $exception instanceof ConnectionException,
+                    throw: false
+                )
                 ->acceptJson()
                 ->withHeaders(['X-Sante-Jeton' => (string) config('health.opcache.token')])
                 ->get($this->endpointUrl());
@@ -53,12 +65,40 @@ class OpcacheCheck extends Check
 
             $payload = $response->json();
         } catch (ConnectionException $exception) {
-            return $result->failed('Impossible de mesurer OPcache : la connexion HTTP interne a échoué. Vérifiez APP_URL, le serveur web et PHP-FPM.')
-                ->meta(['erreur' => $exception->getMessage()]);
+            // Faux signal recurrent n°2 (2026-08-13). Ce controle avait envoye 7 courriels
+            // « intervention rapide » depuis sa mise en service SANS jamais reveler un seul
+            // incident : verification faite le 2026-08-13, le site repondait en 0,2 s et
+            // l'endpoint aussi, au moment meme de l'alerte. La cause n'est pas une panne mais
+            // la nature de la mesure : un worker PHP-FPM adresse ici une requete HTTP a son
+            // PROPRE pool, sur un hebergement mutualise ou plusieurs sites executent des taches
+            // chaque minute. Une contention de quelques secondes suffit a faire expirer cet
+            // aller-retour alors que le site sert normalement les visiteurs.
+            //
+            // Un echec de connexion ISOLE n'est donc pas un signal : deux echecs CONSECUTIFS
+            // en sont un. Le premier reste silencieux (ok() SANS message, seul moyen de ne pas
+            // declencher de courriel - cf. la note plus bas sur getNotificationMessage()), mais
+            // il est compte ; le compteur est remis a zero des qu'une mesure reussit.
+            $cacheKey = (string) config('health.opcache.connection_failures_cache_key');
+            $consecutiveFailures = (int) Cache::get($cacheKey, 0) + 1;
+            Cache::forever($cacheKey, $consecutiveFailures);
+
+            $meta = ['erreur' => $exception->getMessage(), 'echecs_consecutifs' => $consecutiveFailures];
+
+            if ($consecutiveFailures >= (int) config('health.opcache.fail_after_consecutive_failures', 2)) {
+                return $result->failed("Impossible de mesurer OPcache : la connexion HTTP interne a échoué {$consecutiveFailures} fois d'affilée. Vérifiez APP_URL, le serveur web et PHP-FPM.")
+                    ->meta($meta);
+            }
+
+            return $result->meta($meta)->ok();
         } catch (Throwable $exception) {
             return $result->failed('Impossible de mesurer OPcache : la réponse HTTP est inexploitable. Vérifiez le point de contrôle interne.')
                 ->meta(['erreur' => $exception->getMessage()]);
         }
+
+        // La connexion a abouti : la serie d'echecs consecutifs est rompue. Remise a zero ici
+        // plutot que plus bas, car c'est bien la CONNEXION que ce compteur surveille, pas la
+        // qualite du JSON recu ni l'etat d'OPcache lui-meme.
+        Cache::forever((string) config('health.opcache.connection_failures_cache_key'), 0);
 
         if (! $this->isUsablePayload($payload)) {
             return $result->failed('Impossible de mesurer OPcache : le JSON reçu est incomplet. Vérifiez le point de contrôle interne et PHP-FPM.');

@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.171.0] - 2026-08-13
+
+### Corrigé
+- **Alerte de santé OPcache : 7 courriels « intervention rapide », 0 incident réel.** Vérification faite au moment même de la 7e alerte : le site répondait en 0,2 s et le point de contrôle aussi. La mesure d'OPcache est une requête HTTP que le serveur s'adresse à LUI-MÊME ; sur un pool PHP-FPM mutualisé où plusieurs sites exécutent des tâches chaque minute, une contention de quelques secondes suffit à la faire expirer alors que les visiteurs sont servis normalement. Le contrôle n'avait aucune reprise et un délai d'attente de 5 s : un seul hoquet déclenchait une alerte. Désormais : délai porté à 10 s, deux tentatives espacées de 500 ms, et surtout escalade sur échec CONSÉCUTIF - le premier échec de connexion est totalement silencieux mais compté, le second seulement déclenche l'alerte, et une mesure réussie remet le compteur à zéro. Un signal qui se déclenche 7 fois sans rien révéler est un signal à réparer, pas à acquitter.
+- La reprise est volontairement restreinte aux erreurs de CONNEXION, jamais aux réponses HTTP d'erreur : sans cette précaution (et sans `throw: false`), un 503 ne remontait plus intact jusqu'au bloc qui distingue le mode maintenance d'une vraie panne, et l'alerte serait repartie à chaque déploiement. Régression attrapée par les tests avant livraison, pas après.
+
+### Modifié
+- **Actus 2.0 : « AI » et « IA » ne comptent plus comme entités distinctives.** Sur un site de veille en intelligence artificielle, ces deux termes figurent dans une grande part des titres et n'identifient donc rien. Ils étaient pourtant absents des mots vides du calcul de similarité ET présents dans la liste des acronymes connus, ce qui leur faisait contourner à la fois le minimum de 4 caractères et le filtre des mots vides. Résultat concret retiré : « Chrome : supprimez les Aperçus IA de Google » était rapproché de « la future usine IA d'Amazon », deux articles sans aucun rapport reliés uniquement par le mot « IA ».
+- Les deux listes de mots vides, jusqu'ici codées en dur dans le service, vivent maintenant dans `Modules/News/config/fusion.php` (`stop_words`, `stop_entities`, `known_acronyms`, `generic_acronyms`) : ajustables sans toucher au code, conformément à la règle « zéro code en dur ». Le doublon « a » de la liste d'origine a été retiré au passage.
+- **Décision fondée sur une mesure, pas sur une intuition** : 5 000 paires d'articles réels échantillonnées (30 jours, fenêtre de 36 h, graine fixe, variante « avant » calculée en appelant la classe réellement déployée). Déduplication : 1 doublon détecté avant, 1 après, zéro perdu. Le seuil de déduplication n'a donc PAS été abaissé - le faire aurait fait remonter 18 paires qui sont des articles différents sur un même événement, ce qui relève du regroupement, pas de la déduplication. La limite qui subsiste est verrouillée par un test explicite plutôt que masquée.
+
 ## [1.170.0] - 2026-08-12
 
 ### Ajouté

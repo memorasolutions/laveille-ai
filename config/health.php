@@ -171,7 +171,17 @@ return [
         'enabled' => env('HEALTH_OPCACHE_ENABLED', false),
         'path' => env('HEALTH_OPCACHE_PATH', '_sante/opcache'),
         'token' => env('HEALTH_OPCACHE_TOKEN', ''),
-        'timeout' => env('HEALTH_OPCACHE_TIMEOUT', 5),
+        'timeout' => env('HEALTH_OPCACHE_TIMEOUT', 10),
+
+        // Tolerance aux contentions transitoires de PHP-FPM (2026-08-13). La mesure est une
+        // requete HTTP que le serveur s'adresse a LUI-MEME : sur un pool mutualise, elle peut
+        // expirer quelques secondes alors que le site sert normalement les visiteurs. Sans
+        // reprise ni seuil, 7 alertes « intervention rapide » ont ete envoyees sans qu'aucune
+        // ne corresponde a un incident reel.
+        'retry_times' => env('HEALTH_OPCACHE_RETRY_TIMES', 2),
+        'retry_sleep_ms' => env('HEALTH_OPCACHE_RETRY_SLEEP_MS', 500),
+        'fail_after_consecutive_failures' => env('HEALTH_OPCACHE_FAIL_AFTER_CONSECUTIVE_FAILURES', 2),
+        'connection_failures_cache_key' => env('HEALTH_OPCACHE_CONNECTION_FAILURES_CACHE_KEY', 'health:opcache:connection_failures'),
         'warn_keys_percent' => env('HEALTH_OPCACHE_WARN_KEYS_PERCENT', 75),
         'fail_keys_percent' => env('HEALTH_OPCACHE_FAIL_KEYS_PERCENT', 90),
         'warn_memory_percent' => env('HEALTH_OPCACHE_WARN_MEMORY_PERCENT', 75),

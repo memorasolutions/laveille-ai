@@ -123,20 +123,48 @@ it('alerte quand même sur un 503 SANS Retry-After (vraie saturation PHP-FPM)', 
     expect(OpcacheCheck::new()->run()->status->equals(Status::failed()))->toBeTrue();
 });
 
-it('affiche la marche à suivre "mesure impossible", jamais la procédure de capacité, sur un timeout', function () {
+it('reste silencieux au PREMIER echec de connexion, mais le compte', function () {
+    // 2026-08-13 : ce controle avait envoye 7 courriels « intervention rapide » sans qu'aucun
+    // ne corresponde a un incident (site verifie a 0,2 s au moment meme de l'alerte). Un echec
+    // de connexion ISOLE n'est pas un signal : la mesure est une requete HTTP que le serveur
+    // s'adresse a lui-meme, et une contention passagere de PHP-FPM suffit a la faire expirer.
+    // Le silence doit etre TOTAL : la librairie envoie un courriel des que le message n'est pas
+    // vide, quel que soit le statut - d'ou ok() sans argument, verifie ici par le message vide.
+    Cache::forget(config('health.opcache.connection_failures_cache_key'));
+
+    Http::fake(function () {
+        throw new \Illuminate\Http\Client\ConnectionException('cURL error 28: Operation timed out');
+    });
+
+    $result = OpcacheCheck::new()->run();
+
+    expect($result->status->equals(Status::ok()))->toBeTrue()
+        ->and($result->getNotificationMessage())->toBe('')
+        ->and($result->meta)->toHaveKey('echecs_consecutifs')
+        ->and($result->meta['echecs_consecutifs'])->toBe(1);
+});
+
+it('echoue et affiche la marche a suivre "mesure impossible" au DEUXIEME echec consecutif', function () {
     // Incident reel du 2026-08-01 21h11 Quebec : un timeout cURL (mesure impossible, aucun
     // pourcentage disponible) affichait quand meme « augmentez la directive saturee », une
     // consigne fausse pour ce cas puisqu'aucune capacite n'a pu etre mesuree.
+    // Depuis le 2026-08-13, un echec isole est ignore : seul le DEUXIEME echec consecutif
+    // declenche l'alerte, et c'est bien la marche a suivre « mesure impossible » qui doit
+    // alors s'afficher, jamais la procedure d'augmentation de capacite.
+    Cache::forget(config('health.opcache.connection_failures_cache_key'));
+
     Http::fake(function () {
         throw new \Illuminate\Http\Client\ConnectionException('cURL error 28: Operation timed out');
     });
 
     $check = OpcacheCheck::new();
+    $check->run();
     $result = $check->run();
     $result->check = $check;
 
     expect($result->status->equals(Status::failed()))->toBeTrue()
-        ->and($result->meta)->not->toHaveKey('keys_percent');
+        ->and($result->meta)->not->toHaveKey('keys_percent')
+        ->and($result->meta['echecs_consecutifs'])->toBe(2);
 
     $courriel = implode("\n", (new CheckFailedNotification([$result]))->toMail()->introLines);
 

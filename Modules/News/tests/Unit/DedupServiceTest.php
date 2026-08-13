@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 use Modules\News\Services\DedupService;
 
+// DedupService lit ses listes de mots vides depuis config('news.fusion.*') depuis le
+// 2026-08-13 (elles étaient codées en dur) : le conteneur Laravel est donc requis ici.
+uses(Tests\TestCase::class);
+
 test('normalizeUrl strips utm tracking params', function () {
     $input = 'https://example.com/article?id=42&utm_source=twitter&utm_medium=social';
     expect(DedupService::normalizeUrl($input))->toBe('https://example.com/article?id=42');
@@ -60,9 +64,14 @@ test('isLikelyDuplicate detects multi-signal duplicate via canonical and title f
 
 test('extractKeyEntities captures capitalized words and known acronyms', function () {
     $entities = DedupService::extractKeyEntities('Microsoft puts an AI legal agent inside Word for contract review');
+    // 2026-08-13 : « AI » ne compte plus comme entité distinctive (config 'generic_acronyms').
+    // Sur un site de veille en intelligence artificielle, il figure dans une grande part des
+    // titres et n'identifie donc rien ; il était le principal contributeur de faux
+    // rapprochements. Les acronymes réellement discriminants (GPT, RAG...) restent comptés,
+    // cf. Modules/News/tests/Unit/DedupServiceGenericAcronymTest.php.
     expect($entities)->toContain('microsoft')
         ->and($entities)->toContain('word')
-        ->and($entities)->toContain('AI');
+        ->and($entities)->not->toContain('AI');
 });
 
 test('jaccardKeywords excludes french and english stopwords', function () {
@@ -79,24 +88,62 @@ test('keyEntitiesIntersectionCount finds shared brand entities cross language', 
     expect(DedupService::keyEntitiesIntersectionCount($a, $b))->toBeGreaterThanOrEqual(2);
 });
 
-test('isLikelyDuplicate detects Microsoft Word legal agent cross source via entities and similarity', function () {
+test('isLikelyDuplicate detects a cross source duplicate on three real shared entities', function () {
+    // Detection cross-source par entites : trois entites REELLES partagees (microsoft, word,
+    // copilot) suffisent a elles seules, sans dependre d'un acronyme generique.
     $newArticle = [
         'url' => 'https://thedecoder.com/microsoft-word-legal-agent',
-        'title' => 'Microsoft puts an AI legal agent inside Word for contract review',
+        'title' => 'Microsoft puts a legal agent inside Word for Copilot users',
         'published_at' => '2026-05-01 09:15:00',
         'source_language' => 'en',
     ];
     $candidate = [
         'url' => 'https://theverge.com/microsoft-legal-agent-word',
-        'title' => 'Microsoft wants lawyers to trust its new AI agent in Word documents',
+        'title' => 'Microsoft brings its Copilot legal agent to Word documents',
         'published_at' => '2026-05-01 08:15:00',
         'source_language' => 'en',
     ];
     $result = DedupService::isLikelyDuplicate($newArticle, $candidate);
     expect($result['is_duplicate'])->toBeTrue()
         ->and($result['signals'])->toHaveKey('key_entities_match')
-        // Le reason courant est le code de signal le plus spécifique déclenché.
-        ->and($result['reason'])->toBe('key_entities_match');
+        // Le reason vaut 'multi_core' des que DEUX signaux principaux convergent, et
+        // 'key_entities_match' quand les entites sont le seul signal. Les deux sont corrects :
+        // 'multi_core' est meme un verdict PLUS fort. N'exiger ici que la presence du signal,
+        // pas un libelle precis - sinon le test casse au premier renforcement de la detection.
+        ->and($result['reason'])->toBeIn(['key_entities_match', 'multi_core']);
+});
+
+test('isLikelyDuplicate ne detecte PLUS un doublon qui ne tenait que par l acronyme AI', function () {
+    // LIMITE CONNUE ET ASSUMEE, documentee plutot que maquillee (2026-08-13).
+    // Ces deux titres traitent bien du MEME sujet. Ils etaient detectes comme doublons parce que
+    // « AI » comptait comme troisieme entite distinctive - un signal gratuit offert a la quasi
+    // totalite des articles d'un site de veille en intelligence artificielle, donc sans valeur
+    // discriminante. Une fois « AI » retire, il ne reste que 2 vraies entites (microsoft, word)
+    // et un Jaccard de 0,273, sous le seuil de 0,40 : la paire n'est plus retenue.
+    //
+    // Le seuil de deduplication n'a PAS ete abaisse pour la recuperer, et ce choix repose sur une
+    // mesure, pas sur une intuition : sur 5 000 paires reelles echantillonnees (30 jours, fenetre
+    // de 36 h), le retrait de « AI » n'a fait perdre AUCUN doublon. Abaisser le seuil a 2 entites
+    // aurait au contraire fait remonter 18 paires qui sont des articles DIFFERENTS sur un MEME
+    // evenement - le travail du clustering, pas celui de la deduplication.
+    //
+    // Ce test verrouille la limite : s'il redevient vert un jour, c'est qu'un changement a
+    // reintroduit un signal trop permissif dans la deduplication. Le verifier avant de s'en rejouir.
+    $newArticle = [
+        'url' => 'https://thedecoder.com/microsoft-word-ai-legal-agent',
+        'title' => 'Microsoft puts an AI legal agent inside Word for contract review',
+        'published_at' => '2026-05-01 09:15:00',
+        'source_language' => 'en',
+    ];
+    $candidate = [
+        'url' => 'https://theverge.com/microsoft-ai-legal-agent-word',
+        'title' => 'Microsoft wants lawyers to trust its new AI agent in Word documents',
+        'published_at' => '2026-05-01 08:15:00',
+        'source_language' => 'en',
+    ];
+    $result = DedupService::isLikelyDuplicate($newArticle, $candidate);
+    expect($result['signals'])->not->toHaveKey('key_entities_match')
+        ->and(DedupService::keyEntitiesIntersectionCount($newArticle['title'], $candidate['title']))->toBe(2);
 });
 
 test('isLikelyDuplicate avoids false positive on short generic titles with one shared entity', function () {
