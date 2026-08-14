@@ -17,6 +17,30 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.173.0 · 2026-08-14 · fix(annuaire) tools:reenrich-stale suspendue par défaut + porte de
+ *     qualité (incident SceneNote) - la commande mensuelle de re-enrichissement des fiches
+ *     périmées (~2355 fiches au catalogue) a écrit « aucune version officielle de cet outil ne
+ *     dispose d'un site web dédié » alors que l'adresse du produit figurait DÉJÀ dans la fiche
+ *     au moment de la régénération : le modèle avait la référence sous les yeux et a quand même
+ *     affirmé l'absence. Correctifs, dans l'ordre : (1) verrou dédié
+ *     DIRECTORY_REENRICH_STALE_ENABLED, défaut FALSE, sans contournement --force, même principe
+ *     que NEWS_SEO_PRUNE_ENABLED/HEALTH_NOTIFICATIONS_ENABLED (protection = défaut) ; (2) les
+ *     deux prompts (recherche sonar-pro puis rédaction qwen3-max) reçoivent désormais les
+ *     données déjà connues de la fiche (nom, URL, tarification, catégories) avec interdiction
+ *     explicite de les contredire, et une règle absolue interdisant d'affirmer qu'une chose
+ *     n'existe pas ou n'est pas disponible - une information non établie est omise, jamais
+ *     niée (même principe que la porte de qualité des résumés d'actualité, v1.172.0) ; (3) une
+ *     fiche dont la recherche ne donne rien reste inchangée (comportement déjà correct, non
+ *     modifié) ; (4) nouvelle porte EnrichmentQualityGate (Modules/Directory/app/Services)
+ *     rejetant toute description affirmant une absence ou citant une entité absente des données
+ *     de recherche/connues - technique reprise de Modules\News\Services\SummaryQualityGate
+ *     (v1.172.0) sans réutilisation de la classe : contrat de champs JSON incompatible
+ *     (résumé structuré multi-champs vs. bloc Markdown unique) et modules volontairement
+ *     indépendants (Directory ne doit pas dépendre d'une classe de News). Mutualisation dans
+ *     Modules/Core à envisager si un 3e domaine a le même besoin. 13 tests ajoutés (9 unitaires
+ *     EnrichmentQualityGateTest + 4 fonctionnels ReenrichStaleKillSwitchTest, dont la
+ *     reproduction exacte de la faute SceneNote) ; suite Directory 115 verts (102 avant, +13,
+ *     0 échec).
  *   1.172.1 · 2026-08-14 · fix(news) 'description' retiré des champs journalisés de NewsArticle
  *     (étape 4 de la procédure de purge du design doc "Actus - zéro copie du texte source",
  *     2026-08-13) - cette colonne va être purgée (32 840 lignes, texte intégral d'articles
@@ -3643,8 +3667,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 172;
-$lvPatch = 1;
+$lvMinor = 173;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

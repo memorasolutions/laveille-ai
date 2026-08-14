@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Modules\Directory\Models\Tool;
+use Modules\Directory\Services\EnrichmentQualityGate;
 use Modules\Directory\Services\OpenRouterService;
 
 class ReenrichStaleCommand extends Command
@@ -23,6 +24,18 @@ class ReenrichStaleCommand extends Command
             $this->error('Module Directory introuvable.');
 
             return self::FAILURE;
+        }
+
+        // Verrou dédié (défaut : désactivé) - voir Modules/Directory/config/config.php,
+        // clé reenrich_stale.enabled. Incident SceneNote 2026-08-14 : la commande a affirmé
+        // l'absence d'un site officiel qui figurait pourtant déjà dans la fiche. Volontairement
+        // AUCUN contournement --force ici : le point de cette protection est qu'elle ne se
+        // désactive pas par inadvertance tant que le correctif n'a pas été validé en conditions
+        // réelles (mettre DIRECTORY_REENRICH_STALE_ENABLED=true pour un essai contrôlé).
+        if (! (bool) config('directory.reenrich_stale.enabled', false)) {
+            $this->components->warn('tools:reenrich-stale désactivé (DIRECTORY_REENRICH_STALE_ENABLED=false par défaut).');
+
+            return self::SUCCESS;
         }
 
         if ($this->shouldSkipForKillSwitch('cron.ai-enrich')) {
@@ -59,23 +72,32 @@ class ReenrichStaleCommand extends Command
         $this->info("{$tools->count()} outil(s) périmé(s) à re-enrichir (seuil : {$months} mois).");
 
         $openRouter = new OpenRouterService;
+        $qualityGate = new EnrichmentQualityGate;
         $success = 0;
         $failures = 0;
 
         foreach ($tools as $tool) {
             $toolName = $tool->getTranslation('name', 'fr_CA', false) ?: $tool->name;
             $toolUrl = $tool->url ?? '';
+            $knownFacts = $this->buildKnownFacts($tool, $toolName, $toolUrl);
 
             $this->info("--- {$toolName} (ID:{$tool->id}, v{$tool->enrichment_version}) ---");
 
             try {
                 $this->line('  Recherche sonar-pro...');
                 $searchResult = $openRouter->search(
-                    "Outil IA {$toolName} ({$toolUrl}) : fonctionnalités, pricing détaillé (plans et prix), cas d'utilisation, avantages, inconvénients, public cible, alternatives. ".now()->format('F Y').'.'
+                    "Outil IA {$toolName} : fonctionnalités, pricing détaillé (plans et prix), cas d'utilisation, avantages, inconvénients, public cible, alternatives. ".now()->format('F Y').".\n\n"
+                    ."DONNÉES DÉJÀ CONNUES SUR CET OUTIL (vérifiées, à ne jamais contredire) :\n{$knownFacts}\n\n"
+                    .'RÈGLE ABSOLUE : ne conclus jamais qu\'un site officiel, une fonctionnalité ou un plan tarifaire '
+                    ."n'existe pas ou n'est pas disponible du seul fait que ta recherche ne l'a pas trouvé. Une "
+                    .'information que tu ne peux pas confirmer est OMISE de ta réponse, jamais présentée comme '
+                    .'absente ou inexistante.'
                 );
 
+                // Fiche conservée telle quelle si la recherche ne donne rien : une fiche imparfaite
+                // vaut mieux qu'une fiche remplacée par une description spéculative.
                 if (empty($searchResult)) {
-                    $this->warn('  Recherche vide. Ignoré.');
+                    $this->warn('  Recherche vide. Fiche existante conservée, ignoré.');
                     $failures++;
 
                     continue;
@@ -83,12 +105,28 @@ class ReenrichStaleCommand extends Command
 
                 $this->line('  Rédaction qwen3-max...');
                 $description = $openRouter->generate(
-                    "Rédige la fiche complète de {$toolName} ({$toolUrl}) avec ces sections H2 : À propos de {$toolName}, Fonctionnalités principales, Tarification, Cas d'utilisation, Notre avis. 800-1200 mots. Voici les informations :\n\n{$searchResult}",
-                    "Tu rédiges des fiches d'outils IA en français québécois professionnel pour laveille.ai. Structure Markdown H2. Accents parfaits. Pas de titre H1. Pas d'emoji. RÈGLE PRIX : exprime tout montant en dollars canadiens approximatifs (ex. « ≈ 27 \$ CA/mois ») ; précise la devise de facturation d'origine si différente (ex. « facturé ~20 \$ US ») ; n'écris jamais « \$ » seul (ambigu)."
+                    "Rédige la fiche complète de {$toolName} avec ces sections H2 : À propos de {$toolName}, Fonctionnalités principales, Tarification, Cas d'utilisation, Notre avis. 800-1200 mots.\n\n"
+                    ."DONNÉES DÉJÀ CONNUES SUR CETTE FICHE (vérifiées, à ne jamais contredire sans preuve contraire explicite dans les informations de recherche ci-dessous) :\n{$knownFacts}\n\n"
+                    ."INFORMATIONS DE RECHERCHE (peuvent être incomplètes) :\n{$searchResult}",
+                    'Tu rédiges des fiches d\'outils IA en français québécois professionnel pour laveille.ai. Structure Markdown H2. Accents parfaits. Pas de titre H1. Pas d\'emoji. '
+                    .'RÈGLE PRIX : exprime tout montant en dollars canadiens approximatifs (ex. « ≈ 27 $ CA/mois ») ; précise la devise de facturation d\'origine si différente (ex. « facturé ~20 $ US ») ; n\'écris jamais « $ » seul (ambigu). '
+                    .'RÈGLE ABSENCE (absolue) : n\'écris JAMAIS qu\'une chose n\'existe pas, n\'est pas disponible, ou n\'a pas de site officiel, de version gratuite, d\'API, etc. Une information que les données ci-dessus n\'établissent pas est OMISE de la fiche, jamais présentée comme une absence ou une inexistence. Ne contredis jamais les données déjà connues fournies dans ce prompt.'
                 );
 
                 if (empty($description) || mb_strlen($description) < 200) {
-                    $this->warn('  Génération trop courte. Ignoré.');
+                    $this->warn('  Génération trop courte. Fiche existante conservée, ignoré.');
+                    $failures++;
+
+                    continue;
+                }
+
+                $gateResult = $qualityGate->check($description, $searchResult, explode("\n", $knownFacts));
+                if (! $gateResult['ok']) {
+                    $this->warn("  Rejeté par la porte de qualité ({$gateResult['reason']}). Fiche existante conservée.");
+                    Log::warning("[ReenrichStale] Rejet porte de qualité {$toolName}", [
+                        'tool_id' => $tool->id,
+                        'reason' => $gateResult['reason'],
+                    ]);
                     $failures++;
 
                     continue;
@@ -115,6 +153,47 @@ class ReenrichStaleCommand extends Command
         $this->info("=== BILAN : {$success} re-enrichis, {$failures} échoués ===");
 
         return $failures > 0 && $success === 0 ? self::FAILURE : self::SUCCESS;
+    }
+
+    /**
+     * Rassemble les données déjà connues de la fiche (nom, URL, tarification, catégories) pour
+     * les injecter dans les deux prompts (recherche puis rédaction). Incident SceneNote
+     * 2026-08-14 : l'adresse du produit figurait déjà dans la fiche au moment de la
+     * régénération et le modèle a quand même affirmé qu'aucun site officiel n'existait -
+     * lui redonner explicitement ces faits, avec l'interdiction de les contredire, est la
+     * mesure qui aurait à elle seule évité cette erreur précise.
+     */
+    private function buildKnownFacts(Tool $tool, string $toolName, string $toolUrl): string
+    {
+        $facts = ["Nom : {$toolName}"];
+
+        if ($toolUrl !== '') {
+            $facts[] = "Site officiel déjà connu (vérifié, ne jamais affirmer son inexistence) : {$toolUrl}";
+        }
+
+        if (! empty($tool->pricing)) {
+            $facts[] = "Modèle de tarification déjà connu : {$tool->pricing}";
+        }
+
+        if (! empty($tool->affiliate_url)) {
+            $facts[] = "Lien affilié déjà en place : {$tool->affiliate_url}";
+        }
+
+        try {
+            $categoryNames = $tool->categories
+                ->map(fn ($category) => $category->getTranslation('name', 'fr_CA', false) ?: $category->name)
+                ->filter()
+                ->values()
+                ->all();
+        } catch (\Throwable) {
+            $categoryNames = [];
+        }
+
+        if (! empty($categoryNames)) {
+            $facts[] = 'Catégorie(s) déjà connue(s) : '.implode(', ', $categoryNames);
+        }
+
+        return implode("\n", $facts);
     }
 
     private function extractShortDescription(string $content, string $toolName): string

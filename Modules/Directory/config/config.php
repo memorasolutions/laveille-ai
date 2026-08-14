@@ -61,4 +61,32 @@ return [
     'leaderboard' => [
         'enabled' => (bool) env('DIRECTORY_LEADERBOARD_ENABLED', false),
     ],
+
+    /*
+     * tools:reenrich-stale — régénération mensuelle de la description des fiches périmées
+     * (>3 mois sans mise à jour), via recherche sonar-pro puis rédaction qwen3-max.
+     *
+     * Désactivé par défaut (2026-08-14) : sur la fiche SceneNote, la commande a écrit
+     * « aucune version officielle de cet outil ne dispose d'un site web dédié » alors que
+     * l'adresse du produit figurait DÉJÀ dans la fiche au moment de la régénération — le
+     * modèle avait la référence sous les yeux et a quand même affirmé l'absence. Le
+     * catalogue compte ~2355 fiches ; sans ce verrou, la même faussete peut être reproduite
+     * sur n'importe quel produit nommé, à chaque exécution mensuelle. Un réglage qui protège
+     * contre un défaut connu doit avoir la protection comme valeur par défaut (même principe
+     * que directory.category_alerts / directory.leaderboard ci-dessus, et que
+     * news.seo_prune.enabled) : si DIRECTORY_REENRICH_STALE_ENABLED est absent d'un
+     * environnement, le traitement reste éteint plutôt que de reprendre silencieusement sa
+     * génération fautive. Réactivation seulement après correctif du prompt (interdiction
+     * d'affirmer une absence, injection des données déjà connues) et porte de qualité
+     * (EnrichmentQualityGate) : DIRECTORY_REENRICH_STALE_ENABLED=true.
+     */
+    'reenrich_stale' => [
+        'enabled' => (bool) env('DIRECTORY_REENRICH_STALE_ENABLED', false),
+
+        // Porte de qualité (EnrichmentQualityGate) avant persistance d'une fiche régénérée.
+        // Sous-interrupteurs distincts pour pouvoir désactiver un seul contrôle en cas de faux
+        // positif mesuré, sans rouvrir l'ensemble de la porte.
+        'quality_gate_enabled' => (bool) env('DIRECTORY_REENRICH_STALE_QUALITY_GATE_ENABLED', true),
+        'entity_check_enabled' => (bool) env('DIRECTORY_REENRICH_STALE_ENTITY_CHECK_ENABLED', true),
+    ],
 ];

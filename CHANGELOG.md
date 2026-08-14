@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.173.0] - 2026-08-14
+
+### Corrigé
+- **La régénération mensuelle des fiches de l'annuaire est suspendue par défaut.** Sur la fiche d'un outil dont l'adresse officielle figurait déjà dans la base, cette commande a écrit qu'aucun site officiel n'existait - le modèle avait la référence sous les yeux et a quand même affirmé l'absence. Sur environ deux mille trois cent cinquante-cinq fiches, la même erreur pouvait se reproduire sur n'importe quel produit nommé, à chaque exécution. Un nouveau réglage, désactivé par défaut, doit être activé explicitement pour reprendre le traitement.
+- Les deux invites envoyées au modèle (recherche, puis rédaction) reçoivent désormais les données déjà connues de la fiche - adresse, tarification, catégories - avec l'interdiction de les contredire, et une règle interdisant d'affirmer qu'une chose n'existe pas ou n'est pas disponible : une information non établie est omise, jamais présentée comme une absence.
+- Une fiche dont la recherche ne retourne rien reste inchangée (comportement déjà correct, vérifié et maintenant couvert par un test).
+
+### Ajouté
+- Une porte de qualité dédiée contrôle chaque description générée avant son enregistrement : elle rejette toute affirmation d'absence et toute mention d'une entité absente des données de recherche ou déjà connues de la fiche.
+- Treize tests ajoutés, dont la reproduction exacte de la faute constatée ; suite du module concerné à cent quinze tests verts (cent deux avant, aucun échec).
+
 ## [1.172.1] - 2026-08-14
 
 ### Corrigé
