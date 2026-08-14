@@ -111,7 +111,10 @@ PROMPT;
             $flattened = trim((string) $article->flattenStructuredSummary());
 
             if ($flattened === '') {
-                $flattened = trim((string) ($article->summary ?? $article->description ?? ''));
+                // ACTION : description ne véhicule plus jamais le texte source (design doc
+                // "Actus - zéro copie du texte source", 2026-08-13, section 4.1).
+                // MCP: SELF (<5 lignes)
+                $flattened = trim((string) ($article->summary ?? ''));
             }
 
             return "- Titre : {$title}\n  Contenu : {$flattened}";

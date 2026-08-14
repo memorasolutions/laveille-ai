@@ -22,7 +22,18 @@ it('JsonLdService::newsArticle emits 2026 best-practice fields (R1+R2+R3+R4)', f
         'title' => 'OpenAI ships GPT-5.5',
         'seo_title' => 'GPT-5.5 : OpenAI dévoile son nouveau modèle',
         'meta_description' => 'OpenAI a annoncé GPT-5.5 le 8 mai 2026.',
-        'description' => 'Article complet sur GPT-5.5 avec faits, chiffres et citations expertes.',
+        // ACTION : articleBody/wordCount sont désormais dérivés du résumé structuré, jamais de
+        // description (design doc "Actus - zéro copie du texte source", 2026-08-13, section
+        // 4.3) - description reste vide, comme en production après le recâblage.
+        'description' => '',
+        'structured_summary' => [
+            'hook' => 'OpenAI dévoile GPT-5.5, un nouveau modèle avec des gains de performance mesurés.',
+            'key_points' => [
+                'Amélioration du raisonnement multi-étapes par rapport à GPT-5.',
+                'Disponible en priorité pour les abonnés entreprise.',
+            ],
+            'why_important' => 'Ce nouveau modèle change les capacités disponibles pour les développeurs francophones.',
+        ],
         'image_url' => 'https://laveille.ai/storage/news/images/123.webp',
         'category_tag' => 'IA générative',
         'pub_date' => now()->subHours(2),

@@ -83,16 +83,22 @@ class ReprocessArticlesCommand extends Command
                 }
             }
 
-            // Description : enrichir avec le contenu complet
-            if ($extracted['word_count'] > 100 && mb_strlen($extracted['content']) > mb_strlen($article->description ?? '')) {
-                $updateData['description'] = Str::limit($extracted['content'], 5000);
-            }
+            // ACTION : le texte extrait n'est plus jamais écrit dans description (design doc
+            // "Actus - zéro copie du texte source", 2026-08-13, section 4.1) - il reste en
+            // mémoire ($extracted['content']) et transite uniquement en argument vers le
+            // service de résumé ci-dessous.
+            // MCP: SELF (<5 lignes, suppression)
+            // RAISON: la colonne ne doit jamais véhiculer le texte source, même partiellement.
 
             // Résumé IA si contenu suffisant
             if ($extracted['word_count'] > 200) {
+                // pub_date transmise pour le contrôle de cohérence des années de
+                // SummaryQualityGate (2026-08-13).
                 $aiResult = app(AiSummaryService::class)->scoreAndSummarize(
                     $extracted['title'] ?: $article->title,
-                    $extracted['content']
+                    $extracted['content'],
+                    'fr',
+                    $article->pub_date
                 );
 
                 if ($aiResult && isset($aiResult['score'])) {

@@ -9,6 +9,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Modules\Core\Services\OpenRouterPrivacy;
 
 final class AnalyticsRecommendationService
 {
@@ -80,11 +81,11 @@ final class AnalyticsRecommendationService
                     'X-Title' => 'Author Insights',
                 ])
                 ->timeout(30)
-                ->post('https://openrouter.ai/api/v1/chat/completions', [
+                ->post('https://openrouter.ai/api/v1/chat/completions', OpenRouterPrivacy::applyTo([
                     'model' => 'qwen/qwen3-max',
                     'messages' => [['role' => 'user', 'content' => $prompt]],
                     'temperature' => 0.7,
-                ]);
+                ]));
 
             if (! $response->successful()) {
                 return null;

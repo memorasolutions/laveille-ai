@@ -2,7 +2,13 @@
 
 return [
     // Active/désactive l'élagage SEO automatique des anciennes actualités.
-    'enabled' => true,
+    // Défaut FALSE (2026-08-13) : le compteur de vues sous-jacent s'est révélé faussé et a
+    // désindexé 183 fiches qui recevaient réellement des clics Google (constat du 2026-08-13,
+    // traitement coupé à la main en prod via cette même clé). Un réglage qui protège contre un
+    // défaut connu doit avoir la protection comme valeur par défaut : si NEWS_SEO_PRUNE_ENABLED
+    // est absent d'un environnement (nouvel environnement, .env oublié...), le traitement reste
+    // éteint plutôt que de reprendre silencieusement son désindexage erroné.
+    'enabled' => (bool) env('NEWS_SEO_PRUNE_ENABLED', false),
 
     // Critères pour passer une vieille actualité peu vue en "noindex" (réversible).
     // Recalibrage 2026-08-09 (refus AdSense « contenu à faible valeur ») : le site n'a que

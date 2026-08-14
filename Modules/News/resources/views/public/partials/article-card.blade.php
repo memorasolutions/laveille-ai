@@ -113,11 +113,10 @@
         'Moyen' => 'nw-impact-mid',
         default => 'nw-impact-low',
     };
-    $readText = strip_tags($article->description ?? '') . ' ' . ($article->summary ?? '');
-    if ($ss) {
-        $readText .= ' ' . $article->flattenStructuredSummary();
-    }
-    $readMinutes = reading_time_minutes($readText);
+    // Temps de lecture calculé sur le résumé publié, jamais sur le texte source (design doc
+    // "Actus - zéro copie du texte source", 2026-08-13, section 4.5) : bloc réutilisable
+    // unique, identique à show.blade.php.
+    $readMinutes = reading_time_minutes($article->structuredBodyText());
 @endphp
 
 <article class="nw-card nw-impact-bar {{ $impactClass }}">
@@ -168,11 +167,14 @@
                      article et la liste admin. Voir components/admin-shared-dot.blade.php. --}}
                 <x-news::admin-shared-dot :article="$article" />{{ $article->seo_title ?? $article->title }}
             </h3>
+            {{-- Cascade accroche de carte (design doc section 4.5) : hook du résumé structuré,
+                 sinon NewsArticle::displayExcerpt() (résumé court, sinon accroche du résumé
+                 structuré, sinon repli configuré) - jamais $article->description. --}}
             <p class="nw-card-hook">
                 @if($ss && isset($ss['hook']))
                     {{ $ss['hook'] }}
                 @else
-                    {{ Str::limit($article->summary ?? strip_tags($article->description ?? ''), 120) }}
+                    {{ $article->displayExcerpt(120) }}
                 @endif
             </p>
             <div class="nw-meta">

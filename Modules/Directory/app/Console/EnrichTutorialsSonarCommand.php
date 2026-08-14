@@ -8,6 +8,7 @@ use App\Console\Concerns\HasKillSwitch;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Modules\Core\Services\OpenRouterPrivacy;
 use Modules\Directory\Models\Tool;
 use Modules\Directory\Models\ToolResource;
 use Modules\Directory\Services\YouTubeService;
@@ -120,7 +121,7 @@ class EnrichTutorialsSonarCommand extends Command
             'Content-Type' => 'application/json',
         ])
             ->timeout(60)
-            ->post('https://openrouter.ai/api/v1/chat/completions', [
+            ->post('https://openrouter.ai/api/v1/chat/completions', OpenRouterPrivacy::applyTo([
                 'model' => 'perplexity/sonar-pro',
                 'temperature' => 0.15,
                 'messages' => [
@@ -129,7 +130,7 @@ class EnrichTutorialsSonarCommand extends Command
                         'content' => "Trouve {$needed} tutoriels YouTube FR 2025-2026 récents pour \"{$toolName}\". Chaînes reconnues (pas spam), durées 5-60min, niveaux variés. IMPORTANT : retourne UNIQUEMENT un array JSON strict (zéro texte autour, zéro markdown fence). Format : [{\"url\": \"https://www.youtube.com/watch?v=XXX\", \"video_id\": \"XXX\", \"title\": \"...\", \"channel_name\": \"...\"}]. URLs doivent être réelles et vérifiées.",
                     ],
                 ],
-            ]);
+            ]));
 
         if (! $response->successful()) {
             return [];

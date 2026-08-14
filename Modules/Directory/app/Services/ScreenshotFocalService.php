@@ -24,6 +24,12 @@ class ScreenshotFocalService
     public const THUMB_HEIGHT = 630;
 
     /**
+     * Hauteur maximale conservee pour un maitre (plafond anti-page-infinie). Constante partagee
+     * avec DirectoryAdminController::deriveMasterFromUpload() - jamais recopiee en dur (DRY).
+     */
+    public const MAX_MASTER_HEIGHT = 1400;
+
+    /**
      * Derive la vignette 1200x630 du Tool a partir de son master et de son screenshot_focal_y
      * courant (deja borne en amont par le controleur, mais reborne ici par securite - jamais de
      * confiance dans une valeur venant d'ailleurs).

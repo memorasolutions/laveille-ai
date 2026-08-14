@@ -117,9 +117,12 @@ final class NewsToolSyncAction
     {
         GlossaryLinkifier::resetState();
 
+        // ACTION : description ne véhicule plus jamais le texte source (design doc "Actus -
+        // zéro copie du texte source", 2026-08-13, section 4.1) - retirée de la détection, déjà
+        // couverte par summary + le résumé structuré aplati ci-dessous.
+        // MCP: SELF (<5 lignes)
         $text = implode(' ', array_filter([
             strip_tags($article->title ?? ''),
-            strip_tags($article->description ?? ''),
             strip_tags($article->summary ?? ''),
             strip_tags($article->flattenStructuredSummary()),
         ]));

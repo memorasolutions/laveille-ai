@@ -14,6 +14,7 @@ use Intervention\Image\Drivers\Imagick\Driver as ImagickDriver;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Interfaces\ImageInterface;
 use Modules\Authors\Models\ImageVariant;
+use Modules\Core\Services\OpenRouterPrivacy;
 
 final class ImagePipelineService
 {
@@ -186,7 +187,7 @@ final class ImagePipelineService
 
             $response = Http::timeout(30)
                 ->withToken(config('services.openrouter.api_key'))
-                ->post('https://openrouter.ai/api/v1/chat/completions', [
+                ->post('https://openrouter.ai/api/v1/chat/completions', OpenRouterPrivacy::applyTo([
                     'model' => 'google/gemini-2.0-flash-exp:free',
                     'messages' => [[
                         'role' => 'user',
@@ -195,7 +196,7 @@ final class ImagePipelineService
                             ['type' => 'image_url', 'image_url' => ['url' => "data:{$mimeType};base64,{$base64Image}"]],
                         ],
                     ]],
-                ]);
+                ]));
 
             if (! $response->successful()) {
                 return null;

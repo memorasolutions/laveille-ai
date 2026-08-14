@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\View\View;
 use Modules\Authors\Models\AuthorPost;
 use Modules\Authors\Models\AuthorProfile;
+use Modules\Core\Services\ViewCounterService;
 
 final class PostController extends Controller
 {
@@ -23,7 +24,9 @@ final class PostController extends Controller
             ->public()
             ->firstOrFail();
 
-        $post->increment('views_count');
+        // Incident 2026-08-13 : increment views_count délégué au service partagé
+        // (filtre robots réel + déduplication rapprochée, jamais de casse de page).
+        ViewCounterService::record($post, 'views_count');
 
         $graph = [];
 

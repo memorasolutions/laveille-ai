@@ -15,6 +15,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
+use Modules\Core\Services\ViewCounterService;
 use Modules\Tools\Models\Tool;
 
 class PublicToolController extends Controller
@@ -51,10 +52,9 @@ class PublicToolController extends Controller
             return view('tools::public.under-construction', compact('tool'));
         }
 
-        // #190 : increment views_count (ignore HEAD + bots)
-        if (! request()->isMethod('HEAD') && Schema::hasColumn('tools', 'views_count')) {
-            try { Tool::where('id', $tool->id)->increment('views_count'); } catch (\Throwable $e) {}
-        }
+        // #190 - incident 2026-08-13 : increment views_count délégué au service partagé
+        // (filtre robots réel + déduplication rapprochée, jamais de casse de page).
+        ViewCounterService::record($tool, 'views_count');
 
         $this->trackUsage($slug);
 

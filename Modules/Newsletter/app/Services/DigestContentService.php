@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Modules\Core\Services\OpenRouterPrivacy;
 use Modules\Newsletter\Models\NewsletterIssue;
 
 /**
@@ -195,7 +196,7 @@ class DigestContentService
 
             $response = Http::withToken($apiKey)
                 ->timeout(15)
-                ->post('https://openrouter.ai/api/v1/chat/completions', [
+                ->post('https://openrouter.ai/api/v1/chat/completions', OpenRouterPrivacy::applyTo([
                     'model' => 'deepseek/deepseek-chat',
                     'messages' => [
                         [
@@ -209,7 +210,7 @@ class DigestContentService
                     ],
                     'temperature' => 0.8,
                     'max_tokens' => 150,
-                ]);
+                ]));
 
             if ($response->successful()) {
                 return self::stripMarkdown($response->json('choices.0.message.content') ?? '');
@@ -433,7 +434,7 @@ class DigestContentService
 
             $response = Http::withToken($apiKey)
                 ->timeout(20)
-                ->post('https://openrouter.ai/api/v1/chat/completions', [
+                ->post('https://openrouter.ai/api/v1/chat/completions', OpenRouterPrivacy::applyTo([
                     'model' => 'deepseek/deepseek-chat',
                     'messages' => [
                         [
@@ -447,7 +448,7 @@ class DigestContentService
                     ],
                     'temperature' => 0.8,
                     'max_tokens' => 400,
-                ]);
+                ]));
 
             if ($response->successful()) {
                 $text = self::stripMarkdown(trim($response->json('choices.0.message.content') ?? ''));

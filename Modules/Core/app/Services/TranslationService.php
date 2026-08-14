@@ -57,14 +57,14 @@ class TranslationService
                             'Authorization' => 'Bearer '.$apiKey,
                             'Content-Type' => 'application/json',
                         ])
-                        ->post(self::API_URL, [
+                        ->post(self::API_URL, OpenRouterPrivacy::applyTo([
                             'model' => $model,
                             'messages' => [
                                 ['role' => 'system', 'content' => $systemPrompt],
                                 ['role' => 'user', 'content' => $text],
                             ],
                             'temperature' => 0.3,
-                        ]);
+                        ]));
 
                     if ($response->successful()) {
                         $result = $response->json('choices.0.message.content', '');

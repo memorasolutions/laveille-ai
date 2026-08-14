@@ -147,6 +147,14 @@ class ScreenshotService
                 Log::info("Screenshot {$slug}: focal reinitialise de {$previousFocalY} a 0 suite a une nouvelle capture");
             }
             $tool->screenshot_focal_y = 0;
+            // ACTION: leve le marqueur de peremption (screenshot_master_stale) - ce chemin ecrit
+            // toujours un master frais a taille fixe (viewport 1200x1400, jamais de branche "trop
+            // court"), donc un ecart signale par une precedente recapture manuelle trop courte est
+            // desormais resolu par cette nouvelle capture automatique.
+            // MCP: SELF (< 5 lignes)
+            // RAISON: correctif 2026-08-14 - garde l'indicateur admin exact, jamais laisse "perime"
+            // apres qu'un master a jour a ete effectivement obtenu.
+            $tool->screenshot_master_stale = false;
             // ACTION: force le rafraîchissement du cache-bust ?v= même quand aucun attribut ne
             // change (recapture du même outil : chemin identique, focal déjà à 0 = rien de
             // « dirty », aucun UPDATE, donc ?v= servait l'ancienne image en cache).

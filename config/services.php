@@ -110,11 +110,24 @@ return [
 
     'openrouter' => [
         'api_key' => env('OPENROUTER_API_KEY'),
+        // Source de vérité UNIQUE de la cascade de modèles du résumé IA (Modules/News/AiSummaryService).
+        // Ordre choisi le 2026-08-13 pour la protection des données : openai/gpt-4o-mini en tête
+        // (politique de rétention publiée la plus protectrice parmi les modèles déjà utilisés,
+        // fournisseur identifiable) ; deepseek/deepseek-chat en dernier recours seulement (sa
+        // politique publiée admet une rétention sans durée bornée ET l'entraînement sur les
+        // données reçues - jamais en tête). google/gemma-3-27b-it:free retiré : fournisseur
+        // d'inférence non identifiable, donc politique invérifiable, incompatible avec la règle
+        // "le texte source n'est jamais conservé".
         'summary_models' => [
-            'deepseek/deepseek-chat',
             'openai/gpt-4o-mini',
-            'google/gemma-3-27b-it:free',
+            'deepseek/deepseek-chat',
         ],
+        // Refus de collecte des données par le fournisseur (OpenRouter provider preferences),
+        // valeur par défaut SÛRE = refus activé. https://openrouter.ai/docs/guides/routing/provider-selection
+        'data_collection' => env('OPENROUTER_DATA_COLLECTION', 'deny'),
+        // Mode sans rétention : ne route que vers des fournisseurs à politique Zero Data Retention.
+        // Valeur par défaut SÛRE = activé. https://openrouter.ai/docs/guides/features/zdr
+        'zdr' => env('OPENROUTER_ZDR', true),
     ],
 
     'browsershot' => [

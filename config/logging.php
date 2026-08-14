@@ -103,6 +103,20 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Porte de qualite des resumes IA News (2026-08-13) - canal dedie aux rejets de
+        // SummaryQualityGate (Modules\News\Services\AiSummaryService::callModelCascade).
+        // 'level' fixe en dur a 'info', volontairement INDEPENDANT de LOG_LEVEL, meme parade
+        // que le canal 'fusion' ci-dessus (LOG_LEVEL=error en prod avalerait sinon ces motifs
+        // de rejet avant ecriture, rendant impossible tout ajustement de seuils sur donnees
+        // reelles). Retention alignee sur les autres canaux 'daily' du projet.
+        'quality_gate' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/quality_gate.log'),
+            'level' => 'info',
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

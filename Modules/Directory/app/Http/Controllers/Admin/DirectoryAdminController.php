@@ -15,6 +15,7 @@ use Modules\Directory\Models\Category;
 use Modules\Directory\Models\Tool;
 use Modules\Directory\Models\ToolPricingReport;
 use Modules\Directory\Services\ScreenshotFocalService;
+use Modules\Directory\Services\ScreenshotMasterDerivationService;
 use Modules\Directory\Services\ScreenshotService;
 use Modules\Settings\Facades\Settings;
 
@@ -119,8 +120,14 @@ class DirectoryAdminController extends Controller
         $screenshotMasterRelative = $slug ? "screenshots/masters/{$slug}.jpg" : null;
         $hasScreenshotMaster = $screenshotMasterRelative && \Illuminate\Support\Facades\File::exists(public_path($screenshotMasterRelative));
         $screenshotMasterUrl = $hasScreenshotMaster ? asset($screenshotMasterRelative) : null;
+        // ACTION: transmet l'ecart maitre/capture courante a la vue (correctif 2026-08-14) - rendu
+        // VISIBLE cote admin plutot que tranche automatiquement (principe directeur de la brique 1).
+        // MCP: SELF (< 5 lignes)
+        // RAISON: Tool::screenshot_master_stale pose par deriveMasterFromUpload() quand une
+        // recapture trop courte conserve un master existant.
+        $isScreenshotMasterStale = (bool) $tool->screenshot_master_stale;
 
-        return view('directory::admin.edit', compact('tool', 'categories', 'hasScreenshotMaster', 'screenshotMasterUrl'));
+        return view('directory::admin.edit', compact('tool', 'categories', 'hasScreenshotMaster', 'screenshotMasterUrl', 'isScreenshotMasterStale'));
     }
 
     public function update(Request $request, Tool $tool): RedirectResponse
@@ -228,8 +235,10 @@ class DirectoryAdminController extends Controller
         // ACTION: derivation d'un master a partir du fichier source brut, AVANT l'appel au
         // service partage (qui reste, lui, strictement inchange - contrat News).
         // MCP: SELF (orchestration, logique dans deriveMasterFromUpload())
-        // RAISON: design doc 2026-08-10, brique 1, upload manuel.
-        $this->deriveMasterFromUpload($request->file('screenshot'), $slug);
+        // RAISON: design doc 2026-08-10, brique 1, upload manuel ; statut retourne corrige le
+        // 2026-08-14 (le point focal et l'indicateur de peremption suivent desormais ce que la
+        // derivation a reellement produit, plus un reset aveugle a chaque upload reussi).
+        $masterStatus = $this->deriveMasterFromUpload($request->file('screenshot'), $slug);
 
         $result = $uploader->upload(
             $request->file('screenshot'),
@@ -242,12 +251,22 @@ class DirectoryAdminController extends Controller
 
         if ($result['ok']) {
             // Verrouille le screenshot manuel : la régénération automatique ne doit jamais l'écraser.
-            // ACTION: remise à zéro du point focal - un nouveau master vient d'être dérivé, un
-            // ancien focal pointerait dans le vide (même décision que pour la capture automatique).
-            // MCP: SELF (<5 lignes)
-            // RAISON: cohérence avec ScreenshotService::capture() (design doc, brique 1).
             $tool->screenshot_locked = true;
-            $tool->screenshot_focal_y = 0;
+
+            // ACTION: le point focal et le marqueur de péremption ne sont touchés QUE si un nouveau
+            // maître valide vient d'être dérivé - jamais sur un maître conservé (stale) ni sur une
+            // absence de maître, pour ne jamais effacer un point focal réglé par l'administrateur.
+            // MCP: SELF (< 5 lignes)
+            // RAISON: correctif 2026-08-14 (perte de travail admin silencieuse, principe directeur
+            // « ne jamais détruire le travail de l'administrateur ») - remplace l'ancien reset
+            // inconditionnel de screenshot_focal_y à chaque upload réussi.
+            if ($masterStatus === self::MASTER_STATUS_CREATED) {
+                $tool->screenshot_focal_y = 0;
+                $tool->screenshot_master_stale = false;
+            } elseif ($masterStatus === self::MASTER_STATUS_KEPT_STALE) {
+                $tool->screenshot_master_stale = true;
+            }
+
             $tool->saveQuietly();
 
             return $wantsJson
@@ -261,55 +280,48 @@ class DirectoryAdminController extends Controller
     }
 
     /**
+     * Statuts retournes par deriveMasterFromUpload() - pilotent, cote appelant, la remise a zero
+     * du point focal et le marqueur de peremption (jamais un reset aveugle a chaque upload).
+     */
+    private const MASTER_STATUS_CREATED = 'created';
+
+    private const MASTER_STATUS_KEPT_STALE = 'kept_stale';
+
+    private const MASTER_STATUS_NONE = 'none';
+
+    /**
      * Brique 1 (design doc 2026-08-10) - derive un master pour le point focal a partir du fichier
-     * uploade brut. Largeur ramenee a 1200 (cover horizontal, aspect conserve) EN PREMIER, puis
-     * la hauteur RESULTANTE (apres scale) est testee - jamais la hauteur brute de la source. Une
-     * source etroite mais haute (ex. 600x900) devient donc un master valide une fois mise a
-     * l'echelle a 1200 de large, exactement comme le client (screenshot-capture.blade.php mode
-     * cadrage, meme regle scale-puis-teste). Hauteur plafonnee a 1400px maximum. N'affecte JAMAIS
+     * uploade brut. La regle scale-puis-teste (largeur ramenee a THUMB_WIDTH EN PREMIER, hauteur
+     * RESULTANTE comparee au minimum) vit desormais dans ScreenshotMasterDerivationService,
+     * extraite le 2026-08-14 pour etre reutilisee sans duplication par la commande de backfill
+     * (directory:backfill-screenshot-masters) - ce mapping ne fait plus qu'orchestrer le statut
+     * retourne vers le vocabulaire prive de ce controleur. N'affecte JAMAIS
      * ScreenshotUploadService::upload() (contrat partage avec News, laisse strictement inchange).
      *
-     * Correctifs revue adversariale 2026-08-10 (Codex) :
-     * - #3 (WYSIWYG) : test de hauteur deplace APRES scale(width:1200), plus avant.
-     * - #2 (master perime) : si la hauteur resultante ne depasse pas 630, un master EXISTANT est
-     *   supprime (jamais laisse en place) - c'est un artefact derive regenerable, pas une donnee
-     *   utilisateur, et un master perime ferait travailler "Recadrer" sur l'ancienne image.
+     * Principe directeur (correctif 2026-08-14, remplace la decision du 2026-08-10) : ne jamais
+     * detruire le travail de l'administrateur. Quand la nouvelle capture, une fois mise a
+     * l'echelle, n'atteint pas la hauteur minimale requise :
+     * - un master EXISTANT (et le point focal associe) est desormais CONSERVE intact - plus
+     *   jamais supprime silencieusement (l'ancienne version #2 du 2026-08-10 l'effacait, ce qui
+     *   effacait par ricochet un cadrage regle a la main par l'administrateur) ;
+     * - l'evenement est journalise avec son motif (dans le service, cote source unique) ;
+     * - l'ecart entre le master conserve et la capture courante devient VISIBLE cote admin via
+     *   Tool::screenshot_master_stale, jamais tranche automatiquement (cf. appelant dans
+     *   uploadScreenshot()).
+     * - si aucun master n'existait avant, rien ne change (comportement inchange).
      */
-    private function deriveMasterFromUpload(\Illuminate\Http\UploadedFile $file, string $slug): void
+    private function deriveMasterFromUpload(\Illuminate\Http\UploadedFile $file, string $slug): string
     {
         $masterPath = public_path("screenshots/masters/{$slug}.jpg");
+        $hadExistingMaster = \Illuminate\Support\Facades\File::exists($masterPath);
 
-        try {
-            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
-            $source = $manager->read($file->getRealPath());
+        $status = (new ScreenshotMasterDerivationService())->deriveFromSourcePath($file->getRealPath(), $slug);
 
-            $scaled = $source->scale(width: 1200);
-
-            if ($scaled->height() <= 630) {
-                // Pas assez de hauteur resultante pour justifier un master (focal indisponible,
-                // comme aujourd'hui) - mais un master d'une capture PRECEDENTE peut encore exister
-                // pour ce slug : le laisser en place le rendrait perime (le bouton "Recadrer"
-                // travaillerait sur l'ancienne image et l'ecraserait). On le supprime.
-                if (\Illuminate\Support\Facades\File::exists($masterPath)) {
-                    \Illuminate\Support\Facades\File::delete($masterPath);
-                }
-
-                return;
-            }
-
-            if ($scaled->height() > 1400) {
-                $scaled = $scaled->crop(1200, 1400, 0, 0);
-            }
-
-            $mastersDir = public_path('screenshots/masters');
-            if (! \Illuminate\Support\Facades\File::isDirectory($mastersDir)) {
-                \Illuminate\Support\Facades\File::makeDirectory($mastersDir, 0755, true);
-            }
-
-            file_put_contents($masterPath, $scaled->toJpeg(85)->toString());
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning("deriveMasterFromUpload: echec pour {$slug} - {$e->getMessage()}");
+        if ($status === ScreenshotMasterDerivationService::STATUS_CREATED) {
+            return self::MASTER_STATUS_CREATED;
         }
+
+        return $hadExistingMaster ? self::MASTER_STATUS_KEPT_STALE : self::MASTER_STATUS_NONE;
     }
 
     /**

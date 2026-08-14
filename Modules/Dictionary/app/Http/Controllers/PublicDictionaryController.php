@@ -13,6 +13,7 @@ namespace Modules\Dictionary\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
+use Modules\Core\Services\ViewCounterService;
 use Modules\Dictionary\Models\Category;
 use Modules\Dictionary\Models\Term;
 
@@ -58,9 +59,9 @@ class PublicDictionaryController extends Controller
             ->where('slug->'.app()->getLocale(), $slug)
             ->firstOrFail();
 
-        if (\Schema::hasColumn('dictionary_terms', 'views_count') && ! request()->isMethod('HEAD')) {
-            try { $term->incrementQuietly('views_count'); } catch (\Throwable $e) {}
-        }
+        // Colonne views_count jamais activée sur ce module (Schema::hasColumn gardé côté
+        // service) - ViewCounterService reste un no-op silencieux tant qu'elle n'existe pas.
+        ViewCounterService::record($term, 'views_count');
 
         $relatedTerms = Term::published()
             ->where('id', '!=', $term->id)

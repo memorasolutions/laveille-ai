@@ -8,6 +8,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Services\ViewCounterService;
 use Modules\News\Models\NewsArticle;
 
 class PublicNewsController extends Controller
@@ -70,8 +71,18 @@ class PublicNewsController extends Controller
         abort_if(! $article->is_published, 404);
         // Élagage SEO : une actualité marquée "gone" renvoie 410 (contenu retiré définitivement).
         abort_if(($article->seo_status ?? 'index') === 'gone', 410);
+        // ACTION : garde-fou permanent (design doc "Actus - zéro copie du texte source",
+        // 2026-08-13, section 4.4) - une fiche sans résumé exploitable ne peut jamais être
+        // servie publiquement avec un corps vide, quelle qu'en soit la cause.
+        // MCP: SELF (<5 lignes)
+        // RAISON: la colonne description ne porte plus aucun texte de repli.
+        abort_if(! $article->hasExploitableSummary(), 404);
 
-        $article->increment('views_count');
+        // Incident 2026-08-13 (mesuré : rapport vues/clics réels de 8 à 487x selon la
+        // fiche - cause de la désindexation erronée de 183 fiches par l'élagage SEO).
+        // increment views_count délégué au service partagé (filtre robots réel +
+        // déduplication rapprochée, jamais de casse de page).
+        ViewCounterService::record($article, 'views_count');
         // ACTION: charger source + outils liés publiés (maillage SEO, évite N+1 en vue)
         // MCP: SELF (<5 lignes)
         // RAISON: bloc « Outils mentionnés » dans show.blade

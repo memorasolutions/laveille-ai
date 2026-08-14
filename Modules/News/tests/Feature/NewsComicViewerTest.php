@@ -29,6 +29,9 @@ function makeComicArticle(int $sourceId, string $slug): NewsArticle
         'guid' => 'guid-'.$slug,
         'url' => 'https://exemple.com/'.$slug,
         'description' => 'Description de test pour '.$slug,
+        // Garde-fou anti-corps-vide (design doc "Actus - zéro copie du texte source",
+        // 2026-08-13, section 4.4) : une fiche publiée sans résumé n'est plus servie (404).
+        'summary' => 'Résumé de test pour '.$slug,
         'slug' => $slug,
         'pub_date' => now()->subDay(),
         'is_published' => true,

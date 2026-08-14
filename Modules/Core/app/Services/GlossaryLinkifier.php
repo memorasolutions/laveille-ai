@@ -21,7 +21,7 @@ use Illuminate\Support\Str;
  * Cache 1h via Model events (Term + Acronym).
  *
  * Usage:
- *   {!! GlossaryLinkifier::linkify($article->description) !!}
+ *   {!! GlossaryLinkifier::linkify($article->summary) !!}
  *   $matched = GlossaryLinkifier::extractMatchedTerms($html); // pour Schema.org
  */
 class GlossaryLinkifier

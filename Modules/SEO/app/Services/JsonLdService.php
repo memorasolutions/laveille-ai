@@ -186,7 +186,15 @@ final class JsonLdService
     {
         $headline = $article->seo_title ?? $article->title;
         $description = $article->meta_description ?? \Illuminate\Support\Str::limit($article->summary ?? '', 155);
-        $body = trim(strip_tags((string) ($article->description ?? '')));
+        // ACTION : articleBody publie NOTRE résumé, jamais le texte source (design doc "Actus -
+        // zéro copie du texte source", 2026-08-13, section 4.3) - structuredBodyText() est le
+        // bloc réutilisable unique pour ce rendu (aussi consommé par le temps de lecture et le
+        // garde-fou anti-corps-vide, cf. NewsArticle). $article est toujours une NewsArticle
+        // réelle ici (seul appelant : show.blade.php), la méthode existe donc toujours.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: republier le texte d'éditeur dans le JSON-LD était le problème d'origine (une
+        // fiche à 255 mots en français publiait 959 mots de texte source en anglais).
+        $body = trim(strip_tags((string) ($article->structuredBodyText() ?? '')));
         $wordCount = $body !== '' ? str_word_count($body) : null;
 
         $keywords = collect([

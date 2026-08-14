@@ -61,6 +61,9 @@ function nastArticle(int $sourceId, string $suffix = 'A'): NewsArticle
         'guid' => "guid-nast-{$suffix}",
         'url' => "https://exemple.com/nast-{$suffix}",
         'description' => "Description de test pour tracking {$suffix}",
+        // Garde-fou anti-corps-vide (design doc "Actus - zéro copie du texte source",
+        // 2026-08-13, section 4.4) : une fiche publiée sans résumé n'est plus servie (404).
+        'summary' => "Résumé de test pour tracking {$suffix}",
         'slug' => 'article-tracking-' . strtolower($suffix),
         'pub_date' => now()->subDay(),
         'is_published' => true,

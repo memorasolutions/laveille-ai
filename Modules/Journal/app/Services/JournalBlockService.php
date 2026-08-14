@@ -56,9 +56,21 @@ class JournalBlockService
         /** @var \Illuminate\Database\Eloquent\Model $source */
         $source = $modelClass::findOrFail($sourceId);
 
+        // ACTION : une source de type "news" publie désormais son résumé structuré, jamais le
+        // texte source (design doc "Actus - zéro copie du texte source", 2026-08-13, section
+        // 4.5) - via NewsArticle::displayExcerpt(), le bloc réutilisable unique de cette
+        // cascade. Les blocs Journal DÉJÀ CRÉÉS gardent leur instantané (payload figé en base,
+        // jamais recalculé après coup). method_exists() : jamais de dépendance dure de ce
+        // module vers une classe News (le module News reste désactivable sans casser ce code).
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: source->description ne véhicule plus le texte source pour les actualités.
+        $excerpt = ($type === 'news' && method_exists($source, 'displayExcerpt'))
+            ? $source->displayExcerpt(200)
+            : Str::limit(strip_tags($source->description ?? $source->definition ?? ''), 200);
+
         $payload = [
             'title' => $source->title ?? $source->name ?? '',
-            'excerpt' => Str::limit(strip_tags($source->description ?? $source->definition ?? ''), 200),
+            'excerpt' => $excerpt,
             'url' => route($routeName, $source->slug),
         ];
 

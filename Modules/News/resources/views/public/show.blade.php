@@ -14,7 +14,10 @@
 @endif
 
 @section('title', ($article->seo_title ?? $article->title) . ' - ' . __('Actualités') . ' - ' . config('app.name'))
-@section('meta_description', $article->meta_description ?? safe_excerpt($article->summary ?? strip_tags($article->description), 155))
+{{-- Cascade meta description (design doc "Actus - zéro copie du texte source", 2026-08-13,
+     section 4.5) : meta_description explicite, sinon NewsArticle::displayExcerpt() (résumé
+     court, sinon accroche du résumé structuré, sinon repli configuré) - jamais $article->description. --}}
+@section('meta_description', $article->meta_description ?? $article->displayExcerpt(155))
 @section('share_text')
 @php
     // Refonte share_text News - pattern viral 2026 aligné Blog (sonar-pro hybride #3+#1+#5)
@@ -110,7 +113,10 @@
 
 {{-- Meta AEO/LLM-first 2026 + Schema.org NewsArticle + FAQPage --}}
 @push('head')
-<meta name="llm:summary" content="{{ e($article->seo_title ?? $article->title) }} - {{ e(Str::limit(strip_tags($article->meta_description ?? $article->summary ?? $article->description ?? ''), 200)) }} ({{ e($article->source->name ?? 'Actualité IA') }})">
+{{-- Résumé pour agents (design doc section 4.5) : meta_description, sinon
+     NewsArticle::displayExcerpt() (résumé court, sinon rendu du résumé structuré, sinon repli
+     configuré catégorie+date) - jamais $article->description. --}}
+<meta name="llm:summary" content="{{ e($article->seo_title ?? $article->title) }} - {{ e($article->meta_description ?? $article->displayExcerpt(200)) }} ({{ e($article->source->name ?? 'Actualité IA') }})">
 <meta name="llm:keywords" content="actualité IA, {{ e($article->source->name ?? 'IA') }}, intelligence artificielle, francophone, Québec">
 <meta name="llm:url" content="{{ route('news.show', $article) }}">
 @if($ss && isset($ss['faq_question']))
@@ -203,6 +209,10 @@
         font-style: italic; color: #475569;
     }
     .nw-quote cite { display: block; margin-top: 0.5rem; font-size: 0.8125rem; color: #64748b; font-style: normal; }
+    /* Attribution citation (article 29.2 LDA) - lien vers l'article original, cf.
+       x-news::quote-attribution. */
+    .nw-quote-source-link { color: var(--c-primary); font-weight: 600; text-decoration: none; }
+    .nw-quote-source-link:hover { text-decoration: underline; }
     .nw-stat { display: inline-block; background: var(--c-primary); color: #fff; padding: 0.125rem 0.5rem; border-radius: 4px; font-weight: 700; font-size: 0.875rem; }
     .nw-expert { font-size: 0.875rem; color: #475569; margin: 0.5rem 0 0; }
     .nw-expert strong { color: var(--c-dark); }
@@ -252,12 +262,11 @@
                         {{ $article->seo_title ?? $article->title }}
                     </h1>
 
+                    {{-- Temps de lecture calculé sur le résumé publié, jamais sur le texte source
+                         (design doc section 4.5) : NewsArticle::structuredBodyText() est le
+                         bloc réutilisable unique du rendu intégral du résumé structuré. --}}
                     @php
-                        $readText = strip_tags($article->description ?? '') . ' ' . ($article->summary ?? '');
-                        if ($ss) {
-                            $readText .= ' ' . $article->flattenStructuredSummary();
-                        }
-                        $readMinutes = reading_time_minutes($readText);
+                        $readMinutes = reading_time_minutes($article->structuredBodyText());
                     @endphp
                     <div class="nw-meta-bar">
                         <span class="nw-pill">{{ $readMinutes }} min {{ __('de lecture') }}</span>
@@ -332,13 +341,15 @@
                         <p class="nw-lead">@glossarize(e($ss['hook']))</p>
                     @endif
 
-                    {{-- R10 - Citation verbatim extraite de la source externe (R7 AiSummary) --}}
+                    {{-- R10 - Citation verbatim extraite de la source externe (R7 AiSummary).
+                         Attribution complète (journaliste, média, date, lien original) via le
+                         composant réutilisable x-news::quote-attribution - conformité article
+                         29.2 Loi sur le droit d'auteur (design doc "Attribution citation 29.2
+                         LDA", 2026-08-13). --}}
                     @if($ss && !empty($ss['quote']))
                         <blockquote class="nw-quote" @if(!empty($article->resolved_url ?? $article->url)) cite="{{ $article->resolved_url ?? $article->url }}" @endif>
                             « @glossarize(e($ss['quote'])) »
-                            @if(!empty($article->source?->name))
-                                <cite>- {{ $article->source->name }}</cite>
-                            @endif
+                            <x-news::quote-attribution :article="$article" />
                         </blockquote>
                     @endif
 
@@ -438,12 +449,12 @@
                     </div>
                     @endif
 
-                    {{-- Description originale (seulement si pas de résumé structuré) --}}
-                    @if($article->description && !$ss)
-                    <div class="nw-desc">
-                        @glossarize(nl2br(e($article->description)))
-                    </div>
-                    @endif
+                    {{-- Le repli sur le texte source (ex-"Description originale") a été retiré
+                         (design doc "Actus - zéro copie du texte source", 2026-08-13, section
+                         4.5) : le corps est désormais le résumé structuré uniquement (bloc
+                         @if($ss) plus haut, avec repli @elseif($article->summary)). Le
+                         garde-fou anti-corps-vide (section 4.4) empêche toute fiche sans résumé
+                         exploitable d'être servie ici (PublicNewsController::show(), 404). --}}
 
                     {{-- Schema.org JSON-LD DefinedTermSet (couvre les zones glossarized ci-dessus) --}}
                     @include('core::partials.glossary-jsonld')

@@ -14,6 +14,7 @@ use Modules\News\Models\NewsSource;
 use Modules\News\Services\AiSummaryService;
 use Modules\News\Services\ArchiveContextService;
 use Modules\News\Services\ArticleClusteringService;
+use Modules\News\Services\ContentExtractor;
 use Modules\News\Services\DedupService;
 use Modules\News\Services\RssFetcherService;
 use Modules\Settings\Facades\Settings;
@@ -71,10 +72,20 @@ class FetchNewsCommand extends Command
         $fusionEnabled = (bool) config('news.fusion.enabled', false);
         $fusionCandidates = [];
 
+        // ACTION : le texte source ne transite plus jamais par la colonne description (design
+        // doc "Actus - zéro copie du texte source", 2026-08-13, section 4.1) - RssFetcherService
+        // le retourne par article, on le garde ici en mémoire pour CETTE exécution et on le
+        // passe explicitement en argument au service de résumé plus bas.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: aucune propriété du modèle ne doit servir de véhicule au texte source.
+        $textsByArticleId = [];
+
         foreach ($sources as $source) {
             $this->info("Récupération : {$source->name}");
-            $fetched = $fetcher->fetchSource($source);
+            $fetchResult = $fetcher->fetchSource($source);
+            $fetched = $fetchResult['count'];
             $totalFetched += $fetched;
+            $textsByArticleId += $fetchResult['texts'];
             $this->line("  {$fetched} nouveaux articles");
 
             $feedType = $this->detectFeedType($source);
@@ -91,8 +102,17 @@ class FetchNewsCommand extends Command
                 ->get();
 
             foreach ($toProcess as $article) {
+                // ACTION : texte source de CET article - en mémoire depuis cette exécution, sinon
+                // re-téléchargé (design doc section 4.1 : « toute reprise exige de
+                // re-télécharger »). Jamais lu depuis $article->description.
+                // MCP: SELF (<5 lignes utiles, appel à resolveArticleText())
+                // RAISON: couvre l'article déjà créé lors d'une exécution précédente (quota
+                // atteint, jamais résumé) - son GUID existe déjà, il ne repasse jamais par
+                // RssFetcherService::fetchSource().
+                $text = $this->resolveArticleText($article, $textsByArticleId);
+
                 // Pré-filtre mots-clés (gratuit)
-                if (! $summarizer->isRelevant($article->title, $article->description)) {
+                if (! $summarizer->isRelevant($article->title, $text)) {
                     $article->update([
                         'is_published' => false,
                         'summary' => '[non pertinent - mots-clés]',
@@ -188,12 +208,13 @@ class FetchNewsCommand extends Command
                 // RAISON: flag OFF => cette branche n'est jamais empruntée, chemin existant
                 // (lignes suivantes) strictement inchangé.
                 if ($fusionEnabled) {
-                    $fusionCandidates[] = ['article' => $article, 'feedType' => $feedType];
+                    $fusionCandidates[] = ['article' => $article, 'feedType' => $feedType, 'text' => $text];
                     continue;
                 }
 
-                // Score + résumé IA (1 seul appel)
-                $result = $summarizer->scoreAndSummarize($article->title, $article->description, $source->language);
+                // Score + résumé IA (1 seul appel) - pub_date transmise pour le contrôle de
+                // cohérence des années de SummaryQualityGate (2026-08-13).
+                $result = $summarizer->scoreAndSummarize($article->title, $text, $source->language, $article->pub_date);
 
                 if (! $result) {
                     $article->update(['summary' => '[échec IA]', 'feed_type' => $feedType]);
@@ -264,7 +285,7 @@ class FetchNewsCommand extends Command
      * sont appliqués ici à l'échelle du GROUPE (feed_type du premier membre) plutôt que par
      * article individuel, puisqu'un groupe produit une seule décision de publication.
      *
-     * @param  array<int, array{article: NewsArticle, feedType: string}>  $fusionCandidates
+     * @param  array<int, array{article: NewsArticle, feedType: string, text: string}>  $fusionCandidates
      * @return array{0: int, 1: int} [totalPublished, totalFiltered]
      */
     private function processFusionCandidates(
@@ -284,8 +305,14 @@ class FetchNewsCommand extends Command
 
         $articles = array_map(static fn (array $c) => $c['article'], $fusionCandidates);
         $feedTypeByArticleId = [];
+        // ACTION : texte source par article, gardé en mémoire depuis la boucle de récupération
+        // (design doc section 4.1) - jamais relu depuis $article->description ci-dessous.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: alimente le chemin singleton ET le chemin groupe de cette même méthode.
+        $textsByArticleId = [];
         foreach ($fusionCandidates as $c) {
             $feedTypeByArticleId[$c['article']->id] = $c['feedType'];
+            $textsByArticleId[$c['article']->id] = $c['text'] ?? '';
         }
 
         $clusters = $clusteringService->cluster($articles);
@@ -311,7 +338,7 @@ class FetchNewsCommand extends Command
         foreach ($clusters['singletons'] as $article) {
             $feedType = $feedTypeByArticleId[$article->id] ?? 'techno';
 
-            $result = $summarizer->scoreAndSummarize($article->title, $article->description, $article->source->language ?? 'fr');
+            $result = $summarizer->scoreAndSummarize($article->title, $textsByArticleId[$article->id] ?? '', $article->source->language ?? 'fr', $article->pub_date);
 
             if (! $result) {
                 $article->update(['summary' => '[échec IA]', 'feed_type' => $feedType]);
@@ -387,15 +414,22 @@ class FetchNewsCommand extends Command
                 $digestArticle->id
             );
 
+            // Référence temporelle du groupe = pub_date la plus récente parmi ses membres, pour
+            // le contrôle de cohérence des années de SummaryQualityGate (2026-08-13) - la
+            // synthèse porte sur le développement le plus récent du sujet couvert.
+            $groupReferenceDate = collect($group)->max(fn (NewsArticle $a) => $a->pub_date);
+
             $result = $summarizer->scoreAndSummarizeGroup(
                 array_map(static fn (NewsArticle $a) => [
                     'title' => $a->title,
                     'url' => $a->resolved_url ?: $a->url,
                     'author' => $a->author,
                     'source_name' => $a->source->name ?? null,
-                    'text' => $a->description,
+                    'text' => $textsByArticleId[$a->id] ?? '',
                 ], $group),
-                $archiveContext
+                $archiveContext,
+                'fr',
+                $groupReferenceDate
             );
 
             if (! $result) {
@@ -591,6 +625,31 @@ class FetchNewsCommand extends Command
     private function pluralizeGroupSize(int $size): string
     {
         return $size.' '.($size > 1 ? 'sources' : 'source');
+    }
+
+    /**
+     * ACTION : texte source pour le scoring de CET article - jamais lu depuis
+     * $article->description (design doc "Actus - zéro copie du texte source", 2026-08-13,
+     * section 4.1). Priorité au texte déjà extrait CETTE exécution (fourni par
+     * RssFetcherService::fetchSource()) ; à défaut, re-téléchargé à la volée.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: bloc réutilisable UNIQUE pour ce besoin - seul appelant du couple
+     * ContentExtractor::extract()/résolution d'URL pour un article déjà en base dans cette
+     * commande (le chemin singleton, les candidats de fusion et les groupes s'y alimentent
+     * tous via $textsByArticleId, jamais une deuxième implémentation).
+     *
+     * @param  array<int, string>  $textsByArticleId
+     */
+    private function resolveArticleText(NewsArticle $article, array $textsByArticleId): string
+    {
+        if (isset($textsByArticleId[$article->id])) {
+            return $textsByArticleId[$article->id];
+        }
+
+        $url = $article->resolved_url ?: $article->url;
+        $extracted = app(ContentExtractor::class)->extract($url);
+
+        return $extracted['content'] ?? '';
     }
 
     private function detectFeedType(NewsSource $source): string

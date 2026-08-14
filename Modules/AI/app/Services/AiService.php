@@ -13,6 +13,7 @@ namespace Modules\AI\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Modules\AI\Exceptions\AiBudgetExceededException;
+use Modules\Core\Services\OpenRouterPrivacy;
 use Modules\Settings\Models\Setting;
 
 class AiService
@@ -68,12 +69,12 @@ class AiService
                 'HTTP-Referer' => config('app.url'),
             ])
                 ->retry(2, 100)
-                ->post(self::API_URL, [
+                ->post(self::API_URL, OpenRouterPrivacy::applyTo([
                     'model' => $model,
                     'messages' => $messages,
                     'temperature' => (float) Setting::get('ai.temperature', '0.7'),
                     'max_tokens' => (int) Setting::get('ai.max_tokens', '2048'),
-                ]);
+                ]));
 
             $response->throw();
 
@@ -208,12 +209,12 @@ class AiService
                 'HTTP-Referer' => config('app.url'),
             ])
                 ->retry(2, 100)
-                ->post(self::API_URL, [
+                ->post(self::API_URL, OpenRouterPrivacy::applyTo([
                     'model' => $model,
                     'messages' => $messages,
                     'temperature' => (float) Setting::get('ai.temperature', '0.7'),
                     'max_tokens' => (int) Setting::get('ai.max_tokens', '2048'),
-                ]);
+                ]));
 
             $response->throw();
 
@@ -551,12 +552,12 @@ class AiService
                 'HTTP-Referer' => config('app.url'),
             ])
                 ->withOptions(['stream' => true, 'timeout' => 120])
-                ->post(self::API_URL, [
+                ->post(self::API_URL, OpenRouterPrivacy::applyTo([
                     'model' => $model,
                     'messages' => $messages,
                     'stream' => true,
                     'temperature' => (float) Setting::get('ai.temperature', '0.7'),
-                ]);
+                ]));
 
             /** @var \Psr\Http\Message\StreamInterface $body */
             $body = $response->toPsrResponse()->getBody();

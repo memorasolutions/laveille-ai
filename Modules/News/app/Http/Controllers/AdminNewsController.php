@@ -97,7 +97,11 @@ class AdminNewsController extends Controller
 
     public function fetchNow(NewsSource $source, RssFetcherService $fetcher): RedirectResponse
     {
-        $count = $fetcher->fetchSource($source);
+        // ACTION : fetchSource() retourne désormais ['count' => int, 'texts' => array] (design
+        // doc "Actus - zéro copie du texte source", 2026-08-13, section 4.1) - seul le compteur
+        // sert ici, cette action ne score rien.
+        // SELF: correction <5 lignes
+        $count = $fetcher->fetchSource($source)['count'];
 
         return back()->with('success', __(':count articles récupérés pour :name.', ['count' => $count, 'name' => $source->name]));
     }
@@ -216,10 +220,20 @@ class AdminNewsController extends Controller
 
     public function rescoreArticle(NewsArticle $article, AiSummaryService $aiService): RedirectResponse
     {
-        // ACTION: passer titre et texte séparément (la signature exige 2 arguments)
-        // SELF: correction <5 lignes
-        // RAISON: l'appel à 1 argument levait une ArgumentCountError (« Rescorer » cassé)
-        $result = $aiService->scoreAndSummarize($article->title, $article->description ?? '');
+        // ACTION : la colonne description ne véhicule plus jamais le texte source (design doc
+        // "Actus - zéro copie du texte source", 2026-08-13, section 4.1) - rescorer une fiche
+        // déjà existante exige de re-télécharger sa source, gardée en mémoire le temps de cet
+        // appel seulement, exactement comme news:reprocess.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: sans ce re-téléchargement, cette action générerait un résumé à partir du
+        // titre seul, silencieusement - le risque exact que le design doc met en garde.
+        $sourceUrl = $article->resolved_url ?: $article->url;
+        $extracted = app(\Modules\News\Services\ContentExtractor::class)->extract($sourceUrl);
+        $sourceText = $extracted['content'] ?? '';
+
+        // pub_date transmise pour le contrôle de cohérence des années de SummaryQualityGate
+        // (2026-08-13).
+        $result = $aiService->scoreAndSummarize($article->title, $sourceText, 'fr', $article->pub_date);
 
         if ($result) {
             $article->update([

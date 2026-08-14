@@ -254,6 +254,18 @@
                     }"
                 >
                     <h6 class="mb-2">{{ __('Repositionner la vignette') }}</h6>
+                    {{-- Correctif 2026-08-14 : indicateur visible quand une recapture trop courte a
+                         conserve un master existant (perime) plutôt que de le supprimer/l'ecraser
+                         silencieusement - l'ecart n'est jamais tranche automatiquement, il est montre. --}}
+                    @if($hasScreenshotMaster && $isScreenshotMasterStale)
+                        <div class="alert alert-warning d-flex align-items-start gap-2 py-2 px-3 mb-2" role="alert">
+                            <i data-lucide="alert-triangle" aria-hidden="true" style="flex-shrink:0;margin-top:2px;"></i>
+                            <div class="small">
+                                <strong>{{ __('Image maître périmée.') }}</strong>
+                                {{ __('La dernière recapture était trop courte une fois mise à l\'échelle : le cadrage ci-dessous s\'applique encore à une capture antérieure de cette page. Le point focal réglé a été conservé tel quel.') }}
+                            </div>
+                        </div>
+                    @endif
                     @if($hasScreenshotMaster)
                         <p class="text-muted small mb-2">{{ __('Choisissez quelle partie de la capture complète apparaît dans la vignette 1200×630 affichée publiquement.') }}</p>
                         <div class="d-flex flex-column flex-md-row gap-3 align-items-start">

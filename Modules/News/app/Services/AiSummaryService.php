@@ -6,16 +6,11 @@ namespace Modules\News\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Modules\Core\Services\OpenRouterPrivacy;
 use Modules\Settings\Facades\Settings;
 
 class AiSummaryService
 {
-    private const DEFAULT_MODELS = [
-        'deepseek/deepseek-chat',
-        'openai/gpt-4o-mini',
-        'google/gemma-3-27b-it:free',
-    ];
-
     /**
      * Vérifie si l'article est pertinent via mots-clés (pré-filtre gratuit).
      */
@@ -41,8 +36,12 @@ class AiSummaryService
     /**
      * Score + résumé structuré en 1 seul appel API.
      * Retourne le JSON parsé ou null si échec.
+     *
+     * @param  ?\DateTimeInterface  $publishedAt  Date de publication de l'article, transmise à
+     *         SummaryQualityGate pour le contrôle de cohérence des années (2026-08-13). Repli
+     *         sur "aujourd'hui" côté porte si absente - jamais bloquant.
      */
-    public function scoreAndSummarize(string $title, string $text, string $language = 'fr'): ?array
+    public function scoreAndSummarize(string $title, string $text, string $language = 'fr', ?\DateTimeInterface $publishedAt = null): ?array
     {
         $apiKey = config('services.openrouter.api_key');
         if (! $apiKey) {
@@ -50,7 +49,6 @@ class AiSummaryService
             return null;
         }
 
-        $models = config('services.openrouter.summary_models', self::DEFAULT_MODELS);
         $truncatedText = mb_substr($text, 0, 4000);
         $minScore = (int) Settings::get('news.min_relevance_score', 7);
 
@@ -109,7 +107,7 @@ Article :
 {$truncatedText}
 PROMPT;
 
-        return $this->callModelCascade($prompt, $title);
+        return $this->callModelCascade($prompt, $title, $truncatedText, $publishedAt);
     }
 
     /**
@@ -126,15 +124,20 @@ PROMPT;
      *
      * @param  array<int, array{title: string, url: string, author: ?string, source_name: ?string, text: string}>  $articles
      * @param  array<int, array{title: string, url: string, date: string}>  $archiveContext
+     * @param  ?\DateTimeInterface  $referenceDate  Date retenue pour le controle de coherence des
+     *         annees de SummaryQualityGate (typiquement la plus recente pub_date du groupe) -
+     *         voir scoreAndSummarize().
      */
-    public function scoreAndSummarizeGroup(array $articles, array $archiveContext, string $language = 'fr'): ?array
+    public function scoreAndSummarizeGroup(array $articles, array $archiveContext, string $language = 'fr', ?\DateTimeInterface $referenceDate = null): ?array
     {
         $sourcesCount = count($articles);
 
         $sourcesBlock = '';
+        $combinedSourceText = '';
         foreach ($articles as $index => $item) {
             $num = $index + 1;
             $truncated = mb_substr((string) ($item['text'] ?? ''), 0, 4000);
+            $combinedSourceText .= "\n".$truncated;
             $sourcesBlock .= "\n--- Source {$num} ---\n";
             $sourcesBlock .= 'Média : '.($item['source_name'] ?? 'Inconnu')."\n";
             $sourcesBlock .= 'Auteur : '.($item['author'] ?? 'Non précisé')."\n";
@@ -216,7 +219,7 @@ Contexte d'archives internes :
 {$archiveBlock}
 PROMPT;
 
-        return $this->callModelCascade($prompt, 'GROUPE:'.($articles[0]['title'] ?? ''));
+        return $this->callModelCascade($prompt, 'GROUPE:'.($articles[0]['title'] ?? ''), $combinedSourceText, $referenceDate);
     }
 
     /**
@@ -224,8 +227,17 @@ PROMPT;
      * scoreAndSummarize() (singleton) et scoreAndSummarizeGroup() (groupe Actus 2.0).
      * MCP: SELF (extraction pure, code identique à l'ancien corps de scoreAndSummarize())
      * RAISON: DRY explicite du mandat - jamais dupliquer la logique de cascade/retry.
+     *
+     * ACTION : porte de qualité (design doc "Actus - zéro copie du texte source", 2026-08-13,
+     * section 4.2) branchée ICI, au seul point de sortie commun aux deux chemins (singleton et
+     * groupe) - un résumé qui échoue le contrôle est traité EXACTEMENT comme un JSON invalide :
+     * relance sur le modèle suivant pendant que $sourceText est encore en mémoire.
+     * MCP: SELF (<5 lignes utiles, branchement)
+     * RAISON: bloc réutilisable unique (SummaryQualityGate) - jamais de logique de contrôle
+     * recopiée par appelant ; couvre automatiquement news:fetch, news:reprocess et le
+     * rescorage admin, qui passent tous par scoreAndSummarize()/scoreAndSummarizeGroup().
      */
-    private function callModelCascade(string $prompt, string $logLabel): ?array
+    private function callModelCascade(string $prompt, string $logLabel, string $sourceText = '', ?\DateTimeInterface $referenceDate = null): ?array
     {
         $apiKey = config('services.openrouter.api_key');
         if (! $apiKey) {
@@ -233,17 +245,25 @@ PROMPT;
             return null;
         }
 
-        $models = config('services.openrouter.summary_models', self::DEFAULT_MODELS);
+        $models = config('services.openrouter.summary_models', []);
 
         foreach ($models as $index => $model) {
             try {
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $apiKey,
-                ])->timeout(45)->post('https://openrouter.ai/api/v1/chat/completions', [
+                // ACTION : bloc partagé Modules\Core\Services\OpenRouterPrivacy - refus de
+                // collecte des données par le fournisseur (le texte source d'un article ne
+                // doit jamais être conservé par le sous-traitant IA).
+                // MCP: SELF (appel du bloc partagé, < 5 lignes)
+                // RAISON: DRY explicite du mandat - une seule définition des préférences,
+                // jamais recopiée entre services.
+                $payload = OpenRouterPrivacy::applyTo([
                     'model' => $model,
                     'messages' => [['role' => 'user', 'content' => $prompt]],
                     'temperature' => 0.3,
                 ]);
+
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $apiKey,
+                ])->timeout(45)->post('https://openrouter.ai/api/v1/chat/completions', $payload);
 
                 $data = $response->json();
 
@@ -255,11 +275,24 @@ PROMPT;
 
                     $parsed = json_decode($content, true);
                     if ($parsed && isset($parsed['score'])) {
-                        Log::info("News summary OK [{$model}]: score={$parsed['score']} - {$logLabel}");
-                        return $parsed;
-                    }
+                        $gate = app(SummaryQualityGate::class)->check($parsed, $sourceText, $referenceDate);
 
-                    Log::warning("News summary invalid JSON [{$model}]: " . mb_substr($content, 0, 200));
+                        if ($gate['ok']) {
+                            Log::info("News summary OK [{$model}]: score={$parsed['score']} - {$logLabel}");
+                            return $parsed;
+                        }
+
+                        // Refus normal du pipeline (design doc section 4.2) : le texte source
+                        // est encore en mémoire, on relance sur le modèle suivant de la cascade.
+                        // Canal DÉDIÉ 'quality_gate' (2026-08-13, même parade que le canal
+                        // 'fusion' existant) : INDÉPENDANT de LOG_LEVEL, pour ne jamais perdre
+                        // ces motifs de rejet en prod (LOG_LEVEL=error avalerait sinon un
+                        // Log::warning par défaut avant écriture) - condition nécessaire pour
+                        // pouvoir ajuster les seuils sur des données réelles plus tard.
+                        Log::channel('quality_gate')->warning("News summary rejected by quality gate [{$model}]: {$gate['reason']} - {$logLabel}");
+                    } else {
+                        Log::warning("News summary invalid JSON [{$model}]: " . mb_substr($content, 0, 200));
+                    }
                 } else {
                     $errorMessage = $data['error']['message'] ?? 'Réponse invalide';
                     Log::warning("News summary API error [{$model}]: {$errorMessage}");

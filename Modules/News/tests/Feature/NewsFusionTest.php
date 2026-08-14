@@ -74,14 +74,28 @@ function nfusArticle(NewsSource $source, string $slug, string $title, $pubDate =
     ]);
 }
 
-/** Neutralise RssFetcherService (les articles sont déjà pré-semés) : zéro appel réseau réel. */
+/**
+ * Neutralise RssFetcherService (les articles sont déjà pré-semés) : zéro appel réseau réel.
+ *
+ * Contrat mis à jour (design doc "Actus - zéro copie du texte source", 2026-08-13, section
+ * 4.1) : fetchSource() retourne désormais ['count' => int, 'texts' => array<id, string>], le
+ * texte source n'étant plus jamais lu depuis la colonne description en production. Ce double
+ * simule ce que RssFetcherService aurait "extrait" en restituant la description de fixture de
+ * chaque article non encore résumé de la source - AUCUN appel réseau, réel ou faké : la
+ * colonne description ne sert ici QUE de stockage de fixture, jamais de véhicule en production.
+ */
 function nfusBindFakeRssFetcher(): void
 {
     app()->instance(RssFetcherService::class, new class extends RssFetcherService
     {
-        public function fetchSource(NewsSource $source): int
+        public function fetchSource(NewsSource $source): array
         {
-            return 0;
+            $texts = NewsArticle::where('news_source_id', $source->id)
+                ->whereNull('structured_summary')
+                ->pluck('description', 'id')
+                ->all();
+
+            return ['count' => 0, 'texts' => $texts];
         }
     });
 }

@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Modules\AI\Models\KnowledgeChunk;
+use Modules\Core\Services\OpenRouterPrivacy;
 use Modules\Settings\Models\Setting;
 
 class EmbeddingService
@@ -37,10 +38,10 @@ class EmbeddingService
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer '.$apiKey,
-            ])->post(self::ENDPOINT, [
+            ])->post(self::ENDPOINT, OpenRouterPrivacy::applyTo([
                 'model' => self::MODEL,
                 'input' => $text,
-            ]);
+            ]));
 
             if ($response->successful()) {
                 return $response->json('data.0.embedding', []);
@@ -70,10 +71,10 @@ class EmbeddingService
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer '.$apiKey,
-            ])->post(self::ENDPOINT, [
+            ])->post(self::ENDPOINT, OpenRouterPrivacy::applyTo([
                 'model' => self::MODEL,
                 'input' => $texts,
-            ]);
+            ]));
 
             if ($response->successful()) {
                 return array_map(

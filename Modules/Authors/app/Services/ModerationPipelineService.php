@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use Modules\Authors\Mail\ModerationAlertMail;
 use Modules\Authors\Models\ModerationLog;
 use Modules\Blog\Models\Article;
+use Modules\Core\Services\OpenRouterPrivacy;
 
 final class ModerationPipelineService
 {
@@ -157,10 +158,10 @@ final class ModerationPipelineService
         $response = Http::withHeaders([
             'Authorization' => 'Bearer '.$this->apiKey,
             'Content-Type' => 'application/json',
-        ])->timeout(30)->post('https://openrouter.ai/api/v1/chat/completions', [
+        ])->timeout(30)->post('https://openrouter.ai/api/v1/chat/completions', OpenRouterPrivacy::applyTo([
             'model' => $model,
             'messages' => [['role' => 'user', 'content' => $prompt]],
-        ]);
+        ]));
 
         if (! $response->successful()) {
             throw new Exception("OpenRouter API error ({$model}): ".$response->status());

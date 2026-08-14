@@ -13,9 +13,21 @@ use SimplePie\SimplePie;
 
 class RssFetcherService
 {
-    public function fetchSource(NewsSource $source): int
+    /**
+     * ACTION : le texte extrait n'est plus jamais écrit dans la colonne description (design doc
+     * "Actus - zéro copie du texte source", 2026-08-13, section 4.1) - il est retourné ici, par
+     * article, pour que l'appelant (FetchNewsCommand) le garde en mémoire le temps de CETTE
+     * exécution et le passe explicitement en argument au service de résumé.
+     * MCP: SELF (<5 lignes utiles, changement de contrat de retour)
+     * RAISON: aucune propriété du modèle ne doit servir de véhicule au texte source - sans ce
+     * relais explicite, la génération retomberait silencieusement sur le titre seul.
+     *
+     * @return array{count: int, texts: array<int, string>}
+     */
+    public function fetchSource(NewsSource $source): array
     {
         $count = 0;
+        $texts = [];
 
         try {
             $feed = new SimplePie;
@@ -29,7 +41,7 @@ class RssFetcherService
             if ($feed->error()) {
                 Log::warning("RSS feed error for {$source->url}: ".$feed->error());
 
-                return 0;
+                return ['count' => 0, 'texts' => []];
             }
 
             $now = Carbon::now();
@@ -66,12 +78,19 @@ class RssFetcherService
 
                 // og:image sera extraite par ContentExtractor après résolution URL
 
+                // ACTION : blurb court du flux RSS gardé en mémoire (jamais persisté) - sert de
+                // repli si l'extraction complète échoue ou fournit moins de contenu que lui.
+                // MCP: SELF (<5 lignes utiles)
+                // RAISON: description reçoit '' à la création (design doc section 4.1) ; le
+                // texte candidat pour le résumé transite désormais uniquement par $text.
+                $rssBlurb = strip_tags($item->get_description() ?? '');
+
                 $article = NewsArticle::create([
                     'news_source_id' => $source->id,
                     'title' => $itemTitle,
                     'guid' => $guid,
                     'url' => $itemUrl,
-                    'description' => strip_tags($item->get_description() ?? ''),
+                    'description' => '',
                     'pub_date' => $item->get_date('Y-m-d H:i:s') ? Carbon::parse($item->get_date('Y-m-d H:i:s')) : $now,
                     'author' => $item->get_author() ? $item->get_author()->get_name() : null,
                     'image_url' => $imageUrl,
@@ -120,15 +139,20 @@ class RssFetcherService
                 }
                 $articleUrl = $article->resolved_url ?? $article->url;
 
-                // Extraire contenu complet pour résumé IA + image
+                // Extraire contenu complet pour résumé IA + image - texte gardé en mémoire
+                // (jamais persisté), retourné à l'appelant via $texts.
+                $text = $rssBlurb;
                 $extracted = app(ContentExtractor::class)->extract($articleUrl);
                 if ($extracted) {
                     if (! $imageUrl && $extracted['image']) {
                         $imageUrl = $extracted['image'];
                     }
-                    if ($extracted['word_count'] > 100 && mb_strlen($extracted['content']) > mb_strlen($article->description ?? '')) {
-                        $article->update(['description' => Str::limit($extracted['content'], 5000)]);
+                    if ($extracted['word_count'] > 100 && mb_strlen($extracted['content']) > mb_strlen($rssBlurb)) {
+                        $text = $extracted['content'];
                     }
+                }
+                if (trim($text) !== '') {
+                    $texts[$article->id] = $text;
                 }
 
                 // Optimiser l'image localement (WebP 1200x630)
@@ -157,7 +181,7 @@ class RssFetcherService
             Log::error("Error fetching RSS from {$source->url}: ".$e->getMessage());
         }
 
-        return $count;
+        return ['count' => $count, 'texts' => $texts];
     }
 
     // scrapeOgImage supprimé — utiliser ContentExtractor::extractOgImage() (zéro duplication)

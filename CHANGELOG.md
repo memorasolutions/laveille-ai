@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.172.0] - 2026-08-14
+
+### Ajouté
+- **Conformité vie privée : refus explicite de collecte et politique de rétention nulle sur tous les appels au fournisseur de modèles de langage.** Aucune requête ne transmettait auparavant ces paramètres. Seize points d'appel répartis dans onze fichiers sont désormais couverts, à travers les modules d'actualités, d'intelligence artificielle, d'infolettre, d'annuaire, de contributeurs et le noyau. Une classe partagée unique centralise ces préférences : aucun de ces réglages n'est dupliqué d'un module à l'autre.
+- **Porte de qualité éditoriale avant publication d'un résumé.** Structure, champs obligatoires (portés de deux à treize), langue, longueurs, absence de recopie du texte source, cohérence des années citées et non-invention d'entités sont désormais tous vérifiés. Un résumé rejeté déclenche la relance sur le modèle suivant de la cascade ; si la cascade est épuisée, la fiche n'est simplement pas publiée - une issue normale, journalisée, jamais une erreur.
+- Canal de journalisation dédié qui enregistre chaque rejet avec son motif, à un niveau fixe, indépendant du niveau de journalisation global de la production.
+- Garde-fou de diffusion : aucune fiche sans résumé exploitable ne peut plus être servie avec un corps vide.
+
+### Modifié
+- Cascade de modèles du pipeline d'actualités réordonnée pour placer en tête celui dont la politique de rétention est la plus protectrice ; le modèle dont le fournisseur d'inférence n'est pas identifiable a été retiré de la cascade.
+- Le texte intégral des articles sources ne transite plus par une colonne de la base de données : il est tenu en mémoire pour la durée du traitement, puis passé en argument au service de résumé.
+- Les données structurées (schema.org) des fiches publient désormais le résumé réellement affiché au lecteur, et non plus le texte de l'éditeur source.
+- Attribution des citations complétée avec le nom du journaliste, conformément aux exigences légales de l'utilisation équitable aux fins de communication des nouvelles.
+
+### Corrigé
+- **Traitement nocturne d'élagage du référencement désactivé par défaut.** Le compteur de vues qui lui servait de critère s'est révélé faussé par l'absence de filtrage des robots.
+- Cent quatre-vingt-trois fiches recevant réellement des clics avaient été désindexées à tort ; elles ont été réindexées.
+- Cinquante et une fiches dépourvues de résumé ont été régénérées.
+- Quatre fiches comportant des erreurs factuelles vérifiées ont été corrigées.
+
 ## [1.171.0] - 2026-08-13
 
 ### Corrigé

@@ -53,6 +53,9 @@ function natFrontArticle(int $sourceId, string $suffix = 'F', bool $published = 
         'guid' => "guid-nat-front-{$suffix}",
         'url' => "https://exemple.com/nat-front-{$suffix}",
         'description' => "Description de test pour front {$suffix}",
+        // Garde-fou anti-corps-vide (design doc "Actus - zéro copie du texte source",
+        // 2026-08-13, section 4.4) : une fiche publiée sans résumé n'est plus servie (404).
+        'summary' => "Résumé de test pour front {$suffix}",
         'slug' => "article-front-" . strtolower($suffix),
         'pub_date' => now()->subDay(),
         'is_published' => $published,

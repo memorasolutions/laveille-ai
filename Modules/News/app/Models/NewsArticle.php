@@ -206,7 +206,7 @@ class NewsArticle extends Model implements Searchable
 
     public function searchableResultExcerpt(): string
     {
-        return \Illuminate\Support\Str::limit(strip_tags($this->summary ?: $this->description ?: ''), 200);
+        return $this->displayExcerpt(200);
     }
 
     public function searchableResultUrl(): string
@@ -235,6 +235,86 @@ class NewsArticle extends Model implements Searchable
         return trim(
             ($ss['hook'] ?? '').' '.implode(' ', $keyPoints).' '.($ss['why_important'] ?? '')
         );
+    }
+
+    /**
+     * ACTION : rendu textuel INTÉGRAL du résumé structuré IA, unique source de vérité pour le
+     * corps réellement affiché d'une fiche - utilisé par le JSON-LD (articleBody/wordCount, cf.
+     * JsonLdService::newsArticle()), le calcul du temps de lecture (show.blade.php,
+     * article-card.blade.php) et le garde-fou anti-corps-vide hasExploitableSummary() ci-dessous.
+     * Priorité : résumé structuré aplati (flattenStructuredSummary()), sinon le résumé court.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: design doc "Actus - zéro copie du texte source" (2026-08-13) section 4.3/4.4 - le
+     * texte source (description) n'entre plus JAMAIS dans ce calcul, même en repli.
+     */
+    public function structuredBodyText(): string
+    {
+        $flattened = trim($this->flattenStructuredSummary());
+        if ($flattened !== '') {
+            return $flattened;
+        }
+
+        return trim((string) ($this->summary ?? ''));
+    }
+
+    /**
+     * ACTION : garde-fou permanent (design doc section 4.4) - vrai uniquement si cette fiche a
+     * un contenu réellement exploitable à afficher publiquement. Consommé par
+     * PublicNewsController::show() pour refuser de servir une fiche au corps vide.
+     * MCP: SELF (<5 lignes)
+     * RAISON: une fiche sans résumé exploitable ne doit jamais être servie avec un corps vide,
+     * quelle qu'en soit la cause (échec IA jamais rattrapé, cascade épuisée avant régénération).
+     */
+    public function hasExploitableSummary(): bool
+    {
+        return $this->structuredBodyText() !== '';
+    }
+
+    /**
+     * ACTION : extrait court réutilisable - SOURCE UNIQUE de la cascade « résumé court, sinon
+     * accroche du résumé structuré, sinon repli configuré » demandée à six endroits distincts
+     * (design doc section 4.5) : meta description et résumé pour agents (show.blade.php),
+     * accroche de carte (article-card.blade.php), extrait de recherche
+     * (searchableResultExcerpt() ci-dessus), bloc Journal (JournalBlockService) et partage
+     * admin (adminShareContents() ci-dessous). Ne JAMAIS recopier cette logique ailleurs.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: DRY explicite - un seul endroit à corriger si la cascade doit changer.
+     */
+    public function displayExcerpt(int $maxLength = 200): string
+    {
+        $summary = trim((string) ($this->summary ?? ''));
+        if ($summary !== '') {
+            return safe_excerpt($summary, $maxLength);
+        }
+
+        $flattened = trim($this->flattenStructuredSummary());
+        if ($flattened !== '') {
+            return safe_excerpt($flattened, $maxLength);
+        }
+
+        return $this->fallbackExcerpt();
+    }
+
+    /**
+     * ACTION : dernier repli de la cascade displayExcerpt() - jamais une chaîne vide. Gabarit et
+     * mention générique en configuration (news.display_fallback), jamais en dur.
+     * MCP: SELF (<5 lignes)
+     * RAISON: design doc section 4.5 - « catégorie plus date » quand disponible, sinon une
+     * mention non vide.
+     */
+    private function fallbackExcerpt(): string
+    {
+        if ($this->category_tag) {
+            $template = (string) config('news.display_fallback.with_category', ':category - :date');
+
+            return str_replace(
+                [':category', ':date'],
+                [(string) $this->category_tag, $this->pub_date ? format_date($this->pub_date) : ''],
+                $template
+            );
+        }
+
+        return (string) config('news.display_fallback.generic', 'Actualité en cours de traitement.');
     }
 
     /**
@@ -270,7 +350,11 @@ class NewsArticle extends Model implements Searchable
                 $resume .= "## Question\n{$faqQ}\n\n" . data_get($structured, 'faq_answer', '') . "\n\n";
             }
         } else {
-            $resume = "# {$title}\n\n" . strip_tags((string) $this->summary) . "\n\n" . strip_tags((string) $this->description);
+            // ACTION : plus de résumé structuré à plat texter - repli sur le résumé court
+            // uniquement (design doc "Actus - zéro copie du texte source", 2026-08-13, section
+            // 4.1) : $this->description ne véhicule plus jamais le texte source.
+            // MCP: SELF (<5 lignes)
+            $resume = "# {$title}\n\n" . strip_tags((string) $this->summary);
         }
         $resume = $this->stripLinks($resume);
 

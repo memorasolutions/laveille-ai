@@ -4,6 +4,7 @@ namespace Modules\Directory\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Modules\Core\Services\OpenRouterPrivacy;
 
 class OpenRouterService
 {
@@ -62,10 +63,10 @@ class OpenRouterService
                         'HTTP-Referer' => 'https://laveille.ai',
                         'X-Title' => 'LaVeille',
                     ])
-                    ->post($this->apiUrl, [
+                    ->post($this->apiUrl, OpenRouterPrivacy::applyTo([
                         'model' => $model,
                         'messages' => $messages,
-                    ]);
+                    ]));
 
                 if ($response->successful()) {
                     return $response->json('choices.0.message.content') ?? '';

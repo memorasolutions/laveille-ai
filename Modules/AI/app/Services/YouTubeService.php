@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
+use Modules\Core\Services\OpenRouterPrivacy;
 
 class YouTubeService
 {
@@ -68,7 +69,7 @@ class YouTubeService
                 $response = Http::withHeaders([
                     'Authorization' => 'Bearer '.config('services.openrouter.api_key'),
                     'HTTP-Referer' => config('app.url'),
-                ])->timeout(120)->post('https://openrouter.ai/api/v1/chat/completions', [
+                ])->timeout(120)->post('https://openrouter.ai/api/v1/chat/completions', OpenRouterPrivacy::applyTo([
                     'model' => 'deepseek/deepseek-chat',
                     'messages' => [
                         [
@@ -80,7 +81,7 @@ class YouTubeService
                             'content' => mb_substr($transcript, 0, 15000),
                         ],
                     ],
-                ]);
+                ]));
 
                 if ($response->failed()) {
                     Log::warning('YouTubeService: API OpenRouter echouee', ['status' => $response->status()]);
@@ -126,13 +127,13 @@ class YouTubeService
                 $response = Http::withoutVerifying()->withHeaders([
                     'Authorization' => 'Bearer '.config('services.openrouter.api_key'),
                     'HTTP-Referer' => config('app.url'),
-                ])->timeout(60)->post('https://openrouter.ai/api/v1/chat/completions', [
+                ])->timeout(60)->post('https://openrouter.ai/api/v1/chat/completions', OpenRouterPrivacy::applyTo([
                     'model' => 'deepseek/deepseek-chat',
                     'messages' => [
                         ['role' => 'system', 'content' => $systemPrompt],
                         ['role' => 'user', 'content' => $context],
                     ],
-                ]);
+                ]));
 
                 if ($response->failed()) {
                     return null;
