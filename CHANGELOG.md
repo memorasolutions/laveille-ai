@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.172.1] - 2026-08-14
+
+### Corrigé
+- **Purge à venir du texte source des actualités : le champ n'était pas retiré de la journalisation avant l'écriture, contrairement à ce que le changelog de la veille annonçait déjà avoir fait.** La colonne concernée contient le texte intégral de 32 840 articles de presse et doit être vidée ; tant que le champ restait journalisé, cette purge aurait recopié chacune de ces 32 840 valeurs dans la table d'audit interne, recréant exactement le problème qu'elle visait à éliminer, dans une table que personne ne surveille. La purge elle-même reste hors de ce correctif : seule la précondition bloquante est levée ici.
+- Audit du reste du projet : aucun autre point d'écriture de ce champ n'a été trouvé hors de celui déjà neutralisé la veille. Quatre autres modèles journalisent un champ de nom identique ou un contenu long, mais il s'agit dans chaque cas de texte rédigé en interne, jamais de texte d'éditeur externe copié - laissés en l'état, le motif ne s'y applique pas.
+
 ## [1.172.0] - 2026-08-14
 
 ### Ajouté

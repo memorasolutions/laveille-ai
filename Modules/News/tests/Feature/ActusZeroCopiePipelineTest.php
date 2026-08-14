@@ -447,3 +447,53 @@ it('structuredBodyText() et hasExploitableSummary() ignorent totalement descript
     expect($article->structuredBodyText())->toBe('')
         ->and($article->hasExploitableSummary())->toBeFalse();
 });
+
+// ── 5. Journalisation : 'description' n'est plus un champ journalisé ──────────
+//
+// Étape 4 de la procédure de purge (design doc section 5) : cette étape DOIT précéder la
+// purge de la colonne (étapes 5 et 6), sinon la purge des 32 840 lignes recopierait le texte
+// intégral de chacune dans activity_log au moment même de l'écrire à ''. Ces tests prouvent
+// qu'une modification de 'description' - y compris son passage à '' comme le fera la purge -
+// ne produit AUCUNE entrée de journal contenant le texte, ni même le nom du champ.
+
+it('activitylogFields de NewsArticle ne contient plus \'description\'', function () {
+    $article = new NewsArticle();
+    $fields = (fn () => $this->activitylogFields)->call($article);
+
+    expect($fields)->not->toContain('description')
+        ->and($fields)->toContain('title'); // le tableau reste non vide, pas une régression de portée
+});
+
+it('modifier description seule ne crée aucune entrée de journal (champ non dirty-loggable)', function () {
+    $source = azcSource();
+    $article = azcArticle($source->id, ['description' => 'Texte source initial du test.']);
+    $countBefore = \Spatie\Activitylog\Models\Activity::count();
+
+    $article->update(['description' => 'MARQUEUR-TEXTE-EDITEUR-JAMAIS-JOURNALISE']);
+
+    // logOnlyDirty() + dontSubmitEmptyLogs() : aucun champ journalisé n'a changé -> aucune ligne écrite.
+    expect(\Spatie\Activitylog\Models\Activity::count())->toBe($countBefore);
+});
+
+it('purger description (mise à \'\') en même temps qu\'un champ journalisé ne fait apparaître le texte source nulle part dans le journal', function () {
+    $source = azcSource();
+    $article = azcArticle($source->id, [
+        'description' => 'MARQUEUR-TEXTE-EDITEUR-A-NE-JAMAIS-JOURNALISER',
+        'relevance_score' => 5,
+    ]);
+
+    // Simule la purge (étape 6) survenant en même temps qu'une modification légitime d'un champ
+    // journalisé, pire cas pour cette garantie.
+    $article->update(['description' => '', 'relevance_score' => 9]);
+
+    $activity = \Spatie\Activitylog\Models\Activity::where('subject_type', NewsArticle::class)
+        ->where('subject_id', $article->id)
+        ->latest('id')
+        ->first();
+
+    expect($activity)->not->toBeNull();
+    $payload = json_encode($activity->properties);
+    expect($payload)->not->toContain('MARQUEUR-TEXTE-EDITEUR-A-NE-JAMAIS-JOURNALISER')
+        ->and($payload)->not->toContain('description')
+        ->and($activity->properties['attributes']['relevance_score'] ?? null)->toBe(9);
+});

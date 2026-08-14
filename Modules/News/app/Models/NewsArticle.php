@@ -25,7 +25,14 @@ class NewsArticle extends Model implements Searchable
     use LogsActivityStandard;
     use \Modules\SEO\Traits\NotifiesIndexNow;
 
-    protected array $activitylogFields = ['title', 'seo_title', 'summary', 'description', 'is_published', 'relevance_score'];
+    // ACTION : 'description' retiré des champs journalisés (design doc "Actus - zéro copie du
+    // texte source", 2026-08-13, section 5 étape 4) - cette colonne va être purgée (texte
+    // intégral des articles sources, 32 840 lignes) ; la laisser journalisée aurait recopié
+    // chaque valeur dans activity_log au moment même de la purge, recréant le problème dans
+    // une table que personne ne surveille. Cette étape doit précéder la purge de la colonne.
+    // MCP: SELF (<5 lignes)
+    // RAISON: étape 4 de la procédure de purge, bloquante avant les étapes 5 et 6.
+    protected array $activitylogFields = ['title', 'seo_title', 'summary', 'is_published', 'relevance_score'];
     protected string $activitylogName = 'news_article';
 
     public function getPublicUrl(): string

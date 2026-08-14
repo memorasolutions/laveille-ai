@@ -17,6 +17,22 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.172.1 · 2026-08-14 · fix(news) 'description' retiré des champs journalisés de NewsArticle
+ *     (étape 4 de la procédure de purge du design doc "Actus - zéro copie du texte source",
+ *     2026-08-13) - cette colonne va être purgée (32 840 lignes, texte intégral d'articles
+ *     sources) ; la laisser journalisée aurait recopié chaque valeur dans activity_log au
+ *     moment même de la purge, recréant le problème dans une table que personne ne surveille.
+ *     Audit exhaustif du reste du projet : le seul autre point d'écriture connu de description
+ *     (RssFetcherService.php) écrit déjà '' depuis v1.172.0 ; ReprocessArticlesCommand ne
+ *     touche déjà plus la colonne. 4 autres modèles journalisent un champ 'description'
+ *     (Acronyms, Directory) ou du contenu long (Authors body_markdown, Blog content via
+ *     logFillable()) - laissés en l'état car ce sont des textes rédigés en interne (édito),
+ *     jamais du texte d'éditeur externe copié : aucun retrait n'y était justifié par le même
+ *     motif. 3 nouveaux tests dans ActusZeroCopiePipelineTest, vérifiés en échec contre le code
+ *     fautif avant d'être acceptés (preuve directe : une mise à jour simultanée de description
+ *     et relevance_score laissait apparaître le texte source en clair dans
+ *     activity_log.properties). Suite News 196 verts (+3, 0 échec) ; suite Core 121 verts
+ *     (inchangée, le trait n'y a pas de test dédié). Codename seo-piliers-veille-generative.
  *   1.149.0 · 2026-08-07 · feat(outils) constructeur : gabarits v2 du prompt généré (panel 5 IA + pratiques 2026) - critères de réussite dérivés des choix, ancrage final avec rappel du livrable, contexte balisé comme données, 2 verrous anti-contradiction (chaîne de pensée montrée/cachée, clarification vs « produis maintenant »), rôle sans boilerplate, consigne anti-IA concrète sans exemple amorce, héritage explicite de la 2e tâche ; aides {{sujet}} réécrites avec exemple concret
  *   1.148.3 · 2026-08-07 · fix(outils) constructeur : aide du persona reformulée (panel 5 IA unanime, EMNLP 2024/Wharton 2025) - un rôle oriente ton/style/vocabulaire mais n'améliore ni l'expertise ni l'exactitude ; l'ancien texte surpromettait (« réponses plus stratégiques ») ; FR (blade + fallback JS) et EN (en.json) alignés
  *   1.148.2 · 2026-08-07 · fix(outils) constructeur : « ? » des boutons d'aide enfin optiquement centré (round 2) - cause double mesurée : font-size du composant écrasé par le thème (11,25 px rendus au lieu de 13,9) → taille en inline ; glyphe sans jambage de DM Sans perché dans sa boîte de ligne → correction optique translateY(0.07em) ; preuve au pixel : écart 0,0 px sur les deux axes
@@ -3628,7 +3644,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 172;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,
