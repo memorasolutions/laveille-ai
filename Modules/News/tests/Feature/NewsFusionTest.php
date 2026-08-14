@@ -155,7 +155,9 @@ it('drapeau OFF : aucun article marque fusion, un appel HTTP par article (identi
 // ── Critère 3 : article sans jumeau = chemin singleton inchangé, même drapeau ON ─────
 
 it('drapeau ON : un article sans jumeau suit le chemin singleton habituel', function () {
-    config(['news.fusion.enabled' => true]);
+    // Publication automatique activée explicitement (2026-08-14) : par défaut FALSE depuis la
+    // suspension de la publication auto, ce test vérifie le chemin singleton EN PUBLICATION.
+    config(['news.fusion.enabled' => true, 'news.autopublish.enabled' => true]);
     nfusBindFakeRssFetcher();
     nfusFakeOpenRouterSuccess();
 
@@ -175,7 +177,10 @@ it('drapeau ON : un article sans jumeau suit le chemin singleton habituel', func
 // ── Critères 2, 4, 5 : groupe de 2+ = UNE fiche comparative, UN seul appel IA, sources[] ─────
 
 it('deux articles au sujet partage produisent une fiche comparative avec un membre et sources[]', function () {
-    config(['news.fusion.enabled' => true]);
+    // Publication automatique activée explicitement (2026-08-14) : par défaut FALSE depuis la
+    // suspension de la publication auto - ce test vérifie que le membre hérite bien du statut
+    // publié de sa fiche comparative, donc la fiche doit réellement être publiée ici.
+    config(['news.fusion.enabled' => true, 'news.autopublish.enabled' => true]);
     nfusBindFakeRssFetcher();
     nfusFakeOpenRouterSuccess(['sources' => [
         ['source_name' => 'SourceA', 'author' => null, 'url' => 'https://exemple.com/grp-a', 'angle' => null],
@@ -263,7 +268,10 @@ it('angle_qc_ca reste absent si le champ n est pas retourne par l IA', function 
 // ── Critère 7 : quota d'indexation fixe, jamais un score IA comme filtre ─────
 
 it('au dela du quota d indexation, la fiche comparative supplementaire est creee noindex des la creation', function () {
-    config(['news.fusion.enabled' => true, 'news.fusion.max_indexed_digests_per_day' => 1]);
+    // Publication automatique activée explicitement (2026-08-14) : ce test vérifie que le quota
+    // d'INDEXATION (seo_status) reste indépendant du statut publié - il faut donc une fiche
+    // réellement publiée pour que la distinction ait un sens.
+    config(['news.fusion.enabled' => true, 'news.fusion.max_indexed_digests_per_day' => 1, 'news.autopublish.enabled' => true]);
     nfusBindFakeRssFetcher();
     nfusFakeOpenRouterSuccess();
 
@@ -524,7 +532,9 @@ it('le volume de lignes fusion reste borne meme avec beaucoup de candidats rejet
 // ── Critère 10 : désactiver le drapeau après usage ne supprime/modifie rien ─────
 
 it('desactiver le drapeau apres usage ne supprime ni ne modifie une fiche deja publiee', function () {
-    config(['news.fusion.enabled' => true]);
+    // Publication automatique activée explicitement (2026-08-14) pour ce premier passage : le
+    // titre du test suppose une fiche RÉELLEMENT publiée avant le rollback (défaut désormais FALSE).
+    config(['news.fusion.enabled' => true, 'news.autopublish.enabled' => true]);
     nfusBindFakeRssFetcher();
     nfusFakeOpenRouterSuccess(['sources' => [
         ['source_name' => 'SourceA', 'author' => null, 'url' => 'https://exemple.com/rb-a', 'angle' => null],

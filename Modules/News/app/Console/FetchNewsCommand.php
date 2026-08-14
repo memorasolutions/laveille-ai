@@ -27,10 +27,41 @@ class FetchNewsCommand extends Command
 
     protected $description = 'Récupère les articles RSS, score et génère les résumés structurés IA.';
 
+    // ACTION : drapeau maître de publication automatique (2026-08-14), lu une seule fois en
+    // début de handle() et conservé pour toute la durée de l'exécution - jamais un config() par
+    // point d'écriture. Consommé exclusivement par resolvePublicationState().
+    // MCP: SELF (<5 lignes)
+    // RAISON: propriété plutôt que paramètre thread à travers processFusionCandidates() - la
+    // collecte, le scoring et la fusion restent inchangés, seule l'écriture is_published change.
+    private bool $autopublishEnabled = false;
+
+    // ACTION : compteur diagnostic SÉPARÉ (2026-08-14, correctif effet de bord round 1) - nombre
+    // d'articles/groupes qui ATTEIGNENT le seuil de pertinence mais restent non publiés parce
+    // que le drapeau est désactivé. Jamais mélangé à totalPublished/totalFiltered : incrémenté
+    // uniquement par resolvePublicationState(), affiché dans le bilan seulement si le drapeau
+    // est désactivé (sinon toujours à zéro, aucun intérêt à l'afficher).
+    // MCP: SELF (<5 lignes)
+    // RAISON: distinguer « refusé pour manque de pertinence » (totalFiltered, inchangé) de
+    // « pertinent mais retenu par la politique de publication » - deux causes différentes.
+    private int $totalEligibleNonPublies = 0;
+
     public function handle(RssFetcherService $fetcher, AiSummaryService $summarizer): int
     {
         if ($this->shouldSkipForKillSwitch('cron.news-fetch')) {
             return self::SUCCESS;
+        }
+
+        $this->autopublishEnabled = (bool) config('news.autopublish.enabled', false);
+
+        if (! $this->autopublishEnabled) {
+            // ACTION : ligne de journalisation obligatoire (spec 2026-08-14) - canal dédié 'fusion'
+            // (config/logging.php), niveau fixé en dur à 'info', indépendant de LOG_LEVEL=error en
+            // production (sinon cette ligne serait jetée avant écriture, piège déjà documenté 3 fois
+            // sur ce projet).
+            // MCP: SELF (<5 lignes)
+            // RAISON: rend visible en prod que la collecte continue mais que la publication est
+            // suspendue - sans quoi un run "normal en apparence" masquerait la décision du fondateur.
+            Log::channel('fusion')->info('AUTOPUBLISH-OFF: publication automatique suspendue - les articles sont collectés en brouillon (is_published=false).');
         }
 
         $query = NewsSource::active();
@@ -223,6 +254,17 @@ class FetchNewsCommand extends Command
                 }
 
                 $score = (int) ($result['score'] ?? 0);
+                // ACTION : correctif 2026-08-14 (effet de bord round 1) - $wouldPublish et
+                // $published sont désormais deux variables distinctes ; TOUS les consommateurs
+                // (compteurs, quotas quotidiens, ligne console) lisent $published (l'état RÉEL
+                // écrit en base), plus jamais $score >= $minScore brut. Sinon les quotas
+                // journaliers seraient entamés par des brouillons jamais publiés - piège différé
+                // au jour où la publication sera réactivée.
+                // MCP: SELF (<5 lignes)
+                // RAISON: demande explicite du superviseur - le bilan ne doit jamais annoncer une
+                // publication qui n'a pas eu lieu.
+                $wouldPublish = $score >= $minScore;
+                $published = $this->resolvePublicationState($wouldPublish);
 
                 $article->update([
                     'relevance_score' => $score,
@@ -234,14 +276,19 @@ class FetchNewsCommand extends Command
                     'seo_title' => \Illuminate\Support\Str::limit($result['seo_title'] ?? '', 250, ''),
                     'meta_description' => \Illuminate\Support\Str::limit($result['meta_description'] ?? '', 250, ''),
                     'summary' => $result['hook'] ?? null,
-                    'is_published' => $score >= $minScore,
+                    'is_published' => $published,
                 ]);
 
-                if ($score >= $minScore) {
+                if ($published) {
                     $totalPublished++;
                     if ($feedType === 'ia') $todayIa++;
                     else $todayTech++;
                     $this->line("  ✓ [{$score}/10] {$article->title}");
+                } elseif ($wouldPublish) {
+                    // Pertinent (score >= seuil) mais retenu par le drapeau, jamais compté dans
+                    // totalFiltered (réservé aux articles réellement sous le seuil) ni dans les
+                    // quotas quotidiens is_published-only.
+                    $this->line("  ⏳ [{$score}/10] Collecté en brouillon (publication suspendue) : {$article->title}");
                 } else {
                     $totalFiltered++;
                     $this->line("  ⊘ [{$score}/10] Non pertinent : {$article->title}");
@@ -267,7 +314,18 @@ class FetchNewsCommand extends Command
             $totalFiltered += $fusionFiltered;
         }
 
-        $this->info("--- Bilan : {$totalFetched} récupérés, {$totalPublished} publiés, {$totalFiltered} filtrés ---");
+        // ACTION : correctif 2026-08-14 (effet de bord round 1) - segment additionnel du bilan,
+        // affiché UNIQUEMENT quand le drapeau est désactivé (sinon $totalEligibleNonPublies
+        // reste toujours à zéro, rien à afficher). Distinct de "filtrés" (non pertinents).
+        // MCP: SELF (<5 lignes)
+        // RAISON: demande explicite du superviseur - le bilan doit dire la vérité sur ce qui
+        // s'est réellement passé, jamais laisser croire qu'un brouillon a été publié.
+        $bilan = "--- Bilan : {$totalFetched} récupérés, {$totalPublished} publiés, {$totalFiltered} filtrés";
+        if (! $this->autopublishEnabled && $this->totalEligibleNonPublies > 0) {
+            $bilan .= ", {$this->totalEligibleNonPublies} admissibles non publiés (drapeau désactivé)";
+        }
+        $bilan .= ' ---';
+        $this->info($bilan);
 
         return 0;
     }
@@ -347,6 +405,13 @@ class FetchNewsCommand extends Command
             }
 
             $score = (int) ($result['score'] ?? 0);
+            // ACTION : correctif 2026-08-14 (effet de bord round 1) - même parade que le chemin
+            // non-fusion : $published (état réel écrit) alimente seul compteurs/quotas/console,
+            // jamais $score >= $minScore brut.
+            // MCP: SELF (<5 lignes)
+            // RAISON: demande explicite du superviseur.
+            $wouldPublish = $score >= $minScore;
+            $published = $this->resolvePublicationState($wouldPublish);
 
             $article->update([
                 'relevance_score' => $score,
@@ -358,13 +423,15 @@ class FetchNewsCommand extends Command
                 'seo_title' => Str::limit($result['seo_title'] ?? '', 250, ''),
                 'meta_description' => Str::limit($result['meta_description'] ?? '', 250, ''),
                 'summary' => $result['hook'] ?? null,
-                'is_published' => $score >= $minScore,
+                'is_published' => $published,
             ]);
 
-            if ($score >= $minScore) {
+            if ($published) {
                 $totalPublished++;
                 $feedType === 'ia' ? $todayIa++ : $todayTech++;
                 $this->line("  ✓ [{$score}/10] {$article->title}");
+            } elseif ($wouldPublish) {
+                $this->line("  ⏳ [{$score}/10] Collecté en brouillon (publication suspendue) : {$article->title}");
             } else {
                 $totalFiltered++;
                 $this->line("  ⊘ [{$score}/10] Non pertinent : {$article->title}");
@@ -441,7 +508,8 @@ class FetchNewsCommand extends Command
             }
 
             $score = (int) ($result['score'] ?? 0);
-            $isPublished = $score >= $minScore;
+            $wouldPublish = $score >= $minScore;
+            $isPublished = $this->resolvePublicationState($wouldPublish);
             $indexed = $isPublished && $todayIndexedDigests < $maxIndexedDigests;
 
             $digestUpdate = [
@@ -490,6 +558,8 @@ class FetchNewsCommand extends Command
                     $todayIndexedDigests++;
                 }
                 $this->line("  ✓ [{$score}/10] Fiche comparative ({$this->pluralizeGroupSize(count($group))}) : {$digestArticle->title}");
+            } elseif ($wouldPublish) {
+                $this->line("  ⏳ [{$score}/10] Groupe collecté en brouillon (publication suspendue) : {$digestArticle->title}");
             } else {
                 $totalFiltered++;
                 $this->line("  ⊘ [{$score}/10] Groupe non pertinent : {$digestArticle->title}");
@@ -625,6 +695,36 @@ class FetchNewsCommand extends Command
     private function pluralizeGroupSize(int $size): string
     {
         return $size.' '.($size > 1 ? 'sources' : 'source');
+    }
+
+    /**
+     * ACTION : point d'écriture UNIQUE de la décision de publication (2026-08-14) - appelé aux
+     * 4 endroits qui calculent fraîchement un statut de publication (chemin non-fusion, chemin
+     * fusion singleton, fiche comparative/digest, membre rattaché à un digest nouvellement créé).
+     * Le 5e endroit historique (absorbFusionMember, republication absorbée dans une fiche
+     * comparative EXISTANTE) hérite déjà de $digest->is_published, une valeur elle-même
+     * résolue par cette méthode au moment de la création du digest - aucun appel supplémentaire
+     * n'y est nécessaire.
+     * MCP: SELF (<5 lignes)
+     * RAISON: DRY strict (consigne explicite) - une seule méthode plutôt que 5 conditions
+     * copiées-collées ; le scoring, la porte de qualité et la fusion restent des décisions
+     * indépendantes de ce drapeau, qui ne fait que court-circuiter l'écriture finale.
+     *
+     * Correctif 2026-08-14 (effet de bord round 1) : incrémente aussi le compteur diagnostic
+     * $totalEligibleNonPublies quand un article/groupe ATTEINT le seuil mais reste non publié à
+     * cause du drapeau - jamais l'inverse (score insuffisant), qui reste compté ailleurs comme
+     * "filtré". Centralisé ici : les 3 sites appelants (chemin non-fusion, fusion-singleton,
+     * fiche comparative) héritent du comptage correct sans le dupliquer.
+     */
+    private function resolvePublicationState(bool $wouldPublish): bool
+    {
+        $published = $wouldPublish && $this->autopublishEnabled;
+
+        if ($wouldPublish && ! $published) {
+            $this->totalEligibleNonPublies++;
+        }
+
+        return $published;
     }
 
     /**

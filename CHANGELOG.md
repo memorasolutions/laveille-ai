@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.174.0] - 2026-08-14
+
+### Ajouté
+- **La publication automatique des actualités est désormais séparée de la collecte, et suspendue par défaut.** Un nouveau réglage, désactivé tant qu'il n'est pas activé explicitement, gouverne la mise en ligne des fiches. La collecte des sources, l'évaluation de pertinence, la génération du résumé, la porte de qualité, le regroupement et la déduplication continuent exactement comme avant : seule la mise en ligne s'arrête. Les articles collectés restent en brouillon et forment la file de propositions à partir de laquelle le choix éditorial se fera désormais à la main.
+- Le comportement est gouverné par une méthode unique appelée aux points d'écriture, jamais par une condition recopiée à chaque endroit. Une ligne est écrite au journal dédié du module au début de chaque exécution quand la publication est suspendue.
+
+### Corrigé
+- **Les brouillons ne sont plus comptés comme publiés et ne consomment plus les quotas quotidiens.** Sur deux des trois chemins de traitement, les compteurs de bilan et les quotas par catégorie utilisaient l'évaluation de pertinence brute plutôt que l'état de publication réellement appliqué. Le bilan aurait annoncé des fiches publiées qui ne l'étaient pas, et surtout les quotas se seraient remplis avec des fiches jamais parues, faussant le comportement au moment de la reprise. Les trois chemins sont désormais alignés sur l'état réel, et un compteur distinct, affiché uniquement quand la publication est suspendue, indique combien de fiches auraient été publiées.
+- Recherche exhaustive faite sur tous les usages du seuil de pertinence dans le fichier : trois évaluations, toutes ramenées à une variable unique consommée en aval. Certitude vérifiée, pas échantillon.
+
+### Vérifié
+- Deux cent deux tests du module concerné, cinq cent trente-quatre assertions, aucun échec. Les nouveaux tests couvrent les deux états du réglage, avec un contrôle positif qui écarte le risque d'un test qui passerait pour la mauvaise raison : réglage actif, le quota d'une fiche par jour s'applique normalement ; réglage suspendu, les deux fiches éligibles sont traitées sans que le quota bouge.
+- Cinq tests existants ajustés en activant explicitement le réglage dans leur mise en place, jamais en affaiblissant ce qu'ils vérifient. Les tests qui contrôlaient déjà l'absence de publication sont restés intacts.
+- Régression hors du module sur les six modules qui consomment les actualités publiées, exécutés un à la fois : quatre cent quinze tests, un seul échec, prouvé préexistant par retour à l'état antérieur et sans rapport avec ce changement.
+- Aucune page retirée, aucune donnée supprimée, aucune migration. Les articles déjà publiés restent publiés. Le retour en arrière tient en l'ajout d'une ligne de configuration.
+
 ## [1.173.0] - 2026-08-14
 
 ### Corrigé

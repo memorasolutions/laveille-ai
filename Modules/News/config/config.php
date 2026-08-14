@@ -28,6 +28,27 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Publication automatique des fiches collectees
+    |--------------------------------------------------------------------------
+    | 2026-08-14 - decision du fondateur : le site cesse de publier automatiquement une fiche
+    | d'actualite (erreurs factuelles, risque juridique, refus publicitaire pour contenu a
+    | faible valeur). La COLLECTE continue sans interruption (scoring, resume IA, porte de
+    | qualite, fusion, deduplication) ; seule la publication finale est suspendue. Les fiches
+    | qui auraient ete publiees deviennent des brouillons (is_published=false) alimentant la
+    | future file de propositions du courriel de veille quotidien.
+    | DEFAUT VOLONTAIREMENT FALSE : un oubli de configuration (env absent, mauvaise valeur) ne
+    | doit jamais pouvoir remettre la publication automatique en marche par accident - il faut
+    | une action explicite (NEWS_AUTOPUBLISH_ENABLED=true) pour la reactiver.
+    | Resolu par FetchNewsCommand::resolvePublicationState(), lu une seule fois en debut de
+    | handle(). Distinct du kill switch Pennant 'cron.news-fetch' (qui coupe TOUTE la commande,
+    | y compris la collecte) - ce drapeau ne coupe que l'ecriture is_published.
+    */
+    'autopublish' => [
+        'enabled' => (bool) env('NEWS_AUTOPUBLISH_ENABLED', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Fenêtre de traitement des articles récupérés
     |--------------------------------------------------------------------------
     | news:fetch ne (re)traite que les articles créés dans cette fenêtre. Sans

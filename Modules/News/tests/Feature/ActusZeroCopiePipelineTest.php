@@ -403,6 +403,9 @@ it('JournalBlockService::addFromSource (type news) utilise la cascade displayExc
 });
 
 it('échec du premier modèle rejeté par la porte, succès du second : la fiche est publiée par news:fetch (pipeline complet)', function () {
+    // Publication automatique activée explicitement (2026-08-14) : par défaut FALSE depuis la
+    // suspension de la publication auto - ce test vérifie précisément le chemin PUBLIÉ.
+    config(['news.autopublish.enabled' => true]);
     Http::fake([
         'openrouter.ai/*' => Http::sequence()
             ->push(['choices' => [['message' => ['content' => json_encode(['score' => 8, 'hook' => ''])]]]], 200)
