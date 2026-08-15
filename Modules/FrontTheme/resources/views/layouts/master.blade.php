@@ -311,8 +311,13 @@
 
         {{-- Pop-up infolettre : retirée des pages OUTILS (tâches focalisées : éditeur/formulaire) pour ne pas
              interrompre l'usage sur mobile (NN/g + pénalité Google interstitiels intrusifs). Conservée sur le
-             contenu (blog/articles/index) où le scroll-trigger est pertinent. Réversible (retirer le @unless). --}}
-        @unless(request()->is('outils/*'))
+             contenu (blog/articles/index) où le scroll-trigger est pertinent. Réversible (retirer le @unless).
+             2026-08-15 (docs/specs/2026-08-15-decido-page-vote-design.md) : même exclusion étendue à la page
+             de vote Décido publique (decido.vote.show) - un votant y accomplit une tâche pour rendre service,
+             et sur mobile ce popup (déclenché aussi par un minuteur, pas seulement au défilement, voir
+             public/js/newsletter-scroll-trigger.js) recouvrait le formulaire, zéro créneau visible au 1er
+             écran. Scopé à cette seule route (pas 'decido/*') pour ne pas toucher création/gestion/résultats. --}}
+        @unless(request()->is('outils/*') || request()->routeIs('decido.vote.show'))
             @include('fronttheme::partials.newsletter-scroll-trigger')
         @endunless
         @include('fronttheme::partials.newsletter-modal')

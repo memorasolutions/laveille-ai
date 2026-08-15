@@ -3678,10 +3678,25 @@ declare(strict_types=1);
  *     canaux existants du projet ('fusion', 'quality_gate'), niveau fixé en dur à 'info',
  *     volontairement indépendant de LOG_LEVEL. 121 tests du module Directory (276 assertions) et
  *     204 tests du module News (542 assertions), aucun échec.
+ *
+ *   1.176.0 · 2026-08-15 · feat(decido) refonte de la page de vote publique, décidée par un
+ *     panel multi-modèles après mesure sur un sondage réel en production. Le popup d'infolettre
+ *     est désormais désactivé sur la route de vote (il recouvrait le formulaire sur téléphone),
+ *     via le mécanisme d'exclusion déjà utilisé pour les pages d'outils, étendu à cette route
+ *     (il reste actif partout ailleurs). Le titre du sondage n'apparaît plus qu'une seule fois
+ *     (il était affiché deux fois) et la bannière est réduite en hauteur, via un style scopé à
+ *     cette seule vue. Les créneaux sont désormais groupés par journée : en-tête de date fort,
+ *     puis les heures seules en dessous, avec séparateur - la date n'est plus réécrite à chaque
+ *     ligne. Chaque créneau affiche maintenant les totaux de réponses (Oui / Peut-être / Non),
+ *     sans jamais montrer les noms des votants, à coût ZÉRO en requêtes SQL supplémentaires (les
+ *     votes étaient déjà chargés par le contrôleur). 103 tests du module Decido (440 assertions),
+ *     aucun échec. Validation visuelle : à 375 pixels de large, le premier créneau complet est
+ *     désormais visible sans défiler (126 pixels de marge, contre zéro avant), popup absent après
+ *     57 secondes d'attente et défilement, navigation au clavier intacte.
  */
 
 $lvMajor = 1;
-$lvMinor = 175;
+$lvMinor = 176;
 $lvPatch = 0;
 
 return [

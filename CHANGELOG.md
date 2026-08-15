@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.176.0] - 2026-08-15
+
+### Ajouté
+- **La page de vote publique de Décido affiche désormais, pour chaque créneau, les totaux de réponses (Oui / Peut-être / Non), sans jamais montrer les noms des votants.** Coût nul en requêtes SQL supplémentaires : les votes étaient déjà chargés par le contrôleur, seul l'affichage change.
+- **Les créneaux sont désormais groupés par journée** : un en-tête de date fort, suivi des heures seules en dessous avec séparateur. La date n'est plus réécrite à chaque ligne, ce qui allège fortement la lecture sur téléphone.
+
+### Corrigé
+- **Le popup d'infolettre recouvrait le formulaire de vote sur téléphone.** Il est désormais désactivé sur la route de vote, en réutilisant le mécanisme d'exclusion déjà en place pour les pages d'outils, simplement étendu à cette route. Il reste actif partout ailleurs.
+- **Le titre du sondage était affiché deux fois** sur la page de vote ; il n'apparaît plus qu'une seule fois, et la bannière est réduite en hauteur (style scopé à cette seule vue).
+
+### Vérifié
+- Décision prise par un panel multi-modèles après mesure sur un sondage réel en production, pas sur une intuition.
+- Cent trois tests du module Décido (quatre cent quarante assertions), aucun échec.
+- Validation visuelle en navigateur, neuf points vérifiés : à 375 pixels de large, le premier créneau complet est désormais visible sans défiler, avec cent vingt-six pixels de marge (contre zéro avant) ; popup vérifié absent après cinquante-sept secondes d'attente et de défilement ; navigation au clavier intacte (les flèches déplacent toujours la sélection dans un groupe de boutons radio).
+
 ## [1.175.0] - 2026-08-15
 
 ### Ajouté

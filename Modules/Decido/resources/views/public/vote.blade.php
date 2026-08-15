@@ -7,7 +7,16 @@
 @section('page_noindex', true)
 @section('meta_description', "Participe au sondage Décido « {$poll->title} » pour aider à trouver le bon moment ou le bon choix.")
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $poll->title, 'breadcrumbItems' => [__('Outils'), $poll->title]])
+    {{-- Priorité 1 (docs/specs/2026-08-15-decido-page-vote-design.md) : le titre du sondage
+         apparaissait deux fois au premier écran mobile (h2 de la bannière ICI + h1 juste en
+         dessous). breadcrumbTitle n'est plus transmis (le fil d'Ariane garde son rôle de
+         navigation via breadcrumbItems, le h2 - désormais vide - est masqué en CSS scopé
+         .decido-vote-hero ci-dessous) ; le h1 plus bas reste la SEULE occurrence visuelle du
+         titre. La bannière (normalement min-height 400px/250px, voir _page-title.scss) est aussi
+         réduite, mais SEULEMENT sur cette page (wrapper .decido-vote-hero, style scopé à cette vue). --}}
+    <div class="decido-vote-hero">
+        @include('fronttheme::partials.breadcrumb', ['breadcrumbItems' => [__('Outils'), $poll->title]])
+    </div>
 @endsection
 @section('content')
 <section class="wpo-blog-single-section section-padding">
@@ -93,39 +102,116 @@
                                  ne pas spammer. --}}
                             <div aria-live="polite" class="visually-hidden" x-text="announcement"></div>
 
-                            @foreach($options as $option)
+                            @php
+                                // Priorité 2 (docs/specs/2026-08-15-decido-page-vote-design.md) : regroupement
+                                // PAR JOURNÉE, calculé ici en vue - pure présentation sur une collection déjà
+                                // chargée ($poll->load('options.votes') dans PublicPollController::show()),
+                                // aucune requête SQL additionnelle. Toujours dans le fuseau du SONDAGE
+                                // ($poll->timezone), jamais celui du navigateur : le sélecteur de fuseau JS
+                                // (decidoSlotTimezone plus bas) reste seul responsable de la conversion pour
+                                // le fuseau du VOTANT, et réécrit alors le libellé COMPLET (le jour civil peut
+                                // changer sous conversion, ce qui invaliderait un regroupement par journée du
+                                // sondage) - comportement JS pré-existant, non touché ici.
+                                $groupedByDay = $options->groupBy(function ($option) use ($poll) {
+                                    return $option->starts_at
+                                        ? \Carbon\Carbon::parse($option->starts_at->format('Y-m-d H:i:s'), 'UTC')->timezone($poll->timezone)->format('Y-m-d')
+                                        : 'sans-date';
+                                });
+                            @endphp
+                            @foreach($groupedByDay as $dayKey => $dayOptions)
                                 @php
-                                    // starts_at/ends_at sont stockés en UTC brut, mais config('app.timezone')
-                                    // = America/Toronto fait que le cast Eloquent datetime réinterprète à tort
-                                    // la valeur comme déjà en heure de Québec sans conversion : reparser
-                                    // explicitement la valeur brute comme UTC est requis (même cause racine
-                                    // que le fix PollExportService::exportIcs() v1.107.1 - bug trouvé ici par
-                                    // vérification visuelle Playwright, écart constant de 4h confirmé avant fix).
-                                    $slotStartUtc = $option->starts_at ? \Carbon\Carbon::parse($option->starts_at->format('Y-m-d H:i:s'), 'UTC')->toIso8601String() : null;
-                                    $slotEndUtc = $option->ends_at ? \Carbon\Carbon::parse($option->ends_at->format('Y-m-d H:i:s'), 'UTC')->toIso8601String() : null;
+                                    $dayHeading = null;
+                                    if ($dayKey !== 'sans-date') {
+                                        $dayHeading = ucfirst(
+                                            \Carbon\Carbon::parse($dayOptions->first()->starts_at->format('Y-m-d H:i:s'), 'UTC')
+                                                ->timezone($poll->timezone)
+                                                ->locale('fr')
+                                                ->isoFormat('dddd D MMMM')
+                                        );
+                                    }
                                 @endphp
-                                <div class="card mb-3 decido-slot"
-                                     data-starts-at-utc="{{ $slotStartUtc }}"
-                                     data-ends-at-utc="{{ $slotEndUtc }}">
-                                    <div class="card-body">
-                                        <h3 class="h5 mb-1 decido-slot-label">{{ $option->label }}</h3>
-                                        <p class="decido-slot-secondary text-muted small mb-3" style="display:none"></p>
-                                        <div class="d-flex flex-wrap gap-2 decido-vote-pills">
-                                            @foreach(['yes' => 'Oui', 'maybe' => 'Peut-être', 'no' => 'Non'] as $value => $label)
-                                                <label class="decido-vote-pill" for="vote_{{ $option->id }}_{{ $value }}">
-                                                    <input class="visually-hidden" type="radio"
-                                                           name="votes[{{ $option->id }}]"
-                                                           id="vote_{{ $option->id }}_{{ $value }}"
-                                                           value="{{ $value }}"
-                                                           {{ (($existingVotes[$option->id] ?? null) === $value) ? 'checked' : '' }}>
-                                                    {{ $label }}
-                                                </label>
-                                            @endforeach
+                                <div class="decido-day-group">
+                                    @if($dayHeading)
+                                        <h3 class="decido-day-heading">{{ $dayHeading }}</h3>
+                                    @endif
+                                    @foreach($dayOptions as $option)
+                                        @php
+                                            // starts_at/ends_at sont stockés en UTC brut, mais config('app.timezone')
+                                            // = America/Toronto fait que le cast Eloquent datetime réinterprète à tort
+                                            // la valeur comme déjà en heure de Québec sans conversion : reparser
+                                            // explicitement la valeur brute comme UTC est requis (même cause racine
+                                            // que le fix PollExportService::exportIcs() v1.107.1 - bug trouvé ici par
+                                            // vérification visuelle Playwright, écart constant de 4h confirmé avant fix).
+                                            $slotStartUtc = $option->starts_at ? \Carbon\Carbon::parse($option->starts_at->format('Y-m-d H:i:s'), 'UTC')->toIso8601String() : null;
+                                            $slotEndUtc = $option->ends_at ? \Carbon\Carbon::parse($option->ends_at->format('Y-m-d H:i:s'), 'UTC')->toIso8601String() : null;
+
+                                            // La date n'est plus répétée à chaque ligne (mesure du 15 août : 5
+                                            // répétitions identiques pour samedi/dimanche) - l'en-tête de journée
+                                            // ci-dessus l'annonce une seule fois. $option->label (généré par
+                                            // SlotGenerationService, complet, avec suffixe UTC de désambiguïsation
+                                            // DST le cas échéant) reste posé en attribut data-full-label pour le
+                                            // JS de bascule de fuseau (decidoSlotTimezone), qui en a besoin comme
+                                            // point de retour "heure du sondage".
+                                            $displayLabel = $option->label;
+                                            if ($dayHeading && $option->starts_at && $option->ends_at) {
+                                                $hoursStart = \Carbon\Carbon::parse($option->starts_at->format('Y-m-d H:i:s'), 'UTC')->timezone($poll->timezone)->locale('fr');
+                                                $hoursEnd = \Carbon\Carbon::parse($option->ends_at->format('Y-m-d H:i:s'), 'UTC')->timezone($poll->timezone)->locale('fr');
+                                                $displayLabel = $hoursStart->isoFormat('H [h] mm').' - '.$hoursEnd->isoFormat('H [h] mm');
+                                                // Conserve le suffixe de désambiguïsation DST éventuel du libellé
+                                                // complet (ex. " (UTC-04:00)") - rare, mais l'omettre rendrait deux
+                                                // créneaux distincts strictement identiques à l'affichage un jour
+                                                // de changement d'heure.
+                                                $suffixPos = strpos($option->label, ' (UTC');
+                                                if ($suffixPos !== false) {
+                                                    $displayLabel .= substr($option->label, $suffixPos);
+                                                }
+                                            }
+
+                                            // Priorité 3 : totaux par créneau. $option->votes est déjà chargé en
+                                            // mémoire par $poll->load('options.votes') (contrôleur) - countBy() sur
+                                            // une collection déjà hydratée ne déclenche AUCUNE requête SQL
+                                            // supplémentaire (0 requête par créneau, pas de N+1).
+                                            $voteCounts = $option->votes->countBy('value');
+                                        @endphp
+                                        <div class="card mb-3 decido-slot"
+                                             data-starts-at-utc="{{ $slotStartUtc }}"
+                                             data-ends-at-utc="{{ $slotEndUtc }}"
+                                             data-full-label="{{ $option->label }}">
+                                            <div class="card-body">
+                                                <h4 class="h5 mb-1 decido-slot-label">{{ $displayLabel }}</h4>
+                                                <p class="decido-slot-secondary text-muted small mb-3" style="display:none"></p>
+                                                {{-- Totaux par créneau (jamais les noms) : même langage visuel que
+                                                     Modules/Decido/resources/views/manage/partials/results-content.blade.php
+                                                     (badges succès/avertissement/danger), réutilisé pour rester DRY. --}}
+                                                <div class="d-flex flex-wrap gap-2 mb-2 decido-slot-totals">
+                                                    <span class="badge" style="background-color: var(--sys-success-bg); color: var(--sys-success); border: 1px solid var(--sys-success); display: inline-flex; align-items: center; gap: 4px;">
+                                                        ✓ {{ $voteCounts['yes'] ?? 0 }} oui
+                                                    </span>
+                                                    <span class="badge" style="background-color: var(--sys-warning-bg); color: var(--sys-warning); border: 1px solid var(--sys-warning); display: inline-flex; align-items: center; gap: 4px;">
+                                                        ? {{ $voteCounts['maybe'] ?? 0 }} peut-être
+                                                    </span>
+                                                    <span class="badge" style="background-color: #fff; color: var(--sys-danger); border: 1px solid var(--sys-danger); display: inline-flex; align-items: center; gap: 4px;">
+                                                        ✕ {{ $voteCounts['no'] ?? 0 }} non
+                                                    </span>
+                                                </div>
+                                                <div class="d-flex flex-wrap gap-2 decido-vote-pills">
+                                                    @foreach(['yes' => 'Oui', 'maybe' => 'Peut-être', 'no' => 'Non'] as $value => $label)
+                                                        <label class="decido-vote-pill" for="vote_{{ $option->id }}_{{ $value }}">
+                                                            <input class="visually-hidden" type="radio"
+                                                                   name="votes[{{ $option->id }}]"
+                                                                   id="vote_{{ $option->id }}_{{ $value }}"
+                                                                   value="{{ $value }}"
+                                                                   {{ (($existingVotes[$option->id] ?? null) === $value) ? 'checked' : '' }}>
+                                                            {{ $label }}
+                                                        </label>
+                                                    @endforeach
+                                                </div>
+                                                @error("votes.{$option->id}")
+                                                    <div class="text-danger mt-2">{{ $message }}</div>
+                                                @enderror
+                                            </div>
                                         </div>
-                                        @error("votes.{$option->id}")
-                                            <div class="text-danger mt-2">{{ $message }}</div>
-                                        @enderror
-                                    </div>
+                                    @endforeach
                                 </div>
                             @endforeach
                             {{-- Round 27 (revue adversariale) : aucun bloc n'affichait l'erreur de
@@ -236,6 +322,50 @@
                             outline-offset: 2px;
                         }
                         .decido-slot-secondary { margin-top: -0.5rem; }
+
+                        /* Priorité 1 (docs/specs/2026-08-15-decido-page-vote-design.md) : bannière de
+                           titre écrasée SUR CETTE PAGE SEULEMENT (scopée par .decido-vote-hero, qui
+                           n'entoure l'include du fil d'Ariane que dans cette vue) - normalement
+                           min-height 400px desktop / 250px mobile (voir _page-title.scss), le popup
+                           infolettre en plus recouvrait le formulaire : zéro créneau visible au 1er
+                           écran mobile (mesure réelle du 15 août sur /decido/LDitANr2dPmJ). Le h2 (titre
+                           dupliqué avec le h1 juste en dessous) est masqué plutôt que simplement vidé de
+                           contenu, pour ne laisser aucun espace vide résiduel. */
+                        .decido-vote-hero .wpo-breadcumb-area {
+                            min-height: auto;
+                            padding: 0.85rem 0;
+                        }
+                        .decido-vote-hero .wpo-breadcumb-wrap h2 {
+                            display: none;
+                        }
+                        .decido-vote-hero .wpo-breadcumb-wrap ul {
+                            margin: 0;
+                        }
+
+                        /* Priorité 2 : regroupement visuel par journée - en-tête fort + séparateur net
+                           entre journées. Reste sobre même quand une journée n'a qu'un seul créneau
+                           (4 journées sur 6 dans le relevé du 15 août) : pas de bouton d'action par
+                           journée (tué par le panel, voir section 2 du plan - ils ne groupent rien
+                           quand il n'y a qu'une ligne à grouper). */
+                        .decido-day-heading {
+                            font-size: 1.05rem;
+                            font-weight: 700;
+                            color: var(--c-primary, #064E5A);
+                            margin: 0 0 0.75rem;
+                        }
+                        .decido-day-group + .decido-day-group {
+                            margin-top: 1.5rem;
+                            padding-top: 1.25rem;
+                            border-top: 2px solid #E5E7EB;
+                        }
+
+                        /* Priorité 3 : totaux par créneau (jamais les noms). */
+                        .decido-slot-totals .badge {
+                            font-size: 0.8rem;
+                            font-weight: 600;
+                            padding: 0.3rem 0.6rem;
+                            border-radius: 999px;
+                        }
                     </style>
 
                     <div class="d-grid">
@@ -388,9 +518,14 @@
 
                         // Le libellé serveur d'origine (fuseau du sondage) est capturé une seule
                         // fois, avant la première mutation, pour rester réutilisable à chaque
-                        // bascule sans perte d'information.
+                        // bascule sans perte d'information. Depuis le regroupement par journée
+                        // (docs/specs/2026-08-15-decido-page-vote-design.md), le texte affiché par
+                        // défaut n'est plus le libellé complet mais les heures seules (la date est
+                        // annoncée par l'en-tête de journée) - card.dataset.fullLabel (posé côté
+                        // serveur, voir data-full-label) reste la seule source fiable du libellé
+                        // complet à restaurer quand displayMode revient sur 'poll'.
                         if (!labelEl.dataset.pollLabel) {
-                            labelEl.dataset.pollLabel = labelEl.textContent.trim();
+                            labelEl.dataset.pollLabel = card.dataset.fullLabel || labelEl.textContent.trim();
                         }
 
                         var startLocal = self.formatParts(startIso, tz);
