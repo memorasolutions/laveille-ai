@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.175.0] - 2026-08-15
+
+### Ajouté
+- **Nouveau canal de journalisation dédié `directory_screenshots`, sur le modèle exact des canaux existants du projet (`fusion`, `quality_gate`).** Niveau fixé en dur à `info`, volontairement indépendant de `LOG_LEVEL` : en production, `LOG_LEVEL=error` jette les messages d'information avant même leur écriture, rendant invisible tout ce qui n'est pas une erreur.
+
+### Corrigé
+- **Le bilan de chaque collecte horaire d'actualités (articles récupérés, publiés, filtrés, admissibles retenus en brouillon) partait en sortie console uniquement, et le cron redirige tout vers le néant.** Invisible à chaque exécution depuis toujours. Désormais routé vers le canal dédié du module concerné.
+- **26 points de journalisation du cycle de vie des captures d'écran de l'annuaire étaient invisibles en production** (échec d'écriture, maître introuvable, déplacement raté, verrou). Un évènement était même annoncé comme journalisé par un simple commentaire de code, sans qu'aucune ligne ne le fasse réellement. Tous routés vers le nouveau canal dédié.
+- Aucun message n'a été transformé en erreur pour devenir visible : c'est le canal qui change, jamais le niveau. La solution inverse aurait noyé le canal d'erreurs de bruit opérationnel.
+
+### Vérifié
+- Cent vingt et un tests du module Directory (deux cent soixante-seize assertions) et deux cent quatre tests du module News (cinq cent quarante-deux assertions), aucun échec.
+- Aucune page retirée, aucune donnée supprimée, aucune migration. Retour en arrière possible sans perte : seule la destination des lignes de journal change.
+
 ## [1.174.1] - 2026-08-15
 
 ### Corrigé

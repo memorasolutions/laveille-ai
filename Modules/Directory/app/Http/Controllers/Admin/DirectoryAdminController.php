@@ -304,7 +304,10 @@ class DirectoryAdminController extends Controller
      * - un master EXISTANT (et le point focal associe) est desormais CONSERVE intact - plus
      *   jamais supprime silencieusement (l'ancienne version #2 du 2026-08-10 l'effacait, ce qui
      *   effacait par ricochet un cadrage regle a la main par l'administrateur) ;
-     * - l'evenement est journalise avec son motif (dans le service, cote source unique) ;
+     * - l'evenement est journalise avec son motif, sur le canal dedie 'directory_screenshots'
+     *   (config/logging.php, niveau fixe, correctif #1840 du 2026-08-14 - avant ce correctif,
+     *   aucune ligne n'etait ecrite ici, ce qui rendait l'ecart invisible en dehors de la fiche
+     *   admin elle-meme) ;
      * - l'ecart entre le master conserve et la capture courante devient VISIBLE cote admin via
      *   Tool::screenshot_master_stale, jamais tranche automatiquement (cf. appelant dans
      *   uploadScreenshot()).
@@ -321,7 +324,22 @@ class DirectoryAdminController extends Controller
             return self::MASTER_STATUS_CREATED;
         }
 
-        return $hadExistingMaster ? self::MASTER_STATUS_KEPT_STALE : self::MASTER_STATUS_NONE;
+        if ($hadExistingMaster) {
+            // ACTION: journalise l'evenement "maitre de vignette conserve mais perime", motif inclus.
+            // MCP: SELF (< 5 lignes)
+            // RAISON: correctif #1840 (3e occurrence du piege LOG_LEVEL=error qui avale
+            // Log::info/warning avant ecriture en production) - canal dedie 'directory_screenshots'
+            // (config/logging.php, niveau fixe, meme parade que 'fusion'/'quality_gate'), jamais
+            // Log::error (l'ecart est une decision assumee de conservation, pas une erreur reelle).
+            \Illuminate\Support\Facades\Log::channel('directory_screenshots')->info(
+                "SCREENSHOT-MASTER-STALE: maitre conserve mais perime pour {$slug} (motif: {$status}) - ".
+                'recapture insuffisante, ancien maitre et point focal intacts, ecart signale a l\'admin.'
+            );
+
+            return self::MASTER_STATUS_KEPT_STALE;
+        }
+
+        return self::MASTER_STATUS_NONE;
     }
 
     /**

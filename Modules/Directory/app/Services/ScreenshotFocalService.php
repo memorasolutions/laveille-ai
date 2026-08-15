@@ -43,7 +43,7 @@ class ScreenshotFocalService
 
         $masterPath = public_path("screenshots/masters/{$slug}.jpg");
         if (! File::exists($masterPath)) {
-            Log::warning("ScreenshotFocalService: master introuvable pour {$slug}");
+            Log::channel('directory_screenshots')->warning("ScreenshotFocalService: master introuvable pour {$slug}");
 
             return false;
         }
@@ -52,7 +52,7 @@ class ScreenshotFocalService
             $manager = new ImageManager(new ImageGdDriver());
             $master = $manager->read($masterPath);
         } catch (Throwable $e) {
-            Log::warning("ScreenshotFocalService: master illisible pour {$slug} - {$e->getMessage()}");
+            Log::channel('directory_screenshots')->warning("ScreenshotFocalService: master illisible pour {$slug} - {$e->getMessage()}");
 
             return false;
         }
@@ -77,7 +77,7 @@ class ScreenshotFocalService
 
                     return true;
                 } catch (Throwable $e) {
-                    Log::warning('ScreenshotFocalService: derivation vignette echouee - '.$e->getMessage());
+                    Log::channel('directory_screenshots')->warning('ScreenshotFocalService: derivation vignette echouee - '.$e->getMessage());
 
                     return false;
                 }

@@ -3664,11 +3664,25 @@ declare(strict_types=1);
  *     la modale d'aide) pour refléter le vocabulaire réel de l'UI ("carte d'objectif", "réglages").
  *     30 tests Pest ConstructeurPromptsGateTest verts (dont le test qui vérifie le rendu texte réel
  *     du Blade), aucune assertion sur les anciennes chaînes.
+ *
+ *   1.175.0 · 2026-08-15 · feat(journalisation) le niveau de journalisation de production
+ *     (LOG_LEVEL=error) jetait les messages d'information AVANT écriture, rendant invisibles :
+ *     (1) le bilan de chaque collecte horaire d'actualités (articles récupérés, publiés, filtrés,
+ *     admissibles retenus en brouillon), qui partait en sortie console alors que le cron redirige
+ *     tout vers le néant ; (2) 26 points de journalisation du cycle de vie des captures d'écran de
+ *     l'annuaire (échec d'écriture, maître introuvable, déplacement raté, verrou), dont un était
+ *     même annoncé journalisé par un simple COMMENTAIRE de code sans qu'aucune ligne ne le fasse
+ *     réellement. Aucun message n'a été transformé en erreur pour devenir visible - c'est le CANAL
+ *     qui change, jamais le niveau, pour ne pas noyer le canal d'erreurs de bruit opérationnel.
+ *     Nouveau canal dédié 'directory_screenshots' dans config/logging.php, sur le modèle exact des
+ *     canaux existants du projet ('fusion', 'quality_gate'), niveau fixé en dur à 'info',
+ *     volontairement indépendant de LOG_LEVEL. 121 tests du module Directory (276 assertions) et
+ *     204 tests du module News (542 assertions), aucun échec.
  */
 
 $lvMajor = 1;
-$lvMinor = 174;
-$lvPatch = 1;
+$lvMinor = 175;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

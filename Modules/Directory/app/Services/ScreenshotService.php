@@ -23,13 +23,13 @@ class ScreenshotService
     {
         // Screenshot verrouillé (uploadé manuellement) : ne JAMAIS l'écraser via la capture automatique.
         if (! empty($tool->screenshot_locked)) {
-            Log::info('ScreenshotService: capture ignorée (screenshot verrouillé) pour '.$tool->getTranslation('slug', 'fr_CA'));
+            Log::channel('directory_screenshots')->info('ScreenshotService: capture ignorée (screenshot verrouillé) pour '.$tool->getTranslation('slug', 'fr_CA'));
 
             return false;
         }
 
         if (! self::isAvailable()) {
-            Log::warning('ScreenshotService: Node.js ou script introuvable.');
+            Log::channel('directory_screenshots')->warning('ScreenshotService: Node.js ou script introuvable.');
 
             return false;
         }
@@ -61,7 +61,7 @@ class ScreenshotService
             $json = json_decode(trim($result->output()), true);
 
             if (! is_array($json)) {
-                Log::warning("Screenshot {$slug}: reponse JSON invalide");
+                Log::channel('directory_screenshots')->warning("Screenshot {$slug}: reponse JSON invalide");
                 @unlink($tempPath);
 
                 return false;
@@ -72,7 +72,7 @@ class ScreenshotService
                 $reason = $json['error'] ?? 'Erreur inconnue';
                 $blocked = $json['blocked'] ?? false;
                 $tooSmall = $json['tooSmall'] ?? false;
-                Log::warning("Screenshot {$slug}: {$reason}".($blocked ? ' [BLOQUE]' : '').($tooSmall ? ' [TROP PETIT]' : ''));
+                Log::channel('directory_screenshots')->warning("Screenshot {$slug}: {$reason}".($blocked ? ' [BLOQUE]' : '').($tooSmall ? ' [TROP PETIT]' : ''));
                 @unlink($tempPath);
 
                 return false;
@@ -80,7 +80,7 @@ class ScreenshotService
 
             // Succes : verifier que le fichier temporaire est valide
             if (! File::exists($tempPath) || File::size($tempPath) < 5000) {
-                Log::warning("Screenshot {$slug}: fichier temporaire invalide");
+                Log::channel('directory_screenshots')->warning("Screenshot {$slug}: fichier temporaire invalide");
                 @unlink($tempPath);
 
                 return false;
@@ -94,7 +94,7 @@ class ScreenshotService
             // MCP: SELF (< 5 lignes de logique de garde)
             // RAISON: design doc 2026-08-10, brique 4, critere (b), CA-4.
             if (($json['blocked'] ?? false) === true) {
-                Log::warning("Screenshot {$slug}: rejet - blocage signale par le script malgre success=true");
+                Log::channel('directory_screenshots')->warning("Screenshot {$slug}: rejet - blocage signale par le script malgre success=true");
                 @unlink($tempPath);
                 self::cleanupMasterTempFile($json);
 
@@ -106,7 +106,7 @@ class ScreenshotService
             // MCP: SELF (orchestration, la logique lourde vit dans normalizeOgImageFallback())
             // RAISON: design doc 2026-08-10, brique 3, CA-6, CA-8.
             if ($method === 'og:image' && ! self::normalizeOgImageFallback($tempPath)) {
-                Log::warning("Screenshot {$slug}: og:image rejetee (anti-bombe ou decodage impossible)");
+                Log::channel('directory_screenshots')->warning("Screenshot {$slug}: og:image rejetee (anti-bombe ou decodage impossible)");
                 @unlink($tempPath);
 
                 return false;
@@ -117,7 +117,7 @@ class ScreenshotService
             // MCP: SELF (orchestration, logique lourde dans isValidScreenshotContent())
             // RAISON: design doc 2026-08-10, brique 4, critere (b), CA-4.
             if (! self::isValidScreenshotContent($tempPath, $method)) {
-                Log::warning("Screenshot {$slug}: nouvelle image invalide (contenu) - conserve l'existant");
+                Log::channel('directory_screenshots')->warning("Screenshot {$slug}: nouvelle image invalide (contenu) - conserve l'existant");
                 @unlink($tempPath);
                 self::cleanupMasterTempFile($json);
 
@@ -173,7 +173,7 @@ class ScreenshotService
 
             return true;
         } catch (Throwable $e) {
-            Log::warning("Screenshot exception {$slug}: {$e->getMessage()}");
+            Log::channel('directory_screenshots')->warning("Screenshot exception {$slug}: {$e->getMessage()}");
             @unlink($outputDir."/_tmp_{$filename}");
         }
 
@@ -201,7 +201,7 @@ class ScreenshotService
         $slug = $tool->getTranslation('slug', 'fr_CA');
         $existingPath = public_path($tool->screenshot ?? '');
         if (! File::exists($existingPath) || File::size($existingPath) < 20000) {
-            Log::info("Screenshot {$slug}: generation gradient fallback");
+            Log::channel('directory_screenshots')->info("Screenshot {$slug}: generation gradient fallback");
 
             return self::generateFallbackGradient($tool);
         }
@@ -343,7 +343,7 @@ class ScreenshotService
         try {
             File::move($masterTempPath, $masterAbsolutePath);
         } catch (Throwable $e) {
-            Log::warning("persistMasterFile: deplacement master {$slug} echoue - {$e->getMessage()}");
+            Log::channel('directory_screenshots')->warning("persistMasterFile: deplacement master {$slug} echoue - {$e->getMessage()}");
             @unlink($masterTempPath);
         }
     }
@@ -407,7 +407,7 @@ class ScreenshotService
 
             return true;
         } catch (Throwable $e) {
-            Log::warning('normalizeOgImageFallback: exception - '.$e->getMessage());
+            Log::channel('directory_screenshots')->warning('normalizeOgImageFallback: exception - '.$e->getMessage());
 
             return false;
         }
@@ -424,19 +424,19 @@ class ScreenshotService
             $manager = new ImageManager(new ImageGdDriver());
             $image = $manager->read($tempPath);
         } catch (Throwable $e) {
-            Log::warning('isValidScreenshotContent: image non decodable - '.$e->getMessage());
+            Log::channel('directory_screenshots')->warning('isValidScreenshotContent: image non decodable - '.$e->getMessage());
 
             return false;
         }
 
         if ($method === 'screenshot' && ($image->width() !== 1200 || $image->height() !== 630)) {
-            Log::warning("isValidScreenshotContent: dimensions inattendues ({$image->width()}x{$image->height()}) pour une capture Puppeteer");
+            Log::channel('directory_screenshots')->warning("isValidScreenshotContent: dimensions inattendues ({$image->width()}x{$image->height()}) pour une capture Puppeteer");
 
             return false;
         }
 
         if (self::isQuasiUniformImage($image)) {
-            Log::warning('isValidScreenshotContent: image quasi-uniforme detectee (page blanche/erreur probable)');
+            Log::channel('directory_screenshots')->warning('isValidScreenshotContent: image quasi-uniforme detectee (page blanche/erreur probable)');
 
             return false;
         }
@@ -537,7 +537,7 @@ class ScreenshotService
             return true;
         } catch (Throwable $e) {
             @unlink($tempPath);
-            \Illuminate\Support\Facades\Log::warning('safeWriteScreenshot exception: '.$e->getMessage());
+            \Illuminate\Support\Facades\Log::channel('directory_screenshots')->warning('safeWriteScreenshot exception: '.$e->getMessage());
             return false;
         }
     }

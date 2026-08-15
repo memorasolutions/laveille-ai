@@ -27,7 +27,7 @@ class CaptureScreenshotJob implements ShouldQueue
     public function handle(ScreenshotService $service): void
     {
         if (! ScreenshotService::isAvailable()) {
-            Log::warning("[CaptureScreenshotJob] Service de capture indisponible pour Tool #{$this->tool->id}.");
+            Log::channel('directory_screenshots')->warning("[CaptureScreenshotJob] Service de capture indisponible pour Tool #{$this->tool->id}.");
 
             return;
         }

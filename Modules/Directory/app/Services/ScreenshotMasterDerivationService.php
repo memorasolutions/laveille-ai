@@ -69,7 +69,7 @@ class ScreenshotMasterDerivationService
 
             return ['status' => self::STATUS_CREATED, 'scaled' => $scaled, 'scaledHeight' => $scaled->height()];
         } catch (Throwable $e) {
-            Log::warning("ScreenshotMasterDerivationService: source illisible ({$sourcePath}) - {$e->getMessage()}");
+            Log::channel('directory_screenshots')->warning("ScreenshotMasterDerivationService: source illisible ({$sourcePath}) - {$e->getMessage()}");
 
             return ['status' => self::STATUS_ERROR, 'scaled' => null, 'scaledHeight' => null];
         }
@@ -100,7 +100,7 @@ class ScreenshotMasterDerivationService
 
             return self::STATUS_CREATED;
         } catch (Throwable $e) {
-            Log::warning("ScreenshotMasterDerivationService: ecriture master echouee pour {$slug} - {$e->getMessage()}");
+            Log::channel('directory_screenshots')->warning("ScreenshotMasterDerivationService: ecriture master echouee pour {$slug} - {$e->getMessage()}");
 
             return self::STATUS_ERROR;
         }

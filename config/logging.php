@@ -117,6 +117,24 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Annuaire (2026-08-14, correctif #1840, 3e occurrence du meme piege apres 'fusion' et
+        // 'quality_gate' ci-dessus) - canal dedie a l'evenement "maitre de vignette conserve mais
+        // perime" (DirectoryAdminController::deriveMasterFromUpload() : une recapture admin, une
+        // fois mise a l'echelle, n'atteint pas la hauteur minimale requise - l'ancien maitre et son
+        // point focal sont volontairement CONSERVES plutot que detruits, et l'ecart est marque
+        // Tool::screenshot_master_stale=true). 'level' fixe en dur a 'info', volontairement
+        // INDEPENDANT de LOG_LEVEL - meme parade que 'fusion'/'quality_gate' : LOG_LEVEL=error en
+        // prod avalerait sinon ce motif avant ecriture, rendant l'ecart invisible aux admins tant
+        // qu'ils ne consultent pas la fiche outil elle-meme. Retention alignee sur les autres
+        // canaux 'daily' du projet.
+        'directory_screenshots' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/directory_screenshots.log'),
+            'level' => 'info',
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
