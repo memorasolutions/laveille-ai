@@ -239,7 +239,7 @@
                                      personnalisée (DRY, cohérent). --}}
                                 <label class="form-label d-flex align-items-center gap-2">
                                     Créneaux proposés aux votants
-                                    <button type="button" class="ct-btn ct-btn-primary ct-btn-icon" @click="jQuery('#stepHelpModal').modal('show')" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;font-size:0.7rem;" title="Aide">?</button>
+                                    <x-tools::help-btn click="jQuery('#stepHelpModal').modal('show')" />
                                 </label>
                                 <div class="d-flex flex-wrap gap-2" role="group" aria-label="Créneaux proposés aux votants" x-show="stepMode !== 'custom'">
                                     <button type="button" class="ct-btn ct-btn-sm" :class="stepMode === 'flexible' ? 'ct-btn-primary' : 'ct-btn-outline'"

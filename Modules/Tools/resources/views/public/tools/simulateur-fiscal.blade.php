@@ -139,7 +139,7 @@ function fiscalSim(cfg) {
                                         <div class="d-flex gap-1">
                                             @include('tools::partials.fullscreen-btn')
                                             @include('tools::partials.share-btn', ['tool' => $tool])
-                                            <button class="ct-btn ct-btn-primary ct-btn-icon" @click="jQuery('#fiscalHelpModal').modal('show')" style="border-radius:50%;width:28px;height:28px;padding:0;line-height:28px;flex-shrink:0;">?</button>
+                                            <x-tools::help-btn click="jQuery('#fiscalHelpModal').modal('show')" />
                                         </div>
                                     </div>
 

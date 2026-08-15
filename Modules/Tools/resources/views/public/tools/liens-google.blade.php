@@ -24,7 +24,7 @@
                                 <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0;">{{ $tool->name }}</h1>
                                 <p class="text-muted mb-0">{{ $tool->description }}</p>
                             </div>
-                            <button class="ct-btn ct-btn-primary ct-btn-icon" @click="jQuery('#helpModal').modal('show')" style="border-radius:50%;width:32px;height:32px;padding:0;line-height:32px;flex-shrink:0;" title="{{ __('Aide') }}">?</button>
+                            <x-tools::help-btn click="jQuery('#helpModal').modal('show')" />
                         </div>
                         <div class="mb-4"></div>
 

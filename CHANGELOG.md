@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.174.1] - 2026-08-15
+
+### Corrigé
+- **Cinq boutons d'aide « ? » incohérents unifiés vers le composant partagé `<x-tools::help-btn>`.** Les outils Décido (création par date), Code QR, simulateur fiscal, roue de tirage et raccourcisseur de liens Google affichaient chacun un cercle plein de 44 pixels en vert foncé, style dupliqué à chaque endroit, alors que le composant partagé utilise un contour fin de 24 pixels avec une zone cliquable maintenue à 44 pixels pour préserver l'accessibilité. Les cinq boutons pointent désormais vers la même définition, sans duplication de style.
+
+### Ajouté
+- Un indicateur de déroulement (chevron) ajouté au champ de recherche « Fuseau horaire » de Décido, dans le partiel partagé entre les vues de création par date et de création classique. Purement décoratif (`aria-hidden`), il tourne à l'ouverture de la liste et reste cliquable sans faire perdre le focus au champ.
+
+### Vérifié
+- Cent trois tests du module Décido (quatre cent quarante assertions) et trois cent soixante-treize tests du module Tools (mille six cent vingt-neuf assertions), aucun échec.
+- Validation visuelle en navigateur : chevron visible sans recouvrir le texte de substitution même long, tourne à l'ouverture de la liste, reste cliquable ; bouton d'aide au contraste mesuré à 9,35:1 ; les quatre autres outils corrigés cohérents entre eux ; rendu correct à 375 pixels.
+
 ## [1.174.0] - 2026-08-14
 
 ### Ajouté

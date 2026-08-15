@@ -38,6 +38,7 @@
             autocomplete="off"
             spellcheck="false"
             x-model="query"
+            x-ref="tzSearchInput"
             :aria-expanded="open ? 'true' : 'false'"
             :aria-activedescendant="open ? activeDomId : null"
             @focus="openList()"
@@ -48,6 +49,19 @@
             @keydown.tab="closeList()"
             placeholder="Rechercher (ville, région, ex. « Toronto »)…"
         >
+
+        {{-- Chevron purement décoratif (aria-hidden) : le role="combobox" porte déjà la
+             sémantique de déroulement, ce caret ne fait qu'indiquer visuellement qu'on peut
+             dérouler des choix - motif repris de .bd-chip__caret (brain-dump.blade.php).
+             Tourne selon `open` (état déjà présent dans le composant Alpine, pas de nouvelle
+             variable) ; @mousedown.prevent évite de faire perdre le focus au champ avant que
+             le clic ne s'exécute. --}}
+        <span
+            class="decido-tz-caret"
+            :class="{ 'is-open': open }"
+            aria-hidden="true"
+            @mousedown.prevent="if (open) { closeList(); } else { openList(); $refs.tzSearchInput.focus(); }"
+        >▾</span>
 
         {{-- Valeur réellement soumise : l'identifiant IANA canonique. Le champ texte ci-dessus
              n'affiche que le libellé lisible et sert de filtre - jamais soumis directement. --}}
@@ -283,6 +297,27 @@
 
 <style>
     .decido-tz-combobox { position: relative; }
+    /* Chevron de déroulement (jamais un <select> natif ici, cf. commentaire du champ plus
+       haut) : padding-right sur le champ pour que le texte long (placeholder ou saisie) ne
+       passe jamais sous le caret. Un seul combobox non natif dans tout le projet : ces règles
+       restent ici plutôt que dans charte.css (sur-ingénierie évitée, cf. instructions). */
+    #timezone_search { padding-right: 34px; }
+    .decido-tz-caret {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        margin-top: -6px;
+        font-size: 12px;
+        line-height: 1;
+        color: #374151;
+        cursor: pointer;
+        transition: transform .15s ease;
+        user-select: none;
+    }
+    .decido-tz-caret.is-open { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+        .decido-tz-caret { transition-duration: 0s; }
+    }
     .decido-tz-listbox {
         position: absolute;
         z-index: 20;

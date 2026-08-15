@@ -95,7 +95,7 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                                 </button>
                                 <button class="ct-btn ct-btn-ghost ct-btn-sm" @click="toggleFullscreen()" aria-label="Plein écran">⛶</button>
                                 <button class="ct-btn ct-btn-primary ct-btn-sm" @click="showDrawer = true; document.body.style.overflow = 'hidden'" aria-label="Paramètres">⚙ {{ __('Paramètres') }}</button>
-                                <button class="ct-btn ct-btn-primary ct-btn-icon" @click="jQuery('#roueTirageHelpModal').modal('show')" style="border-radius:50%;width:28px;height:28px;padding:0;line-height:28px;">?</button>
+                                <x-tools::help-btn click="jQuery('#roueTirageHelpModal').modal('show')" />
                             </div>
                         </div>
 
