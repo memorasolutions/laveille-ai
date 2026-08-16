@@ -1313,6 +1313,11 @@ article h3 {
 .ct-badge-status-success { background-color: var(--sys-success-bg); color: var(--sys-success); border-color: var(--sys-success); }
 .ct-badge-status-warning { background-color: var(--sys-warning-bg); color: var(--sys-warning); border-color: var(--sys-warning); }
 .ct-badge-status-danger { background-color: #fff; color: var(--sys-danger); border-color: var(--sys-danger); }
+/* Décido LOT 1 (2026-08-16) : variante "neutre" - refus explicite ("aucune date ne me convient")
+   et échéance de réponse dépassée, ni une réussite (succès) ni un échec (danger) au sens des 3
+   variantes ci-dessus. Réutilise les jetons --sys-info/--sys-info-bg déjà définis (alias de
+   --c-primary/--c-primary-light) plutôt que d'introduire une nouvelle couleur. */
+.ct-badge-status-neutral { background-color: var(--sys-info-bg); color: var(--sys-info); border-color: var(--sys-info); }
 
 /* ═══════════════════════════════════════════════════
    23. IMPRESSION (@media print)

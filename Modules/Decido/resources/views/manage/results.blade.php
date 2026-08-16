@@ -46,13 +46,13 @@
 @endsection
 @section($contentSection)
     @if($isOwnerContext)
-        @include('decido::manage.partials.results-content', ['poll' => $poll, 'options' => $options, 'adminToken' => $adminToken])
+        @include('decido::manage.partials.results-content', ['poll' => $poll, 'options' => $options, 'adminToken' => $adminToken, 'declines' => $declines ?? $poll->declines, 'comments' => $comments ?? $poll->comments])
     @else
         <section class="wpo-blog-single-section section-padding" x-data="{}">
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-lg-9">
-                        @include('decido::manage.partials.results-content', ['poll' => $poll, 'options' => $options, 'adminToken' => $adminToken])
+                        @include('decido::manage.partials.results-content', ['poll' => $poll, 'options' => $options, 'adminToken' => $adminToken, 'declines' => $declines ?? $poll->declines, 'comments' => $comments ?? $poll->comments])
                     </div>
                 </div>
             </div>

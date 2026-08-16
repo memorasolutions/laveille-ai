@@ -14,6 +14,23 @@
     <textarea id="description" name="description" class="form-control" rows="3">{{ old('description') }}</textarea>
 </div>
 
+{{-- LOT 1 (docs/specs/2026-08-16-decido-reste-a-faire.md, point 2) : échéance de réponse
+     FACULTATIVE, partagée entre les 2 formulaires dédiés (même emplacement DRY que la
+     description/le fuseau ci-dessus). Un sondage sans échéance continue de fonctionner
+     exactement comme avant - jamais bloquante par défaut (aucune option de verrouillage ici :
+     une échéance passée n'est affichée que comme un avertissement côté vote, le vote reste
+     accepté). Heure interprétée dans le FUSEAU du sondage choisi ci-dessus, pas celui du
+     navigateur ni du serveur (voir PollManageController::store()). --}}
+<div class="mb-4">
+    <label for="response_deadline_at" class="form-label">Date limite de réponse (optionnel)</label>
+    <input type="datetime-local" id="response_deadline_at" name="response_deadline_at" class="form-control"
+           style="max-width:320px;" value="{{ old('response_deadline_at') }}">
+    <p class="text-muted small mt-1 mb-0">Une fois passée, les votants sont avertis mais peuvent toujours répondre - rien n'est verrouillé.</p>
+    @error('response_deadline_at')
+        <div class="text-danger mt-1">{{ $message }}</div>
+    @enderror
+</div>
+
 <div class="mb-4">
     <label for="timezone_search" class="form-label">Fuseau horaire</label>
 

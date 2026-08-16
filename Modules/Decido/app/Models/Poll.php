@@ -38,8 +38,10 @@ class Poll extends Model
         'step_minutes',
         'final_option_id',
         'expires_at',
+        'response_deadline_at',
         'expiry_warned_at',
         'extension_count',
+        'expected_participants',
         'admin_token_hash',
         'custom_slug',
         'short_url_id',
@@ -50,8 +52,10 @@ class Poll extends Model
         'vote_mode' => VoteMode::class,
         'status' => PollStatus::class,
         'expires_at' => 'datetime',
+        'response_deadline_at' => 'datetime',
         'expiry_warned_at' => 'datetime',
         'extension_count' => 'integer',
+        'expected_participants' => 'integer',
     ];
 
     protected $hidden = [
@@ -73,6 +77,24 @@ class Poll extends Model
         return $this->hasManyThrough(PollVote::class, PollOption::class, 'poll_id', 'option_id');
     }
 
+    /**
+     * Nombre de votants DISTINCTS (par voter_token) pour ce sondage - pas le nombre de lignes de
+     * vote (un même votant a une ligne par option en mode yes_no_maybe). Sert au suivi "X sur Y
+     * réponses reçues" (LOT 3, suivi des non-répondants sans carnet d'adresses).
+     */
+    public function responseCount(): int
+    {
+        if ($this->relationLoaded('options') && $this->options->every(fn (PollOption $option) => $option->relationLoaded('votes'))) {
+            return $this->options->flatMap(fn (PollOption $option) => $option->votes)
+                ->unique('voter_token')
+                ->count();
+        }
+
+        return PollVote::whereIn('option_id', $this->options()->pluck('id'))
+            ->distinct('voter_token')
+            ->count('voter_token');
+    }
+
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
@@ -81,6 +103,49 @@ class Poll extends Model
     public function finalOption(): BelongsTo
     {
         return $this->belongsTo(PollOption::class, 'final_option_id');
+    }
+
+    /**
+     * LOT 1 : votants ayant déclaré qu'aucune option ne leur convenait - voir PollDecline.
+     */
+    public function declines(): HasMany
+    {
+        return $this->hasMany(PollDecline::class, 'poll_id');
+    }
+
+    /**
+     * LOT 2 (docs/specs/2026-08-16-decido-reste-a-faire.md, point 5) : commentaires libres
+     * facultatifs, un par participant - voir PollComment.
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(PollComment::class, 'poll_id');
+    }
+
+    /**
+     * starts_at/expires_at/response_deadline_at sont stockés en UTC brut, mais
+     * config('app.timezone') = America/Toronto fait que le cast Eloquent datetime réinterprète à
+     * tort la valeur comme déjà en heure de Québec sans conversion (même piège que
+     * PollExportService::exportIcs() et vote.blade.php) - reparser explicitement comme UTC avant
+     * de convertir vers le fuseau du sondage.
+     */
+    public function responseDeadlineInPollTimezone(): ?\Carbon\CarbonInterface
+    {
+        if (! $this->response_deadline_at) {
+            return null;
+        }
+
+        return \Carbon\Carbon::parse($this->response_deadline_at->format('Y-m-d H:i:s'), 'UTC')
+            ->timezone($this->timezone);
+    }
+
+    public function isResponseDeadlinePassed(): bool
+    {
+        if (! $this->response_deadline_at) {
+            return false;
+        }
+
+        return \Carbon\Carbon::parse($this->response_deadline_at->format('Y-m-d H:i:s'), 'UTC')->isPast();
     }
 
     protected static function booted(): void

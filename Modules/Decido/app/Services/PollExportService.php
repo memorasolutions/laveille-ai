@@ -48,6 +48,17 @@ class PollExportService
             }
         }
 
+        // LOT 1, point 3 : les votants ayant déclaré qu'aucune date/option ne leur convenait
+        // (Modules\Decido\Models\PollDecline, distinct d'un simple silence) apparaissent aussi
+        // dans l'export, avec une réponse dédiée et sans option associée.
+        foreach ($poll->declines as $decline) {
+            fputcsv($handle, [
+                '—',
+                $this->sanitizeCsvCell($decline->voter_pseudonym),
+                'Aucune date ne convient',
+            ], ';', '"', '');
+        }
+
         rewind($handle);
         $csv = stream_get_contents($handle);
         fclose($handle);

@@ -176,6 +176,11 @@ class PollManageController extends Controller
             'candidate_date_ranges.*' => $isDateType ? ['nullable', 'array'] : ['nullable'],
             'candidate_date_ranges.*.*.start' => $isDateType ? ['nullable', 'date_format:H:i', 'required_with:candidate_date_ranges.*.*.end'] : ['nullable'],
             'candidate_date_ranges.*.*.end' => $isDateType ? ['nullable', 'date_format:H:i', 'required_with:candidate_date_ranges.*.*.start'] : ['nullable'],
+            // LOT 1 (docs/specs/2026-08-16-decido-reste-a-faire.md, point 2) : échéance de réponse
+            // FACULTATIVE - un sondage sans échéance continue de fonctionner exactement comme
+            // avant (nullable). 'date' suffit ici : la valeur brute du <input type="datetime-local">
+            // est reparsée dans le fuseau du sondage (jamais celui du serveur) juste après.
+            'response_deadline_at' => ['nullable', 'date'],
         ]);
 
         // Round 16 (skill /100) : la création du Poll (INSERT immédiat via $poll->save()) puis la
@@ -202,6 +207,13 @@ class PollManageController extends Controller
                 $poll->timezone = $validated['timezone'];
                 $poll->creator_id = Auth::id();
                 $poll->status = 'draft';
+
+                // LOT 1, point 2 : reparsée explicitement dans le fuseau CHOISI pour ce sondage
+                // (jamais celui du serveur), puis stockée en UTC - même convention que
+                // decido_poll_options.starts_at/ends_at (voir SlotGenerationService).
+                if (! empty($validated['response_deadline_at'])) {
+                    $poll->response_deadline_at = \Carbon\Carbon::parse($validated['response_deadline_at'], $validated['timezone'])->utc();
+                }
 
                 if ($isDateType) {
                     $poll->duration_minutes = (int) $validated['duration_minutes'];
@@ -362,13 +374,47 @@ class PollManageController extends Controller
 
         $this->authorizeManage($pollModel, $adminToken);
 
-        $pollModel->load(['options.votes']);
+        // LOT 2 (docs/specs/2026-08-16-decido-reste-a-faire.md, point 5) : 'comments' chargée en
+        // même temps que 'declines' - results-content.blade.php affiche le commentaire de chaque
+        // participant à côté de son pseudonyme.
+        $pollModel->load(['options.votes', 'declines', 'comments']);
 
         return View::make('decido::manage.results', [
             'poll' => $pollModel,
             'options' => $pollModel->options,
+            'declines' => $pollModel->declines,
+            'comments' => $pollModel->comments,
             'adminToken' => $adminToken,
         ]);
+    }
+
+    /**
+     * LOT 1, point 2 : échéance de réponse modifiable après coup depuis la page de gestion (en
+     * plus du champ de création) - facultative, jamais bloquante (aucune logique de verrouillage
+     * n'existe : une échéance passée reste seulement affichée comme avertissement côté vote).
+     */
+    public function updateDeadline(Request $request, string $poll, string $adminToken): RedirectResponse
+    {
+        $pollModel = Poll::findByShareIdentifier($poll);
+        if (! $pollModel) {
+            abort(404);
+        }
+
+        $this->authorizeManage($pollModel, $adminToken);
+
+        $validated = $request->validate([
+            'response_deadline_at' => ['nullable', 'date'],
+        ]);
+
+        $pollModel->response_deadline_at = ! empty($validated['response_deadline_at'])
+            ? \Carbon\Carbon::parse($validated['response_deadline_at'], $pollModel->timezone)->utc()
+            : null;
+        $pollModel->save();
+
+        return Redirect::route('decido.manage', [
+            'poll' => $pollModel->public_id,
+            'adminToken' => $adminToken,
+        ])->with('success', 'Échéance de réponse mise à jour.');
     }
 
     public function close(Request $request, string $poll, string $adminToken): RedirectResponse
@@ -477,6 +523,34 @@ class PollManageController extends Controller
         ])->with('success', 'Le sondage a été prolongé de 3 mois.');
     }
 
+    /**
+     * Suivi des non-répondants, SANS carnet d'adresses (LOT 3, 2026-08-16) : déclare/efface le
+     * nombre de participants attendus (un simple entier facultatif). Ne collecte ni ne stocke
+     * aucune adresse - la progression "X sur Y" affichée par results-content.blade.php se calcule
+     * à partir de ce seul nombre et de Poll::responseCount().
+     */
+    public function updateExpected(Request $request, string $poll, string $adminToken): RedirectResponse
+    {
+        $pollModel = Poll::findByShareIdentifier($poll);
+        if (! $pollModel) {
+            abort(404);
+        }
+
+        $this->authorizeManage($pollModel, $adminToken);
+
+        $validated = $request->validate([
+            'expected_participants' => ['nullable', 'integer', 'min:1', 'max:1000'],
+        ]);
+
+        $pollModel->expected_participants = $validated['expected_participants'] ?? null;
+        $pollModel->save();
+
+        return Redirect::route('decido.manage', [
+            'poll' => $pollModel->public_id,
+            'adminToken' => $adminToken,
+        ])->with('success', 'Nombre de participants attendus mis à jour.');
+    }
+
     public function exportCsv(Request $request, string $poll, string $adminToken): \Symfony\Component\HttpFoundation\Response
     {
         $pollModel = Poll::findByShareIdentifier($poll);
@@ -486,7 +560,7 @@ class PollManageController extends Controller
 
         $this->authorizeManage($pollModel, $adminToken);
 
-        $pollModel->load('options.votes');
+        $pollModel->load(['options.votes', 'declines']);
 
         $csv = (new \Modules\Decido\Services\PollExportService)->exportCsv($pollModel);
 

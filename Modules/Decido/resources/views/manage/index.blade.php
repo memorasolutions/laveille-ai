@@ -48,6 +48,21 @@
                     <small class="text-muted d-block mt-1">
                         Créé le {{ $poll->created_at->locale('fr')->isoFormat('LL') }}
                     </small>
+                    {{-- LOT 3 (2026-08-16) : nombre de réponses reçues + lien public à partager,
+                         directement depuis "Mes sondages" - évite de devoir ouvrir chaque sondage
+                         juste pour retrouver son lien. --}}
+                    <div class="d-flex flex-wrap align-items-center gap-2 mt-2" x-data="{ copied: false }">
+                        <span class="text-muted small">
+                            {{ $poll->responseCount() }} réponse{{ $poll->responseCount() > 1 ? 's' : '' }} reçue{{ $poll->responseCount() > 1 ? 's' : '' }}
+                        </span>
+                        <code class="small">{{ $poll->share_url }}</code>
+                        <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" style="min-height:44px;"
+                                aria-label="Copier le lien du sondage {{ $poll->title }}"
+                                x-on:click="copyToClipboard({{ Illuminate\Support\Js::from($poll->share_url) }}, 'Lien public copié').then(ok => { if (ok) { copied = true; setTimeout(() => copied = false, 2000) } })">
+                            <span x-show="!copied">Copier</span>
+                            <span x-show="copied" aria-hidden="true">✓ Copié !</span>
+                        </button>
+                    </div>
                 </div>
                 <x-core::button :href="route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'proprietaire'])" variant="ghost" size="sm">Gérer</x-core::button>
             </div>

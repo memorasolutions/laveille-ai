@@ -39,15 +39,87 @@
               <div class="card shadow-sm" style="border-radius: var(--r-base);">
                 <div class="card-body p-4 p-md-5">
                 <h1 class="h2 mb-2">{{ $poll->title }}</h1>
+
+                @php
+                    // LOT 1 (docs/specs/2026-08-16-decido-reste-a-faire.md, point 1) : le sondage
+                    // clôturé n'est plus un formulaire fermé sans réponse visible - la décision
+                    // s'affiche CLAIREMENT et EN PREMIER (avant même la description), le formulaire
+                    // n'est plus soumissible ($isOpenForVoting pilote le reste de cette vue), mais
+                    // les créneaux et leurs totaux restent consultables juste en dessous.
+                    $isOpenForVoting = $poll->status->value === 'open';
+                    $isClosedWithFinal = $poll->status->value === 'closed' && $poll->final_option_id !== null;
+                    $finalOption = $isClosedWithFinal ? $options->firstWhere('id', $poll->final_option_id) : null;
+                    $finalOptionHasDates = $finalOption && $finalOption->starts_at && $finalOption->ends_at;
+                @endphp
+
+                @if($isClosedWithFinal)
+                    <div class="alert mb-4" style="border-color: var(--c-primary); background-color: rgba(6, 78, 90, 0.08);">
+                        <h2 class="h5 mb-2" style="color: var(--c-primary);">Créneau retenu</h2>
+                        <p class="mb-2">{{ $finalOption->label }}</p>
+                        @if($finalOptionHasDates)
+                            {{-- Réutilise PollExportService::exportIcs() (même service que
+                                 l'organisateur) via une route publique dédiée - voir
+                                 PublicPollController::exportIcs(). --}}
+                            <a href="{{ route('decido.vote.ics', ['slug' => $poll->share_slug]) }}" class="ct-btn ct-btn-outline ct-btn-sm">
+                                Ajouter à mon calendrier (.ics)
+                            </a>
+                        @endif
+                    </div>
+                @elseif($poll->status->value === 'closed')
+                    <div class="alert alert-light border mb-4">
+                        Ce sondage est clôturé. L'organisateur n'a pas retenu de créneau final.
+                    </div>
+                @endif
+
                 @if($poll->description)
                     <p class="text-muted mb-4">{{ $poll->description }}</p>
                 @endif
 
-                @if($voterToken)
-                    <div class="alert alert-info mb-4">
-                        Tu as déjà voté sous ce lien - modifie ton choix ci-dessous si besoin.
+                @if($isOpenForVoting && $poll->response_deadline_at)
+                    @php
+                        $deadlineLocal = $poll->responseDeadlineInPollTimezone()->locale('fr');
+                        $deadlinePassed = $poll->isResponseDeadlinePassed();
+                    @endphp
+                    {{-- LOT 1, point 2 : affichée avant ET après l'envoi (donc ici, hors du bloc
+                         succès plus bas) - JAMAIS bloquante : une échéance dépassée avertit
+                         seulement, aucun champ n'est désactivé ni rendu required en conséquence. --}}
+                    <div class="alert {{ $deadlinePassed ? 'alert-warning' : 'alert-light border' }} mb-4">
+                        @if($deadlinePassed)
+                            La date limite de réponse ({{ $deadlineLocal->isoFormat('dddd D MMMM [à] H [h] mm') }}) est passée. Tu peux tout de même répondre - l'organisateur en sera informé.
+                        @else
+                            Réponds avant le {{ $deadlineLocal->isoFormat('dddd D MMMM [à] H [h] mm') }}.
+                        @endif
                     </div>
                 @endif
+
+                {{-- La bannière se déclenche sur l'existence RÉELLE de votes, jamais sur la simple
+                     présence du témoin : celui-ci est posé aussi bien par vote() que par decline(),
+                     et quelqu'un qui a SEULEMENT décliné voyait deux messages contradictoires
+                     (« tu as déjà voté » + « aucune date ne te convenait »). Défaut trouvé en
+                     validation visuelle le 2026-08-16 ; les tests ne l'attrapaient pas, la donnée
+                     étant juste et seul l'affichage étant faux. --}}
+                @if($voterToken && (! empty($existingVotes) || ($existingDecline ?? false)))
+                    <div class="alert alert-info mb-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <span>@if(! empty($existingVotes))Tu as déjà voté sous ce lien - modifie ton choix ci-dessous si besoin.@else Tu as déjà indiqué qu'aucune date ne te convenait. Tu peux voter ci-dessous si un créneau finit par te convenir.@endif</span>
+                        {{-- LOT 2 (docs/specs/2026-08-16-decido-reste-a-faire.md, point 4) : geste
+                             EXPLICITE et IRRÉVERSIBLE, distinct du simple "revoter" ci-dessus -
+                             confirmation obligatoire via la modale du thème (x-core::confirm-modal,
+                             instance globale montée par FrontTheme/layouts/master.blade.php), câblée
+                             par le seul attribut data-confirm (délégué global déjà présent dans ce
+                             layout - AUCUN JS ajouté ici). JAMAIS confirm()/alert() natifs du
+                             navigateur (interdit au projet). PublicPollController::clearVote()
+                             n'efface QUE les données du voter_token du cookie chiffré du demandeur,
+                             jamais celles d'un autre votant. --}}
+                        <form method="POST" action="{{ route('decido.vote.clear', ['slug' => $poll->share_slug]) }}"
+                              data-confirm="Effacer TOUTE ta participation à ce sondage (votes, réponse et commentaire) ? Cette action est irréversible.">
+                            @csrf
+                            <button type="submit" class="ct-btn ct-btn-outline-danger ct-btn-sm">Effacer ma participation</button>
+                        </form>
+                    </div>
+                @endif
+
+                {{-- Le message de refus est désormais porté par le bandeau unique ci-dessus, qui
+                     conserve le bouton d'effacement : un seul bandeau, jamais deux contradictoires. --}}
 
                 @if(session('success'))
                     <div class="alert alert-success mb-4">
@@ -55,9 +127,14 @@
                     </div>
                 @endif
 
+                @if($isOpenForVoting)
                 <form method="POST" action="{{ route('decido.vote.store', ['slug' => $poll->share_slug]) }}">
                     @csrf
+                @else
+                <div>
+                @endif
 
+                    @if($isOpenForVoting)
                     <div class="mb-4">
                         <label for="voter_pseudonym" class="form-label">Ton nom ou pseudonyme <span class="text-danger">*</span></label>
                         <input type="text" id="voter_pseudonym" name="voter_pseudonym" class="form-control"
@@ -66,6 +143,23 @@
                             <div class="text-danger mt-1">{{ $message }}</div>
                         @enderror
                     </div>
+
+                    {{-- LOT 2 (docs/specs/2026-08-16-decido-reste-a-faire.md, point 5) : UN
+                         commentaire facultatif par participant (pas un par créneau - 14 champs à
+                         remplir serait du bruit). Même <form> que le vote ET le déclin (bouton
+                         "Aucune de ces dates ne me convient" plus bas) : le champ voyage avec les
+                         deux soumissions sans dupliquer de HTML. maxlength="280" = même limite que
+                         la validation serveur (PublicPollController::vote()/decline()) - repli
+                         client, la vraie limite reste imposée côté serveur. --}}
+                    <div class="mb-4">
+                        <label for="comment" class="form-label">Un commentaire ? (facultatif)</label>
+                        <textarea id="comment" name="comment" class="form-control" rows="2" maxlength="280"
+                                  placeholder="Ex. : je peux seulement après 18 h, je participe à distance...">{{ old('comment', $existingComment ?? '') }}</textarea>
+                        @error('comment')
+                            <div class="text-danger mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    @endif
 
                     {{-- Round 8 (skill /100) : les cases à cocher/radios natives (.form-check) mesuraient
                          14×14px avec un libellé cliquable ~22×21px - bien sous la cible tactile WCAG 2.5.5
@@ -248,7 +342,8 @@
                                                                        name="votes[{{ $option->id }}]"
                                                                        id="vote_{{ $option->id }}_{{ $value }}"
                                                                        value="{{ $value }}"
-                                                                       {{ (($existingVotes[$option->id] ?? null) === $value) ? 'checked' : '' }}>
+                                                                       {{ (($existingVotes[$option->id] ?? null) === $value) ? 'checked' : '' }}
+                                                                       {{ $isOpenForVoting ? '' : 'disabled' }}>
                                                                 {{ $label }}
                                                             </label>
                                                         @endforeach
@@ -324,7 +419,8 @@
                                                name="votes"
                                                id="vote_{{ $option->id }}"
                                                value="{{ $option->id }}"
-                                               {{ array_key_exists($option->id, $existingVotes) ? 'checked' : '' }}>
+                                               {{ array_key_exists($option->id, $existingVotes) ? 'checked' : '' }}
+                                               {{ $isOpenForVoting ? '' : 'disabled' }}>
                                         {{ $option->label }}
                                     </label>
                                 @endforeach
@@ -343,7 +439,8 @@
                                                name="votes[]"
                                                id="vote_{{ $option->id }}"
                                                value="{{ $option->id }}"
-                                               {{ array_key_exists($option->id, $existingVotes) ? 'checked' : '' }}>
+                                               {{ array_key_exists($option->id, $existingVotes) ? 'checked' : '' }}
+                                               {{ $isOpenForVoting ? '' : 'disabled' }}>
                                         {{ $option->label }}
                                     </label>
                                 @endforeach
@@ -626,10 +723,48 @@
                         }
                     </style>
 
+                    @if($isOpenForVoting)
+                    {{-- LOT 1, point 3 : "aucune date ne me convient", en un geste - même <form>,
+                         même champ pseudonyme, formaction/formnovalidate détourne SEULEMENT cette
+                         soumission vers la route dédiée (PublicPollController::decline()) sans JS
+                         ni exiger que les créneaux ci-dessus soient remplis. Représentation choisie
+                         : table decido_poll_declines dédiée (état distinct), pas un "no" forcé sur
+                         chaque créneau - voir le commentaire de sa migration pour la justification. --}}
+                    <div class="mb-3">
+                        <button type="submit"
+                                formaction="{{ route('decido.vote.decline', ['slug' => $poll->share_slug]) }}"
+                                formnovalidate
+                                class="ct-btn ct-btn-outline">
+                            Aucune de ces dates ne me convient
+                        </button>
+                    </div>
+
                     <div class="d-grid">
                         <x-core::button type="submit" variant="primary">Envoyer mon vote</x-core::button>
                     </div>
                 </form>
+                    @else
+                </div>
+                    @endif
+
+                    {{-- LOT 2 (docs/specs/2026-08-16-decido-reste-a-faire.md, point 5) : les
+                         commentaires sont VISIBLES DE TOUS LES PARTICIPANTS, pas seulement de
+                         l'organisateur - "un commentaire que personne ne lit ne sert à rien".
+                         Affiché hors du bloc @if($isOpenForVoting) ci-dessus : reste visible même
+                         un sondage clôturé. {{ }} échappe tout HTML (le texte est de toute façon
+                         déjà nettoyé de ses balises à l'écriture, voir PublicPollController) et
+                         AUCUN linkifier n'est appliqué - une URL collée par un participant reste du
+                         texte brut, jamais un lien cliquable. --}}
+                    @if(($comments ?? collect())->isNotEmpty())
+                        <div class="mt-4 pt-4 border-top">
+                            <h2 class="h5 mb-3">Commentaires des participants</h2>
+                            <div class="d-flex flex-column gap-2">
+                                @foreach($comments as $c)
+                                    <p class="small mb-0"><strong>{{ $c->voter_pseudonym }}</strong> <span class="text-muted">- {{ $c->comment }}</span></p>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
               </div>
             </div>

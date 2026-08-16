@@ -113,6 +113,35 @@ test('la liste "Mes sondages" contient un lien Gérer fonctionnel (owner-bypass,
         ->assertStatus(200);
 });
 
+test('un utilisateur connecté ne voit QUE ses propres sondages dans "Mes sondages", jamais ceux d\'un autre', function (): void {
+    // isSuperAdmin() exige à la fois le rôle ET l'email configuré (config('app.superadmin_email'))
+    // - un second utilisateur ne peut donc jamais le devenir. Ce test porte sur l'isolation des
+    // données, pas sur le gate "en construction" : on le désactive pour ne tester qu'une chose.
+    config()->set('decido.under_construction', false);
+
+    $userB = User::factory()->create();
+
+    $pollA = decidoCreatePoll(['creator_id' => $this->superadmin->id, 'title' => 'Sondage privé de A']);
+    $pollB = decidoCreatePoll(['creator_id' => $userB->id, 'title' => 'Sondage privé de B']);
+
+    $indexAsA = $this->actingAs($this->superadmin)->get(route('decido.index'));
+    $indexAsA->assertStatus(200);
+    $indexAsA->assertSee('Sondage privé de A');
+    $indexAsA->assertDontSee('Sondage privé de B');
+
+    $indexAsB = $this->actingAs($userB)->get(route('decido.index'));
+    $indexAsB->assertStatus(200);
+    $indexAsB->assertSee('Sondage privé de B');
+    $indexAsB->assertDontSee('Sondage privé de A');
+
+    // Le bypass owner de authorizeManage() ne doit fonctionner QUE pour le vrai créateur : A ne
+    // peut pas gérer le sondage de B même avec le jeton bidon 'proprietaire' qui suffit pour ses
+    // propres sondages.
+    $this->actingAs($this->superadmin)
+        ->get(route('decido.manage', ['poll' => $pollB->public_id, 'adminToken' => 'proprietaire']))
+        ->assertStatus(403);
+});
+
 // ── Création ────────────────────────────────────────────────────────────────
 
 test('superadmin peut créer un sondage de dates', function (): void {
@@ -2731,4 +2760,463 @@ test('le rétro-remplissage de la migration calcule expires_at pour les sondages
 
     $closedLegacy->refresh();
     expect($closedLegacy->expires_at->diffInSeconds($closedExpiresAtBefore))->toBeLessThan(2);
+});
+
+// ── LOT 1 (docs/specs/2026-08-16-decido-reste-a-faire.md) : refermer le cycle ──────────────────
+
+test('un sondage clôturé avec créneau final affiche le résultat sur la page publique et n\'accepte plus de vote', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'single_choice', 'status' => 'closed']);
+    $optionA = $poll->options()->create(['label' => 'Pizza', 'sort_order' => 0]);
+    $optionB = $poll->options()->create(['label' => 'Sushi', 'sort_order' => 1]);
+    $poll->final_option_id = $optionA->id;
+    $poll->save();
+
+    $response = $this->get(route('decido.vote.show', ['slug' => $poll->public_id]));
+    $response->assertStatus(200);
+    $response->assertSee('Créneau retenu');
+    $response->assertSee('Pizza');
+    // Le formulaire de vote n'est plus soumissible : aucune action POST vers decido.vote.store
+    // ne doit plus apparaître dans le HTML rendu (radios désactivées ou absentes).
+    $response->assertDontSee(route('decido.vote.store', ['slug' => $poll->public_id]), false);
+
+    // Preuve serveur (pas seulement visuelle) : voter sur ce sondage clôturé reste rejeté.
+    $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Trop tard',
+        'votes' => (string) $optionB->id,
+    ])->assertNotFound();
+});
+
+test('un sondage clôturé SANS créneau final n\'affiche pas de résultat mais reste marqué clôturé', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'single_choice', 'status' => 'closed']);
+    $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+
+    $response = $this->get(route('decido.vote.show', ['slug' => $poll->public_id]));
+    $response->assertStatus(200);
+    $response->assertDontSee('Créneau retenu');
+    $response->assertSee('Ce sondage est clôturé');
+});
+
+test('l\'export ICS public est débloqué seulement après clôture avec créneau final daté, et réutilise PollExportService', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'date', 'vote_mode' => 'yes_no_maybe', 'status' => 'open']);
+    $option = $poll->options()->create([
+        'label' => 'Lundi 9h-10h',
+        'starts_at' => now()->addDays(3),
+        'ends_at' => now()->addDays(3)->addHour(),
+        'sort_order' => 0,
+    ]);
+
+    // Encore ouvert : 404.
+    $this->get(route('decido.vote.ics', ['slug' => $poll->public_id]))->assertNotFound();
+
+    $poll->status = 'closed';
+    $poll->final_option_id = $option->id;
+    $poll->save();
+
+    $icsResponse = $this->get(route('decido.vote.ics', ['slug' => $poll->public_id]));
+    $icsResponse->assertStatus(200);
+    $icsResponse->assertHeader('Content-Type', 'text/calendar; charset=UTF-8');
+    $this->assertStringContainsString('BEGIN:VCALENDAR', $icsResponse->getContent());
+
+    // La page de vote propose bien le lien vers cet export (réutilisation, pas de duplication de
+    // logique ICS : PublicPollController::exportIcs() délègue à PollExportService::exportIcs()).
+    $voteHtml = $this->get(route('decido.vote.show', ['slug' => $poll->public_id]))->getContent();
+    $this->assertStringContainsString(route('decido.vote.ics', ['slug' => $poll->public_id]), $voteHtml);
+});
+
+test('une échéance de réponse dépassée avertit sans jamais bloquer le vote', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'single_choice', 'status' => 'open']);
+    $option = $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+    $poll->response_deadline_at = now()->utc()->subDay();
+    $poll->save();
+
+    $voteHtml = $this->get(route('decido.vote.show', ['slug' => $poll->public_id]))->getContent();
+    $this->assertStringContainsString('est passée', $voteHtml);
+    $this->assertStringContainsString(route('decido.vote.store', ['slug' => $poll->public_id]), $voteHtml);
+
+    // Le vote reste accepté malgré l'échéance dépassée - jamais bloquante par défaut.
+    $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Retardataire',
+        'votes' => (string) $option->id,
+    ]);
+
+    $this->assertDatabaseHas('decido_poll_votes', [
+        'option_id' => $option->id,
+        'voter_pseudonym' => 'Retardataire',
+    ]);
+});
+
+test('un sondage sans échéance de réponse continue de fonctionner exactement comme avant', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'single_choice', 'status' => 'open']);
+    $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+    expect($poll->response_deadline_at)->toBeNull();
+
+    $voteHtml = $this->get(route('decido.vote.show', ['slug' => $poll->public_id]))->getContent();
+    $this->assertStringNotContainsString('date limite de réponse', $voteHtml);
+    $this->assertStringNotContainsString('est passée', $voteHtml);
+});
+
+test('"aucune date ne me convient" est distinct d\'une absence de réponse dans les résultats de l\'organisateur', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-declines', 'type' => 'classic', 'vote_mode' => 'single_choice']);
+    $option = $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+
+    $this->post(route('decido.vote.decline', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Denise',
+    ])->assertRedirect();
+
+    $this->assertDatabaseHas('decido_poll_declines', [
+        'poll_id' => $poll->id,
+        'voter_pseudonym' => 'Denise',
+    ]);
+    // Aucun vote n'est créé pour ce votant : le refus est un état DISTINCT, pas un "no" déguisé.
+    $this->assertDatabaseMissing('decido_poll_votes', ['poll_id' => $poll->id]);
+
+    $manageHtml = $this->get(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-declines']))->getContent();
+    $this->assertStringContainsString('Denise', $manageHtml);
+    $this->assertStringContainsString('aucune date ne leur convenait', $manageHtml);
+    $this->assertStringContainsString('distinct d', $manageHtml);
+});
+
+test('un vote normal après un refus global annule le refus (mutuellement exclusifs)', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'single_choice']);
+    $option = $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+
+    $declineResponse = $this->post(route('decido.vote.decline', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Denise',
+    ]);
+    $cookieName = 'decido_voter_'.$poll->public_id;
+    $voterToken = $declineResponse->getCookie($cookieName)->getValue();
+
+    $this->withCookie($cookieName, $voterToken)->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Denise',
+        'votes' => (string) $option->id,
+    ]);
+
+    $this->assertDatabaseMissing('decido_poll_declines', ['poll_id' => $poll->id]);
+    $this->assertDatabaseHas('decido_poll_votes', ['poll_id' => $poll->id, 'voter_pseudonym' => 'Denise']);
+});
+
+test('un refus global après un vote normal annule les votes précédents du même votant', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'single_choice']);
+    $option = $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+
+    $voteResponse = $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Denise',
+        'votes' => (string) $option->id,
+    ]);
+    $cookieName = 'decido_voter_'.$poll->public_id;
+    $voterToken = $voteResponse->getCookie($cookieName)->getValue();
+
+    $this->withCookie($cookieName, $voterToken)->post(route('decido.vote.decline', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Denise',
+    ]);
+
+    $this->assertDatabaseMissing('decido_poll_votes', ['poll_id' => $poll->id]);
+    $this->assertDatabaseHas('decido_poll_declines', ['poll_id' => $poll->id, 'voter_pseudonym' => 'Denise']);
+});
+
+test('décliner sur un sondage fermé retourne 404', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'single_choice', 'status' => 'closed']);
+    $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+
+    $this->post(route('decido.vote.decline', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Trop tard',
+    ])->assertNotFound();
+});
+
+test('l\'échéance de réponse est modifiable après coup depuis la page de gestion, et retirable', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-echeance']);
+
+    $this->post(route('decido.deadline', ['poll' => $poll->public_id, 'adminToken' => 'jeton-echeance']), [
+        'response_deadline_at' => now()->addDays(5)->format('Y-m-d\TH:i'),
+    ])->assertRedirect();
+
+    $poll->refresh();
+    expect($poll->response_deadline_at)->not->toBeNull();
+
+    // Vide = retire l'échéance (redevient un sondage sans échéance, comportement d'avant).
+    $this->post(route('decido.deadline', ['poll' => $poll->public_id, 'adminToken' => 'jeton-echeance']), [
+        'response_deadline_at' => '',
+    ])->assertRedirect();
+
+    $poll->refresh();
+    expect($poll->response_deadline_at)->toBeNull();
+});
+
+// ── LOT 2 (docs/specs/2026-08-16-decido-reste-a-faire.md) : défauts fonctionnels ───────────────
+
+test('yes_no_maybe : un créneau laissé SANS réponse à une nouvelle soumission voit son ancien vote SUPPRIMÉ, pas conservé (défaut corrigé)', function (): void {
+    // Point 4 du LOT 2 : avant ce fix, PublicPollController::vote() n'upsertait que les créneaux
+    // PRÉSENTS dans $validated['votes'] - un créneau omis d'une nouvelle soumission (le votant a
+    // retiré son choix) gardait silencieusement son ancien vote en base, contredisant ce que le
+    // participant croyait avoir fait. Preuve : un même votant vote d'abord sur 2 créneaux (A=yes,
+    // B=no), puis resoumet en n'incluant QUE le créneau A - B doit disparaître de ses votes.
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'date', 'vote_mode' => 'yes_no_maybe']);
+    $optionA = $poll->options()->create(['label' => 'Créneau A', 'sort_order' => 0]);
+    $optionB = $poll->options()->create(['label' => 'Créneau B', 'sort_order' => 1]);
+
+    $cookieName = 'decido_voter_'.$poll->public_id;
+
+    $first = $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Fanny',
+        'votes' => [$optionA->id => 'yes', $optionB->id => 'no'],
+    ]);
+    $voterToken = $first->getCookie($cookieName)->getValue();
+
+    expect(PollVote::where('voter_token', $voterToken)->count())->toBe(2);
+
+    // Nouvelle soumission : le créneau B est omis (retiré du formulaire), seul A est renvoyé.
+    $this->withCookie($cookieName, $voterToken)->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Fanny',
+        'votes' => [$optionA->id => 'yes'],
+    ]);
+
+    $remainingVotes = PollVote::where('voter_token', $voterToken)->get();
+    expect($remainingVotes)->toHaveCount(1);
+    expect($remainingVotes->first()->option_id)->toBe($optionA->id);
+    $this->assertDatabaseMissing('decido_poll_votes', ['voter_token' => $voterToken, 'option_id' => $optionB->id]);
+});
+
+test('LE TEST LE PLUS IMPORTANT DE CE LOT : un créneau omis par un votant ne supprime JAMAIS le vote d\'un AUTRE votant sur ce même créneau', function (): void {
+    // Le fix ci-dessus ajoute une suppression (DELETE ... WHERE voter_token = ? AND option_id IN
+    // (...)) - toute erreur de portée (ex. oubli du filtre voter_token, ou un filtre appliqué au
+    // mauvais moment) effacerait le vote d'un AUTRE participant sur le même créneau, un incident
+    // bien pire que le bug d'origine. Preuve : Alice ET Bob votent tous deux sur les 2 mêmes
+    // créneaux (A=yes, B=yes chacun, cookies DISTINCTS - aucun withCookie() partagé entre les deux
+    // séquences). Alice revote en omettant B (son B doit disparaître) ; le vote de Bob sur A ET B
+    // doit rester PARFAITEMENT intact.
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'date', 'vote_mode' => 'yes_no_maybe']);
+    $optionA = $poll->options()->create(['label' => 'Créneau A', 'sort_order' => 0]);
+    $optionB = $poll->options()->create(['label' => 'Créneau B', 'sort_order' => 1]);
+    $cookieName = 'decido_voter_'.$poll->public_id;
+
+    // Alice (aucun cookie envoyé -> nouveau voter_token aléatoire généré côté serveur).
+    $aliceFirst = $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Alice',
+        'votes' => [$optionA->id => 'yes', $optionB->id => 'yes'],
+    ]);
+    $aliceToken = $aliceFirst->getCookie($cookieName)->getValue();
+
+    // Bob (nouvel appel SANS withCookie() -> voter_token distinct, jamais celui d'Alice).
+    $bobFirst = $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Bob',
+        'votes' => [$optionA->id => 'yes', $optionB->id => 'yes'],
+    ]);
+    $bobToken = $bobFirst->getCookie($cookieName)->getValue();
+
+    expect($aliceToken)->not->toBe($bobToken);
+    expect(PollVote::where('poll_id', $poll->id)->count())->toBe(4);
+
+    // Alice revote en omettant le créneau B - seule SA ligne B doit être affectée.
+    $this->withCookie($cookieName, $aliceToken)->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Alice',
+        'votes' => [$optionA->id => 'yes'],
+    ]);
+
+    // Alice : B disparu, A survit.
+    expect(PollVote::where('voter_token', $aliceToken)->count())->toBe(1);
+    $this->assertDatabaseMissing('decido_poll_votes', ['voter_token' => $aliceToken, 'option_id' => $optionB->id]);
+
+    // Bob : les 2 lignes (A ET B) doivent être RIGOUREUSEMENT intactes - aucune ligne perdue, aucune
+    // valeur modifiée, malgré la suppression déclenchée par la soumission d'Alice sur le même créneau.
+    $bobVotes = PollVote::where('voter_token', $bobToken)->get()->keyBy('option_id');
+    expect($bobVotes)->toHaveCount(2);
+    expect($bobVotes[$optionA->id]->value)->toBe('yes');
+    expect($bobVotes[$optionB->id]->value)->toBe('yes');
+    expect($bobVotes[$optionA->id]->voter_pseudonym)->toBe('Bob');
+});
+
+test('"Effacer ma participation" (decido.vote.clear) supprime votes, refus ET commentaire du votant courant, jamais ceux d\'un autre votant', function (): void {
+    // Point 4 du LOT 2 : le geste EXPLICITE et IRRÉVERSIBLE d'effacer TOUTE la participation.
+    // Même exigence de portée que le test précédent, sur les 3 tables concernées à la fois.
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'date', 'vote_mode' => 'yes_no_maybe']);
+    $optionA = $poll->options()->create(['label' => 'Créneau A', 'sort_order' => 0]);
+    $cookieName = 'decido_voter_'.$poll->public_id;
+
+    $aliceResponse = $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Alice',
+        'comment' => 'Je peux seulement après 18h',
+        'votes' => [$optionA->id => 'yes'],
+    ]);
+    $aliceToken = $aliceResponse->getCookie($cookieName)->getValue();
+
+    $bobResponse = $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Bob',
+        'comment' => 'Je participe à distance',
+        'votes' => [$optionA->id => 'yes'],
+    ]);
+    $bobToken = $bobResponse->getCookie($cookieName)->getValue();
+
+    $this->assertDatabaseHas('decido_poll_comments', ['poll_id' => $poll->id, 'voter_token' => $aliceToken]);
+    $this->assertDatabaseHas('decido_poll_comments', ['poll_id' => $poll->id, 'voter_token' => $bobToken]);
+
+    $clearResponse = $this->withCookie($cookieName, $aliceToken)
+        ->post(route('decido.vote.clear', ['slug' => $poll->public_id]));
+    $clearResponse->assertRedirect();
+
+    // Alice : plus rien nulle part pour ce sondage.
+    $this->assertDatabaseMissing('decido_poll_votes', ['poll_id' => $poll->id, 'voter_token' => $aliceToken]);
+    $this->assertDatabaseMissing('decido_poll_declines', ['poll_id' => $poll->id, 'voter_token' => $aliceToken]);
+    $this->assertDatabaseMissing('decido_poll_comments', ['poll_id' => $poll->id, 'voter_token' => $aliceToken]);
+
+    // Bob : rigoureusement intact (vote ET commentaire) malgré l'effacement d'Alice.
+    $this->assertDatabaseHas('decido_poll_votes', ['poll_id' => $poll->id, 'voter_token' => $bobToken, 'option_id' => $optionA->id]);
+    $this->assertDatabaseHas('decido_poll_comments', ['poll_id' => $poll->id, 'voter_token' => $bobToken, 'comment' => 'Je participe à distance']);
+
+    // Le cookie d'Alice est oublié côté serveur (Cookie::forget() : plus aucune donnée à
+    // ré-identifier au prochain chargement).
+    $forgottenCookie = collect($clearResponse->headers->getCookies())
+        ->first(fn ($cookie) => $cookie->getName() === $cookieName);
+    expect($forgottenCookie)->not->toBeNull();
+    expect($forgottenCookie->getExpiresTime())->toBeLessThan(time());
+});
+
+test('decido.vote.clear sans aucun cookie voter ne supprime rien et redirige avec un message neutre (rien à effacer)', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'single_choice']);
+    $option = $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+
+    $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Gigi',
+        'votes' => (string) $option->id,
+    ]);
+    expect(PollVote::where('poll_id', $poll->id)->count())->toBe(1);
+
+    // Aucun cookie envoyé avec cette requête (visiteur qui n'a jamais voté sous CE navigateur).
+    $response = $this->post(route('decido.vote.clear', ['slug' => $poll->public_id]));
+    $response->assertRedirect();
+
+    // Le vote de Gigi, sans lien avec ce visiteur anonyme, doit rester intact.
+    expect(PollVote::where('poll_id', $poll->id)->count())->toBe(1);
+});
+
+test('un commentaire facultatif est enregistré avec le vote et visible sur la page publique (pour les autres participants)', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'single_choice']);
+    $option = $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+
+    $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Hugo',
+        'comment' => 'Je peux seulement après 18 h',
+        'votes' => (string) $option->id,
+    ]);
+
+    $this->assertDatabaseHas('decido_poll_comments', [
+        'poll_id' => $poll->id,
+        'voter_pseudonym' => 'Hugo',
+        'comment' => 'Je peux seulement après 18 h',
+    ]);
+
+    // Visible par un AUTRE visiteur anonyme (aucun cookie), preuve que ce n'est pas réservé à
+    // l'auteur du commentaire ni à l'organisateur.
+    $publicHtml = $this->get(route('decido.vote.show', ['slug' => $poll->public_id]))->getContent();
+    $this->assertStringContainsString('Hugo', $publicHtml);
+    $this->assertStringContainsString('Je peux seulement après 18 h', $publicHtml);
+});
+
+test('un commentaire laissé vide à une nouvelle soumission EFFACE l\'ancien commentaire (comportement symétrique au fix des votes)', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'single_choice']);
+    $option = $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+    $cookieName = 'decido_voter_'.$poll->public_id;
+
+    $first = $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Ines',
+        'comment' => 'Un premier commentaire',
+        'votes' => (string) $option->id,
+    ]);
+    $voterToken = $first->getCookie($cookieName)->getValue();
+    $this->assertDatabaseHas('decido_poll_comments', ['voter_token' => $voterToken, 'comment' => 'Un premier commentaire']);
+
+    $this->withCookie($cookieName, $voterToken)->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Ines',
+        'comment' => '',
+        'votes' => (string) $option->id,
+    ]);
+
+    $this->assertDatabaseMissing('decido_poll_comments', ['voter_token' => $voterToken]);
+});
+
+test('un commentaire est nettoyé de toute balise HTML avant écriture (anti-injection, aucune modération humaine possible)', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'single_choice']);
+    $option = $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+
+    $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Jules',
+        'comment' => '<script>alert(1)</script>Dispo le soir<img src=x onerror=alert(2)>',
+        'votes' => (string) $option->id,
+    ]);
+
+    $stored = \Modules\Decido\Models\PollComment::where('poll_id', $poll->id)->value('comment');
+    expect($stored)->not->toBeNull();
+    expect($stored)->not->toContain('<script');
+    expect($stored)->not->toContain('<img');
+    expect($stored)->not->toContain('onerror');
+    expect($stored)->toContain('Dispo le soir');
+
+    // Défense en profondeur : même si une balise survivait, l'affichage Blade {{ }} l'échapperait -
+    // preuve que la page rendue n'expose jamais de <script> exécutable pour ce commentaire.
+    $publicHtml = $this->get(route('decido.vote.show', ['slug' => $poll->public_id]))->getContent();
+    $this->assertStringNotContainsString('<script>alert(1)</script>', $publicHtml);
+});
+
+test('un commentaire dépassant 280 caractères est rejeté par la validation, pas silencieusement tronqué', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'single_choice']);
+    $option = $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+
+    $response = $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Karim',
+        'comment' => str_repeat('x', 281),
+        'votes' => (string) $option->id,
+    ]);
+
+    $response->assertSessionHasErrors('comment');
+    $this->assertDatabaseMissing('decido_poll_comments', ['voter_pseudonym' => 'Karim']);
+});
+
+test('un commentaire laissé au moment d\'un refus global ("aucune date ne me convient") est aussi enregistré', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['type' => 'classic', 'vote_mode' => 'single_choice']);
+    $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+
+    $this->post(route('decido.vote.decline', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Léa',
+        'comment' => 'Je participe à distance si jamais',
+    ])->assertRedirect();
+
+    $this->assertDatabaseHas('decido_poll_comments', [
+        'poll_id' => $poll->id,
+        'voter_pseudonym' => 'Léa',
+        'comment' => 'Je participe à distance si jamais',
+    ]);
+});
+
+test('la page de gestion (organisateur) affiche le commentaire d\'un participant à côté de son pseudonyme', function (): void {
+    config()->set('decido.under_construction', false);
+    $poll = decidoCreatePoll(['admin_token' => 'jeton-commentaires', 'type' => 'classic', 'vote_mode' => 'single_choice']);
+    $option = $poll->options()->create(['label' => 'Option A', 'sort_order' => 0]);
+
+    $this->post(route('decido.vote.store', ['slug' => $poll->public_id]), [
+        'voter_pseudonym' => 'Manon',
+        'comment' => 'Dispo seulement le matin',
+        'votes' => (string) $option->id,
+    ]);
+
+    $manageHtml = $this->get(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-commentaires']))->getContent();
+    $this->assertStringContainsString('Manon', $manageHtml);
+    $this->assertStringContainsString('Dispo seulement le matin', $manageHtml);
 });

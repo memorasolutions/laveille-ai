@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.178.0] - 2026-08-16
+
+### Ajouté
+- **Lot 1 - refermer le cycle.** Le créneau final s'affiche désormais EN PREMIER sur la page publique quand le sondage est clôturé, et le formulaire n'est plus soumissible. Échéance de réponse FACULTATIVE (`response_deadline_at`) qui AVERTIT sans jamais bloquer : le vote reste accepté après la date, vérifié en base. Option « aucune date ne me convient » sur sa propre table (`decido_poll_declines`) et son propre modèle, distincte d'une absence de réponse et mutuellement exclusive avec un vote normal pour un même votant.
+- **Lot 2 - commentaires.** Commentaire libre facultatif (280 caractères, un seul par participant via contrainte unique poll_id+voter_token, balises retirées, aucune transformation en lien cliquable), sur une table dédiée `decido_poll_comments`.
+- **Lot 3 - côté organisateur.** Page « Mes sondages » intégrée à l'espace utilisateur existant. Progression « X sur Y réponses » (`expected_participants`, un simple entier facultatif déclaré par l'organisateur, JAMAIS un carnet d'adresses ni un envoi automatique) avec message de rappel à copier manuellement.
+
+### Corrigé
+- **Bug réel** : un créneau retiré d'une nouvelle soumission gardait son ancien vote en base.
+- **Bouton d'effacement total** dont la portée vient du cookie chiffré du demandeur, avec confirmation par la modale du thème (jamais de fenêtre native).
+- **Correction de dernière minute** : un votant ayant SEULEMENT décliné voyait deux bandeaux contradictoires. Le bandeau se déclenche désormais sur l'existence réelle de votes, et un bandeau unique porte le message adapté tout en conservant le bouton d'effacement.
+
+### Vérifié
+- Cent vingt-quatre tests du module Décido (cinq cent vingt-cinq assertions), aucun échec, deux passes identiques (avant et après la correction de dernière minute).
+- Validation visuelle en navigateur : sondage clôturé, échéance dépassée (vote accepté après la date, vérifié en base), refus explicite, effacement total (modale du thème confirmée, jamais de fenêtre native), commentaires (test d'injection : une adresse reste du texte, les balises ne s'exécutent pas), page « Mes sondages », rendu à 375 pixels. Non-régression des acquis précédents vérifiée.
+- Blade compile sans erreur.
+- Quatre migrations additives, toutes vérifiées réversibles (`dropColumn`/`dropIfExists` en `down()`) : `expected_participants` sur `decido_polls`, `response_deadline_at` sur `decido_polls`, `decido_poll_declines`, `decido_poll_comments`.
+
 ## [1.177.1] - 2026-08-16
 
 ### Corrigé

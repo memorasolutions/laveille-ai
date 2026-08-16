@@ -6,6 +6,48 @@
      public sans sidebar. Attend $poll, $options, $adminToken. --}}
                 <h1 class="h2 mb-4">Résultats - {{ $poll->title }}</h1>
 
+                @php
+                    $declines = $declines ?? $poll->declines;
+                    // LOT 2 (docs/specs/2026-08-16-decido-reste-a-faire.md, point 5) : lookup
+                    // voter_token -> commentaire, calculé UNE FOIS ici (pas de requête par ligne -
+                    // $poll->comments est déjà chargée en mémoire par PollManageController::manage(),
+                    // voir 'comments' passée à ce partial). Réutilisé plus bas dans le drill-down par
+                    // option ET dans le tableau croisé.
+                    $commentsByToken = ($comments ?? $poll->comments)->keyBy('voter_token');
+                @endphp
+
+                {{-- LOT 1 (docs/specs/2026-08-16-decido-reste-a-faire.md, point 2) : échéance de
+                     réponse, modifiable après coup (en plus du champ de création, dans
+                     description-timezone-fields.blade.php). Facultative, jamais bloquante - voir
+                     Poll::isResponseDeadlinePassed(). --}}
+                <div class="mb-4 p-3 border rounded">
+                    <h2 class="h6 mb-2">Échéance de réponse</h2>
+                    @if($poll->response_deadline_at)
+                        @php $deadlineLocal = $poll->responseDeadlineInPollTimezone()->locale('fr'); @endphp
+                        <p class="mb-2">
+                            {{ $poll->isResponseDeadlinePassed() ? 'Dépassée depuis le' : 'Fixée au' }}
+                            {{ $deadlineLocal->isoFormat('dddd D MMMM [à] H [h] mm') }}.
+                            @if($poll->isResponseDeadlinePassed())
+                                <span class="ct-badge-status ct-badge-status-neutral">Dépassée - non bloquante</span>
+                            @endif
+                        </p>
+                    @else
+                        <p class="text-muted mb-2">Aucune échéance fixée - les votants peuvent répondre en tout temps.</p>
+                    @endif
+                    <form method="POST" action="{{ route('decido.deadline', ['poll' => $poll->public_id, 'adminToken' => $adminToken]) }}" class="d-flex flex-wrap gap-2 align-items-end">
+                        @csrf
+                        <div>
+                            <label for="response_deadline_at_edit" class="form-label small mb-1">Nouvelle échéance (laisser vide pour retirer)</label>
+                            <input type="datetime-local" id="response_deadline_at_edit" name="response_deadline_at" class="form-control form-control-sm"
+                                   value="{{ $poll->response_deadline_at ? $poll->responseDeadlineInPollTimezone()->format('Y-m-d\TH:i') : '' }}">
+                        </div>
+                        <button type="submit" class="ct-btn ct-btn-outline ct-btn-sm">Mettre à jour</button>
+                    </form>
+                    @error('response_deadline_at')
+                        <small class="text-danger d-block mt-1">{{ $message }}</small>
+                    @enderror
+                </div>
+
                 @if(session('admin_token_plain'))
                     @php
                         $adminUrl = route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => session('admin_token_plain')]);
@@ -138,8 +180,16 @@
                                             <p class="text-muted small">Aucun vote pour cette option.</p>
                                         @else
                                             @foreach($stat->option->votes as $vote)
-                                                <div class="d-flex justify-content-between small py-1">
-                                                    <span>{{ $vote->voter_pseudonym }}</span>
+                                                <div class="d-flex justify-content-between align-items-start small py-1">
+                                                    <span>
+                                                        {{ $vote->voter_pseudonym }}
+                                                        {{-- LOT 2, point 5 : commentaire à côté du pseudonyme - jamais {!! !!},
+                                                             {{ }} échappe déjà tout HTML résiduel (défense en profondeur, le
+                                                             texte est aussi nettoyé de ses balises à l'écriture). --}}
+                                                        @if($comment = $commentsByToken->get($vote->voter_token))
+                                                            <span class="d-block text-muted fst-italic">« {{ $comment->comment }} »</span>
+                                                        @endif
+                                                    </span>
                                                     <span>
                                                         @php
                                                             $label = match($vote->value) {
@@ -165,6 +215,37 @@
                         @endif
                     @endif
                 </div>
+
+                {{-- LOT 1 (docs/specs/2026-08-16-decido-reste-a-faire.md, point 3) : "aucune date
+                     ne me convient", DISTINCT d'une absence de réponse (qui, elle, n'apparaît nulle
+                     part explicitement - un décliné a positivement répondu, il ne se trouve pas
+                     dans $voters ci-dessous car il n'a laissé aucun PollVote, voir le commentaire de
+                     la migration decido_poll_declines pour la justification de ce choix). --}}
+                @if($declines->isNotEmpty())
+                    <div class="alert alert-light border mt-3" x-data="{ openDeclines: false }">
+                        <strong>{{ $declines->count() }}</strong>
+                        {{ $declines->count() > 1 ? 'personnes ont indiqué' : 'personne a indiqué' }}
+                        qu'aucune date ne leur convenait
+                        <span class="ct-badge-status ct-badge-status-neutral ms-1">distinct d'une absence de réponse</span>.
+                        <button type="button" class="ct-btn ct-btn-ghost ct-btn-sm ms-2"
+                                x-on:click="openDeclines = !openDeclines"
+                                x-text="openDeclines ? 'Masquer' : 'Voir qui'"
+                                x-bind:aria-expanded="openDeclines.toString()"
+                                aria-controls="decido-declines-list">
+                            Voir qui
+                        </button>
+                        <div id="decido-declines-list" x-show="openDeclines" x-cloak class="mt-2 pt-2 border-top">
+                            @foreach($declines as $decline)
+                                <div class="small py-1">
+                                    {{ $decline->voter_pseudonym }}
+                                    @if($comment = $commentsByToken->get($decline->voter_token))
+                                        <span class="d-block text-muted fst-italic">« {{ $comment->comment }} »</span>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
 
                 <details id="decido-comparaison-complete" class="mt-4 border rounded p-3">
                     <summary class="h5" style="cursor: pointer;">Comparer toutes les réponses ({{ $voters->count() }} participant(s) × {{ $options->count() }} option(s))</summary>
@@ -206,7 +287,12 @@
                                 <tbody>
                                     @foreach($voters as $voter)
                                         <tr>
-                                            <th scope="row" style="position: sticky; left: 0; background: #fff; z-index: 1;">{{ $voter->name }}</th>
+                                            <th scope="row" style="position: sticky; left: 0; background: #fff; z-index: 1;">
+                                                {{ $voter->name }}
+                                                @if($comment = $commentsByToken->get($voter->token))
+                                                    <span class="d-block small text-muted fst-italic fw-normal">« {{ $comment->comment }} »</span>
+                                                @endif
+                                            </th>
                                             @if($isDateType)
                                                 @foreach($groupedByDay as $dayOptions)
                                                     @foreach($dayOptions as $option)
@@ -273,6 +359,59 @@
                         </div>
                     @endif
                 </details>
+
+                {{-- LOT 3 (docs/specs/2026-08-16-decido-reste-a-faire.md, point 7) : suivi des
+                     non-répondants SANS carnet d'adresses - un entier facultatif déclaré par
+                     l'organisateur (jamais de liste de noms/courriels), une progression "X sur Y"
+                     calculée à partir de Poll::responseCount(), et un message de rappel prêt à
+                     copier (aucune collecte, aucun envoi automatique - l'organisateur colle le
+                     texte lui-même dans son propre outil de messagerie). Réservé à cette page de
+                     gestion (organisateur) : jamais affiché sur public/vote.blade.php. --}}
+                <div class="mt-5 p-3 border rounded">
+                    <h3 class="h5 mb-2">Relancer les non-répondants</h3>
+                    <p class="text-muted small">Aucune adresse n'est collectée ici : copie ce message et envoie-le toi-même par le moyen de ton choix (courriel, texto, messagerie).</p>
+
+                    <form method="POST" action="{{ route('decido.expected', ['poll' => $poll->public_id, 'adminToken' => $adminToken]) }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
+                        @csrf
+                        <div>
+                            <label for="expected_participants" class="small text-muted mb-1 d-block">Combien de personnes attends-tu ? (facultatif)</label>
+                            <input type="number" id="expected_participants" name="expected_participants" min="1" max="1000"
+                                   value="{{ $poll->expected_participants }}"
+                                   class="form-control form-control-sm" style="max-width:120px;">
+                        </div>
+                        <button type="submit" class="ct-btn ct-btn-outline ct-btn-sm" style="min-height:44px;">Enregistrer</button>
+                    </form>
+
+                    @if($poll->expected_participants)
+                        @php
+                            $expectedRatio = min(100, (int) round($totalVoters / $poll->expected_participants * 100));
+                            $progressColor = $totalVoters < $poll->expected_participants ? 'var(--c-primary)' : 'var(--sys-success)';
+                        @endphp
+                        <p class="mb-1">{{ $totalVoters }} sur {{ $poll->expected_participants }} réponses reçues</p>
+                        <div class="mb-3" role="progressbar" aria-valuenow="{{ $totalVoters }}" aria-valuemin="0" aria-valuemax="{{ $poll->expected_participants }}" aria-label="Progression des réponses reçues" style="background:#E5E7EB; border-radius:999px; height:10px; overflow:hidden;">
+                            <div style="width:{{ $expectedRatio }}%; height:100%; background:{{ $progressColor }}; border-radius:999px;"></div>
+                        </div>
+                    @else
+                        <p class="mb-3">{{ $totalVoters }} réponse{{ $totalVoters > 1 ? 's' : '' }} reçue{{ $totalVoters > 1 ? 's' : '' }} jusqu'à présent.</p>
+                    @endif
+
+                    @php
+                        // Le champ response_deadline_at (LOT 1) peut ne pas encore avoir de valeur -
+                        // méthode déjà défensive (retourne null si absent), reprise telle quelle.
+                        $reminderDeadline = method_exists($poll, 'responseDeadlineInPollTimezone') ? $poll->responseDeadlineInPollTimezone() : null;
+                        $reminderMessage = "Bonjour, un petit rappel pour répondre au sondage « {$poll->title} » : {$poll->share_url}"
+                            . ($reminderDeadline ? "\n\nÀ répondre avant le " . $reminderDeadline->locale('fr')->isoFormat('LL') . '.' : '');
+                    @endphp
+                    <div class="d-flex flex-wrap align-items-center gap-2" x-data="{ copied: false }">
+                        <code class="d-block small" style="white-space: pre-wrap; word-break: break-word;">{{ $reminderMessage }}</code>
+                        <button type="button" class="ct-btn ct-btn-outline ct-btn-sm flex-shrink-0" style="min-height:44px;"
+                                aria-label="Copier le message de rappel"
+                                x-on:click="copyToClipboard({{ Illuminate\Support\Js::from($reminderMessage) }}, 'Message de rappel copié').then(ok => { if (ok) { copied = true; setTimeout(() => copied = false, 2000) } })">
+                            <span x-show="!copied">Copier le message</span>
+                            <span x-show="copied" aria-hidden="true">✓ Copié !</span>
+                        </button>
+                    </div>
+                </div>
 
                 <div class="mt-5 p-3 border rounded">
                     <h3 class="h5 mb-3">Partage et export</h3>

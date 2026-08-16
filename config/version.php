@@ -3745,11 +3745,41 @@ declare(strict_types=1);
  *     apparaissait) et un sondage sans aucun vote ; la zone de résumé reste toujours
  *     présente dans le document, seul son contenu est conditionnel. Coût : zéro requête SQL
  *     supplémentaire, les votes étaient déjà chargés.
+ *
+ *   1.178.0 · 2026-08-16 · feat(decido) trois lots livrés en une session : refermer le
+ *     cycle, corriger des défauts fonctionnels, outiller l'organisateur. LOT 1 - le
+ *     créneau final s'affiche désormais EN PREMIER sur la page publique quand le sondage
+ *     est clôturé, formulaire non soumissible ; échéance de réponse FACULTATIVE
+ *     (`response_deadline_at`, stockée en UTC brut) qui AVERTIT sans jamais bloquer - le
+ *     vote reste accepté après la date, vérifié en base ; option « aucune date ne me
+ *     convient » sur une table dédiée `decido_poll_declines` (mutuellement exclusive avec
+ *     un vote normal pour un même votant, jamais les deux à la fois), distincte d'une
+ *     absence de réponse. LOT 2 - correction d'un bug réel : un créneau retiré d'une
+ *     nouvelle soumission gardait son ancien vote en base ; bouton d'effacement total dont
+ *     la portée vient du cookie chiffré du demandeur, confirmation par la modale du thème
+ *     (jamais de fenêtre native) ; commentaires facultatifs sur `decido_poll_comments` (280
+ *     caractères, un seul par participant via contrainte unique poll_id+voter_token,
+ *     balises retirées, aucune transformation en lien cliquable - testé par injection).
+ *     LOT 3 - page « Mes sondages » intégrée à l'espace utilisateur existant ; progression
+ *     « X sur Y réponses » via `expected_participants` (entier facultatif déclaré par
+ *     l'organisateur, JAMAIS un carnet d'adresses ni un envoi automatique) avec message de
+ *     rappel à copier manuellement. CORRECTION DE DERNIÈRE MINUTE : un votant ayant
+ *     SEULEMENT décliné voyait deux bandeaux contradictoires - le déclenchement se fait
+ *     désormais sur l'existence réelle de votes, un bandeau unique porte le message adapté
+ *     tout en conservant le bouton d'effacement. 4 migrations additives, toutes réversibles
+ *     (dropColumn/dropIfExists en down()) : expected_participants sur decido_polls,
+ *     response_deadline_at sur decido_polls, decido_poll_declines, decido_poll_comments.
+ *     124 tests du module Décido (525 assertions), aucun échec, deux passes identiques
+ *     (avant et après la correction de dernière minute). Validation visuelle en navigateur :
+ *     sondage clôturé, échéance dépassée (vote accepté, vérifié en base), refus explicite,
+ *     effacement total (modale du thème, jamais de fenêtre native), commentaires (test
+ *     d'injection : adresse restée du texte, balises non exécutées), page « Mes sondages »,
+ *     rendu à 375px. Blade compile sans erreur.
  */
 
 $lvMajor = 1;
-$lvMinor = 177;
-$lvPatch = 1;
+$lvMinor = 178;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,
