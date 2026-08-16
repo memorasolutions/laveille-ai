@@ -114,6 +114,37 @@ class NewsImageService
         }
     }
 
+    /**
+     * ACTION : traite un fichier d'image déposé manuellement par l'admin (écran de composition,
+     * design doc "Actus - composition manuelle assistée" 2026-08-15, sections 5.3/5.4) - remplace
+     * l'image de repli générée par generateFallbackImage() par le fichier rapporté de Gemini.
+     * Réutilise EXACTEMENT le même recadrage et les mêmes chemins que processFromUrl() ci-dessus
+     * (cover 1200x630, .webp pour la page + .jpg pour le partage social 1200x630 obligatoire) :
+     * aucun nouveau pipeline, nom de fichier dérivé de l'articleId - jamais du nom d'origine du
+     * fichier déposé (design doc section 5.4). La validation (type MIME réel, poids, dimensions
+     * minimales) est faite par l'appelant AVANT cet appel (NewsCompositionController::uploadImage())
+     * - cette méthode laisse volontairement remonter toute exception à l'appelant, contrairement à
+     * processFromUrl() qui les avale : ici, l'admin doit savoir immédiatement si le dépôt a échoué.
+     * MCP: SELF (Hermes model_invoke a échoué ALL_PROVIDERS_FAILED, écrit directement - signalé
+     * dans le rapport de la tâche)
+     * RAISON: consigne explicite du design doc - étendre NewsImageService plutôt que créer un
+     * service d'images concurrent.
+     */
+    public function processFromUploadedFile(\Illuminate\Http\UploadedFile $file, int $articleId): string
+    {
+        $manager = new ImageManager(new Driver());
+        $image = $manager->read($file->getRealPath());
+        $image->cover(1200, 630);
+
+        $webpContent = $image->toWebp(80)->toString();
+        $this->disk()->put("news/images/{$articleId}.webp", $webpContent);
+
+        $jpgContent = $image->toJpeg(85)->toString();
+        $this->disk()->put("news/images/{$articleId}.jpg", $jpgContent);
+
+        return "/storage/news/images/{$articleId}.webp";
+    }
+
     public function exists(int $articleId): bool
     {
         return $this->disk()->exists("news/images/{$articleId}.webp");

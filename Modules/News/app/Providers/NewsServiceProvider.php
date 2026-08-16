@@ -67,6 +67,7 @@ class NewsServiceProvider extends ServiceProvider
             \Modules\News\Console\ReprocessArticlesCommand::class,
             \Modules\News\Console\PruneSeoCommand::class,
             \Modules\News\Console\BackfillAutoToolDetectionCommand::class,
+            \Modules\News\Console\NotifyNewsDigestCommand::class,
         ]);
     }
 

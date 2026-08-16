@@ -3813,10 +3813,30 @@ declare(strict_types=1);
  *     échec (204 avant ce lot). Validation visuelle complète, dont un test de non-fuite :
  *     marqueur distinctif collé dans le texte source, fiche publiée temporairement en
  *     local, zéro occurrence du marqueur dans le HTML servi ni dans le DOM rendu.
+ *   1.181.0 · 2026-08-16 · feat(news) courriel de veille quotidien, prompts de composition
+ *     normalisés, fiche de preuve éditoriale, flux d'image manuel et complément de
+ *     conservation. NotifyNewsDigestCommand (news:notify-digest, 7h15) liste les actualités
+ *     collectées non publiées depuis le dernier envoi avec lien direct vers l'écran de
+ *     composition, au plus un envoi par jour, silence si rien de nouveau, curseur d'idempotence
+ *     persisté dans la table des réglages (insensible à optimize:clear), désactivable
+ *     (NEWS_DIGEST_ENABLED, défaut actif), mailer transactionnel Workspace. CompositionPromptBuilder
+ *     incorpore le standard du panel : attribution dans la phrase, lien assumé comme analyse,
+ *     citation exacte sur chiffres/dates/noms, autorisation explicite de « aucune source ».
+ *     Fiche de preuve éditoriale : paires phrase/extrait avec décision fait/analyse, un « fait »
+ *     doit être une sous-chaîne exacte du texte source (normalisation espaces/apostrophes
+ *     seulement), les paires survivent à la suppression du texte, colonne JSON interne jamais
+ *     exposée. Flux d'image manuel : bouton « Copier le prompt d'image et ouvrir Gemini »
+ *     (style 3D isométrique teal/orange), dépôt manuel, validation MIME réelle + dimensions
+ *     minimales, production du JPEG social 1200x630 ET du WebP par NewsImageService (méthode
+ *     ajoutée, aucun service concurrent). Conservation : source_captured_at et
+ *     source_content_hash remplis au collage, survivent à la suppression du texte intégral.
+ *     Deux migrations additives, réversibles (garde hasColumn dans les deux sens). 244 tests
+ *     du module News (671 assertions), aucun échec (217 avant ce lot). Validation visuelle
+ *     complète en navigateur, 7 points sur 7 OK.
  */
 
 $lvMajor = 1;
-$lvMinor = 180;
+$lvMinor = 181;
 $lvPatch = 0;
 
 return [

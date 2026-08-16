@@ -49,6 +49,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Courriel de veille quotidien (brouillons non publies)
+    |--------------------------------------------------------------------------
+    | 2026-08-16 - demande du fondateur : depuis l'arret de la publication automatique
+    | (autopublish ci-dessus), les fiches collectees s'accumulent en brouillon
+    | (is_published=false) sans que personne ne soit averti. NotifyNewsDigestCommand
+    | (news:notify-digest) envoie un resume quotidien groupe des nouveaux brouillons a
+    | l'administrateur (config app.superadmin_email), avec lien direct vers l'ecran de
+    | composition pour chacun. DEFAUT ACTIF (contrairement a autopublish) : ce courriel ne
+    | publie rien tout seul, il informe seulement - aucun risque a le laisser actif par defaut.
+    | max_items borne la taille du courriel si un gros arriere s'est accumule (ex. premier envoi
+    | apres plusieurs jours sans consultation) ; le reste reste consultable dans l'administration.
+    */
+    'digest' => [
+        'enabled' => (bool) env('NEWS_DIGEST_ENABLED', true),
+        'max_items' => (int) env('NEWS_DIGEST_MAX_ITEMS', 100),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Fenêtre de traitement des articles récupérés
     |--------------------------------------------------------------------------
     | news:fetch ne (re)traite que les articles créés dans cette fenêtre. Sans

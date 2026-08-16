@@ -148,6 +148,13 @@ Schedule::command('decido:purge-expired')->dailyAt('06:15');
 // courriel) si rien de nouveau depuis le dernier resume, voir NotifyPollActivityCommand.
 Schedule::command('decido:notify-poll-activity')->dailyAt('07:00')->withoutOverlapping();
 
+// News - courriel de veille quotidien des actualites collectees non publiees (brouillons), pour
+// que le proprietaire choisisse lesquelles publier (demande fondateur 2026-08-16, suite a l'arret
+// de la publication automatique v1.174.0). Planifie apres les commandes Decido ci-dessus (meme
+// fenetre matinale, avant le debut de journee de travail) ; aucune dependance entre les deux.
+// Silencieux si rien de nouveau depuis le dernier envoi, voir NotifyNewsDigestCommand.
+Schedule::command('news:notify-digest')->dailyAt('07:15')->withoutOverlapping();
+
 // Messages de contact - purge de la quarantaine spam de plus de 60 jours (hebdo).
 // Passe par le schedule:run deja en place (pas un nouveau cron serveur). Defensif :
 // table possiblement absente en contexte de portabilite/migration.

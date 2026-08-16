@@ -35,6 +35,20 @@
     .nc-status-ok { color:#059669; font-size:13px; font-weight:600; }
     .nc-status-error { color:#dc2626; font-size:13px; font-weight:600; }
     .nc-internal-badge { background:#fef3c7; color:#92400e; padding:2px 10px; border-radius:10px; font-size:11px; font-weight:700; }
+    /* Fiche de preuve éditoriale (Phase B, design doc 2026-08-15 section 7) - carte par paire
+       phrase/extrait, badge de décision fait/analyse. */
+    .nc-proof-card { border:1px solid #e2e8f0; border-radius:8px; padding:10px 12px; margin-bottom:10px; background:#fff; }
+    .nc-proof-type { display:inline-block; font-size:10.5px; font-weight:800; letter-spacing:.04em; padding:2px 8px; border-radius:10px; margin-bottom:6px; }
+    .nc-proof-type-fact { background:#dcfce7; color:#166534; }
+    .nc-proof-type-analysis { background:#e0e7ff; color:#3730a3; }
+    .nc-proof-statement { font-weight:600; color:#064E5A; font-size:13px; margin-bottom:4px; }
+    .nc-proof-excerpt { font-style:italic; color:#374151; font-size:12.5px; background:#f8fafc; padding:6px 8px; border-radius:6px; }
+    .nc-proof-remove { background:none; border:none; color:#dc2626; text-decoration:underline; cursor:pointer; padding:10px 4px; font-size:12px; min-height:44px; display:inline-flex; align-items:center; }
+    .nc-proof-form { border-top:1px dashed #cbd5e1; padding-top:12px; margin-top:4px; }
+    /* Standard d'images (Phase D, design doc 2026-08-15 section 5.3/5.4) - flux manuel, aucun
+       indicateur de progression fictif. */
+    .nc-image-preview { max-width:220px; border-radius:8px; border:1px solid #e2e8f0; display:block; margin-top:8px; }
+    .nc-image-dropzone { border:2px dashed #cbd5e1; border-radius:8px; padding:14px; text-align:center; color:#6b7280; font-size:12.5px; }
 </style>
 @endpush
 
@@ -45,6 +59,11 @@
         showEndpointTemplate: @js($showEndpointTemplate),
         updateEndpointTemplate: @js($updateEndpointTemplate),
         deleteSourceTextEndpointTemplate: @js($deleteSourceTextEndpointTemplate),
+        generatePromptEndpointTemplate: @js($generatePromptEndpointTemplate),
+        proofPairsStoreEndpointTemplate: @js($proofPairsStoreEndpointTemplate),
+        proofPairsDestroyEndpointTemplate: @js($proofPairsDestroyEndpointTemplate),
+        generateImagePromptEndpointTemplate: @js($generateImagePromptEndpointTemplate),
+        uploadImageEndpointTemplate: @js($uploadImageEndpointTemplate),
         articlesIndexUrl: @js($articlesIndexUrl),
     })"
     x-init="init()"
@@ -109,6 +128,31 @@
                             <textarea id="nc-source" class="form-control nc-source-textarea" rows="10" x-model="formSourceText" placeholder="Colle ici le texte intégral de l'article source, pour ton propre usage éditorial."></textarea>
                         </div>
 
+                        <div class="nc-field">
+                            <label for="nc-angle">Angle éditorial <span class="nc-hint">(optionnel, transmis au prompt de rédaction)</span></label>
+                            <input id="nc-angle" type="text" class="form-control" x-model="formAngle" maxlength="500" placeholder="Ex. impact pour les PME québécoises">
+                        </div>
+
+                        <div class="nc-field">
+                            <button type="button" class="cb-btn cb-btn-secondary" @click="generatePrompt()" :disabled="promptLoading || !formSourceText">
+                                <span x-show="!promptLoading">🧠 Générer le prompt de rédaction</span>
+                                <span x-show="promptLoading" x-cloak>⏳ Génération…</span>
+                            </button>
+                            <span class="nc-status-error" x-show="promptError" x-cloak x-text="promptError" style="display:block; margin-top:6px;"></span>
+                            <template x-if="generatedPrompt">
+                                <div style="margin-top:10px;">
+                                    <textarea class="form-control nc-source-textarea" rows="12" readonly x-text="generatedPrompt" style="background:#f8fafc;"></textarea>
+                                    <div class="mt-2">
+                                        <button type="button" class="cb-btn cb-btn-secondary" @click="copyPrompt()">
+                                            <span x-show="!promptCopied">📋 Copier le prompt</span>
+                                            <span x-show="promptCopied" x-cloak>✓ Copié</span>
+                                        </button>
+                                        <span class="nc-hint">Colle-le ensuite dans ton outil d'IA externe, puis recolle son résultat dans le titre et le résumé ci-dessus.</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
                         <div class="d-flex flex-wrap gap-2 align-items-center">
                             <button type="button" class="cb-btn" @click="save()" :disabled="loading.saving">
                                 <span x-show="!loading.saving">💾 Enregistrer</span>
@@ -131,6 +175,90 @@
                             <span class="nc-status-ok" x-show="saveOk" x-cloak x-transition>✓ Enregistré</span>
                             <span class="nc-status-error" x-show="saveError" x-cloak x-text="saveError"></span>
                         </div>
+
+                        <div class="nc-proof-section">
+                            <div class="cb-section-title" style="font-size:14px; margin-top:20px;">🔍 Passages à vérifier</div>
+                            <p class="nc-hint" style="display:block; margin:0 0 10px;">
+                                Pour chaque passage risqué du résumé publié : colle la phrase, colle l'extrait exact de la
+                                source qui l'appuie, et déclare-le « fait » (l'extrait doit être une sous-chaîne exacte
+                                du texte source) ou « analyse » (ton propre liant éditorial, non vérifié).
+                            </p>
+
+                            <template x-if="!proofPairs.length">
+                                <p class="nc-hint" style="display:block; font-style:italic;">Aucun passage vérifié pour l'instant.</p>
+                            </template>
+
+                            <div class="nc-proof-pair" x-show="proofPairs.length" x-cloak>
+                                <template x-for="pair in proofPairs" :key="pair.id">
+                                    <div class="nc-proof-card">
+                                        <div class="nc-proof-type" :class="pair.type === 'fact' ? 'nc-proof-type-fact' : 'nc-proof-type-analysis'" x-text="pair.type === 'fact' ? 'FAIT' : 'ANALYSE'"></div>
+                                        <div class="nc-proof-statement" x-text="pair.statement"></div>
+                                        <div class="nc-proof-excerpt" x-text="'« ' + pair.excerpt + ' »'"></div>
+                                        <button type="button" class="nc-proof-remove" @click="$dispatch('confirm-action', {
+                                            title: 'Confirmer',
+                                            message: 'Retirer ce passage de la fiche de preuve éditoriale ?',
+                                            action: () => removeProofPair(pair.id)
+                                        })">🗑 Retirer</button>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="nc-proof-form">
+                                <div class="nc-field">
+                                    <label for="nc-pair-statement">Phrase du résumé</label>
+                                    <input id="nc-pair-statement" type="text" class="form-control" x-model="newPairStatement" maxlength="1000" placeholder="La phrase publiée qui doit être appuyée">
+                                </div>
+                                <div class="nc-field">
+                                    <label for="nc-pair-excerpt">Extrait de la source</label>
+                                    <textarea id="nc-pair-excerpt" class="form-control nc-source-textarea" rows="3" x-model="newPairExcerpt" maxlength="2000" placeholder="Copie-colle l'extrait exact du texte source"></textarea>
+                                    <span class="nc-hint" x-show="newPairType === 'fact' && newPairExcerpt" x-cloak x-text="excerptFoundInSource() ? '✓ trouvé tel quel dans le texte source' : '⚠ introuvable tel quel dans le texte source'" :style="excerptFoundInSource() ? 'color:#059669' : 'color:#dc2626'"></span>
+                                </div>
+                                <div class="nc-field">
+                                    <label for="nc-pair-type">Décision</label>
+                                    <select id="nc-pair-type" class="form-control" x-model="newPairType" style="max-width:220px;">
+                                        <option value="fact">Fait (sous-chaîne exacte exigée)</option>
+                                        <option value="analysis">Analyse (liant éditorial)</option>
+                                    </select>
+                                </div>
+                                <button type="button" class="cb-btn cb-btn-secondary" @click="addProofPair()" :disabled="pairSaving || !newPairStatement || !newPairExcerpt || (newPairType === 'fact' && !excerptFoundInSource())">
+                                    <span x-show="!pairSaving">➕ Ajouter le passage</span>
+                                    <span x-show="pairSaving" x-cloak>⏳ Ajout…</span>
+                                </button>
+                                <span class="nc-status-error" x-show="pairError" x-cloak x-text="pairError" style="display:block; margin-top:6px;"></span>
+                            </div>
+                        </div>
+
+                        <div class="nc-image-section">
+                            <div class="cb-section-title" style="font-size:14px; margin-top:20px;">🖼️ Image</div>
+                            <p class="nc-hint" style="display:block; margin:0 0 10px;">
+                                La génération d'image par IA n'est pas automatisée sur ce site : copie le prompt,
+                                colle-le dans Gemini, puis dépose ici le fichier obtenu. La fiche s'enregistre et
+                                se publie sans image - le dépôt remplace simplement l'illustration générée par défaut.
+                            </p>
+
+                            <template x-if="selectedArticle?.image_url">
+                                <img :src="selectedArticle.image_url" alt="" class="nc-image-preview">
+                            </template>
+
+                            <div class="nc-field" style="margin-top:10px;">
+                                <button type="button" class="cb-btn cb-btn-secondary" @click="copyImagePromptAndOpenGemini()" :disabled="imagePromptLoading">
+                                    <span x-show="!imagePromptLoading">📋 Copier le prompt d'image et ouvrir Gemini</span>
+                                    <span x-show="imagePromptLoading" x-cloak>⏳ Génération du prompt…</span>
+                                </button>
+                                <span class="nc-status-ok" x-show="imagePromptCopied" x-cloak x-transition>✓ Prompt copié, Gemini ouvert dans un nouvel onglet</span>
+                                <span class="nc-status-error" x-show="imagePromptError" x-cloak x-text="imagePromptError" style="display:block; margin-top:6px;"></span>
+                            </div>
+
+                            <div class="nc-field">
+                                <label for="nc-image-file">Déposer le fichier reçu de Gemini <span class="nc-hint">(jpeg, png ou webp)</span></label>
+                                <div class="nc-image-dropzone">
+                                    <input id="nc-image-file" type="file" accept="image/jpeg,image/png,image/webp" @change="uploadImage($event.target.files[0])" :disabled="imageUploading">
+                                    <div x-show="imageUploading" x-cloak>⏳ Traitement de l'image…</div>
+                                </div>
+                                <span class="nc-status-ok" x-show="imageUploadOk" x-cloak x-transition>✓ Image déposée et traitée (JPEG social 1200×630 + WebP)</span>
+                                <span class="nc-status-error" x-show="imageUploadError" x-cloak x-text="imageUploadError" style="display:block; margin-top:6px;"></span>
+                            </div>
+                        </div>
                     </div>
                 </template>
             </div>
@@ -150,6 +278,11 @@ function compositionBuilder(opts) {
             showTemplate: opts.showEndpointTemplate,
             updateTemplate: opts.updateEndpointTemplate,
             deleteSourceTextTemplate: opts.deleteSourceTextEndpointTemplate,
+            generatePromptTemplate: opts.generatePromptEndpointTemplate,
+            proofPairsStoreTemplate: opts.proofPairsStoreEndpointTemplate,
+            proofPairsDestroyTemplate: opts.proofPairsDestroyEndpointTemplate,
+            generateImagePromptTemplate: opts.generateImagePromptEndpointTemplate,
+            uploadImageTemplate: opts.uploadImageEndpointTemplate,
             articlesIndexUrl: opts.articlesIndexUrl,
         },
         loading: { news: false, article: false, saving: false, deleting: false },
@@ -159,6 +292,29 @@ function compositionBuilder(opts) {
         formSourceText: '',
         saveOk: false,
         saveError: '',
+
+        // Phase B (design doc 2026-08-15, sections 5.1 et 7) : génération du prompt de
+        // rédaction et fiche de preuve éditoriale.
+        formAngle: '',
+        generatedPrompt: '',
+        promptLoading: false,
+        promptError: '',
+        promptCopied: false,
+        proofPairs: [],
+        newPairStatement: '',
+        newPairExcerpt: '',
+        newPairType: 'fact',
+        pairError: '',
+        pairSaving: false,
+
+        // Phase D (design doc 2026-08-15, sections 5.3 et 5.4) : prompt d'image (jamais de
+        // bouton "générer", flux manuel Gemini) et dépôt/validation du fichier rapporté.
+        imagePromptLoading: false,
+        imagePromptCopied: false,
+        imagePromptError: '',
+        imageUploading: false,
+        imageUploadOk: false,
+        imageUploadError: '',
 
         init() {
             this.fetchNews();
@@ -191,10 +347,220 @@ function compositionBuilder(opts) {
                 this.formSeoTitle = data.seo_title || data.title || '';
                 this.formSummary = data.summary || '';
                 this.formSourceText = data.internal_source_text || '';
+                this.proofPairs = data.editorial_proof_pairs || [];
+                this.formAngle = '';
+                this.generatedPrompt = '';
+                this.promptError = '';
+                this.newPairStatement = '';
+                this.newPairExcerpt = '';
+                this.newPairType = 'fact';
+                this.pairError = '';
+                this.imagePromptError = '';
+                this.imagePromptCopied = false;
+                this.imageUploadOk = false;
+                this.imageUploadError = '';
             } catch (e) {
                 this.saveError = 'Erreur réseau : ' + e.message;
             } finally {
                 this.loading.article = false;
+            }
+        },
+
+        // Normalisation MIROIR de EditorialProofNormalizer::normalize() (PHP, source de vérité
+        // - cette copie client n'est qu'un confort d'interface, la validation qui compte est
+        // celle du serveur dans addProofPair()) : espaces (dont insécables) réduits à un seul,
+        // apostrophes typographiques ramenées à l'apostrophe droite, extrémités nettoyées.
+        normalizeForCompare(text) {
+            return String(text || '')
+                .replace(/[’‘]/g, "'")
+                .replace(/[  ]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        },
+
+        excerptFoundInSource() {
+            const needle = this.normalizeForCompare(this.newPairExcerpt);
+            if (!needle) return false;
+            return this.normalizeForCompare(this.formSourceText).includes(needle);
+        },
+
+        async generatePrompt() {
+            if (!this.selectedArticle || !this.formSourceText) return;
+            this.promptLoading = true;
+            this.promptError = '';
+            this.generatedPrompt = '';
+            try {
+                const url = this.endpoints.generatePromptTemplate.replace('__SLUG__', this.selectedArticle.slug);
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ angle: this.formAngle }),
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.promptError = data.error || data.message || ('Erreur HTTP ' + res.status);
+                    return;
+                }
+                this.generatedPrompt = data.prompt;
+            } catch (e) {
+                this.promptError = 'Erreur réseau : ' + e.message;
+            } finally {
+                this.promptLoading = false;
+            }
+        },
+
+        async copyPrompt() {
+            if (!this.generatedPrompt) return;
+            try {
+                await navigator.clipboard.writeText(this.generatedPrompt);
+                this.promptCopied = true;
+                setTimeout(() => { this.promptCopied = false; }, 2500);
+            } catch (e) {
+                this.promptError = 'Copie impossible, sélectionne et copie manuellement.';
+            }
+        },
+
+        async addProofPair() {
+            if (!this.selectedArticle || !this.newPairStatement || !this.newPairExcerpt) return;
+            this.pairSaving = true;
+            this.pairError = '';
+            try {
+                const url = this.endpoints.proofPairsStoreTemplate.replace('__SLUG__', this.selectedArticle.slug);
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        statement: this.newPairStatement,
+                        excerpt: this.newPairExcerpt,
+                        type: this.newPairType,
+                    }),
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.pairError = data.error || data.message || ('Erreur HTTP ' + res.status);
+                    return;
+                }
+                this.proofPairs = data.pairs;
+                this.newPairStatement = '';
+                this.newPairExcerpt = '';
+                this.newPairType = 'fact';
+            } catch (e) {
+                this.pairError = 'Erreur réseau : ' + e.message;
+            } finally {
+                this.pairSaving = false;
+            }
+        },
+
+        async removeProofPair(pairId) {
+            if (!this.selectedArticle) return;
+            this.pairError = '';
+            try {
+                const url = this.endpoints.proofPairsDestroyTemplate.replace('__SLUG__', this.selectedArticle.slug).replace('__PAIR_ID__', pairId);
+                const res = await fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.pairError = 'Impossible de retirer ce passage (HTTP ' + res.status + ').';
+                    return;
+                }
+                this.proofPairs = data.pairs;
+            } catch (e) {
+                this.pairError = 'Erreur réseau : ' + e.message;
+            }
+        },
+
+        // Phase D (design doc 2026-08-15, section 5.3) : génère le prompt d'image côté serveur
+        // (style fixe + titre + angle), le copie dans le presse-papiers, PUIS ouvre Gemini dans
+        // un nouvel onglet - libellé assumé "copier le prompt et ouvrir Gemini", aucun bouton
+        // "générer l'image" et aucun indicateur de progression fictif (l'appli ne sait rien de
+        // l'autre onglet une fois ouvert).
+        async copyImagePromptAndOpenGemini() {
+            if (!this.selectedArticle) return;
+            this.imagePromptLoading = true;
+            this.imagePromptError = '';
+            this.imagePromptCopied = false;
+            try {
+                const url = this.endpoints.generateImagePromptTemplate.replace('__SLUG__', this.selectedArticle.slug);
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ angle: this.formAngle }),
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.imagePromptError = data.error || data.message || ('Erreur HTTP ' + res.status);
+                    return;
+                }
+                await navigator.clipboard.writeText(data.prompt);
+                window.open('https://gemini.google.com/app', '_blank', 'noopener');
+                this.imagePromptCopied = true;
+                setTimeout(() => { this.imagePromptCopied = false; }, 4000);
+            } catch (e) {
+                this.imagePromptError = 'Erreur : ' + e.message;
+            } finally {
+                this.imagePromptLoading = false;
+            }
+        },
+
+        // Dépôt manuel du fichier rapporté de Gemini (design doc section 5.3/5.4). Le flux ne
+        // bloque JAMAIS la composition : cette action est indépendante de save(), la fiche reste
+        // enregistrable/publiable sans image (l'image de repli existante fait foi en attendant).
+        async uploadImage(file) {
+            if (!this.selectedArticle || !file) return;
+            this.imageUploading = true;
+            this.imageUploadOk = false;
+            this.imageUploadError = '';
+            try {
+                const url = this.endpoints.uploadImageTemplate.replace('__SLUG__', this.selectedArticle.slug);
+                const formData = new FormData();
+                formData.append('image', file);
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                    body: formData,
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.imageUploadError = data.error || data.message || ('Erreur HTTP ' + res.status);
+                    return;
+                }
+                this.selectedArticle.image_url = data.image_url;
+                this.imageUploadOk = true;
+                setTimeout(() => { this.imageUploadOk = false; }, 4000);
+            } catch (e) {
+                this.imageUploadError = 'Erreur réseau : ' + e.message;
+            } finally {
+                this.imageUploading = false;
             }
         },
 

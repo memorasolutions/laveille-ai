@@ -64,6 +64,24 @@ class NewsArticle extends Model implements Searchable
         // MCP: SELF (<5 lignes)
         // RAISON: emplacement distinct explicite exigé (ne PAS réutiliser 'description', purgée).
         'internal_source_text',
+        // ACTION : fiche de preuve éditoriale (design doc "Actus - composition manuelle
+        // assistée" 2026-08-15, section 7 / Phase B) - paires {phrase publiée, extrait exact du
+        // texte source, décision fait/analyse}, JSON interne. Même garde-fou que
+        // 'internal_source_text' juste au-dessus : jamais lu par un chemin public, jamais
+        // journalisé (absent de $activitylogFields), et volontairement absent de
+        // NewsCompositionController::candidates().
+        // MCP: SELF (<5 lignes)
+        // RAISON: emplacement distinct explicite, cohérent avec internal_source_text.
+        'editorial_proof_pairs',
+        // ACTION : complément de conservation (design doc "Actus - composition manuelle
+        // assistée" 2026-08-15, section 5.2) - date de capture et empreinte SHA-256 du texte
+        // source, calculées par NewsCompositionController::update(). SURVIVENT à la suppression
+        // de 'internal_source_text' (jamais écrites par destroySourceText()) : avec les extraits
+        // des paires de preuve, elles font foi une fois le texte intégral supprimé.
+        // MCP: SELF (<5 lignes)
+        // RAISON: même garde-fou d'emplacement distinct que les deux champs ci-dessus.
+        'source_captured_at',
+        'source_content_hash',
     ];
 
     protected $casts = [
@@ -76,6 +94,8 @@ class NewsArticle extends Model implements Searchable
         'linkedin_shared_at' => 'datetime',
         'facebook_shared_at' => 'datetime',
         'is_comparative_digest' => 'boolean',
+        'editorial_proof_pairs' => 'array',
+        'source_captured_at' => 'datetime',
     ];
 
     protected static function booted(): void

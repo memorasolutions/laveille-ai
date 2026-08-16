@@ -90,6 +90,13 @@ Route::prefix('admin/news/composition')
         Route::get('/{article}', [NewsCompositionController::class, 'show'])->name('show');
         Route::put('/{article}', [NewsCompositionController::class, 'update'])->name('update');
         Route::delete('/{article}/source-text', [NewsCompositionController::class, 'destroySourceText'])->name('destroy-source-text');
+        // ── Phase B (design doc 2026-08-15, sections 5.1 et 7) ──
+        Route::post('/{article}/generate-prompt', [NewsCompositionController::class, 'generatePrompt'])->name('generate-prompt');
+        Route::post('/{article}/proof-pairs', [NewsCompositionController::class, 'storeProofPair'])->name('proof-pairs.store');
+        Route::delete('/{article}/proof-pairs/{pair}', [NewsCompositionController::class, 'destroyProofPair'])->name('proof-pairs.destroy');
+        // ── Phase D (design doc 2026-08-15, sections 5.3 et 5.4) - standard d'images ──
+        Route::post('/{article}/generate-image-prompt', [NewsCompositionController::class, 'generateImagePrompt'])->name('generate-image-prompt');
+        Route::post('/{article}/image', [NewsCompositionController::class, 'uploadImage'])->name('upload-image');
     });
 
 // ── Générateur d'objectif vidéo (admin, superadmin uniquement) ──
