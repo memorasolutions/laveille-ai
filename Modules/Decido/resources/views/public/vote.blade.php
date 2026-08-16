@@ -117,15 +117,32 @@
                                  ne pas spammer. --}}
                             <div aria-live="polite" class="visually-hidden" x-text="announcement"></div>
 
-                            {{-- Explique UNE SEULE FOIS le sens des totaux affichés dans chaque carte
-                                 (zone de droite), jamais répété par créneau. Formulation vérifiée contre
-                                 PublicPollController::show() : $poll->load('options.votes') charge TOUS
-                                 les votes du créneau sans filtrer par voter_token, donc ces totaux
-                                 incluent le propre vote du votant s'il a déjà répondu - jamais
-                                 "autres participants", qui serait faux. --}}
-                            <p class="decido-slot-summary-explainer text-muted small mb-3">
-                                Ces totaux montrent les choix déjà enregistrés par les participants, y compris le tien si tu as déjà voté.
-                            </p>
+                            @php
+                                // Correction microcopie (2026-08-16) : état 1 du résumé par créneau
+                                // ("Réponses déjà reçues" annoncé puis "Aucune réponse reçue" juste en
+                                // dessous - absurde et redondant, répété 14 fois sur un sondage neuf).
+                                // Il faut savoir si le SONDAGE ENTIER (pas seulement le créneau courant)
+                                // a reçu au moins un vote - calculé ICI, UNE SEULE FOIS avant la boucle
+                                // des créneaux plus bas, jamais à chaque itération. $options->votes est
+                                // déjà chargé en mémoire par $poll->load('options.votes')
+                                // (PublicPollController::show()) : contains() ne déclenche aucune requête
+                                // SQL supplémentaire et court-circuite au premier vote trouvé.
+                                $pollHasAnyVotes = $options->contains(fn ($option) => $option->votes->isNotEmpty());
+                            @endphp
+
+                            @if($pollHasAnyVotes)
+                                {{-- Explique UNE SEULE FOIS le sens des totaux affichés dans chaque carte
+                                     (zone de droite), jamais répété par créneau. N'a de sens que s'il existe
+                                     déjà des totaux à expliquer (sinon la phrase annonce des totaux
+                                     inexistants) - masquée à l'état 1 (sondage sans aucun vote). Formulation
+                                     vérifiée contre PublicPollController::show() : $poll->load('options.votes')
+                                     charge TOUS les votes du créneau sans filtrer par voter_token, donc ces
+                                     totaux incluent le propre vote du votant s'il a déjà répondu - jamais
+                                     "autres participants", qui serait faux. --}}
+                                <p class="decido-slot-summary-explainer text-muted small mb-3">
+                                    Ces totaux montrent les choix déjà enregistrés par les participants, y compris le tien si tu as déjà voté.
+                                </p>
+                            @endif
 
                             @php
                                 // Priorité 2 (docs/specs/2026-08-15-decido-page-vote-design.md) : regroupement
@@ -240,27 +257,48 @@
                                                         <div class="text-danger mt-2">{{ $message }}</div>
                                                     @enderror
                                                 </div>
-                                                <div class="decido-slot-zone decido-slot-zone-summary">
-                                                    <p class="decido-slot-summary-title mb-1">Réponses déjà reçues</p>
-                                                    @if($totalOptionVotes === 0)
-                                                        <p class="decido-slot-summary-empty text-muted small mb-0">Aucune réponse reçue</p>
-                                                    @else
-                                                        {{-- Totaux par créneau (jamais les noms) : classe .ct-badge-status
-                                                             de public/css/charte.css (Point 3, rapport 2026-08-16) - remplace
-                                                             les 3 badges Bootstrap .badge en style="" en ligne dupliqués ici
-                                                             ET dans results-content.blade.php (dette DRY partagée, migrée
-                                                             aux deux endroits). --}}
-                                                        <div class="d-flex flex-wrap gap-2 decido-slot-totals">
-                                                            <span class="ct-badge-status ct-badge-status-success">
-                                                                ✓ {{ $voteCounts['yes'] ?? 0 }} oui
-                                                            </span>
-                                                            <span class="ct-badge-status ct-badge-status-warning">
-                                                                ? {{ $voteCounts['maybe'] ?? 0 }} peut-être
-                                                            </span>
-                                                            <span class="ct-badge-status ct-badge-status-danger">
-                                                                ✕ {{ $voteCounts['no'] ?? 0 }} non
-                                                            </span>
-                                                        </div>
+                                                {{-- Correction microcopie (2026-08-16) : trois états, jamais un
+                                                     titre suivi d'un "aucune réponse" en dessous (absurde et
+                                                     redondant, répété 14 fois sur un sondage neuf).
+                                                     - État 1 (sondage entier sans AUCUN vote, $pollHasAnyVotes
+                                                       faux) : zone vide, ni titre ni message - mais l'élément
+                                                       reste dans le DOM (grid-template-columns ne dépend pas du
+                                                       contenu de cette zone) pour ne jamais faire sauter la
+                                                       grille 2↔3 colonnes au 1er vote du sondage. aria-hidden
+                                                       explicite (en plus d'un div sans texte, déjà ignoré par
+                                                       les lecteurs d'écran) pour garantir qu'aucun titre
+                                                       orphelin n'est jamais annoncé.
+                                                     - État 2 (le sondage a des votes, mais pas CE créneau) :
+                                                       une seule ligne, sans titre.
+                                                     - État 3 (ce créneau a des réponses) : titre court +
+                                                       pastilles existantes, inchangées. --}}
+                                                <div class="decido-slot-zone decido-slot-zone-summary"@if(!$pollHasAnyVotes) aria-hidden="true" @endif>
+                                                    @if($pollHasAnyVotes)
+                                                        @if($totalOptionVotes === 0)
+                                                            <p class="decido-slot-summary-empty text-muted small mb-0">Aucune réponse</p>
+                                                        @else
+                                                            <p class="decido-slot-summary-title mb-1">Réponses</p>
+                                                            {{-- Totaux par créneau (jamais les noms) : classe .ct-badge-status
+                                                                 de public/css/charte.css (Point 3, rapport 2026-08-16) - remplace
+                                                                 les 3 badges Bootstrap .badge en style="" en ligne dupliqués ici
+                                                                 ET dans results-content.blade.php (dette DRY partagée, migrée
+                                                                 aux deux endroits). Classes utilitaires Bootstrap d-flex/flex-wrap/
+                                                                 gap-2 retirées (2026-08-16, défaut visuel constaté par le
+                                                                 propriétaire) au profit de .decido-slot-totals seule, qui pilote
+                                                                 maintenant elle-même sa mise en page (ligne ou pile propre selon
+                                                                 la place réellement disponible - voir le <style> plus bas). --}}
+                                                            <div class="decido-slot-totals">
+                                                                <span class="ct-badge-status ct-badge-status-success">
+                                                                    ✓ {{ $voteCounts['yes'] ?? 0 }} oui
+                                                                </span>
+                                                                <span class="ct-badge-status ct-badge-status-warning">
+                                                                    ? {{ $voteCounts['maybe'] ?? 0 }} peut-être
+                                                                </span>
+                                                                <span class="ct-badge-status ct-badge-status-danger">
+                                                                    ✕ {{ $voteCounts['no'] ?? 0 }} non
+                                                                </span>
+                                                            </div>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             </div>
@@ -479,8 +517,40 @@
                             flex-direction: column;
                             gap: 0.75rem;
                         }
+                        /* Correction visuelle (2026-08-16, constat propriétaire sur capture prod) :
+                           2 défauts corrigés ensemble ici, même cause racine que le fix historique des
+                           pills de vote (qui avait dû garantir une largeur minimale à SA colonne pour
+                           empêcher "Non" de retomber seul) - le problème s'était simplement déplacé
+                           vers la colonne du résumé, jamais traité côté résumé :
+                           1) Le titre ("Réponses") était text-align:right alors que les pastilles
+                              (flex, alignées à gauche dans leur propre boîte) commençaient à gauche -
+                              les deux n'avaient pas le même bord de référence, d'où le décalage visuel
+                              constaté. text-align:left partout (aucune exception dans les container
+                              queries plus bas) aligne désormais les deux sur le même bord.
+                           2) À width=763px (mesuré Playwright, poll cyO3pTAxaAlT), la boîte .decido-
+                              slot-zone-summary ne recevait que ~236.5px (justify-self:end la réduisait
+                              au fit-content de son contenu, capé par l'espace de piste disponible),
+                              alors que les 3 pastilles sur une seule ligne réclament ~237.6px (mesuré) -
+                              1px d'écart suffisait à faire retomber "✕ 0 non" seul sur une 2e ligne.
+                              Plutôt que chasser ce chiffre à chaque palier de container query (fragile
+                              si le libellé "peut-être" change un jour, ou si les compteurs passent à 2
+                              chiffres - mesuré ~262px dans ce cas), la boîte résumé devient elle-même un
+                              conteneur (container-type: inline-size) : les pastilles s'affichent sur une
+                              seule ligne UNIQUEMENT si leur propre boîte a réellement la place (>= 280px,
+                              marge de sécurité au-delà des ~262px mesurés pour des compteurs à 2
+                              chiffres), sinon elles s'empilent PROPREMENT en colonne (jamais 2 pastilles
+                              sur une ligne puis 1 orpheline en dessous - le pire des deux mondes,
+                              signalé par le propriétaire). Ce mécanisme s'applique à N'IMPORTE QUELLE
+                              largeur de carte, pas seulement aux 3 paliers de .decido-slot ci-dessous -
+                              condition nécessaire pour que la largeur de cette boîte reste déterministe
+                              (justify-self reste au défaut "stretch" au palier 760px plus bas, jamais
+                              "end" : une boîte en fit-content dont la taille dépendrait de son propre
+                              contenu conditionné par une container query créerait une dépendance
+                              circulaire que les navigateurs refusent de résoudre). */
                         .decido-slot-zone-summary {
                             text-align: left;
+                            container-type: inline-size;
+                            container-name: decido-slot-summary;
                         }
                         .decido-slot-summary-title {
                             font-size: 0.85rem;
@@ -489,6 +559,20 @@
                         }
                         .decido-slot-summary-empty {
                             font-style: italic;
+                        }
+                        .decido-slot-totals {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: flex-start;
+                            gap: 0.35rem;
+                        }
+                        @container decido-slot-summary (min-width: 280px) {
+                            .decido-slot-totals {
+                                flex-direction: row;
+                                flex-wrap: nowrap;
+                                align-items: center;
+                                gap: 0.5rem;
+                            }
                         }
                         @container decido-slot (min-width: 480px) {
                             .decido-slot-layout {
@@ -509,13 +593,23 @@
                             .decido-slot-zone-time {
                                 grid-column: 1 / -1;
                             }
-                            .decido-slot-zone-summary {
-                                text-align: right;
-                            }
                         }
                         @container decido-slot (min-width: 760px) {
                             .decido-slot-layout {
-                                grid-template-columns: minmax(140px, 1fr) auto minmax(190px, 1fr);
+                                /* 1fr/1fr → max-content/1fr (2026-08-16) : la largeur RÉELLE de la carte
+                                   reste plafonnée à ~763px sur cette page quelle que soit la largeur
+                                   d'écran (col-lg-9 Bootstrap, voir le commentaire du complément
+                                   responsive plus haut). Avec deux pistes 1fr (heure ET résumé), l'espace
+                                   restant se partage à ÉGALITÉ entre elles peu importe leur minimum -
+                                   relever le seul minimum du résumé (190px → 230px) n'y changeait donc
+                                   RIEN, le résumé restait bloqué à ~236.5px, sous le seuil de 280px de la
+                                   container query decido-slot-summary ci-dessus (pastilles TOUJOURS
+                                   empilées, même quand 3 sur une ligne auraient largement tenu). La piste
+                                   heure n'a besoin que de son propre contenu (~140px mesuré pour un
+                                   libellé "H h MM - H h MM") - max-content la sort de la compétition 1fr,
+                                   laissant le résumé (SEULE piste flexible restante) absorber tout le
+                                   reste (333px mesuré sur cette carte), largement au-dessus du seuil. */
+                                grid-template-columns: minmax(140px, max-content) auto minmax(230px, 1fr);
                             }
                             .decido-slot-zone-time {
                                 grid-column: auto;
@@ -523,9 +617,12 @@
                             .decido-slot-zone-buttons {
                                 justify-self: center;
                             }
-                            .decido-slot-zone-summary {
-                                justify-self: end;
-                            }
+                            /* justify-self reste au défaut (stretch), jamais "end" - voir le
+                               commentaire plus haut sur .decido-slot-zone-summary : "end" créait une
+                               boîte en fit-content dont la largeur dépendait de son propre contenu, ce
+                               qui cassait le calcul de la container query decido-slot-summary
+                               ci-dessus (dépendance circulaire) et provoquait le décalage/retour à la
+                               ligne constaté par le propriétaire. */
                         }
                     </style>
 

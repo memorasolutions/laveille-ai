@@ -3716,11 +3716,40 @@ declare(strict_types=1);
  *     sans aucun vote : à 375px le premier créneau complet est visible sans défiler ; à 1440px
  *     la bannière fait 250px, identique à la page /outils. Zoom équivalent 400% testé, aucun
  *     défilement horizontal.
+ *
+ *   1.177.1 · 2026-08-16 · fix(decido) deux nouveaux reproches du propriétaire, sur la
+ *     même carte de créneau que le fix 1.177.0. (1) « Réponses déjà reçues » suivi de
+ *     « Aucune réponse reçue » restait contradictoire dans le cas fréquent d'un sondage
+ *     neuf : on annonçait un titre puis on disait qu'il n'y avait rien, 14 fois de suite.
+ *     Passage à trois états distincts : quand le sondage ENTIER n'a reçu aucun vote
+ *     ($options->contains, calculé une seule fois avant la boucle des créneaux, zéro
+ *     requête SQL supplémentaire), la zone reste vide dans le DOM mais aria-hidden (la
+ *     grille 2↔3 colonnes ne dépend pas de son contenu, donc pas de saut au 1er vote), et
+ *     la phrase d'explication en haut de page disparaît aussi (elle annoncerait des totaux
+ *     inexistants) ; quand le sondage a des votes mais pas ce créneau, « Aucune réponse »
+ *     sans titre ; quand le créneau a des réponses, titre « Réponses » puis les pastilles,
+ *     inchangées. (2) Sur une capture de production (poll cyO3pTAxaAlT, 763px) : le titre
+ *     était aligné à droite alors que les pastilles (flex, ancrées à gauche dans leur
+ *     propre boîte) partaient de la gauche - même bord de référence désormais partout
+ *     (text-align:left sans exception). Et « ✕ 0 non » retombait seul sur une 2e ligne :
+ *     mesuré, la boîte ne recevait que 236,5px pour des pastilles en réclamant 237,6px, un
+ *     seul pixel d'écart. Plutôt que chasser ce chiffre à chaque palier, la boîte devient
+ *     son propre conteneur (container-type: inline-size) : pastilles sur une seule ligne
+ *     uniquement si sa propre largeur atteint 280px (marge au-delà des ~262px mesurés pour
+ *     des compteurs à 2 chiffres), sinon empilement propre en colonne - jamais deux
+ *     pastilles sur une ligne puis une orpheline en dessous. La colonne de l'heure passe à
+ *     sa taille naturelle (minmax(140px, max-content) au lieu de 1fr), ce qui libère 333px
+ *     au lieu de 236 pour le résumé au palier ≥760px. 103 tests du module Decido (440
+ *     assertions), aucun échec, deux passes identiques. Validation visuelle en navigateur à
+ *     320, 470, 605 et 763 pixels, sur un sondage avec votes (seul cas où le défaut
+ *     apparaissait) et un sondage sans aucun vote ; la zone de résumé reste toujours
+ *     présente dans le document, seul son contenu est conditionnel. Coût : zéro requête SQL
+ *     supplémentaire, les votes étaient déjà chargés.
  */
 
 $lvMajor = 1;
 $lvMinor = 177;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,

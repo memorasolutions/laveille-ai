@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.177.1] - 2026-08-16
+
+### Corrigé
+- **« Réponses déjà reçues » suivi de « Aucune réponse reçue » restait contradictoire sur un sondage neuf** : un titre était annoncé puis suivi de « il n'y a rien », répété pour chaque créneau. Passage à trois états distincts : quand le sondage entier n'a reçu aucun vote, la zone de résumé reste vide (sans titre ni message, et la phrase d'explication en haut de page disparaît aussi, car elle annoncerait des totaux inexistants) ; quand le sondage a des votes mais pas ce créneau précis, « Aucune réponse » sans titre ; quand le créneau a des réponses, titre « Réponses » puis les pastilles existantes, inchangées.
+- **Sur une capture de production, la mise en page du résumé de créneau était incohérente.** Le titre était aligné à droite alors que les pastilles partaient de la gauche (même bord de référence désormais partout) ; à 763 pixels, « ✕ 0 non » retombait seul sur une deuxième ligne (écart mesuré d'un seul pixel entre l'espace disponible et l'espace requis). Corrigé par une requête de conteneur imbriquée sur la boîte de résumé elle-même (une seule ligne si sa largeur atteint 280 pixels, sinon empilement propre en colonne) et par la colonne de l'heure ramenée à sa taille naturelle, ce qui libère 333 pixels au lieu de 236 pour le résumé.
+
+### Vérifié
+- Cent trois tests du module Décido (quatre cent quarante assertions), aucun échec, deux passes identiques.
+- Validation visuelle en navigateur à 320, 470, 605 et 763 pixels, sur un sondage avec votes et un sondage sans aucun vote. La zone de résumé reste toujours présente dans le document, seul son contenu est conditionnel.
+- Coût : zéro requête SQL supplémentaire, les votes étaient déjà chargés.
+
 ## [1.177.0] - 2026-08-16
 
 ### Corrigé
