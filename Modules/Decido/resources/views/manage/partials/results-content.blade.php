@@ -104,21 +104,24 @@
                                 <div class="card-body">
                                     <h3 class="h5 mb-2">{{ $stat->option->label }}</h3>
                                     @if($isYesNoMaybe)
+                                        {{-- Classe .ct-badge-status de public/css/charte.css (2026-08-16,
+                                             dette DRY migrée avec vote.blade.php - même badge dupliqué en
+                                             style="" ligne par ligne aux deux endroits). --}}
                                         <div class="d-flex flex-wrap gap-2 mb-2">
-                                            <span class="badge" style="background-color: var(--sys-success-bg); color: var(--sys-success); border: 1px solid var(--sys-success); display: inline-flex; align-items: center; gap: 4px;">
+                                            <span class="ct-badge-status ct-badge-status-success">
                                                 ✓ {{ $stat->yes }} oui
                                             </span>
-                                            <span class="badge" style="background-color: var(--sys-warning-bg); color: var(--sys-warning); border: 1px solid var(--sys-warning); display: inline-flex; align-items: center; gap: 4px;">
+                                            <span class="ct-badge-status ct-badge-status-warning">
                                                 ? {{ $stat->maybe }} peut-être
                                             </span>
-                                            <span class="badge" style="background-color: #fff; color: var(--sys-danger); border: 1px solid var(--sys-danger); display: inline-flex; align-items: center; gap: 4px;">
+                                            <span class="ct-badge-status ct-badge-status-danger">
                                                 ✕ {{ $stat->no }} non
                                             </span>
                                         </div>
                                         <p class="text-muted small">{{ $stat->noResponse }} sans réponse</p>
                                     @else
                                         <div class="mb-2">
-                                            <span class="badge" style="background-color: var(--sys-success-bg); color: var(--sys-success); border: 1px solid var(--sys-success); display: inline-flex; align-items: center; gap: 4px;">
+                                            <span class="ct-badge-status ct-badge-status-success">
                                                 ✓ {{ $stat->yes }} sur {{ $totalVoters }} participants
                                             </span>
                                         </div>
@@ -409,7 +412,7 @@
                                         @if($bestOptions->contains('option.id', $option->id)) checked @endif required>
                                     <label class="form-check-label" for="opt_{{ $option->id }}">{{ $option->label }}</label>
                                     @if($stat && $stat->yes > 0)
-                                        <span class="badge" style="background-color: var(--sys-success-bg); color: var(--sys-success); border: 1px solid var(--sys-success); display: inline-flex; align-items: center; gap: 4px;">
+                                        <span class="ct-badge-status ct-badge-status-success">
                                             ✓ {{ $stat->yes }} {{ $isYesNoMaybe ? 'oui' : ($stat->yes > 1 ? 'participants' : 'participant') }}
                                         </span>
                                     @endif

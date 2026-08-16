@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.177.0] - 2026-08-16
+
+### Corrigé
+- **La carte de créneau de la page de vote publique était à moitié vide.** Refonte en trois zones : l'heure à gauche, les boutons de vote au centre, le résumé des réponses à droite. Trois paliers en requêtes de conteneur, mesurés sur la largeur réelle de la carte (et non de l'écran, car la grille du site rend cette largeur non monotone) : empilé sous 480 pixels, deux lignes entre 480 et 760, trois colonnes au-delà.
+- **Les compteurs de réponses à zéro n'apprenaient rien au votant.** Remplacés par « Aucune réponse reçue » tant qu'aucun vote n'existe pour le créneau, sous un titre « Réponses déjà reçues » et une seule phrase d'explication en haut de page, jamais répétée. Le libellé précise « y compris le tien si tu as déjà voté » (vérifié dans le contrôleur : les totaux incluent bien le vote de la personne elle-même).
+- **La page de vote ne respectait pas la charte graphique du site.** La bannière retrouve sa hauteur standard sur bureau (la réduction est désormais limitée aux écrans de moins de 767 pixels), le contenu est enveloppé dans une carte comme les autres pages du site, et le bouton de fuseau horaire a été migré vers la classe de charte existante.
+
+### Ajouté
+- **Nouvelle classe `.ct-badge-status` dans `public/css/charte.css`**, consommant les jetons de couleur `--sys-success`/`--sys-warning`/`--sys-danger` qui existaient déjà sans être utilisés par aucune classe. Le badge de totaux (Oui / Peut-être / Non) était dupliqué en style en ligne à deux endroits (page de vote et page de résultats de gestion) ; les deux ont été migrés vers cette classe unique, sans qu'aucun badge avec style en ligne ne subsiste. Modification purement additive : aucune règle existante de la feuille partagée n'a été touchée.
+
+### Vérifié
+- Cent trois tests du module Décido (quatre cent quarante assertions), aucun échec, identique avant et après les corrections.
+- Validation visuelle en navigateur sur un sondage local sans aucun vote : à 375 pixels de large, le premier créneau complet est visible sans défiler ; à 1440 pixels, la bannière fait 250 pixels, identique à celle de la page /outils.
+- Zoom équivalent 400 pour cent testé : aucun défilement horizontal.
+- Aucun badge avec style en ligne restant (vérifié par grep).
+
 ## [1.176.0] - 2026-08-15
 
 ### Ajouté

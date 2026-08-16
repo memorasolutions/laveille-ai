@@ -12,8 +12,11 @@
          dessous). breadcrumbTitle n'est plus transmis (le fil d'Ariane garde son rôle de
          navigation via breadcrumbItems, le h2 - désormais vide - est masqué en CSS scopé
          .decido-vote-hero ci-dessous) ; le h1 plus bas reste la SEULE occurrence visuelle du
-         titre. La bannière (normalement min-height 400px/250px, voir _page-title.scss) est aussi
-         réduite, mais SEULEMENT sur cette page (wrapper .decido-vote-hero, style scopé à cette vue). --}}
+         titre. CORRIGÉ le 16 août : la bannière n'est plus réduite qu'en dessous de 768px (voir
+         le média query dans le <style> plus bas) - à 768px et plus, elle retrouve la hauteur
+         standard du site (mesurée à 250px, IDENTIQUE à toutes les autres pages ; la valeur
+         400px documentée dans _page-title.scss n'est PAS celle réellement compilée/servie par
+         public/themes/bloggar/sass/style.css, vérifié par mesure Playwright sur /outils). --}}
     <div class="decido-vote-hero">
         @include('fronttheme::partials.breadcrumb', ['breadcrumbItems' => [__('Outils'), $poll->title]])
     </div>
@@ -23,6 +26,18 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-9">
+              {{-- Point 2 (rapport 2026-08-16, reproche propriétaire) : la page de vote n'avait
+                   AUCUNE enveloppe de contenu, alors que les autres pages du site enveloppent tout
+                   leur contenu dans une carte unique (motif de référence vérifié :
+                   Modules/Tools/resources/views/public/show.blade.php, `.card.shadow-sm` +
+                   `.card-body.p-4.p-md-5`) - le formulaire flottait nu sur le fond de page.
+                   Anti carte-dans-carte : les créneaux (.decido-slot) sont eux-mêmes des mini-cartes
+                   Bootstrap .card ; plutôt que les extraire de la carte englobante (ce qui aurait
+                   cassé le regroupement par journée/container queries), leur habillage carte
+                   (bordure + ombre + coins arrondis) est neutralisé au profit d'un simple séparateur
+                   horizontal - voir la règle .decido-slot plus bas dans ce même <style>. --}}
+              <div class="card shadow-sm" style="border-radius: var(--r-base);">
+                <div class="card-body p-4 p-md-5">
                 <h1 class="h2 mb-2">{{ $poll->title }}</h1>
                 @if($poll->description)
                     <p class="text-muted mb-4">{{ $poll->description }}</p>
@@ -71,7 +86,7 @@
                             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
                                 <h2 class="h4 mb-0">Tes disponibilités</h2>
                                 <button type="button"
-                                        class="decido-tz-toggle-btn"
+                                        class="ct-btn ct-btn-outline decido-tz-toggle-btn"
                                         x-show="showToggle"
                                         x-cloak
                                         @click="toggleDisplay()"
@@ -101,6 +116,16 @@
                                  frappe) aux lecteurs d'écran - jamais peuplée au chargement pour
                                  ne pas spammer. --}}
                             <div aria-live="polite" class="visually-hidden" x-text="announcement"></div>
+
+                            {{-- Explique UNE SEULE FOIS le sens des totaux affichés dans chaque carte
+                                 (zone de droite), jamais répété par créneau. Formulation vérifiée contre
+                                 PublicPollController::show() : $poll->load('options.votes') charge TOUS
+                                 les votes du créneau sans filtrer par voter_token, donc ces totaux
+                                 incluent le propre vote du votant s'il a déjà répondu - jamais
+                                 "autres participants", qui serait faux. --}}
+                            <p class="decido-slot-summary-explainer text-muted small mb-3">
+                                Ces totaux montrent les choix déjà enregistrés par les participants, y compris le tien si tu as déjà voté.
+                            </p>
 
                             @php
                                 // Priorité 2 (docs/specs/2026-08-15-decido-page-vote-design.md) : regroupement
@@ -171,44 +196,73 @@
                                             // mémoire par $poll->load('options.votes') (contrôleur) - countBy() sur
                                             // une collection déjà hydratée ne déclenche AUCUNE requête SQL
                                             // supplémentaire (0 requête par créneau, pas de N+1).
+                                            //
+                                            // Round « trois zones » (2026-08-16, constat propriétaire sur sondage
+                                            // réel) : $option->votes N'EST PAS filtré par voter_token dans
+                                            // PublicPollController::show() ($poll->load('options.votes') charge
+                                            // TOUS les votes du créneau) - ces totaux incluent donc le propre vote
+                                            // du votant qui regarde la page, s'il a déjà répondu. Le libellé et la
+                                            // phrase d'explication plus haut sont formulés en conséquence (jamais
+                                            // "autres participants", qui serait faux).
                                             $voteCounts = $option->votes->countBy('value');
+                                            $totalOptionVotes = $option->votes->count();
                                         @endphp
                                         <div class="card mb-3 decido-slot"
                                              data-starts-at-utc="{{ $slotStartUtc }}"
                                              data-ends-at-utc="{{ $slotEndUtc }}"
                                              data-full-label="{{ $option->label }}">
-                                            <div class="card-body">
-                                                <h4 class="h5 mb-1 decido-slot-label">{{ $displayLabel }}</h4>
-                                                <p class="decido-slot-secondary text-muted small mb-3" style="display:none"></p>
-                                                {{-- Totaux par créneau (jamais les noms) : même langage visuel que
-                                                     Modules/Decido/resources/views/manage/partials/results-content.blade.php
-                                                     (badges succès/avertissement/danger), réutilisé pour rester DRY. --}}
-                                                <div class="d-flex flex-wrap gap-2 mb-2 decido-slot-totals">
-                                                    <span class="badge" style="background-color: var(--sys-success-bg); color: var(--sys-success); border: 1px solid var(--sys-success); display: inline-flex; align-items: center; gap: 4px;">
-                                                        ✓ {{ $voteCounts['yes'] ?? 0 }} oui
-                                                    </span>
-                                                    <span class="badge" style="background-color: var(--sys-warning-bg); color: var(--sys-warning); border: 1px solid var(--sys-warning); display: inline-flex; align-items: center; gap: 4px;">
-                                                        ? {{ $voteCounts['maybe'] ?? 0 }} peut-être
-                                                    </span>
-                                                    <span class="badge" style="background-color: #fff; color: var(--sys-danger); border: 1px solid var(--sys-danger); display: inline-flex; align-items: center; gap: 4px;">
-                                                        ✕ {{ $voteCounts['no'] ?? 0 }} non
-                                                    </span>
+                                            {{-- Trois zones, DANS CET ORDRE dans le DOM (heure, boutons,
+                                                 résumé) - l'ordre visuel (desktop en ligne, mobile en colonne
+                                                 via .decido-slot-layout ci-dessous) SUIT STRICTEMENT cet ordre
+                                                 du document : aucune propriété CSS `order` ni `grid-column`
+                                                 explicite n'est utilisée nulle part dans ce bloc, pour qu'un
+                                                 parcours au clavier ou au lecteur d'écran corresponde toujours
+                                                 à ce qui est affiché. --}}
+                                            <div class="card-body decido-slot-layout">
+                                                <div class="decido-slot-zone decido-slot-zone-time">
+                                                    <h4 class="h5 mb-1 decido-slot-label">{{ $displayLabel }}</h4>
+                                                    <p class="decido-slot-secondary text-muted small mb-0" style="display:none"></p>
                                                 </div>
-                                                <div class="d-flex flex-wrap gap-2 decido-vote-pills">
-                                                    @foreach(['yes' => 'Oui', 'maybe' => 'Peut-être', 'no' => 'Non'] as $value => $label)
-                                                        <label class="decido-vote-pill" for="vote_{{ $option->id }}_{{ $value }}">
-                                                            <input class="visually-hidden" type="radio"
-                                                                   name="votes[{{ $option->id }}]"
-                                                                   id="vote_{{ $option->id }}_{{ $value }}"
-                                                                   value="{{ $value }}"
-                                                                   {{ (($existingVotes[$option->id] ?? null) === $value) ? 'checked' : '' }}>
-                                                            {{ $label }}
-                                                        </label>
-                                                    @endforeach
+                                                <div class="decido-slot-zone decido-slot-zone-buttons">
+                                                    <div class="d-flex flex-wrap gap-2 decido-vote-pills">
+                                                        @foreach(['yes' => 'Oui', 'maybe' => 'Peut-être', 'no' => 'Non'] as $value => $label)
+                                                            <label class="decido-vote-pill" for="vote_{{ $option->id }}_{{ $value }}">
+                                                                <input class="visually-hidden" type="radio"
+                                                                       name="votes[{{ $option->id }}]"
+                                                                       id="vote_{{ $option->id }}_{{ $value }}"
+                                                                       value="{{ $value }}"
+                                                                       {{ (($existingVotes[$option->id] ?? null) === $value) ? 'checked' : '' }}>
+                                                                {{ $label }}
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                    @error("votes.{$option->id}")
+                                                        <div class="text-danger mt-2">{{ $message }}</div>
+                                                    @enderror
                                                 </div>
-                                                @error("votes.{$option->id}")
-                                                    <div class="text-danger mt-2">{{ $message }}</div>
-                                                @enderror
+                                                <div class="decido-slot-zone decido-slot-zone-summary">
+                                                    <p class="decido-slot-summary-title mb-1">Réponses déjà reçues</p>
+                                                    @if($totalOptionVotes === 0)
+                                                        <p class="decido-slot-summary-empty text-muted small mb-0">Aucune réponse reçue</p>
+                                                    @else
+                                                        {{-- Totaux par créneau (jamais les noms) : classe .ct-badge-status
+                                                             de public/css/charte.css (Point 3, rapport 2026-08-16) - remplace
+                                                             les 3 badges Bootstrap .badge en style="" en ligne dupliqués ici
+                                                             ET dans results-content.blade.php (dette DRY partagée, migrée
+                                                             aux deux endroits). --}}
+                                                        <div class="d-flex flex-wrap gap-2 decido-slot-totals">
+                                                            <span class="ct-badge-status ct-badge-status-success">
+                                                                ✓ {{ $voteCounts['yes'] ?? 0 }} oui
+                                                            </span>
+                                                            <span class="ct-badge-status ct-badge-status-warning">
+                                                                ? {{ $voteCounts['maybe'] ?? 0 }} peut-être
+                                                            </span>
+                                                            <span class="ct-badge-status ct-badge-status-danger">
+                                                                ✕ {{ $voteCounts['no'] ?? 0 }} non
+                                                            </span>
+                                                        </div>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -298,42 +352,43 @@
                             outline: 3px solid var(--c-primary, #064E5A);
                             outline-offset: 2px;
                         }
-                        /* Volet B : bascule d'affichage du fuseau horaire (heure locale du
-                           votant vs heure du sondage). */
+                        /* Point 3 (rapport 2026-08-16) : le visuel (bordure, couleur, fond, survol,
+                           focus) de ce bouton reimplementait presque trait pour trait .ct-btn-outline
+                           de public/css/charte.css - remplacé par cette classe existante (voir
+                           l'attribut class="ct-btn ct-btn-outline decido-tz-toggle-btn" plus haut).
+                           .decido-tz-toggle-btn ne sert plus qu'à garantir la cible tactile AAA 44px
+                           (2.5.5), que .ct-btn/.ct-btn-outline n'imposent pas par défaut (seuls
+                           .ct-btn-accent et .ct-btn-icon le font dans charte.css) - la seule règle non
+                           déjà couverte par la classe réutilisée. */
                         .decido-tz-toggle-btn {
-                            display: inline-flex;
-                            align-items: center;
-                            justify-content: center;
                             min-height: 44px;
                             min-width: 44px;
-                            padding: 0.5rem 1rem;
-                            border: 1px solid var(--c-primary, #064E5A);
-                            border-radius: 0.375rem;
-                            background-color: #fff;
-                            color: var(--c-primary, #064E5A);
                             font-size: 0.9rem;
-                            cursor: pointer;
-                        }
-                        .decido-tz-toggle-btn:hover {
-                            background-color: var(--c-primary-light, #F0FAFB);
-                        }
-                        .decido-tz-toggle-btn:focus-visible {
-                            outline: 3px solid var(--c-primary, #064E5A);
-                            outline-offset: 2px;
                         }
                         .decido-slot-secondary { margin-top: -0.5rem; }
 
-                        /* Priorité 1 (docs/specs/2026-08-15-decido-page-vote-design.md) : bannière de
-                           titre écrasée SUR CETTE PAGE SEULEMENT (scopée par .decido-vote-hero, qui
-                           n'entoure l'include du fil d'Ariane que dans cette vue) - normalement
-                           min-height 400px desktop / 250px mobile (voir _page-title.scss), le popup
-                           infolettre en plus recouvrait le formulaire : zéro créneau visible au 1er
-                           écran mobile (mesure réelle du 15 août sur /decido/LDitANr2dPmJ). Le h2 (titre
-                           dupliqué avec le h1 juste en dessous) est masqué plutôt que simplement vidé de
-                           contenu, pour ne laisser aucun espace vide résiduel. */
-                        .decido-vote-hero .wpo-breadcumb-area {
-                            min-height: auto;
-                            padding: 0.85rem 0;
+                        /* Priorité 1 (docs/specs/2026-08-15-decido-page-vote-design.md), CORRIGÉ le
+                           16 août (reproche propriétaire : la page ne respecte pas la mise en page
+                           du site) : réduire la bannière à TOUS les paliers était une SUR-CORRECTION.
+                           Le problème mesuré le 15 août (zéro créneau visible au 1er écran, popup
+                           infolettre compris) n'existait que sur téléphone - sur grand écran, deux
+                           créneaux étaient déjà visibles avec la bannière standard. Seul le palier
+                           mobile (max-width: 767px, MÊME seuil que le thème utilise pour sa propre
+                           media query .wpo-breadcumb-area, voir _page-title.scss) reste réduit ; à
+                           768px et plus, plus AUCUNE règle de ce fichier ne touche min-height/padding
+                           - la bannière retombe simplement sur le style standard du site (vérifié
+                           IDENTIQUE, 250px mesurés par Playwright à 1440px, sur /decido/{slug} ET sur
+                           /outils - la valeur 400px documentée dans _page-title.scss ne correspond
+                           PAS à ce que public/themes/bloggar/sass/style.css sert réellement, ce
+                           fichier compilé n'a d'ailleurs aucune media query sur cette règle). Le h2
+                           (titre dupliqué avec le h1 juste en dessous) reste masqué à TOUS les
+                           paliers - il est vide dans tous les cas ($breadcrumbTitle non transmis, voir
+                           breadcrumb.blade.php), orthogonal au problème de hauteur ci-dessus. */
+                        @media (max-width: 767px) {
+                            .decido-vote-hero .wpo-breadcumb-area {
+                                min-height: auto;
+                                padding: 0.85rem 0;
+                            }
                         }
                         .decido-vote-hero .wpo-breadcumb-wrap h2 {
                             display: none;
@@ -359,12 +414,118 @@
                             border-top: 2px solid #E5E7EB;
                         }
 
-                        /* Priorité 3 : totaux par créneau (jamais les noms). */
-                        .decido-slot-totals .badge {
-                            font-size: 0.8rem;
-                            font-weight: 600;
-                            padding: 0.3rem 0.6rem;
-                            border-radius: 999px;
+                        /* Priorité 3 : totaux par créneau (jamais les noms). Styles du badge
+                           lui-même migrés vers .ct-badge-status (public/css/charte.css, Point 3
+                           du rapport 2026-08-16) - plus rien à redéfinir ici. */
+
+                        /* Complément responsive (2026-08-16, constat propriétaire + point de rupture
+                           basé sur le CONTENU, pas un gabarit d'appareil) : chaque carte .decido-slot
+                           mesure SA PROPRE largeur rendue via une container query CSS plutôt qu'un
+                           media query lié au viewport. Raison : à cause de col-lg-9 (Bootstrap), la
+                           largeur réelle de la carte n'est PAS monotone avec la largeur d'écran - elle
+                           vaut ~720px de 768px à 1199px de viewport (le conteneur .container passe à
+                           720px fixe à 768px, puis col-lg-9 la ramène au même ~720px à 992px), donc un
+                           media query calé sur une largeur d'écran aurait pu mal cibler la vraie zone
+                           à l'étroit. La container query s'ajuste à la largeur RÉELLE de la carte,
+                           qu'elle soit dans cette page (col-lg-9) ou réutilisée ailleurs plus tard.
+
+                           3 paliers, choisis par mesure visuelle réelle (Playwright, cette carte) :
+                           - < 480px (conteneur de carte) : une seule colonne (heure, boutons, résumé
+                             empilés) - en dessous, boutons ("Peut-être" ~110-130px à lui seul) et
+                             résumé (titre "Réponses déjà reçues" ~150-170px) ne tiennent plus côte à
+                             côte sans se resserrer excessivement.
+                           - 480px à 759px (le vrai "entre-deux" signalé, ex. carte ~540-720px comme au
+                             palier Bootstrap 576-767px où le conteneur est fixé à 540px) : heure sur sa
+                             propre ligne pleine largeur (elle est le texte le plus imprévisible en
+                             longueur - créneaux "sans-date" ou libellé complet avec suffixe DST), puis
+                             boutons + résumé se partagent la ligne suivante (boutons à gauche, résumé à
+                             droite) - c'est la largeur où les 3 zones AU COMPLET sur une seule ligne se
+                             seraient serrées, mais où 2 zones tiennent confortablement.
+                           - >= 760px : les 3 zones sur une seule ligne (heure | boutons au centre |
+                             résumé à droite), le layout "bureau" du brief.
+
+                           RÈGLE D'ORDRE (non négociable, prime sur l'esthétique) : à AUCUN palier une
+                           propriété `order` n'est utilisée, et le seul `grid-column` explicite sert à
+                           faire OCCUPER PLUS DE PLACE à la zone heure (span pleine largeur au palier
+                           intermédiaire), jamais à intervertir la position de deux zones. Le
+                           placement des zones boutons/résumé reste TOUJOURS le placement automatique de
+                           grille en ordre de document (1ère zone libre suivante), donc l'ordre visuel de
+                           lecture (haut→bas puis gauche→droite) reste heure, boutons, résumé à CHAQUE
+                           palier - identique à l'ordre HTML, y compris à 320px et à 200% de zoom (qui
+                           revient à un conteneur de carte plus étroit, retombant simplement dans le
+                           palier "une colonne" déjà validé). */
+                        .decido-slot {
+                            container-type: inline-size;
+                            container-name: decido-slot;
+                            /* Point 2 (rapport 2026-08-16) : anti carte-dans-carte - la page est
+                               maintenant enveloppée dans une carte unique (voir plus haut dans cette
+                               vue). Les mini-cartes Bootstrap .card par créneau perdent donc leur
+                               bordure/ombre/coins arrondis au profit d'un simple séparateur
+                               horizontal entre créneaux, plus léger visuellement dans ce contexte
+                               imbriqué. Le regroupement par journée (.decido-day-group) garde son
+                               propre séparateur (border-top) : les deux niveaux restent visuellement
+                               distincts (trait fort entre journées, trait fin entre créneaux). */
+                            border: none;
+                            border-radius: 0;
+                            box-shadow: none;
+                            background-color: transparent;
+                            border-bottom: 1px solid var(--sys-border-default, #E5E7EB);
+                        }
+                        .decido-slot:last-child {
+                            border-bottom: none;
+                        }
+                        .decido-slot-layout {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 0.75rem;
+                        }
+                        .decido-slot-zone-summary {
+                            text-align: left;
+                        }
+                        .decido-slot-summary-title {
+                            font-size: 0.85rem;
+                            font-weight: 700;
+                            color: var(--c-primary, #064E5A);
+                        }
+                        .decido-slot-summary-empty {
+                            font-style: italic;
+                        }
+                        @container decido-slot (min-width: 480px) {
+                            .decido-slot-layout {
+                                display: grid;
+                                /* 235px = mesure réelle (Playwright) des 3 pills "Oui"/"Peut-être"/"Non"
+                                   sur une seule ligne (~231px) + marge - une colonne 1fr/1fr stricte les
+                                   compressait sous ce seuil et forçait "Non" seul sur une 2e ligne au bas
+                                   de ce palier (~218px de colonne à 480px de carte, vérifié visuellement).
+                                   max-content borne la colonne à SA largeur naturelle si plus de place est
+                                   disponible, jamais au-delà. */
+                                grid-template-columns: minmax(235px, max-content) 1fr;
+                                align-items: center;
+                                gap: 0.5rem 1rem;
+                            }
+                            /* Span pleine largeur = agrandissement de la zone, pas un réordonnancement :
+                               la zone heure reste la 1ère affichée (ligne 1), boutons et résumé suivent
+                               en ligne 2 par placement automatique dans l'ordre du document. */
+                            .decido-slot-zone-time {
+                                grid-column: 1 / -1;
+                            }
+                            .decido-slot-zone-summary {
+                                text-align: right;
+                            }
+                        }
+                        @container decido-slot (min-width: 760px) {
+                            .decido-slot-layout {
+                                grid-template-columns: minmax(140px, 1fr) auto minmax(190px, 1fr);
+                            }
+                            .decido-slot-zone-time {
+                                grid-column: auto;
+                            }
+                            .decido-slot-zone-buttons {
+                                justify-self: center;
+                            }
+                            .decido-slot-zone-summary {
+                                justify-self: end;
+                            }
                         }
                     </style>
 
@@ -372,6 +533,8 @@
                         <x-core::button type="submit" variant="primary">Envoyer mon vote</x-core::button>
                     </div>
                 </form>
+                </div>
+              </div>
             </div>
         </div>
     </div>

@@ -3693,10 +3693,33 @@ declare(strict_types=1);
  *     aucun échec. Validation visuelle : à 375 pixels de large, le premier créneau complet est
  *     désormais visible sans défiler (126 pixels de marge, contre zéro avant), popup absent après
  *     57 secondes d'attente et défilement, navigation au clavier intacte.
+ *
+ *   1.177.0 · 2026-08-16 · fix(decido) trois reproches du propriétaire sur la page de vote
+ *     publique corrigés. (1) La carte de créneau était à moitié vide : désormais trois zones
+ *     (heure à gauche, boutons de vote au centre, résumé des réponses à droite), avec trois
+ *     paliers en requêtes de conteneur mesurées sur la largeur réelle de la carte (pas de
+ *     l'écran, car la grille du site rend cette largeur non monotone) - empilé sous 480px, deux
+ *     lignes entre 480 et 760, trois colonnes au-delà. (2) Les compteurs à zéro n'apprenaient
+ *     rien : remplacés par « Aucune réponse reçue » tant qu'aucun vote n'existe pour le créneau,
+ *     sous un titre « Réponses déjà reçues » et une seule phrase d'explication en haut de page,
+ *     jamais répétée - le libellé précise « y compris le tien si tu as déjà voté » (vérifié dans
+ *     le contrôleur : les totaux incluent bien le vote de la personne). (3) La page ne
+ *     respectait pas la charte : bannière revenue à la hauteur standard sur bureau (réduction
+ *     désormais limitée à moins de 767px), contenu enveloppé dans une carte comme les autres
+ *     pages du site, bouton de fuseau horaire migré vers la classe de charte existante, et
+ *     nouvelle classe .ct-badge-status créée dans charte.css consommant des jetons de couleur
+ *     (--sys-success/--sys-warning/--sys-danger) qui existaient sans être utilisés - migrée aux
+ *     deux endroits (page de vote ET page de résultats de gestion), zéro badge avec style en
+ *     ligne restant (vérifié par grep). Modification de charte.css purement additive (nouvelle
+ *     classe uniquement, aucune règle existante touchée). 103 tests du module Decido (440
+ *     assertions), aucun échec, identique avant/après. Validation visuelle sur un sondage local
+ *     sans aucun vote : à 375px le premier créneau complet est visible sans défiler ; à 1440px
+ *     la bannière fait 250px, identique à la page /outils. Zoom équivalent 400% testé, aucun
+ *     défilement horizontal.
  */
 
 $lvMajor = 1;
-$lvMinor = 176;
+$lvMinor = 177;
 $lvPatch = 0;
 
 return [

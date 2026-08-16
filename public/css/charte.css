@@ -1290,6 +1290,31 @@ article h3 {
 .ct-help-btn__glyphe { display: inline-block; transform: translateY(0.07em); }
 
 /* ═══════════════════════════════════════════════════
+   24ter. BADGE DE STATUT - .ct-badge-status (définition UNIQUE)
+   Fusion DRY (2026-08-16, reproche propriétaire /decido/{slug}) : ce badge
+   (totaux oui/peut-être/non par créneau) était dupliqué en style="" ligne par
+   ligne à 2 endroits (Modules/Decido/resources/views/public/vote.blade.php ET
+   manage/partials/results-content.blade.php, 6 occurrences au total) alors que
+   les jetons --sys-success/--sys-warning/--sys-danger existaient déjà ici mais
+   n'étaient consommés par aucune classe. La variante "danger" garde un fond
+   #fff explicite (pas --sys-danger-bg, plus rosé) pour rester visuellement
+   identique à l'existant - zéro régression, changement purement structurel.
+   ═══════════════════════════════════════════════════ */
+.ct-badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+}
+.ct-badge-status-success { background-color: var(--sys-success-bg); color: var(--sys-success); border-color: var(--sys-success); }
+.ct-badge-status-warning { background-color: var(--sys-warning-bg); color: var(--sys-warning); border-color: var(--sys-warning); }
+.ct-badge-status-danger { background-color: #fff; color: var(--sys-danger); border-color: var(--sys-danger); }
+
+/* ═══════════════════════════════════════════════════
    23. IMPRESSION (@media print)
    Masquer les éléments UI non pertinents à l'impression
    ═══════════════════════════════════════════════════ */
