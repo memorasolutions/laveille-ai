@@ -316,10 +316,19 @@
              de vote Décido publique (decido.vote.show) - un votant y accomplit une tâche pour rendre service,
              et sur mobile ce popup (déclenché aussi par un minuteur, pas seulement au défilement, voir
              public/js/newsletter-scroll-trigger.js) recouvrait le formulaire, zéro créneau visible au 1er
-             écran. Scopé à cette seule route (pas 'decido/*') pour ne pas toucher création/gestion/résultats. --}}
-        @unless(request()->is('outils/*') || request()->routeIs('decido.vote.show'))
+             écran. Scopé à cette seule route (pas 'decido/*') pour ne pas toucher création/gestion/résultats.
+             LOT 4 (docs/specs/2026-08-16-decido-reste-a-faire.md, point 9) : /js/newsletter-scroll-trigger.js
+             restait chargé en bas de page (voir plus loin dans ce fichier) MÊME sur les routes exclues
+             ci-dessus - il se neutralise seul en silence (son marqueur DOM est absent), mais reste du poids
+             mort téléchargé/exécuté pour rien. La condition est calculée UNE SEULE FOIS ici, dans
+             $showNewsletterScrollTrigger, et réutilisée telle quelle plus bas pour la balise <script> - jamais
+             dupliquée. --}}
+        @php
+            $showNewsletterScrollTrigger = ! (request()->is('outils/*') || request()->routeIs('decido.vote.show'));
+        @endphp
+        @if($showNewsletterScrollTrigger)
             @include('fronttheme::partials.newsletter-scroll-trigger')
-        @endunless
+        @endif
         @include('fronttheme::partials.newsletter-modal')
         @include('fronttheme::partials.auth-modal')
         @auth
@@ -390,7 +399,11 @@
     <script src="/js/infinite-scroll.js?v={{ filemtime(public_path('js/infinite-scroll.js')) }}" defer></script>
     {{-- /js/sw-register.js retiré : il enregistrait l'ancien SW de nettoyage /sw.js (conflit de scope « / »
          avec le SW vite-pwa = rechargements forcés + crash renderer). Seul le SW vite-pwa subsiste. --}}
+    {{-- $showNewsletterScrollTrigger calculé une seule fois plus haut (même condition que le partial
+         newsletter-scroll-trigger, jamais dupliquée) - LOT 4, point 9. --}}
+    @if($showNewsletterScrollTrigger)
     <script src="/js/newsletter-scroll-trigger.js?v={{ filemtime(public_path('js/newsletter-scroll-trigger.js')) }}" defer></script>
+    @endif
     <script src="/js/ga4-events.js" defer></script>
 
     {{-- Floating share bar (sidebar desktop + bottom bar mobile) — masqué sur pages protégées --}}

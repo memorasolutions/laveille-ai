@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.179.0] - 2026-08-16
+
+### Ajouté
+- **Lot 5 - notification à l'organisateur.** Résumé quotidien groupé par courriel quand un sondage reçoit de nouvelles réponses (votes, refus, commentaires) : au plus UN courriel par sondage par jour, envoyé seulement s'il y a du nouveau depuis le dernier résumé. Interrupteur PAR SONDAGE (activé par défaut, jamais un réglage global de compte), exposé depuis la page de gestion. Mailer transactionnel Workspace, jamais Brevo. Commande planifiée `decido:notify-poll-activity` à 7h00, calquée sur la commande d'avertissement d'expiration existante, avec la même garde d'idempotence. Deux colonnes additives sur `decido_polls` (`activity_notifications_enabled`, `activity_notified_at`), migration réversible avec garde `hasColumn`.
+- **Lot 4 - dette technique.** Les ~200 lignes de CSS de la page de vote sorties vers `public/assets/tools/decido/vote.css`, chargée uniquement sur cette page, cache-bust par semver. Le script du popup d'infolettre est désormais conditionnel via une variable calculée une seule fois, plus aucune duplication de la condition. Les boutons de vote à 320 pixels s'empilent désormais proprement en colonne au lieu de deux plus un orphelin. Garde ajoutée contre un `format()` sur une valeur nulle (`starts_at` d'un créneau de type « date ») dans la page de gestion.
+
+### Vérifié
+- Cent trente-six tests du module Décido (cinq cent cinquante-deux assertions), aucun échec (cent vingt-quatre avant ce lot).
+- Validation visuelle du lot 4 : captures avant/après à 320, 600 et 1440 pixels - trois boutons empilés proprement à 320 pixels, paliers supérieurs identiques au design livré.
+- `php -l` propre sur tous les fichiers touchés.
+- Une migration additive, vérifiée réversible (`dropColumn` en `down()`, garde `hasColumn` dans les deux sens) : `activity_notifications_enabled` et `activity_notified_at` sur `decido_polls`.
+- Deux pièges CSS/Blade découverts en cours de route et documentés dans `docs/CONTRAINTES-SOUS-AGENTS.md` : une requête de conteneur qui effondre une piste de grille `auto`, et la forme courte `@php(...)` qui casse la compilation Blade dans ce projet.
+
 ## [1.178.0] - 2026-08-16
 
 ### Ajouté

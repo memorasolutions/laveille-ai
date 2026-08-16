@@ -142,6 +142,12 @@ Schedule::command('decido:warn-expiring-polls')->dailyAt('06:00')->withoutOverla
 // du seul statut 'closed' le 2026-07-19, voir PurgeExpiredPollsCommand)
 Schedule::command('decido:purge-expired')->dailyAt('06:15');
 
+// Decido - resume quotidien groupe de l'activite (votes/declins/commentaires) au createur d'un
+// sondage (LOT 5, docs/specs/2026-08-16-decido-reste-a-faire.md). Aucune dependance avec les deux
+// commandes Decido ci-dessus - regroupe simplement au meme moment de la nuit. Silencieux (aucun
+// courriel) si rien de nouveau depuis le dernier resume, voir NotifyPollActivityCommand.
+Schedule::command('decido:notify-poll-activity')->dailyAt('07:00')->withoutOverlapping();
+
 // Messages de contact - purge de la quarantaine spam de plus de 60 jours (hebdo).
 // Passe par le schedule:run deja en place (pas un nouveau cron serveur). Defensif :
 // table possiblement absente en contexte de portabilite/migration.

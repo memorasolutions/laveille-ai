@@ -34,6 +34,9 @@ Route::middleware(DecidoUnderConstruction::class)->group(function () {
     // SANS carnet d'adresses - un simple entier facultatif (nombre de personnes attendues),
     // modifiable depuis la page de gestion. Aucune collecte de courriel.
     Route::post('/decido/{poll}/gerer/{adminToken}/attendus', [PollManageController::class, 'updateExpected'])->name('decido.expected');
+    // LOT 5 (docs/specs/2026-08-16-decido-reste-a-faire.md) : interrupteur PAR SONDAGE du résumé
+    // quotidien d'activité (decido:notify-poll-activity) - jamais un réglage global de compte.
+    Route::post('/decido/{poll}/gerer/{adminToken}/notifications', [PollManageController::class, 'updateActivityNotifications'])->name('decido.notifications');
     Route::get('/decido/{poll}/gerer/{adminToken}/export.csv', [PollManageController::class, 'exportCsv'])->name('decido.export.csv');
     Route::get('/decido/{poll}/gerer/{adminToken}/export.ics', [PollManageController::class, 'exportIcs'])->name('decido.export.ics');
     Route::post('/decido/{poll}/gerer/{adminToken}/lien-court', [PollManageController::class, 'createShortLink'])->name('decido.shortlink');

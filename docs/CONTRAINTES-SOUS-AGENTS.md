@@ -96,6 +96,14 @@ consignes à chaque tâche. Tout ce qui suit est acquis, permanent, et non négo
 - **Les formats WebP et AVIF ne sont pas fiables pour les aperçus sur les réseaux sociaux.** Un JPEG
   1200x630 reste obligatoire pour l'image de partage. (107 images du glossaire ont dû être
   rattrapées.)
+- **`container-type: inline-size` sur un élément de grille dont la piste est `auto` effondre sa
+  largeur.** La mise en confinement fait que l'élément contribue une taille d'environ zéro au calcul
+  de la piste : le parent s'effondre et la mise en page casse à GRANDE largeur, là où il y avait
+  pourtant toute la place. Trouvé le 2026-08-16 en ajoutant une requête de conteneur aux boutons de
+  vote - le palier au-delà de 760 pixels repassait en deux plus un. Parade : donner une largeur
+  minimale explicite, scopée au seul palier concerné.
+- **La forme courte `@php(...)` casse la compilation Blade** dans ce projet (erreur de syntaxe,
+  page 500). Utiliser systématiquement la forme bloc `@php ... @endphp`.
 - **Le texte alternatif décrit l'image**, il ne contient pas de mots-clés - le bourrage dégrade
   l'accessibilité sans bénéfice.
 

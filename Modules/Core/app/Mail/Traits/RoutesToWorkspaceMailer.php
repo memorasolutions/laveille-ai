@@ -43,6 +43,7 @@ namespace Modules\Core\Mail\Traits;
  *   - Modules\Booking\Mail\BookingCancellation
  *   - Modules\Booking\Mail\BookingConfirmation
  *   - Modules\Booking\Mail\BookingReminder
+ *   - Modules\Decido\Mail\PollActivityDigestMail
  *   - Modules\Decido\Mail\PollExpiringSoonMail
  *   - Modules\Directory\Mail\HealthCheckReportMail
  *   - Modules\Notifications\Mail\DigestMail

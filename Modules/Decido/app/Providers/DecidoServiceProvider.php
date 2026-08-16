@@ -56,6 +56,9 @@ class DecidoServiceProvider extends ServiceProvider
         $this->commands([
             \Modules\Decido\Console\PurgeExpiredPollsCommand::class,
             \Modules\Decido\Console\WarnExpiringPollsCommand::class,
+            // LOT 5 (docs/specs/2026-08-16-decido-reste-a-faire.md) : résumé quotidien groupé de
+            // l'activité (votes/déclins/commentaires) aux créateurs de sondages.
+            \Modules\Decido\Console\NotifyPollActivityCommand::class,
         ]);
     }
 

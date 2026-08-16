@@ -551,6 +551,36 @@ class PollManageController extends Controller
         ])->with('success', 'Nombre de participants attendus mis à jour.');
     }
 
+    /**
+     * LOT 5 (docs/specs/2026-08-16-decido-reste-a-faire.md) : interrupteur PAR SONDAGE (pas un
+     * réglage global de compte) du résumé quotidien d'activité (decido:notify-poll-activity).
+     * Un simple booléen - aucun seuil à configurer, voir NotifyPollActivityCommand pour la
+     * justification du regroupement quotidien retenu à la place d'un seuil déclaré.
+     */
+    public function updateActivityNotifications(Request $request, string $poll, string $adminToken): RedirectResponse
+    {
+        $pollModel = Poll::findByShareIdentifier($poll);
+        if (! $pollModel) {
+            abort(404);
+        }
+
+        $this->authorizeManage($pollModel, $adminToken);
+
+        $validated = $request->validate([
+            'activity_notifications_enabled' => ['required', 'boolean'],
+        ]);
+
+        $pollModel->activity_notifications_enabled = $validated['activity_notifications_enabled'];
+        $pollModel->save();
+
+        return Redirect::route('decido.manage', [
+            'poll' => $pollModel->public_id,
+            'adminToken' => $adminToken,
+        ])->with('success', $pollModel->activity_notifications_enabled
+            ? 'Résumés d\'activité réactivés pour ce sondage.'
+            : 'Résumés d\'activité désactivés pour ce sondage.');
+    }
+
     public function exportCsv(Request $request, string $poll, string $adminToken): \Symfony\Component\HttpFoundation\Response
     {
         $pollModel = Poll::findByShareIdentifier($poll);

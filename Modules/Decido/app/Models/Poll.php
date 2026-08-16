@@ -42,6 +42,8 @@ class Poll extends Model
         'expiry_warned_at',
         'extension_count',
         'expected_participants',
+        'activity_notifications_enabled',
+        'activity_notified_at',
         'admin_token_hash',
         'custom_slug',
         'short_url_id',
@@ -56,6 +58,8 @@ class Poll extends Model
         'expiry_warned_at' => 'datetime',
         'extension_count' => 'integer',
         'expected_participants' => 'integer',
+        'activity_notifications_enabled' => 'boolean',
+        'activity_notified_at' => 'datetime',
     ];
 
     protected $hidden = [
@@ -93,6 +97,35 @@ class Poll extends Model
         return PollVote::whereIn('option_id', $this->options()->pluck('id'))
             ->distinct('voter_token')
             ->count('voter_token');
+    }
+
+    /**
+     * LOT 5 (docs/specs/2026-08-16-decido-reste-a-faire.md) : compte l'activité NOUVELLE
+     * (votants DISTINCTS, déclins, commentaires) survenue depuis un horodatage donné - base du
+     * regroupement quotidien de NotifyPollActivityCommand. Comparaison sur `updated_at` (jamais
+     * `created_at` seul) : un votant qui modifie sa réponse plusieurs fois ne doit être compté
+     * qu'UNE fois (distinct('voter_token'), même garde que responseCount() ci-dessus) mais son
+     * changement doit rester visible au prochain résumé - c'est le mécanisme même qui empêche un
+     * courriel par vote tout en ne perdant aucune activité réelle.
+     *
+     * @return array{voters: int, declines: int, comments: int}
+     */
+    public function newActivitySince(\Carbon\CarbonInterface $since): array
+    {
+        $optionIds = $this->options()->pluck('id');
+
+        return [
+            'voters' => PollVote::whereIn('option_id', $optionIds)
+                ->where('updated_at', '>', $since)
+                ->distinct('voter_token')
+                ->count('voter_token'),
+            'declines' => PollDecline::where('poll_id', $this->id)
+                ->where('updated_at', '>', $since)
+                ->count(),
+            'comments' => PollComment::where('poll_id', $this->id)
+                ->where('updated_at', '>', $since)
+                ->count(),
+        ];
     }
 
     public function creator(): BelongsTo

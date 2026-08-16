@@ -1,0 +1,369 @@
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project laveille.ai
+ *
+ * ACTION: Styles de la page de vote publique Décido (Modules/Decido/resources/views/public/
+ *         vote.blade.php) - extraits À L'IDENTIQUE du bloc <style> inline de cette vue
+ *         (docs/specs/2026-08-16-decido-reste-a-faire.md, LOT 4, point 8), aucune valeur changée.
+ * RAISON: ~200 lignes de CSS ne devaient pas rester embarquées dans la vue - feuille dédiée,
+ *         chargée UNIQUEMENT sur cette page (voir @push('styles') dans vote.blade.php), jamais
+ *         sur tout le site.
+ *
+ * PRUDENCE (ne pas modifier sans mesurer à nouveau) : ce fichier porte des mécanismes fragiles -
+ *   - deux niveaux de requêtes de conteneur imbriqués (container-type: inline-size sur
+ *     .decido-slot ET sur .decido-slot-zone-summary) ;
+ *   - des sélecteurs :has(input:checked) qui portent le retour visuel de sélection ;
+ *   - trois paliers de disposition calibrés sur des largeurs MESURÉES (< 480px, 480-760px,
+ *     >= 760px) ;
+ *   - une largeur minimale de 235px garantie à la colonne des boutons, et de 280px à celle des
+ *     pastilles - sans elles, "Non" et "0 non" retombent seuls à la ligne.
+ * Voir les commentaires détaillés conservés ci-dessous, à côté de chaque règle qu'ils expliquent.
+ */
+
+.decido-vote-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.4rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 999px;
+    cursor: pointer;
+}
+.decido-vote-pill:has(input:checked) {
+    border-color: var(--c-primary, #064E5A);
+    background-color: var(--c-primary-light, #F0FAFB);
+    font-weight: 600;
+}
+.decido-vote-options { display: flex; flex-direction: column; gap: 0.5rem; }
+.decido-vote-option {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    cursor: pointer;
+}
+.decido-vote-option:has(input:checked) {
+    border-color: var(--c-primary, #064E5A);
+    border-width: 2px;
+    background-color: var(--c-primary-light, #F0FAFB);
+}
+.decido-vote-pill:has(input:focus-visible),
+.decido-vote-option:has(input:focus-visible) {
+    outline: 3px solid var(--c-primary, #064E5A);
+    outline-offset: 2px;
+}
+/* Point 3 (rapport 2026-08-16) : le visuel (bordure, couleur, fond, survol,
+   focus) de ce bouton reimplementait presque trait pour trait .ct-btn-outline
+   de public/css/charte.css - remplacé par cette classe existante (voir
+   l'attribut class="ct-btn ct-btn-outline decido-tz-toggle-btn" dans la vue).
+   .decido-tz-toggle-btn ne sert plus qu'à garantir la cible tactile AAA 44px
+   (2.5.5), que .ct-btn/.ct-btn-outline n'imposent pas par défaut (seuls
+   .ct-btn-accent et .ct-btn-icon le font dans charte.css) - la seule règle non
+   déjà couverte par la classe réutilisée. */
+.decido-tz-toggle-btn {
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 0.9rem;
+}
+.decido-slot-secondary { margin-top: -0.5rem; }
+
+/* Priorité 1 (docs/specs/2026-08-15-decido-page-vote-design.md), CORRIGÉ le
+   16 août (reproche propriétaire : la page ne respecte pas la mise en page
+   du site) : réduire la bannière à TOUS les paliers était une SUR-CORRECTION.
+   Le problème mesuré le 15 août (zéro créneau visible au 1er écran, popup
+   infolettre compris) n'existait que sur téléphone - sur grand écran, deux
+   créneaux étaient déjà visibles avec la bannière standard. Seul le palier
+   mobile (max-width: 767px, MÊME seuil que le thème utilise pour sa propre
+   media query .wpo-breadcumb-area, voir _page-title.scss) reste réduit ; à
+   768px et plus, plus AUCUNE règle de ce fichier ne touche min-height/padding
+   - la bannière retombe simplement sur le style standard du site (vérifié
+   IDENTIQUE, 250px mesurés par Playwright à 1440px, sur /decido/{slug} ET sur
+   /outils - la valeur 400px documentée dans _page-title.scss ne correspond
+   PAS à ce que public/themes/bloggar/sass/style.css sert réellement, ce
+   fichier compilé n'a d'ailleurs aucune media query sur cette règle). Le h2
+   (titre dupliqué avec le h1 juste en dessous) reste masqué à TOUS les
+   paliers - il est vide dans tous les cas ($breadcrumbTitle non transmis, voir
+   breadcrumb.blade.php), orthogonal au problème de hauteur ci-dessus. */
+@media (max-width: 767px) {
+    .decido-vote-hero .wpo-breadcumb-area {
+        min-height: auto;
+        padding: 0.85rem 0;
+    }
+}
+.decido-vote-hero .wpo-breadcumb-wrap h2 {
+    display: none;
+}
+.decido-vote-hero .wpo-breadcumb-wrap ul {
+    margin: 0;
+}
+
+/* Priorité 2 : regroupement visuel par journée - en-tête fort + séparateur net
+   entre journées. Reste sobre même quand une journée n'a qu'un seul créneau
+   (4 journées sur 6 dans le relevé du 15 août) : pas de bouton d'action par
+   journée (tué par le panel, voir section 2 du plan - ils ne groupent rien
+   quand il n'y a qu'une ligne à grouper). */
+.decido-day-heading {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--c-primary, #064E5A);
+    margin: 0 0 0.75rem;
+}
+.decido-day-group + .decido-day-group {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 2px solid #E5E7EB;
+}
+
+/* Priorité 3 : totaux par créneau (jamais les noms). Styles du badge
+   lui-même migrés vers .ct-badge-status (public/css/charte.css, Point 3
+   du rapport 2026-08-16) - plus rien à redéfinir ici. */
+
+/* Complément responsive (2026-08-16, constat propriétaire + point de rupture
+   basé sur le CONTENU, pas un gabarit d'appareil) : chaque carte .decido-slot
+   mesure SA PROPRE largeur rendue via une container query CSS plutôt qu'un
+   media query lié au viewport. Raison : à cause de col-lg-9 (Bootstrap), la
+   largeur réelle de la carte n'est PAS monotone avec la largeur d'écran - elle
+   vaut ~720px de 768px à 1199px de viewport (le conteneur .container passe à
+   720px fixe à 768px, puis col-lg-9 la ramène au même ~720px à 992px), donc un
+   media query calé sur une largeur d'écran aurait pu mal cibler la vraie zone
+   à l'étroit. La container query s'ajuste à la largeur RÉELLE de la carte,
+   qu'elle soit dans cette page (col-lg-9) ou réutilisée ailleurs plus tard.
+
+   3 paliers, choisis par mesure visuelle réelle (Playwright, cette carte) :
+   - < 480px (conteneur de carte) : une seule colonne (heure, boutons, résumé
+     empilés) - en dessous, boutons ("Peut-être" ~110-130px à lui seul) et
+     résumé (titre "Réponses déjà reçues" ~150-170px) ne tiennent plus côte à
+     côte sans se resserrer excessivement.
+   - 480px à 759px (le vrai "entre-deux" signalé, ex. carte ~540-720px comme au
+     palier Bootstrap 576-767px où le conteneur est fixé à 540px) : heure sur sa
+     propre ligne pleine largeur (elle est le texte le plus imprévisible en
+     longueur - créneaux "sans-date" ou libellé complet avec suffixe DST), puis
+     boutons + résumé se partagent la ligne suivante (boutons à gauche, résumé à
+     droite) - c'est la largeur où les 3 zones AU COMPLET sur une seule ligne se
+     seraient serrées, mais où 2 zones tiennent confortablement.
+   - >= 760px : les 3 zones sur une seule ligne (heure | boutons au centre |
+     résumé à droite), le layout "bureau" du brief.
+
+   RÈGLE D'ORDRE (non négociable, prime sur l'esthétique) : à AUCUN palier une
+   propriété `order` n'est utilisée, et le seul `grid-column` explicite sert à
+   faire OCCUPER PLUS DE PLACE à la zone heure (span pleine largeur au palier
+   intermédiaire), jamais à intervertir la position de deux zones. Le
+   placement des zones boutons/résumé reste TOUJOURS le placement automatique de
+   grille en ordre de document (1ère zone libre suivante), donc l'ordre visuel de
+   lecture (haut→bas puis gauche→droite) reste heure, boutons, résumé à CHAQUE
+   palier - identique à l'ordre HTML, y compris à 320px et à 200% de zoom (qui
+   revient à un conteneur de carte plus étroit, retombant simplement dans le
+   palier "une colonne" déjà validé). */
+.decido-slot {
+    container-type: inline-size;
+    container-name: decido-slot;
+    /* Point 2 (rapport 2026-08-16) : anti carte-dans-carte - la page est
+       maintenant enveloppée dans une carte unique (voir vote.blade.php). Les
+       mini-cartes Bootstrap .card par créneau perdent donc leur
+       bordure/ombre/coins arrondis au profit d'un simple séparateur
+       horizontal entre créneaux, plus léger visuellement dans ce contexte
+       imbriqué. Le regroupement par journée (.decido-day-group) garde son
+       propre séparateur (border-top) : les deux niveaux restent visuellement
+       distincts (trait fort entre journées, trait fin entre créneaux). */
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background-color: transparent;
+    border-bottom: 1px solid var(--sys-border-default, #E5E7EB);
+}
+.decido-slot:last-child {
+    border-bottom: none;
+}
+.decido-slot-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+/* Correction visuelle (2026-08-16, constat propriétaire sur capture prod) :
+   2 défauts corrigés ensemble ici, même cause racine que le fix historique des
+   pills de vote (qui avait dû garantir une largeur minimale à SA colonne pour
+   empêcher "Non" de retomber seul) - le problème s'était simplement déplacé
+   vers la colonne du résumé, jamais traité côté résumé :
+   1) Le titre ("Réponses") était text-align:right alors que les pastilles
+      (flex, alignées à gauche dans leur propre boîte) commençaient à gauche -
+      les deux n'avaient pas le même bord de référence, d'où le décalage visuel
+      constaté. text-align:left partout (aucune exception dans les container
+      queries plus bas) aligne désormais les deux sur le même bord.
+   2) À width=763px (mesuré Playwright, poll cyO3pTAxaAlT), la boîte .decido-
+      slot-zone-summary ne recevait que ~236.5px (justify-self:end la réduisait
+      au fit-content de son contenu, capé par l'espace de piste disponible),
+      alors que les 3 pastilles sur une seule ligne réclament ~237.6px (mesuré) -
+      1px d'écart suffisait à faire retomber "✕ 0 non" seul sur une 2e ligne.
+      Plutôt que chasser ce chiffre à chaque palier de container query (fragile
+      si le libellé "peut-être" change un jour, ou si les compteurs passent à 2
+      chiffres - mesuré ~262px dans ce cas), la boîte résumé devient elle-même un
+      conteneur (container-type: inline-size) : les pastilles s'affichent sur une
+      seule ligne UNIQUEMENT si leur propre boîte a réellement la place (>= 280px,
+      marge de sécurité au-delà des ~262px mesurés pour des compteurs à 2
+      chiffres), sinon elles s'empilent PROPREMENT en colonne (jamais 2 pastilles
+      sur une ligne puis 1 orpheline en dessous - le pire des deux mondes,
+      signalé par le propriétaire). Ce mécanisme s'applique à N'IMPORTE QUELLE
+      largeur de carte, pas seulement aux 3 paliers de .decido-slot ci-dessous -
+      condition nécessaire pour que la largeur de cette boîte reste déterministe
+      (justify-self reste au défaut "stretch" au palier 760px plus bas, jamais
+      "end" : une boîte en fit-content dont la taille dépendrait de son propre
+      contenu conditionné par une container query créerait une dépendance
+      circulaire que les navigateurs refusent de résoudre). */
+.decido-slot-zone-summary {
+    text-align: left;
+    container-type: inline-size;
+    container-name: decido-slot-summary;
+}
+.decido-slot-summary-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--c-primary, #064E5A);
+}
+.decido-slot-summary-empty {
+    font-style: italic;
+}
+.decido-slot-totals {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+}
+@container decido-slot-summary (min-width: 280px) {
+    .decido-slot-totals {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+}
+@container decido-slot (min-width: 480px) {
+    .decido-slot-layout {
+        display: grid;
+        /* 235px = mesure réelle (Playwright) des 3 pills "Oui"/"Peut-être"/"Non"
+           sur une seule ligne (~231px) + marge - une colonne 1fr/1fr stricte les
+           compressait sous ce seuil et forçait "Non" seul sur une 2e ligne au bas
+           de ce palier (~218px de colonne à 480px de carte, vérifié visuellement).
+           max-content borne la colonne à SA largeur naturelle si plus de place est
+           disponible, jamais au-delà. */
+        grid-template-columns: minmax(235px, max-content) 1fr;
+        align-items: center;
+        gap: 0.5rem 1rem;
+    }
+    /* Span pleine largeur = agrandissement de la zone, pas un réordonnancement :
+       la zone heure reste la 1ère affichée (ligne 1), boutons et résumé suivent
+       en ligne 2 par placement automatique dans l'ordre du document. */
+    .decido-slot-zone-time {
+        grid-column: 1 / -1;
+    }
+}
+@container decido-slot (min-width: 760px) {
+    .decido-slot-layout {
+        /* 1fr/1fr → max-content/1fr (2026-08-16) : la largeur RÉELLE de la carte
+           reste plafonnée à ~763px sur cette page quelle que soit la largeur
+           d'écran (col-lg-9 Bootstrap, voir le commentaire du complément
+           responsive plus haut). Avec deux pistes 1fr (heure ET résumé), l'espace
+           restant se partage à ÉGALITÉ entre elles peu importe leur minimum -
+           relever le seul minimum du résumé (190px → 230px) n'y changeait donc
+           RIEN, le résumé restait bloqué à ~236.5px, sous le seuil de 280px de la
+           container query decido-slot-summary ci-dessus (pastilles TOUJOURS
+           empilées, même quand 3 sur une ligne auraient largement tenu). La piste
+           heure n'a besoin que de son propre contenu (~140px mesuré pour un
+           libellé "H h MM - H h MM") - max-content la sort de la compétition 1fr,
+           laissant le résumé (SEULE piste flexible restante) absorber tout le
+           reste (333px mesuré sur cette carte), largement au-dessus du seuil. */
+        grid-template-columns: minmax(140px, max-content) auto minmax(230px, 1fr);
+    }
+    .decido-slot-zone-time {
+        grid-column: auto;
+    }
+    .decido-slot-zone-buttons {
+        justify-self: center;
+        /* Garde-fou ajouté avec le point 10 (boutons à 320px, voir plus bas) :
+           .decido-slot-zone-buttons porte maintenant sa propre container query
+           (container-type: inline-size), et Grid calcule la piste "auto"
+           ci-dessus à partir de la taille intrinsèque (max-content) de CET
+           élément. Un élément avec size containment (ce que container-type
+           implique) doit se comporter, pour le calcul de sizing de SES
+           ANCÊTRES, "comme s'il n'avait aucun contenu" - sans ce min-width
+           explicite, la piste "auto" s'effondrait à 0px (mesuré : bug réel
+           rencontré en validation visuelle Playwright à 1440px, les 3 boutons
+           retombaient empilés alors qu'il y avait toute la place). Un
+           min-width explicite remplace la contribution automatique
+           (content-based, cassée par la containment) par cette valeur fixe -
+           235px, la même mesure déjà établie ailleurs dans ce fichier pour ces
+           mêmes 3 boutons. Scopé à CE palier seulement (jamais en dehors) :
+           en dessous de 480px de carte, la boîte est en layout 1 colonne
+           (flex) et DOIT pouvoir descendre sous 235px sans déborder - un
+           min-width global aurait fait déborder la carte aux très petites
+           largeurs déjà corrigées par le point 10. */
+        min-width: 235px;
+    }
+    /* justify-self reste au défaut (stretch), jamais "end" - voir le
+       commentaire plus haut sur .decido-slot-zone-summary : "end" créait une
+       boîte en fit-content dont la largeur dépendait de son propre contenu, ce
+       qui cassait le calcul de la container query decido-slot-summary
+       ci-dessus (dépendance circulaire) et provoquait le décalage/retour à la
+       ligne constaté par le propriétaire. */
+}
+
+/* LOT 4, point 10 (docs/specs/2026-08-16-decido-reste-a-faire.md) : à 320px de
+   large (viewport), les 3 boutons de vote (Oui/Peut-être/Non) passaient sur
+   deux lignes - "Oui" + "Peut-être" sur la 1ère, "Non" seul orphelin sur la
+   2e. Défaut PRÉEXISTANT, jamais traité avant ce lot.
+
+   MESURE RÉELLE (Playwright, poll seed FWXWn818uiDb, viewport 320px) : la
+   boîte .decido-slot-zone-buttons (conteneur direct des pills, en layout
+   1 colonne car le conteneur .decido-slot ne mesure que 236px, sous le seuil
+   de 480px de la container query ci-dessus) ne reçoit que 206px de large.
+   Les 3 pills mesurés (54 + 95 + 58 = 207px) plus 2 espaces de 0.5rem (16px)
+   = 223px nécessaires sur une seule ligne - 17px d'écart, jamais comblable de
+   façon fiable en resserrant le padding des pills sans dépendre du rendu
+   exact de la police (fragile - même risque déjà écarté ailleurs dans ce
+   fichier pour les totaux). AUCUN nouveau seuil inventé : 235px est DÉJÀ la
+   largeur mesurée et validée ailleurs dans ce même fichier comme suffisante
+   pour ces 3 mêmes pills sur une seule ligne (voir le commentaire "235px =
+   mesure réelle" de la container query decido-slot à 480px ci-dessus) - donc
+   réutilisé tel quel comme seuil de la container query dédiée ci-dessous,
+   plutôt que d'en mesurer un autre pour le même contenu.
+
+   Approche "mobile-first" (même construction que .decido-slot-totals /
+   decido-slot-summary plus haut) : empilement PROPRE en colonne pleine
+   largeur PAR DÉFAUT (jamais 2 pills sur une ligne puis 1 orpheline), rangée
+   sur une seule ligne UNIQUEMENT quand .decido-slot-zone-buttons a
+   réellement 235px ou plus. Indépendant du palier viewport/carte : cette
+   boîte est elle-même transformée en conteneur de requête (container-type),
+   imbriqué dans le conteneur .decido-slot existant - safe, chaque
+   container-type supplémentaire ne fait qu'ajouter une nouvelle limite de
+   requête, sans changer la taille déjà déterminée par le flex/grid parent
+   (.decido-slot-layout), exactement comme .decido-slot-zone-summary
+   ci-dessus. Vérifié aux 3 paliers existants (avant/après identiques, voir
+   captures Playwright) : à >= 480px la piste de grille
+   "minmax(235px, max-content)" garantit déjà >= 235px, donc la requête
+   bascule immédiatement en ligne - aucune régression sur les paliers déjà
+   livrés. */
+.decido-slot-zone-buttons {
+    container-type: inline-size;
+    container-name: decido-slot-buttons;
+}
+.decido-vote-pills {
+    flex-direction: column;
+    align-items: stretch;
+}
+.decido-vote-pills .decido-vote-pill {
+    width: 100%;
+}
+@container decido-slot-buttons (min-width: 235px) {
+    .decido-vote-pills {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+    .decido-vote-pills .decido-vote-pill {
+        width: auto;
+    }
+}

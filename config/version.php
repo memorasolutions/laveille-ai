@@ -3775,10 +3775,35 @@ declare(strict_types=1);
  *     effacement total (modale du thème, jamais de fenêtre native), commentaires (test
  *     d'injection : adresse restée du texte, balises non exécutées), page « Mes sondages »,
  *     rendu à 375px. Blade compile sans erreur.
+ *   1.179.0 · 2026-08-16 · feat(decido) LOT 5 - résumé quotidien groupé de l'activité
+ *     (votes/déclins/commentaires) envoyé à l'organisateur d'un sondage, au plus UN courriel par
+ *     sondage par jour, silencieux s'il n'y a rien de nouveau depuis le dernier envoi. Deux
+ *     colonnes additives sur `decido_polls` (migration réversible, garde hasColumn) :
+ *     `activity_notifications_enabled` (interrupteur PAR SONDAGE, activé par défaut, jamais un
+ *     réglage global de compte) et `activity_notified_at` (curseur horodaté, réécrit à CHAQUE
+ *     envoi - contrairement à `expiry_warned_at` qui n'est écrit qu'une seule fois). Nouvelle
+ *     commande `decido:notify-poll-activity`, planifiée à 7h00, calquée sur
+ *     `decido:warn-expiring-polls` (même garde d'idempotence) ; mailable `PollActivityDigestMail`
+ *     routé par le mailer transactionnel Workspace (jamais Brevo, voir
+ *     RoutesToWorkspaceMailer::class). Interrupteur exposé sur la page de gestion. LOT 4 - dette
+ *     technique : les ~200 lignes de CSS de la page de vote publique sorties vers
+ *     `public/assets/tools/decido/vote.css` (chargée uniquement sur cette page, cache-bust par
+ *     semver, motif déjà utilisé par anon-v2.css) ; le script du popup d'infolettre est désormais
+ *     conditionnel via une variable calculée UNE seule fois ($showNewsletterScrollTrigger), plus
+ *     de duplication de la condition entre l'inclusion du partial et la balise `<script>` ; les
+ *     boutons de vote à 320px s'empilent désormais proprement en colonne au lieu de deux plus un
+ *     orphelin (piège trouvé : `container-type: inline-size` sur un élément de grille dont la
+ *     piste est `auto` effondre sa largeur au calcul de la piste, documenté dans
+ *     docs/CONTRAINTES-SOUS-AGENTS.md) ; garde ajoutée contre un `format()` sur `starts_at` null
+ *     pour un créneau de type « date » sur la page de résultats de gestion (non atteignable par
+ *     le parcours normal, mais 500 fatale sinon - repli sur le label). 136 tests du module Décido
+ *     (552 assertions), aucun échec (124 avant). Validation visuelle du lot 4 en navigateur à
+ *     320/600/1440px : trois boutons empilés proprement à 320px, paliers supérieurs identiques au
+ *     design livré.
  */
 
 $lvMajor = 1;
-$lvMinor = 178;
+$lvMinor = 179;
 $lvPatch = 0;
 
 return [

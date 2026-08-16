@@ -48,6 +48,29 @@
                     @enderror
                 </div>
 
+                {{-- LOT 5 (docs/specs/2026-08-16-decido-reste-a-faire.md) : interrupteur PAR
+                     SONDAGE (jamais un réglage global - deux sondages du même créateur peuvent
+                     avoir des enjeux très différents) du résumé quotidien d'activité. Activé par
+                     défaut ; le résumé lui-même ne part JAMAIS s'il n'y a rien de nouveau depuis
+                     le dernier envoi, voir NotifyPollActivityCommand. --}}
+                <div class="mb-4 p-3 border rounded">
+                    <h2 class="h6 mb-2">Résumés d'activité par courriel</h2>
+                    <p class="text-muted small mb-2">
+                        @if($poll->activity_notifications_enabled)
+                            Un résumé t'est envoyé une fois par jour, au maximum, quand ce sondage reçoit de nouvelles réponses (jamais un courriel par vote individuel).
+                        @else
+                            Les résumés d'activité sont désactivés pour ce sondage : tu ne seras averti d'aucune nouvelle réponse par courriel.
+                        @endif
+                    </p>
+                    <form method="POST" action="{{ route('decido.notifications', ['poll' => $poll->public_id, 'adminToken' => $adminToken]) }}">
+                        @csrf
+                        <input type="hidden" name="activity_notifications_enabled" value="{{ $poll->activity_notifications_enabled ? '0' : '1' }}">
+                        <button type="submit" class="ct-btn ct-btn-outline ct-btn-sm" style="min-height:44px;">
+                            {{ $poll->activity_notifications_enabled ? 'Désactiver les résumés' : 'Activer les résumés' }}
+                        </button>
+                    </form>
+                </div>
+
                 @if(session('admin_token_plain'))
                     @php
                         $adminUrl = route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => session('admin_token_plain')]);
@@ -269,7 +292,14 @@
                                             <th scope="col" style="position: sticky; left: 0; background: #fff; z-index: 2;">Participant</th>
                                             @foreach($groupedByDay as $dayOptions)
                                                 @foreach($dayOptions as $option)
-                                                    <th scope="col" class="text-center small">{{ \Carbon\Carbon::parse($option->starts_at->format('Y-m-d H:i:s'), 'UTC')->timezone($poll->timezone)->isoFormat('H[h]mm') }}</th>
+                                                    {{-- Garde trouvée en validation visuelle (docs/specs/2026-08-16-decido-reste-a-faire.md,
+                                                         section "garde manquante") : $option->starts_at peut être null pour un créneau de type
+                                                         "date" (aucune garde dans le code existant, alors que la ligne 107-108 juste au-dessus
+                                                         groupe déjà ces options sous une clé null - $groupedByDay peut donc contenir un groupe
+                                                         d'options sans starts_at). Non atteignable par le parcours normal (le formulaire de
+                                                         création force toujours une date de début), mais ->format() sur null provoquait une
+                                                         erreur 500 fatale. Repli sur $option->label (même convention que la ligne 108). --}}
+                                                    <th scope="col" class="text-center small">{{ $option->starts_at ? \Carbon\Carbon::parse($option->starts_at->format('Y-m-d H:i:s'), 'UTC')->timezone($poll->timezone)->isoFormat('H[h]mm') : $option->label }}</th>
                                                 @endforeach
                                             @endforeach
                                         </tr>
