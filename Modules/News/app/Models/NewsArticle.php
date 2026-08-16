@@ -32,6 +32,13 @@ class NewsArticle extends Model implements Searchable
     // une table que personne ne surveille. Cette étape doit précéder la purge de la colonne.
     // MCP: SELF (<5 lignes)
     // RAISON: étape 4 de la procédure de purge, bloquante avant les étapes 5 et 6.
+    // ACTION : 'internal_source_text' (écran de composition, design doc "Actus - composition
+    // manuelle assistée" 2026-08-15, section 5.2) est VOLONTAIREMENT absent de ce tableau, pour
+    // la même raison que 'description' ci-dessus : logger ce champ recopierait le texte source
+    // intégral dans activity_log à chaque sauvegarde ou suppression, recréant l'incident que la
+    // purge de 'description' a corrigé - dans une table que personne ne surveille.
+    // MCP: SELF (<5 lignes)
+    // RAISON: garde-fou zéro-copie, cohérent avec l'exclusion déjà en place pour 'description'.
     protected array $activitylogFields = ['title', 'seo_title', 'summary', 'is_published', 'relevance_score'];
     protected string $activitylogName = 'news_article';
 
@@ -48,6 +55,15 @@ class NewsArticle extends Model implements Searchable
         'seo_status', // index | noindex | gone - élagage SEO réversible des vieilles news peu vues
         'linkedin_shared_at', 'facebook_shared_at', // tracking "déjà publié" (admin, point rouge)
         'is_comparative_digest', // Actus 2.0 : fiche comparative issue de la fusion multi-sources
+        // ACTION : écran de composition (design doc "Actus - composition manuelle assistée"
+        // 2026-08-15, section 5.2) - texte source collé par l'admin, back-office UNIQUEMENT.
+        // Jamais lu par NewsArticle::searchableFields(), jamais par les cascades d'affichage
+        // (displayExcerpt/structuredBodyText), jamais par JsonLdService - voir
+        // Modules\News\Http\Controllers\Admin\NewsCompositionController pour le seul point
+        // d'écriture/lecture admin.
+        // MCP: SELF (<5 lignes)
+        // RAISON: emplacement distinct explicite exigé (ne PAS réutiliser 'description', purgée).
+        'internal_source_text',
     ];
 
     protected $casts = [

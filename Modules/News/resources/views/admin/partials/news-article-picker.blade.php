@@ -85,7 +85,10 @@
         </template>
         <div class="cb-empty" x-show="filteredAvailable.length === 0 && !loading.news" x-cloak>
             <template x-if="newsItems.length === 0">
-                <span>Aucune actualité publiée cette semaine.</span>
+                {{-- Texte d'état vide paramétrable : le libellé hebdomadaire par défaut convient au
+                     Concentré et à l'Objectif vidéo, mais l'écran de composition n'a AUCUN filtre
+                     de semaine (200 dernières collectées, toutes dates) - il passe le sien. --}}
+                <span>{{ $emptyStateText ?? 'Aucune actualité publiée cette semaine.' }}</span>
             </template>
             <template x-if="newsItems.length > 0 && availableItems.length === 0">
                 <span>Toutes les actualités sont déjà sélectionnées.</span>

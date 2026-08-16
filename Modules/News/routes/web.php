@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Core\Http\Middleware\EnsureIsAdmin;
 use Modules\Core\Http\Middleware\SetBackofficeTheme;
 use Modules\News\Http\Controllers\Admin\ConcentreBuilderController;
+use Modules\News\Http\Controllers\Admin\NewsCompositionController;
 use Modules\News\Http\Controllers\Admin\VideoGoalBuilderController;
 use Modules\News\Http\Controllers\AdminNewsController;
 use Modules\News\Http\Controllers\NewsSitemapController;
@@ -74,6 +75,21 @@ Route::prefix('admin/concentre-builder')
         Route::post('/generate', [ConcentreBuilderController::class, 'generate'])->name('generate');
         Route::post('/upload-image', [ConcentreBuilderController::class, 'uploadImage'])->name('upload-image')->middleware('throttle:10,1');
         Route::get('/runs/{id}', [ConcentreBuilderController::class, 'showRun'])->name('runs.show');
+    });
+
+// ── Écran de composition manuelle (admin, Phase A - design doc 2026-08-15) ──
+// Mêmes droits que le Concentré (EnsureIsAdmin = permission 'view_admin_panel', pas de
+// restriction superadmin) : c'est un outil éditorial courant, pas une fonctionnalité sensible
+// réservée comme le générateur d'objectif vidéo ci-dessous.
+Route::prefix('admin/news/composition')
+    ->name('admin.news.composition.')
+    ->middleware(['web', 'auth', 'two.factor', EnsureIsAdmin::class, SetBackofficeTheme::class])
+    ->group(function () {
+        Route::get('/', [NewsCompositionController::class, 'index'])->name('index');
+        Route::get('/candidates', [NewsCompositionController::class, 'candidates'])->name('candidates');
+        Route::get('/{article}', [NewsCompositionController::class, 'show'])->name('show');
+        Route::put('/{article}', [NewsCompositionController::class, 'update'])->name('update');
+        Route::delete('/{article}/source-text', [NewsCompositionController::class, 'destroySourceText'])->name('destroy-source-text');
     });
 
 // ── Générateur d'objectif vidéo (admin, superadmin uniquement) ──

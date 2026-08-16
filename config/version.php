@@ -3800,10 +3800,23 @@ declare(strict_types=1);
  *     (552 assertions), aucun échec (124 avant). Validation visuelle du lot 4 en navigateur à
  *     320/600/1440px : trois boutons empilés proprement à 320px, paliers supérieurs identiques au
  *     design livré.
+ *   1.180.0 · 2026-08-16 · feat(news) écran d'administration de composition manuelle
+ *     d'une actualité : sélection d'UNE actualité collectée via le composant partagé du
+ *     Concentré (réutilisé, pas réécrit ; un seul élément sélectionnable), composition du
+ *     titre et du résumé, et collage du texte complet de la source dans un champ dédié.
+ *     Ce texte est stocké dans une colonne interne `internal_source_text` (distincte de
+ *     l'ancien champ `description`), JAMAIS exposée côté public, et supprimable à tout
+ *     moment par l'administrateur via la modale du thème. Texte d'état vide du composant
+ *     partagé désormais paramétrable (le libellé hebdomadaire par défaut reste inchangé
+ *     pour le Concentré et l'Objectif vidéo). Une migration additive, réversible (garde
+ *     hasColumn dans les deux sens). 217 tests du module News (572 assertions), aucun
+ *     échec (204 avant ce lot). Validation visuelle complète, dont un test de non-fuite :
+ *     marqueur distinctif collé dans le texte source, fiche publiée temporairement en
+ *     local, zéro occurrence du marqueur dans le HTML servi ni dans le DOM rendu.
  */
 
 $lvMajor = 1;
-$lvMinor = 179;
+$lvMinor = 180;
 $lvPatch = 0;
 
 return [

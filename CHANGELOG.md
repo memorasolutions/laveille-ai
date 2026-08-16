@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.180.0] - 2026-08-16
+
+### Ajouté
+- **Actus 2.0 phase A - écran de composition manuelle.** Nouvel écran d'administration (module News) où l'on sélectionne UNE actualité collectée via le composant partagé du Concentré (réutilisé, pas réécrit - un seul élément sélectionnable), compose le titre et le résumé, et colle le texte complet de la source dans un champ dédié. Ce texte est stocké dans une colonne interne `internal_source_text` (distincte de l'ancien champ `description`), JAMAIS exposée côté public, et supprimable à tout moment par l'administrateur via la modale du thème. Le texte d'état vide du composant partagé est désormais paramétrable (le libellé hebdomadaire par défaut reste inchangé pour le Concentré et l'Objectif vidéo). Une migration additive, réversible (garde `hasColumn` dans les deux sens).
+
+### Vérifié
+- Deux cent dix-sept tests du module News (cinq cent soixante-douze assertions), aucun échec (deux cent quatre avant ce lot).
+- Validation visuelle complète en navigateur, dont le test de non-fuite : marqueur distinctif collé dans le texte source, fiche publiée temporairement en local, zéro occurrence du marqueur dans les neuf cent quarante-deux kilooctets de HTML réellement servi ni dans le DOM rendu. Suppression vérifiée jusqu'en base (colonne NULL après confirmation par la modale du thème).
+- `php -l` propre sur tous les fichiers touchés.
+
 ## [1.179.0] - 2026-08-16
 
 ### Ajouté
