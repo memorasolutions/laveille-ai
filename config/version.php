@@ -3895,10 +3895,19 @@ declare(strict_types=1);
  *     news:apply ; prompt v2026-08-17.3 en 7 étapes (verdict de divergence, révision enrichie
  *     avec reconstitution aveugle et porte RESTER EN BROUILLON, photo libre de droits créditée
  *     après texte figé - garde PicRights). Preuve : 313 tests News, 0 échec.
+ *
+ * 1.186.0 (2026-08-17) - feat(news) : volet serveur du flux /actu2 - commandes news:brief (JSON
+ *     canonique, point d'entrée du skill) et news:source (récolte de l'ORIGINAL par le fetcher
+ *     borné, --replace obligatoire pour écraser, refus si publiée) ; champs nature_original,
+ *     niveau_preuve (badge public traduit) et original_post (citation statique de post X, jamais
+ *     le widget de pistage) ; liste blanche news:apply étendue ; bouton « Copier le prompt
+ *     /actu2 » côté client (id toujours fourni par l'écran). Skill orchestrateur complet dans
+ *     ~/.claude/skills/actu2/ (9 étapes, états persistés, titre décidé par le skill, AEO prouvé
+ *     seulement). Preuve : suite complète News verte (5 nouveaux fichiers de tests).
  */
 
 $lvMajor = 1;
-$lvMinor = 185;
+$lvMinor = 186;
 $lvPatch = 0;
 
 return [

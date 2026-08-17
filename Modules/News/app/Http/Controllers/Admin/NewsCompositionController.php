@@ -239,8 +239,13 @@ class NewsCompositionController extends Controller
      * seule règle de provenance, deux points d'entrée. Un vidage manuel du champ laisse ces deux
      * valeurs INTACTES, exactement comme la suppression dédiée destroySourceText() - même
      * garde-fou "survit à la suppression" (5.2), quel que soit le chemin emprunté.
-     * MCP: SELF (<5 lignes)
-     * RAISON: preuve durable qui rend le texte intégral supprimable sans perte.
+     *
+     * ACTION : implémentation /actu2 (2026-08-17) - le calcul lui-même est désormais DÉLÉGUÉ à
+     * NewsArticle::sourceProvenanceUpdates(), extraite pour être réutilisée SANS DUPLICATION par
+     * Modules\News\Console\NewsSourceCommand (porte serveur du skill /actu2). Cette méthode reste
+     * ici uniquement pour son rôle de garde d'entrée (champ absent ou vide → aucun calcul).
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: DRY explicite, une seule implémentation de la provenance à travers le code.
      */
     private function applySourceProvenance(array &$fields, NewsArticle $article): void
     {
@@ -248,11 +253,7 @@ class NewsCompositionController extends Controller
             return;
         }
 
-        $hash = hash('sha256', $fields['internal_source_text']);
-        if ($hash !== $article->source_content_hash) {
-            $fields['source_content_hash'] = $hash;
-            $fields['source_captured_at'] = now('America/Toronto');
-        }
+        $fields = array_merge($fields, $article->sourceProvenanceUpdates($fields['internal_source_text']));
     }
 
     /**

@@ -545,3 +545,121 @@ retenue : la fiche telle qu'appliquée est affichée intégralement dans le rapp
 propriétaire, AVANT l'appel à `--publish` dans ce même rapport - l'inspection réelle porte donc sur
 du contenu déjà visible, même si le geste de publication précède sa lecture effective par le
 propriétaire.
+
+## Implémentation /actu2 - volet serveur (2026-08-17)
+
+**Contexte** : un skill Claude Code LOCAL (`/actu2 <url> fiche:<id>`) orchestre désormais la
+composition d'une fiche à partir d'UN LIEN plutôt qu'à partir de matière déjà collée dans l'écran
+(retrouve l'original, récolte, rédige, prouve, révise, illustre, publie). Les règles VÉRIFIABLES
+restent serveur, exactement comme le reste de ce design doc - le skill n'écrit jamais librement en
+base, il ne peut appliquer son travail que par les portes bornées ci-dessous. Cette section fige
+les contrats exacts que le skill consomme.
+
+### Colonnes ajoutées (migration additive réversible)
+
+Migration `2026_08_17_190000_add_actu2_orchestration_fields_to_news_articles.php`, garde
+`hasColumn()` dans les deux sens comme toutes les migrations précédentes de ce design doc, sur
+`news_articles` :
+
+- `nature_original` (string, nullable) - classification INTERNE de la nature de l'original
+  retrouvé : `annonce_commerciale`, `etude_evaluee`, `preimpression`, `message_personnel`. Jamais
+  affiché tel quel sur la fiche publique.
+- `niveau_preuve` (string, nullable) - `primaire` | `mixte` | `relais`. PUBLIC, mais toujours
+  traduit en français courant côté fiche (badge sobre près de la section « Sources »), jamais
+  l'étiquette technique brute : « Fondée sur la source originale » / « Sources originale et
+  média » / « D'après un média relais ».
+- `original_post` (JSON, nullable) - `{text, author?, handle?, date?, url?}`, citation STATIQUE
+  d'un post X quand l'ORIGINAL est lui-même un post. PUBLIC, affichée après le résumé
+  (`show.blade.php`, classes `nw-post-quote*`) - JAMAIS le widget `platform.x.com` (script tiers
+  interdit : pistage, CSP, fragilité).
+
+Seul écrivain des trois : `NewsApplyCommand` (`--payload`), même porte bornée que les champs de
+composition existants - aucune dérogation.
+
+### `news:brief {article}` - point d'entrée du skill, LECTURE SEULE
+
+`Modules\News\Console\NewsBriefCommand`. N'écrit RIEN (aucun `update()`). Sort un JSON canonique
+sur stdout :
+
+```json
+{
+  "id": 123,
+  "slug": "titre-de-la-fiche",
+  "title": "Titre de collecte (RSS)",
+  "url": "https://exemple.com/article-collecte",
+  "resolved_url": "https://exemple.com/article-collecte-resolue",
+  "is_published": false,
+  "source_content_hash": "sha256...ou null",
+  "source_captured_at": "2026-08-17T10:00:00-04:00 (ISO 8601, ou null)",
+  "updated_at": "2026-08-17T10:05:00-04:00 (ISO 8601)",
+  "primary_sources": [{"label": "...", "url": "...", "note": null}],
+  "nature_original": "etude_evaluee (ou null)",
+  "niveau_preuve": "primaire (ou null)",
+  "has_image": false,
+  "policy_version": "valeur courante de CompositionPromptBuilder::PROMPT_TEMPLATE_VERSION",
+  "site_url": "https://laveille.ai/actualites/titre-de-la-fiche"
+}
+```
+
+Fiche introuvable → code de sortie non nul, message d'erreur sur `error()` (jamais de JSON
+partiel). `policy_version` permet au skill de détecter un désalignement avec les règles
+d'orchestration en vigueur avant de composer.
+
+### `news:source {article} {url} [--replace]` - récolte de l'ORIGINAL
+
+`Modules\News\Console\NewsSourceCommand`. Deuxième porte d'écriture bornée, aux côtés de
+`NewsApplyCommand` - n'écrit QUE `internal_source_text`, `source_acquisition` et la provenance
+dérivée (`source_content_hash`/`source_captured_at`, via `NewsArticle::sourceProvenanceUpdates()`,
+extraite de l'ancien code privé du contrôleur pour ce mandat - DRY strict, aucune duplication).
+Réutilise ENTIÈREMENT `SourceMarkdownFetcher::fetch()` (même garde SSRF, même refus de paywall,
+même repli Puppeteer que l'écran de composition).
+
+`{url}` est l'URL de l'ORIGINAL trouvé par le skill - pas nécessairement l'URL déjà collectée par
+le flux RSS (le skill peut avoir remonté jusqu'au communiqué, au post X ou à l'étude source).
+
+Garde-fous, dans l'ordre : refuse sur une fiche déjà publiée (même message que
+`NewsApplyCommand`) ; refuse d'écraser un texte source déjà présent sans `--replace` explicite
+(même règle que `NewsCompositionController::fetchSource()`) ; sur échec de la récupération, ne
+persiste rien. Journalise sur le canal `composition`.
+
+Sortie JSON sur succès (le skill recopie ces deux valeurs telles quelles dans son payload
+`news:apply`, comme `expected_source_hash`/`expected_updated_at`) :
+
+```json
+{"success": true, "article_id": 123, "source_content_hash": "sha256...", "updated_at": "2026-08-17T10:06:00-04:00"}
+```
+
+### `news:apply --payload=` - clés de contenu ajoutées
+
+Trois clés rejoignent la liste blanche stricte de `NewsApplyCommand::ALLOWED_PAYLOAD_KEYS`, mêmes
+garde-fous de validation que les clés existantes (refus explicite, jamais un enregistrement
+partiel) :
+
+- `nature_original` (string) - une des quatre valeurs ci-dessus, sinon refus.
+- `niveau_preuve` (string) - une des trois valeurs ci-dessus, sinon refus.
+- `original_post` (objet) - `text` obligatoire (chaîne non vide, max 1000 caractères) ; `author`,
+  `handle`, `date` optionnels (chaînes) ; `url` optionnelle mais doit être une URL http/https
+  valide si fournie ; toute clé hors de cette liste fait refuser tout le payload.
+
+Comme les autres clés de contenu, `nature_original`/`niveau_preuve`/`original_post` REMPLACENT
+intégralement la valeur existante à chaque application (aucune accumulation, contrairement à
+`editorial_proof_pairs`) et SURVIVENT à `publishAndPurgeSource()` - même garde-fou que
+`primary_sources`/`image_credit`.
+
+### Écran de composition - bouton principal remplacé
+
+Le bouton « Enregistrer et générer le prompt Claude Code » devient « 📋 Copier le prompt /actu2 » :
+construit CÔTÉ CLIENT (aucun appel serveur) le mini-prompt `/actu2 {source_url} fiche:{id}` à
+partir de `selectedArticle.source_url` (déjà calculé côté serveur par `show()` :
+`resolved_url ?: url`) et `selectedArticle.id`, copié au presse-papier. Fonctionne même sans texte
+source collé - c'est le skill qui récolte l'original via `news:source`. L'ancien flux (gros
+gabarit, `generatePrompt()`/`copyPrompt()`) reste inchangé et accessible, déplacé dans le volet
+replié « Édition manuelle (filet de secours) », étiqueté « (déprécié - l'ancien gros prompt) ».
+
+### Écarté à ce round
+
+- **Aucune dérogation à la porte bornée** : `news:source` n'écrit que le texte source et sa
+  provenance, jamais un champ de la liste blanche de `news:apply` - un skill qui aurait besoin
+  d'appliquer du contenu passe TOUJOURS par `news:apply --payload` ensuite, jamais un raccourci.
+- **Aucun format de sortie alternatif** (YAML, texte libre) pour `news:brief`/`news:source` : JSON
+  strict sur stdout uniquement, pour rester trivialement analysable par le skill.

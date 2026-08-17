@@ -177,24 +177,19 @@
                             </div>
                         </div>
 
+                        {{-- Implémentation /actu2 - volet serveur (design doc "Actus - composition
+                             manuelle assistée" 2026-08-15, section "Implémentation /actu2 - volet
+                             serveur (2026-08-17)") - le mini-prompt /actu2 est construit CÔTÉ
+                             CLIENT (aucun appel serveur requis) : source_url et id sont déjà dans
+                             selectedArticle (endpoint show()). Fonctionne même sans texte source
+                             collé - c'est le skill qui récoltera l'original via news:source. --}}
                         <div class="nc-field">
-                            <button type="button" class="cb-btn" @click="generatePrompt()" :disabled="promptLoading || !formSourceText">
-                                <span x-show="!promptLoading">🧠 Enregistrer et générer le prompt Claude Code</span>
-                                <span x-show="promptLoading" x-cloak>⏳ Enregistrement et génération…</span>
+                            <button type="button" class="cb-btn" @click="copyQuickPrompt()">
+                                <span x-show="!quickPromptCopied">📋 Copier le prompt /actu2</span>
+                                <span x-show="quickPromptCopied" x-cloak>✓ Copié</span>
                             </button>
-                            <span class="nc-status-error" x-show="promptError" x-cloak x-text="promptError" style="display:block; margin-top:6px;"></span>
-                            <template x-if="generatedPrompt">
-                                <div style="margin-top:10px;">
-                                    <textarea class="form-control nc-source-textarea" rows="12" readonly x-text="generatedPrompt" style="background:#f8fafc;"></textarea>
-                                    <div class="mt-2">
-                                        <button type="button" class="cb-btn cb-btn-secondary" @click="copyPrompt()">
-                                            <span x-show="!promptCopied">📋 Copier le prompt</span>
-                                            <span x-show="promptCopied" x-cloak>✓ Copié</span>
-                                        </button>
-                                        <span class="nc-hint">Colle-le dans Claude Code (CLI) : il rédige, remplit la preuve, crée l'image et met à jour la fiche - qui reste en brouillon.</span>
-                                    </div>
-                                </div>
-                            </template>
+                            <span class="nc-status-error" x-show="quickPromptError" x-cloak x-text="quickPromptError" style="display:block; margin-top:6px;"></span>
+                            <span class="nc-hint" style="display:block; margin-top:6px;">Colle /actu2 dans Claude Code : il retrouve l'original, rédige, prouve, révise, choisit la photo et publie - puis te donne le lien.</span>
                         </div>
 
                         <div class="nc-field">
@@ -220,6 +215,31 @@
                             <div class="nc-field">
                                 <label for="nc-angle">Angle éditorial <span class="nc-hint">(optionnel, transmis au prompt de rédaction)</span></label>
                                 <input id="nc-angle" type="text" class="form-control" x-model="formAngle" maxlength="500" placeholder="Ex. impact pour les PME québécoises">
+                            </div>
+
+                            {{-- Ancien flux de génération (gros gabarit) - DÉPLACÉ ici depuis le
+                                 parcours principal (implémentation /actu2, 2026-08-17) : le bouton
+                                 principal copie désormais le mini-prompt /actu2, qui remplace ce
+                                 flux pour l'usage courant. Conservé accessible en filet de secours,
+                                 jamais supprimé. --}}
+                            <div class="nc-field">
+                                <button type="button" class="cb-btn cb-btn-secondary" @click="generatePrompt()" :disabled="promptLoading || !formSourceText">
+                                    <span x-show="!promptLoading">🧠 Enregistrer et générer le prompt Claude Code (déprécié - l'ancien gros prompt)</span>
+                                    <span x-show="promptLoading" x-cloak>⏳ Enregistrement et génération…</span>
+                                </button>
+                                <span class="nc-status-error" x-show="promptError" x-cloak x-text="promptError" style="display:block; margin-top:6px;"></span>
+                                <template x-if="generatedPrompt">
+                                    <div style="margin-top:10px;">
+                                        <textarea class="form-control nc-source-textarea" rows="12" readonly x-text="generatedPrompt" style="background:#f8fafc;"></textarea>
+                                        <div class="mt-2">
+                                            <button type="button" class="cb-btn cb-btn-secondary" @click="copyPrompt()">
+                                                <span x-show="!promptCopied">📋 Copier le prompt</span>
+                                                <span x-show="promptCopied" x-cloak>✓ Copié</span>
+                                            </button>
+                                            <span class="nc-hint">Colle-le dans Claude Code (CLI) : il rédige, remplit la preuve, crée l'image et met à jour la fiche - qui reste en brouillon.</span>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
 
                             <div class="nc-field">
@@ -394,12 +414,19 @@ function compositionBuilder(opts) {
         publishError: '',
 
         // Phase B (design doc 2026-08-15, sections 5.1 et 7) : génération du prompt de
-        // rédaction et fiche de preuve éditoriale.
+        // rédaction et fiche de preuve éditoriale. Flux DÉPRECIÉ (implémentation /actu2,
+        // 2026-08-17) - déplacé dans le volet replié, conservé en filet de secours.
         formAngle: '',
         generatedPrompt: '',
         promptLoading: false,
         promptError: '',
         promptCopied: false,
+
+        // Implémentation /actu2 - volet serveur (design doc "Actus - composition manuelle
+        // assistée" 2026-08-15, section "Implémentation /actu2 - volet serveur (2026-08-17)") :
+        // mini-prompt /actu2 construit CÔTÉ CLIENT (aucun appel serveur), copié au presse-papier.
+        quickPromptCopied: false,
+        quickPromptError: '',
         proofPairs: [],
         newPairStatement: '',
         newPairExcerpt: '',
@@ -643,6 +670,25 @@ function compositionBuilder(opts) {
                 this.promptError = 'Erreur réseau : ' + e.message;
             } finally {
                 this.promptLoading = false;
+            }
+        },
+
+        // Implémentation /actu2 - volet serveur (design doc composition manuelle, section
+        // "Implémentation /actu2 - volet serveur (2026-08-17)") : mini-prompt construit CÔTÉ
+        // CLIENT, aucun appel serveur - source_url et id sont déjà dans selectedArticle (endpoint
+        // show(), champ source_url = resolved_url ?: url calculé côté serveur). Fonctionne même
+        // sans texte source collé : c'est le skill qui récoltera l'original via news:source.
+        async copyQuickPrompt() {
+            if (!this.selectedArticle) return;
+            this.quickPromptError = '';
+            const sourceUrl = this.selectedArticle.source_url || '';
+            const prompt = '/actu2 ' + (sourceUrl ? sourceUrl + ' ' : '') + 'fiche:' + this.selectedArticle.id;
+            try {
+                await navigator.clipboard.writeText(prompt);
+                this.quickPromptCopied = true;
+                setTimeout(() => { this.quickPromptCopied = false; }, 2500);
+            } catch (e) {
+                this.quickPromptError = 'Copie impossible, copie-le manuellement : ' + prompt;
             }
         },
 

@@ -74,6 +74,11 @@ class NewsServiceProvider extends ServiceProvider
             // Actus 2.0, addendum 2026-08-17 (« purge garantie sur tous les chemins de
             // publication ») - filet de vérification quotidien, planifié dans routes/console.php.
             \Modules\News\Console\VerifySourcePurgeCommand::class,
+            // Implémentation /actu2 - volet serveur (2026-08-17) : point d'entrée LECTURE SEULE
+            // du skill Claude Code local (JSON canonique) et récolte de l'ORIGINAL (2e porte
+            // d'écriture bornée, aux côtés de NewsApplyCommand) - voir docblocs des classes.
+            \Modules\News\Console\NewsBriefCommand::class,
+            \Modules\News\Console\NewsSourceCommand::class,
         ]);
     }
 

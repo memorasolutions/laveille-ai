@@ -77,7 +77,25 @@ class NewsApplyCommand extends Command
     // n'est jamais acceptée en silence).
     // MCP: SELF (<5 lignes)
     // RAISON: design doc, section "Bonification panel 2026-08-17 (soir)".
-    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'seo_title', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit'];
+    // ACTION : implémentation /actu2 - volet serveur (2026-08-17) - 'nature_original',
+    // 'niveau_preuve' et 'original_post' rejoignent la liste blanche, mêmes garde-fous.
+    // MCP: SELF (<5 lignes)
+    // RAISON: design doc, section "Implémentation /actu2 - volet serveur (2026-08-17)".
+    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'seo_title', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve', 'original_post'];
+
+    /**
+     * Valeurs acceptées pour 'nature_original' (design doc, section "Implémentation /actu2 -
+     * volet serveur (2026-08-17)") - classification INTERNE de la nature de l'original retrouvé
+     * par le skill.
+     */
+    private const ALLOWED_NATURE_ORIGINAL = ['annonce_commerciale', 'etude_evaluee', 'preimpression', 'message_personnel'];
+
+    /**
+     * Valeurs acceptées pour 'niveau_preuve' (même section) - degré auquel la fiche s'appuie sur
+     * l'original plutôt que sur un texte secondaire. PUBLIC, traduit côté fiche (jamais
+     * l'étiquette technique brute) par Modules\News\resources\views\public\show.blade.php.
+     */
+    private const ALLOWED_NIVEAU_PREUVE = ['primaire', 'mixte', 'relais'];
 
     protected $signature = 'news:apply {article : id de la fiche news_articles} {--payload= : chemin d\'un fichier JSON de charge utile texte - efface aussi structured_summary (résumé machine), qui prime sinon sur ta composition côté fiche publique} {--image= : chemin d\'un fichier image local à appliquer} {--credit= : crédit photo appliqué avec --image (le payload exige la fraîcheur, qui change après la 1re écriture - le crédit voyage donc avec l\'image)} {--publish : publie la fiche - mêmes prérequis que le bouton manuel Publier-et-purger, refuse si déjà publiée}';
 
@@ -255,8 +273,40 @@ class NewsApplyCommand extends Command
             $updates['image_credit'] = $decoded['image_credit'];
         }
 
+        // ACTION : implémentation /actu2 - volet serveur (2026-08-17) - trois clés
+        // supplémentaires, mêmes garde-fous de validation stricte que les clés existantes
+        // ci-dessus (refus explicite, jamais un enregistrement partiel).
+        // MCP: SELF (<5 lignes)
+        // RAISON: design doc, section "Implémentation /actu2 - volet serveur (2026-08-17)".
+        if (array_key_exists('nature_original', $decoded)) {
+            if (! is_string($decoded['nature_original']) || ! in_array($decoded['nature_original'], self::ALLOWED_NATURE_ORIGINAL, true)) {
+                $this->error('nature_original invalide (attendu : '.implode(', ', self::ALLOWED_NATURE_ORIGINAL).').');
+
+                return self::FAILURE;
+            }
+            $updates['nature_original'] = $decoded['nature_original'];
+        }
+
+        if (array_key_exists('niveau_preuve', $decoded)) {
+            if (! is_string($decoded['niveau_preuve']) || ! in_array($decoded['niveau_preuve'], self::ALLOWED_NIVEAU_PREUVE, true)) {
+                $this->error('niveau_preuve invalide (attendu : '.implode(', ', self::ALLOWED_NIVEAU_PREUVE).').');
+
+                return self::FAILURE;
+            }
+            $updates['niveau_preuve'] = $decoded['niveau_preuve'];
+        }
+
+        if (array_key_exists('original_post', $decoded)) {
+            $normalizedPost = $this->normalizeOriginalPost($decoded['original_post']);
+            if ($normalizedPost === null) {
+                // Message d'erreur déjà émis par normalizeOriginalPost().
+                return self::FAILURE;
+            }
+            $updates['original_post'] = $normalizedPost;
+        }
+
         if ($updates === []) {
-            $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs / primary_sources / image_credit n\'est fournie.');
+            $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs / primary_sources / image_credit / nature_original / niveau_preuve / original_post n\'est fournie.');
 
             return self::FAILURE;
         }
@@ -412,6 +462,73 @@ class NewsApplyCommand extends Command
                 'url' => $url,
                 'note' => $note,
             ];
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * ACTION : implémentation /actu2 - volet serveur (2026-08-17) - valide et normalise la
+     * citation statique d'un post X du payload : {text, author, handle, date, url}, tous des
+     * chaînes. Utilisée quand l'ORIGINAL retrouvé par le skill est lui-même un post - jamais le
+     * widget platform.x.com (script tiers interdit), une citation statique affichée par
+     * show.blade.php. 'text' est la seule clé obligatoire (sans elle, rien à citer) ; 'url', si
+     * fournie, doit être une URL http/https valide (lien « Voir sur X »).
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: design doc, section "Implémentation /actu2 - volet serveur (2026-08-17)".
+     *
+     * @return array{text: string, author?: string, handle?: string, date?: string, url?: string}|null
+     */
+    private function normalizeOriginalPost(mixed $postInput): ?array
+    {
+        if (! is_array($postInput)) {
+            $this->error('original_post doit être un objet (text, author, handle, date, url).');
+
+            return null;
+        }
+
+        $allowedKeys = ['text', 'author', 'handle', 'date', 'url'];
+        $unknownKeys = array_diff(array_keys($postInput), $allowedKeys);
+        if ($unknownKeys !== []) {
+            $this->error('Clé(s) non autorisée(s) dans original_post : '.implode(', ', $unknownKeys).'. Clés permises : '.implode(', ', $allowedKeys).'.');
+
+            return null;
+        }
+
+        $text = $postInput['text'] ?? null;
+        if (! is_string($text) || trim($text) === '') {
+            $this->error('original_post.text est obligatoire (citation statique du post original).');
+
+            return null;
+        }
+        if (mb_strlen($text) > 1000) {
+            $this->error('original_post.text dépasse 1000 caractères.');
+
+            return null;
+        }
+
+        $normalized = ['text' => $text];
+
+        foreach (['author', 'handle', 'date'] as $key) {
+            if (! array_key_exists($key, $postInput)) {
+                continue;
+            }
+            if (! is_string($postInput[$key])) {
+                $this->error("original_post.{$key} doit être une chaîne de caractères.");
+
+                return null;
+            }
+            $normalized[$key] = $postInput[$key];
+        }
+
+        if (array_key_exists('url', $postInput)) {
+            $url = is_string($postInput['url']) ? trim($postInput['url']) : '';
+            if ($url === '' || ! filter_var($url, FILTER_VALIDATE_URL) || ! preg_match('#^https?://#i', $url)) {
+                $this->error("original_post.url invalide (http/https attendu) : « {$url} ».");
+
+                return null;
+            }
+            $normalized['url'] = $url;
         }
 
         return $normalized;

@@ -237,6 +237,32 @@
     .nw-sources-list a:hover { text-decoration: underline; }
     .nw-sources-author { color: #6b7280; }
     .nw-sources-angle { color: #4b5563; }
+    /* Implémentation /actu2 - volet serveur (design doc "Actus - composition manuelle assistée"
+       2026-08-15, section "Implémentation /actu2 - volet serveur (2026-08-17)") - citation
+       statique d'un post X quand l'ORIGINAL retrouvé par le skill est lui-même un post. Jamais le
+       widget officiel de X (script tiers interdit : pistage, CSP, fragilité) - même style de
+       bloc que .nw-quote, en distinct (nw-post-quote) car sa structure porte l'auteur/le handle/
+       la date, pas seulement une source. */
+    .nw-post-quote {
+        border-left: 3px solid var(--c-primary); background: #f8fafc;
+        padding: 0.875rem 1.25rem; margin: 1.25rem 0; border-radius: 0 8px 8px 0;
+    }
+    .nw-post-quote__text { margin: 0 0 0.5rem; color: var(--c-dark); line-height: 1.6; font-style: italic; }
+    .nw-post-quote__footer { display: flex; flex-wrap: wrap; gap: 0.375rem 0.5rem; align-items: center; font-size: 0.8125rem; color: #4b5563; }
+    .nw-post-quote__author { font-weight: 700; color: var(--c-dark); }
+    .nw-post-quote__handle { color: #6b7280; }
+    .nw-post-quote__date { color: #6b7280; }
+    .nw-post-quote__link { color: var(--c-primary); font-weight: 600; text-decoration: none; }
+    .nw-post-quote__link:hover { text-decoration: underline; }
+    /* Badge sobre de niveau de preuve (même section du design doc) - contraste AAA (~8:1 sur
+       fond blanc), jamais l'étiquette technique brute (primaire/mixte/relais), toujours le
+       libellé traduit calculé côté PHP juste avant la section Sources. */
+    .nw-niveau-preuve { margin: 0 0 0.75rem; }
+    .nw-niveau-preuve__pill {
+        display: inline-block; font-size: 0.8125rem; font-weight: 600;
+        color: var(--c-text-secondary, #4a4f5c); background: #f3f4f6;
+        padding: 0.2rem 0.625rem; border-radius: 4px;
+    }
 </style>
 @endpush
 
@@ -452,6 +478,36 @@
                         </div>
                     @endif
 
+                    {{-- Implémentation /actu2 - volet serveur (design doc "Actus - composition
+                         manuelle assistée" 2026-08-15, section "Implémentation /actu2 - volet
+                         serveur (2026-08-17)") - citation STATIQUE d'un post X quand l'ORIGINAL
+                         retrouvé par le skill est lui-même un post. Placée après le résumé, dans
+                         les DEUX branches d'affichage du corps (@if($ss) et
+                         @elseif($article->summary) ci-dessus) puisqu'elle vit après leur
+                         branchement. Jamais le widget platform.x.com (script tiers interdit). --}}
+                    @php
+                        $originalPost = is_array($article->original_post ?? null) ? $article->original_post : null;
+                    @endphp
+                    @if($originalPost && !empty($originalPost['text']))
+                        <blockquote class="nw-post-quote">
+                            <p class="nw-post-quote__text">« {{ $originalPost['text'] }} »</p>
+                            <footer class="nw-post-quote__footer">
+                                @if(!empty($originalPost['author']))
+                                    <span class="nw-post-quote__author">{{ $originalPost['author'] }}</span>
+                                @endif
+                                @if(!empty($originalPost['handle']))
+                                    <span class="nw-post-quote__handle">{{ $originalPost['handle'] }}</span>
+                                @endif
+                                @if(!empty($originalPost['date']))
+                                    <span class="nw-post-quote__date">{{ $originalPost['date'] }}</span>
+                                @endif
+                                @if(!empty($originalPost['url']))
+                                    <a href="{{ $originalPost['url'] }}" target="_blank" rel="noopener nofollow" class="nw-post-quote__link">{{ __('Voir sur X') }} &rarr;</a>
+                                @endif
+                            </footer>
+                        </blockquote>
+                    @endif
+
                     {{-- FAQ --}}
                     @if($ss && isset($ss['faq_question']))
                     <div class="nw-faq">
@@ -477,10 +533,23 @@
                         // fiche, fournies par l'agent (NewsApplyCommand --payload), jamais éditées
                         // depuis la fiche publique elle-même.
                         $primarySources = is_array($article->primary_sources ?? null) ? $article->primary_sources : [];
+                        // Implémentation /actu2 - volet serveur (design doc "Actus - composition
+                        // manuelle assistée" 2026-08-15, section "Implémentation /actu2 - volet
+                        // serveur (2026-08-17)") - niveau_preuve est PUBLIC mais TOUJOURS traduit
+                        // en français courant, jamais l'étiquette technique brute.
+                        $niveauPreuveLabels = [
+                            'primaire' => __('Fondée sur la source originale'),
+                            'mixte' => __('Sources originale et média'),
+                            'relais' => __('D\'après un média relais'),
+                        ];
+                        $niveauPreuveLabel = $niveauPreuveLabels[$article->niveau_preuve ?? ''] ?? null;
                     @endphp
                     {{-- Actus 2.0 : bloc à source unique remplacé par la liste « Sources » plus
                          haut pour une fiche comparative (design doc section 7), aucune suppression. --}}
                     @unless($isDigest)
+                    @if($niveauPreuveLabel)
+                        <p class="nw-niveau-preuve"><span class="nw-niveau-preuve__pill">{{ $niveauPreuveLabel }}</span></p>
+                    @endif
                     @if(! empty($primarySources))
                         {{-- Bonification panel 2026-08-17 (soir) - section « Sources » EN FIN de
                              fiche (jamais une citation par affirmation, leçon projet consignée en

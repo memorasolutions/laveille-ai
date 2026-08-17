@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.186.0] - 2026-08-17
+
+### Ajouté
+- **Volet serveur du flux `/actu2` (module News) - architecture arbitrée par panel de 5 IA.** Commande `news:brief {article}` (lecture seule : JSON canonique avec empreinte, updated_at, version de politique - le point d'entrée du skill, la fraîcheur reste générée serveur) et commande `news:source {article} {url} [--replace]` (la récolte de l'article ORIGINAL par le fetcher borné existant - garde SSRF, TLS, jamais de paywall contourné ; refus sur fiche publiée, refus d'écraser sans --replace). Nouveaux champs `nature_original` (classification interne de l'original), `niveau_preuve` (primaire/mixte/relais - affiché sur la fiche publique traduit en français courant, jamais l'étiquette technique) et `original_post` (citation statique d'un post X : texte, auteur, date, lien - JAMAIS le widget platform.x.com : script tiers de pistage interdit, et la citation survit à la suppression du post). Liste blanche `news:apply` étendue avec validation stricte.
+- **Écran de composition simplifié** : le bouton principal devient « 📋 Copier le prompt /actu2 » - il construit côté client le mini-prompt `/actu2 <url> fiche:<id>` (l'identifiant vient toujours de l'écran, jamais résolu d'une URL - garde du panel). L'ancien gros prompt reste accessible dans le volet replié, étiqueté déprécié.
+- **Skill local `~/.claude/skills/actu2/`** (hors dépôt) : orchestrateur complet en 9 étapes - préflight, découverte de l'original par recherche indépendante, récolte serveur en cascade de repli déclarée, rédaction ancrée sur l'original (titre décidé par le skill : jamais de traduction mot à mot, 3-5 candidats au regard croisé IA ; AEO/SEO fondé sur le prouvé, contenu suffisant sans gonflage), preuve à 3 types, révision adversariale avec porte « rester en brouillon », photo libre de droits créditée sur texte figé, publication bornée et lien d'inspection. États persistés avec reprise, 3 fiches canoniques d'exemple.
+
+### Vérifié
+- Suite complète du module News (5 nouveaux fichiers de tests : brief, source, champs payload, rendu public, écran), aucun échec. `php -l` et compilation Blade propres partout, commandes visibles dans `php artisan list news`.
+
 ## [1.185.0] - 2026-08-17
 
 ### Ajouté

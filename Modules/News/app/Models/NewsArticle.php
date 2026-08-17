@@ -105,6 +105,19 @@ class NewsArticle extends Model implements Searchable
         // RAISON: design doc, section "Bonification panel 2026-08-17 (soir)".
         'primary_sources',
         'image_credit',
+        // ACTION : implémentation /actu2 - volet serveur (design doc "Actus - composition
+        // manuelle assistée" 2026-08-15, section "Implémentation /actu2 - volet serveur
+        // (2026-08-17)") - trois champs additifs. 'nature_original' est INTERNE (jamais affiché
+        // tel quel sur la fiche publique - même garde-fou que internal_source_text). 'niveau_preuve'
+        // et 'original_post' sont affichés publiquement (voir show.blade.php), exactement comme
+        // primary_sources/image_credit ; 'niveau_preuve' est traduit en français courant, jamais
+        // l'étiquette technique brute. Seul écrivain : NewsApplyCommand (--payload), même porte
+        // bornée.
+        // MCP: SELF (<5 lignes)
+        // RAISON: design doc, section "Implémentation /actu2 - volet serveur (2026-08-17)".
+        'nature_original',
+        'niveau_preuve',
+        'original_post',
     ];
 
     protected $casts = [
@@ -122,6 +135,7 @@ class NewsArticle extends Model implements Searchable
         'source_acquisition' => 'array',
         'published_at' => 'datetime',
         'primary_sources' => 'array',
+        'original_post' => 'array',
     ];
 
     protected static function booted(): void
@@ -403,6 +417,39 @@ class NewsArticle extends Model implements Searchable
             'slug' => $this->slug,
             'structured_summary_avant' => $this->structured_summary,
         ]);
+    }
+
+    /**
+     * ACTION : provenance du texte source (design doc "Actus - composition manuelle assistée"
+     * 2026-08-15, section 5.2) - extrait TEL QUEL de l'ancienne méthode privée
+     * NewsCompositionController::applySourceProvenance() (implémentation /actu2, révision
+     * 2026-08-17) pour être réutilisé SANS DUPLICATION par Modules\News\Console\
+     * NewsSourceCommand (porte serveur du skill /actu2, `php artisan news:source`). Retourne les
+     * champs à fusionner dans un update() UNIQUEMENT si le texte fourni change réellement
+     * l'empreinte déjà en base (jamais sur un texte vide ou inchangé) - même règle que l'ancien
+     * code du contrôleur, aucune divergence de comportement.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: DRY explicite exigé par le mandat /actu2 - une seule implémentation de la
+     * provenance, partagée par les deux points d'écriture (écran de composition ET commande
+     * news:source).
+     *
+     * @return array<string, mixed>
+     */
+    public function sourceProvenanceUpdates(string $sourceText): array
+    {
+        if (blank($sourceText)) {
+            return [];
+        }
+
+        $hash = hash('sha256', $sourceText);
+        if ($hash === $this->source_content_hash) {
+            return [];
+        }
+
+        return [
+            'source_content_hash' => $hash,
+            'source_captured_at' => now('America/Toronto'),
+        ];
     }
 
     // 2026-05-05 #146 : scopePublished mutualise via HasPublishedState (DRY Core).
