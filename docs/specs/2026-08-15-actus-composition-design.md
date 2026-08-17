@@ -395,3 +395,153 @@ articles originaux, important de vérifier »*. Deux ajouts :
 - **File d'attente asynchrone (job/queue) rejetée** : sur-ingénierie pour une action déclenchée
   à la main par un seul propriétaire, une fiche à la fois - `set_time_limit(40)` côté requête
   synchrone suffit, le repli Puppeteer (20 s max) restant largement sous ce plafond.
+
+## Note datée 2026-08-17 (fin de journée) - l'agent publie lui-même via `news:apply --publish`
+
+**Décision propriétaire 2026-08-17 (fin de journée) : l'agent publie lui-même via `news:apply
+--publish` et fournit le lien d'inspection - renverse l'arbitrage « l'agent ne publie jamais » du
+panel du même jour (section « Révision 2026-08-17 - prompt d'orchestration Claude Code CLI »
+ci-dessus, et l'interdiction nommée correspondante dans le gabarit de prompt) ; mitigation : mêmes
+prérequis que le bouton manuel, porte unique.**
+
+Concrètement : l'agent Claude Code CLI exécutant le prompt d'orchestration de l'écran de
+composition exécute désormais, en toute fin de flux (nouvelle ÉTAPE 6, après le texte de l'étape
+3, l'image de l'étape 4 ET la révision adversariale obligatoire de l'étape 5 - addendum reçu
+pendant cette même révision, détaillé plus bas), `php artisan news:apply {id} --publish`, puis
+donne au propriétaire le lien public direct de la fiche - qui l'inspecte donc APRÈS publication
+plutôt qu'avant.
+
+Ce que ça change concrètement :
+
+- **`NewsApplyCommand`** gagne un troisième mode indépendant `--publish`, combinable avec
+  `--payload`/`--image` dans le même appel ou utilisable seul dans un appel séparé. Applique
+  EXACTEMENT les mêmes prérequis que le bouton manuel Publier-et-purger de l'écran de composition
+  (`NewsCompositionController::publish()`) : `seo_title` non vide, `summary` non vide, au moins
+  une paire de preuve, et revalidation à 100 % des paires « fact » contre le texte source COURANT.
+  Refuse si la fiche est déjà publiée (même garde générique que les modes `--payload`/`--image`).
+- **DRY strict** : la règle « prêt à publier » (prérequis + revalidation) était dupliquée dans le
+  seul contrôleur avant cette révision. Elle est désormais extraite dans une méthode UNIQUE,
+  `NewsArticle::publishReadinessCheck()`, réutilisée telle quelle par
+  `NewsCompositionController::publish()` (bouton manuel) ET `NewsApplyCommand` (`--publish`,
+  porte bornée de l'agent) - aucune divergence possible entre les deux chemins. La mécanique
+  d'écriture reste celle déjà existante, `NewsArticle::publishAndPurgeSource()` (règle unique
+  « publier = purger »), inchangée.
+- **Gabarit de prompt** (`_composition_prompt_template.blade.php`) : l'interdiction nommée « ne
+  publie jamais cette fiche » devient « la publication passe EXCLUSIVEMENT par
+  `news:apply --publish`, jamais par un autre moyen, et SEULEMENT à l'étape 6, après texte, image
+  ET révision adversariale appliqués ». Toutes les autres interdictions (`.env`, migrations,
+  autres fiches, exposition du texte source) restent inchangées. La fin du prompt rappelle le lien
+  public à transmettre, ce que la révision de l'étape 5 a trouvé et corrigé, et que la fiche reste
+  dépubliable depuis `/admin/news/articles` si l'inspection post-publication révèle un problème.
+  Version du gabarit incrémentée UNE SEULE FOIS pour l'ensemble des addenda de cette révision
+  (`CompositionPromptBuilder::PROMPT_TEMPLATE_VERSION`, `2026-08-17.2`).
+- **Deux seuls endroits du code entier** écrivent désormais `is_published`/`published_at` :
+  `NewsCompositionController::publish()` (bouton manuel, HTTP) et `NewsApplyCommand` en mode
+  `--publish` (agent, CLI) - jamais un troisième chemin, jamais un Eloquent/SQL/tinker direct.
+
+### Trois addenda reçus PENDANT cette même révision (même jour, un seul incrément de version)
+
+1. **Recherche avant rédaction (règle de rédaction n°7, ÉTAPE 1)** : si le texte source laisse une
+   question factuelle ouverte, l'agent DOIT chercher (`pp_search` ou équivalent) avant d'écrire
+   « je n'ai eu accès à aucune source confirmant X » - cette issue reste valide, mais seulement
+   après une recherche réellement tentée, jamais comme raccourci. Ce qui vient d'une recherche
+   complémentaire est attribué à sa propre source et ne peut alimenter qu'une paire de preuve
+   « analysis » (jamais « fact », réservée au texte source de la fiche).
+2. **structured_summary effacé au profit de la composition (défaut découvert en production)** :
+   la fiche publique (`show.blade.php`, bloc `@if($ss) ... @elseif($article->summary)`) affiche
+   `structured_summary` (résumé MACHINE de la collecte) EN PRIORITÉ sur `summary` - tant qu'il
+   subsistait, une composition manuelle appliquée via `news:apply --payload` restait invisible sur
+   le site. Extrait dans une méthode UNIQUE, `NewsArticle::logStructuredSummaryOverride()`
+   (journalise l'ancienne valeur sur le canal `composition` avant l'effacement, jamais perdue en
+   silence), réutilisée par DEUX endroits SEULEMENT : `NewsApplyCommand` (mode `--payload`, dès
+   qu'un champ de contenu est appliqué) et `NewsCompositionController::publish()` (juste avant
+   `publishAndPurgeSource()`). Volontairement PAS dans `publishAndPurgeSource()` elle-même (sinon
+   `AdminNewsController::toggleArticle()` et `news:verify-source-purge` effaceraient aussi le
+   résumé machine de fiches jamais passées par l'écran de composition - hors mandat), ni dans
+   `update()` (l'admin peut retoucher le texte sans forcer la bascule d'affichage).
+3. **ÉTAPE 5 - RÉVISION ADVERSARIALE, obligatoire avant toute publication** : renumérote la
+   publication de l'étape 5 à l'étape 6. Avant d'exécuter `--publish`, l'agent relit la fiche
+   TELLE QU'APPLIQUÉE (pas son brouillon) avec le mandat de la démentir sur trois axes - VRAI
+   (chaque affirmation appuyée par une paire « fact » ou une recherche sourcée), VÉRIFIABLE
+   (attribution dans la phrase), PARFAITEMENT VULGARISÉ (compréhensible par un lecteur non
+   initié, termes techniques expliqués, phrases courtes). Un défaut trouvé → correction, ré-
+   application via `news:apply --payload` (ré-applicable tant que la fiche n'est pas publiée), et
+   nouvelle révision - la publication n'a lieu que quand la révision ne trouve plus rien, et le
+   rapport final au propriétaire liste ce qui a été trouvé et corrigé (« rien trouvé » est une
+   conclusion à énoncer, jamais une esquive silencieuse).
+
+## Bonification panel 2026-08-17 (soir)
+
+**Décision du propriétaire, panel de 5 IA, 2026-08-17 (soir) : les fiches doivent CITER l'original
+(sources primaires visibles) et porter une PHOTO créditée plutôt qu'une illustration.**
+
+### Synthèse
+
+- **Fait-primaire avec préséance** : un 3e type de paire de preuve éditoriale, `primary_fact`,
+  s'ajoute à `fact`/`analysis` (section 5.1 ci-dessus). Une paire `primary_fact` cite l'original mot
+  pour mot et exige un `source_url` (URL http/https valide) ; contrairement à `fact`, son extrait
+  N'EST JAMAIS revalidé en sous-chaîne du texte source collé pour l'agent - c'est précisément ce qui
+  lui donne PRÉSÉANCE sur un `fact` construit à partir du texte secondaire quand les deux se
+  contredisent : la source primaire fait foi, pas le texte collé. `NewsArticle::
+  publishReadinessCheck()` (réutilisée par `NewsCompositionController::publish()` ET
+  `NewsApplyCommand --publish`, aucune divergence possible entre les deux portes) revalide
+  uniquement la présence d'un `source_url` non vide pour ce type, jamais une sous-chaîne.
+- **Verdict de divergence** : quand le texte source collé et une source primaire citée divergent sur
+  un fait, l'agent doit trancher explicitement - paire `primary_fact` faisant foi, ou mention
+  nommée de la divergence dans la révision adversariale de l'étape 6 - plutôt que de laisser
+  cohabiter silencieusement deux versions contradictoires dans la fiche publiée.
+- **Ordre révision-puis-photo** : dans le prompt d'orchestration (gabarit
+  `_composition_prompt_template.blade.php`/`CompositionPromptBuilder.php`, hors périmètre de cette
+  bonification côté code - agent parallèle), la révision adversariale de l'étape 6 précède
+  désormais la recherche et le dépôt de la photo, pour qu'une correction de texte trouvée en
+  révision ne rende jamais une photo déjà choisie inadéquate à l'angle final de la fiche.
+- **Reconstitution aveugle** : technique retenue pour la révision adversariale - l'agent reconstruit
+  mentalement les faits de la fiche à partir des seules paires de preuve (`fact`/`primary_fact`),
+  sans relire son propre brouillon, pour détecter les affirmations qui ne tiennent que par la
+  mémoire du brouillon plutôt que par une preuve traçable.
+- **Porte rester-brouillon** : l'agent peut choisir de NE PAS appeler `--publish` si la révision
+  adversariale trouve un défaut non corrigible dans l'immédiat - la fiche reste un brouillon
+  exploitable plus tard, plutôt que publiée avec un défaut connu. Cohérent avec la porte bornée
+  existante : rien n'oblige `--publish` à conclure chaque exécution du prompt.
+- **Photos libres de droits créditées** : remplace l'illustration générée par défaut - une photo
+  réelle, sous licence libre de droits, avec un crédit obligatoire (`image_credit`, ex. « Photo :
+  Untel, Unsplash ») affiché discrètement sous l'image principale de la fiche publique.
+- **Sources primaires affichées** : `primary_sources` (tableau `{label, url, note?}`) est désormais
+  un champ PUBLIC - contrairement à `internal_source_text`/`editorial_proof_pairs`, jamais lus par
+  un chemin public - affiché en fin de fiche (`Modules\News\resources\views\public\show.blade.php`,
+  section « Sources », jamais une citation par affirmation) : les sources primaires d'abord, puis le
+  relais média existant renommé « Relais média » puisque la source primaire prime désormais.
+
+### Colonnes ajoutées (migration additive réversible)
+
+`primary_sources` (JSON, nullable) et `image_credit` (string, nullable) sur `news_articles` -
+migration `2026_08_17_180000_add_primary_sources_and_image_credit_to_news_articles.php`, garde
+`hasColumn()` dans les deux sens comme toutes les migrations précédentes de ce design doc. Seul
+écrivain : `NewsApplyCommand` (`--payload`), même porte bornée que les champs de composition
+existants - aucune dérogation, voir « Écartés » ci-dessous.
+
+### Écartés à ce round - ne pas les re-proposer
+
+- **Fraîcheur/rectificatifs** : pas de mécanisme de suivi des rectificatifs publiés après coup par
+  la source primaire - hors périmètre ; une fiche `laveille.ai` n'est pas un flux d'actualité vivant
+  qui se met à jour après publication.
+- **Quota d'analyse** : pas de limite chiffrée sur le nombre de paires `analysis` par fiche - la
+  porte de qualité reste la révision adversariale (agent puis, en aval, le propriétaire), pas un
+  compteur arbitraire.
+- **Dérogation à la porte bornée** : aucune exception à `news:apply` comme SEULE porte d'écriture de
+  l'agent, même pour `primary_sources`/`image_credit` - même garde-fou que tous les champs de
+  composition existants : jamais un Eloquent/SQL/tinker direct par l'agent, jamais un autre chemin.
+- **Registre `claim_id` complet** : pas de registre séparé identifiant chaque affirmation par un
+  identifiant unique traçable à travers tout le pipeline - `editorial_proof_pairs` reste la seule
+  structure de traçabilité, jugée suffisante à l'échelle actuelle du site.
+
+### Divergence consignée
+
+claude.ai proposait une inspection du propriétaire AVANT la publication - un retour à l'arbitrage du
+2026-08-17 après-midi (section « Révision 2026-08-17 - prompt d'orchestration Claude Code CLI »
+ci-dessus). Décision du propriétaire, tranchée : l'inspection reste APRÈS `--publish` (note datée
+2026-08-17, fin de journée, ci-dessus - jamais renversée par cette bonification). Mitigation
+retenue : la fiche telle qu'appliquée est affichée intégralement dans le rapport final de l'agent au
+propriétaire, AVANT l'appel à `--publish` dans ce même rapport - l'inspection réelle porte donc sur
+du contenu déjà visible, même si le geste de publication précède sa lecture effective par le
+propriétaire.

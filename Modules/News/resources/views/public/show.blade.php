@@ -133,6 +133,11 @@
 <style>
     .nw-show { max-width: 740px; margin: 0 auto; }
     .nw-hero { width: 100%; max-height: 420px; object-fit: cover; border-radius: 12px; margin-bottom: 1.5rem; }
+    /* Bonification panel 2026-08-17 (soir) - crédit photo discret. Contraste AAA (~8:1 sur
+       fond blanc) via le jeton --c-text-secondary, jamais le gris clair déjà utilisé pour les
+       méta-données secondaires de cette page (celui-ci passe tout juste l'AA, pas l'AAA). */
+    .nw-hero-has-credit { margin-bottom: 0.375rem; }
+    .nw-image-credit { font-size: 0.8125rem; color: var(--c-text-secondary, #4a4f5c); text-align: right; margin: 0 0 1.5rem; }
     .nw-show-title { font-family: var(--f-heading); font-size: 2rem; line-height: 1.2; margin-bottom: 1rem; }
     {{-- .nw-shared-dot : styles fournis par le composant partagé x-news::admin-shared-dot (@once push('styles')). --}}
     .nw-lead { font-size: 1.0625rem; font-weight: 600; color: var(--c-dark); line-height: 1.6; margin-bottom: 1.5rem; }
@@ -321,7 +326,13 @@
                     @endauth
 
                     @if($article->image_url)
-                        <img src="{{ $article->image_url }}{{ str_contains($article->image_url, 'http') ? '' : '?v='.($article->updated_at?->timestamp ?? time()) }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-hero" loading="lazy">
+                        <img src="{{ $article->image_url }}{{ str_contains($article->image_url, 'http') ? '' : '?v='.($article->updated_at?->timestamp ?? time()) }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-hero{{ !empty($article->image_credit) ? ' nw-hero-has-credit' : '' }}" loading="lazy">
+                        {{-- Bonification panel 2026-08-17 (soir) : photo créditée plutôt qu'une
+                             illustration - crédit discret sous l'image principale, jamais affiché
+                             si absent (aucune fiche antérieure n'en porte). --}}
+                        @if(!empty($article->image_credit))
+                            <p class="nw-image-credit">{{ $article->image_credit }}</p>
+                        @endif
                     @endif
 
                     {{-- Bande dessinée pédagogique (standard « visionneur de BD ») - apparaît si public/bd/{slug}/manifest.json existe. 100 % réutilisé du glossaire (ComicLibrary + comic-viewer), zéro logique dupliquée. --}}
@@ -462,11 +473,44 @@
                     @php
                         $externalUrl = $article->resolved_url ?: $article->url;
                         $isGoogleNewsUnresolved = str_contains(parse_url($externalUrl, PHP_URL_HOST) ?? '', 'news.google.com');
+                        // Bonification panel 2026-08-17 (soir) : sources primaires citées par la
+                        // fiche, fournies par l'agent (NewsApplyCommand --payload), jamais éditées
+                        // depuis la fiche publique elle-même.
+                        $primarySources = is_array($article->primary_sources ?? null) ? $article->primary_sources : [];
                     @endphp
                     {{-- Actus 2.0 : bloc à source unique remplacé par la liste « Sources » plus
                          haut pour une fiche comparative (design doc section 7), aucune suppression. --}}
                     @unless($isDigest)
-                    @if(! $isGoogleNewsUnresolved)
+                    @if(! empty($primarySources))
+                        {{-- Bonification panel 2026-08-17 (soir) - section « Sources » EN FIN de
+                             fiche (jamais une citation par affirmation, leçon projet consignée en
+                             mémoire "exiger-des-sources-sans-issue-licite") : les sources
+                             primaires d'abord, puis le relais média existant, désormais RENOMMÉ
+                             « Relais média » puisque la source primaire prime. --}}
+                        <h2 class="nw-section-heading">{{ __('Sources') }}</h2>
+                        <ul class="nw-sources-list">
+                            @foreach($primarySources as $primarySource)
+                                @if(!empty($primarySource['url']))
+                                <li>
+                                    <a href="{{ $primarySource['url'] }}" target="_blank" rel="noopener nofollow">{{ $primarySource['label'] ?? __('Source primaire') }}</a>
+                                    @if(!empty($primarySource['note']))
+                                        <span class="nw-sources-angle"> : {{ $primarySource['note'] }}</span>
+                                    @endif
+                                </li>
+                                @endif
+                            @endforeach
+                            @if(! $isGoogleNewsUnresolved)
+                                <li>
+                                    <a href="{{ $externalUrl }}" target="_blank" rel="noopener">{{ __('Relais média :') }} {{ $article->source?->name ?? __('article original') }} &rarr;</a>
+                                    @if($article->source?->language === 'en')
+                                        &nbsp;·&nbsp;<a href="https://translate.google.com/translate?sl=en&tl=fr&u={{ urlencode($externalUrl) }}" target="_blank" rel="noopener">{{ __('Lire en français') }}</a>
+                                    @endif
+                                </li>
+                            @else
+                                <li>{{ __('Relais média :') }} <strong>{{ $article->source?->name ?? __('Google News') }}</strong></li>
+                            @endif
+                        </ul>
+                    @elseif(! $isGoogleNewsUnresolved)
                     <div style="text-align: center; margin: 2rem 0; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
                         <a href="{{ $externalUrl }}" target="_blank" rel="noopener" class="nw-cta">{{ __('Voir l\'article original') }} &rarr;</a>
                         @if($article->source?->language === 'en')

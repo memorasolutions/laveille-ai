@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Modules\Community\Traits\HasComments;
 use Modules\Community\Traits\HasReports;
@@ -15,6 +16,7 @@ use Modules\Core\Concerns\HasAdminShareContents;
 use Modules\Core\Contracts\Searchable;
 use Modules\Core\Traits\HasPublishedState;
 use Modules\Core\Traits\LogsActivityStandard;
+use Modules\News\Services\EditorialProofNormalizer;
 use Modules\Voting\Traits\HasCommunityVotes;
 
 class NewsArticle extends Model implements Searchable
@@ -93,6 +95,16 @@ class NewsArticle extends Model implements Searchable
         // RAISON: même garde-fou d'emplacement distinct que les champs voisins.
         'source_acquisition',
         'published_at',
+        // ACTION : bonification panel 2026-08-17 (soir), décision du propriétaire - les fiches
+        // doivent CITER l'original et porter une photo créditée. 'primary_sources' (tableau
+        // {label, url, note?}) N'EST PAS interne comme les champs voisins ci-dessus : il est
+        // affiché tel quel en fin de fiche publique (show.blade.php, section « Sources »).
+        // 'image_credit' est affiché sous l'image principale. Seul écrivain : NewsApplyCommand
+        // (--payload), même porte bornée que les autres champs de composition.
+        // MCP: SELF (<5 lignes)
+        // RAISON: design doc, section "Bonification panel 2026-08-17 (soir)".
+        'primary_sources',
+        'image_credit',
     ];
 
     protected $casts = [
@@ -109,6 +121,7 @@ class NewsArticle extends Model implements Searchable
         'source_captured_at' => 'datetime',
         'source_acquisition' => 'array',
         'published_at' => 'datetime',
+        'primary_sources' => 'array',
     ];
 
     protected static function booted(): void
@@ -244,6 +257,151 @@ class NewsArticle extends Model implements Searchable
             'is_published' => true,
             'published_at' => now('America/Toronto'),
             'internal_source_text' => null,
+        ]);
+    }
+
+    /**
+     * ACTION : point UNIQUE de la règle « prêt à publier » (design doc "Actus - composition
+     * manuelle assistée" 2026-08-15, note datée 2026-08-17 "l'agent publie lui-même via
+     * news:apply --publish") - extrait de NewsCompositionController::publish() (révision
+     * 2026-08-17) pour être réutilisé TEL QUEL par ce même contrôleur (bouton manuel
+     * Publier-et-purger) ET par NewsApplyCommand (--publish, porte bornée de l'agent Claude Code
+     * CLI). DRY explicite exigé par le mandat : aucune divergence possible entre les deux
+     * chemins de publication.
+     *
+     * Vérifie, dans l'ordre :
+     * 1. les champs obligatoires (seo_title, summary, au moins une paire de preuve) - liste
+     *    COMPLÈTE des manquants, jamais seulement le premier ;
+     * 2. si tous présents, la revalidation à 100 % des paires de type "fact" contre le texte
+     *    source COURANT (celui en base au moment de l'appel, pas celui du moment où le prompt a
+     *    été généré) - la première paire invalide arrête la vérification.
+     *
+     * Ne lève jamais d'exception et n'écrit rien : chaque appelant traduit ce résultat dans son
+     * propre format (JSON HTTP avec codes 422, sortie console avec code de sortie non nul). La
+     * vérification "déjà publiée" (409 côté HTTP, refus explicite côté commande) reste
+     * VOLONTAIREMENT hors de cette méthode - elle porte sur is_published, pas sur la
+     * préparation du contenu, et chaque appelant l'exprime déjà avec son propre code/message.
+     * MCP: SELF (<5 lignes utiles par branche)
+     * RAISON: DRY explicite demandé par le propriétaire - une seule implémentation de "prêt à
+     * publier" à travers le code, jamais deux gardes qui pourraient diverger avec le temps.
+     *
+     * ACTION : bonification panel 2026-08-17 (soir) - un 3e type de paire est désormais accepté,
+     * « primary_fact » (fait confirmé à la SOURCE PRIMAIRE, distincte du texte source collé pour
+     * l'agent). Son excerpt N'EST JAMAIS revalidé en sous-chaîne du texte source courant (contrai-
+     * rement à « fact ») - c'est précisément sa raison d'être : citer l'original mot pour mot, pas
+     * le texte secondaire éventuellement paraphrasé ou incomplet fourni à l'agent. La seule
+     * exigence revalidée ici est la présence d'un 'source_url' non vide (déjà validé comme URL à
+     * l'écriture, par NewsCompositionController::storeProofPair() et NewsApplyCommand).
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: design doc, section "Bonification panel 2026-08-17 (soir)" - 3e type de paire.
+     *
+     * @return array{ready: bool, missing: array<int, string>, invalid_pair: array{statement: string, excerpt: string, reason?: string}|null}
+     */
+    public function publishReadinessCheck(): array
+    {
+        $missing = [];
+        if (blank($this->seo_title)) {
+            $missing[] = 'seo_title';
+        }
+        if (blank($this->summary)) {
+            $missing[] = 'summary';
+        }
+        $pairs = $this->editorial_proof_pairs ?? [];
+        if ($pairs === []) {
+            $missing[] = 'editorial_proof_pairs';
+        }
+
+        if ($missing !== []) {
+            return ['ready' => false, 'missing' => $missing, 'invalid_pair' => null];
+        }
+
+        $sourceText = (string) $this->internal_source_text;
+        foreach ($pairs as $pair) {
+            $type = $pair['type'] ?? null;
+
+            if ($type === 'fact' && ! EditorialProofNormalizer::containsExact($sourceText, (string) ($pair['excerpt'] ?? ''))) {
+                return [
+                    'ready' => false,
+                    'missing' => [],
+                    'invalid_pair' => [
+                        'statement' => (string) ($pair['statement'] ?? ''),
+                        'excerpt' => (string) ($pair['excerpt'] ?? ''),
+                        'reason' => 'fact_substring',
+                    ],
+                ];
+            }
+
+            if ($type === 'primary_fact' && blank($pair['source_url'] ?? null)) {
+                return [
+                    'ready' => false,
+                    'missing' => [],
+                    'invalid_pair' => [
+                        'statement' => (string) ($pair['statement'] ?? ''),
+                        'excerpt' => (string) ($pair['excerpt'] ?? ''),
+                        'reason' => 'primary_fact_missing_source_url',
+                    ],
+                ];
+            }
+        }
+
+        return ['ready' => true, 'missing' => [], 'invalid_pair' => null];
+    }
+
+    /**
+     * ACTION : bonification panel 2026-08-17 (soir) - message d'erreur normalisé pour une paire
+     * invalide retournée par publishReadinessCheck(), RÉUTILISÉ par les deux seuls appelants
+     * (NewsCompositionController::publish() et NewsApplyCommand --publish) pour qu'un nouveau
+     * motif de refus (ex. primary_fact sans source_url) ne puisse jamais diverger entre les deux
+     * chemins de publication - même garde-fou DRY que les extractions précédentes de cette classe.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: DRY explicite, un seul endroit à corriger si un nouveau motif de refus apparaît.
+     *
+     * @param array{statement: string, excerpt: string, reason?: string} $pair
+     */
+    public static function publishInvalidPairMessage(array $pair): string
+    {
+        if (($pair['reason'] ?? null) === 'primary_fact_missing_source_url') {
+            return 'La paire de preuve « '.($pair['statement'] ?? '').' » est déclarée « fait primaire » mais n\'a pas d\'URL de source primaire valide. Rien n\'a été publié, rien n\'a été purgé.';
+        }
+
+        return 'La paire de preuve « '.($pair['statement'] ?? '').' » n\'est plus une sous-chaîne exacte du texte source courant. Rien n\'a été publié, rien n\'a été purgé.';
+    }
+
+    /**
+     * ACTION : addendum daté 2026-08-17 (fin de journée, découvert en production) - la fiche
+     * publique (Modules\News\resources\views\public\show.blade.php, bloc `@if($ss) ...
+     * @elseif($article->summary)`) affiche `structured_summary` (résumé MACHINE généré à la
+     * collecte) EN PRIORITÉ sur `summary` : tant que `structured_summary` existe, le résumé
+     * composé à la main via l'écran de composition restait invisible sur le site, même une fois
+     * appliqué. La composition manuelle fait désormais AUTORITÉ sur le résumé publié - cette
+     * méthode JOURNALISE l'ancienne valeur de `structured_summary` (canal 'composition',
+     * récupérable au besoin, jamais perdu en silence) puis la retourne pour que l'appelant
+     * l'inclue dans SON PROPRE update()/transaction ; cette méthode n'écrit rien elle-même, elle
+     * ne fait QUE journaliser (aucun effet de bord en base sans l'update() de l'appelant).
+     *
+     * Réutilisée par DEUX endroits SEULEMENT (DRY explicite, ni plus ni moins) :
+     * NewsApplyCommand (mode --payload, dès qu'un des trois champs de contenu est appliqué) et
+     * NewsCompositionController::publish() (juste avant publishAndPurgeSource()).
+     * VOLONTAIREMENT PAS dans publishAndPurgeSource() elle-même : cette méthode partagée sert
+     * aussi AdminNewsController::toggleArticle() (bascule rapide de fiches jamais passées par
+     * l'écran de composition) et `news:verify-source-purge`, où effacer structured_summary
+     * serait une régression hors mandat. VOLONTAIREMENT PAS dans update() (édition manuelle de
+     * l'écran de composition) : l'admin peut retoucher le texte sans forcer la bascule
+     * d'affichage.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: correctif ciblé d'un défaut découvert en production, DRY entre les deux seuls
+     * chemins concernés.
+     */
+    public function logStructuredSummaryOverride(): void
+    {
+        if ($this->structured_summary === null) {
+            return;
+        }
+
+        Log::channel('composition')->info('structured_summary effacé au profit de la composition manuelle', [
+            'article_id' => $this->id,
+            'slug' => $this->slug,
+            'structured_summary_avant' => $this->structured_summary,
         ]);
     }
 

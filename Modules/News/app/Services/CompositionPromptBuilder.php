@@ -30,6 +30,45 @@ use Modules\News\Models\NewsArticle;
  * aux métadonnées de fraîcheur) plutôt que le seul texte source. Panel de 5 IA unanime : la
  * commande bornée est la SEULE porte d'écriture, jamais d'Eloquent/SQL direct par l'agent.
  *
+ * NOTE DATÉE 2026-08-17 (fin de journée, PROMPT_TEMPLATE_VERSION 2026-08-17.2, un seul
+ * incrément pour l'ensemble des addenda ci-dessous) : décision du propriétaire qui renverse
+ * l'arbitrage "l'agent ne publie jamais" du panel du même jour. Quatre changements dans le même
+ * gabarit :
+ * - ÉTAPE 6 - PUBLICATION (après l'image) : l'agent exécute lui-même
+ *   `php artisan news:apply --publish` en toute fin de flux et rapporte le lien public direct.
+ * - ÉTAPE 5 - RÉVISION ADVERSARIALE (nouvelle, entre l'image et la publication) : relecture
+ *   obligatoire de la fiche telle qu'appliquée sur trois axes (vrai, vérifiable, parfaitement
+ *   vulgarisé) avant que la porte de publication ne s'ouvre.
+ * - Règle de rédaction n°7 à l'ÉTAPE 1 (« recherche avant rédaction ») : une inconnue factuelle
+ *   ouverte doit être cherchée (pp_search) avant d'invoquer « aucune source » comme raccourci.
+ * - structured_summary (résumé MACHINE de la collecte, prioritaire sur summary côté fiche
+ *   publique) est désormais effacé par `news:apply --payload` et par le bouton manuel
+ *   Publier-et-purger - voir NewsArticle::logStructuredSummaryOverride().
+ *
+ * NOTE DATÉE 2026-08-17 (2e révision de la journée, PROMPT_TEMPLATE_VERSION 2026-08-17.3) -
+ * synthèse du panel de 5 IA + 2 décisions du propriétaire. Renumérote les étapes du gabarit
+ * (7 au lieu de 6) :
+ * - ÉTAPE 3 - VERDICT DE DIVERGENCE (nouvelle, entre la preuve éditoriale et l'écriture bornée) :
+ *   compare le texte média à l'original retrouvé, déclare CONCORDANT/IMPRÉCIS/CONTRADICTOIRE ;
+ *   en cas d'écart, le fait de l'original prime toujours et l'écart est énoncé dans la fiche.
+ * - ÉTAPE 2 - PREUVE ÉDITORIALE accepte un 3e type de paire "primary_fact" (citation exacte de
+ *   l'original, source_url obligatoire, préséance sur "fact" en cas d'écart) - non vérifiable
+ *   automatiquement contre l'original (non stocké en base), contrairement à "fact".
+ * - ÉTAPE 4 - ÉCRITURE BORNÉE (ex-étape 3, mécanique inchangée) : le payload accepte désormais
+ *   "primary_sources" (tableau {label, url, note?}) et, à l'étape 6, "image_credit".
+ * - ÉTAPE 5 - RÉVISION ADVERSARIALE (mécanique et axes existants conservés) : ajoute le test de
+ *   retrait, l'audit des omissions délibérées, la reconstitution aveugle et la porte de sortie
+ *   « RESTER EN BROUILLON : [motif] » - verdict non contournable qui arrête le cycle.
+ * - ÉTAPE 6 - PHOTO (remplace l'ex-étape 4 - IMAGE, décision du propriétaire) : l'illustration
+ *   n'est plus générée par IA mais cherchée dans une banque libre de droits (MCP stock-photos),
+ *   APRÈS la révision (texte figé) plutôt qu'avant - décision unanime du panel 4/5. Interdit
+ *   absolu : photo de presse/éditoriale/agence (réclamation PicRights déjà reçue par le projet).
+ * - ÉTAPE 7 - PUBLICATION (ex-étape 6, garde-fous inchangés) : affiche désormais la fiche finale
+ *   à l'écran avant --publish, et le rapport final liste verdict de divergence, trouvailles de la
+ *   révision, omissions délibérées, reconstitution aveugle et traçabilité des recherches.
+ * - buildImagePrompt() ci-dessous alimente maintenant l'étape 6 (consigne de recherche photo) et
+ *   non plus une génération d'image IA - voir sa documentation mise à jour plus bas.
+ *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
  */
@@ -41,7 +80,7 @@ class CompositionPromptBuilder
      * 'composition') pour savoir, a posteriori, sous quelle version d'instructions une fiche a
      * été composée.
      */
-    public const PROMPT_TEMPLATE_VERSION = '2026-08-17.1';
+    public const PROMPT_TEMPLATE_VERSION = '2026-08-17.3';
 
     /**
      * ACTION : signature changée de (string $sourceText, string $title, string $angle) à
@@ -84,12 +123,15 @@ class CompositionPromptBuilder
     }
 
     /**
-     * ACTION : prompt d'image (design doc section 5.3) - jamais de bouton « générer », le libellé
-     * assume le flux manuel (« copier le prompt et ouvrir Gemini »). Contrairement à build()
-     * ci-dessus, ne nécessite PAS le texte source : le style est fixe (identité visuelle du site,
-     * gabarit _composition_image_prompt_template), seuls le titre et l'angle varient par fiche.
-     * Appelée à la fois par NewsCompositionController::generateImagePrompt() (bouton dédié,
-     * inchangé) et par build() ci-dessus (étape 4 du prompt d'orchestration).
+     * ACTION : consigne de recherche photo (design doc section 5.3, RÉVISION 2026-08-17.3 -
+     * décision du propriétaire) - ne produit plus un prompt de génération d'image IA, mais la
+     * consigne de recherche suivie pour choisir une PHOTO libre de droits à l'étape 6 du prompt
+     * d'orchestration. Jamais de bouton « générer », le libellé assume le flux manuel (« copier
+     * la consigne et chercher dans la banque de photos »). Contrairement à build() ci-dessus, ne
+     * nécessite PAS le texte source : la structure de la consigne est fixe (gabarit
+     * _composition_image_prompt_template), seuls le titre et l'angle varient par fiche. Appelée à
+     * la fois par NewsCompositionController::generateImagePrompt() (bouton dédié, inchangé) et
+     * par build() ci-dessus (étape 6 du prompt d'orchestration, après la révision adversariale).
      * MCP: SELF (<5 lignes, même mécanique que build() juste au-dessus)
      * RAISON: garde-fou "l'écran est un assistant de composition, jamais un générateur" (5.3).
      */

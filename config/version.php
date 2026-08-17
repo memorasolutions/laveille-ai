@@ -3887,10 +3887,18 @@ declare(strict_types=1);
  *     news:verify-source-purge (07h05) : purge tout texte source résiduel d'une fiche publiée,
  *     quel que soit le chemin emprunté. Colonne source_acquisition (méthode, URL finale, statut,
  *     mots, empreinte du brut). Preuve : 290 tests News (862 assertions), 0 échec (268 avant).
+ *
+ * 1.185.0 (2026-08-17) - feat(news) : sources primaires citées et visibles (champs
+ *     primary_sources + image_credit, section « Sources » en fin de fiche publique - l'original
+ *     d'abord, le relais ensuite - crédit photo sous l'image) ; 3e type de paire primary_fact
+ *     (citation exacte de l'original + URL, préséance sur le média) ; option --credit de
+ *     news:apply ; prompt v2026-08-17.3 en 7 étapes (verdict de divergence, révision enrichie
+ *     avec reconstitution aveugle et porte RESTER EN BROUILLON, photo libre de droits créditée
+ *     après texte figé - garde PicRights). Preuve : 313 tests News, 0 échec.
  */
 
 $lvMajor = 1;
-$lvMinor = 184;
+$lvMinor = 185;
 $lvPatch = 0;
 
 return [

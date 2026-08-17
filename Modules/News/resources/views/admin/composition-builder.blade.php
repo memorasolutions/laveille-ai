@@ -232,6 +232,22 @@
                                 <textarea id="nc-summary" class="form-control" rows="4" x-model="formSummary" maxlength="2000" placeholder="Résumé court destiné à l'affichage public"></textarea>
                             </div>
 
+                            {{-- Bonification panel 2026-08-17 (soir) - bloc LECTURE SEULE : les
+                                 sources primaires et le crédit photo sont fournis par l'agent
+                                 (NewsApplyCommand --payload), jamais édités depuis cet écran.
+                                 Masqué si aucune source primaire n'a encore été fournie. --}}
+                            <div class="nc-field" x-show="selectedArticle?.primary_sources?.length" x-cloak>
+                                <label>Sources primaires <span class="nc-hint">(fournies par l'agent, lecture seule)</span></label>
+                                <ul style="margin:0; padding-left:18px; font-size:13px; color:#374151; line-height:1.6;">
+                                    <template x-for="src in (selectedArticle?.primary_sources || [])" :key="src.url">
+                                        <li>
+                                            <a :href="src.url" target="_blank" rel="noopener nofollow" x-text="src.label || src.url" style="color:#0B7285; font-weight:600;"></a>
+                                            <template x-if="src.note"><span x-text="' - ' + src.note" style="color:#6b7280;"></span></template>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+
                             <div class="d-flex flex-wrap gap-2 align-items-center">
                                 <button type="button" class="cb-btn" @click="save()" :disabled="loading.saving">
                                     <span x-show="!loading.saving">💾 Enregistrer</span>

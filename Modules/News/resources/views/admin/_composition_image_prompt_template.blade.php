@@ -1,34 +1,45 @@
-{{-- Prompt d'image pour l'écran de composition manuelle d'une actualité (design doc "Actus -
-     composition manuelle assistée" 2026-08-15, section 5.3). Copié manuellement par l'admin dans
-     Gemini (pilotage navigateur, compte propriétaire) : la génération d'image n'est PAS
-     programmable sur ce projet, aucun bouton « générer » n'existe.
-     Style calqué sur le standard établi (mémoire projet "Miniatures via Gemini Playwright" -
-     scène 3D isométrique multi-niveaux, jamais un objet unique) et cohérent avec la palette
-     teal/bleu-acier signature déjà produite par NewsImageService::generateFallbackImage()
-     (dégradé #064E5A par défaut, accents ambre/orange discrets) - ce prompt reproduit ce standard
-     en scène illustrée plutôt qu'en dégradé généré par code.
+{{-- Consigne de recherche photo pour l'écran de composition manuelle d'une actualité (design doc
+     "Actus - composition manuelle assistée" 2026-08-15, section 5.3 ; RÉVISION 2026-08-17.3 -
+     décision du propriétaire, panel de 5 IA : l'illustration générée par IA est abandonnée au
+     profit d'une PHOTO cherchée dans une banque libre de droits, APRÈS que le texte de la fiche
+     soit révisé et figé (étape 5 du gabarit d'orchestration). Ce gabarit ne produit donc plus un
+     prompt de génération d'image 3D isométrique, mais la CONSIGNE DE RECHERCHE que Claude Code CLI
+     (ou l'admin, via le bouton "copier") suit pour choisir la photo à l'étape 6. Le bouton de
+     l'écran reste fonctionnel à l'identique : il copie ce texte tel quel.
      Variables : $title, $angle. --}}
-Crée une image d'illustration pour une fiche d'actualité du site laveille.ai.
+CONSIGNE DE RECHERCHE PHOTO pour une fiche d'actualité du site laveille.ai.
 
-SUJET : {{ $title !== '' ? $title : "(aucun titre de travail fourni - illustre le thème de l'intelligence artificielle en général)" }}
+SUJET : {{ $title !== '' ? $title : "(aucun titre de travail fourni - cherche une photo sur le thème de l'intelligence artificielle en général)" }}
 @if($angle !== '')
 ANGLE ÉDITORIAL : {{ $angle }}
 @endif
 
-STYLE OBLIGATOIRE (identité visuelle du site, ne pas dévier) :
-- Scène 3D ISOMÉTRIQUE multi-niveaux : plusieurs plateformes/socles flottants à des hauteurs
-  différentes, chacun illustrant un aspect du sujet - jamais un objet unique centré sur fond plat.
-- Palette dominante : bleu acier et teal/cyan pâle, avec des touches DISCRÈTES d'ambre/orange en
-  accent (jamais l'orange en couleur dominante).
-- Personnages et objets : silhouettes blanches ou crème, écrans cyan, petits modules/robots/plantes
-  qui peuplent la scène - univers "monde miniature" riche en détails, jamais minimaliste.
-- Connexions/lignes fines cyan ou bleues entre les plateformes.
-- Fond clair (bleu-gris ou bleu ciel très pâle), jamais un fond sombre uniforme.
+MOTS-CLÉS DE RECHERCHE : tire 3 à 5 mots-clés concrets du sujet ci-dessus (objets, lieux, métiers,
+scènes réelles qu'il évoque - jamais des mots abstraits comme « intelligence » ou « innovation »
+qui ne renvoient aucun résultat pertinent dans une banque de photos). Cherche-les en français ET en
+anglais : la majorité des banques libres de droits sont indexées en anglais, une recherche
+uniquement française rate souvent la meilleure photo.
 
-INTERDICTIONS STRICTES :
-- AUCUN texte, AUCUNE lettre, AUCUN chiffre visible dans l'image, nulle part.
-- Aucun logo, aucune marque, aucun drapeau, aucune carte du monde.
-- Pas de style "icône plate 2D" ni de fond sombre uni.
+CRITÈRES D'ACCROCHE :
+- Une photo qui attire l'oeil en vignette : sujet net, cadrage clair, lisible même en petit format.
+- Cohérente avec le sujet réel de la fiche - pas une scène générique interchangeable (poignée de
+  main devant un écran flou, personne souriante devant un ordinateur sans rapport avec le texte).
+- Si une photo dans la palette teal/bleu-acier de la charte du site existe et convient, elle est un
+  plus, mais ce n'est jamais un critère éliminatoire face à une photo plus juste et plus accrocheuse
+  dans d'autres teintes.
 
-FORMAT : cadrage paysage, pensé pour un recadrage 1200×630 (image de partage réseaux sociaux) - garde
-le sujet principal centré, avec de la marge exploitable en haut et en bas de l'image.
+INTERDITS DE LICENCE, STRICTS (le projet a déjà reçu une réclamation PicRights sur une photo de
+presse) :
+- AUCUNE photo de presse, éditoriale ou d'agence (Getty Images, AP, Reuters, agences de presse et
+  équivalents) - même trouvée via une recherche d'image générale. Seules les licences explicitement
+  libres de droits pour usage commercial (Unsplash, Pexels, ou équivalent) sont admises.
+- Aucun logo visible, aucune marque reconnaissable.
+- Éviter les personnes réellement identifiables (visage reconnaissable d'une personnalité publique
+  liée au sujet) - préférer une scène, un objet, ou des personnes anonymes de photo de stock.
+- Vérifier la licence AVANT de retenir la photo, pas après.
+
+FORMAT : cadrage paysage, pensé pour un recadrage 1200×630 (image de partage réseaux sociaux) -
+sujet principal centré, avec de la marge exploitable en haut et en bas de l'image.
+
+CRÉDIT : note le nom du photographe et de la banque exigés par la licence - il sera appliqué à la
+fiche via le champ image_credit (étape 6 du gabarit d'orchestration).

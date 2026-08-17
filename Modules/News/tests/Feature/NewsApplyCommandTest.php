@@ -10,6 +10,12 @@ declare(strict_types=1);
  * anti-écrasement (empreinte + updated_at), l'application d'un payload valide, la fusion des
  * paires de preuve, et le dépôt d'image local (mêmes validations que le dépôt web).
  *
+ * Ajout (note datée 2026-08-17, fin de journée - "l'agent publie lui-même via
+ * news:apply --publish") : le mode --publish, seul autre endroit du code (avec
+ * NewsCompositionController::publish()) autorisé à écrire is_published/published_at. Mêmes
+ * prérequis que le bouton manuel, délégués à NewsArticle::publishReadinessCheck() - voir la
+ * section "── Mode --publish ──" plus bas.
+ *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
  */
@@ -251,6 +257,51 @@ it('refuses a payload file that is not valid JSON', function () {
         ->assertFailed();
 });
 
+// ── Addendum 2026-08-17 : structured_summary (résumé machine) effacé au profit de la
+// composition manuelle - la fiche publique affiche structured_summary EN PRIORITÉ sur summary,
+// donc il doit disparaître dès qu'un payload de contenu est appliqué (Modules\News\resources\
+// views\public\show.blade.php, bloc @if($ss) ... @elseif($article->summary)). ─────────────────
+
+it('applying a valid payload also clears structured_summary (machine summary), logging the old value first', function () {
+    $logPath = storage_path('logs/composition-'.now()->format('Y-m-d').'.log');
+    @unlink($logPath);
+
+    $article = nacArticle([
+        'internal_source_text' => 'Texte source pour la fiche.',
+        'source_content_hash' => hash('sha256', 'Texte source pour la fiche.'),
+        'structured_summary' => ['hook' => 'MARQUEUR-RESUME-MACHINE-A-EFFACER'],
+    ]);
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'seo_title' => 'Titre composé',
+        'summary' => 'Résumé composé.',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->structured_summary)->toBeNull();
+
+    expect(file_exists($logPath))->toBeTrue();
+    $content = file_get_contents($logPath);
+    expect($content)->toContain('MARQUEUR-RESUME-MACHINE-A-EFFACER');
+
+    @unlink($logPath);
+});
+
+it('applying a payload when structured_summary is already null does not error and stays null', function () {
+    $article = nacArticle([
+        'internal_source_text' => 'Texte source pour la fiche.',
+        'source_content_hash' => hash('sha256', 'Texte source pour la fiche.'),
+        'structured_summary' => null,
+    ]);
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), ['seo_title' => 'Titre composé']));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->structured_summary)->toBeNull();
+});
+
 // ── Dépôt d'image local (--image) ───────────────────────────────────────────────────
 
 it('applies a valid local image: produces the 1200x630 social JPEG and a WebP variant', function () {
@@ -315,6 +366,260 @@ it('applying a valid payload writes to the dedicated composition log file', func
     $payload = nacPayloadFile(array_merge(nacFreshMeta($article), ['seo_title' => 'Titre journalisé']));
 
     $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect(file_exists($logPath))->toBeTrue();
+    $content = file_get_contents($logPath);
+    expect($content)->toContain((string) $article->id);
+
+    @unlink($logPath);
+});
+
+// ── Mode --publish (note datée 2026-08-17, fin de journée) ─────────────────────────
+
+it('applies --publish: article published, source text purged, public link in the output, provenance/pairs survive', function () {
+    $sourceText = 'Le ministère a confirmé un investissement de 12 millions de dollars pour ce projet.';
+    $article = nacArticle([
+        'seo_title' => 'Titre publié prêt',
+        'summary' => 'Résumé publié prêt.',
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+        'source_captured_at' => now(),
+        'editorial_proof_pairs' => [[
+            'id' => 'pair-1',
+            'statement' => 'Le ministère investit 12 millions.',
+            'excerpt' => 'un investissement de 12 millions de dollars',
+            'type' => 'fact',
+            'created_at' => now()->toIso8601String(),
+        ]],
+        'is_published' => false,
+    ]);
+
+    $this->artisan('news:apply', ['article' => $article->id, '--publish' => true])
+        ->assertSuccessful()
+        ->expectsOutputToContain(url('/actualites/'.$article->slug));
+
+    $article->refresh();
+    expect($article->is_published)->toBeTrue()
+        ->and($article->published_at)->not->toBeNull()
+        ->and($article->internal_source_text)->toBeNull()
+        // Provenance et paires SURVIVENT à la purge - même garde-fou que le bouton manuel
+        // (NewsCompositionController::publish(), voir SourceMarkdownFetchPublishTest.php).
+        ->and($article->source_content_hash)->toBe(hash('sha256', $sourceText))
+        ->and($article->source_captured_at)->not->toBeNull()
+        ->and($article->editorial_proof_pairs)->toHaveCount(1);
+});
+
+it('refuses --publish when prerequisites are missing (seo_title/summary/editorial_proof_pairs), nothing published', function () {
+    $article = nacArticle([
+        'seo_title' => null,
+        'summary' => null,
+        'editorial_proof_pairs' => [],
+        'is_published' => false,
+    ]);
+
+    $this->artisan('news:apply', ['article' => $article->id, '--publish' => true])
+        ->assertFailed();
+
+    expect($article->fresh()->is_published)->toBeFalse();
+});
+
+it('refuses --publish when a "fact" pair is no longer an exact substring of the current source text - nothing published, nothing purged', function () {
+    $article = nacArticle([
+        'seo_title' => 'Titre publié prêt',
+        'summary' => 'Résumé publié prêt.',
+        'internal_source_text' => 'Le texte source a changé depuis la création de la paire de preuve.',
+        'editorial_proof_pairs' => [[
+            'id' => 'pair-1',
+            'statement' => 'Une affirmation appuyée par une citation.',
+            'excerpt' => 'un extrait qui ne figure plus dans le texte source actuel',
+            'type' => 'fact',
+            'created_at' => now()->toIso8601String(),
+        ]],
+        'is_published' => false,
+    ]);
+
+    $this->artisan('news:apply', ['article' => $article->id, '--publish' => true])
+        ->assertFailed();
+
+    $article->refresh();
+    expect($article->is_published)->toBeFalse()
+        ->and($article->internal_source_text)->not->toBeNull()
+        ->and($article->editorial_proof_pairs)->toHaveCount(1);
+});
+
+it('refuses --publish on an already-published article', function () {
+    $article = nacArticle([
+        'seo_title' => 'Déjà en ligne',
+        'summary' => 'Déjà en ligne.',
+        'editorial_proof_pairs' => [['id' => 'p1', 'statement' => 's', 'excerpt' => 'e', 'type' => 'analysis', 'created_at' => now()->toIso8601String()]],
+        'is_published' => true,
+        'published_at' => now()->subDay(),
+    ]);
+
+    $this->artisan('news:apply', ['article' => $article->id, '--publish' => true])
+        ->assertFailed();
+});
+
+// ── Bonification panel 2026-08-17 (soir) : 3e type de paire "primary_fact" ─────────
+
+it('applies a "primary_fact" pair with a valid source_url, without revalidating its excerpt as a substring', function () {
+    $article = nacArticle([
+        'internal_source_text' => 'Un texte source secondaire qui ne contient pas la citation exacte.',
+        'source_content_hash' => hash('sha256', 'Un texte source secondaire qui ne contient pas la citation exacte.'),
+    ]);
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'editorial_proof_pairs' => [
+            [
+                'statement' => 'Le ministre a confirmé la mesure.',
+                'excerpt' => 'citation exacte tirée du communiqué original, absente du texte collé',
+                'type' => 'primary_fact',
+                'source_url' => 'https://exemple-officiel.com/communique',
+            ],
+        ],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $pairs = $article->fresh()->editorial_proof_pairs;
+    expect($pairs)->toHaveCount(1)
+        ->and($pairs[0]['type'])->toBe('primary_fact')
+        ->and($pairs[0]['source_url'])->toBe('https://exemple-officiel.com/communique');
+});
+
+it('refuses a "primary_fact" pair without a source_url', function () {
+    $article = nacArticle([
+        'internal_source_text' => 'Texte source.',
+        'source_content_hash' => hash('sha256', 'Texte source.'),
+    ]);
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'editorial_proof_pairs' => [
+            ['statement' => 'Affirmation.', 'excerpt' => 'Citation originale.', 'type' => 'primary_fact'],
+        ],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    expect($article->fresh()->editorial_proof_pairs ?? [])->toBeEmpty();
+});
+
+it('refuses a "primary_fact" pair whose source_url is not a valid http/https URL', function () {
+    $article = nacArticle([
+        'internal_source_text' => 'Texte source.',
+        'source_content_hash' => hash('sha256', 'Texte source.'),
+    ]);
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'editorial_proof_pairs' => [
+            ['statement' => 'Affirmation.', 'excerpt' => 'Citation originale.', 'type' => 'primary_fact', 'source_url' => 'ceci-n-est-pas-une-url'],
+        ],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    expect($article->fresh()->editorial_proof_pairs ?? [])->toBeEmpty();
+});
+
+// ── Bonification panel 2026-08-17 (soir) : primary_sources / image_credit ──────────
+
+it('applies primary_sources via payload, persisted as label/url/note', function () {
+    $article = nacArticle();
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'primary_sources' => [
+            ['label' => 'Communiqué officiel', 'url' => 'https://exemple-officiel.com/communique', 'note' => 'Source du chiffre cité'],
+            ['label' => 'Rapport PDF', 'url' => 'https://exemple-officiel.com/rapport.pdf'],
+        ],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $sources = $article->fresh()->primary_sources;
+    expect($sources)->toHaveCount(2)
+        ->and($sources[0]['label'])->toBe('Communiqué officiel')
+        ->and($sources[0]['url'])->toBe('https://exemple-officiel.com/communique')
+        ->and($sources[0]['note'])->toBe('Source du chiffre cité')
+        ->and($sources[1]['note'])->toBeNull();
+});
+
+it('refuses primary_sources containing an invalid URL, persisting nothing', function () {
+    $article = nacArticle();
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'primary_sources' => [
+            ['label' => 'Source douteuse', 'url' => 'pas-une-url-valide'],
+        ],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    expect($article->fresh()->primary_sources ?? [])->toBeEmpty();
+});
+
+it('applies image_credit via payload, persisted', function () {
+    $article = nacArticle();
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'image_credit' => 'Photo : Untel, Unsplash',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->image_credit)->toBe('Photo : Untel, Unsplash');
+});
+
+// ── Bonification panel 2026-08-17 (soir) : primary_sources SURVIT à la publication-purge,
+// même garde-fou que editorial_proof_pairs (voir le test --publish ci-dessus). ─────────────
+
+it('applying --publish preserves primary_sources across the publish-and-purge transaction', function () {
+    $sourceText = 'Le ministère a confirmé un investissement de 12 millions de dollars pour ce projet.';
+    $article = nacArticle([
+        'seo_title' => 'Titre publié prêt',
+        'summary' => 'Résumé publié prêt.',
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+        'primary_sources' => [
+            ['label' => 'Communiqué officiel', 'url' => 'https://exemple-officiel.com/communique', 'note' => null],
+        ],
+        'image_credit' => 'Photo : Untel, Unsplash',
+        'editorial_proof_pairs' => [[
+            'id' => 'pair-1',
+            'statement' => 'Le ministère investit 12 millions.',
+            'excerpt' => 'un investissement de 12 millions de dollars',
+            'type' => 'fact',
+            'created_at' => now()->toIso8601String(),
+        ]],
+        'is_published' => false,
+    ]);
+
+    $this->artisan('news:apply', ['article' => $article->id, '--publish' => true])
+        ->assertSuccessful();
+
+    $article->refresh();
+    expect($article->is_published)->toBeTrue()
+        ->and($article->internal_source_text)->toBeNull()
+        ->and($article->primary_sources)->toHaveCount(1)
+        ->and($article->primary_sources[0]['url'])->toBe('https://exemple-officiel.com/communique')
+        ->and($article->image_credit)->toBe('Photo : Untel, Unsplash');
+});
+
+it('applying --publish writes to the dedicated composition log file', function () {
+    $logPath = storage_path('logs/composition-'.now()->format('Y-m-d').'.log');
+    @unlink($logPath);
+
+    $sourceText = 'Texte source pour vérifier la journalisation de la publication.';
+    $article = nacArticle([
+        'seo_title' => 'Titre journalisé publié',
+        'summary' => 'Résumé journalisé publié.',
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+        'editorial_proof_pairs' => [['id' => 'p1', 'statement' => 's', 'excerpt' => 'e', 'type' => 'analysis', 'created_at' => now()->toIso8601String()]],
+        'is_published' => false,
+    ]);
+
+    $this->artisan('news:apply', ['article' => $article->id, '--publish' => true])
         ->assertSuccessful();
 
     expect(file_exists($logPath))->toBeTrue();

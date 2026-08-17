@@ -62,6 +62,25 @@ use Modules\News\Services\SourceMarkdownFetcher;
  * manuelle oubliable) qui laisseraient une fenêtre où une fiche publiée garde encore son texte
  * source intégral en base.
  *
+ * RÉVISION 2026-08-17 (fin de journée) - décision du propriétaire qui RENVERSE l'arbitrage
+ * ci-dessus : l'agent Claude Code CLI publie désormais lui-même la fiche, en toute fin de son
+ * prompt d'orchestration, via `php artisan news:apply {id} --publish`
+ * (Modules\News\Console\NewsApplyCommand) - PUIS donne au propriétaire le lien public direct
+ * pour une inspection APRÈS publication, plutôt qu'avant. Mitigation retenue : cette porte
+ * applique EXACTEMENT les mêmes prérequis et la même revalidation que le bouton manuel publish()
+ * ci-dessous - les deux chemins délèguent à la même méthode unique
+ * NewsArticle::publishReadinessCheck() puis à NewsArticle::publishAndPurgeSource() (DRY strict,
+ * voir les doc-blocs de ces deux méthodes). publish() ci-dessous reste le SEUL endroit HTTP qui
+ * écrit is_published/published_at ; NewsApplyCommand (--publish) est désormais le SEUL autre
+ * endroit du code entier autorisé à le faire - jamais un Eloquent/SQL/tinker direct par l'agent,
+ * jamais un autre chemin.
+ *
+ * ADDENDUM (même jour, découvert en production) : structured_summary (résumé MACHINE de la
+ * collecte) affiche EN PRIORITÉ sur summary côté fiche publique - publish() ci-dessous l'efface
+ * donc désormais juste avant publishAndPurgeSource() (NewsArticle::logStructuredSummaryOverride(),
+ * DRY avec NewsApplyCommand --payload), pour que la composition manuelle soit enfin visible.
+ * VOLONTAIREMENT PAS dans update() : l'admin peut retoucher le texte sans forcer la bascule.
+ *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
  */
@@ -157,6 +176,15 @@ class NewsCompositionController extends Controller
             // internal_source_text et editorial_proof_pairs ci-dessus.
             'source_captured_at' => $article->source_captured_at?->toIso8601String(),
             'source_content_hash' => $article->source_content_hash,
+            // ACTION : bonification panel 2026-08-17 (soir) - contrairement aux champs internes
+            // ci-dessus, primary_sources/image_credit ne sont PAS secrets (ils sont affichés tels
+            // quels sur la fiche publique) : présents ici pour le bloc lecture seule du volet
+            // "Édition manuelle (filet de secours)" de composition-builder.blade.php - jamais
+            // édités depuis cet écran, seul NewsApplyCommand (--payload) les écrit.
+            // MCP: SELF (<5 lignes)
+            // RAISON: design doc, section "Bonification panel 2026-08-17 (soir)".
+            'primary_sources' => $article->primary_sources ?? [],
+            'image_credit' => $article->image_credit,
             'is_published' => (bool) $article->is_published,
             'site_url' => url('/actualites/'.$article->slug),
             // Lien vers l'article ORIGINAL chez l'éditeur (demande du propriétaire 2026-08-17,
@@ -381,13 +409,23 @@ class NewsCompositionController extends Controller
      * collé - c'est ce qui rend la paraphrase mécaniquement impossible sur les passages déclarés
      * factuels. Une paire déclarée « analyse » n'est soumise à aucune vérification de
      * sous-chaîne : le liant éditorial n'a pas à être une citation (section 5.1 du design doc).
+     *
+     * ACTION : bonification panel 2026-08-17 (soir) - 3e type accepté, « primary_fact » (fait
+     * confirmé à la SOURCE PRIMAIRE) : exige un 'source_url' (URL http/https valide) et son
+     * excerpt est la citation exacte de l'ORIGINAL - volontairement PAS vérifiée en sous-chaîne du
+     * texte source collé pour l'agent (potentiellement une paraphrase ou un texte secondaire) :
+     * c'est précisément sa raison d'être. Même règle appliquée par NewsApplyCommand
+     * (normalizeProofPairs()) - aucune divergence entre les deux portes d'écriture.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: design doc, section "Bonification panel 2026-08-17 (soir)".
      */
     public function storeProofPair(Request $request, NewsArticle $article): JsonResponse
     {
         $validated = $request->validate([
             'statement' => ['required', 'string', 'max:1000'],
             'excerpt' => ['required', 'string', 'max:2000'],
-            'type' => ['required', 'in:fact,analysis'],
+            'type' => ['required', 'in:fact,analysis,primary_fact'],
+            'source_url' => ['required_if:type,primary_fact', 'nullable', 'url:http,https', 'max:2000'],
         ]);
 
         if ($validated['type'] === 'fact') {
@@ -401,13 +439,17 @@ class NewsCompositionController extends Controller
         }
 
         $pairs = $article->editorial_proof_pairs ?? [];
-        $pairs[] = [
+        $newPair = [
             'id' => (string) Str::uuid(),
             'statement' => $validated['statement'],
             'excerpt' => $validated['excerpt'],
             'type' => $validated['type'],
             'created_at' => now('America/Toronto')->toIso8601String(),
         ];
+        if ($validated['type'] === 'primary_fact') {
+            $newPair['source_url'] = $validated['source_url'];
+        }
+        $pairs[] = $newPair;
 
         $article->update(['editorial_proof_pairs' => $pairs]);
 
@@ -508,6 +550,13 @@ class NewsCompositionController extends Controller
      * 3. revalidation à 100 % des paires « fait » contre le texte source COURANT (pas celui du
      *    moment où le prompt a été généré - une seule paire dont l'extrait n'est plus une
      *    sous-chaîne exacte fait échouer TOUTE la publication, rien ne part, rien n'est purgé.
+     *
+     * ACTION : les vérifications 2 et 3 sont DÉLÉGUÉES à NewsArticle::publishReadinessCheck()
+     * (note datée 2026-08-17 ci-dessus dans le doc-bloc de classe) - RÉUTILISÉE telle quelle par
+     * NewsApplyCommand (--publish, porte bornée de l'agent). DRY explicite : une seule
+     * implémentation de « prêt à publier », jamais deux gardes qui pourraient diverger.
+     * MCP: SELF (<5 lignes)
+     * RAISON: extraction demandée par le mandat, aucune autre logique changée.
      */
     public function publish(NewsArticle $article): JsonResponse
     {
@@ -517,37 +566,30 @@ class NewsCompositionController extends Controller
             ], 409);
         }
 
-        $missing = [];
-        if (blank($article->seo_title)) {
-            $missing[] = 'seo_title';
-        }
-        if (blank($article->summary)) {
-            $missing[] = 'summary';
-        }
-        $pairs = $article->editorial_proof_pairs ?? [];
-        if ($pairs === []) {
-            $missing[] = 'editorial_proof_pairs';
-        }
+        $check = $article->publishReadinessCheck();
 
-        if ($missing !== []) {
+        if (! $check['ready']) {
+            if ($check['missing'] !== []) {
+                return response()->json([
+                    'error' => "Cette fiche n'est pas prête à être publiée : ".implode(', ', $check['missing']).' manquant(s).',
+                    'missing' => $check['missing'],
+                ], 422);
+            }
+
             return response()->json([
-                'error' => "Cette fiche n'est pas prête à être publiée : ".implode(', ', $missing).' manquant(s).',
-                'missing' => $missing,
+                'error' => NewsArticle::publishInvalidPairMessage($check['invalid_pair']),
             ], 422);
         }
 
-        $sourceText = (string) $article->internal_source_text;
-        foreach ($pairs as $pair) {
-            if (($pair['type'] ?? null) !== 'fact') {
-                continue;
-            }
-
-            if (! EditorialProofNormalizer::containsExact($sourceText, (string) ($pair['excerpt'] ?? ''))) {
-                return response()->json([
-                    'error' => 'La paire de preuve « '.($pair['statement'] ?? '').' » n\'est plus une sous-chaîne exacte du texte source courant. Rien n\'a été publié, rien n\'a été purgé.',
-                ], 422);
-            }
-        }
+        // ACTION : addendum daté 2026-08-17 (fin de journée) - structured_summary (résumé
+        // MACHINE de la collecte, prioritaire sur summary côté fiche publique) est effacé JUSTE
+        // AVANT la publication, la composition manuelle faisant désormais autorité sur le
+        // résumé affiché. logStructuredSummaryOverride() journalise l'ancienne valeur, réutilisée
+        // telle quelle par NewsApplyCommand (--payload) - DRY, un seul point de la règle.
+        // MCP: SELF (<5 lignes)
+        // RAISON: correctif ciblé d'un défaut découvert en production, même point unique que la
+        // porte bornée de l'agent.
+        $article->logStructuredSummaryOverride();
 
         // ACTION : mécanique d'écriture DÉLÉGUÉE à NewsArticle::publishAndPurgeSource() (addendum
         // "purge garantie sur tous les chemins de publication", 2026-08-17) - RÉUTILISÉE telle
@@ -557,6 +599,7 @@ class NewsCompositionController extends Controller
         // MCP: SELF (<5 lignes)
         // RAISON: DRY explicite, une seule implémentation de la purge à travers le code.
         DB::transaction(function () use ($article): void {
+            $article->update(['structured_summary' => null]);
             $article->publishAndPurgeSource();
         });
 

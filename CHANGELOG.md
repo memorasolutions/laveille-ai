@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.185.0] - 2026-08-17
+
+### Ajouté
+- **Sources primaires citées et visibles (module News, décision propriétaire + panel 5 IA).** Nouveaux champs `primary_sources` (libellé + URL + note, retrouvées par recherche indépendante) et `image_credit`. La fiche publique affiche une section « Sources » en fin (l'original d'abord, le relais média ensuite) et le crédit photo sous l'image. 3e type de paire de preuve `primary_fact` : fait confirmé à la source ORIGINALE (citation exacte + URL obligatoire), avec préséance sur le texte du média en cas d'écart - répond à la faille nommée par le panel (« les preuves certifiaient la fidélité au relais, pas au réel »). Liste blanche `news:apply` étendue ; option `--credit` appliquée avec l'image (le payload exige la fraîcheur, qui change après la première écriture).
+- **Prompt d'orchestration v2026-08-17.3** : 7 étapes réordonnées (panel 4/5 unanime : l'illustration APRÈS le texte figé) - rédaction → preuve → verdict de divergence média/original (CONCORDANT/IMPRÉCIS/CONTRADICTOIRE, le fait de l'original prime toujours) → écriture bornée → révision adversariale enrichie (test de retrait, audit des omissions délibérées, reconstitution aveugle, porte « RESTER EN BROUILLON ») → **photo libre de droits créditée** (banques Unsplash/Pexels, garde PicRights absolue, choisie sur texte figé, vérification qu'elle n'affirme rien que le texte n'affirme pas) → publication avec fiche affichée au rapport puis lien. Consigne de recherche photo remplace le prompt d'illustration 3D.
+
+### Vérifié
+- 313 tests du module News (dont 51 sur les fichiers retouchés re-exécutés après 2 corrections d'assertions), aucun échec. Gabarit rendu réellement (26 569 caractères, 14 marqueurs confirmés programmatiquement). Blade compilé vérifié sur les deux vues.
+
 ## [1.184.0] - 2026-08-17
 
 ### Ajouté

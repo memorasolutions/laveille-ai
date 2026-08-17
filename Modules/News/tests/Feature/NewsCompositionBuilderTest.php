@@ -335,6 +335,81 @@ it('the generated prompt contains the source text, the attribution rule and the 
         ->and($prompt)->toContain('je n\'ai eu accès à aucune source confirmant');
 });
 
+// ── Note datée 2026-08-17 (fin de journée) : l'agent publie lui-même via
+// news:apply --publish (ÉTAPE 7), précédé d'une révision adversariale obligatoire (ÉTAPE 5) ────
+
+it('the generated prompt contains the new step 5 (révision), step 7 (--publish) and the current template version', function () {
+    $admin = ncbAdmin();
+    $source = ncbSource();
+    $article = ncbArticle($source->id, [
+        'internal_source_text' => 'MARQUEUR-TEXTE-SOURCE-ETAPE-5',
+        'seo_title' => 'Titre de travail composé',
+    ]);
+
+    $response = $this->actingAs($admin)->postJson(route('admin.news.composition.generate-prompt', $article));
+
+    $response->assertOk()->assertJson(['success' => true]);
+    $prompt = $response->json('prompt');
+
+    expect($prompt)->toContain('ÉTAPE 5 - RÉVISION ADVERSARIALE')
+        ->and($prompt)->toContain('ÉTAPE 7 - PUBLICATION')
+        ->and($prompt)->toContain('news:apply '.$article->id.' --publish')
+        ->and($prompt)->toContain(url('/actualites/'.$article->slug))
+        ->and($prompt)->toContain('RECHERCHE AVANT RÉDACTION')
+        ->and($prompt)->toContain(\Modules\News\Services\CompositionPromptBuilder::PROMPT_TEMPLATE_VERSION)
+        ->and(\Modules\News\Services\CompositionPromptBuilder::PROMPT_TEMPLATE_VERSION)->toBe('2026-08-17.3');
+});
+
+// ── Révision 2026-08-17.3 : verdict de divergence, primary_fact/primary_sources, ordre
+// révision-avant-photo, reconstitution aveugle, porte "RESTER EN BROUILLON", interdit PicRights ──
+
+it('the generated prompt contains the divergence verdict step, the primary_fact/primary_sources contract and the révision-before-photo order', function () {
+    $admin = ncbAdmin();
+    $source = ncbSource();
+    $article = ncbArticle($source->id, [
+        'internal_source_text' => 'MARQUEUR-TEXTE-SOURCE-ETAPE-3-DIVERGENCE',
+        'seo_title' => 'Titre de travail composé',
+    ]);
+
+    $response = $this->actingAs($admin)->postJson(route('admin.news.composition.generate-prompt', $article));
+
+    $response->assertOk();
+    $prompt = $response->json('prompt');
+
+    // Les 7 étapes, dans l'ordre : rédaction, preuve, verdict, écriture, révision, photo, publication.
+    expect($prompt)->toContain('ÉTAPE 1 - RÉDACTION')
+        ->and($prompt)->toContain('ÉTAPE 2 - PREUVE ÉDITORIALE')
+        ->and($prompt)->toContain('ÉTAPE 3 - VERDICT DE DIVERGENCE')
+        ->and($prompt)->toContain('ÉTAPE 4 - ÉCRITURE BORNÉE')
+        ->and($prompt)->toContain('ÉTAPE 5 - RÉVISION ADVERSARIALE')
+        ->and($prompt)->toContain('ÉTAPE 6 - PHOTO')
+        ->and($prompt)->toContain('ÉTAPE 7 - PUBLICATION')
+        // L'ordre TEXTUEL doit placer la révision (étape 5) avant la photo (étape 6).
+        ->and(strpos($prompt, 'ÉTAPE 5 - RÉVISION ADVERSARIALE'))->toBeLessThan(strpos($prompt, 'ÉTAPE 6 - PHOTO'))
+        // Verdict de divergence : CONCORDANT/IMPRÉCIS/CONTRADICTOIRE, préséance de l'original.
+        ->and($prompt)->toContain('CONCORDANT')
+        ->and($prompt)->toContain('IMPRÉCIS')
+        ->and($prompt)->toContain('CONTRADICTOIRE')
+        ->and($prompt)->toContain('LE FAIT DE L\'ORIGINAL PRIME TOUJOURS')
+        // 3e type de paire de preuve.
+        ->and($prompt)->toContain('primary_fact')
+        ->and($prompt)->toContain('source_url')
+        ->and($prompt)->toContain('PRÉSÉANCE')
+        // Charge utile enrichie.
+        ->and($prompt)->toContain('primary_sources')
+        ->and($prompt)->toContain('image_credit')
+        // Révision adversariale enrichie.
+        ->and($prompt)->toContain('TEST DE RETRAIT')
+        ->and($prompt)->toContain('AUDIT DES OMISSIONS DÉLIBÉRÉES')
+        ->and($prompt)->toContain('RECONSTITUTION AVEUGLE')
+        ->and($prompt)->toContain('RESTER EN BROUILLON')
+        // Interdit de licence photo (incident PicRights réel du projet).
+        ->and($prompt)->toContain('PicRights')
+        ->and($prompt)->toContain('libre')
+        // Traçabilité.
+        ->and($prompt)->toContain('TRAÇABILITÉ');
+});
+
 it('generating a prompt without a source text is rejected (422)', function () {
     $admin = ncbAdmin();
     $source = ncbSource();
@@ -445,11 +520,13 @@ it('the generated prompt contains the mission, the nonce-delimited source, the n
         ->toContain('expected_source_hash')
         ->toContain('expected_updated_at')
         ->toContain($article->source_content_hash)
-        // Les trois étapes et la commande bornée.
+        // Les étapes et la commande bornée (ordre 2026-08-17.3 : rédaction, preuve, verdict de
+        // divergence, écriture bornée, révision, photo, publication).
         ->toContain('ÉTAPE 1 - RÉDACTION')
         ->toContain('ÉTAPE 2 - PREUVE ÉDITORIALE')
-        ->toContain('ÉTAPE 3 - ÉCRITURE BORNÉE')
-        ->toContain('ÉTAPE 4 - IMAGE')
+        ->toContain('ÉTAPE 3 - VERDICT DE DIVERGENCE')
+        ->toContain('ÉTAPE 4 - ÉCRITURE BORNÉE')
+        ->toContain('ÉTAPE 6 - PHOTO')
         ->toContain('php artisan news:apply')
         ->toContain('--payload=')
         ->toContain('--image=')
@@ -634,9 +711,10 @@ it('NewsArticle::activitylogFields does not include editorial_proof_pairs', func
     expect($fields)->not->toContain('editorial_proof_pairs');
 });
 
-// ── Phase D : prompt d'image (design doc section 5.3/5.4) ─────────────────────
+// ── Phase D / révision 2026-08-17.3 : consigne de recherche photo (design doc section 5.3/5.4,
+// décision du propriétaire - remplace le prompt de génération d'image IA) ─────────────────────
 
-it('the image prompt contains the site style and the title of the fiche', function () {
+it('the image prompt contains the photo-search brief, the title of the fiche and the PicRights licence prohibition', function () {
     $admin = ncbAdmin();
     $source = ncbSource();
     $article = ncbArticle($source->id, ['seo_title' => 'MARQUEUR-TITRE-PROMPT-IMAGE-XYZ']);
@@ -651,8 +729,10 @@ it('the image prompt contains the site style and the title of the fiche', functi
 
     expect($prompt)->toContain('MARQUEUR-TITRE-PROMPT-IMAGE-XYZ')
         ->and($prompt)->toContain('impact pour les PME québécoises')
-        ->and($prompt)->toContain('ISOMÉTRIQUE')
-        ->and($prompt)->toContain('AUCUN texte');
+        ->and($prompt)->toContain('CONSIGNE DE RECHERCHE PHOTO')
+        ->and($prompt)->toContain('libre')
+        ->and($prompt)->toContain('PicRights')
+        ->and($prompt)->toContain('image_credit');
 });
 
 it('a non-admin cannot generate an image prompt (403)', function () {

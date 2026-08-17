@@ -396,6 +396,73 @@ it('publish succeeds: article published, internal_source_text purged, provenance
         ->and($article->editorial_proof_pairs)->toHaveCount(1);
 });
 
+// ── publish : bonification panel 2026-08-17 (soir) - primary_sources/image_credit SURVIVENT
+// à la purge, même garde-fou que la provenance/les paires ci-dessus. ────────────────────────
+
+it('publish preserves primary_sources and image_credit across the purge (HTTP button, same guard as news:apply)', function () {
+    $admin = smfAdmin();
+    $source = smfSource();
+    $sourceText = 'Le ministère a confirmé un investissement de 12 millions de dollars pour ce projet.';
+    $article = smfArticle($source->id, [
+        'seo_title' => 'Titre publié prêt',
+        'summary' => 'Résumé publié prêt.',
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+        'primary_sources' => [
+            ['label' => 'Communiqué officiel', 'url' => 'https://exemple-officiel.com/communique', 'note' => null],
+        ],
+        'image_credit' => 'Photo : Untel, Unsplash',
+        'editorial_proof_pairs' => [[
+            'id' => 'pair-1',
+            'statement' => 'Le ministère investit 12 millions.',
+            'excerpt' => 'un investissement de 12 millions de dollars',
+            'type' => 'fact',
+            'created_at' => now()->toIso8601String(),
+        ]],
+        'is_published' => false,
+    ]);
+
+    $response = $this->actingAs($admin)->postJson(route('admin.news.composition.publish', $article));
+
+    $response->assertOk()->assertJson(['success' => true]);
+
+    $article->refresh();
+    expect($article->is_published)->toBeTrue()
+        ->and($article->internal_source_text)->toBeNull()
+        ->and($article->primary_sources)->toHaveCount(1)
+        ->and($article->image_credit)->toBe('Photo : Untel, Unsplash');
+});
+
+// ── publish : addendum 2026-08-17 - structured_summary (résumé machine) effacé juste avant
+// la publication, même règle DRY que NewsApplyCommand --payload (voir NewsApplyCommandTest.php)
+// (Modules\News\resources\views\public\show.blade.php affiche structured_summary EN PRIORITÉ) ──
+
+it('publish also clears structured_summary (machine summary) so the composed summary becomes visible on the public page', function () {
+    $admin = smfAdmin();
+    $source = smfSource();
+    $sourceText = 'Le ministère a confirmé un investissement de 12 millions de dollars pour ce projet.';
+    $article = smfArticle($source->id, [
+        'seo_title' => 'Titre publié prêt',
+        'summary' => 'Résumé publié prêt.',
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+        'structured_summary' => ['hook' => 'MARQUEUR-RESUME-MACHINE-PUBLISH'],
+        'editorial_proof_pairs' => [[
+            'id' => 'pair-1',
+            'statement' => 'Le ministère investit 12 millions.',
+            'excerpt' => 'un investissement de 12 millions de dollars',
+            'type' => 'fact',
+            'created_at' => now()->toIso8601String(),
+        ]],
+        'is_published' => false,
+    ]);
+
+    $response = $this->actingAs($admin)->postJson(route('admin.news.composition.publish', $article));
+
+    $response->assertOk()->assertJson(['success' => true]);
+    expect($article->fresh()->structured_summary)->toBeNull();
+});
+
 // ── publish : déjà publiée ───────────────────────────────────────────────────
 
 it('publish refuses an already-published article (409)', function () {

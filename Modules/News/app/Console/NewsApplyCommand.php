@@ -21,19 +21,46 @@ use Modules\News\Services\NewsImageService;
  * appliquer son travail que par CETTE commande, qui impose une liste blanche stricte de clés et
  * une double protection anti-écrasement (empreinte du texte source + updated_at).
  *
- * Deux modes indépendants, chacun reprenable seul :
- * - `--payload=` : applique seo_title / summary / editorial_proof_pairs depuis un fichier JSON.
+ * Trois modes indépendants, chacun reprenable seul :
+ * - `--payload=` : applique seo_title / summary / editorial_proof_pairs / primary_sources /
+ *                  image_credit depuis un fichier JSON, et efface AUSSI structured_summary
+ *                  (résumé MACHINE de la collecte - addendum daté 2026-08-17, fin de journée, voir
+ *                  NewsArticle::logStructuredSummaryOverride()). primary_sources/image_credit
+ *                  ajoutés par la bonification panel 2026-08-17 (soir, design doc) - contrairement
+ *                  aux autres champs de ce mode, ils NE SONT PAS internes : affichés tels quels
+ *                  sur la fiche publique (Modules\News\resources\views\public\show.blade.php).
  * - `--image=`   : applique un fichier image local déjà obtenu (Gemini), via
  *                  NewsImageService::processFromLocalFile().
+ * - `--publish`  : publie la fiche (voir la note ci-dessous - ajouté 2026-08-17, fin de journée).
+ *
+ * NOTE DATÉE 2026-08-17 (fin de journée, addendum découvert en production) - la fiche publique
+ * affiche structured_summary EN PRIORITÉ sur summary (Modules\News\resources\views\public\
+ * show.blade.php) : tant qu'il subsiste, le résumé composé via --payload restait invisible sur
+ * le site. Le mode --payload l'efface donc désormais systématiquement dès qu'il applique du
+ * contenu - la composition manuelle fait autorité sur le résumé publié. L'ancienne valeur est
+ * JOURNALISÉE avant l'effacement (canal 'composition'), jamais perdue en silence. Même règle
+ * appliquée par NewsCompositionController::publish() juste avant publishAndPurgeSource() - DRY
+ * via NewsArticle::logStructuredSummaryOverride(), réutilisée par les deux SEULS chemins
+ * concernés (jamais update() de l'écran de composition, jamais la bascule rapide
+ * AdminNewsController::toggleArticle()).
  *
  * Un échec du mode --image ne remet jamais en cause une application --payload déjà réussie, et
  * inversement - c'est voulu (étape 4 du prompt généré, reprenable indépendamment de l'étape 3).
  *
- * Ne touche JAMAIS is_published ni published_at : la publication reste un geste manuel du
- * propriétaire, quel que soit ce que la commande applique - via /admin/news/articles ou, depuis
- * la révision 2026-08-17, via le bouton Publier-et-purger de l'écran de composition
- * (Modules\News\Http\Controllers\Admin\NewsCompositionController::publish(), seul autre endroit
- * du code qui écrit ces deux colonnes).
+ * NOTE DATÉE 2026-08-17 (fin de journée) - RENVERSE un arbitrage antérieur du panel de 5 IA du
+ * MÊME jour : décision du propriétaire, l'agent Claude Code CLI publie désormais lui-même la
+ * fiche, en toute fin de son prompt d'orchestration (étape 6, après texte, image ET révision
+ * adversariale obligatoire - étape 5, addendum reçu pendant cette même révision), via le mode
+ * `--publish` ci-dessous, puis donne au propriétaire le lien public direct de la fiche pour une
+ * inspection APRÈS publication (et non plus avant). L'ancien principe « l'agent ne publie
+ * jamais » tombe : CETTE commande reste la SEULE porte, et `--publish` applique EXACTEMENT les
+ * mêmes prérequis et la même revalidation que le bouton manuel Publier-et-purger de l'écran de
+ * composition (Modules\News\Http\Controllers\Admin\NewsCompositionController::publish()) - les
+ * deux chemins délèguent à NewsArticle::publishReadinessCheck() puis
+ * NewsArticle::publishAndPurgeSource() (DRY strict, aucune divergence possible). Cette commande
+ * et publish() ci-dessus sont désormais les DEUX SEULS endroits du code entier qui écrivent
+ * is_published/published_at - jamais un Eloquent/SQL/tinker direct par l'agent, jamais un autre
+ * moyen.
  *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
@@ -45,9 +72,14 @@ class NewsApplyCommand extends Command
      * (y compris is_published, published_at, slug, id...) fait refuser la commande explicitement
      * - jamais un simple avertissement, jamais une clé ignorée en silence.
      */
-    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'seo_title', 'summary', 'editorial_proof_pairs'];
+    // ACTION : bonification panel 2026-08-17 (soir) - 'primary_sources' et 'image_credit'
+    // rejoignent la liste blanche, mêmes garde-fous que les clés existantes (aucune autre clé
+    // n'est jamais acceptée en silence).
+    // MCP: SELF (<5 lignes)
+    // RAISON: design doc, section "Bonification panel 2026-08-17 (soir)".
+    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'seo_title', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit'];
 
-    protected $signature = 'news:apply {article : id de la fiche news_articles} {--payload= : chemin d\'un fichier JSON de charge utile texte} {--image= : chemin d\'un fichier image local à appliquer}';
+    protected $signature = 'news:apply {article : id de la fiche news_articles} {--payload= : chemin d\'un fichier JSON de charge utile texte - efface aussi structured_summary (résumé machine), qui prime sinon sur ta composition côté fiche publique} {--image= : chemin d\'un fichier image local à appliquer} {--credit= : crédit photo appliqué avec --image (le payload exige la fraîcheur, qui change après la 1re écriture - le crédit voyage donc avec l\'image)} {--publish : publie la fiche - mêmes prérequis que le bouton manuel Publier-et-purger, refuse si déjà publiée}';
 
     protected $description = 'Seule porte d\'écriture bornée pour l\'agent de composition (Actus 2.0) - jamais d\'Eloquent/SQL direct par l\'agent.';
 
@@ -72,7 +104,7 @@ class NewsApplyCommand extends Command
         // pouvoir modifier une fiche déjà en ligne par cette porte.
         // MCP: SELF (<5 lignes)
         // RAISON: unique limite non négociable exigée par le mandat, vérifiée avant toute autre
-        // logique des deux modes ci-dessous.
+        // logique des trois modes ci-dessous.
         if ($article->is_published) {
             $this->error("La fiche {$article->id} est déjà publiée - news:apply refuse d'écrire sur une fiche publiée.");
 
@@ -81,9 +113,10 @@ class NewsApplyCommand extends Command
 
         $payloadPath = $this->option('payload');
         $imagePath = $this->option('image');
+        $publish = (bool) $this->option('publish');
 
-        if (! $payloadPath && ! $imagePath) {
-            $this->error('Fournis --payload=<fichier.json> ou --image=<fichier> (ou les deux, en deux appels séparés).');
+        if (! $payloadPath && ! $imagePath && ! $publish) {
+            $this->error('Fournis --payload=<fichier.json>, --image=<fichier> et/ou --publish (au moins une des trois, seule ou combinée).');
 
             return self::FAILURE;
         }
@@ -97,6 +130,13 @@ class NewsApplyCommand extends Command
 
         if ($imagePath) {
             $result = $this->applyImage($article, (string) $imagePath);
+            if ($result !== self::SUCCESS) {
+                return $result;
+            }
+        }
+
+        if ($publish) {
+            $result = $this->applyPublish($article);
             if ($result !== self::SUCCESS) {
                 return $result;
             }
@@ -186,11 +226,50 @@ class NewsApplyCommand extends Command
             $updates['editorial_proof_pairs'] = array_merge($article->editorial_proof_pairs ?? [], $normalizedPairs);
         }
 
+        // ACTION : bonification panel 2026-08-17 (soir) - primary_sources REMPLACE la valeur
+        // existante (contrairement à editorial_proof_pairs, accumulé pair par pair) : la liste de
+        // sources primaires est fournie par l'agent comme un tout cohérent à chaque application,
+        // jamais construite depuis l'écran (lecture seule côté composition-builder.blade.php).
+        // MCP: SELF (<5 lignes)
+        // RAISON: design doc, section "Bonification panel 2026-08-17 (soir)".
+        if (array_key_exists('primary_sources', $decoded)) {
+            $normalizedSources = $this->normalizePrimarySources($decoded['primary_sources']);
+            if ($normalizedSources === null) {
+                // Message d'erreur déjà émis par normalizePrimarySources().
+                return self::FAILURE;
+            }
+            $updates['primary_sources'] = $normalizedSources;
+        }
+
+        if (array_key_exists('image_credit', $decoded)) {
+            if (! is_string($decoded['image_credit'])) {
+                $this->error('image_credit doit être une chaîne de caractères.');
+
+                return self::FAILURE;
+            }
+            if (mb_strlen($decoded['image_credit']) > 255) {
+                $this->error('image_credit dépasse 255 caractères.');
+
+                return self::FAILURE;
+            }
+            $updates['image_credit'] = $decoded['image_credit'];
+        }
+
         if ($updates === []) {
-            $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs n\'est fournie.');
+            $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs / primary_sources / image_credit n\'est fournie.');
 
             return self::FAILURE;
         }
+
+        // ACTION : addendum daté 2026-08-17 (fin de journée) - dès qu'un payload de contenu est
+        // appliqué, structured_summary (résumé MACHINE de la collecte, prioritaire sur summary
+        // côté fiche publique) est effacé : la composition manuelle fait désormais autorité.
+        // logStructuredSummaryOverride() journalise l'ancienne valeur AVANT l'effacement, cette
+        // même méthode réutilisée telle quelle par NewsCompositionController::publish() (DRY).
+        // MCP: SELF (<5 lignes)
+        // RAISON: correctif ciblé, réutilise le point unique déjà extrait sur le modèle.
+        $article->logStructuredSummaryOverride();
+        $updates['structured_summary'] = null;
 
         DB::transaction(function () use ($article, $updates): void {
             $article->update($updates);
@@ -215,7 +294,16 @@ class NewsApplyCommand extends Command
      * NewsCompositionController::storeProofPair() : une paire "fact" doit être une sous-chaîne
      * exacte du texte source.
      *
-     * @return array<int, array{id: string, statement: string, excerpt: string, type: string, created_at: string}>|null
+     * ACTION : bonification panel 2026-08-17 (soir) - 3e type accepté, « primary_fact » (fait
+     * confirmé à la SOURCE PRIMAIRE) : exige un 'source_url' (URL http/https valide) ; son excerpt
+     * N'EST JAMAIS revalidé en sous-chaîne du texte source ($sourceText, le texte collé pour
+     * l'agent) - c'est la citation exacte de l'ORIGINAL, potentiellement absente d'un texte
+     * secondaire paraphrasé ou incomplet. Même règle que
+     * NewsCompositionController::storeProofPair() - aucune divergence entre les deux portes.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: design doc, section "Bonification panel 2026-08-17 (soir)".
+     *
+     * @return array<int, array{id: string, statement: string, excerpt: string, type: string, created_at: string, source_url?: string}>|null
      */
     private function normalizeProofPairs(mixed $pairsInput, string $sourceText): ?array
     {
@@ -235,8 +323,8 @@ class NewsApplyCommand extends Command
                 return null;
             }
 
-            if (! in_array($pair['type'], ['fact', 'analysis'], true)) {
-                $this->error("Type de paire invalide : « {$pair['type']} » (attendu : fact ou analysis).");
+            if (! in_array($pair['type'], ['fact', 'analysis', 'primary_fact'], true)) {
+                $this->error("Type de paire invalide : « {$pair['type']} » (attendu : fact, analysis ou primary_fact).");
 
                 return null;
             }
@@ -247,12 +335,82 @@ class NewsApplyCommand extends Command
                 return null;
             }
 
-            $normalized[] = [
+            $entry = [
                 'id' => (string) Str::uuid(),
                 'statement' => $pair['statement'],
                 'excerpt' => $pair['excerpt'],
                 'type' => $pair['type'],
                 'created_at' => now('America/Toronto')->toIso8601String(),
+            ];
+
+            if ($pair['type'] === 'primary_fact') {
+                $sourceUrl = is_string($pair['source_url'] ?? null) ? trim($pair['source_url']) : '';
+                if ($sourceUrl === '' || ! filter_var($sourceUrl, FILTER_VALIDATE_URL) || ! preg_match('#^https?://#i', $sourceUrl)) {
+                    $this->error("Paire « primary_fact » sans URL de source primaire valide (http/https) : « {$pair['statement']} ».");
+
+                    return null;
+                }
+                $entry['source_url'] = $sourceUrl;
+            }
+
+            $normalized[] = $entry;
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * ACTION : bonification panel 2026-08-17 (soir) - valide et normalise le tableau de sources
+     * primaires du payload. REMPLACE intégralement la valeur existante (contrairement aux paires
+     * de preuve, accumulées) : voir le commentaire d'appel dans applyPayload(). Borne à 10
+     * sources : une fiche cite ses sources primaires, elle n'en dresse pas un annuaire.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: design doc, section "Bonification panel 2026-08-17 (soir)".
+     *
+     * @return array<int, array{label: string, url: string, note: string|null}>|null
+     */
+    private function normalizePrimarySources(mixed $sourcesInput): ?array
+    {
+        if (! is_array($sourcesInput)) {
+            $this->error('primary_sources doit être un tableau de sources.');
+
+            return null;
+        }
+
+        if (count($sourcesInput) > 10) {
+            $this->error('primary_sources dépasse la limite de 10 sources.');
+
+            return null;
+        }
+
+        $normalized = [];
+
+        foreach ($sourcesInput as $source) {
+            if (! is_array($source) || ! isset($source['label'], $source['url'])
+                || ! is_string($source['label']) || ! is_string($source['url'])) {
+                $this->error('Chaque source de primary_sources doit contenir label et url (chaînes).');
+
+                return null;
+            }
+
+            $url = trim($source['url']);
+            if (! filter_var($url, FILTER_VALIDATE_URL) || ! preg_match('#^https?://#i', $url)) {
+                $this->error("URL de source primaire invalide (http/https attendu) : « {$url} ».");
+
+                return null;
+            }
+
+            $note = $source['note'] ?? null;
+            if ($note !== null && ! is_string($note)) {
+                $this->error('note de primary_sources doit être une chaîne de caractères si fournie.');
+
+                return null;
+            }
+
+            $normalized[] = [
+                'label' => $source['label'],
+                'url' => $url,
+                'note' => $note,
             ];
         }
 
@@ -304,12 +462,73 @@ class NewsApplyCommand extends Command
             return self::FAILURE;
         }
 
+        // Crédit photo appliqué AVEC l'image (option --credit) : le mode payload exige la
+        // fraîcheur (updated_at), qui change dès la première écriture - le crédit voyage donc
+        // avec l'image, jamais dans un second payload voué au refus.
+        $credit = trim((string) $this->option('credit'));
+        if ($credit !== '') {
+            if (mb_strlen($credit) > 255) {
+                $this->error('Le crédit photo dépasse 255 caractères.');
+
+                return self::FAILURE;
+            }
+            $article->update(['image_credit' => $credit]);
+        }
+
         Log::channel('composition')->info('news:apply - image appliquée', [
             'article_id' => $article->id,
+            'image_credit' => $credit !== '' ? $credit : null,
             'prompt_version' => CompositionPromptBuilder::PROMPT_TEMPLATE_VERSION,
         ]);
 
-        $this->info("Fiche {$article->id} : image appliquée ({$imageUrl}).");
+        $this->info("Fiche {$article->id} : image appliquée ({$imageUrl})".($credit !== '' ? " avec crédit « {$credit} »" : '').'.');
+
+        return self::SUCCESS;
+    }
+
+    /**
+     * Mode --publish (ajouté 2026-08-17, fin de journée - voir la note datée du doc-bloc de
+     * classe) : publie la fiche par la porte bornée, seule alternative au bouton manuel
+     * Publier-et-purger de l'écran de composition. Le refus « déjà publiée » est déjà couvert
+     * plus haut dans handle() (avant même l'appel à cette méthode, quel que soit le mode
+     * demandé) - cette méthode ne revérifie donc que les prérequis de CONTENU, exactement comme
+     * NewsCompositionController::publish() après son propre refus 409.
+     *
+     * DÉLÈGUE la règle « prêt à publier » à NewsArticle::publishReadinessCheck() (DRY strict,
+     * même méthode que le bouton manuel - AUCUNE divergence possible entre les deux chemins) et
+     * la mécanique d'écriture à NewsArticle::publishAndPurgeSource() (même règle unique
+     * « publier = purger » que tous les autres chemins de publication du projet).
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: réutilise deux méthodes déjà extraites pour ce mandat, aucune logique nouvelle
+     * inventée ici.
+     */
+    private function applyPublish(NewsArticle $article): int
+    {
+        $check = $article->publishReadinessCheck();
+
+        if (! $check['ready']) {
+            if ($check['missing'] !== []) {
+                $this->error("Cette fiche n'est pas prête à être publiée : ".implode(', ', $check['missing']).' manquant(s).');
+            } else {
+                $this->error(NewsArticle::publishInvalidPairMessage($check['invalid_pair']));
+            }
+
+            return self::FAILURE;
+        }
+
+        DB::transaction(function () use ($article): void {
+            $article->publishAndPurgeSource();
+        });
+
+        $siteUrl = url('/actualites/'.$article->slug);
+
+        Log::channel('composition')->info('news:apply - publication par la porte bornée', [
+            'article_id' => $article->id,
+            'slug' => $article->slug,
+            'prompt_version' => CompositionPromptBuilder::PROMPT_TEMPLATE_VERSION,
+        ]);
+
+        $this->info("Fiche {$article->id} publiée : {$siteUrl}");
 
         return self::SUCCESS;
     }
