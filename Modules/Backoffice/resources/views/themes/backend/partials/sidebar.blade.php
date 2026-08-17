@@ -64,6 +64,9 @@
                         @if(Route::has('admin.news.articles.index'))
                         <li class="nav-item"><a href="{{ route('admin.news.articles.index') }}" class="nav-link {{ request()->routeIs('admin.news.articles.*') ? 'active' : '' }}" {{ request()->routeIs('admin.news.articles.*') ? 'aria-current=page' : '' }}>{{ __('Actualités IA') }}</a></li>
                         @endif
+                        @if(Route::has('admin.news.composition.index'))
+                        <li class="nav-item"><a href="{{ route('admin.news.composition.index') }}" class="nav-link {{ request()->routeIs('admin.news.composition.*') ? 'active' : '' }}" {{ request()->routeIs('admin.news.composition.*') ? 'aria-current=page' : '' }}>{{ __('Actualités IA 2.0') }}</a></li>
+                        @endif
                         @if(Route::has('admin.news.sources.index'))
                         <li class="nav-item"><a href="{{ route('admin.news.sources.index') }}" class="nav-link {{ request()->routeIs('admin.news.sources.*') ? 'active' : '' }}" {{ request()->routeIs('admin.news.sources.*') ? 'aria-current=page' : '' }}>{{ __('Sources RSS') }}</a></li>
                         @endif

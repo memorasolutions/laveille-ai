@@ -3853,11 +3853,17 @@ declare(strict_types=1);
  *     aucune. Books : 39 tests (16 nouveaux), 0 échec. Auth : 44 tests (7 nouveaux) ;
  *     Directory : 121 tests, 0 échec. Deux migrations Books testées up + rollback + re-up
  *     en local, données restaurées à l'identique au rollback. Validation visuelle complète.
+ *
+ * 1.182.1 (2026-08-17) - fix(backoffice) : entrée de menu « Actualités IA 2.0 » ajoutée au
+ *     sidebar admin, sous « Actualités IA », vers l'écran de composition /admin/news/composition
+ *     (l'écran livré en v1.181.0 n'avait aucune entrée de menu - signalé par le propriétaire).
+ *     Idiome exact des autres entrées (garde Route::has, état actif, aria-current). Preuve :
+ *     nouveau test AdminSidebarCompositionLinkTest, 2 tests / 4 assertions, 0 échec.
  */
 
 $lvMajor = 1;
 $lvMinor = 182;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.182.1] - 2026-08-17
+
+### Corrigé
+- **Entrée de menu « Actualités IA 2.0 » ajoutée au sidebar admin (module Backoffice).** L'écran de composition `/admin/news/composition` livré en v1.181.0 n'avait aucune entrée de menu (signalé par le propriétaire) : ajout sous « Actualités IA », dans l'idiome exact des autres entrées (garde `Route::has`, état actif, `aria-current`).
+
+### Vérifié
+- Nouveau test `AdminSidebarCompositionLinkTest` : le lien apparaît sur une page admin réellement rendue pour un admin, et l'écran de composition redirige un visiteur non connecté - 2 tests, 4 assertions, aucun échec.
+
 ## [1.182.0] - 2026-08-17
 
 ### Ajouté
