@@ -12,6 +12,22 @@ use Intervention\Image\ImageManager;
 
 class NewsImageService
 {
+    // ACTION : bornes de validation du dépôt manuel d'image (design doc "Actus - composition
+    // manuelle assistée" 2026-08-15, section 5.4), déplacées ici (révision 2026-08-17) depuis
+    // NewsCompositionController - c'est ici, le seul service de traitement d'image du module,
+    // qu'elles sont réutilisées par DEUX appelants : le contrôleur (dépôt web, validation Laravel
+    // 'image'/'mimes') ET NewsApplyCommand (dépôt --image en CLI, validation manuelle sans
+    // middleware Laravel disponible) - une seule source de vérité plutôt que deux jeux de bornes
+    // qui pourraient diverger. Poids maximal raisonnable pour une image source (avant
+    // recadrage/compression) : 8 Mo. Dimensions minimales : la moitié de la cible 1200x630, pour
+    // éviter un agrandissement excessif (au-delà, l'image serait visiblement floue une fois
+    // recadrée en 1200x630).
+    public const MAX_UPLOAD_KB = 8192;
+
+    public const MIN_WIDTH = 600;
+
+    public const MIN_HEIGHT = 315;
+
     private function disk(): \Illuminate\Contracts\Filesystem\Filesystem
     {
         return Storage::disk('public');
@@ -132,8 +148,38 @@ class NewsImageService
      */
     public function processFromUploadedFile(\Illuminate\Http\UploadedFile $file, int $articleId): string
     {
+        return $this->processImageAtPath($file->getRealPath(), $articleId);
+    }
+
+    /**
+     * ACTION : traite un fichier d'image local (révision 2026-08-17, prompt d'orchestration
+     * Claude Code CLI - design doc section "Révision 2026-08-17") - appelé par
+     * NewsApplyCommand::handle() en mode --image, une fois que l'agent a obtenu le fichier
+     * généré via Gemini sur le disque local. RÉUTILISE la logique interne de
+     * processFromUploadedFile() ci-dessus (extraite dans processImageAtPath() juste en dessous) :
+     * un fichier local et un UploadedFile Laravel exposent tous deux, au fond, un CHEMIN de
+     * fichier lisible - aucune raison de dupliquer le pipeline cover/webp/jpg pour la seule
+     * différence de type d'entrée. La validation (type MIME réel, poids, dimensions minimales)
+     * est faite par l'appelant AVANT cet appel (NewsApplyCommand), même contrat que
+     * processFromUploadedFile() avec NewsCompositionController::uploadImage().
+     * MCP: SELF (<5 lignes)
+     * RAISON: refactor DRY explicitement demandé par le mandat - pas de service concurrent.
+     */
+    public function processFromLocalFile(string $path, int $articleId): string
+    {
+        return $this->processImageAtPath($path, $articleId);
+    }
+
+    /**
+     * Pipeline commun (cover 1200x630 + JPEG social + WebP page) partagé par
+     * processFromUploadedFile() et processFromLocalFile() ci-dessus. Laisse volontairement
+     * remonter toute exception à l'appelant : celui-ci doit savoir immédiatement si le
+     * traitement a échoué.
+     */
+    private function processImageAtPath(string $path, int $articleId): string
+    {
         $manager = new ImageManager(new Driver());
-        $image = $manager->read($file->getRealPath());
+        $image = $manager->read($path);
         $image->cover(1200, 630);
 
         $webpContent = $image->toWebp(80)->toString();

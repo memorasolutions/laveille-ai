@@ -135,6 +135,21 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Écran de composition (Actus 2.0, révision 2026-08-17 - prompt d'orchestration Claude
+        // Code CLI) - canal dédié à news:apply (Modules\News\Console\NewsApplyCommand), la SEULE
+        // porte d'écriture bornée mise à la disposition de l'agent. 'level' fixé en dur à 'info',
+        // volontairement INDÉPENDANT de LOG_LEVEL - même parade que 'fusion'/'quality_gate'/
+        // 'directory_screenshots' ci-dessus : LOG_LEVEL=error en prod avalerait sinon chaque
+        // application avant écriture, rendant l'historique des écritures bornées invisible.
+        // Rétention alignée sur les autres canaux 'daily' du projet.
+        'composition' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/composition.log'),
+            'level' => 'info',
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

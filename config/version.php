@@ -3859,11 +3859,22 @@ declare(strict_types=1);
  *     (l'écran livré en v1.181.0 n'avait aucune entrée de menu - signalé par le propriétaire).
  *     Idiome exact des autres entrées (garde Route::has, état actif, aria-current). Preuve :
  *     nouveau test AdminSidebarCompositionLinkTest, 2 tests / 4 assertions, 0 échec.
+ *
+ * 1.183.0 (2026-08-17) - feat(news) : révision Actus 2.0 sur retours du propriétaire, panel 5 IA
+ *     unanime. Écran de composition minimal (texte source + un bouton « Enregistrer et générer le
+ *     prompt Claude Code » qui persiste le texte lui-même - bug « Colle d'abord le texte » éliminé
+ *     par conception) ; champs manuels conservés mais repliés en « filet de secours » ; lien
+ *     « Voir la fiche publique » remplacé par un badge Brouillon tant que rien n'est publié.
+ *     Prompt réécrit : orchestration Claude Code CLI (spotlighting à nonce aléatoire, interdictions
+ *     nommées, fraîcheur hash+updated_at, étapes ordonnées, image via Gemini reprenable seule).
+ *     Nouvelle commande news:apply = seule porte d'écriture de l'agent (brouillon forcé, liste
+ *     blanche de colonnes, refus fiche publiée, refus données périmées, canal de journalisation
+ *     dédié à niveau fixe). Preuve : 268 tests News (759 assertions), 0 échec (244 avant).
  */
 
 $lvMajor = 1;
-$lvMinor = 182;
-$lvPatch = 1;
+$lvMinor = 183;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

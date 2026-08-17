@@ -68,6 +68,9 @@ class NewsServiceProvider extends ServiceProvider
             \Modules\News\Console\PruneSeoCommand::class,
             \Modules\News\Console\BackfillAutoToolDetectionCommand::class,
             \Modules\News\Console\NotifyNewsDigestCommand::class,
+            // Actus 2.0, révision 2026-08-17 (prompt d'orchestration Claude Code CLI) - SEULE
+            // porte d'écriture bornée pour l'agent, voir docblock de la classe.
+            \Modules\News\Console\NewsApplyCommand::class,
         ]);
     }
 

@@ -38,21 +38,18 @@ use Modules\News\Services\NewsImageService;
  * complément 5.2 déjà couvert ici). La bascule de publication existe déjà ailleurs
  * (Modules\News\Http\Controllers\AdminNewsController::toggleArticle).
  *
+ * RÉVISION 2026-08-17 (design doc, section "Révision 2026-08-17 - prompt d'orchestration Claude
+ * Code CLI") : generatePrompt() cible désormais Claude Code CLI comme exécutant complet et
+ * accepte le texte source EN LIGNE (paramètre source_text, persisté avec la même règle que
+ * update() via applySourceProvenance()). La seule porte d'écriture pour l'agent est la commande
+ * `php artisan news:apply` (Modules\News\Console\NewsApplyCommand) - ce contrôleur n'écrit
+ * jamais is_published/published_at et ne l'a jamais fait.
+ *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
  */
 class NewsCompositionController extends Controller
 {
-    // Bornes de validation du dépôt manuel d'image (design doc section 5.4). Poids maximal
-    // raisonnable pour une image source (avant recadrage/compression) : 8 Mo. Dimensions
-    // minimales : la moitié de la cible 1200x630, pour éviter un agrandissement excessif
-    // (au-delà, l'image serait visiblement floue une fois recadrée en 1200x630).
-    private const IMAGE_MAX_KB = 8192;
-
-    private const IMAGE_MIN_WIDTH = 600;
-
-    private const IMAGE_MIN_HEIGHT = 315;
-
     public function __construct(
         private readonly CompositionPromptBuilder $promptBuilder,
         private readonly NewsImageService $imageService,
@@ -169,22 +166,7 @@ class NewsCompositionController extends Controller
             'internal_source_text' => ['sometimes', 'nullable', 'string', 'max:200000'],
         ]);
 
-        // ACTION : complément de conservation (design doc section 5.2) - date de capture et
-        // empreinte SHA-256 recalculées UNIQUEMENT quand un texte source non vide est
-        // effectivement collé ou modifié (hash différent de celui déjà en base), jamais sur un
-        // texte vide ou inchangé. Un vidage manuel du champ (texte source envoyé vide, puis
-        // "Enregistrer") laisse donc ces deux valeurs INTACTES, exactement comme la suppression
-        // dédiée destroySourceText() - même garde-fou "survit à la suppression" (5.2), quel que
-        // soit le chemin emprunté pour vider le texte.
-        // MCP: SELF (<5 lignes)
-        // RAISON: preuve durable qui rend le texte intégral supprimable sans perte.
-        if (array_key_exists('internal_source_text', $validated) && filled($validated['internal_source_text'])) {
-            $hash = hash('sha256', $validated['internal_source_text']);
-            if ($hash !== $article->source_content_hash) {
-                $validated['source_content_hash'] = $hash;
-                $validated['source_captured_at'] = now('America/Toronto');
-            }
-        }
+        $this->applySourceProvenance($validated, $article);
 
         $article->update($validated);
 
@@ -192,6 +174,31 @@ class NewsCompositionController extends Controller
             'success' => true,
             'updated_at' => $article->fresh()->updated_at?->toIso8601String(),
         ]);
+    }
+
+    /**
+     * ACTION : complément de conservation (design doc section 5.2) - date de capture et
+     * empreinte SHA-256 recalculées UNIQUEMENT quand un texte source non vide est effectivement
+     * collé ou modifié (hash différent de celui déjà en base), jamais sur un texte vide ou
+     * inchangé. Extraite d'update() (révision 2026-08-17) pour être réutilisée telle quelle par
+     * generatePrompt() ci-dessous, qui accepte désormais le texte source EN LIGNE - DRY : une
+     * seule règle de provenance, deux points d'entrée. Un vidage manuel du champ laisse ces deux
+     * valeurs INTACTES, exactement comme la suppression dédiée destroySourceText() - même
+     * garde-fou "survit à la suppression" (5.2), quel que soit le chemin emprunté.
+     * MCP: SELF (<5 lignes)
+     * RAISON: preuve durable qui rend le texte intégral supprimable sans perte.
+     */
+    private function applySourceProvenance(array &$fields, NewsArticle $article): void
+    {
+        if (! array_key_exists('internal_source_text', $fields) || blank($fields['internal_source_text'])) {
+            return;
+        }
+
+        $hash = hash('sha256', $fields['internal_source_text']);
+        if ($hash !== $article->source_content_hash) {
+            $fields['source_content_hash'] = $hash;
+            $fields['source_captured_at'] = now('America/Toronto');
+        }
     }
 
     /**
@@ -214,17 +221,35 @@ class NewsCompositionController extends Controller
     }
 
     /**
-     * Génère le prompt de rédaction (Phase B, design doc section 5.1 et 7) à partir du texte
-     * source déjà collé, du titre de travail et d'un angle éditorial optionnel. Calqué sur
-     * ConcentreBuilderController::generate() : aucune écriture en base ici, uniquement du texte
-     * à copier - l'écran reste un assistant de composition, jamais un générateur (section 5.3 du
-     * design doc).
+     * Génère le prompt d'orchestration Claude Code CLI (Phase B, design doc section 5.1 et 7,
+     * révision 2026-08-17) à partir du texte source déjà collé, du titre de travail et d'un
+     * angle éditorial optionnel. Calqué sur ConcentreBuilderController::generate() : aucune
+     * écriture "métier" ici (le seul écrit possible est la persistance du texte source lui-même,
+     * identique à update()) - l'écran reste un assistant de composition, jamais un générateur
+     * (section 5.3 du design doc).
+     *
+     * ACTION : accepte désormais 'source_text' EN LIGNE (révision 2026-08-17) - corrige le
+     * blocage "Colle d'abord le texte source" quand l'admin colle le texte puis clique
+     * directement sur Générer sans passer par Enregistrer d'abord. S'il est fourni et non blanc,
+     * il est persisté AVANT génération avec EXACTEMENT la même logique que update()
+     * (applySourceProvenance ci-dessus), puis le garde 422 s'applique au champ persisté - jamais
+     * à un état intermédiaire non sauvegardé.
+     * MCP: SELF (<5 lignes)
+     * RAISON: réutilise applySourceProvenance() déjà extraite pour update(), aucune divergence
+     * de règle entre les deux points d'entrée.
      */
     public function generatePrompt(Request $request, NewsArticle $article): JsonResponse
     {
         $validated = $request->validate([
             'angle' => ['nullable', 'string', 'max:500'],
+            'source_text' => ['nullable', 'string', 'max:200000'],
         ]);
+
+        if (filled($validated['source_text'] ?? null)) {
+            $update = ['internal_source_text' => $validated['source_text']];
+            $this->applySourceProvenance($update, $article);
+            $article->update($update);
+        }
 
         if (blank($article->internal_source_text)) {
             return response()->json([
@@ -232,11 +257,18 @@ class NewsCompositionController extends Controller
             ], 422);
         }
 
-        $prompt = $this->promptBuilder->build(
-            $article->internal_source_text,
-            $article->seo_title ?: $article->title,
-            $validated['angle'] ?? ''
-        );
+        // Backfill défensif : garantit que l'empreinte utilisée dans le prompt (que
+        // NewsApplyCommand comparera au mot près) est TOUJOURS celle persistée en base, même
+        // pour une fiche dont le texte source aurait été inséré avant l'ajout du complément de
+        // conservation (section 5.2) ou par un chemin autre que update()/ce contrôleur.
+        if (blank($article->source_content_hash)) {
+            $article->update([
+                'source_content_hash' => hash('sha256', $article->internal_source_text),
+                'source_captured_at' => $article->source_captured_at ?? now('America/Toronto'),
+            ]);
+        }
+
+        $prompt = $this->promptBuilder->build($article, $validated['angle'] ?? '');
 
         return response()->json([
             'success' => true,
@@ -339,16 +371,16 @@ class NewsCompositionController extends Controller
                 'required',
                 'image',
                 'mimes:jpg,jpeg,png,webp',
-                'max:'.self::IMAGE_MAX_KB,
+                'max:'.NewsImageService::MAX_UPLOAD_KB,
             ],
         ]);
 
         $file = $request->file('image');
         [$width, $height] = array_pad((array) @getimagesize($file->getRealPath()), 2, 0);
 
-        if ($width < self::IMAGE_MIN_WIDTH || $height < self::IMAGE_MIN_HEIGHT) {
+        if ($width < NewsImageService::MIN_WIDTH || $height < NewsImageService::MIN_HEIGHT) {
             return response()->json([
-                'error' => "Image trop petite (reçue {$width}×{$height}px, minimum ".self::IMAGE_MIN_WIDTH.'×'.self::IMAGE_MIN_HEIGHT.'px).',
+                'error' => "Image trop petite (reçue {$width}×{$height}px, minimum ".NewsImageService::MIN_WIDTH.'×'.NewsImageService::MIN_HEIGHT.'px).',
             ], 422);
         }
 

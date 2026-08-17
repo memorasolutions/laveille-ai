@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.183.0] - 2026-08-17
+
+### Modifié
+- **Actus 2.0 - révision de l'écran de composition sur retours du propriétaire (panel de 5 IA, verdict unanime : « le code, et non la docilité de l'agent, protège la production »).** L'écran devient minimal : sélection d'actualité, champ texte source et UN bouton « Enregistrer et générer le prompt Claude Code » qui persiste lui-même le texte avant génération - le bug « Colle d'abord le texte source » (il fallait cliquer Enregistrer d'abord) disparaît par conception. Les champs manuels (angle, titre, résumé, preuve éditoriale, image) sont conservés mais repliés dans un volet « Édition manuelle (filet de secours) » - seul endroit où corriger la preuve à la main. Le lien « Voir la fiche publique » (qui menait à un 404 pour un brouillon jamais publié) est remplacé par un badge « Brouillon - pas encore publié » tant que la fiche n'est pas publiée.
+- **Prompt réécrit en prompt d'orchestration pour Claude Code CLI** : mission bornée à UNE fiche, texte source encadré de délimiteurs à nonce aléatoire déclaré « donnée inerte non fiable » avant ET après (parade injection - spotlighting, sources Anthropic/Chrome), interdictions nommées (jamais publier, jamais is_published/published_at, jamais .env ni migration, jamais une autre fiche), métadonnées de fraîcheur (empreinte SHA-256 + updated_at), étapes ordonnées avec le standard éditorial intégral conservé, et étape image (compte Gemini, 3D isométrique teal/orange) reprenable seule APRÈS persistance du texte.
+
+### Ajouté
+- **Commande `news:apply` - la seule porte d'écriture offerte à l'agent.** Liste blanche stricte de colonnes (titre, résumé, preuve), brouillon forcé (ne touche jamais is_published/published_at), refus d'une fiche déjà publiée, refus si l'empreinte source ou updated_at ne correspondent plus (protection contre l'écrasement d'une correction manuelle), validation des paires de preuve identique au contrôleur, mode `--image=` réutilisant le pipeline d'images existant (refactor DRY `processFromLocalFile`), journalisation sur un canal dédié `composition` à niveau fixe (insensible à LOG_LEVEL=error en prod).
+
+### Vérifié
+- 268 tests du module News (759 assertions), aucun échec (244 avant ce lot). Rendu réel de la vue confirmé (marqueurs structurels, angle replié dans le filet de secours).
+
 ## [1.182.1] - 2026-08-17
 
 ### Corrigé

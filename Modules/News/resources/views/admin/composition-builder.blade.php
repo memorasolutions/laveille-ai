@@ -35,6 +35,17 @@
     .nc-status-ok { color:#059669; font-size:13px; font-weight:600; }
     .nc-status-error { color:#dc2626; font-size:13px; font-weight:600; }
     .nc-internal-badge { background:#fef3c7; color:#92400e; padding:2px 10px; border-radius:10px; font-size:11px; font-weight:700; }
+    .nc-draft-badge { color:#92400e; font-weight:700; font-size:12px; }
+    /* Écran minimal (panel "club des sages", 2026-08-15) - filet de secours replié par défaut :
+       titre/résumé publiés, preuve éditoriale, image et bouton Enregistrer restent accessibles
+       sans être imposés au parcours principal (source + génération du prompt). */
+    .nc-manual-details { margin-top:22px; border-top:1px solid #e2e8f0; padding-top:14px; }
+    .nc-manual-details > summary { cursor:pointer; font-weight:700; color:#064E5A; font-size:14px; list-style:none; display:flex; align-items:center; gap:8px; min-height:44px; }
+    .nc-manual-details > summary::-webkit-details-marker { display:none; }
+    .nc-manual-details > summary::before { content:'▶'; font-size:11px; color:#0B7285; }
+    .nc-manual-details[open] > summary::before { content:'▼'; }
+    .nc-manual-details > summary:focus-visible { outline:3px solid #0B7285; outline-offset:2px; }
+    .nc-manual-details[open] > summary { margin-bottom:10px; }
     /* Fiche de preuve éditoriale (Phase B, design doc 2026-08-15 section 7) - carte par paire
        phrase/extrait, badge de décision fait/analyse. */
     .nc-proof-card { border:1px solid #e2e8f0; border-radius:8px; padding:10px 12px; margin-bottom:10px; background:#fff; }
@@ -107,36 +118,42 @@
                         <div class="nc-selected-banner">
                             <div class="nc-orig-title" x-text="selectedArticle.title"></div>
                             <div class="nc-meta">
-                                <a :href="selectedArticle.site_url" target="_blank" rel="noopener">🔗 Voir la fiche publique</a>
+                                <a :href="selectedArticle.site_url" target="_blank" rel="noopener" x-show="selectedArticle.is_published" x-cloak>🔗 Voir la fiche publique</a>
+                                <span class="nc-draft-badge" x-show="!selectedArticle.is_published" x-cloak>📝 Brouillon - pas encore publié</span>
                                 &nbsp;·&nbsp;
                                 <button type="button" @click="removeItem()" style="background:none; border:none; color:#0B7285; text-decoration:underline; cursor:pointer; padding:0; font-size:12px;">Changer d'actualité</button>
                             </div>
                         </div>
 
-                        <div class="nc-field">
-                            <label for="nc-title">Titre publié</label>
-                            <input id="nc-title" type="text" class="form-control" x-model="formSeoTitle" maxlength="255" placeholder="Titre affiché sur la fiche publique">
-                        </div>
-
-                        <div class="nc-field">
-                            <label for="nc-summary">Résumé publié <span class="nc-hint">(court, affiché sur la fiche et les cartes)</span></label>
-                            <textarea id="nc-summary" class="form-control" rows="4" x-model="formSummary" maxlength="2000" placeholder="Résumé court destiné à l'affichage public"></textarea>
-                        </div>
-
+                        {{-- Écran minimal (panel "club des sages", 2026-08-15) : le texte source et le
+                             bouton de génération du prompt sont la seule action attendue de ce parcours -
+                             tout le reste (édition manuelle des champs publiés, preuve éditoriale, image)
+                             est un filet de secours replié, jamais supprimé. --}}
                         <div class="nc-field">
                             <label for="nc-source">Texte complet de la source <span class="nc-hint">(interne, jamais publié)</span></label>
                             <textarea id="nc-source" class="form-control nc-source-textarea" rows="10" x-model="formSourceText" placeholder="Colle ici le texte intégral de l'article source, pour ton propre usage éditorial."></textarea>
+                            <div class="mt-2">
+                                <button type="button"
+                                        class="cb-btn cb-btn-secondary"
+                                        style="color:#dc2626; border-color:#dc2626;"
+                                        x-show="formSourceText"
+                                        x-cloak
+                                        :disabled="loading.deleting"
+                                        @click="$dispatch('confirm-action', {
+                                            title: 'Confirmer',
+                                            message: 'Supprimer définitivement le texte source collé pour cette actualité ? Cette action est irréversible.',
+                                            action: () => deleteSourceText()
+                                        })">
+                                    <span x-show="!loading.deleting">🗑 Supprimer le texte source</span>
+                                    <span x-show="loading.deleting" x-cloak>⏳ Suppression…</span>
+                                </button>
+                            </div>
                         </div>
 
                         <div class="nc-field">
-                            <label for="nc-angle">Angle éditorial <span class="nc-hint">(optionnel, transmis au prompt de rédaction)</span></label>
-                            <input id="nc-angle" type="text" class="form-control" x-model="formAngle" maxlength="500" placeholder="Ex. impact pour les PME québécoises">
-                        </div>
-
-                        <div class="nc-field">
-                            <button type="button" class="cb-btn cb-btn-secondary" @click="generatePrompt()" :disabled="promptLoading || !formSourceText">
-                                <span x-show="!promptLoading">🧠 Générer le prompt de rédaction</span>
-                                <span x-show="promptLoading" x-cloak>⏳ Génération…</span>
+                            <button type="button" class="cb-btn" @click="generatePrompt()" :disabled="promptLoading || !formSourceText">
+                                <span x-show="!promptLoading">🧠 Enregistrer et générer le prompt Claude Code</span>
+                                <span x-show="promptLoading" x-cloak>⏳ Enregistrement et génération…</span>
                             </button>
                             <span class="nc-status-error" x-show="promptError" x-cloak x-text="promptError" style="display:block; margin-top:6px;"></span>
                             <template x-if="generatedPrompt">
@@ -147,118 +164,123 @@
                                             <span x-show="!promptCopied">📋 Copier le prompt</span>
                                             <span x-show="promptCopied" x-cloak>✓ Copié</span>
                                         </button>
-                                        <span class="nc-hint">Colle-le ensuite dans ton outil d'IA externe, puis recolle son résultat dans le titre et le résumé ci-dessus.</span>
+                                        <span class="nc-hint">Colle-le dans Claude Code (CLI) : il rédige, remplit la preuve, crée l'image et met à jour la fiche - qui reste en brouillon.</span>
                                     </div>
                                 </div>
                             </template>
                         </div>
 
-                        <div class="d-flex flex-wrap gap-2 align-items-center">
-                            <button type="button" class="cb-btn" @click="save()" :disabled="loading.saving">
-                                <span x-show="!loading.saving">💾 Enregistrer</span>
-                                <span x-show="loading.saving" x-cloak>⏳ Enregistrement…</span>
-                            </button>
-                            <button type="button"
-                                    class="cb-btn cb-btn-secondary"
-                                    style="color:#dc2626; border-color:#dc2626;"
-                                    x-show="formSourceText"
-                                    x-cloak
-                                    :disabled="loading.deleting"
-                                    @click="$dispatch('confirm-action', {
-                                        title: 'Confirmer',
-                                        message: 'Supprimer définitivement le texte source collé pour cette actualité ? Cette action est irréversible.',
-                                        action: () => deleteSourceText()
-                                    })">
-                                <span x-show="!loading.deleting">🗑 Supprimer le texte source</span>
-                                <span x-show="loading.deleting" x-cloak>⏳ Suppression…</span>
-                            </button>
-                            <span class="nc-status-ok" x-show="saveOk" x-cloak x-transition>✓ Enregistré</span>
-                            <span class="nc-status-error" x-show="saveError" x-cloak x-text="saveError"></span>
-                        </div>
+                        <details class="nc-manual-details">
+                            <summary>Édition manuelle (filet de secours)</summary>
 
-                        <div class="nc-proof-section">
-                            <div class="cb-section-title" style="font-size:14px; margin-top:20px;">🔍 Passages à vérifier</div>
-                            <p class="nc-hint" style="display:block; margin:0 0 10px;">
-                                Pour chaque passage risqué du résumé publié : colle la phrase, colle l'extrait exact de la
-                                source qui l'appuie, et déclare-le « fait » (l'extrait doit être une sous-chaîne exacte
-                                du texte source) ou « analyse » (ton propre liant éditorial, non vérifié).
-                            </p>
-
-                            <template x-if="!proofPairs.length">
-                                <p class="nc-hint" style="display:block; font-style:italic;">Aucun passage vérifié pour l'instant.</p>
-                            </template>
-
-                            <div class="nc-proof-pair" x-show="proofPairs.length" x-cloak>
-                                <template x-for="pair in proofPairs" :key="pair.id">
-                                    <div class="nc-proof-card">
-                                        <div class="nc-proof-type" :class="pair.type === 'fact' ? 'nc-proof-type-fact' : 'nc-proof-type-analysis'" x-text="pair.type === 'fact' ? 'FAIT' : 'ANALYSE'"></div>
-                                        <div class="nc-proof-statement" x-text="pair.statement"></div>
-                                        <div class="nc-proof-excerpt" x-text="'« ' + pair.excerpt + ' »'"></div>
-                                        <button type="button" class="nc-proof-remove" @click="$dispatch('confirm-action', {
-                                            title: 'Confirmer',
-                                            message: 'Retirer ce passage de la fiche de preuve éditoriale ?',
-                                            action: () => removeProofPair(pair.id)
-                                        })">🗑 Retirer</button>
-                                    </div>
-                                </template>
-                            </div>
-
-                            <div class="nc-proof-form">
-                                <div class="nc-field">
-                                    <label for="nc-pair-statement">Phrase du résumé</label>
-                                    <input id="nc-pair-statement" type="text" class="form-control" x-model="newPairStatement" maxlength="1000" placeholder="La phrase publiée qui doit être appuyée">
-                                </div>
-                                <div class="nc-field">
-                                    <label for="nc-pair-excerpt">Extrait de la source</label>
-                                    <textarea id="nc-pair-excerpt" class="form-control nc-source-textarea" rows="3" x-model="newPairExcerpt" maxlength="2000" placeholder="Copie-colle l'extrait exact du texte source"></textarea>
-                                    <span class="nc-hint" x-show="newPairType === 'fact' && newPairExcerpt" x-cloak x-text="excerptFoundInSource() ? '✓ trouvé tel quel dans le texte source' : '⚠ introuvable tel quel dans le texte source'" :style="excerptFoundInSource() ? 'color:#059669' : 'color:#dc2626'"></span>
-                                </div>
-                                <div class="nc-field">
-                                    <label for="nc-pair-type">Décision</label>
-                                    <select id="nc-pair-type" class="form-control" x-model="newPairType" style="max-width:220px;">
-                                        <option value="fact">Fait (sous-chaîne exacte exigée)</option>
-                                        <option value="analysis">Analyse (liant éditorial)</option>
-                                    </select>
-                                </div>
-                                <button type="button" class="cb-btn cb-btn-secondary" @click="addProofPair()" :disabled="pairSaving || !newPairStatement || !newPairExcerpt || (newPairType === 'fact' && !excerptFoundInSource())">
-                                    <span x-show="!pairSaving">➕ Ajouter le passage</span>
-                                    <span x-show="pairSaving" x-cloak>⏳ Ajout…</span>
-                                </button>
-                                <span class="nc-status-error" x-show="pairError" x-cloak x-text="pairError" style="display:block; margin-top:6px;"></span>
-                            </div>
-                        </div>
-
-                        <div class="nc-image-section">
-                            <div class="cb-section-title" style="font-size:14px; margin-top:20px;">🖼️ Image</div>
-                            <p class="nc-hint" style="display:block; margin:0 0 10px;">
-                                La génération d'image par IA n'est pas automatisée sur ce site : copie le prompt,
-                                colle-le dans Gemini, puis dépose ici le fichier obtenu. La fiche s'enregistre et
-                                se publie sans image - le dépôt remplace simplement l'illustration générée par défaut.
-                            </p>
-
-                            <template x-if="selectedArticle?.image_url">
-                                <img :src="selectedArticle.image_url" alt="" class="nc-image-preview">
-                            </template>
-
-                            <div class="nc-field" style="margin-top:10px;">
-                                <button type="button" class="cb-btn cb-btn-secondary" @click="copyImagePromptAndOpenGemini()" :disabled="imagePromptLoading">
-                                    <span x-show="!imagePromptLoading">📋 Copier le prompt d'image et ouvrir Gemini</span>
-                                    <span x-show="imagePromptLoading" x-cloak>⏳ Génération du prompt…</span>
-                                </button>
-                                <span class="nc-status-ok" x-show="imagePromptCopied" x-cloak x-transition>✓ Prompt copié, Gemini ouvert dans un nouvel onglet</span>
-                                <span class="nc-status-error" x-show="imagePromptError" x-cloak x-text="imagePromptError" style="display:block; margin-top:6px;"></span>
+                            <div class="nc-field">
+                                <label for="nc-angle">Angle éditorial <span class="nc-hint">(optionnel, transmis au prompt de rédaction)</span></label>
+                                <input id="nc-angle" type="text" class="form-control" x-model="formAngle" maxlength="500" placeholder="Ex. impact pour les PME québécoises">
                             </div>
 
                             <div class="nc-field">
-                                <label for="nc-image-file">Déposer le fichier reçu de Gemini <span class="nc-hint">(jpeg, png ou webp)</span></label>
-                                <div class="nc-image-dropzone">
-                                    <input id="nc-image-file" type="file" accept="image/jpeg,image/png,image/webp" @change="uploadImage($event.target.files[0])" :disabled="imageUploading">
-                                    <div x-show="imageUploading" x-cloak>⏳ Traitement de l'image…</div>
-                                </div>
-                                <span class="nc-status-ok" x-show="imageUploadOk" x-cloak x-transition>✓ Image déposée et traitée (JPEG social 1200×630 + WebP)</span>
-                                <span class="nc-status-error" x-show="imageUploadError" x-cloak x-text="imageUploadError" style="display:block; margin-top:6px;"></span>
+                                <label for="nc-title">Titre publié</label>
+                                <input id="nc-title" type="text" class="form-control" x-model="formSeoTitle" maxlength="255" placeholder="Titre affiché sur la fiche publique">
                             </div>
-                        </div>
+
+                            <div class="nc-field">
+                                <label for="nc-summary">Résumé publié <span class="nc-hint">(court, affiché sur la fiche et les cartes)</span></label>
+                                <textarea id="nc-summary" class="form-control" rows="4" x-model="formSummary" maxlength="2000" placeholder="Résumé court destiné à l'affichage public"></textarea>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <button type="button" class="cb-btn" @click="save()" :disabled="loading.saving">
+                                    <span x-show="!loading.saving">💾 Enregistrer</span>
+                                    <span x-show="loading.saving" x-cloak>⏳ Enregistrement…</span>
+                                </button>
+                                <span class="nc-status-ok" x-show="saveOk" x-cloak x-transition>✓ Enregistré</span>
+                                <span class="nc-status-error" x-show="saveError" x-cloak x-text="saveError"></span>
+                            </div>
+
+                            <div class="nc-proof-section">
+                                <div class="cb-section-title" style="font-size:14px; margin-top:20px;">🔍 Passages à vérifier</div>
+                                <p class="nc-hint" style="display:block; margin:0 0 10px;">
+                                    Pour chaque passage risqué du résumé publié : colle la phrase, colle l'extrait exact de la
+                                    source qui l'appuie, et déclare-le « fait » (l'extrait doit être une sous-chaîne exacte
+                                    du texte source) ou « analyse » (ton propre liant éditorial, non vérifié).
+                                </p>
+
+                                <template x-if="!proofPairs.length">
+                                    <p class="nc-hint" style="display:block; font-style:italic;">Aucun passage vérifié pour l'instant.</p>
+                                </template>
+
+                                <div class="nc-proof-pair" x-show="proofPairs.length" x-cloak>
+                                    <template x-for="pair in proofPairs" :key="pair.id">
+                                        <div class="nc-proof-card">
+                                            <div class="nc-proof-type" :class="pair.type === 'fact' ? 'nc-proof-type-fact' : 'nc-proof-type-analysis'" x-text="pair.type === 'fact' ? 'FAIT' : 'ANALYSE'"></div>
+                                            <div class="nc-proof-statement" x-text="pair.statement"></div>
+                                            <div class="nc-proof-excerpt" x-text="'« ' + pair.excerpt + ' »'"></div>
+                                            <button type="button" class="nc-proof-remove" @click="$dispatch('confirm-action', {
+                                                title: 'Confirmer',
+                                                message: 'Retirer ce passage de la fiche de preuve éditoriale ?',
+                                                action: () => removeProofPair(pair.id)
+                                            })">🗑 Retirer</button>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <div class="nc-proof-form">
+                                    <div class="nc-field">
+                                        <label for="nc-pair-statement">Phrase du résumé</label>
+                                        <input id="nc-pair-statement" type="text" class="form-control" x-model="newPairStatement" maxlength="1000" placeholder="La phrase publiée qui doit être appuyée">
+                                    </div>
+                                    <div class="nc-field">
+                                        <label for="nc-pair-excerpt">Extrait de la source</label>
+                                        <textarea id="nc-pair-excerpt" class="form-control nc-source-textarea" rows="3" x-model="newPairExcerpt" maxlength="2000" placeholder="Copie-colle l'extrait exact du texte source"></textarea>
+                                        <span class="nc-hint" x-show="newPairType === 'fact' && newPairExcerpt" x-cloak x-text="excerptFoundInSource() ? '✓ trouvé tel quel dans le texte source' : '⚠ introuvable tel quel dans le texte source'" :style="excerptFoundInSource() ? 'color:#059669' : 'color:#dc2626'"></span>
+                                    </div>
+                                    <div class="nc-field">
+                                        <label for="nc-pair-type">Décision</label>
+                                        <select id="nc-pair-type" class="form-control" x-model="newPairType" style="max-width:220px;">
+                                            <option value="fact">Fait (sous-chaîne exacte exigée)</option>
+                                            <option value="analysis">Analyse (liant éditorial)</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" class="cb-btn cb-btn-secondary" @click="addProofPair()" :disabled="pairSaving || !newPairStatement || !newPairExcerpt || (newPairType === 'fact' && !excerptFoundInSource())">
+                                        <span x-show="!pairSaving">➕ Ajouter le passage</span>
+                                        <span x-show="pairSaving" x-cloak>⏳ Ajout…</span>
+                                    </button>
+                                    <span class="nc-status-error" x-show="pairError" x-cloak x-text="pairError" style="display:block; margin-top:6px;"></span>
+                                </div>
+                            </div>
+
+                            <div class="nc-image-section">
+                                <div class="cb-section-title" style="font-size:14px; margin-top:20px;">🖼️ Image</div>
+                                <p class="nc-hint" style="display:block; margin:0 0 10px;">
+                                    La génération d'image par IA n'est pas automatisée sur ce site : copie le prompt,
+                                    colle-le dans Gemini, puis dépose ici le fichier obtenu. La fiche s'enregistre et
+                                    se publie sans image - le dépôt remplace simplement l'illustration générée par défaut.
+                                </p>
+
+                                <template x-if="selectedArticle?.image_url">
+                                    <img :src="selectedArticle.image_url" alt="" class="nc-image-preview">
+                                </template>
+
+                                <div class="nc-field" style="margin-top:10px;">
+                                    <button type="button" class="cb-btn cb-btn-secondary" @click="copyImagePromptAndOpenGemini()" :disabled="imagePromptLoading">
+                                        <span x-show="!imagePromptLoading">📋 Copier le prompt d'image et ouvrir Gemini</span>
+                                        <span x-show="imagePromptLoading" x-cloak>⏳ Génération du prompt…</span>
+                                    </button>
+                                    <span class="nc-status-ok" x-show="imagePromptCopied" x-cloak x-transition>✓ Prompt copié, Gemini ouvert dans un nouvel onglet</span>
+                                    <span class="nc-status-error" x-show="imagePromptError" x-cloak x-text="imagePromptError" style="display:block; margin-top:6px;"></span>
+                                </div>
+
+                                <div class="nc-field">
+                                    <label for="nc-image-file">Déposer le fichier reçu de Gemini <span class="nc-hint">(jpeg, png ou webp)</span></label>
+                                    <div class="nc-image-dropzone">
+                                        <input id="nc-image-file" type="file" accept="image/jpeg,image/png,image/webp" @change="uploadImage($event.target.files[0])" :disabled="imageUploading">
+                                        <div x-show="imageUploading" x-cloak>⏳ Traitement de l'image…</div>
+                                    </div>
+                                    <span class="nc-status-ok" x-show="imageUploadOk" x-cloak x-transition>✓ Image déposée et traitée (JPEG social 1200×630 + WebP)</span>
+                                    <span class="nc-status-error" x-show="imageUploadError" x-cloak x-text="imageUploadError" style="display:block; margin-top:6px;"></span>
+                                </div>
+                            </div>
+                        </details>
                     </div>
                 </template>
             </div>
@@ -400,7 +422,7 @@ function compositionBuilder(opts) {
                         'X-Requested-With': 'XMLHttpRequest',
                     },
                     credentials: 'same-origin',
-                    body: JSON.stringify({ angle: this.formAngle }),
+                    body: JSON.stringify({ angle: this.formAngle, source_text: this.formSourceText }),
                 });
                 const data = await res.json();
                 if (!res.ok) {

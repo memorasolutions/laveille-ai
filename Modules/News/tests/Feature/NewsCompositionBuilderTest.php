@@ -111,6 +111,40 @@ it('allows an admin to view the composition screen', function () {
     $response->assertSee('news-article-picker.js', false);
 });
 
+// ── Écran minimal : édition manuelle repliée, bouton principal (panel "club des sages",
+//    2026-08-15) ──────────────────────────────────────────────────────────────────────
+
+it('the composition screen renders the minimal layout: manual-edition details and the save+generate button', function () {
+    $admin = ncbAdmin();
+
+    $response = $this->actingAs($admin)->get(route('admin.news.composition.index'));
+
+    $response->assertOk();
+    $response->assertSee('nc-manual-details', false);
+    $response->assertSee('Édition manuelle (filet de secours)', false);
+    $response->assertSee('Enregistrer et générer le prompt Claude Code', false);
+    // Le texte source est désormais transmis dans la requête de génération elle-même, le clic
+    // fonctionne donc sans passage préalable par le bouton « Enregistrer » replié.
+    $response->assertSee('source_text: this.formSourceText', false);
+});
+
+it('the composition screen renders both variants of the public-fiche link, gated by is_published', function () {
+    $admin = ncbAdmin();
+
+    $response = $this->actingAs($admin)->get(route('admin.news.composition.index'));
+
+    $response->assertOk();
+    // Lien réel, affiché seulement si l'actualité est publiée.
+    $response->assertSee('x-show="selectedArticle.is_published"', false);
+    $response->assertSee('Voir la fiche publique', false);
+    // Badge texte (jamais un lien), affiché seulement pour un brouillon jamais publié.
+    $response->assertSee('x-show="!selectedArticle.is_published"', false);
+    $response->assertSee('Brouillon - pas encore publié', false);
+    // Régression du bug signalé : l'ancien lien inconditionnel (404 garanti sur un brouillon)
+    // ne doit plus exister tel quel.
+    $response->assertDontSee('<a :href="selectedArticle.site_url" target="_blank" rel="noopener">🔗 Voir la fiche publique</a>', false);
+});
+
 // ── Persistance du texte source ────────────────────────────────────────────────
 
 it('an admin can save the internal source text of a selected article', function () {
@@ -317,6 +351,128 @@ it('a non-admin cannot generate a prompt (403)', function () {
     $response = $this->actingAs($user)->postJson(route('admin.news.composition.generate-prompt', $article));
 
     $response->assertStatus(403);
+});
+
+// ── Révision 2026-08-17 : texte source EN LIGNE dans generatePrompt (corrige le blocage
+// "Colle d'abord le texte source" quand l'admin colle le texte sans passer par Enregistrer) ──
+
+it('generatePrompt with an inline source_text persists it then generates the prompt', function () {
+    $admin = ncbAdmin();
+    $source = ncbSource();
+    $article = ncbArticle($source->id, ['internal_source_text' => null]);
+    expect($article->source_content_hash)->toBeNull();
+
+    $response = $this->actingAs($admin)->postJson(
+        route('admin.news.composition.generate-prompt', $article),
+        ['source_text' => 'MARQUEUR-TEXTE-SOURCE-EN-LIGNE-XYZ']
+    );
+
+    $response->assertOk()->assertJson(['success' => true]);
+    expect($response->json('prompt'))->toContain('MARQUEUR-TEXTE-SOURCE-EN-LIGNE-XYZ');
+
+    $article->refresh();
+    expect($article->internal_source_text)->toBe('MARQUEUR-TEXTE-SOURCE-EN-LIGNE-XYZ')
+        ->and($article->source_content_hash)->toBe(hash('sha256', 'MARQUEUR-TEXTE-SOURCE-EN-LIGNE-XYZ'))
+        ->and($article->source_captured_at)->not->toBeNull();
+});
+
+it('generatePrompt is still rejected (422) when both the stored and the inline source text are blank', function () {
+    $admin = ncbAdmin();
+    $source = ncbSource();
+    $article = ncbArticle($source->id, ['internal_source_text' => null]);
+
+    $response = $this->actingAs($admin)->postJson(
+        route('admin.news.composition.generate-prompt', $article),
+        ['source_text' => '   ']
+    );
+
+    $response->assertStatus(422);
+    expect($article->fresh()->internal_source_text)->toBeNull();
+});
+
+it('generatePrompt backfills a missing source_content_hash for an article already carrying a stored source text', function () {
+    $admin = ncbAdmin();
+    $source = ncbSource();
+    // Simule une fiche dont le texte source aurait été inséré avant le complément de
+    // conservation (section 5.2) ou par un chemin autre que update() : hash absent malgré un
+    // texte source déjà présent.
+    $article = ncbArticle($source->id, [
+        'internal_source_text' => 'Texte source déjà présent, sans empreinte enregistrée.',
+        'source_content_hash' => null,
+        'source_captured_at' => null,
+    ]);
+
+    $response = $this->actingAs($admin)->postJson(route('admin.news.composition.generate-prompt', $article));
+
+    $response->assertOk();
+    $expectedHash = hash('sha256', 'Texte source déjà présent, sans empreinte enregistrée.');
+    expect($response->json('prompt'))->toContain($expectedHash);
+    expect($article->fresh()->source_content_hash)->toBe($expectedHash);
+});
+
+// ── Révision 2026-08-17 : contenu du prompt d'orchestration Claude Code CLI ────────────────
+
+it('the generated prompt contains the mission, the nonce-delimited source, the named prohibitions, the freshness metadata and the news:apply command', function () {
+    $admin = ncbAdmin();
+    $source = ncbSource();
+    $article = ncbArticle($source->id, [
+        'internal_source_text' => 'Texte source pour vérifier le contenu du prompt d\'orchestration.',
+        'seo_title' => 'Titre de travail',
+    ]);
+
+    $response = $this->actingAs($admin)->postJson(route('admin.news.composition.generate-prompt', $article));
+
+    $response->assertOk();
+    $prompt = $response->json('prompt');
+    $article->refresh();
+
+    expect($prompt)
+        ->toContain('Tu es Claude Code CLI dans le projet laveille.ai')
+        ->toContain("fiche d'actualité {$article->id}")
+        ->toContain($article->slug)
+        // Nonce à usage unique : les deux délimiteurs partagent le même suffixe aléatoire.
+        ->toContain('<<<SOURCE-')
+        ->toContain('<<<FIN-SOURCE-')
+        // Interdictions nommées.
+        ->toContain('is_published')
+        ->toContain('published_at')
+        ->toContain('.env')
+        ->toContain('AUCUNE migration')
+        ->toContain("Ne modifie AUCUNE autre fiche")
+        // Métadonnées de fraîcheur.
+        ->toContain('expected_source_hash')
+        ->toContain('expected_updated_at')
+        ->toContain($article->source_content_hash)
+        // Les trois étapes et la commande bornée.
+        ->toContain('ÉTAPE 1 - RÉDACTION')
+        ->toContain('ÉTAPE 2 - PREUVE ÉDITORIALE')
+        ->toContain('ÉTAPE 3 - ÉCRITURE BORNÉE')
+        ->toContain('ÉTAPE 4 - IMAGE')
+        ->toContain('php artisan news:apply')
+        ->toContain('--payload=')
+        ->toContain('--image=')
+        ->toContain('POINT D\'ARRÊT')
+        // Jamais d'Eloquent/SQL direct.
+        ->toContain('N\'écris JAMAIS directement en base')
+        // Le standard de rédaction antérieur reste intégralement présent.
+        ->toContain('ATTRIBUTION DANS LA PHRASE')
+        ->toContain('je n\'ai eu accès à aucune source confirmant');
+});
+
+it('each call to generatePrompt uses a fresh random nonce', function () {
+    $admin = ncbAdmin();
+    $source = ncbSource();
+    $article = ncbArticle($source->id, ['internal_source_text' => 'Texte source stable pour comparer deux nonces.']);
+
+    $first = $this->actingAs($admin)->postJson(route('admin.news.composition.generate-prompt', $article))->json('prompt');
+    $second = $this->actingAs($admin)->postJson(route('admin.news.composition.generate-prompt', $article))->json('prompt');
+
+    preg_match('/<<<SOURCE-([A-Za-z0-9]+)>>>/', $first, $firstMatch);
+    preg_match('/<<<SOURCE-([A-Za-z0-9]+)>>>/', $second, $secondMatch);
+
+    expect($firstMatch[1] ?? null)->not->toBeNull()
+        ->and($secondMatch[1] ?? null)->not->toBeNull()
+        ->and($firstMatch[1])->not->toBe($secondMatch[1]);
 });
 
 // ── Phase B : fiche de preuve éditoriale (design doc section 7) ─────────────────

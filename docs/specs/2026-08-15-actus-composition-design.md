@@ -220,3 +220,91 @@ change.
 - **Un bouton de génération d'image** : techniquement impossible, donc mensonger.
 - **La mutualisation immédiate des pipelines d'images** : reportée, pas abandonnée.
 - **Le bourrage de mots-clés dans le texte alternatif.**
+
+---
+
+## CLÔTURE - 16 août 2026, 19h15 Québec (23:15 UTC)
+
+**Actus 2.0 est LIVRÉ en production.**
+
+- **v1.180.0** (17h02 Québec) - phase A : écran de composition, sélection d'une actualité, texte
+  source interne jamais exposé (non-fuite prouvée par marqueur en local et vérifiée en production).
+- **v1.181.0** (19h05 Québec) - le reste : courriel de veille quotidien (7h15, curseur dans la table
+  des réglages persistée, insensible aux purges de cache), prompt de rédaction incorporant le
+  standard du panel, fiche de preuve éditoriale (validation par sous-chaîne exacte, paires
+  survivant à la suppression du texte), flux d'image manuel assumé (prompt à copier vers Gemini,
+  dépôt, validation MIME réel, JPEG social 1200x630 + WebP), conservation (empreinte SHA-256 et
+  date de capture survivant à la suppression).
+
+**Preuves finales** : 244 tests News (204 au matin), 671 assertions, zéro échec ; validation
+visuelle complète en navigateur (7 points sur 7) ; non-fuite vérifiée en production sur une
+actualité réelle (zéro occurrence des trois champs internes dans le HTML servi) ; planification
+confirmée dans la liste réelle des tâches de production.
+
+**Le skill `/actu`** (~/.claude/skills/actu/SKILL.md) fige le flux complet et le standard - créé et
+mis à jour pour refléter le code livré, pas le plan.
+
+**Écarts assumés par rapport au plan initial** : la mutualisation des trois pipelines d'images reste
+reportée (décision du panel, round 2) ; le point encore ouvert de la section 4 (le texte part chez le
+fournisseur de modèle pendant la génération du résumé automatique) demeure - la minimisation avant
+envoi reste la seule protection, décision du propriétaire du 15 août appliquée.
+
+---
+
+## Révision 2026-08-17 - prompt d'orchestration Claude Code CLI
+
+**Décision du propriétaire** : le prompt généré par l'écran de composition cible désormais **Claude
+Code CLI** (agent local avec accès au projet) comme exécutant complet - rédaction, preuve
+éditoriale, image via le compte Gemini du propriétaire, ET écriture en base - plutôt qu'un simple
+texte à copier dans un outil d'IA externe passif. **Panel de 5 IA unanime** : l'agent ne doit
+JAMAIS écrire librement en base (aucun Eloquent, aucun SQL, aucun tinker) - une commande Artisan
+bornée est la SEULE porte d'écriture.
+
+### Ce qui a été livré
+
+- **`generatePrompt` accepte le texte source EN LIGNE** (paramètre `source_text`) - corrige le
+  blocage « Colle d'abord le texte source » quand l'admin colle le texte et clique directement sur
+  Générer sans passer par Enregistrer d'abord. Persisté AVANT génération avec exactement la même
+  règle de provenance que `update()` (empreinte SHA-256 + date de capture) - la logique a été
+  extraite dans `NewsCompositionController::applySourceProvenance()`, un seul point de vérité pour
+  les deux entrées.
+- **Gabarit de prompt réécrit** (`_composition_prompt_template.blade.php`, via
+  `CompositionPromptBuilder::build(NewsArticle $article, string $angle)` - signature changée) :
+  mission, règles de sécurité par **spotlighting à nonce aléatoire** (délimiteurs
+  `<<<SOURCE-{nonce}>>>` générés à CHAQUE appel via `Str::random(8)`, jamais réutilisés,
+  déclaration avant et rappel après le bloc source), interdictions nommées (jamais publier,
+  jamais `.env`/secrets, jamais de migration/déploiement, jamais une autre fiche, jamais exposer
+  le texte source), métadonnées de fraîcheur (id, slug, empreinte, `updated_at`), les quatre
+  étapes (rédaction - standard antérieur conservé intégralement -, preuve, écriture bornée via
+  `php artisan news:apply`, image reprenable seule). Version du gabarit journalisée via la
+  constante `CompositionPromptBuilder::PROMPT_TEMPLATE_VERSION`.
+- **Commande `news:apply`** (`Modules\News\Console\NewsApplyCommand`, signature
+  `{article} {--payload=} {--image=}`) : refuse toute fiche introuvable ou déjà publiée ; mode
+  `--payload` avec liste blanche stricte (`seo_title`, `summary`, `editorial_proof_pairs` -
+  toute autre clé, y compris `is_published`/`published_at`, fait refuser explicitement) et double
+  protection anti-écrasement (`expected_source_hash` + `expected_updated_at` doivent correspondre
+  à la fiche réelle) ; mode `--image` avec les mêmes validations que le dépôt web (type MIME réel,
+  poids, dimensions minimales) via `NewsImageService::processFromLocalFile()` (nouvelle méthode,
+  refactor DRY de `processFromUploadedFile()` autour d'un pipeline commun
+  `processImageAtPath()`) ; jamais de publication, jamais `is_published`/`published_at` touchés ;
+  journalisation sur le canal dédié `composition` (niveau fixé à `info`, indépendant de
+  `LOG_LEVEL` - même parade que les canaux `fusion`/`quality_gate`/`directory_screenshots`
+  existants).
+- Les paires de preuve éditoriale apportées par `--payload` **complètent** les paires déjà
+  présentes (fusion, jamais un remplacement intégral) - une fiche peut déjà porter des paires
+  ajoutées à la main via l'écran.
+
+### Idées explicitement écartées à ce round - ne pas les re-proposer
+
+- **Jeton à usage unique** (consommé après le premier `news:apply`, invalidant tout rejeu) :
+  reporté - sur-ingénierie pour un usage solo (un seul propriétaire, un seul agent local à la
+  fois). La double protection empreinte + `updated_at` suffit à détecter une fiche modifiée entre
+  la génération du prompt et l'écriture ; un jeton à usage unique protégerait contre un scénario
+  de rejeu concurrent qui n'existe pas dans ce contexte d'usage.
+- **Commande `news:brief`** (qui aurait généré un résumé structuré séparé du prompt) : redondante
+  - le prompt collé dans Claude Code CLI EST déjà le brief complet (mission, règles, étapes),
+  une commande distincte aurait dupliqué la même information sous une autre forme.
+- **Purge automatique du texte source après application** : décision du propriétaire, **en
+  attente** - le texte source reste supprimable manuellement à tout moment
+  (`destroySourceText()`, section 5.2 ci-dessus), mais rien n'automatise sa suppression après un
+  `news:apply` réussi. Ne pas l'implémenter sans une décision explicite du propriétaire.
