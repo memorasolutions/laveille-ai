@@ -663,3 +663,36 @@ replié « Édition manuelle (filet de secours) », étiqueté « (déprécié -
   d'appliquer du contenu passe TOUJOURS par `news:apply --payload` ensuite, jamais un raccourci.
 - **Aucun format de sortie alternatif** (YAML, texte libre) pour `news:brief`/`news:source` : JSON
   strict sur stdout uniquement, pour rester trivialement analysable par le skill.
+
+## Améliorations en attente (consignées le 2026-08-17, après le PREMIER cycle /actu2 réel - fiche 33530)
+
+Par ordre de priorité. Chacune attend son propre cycle (veille au besoin, implémentation, tests, déploiement).
+
+1. **Commande `news:create-draft {url} [--title=]`** (haute) : le premier test a prouvé qu'aucune
+   création manuelle de fiche n'existe - un post X hors collecte RSS n'a pas de fiche à composer.
+   Créée en supervision cette fois (source « Soumission manuelle », brouillon) ; formaliser en
+   commande bornée avec test, et l'écran de composition pourrait offrir « Créer une fiche depuis
+   un lien ».
+2. **Outillage de l'exécution en PRODUCTION du cycle /actu2** (haute) : le premier cycle a exigé
+   8 scripts one-shot écrits à la main (création, lecture du texte, application, révision, image,
+   publication, correctifs). Fluidifier : un runner générique réutilisable (un seul script
+   paramétré par action+payload, même sécurité jeton+auto-suppression) ou une exécution via
+   session serveur. Le skill documente déjà que le choix appartient au superviseur.
+3. **Mise en page des fiches - v1.187.0** (arbitrée par le panel du 17 août, à exécuter) : badge
+   unique en français clair au lieu de « 8/10 »/« Élevé » opaques ; « Résumé IA » → « L'essentiel »
+   avec transparence reformulée en force dessous ; haut de page allégé (titre non répété,
+   métadonnées réduites, boutons sous le résumé) ; ligne « D'après [original], relayé par
+   [média] » sous les métadonnées ; fin de page dégraissée (3 liens contextuels, « article
+   précédent » supprimé) ; partage natif mobile (Web Share API).
+4. **Articles connexes par ENTITÉS partagées** (idée neuve claude.ai retenue) : index d'entités
+   (entreprises, modèles, lois) par fiche - connexes réellement pertinents sans modération, plus
+   auto-liaison glossaire à la rédaction.
+5. **Courriel de veille 7h15 : inclure le mini-prompt /actu2 copiable** pour chaque actu listée
+   (aujourd'hui le lien mène à l'écran, d'où il faut recliquer « Copier »).
+6. **`pp_search_many` (requêtes parallèles Perplexity) en panne** : TimeoutError sur les onglets
+   parallèles (constaté 2 fois le 17 août) - la requête simple fonctionne ; réparer le MCP.
+7. **Session Gemini navigateur non connectée** : `ia-sync` AVANT redémarrage de session (ordre
+   documenté en mémoire) - encore utile pour les images d'autres sections (les actus sont passées
+   aux photos).
+8. **Fiches canoniques du skill** (`references/fiche-*.md`) : à confronter aux 3-4 premières
+   vraies fiches et ajuster le ton si dérive.
