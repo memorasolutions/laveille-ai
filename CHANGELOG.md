@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.186.1] - 2026-08-17
+
+### Corrigé
+- **`news:apply --image` renseigne `image_url` s'il est vide (module News).** Une fiche créée manuellement via le flux `/actu2` (hors collecte RSS) recevait ses fichiers d'image traités sans que le héros s'affiche - le rendu public lit `image_url`, jamais rempli pour elle. Trou trouvé au premier test réel du cycle (fiche 33530), corrigé sur la fiche et systémiquement. Jamais écrasé s'il est déjà rempli.
+
+### Vérifié
+- 31 tests NewsApplyCommand (85 assertions), aucun échec.
+
 ## [1.186.0] - 2026-08-17
 
 ### Ajouté

@@ -579,6 +579,14 @@ class NewsApplyCommand extends Command
             return self::FAILURE;
         }
 
+        // Le héros de la fiche publique se rend depuis image_url : une fiche créée MANUELLEMENT
+        // (flux /actu2, hors collecte RSS) ne l'a jamais reçu - sans ce renseignement, l'image
+        // traitée existe sur disque mais reste invisible (trou trouvé au premier test réel,
+        // fiche 33530, 2026-08-17). Jamais écrasé s'il est déjà rempli.
+        if (blank($article->image_url)) {
+            $article->update(['image_url' => $imageUrl]);
+        }
+
         // Crédit photo appliqué AVEC l'image (option --credit) : le mode payload exige la
         // fraîcheur (updated_at), qui change dès la première écriture - le crédit voyage donc
         // avec l'image, jamais dans un second payload voué au refus.

@@ -3904,11 +3904,15 @@ declare(strict_types=1);
  *     /actu2 » côté client (id toujours fourni par l'écran). Skill orchestrateur complet dans
  *     ~/.claude/skills/actu2/ (9 étapes, états persistés, titre décidé par le skill, AEO prouvé
  *     seulement). Preuve : suite complète News verte (5 nouveaux fichiers de tests).
+ *
+ * 1.186.1 (2026-08-17) - fix(news) : news:apply --image renseigne image_url s'il est vide (une
+ *     fiche créée manuellement via /actu2 n'affichait pas son héros - trou trouvé au premier test
+ *     réel, fiche 33530). Preuve : 31 tests NewsApplyCommand, 0 échec.
  */
 
 $lvMajor = 1;
 $lvMinor = 186;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,
