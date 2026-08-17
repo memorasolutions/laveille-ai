@@ -11,15 +11,22 @@ use Modules\Books\Models\Book;
  *
  * Inclus :
  *   - Book (le livre courant — author Person + worksFor Organization, isbn, bookFormat,
- *     datePublished, image, description, offers[] par format disponible)
+ *     datePublished, image, description)
  *   - BreadcrumbList (Accueil > Livres > Titre)
- *   - FAQPage (si le livre a des Q&A) — clé pour AI Overviews et LLM 2026
  *   - isPartOf (si series_slug rempli) : @id synthétique de la série
  *
- * Pattern calqué sur Modules\Dictionary\Services\TermSchemaService::buildGraph(), IRIs
- * bookFormat/offers repris du composant <x-fronttheme::book-promo> déjà en prod.
+ * Pattern calqué sur Modules\Dictionary\Services\TermSchemaService::buildGraph(), IRI
+ * bookFormat repris du composant <x-fronttheme::book-promo> déjà en prod.
  *
  * 2026-07-08 : squelette créé pour Modules\Books (schéma seul, pas de données).
+ * 2026-08-17 (LPC art. 219 + retrait Google du résultat enrichi FAQPage le 7 mai 2026) :
+ *   - offers[] SUPPRIMÉ - un Offer au prix figé et à l'InStock jamais vérifié risque la perte
+ *     des résultats enrichis Google (Merchant Center policy) pour un prix qui devient périmé
+ *     dès qu'Amazon change le sien. Le prix reste visible directement sur la fiche Amazon.
+ *   - FAQPage SUPPRIMÉ des données structurées - Google a retiré ce résultat enrichi le
+ *     7 mai 2026 (poids mort, source : mémoire projet aeo-geo-ce-qui-est-prouve-2026-08-14).
+ *     La FAQ reste affichée normalement sur la page (@if($book->faq) dans show.blade.php) :
+ *     seul le balisage JSON-LD part.
  */
 final class BookSchemaService
 {
@@ -119,37 +126,8 @@ final class BookSchemaService
             $bookNode['bookFormat'] = count($formats) === 1 ? $formats[0] : $formats;
         }
 
-        // offers[] : un Offer par format rempli (prix + URL + disponibilité).
-        $offers = [];
-        if (! empty($book->amazon_url_paperback)) {
-            $offer = [
-                '@type' => 'Offer',
-                'url' => $book->amazon_url_paperback,
-                'availability' => 'https://schema.org/InStock',
-                'priceCurrency' => 'CAD',
-                'seller' => ['@type' => 'Organization', 'name' => 'Amazon'],
-            ];
-            if ($book->price_paperback !== null) {
-                $offer['price'] = (string) $book->price_paperback;
-            }
-            $offers[] = $offer;
-        }
-        if (! empty($book->amazon_url_kindle)) {
-            $offer = [
-                '@type' => 'Offer',
-                'url' => $book->amazon_url_kindle,
-                'availability' => 'https://schema.org/InStock',
-                'priceCurrency' => 'CAD',
-                'seller' => ['@type' => 'Organization', 'name' => 'Amazon'],
-            ];
-            if ($book->price_kindle !== null) {
-                $offer['price'] = (string) $book->price_kindle;
-            }
-            $offers[] = $offer;
-        }
-        if (! empty($offers)) {
-            $bookNode['offers'] = $offers;
-        }
+        // 2026-08-17 (LPC art. 219) : offers[] supprimé - prix figé jamais garanti à jour,
+        // InStock jamais vérifié auprès d'Amazon. Voir doc-bloc de la classe.
 
         // isPartOf : série (si le livre appartient à une série) — @id synthétique.
         if (! empty($book->series_slug)) {
@@ -175,30 +153,9 @@ final class BookSchemaService
             ],
         ];
 
-        $faq = $book->faq;
-        if (is_array($faq) && ! empty($faq)) {
-            $mainEntity = [];
-            foreach ($faq as $qa) {
-                if (! is_array($qa) || empty($qa['question']) || empty($qa['answer'])) {
-                    continue;
-                }
-                $mainEntity[] = [
-                    '@type' => 'Question',
-                    'name' => (string) $qa['question'],
-                    'acceptedAnswer' => [
-                        '@type' => 'Answer',
-                        'text' => strip_tags((string) $qa['answer']),
-                    ],
-                ];
-            }
-            if (! empty($mainEntity)) {
-                $graph[] = [
-                    '@type' => 'FAQPage',
-                    '@id' => $url.'#faq',
-                    'mainEntity' => $mainEntity,
-                ];
-            }
-        }
+        // 2026-08-17 : FAQPage retiré des données structurées - Google a retiré ce résultat
+        // enrichi le 7 mai 2026 (poids mort). La FAQ visible sur la page reste intacte
+        // (show.blade.php affiche $book->faq indépendamment de ce service).
 
         return [
             '@context' => 'https://schema.org',

@@ -3,10 +3,17 @@
 
 @section('title', __('Livres') . ' - ' . __("Livres de Stéphane Lapointe : essais IA et thriller SF") . ' · ' . config('app.name'))
 @section('meta_description', __("Découvrez les livres de Stéphane Lapointe : deux essais pratiques sur l'IA (conformité PME, parentalité numérique) et la trilogie techno-thriller Nexus Neural, disponibles en broché et Kindle sur Amazon."))
-@section('page_noindex', true)
-{{-- ↑ Défense en profondeur : le middleware BooksUnderConstruction bloque déjà l'accès public (503) tant que
-     config('books.under_construction') est vrai. Ce noindex évite en plus toute indexation accidentelle si un
-     crawler passait malgré tout (ex. superadmin qui partage un lien avant le lancement officiel). --}}
+{{-- Lié au drapeau (2026-08-17) : noindex UNIQUEMENT tant que config('books.under_construction')
+     est vrai. Le layout master.blade.php teste View::hasSection('page_noindex') - donc la SECTION
+     ne doit être déclarée QUE dans ce cas (@section avec une valeur false serait quand même
+     "présente" et forcerait noindex en permanence - piège vu sur Modules/News/public/show.blade.php,
+     même pattern @if ici). Le middleware BooksUnderConstruction bloque déjà l'accès public (503)
+     pendant cette période - ce noindex évite en plus toute indexation accidentelle si un crawler
+     passait malgré tout (ex. superadmin qui partage un lien avant le lancement officiel). Dès la
+     porte ouverte, les pages redeviennent indexables automatiquement, sans intervention. --}}
+@if(config('books.under_construction'))
+    @section('page_noindex', true)
+@endif
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Livres')])
@@ -135,14 +142,15 @@
                             @if($book->subtitle)
                                 <p class="bk-card-subtitle">{{ Str::limit($book->subtitle, 140) }}</p>
                             @endif
-                            <div class="bk-card-meta">
-                                @if($book->price_paperback)
-                                    <span class="bk-card-price">{{ __('Broché') }} {{ number_format((float) $book->price_paperback, 2, ',', ' ') }} $ CAD</span>
-                                @endif
-                                @if($book->price_kindle)
-                                    <span class="bk-card-price">Kindle {{ number_format((float) $book->price_kindle, 2, ',', ' ') }} $ CAD</span>
-                                @endif
-                            </div>
+                            {{-- 2026-08-17 (LPC art. 219) : prix retiré de l'affichage - un prix figé côté
+                                 site peut devenir périmé face au prix réel affiché sur Amazon (représentation
+                                 trompeuse). Les colonnes price_paperback/price_kindle restent en base (données
+                                 internes) ; seul l'affichage disparaît, remplacé par un renvoi neutre. --}}
+                            @if($book->amazon_url_paperback || $book->amazon_url_kindle)
+                                <div class="bk-card-meta">
+                                    <span class="bk-card-price">{{ __('Voir le prix sur Amazon') }}</span>
+                                </div>
+                            @endif
                             <span class="bk-card-link">{{ __('Découvrir ce livre') }} →</span>
                         </div>
                     </a>
@@ -167,8 +175,9 @@
                             >
                             <span class="bk-tome-num">{{ __('Tome') }} {{ $tome->series_position }}</span>
                             <h3 class="bk-tome-title">{{ $tome->title }}</h3>
-                            @if($tome->price_kindle)
-                                <p class="bk-tome-price">Kindle {{ number_format((float) $tome->price_kindle, 2, ',', ' ') }} $ CAD</p>
+                            {{-- 2026-08-17 (LPC art. 219) : prix Kindle retiré de l'affichage, cf. bk-card-price plus haut. --}}
+                            @if($tome->amazon_url_paperback || $tome->amazon_url_kindle)
+                                <p class="bk-tome-price">{{ __('Voir le prix sur Amazon') }}</p>
                             @endif
                         </a>
                     @endforeach

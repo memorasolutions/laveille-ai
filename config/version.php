@@ -3833,10 +3833,30 @@ declare(strict_types=1);
  *     Deux migrations additives, réversibles (garde hasColumn dans les deux sens). 244 tests
  *     du module News (671 assertions), aucun échec (217 avant ce lot). Validation visuelle
  *     complète en navigateur, 7 points sur 7 OK.
+ *   1.182.0 · 2026-08-17 · feat(books) OUVERTURE PUBLIQUE de la bibliothèque de livres +
+ *     feat(auth/directory) notifications cliquables. Books : bascule du défaut de
+ *     BOOKS_UNDER_CONSTRUCTION à false (le .env de production ne définit pas la variable,
+ *     donc la bibliothèque s'ouvre au public à ce déploiement) ; prix retirés des 4 surfaces
+ *     (index, fiches, FAQ en base via migration additive réversible, données structurées -
+ *     décision panel + LPC art. 219, un prix figé devient trompeur dès qu'Amazon change le
+ *     sien) ; JSON-LD Book + BreadcrumbList conservés, Offer et FAQPage retirés (FAQPage
+ *     retiré des résultats enrichis Google le 7 mai 2026) ; liens papier des tomes 2 et 3
+ *     de Nexus Neural retirés par migration additive réversible (ASIN vérifiés mal appariés
+ *     sur Amazon/KDP, Kindle et tome 1 papier intacts) ; noindex désormais LIÉ au drapeau
+ *     under_construction (bug de section Blade corrigé - porte ouverte = pages indexables) ;
+ *     avertissement 18+ ajouté sur les fiches des 3 tomes de la trilogie ; entrée de menu
+ *     « Livres » au premier niveau (desktop + menu mobile), conditionnée au module actif ET
+ *     à la porte ouverte. Auth/Directory : chaque notification de « Mon espace » devient
+ *     cliquable vers l'écran d'administration de l'élément soumis (zone tactile 44px),
+ *     anciennes notifications sans cible affichées sans lien ni erreur ; « Tout est à jour. »
+ *     ne s'affiche plus au-dessus d'une liste de notifications, seulement quand il n'y en a
+ *     aucune. Books : 39 tests (16 nouveaux), 0 échec. Auth : 44 tests (7 nouveaux) ;
+ *     Directory : 121 tests, 0 échec. Deux migrations Books testées up + rollback + re-up
+ *     en local, données restaurées à l'identique au rollback. Validation visuelle complète.
  */
 
 $lvMajor = 1;
-$lvMinor = 181;
+$lvMinor = 182;
 $lvPatch = 0;
 
 return [

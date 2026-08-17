@@ -36,9 +36,11 @@ class ResourceSubmittedNotification extends Notification
             'type' => 'resource_submitted',
             'resource_id' => $this->resource->id,
             'title' => $this->resource->title,
-            'url' => $this->resource->url,
+            'resource_url' => $this->resource->url,
             'submitter' => $this->resource->user->name ?? __('Anonyme'),
             'message' => __('Nouvelle ressource soumise : « :title »', ['title' => $this->resource->title]),
+            // Cible cliquable : l'écran d'administration (modération), pas la page publique.
+            'url' => route('admin.directory.moderation'),
         ];
     }
 }

@@ -18,8 +18,12 @@ return [
     | identique à Academy (voir config('academy.under_construction')).
     | Désactiver via BOOKS_UNDER_CONSTRUCTION=false dans le .env pour ouvrir
     | la bibliothèque au public.
+    |
+    | 2026-08-17 : défaut basculé à false (mise en ligne publique mandatée par le
+    | propriétaire). Le .env de production ne définit pas BOOKS_UNDER_CONSTRUCTION,
+    | donc ce changement ouvre la bibliothèque au déploiement suivant.
     */
-    'under_construction' => env('BOOKS_UNDER_CONSTRUCTION', true),
+    'under_construction' => env('BOOKS_UNDER_CONSTRUCTION', false),
 
     /*
     |--------------------------------------------------------------------------

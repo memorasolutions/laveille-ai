@@ -9,10 +9,12 @@
     <div>
         <h2 style="font-family: var(--f-heading, inherit); font-weight: 700; margin: 0 0 5px;">{{ __('Notifications') }}</h2>
         <p style="color: #777; margin: 0;">
-            @if($unreadCount > 0)
+            @if($notifications->total() === 0)
+                {{ __('Tout est à jour.') }}
+            @elseif($unreadCount > 0)
                 <strong style="color: #337ab7;">{{ $unreadCount }}</strong> {{ __('non lue(s)') }}
             @else
-                {{ __('Tout est à jour.') }}
+                {{ trans_choice(':count notification|:count notifications', $notifications->total(), ['count' => $notifications->total()]) }}
             @endif
         </p>
     </div>
@@ -64,8 +66,11 @@
                 style="{{ is_null($notification->read_at) ? 'background: #f0f7ff; border-left: 3px solid var(--c-primary, #064E5A);' : '' }}">
                 <div style="display: flex !important; align-items: flex-start !important;">
                     <span style="font-size: 18px; margin-right: 12px; margin-top: 2px; flex-shrink: 0;">{{ $emoji }}</span>
-                    <div style="flex: 1 !important; min-width: 0;">
-                        <p style="font-weight: 600; font-size: 14px; margin: 0 0 3px;">
+                    @php $targetUrl = $notification->data['url'] ?? null; @endphp
+                    {{-- Ancre sans href = non interactive (comportement voulu quand il n'y a pas de cible). --}}
+                    <a @if($targetUrl) href="{{ $targetUrl }}" @endif
+                        style="flex: 1 !important; min-width: 0; display: block; min-height: 44px; color: inherit; text-decoration: none;">
+                        <p style="font-weight: 600; font-size: 14px; margin: 0 0 3px; {{ $targetUrl ? 'text-decoration: underline;' : '' }}">
                             {{ $notification->data['message'] ?? $notification->data['title'] ?? $type }}
                         </p>
                         @if(!empty($notification->data['body'] ?? $notification->data['details'] ?? null))
@@ -79,7 +84,7 @@
                                 <span style="display: inline-block; width: 8px; height: 8px; background: #337ab7; border-radius: 50%; vertical-align: middle; margin-left: 5px;"></span>
                             @endif
                         </small>
-                    </div>
+                    </a>
                     <div style="flex-shrink: 0; margin-left: 10px; white-space: nowrap;">
                         @if(is_null($notification->read_at))
                             <form method="POST" action="{{ route('user.notifications.markRead', $notification->id) }}" style="display: inline;">

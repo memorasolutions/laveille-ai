@@ -284,6 +284,14 @@
                             <li><a href="{{ route('academy.index') }}">{{ __('Académie') }}</a></li>
                             @endif
 
+                            {{-- Livres — vitrine commerciale (bibliothèque de l'auteur), premier niveau après
+                                 Apprendre (arbitrage panel 2026-08-17 : une vitrine commerciale ne se déguise
+                                 pas en ressource d'apprentissage). Défensif comme Académie ci-dessus : visible
+                                 UNIQUEMENT si le module est activé (route enregistrée) ET la porte ouverte. --}}
+                            @if(Route::has('books.index') && ! config('books.under_construction'))
+                            <li><a href="{{ route('books.index') }}">{{ __('Livres') }}</a></li>
+                            @endif
+
                             {{-- #200 Anciens blocs Ressources + Jouer retirés — remplacés par les 3 nouveaux mega Outils/Annuaire/Apprendre ci-dessus. Old code ci-dessous gardé en @if(false) zone --}}
                             @if(false)
                             <li class="menu-item-has-children has-mega-menu" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">
@@ -628,6 +636,15 @@
                                                 @if(Route::has('shop.index') && ! config('shop.maintenance', false))<li><a href="{{ route('shop.index') }}">🛍️ {{ __('Boutique') }}</a></li>@endif
                                             </ul>
                                         </div>
+                                        {{-- Livres — même garde défensive que l'entrée desktop ci-dessus (2026-08-17). --}}
+                                        @if(Route::has('books.index') && ! config('books.under_construction'))
+                                        <div class="widget link-widget">
+                                            <div class="widget-title"><h3>{{ __('Livres') }}</h3></div>
+                                            <ul>
+                                                <li><a href="{{ route('books.index') }}">📖 {{ __('La bibliothèque') }}</a></li>
+                                            </ul>
+                                        </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>

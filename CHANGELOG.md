@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.182.0] - 2026-08-17
+
+### Ajouté
+- **Ouverture publique de la bibliothèque de livres (module Books).** Bascule du défaut de `BOOKS_UNDER_CONSTRUCTION` à `false` (le `.env` de production ne définit pas la variable, la bibliothèque s'ouvre donc au public à ce déploiement, décision mandatée par le propriétaire). Prix retirés des 4 surfaces (index, fiches, FAQ en base via migration additive réversible, données structurées) - décision panel + LPC art. 219, un prix figé côté site devient une représentation trompeuse dès qu'Amazon change le sien ; renvoi neutre vers la fiche Amazon à la place. JSON-LD conserve `Book` et `BreadcrumbList`, perd `Offer` (même raison que le prix affiché) et `FAQPage` (Google a retiré ce résultat enrichi le 7 mai 2026 - la FAQ reste affichée normalement sur la page, seul le balisage part). Liens papier des tomes 2 et 3 de Nexus Neural retirés par migration additive réversible : les ASIN pointaient, vérifié sur les fiches produit Amazon réelles, vers de MAUVAISES éditions (mauvais sous-titre) - Kindle et tome 1 papier intacts. `noindex` désormais LIÉ au drapeau `under_construction` (bug de section Blade corrigé : la section n'est déclarée que si la porte est fermée) - porte ouverte = pages indexables. Avertissement 18+ ajouté sur les fiches des 3 tomes de la trilogie (contenu de fiction adulte). Entrée de menu « Livres » au premier niveau (desktop + menu mobile), conditionnée : visible seulement si le module est actif ET la porte ouverte.
+- **Notifications cliquables (modules Auth + Directory).** Chaque notification de « Mon espace » devient cliquable vers l'écran d'administration de l'élément soumis (zone tactile 44px) : `ToolSubmittedNotification` et `ResourceSubmittedNotification` portent désormais une clé `url` pointant vers l'écran de modération/édition admin. Les anciennes notifications sans cible s'affichent sans lien, sans erreur (ancre sans `href`). « Tout est à jour. » ne s'affiche plus au-dessus d'une liste de notifications - seulement quand il n'y en a aucune (compteur total affiché sinon).
+
+### Vérifié
+- Module Books : 39 tests (16 nouveaux du lot de lancement, après correction d'une assertion), aucun échec. Revue visuelle complète : 5 fiches, extraits feuilletables, 375px, balises de partage, bascule `noindex` vérifiée dans le HTML rendu porte ouverte/fermée.
+- Module Auth : 44 tests (7 nouveaux), aucun échec. Module Directory : 121 tests, aucun échec.
+- Deux migrations Books testées up + rollback + re-up en local, données restaurées à l'identique au rollback.
+
 ## [1.181.0] - 2026-08-16
 
 ### Ajouté

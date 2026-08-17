@@ -27,7 +27,7 @@ final class ToolSubmittedNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $adminUrl = URL::to('/admin/directory/'.$this->tool->getKey().'/edit');
+        $adminUrl = $this->adminUrl();
 
         return (new MailMessage)
             ->subject('[laveille.ai] Nouvel outil soumis : '.$this->tool->name)
@@ -49,6 +49,15 @@ final class ToolSubmittedNotification extends Notification
             'submitter_name' => (string) $this->submitter->name,
             'submitter_email' => (string) $this->submitter->email,
             'message' => 'Nouvel outil soumis : '.$this->tool->name.' par '.$this->submitter->name,
+            'url' => $this->adminUrl(),
         ];
+    }
+
+    /**
+     * Cible cliquable : l'écran d'administration de l'outil soumis (moderation), pas la page publique.
+     */
+    private function adminUrl(): string
+    {
+        return URL::to('/admin/directory/'.$this->tool->getKey().'/edit');
     }
 }

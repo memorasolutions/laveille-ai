@@ -4,9 +4,15 @@
 @section('title', $book->title . ' - ' . __('Livres') . ' - ' . config('app.name'))
 @section('meta_description', safe_excerpt($book->one_sentence_answer ?? strip_tags($book->excerpt ?? ''), 160))
 @section('og_type', 'book')
-@section('page_noindex', true)
-{{-- ↑ Défense en profondeur : le middleware BooksUnderConstruction bloque déjà l'accès public (503) tant que
-     config('books.under_construction') est vrai. --}}
+{{-- Lié au drapeau (2026-08-17) : noindex UNIQUEMENT tant que config('books.under_construction')
+     est vrai. Le layout master.blade.php teste View::hasSection('page_noindex') - donc la SECTION
+     ne doit être déclarée QUE dans ce cas (@section avec une valeur false serait quand même
+     "présente" et forcerait noindex en permanence - même piège/pattern que Modules/News). Le
+     middleware BooksUnderConstruction bloque déjà l'accès public (503) pendant cette période. Dès
+     la porte ouverte, les fiches redeviennent indexables automatiquement. --}}
+@if(config('books.under_construction'))
+    @section('page_noindex', true)
+@endif
 @php
     $_bkOgPath = $book->cover_image ? preg_replace('/-cover-600\.jpg$/', '-og-1200x630.jpg', $book->cover_image) : null;
 @endphp
@@ -55,6 +61,14 @@
          avant vente). Style calqué sur .bk-back-link (même ratio de contraste AAA déjà validé). --}}
     .bk-hero-author { font-size: 0.95rem; color: #4B5563; margin: 0 0 16px; }
     .bk-hero-author strong { color: var(--c-dark); }
+
+    {{-- #avertissement-18plus-fiche-2026-08-17 : badge sobre, même paire de couleurs que les
+         alertes de la charte (fond clair + texte foncé sur teinte d'alerte), contraste AAA. --}}
+    .bk-hero-adult-notice {
+        display: inline-block; font-size: 0.82rem; font-weight: 700;
+        color: #7A1F00; background: #FEF2F0; border: 1px solid #F3C4B4;
+        border-radius: 6px; padding: 6px 12px; margin: 0 0 16px;
+    }
 
     {{-- #refonte-hero-pourquoi-lire-2026-07-09 : "Pourquoi lire" intégré directement dans le
          hero (plus d'onglet à cliquer) - titre de section plus discret que .bk-section-title
@@ -307,6 +321,16 @@
 
                         <p class="bk-hero-author">{{ __('par') }} <strong>Stéphane Lapointe</strong></p>
 
+                        {{-- 2026-08-17 : avertissement 18+ repris sur la fiche - l'index le mentionne déjà
+                             dans le texte de la bannière série, mais un visiteur arrivant directement sur
+                             une fiche de tome (lien direct, recherche, réseaux sociaux) ne le voit jamais.
+                             Critère = $_isFiction (série renseignée) : seule la trilogie Nexus Neural est
+                             de la fiction adulte, les deux essais restent hors avertissement. Formulation
+                             identique à celle de l'index (DRY texte), cf. .bk-series-banner-header p. --}}
+                        @if($_isFiction)
+                            <p class="bk-hero-adult-notice">{{ __('Contenu réservé à un public adulte (18+).') }}</p>
+                        @endif
+
                         {{-- Pourquoi lire ce livre - intégré au hero (2026-07-09), visible sans clic. --}}
                         @if(! empty($book->benefits) && is_array($book->benefits))
                             <div class="bk-hero-benefits">
@@ -549,16 +573,14 @@
                             {{ __('date de publication') }}
                         </div>
                     @endif
-                    @if($book->price_paperback)
+                    {{-- 2026-08-17 (LPC art. 219) : prix retiré de l'affichage - un prix figé côté site peut
+                         devenir périmé face au prix réel affiché sur Amazon (représentation trompeuse). Les
+                         colonnes price_paperback/price_kindle restent en base (données internes) ; seul
+                         l'affichage disparaît, remplacé par un renvoi neutre unique. --}}
+                    @if($book->amazon_url_paperback || $book->amazon_url_kindle)
                         <div class="bk-proof-item">
-                            <strong>{{ number_format((float) $book->price_paperback, 2, ',', ' ') }} $ CAD</strong>
-                            {{ __('broché') }}
-                        </div>
-                    @endif
-                    @if($book->price_kindle)
-                        <div class="bk-proof-item">
-                            <strong>{{ number_format((float) $book->price_kindle, 2, ',', ' ') }} $ CAD</strong>
-                            Kindle
+                            <strong>{{ __('Voir le prix') }}</strong>
+                            {{ __('sur Amazon') }}
                         </div>
                     @endif
                     @if($_isFiction && $book->series_position)
