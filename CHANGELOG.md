@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.183.1] - 2026-08-17
+
+### Corrigé
+- **Lien « 📰 Lire l'article original » ajouté au bandeau de l'écran de composition (module News).** En sélectionnant une actualité, l'URL de l'article chez l'éditeur (resolved_url prioritaire sur l'URL de flux) est désormais affichée - manque « source formelle » pointé par le panel et demandé par le propriétaire. `source_url` ajouté au payload de `show()`.
+
+### Vérifié
+- 42 tests du fichier composition (171 assertions), aucun échec ; rendu réel de la vue reconfirmé.
+
 ## [1.183.0] - 2026-08-17
 
 ### Modifié

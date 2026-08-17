@@ -118,6 +118,8 @@
                         <div class="nc-selected-banner">
                             <div class="nc-orig-title" x-text="selectedArticle.title"></div>
                             <div class="nc-meta">
+                                <a :href="selectedArticle.source_url" target="_blank" rel="noopener" x-show="selectedArticle.source_url" x-cloak>📰 Lire l'article original</a>
+                                <template x-if="selectedArticle.source_url"><span>&nbsp;·&nbsp;</span></template>
                                 <a :href="selectedArticle.site_url" target="_blank" rel="noopener" x-show="selectedArticle.is_published" x-cloak>🔗 Voir la fiche publique</a>
                                 <span class="nc-draft-badge" x-show="!selectedArticle.is_published" x-cloak>📝 Brouillon - pas encore publié</span>
                                 &nbsp;·&nbsp;

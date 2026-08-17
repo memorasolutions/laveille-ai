@@ -228,6 +228,8 @@ it('the show() endpoint returns the internal source text only to an admin', func
     $response = $this->actingAs($admin)->getJson(route('admin.news.composition.show', $article));
 
     $response->assertOk()->assertJsonPath('internal_source_text', 'MARQUEUR-VISIBLE-ADMIN-SEULEMENT');
+    // Lien vers l'article original chez l'éditeur (demande du propriétaire 2026-08-17).
+    $response->assertJsonPath('source_url', $article->resolved_url ?: $article->url);
 });
 
 it('the candidates() endpoint truncates the summary and never includes the internal source text', function () {

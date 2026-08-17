@@ -137,6 +137,10 @@ class NewsCompositionController extends Controller
             'source_content_hash' => $article->source_content_hash,
             'is_published' => (bool) $article->is_published,
             'site_url' => url('/actualites/'.$article->slug),
+            // Lien vers l'article ORIGINAL chez l'éditeur (demande du propriétaire 2026-08-17,
+            // manque « source formelle » pointé par le panel) : resolved_url prime sur url
+            // (les flux RSS servent souvent une URL de redirection).
+            'source_url' => $article->resolved_url ?: $article->url,
             'updated_at' => $article->updated_at?->toIso8601String(),
             // Standard d'images (design doc section 5.4) : indique au front si une image (dépôt
             // manuel ou image de repli générée) existe déjà pour cette fiche, pour l'aperçu.

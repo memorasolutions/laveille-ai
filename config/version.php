@@ -3870,11 +3870,16 @@ declare(strict_types=1);
  *     Nouvelle commande news:apply = seule porte d'écriture de l'agent (brouillon forcé, liste
  *     blanche de colonnes, refus fiche publiée, refus données périmées, canal de journalisation
  *     dédié à niveau fixe). Preuve : 268 tests News (759 assertions), 0 échec (244 avant).
+ *
+ * 1.183.1 (2026-08-17) - fix(news) : lien « 📰 Lire l'article original » (URL de l'éditeur,
+ *     resolved_url prioritaire) ajouté au bandeau de l'écran de composition - manque « source
+ *     formelle » pointé par le panel et demandé par le propriétaire. source_url ajouté au payload
+ *     show(). Preuve : 42 tests du fichier composition (171 assertions), 0 échec.
  */
 
 $lvMajor = 1;
 $lvMinor = 183;
-$lvPatch = 0;
+$lvPatch = 1;
 
 return [
     'major' => $lvMajor,
