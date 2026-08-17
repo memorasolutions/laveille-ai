@@ -3921,10 +3921,22 @@ declare(strict_types=1);
  *     aucun texte envoyé au fournisseur de modèle à la collecte - vigilance Loi 25 close ;
  *     ligne MACHINE-SUMMARY-OFF journalisée à chaque run comme AUTOPUBLISH-OFF).
  *     Preuve : suite complète News verte.
+ *
+ * 1.188.0 (2026-08-17) - feat(news) : richesse structurée des fiches composées (panel de 5 IA).
+ *     Clé composed_summary de news:apply (8 sous-clés nullables bornées : hook, key_points,
+ *     why_important, key_number, quote, angle_qc_ca, action_concrete, reperes_dates), stockée
+ *     avec marqueur composed:true - remplace le défunt résumé machine, jamais confondue avec lui.
+ *     Rendu public à ORDRE FIXE et libellés constants (L'essentiel, À retenir, Pourquoi ça
+ *     compte, Chiffre-clé, Citation, Ce que ça change au Québec, Action concrète, Repères datés,
+ *     Sources) - droit d'omission silencieuse (une section sans matière prouvée est absente,
+ *     jamais remplie de force). Action concrète enfin visible sur la fiche (n'existait que dans
+ *     le texte de partage). Correctif au passage : publish() aurait effacé un résumé composé
+ *     (garde hasComposedSummary). Skill /actu2 mis à jour (rédaction par sections, 3 zones
+ *     d'hallucination verrouillées, fiches canoniques au format riche).
  */
 
 $lvMajor = 1;
-$lvMinor = 187;
+$lvMinor = 188;
 $lvPatch = 0;
 
 return [

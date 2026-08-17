@@ -23,12 +23,17 @@ use Modules\News\Services\NewsImageService;
  *
  * Trois modes indépendants, chacun reprenable seul :
  * - `--payload=` : applique seo_title / summary / editorial_proof_pairs / primary_sources /
- *                  image_credit depuis un fichier JSON, et efface AUSSI structured_summary
- *                  (résumé MACHINE de la collecte - addendum daté 2026-08-17, fin de journée, voir
- *                  NewsArticle::logStructuredSummaryOverride()). primary_sources/image_credit
- *                  ajoutés par la bonification panel 2026-08-17 (soir, design doc) - contrairement
- *                  aux autres champs de ce mode, ils NE SONT PAS internes : affichés tels quels
- *                  sur la fiche publique (Modules\News\resources\views\public\show.blade.php).
+ *                  image_credit / composed_summary depuis un fichier JSON, et efface AUSSI
+ *                  structured_summary (résumé MACHINE de la collecte - addendum daté 2026-08-17,
+ *                  fin de journée, voir NewsArticle::logStructuredSummaryOverride()). primary_sources/
+ *                  image_credit ajoutés par la bonification panel 2026-08-17 (soir, design doc) -
+ *                  contrairement aux autres champs de ce mode, ils NE SONT PAS internes : affichés
+ *                  tels quels sur la fiche publique (Modules\News\resources\views\public\show.blade.php).
+ *                  composed_summary (Richesse v1.188.0, design doc section "Richesse v1.188.0")
+ *                  est un CAS SPÉCIAL : au lieu d'effacer structured_summary à null comme les
+ *                  autres champs de ce mode, il le REMPLACE par la version composée (marqueur
+ *                  `composed: true`, distinguant à jamais le résumé composé du défunt résumé
+ *                  machine) - voir NewsArticle::hasComposedSummary().
  * - `--image=`   : applique un fichier image local déjà obtenu (Gemini), via
  *                  NewsImageService::processFromLocalFile().
  * - `--publish`  : publie la fiche (voir la note ci-dessous - ajouté 2026-08-17, fin de journée).
@@ -81,7 +86,25 @@ class NewsApplyCommand extends Command
     // 'niveau_preuve' et 'original_post' rejoignent la liste blanche, mêmes garde-fous.
     // MCP: SELF (<5 lignes)
     // RAISON: design doc, section "Implémentation /actu2 - volet serveur (2026-08-17)".
-    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'seo_title', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve', 'original_post'];
+    // ACTION : Richesse v1.188.0 - 'composed_summary' rejoint la liste blanche, même garde-fou.
+    // MCP: SELF (<5 lignes)
+    // RAISON: design doc, section "Richesse v1.188.0 - structure fixe composée (2026-08-17 soir)".
+    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'seo_title', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve', 'original_post', 'composed_summary'];
+
+    /**
+     * Richesse v1.188.0 - sous-clés autorisées de composed_summary (design doc, section
+     * "Richesse v1.188.0"). Toute autre sous-clé fait refuser tout le payload, même règle que
+     * ALLOWED_PAYLOAD_KEYS ci-dessus.
+     */
+    private const ALLOWED_COMPOSED_SUMMARY_KEYS = ['hook', 'key_points', 'why_important', 'key_number', 'quote', 'angle_qc_ca', 'action_concrete', 'reperes_dates'];
+
+    /**
+     * Richesse v1.188.0 - borne par défaut d'une chaîne simple de composed_summary (hook,
+     * why_important, key_number, angle_qc_ca, action_concrete) - "~600 max chacune sauf indiqué"
+     * (design doc). quote.text/quote.author, les éléments de key_points et les champs de
+     * reperes_dates ont leurs propres bornes, plus courtes, validées séparément.
+     */
+    private const COMPOSED_SUMMARY_STRING_MAX = 600;
 
     /**
      * Valeurs acceptées pour 'nature_original' (design doc, section "Implémentation /actu2 -
@@ -305,8 +328,25 @@ class NewsApplyCommand extends Command
             $updates['original_post'] = $normalizedPost;
         }
 
+        // ACTION : Richesse v1.188.0 - composed_summary est un CAS SPÉCIAL parmi les clés de ce
+        // mode : il écrit DIRECTEMENT structured_summary (marqueur composed:true ajouté ici),
+        // au lieu de laisser le bloc générique ci-dessous l'effacer à null comme pour les autres
+        // clés de contenu. Voir NewsArticle::hasComposedSummary(), point unique de cette
+        // distinction, réutilisé par show.blade.php (ordre fixe) et NewsCompositionController::
+        // publish() (garde-fou anti-effacement au bouton manuel).
+        // MCP: SELF (<5 lignes)
+        // RAISON: design doc, section "Richesse v1.188.0 - structure fixe composée (2026-08-17 soir)".
+        if (array_key_exists('composed_summary', $decoded)) {
+            $normalizedComposed = $this->normalizeComposedSummary($decoded['composed_summary']);
+            if ($normalizedComposed === null) {
+                // Message d'erreur déjà émis par normalizeComposedSummary().
+                return self::FAILURE;
+            }
+            $updates['structured_summary'] = array_merge(['composed' => true], $normalizedComposed);
+        }
+
         if ($updates === []) {
-            $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs / primary_sources / image_credit / nature_original / niveau_preuve / original_post n\'est fournie.');
+            $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs / primary_sources / image_credit / nature_original / niveau_preuve / original_post / composed_summary n\'est fournie.');
 
             return self::FAILURE;
         }
@@ -318,8 +358,17 @@ class NewsApplyCommand extends Command
         // même méthode réutilisée telle quelle par NewsCompositionController::publish() (DRY).
         // MCP: SELF (<5 lignes)
         // RAISON: correctif ciblé, réutilise le point unique déjà extrait sur le modèle.
+        //
+        // ACTION : Richesse v1.188.0 - si composed_summary vient d'écrire structured_summary
+        // ci-dessus, ne PAS l'écraser à null ici (seule la journalisation de l'ANCIENNE valeur
+        // reste inconditionnelle - jamais perdue en silence, même quand elle est remplacée par
+        // une composition plutôt qu'effacée).
+        // MCP: SELF (<5 lignes)
+        // RAISON: design doc, section "Richesse v1.188.0" - "il le REMPLACE par la version composée".
         $article->logStructuredSummaryOverride();
-        $updates['structured_summary'] = null;
+        if (! array_key_exists('structured_summary', $updates)) {
+            $updates['structured_summary'] = null;
+        }
 
         DB::transaction(function () use ($article, $updates): void {
             $article->update($updates);
@@ -529,6 +578,241 @@ class NewsApplyCommand extends Command
                 return null;
             }
             $normalized['url'] = $url;
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * Richesse v1.188.0 (design doc "Actus - composition manuelle assistée" 2026-08-15, section
+     * "Richesse v1.188.0 - structure fixe composée") - valide et normalise composed_summary :
+     * huit sous-clés nullables (hook, key_points, why_important, key_number, quote, angle_qc_ca,
+     * action_concrete, reperes_dates), toute sous-clé inconnue fait refuser tout le payload,
+     * chaînes bornées (~600 caractères sauf indication contraire par sous-structure). Le
+     * marqueur `composed: true` N'EST PAS ajouté ici - il l'est par l'appelant (applyPayload()),
+     * pour que cette méthode reste une simple validation/normalisation sans connaître le
+     * contexte de stockage.
+     * MCP: SELF (<5 lignes utiles par branche)
+     * RAISON: design doc, section "Richesse v1.188.0" - liste blanche stricte, même doctrine que
+     * les autres normalizeXxx() de cette commande.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function normalizeComposedSummary(mixed $input): ?array
+    {
+        if (! is_array($input)) {
+            $this->error('composed_summary doit être un objet.');
+
+            return null;
+        }
+
+        $unknownKeys = array_diff(array_keys($input), self::ALLOWED_COMPOSED_SUMMARY_KEYS);
+        if ($unknownKeys !== []) {
+            $this->error('Clé(s) non autorisée(s) dans composed_summary : '.implode(', ', $unknownKeys).'. Clés permises : '.implode(', ', self::ALLOWED_COMPOSED_SUMMARY_KEYS).'.');
+
+            return null;
+        }
+
+        $normalized = [];
+
+        foreach (['hook', 'why_important', 'key_number', 'angle_qc_ca', 'action_concrete'] as $key) {
+            if (! array_key_exists($key, $input)) {
+                continue;
+            }
+            if (! is_string($input[$key])) {
+                $this->error("composed_summary.{$key} doit être une chaîne de caractères.");
+
+                return null;
+            }
+            if (mb_strlen($input[$key]) > self::COMPOSED_SUMMARY_STRING_MAX) {
+                $this->error("composed_summary.{$key} dépasse ".self::COMPOSED_SUMMARY_STRING_MAX.' caractères.');
+
+                return null;
+            }
+            $normalized[$key] = $input[$key];
+        }
+
+        if (array_key_exists('key_points', $input)) {
+            $points = $this->normalizeComposedKeyPoints($input['key_points']);
+            if ($points === null) {
+                // Message d'erreur déjà émis par normalizeComposedKeyPoints().
+                return null;
+            }
+            $normalized['key_points'] = $points;
+        }
+
+        if (array_key_exists('quote', $input)) {
+            $quote = $this->normalizeComposedQuote($input['quote']);
+            if ($quote === null) {
+                // Message d'erreur déjà émis par normalizeComposedQuote().
+                return null;
+            }
+            $normalized['quote'] = $quote;
+        }
+
+        if (array_key_exists('reperes_dates', $input)) {
+            $reperes = $this->normalizeComposedReperesDates($input['reperes_dates']);
+            if ($reperes === null) {
+                // Message d'erreur déjà émis par normalizeComposedReperesDates().
+                return null;
+            }
+            $normalized['reperes_dates'] = $reperes;
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * Richesse v1.188.0 - composed_summary.key_points : au plus 5 puces, chacune au plus 300
+     * caractères (design doc : "3-5 puces factuelles attribuées, 20-35 mots chacune").
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: design doc, section "Richesse v1.188.0".
+     *
+     * @return array<int, string>|null
+     */
+    private function normalizeComposedKeyPoints(mixed $input): ?array
+    {
+        if (! is_array($input)) {
+            $this->error('composed_summary.key_points doit être un tableau de chaînes.');
+
+            return null;
+        }
+
+        if (count($input) > 5) {
+            $this->error('composed_summary.key_points dépasse la limite de 5 puces.');
+
+            return null;
+        }
+
+        $normalized = [];
+        foreach ($input as $point) {
+            if (! is_string($point)) {
+                $this->error('Chaque élément de composed_summary.key_points doit être une chaîne de caractères.');
+
+                return null;
+            }
+            if (mb_strlen($point) > 300) {
+                $this->error('Un élément de composed_summary.key_points dépasse 300 caractères.');
+
+                return null;
+            }
+            $normalized[] = $point;
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * Richesse v1.188.0 - composed_summary.quote : objet {text, author}, text obligatoire (une
+     * citation sans texte n'a pas de sens), author facultatif. Bornes propres à cette
+     * sous-structure (design doc : "une seule citation, locuteur et fonction identifiés").
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: design doc, section "Richesse v1.188.0".
+     *
+     * @return array{text: string, author?: string}|null
+     */
+    private function normalizeComposedQuote(mixed $input): ?array
+    {
+        if (! is_array($input)) {
+            $this->error('composed_summary.quote doit être un objet {text, author}.');
+
+            return null;
+        }
+
+        $allowedKeys = ['text', 'author'];
+        $unknownKeys = array_diff(array_keys($input), $allowedKeys);
+        if ($unknownKeys !== []) {
+            $this->error('Clé(s) non autorisée(s) dans composed_summary.quote : '.implode(', ', $unknownKeys).'. Clés permises : '.implode(', ', $allowedKeys).'.');
+
+            return null;
+        }
+
+        $text = $input['text'] ?? null;
+        if (! is_string($text) || trim($text) === '') {
+            $this->error('composed_summary.quote.text est obligatoire (citation).');
+
+            return null;
+        }
+        if (mb_strlen($text) > 400) {
+            $this->error('composed_summary.quote.text dépasse 400 caractères.');
+
+            return null;
+        }
+
+        $normalized = ['text' => $text];
+
+        if (array_key_exists('author', $input)) {
+            if (! is_string($input['author'])) {
+                $this->error('composed_summary.quote.author doit être une chaîne de caractères.');
+
+                return null;
+            }
+            if (mb_strlen($input['author']) > 120) {
+                $this->error('composed_summary.quote.author dépasse 120 caractères.');
+
+                return null;
+            }
+            $normalized['author'] = $input['author'];
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * Richesse v1.188.0 - composed_summary.reperes_dates : au plus 4 jalons {date, texte, url?},
+     * juxtaposés jamais causaux (design doc). date/texte obligatoires par jalon, url facultative
+     * mais doit être http/https valide si fournie - même règle que primary_sources.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: design doc, section "Richesse v1.188.0".
+     *
+     * @return array<int, array{date: string, texte: string, url?: string}>|null
+     */
+    private function normalizeComposedReperesDates(mixed $input): ?array
+    {
+        if (! is_array($input)) {
+            $this->error('composed_summary.reperes_dates doit être un tableau.');
+
+            return null;
+        }
+
+        if (count($input) > 4) {
+            $this->error('composed_summary.reperes_dates dépasse la limite de 4 repères.');
+
+            return null;
+        }
+
+        $normalized = [];
+        foreach ($input as $repere) {
+            if (! is_array($repere) || ! isset($repere['date'], $repere['texte'])
+                || ! is_string($repere['date']) || ! is_string($repere['texte'])) {
+                $this->error('Chaque repère de composed_summary.reperes_dates doit contenir date et texte (chaînes).');
+
+                return null;
+            }
+            if (mb_strlen($repere['date']) > 40) {
+                $this->error('composed_summary.reperes_dates : une date dépasse 40 caractères.');
+
+                return null;
+            }
+            if (mb_strlen($repere['texte']) > 200) {
+                $this->error('composed_summary.reperes_dates : un texte dépasse 200 caractères.');
+
+                return null;
+            }
+
+            $entry = ['date' => $repere['date'], 'texte' => $repere['texte']];
+
+            if (array_key_exists('url', $repere)) {
+                $url = is_string($repere['url']) ? trim($repere['url']) : '';
+                if ($url === '' || ! filter_var($url, FILTER_VALIDATE_URL) || ! preg_match('#^https?://#i', $url)) {
+                    $this->error("composed_summary.reperes_dates : url invalide (http/https attendu) : « {$url} ».");
+
+                    return null;
+                }
+                $entry['url'] = $url;
+            }
+
+            $normalized[] = $entry;
         }
 
         return $normalized;

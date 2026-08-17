@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.188.0] - 2026-08-17
+
+### Ajouté
+- **Richesse structurée des fiches composées (module News, panel de 5 IA - « la fiche n'était pas trop courte, elle était trop monolithique »).** Nouvelle clé `composed_summary` de la porte bornée `news:apply` : 8 sections nullables et bornées rédigées par l'agent /actu2 (l'essentiel, points à retenir, pourquoi ça compte, chiffre-clé avec unité+date+source, citation identifiée, ce que ça change au Québec - sur preuve québécoise datée seulement -, action concrète, repères datés juxtaposés). Stockée avec marqueur `composed: true` - jamais confondue avec le défunt résumé machine. Rendu public à **ordre fixe et libellés constants** (« le lecteur retrouve toujours la même maison, parfois une pièce en moins, jamais une pièce déplacée ») avec droit d'omission silencieuse. « Action concrète » enfin visible sur la fiche (n'existait que dans le texte de partage - trouvaille du panel). Skill /actu2 mis à jour en conséquence (rédaction par sections, zones d'hallucination verrouillées, 3 fiches canoniques réécrites au format riche).
+
+### Corrigé
+- `NewsCompositionController::publish()` effaçait `structured_summary` inconditionnellement - il aurait détruit un résumé composé publié par le bouton manuel (garde `hasComposedSummary`, défaut trouvé pendant l'implémentation).
+
+### Vérifié
+- Suite complète du module News verte (2 nouveaux fichiers de tests : application du payload composé, rendu à ordre fixe et omission silencieuse, non-régression des fiches machine historiques).
+
 ## [1.187.0] - 2026-08-17
 
 ### Ajouté

@@ -6,6 +6,13 @@
     // blocs conditionnels ci-dessous (design doc section 7).
     $isDigest = (bool) ($article->is_comparative_digest ?? false);
     $fusionDigestArticle = method_exists($article, 'fusionDigest') ? $article->fusionDigest() : null;
+    // Richesse v1.188.0 (design doc "Actus - composition manuelle assistée" 2026-08-15, section
+    // "Richesse v1.188.0 - structure fixe composée") : une fiche COMPOSÉE (marqueur composed:true,
+    // écrit par NewsApplyCommand --payload/composed_summary, via NewsArticle::hasComposedSummary()
+    // - point unique, jamais recalculé ici) rend ses sections dans un ORDRE FIXE et des libellés
+    // CONSTANTS, distincts de l'ancien résumé MACHINE ci-dessous (structure historique, inchangée
+    // pour les fiches qui n'ont jamais transité par la composition).
+    $isComposed = $article->hasComposedSummary();
 @endphp
 
 {{-- Élagage SEO : vieille actualité peu vue → noindex,follow (le layout master lit cette section). --}}
@@ -234,7 +241,7 @@
        périmètre ici) garde le fil d'Ariane mais ne répète plus le titre : h2 vidé côté PHP
        (breadcrumbTitle => ''), collapsé ici pour ne pas laisser un espace vide dans le bandeau. */
     .wpo-breadcumb-area .wpo-breadcumb-wrap h2:empty { display: none; }
-    /* R10 - Citation source extracted (rendu si quote présent) */
+    /* R10 - extrait verbatim de la source (rendu si quote présent) */
     .nw-quote {
         border-left: 3px solid #94a3b8; background: #f8fafc;
         padding: 0.875rem 1.25rem; margin: 1.25rem 0;
@@ -503,16 +510,102 @@
                         <p class="nw-lead">@glossarize(e($ss['hook']))</p>
                     @endif
 
-                    {{-- R10 - Citation verbatim extraite de la source externe (R7 AiSummary).
-                         Attribution complète (journaliste, média, date, lien original) via le
-                         composant réutilisable x-news::quote-attribution - conformité article
-                         29.2 Loi sur le droit d'auteur (design doc "Attribution citation 29.2
-                         LDA", 2026-08-13). --}}
-                    @if($ss && !empty($ss['quote']))
+                    @if($isComposed)
+                        {{-- Richesse v1.188.0 (design doc "Actus - composition manuelle assistée"
+                             2026-08-15, section "Richesse v1.188.0 - structure fixe composée") :
+                             fiche COMPOSÉE, ordre FIXE et libellés CONSTANTS - « le lecteur
+                             retrouve toujours la même maison ». Chaque section est NULLABLE avec
+                             droit d'omission silencieuse (@if(!empty(...)) partout : aucun titre
+                             orphelin, aucun espace résiduel quand une section est absente). Section
+                             1 « L'essentiel » déjà rendue plus haut (encadré nw-tldr, hook/tldr
+                             partagés avec l'ancien résumé machine) ; section 9 « Sources » rendue
+                             plus bas (bloc partagé, inchangé). Sections 2 à 8 ci-dessous. --}}
+
+                        {{-- 2. À retenir --}}
+                        @if(!empty($ss['key_points']))
+                        <h2 class="nw-section-heading">{{ __('À retenir') }}</h2>
+                        <ul class="nw-key-list">
+                            @foreach($ss['key_points'] as $point)
+                                <li>@glossarize(e($point))</li>
+                            @endforeach
+                        </ul>
+                        @endif
+
+                        {{-- 3. Pourquoi ça compte --}}
+                        @if(!empty($ss['why_important']))
+                        <h2 class="nw-section-heading">{{ __('Pourquoi ça compte') }}</h2>
+                        <div class="nw-why">
+                            <p>@glossarize(e($ss['why_important']))</p>
+                        </div>
+                        @endif
+
+                        {{-- 4. Chiffre-clé --}}
+                        @if(!empty($ss['key_number']))
+                        <h2 class="nw-section-heading">{{ __('Chiffre-clé') }}</h2>
+                        <div class="nw-why">
+                            <p><span class="nw-stat">{{ $ss['key_number'] }}</span></p>
+                        </div>
+                        @endif
+
+                        {{-- 5. Citation - quote composé = objet {text, author}, distinct de
+                             l'ancien quote-attribution (chaîne + attribution calculée sur
+                             l'article) rendu dans la branche @else ci-dessous. --}}
+                        @if(!empty($ss['quote']['text'] ?? null))
+                        <h2 class="nw-section-heading">{{ __('Citation') }}</h2>
                         <blockquote class="nw-quote" @if(!empty($article->resolved_url ?? $article->url)) cite="{{ $article->resolved_url ?? $article->url }}" @endif>
-                            « @glossarize(e($ss['quote'])) »
-                            <x-news::quote-attribution :article="$article" />
+                            « @glossarize(e($ss['quote']['text'])) »
+                            @if(!empty($ss['quote']['author']))
+                                <cite>{{ $ss['quote']['author'] }}</cite>
+                            @endif
                         </blockquote>
+                        @endif
+
+                        {{-- 6. Ce que ça change au Québec - admissible seulement sur preuve
+                             québécoise datée (décision éditoriale, jamais forcée côté code). --}}
+                        @if(!empty($ss['angle_qc_ca']))
+                        <h2 class="nw-section-heading">{{ __('Ce que ça change au Québec') }}</h2>
+                        <p class="nw-expert">🇨🇦 @glossarize(e($ss['angle_qc_ca']))</p>
+                        @endif
+
+                        {{-- 7. Action concrète - bonus Codex (design doc) : cette clé n'était
+                             visible QUE dans le texte de partage jusqu'ici, désormais visible sur
+                             la fiche. --}}
+                        @if(!empty($ss['action_concrete']))
+                        <h2 class="nw-section-heading">{{ __('Action concrète') }}</h2>
+                        <div class="nw-why">
+                            <p>@glossarize(e($ss['action_concrete']))</p>
+                        </div>
+                        @endif
+
+                        {{-- 8. Repères datés - jalons d'archives internes juxtaposés, jamais
+                             causaux. --}}
+                        @if(!empty($ss['reperes_dates']))
+                        <h2 class="nw-section-heading">{{ __('Repères datés') }}</h2>
+                        <ul class="nw-key-list">
+                            @foreach($ss['reperes_dates'] as $repere)
+                                <li>
+                                    @if(!empty($repere['date']))<strong>{{ $repere['date'] }}</strong> - @endif
+                                    @if(!empty($repere['url']))
+                                        <a href="{{ $repere['url'] }}" target="_blank" rel="noopener">{{ $repere['texte'] ?? '' }}</a>
+                                    @else
+                                        {{ $repere['texte'] ?? '' }}
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                        @endif
+                    @else
+                        {{-- R10 - Citation verbatim extraite de la source externe (R7 AiSummary).
+                             Attribution complète (journaliste, média, date, lien original) via le
+                             composant réutilisable x-news::quote-attribution - conformité article
+                             29.2 Loi sur le droit d'auteur (design doc "Attribution citation 29.2
+                             LDA", 2026-08-13). --}}
+                        @if($ss && !empty($ss['quote']))
+                            <blockquote class="nw-quote" @if(!empty($article->resolved_url ?? $article->url)) cite="{{ $article->resolved_url ?? $article->url }}" @endif>
+                                « @glossarize(e($ss['quote'])) »
+                                <x-news::quote-attribution :article="$article" />
+                            </blockquote>
+                        @endif
                     @endif
 
                     {{-- Actus 2.0 - Sources (design doc section 7) : liste « Sources » pour une
@@ -535,7 +628,10 @@
                         </ul>
                     @endif
 
-                    {{-- Résumé structuré --}}
+                    {{-- Résumé structuré (ancien résumé MACHINE uniquement - une fiche composée
+                         rend ses sections dans le bloc @if($isComposed) plus haut, jamais ici,
+                         pour ne jamais dupliquer key_points/why_important/angle_qc_ca). --}}
+                    @unless($isComposed)
                     @if($ss)
                         @if(!empty($ss['key_points']))
                         <h2 class="nw-section-heading">{{ __('Que faut-il retenir ?') }}</h2>
@@ -597,6 +693,7 @@
                         <p class="nw-audience">{{ __('Public concerné') }} : {{ implode(', ', $ss['audience']) }}</p>
                         @endif
                     @endif
+                    @endunless
                     {{-- Le repli $article->summary (ex-encadré « Résumé IA ») est désormais
                          rendu plus haut par l'encadré unique « L'essentiel » (point 2, panel
                          2026-08-17) - aucun second rendu ici. --}}

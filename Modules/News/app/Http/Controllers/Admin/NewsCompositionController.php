@@ -640,8 +640,17 @@ class NewsCompositionController extends Controller
         // SPÉCIFIQUES à cet endpoint, volontairement absentes de la méthode partagée.
         // MCP: SELF (<5 lignes)
         // RAISON: DRY explicite, une seule implémentation de la purge à travers le code.
+        // ACTION : Richesse v1.188.0 - garde-fou découvert en implémentant ce mandat : l'effacement
+        // inconditionnel de structured_summary ci-dessous était correct pour l'ancien résumé
+        // MACHINE, mais aurait aussi détruit un résumé COMPOSÉ (marqueur composed:true, écrit par
+        // NewsApplyCommand --payload) au moment même de le publier. hasComposedSummary() est le
+        // point UNIQUE de cette distinction (DRY, réutilisé par show.blade.php).
+        // MCP: SELF (<5 lignes)
+        // RAISON: design doc "Actus - composition manuelle assistée", section "Richesse v1.188.0".
         DB::transaction(function () use ($article): void {
-            $article->update(['structured_summary' => null]);
+            if (! $article->hasComposedSummary()) {
+                $article->update(['structured_summary' => null]);
+            }
             $article->publishAndPurgeSource();
         });
 

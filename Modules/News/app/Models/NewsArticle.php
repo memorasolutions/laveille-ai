@@ -420,6 +420,28 @@ class NewsArticle extends Model implements Searchable
     }
 
     /**
+     * ACTION : Richesse v1.188.0 - structure fixe composée (design doc "Actus - composition
+     * manuelle assistée" 2026-08-15, section "Richesse v1.188.0") - vrai uniquement si
+     * structured_summary porte le marqueur `composed: true` écrit par NewsApplyCommand
+     * (--payload, clé composed_summary). Distingue À JAMAIS une fiche composée par l'agent
+     * /actu2 d'une fiche à l'ancien résumé MACHINE (défunt depuis NEWS_MACHINE_SUMMARY_ENABLED
+     * = false, mais des fiches historiques en portent encore). Point UNIQUE réutilisé par
+     * Modules\News\resources\views\public\show.blade.php (ordre fixe des sections) ET
+     * Modules\News\Http\Controllers\Admin\NewsCompositionController::publish() (garde-fou
+     * empêchant le bouton manuel Publier-et-purger d'effacer un résumé composé - découvert en
+     * implémentant ce mandat : l'effacement inconditionnel de structured_summary avant
+     * publication, correct pour l'ancien résumé machine, aurait sinon détruit une composition
+     * riche au moment même de la publier).
+     * MCP: SELF (<5 lignes)
+     * RAISON: DRY explicite - un seul point de vérité pour "cette fiche porte-t-elle un résumé
+     * composé", jamais une divergence entre le rendu et la garde d'écriture.
+     */
+    public function hasComposedSummary(): bool
+    {
+        return is_array($this->structured_summary) && ($this->structured_summary['composed'] ?? false) === true;
+    }
+
+    /**
      * ACTION : provenance du texte source (design doc "Actus - composition manuelle assistée"
      * 2026-08-15, section 5.2) - extrait TEL QUEL de l'ancienne méthode privée
      * NewsCompositionController::applySourceProvenance() (implémentation /actu2, révision
@@ -683,8 +705,15 @@ class NewsArticle extends Model implements Searchable
             if ($tldr = data_get($structured, 'tldr')) {
                 $resume .= "## En bref\n{$tldr}\n\n";
             }
-            if ($quote = data_get($structured, 'quote')) {
-                $resume .= "## Citation\n« {$quote} »\n\n";
+            // ACTION : Richesse v1.188.0 - quote est désormais soit une chaîne (ancien résumé
+            // machine), soit un objet {text, author} (résumé composé, design doc section
+            // "Richesse v1.188.0") - garde-fou évitant une conversion tableau-vers-chaîne.
+            // MCP: SELF (<5 lignes)
+            // RAISON: robustesse zéro-casse découverte en implémentant ce mandat.
+            $quote = data_get($structured, 'quote');
+            $quoteText = is_array($quote) ? (string) ($quote['text'] ?? '') : (string) ($quote ?? '');
+            if ($quoteText !== '') {
+                $resume .= "## Citation\n« {$quoteText} »\n\n";
             }
             if ($faqQ = data_get($structured, 'faq_question')) {
                 $resume .= "## Question\n{$faqQ}\n\n" . data_get($structured, 'faq_answer', '') . "\n\n";
@@ -716,7 +745,10 @@ class NewsArticle extends Model implements Searchable
                     $candidates[] = (string) $point;
                 }
             }
-            $candidates[] = (string) data_get($structured, 'quote');
+            // ACTION : Richesse v1.188.0 - même garde-fou que plus haut (quote peut être un
+            // objet {text, author} pour un résumé composé).
+            // MCP: SELF (<5 lignes)
+            $candidates[] = $quoteText ?? '';
             $candidates[] = (string) data_get($structured, 'why_important');
         }
         foreach ($candidates as $cand) {

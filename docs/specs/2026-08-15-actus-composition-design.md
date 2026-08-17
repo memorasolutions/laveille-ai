@@ -721,3 +721,140 @@ explicite dans la sortie/le flash plutôt qu'un échec silencieux). Journalisati
 (ligne `MACHINE-SUMMARY-OFF`, même pattern qu'`AUTOPUBLISH-OFF`) et segment de bilan « résumés
 machine : désactivés » dans la sortie de `news:fetch`. Tests :
 `Modules/News/tests/Feature/NewsMachineSummaryGateTest.php`.
+
+## Richesse v1.188.0 - structure fixe composée (2026-08-17 soir)
+
+**Décisions verrouillées, panel de 5 IA clos** : les fiches composées par l'agent `/actu2`
+deviennent RICHES et STRUCTURÉES plutôt que minimales. Structure FIXE et identique d'une fiche à
+l'autre (ordre et libellés constants - « le lecteur retrouve toujours la même maison ») ; chaque
+section NULLABLE avec droit d'omission silencieuse (« une section vide est un succès », aucun
+titre orphelin, aucun espace résiduel) ; contenu rédigé EXCLUSIVEMENT par l'agent (la génération
+machine est éteinte depuis v1.187.0, section ci-dessus) ; ~320-500 mots quand la matière existe,
+jamais de gonflage.
+
+### Ordre fixe des neuf sections (libellés publics exacts)
+
+1. **« L'essentiel »** - accroche autonome, 30-40 mots. Clé `hook` (mécanisme INCHANGÉ, partagé
+   avec l'ancien résumé machine : encadré `.nw-tldr`, priorité `tldr` puis `hook` - composed_summary
+   ne porte jamais de `tldr`, donc toujours `hook` en pratique).
+2. **« À retenir »** - 3 à 5 puces factuelles attribuées, 20-35 mots chacune. Clé NOUVELLE
+   `key_points` (tableau de chaînes) - même nom de clé que l'ancien résumé machine, mais libellé et
+   position DIFFÉRENTS pour une fiche composée (voir "Rendu" ci-dessous).
+3. **« Pourquoi ça compte »** - 60-90 mots. Clé existante `why_important`.
+4. **« Chiffre-clé »** - donnée + unité + date + source dans la même phrase. Clé existante
+   `key_number` - jusqu'ici visible SEULEMENT dans le texte de partage (`@section('share_text')`),
+   jamais sur la fiche elle-même ; désormais rendue.
+5. **« Citation »** - une seule, locuteur et fonction identifiés. Clé existante `quote`, mais
+   FORMAT CHANGÉ pour une fiche composée : objet `{text, author}` au lieu d'une chaîne simple -
+   l'ancien format chaîne (résumé machine, attribution calculée via
+   `x-news::quote-attribution`) reste inchangé et continue de fonctionner pour les fiches non
+   composées.
+6. **« Ce que ça change au Québec »** - 50-70 mots, admissible SEULEMENT sur preuve québécoise
+   datée (décision éditoriale de l'agent, jamais forcée côté code). Clé existante `angle_qc_ca` -
+   jusqu'ici affichée sans titre (`🇨🇦 {texte}`), désormais sous un titre dédié pour une fiche
+   composée.
+7. **« Action concrète »** - 2 à 3 impératifs, 40 mots. Clé existante `action_concrete` - BONUS
+   Codex identifié en amont : cette clé n'était visible QUE dans le texte de partage jusqu'ici,
+   jamais sur la fiche ; désormais rendue.
+8. **« Repères datés »** - 2 à 4 jalons d'archives internes, JUXTAPOSÉS jamais causaux. Clé
+   NOUVELLE `reperes_dates` (tableau de `{date, texte, url?}`).
+9. **Sources** - section existante, inchangée (primary_sources puis relais média).
+
+### 1. `news:apply --payload=` - clé `composed_summary`
+
+`Modules\News\Console\NewsApplyCommand` (`ALLOWED_PAYLOAD_KEYS`) accepte une nouvelle clé
+`composed_summary` : objet dont les sous-clés autorisées sont EXACTEMENT `hook`, `key_points`
+(tableau ≤5 chaînes ≤300 caractères), `why_important`, `key_number`, `quote` (`{text ≤400,
+author ≤120}`, `text` obligatoire si `quote` fourni), `angle_qc_ca`, `action_concrete` (chaînes
+simples ≤600 caractères chacune, `COMPOSED_SUMMARY_STRING_MAX`), `reperes_dates` (tableau ≤4 de
+`{date ≤40, texte ≤200, url http/https facultative}`) - toute sous-clé inconnue fait refuser tout
+le payload (même doctrine que les autres `normalizeXxx()` de cette commande), toutes les sous-clés
+sont nullables/absentes.
+
+**Comportement de stockage - CAS SPÉCIAL parmi les clés de ce mode** : `composed_summary`
+n'efface PAS `structured_summary` à `null` comme le font les autres clés de contenu de
+`--payload` (`seo_title`/`summary`/`editorial_proof_pairs`/etc.) - il le REMPLACE par la version
+composée, avec un marqueur `composed: true` ajouté par l'appelant (`applyPayload()`, pas par le
+normaliseur lui-même). `NewsArticle::logStructuredSummaryOverride()` journalise toujours l'ANCIENNE
+valeur avant remplacement (canal `composition`), jamais perdue en silence, que la nouvelle valeur
+soit `null` (autres clés) ou la composition (`composed_summary`).
+
+`NewsArticle::hasComposedSummary(): bool` (nouveau, point UNIQUE de la distinction
+composé/machine) : `is_array(structured_summary) && (structured_summary['composed'] ?? false) ===
+true`. Réutilisée par `show.blade.php` (ordre fixe des sections) ET par
+`NewsCompositionController::publish()` (voir garde-fou ci-dessous).
+
+### 2. Garde-fou découvert en implémentant ce mandat - `NewsCompositionController::publish()`
+
+Défaut trouvé en lisant le code existant, corrigé dans le même mandat (zéro casse) :
+`NewsCompositionController::publish()` (bouton manuel Publier-et-purger) effaçait
+INCONDITIONNELLEMENT `structured_summary` à `null` juste avant `publishAndPurgeSource()` (addendum
+2026-08-17, fin de journée - correct pour l'ancien résumé MACHINE, qui n'avait jamais de raison
+de survivre à la publication). Sans garde, ce même effacement aurait aussi détruit un résumé
+COMPOSÉ au moment même de le publier via le bouton manuel (le mode `--publish` de
+`NewsApplyCommand`, lui, n'a jamais eu ce problème - il ne touche jamais `structured_summary`).
+Corrigé par un appel à `hasComposedSummary()` avant l'effacement : `structured_summary` n'est mis
+à `null` que s'il ne porte PAS le marqueur composé.
+
+### 3. Rendu (`show.blade.php`)
+
+`$isComposed = $article->hasComposedSummary();` calculé une fois en haut du fichier, à côté de
+`$ss`/`$isDigest`. Deux branches distinctes et mutuellement exclusives :
+
+- **`@if($isComposed)`** : nouveau bloc unique rendant les sections 2 à 8 dans l'ORDRE FIXE
+  ci-dessus, avec les libellés publics exacts (`__('À retenir')`, `__('Pourquoi ça compte')`,
+  `__('Chiffre-clé')`, `__('Citation')`, `__('Ce que ça change au Québec')`, `__('Action
+  concrète')`, `__('Repères datés')`), chaque section gardée par `@if(!empty(...))` - aucun titre
+  ni bloc résiduel si la clé est absente. Réutilise les classes CSS existantes (`nw-section-heading`,
+  `nw-key-list`, `nw-why`, `nw-quote`/`cite`, `nw-expert`, `nw-stat`) - DRY strict, **aucune
+  nouvelle règle CSS ajoutée**. La citation composée (`quote.text`/`quote.author`) est un bloc
+  DISTINCT de l'ancien rendu `quote-attribution` (chaîne + attribution calculée sur l'article).
+- **`@else`** : ancien bloc de citation (chaîne + `x-news::quote-attribution`), inchangé.
+- Plus bas, l'ancien bloc "Résumé structuré" (Que faut-il retenir ?/Pourquoi cette nouvelle
+  compte-t-elle ?/divergences/contexte d'archives/angle Québec sans titre/expert/audience) est
+  entouré de `@unless($isComposed) ... @endunless` : pour une fiche composée, ces clés
+  (`key_points`/`why_important`/`angle_qc_ca`) sont déjà rendues par le bloc `@if($isComposed)`
+  ci-dessus et ne doivent JAMAIS être dupliquées.
+- La section 1 « L'essentiel » (encadré `.nw-tldr`) et la section 9 « Sources » restent des blocs
+  PARTAGÉS, mécanisme inchangé (composed_summary alimente les mêmes clés `hook`/`primary_sources`
+  que l'ancien résumé machine).
+
+**Robustesse annexe (découverte en implémentant, corrigée dans le même mandat)** :
+`NewsArticle::adminShareContents()` (menu de partage superadmin, hors périmètre fonctionnel de ce
+mandat mais lisait `structured_summary['quote']` comme une chaîne) aurait produit une conversion
+tableau-vers-chaîne (`Warning: Array to string conversion`) sur une fiche composée dont `quote`
+est désormais un objet. Corrigé par une extraction de texte tolérante aux deux formats
+(`is_array($quote) ? $quote['text'] ?? '' : (string) $quote`), réutilisée aux deux points d'usage
+de la méthode.
+
+### 4. Tests Pest (écrits, NON EXÉCUTÉS - le superviseur lance la suite complète une fois)
+
+- **`Modules/News/tests/Feature/ComposedSummaryApplyTest.php`** : application valide (marqueur
+  `composed:true`, toutes les sous-clés persistées) ; REMPLACEMENT (jamais un effacement à null,
+  contrairement aux autres clés du mode) ; journalisation de l'ancienne valeur machine ; refus sur
+  fiche déjà publiée ; sous-clé inconnue refusée ; type invalide refusé (`composed_summary` non
+  objet) ; bornes de longueur refusées et acceptées à la limite exacte (hook 600/601 caractères,
+  key_points 5/6 éléments, item 300/301 caractères, quote.text 400/401, quote.author 120/121,
+  reperes_dates 4/5 éléments, entrée sans date/texte, url invalide/absente) ; cohabitation avec
+  `seo_title`/`summary` dans le même payload.
+- **`Modules/News/tests/Feature/ComposedSummaryRenderTest.php`** : ordre fixe des 9 sections via
+  `assertSeeInOrder` (piège évité : le libellé CSS `content: "L'ESSENTIEL"` du `<style>` est
+  TOUJOURS présent dans la réponse HTTP, donc jamais utilisé comme marqueur d'ordre - c'est le
+  contenu réellement rendu du `hook` qui sert de repère pour la section 1) ; rendu de
+  `key_points`/`reperes_dates`/`action_concrete`/`key_number`/`quote` composé/`angle_qc_ca` sous
+  titre ; omission silencieuse d'une section absente (aucun des 7 libellés composés visible sur
+  une fiche ne portant que `hook`) ; non-régression totale d'une fiche MACHINE historique (sans
+  `composed:true`) : anciens libellés, ancien format de citation (chaîne), aucun des nouveaux
+  libellés composés jamais visible.
+
+### Limite documentée, non corrigée dans ce mandat (hors périmètre explicite)
+
+`NewsArticle::flattenStructuredSummary()` (utilisée par `hasExploitableSummary()`, le garde-fou
+anti-corps-vide de `PublicNewsController::show()`) ne lit que `hook`/`key_points`/`why_important`
+- inchangé par ce mandat. Une fiche composée qui ne renseignerait AUCUNE de ces trois clés (par
+exemple seulement `key_number`+`reperes_dates`) serait donc traitée comme un corps vide (404),
+même si elle porte un contenu composé réel. Risque jugé faible en pratique (la section 1
+« L'essentiel » est l'ancrage quasi systématique de toute fiche composée) et volontairement non
+modifié ici pour ne pas changer le calcul du temps de lecture/`wordCount` JSON-LD des fiches
+machine existantes sans mandat explicite ni suite de tests exécutée pour le vérifier - à trancher
+par le propriétaire si ce cas se présente réellement.
