@@ -92,25 +92,36 @@ class ReprocessArticlesCommand extends Command
 
             // Résumé IA si contenu suffisant
             if ($extracted['word_count'] > 200) {
-                // pub_date transmise pour le contrôle de cohérence des années de
-                // SummaryQualityGate (2026-08-13).
-                $aiResult = app(AiSummaryService::class)->scoreAndSummarize(
-                    $extracted['title'] ?: $article->title,
-                    $extracted['content'],
-                    'fr',
-                    $article->pub_date
-                );
+                // ACTION : génération machine du résumé éteinte (2026-08-17, décision du
+                // fondateur) - refus EXPLICITE plutôt qu'un échec silencieux : le reste du
+                // pipeline de cette commande (résolution Google News, image) continue d'agir
+                // normalement, seul le résumé structuré est refusé.
+                // MCP: SELF (<5 lignes, garde de configuration)
+                // RAISON: le contenu des fiches vient désormais exclusivement du flux /actu2 ;
+                // aucun chemin ne doit pouvoir régénérer un résumé machine drapeau éteint.
+                if (! (bool) config('news.machine_summary.enabled', false)) {
+                    $this->warn('  résumé machine REFUSÉ (drapeau news.machine_summary.enabled désactivé - flux /actu2 uniquement)');
+                } else {
+                    // pub_date transmise pour le contrôle de cohérence des années de
+                    // SummaryQualityGate (2026-08-13).
+                    $aiResult = app(AiSummaryService::class)->scoreAndSummarize(
+                        $extracted['title'] ?: $article->title,
+                        $extracted['content'],
+                        'fr',
+                        $article->pub_date
+                    );
 
-                if ($aiResult && isset($aiResult['score'])) {
-                    $updateData['relevance_score'] = $aiResult['score'];
-                    $updateData['structured_summary'] = $aiResult;
-                    $updateData['category_tag'] = mb_substr((string) ($aiResult['category'] ?? $article->category_tag ?? ''), 0, 50);
-                    $updateData['impact_level'] = mb_substr((string) ($aiResult['impact'] ?? $article->impact_level ?? ''), 0, 10);
-                    $updateData['seo_title'] = mb_substr((string) ($aiResult['seo_title'] ?? $article->seo_title ?? ''), 0, 200);
-                    $updateData['meta_description'] = mb_substr((string) ($aiResult['meta_description'] ?? $article->meta_description ?? ''), 0, 200);
-                    $updateData['summary'] = $aiResult['hook'] ?? $article->summary;
-                    $cat = $aiResult['category'] ?? '?';
-                    $this->info("  IA: score={$aiResult['score']} cat={$cat}");
+                    if ($aiResult && isset($aiResult['score'])) {
+                        $updateData['relevance_score'] = $aiResult['score'];
+                        $updateData['structured_summary'] = $aiResult;
+                        $updateData['category_tag'] = mb_substr((string) ($aiResult['category'] ?? $article->category_tag ?? ''), 0, 50);
+                        $updateData['impact_level'] = mb_substr((string) ($aiResult['impact'] ?? $article->impact_level ?? ''), 0, 10);
+                        $updateData['seo_title'] = mb_substr((string) ($aiResult['seo_title'] ?? $article->seo_title ?? ''), 0, 200);
+                        $updateData['meta_description'] = mb_substr((string) ($aiResult['meta_description'] ?? $article->meta_description ?? ''), 0, 200);
+                        $updateData['summary'] = $aiResult['hook'] ?? $article->summary;
+                        $cat = $aiResult['category'] ?? '?';
+                        $this->info("  IA: score={$aiResult['score']} cat={$cat}");
+                    }
                 }
             }
 

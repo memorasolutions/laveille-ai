@@ -71,6 +71,7 @@
 <div
     x-data="compositionBuilder({
         candidatesEndpoint: @js($candidatesEndpoint),
+        createDraftEndpoint: @js($createDraftEndpoint),
         showEndpointTemplate: @js($showEndpointTemplate),
         updateEndpointTemplate: @js($updateEndpointTemplate),
         deleteSourceTextEndpointTemplate: @js($deleteSourceTextEndpointTemplate),
@@ -98,6 +99,44 @@
         <div class="mt-2">
             <a :href="endpoints.articlesIndexUrl" class="cb-btn cb-btn-secondary" style="font-size:12px; padding:6px 12px; min-height:32px; text-decoration:none;">← Liste des articles (publication)</a>
         </div>
+    </div>
+
+    {{-- Améliorations en attente (2026-08-17), point 1 - « Créer une fiche depuis un lien » : le
+         premier cycle /actu2 réel a prouvé qu'un post X ou une annonce hors collecte RSS n'a
+         aucune fiche à composer tant qu'elle n'est pas créée ici. Même implémentation serveur
+         que `php artisan news:create-draft` (NewsArticle::createManualDraft(), DRY strict). --}}
+    <div class="cb-card">
+        <div class="cb-section-title">➕ Créer une fiche depuis un lien</div>
+        <p class="nc-hint" style="display:block; margin:0 0 10px;">
+            Pour un lien qui n'a pas été collecté automatiquement (post X, communiqué...) - crée un
+            brouillon vide, déjà sélectionné, prêt pour /actu2.
+        </p>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <input type="url"
+                   class="form-control"
+                   x-model="createDraftUrl"
+                   :disabled="createDraftLoading"
+                   placeholder="https://…"
+                   style="max-width:420px;"
+                   @keydown.enter="createDraft()">
+            <button type="button" class="cb-btn" @click="createDraft()" :disabled="createDraftLoading || !createDraftUrl">
+                <span x-show="!createDraftLoading">➕ Créer la fiche</span>
+                <span x-show="createDraftLoading" x-cloak>⏳ Création…</span>
+            </button>
+        </div>
+        <span class="nc-status-error" x-show="createDraftError" x-cloak x-text="createDraftError" style="display:block; margin-top:6px;"></span>
+        <template x-if="createDraftPrompt">
+            <div style="margin-top:10px;">
+                <span class="nc-status-ok" x-text="createDraftCreatedNew ? '✓ Fiche créée et sélectionnée.' : '✓ Fiche déjà existante, sélectionnée.'"></span>
+                <div class="d-flex flex-wrap gap-2 align-items-center" style="margin-top:6px;">
+                    <code x-text="createDraftPrompt" style="background:#f8fafc; padding:6px 8px; border-radius:6px; font-size:12.5px;"></code>
+                    <button type="button" class="cb-btn cb-btn-secondary" @click="copyCreateDraftPrompt()">
+                        <span x-show="!createDraftPromptCopied">📋 Copier</span>
+                        <span x-show="createDraftPromptCopied" x-cloak>✓ Copié</span>
+                    </button>
+                </div>
+            </div>
+        </template>
     </div>
 
     <div class="row">
@@ -377,6 +416,7 @@ function compositionBuilder(opts) {
     const state = {
         endpoints: {
             candidates: opts.candidatesEndpoint,
+            createDraft: opts.createDraftEndpoint,
             showTemplate: opts.showEndpointTemplate,
             updateTemplate: opts.updateEndpointTemplate,
             deleteSourceTextTemplate: opts.deleteSourceTextEndpointTemplate,
@@ -427,6 +467,15 @@ function compositionBuilder(opts) {
         // mini-prompt /actu2 construit CÔTÉ CLIENT (aucun appel serveur), copié au presse-papier.
         quickPromptCopied: false,
         quickPromptError: '',
+
+        // Améliorations en attente (2026-08-17), point 1 - « Créer une fiche depuis un lien »
+        // (formulaire au-dessus de la colonne gauche).
+        createDraftUrl: '',
+        createDraftLoading: false,
+        createDraftError: '',
+        createDraftPrompt: '',
+        createDraftCreatedNew: true,
+        createDraftPromptCopied: false,
         proofPairs: [],
         newPairStatement: '',
         newPairExcerpt: '',
@@ -689,6 +738,57 @@ function compositionBuilder(opts) {
                 setTimeout(() => { this.quickPromptCopied = false; }, 2500);
             } catch (e) {
                 this.quickPromptError = 'Copie impossible, copie-le manuellement : ' + prompt;
+            }
+        },
+
+        // Améliorations en attente (2026-08-17), point 1 - « Créer une fiche depuis un lien » :
+        // appelle la même implémentation serveur que `php artisan news:create-draft`
+        // (NewsArticle::createManualDraft(), DRY strict). Idempotent par URL - créer deux fois
+        // le même lien sélectionne simplement la fiche déjà créée, sans erreur. Une fois créée,
+        // rafraîchit la liste des actualités disponibles (fetchNews()) PUIS sélectionne
+        // directement la fiche (selectItem()), pour ne jamais laisser l'admin la rechercher.
+        async createDraft() {
+            if (!this.createDraftUrl) return;
+            this.createDraftLoading = true;
+            this.createDraftError = '';
+            this.createDraftPrompt = '';
+            try {
+                const res = await fetch(this.endpoints.createDraft, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ url: this.createDraftUrl }),
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.createDraftError = data.error || data.message || ('Erreur HTTP ' + res.status);
+                    return;
+                }
+                this.createDraftPrompt = data.mini_prompt || '';
+                this.createDraftCreatedNew = !!data.created;
+                this.createDraftUrl = '';
+                await this.fetchNews();
+                this.selectItem(data.id);
+            } catch (e) {
+                this.createDraftError = 'Erreur réseau : ' + e.message;
+            } finally {
+                this.createDraftLoading = false;
+            }
+        },
+
+        async copyCreateDraftPrompt() {
+            if (!this.createDraftPrompt) return;
+            try {
+                await navigator.clipboard.writeText(this.createDraftPrompt);
+                this.createDraftPromptCopied = true;
+                setTimeout(() => { this.createDraftPromptCopied = false; }, 2500);
+            } catch (e) {
+                this.createDraftError = 'Copie impossible, copie-le manuellement : ' + this.createDraftPrompt;
             }
         },
 

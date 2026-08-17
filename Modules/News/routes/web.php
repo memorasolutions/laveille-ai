@@ -87,6 +87,8 @@ Route::prefix('admin/news/composition')
     ->group(function () {
         Route::get('/', [NewsCompositionController::class, 'index'])->name('index');
         Route::get('/candidates', [NewsCompositionController::class, 'candidates'])->name('candidates');
+        // ── Améliorations en attente (2026-08-17), point 1 - « Créer une fiche depuis un lien » ──
+        Route::post('/create-draft', [NewsCompositionController::class, 'createDraft'])->name('create-draft');
         Route::get('/{article}', [NewsCompositionController::class, 'show'])->name('show');
         Route::put('/{article}', [NewsCompositionController::class, 'update'])->name('update');
         Route::delete('/{article}/source-text', [NewsCompositionController::class, 'destroySourceText'])->name('destroy-source-text');

@@ -452,6 +452,56 @@ class NewsArticle extends Model implements Searchable
         ];
     }
 
+    /**
+     * ACTION : commande `news:create-draft` + écran de composition « Créer une fiche depuis un
+     * lien » (design doc "Actus - composition manuelle assistée" 2026-08-15, section
+     * "Améliorations en attente", point 1) - le premier cycle /actu2 réel (fiche 33530) a prouvé
+     * qu'aucune création manuelle de fiche n'existait : un post X ou une annonce hors collecte
+     * RSS n'avait aucune fiche à composer. Point d'entrée UNIQUE (DRY strict) réutilisé TEL QUEL
+     * par Modules\News\Console\NewsCreateDraftCommand ET
+     * Modules\News\Http\Controllers\Admin\NewsCompositionController::createDraft() - une seule
+     * implémentation, deux portes.
+     *
+     * Idempotente par URL : une fiche déjà créée à cette URL exacte (peu importe sa source) est
+     * retournée TELLE QUELLE plutôt que dupliquée - un appel répété (rejeu du skill, double
+     * clic) ne crée jamais deux fiches pour le même lien. La source "Soumission manuelle" (URL
+     * factice 'manuel://soumission-directe', volontairement INACTIVE - jamais collectée par le
+     * flux RSS) n'est créée qu'une seule fois, via firstOrCreate(). Le slug est dérivé
+     * automatiquement du titre par le hook static::creating() déjà en place plus haut
+     * (generateUniqueSlug(), suffixe unique si collision) - aucune duplication de cette règle.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: DRY explicite exigé par le mandat, une seule implémentation à travers le code.
+     *
+     * @return array{article: self, created: bool}
+     */
+    public static function createManualDraft(string $url, ?string $title = null): array
+    {
+        $url = trim($url);
+
+        $existing = self::where('url', $url)->first();
+        if ($existing) {
+            return ['article' => $existing, 'created' => false];
+        }
+
+        $source = NewsSource::firstOrCreate(
+            ['url' => 'manuel://soumission-directe'],
+            ['name' => 'Soumission manuelle', 'language' => 'fr', 'active' => false]
+        );
+
+        $article = self::create([
+            'news_source_id' => $source->id,
+            'title' => filled($title) ? trim($title) : 'Fiche créée depuis un lien - à composer',
+            'guid' => 'manuel-'.(string) Str::uuid(),
+            'url' => $url,
+            'description' => '',
+            'pub_date' => now('America/Toronto'),
+            'is_published' => false,
+            'seo_status' => 'index',
+        ]);
+
+        return ['article' => $article, 'created' => true];
+    }
+
     // 2026-05-05 #146 : scopePublished mutualise via HasPublishedState (DRY Core).
 
     public function scopeRecent(Builder $query): Builder

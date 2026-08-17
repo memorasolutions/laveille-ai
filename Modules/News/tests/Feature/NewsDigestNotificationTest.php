@@ -164,3 +164,33 @@ test('le texte integral d\'une source n\'apparait jamais dans le corps du courri
         ->not->toContain('PHRASE SOURCE INTERDITE QUI NE DOIT JAMAIS FUITER DANS LE COURRIEL')
         ->toContain('Un resume court et sur, jamais le texte source.');
 });
+
+// ── Mini-prompt /actu2 copiable (ameliorations en attente 2026-08-17, point 5) ────────
+
+test('le courriel contient le mini-prompt /actu2 pour chaque actualite listee', function (): void {
+    $source = digestSource();
+    $article = digestArticle($source, [
+        'url' => 'https://exemple.test/original-'.uniqid(),
+        'resolved_url' => null,
+    ]);
+
+    $mailable = new NewsDigestMail(collect([$article->load('source')]), 1, 100);
+    $rendered = $mailable->render();
+
+    expect($rendered)->toContain('/actu2 '.$article->url.' fiche:'.$article->id);
+});
+
+test('le mini-prompt du courriel utilise resolved_url quand il est present, comme le bouton client de l\'ecran de composition', function (): void {
+    $source = digestSource();
+    $article = digestArticle($source, [
+        'url' => 'https://exemple.test/url-de-collecte-'.uniqid(),
+        'resolved_url' => 'https://exemple.test/url-resolue-'.uniqid(),
+    ]);
+
+    $mailable = new NewsDigestMail(collect([$article->load('source')]), 1, 100);
+    $rendered = $mailable->render();
+
+    expect($rendered)
+        ->toContain('/actu2 '.$article->resolved_url.' fiche:'.$article->id)
+        ->not->toContain('/actu2 '.$article->url.' fiche:'.$article->id);
+});

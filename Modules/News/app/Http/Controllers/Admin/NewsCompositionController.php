@@ -97,6 +97,9 @@ class NewsCompositionController extends Controller
     {
         return view('news::admin.composition-builder', [
             'candidatesEndpoint' => route('admin.news.composition.candidates'),
+            // Améliorations en attente (2026-08-17), point 1 - « Créer une fiche depuis un
+            // lien », voir createDraft() ci-dessous.
+            'createDraftEndpoint' => route('admin.news.composition.create-draft'),
             'showEndpointTemplate' => route('admin.news.composition.show', ['article' => '__SLUG__']),
             'updateEndpointTemplate' => route('admin.news.composition.update', ['article' => '__SLUG__']),
             'deleteSourceTextEndpointTemplate' => route('admin.news.composition.destroy-source-text', ['article' => '__SLUG__']),
@@ -149,6 +152,44 @@ class NewsCompositionController extends Controller
                 // composition a déjà été commencée sur cette fiche (texte source déjà collé).
                 'already_used' => filled($a->internal_source_text),
             ])->values(),
+        ]);
+    }
+
+    /**
+     * ACTION : « Créer une fiche depuis un lien » (design doc "Actus - composition manuelle
+     * assistée" 2026-08-15, section "Améliorations en attente", point 1) - porte web de
+     * Modules\News\Models\NewsArticle::createManualDraft(), SEULE implémentation (DRY strict),
+     * réutilisée TELLE QUELLE par Modules\News\Console\NewsCreateDraftCommand (`php artisan
+     * news:create-draft`), le point d'entrée console équivalent. Idempotente par URL : un
+     * second appel sur la même URL renvoie la fiche déjà créée (created: false) plutôt que d'en
+     * créer une seconde.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: DRY explicite exigé par le mandat, aucune logique dupliquée entre les deux portes.
+     */
+    public function createDraft(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'url' => ['required', 'string', 'max:2000', 'url'],
+            'title' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        ['article' => $article, 'created' => $created] = NewsArticle::createManualDraft(
+            $validated['url'],
+            $validated['title'] ?? null
+        );
+
+        Log::channel('composition')->info('createDraft (écran) - création manuelle', [
+            'article_id' => $article->id,
+            'url' => $article->url,
+            'created' => $created,
+        ]);
+
+        return response()->json([
+            'id' => $article->id,
+            'slug' => $article->slug,
+            'url' => $article->url,
+            'created' => $created,
+            'mini_prompt' => '/actu2 '.$article->url.' fiche:'.$article->id,
         ]);
     }
 

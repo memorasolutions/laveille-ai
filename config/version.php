@@ -3908,11 +3908,24 @@ declare(strict_types=1);
  * 1.186.1 (2026-08-17) - fix(news) : news:apply --image renseigne image_url s'il est vide (une
  *     fiche créée manuellement via /actu2 n'affichait pas son héros - trou trouvé au premier test
  *     réel, fiche 33530). Preuve : 31 tests NewsApplyCommand, 0 échec.
+ *
+ * 1.187.0 (2026-08-17) - feat(news) : lot « améliorations post-premier-cycle /actu2 ». Mise en
+ *     page des fiches (6 corrections du panel de 5 IA : badge de pertinence en français clair,
+ *     encadré « L'essentiel » avec ligne de transparence, haut de page allégé, ligne « D'après
+ *     [l'original], relayé par [média] », fin de page dégraissée, partage natif mobile).
+ *     Commande news:create-draft + bouton « Créer une fiche depuis un lien » (une implémentation,
+ *     deux portes). Runner prod scripts/prod-artisan.sh (générateur de one-shots, squelette
+ *     unique). Mini-prompt /actu2 copiable dans le courriel de veille de 7h15. EXTINCTION par
+ *     défaut de la génération machine des résumés (NEWS_MACHINE_SUMMARY_ENABLED=false - le
+ *     contenu vient exclusivement du flux /actu2 ; la collecte titres/liens continue ; plus
+ *     aucun texte envoyé au fournisseur de modèle à la collecte - vigilance Loi 25 close ;
+ *     ligne MACHINE-SUMMARY-OFF journalisée à chaque run comme AUTOPUBLISH-OFF).
+ *     Preuve : suite complète News verte.
  */
 
 $lvMajor = 1;
-$lvMinor = 186;
-$lvPatch = 1;
+$lvMinor = 187;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

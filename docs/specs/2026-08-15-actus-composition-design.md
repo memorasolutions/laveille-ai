@@ -696,3 +696,28 @@ Par ordre de priorité. Chacune attend son propre cycle (veille au besoin, impl�
    aux photos).
 8. **Fiches canoniques du skill** (`references/fiche-*.md`) : à confronter aux 3-4 premières
    vraies fiches et ajuster le ton si dérive.
+
+## Décision propriétaire 2026-08-17 (soir) : extinction de la génération machine des résumés
+
+Verbatim du fondateur : « supprime l'automatisation qu'on utilisait pour les anciennes actus, on
+ne l'utilisera plus. » La génération MACHINE des résumés à la collecte
+(`AiSummaryService::scoreAndSummarize`/`scoreAndSummarizeGroup`, exécutée dans `news:fetch`,
+`news:reprocess` et le re-scorage admin) est ÉTEINTE par défaut
+(`NEWS_MACHINE_SUMMARY_ENABLED=false`, `Modules/News/config/config.php`) - le contenu des fiches
+vient désormais exclusivement du flux /actu2 (composition IA supervisée décrite plus haut dans ce
+document). Réversible par configuration (doctrine modules désactivables), jamais une suppression
+de code sèche.
+
+La COLLECTE elle-même (titres, liens, dédup, évaluation de pertinence par mots-clés) continue sans
+interruption - elle alimente le sélecteur de l'écran de composition et le courriel de veille de
+7h15. Effet conjoint : drapeau éteint = plus AUCUN texte d'article n'est envoyé au fournisseur de
+modèle pendant la collecte (point de vigilance Loi 25 de la clôture Actus 2.0, réglé par
+extinction).
+
+Implémentation : `FetchNewsCommand` (3 points d'appel gardés : chemin non-fusion, fusion
+singleton, fusion groupe - chaque article/groupe reste collecté normalement, `structured_summary`
+reste `null`), `ReprocessArticlesCommand` et `AdminNewsController::rescoreArticle` (refus
+explicite dans la sortie/le flash plutôt qu'un échec silencieux). Journalisation canal `fusion`
+(ligne `MACHINE-SUMMARY-OFF`, même pattern qu'`AUTOPUBLISH-OFF`) et segment de bilan « résumés
+machine : désactivés » dans la sortie de `news:fetch`. Tests :
+`Modules/News/tests/Feature/NewsMachineSummaryGateTest.php`.

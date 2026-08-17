@@ -26,6 +26,10 @@ Les {{ $shown_count }} plus pertinentes sont listées ci-dessous ; {{ $more_coun
 @component('mail::button', ['url' => $item['compose_url'], 'color' => 'primary'])
 Composer cette actualité
 @endcomponent
+
+Ou colle directement ce mini-prompt dans Claude Code :
+
+<pre style="font-family:'SF Mono','Monaco','Consolas',monospace; font-size:13px; white-space:pre-wrap; word-break:break-all;">{{ $item['mini_prompt'] }}</pre>
 @endforeach
 
 ---

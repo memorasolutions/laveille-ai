@@ -107,7 +107,10 @@ function napgResetFusionLog(): void
 }
 
 beforeEach(function () {
-    config(['news.fusion.enabled' => false, 'news.dedup_skip_enabled' => true]);
+    // Pipeline historique : générateur machine explicitement allumé, éteint par défaut
+    // depuis v1.187.0 - ce fichier teste le drapeau autopublish, qui suppose que la génération
+    // machine (résumé structuré, score) a bien eu lieu en amont.
+    config(['news.fusion.enabled' => false, 'news.dedup_skip_enabled' => true, 'news.machine_summary.enabled' => true]);
 });
 
 it('drapeau ON : une fiche qui depasse le seuil de pertinence est publiee', function () {

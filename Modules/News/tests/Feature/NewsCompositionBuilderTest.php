@@ -960,3 +960,65 @@ it('neither source_content_hash nor source_captured_at appear in any public view
         ->and($payload)->not->toContain('source_content_hash')
         ->and($payload)->not->toContain('source_captured_at');
 });
+
+// ── « Créer une fiche depuis un lien » (design doc "Actus - composition manuelle assistée"
+//    2026-08-15, section "Améliorations en attente", point 1) - createDraft(), même
+//    implémentation que `php artisan news:create-draft` (NewsArticle::createManualDraft(), DRY
+//    strict, vérifié ici par le COMPORTEMENT : mêmes garanties d'idempotence et de forme JSON
+//    que Modules/News/tests/Feature/NewsCreateDraftCommandTest.php). ──────────────────────────
+
+it('an admin can create a draft fiche from a link, with the mini_prompt in the JSON response', function () {
+    $admin = ncbAdmin();
+
+    $response = $this->actingAs($admin)->postJson(route('admin.news.composition.create-draft'), [
+        'url' => 'https://x.com/exemple/status/1234567890',
+    ]);
+
+    $response->assertOk();
+    $response->assertJson(['created' => true]);
+    $id = $response->json('id');
+    $slug = $response->json('slug');
+    expect($id)->toBeInt()
+        ->and($slug)->toBeString()->not->toBeEmpty()
+        ->and($response->json('mini_prompt'))->toBe('/actu2 https://x.com/exemple/status/1234567890 fiche:'.$id);
+
+    $article = \Modules\News\Models\NewsArticle::find($id);
+    expect($article)->not->toBeNull()
+        ->and($article->is_published)->toBeFalse()
+        ->and($article->source?->name)->toBe('Soumission manuelle')
+        ->and($article->source?->active)->toBeFalse();
+});
+
+it('creating a draft twice on the same URL is idempotent (created:false, same id, no duplicate fiche)', function () {
+    $admin = ncbAdmin();
+    $url = 'https://exemple-editeur.com/annonce-'.uniqid();
+
+    $first = $this->actingAs($admin)->postJson(route('admin.news.composition.create-draft'), ['url' => $url]);
+    $first->assertOk()->assertJson(['created' => true]);
+    $firstId = $first->json('id');
+
+    $second = $this->actingAs($admin)->postJson(route('admin.news.composition.create-draft'), ['url' => $url]);
+    $second->assertOk()->assertJson(['created' => false, 'id' => $firstId]);
+
+    expect(\Modules\News\Models\NewsArticle::where('url', $url)->count())->toBe(1);
+});
+
+it('a non-admin cannot create a draft fiche (403), nothing is written', function () {
+    $user = ncbRegularUser();
+    $url = 'https://exemple-editeur.com/refuse-'.uniqid();
+
+    $response = $this->actingAs($user)->postJson(route('admin.news.composition.create-draft'), ['url' => $url]);
+
+    $response->assertStatus(403);
+    expect(\Modules\News\Models\NewsArticle::where('url', $url)->exists())->toBeFalse();
+});
+
+it('createDraft rejects a missing or malformed URL (422)', function () {
+    $admin = ncbAdmin();
+
+    $this->actingAs($admin)->postJson(route('admin.news.composition.create-draft'), [])
+        ->assertStatus(422);
+
+    $this->actingAs($admin)->postJson(route('admin.news.composition.create-draft'), ['url' => 'pas-une-url'])
+        ->assertStatus(422);
+});

@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.187.0] - 2026-08-17
+
+### Ajouté
+- **Lot « améliorations post-premier-cycle /actu2 » (module News), tout arbitré par le panel de 5 IA du jour.**
+- **Mise en page des fiches - 6 corrections** : badge de pertinence unique en français clair (« Pertinence : élevée/moyenne », scores bruts « 8/10 »/« Élevé » retirés de l'affichage) ; encadré renommé « L'essentiel » avec ligne de transparence dessous (« Rédigé à partir de la source originale; chaque fait est vérifié contre le texte source ») ; haut de page allégé (titre non répété, métadonnées réduites, boutons descendus sous l'encadré) ; ligne de provenance compacte « D'après [l'original], relayé par [média] » sous les métadonnées ; fin de page dégraissée (« article précédent » supprimé, un seul lien générique) ; bouton Partager natif mobile (Web Share API, repli copie). « Ajouter à mon journal » masqué pour les visiteurs non connectés.
+- **Commande `news:create-draft {url} [--title=]`** + bouton « ➕ Créer une fiche depuis un lien » dans l'écran de composition - une seule implémentation (NewsArticle::createManualDraft), deux portes ; idempotente par URL ; sort le mini-prompt /actu2 prêt à coller. Comble le trou n°1 du premier test réel.
+- **Runner prod `scripts/prod-artisan.sh`** : générateur déterministe de scripts one-shot (squelette unique scripts/templates/prod-oneshot.php.tpl, jeton + auto-suppression) - remplace la rédaction manuelle des scripts d'exécution en production.
+- **Mini-prompt `/actu2` copiable dans le courriel de veille de 7h15** pour chaque actualité listée.
+
+### Modifié
+- **EXTINCTION par défaut de la génération machine des résumés (décision propriétaire : le contenu vient exclusivement du flux /actu2).** `NEWS_MACHINE_SUMMARY_ENABLED` (défaut `false`) garde les 3 points de génération de la collecte, `news:reprocess` et le rescore admin - un oubli de configuration ne peut pas relancer la génération ni l'envoi des textes au fournisseur de modèle (point de vigilance Loi 25 de la clôture Actus 2.0 : clos). La collecte des titres/liens, la déduplication et le score de pertinence continuent (sélecteur + courriel de veille). Ligne `MACHINE-SUMMARY-OFF` journalisée à chaque run sur le canal à niveau fixe, comme `AUTOPUBLISH-OFF`.
+
+### Vérifié
+- Suite complète du module News verte (374 tests) après correction de 3 assertions (dont le piège récurrent du commentaire CSS servi au navigateur, 2e occurrence du jour, désormais en mémoire projet).
+
 ## [1.186.1] - 2026-08-17
 
 ### Corrigé

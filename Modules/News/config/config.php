@@ -49,6 +49,34 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Generation machine des resumes a la collecte
+    |--------------------------------------------------------------------------
+    | 2026-08-17 - decision du fondateur (verbatim : « supprime l'automatisation qu'on
+    | utilisait pour les anciennes actus, on ne l'utilisera plus »). La generation MACHINE du
+    | resume structure (AiSummaryService::scoreAndSummarize/scoreAndSummarizeGroup) a la collecte
+    | est abandonnee : le contenu des fiches vient desormais exclusivement du flux /actu2
+    | (composition IA supervisee). Reversible par configuration (doctrine modules
+    | desactivables) - jamais une suppression de code seche. La COLLECTE elle-meme (titres,
+    | liens, dedup, evaluation de pertinence par mots-cles) CONTINUE sans interruption : elle
+    | alimente le selecteur de l'ecran de composition et le courriel de veille de 7h15.
+    | Effet conjoint : drapeau eteint = plus AUCUN texte d'article n'est envoye au fournisseur
+    | de modele pendant la collecte (point de vigilance Loi 25 de la cloture Actus 2.0, regle
+    | par extinction).
+    | DEFAUT VOLONTAIREMENT FALSE, meme doctrine qu'autopublish ci-dessus : un oubli de
+    | configuration (env absent, mauvaise valeur) ne doit jamais pouvoir relancer la generation
+    | machine ni l'envoi des textes au fournisseur par accident - il faut une action explicite
+    | (NEWS_MACHINE_SUMMARY_ENABLED=true) pour la reactiver.
+    | Consomme par FetchNewsCommand (3 points d'appel : chemin non-fusion, fusion singleton,
+    | fusion groupe), ReprocessArticlesCommand et AdminNewsController::rescoreArticle - chaque
+    | point d'appel refuse explicitement (sortie/console/flash) plutot que d'echouer en
+    | silence.
+    */
+    'machine_summary' => [
+        'enabled' => (bool) env('NEWS_MACHINE_SUMMARY_ENABLED', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Courriel de veille quotidien (brouillons non publies)
     |--------------------------------------------------------------------------
     | 2026-08-16 - demande du fondateur : depuis l'arret de la publication automatique

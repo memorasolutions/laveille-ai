@@ -234,6 +234,15 @@ class AdminNewsController extends Controller
 
     public function rescoreArticle(NewsArticle $article, AiSummaryService $aiService): RedirectResponse
     {
+        // ACTION : génération machine du résumé éteinte (2026-08-17, décision du fondateur) -
+        // refus EXPLICITE avant tout re-téléchargement de la source, pas un échec silencieux.
+        // MCP: SELF (<5 lignes, garde de configuration)
+        // RAISON: le contenu des fiches vient désormais exclusivement du flux /actu2 ; aucun
+        // chemin ne doit pouvoir régénérer un résumé machine drapeau éteint.
+        if (! (bool) config('news.machine_summary.enabled', false)) {
+            return back()->with('error', __('Re-scoring IA refusé : la génération machine des résumés est désactivée (flux /actu2 uniquement).'));
+        }
+
         // ACTION : la colonne description ne véhicule plus jamais le texte source (design doc
         // "Actus - zéro copie du texte source", 2026-08-13, section 4.1) - rescorer une fiche
         // déjà existante exige de re-télécharger sa source, gardée en mémoire le temps de cet

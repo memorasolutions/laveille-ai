@@ -61,8 +61,12 @@
 @endif
 
 @section('breadcrumb')
+    {{-- Haut de page allégé (point 3, panel 2026-08-17) : le bandeau sombre garde le fil
+         d'Ariane (dont le titre complet, comme dernier maillon), mais ne répète plus le titre
+         en grand h2 - le h1 du corps (nw-show-title, plus bas) devient l'unique titre affiché.
+         breadcrumb.blade.php reste hors périmètre : on vide breadcrumbTitle depuis l'appelant. --}}
     @include('fronttheme::partials.breadcrumb', [
-        'breadcrumbTitle' => $article->seo_title ?? $article->title,
+        'breadcrumbTitle' => '',
         'breadcrumbItems' => [__('Actualités'), $article->seo_title ?? $article->title]
     ])
 @endsection
@@ -188,25 +192,48 @@
     .nw-related-meta { font-size: 0.75rem; color: #6b7280; }
     .nw-user-actions { display: flex; align-items: center; gap: 1rem; padding: 1rem 0; border-top: 1px solid #e5e7eb; margin-top: 1.5rem; }
     @media (max-width: 767px) { .nw-related-card { max-width: 100%; } }
-    .nw-summary-fallback {
-        background: #f0f9fa; border-left: 4px solid var(--c-primary);
-        border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.75rem;
-    }
-    .nw-summary-fallback p { margin: 0; color: #1a365d; line-height: 1.6; }
-    /* R4 - Bloc TL;DR Speakable (AEO 2026 : answer-first paragraph 30-40 mots) */
+    /* Mise en page des fiches - v1.187.0 (panel 2026-08-17, point 2) : l'ancien libellé de
+       l'encadré devient « L'essentiel ». La classe reste `nw-tldr` (JsonLdService::newsArticle() cible ce
+       sélecteur pour le schema Speakable, NewsSeoEnrichedTest.php l'attend) - seul le libellé
+       visible change, via ::before ci-dessous. Ce même encadré sert désormais aux TROIS
+       origines de contenu (tldr, hook, résumé de repli) - voir show.blade.php. */
     .nw-tldr {
         background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%);
         border-left: 4px solid var(--c-primary); border-radius: 8px;
-        padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+        padding: 1rem 1.25rem; margin-bottom: 0.75rem;
         position: relative;
     }
     .nw-tldr::before {
-        content: 'EN BREF'; position: absolute; top: -10px; left: 1rem;
+        content: "L'ESSENTIEL"; position: absolute; top: -10px; left: 1rem;
         background: var(--c-primary); color: #fff; font-size: 0.7rem;
         font-weight: 700; letter-spacing: 0.05em; padding: 2px 8px;
         border-radius: 4px;
     }
     .nw-tldr p { margin: 0; font-size: 1rem; line-height: 1.6; color: #134e4a; font-weight: 500; }
+    /* Ligne de transparence (point 2) - sous l'encadré « L'essentiel », jamais un aveu de
+       faiblesse : reformulée en force. Contraste AAA via le jeton partagé avec le crédit photo. */
+    .nw-essential-transparency {
+        font-size: 0.8125rem; color: var(--c-text-secondary, #4a4f5c);
+        font-style: italic; margin: 0 0 1.25rem;
+    }
+    /* Ligne de provenance compacte (point 4), sous les métadonnées. */
+    .nw-provenance { font-size: 0.875rem; color: var(--c-text-secondary, #4a4f5c); margin: 0 0 1.25rem; }
+    .nw-provenance a { color: var(--c-primary); font-weight: 600; text-decoration: none; }
+    .nw-provenance a:hover { text-decoration: underline; }
+    /* Partage natif mobile (point 6) - cible tactile 44px. */
+    .nw-share-btn { min-height: 44px; min-width: 44px; justify-content: center; }
+    /* Fin de page dégraissée (point 5) - un seul lien générique, même gabarit que le maillage
+       evergreen partagé (fronttheme::partials.evergreen-related, hors périmètre ici). */
+    .nw-plus-loin { margin-top: 44px; padding-top: 24px; border-top: 1px solid #e5e7eb; }
+    .nw-plus-loin-link {
+        display: inline-block; padding: 8px 14px; border: 1px solid #d1d5db; border-radius: 999px;
+        color: var(--c-primary); text-decoration: none; font-size: 0.9rem; font-weight: 600; background: #f8fafb;
+    }
+    .nw-plus-loin-link:hover { text-decoration: underline; }
+    /* Haut de page allégé (point 3) - le bandeau sombre du thème (partial breadcrumb, hors
+       périmètre ici) garde le fil d'Ariane mais ne répète plus le titre : h2 vidé côté PHP
+       (breadcrumbTitle => ''), collapsé ici pour ne pas laisser un espace vide dans le bandeau. */
+    .wpo-breadcumb-area .wpo-breadcumb-wrap h2:empty { display: none; }
     /* R10 - Citation source extracted (rendu si quote présent) */
     .nw-quote {
         border-left: 3px solid #94a3b8; background: #f8fafc;
@@ -299,34 +326,64 @@
                     @php
                         $readMinutes = reading_time_minutes($article->structuredBodyText());
                     @endphp
+                    {{-- Badge de pertinence (point 1, panel 2026-08-17) : un seul badge clair,
+                         dérivé du score brut (jamais affiché tel quel) - ≥8 élevée, 5-7 moyenne,
+                         <5 masqué. L'ancien couple opaque « 8/10 »/« Élevé » (impact_level) a
+                         disparu de l'affichage. --}}
+                    @php
+                        $relevanceLabel = null;
+                        if (is_numeric($article->relevance_score ?? null)) {
+                            if ($article->relevance_score >= 8) {
+                                $relevanceLabel = __('Pertinence : élevée');
+                            } elseif ($article->relevance_score >= 5) {
+                                $relevanceLabel = __('Pertinence : moyenne');
+                            }
+                        }
+                    @endphp
+                    {{-- Haut de page allégé (point 3) : métadonnées réduites à média/date/temps
+                         de lecture, catégorie conservée, scores remplacés par le badge ci-dessus
+                         (auteur retiré, hors de la liste retenue par l'arbitrage). --}}
                     <div class="nw-meta-bar">
                         <span class="nw-pill">{{ $readMinutes }} min {{ __('de lecture') }}</span>
                         <span class="nw-pill-sep">&middot;</span>
                         <span class="nw-pill">{{ $article->source->name ?? __('Source') }}</span>
-                        @if($article->author)
-                            <span class="nw-pill-sep">&middot;</span>
-                            <span class="nw-pill">{{ $article->author }}</span>
-                        @endif
                         <span class="nw-pill-sep">&middot;</span>
                         <span class="nw-pill">{{ $article->pub_date ? format_date($article->pub_date) : '' }}</span>
                         @if($article->category_tag)
+                            <span class="nw-pill-sep">&middot;</span>
                             <span class="nw-pill nw-pill-cat">{{ $article->category_tag }}</span>
                         @endif
-                        @if($article->relevance_score)
-                            <span class="nw-pill">{{ $article->relevance_score }}/10</span>
-                        @endif
-                        @if($article->impact_level)
-                            <span class="nw-pill">{{ $article->impact_level }}</span>
+                        @if($relevanceLabel)
+                            <span class="nw-pill-sep">&middot;</span>
+                            <span class="nw-pill" title="{{ __('Évaluation interne de pertinence pour le lectorat québécois.') }}">{{ $relevanceLabel }}</span>
                         @endif
                     </div>
 
-                    {{-- Barre d'interactions (+ menu admin partage à droite, superadmin only) --}}
-                    @include('fronttheme::partials.article-action-bar', [
-                        'model' => $article,
-                        'modelType' => 'Modules\\News\\Models\\NewsArticle',
-                        'journalSourceType' => 'news',
-                        'adminShareItems' => auth()->user()?->isSuperAdmin() ? $article->adminShareContents() : null,
-                    ])
+                    {{-- Sources (points 1 bas de page/4/Sources détaillée) - calculées ici (haut
+                         de page) pour la ligne de provenance ci-dessous ET réutilisées telles
+                         quelles plus bas pour la section « Sources » détaillée (DRY, aucun
+                         recalcul - la version précédente les calculait deux fois). --}}
+                    @php
+                        $externalUrl = $article->resolved_url ?: $article->url;
+                        $isGoogleNewsUnresolved = str_contains(parse_url($externalUrl, PHP_URL_HOST) ?? '', 'news.google.com');
+                        $primarySources = is_array($article->primary_sources ?? null) ? $article->primary_sources : [];
+                        // niveau_preuve est PUBLIC mais TOUJOURS traduit en français courant,
+                        // jamais l'étiquette technique brute.
+                        $niveauPreuveLabels = [
+                            'primaire' => __('Fondée sur la source originale'),
+                            'mixte' => __('Sources originale et média'),
+                            'relais' => __('D\'après un média relais'),
+                        ];
+                        $niveauPreuveLabel = $niveauPreuveLabels[$article->niveau_preuve ?? ''] ?? null;
+                    @endphp
+                    {{-- Ligne de provenance compacte (point 4) - fiche à source unique
+                         uniquement : une fiche comparative affiche déjà sa propre liste
+                         « Sources » plus bas (design doc section 7). --}}
+                    @unless($isDigest)
+                    @if(!empty($primarySources[0]['url'] ?? null))
+                        <p class="nw-provenance">{{ __("D'après") }} <a href="{{ $primarySources[0]['url'] }}" target="_blank" rel="noopener nofollow">{{ $primarySources[0]['label'] ?? __('la source primaire') }}</a>, {{ __('relayé par') }} {{ $article->source?->name ?? __('un média') }}</p>
+                    @endif
+                    @endunless
 
                     {{-- Éditeur « Outils liés » (admin uniquement) : accordéon FERMÉ par défaut, au-dessus de l'image.
                          Le <details> est PARENT du composant Livewire → l'état ouvert/fermé survit au morph (cf. piège Livewire v4). --}}
@@ -366,15 +423,83 @@
                         <x-dictionary::comic-viewer :comic="\Modules\Dictionary\Support\ComicLibrary::forSlug((string) $article->slug)" />
                     @endif
 
-                    {{-- R4 - TL;DR aside Speakable (AEO 2026 : answer-first 30-40 mots) --}}
-                    @if($ss && !empty($ss['tldr']))
-                        <aside class="nw-tldr" aria-label="{{ __('Résumé en bref') }}">
-                            <p>@glossarize(e($ss['tldr']))</p>
+                    {{-- « L'essentiel » (point 2, panel 2026-08-17) : encadré unique (ex-« EN
+                         BREF »/ex-« Résumé IA »), reçoit les DEUX branches d'affichage - priorité
+                         au tldr (réponse directe AEO, R4 Speakable), sinon au hook (accroche),
+                         sinon au résumé de repli $article->summary quand $ss est absent. La
+                         classe reste `nw-tldr` (JsonLdService cible ce sélecteur pour le schema
+                         Speakable, NewsSeoEnrichedTest.php l'attend) - seul le libellé visible
+                         change (règle CSS ::before, plus haut). --}}
+                    @php
+                        $essentialText = null;
+                        $essentialUsedHook = false;
+                        if ($ss) {
+                            if (!empty($ss['tldr'])) {
+                                $essentialText = $ss['tldr'];
+                            } elseif (!empty($ss['hook'])) {
+                                $essentialText = $ss['hook'];
+                                $essentialUsedHook = true;
+                            }
+                        } elseif ($article->summary) {
+                            $essentialText = $article->summary;
+                        }
+                        // Ligne de transparence - reformulée en force, jamais un aveu de faiblesse.
+                        $transparencyText = (($article->niveau_preuve ?? null) === 'relais')
+                            ? __('Rédigé à partir du média cité; chaque fait est vérifié contre le texte source.')
+                            : __('Rédigé à partir de la source originale; chaque fait est vérifié contre le texte source.');
+                    @endphp
+                    @if($essentialText)
+                        <aside class="nw-tldr" aria-label="{{ __("L'essentiel") }}">
+                            <p>@glossarize(e($essentialText))</p>
                         </aside>
+                        <p class="nw-essential-transparency">{{ $transparencyText }}</p>
+
+                        {{-- Barre d'interactions (+ menu admin partage), descendue sous
+                             « L'essentiel » (point 3). « Ajouter à mon journal » masqué pour un
+                             visiteur non connecté : on ne transmet journalSourceType que si
+                             authentifié - le partial (hors périmètre ici) cache déjà tout le bloc
+                             quand ce paramètre est vide. --}}
+                        @include('fronttheme::partials.article-action-bar', [
+                            'model' => $article,
+                            'modelType' => 'Modules\\News\\Models\\NewsArticle',
+                            'journalSourceType' => auth()->check() ? 'news' : null,
+                            'adminShareItems' => auth()->user()?->isSuperAdmin() ? $article->adminShareContents() : null,
+                        ])
+                        {{-- Partage natif mobile (point 6) : Web Share API si disponible, repli
+                             sur le bouton « Copier le lien » déjà offert ci-dessus. Jamais de
+                             fenêtre native bloquante (alert/confirm/prompt). Cible tactile 44px
+                             (.nw-share-btn, règle CSS plus haut). Réutilise la classe .aab-btn du
+                             partial ci-dessus (déjà chargée sur cette page) plutôt que d'en
+                             recréer une - DRY. --}}
+                        <div class="aab" style="border-bottom: none; padding-top: 0;">
+                            <button type="button" class="aab-btn nw-share-btn" id="nw-share-btn-{{ $article->id }}" aria-label="{{ __('Partager') }}" title="{{ __('Partager') }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                                <span class="aab-label">{{ __('Partager') }}</span>
+                            </button>
+                        </div>
+                        <script>
+                            (function () {
+                                var btn = document.getElementById('nw-share-btn-{{ $article->id }}');
+                                if (!btn) { return; }
+                                btn.addEventListener('click', function () {
+                                    var shareTitle = {!! \Illuminate\Support\Js::from($article->seo_title ?? $article->title) !!};
+                                    if (navigator.share) {
+                                        navigator.share({ title: shareTitle, url: window.location.href }).catch(function () {});
+                                        return;
+                                    }
+                                    navigator.clipboard.writeText(window.location.href);
+                                    if (typeof window.toast === 'function') {
+                                        window.toast({!! \Illuminate\Support\Js::from(__('Lien copié')) !!}, 'success', 2000);
+                                    }
+                                });
+                            })();
+                        </script>
                     @endif
 
-                    {{-- Lead : hook IA + auto-link glossaire 2026-05-05 #141 --}}
-                    @if($ss && isset($ss['hook']))
+                    {{-- Lead : hook IA + auto-link glossaire 2026-05-05 #141 - affiché
+                         séparément seulement s'il n'a pas déjà servi de contenu à « L'essentiel »
+                         ci-dessus (cas où le tldr est absent mais le hook présent). --}}
+                    @if($ss && !empty($ss['hook']) && !$essentialUsedHook)
                         <p class="nw-lead">@glossarize(e($ss['hook']))</p>
                     @endif
 
@@ -471,12 +596,10 @@
                         @if(!empty($ss['audience']))
                         <p class="nw-audience">{{ __('Public concerné') }} : {{ implode(', ', $ss['audience']) }}</p>
                         @endif
-                    @elseif($article->summary)
-                        <div class="nw-summary-fallback">
-                            <strong style="display: block; margin-bottom: 0.5rem; color: var(--c-primary); font-size: 0.875rem;">{{ __('Résumé IA') }}</strong>
-                            <p>@glossarize(e($article->summary))</p>
-                        </div>
                     @endif
+                    {{-- Le repli $article->summary (ex-encadré « Résumé IA ») est désormais
+                         rendu plus haut par l'encadré unique « L'essentiel » (point 2, panel
+                         2026-08-17) - aucun second rendu ici. --}}
 
                     {{-- Implémentation /actu2 - volet serveur (design doc "Actus - composition
                          manuelle assistée" 2026-08-15, section "Implémentation /actu2 - volet
@@ -526,24 +649,9 @@
                     {{-- Schema.org JSON-LD DefinedTermSet (couvre les zones glossarized ci-dessus) --}}
                     @include('core::partials.glossary-jsonld')
 
-                    @php
-                        $externalUrl = $article->resolved_url ?: $article->url;
-                        $isGoogleNewsUnresolved = str_contains(parse_url($externalUrl, PHP_URL_HOST) ?? '', 'news.google.com');
-                        // Bonification panel 2026-08-17 (soir) : sources primaires citées par la
-                        // fiche, fournies par l'agent (NewsApplyCommand --payload), jamais éditées
-                        // depuis la fiche publique elle-même.
-                        $primarySources = is_array($article->primary_sources ?? null) ? $article->primary_sources : [];
-                        // Implémentation /actu2 - volet serveur (design doc "Actus - composition
-                        // manuelle assistée" 2026-08-15, section "Implémentation /actu2 - volet
-                        // serveur (2026-08-17)") - niveau_preuve est PUBLIC mais TOUJOURS traduit
-                        // en français courant, jamais l'étiquette technique brute.
-                        $niveauPreuveLabels = [
-                            'primaire' => __('Fondée sur la source originale'),
-                            'mixte' => __('Sources originale et média'),
-                            'relais' => __('D\'après un média relais'),
-                        ];
-                        $niveauPreuveLabel = $niveauPreuveLabels[$article->niveau_preuve ?? ''] ?? null;
-                    @endphp
+                    {{-- $externalUrl / $isGoogleNewsUnresolved / $primarySources / $niveauPreuveLabel
+                         déjà calculés en haut de page (ligne de provenance, point 4) - réutilisés
+                         ici tels quels, aucun recalcul (DRY). --}}
                     {{-- Actus 2.0 : bloc à source unique remplacé par la liste « Sources » plus
                          haut pour une fiche comparative (design doc section 7), aucune suppression. --}}
                     @unless($isDigest)
@@ -593,17 +701,12 @@
                     @endif
                     @endunless
 
-                    {{-- Navigation précédent/suivant --}}
-                    @if($previousArticle || $nextArticle)
+                    {{-- Fin de page dégraissée (point 5, panel 2026-08-17) : le lien « article
+                         précédent » a été retiré (redondant avec les cartes connexes et le fil
+                         chronologique de l'index) - navigation « suivant » seule conservée. --}}
+                    @if($nextArticle)
                     <nav class="nw-nav">
-                        @if($previousArticle)
-                            <a href="{{ route('news.show', $previousArticle) }}">&larr; {{ Str::limit($previousArticle->seo_title ?? $previousArticle->title, 55) }}</a>
-                        @else
-                            <span></span>
-                        @endif
-                        @if($nextArticle)
-                            <a href="{{ route('news.show', $nextArticle) }}" class="nw-nav-next">{{ Str::limit($nextArticle->seo_title ?? $nextArticle->title, 55) }} &rarr;</a>
-                        @endif
+                        <a href="{{ route('news.show', $nextArticle) }}" class="nw-nav-next">{{ Str::limit($nextArticle->seo_title ?? $nextArticle->title, 55) }} &rarr;</a>
                     </nav>
                     @endif
 
@@ -657,7 +760,16 @@
                     </div>
                     @endif
 
-                    @include('fronttheme::partials.evergreen-related', ['haystack' => \Illuminate\Support\Str::lower(($article->title ?? '').' '.($article->category_tag ?? '').' '.strip_tags((string) ($article->summary ?? $article->meta_description ?? '')))])
+                    {{-- Fin de page dégraissée (point 5, panel 2026-08-17) : un seul lien
+                         générique (Glossaire Techno) plutôt que le maillage evergreen partagé
+                         blog+actualités (fronttheme::partials.evergreen-related, hors périmètre
+                         de cette édition) - bloc autonome au même gabarit visuel (nw-section-heading). --}}
+                    @if(Route::has('dictionary.index'))
+                    <nav aria-label="{{ __('Pour aller plus loin') }}" class="nw-plus-loin">
+                        <h2 class="nw-section-heading">{{ __('Pour aller plus loin') }}</h2>
+                        <a href="{{ route('dictionary.index') }}" class="nw-plus-loin-link">{{ __('Glossaire Techno') }}</a>
+                    </nav>
+                    @endif
 
                     {{-- Commentaires - 2026-05-27 #312 DÉSACTIVÉS sur actualités (décision user).
                          Pour réactiver : retirer le `&& false` ci-dessous OU basculer flag config('news.comments_enabled', false). --}}

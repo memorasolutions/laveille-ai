@@ -237,6 +237,10 @@ it('cascade épuisée : aucune fiche créée côté résumé, un journal écrit 
 });
 
 it('news:fetch ne publie jamais une fiche dont le résumé a été rejeté par la porte de qualité (pipeline complet)', function () {
+    // Pipeline historique : générateur machine explicitement allumé, éteint par défaut
+    // depuis v1.187.0 - ce test vérifie la porte de qualité EN AMONT de la publication, donc
+    // suppose que la génération machine a bien lieu.
+    config(['news.machine_summary.enabled' => true]);
     Http::fake([
         'openrouter.ai/*' => Http::response([
             'choices' => [['message' => ['content' => json_encode(['score' => 8, 'hook' => ''])]]],
@@ -405,7 +409,9 @@ it('JournalBlockService::addFromSource (type news) utilise la cascade displayExc
 it('échec du premier modèle rejeté par la porte, succès du second : la fiche est publiée par news:fetch (pipeline complet)', function () {
     // Publication automatique activée explicitement (2026-08-14) : par défaut FALSE depuis la
     // suspension de la publication auto - ce test vérifie précisément le chemin PUBLIÉ.
-    config(['news.autopublish.enabled' => true]);
+    // Pipeline historique : générateur machine explicitement allumé, éteint par défaut
+    // depuis v1.187.0.
+    config(['news.autopublish.enabled' => true, 'news.machine_summary.enabled' => true]);
     Http::fake([
         'openrouter.ai/*' => Http::sequence()
             ->push(['choices' => [['message' => ['content' => json_encode(['score' => 8, 'hook' => ''])]]]], 200)

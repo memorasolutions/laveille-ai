@@ -131,7 +131,10 @@ function nfusFakeOpenRouterSuccess(array $overrides = []): void
 }
 
 beforeEach(function () {
-    config(['news.dedup_skip_enabled' => true]);
+    // Pipeline historique : générateur machine explicitement allumé, éteint par défaut
+    // depuis v1.187.0 - ce fichier teste le comportement de fusion qui suppose la génération
+    // active (résumé structuré produit par news:fetch).
+    config(['news.dedup_skip_enabled' => true, 'news.machine_summary.enabled' => true]);
 });
 
 // ── Critère 1 : drapeau OFF = zéro diff, zéro appel aux nouveaux services ─────

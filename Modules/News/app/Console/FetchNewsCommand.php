@@ -45,6 +45,24 @@ class FetchNewsCommand extends Command
     // « pertinent mais retenu par la politique de publication » - deux causes différentes.
     private int $totalEligibleNonPublies = 0;
 
+    // ACTION : drapeau maître de génération machine des résumés (2026-08-17, décision du
+    // fondateur), lu une seule fois en début de handle() - même doctrine que
+    // $autopublishEnabled ci-dessus (propriété plutôt que paramètre thread à travers
+    // processFusionCandidates()).
+    // MCP: SELF (<5 lignes)
+    // RAISON: OFF (défaut) = les 3 points d'appel à AiSummaryService::scoreAndSummarize/
+    // scoreAndSummarizeGroup ne sont jamais atteints - la collecte, le pré-filtre mots-clés et
+    // la déduplication restent inchangés.
+    private bool $machineSummaryEnabled = false;
+
+    // ACTION : compteur diagnostic (2026-08-17) - nombre d'articles/groupes collectés SANS
+    // résumé machine parce que le drapeau est désactivé. Distinct de totalFiltered (non
+    // pertinent) et de totalEligibleNonPublies (pertinent mais publication suspendue) : ici
+    // aucune pertinence n'a même été évaluée par IA.
+    // MCP: SELF (<5 lignes)
+    // RAISON: alimente la ligne de bilan « résumés machine : désactivés ».
+    private int $totalMachineSummarySkipped = 0;
+
     public function handle(RssFetcherService $fetcher, AiSummaryService $summarizer): int
     {
         if ($this->shouldSkipForKillSwitch('cron.news-fetch')) {
@@ -52,6 +70,7 @@ class FetchNewsCommand extends Command
         }
 
         $this->autopublishEnabled = (bool) config('news.autopublish.enabled', false);
+        $this->machineSummaryEnabled = (bool) config('news.machine_summary.enabled', false);
 
         if (! $this->autopublishEnabled) {
             // ACTION : ligne de journalisation obligatoire (spec 2026-08-14) - canal dédié 'fusion'
@@ -62,6 +81,17 @@ class FetchNewsCommand extends Command
             // RAISON: rend visible en prod que la collecte continue mais que la publication est
             // suspendue - sans quoi un run "normal en apparence" masquerait la décision du fondateur.
             Log::channel('fusion')->info('AUTOPUBLISH-OFF: publication automatique suspendue - les articles sont collectés en brouillon (is_published=false).');
+        }
+
+        if (! $this->machineSummaryEnabled) {
+            // ACTION : même pattern qu'AUTOPUBLISH-OFF ci-dessus - canal dédié 'fusion', niveau
+            // fixé en dur à 'info', indépendant de LOG_LEVEL=error en production.
+            // MCP: SELF (<5 lignes)
+            // RAISON: rend visible en prod que la génération machine des résumés est
+            // désactivée (décision du fondateur 2026-08-17) - sans cette ligne, un run
+            // "normal en apparence" masquerait qu'aucun texte d'article n'est envoyé au
+            // fournisseur de modèle pendant la collecte.
+            Log::channel('fusion')->info('MACHINE-SUMMARY-OFF: génération machine des résumés désactivée - le contenu vient exclusivement du flux /actu2 ; la collecte continue (titres/liens/dédup/pertinence mots-clés), structured_summary reste null, aucun texte d\'article n\'est envoyé au fournisseur de modèle.');
         }
 
         $query = NewsSource::active();
@@ -243,6 +273,19 @@ class FetchNewsCommand extends Command
                     continue;
                 }
 
+                // ACTION : génération machine du résumé éteinte (2026-08-17, décision du
+                // fondateur) - article collecté normalement (titre, url, dédup, pertinence
+                // mots-clés déjà passés ci-dessus) mais structured_summary reste null et AUCUN
+                // appel au fournisseur de modèle n'a lieu.
+                // MCP: SELF (<5 lignes, garde de configuration)
+                // RAISON: le contenu des fiches vient désormais exclusivement du flux /actu2.
+                if (! $this->machineSummaryEnabled) {
+                    $article->update(['feed_type' => $feedType, 'is_published' => false]);
+                    $this->totalMachineSummarySkipped++;
+                    $this->line("  ⏭ Résumé machine désactivé (flux /actu2 uniquement) : {$article->title}");
+                    continue;
+                }
+
                 // Score + résumé IA (1 seul appel) - pub_date transmise pour le contrôle de
                 // cohérence des années de SummaryQualityGate (2026-08-13).
                 $result = $summarizer->scoreAndSummarize($article->title, $text, $source->language, $article->pub_date);
@@ -324,6 +367,16 @@ class FetchNewsCommand extends Command
         if (! $this->autopublishEnabled && $this->totalEligibleNonPublies > 0) {
             $bilan .= ", {$this->totalEligibleNonPublies} admissibles non publiés (drapeau désactivé)";
         }
+        // ACTION : segment de bilan obligatoire (2026-08-17, décision du fondateur) - affiché
+        // dès que le drapeau est désactivé, même si $totalMachineSummarySkipped vaut 0 (aucun
+        // article éligible ce run) : c'est un état de configuration, pas seulement un
+        // compteur.
+        // MCP: SELF (<5 lignes)
+        // RAISON: rend visible en sortie de commande que la génération machine est éteinte,
+        // même en lecture rapide du run.
+        if (! $this->machineSummaryEnabled) {
+            $bilan .= ", résumés machine : désactivés ({$this->totalMachineSummarySkipped} article(s)/groupe(s) collecté(s) sans résumé)";
+        }
         $bilan .= ' ---';
         $this->info($bilan);
 
@@ -395,6 +448,17 @@ class FetchNewsCommand extends Command
         //    de quota is_published que le chemin non-fusion ci-dessus).
         foreach ($clusters['singletons'] as $article) {
             $feedType = $feedTypeByArticleId[$article->id] ?? 'techno';
+
+            // ACTION : génération machine du résumé éteinte (2026-08-17, décision du fondateur)
+            // - même garde que le chemin non-fusion, voir plus haut dans handle().
+            // MCP: SELF (<5 lignes, garde de configuration)
+            // RAISON: DRY - un seul comportement pour les deux chemins singleton.
+            if (! $this->machineSummaryEnabled) {
+                $article->update(['feed_type' => $feedType, 'is_published' => false]);
+                $this->totalMachineSummarySkipped++;
+                $this->line("  ⏭ Résumé machine désactivé (flux /actu2 uniquement) : {$article->title}");
+                continue;
+            }
 
             $result = $summarizer->scoreAndSummarize($article->title, $textsByArticleId[$article->id] ?? '', $article->source->language ?? 'fr', $article->pub_date);
 
@@ -475,6 +539,26 @@ class FetchNewsCommand extends Command
             usort($group, static fn (NewsArticle $a, NewsArticle $b) => ($a->pub_date?->timestamp ?? PHP_INT_MAX) <=> ($b->pub_date?->timestamp ?? PHP_INT_MAX));
             $digestArticle = $group[0];
             $members = array_slice($group, 1);
+
+            // ACTION : génération machine du résumé éteinte (2026-08-17, décision du fondateur)
+            // - même garde que les chemins singleton ci-dessus, appliquée AVANT le calcul du
+            // contexte d'archives (évite un travail inutile puisqu'aucun appel IA groupe n'aura
+            // lieu). Chaque membre du groupe reste collecté normalement, feed_type renseigné,
+            // is_published=false ; aucun n'est fusionné avec un digest (l'écriture des relations
+            // de fusion dépend elle-même d'un digest résumé, jamais créé ici).
+            // MCP: SELF (<5 lignes, garde de configuration)
+            // RAISON: DRY - même comportement que les chemins singleton, adapté au groupe.
+            if (! $this->machineSummaryEnabled) {
+                foreach ($group as $groupedArticle) {
+                    $groupedArticle->update([
+                        'feed_type' => $feedTypeByArticleId[$groupedArticle->id] ?? $feedType,
+                        'is_published' => false,
+                    ]);
+                }
+                $this->totalMachineSummarySkipped += count($group);
+                $this->line('  ⏭ Résumé machine désactivé (flux /actu2 uniquement) : groupe de '.count($group).' article(s) : '.$digestArticle->title);
+                continue;
+            }
 
             $archiveContext = $archiveService->findRelevant(
                 array_map(static fn (NewsArticle $a) => $a->title, $group),

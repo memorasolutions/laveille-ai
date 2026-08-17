@@ -39,6 +39,9 @@ _ide_helper_models.php
 
 # Outils dev locaux
 storage/debugbar/
+# Runner prod local (scripts/prod-artisan.sh) - fichiers one-shot générés localement, jamais
+# commités, jamais déployés (voir aussi l'exclusion rsync `public/_*.php` dans deploy.yml).
+/scripts/.scratch/
 test-results/
 playwright-report/
 .playwright-audit/

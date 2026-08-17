@@ -47,6 +47,15 @@ class NewsDigestMail extends Mailable
             'source' => $article->source?->name,
             'score' => $article->relevance_score,
             'compose_url' => route('admin.news.composition.show', ['article' => $article->slug]),
+            // ACTION : améliorations en attente (design doc "Actus - composition manuelle
+            // assistée" 2026-08-15, point 5) - mini-prompt /actu2 copiable directement dans le
+            // courriel, pour éviter de recliquer "Copier" une fois sur l'écran de composition.
+            // resolved_url ?: url = MÊME règle que selectedArticle.source_url côté client
+            // (composition-builder.blade.php, copyQuickPrompt()) - un seul calcul, deux
+            // affichages, aucune divergence.
+            // MCP: SELF (<5 lignes)
+            // RAISON: design doc, section "Améliorations en attente (2026-08-17)", point 5.
+            'mini_prompt' => '/actu2 '.($article->resolved_url ?: $article->url).' fiche:'.$article->id,
         ]);
 
         $shownCount = $items->count();
