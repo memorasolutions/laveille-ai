@@ -7,12 +7,15 @@ namespace Modules\News\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\News\Models\NewsArticle;
 use Modules\News\Services\CompositionPromptBuilder;
 use Modules\News\Services\EditorialProofNormalizer;
 use Modules\News\Services\NewsImageService;
+use Modules\News\Services\SourceMarkdownFetcher;
 
 /**
  * Écran de composition manuelle d'une actualité (Phase A puis Phase B - design doc "Actus -
@@ -41,9 +44,23 @@ use Modules\News\Services\NewsImageService;
  * RÉVISION 2026-08-17 (design doc, section "Révision 2026-08-17 - prompt d'orchestration Claude
  * Code CLI") : generatePrompt() cible désormais Claude Code CLI comme exécutant complet et
  * accepte le texte source EN LIGNE (paramètre source_text, persisté avec la même règle que
- * update() via applySourceProvenance()). La seule porte d'écriture pour l'agent est la commande
- * `php artisan news:apply` (Modules\News\Console\NewsApplyCommand) - ce contrôleur n'écrit
- * jamais is_published/published_at et ne l'a jamais fait.
+ * update() via applySourceProvenance()). La seule porte d'écriture BORNÉE pour l'agent est la
+ * commande `php artisan news:apply` (Modules\News\Console\NewsApplyCommand) - cette commande
+ * n'écrit jamais is_published/published_at et ne l'a jamais fait.
+ *
+ * RÉVISION 2026-08-17 (design doc, section "Récupération automatique Markdown + Publier-et-purger
+ * (2026-08-17)") : fetchSource() récupère automatiquement le texte source complet en Markdown à
+ * la sélection d'une actualité (Modules\News\Services\SourceMarkdownFetcher, HTTP puis repli
+ * Puppeteer, jamais de contournement de paywall). publish() EST DÉSORMAIS le SEUL endroit de ce
+ * contrôleur qui écrit is_published/published_at (le paragraphe ci-dessus, à propos de
+ * generatePrompt()/news:apply, décrivait la porte d'écriture de CONTENU de l'agent - la
+ * publication elle-même reste un geste du propriétaire, exclusivement humain, jamais déclenché
+ * par l'agent). C'est une exception VOULUE et NOMMÉE, pas un oubli : décision du propriétaire
+ * 2026-08-17, arbitrée par le panel de 5 IA - « publier = purger », un seul geste qui bascule
+ * is_published, horodate published_at et purge internal_source_text dans la MÊME transaction,
+ * plutôt que deux actions séparées (bascule ailleurs dans /admin/news/articles, puis purge
+ * manuelle oubliable) qui laisseraient une fenêtre où une fiche publiée garde encore son texte
+ * source intégral en base.
  *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
@@ -53,6 +70,7 @@ class NewsCompositionController extends Controller
     public function __construct(
         private readonly CompositionPromptBuilder $promptBuilder,
         private readonly NewsImageService $imageService,
+        private readonly SourceMarkdownFetcher $sourceFetcher,
     ) {
     }
 
@@ -63,6 +81,10 @@ class NewsCompositionController extends Controller
             'showEndpointTemplate' => route('admin.news.composition.show', ['article' => '__SLUG__']),
             'updateEndpointTemplate' => route('admin.news.composition.update', ['article' => '__SLUG__']),
             'deleteSourceTextEndpointTemplate' => route('admin.news.composition.destroy-source-text', ['article' => '__SLUG__']),
+            // ── Récupération automatique Markdown + Publier-et-purger (design doc 2026-08-15,
+            // révision 2026-08-17) ──
+            'fetchSourceEndpointTemplate' => route('admin.news.composition.fetch-source', ['article' => '__SLUG__']),
+            'publishEndpointTemplate' => route('admin.news.composition.publish', ['article' => '__SLUG__']),
             'generatePromptEndpointTemplate' => route('admin.news.composition.generate-prompt', ['article' => '__SLUG__']),
             'proofPairsStoreEndpointTemplate' => route('admin.news.composition.proof-pairs.store', ['article' => '__SLUG__']),
             'proofPairsDestroyEndpointTemplate' => route('admin.news.composition.proof-pairs.destroy', ['article' => '__SLUG__', 'pair' => '__PAIR_ID__']),
@@ -222,6 +244,76 @@ class NewsCompositionController extends Controller
         $article->update(['internal_source_text' => null]);
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Récupération automatique du texte source en Markdown (design doc, section "Récupération
+     * automatique Markdown + Publier-et-purger (2026-08-17)") - délègue entièrement à
+     * SourceMarkdownFetcher::fetch(). Refuse d'écraser un texte source déjà présent sauf
+     * confirmation explicite ('replace'), pour ne jamais perdre en silence un texte collé ou
+     * retouché à la main.
+     *
+     * set_time_limit(40) explicite : le repli Puppeteer peut approcher les 20 secondes à lui
+     * seul, et php-fpm coupe sinon la requête sans message exploitable côté admin (504 muette,
+     * arbitrage du panel de 5 IA).
+     */
+    public function fetchSource(Request $request, NewsArticle $article): JsonResponse
+    {
+        $validated = $request->validate([
+            'replace' => ['sometimes', 'boolean'],
+        ]);
+        $replace = (bool) ($validated['replace'] ?? false);
+
+        if (filled($article->internal_source_text) && ! $replace) {
+            return response()->json([
+                'error' => 'un texte source existe déjà',
+            ], 409);
+        }
+
+        $url = $article->resolved_url ?: $article->url;
+        if (blank($url)) {
+            return response()->json([
+                'error' => "Cette fiche n'a pas d'URL source à récupérer.",
+            ], 422);
+        }
+
+        // Jamais en console : en CLI (tests Pest, artisan) set_time_limit plafonne le PROCESSUS
+        // entier - la suite complète mourait 40 s après le premier test passé ici (fatal
+        // « Maximum execution time » élucidé le 2026-08-17). La 504 muette n'existe qu'en web.
+        if (! app()->runningInConsole()) {
+            set_time_limit(40);
+        }
+
+        $result = $this->sourceFetcher->fetch($url, $article->title);
+
+        Log::channel('composition')->info('fetch-source - tentative', [
+            'article_id' => $article->id,
+            'success' => $result['success'],
+            'method' => $result['acquisition']['method'] ?? null,
+            'http_status' => $result['acquisition']['http_status'] ?? null,
+            'error' => $result['error'],
+        ]);
+
+        if (! $result['success']) {
+            // ACTION : échec → ne persiste RIEN (aucun champ, ni internal_source_text ni
+            // source_acquisition) - un texte source déjà présent (cas 'replace') reste intact.
+            // MCP: SELF (<5 lignes)
+            // RAISON: garde-fou explicite du mandat, tout-ou-rien.
+            return response()->json(['error' => $result['error']], 422);
+        }
+
+        $update = [
+            'internal_source_text' => $result['markdown'],
+            'source_acquisition' => $result['acquisition'],
+        ];
+        $this->applySourceProvenance($update, $article);
+        $article->update($update);
+
+        return response()->json([
+            'success' => true,
+            'markdown' => $result['markdown'],
+            'acquisition' => $result['acquisition'],
+        ]);
     }
 
     /**
@@ -399,6 +491,83 @@ class NewsCompositionController extends Controller
         return response()->json([
             'success' => true,
             'image_url' => asset($imageUrl).'?v='.time(),
+        ]);
+    }
+
+    /**
+     * Bouton Publier-et-purger (design doc, section "Récupération automatique Markdown +
+     * Publier-et-purger (2026-08-17)", décision propriétaire 2026-08-17) : publier et purger le
+     * texte source intégral en UN SEUL geste, dans une seule transaction. Voir le doc-bloc de
+     * classe ci-dessus pour l'explication de l'exception (seul endroit du contrôleur qui écrit
+     * is_published/published_at).
+     *
+     * Ordre des vérifications, chacune bloquante et exclusive (jamais deux erreurs mélangées) :
+     * 1. déjà publiée → 409 ;
+     * 2. prérequis serveur manquants (seo_title, summary, au moins une paire de preuve) → 422
+     *    avec la LISTE complète des manquants, pas seulement le premier ;
+     * 3. revalidation à 100 % des paires « fait » contre le texte source COURANT (pas celui du
+     *    moment où le prompt a été généré - une seule paire dont l'extrait n'est plus une
+     *    sous-chaîne exacte fait échouer TOUTE la publication, rien ne part, rien n'est purgé.
+     */
+    public function publish(NewsArticle $article): JsonResponse
+    {
+        if ($article->is_published) {
+            return response()->json([
+                'error' => 'Cette fiche est déjà publiée.',
+            ], 409);
+        }
+
+        $missing = [];
+        if (blank($article->seo_title)) {
+            $missing[] = 'seo_title';
+        }
+        if (blank($article->summary)) {
+            $missing[] = 'summary';
+        }
+        $pairs = $article->editorial_proof_pairs ?? [];
+        if ($pairs === []) {
+            $missing[] = 'editorial_proof_pairs';
+        }
+
+        if ($missing !== []) {
+            return response()->json([
+                'error' => "Cette fiche n'est pas prête à être publiée : ".implode(', ', $missing).' manquant(s).',
+                'missing' => $missing,
+            ], 422);
+        }
+
+        $sourceText = (string) $article->internal_source_text;
+        foreach ($pairs as $pair) {
+            if (($pair['type'] ?? null) !== 'fact') {
+                continue;
+            }
+
+            if (! EditorialProofNormalizer::containsExact($sourceText, (string) ($pair['excerpt'] ?? ''))) {
+                return response()->json([
+                    'error' => 'La paire de preuve « '.($pair['statement'] ?? '').' » n\'est plus une sous-chaîne exacte du texte source courant. Rien n\'a été publié, rien n\'a été purgé.',
+                ], 422);
+            }
+        }
+
+        // ACTION : mécanique d'écriture DÉLÉGUÉE à NewsArticle::publishAndPurgeSource() (addendum
+        // "purge garantie sur tous les chemins de publication", 2026-08-17) - RÉUTILISÉE telle
+        // quelle par AdminNewsController::toggleArticle(), DRY strict sur la règle « publier =
+        // purger ». Les gardes ci-dessus (prérequis + revalidation des paires) restent
+        // SPÉCIFIQUES à cet endpoint, volontairement absentes de la méthode partagée.
+        // MCP: SELF (<5 lignes)
+        // RAISON: DRY explicite, une seule implémentation de la purge à travers le code.
+        DB::transaction(function () use ($article): void {
+            $article->publishAndPurgeSource();
+        });
+
+        Log::channel('composition')->info('publish - publication et purge', [
+            'article_id' => $article->id,
+            'slug' => $article->slug,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'site_url' => url('/actualites/'.$article->slug),
         ]);
     }
 }

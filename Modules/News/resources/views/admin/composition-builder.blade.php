@@ -34,6 +34,10 @@
     .nc-source-textarea { font-family:'SF Mono','Monaco','Consolas',monospace; font-size:12.5px; line-height:1.5; }
     .nc-status-ok { color:#059669; font-size:13px; font-weight:600; }
     .nc-status-error { color:#dc2626; font-size:13px; font-weight:600; }
+    /* Avertissement non bloquant sur l'acquisition automatique (design doc composition manuelle,
+       2026-08-17) - mêmes tokens que les badges internes, pour rester un avertissement, pas une
+       erreur. */
+    .nc-status-warning { color:#92400e; font-size:12.5px; font-weight:600; background:#fef3c7; padding:6px 8px; border-radius:6px; }
     .nc-internal-badge { background:#fef3c7; color:#92400e; padding:2px 10px; border-radius:10px; font-size:11px; font-weight:700; }
     .nc-draft-badge { color:#92400e; font-weight:700; font-size:12px; }
     /* Écran minimal (panel "club des sages", 2026-08-15) - filet de secours replié par défaut :
@@ -70,11 +74,13 @@
         showEndpointTemplate: @js($showEndpointTemplate),
         updateEndpointTemplate: @js($updateEndpointTemplate),
         deleteSourceTextEndpointTemplate: @js($deleteSourceTextEndpointTemplate),
+        fetchSourceEndpointTemplate: @js($fetchSourceEndpointTemplate),
         generatePromptEndpointTemplate: @js($generatePromptEndpointTemplate),
         proofPairsStoreEndpointTemplate: @js($proofPairsStoreEndpointTemplate),
         proofPairsDestroyEndpointTemplate: @js($proofPairsDestroyEndpointTemplate),
         generateImagePromptEndpointTemplate: @js($generateImagePromptEndpointTemplate),
         uploadImageEndpointTemplate: @js($uploadImageEndpointTemplate),
+        publishEndpointTemplate: @js($publishEndpointTemplate),
         articlesIndexUrl: @js($articlesIndexUrl),
     })"
     x-init="init()"
@@ -133,8 +139,27 @@
                              est un filet de secours replié, jamais supprimé. --}}
                         <div class="nc-field">
                             <label for="nc-source">Texte complet de la source <span class="nc-hint">(interne, jamais publié)</span></label>
-                            <textarea id="nc-source" class="form-control nc-source-textarea" rows="10" x-model="formSourceText" placeholder="Colle ici le texte intégral de l'article source, pour ton propre usage éditorial."></textarea>
-                            <div class="mt-2">
+
+                            <div x-show="fetchLoading" x-cloak style="display:block; color:#0B7285; font-size:13px; font-weight:600; margin-bottom:8px;">⏳ Récupération de l'article chez l'éditeur…</div>
+                            <div class="nc-status-ok" x-show="!fetchLoading && fetchSuccessMessage" x-cloak x-text="fetchSuccessMessage" style="display:block; margin-bottom:8px;"></div>
+                            <div class="nc-status-warning" x-show="fetchWarning" x-cloak style="display:block; margin-bottom:8px;"><span x-text="'⚠️ ' + fetchWarning"></span></div>
+                            <div class="nc-status-error" x-show="fetchError" x-cloak style="display:block; margin-bottom:8px;">⚠️ Récupération impossible : <span x-text="fetchError"></span>. Colle le texte manuellement ou réessaie.</div>
+
+                            <textarea id="nc-source" class="form-control nc-source-textarea" rows="10" x-model="formSourceText" :disabled="fetchLoading" placeholder="Colle ici le texte intégral de l'article source, pour ton propre usage éditorial."></textarea>
+                            <div class="mt-2 d-flex flex-wrap gap-2 align-items-center">
+                                <button type="button"
+                                        class="cb-btn cb-btn-secondary"
+                                        :disabled="fetchLoading"
+                                        @click="formSourceText
+                                            ? $dispatch('confirm-action', {
+                                                title: 'Confirmer',
+                                                message: 'Remplacer le texte source actuel par une nouvelle récupération ? Le texte actuel sera perdu.',
+                                                action: () => fetchSource(true)
+                                              })
+                                            : fetchSource(false)">
+                                    <span x-show="!fetchLoading">🔁 Récupérer à nouveau</span>
+                                    <span x-show="fetchLoading" x-cloak>⏳ Récupération…</span>
+                                </button>
                                 <button type="button"
                                         class="cb-btn cb-btn-secondary"
                                         style="color:#dc2626; border-color:#dc2626;"
@@ -170,6 +195,23 @@
                                     </div>
                                 </div>
                             </template>
+                        </div>
+
+                        <div class="nc-field">
+                            <button type="button"
+                                    class="cb-btn"
+                                    :disabled="publishing || publishMissingList().length > 0"
+                                    @click="$dispatch('confirm-action', {
+                                        title: 'Confirmer',
+                                        message: 'Publier cette actualité ET supprimer définitivement le texte source original ? La suppression est irréversible (l\'empreinte et la preuve sont conservées).',
+                                        action: () => publishArticle()
+                                    })">
+                                <span x-show="!publishing">✅ Publier et purger le texte source</span>
+                                <span x-show="publishing" x-cloak>⏳ Publication…</span>
+                            </button>
+                            <div class="nc-hint" x-show="publishMissingList().length > 0" x-cloak x-text="'Il manque : ' + publishMissingList().join(', ')" style="display:block; margin-top:6px;"></div>
+                            <span class="nc-status-ok" x-show="publishOk" x-cloak x-transition x-text="'✓ Actualité publiée.'" style="display:block; margin-top:6px;"></span>
+                            <span class="nc-status-error" x-show="publishError" x-cloak x-text="publishError" style="display:block; margin-top:6px;"></span>
                         </div>
 
                         <details class="nc-manual-details">
@@ -302,11 +344,13 @@ function compositionBuilder(opts) {
             showTemplate: opts.showEndpointTemplate,
             updateTemplate: opts.updateEndpointTemplate,
             deleteSourceTextTemplate: opts.deleteSourceTextEndpointTemplate,
+            fetchSourceTemplate: opts.fetchSourceEndpointTemplate,
             generatePromptTemplate: opts.generatePromptEndpointTemplate,
             proofPairsStoreTemplate: opts.proofPairsStoreEndpointTemplate,
             proofPairsDestroyTemplate: opts.proofPairsDestroyEndpointTemplate,
             generateImagePromptTemplate: opts.generateImagePromptEndpointTemplate,
             uploadImageTemplate: opts.uploadImageEndpointTemplate,
+            publishTemplate: opts.publishEndpointTemplate,
             articlesIndexUrl: opts.articlesIndexUrl,
         },
         loading: { news: false, article: false, saving: false, deleting: false },
@@ -316,6 +360,22 @@ function compositionBuilder(opts) {
         formSourceText: '',
         saveOk: false,
         saveError: '',
+
+        // Récupération automatique du texte source chez l'éditeur (design doc composition
+        // manuelle, révision 2026-08-17). fetchAbortController n'est jamais lu dans le template -
+        // stocker un AbortController sur l'état réactif Alpine ne pose pas de problème (aucune
+        // lecture ne le rend réactif, seule sa présence/absence compte).
+        fetchLoading: false,
+        fetchError: '',
+        fetchWarning: '',
+        fetchSuccessMessage: '',
+        fetchAbortController: null,
+
+        // Publication + purge du texte source (design doc composition manuelle, révision
+        // 2026-08-17).
+        publishing: false,
+        publishOk: false,
+        publishError: '',
 
         // Phase B (design doc 2026-08-15, sections 5.1 et 7) : génération du prompt de
         // rédaction et fiche de preuve éditoriale.
@@ -353,6 +413,19 @@ function compositionBuilder(opts) {
         async loadArticle(id) {
             const item = this.itemById(id);
             if (!item) return;
+            // Piège nommé par le panel (design doc composition manuelle, révision 2026-08-17) :
+            // une récupération encore en vol pour l'actualité précédente ne doit jamais remplir
+            // la fiche qu'on est en train d'ouvrir - on l'annule systématiquement.
+            if (this.fetchAbortController) {
+                this.fetchAbortController.abort();
+                this.fetchAbortController = null;
+            }
+            this.fetchLoading = false;
+            this.fetchError = '';
+            this.fetchWarning = '';
+            this.fetchSuccessMessage = '';
+            this.publishError = '';
+            this.publishOk = false;
             this.loading.article = true;
             this.saveError = '';
             this.saveOk = false;
@@ -383,10 +456,128 @@ function compositionBuilder(opts) {
                 this.imagePromptCopied = false;
                 this.imageUploadOk = false;
                 this.imageUploadError = '';
+                // Récupération automatique (design doc composition manuelle, révision
+                // 2026-08-17) : seulement si aucun texte source n'existe déjà - jamais
+                // d'écrasement silencieux d'un texte collé manuellement.
+                if (!this.formSourceText) {
+                    this.fetchSource(false);
+                }
             } catch (e) {
                 this.saveError = 'Erreur réseau : ' + e.message;
             } finally {
                 this.loading.article = false;
+            }
+        },
+
+        // Récupération automatique/manuelle du texte source chez l'éditeur (design doc
+        // composition manuelle, révision 2026-08-17). AbortController pour ne jamais remplir la
+        // mauvaise fiche si l'admin change d'actualité pendant l'attente (jusqu'à 35 s côté
+        // serveur).
+        async fetchSource(replace = false) {
+            if (!this.selectedArticle) return;
+            if (this.fetchAbortController) {
+                this.fetchAbortController.abort();
+            }
+            const controller = new AbortController();
+            this.fetchAbortController = controller;
+            const slugAtStart = this.selectedArticle.slug;
+
+            this.fetchLoading = true;
+            this.fetchError = '';
+            this.fetchWarning = '';
+            this.fetchSuccessMessage = '';
+
+            try {
+                const url = this.endpoints.fetchSourceTemplate.replace('__SLUG__', slugAtStart);
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ replace: !!replace }),
+                    signal: controller.signal,
+                });
+                // Réponse tardive après changement de sélection : on l'ignore silencieusement,
+                // elle ne doit jamais remplir la fiche désormais affichée.
+                if (!this.selectedArticle || this.selectedArticle.slug !== slugAtStart) return;
+                const data = await res.json();
+                if (!res.ok) {
+                    this.fetchError = data.error || data.message || ('Erreur HTTP ' + res.status);
+                    return;
+                }
+                this.formSourceText = data.markdown || '';
+                const words = this.formSourceText.trim() ? this.formSourceText.trim().split(/\s+/).length : 0;
+                const method = data.acquisition?.method || 'inconnue';
+                this.fetchSuccessMessage = '✓ Article récupéré (' + words + ' mots, ' + method + ')';
+                if (data.acquisition?.warning) {
+                    this.fetchWarning = data.acquisition.warning;
+                }
+            } catch (e) {
+                if (e.name === 'AbortError') return;
+                this.fetchError = 'erreur réseau (' + e.message + ')';
+            } finally {
+                if (this.fetchAbortController === controller) {
+                    this.fetchAbortController = null;
+                }
+                if (this.selectedArticle && this.selectedArticle.slug === slugAtStart) {
+                    this.fetchLoading = false;
+                }
+            }
+        },
+
+        // Champs manquants avant publication (design doc composition manuelle, révision
+        // 2026-08-17) : lu par le template pour désactiver le bouton et lister ce qui manque.
+        publishMissingList() {
+            const missing = [];
+            if (!this.formSeoTitle || !this.formSeoTitle.trim()) missing.push('titre publié');
+            if (!this.formSummary || !this.formSummary.trim()) missing.push('résumé');
+            if (!this.proofPairs.length) missing.push('au moins une paire de preuve');
+            return missing;
+        },
+
+        async publishArticle() {
+            if (!this.selectedArticle) return;
+            this.publishing = true;
+            this.publishError = '';
+            this.publishOk = false;
+            try {
+                const url = this.endpoints.publishTemplate.replace('__SLUG__', this.selectedArticle.slug);
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    if (data.missing && data.missing.length) {
+                        this.publishError = (data.error || 'Publication impossible.') + ' (' + data.missing.join(', ') + ')';
+                    } else {
+                        this.publishError = data.error || data.message || ('Erreur HTTP ' + res.status);
+                    }
+                    return;
+                }
+                this.selectedArticle.is_published = true;
+                if (data.site_url) { this.selectedArticle.site_url = data.site_url; }
+                this.selectedArticle.internal_source_text = null;
+                this.formSourceText = '';
+                this.publishOk = true;
+                setTimeout(() => { this.publishOk = false; }, 2500);
+                if (typeof Livewire !== 'undefined') {
+                    Livewire.dispatch('toast', { type: 'success', message: 'Actualité publiée.' });
+                }
+            } catch (e) {
+                this.publishError = 'Erreur réseau : ' + e.message;
+            } finally {
+                this.publishing = false;
             }
         },
 
@@ -683,6 +874,10 @@ function compositionBuilder(opts) {
         this.loadArticle(id);
     };
     state.removeItem = function () {
+        if (this.fetchAbortController) {
+            this.fetchAbortController.abort();
+            this.fetchAbortController = null;
+        }
         this.selectedIds = [];
         this.selectedArticle = null;
         this.formSeoTitle = '';
@@ -690,6 +885,12 @@ function compositionBuilder(opts) {
         this.formSourceText = '';
         this.saveError = '';
         this.saveOk = false;
+        this.fetchLoading = false;
+        this.fetchError = '';
+        this.fetchWarning = '';
+        this.fetchSuccessMessage = '';
+        this.publishError = '';
+        this.publishOk = false;
     };
     // "Tout cocher" n'a pas de sens sur un écran à sélection unique - remplacé par un simple
     // rappel plutôt que de laisser le bouton partagé sélectionner plusieurs actualités.

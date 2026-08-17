@@ -3875,11 +3875,23 @@ declare(strict_types=1);
  *     resolved_url prioritaire) ajouté au bandeau de l'écran de composition - manque « source
  *     formelle » pointé par le panel et demandé par le propriétaire. source_url ajouté au payload
  *     show(). Preuve : 42 tests du fichier composition (171 assertions), 0 échec.
+ *
+ * 1.184.0 (2026-08-17) - feat(news) : récupération automatique de l'article source en Markdown à
+ *     la sélection (SourceMarkdownFetcher : HTTP TLS vérifié 12 s puis repli Puppeteer 20 s,
+ *     garde SSRF, jamais de contournement de paywall - art. 41.1 ; tout-ou-rien, bandeaux d'état
+ *     hors du textarea, jamais d'écrasement silencieux) + bouton « Publier et purger le texte
+ *     source » (prérequis bloquants, revalidation serveur des paires de preuve, transaction
+ *     publier+purger, colonne published_at créée). Règle « publier = purger » unifiée
+ *     (NewsArticle::publishAndPurgeSource) sur les DEUX chemins de publication (composition ET
+ *     bascule de la liste des articles, qui ne purgeait pas). Vérificateur quotidien
+ *     news:verify-source-purge (07h05) : purge tout texte source résiduel d'une fiche publiée,
+ *     quel que soit le chemin emprunté. Colonne source_acquisition (méthode, URL finale, statut,
+ *     mots, empreinte du brut). Preuve : 290 tests News (862 assertions), 0 échec (268 avant).
  */
 
 $lvMajor = 1;
-$lvMinor = 183;
-$lvPatch = 1;
+$lvMinor = 184;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

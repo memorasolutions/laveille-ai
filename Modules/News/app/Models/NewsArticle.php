@@ -39,7 +39,7 @@ class NewsArticle extends Model implements Searchable
     // purge de 'description' a corrigé - dans une table que personne ne surveille.
     // MCP: SELF (<5 lignes)
     // RAISON: garde-fou zéro-copie, cohérent avec l'exclusion déjà en place pour 'description'.
-    protected array $activitylogFields = ['title', 'seo_title', 'summary', 'is_published', 'relevance_score'];
+    protected array $activitylogFields = ['title', 'seo_title', 'summary', 'is_published', 'published_at', 'relevance_score'];
     protected string $activitylogName = 'news_article';
 
     public function getPublicUrl(): string
@@ -82,6 +82,17 @@ class NewsArticle extends Model implements Searchable
         // RAISON: même garde-fou d'emplacement distinct que les deux champs ci-dessus.
         'source_captured_at',
         'source_content_hash',
+        // ACTION : récupération automatique Markdown + Publier-et-purger (design doc "Actus -
+        // composition manuelle assistée" 2026-08-15, révision 2026-08-17) - même garde-fou
+        // d'emplacement distinct que les trois champs ci-dessus. 'source_acquisition' (trace de
+        // Modules\News\Services\SourceMarkdownFetcher) n'est écrite QUE par
+        // NewsCompositionController::fetchSource(). 'published_at' n'est écrite QUE par
+        // NewsCompositionController::publish() (le seul écrit possible de is_published dans ce
+        // contrôleur, exception documentée sur cette méthode).
+        // MCP: SELF (<5 lignes)
+        // RAISON: même garde-fou d'emplacement distinct que les champs voisins.
+        'source_acquisition',
+        'published_at',
     ];
 
     protected $casts = [
@@ -96,6 +107,8 @@ class NewsArticle extends Model implements Searchable
         'is_comparative_digest' => 'boolean',
         'editorial_proof_pairs' => 'array',
         'source_captured_at' => 'datetime',
+        'source_acquisition' => 'array',
+        'published_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -203,6 +216,35 @@ class NewsArticle extends Model implements Searchable
         $shortUrl = \Modules\ShortUrl\Models\ShortUrl::find($this->short_url_id);
 
         return $shortUrl?->getShortUrl();
+    }
+
+    /**
+     * ACTION : RÈGLE UNIQUE « publier = purger » (design doc "Actus - composition manuelle
+     * assistée" 2026-08-15, révision 2026-08-17, addendum "purge garantie sur tous les chemins
+     * de publication") - bascule is_published, horodate published_at et purge
+     * internal_source_text dans UN SEUL update(), quel que soit le chemin qui publie :
+     * Modules\News\Http\Controllers\Admin\NewsCompositionController::publish() (bouton
+     * Publier-et-purger, avec ses propres gardes de prérequis AVANT d'appeler cette méthode) ET
+     * Modules\News\Http\Controllers\AdminNewsController::toggleArticle() (bascule rapide de
+     * /admin/news/articles, sans garde de prérequis - ce n'est pas son rôle). Cette méthode ne
+     * fait volontairement AUCUNE validation métier (seo_title/summary/preuve éditoriale) : ces
+     * gardes sont spécifiques à l'écran de composition et seraient incohérentes appliquées à la
+     * bascule rapide, qui publie des fiches n'ayant jamais transité par cet écran. Seule la
+     * MÉCANIQUE d'écriture est partagée, jamais les gardes métier. Provenance
+     * (source_captured_at/source_content_hash), source_acquisition et editorial_proof_pairs
+     * survivent volontairement - même garde-fou que destroySourceText() (section 5.2).
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: DRY explicite demandé par le propriétaire - une seule implémentation de la purge,
+     * jamais un texte source original conservé au-delà de la publication, quel que soit le
+     * chemin emprunté pour publier.
+     */
+    public function publishAndPurgeSource(): void
+    {
+        $this->update([
+            'is_published' => true,
+            'published_at' => now('America/Toronto'),
+            'internal_source_text' => null,
+        ]);
     }
 
     // 2026-05-05 #146 : scopePublished mutualise via HasPublishedState (DRY Core).

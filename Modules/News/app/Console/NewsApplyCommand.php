@@ -30,7 +30,10 @@ use Modules\News\Services\NewsImageService;
  * inversement - c'est voulu (étape 4 du prompt généré, reprenable indépendamment de l'étape 3).
  *
  * Ne touche JAMAIS is_published ni published_at : la publication reste un geste manuel du
- * propriétaire dans /admin/news/articles, quel que soit ce que la commande applique.
+ * propriétaire, quel que soit ce que la commande applique - via /admin/news/articles ou, depuis
+ * la révision 2026-08-17, via le bouton Publier-et-purger de l'écran de composition
+ * (Modules\News\Http\Controllers\Admin\NewsCompositionController::publish(), seul autre endroit
+ * du code qui écrit ces deux colonnes).
  *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai

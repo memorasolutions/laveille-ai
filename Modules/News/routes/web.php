@@ -90,6 +90,10 @@ Route::prefix('admin/news/composition')
         Route::get('/{article}', [NewsCompositionController::class, 'show'])->name('show');
         Route::put('/{article}', [NewsCompositionController::class, 'update'])->name('update');
         Route::delete('/{article}/source-text', [NewsCompositionController::class, 'destroySourceText'])->name('destroy-source-text');
+        // ── Récupération automatique Markdown + Publier-et-purger (design doc 2026-08-15,
+        // révision 2026-08-17) ──
+        Route::post('/{article}/fetch-source', [NewsCompositionController::class, 'fetchSource'])->name('fetch-source');
+        Route::post('/{article}/publish', [NewsCompositionController::class, 'publish'])->name('publish');
         // ── Phase B (design doc 2026-08-15, sections 5.1 et 7) ──
         Route::post('/{article}/generate-prompt', [NewsCompositionController::class, 'generatePrompt'])->name('generate-prompt');
         Route::post('/{article}/proof-pairs', [NewsCompositionController::class, 'storeProofPair'])->name('proof-pairs.store');

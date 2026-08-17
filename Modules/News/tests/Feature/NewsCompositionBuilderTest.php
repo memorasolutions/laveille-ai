@@ -808,6 +808,54 @@ it('re-saving the same source text does not change an already-recorded capture d
     expect($article->fresh()->source_captured_at->toIso8601String())->toBe($capturedAt->toIso8601String());
 });
 
+// ── Front (Alpine) : récupération automatique + bouton Publier-et-purger (design doc
+// composition manuelle, révision 2026-08-17) ───────────────────────────────────────────
+
+it('the composition screen renders the auto-fetch state banners, the re-fetch button and the fetch-source endpoint wiring', function () {
+    $admin = ncbAdmin();
+
+    $response = $this->actingAs($admin)->get(route('admin.news.composition.index'));
+
+    $response->assertOk();
+    // Bandeaux d'état (chargement/succès/avertissement/erreur), hors du textarea.
+    $response->assertSee('Récupération de l\'article chez l\'éditeur', false);
+    $response->assertSee('fetchSuccessMessage', false);
+    $response->assertSee('fetchWarning', false);
+    $response->assertSee('Récupération impossible :', false);
+    // Le textarea est désactivé pendant la récupération.
+    $response->assertSee(':disabled="fetchLoading"', false);
+    // Bouton de nouvelle récupération, avec confirmation seulement si le champ est déjà rempli.
+    $response->assertSee('Récupérer à nouveau', false);
+    $response->assertSee('Remplacer le texte source actuel par une nouvelle récupération', false);
+    $response->assertSee('fetchSource(true)', false);
+    $response->assertSee('fetchSource(false)', false);
+    // Récupération automatique déclenchée depuis loadArticle() quand le champ est vide.
+    $response->assertSee('this.fetchSource(false);', false);
+    // Câblage du gabarit d'endpoint attendu du contrôleur (nom exact, cf. rapport d'alignement).
+    $response->assertSee('fetchSourceEndpointTemplate:', false);
+    $response->assertSee('fetchSourceTemplate: opts.fetchSourceEndpointTemplate', false);
+});
+
+it('the composition screen renders the publish-and-purge button with its explicit confirmation modal and the missing-fields list', function () {
+    $admin = ncbAdmin();
+
+    $response = $this->actingAs($admin)->get(route('admin.news.composition.index'));
+
+    $response->assertOk();
+    $response->assertSee('Publier et purger le texte source', false);
+    $response->assertSee('Publier cette actualité ET supprimer définitivement le texte source original', false);
+    $response->assertSee('La suppression est irréversible', false);
+    $response->assertSee('publishArticle()', false);
+    // Bouton désactivé tant qu'il manque un champ requis, liste des manquants affichée.
+    $response->assertSee('publishMissingList()', false);
+    $response->assertSee('titre publié', false);
+    $response->assertSee('résumé', false);
+    $response->assertSee('au moins une paire de preuve', false);
+    // Câblage du gabarit d'endpoint attendu du contrôleur (nom exact, cf. rapport d'alignement).
+    $response->assertSee('publishEndpointTemplate:', false);
+    $response->assertSee('publishTemplate: opts.publishEndpointTemplate', false);
+});
+
 it('neither source_content_hash nor source_captured_at appear in any public view or candidates()', function () {
     $admin = ncbAdmin();
     $source = ncbSource();

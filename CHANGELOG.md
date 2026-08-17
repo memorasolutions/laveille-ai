@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.184.0] - 2026-08-17
+
+### Ajouté
+- **Récupération automatique de l'article source en Markdown (module News, panel 5 IA arbitré).** À la sélection d'une actualité dans l'écran de composition, le moteur récupère l'article complet chez l'éditeur et remplit le champ texte source : requête HTTP (TLS vérifié, 12 s, un seul essai, arrêt franc sur 403/429) puis repli rendu navigateur Puppeteer (20 s, script `extract-article.cjs`), parse Readability, conversion Markdown (league/html-to-markdown). Garde SSRF (schéma + refus des adresses privées/réservées). **Jamais de contournement de paywall/authentification/CAPTCHA** (art. 41.1 Loi sur le droit d'auteur - un mur d'abonnement détecté produit un échec explicite « colle le texte manuellement »). Tout-ou-rien : plancher de 50 mots, détection de marqueurs de mur, avertissement non bloquant si le titre extrait diverge ; un échec ne persiste RIEN et s'affiche dans un bandeau distinct, jamais dans le champ. Jamais d'écrasement silencieux : un texte existant exige le bouton « Récupérer à nouveau » avec confirmation. Trace d'acquisition persistée (méthode, URL finale, statut HTTP, nombre de mots, horodatage, empreinte du Markdown brut - prouve toute retouche ultérieure sans stocker deux textes).
+- **Bouton « Publier et purger le texte source » (décision propriétaire : publier = purger, un seul geste).** Désactivé tant qu'il manque le titre publié, le résumé ou une paire de preuve (liste des manquants affichée) ; au clic, revalidation serveur de 100 % des paires « fait » contre le texte courant - si une seule échoue, rien n'est publié ni supprimé ; puis publication (is_published + published_at, colonne créée par migration) et purge du texte source dans la même transaction. L'empreinte, la trace d'acquisition et la preuve éditoriale survivent.
+- **Garantie « jamais de texte original conservé » sur TOUS les chemins (exigence propriétaire)** : règle unifiée `NewsArticle::publishAndPurgeSource()` utilisée par l'écran de composition ET par la bascule de publication de la liste des articles (qui publiait sans purger - trou bouché) ; et vérificateur quotidien `news:verify-source-purge` (07h05, avant le courriel de veille) qui purge tout texte source résiduel d'une fiche publiée, quel que soit le chemin de publication, et journalise chaque cas sur le canal `composition`.
+
+### Corrigé
+- `set_time_limit(40)` de la récupération limité au contexte web (en CLI il plafonnait le processus entier - la suite de tests complète mourait d'un « Maximum execution time » 40 s après le premier test concerné).
+
+### Vérifié
+- 290 tests du module News (862 assertions), aucun échec (268 avant ce lot), suite complète sans fatal.
+
 ## [1.183.1] - 2026-08-17
 
 ### Corrigé

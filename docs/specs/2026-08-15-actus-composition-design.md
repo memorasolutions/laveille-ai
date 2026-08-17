@@ -308,3 +308,90 @@ bornée est la SEULE porte d'écriture.
   attente** - le texte source reste supprimable manuellement à tout moment
   (`destroySourceText()`, section 5.2 ci-dessus), mais rien n'automatise sa suppression après un
   `news:apply` réussi. Ne pas l'implémenter sans une décision explicite du propriétaire.
+
+## Récupération automatique Markdown + Publier-et-purger (2026-08-17)
+
+**Décisions du propriétaire, arbitrées par le panel de 5 IA** : (1) à la sélection d'une
+actualité dans l'écran de composition, le texte source complet est désormais récupéré
+**automatiquement** en Markdown (jusque-là, l'admin devait le coller à la main) ; (2) un seul
+bouton **Publier-et-purger** bascule `is_published`, horodate `published_at` et supprime
+`internal_source_text` dans le MÊME geste - jamais deux actions séparées qui laisseraient une
+fenêtre où une fiche déjà en ligne garde encore son texte source intégral en base.
+
+### Ce qui a été livré
+
+- **`Modules\News\Services\SourceMarkdownFetcher`** : étape 1 requête HTTP directe (TLS vérifié,
+  un seul essai, 12 s, 403/429 → échec immédiat, jamais d'acharnement) ; étape 2 repli Puppeteer
+  (`scripts/extract-article.cjs`, calqué sur `extract-og-image.cjs`, 20 s) uniquement si l'étape
+  1 échoue ou produit un contenu invalide ; même parse Readability PHP des deux côtés, puis
+  conversion en Markdown via `league/html-to-markdown`. Garde SSRF légère (schéma http/https
+  seulement, hôte résolu et vérifié public - ni privé, ni de bouclage, ni réservé - avant toute
+  requête sortante). Validation tout-ou-rien : plancher de 50 mots, détection de marqueurs de mur
+  d'abonnement (échec explicite « colle le texte manuellement »), comparaison grossière du titre
+  extrait au titre attendu (avertissement non bloquant seulement).
+- **`POST /admin/news/composition/{article}/fetch-source`** : refuse d'écraser un texte source
+  déjà présent sans confirmation explicite (`replace`, 409) ; échec → rien n'est persisté ; succès
+  → une seule écriture (`internal_source_text`, provenance via `applySourceProvenance()`
+  réutilisée telle quelle, `source_acquisition` avec l'empreinte SHA-256 du Markdown BRUT figée
+  au moment de la récupération).
+- **`POST /admin/news/composition/{article}/publish`** (bouton Publier-et-purger) : refuse une
+  fiche déjà publiée (409) ; prérequis serveur (titre publié, résumé, au moins une paire de
+  preuve) → 422 avec la liste complète des manquants ; revalide à 100 % les paires « fait » contre
+  le texte source COURANT (pas celui du moment de la génération du prompt) - une seule paire
+  invalide fait échouer toute la publication, rien ne part, rien n'est purgé.
+- **`NewsArticle::publishAndPurgeSource()`** : la mécanique d'écriture de « publier = purger »
+  (bascule + horodatage + purge) est extraite dans le MODÈLE plutôt que dupliquée dans chaque
+  contrôleur - DRY explicite, une seule implémentation partagée par `publish()` ci-dessus ET par
+  `AdminNewsController::toggleArticle()` (voir addendum ci-dessous).
+
+### Colonnes ajoutées (migration additive réversible)
+
+- `source_acquisition` (JSON, nullable) : trace de la récupération automatique (méthode
+  http/puppeteer, URL finale, statut HTTP, nombre de mots, date de capture, empreinte SHA-256 du
+  Markdown brut).
+- `published_at` (timestamp, nullable) : **aucune colonne équivalente n'existait avant cette
+  migration** - vérifié dans le modèle et dans toutes les migrations du module avant de l'ajouter.
+  Volontairement distincte de `pub_date` (date de publication originale chez l'éditeur source,
+  jamais écrasée, utilisée par l'index d'accueil) : `published_at` porte le moment où LA VEILLE
+  elle-même a publié la fiche.
+
+### Addendum (même jour) - « purge garantie sur tous les chemins de publication »
+
+Exigence du propriétaire reçue après la première livraison : *« important de ne jamais garder les
+articles originaux, important de vérifier »*. Deux ajouts :
+
+- **`AdminNewsController::toggleArticle()`** (bascule rapide de `/admin/news/articles`) publiait
+  jusque-là sans purger - trou bouché en la faisant appeler `publishAndPurgeSource()` quand elle
+  publie (jamais quand elle dépublie : le texte est déjà parti dès la première publication, et une
+  republication future ne le fait pas renaître).
+- **`news:verify-source-purge`** (commande sans argument, idempotente) : filet de vérification
+  quotidien (`routes/console.php`, 07h05, avant le digest de 07h15, `withoutOverlapping`) - trouve
+  toute fiche `is_published=true` dont `internal_source_text` est encore non NULL, peu importe le
+  chemin de publication emprunté, la purge, journalise chaque cas sur le canal `composition` (id,
+  slug, longueur du texte purgé). Le vrai filet : même un chemin de publication futur qui
+  oublierait d'appeler `publishAndPurgeSource()` serait rattrapé sous 24 h.
+
+### Arbitrages du panel de 5 IA
+
+- **`robots.txt` non vérifié** : geste unitaire déclenché à la main par le propriétaire pour UNE
+  fiche à la fois (pas un robot d'indexation de masse) - claude.ai et Gemini pour l'omission
+  (proportionnalité), Codex et DeepSeek pour une vérification systématique par prudence. Tranché
+  en faveur de l'omission : la charge d'ingénierie (parser, cache, respect des règles
+  `Crawl-delay`) est disproportionnée pour une action manuelle et occasionnelle.
+- **Paywall jamais contourné** (art. 41.1 de la Loi sur le droit d'auteur) : aucune tentative de
+  connexion, de résolution de CAPTCHA ou de contournement technique - un mur détecté échoue avec
+  un message invitant à coller le texte manuellement. Unanimité du panel, aucune divergence.
+- **UA navigateur conservé** (même chaîne que `ContentExtractor`, pas un UA « bot » identifiable) :
+  divergence consignée - claude.ai plaidait pour un UA distinctif (transparence vis-à-vis des
+  éditeurs), les quatre autres pour la cohérence avec l'existant (un second comportement de
+  scraping sur le même domaine aurait été plus détectable, pas moins).
+- **Jina.ai Reader rejeté** : dépendance à un tiers externe pour une fonctionnalité qui doit
+  fonctionner hors ligne/sans clé API tierce et sans exposer les URLs sources à un service externe
+  non contractualisé.
+- **Diff complet HTML original vs Markdown rejeté** : aurait exigé de conserver le HTML brut
+  quelque part pour comparer - stockage double, exactement contraire à l'objectif de purge.
+  `raw_markdown_hash` (empreinte seule, pas le contenu) suffit à prouver toute retouche
+  ultérieure sans rien conserver de plus.
+- **File d'attente asynchrone (job/queue) rejetée** : sur-ingénierie pour une action déclenchée
+  à la main par un seul propriétaire, une fiche à la fois - `set_time_limit(40)` côté requête
+  synchrone suffit, le repli Puppeteer (20 s max) restant largement sous ce plafond.

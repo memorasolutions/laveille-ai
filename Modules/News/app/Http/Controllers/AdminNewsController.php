@@ -144,7 +144,21 @@ class AdminNewsController extends Controller
 
     public function toggleArticle(NewsArticle $article): RedirectResponse
     {
-        $article->update(['is_published' => ! $article->is_published]);
+        if (! $article->is_published) {
+            // ACTION : bascule rapide → même règle « publier = purger » que le bouton
+            // Publier-et-purger de l'écran de composition (addendum "purge garantie sur tous
+            // les chemins de publication", 2026-08-17) - DRY sur
+            // NewsArticle::publishAndPurgeSource(), aucune fiche publiée ne doit pouvoir garder
+            // son texte source intégral, quel que soit le chemin emprunté pour la publier.
+            // MCP: SELF (<5 lignes)
+            // RAISON: exigence explicite du propriétaire, une seule implémentation de la purge.
+            $article->publishAndPurgeSource();
+        } else {
+            // Dépublication : ne touche à rien d'autre - le texte source est déjà parti dès la
+            // première publication (ou n'a jamais existé), et une republication future ne le
+            // fait pas renaître (design doc section 5.2 : la purge n'est jamais réversible).
+            $article->update(['is_published' => false]);
+        }
 
         return back()->with('success', $article->is_published
             ? __('Article publié.')

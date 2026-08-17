@@ -148,6 +148,13 @@ Schedule::command('decido:purge-expired')->dailyAt('06:15');
 // courriel) si rien de nouveau depuis le dernier resume, voir NotifyPollActivityCommand.
 Schedule::command('decido:notify-poll-activity')->dailyAt('07:00')->withoutOverlapping();
 
+// News - filet de verification "publier = purger" (addendum Actus 2.0, 2026-08-17, exigence
+// fondateur : "important de ne jamais garder les articles originaux, important de verifier").
+// Trouve toute fiche publiee dont le texte source integral serait encore present (peu importe
+// le chemin de publication emprunte) et la purge. Rattrapage sous 24h, avant le digest de 07h15
+// ci-dessous - jamais de dependance entre les deux. Voir VerifySourcePurgeCommand.
+Schedule::command('news:verify-source-purge')->dailyAt('07:05')->withoutOverlapping();
+
 // News - courriel de veille quotidien des actualites collectees non publiees (brouillons), pour
 // que le proprietaire choisisse lesquelles publier (demande fondateur 2026-08-16, suite a l'arret
 // de la publication automatique v1.174.0). Planifie apres les commandes Decido ci-dessus (meme

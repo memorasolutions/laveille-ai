@@ -71,6 +71,9 @@ class NewsServiceProvider extends ServiceProvider
             // Actus 2.0, révision 2026-08-17 (prompt d'orchestration Claude Code CLI) - SEULE
             // porte d'écriture bornée pour l'agent, voir docblock de la classe.
             \Modules\News\Console\NewsApplyCommand::class,
+            // Actus 2.0, addendum 2026-08-17 (« purge garantie sur tous les chemins de
+            // publication ») - filet de vérification quotidien, planifié dans routes/console.php.
+            \Modules\News\Console\VerifySourcePurgeCommand::class,
         ]);
     }
 
