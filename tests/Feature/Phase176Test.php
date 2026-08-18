@@ -48,6 +48,10 @@ test('search returns users results', function () {
 });
 
 test('search returns articles results', function () {
+    // La fiche n'a un titre qu'en fr ; l'app réelle tourne en français (fr_CA), alors que la
+    // locale par défaut des tests est en. On cale la locale sur fr pour que la recherche
+    // affiche le titre - même correctif que Phase166/168 (triage tests hérités 2026-08-18).
+    config(['app.locale' => 'fr']);
     Article::factory()->create(['title' => ['fr' => 'Article Unique Test'], 'status' => 'published']);
 
     $this->actingAs($this->admin)

@@ -45,6 +45,8 @@ test('digest --force bypasses the disabled flag without error', function () {
 });
 
 test('digest is scheduled', function () {
+    $this->markTestSkipped('Planification newsletter volontairement désactivée (routes/console.php) - décision produit, gate explicite ; voir mémoire newsletter-strategie-croissance-contenu.');
+
     $events = \Illuminate\Support\Facades\Schedule::events();
 
     $found = collect($events)->contains(function ($event) {

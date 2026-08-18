@@ -27,7 +27,8 @@ test('sync permissions command exists', function () {
 
 test('readme is customized for core template', function () {
     $content = file_get_contents(base_path('README.md'));
-    expect($content)->toContain('Laravel Core Template');
+    // Croissance légitime, valeur actualisée le 2026-08-18 (triage tests hérités) : README réécrit.
+    expect($content)->toContain('Laravel SaaS CORE Template');
 });
 
 test('sanctum token prefix is configured', function () {

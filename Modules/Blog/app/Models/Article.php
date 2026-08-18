@@ -118,7 +118,15 @@ class Article extends Model implements SearchableContract
 
         static::creating(function ($model) {
             if (empty($model->slug)) {
-                $model->slug = Str::slug($model->title);
+                // ACTION : dériver le slug de la 1re traduction NON VIDE, jamais de $model->title
+                // (dépendant de la locale courante) - sinon un article sans traduction dans la
+                // locale d'app produit un slug vide, qui casse toute génération de lien route()
+                // vers lui (UrlGenerationException, page recherche admin en 500).
+                // MCP: SELF (<5 lignes)
+                // RAISON: triage tests hérités 2026-08-18 (Phase176) - vrai bug de robustesse.
+                $title = collect($model->getTranslations('title'))->first(fn ($v) => filled($v))
+                    ?? $model->title;
+                $model->slug = Str::slug((string) $title);
             }
         });
     }

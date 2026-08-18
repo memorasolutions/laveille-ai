@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.190.1] - 2026-08-18
+
+### Corrigé
+- **Slug d'article robuste à la locale** : `Article::boot()` dérive désormais le slug de la première traduction NON VIDE du titre, jamais de `$model->title` (dépendant de la locale courante) - un article sans traduction dans la locale d'application produisait un slug vide, qui cassait toute génération de lien `route()` vers lui (`UrlGenerationException`, page recherche admin en 500).
+
+### Ajouté
+- **Bannière d'impersonation** : un administrateur qui « devient » un utilisateur voit maintenant en permanence un bandeau « Impersonnification en cours » avec un bouton de retour, dans tout l'espace utilisateur (trou de sécurité/UX comblé). Placée une seule fois dans le layout `auth::layouts.user-frontend` (DRY).
+
+### Vérifié
+- Les 9 derniers tests hérités en échec ramenés à 0 : 2 correctifs de code de production ci-dessus, 3 assertions actualisées (enum webhooks 14 cas, réglages IA 32, titre README réécrit), 2 skips documentés (planification newsletter et service worker volontairement désactivés). Anti-régression Blog + Auth verte (55 tests).
+
 ## [1.190.0] - 2026-08-18
 
 ### Ajouté

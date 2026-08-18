@@ -33,6 +33,8 @@ it('webpush config file exists', function () {
 });
 
 it('service worker contains push event handler', function () {
+    $this->markTestSkipped('Service worker volontairement désactivé (nettoyage de cache seulement) - cohérent avec Phase46PwaTest ; PWA/push non actifs.');
+
     $sw = file_get_contents(public_path('service-worker.js'));
     expect($sw)->toContain("addEventListener('push'");
 });

@@ -111,7 +111,9 @@ test('AI settings exist after seeding', function () {
     $this->seed(\Modules\Settings\Database\Seeders\SettingsDatabaseSeeder::class);
 
     $aiSettings = Setting::where('group', 'ai')->get();
-    expect($aiSettings)->toHaveCount(27);
+    // Croissance légitime, valeur actualisée le 2026-08-18 (triage tests hérités) :
+    // 27 du seeder + 5 ajoutés par la migration 2026_07_01_140000_seed_ai_escalation_settings.
+    expect($aiSettings)->toHaveCount(32);
 });
 
 test('AiService::chat makes HTTP call', function () {

@@ -20,8 +20,9 @@ uses(RefreshDatabase::class);
 
 // --- WebhookEvent enum ---
 
-it('webhook event enum has 9 cases', function () {
-    expect(WebhookEvent::cases())->toHaveCount(9);
+it('webhook event enum has 14 cases', function () {
+    // Croissance légitime, valeur actualisée le 2026-08-18 (triage tests hérités).
+    expect(WebhookEvent::cases())->toHaveCount(14);
 });
 
 it('webhook event values returns array of strings', function () {

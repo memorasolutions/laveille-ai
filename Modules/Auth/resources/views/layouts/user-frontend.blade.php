@@ -9,6 +9,22 @@
 @endsection
 
 @section('content')
+{{-- Bannière d'impersonation : un admin qui « devient » un utilisateur (session
+     impersonating_original_id, ImpersonationController) doit voir en permanence qu'il l'est et
+     pouvoir revenir - trou de sécurité/UX comblé (triage tests hérités 2026-08-18, Phase121).
+     Placée dans le layout de l'espace utilisateur : couvre le tableau de bord et toutes les
+     pages de cet espace, jamais dupliquée. --}}
+@if(session('impersonating_original_id'))
+<div class="container" style="padding-top: 15px;">
+    <div class="alert alert-warning d-flex align-items-center justify-content-between" role="alert" style="margin-bottom: 0;">
+        <span>⚠️ {{ __('Impersonnification en cours') }} — {{ __('vous naviguez au nom d\'un autre utilisateur.') }}</span>
+        <form method="POST" action="{{ route('admin.impersonate.stop') }}" style="margin: 0;">
+            @csrf
+            <button type="submit" class="btn btn-sm btn-dark">{{ __('Revenir à mon compte') }}</button>
+        </form>
+    </div>
+</div>
+@endif
 <div class="container user-space" style="padding: 30px 0 60px;">
     <div class="row" x-data="{ sidebarOpen: false }">
 
