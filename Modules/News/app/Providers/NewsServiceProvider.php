@@ -83,6 +83,9 @@ class NewsServiceProvider extends ServiceProvider
             // brouillon à partir d'un lien, voir docblock de la classe et
             // NewsArticle::createManualDraft() (DRY, même implémentation que l'écran web).
             \Modules\News\Console\NewsCreateDraftCommand::class,
+            // Chantier AdSense « faible valeur » (2026-08-18) - retrait SEO-sûr et réversible
+            // d'un lot de fiches (410 Gone), voir docblock de la classe.
+            \Modules\News\Console\RetireArticlesCommand::class,
         ]);
     }
 

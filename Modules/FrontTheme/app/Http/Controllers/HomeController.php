@@ -73,6 +73,13 @@ class HomeController extends Controller
         if (Module::has('News') && Module::find('News')?->isEnabled() && class_exists($newsClass)) {
             $latestNews = $newsClass::query()
                 ->where('is_published', true)
+                // ACTION : chantier AdSense « faible valeur » (2026-08-18) - requête directe sur
+                // is_published (jamais NewsArticle::published()), donc l'override de
+                // scopePublished() ne la couvre PAS ; filtre explicite requis.
+                // MCP: SELF (<5 lignes)
+                // RAISON: une fiche retirée (410) ne doit jamais apparaître dans le widget
+                // « Dernières actualités » de l'accueil.
+                ->whereNull('retired_at')
                 ->with('source')
                 ->latest('pub_date')
                 ->take((int) Settings::get('fronttheme.home_latest_news_limit', 8))

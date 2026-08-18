@@ -6,6 +6,7 @@ namespace Modules\News\Http\Controllers;
 
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Services\ViewCounterService;
@@ -66,8 +67,25 @@ class PublicNewsController extends Controller
         return view('news::public.index', compact('articles', 'categories', 'filters'));
     }
 
-    public function show(NewsArticle $article): View
+    // ACTION : type de retour élargi à Response (chantier AdSense « faible valeur »,
+    // 2026-08-18) - response()->view(..., 410) retourne Illuminate\Http\Response, pas View ;
+    // sans cet élargissement, le TypeError est immédiat au premier appel sur une fiche retirée.
+    // MCP: SELF (<5 lignes)
+    // RAISON: correction nécessaire pour que la réponse 410 soit valide côté PHP.
+    public function show(NewsArticle $article): View|Response
     {
+        // ACTION : chantier AdSense « faible valeur » (2026-08-18) - une fiche retirée
+        // (retired_at non nul) résout encore par route model binding (retired_at n'est pas
+        // filtré à la résolution, volontairement - voir docblock de scopePublished() dans
+        // NewsArticle) : elle doit répondre 410 Gone AVANT tout autre traitement de cette
+        // méthode (vue dédiée, jamais l'erreur 404 générique), c'est un retrait volontaire au
+        // sens de Google, pas une disparition.
+        // MCP: SELF (<5 lignes)
+        // RAISON: design doc du chantier - retrait SEO-sûr et réversible.
+        if ($article->isRetired()) {
+            return response()->view('news::public.gone', ['article' => $article], 410);
+        }
+
         abort_if(! $article->is_published, 404);
         // Élagage SEO : une actualité marquée "gone" renvoie 410 (contenu retiré définitivement).
         abort_if(($article->seo_status ?? 'index') === 'gone', 410);

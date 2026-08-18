@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.191.0] - 2026-08-18
+
+### Ajouté
+- **Retrait SEO-sûr et RÉVERSIBLE des fiches d'actualités (chantier AdSense « faible valeur »).** Nouvelle colonne `retired_at` : une fiche retirée répond HTTP **410 Gone** (page utile, pas une erreur brute) et sort de l'index, du sitemap, des widgets d'accueil, de la recherche et des connexes. Point DRY unique : l'override de `NewsArticle::scopePublished()` (`whereNull('retired_at')`) couvre toutes les surfaces qui passent par `published()` ; les requêtes directes (sitemaps, widgets accueil, digest infolettre) reçoivent un filtre explicite. Réversible : `retired_at` remis à null = restauration complète, aucune donnée supprimée. Commande `news:retire {--ids-file=} {--restore} {--dry-run}` avec sauvegarde horodatée de l'état AVANT toute mutation (`storage/app/news-retire-backup-{timestamp}.json`).
+- **Motivation** : le noindex ne retire PAS une page du périmètre d'évaluation AdSense (politique Google 2026, vérifiée par le club des sages) ; seul le 410 le fait. Croisement GSC × base : 1 613 fiches minces indexées ont 0 clic ET 0 impression sur 90 jours (candidates propres), contre 329 gagnantes (à garder/enrichir) - le retrait ne touche que le poids mort, zéro trafic perdu.
+
+### Vérifié
+- 7 tests du mécanisme (410, exclusion de published(), restauration, backup, dry-run) + 431 tests du module News + SEO/Search/FrontTheme verts. Zéro régression introduite.
+
 ## [1.190.2] - 2026-08-18
 
 ### Corrigé

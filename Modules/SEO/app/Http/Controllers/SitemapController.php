@@ -203,7 +203,13 @@ class SitemapController
         if (Route::has('news.index')) {
             $sitemap->add(Url::create(route('news.index'))->setPriority(0.7)->setChangeFrequency('daily'));
             if (class_exists(\Modules\News\Models\NewsArticle::class)) {
-                \Modules\News\Models\NewsArticle::where('is_published', true)->where('seo_status', 'index')->select(['id', 'slug', 'updated_at', 'image_url'])->get()->each(function ($article) use ($sitemap) {
+                // ACTION : chantier AdSense « faible valeur » (2026-08-18) - requête directe sur
+                // is_published (jamais NewsArticle::published()), donc l'override de
+                // scopePublished() ne la couvre PAS : whereNull('retired_at') explicite requis
+                // pour qu'une fiche retirée (réponse 410) sorte du sitemap principal.
+                // MCP: SELF (<5 lignes)
+                // RAISON: design doc du chantier - toutes les surfaces publiques couvertes.
+                \Modules\News\Models\NewsArticle::where('is_published', true)->where('seo_status', 'index')->whereNull('retired_at')->select(['id', 'slug', 'updated_at', 'image_url'])->get()->each(function ($article) use ($sitemap) {
                     $url = Url::create(url('/actualites/'.$article->slug))
                         ->setLastModificationDate($article->updated_at)
                         ->setPriority(0.6)

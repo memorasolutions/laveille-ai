@@ -27,12 +27,18 @@ class DigestContentService
         $topNews = collect();
 
         if (class_exists(\Modules\News\Models\NewsArticle::class)) {
+            // ACTION : exclure les fiches retirées (410, chantier AdSense 2026-08-18) - une
+            // actu retirée ne doit jamais partir dans un courriel (lien mort). Requête directe
+            // sur is_published, donc l'override de scopePublished() ne s'applique pas ici.
+            // MCP: SELF (<5 lignes)
             $highlight = \Modules\News\Models\NewsArticle::where('is_published', true)
+                ->whereNull('retired_at')
                 ->where('pub_date', '>=', now()->subDays(7))
                 ->orderByDesc('relevance_score')
                 ->first();
 
             $topNews = \Modules\News\Models\NewsArticle::where('is_published', true)
+                ->whereNull('retired_at')
                 ->where('pub_date', '>=', now()->subDays(7))
                 ->when($highlight, fn ($q) => $q->where('id', '!=', $highlight->id))
                 ->orderByDesc('relevance_score')

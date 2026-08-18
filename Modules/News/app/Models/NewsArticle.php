@@ -121,6 +121,13 @@ class NewsArticle extends Model implements Searchable
         'nature_original',
         'niveau_preuve',
         'original_post',
+        // ACTION : chantier AdSense « faible valeur » (2026-08-18) - retrait SEO-sûr et
+        // RÉVERSIBLE d'une fiche (colonne ajoutée par la migration
+        // 2026_08_18_150000_add_retired_at_to_news_articles). Seuls écrivains : retire()/
+        // unretire() ci-dessous (jamais d'écriture directe ailleurs).
+        // MCP: SELF (<5 lignes)
+        // RAISON: design doc du chantier, section retrait 410.
+        'retired_at',
     ];
 
     protected $casts = [
@@ -139,6 +146,7 @@ class NewsArticle extends Model implements Searchable
         'published_at' => 'datetime',
         'primary_sources' => 'array',
         'original_post' => 'array',
+        'retired_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -528,6 +536,67 @@ class NewsArticle extends Model implements Searchable
     }
 
     // 2026-05-05 #146 : scopePublished mutualise via HasPublishedState (DRY Core).
+
+    /**
+     * ACTION : chantier AdSense « faible valeur » (2026-08-18) - OVERRIDE de scopePublished()
+     * (HasPublishedState, Modules\Core) : ce override, défini DANS NewsArticle, prime sur celui
+     * du trait (PHP résout d'abord les méthodes de la classe elle-même). C'est le POINT DRY
+     * UNIQUE qui exclut une fiche retirée (retired_at non nul) de TOUTE surface publique qui
+     * appelle published() - liste /actualites, connexes (relatedFor/relatedByEntities), recherche
+     * (Modules\Search\Services\SearchService::searchFront(), qui appelle ->published() dès que
+     * scopePublished existe). Une fiche retirée continue de résoudre par son slug (route model
+     * binding manuel de routes/web.php) : c'est volontaire, PublicNewsController::show() la
+     * détecte et sert un 410 explicite plutôt qu'un 404 générique - retrait SEO « volontaire »
+     * au sens de Google, jamais une simple disparition.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: design doc du chantier - un seul endroit à corriger si la définition de "publiée"
+     * doit évoluer, jamais une divergence entre les surfaces publiques qui l'appellent.
+     */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('is_published', true)->whereNull('retired_at');
+    }
+
+    /**
+     * ACTION : vrai si cette fiche a été retirée (retired_at non nul) - chantier AdSense
+     * « faible valeur » (2026-08-18). Consommé par PublicNewsController::show() pour servir un
+     * 410 explicite avant tout autre traitement.
+     * MCP: SELF (<5 lignes)
+     * RAISON: design doc du chantier.
+     */
+    public function isRetired(): bool
+    {
+        return $this->retired_at !== null;
+    }
+
+    /**
+     * ACTION : retire cette fiche (retired_at = maintenant) - idempotent, jamais d'écrasement
+     * d'un retired_at déjà posé (préserve la date réelle du premier retrait). Chantier AdSense
+     * « faible valeur » (2026-08-18). Seul appelant : Modules\News\Console\
+     * RetireArticlesCommand (porte bornée, jamais d'appel direct ailleurs).
+     * MCP: SELF (<5 lignes)
+     * RAISON: réversibilité exigée par le design doc - jamais de suppression de données, seul
+     * le statut de service change.
+     */
+    public function retire(): void
+    {
+        if ($this->retired_at === null) {
+            $this->retired_at = now('America/Toronto');
+            $this->save();
+        }
+    }
+
+    /**
+     * ACTION : restaure cette fiche (retired_at = null) - réversibilité du retrait, chantier
+     * AdSense « faible valeur » (2026-08-18). Seul appelant : RetireArticlesCommand (--restore).
+     * MCP: SELF (<5 lignes)
+     * RAISON: garde-fou zéro-suppression - le retrait n'efface jamais rien, il se défait.
+     */
+    public function unretire(): void
+    {
+        $this->retired_at = null;
+        $this->save();
+    }
 
     public function scopeRecent(Builder $query): Builder
     {

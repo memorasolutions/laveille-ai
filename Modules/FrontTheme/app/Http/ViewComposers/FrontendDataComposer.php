@@ -66,7 +66,14 @@ class FrontendDataComposer
         $newsArticleClass = 'Modules\\News\\Models\\NewsArticle';
         if (Module::has('News') && Module::find('News')?->isEnabled() && class_exists($newsArticleClass)) {
             $latestNewsArticle = Cache::remember('front_latest_news_article', 300, function () use ($newsArticleClass) {
+                // ACTION : chantier AdSense « faible valeur » (2026-08-18) - requête directe sur
+                // is_published (jamais NewsArticle::published()), donc l'override de
+                // scopePublished() ne la couvre PAS ; filtre explicite requis.
+                // MCP: SELF (<5 lignes)
+                // RAISON: le lien « dernière actualité » de l'en-tête ne doit jamais pointer vers
+                // une fiche retirée (410).
                 return $newsArticleClass::where('is_published', true)
+                    ->whereNull('retired_at')
                     ->latest('pub_date')
                     ->first(['id', 'title', 'seo_title', 'slug']);
             });

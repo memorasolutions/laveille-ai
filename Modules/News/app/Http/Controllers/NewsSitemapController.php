@@ -34,6 +34,13 @@ class NewsSitemapController
             $articles = NewsArticle::query()
                 ->where('pub_date', '>=', now()->subHours(self::FRESHNESS_HOURS))
                 ->where('seo_status', 'index') // exclut les actualités élaguées (noindex/gone)
+                // ACTION : chantier AdSense « faible valeur » (2026-08-18) - cette requête
+                // filtre directement sur la table (jamais NewsArticle::published()), donc
+                // l'override de scopePublished() ne la couvre PAS : filtre explicite requis.
+                // MCP: SELF (<5 lignes)
+                // RAISON: une fiche retirée (retired_at non nul, réponse 410) ne doit jamais
+                // apparaître dans le sitemap Google News.
+                ->whereNull('retired_at')
                 ->whereNotNull('slug')
                 ->orderByDesc('pub_date')
                 ->limit(self::MAX_URLS)
