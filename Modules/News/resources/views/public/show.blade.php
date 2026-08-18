@@ -127,8 +127,8 @@
 {{-- Résumé pour agents (design doc section 4.5) : meta_description, sinon
      NewsArticle::displayExcerpt() (résumé court, sinon rendu du résumé structuré, sinon repli
      configuré catégorie+date) - jamais $article->description. --}}
-<meta name="llm:summary" content="{{ e($article->seo_title ?? $article->title) }} - {{ e($article->meta_description ?? $article->displayExcerpt(200)) }} ({{ e($article->source->name ?? 'Actualité IA') }})">
-<meta name="llm:keywords" content="actualité IA, {{ e($article->source->name ?? 'IA') }}, intelligence artificielle, francophone, Québec">
+<meta name="llm:summary" content="{{ e($article->seo_title ?? $article->title) }} - {{ e($article->meta_description ?? $article->displayExcerpt(200)) }} ({{ e($article->displaySourceName()) }})">
+<meta name="llm:keywords" content="actualité IA, {{ e($article->displaySourceName()) }}, intelligence artificielle, francophone, Québec">
 <meta name="llm:url" content="{{ route('news.show', $article) }}">
 @if($ss && isset($ss['faq_question']))
     {!! \Modules\SEO\Services\JsonLdService::render(
@@ -353,7 +353,7 @@
                     <div class="nw-meta-bar">
                         <span class="nw-pill">{{ $readMinutes }} min {{ __('de lecture') }}</span>
                         <span class="nw-pill-sep">&middot;</span>
-                        <span class="nw-pill">{{ $article->source->name ?? __('Source') }}</span>
+                        <span class="nw-pill">{{ $article->displaySourceName() }}</span>
                         <span class="nw-pill-sep">&middot;</span>
                         <span class="nw-pill">{{ $article->pub_date ? format_date($article->pub_date) : '' }}</span>
                         @if($article->category_tag)
@@ -388,7 +388,7 @@
                          « Sources » plus bas (design doc section 7). --}}
                     @unless($isDigest)
                     @if(!empty($primarySources[0]['url'] ?? null))
-                        <p class="nw-provenance">{{ __("D'après") }} <a href="{{ $primarySources[0]['url'] }}" target="_blank" rel="noopener nofollow">{{ $primarySources[0]['label'] ?? __('la source primaire') }}</a>, {{ __('relayé par') }} {{ $article->source?->name ?? __('un média') }}</p>
+                        <p class="nw-provenance">{{ __("D'après") }} <a href="{{ $primarySources[0]['url'] }}" target="_blank" rel="noopener nofollow">{{ $primarySources[0]['label'] ?? __('la source primaire') }}</a>@if($nwRelay = $article->displayRelayName()), {{ __('relayé par') }} {{ $nwRelay }}@endif</p>
                     @endif
                     @endunless
 
@@ -774,12 +774,14 @@
                                 @endif
                             @endforeach
                             @if(! $isGoogleNewsUnresolved)
+                                @if($nwRelayLine = $article->displayRelayName())
                                 <li>
-                                    <a href="{{ $externalUrl }}" target="_blank" rel="noopener">{{ __('Relais média :') }} {{ $article->source?->name ?? __('article original') }} &rarr;</a>
+                                    <a href="{{ $externalUrl }}" target="_blank" rel="noopener">{{ __('Relais média :') }} {{ $nwRelayLine }} &rarr;</a>
                                     @if($article->source?->language === 'en')
                                         &nbsp;·&nbsp;<a href="https://translate.google.com/translate?sl=en&tl=fr&u={{ urlencode($externalUrl) }}" target="_blank" rel="noopener">{{ __('Lire en français') }}</a>
                                     @endif
                                 </li>
+                                @endif
                             @else
                                 <li>{{ __('Relais média :') }} <strong>{{ $article->source?->name ?? __('Google News') }}</strong></li>
                             @endif
@@ -819,7 +821,7 @@
                                         <img src="{{ $related->image_url }}{{ str_contains($related->image_url, 'http') ? '' : '?v='.($related->updated_at?->timestamp ?? time()) }}" alt="{{ $related->seo_title ?? $related->title }}" class="nw-related-img" loading="lazy">
                                     @endif
                                     <div class="nw-related-title">{{ $related->seo_title ?? $related->title }}</div>
-                                    <div class="nw-related-meta">{{ $related->source->name ?? '' }} &middot; {{ $related->pub_date?->diffForHumans() }}</div>
+                                    <div class="nw-related-meta">{{ $related->displaySourceName() }} &middot; {{ $related->pub_date?->diffForHumans() }}</div>
                                 </a>
                             </div>
                             @endforeach

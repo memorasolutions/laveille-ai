@@ -3933,10 +3933,22 @@ declare(strict_types=1);
  *     le texte de partage). Correctif au passage : publish() aurait effacé un résumé composé
  *     (garde hasComposedSummary). Skill /actu2 mis à jour (rédaction par sections, 3 zones
  *     d'hallucination verrouillées, fiches canoniques au format riche).
+ *
+ * 1.189.0 (2026-08-17) - feat(news) : lot « intégration /actu2 complète » (3 demandes fondateur
+ *     du soir). (1) Outils liés : clé related_tool_slugs de news:apply - curation par le cycle,
+ *     résolution contre les outils PUBLIÉS, ajout pur attachAuto (jamais d'écrasement d'une
+ *     sélection admin), slugs inconnus signalés ; flattenStructuredSummary() étendu aux clés
+ *     composées (auto-détection, temps de lecture et wordCount JSON-LD voient tout le corps).
+ *     (2) Clé title : le cycle pose le titre par la porte, slug régénéré par generateUniqueSlug
+ *     (correctif systémique du défaut fiche 33558 publiée avec le slug provisoire du brouillon).
+ *     (3) Provenance : jamais « Soumission manuelle » publiquement - displaySourceName()
+ *     (hôte de la 1re source primaire, sinon X (@handle), sinon « Source directe ») et
+ *     displayRelayName() (relais masqué sans post), alignés sur pastilles, cartes, meta et
+ *     JSON-LD (keywords, author Organization, isBasedOn.publisher). Fiches RSS inchangées.
  */
 
 $lvMajor = 1;
-$lvMinor = 188;
+$lvMinor = 189;
 $lvPatch = 0;
 
 return [

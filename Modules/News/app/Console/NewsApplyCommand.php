@@ -89,7 +89,7 @@ class NewsApplyCommand extends Command
     // ACTION : Richesse v1.188.0 - 'composed_summary' rejoint la liste blanche, même garde-fou.
     // MCP: SELF (<5 lignes)
     // RAISON: design doc, section "Richesse v1.188.0 - structure fixe composée (2026-08-17 soir)".
-    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'seo_title', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve', 'original_post', 'composed_summary'];
+    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'title', 'seo_title', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve', 'original_post', 'composed_summary', 'related_tool_slugs'];
 
     /**
      * Richesse v1.188.0 - sous-clés autorisées de composed_summary (design doc, section
@@ -234,6 +234,24 @@ class NewsApplyCommand extends Command
 
         $updates = [];
 
+        // ACTION : clé title (correctif systémique 2026-08-17 soir) - la fiche 33558 a été publiée
+        // avec le titre/slug provisoires du brouillon car le slug n'est généré qu'à la CRÉATION
+        // (NewsArticle::booted). Le cycle /actu2 décide du titre APRÈS la recherche : cette clé
+        // lui permet de le poser par la porte, slug régénéré par la méthode canonique du modèle
+        // (fiche brouillon garantie par le préflight : aucun churn d'URL publique).
+        // MCP: SELF (bloc court calqué sur seo_title)
+        // RAISON: défaut réel observé en prod (journal, entrée 115) ; jamais deux implémentations
+        //         de la règle de slug.
+        if (array_key_exists('title', $decoded)) {
+            if (! is_string($decoded['title']) || trim($decoded['title']) === '' || mb_strlen($decoded['title']) > 200) {
+                $this->error('title doit être une chaîne non vide de 200 caractères maximum.');
+
+                return self::FAILURE;
+            }
+            $updates['title'] = trim($decoded['title']);
+            $updates['slug'] = NewsArticle::generateUniqueSlug($updates['title'], $article->id);
+        }
+
         if (array_key_exists('seo_title', $decoded)) {
             if (! is_string($decoded['seo_title'])) {
                 $this->error('seo_title doit être une chaîne de caractères.');
@@ -345,8 +363,39 @@ class NewsApplyCommand extends Command
             $updates['structured_summary'] = array_merge(['composed' => true], $normalizedComposed);
         }
 
-        if ($updates === []) {
-            $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs / primary_sources / image_credit / nature_original / niveau_preuve / original_post / composed_summary n\'est fournie.');
+        // ACTION : intégration « Outils liés » (demande fondateur 2026-08-17 soir) - la clé
+        // related_tool_slugs permet au cycle /actu2 de CURATER les outils de l'annuaire liés à la
+        // fiche. C'est un pivot (jamais une colonne de $updates) : résolution par slug contre les
+        // outils PUBLIÉS seulement, ajout PUR via NewsToolSyncAction::attachAuto() (n'écrase
+        // JAMAIS une sélection admin), slugs inconnus signalés explicitement - jamais en silence.
+        // MCP: multi-ai-mcp→qwen3-max (validé + corrigé par le superviseur)
+        // RAISON: l'auto-détection par mots-clés ne voit que les noms exacts ; l'agent, lui,
+        //         sait quels outils sont réellement au coeur de l'actu.
+        $relatedToolSlugs = null;
+        if (array_key_exists('related_tool_slugs', $decoded)) {
+            $value = $decoded['related_tool_slugs'];
+            if (! is_array($value)) {
+                $this->error('related_tool_slugs doit être un tableau de slugs.');
+
+                return self::FAILURE;
+            }
+            if (count($value) > 10) {
+                $this->error('related_tool_slugs dépasse la limite de 10 slugs.');
+
+                return self::FAILURE;
+            }
+            foreach ($value as $slug) {
+                if (! is_string($slug) || trim($slug) === '' || mb_strlen($slug) > 120) {
+                    $this->error('Chaque slug de related_tool_slugs doit être une chaîne non vide de 120 caractères maximum.');
+
+                    return self::FAILURE;
+                }
+            }
+            $relatedToolSlugs = array_values($value);
+        }
+
+        if ($updates === [] && $relatedToolSlugs === null) {
+            $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs / primary_sources / image_credit / nature_original / niveau_preuve / original_post / composed_summary / related_tool_slugs n\'est fournie.');
 
             return self::FAILURE;
         }
@@ -365,25 +414,83 @@ class NewsApplyCommand extends Command
         // une composition plutôt qu'effacée).
         // MCP: SELF (<5 lignes)
         // RAISON: design doc, section "Richesse v1.188.0" - "il le REMPLACE par la version composée".
-        $article->logStructuredSummaryOverride();
-        if (! array_key_exists('structured_summary', $updates)) {
-            $updates['structured_summary'] = null;
+        // ACTION : intégration « Outils liés » - un payload ne portant QUE related_tool_slugs ne
+        // doit ni journaliser un override, ni effacer structured_summary (l'addendum ci-dessus ne
+        // vaut que pour un payload de CONTENU) : tout le bloc écriture est donc gardé.
+        // MCP: SELF (<5 lignes de garde)
+        // RAISON: sans cette garde, une curation d'outils après coup détruirait le résumé composé.
+        if ($updates !== []) {
+            $article->logStructuredSummaryOverride();
+            if (! array_key_exists('structured_summary', $updates)) {
+                $updates['structured_summary'] = null;
+            }
+
+            DB::transaction(function () use ($article, $updates): void {
+                $article->update($updates);
+            });
+
+            Log::channel('composition')->info('news:apply - payload appliqué', [
+                'article_id' => $article->id,
+                'source_hash' => $article->source_content_hash,
+                'prompt_version' => CompositionPromptBuilder::PROMPT_TEMPLATE_VERSION,
+                'keys_applied' => array_keys($updates),
+            ]);
+
+            $this->info("Fiche {$article->id} : payload texte appliqué (".implode(', ', array_keys($updates)).').');
         }
 
-        DB::transaction(function () use ($article, $updates): void {
-            $article->update($updates);
-        });
-
-        Log::channel('composition')->info('news:apply - payload appliqué', [
-            'article_id' => $article->id,
-            'source_hash' => $article->source_content_hash,
-            'prompt_version' => CompositionPromptBuilder::PROMPT_TEMPLATE_VERSION,
-            'keys_applied' => array_keys($updates),
-        ]);
-
-        $this->info("Fiche {$article->id} : payload texte appliqué (".implode(', ', array_keys($updates)).').');
+        if ($relatedToolSlugs !== null) {
+            $this->attachRelatedTools($article, $relatedToolSlugs);
+        }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * ACTION : intégration « Outils liés » - résout les slugs (traduisibles Spatie) contre les
+     * outils PUBLIÉS de l'annuaire et les attache en ajout PUR (source=auto, attachAuto() ne
+     * touche jamais une liaison existante, manuelle ou automatique). Slugs introuvables signalés
+     * explicitement en sortie - jamais un échec (l'auto-détection à la publication complète), et
+     * jamais un silence.
+     * MCP: multi-ai-mcp→qwen3-max (validé + corrigé par le superviseur)
+     * RAISON: demande fondateur 2026-08-17 - « actu2 doit aussi bien intégrer Outils liés ».
+     */
+    private function attachRelatedTools(NewsArticle $article, array $slugs): void
+    {
+        if (! class_exists(\Modules\Directory\Models\Tool::class)) {
+            $this->warn('related_tool_slugs ignoré : le module Directory est désactivé.');
+
+            return;
+        }
+
+        $tools = \Modules\Directory\Models\Tool::published()->get(['id', 'slug', 'name']);
+        $resolvedIds = [];
+        $resolvedNames = [];
+        $unknownSlugs = [];
+
+        foreach ($slugs as $slug) {
+            $match = $tools->first(fn ($tool) => in_array($slug, $tool->getTranslations('slug'), true));
+            if ($match === null) {
+                $unknownSlugs[] = $slug;
+
+                continue;
+            }
+            $resolvedIds[] = (int) $match->id;
+            $resolvedNames[] = $match->getTranslation('name', 'fr_CA', false)
+                ?: $match->getTranslation('name', 'en', false)
+                ?: $slug;
+        }
+
+        if ($unknownSlugs !== []) {
+            $this->warn('related_tool_slugs ignoré(s) - slug(s) introuvable(s) dans l\'annuaire publié : '.implode(', ', $unknownSlugs).'.');
+        }
+
+        if ($resolvedIds !== []) {
+            $attached = app(\Modules\News\Actions\NewsToolSyncAction::class)
+                ->attachAuto($article, collect($resolvedIds));
+            \Modules\News\Actions\NewsToolSyncAction::invalidatePublicCache($article);
+            $this->info("Fiche {$article->id} : {$attached} outil(s) lié(s) (".implode(', ', $resolvedNames).').');
+        }
     }
 
     /**

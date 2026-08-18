@@ -203,7 +203,7 @@ final class JsonLdService
             'IA',
             'Québec',
             'francophone',
-            $article->source->name ?? null,
+            method_exists($article, 'displaySourceName') ? $article->displaySourceName() : ($article->source->name ?? null),
         ])->filter()->unique()->values()->implode(', ');
 
         // #237 P27 : Person canonique via helper lv_jsonld_author_stephane().
@@ -226,10 +226,16 @@ final class JsonLdService
                     ],
                 ],
         ];
-        if (! empty($article->source->name)) {
+        // ACTION : demande fondateur 2026-08-17 - jamais « Soumission manuelle » publiquement ;
+        // displaySourceName() rend la provenance réelle de l'original (hôte de la source
+        // primaire, sinon le compte X). MCP: SELF (<5 lignes). RAISON: journal, entrée 116.
+        $sourceOrgName = method_exists($article, 'displaySourceName')
+            ? $article->displaySourceName()
+            : ($article->source->name ?? '');
+        if (! empty($sourceOrgName)) {
             $authors[] = [
                 '@type' => 'Organization',
-                'name' => $article->source->name,
+                'name' => $sourceOrgName,
             ];
         }
 
@@ -272,7 +278,10 @@ final class JsonLdService
                 'headline' => $article->title ?? null,
                 'publisher' => [
                     '@type' => 'NewsMediaOrganization',
-                    'name' => $article->source->name ?? null,
+                    // Jamais le libellé technique « Soumission manuelle » (fondateur 2026-08-17).
+                    'name' => method_exists($article, 'displaySourceName')
+                        ? $article->displaySourceName()
+                        : ($article->source->name ?? null),
                 ],
             ]];
         }

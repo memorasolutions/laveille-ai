@@ -628,3 +628,103 @@ it('applying --publish writes to the dedicated composition log file', function (
 
     @unlink($logPath);
 });
+
+// ── Clé related_tool_slugs (intégration « Outils liés », 2026-08-17 soir) ──────────────
+
+function nacTool(string $slug): \Modules\Directory\Models\Tool
+{
+    $name = 'Outil nac '.$slug;
+
+    // Tableau associatif (PAS json_encode) pour que Spatie appelle setTranslations() correctement.
+    return \Modules\Directory\Models\Tool::withoutEvents(fn () => \Modules\Directory\Models\Tool::create([
+        'name' => ['fr_CA' => $name, 'en' => $name],
+        'slug' => ['fr_CA' => $slug, 'en' => $slug],
+        'status' => 'published',
+        'pricing' => 'free',
+    ]));
+}
+
+it('related_tool_slugs attache les outils publiés, signale les slugs inconnus et préserve les liaisons manuelles', function () {
+    $sourceText = 'Texte source pour la curation des outils liés.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+        'structured_summary' => ['composed' => true, 'hook' => 'Accroche composée conservée.'],
+    ]);
+
+    $known = nacTool('outil-nac-connu');
+    $manual = nacTool('outil-nac-manuel');
+    $article->tools()->attach($manual->id, ['source' => 'manual']);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'related_tool_slugs' => ['outil-nac-connu', 'slug-inconnu-xyz'],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->expectsOutputToContain('slug-inconnu-xyz')
+        ->assertSuccessful();
+
+    $article = $article->fresh();
+    $pivots = $article->tools()->get()->keyBy('id');
+
+    expect($pivots)->toHaveCount(2)
+        ->and($pivots[$known->id]->pivot->source)->toBe('auto')
+        ->and($pivots[$manual->id]->pivot->source)->toBe('manual')
+        // Un payload outils-seulement ne doit JAMAIS effacer le résumé composé.
+        ->and($article->structured_summary['hook'] ?? null)->toBe('Accroche composée conservée.');
+});
+
+it('related_tool_slugs non-tableau est refusé sans rien lier', function () {
+    $sourceText = 'Texte source refus outils.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'related_tool_slugs' => 'pas-un-tableau',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    expect($article->fresh()->tools()->count())->toBe(0);
+});
+
+// ── Clé title (correctif systémique : titre + slug par la porte, 2026-08-17 soir) ──────
+
+it('la clé title applique le titre et régénère le slug par la méthode canonique', function () {
+    $sourceText = 'Texte source pour le titre.';
+    $article = nacArticle([
+        'title' => 'Fiche créée depuis un lien - à composer',
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'title' => 'Un vrai titre décidé par le cycle',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $article = $article->fresh();
+    expect($article->title)->toBe('Un vrai titre décidé par le cycle')
+        ->and($article->slug)->toStartWith('un-vrai-titre-decide-par-le-cycle');
+});
+
+it('un title vide ou trop long est refusé sans écriture', function () {
+    $sourceText = 'Texte source refus titre.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+    $ancienSlug = $article->slug;
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), ['title' => '   ']));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    expect($article->fresh()->slug)->toBe($ancienSlug);
+});

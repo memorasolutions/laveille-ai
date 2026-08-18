@@ -592,11 +592,37 @@ class NewsArticle extends Model implements Searchable
             return '';
         }
 
-        $keyPoints = is_array($ss['key_points'] ?? null) ? $ss['key_points'] : [];
+        // ACTION : intégration « Outils liés » (2026-08-17 soir) - l'aplatissement couvre AUSSI
+        // les clés du résumé COMPOSÉ v1.188.0 (chiffre-clé, citation, angle QC, action concrète,
+        // repères datés), toutes affichées publiquement : sans elles, l'auto-détection d'outils,
+        // le temps de lecture et le wordCount JSON-LD ignoraient une partie du corps réel.
+        // MCP: multi-ai-mcp→qwen3-max (validé par le superviseur)
+        // RAISON: demande fondateur 2026-08-17 - « actu2 doit aussi bien intégrer Outils liés ».
+        $parts = [];
 
-        return trim(
-            ($ss['hook'] ?? '').' '.implode(' ', $keyPoints).' '.($ss['why_important'] ?? '')
-        );
+        foreach (['hook', 'why_important', 'key_number', 'angle_qc_ca', 'action_concrete'] as $key) {
+            if (is_string($ss[$key] ?? null) && trim($ss[$key]) !== '') {
+                $parts[] = trim($ss[$key]);
+            }
+        }
+
+        foreach (is_array($ss['key_points'] ?? null) ? $ss['key_points'] : [] as $point) {
+            if (is_string($point) && trim($point) !== '') {
+                $parts[] = trim($point);
+            }
+        }
+
+        if (is_string($ss['quote']['text'] ?? null) && trim($ss['quote']['text']) !== '') {
+            $parts[] = trim($ss['quote']['text']);
+        }
+
+        foreach (is_array($ss['reperes_dates'] ?? null) ? $ss['reperes_dates'] : [] as $repere) {
+            if (is_array($repere) && is_string($repere['texte'] ?? null) && trim($repere['texte']) !== '') {
+                $parts[] = trim($repere['texte']);
+            }
+        }
+
+        return trim(implode(' ', $parts));
     }
 
     /**
@@ -655,6 +681,71 @@ class NewsArticle extends Model implements Searchable
         }
 
         return $this->fallbackExcerpt();
+    }
+
+    /**
+     * ACTION : vrai si la fiche provient de la source technique « Soumission manuelle »
+     * (createManualDraft(), URL factice 'manuel://soumission-directe').
+     * MCP: multi-ai-mcp→qwen3-max (validé + corrigé par le superviseur)
+     * RAISON: demande fondateur 2026-08-17 - ce libellé technique ne doit jamais paraître
+     *         publiquement ; les vues affichent la provenance réelle de l'original à la place.
+     */
+    public function isManualSubmission(): bool
+    {
+        return $this->source?->url === 'manuel://soumission-directe';
+    }
+
+    /**
+     * ACTION : nom de source affiché publiquement (pastilles, meta, cartes). Fiche RSS :
+     * comportement inchangé (nom du média). Fiche manuelle : hôte de la première source
+     * primaire (d'où vient l'ORIGINAL), sinon « X (@handle) » du post, sinon « Source directe ».
+     * MCP: multi-ai-mcp→qwen3-max (validé + corrigé par le superviseur : preg_replace au lieu
+     *      du piège ltrim($host, 'www.') qui rognerait « web.dev » en « eb.dev »)
+     * RAISON: demande fondateur 2026-08-17 - « ne pas écrire Soumission manuelle mais plutôt
+     *         d'où vient l'original ».
+     */
+    public function displaySourceName(): string
+    {
+        if (! $this->isManualSubmission()) {
+            return $this->source->name ?? __('Source');
+        }
+
+        $sources = is_array($this->primary_sources) ? $this->primary_sources : [];
+        $url = $sources[0]['url'] ?? null;
+        if (is_string($url) && $url !== '') {
+            $host = parse_url($url, PHP_URL_HOST);
+            if (is_string($host) && $host !== '') {
+                return (string) preg_replace('/^www\./', '', $host);
+            }
+        }
+
+        $post = is_array($this->original_post) ? $this->original_post : [];
+        if (filled($post['handle'] ?? null)) {
+            return 'X ('.$post['handle'].')';
+        }
+
+        return __('Source directe');
+    }
+
+    /**
+     * ACTION : nom du RELAIS (« relayé par », « Relais média »). Fiche RSS : le média,
+     * inchangé. Fiche manuelle : « X (@handle) » si l'entrée est un post, sinon null - la vue
+     * masque alors la mention de relais, jamais le libellé technique.
+     * MCP: multi-ai-mcp→qwen3-max (validé par le superviseur)
+     * RAISON: même demande fondateur 2026-08-17 (journal, entrées 113 et 115).
+     */
+    public function displayRelayName(): ?string
+    {
+        if (! $this->isManualSubmission()) {
+            return $this->source?->name;
+        }
+
+        $post = is_array($this->original_post) ? $this->original_post : [];
+        if (filled($post['handle'] ?? null)) {
+            return 'X ('.$post['handle'].')';
+        }
+
+        return null;
     }
 
     /**

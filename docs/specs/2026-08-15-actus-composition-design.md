@@ -847,7 +847,7 @@ de la méthode.
   `composed:true`) : anciens libellés, ancien format de citation (chaîne), aucun des nouveaux
   libellés composés jamais visible.
 
-### Limite documentée, non corrigée dans ce mandat (hors périmètre explicite)
+### Limite documentée, non corrigée dans ce mandat (hors périmètre explicite) - LEVÉE le 2026-08-17 soir, voir la section « Outils liés » ci-dessous
 
 `NewsArticle::flattenStructuredSummary()` (utilisée par `hasExploitableSummary()`, le garde-fou
 anti-corps-vide de `PublicNewsController::show()`) ne lit que `hook`/`key_points`/`why_important`
@@ -858,3 +858,62 @@ même si elle porte un contenu composé réel. Risque jugé faible en pratique (
 modifié ici pour ne pas changer le calcul du temps de lecture/`wordCount` JSON-LD des fiches
 machine existantes sans mandat explicite ni suite de tests exécutée pour le vérifier - à trancher
 par le propriétaire si ce cas se présente réellement.
+
+
+## Outils liés - curation par la porte bornée (2026-08-17 soir, demande fondateur)
+
+Demande : « actu2 doit aussi bien intégrer 🔗 Outils liés (admin) ». État des lieux mesuré en prod
+avant d'agir : l'auto-détection à la publication (NewsArticleObserver → AutoDetectNewsToolsJob →
+NewsToolSyncAction::suggest/attachAuto) FONCTIONNE (fiche 33548 : « Claude » lié source=auto,
+file news-tools vide, zéro échec) ; la fiche 33486 n'a aucun outil (aucun nom d'outil de
+l'annuaire dans son texte - zéro légitime). Le manque réel : le cycle /actu2 ne pouvait pas
+CURATER les outils, et l'aplatissement ignorait les clés composées.
+
+Trois changements livrés :
+
+1. **`related_tool_slugs` dans la liste blanche de `news:apply --payload`** (10 slugs maximum,
+   chaînes non vides ≤ 120 caractères). Résolution serveur par slug traduisible (toutes locales)
+   contre les outils PUBLIÉS seulement ; attache en ajout PUR via `attachAuto()` (source=auto,
+   n'écrase jamais une sélection admin) + invalidation ciblée du cache public ; slugs introuvables
+   SIGNALÉS en sortie (warn) sans échec - jamais silencieux. Un payload ne portant QUE
+   `related_tool_slugs` est un payload valide qui n'efface PAS `structured_summary` (le bloc
+   écriture/override est gardé par `$updates !== []`) - sans cette garde, une curation d'outils
+   après coup aurait détruit le résumé composé.
+2. **`flattenStructuredSummary()` étendu aux clés composées** (`key_number`, `quote.text`,
+   `angle_qc_ca`, `action_concrete`, `reperes_dates[].texte`) - lève la limite documentée
+   ci-dessus (mandat explicite du fondateur + suite complète exécutée). Améliore du même coup
+   l'auto-détection d'outils, le temps de lecture et le `wordCount` JSON-LD des fiches composées.
+3. **Skill `/actu2` mis à jour** : contrat (section 2), étape 5 (curation délibérée, jamais
+   l'exhaustivité - l'auto-détection complète à la publication ; droit d'omission : champ absent
+   si aucun outil au coeur de l'actu) et rapport final (outils envoyés/attachés/introuvables, ou
+   « aucun outil » énoncé comme conclusion).
+
+Tests : 2 nouveaux dans NewsApplyCommandTest (attache + préservation manuelle + non-effacement du
+composé + slug inconnu signalé ; refus non-tableau). Module News : 412 verts.
+
+
+## Lot v1.189.0 - title par la porte + provenance affichée (2026-08-17 soir, demandes fondateur)
+
+**Clé `title` dans `news:apply --payload`** (correctif systémique) : la fiche 33558 a été publiée
+avec le titre/slug provisoires du brouillon - le slug n'est généré qu'à la CRÉATION
+(NewsArticle::booted) et le cycle /actu2 décide du titre APRÈS la recherche. La clé `title`
+(chaîne non vide ≤ 200) applique le titre ET régénère le slug via generateUniqueSlug()
+(fiche brouillon garantie par le préflight - aucun churn d'URL publique). Réparation ponctuelle
+de la 33558 faite par one-shot journalisé le soir même. Skill /actu2 mis à jour : `title`
+obligatoire dans le payload pour une fiche créée sans --title.
+
+**Provenance affichée - jamais « Soumission manuelle »** (demande : « Ne pas écrire Soumission
+manuelle mais plutôt d'où vient l'original ») : deux méthodes DRY sur NewsArticle -
+`displaySourceName()` (pastilles/meta/cartes/JSON-LD : fiche RSS inchangée ; fiche manuelle =
+hôte de la 1re source primaire sans www (piège ltrim évité par preg_replace), sinon
+« X (@handle) », sinon « Source directe ») et `displayRelayName()` (« relayé par »/« Relais » :
+« X (@handle) » si post, sinon null = mention masquée). Consommateurs alignés : show.blade.php
+(pastille, provenance, relais, cartes connexes, meta llm), article-card.blade.php,
+JsonLdService (keywords, author Organization, isBasedOn.publisher - trouvé par rendu réel,
+pas par grep). Tests : +4 dans Actu2PublicRenderTest (11/11), +2 title dans
+NewsApplyCommandTest (35/35).
+
+**Améliorations notées au passage** : énumération nature_original sans valeur adaptée à une
+conférence universitaire (candidat : contenu_educatif) ; récolte X peut persister la carte du
+lien du post au lieu du post lui-même (33558 : paires fact abandonnées au profit de
+primary_fact vérifiés au navigateur - à fiabiliser).

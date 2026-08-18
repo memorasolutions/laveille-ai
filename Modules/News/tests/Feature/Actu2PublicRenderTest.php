@@ -151,3 +151,76 @@ it('never renders the niveau_preuve badge when the field is absent', function ()
     // on vise l'ÉLÉMENT rendu (le <p> du badge), pas le nom de classe seul.
     $response->assertOk()->assertDontSee('<p class="nw-niveau-preuve">', false);
 });
+
+// ── Provenance affichée : jamais « Soumission manuelle » (demande fondateur 2026-08-17) ──
+
+function a2rManualSource(): NewsSource
+{
+    return NewsSource::firstOrCreate(
+        ['url' => 'manuel://soumission-directe'],
+        ['name' => 'Soumission manuelle', 'language' => 'fr', 'active' => false]
+    );
+}
+
+it('une fiche manuelle affiche l\'hôte de la source primaire, jamais « Soumission manuelle »', function () {
+    $source = a2rManualSource();
+    $article = a2rArticle($source->id, 'provenance-hote-primaire', [
+        'url' => 'https://x.com/jtremblay/status/999888777',
+        'structured_summary' => ['hook' => 'Accroche provenance.'],
+        'primary_sources' => [['label' => 'La page officielle', 'url' => 'https://www.claude.com/annonce']],
+        'original_post' => [
+            'text' => 'Texte du post relais.',
+            'author' => 'Jeanne Tremblay',
+            'handle' => '@jtremblay',
+            'date' => '17 août 2026',
+            'url' => 'https://x.com/jtremblay/status/999888777',
+        ],
+    ]);
+
+    $response = $this->get(route('news.show', $article));
+
+    $response->assertOk()
+        ->assertSee('claude.com')
+        ->assertSee('Relais média :')
+        ->assertSee('X (@jtremblay)')
+        ->assertDontSee('Soumission manuelle');
+});
+
+it('une fiche manuelle sans source primaire ni post affiche « Source directe » et masque le relais', function () {
+    $source = a2rManualSource();
+    $article = a2rArticle($source->id, 'provenance-source-directe', [
+        'url' => 'https://exemple-direct.com/annonce',
+        'structured_summary' => ['hook' => 'Accroche directe.'],
+    ]);
+
+    $response = $this->get(route('news.show', $article));
+
+    $response->assertOk()
+        ->assertSee('Source directe')
+        ->assertDontSee('Soumission manuelle')
+        ->assertDontSee('Relais média :');
+});
+
+it('une fiche RSS classique garde le nom de son média partout (comportement inchangé)', function () {
+    $source = a2rSource();
+    $article = a2rArticle($source->id, 'provenance-rss-inchangee', [
+        'structured_summary' => ['hook' => 'Accroche RSS.'],
+        'primary_sources' => [['label' => 'Annonce officielle', 'url' => 'https://www.officiel.com/annonce']],
+    ]);
+
+    $response = $this->get(route('news.show', $article));
+
+    $response->assertOk()
+        ->assertSee('Source rendu /actu2')
+        ->assertSee('relayé par');
+});
+
+it('le piège ltrim est évité : un hôte comme web.dev n\'est jamais rogné', function () {
+    $source = a2rManualSource();
+    $article = a2rArticle($source->id, 'provenance-web-dev', [
+        'url' => 'https://x.com/jtremblay/status/777666555',
+        'primary_sources' => [['label' => 'Le guide', 'url' => 'https://web.dev/articles/guide']],
+    ]);
+
+    expect($article->displaySourceName())->toBe('web.dev');
+});

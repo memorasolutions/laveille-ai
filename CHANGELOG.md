@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.189.0] - 2026-08-17
+
+### Ajouté
+- **Outils liés par le cycle /actu2 (module News).** Clé `related_tool_slugs` de la porte bornée `news:apply` : l'agent cure les outils de l'annuaire réellement au coeur de l'actu (résolution par slug contre les outils publiés, ajout pur qui n'écrase jamais une sélection admin, slugs introuvables signalés en sortie - jamais en silence). `flattenStructuredSummary()` étendu aux clés composées (chiffre-clé, citation, angle Québec, action concrète, repères datés) : l'auto-détection d'outils, le temps de lecture et le `wordCount` JSON-LD voient désormais tout le corps des fiches riches.
+- **Clé `title` de `news:apply`** : le cycle /actu2 pose le titre décidé après recherche, slug régénéré par la méthode canonique du modèle - correctif systémique du défaut observé en prod (fiche publiée avec le titre/slug provisoires du brouillon).
+- **Provenance affichée au lieu de « Soumission manuelle » (demande fondateur).** Fiches manuelles : la pastille de source (et cartes, meta, JSON-LD - y compris `isBasedOn.publisher`) affiche l'hôte de la première source primaire (« claude.com », « youtube.com »...), la mention de relais devient « X (@handle) » quand l'entrée est un post et disparaît sinon. Fiches RSS strictement inchangées.
+
+### Vérifié
+- 64 tests ciblés du lot verts (porte, rendu public, SEO) ; suite complète exécutée : 6 158 verts, 118 échecs dont 116 hérités prouvés préexistants sur arbre vierge (dette antérieure au lot, consignée) et 2 corrigés dans le lot.
+
 ## [1.188.0] - 2026-08-17
 
 ### Ajouté

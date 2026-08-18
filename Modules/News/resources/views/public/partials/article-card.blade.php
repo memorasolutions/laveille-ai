@@ -179,7 +179,7 @@
             </p>
             <div class="nw-meta">
                 <span class="nw-source-pill">{{ $readMinutes }} min</span>
-                <span class="nw-source-pill">{{ $article->source->name ?? __('Source') }}</span>
+                <span class="nw-source-pill">{{ $article->displaySourceName() }}</span>
                 <span class="nw-date">
                     {{ $article->pub_date?->diffForHumans() }}
                     @if($score)
