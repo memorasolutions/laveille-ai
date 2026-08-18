@@ -224,3 +224,18 @@ it('le piège ltrim est évité : un hôte comme web.dev n\'est jamais rogné', 
 
     expect($article->displaySourceName())->toBe('web.dev');
 });
+
+// ── versionedImageUrl() : cache-bust centralisé (DRY, 2026-08-18) ──────────────────────
+
+it('versionedImageUrl ajoute ?v=updated_at à une image locale, laisse une URL http intacte, null si vide', function () {
+    $source = a2rSource();
+
+    $locale = a2rArticle($source->id, 'vimg-locale', ['image_url' => '/storage/news/images/999.webp']);
+    expect($locale->versionedImageUrl())->toBe('/storage/news/images/999.webp?v='.$locale->updated_at->timestamp);
+
+    $externe = a2rArticle($source->id, 'vimg-http', ['image_url' => 'https://exemple.com/photo.jpg']);
+    expect($externe->versionedImageUrl())->toBe('https://exemple.com/photo.jpg');
+
+    $vide = a2rArticle($source->id, 'vimg-vide', ['image_url' => null]);
+    expect($vide->versionedImageUrl())->toBeNull();
+});

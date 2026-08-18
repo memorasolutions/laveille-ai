@@ -113,7 +113,7 @@
                         <div class="wpo-breacking-item{{ $loop->first ? ' s1' : '' }}">
                             <div class="wpo-breacking-img">
                                 @if($newsItem->image_url)
-                                    <img src="{{ $newsItem->image_url }}" alt="{{ $newsItem->seo_title ?? $newsItem->title }}" loading="lazy">
+                                    <img src="{{ $newsItem->versionedImageUrl() }}" alt="{{ $newsItem->seo_title ?? $newsItem->title }}" loading="lazy">
                                 @else
                                     <div style="background: linear-gradient(135deg, #1a2332 0%, #064E5A 100%); display: flex; align-items: center; justify-content: center; width: 80px; height: 80px; border-radius: 8px; color: rgba(255,255,255,0.3); font-weight: 700; font-size: 1.25rem;">
                                         {{ mb_strtoupper(mb_substr($newsItem->category_tag ?? 'N', 0, 2)) }}
@@ -291,7 +291,7 @@
                         <a href="{{ route('news.show', $newsItem) }}" class="hp-card">
                             <div class="hp-card-img" style="{{ $newsItem->image_url ? '' : 'background: linear-gradient(135deg, #1a2332, #064E5A);' }}">
                                 @if($newsItem->image_url)
-                                    <img src="{{ $newsItem->image_url }}" alt="{{ $newsItem->seo_title ?? $newsItem->title }}" loading="lazy">
+                                    <img src="{{ $newsItem->versionedImageUrl() }}" alt="{{ $newsItem->seo_title ?? $newsItem->title }}" loading="lazy">
                                 @else
                                     <div class="hp-card-img-gradient">
                                         <span class="hp-card-img-text">{{ mb_strtoupper(mb_substr($newsItem->category_tag ?? 'IA', 0, 2)) }}</span>

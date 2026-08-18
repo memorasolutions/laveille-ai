@@ -416,7 +416,7 @@
                     @endauth
 
                     @if($article->image_url)
-                        <img src="{{ $article->image_url }}{{ str_contains($article->image_url, 'http') ? '' : '?v='.($article->updated_at?->timestamp ?? time()) }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-hero{{ !empty($article->image_credit) ? ' nw-hero-has-credit' : '' }}" loading="lazy">
+                        <img src="{{ $article->versionedImageUrl() }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-hero{{ !empty($article->image_credit) ? ' nw-hero-has-credit' : '' }}" loading="lazy">
                         {{-- Bonification panel 2026-08-17 (soir) : photo créditée plutôt qu'une
                              illustration - crédit discret sous l'image principale, jamais affiché
                              si absent (aucune fiche antérieure n'en porte). --}}
@@ -818,7 +818,7 @@
                             <div class="nw-related-card">
                                 <a href="{{ route('news.show', $related) }}">
                                     @if($related->image_url)
-                                        <img src="{{ $related->image_url }}{{ str_contains($related->image_url, 'http') ? '' : '?v='.($related->updated_at?->timestamp ?? time()) }}" alt="{{ $related->seo_title ?? $related->title }}" class="nw-related-img" loading="lazy">
+                                        <img src="{{ $related->versionedImageUrl() }}" alt="{{ $related->seo_title ?? $related->title }}" class="nw-related-img" loading="lazy">
                                     @endif
                                     <div class="nw-related-title">{{ $related->seo_title ?? $related->title }}</div>
                                     <div class="nw-related-meta">{{ $related->displaySourceName() }} &middot; {{ $related->pub_date?->diffForHumans() }}</div>

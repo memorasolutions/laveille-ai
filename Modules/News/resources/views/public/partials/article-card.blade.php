@@ -130,7 +130,8 @@
                 </span>
             @endif
             @if($article->image_url)
-                <img src="{{ $article->image_url }}{{ str_contains($article->image_url, 'http') ? '' : '?v='.($article->updated_at?->timestamp ?? time()) }}"
+                {{-- Cache-bust centralisé : NewsArticle::versionedImageUrl() (DRY, 2026-08-18). --}}
+                <img src="{{ $article->versionedImageUrl() }}"
                      alt="{{ $article->seo_title ?? $article->title }}"
                      class="nw-card-img" loading="lazy">
             @else

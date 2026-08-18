@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.190.2] - 2026-08-18
+
+### Corrigé
+- **Images de fiches périmées dans le widget « Dernières actualités » de l'accueil** : ce widget rendait `image_url` SANS le suffixe de cache-bust `?v={updated_at}` présent partout ailleurs - après le remplacement d'une image (même chemin), les navigateurs et le CDN servaient l'ancienne pendant un an (max-age immuable). La photo restaurée de la fiche Stanford restait donc la vieille vignette sur la page d'accueil. Cause racine : le cache-bust était DUPLIQUÉ à la main dans chaque vue et oublié dans ce widget.
+
+### Modifié
+- **Cache-bust d'image centralisé (DRY)** : nouveau `NewsArticle::versionedImageUrl()`, source unique rappelée par toutes les vues qui rendent l'image d'une fiche (héros, cartes, connexes, les deux widgets de l'accueil) - la logique recopiée à la main est éliminée, ce type d'oubli ne peut plus se reproduire.
+
 ## [1.190.1] - 2026-08-18
 
 ### Corrigé

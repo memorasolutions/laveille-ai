@@ -699,6 +699,30 @@ class NewsArticle extends Model implements Searchable
     }
 
     /**
+     * ACTION : URL d'image AVEC cache-bust `?v={updated_at}` - source UNIQUE (DRY) à rappeler
+     * dans TOUTE vue qui rend l'image d'une fiche (héros, cartes, widgets d'accueil). Sans ce
+     * suffixe, remplacer une image (même chemin) laissait les navigateurs/CDN servir l'ancienne
+     * pendant un an (max-age immuable) - incident 2026-08-18 : la photo restaurée de la fiche
+     * 33558 restait la vieille vignette dans le widget « Dernières actualités » de l'accueil,
+     * seul endroit qui rendait image_url sans version. Retourne null si aucune image ; laisse
+     * une URL http externe intacte (jamais de version ajoutée à un domaine tiers).
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: demande fondateur 2026-08-18 - « problème d'images encore » ; élimine la
+     *         duplication du cache-bust recopié à la main dans article-card et le héros.
+     */
+    public function versionedImageUrl(): ?string
+    {
+        if (blank($this->image_url)) {
+            return null;
+        }
+        if (str_contains($this->image_url, 'http')) {
+            return $this->image_url;
+        }
+
+        return $this->image_url.'?v='.($this->updated_at?->timestamp ?? time());
+    }
+
+    /**
      * ACTION : entités nommées de la fiche (index des connexes par entités partagées).
      * MCP: hermes→deepseek-v4-flash (validé par le superviseur)
      * RAISON: arbitrage panel 2026-08-17 - curation par la porte bornée (clé entities).
