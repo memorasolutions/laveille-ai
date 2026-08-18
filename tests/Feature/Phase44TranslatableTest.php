@@ -119,10 +119,11 @@ it('factory creates translatable model correctly', function () {
 // --- Locale switcher ---
 
 it('locale route changes session locale', function () {
+    // LocaleController normalise 'fr' vers 'fr_CA' (localeMap) avant de l'écrire en session.
     $this->post(route('locale.switch', 'fr'))
         ->assertRedirect();
 
-    expect(session('locale'))->toBe('fr');
+    expect(session('locale'))->toBe('fr_CA');
 
     $this->post(route('locale.switch', 'en'))
         ->assertRedirect();

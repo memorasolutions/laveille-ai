@@ -17,6 +17,11 @@ use Spatie\Permission\Models\Role;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    // Module Team desactive (modules_statuses.json) - tests reactives avec le module.
+    if (! (\Nwidart\Modules\Facades\Module::find('Team')?->isEnabled())) {
+        $this->markTestSkipped('Module Team désactivé (modules_statuses.json) - tests réactivés avec le module.');
+    }
+
     $this->seed(\Modules\RolesPermissions\Database\Seeders\RolesPermissionsDatabaseSeeder::class);
     $this->admin = User::factory()->create();
     $this->admin->assignRole(Role::findByName('super_admin', 'web'));

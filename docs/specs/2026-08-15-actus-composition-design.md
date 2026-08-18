@@ -917,3 +917,32 @@ NewsApplyCommandTest (35/35).
 conférence universitaire (candidat : contenu_educatif) ; récolte X peut persister la carte du
 lien du post au lieu du post lui-même (33558 : paires fact abandonnées au profit de
 primary_fact vérifiés au navigateur - à fiabiliser).
+
+
+## Lot v1.190.0 - entités + assainissement de la dette de tests héritée (2026-08-18)
+
+**Connexes par ENTITÉS partagées (amélioration 4, arbitrage panel 2026-08-17)** : table
+`news_article_entities` (slug normalisé indexé, unique par fiche), clé `entities` de
+`news:apply --payload` (10 libellés max, remplacement complet via `syncEntities()`),
+`NewsArticle::relatedFor()` = point d'entrée UNIQUE des connexes (entités partagées classées par
+recouvrement puis fraîcheur - `joinSub` agrégé, jamais de groupBy sur `news_articles.*` -, repli
+catégorie pour compléter). L'auto-liaison glossaire de l'amélioration 4 était DÉJÀ en place
+(liens de glossaire visibles dans les sections composées - vérifié sur la fiche 33671). Skill
+/actu2 : clé `entities` documentée (entités CENTRALES, droit d'omission), fiches canoniques
+ajustées (bloc « Curation »). Tests : 3 nouveaux (sync + remplacement, refus, priorité des
+connexes). Module News : 421 verts.
+
+**Dette héritée : 107 échecs → 0** (triage sous-agent vérifié + 2 lots) :
+- 84 skips PROPRES : conditionnels au statut du module (Team/SaaS/Testimonials - se réactivent
+  avec le module) ou documentés « écran refondu - arbitrage produit en attente » (ancien
+  dashboard utilisateur, 9 tests - décision à prendre : resurfacer Mes articles/notifications ?).
+- 4 correctifs de CODE DE PRODUCTION : (1) `AnalyticsService` - DATEDIFF non portable (SQLite) ;
+  (2) `CacheablePurgeObserver` - `UrlGenerationException` non catchée (slug vide plantait le
+  saved()) ; (3) **`TranslationService::getLocales()` - fr_CA.json est un SYMLINK vers fr.json :
+  `addKey()` écrasait la traduction française avec une valeur vide à travers le lien à CHAQUE
+  ajout de clé par l'écran admin - bug destructeur de données réel en prod, corrigé par
+  dédoublonnage realpath** ; (4) sidebar admin - lien Onboarding enfermé dans le gate SaaS alors
+  que sa route ne l'est pas.
+- 19 assertions adaptées au comportement ACTUEL voulu (ucfirst, fr→fr_CA, magic link auto-création,
+  PWA désactivée, recherche par sections, dashboard public par conception, commentaires =
+  modèle Community et suppression DOUCE, newsletter template+Brevo fake, locale fr).

@@ -49,10 +49,14 @@ it('send link creates token and redirects to verify', function () {
     $this->assertDatabaseHas('magic_login_tokens', ['email' => $user->email]);
 });
 
-it('send link validates email exists', function () {
+it('send link auto-crée un compte pour un courriel inconnu', function () {
+    // MagicLinkController::sendLink() auto-crée désormais le compte (comportement voulu,
+    // cf. commentaire dans le contrôleur) au lieu de rejeter l'e-mail comme inexistant.
     $response = $this->post(route('magic-link.send'), ['email' => 'nonexistent@test.com']);
 
-    $response->assertSessionHasErrors('email');
+    $response->assertRedirect(route('magic-link.verify', ['email' => 'nonexistent@test.com']));
+    $this->assertDatabaseHas('users', ['email' => 'nonexistent@test.com']);
+    $this->assertDatabaseHas('magic_login_tokens', ['email' => 'nonexistent@test.com']);
 });
 
 // --- Magic Link Verify ---

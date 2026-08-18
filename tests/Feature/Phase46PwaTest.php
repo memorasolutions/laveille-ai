@@ -42,12 +42,17 @@ it('service-worker.js exists', function () {
     expect(file_exists(public_path('service-worker.js')))->toBeTrue();
 });
 
-it('service-worker.js contains cache and fetch logic', function () {
+it('service-worker.js est désactivé et nettoie les caches existants', function () {
+    // Le service worker a été volontairement désactivé (public/service-worker.js) :
+    // il ne fait plus de cache/fetch offline, il désinstalle les anciens caches des
+    // visiteurs qui avaient encore l'ancien SW enregistré. Ce test reste un témoin
+    // du choix produit plutôt qu'une vérification de logique offline.
     $content = file_get_contents(public_path('service-worker.js'));
 
-    expect($content)->toContain('CACHE_NAME')
-        ->and($content)->toContain("addEventListener('fetch'")
-        ->and($content)->toContain('offline.html');
+    expect($content)->toContain('désactivé')
+        ->and($content)->toContain("addEventListener('activate'")
+        ->and($content)->toContain('caches.delete')
+        ->and($content)->toContain('unregister');
 });
 
 it('PWA icons exist', function () {

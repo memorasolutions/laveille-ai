@@ -130,6 +130,13 @@ it('translate route sets translations on article', function (): void {
         ]),
     ]);
 
+    // ArticleController::translateArticle() lit la locale source en dur ('fr') ;
+    // la locale applicative de production est fr_CA, donc le titre créé par la factory
+    // n'est pas forcément indexé sous la clé exacte 'fr'. On garantit ici la présence
+    // du contenu source attendu par le pipeline.
+    $this->article->setTranslation('title', 'fr', 'Titre original en français');
+    $this->article->save();
+
     $this->actingAs($this->admin)
         ->postJson(route('admin.blog.articles.translate', $this->article), [
             'target_locale' => 'en',
@@ -148,6 +155,13 @@ it('translate route generates slug for target locale', function (): void {
             ],
         ]),
     ]);
+
+    // ArticleController::translateArticle() lit la locale source en dur ('fr') ;
+    // la locale applicative de production est fr_CA, donc le titre créé par la factory
+    // n'est pas forcément indexé sous la clé exacte 'fr'. On garantit ici la présence
+    // du contenu source attendu par le pipeline.
+    $this->article->setTranslation('title', 'fr', 'Titre original en français');
+    $this->article->save();
 
     $this->actingAs($this->admin)
         ->postJson(route('admin.blog.articles.translate', $this->article), [

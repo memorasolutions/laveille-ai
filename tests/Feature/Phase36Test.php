@@ -114,9 +114,14 @@ test('magic link service cleanup deletes expired tokens', function () {
     expect($deleted)->toBeGreaterThan(0);
 });
 
-test('send magic link validates email exists', function () {
+test('send magic link auto-crée un compte pour un courriel inconnu', function () {
+    // MagicLinkController::sendLink() auto-crée désormais le compte (comportement voulu,
+    // cf. commentaire dans le contrôleur) au lieu de rejeter l'e-mail comme inexistant.
     $this->post('/magic-link', ['email' => 'nonexistent@test.com'])
-        ->assertSessionHasErrors('email');
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('users', ['email' => 'nonexistent@test.com']);
+    $this->assertDatabaseHas('magic_login_tokens', ['email' => 'nonexistent@test.com']);
 });
 
 test('send magic link succeeds for valid user', function () {

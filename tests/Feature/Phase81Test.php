@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Modules\Newsletter\Models\Campaign;
 use Modules\Newsletter\Models\Subscriber;
 use Modules\RolesPermissions\Database\Seeders\RolesAndPermissionsSeeder;
@@ -71,9 +72,11 @@ it('campaigns create page loads', function () {
 });
 
 it('stores a campaign as draft', function () {
+    // CampaignController::store exige désormais le champ template (in: modern|minimal|dark).
     $this->post(route('admin.newsletter.campaigns.store'), [
         'subject' => 'Ma première campagne',
         'content' => 'Bonjour à tous !',
+        'template' => 'modern',
     ])->assertRedirect();
 
     expect(Campaign::where('subject', 'Ma première campagne')->where('status', 'draft')->exists())
@@ -81,6 +84,13 @@ it('stores a campaign as draft', function () {
 });
 
 it('sends a draft campaign', function () {
+    // BrevoService::isConfigured() exige une clé API ; on configure une clé factice
+    // et on intercepte tout appel HTTP réel vers Brevo (aucun envoi véritable).
+    config(['services.brevo.api_key' => 'test-key']);
+    Http::fake([
+        'api.brevo.com/*' => Http::response(['messageId' => 'test-message-id'], 201),
+    ]);
+
     $campaign = Campaign::factory()->create(['status' => 'draft']);
     Subscriber::factory()->count(2)->create(['confirmed_at' => now()]);
 

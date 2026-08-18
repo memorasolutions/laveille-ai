@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Modules\Newsletter\Models\Campaign;
 use Modules\Newsletter\Models\Subscriber;
@@ -52,10 +53,12 @@ it('admin peut créer une campagne', function () {
     $admin = User::factory()->create();
     $admin->assignRole(Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']));
 
+    // CampaignController::store exige désormais le champ template (in: modern|minimal|dark).
     $this->actingAs($admin)
         ->post('/admin/newsletter/campaigns', [
             'subject' => 'Sujet test',
             'content' => 'Contenu test',
+            'template' => 'modern',
         ])
         ->assertRedirect();
 
@@ -64,6 +67,13 @@ it('admin peut créer une campagne', function () {
 
 it('admin peut envoyer une campagne', function () {
     Notification::fake();
+
+    // BrevoService::isConfigured() exige une clé API ; on configure une clé factice
+    // et on intercepte tout appel HTTP réel vers Brevo (aucun envoi véritable).
+    config(['services.brevo.api_key' => 'test-key']);
+    Http::fake([
+        'api.brevo.com/*' => Http::response(['messageId' => 'test-message-id'], 201),
+    ]);
 
     $admin = User::factory()->create();
     $admin->assignRole(Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']));

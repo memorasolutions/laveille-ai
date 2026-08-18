@@ -15,6 +15,11 @@ use Illuminate\Support\Facades\Route;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    // Module SaaS desactive (modules_statuses.json) - tests reactives avec le module.
+    if (! (\Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled())) {
+        $this->markTestSkipped('Module SaaS désactivé (modules_statuses.json) - tests réactivés avec le module.');
+    }
+
     $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
     $this->admin = User::factory()->create();
     $this->admin->assignRole('super_admin');

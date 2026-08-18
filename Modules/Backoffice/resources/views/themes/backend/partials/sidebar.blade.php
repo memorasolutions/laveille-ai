@@ -379,11 +379,13 @@
                         <li class="nav-item"><a href="{{ route('admin.tenants.index') }}" class="nav-link {{ request()->routeIs('admin.tenants.*') ? 'active' : '' }}" {{ request()->routeIs('admin.tenants.*') ? 'aria-current=page' : '' }}>{{ __('Tenants') }}</a></li>
                         @endcan
                         @endif
+                        @endif
+                        {{-- Onboarding : la route n'est PAS gardée par le module SaaS - le lien
+                             ne doit pas l'être non plus (triage tests hérités 2026-08-18, gr. 16). --}}
                         @if(Route::has('admin.onboarding-steps.index'))
                         @can('view_onboarding')
                         <li class="nav-item"><a href="{{ route('admin.onboarding-steps.index') }}" class="nav-link {{ request()->routeIs('admin.onboarding-steps.*') ? 'active' : '' }}" {{ request()->routeIs('admin.onboarding-steps.*') ? 'aria-current=page' : '' }}>{{ __('Onboarding') }}</a></li>
                         @endcan
-                        @endif
                         @endif
                         {{-- Réservations --}}
                         @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('Booking') && \Nwidart\Modules\Facades\Module::isEnabled('Booking'))

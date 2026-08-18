@@ -110,14 +110,11 @@ class PublicNewsController extends Controller
                 ->orderBy('pub_date', 'asc')
                 ->first();
 
-        // Articles connexes (même catégorie)
-        $relatedArticles = NewsArticle::published()
-            ->where('category_tag', $article->category_tag)
-            ->where('id', '!=', $article->id)
-            ->with('source')
-            ->orderBy('pub_date', 'desc')
-            ->limit(3)
-            ->get();
+        // ACTION : articles connexes par ENTITÉS partagées d'abord (arbitrage panel 2026-08-17),
+        // repli catégorie pour compléter - point d'entrée unique NewsArticle::relatedFor() (DRY).
+        // MCP: SELF (<5 lignes)
+        // RAISON: connexes réellement pertinents sans modération.
+        $relatedArticles = NewsArticle::relatedFor($article, 3);
 
         return view('news::public.show', compact('article', 'previousArticle', 'nextArticle', 'relatedArticles'));
     }

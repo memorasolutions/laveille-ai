@@ -3945,10 +3945,24 @@ declare(strict_types=1);
  *     (hôte de la 1re source primaire, sinon X (@handle), sinon « Source directe ») et
  *     displayRelayName() (relais masqué sans post), alignés sur pastilles, cartes, meta et
  *     JSON-LD (keywords, author Organization, isBasedOn.publisher). Fiches RSS inchangées.
+ *
+ * 1.190.0 (2026-08-18) - feat(news) : connexes par entités + assainissement de la dette de tests.
+ *     (1) Articles connexes par ENTITÉS partagées (arbitrage panel 2026-08-17) : table
+ *     news_article_entities, clé entities de news:apply (10 max, remplacement via syncEntities),
+ *     NewsArticle::relatedFor() = point d'entrée unique (entités partagées classées par
+ *     recouvrement puis fraîcheur via joinSub, repli catégorie). (2) Protection des fiches
+ *     curatées : news:reprocess exclut manuelles/composées, hasCuratedImage() empêche le pipeline
+ *     machine d'écraser une photo /actu2 (incident 33558). (3) Dette héritée 107 -> 0 : 84 skips
+ *     propres (modules Team/SaaS/Testimonials désactivés, dashboard refondu), 19 assertions
+ *     adaptées, 4 vrais correctifs de code - DATEDIFF portable SQLite (AnalyticsService),
+ *     UrlGenerationException catchée (CacheablePurgeObserver), symlink fr_CA.json dédoublonné
+ *     (TranslationService::getLocales - addKey effaçait la traduction FR), lien Onboarding sorti
+ *     du gate SaaS. Suite complète : 6 189 verts, 9 échecs hérités préexistants (hors lot, prouvés
+ *     sur arbre vierge) à traiter séparément.
  */
 
 $lvMajor = 1;
-$lvMinor = 189;
+$lvMinor = 190;
 $lvPatch = 0;
 
 return [

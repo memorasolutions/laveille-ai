@@ -103,12 +103,15 @@ test('SearchService searchNavbar retourne users articles settings', function () 
         ->toHaveKeys(['users', 'articles', 'settings']);
 });
 
-test('SearchService searchFront retourne articles pages total', function () {
+test('SearchService searchFront retourne sections et total', function () {
+    // SearchService::searchFront() retourne désormais ['sections' => ..., 'total' => ...]
+    // (une section par modèle enregistré dans SearchRegistry, plus un compte global).
     $service = app(SearchService::class);
     $results = $service->searchFront('test');
 
     expect($results)->toBeArray()
-        ->toHaveKeys(['articles', 'pages', 'total'])
+        ->toHaveKeys(['sections', 'total'])
+        ->and($results['sections'])->toBeArray()
         ->and($results['total'])->toBeInt();
 });
 

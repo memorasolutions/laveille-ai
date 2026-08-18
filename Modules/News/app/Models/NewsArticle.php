@@ -6,8 +6,11 @@ namespace Modules\News\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Modules\Community\Traits\HasComments;
@@ -681,6 +684,120 @@ class NewsArticle extends Model implements Searchable
         }
 
         return $this->fallbackExcerpt();
+    }
+
+    /**
+     * ACTION : vrai si l'image de la fiche a été posée par CURATION (porte news:apply --image,
+     * toujours accompagnée d'un crédit) - le pipeline machine ne doit JAMAIS la régénérer.
+     * MCP: SELF (<5 lignes)
+     * RAISON: incident 2026-08-18 - news:reprocess a écrasé la photo générée de la fiche 33558
+     *         par la vignette de marque, 20 minutes après sa publication.
+     */
+    public function hasCuratedImage(): bool
+    {
+        return filled($this->image_credit);
+    }
+
+    /**
+     * ACTION : entités nommées de la fiche (index des connexes par entités partagées).
+     * MCP: hermes→deepseek-v4-flash (validé par le superviseur)
+     * RAISON: arbitrage panel 2026-08-17 - curation par la porte bornée (clé entities).
+     */
+    public function entities(): HasMany
+    {
+        return $this->hasMany(NewsArticleEntity::class);
+    }
+
+    /**
+     * ACTION : REMPLACE les entités de la fiche par la liste fournie (normalisation slug,
+     * dédoublonnage) - la curation du cycle /actu2 est la source de vérité.
+     * MCP: hermes→deepseek-v4-flash (validé par le superviseur)
+     */
+    public function syncEntities(array $labels): void
+    {
+        $normalized = [];
+
+        foreach ($labels as $label) {
+            $trimmed = trim((string) $label);
+            $slug = Str::slug($trimmed);
+
+            if ($trimmed === '' || $slug === '') {
+                continue;
+            }
+
+            $normalized[$slug] = [
+                'entity_slug' => $slug,
+                'entity_label' => $trimmed,
+            ];
+        }
+
+        if ($normalized === []) {
+            return;
+        }
+
+        DB::transaction(function () use ($normalized): void {
+            $this->entities()->delete();
+            $this->entities()->createMany(array_values($normalized));
+        });
+    }
+
+    /**
+     * ACTION : connexes par ENTITÉS partagées - fiches publiées classées par nombre d'entités
+     * communes puis fraîcheur. Sous-requête agrégée joinSub (jamais de groupBy sur
+     * news_articles.*, incompatible ONLY_FULL_GROUP_BY).
+     * MCP: hermes→deepseek-v4-flash (2e passe, squelette imposé par le superviseur)
+     * RAISON: arbitrage panel 2026-08-17 (idée neuve claude.ai retenue).
+     */
+    public function relatedByEntities(int $limit = 3): EloquentCollection
+    {
+        $slugs = $this->entities()->pluck('entity_slug');
+
+        if ($slugs->isEmpty()) {
+            return new EloquentCollection();
+        }
+
+        $counts = NewsArticleEntity::query()
+            ->select('news_article_id', DB::raw('COUNT(*) as shared_entities'))
+            ->whereIn('entity_slug', $slugs)
+            ->where('news_article_id', '!=', $this->id)
+            ->groupBy('news_article_id');
+
+        return static::published()
+            ->joinSub($counts, 'se', function ($join) {
+                $join->on('news_articles.id', '=', 'se.news_article_id');
+            })
+            ->select('news_articles.*', 'se.shared_entities')
+            ->orderByDesc('se.shared_entities')
+            ->orderByDesc('news_articles.pub_date')
+            ->limit($limit)
+            ->with('source')
+            ->get();
+    }
+
+    /**
+     * ACTION : point d'entrée UNIQUE des articles connexes (DRY) - entités partagées d'abord,
+     * repli sur la catégorie pour compléter jusqu'à la limite.
+     * MCP: hermes→deepseek-v4-flash (validé par le superviseur)
+     */
+    public static function relatedFor(self $article, int $limit = 3): EloquentCollection
+    {
+        $related = $article->relatedByEntities($limit);
+
+        if ($related->count() >= $limit) {
+            return $related;
+        }
+
+        $excluded = array_merge($related->pluck('id')->all(), [$article->id]);
+
+        $complement = static::published()
+            ->where('category_tag', $article->category_tag)
+            ->whereNotIn('id', $excluded)
+            ->orderByDesc('pub_date')
+            ->limit($limit - $related->count())
+            ->with('source')
+            ->get();
+
+        return new EloquentCollection($related->concat($complement)->all());
     }
 
     /**

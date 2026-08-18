@@ -21,6 +21,11 @@ use Modules\Team\Services\TeamService;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    // Module Team desactive (modules_statuses.json) - tests reactives avec le module.
+    if (! (\Nwidart\Modules\Facades\Module::find('Team')?->isEnabled())) {
+        $this->markTestSkipped('Module Team désactivé (modules_statuses.json) - tests réactivés avec le module.');
+    }
+
     app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     $this->seed(RolesAndPermissionsSeeder::class);
     Notification::fake();

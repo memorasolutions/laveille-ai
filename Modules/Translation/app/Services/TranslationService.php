@@ -17,8 +17,15 @@ class TranslationService
 {
     public function getLocales(): array
     {
+        // ACTION : dédoublonner les fichiers qui pointent vers la MÊME cible (realpath) -
+        // lang/fr_CA.json est un lien symbolique vers fr.json (migration Québec 2026-03) ;
+        // sans cette garde, addKey() écrivait fr puis ÉCRASAIT fr.json avec la valeur vide
+        // de fr_CA à travers le symlink (perte de la traduction française à chaque ajout).
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: triage des tests hérités 2026-08-18, groupe 11 - vrai bug destructeur en prod.
         return collect(File::files(lang_path()))
             ->filter(fn ($file) => $file->getExtension() === 'json')
+            ->unique(fn ($file) => $file->getRealPath() ?: $file->getPathname())
             ->map(fn ($file) => $file->getFilenameWithoutExtension())
             ->values()
             ->all();

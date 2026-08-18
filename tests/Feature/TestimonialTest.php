@@ -14,6 +14,13 @@ use Modules\Testimonials\Models\Testimonial;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function () {
+    // Module Testimonials desactive (modules_statuses.json) - tests reactives avec le module.
+    if (! (\Nwidart\Modules\Facades\Module::find('Testimonials')?->isEnabled())) {
+        $this->markTestSkipped('Module Testimonials désactivé (modules_statuses.json) - tests réactivés avec le module.');
+    }
+});
+
 // --- Modèle ---
 
 it('crée un témoignage avec les champs requis', function () {

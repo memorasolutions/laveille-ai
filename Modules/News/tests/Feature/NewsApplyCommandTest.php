@@ -728,3 +728,76 @@ it('un title vide ou trop long est refusé sans écriture', function () {
 
     expect($article->fresh()->slug)->toBe($ancienSlug);
 });
+
+// ── Clé entities (connexes par entités partagées, 2026-08-18) ──────────────────────────
+
+it('la clé entities enregistre les entités normalisées et remplace les précédentes', function () {
+    $sourceText = 'Texte source pour les entités.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+    $article->syncEntities(['Ancienne Entité']);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'entities' => ['Université d\'Arizona', 'ChatGPT', 'ChatGPT'],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $slugs = $article->fresh()->entities()->pluck('entity_slug')->sort()->values()->all();
+    expect($slugs)->toBe(['chatgpt', 'universite-darizona']);
+});
+
+it('entities non-tableau ou trop nombreux est refusé sans écriture', function () {
+    $sourceText = 'Texte source refus entités.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), ['entities' => 'pas-un-tableau']));
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])->assertFailed();
+
+    $payload2 = nacPayloadFile(array_merge(nacFreshMeta($article), ['entities' => array_fill(0, 11, 'Entité')]));
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload2])->assertFailed();
+
+    expect($article->fresh()->entities()->count())->toBe(0);
+});
+
+it('les articles connexes priorisent les entités partagées puis complètent par la catégorie', function () {
+    $a = nacArticle(['is_published' => true, 'category_tag' => 'ia-generative']);
+    // Réutiliser la même source (nacSource crée une URL fixe, unique en base).
+    $clone = function (array $overrides) use ($a) {
+        static $i = 0;
+        $i++;
+        $suffix = 'rel-'.$i.'-'.uniqid();
+
+        return \Modules\News\Models\NewsArticle::create(array_merge([
+            'news_source_id' => $a->news_source_id,
+            'title' => "Article connexe {$suffix}",
+            'guid' => "guid-{$suffix}",
+            'url' => "https://exemple.com/{$suffix}",
+            'description' => '',
+            'summary' => 'Résumé connexe.',
+            'slug' => "article-{$suffix}",
+            'pub_date' => now()->subDay(),
+            'is_published' => true,
+            'seo_status' => 'index',
+        ], $overrides));
+    };
+    $memeEntites = $clone(['category_tag' => 'autre-categorie', 'pub_date' => now()->subDays(9)]);
+    $memeCategorie = $clone(['category_tag' => 'ia-generative', 'pub_date' => now()->subDays(2)]);
+    $horsTout = $clone(['category_tag' => 'zzz', 'pub_date' => now()]);
+
+    $a->syncEntities(['Anthropic', 'Claude Code']);
+    $memeEntites->syncEntities(['Anthropic', 'Claude Code']);
+    $horsTout->syncEntities(['Mistral']);
+
+    $related = \Modules\News\Models\NewsArticle::relatedFor($a->fresh(), 3);
+
+    expect($related->first()->id)->toBe($memeEntites->id)
+        ->and($related->pluck('id')->all())->toContain($memeCategorie->id)
+        ->and($related->pluck('id')->all())->not->toContain($horsTout->id);
+});

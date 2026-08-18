@@ -103,6 +103,11 @@ test('Observer generates excerpt on published article with auto_summary enabled'
     Setting::set('ai.openrouter_api_key', 'test-key');
     Setting::set('ai.auto_summary', true);
 
+    // L'observateur écrit sous app()->getLocale() ; la locale applicative de production
+    // est francophone (fr_CA en environnement réel), on force 'fr' pour que la clé lue
+    // par le test corresponde à celle réellement écrite.
+    config(['app.locale' => 'fr']);
+
     $article = Article::factory()->published()->create(['excerpt' => null]);
     $article->refresh();
 
@@ -122,6 +127,10 @@ test('Observer skips excerpt if auto_summary setting disabled', function () {
 
 test('Observer skips excerpt if excerpt already exists', function () {
     Setting::set('ai.auto_summary', true);
+
+    // La factory écrit sous app()->getLocale() ; on force 'fr' pour que la clé lue
+    // par le test corresponde à celle réellement écrite (locale applicative francophone).
+    config(['app.locale' => 'fr']);
 
     $article = Article::factory()->published()->create(['excerpt' => 'Existing excerpt']);
     $article->refresh();

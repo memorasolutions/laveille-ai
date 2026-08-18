@@ -99,10 +99,13 @@ test('articles table renders with bulk actions', function () {
 });
 
 test('articles bulk delete works', function () {
+    // executeBulkAction() exige la permission delete_articles (abort_if 403 si absente).
+    $admin = User::factory()->create();
+    $admin->assignRole('super_admin');
     $user = User::factory()->create();
     $article = Article::factory()->create(['user_id' => $user->id]);
 
-    Livewire::test(ArticlesTable::class)
+    Livewire::actingAs($admin)->test(ArticlesTable::class)
         ->set('selected', [(int) $article->id])
         ->set('bulkAction', 'delete')
         ->call('executeBulkAction');
@@ -118,16 +121,27 @@ test('comments table renders with bulk actions', function () {
 });
 
 test('comments bulk delete works', function () {
+    // Comportement ACTUEL : l'admin CommentsTable gère les commentaires COMMUNITY
+    // (Modules\Community\Models\Comment, polymorphes), plus l'ancien modèle Blog\Comment -
+    // le test hérité créait un commentaire du mauvais système (triage 2026-08-18, gr. 10).
+    $admin = User::factory()->create();
+    $admin->assignRole('super_admin');
     $user = User::factory()->create();
     $article = Article::factory()->create(['user_id' => $user->id]);
-    $comment = Comment::factory()->create(['article_id' => $article->id, 'user_id' => $user->id]);
+    $comment = \Modules\Community\Models\Comment::create([
+        'commentable_type' => Article::class,
+        'commentable_id' => $article->id,
+        'user_id' => $user->id,
+        'content' => 'Commentaire de test bulk delete.',
+        'status' => 'approved',
+    ]);
 
-    Livewire::test(CommentsTable::class)
+    Livewire::actingAs($admin)->test(CommentsTable::class)
         ->set('selected', [(int) $comment->id])
         ->set('bulkAction', 'delete')
         ->call('executeBulkAction');
 
-    expect(Comment::withTrashed()->find($comment->id))->toBeNull();
+    expect(\Modules\Community\Models\Comment::find($comment->id))->toBeNull();
 });
 
 test('bulk action without selection does not execute', function () {

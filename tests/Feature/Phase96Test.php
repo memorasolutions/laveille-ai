@@ -50,9 +50,10 @@ it('la page affiche Aucune activité si aucune entrée', function () {
 it('la page affiche les activités de l utilisateur courant', function () {
     activity()->causedBy($this->user)->log('action-test-user');
 
+    // La vue applique ucfirst() sur la description (défaut du match dans activity/index.blade.php).
     $this->actingAs($this->user)
         ->get('/user/activity')
-        ->assertSee('action-test-user');
+        ->assertSee(ucfirst('action-test-user'));
 });
 
 it('la page n affiche pas les activités d un autre utilisateur', function () {
@@ -75,9 +76,10 @@ it('la page affiche le log_name de l activité', function () {
 it('la page affiche la description de l activité', function () {
     activity()->causedBy($this->user)->log('connexion-depuis-chrome');
 
+    // La vue applique ucfirst() sur la description (défaut du match dans activity/index.blade.php).
     $this->actingAs($this->user)
         ->get('/user/activity')
-        ->assertSee('connexion-depuis-chrome');
+        ->assertSee(ucfirst('connexion-depuis-chrome'));
 });
 
 it('plusieurs activités de l utilisateur sont affichées', function () {
@@ -85,9 +87,10 @@ it('plusieurs activités de l utilisateur sont affichées', function () {
     activity()->causedBy($this->user)->log('action-deux');
     activity()->causedBy($this->user)->log('action-trois');
 
+    // La vue applique ucfirst() sur la description (défaut du match dans activity/index.blade.php).
     $this->actingAs($this->user)
         ->get('/user/activity')
-        ->assertSee('action-une')
-        ->assertSee('action-deux')
-        ->assertSee('action-trois');
+        ->assertSee(ucfirst('action-une'))
+        ->assertSee(ucfirst('action-deux'))
+        ->assertSee(ucfirst('action-trois'));
 });

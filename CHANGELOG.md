@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.190.0] - 2026-08-18
+
+### Ajouté
+- **Articles connexes par ENTITÉS partagées (module News, arbitrage panel 2026-08-17).** Nouvelle table `news_article_entities` (slug normalisé indexé, unique par fiche) et clé `entities` de la porte `news:apply` : le cycle /actu2 cure les entités nommées centrales d'une fiche (entreprises, modèles, personnes, lois - 10 maximum, remplacement complet). `NewsArticle::relatedFor()` devient le point d'entrée UNIQUE des connexes : les fiches partageant le plus d'entités remontent (classées par recouvrement puis fraîcheur), avec repli sur la catégorie pour compléter.
+- **Protection des fiches curatées contre le pipeline machine.** `news:reprocess` exclut désormais les fiches manuelles et composées de sa sélection, et `hasCuratedImage()` empêche toute régénération d'une image posée avec crédit par la porte - correctif de l'incident où la photo générée d'une fiche /actu2 était écrasée par la vignette de marque 20 minutes après publication.
+
+### Corrigé
+- **Bug destructeur de traductions** : `lang/fr_CA.json` étant un lien symbolique vers `fr.json`, `TranslationService::addKey()` écrasait la traduction française avec une valeur vide à chaque ajout de clé par l'écran admin - `getLocales()` dédoublonne maintenant par chemin réel.
+- **`AnalyticsService`** : expression de durée portable par pilote (SQLite n'a pas `DATEDIFF`) - la page admin des statistiques ne tombe plus en 500.
+- **`CacheablePurgeObserver`** : `UrlGenerationException` (slug encore vide au `saved()`) désormais captée, ne fait plus échouer l'enregistrement.
+- **Sidebar admin** : le lien Onboarding, dont la route n'est pas gardée par le module SaaS, n'est plus enfermé à tort dans le bloc conditionnel SaaS.
+
+### Vérifié
+- Suite complète : 6 189 tests verts, 0 régression introduite par ce lot (les 9 échecs restants sont des tests hérités préexistants, prouvés sur arbre vierge, hors du périmètre - à traiter séparément). Dette héritée du lot triée passée de 107 à 0 (84 skips conditionnels au statut de module ou documentés « écran refondu », 19 assertions adaptées au comportement actuel, 4 correctifs de code de production).
+
 ## [1.189.0] - 2026-08-17
 
 ### Ajouté

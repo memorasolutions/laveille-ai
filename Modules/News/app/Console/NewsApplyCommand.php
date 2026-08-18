@@ -89,7 +89,7 @@ class NewsApplyCommand extends Command
     // ACTION : Richesse v1.188.0 - 'composed_summary' rejoint la liste blanche, même garde-fou.
     // MCP: SELF (<5 lignes)
     // RAISON: design doc, section "Richesse v1.188.0 - structure fixe composée (2026-08-17 soir)".
-    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'title', 'seo_title', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve', 'original_post', 'composed_summary', 'related_tool_slugs'];
+    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'title', 'seo_title', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve', 'original_post', 'composed_summary', 'related_tool_slugs', 'entities'];
 
     /**
      * Richesse v1.188.0 - sous-clés autorisées de composed_summary (design doc, section
@@ -394,7 +394,35 @@ class NewsApplyCommand extends Command
             $relatedToolSlugs = array_values($value);
         }
 
-        if ($updates === [] && $relatedToolSlugs === null) {
+        // ACTION : clé entities (connexes par entités partagées, arbitrage panel 2026-08-17) -
+        // curation des entités nommées CENTRALES de la fiche par le cycle /actu2. Pivot, jamais
+        // une colonne de $updates ; remplacement complet via syncEntities() (normalisation slug).
+        // MCP: hermes→deepseek-v4-flash (validé + adapté par le superviseur)
+        // RAISON: connexes réellement pertinents sans modération, sans NER machine.
+        $entities = null;
+        if (array_key_exists('entities', $decoded)) {
+            $value = $decoded['entities'];
+            if (! is_array($value)) {
+                $this->error('entities doit être un tableau de libellés.');
+
+                return self::FAILURE;
+            }
+            if (count($value) > 10) {
+                $this->error('entities dépasse la limite de 10 entités.');
+
+                return self::FAILURE;
+            }
+            foreach ($value as $item) {
+                if (! is_string($item) || trim($item) === '' || mb_strlen($item) > 120) {
+                    $this->error('Chaque entité doit être une chaîne non vide de 120 caractères maximum.');
+
+                    return self::FAILURE;
+                }
+            }
+            $entities = array_values($value);
+        }
+
+        if ($updates === [] && $relatedToolSlugs === null && $entities === null) {
             $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs / primary_sources / image_credit / nature_original / niveau_preuve / original_post / composed_summary / related_tool_slugs n\'est fournie.');
 
             return self::FAILURE;
@@ -441,6 +469,11 @@ class NewsApplyCommand extends Command
 
         if ($relatedToolSlugs !== null) {
             $this->attachRelatedTools($article, $relatedToolSlugs);
+        }
+
+        if ($entities !== null) {
+            $article->syncEntities($entities);
+            $this->info("Fiche {$article->id} : ".$article->entities()->count().' entité(s) enregistrée(s).');
         }
 
         return self::SUCCESS;

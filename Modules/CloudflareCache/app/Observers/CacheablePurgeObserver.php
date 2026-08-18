@@ -57,8 +57,10 @@ class CacheablePurgeObserver
 
                 $url = route($routeConfig['name'], $parameters, absolute: true);
                 $urls[] = $url;
-            } catch (\Illuminate\Routing\Exceptions\RouteNotFoundException) {
-                Log::warning('CacheablePurgeObserver: route not found', [
+            } catch (\Illuminate\Routing\Exceptions\RouteNotFoundException|\Illuminate\Routing\Exceptions\UrlGenerationException) {
+                // UrlGenerationException : un modèle au slug encore vide au moment du saved()
+                // ne doit JAMAIS faire échouer l'enregistrement - purge simplement sautée.
+                Log::warning('CacheablePurgeObserver: route not found or URL not generatable', [
                     'model' => $modelClass,
                     'route_name' => $routeConfig['name'],
                 ]);

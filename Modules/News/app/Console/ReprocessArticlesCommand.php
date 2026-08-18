@@ -21,7 +21,17 @@ class ReprocessArticlesCommand extends Command
 
     public function handle(): int
     {
+        // ACTION : le reprocess est un outil du pipeline MACHINE - il ne touche JAMAIS les
+        // fiches de soumission manuelle ni les fiches composées par /actu2 (incident 2026-08-18 :
+        // la photo générée de la fiche 33558 a été écrasée par la vignette de marque).
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: les fiches curatées appartiennent au flux /actu2, jamais au pipeline machine.
         $query = NewsArticle::with('source')
+            ->whereDoesntHave('source', fn ($q) => $q->where('url', 'manuel://soumission-directe'))
+            ->where(function ($q) {
+                $q->whereNull('structured_summary')
+                    ->orWhere('structured_summary', 'not like', '%"composed":true%');
+            })
             ->orderByDesc('id')
             ->limit((int) $this->option('limit'));
 
@@ -74,8 +84,9 @@ class ReprocessArticlesCommand extends Command
 
             $updateData = [];
 
-            // Image : télécharger si disponible
-            if ($extracted['image']) {
+            // Image : télécharger si disponible - JAMAIS par-dessus une image curatée
+            // (posée avec crédit par la porte news:apply --image), défense en profondeur.
+            if ($extracted['image'] && ! $article->hasCuratedImage()) {
                 $newImage = app(NewsImageService::class)->processFromUrl($extracted['image'], $article->id);
                 if ($newImage) {
                     $updateData['image_url'] = $newImage;

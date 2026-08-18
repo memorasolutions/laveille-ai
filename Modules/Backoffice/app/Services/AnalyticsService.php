@@ -450,10 +450,17 @@ class AnalyticsService
             }
 
             // Lifetime moyen (création → expiration ou now si pas d'expiration).
+            // ACTION : expression portable par pilote - DATEDIFF n'existe pas en SQLite (page
+            // admin.stats en 500 sous les tests) ; julianday() couvre SQLite, DATEDIFF le reste.
+            // MCP: SELF (<5 lignes)
+            // RAISON: triage des tests hérités 2026-08-18, groupe 6 - vrai défaut de portabilité.
+            $lifetimeExpr = DB::connection()->getDriverName() === 'sqlite'
+                ? 'AVG(julianday(expires_at) - julianday(created_at)) as avg_days'
+                : 'AVG(DATEDIFF(expires_at, created_at)) as avg_days';
             $lifetimeAvgDays = (int) DB::table('short_urls')
                 ->whereNull('deleted_at')
                 ->whereNotNull('expires_at')
-                ->selectRaw('AVG(DATEDIFF(expires_at, created_at)) as avg_days')
+                ->selectRaw($lifetimeExpr)
                 ->value('avg_days') ?: 0;
 
             return [
