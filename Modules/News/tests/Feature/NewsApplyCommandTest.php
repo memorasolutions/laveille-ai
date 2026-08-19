@@ -801,3 +801,77 @@ it('les articles connexes priorisent les entités partagées puis complètent pa
         ->and($related->pluck('id')->all())->toContain($memeCategorie->id)
         ->and($related->pluck('id')->all())->not->toContain($horsTout->id);
 });
+
+// ── Mode --enrich (chantier enrichissement AdSense, 2026-08-19) : SEULE exception au refus
+// « fiche déjà publiée », réservée à la recomposition de contenu (composed_summary), jamais au
+// titre/slug ni au statut de publication. ─────────────────────────────────────────────────────
+
+it('--enrich applies a composed_summary payload to an already-published article without touching its slug or publication status', function () {
+    $sourceText = 'Texte source pour la recomposition enrichie.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+        'is_published' => true,
+        'published_at' => now()->subDays(30),
+        'structured_summary' => null,
+    ]);
+    $ancienSlug = $article->slug;
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'composed_summary' => ['hook' => 'MARQUEUR-ENRICHISSEMENT-ADSENSE'],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload, '--enrich' => true])
+        ->assertSuccessful();
+
+    $article = $article->fresh();
+    expect($article->structured_summary['composed'] ?? null)->toBeTrue()
+        ->and($article->structured_summary['hook'] ?? null)->toBe('MARQUEUR-ENRICHISSEMENT-ADSENSE')
+        ->and($article->is_published)->toBeTrue()
+        ->and($article->slug)->toBe($ancienSlug);
+});
+
+it('--enrich refuses a payload containing the title key on an already-published article, slug unchanged', function () {
+    $sourceText = 'Texte source pour le refus title en enrich.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+        'is_published' => true,
+        'published_at' => now()->subDays(30),
+    ]);
+    $ancienSlug = $article->slug;
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'title' => 'Titre interdit en mode enrich',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload, '--enrich' => true])
+        ->assertFailed();
+
+    $article = $article->fresh();
+    expect($article->slug)->toBe($ancienSlug)
+        ->and($article->title)->not->toBe('Titre interdit en mode enrich')
+        ->and($article->is_published)->toBeTrue();
+});
+
+it('without --enrich, applying a payload to an already-published article is still refused (non-regression)', function () {
+    $sourceText = 'Texte source pour la non-régression du refus.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+        'is_published' => true,
+        'published_at' => now()->subDays(30),
+    ]);
+    $ancienSlug = $article->slug;
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'composed_summary' => ['hook' => 'NE-DOIT-JAMAIS-ETRE-APPLIQUE'],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    $article = $article->fresh();
+    expect($article->slug)->toBe($ancienSlug)
+        ->and($article->structured_summary)->toBeNull();
+});

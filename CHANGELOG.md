@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.191.1] - 2026-08-19
+
+### Ajouté
+- **Mode `news:apply --enrich`** : recompose richement une fiche DÉJÀ PUBLIÉE (résumé machine mince → contenu structuré /actu2) SANS la dépublier ni changer son slug/URL - pour enrichir les fiches qui rankent (chantier AdSense : transformer les pages à trafic en contenu substantiel, couche propriétaire, sans perdre leur position). Seule exception au refus « fiche publiée » ; la clé `title` y est INTERDITE (le slug d'une page référencée ne doit jamais changer) ; débloque aussi `--image` sur une fiche publiée. Double protection anti-écrasement (hash + updated_at) et override de structured_summary inchangés.
+
 ## [1.191.0] - 2026-08-18
 
 ### Ajouté
