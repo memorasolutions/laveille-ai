@@ -556,6 +556,9 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
     </div>
 
+    {{-- Fiche technique (données propriétaires réelles, omission silencieuse — spec 2026-08-20) --}}
+    <x-directory::tool-spec-table :tool="$tool" />
+
     {{-- TABS --}}
     <div class="rt-tabs">
         <div class="rt-tab-bar">

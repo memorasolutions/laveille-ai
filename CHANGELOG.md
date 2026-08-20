@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.193.0] - 2026-08-20
+
+### Ajouté
+- **Fiche technique dense sur les fiches d'annuaire (gain d'information propriétaire, club des sages 95/100).** Nouveau composant DRY `x-directory::tool-spec-table` qui rend une vraie table HTML sémantique des données RÉELLES déjà en base mais jamais affichées (modèle sous-jacent, multimodal, types de sortie, ce qui distingue l'outil, exclusion des données d'entraînement, nombre de tutoriels), avec omission silencieuse ligne par ligne - rendu hors des onglets Alpine, donc visible des crawlers/moteurs génératifs. Zéro fabrication : n'affiche que des champs réels ; `opt_out_training='unknown'` jamais montré ; `launch_year` non dupliqué.
+- **Commande `news:prune-drafts` (fenêtre glissante SÛRE de la file de composition).** Supprime les vieux brouillons bruts au-delà des 200 plus récents, mais UNIQUEMENT ceux jamais publiés, jamais composés, jamais retirés, jamais relus (4 conditions cumulatives, filtrées en PHP). Backup JSON réversible avant toute suppression (`--restore`), `--dry-run`, `--keep=N`, rotation des 14 derniers backups, planification quotidienne. Ne touche JAMAIS une fiche publiée/enrichie/retirée.
+
+### Modifié
+- **Versioning : miroir sur le forge maison (Pi).** Le dépôt est désormais aussi hébergé sur le Forgejo du Pi (`laveille/la-veille-de-stef-v2`) comme miroir/backup ; `origin` reste GitHub (CI/déploiement), `forge` = Forgejo. Marqueur `.github-maison.json` + CLAUDE.md documentant le double remote.
+
 ## [1.192.1] - 2026-08-20
 
 ### Corrigé

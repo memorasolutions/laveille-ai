@@ -86,6 +86,9 @@ class NewsServiceProvider extends ServiceProvider
             // Chantier AdSense « faible valeur » (2026-08-18) - retrait SEO-sûr et réversible
             // d'un lot de fiches (410 Gone), voir docblock de la classe.
             \Modules\News\Console\RetireArticlesCommand::class,
+            // Fenêtre glissante des brouillons bruts (design doc SPEC-PRUNE-DRAFTS, 2026-08-20) -
+            // purge sûre et réversible du backlog /admin/news/composition, voir docblock.
+            \Modules\News\Console\PruneDraftsCommand::class,
         ]);
     }
 
@@ -103,6 +106,17 @@ class NewsServiceProvider extends ServiceProvider
             // Réversible (flag DB) ; piloté par config('news.seo_prune').
             $schedule->command('news:prune-seo')
                 ->dailyAt('02:10')
+                ->timezone('America/Toronto')
+                ->onOneServer();
+
+            // Purge SÛRE des brouillons bruts QUOTIDIENNE (design doc SPEC-PRUNE-DRAFTS,
+            // 2026-08-20) - fenêtre glissante des 200 brouillons les plus récents ; ne touche
+            // jamais une fiche publiée/composée/retirée/relue (garde-fou absolu, voir docblock de
+            // la classe). Backup horodaté AVANT toute suppression, rotation interne des 14
+            // derniers backups. Idempotente : rien à faire si moins de 200 brouillons bruts
+            // existent. Décalée de 30 minutes après news:prune-seo pour éviter tout chevauchement.
+            $schedule->command('news:prune-drafts')
+                ->dailyAt('02:40')
                 ->timezone('America/Toronto')
                 ->onOneServer();
         });
