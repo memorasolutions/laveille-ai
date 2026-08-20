@@ -366,6 +366,11 @@
                         @endif
                     </div>
 
+                    {{-- Signature éditoriale « Vérifié par la rédaction » (signal humain E-E-A-T,
+                         design doc SPEC-SIGNAL-HUMAIN 2026-08-20) - composant DRY, ne rend rien
+                         tant que la fiche n'a pas reçu de vraie relecture datée. --}}
+                    <x-news::editorial-signature :article="$article" />
+
                     {{-- Sources (points 1 bas de page/4/Sources détaillée) - calculées ici (haut
                          de page) pour la ligne de provenance ci-dessous ET réutilisées telles
                          quelles plus bas pour la section « Sources » détaillée (DRY, aucun

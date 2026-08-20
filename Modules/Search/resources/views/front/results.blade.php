@@ -3,6 +3,12 @@
 
 @section('title', __('Recherche') . ' : ' . $query . ' - ' . config('app.name'))
 @section('meta_description', __('Résultats de recherche pour') . ' « ' . $query . ' » - ' . config('app.name'))
+@if($results['total'] === 0)
+    {{-- Audit AdSense 2026-08-20 : recherche sans résultat - noindex via le helper existant du
+         projet (page_noindex, cf. master.blade.php), même mécanisme que Journal/Tools/Books/
+         Decido/News. Page réversible, aucune donnée touchée, juste la balise robots. --}}
+    @section('page_noindex', true)
+@endif
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [

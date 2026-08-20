@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.192.0] - 2026-08-20
+
+### Ajouté
+- **Signal humain E-E-A-T sur les actualités (module « signature éditoriale »).** Nouveau composant DRY `x-news::editorial-signature` qui affiche « Vérifié par la rédaction de laveille.ai le [date] » sur une fiche, mais UNIQUEMENT si elle a une relecture éditoriale réelle et datée (`reviewed_at`) - jamais une date fabriquée ou dérivée. La porte `news:apply` pose automatiquement `reviewed_at`/`reviewed_by` quand une fiche est composée ou enrichie avec preuve (composed_summary + editorial_proof_pairs). Le JSON-LD des fiches gagne `reviewedBy` et un `dateModified` reflétant la relecture (les clés `author` existantes sont intactes). La page `/methodologie` (réutilisée, pas dupliquée) explique désormais les 3 niveaux de preuve et la vérification à deux couches. Migration additive et réversible (`reviewed_at`, `reviewed_by` nullables). Décision fondée sur un club des sages 5 oracles (noté 93/100).
+
+### Modifié
+- **Assainissement AdSense de tout le site : noindex conditionnel des pages minces (levier « séparer l'inventaire éditorial », club des sages).** Passent en `noindex` tant qu'elles restent sans substance, via le mécanisme `@section('page_noindex')` existant (DRY, réversible, aucune suppression de donnée) : profils membres sans aucune contribution (0 avis + 0 discussion + 0 ressource), fiches d'annuaire minces (sans catégorie ni description substantielle ni avis/tutoriel/capture), comparateur `/annuaire/comparer` sans outils sélectionnés, recherche `/recherche` à 0 résultat, roadmap sans proposition publique. Le sitemap exclut ces pages en cohérence. Les pages riches (fiche annuaire substantielle, profil actif, comparateur par catégorie) restent pleinement indexables.
+
 ## [1.191.2] - 2026-08-20
 
 ### Corrigé

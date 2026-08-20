@@ -451,6 +451,24 @@ class NewsApplyCommand extends Command
             $entities = array_values($value);
         }
 
+        // ACTION : module « signature éditoriale » (signal humain E-E-A-T vérifiable, design doc
+        // SPEC-SIGNAL-HUMAIN, club des sages 93/100, 2026-08-20) - 'reviewed_at'/'reviewed_by'
+        // sont posés CÔTÉ SERVEUR uniquement, jamais exposés dans ALLOWED_PAYLOAD_KEYS : l'agent
+        // ne peut jamais fabriquer sa propre date de relecture. Condition retenue pour « une vraie
+        // relecture » (parmi les options ouvertes par le design doc) : composed_summary ET
+        // editorial_proof_pairs présents ENSEMBLE dans le MÊME payload - une simple correction de
+        // summary ou de primary_sources seule ne constitue pas une relecture substantielle.
+        // Rafraîchi à CHAQUE relecture substantielle (jamais figé à la première application) :
+        // reviewed_at doit refléter la dernière vraie vérification éditoriale, pas la première -
+        // choix explicitement laissé au sous-agent par le design doc, retenu comme le plus sûr
+        // (une fiche ré-enrichie plus tard porte une date de relecture à jour, jamais périmée).
+        // MCP: SELF (<5 lignes)
+        // RAISON: design doc SPEC-SIGNAL-HUMAIN, étape 2 - « poser reviewed_at automatiquement ».
+        if (array_key_exists('composed_summary', $decoded) && array_key_exists('editorial_proof_pairs', $decoded)) {
+            $updates['reviewed_at'] = now('America/Toronto');
+            $updates['reviewed_by'] = 'La rédaction de laveille.ai';
+        }
+
         if ($updates === [] && $relatedToolSlugs === null && $entities === null) {
             $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs / primary_sources / image_credit / nature_original / niveau_preuve / original_post / composed_summary / related_tool_slugs n\'est fournie.');
 

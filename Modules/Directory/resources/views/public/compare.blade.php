@@ -23,7 +23,14 @@
 
 @section('title', $title.' - '.config('app.name'))
 @section('meta_description', __('Comparez les outils IA côte-à-côte selon leur tarification, capacités, intégrations et confidentialité.'))
-@section('meta_robots', $count >= 2 ? 'index, follow' : 'noindex, follow')
+@if(! $category && $count < 2)
+    {{-- Audit AdSense 2026-08-20 : la section 'meta_robots' ci-dessous n'était consommée nulle
+         part (master.blade.php ne teste que 'page_noindex') - variante sans outils sélectionnés
+         (« Aucun outil sélectionné ») réellement retirée de l'index via le helper existant.
+         La variante /annuaire/comparer/{categorySlug} garde du contenu fixe (catégorie) : elle
+         reste indexable même avec moins de 2 outils dans la catégorie. --}}
+    @section('page_noindex', true)
+@endif
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Comparateur')])

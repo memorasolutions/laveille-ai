@@ -2,6 +2,11 @@
 @extends(fronttheme_layout())
 
 @section('title', $user->name . ' - ' . config('app.name'))
+@if($isThinProfile ?? false)
+    {{-- Audit AdSense 2026-08-20 : profil sans avis/discussion/ressource approuvés - retiré de
+         l'index tant qu'il reste sans activité réelle (réversible, aucune donnée touchée). --}}
+    @section('page_noindex', true)
+@endif
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $user->name])

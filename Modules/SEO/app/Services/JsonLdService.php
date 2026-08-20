@@ -256,6 +256,22 @@ final class JsonLdService
             ],
         ];
 
+        // ACTION : module « signature éditoriale » (signal humain E-E-A-T vérifiable, design doc
+        // SPEC-SIGNAL-HUMAIN, club des sages 93/100, 2026-08-20) - reviewedBy s'AJOUTE au schema,
+        // il ne remplace JAMAIS author[0]/author[1] ci-dessus (test NewsSeoEnrichedTest intact).
+        // dateModified reflète alors la date de relecture RÉELLE (plus proche de la réalité
+        // éditoriale que le simple updated_at technique de la ligne) quand une vraie relecture a
+        // eu lieu ; sinon dateModified garde sa valeur d'origine, inchangée.
+        // MCP: SELF (<5 lignes)
+        // RAISON: design doc SPEC-SIGNAL-HUMAIN, étape 4.
+        if (method_exists($article, 'hasEditorialReview') && $article->hasEditorialReview()) {
+            $data['dateModified'] = $article->reviewed_at->toIso8601String();
+            $data['reviewedBy'] = [
+                '@type' => 'Organization',
+                'name' => $article->reviewerLabel(),
+            ];
+        }
+
         if ($article->category_tag ?? null) {
             $data['articleSection'] = (string) $article->category_tag;
         }

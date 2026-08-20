@@ -1,6 +1,11 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('roadmap::layouts.public')
 @section('title', __('Propositions de la communauté') . ' - ' . config('app.name'))
+@if($boards->sum('ideas_count') === 0)
+    {{-- Audit AdSense 2026-08-20 : aucune proposition publique réelle sur aucun tableau public -
+         noindex via le helper existant (page_noindex). Réversible dès la première proposition. --}}
+    @section('page_noindex', true)
+@endif
 
 @section('roadmap-content')
     <div style="text-align:center;margin-bottom:32px;">

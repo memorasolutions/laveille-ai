@@ -128,6 +128,16 @@ class NewsArticle extends Model implements Searchable
         // MCP: SELF (<5 lignes)
         // RAISON: design doc du chantier, section retrait 410.
         'retired_at',
+        // ACTION : module « signature éditoriale » (signal humain E-E-A-T vérifiable, design doc
+        // SPEC-SIGNAL-HUMAIN, club des sages 93/100, 2026-08-20) - 'reviewed_at'/'reviewed_by'
+        // sont fillable pour permettre l'écriture SERVEUR depuis NewsApplyCommand (jamais depuis
+        // un payload agent : ces deux clés sont volontairement ABSENTES de
+        // NewsApplyCommand::ALLOWED_PAYLOAD_KEYS, l'agent ne peut jamais fabriquer sa propre date
+        // de relecture).
+        // MCP: SELF (<5 lignes)
+        // RAISON: design doc SPEC-SIGNAL-HUMAIN, étape 1.
+        'reviewed_at',
+        'reviewed_by',
     ];
 
     protected $casts = [
@@ -147,6 +157,7 @@ class NewsArticle extends Model implements Searchable
         'primary_sources' => 'array',
         'original_post' => 'array',
         'retired_at' => 'datetime',
+        'reviewed_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -956,6 +967,35 @@ class NewsArticle extends Model implements Searchable
         }
 
         return null;
+    }
+
+    /**
+     * ACTION : module « signature éditoriale » (design doc SPEC-SIGNAL-HUMAIN, 2026-08-20) - vrai
+     * si la fiche a reçu une relecture éditoriale RÉELLE et datée (jamais dérivée). Seul écrivain
+     * de 'reviewed_at' : Modules\News\Console\NewsApplyCommand (porte bornée), jamais une saisie
+     * libre. Gate unique du composant x-news::editorial-signature et du reviewedBy JSON-LD.
+     * MCP: SELF (<5 lignes)
+     * RAISON: design doc, section « Décision de conception » - une date de relecture sans vraie
+     * relecture est trompeuse et se retourne contre le site.
+     */
+    public function hasEditorialReview(): bool
+    {
+        return ! is_null($this->reviewed_at);
+    }
+
+    /**
+     * ACTION : module « signature éditoriale » (même design doc) - libellé de qui a relu.
+     * 'reviewed_by' vide (cas normal, la porte ne pose que 'reviewed_at') retombe sur le libellé
+     * applicatif de la rédaction - jamais un nom de journaliste tiers, jamais l'auteur de la
+     * source externe (retiré volontairement de la byline, arbitrage du panel éditorial
+     * 2026-08-17). Chaîne traduisible, cohérente avec le reste des mentions « laveille.ai » déjà
+     * écrites en toutes lettres ailleurs sur le site public (ex. public/gone.blade.php).
+     * MCP: SELF (<5 lignes)
+     * RAISON: design doc, section 3 - « la signature affiche "la rédaction de laveille.ai" ».
+     */
+    public function reviewerLabel(): string
+    {
+        return $this->reviewed_by ?: __('La rédaction de laveille.ai');
     }
 
     /**

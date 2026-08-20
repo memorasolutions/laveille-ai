@@ -28,6 +28,13 @@ class ProfileController extends Controller
                 + (int) DB::table('directory_resources')->where('user_id', $user->id)->sum('upvotes'),
         ];
 
-        return view('directory::public.profile', compact('user', 'levelInfo', 'badges', 'stats'));
+        // ACTION: critère d'activité réelle pour noindex conditionnel (audit AdSense 2026-08-20).
+        // Un profil sans aucune contribution approuvée (avis/discussion/ressource) est une coquille
+        // vide pour l'indexation - la donnée du membre n'est pas touchée, seule la balise robots.
+        // MCP: SELF (<5 lignes, simple somme des compteurs déjà calculés)
+        // RAISON: DRY avec page_noindex (cf. master.blade.php), aucune requête supplémentaire.
+        $isThinProfile = ($stats['reviews'] + $stats['discussions'] + $stats['resources']) === 0;
+
+        return view('directory::public.profile', compact('user', 'levelInfo', 'badges', 'stats', 'isThinProfile'));
     }
 }

@@ -3,6 +3,11 @@
 
 @section('title', $tool->name . ' - ' . __('Répertoire techno') . ' - ' . config('app.name'))
 @section('meta_description', safe_excerpt($tool->short_description ?? strip_tags($tool->description), 160))
+@if($isThinTool ?? false)
+    {{-- Audit AdSense 2026-08-20 : fiche sans catégorie, sans description substantielle, sans
+         avis/tutoriel/screenshot - retirée de l'index tant qu'elle reste mince (réversible). --}}
+    @section('page_noindex', true)
+@endif
 @section('og_type', 'article')
 @if($tool->screenshot)
     @section('og_image', str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.($tool->updated_at?->timestamp ?? '0'))

@@ -27,6 +27,18 @@ use Modules\Settings\Facades\Settings;
 
 class PublicDirectoryController extends Controller
 {
+    /**
+     * Longueur minimale (caractères) sous laquelle la description « en bref » est considérée
+     * comme un fragment plutôt qu'un vrai résumé - audit AdSense « contenu de faible valeur »,
+     * spec 2026-08-20. Seuil de jugement (aucune convention existante trouvée dans le projet
+     * pour ce champ) : une phrase courte réelle dépasse largement 40 caractères (ex. seeder
+     * DirectorySession127ToolsSeeder : 60-90 caractères par outil).
+     * Public : réutilisé tel quel par Modules/SEO/app/Http/Controllers/SitemapController.php
+     * pour que le sitemap exclue exactement les mêmes fiches minces que le noindex (DRY, une
+     * seule source de vérité pour ce seuil).
+     */
+    public const THIN_SHORT_DESCRIPTION_MAX_LENGTH = 40;
+
     public function index(Request $request): View
     {
         // 2026-05-05 #137 : cache outils archived par defaut (S43 cleanup HN/blog/video crawler errone).
@@ -242,7 +254,22 @@ class PublicDirectoryController extends Controller
             ? (int) (@getimagesize(public_path($screenshotMasterRelative))[1] ?? 630)
             : 630;
 
-        return view('directory::public.show', compact('tool', 'similarTools', 'resources', 'relatedCollections', 'toolNewsArticles', 'hasMoreNews', 'hasScreenshotMaster', 'screenshotMasterUrl', 'screenshotMasterHeight'));
+        // ACTION: critère de « substance » pour noindex conditionnel (audit AdSense 2026-08-20,
+        // fiches longue traîne minces). Une fiche RESTE indexable dès qu'UN seul signal de
+        // richesse réelle est présent (catégorie assignée, description « en bref » substantielle,
+        // avis, tutoriel ou screenshot approuvé) - seule l'intersection de tous les signaux
+        // absents déclenche le noindex.
+        // MCP: SELF (<5 lignes utiles, simples comptages sur relations déjà chargées/filtrées)
+        // RAISON: aucune donnée modifiée, seulement la balise robots au rendu (DRY avec
+        // page_noindex, cf. Modules/FrontTheme/resources/views/layouts/master.blade.php).
+        $shortDescriptionLength = mb_strlen(trim(strip_tags((string) ($tool->short_description ?? ''))));
+        $isThinTool = $tool->categories->isEmpty()
+            && $shortDescriptionLength < self::THIN_SHORT_DESCRIPTION_MAX_LENGTH
+            && $tool->reviews()->approved()->count() === 0
+            && $resources->count() === 0
+            && $tool->screenshots()->approved()->count() === 0;
+
+        return view('directory::public.show', compact('tool', 'similarTools', 'resources', 'relatedCollections', 'toolNewsArticles', 'hasMoreNews', 'hasScreenshotMaster', 'screenshotMasterUrl', 'screenshotMasterHeight', 'isThinTool'));
     }
 
     /**

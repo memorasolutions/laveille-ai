@@ -150,6 +150,34 @@
                     {{ __("La veille vise le standard WCAG 2.2 niveau AAA pour la conformité d'accessibilité numérique : contrastes 7:1 minimum, cibles cliquables 44 px, navigation clavier complète, sous-titres pour les vidéos intégrées. Les écarts résiduels sont audités et corrigés en continu.") }}
                 </p>
 
+                {{-- Ajout additif (design doc SPEC-SIGNAL-HUMAIN, club des sages 93/100,
+                     2026-08-20) - la page méthodologie existait déjà (audit du site 2026-08-20) et
+                     couvrait sources/corrections, mais pas explicitement les niveaux de preuve
+                     affichés sur les fiches ni le processus de vérification en deux couches. Section
+                     ajoutée SANS toucher aux sept sections existantes ci-dessus. --}}
+                <h2 style="font-weight: 800; font-size: 24px; margin: 32px 0 14px; color: var(--c-dark);">{{ __('9. Niveaux de preuve et vérification des actualités') }}</h2>
+                <p>
+                    {{ __("Chaque actualité affiche un indicateur de sa proximité avec la source d'origine :") }}
+                </p>
+                <ul style="margin: 12px 0 16px; padding-left: 24px;">
+                    <li><strong>{{ __('Fondée sur la source originale') }}</strong> {{ __('- la fiche s\'appuie directement sur l\'annonce, la publication ou le document primaire.') }}</li>
+                    <li><strong>{{ __('Sources originale et média') }}</strong> {{ __('- la fiche croise l\'original et un média qui l\'a relayé ou commenté.') }}</li>
+                    <li><strong>{{ __('D\'après un média relais') }}</strong> {{ __('- l\'original n\'était pas accessible directement; la fiche s\'appuie sur un média qui l\'a rapporté, toujours cité.') }}</li>
+                </ul>
+                <p>
+                    {{ __('Ce niveau est déterminé au moment de la rédaction et n\'est jamais affiché sous son étiquette technique brute : la fiche traduit toujours ce niveau en français courant.') }}
+                </p>
+                <p>
+                    {{ __('Chaque actualité passe ensuite par deux couches de vérification distinctes :') }}
+                </p>
+                <ul style="margin: 12px 0 16px; padding-left: 24px;">
+                    <li><strong>{{ __('1. Composition avec preuve') }}</strong> {{ __('- chaque affirmation publiée est reliée en coulisses à un extrait exact du texte source (fait) ou identifiée comme une analyse (interprétation) - aucune affirmation factuelle n\'est publiée sans cette attache.') }}</li>
+                    <li><strong>{{ __('2. Relecture éditoriale humaine') }}</strong> {{ __('- une fois composée, la fiche est relue par la rédaction. Cette relecture est datée et affichée publiquement sur la fiche elle-même (« Vérifié par la rédaction de laveille.ai le [date] ») - jamais une date fabriquée ou dérivée automatiquement : elle n\'apparaît que sur les fiches réellement relues.') }}</li>
+                </ul>
+                <p>
+                    {{ __('L\'attribution de la source d\'origine est systématique : la mention « D\'après [source] » figure en haut de chaque fiche à source unique, les sources primaires citées apparaissent en fin de fiche, et toute photo porte son crédit sous l\'image.') }}
+                </p>
+
             </article>
 
             <div style="background: #F0F4F8; border-radius: 12px; padding: 26px 28px; margin-top: 44px; text-align: center;">

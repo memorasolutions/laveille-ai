@@ -109,19 +109,40 @@ class SitemapController
                 $sitemap->add(Url::create(route('directory.education-pricing'))->setPriority(0.8)->setChangeFrequency('weekly'));
             }
             // 2026-08-06 #1645 : les fiches archivées (contenu crawlé à tort) ne doivent plus être indexées.
-            \Modules\Directory\Models\Tool::published()->notArchived()->select(['id', 'slug', 'updated_at', 'screenshot', 'lifecycle_status'])->get()->each(function ($tool) use ($sitemap) {
-                $url = Url::create($tool->getPublicUrl())
-                    ->setLastModificationDate($tool->updated_at)
-                    ->setPriority(0.7)
-                    ->setChangeFrequency('monthly');
+            // 2026-08-20 (audit AdSense) : les fiches minces (mêmes critères que le noindex posé dans
+            // PublicDirectoryController::show(), constante partagée THIN_SHORT_DESCRIPTION_MAX_LENGTH)
+            // sont exclues du sitemap - cohérence noindex/sitemap.
+            \Modules\Directory\Models\Tool::published()->notArchived()
+                ->with('categories:id')
+                ->withCount([
+                    'reviews as approved_reviews_count' => fn ($q) => $q->approved(),
+                    'resources as approved_resources_count' => fn ($q) => $q->where('is_approved', true),
+                    'screenshots as approved_screenshots_count' => fn ($q) => $q->approved(),
+                ])
+                ->select(['id', 'slug', 'updated_at', 'screenshot', 'lifecycle_status', 'short_description'])
+                ->get()
+                ->reject(function ($tool) {
+                    $shortDescriptionLength = mb_strlen(trim(strip_tags((string) ($tool->short_description ?? ''))));
 
-                // S134 SEO : ne lister QUE les images self-hosted (les screenshots externes causent des warnings sitemap-image GSC)
-                if ($tool->screenshot && ! (str_starts_with($tool->screenshot, 'http') && ! str_contains($tool->screenshot, 'laveille.ai'))) {
-                    $url->addImage(str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : url($tool->screenshot));
-                }
+                    return $tool->categories->isEmpty()
+                        && $shortDescriptionLength < \Modules\Directory\Http\Controllers\PublicDirectoryController::THIN_SHORT_DESCRIPTION_MAX_LENGTH
+                        && (int) $tool->approved_reviews_count === 0
+                        && (int) $tool->approved_resources_count === 0
+                        && (int) $tool->approved_screenshots_count === 0;
+                })
+                ->each(function ($tool) use ($sitemap) {
+                    $url = Url::create($tool->getPublicUrl())
+                        ->setLastModificationDate($tool->updated_at)
+                        ->setPriority(0.7)
+                        ->setChangeFrequency('monthly');
 
-                $sitemap->add($url);
-            });
+                    // S134 SEO : ne lister QUE les images self-hosted (les screenshots externes causent des warnings sitemap-image GSC)
+                    if ($tool->screenshot && ! (str_starts_with($tool->screenshot, 'http') && ! str_contains($tool->screenshot, 'laveille.ai'))) {
+                        $url->addImage(str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : url($tool->screenshot));
+                    }
+
+                    $sitemap->add($url);
+                });
         }
 
         // Collections publiques (si module Directory actif)
@@ -181,8 +202,17 @@ class SitemapController
         if (Route::has('resources.index')) {
             $sitemap->add(Url::create(route('resources.index'))->setPriority(0.7)->setChangeFrequency('weekly'));
         }
-        if (Route::has('roadmap.boards.index')) {
-            $sitemap->add(Url::create(route('roadmap.boards.index'))->setPriority(0.6)->setChangeFrequency('weekly'));
+        // 2026-08-20 (audit AdSense) : tant qu'aucune proposition publique réelle n'existe, la page
+        // reste hors sitemap - même critère que le noindex conditionnel posé dans la vue publique.
+        if (Route::has('roadmap.boards.index') && class_exists(\Modules\Roadmap\Models\Board::class)) {
+            // Même filtre que PublicBoardController::index() (le tableau glossaire-communautaire
+            // n'apparaît pas sur /roadmap, il ne doit donc pas compter dans ce critère).
+            $hasPublicIdeas = \Modules\Roadmap\Models\Board::where('is_public', true)
+                ->where('slug', '!=', 'glossaire-communautaire')
+                ->withCount('ideas')->get()->sum('ideas_count') > 0;
+            if ($hasPublicIdeas) {
+                $sitemap->add(Url::create(route('roadmap.boards.index'))->setPriority(0.6)->setChangeFrequency('weekly'));
+            }
         }
 
         // Pages auteur EEAT 2026 (#218 S84 — Schema.org Person + sameAs)
