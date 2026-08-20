@@ -128,7 +128,7 @@ it('unauthenticated redirect from notifications', function () {
 });
 
 it('notification bell badge shows in nav when unread exist', function () {
-    $this->markTestSkipped('Ancien tableau de bord utilisateur refondu (curation) - arbitrage produit en attente, voir QUESTIONS-CLAUDE.html entrée 119.');
+    $this->markTestSkipped('Widget enterré définitivement (fonctionnalité morte/remplacée), voir CHANGELOG v1.193.x.');
 
     makeNotification($this->user);
 

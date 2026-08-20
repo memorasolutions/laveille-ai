@@ -30,7 +30,7 @@ it('user dashboard loads', function () {
 });
 
 it('dashboard shows articles count stat', function () {
-    $this->markTestSkipped('Ancien tableau de bord utilisateur refondu (curation) - arbitrage produit en attente, voir QUESTIONS-CLAUDE.html entrée 119.');
+    $this->markTestSkipped('Widget enterré définitivement (fonctionnalité morte/remplacée), voir CHANGELOG v1.193.x.');
 
     Article::factory()->count(3)->create(['user_id' => $this->user->id]);
 
@@ -40,7 +40,7 @@ it('dashboard shows articles count stat', function () {
 });
 
 it('dashboard shows published and draft counts', function () {
-    $this->markTestSkipped('Ancien tableau de bord utilisateur refondu (curation) - arbitrage produit en attente, voir QUESTIONS-CLAUDE.html entrée 119.');
+    $this->markTestSkipped('Widget enterré définitivement (fonctionnalité morte/remplacée), voir CHANGELOG v1.193.x.');
 
     Article::factory()->count(2)->create(['user_id' => $this->user->id, 'status' => 'published']);
     Article::factory()->create(['user_id' => $this->user->id, 'status' => 'draft']);
@@ -51,7 +51,7 @@ it('dashboard shows published and draft counts', function () {
 });
 
 it('dashboard shows Free plan badge when no subscription', function () {
-    $this->markTestSkipped('Ancien tableau de bord utilisateur refondu (curation) - arbitrage produit en attente, voir QUESTIONS-CLAUDE.html entrée 119.');
+    $this->markTestSkipped('Widget enterré définitivement (fonctionnalité morte/remplacée), voir CHANGELOG v1.193.x.');
 
     $this->get(route('user.dashboard'))
         ->assertStatus(200)
@@ -59,7 +59,7 @@ it('dashboard shows Free plan badge when no subscription', function () {
 });
 
 it('dashboard shows recent articles', function () {
-    $this->markTestSkipped('Ancien tableau de bord utilisateur refondu (curation) - arbitrage produit en attente, voir QUESTIONS-CLAUDE.html entrée 119.');
+    $this->markTestSkipped('Widget enterré définitivement (fonctionnalité morte/remplacée), voir CHANGELOG v1.193.x.');
 
     $article = Article::factory()->create([
         'user_id' => $this->user->id,
@@ -72,7 +72,7 @@ it('dashboard shows recent articles', function () {
 });
 
 it('dashboard shows comments count for user articles', function () {
-    $this->markTestSkipped('Ancien tableau de bord utilisateur refondu (curation) - arbitrage produit en attente, voir QUESTIONS-CLAUDE.html entrée 119.');
+    $this->markTestSkipped('Widget enterré définitivement (fonctionnalité morte/remplacée), voir CHANGELOG v1.193.x.');
 
     $article = Article::factory()->create(['user_id' => $this->user->id]);
     Comment::factory()->count(4)->create(['article_id' => $article->id]);

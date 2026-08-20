@@ -134,7 +134,7 @@ it('unauthenticated user is redirected from articles', function () {
 });
 
 it('articles nav link is present in user layout', function () {
-    $this->markTestSkipped('Ancien tableau de bord utilisateur refondu (curation) - arbitrage produit en attente, voir QUESTIONS-CLAUDE.html entrée 119.');
+    $this->markTestSkipped('Widget enterré définitivement (fonctionnalité morte/remplacée), voir CHANGELOG v1.193.x.');
 
     $this->get(route('user.dashboard'))
         ->assertStatus(200)

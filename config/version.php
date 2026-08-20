@@ -3959,10 +3959,22 @@ declare(strict_types=1);
  *     (TranslationService::getLocales - addKey effaçait la traduction FR), lien Onboarding sorti
  *     du gate SaaS. Suite complète : 6 189 verts, 9 échecs hérités préexistants (hors lot, prouvés
  *     sur arbre vierge) à traiter séparément.
+ *
+ * 1.194.0 (2026-08-20) - feat(auth) : bannière de vérification de courriel resurfacée sur le
+ *     tableau de bord utilisateur. La vérification est imposée en middleware `verified` sur
+ *     Santé, Journal et Feuille de route - un utilisateur non vérifié y était bloqué sans aucun
+ *     avertissement préalable (régression UX silencieuse). Ajout conditionnel dans
+ *     dashboard/index.blade.php (! $user->hasVerifiedEmail()), réutilise le composant
+ *     x-core::button (cible tactile 44px AAA) et le style .alert.alert-warning déjà établi par
+ *     la bannière d'impersonation du même layout - aucun nouveau composant créé. Les 8 autres
+ *     anciens widgets du tableau de bord (Mes articles, Abonnement SaaS, Commentaires reçus...)
+ *     restent enterrés définitivement (décision produit, pas un arbitrage en attente) - raisons
+ *     de skip mises à jour en conséquence dans Phase83/84/86/87Test.php. Test Phase90Test.php
+ *     dé-skippé et adapté au rendu réel de la bannière.
  */
 
 $lvMajor = 1;
-$lvMinor = 193;
+$lvMinor = 194;
 $lvPatch = 0;
 
 return [

@@ -33,15 +33,13 @@ it('unverified user can still access dashboard', function () {
 });
 
 it('unverified user sees verification banner on dashboard', function () {
-    $this->markTestSkipped('Ancien tableau de bord utilisateur refondu (curation) - arbitrage produit en attente, voir QUESTIONS-CLAUDE.html entrée 119.');
-
     $user = User::factory()->unverified()->create();
-    $this->actingAs($user)->get(route('user.dashboard'))->assertSee('Vérifiez');
+    $this->actingAs($user)->get(route('user.dashboard'))->assertSee('Vérifier mon courriel');
 });
 
 it('verified user does not see verification banner', function () {
     $user = User::factory()->create();
-    $this->actingAs($user)->get(route('user.dashboard'))->assertDontSee('Vérifiez');
+    $this->actingAs($user)->get(route('user.dashboard'))->assertDontSee('Vérifier mon courriel');
 });
 
 it('email verification notice page loads for unverified user', function () {

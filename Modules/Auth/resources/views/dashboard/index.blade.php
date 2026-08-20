@@ -5,6 +5,21 @@
 
 @section('user-content')
 
+{{-- Bannière de vérification de courriel : la vérification est IMPOSÉE en middleware `verified`
+     sur Santé, Journal et Feuille de route - un utilisateur non vérifié y est bloqué sans aucun
+     avertissement préalable si cette bannière est absente (régression UX silencieuse). $user est
+     garanti authentifié ici (UserDashboardController::dashboard() redirige les invités vers la
+     vue guest avant d'atteindre cette vue). Seule des anciens widgets du tableau de bord à être
+     resurfacée - les autres restent enterrés (v1.193.x). --}}
+@if(! $user->hasVerifiedEmail())
+<div class="alert alert-warning d-flex align-items-center justify-content-between" role="alert" style="margin-bottom: 25px; flex-wrap: wrap; gap: 10px;">
+    <span><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{ __("Votre adresse courriel n'est pas encore vérifiée. Certaines fonctionnalités (Santé, Journal, Feuille de route) la requièrent.") }}</span>
+    <x-core::button :href="route('verification.notice')" variant="primary">
+        {{ __('Vérifier mon courriel') }}
+    </x-core::button>
+</div>
+@endif
+
 <h2 style="font-family: var(--f-heading, inherit); font-weight: 700; margin: 0 0 5px;">{{ __('Bonjour') }}, {{ $user->name }} !</h2>
 <p style="color: #777; margin: 0 0 25px;">{{ __('Bienvenue dans votre espace personnel.') }}</p>
 

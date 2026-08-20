@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.194.0] - 2026-08-20
+
+### Ajouté
+- **Texte de partage optimisé PAR RÉSEAU sur les fiches d'actualité.** Le texte de partage n'est plus générique : 4 variantes calibrées (X ~100-140 caractères, une affirmation nette ; LinkedIn 250-600 avec accroche autonome et invitation ; Facebook court ou omis pour laisser l'aperçu Open Graph vendre ; Messenger ton direct « pensé à toi »), dosage de hashtags par réseau. Corrige aussi une incohérence : le bouton X copiait un texte différent de celui de l'intent - désormais chaque réseau utilise la MÊME variante dans son lien et dans le presse-papier. Repli sur l'ancien texte générique pour les gabarits sans variantes définies (zéro régression Blog/glossaire). Aucun script tiers chargé (Loi 25).
+- **Bannière de vérification de courriel resurfacée sur le tableau de bord utilisateur.** La vérification est imposée en middleware `verified` sur Santé, Journal et Feuille de route - un utilisateur non vérifié y était bloqué sans aucun avertissement préalable (régression UX silencieuse). Bannière conditionnelle (`! $user->hasVerifiedEmail()`) ajoutée dans `dashboard/index.blade.php`, réutilisant le composant `x-core::button` (cible tactile 44px AAA) et le style `.alert.alert-warning` déjà établi par la bannière d'impersonation du même layout - aucun nouveau composant créé.
+
+### Modifié
+- **Widgets morts du tableau de bord : décision produit clarifiée.** Les 8 autres anciens tests skippés du tableau de bord (Mes articles, Abonnement SaaS, Commentaires reçus...) portent désormais la raison « enterré définitivement » au lieu d'« arbitrage en attente » - ce ne sont plus des décisions en suspens.
+
 ## [1.193.0] - 2026-08-20
 
 ### Ajouté
