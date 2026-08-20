@@ -96,7 +96,7 @@ it('hasEditorialReview() est vrai dès que reviewed_at est posé', function () {
 it('reviewerLabel() retombe sur le libellé applicatif par défaut si reviewed_by est vide', function () {
     $article = new NewsArticle(['reviewed_at' => now(), 'reviewed_by' => null]);
 
-    expect($article->reviewerLabel())->toBe('La rédaction de laveille.ai');
+    expect($article->reviewerLabel())->toBe('la rédaction de laveille.ai');
 });
 
 it('reviewerLabel() retourne reviewed_by quand il est posé', function () {
@@ -125,7 +125,7 @@ it('le composant editorial-signature rend la mention et le lien méthodologie si
     $html = Blade::render('<x-news::editorial-signature :article="$article" />', ['article' => $article]);
 
     expect($html)->toContain('Vérifié par')
-        ->and($html)->toContain('La rédaction de laveille.ai')
+        ->and($html)->toContain('la rédaction de laveille.ai')
         ->and($html)->toContain(route('methodologie'))
         ->and($html)->toContain('Notre méthodologie');
 });
@@ -175,7 +175,7 @@ it('reviewedBy apparaît dans le JSON-LD une fois la fiche relue, sans jamais to
 
     expect($schema)->toHaveKey('reviewedBy')
         ->and($schema['reviewedBy']['@type'])->toBe('Organization')
-        ->and($schema['reviewedBy']['name'])->toBe('La rédaction de laveille.ai')
+        ->and($schema['reviewedBy']['name'])->toBe('la rédaction de laveille.ai')
         ->and($schema['dateModified'])->toBe($reviewedAt->toIso8601String());
 
     // Non-régression stricte : author[0]/author[1] intacts (contrat NewsSeoEnrichedTest.php).
@@ -204,7 +204,8 @@ it('news:apply pose reviewed_at/reviewed_by quand composed_summary et editorial_
     $article->refresh();
     expect($article->hasEditorialReview())->toBeTrue()
         ->and($article->reviewed_at)->not->toBeNull()
-        ->and($article->reviewed_by)->toBe('La rédaction de laveille.ai');
+        // La porte ne pose QUE reviewed_at ; le libellé vient de reviewerLabel() (source unique).
+        ->and($article->reviewed_by)->toBeNull();
 });
 
 it('news:apply ne pose pas reviewed_at si seul editorial_proof_pairs est fourni (pas de composed_summary)', function () {

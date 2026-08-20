@@ -465,8 +465,8 @@ class NewsApplyCommand extends Command
         // MCP: SELF (<5 lignes)
         // RAISON: design doc SPEC-SIGNAL-HUMAIN, étape 2 - « poser reviewed_at automatiquement ».
         if (array_key_exists('composed_summary', $decoded) && array_key_exists('editorial_proof_pairs', $decoded)) {
+            // La porte ne pose QUE reviewed_at ; le libellé vient de reviewerLabel() (source unique, DRY).
             $updates['reviewed_at'] = now('America/Toronto');
-            $updates['reviewed_by'] = 'La rédaction de laveille.ai';
         }
 
         if ($updates === [] && $relatedToolSlugs === null && $entities === null) {

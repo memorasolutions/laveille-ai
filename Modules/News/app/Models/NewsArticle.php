@@ -995,7 +995,7 @@ class NewsArticle extends Model implements Searchable
      */
     public function reviewerLabel(): string
     {
-        return $this->reviewed_by ?: __('La rédaction de laveille.ai');
+        return $this->reviewed_by ?: __('la rédaction de laveille.ai');
     }
 
     /**

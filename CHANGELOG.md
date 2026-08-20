@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.192.1] - 2026-08-20
+
+### Corrigé
+- **Signature éditoriale : orthographe et source unique du libellé.** « Vérifié par La rédaction » (majuscule fautive en milieu de phrase) devient « Vérifié par la rédaction de laveille.ai » (règle orthographique). La porte `news:apply` ne pose désormais QUE `reviewed_at` ; le libellé vient d'une source unique (`reviewerLabel()`, DRY), utilisée à la fois par le composant visible et le JSON-LD `reviewedBy`. La date de relecture des fiches déjà enrichies a été recalée sur la date réelle de la relecture éditoriale (et non la date de publication de la source).
+
 ## [1.192.0] - 2026-08-20
 
 ### Ajouté
