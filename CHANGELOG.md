@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.191.2] - 2026-08-20
+
+### Corrigé
+- **Fiche publiée mais au résumé vide : 410 propre au lieu d'un 404 brut.** `PublicNewsController::show()` servait un 404 générique quand une fiche publiée n'avait plus de résumé exploitable (`hasExploitableSummary()` faux) - séquelle possible de l'extinction des résumés machine. Elle rend désormais la même page utile `news::public.gone` en HTTP **410 Gone** que les fiches retirées (DRY, réutilisation de la vue et du pattern existants), meilleur signal pour le visiteur et pour Google. La vue `gone.blade.php` distingue le texte : « Actualité retirée » quand la fiche est réellement retirée (`retired_at`), « Actualité indisponible » quand elle est publiée mais vide - sans jamais présupposer `retired_at`. Les autres cas sont inchangés (`is_published` faux = 404, `seo_status='gone'` = 410, fiche riche = 200).
+
 ## [1.191.1] - 2026-08-19
 
 ### Ajouté

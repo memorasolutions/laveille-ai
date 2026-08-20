@@ -300,7 +300,7 @@ it('le JSON-LD publié sur la fiche ne contient aucune phrase absente de la page
 
 // ── 4.4 : garde-fou anti-corps-vide ────────────────────────────────────────────
 
-it('une fiche publiée sans résumé exploitable n\'est jamais servie avec un corps vide (404)', function () {
+it('une fiche publiée sans résumé exploitable n\'est jamais servie avec un corps vide (410, vue gone)', function () {
     $source = azcSource();
     $article = azcArticle($source->id, [
         'description' => '',
@@ -310,7 +310,14 @@ it('une fiche publiée sans résumé exploitable n\'est jamais servie avec un co
 
     $response = $this->get(route('news.show', $article->slug));
 
-    $response->assertStatus(404);
+    // Fiche publiée et non retirée : 410 propre via la vue partagée avec les fiches
+    // retirées (DRY), jamais un 404 brut - meilleur pour l'UX et le SEO (2026-08-20).
+    $response->assertStatus(410);
+    $response->assertViewIs('news::public.gone');
+    // Texte générique : cette fiche n'est PAS retirée (retired_at reste nul), le texte ne
+    // doit donc jamais présupposer un retrait volontaire.
+    $response->assertSee('indisponible', escape: false);
+    $response->assertDontSee('retirée', escape: false);
 });
 
 it('une fiche publiée AVEC un résumé exploitable reste servie normalement', function () {

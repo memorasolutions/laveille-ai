@@ -90,11 +90,16 @@ class PublicNewsController extends Controller
         // Élagage SEO : une actualité marquée "gone" renvoie 410 (contenu retiré définitivement).
         abort_if(($article->seo_status ?? 'index') === 'gone', 410);
         // ACTION : garde-fou permanent (design doc "Actus - zéro copie du texte source",
-        // 2026-08-13, section 4.4) - une fiche sans résumé exploitable ne peut jamais être
-        // servie publiquement avec un corps vide, quelle qu'en soit la cause.
+        // 2026-08-13, section 4.4), servi en 410 propre via la même vue que le retrait
+        // (news::public.gone, DRY - voir bloc isRetired() ci-dessus) plutôt qu'un 404 brut
+        // (2026-08-20) - une fiche sans résumé exploitable est publiée mais inexploitable pour
+        // le visiteur, jamais une simple absence de ressource.
         // MCP: SELF (<5 lignes)
-        // RAISON: la colonne description ne porte plus aucun texte de repli.
-        abort_if(! $article->hasExploitableSummary(), 404);
+        // RAISON: la colonne description ne porte plus aucun texte de repli ; un 404 brut est
+        // mauvais pour l'UX et le SEO là où un 410 explicite l'est moins.
+        if (! $article->hasExploitableSummary()) {
+            return response()->view('news::public.gone', ['article' => $article], 410);
+        }
 
         // Incident 2026-08-13 (mesuré : rapport vues/clics réels de 8 à 487x selon la
         // fiche - cause de la désindexation erronée de 183 fiches par l'élagage SEO).
