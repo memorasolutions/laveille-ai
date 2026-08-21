@@ -96,6 +96,10 @@ Route::prefix('admin/news/composition')
         // révision 2026-08-17) ──
         Route::post('/{article}/fetch-source', [NewsCompositionController::class, 'fetchSource'])->name('fetch-source');
         Route::post('/{article}/publish', [NewsCompositionController::class, 'publish'])->name('publish');
+        // 2026-08-21 : geste humain qui pose la signature éditoriale sur une fiche DÉJÀ publiée
+        // (celles composées et publiées par l'agent n'en ont aucune, par construction). Même
+        // groupe, mêmes protections d'accès que les autres actions de composition.
+        Route::post('/{article}/marquer-relu', [NewsCompositionController::class, 'markReviewed'])->name('mark-reviewed');
         // ── Phase B (design doc 2026-08-15, sections 5.1 et 7) ──
         Route::post('/{article}/generate-prompt', [NewsCompositionController::class, 'generatePrompt'])->name('generate-prompt');
         Route::post('/{article}/proof-pairs', [NewsCompositionController::class, 'storeProofPair'])->name('proof-pairs.store');

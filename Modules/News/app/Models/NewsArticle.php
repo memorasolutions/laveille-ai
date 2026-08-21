@@ -984,6 +984,36 @@ class NewsArticle extends Model implements Searchable
     }
 
     /**
+     * ACTION : pose la signature éditoriale - SEUL point d'écriture de reviewed_at (DRY strict).
+     *
+     * 2026-08-21, correctif de fond. Jusqu'ici, `news:apply --payload` posait reviewed_at
+     * AUTOMATIQUEMENT dès qu'un contenu composé arrivait avec ses preuves. La fiche affichait donc
+     * « Vérifié par la rédaction le [date] » sans qu'aucun être humain ne l'ait lue, alors que la
+     * page publique /methodologie promet l'inverse mot pour mot : « relue par la rédaction [...]
+     * jamais une date fabriquée ou dérivée automatiquement ». 110 fiches publiées portaient cette
+     * signature non méritée.
+     *
+     * Désormais, cette méthode est le SEUL endroit qui écrit reviewed_at, et elle n'est appelée
+     * que depuis un GESTE HUMAIN de l'écran d'administration (publication manuelle, ou bouton
+     * « J'ai relu »). La porte de l'agent ne la touche jamais : une fiche composée et publiée par
+     * l'agent reste sans signature tant qu'un humain ne l'a pas relue. C'est ce qui rend la
+     * mention vraie, donc utile.
+     *
+     * saveQuietly : la signature ne doit pas déclencher les observateurs de contenu ni bousculer
+     * updated_at, qui sert de jeton de fraîcheur à la porte d'écriture (leçon projet 2026-08-20).
+     */
+    public function markReviewedByHuman(?string $reviewerLabel = null): void
+    {
+        $this->reviewed_at = now('America/Toronto');
+
+        if ($reviewerLabel !== null && trim($reviewerLabel) !== '') {
+            $this->reviewed_by = trim($reviewerLabel);
+        }
+
+        $this->saveQuietly();
+    }
+
+    /**
      * ACTION : module « signature éditoriale » (même design doc) - libellé de qui a relu.
      * 'reviewed_by' vide (cas normal, la porte ne pose que 'reviewed_at') retombe sur le libellé
      * applicatif de la rédaction - jamais un nom de journaliste tiers, jamais l'auteur de la

@@ -185,9 +185,15 @@ it('reviewedBy apparaît dans le JSON-LD une fois la fiche relue, sans jamais to
         ->and($schema['author'][1]['name'])->toBe('TechCrunch');
 });
 
-// ── NewsApplyCommand : pose reviewed_at/reviewed_by côté serveur ────────────────────────
+// ── NewsApplyCommand : ne pose JAMAIS la signature (2026-08-21) ─────────────────────────
 
-it('news:apply pose reviewed_at/reviewed_by quand composed_summary et editorial_proof_pairs sont tous deux présents', function () {
+/**
+ * Test INVERSÉ le 2026-08-21. Il vérifiait auparavant que la porte posait reviewed_at dès qu'un
+ * contenu composé arrivait avec ses preuves. C'était précisément le défaut : la fiche affichait
+ * « Vérifié par la rédaction » sans qu'aucun humain ne l'ait lue, alors que la page publique
+ * /methodologie promet l'inverse. La signature vient désormais d'un geste humain seul.
+ */
+it('news:apply ne pose JAMAIS la signature, même avec composed_summary et editorial_proof_pairs', function () {
     $article = esArticle();
     $payload = esPayloadFile(array_merge(esFreshMeta($article), [
         'composed_summary' => ['hook' => 'Accroche composée de test.'],
@@ -202,10 +208,38 @@ it('news:apply pose reviewed_at/reviewed_by quand composed_summary et editorial_
         ->assertSuccessful();
 
     $article->refresh();
+    expect($article->hasEditorialReview())->toBeFalse()
+        ->and($article->reviewed_at)->toBeNull();
+});
+
+it('markReviewedByHuman() pose la signature et retombe sur le libellé applicatif', function () {
+    $article = esArticle();
+    expect($article->hasEditorialReview())->toBeFalse();
+
+    $article->markReviewedByHuman();
+
+    $article->refresh();
     expect($article->hasEditorialReview())->toBeTrue()
         ->and($article->reviewed_at)->not->toBeNull()
-        // La porte ne pose QUE reviewed_at ; le libellé vient de reviewerLabel() (source unique).
-        ->and($article->reviewed_by)->toBeNull();
+        ->and($article->reviewed_by)->toBeNull()
+        ->and($article->reviewerLabel())->toBe(__('la rédaction de laveille.ai'));
+});
+
+it('markReviewedByHuman() accepte un libellé explicite quand il est fourni', function () {
+    $article = esArticle();
+
+    $article->markReviewedByHuman('Stéphane Lapointe');
+
+    expect($article->fresh()->reviewerLabel())->toBe('Stéphane Lapointe');
+});
+
+it('markReviewedByHuman() ne bouscule pas updated_at, jeton de fraîcheur de la porte d\'écriture', function () {
+    $article = esArticle();
+    $before = $article->fresh()->updated_at->toIso8601String();
+
+    $article->markReviewedByHuman();
+
+    expect($article->fresh()->updated_at->toIso8601String())->toBe($before);
 });
 
 it('news:apply ne pose pas reviewed_at si seul editorial_proof_pairs est fourni (pas de composed_summary)', function () {

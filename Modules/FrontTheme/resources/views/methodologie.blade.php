@@ -65,7 +65,7 @@
             <div style="background: linear-gradient(135deg, #F0F4F8 0%, #ffffff 100%); border-left: 4px solid var(--c-primary, #064E5A); padding: 22px 26px; border-radius: 8px; margin-bottom: 40px;">
                 <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #1f2937;">
                     <strong>{{ __('Promesse en une ligne') }} :</strong>
-                    {{ __("La veille est rédigé à 100 % par un humain (Stéphane Lapointe), assisté de l'IA pour la recherche et la rédaction, vérifié manuellement avant publication, et financé exclusivement par la newsletter, l'affiliation transparente et la boutique. Aucun outil ne paie pour figurer.") }}
+                    {{ __("La veille est dirigé par un humain (Stéphane Lapointe), qui en assume la responsabilité éditoriale. Les actualités sont composées avec l'aide de l'IA à partir des sources primaires, puis passées au crible de plusieurs modèles indépendants, dont l'un a pour seul mandat de les contredire. La mention « Vérifié par la rédaction » n'apparaît que sur les fiches qu'un humain a réellement relues. Financement : newsletter, affiliation signalée et boutique. Aucun outil ne paie pour figurer.") }}
                 </p>
             </div>
 
@@ -168,11 +168,12 @@
                     {{ __('Ce niveau est déterminé au moment de la rédaction et n\'est jamais affiché sous son étiquette technique brute : la fiche traduit toujours ce niveau en français courant.') }}
                 </p>
                 <p>
-                    {{ __('Chaque actualité passe ensuite par deux couches de vérification distinctes :') }}
+                    {{ __('Chaque actualité passe ensuite par trois couches de vérification distinctes :') }}
                 </p>
                 <ul style="margin: 12px 0 16px; padding-left: 24px;">
-                    <li><strong>{{ __('1. Composition avec preuve') }}</strong> {{ __('- chaque affirmation publiée est reliée en coulisses à un extrait exact du texte source (fait) ou identifiée comme une analyse (interprétation) - aucune affirmation factuelle n\'est publiée sans cette attache.') }}</li>
-                    <li><strong>{{ __('2. Relecture éditoriale humaine') }}</strong> {{ __('- une fois composée, la fiche est relue par la rédaction. Cette relecture est datée et affichée publiquement sur la fiche elle-même (« Vérifié par la rédaction de laveille.ai le [date] ») - jamais une date fabriquée ou dérivée automatiquement : elle n\'apparaît que sur les fiches réellement relues.') }}</li>
+                    <li><strong>{{ __('1. Composition avec preuve') }}</strong> {{ __('- chaque affirmation publiée est reliée en coulisses à un extrait exact du texte source (fait) ou identifiée comme une analyse (interprétation) - aucune affirmation factuelle n\'est publiée sans cette attache. Cette attache est vérifiée par le code, pas au jugé : un extrait qui ne se retrouve pas mot pour mot dans la source bloque la publication.') }}</li>
+                    <li><strong>{{ __('2. Contre-vérification par plusieurs modèles d\'IA') }}</strong> {{ __('- la fiche composée est soumise à des modèles indépendants les uns des autres, dont l\'un a pour seul mandat de la contredire : chiffre mal attribué, citation introuvable, nuance manquante, conclusion trop large. Ce qui résiste est publié, ce qui tombe est corrigé ou retiré. Cette couche ne remplace pas le jugement humain : elle le prépare.') }}</li>
+                    <li><strong>{{ __('3. Relecture humaine, quand elle a eu lieu') }}</strong> {{ __('- la mention « Vérifié par la rédaction de laveille.ai le [date] » n\'est jamais posée par une routine. Elle atteste qu\'un être humain a relu la fiche et en assume la responsabilité éditoriale. Son absence sur une fiche signifie exactement ce qu\'elle dit : la fiche a été composée et contre-vérifiée, mais pas encore relue par une personne.') }}</li>
                 </ul>
                 <p>
                     {{ __('L\'attribution de la source d\'origine est systématique : la mention « D\'après [source] » figure en haut de chaque fiche à source unique, les sources primaires citées apparaissent en fin de fiche, et toute photo porte son crédit sous l\'image.') }}

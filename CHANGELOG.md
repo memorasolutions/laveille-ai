@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.201.0] - 2026-08-21
+
+### Corrigé
+- **La mention « Vérifié par la rédaction » atteste désormais une vraie relecture humaine.** Elle était posée automatiquement par `news:apply` dès qu'un contenu composé arrivait avec ses preuves : 110 fiches publiées l'affichaient sans qu'aucun être humain ne les ait lues, alors que la page publique « Méthodologie » promettait mot pour mot l'inverse (« relue par la rédaction […] jamais une date fabriquée ou dérivée automatiquement »). La porte de l'agent ne pose plus rien ; `NewsArticle::markReviewedByHuman()` devient le point d'écriture UNIQUE de la signature, appelé seulement depuis un geste humain de l'écran d'administration : publication manuelle, ou nouveau bouton « J'ai relu » (`POST admin/news/composition/{article}/marquer-relu`) pour les fiches déjà publiées. Le garde-fou existant reste entier : `reviewed_at` n'est toujours pas exposé dans la liste blanche du payload, l'agent ne peut donc pas davantage fabriquer sa date. Les 110 signatures non méritées ont été retirées, après sauvegarde de leurs valeurs (`storage/app/backup-signatures-editoriales-2026-08-21.json`) pour rester réversible. Le test qui vérifiait l'ancien automatisme a été inversé, et trois tests couvrent le nouveau point d'écriture (14 au total sur ce module).
+
+### Modifié
+- **Page « Méthodologie » : la description correspond enfin au mécanisme.** La promesse « rédigé à 100 % par un humain, vérifié manuellement avant publication » devient une description exacte : direction et responsabilité éditoriale humaines, composition assistée par l'IA à partir des sources primaires, et signature affichée seulement quand une relecture a eu lieu. La section de vérification passe de deux à **trois couches** et nomme celle qui manquait à l'appel alors qu'elle existe depuis longtemps : la contre-vérification par plusieurs modèles d'IA indépendants, dont l'un a pour seul mandat de contredire la fiche. L'absence de signature sur une fiche y est expliquée franchement plutôt que passée sous silence.
+
 ## [1.200.0] - 2026-08-21
 
 ### Modifié

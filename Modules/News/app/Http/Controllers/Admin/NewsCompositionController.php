@@ -654,14 +654,57 @@ class NewsCompositionController extends Controller
             $article->publishAndPurgeSource();
         });
 
+        // ACTION : publier DEPUIS CET ÉCRAN est un geste humain - c'est donc ici, et non dans la
+        // porte de l'agent, que la signature éditoriale se pose (2026-08-21, voir le docblock de
+        // NewsArticle::markReviewedByHuman()). Une personne qui clique « Publier » a vu la fiche.
+        // MCP: SELF (<5 lignes)
+        // RAISON: rendre vraie la promesse publique de /methodologie (relecture humaine datée).
+        $article->markReviewedByHuman();
+
         Log::channel('composition')->info('publish - publication et purge', [
             'article_id' => $article->id,
             'slug' => $article->slug,
+            'reviewed_at' => optional($article->reviewed_at)->toIso8601String(),
         ]);
 
         return response()->json([
             'success' => true,
             'site_url' => url('/actualites/'.$article->slug),
+        ]);
+    }
+
+    /**
+     * ACTION : bouton « J'ai relu » - pose la signature éditoriale sur une fiche DÉJÀ publiée.
+     *
+     * Complément indispensable de publish() : les fiches composées et publiées par l'agent
+     * n'ont, par construction, aucune signature (2026-08-21). Cet endpoint est le geste humain
+     * qui l'accorde, une fois la fiche réellement lue. Il ne modifie RIEN d'autre : ni le texte,
+     * ni la publication, ni la fraîcheur servant de jeton à la porte d'écriture.
+     *
+     * MCP: SELF (<5 lignes de logique, le reste est du contrat HTTP)
+     * RAISON: sans cet endroit, une fiche publiée par l'agent ne pourrait jamais être signée.
+     */
+    public function markReviewed(NewsArticle $article): JsonResponse
+    {
+        if ($article->hasEditorialReview()) {
+            return response()->json([
+                'error' => 'Cette fiche porte déjà une signature éditoriale.',
+                'reviewed_at' => $article->reviewed_at->toIso8601String(),
+            ], 409);
+        }
+
+        $article->markReviewedByHuman();
+
+        Log::channel('composition')->info('markReviewed - signature éditoriale posée par un humain', [
+            'article_id' => $article->id,
+            'slug' => $article->slug,
+            'reviewed_at' => optional($article->reviewed_at)->toIso8601String(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'reviewed_at' => optional($article->reviewed_at)->toIso8601String(),
+            'label' => $article->reviewerLabel(),
         ]);
     }
 }
