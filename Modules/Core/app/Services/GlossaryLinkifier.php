@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v10.'; // 2026-08-21 bump : tri secondaire par spécificité de stratégie (voir loadTerms)
+    public const CACHE_KEY = 'glossary.terms.v11.'; // 2026-08-21 bump : tri secondaire par spécificité de stratégie (voir loadTerms)
     public const CACHE_TTL = 3600; // 1h
     // 2026-08-02 #1526 : compteur d'epoch pour invalider le cache du RÉSULTAT linkify() (voir linkify()
     // et flushCache()) sans avoir à énumérer des clés — un seul Cache::forever() invalide tout d'un coup.
@@ -35,6 +35,23 @@ class GlossaryLinkifier
     public const MAX_LINKS_PER_PAGE = 120; // #158 bump 60→120 : articles longs (S90 concentré 20 URLs) saturent à 60. 120 couvre 80%+ occurrences
     public const MAX_OCCURRENCES_PER_TERM = 10; // #158 wrap jusqu'à 10× le même terme par page (vs 1× avant)
 
+
+    /**
+     * 2026-08-21 (demande fondateur, après audit exhaustif) : ORIGINE d'une entrée de matching.
+     * Une même chaîne peut être revendiquée par plusieurs fiches - par exemple « Modèle multimodal »
+     * est le NOM PRINCIPAL de /glossaire/modele-multimodal ET un simple ALIAS de
+     * /glossaire/ia-multimodale. L'intention éditoriale veut que le nom principal l'emporte : c'est
+     * la fiche qui porte réellement ce titre. Ce rang sert de critère de tri (voir loadTerms()),
+     * APRÈS la longueur et la spécificité de stratégie.
+     *   0 = nom principal d'une fiche (glossaire, acronyme, outil)
+     *   1 = alias CURÉ à la main par l'équipe (colonne `aliases`)
+     *   2 = alias AUTO-DÉRIVÉ par le code (pluriel FR, variante de casse, qualifier « X (Y) »)
+     */
+    public const ORIGIN_PRIMARY = 0;
+
+    public const ORIGIN_CURATED_ALIAS = 1;
+
+    public const ORIGIN_DERIVED_ALIAS = 2;
     /**
      * 2026-05-05 #145 WSD : stop-list FR baseline (verbes/noms communs polysémiques).
      * Si terme glossaire matche un mot de cette liste ET que sa strategy est 'loose',
@@ -230,6 +247,7 @@ class GlossaryLinkifier
                             $terms[] = [
                                 'name' => $name, 'slug' => $slug, 'definition' => $shortDef,
                                 'type' => 'glossary', 'url' => $url, 'match_strategy' => $strategy,
+                                'origin_rank' => self::ORIGIN_PRIMARY,
                             ];
                             // 2026-05-11 #138 : aliases manuels DB
                             $aliases = is_array($t->aliases) ? $t->aliases : (is_string($t->aliases) ? json_decode($t->aliases, true) : []);
@@ -240,6 +258,7 @@ class GlossaryLinkifier
                                         'name' => $alias, 'slug' => $slug, 'definition' => $shortDef,
                                         'type' => 'glossary', 'url' => $url,
                                         'match_strategy' => self::escalateStrategyIfStopList($alias, $strategy),
+                                        'origin_rank' => self::ORIGIN_CURATED_ALIAS,
                                     ];
                                 }
                             }
@@ -250,6 +269,7 @@ class GlossaryLinkifier
                                     'name' => $autoAlias, 'slug' => $slug, 'definition' => $shortDef,
                                     'type' => 'glossary', 'url' => $url,
                                     'match_strategy' => self::escalateStrategyIfStopList($autoAlias, $strategy),
+                                    'origin_rank' => self::ORIGIN_DERIVED_ALIAS,
                                 ];
                             }
                             // 2026-05-11 #146 Phase A : aliases morphologiques FR (pluriel + casse)
@@ -262,6 +282,7 @@ class GlossaryLinkifier
                                         'name' => $morpho, 'slug' => $slug, 'definition' => $shortDef,
                                         'type' => 'glossary', 'url' => $url,
                                         'match_strategy' => self::escalateStrategyIfStopList($morpho, $strategy),
+                                        'origin_rank' => self::ORIGIN_DERIVED_ALIAS,
                                     ];
                                 }
                             }
@@ -299,6 +320,7 @@ class GlossaryLinkifier
                                 $terms[] = [
                                     'name' => $full, 'slug' => $slug, 'definition' => $shortDesc,
                                     'type' => 'acronym_full', 'url' => $url, 'match_strategy' => $fullStrategy,
+                                    'origin_rank' => self::ORIGIN_PRIMARY,
                                 ];
                             }
                             // 2026-05-05 #151 : aliases (variations) avec strategy heritee → URL individuelle
@@ -310,6 +332,7 @@ class GlossaryLinkifier
                                         'name' => $alias, 'slug' => $slug, 'definition' => $shortDesc,
                                         'type' => 'acronym_alias', 'url' => $url,
                                         'match_strategy' => self::escalateStrategyIfStopList($alias, $strategy),
+                                        'origin_rank' => self::ORIGIN_CURATED_ALIAS,
                                     ];
                                 }
                             }
@@ -321,6 +344,7 @@ class GlossaryLinkifier
                                         'name' => $autoAlias, 'slug' => $slug, 'definition' => $shortDesc,
                                         'type' => 'acronym_alias', 'url' => $url,
                                         'match_strategy' => self::escalateStrategyIfStopList($autoAlias, $strategy === 'case_sensitive' ? 'loose' : $strategy),
+                                        'origin_rank' => self::ORIGIN_DERIVED_ALIAS,
                                     ];
                                 }
                             }
@@ -332,6 +356,7 @@ class GlossaryLinkifier
                                     'name' => $acro, 'slug' => $slug,
                                     'definition' => $full ? "{$full} : {$shortDesc}" : $shortDesc,
                                     'type' => 'acronym', 'url' => $url, 'match_strategy' => $strategy,
+                                    'origin_rank' => self::ORIGIN_PRIMARY,
                                 ];
                             }
                         });
@@ -351,6 +376,7 @@ class GlossaryLinkifier
                                 'type' => 'acronym',
                                 'url' => $resolvedUrl,
                                 'match_strategy' => 'case_sensitive', // strict pour les sigles
+                                'origin_rank' => self::ORIGIN_PRIMARY,
                             ];
                         }
                     }
@@ -398,6 +424,7 @@ class GlossaryLinkifier
                                     'type' => 'tool',
                                     'url' => $url,
                                     'match_strategy' => 'case_sensitive',
+                                    'origin_rank' => self::ORIGIN_PRIMARY,
                                 ];
                                 $takenLower[$lower] = true;
 
@@ -423,6 +450,7 @@ class GlossaryLinkifier
                                             'type'           => 'tool_alias',
                                             'url'            => $url,
                                             'match_strategy' => 'case_sensitive',
+                                            'origin_rank'    => self::ORIGIN_CURATED_ALIAS,
                                         ];
                                         $takenLower[$aliasLower] = true;
                                     }
@@ -458,9 +486,14 @@ class GlossaryLinkifier
                 'partial_case_sensitive' => 1,
                 default => 2,
             };
+            // 3e critère (2026-08-21) : à longueur ET stratégie égales, le NOM PRINCIPAL d'une fiche
+            // bat un alias curé, qui bat lui-même un alias auto-dérivé (voir ORIGIN_* plus haut).
+            // Mesuré : ce seul critère résout 7 des 11 collisions restantes de l'audit, et surtout
+            // il PRÉVIENT les suivantes sans intervention humaine.
             usort($terms, function ($a, $b) use ($strategyRank) {
                 return (mb_strlen($b['name']) <=> mb_strlen($a['name']))
-                    ?: ($strategyRank($a) <=> $strategyRank($b));
+                    ?: ($strategyRank($a) <=> $strategyRank($b))
+                    ?: (($a['origin_rank'] ?? self::ORIGIN_DERIVED_ALIAS) <=> ($b['origin_rank'] ?? self::ORIGIN_DERIVED_ALIAS));
             });
 
             return $terms;
@@ -666,6 +699,7 @@ class GlossaryLinkifier
             // 2026-08-21 : v9 (et v8, oubliée lors d'un bump précédent) ajoutées ici en même temps
             // que le bump v10 - sans quoi une clé de la version précédente resterait servie jusqu'à
             // l'expiration de son TTL après un flush explicite.
+            Cache::forget('glossary.terms.v10.'.$loc);
             Cache::forget('glossary.terms.v9.'.$loc);
             Cache::forget('glossary.terms.v8.'.$loc);
             Cache::forget('glossary.terms.v7.'.$loc);

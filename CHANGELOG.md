@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.199.0] - 2026-08-21
+
+### Corrigé
+- **Auto-lien du glossaire : le nom principal d'une fiche l'emporte sur l'alias d'une autre fiche.** Un audit exhaustif de la production (5 032 entrées de matching) a révélé 48 libellés visant deux destinations et 11 collisions réelles au-delà du cas « xAI » réglé en v1.198.0. Sept d'entre elles avaient la même cause : un ALIAS captait le NOM PRINCIPAL d'une autre fiche (« Modèle multimodal », titre de `/glossaire/modele-multimodal`, était lié vers `/glossaire/ia-multimodale` ; idem pour « Étiquetage de données », « Agent autonome », « agentic AI »). Chaque entrée porte désormais son origine (`ORIGIN_PRIMARY` / `ORIGIN_CURATED_ALIAS` / `ORIGIN_DERIVED_ALIAS`), utilisée comme troisième critère de tri, après la longueur et la spécificité de stratégie. Ce critère prévient aussi les collisions futures sans intervention humaine. Clé de cache bumpée en `v11`. 3 tests de non-régression.
+
+### Ajouté
+- **`php artisan glossary:audit-collisions` : le filet qui reste.** Les collisions que le code ne peut pas trancher (deux fiches distinctes portant réellement le même nom, comme `/glossaire/jailbreak` et `/glossaire/debridage-dia`) relèvent d'une décision éditoriale. La commande les liste avec la destination obtenue et celle attendue ; `--strict` sort en échec s'il en reste. Écartés après examen du panel (Perplexity, DeepSeek, Gemini 3.1 Pro) : un blocage à l'écriture, qui refuserait des ajouts légitimes et forcerait des titres artificiels ; et un test d'intégration continue rejouant un instantané de la base de production, périmé dès le lendemain et risqué à versionner.
+
 ## [1.198.0] - 2026-08-21
 
 ### Corrigé

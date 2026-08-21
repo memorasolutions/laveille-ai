@@ -106,6 +106,7 @@ class CoreServiceProvider extends ServiceProvider
             \Modules\Core\Console\AuditCommand::class,
             \Modules\Core\Console\RefreshFaviconsCommand::class,
             \Modules\Core\Console\FindReplaceTextCommand::class,
+            \Modules\Core\Console\GlossaryAuditCollisionsCommand::class,
         ]);
     }
 

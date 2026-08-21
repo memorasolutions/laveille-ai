@@ -205,3 +205,57 @@ it('trie les termes de même longueur par spécificité de stratégie décroissa
 
     expect(array_column($sorted, 'slug'))->toBe(['longest-one', 'strict-one', 'partial-one', 'loose-one']);
 });
+
+/**
+ * 2026-08-21 : 3e critère de tri - à longueur ET stratégie égales, le NOM PRINCIPAL d'une fiche bat
+ * un alias curé, qui bat un alias auto-dérivé. Mesuré sur la production : ce seul critère résout 7
+ * des 11 collisions restantes (ex. « Modèle multimodal », nom principal de modele-multimodal, était
+ * capté par ia-multimodale où ce n'est qu'un alias).
+ */
+function glxSortWithOrigin(array $terms): array
+{
+    $strategyRank = static fn (array $t): int => match ($t['match_strategy'] ?? 'loose') {
+        'case_sensitive', 'exact_phrase' => 0,
+        'partial_case_sensitive' => 1,
+        default => 2,
+    };
+
+    usort($terms, function ($a, $b) use ($strategyRank) {
+        return (mb_strlen($b['name']) <=> mb_strlen($a['name']))
+            ?: ($strategyRank($a) <=> $strategyRank($b))
+            ?: (($a['origin_rank'] ?? GlossaryLinkifier::ORIGIN_DERIVED_ALIAS) <=> ($b['origin_rank'] ?? GlossaryLinkifier::ORIGIN_DERIVED_ALIAS));
+    });
+
+    return $terms;
+}
+
+it('fait gagner le nom principal d\'une fiche contre l\'alias d\'une autre fiche', function () {
+    // Ordre d'entrée défavorable : l'alias arrive en premier, comme en production.
+    $sorted = glxSortWithOrigin([
+        ['name' => 'Modèle multimodal', 'slug' => 'ia-multimodale', 'match_strategy' => 'loose', 'origin_rank' => GlossaryLinkifier::ORIGIN_CURATED_ALIAS],
+        ['name' => 'Modèle multimodal', 'slug' => 'modele-multimodal', 'match_strategy' => 'loose', 'origin_rank' => GlossaryLinkifier::ORIGIN_PRIMARY],
+    ]);
+
+    expect($sorted[0]['slug'])->toBe('modele-multimodal');
+});
+
+it('classe les origines dans l\'ordre : nom principal, alias curé, alias auto-dérivé', function () {
+    $sorted = glxSortWithOrigin([
+        ['name' => 'Terme', 'slug' => 'derive', 'match_strategy' => 'loose', 'origin_rank' => GlossaryLinkifier::ORIGIN_DERIVED_ALIAS],
+        ['name' => 'Terme', 'slug' => 'principal', 'match_strategy' => 'loose', 'origin_rank' => GlossaryLinkifier::ORIGIN_PRIMARY],
+        ['name' => 'Terme', 'slug' => 'cure', 'match_strategy' => 'loose', 'origin_rank' => GlossaryLinkifier::ORIGIN_CURATED_ALIAS],
+    ]);
+
+    expect(array_column($sorted, 'slug'))->toBe(['principal', 'cure', 'derive']);
+});
+
+it('garde la spécificité de stratégie PRIORITAIRE sur l\'origine', function () {
+    // Une entrée stricte (même si c'est un alias) doit rester devant une entrée tolérante : c'est
+    // elle qui porte la casse exacte, et elle ne matche rien d'autre (cas xAI, corrigé plus haut).
+    $sorted = glxSortWithOrigin([
+        ['name' => 'ABC', 'slug' => 'loose-principal', 'match_strategy' => 'loose', 'origin_rank' => GlossaryLinkifier::ORIGIN_PRIMARY],
+        ['name' => 'ABC', 'slug' => 'strict-alias', 'match_strategy' => 'case_sensitive', 'origin_rank' => GlossaryLinkifier::ORIGIN_CURATED_ALIAS],
+    ]);
+
+    expect($sorted[0]['slug'])->toBe('strict-alias');
+});
