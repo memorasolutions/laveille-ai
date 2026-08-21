@@ -2,7 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', __('Acronymes de l\'éducation au Québec') . ' - ' . config('app.name'))
-@section('meta_description', __('Le glossaire complet des 314 acronymes du système éducatif québécois. Ministères, associations, formations, technologies et plus.'))
+@section('meta_description', __('Le glossaire complet des :count acronymes du système éducatif québécois. Ministères, associations, formations, technologies et plus.', ['count' => $acronyms->count()]))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Acronymes éducation')])

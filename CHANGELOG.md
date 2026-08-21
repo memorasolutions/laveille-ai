@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.196.5] - 2026-08-21
+
+### Corrigé
+- **Acronymes éducation : nombre d'acronymes de la meta-description rendu dynamique.** La page `/acronymes-education` annonçait « 314 acronymes » en dur dans sa meta-description SEO, alors que le nombre réel est 312 (et changeait à chaque ajout/retrait). Remplacé par le compte réel `$acronyms->count()` : la meta reflète désormais toujours le nombre exact. Le badge de la page et les compteurs du menu étaient déjà dynamiques (`Acronym::count()` en cache 1 h) ; il ne restait que ce nombre figé.
+
 ## [1.196.4] - 2026-08-21
 
 ### Retiré
