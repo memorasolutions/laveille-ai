@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.200.0] - 2026-08-21
+
+### Modifié
+- **Trois fiches en double consolidées, sans rien supprimer.** L'audit `glossary:audit-collisions` a confirmé de vrais doublons : « Jailbreak » et « Débridage d'IA » décrivaient la même chose, « Système multi-agents » et « Système multiagent » aussi, et deux sigles du ministère de l'Éducation désignaient la même direction. Les fiches absorbées sont **dépubliées, jamais effacées** (réversible d'un clic, aucune donnée perdue) et leurs URL redirigées en 301 vers la fiche canonique, selon le pattern déjà en place dans ce projet (12 redirections de doublons existaient déjà). Les alias des fiches absorbées ont été repris par la canonique, pour ne perdre aucune requête : « jailbreak » gagne parce que c'est le terme réellement cherché, mais sa définition nomme désormais l'équivalent français et « débridage d'IA » reste auto-lié. Un tiret cadratin traînait dans cette définition, corrigé au passage.
+- **`DEAFCP` était un sigle faux, `DEAFP` est conservé bien que périmé.** Vérification faite : aucune appellation officielle du ministère ne contient « continue », le sigle exact est DEAFP. L'URL fautive redirige donc vers le sigle exact plutôt que de disparaître, ce qui intercepte une erreur de mémoire courante. DEAFP est gardé et complété d'une note : l'entité a été réorganisée et l'organigramme du 13 juillet 2026 ne la mentionne plus sous ce nom. Un glossaire d'acronymes sert précisément à décoder les sigles qu'on rencontre dans des documents anciens (arbitrage retenu de Gemini 3.1 Pro contre DeepSeek, qui proposait de supprimer les deux fiches).
+
 ## [1.199.0] - 2026-08-21
 
 ### Corrigé

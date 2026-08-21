@@ -27,6 +27,13 @@ Route::middleware('web')->group(function () {
     Route::redirect('/glossaire/affinage', '/glossaire/fine-tuning', 301);
     Route::redirect('/glossaire/edge-ai', '/glossaire/ia-embarquee', 301);
     Route::redirect('/glossaire/spoiler', '/glossaire/data-poisoning', 301);
+    // 2026-08-21 : deux doublons trouvés par `php artisan glossary:audit-collisions`. Fiches
+    // absorbées DÉPUBLIÉES (jamais supprimées : réversible, aucune donnée perdue), leurs alias
+    // repris par la fiche canonique. « Jailbreak » l'emporte sur « Débridage d'IA » parce que
+    // c'est le terme réellement cherché, mais la définition canonique nomme désormais l'équivalent
+    // français, qui reste un alias auto-lié (panel : DeepSeek et Gemini 3.1 Pro convergent).
+    Route::redirect('/glossaire/debridage-dia', '/glossaire/jailbreak', 301);
+    Route::redirect('/glossaire/systeme-multiagent', '/glossaire/systeme-multi-agents', 301);
     Route::get('/glossaire/{slug}', [PublicDictionaryController::class, 'show'])->name('dictionary.show')->middleware('cacheResponse:3600');
 });
 

@@ -15,6 +15,14 @@ Route::middleware('web')->group(function () {
     // ACTION: ajout route désambiguïsation acronymes homonymes (DOIT être AVANT {slug} pour ne pas être capturé)
     // MCP: Hermes→qwen3-max | RAISON: sigle ambigu (N sens) → page de choix générée dynamiquement
     Route::get('/acronymes-education/disambiguate/{sigle}', [PublicAcronymController::class, 'disambiguate'])->name('acronyms.disambiguate');
+    // 2026-08-21 : « DEAFCP » est un sigle FACTUELLEMENT FAUX (vérifié : aucune appellation
+    // officielle du ministère ne contient « continue » ; le sigle exact est DEAFP). La fiche est
+    // dépubliée et son URL redirigée vers le sigle exact plutôt que supprimée : elle intercepte
+    // ainsi une erreur de mémoire courante et amène le lecteur à la bonne page. DEAFP, lui, est
+    // CONSERVÉ bien que l'entité ait été réorganisée en 2026 - un glossaire d'acronymes sert
+    // précisément à décoder les sigles rencontrés dans des documents anciens (arbitrage Gemini
+    // 3.1 Pro contre DeepSeek, qui proposait de supprimer les deux). DOIT rester AVANT {slug}.
+    Route::redirect('/acronymes-education/deafcp', '/acronymes-education/deafp', 301);
     Route::get('/acronymes-education/{slug}', [PublicAcronymController::class, 'show'])->name('acronyms.show');
 });
 
