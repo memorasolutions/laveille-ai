@@ -57,9 +57,17 @@ class PromptFromDraftService
             return null;
         }
 
+        // Modèle EXPLICITE et fiable : le défaut d'AiService (getModelForTask -> 'openrouter/free',
+        // routeur gratuit rate-limité) renvoie vide de façon intermittente, donc inutilisable pour
+        // une action utilisateur temps réel. On réutilise le modèle en tête de la cascade de résumé
+        // News (source unique services.openrouter.summary_models, déjà vetté confidentialité :
+        // fournisseur identifiable, politique de rétention protectrice), openai/gpt-4o-mini par défaut.
+        $reliableModel = config('services.openrouter.summary_models.0', 'openai/gpt-4o-mini');
+
         $response = app(\Modules\AI\Services\AiService::class)->chat(
             $this->buildPrompt($texte),
-            $this->systemPrompt()
+            $this->systemPrompt(),
+            $reliableModel
         );
 
         // AiService::chat() renvoie '' sur budget dépassé, clé API absente, ou erreur HTTP (déjà

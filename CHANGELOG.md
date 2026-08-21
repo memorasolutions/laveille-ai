@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.196.1] - 2026-08-20
+
+### Corrigé
+- **« Partir de mon brouillon » : modèle IA fiable.** La transformation échouait (422 doux) parce que le modèle IA par défaut de l'application (`openrouter/free`, routeur gratuit rate-limité) renvoyait une réponse vide de façon intermittente. Le service utilise désormais explicitement le modèle en tête de la cascade de résumé News (`openai/gpt-4o-mini`, fiable et déjà vetté confidentialité), au lieu du routeur gratuit. Aucune donnée utilisateur n'est journalisée.
+
 ## [1.196.0] - 2026-08-20
 
 ### Ajouté
