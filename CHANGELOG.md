@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.196.3] - 2026-08-21
+
+### Corrigé
+- **Actualités : clarification du filtre par catégorie (les « cloches » d'abonnement).** Sur la page des actualités, chaque catégorie porte une cloche 🔔 permettant à un utilisateur connecté de suivre la catégorie (nouveautés par courriel), mais son rôle n'était pas compréhensible (icône seule, infobulle vague « Suivre »). Ajout d'une légende visible sous les chips (« Cliquez la cloche d'une catégorie pour recevoir ses nouveautés par courriel »), infobulle explicite (« Recevoir les nouveautés de cette catégorie par courriel »), et état « suivi » désormais visible (cloche pleine en teal). Aucune modification de comportement, uniquement de la lisibilité. Visible uniquement pour les utilisateurs connectés (inchangé).
+
 ## [1.196.2] - 2026-08-21
 
 ### Ajouté
