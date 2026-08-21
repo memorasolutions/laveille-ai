@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.196.4] - 2026-08-21
+
+### Retiré
+- **Actualités (fiche) : retrait du bouton « Partager » (partage natif Web Share API).** Sur la page d'une actualité, un bouton « Partager » autonome s'affichait toujours (même sur ordinateur, où il ne faisait que copier le lien), en doublon avec « Copier le lien » de la barre d'interactions et avec la barre de partage flottante par réseau. Jugé inutile et encombrant pour les lecteurs : retiré (bouton, script et règle CSS orpheline). Le partage reste offert par « Copier le lien » et la barre flottante (X, LinkedIn, Facebook, Messenger). Restaurable en version mobile-seulement si souhaité.
+
 ## [1.196.3] - 2026-08-21
 
 ### Corrigé

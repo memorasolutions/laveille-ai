@@ -280,8 +280,6 @@
     .nw-provenance { font-size: 0.875rem; color: var(--c-text-secondary, #4a4f5c); margin: 0 0 1.25rem; }
     .nw-provenance a { color: var(--c-primary); font-weight: 600; text-decoration: none; }
     .nw-provenance a:hover { text-decoration: underline; }
-    /* Partage natif mobile (point 6) - cible tactile 44px. */
-    .nw-share-btn { min-height: 44px; min-width: 44px; justify-content: center; }
     /* Fin de page dégraissée (point 5) - un seul lien générique, même gabarit que le maillage
        evergreen partagé (fronttheme::partials.evergreen-related, hors périmètre ici). */
     .nw-plus-loin { margin-top: 44px; padding-top: 24px; border-top: 1px solid #e5e7eb; }
@@ -530,35 +528,10 @@
                             'journalSourceType' => auth()->check() ? 'news' : null,
                             'adminShareItems' => auth()->user()?->isSuperAdmin() ? $article->adminShareContents() : null,
                         ])
-                        {{-- Partage natif mobile (point 6) : Web Share API si disponible, repli
-                             sur le bouton « Copier le lien » déjà offert ci-dessus. Jamais de
-                             fenêtre native bloquante (alert/confirm/prompt). Cible tactile 44px
-                             (.nw-share-btn, règle CSS plus haut). Réutilise la classe .aab-btn du
-                             partial ci-dessus (déjà chargée sur cette page) plutôt que d'en
-                             recréer une - DRY. --}}
-                        <div class="aab" style="border-bottom: none; padding-top: 0;">
-                            <button type="button" class="aab-btn nw-share-btn" id="nw-share-btn-{{ $article->id }}" aria-label="{{ __('Partager') }}" title="{{ __('Partager') }}">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                                <span class="aab-label">{{ __('Partager') }}</span>
-                            </button>
-                        </div>
-                        <script>
-                            (function () {
-                                var btn = document.getElementById('nw-share-btn-{{ $article->id }}');
-                                if (!btn) { return; }
-                                btn.addEventListener('click', function () {
-                                    var shareTitle = {!! \Illuminate\Support\Js::from($article->seo_title ?? $article->title) !!};
-                                    if (navigator.share) {
-                                        navigator.share({ title: shareTitle, url: window.location.href }).catch(function () {});
-                                        return;
-                                    }
-                                    navigator.clipboard.writeText(window.location.href);
-                                    if (typeof window.toast === 'function') {
-                                        window.toast({!! \Illuminate\Support\Js::from(__('Lien copié')) !!}, 'success', 2000);
-                                    }
-                                });
-                            })();
-                        </script>
+                        {{-- Partage natif « Partager » retiré (v1.196.4, demande fondateur 2026-08-21) :
+                             jugé inutile et encombrant pour les lecteurs. Redondant avec « Copier le
+                             lien » (barre d'interactions ci-dessus) et la barre de partage flottante
+                             par réseau. Restaurable en version mobile-seulement si souhaité. --}}
                     @endif
 
                     {{-- Lead : hook IA + auto-link glossaire 2026-05-05 #141 - affiché
