@@ -136,3 +136,72 @@ it('links the term once per section H2 when perSection is true (moins agressant 
     // 2 occurrences dans la section 1 (une seule liée) + 1 occurrence dans la section 2 (liée) = 2 liens.
     expect($linkCount)->toBe(2);
 });
+
+/**
+ * 2026-08-21 (demande fondateur) : à longueur égale, l'entrée dont la stratégie est la PLUS STRICTE
+ * doit gagner, pour qu'un alias insensible à la casse ne vole pas un terme dont la casse est exacte.
+ * Bug mesuré en prod avant le correctif : « xAI » (entreprise) était lié vers /glossaire/ia-explicable
+ * parce que l'alias « XAI » (loose, IA explicable) précédait l'entrée « xAI » (case_sensitive) ;
+ * même motif pour « IA » (alias loose vers /glossaire/autonomie-ia).
+ */
+function glxDomFromHtml(string $html): array
+{
+    $dom = new \DOMDocument;
+    libxml_use_internal_errors(true);
+    $dom->loadHTML('<?xml encoding="UTF-8"?><div id="glx-root">'.$html.'</div>', LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    libxml_clear_errors();
+
+    return [$dom, $dom->getElementById('glx-root')];
+}
+
+/** Trie comme loadTerms() : longueur DESC, puis spécificité de stratégie (strict avant tolérant). */
+function glxSortLikeProduction(array $terms): array
+{
+    $rank = static fn (array $t): int => match ($t['match_strategy'] ?? 'loose') {
+        'case_sensitive', 'exact_phrase' => 0,
+        'partial_case_sensitive' => 1,
+        default => 2,
+    };
+    usort($terms, fn ($a, $b) => (mb_strlen($b['name']) <=> mb_strlen($a['name'])) ?: ($rank($a) <=> $rank($b)));
+
+    return $terms;
+}
+
+it('préfère le terme à casse exacte plutôt que l\'alias insensible à la casse (xAI ≠ XAI)', function () {
+    // Ordre d'entrée VOLONTAIREMENT défavorable : l'alias loose arrive en premier, comme en prod.
+    $terms = glxSortLikeProduction([
+        ['name' => 'XAI', 'slug' => 'ia-explicable', 'definition' => 'IA explicable', 'type' => 'glossary', 'url' => '/glossaire/ia-explicable', 'match_strategy' => 'loose'],
+        ['name' => 'xAI', 'slug' => 'xai', 'definition' => 'Entreprise d\'Elon Musk', 'type' => 'glossary', 'url' => '/glossaire/xai', 'match_strategy' => 'case_sensitive'],
+    ]);
+
+    [$dom, $root] = glxDomFromHtml('<p>Le litige oppose xAI au Minnesota.</p>');
+    glxWalk($dom, $root, $terms, false, 10);
+
+    $html = $dom->saveHTML($root);
+    expect($html)->toContain('/glossaire/xai')
+        ->and($html)->not->toContain('/glossaire/ia-explicable');
+});
+
+it('laisse l\'alias insensible à la casse gagner quand la casse ne correspond à aucun terme strict', function () {
+    // « xai » tout en minuscules : l'entrée case_sensitive « xAI » ne matche pas, le repli loose doit jouer.
+    $terms = glxSortLikeProduction([
+        ['name' => 'XAI', 'slug' => 'ia-explicable', 'definition' => 'IA explicable', 'type' => 'glossary', 'url' => '/glossaire/ia-explicable', 'match_strategy' => 'loose'],
+        ['name' => 'xAI', 'slug' => 'xai', 'definition' => 'Entreprise d\'Elon Musk', 'type' => 'glossary', 'url' => '/glossaire/xai', 'match_strategy' => 'case_sensitive'],
+    ]);
+
+    [$dom, $root] = glxDomFromHtml('<p>On parle beaucoup de xai en ce moment.</p>');
+    glxWalk($dom, $root, $terms, false, 10);
+
+    expect($dom->saveHTML($root))->toContain('/glossaire/ia-explicable');
+});
+
+it('trie les termes de même longueur par spécificité de stratégie décroissante', function () {
+    $sorted = glxSortLikeProduction([
+        ['name' => 'ABC', 'slug' => 'loose-one', 'match_strategy' => 'loose'],
+        ['name' => 'ABC', 'slug' => 'partial-one', 'match_strategy' => 'partial_case_sensitive'],
+        ['name' => 'ABC', 'slug' => 'strict-one', 'match_strategy' => 'case_sensitive'],
+        ['name' => 'ABCDEF', 'slug' => 'longest-one', 'match_strategy' => 'loose'],
+    ]);
+
+    expect(array_column($sorted, 'slug'))->toBe(['longest-one', 'strict-one', 'partial-one', 'loose-one']);
+});

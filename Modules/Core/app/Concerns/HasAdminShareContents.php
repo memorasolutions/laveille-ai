@@ -58,6 +58,26 @@ trait HasAdminShareContents
      * LinkedIn pénalise le « bridge behaviour » (post qui pousse vers un commentaire-lien) en 2026.
      * Le lien se met à la main dans un 1er commentaire substantiel (pas un lien nu). Format long structuré.
      */
+    /**
+     * 2026-08-21 (demande fondateur : « je veux des posts viraux chaque fois ») - refonte du post
+     * LinkedIn. Défaut constaté sur un post réel : trois fragments TRONQUÉS au milieu d'une phrase
+     * (« compte 67 leç… ») collés bout à bout, avec les libellés internes recopiés (« Le chiffre à
+     * retenir : », « Pourquoi ça compte : ») et un appel à l'action mou.
+     *
+     * Règles retenues (panel : DeepSeek pour le gabarit LinkedIn B2B francophone 2026, synthèse et
+     * arbitrage éditorial par le superviseur) :
+     *  1. JAMAIS de phrase coupée : chaque bloc s'arrête à une frontière de phrase réelle
+     *     (firstCompleteSentences), quitte à être plus court. Une ellipse « … » au milieu d'un mot
+     *     est le défaut le plus visible d'un post généré.
+     *  2. Première ligne AUTONOME et courte (<= 150 caractères) : c'est tout ce que LinkedIn montre
+     *     avant « voir plus ». Elle doit donner envie sans promettre plus que la fiche ne prouve.
+     *  3. AUCUN libellé de section interne recopié dans le post.
+     *  4. Corps aéré : une idée par bloc, séparé par une ligne vide.
+     *  5. Appel à l'action précis (une vraie question sur le sujet), jamais « votre avis ? ».
+     *  6. 3 à 5 mots-clics, en fin de post seulement.
+     * Le lien reste dans le post (le placer en commentaire est une pratique courante mais son gain
+     * n'est pas prouvé de façon indépendante, et un lien absent nuit à la traçabilité de la source).
+     */
     protected function buildLinkedInPost(string $hook, string $plainDef, string $interest, string $cta, array $hashtags, string $bonus = ''): string
     {
         $hook = trim($hook);
@@ -67,17 +87,45 @@ trait HasAdminShareContents
         $bonus = trim($bonus);
         $hashtags = array_filter(array_map('trim', $hashtags));
 
-        $parts = [$hook];
-        if ($plainDef !== '' && ! $this->textsAreSimilar($hook, $plainDef)) {
-            $parts[] = "En clair : {$plainDef}";
+        // Ligne d'accroche : la ou les premières phrases COMPLÈTES du hook, dans la limite d'affichage.
+        $opener = $this->firstCompleteSentences($hook, 150);
+        if ($opener === '') {
+            $opener = $this->firstCompleteSentences($plainDef, 150);
         }
-        if ($interest !== '') {
-            $parts[] = "👉 {$interest}";
+
+        $parts = [$opener];
+
+        // Contexte : le RESTE du hook, mais seulement si l'accroche en est réellement le début
+        // (sinon on couperait le hook en plein mot - défaut attrapé au test le 2026-08-21, l'accroche
+        // pouvant provenir du résumé quand la première phrase du hook dépasse la limite d'affichage).
+        $context = '';
+        if ($opener !== '' && str_starts_with($hook, $opener)) {
+            // L'accroche EST le début du hook : le contexte est la suite du hook.
+            $context = $this->firstCompleteSentences(trim(mb_substr($hook, mb_strlen($opener))), 320);
+        } elseif ($hook !== '') {
+            // L'accroche vient d'ailleurs (résumé) : le hook entier redevient le contexte.
+            $context = $this->firstCompleteSentences($hook, 320);
         }
+        if ($context === '' && ! $this->textsAreSimilar($opener, $plainDef)) {
+            $context = $this->firstCompleteSentences($plainDef, 320);
+        }
+        if ($context !== '' && ! $this->textsAreSimilar($opener, $context)) {
+            $parts[] = $context;
+        }
+
+        // Un fait distinct, sans libellé interne recopié.
+        $detail = $this->firstCompleteSentences($this->stripSectionLabel($interest), 300);
+        if ($detail !== '' && ! $this->textsAreSimilar($opener, $detail) && ! $this->textsAreSimilar($context, $detail)) {
+            $parts[] = $detail;
+        }
+
         if ($bonus !== '') {
             $parts[] = $bonus;
         }
-        $parts[] = $cta;
+        if ($cta !== '') {
+            $parts[] = $cta;
+        }
+
         $post = implode("\n\n", $parts);
 
         $tags = array_slice($hashtags, 0, 5);
@@ -86,6 +134,72 @@ trait HasAdminShareContents
         }
 
         return trim($post);
+    }
+
+    /**
+     * 2026-08-21 : retourne les premières phrases COMPLÈTES d'un texte sans jamais dépasser $max,
+     * et sans jamais couper au milieu d'une phrase (contrairement à smartTrim, qui tronque au
+     * dernier espace et ajoute « … »). Retourne une chaîne vide si même la première phrase dépasse
+     * la limite : mieux vaut omettre un bloc que publier une phrase mutilée.
+     */
+    protected function firstCompleteSentences(string $text, int $max): string
+    {
+        $text = trim($this->stripLinks($text));
+        if ($text === '') {
+            return '';
+        }
+        if (mb_strlen($text) <= $max) {
+            return $text;
+        }
+
+        // Découpe aux frontières de phrase (point, point d'exclamation, point d'interrogation)
+        // suivies d'une espace : conserve les décimales (« 3.5 ») et les sigles pointés.
+        $sentences = preg_split('/(?<=[.!?])\s+/u', $text) ?: [];
+        $out = '';
+        foreach ($sentences as $sentence) {
+            $sentence = trim($sentence);
+            if ($sentence === '') {
+                continue;
+            }
+            $candidate = $out === '' ? $sentence : $out.' '.$sentence;
+            if (mb_strlen($candidate) > $max) {
+                break;
+            }
+            $out = $candidate;
+        }
+
+        return $out;
+    }
+
+    /**
+     * 2026-08-21 : retire un libellé de section interne en tête de fragment (« Le chiffre à
+     * retenir : », « Pourquoi ça compte : »...). Ces libellés structurent la fiche du site ; recopiés
+     * tels quels dans un post social, ils trahissent la génération automatique.
+     */
+    protected function stripSectionLabel(string $text): string
+    {
+        $stripped = $this->stripSectionLabelRaw($text);
+
+        // Recapitalise : « Pourquoi ça compte : la formation devient... » laissait une minuscule
+        // en tête de bloc une fois le libellé retiré (défaut attrapé au test le 2026-08-21).
+        if ($stripped !== '' && $stripped !== $text) {
+            $first = mb_substr($stripped, 0, 1);
+            if (mb_strtolower($first) === $first && preg_match('/\p{L}/u', $first)) {
+                $stripped = mb_strtoupper($first).mb_substr($stripped, 1);
+            }
+        }
+
+        return $stripped;
+    }
+
+    /** Retrait brut du libellé de section, sans recapitalisation (voir stripSectionLabel). */
+    protected function stripSectionLabelRaw(string $text): string
+    {
+        return trim(preg_replace(
+            '/^\s*(le chiffre (?:à|a) retenir|chiffre[- ]cl(?:é|e)|pourquoi (?:ça|ca) compte|(?:l\')?essentiel|(?:à|a) retenir|action concr(?:è|e)te|ce que (?:ça|ca) change au Qu(?:é|e)bec|rep(?:è|e)res dat(?:é|e)s|en clair)\s*:\s*/iu',
+            '',
+            trim($text)
+        ) ?? $text);
     }
 
     /**

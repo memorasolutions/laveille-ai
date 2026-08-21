@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v9.'; // #164 bump : ajout de la 3e source (outils de l'annuaire)
+    public const CACHE_KEY = 'glossary.terms.v10.'; // 2026-08-21 bump : tri secondaire par spécificité de stratégie (voir loadTerms)
     public const CACHE_TTL = 3600; // 1h
     // 2026-08-02 #1526 : compteur d'epoch pour invalider le cache du RÉSULTAT linkify() (voir linkify()
     // et flushCache()) sans avoir à énumérer des clés — un seul Cache::forever() invalide tout d'un coup.
@@ -436,8 +436,32 @@ class GlossaryLinkifier
                 }
             }
 
-            // Sort par longueur DESC (matche les expressions longues en priorité)
-            usort($terms, fn ($a, $b) => mb_strlen($b['name']) <=> mb_strlen($a['name']));
+            // Sort par longueur DESC (matche les expressions longues en priorité), PUIS par
+            // SPÉCIFICITÉ DE STRATÉGIE à longueur égale (2026-08-21, demande fondateur ; panel :
+            // Gemini 3.1 Pro « recommandation 1 », la seule sans coût de parcours DOM).
+            //
+            // Bug mesuré en prod AVANT ce tri : à longueur égale, l'ordre entre deux entrées était
+            // indéterminé, donc une entrée `loose` (souvent un ALIAS auto-dérivé, insensible à la
+            // casse) pouvait passer devant l'entrée `case_sensitive` dont la casse est EXACTEMENT
+            // celle du texte. Conséquences constatées sur des pages réelles :
+            //   « xAI » (entreprise d'Elon Musk) → /glossaire/ia-explicable   [alias loose « XAI »]
+            //   « IA »  (générique)              → /glossaire/autonomie-ia    [alias loose « IA »]
+            // Désormais, à longueur égale, la stratégie la plus stricte gagne : case_sensitive (0)
+            // avant partial_case_sensitive (1) avant loose (2). Une entrée case_sensitive n'a par
+            // définition PAS d'effet sur un texte dont la casse diffère (sa regex ne matche pas) :
+            // le repli sur l'entrée loose reste donc possible, ce qui rend ce tri non régressif
+            // pour les 5000+ autres entrées (« l'api rest » continue de matcher l'alias loose).
+            // Piste explicitement ÉCARTÉE (Gemini) : exiger la casse exacte pour tout terme court
+            // (<= 4 caractères) casserait « LE FUTUR DE L'IA », « une api rest », « Ia générative ».
+            $strategyRank = static fn (array $t): int => match ($t['match_strategy'] ?? 'loose') {
+                'case_sensitive', 'exact_phrase' => 0,
+                'partial_case_sensitive' => 1,
+                default => 2,
+            };
+            usort($terms, function ($a, $b) use ($strategyRank) {
+                return (mb_strlen($b['name']) <=> mb_strlen($a['name']))
+                    ?: ($strategyRank($a) <=> $strategyRank($b));
+            });
 
             return $terms;
         });
@@ -639,6 +663,11 @@ class GlossaryLinkifier
         // #158 flush toutes les versions cache (v2-v8) pour migration propre
         foreach (['fr_CA', 'fr', 'en', 'en_CA'] as $loc) {
             Cache::forget(self::CACHE_KEY.$loc);
+            // 2026-08-21 : v9 (et v8, oubliée lors d'un bump précédent) ajoutées ici en même temps
+            // que le bump v10 - sans quoi une clé de la version précédente resterait servie jusqu'à
+            // l'expiration de son TTL après un flush explicite.
+            Cache::forget('glossary.terms.v9.'.$loc);
+            Cache::forget('glossary.terms.v8.'.$loc);
             Cache::forget('glossary.terms.v7.'.$loc);
             Cache::forget('glossary.terms.v6.'.$loc);
             Cache::forget('glossary.terms.v5.'.$loc);

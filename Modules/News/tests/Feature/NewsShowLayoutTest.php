@@ -147,7 +147,7 @@ it('adapts the transparency line when niveau_preuve is relais', function () {
 
 // ── Point 3 : barre d'interactions + bouton Partager après l'encadré ───────────────
 
-it('places the action bar and the Partager button after the "L\'essentiel" box, in that order', function () {
+it('places the action bar after the "L\'essentiel" box', function () {
     $source = nslSource();
     $article = nslArticle($source->id, 'ordre-boutons', [
         'structured_summary' => ['tldr' => 'Réponse directe de test.', 'key_points' => ['Point clé.']],
@@ -158,22 +158,18 @@ it('places the action bar and the Partager button after the "L\'essentiel" box, 
 
     $html = $response->getContent();
 
-    // Marqueurs body-only : « L'ESSENTIEL » et « nw-share-btn » existent AUSSI dans le <style>
-    // du <head> (règle CSS ::before, sélecteur .nw-share-btn) - une comparaison de position sur
-    // ces chaînes serait trompeuse (le <head> précède toujours le <body>). On cible donc la
-    // balise ouvrante réelle de l'encadré, absente du CSS.
+    // 2026-08-21 : le bouton « Partager » (partage natif) a été retiré de la fiche au commit
+    // v1.196.4 (demande fondateur : redondant et encombrant, « Copier le lien » et la barre
+    // flottante suffisent). Ce test ne vérifie donc plus que l'ordre encadré -> barre d'actions.
     $posEssentiel = mb_strpos($html, '<aside class="nw-tldr"');
     $posSave = mb_strpos($html, 'Sauvegarder');
-    $posShare = mb_strpos($html, 'id="nw-share-btn-');
 
     expect($posEssentiel)->not->toBeFalse()
         ->and($posSave)->not->toBeFalse()
-        ->and($posShare)->not->toBeFalse()
-        ->and($posSave)->toBeGreaterThan($posEssentiel)
-        ->and($posShare)->toBeGreaterThan($posEssentiel);
+        ->and($posSave)->toBeGreaterThan($posEssentiel);
 });
 
-it('renders the Partager button with a 44px target and a Web Share API fallback to copy', function () {
+it('ne rend plus le bouton « Partager » (partage natif) retiré en v1.196.4', function () {
     $source = nslSource();
     $article = nslArticle($source->id, 'bouton-partager', [
         'structured_summary' => ['tldr' => 'Réponse directe de test.', 'key_points' => ['Point clé.']],
@@ -181,11 +177,11 @@ it('renders the Partager button with a 44px target and a Web Share API fallback 
 
     $response = $this->get(route('news.show', $article));
 
+    // 2026-08-21 : garde-fou INVERSÉ après le retrait demandé par le fondateur (v1.196.4) - le
+    // bouton de partage natif ne doit plus réapparaître sur la fiche publique.
     $response->assertOk()
-        ->assertSee('nw-share-btn', false)
-        ->assertSee('Partager', false)
-        ->assertSee('navigator.share', false)
-        ->assertSee('navigator.clipboard.writeText', false);
+        ->assertDontSee('id="nw-share-btn-', false)
+        ->assertDontSee('navigator.share', false);
 });
 
 // ── Point 4 : ligne de provenance « D'après ..., relayé par ... » ──────────────────

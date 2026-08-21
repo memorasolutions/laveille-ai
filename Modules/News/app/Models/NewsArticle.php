@@ -1074,8 +1074,11 @@ class NewsArticle extends Model implements Searchable
 
         // 3. Post réseaux sociaux natif (via trait HasAdminShareContents).
         // Post réseaux sociaux « 2026 » : hook structuré + En clair (tldr/résumé) + 👉 (point clé) + CTA (sans lien ni promo).
-        $hook = $this->smartTrim((string) (data_get($structured, 'hook') ?: $this->title), 150);
-        $plainDef = $this->smartTrim($this->stripLinks((string) (data_get($structured, 'tldr') ?: $this->summary)), 200);
+        // 2026-08-21 : on ne PRÉ-tronque plus ici (smartTrim coupait au milieu d'une phrase et
+        // ajoutait « … », d'où des posts sociaux illisibles). buildLinkedInPost/buildFacebookPost
+        // découpent désormais eux-mêmes à des frontières de phrase réelles.
+        $hook = trim((string) (data_get($structured, 'hook') ?: $this->title));
+        $plainDef = trim($this->stripLinks((string) (data_get($structured, 'tldr') ?: $this->summary)));
         // 👉 : un point clé DISTINCT du résumé (évite la redondance hook/En clair/👉).
         $interest = '';
         $candidates = [];
@@ -1097,7 +1100,7 @@ class NewsArticle extends Model implements Searchable
             if ($c === '' || $this->textsAreSimilar($plainDef, $c)) {
                 continue;
             }
-            $interest = $this->smartTrim($c, 180);
+            $interest = $c; // découpe par phrase complète déléguée à buildLinkedInPost (2026-08-21)
             break;
         }
         $tags = ['#IA'];

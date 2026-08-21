@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.198.0] - 2026-08-21
+
+### Corrigé
+- **Auto-lien du glossaire : le bon terme gagne quand deux entrées portent le même mot.** À longueur égale, l'ordre entre deux entrées du linkifier était indéterminé, si bien qu'un ALIAS insensible à la casse pouvait passer devant l'entrée dont la casse est exactement celle du texte. Mesuré en production : « xAI » (l'entreprise) pointait vers `/glossaire/ia-explicable` (à cause de l'acronyme « XAI », IA explicable) et « IA » pointait vers `/glossaire/autonomie-ia`. Le tri de `GlossaryLinkifier::loadTerms()` ajoute désormais un critère secondaire de spécificité (`case_sensitive` avant `partial_case_sensitive` avant `loose`) ; une entrée stricte ne matchant pas une casse différente, le repli tolérant reste possible (« une api rest » continue de fonctionner). Aucun coût de parcours du DOM. Clé de cache bumpée en `v10`, et `flushCache()` purge désormais aussi v8/v9. Piste écartée après analyse (Gemini 3.1 Pro) : exiger la casse exacte pour tout terme court, qui aurait cassé « LE FUTUR DE L'IA » ou « Ia générative ». 3 tests de non-régression, dont la preuve d'échec sans le correctif.
+
+### Modifié
+- **Post LinkedIn de partage : fin des phrases coupées et des libellés internes.** Le gabarit collait bout à bout trois fragments tronqués à 150/200/180 caractères (« compte 67 leç… ») en recopiant les libellés de la fiche (« Le chiffre à retenir : », « Pourquoi ça compte : »). Le générateur découpe désormais uniquement à des frontières de phrase réelles (nouveau `firstCompleteSentences()` : un bloc est omis plutôt que mutilé), retire les libellés de section et recapitalise (`stripSectionLabel()`), garde une première ligne autonome sous 150 caractères (limite d'affichage avant « voir plus »), et plafonne les mots-clics à 5, en fin de post. `NewsArticle::adminShareContents()` ne pré-tronque plus. 6 tests de garde-fou.
+
 ## [1.197.0] - 2026-08-21
 
 ### Ajouté
