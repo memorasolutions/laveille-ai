@@ -576,6 +576,39 @@
                                 </div>
                             </div>
 
+                            {{-- « Partir de mon brouillon » (Brique 2, SPEC-BRIQUE2, design docs/specs/
+                                 2026-08-20-bibliotheque-pre-prompts-design.md) : décomposition inverse -
+                                 un texte déjà écrit (courriel, notes, prompt existant) devient un état de
+                                 wizard pré-rempli (taskObject + espaces à remplir), via submitDraft()
+                                 (constructeur-prompts-core.js) qui appelle _applyWizardParams(), le MÊME
+                                 chemin que ?remix=. Décision FERME (2026-08-04, jamais rouverte) : PAS de
+                                 panneau de masquage PII intégré ici - seulement un avertissement non
+                                 bloquant + lien vers /outils/anonymiseur si detectEntities() (client,
+                                 anonymizer-core.js chargé plus bas, @if(window.AnonymizerCore) gardé côté
+                                 JS) trouve des renseignements personnels dans le brouillon collé. Visible
+                                 seulement à l'état vide de cette étape (taskObject encore vide) - une fois
+                                 la demande tapée à la main, ce point d'entrée n'a plus lieu d'être. --}}
+                            <div class="ct-block__field mb-3" x-show="taskObject === '' && !editLoading" x-cloak>
+                                <button type="button" x-show="!draftOpen" @click="draftOpen = true" style="display: inline-flex; align-items: center; min-height: 44px; padding: 4px 6px; border: 0; background: transparent; color: var(--c-primary); font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                                    {{ __('✍️ Partir de mon brouillon (courriel, notes, prompt existant)') }}
+                                </button>
+                                <div x-show="draftOpen" x-transition style="border: 1px solid var(--c-primary); border-radius: 10px; padding: 10px;">
+                                    <label class="form-label fw-medium mb-1" for="cpDraftText" style="font-size: 0.85rem;">{{ __('Colle ton texte ici') }}</label>
+                                    <textarea id="cpDraftText" class="form-control" rows="4" x-model="draftText" autocomplete="off" placeholder="{{ __('Ex: le courriel que tu écris souvent, tes notes de réunion, un prompt déjà utilisé...') }}" aria-label="{{ __('Brouillon à transformer') }}" @blur="checkDraftPii()"></textarea>
+                                    <p class="small mb-0 mt-2 p-2 rounded" style="font-size: 0.8rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;" x-show="draftPiiWarning" x-cloak>🔒 {{ __('Ce texte semble contenir des renseignements personnels. Pour les retirer avant de l\'envoyer, utilise l\'') }}<a href="/outils/anonymiseur" style="color: #0A3A42; font-weight: 600; text-decoration: underline;">{{ __('Anonymiseur') }}</a>.</p>
+                                    <p class="small mb-0 mt-2" style="font-size: 0.8rem; color: #991B1B;" x-show="draftError" x-cloak x-text="draftError" role="alert" aria-live="assertive"></p>
+                                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px;">
+                                        <button type="button" class="ct-btn ct-btn-primary ct-btn-xs" style="min-height:44px;" @click="submitDraft()" :disabled="draftLoading || draftText.trim() === ''">
+                                            <span x-show="!draftLoading">{{ __('Transformer en prompt') }}</span>
+                                            <span x-show="draftLoading" x-cloak>{{ __('Transformation...') }}</span>
+                                        </button>
+                                        <button type="button" class="ct-btn ct-btn-outline ct-btn-xs" style="min-height:44px;" @click="draftOpen = false; draftText = ''; draftError = ''; draftPiiWarning = false;">
+                                            {{ __('Annuler') }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                             {{-- Retrait du panneau de masquage intégré (2026-08-04, demande explicite de
                                  l'utilisateur) : l'anonymisation vit désormais UNIQUEMENT à l'outil séparé
                                  /outils/anonymiseur (jamais touché par ce retrait). L'`id` de ce champ est
@@ -2003,9 +2036,21 @@ window.promptBuilderConfig = {
         spaceRenameMergeOne: @json(__('Ce texte apparaît déjà 1 fois dans ta demande - toutes les occurrences seront remplies ensemble.')),
         spaceRenameMergeMany: @json(__('Ce texte apparaît déjà {count} fois dans ta demande - toutes les occurrences seront remplies ensemble.')),
         spaceOrphanOne: @json(__("1 espace à remplir n'est plus dans ton texte.")),
-        spaceOrphanMany: @json(__('{count} espaces à remplir ne sont plus dans ton texte.'))
+        spaceOrphanMany: @json(__('{count} espaces à remplir ne sont plus dans ton texte.')),
+        // Brique 2 (2026-08-20) - « Partir de mon brouillon » : message doux affiché par submitDraft()
+        // (constructeur-prompts-core.js) sur échec de transformation (JSON invalide, texte vide, budget
+        // IA dépassé...) - jamais un 500, jamais une erreur technique brute affichée à l'utilisateur.
+        draftError: @json(__("Je n'ai pas pu transformer ce texte, réessaie ou pars du wizard."))
     }
 };
 </script>
+{{-- Brique 2 (2026-08-20) - « Partir de mon brouillon » : moteur de détection PII 100 % client
+     (anonymizer-core.js), jamais l'éditeur riche complet (anonymizer-rich.js/anonymizer-ui.js, inutile
+     ici - voir Modules/Tools/resources/views/partials/anonymizer-scripts.blade.php pour la version
+     complète utilisée par /outils/anonymiseur et « Mes prompts »). Chargé en `defer`, donc déjà présent
+     au moment où submitDraft()/checkDraftPii() s'exécutent (déclenchés par un clic, jamais avant
+     interaction) ; window.AnonymizerCore est de toute façon vérifié avant usage (dégradation silencieuse
+     si absent - jamais d'erreur JS bloquante). --}}
+<script src="{{ asset('assets/tools/anonymiseur/anonymizer-core.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/constructeur-prompts/constructeur-prompts-core.js') }}?v={{ config('version.semver') }}" defer></script>
 @endpush

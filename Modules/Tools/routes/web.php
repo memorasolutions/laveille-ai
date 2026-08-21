@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Tools\Http\Controllers\Admin\ToolAdminController;
 use Modules\Tools\Http\Controllers\PublicCrosswordController;
 use Modules\Tools\Http\Controllers\PublicMotdleController;
+use Modules\Tools\Http\Controllers\PromptFromDraftController;
 use Modules\Tools\Http\Controllers\PublicPromptController;
 use Modules\Tools\Http\Controllers\PublicQtController;
 use Modules\Tools\Http\Controllers\PublicToolController;
@@ -102,6 +103,13 @@ Route::middleware('web')->group(function () {
         ->where('publicId', '[a-zA-Z0-9_-]+')
         ->middleware('throttle:60,1')
         ->name('tools.prompts.remix-data');
+
+    // Brique 2 - « Partir de mon brouillon » (SPEC-BRIQUE2, design docs/specs/
+    // 2026-08-20-bibliotheque-pre-prompts-design.md) : un appel LLM est cher, throttle:5,60 (comme
+    // les autres endpoints IA du projet) - jamais le throttle:60,1 des simples lectures ci-dessus.
+    Route::post('/outils/constructeur-prompts/depuis-brouillon', [PromptFromDraftController::class, 'transform'])
+        ->middleware('throttle:5,60')
+        ->name('tools.prompts.from-draft');
 
     // #177 Avatar tool — admin-only durant construction (page "En construction" sinon)
     Route::get('/outils/avatar', [\Modules\Tools\Http\Controllers\AvatarController::class, 'index'])

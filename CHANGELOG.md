@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.196.0] - 2026-08-20
+
+### Ajouté
+- **Constructeur de prompts : « Partir de mon brouillon » (Brique 2, l'idée neuve la mieux notée du club, 96).** À l'état vide du constructeur, un point d'entrée discret permet de coller un texte existant (courriel, notes, ancien prompt) ; l'outil le transforme en une demande réutilisable qui pré-remplit le wizard avec des espaces à remplir détectés. Endpoint `POST /outils/constructeur-prompts/depuis-brouillon` (`throttle:5,60`), qui réutilise le service LLM applicatif existant (`AiService::chat()`, budgété, avec la garde de confidentialité `OpenRouterPrivacy` deny+zdr obligatoire - Loi 25, testée). La sortie du modèle n'est JAMAIS crue aveuglément : validée (clés autorisées, taskObject non vide, espaces = sous-chaînes réelles de la demande), tout échec = 422 propre jamais un 500 ; texte tronqué à 4000 caractères, contenu utilisateur jamais journalisé. Détection de renseignements personnels côté client (réutilise l'Anonymiseur) : si le texte collé en contient, un avertissement non bloquant renvoie vers l'outil Anonymiseur - sans réintroduire de panneau de masquage intégré (doctrine du 2026-08-04 respectée).
+
 ## [1.195.1] - 2026-08-20
 
 ### Corrigé

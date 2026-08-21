@@ -76,6 +76,19 @@ document.addEventListener('alpine:init', function() {
             // selectTask() pendant le chargement de ?remix=ID (voir init() plus bas), même
             // garde-fou anti-race-condition que ?edit=ID ci-dessus (round 64).
             editLoading: !!(new URLSearchParams(window.location.search).get('edit') || new URLSearchParams(window.location.search).get('remix')),
+            // Brique 2 (2026-08-20) - « Partir de mon brouillon » (SPEC-BRIQUE2, design docs/specs/
+            // 2026-08-20-bibliotheque-pre-prompts-design.md) : état du panneau de collage-transformation
+            // à l'étape 2, avant #cpTaskField. SANS RAPPORT avec le « brouillon local » ci-dessus
+            // (_draftKey/draftRestored, qui autosauvegarde le wizard EN COURS dans localStorage) - ici
+            // "draft" = le texte source (courriel, notes) que la personne colle pour le faire transformer.
+            draftOpen: false,
+            draftText: '',
+            draftLoading: false,
+            // Détection PII côté client UNIQUEMENT (AnonymizerCore.detectEntities(), decision FERME
+            // 2026-08-04 : JAMAIS de panneau de masquage réintégré ici) - avertissement non bloquant,
+            // voir checkDraftPii()/submitDraft() plus bas.
+            draftPiiWarning: false,
+            draftError: '',
             // Round 152 (2026-08-01, écran 3) : les 5 accordéons imbriqués « + Réglages avancés »
             // (openSections.role/verb/format/technique/contraintes) sont RETIRÉS - le proprétaire a
             // été explicite (« les ouvrir et fermer à chaque fois... ark ! »). Les mêmes réglages
@@ -1873,6 +1886,58 @@ document.addEventListener('alpine:init', function() {
                 clearTimeout(this._saveErrorTimer);
                 this.saveError = msg || (window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.saveError) || 'Erreur de sauvegarde. Réessayez.';
                 this._saveErrorTimer = setTimeout(function() { self.saveError = ''; }, 4000);
+            },
+            // Brique 2 (2026-08-20) - « Partir de mon brouillon ». Avertissement NON BLOQUANT : ne
+            // JAMAIS empêcher submitDraft() de continuer, seulement informer + pointer vers
+            // /outils/anonymiseur (décision FERME 2026-08-04, jamais un éditeur de masquage ici).
+            // window.AnonymizerCore est chargé en `defer` sur cette page (voir @push('scripts') du
+            // Blade) - vérifié avant usage : dégradation silencieuse si absent, jamais d'erreur JS.
+            checkDraftPii: function() {
+                var texte = (this.draftText || '').trim();
+                if (!texte) { this.draftPiiWarning = false; return; }
+                try {
+                    this.draftPiiWarning = !!(window.AnonymizerCore && window.AnonymizerCore.detectEntities(texte).length > 0);
+                } catch (e) {
+                    this.draftPiiWarning = false;
+                }
+            },
+            // Brique 2 (2026-08-20) - envoie le brouillon collé à POST /outils/constructeur-prompts/
+            // depuis-brouillon (PromptFromDraftController::transform(), throttle:5,60) ; sur succès,
+            // applique le `params` renvoyé par le MÊME chemin que ?remix= (_applyWizardParams()) - le
+            // wizard se pré-remplit avec taskObject + les espaces à remplir déjà posés. Le serveur ne
+            // renvoie jamais un 500 sur une sortie IA imparfaite (validée côté PHP) : seul un message
+            // doux (draftError) est affiché ici en cas d'échec, jamais une erreur technique brute.
+            submitDraft: function() {
+                var self = this;
+                var texte = (this.draftText || '').trim();
+                if (!texte || this.draftLoading) return;
+                this.checkDraftPii();
+                this.draftLoading = true;
+                this.draftError = '';
+                fetch('/outils/constructeur-prompts/depuis-brouillon', {
+                    method: 'POST',
+                    headers: self._headers(),
+                    body: JSON.stringify({ texte: texte })
+                })
+                    .then(function(r) {
+                        return r.json().catch(function() { return {}; }).then(function(data) { return { ok: r.ok, data: data }; });
+                    })
+                    .then(function(res) {
+                        self.draftLoading = false;
+                        if (!res.ok || !res.data || !res.data.params || !res.data.params.taskObject) {
+                            self.draftError = (res.data && res.data.message) || (window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.draftError) || "Je n'ai pas pu transformer ce texte, réessaie ou pars du wizard.";
+                            return;
+                        }
+                        self._applyWizardParams(res.data.params, { legacy: true });
+                        self.step = 2;
+                        self.draftOpen = false;
+                        self.draftText = '';
+                        self.draftPiiWarning = false;
+                    })
+                    .catch(function() {
+                        self.draftLoading = false;
+                        self.draftError = (window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.draftError) || "Je n'ai pas pu transformer ce texte, réessaie ou pars du wizard.";
+                    });
             },
             init: function() {
                 var self = this;
