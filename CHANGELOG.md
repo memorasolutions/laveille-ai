@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.195.1] - 2026-08-20
+
+### Corrigé
+- **Constructeur de prompts : 500 corrigé (bibliothèque de pré-prompts).** La variable `$officialTemplates` était utilisée à l'état vide du wizard AVANT sa définition (Blade rend de haut en bas), ce qui plantait la page. La définition est remontée avant son premier usage. Un test de RENDU du blade (les deux cas : avec et sans gabarits) comble le trou de couverture qui avait laissé passer le 500 - les tests précédents validaient la logique mais ne rendaient jamais la page.
+
 ## [1.195.0] - 2026-08-20
 
 ### Ajouté

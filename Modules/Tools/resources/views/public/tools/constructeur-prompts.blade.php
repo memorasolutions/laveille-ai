@@ -384,6 +384,36 @@
                             </template>
                         </div>
 
+                        @php
+                        // Bibliothèque de gabarits curés (Brique 1) - DÉFINITION AVANT USAGE : Blade rend
+                        // de haut en bas ; $officialTemplates est utilisé juste dessous (état vide) ET plus
+                        // bas dans window.promptBuilderConfig. Icône dérivée de la catégorie (tags[0]).
+                        // Un gabarit = un SavedPrompt is_official=true, chargé au clic par le MÊME chemin
+                        // ?remix={public_id} (PublicPromptController::remixData, testé IDOR-safe).
+                        $officialTemplateCategoryIcons = [
+                            'Rédiger et communiquer' => '✍️',
+                            'Résumer et analyser' => '📝',
+                            'Marketing et ventes' => '📣',
+                            'RH et opérations' => '👥',
+                        ];
+                        $officialTemplates = \Modules\Tools\Models\SavedPrompt::official()
+                            ->orderBy('id')
+                            ->get(['public_id', 'name', 'params', 'tags'])
+                            ->map(function ($tpl) use ($officialTemplateCategoryIcons) {
+                                $category = $tpl->tags[0] ?? '';
+                                $spaceLabels = collect($tpl->params['spaces'] ?? [])->pluck('text')->filter()->implode(', ');
+
+                                return [
+                                    'public_id' => $tpl->public_id,
+                                    'name' => $tpl->name,
+                                    'category' => $category,
+                                    'icon' => $officialTemplateCategoryIcons[$category] ?? '📄',
+                                    'fillHint' => $spaceLabels !== '' ? __('À remplir : :spaces', ['spaces' => $spaceLabels]) : '',
+                                ];
+                            })
+                            ->all();
+                        @endphp
+
                         {{-- Bibliothèque de gabarits curés (2026-08-20, Brique 1, design docs/specs/
                              2026-08-20-bibliotheque-pre-prompts-design.md) : rangée affichée SEULEMENT à
                              l'état vide (aucun rôle encore choisi) - dès que la personne répond au premier
@@ -1840,42 +1870,9 @@ $defaultProfiles = [
     ['value' => 'programmation', 'label' => __('Programmation'), 'hint' => __('Aucune règle de style français ; ajoute la mise en forme du code.')],
     ['value' => 'traduction', 'label' => __('Traduction'), 'hint' => __('Aucune règle de français du Québec appliquée au résultat.')],
 ];
-// Bibliothèque de gabarits curés (2026-08-20, Brique 1, design docs/specs/2026-08-20-
-// bibliotheque-pre-prompts-design.md). Un gabarit = un SavedPrompt ordinaire (is_official=true) -
-// zéro nouveau moteur, chargé au clic par le MÊME chemin ?remix={public_id} que le partage public
-// existant (PublicPromptController::remixData, déjà testé IDOR-safe). Requête faite ICI (au
-// rendu de la page, comme $defaultTaskCards ci-dessus) plutôt que via un endpoint dédié : la
-// page passe déjà par cacheResponse:600 (Spatie ResponseCache), donc une fraîcheur de quelques
-// minutes est déjà la norme pour ce contenu (voir le commentaire sur ?share_error plus bas).
-// Icône dérivée de la catégorie (elle-même portée par `tags[0]`, colonne déjà existante -
-// jamais de nouvelle colonne « propre au gabarit », frontière du CLAUDE.md projet).
-$officialTemplateCategoryIcons = [
-    'Rédiger et communiquer' => '✍️',
-    'Résumer et analyser' => '📝',
-    'Marketing et ventes' => '📣',
-    'RH et opérations' => '👥',
-];
-// Pas de garde class_exists() ici (contrairement à $pbPersonas plus haut, qui dépend du module
-// Settings, optionnel) : SavedPrompt est le modèle central de CETTE page (Tools), déjà utilisé
-// sans garde partout ailleurs dans ce fichier et dans PublicPromptController/SavedPromptController.
-$officialTemplates = \Modules\Tools\Models\SavedPrompt::official()
-    ->orderBy('id')
-    ->get(['public_id', 'name', 'params', 'tags'])
-    ->map(function ($tpl) use ($officialTemplateCategoryIcons) {
-        $category = $tpl->tags[0] ?? '';
-        $spaceLabels = collect($tpl->params['spaces'] ?? [])->pluck('text')->filter()->implode(', ');
-
-        return [
-            'public_id' => $tpl->public_id,
-            'name' => $tpl->name,
-            'category' => $category,
-            'icon' => $officialTemplateCategoryIcons[$category] ?? '📄',
-            // « quoi remplir » (structure de carte, design approuvé) dérivé des espaces déjà
-            // posés dans params.spaces - jamais une description propre stockée séparément.
-            'fillHint' => $spaceLabels !== '' ? __('À remplir : :spaces', ['spaces' => $spaceLabels]) : '',
-        ];
-    })
-    ->all();
+// $officialTemplates + $officialTemplateCategoryIcons sont définis PLUS HAUT, avant leur premier
+// usage à l'état vide (Blade rend de haut en bas). Ils restent disponibles ici pour l'injection
+// dans window.promptBuilderConfig ci-dessous.
 @endphp
 <script>
 // Injection des données dynamiques (personas/verbes/audiences configurables via Settings + i18n)
