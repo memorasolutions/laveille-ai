@@ -66,23 +66,35 @@ class GlossaryAuditCollisionsCommand extends Command
             }
             $multiUrl++;
 
-            foreach (array_unique(array_column($entries, 'name')) as $forme) {
-                $winner = $this->firstMatching($entries, $forme);
-                $expected = null;
-                foreach ($entries as $entry) {
-                    if ($entry['name'] === $forme) {
-                        $expected = $entry;
-                        break;
-                    }
+            // Une collision que le CODE ne peut pas trancher = deux entrées portant EXACTEMENT le
+            // même libellé (même casse) mais visant des fiches différentes. Là, aucun critère de
+            // tri ne fait sens : les deux ont la même longueur, souvent la même stratégie, et
+            // départager relève de l'éditorial (retirer un alias, ou fusionner deux doublons).
+            //
+            // 2026-08-21, correction d'un défaut de cette commande elle-même : la première version
+            // comparait le gagnant à « la première entrée dont le nom est exact », ce qui signalait
+            // à tort des cas DÉJÀ RÉSOLUS (« modèle multimodal » pointe bien vers modele-multimodal
+            // depuis le critère d'origine) simplement parce qu'une variante de casse existait
+            // ailleurs. Elle gonflait le compte au lieu de le réduire.
+            $exactGroups = [];
+            foreach ($entries as $entry) {
+                $exactGroups[$entry['name']][] = $entry;
+            }
+
+            foreach ($exactGroups as $forme => $sameLabel) {
+                $urls = array_values(array_unique(array_column($sameLabel, 'url')));
+                if (count($urls) < 2) {
+                    continue; // un seul libellé exact -> le tri suffit à trancher
                 }
 
-                if ($winner && $expected && $winner['url'] !== $expected['url']) {
-                    $collisions[] = [
-                        'forme' => $forme,
-                        'gagnant' => $winner,
-                        'attendu' => $expected,
-                    ];
-                }
+                $winner = $this->firstMatching($sameLabel, (string) $forme);
+                $others = array_values(array_filter($sameLabel, fn ($e) => $winner && $e['url'] !== $winner['url']));
+
+                $collisions[] = [
+                    'forme' => (string) $forme,
+                    'gagnant' => $winner ?? $sameLabel[0],
+                    'attendu' => $others[0] ?? $sameLabel[0],
+                ];
             }
         }
 
@@ -96,8 +108,8 @@ class GlossaryAuditCollisionsCommand extends Command
         }
 
         $this->newLine();
-        $this->warn('Ces libellés sont revendiqués par deux fiches. Le code ne peut pas trancher : il faut');
-        $this->warn('soit retirer l\'alias en trop, soit fusionner les fiches doublons (décision éditoriale).');
+        $this->warn('Ces libellés EXACTS sont portés par deux fiches différentes. Aucun critère de tri ne peut');
+        $this->warn('trancher : il faut retirer l\'alias en trop, ou fusionner les fiches doublons (éditorial).');
         $this->newLine();
 
         foreach (array_slice($collisions, 0, (int) $this->option('limit')) as $collision) {
