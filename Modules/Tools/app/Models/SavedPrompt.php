@@ -23,6 +23,15 @@ class SavedPrompt extends Model
         'is_public',
         'tags',
         'is_favorite',
+        // Bibliothèque de gabarits curés (2026-08-20, Brique 1) : 'is_official' est bien listé ici
+        // (mass-assignment techniquement possible) mais SavedPromptController::store()/update()
+        // filtrent AVANT d'atteindre create()/update() - $request->validate() ne renvoie QUE les
+        // clés déclarées dans ses règles, et 'is_official' n'y figure JAMAIS (voir ces méthodes).
+        // Double barrière volontaire : seuls le seeder (OfficialPromptTemplatesSeeder) ou une
+        // commande admin, qui appellent le modèle directement hors requête HTTP, peuvent poser ce
+        // flag à true. Preuve : SavedPromptOfficialFlagTest::'un utilisateur ne peut pas se
+        // fabriquer un gabarit officiel via l'API'.
+        'is_official',
     ];
 
     protected static function booted(): void
@@ -42,6 +51,7 @@ class SavedPrompt extends Model
         'is_public' => 'boolean',
         'tags' => 'array',
         'is_favorite' => 'boolean',
+        'is_official' => 'boolean',
     ];
 
     public function user()
@@ -62,6 +72,15 @@ class SavedPrompt extends Model
     public function scopeFavorite($query)
     {
         return $query->where('is_favorite', true);
+    }
+
+    // Bibliothèque de gabarits curés (2026-08-20, Brique 1, design docs/specs/2026-08-20-
+    // bibliotheque-pre-prompts-design.md) : les gabarits officiels sont des SavedPrompt ordinaires
+    // (is_public=true + is_official=true, propriétaire = utilisateur système « templates@laveille.ai »
+    // - voir OfficialPromptTemplatesSeeder) - AUCUN nouveau moteur, AUCUN champ propre au gabarit.
+    public function scopeOfficial($query)
+    {
+        return $query->where('is_official', true);
     }
 
     public function scopeSearch($query, string $term)
