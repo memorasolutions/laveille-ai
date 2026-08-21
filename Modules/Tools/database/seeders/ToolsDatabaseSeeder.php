@@ -13,8 +13,6 @@ class ToolsDatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            OfficialPromptTemplatesSeeder::class,
-        ]);
+        // $this->call([]);
     }
 }

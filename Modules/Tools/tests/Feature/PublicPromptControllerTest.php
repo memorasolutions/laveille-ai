@@ -123,48 +123,6 @@ it('returns 404 for remix data on a public_id that does not exist', function () 
     $response->assertNotFound();
 });
 
-// Garde-fou durci (SPEC-BRIQUE1-GABARITS.md point 5) : test de non-régression manquant jusqu'ici.
-// SavedPrompt utilise SoftDeletes - le scope global exclut déjà les lignes supprimées de TOUTE
-// requête Eloquent standard (SavedPrompt::where(...)->first() dans show()/remixData()), donc la
-// suppression logique doit déjà purger l'accès public sans code additionnel. Ce test le PROUVE.
-it('treats a soft-deleted prompt as gone: /p/{id} redirects and remix-data 404s', function () {
-    $user = User::factory()->create();
-
-    $prompt = SavedPrompt::create([
-        'user_id' => $user->id,
-        'name' => 'Prompt supprimé',
-        'prompt_text' => 'Texte supprimé',
-        'is_public' => true,
-    ]);
-    $publicId = $prompt->public_id;
-    $prompt->delete();
-
-    $showResponse = $this->get('/p/'.$publicId);
-    $showResponse->assertRedirect('/outils/constructeur-prompts?share_error=notfound');
-
-    $remixResponse = $this->getJson('/p/'.$publicId.'/remix-data');
-    $remixResponse->assertNotFound();
-});
-
-it('purges access as soon as is_public is turned off, even without deleting the prompt', function () {
-    $user = User::factory()->create();
-
-    $prompt = SavedPrompt::create([
-        'user_id' => $user->id,
-        'name' => 'Prompt rendu privé',
-        'prompt_text' => 'Texte',
-        'is_public' => true,
-    ]);
-    $publicId = $prompt->public_id;
-    $prompt->update(['is_public' => false]);
-
-    $showResponse = $this->get('/p/'.$publicId);
-    $showResponse->assertRedirect('/outils/constructeur-prompts?share_error=notfound');
-
-    $remixResponse = $this->getJson('/p/'.$publicId.'/remix-data');
-    $remixResponse->assertNotFound();
-});
-
 // Non-régression explicite demandée par le plan : le toggle is_public existant (PUT
 // /api/prompts/{id}, SavedPromptController::update) reste fonctionnel pour le propriétaire et
 // bloqué pour un tiers - aucun nouvel endpoint de bascule n'a été introduit par cette phase.

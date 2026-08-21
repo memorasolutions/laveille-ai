@@ -2,12 +2,6 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.195.0] - 2026-08-20
-
-### Ajouté
-- **Bibliothèque de pré-prompts : gabarits curés en état vide du constructeur (Brique 1, club des sages 5 oracles).** À l'étape de départ du constructeur de prompts, une rangée de gabarits curés par l'équipe (« Courriel professionnel à un client », « Résumé de réunion en points d'action », « Publication pour les réseaux sociaux », « Traduire en adaptant au public », « Réécrire un texte pour le rendre plus clair », « Rédiger une offre d'emploi ») pré-remplit le wizard AVEC les espaces à remplir déjà posés - l'utilisateur n'a plus qu'à compléter quelques champs. Zéro refonte : un gabarit = un `SavedPrompt` officiel (nouveau flag `is_official`, protégé en écriture - un utilisateur ordinaire ne peut pas se le fabriquer), chargé via le mécanisme de remix existant (`?remix={public_id}`, zéro JS ajouté). CURÉ par l'équipe, ZÉRO contenu public d'utilisateurs (Loi 25). Frontière anti-dérive inscrite dans le CLAUDE.md du projet (un gabarit ne déclare jamais ses propres champs). Design : docs/specs/2026-08-20-bibliotheque-pre-prompts-design.md.
-- **Garde-fou de confidentialité durci sur les permaliens publics `/p/{id}` :** tests de non-régression prouvant qu'un prompt supprimé (SoftDelete) ou repassé en privé devient inaccessible (404 / redirection), en plus du `noindex` et de l'avertissement de consentement déjà en place.
-
 ## [1.194.0] - 2026-08-20
 
 ### Ajouté
