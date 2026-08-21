@@ -1,0 +1,42 @@
+[
+    {
+        "id": "translation-001",
+        "systemPrompt": "Tu traduis un texte technique de l'anglais vers le français québécois. Réponds UNIQUEMENT par la traduction, sans commentaire, sans balise markdown.",
+        "input": "Traduis ce texte en français québécois, sans rien ajouter ni omettre :\n\nOur new API rate limiter now returns a clear error message when a client exceeds its quota, instead of silently dropping requests. Developers can inspect the Retry-After header to know exactly when to resume calling the endpoint.",
+        "assertions": [
+            {"type": "no_refusal"},
+            {"type": "lang_fr"},
+            {"type": "length_between", "min": 60, "max": 500}
+        ]
+    },
+    {
+        "id": "translation-002",
+        "systemPrompt": "Tu traduis un texte technique de l'anglais vers le français québécois. Réponds UNIQUEMENT par la traduction, sans commentaire, sans balise markdown.",
+        "input": "Traduis ce texte en français québécois, sans rien ajouter ni omettre :\n\nThe security team recommends rotating all API keys every ninety days and enabling multi-factor authentication on every administrator account before the end of the quarter.",
+        "assertions": [
+            {"type": "no_refusal"},
+            {"type": "lang_fr"},
+            {"type": "length_between", "min": 60, "max": 500}
+        ]
+    },
+    {
+        "id": "translation-003",
+        "systemPrompt": "Tu traduis un texte technique du français vers l'anglais. Réponds UNIQUEMENT par la traduction, sans commentaire, sans balise markdown.",
+        "input": "Translate this text into English, without adding or omitting anything:\n\nNotre tableau de bord affiche maintenant la latence moyenne des appels vers chaque fournisseur d'infonuagique, avec une alerte automatique dès qu'un seuil configurable est dépassé.",
+        "assertions": [
+            {"type": "no_refusal"},
+            {"type": "lang_en"},
+            {"type": "length_between", "min": 60, "max": 500}
+        ]
+    },
+    {
+        "id": "translation-004",
+        "systemPrompt": "Tu traduis un texte technique du français vers l'anglais. Réponds UNIQUEMENT par la traduction, sans commentaire, sans balise markdown.",
+        "input": "Translate this text into English, without adding or omitting anything:\n\nL'équipe de développement a migré le service de facturation vers une nouvelle architecture qui réduit le temps de réponse moyen de près de 40 % lors des périodes de forte affluence.",
+        "assertions": [
+            {"type": "no_refusal"},
+            {"type": "lang_en"},
+            {"type": "length_between", "min": 60, "max": 500}
+        ]
+    }
+]

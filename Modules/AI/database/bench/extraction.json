@@ -1,0 +1,38 @@
+[
+    {
+        "id": "extraction-001",
+        "systemPrompt": "Tu convertis un texte fourni par un utilisateur en une DEMANDE réutilisable pour un générateur de prompts. Tu renvoies UNIQUEMENT un JSON valide, aucun texte avant ou après, aucune balise markdown.",
+        "input": "Analyse le texte ci-dessous (un courriel, des notes, ou un prompt déjà écrit par un utilisateur québécois francophone) et transforme-le en une DEMANDE réutilisable, en français, avec des accents corrects. Ne rien inventer : reformule et repère uniquement ce qui est déjà présent dans le texte.\n\nRetourne UNIQUEMENT ce JSON (aucun texte avant ou après, aucune balise markdown) :\n{\n  \"taskObject\": \"[la demande reformulée en UNE phrase d'action réutilisable, en français]\",\n  \"spaces\": [{\"text\": \"[bout VARIABLE à remplir - nom, date, sujet - qui doit être une SOUS-CHAÎNE EXACTE de taskObject]\"}],\n  \"contextInfo\": \"[contexte de fond utile s'il y en a dans le texte, sinon une chaîne vide]\",\n  \"verb\": \"[le verbe d'action principal de la demande, en français, sinon une chaîne vide]\",\n  \"tone\": \"[le ton du texte original, en français, sinon une chaîne vide]\"\n}\n\nTexte :\nRédige un courriel de suivi pour rappeler à Mme Tremblay notre rendez-vous du 14 septembre à 10h, au sujet du renouvellement de son contrat de service.",
+        "assertions": [
+            {"type": "json_valid"},
+            {"type": "json_has_keys", "keys": ["taskObject", "spaces"]}
+        ]
+    },
+    {
+        "id": "extraction-002",
+        "systemPrompt": "Tu convertis un texte fourni par un utilisateur en une DEMANDE réutilisable pour un générateur de prompts. Tu renvoies UNIQUEMENT un JSON valide, aucun texte avant ou après, aucune balise markdown.",
+        "input": "Analyse le texte ci-dessous (un courriel, des notes, ou un prompt déjà écrit par un utilisateur québécois francophone) et transforme-le en une DEMANDE réutilisable, en français, avec des accents corrects. Ne rien inventer : reformule et repère uniquement ce qui est déjà présent dans le texte.\n\nRetourne UNIQUEMENT ce JSON (aucun texte avant ou après, aucune balise markdown) :\n{\n  \"taskObject\": \"[la demande reformulée en UNE phrase d'action réutilisable, en français]\",\n  \"spaces\": [{\"text\": \"[bout VARIABLE à remplir - nom, date, sujet - qui doit être une SOUS-CHAÎNE EXACTE de taskObject]\"}],\n  \"contextInfo\": \"[contexte de fond utile s'il y en a dans le texte, sinon une chaîne vide]\",\n  \"verb\": \"[le verbe d'action principal de la demande, en français, sinon une chaîne vide]\",\n  \"tone\": \"[le ton du texte original, en français, sinon une chaîne vide]\"\n}\n\nTexte :\nCréer une affiche pour la vente de garage du samedi 6 juin, adresse 245 rue des Érables, de 8h à 14h.",
+        "assertions": [
+            {"type": "json_valid"},
+            {"type": "json_has_keys", "keys": ["taskObject", "spaces"]}
+        ]
+    },
+    {
+        "id": "extraction-003",
+        "systemPrompt": "Tu convertis un texte fourni par un utilisateur en une DEMANDE réutilisable pour un générateur de prompts. Tu renvoies UNIQUEMENT un JSON valide, aucun texte avant ou après, aucune balise markdown.",
+        "input": "Analyse le texte ci-dessous (un courriel, des notes, ou un prompt déjà écrit par un utilisateur québécois francophone) et transforme-le en une DEMANDE réutilisable, en français, avec des accents corrects. Ne rien inventer : reformule et repère uniquement ce qui est déjà présent dans le texte.\n\nRetourne UNIQUEMENT ce JSON (aucun texte avant ou après, aucune balise markdown) :\n{\n  \"taskObject\": \"[la demande reformulée en UNE phrase d'action réutilisable, en français]\",\n  \"spaces\": [{\"text\": \"[bout VARIABLE à remplir - nom, date, sujet - qui doit être une SOUS-CHAÎNE EXACTE de taskObject]\"}],\n  \"contextInfo\": \"[contexte de fond utile s'il y en a dans le texte, sinon une chaîne vide]\",\n  \"verb\": \"[le verbe d'action principal de la demande, en français, sinon une chaîne vide]\",\n  \"tone\": \"[le ton du texte original, en français, sinon une chaîne vide]\"\n}\n\nTexte :\nRésume ce rapport financier trimestriel pour le comité de direction en insistant sur la baisse des coûts de logistique.",
+        "assertions": [
+            {"type": "json_valid"},
+            {"type": "json_has_keys", "keys": ["taskObject", "spaces"]}
+        ]
+    },
+    {
+        "id": "extraction-004",
+        "systemPrompt": "Tu convertis un texte fourni par un utilisateur en une DEMANDE réutilisable pour un générateur de prompts. Tu renvoies UNIQUEMENT un JSON valide, aucun texte avant ou après, aucune balise markdown.",
+        "input": "Analyse le texte ci-dessous (un courriel, des notes, ou un prompt déjà écrit par un utilisateur québécois francophone) et transforme-le en une DEMANDE réutilisable, en français, avec des accents corrects. Ne rien inventer : reformule et repère uniquement ce qui est déjà présent dans le texte.\n\nRetourne UNIQUEMENT ce JSON (aucun texte avant ou après, aucune balise markdown) :\n{\n  \"taskObject\": \"[la demande reformulée en UNE phrase d'action réutilisable, en français]\",\n  \"spaces\": [{\"text\": \"[bout VARIABLE à remplir - nom, date, sujet - qui doit être une SOUS-CHAÎNE EXACTE de taskObject]\"}],\n  \"contextInfo\": \"[contexte de fond utile s'il y en a dans le texte, sinon une chaîne vide]\",\n  \"verb\": \"[le verbe d'action principal de la demande, en français, sinon une chaîne vide]\",\n  \"tone\": \"[le ton du texte original, en français, sinon une chaîne vide]\"\n}\n\nTexte :\nPrépare une liste de dix questions d'entrevue pour un poste de développeur back-end Laravel, niveau intermédiaire.",
+        "assertions": [
+            {"type": "json_valid"},
+            {"type": "json_has_keys", "keys": ["taskObject", "spaces"]}
+        ]
+    }
+]

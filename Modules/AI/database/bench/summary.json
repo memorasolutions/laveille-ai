@@ -1,0 +1,42 @@
+[
+    {
+        "id": "summary-001",
+        "systemPrompt": "Tu es un journaliste tech senior pour un public québécois francophone. Réponds UNIQUEMENT par le résumé demandé, en français, aucun texte d'introduction, aucune balise markdown.",
+        "input": "Résume l'article suivant en un seul paragraphe de 40 à 60 mots, style factuel answer-first (qui-quoi-quand-pourquoi), sans accroche marketing.\n\nArticle :\nLe gouvernement du Québec a annoncé la semaine dernière un investissement de 120 millions de dollars sur cinq ans pour soutenir l'adoption de l'intelligence artificielle par les petites et moyennes entreprises de la province. Le programme, géré par le ministère de l'Économie, prévoit des subventions couvrant jusqu'à 50 % des coûts d'implantation d'outils d'IA, ainsi qu'un volet de formation destiné aux gestionnaires. Selon la ministre responsable, moins de 15 % des PME québécoises utilisent actuellement une forme d'IA dans leurs opérations.",
+        "assertions": [
+            {"type": "no_refusal"},
+            {"type": "lang_fr"},
+            {"type": "length_between", "min": 120, "max": 600}
+        ]
+    },
+    {
+        "id": "summary-002",
+        "systemPrompt": "Tu es un journaliste tech senior pour un public québécois francophone. Réponds UNIQUEMENT par le résumé demandé, en français, aucun texte d'introduction, aucune balise markdown.",
+        "input": "Résume l'article suivant en un seul paragraphe de 40 à 60 mots, style factuel answer-first (qui-quoi-quand-pourquoi), sans accroche marketing.\n\nArticle :\nUne panne majeure du fournisseur infonuagique CloudNova a paralysé pendant près de six heures les services de centaines d'entreprises nord-américaines mardi dernier. La panne, causée par une défaillance dans un centre de données de Virginie, a touché des plateformes de commerce en ligne, des applications bancaires et plusieurs outils de gestion utilisés par des PME. CloudNova a présenté ses excuses et promis un rapport d'incident détaillé dans les deux prochaines semaines.",
+        "assertions": [
+            {"type": "no_refusal"},
+            {"type": "lang_fr"},
+            {"type": "length_between", "min": 120, "max": 600}
+        ]
+    },
+    {
+        "id": "summary-003",
+        "systemPrompt": "Tu es un journaliste tech senior pour un public québécois francophone. Réponds UNIQUEMENT par le résumé demandé, en français, aucun texte d'introduction, aucune balise markdown.",
+        "input": "Résume l'article suivant en un seul paragraphe de 40 à 60 mots, style factuel answer-first (qui-quoi-quand-pourquoi), sans accroche marketing.\n\nArticle :\nLa jeune pousse montréalaise ÉduSphère a complété un tour de financement de série A de 18 millions de dollars, mené par un fonds torontois spécialisé en technologies éducatives. L'entreprise, fondée en 2023, développe une plateforme d'apprentissage adaptatif utilisée par une trentaine de commissions scolaires au Canada. Les fonds serviront à l'embauche de vingt-cinq employés supplémentaires et à l'expansion vers le marché américain d'ici la fin de l'année.",
+        "assertions": [
+            {"type": "no_refusal"},
+            {"type": "lang_fr"},
+            {"type": "length_between", "min": 120, "max": 600}
+        ]
+    },
+    {
+        "id": "summary-004",
+        "systemPrompt": "Tu es un journaliste tech senior pour un public québécois francophone. Réponds UNIQUEMENT par le résumé demandé, en français, aucun texte d'introduction, aucune balise markdown.",
+        "input": "Résume l'article suivant en un seul paragraphe de 40 à 60 mots, style factuel answer-first (qui-quoi-quand-pourquoi), sans accroche marketing.\n\nArticle :\nUne faille de sécurité touchant un fournisseur de gestion des mots de passe utilisé par plusieurs municipalités québécoises a été corrigée après la découverte d'un accès non autorisé à des journaux de connexion. Aucun mot de passe n'aurait été exposé selon l'entreprise, mais l'incident a forcé la réinitialisation des jetons d'accès de près de 40 000 comptes administratifs à travers le Canada.",
+        "assertions": [
+            {"type": "no_refusal"},
+            {"type": "lang_fr"},
+            {"type": "length_between", "min": 120, "max": 600}
+        ]
+    }
+]

@@ -13,6 +13,7 @@ namespace Modules\AI\Providers;
 use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 use Modules\AI\Adapters\EmailChannelAdapter;
+use Modules\AI\Console\AiBenchCommand;
 use Modules\AI\Console\CheckSlaCommand;
 use Modules\AI\Console\ScrapeUrlsCommand;
 use Modules\AI\Console\SyncKnowledgeBaseCommand;
@@ -73,7 +74,7 @@ class AiServiceProvider extends BaseModuleServiceProvider
         Ticket::observe(TicketObserver::class);
         Ticket::observe(CsatObserver::class);
 
-        $this->commands([SyncKnowledgeBaseCommand::class, ScrapeUrlsCommand::class, CheckSlaCommand::class, YouTubeSummarizeCommand::class]);
+        $this->commands([SyncKnowledgeBaseCommand::class, ScrapeUrlsCommand::class, CheckSlaCommand::class, YouTubeSummarizeCommand::class, AiBenchCommand::class]);
 
         Event::listen(HumanTakeoverRequested::class, NotifyAgentsOfTakeover::class);
     }

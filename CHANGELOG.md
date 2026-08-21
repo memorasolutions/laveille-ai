@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.196.2] - 2026-08-21
+
+### Ajouté
+- **Banc d'essai IA (`ai:bench`) - stratégie de routage de modèles, phase 2 (outil de mesure, zéro impact prod).** Commande CLI qui rejoue des cas réels gelés par tâche (extraction, résumé, traduction) contre plusieurs modèles candidats et produit un tableau qualité / coût / latence, pour choisir les modèles par MESURE plutôt que par intuition (idée du club des sages 5 oracles). Réutilise le client OpenRouter existant et la garde de confidentialité (deny+zdr) ; préfère le coût réel rapporté par OpenRouter ; isole chaque échec d'appel (jamais de crash global) ; ne journalise aucun contenu utilisateur. Aucune route, aucune UI, aucun changement de comportement des fonctionnalités existantes. Design : docs/specs/2026-08-21-strategie-routage-cascade-ia-design.md.
+
+### Corrigé
+- **Fiabilité IA globale : retrait du modèle par défaut gratuit.** Les 6 réglages de modèle par tâche (`ai.default_model`, `ai.chatbot_model`, etc.) passent de `openrouter/free` (routeur gratuit rate-limité, qui renvoyait vide par intermittence et faisait échouer silencieusement le tuteur Académie et les autres fonctionnalités IA) à `openai/gpt-4o-mini` (fiable, très bon marché, déjà éprouvé par les résumés d'actualités). Réversible (réglages en base, éditables en admin).
+
 ## [1.196.1] - 2026-08-20
 
 ### Corrigé
