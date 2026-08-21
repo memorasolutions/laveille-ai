@@ -338,6 +338,20 @@
                         {{-- Pré-rendu masqué par défaut (voir commentaire sur la modale plus bas) - JAMAIS
                              d'innerHTML, seul le display est basculé par le script de la modale. --}}
                         .cp-tech-current-badge{display:none;margin-left:6px;padding:2px 8px;border-radius:999px;background:var(--c-primary);color:#fff;font-size:0.72rem;font-weight:600;white-space:nowrap;}
+                        {{-- Bibliothèque de gabarits curés (2026-08-20, Brique 1) : rangée de cartes-liens
+                             affichée en tête d'étape 1, uniquement à l'état vide (aucun rôle choisi). Chaque
+                             carte est un <a> simple vers la même URL avec ?remix={public_id} - même chemin
+                             que le partage public existant, zéro JS ajouté pour le chargement. Contraste AAA :
+                             #FFFFFF sur var(--c-primary) mesuré ailleurs dans ce fichier (voir stepper), cible
+                             tactile 44px sur toute la hauteur de carte (bien au-delà du minimum). --}}
+                        .ct-gabarits{margin-bottom:1.25rem;padding:0.85rem 1rem;border:1px solid #e5e7eb;border-radius:12px;background:var(--c-surface,#F8FAFB);}
+                        .ct-gabarits__title{font-family:var(--f-heading);font-weight:700;color:var(--c-dark);font-size:0.95rem;margin:0 0 0.65rem;}
+                        .ct-gabarits__row{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.6rem;}
+                        .ct-gabarit-card{display:flex;flex-direction:column;gap:2px;min-height:44px;padding:0.6rem 0.75rem;border:1px solid #d1d5db;border-radius:10px;background:#fff;color:var(--c-dark);text-decoration:none;}
+                        .ct-gabarit-card:hover{border-color:var(--c-primary);background:var(--c-primary-light);}
+                        .ct-gabarit-card:focus-visible{outline:2px solid var(--c-primary);outline-offset:2px;}
+                        .ct-gabarit-card__head{display:flex;align-items:center;gap:6px;font-weight:700;font-size:0.85rem;}
+                        .ct-gabarit-card__hint{font-size:0.75rem;color:var(--c-text-muted);}
                         </style>
                         {{-- .ct-profile-strip / .ct-profile-strip__title retirés le 2026-08-04 :
                              classes jamais utilisées dans ce fichier (CSS orphelin), aucun effet
@@ -369,6 +383,31 @@
                                 </div>
                             </template>
                         </div>
+
+                        {{-- Bibliothèque de gabarits curés (2026-08-20, Brique 1, design docs/specs/
+                             2026-08-20-bibliotheque-pre-prompts-design.md) : rangée affichée SEULEMENT à
+                             l'état vide (aucun rôle encore choisi) - dès que la personne répond au premier
+                             champ, la rangée disparaît pour ne pas encombrer un formulaire déjà entamé.
+                             Chaque carte est un lien simple vers CETTE MÊME page avec ?remix={public_id} -
+                             chemin déjà existant et testé (PublicPromptController::remixData, IDOR-safe),
+                             aucune logique de chargement dupliquée en JS. @if($officialTemplates) tout court
+                             (jamais x-if/x-show ajouté ici) : si la table est vide, PHP ne rend rien - pas de
+                             bloc caché inutile dans le DOM. --}}
+                        @if(count($officialTemplates) > 0)
+                        <div class="ct-gabarits" x-show="step === 1 && !editLoading && personaType === 'preset' && !personaPreset && personaCustom === ''" x-cloak>
+                            <p class="ct-gabarits__title">{{ __('Ou partez d\'un gabarit prêt à l\'emploi') }}</p>
+                            <div class="ct-gabarits__row" role="list" aria-label="{{ __('Gabarits officiels') }}">
+                                @foreach($officialTemplates as $tpl)
+                                <a class="ct-gabarit-card" role="listitem" href="{{ request()->url() }}?remix={{ $tpl['public_id'] }}">
+                                    <span class="ct-gabarit-card__head"><span aria-hidden="true">{{ $tpl['icon'] }}</span> {{ $tpl['name'] }}</span>
+                                    @if($tpl['fillHint'])
+                                    <span class="ct-gabarit-card__hint">{{ $tpl['fillHint'] }}</span>
+                                    @endif
+                                </a>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
 
                         {{-- Étape 1 : Persona --}}
                         <div x-show="step === 1" x-transition>
@@ -1801,6 +1840,42 @@ $defaultProfiles = [
     ['value' => 'programmation', 'label' => __('Programmation'), 'hint' => __('Aucune règle de style français ; ajoute la mise en forme du code.')],
     ['value' => 'traduction', 'label' => __('Traduction'), 'hint' => __('Aucune règle de français du Québec appliquée au résultat.')],
 ];
+// Bibliothèque de gabarits curés (2026-08-20, Brique 1, design docs/specs/2026-08-20-
+// bibliotheque-pre-prompts-design.md). Un gabarit = un SavedPrompt ordinaire (is_official=true) -
+// zéro nouveau moteur, chargé au clic par le MÊME chemin ?remix={public_id} que le partage public
+// existant (PublicPromptController::remixData, déjà testé IDOR-safe). Requête faite ICI (au
+// rendu de la page, comme $defaultTaskCards ci-dessus) plutôt que via un endpoint dédié : la
+// page passe déjà par cacheResponse:600 (Spatie ResponseCache), donc une fraîcheur de quelques
+// minutes est déjà la norme pour ce contenu (voir le commentaire sur ?share_error plus bas).
+// Icône dérivée de la catégorie (elle-même portée par `tags[0]`, colonne déjà existante -
+// jamais de nouvelle colonne « propre au gabarit », frontière du CLAUDE.md projet).
+$officialTemplateCategoryIcons = [
+    'Rédiger et communiquer' => '✍️',
+    'Résumer et analyser' => '📝',
+    'Marketing et ventes' => '📣',
+    'RH et opérations' => '👥',
+];
+// Pas de garde class_exists() ici (contrairement à $pbPersonas plus haut, qui dépend du module
+// Settings, optionnel) : SavedPrompt est le modèle central de CETTE page (Tools), déjà utilisé
+// sans garde partout ailleurs dans ce fichier et dans PublicPromptController/SavedPromptController.
+$officialTemplates = \Modules\Tools\Models\SavedPrompt::official()
+    ->orderBy('id')
+    ->get(['public_id', 'name', 'params', 'tags'])
+    ->map(function ($tpl) use ($officialTemplateCategoryIcons) {
+        $category = $tpl->tags[0] ?? '';
+        $spaceLabels = collect($tpl->params['spaces'] ?? [])->pluck('text')->filter()->implode(', ');
+
+        return [
+            'public_id' => $tpl->public_id,
+            'name' => $tpl->name,
+            'category' => $category,
+            'icon' => $officialTemplateCategoryIcons[$category] ?? '📄',
+            // « quoi remplir » (structure de carte, design approuvé) dérivé des espaces déjà
+            // posés dans params.spaces - jamais une description propre stockée séparément.
+            'fillHint' => $spaceLabels !== '' ? __('À remplir : :spaces', ['spaces' => $spaceLabels]) : '',
+        ];
+    })
+    ->all();
 @endphp
 <script>
 // Injection des données dynamiques (personas/verbes/audiences configurables via Settings + i18n)
@@ -1812,6 +1887,7 @@ window.promptBuilderConfig = {
     verbs: @json($pbVerbs),
     audiences: @json($pbAudiences),
     taskCards: @json($defaultTaskCards),
+    officialTemplates: @json($officialTemplates),
     formats: @json($defaultFormats),
     lengths: @json($defaultLengths),
     tones: @json($defaultTones),
