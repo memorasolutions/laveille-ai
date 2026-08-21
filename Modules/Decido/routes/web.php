@@ -22,6 +22,12 @@ Route::middleware(DecidoUnderConstruction::class)->group(function () {
 
     Route::get('/decido/{poll}/gerer/{adminToken}', [PollManageController::class, 'manage'])->name('decido.manage');
     Route::post('/decido/{poll}/gerer/{adminToken}/fermer', [PollManageController::class, 'close'])->name('decido.close');
+    // Suppression manuelle par le proprietaire (demande fondateur 2026-08-21 : controle utilisateur,
+    // "privacy by design"). Gardee par authorizeManage (proprietaire connecte OU jeton admin valide),
+    // au meme titre que les autres actions de gestion. Supprime le sondage ET ses reponses (cascade
+    // FK poll_id sur options/votes/comments/declines). Complete la purge automatique (retention) d'un
+    // effacement immediat a la main.
+    Route::post('/decido/{poll}/gerer/{adminToken}/supprimer', [PollManageController::class, 'destroy'])->name('decido.destroy');
     // Politique de rétention (2026-07-19) : "Prolonger de 3 mois", déclenché depuis le courriel
     // d'avertissement J-14 (via la page de gestion) ou depuis le menu d'actions de la page de
     // gestion elle-même. Même groupe/pattern d'autorisation que fermer/export/lien-court/qr

@@ -468,6 +468,39 @@ class PollManageController extends Controller
     }
 
     /**
+     * Suppression manuelle d'un sondage par son propriétaire (bouton "Supprimer ce sondage",
+     * demande fondateur 2026-08-21 : contrôle utilisateur, "privacy by design"). Même garde que les
+     * autres actions de gestion (authorizeManage : propriétaire connecté OU jeton admin valide). La
+     * suppression du Poll cascade sur options/votes/comments/declines (FK poll_id ->cascadeOnDelete,
+     * migrations decido_*). Complète la purge automatique de la politique de rétention par un
+     * effacement immédiat à la demande de l'utilisateur.
+     */
+    public function destroy(Request $request, string $poll, string $adminToken): RedirectResponse
+    {
+        $pollModel = Poll::findByShareIdentifier($poll);
+        if (! $pollModel) {
+            abort(404);
+        }
+
+        $this->authorizeManage($pollModel, $adminToken);
+
+        $title = (string) $pollModel->title;
+        $isOwner = Auth::check() && Auth::id() === $pollModel->creator_id;
+
+        $pollModel->delete();
+
+        $message = 'Le sondage « '.$title.' » et toutes ses réponses ont été supprimés définitivement.';
+
+        // Propriétaire connecté : retour à sa liste. Sinon (gestion via jeton admin d'un sondage
+        // anonyme), retour à la page publique de l'outil - la page de gestion n'existe plus.
+        if ($isOwner) {
+            return Redirect::route('decido.index')->with('success', $message);
+        }
+
+        return Redirect::to('/outils/decido')->with('success', $message);
+    }
+
+    /**
      * "Prolonger de 3 mois" - déclenché depuis le courriel d'avertissement J-14
      * (Modules\Decido\Mail\PollExpiringSoonMail, via la page de gestion) ou directement depuis le
      * bouton du menu d'actions sur la page de gestion (results-content.blade.php). Réservé au

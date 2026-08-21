@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.197.0] - 2026-08-21
+
+### Ajouté
+- **Decido : suppression manuelle d'un sondage par son propriétaire.** Un bouton « Supprimer ce sondage » (zone d'action de la page de gestion) permet désormais d'effacer immédiatement un sondage et toutes ses réponses, sans attendre la purge automatique de la politique de rétention. Contrôle utilisateur et « protection de la vie privée par défaut ». Réservé au propriétaire (garde `authorizeManage` : créateur connecté OU jeton admin valide), confirmation via la modale du thème (jamais de `confirm()` natif), suppression en cascade des options/votes/commentaires/déclins (clés étrangères). Route `decido.destroy` (POST), 3 tests (suppression autorisée, refus 403 sur jeton invalide, rendu du bouton).
+
 ## [1.196.5] - 2026-08-21
 
 ### Corrigé

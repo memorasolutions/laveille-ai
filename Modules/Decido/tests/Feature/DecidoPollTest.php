@@ -3220,3 +3220,39 @@ test('la page de gestion (organisateur) affiche le commentaire d\'un participant
     $this->assertStringContainsString('Manon', $manageHtml);
     $this->assertStringContainsString('Dispo seulement le matin', $manageHtml);
 });
+
+// ── Suppression manuelle d'un sondage (decido.destroy, demande fondateur 2026-08-21) ──────────
+
+test('le proprietaire peut supprimer son sondage via son jeton admin (redirige vers la liste)', function (): void {
+    $poll = decidoCreatePoll(['creator_id' => $this->superadmin->id, 'admin_token' => 'plain-admin-token']);
+
+    $this->actingAs($this->superadmin)
+        ->post(route('decido.destroy', ['poll' => $poll->public_id, 'adminToken' => 'plain-admin-token']))
+        ->assertRedirect(route('decido.index'));
+
+    // Le sondage est reellement supprime (ses reponses cascadent au niveau FK : cascadeOnDelete).
+    $this->assertDatabaseMissing('decido_polls', ['id' => $poll->id]);
+});
+
+test('un jeton admin invalide et non-proprietaire ne peut pas supprimer le sondage (403, conserve)', function (): void {
+    $autre = User::factory()->create();
+    $poll = decidoCreatePoll(['creator_id' => $autre->id, 'admin_token' => 'le-vrai-jeton']);
+
+    // superadmin est connecte (passe le gate under_construction) mais n'est ni createur ni
+    // porteur du bon jeton -> authorizeManage() doit abort(403).
+    $this->actingAs($this->superadmin)
+        ->post(route('decido.destroy', ['poll' => $poll->public_id, 'adminToken' => 'mauvais-jeton']))
+        ->assertStatus(403);
+
+    $this->assertDatabaseHas('decido_polls', ['id' => $poll->id]);
+});
+
+test('la page de gestion affiche le bouton "Supprimer ce sondage"', function (): void {
+    $poll = decidoCreatePoll(['creator_id' => $this->superadmin->id, 'admin_token' => 'plain-admin-token']);
+
+    $this->actingAs($this->superadmin)
+        ->get(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'plain-admin-token']))
+        ->assertStatus(200)
+        ->assertSee('Supprimer ce sondage')
+        ->assertSee(route('decido.destroy', ['poll' => $poll->public_id, 'adminToken' => 'plain-admin-token']), false);
+});

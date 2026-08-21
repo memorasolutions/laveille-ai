@@ -502,6 +502,21 @@
                                 'confirm' => 'Prolonger ce sondage de 3 mois ? Sa date de suppression automatique sera repoussée d\'autant.',
                             ];
                         }
+
+                        // Suppression manuelle (demande fondateur 2026-08-21) : disponible à quiconque
+                        // détient le lien de gestion (jeton admin) - authorizeManage() fait foi côté
+                        // serveur, comme pour les autres actions. Confirmation via la modale du thème
+                        // (action-menu -> $dispatch('confirm-action'), jamais un confirm() natif).
+                        // Supprime le sondage ET ses réponses (cascade FK). Complète la purge auto.
+                        $shareActions[] = ['divider' => true];
+                        $shareActions[] = [
+                            'label' => 'Supprimer ce sondage',
+                            'icon' => 'trash-2',
+                            'url' => route('decido.destroy', ['poll' => $poll->public_id, 'adminToken' => $adminToken]),
+                            'method' => 'POST',
+                            'confirm' => 'Supprimer définitivement ce sondage et toutes ses réponses ? Cette action est irréversible.',
+                            'danger' => true,
+                        ];
                     @endphp
                     <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
                         <span class="text-muted">Lien public :</span>
