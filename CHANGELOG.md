@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.203.1] - 2026-08-21
+
+### Corrigé
+- **« Nano Banana » est enfin rattaché à « Gemini (Google) » dans le graphe du glossaire.** Le terme parent existait déjà, mais sous le slug `gemini-google` et non `gemini` : la vérification anti-doublon faite avant d'écrire la fiche avait interrogé une adresse devinée, reçu un 404, et conclu à tort que le glossaire ne disait rien de Gemini. Le vrai slug n'est apparu qu'en lisant les liens que le module d'auto-lien avait posés tout seul sur une fiche d'actualité. **Sonder un slug deviné ne prouve pas l'absence d'un terme** - seule la liste réelle fait foi, et c'est la leçon à garder du correctif. Les deux fiches ne font pas doublon et n'ont pas été fusionnées : l'une couvre la famille de modèles, l'autre la ligne image et la correspondance entre ses noms commerciaux et techniques. C'est exactement une relation parent-enfant.
+- La migration est **additive et idempotente** : chaque liste de relations est relue puis complétée, jamais remplacée, et la marche arrière retire uniquement le lien posé ici en préservant les relations qui ne viennent pas de nous. Rollback puis rejeu vérifiés.
+
 ## [1.203.0] - 2026-08-21
 
 ### Modifié
