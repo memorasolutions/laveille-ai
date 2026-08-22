@@ -104,6 +104,18 @@ consignes à chaque tâche. Tout ce qui suit est acquis, permanent, et non négo
   minimale explicite, scopée au seul palier concerné.
 - **La forme courte `@php(...)` casse la compilation Blade** dans ce projet (erreur de syntaxe,
   page 500). Utiliser systématiquement la forme bloc `@php ... @endphp`.
+- **Un fork hérite du contexte COMPLET de la conversation.** Chargé d'une question étroite (« quel
+  est le chemin du compte ? »), un fork économique peut exécuter le MANDAT ENTIER qu'il voit dans le
+  contexte hérité - y compris des opérations de production (constaté le 2026-08-17 : dépôt de script,
+  cron, lecture de production, au lieu d'une simple recherche locale). Parade : pour une question
+  étroite, préférer un agent NEUF avec un brief minimal plutôt qu'un fork ; et tout brief de
+  sous-sous-agent répète explicitement « UNIQUEMENT cette question, rien du mandat parent ».
+- **Une nouvelle clé de `news:apply --payload` est soit du CONTENU, soit une méta-donnée - jamais
+  les deux.** Tout payload dont le panier de contenu est non vide efface `structured_summary` (le
+  résumé composé de la fiche), volontairement, depuis le 2026-08-17. Une clé posée APRÈS coup sur
+  une fiche déjà rédigée (outils liés, entités, verdict de vérification) doit donc voyager dans son
+  PROPRE panier, appliqué à part - sinon elle détruit le résumé en silence. Le piège s'est produit
+  deux fois, la seconde le 2026-08-21.
 - **Le texte alternatif décrit l'image**, il ne contient pas de mots-clés - le bourrage dégrade
   l'accessibilité sans bénéfice.
 
