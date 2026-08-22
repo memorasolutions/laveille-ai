@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.203.2] - 2026-08-22
+
+### Corrigé
+- **Les sources en bas des articles étaient découpées en morceaux.** Signalé par le fondateur sur l'article consacré au guide du ministère de l'Éducation : chaque référence apparaissait éclatée en quatre ou cinq blocs empilés, séparés par des traits pointillés, avec des fragments orphelins du type « . ( » sur une ligne, « source primaire » sur la suivante, « ) » sur une troisième. Une bibliographie illisible, exactement là où le site joue sa crédibilité.
+- **Le HTML était pourtant parfait** : le défaut venait entièrement de la charte, qui posait `display: block` sur **tous** les liens de la section. Une source citant deux termes de glossaire et un lien externe se retrouvait donc coupée en autant de blocs qu'elle contenait de liens. La règle datait d'un format hérité où une source était un paragraphe ne contenant qu'un lien seul, présenté en bloc avec un tiret en puce.
+- **Correction par construction, pas en rustine** : un lien au milieu d'une phrase reste désormais en ligne, comme partout ailleurs sur le web. Le style en bloc est conservé pour le cas hérité, mais restreint par `p > a:only-child` - une garde qui ne peut jamais viser un lien inséré dans une phrase. La liste numérotée de références reçoit enfin un style dédié (espacement, interligne, retrait), qu'aucune règle ne couvrait.
+
+### Ajouté
+- **Un garde-fou automatique, pour ne plus avoir à le vérifier à l'oeil.** Demande explicite du fondateur : « ça doit toujours être parfait sans que je sois obligé de voir chaque fois. » Quatre tests verrouillent l'invariant : les liens de sources restent en ligne, le cas hérité reste supporté, **aucun sélecteur large ne peut réintroduire un `display: block` sans la garde `:only-child`**, et la liste de références garde son style. Le troisième balaie toute la feuille et attrape donc aussi une régression écrite autrement, pas seulement le retour à l'identique de l'ancienne règle.
+- Le garde-fou a été **prouvé par l'échec** avant d'être retenu : le défaut d'origine réintroduit volontairement fait tomber deux tests avec un message nommant la régression ; restauré, les quatre repassent. Un test qui ne peut pas échouer ne protège rien.
+
 ## [1.203.1] - 2026-08-21
 
 ### Corrigé

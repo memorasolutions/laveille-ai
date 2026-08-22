@@ -761,19 +761,35 @@ select:focus {
 .sources-section p:last-child { margin-bottom: 0; }
 .sources-section p:empty { display: none; }
 
-.sources-section p a,
+/* Un lien situé AU MILIEU d'une phrase reste INLINE - c'est le défaut du web, et
+   le seul comportement correct pour une référence bibliographique.
+   Corrigé le 2026-08-22 : la règle précédente posait `display: block` sur TOUS les
+   liens de la section. Une source citant deux liens de glossaire et un lien externe
+   se retrouvait donc coupée en quatre ou cinq blocs, chacun souligné d'un pointillé,
+   avec des fragments isolés du type « . ( » puis « source primaire » puis « ) ».
+   Le HTML était pourtant correct : le défaut était entièrement ici. */
 .sources-section a {
-    display: block;
+    display: inline;
     color: var(--c-primary);
     text-decoration: none;
     border-bottom: 1px dotted var(--c-primary);
+    padding-left: 0;
+    margin-bottom: 0;
+    position: static;
+}
+
+/* Cas HÉRITÉ, volontairement conservé : dans les articles anciens, une source est un
+   paragraphe qui ne contient QUE son lien, présenté en bloc avec un tiret en puce.
+   `:only-child` est la garde : il ne peut jamais viser un lien inséré dans une phrase,
+   contrairement au sélecteur large qu'il remplace. */
+.sources-section p > a:only-child {
+    display: block;
     margin-bottom: 0.3rem;
     padding-left: 1rem;
     position: relative;
 }
 
-.sources-section p a:before,
-.sources-section > a:before {
+.sources-section p > a:only-child::before {
     content: "–";
     position: absolute;
     left: 0;
@@ -781,7 +797,27 @@ select:focus {
     font-weight: 700;
 }
 
-.sources-section a:hover {
+/* Format courant : la liste numérotée de références. Aucune règle ne l'habillait
+   jusqu'ici, d'où un rendu serré et des retraits incohérents. */
+.sources-section ol,
+.sources-section ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.sources-section li {
+    margin-bottom: 0.7rem;
+    line-height: 1.65;
+    font-size: 0.9rem;
+}
+
+.sources-section li:last-child { margin-bottom: 0; }
+
+/* Une référence ne doit jamais se briser en plein milieu d'une URL ou d'un titre. */
+.sources-section li a { overflow-wrap: anywhere; }
+
+.sources-section a:hover,
+.sources-section a:focus-visible {
     color: var(--c-primary-hover);
     border-bottom-style: solid;
 }
