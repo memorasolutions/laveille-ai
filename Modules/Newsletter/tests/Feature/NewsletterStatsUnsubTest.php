@@ -153,5 +153,5 @@ it("la page admin newsletter stats affiche la distinction purges vs reels", func
         ->assertStatus(200)
         ->assertSee('Désabonnements réels')
         ->assertSee('purge')
-        ->assertSee('hygiene');
+        ->assertSee('hygiène');
 });

@@ -50,7 +50,10 @@ test('download returns empty string on HTTP failure', function () {
 });
 
 test('isDownloaded returns false for non-existent font', function () {
-    expect($this->service->isDownloaded('Roboto'))->toBeFalse();
+    // Nom volontairement absent de toute autre police manipulée dans la suite (« Roboto »
+    // est réellement téléchargée ailleurs, ex. Modules/Backoffice/tests/Feature/BrandingTest.php,
+    // sans nettoyage) : ce test doit rester vrai peu importe l'ordre ou l'état résiduel du disque.
+    expect($this->service->isDownloaded('NonExistentFont404'))->toBeFalse();
 });
 
 test('isDownloaded returns true after download', function () {
