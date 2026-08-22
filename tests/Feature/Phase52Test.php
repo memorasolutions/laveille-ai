@@ -76,10 +76,18 @@ it('stripe webhook route exists and does not return 404', function () {
 });
 
 // Middleware
-it('recaptcha middleware alias is registered', function () {
-    $router = app('router');
-    $aliases = $router->getMiddleware();
-    expect($aliases)->toHaveKey('recaptcha');
+it('honeypot middleware alias is registered and points to the shared block', function () {
+    $aliases = app('router')->getMiddleware();
+
+    expect($aliases)->toHaveKey('honeypot')
+        ->and($aliases['honeypot'])->toBe(\Modules\Core\Http\Middleware\HoneypotProtection::class);
+});
+
+it('recaptcha middleware alias is gone', function () {
+    // Cet alias pointait vers un middleware appliqué à AUCUNE route, qui entretenait
+    // l'illusion d'une protection. Il a été retiré en v1.204.0 avec sa classe. Ce test
+    // garde le ménage : il échoue si quelqu'un réintroduit l'alias sans le brancher.
+    expect(app('router')->getMiddleware())->not->toHaveKey('recaptcha');
 });
 
 // Billable trait

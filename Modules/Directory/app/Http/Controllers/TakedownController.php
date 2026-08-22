@@ -7,6 +7,7 @@ namespace Modules\Directory\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Mail;
+use Modules\Core\Support\Honeypot;
 use Modules\Directory\Models\TakedownRequest;
 use Modules\Directory\Models\Tool;
 
@@ -34,7 +35,7 @@ class TakedownController extends Controller
     public function store(Request $request)
     {
         // Honeypot anti-bot : champ « website » invisible, rempli seulement par les robots.
-        if ($request->filled('website')) {
+        if (Honeypot::isBot($request)) {
             return redirect()->route('directory.takedown.create')
                 ->with('success', 'Votre demande a été transmise.');
         }

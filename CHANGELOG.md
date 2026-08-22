@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.204.0] - 2026-08-22
+
+### Ajouté
+- **Un seul bloc anti-robot, rappelé partout.** La même détection de pot de miel était réécrite à la main dans quatre contrôleurs (infolettre, contact, demande de retrait, opt-in auteur), sous **trois noms de champ différents**, plus un middleware qui en cherchait un quatrième. `Modules\Core\Support\Honeypot` devient la source de vérité unique : le nom canonique, la liste des anciens noms encore acceptés, la détection, et les attributs HTML du champ leurre.
+- **Un composant Blade `<x-core::honeypot />`** rend le champ à partir des mêmes attributs que la détection lit, de sorte que le formulaire et le contrôle ne peuvent plus diverger.
+- **11 tests verrouillent le contrat**, dont trois gardes : `website_url` n'est **jamais** confondu avec un leurre (c'est un vrai champ métier du module Acronyms, le confondre rejetterait des soumissions légitimes) ; ni `display:none` ni `visibility:hidden` ne sont utilisés (certains robots les détectent et évitent alors le champ, et un champ ainsi masqué peut malgré tout être exposé par une technologie d'assistance) ; et le composant est vérifié par un **rendu réel**, parce qu'une variable Blade réservée écrasée ne se voit qu'au rendu.
+
+### Corrigé
+- **Le middleware anti-robot était inerte.** Appliqué à `POST /api/v1/newsletter/subscribe`, il cherchait un champ nommé `website_url` qu'**aucun formulaire du site n'émet** : il ne bloquait donc jamais rien. Il cherche désormais les vrais noms. C'est le seul changement de comportement de ce lot, et il est volontaire.
+- **Le choix du nom canonique protège des faux positifs** : `hp_url` a été retenu plutôt que `website`, parce que les gestionnaires de mots de passe remplissent parfois un champ nommé « website » ou « url », ce qui bloquerait un visiteur bien réel.
+
+### Retiré
+- **`app/Http/Middleware/VerifyRecaptcha.php` et son alias**, déclarés mais appliqués à **aucune route** : du code mort qui entretenait l'illusion d'une protection. Avec le réglage `security.captcha_enabled` et les clés reCAPTCHA en base que plus aucun code ne lit, cela faisait **quatre sources de vérité** pour une seule question.
+- **L'ancien `app/Http/Middleware/HoneypotProtection.php`**, remplacé. Il ne survivait que parce que trois tests de sécurité l'épinglaient par son nom complet : ces tests visent désormais le nouveau contrat, et un quatrième a été ajouté pour garantir que le module Acronyms n'est pas cassé.
+
+### Note de conception
+- **La rétrocompatibilité est assumée et documentée** : des pages déjà servies et mises en cache chez des visiteurs émettent encore l'ancien nom `website`. Cesser de le lire désactiverait leur protection jusqu'à l'expiration de leur cache, sans que personne ne s'en aperçoive. Le bloc lit donc les deux noms, mais n'en rend plus qu'un.
+- Aucune vue n'a été modifiée : les formulaires existants continuent d'émettre leurs champs actuels, que le bloc lit tous les deux. La migration des vues suivra, séparément.
+
 ## [1.203.3] - 2026-08-22
 
 ### Corrigé

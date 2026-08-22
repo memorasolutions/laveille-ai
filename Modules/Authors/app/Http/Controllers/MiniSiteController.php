@@ -227,7 +227,7 @@ final class MiniSiteController extends Controller
 
     public function subscribe(Request $request, string $slug)
     {
-        if (! empty($request->input('website'))) {
+        if (\Modules\Core\Support\Honeypot::isBot($request)) {
             return ResponseFacade::json(['ok' => true], 200);
         }
 

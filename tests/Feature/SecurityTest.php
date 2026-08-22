@@ -83,21 +83,42 @@ test('debug mode defaults to false in config', function () {
 });
 
 test('honeypot middleware exists', function () {
-    expect(class_exists(\App\Http\Middleware\HoneypotProtection::class))->toBeTrue();
+    expect(class_exists(\Modules\Core\Http\Middleware\HoneypotProtection::class))->toBeTrue();
 });
 
 test('honeypot middleware rejects filled bot field', function () {
-    $middleware = new \App\Http\Middleware\HoneypotProtection;
-    $request = \Illuminate\Http\Request::create('/test', 'POST', ['website_url' => 'spam']);
+    // Rejet SILENCIEUX assumé (et non plus abort(422)) : le robot reçoit un succès et
+    // persiste dans une stratégie qui ne produit rien. Accept: json pour obtenir la
+    // branche déterministe (redirect()->back() exigerait une session).
+    $middleware = new \Modules\Core\Http\Middleware\HoneypotProtection;
+    $request = \Illuminate\Http\Request::create('/test', 'POST', [\Modules\Core\Support\Honeypot::FIELD => 'spam']);
+    $request->headers->set('Accept', 'application/json');
 
-    expect(fn () => $middleware->handle($request, fn ($r) => new \Illuminate\Http\Response('OK')))
-        ->toThrow(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+    $response = $middleware->handle($request, fn ($r) => new \Illuminate\Http\Response('OK'));
+
+    expect($response->getStatusCode())->toBe(200)
+        ->and($response->getContent())->not->toBe('OK');
 });
 
 test('honeypot middleware allows empty bot field', function () {
-    $middleware = new \App\Http\Middleware\HoneypotProtection;
-    $request = \Illuminate\Http\Request::create('/test', 'POST', ['website_url' => '']);
+    $middleware = new \Modules\Core\Http\Middleware\HoneypotProtection;
+    $request = \Illuminate\Http\Request::create('/test', 'POST', [\Modules\Core\Support\Honeypot::FIELD => '']);
 
     $response = $middleware->handle($request, fn ($r) => new \Illuminate\Http\Response('OK'));
-    expect($response->getStatusCode())->toBe(200);
+
+    expect($response->getStatusCode())->toBe(200)
+        ->and($response->getContent())->toBe('OK');
+});
+
+test('honeypot middleware ignores website_url - champ métier du module Acronyms', function () {
+    // NON-RÉGRESSION CRITIQUE. « website_url » est un VRAI champ métier du module
+    // Acronyms (site web officiel d'un acronyme). Le confondre avec le leurre
+    // rejetterait des soumissions parfaitement légitimes.
+    $middleware = new \Modules\Core\Http\Middleware\HoneypotProtection;
+    $request = \Illuminate\Http\Request::create('/test', 'POST', ['website_url' => 'https://exemple.qc.ca']);
+
+    $response = $middleware->handle($request, fn ($r) => new \Illuminate\Http\Response('OK'));
+
+    expect($response->getStatusCode())->toBe(200)
+        ->and($response->getContent())->toBe('OK');
 });

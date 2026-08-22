@@ -15,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Core\Support\Honeypot;
 use Modules\Newsletter\Models\Subscriber;
 use Modules\Newsletter\Notifications\WelcomeNewsletterNotification;
 
@@ -27,9 +28,9 @@ class NewsletterController extends Controller
             ? response()->json(['message' => $message])
             : back()->with('newsletter_success', $message);
 
-        // Anti-bot — honeypot maison : champ caché 'hp_url' (un humain ne le remplit JAMAIS → zéro faux positif).
-        // Graceful : si le champ est absent (form sans honeypot), aucun blocage. Rejet SILENCIEUX (le bot n'apprend rien).
-        if ($request->filled('hp_url')) {
+        // Anti-bot - détection unifiée, voir Modules\Core\Support\Honeypot (bloc commun à tous les formulaires du site).
+        // Graceful : si aucun champ leurre n'est présent (form sans honeypot), aucun blocage. Rejet SILENCIEUX (le bot n'apprend rien).
+        if (Honeypot::isBot($request)) {
             return $silentSuccess();
         }
 

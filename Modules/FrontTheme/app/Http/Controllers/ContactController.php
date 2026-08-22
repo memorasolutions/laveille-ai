@@ -17,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
+use Modules\Core\Support\Honeypot;
 
 class ContactController extends Controller
 {
@@ -39,7 +40,7 @@ class ContactController extends Controller
         // On NE renvoie PLUS sans trace : on met en QUARANTAINE (status='spam') pour que
         // l'humain puisse vérifier l'absence de faux positif, puis on renvoie le succès
         // (silencieux, le bot n'apprend rien) sans envoyer le courriel.
-        if ($request->filled('hp_url')) {
+        if (Honeypot::isBot($request)) {
             $this->quarantine([
                 'name' => mb_substr((string) $request->input('name', ''), 0, 255),
                 'email' => mb_substr((string) $request->input('email', ''), 0, 255),
