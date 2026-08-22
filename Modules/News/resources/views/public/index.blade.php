@@ -1,10 +1,14 @@
 @extends(fronttheme_layout())
 
-@section('title', __('Actualités IA et technologie') . ' - ' . config('app.name'))
-@section('meta_description', __('Veille quotidienne IA et technologie : résumés structurés par intelligence artificielle, classés par catégorie.'))
+@section('title', ($filters['verifications'] ?? false)
+    ? __('Vérifications') . ' - ' . config('app.name')
+    : __('Actualités IA et technologie') . ' - ' . config('app.name'))
+@section('meta_description', ($filters['verifications'] ?? false)
+    ? __('Les affirmations virales examinées une à une : citation inexacte, attribution erronée, contenu généré par une IA. Ce qui est exact, ce qui ne l\'est pas, et pourquoi.')
+    : __('Veille quotidienne IA et technologie : résumés structurés par intelligence artificielle, classés par catégorie.'))
 
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Actualités')])
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => ($filters['verifications'] ?? false) ? __('Vérifications') : __('Actualités')])
 @endsection
 
 @push('styles')
@@ -79,8 +83,16 @@
 @section('content')
 <section class="wpo-blog-single-section section-padding">
     <div class="container">
-        <h1 style="font-family: var(--f-heading); margin-bottom: 0.25rem;">{{ __('Actualités IA et technologie') }}</h1>
-        <p class="nw-page-intro">{{ __('Veille quotidienne — résumés structurés par intelligence artificielle') }}</p>
+        {{-- Module « vérification » (2026-08-21) : MÊME vue, MÊME liste, MÊMES filtres - seuls
+             l'en-tête et la promesse changent quand on arrive par /verifications. Dupliquer la
+             vue pour deux titres aurait créé deux gabarits à maintenir pour rien. --}}
+        @if($filters['verifications'] ?? false)
+            <h1 style="font-family: var(--f-heading); margin-bottom: 0.25rem;">{{ __('Vérifications') }}</h1>
+            <p class="nw-page-intro">{{ __('Les affirmations qui circulent, examinées une à une - avec ce qui est exact, ce qui ne l\'est pas, et pourquoi') }}</p>
+        @else
+            <h1 style="font-family: var(--f-heading); margin-bottom: 0.25rem;">{{ __('Actualités IA et technologie') }}</h1>
+            <p class="nw-page-intro">{{ __('Veille quotidienne - résumés structurés par intelligence artificielle') }}</p>
+        @endif
 
         {{-- Filtres --}}
         <div class="nw-filters">

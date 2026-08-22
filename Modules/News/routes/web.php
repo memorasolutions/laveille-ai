@@ -19,6 +19,12 @@ Route::get('/news-sitemap.xml', [NewsSitemapController::class, 'index'])->name('
 Route::middleware('web')->group(function () {
     Route::get('/actualites', [PublicNewsController::class, 'index'])->name('news.index')->middleware('cacheResponse:600');
 
+    // Module « vérification » (2026-08-21) : adresse stable et citable pour les fiches qui
+    // vérifient une affirmation circulant ailleurs. Déclarée AVANT /actualites/{slug} n'est pas
+    // nécessaire ici (préfixe différent), mais elle réutilise le même contrôleur et le même
+    // rendu - elle ne fait qu'activer un filtre, jamais dupliquer l'index.
+    Route::get('/verifications', [PublicNewsController::class, 'verifications'])->name('news.verifications')->middleware('cacheResponse:600');
+
     // Redirect 301 : anciennes URLs /actualites/{id} → /actualites/{slug}
     Route::get('/actualites/{id}', function (string $id) {
         $article = \Modules\News\Models\NewsArticle::findOrFail((int) $id);

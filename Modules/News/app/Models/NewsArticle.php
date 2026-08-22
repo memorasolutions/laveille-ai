@@ -130,14 +130,21 @@ class NewsArticle extends Model implements Searchable
         'retired_at',
         // ACTION : module « signature éditoriale » (signal humain E-E-A-T vérifiable, design doc
         // SPEC-SIGNAL-HUMAIN, club des sages 93/100, 2026-08-20) - 'reviewed_at'/'reviewed_by'
-        // sont fillable pour permettre l'écriture SERVEUR depuis NewsApplyCommand (jamais depuis
-        // un payload agent : ces deux clés sont volontairement ABSENTES de
-        // NewsApplyCommand::ALLOWED_PAYLOAD_KEYS, l'agent ne peut jamais fabriquer sa propre date
-        // de relecture).
+        // sont fillable pour l'écriture SERVEUR, mais CORRECTIF DU 2026-08-21 : le SEUL point
+        // d'écriture est désormais markReviewedByHuman(), appelé par un geste humain de l'écran
+        // d'administration (publication manuelle ou bouton « J'ai relu »). NewsApplyCommand ne
+        // les écrit PLUS - la signature attestait sinon une relecture qui n'avait pas eu lieu.
+        // Ces deux clés restent volontairement ABSENTES de ALLOWED_PAYLOAD_KEYS : l'agent ne
+        // peut jamais fabriquer sa propre date de relecture.
         // MCP: SELF (<5 lignes)
         // RAISON: design doc SPEC-SIGNAL-HUMAIN, étape 1.
         'reviewed_at',
         'reviewed_by',
+        // Module « vérification » (2026-08-21) : trois champs additifs, nullables, sans effet sur
+        // une fiche ordinaire. Vocabulaire et rendu : voir FACT_CHECK_VERDICTS.
+        'fact_check_verdict',
+        'fact_check_claim',
+        'fact_check_source',
     ];
 
     protected $casts = [
@@ -981,6 +988,94 @@ class NewsArticle extends Model implements Searchable
     public function hasEditorialReview(): bool
     {
         return ! is_null($this->reviewed_at);
+    }
+
+    /**
+     * Module « vérification » (2026-08-21) - SOURCE UNIQUE du vocabulaire des verdicts.
+     *
+     * Tout ce qui touche à une vérification en découle et n'est JAMAIS réécrit ailleurs : le
+     * libellé affiché sur le badge, la teinte du badge, la phrase explicative, et la note portée
+     * par le balisage Schema.org ClaimReview. Ajouter un verdict, c'est ajouter une entrée ici,
+     * et rien d'autre.
+     *
+     * Le choix des étiquettes suit deux contraintes. D'abord la justesse : les cas rencontrés ne
+     * sont presque jamais des « fausses nouvelles » au sens strict, mais des citations mal
+     * attribuées, des propos recomposés ou des œuvres de fiction sorties de leur contexte - le
+     * mot juste vaut mieux que le mot fort. Ensuite la lisibilité : cinq étiquettes, pas douze,
+     * pour qu'un lecteur pressé comprenne du premier coup d'oeil.
+     *
+     * 'contenu_synthetique' a été ajouté le 2026-08-21 après une passe adversariale qui a nommé
+     * l'angle mort : sur un site consacré à l'IA, le cas le plus probable n'est pas la citation
+     * mal recopiée, c'est l'image ou la vidéo fabriquée par un générateur puis présentée comme
+     * un document authentique. Le ranger sous « présentation trompeuse » aurait tout dit sauf
+     * l'essentiel.
+     *
+     * 'rating' : note ClaimReview sur 5 (1 = entièrement faux, 5 = entièrement exact), attendue
+     * par Google en complément de l'étiquette textuelle, qui reste la valeur affichée.
+     */
+    public const FACT_CHECK_VERDICTS = [
+        'contenu_synthetique' => [
+            'label' => 'Contenu généré par une IA',
+            'tone' => 'danger',
+            'summary' => "Le document présenté comme authentique a été fabriqué par un outil de génération.",
+            'rating' => 1,
+        ],
+        'citation_inexacte' => [
+            'label' => 'Citation inexacte',
+            'tone' => 'danger',
+            'summary' => "La citation attribuée ne se trouve pas dans la source à laquelle on la rattache.",
+            'rating' => 1,
+        ],
+        'attribution_erronee' => [
+            'label' => 'Attribution erronée',
+            'tone' => 'danger',
+            'summary' => "Les propos existent, mais pas sous cette forme, ou pas de cette personne, ou pas à cette occasion.",
+            'rating' => 2,
+        ],
+        'presentation_trompeuse' => [
+            'label' => 'Présentation trompeuse',
+            'tone' => 'warning',
+            'summary' => "Le contenu est authentique, mais présenté d'une manière qui lui fait dire autre chose.",
+            'rating' => 2,
+        ],
+        'contexte_manquant' => [
+            'label' => 'Contexte manquant',
+            'tone' => 'warning',
+            'summary' => "L'information est exacte, mais il lui manque un élément sans lequel on la comprend mal.",
+            'rating' => 3,
+        ],
+    ];
+
+    /**
+     * Le module de vérification est-il actif sur cette fiche ? Un verdict inconnu (étiquette
+     * retirée du vocabulaire après coup) se comporte comme une absence : rien ne s'affiche,
+     * plutôt qu'un badge vide ou une erreur.
+     */
+    public function hasFactCheck(): bool
+    {
+        return $this->fact_check_verdict !== null
+            && array_key_exists($this->fact_check_verdict, self::FACT_CHECK_VERDICTS);
+    }
+
+    /**
+     * Définition complète du verdict de cette fiche (libellé, teinte, phrase, note), ou null.
+     * Point d'accès unique : ni la vue, ni le service JSON-LD ne lisent la constante directement.
+     *
+     * @return array{label:string, tone:string, summary:string, rating:int}|null
+     */
+    public function factCheckVerdict(): ?array
+    {
+        return $this->hasFactCheck() ? self::FACT_CHECK_VERDICTS[$this->fact_check_verdict] : null;
+    }
+
+    /**
+     * Fiches portant une vérification, les plus récentes d'abord - réutilisée par la page
+     * publique d'index des vérifications ET par tout comptage (DRY, une seule définition de
+     * « ce qu'est une vérification » côté requête).
+     */
+    public function scopeFactChecked($query)
+    {
+        return $query->whereNotNull('fact_check_verdict');
     }
 
     /**

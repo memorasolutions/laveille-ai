@@ -107,6 +107,9 @@ class NewsCompositionController extends Controller
             // révision 2026-08-17) ──
             'fetchSourceEndpointTemplate' => route('admin.news.composition.fetch-source', ['article' => '__SLUG__']),
             'publishEndpointTemplate' => route('admin.news.composition.publish', ['article' => '__SLUG__']),
+            // Signature éditoriale (2026-08-21) : bouton « J'ai relu » de l'écran, seul geste
+            // humain qui date la relecture d'une fiche DÉJÀ publiée (voir markReviewed()).
+            'markReviewedEndpointTemplate' => route('admin.news.composition.mark-reviewed', ['article' => '__SLUG__']),
             'generatePromptEndpointTemplate' => route('admin.news.composition.generate-prompt', ['article' => '__SLUG__']),
             'proofPairsStoreEndpointTemplate' => route('admin.news.composition.proof-pairs.store', ['article' => '__SLUG__']),
             'proofPairsDestroyEndpointTemplate' => route('admin.news.composition.proof-pairs.destroy', ['article' => '__SLUG__', 'pair' => '__PAIR_ID__']),
@@ -227,6 +230,12 @@ class NewsCompositionController extends Controller
             'primary_sources' => $article->primary_sources ?? [],
             'image_credit' => $article->image_credit,
             'is_published' => (bool) $article->is_published,
+            // ACTION : signature éditoriale (2026-08-21) - l'écran doit savoir si la fiche est
+            // DÉJÀ signée, pour n'offrir le bouton « J'ai relu » qu'à celles qui ne le sont pas.
+            // MCP: SELF (<5 lignes)
+            // RAISON: la signature est un geste humain unique, jamais reposé deux fois.
+            'reviewed_at' => $article->reviewed_at?->toIso8601String(),
+            'reviewed_by' => $article->reviewed_by,
             'site_url' => url('/actualites/'.$article->slug),
             // Lien vers l'article ORIGINAL chez l'éditeur (demande du propriétaire 2026-08-17,
             // manque « source formelle » pointé par le panel) : resolved_url prime sur url
@@ -670,6 +679,10 @@ class NewsCompositionController extends Controller
         return response()->json([
             'success' => true,
             'site_url' => url('/actualites/'.$article->slug),
+            // Publier vaut relecture (markReviewedByHuman() ci-dessus) : l'écran doit le savoir,
+            // sinon il proposerait « J'ai relu » sur une fiche qui vient justement d'être signée.
+            'reviewed_at' => optional($article->reviewed_at)->toIso8601String(),
+            'reviewed_by' => $article->reviewerLabel(),
         ]);
     }
 
@@ -701,10 +714,13 @@ class NewsCompositionController extends Controller
             'reviewed_at' => optional($article->reviewed_at)->toIso8601String(),
         ]);
 
+        // Même nom de clé que publish() ci-dessus (`reviewed_by`) : deux points d'entrée qui
+        // décrivent la même chose ne doivent pas la nommer différemment - le front n'a alors
+        // qu'une seule convention à connaître.
         return response()->json([
             'success' => true,
             'reviewed_at' => optional($article->reviewed_at)->toIso8601String(),
-            'label' => $article->reviewerLabel(),
+            'reviewed_by' => $article->reviewerLabel(),
         ]);
     }
 }

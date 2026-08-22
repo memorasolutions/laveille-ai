@@ -82,6 +82,7 @@
         generateImagePromptEndpointTemplate: @js($generateImagePromptEndpointTemplate),
         uploadImageEndpointTemplate: @js($uploadImageEndpointTemplate),
         publishEndpointTemplate: @js($publishEndpointTemplate),
+        markReviewedEndpointTemplate: @js($markReviewedEndpointTemplate),
         articlesIndexUrl: @js($articlesIndexUrl),
     })"
     x-init="init()"
@@ -246,6 +247,29 @@
                             <div class="nc-hint" x-show="publishMissingList().length > 0" x-cloak x-text="'Il manque : ' + publishMissingList().join(', ')" style="display:block; margin-top:6px;"></div>
                             <span class="nc-status-ok" x-show="publishOk" x-cloak x-transition x-text="'✓ Actualité publiée.'" style="display:block; margin-top:6px;"></span>
                             <span class="nc-status-error" x-show="publishError" x-cloak x-text="publishError" style="display:block; margin-top:6px;"></span>
+                        </div>
+
+                        {{-- Signature éditoriale (2026-08-21) : le geste HUMAIN qui date la
+                             relecture affichée sous la fiche publique. Volontairement séparé de
+                             la publication, car une fiche composée puis publiée par l'agent
+                             n'a, par construction, jamais été relue par quelqu'un. --}}
+                        <div class="nc-field" x-show="selectedArticle && selectedArticle.is_published" x-cloak>
+                            <button type="button"
+                                    class="cb-btn"
+                                    x-show="!selectedArticle.reviewed_at"
+                                    :disabled="reviewing"
+                                    @click="markReviewed()">
+                                <span x-show="!reviewing">✍️ J'ai relu cette fiche</span>
+                                <span x-show="reviewing" x-cloak>⏳ Enregistrement…</span>
+                            </button>
+                            <span class="nc-hint" x-show="!selectedArticle.reviewed_at" style="display:block; margin-top:6px;">
+                                Date ta relecture : la fiche publique affiche alors « Relu et validé par… », avec cette date. À ne cliquer qu'après avoir vraiment lu la fiche.
+                            </span>
+                            <span class="nc-hint" x-show="selectedArticle.reviewed_at" x-cloak style="display:block; margin-top:6px;">
+                                ✍️ Fiche déjà signée <span x-text="selectedArticle.reviewed_by ? 'par ' + selectedArticle.reviewed_by : ''"></span>.
+                            </span>
+                            <span class="nc-status-ok" x-show="reviewOk" x-cloak x-transition style="display:block; margin-top:6px;">✓ Relecture enregistrée.</span>
+                            <span class="nc-status-error" x-show="reviewError" x-cloak x-text="reviewError" style="display:block; margin-top:6px;"></span>
                         </div>
 
                         <details class="nc-manual-details">
@@ -427,6 +451,7 @@ function compositionBuilder(opts) {
             generateImagePromptTemplate: opts.generateImagePromptEndpointTemplate,
             uploadImageTemplate: opts.uploadImageEndpointTemplate,
             publishTemplate: opts.publishEndpointTemplate,
+            markReviewedTemplate: opts.markReviewedEndpointTemplate,
             articlesIndexUrl: opts.articlesIndexUrl,
         },
         loading: { news: false, article: false, saving: false, deleting: false },
@@ -452,6 +477,9 @@ function compositionBuilder(opts) {
         publishing: false,
         publishOk: false,
         publishError: '',
+        reviewing: false,
+        reviewOk: false,
+        reviewError: '',
 
         // Phase B (design doc 2026-08-15, sections 5.1 et 7) : génération du prompt de
         // rédaction et fiche de preuve éditoriale. Flux DÉPRECIÉ (implémentation /actu2,
@@ -631,6 +659,44 @@ function compositionBuilder(opts) {
             return missing;
         },
 
+        // Signature éditoriale : seul chemin front qui pose reviewed_at sur une fiche déjà
+        // publiée. Le serveur refuse (409) une fiche déjà signée - on n'écrase jamais une date.
+        async markReviewed() {
+            if (!this.selectedArticle) return;
+            this.reviewing = true;
+            this.reviewError = '';
+            this.reviewOk = false;
+            try {
+                const url = this.endpoints.markReviewedTemplate.replace('__SLUG__', this.selectedArticle.slug);
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.reviewError = data.error || data.message || ('Erreur HTTP ' + res.status);
+                    return;
+                }
+                this.selectedArticle.reviewed_at = data.reviewed_at;
+                this.selectedArticle.reviewed_by = data.reviewed_by || this.selectedArticle.reviewed_by;
+                this.reviewOk = true;
+                setTimeout(() => { this.reviewOk = false; }, 2500);
+                if (typeof Livewire !== 'undefined') {
+                    Livewire.dispatch('toast', { type: 'success', message: 'Relecture enregistrée.' });
+                }
+            } catch (e) {
+                this.reviewError = 'Erreur réseau : ' + e.message;
+            } finally {
+                this.reviewing = false;
+            }
+        },
+
         async publishArticle() {
             if (!this.selectedArticle) return;
             this.publishing = true;
@@ -659,6 +725,8 @@ function compositionBuilder(opts) {
                 }
                 this.selectedArticle.is_published = true;
                 if (data.site_url) { this.selectedArticle.site_url = data.site_url; }
+                if (data.reviewed_at) { this.selectedArticle.reviewed_at = data.reviewed_at; }
+                if (data.reviewed_by) { this.selectedArticle.reviewed_by = data.reviewed_by; }
                 this.selectedArticle.internal_source_text = null;
                 this.formSourceText = '';
                 this.publishOk = true;

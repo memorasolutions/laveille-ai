@@ -179,6 +179,25 @@
                     {{ __('L\'attribution de la source d\'origine est systématique : la mention « D\'après [source] » figure en haut de chaque fiche à source unique, les sources primaires citées apparaissent en fin de fiche, et toute photo porte son crédit sous l\'image.') }}
                 </p>
 
+                {{-- Module « vérification » (2026-08-21) : la promesse ci-dessus reste creuse tant
+                     qu'on ne peut pas la vérifier. Ce paragraphe pointe vers la liste réelle des
+                     fiches qui examinent une affirmation - une preuve consultable, pas une
+                     déclaration d'intention. --}}
+                <h3 style="margin-top: 30px;">{{ __('Quand une affirmation circule et qu\'elle est fausse') }}</h3>
+                <p>
+                    {{ __('Certaines fiches n\'annoncent pas une nouvelle : elles examinent une affirmation qui circule déjà, souvent virale. Elles portent alors un verdict affiché en clair en haut de la fiche - contenu généré par une IA, citation inexacte, attribution erronée, présentation trompeuse ou contexte manquant - avec l\'affirmation examinée, mot pour mot, et le lien vers l\'endroit où elle circule.') }}
+                </p>
+                <p>
+                    {{ __('Deux règles encadrent ces fiches. Le verdict qualifie toujours l\'affirmation, jamais la personne qui l\'a relayée : se tromper de bonne foi n\'est pas mentir. Et le mot juste prime sur le mot fort : la plupart de ces cas ne sont pas des « fausses nouvelles » au sens strict, mais des propos mal attribués ou sortis de leur contexte.') }}
+                </p>
+                <p>
+                    {{ __('Un site qui juge les affirmations des autres doit accepter d\'être jugé à son tour.') }}
+                    <a href="{{ route('contact') }}">{{ __('Si vous estimez qu\'une de ces vérifications est erronée, écrivez-nous avec vos éléments') }}</a>{{ __(' : une vérification qui se révèle fausse est corrigée, et la correction est dite sur la fiche plutôt qu\'effacée en silence.') }}
+                </p>
+                <p>
+                    <a href="{{ route('news.verifications') }}" style="font-weight: 700; color: var(--c-primary, #064E5A);">{{ __('Consulter toutes les vérifications publiées') }} &rarr;</a>
+                </p>
+
             </article>
 
             <div style="background: #F0F4F8; border-radius: 12px; padding: 26px 28px; margin-top: 44px; text-align: center;">

@@ -24,6 +24,16 @@ class PublicNewsController extends Controller
             $query->where('category_tag', $category);
         }
 
+        // Filtre « vérifications » (module « vérification », 2026-08-21) : ne garde que les
+        // fiches qui vérifient une affirmation circulant ailleurs. Le scope factChecked() du
+        // modèle est la définition UNIQUE de « ce qu'est une vérification » côté requête -
+        // réutilisée telle quelle par la route dédiée /verifications, qui ne fait qu'activer ce
+        // filtre plutôt que de dupliquer tout cet index.
+        $factCheckOnly = $request->boolean('verifications');
+        if ($factCheckOnly) {
+            $query->factChecked();
+        }
+
         // Filtre période
         $period = $request->input('period');
         match ($period) {
@@ -62,9 +72,25 @@ class PublicNewsController extends Controller
             'period' => $period,
             'sort' => $sort,
             'q' => $search,
+            'verifications' => $factCheckOnly,
         ];
 
         return view('news::public.index', compact('articles', 'categories', 'filters'));
+    }
+
+    /**
+     * Page publique des vérifications (module « vérification », 2026-08-21).
+     *
+     * Ne duplique RIEN : elle active le filtre puis délègue à index(), qui garde la pagination,
+     * la recherche, le tri et le rendu des cartes. Son intérêt est d'exister comme adresse
+     * stable et citable - c'est aussi ce que Google attend d'un éditeur qui balise des
+     * vérifications : une pratique suivie, visible en un endroit, plutôt qu'une page isolée.
+     */
+    public function verifications(Request $request): View
+    {
+        $request->merge(['verifications' => true]);
+
+        return $this->index($request);
     }
 
     // ACTION : type de retour élargi à Response (chantier AdSense « faible valeur »,

@@ -99,7 +99,7 @@ class NewsApplyCommand extends Command
     // ACTION : Richesse v1.188.0 - 'composed_summary' rejoint la liste blanche, même garde-fou.
     // MCP: SELF (<5 lignes)
     // RAISON: design doc, section "Richesse v1.188.0 - structure fixe composée (2026-08-17 soir)".
-    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'title', 'seo_title', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve', 'original_post', 'composed_summary', 'related_tool_slugs', 'entities'];
+    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'title', 'seo_title', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve', 'original_post', 'composed_summary', 'related_tool_slugs', 'entities', 'fact_check'];
 
     /**
      * Richesse v1.188.0 - sous-clés autorisées de composed_summary (design doc, section
@@ -366,6 +366,97 @@ class NewsApplyCommand extends Command
             $updates['niveau_preuve'] = $decoded['niveau_preuve'];
         }
 
+        // Module « vérification » (2026-08-21) : les trois colonnes du verdict voyagent dans leur
+        // PROPRE panier, jamais dans $updates. Raison précise, et c'est un piège déjà rencontré
+        // avec related_tool_slugs : tout payload de CONTENU efface structured_summary (le résumé
+        // composé) plus bas. Un verdict est une méta-donnée posée souvent APRÈS coup, sur une
+        // fiche déjà composée - le ranger avec le contenu détruirait silencieusement son résumé.
+        $factCheckUpdates = [];
+
+        // Module « vérification » (2026-08-21) : clé UNIQUE 'fact_check' portant l'objet complet
+        // {verdict, claim, source}. Le vocabulaire des verdicts vit dans le modèle
+        // (NewsArticle::FACT_CHECK_VERDICTS), jamais recopié ici : la porte valide contre lui.
+        // Passer fact_check à null EFFACE la vérification - c'est le seul moyen de retirer un
+        // verdict posé par erreur, et il reste borné à cette porte.
+        if (array_key_exists('fact_check', $decoded)) {
+            $factCheck = $decoded['fact_check'];
+
+            if ($factCheck === null) {
+                $factCheckUpdates['fact_check_verdict'] = null;
+                $factCheckUpdates['fact_check_claim'] = null;
+                $factCheckUpdates['fact_check_source'] = null;
+            } else {
+                $allowedVerdicts = array_keys(NewsArticle::FACT_CHECK_VERDICTS);
+
+                // Sous-clés en liste blanche, même doctrine que composed_summary : une clé mal
+                // orthographiée (« souce ») serait sinon ignorée EN SILENCE, et l'agent croirait
+                // avoir posé une source qui n'existe pas. Refus explicite, jamais un oubli muet.
+                if (is_array($factCheck)) {
+                    $inconnues = array_diff(array_keys($factCheck), ['verdict', 'claim', 'source']);
+
+                    if ($inconnues !== []) {
+                        $this->error('fact_check : sous-clé(s) inconnue(s) refusée(s) : '.implode(', ', $inconnues).' (attendu : verdict, claim, source).');
+
+                        return self::FAILURE;
+                    }
+                }
+
+                if (! is_array($factCheck)
+                    || ! isset($factCheck['verdict'], $factCheck['claim'])
+                    || ! is_string($factCheck['verdict'])
+                    || ! in_array($factCheck['verdict'], $allowedVerdicts, true)) {
+                    $this->error('fact_check invalide : verdict attendu parmi '.implode(', ', $allowedVerdicts).', avec une clé claim.');
+
+                    return self::FAILURE;
+                }
+
+                if (! is_string($factCheck['claim']) || trim($factCheck['claim']) === '' || mb_strlen($factCheck['claim']) > 300) {
+                    $this->error('fact_check.claim doit être une chaîne non vide de 300 caractères maximum (affirmation examinée, en une phrase).');
+
+                    return self::FAILURE;
+                }
+
+                // La source est facultative. Deux garde-fous, pour deux risques distincts.
+                //
+                // 1. SCHÉMA : filter_var(FILTER_VALIDATE_URL) accepte `javascript://...`, qui
+                //    deviendrait exécutable dans le href du badge public au premier clic. Seuls
+                //    http et https passent - refus explicite pour tout le reste. (Relevé par une
+                //    relecture adversariale du diff avant déploiement, 2026-08-21.)
+                // 2. ABSENCE ≠ EFFACEMENT : une clé `source` simplement absente laisse la source
+                //    déjà enregistrée INTACTE ; seul un `source: null` explicite l'efface. Sans
+                //    cette distinction, recomposer un verdict sans repréciser la source aurait
+                //    silencieusement perdu le lien vers la publication d'origine.
+                $sourceFournie = array_key_exists('source', $factCheck);
+                $claimSource = $sourceFournie ? $factCheck['source'] : null;
+
+                if ($sourceFournie && $claimSource !== null) {
+                    $schema = is_string($claimSource) ? mb_strtolower((string) parse_url($claimSource, PHP_URL_SCHEME)) : '';
+
+                    if (! is_string($claimSource) || ! filter_var($claimSource, FILTER_VALIDATE_URL) || ! in_array($schema, ['http', 'https'], true)) {
+                        $this->error('fact_check.source doit être une URL http(s) valide (la publication où circule l\'affirmation), ou être absente.');
+
+                        return self::FAILURE;
+                    }
+
+                    // La colonne accepte 2048 caractères : au-delà, l'écriture échouerait APRÈS
+                    // que le contenu du même payload a déjà été commité (deux paniers, deux
+                    // transactions). On refuse donc AVANT d'écrire quoi que ce soit.
+                    if (mb_strlen($claimSource) > 2048) {
+                        $this->error('fact_check.source dépasse 2048 caractères (limite de la colonne).');
+
+                        return self::FAILURE;
+                    }
+                }
+
+                $factCheckUpdates['fact_check_verdict'] = $factCheck['verdict'];
+                $factCheckUpdates['fact_check_claim'] = trim($factCheck['claim']);
+
+                if ($sourceFournie) {
+                    $factCheckUpdates['fact_check_source'] = $claimSource;
+                }
+            }
+        }
+
         if (array_key_exists('original_post', $decoded)) {
             $normalizedPost = $this->normalizeOriginalPost($decoded['original_post']);
             if ($normalizedPost === null) {
@@ -468,8 +559,8 @@ class NewsApplyCommand extends Command
         // simplement une fiche qui n'a pas encore été relue, et le composant editorial-signature
         // ne rend alors rien du tout.
 
-        if ($updates === [] && $relatedToolSlugs === null && $entities === null) {
-            $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs / primary_sources / image_credit / nature_original / niveau_preuve / original_post / composed_summary / related_tool_slugs n\'est fournie.');
+        if ($updates === [] && $relatedToolSlugs === null && $entities === null && $factCheckUpdates === []) {
+            $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs / primary_sources / image_credit / nature_original / niveau_preuve / original_post / composed_summary / related_tool_slugs / entities / fact_check n\'est fournie.');
 
             return self::FAILURE;
         }
@@ -511,6 +602,22 @@ class NewsApplyCommand extends Command
             ]);
 
             $this->info("Fiche {$article->id} : payload texte appliqué (".implode(', ', array_keys($updates)).').');
+        }
+
+        // Verdict de vérification appliqué à part (voir la note du panier plus haut) : jamais
+        // d'effacement de structured_summary, jamais de journal d'override - poser ou retirer un
+        // verdict ne touche à rien d'autre sur la fiche.
+        if ($factCheckUpdates !== []) {
+            DB::transaction(function () use ($article, $factCheckUpdates): void {
+                $article->update($factCheckUpdates);
+            });
+
+            Log::channel('composition')->info('news:apply - verdict de vérification appliqué', [
+                'article_id' => $article->id,
+                'verdict' => $factCheckUpdates['fact_check_verdict'],
+            ]);
+
+            $this->info("Fiche {$article->id} : verdict de vérification ".($factCheckUpdates['fact_check_verdict'] ?? 'retiré').'.');
         }
 
         if ($relatedToolSlugs !== null) {

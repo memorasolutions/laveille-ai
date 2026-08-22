@@ -465,6 +465,89 @@ final class JsonLdService
     }
 
     /**
+     * ClaimReview - balisage de vérification des faits (module « vérification », 2026-08-21).
+     *
+     * VÉRIFIÉ le 2026-08-21, et ce point corrige une croyance fausse : ClaimReview n'est PLUS un
+     * résultat enrichi de Google Search. Le retrait a été annoncé le 12 juin 2025 et la page
+     * officielle (Search Central, « Fact Check (ClaimReview) Markup for Search », mise à jour le
+     * 10 décembre 2025) porte désormais un avertissement de dépréciation. On ne pose donc PAS ce
+     * balisage en espérant un badge dans les pages de résultats : ce serait poursuivre une
+     * fonctionnalité morte.
+     *
+     * Il reste posé pour trois usages qui, eux, sont vivants : le type reste valide chez
+     * schema.org ; Fact Check Explorer et l'API Fact Check Tools continuent de le consommer
+     * explicitement (Google le dit sur la même page) ; et c'est la seule forme lisible par une
+     * machine qui dit « cette page examine telle affirmation et conclut ceci » - ce qu'un moteur
+     * de réponse peut exploiter sans dépendre du bon vouloir de Google Search. Coût nul, aucune
+     * promesse invérifiable faite au lecteur.
+     *
+     * Retourne null quand la fiche ne porte aucun verdict : la vue n'ajoute alors rien du tout,
+     * et une page ordinaire reste strictement inchangée.
+     *
+     * Conventions du vocabulaire respectées ici :
+     *   - un SEUL objet ClaimReview par page (la fiche est sa propre URL) ;
+     *   - claimReviewed, reviewRating et url sont les trois propriétés obligatoires ;
+     *   - reviewRating.alternateName porte l'étiquette TEXTUELLE - c'est elle la conclusion
+     *     lisible, le chiffre n'est qu'un complément d'échelle ;
+     *   - deux auteurs DISTINCTS à ne jamais confondre : `author` au premier niveau est celui qui
+     *     VÉRIFIE (nous), `itemReviewed.author` serait celui qui a fait la déclaration. Ce
+     *     dernier est volontairement OMIS : on ne l'invente pas quand il n'est pas établi ;
+     *   - la déclaration examinée est rattachée à l'endroit où elle a circulé
+     *     (itemReviewed.appearance), jamais au site qui la vérifie.
+     *
+     * Le vocabulaire vient de NewsArticle::FACT_CHECK_VERDICTS via factCheckVerdict() : ni
+     * libellé ni note ne sont réécrits ici (DRY strict, un seul endroit à modifier).
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function claimReview(object $article): ?array
+    {
+        if (! method_exists($article, 'factCheckVerdict')) {
+            return null;
+        }
+
+        $verdict = $article->factCheckVerdict();
+
+        if ($verdict === null || blank($article->fact_check_claim)) {
+            return null;
+        }
+
+        $claim = ['@type' => 'Claim'];
+
+        // Même filtre de schéma que le badge public : une source qui n'est pas http(s) n'est pas
+        // une publication consultable, elle n'a rien à faire dans un graphe destiné aux machines.
+        if (filled($article->fact_check_source)
+            && in_array(mb_strtolower((string) parse_url($article->fact_check_source, PHP_URL_SCHEME)), ['http', 'https'], true)) {
+            // appearance attend une oeuvre, pas une chaîne : un CreativeWork minimal porte l'URL
+            // sans rien inventer de plus (ni titre, ni auteur, qui ne sont pas établis).
+            $claim['appearance'] = [
+                '@type' => 'CreativeWork',
+                'url' => $article->fact_check_source,
+            ];
+        }
+
+        return [
+            '@type' => 'ClaimReview',
+            'url' => route('news.show', $article),
+            'datePublished' => optional($article->published_at ?? $article->created_at)->toDateString(),
+            'claimReviewed' => (string) $article->fact_check_claim,
+            'itemReviewed' => $claim,
+            'author' => [
+                '@type' => 'Organization',
+                'name' => config('app.name'),
+                'url' => url('/'),
+            ],
+            'reviewRating' => [
+                '@type' => 'Rating',
+                'alternateName' => __($verdict['label']),
+                'ratingValue' => $verdict['rating'],
+                'worstRating' => 1,
+                'bestRating' => 5,
+            ],
+        ];
+    }
+
+    /**
      * Rend un ou plusieurs schémas en balise JSON-LD.
      *
      * @param  array  ...$schemas  Chaque schéma est un array associatif

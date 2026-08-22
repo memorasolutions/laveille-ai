@@ -183,14 +183,26 @@
 <meta name="llm:summary" content="{{ e($article->seo_title ?? $article->title) }} - {{ e($article->meta_description ?? $article->displayExcerpt(200)) }} ({{ e($article->displaySourceName()) }})">
 <meta name="llm:keywords" content="actualité IA, {{ e($article->displaySourceName()) }}, intelligence artificielle, francophone, Québec">
 <meta name="llm:url" content="{{ route('news.show', $article) }}">
-@if($ss && isset($ss['faq_question']))
-    {!! \Modules\SEO\Services\JsonLdService::render(
-        \Modules\SEO\Services\JsonLdService::newsArticle($article),
-        ['@type' => 'FAQPage', 'mainEntity' => [['@type' => 'Question', 'name' => $ss['faq_question'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $ss['faq_answer'] ?? '']]]],
-    ) !!}
-@else
-    {!! \Modules\SEO\Services\JsonLdService::render(\Modules\SEO\Services\JsonLdService::newsArticle($article)) !!}
-@endif
+@php
+    // Graphes JSON-LD de la fiche, assemblés en UN seul endroit (2026-08-21) : l'ancienne
+    // structure dupliquait l'appel à newsArticle() dans les deux branches d'un @if, et ajouter
+    // un troisième graphe y aurait doublé la duplication. Chaque graphe est simplement ajouté
+    // s'il a lieu d'être ; render() est variadique et n'est appelé qu'une fois.
+    $nwSchemas = [\Modules\SEO\Services\JsonLdService::newsArticle($article)];
+
+    if ($ss && isset($ss['faq_question'])) {
+        $nwSchemas[] = ['@type' => 'FAQPage', 'mainEntity' => [['@type' => 'Question', 'name' => $ss['faq_question'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $ss['faq_answer'] ?? '']]]];
+    }
+
+    // ClaimReview : présent UNIQUEMENT sur une fiche qui vérifie une affirmation (module
+    // « vérification »), et un seul par page - c'est la règle du vocabulaire, pas une exigence
+    // de Google, qui a retiré ce balisage de ses résultats enrichis en juin 2025 (voir le
+    // docblock de JsonLdService::claimReview() pour la raison de le poser quand même).
+    if ($nwClaimReview = \Modules\SEO\Services\JsonLdService::claimReview($article)) {
+        $nwSchemas[] = $nwClaimReview;
+    }
+@endphp
+{!! \Modules\SEO\Services\JsonLdService::render(...$nwSchemas) !!}
 @endpush
 
 @push('styles')
@@ -416,6 +428,12 @@
                             <span class="nw-pill" title="{{ __('Évaluation interne de pertinence pour le lectorat québécois.') }}">{{ $relevanceLabel }}</span>
                         @endif
                     </div>
+
+                    {{-- Badge de vérification (module « vérification », 2026-08-21) - placé AVANT
+                         la signature : le lecteur voit d'abord de quoi il s'agit, puis qui en
+                         répond. Ne rend rien sur une fiche ordinaire (composant DRY, vocabulaire
+                         dans NewsArticle::FACT_CHECK_VERDICTS). --}}
+                    <x-news::fact-check-badge :article="$article" />
 
                     {{-- Signature éditoriale « Vérifié par la rédaction » (signal humain E-E-A-T,
                          design doc SPEC-SIGNAL-HUMAIN 2026-08-20) - composant DRY, ne rend rien

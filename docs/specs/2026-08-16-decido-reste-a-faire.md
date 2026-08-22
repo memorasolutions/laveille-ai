@@ -109,3 +109,34 @@ poli par cinq déploiements. La question est : **pourquoi quelqu'un choisirait D
 Doodle, Framadate, Rallly ou When2meet ?**
 
 Résultats du panel à consigner ici une fois les rounds terminés.
+
+---
+
+## CLÔTURE - 16 août 2026, 17h10 Québec (21:10 UTC)
+
+**Les lots 1 à 5 sont LIVRÉS EN PRODUCTION et vérifiés :**
+
+- **v1.178.0** (12h46 Québec) - lots 1, 2, 3 : créneau final affiché en premier, échéance facultative
+  non bloquante, refus explicite distinct du silence, correction du bogue d'effacement de vote,
+  commentaires protégés, page « mes sondages », progression « 7 sur 10 ». Quatre migrations passées.
+- **v1.179.0** (16h21 Québec) - lots 4, 5 : notification quotidienne à l'organisateur (au plus un
+  courriel par sondage par jour, interrupteur par sondage, planifiée à 7h00 - confirmée dans la
+  liste réelle des tâches de production), CSS sorti de la vue, script conditionnel, boutons empilés
+  proprement à 320 pixels, garde contre le format() sur valeur nulle.
+
+**Preuves finales** : 136 tests Decido (103 au matin), 552 assertions, zéro échec ; validations
+visuelles en navigateur à chaque lot ; vérifications en production par lecture réelle du HTML servi.
+
+**Un défaut trouvé par la validation visuelle et corrigé avant déploiement** : deux bannières
+contradictoires pour qui avait seulement décliné - les 124 tests ne le voyaient pas, la donnée étant
+juste et seul l'affichage étant faux.
+
+**LOT 6 (panel « faire une référence ») : DÉLIBÉRÉMENT REPORTÉ.** Décision du propriétaire : il
+utilise l'outil lui-même d'abord (sondage du webinaire), la publicité vient ensuite. Le panel sera
+relancé quand de vraies données d'usage existeront - un premier round l'a confirmé : les deux oracles
+consultés recommandaient d'arrêter de polir et de passer à la distribution, mais leur prémisse
+(« l'outil échoue ») était fausse : il n'avait simplement jamais été annoncé.
+
+**Actus 2.0 phase A : LIVRÉE aussi** - v1.180.0 (17h02 Québec), écran de composition avec texte
+source interne jamais exposé (non-fuite prouvée par marqueur en local ET vérifiée en production sur
+deux fiches réelles). Phases B, C, D : cycles suivants, selon le plan du 15 août.

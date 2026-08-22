@@ -163,6 +163,11 @@
             @endcan
         </div>
         <div class="nw-card-body">
+            {{-- Module « vérification » (2026-08-21) : pastille AVANT le titre, pour qu'une fiche
+                 qui examine une affirmation se distingue dès la liste - c'est le seul endroit où
+                 le lecteur choisit quoi lire. Même composant que le bloc complet de la fiche,
+                 en mode compact : aucune règle ni couleur dupliquée ici. --}}
+            <x-news::fact-check-badge :article="$article" :compact="true" />
             <h3 class="nw-card-title" role="heading" aria-level="2">
                 {{-- Point rouge "déjà publié" (superadmin only) — même composant partagé que la fiche
                      article et la liste admin. Voir components/admin-shared-dot.blade.php. --}}

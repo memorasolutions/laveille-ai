@@ -89,3 +89,6 @@ logo-white-canvas.txt
 .claude/scheduled_tasks.lock
 .backups/
 .articles/
+
+# Dossier de travail temporaire des sessions (jamais versionné)
+/scratchpad/

@@ -28,13 +28,30 @@ it('la page /methodologie liste les trois niveaux de preuve (primaire/mixte/rela
         ->assertSee('un média relais', false);
 });
 
-it('la page /methodologie décrit la vérification en deux couches et l\'attribution des sources', function () {
+// 2026-08-21 : la page est passée de DEUX à TROIS couches de vérification (v1.201.0), et la
+// troisième a été renommée pour dire la vérité - « Relecture humaine, QUAND ELLE A EU LIEU »,
+// puisqu'une fiche composée automatiquement n'est pas relue. Ce test suivait encore l'ancien
+// libellé et échouait en silence depuis. Les libellés vérifiés ici sont volontairement des
+// fragments SANS apostrophe : le rendu HTML les échapperait en &#039;.
+it('la page /methodologie décrit la vérification en trois couches et l\'attribution des sources', function () {
     $response = $this->get(route('methodologie'));
 
     $response->assertOk()
         ->assertSee('Composition avec preuve', false)
-        ->assertSee('Relecture éditoriale humaine', false)
+        ->assertSee('Contre-vérification par plusieurs modèles', false)
+        ->assertSee('Relecture humaine, quand elle a eu lieu', false)
         ->assertSee('Vérifié par la rédaction de laveille.ai', false);
+});
+
+// Module « vérification » (2026-08-21) : la page explique le mécanisme des verdicts et renvoie
+// vers la liste réelle - une promesse de crédibilité doit être consultable.
+it('la page /methodologie explique les verdicts de vérification et renvoie vers /verifications', function () {
+    $response = $this->get(route('methodologie'));
+
+    $response->assertOk()
+        ->assertSee('contenu généré par une IA', false)
+        ->assertSee('Consulter toutes les vérifications publiées', false)
+        ->assertSee(route('news.verifications'), false);
 });
 
 it('la page /methodologie n\'opte pas pour un noindex de niveau page (reste indexable)', function () {
