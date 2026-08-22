@@ -1,0 +1,74 @@
+[
+  {
+    "slug": "nano-banana",
+    "name": "Nano Banana",
+    "cat_slug": "intelligence-artificielle",
+    "type": "ai_term",
+    "difficulty": "beginner",
+    "icon": "🍌",
+    "acronym_full": null,
+    "has_image": true,
+    "match_strategy": "loose",
+    "definition": "Nano Banana est le nom commercial des modèles de génération et de retouche d'images de Google, dont le nom technique appartient à la famille Gemini Image. Ils fabriquent une image à partir d'une description écrite, et modifient une photo existante à laquelle on demande un changement en simples mots.\n\nLa gamme compte quatre déclinaisons : Nano Banana (26 août 2025), Nano Banana Pro (20 novembre 2025), Nano Banana 2 (26 février 2026) et Nano Banana 2 Lite (30 juin 2026). Un point porte souvent à confusion : le « Pro » et le « 2 » sont deux gammes distinctes, pas une progression. Le « Pro » vise le contrôle créatif, avec la cohérence de jusqu'à cinq personnes, la composition à partir de quatorze images et des sorties 2K ou 4K. Le « 2 » vise la vitesse, avec des capacités qui s'en approchent. Le « 2 » ne succède donc pas au « Pro ».",
+    "analogy": "Comme une trousse d'outils de retouche photo où chaque instrument correspond à un besoin différent : rapidité, précision ou économie.",
+    "example": "Au lancement du 26 août 2025, la capacité vedette était de retoucher une photo en la décrivant en mots : restaurer une vieille photo de famille en préservant le visage de la personne.",
+    "did_you_know": "Ce n'était qu'un nom de code pour la plateforme d'évaluation LMArena, en juillet 2025 : la cheffe de produit Naina Raisinghani avait fusionné ses deux surnoms, « Naina Banana » et « Nano ».",
+    "one_sentence_answer": "Nano Banana est le nom public des modèles d'images de Google, dont le nom technique est Gemini Image ; ses variantes « Pro » et « 2 » sont des gammes parallèles, l'une pour le contrôle créatif, l'autre pour la vitesse.",
+    "faq": [
+      {
+        "question": "Nano Banana 2 est-il meilleur que Nano Banana Pro ?",
+        "answer": "Ce sont deux gammes différentes, pas deux versions successives. Le « Pro » vise le contrôle créatif et la qualité de production ; le « 2 » vise la vitesse, avec des capacités qui s'en approchent. Le choix dépend du besoin, pas d'un classement."
+      },
+      {
+        "question": "Peut-on savoir qu'une image vient de Nano Banana ?",
+        "answer": "Google inscrit dans chaque image un filigrane invisible, SynthID, qui résiste au recadrage, aux filtres et à la compression, et que ses outils savent détecter. Attention au raisonnement inverse : l'absence de SynthID ne prouve pas qu'une image est authentique, seulement qu'elle ne vient pas des outils de Google."
+      },
+      {
+        "question": "Peut-on s'y fier pour produire une infographie ?",
+        "answer": "Pas sans vérifier. Google avertit lui-même que l'orthographe du texte dans l'image, les traductions et l'exactitude des faits peuvent échouer. Une image destinée à informer se relit donc comme un texte, avant publication."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Comment Nano Banana a reçu son nom",
+        "url": "https://blog.google/products-and-platforms/products/gemini/how-nano-banana-got-its-name/",
+        "year": 2025,
+        "author": "Google"
+      },
+      {
+        "label": "Nano Banana Pro",
+        "url": "https://blog.google/innovation-and-ai/products/nano-banana-pro/",
+        "year": 2025,
+        "author": "Google"
+      },
+      {
+        "label": "SynthID",
+        "url": "https://deepmind.google/models/synthid/",
+        "year": 2026,
+        "author": "Google DeepMind"
+      },
+      {
+        "label": "Gemini Image (Flash)",
+        "url": "https://deepmind.google/models/gemini-image/flash/",
+        "year": 2026,
+        "author": "Google DeepMind"
+      }
+    ],
+    "aliases": [
+      "Nano-Banana",
+      "Nano Banana Pro",
+      "Nano-Banana-Pro",
+      "Nano Banana 2",
+      "Nano Banana 2 Lite",
+      "Gemini Image",
+      "Gemini 2.5 Flash Image",
+      "Gemini 3 Pro Image",
+      "Gemini 3.1 Flash Image"
+    ],
+    "broader_slugs": [
+      "ia-generative",
+      "modele-multimodal"
+    ],
+    "narrower_slugs": []
+  }
+]

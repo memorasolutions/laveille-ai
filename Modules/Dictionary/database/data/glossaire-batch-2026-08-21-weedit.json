@@ -1,0 +1,54 @@
+[
+    {
+        "slug": "weedit",
+        "cat_slug": "intelligence-artificielle",
+        "name": "WeEdit",
+        "aliases": ["WeEdit benchmark", "WeEdit-Bench"],
+        "definition": "WeEdit est un banc d'essai consacré à un problème précis et notoirement coriace : modifier le texte qui se trouve DÉJÀ dans une image. Une affiche, une enseigne, un emballage, une capture d'écran. Il ne s'agit pas de retoucher une photo en général, mais d'y réécrire des mots sans abîmer ce qu'il y a autour.\n\nLa difficulté est réelle. Les modèles de génération d'images produisent volontiers des caractères tordus, approximatifs ou carrément inventés, et l'ennui s'aggrave dès qu'on sort de l'alphabet latin. WeEdit pousse justement dans cette direction, avec deux jeux de 2 000 cas : l'un bilingue, en chinois et en anglais, l'autre couvrant quinze langues.\n\nHuit gestes sont évalués : ajouter du texte, en remplacer, en supprimer, le réorganiser, le traduire, en changer le style, combiner plusieurs de ces gestes, et une catégorie de raisonnement où il faut comprendre le contexte pour savoir quoi écrire.",
+        "analogy": "Un restaurateur qui repeint une lettre effacée sur une vieille enseigne, sans laisser de trace sur le bois autour.",
+        "example": "Une épreuve peut demander de traduire en chinois le texte anglais d'une capture d'écran : le juge note alors séparément la fidélité à la consigne, la netteté des caractères et l'état de l'arrière-plan.",
+        "did_you_know": "Écrire du texte lisible dans une image reste l'une des faiblesses connues des modèles de génération : ils inventent des caractères. C'est exactement ce que mesure l'axe TC.",
+        "one_sentence_answer": "WeEdit est un banc d'essai qui mesure si un modèle sait modifier le texte présent dans une image, en notant le respect de la consigne, la lisibilité des caractères et la préservation de l'arrière-plan.",
+        "faq": [
+            {
+                "question": "Que veulent dire les sigles IA, TC et BP dans les tableaux de résultats ?",
+                "answer": "Ce sont les trois axes de notation, chacun sur une échelle de 0 à 9. IA (Instruction Adherence) : le respect de la consigne, soit le bon texte, au bon endroit, dans la bonne langue. TC (Text Clarity) : la lisibilité du texte produit, des caractères nets et corrects, sans lettres inventées. BP (Background Preservation) : tout ce qui ne devait pas changer autour du texte est-il resté intact."
+            },
+            {
+                "question": "Qui attribue les notes ?",
+                "answer": "Un modèle vision-langage, Gemini-3-Pro, qui reçoit la consigne, l'image d'origine et le résultat, puis note chaque axe. Ce n'est donc pas une correction humaine."
+            },
+            {
+                "question": "Pourquoi un banc d'essai réservé au texte dans les images ?",
+                "answer": "Parce qu'un modèle peut très bien réussir une retouche d'image ordinaire et échouer dès qu'il faut écrire des mots lisibles. Séparer cette épreuve évite qu'une bonne moyenne générale masque cette faiblesse précise."
+            }
+        ],
+        "sources": [
+            {
+                "label": "WeEdit: A Dataset, Benchmark and Glyph-Guided Framework for Text-centric Image Editing (arXiv 2603.11593)",
+                "url": "https://arxiv.org/abs/2603.11593",
+                "year": 2026,
+                "author": "Hui Zhang, Juntao Liu, Zongkai Liu et collaborateurs"
+            },
+            {
+                "label": "Jeu de données officiel du banc d'essai (Hugging Face)",
+                "url": "https://huggingface.co/datasets/HuiZhang0812/WeEdit_benchmark",
+                "year": 2026,
+                "author": "Hui Zhang"
+            },
+            {
+                "label": "Dépôt officiel du projet",
+                "url": "https://github.com/HuiZhang0812/WeEdit",
+                "year": 2026,
+                "author": "Hui Zhang"
+            }
+        ],
+        "icon": "🔠",
+        "type": "ai_term",
+        "difficulty": "intermediate",
+        "broader_slugs": [],
+        "narrower_slugs": [],
+        "match_strategy": "loose",
+        "has_image": true
+    }
+]

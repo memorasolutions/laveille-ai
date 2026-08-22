@@ -1,0 +1,48 @@
+[
+    {
+        "slug": "apex-agents",
+        "cat_slug": "intelligence-artificielle",
+        "name": "APEX-Agents",
+        "aliases": ["ApexBench", "APEX Agents", "Apex-Agents", "AI Productivity Index for Agents"],
+        "definition": "APEX-Agents est un banc d'essai créé par l'entreprise Mercor pour mesurer si un agent d'intelligence artificielle peut accomplir de vraies tâches professionnelles longues, en passant d'une application à l'autre comme le ferait un employé. Il compte 480 tâches réparties également entre trois métiers : banque d'investissement, conseil en management et droit des affaires, conçues par 256 experts de ces domaines.\n\nChaque tâche se déroule dans l'un des 33 « mondes » de travail simulés, qui contiennent en moyenne 166 fichiers : courriels, clavardage, calendrier, documents, PDF, tableurs, présentations, système de fichiers et exécution de code. La recherche sur le web y est volontairement coupée, pour que deux exécutions restent comparables.\n\nLa mesure principale, appelée Pass@1, est la probabilité qu'un agent réussisse ENTIÈREMENT une tâche du premier coup. Chaque tâche porte une grille de critères tous indispensables : un seul critère manqué et la tâche est un échec, une réussite partielle ne compte pour rien. C'est ce qui explique des scores très bas comparés aux autres bancs d'essai.",
+        "analogy": "Un examen pratique de fin de stage : le dossier est livré complet, ou il ne passe pas.",
+        "example": "Dans ses notes de version du 21 août 2026, DeepSeek annonce un score de 36,5 à ApexBench (Pass@1) pour son modèle expérimental V4-Flash-Vision-Exp.",
+        "did_you_know": "Les experts estimaient chaque tâche à 1,82 heure. L'échantillon réellement exécuté en a pris 1,37 : on surestime la durée de son propre métier.",
+        "one_sentence_answer": "APEX-Agents est un banc d'essai de Mercor qui mesure si un agent d'IA réussit entièrement des tâches professionnelles longues de finance, de conseil et de droit, sans accès au web.",
+        "faq": [
+            {
+                "question": "Pourquoi voit-on « ApexBench » alors que le nom officiel est « APEX-Agents » ?",
+                "answer": "« ApexBench » est un raccourci employé par des fabricants de modèles dans leurs fiches et leurs graphiques. Le nom officiel, celui de l'article de recherche de Mercor, est APEX-Agents, où APEX développe « AI Productivity Index for Agents »."
+            },
+            {
+                "question": "Un agent qui réussit une tâche à moitié obtient-il des points ?",
+                "answer": "Non, et c'est le coeur de la mesure. Chaque tâche porte une grille de critères tous obligatoires : un seul manqué, la tâche entière est comptée en échec. Un score de 36 % ne veut donc pas dire « 36 % du travail fait », mais « 36 % des tâches livrées au complet »."
+            },
+            {
+                "question": "Qui corrige les réponses des agents ?",
+                "answer": "Un modèle de langage sert de juge, critère par critère. Les auteurs rapportent une exactitude de 98,5 % de ce juge par rapport à des étiquettes posées par des humains. Ce n'est donc pas une correction humaine, mais elle est mesurée contre elle."
+            }
+        ],
+        "sources": [
+            {
+                "label": "APEX-Agents (article de recherche, arXiv 2601.14242, version 3)",
+                "url": "https://arxiv.org/abs/2601.14242",
+                "year": 2026,
+                "author": "Mercor"
+            },
+            {
+                "label": "Introducing APEX-Agents (billet officiel)",
+                "url": "https://www.mercor.com/blog/introducing-apex-agents/",
+                "year": 2026,
+                "author": "Mercor"
+            }
+        ],
+        "icon": "📐",
+        "type": "ai_term",
+        "difficulty": "intermediate",
+        "broader_slugs": ["agent-ia"],
+        "narrower_slugs": [],
+        "match_strategy": "case_sensitive",
+        "has_image": true
+    }
+]

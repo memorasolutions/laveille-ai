@@ -23,6 +23,18 @@ declare(strict_types=1);
  * et urlencodés dans les paramètres de requête des liens d'intent (Facebook/X/LinkedIn). Les
  * deux formes sont décodées puis comparées, jamais comparées à l'aveugle sur le texte brut.
  *
+ * ADAPTÉ le 2026-08-21 (refonte des textes de partage PUBLICS, consultation à 5 modèles en 3
+ * rounds) - deux changements de comportement qui rendaient certains tests d'origine faux :
+ *   1. Les paramètres `&quote=` (Facebook) et `summary=` (LinkedIn) sont désormais RETIRÉS des
+ *      liens d'intent, inconditionnellement (Meta ignore/interdit `quote` sur sharer.php,
+ *      LinkedIn a déprécié `summary` sur cet endpoint) - les anciens tests 3 et 4 comparaient
+ *      intent == presse-papiers pour ces deux réseaux ; ils sont remplacés par des tests qui
+ *      vérifient l'ABSENCE du paramètre et la survie du texte via le presse-papiers.
+ *   2. Un texte de partage est désormais TOUJOURS terminé (repli en cascade jusqu'au titre) -
+ *      l'ancien test 5 attendait un texte Facebook VIDE en l'absence d'accroche ; ce n'est plus
+ *      le comportement voulu (règle « texte TERMINÉ, jamais une amorce à compléter »), le test
+ *      est remplacé par la garantie inverse.
+ *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
  */
@@ -111,23 +123,26 @@ it('renders 4 distinct share variants calibrated per network', function () {
     // recopié 4 fois.
     expect(collect([$fb, $x, $li, $msg])->unique()->count())->toBe(4);
 
-    // X : 0-2 hashtags, coeur de message dans une fourchette large (matière source variable).
+    // X : 0-1 hashtag (règle 2026-08-21, resserrée depuis 0-2), coeur de message dans une
+    // fourchette large (matière source variable).
     $xFirstLine = explode("\n", $x)[0];
-    expect(substr_count($x, '#'))->toBeLessThanOrEqual(2)
+    expect(substr_count($x, '#'))->toBeLessThanOrEqual(1)
         ->and(mb_strlen($xFirstLine))->toBeGreaterThan(10)
         ->and(mb_strlen($xFirstLine))->toBeLessThanOrEqual(170);
 
-    // LinkedIn : 250-600 caractères grossièrement, 2-4 hashtags, premiers ~140-210 autonomes.
+    // LinkedIn : 250-600 caractères grossièrement, 1-3 hashtags (règle 2026-08-21, resserrée
+    // depuis 2-4), premiers ~140-210 autonomes.
     expect(mb_strlen($li))->toBeGreaterThanOrEqual(200)
         ->and(mb_strlen($li))->toBeLessThanOrEqual(650)
-        ->and(substr_count($li, '#'))->toBeGreaterThanOrEqual(2)
-        ->and(substr_count($li, '#'))->toBeLessThanOrEqual(4)
+        ->and(substr_count($li, '#'))->toBeGreaterThanOrEqual(1)
+        ->and(substr_count($li, '#'))->toBeLessThanOrEqual(3)
         ->and(mb_strlen(explode("\n", $li)[0]))->toBeLessThanOrEqual(220);
 
-    // Facebook : première ligne courte (0-140), 0-1 hashtag.
+    // Facebook : première ligne courte (0-140), ZÉRO hashtag (règle 2026-08-21, resserrée
+    // depuis 0-1 : l'aperçu Open Graph fait déjà le travail visuel).
     $fbFirstLine = explode("\n", $fb)[0];
     expect(mb_strlen($fbFirstLine))->toBeLessThanOrEqual(145)
-        ->and(substr_count($fb, '#'))->toBeLessThanOrEqual(1);
+        ->and(substr_count($fb, '#'))->toBe(0);
 
     // Messenger : aucun hashtag, ton direct, contient le lien de l'article (son bouton n'ouvre
     // pas d'intent article - seul le texte copié porte le lien).
@@ -156,48 +171,52 @@ it('copies to the clipboard the exact same text used in the X share intent - fix
     expect($jsText)->not->toBeNull()->and($hrefText)->toBe($jsText);
 });
 
-it('copies to the clipboard the exact same text used in the Facebook share intent', function () {
+it('never appends the deprecated quote parameter to the Facebook intent - text survives only via the clipboard (2026-08-21)', function () {
     $source = spnSource();
-    $article = spnArticle($source->id, 'coherence-fb', [
+    $article = spnArticle($source->id, 'fb-sans-quote', [
         'structured_summary' => ['hook' => 'Une avancée notable pour les PME québécoises.'],
     ]);
 
     $response = $this->get(route('news.show', $article));
     $html = $response->getContent();
 
-    preg_match('/facebook\.com\/sharer\/sharer\.php\?u=[^"&]+&amp;quote=([^"]+)"/', $html, $m);
-    expect($m[1] ?? null)->not->toBeNull();
-    $hrefText = urldecode($m[1]);
+    // Meta ignore le paramètre `quote` sur sharer.php et interdit le préremplissage du texte de
+    // partage - le lien ne le porte donc plus jamais, qu'une accroche soit disponible ou non.
+    preg_match('/facebook\.com\/sharer\/sharer\.php\?u=[^"]+"/', $html, $m);
+    expect($m[0] ?? '')->not->toBe('')
+        ->and($m[0])->not->toContain('quote=');
 
+    // Le texte continue de vivre par le presse-papiers (window.__openShare le copie avant
+    // d'ouvrir l'intent) - non perdu par le retrait du paramètre.
     $jsText = spnJsVariant($html, 'fb');
-
-    expect($jsText)->not->toBeNull()->and($hrefText)->toBe($jsText);
+    expect($jsText)->not->toBeNull()->and(trim((string) $jsText))->not->toBe('');
 });
 
-it('copies to the clipboard the exact same text used in the LinkedIn share intent', function () {
+it('never appends the deprecated summary parameter to the LinkedIn intent - text survives only via the clipboard (2026-08-21)', function () {
     $source = spnSource();
-    $article = spnArticle($source->id, 'coherence-li', [
+    $article = spnArticle($source->id, 'li-sans-summary', [
         'structured_summary' => ['hook' => 'Une avancée notable pour les PME québécoises.', 'why_important' => 'Elle change les pratiques.'],
     ]);
 
     $response = $this->get(route('news.show', $article));
     $html = $response->getContent();
 
-    preg_match('/linkedin\.com\/shareArticle\?mini=true&url=[^"&]+&summary=([^"]+)"/', $html, $m);
-    expect($m[1] ?? null)->not->toBeNull();
-    $hrefText = urldecode($m[1]);
+    // LinkedIn a déprécié le paramètre `summary` sur shareArticle - le lien ne le porte donc
+    // plus jamais.
+    preg_match('/linkedin\.com\/shareArticle\?mini=true&url=[^"]+"/', $html, $m);
+    expect($m[0] ?? '')->not->toBe('')
+        ->and($m[0])->not->toContain('summary=');
 
     $jsText = spnJsVariant($html, 'li');
-
-    expect($jsText)->not->toBeNull()->and($hrefText)->toBe($jsText);
+    expect($jsText)->not->toBeNull()->and(trim((string) $jsText))->not->toBe('');
 });
 
-// ── Point 4 : Facebook omet le paramètre quote quand la variante est vide ──────────────────
+// ── Point 4 (adapté 2026-08-21) : un texte est TOUJOURS terminé, même sans accroche ────────
 
-it('omits the Facebook quote parameter when no hook is available for the calibrated variant', function () {
+it('still copies a complete, non-empty Facebook text when no hook is available - a share text is never a blank amorce', function () {
     $source = spnSource();
     $article = spnArticle($source->id, 'fb-sans-accroche', [
-        'title' => 'X',
+        'title' => 'Un titre suffisant à lui seul comme dernier repli',
         'meta_description' => null,
         'structured_summary' => [],
     ]);
@@ -206,9 +225,15 @@ it('omits the Facebook quote parameter when no hook is available for the calibra
     $response->assertOk();
     $html = $response->getContent();
 
-    expect(spnJsVariant($html, 'fb'))->toBe('');
+    // Ancien comportement (avant 2026-08-21) : texte VIDE si aucune accroche n'était calibrée.
+    // Nouveau comportement voulu : un texte de partage est TOUJOURS terminé, jamais une amorce
+    // vide - repli en cascade jusqu'au titre plutôt qu'un silence.
+    $fb = spnJsVariant($html, 'fb');
+    expect($fb)->not->toBeNull();
+    expect(trim((string) $fb))->not->toBe('');
 
-    // Le lien Facebook garde le paramètre u= (l'URL de l'article) mais jamais &quote= dans ce cas.
+    // Le lien Facebook garde le paramètre u= (l'URL de l'article) mais plus jamais &quote=
+    // (retiré inconditionnellement, cf. tests ci-dessus).
     preg_match('/facebook\.com\/sharer\/sharer\.php\?u=[^"]+"/', $html, $m);
     expect($m[0] ?? '')->not->toBe('')
         ->and($m[0])->not->toContain('quote=');

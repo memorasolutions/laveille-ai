@@ -1,0 +1,48 @@
+[
+    {
+        "slug": "imgedit-bench",
+        "cat_slug": "intelligence-artificielle",
+        "name": "ImgEdit-Bench",
+        "aliases": ["ImgEdit Bench", "ImgEdit"],
+        "definition": "ImgEdit-Bench est un banc d'essai qui évalue les modèles capables de MODIFIER une image existante à partir d'une consigne écrite, et non d'en créer une de zéro. C'est la partie évaluation du projet ImgEdit, mené par une équipe de la Peking University Shenzhen Graduate School, du Peng Cheng Laboratory et de Rabbitpre AI.\n\nLes épreuves vont du simple au retors. La suite de base (734 cas) couvre neuf gestes courants : ajouter ou retirer un objet, changer une couleur ou une matière, remplacer un élément, changer le style, l'arrière-plan ou l'action d'un sujet, combiner plusieurs modifications, ou détourer un sujet sur fond propre. Une deuxième suite (47 cas) complique délibérément la consigne : plusieurs cibles à la fois, objets partiellement cachés ou camouflés. Une troisième (30 cas de trois tours) vérifie si le modèle se souvient de ce qu'il a déjà fait et sait revenir à une version antérieure.",
+        "analogy": "Un juge de patinage qui vérifie d'abord si la figure demandée a été exécutée, avant seulement de noter l'artistique.",
+        "example": "Une consigne peut demander de retirer un objet sans abîmer le reste de la photo : le juge note alors séparément le respect de la demande et l'intégrité des zones qui ne devaient pas bouger.",
+        "did_you_know": "Une image techniquement superbe qui n'a pas fait la modification demandée ne peut pas bien noter : les notes de qualité et de préservation sont plafonnées par celle du respect de la consigne.",
+        "one_sentence_answer": "ImgEdit-Bench est un banc d'essai qui mesure si un modèle modifie correctement une image existante à partir d'une consigne écrite, en notant d'abord le respect de cette consigne.",
+        "faq": [
+            {
+                "question": "Combien de cas ce banc d'essai contient-il ?",
+                "answer": "La question n'a pas de réponse tranchée : l'addition des trois suites (734, 47 et 30) donne 811 cas, alors que le tableau de l'article annonce un total de 779. La publication se contredit sur ce point. Elle compte 14 sous-tâches."
+            },
+            {
+                "question": "Qui corrige les copies ?",
+                "answer": "Pour les épreuves à un tour, c'est GPT-4o qui note de 1 à 5 sur trois axes : respect de l'instruction, qualité de l'édition, préservation des zones qui ne devaient pas changer. Les épreuves à plusieurs tours, elles, sont évaluées par des humains, par oui ou par non."
+            },
+            {
+                "question": "Qu'est-ce qu'ImgEdit-Judge ?",
+                "answer": "C'est un juge ouvert publié par la même équipe : un modèle Qwen2.5-VL-7B affiné sur 200 000 évaluations, pour éviter de dépendre d'un modèle commercial. Les auteurs rapportent environ 70 % d'accord avec les annotateurs humains, à une tolérance d'un point."
+            }
+        ],
+        "sources": [
+            {
+                "label": "ImgEdit: A Unified Image Editing Dataset and Benchmark (arXiv 2505.20275)",
+                "url": "https://arxiv.org/abs/2505.20275",
+                "year": 2025,
+                "author": "Yang Ye, Li Yuan et collaborateurs"
+            },
+            {
+                "label": "Dépôt officiel du projet ImgEdit",
+                "url": "https://github.com/PKU-YuanGroup/ImgEdit",
+                "year": 2025,
+                "author": "PKU-YuanGroup"
+            }
+        ],
+        "icon": "🖌️",
+        "type": "ai_term",
+        "difficulty": "intermediate",
+        "broader_slugs": [],
+        "narrower_slugs": [],
+        "match_strategy": "loose",
+        "has_image": true
+    }
+]

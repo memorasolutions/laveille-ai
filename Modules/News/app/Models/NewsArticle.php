@@ -24,7 +24,14 @@ use Modules\Voting\Traits\HasCommunityVotes;
 
 class NewsArticle extends Model implements Searchable
 {
-    use HasAdminShareContents;
+    // ACTION : le trait expose publicShareTexts(array $matiere, string $url) ; NewsArticle a
+    // besoin d'une méthode SANS argument du même nom (appelée par show.blade.php) - aliasée en
+    // sharedPublicShareTexts() pour éviter la collision (une méthode de classe masque toujours
+    // la méthode de trait de même nom en PHP ; l'alias reste le seul moyen de l'appeler encore).
+    // RAISON: mandat explicite (trait générique inchangé pour Blog/Directory/Tools/Dictionary/Acronyms).
+    use HasAdminShareContents {
+        publicShareTexts as protected sharedPublicShareTexts;
+    }
     use HasComments, HasReports, HasCommunityVotes;
     use HasPublishedState;
     use LogsActivityStandard;
@@ -1143,6 +1150,28 @@ class NewsArticle extends Model implements Searchable
         }
 
         return (string) config('news.display_fallback.generic', 'Actualité en cours de traitement.');
+    }
+
+    /**
+     * Textes de partage PUBLICS (barre de partage flottante, visiteurs) - délègue à
+     * Modules\Core\Concerns\HasAdminShareContents::publicShareTexts() (aliasé sharedPublicShareTexts
+     * plus haut, seul moyen d'éviter la collision de nom avec cette méthode SANS argument).
+     * Même matière que adminShareContents() ci-dessous (title/hook/why_important/key_number/
+     * action_concrete/category_tag) - DRY strict, aucune nouvelle lecture de structured_summary.
+     * Consommée par Modules/News/resources/views/public/show.blade.php.
+     */
+    public function publicShareTexts(): array
+    {
+        $structured = is_array($this->structured_summary) ? $this->structured_summary : null;
+
+        return $this->sharedPublicShareTexts([
+            'title' => $this->seo_title ?: $this->title,
+            'hook' => data_get($structured, 'hook'),
+            'why_important' => data_get($structured, 'why_important'),
+            'key_number' => data_get($structured, 'key_number'),
+            'action_concrete' => data_get($structured, 'action_concrete'),
+            'hashtag_categorie' => $this->category_tag,
+        ], request()->url());
     }
 
     /**

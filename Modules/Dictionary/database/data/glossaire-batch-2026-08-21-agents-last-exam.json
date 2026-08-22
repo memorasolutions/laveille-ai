@@ -1,0 +1,54 @@
+[
+    {
+        "slug": "agents-last-exam",
+        "cat_slug": "intelligence-artificielle",
+        "name": "Agents' Last Exam",
+        "aliases": ["ALE", "Agents Last Exam", "Agent's Last Exam"],
+        "definition": "Agents' Last Exam (ALE) est un banc d'essai mené par Berkeley RDI, à l'Université de Californie à Berkeley, avec la RDI Foundation. Il mesure si un agent d'intelligence artificielle peut mener à terme un vrai travail professionnel sur ordinateur, dans une machine virtuelle où tournent les logiciels du métier, avec le terminal et l'interface graphique.\n\nSa particularité tient à ce qu'il ne donne PAS : l'agent reçoit l'instruction de travail, et rien d'autre. Aucune sous-étape, aucune marche à suivre. C'est à lui de planifier. Les tâches couvrent 55 sous-domaines regroupés en 13 grappes, calquées sur la classification professionnelle américaine O*NET / SOC 2018, et ont été conçues avec plus de 300 experts de métier.\n\nChaque tâche embarque son propre programme d'évaluation. La référence de correction reste cachée pendant l'exécution et n'est déposée qu'ensuite, pour qu'un agent ne puisse pas la lire en cours de route.",
+        "analogy": "Un projet confié à un stagiaire sans mode d'emploi : à lui de trouver quels outils ouvrir et dans quel ordre.",
+        "example": "Des tâches d'ALE se déroulent dans de vrais logiciels professionnels : Adobe After Effects, Siemens NX, Unreal Engine, Rhino ou FSLeyes, sur des fichiers de travail réels.",
+        "did_you_know": "Dans la tranche la plus difficile, dite last-exam, le taux moyen de réussite complète rapporté restait sous 1 %. Le banc d'essai a été conçu pour rester hors de portée.",
+        "one_sentence_answer": "Agents' Last Exam est un banc d'essai de Berkeley RDI qui vérifie si un agent d'IA mène à terme un vrai travail professionnel sur ordinateur, à partir de la seule consigne.",
+        "faq": [
+            {
+                "question": "Est-ce la même chose que « Humanity's Last Exam » ?",
+                "answer": "Non. Le nom fait un clin d'oeil, mais ce sont deux bancs d'essai distincts, portés par des équipes différentes, sans lien institutionnel. Humanity's Last Exam pose des questions de connaissance ; Agents' Last Exam fait exécuter du travail sur des logiciels."
+            },
+            {
+                "question": "Combien de tâches contient-il ?",
+                "answer": "L'article de recherche en compte 1 490. Le dépôt public en expose environ 150, et l'objectif annoncé est de 5 000. C'est un banc d'essai évolutif : le chiffre dépend donc de ce que l'on consulte et de quand."
+            },
+            {
+                "question": "Comment une tâche est-elle notée ?",
+                "answer": "Chaque tâche reçoit un score de 0 à 1, mais la mesure mise en avant est le taux de réussite complète (« full pass rate ») : la part des tâches menées entièrement à terme. Un travail à moitié fait ne compte pas."
+            }
+        ],
+        "sources": [
+            {
+                "label": "Agents' Last Exam (article de recherche, arXiv 2606.05405)",
+                "url": "https://arxiv.org/abs/2606.05405",
+                "year": 2026,
+                "author": "Berkeley RDI et RDI Foundation"
+            },
+            {
+                "label": "Site officiel du banc d'essai",
+                "url": "https://agents-last-exam.org/",
+                "year": 2026,
+                "author": "Berkeley RDI"
+            },
+            {
+                "label": "Dépôt public des tâches",
+                "url": "https://github.com/rdi-berkeley/agents-last-exam",
+                "year": 2026,
+                "author": "Berkeley RDI"
+            }
+        ],
+        "icon": "🖥️",
+        "type": "ai_term",
+        "difficulty": "intermediate",
+        "broader_slugs": ["agent-ia"],
+        "narrower_slugs": [],
+        "match_strategy": "case_sensitive",
+        "has_image": true
+    }
+]

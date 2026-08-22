@@ -56,53 +56,18 @@
 @endphp
 @endsection
 @php
-    // Texte de partage PAR RÉSEAU (spec 2026-08-20 - corrige l'incohérence X : la barre flottante
-    // du layout master utilise désormais LA MÊME variante pour l'intent ET le presse-papiers).
-    // Réutilise la matière déjà extraite ci-dessus ($title/$hook/$whyImportant/$keyNumber/
-    // $actionConcrete/$categoryTag) - aucune nouvelle lecture de l'article, DRY.
-    $pageUrl = request()->url();
-
-    // X : 90-160 caractères avant le lien (déjà prefillé séparément par l'intent), 0-2 hashtags,
-    // une affirmation nette - jamais le titre verbatim.
-    $xBody = \Illuminate\Support\Str::limit($keyNumber ?: ($hook ?: $title), 135, '…');
-    $xHashtags = trim(($categoryTag ? $categoryTag . ' ' : '') . '#VeilleIA');
-    $shareTextX = trim("🤖 {$xBody}\n\n{$xHashtags}");
-
-    // LinkedIn : 250-600 caractères, les 140-210 premiers autonomes, 1re personne professionnelle,
-    // angle « à retenir » + invitation à discuter, 2-4 hashtags. Chaque segment est plafonné
-    // individuellement pour que le total reste dans la fourchette quelle que soit la longueur de
-    // la matière source (hook/chiffre-clé/pourquoi ça compte tous potentiellement longs).
-    $liOpening = \Illuminate\Support\Str::limit($hook ?: $title, 170, '…');
-    $liTakeaway = $whyImportant ?: $actionConcrete;
-    $liKeyLine = $keyNumber ? \Illuminate\Support\Str::limit("Le chiffre à retenir : {$keyNumber}", 110, '…') : null;
-    $liWhyLine = $liTakeaway ? \Illuminate\Support\Str::limit("Pourquoi ça compte : {$liTakeaway}", 110, '…') : null;
-    $liLines = array_filter([
-        $liOpening,
-        '',
-        $liKeyLine,
-        $liWhyLine,
-        '',
-        'Votre avis ? Je serais curieux de vous lire en commentaire.',
-        '',
-        $pageUrl,
-        '',
-        trim(($categoryTag ? $categoryTag . ' ' : '') . '#IntelligenceArtificielle #VeilleIA #Innovation'),
-    ], fn($line) => $line !== null);
-    $shareTextLinkedIn = implode("\n", $liLines);
-
-    // Facebook : 0-140 caractères ou rien du tout (l'aperçu Open Graph fait le travail), 0-1
-    // hashtag, conversationnel - si aucune accroche solide, on ne force aucun texte.
-    $fbCore = $hook ? \Illuminate\Support\Str::limit($hook, 120, '…') : null;
-    $fbLines = array_filter([$fbCore, $categoryTag ?: null, $pageUrl], fn($line) => $line !== null && $line !== '');
-    $shareTextFacebook = $fbCore ? implode("\n", $fbLines) : '';
-
-    // Messenger : 40-120 caractères, aucun hashtag, ton direct orienté destinataire. Le lien
-    // Messenger de la barre flottante pointe vers la page de la marque (pas un intent article) -
-    // le lien doit donc rester dans le texte copié pour rester utile une fois collé. Str::limit
-    // porte sur la LIGNE COMPLÈTE (intro + accroche) pour garantir le plafond, quelle que soit
-    // la longueur de la matière source.
-    $msgLine = \Illuminate\Support\Str::limit('Je viens de voir ça, ça va t’intéresser : ' . ($keyNumber ?: ($hook ?: $title)), 115, '…');
-    $shareTextMessenger = "{$msgLine}\n{$pageUrl}";
+    // Texte de partage PAR RÉSEAU (spec 2026-08-21 - remplace le bloc @php ci-dessus, écrit en
+    // dur, par une délégation à NewsArticle::publicShareTexts(), qui délègue à son tour au trait
+    // partagé Modules\Core\Concerns\HasAdminShareContents::publicShareTexts() - même moteur que
+    // Blog/Directory/Tools, règles issues d'une consultation à 5 modèles en 3 rounds (2026-08-21) :
+    // texte TERMINÉ (jamais de « … » de troncature), idée distinctive dans la 1re phrase toujours
+    // coupée à une frontière réelle, aucun libellé interne recopié, aucun CTA creux, mots-clics
+    // 0 Facebook/Messenger - 1 à 3 LinkedIn - 0 ou 1 X, lien inclus dans les 4 textes.
+    $publicShareTexts = $article->publicShareTexts();
+    $shareTextX = $publicShareTexts['x'];
+    $shareTextLinkedIn = $publicShareTexts['linkedin'];
+    $shareTextFacebook = $publicShareTexts['facebook'];
+    $shareTextMessenger = $publicShareTexts['messenger'];
 @endphp
 @section('share_text_x', $shareTextX)
 @section('share_text_linkedin', $shareTextLinkedIn)

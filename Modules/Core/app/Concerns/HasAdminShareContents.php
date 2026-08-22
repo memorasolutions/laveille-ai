@@ -380,4 +380,158 @@ trait HasAdminShareContents
 
         return implode('', array_map('ucfirst', $words));
     }
+
+    /**
+     * 2026-08-21 : textes de partage PUBLICS (barre de partage flottante, visiteurs), pour les
+     * 4 réseaux (X/LinkedIn/Facebook/Messenger). Générique : ne connaît rien du modèle appelant
+     * (News, Blog, Directory, Tools...) - toute la matière entre par $matiere.
+     *
+     * $matiere porte les clés (chaîne ou null) : title, hook, why_important, key_number,
+     * action_concrete, hashtag_categorie (nom de catégorie BRUT, pas encore un mot-clic - ce
+     * trait le formate lui-même via normalizeShareHashtag()).
+     *
+     * Règles (consultation à 5 modèles, 3 rounds, 2026-08-21) :
+     *  - texte TERMINÉ, jamais une amorce à compléter (aucun « ___ », aucune section vide) ;
+     *  - l'idée distinctive tient dans la PREMIÈRE PHRASE, toujours coupée à une frontière de
+     *    phrase RÉELLE (firstCompleteSentences/firstSentenceOnly) - jamais Str::limit + « … » ;
+     *  - aucun libellé interne recopié (stripSectionLabel, via $clean ci-dessous) ;
+     *  - aucun appel à l'action creux (« Votre avis ? »), aucun faux « je » (sauf Messenger, qui
+     *    EST un message écrit par la personne qui partage - pas la voix du site) ;
+     *  - au plus un émoji par texte, jamais en tête de ligne (zéro émoji ici : le plus sûr, et
+     *    toujours conforme) ;
+     *  - mots-clics : 0 Facebook/Messenger, 1 à 3 LinkedIn, 0 ou 1 X ;
+     *  - le lien de la page est inclus dans les 4 textes.
+     */
+    public function publicShareTexts(array $matiere, string $url): array
+    {
+        $clean = function (?string $text): string {
+            return trim($this->stripSectionLabel($this->stripLinks((string) ($text ?? ''))));
+        };
+
+        $title = $clean($matiere['title'] ?? null);
+        $hook = $clean($matiere['hook'] ?? null);
+        $whyImportant = $clean($matiere['why_important'] ?? null);
+        $keyNumber = $clean($matiere['key_number'] ?? null);
+        $actionConcrete = $clean($matiere['action_concrete'] ?? null);
+        $categorie = trim((string) ($matiere['hashtag_categorie'] ?? ''));
+        $hashtag = $categorie !== '' ? '#' . $this->normalizeShareHashtag($categorie) : null;
+        $url = trim($url);
+
+        return [
+            'x' => $this->publicShareTextX($title, $hook, $keyNumber, $hashtag, $url),
+            'linkedin' => $this->publicShareTextLinkedIn($title, $hook, $whyImportant, $keyNumber, $actionConcrete, $hashtag, $url),
+            'facebook' => $this->publicShareTextFacebook($title, $hook, $whyImportant, $url),
+            'messenger' => $this->publicShareTextMessenger($title, $hook, $keyNumber, $actionConcrete, $url),
+        ];
+    }
+
+    /**
+     * X : le seul réseau réellement pré-rempli par la plateforme. Une affirmation nette (le
+     * chiffre vérifiable en priorité, sinon l'accroche), jamais le titre recopié tel quel - à
+     * défaut d'autre matière, le titre est introduit par une amorce de lecture plutôt que recopié.
+     */
+    protected function publicShareTextX(string $title, string $hook, string $keyNumber, ?string $hashtag, string $url): string
+    {
+        $body = $this->firstCompleteSentences($keyNumber, 200);
+        if ($body === '') {
+            $body = $this->firstCompleteSentences($hook, 200);
+        }
+        if ($body === '' && $title !== '') {
+            $body = trim('À lire : ' . $this->firstCompleteSentences($title, 185));
+        }
+
+        return trim(implode("\n\n", array_filter([$body !== '' ? $body : null, $hashtag, $url])));
+    }
+
+    /**
+     * LinkedIn : première phrase AUTONOME et distinctive (seule visible avant « voir plus »),
+     * puis un fait concret distinct, puis le lien, puis 1 à 3 mots-clics.
+     */
+    protected function publicShareTextLinkedIn(string $title, string $hook, string $whyImportant, string $keyNumber, string $actionConcrete, ?string $hashtag, string $url): string
+    {
+        $opening = $this->firstCompleteSentences($hook, 210);
+        if ($opening === '') {
+            $opening = $this->firstCompleteSentences($title, 210);
+        }
+
+        $fact = '';
+        foreach ([$keyNumber, $whyImportant, $actionConcrete] as $candidate) {
+            $piece = $this->firstCompleteSentences($candidate, 260);
+            if ($piece !== '' && ! $this->textsAreSimilar($opening, $piece)) {
+                $fact = $piece;
+                break;
+            }
+        }
+
+        $tags = array_slice(array_values(array_unique(array_filter([$hashtag, '#VeilleIA']))), 0, 3);
+
+        $lines = array_filter([
+            $opening !== '' ? $opening : null,
+            $fact !== '' ? $fact : null,
+            $url,
+            $tags !== [] ? implode(' ', $tags) : null,
+        ]);
+
+        return trim(implode("\n\n", $lines));
+    }
+
+    /**
+     * Facebook : une à deux phrases, ton parlé, plus le lien. Zéro mot-clic (l'aperçu Open Graph
+     * fait déjà le travail visuel).
+     */
+    protected function publicShareTextFacebook(string $title, string $hook, string $whyImportant, string $url): string
+    {
+        $first = $this->firstCompleteSentences($hook, 160);
+        if ($first === '') {
+            $first = $this->firstCompleteSentences($title, 160);
+        }
+
+        $second = '';
+        if ($whyImportant !== '' && ! $this->textsAreSimilar($first, $whyImportant)) {
+            $second = $this->firstCompleteSentences($whyImportant, 160);
+        }
+
+        return trim(implode("\n\n", array_filter([$first !== '' ? $first : null, $second !== '' ? $second : null, $url])));
+    }
+
+    /**
+     * Messenger : ce n'est pas un post mais un message adressé à une personne - UNE seule
+     * phrase (introduite par le ton direct de la personne qui partage), plus le lien. Zéro
+     * mot-clic, zéro émoji.
+     */
+    protected function publicShareTextMessenger(string $title, string $hook, string $keyNumber, string $actionConcrete, string $url): string
+    {
+        $fact = $this->firstSentenceOnly($keyNumber, 130);
+        if ($fact === '') {
+            $fact = $this->firstSentenceOnly($hook, 130);
+        }
+        if ($fact === '') {
+            $fact = $this->firstSentenceOnly($actionConcrete, 130);
+        }
+        if ($fact === '' && $title !== '') {
+            $fact = $this->firstSentenceOnly($title, 125);
+        }
+
+        $body = $fact !== '' ? "Je viens de voir ça : {$fact}" : "Je viens de voir ça, ça va t'intéresser.";
+
+        return trim($body) . "\n" . $url;
+    }
+
+    /**
+     * 2026-08-21 : variante d'UNE SEULE phrase de firstCompleteSentences() (pour Messenger, règle
+     * « une seule phrase, ton direct »). Retourne la première phrase COMPLÈTE si elle tient dans
+     * $max, jamais plusieurs phrases mises bout à bout, jamais une phrase coupée.
+     */
+    protected function firstSentenceOnly(string $text, int $max): string
+    {
+        $text = trim($this->stripLinks($text));
+        if ($text === '') {
+            return '';
+        }
+
+        $sentences = preg_split('/(?<=[.!?])\s+/u', $text) ?: [$text];
+        $first = trim($sentences[0] ?? '');
+
+        return ($first !== '' && mb_strlen($first) <= $max) ? $first : '';
+    }
 }
