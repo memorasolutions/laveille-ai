@@ -1001,11 +1001,11 @@ document.addEventListener('DOMContentLoaded', function () {
             @php
                 $isYt = !empty($res->video_id);
                 $displayType = $isYt ? 'youtube' : $res->type;
-                // hqdefault = la SEULE miniature YouTube garantie réelle pour toutes les vidéos
-                // (maxresdefault renvoie un placeholder gris 120x90 « 200 OK » pour les vidéos non-HD → onerror inopérant).
-                $thumbUrl = $isYt
-                    ? "https://img.youtube.com/vi/{$res->video_id}/hqdefault.jpg"
-                    : ($res->thumbnail ? $res->thumbnail . '?v=' . ($res->updated_at?->timestamp ?? time()) : null);
+                // Miniature : capture locale téléversée par un modérateur en priorité,
+                // sinon YouTube reconstruite depuis video_id. Voir ToolResource::displayThumbnailUrl()
+                // (bug corrigé le 2026-08-22 : une capture locale sur une ressource vidéo n'était
+                // jamais affichée).
+                $thumbUrl = $res->displayThumbnailUrl();
                 $durationFormatted = $res->duration_seconds ? gmdate($res->duration_seconds >= 3600 ? 'G:i:s' : 'i:s', $res->duration_seconds) : null;
             @endphp
             <div data-mod-item x-data="{ expanded: false }" x-show="(filterType === '' || filterType === '{{ $displayType }}') && (filterLang === '' || filterLang === '{{ $res->language }}') && (filterLevel === '' || filterLevel === '{{ $res->level }}')" style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;margin-bottom:14px;box-shadow:0 2px 4px rgba(0,0,0,0.03);transition:box-shadow .2s;position:relative;" @mouseover="$el.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" @mouseout="!expanded && ($el.style.boxShadow='0 2px 4px rgba(0,0,0,0.03)')">

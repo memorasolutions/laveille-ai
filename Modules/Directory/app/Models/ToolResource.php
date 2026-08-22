@@ -62,4 +62,53 @@ class ToolResource extends Model
     {
         return $query->where('is_approved', true);
     }
+
+    /**
+     * Le champ thumbnail pointe-t-il vers un fichier LOCAL (capture téléversée par un
+     * modérateur via ScreenshotUploadService, ex. ModerationController::uploadResourceScreenshot())
+     * plutôt que vers une URL distante (YouTube, oEmbed...) ?
+     *
+     * ScreenshotUploadService::upload() stocke toujours un chemin préfixé d'un "/"
+     * (prefixSlash=true par défaut), jamais une URL "http...". Format vérifié en base le
+     * 2026-08-22 : les captures locales existantes sont toutes "/directory-resources-
+     * screenshots/{id}.jpg". Même convention déjà utilisée pour Tool::screenshot
+     * (voir ToolObserver et PublicToolsController).
+     *
+     * @author MEMORA solutions <info@memora.ca>
+     */
+    public function hasLocalThumbnail(): bool
+    {
+        return ! empty($this->thumbnail) && ! str_starts_with($this->thumbnail, 'http');
+    }
+
+    /**
+     * URL de la miniature à afficher, dans l'ordre de préférence :
+     * 1. capture LOCALE téléversée à la main (thumbnail = chemin relatif) ;
+     * 2. sinon, miniature YouTube reconstruite depuis video_id (comportement historique,
+     *    inchangé, pour toute ressource vidéo sans capture locale) ;
+     * 3. sinon, aucune miniature.
+     *
+     * BUG corrigé le 2026-08-22 : Modules/Directory/resources/views/public/show.blade.php
+     * reconstruisait TOUJOURS l'URL YouTube dès que video_id était présent, en ignorant
+     * thumbnail sans condition. Une capture téléversée par un administrateur sur une
+     * ressource vidéo (thumbnail local + video_id tous deux non vides) n'était donc JAMAIS
+     * affichée : le chemin local restait mort en silence.
+     *
+     * @author MEMORA solutions <info@memora.ca>
+     */
+    public function displayThumbnailUrl(): ?string
+    {
+        if ($this->hasLocalThumbnail()) {
+            return $this->thumbnail . '?v=' . ($this->updated_at?->timestamp ?? time());
+        }
+
+        if (! empty($this->video_id)) {
+            // hqdefault = la SEULE miniature YouTube garantie réelle pour toutes les vidéos
+            // (maxresdefault renvoie un placeholder gris 120x90 « 200 OK » pour les vidéos
+            // non-HD → onerror inopérant).
+            return "https://img.youtube.com/vi/{$this->video_id}/hqdefault.jpg";
+        }
+
+        return null;
+    }
 }

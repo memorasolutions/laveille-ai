@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Tools\Models\Concerns;
 
+use Modules\Core\Services\SocialImageResolver;
+
 trait Shareable
 {
     protected function extractKeywords(): string
@@ -27,8 +29,13 @@ trait Shareable
         $hashtags = ['#LaVeilleAI', '#IAQuebec', '#OutilsIA'];
         $keywords = $this->extractKeywords();
         $clipboardText = "\xF0\x9F\x9A\x80 " . $title . "\n\n" . $description . "\n\n\xE2\x9C\xA8 Pratique pour " . $keywords . "\n\xF0\x9F\x94\x97 " . $url . "\n\n" . implode(' ', $hashtags);
-        $ogImage = $this->featured_image && file_exists(public_path($this->featured_image))
-            ? url($this->featured_image) . '?v=' . filemtime(public_path($this->featured_image))
+        // og:image jamais en WebP/AVIF (Facebook/LinkedIn n'affichent pas ces formats en aperçu
+        // de partage - audit 2026-08-22) : SocialImageResolver retourne toujours un chemin sûr,
+        // au pire le visuel de repli du site (qui existe physiquement, filemtime() reste fiable).
+        $ogImagePath = SocialImageResolver::shareable($this->featured_image);
+        $ogImageFullPath = public_path($ogImagePath);
+        $ogImage = file_exists($ogImageFullPath)
+            ? url($ogImagePath) . '?v=' . filemtime($ogImageFullPath)
             : url('images/og-image.png');
 
         return [

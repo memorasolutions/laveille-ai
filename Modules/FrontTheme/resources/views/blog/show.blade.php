@@ -81,8 +81,12 @@
     echo implode("\n", $lines);
 @endphp
 @endsection
+{{-- og:image jamais en WebP/AVIF (Facebook/LinkedIn n'affichent pas ces formats en aperçu de
+     partage - aperçu vide et silencieux sans cette protection, audit 2026-08-22) : accesseur
+     dédié featured_image_shareable_url (Article model), distinct de featured_image_url utilisé
+     pour l'affichage normal (où le WebP reste légitime). --}}
 @if($article->featured_image)
-    @section('og_image', $article->featured_image_url.'?v='.($article->updated_at?->timestamp ?? '0'))
+    @section('og_image', $article->featured_image_shareable_url.'?v='.($article->updated_at?->timestamp ?? '0'))
 @endif
 
 @php

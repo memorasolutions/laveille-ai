@@ -74,15 +74,19 @@
 @section('share_text_facebook', $shareTextFacebook)
 @section('share_text_messenger', $shareTextMessenger)
 @section('og_type', 'article')
-{{-- og:image fallback chain : .jpg (prioritaire) → image_url originale → absent (externes inchangées) --}}
-@if(!empty($article->image_url) && !str_starts_with($article->image_url, 'http'))
+{{-- og:image jamais en WebP/AVIF (Facebook/LinkedIn n'affichent pas ces formats en aperçu de
+     partage - aperçu vide et silencieux sans cette protection), y compris pour une image_url
+     EXTERNE : chaîne de repli centralisée dans Modules\Core\Services\SocialImageResolver,
+     appelée aussi par Glossaire/Blogue/Outils (DRY, audit 2026-08-22 - la logique locale
+     d'avant laissait passer les images externes en WebP telles quelles). --}}
+@if(!empty($article->image_url))
     @php
-        $_jpgPath = preg_replace('/\.[^.]*$/', '.jpg', $article->image_url);
-        $_ogImagePath = file_exists(public_path(ltrim($_jpgPath, '/'))) ? $_jpgPath : $article->image_url;
+        $_ogImagePath = \Modules\Core\Services\SocialImageResolver::shareable($article->image_url);
+        $_ogImageIsExternal = $_ogImagePath && str_starts_with($_ogImagePath, 'http');
     @endphp
-    @section('og_image', url($_ogImagePath).'?v='.($article->updated_at?->timestamp ?? '0'))
-@elseif(!empty($article->image_url))
-    @section('og_image', $article->image_url)
+    @if($_ogImagePath)
+        @section('og_image', $_ogImageIsExternal ? $_ogImagePath : url($_ogImagePath).'?v='.($article->updated_at?->timestamp ?? '0'))
+    @endif
 @endif
 
 @section('breadcrumb')

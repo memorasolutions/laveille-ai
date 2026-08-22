@@ -45,7 +45,11 @@ class ArticleController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'nullable|string',
             'excerpt' => 'nullable|string|max:500',
-            'featured_image' => 'nullable|image|max:2048',
+            // WebP/AVIF exclus explicitement : ni Facebook ni LinkedIn ne les affichent en
+            // aperçu de partage (og:image reste vide, sans erreur - audit 2026-08-22). Le
+            // repli automatique (Modules\Core\Services\SocialImageResolver) protège déjà les
+            // images existantes ; on évite ici d'en produire de nouvelles.
+            'featured_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'video_url' => 'nullable|url|max:500',
             'status' => 'nullable|in:draft,pending_review,published,archived',
             'category_id' => 'nullable|integer|exists:blog_categories,id',
@@ -55,6 +59,8 @@ class ArticleController extends Controller
             'is_featured' => 'nullable',
             'content_password' => 'nullable|string|max:100',
             'answer_summary' => 'nullable|string|max:600',
+        ], [
+            'featured_image.mimes' => "L'image mise en avant doit être en JPG ou PNG - le WebP et l'AVIF ne s'affichent pas dans l'aperçu de partage de Facebook ou LinkedIn.",
         ]);
 
         $validated['answer_points'] = $this->parseAnswerPoints($request->input('answer_points_text'));
@@ -94,7 +100,11 @@ class ArticleController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'nullable|string',
             'excerpt' => 'nullable|string|max:500',
-            'featured_image' => 'nullable|image|max:2048',
+            // WebP/AVIF exclus explicitement : ni Facebook ni LinkedIn ne les affichent en
+            // aperçu de partage (og:image reste vide, sans erreur - audit 2026-08-22). Le
+            // repli automatique (Modules\Core\Services\SocialImageResolver) protège déjà les
+            // images existantes ; on évite ici d'en produire de nouvelles.
+            'featured_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'video_url' => 'nullable|url|max:500',
             'status' => 'nullable|in:draft,pending_review,published,archived',
             'category_id' => 'nullable|integer|exists:blog_categories,id',
@@ -104,6 +114,8 @@ class ArticleController extends Controller
             'is_featured' => 'nullable',
             'content_password' => 'nullable|string|max:100',
             'answer_summary' => 'nullable|string|max:600',
+        ], [
+            'featured_image.mimes' => "L'image mise en avant doit être en JPG ou PNG - le WebP et l'AVIF ne s'affichent pas dans l'aperçu de partage de Facebook ou LinkedIn.",
         ]);
 
         $validated['answer_points'] = $this->parseAnswerPoints($request->input('answer_points_text'));

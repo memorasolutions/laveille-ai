@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.203.3] - 2026-08-22
+
+### Corrigé
+- **Une vignette téléversée à la main sur un tutoriel n'était jamais affichée.** `ToolResource` construisait systématiquement l'adresse de la miniature depuis YouTube dès qu'un identifiant de vidéo existait, écrasant en silence l'image que l'équipe avait choisie. Le champ existait, l'écran d'administration permettait de le remplir, et le résultat n'apparaissait nulle part. Deux méthodes explicites remplacent désormais la déduction implicite : la vignette locale gagne, celle de YouTube ne sert plus que de repli. Un paramètre de version dérivé de la date de modification évite qu'un ancien fichier reste servi depuis le cache du navigateur.
+- **Une image de partage social pouvait être servie en WebP, donc n'apparaître nulle part.** Facebook et LinkedIn ne documentent pas la prise en charge du WebP en image de partage : une fiche dont l'illustration n'existait qu'en `.webp` produisait un aperçu vide sur ces réseaux. Le défaut touchait quatre modules à la fois, chacun avec sa propre chaîne de repli recopiée. Mesuré sur les données réelles : 129 des 133 termes du glossaire possédaient déjà un jumeau `.jpg` et sont donc servis à l'identique ; les 4 autres (`nvm`, `node-js`, `openclaw`, `sudo`) servaient bel et bien leur `.webp` brut, et reçoivent maintenant l'image de repli.
+
+### Ajouté
+- **Un service unique `SocialImageResolver`** remplace les quatre chaînes de repli dupliquées dans Glossaire, Actualités, Blogue et Outils. Règle unique : une extension `.webp` ou `.avif` cherche son jumeau `.jpg` puis `.png`, et retombe sur l'image de repli à défaut ; une adresse externe en WebP ou AVIF, qui n'était auparavant protégée nulle part, passe désormais par la même garde.
+- **Le téléversement d'image d'article est restreint à `jpg`, `jpeg` et `png`** côté validation, avec un message d'erreur explicite en français : le problème est arrêté à la source plutôt que rattrapé à l'affichage.
+- **16 tests verrouillent les deux invariants** (11 pour l'image sociale, 5 pour la vignette), tous **prouvés par l'échec** avant d'être retenus : le défaut d'origine réintroduit volontairement les fait tomber en nommant la régression ; restauré, ils repassent.
+
+### Note de vérification
+- Suite complète exécutée avant livraison : **6 371 tests verts, 694 ignorés, 1 échec**. L'unique échec (`NewsletterStatsUnsubTest`, module Newsletter) est de la **dette préexistante prouvée par exécution** : le test attend le mot « hygiene » sans accent alors que la vue affiche « hygiène ». Il date du 23 juin, aucun fichier du module Newsletter n'a été touché ici, et il échoue à l'identique sur un arbre remisé. Corrigé séparément.
+
 ## [1.203.2] - 2026-08-22
 
 ### Corrigé

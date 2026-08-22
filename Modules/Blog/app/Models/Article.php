@@ -27,6 +27,7 @@ use Modules\Core\Concerns\HasAdminShareContents;
 use Modules\Core\Contracts\Searchable as SearchableContract;
 use Modules\Blog\States\DraftArticleState;
 use Modules\Blog\States\PublishedArticleState;
+use Modules\Core\Services\SocialImageResolver;
 use Modules\Core\Traits\HasPreviewToken;
 use Modules\CustomFields\Traits\HasCustomFields;
 use Modules\Tenancy\Traits\BelongsToTenant;
@@ -293,6 +294,36 @@ class Article extends Model implements SearchableContract
         return \Illuminate\Support\Facades\Storage::disk('public')->exists($this->featured_image)
             ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->featured_image)
             : asset('images/og-image.png');
+    }
+
+    /**
+     * Variante « partageable » de featured_image_url, réservée à og:image (aperçu Facebook /
+     * LinkedIn / etc) - JAMAIS en WebP ni en AVIF (audit 2026-08-22 : ces formats ne sont
+     * fiables sur aucun grand réseau social, l'aperçu reste silencieusement vide sans cette
+     * protection). L'affichage normal du site continue d'utiliser featured_image_url tel quel :
+     * le WebP y reste légitime et plus léger, on ne dégrade donc pas cet accesseur-là.
+     *
+     * Délègue la décision « WebP/AVIF -> repli » à Modules\Core\Services\SocialImageResolver
+     * (même service que Glossaire/Actualités/Outils), en normalisant d'abord le chemin stocké
+     * vers sa forme relative à public_path() - un featured_image d'upload admin ("articles/x.jpg")
+     * vit sur le disque Storage "public", accessible publiquement via le lien symbolique
+     * public/storage/, donc "storage/articles/x.jpg" du point de vue de public_path().
+     */
+    public function getFeaturedImageShareableUrlAttribute(): ?string
+    {
+        if (empty($this->featured_image)) {
+            return null;
+        }
+
+        $path = $this->featured_image;
+
+        if (!str_starts_with($path, 'http') && !str_starts_with($path, 'storage/')) {
+            $path = 'storage/' . $path;
+        }
+
+        $shareablePath = SocialImageResolver::shareable($path);
+
+        return empty($shareablePath) ? null : asset($shareablePath);
     }
 
     public function scopePendingSubmissions($query)

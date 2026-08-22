@@ -4,19 +4,14 @@
 @section('title', $term->name . ' - ' . __('Glossaire Techno') . ' - ' . config('app.name'))
 @section('meta_description', safe_excerpt($term->analogy ?? strip_tags($term->definition), 160))
 @section('og_type', 'article')
-{{-- og:image fallback chain : .jpg (prioritaire) → hero_image original (.png/.webp) → absent (L-JPEG-vs-WebP-social-V1 S75) --}}
+{{-- og:image jamais en WebP/AVIF (Facebook/LinkedIn n'affichent pas ces formats en aperçu de
+     partage - aperçu vide et silencieux sans cette protection) : chaîne de repli centralisée
+     dans Modules\Core\Services\SocialImageResolver, appelée aussi par News/Blog/Outils (DRY,
+     audit 2026-08-22 - remplace la logique auparavant dupliquée ici). --}}
 @php
-    $_ogImagePath = null;
-    if (!empty($term->hero_image)) {
-        $_jpgPath = preg_replace('/\.[^.]*$/', '.jpg', $term->hero_image);
-        if (file_exists(public_path($_jpgPath))) {
-            $_ogImagePath = $_jpgPath;
-        } else {
-            if (file_exists(public_path($term->hero_image))) {
-                $_ogImagePath = $term->hero_image;
-            }
-        }
-    }
+    $_ogImagePath = !empty($term->hero_image)
+        ? \Modules\Core\Services\SocialImageResolver::shareable($term->hero_image)
+        : null;
 @endphp
 @if($_ogImagePath)
     @section('og_image', asset($_ogImagePath).'?v='.($term->updated_at?->timestamp ?? '0'))
