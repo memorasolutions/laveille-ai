@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.211.0] - 2026-08-23
+
+### Ajouté
+- **`news:sources-report` : le rendement réel de chaque source d'actualités.** Volume collecté, publications, fiches composées, retraits, taux de publication et **délai médian de collecte** (écart entre la date annoncée par la source et le moment où nous l'avons récoltée), sur une fenêtre paramétrable. L'écran de composition listait des candidats, mais rien ne disait quelles sources **rapportent**. Une source qui verse cinquante articles par semaine dont aucun n'est publié coûte du temps de tri à chaque passage ; une source muette depuis des semaines occupe une ligne pour rien. Sans mesure, on arbitre à l'intuition, et l'intuition surestime toujours ce qui fait du bruit.
+- **Lecture seule, jamais planifiée.** La commande dit, elle ne décide pas : activer ou retirer une source reste une décision humaine. Les comptages se font en SQL en une requête ; la médiane est calculée sur un échantillon borné à 2 000 articles récents par source, et le rapport **annonce quand il a borné** plutôt que de laisser croire à un calcul exhaustif — le pipeline collecte en continu, et charger quatre-vingt-dix jours d'articles épuiserait la mémoire d'un hébergement mutualisé.
+- Un écart négatif (date de publication annoncée dans le futur par la source) est **écarté du calcul** au lieu d'être moyenné : c'est une donnée fausse, pas un délai.
+
 ## [1.210.2] - 2026-08-23
 
 ### Corrigé

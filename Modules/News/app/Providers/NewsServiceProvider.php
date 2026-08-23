@@ -89,6 +89,10 @@ class NewsServiceProvider extends ServiceProvider
             // Fenêtre glissante des brouillons bruts (design doc SPEC-PRUNE-DRAFTS, 2026-08-20) -
             // purge sûre et réversible du backlog /admin/news/composition, voir docblock.
             \Modules\News\Console\PruneDraftsCommand::class,
+            // Rendement réel des sources (2026-08-23) : lecture seule, jamais planifiée. Elle
+            // existe pour qu'on arbitre la liste des sources sur des chiffres plutôt qu'à
+            // l'intuition, qui surestime toujours ce qui fait du bruit.
+            \Modules\News\Console\SourcesReportCommand::class,
         ]);
     }
 
