@@ -1,0 +1,163 @@
+[
+  {
+    "slug": "aeon",
+    "name": "AEON",
+    "cat_slug": "intelligence-artificielle",
+    "type": "ai_term",
+    "difficulty": "advanced",
+    "icon": "🧊",
+    "match_strategy": "case_sensitive",
+    "aliases": [
+      "AEON-7",
+      "AEON Ultimate Uncensored"
+    ],
+    "broader_slugs": [
+      "poids-ouverts",
+      "hugging-face"
+    ],
+    "narrower_slugs": [],
+    "acronym_full": null,
+    "has_image": true,
+    "definition": "Dans l'univers des modèles d'intelligence artificielle à poids ouverts, AEON est une étiquette de nommage apposée à des variantes « décensurées » de modèles existants. Ces versions ne sont pas des modèles neufs : ce sont des dérivés dont on a modifié les refus intégrés par l'équipe d'origine, de sorte qu'ils répondent à des demandes que le modèle de départ écartait. Le compte AEON-7, sur la plateforme Hugging Face, en publie plusieurs, dont Qwen3.6-35B-A3B-heretic-NVFP4 et Ornith-1.0-35B-AEON-Ultimate-Uncensored. Deux précautions s'imposent. D'abord, AEON n'est ni une norme, ni une organisation, ni un gage de qualité : c'est un mot dans un nom de fichier, que n'importe qui peut reprendre. Ensuite, le nom est ambigu au-delà de ce contexte, puisqu'il désigne aussi un robot humanoïde industriel de Hexagon Robotics et une bibliothèque Python de séries temporelles. Le contexte est donc indispensable avant de conclure de quoi l'on parle.",
+    "analogy": "Retirer les coussins gonflables et les ceintures d'une voiture pour qu'elle aille où l'on veut, sécurité comprise.",
+    "example": "Le 23 août 2026, la variante Qwen3.6-35B-A3B-heretic-NVFP4 publiée par le compte AEON-7 dépassait 537 000 téléchargements sur Hugging Face, sans qu'aucune évaluation indépendante n'accompagne ce chiffre.",
+    "did_you_know": "Ces variantes ne contournent pas les refus par une consigne rusée : la modification est inscrite dans les poids du modèle, donc impossible à annuler côté utilisateur.",
+    "one_sentence_answer": "AEON est une étiquette de nommage employée sur Hugging Face pour des versions dérivées de modèles à poids ouverts dont les refus intégrés ont été retirés.",
+    "faq": [
+      {
+        "question": "AEON est-il une organisation officielle?",
+        "answer": "Non. C'est un mot repris dans des noms de modèles par des comptes indépendants, à commencer par AEON-7. Rien ne garantit qu'une variante ainsi nommée vienne du même auteur qu'une autre."
+      },
+      {
+        "question": "Pourquoi le nom prête-t-il à confusion?",
+        "answer": "Parce qu'au moins trois objets sans rapport le portent : ces variantes de modèles, un robot humanoïde industriel de Hexagon Robotics, et la bibliothèque Python aeon consacrée aux séries temporelles."
+      },
+      {
+        "question": "Ces modèles sont-ils dangereux à utiliser?",
+        "answer": "Ils retirent des protections que l'auteur d'origine avait posées. Leur usage relève de l'évaluation encadrée, pas de l'assistant du quotidien, et l'utilisateur assume ce que le modèle produit."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Hugging Face, dépôts publics du compte AEON-7",
+        "url": "https://huggingface.co/AEON-7",
+        "year": 2026,
+        "author": "Hugging Face"
+      },
+      {
+        "label": "Hexagon Robotics, robot humanoïde AEON (sens homonyme)",
+        "url": "https://robotics.hexagon.com/product/",
+        "year": 2026,
+        "author": "Hexagon Robotics"
+      }
+    ]
+  },
+  {
+    "slug": "blackfrost",
+    "name": "Blackfrost",
+    "cat_slug": "intelligence-artificielle",
+    "type": "ai_term",
+    "difficulty": "advanced",
+    "icon": "❄️",
+    "match_strategy": "loose",
+    "aliases": [
+      "Blackfrost-AI",
+      "Blackfrost Research"
+    ],
+    "broader_slugs": [
+      "poids-ouverts",
+      "hugging-face"
+    ],
+    "narrower_slugs": [],
+    "acronym_full": null,
+    "has_image": true,
+    "definition": "Blackfrost est un éditeur de modèles d'intelligence artificielle à poids ouverts, présent sur la plateforme Hugging Face sous les comptes Blackfrost-AI et Blackfrost-Research. Sa spécialité tient en un mot : il publie des variantes dites « abliterated » ou « de-risked », c'est-à-dire des modèles existants dont le comportement de refus a été modifié directement dans les poids, et non contourné par une consigne. La différence compte : une consigne se corrige, des poids modifiés ne se remettent pas en place. L'éditeur se présente comme orienté vers la sécurité et l'exécution locale, pour de l'évaluation autorisée et de la recherche en cybersécurité. Sa variante la plus téléchargée, Qwen3.8-27B-ABLITERATED-GGUF, dépassait 224 000 téléchargements le 23 août 2026. Une réserve s'impose sur le nom : une entreprise de conseil s'appelle aussi BlackFrost AI, sans lien établi avec ces dépôts.",
+    "analogy": "Un serrurier qui retire la serrure plutôt que d'en fabriquer la clé : la porte s'ouvre, mais elle ne ferme plus.",
+    "example": "Le 22 août 2026, Blackfrost mettait à jour Qwen3.8-27B-ABLITERATED-GGUF, une version dérivée de Qwen 3.8 destinée à tourner sur une machine locale, sans passer par un service en ligne.",
+    "did_you_know": "Ces variantes circulent au grand jour, sur la même plateforme que les modèles d'origine : leur diffusion ne relève d'aucun réseau clandestin.",
+    "one_sentence_answer": "Blackfrost est un éditeur qui publie sur Hugging Face des versions de modèles à poids ouverts dont les refus ont été retirés au niveau des poids.",
+    "faq": [
+      {
+        "question": "Que veut dire « abliterated »?",
+        "answer": "Que le mécanisme de refus a été altéré dans les poids du modèle lui-même. Contrairement à une consigne détournée, la modification est permanente pour qui utilise ce fichier."
+      },
+      {
+        "question": "À quoi servent ces modèles?",
+        "answer": "L'éditeur les destine à l'évaluation autorisée de garde-fous, au test de détections et à la recherche en sécurité, sur une machine isolée. Ce n'est pas un usage grand public."
+      },
+      {
+        "question": "Faut-il confondre Blackfrost avec l'entreprise BlackFrost AI?",
+        "answer": "Non. Une société de conseil en automatisation porte un nom presque identique, et aucun lien avec ces dépôts n'a été établi. C'est une homonymie, à traiter comme telle."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Hugging Face, dépôts publics du compte Blackfrost-AI",
+        "url": "https://huggingface.co/Blackfrost-AI",
+        "year": 2026,
+        "author": "Hugging Face"
+      },
+      {
+        "label": "Hugging Face, dépôts publics du compte Blackfrost-Research",
+        "url": "https://huggingface.co/Blackfrost-Research",
+        "year": 2026,
+        "author": "Hugging Face"
+      }
+    ]
+  },
+  {
+    "slug": "postgresql",
+    "name": "PostgreSQL",
+    "cat_slug": "intelligence-artificielle",
+    "type": "explainer",
+    "difficulty": "intermediate",
+    "icon": "🐘",
+    "match_strategy": "loose",
+    "aliases": [
+      "Postgres",
+      "pgvector"
+    ],
+    "broader_slugs": [
+      "open-source"
+    ],
+    "narrower_slugs": [
+      "the-postgresql-license",
+      "vector-database"
+    ],
+    "acronym_full": null,
+    "has_image": true,
+    "definition": "PostgreSQL est un système de gestion de base de données relationnelle libre et à code ouvert, reconnu pour sa conformité aux normes et pour son extensibilité. Il range l'information en tables reliées entre elles, avec des garanties strictes sur la cohérence des données, ce qui en a fait pendant des décennies un choix de fond pour les applications sérieuses. Ce qui l'a ramené au centre des discussions sur l'intelligence artificielle, c'est son extension pgvector : elle lui ajoute la capacité de stocker et de comparer des vecteurs, ces longues suites de nombres par lesquelles un modèle représente le sens d'un texte. Une application peut donc y faire de la recherche par le sens, ou alimenter une génération augmentée par récupération, sans installer un second système à côté. On l'abrège couramment en « Postgres ». Sa licence, qui porte un nom propre, fait l'objet d'une fiche distincte.",
+    "analogy": "Un classeur d'archives auquel on ajoute un tiroir qui range les documents par ressemblance de sens plutôt que par ordre alphabétique.",
+    "example": "Une équipe qui bâtit un moteur de recherche interne peut y déposer les vecteurs de ses documents avec pgvector et interroger les deux, données classiques et vecteurs, dans une même requête.",
+    "did_you_know": "L'ajout de pgvector a permis à des équipes de retirer une base vectorielle dédiée de leur infrastructure : un système de moins à surveiller, à sauvegarder et à payer.",
+    "one_sentence_answer": "PostgreSQL est une base de données relationnelle libre qui, avec l'extension pgvector, sait aussi stocker et comparer des vecteurs pour la recherche par le sens.",
+    "faq": [
+      {
+        "question": "Quelle différence entre PostgreSQL et Postgres?",
+        "answer": "Aucune. « Postgres » est l'abréviation d'usage, employée jusque dans la documentation officielle du projet."
+      },
+      {
+        "question": "pgvector remplace-t-il une base de données vectorielle dédiée?",
+        "answer": "Pour beaucoup de projets, oui : il évite d'ajouter un système séparé. Au-delà d'un certain volume ou de besoins d'indexation très particuliers, un moteur spécialisé garde l'avantage."
+      },
+      {
+        "question": "PostgreSQL et « la licence PostgreSQL », est-ce la même chose?",
+        "answer": "Non. L'un est le logiciel, l'autre est le cadre juridique sous lequel il est distribué. Le glossaire leur consacre deux fiches distinctes, reliées entre elles."
+      }
+    ],
+    "sources": [
+      {
+        "label": "The PostgreSQL Global Development Group, documentation officielle",
+        "url": "https://www.postgresql.org/docs/",
+        "year": 2026,
+        "author": "The PostgreSQL Global Development Group"
+      },
+      {
+        "label": "pgvector, dépôt officiel de l'extension vectorielle",
+        "url": "https://github.com/pgvector/pgvector",
+        "year": 2026,
+        "author": "Andrew Kane"
+      }
+    ]
+  }
+]

@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.207.0] - 2026-08-23
+
+### Ajouté
+- **Trois termes au glossaire : « AEON », « Blackfrost » et « PostgreSQL »**, avec images, FAQ et sources datées. Les faits chiffrés viennent d'appels directs à l'API de Hugging Face, jamais d'un résumé, et les six URL de sources ont été appelées une à une avant d'être inscrites.
+- **Le contrôle anti-doublon a évité une fusion fautive.** « the-postgresql-license » existait déjà : un contrôle naïf sur le motif « postgres » aurait crié au doublon. Une licence et un logiciel sont pourtant deux notions distinctes, et un lecteur qui cherche l'une n'est pas satisfait par l'autre. Les deux fiches sont donc reliées par `narrower_slugs`, et la FAQ de « postgresql » lève explicitement la confusion.
+- `AEON` est posé en `case_sensitive` : quatre lettres dont la forme minuscule est un mot latin courant et le nom d'un paquet Python. En `loose`, l'auto-lien aurait attrapé des occurrences sans rapport.
+
+### Note de méthode
+- **La recherche généraliste sur « AEON » avait manqué le sens qui compte pour ce site.** Elle remontait le robot humanoïde de Hexagon, la bibliothèque Python et un jeton cryptographique. Le sens réellement rencontré par le lectorat - l'étiquette de nommage des variantes de modèles décensurées - n'est apparu qu'en interrogeant l'API de Hugging Face, où le compte AEON-7 cumule plus de 537 000 téléchargements sur une seule variante. L'oracle répond à la question posée ; la source primaire dit ce qui existe. Les trois sens homonymes sont conservés dans la fiche : c'est le rôle d'un glossaire.
+
+### Rectifié
+- **La 1.206.4 est partie sans que la constante de version soit incrémentée.** Le code du correctif d'auto-lien était bien déployé et actif - vérifié sur la page en production, où les liens sont passés de `gemini-google` à `google` - mais le pied de page annonçait toujours 1.206.3. Le CHANGELOG décrivait donc une version que le site ne revendiquait pas. Corrigé par ce bump ; le contenu de l'entrée 1.206.4 ci-dessous reste exact.
+
 ## [1.206.4] - 2026-08-23
 
 ### Corrigé
