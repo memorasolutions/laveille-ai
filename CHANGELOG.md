@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.208.1] - 2026-08-23
+
+### Corrigé
+- **`EnrichToolJob` se faisait tuer par son propre délai, puis marquer « attempted too many times ».** Alerte reçue à 10h50 heure du Québec. Sa trace ne montrait que la mécanique de la file : aucune exception applicative, aucun indice de la cause. Celle-ci était une contradiction arithmétique entre deux nombres logés dans deux fichiers différents. Le job s'accordait **180 secondes** ; la cascade OpenRouter pouvait en demander **environ 1 080** (3 modèles × 3 tentatives × 60 s de délai HTTP, et `tools:enrich-pending` enchaîne DEUX cascades par outil : une recherche puis une rédaction). Le job était donc interrompu, deux fois, sans jamais produire d'erreur réelle.
+- **Un budget de temps remplace la multiplication.** `openrouter_cascade_budget_seconds` (120 s par défaut) borne la cascade ENTIÈRE : elle cesse d'essayer dès l'échéance atteinte, quel que soit le nombre de modèles ou de réessais, et le délai HTTP de chaque tentative est plafonné à ce qu'il reste du budget. Le pire cas devient un nombre **déclaré**, pas un produit à recalculer à chaque modification de la liste de modèles.
+- `EnrichToolJob::$timeout` est désormais **calculé** depuis ce budget (`budget × cascades par outil + marge`), plus jamais écrit en dur. `EnrichToolJobTimeoutTest` échoue si la relation se brise, y compris si quelqu'un rallonge le budget sans y penser. Valeurs actuelles : budget 120 s, pire cas 240 s, délai du job 270 s.
+
+### Corrigé (infrastructure)
+- **Cinq files d'attente n'avaient aucun consommateur.** Le seul travailleur en service ne traitait que `default` ; `cloudflare`, `screenshots`, `news-tools`, `workflows` et `newsletters` accumulaient sans que rien ne les vide. Mesuré avant correction : **24 purges Cloudflare en attente depuis le 25 mai 2026**, avec `tentatives_max = 0` - jamais même essayées, trois mois durant.
+- Un travailleur **séparé** a été ajouté (cron dédié, décalé de 46 secondes) plutôt que d'élargir celui qui fonctionne : si le nouveau se comporte mal, une seule ligne est à retirer et rien d'autre ne bouge. Les 24 purges ont été traitées en environ 90 secondes, **sans un seul échec**.
+- **`newsletters` est délibérément EXCLUE de ce travailleur.** Le consommer ferait partir des courriels, et la règle permanente du projet est de ne jamais déclencher d'envoi sans demande explicite. La file est donc toujours sans consommateur, et c'est un choix, pas un oubli - à trancher séparément.
+
 ## [1.208.0] - 2026-08-23
 
 ### Ajouté

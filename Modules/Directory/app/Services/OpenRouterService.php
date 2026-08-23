@@ -75,7 +75,31 @@ class OpenRouterService
     }
 
     /**
+     * BUDGET DE TEMPS de la cascade entière, en secondes. C'est le SEUL nombre à lire pour savoir
+     * combien de temps un appel peut prendre au pire.
+     *
+     * 2026-08-23 : avant ce budget, le pire cas se calculait en multipliant trois nombres logés
+     * dans trois fichiers différents - 3 modèles × 3 tentatives × 60 s de délai HTTP = 540 s par
+     * cascade, et EnrichPendingCommand en enchaîne DEUX par outil, soit ~1 080 s. Or
+     * EnrichToolJob déclarait `$timeout = 180`. Le job se faisait donc tuer par son propre délai,
+     * deux fois de suite, puis marquer en échec sans jamais avoir produit d'erreur réelle : c'est
+     * l'alerte « attempted too many times » du 2026-08-23 à 10h50, dont la trace ne montrait que
+     * le mécanisme de la file, jamais la cause.
+     *
+     * Une échéance unique remplace la multiplication : la cascade s'arrête d'essayer dès que le
+     * budget est épuisé, quel que soit le nombre de modèles ou de réessais. Le pire cas devient
+     * un nombre DÉCLARÉ, pas un produit à recalculer à chaque modification de la liste de modèles.
+     * `EnrichToolJob::timeoutFromBudget()` en dérive son propre délai, et un test échoue si les
+     * deux divergent.
+     */
+    public static function budgetSecondes(): int
+    {
+        return max(15, (int) config('directory.openrouter_cascade_budget_seconds', 120));
+    }
+
+    /**
      * Essaie chaque modèle de la cascade dans l'ordre et retourne le premier résultat non vide.
+     * S'arrête net dès que le budget de temps est épuisé (voir budgetSecondes()).
      * Journalise sur le canal dédié et retourne '' si tous les modèles échouent.
      *
      * @param  array<int, string>  $models
@@ -90,8 +114,19 @@ class OpenRouterService
             return '';
         }
 
+        $echeance = microtime(true) + self::budgetSecondes();
+
         foreach ($models as $model) {
-            $result = $this->callModel($model, $messages, $apiKey, $maxRetries);
+            if (microtime(true) >= $echeance) {
+                Log::channel('directory_enrichment')->warning(
+                    'OpenRouterService : budget de temps épuisé, modèles restants non essayés',
+                    ['budget_secondes' => self::budgetSecondes(), 'modele_abandonne' => $model]
+                );
+
+                return '';
+            }
+
+            $result = $this->callModel($model, $messages, $apiKey, $maxRetries, $echeance);
             if ($result !== '') {
                 return $result;
             }
@@ -115,13 +150,20 @@ class OpenRouterService
      *
      * @param  array<int, array<string, string>>  $messages
      */
-    private function callModel(string $model, array $messages, string $apiKey, int $maxRetries): string
+    private function callModel(string $model, array $messages, string $apiKey, int $maxRetries, float $echeance): string
     {
         $attempt = 0;
 
         while ($attempt <= $maxRetries) {
+            // Le délai HTTP ne dépasse jamais ce qu'il reste au budget : sans cela, une dernière
+            // tentative lancée juste avant l'échéance la ferait exploser de 60 secondes.
+            $restant = (int) ceil($echeance - microtime(true));
+            if ($restant <= 0) {
+                return '';
+            }
+
             try {
-                $response = Http::timeout(60)
+                $response = Http::timeout(min(60, max(5, $restant)))
                     ->withHeaders([
                         'Authorization' => "Bearer {$apiKey}",
                         'HTTP-Referer' => 'https://laveille.ai',
@@ -159,7 +201,7 @@ class OpenRouterService
             }
 
             $attempt++;
-            if ($attempt <= $maxRetries) {
+            if ($attempt <= $maxRetries && microtime(true) < $echeance) {
                 sleep(1);
             }
         }

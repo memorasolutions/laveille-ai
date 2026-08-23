@@ -26,6 +26,14 @@ return [
      * au suivant dès qu'un modèle échoue (immédiatement sur refus de politique de données,
      * après réessai sur erreur transitoire).
      */
+    // Budget de temps de la cascade OpenRouter ENTIERE (tous modeles, tous reessais), en
+    // secondes. C'est le SEUL nombre a lire pour connaitre le pire cas d'un appel, et
+    // EnrichToolJob en derive son propre delai plutot que de le repeter.
+    // Pose le 2026-08-23 apres l'alerte « attempted too many times » : le pire cas se calculait
+    // alors en multipliant trois nombres logés dans trois fichiers (3 modeles x 3 tentatives x
+    // 60 s, deux fois par outil), soit ~1 080 s pour un job qui s'en accordait 180.
+    'openrouter_cascade_budget_seconds' => (int) env('DIRECTORY_OPENROUTER_BUDGET', 120),
+
     'openrouter_writer_models' => [
         'deepseek/deepseek-v4-flash',
         'z-ai/glm-5.2',
