@@ -64,7 +64,7 @@ $commands[] = ['/usr/bin/git', 'status', '-s'];
 // 2026-05-27 #311 : option `&cache=1` pour rafraîchir les caches Laravel après pull,
 // bullet-proof quand cPanel UAPI est down (Shell API désactivée + File Manager API
 // en restart). Workaround validé en S128 incident cPanel maintenance prolongée.
-// Allowlist commandes artisan (view:clear + config:cache + view:cache + route:cache).
+// Allowlist commandes artisan (view:clear + route:cache + event:cache + view:cache).
 // 2026-05-27 #313 : ajout options `&migrate=1` + `&seed=ClassName` (allowlist Modules\ ou Database\Seeders\).
 $phpBin = null;
 $resolvePhpBin = function () use (&$phpBin) {
@@ -77,12 +77,20 @@ $resolvePhpBin = function () use (&$phpBin) {
     }
     return $phpBin = $bin;
 };
+// 2026-08-23 : `config:cache` RETIRÉ de cette liste. Il y figurait alors que c'est la seule
+// commande formellement interdite sur ce projet - elle a silencieusement REFERMÉ l'Académie en
+// production (le middleware AcademyUnderConstruction ne lisait plus ACADEMY_UNDER_CONSTRUCTION
+// du .env : tout env() devient null une fois la config mise en cache). La CI l'exclut depuis
+// (.github/workflows/deploy.yml, étape « Build caches prod »), et docs/CONTRAINTES-SOUS-AGENTS.md
+// l'interdit - mais ce script de déploiement de SECOURS, lui, l'exécutait encore. Or c'est
+// précisément la voie qu'on emprunte quand la CI est indisponible, donc au pire moment.
+// Liste alignée sur celle de la CI : route + event + view, aucune ne dépend d'env().
 if (! empty($_GET['cache'])) {
     $phpBin = $resolvePhpBin();
     $commands[] = [$phpBin, 'artisan', 'view:clear'];
-    $commands[] = [$phpBin, 'artisan', 'config:cache'];
-    $commands[] = [$phpBin, 'artisan', 'view:cache'];
     $commands[] = [$phpBin, 'artisan', 'route:cache'];
+    $commands[] = [$phpBin, 'artisan', 'event:cache'];
+    $commands[] = [$phpBin, 'artisan', 'view:cache'];
 }
 if (! empty($_GET['migrate'])) {
     $phpBin = $resolvePhpBin();

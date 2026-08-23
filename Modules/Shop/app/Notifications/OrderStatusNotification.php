@@ -38,10 +38,10 @@ class OrderStatusNotification extends Notification implements ShouldQueue
     public function toArray($notifiable): array
     {
         return [
-            'title' => 'Commande #' . $this->order->id . ' — statut mis à jour',
+            'title' => 'Commande #' . $this->order->id . ' - statut mis à jour',
             'order_id' => $this->order->id,
             'status' => $this->order->status,
-            'message' => 'Commande #' . $this->order->id . ' — statut : ' . $this->order->status,
+            'message' => 'Commande #' . $this->order->id . ' - statut : ' . $this->order->status,
         ];
     }
 }

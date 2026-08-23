@@ -38,10 +38,27 @@ class BackofficeHealthController extends Controller
     {
         $check = $request->input('check', '');
 
+        // 2026-08-23 : ces deux boutons exécutaient `config:cache`, la seule commande formellement
+        // interdite sur ce projet - elle a silencieusement REFERMÉ l'Académie en production (tout
+        // env() devient null une fois la config mise en cache, et le middleware
+        // AcademyUnderConstruction ne lisait plus ACADEMY_UNDER_CONSTRUCTION du .env).
+        //  - « OptimizedApp » lançait `optimize`, qui appelle `config:cache` EN INTERNE. Or la CI
+        //    laisse volontairement ce voyant partiellement rouge : le panneau invitait donc
+        //    l'admin à cliquer sur le bouton qui casse le site. Remplacé par les seuls caches
+        //    sûrs, exactement ceux de .github/workflows/deploy.yml (aucun ne dépend d'env()).
+        //  - « DebugMode » lançait `config:cache`, qui ne corrige même PAS le mode debug (il ne
+        //    fait que figer la configuration courante). Un bouton qui ne répare pas ce qu'il
+        //    annonce et casse autre chose vaut mieux absent : APP_DEBUG se change dans le .env.
         return match ($check) {
-            'OptimizedApp' => $this->runFix('optimize', 'Application optimisée avec succès.'),
-            'DebugMode' => $this->runFix('config:cache', 'Configuration mise en cache avec succès.'),
+            'OptimizedApp' => $this->runFixes(
+                ['route:cache', 'event:cache', 'view:cache'],
+                'Caches route, événements et vues reconstruits. La configuration reste lue en direct depuis le .env, volontairement.'
+            ),
             'Cache' => $this->runFix('cache:clear', 'Cache vidé avec succès.'),
+            'DebugMode' => response()->json([
+                'success' => false,
+                'message' => "Le mode debug se désactive en mettant APP_DEBUG=false dans le fichier .env, puis en vidant le cache. Aucune commande ne peut le faire à votre place sans risque.",
+            ]),
             'Schedule', 'Database', 'UsedDiskSpace', 'Environment' => response()->json([
                 'success' => false,
                 'message' => 'Cette vérification ne peut pas être corrigée automatiquement.',
@@ -69,12 +86,28 @@ class BackofficeHealthController extends Controller
 
     private function runFix(string $command, string $successMessage): JsonResponse
     {
-        try {
-            Artisan::call($command);
+        return $this->runFixes([$command], $successMessage);
+    }
 
-            return response()->json(['success' => true, 'message' => $successMessage]);
-        } catch (\Throwable $e) {
-            return response()->json(['success' => false, 'message' => 'Erreur : '.$e->getMessage()]);
+    /**
+     * Exécute plusieurs commandes à la suite et s'arrête à la première qui échoue, en nommant
+     * laquelle : un « Erreur : ... » sans le nom de la commande ne dit pas où ça a cassé.
+     *
+     * @param  array<int, string>  $commands
+     */
+    private function runFixes(array $commands, string $successMessage): JsonResponse
+    {
+        foreach ($commands as $command) {
+            try {
+                Artisan::call($command);
+            } catch (\Throwable $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erreur pendant '.$command.' : '.$e->getMessage(),
+                ]);
+            }
         }
+
+        return response()->json(['success' => true, 'message' => $successMessage]);
     }
 }

@@ -37,9 +37,16 @@ echo "Running migrations..."
 php artisan migrate --force
 
 # Clear and rebuild caches
+# 2026-08-23 : `php artisan config:cache` RETIRE d'ici. C'est la seule commande formellement
+# interdite sur ce projet : elle a silencieusement REFERME l'Academie en production (le
+# middleware AcademyUnderConstruction ne lisait plus ACADEMY_UNDER_CONSTRUCTION du .env, car
+# tout env() devient null une fois la config mise en cache). La CI l'exclut deja
+# (.github/workflows/deploy.yml) et docs/CONTRAINTES-SOUS-AGENTS.md l'interdit ; ce script-ci,
+# orphelin (aucune reference dans le depot), la conservait quand meme - et un fichier qui
+# s'appelle deploy.sh est precisement celui qu'on lance en croyant bien faire.
+# NE PAS la remettre sans un audit exhaustif de TOUS les env() (application + vendor + runtime).
 echo "Optimizing..."
 php artisan optimize:clear
-php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 php artisan event:cache

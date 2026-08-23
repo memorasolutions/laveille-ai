@@ -125,6 +125,32 @@ class AppServiceProvider extends ServiceProvider
         // Kill switch Shop cart abandonment recovery (session 16g)
         Feature::define('cron.cart-abandonment', true);
 
+        // ACTION : définir les 6 drapeaux que des commandes vérifiaient sans qu'ils existent.
+        // MCP: SELF (6 lignes déclaratives)
+        // RAISON: Pennant renvoie « inactif » pour un drapeau JAMAIS DÉFINI. Six commandes
+        // appelaient shouldSkipForKillSwitch() sur un nom absent de cette liste et étaient donc
+        // bloquées en permanence, y compris TROIS QUI SONT PLANIFIÉES et échouaient donc en
+        // silence chaque jour : `tools:enrich-rich-fields --batch=20` et les deux
+        // `tools:dispatch-enrichment`. Mesuré le 2026-08-23 : 258 des 524 fiches publiées
+        // (49 %) n'ont ni core_features, ni use_cases, ni pros/cons, ni faq, ni how_to_use -
+        // exactement les champs que enrich-rich-fields remplit.
+        // Ce n'était PAS une coupure délibérée : on ne planifie pas une commande pour la
+        // désactiver ensuite en supprimant la définition de son drapeau, et
+        // `cron.directory-tutorials-sonar` ne diffère que d'un suffixe de
+        // `cron.directory-tutorials`, lui bien défini ligne 121. C'est une dérive de nommage.
+        Feature::define('cron.ai-enrich-rich-fields', true);   // planifiée, remplit les champs du standard
+        Feature::define('cron.ai-enrich-dispatch', true);      // planifiée (2 fois : pending + metadata)
+        Feature::define('cron.ai-enrich-metadata', true);      // manuelle : launch_year + target_audience
+        Feature::define('cron.fix-hn', true);                  // manuelle, crée bien une redirection 301 en renommant
+        Feature::define('cron.import-youtube', true);          // manuelle, idempotente (dédoublonne par video_id)
+
+        // DÉLIBÉRÉMENT à false, et non plus « inactif par accident » : cette voie ajoute des
+        // tutoriels automatiquement, or l'attribution d'un tutoriel au BON outil est justement
+        // le point fragile (des noms comme « Avec », « Donely » ou « Creativly » ont des
+        // homonymes ; un tutoriel sur un homonyme induit le lecteur en erreur plus sûrement que
+        // pas de tutoriel du tout). À rouvrir sur décision explicite, pas par dérive.
+        Feature::define('cron.directory-tutorials-sonar', false);
+
         $this->configureRateLimiting();
         $this->configureQueueFailureHandling();
     }

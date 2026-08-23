@@ -104,8 +104,13 @@
                 'UsedDiskSpace' => __('Libérez de l\'espace disque : supprimez les anciens logs, purgez les backups obsolètes (<code>php artisan backup:clean</code>), videz le cache (<code>php artisan cache:clear</code>).'),
                 'DebugMode' => __('En production, définissez <code>APP_DEBUG=false</code> dans votre fichier <code>.env</code> pour éviter d\'exposer des informations sensibles.'),
                 'Environment' => __('Vérifiez que <code>APP_ENV=production</code> est bien défini dans <code>.env</code> sur le serveur de production.'),
-                'Cache' => __('Vérifiez la configuration du driver de cache dans <code>.env</code> (<code>CACHE_STORE</code>). Essayez <code>php artisan cache:clear</code> puis <code>php artisan config:cache</code>.'),
-                'OptimizedApp' => __('Optimisez l\'application : <code>php artisan config:cache</code>, <code>php artisan route:cache</code>, <code>php artisan view:cache</code>, <code>php artisan event:cache</code>.'),
+                // 2026-08-23 : ces deux consignes disaient à l'admin de lancer `config:cache`, la seule
+                // commande formellement interdite ici (elle a refermé l'Académie en prod : tout env() devient
+                // null une fois la configuration figée). Retirer le bouton sans retirer la RECETTE ne sert à
+                // rien - un panneau qui affiche la marche à suivre est exactement ce qu'on recopie dans un
+                // terminal. Liste alignée sur la CI : route + event + view, aucune ne dépend d'env().
+                'Cache' => __('Vérifiez la configuration du driver de cache dans <code>.env</code> (<code>CACHE_STORE</code>), puis videz-le avec <code>php artisan cache:clear</code>. N\'utilisez jamais <code>config:cache</code> sur ce site : la configuration doit rester lue en direct depuis le <code>.env</code>.'),
+                'OptimizedApp' => __('Optimisez l\'application : <code>php artisan route:cache</code>, <code>php artisan view:cache</code>, <code>php artisan event:cache</code>. Volontairement sans <code>config:cache</code> ni <code>optimize</code> (qui l\'appelle en interne) : figer la configuration ferme des sections du site.'),
                 'Schedule' => __('Le scheduler ne s\'exécute pas. Vérifiez le cron job : <code>* * * * * cd /chemin/projet && php artisan schedule:run >> /dev/null 2>&1</code>.'),
             ];
         @endphp
