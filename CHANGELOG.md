@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.206.2] - 2026-08-23
+
+### Corrigé
+- **Le bouton « Comparer maintenant » de l'annuaire était illisible dans son état désactivé : 1,48:1.** Texte blanc (`color: #fff`, hérité de `.btn` et de `.lv-compare-cta`) sur le gris pâle `#cbd5e1` posé par la règle `[aria-disabled="true"]`. La charte du site exige 7:1 (AAA) ; le seuil AA de 4,5:1 n'était même pas atteint. Mesure confirmée par deux voies indépendantes : calcul direct de la luminance relative, et audit de contraste sur la page en production.
+- **L'exemption WCAG des « composants inactifs » ne s'appliquait pas ici**, contrairement à ce qu'on pourrait croire d'un bouton grisé. Ce n'est pas un `<button disabled>` mais un `<a>` dont le getter `compareUrl` renvoie **toujours** une chaîne : l'attribut `href` est donc toujours présent et le lien reste atteignable au clavier, `pointer-events: none` ne bloquant que la souris. Un libellé qu'un utilisateur peut cibler avec la touche de tabulation doit pouvoir se lire.
+- Correction portée sur le **texte**, pas sur le fond : le gris pâle est ce qui signale « indisponible », le supprimer aurait fait passer un bouton inactif pour un bouton actif. `#1F2937` sur `#cbd5e1` donne **9,89:1**. Trois éléments couvrent le défaut sur la même barre (les deux liens d'appel à l'action et le libellé « Sélectionnez au moins 2 outils », qui hérite du lien parent). `cursor: not-allowed` ajouté à la seconde règle pour que les deux états désactivés du même écran se comportent pareil.
+
+### Observé, non corrigé
+- L'audit de contraste de `/annuaire` signale aussi une quinzaine d'éléments à 1:1 « blanc sur blanc » (fil d'Ariane, titres de la fenêtre d'infolettre). Ils n'ont **pas** été touchés : l'outil ne sait pas résoudre un fond en image ni une superposition translucide, et ces éléments s'affichent correctement à l'écran. Les qualifier de défauts sans vérification serait prendre un rapport pour un constat. À reprendre séparément, avec mesure sur le rendu réel.
+
 ## [1.206.1] - 2026-08-23
 
 ### Corrigé

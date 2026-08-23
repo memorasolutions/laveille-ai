@@ -122,7 +122,13 @@
     }
     .lv-compare-cta:hover { opacity: 0.9; color: #fff; transform: translateY(-1px); }
     .lv-compare-cta:focus-visible { outline: 3px solid var(--c-accent, #9A2A06); outline-offset: 3px; }
-    .lv-compare-cta[aria-disabled="true"] { background: #cbd5e1; cursor: not-allowed; pointer-events: none; }
+    /* 2026-08-23 WCAG 2.2 AAA : le texte restait en #fff sur ce gris, soit 1,48:1 (AAA exige 7:1,
+       AA 4,5:1). L'exemption des « composants inactifs » ne s'applique PAS ici : `compareUrl`
+       renvoie toujours une chaîne, donc le lien garde son href et reste atteignable au clavier
+       (`pointer-events:none` ne bloque que la souris). Un libellé qu'on peut cibler doit se lire.
+       Le fond pâle est conservé - c'est lui qui dit « indisponible » - et seul le texte est foncé :
+       #1F2937 sur #cbd5e1 = 9,89:1, mesuré. */
+    .lv-compare-cta[aria-disabled="true"] { background: #cbd5e1; color: #1F2937; cursor: not-allowed; pointer-events: none; }
     .lv-compare-clear {
         background: none;
         border: 1px solid var(--c-border, #E5E7EB);
@@ -209,7 +215,9 @@
         gap: 6px;
     }
     .lv-selection-help .btn:hover { opacity: 0.9; color: #fff; }
-    .lv-selection-help .btn[aria-disabled="true"] { background: #cbd5e1; pointer-events: none; }
+    /* Même défaut, même correction que .lv-compare-cta ci-dessus (9,89:1 mesuré). `cursor` ajouté
+       pour que les deux états désactivés du même écran se comportent pareil. */
+    .lv-selection-help .btn[aria-disabled="true"] { background: #cbd5e1; color: #1F2937; cursor: not-allowed; pointer-events: none; }
     .lv-selection-help .btn-secondary {
         background: #fff;
         color: var(--c-primary, #064E5A);
