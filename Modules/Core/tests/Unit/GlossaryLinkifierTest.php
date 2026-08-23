@@ -259,3 +259,36 @@ it('garde la spécificité de stratégie PRIORITAIRE sur l\'origine', function (
 
     expect($sorted[0]['slug'])->toBe('strict-alias');
 });
+
+// 2026-08-23 : un qualifier qui nomme le FABRICANT est un désambiguïsateur, jamais un synonyme.
+// Défaut mesuré en production : « Gemini (Google) » promouvait « Google » en alias, si bien que
+// chaque mention de l'entreprise renvoyait vers la fiche du modèle Gemini (6 faux liens sur une
+// seule actualité). Trois autres termes portaient le même défaut.
+it('ne promeut pas un qualifier qui nomme le fabricant', function () {
+    expect(GlossaryLinkifier::extractQualifierAliases('Gemini (Google)'))
+        ->toBe(['Gemini']);
+
+    expect(GlossaryLinkifier::extractQualifierAliases('Claude (Anthropic)'))
+        ->toBe(['Claude']);
+
+    expect(GlossaryLinkifier::extractQualifierAliases('Llama (Meta)'))
+        ->toBe(['Llama']);
+});
+
+// La contrepartie : un acronyme TECHNIQUE en qualifier reste un vrai synonyme du terme, et doit
+// continuer d'être promu. C'est ce qui distingue « (CNN) » de « (Google) ».
+it('promeut toujours un qualifier qui est un acronyme technique', function () {
+    expect(GlossaryLinkifier::extractQualifierAliases('Réseau convolutif (CNN)'))
+        ->toBe(['Réseau convolutif', 'CNN']);
+
+    expect(GlossaryLinkifier::extractQualifierAliases('Raisonnement outillé (ReAct)'))
+        ->toBe(['Raisonnement outillé', 'ReAct']);
+});
+
+// Homographe assumé : « XAI » abrège *eXplainable AI* et reste un synonyme légitime, alors que
+// l'entreprise « xAI » porte la même chaîne. Ce test verrouille le fait que la correction
+// ci-dessus n'a PAS sacrifié le sens technique pour réparer le sens commercial.
+it('conserve XAI comme synonyme technique malgre l entreprise homographe', function () {
+    expect(GlossaryLinkifier::extractQualifierAliases('Explicabilité (XAI)'))
+        ->toBe(['Explicabilité', 'XAI']);
+});

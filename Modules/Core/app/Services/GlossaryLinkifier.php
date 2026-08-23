@@ -501,12 +501,50 @@ class GlossaryLinkifier
     }
 
     /**
+     * Organisations qui n'apparaissent en qualifier QUE pour lever une ambiguïté.
+     *
+     * 2026-08-23 : « Gemini (Google) » promouvait « Google » en synonyme de Gemini, si bien que
+     * CHAQUE mention de l'entreprise Google, partout sur le site, renvoyait le lecteur vers la
+     * fiche du modèle Gemini. Mesuré sur une actualité qui parlait de Sundar Pichai et du code
+     * de Google : 6 liens, tous faux. Trois autres termes portaient le même défaut :
+     * « Claude (Anthropic) », « Grok (xAI) » et « Llama (Meta) ».
+     *
+     * Le motif fautif était `[A-Z][a-zA-Z]{1,9}`, écrit pour capter des noms de techniques
+     * (ReAct, Adam) : il capte tout aussi bien Google, Meta, Apple, Nvidia ou Mistral.
+     *
+     * La règle de fond : **un qualifier qui nomme le FABRICANT est un désambiguïsateur, pas un
+     * synonyme.** Personne qui écrit « Google » ne parle de Gemini ; on précise « (Google) »
+     * justement parce que le mot « Gemini » seul serait ambigu. L'inverse n'est pas vrai.
+     * Un acronyme technique en majuscules (CNN, GAN, RNN), lui, EST bien un synonyme du terme.
+     *
+     * Liste explicite plutôt que devinette : elle se lit, se grep et s'étend en une ligne.
+     * Comparaison insensible à la casse.
+     */
+    public const QUALIFIER_ORGANISATION = [
+        'google', 'anthropic', 'openai', 'meta', 'microsoft', 'apple', 'amazon',
+        'nvidia', 'mistral', 'adobe', 'ibm', 'deepseek', 'alibaba',
+        'perplexity', 'stability', 'cohere', 'huggingface', 'salesforce',
+    ];
+
+    /**
+     * ABSENT DÉLIBÉRÉMENT de la liste ci-dessus : « xAI ».
+     *
+     * La chaîne « XAI » a deux sens sur ce site. Dans « Grok (xAI) » elle nomme l'entreprise ;
+     * dans « Explicabilité (XAI) » elle abrège *eXplainable AI*, et c'est là un vrai synonyme du
+     * terme, que le lecteur cherchera sous cette forme. L'inscrire dans la liste casserait le
+     * second cas pour réparer le premier. Le départage entre les deux est déjà assuré par le tri
+     * par spécificité de buildTerms(), et un terme dédié « xAI » existe au glossaire : c'est lui
+     * qui gagne sur une mention isolée de l'entreprise. Homographe connu, traité ailleurs.
+     */
+
+    /**
      * 2026-05-11 #138 : extrait aliases auto depuis un nom "X (Y)".
      *
      * Retourne :
      * - la base "X" (toujours utile : "Loi 25 (Québec)" → "Loi 25")
-     * - le qualifier "Y" UNIQUEMENT si c'est un acronyme tout-majuscule (CNN, RNN, GAN, XAI, NAS, APE)
-     *   ou un mot capitalisé ≤10 chars (ReAct). Évite "Québec", "mécanisme", phrases descriptives.
+     * - le qualifier "Y" UNIQUEMENT si c'est un acronyme tout-majuscule (CNN, RNN, GAN, NAS, APE)
+     *   ou un mot capitalisé ≤10 chars (ReAct), ET s'il ne nomme pas une organisation
+     *   (cf. QUALIFIER_ORGANISATION). Évite "Québec", "mécanisme", phrases descriptives.
      *
      * @return array<int, string> liste d'aliases auto-dérivés (peut être vide)
      */
@@ -522,9 +560,13 @@ class GlossaryLinkifier
         if ($base !== '' && $base !== $name) {
             $out[] = $base;
         }
+        // Un fabricant en qualifier désambiguïse le terme, il n'en est pas un synonyme.
+        if (in_array(mb_strtolower($qualifier), self::QUALIFIER_ORGANISATION, true)) {
+            return $out;
+        }
         // Push qualifier seulement si acronyme propre (évite faux positifs)
         if ($qualifier !== '' && (
-            preg_match('/^[A-Z]{2,8}$/u', $qualifier) ||           // CNN, RNN, GAN, XAI, NAS, APE
+            preg_match('/^[A-Z]{2,8}$/u', $qualifier) ||           // CNN, RNN, GAN, NAS, APE
             preg_match('/^[A-Z][a-zA-Z]{1,9}$/u', $qualifier)      // ReAct, Adam
         )) {
             $out[] = $qualifier;

@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.206.4] - 2026-08-23
+
+### Corrigé
+- **Chaque mention de « Google » sur le site renvoyait le lecteur vers la fiche du modèle Gemini.** `extractQualifierAliases()` dérive des synonymes depuis un nom de la forme « X (Y) ». Pour « Gemini (Google) », elle promouvait « Google » en synonyme de Gemini, parce que le motif `[A-Z][a-zA-Z]{1,9}` - écrit pour capter des noms de techniques comme *ReAct* ou *Adam* - capte tout aussi bien un nom d'entreprise. Trois autres termes portaient le même défaut : « Claude (Anthropic) », « Llama (Meta) » et « Grok (xAI) ».
+- **La règle de fond, désormais écrite dans le code** : un qualifier qui nomme le FABRICANT est un désambiguïsateur, pas un synonyme. On précise « (Google) » justement parce que le mot « Gemini » seul serait ambigu ; l'inverse n'est pas vrai, et personne qui écrit « Google » ne cherche Gemini. Un acronyme technique en qualifier (CNN, GAN, RNN), lui, EST un synonyme et continue d'être promu.
+- Constante `QUALIFIER_ORGANISATION` explicite plutôt qu'une heuristique : elle se lit, se grep, et s'étend d'une ligne.
+
+### Note de conception
+- **« xAI » est délibérément ABSENT de cette liste, et le code dit pourquoi.** La chaîne « XAI » a deux sens ici : l'entreprise dans « Grok (xAI) », et l'abréviation d'*eXplainable AI* dans « Explicabilité (XAI) » - où c'est un vrai synonyme, sous lequel le lecteur cherchera. L'inscrire aurait réparé le premier cas en cassant le second, ce qu'un test existant a signalé immédiatement. Le départage repose sur le tri par spécificité déjà en place et sur l'existence d'un terme dédié « xAI ». Un test verrouille désormais ce comportement, pour qu'une prochaine correction ne sacrifie pas le sens technique au sens commercial.
+
+### Découvert par
+- Le contrôle des auto-liens exigé APRÈS publication par le skill `/actu2`. Le défaut est invisible avant : le lieur pose ses liens au rendu, jamais dans la charge utile. Une actualité portant sur Sundar Pichai et le code de Google a produit six liens fautifs, tous vers Gemini.
+
 ## [1.206.3] - 2026-08-23
 
 ### Corrigé
