@@ -218,9 +218,18 @@ class NewsCompositionController extends Controller
             return ['titres' => [], 'statut' => 'ok', 'motif' => null];
         }
 
-        $resultat = TranslationService::translateBatch(
-            $aTraduire->map(static fn (NewsArticle $a) => (string) $a->title)->all()
-        );
+        // Rien de ce qui touche à la traduction ne doit pouvoir abattre l'écran. Le 2026-08-23,
+        // une cascade sans budget a bloqué ce point d'accès au-delà de la coupure de Cloudflare :
+        // l'écran affichait « 0 actualité » alors que 526 articles étaient collectés. Le budget
+        // est désormais borné côté service ; ce filet attrape ce qui resterait, et l'écran répond
+        // toujours - avec les titres originaux et le motif affiché, jamais avec une page vide.
+        try {
+            $resultat = TranslationService::translateBatch(
+                $aTraduire->map(static fn (NewsArticle $a) => (string) $a->title)->all()
+            );
+        } catch (\Throwable $e) {
+            return ['titres' => [], 'statut' => 'indisponible', 'motif' => $e->getMessage()];
+        }
 
         $parId = [];
         foreach ($aTraduire as $i => $article) {

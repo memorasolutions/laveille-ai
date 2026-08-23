@@ -147,9 +147,29 @@ class TranslationService
             .'Garde les noms propres, les noms de produits et les sigles tels quels. '
             .'Français impeccable avec tous les accents. N\'utilise JAMAIS le tiret cadratin.';
 
+        // BUDGET TOTAL, jamais par modèle. Incident du 2026-08-23 : ce lot s'accordait 45
+        // secondes PAR modèle et la cascade en essaie trois, soit 135 secondes au pire. Or
+        // Cloudflare coupe une réponse d'origine vers 100 secondes, et cet appel est sur le
+        // chemin SYNCHRONE de l'écran de composition. Résultat mesuré : l'écran ne répondait
+        // plus du tout et affichait « 0 actualité » alors que 526 articles étaient collectés.
+        // Une fonction cosmétique - traduire des titres - ne doit jamais pouvoir immobiliser
+        // un écran. Même mécanisme que le budget de la cascade d'enrichissement.
+        $echeance = microtime(true) + max(3, (int) config('services.openrouter.translation_budget_seconds', 8));
+
         foreach (self::batchModels() as $model) {
+            $restant = (int) floor($echeance - microtime(true));
+
+            if ($restant < 2) {
+                Log::channel('translation')->warning('Budget de traduction épuisé : titres laissés en version originale.', [
+                    'dernier_modele_non_tente' => $model,
+                    'nombre' => count($textes),
+                ]);
+
+                break;
+            }
+
             try {
-                $response = Http::timeout(45)
+                $response = Http::timeout($restant)
                     ->withoutVerifying()
                     ->withHeaders([
                         'Authorization' => 'Bearer '.$apiKey,

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.215.2] - 2026-08-23
+
+### Corrigé
+- **L'écran de composition affichait « 0 actualité » alors que 526 articles étaient collectés.** Cause, et elle est de mon fait : la traduction des titres ajoutée le matin même s'accordait **45 secondes PAR modèle**, et la cascade en essaie trois - soit 135 secondes au pire. Or Cloudflare coupe une réponse d'origine vers 100 secondes, et cet appel est sur le chemin **synchrone** de l'écran. Preuve horodatée dans le journal `translation` : deux expirations à 45 000 ms à 17h43, exactement au moment où l'écran a été consulté.
+- **Budget TOTAL désormais, jamais par modèle** (8 secondes par défaut, configurable), partagé entre les tentatives - même mécanisme que la cascade d'enrichissement. Quand il est épuisé, les titres restent en version originale et le motif est journalisé.
+- **Filet supplémentaire dans le contrôleur** : plus rien de ce qui touche à la traduction ne peut abattre l'écran. Il répond toujours, avec les titres originaux et le motif affiché, jamais avec une page vide.
+
+### Note de méthode
+- **Une fonction cosmétique ne doit jamais être sur le chemin critique d'un écran.** Traduire des titres est un confort ; l'écran de composition est l'outil de travail. J'avais placé le premier devant le second.
+
 ## [1.215.1] - 2026-08-23
 
 ### Corrigé
