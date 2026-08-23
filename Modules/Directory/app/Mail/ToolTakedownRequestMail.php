@@ -25,7 +25,7 @@ class ToolTakedownRequestMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '[La veille] Demande de retrait — '.($this->takedown->tool?->name ?? 'contenu général'),
+            subject: '[La veille] Demande de retrait - '.($this->takedown->tool?->name ?? 'contenu général'),
         );
     }
 

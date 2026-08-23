@@ -53,7 +53,11 @@ class FormSubmissionController extends Controller
 
         $callback = function () use ($submissions, $fields): void {
             $file = fopen('php://output', 'w');
-            assert($file !== false);
+            if ($file === false) {
+                // assert() a été évité ici : désactivable en production (zend.assertions=-1),
+                // ce garde doit rester actif dans tous les environnements.
+                throw new \RuntimeException("Impossible d'ouvrir php://output pour l'export CSV.");
+            }
 
             $headers = ['ID', 'Date', 'Statut', 'IP'];
             foreach ($fields as $field) {

@@ -31,7 +31,7 @@ class FiscalRatesReminderMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "[La veille] Rappel — vérifier les taux fiscaux {$this->currentYear}",
+            subject: "[La veille] Rappel - vérifier les taux fiscaux {$this->currentYear}",
         );
     }
 

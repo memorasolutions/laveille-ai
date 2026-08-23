@@ -168,6 +168,38 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Rédaction/enrichissement des fiches outils IA (2026-08-23) - canal dédié aux échecs de
+        // Modules\Directory\Services\OpenRouterService::call() (utilisé par tools:enrich-pending,
+        // tools:reenrich-stale, et tout autre consommateur de generate()/classifyPricing()).
+        // Incident constaté ce jour : qwen/qwen3-max, appelé en dur jusque-là, n'a AUCUN
+        // fournisseur conforme à la politique de confidentialité du projet
+        // (provider.data_collection=deny + zdr=true, Modules\Core\Services\OpenRouterPrivacy,
+        // règle non négociable posée le 2026-08-13) - chaque appel se soldait par un HTTP 404
+        // "No endpoints found matching your data policy (Zero data retention)", journalisé via
+        // Log::warning() sur le canal PAR DÉFAUT et donc avalé par LOG_LEVEL=error en production :
+        // l'enrichissement était cassé depuis le 2026-08-13 sans qu'aucune alerte ne remonte.
+        // 'level' fixé en dur à 'info', volontairement INDÉPENDANT de LOG_LEVEL - même parade que
+        // 'fusion'/'quality_gate'/'directory_screenshots'/'composition'/'directory_discovery'/
+        // 'llms' ci-dessus. Rétention alignée sur les autres canaux 'daily' du projet.
+        'directory_enrichment' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/directory_enrichment.log'),
+            'level' => 'info',
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
+        // Génération de /llms.txt et /llms-full.txt. Niveau fixé en dur : LOG_LEVEL=error en
+        // production avalerait ces avertissements, alors qu'un comptage tombé à 0 annonce un
+        // site vide aux moteurs de réponse - c'est précisément ce qu'il faut pouvoir constater.
+        'llms' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/llms.log'),
+            'level' => 'info',
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

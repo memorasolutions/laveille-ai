@@ -41,4 +41,18 @@ class WebPushNotification extends Notification implements ShouldQueue
             ->action('Ouvrir', 'open')
             ->data(['url' => $this->url]);
     }
+
+    /**
+     * Représentation tableau, alignée sur les autres notifications du module (utile si le canal
+     * 'database' est ajouté un jour à via() ; sans lui, ce canal ne l'appelle pas aujourd'hui).
+     */
+    public function toArray($notifiable): array
+    {
+        return [
+            'title' => $this->title,
+            'body' => $this->body,
+            'url' => $this->url,
+            'icon' => $this->icon,
+        ];
+    }
 }

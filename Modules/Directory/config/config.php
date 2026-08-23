@@ -9,6 +9,29 @@ return [
     'youtube_api_keys' => array_values(array_filter(array_map('trim', explode(',', (string) env('YOUTUBE_API_KEYS', ''))))),
     'openrouter_api_key' => env('OPENROUTER_API_KEY'),
 
+    /*
+     * Cascade de modèles de rédaction OpenRouter (OpenRouterService::generate() /
+     * classifyPricing()) - chaque appel passe par OpenRouterPrivacy::applyTo(), qui impose
+     * provider.data_collection=deny + provider.zdr=true (rétention nulle, règle non négociable
+     * posée le 2026-08-13). qwen/qwen3-max, utilisé en dur jusqu'ici, n'a AUCUN fournisseur
+     * conforme à cette politique (mesuré le 2026-08-23 en production : HTTP 404 "No endpoints
+     * found matching your data policy (Zero data retention)") - ce qui cassait silencieusement
+     * l'enrichissement des fiches depuis le 2026-08-13, sans qu'aucune alerte ne remonte (voir
+     * canal de log dédié 'directory_enrichment', config/logging.php). Les 3 modèles ci-dessous
+     * ont été mesurés CONFORMES sur la tâche réelle de rédaction d'une fiche (test direct contre
+     * l'API, contrainte de confidentialité active) : deepseek-v4-flash en tête (le moins cher,
+     * le plus rapide), puis glm-5.2, puis kimi-k2.6. openai/gpt-5.2, pourtant conforme, est
+     * volontairement EXCLU : il produit des tirets cadratins, interdits par la charte
+     * éditoriale du projet. OpenRouterService::call() essaie ces modèles dans l'ordre et passe
+     * au suivant dès qu'un modèle échoue (immédiatement sur refus de politique de données,
+     * après réessai sur erreur transitoire).
+     */
+    'openrouter_writer_models' => [
+        'deepseek/deepseek-v4-flash',
+        'z-ai/glm-5.2',
+        'moonshotai/kimi-k2.6',
+    ],
+
     // Product Hunt API v2 (GraphQL) — token développeur gratuit
     'producthunt_token' => env('PRODUCTHUNT_TOKEN'),
 

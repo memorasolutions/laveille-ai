@@ -47,12 +47,21 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->encryptCookies(except: ['consent_v1']);
         $middleware->validateCsrfTokens(except: ['stripe/webhook', 'webhooks/*']);
-        $middleware->web(append: [
-            \App\Http\Middleware\SetLocale::class,
-            \Modules\Privacy\Http\Middleware\DetectPrivacyJurisdiction::class,
-            \Modules\Privacy\Http\Middleware\ResolveCookiePreferences::class,
-            \Modules\Core\Http\Middleware\SetBackofficeTheme::class,
-        ]);
+        $middleware->web(
+            // AVANT StartSession (par défaut en tête du groupe "web") : bascule le
+            // pilote de session sur "array" pour les robots connus sans cookie, afin
+            // d'arrêter la croissance de la table `sessions` (voir docblock de la
+            // classe - ~32 000 lignes/jour, ~85 % de robots, mesuré le 2026-08-23).
+            prepend: [
+                \Modules\Core\Http\Middleware\PreventBotSessionPersistence::class,
+            ],
+            append: [
+                \App\Http\Middleware\SetLocale::class,
+                \Modules\Privacy\Http\Middleware\DetectPrivacyJurisdiction::class,
+                \Modules\Privacy\Http\Middleware\ResolveCookiePreferences::class,
+                \Modules\Core\Http\Middleware\SetBackofficeTheme::class,
+            ],
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->reportable(function (\Throwable $e) {

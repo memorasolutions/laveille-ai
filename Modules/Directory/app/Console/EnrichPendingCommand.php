@@ -12,7 +12,7 @@ class EnrichPendingCommand extends Command
 {
     use HasKillSwitch;
 
-    protected $signature = 'tools:enrich-pending {--batch=3} {--slug= : Slug exact (bypass batch)} {--id= : ID exact (bypass batch)} {--force : Forcer même si kill switch actif}';
+    protected $signature = 'tools:enrich-pending {--batch=3} {--slug= : Slug exact (bypass batch)} {--id= : ID exact (bypass batch)} {--force : Forcer même si kill switch actif} {--no-publish : Ne pas publier automatiquement une fiche pending enrichie (reste en pending pour relecture humaine)}';
 
     protected $description = 'Enrichit les fiches outils IA via OpenRouter (sonar-pro recherche + qwen3-max rédaction)';
 
@@ -98,8 +98,15 @@ class EnrichPendingCommand extends Command
                     "Tu rédiges des fiches d'outils IA en français québécois professionnel pour laveille.ai. Structure Markdown H2. Accents parfaits. Pas de titre H1. Pas d'emoji. RÈGLE PRIX : exprime tout montant en dollars canadiens approximatifs (ex. « ≈ 27 \$ CA/mois ») ; précise la devise de facturation d'origine si différente (ex. « facturé ~20 \$ US ») ; n'écris jamais « \$ » seul (ambigu)."
                 );
 
-                if (empty($description) || mb_strlen($description) < 200) {
-                    $this->warn("  Génération trop courte. Ignoré.");
+                if (empty($description)) {
+                    $this->warn("  Échec de génération (l'API a refusé ou échoué, aucun contenu reçu). Ignoré.");
+                    $failed++;
+
+                    continue;
+                }
+
+                if (mb_strlen($description) < 200) {
+                    $this->warn('  Génération trop courte (' . mb_strlen($description) . ' car.). Ignoré.');
                     $failed++;
 
                     continue;
@@ -113,15 +120,16 @@ class EnrichPendingCommand extends Command
                 $tool->setTranslation('short_description', 'fr_CA', $shortDesc);
                 $tool->last_enriched_at = now();
 
-                // Auto-publier les outils pending enrichis avec succès
-                if ($tool->status === 'pending') {
+                // Auto-publier les outils pending enrichis avec succès, sauf --no-publish
+                // (2026-08-23 : laisse la relecture humaine possible avant mise en ligne)
+                if ($tool->status === 'pending' && ! $this->option('no-publish')) {
                     $tool->status = 'published';
                     $this->info("  Publié automatiquement (était pending)");
                 }
 
                 $tool->save();
 
-                $this->info("  OK — " . mb_strlen($description) . " chars");
+                $this->info("  OK - " . mb_strlen($description) . " chars");
                 $enriched++;
             } catch (\Throwable $e) {
                 $this->warn("  Erreur : {$e->getMessage()}");

@@ -30,7 +30,7 @@ class HealthCheckReportMail extends Mailable
     {
         $count = count($this->suspects);
         return new Envelope(
-            subject: "[La veille] Health-check annuaire — {$count} outil(s) suspect(s)",
+            subject: "[La veille] Health-check annuaire - {$count} outil(s) suspect(s)",
         );
     }
 

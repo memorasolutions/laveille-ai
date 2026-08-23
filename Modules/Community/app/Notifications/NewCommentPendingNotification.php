@@ -35,7 +35,7 @@ class NewCommentPendingNotification extends Notification
         $adminUrl = url('/admin/blog/comments');
 
         return (new MailMessage())
-            ->subject('[laveille.ai] '.__('Nouveau commentaire en attente').' — '.$author)
+            ->subject('[laveille.ai] '.__('Nouveau commentaire en attente').' - '.$author)
             ->greeting(__('Bonjour Stéphane,'))
             ->line(__('Un nouveau commentaire attend ta modération sur laveille.ai.'))
             ->line('')
@@ -45,6 +45,6 @@ class NewCommentPendingNotification extends Notification
             ->line($excerpt)
             ->action(__('Modérer dans l\'admin'), $adminUrl)
             ->line(__('Tu peux Approuver / Spam / Supprimer directement depuis le tableau d\'administration.'))
-            ->salutation(__('— Notification automatique laveille.ai'));
+            ->salutation(__('- Notification automatique laveille.ai'));
     }
 }

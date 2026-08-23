@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 use Mews\Purifier\Facades\Purifier;
 use SimpleXMLElement;
 
-class ImportWordPress extends Command
+class ImportWordPressCommand extends Command
 {
     protected $signature = 'wp:import
         {--file= : Path to the WXR XML file}

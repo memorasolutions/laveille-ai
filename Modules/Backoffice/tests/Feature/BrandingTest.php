@@ -14,6 +14,8 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Modules\Settings\Models\Setting;
 use Tests\TestCase;
@@ -24,6 +26,15 @@ class BrandingTest extends TestCase
 
     private User $admin;
 
+    /**
+     * Polices réellement écrites sur disque par les tests de cette classe : dès que
+     * font_family diffère de "Inter", BrandingController::update() appelle
+     * GoogleFontService::download() (Modules/Core/app/Services/GoogleFontService.php), qui
+     * écrit sous public_path("fonts/{slug}") indépendamment de Http::fake(). La liste sert au
+     * nettoyage avant/après chaque test.
+     */
+    private const TEST_FONT_SLUGS = ['poppins', 'roboto'];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -32,6 +43,38 @@ class BrandingTest extends TestCase
 
         $this->admin = User::factory()->create();
         $this->admin->assignRole('super_admin');
+
+        // Sans ce fake, GoogleFontService::download() ferait de VRAIS appels réseau vers
+        // fonts.googleapis.com et fonts.gstatic.com à chaque test qui change font_family.
+        Http::fake([
+            'fonts.googleapis.com/*' => Http::response(
+                '@font-face { font-family: "Test"; src: url(https://fonts.gstatic.com/s/test/v1/fake.woff2) format("woff2"); }',
+                200
+            ),
+            'fonts.gstatic.com/*' => Http::response('fake-woff2-data', 200),
+        ]);
+
+        // Nettoyage préalable : si un run antérieur (avant ce correctif) a laissé de vraies
+        // polices téléchargées sur disque, isDownloaded() renverrait true et download() ne
+        // serait jamais appelé, ce qui masquerait silencieusement le fake ci-dessus.
+        $this->cleanTestFontDirectories();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->cleanTestFontDirectories();
+
+        parent::tearDown();
+    }
+
+    private function cleanTestFontDirectories(): void
+    {
+        foreach (self::TEST_FONT_SLUGS as $slug) {
+            $dir = public_path("fonts/{$slug}");
+            if (File::exists($dir)) {
+                File::deleteDirectory($dir);
+            }
+        }
     }
 
     public function test_branding_page_is_accessible_by_admin(): void
