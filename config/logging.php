@@ -150,6 +150,24 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Découverte d'outils (2026-08-22) - canal dédié aux échecs et refus de
+        // tools:discover-new (Modules\Directory\Services\ToolDiscoveryService +
+        // Modules\Directory\Console\DiscoverNewToolsCommand) : résolution d'adresse ProductHunt
+        // épuisée/en échec, fiche refusée (hôte d'agrégateur, titre-commande), et le bilan chiffré
+        // de fin d'exécution. 'level' fixé en dur à 'info', volontairement INDÉPENDANT de
+        // LOG_LEVEL - même parade que 'fusion'/'quality_gate'/'directory_screenshots'/'composition'
+        // ci-dessus : LOG_LEVEL=error en prod avalerait sinon ces journaux avant écriture, ce qui
+        // aurait rendu à moitié vain le correctif du 2026-08-22 (fin des catch vides du pipeline de
+        // découverte - voir Modules/Directory/tests/Feature/ToolDiscoveryUrlResolutionTest.php).
+        // Rétention alignée sur les autres canaux 'daily' du projet.
+        'directory_discovery' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/directory_discovery.log'),
+            'level' => 'info',
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

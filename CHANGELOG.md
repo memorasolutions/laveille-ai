@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.205.0] - 2026-08-22
+
+### Corrigé
+- **Le pipeline de découverte créait des fiches pointant vers la page où l'outil avait été trouvé, au lieu du site de l'outil.** `tools:discover-new` tourne tous les jours à 04h00. Pour chaque candidat repéré dans le flux de ProductHunt, il tentait de remonter à la vraie adresse en suivant la redirection de suivi **en un seul saut**, avec `allow_redirects => false`. Dès que ce saut unique échouait, il retombait sur le lien de suivi lui-même, `producthunt.com/r/p/1210501?app_id=339`, et l'enregistrait comme si de rien n'était. 26 fiches publiées en portaient un, et trois nouvelles sont apparues les 4 et 5 août pendant qu'on corrigeait les précédentes à la main.
+- **Trois couches de silence empilées rendaient cet échec quotidien indiscernable d'un succès.** Un `catch (\Throwable) { }` **vide** avalait l'exception. Le repli retournait le mauvais lien sans rien signaler. Et même une fois journalisé, l'avertissement aurait été effacé en production par `LOG_LEVEL=error`, qui supprime tout message sous le niveau `error`. Chaque couche prise isolément est un défaut mineur ; empilées, elles produisent un système dont on ne peut pas savoir qu'il est en panne.
+- **`app_id` survivait au nettoyage d'URL** : `cleanUrl()` retirait `ref`, `utm_*`, `fbclid`, `gclid` et consorts, mais pas ce paramètre-là.
+- **Un titre comme « npm i -g hotcell » devenait un nom de fiche.** Le nettoyeur de noms ne savait retirer qu'un préfixe « Show HN: » ; tout autre titre brut du flux Hacker News passait intact, y compris une commande d'installation.
+- **Le message affiché par item annonçait « Doublon, ignoré. » pour les trois motifs de refus**, y compris quand la fiche était écartée parce que son hôte était un agrégateur ou son titre une commande. Qui lançait la commande à la main croyait à des doublons.
+
+### Ajouté
+- **La résolution suit désormais jusqu'à trois sauts, et échoue bruyamment.** Plus de repli silencieux : si l'adresse reste sur un agrégateur après trois sauts, ou si une exception survient, la découverte est **refusée** et la raison journalisée avec l'adresse de départ. Le `catch` vide a disparu.
+- **Un canal de journalisation dédié `directory_discovery`**, à niveau `info` figé dans le code, calqué sur les quatre canaux du projet qui existent précisément pour échapper à `LOG_LEVEL=error`. Les neuf avertissements du pipeline y écrivent, dont le plus important : **l'absence de jeton ProductHunt**. C'est cette absence qui fait basculer sur la voie RSS défaillante, et un diagnostic muet sur sa propre cause est le pire des cas.
+- **Un bilan chiffré à la fin de chaque exécution**, journalisé et affiché : candidats examinés, acceptés, refusés par motif. Sans lui, la prochaine panne serait aussi silencieuse que celle-ci. Le retour anticipé sur « aucun outil découvert » a été retiré pour que ce bilan s'écrive **même** quand tout échoue, c'est-à-dire le jour où il compte.
+- **Refus à l'ingestion** d'une adresse restée sur une page de découverte, en étendant la liste `blockedHosts` **déjà en place** plutôt qu'en écrivant un second mécanisme. `github.com` et `huggingface.co` en sont volontairement absents, avec un avertissement en commentaire : pour certains produits, c'est leur vraie adresse officielle.
+- **17 tests** verrouillent le contrat, dont la non-régression GitHub et la résolution sur plusieurs sauts. Deux d'entre eux forcent le canal par défaut au niveau `emergency` puis **lisent le vrai fichier de journal** : un mock aurait prouvé l'appel, pas la survie à `LOG_LEVEL=error`, qui est tout l'enjeu.
+
+### Note de conception
+- Le motif de refus remonte à l'appelant par une propriété d'état et son accesseur, sur le modèle exact de `discoveryStats` déjà présent dans la même classe. La signature publique d'`ingest()` reste inchangée, et aucun vocabulaire nouveau n'est introduit : les motifs réutilisent les clés du bilan chiffré.
+- Un titre ressemblant à une commande fait rejeter la fiche entièrement, plutôt que la marquer pour révision. Raison : sans champ visible dans l'administration, une marque dans les métadonnées serait invisible, et un signal que personne ne voit n'est pas un signal.
+
+## [1.204.1] - 2026-08-22
+
+### Corrigé
+- **Deux tests échouaient pour de mauvaises raisons**, tous deux de la dette préexistante, mis au jour en lançant la suite complète **deux fois de suite** - ce qui n'avait jamais été fait.
+- `NewsletterStatsUnsubTest` attendait le mot « hygiene » **sans accent** dans la page d'administration, alors que la vue affiche « Purges d'hygiène (J+7) ». Le test datait du 23 juin : c'est la règle d'accents du projet qui l'a cassé, quelqu'un ayant accentué le libellé sans mettre l'assertion à jour. L'assertion était fautive, pas la vue.
+- `GoogleFontServiceTest` vérifiait qu'une police nommée « Roboto » n'est **pas** téléchargée, alors qu'une police du même nom est réellement téléchargée ailleurs dans la suite et laissée sur le disque. Le test passait la première fois et échouait la deuxième. Il vise désormais un nom qu'aucun test du dépôt ne télécharge.
+
+### Note de vérification
+- **Cause racine identifiée, non corrigée ici** : le résidu ne vient pas de `GoogleFontServiceTest`, qui se nettoie correctement, mais de `Modules/Backoffice/tests/Feature/BrandingTest.php`, qui déclenche de **vrais appels réseau non simulés** vers `fonts.googleapis.com` à chaque exécution de la suite, sans `Http::fake()` ni nettoyage. Test lent, dépendant du réseau, instable, et polluant pour tout code partageant le même identifiant. À traiter séparément.
+
 ## [1.204.0] - 2026-08-22
 
 ### Ajouté

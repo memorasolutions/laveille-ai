@@ -54,50 +54,61 @@ class DiscoverNewToolsCommand extends Command
             $this->info("Source : {$sourceLabel}");
 
             $countDiscovered = count($discovered);
-            $countIngested = 0;
-            $countDuplicates = 0;
 
             if ($countDiscovered === 0) {
                 $this->warn('Aucun nouvel outil découvert.');
+            } else {
+                $this->info("{$countDiscovered} outil(s) découvert(s).");
+                $this->newLine();
 
-                return self::SUCCESS;
-            }
+                foreach ($discovered as $toolData) {
+                    $name = $toolData['name'] ?? 'Sans nom';
+                    $url = $toolData['url'] ?? 'N/A';
 
-            $this->info("{$countDiscovered} outil(s) découvert(s).");
-            $this->newLine();
+                    $this->line("  {$name} — {$url}");
 
-            foreach ($discovered as $toolData) {
-                $name = $toolData['name'] ?? 'Sans nom';
-                $url = $toolData['url'] ?? 'N/A';
+                    if ($dryRun) {
+                        $this->line("    [DRY] Serait ingéré : {$name}");
 
-                $this->line("  {$name} — {$url}");
+                        continue;
+                    }
 
-                if ($dryRun) {
-                    $this->line("    [DRY] Serait ingéré : {$name}");
+                    $result = $service->ingest($toolData);
 
-                    continue;
-                }
-
-                $result = $service->ingest($toolData);
-
-                if ($result) {
-                    $countIngested++;
-                    $this->info("    Créé (ID:{$result->id})");
-                } else {
-                    $countDuplicates++;
-                    $this->line("    Doublon, ignoré.");
+                    if ($result) {
+                        $this->info("    Créé (ID:{$result->id})");
+                    } else {
+                        $this->line('    '.$this->refusalLabel($service->getLastRefusalReason()));
+                    }
                 }
             }
 
-            $this->newLine();
-            $this->info("=== BILAN : {$countDiscovered} découverts, {$countIngested} ingérés, {$countDuplicates} doublons ===");
+            // Bilan chiffré de fin d'exécution (correctif 2026-08-22) : 'examined' inclut aussi
+            // les candidats jamais parvenus jusqu'à $discovered (adresse ProductHunt non résolue,
+            // rejetée dans fetchRssFeeds() avant que le candidat existe) - c'est pourquoi ce bilan
+            // se fonde sur $service->getDiscoveryStats() et non sur $countDiscovered seul. Toujours
+            // journalisé, même quand $countDiscovered === 0 : un pipeline qui examine puis refuse
+            // tout ne doit jamais avoir l'air identique à un pipeline qui ne trouve rien.
+            $stats = $service->getDiscoveryStats();
 
-            Log::info('[DiscoverNewTools] Terminé', [
+            $this->newLine();
+            $this->info("=== BILAN : {$stats['examined']} candidat(s) examiné(s), {$stats['accepted']} accepté(s), {$stats['refused_total']} refusé(s) ===");
+            $this->line("    Refusés - adresse ProductHunt non résolue : {$stats['refused']['adresse_non_resolue']}");
+            $this->line("    Refusés - hôte d'agrégateur : {$stats['refused']['agregateur']}");
+            $this->line("    Refusés - titre ressemblant à une commande : {$stats['refused']['titre_commande']}");
+            $this->line("    Refusés - doublon : {$stats['refused']['doublon']}");
+
+            Log::channel('directory_discovery')->info('[DiscoverNewTools] Bilan de fin d\'exécution', [
                 'source' => $sourceLabel,
                 'dry_run' => $dryRun,
                 'discovered' => $countDiscovered,
-                'ingested' => $countIngested,
-                'duplicates' => $countDuplicates,
+                'examined' => $stats['examined'],
+                'accepted' => $stats['accepted'],
+                'refused_total' => $stats['refused_total'],
+                'refused_adresse_non_resolue' => $stats['refused']['adresse_non_resolue'],
+                'refused_agregateur' => $stats['refused']['agregateur'],
+                'refused_titre_commande' => $stats['refused']['titre_commande'],
+                'refused_doublon' => $stats['refused']['doublon'],
             ]);
 
             return self::SUCCESS;
@@ -107,5 +118,23 @@ class DiscoverNewToolsCommand extends Command
 
             return self::FAILURE;
         }
+    }
+
+    /**
+     * Message affiché par fiche refusée, aligné sur le VRAI motif (correctif 2026-08-22,
+     * finition 2) : avant ce correctif, la ligne affichait « Doublon, ignoré. » pour les trois
+     * motifs de refus d'ingest() confondus - y compris agrégateur et titre-commande - trompeur
+     * pour quiconque lance la commande à la main. Vocabulaire repris tel quel des libellés du
+     * bilan chiffré ci-dessus (« hôte d'agrégateur », « titre ressemblant à une commande »),
+     * pour ne jamais nommer la même raison de deux façons différentes.
+     */
+    private function refusalLabel(?string $reason): string
+    {
+        return match ($reason) {
+            'agregateur' => 'Hôte agrégateur, ignoré.',
+            'titre_commande' => 'Titre ressemblant à une commande, ignoré.',
+            'doublon' => 'Doublon, ignoré.',
+            default => 'Refusé (raison indéterminée), ignoré.',
+        };
     }
 }

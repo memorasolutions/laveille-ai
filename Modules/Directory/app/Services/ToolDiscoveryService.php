@@ -15,7 +15,66 @@ class ToolDiscoveryService
     private const TRACKING_PARAMS = [
         'ref', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
         'fbclid', 'gclid', 'msclkid', 'mc_cid', 'mc_eid',
+        'app_id', // paramètre de suivi ProductHunt (survivait à cleanUrl(), incident 2026-08-22
     ];
+
+    /** Nombre maximal de sauts suivis pour résoudre une redirection de suivi ProductHunt. */
+    private const MAX_PRODUCTHUNT_HOPS = 3;
+
+    /**
+     * Bilan de la présente exécution du pipeline de découverte (correctif 2026-08-22 : sans ce
+     * compteur, le bilan de fin de tools:discover-new ne peut pas distinguer un pipeline qui ne
+     * trouve rien d'un pipeline qui trouve tout et le refuse). Alimenté par resolveProductHuntUrl()
+     * pour les adresses ProductHunt non résolues, et par ingest() pour les 3 autres motifs de
+     * refus. 'examined' n'est jamais compté séparément (getDiscoveryStats() le dérive) : il ne
+     * peut donc jamais diverger de la somme accepté+refusés.
+     */
+    private array $discoveryStats = [
+        'accepted' => 0,
+        'refused' => [
+            'adresse_non_resolue' => 0,
+            'agregateur' => 0,
+            'titre_commande' => 0,
+            'doublon' => 0,
+        ],
+    ];
+
+    /**
+     * Compteurs chiffrés de la présente exécution, pour le bilan de fin de tools:discover-new
+     * (DiscoverNewToolsCommand). 'examined' est dérivé (accepté + total des refus), jamais
+     * compté à part, pour ne jamais pouvoir diverger de la somme de ses parties.
+     */
+    public function getDiscoveryStats(): array
+    {
+        $refusedTotal = array_sum($this->discoveryStats['refused']);
+
+        return [
+            'examined' => $this->discoveryStats['accepted'] + $refusedTotal,
+            'accepted' => $this->discoveryStats['accepted'],
+            'refused' => $this->discoveryStats['refused'],
+            'refused_total' => $refusedTotal,
+        ];
+    }
+
+    /**
+     * Motif du DERNIER refus d'ingest() - 'agregateur', 'titre_commande' ou 'doublon' (les mêmes
+     * clés que discoveryStats['refused'], jamais une deuxième taxonomie), ou null si le dernier
+     * appel a accepté la fiche. Remis à null au tout début de CHAQUE appel à ingest() : ne peut
+     * jamais refléter un appel antérieur.
+     *
+     * Correctif 2026-08-22 (finition 2) : DiscoverNewToolsCommand affichait « Doublon, ignoré. »
+     * pour les trois motifs de refus, y compris agrégateur et titre-commande - trompeur pour qui
+     * lance la commande à la main. ingest() reste `?Tool` (aucun appelant existant, y compris les
+     * tests, n'a besoin d'être modifié) ; ce simple accesseur - même principe que
+     * getDiscoveryStats() ci-dessus - est la façon la MOINS intrusive de porter le motif jusqu'à
+     * l'appelant sans toucher la signature publique.
+     */
+    private ?string $lastRefusalReason = null;
+
+    public function getLastRefusalReason(): ?string
+    {
+        return $this->lastRefusalReason;
+    }
 
     public static function cleanUrl(string $url): string
     {
@@ -59,6 +118,12 @@ class ToolDiscoveryService
         $path = isset($parsed['path']) ? strtolower($parsed['path']) : '';
 
         $blockedHosts = [
+            // Pages de DÉCOUVERTE (agrégateurs) - jamais l'adresse officielle d'un produit.
+            // ATTENTION : ne jamais y ajouter github.com ni huggingface.co, qui sont parfois
+            // l'adresse officielle légitime d'un produit (ex. fiche MemoryCustodian → dépôt
+            // GitHub). Voir correctif 2026-08-22 (défaut : fiches pointant vers la redirection
+            // de suivi producthunt.com/r/p/... au lieu du site du produit).
+            'producthunt.com',
             'news.ycombinator.com',
             'hn.algolia.com',
             'news.google.com',
@@ -132,7 +197,12 @@ class ToolDiscoveryService
     {
         $token = config('directory.producthunt_token');
         if (! $token) {
-            Log::warning('[ToolDiscovery] ProductHunt token non configuré, source ignorée.');
+            // Canal dédié (pas le canal par défaut, avalé par LOG_LEVEL=error en production) :
+            // cet avertissement est LE PLUS IMPORTANT des cinq du pipeline. C'est l'absence de
+            // jeton qui fait basculer la découverte sur la seule voie RSS, celle qui produisait
+            // les mauvaises adresses (défaut 2026-08-22). Si ce message reste invisible, rien
+            // n'explique pourquoi la voie ProductHunt n'est pas utilisée.
+            Log::channel('directory_discovery')->warning('[ToolDiscovery] ProductHunt token non configuré, source ignorée.');
 
             return [];
         }
@@ -160,7 +230,7 @@ class ToolDiscoveryService
         ]);
 
         if (! $response->successful()) {
-            Log::warning('[ToolDiscovery] ProductHunt API erreur', ['status' => $response->status()]);
+            Log::channel('directory_discovery')->warning('[ToolDiscovery] ProductHunt API erreur', ['status' => $response->status()]);
 
             return [];
         }
@@ -203,7 +273,7 @@ class ToolDiscoveryService
 
                 $xml = @simplexml_load_string($response->body());
                 if ($xml === false) {
-                    Log::warning('[ToolDiscovery] RSS XML invalide', ['feed' => $feedName]);
+                    Log::channel('directory_discovery')->warning('[ToolDiscovery] RSS XML invalide', ['feed' => $feedName]);
 
                     continue;
                 }
@@ -248,7 +318,16 @@ class ToolDiscoveryService
                     // Extraire le vrai lien produit depuis le contenu PH (/r/p/ID)
                     $realUrl = $link;
                     if ($isAtom && str_contains($link, 'producthunt.com') && preg_match('/href="(https:\/\/www\.producthunt\.com\/r\/[^"]+)"/', $content, $rMatch)) {
-                        $realUrl = $this->resolveProductHuntUrl($rMatch[1]);
+                        $resolved = $this->resolveProductHuntUrl($rMatch[1]);
+
+                        if ($resolved === null) {
+                            // Résolution impossible (déjà journalisée ET comptabilisée par
+                            // resolveProductHuntUrl() sur le canal 'directory_discovery') : on
+                            // ignore cette découverte plutôt que d'enregistrer l'URL de suivi.
+                            continue;
+                        }
+
+                        $realUrl = $resolved;
                     }
 
                     $tools[] = [
@@ -260,7 +339,7 @@ class ToolDiscoveryService
                     ];
                 }
             } catch (\Exception $e) {
-                Log::warning('[ToolDiscovery] RSS feed échoué', ['feed' => $feedName, 'error' => $e->getMessage()]);
+                Log::channel('directory_discovery')->warning('[ToolDiscovery] RSS feed échoué', ['feed' => $feedName, 'error' => $e->getMessage()]);
             }
         }
 
@@ -269,6 +348,9 @@ class ToolDiscoveryService
 
     public function ingest(array $toolData): ?Tool
     {
+        // Chaque appel repart de zéro : jamais le motif d'un appel précédent.
+        $this->lastRefusalReason = null;
+
         $url = $toolData['url'] ?? null;
         $name = $toolData['name'] ?? null;
 
@@ -282,9 +364,29 @@ class ToolDiscoveryService
             return null;
         }
 
+        if (ToolNameCleanerService::looksLikeShellCommand($name)) {
+            $this->discoveryStats['refused']['titre_commande']++;
+            $this->lastRefusalReason = 'titre_commande';
+
+            Log::channel('directory_discovery')->warning('[ToolDiscovery] Fiche refusée : titre ressemble à une commande shell', [
+                'name' => $name,
+                'url' => $url,
+            ]);
+
+            return null;
+        }
+
         $url = self::cleanUrl($url);
 
         if (self::isUrlExcluded($url)) {
+            $this->discoveryStats['refused']['agregateur']++;
+            $this->lastRefusalReason = 'agregateur';
+
+            Log::channel('directory_discovery')->warning('[ToolDiscovery] Fiche refusée : adresse de découverte/agrégateur', [
+                'name' => $name,
+                'url' => $url,
+            ]);
+
             return null;
         }
 
@@ -302,11 +404,17 @@ class ToolDiscoveryService
         }
 
         if ($host && ! $isPlatform && Tool::where('url', 'LIKE', "%{$host}%")->exists()) {
+            $this->discoveryStats['refused']['doublon']++;
+            $this->lastRefusalReason = 'doublon';
+
             return null;
         }
 
         // Dédup par URL exacte (pour les plateformes)
         if ($isPlatform && Tool::where('url', $url)->exists()) {
+            $this->discoveryStats['refused']['doublon']++;
+            $this->lastRefusalReason = 'doublon';
+
             return null;
         }
 
@@ -316,6 +424,9 @@ class ToolDiscoveryService
 
         foreach ($existing as $tool) {
             if ($tool->matchesName($nameNorm) > 85) {
+                $this->discoveryStats['refused']['doublon']++;
+                $this->lastRefusalReason = 'doublon';
+
                 return null;
             }
         }
@@ -351,6 +462,8 @@ class ToolDiscoveryService
             ];
         }
         $tool->save();
+
+        $this->discoveryStats['accepted']++;
 
         Log::info('[ToolDiscovery] Outil ingéré', [
             'id' => $tool->id,
@@ -415,25 +528,72 @@ class ToolDiscoveryService
         }));
     }
 
-    public function resolveProductHuntUrl(string $phUrl): string
+    /**
+     * Résout une redirection de suivi ProductHunt (/r/p/ID) vers l'adresse réelle du produit.
+     *
+     * Boucle sur au maximum self::MAX_PRODUCTHUNT_HOPS sauts (une chaîne de redirection peut
+     * rester plusieurs fois sur producthunt.com avant d'atteindre le site du produit). Échec
+     * BRUYANT et volontaire : si l'hôte final est toujours producthunt.com après épuisement des
+     * sauts, si un saut ne renvoie aucun en-tête Location, ou si une exception survient, on
+     * journalise la raison précise et on retourne null - jamais l'URL de suivi elle-même. Un
+     * repli silencieux sur $phUrl est précisément le défaut corrigé le 2026-08-22 (21 fiches
+     * d'annuaire pointaient vers producthunt.com au lieu du site du produit).
+     */
+    public function resolveProductHuntUrl(string $phUrl): ?string
     {
         if (! str_contains($phUrl, 'producthunt.com')) {
             return $phUrl;
         }
 
-        try {
-            $response = Http::withHeaders([
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/125.0.0.0',
-            ])->withOptions(['allow_redirects' => false])->timeout(10)->get($phUrl);
+        $current = $phUrl;
 
-            $location = $response->header('Location');
-            if ($location && ! str_contains($location, 'producthunt.com')) {
-                return $location;
+        try {
+            for ($hop = 1; $hop <= self::MAX_PRODUCTHUNT_HOPS; $hop++) {
+                $response = Http::withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/125.0.0.0',
+                ])->withOptions(['allow_redirects' => false])->timeout(10)->get($current);
+
+                $location = $response->header('Location');
+
+                if (! $location) {
+                    $this->discoveryStats['refused']['adresse_non_resolue']++;
+
+                    Log::channel('directory_discovery')->warning('[ToolDiscovery] Résolution ProductHunt échouée : aucun en-tête Location', [
+                        'url_depart' => $phUrl,
+                        'url_courante' => $current,
+                        'saut' => $hop,
+                    ]);
+
+                    return null;
+                }
+
+                if (! str_contains($location, 'producthunt.com')) {
+                    return $location;
+                }
+
+                $current = $location;
             }
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            $this->discoveryStats['refused']['adresse_non_resolue']++;
+
+            Log::channel('directory_discovery')->warning('[ToolDiscovery] Résolution ProductHunt échouée : exception réseau', [
+                'url_depart' => $phUrl,
+                'url_courante' => $current,
+                'erreur' => $e->getMessage(),
+            ]);
+
+            return null;
         }
 
-        return $phUrl;
+        $this->discoveryStats['refused']['adresse_non_resolue']++;
+
+        Log::channel('directory_discovery')->warning('[ToolDiscovery] Résolution ProductHunt échouée : toujours sur producthunt.com après le nombre maximal de sauts', [
+            'url_depart' => $phUrl,
+            'url_finale' => $current,
+            'sauts' => self::MAX_PRODUCTHUNT_HOPS,
+        ]);
+
+        return null;
     }
 
     public function mapPricing(string $raw): string
