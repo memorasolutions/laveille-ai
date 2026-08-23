@@ -112,6 +112,10 @@
                 'Cache' => __('Vérifiez la configuration du driver de cache dans <code>.env</code> (<code>CACHE_STORE</code>), puis videz-le avec <code>php artisan cache:clear</code>. N\'utilisez jamais <code>config:cache</code> sur ce site : la configuration doit rester lue en direct depuis le <code>.env</code>.'),
                 'OptimizedApp' => __('Optimisez l\'application : <code>php artisan route:cache</code>, <code>php artisan view:cache</code>, <code>php artisan event:cache</code>. Volontairement sans <code>config:cache</code> ni <code>optimize</code> (qui l\'appelle en interne) : figer la configuration ferme des sections du site.'),
                 'Schedule' => __('Le scheduler ne s\'exécute pas. Vérifiez le cron job : <code>* * * * * cd /chemin/projet && php artisan schedule:run >> /dev/null 2>&1</code>.'),
+                // Un seul texte doit couvrir les deux cas (solde bas mesuré, ou mesure impossible) :
+                // contrairement au courriel, ce panneau n'a pas accès au détail de l'échec. Le courriel,
+                // lui, distingue les deux marches à suivre.
+                'OpenRouterCredit' => __('Le crédit qui finance l\'enrichissement de l\'annuaire est bas, ou n\'a pas pu être mesuré. Vérifiez le solde sur <code>openrouter.ai/credits</code> et rechargez si nécessaire. Une fois épuisé, <code>tools:enrich-pending</code> s\'arrête <strong>sans aucune erreur visible</strong> : les fiches restent incomplètes en silence. Si un code 401 ou 403 est indiqué, c\'est la clé <code>OPENROUTER_API_KEY</code> qu\'il faut renouveler.'),
             ];
         @endphp
 

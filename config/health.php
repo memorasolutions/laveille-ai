@@ -193,6 +193,34 @@ return [
         'refusals_cache_key' => env('HEALTH_OPCACHE_REFUSALS_CACHE_KEY', 'health:opcache:refusals'),
     ],
 
+    /*
+     * Solde de credit OpenRouter (finance l'enrichissement de l'annuaire).
+     *
+     * ACTIF PAR DEFAUT, volontairement, contrairement au bloc opcache ci-dessus. Leçon du
+     * 2026-08-23 : six drapeaux Pennant jamais definis avaient laisse trois taches planifiees
+     * mortes en silence pendant des semaines. Un garde-fou qui exige une variable
+     * d'environnement pour exister n'existe pas. Il se DESACTIVE explicitement, il ne s'active
+     * pas par decouverte.
+     */
+    'openrouter' => [
+        'enabled' => env('HEALTH_OPENROUTER_ENABLED', true),
+        'timeout' => env('HEALTH_OPENROUTER_TIMEOUT', 10),
+        // Intervalle entre deux interrogations reelles de l'API. Sert AUSSI d'intervalle
+        // d'echantillonnage pour l'estimation d'autonomie : trop court, le bruit domine.
+        'poll_seconds' => env('HEALTH_OPENROUTER_POLL_SECONDS', 1800),
+        'warn_after_consecutive_failures' => env('HEALTH_OPENROUTER_WARN_AFTER_CONSECUTIVE_FAILURES', 3),
+        // Seuils en dollars US : au rythme mesure le 2026-08-23 (environ 2,70 $ par jour),
+        // 50 $ laissent une quinzaine de jours pour reagir et 15 $ en laissent cinq.
+        'warn_remaining_usd' => env('HEALTH_OPENROUTER_WARN_REMAINING_USD', 50),
+        'fail_remaining_usd' => env('HEALTH_OPENROUTER_FAIL_REMAINING_USD', 15),
+        // Seuils en jours : ils prennent le relais quand la consommation s'emballe et qu'un
+        // seuil en dollars fige alerterait trop tard.
+        'warn_remaining_days' => env('HEALTH_OPENROUTER_WARN_REMAINING_DAYS', 10),
+        'fail_remaining_days' => env('HEALTH_OPENROUTER_FAIL_REMAINING_DAYS', 3),
+        'connection_failures_cache_key' => env('HEALTH_OPENROUTER_CONNECTION_FAILURES_CACHE_KEY', 'health:openrouter:echecs_consecutifs'),
+        'measurement_cache_key' => env('HEALTH_OPENROUTER_MEASUREMENT_CACHE_KEY', 'health:openrouter:derniere_mesure'),
+    ],
+
 /**
  * By default, conditionally skipped health checks are treated as failures.
  * You can override this behavior by uncommenting the configuration below.

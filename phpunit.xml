@@ -66,5 +66,12 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="RESPONSE_CACHE_ENABLED" value="false"/>
+        <!-- Le controle du credit OpenRouter est ACTIF par defaut en production, volontairement.
+             Ici il doit etre eteint : Phase183Test appelle `health:check`, qui executerait tous
+             les controles enregistres - donc un vrai appel reseau a openrouter.ai, avec la vraie
+             cle, a chaque passage de la suite. Le controle lui-meme reste couvert par
+             Modules/Health/tests/Feature/OpenRouterCreditCheckTest.php, qui l'instancie
+             directement avec Http::fake. -->
+        <env name="HEALTH_OPENROUTER_ENABLED" value="false"/>
     </php>
 </phpunit>

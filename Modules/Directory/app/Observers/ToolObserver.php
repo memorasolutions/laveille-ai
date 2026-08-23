@@ -4,22 +4,35 @@ declare(strict_types=1);
 
 namespace Modules\Directory\Observers;
 
+use Modules\Directory\Jobs\CaptureScreenshotJob;
 use Modules\Directory\Models\Tool;
 use Modules\Directory\Services\EcosystemCountService;
-use Modules\Directory\Services\ScreenshotService;
 
 class ToolObserver
 {
     public function saved(Tool $tool): void
     {
+        // La capture est DISPATCHÉE, jamais exécutée ici (2026-08-23). Elle l'était en
+        // synchrone, à l'intérieur du save() : captureWithRetry fait 3 tentatives de
+        // Process::timeout(90) séparées par des pauses de 2 s et 4 s, soit 276 secondes au
+        // pire. Deux conséquences mesurées, toutes deux réelles :
+        //  - EnrichToolJob, dont le délai est calculé sur la cascade OpenRouter (270 s),
+        //    portait en plus ces 276 s sans le savoir : il se tuait par expiration, alerte
+        //    « has timed out » du 2026-08-23 13h38 Québec (17:38 UTC) à l'appui ;
+        //  - publier un outil depuis l'administration pouvait bloquer la requête HTTP
+        //    d'autant, ce que rien ne survit côté navigateur.
+        // CaptureScreenshotJob existait déjà, correctement dimensionné (400 s, une seule
+        // tentative) et posté sur la file `screenshots`, qui a un consommateur (cron
+        // 2255189680). Le contrôle isAvailable() est retiré d'ici : le job le refait au
+        // moment de s'exécuter, sur la machine qui exécute VRAIMENT la capture, et il
+        // JOURNALISE l'indisponibilité au lieu de l'avaler en silence.
         if (
             $tool->wasChanged('status')
             && $tool->status === 'published'
             && empty($tool->screenshot_locked)
             && (empty($tool->screenshot) || str_starts_with((string) $tool->screenshot, 'http'))
-            && ScreenshotService::isAvailable()
         ) {
-            (new ScreenshotService)->captureWithRetry($tool);
+            CaptureScreenshotJob::dispatch($tool);
         }
 
         // Invalidation ecosystem_tag sur update réel uniquement (wasChanged() fiable ici, cf.

@@ -101,7 +101,11 @@ class ContentExtractor
     public static function extractOgImageViaPuppeteer(string $url): ?string
     {
         try {
-            $nodePath = config('services.browsershot.node_path', '/usr/bin/node');
+            // `?:` et non le 2e argument de config() : la clé EXISTE et vaut null quand la
+            // variable d'environnement n'est pas définie, si bien que le défaut ne s'applique
+            // jamais et que la valeur nulle se propage (TypeError mesuré le 2026-08-23 sur le
+            // site jumeau de ScreenshotService).
+            $nodePath = (string) (config('services.browsershot.node_path') ?: '/usr/bin/node');
             $scriptPath = base_path('scripts/extract-og-image.cjs');
 
             if (! file_exists($scriptPath)) {

@@ -52,7 +52,7 @@ class ScreenshotService
             $tempPath = "{$outputDir}/_tmp_{$filename}";
 
             $result = Process::timeout(90)->run([
-                config('services.browsershot.node_path', '/usr/local/bin/node'),
+                (string) (config('services.browsershot.node_path') ?: '/usr/local/bin/node'),
                 base_path('scripts/capture-screenshot.cjs'),
                 $tool->url,
                 $tempPath,
@@ -316,7 +316,7 @@ class ScreenshotService
 
     public static function isAvailable(): bool
     {
-        return file_exists(config('services.browsershot.node_path', '/usr/local/bin/node'))
+        return file_exists((string) (config('services.browsershot.node_path') ?: '/usr/local/bin/node'))
             && file_exists(base_path('scripts/capture-screenshot.cjs'));
     }
 

@@ -4,6 +4,28 @@ on:
   push:
     branches:
       - master
+    # 2026-08-23 : un commit de DOCUMENTATION SEULE ne doit plus déployer.
+    #
+    # Mesuré ce jour-là : 4 déploiements sur 12 ne portaient aucun changement de code (entrées de
+    # journal). Or chaque déploiement passe le site en maintenance le temps du rsync et de la
+    # reconstruction des caches, soit environ 2 minutes. Écrire au journal coûtait donc au site
+    # une indisponibilité, pour rien. Le 503 est même tombé pendant un contrôle en production,
+    # provoqué par mon propre commit de journal.
+    #
+    # LISTE VOLONTAIREMENT ÉTROITE, jamais un filtre large. Deux pièges évités :
+    #  - `**.md` aurait exclu `public/bd/README.md`, qui vit DANS l'arbre servi. `*.md` ne matche
+    #    que la racine, car `*` ne traverse pas les `/` dans la syntaxe GitHub.
+    #  - un commit MIXTE (documentation + code) déploie quand même : GitHub déclenche dès qu'un
+    #    seul fichier du push sort de cette liste. C'est le comportement voulu.
+    #
+    # Aucune divergence durable n'est créée : le rsync du déploiement suivant emporte de toute
+    # façon les fichiers ignorés ici. Et `workflow_dispatch` reste disponible pour forcer un
+    # déploiement à la main en cas de doute.
+    paths-ignore:
+      - 'QUESTIONS-CLAUDE.html'
+      - 'QUESTIONS-CLAUDE.html.bak-*'
+      - 'docs/**'
+      - '*.md'
   workflow_dispatch:
 
 jobs:

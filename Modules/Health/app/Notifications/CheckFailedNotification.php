@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Modules\Health\Notifications;
 
 use Illuminate\Notifications\Messages\MailMessage;
+use Modules\Health\Checks\OpenRouterCreditCheck;
 use Spatie\Health\Enums\Status;
 
 class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNotification
@@ -25,6 +26,12 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
         'refusals_delta' => 'Nouveaux refus depuis le passage précédent',
         'cache_full' => 'Cache déclaré plein',
         'erreur' => 'Erreur rencontrée',
+        'restant' => 'Crédit OpenRouter restant (US$)',
+        'total' => 'Crédit OpenRouter acheté (US$)',
+        'consomme' => 'Crédit OpenRouter consommé (US$)',
+        'jours_estimes' => "Jours d'autonomie estimés au rythme actuel",
+        'echecs_consecutifs' => 'Échecs consécutifs',
+        'statut' => 'Code HTTP reçu',
     ];
 
     public function toMail(): MailMessage
@@ -74,6 +81,26 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
 
             if (strtolower($result->check->getLabel()) === 'schedule' && ! $result->status->equals(Status::ok())) {
                 foreach ($this->marcheASuivreSchedule() as $ligne) {
+                    $mail->line($ligne);
+                }
+            }
+
+            // On compare la CLASSE, pas le libelle : Spatie derive le libelle en decoupant le
+            // nom en mots (« OpenRouterCreditCheck » devient « Open Router Credit »), ce qui
+            // rend toute comparaison de chaine silencieusement fausse. Les deux branches
+            // ci-dessus n'y echappent que parce que « Opcache » et « Schedule » sont des mots
+            // uniques. Mesure du 2026-08-23 : sans ce correctif, la marche a suivre
+            // n'apparaissait dans AUCUN courriel, sans la moindre erreur.
+            if ($result->check instanceof OpenRouterCreditCheck && ! $result->status->equals(Status::ok())) {
+                // Deux situations opposees derriere le meme controle : soit on a MESURE un
+                // solde qui descend (meta contient 'restant'), soit on n'a pas pu mesurer du
+                // tout. Afficher « rechargez » sur un simple timeout serait la meme faute que
+                // celle corrigee pour OPcache le 2026-08-01.
+                $lignes = array_key_exists('restant', $result->meta ?? [])
+                    ? $this->marcheASuivreOpenRouter()
+                    : $this->marcheASuivreOpenRouterMesureImpossible();
+
+                foreach ($lignes as $ligne) {
                     $mail->line($ligne);
                 }
             }
@@ -179,6 +206,44 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
             "2. Si le site répond, il s'agit très probablement d'une surcharge PONCTUELLE du serveur PHP-FPM partagé (plusieurs sites y exécutent des tâches chaque minute) : le planificateur reprendra de lui-même dès le passage suivant, aucune action n'est requise si l'alerte ne se répète pas.",
             "3. Si l'alerte se répète PLUSIEURS FOIS DE SUITE (pas seulement isolée dans la journée), vérifier que la ligne de cron 'artisan schedule:run' existe toujours dans cPanel > Cron Jobs pour laveille.ai.",
             '4. En dernier recours seulement : vérifier la charge du serveur (WHM > Server Status) au moment exact de l\'alerte.',
+        ];
+    }
+
+    /**
+     * Marche a suivre quand le solde a bien ete MESURE et qu'il descend.
+     *
+     * Ce qui est en jeu : le credit OpenRouter finance l'enrichissement des fiches de
+     * l'annuaire. Quand il s'epuise, l'API repond 402, la cascade echoue en silence et le job
+     * se termine en SUCCES - la panne ne se voit nulle part. C'est exactement ce qui avait tue
+     * l'enrichissement pendant neuf jours avant le 2026-08-23.
+     *
+     * @return array<int, string>
+     */
+    private function marcheASuivreOpenRouter(): array
+    {
+        return [
+            'Marche à suivre :',
+            '1. Ouvrir https://openrouter.ai/credits avec le compte MEMORA et vérifier le solde affiché.',
+            '2. Recharger le compte si le montant restant est confirmé. Rien d\'autre n\'est à modifier : la clé et la cascade de modèles restent valides.',
+            "3. Tant que le solde n'est pas rechargé, l'enrichissement de l'annuaire (tools:enrich-pending) s'arrête SANS erreur visible : les fiches restent incomplètes en silence.",
+            "4. Pour ralentir la consommation en attendant, la cascade privilégie déjà les modèles gratuits ; le poste de dépense réel est le volume de fiches traitées, pas le choix des modèles.",
+        ];
+    }
+
+    /**
+     * Marche a suivre quand le solde n'a PAS pu etre mesure (reseau, cle refusee, JSON
+     * inexploitable) : distincte de la precedente, qui suppose un solde bas - conseiller une
+     * recharge sur un simple timeout serait faux et ferait perdre du temps.
+     *
+     * @return array<int, string>
+     */
+    private function marcheASuivreOpenRouterMesureImpossible(): array
+    {
+        return [
+            'Marche à suivre (la mesure a échoué, le solde est peut-être intact) :',
+            '1. Vérifier que https://openrouter.ai répond dans un navigateur : une indisponibilité de leur côté explique à elle seule cette alerte.',
+            "2. Si un code HTTP 401 ou 403 est indiqué ci-dessus, la clé OPENROUTER_API_KEY du .env de production est refusée : la regénérer sur openrouter.ai puis la remplacer.",
+            "3. Si l'alerte ne se répète pas au passage suivant, aucune action n'est requise : un échec isolé est déjà absorbé sans alerte, seule la répétition remonte.",
         ];
     }
 }

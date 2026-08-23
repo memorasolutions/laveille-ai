@@ -12,6 +12,7 @@ namespace Modules\Health\Providers;
 
 use Modules\Core\Providers\BaseModuleServiceProvider;
 use Modules\Health\Checks\OpcacheCheck;
+use Modules\Health\Checks\OpenRouterCreditCheck;
 use Spatie\Health\Checks\Checks\CacheCheck;
 use Spatie\Health\Checks\Checks\DatabaseCheck;
 use Spatie\Health\Checks\Checks\DebugModeCheck;
@@ -55,6 +56,13 @@ class HealthCheckServiceProvider extends BaseModuleServiceProvider
 
         if ((bool) config('health.opcache.enabled', false)) {
             $checks[] = OpcacheCheck::new();
+        }
+
+        // Actif par defaut (cf. le commentaire du bloc `openrouter` dans config/health.php) :
+        // l'epuisement du credit arrete l'enrichissement de l'annuaire SANS aucune erreur
+        // visible, et c'est precisement cette classe de panne muette qu'on cherche a eteindre.
+        if ((bool) config('health.openrouter.enabled', true)) {
+            $checks[] = OpenRouterCreditCheck::new();
         }
 
         Health::checks($checks);
