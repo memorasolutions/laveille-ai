@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.215.1] - 2026-08-23
+
+### Corrigé
+- **Quatre sources qui refusent l'adresse IP du serveur sont désactivées** : AI News, Le Big Data, ZDNet France, The Atlantic Technology. Preuve horodatée tirée du canal `news_fetch` : **403 à chaque tentative**, y compris après le déploiement de l'identité de navigateur. Les mêmes flux répondent 20 éléments depuis un poste ordinaire, avec le même code et la même librairie. Ce n'est pas l'identité qui est refusée, c'est l'**adresse de l'hébergement mutualisé**.
+- **Ce correctif est indissociable du tri par famine livré juste avant.** Sans lui, chaque passage aurait commencé par les trois sources jamais récoltées - c'est-à-dire précisément celles qui ne peuvent jamais aboutir - et leur aurait donné le budget d'un processus déjà interrompu au bout de deux minutes. Garder les bloquées actives aurait transformé une bonne idée en régression.
+- **Désactivées, jamais supprimées** : leurs articles restent rattachés, `down()` rend l'état exact d'avant, et il suffira de les réactiver le jour où un relais existe.
+
+### Note de méthode
+- **Le cas de « Le Big Data » mérite d'être nommé** : c'était la meilleure source du site, 77 % de taux de publication. Elle est muette depuis le 7 juillet. La désactiver ne perd rien - elle ne rapportait déjà plus - mais rend la vérité visible au lieu de la laisser se déguiser en source active.
+
 ## [1.215.0] - 2026-08-23
 
 ### Corrigé
