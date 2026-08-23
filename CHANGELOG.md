@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.206.3] - 2026-08-23
+
+### Corrigé
+- **La correction 1.206.2 n'avait pris que sur deux des trois éléments** : `.lv-compare-cta` pose `color: #fff !important` dans sa règle de base (pour battre la couleur de lien que le thème applique à un `<a>`). Une déclaration simple, même plus spécifique, ne peut pas battre un `!important` : le bouton principal et son libellé « Sélectionnez au moins 2 outils » restaient donc à **1,48:1** en production. Le second bouton, lui, était bien corrigé, sa règle de base n'ayant pas de `!important`. `color: #1F2937 !important` ajouté sur la seule règle `[aria-disabled="true"]` - entre deux `!important`, c'est la spécificité qui tranche et l'attribut l'emporte.
+
+### Méthode
+- **Lire la feuille de style ne prouve rien ; seul le rendu tranche.** Le CSS déployé en 1.206.2 contenait bien la nouvelle couleur - je l'avais vérifié par `curl` sur la page en production - et le défaut persistait pourtant, invisible à la lecture. C'est l'audit de contraste relancé APRÈS déploiement qui l'a montré, en signalant que l'un des deux boutons avait disparu du rapport et pas l'autre : c'est cet écart entre les deux qui a désigné la cascade comme cause. Même classe d'erreur que le commentaire Blade placé dans un bloc `@php` plus tôt dans la journée, où `Blade::compileString` répondait « OK » et où seul un test rendant la vue a révélé la panne.
+
 ## [1.206.2] - 2026-08-23
 
 ### Corrigé

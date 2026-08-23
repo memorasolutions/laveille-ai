@@ -127,8 +127,13 @@
        renvoie toujours une chaîne, donc le lien garde son href et reste atteignable au clavier
        (`pointer-events:none` ne bloque que la souris). Un libellé qu'on peut cibler doit se lire.
        Le fond pâle est conservé - c'est lui qui dit « indisponible » - et seul le texte est foncé :
-       #1F2937 sur #cbd5e1 = 9,89:1, mesuré. */
-    .lv-compare-cta[aria-disabled="true"] { background: #cbd5e1; color: #1F2937; cursor: not-allowed; pointer-events: none; }
+       #1F2937 sur #cbd5e1 = 9,89:1, mesuré.
+       `!important` est requis ici, et seulement ici : la règle de base pose `color: #fff !important`
+       (ligne 111, pour battre la couleur de lien du thème sur un <a>). Une déclaration simple, même
+       plus spécifique, ne peut pas la battre - mesuré : après un premier déploiement sans lui, la
+       page rendue affichait toujours 1,48:1 alors que la feuille de style semblait corrigée. Entre
+       deux `!important`, c'est la spécificité qui tranche, et [aria-disabled] l'emporte. */
+    .lv-compare-cta[aria-disabled="true"] { background: #cbd5e1; color: #1F2937 !important; cursor: not-allowed; pointer-events: none; }
     .lv-compare-clear {
         background: none;
         border: 1px solid var(--c-border, #E5E7EB);
