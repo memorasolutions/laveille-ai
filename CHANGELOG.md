@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.210.1] - 2026-08-23
+
+### Ajouté
+- **Variantes du terme « Superintelligence », en sept langues.** Aucune nouvelle fiche : le contrôle anti-doublon a montré que le terme existe déjà avec quatre variantes, et que `agi` existe séparément. Ajoutés en français et en anglais : `superintelligence artificielle`, `IA superintelligente`, `superintelligent AI`, `AI superintelligence`. Ajoutés pour le balisage `alternateName` seulement, une forme canonique par langue : allemand, espagnol, italien, portugais, néerlandais. Ces formes n'apparaîtront jamais dans le corps français du site et ne servent donc pas l'auto-lien : elles servent à rattacher une requête étrangère à cette page.
+
+### Note de méthode
+- **Deux exclusions décidées par la validation croisée de deux oracles indépendants.** « IA surhumaine » et « superhuman AI » sont des **faux synonymes** : une IA peut être surhumaine aux échecs, au go ou au repliement des protéines sans être une superintelligence, où le dépassement doit être **général**. Les retenir aurait posé des liens faux sur tout article traitant d'une performance dans un seul domaine — exactement le défaut corrigé le matin même, où « Google » renvoyait vers la fiche du modèle Gemini. « super AI » et son miroir « super-IA » sont écartés pour ambiguïté : dans « a super AI tool » ou « une super IA », `super` n'est qu'un adjectif d'appréciation.
+- **Aucune relation `broader`/`narrower` déclarée entre AGI et superintelligence.** Aucune des deux n'englobe l'autre au sens du graphe : ce sont deux étapes d'une même échelle. Poser une relation fausse abîme la navigation davantage que son absence.
+
 ## [1.210.0] - 2026-08-23
 
 ### Ajouté
