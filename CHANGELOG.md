@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.212.0] - 2026-08-23
+
+### Corrigé
+- **Quatre sources d'actualités ne collectaient rien depuis 90 jours à cause d'une adresse de flux périmée, pas parce qu'elles étaient mauvaises.** Les quatre nouvelles adresses ont été testées une par une **avant** d'être écrites : Google DeepMind 100 éléments, ZDNet France 50 éléments datés du jour même, IEEE Spectrum 30, Agence Science-Presse 10. Les déclarer mortes aurait fait perdre une source primaire majeure.
+- **Sept sources désactivées, jamais supprimées, chacune sur un motif objectif** et non sur un simple taux de publication faible : ITespresso (délai médian de 124 jours, le contenu arrive mort), Frenchweb (19 jours), Fredzone (12,7 jours), Maddyness (6,7 jours et 6 articles en 90 jours), Journal du Coin (cryptomonnaie, hors périmètre), OpenAI News (doublon de OpenAI Blog, 1 article collecté contre 135) et Numerama IA id 53 (doublon de l'id 35, zéro collecte).
+
+### Note de méthode
+- **Deux sources à zéro publication sont volontairement CONSERVÉES**, Quanta Magazine et Le Monde Pixels. Le panel a montré que juger une source sur son seul taux de publication revient à mesurer le goût de l'éditeur par l'éditeur lui-même : une boucle fermée. Elles sont dans le périmètre et assez rapides.
+- **The Atlantic Technology n'est pas touchée** : son adresse est déjà celle qui a été testée et validée, et son absence de collecte reste **inexpliquée**. On ne répare pas ce qu'on n'a pas diagnostiqué.
+- **L'accélération de la collecte a été ÉCARTÉE**, alors que c'était ma proposition principale. La mesure montre que les 28 à 35 minutes de délai médian des meilleures sources sont la signature du cron horaire, pas leur vitesse ; deux oracles ont établi qu'un gain de 23 minutes n'a aucun effet perçu quand écrire une fiche prend une heure et qu'on publie trois fois par semaine.
+- **Effet attendu, à ne pas prendre pour une anomalie** : une pointe unique de collecte au premier passage après réparation, les flux réparés livrant leur historique d'un coup.
+
 ## [1.211.1] - 2026-08-23
 
 ### Ajouté
