@@ -164,4 +164,23 @@ return [
         'privacy_enabled' => (bool) env('PRIVACY_GA_ENABLED', false),
     ],
 
+    /*
+     * Identité annoncée par nos requêtes SORTANTES vers des sites tiers.
+     *
+     * Source unique, parce que la même chaîne était déjà recopiée dans plusieurs services avec
+     * QUATRE versions de Chrome différentes : une connaissance dupliquée finit toujours par
+     * diverger. Configurable pour pouvoir la rafraîchir sans toucher au code.
+     *
+     * NE COUVRE PAS l'agent de GoogleFontService, qui est délibérément laissé à part : le sien
+     * n'est pas une identité anti-robot mais un PARAMÈTRE FONCTIONNEL - c'est lui qui détermine
+     * le format de police que Google renvoie. Deux chaînes qui se ressemblent, deux rôles
+     * distincts : les fusionner serait la faute inverse de la duplication.
+     */
+    'http' => [
+        'user_agent' => env(
+            'HTTP_USER_AGENT',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+        ),
+    ],
+
 ];

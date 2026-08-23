@@ -35,6 +35,14 @@ class RssFetcherService
             $feed->set_cache_location(storage_path('framework/cache'));
             $feed->enable_cache(false);
             $feed->set_timeout(15);
+            // Sans cet appel, SimplePie s'annonce sous son propre nom de librairie, ce que
+            // plusieurs protections anti-robot refusent. Diagnostic du 2026-08-23, chiffré :
+            // cinq sources affichaient `last_fetched_at` a « jamais » cote serveur (ZDNet,
+            // IEEE Spectrum, The Atlantic, Google DeepMind) ou figé au 7 juillet (Le Big Data),
+            // alors que les MEMES flux, avec le MEME code et les MEMES reglages, repondent 20
+            // items depuis un poste ordinaire. La difference tenait a l'identite annoncee et a
+            // l'adresse d'ou part la requete. On corrige ce qui est en notre pouvoir.
+            $feed->set_useragent((string) config('services.http.user_agent'));
             $feed->init();
             $feed->handle_content_type();
 

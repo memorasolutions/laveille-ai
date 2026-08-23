@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.214.0] - 2026-08-23
+
+### Corrigé
+- **Cinq sources n'avaient JAMAIS réussi une seule récolte, et rien ne le disait.** `last_fetched_at` n'étant écrit qu'en cas de succès complet, il donne le diagnostic sans instrumenter : ZDNet France, IEEE Spectrum, The Atlantic et Google DeepMind affichaient **« jamais »**, et Le Big Data - la meilleure source du site - était figée au **7 juillet 10h15**. Pendant ce temps TechCrunch et The Decoder se récoltaient normalement à 16h15.
+- **Les mêmes flux répondent 20 éléments** depuis un poste ordinaire, avec le **même code, les mêmes réglages et la même librairie**. La différence tient à l'identité annoncée et à l'adresse d'où part la requête. Le récolteur ne définissait **aucun agent utilisateur** : SimplePie s'annonçait sous son propre nom, ce que plusieurs protections anti-robot refusent. Il annonce désormais une identité de navigateur.
+
+### Ajouté
+- **Une source unique pour l'identité HTTP sortante** (`services.http.user_agent`, surchargeable par variable d'environnement). La même chaîne était recopiée dans plusieurs services avec **quatre versions de Chrome différentes** : une connaissance dupliquée finit toujours par diverger.
+- **`GoogleFontService` est délibérément laissé à part** : son agent n'est pas une identité anti-robot mais un **paramètre fonctionnel** - c'est lui qui détermine le format de police renvoyé par Google. Deux chaînes qui se ressemblent, deux rôles distincts ; les fusionner aurait été la faute inverse de la duplication.
+
+### Note de méthode
+- **Vérification locale rendue possible en cours de route** : `simplepie/simplepie` était partiellement corrompu dans le vendor local (`src/Misc.php` absent), au point que toute instanciation échouait. Constat utile : **`composer install` ne répare PAS un paquet partiellement corrompu**, il le considère installé ; seul `composer reinstall` l'a restauré. Ce défaut était local uniquement - la production collecte quotidiennement, ce qui le prouve - mais il avait rendu un premier diagnostic entièrement aveugle.
+
 ## [1.213.0] - 2026-08-23
 
 ### Corrigé
