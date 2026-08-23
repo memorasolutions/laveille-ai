@@ -53,9 +53,28 @@ final class SourcesReportCommand extends Command
         // Sortie brute, pour ecrire une migration de correction avec les valeurs EXACTES : une
         // migration reversible a besoin de l'ANCIENNE valeur, pas d'une approximation tronquee.
         if ($this->option('brut')) {
-            NewsSource::orderBy('id')->each(function (NewsSource $source): void {
-                $this->line($source->id.';'.$source->name.';'.($source->active ? '1' : '0').';'.$source->url);
+            // `last_fetched_at` est le diagnostic le moins cher qui existe ici : le service de
+            // recolte ne le met a jour QU'EN CAS DE SUCCES COMPLET. Une date ancienne sur une
+            // source active signifie donc que la recuperation ECHOUE, sans avoir a instrumenter
+            // quoi que ce soit. Une date fraiche avec zero article dit l'inverse : le flux est
+            // lu, mais rien n'en sort.
+            $tampon = fopen('php://temp', 'r+');
+
+            NewsSource::orderBy('id')->each(function (NewsSource $source) use ($tampon): void {
+                // fputcsv plutot qu'une concatenation : un nom ou une URL contenant le separateur,
+                // un guillemet ou un retour a la ligne cassait silencieusement le format (revue Codex).
+                fputcsv($tampon, [
+                    $source->id,
+                    $source->name,
+                    $source->active ? '1' : '0',
+                    $source->url,
+                    $source->last_fetched_at?->format('Y-m-d H:i') ?? 'jamais',
+                ], ';', '"', '\\');
             });
+
+            rewind($tampon);
+            $this->line(rtrim((string) stream_get_contents($tampon), "\n"));
+            fclose($tampon);
 
             return self::SUCCESS;
         }
@@ -72,6 +91,12 @@ final class SourcesReportCommand extends Command
                 'articles as composees' => fn (Builder $q) => $q->where('created_at', '>=', $depuis)
                     ->whereNotNull('reviewed_at'),
             ])
+            // Volontairement SANS filtre de fenetre : cette colonne repond a « quand cette source
+            // a-t-elle collecte pour la DERNIERE fois, tous temps confondus ». C'est elle qui a
+            // revele qu'une source au tres bon rendement historique etait morte depuis sept
+            // semaines - avec un filtre de fenetre, elle aurait affiche « jamais » et dit moins.
+            // L'en-tete du tableau le nomme explicitement pour lever l'ambiguite (revue Codex).
+            ->withMax('articles', 'created_at')
             ->orderBy('name')
             ->get();
 
@@ -86,7 +111,7 @@ final class SourcesReportCommand extends Command
             [$delai, $echantillonBorne] = $this->delaiMedianEnMinutes((int) $source->id, $depuis);
             $borne = $borne || $echantillonBorne;
 
-            $dernier = NewsArticle::where('news_source_id', $source->id)->max('created_at');
+            $dernier = $source->articles_max_created_at;
             $actif = (bool) $source->active;
             $taux = $source->collectes > 0 ? $source->publiees / $source->collectes * 100 : null;
 
@@ -124,7 +149,7 @@ final class SourcesReportCommand extends Command
         $this->info("Fenêtre d'observation : {$jours} jours, depuis le ".$depuis->format('Y-m-d').".");
         $this->newLine();
         $this->table(
-            ['Source', 'État', 'Collectés', 'Publiés', 'Taux', 'Composés', 'Retirés', 'Délai médian', 'Dernier'],
+            ['Source', 'État', 'Collectés', 'Publiés', 'Taux', 'Composés', 'Retirés', 'Délai médian', 'Dernier (tout temps)'],
             $lignes
         );
 
@@ -166,8 +191,15 @@ final class SourcesReportCommand extends Command
             ->where('created_at', '>=', $depuis)
             ->whereNotNull('pub_date')
             ->orderByDesc('created_at')
-            ->limit(self::ECHANTILLON_MAX)
+            // MAX + 1 : avec exactement MAX lignes on ne saurait pas distinguer « borne atteinte »
+            // de « c'etait toute la fenetre ». La ligne excedentaire tranche, et on la retire.
+            ->limit(self::ECHANTILLON_MAX + 1)
             ->get(['pub_date', 'created_at']);
+
+        // Le drapeau se calcule AVANT le filtrage des ecarts negatifs : sinon un lot entier de
+        // dates fausses le perdrait en route (revue Codex).
+        $borne = $lignes->count() > self::ECHANTILLON_MAX;
+        $lignes = $lignes->take(self::ECHANTILLON_MAX);
 
         $ecarts = [];
 
@@ -185,7 +217,7 @@ final class SourcesReportCommand extends Command
         }
 
         if ($ecarts === []) {
-            return [null, false];
+            return [null, $borne];
         }
 
         sort($ecarts);
@@ -193,7 +225,7 @@ final class SourcesReportCommand extends Command
         $milieu = intdiv($n, 2);
         $mediane = $n % 2 === 0 ? ($ecarts[$milieu - 1] + $ecarts[$milieu]) / 2 : $ecarts[$milieu];
 
-        return [(float) $mediane, $lignes->count() >= self::ECHANTILLON_MAX];
+        return [(float) $mediane, $borne];
     }
 
     private function delai(?float $minutes): string

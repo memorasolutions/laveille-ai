@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.213.0] - 2026-08-23
+
+### Corrigé
+- **Les échecs de récolte des flux RSS étaient invisibles depuis toujours.** Le récolteur journalisait en `Log::warning` sur le canal par défaut, or la production tourne en `LOG_LEVEL=error` : ces avertissements étaient **intégralement avalés**. Conséquence mesurée : plusieurs sources ne collectaient plus rien depuis des semaines - dont **la meilleure du site, muette depuis le 7 juillet** - sans qu'aucune trace n'existe nulle part. Canal dédié `news_fetch`, niveau `info` en dur, et le message porte désormais l'**identifiant et le nom** de la source : une URL seule n'est pas actionnable.
+
+### Ajouté
+- **`--brut` expose `last_fetched_at`**, qui est le diagnostic le moins cher disponible : le récolteur ne met cette date à jour **qu'en cas de succès complet**. Une date ancienne sur une source active prouve donc que la récupération échoue, sans instrumenter quoi que ce soit ; une date fraîche avec zéro article dit l'inverse.
+
+### Corrigé (revue adversariale Codex)
+- **N+1 supprimé** : la date du dernier article passe d'une requête par source à un `withMax` unique - 54 requêtes en moins.
+- **Drapeau d'échantillon faux** : avec exactement 2 000 lignes, impossible de distinguer « borne atteinte » de « toute la fenêtre ». Corrigé par une ligne excédentaire qui tranche.
+- **Drapeau perdu** quand tous les écarts d'une source étaient négatifs : il se calcule désormais avant le filtrage.
+- **Sortie brute cassable** par un `;`, un guillemet ou un retour à la ligne dans un nom ou une URL : passage à `fputcsv`.
+- **Colonne `Dernier` renommée `Dernier (tout temps)`** : son absence de filtre de fenêtre est **délibérée** - c'est elle qui a révélé une source morte depuis sept semaines - mais l'étiquette le dit maintenant.
+- Conservé malgré l'objection : la médiane reste bornée aux articles les plus récents. Le biais est réel en théorie, **sans effet ici** - la plus grosse source atteint 408 articles sur 90 jours, la borne de 2 000 ne se déclenche jamais.
+
+### Note de méthode
+- **Anthropic n'expose aucun flux RSS**, vérifié : les 8 chemins conventionnels renvoient 404 et la page `/news` ne déclare aucun `link rel="alternate"`. En revanche son **sitemap répond, 514 URL, chacune avec un `lastmod`** daté. C'est une interface stable et destinée aux machines, bien plus robuste qu'une détection de changement de page, qui casse à la première refonte visuelle.
+- **Les ~50 fichiers de sauvegarde horodatés cessent d'être suivis** (`*.bak`, `*.bak-*` dans `.gitignore`). Rien n'est supprimé : ils restent sur le disque, git étant déjà l'historique versionné. Sept d'entre eux étaient suivis par erreur, dont 504 Ko de copies du journal rsyncées en production pour rien. Vérifié au passage : aucun fichier de sauvegarde de **code source** n'est exposé sous `public/`.
+
 ## [1.212.0] - 2026-08-23
 
 ### Corrigé

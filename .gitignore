@@ -92,3 +92,11 @@ logo-white-canvas.txt
 
 # Dossier de travail temporaire des sessions (jamais versionné)
 /scratchpad/
+
+# Sauvegardes horodatees produites automatiquement avant chaque ecriture (hook auto-backup).
+# Elles sont le filet de securite LOCAL : on ne les supprime pas, on cesse simplement de les
+# suivre. Git est deja l'historique versionne ; les suivre en double alourdit le depot et les
+# fait rsyncer en production pour rien (mesure du 2026-08-23 : 50 fichiers non suivis, plus
+# 504 Ko de copies du journal suivies par erreur).
+*.bak
+*.bak-*

@@ -39,7 +39,12 @@ class RssFetcherService
             $feed->handle_content_type();
 
             if ($feed->error()) {
-                Log::warning("RSS feed error for {$source->url}: ".$feed->error());
+                // Canal DEDIE, niveau info en dur : en production LOG_LEVEL=error avalait ce
+                // warning, et des sources muettes depuis des semaines ne laissaient aucune trace.
+                // Le nom et l'id sont dans le message : une URL seule n'est pas actionnable.
+                Log::channel('news_fetch')->warning(
+                    "Echec de recolte, source #{$source->id} « {$source->name} » ({$source->url}) : ".$feed->error()
+                );
 
                 return ['count' => 0, 'texts' => []];
             }
@@ -178,7 +183,9 @@ class RssFetcherService
             $source->update(['last_fetched_at' => $now]);
 
         } catch (\Throwable $e) {
-            Log::error("Error fetching RSS from {$source->url}: ".$e->getMessage());
+            Log::channel('news_fetch')->error(
+                "Exception de recolte, source #{$source->id} « {$source->name} » ({$source->url}) : ".$e->getMessage()
+            );
         }
 
         return ['count' => $count, 'texts' => $texts];

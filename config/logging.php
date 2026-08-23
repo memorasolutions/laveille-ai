@@ -212,6 +212,22 @@ return [
             'replace_placeholders' => true,
         ],
 
+        /*
+         * Récolte des flux RSS. Niveau `info` EN DUR, comme les canaux voisins : la production
+         * tourne en LOG_LEVEL=error, si bien que les Log::warning du récolteur étaient
+         * intégralement avalés. Conséquence mesurée le 2026-08-23 : plusieurs sources ne
+         * collectaient plus rien depuis des semaines - dont la meilleure du site, muette depuis
+         * le 7 juillet - sans qu'aucune trace n'existe nulle part. Un échec de récolte doit
+         * laisser une trace, sinon il n'a jamais eu lieu.
+         */
+        'news_fetch' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/news_fetch.log'),
+            'level' => 'info',
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
