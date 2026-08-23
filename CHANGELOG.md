@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.215.3] - 2026-08-23
+
+### Corrigé
+- **Mon propre correctif de la 1.215.2 aurait éteint la traduction au lieu de la réparer.** Le journal montre que `openai/gpt-5` a expiré **quatre fois** sur cette tâche, toujours de la même façon : « timed out after 45000 ms **with 1166 bytes received** » - la connexion s'établit, la génération commence, puis n'aboutit jamais. Or ce modèle était **en tête** de la cascade : avec un budget total, il l'aurait consommé entièrement sans jamais laisser sa chance à un modèle prompt.
+- **Ordre inversé, le plus rapide d'abord** (`openai/gpt-5-mini`, puis `deepseek/deepseek-v4-flash`). Traduire une vingtaine de titres est une tâche triviale : elle ne justifie pas le modèle le plus lourd, elle exige le plus prompt.
+- **Budget porté à 15 secondes** et rendu configurable : large pour un modèle prompt, très en deçà de la coupure de Cloudflare, et tolérable sur un écran d'administration qui ne le paie que s'il a des titres étrangers à traduire.
+
 ## [1.215.2] - 2026-08-23
 
 ### Corrigé

@@ -134,10 +134,23 @@ return [
         // pouvoir changer de modèle SANS redéploiement le jour où un fournisseur refuse la
         // rétention nulle - c'est ce refus, non journalisé, qui a immobilisé l'enrichissement de
         // l'annuaire pendant neuf jours (cf. CHANGELOG 1.206.0).
+        //
+        // ORDRE : le plus RAPIDE d'abord, mesuré. Le 2026-08-23, `openai/gpt-5` a expiré QUATRE
+        // fois sur cette tâche, toujours de la même façon : « timed out after 45000 ms with 1166
+        // bytes received » - la connexion s'établit, la génération commence, puis n'aboutit
+        // jamais. Le placer en tête consommait tout le budget sans jamais laisser sa chance à un
+        // modèle rapide, ce qui aurait éteint la fonction au lieu de la réparer. Traduire une
+        // vingtaine de titres est une tâche triviale : elle ne justifie pas le modèle le plus
+        // lourd, elle exige le plus prompt.
         'translation_models' => array_values(array_filter(array_map(
             'trim',
-            explode(',', (string) env('OPENROUTER_TRANSLATION_MODELS', 'openai/gpt-5,deepseek/deepseek-v4-flash,openai/gpt-5-mini'))
+            explode(',', (string) env('OPENROUTER_TRANSLATION_MODELS', 'openai/gpt-5-mini,deepseek/deepseek-v4-flash'))
         ))),
+
+        // Budget TOTAL du lot de traduction, partagé entre les tentatives (cf. TranslationService).
+        // 15 secondes : large pour un modèle prompt, très en deçà de la coupure de Cloudflare, et
+        // tolérable sur un écran d'administration qui ne le paie que s'il a des titres étrangers.
+        'translation_budget_seconds' => (int) env('OPENROUTER_TRANSLATION_BUDGET_SECONDS', 15),
     ],
 
     'browsershot' => [
