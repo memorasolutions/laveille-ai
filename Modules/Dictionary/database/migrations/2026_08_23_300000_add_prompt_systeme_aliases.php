@@ -58,7 +58,11 @@ return new class extends Migration
 
     public function up(): void
     {
-        $term = Term::where('slug', self::SLUG)->first();
+        // `slug` est TRADUISIBLE (Spatie) : la colonne contient un JSON, et `where('slug', ...)`
+        // compare ce JSON entier à une chaîne simple - donc ne correspond JAMAIS. Défaut corrigé
+        // le 2026-08-23 après que cette migration soit passée en production sans rien écrire.
+        $term = Term::where('slug->fr_CA', self::SLUG)->first()
+            ?? Term::where('slug->fr', self::SLUG)->first();
 
         if (! $term) {
             // Base locale désynchronisée de la production : on ne crée SURTOUT pas la fiche ici
@@ -77,7 +81,11 @@ return new class extends Migration
 
     public function down(): void
     {
-        $term = Term::where('slug', self::SLUG)->first();
+        // `slug` est TRADUISIBLE (Spatie) : la colonne contient un JSON, et `where('slug', ...)`
+        // compare ce JSON entier à une chaîne simple - donc ne correspond JAMAIS. Défaut corrigé
+        // le 2026-08-23 après que cette migration soit passée en production sans rien écrire.
+        $term = Term::where('slug->fr_CA', self::SLUG)->first()
+            ?? Term::where('slug->fr', self::SLUG)->first();
 
         if (! $term) {
             return;

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.210.2] - 2026-08-23
+
+### Corrigé
+- **Les deux migrations d'alias du glossaire n'écrivaient rien, et se déclaraient réussies.** Elles cherchaient le terme par `Term::where('slug', '...')`, or `slug` est un champ **traduisible** : la colonne contient un JSON du type `{"fr_CA":"..."}`, et cette comparaison confronte le JSON entier à une chaîne simple. Elle ne correspond jamais. Les migrations se sont exécutées, ont été inscrites au registre, et n'ont touché aucun enregistrement. Forme correcte, déjà utilisée par les migrations voisines : `where('slug->fr_CA', ...)`.
+- **Ce n'est pas la migration qui a révélé le défaut** — elle a rendu un succès — **mais la vérification de l'effet sur la page publique après déploiement.** Un code de sortie ne prouve pas qu'un enregistrement a changé. Les deux fichiers d'origine sont corrigés pour tout environnement futur ; une migration de rattrapage rejoue les alias en production, où les précédentes ne rejoueront jamais.
+- **Un terme introuvable est désormais journalisé** au lieu de passer en silence. La migration ne lève pas d'exception pour autant : un déploiement ne doit pas échouer parce qu'une base de travail n'a qu'un sous-ensemble du glossaire, qui s'écrit en production.
+
 ## [1.210.1] - 2026-08-23
 
 ### Ajouté
