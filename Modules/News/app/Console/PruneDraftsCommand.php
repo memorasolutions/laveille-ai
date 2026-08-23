@@ -47,6 +47,7 @@ class PruneDraftsCommand extends Command
     protected $signature = 'news:prune-drafts
         {--dry-run : Compte et liste les ids candidats SANS supprimer ni écrire de backup}
         {--keep=200 : Nombre de brouillons bruts les plus récents (par pub_date) à conserver}
+        {--keep-days= : Fenêtre en JOURS de collecte à conserver (1 = aujourd\'hui seulement). Remplace --keep quand elle est fournie.}
         {--restore= : Chemin (ou nom de fichier dans storage/app) d\'une sauvegarde JSON à restaurer}';
 
     protected $description = 'Purge sûre des vieux brouillons bruts au-delà des N plus récents (backup JSON réversible avant suppression)';
@@ -71,14 +72,20 @@ class PruneDraftsCommand extends Command
         }
 
         $keep = max(0, (int) $this->option('keep'));
+        $keepDaysOption = $this->option('keep-days');
+        $keepDays = ($keepDaysOption === null || $keepDaysOption === '') ? null : max(1, (int) $keepDaysOption);
         $isDryRun = (bool) $this->option('dry-run');
 
-        [$eligibleCount, $keptCount, $candidateIds] = $this->collectCandidates($keep);
+        [$eligibleCount, $keptCount, $candidateIds] = $this->collectCandidates($keep, $keepDays);
+
+        $libelleFenetre = $keepDays !== null
+            ? ($keepDays === 1 ? 'Gardés (collectés aujourd\'hui)' : "Gardés (collectés depuis {$keepDays} jours)")
+            : "Gardés ({$keep} plus récents)";
 
         if ($isDryRun) {
             $this->table(['Mesure', 'Valeur'], [
                 ['Brouillons bruts éligibles', $eligibleCount],
-                ["Gardés ({$keep} plus récents)", $keptCount],
+                [$libelleFenetre, $keptCount],
                 ['Candidats à suppression', count($candidateIds)],
             ]);
             if ($candidateIds !== []) {
@@ -120,11 +127,22 @@ class PruneDraftsCommand extends Command
      *
      * @return array{0: int, 1: int, 2: array<int, int>}
      */
-    private function collectCandidates(int $keep): array
+    private function collectCandidates(int $keep, ?int $keepDays = null): array
     {
         $eligibleCount = 0;
         $keptCount = 0;
         $candidateIds = [];
+
+        // Fenêtre en JOURS de COLLECTE (created_at), pas de publication (pub_date) - demande du
+        // fondateur du 2026-08-23 : l'écran de composition ne doit montrer que la journée en
+        // cours. Le choix de created_at est le même que celui de l'écran, et pour la même raison :
+        // une source date souvent son article de la veille au soir ; purger sur pub_date
+        // supprimerait dès la nuit suivante un article récolté le matin même, avant qu'il ait pu
+        // servir. Les quatre garde-fous ci-dessous sont INCHANGÉS : jamais une fiche publiée,
+        // retirée, relue, ni composée.
+        $limiteCollecte = $keepDays !== null
+            ? now(config('app.timezone', 'America/Toronto'))->subDays(max(0, $keepDays - 1))->startOfDay()
+            : null;
 
         NewsArticle::query()
             ->where('is_published', false)
@@ -132,14 +150,28 @@ class PruneDraftsCommand extends Command
             ->whereNull('reviewed_at')
             ->orderByDesc('pub_date')
             ->orderByDesc('id')
-            ->chunk(self::CHUNK_SIZE, function ($rows) use ($keep, &$eligibleCount, &$keptCount, &$candidateIds) {
+            ->chunk(self::CHUNK_SIZE, function ($rows) use ($keep, $limiteCollecte, &$eligibleCount, &$keptCount, &$candidateIds) {
                 foreach ($rows as $article) {
                     if ($article->hasComposedSummary()) {
                         continue; // composée : jamais un brouillon « brut », intouchable, hors décompte.
                     }
                     $eligibleCount++;
+
+                    if ($limiteCollecte !== null) {
+                        // Une date de collecte absente ne se juge pas : dans le doute, on garde.
+                        if ($article->created_at === null || $article->created_at->gte($limiteCollecte)) {
+                            $keptCount++;
+
+                            continue;
+                        }
+                        $candidateIds[] = $article->id;
+
+                        continue;
+                    }
+
                     if ($keptCount < $keep) {
                         $keptCount++;
+
                         continue;
                     }
                     $candidateIds[] = $article->id;

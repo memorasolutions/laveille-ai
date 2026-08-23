@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Modules\Core\Services\TranslationService;
 use Modules\News\Models\NewsArticle;
 use Modules\News\Services\CompositionPromptBuilder;
 use Modules\News\Services\EditorialProofNormalizer;
@@ -127,16 +128,47 @@ class NewsCompositionController extends Controller
      */
     public function candidates(): JsonResponse
     {
-        $articles = NewsArticle::query()
+        // Filtre sur created_at (le moment où NOUS avons collecté), et non sur pub_date (la date
+        // annoncée par la source). Demande du 2026-08-23 : « je veux les articles du jour
+        // seulement ». Une source date souvent son article de la veille au soir ; filtrer sur
+        // pub_date ferait disparaître de l'écran un article récolté ce matin, et la purge
+        // nocturne le supprimerait avant même qu'il ait pu être vu. L'affichage et le tri
+        // restent sur pub_date, qui est ce que le lecteur comprend.
+        $fuseau = config('app.timezone', 'America/Toronto');
+        $jour = now($fuseau)->toDateString();
+
+        $pourLeJour = static fn (string $date) => NewsArticle::query()
             ->with('source')
+            ->whereDate('created_at', $date)
             ->orderByDesc('pub_date')
             ->limit(200)
             ->get();
 
+        $articles = $pourLeJour($jour);
+        $estRepli = false;
+
+        // La collecte tourne à l'heure (cron `news:fetch`, minute 15) : entre minuit et le premier
+        // passage, la journée est vide. Plutôt qu'un écran vide et muet, on montre le dernier jour
+        // qui a des articles ET on le DIT - `est_repli` permet à l'écran de l'afficher.
+        if ($articles->isEmpty()) {
+            $dernierJour = NewsArticle::query()->max('created_at');
+            if ($dernierJour) {
+                $jour = \Illuminate\Support\Carbon::parse($dernierJour)->setTimezone($fuseau)->toDateString();
+                $articles = $pourLeJour($jour);
+                $estRepli = $articles->isNotEmpty();
+            }
+        }
+
+        $traduction = $this->titresTraduits($articles);
+
         return response()->json([
+            'jour_affiche' => $jour,
+            'est_repli' => $estRepli,
+            'traduction_statut' => $traduction['statut'],
+            'traduction_motif' => $traduction['motif'],
             'items' => $articles->map(fn (NewsArticle $a) => [
                 'id' => $a->id,
-                'title' => $a->seo_title ?: $a->title,
+                'title' => $traduction['titres'][$a->id] ?? ($a->seo_title ?: $a->title),
                 'title_original' => $a->title,
                 'slug' => $a->slug,
                 'site_url' => url('/actualites/'.$a->slug),
@@ -156,6 +188,49 @@ class NewsCompositionController extends Controller
                 'already_used' => filled($a->internal_source_text),
             ])->values(),
         ]);
+    }
+
+    /**
+     * Traduit en français les titres des actualités dont la source n'est pas francophone.
+     *
+     * Demande du fondateur, réitérée le 2026-08-23 : lire une liste moitié anglaise ralentit le
+     * tri éditorial. Le titre ORIGINAL reste rendu séparément (`title_original`), il n'est jamais
+     * perdu ni écrasé en base - cette traduction est un confort d'affichage, pas une écriture.
+     *
+     * Un seul appel réseau pour toute la page, avec alignement strict par index (voir
+     * TranslationService::translateBatch). Si quoi que ce soit échoue, on rend les originaux ET
+     * le statut le dit, pour que l'écran puisse afficher « traduction indisponible » plutôt que
+     * de laisser croire à un oubli - c'est précisément l'ambiguïté qui a fait reposer la question.
+     *
+     * @param  \Illuminate\Support\Collection<int, NewsArticle>  $articles
+     * @return array{titres: array<int, string>, statut: string, motif: string|null}
+     */
+    private function titresTraduits(\Illuminate\Support\Collection $articles): array
+    {
+        $aTraduire = $articles->filter(static function (NewsArticle $a): bool {
+            $langue = mb_strtolower((string) ($a->source?->language ?? ''));
+
+            // Le seo_title est déjà une réécriture éditoriale française : ne pas y toucher.
+            return $langue !== '' && ! str_starts_with($langue, 'fr') && blank($a->seo_title);
+        })->values();
+
+        if ($aTraduire->isEmpty()) {
+            return ['titres' => [], 'statut' => 'ok', 'motif' => null];
+        }
+
+        $resultat = TranslationService::translateBatch(
+            $aTraduire->map(static fn (NewsArticle $a) => (string) $a->title)->all()
+        );
+
+        $parId = [];
+        foreach ($aTraduire as $i => $article) {
+            $traduit = $resultat['titres'][$i] ?? null;
+            if (is_string($traduit) && trim($traduit) !== '') {
+                $parId[$article->id] = $traduit;
+            }
+        }
+
+        return ['titres' => $parId, 'statut' => $resultat['statut'], 'motif' => $resultat['motif']];
     }
 
     /**

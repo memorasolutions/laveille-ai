@@ -20,6 +20,14 @@
         📰 Actualités disponibles
         <span class="cb-counter" x-text="availableItems.length + ' / ' + newsItems.length"></span>
     </div>
+    {{--
+        Avis de liste (2026-08-23). Deux situations doivent se DIRE plutôt que se deviner :
+        une journée sans collecte (on montre alors le dernier jour disponible) et une traduction
+        de titres indisponible (les titres anglais restent tels quels). Sans cet avis, l'écran
+        est muet et la même question revient un mois plus tard. Rendu seulement si le contrôleur
+        hôte fournit ces champs : `avisListe` vaut la chaîne vide partout ailleurs.
+    --}}
+    <div class="cb-list-notice" role="status" aria-live="polite" x-show="avisListe" x-cloak x-text="'ℹ️ ' + avisListe"></div>
     <div class="mb-2 d-flex gap-2 align-items-center flex-wrap">
         <input type="search" class="form-control form-control-sm" placeholder="🔍 Rechercher dans les titres / résumés…" x-model="searchQuery" style="flex:1; min-width:200px;">
         <select class="form-select form-select-sm" x-model="languageFilter" style="width:auto;">

@@ -115,7 +115,14 @@ class NewsServiceProvider extends ServiceProvider
             // la classe). Backup horodaté AVANT toute suppression, rotation interne des 14
             // derniers backups. Idempotente : rien à faire si moins de 200 brouillons bruts
             // existent. Décalée de 30 minutes après news:prune-seo pour éviter tout chevauchement.
-            $schedule->command('news:prune-drafts')
+            // 2026-08-23, demande du fondateur : l'écran de composition ne doit montrer que les
+            // actualités du jour, et celles de la veille doivent disparaître. La fenêtre passe
+            // donc d'un COMPTE (200 plus récents, soit environ cinq jours au débit actuel) à un
+            // JOUR de collecte. À 02h40 heure du Québec, « aujourd'hui » vient de commencer :
+            // la purge emporte exactement la veille, ce qui est l'effet voulu.
+            // Les quatre garde-fous restent entiers - jamais une fiche publiée, retirée, relue ni
+            // composée - et un backup JSON restaurable est écrit AVANT toute suppression.
+            $schedule->command('news:prune-drafts --keep-days=1')
                 ->dailyAt('02:40')
                 ->timezone('America/Toronto')
                 ->onOneServer();

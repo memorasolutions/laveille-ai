@@ -56,6 +56,16 @@ window.NewsArticlePicker = function (opts) {
         newsItems: [],
         selectedIds: [],
         fetchError: '',
+
+        // ── Avis de liste (2026-08-23) ───────────────────────────────────────
+        // Renseignes par les reponses qui les fournissent (ecran de composition) ; restent nuls
+        // ailleurs, ce qui rend l'ajout inoffensif pour les autres pages hotes du composant.
+        // Raison d'etre : une liste vide ou des titres restes en anglais doivent DIRE pourquoi.
+        // Un ecran muet fait reposer la meme question un mois plus tard.
+        jourAffiche: null,
+        estRepli: false,
+        traductionStatut: null,
+        traductionMotif: null,
         searchQuery: '',
         languageFilter: '',
         colorFilter: '',
@@ -70,6 +80,19 @@ window.NewsArticlePicker = function (opts) {
             { label: 'Bleu', value: '#3b82f6' },
             { label: 'Violet', value: '#a855f7' },
         ],
+
+        // Message d'avis, calcule a UN seul endroit plutot que recompose dans chaque vue.
+        // Rend une chaine vide quand tout est normal : la vue n'affiche alors rien.
+        get avisListe() {
+            const avis = [];
+            if (this.estRepli && this.jourAffiche) {
+                avis.push('Aucune actualite collectee aujourd\'hui : affichage du ' + this.jourAffiche + '.');
+            }
+            if (this.traductionStatut === 'indisponible') {
+                avis.push('Traduction des titres indisponible' + (this.traductionMotif ? ' (' + this.traductionMotif + ')' : '') + ' : les titres anglais restent tels quels.');
+            }
+            return avis.join(' ');
+        },
 
         // ── Fetch des actualités ─────────────────────────────────────────────
         // Mécanique de fetch (loading/erreurs/parsing JSON) commune aux deux pages ; seule la
@@ -113,6 +136,10 @@ window.NewsArticlePicker = function (opts) {
                 }
                 const data = await res.json();
                 this.newsItems = data.items || [];
+                this.jourAffiche = data.jour_affiche || null;
+                this.estRepli = data.est_repli === true;
+                this.traductionStatut = data.traduction_statut || null;
+                this.traductionMotif = data.traduction_motif || null;
                 if (typeof opts.onFetchSuccess === 'function') opts.onFetchSuccess(this, data);
             } catch (e) {
                 this.fetchError = 'Erreur réseau : ' + e.message;

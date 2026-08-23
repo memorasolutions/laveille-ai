@@ -177,3 +177,50 @@ it('le backup est écrit avant suppression et --restore recrée les lignes', fun
     expect($restored)->not->toBeNull();
     expect($restored->slug)->toBe($oldSlug);
 });
+
+// ── Fenêtre en JOURS de collecte (--keep-days), demande du fondateur 2026-08-23 ─────────
+
+it('garde les brouillons collectés aujourd\'hui et cible ceux de la veille', function () {
+    $aujourdhui = npdArticle();
+    $hier = npdArticle();
+    // La date de collecte se force après coup : created_at n'est pas dans $fillable.
+    $hier->forceFill(['created_at' => now()->subDay()->setTime(14, 0)])->saveQuietly();
+
+    $this->artisan('news:prune-drafts', ['--keep-days' => 1])->assertExitCode(0);
+
+    expect(NewsArticle::find($aujourdhui->id))->not->toBeNull()
+        ->and(NewsArticle::find($hier->id))->toBeNull();
+});
+
+// La fenêtre en jours ne doit RIEN changer aux quatre garde-fous. Chacun est vérifié
+// séparément : un test qui les grouperait masquerait lequel a lâché.
+it('la fenêtre en jours ne touche ni une fiche publiée ni une fiche composée, même anciennes', function () {
+    $publiee = npdArticle(['is_published' => true]);
+    $publiee->forceFill(['created_at' => now()->subDays(30)])->saveQuietly();
+
+    $composee = npdArticle(['structured_summary' => ['composed' => true, 'hook' => 'Quelque chose de composé.']]);
+    $composee->forceFill(['created_at' => now()->subDays(30)])->saveQuietly();
+
+    $this->artisan('news:prune-drafts', ['--keep-days' => 1])->assertExitCode(0);
+
+    expect(NewsArticle::find($publiee->id))->not->toBeNull()
+        ->and(NewsArticle::find($composee->id))->not->toBeNull();
+});
+
+it('une date de collecte absente ne se juge pas : le brouillon est gardé', function () {
+    $sansDate = npdArticle();
+    $sansDate->forceFill(['created_at' => null])->saveQuietly();
+
+    $this->artisan('news:prune-drafts', ['--keep-days' => 1])->assertExitCode(0);
+
+    expect(NewsArticle::find($sansDate->id))->not->toBeNull();
+});
+
+it('le mode --dry-run avec une fenêtre en jours ne supprime rien', function () {
+    $hier = npdArticle();
+    $hier->forceFill(['created_at' => now()->subDays(3)])->saveQuietly();
+
+    $this->artisan('news:prune-drafts', ['--keep-days' => 1, '--dry-run' => true])->assertExitCode(0);
+
+    expect(NewsArticle::find($hier->id))->not->toBeNull();
+});

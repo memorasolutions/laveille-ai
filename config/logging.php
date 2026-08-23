@@ -200,6 +200,18 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Traduction par lot des titres d'actualités (TranslationService::translateBatch).
+        // Niveau 'info' EN DUR, comme les canaux voisins : LOG_LEVEL=error en production avale
+        // tout ce qui est en dessous, et c'est exactement ainsi qu'un refus de fournisseur peut
+        // rester invisible pendant des semaines pendant que l'écran affiche des titres anglais.
+        'translation' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/translation.log'),
+            'level' => 'info',
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.208.0] - 2026-08-23
+
+### Ajouté
+- **L'écran de composition ne montre plus que les actualités du jour.** Le filtre porte sur `created_at`, le moment où *nous* avons collecté, et non sur `pub_date`, la date annoncée par la source. La raison est concrète : une source date souvent son article de la veille au soir ; filtrer sur `pub_date` ferait disparaître de l'écran un article récolté le matin même, et la purge nocturne le supprimerait avant qu'il ait pu servir. L'affichage et le tri restent sur `pub_date`, qui est ce que le lecteur comprend.
+- **Les titres venus de sources non francophones sont traduits en français**, en un seul appel réseau pour toute la page. Le titre original reste rendu à part et n'est jamais écrasé en base : c'est un confort d'affichage, pas une écriture.
+- **`news:prune-drafts --keep-days=N`** : fenêtre exprimée en jours de collecte plutôt qu'en nombre de brouillons. La tâche planifiée de 02h40 heure du Québec passe de `--keep=200` (environ cinq jours au débit actuel) à `--keep-days=1`. À cette heure, « aujourd'hui » vient de commencer : la purge emporte exactement la veille.
+- Source d'actualités « Les numériques » **désactivée**, pas supprimée : `active` à `false` la retire du flux de collecte tout en laissant intactes les actualités déjà collectées, qui portent une clé étrangère vers cette ligne. Migration à correspondance exacte sur le nom, jamais un motif large qui attraperait d'autres sources, et qui énumère dans sa sortie ce qu'elle a réellement modifié.
+
+### Corrigé
+- **Les titres anglais n'étaient pas traduits parce que rien n'appelait le service de traduction.** La fonctionnalité avait été annoncée puis jamais branchée. `TranslationService::translateBatch()` est la porte, et l'écran l'appelle désormais.
+
+### Note de conception
+- **Une traduction mal alignée est pire qu'une absence de traduction** : la première est une erreur invisible collée au mauvais article, la seconde se voit. Le lot exige donc que le nombre de lignes rendues corresponde EXACTEMENT au nombre de titres envoyés ; au moindre écart, tous les originaux sont conservés.
+- **L'échec est rendu VISIBLE**, dans la réponse et à l'écran. C'est la leçon directe de la panne d'enrichissement de l'annuaire : neuf jours d'arrêt parce qu'un refus de fournisseur se traduisait par un repli silencieux. Un canal de journal dédié (`translation`, niveau `info` en dur, car `LOG_LEVEL=error` avale tout le reste en production) enregistre chaque échec, et l'écran affiche « traduction indisponible » avec son motif plutôt que de laisser croire à un oubli.
+- La cascade de modèles de traduction est **pilotée par la configuration** (`OPENROUTER_TRANSLATION_MODELS`), pour pouvoir changer de modèle sans redéploiement le jour où un fournisseur refuse la rétention nulle imposée à tous les appels du projet. Impossible de vérifier depuis le poste local quels fournisseurs l'acceptent : l'API publique d'OpenRouter n'expose pas cette information par point d'accès, et la clé n'est pas lisible d'ici. D'où le choix de rendre l'échec bruyant plutôt que de parier sur un modèle.
+- La purge conserve ses **quatre garde-fous intacts** : jamais une fiche publiée, retirée, relue ni composée, et un backup JSON restaurable écrit AVANT toute suppression. Une date de collecte absente ne se juge pas : le brouillon est gardé.
+
 ## [1.207.0] - 2026-08-23
 
 ### Ajouté

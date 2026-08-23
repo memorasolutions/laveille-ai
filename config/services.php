@@ -128,6 +128,16 @@ return [
         // Mode sans rétention : ne route que vers des fournisseurs à politique Zero Data Retention.
         // Valeur par défaut SÛRE = activé. https://openrouter.ai/docs/guides/features/zdr
         'zdr' => env('OPENROUTER_ZDR', true),
+        // Cascade de la traduction PAR LOT des titres (TranslationService::translateBatch),
+        // distincte de celle du résumé : ici le modèle doit rendre un FORMAT (une ligne numérotée
+        // par titre), pas seulement une bonne traduction. Pilotée par la configuration pour
+        // pouvoir changer de modèle SANS redéploiement le jour où un fournisseur refuse la
+        // rétention nulle - c'est ce refus, non journalisé, qui a immobilisé l'enrichissement de
+        // l'annuaire pendant neuf jours (cf. CHANGELOG 1.206.0).
+        'translation_models' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('OPENROUTER_TRANSLATION_MODELS', 'openai/gpt-5,deepseek/deepseek-v4-flash,openai/gpt-5-mini'))
+        ))),
     ],
 
     'browsershot' => [
