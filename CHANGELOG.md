@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.211.1] - 2026-08-23
+
+### Ajouté
+- **`news:sources-report --brut`** : sortie `id;nom;actif;url` sans troncature. Elle existe pour une raison précise : une migration de correction réversible a besoin de l'**ancienne** valeur exacte, pas d'une approximation tronquée par l'affichage en tableau.
+
 ## [1.211.0] - 2026-08-23
 
 ### Ajouté

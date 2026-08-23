@@ -41,7 +41,7 @@ final class SourcesReportCommand extends Command
      */
     private const ECHANTILLON_MAX = 2000;
 
-    protected $signature = 'news:sources-report {--jours=90 : Fenêtre d\'observation en jours}';
+    protected $signature = 'news:sources-report {--jours=90 : Fenêtre d\'observation en jours} {--brut : Sortie brute id;nom;actif;url, sans troncature}';
 
     protected $description = 'Rapport de rendement des sources d\'actualités : volume, publications, délai de collecte.';
 
@@ -49,6 +49,16 @@ final class SourcesReportCommand extends Command
     {
         $jours = max(1, (int) $this->option('jours'));
         $depuis = now()->subDays($jours);
+
+        // Sortie brute, pour ecrire une migration de correction avec les valeurs EXACTES : une
+        // migration reversible a besoin de l'ANCIENNE valeur, pas d'une approximation tronquee.
+        if ($this->option('brut')) {
+            NewsSource::orderBy('id')->each(function (NewsSource $source): void {
+                $this->line($source->id.';'.$source->name.';'.($source->active ? '1' : '0').';'.$source->url);
+            });
+
+            return self::SUCCESS;
+        }
 
         // Tous les comptages se font en SQL, en UNE requete : aucun modele d'article n'est
         // charge en memoire pour cette partie.
