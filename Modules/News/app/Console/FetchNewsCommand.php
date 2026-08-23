@@ -100,7 +100,19 @@ class FetchNewsCommand extends Command
             $query->where('id', $sourceId);
         }
 
-        $sources = $query->get();
+        // ORDRE PAR FAMINE, jamais par identifiant (2026-08-23). Mesure a l'appui : la passe
+        // horaire de 17h15 a traite les sources #13, #17 puis #29 et s'est ARRETEE la - le
+        // processus est interrompu par l'hebergement apres environ deux minutes. Les sources
+        // #31 a #54 dataient toutes de 04h19, c'est-a-dire de la seule passe nocturne qui va
+        // au bout parce que le serveur est au repos. Resultat : la moitie basse de la liste
+        // n'etait recoltee qu'UNE FOIS PAR JOUR, en silence.
+        //
+        // Trier par date de derniere recolte reussie, les jamais-recoltees d'abord, transforme
+        // une coupure franche en degradation progressive : quel que soit l'endroit ou le
+        // processus s'arrete, ce sont toujours les sources les plus en retard qui ont ete
+        // servies. Aucune ne peut plus etre affamee indefiniment par sa seule position dans la
+        // liste. On ne cherche pas a rallonger un processus qu'on ne controle pas.
+        $sources = $query->orderByRaw('last_fetched_at IS NOT NULL, last_fetched_at ASC')->get();
 
         if ($sources->isEmpty()) {
             $this->info('Aucune source active trouvée.');

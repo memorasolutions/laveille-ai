@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.215.0] - 2026-08-23
+
+### Corrigé
+- **La moitié des sources n'était récoltée qu'UNE FOIS PAR JOUR, en silence.** Mesure à l'appui, prise dans le journal du récolteur : la passe horaire de 17h15 a traité les sources #13, #17, puis #29 à 17:16:58, et **s'est arrêtée là** - le processus est interrompu par l'hébergement après environ deux minutes. Les sources #31 à #54 dataient toutes de **04h19**, c'est-à-dire de la seule passe nocturne qui va au bout parce que le serveur est au repos.
+- **Les sources sont désormais triées par famine**, les jamais-récoltées d'abord puis les plus anciennes, au lieu de l'ordre des identifiants. Cela transforme une coupure franche en dégradation progressive : quel que soit l'endroit où le processus s'arrête, ce sont toujours les sources les plus en retard qui ont été servies. Aucune ne peut plus être affamée indéfiniment par sa seule position dans la liste. On ne cherche pas à rallonger un processus qu'on ne contrôle pas.
+
+### Note de méthode
+- **Deux sources primaires majeures récupérées, vérifiées en production** : Google DeepMind (19 articles) et IEEE Spectrum (20). Leur adresse réparée était bonne depuis le début ; elles affichaient « jamais » simplement parce que **la boucle horaire ne les atteignait plus**.
+- **Trois sources renvoient 403 au serveur et ne peuvent pas être réparées d'ici** : ZDNet France, The Atlantic et Le Big Data, plus AI News. Les mêmes flux répondent parfaitement depuis un poste ordinaire. C'est l'**adresse IP de l'hébergement mutualisé** qui est refusée.
+- **Le correctif d'agent utilisateur de la v1.214.0 ne débloque PAS ces 403**, contrairement à ce que j'avais avancé. Les refus sont horodatés après son déploiement. Il reste un durcissement défendable - s'annoncer comme une librairie est objectivement moins bon - mais il ne résout pas ce problème-ci.
+
 ## [1.214.0] - 2026-08-23
 
 ### Corrigé
