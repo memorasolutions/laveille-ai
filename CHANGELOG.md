@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.209.0] - 2026-08-23
+
+### Ajouté
+- **Terme « Grok Bot » au glossaire.** Produit d'agents persistants de SpaceXAI, lancé en bêta le 11 août 2026. Le coeur de la fiche est une distinction que les publications virales brouillent : **« Grok » est l'assistant conversationnel, « Grok Build » l'agent de programmation, « Grok Bot » le produit d'agents persistants.** Trois noms proches, trois produits. La fiche précise aussi que le nom officiel s'écrit en deux mots.
+- **« SpaceXAI » rattaché au terme « xAI » existant, sans nouvelle fiche.** C'est l'application directe de la règle anti-doublon : même notion, autre nom. Une seconde fiche aurait divisé le référencement entre deux pages qui se cannibalisent et cassé l'auto-lien, qui doit pouvoir choisir une cible unique. Alias posés, définition mise à jour avec l'acquisition de xAI par SpaceX du 2 février 2026, et lien vers le nouveau terme.
+- **« SpaceX » n'est volontairement PAS un alias** : c'est l'entreprise de fusées qui a acquis xAI, pas le laboratoire d'IA. L'y mettre reproduirait exactement le défaut corrigé le matin même, où « Google » renvoyait vers la fiche du modèle Gemini.
+
+### Note de méthode
+- **Deux réponses du même oracle se contredisaient**, l'une affirmant que « SpaceXAI » était le nom officiel, l'autre qu'il n'existait pas. Une divergence ne se moyenne pas : elle se tranche. Lecture directe au navigateur : la page d'accueil de `x.ai` porte le titre **« SpaceXAI »**, le compte social est `@spacexai`, et la chaîne « xAI » seule n'apparaît **pas une fois** dans le corps de page. La seconde réponse lisait le communiqué d'acquisition de février, qui parle bien de « SpaceX » et de « xAI » : exacte sur ce document, fausse sur la marque actuelle.
+- L'exemple rédigé par le modèle sollicité était **fabriqué** : il datait un usage de « septembre 2026 », soit dans le futur, chez une PME québécoise inexistante. Remplacé par le cas d'usage que documente l'éditeur lui-même. C'est la raison d'être du contrôle systématique des sorties déléguées.
+
 ## [1.208.1] - 2026-08-23
 
 ### Corrigé

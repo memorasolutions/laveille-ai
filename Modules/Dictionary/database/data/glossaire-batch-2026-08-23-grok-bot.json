@@ -1,0 +1,59 @@
+[
+  {
+    "slug": "grok-bot",
+    "name": "Grok Bot",
+    "cat_slug": "intelligence-artificielle",
+    "type": "ai_term",
+    "difficulty": "intermediate",
+    "icon": "🤝",
+    "match_strategy": "case_sensitive",
+    "aliases": [
+      "GrokBot",
+      "Grok Bots"
+    ],
+    "broader_slugs": [
+      "xai",
+      "agent-autonome"
+    ],
+    "narrower_slugs": [],
+    "acronym_full": null,
+    "has_image": true,
+    "definition": "Grok Bot est le produit d'agents persistants de SpaceXAI, l'entreprise anciennement nommée xAI, lancé en version bêta le 11 août 2026 et élargi dix jours plus tard. Chaque « Bot » possède une identité, un rôle, un historique et un ordinateur infonuagique qui lui reste attribué : il conserve donc son contexte d'une session à l'autre, se connecte à des applications et à des sites, et y agit comme le ferait une personne. Les Bots peuvent aussi se passer du contexte entre eux et se transmettre des tâches. Trois produits aux noms très proches sont à ne pas confondre : « Grok » est l'assistant conversationnel, « Grok Build » est l'agent de programmation en ligne de commande, et « Grok Bot » est ce produit-ci. La différence n'est pas cosmétique : un agent qui agit dans vos vraies applications engage votre responsabilité, pas seulement votre attention.",
+    "analogy": "Un employé à distance avec son propre poste de travail, ses accès et sa mémoire du dossier d'une semaine à l'autre.",
+    "example": "La documentation officielle donne ce contraste : au lieu de demander à un assistant de résumer des factures dans une conversation, on crée un Bot chargé des opérations, on lui ouvre l'accès aux documents, et il prépare le tableau.",
+    "did_you_know": "Le Bot s'interrompt de lui-même devant un mot de passe, une authentification à deux facteurs ou un captcha : c'est vous qui reprenez le clavier.",
+    "one_sentence_answer": "Grok Bot est le produit d'agents persistants de SpaceXAI, où chaque agent dispose d'un ordinateur infonuagique durable et agit directement dans des applications, sous approbation humaine.",
+    "faq": [
+      {
+        "question": "Quelle différence avec Grok tout court?",
+        "answer": "Grok est l'assistant conversationnel : il répond dans une discussion. Un Bot agit dans de vraies applications, sur son propre ordinateur infonuagique, et garde son contexte entre les sessions."
+      },
+      {
+        "question": "Et « Grok Build », est-ce la même chose?",
+        "answer": "Non. Grok Build est l'agent de programmation, utilisé en ligne de commande dans un projet de code. Grok Bot vise le travail courant dans des applications et des sites. Trois noms proches, trois produits distincts."
+      },
+      {
+        "question": "Un Bot peut-il franchir un captcha ou saisir un mot de passe?",
+        "answer": "Non, et c'est délibéré. Il s'arrête et rend la main à l'utilisateur pour les mots de passe, l'authentification à deux facteurs et les captchas, comme pour toute action qu'il juge sensible."
+      },
+      {
+        "question": "Faut-il écrire « GrokBot »?",
+        "answer": "Non. Le nom officiel s'écrit « Grok Bot », en deux mots. La graphie collée circule surtout dans des publications virales, dont certaines lui prêtent des taux d'adoption qu'aucune source publique n'appuie."
+      }
+    ],
+    "sources": [
+      {
+        "label": "SpaceXAI, documentation officielle de Grok Bot",
+        "url": "https://docs.x.ai/grok-bot/overview",
+        "year": 2026,
+        "author": "SpaceXAI"
+      },
+      {
+        "label": "SpaceXAI, annonce du lancement de Grok Bot",
+        "url": "https://x.ai/news/introducing-grok-bot",
+        "year": 2026,
+        "author": "SpaceXAI"
+      }
+    ]
+  }
+]
