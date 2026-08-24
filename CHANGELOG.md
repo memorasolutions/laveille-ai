@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.217.1] - 2026-08-24
+
+### Corrigé
+- **La traduction des titres ne fonctionnait plus du tout en production, et rien ne le signalait.** Mesure faite en production sur un lot réel : 40 titres demandent **36,6 secondes** au fournisseur, qui rend bien 40 lignes sur 40. Or le budget de traduction est de **15 secondes**. Le budget expirait donc avant chaque réponse, le lot entier était rejeté, et l'écran se rabattait silencieusement sur les titres originaux. Ce budget avait été introduit le 23 août pour empêcher cet écran de s'immobiliser derrière la coupure de Cloudflare : il reste justifié là, mais il n'a aucune raison de brider une commande planifiée qui tourne en arrière-plan.
+- `TranslationService::translateBatch()` accepte désormais un paramètre optionnel `$budgetSecondes`. Absent, le comportement est strictement inchangé et la valeur de configuration s'applique : le rattrapage synchrone de l'écran garde donc ses 15 secondes et sa protection. La commande `news:translate-titles`, elle, demande 120 secondes et ramène ses lots de 40 à 20 titres.
+- Vérifié : 166 tests du module Core, 509 du module News, plus deux tests dédiés prouvant que le paramètre fourni est bien celui utilisé et que son absence retombe sur la configuration.
+
 ## [1.217.0] - 2026-08-24
 
 ### Ajouté

@@ -24,16 +24,28 @@ namespace Modules\News\Console;
  * mais UNE seule règle métier) : source non francophone (`language` non vide et ne commençant pas
  * par « fr ») et 'seo_title' vide (un titre déjà réécrit éditorialement n'est jamais traduit).
  *
- * MÉCANISME DE REPRISE, volontaire et sans boucle de tentative : chaque lot de 40 titres est
- * envoyé à TranslationService::translateBatch(), qui rejette le lot ENTIER si le compte de lignes
- * rendues diverge. Un lot rejeté laisse simplement ses articles avec 'title_fr' à NULL - ils
- * seront de nouveau candidats à la PROCHAINE exécution planifiée (toutes les heures, voir
+ * MÉCANISME DE REPRISE, volontaire et sans boucle de tentative : chaque lot de BATCH_SIZE titres
+ * est envoyé à TranslationService::translateBatch(), qui rejette le lot ENTIER si le compte de
+ * lignes rendues diverge. Un lot rejeté laisse simplement ses articles avec 'title_fr' à NULL -
+ * ils seront de nouveau candidats à la PROCHAINE exécution planifiée (toutes les heures, voir
  * Modules\News\Providers\NewsServiceProvider::registerCommandSchedules()). Retenter en boucle
  * dans la même exécution referait échouer le même appel pour la même raison (budget, format) sans
  * bénéfice, et retarderait les lots suivants.
  *
  * IDEMPOTENTE par construction : la sélection porte sur 'title_fr' IS NULL, donc un article déjà
  * traduit ne redevient jamais candidat, quel que soit le nombre de fois où la commande tourne.
+ *
+ * RÉVISION 2026-08-24 (mesure en PRODUCTION, même jour que la mise en service) : le budget de
+ * config (services.openrouter.translation_budget_seconds, 15 s) protège le chemin SYNCHRONE de
+ * l'écran (Cloudflare coupe vers 100 s) - il n'a AUCUNE raison de s'appliquer à cette commande,
+ * qui tourne en arrière-plan. Résultat mesuré : un lot RÉEL de 40 titres a pris 36,6 secondes
+ * pour une réponse au format parfaitement conforme (compte de lignes concordant) - rejeté par le
+ * budget de 15 s AVANT même d'avoir reçu la réponse. La taille du lot passe donc de 40 à
+ * BATCH_SIZE = 20 titres (mesure : 20 ≈ 18,3 s, moitié de 36,6 s), et translateBatch() reçoit
+ * désormais un budget explicite de BUDGET_SECONDES = 120 s (voir
+ * Modules\Core\Services\TranslationService::translateBatch(), paramètre $budgetSecondes ajouté ce
+ * même jour) - large marge sous les 45 s par modèle déjà consentis, pour laisser la cascade de
+ * modèles retenter au besoin sans jamais couper une réponse conforme en cours de route.
  *
  * MCP: SELF (<5 lignes utiles par branche)
  * RAISON: porte serveur unique de la traduction précalculée, jamais d'écriture ailleurs.
@@ -53,10 +65,22 @@ class TranslateTitlesCommand extends Command
 
     /**
      * Taille des lots envoyés à TranslationService::translateBatch() - même contrainte de format
-     * que l'écran (une réponse numérotée ligne à ligne), bornée pour rester sous le budget de
-     * traduction (services.openrouter.translation_budget_seconds).
+     * que l'écran (une réponse numérotée ligne à ligne). Ramenée de 40 à 20 le 2026-08-24 :
+     * mesure en production, un lot de 40 titres prend 36,6 secondes ; 20 titres ≈ 18 secondes,
+     * confortablement sous BUDGET_SECONDES.
      */
-    private const BATCH_SIZE = 40;
+    private const BATCH_SIZE = 20;
+
+    /**
+     * Budget (en secondes) passé explicitement à TranslationService::translateBatch() pour CETTE
+     * commande - distinct du budget de config (services.openrouter.translation_budget_seconds,
+     * 15 s), qui protège le chemin synchrone de l'écran de composition (Cloudflare) et n'a aucune
+     * raison de s'appliquer ici. Mesure en production, 2026-08-24 : un lot de 40 titres a pris
+     * 36,6 secondes pour une réponse conforme, rejetée à tort par les 15 s du budget de l'écran.
+     * 120 s laisse une large marge à la cascade de modèles (jusqu'à 45 s par modèle déjà
+     * consentis ailleurs) sans jamais couper une réponse en cours de route.
+     */
+    private const BUDGET_SECONDES = 120;
 
     public function handle(): int
     {
@@ -83,7 +107,8 @@ class TranslateTitlesCommand extends Command
             $processed += $lot->count();
 
             $resultat = TranslationService::translateBatch(
-                $lot->map(static fn (NewsArticle $a): string => (string) $a->title)->values()->all()
+                $lot->map(static fn (NewsArticle $a): string => (string) $a->title)->values()->all(),
+                budgetSecondes: self::BUDGET_SECONDES,
             );
 
             if ($resultat['statut'] !== 'ok') {

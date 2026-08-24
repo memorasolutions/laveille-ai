@@ -105,10 +105,25 @@ class TranslationService
      * 3. **Aucun texte n'est perdu.** En cas de refus, d'erreur réseau ou de clé absente, les
      *    originaux sont rendus tels quels : l'écran reste utilisable.
      *
+     * ACTION : paramètre `$budgetSecondes` ajouté (2026-08-24, mesure en production) - le budget
+     * de config (`services.openrouter.translation_budget_seconds`) protège l'ÉCRAN de
+     * composition, dont l'appel est sur un chemin SYNCHRONE que Cloudflare coupe vers 100
+     * secondes (incident du 23 août, voir le commentaire sur `$echeance` plus bas). Une commande
+     * planifiée qui tourne en arrière-plan (Modules\News\Console\TranslateTitlesCommand) n'a
+     * AUCUNE de ces deux contraintes, et le même budget de 15 s lui faisait rejeter 100 % de ses
+     * lots : un lot RÉEL de 40 titres a mesuré 36,6 secondes pour une réponse au format
+     * parfaitement conforme (compte de lignes concordant). `null` (défaut) laisse le comportement
+     * actuel strictement inchangé - la config reste la seule source pour tout appelant qui ne
+     * fournit pas ce paramètre. La clé de cache, la garantie de compte de lignes et la cascade de
+     * modèles restent inchangées quel que soit le budget.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: mesure en production, 2026-08-24 - ne pas confondre le budget de l'écran avec celui
+     * d'une commande planifiée.
+     *
      * @param  array<int, string>  $textes
      * @return array{titres: array<int, string>, statut: string, motif: string|null}
      */
-    public static function translateBatch(array $textes, string $from = 'en', string $to = 'fr'): array
+    public static function translateBatch(array $textes, string $from = 'en', string $to = 'fr', ?int $budgetSecondes = null): array
     {
         $textes = array_values($textes);
         if ($textes === []) {
@@ -154,7 +169,9 @@ class TranslationService
         // plus du tout et affichait « 0 actualité » alors que 526 articles étaient collectés.
         // Une fonction cosmétique - traduire des titres - ne doit jamais pouvoir immobiliser
         // un écran. Même mécanisme que le budget de la cascade d'enrichissement.
-        $echeance = microtime(true) + max(3, (int) config('services.openrouter.translation_budget_seconds', 8));
+        // $budgetSecondes (voir docblock ci-dessus) prime sur la config quand l'appelant le
+        // fournit explicitement - seul cas où ce n'est PAS l'écran qui appelle.
+        $echeance = microtime(true) + max(3, $budgetSecondes ?? (int) config('services.openrouter.translation_budget_seconds', 8));
 
         foreach (self::batchModels() as $model) {
             $restant = (int) floor($echeance - microtime(true));
