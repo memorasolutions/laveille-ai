@@ -137,11 +137,17 @@ class NewsCompositionController extends Controller
         $fuseau = config('app.timezone', 'America/Toronto');
         $jour = now($fuseau)->toDateString();
 
+        // ACTION : plafond de 200 RETIRÉ (demande du propriétaire, 2026-08-24) - 452 des 652
+        // actualités collectées le 23 août restaient invisibles derrière cette limite. La
+        // traduction n'est plus le facteur bloquant : elle est désormais PRÉCALCULÉE en base par
+        // Modules\News\Console\TranslateTitlesCommand (voir titresTraduits() ci-dessous), qui ne
+        // tente plus qu'un rattrapage synchrone borné à 40 titres, jamais l'ensemble du lot.
+        // MCP: SELF (<5 lignes)
+        // RAISON: design doc "Actus - composition manuelle assistée", section traduction précalculée.
         $pourLeJour = static fn (string $date) => NewsArticle::query()
             ->with('source')
             ->whereDate('created_at', $date)
             ->orderByDesc('pub_date')
-            ->limit(200)
             ->get();
 
         $articles = $pourLeJour($jour);
@@ -191,16 +197,38 @@ class NewsCompositionController extends Controller
     }
 
     /**
-     * Traduit en français les titres des actualités dont la source n'est pas francophone.
+     * Nombre maximum de titres traduits À LA VOLÉE par requête d'écran (rattrapage synchrone).
+     * La très grande majorité des titres arrive déjà traduite (colonne 'title_fr', écrite en
+     * amont par Modules\News\Console\TranslateTitlesCommand) - cette borne ne couvre que ce que
+     * le passage horaire n'a pas encore rattrapé, pour que l'écran reste rapide même avec
+     * plusieurs centaines de fiches du jour (design doc, section traduction précalculée,
+     * 2026-08-24).
+     */
+    private const RATTRAPAGE_SYNCHRONE_MAX = 40;
+
+    /**
+     * Donne aux actualités dont la source n'est pas francophone leur meilleur titre français
+     * disponible.
      *
      * Demande du fondateur, réitérée le 2026-08-23 : lire une liste moitié anglaise ralentit le
      * tri éditorial. Le titre ORIGINAL reste rendu séparément (`title_original`), il n'est jamais
-     * perdu ni écrasé en base - cette traduction est un confort d'affichage, pas une écriture.
+     * perdu ni écrasé en base - cette traduction est un confort d'affichage, pas une écriture
+     * (sauf le rattrapage ci-dessous, qui n'écrit rien non plus : seule la commande planifiée
+     * persiste 'title_fr').
      *
-     * Un seul appel réseau pour toute la page, avec alignement strict par index (voir
-     * TranslationService::translateBatch). Si quoi que ce soit échoue, on rend les originaux ET
-     * le statut le dit, pour que l'écran puisse afficher « traduction indisponible » plutôt que
-     * de laisser croire à un oubli - c'est précisément l'ambiguïté qui a fait reposer la question.
+     * RÉVISION 2026-08-24 (retrait du plafond de candidates(), voir ci-dessus) : traduire
+     * l'ensemble du lot à la volée sur le chemin synchrone de l'écran a immobilisé l'écran une
+     * première fois (2026-08-23, budget dépassé). Cette méthode ne traduit donc plus l'ensemble :
+     * elle LIT d'abord 'title_fr' (déjà écrit par Modules\News\Console\TranslateTitlesCommand,
+     * planifiée toutes les heures), et ne tente un appel réseau QUE sur ce qui n'a pas encore de
+     * 'title_fr', borné à RATTRAPAGE_SYNCHRONE_MAX titres. Le reste s'affiche en version
+     * originale et sera rattrapé au prochain passage horaire - jamais de blocage de l'écran, peu
+     * importe le nombre de fiches du jour.
+     *
+     * Si quoi que ce soit échoue pendant le rattrapage, on rend les originaux ET le statut le
+     * dit, pour que l'écran puisse afficher « traduction indisponible » plutôt que de laisser
+     * croire à un oubli - c'est précisément l'ambiguïté qui a fait reposer la question du
+     * 2026-08-23.
      *
      * @param  \Illuminate\Support\Collection<int, NewsArticle>  $articles
      * @return array{titres: array<int, string>, statut: string, motif: string|null}
@@ -218,21 +246,42 @@ class NewsCompositionController extends Controller
             return ['titres' => [], 'statut' => 'ok', 'motif' => null];
         }
 
+        // Ce qui a déjà 'title_fr' (posé par la commande planifiée) est lu directement, jamais
+        // retraduit ni renvoyé au fournisseur.
+        $parId = [];
+        $sansTitleFr = collect();
+        foreach ($aTraduire as $article) {
+            if (filled($article->title_fr)) {
+                $parId[$article->id] = $article->title_fr;
+            } else {
+                $sansTitleFr->push($article);
+            }
+        }
+
+        if ($sansTitleFr->isEmpty()) {
+            return ['titres' => $parId, 'statut' => 'ok', 'motif' => null];
+        }
+
+        // Rattrapage synchrone BORNÉ : le reste (au-delà de la borne) s'affiche en version
+        // originale, la commande planifiée horaire le rattrapera au prochain passage.
+        $rattrapage = $sansTitleFr->take(self::RATTRAPAGE_SYNCHRONE_MAX)->values();
+
         // Rien de ce qui touche à la traduction ne doit pouvoir abattre l'écran. Le 2026-08-23,
         // une cascade sans budget a bloqué ce point d'accès au-delà de la coupure de Cloudflare :
         // l'écran affichait « 0 actualité » alors que 526 articles étaient collectés. Le budget
-        // est désormais borné côté service ; ce filet attrape ce qui resterait, et l'écran répond
-        // toujours - avec les titres originaux et le motif affiché, jamais avec une page vide.
+        // est désormais borné côté service, ET l'appel lui-même ne porte plus que sur au plus 40
+        // titres (jamais l'ensemble du lot) ; ce filet attrape ce qui resterait, et l'écran
+        // répond toujours - avec les titres originaux et le motif affiché, jamais avec une page
+        // vide.
         try {
             $resultat = TranslationService::translateBatch(
-                $aTraduire->map(static fn (NewsArticle $a) => (string) $a->title)->all()
+                $rattrapage->map(static fn (NewsArticle $a) => (string) $a->title)->all()
             );
         } catch (\Throwable $e) {
-            return ['titres' => [], 'statut' => 'indisponible', 'motif' => $e->getMessage()];
+            return ['titres' => $parId, 'statut' => 'indisponible', 'motif' => $e->getMessage()];
         }
 
-        $parId = [];
-        foreach ($aTraduire as $i => $article) {
+        foreach ($rattrapage as $i => $article) {
             $traduit = $resultat['titres'][$i] ?? null;
             if (is_string($traduit) && trim($traduit) !== '') {
                 $parId[$article->id] = $traduit;

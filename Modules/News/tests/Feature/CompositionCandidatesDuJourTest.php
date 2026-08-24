@@ -11,6 +11,12 @@ declare(strict_types=1);
  *    source) : un article daté d'hier soir mais récolté ce matin DOIT rester visible ;
  *  - une traduction mal alignée est pire qu'une absence de traduction, donc tout écart de compte
  *    doit rendre TOUS les originaux, jamais un mélange.
+ *
+ * RÉVISION 2026-08-24 (design doc, section traduction précalculée) : le plafond de 200 est
+ * retiré (452 des 652 actualités du 23 août restaient invisibles derrière lui) et la traduction
+ * lit désormais 'title_fr' en priorité (voir Modules\News\Console\TranslateTitlesCommand et
+ * Modules\News\Http\Controllers\Admin\NewsCompositionController::titresTraduits()) - deux
+ * propriétés supplémentaires verrouillées plus bas dans ce fichier.
  */
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -135,4 +141,45 @@ it('signale l\'indisponibilité quand le fournisseur refuse, sans perdre les tit
     expect($resultat['titres'])->toBe(['First headline'])
         ->and($resultat['statut'])->toBe('indisponible')
         ->and($resultat['motif'])->not->toBeNull();
+});
+
+// ── Retrait du plafond de 200 + lecture prioritaire de title_fr (2026-08-24) ──────────────
+
+it('renvoie plus de 200 actualités quand plus de 200 ont été collectées aujourd\'hui', function () {
+    // C'est LE test qui prouve la demande du propriétaire : 452 des 652 actualités du 23 août
+    // restaient invisibles derrière l'ancien plafond de 200.
+    foreach (range(1, 205) as $i) {
+        cdjArticle();
+    }
+
+    $admin = cdjAdmin();
+    $reponse = $this->actingAs($admin)->getJson(route('admin.news.composition.candidates'));
+
+    $reponse->assertOk();
+    expect(count($reponse->json('items')))->toBeGreaterThan(200);
+});
+
+it('préfère title_fr à title quand présent, et seo_title à tout le reste', function () {
+    // title_fr déjà écrit par la commande planifiée : aucun appel réseau nécessaire pour
+    // l'afficher, contrairement à l'ancien comportement qui retraduisait tout à la volée.
+    $avecTitleFr = cdjArticle('en', [
+        'title' => 'English original',
+        'title_fr' => 'Déjà traduit en base',
+        'title_fr_at' => now(),
+    ]);
+    // seo_title est une réécriture éditoriale : elle prime, et l'article n'entre même pas dans
+    // le lot à traduire.
+    $avecSeoTitle = cdjArticle('en', [
+        'title' => 'English original 2',
+        'seo_title' => 'Titre éditorial',
+    ]);
+
+    $admin = cdjAdmin();
+    $reponse = $this->actingAs($admin)->getJson(route('admin.news.composition.candidates'));
+
+    $reponse->assertOk();
+    $items = collect($reponse->json('items'))->keyBy('id');
+
+    expect($items[$avecTitleFr->id]['title'])->toBe('Déjà traduit en base')
+        ->and($items[$avecSeoTitle->id]['title'])->toBe('Titre éditorial');
 });

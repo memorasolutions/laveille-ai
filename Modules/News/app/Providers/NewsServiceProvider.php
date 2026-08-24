@@ -93,6 +93,10 @@ class NewsServiceProvider extends ServiceProvider
             // existe pour qu'on arbitre la liste des sources sur des chiffres plutôt qu'à
             // l'intuition, qui surestime toujours ce qui fait du bruit.
             \Modules\News\Console\SourcesReportCommand::class,
+            // Traduction des titres précalculée (2026-08-24) - retire la traduction du chemin
+            // synchrone de l'écran de composition, voir docblock de la classe et le plafond
+            // retiré dans NewsCompositionController::candidates().
+            \Modules\News\Console\TranslateTitlesCommand::class,
         ]);
     }
 
@@ -130,6 +134,18 @@ class NewsServiceProvider extends ServiceProvider
                 ->dailyAt('02:40')
                 ->timezone('America/Toronto')
                 ->onOneServer();
+
+            // Traduction des titres PRÉCALCULÉE, HORAIRE (2026-08-24) - retire la traduction du
+            // chemin synchrone de l'écran de composition (voir docblock de
+            // Modules\News\Console\TranslateTitlesCommand). Minute 25 : la collecte `news:fetch`
+            // (cron cPanel, hors scheduler Laravel) tourne à la minute 15, donc la minute 25 la
+            // suit et laisse dix minutes à la collecte pour terminer avant que la traduction
+            // parte sur les titres fraîchement récoltés.
+            $schedule->command('news:translate-titles --limit=200')
+                ->hourlyAt(25)
+                ->timezone('America/Toronto')
+                ->onOneServer()
+                ->withoutOverlapping();
         });
     }
 

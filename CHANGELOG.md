@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.217.0] - 2026-08-24
+
+### Ajouté
+- **Traduction des titres précalculée, hors du chemin de l'écran.** Nouvelle commande `news:translate-titles` (options `--limit` et `--dry-run`), planifiée chaque heure à la minute 25, juste après la collecte. Elle traduit par lots de 40 les titres étrangers encore sans traduction, écrit le résultat dans les nouvelles colonnes `title_fr` et `title_fr_at`, et reste idempotente : un titre déjà traduit n'est jamais retraduit. Un lot refusé par le fournisseur reste simplement à traduire au passage suivant, sans boucle de tentatives.
+
+### Modifié
+- **L'écran de composition n'est plus plafonné à 200 actualités.** Le plafond masquait silencieusement une partie de la journée : le 24 août 2026, 652 actualités avaient été collectées et 452 restaient invisibles. La requête est désormais bornée par la seule journée de collecte, elle-même bornée par la purge quotidienne existante.
+- **L'écran ne traduit presque plus en direct.** Il lit d'abord `title_fr`, et ne tente un rattrapage synchrone que sur ce qui en manque, borné à 40 titres. Motif : la traduction en direct dispose d'un budget total de 8 secondes, rejette le lot entier au moindre écart de lignes, et voit sa clé de cache changer à chaque collecte horaire. Tripler le volume sans rien changer aurait fait échouer la traduction à tous les coups, sur le composant même qui avait immobilisé cet écran le 23 août. Ordre de priorité du libellé affiché, inchangé : `seo_title`, puis `title_fr`, puis une traduction à la volée, puis le titre original.
+
 ## [1.216.0] - 2026-08-24
 
 ### Ajouté

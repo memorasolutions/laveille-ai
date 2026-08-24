@@ -152,6 +152,12 @@ class NewsArticle extends Model implements Searchable
         'fact_check_verdict',
         'fact_check_claim',
         'fact_check_source',
+        // Traduction des titres précalculée (2026-08-24) - voir la migration
+        // 2026_08_24_090000_add_title_fr_to_news_articles. Seul écrivain :
+        // Modules\News\Console\TranslateTitlesCommand (`news:translate-titles`), jamais l'écran
+        // de composition lui-même (voir NewsCompositionController::titresTraduits()).
+        'title_fr',
+        'title_fr_at',
     ];
 
     protected $casts = [
@@ -172,6 +178,7 @@ class NewsArticle extends Model implements Searchable
         'original_post' => 'array',
         'retired_at' => 'datetime',
         'reviewed_at' => 'datetime',
+        'title_fr_at' => 'datetime',
     ];
 
     protected static function booted(): void
