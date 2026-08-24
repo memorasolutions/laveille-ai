@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.216.0] - 2026-08-24
+
+### Ajouté
+- **Générateur d'équipes : les exclusions se désignent désormais en touchant des noms, plus en les retapant.** Tous les participants apparaissent en pastilles sous le champ ; un premier appui choisit la personne, un second appui désigne qui ne doit jamais être avec elle. Les contraintes s'affichent en phrases lisibles (« Alice et Bob ne seront jamais ensemble ») avec un bouton « Retirer » explicite. Les pastilles sont des boutons natifs porteurs de `aria-pressed`, cibles de 44 px, l'état actif étant signalé par une bordure épaisse ET un pictogramme, jamais par la couleur seule.
+- **Indicateur vivant du minimum d'équipes** sous la liste des contraintes : « Minimum 3 équipes avec ces contraintes. » L'impossibilité devient visible avant même de lancer le tirage.
+- **Signalement des exclusions orphelines** : si un nom disparaît de la liste des participants, les contraintes qui le mentionnent sont regroupées dans un avertissement distinct plutôt que de rester actives sans effet.
+
+### Corrigé
+- **Une exclusion pouvait être silencieusement inopérante.** Les deux noms étaient saisis à la main puis comparés par égalité de chaîne exacte : un accent oublié ou un prénom partiel suffisait à ce que la contrainte ne s'applique jamais, sans le moindre avertissement. L'enseignant croyait deux élèves séparés alors qu'ils se retrouvaient ensemble. La saisie disparaît, donc la faute de frappe aussi.
+- **Le tirage s'affichait même quand les contraintes étaient insatisfiables.** L'ancienne résolution tentait cent permutations aléatoires puis affichait le résultat quoi qu'il arrive. Cent essais au hasard ne prouvent rien : leur échec ne distingue pas « impossible » de « malchanceux ». Ils sont remplacés par un retour arrière déterministe et exact, dont l'échec démontre réellement l'impossibilité. Aucun tirage n'est produit dans ce cas ; un message nomme les personnes en cause et propose deux issues, passer au nombre d'équipes nécessaire ou revoir les exclusions.
+- **Le tirage précédent pouvait passer pour le résultat courant.** Quand une demande devient impossible, l'ancien tirage reste consultable mais il est désormais atténué et surmonté de la mention « Tirage précédent : il ne respecte pas vos dernières exclusions. » Sans cette marque, l'écran annonçait « impossible » tout en affichant des équipes qui violaient la contrainte que l'on venait d'ajouter.
+- **Contraste conforme au niveau AAA** pour les messages d'avertissement : `#7f1d1d` sur `#FEF2F2`, mesuré à 9,16:1. Le rouge Bootstrap employé ailleurs plafonne à 4,53:1 et n'aurait pas satisfait le critère 1.4.6.
+
+### Notes
+- Le format des configurations enregistrées est inchangé (`exclusions: [{name1, name2}]`) : les sauvegardes existantes des utilisateurs restent lisibles.
+- Conception arbitrée par un panel de cinq modèles. La proposition de remplacer les paires par des groupes numérotés, avancée indépendamment par deux d'entre eux, a été écartée après réfutation : un groupe impose que tous ses membres soient séparés deux à deux, alors que la contrainte réelle d'une classe est presque toujours en étoile autour d'un seul élève.
+
 ## [1.215.3] - 2026-08-23
 
 ### Corrigé

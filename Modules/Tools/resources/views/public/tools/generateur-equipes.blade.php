@@ -99,20 +99,55 @@
                             {{-- Exclusions --}}
                             <div class="mb-4">
                                 <label class="form-label fw-medium">🚫 {{ __('Exclure des paires') }}</label>
-                                <p class="text-muted" style="font-size: 0.8rem;">{{ __('Ces personnes ne seront jamais dans la même équipe.') }}</p>
-                                <div class="d-flex gap-2 mb-2">
-                                    <input type="text" class="form-control form-control-sm" x-model="newExcl1" aria-label="Personne 1 exclusion" placeholder="{{ __('Personne 1') }}">
-                                    <span class="align-self-center">≠</span>
-                                    <input type="text" class="form-control form-control-sm" x-model="newExcl2" aria-label="Personne 2 exclusion" placeholder="{{ __('Personne 2') }}">
-                                    <button class="ct-btn ct-btn-primary ct-btn-sm" @click="addExclusion()" style="white-space:nowrap;">+ {{ __('Ajouter') }}</button>
-                                </div>
-                                <template x-for="(excl, i) in exclusions" :key="i">
-                                    <div class="d-flex align-items-center gap-2 mb-1 p-2 rounded" style="background: #FEE2E2; font-size: 0.85rem;">
-                                        <span x-text="excl.name1"></span> <span>≠</span> <span x-text="excl.name2"></span>
-                                        <button class="ct-btn ct-btn-outline-danger ct-btn-xs ms-auto" @click="removeExclusion(i)">✕</button>
+                                <p class="text-muted" style="font-size: 0.8rem;">{{ __('Touchez un nom, puis touchez la personne qui ne doit jamais être dans la même équipe.') }}</p>
+
+                                <template x-if="nameList.length === 0">
+                                    <p class="text-muted" style="font-size: 0.85rem;">{{ __("Saisissez d'abord les participants dans l'onglet précédent.") }}</p>
+                                </template>
+
+                                <template x-if="nameList.length > 0">
+                                    <div>
+                                        <div class="d-flex flex-wrap gap-2 mb-2" role="group" aria-label="{{ __('Participants') }}">
+                                            <template x-for="nom in nameList" :key="nom">
+                                                <button type="button"
+                                                        class="ct-btn ct-btn-sm"
+                                                        :class="pivot === nom ? 'ct-btn-primary' : 'ct-btn-outline'"
+                                                        :aria-pressed="pivot === nom"
+                                                        @click="togglePivot(nom)"
+                                                        :style="pivot === nom ? 'min-width:44px; min-height:44px; border-radius: var(--r-btn); border-width: 3px; font-weight: 700;' : 'min-width:44px; min-height:44px; border-radius: var(--r-btn); border-width: 2px;'">
+                                                    <span x-show="pivot === nom" aria-hidden="true">📌 </span><span x-text="nom"></span>
+                                                </button>
+                                            </template>
+                                        </div>
+
+                                        <p class="mb-2" style="font-size: 0.85rem; color: var(--c-primary); font-weight: 600;" x-show="pivot" x-text="pivot ? '{{ __('Choisissez qui ne doit pas être avec') }} ' + pivot : ''"></p>
+
+                                        {{-- Exclusions actives, en phrases lisibles --}}
+                                        <template x-for="item in exclusionsAffichables" :key="'excl-' + item.index">
+                                            <div class="d-flex align-items-center gap-2 mb-1 p-2 rounded" style="background: #FEE2E2; font-size: 0.85rem;">
+                                                <span x-text="item.name1 + ' {{ __('et') }} ' + item.name2 + ' {{ __('ne seront jamais ensemble') }}'"></span>
+                                                <button type="button" class="ct-btn ct-btn-outline-danger ct-btn-sm ms-auto" @click="removeExclusion(item.index)" style="min-height:44px; white-space:nowrap;">{{ __('Retirer') }}</button>
+                                            </div>
+                                        </template>
+                                        <p class="text-muted mt-1" x-show="exclusions.length === 0" style="font-size: 0.8rem;">{{ __('Aucune exclusion définie.') }}</p>
+
+                                        {{-- Exclusions orphelines : la liste des participants a changé depuis --}}
+                                        <template x-if="exclusionsOrphelines.length > 0">
+                                            <div class="mt-3 p-2 rounded" style="background: #FFF7ED; border: 1px solid #FDBA74;">
+                                                <p class="mb-2 d-flex align-items-center gap-2" style="font-size: 0.8rem; font-weight: 600; color: #7C2D12;"><span aria-hidden="true">⚠️</span> {{ __('Ces exclusions ne correspondent plus à personne dans votre liste') }}</p>
+                                                <template x-for="item in exclusionsOrphelines" :key="'orphan-' + item.index">
+                                                    <div class="d-flex align-items-center gap-2 mb-1 p-2 rounded" style="background: #fff; font-size: 0.85rem;">
+                                                        <span x-text="item.name1 + ' ≠ ' + item.name2"></span>
+                                                        <button type="button" class="ct-btn ct-btn-outline-danger ct-btn-sm ms-auto" @click="removeExclusion(item.index)" style="min-height:44px; white-space:nowrap;">{{ __('Retirer') }}</button>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        {{-- Indicateur vivant --}}
+                                        <p class="mt-3 mb-0" style="font-size: 0.85rem; color: var(--c-text-muted);" x-show="exclusionsAffichables.length > 0" x-text="'{{ __('Minimum') }} ' + minimumEquipesRequis() + ' {{ __('équipes avec ces contraintes.') }}'"></p>
                                     </div>
                                 </template>
-                                <p class="text-muted mt-1" x-show="exclusions.length === 0" style="font-size: 0.8rem;">{{ __('Aucune exclusion définie.') }}</p>
                             </div>
 
                             {{-- Presets (localStorage uniquement pour visiteurs, masqué pour connectés qui utilisent la barre en haut) --}}
@@ -133,10 +168,34 @@
                             </div>
                         </div>
 
+                        {{-- ==================== MESSAGE D'IMPOSSIBILITÉ ==================== --}}
+                        {{-- Contraste vérifié : #7f1d1d sur #FEF2F2 = ratio ~9,17:1 (AAA 1.4.6 exige 7:1). --}}
+                        <div x-show="impossibleMessage" x-cloak role="status" aria-live="polite" class="mt-2 mb-3 p-3" style="background: #FEF2F2; border: 2px solid #7f1d1d; border-radius: var(--r-base);">
+                            <div class="d-flex align-items-start gap-2 mb-2">
+                                <span aria-hidden="true" style="font-size: 1.3rem; line-height: 1;">⚠️</span>
+                                <p class="mb-0" style="color: #7f1d1d; font-weight: 600;" x-text="impossibleMessage ? impossibleMessage.texte : ''"></p>
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button type="button" class="ct-btn ct-btn-primary ct-btn-sm" @click="appliquerSuggestionEquipes()" x-show="impossibleMessage && impossibleMessage.suggestion" style="border-radius: var(--r-btn); min-height: 44px;">
+                                    <span x-text="impossibleMessage ? '{{ __('Passer à') }} ' + impossibleMessage.suggestion + ' {{ __('équipes') }}' : ''"></span>
+                                </button>
+                                <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" @click="tab = 'options'" style="border-radius: var(--r-btn); min-height: 44px;">{{ __('Modifier les exclusions') }}</button>
+                            </div>
+                        </div>
+
                         {{-- ==================== RÉSULTATS ==================== --}}
                         <template x-if="drawn">
                             <div>
-                                <div class="row">
+                                {{-- Mention tirage périmé : reprend #7f1d1d sur #FEF2F2 (ratio ~9,17:1,
+                                     AAA 1.4.6). Le texte reste à opacité pleine (hors du conteneur
+                                     assombri ci-dessous) pour rester lisible par lecteur d'écran ET
+                                     visuellement, la mise en retrait ne repose pas sur la couleur seule. --}}
+                                <template x-if="tirageObsolete">
+                                    <p role="status" aria-live="polite" class="mb-2 p-2" style="color: #7f1d1d; background: #FEF2F2; border: 1px solid #7f1d1d; border-radius: var(--r-base); font-weight: 600; font-size: 0.9rem;">
+                                        <span aria-hidden="true">⚠️</span> {{ __('Tirage précédent : il ne respecte pas vos dernières exclusions.') }}
+                                    </p>
+                                </template>
+                                <div class="row" :style="tirageObsolete ? 'opacity: 0.55;' : ''">
                                     <template x-for="(team, ti) in teams" :key="ti">
                                         <div class="col-md-6 col-lg-4 mb-3">
                                             <div class="p-3 rounded h-100"
@@ -196,8 +255,9 @@ document.addEventListener('alpine:init', function() {
 
             // Options avancées
             exclusions: [],
-            newExcl1: '',
-            newExcl2: '',
+            pivot: null,
+            impossibleMessage: null,
+            tirageObsolete: false,
             presets: [],
             presetName: '',
 
@@ -207,9 +267,13 @@ document.addEventListener('alpine:init', function() {
             saving: false,
             saveError: '',
             _editingId: null,
+            _derniereBorneAtteinte: false,
 
             init: function() {
                 var self = this;
+                this.$watch('names', function() {
+                    if (self.pivot && self.nameList.indexOf(self.pivot) === -1) self.pivot = null;
+                });
                 if (this.isAuthenticated) {
                     // Charger depuis API
                     fetch('/api/team-presets', { headers: this._headers() })
@@ -260,68 +324,197 @@ document.addEventListener('alpine:init', function() {
                 return Math.max(1, Math.ceil(this.nameList.length / Math.max(1, this.teamSize)));
             },
 
+            // Exclusions actives dont les deux noms existent encore dans la liste des participants
+            get exclusionsAffichables() {
+                var noms = this.nameList;
+                return this.exclusions.map(function(e, i) { return { name1: e.name1, name2: e.name2, index: i }; }).filter(function(item) {
+                    return noms.indexOf(item.name1) !== -1 && noms.indexOf(item.name2) !== -1;
+                });
+            },
+
+            // Exclusions dont au moins un nom ne correspond plus à la liste actuelle des participants
+            get exclusionsOrphelines() {
+                var noms = this.nameList;
+                return this.exclusions.map(function(e, i) { return { name1: e.name1, name2: e.name2, index: i }; }).filter(function(item) {
+                    return noms.indexOf(item.name1) === -1 || noms.indexOf(item.name2) === -1;
+                });
+            },
+
             secureRandom: function(max) {
                 var arr = new Uint32Array(1);
                 crypto.getRandomValues(arr);
                 return arr[0] % max;
             },
 
+            // Retour arrière (backtracking) déterministe et exact : un échec ici PROUVE l'impossibilité,
+            // contrairement à un tirage aléatoire répété dont l'échec ne distingue jamais "impossible" de
+            // "malchanceux". Retourne un tableau d'équipes (tableau de tableaux de noms), ou null.
+            construireEquipes: function(noms, nbEquipes) {
+                this._derniereBorneAtteinte = false;
+                if (!noms || noms.length === 0) return null;
+                if (nbEquipes < 1 || nbEquipes > noms.length) return null;
+
+                var maxParEquipe = Math.ceil(noms.length / nbEquipes);
+                var minParEquipe = Math.floor(noms.length / nbEquipes);
+                var equipes = [];
+                for (var e = 0; e < nbEquipes; e++) equipes.push([]);
+
+                // Ordre d'essai des équipes mélangé : deuxième source d'aléa, en plus du mélange des noms
+                var ordreEquipes = [];
+                for (var oe = 0; oe < nbEquipes; oe++) ordreEquipes.push(oe);
+                for (var oi = ordreEquipes.length - 1; oi > 0; oi--) {
+                    var oj = this.secureRandom(oi + 1);
+                    var otmp = ordreEquipes[oi]; ordreEquipes[oi] = ordreEquipes[oj]; ordreEquipes[oj] = otmp;
+                }
+
+                var self = this;
+                var explorations = 0;
+                var BORNE_EXPLORATIONS = 200000;
+                var borneAtteinte = false;
+
+                function backtrack(idx) {
+                    if (borneAtteinte) return false;
+                    explorations++;
+                    if (explorations > BORNE_EXPLORATIONS) { borneAtteinte = true; return false; }
+
+                    // Élagage : plus assez de personnes pour combler les équipes sous le minimum équitable
+                    var placesManquantes = 0;
+                    for (var e3 = 0; e3 < equipes.length; e3++) {
+                        if (equipes[e3].length < minParEquipe) placesManquantes += (minParEquipe - equipes[e3].length);
+                    }
+                    if ((noms.length - idx) < placesManquantes) return false;
+
+                    if (idx === noms.length) return true;
+
+                    var nom = noms[idx];
+                    for (var k = 0; k < ordreEquipes.length; k++) {
+                        var e2 = ordreEquipes[k];
+                        if (equipes[e2].length >= maxParEquipe) continue;
+                        var conflit = false;
+                        for (var m = 0; m < equipes[e2].length; m++) {
+                            if (self._sontExclus(nom, equipes[e2][m])) { conflit = true; break; }
+                        }
+                        if (conflit) continue;
+                        equipes[e2].push(nom);
+                        if (backtrack(idx + 1)) return true;
+                        equipes[e2].pop();
+                    }
+                    return false;
+                }
+
+                var succes = backtrack(0);
+                this._derniereBorneAtteinte = borneAtteinte;
+                if (!succes) return null;
+                return equipes.map(function(eq) { return eq.slice(); });
+            },
+
+            // Premier nombre d'équipes (à partir de 2) qui satisfait les exclusions actuelles.
+            minimumEquipesRequis: function() {
+                var noms = this.nameList;
+                if (noms.length < 2) return null;
+                for (var k = 2; k <= noms.length; k++) {
+                    if (this.construireEquipes(noms.slice(), k) !== null) return k;
+                }
+                return null;
+            },
+
+            _sontExclus: function(a, b) {
+                for (var i = 0; i < this.exclusions.length; i++) {
+                    var ex = this.exclusions[i];
+                    if ((ex.name1 === a && ex.name2 === b) || (ex.name1 === b && ex.name2 === a)) return true;
+                }
+                return false;
+            },
+
+            // Recherche gloutonne d'un groupe de personnes toutes mutuellement exclues (une clique du
+            // graphe de conflit). Sert uniquement à NOMMER les personnes en cause dans le message
+            // d'impossibilité - la faisabilité elle-même reste toujours tranchée par construireEquipes.
+            _trouverGroupeConflit: function(noms) {
+                var grafo = {};
+                noms.forEach(function(n) { grafo[n] = []; });
+                this.exclusions.forEach(function(e) {
+                    if (grafo[e.name1] !== undefined && grafo[e.name2] !== undefined) {
+                        grafo[e.name1].push(e.name2);
+                        grafo[e.name2].push(e.name1);
+                    }
+                });
+                var meilleur = [];
+                noms.forEach(function(depart) {
+                    var groupe = [depart];
+                    var candidats = grafo[depart].slice();
+                    while (candidats.length > 0) {
+                        var choisi = candidats[0];
+                        groupe.push(choisi);
+                        candidats = candidats.filter(function(c) {
+                            return c !== choisi && grafo[choisi].indexOf(c) !== -1;
+                        });
+                    }
+                    if (groupe.length > meilleur.length) meilleur = groupe;
+                });
+                return meilleur;
+            },
+
+            _listeFr: function(noms) {
+                if (noms.length === 0) return '';
+                if (noms.length === 1) return noms[0];
+                return noms.slice(0, -1).join(', ') + ' {{ __('et') }} ' + noms[noms.length - 1];
+            },
+
+            _afficherImpossibilite: function(tcDemande) {
+                var minReq = this.minimumEquipesRequis();
+                var texte, suggestion;
+                if (minReq !== null && minReq > tcDemande) {
+                    var groupe = this._trouverGroupeConflit(this.nameList);
+                    if (groupe.length >= minReq) {
+                        texte = this._listeFr(groupe.slice(0, minReq)) + ' {{ __('doivent tous être séparés') }} : {{ __('il faut au moins') }} ' + minReq + ' {{ __('équipes.') }}';
+                    } else {
+                        texte = '{{ __('Les exclusions actuelles exigent au moins') }} ' + minReq + ' {{ __("équipes, ce qui dépasse le nombre demandé.") }}';
+                    }
+                    suggestion = minReq;
+                } else {
+                    texte = '{{ __("Cette configuration est trop complexe à résoudre avec les contraintes actuelles. Réduisez le nombre d'exclusions ou augmentez le nombre d'équipes.") }}';
+                    suggestion = null;
+                }
+                this.impossibleMessage = { texte: texte, suggestion: suggestion };
+            },
+
+            appliquerSuggestionEquipes: function() {
+                if (!this.impossibleMessage || !this.impossibleMessage.suggestion) return;
+                var n = this.impossibleMessage.suggestion;
+                this.mode = 'count';
+                this.teamCount = n;
+                this.impossibleMessage = null;
+                this.generate();
+            },
+
             generate: function() {
                 if (this.nameList.length < 2) return;
-                this.previousTeams = this.drawn ? JSON.parse(JSON.stringify(this.teams)) : null;
 
-                var list = this.nameList.slice();
-                // Fisher-Yates avec crypto
-                for (var i = list.length - 1; i > 0; i--) {
+                var noms = this.nameList.slice();
+                // Fisher-Yates avec crypto : source d'aléa principale
+                for (var i = noms.length - 1; i > 0; i--) {
                     var j = this.secureRandom(i + 1);
-                    var tmp = list[i]; list[i] = list[j]; list[j] = tmp;
+                    var tmp = noms[i]; noms[i] = noms[j]; noms[j] = tmp;
                 }
 
                 var tc = this.actualTeamCount;
-                this.teams = [];
-                for (var t = 0; t < tc; t++) {
-                    this.teams.push({
-                        name: 'Équipe ' + (t + 1),
-                        members: [],
-                        color: this.colors[t % this.colors.length]
-                    });
+                var resultat = this.construireEquipes(noms, tc);
+
+                if (resultat === null) {
+                    this._afficherImpossibilite(tc);
+                    // le tirage précédent, s'il existe, reste affiché tel quel, mais il ne respecte
+                    // plus les exclusions actuelles : on le marque pour ne jamais le faire passer
+                    // pour le résultat de cette demande.
+                    if (this.drawn) this.tirageObsolete = true;
+                    return;
                 }
 
-                for (var n = 0; n < list.length; n++) {
-                    this.teams[n % tc].members.push(list[n]);
-                }
-
-                // Résoudre exclusions
-                if (this.exclusions.length > 0) {
-                    var attempts = 0;
-                    var maxAttempts = 100;
-                    var resolved = false;
-                    while (!resolved && attempts < maxAttempts) {
-                        resolved = true;
-                        for (var e = 0; e < this.exclusions.length; e++) {
-                            var excl = this.exclusions[e];
-                            for (var ti = 0; ti < this.teams.length; ti++) {
-                                var team = this.teams[ti];
-                                if (team.members.indexOf(excl.name1) !== -1 && team.members.indexOf(excl.name2) !== -1) {
-                                    resolved = false;
-                                    // Swap name1 avec un membre d'une autre équipe
-                                    var otherIdx = (ti + 1) % this.teams.length;
-                                    var otherTeam = this.teams[otherIdx];
-                                    if (otherTeam.members.length > 0) {
-                                        var swapIdx = this.secureRandom(otherTeam.members.length);
-                                        var swapName = otherTeam.members[swapIdx];
-                                        // Swap
-                                        var idx1 = team.members.indexOf(excl.name1);
-                                        team.members[idx1] = swapName;
-                                        otherTeam.members[swapIdx] = excl.name1;
-                                    }
-                                }
-                            }
-                        }
-                        attempts++;
-                    }
-                }
-
+                this.impossibleMessage = null;
+                this.tirageObsolete = false;
+                this.previousTeams = this.drawn ? JSON.parse(JSON.stringify(this.teams)) : null;
+                this.teams = resultat.map(function(membres, t) {
+                    return { name: 'Équipe ' + (t + 1), members: membres, color: this.colors[t % this.colors.length] };
+                }, this);
                 this.drawn = true;
                 localStorage.setItem('tg_names', this.names);
             },
@@ -337,6 +530,8 @@ document.addEventListener('alpine:init', function() {
                 this.teams = [];
                 this.drawn = false;
                 this.previousTeams = null;
+                this.impossibleMessage = null;
+                this.tirageObsolete = false;
             },
 
             copyResults: function() {
@@ -376,13 +571,21 @@ document.addEventListener('alpine:init', function() {
                 }
             },
 
-            // Exclusions
-            addExclusion: function() {
-                if (this.newExcl1.trim() && this.newExcl2.trim()) {
-                    this.exclusions.push({ name1: this.newExcl1.trim(), name2: this.newExcl2.trim() });
-                    this.newExcl1 = '';
-                    this.newExcl2 = '';
+            // Exclusions par pastilles : 1er tap = pivot, 2e tap sur un autre nom = crée l'exclusion
+            // (désactive le pivot), re-tap sur le pivot lui-même = annule la sélection.
+            togglePivot: function(nom) {
+                if (this.pivot === null) {
+                    this.pivot = nom;
+                    return;
                 }
+                if (this.pivot === nom) {
+                    this.pivot = null;
+                    return;
+                }
+                if (!this._sontExclus(this.pivot, nom)) {
+                    this.exclusions.push({ name1: this.pivot, name2: nom });
+                }
+                this.pivot = null;
             },
             removeExclusion: function(index) { this.exclusions.splice(index, 1); },
 
