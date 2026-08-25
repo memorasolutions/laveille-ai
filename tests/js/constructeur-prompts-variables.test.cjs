@@ -131,3 +131,81 @@ setTimeout(function () {
     console.log('\n' + pass + '/' + (pass + fail) + ' OK');
     process.exit(fail > 0 ? 1 : 0);
 }, 50);
+
+// ---------------------------------------------------------------------------
+// Signalement fondateur (2026-08-25) : « je me retrouve avec des variables dans
+// mon prompt, normal ? ». Le comportement l'était ; son ABSENCE DE SIGNALEMENT
+// ne l'était pas. Un espace à remplir vide était annoncé avant la copie, une
+// variable vide ne l'était pas, et les repères ⟦DONNEES-...⟧ n'étaient expliqués
+// nulle part. Ces cas verrouillent les trois getters ajoutés.
+// ---------------------------------------------------------------------------
+
+// 6. Compteur de variables non remplies.
+{
+    const { component } = loadPromptBuilder();
+    fillBaseFields(component);
+    component.taskObject = 'un texte sur {{sujet}} pour {{public}}';
+    assert(component.unfilledVariablesCount === 2, 'deux variables vides sont comptées : ' + component.unfilledVariablesCount);
+    component.varValues = { sujet: 'le climat' };
+    assert(component.unfilledVariablesCount === 1, 'une seule reste vide après remplissage partiel');
+    component.varValues = { sujet: 'le climat', public: 'des ados' };
+    assert(component.unfilledVariablesCount === 0, 'aucune vide une fois les deux remplies');
+    assert(component.unfilledVariablesMessage === '', 'aucun message quand tout est rempli');
+}
+
+// 7. Une valeur faite d'espaces compte comme non remplie (même règle que les espaces à remplir).
+{
+    const { component } = loadPromptBuilder();
+    fillBaseFields(component);
+    component.taskObject = 'un texte sur {{sujet}}';
+    component.varValues = { sujet: '   ' };
+    assert(component.unfilledVariablesCount === 1, 'une valeur faite d\'espaces ne compte pas comme remplie');
+    assert(component.unfilledVariablesMessage.indexOf('1 variable') === 0, 'message au singulier : ' + component.unfilledVariablesMessage);
+}
+
+// 8. Message au pluriel avec le compte substitué.
+{
+    const { component } = loadPromptBuilder();
+    fillBaseFields(component);
+    component.taskObject = 'un texte sur {{sujet}} pour {{public}} avant {{date}}';
+    const msg = component.unfilledVariablesMessage;
+    assert(msg.indexOf('3') !== -1, 'le compte est substitué dans le message : ' + msg);
+    assert(msg.indexOf('{count}') === -1, 'le gabarit {count} ne fuit jamais dans le message affiché');
+}
+
+// 9. Repères de données : présents seulement si contexte ou exemples remplis.
+{
+    const { component } = loadPromptBuilder();
+    fillBaseFields(component);
+    component.taskObject = 'un texte';
+    assert(component.hasDataDelimiters === false, 'aucun repère annoncé sans contexte ni exemples');
+    assert(component.dataDelimitersMessage === '', 'aucun message sans repère');
+    component.contextInfo = 'La recherche doit être à jour.';
+    assert(component.hasDataDelimiters === true, 'repères annoncés dès que le contexte est rempli');
+    assert(component.dataDelimitersMessage.indexOf('DONNEES') !== -1, 'le message nomme le repère réel');
+}
+
+// 10. Les exemples seuls suffisent aussi, et un texte fait d'espaces ne compte pas.
+{
+    const { component } = loadPromptBuilder();
+    fillBaseFields(component);
+    component.taskObject = 'un texte';
+    component.contextInfo = '   ';
+    assert(component.hasDataDelimiters === false, 'un contexte fait d\'espaces ne déclenche pas la mention');
+    component.examples = 'Exemple 1 : ...';
+    assert(component.hasDataDelimiters === true, 'les exemples seuls déclenchent la mention');
+}
+
+// 11. Le prompt copié contient bien le repère réel quand le contexte est rempli
+//     (cohérence entre ce que la mention annonce et ce qui part au presse-papiers).
+{
+    const { component } = loadPromptBuilder();
+    fillBaseFields(component);
+    component.taskObject = 'un texte';
+    component.contextInfo = 'Une donnée de fond.';
+    assert(component.promptFilled.indexOf('⟦DONNEES-') !== -1, 'le prompt copié porte le repère avec suffixe');
+    assert(component.prompt.indexOf('⟦DONNEES⟧') !== -1, 'l\'aperçu écran porte le repère sans suffixe');
+}
+
+console.log('\n' + pass + '/' + (pass + fail) + ' OK');
+process.exit(fail === 0 ? 0 : 1);

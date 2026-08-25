@@ -268,7 +268,7 @@ document.addEventListener('alpine:init', function() {
                 length: 'Indiquer une longueur permet de contrôler si la réponse est concise (pour un résumé) ou détaillée (pour un article complet).',
                 tone: 'Le ton change le style : professionnel pour un rapport, chaleureux pour un courriel client, académique pour un mémoire.',
                 technique: 'Réponse directe : l\'IA répond tout de suite sans exemple. Avec des exemples : vous lui donnez 2-3 modèles à suivre. Réflexion étape par étape : l\'IA détaille son raisonnement avant de conclure (meilleur pour la logique et les calculs). Par étapes : l\'IA valide chaque étape avec vous avant de continuer.',
-                delimiters: 'Les délimiteurs (###) séparent vos instructions de vos données. Utile quand vous analysez un texte spécifique : l\'IA sait où commence le texte à analyser.',
+                delimiters: 'Les délimiteurs séparent vos instructions de vos données. Utile quand vous analysez un texte précis : l\'IA sait où commence le texte à traiter. Dans le prompt copié, ils prennent la forme ⟦DONNEES-...⟧ avec un suffixe tiré au hasard à chaque copie, pour que personne ne puisse imiter le repère de fermeture et faire passer un texte collé pour une consigne.',
                 constraintAntiAI: 'L\'IA a tendance à produire des textes génériques reconnaissables. Cette option force un style plus naturel, varié et authentiquement humain.',
                 constraintCanvas: 'Canvas (ChatGPT) et artefact (Claude) sont des espaces de travail dédiés où l\'IA crée du contenu que vous pouvez modifier directement.',
                 constraintChainOfThought: 'La chaîne de pensée force l\'IA à montrer son raisonnement, pas juste le résultat. Très utile pour les problèmes complexes, les mathématiques ou la logique.',
@@ -3586,6 +3586,45 @@ document.addEventListener('alpine:init', function() {
                     ? (i18n.spaceUnfilledOne || '1 espace non rempli, on garde le mot de départ.')
                     : (i18n.spaceUnfilledMany || '{count} espaces non remplis, on garde les mots de départ.');
                 return template.replace('{count}', n);
+            },
+            // Variables {{...}} laissées vides (signalement fondateur, 2026-08-25) : asymétrie
+            // corrigée. Un espace à remplir vide retombe sur le mot de départ et était déjà
+            // signalé ci-dessus ; une variable vide, elle, reste affichée telle quelle dans le
+            // texte copié (voir get promptFilled()) SANS aucun avertissement - on découvrait les
+            // {{...}} une fois collés dans l'IA. Même patron, même ton, même canal i18n.
+            get unfilledVariablesCount() {
+                var self = this;
+                var names = this.promptVariables;
+                var count = 0;
+                for (var i = 0; i < names.length; i++) {
+                    var val = self.varValues ? self.varValues[names[i]] : undefined;
+                    if (val === undefined || val === null || String(val).trim() === '') count++;
+                }
+                return count;
+            },
+            get unfilledVariablesMessage() {
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var n = this.unfilledVariablesCount;
+                if (n === 0) return '';
+                var template = n === 1
+                    ? (i18n.variableUnfilledOne || '1 variable non remplie : elle sera copiée telle quelle, entre doubles accolades.')
+                    : (i18n.variableUnfilledMany || '{count} variables non remplies : elles seront copiées telles quelles, entre doubles accolades.');
+                return template.replace('{count}', n);
+            },
+            // Blocs de données délimités (signalement fondateur, 2026-08-25) : présents dès que le
+            // contexte additionnel ou les exemples sont remplis (voir _buildPromptSegments). Le
+            // suffixe est tiré au hasard à CHAQUE copie alors que l'aperçu écran en montre un fixe
+            // (⟦DONNEES⟧) : sans cette mention, l'écart entre les deux passe pour un défaut, et le
+            // premier réflexe est de supprimer les repères - c'est-à-dire la protection elle-même.
+            get hasDataDelimiters() {
+                var ctx = this.contextInfo ? String(this.contextInfo).trim() : '';
+                var ex = this.examples ? String(this.examples).trim() : '';
+                return ctx !== '' || ex !== '';
+            },
+            get dataDelimitersMessage() {
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                if (!this.hasDataDelimiters) return '';
+                return i18n.dataDelimitersNotice || 'Les repères ⟦DONNEES-...⟧ encadrent vos données pour que l\'IA ne les prenne jamais pour des consignes. Laissez-les en place : leur suffixe change à chaque copie, c\'est voulu.';
             },
             // C2-3 (couche 2, tâches 1660-1665, 2026-08-09) : avis de LECTURE SEULE affiché près des
             // boutons Copier/« Ouvrir dans » (voir constructeur-prompts.blade.php) - réutilise

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.218.0] - 2026-08-25
+
+### Ajouté
+- **Le prompt copié explique enfin ses propres repères.** Signalement du fondateur : « quand je fais copier le prompt, je me retrouve avec des variables dans mon prompt, normal ? ». Ça l'était, mais rien ne le disait. Deux mécanismes distincts étaient confondus, et aucun n'était expliqué là où on les découvre, c'est-à-dire une fois le texte collé dans l'IA.
+- Les repères `⟦DONNEES-...⟧` encadrent les données de l'utilisateur (contexte additionnel, exemples) pour que le modèle ne les prenne jamais pour des consignes. Leur suffixe est tiré au hasard à chaque copie, précisément pour que personne ne puisse imiter le repère de fermeture et faire passer un texte collé pour des ordres. L'aperçu écran, lui, affiche un suffixe fixe pour rester lisible : l'écart entre les deux passait pour un défaut. Or le premier réflexe devant un symbole incompris est de l'effacer, c'est-à-dire d'effacer la protection.
+- Nouvelle section dans l'aide du bouton « ? » : à quoi servent ces repères, pourquoi le suffixe change à chaque copie, pourquoi il ne faut pas les retirer, et en quoi ils diffèrent des variables réutilisables.
+- Mention discrète près du bouton Copier quand le prompt contient réellement des repères de données, c'est-à-dire quand le contexte additionnel ou les exemples sont remplis. Jamais affichée autrement, pour ne pas devenir du bruit.
+
+### Corrigé
+- **Asymétrie d'avertissement entre les espaces à remplir et les variables.** Un espace à remplir laissé vide retombe sur son mot de départ et était signalé avant la copie. Une variable entre doubles accolades laissée vide, elle, part telle quelle dans le presse-papiers, et rien ne prévenait : on découvrait le motif une fois collé. Même patron, même ton, même contrat d'accessibilité que les deux mentions existantes (annonce polie, jamais bloquante, la copie part quand même).
+- **Texte d'aide périmé sur les délimiteurs.** L'aide décrivait encore des « `###` », format abandonné par le correctif de sécurité du 12 août 2026 au profit du repère aléatoire. Un texte d'aide faux est pire que pas d'aide : il apprend à chercher un symbole qui n'existe plus. Corrigé aux deux endroits qui le portaient, le pont i18n de la vue et le repli en dur du script.
+- **Régression attrapée par le test de rendu, le jour même.** Des doubles accolades écrites dans un commentaire JavaScript à l'intérieur d'une balise `script` ont été compilées par Blade en `echo` PHP : l'expression étant l'opérateur de décomposition, la page rendait une 500. Blade compile aussi l'intérieur des balises `script` - un commentaire JavaScript n'est pas un commentaire Blade. Un garde-fou écrit sur place le rappelle.
+- Vérifié : 25 assertions JS sur la logique (dont les 11 préexistantes), 36 fichiers de tests JS du constructeur au vert, et un test Pest dédié qui REND réellement la page - la logique peut être juste et le texte absent de l'écran, seul un test de rendu attrape les deux.
+
 ## [1.217.1] - 2026-08-24
 
 ### Corrigé

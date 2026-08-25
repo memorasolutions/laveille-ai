@@ -1218,6 +1218,16 @@
                              constructeur-prompts-core.js). Même patron que unfilledSpacesMessage juste
                              au-dessus (role="status" aria-live="polite"). --}}
                         <p x-show="isValid && orphanSpacesCount > 0" x-cloak role="status" aria-live="polite" class="small mb-2" style="color: var(--c-text-muted); font-size: 0.78rem;" x-text="orphanSpacesMessage"></p>
+                        {{-- Variables entre doubles accolades non remplies (signalement fondateur, 2026-08-25) : une
+                             variable vide part telle quelle dans la copie, contrairement à un espace
+                             à remplir qui retombe sur son mot de départ. Seuls les espaces étaient
+                             signalés. Même patron que les deux lignes ci-dessus : discret, non
+                             bloquant, role="status" aria-live="polite" - la copie part quand même. --}}
+                        <p x-show="isValid && unfilledVariablesCount > 0" x-cloak role="status" aria-live="polite" class="small mb-2" style="color: var(--c-text-muted); font-size: 0.78rem;" x-text="unfilledVariablesMessage"></p>
+                        {{-- Repères de données (même signalement) : affichés SEULEMENT quand le prompt
+                             en contient réellement, c'est-à-dire quand le contexte additionnel ou les
+                             exemples sont remplis (voir hasDataDelimiters). Sinon ce serait du bruit. --}}
+                        <p x-show="isValid && hasDataDelimiters" x-cloak role="status" aria-live="polite" class="small mb-2" style="color: var(--c-text-muted); font-size: 0.78rem;" x-text="dataDelimitersMessage"></p>
                         <div class="d-flex gap-2 mb-3 flex-wrap">
                             <button class="ct-btn ct-btn-accent flex-fill" @click="copy()" :disabled="!isValid" aria-describedby="cpValidityHint" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'"
                                     x-text="copied ? '{{ __('Copié !') }}' : '{{ __('Copier le prompt') }}'"></button>
@@ -1402,6 +1412,19 @@
                     <li><strong>{{ __('Destination') }}</strong> : {{ __('choisissez si la réponse doit s\'afficher dans la conversation normale ou dans un espace de travail dédié (Canvas ChatGPT, Artefact Claude, Canvas Gemini, Mistral) ; le « Format attendu » qui suit précise alors la structure du contenu généré dans cet espace') }}</li>
                     <li><strong>{{ __('Réflexion étape par étape') }}</strong> : {{ __('meilleur pour les problèmes complexes') }}</li>
                     <li><strong>{{ __('Poser des questions') }}</strong> : {{ __('l\'IA clarifie avant de répondre = meilleur résultat') }}</li>
+                </ul>
+                {{-- Signalement fondateur (2026-08-25) : « je me retrouve avec des variables dans mon
+                     prompt, normal ? ». Deux mécanismes différents étaient confondus, et aucun n'était
+                     expliqué là où on les découvre, c'est-à-dire APRÈS avoir copié. Les repères de
+                     données sont une protection : le premier réflexe étant de les effacer, il faut
+                     dire à quoi ils servent, pas seulement qu'ils existent. --}}
+                <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">{{ __('Ces repères dans le prompt copié : à quoi ils servent') }}</h4>
+                <p class="mb-2">{{ __('Deux choses différentes peuvent apparaître dans le texte que vous copiez. Aucune n\'est une erreur.') }}</p>
+                <ul>
+                    <li><strong>{{ __('Les repères ⟦DONNEES-...⟧') }}</strong> : {{ __('ils encadrent ce que VOUS avez écrit dans « contexte additionnel » et dans les exemples, et la phrase juste avant demande à l\'IA de ne jamais prendre ce contenu pour une consigne. Sans eux, un texte collé qui contiendrait « ignore les instructions précédentes » pourrait être obéi.') }}</li>
+                    <li><strong>{{ __('Pourquoi le suffixe change à chaque copie') }}</strong> : {{ __('si le repère de fermeture était toujours le même, n\'importe qui pourrait l\'écrire dans un texte collé pour refermer le bloc et faire passer la suite pour des ordres. Un suffixe imprévisible rend cette manoeuvre impossible. L\'aperçu à l\'écran affiche une version simplifiée, sans suffixe, pour rester lisible.') }}</li>
+                    <li><strong>{{ __('À ne pas faire') }}</strong> : {{ __('les effacer avant de coller. C\'est précisément la partie qui protège votre prompt.') }}</li>
+                    <li><strong>{{ __('Les variables entre doubles accolades') }}</strong> : {{ __('elles, ce sont vos champs réutilisables. Une variable laissée vide est copiée telle quelle, volontairement, pour que vous voyiez ce qui manque plutôt que de découvrir un trou dans la réponse. Une mention vous prévient avant de copier.') }}</li>
                 </ul>
             </div>
             <div class="modal-footer">
@@ -1794,7 +1817,7 @@ $pbHelps = [
     'length' => __('Indiquer une longueur permet de contrôler si la réponse est concise (pour un résumé) ou détaillée (pour un article complet).'),
     'tone' => __('Le ton change le style : professionnel pour un rapport, chaleureux pour un courriel client, académique pour un mémoire.'),
     'technique' => __('Réponse directe : l\'IA répond tout de suite sans exemple. Avec des exemples : vous lui donnez 2-3 modèles à suivre. Réflexion étape par étape : l\'IA détaille son raisonnement avant de conclure (meilleur pour la logique et les calculs). Par étapes : l\'IA valide chaque étape avec vous avant de continuer.'),
-    'delimiters' => __('Les délimiteurs (###) séparent vos instructions de vos données. Utile quand vous analysez un texte spécifique : l\'IA sait où commence le texte à analyser.'),
+    'delimiters' => __('Les délimiteurs séparent vos instructions de vos données. Utile quand vous analysez un texte précis : l\'IA sait où commence le texte à traiter. Dans le prompt copié, ils prennent la forme ⟦DONNEES-...⟧ avec un suffixe tiré au hasard à chaque copie, pour que personne ne puisse imiter le repère de fermeture et faire passer un texte collé pour une consigne.'),
     'constraintAntiAI' => __('L\'IA a tendance à produire des textes génériques reconnaissables. Cette option force un style plus naturel, varié et authentiquement humain.'),
     'constraintCanvas' => __('Canvas (ChatGPT) et artefact (Claude) sont des espaces de travail dédiés où l\'IA crée du contenu que vous pouvez modifier directement.'),
     'constraintChainOfThought' => __('La chaîne de pensée force l\'IA à montrer son raisonnement, pas juste le résultat. Très utile pour les problèmes complexes, les mathématiques ou la logique.'),
@@ -2037,6 +2060,16 @@ window.promptBuilderConfig = {
         spaceRenameMergeMany: @json(__('Ce texte apparaît déjà {count} fois dans ta demande - toutes les occurrences seront remplies ensemble.')),
         spaceOrphanOne: @json(__("1 espace à remplir n'est plus dans ton texte.")),
         spaceOrphanMany: @json(__('{count} espaces à remplir ne sont plus dans ton texte.')),
+        // Signalement fondateur (2026-08-25) : une variable entre doubles accolades laissée vide est
+        // copiée telle quelle (voir get promptFilled()), alors qu'un espace à remplir retombe sur son
+        // mot de départ. Seuls les espaces étaient signalés - même patron {count} que spaceUnfilledMany.
+        // NE JAMAIS écrire de doubles accolades ici, même en commentaire JS : Blade compile aussi
+        // l'intérieur des balises script et les transformerait en echo PHP (500 au rendu, 2026-08-25).
+        variableUnfilledOne: @json(__('1 variable non remplie : elle sera copiée telle quelle, entre doubles accolades.')),
+        variableUnfilledMany: @json(__('{count} variables non remplies : elles seront copiées telles quelles, entre doubles accolades.')),
+        // Même signalement : les repères ⟦DONNEES-...⟧ du prompt copié passaient pour un défaut,
+        // faute d'être expliqués là où on les découvre (voir get dataDelimitersMessage()).
+        dataDelimitersNotice: @json(__("Les repères ⟦DONNEES-...⟧ encadrent vos données pour que l'IA ne les prenne jamais pour des consignes. Laissez-les en place : leur suffixe change à chaque copie, c'est voulu.")),
         // Brique 2 (2026-08-20) - « Partir de mon brouillon » : message doux affiché par submitDraft()
         // (constructeur-prompts-core.js) sur échec de transformation (JSON invalide, texte vide, budget
         // IA dépassé...) - jamais un 500, jamais une erreur technique brute affichée à l'utilisateur.
