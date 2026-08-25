@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.219.0] - 2026-08-25
+
+### Ajouté
+- **La fenêtre de recadrage montre enfin le cadre réellement utilisé sur la page.** Signalement du fondateur : après une capture, le recadrage présente la vignette entière, mais la fiche de l'outil en affiche un format « moins haut ». On cadrait donc à l'aveugle, et le sujet placé au centre de la vignette pouvait se retrouver coupé une fois publié.
+- Mesuré avant de coder, plutôt que supposé : la fiche d'un outil pose la vignette en `width: 100%` sous une hauteur plafonnée à 400 px avec `object-fit: cover`, dans un cadre qui plafonne à 1146 px de large. Résultat, **66,5 % de la hauteur seulement survivent, et 105 px disparaissent en haut comme en bas**. Le repère montre cette bande : contour jaune tireté, deux bandes assombries sur ce qui sera perdu, et une étiquette « Visible sur la fiche ».
+- Le texte d'aide distingue désormais les deux cadres. Le blanc est la vignette 1200×630, celle des partages et des listes. Le jaune est ce qui restera à l'écran sur la page.
+
+### Corrigé
+- **Le repère ne pouvait pas être une valeur figée, et la mesure l'a prouvé.** Le composant de recadrage est partagé : le module Actualités l'utilise aussi. Or une fiche d'actualité affiche la vignette **en entier** (cadre 740 px, plafond 420 px), tout comme un affichage mobile étroit. Écrire « 16,75 % » en dur dans le composant aurait donc dessiné une coupe imaginaire partout ailleurs que sur une fiche d'outil, c'est-à-dire remplacé une absence d'information par une information fausse.
+- La bande est donc calculée à l'ouverture, à partir de la largeur **mesurée** du cadre visé et de sa variable CSS `--fc-apercu-hauteur-max`. Le plafond de hauteur n'est déclaré qu'une seule fois, sur le cadre lui-même, où il sert déjà de `max-height` : le repère ne peut pas se désynchroniser du CSS réel, puisqu'il le lit. Sans cadre exploitable, aucun repère n'est dessiné - c'est un cas « je ne sais pas », jamais un repère approximatif.
+- Le calcul se tait aussi quand la coupe est inférieure à un demi pour cent : un liseré dans ce cas ferait croire à une perte inexistante.
+- Vérifié au navigateur, aux deux extrêmes : sur écran large, la bande s'affiche à 16,80 % par côté, cohérente avec les 16,76 % mesurés en production. En largeur mobile, le repère et sa phrase d'aide disparaissent d'eux-mêmes, la vignette passant entière. Les deux flux qui ouvrent le recadrage sont couverts, le bouton « Recadrer » et la première capture.
+- Garde-fous : 33 assertions JS sur le calcul (dont les 20 préexistantes), fondées sur les dimensions réellement mesurées, et un test Pest qui verrouille la chaîne rendant ce calcul possible - déclaration unique du plafond, sélecteur pointant vers un élément qui existe vraiment, repère masqué par défaut dans le composant partagé. Éprouvé rouge sur deux régressions simulées (renommage du cadre, retour du plafond en dur), vert ensuite.
+
 ## [1.218.1] - 2026-08-25
 
 ### Corrigé

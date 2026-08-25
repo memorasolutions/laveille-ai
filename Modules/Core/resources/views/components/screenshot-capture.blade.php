@@ -8,11 +8,14 @@
          framingMode=true (seule instance : FAB de Modules/Directory/resources/views/public/show.blade.php). --}}
     'framingMode' => false,
     'setFocalUrl' => null,
+    {{-- Selecteur du cadre ou la page affichera la vignette. Transmis tel quel au
+         focal-cropper, qui y mesure la bande reellement visible. Null = aucun repere. --}}
+    'apercuSelector' => null,
 ])
 
 @if($enabled)
 <div
-    x-data="screenshotCaptureComponent({ uploadUrl: @js($uploadUrl), framingMode: @js($framingMode), setFocalUrl: @js($setFocalUrl) })"
+    x-data="screenshotCaptureComponent({ uploadUrl: @js($uploadUrl), framingMode: @js($framingMode), setFocalUrl: @js($setFocalUrl), apercuSelector: @js($apercuSelector) })"
     style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:16px;margin-bottom:16px;"
 >
     <h6 class="mb-2">{{ $label }}</h6>
@@ -57,6 +60,7 @@ if (!window.__screenshotCaptureComponentRegistered) {
             uploadUrl: config.uploadUrl,
             framingMode: config.framingMode || false,
             setFocalUrl: config.setFocalUrl || null,
+            apercuSelector: config.apercuSelector || null,
             status: 'idle',
             message: '',
             supported: false,
@@ -207,6 +211,7 @@ if (!window.__screenshotCaptureComponentRegistered) {
                     imageSrc: dataUrl,
                     initialFocal: 0,
                     maxHauteurMaster: normalizedH,
+                    apercuSelector: this.apercuSelector,
                     onSave: (focalY) => this.uploadFramedAndSetFocal(dataUrl, focalY),
                 });
             },

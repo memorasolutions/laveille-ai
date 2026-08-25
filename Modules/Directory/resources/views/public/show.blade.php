@@ -177,6 +177,7 @@
         :enabled="\Modules\Settings\Facades\Settings::get('directory.assisted_screenshot_enabled', true)"
         label=""
         helpText="Ouvre le site cible dans un autre onglet, accepte les cookies, cadre. Reviens ici et clique Capturer. Upload auto 1200×630."
+        apercuSelector=".js-rt-screenshot-box"
         {{-- Correctif revue adversariale 2026-08-10 (Codex) #1 : le FAB est visible sous
              view_admin_panel (@can plus haut) mais x-core::focal-cropper n'est rendu que sous
              moderate_tools (permission requise par set-focal cote serveur). Un "editor" (view_admin_panel
@@ -217,6 +218,7 @@ document.addEventListener('DOMContentLoaded', function () {
             imageSrc: @js($screenshotMasterUrl),
             initialFocal: @js((int) ($tool->screenshot_focal_y ?? 0)),
             maxHauteurMaster: @js($screenshotMasterHeight),
+            apercuSelector: '.js-rt-screenshot-box',
             onSave: function (focalY) {
                 var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
@@ -465,9 +467,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     {{-- Screenshot ou gradient fallback --}}
     @if($tool->screenshot)
-        <div style="position: relative; margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; border: 1px solid #E5E7EB;">
+        <div class="js-rt-screenshot-box" style="--fc-apercu-hauteur-max: 400px; position: relative; margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; border: 1px solid #E5E7EB;">
             @php $__ssUrl = str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.$tool->updated_at->timestamp; @endphp
-            <img src="{{ $__ssUrl }}" alt="{{ __('Capture d\'écran de') }} {{ $tool->name }}" loading="lazy" class="js-rt-screenshot-img" style="width: 100%; max-height: 400px; object-fit: cover; display: block;"
+            <img src="{{ $__ssUrl }}" alt="{{ __('Capture d\'écran de') }} {{ $tool->name }}" loading="lazy" class="js-rt-screenshot-img" style="width: 100%; max-height: var(--fc-apercu-hauteur-max); object-fit: cover; display: block;"
                  onerror="this.onerror=null; this.src='/images/directory-fallback.svg';">
             {{-- Design doc 2026-08-10 (recadrage frontend), volet B : bouton "Recadrer" (master
                  disponible) ou lien "Cadrage indisponible" (aucun master) - jamais les deux, jamais
@@ -493,7 +495,7 @@ document.addEventListener('DOMContentLoaded', function () {
             @endcan
         </div>
     @else
-        <div style="margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; max-height: 400px; height: 280px; background: linear-gradient(135deg, var(--c-primary), var(--c-dark)); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px;">
+        <div class="js-rt-screenshot-box" style="--fc-apercu-hauteur-max: 400px; margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; max-height: var(--fc-apercu-hauteur-max); height: 280px; background: linear-gradient(135deg, var(--c-primary), var(--c-dark)); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px;">
             <span style="font-family: var(--f-heading); font-size: 2.5rem; font-weight: 800; color: rgba(255,255,255,0.9);">{{ $tool->name }}</span>
             <span style="font-size: 0.9rem; color: rgba(255,255,255,0.5);">laveille.ai</span>
         </div>

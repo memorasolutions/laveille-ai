@@ -54,5 +54,35 @@ assert(FocalCropperMath.pointerDeltaToFocalDelta(-100, 2) === 50, 'échelle 2 (c
 assert(FocalCropperMath.focalTopPercent(0, 630) === 0, 'focalTopPercent(0, 630) = 0% (aucune marge, cadre plein)');
 assert(FocalCropperMath.focalBottomPercent(0, 630) === 0, 'focalBottomPercent(0, 630) = 0% (aucune marge, cadre plein)');
 
+// --- visibleHeightFraction : la part de la vignette qui survit a l'affichage d'une page ---
+// Valeurs mesurees au navigateur le 2026-08-25 sur laveille.ai, pas des hypotheses.
+(function () {
+    const f = FocalCropperMath.visibleHeightFraction(1146, 400); // fiche d'un outil, ecran large
+    assert(Math.abs(f * 100 - 66.5) < 0.1, 'fiche outil (1146 x plafond 400) : 66,5 % visible (mesure reelle)');
+    assert(Math.abs(FocalCropperMath.croppedSidePercent(f) - 16.76) < 0.05, 'fiche outil : environ 16,76 % rognes de CHAQUE cote');
+})();
+
+// Le cas qui interdit toute constante en dur : ici rien n'est rogne, donc aucun repere ne doit
+// s'afficher. Un 16,75 % ecrit dans le composant dessinerait une coupe imaginaire.
+assert(FocalCropperMath.visibleHeightFraction(740, 420) === 1, 'fiche actualite (740 x plafond 420) : vignette entiere, rien de rogne');
+assert(FocalCropperMath.croppedSidePercent(1) === 0, 'une vignette entiere ne produit aucune bande rognee');
+assert(FocalCropperMath.visibleHeightFraction(351, 400) === 1, 'affichage mobile etroit : vignette entiere');
+
+// La fraction ne depasse jamais 1 : un plafond genereux ne "revele" pas plus que l'image.
+assert(FocalCropperMath.visibleHeightFraction(600, 5000) === 1, 'plafond tres haut : plafonne a 100 %, jamais au-dela');
+
+// Dimensions inexploitables -> null, que l'appelant doit traiter comme "je ne sais pas".
+assert(FocalCropperMath.visibleHeightFraction(0, 400) === null, 'largeur nulle (cadre absent) -> null, donc aucun repere');
+assert(FocalCropperMath.visibleHeightFraction(1146, 0) === null, 'plafond absent (variable CSS non declaree) -> null, donc aucun repere');
+assert(FocalCropperMath.visibleHeightFraction(1146, NaN) === null, 'plafond illisible (parseFloat rate) -> null, donc aucun repere');
+assert(FocalCropperMath.croppedSidePercent(null) === 0, 'croppedSidePercent(null) = 0 (aucune bande a dessiner)');
+
+// Coherence des deux fonctions : la bande visible plus les deux cotes rognes font toujours 100 %.
+(function () {
+    const f = FocalCropperMath.visibleHeightFraction(1600, 400);
+    const cote = FocalCropperMath.croppedSidePercent(f);
+    assert(Math.abs(f * 100 + 2 * cote - 100) < 0.001, 'bande visible + les deux cotes rognes = 100 % (aucun trou)');
+})();
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail > 0 ? 1 : 0);
