@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.218.1] - 2026-08-25
+
+### Corrigé
+- **Les captures d'écran de l'annuaire échouaient en silence depuis deux jours.** Alerte reçue à 12h22 Québec (16h22 UTC) : `CaptureScreenshotJob has been attempted too many times`. Diagnostic : 15 échecs entre le 23 et le 25 août, aucun avant. Tous portaient la même exception, `MaxAttemptsExceededException`, et **aucune erreur métier n'était enregistrée** ; le journal était vide. C'est la signature d'un job repris pendant qu'il s'exécute, pas d'un job qui plante.
+- Cause : trois réglages incohérents entre eux. La file `database` remettait un job en circulation après `retry_after = 90` secondes, alors que le worker des captures tourne avec `--timeout=270` (`DirectoryServiceProvider`, toutes les 3 minutes) et que le job déclarait `$timeout = 400`. Une capture dépassant 90 secondes était donc remise en file **pendant** son exécution ; la reprise voyait le compteur de tentatives déjà consommé (`$tries = 1`) et échouait aussitôt, sans jamais lever d'exception. D'où l'invisibilité de la panne.
+- La règle de Laravel est explicite : `retry_after` doit dépasser le plus long `--timeout` des workers de la même connexion. `retry_after` passe donc de 90 à **300** secondes. Les autres files de cette connexion (`newsletters`, `news-tools`) tournent avec `--max-time=55` et ne sont pas concernées ; le seul effet est qu'un job réellement mort attend 300 secondes au lieu de 90 avant reprise.
+- `CaptureScreenshotJob::$timeout` passe de 400 à 270, aligné sur le worker qui prime de toute façon. Annoncer 400 laissait croire à une marge qui n'existait pas.
+- Le déclencheur est identifié : le commit `27b11dff` du 23 août à 14h27 (v1.210.0) a sorti la capture du chemin synchrone pour la confier à la file. Il n'a pas créé l'incohérence de configuration, il l'a révélée en dirigeant du trafic vers cette file.
+- Nouveau test de non-régression `QueueRetryAfterCoherenceTest` : il lit `retry_after` et extrait le `--timeout` réellement déclaré dans le planificateur, puis vérifie que le premier dépasse le second. Vérifié rouge à 90 (message d'échec explicite) et vert à 300. Un second cas garde le `$timeout` du job aligné sur celui du worker. 194 tests du module Directory au vert.
+
 ## [1.218.0] - 2026-08-25
 
 ### Ajouté

@@ -48,7 +48,13 @@ return [
             'connection' => env('DB_QUEUE_CONNECTION'),
             'table' => env('DB_QUEUE_TABLE', 'jobs'),
             'queue' => env('DB_QUEUE', 'default'),
-            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
+            // DOIT rester superieur au plus long --timeout des workers de cette connexion,
+            // sinon un job encore en cours est remis en file et sa reprise echoue en
+            // MaxAttemptsExceeded, sans qu'aucune erreur metier ne soit jamais enregistree.
+            // Le worker le plus long est celui des captures d'ecran (--timeout=270,
+            // DirectoryServiceProvider) : 300 lui laisse une marge. Les autres files
+            // (newsletters, news-tools) tournent avec --max-time=55 et ne sont pas concernees.
+            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 300),
             'after_commit' => false,
         ],
 

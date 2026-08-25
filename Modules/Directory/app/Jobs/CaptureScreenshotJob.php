@@ -15,7 +15,9 @@ class CaptureScreenshotJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $timeout = 400;
+    // Aligne sur le --timeout du worker (270, DirectoryServiceProvider), qui prime de toute
+    // facon sur cette propriete. Annoncer 400 laissait croire a une marge qui n'existait pas.
+    public int $timeout = 270;
 
     public int $tries = 1;
 
