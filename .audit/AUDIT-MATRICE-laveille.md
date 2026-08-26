@@ -1,36 +1,19 @@
-# Matrice de couverture - audit laveille.ai
+# Matrice de couverture - audit ultra exhaustif de laveille.ai
 
-Date : 2026-08-01 (America/Toronto)
-Demande : « quand je suis connecté, le site est ultra lent, normal ? On doit améliorer. »
-
-Périmètre RESTREINT à la performance en session authentifiée. Conformément au skill, un
-argument ne fait que retirer des dimensions, jamais en ajouter : les dix autres dimensions sont
-donc déclarées non applicables au présent audit, avec leur raison. « Non applicable » est ici une
-conclusion de cadrage, pas une omission - chacune reste auditable par un `/audit` sans argument.
+Lancé le 2026-08-25 (America/Toronto). Portée : **complet** (aucune dimension retirée).
+Cible : laveille.ai (production, lecture seule) + dépôt local @ ec5195e3 (v1.219.0).
+Volume : 4 913 fichiers PHP, 54 modules nwidart, 942 routes, 1 178 vues Blade, 542 migrations.
 
 | Dimension | Statut | Preuve / justification |
 |---|---|---|
-| performance | à faire | SEULE dimension demandée. Symptôme rapporté : lenteur ressentie une fois connecté. |
-| securite-applicative | non applicable | Hors périmètre demandé. Couverte le 2026-07-22 et le 2026-07-24 (2 failles RBAC trouvées et corrigées, v1.117.21/22). |
-| securite-infra | non applicable | Hors périmètre demandé. Aucun changement d'infra depuis le dernier audit. |
-| qualite-code-DRY | non applicable | Hors périmètre demandé, SAUF si la cause racine de la lenteur est une duplication : dans ce cas elle remonte au titre de la performance. |
-| accessibilite | non applicable | Hors périmètre demandé. |
-| UX-UI | non applicable | Hors périmètre demandé. La lenteur perçue est traitée comme un fait mesurable, pas comme une impression d'interface. |
-| SEO-GEO-AEO | non applicable | Hors périmètre demandé. Les pages authentifiées ne sont pas indexées. |
-| conformite-Loi25-RGPD | non applicable | Hors périmètre demandé. Bannière de consentement revérifiée le jour même (fausse alerte close). |
-| tests-couverture | non applicable | Hors périmètre demandé. Suite Modules/Tools verte ce matin : 393 tests, 1654 assertions. |
-| dependances-CVE-licences | non applicable | Hors périmètre demandé, SAUF si une dépendance est la cause de la lenteur. |
-| hygiene-serveur | non applicable | Hors périmètre demandé. Crons vérifiés le jour même : zéro résidu temporaire. |
-
-## Gate de sortie
-
-Le rapport final ne peut pas être rédigé tant que la ligne « performance » porte encore « à faire ».
-Aucune formule du type « cet audit ne couvre pas tout » n'est autorisée : le périmètre est
-explicitement restreint et documenté ci-dessus.
-
-## Règle de méthode pour cet audit
-
-Aucune cause n'est retenue sans mesure. Le symptôme est rapporté par le propriétaire, ce qui le
-rend crédible mais pas encore chiffré. La première étape est donc de reproduire l'écart et de le
-quantifier, avant toute proposition de correctif. Une hypothèse plausible et fausse coûte plus
-cher qu'une absence d'hypothèse.
+| securite-applicative | complété | 10 classes OWASP 2025 + 3 classes LLM toutes conclues ; XSS stocké REPRODUIT (ligne 1114, `<img onerror>` intact) ; RCE signalée ÉCARTÉE par test (published_at jamais renseigné) ; endpoint `public/_lvgit.php` audité et testé (403 sans jeton et avec jeton invalide, `proc_open` en tableau donc aucune injection, seeder filtré par liste blanche) |
+| securite-infra | complété | `sec_full_audit` : en-têtes grade A (7/8), HSTS, CSP, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy tous présents ; SPF + DMARC (p=quarantine) + DKIM configurés ; .env, .git/config, logs, vendor, storage tous en 404 vérifiés par requête réelle |
+| qualite-code-DRY | complété | Trait `NotifiesIndexNow` importé SANS garde dans 4 modèles (vérifié) alors que 11 modules sont réellement désactivés ; 15 `onclick="return confirm("` dans 12 fichiers alors que 53 `data-confirm` conformes existent ; 4 méthodes mortes ; clé `app.frontend_theme` inexistante |
+| performance | complété | Mesure réelle accueil : TTFB 372 ms, DOM interactif 604 ms, chargé 885 ms, 77 requêtes, 2 397 Ko (images 998 Ko, styles 839 Ko, scripts 535 Ko) |
+| accessibilite | complété | WCAG 2.2 AA accueil + fiche annuaire ; faux positifs tranchés au navigateur (skip link conforme : 233x51 px au focus ; titres blancs posés sur image sombre, lisibles) ; défauts réels retenus : cible 1x1 du honeypot, focus order partiel |
+| UX-UI | complété | Capture réelle : bandeau de témoins ET modale d'infolettre simultanés ; 2 bandeaux empilés au-dessus du titre |
+| SEO-GEO-AEO | complété | Effondrement daté au 19 juillet 2026 (481 impressions le 18, 46 le 19) ; technique saine (index+follow, canonical, sitemap 3 599 URL, `Submitted and indexed`) ; volatilité SERP externe confirmée les 18-19 juillet |
+| conformite-Loi25-RGPD | complété | AdSense chargé SANS consentement : REPRODUIT (10 requêtes publicitaires émises, bandeau encore affiché, consentement absent) ; registre d'incidents Loi 25 absent ; double opt-in infolettre et purges automatiques conformes |
+| tests-couverture | complété | Suite complète : **6 485 tests, 0 échec** ; 3 modules sans aucun test (Ads, Community, Voting) ; 41/42 fichiers de tests JS au vert (1 orphelin préexistant : sa source a été supprimée par le revert fad32772) |
+| dependances-CVE-licences | complété | `composer audit` : 9 avis (5 hautes) sur guzzle, league/commonmark, sodium_compat ; `npm audit` : 10 avis (9 hauts) ; licences toutes permissives, aucun GPL/AGPL |
+| hygiene-serveur | complété (partiel externe) | Local : `opcache_reset.php` et `audit-console-errors.log` résiduels. Prod par HTTP : aucun fichier sensible exposé (10 chemins testés). **Blocage externe** : MCP cPanel et memora-multi renvoient un interstitiel de chargement / "Could not fetch WHM accounts" - la liste des crons prod n'a pas pu être lue. Pour débloquer : ouvrir une session cPanel valide puis relancer `cpanel_cron_list`. |

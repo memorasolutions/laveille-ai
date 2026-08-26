@@ -1,21 +1,17 @@
-audit_id: laveille-2026-07-22
-dimension: complet
-cible: site complet (frontend + backend), tous rôles
-url_base_local: https://laveilledestef.test
-url_base_prod: https://laveille.ai
-env: local (audit + corrections), prod (lecture seule, vérif finale)
+# Cadrage de l'audit - Phase 1
+dimensions: toutes (11)
+mode_portee: complet
+cible: laveille.ai
+url_base: https://laveille.ai
+env: production (lecture seule) + local (corrections autorisees)
+depot: /Users/stephanelapointe/__IA__/_____SERVEUR_____/site_internet/la-veille-de-stef-v2
+commit: ec5195e3
+version: 1.219.0
 stack:
-  backend: Laravel 12, PHP 8.4, nwidart modules
-  frontend: Livewire v4, Alpine.js, Bootstrap/NobleUI (admin), tokens charte custom (front public)
-  db: MySQL local + prod, sqlite fallback tests
-perimetre_explicite:
-  - Toutes les 11 dimensions d'audit (voir .audit/AUDIT-MATRICE-laveille-2026-07-22.md)
-  - Simulation E2E complète (/sim) tous rôles, comptes @memora.ca
-  - Recherche tendances juillet 2026 validée 4 sources (Perplexity/Codex/Gemini/Claude)
-  - Boucle correction locale -> re-simulation -> régression, jusqu'à stabilité
-comptes_test: "@memora.ca"
-notes:
-  - Audit précédent Academy-only (2026-07-19, laveille-academie-2026-07-19) reste valide pour son périmètre - cet audit couvre TOUT le site en neuf, grille re-validée par pp_search du jour
-  - Prod = lecture seule sauf confirmation explicite ; corrections locales d'abord, déploiement par lot après vérification
-  - Gate Phase 2.5 de /sim (go explicite avant navigateur) s'applique intégralement même invoqué via /audit
-matrice: .audit/AUDIT-MATRICE-laveille-2026-07-22.md
+  backend: Laravel 11, PHP, modules nwidart (54)
+  frontend: Blade, Alpine.js, aucun build
+  tests: Pest
+  bd: MySQL
+  hebergement: cPanel (gmemora), Cloudflare devant
+  file: database queue
+date_lancement: 2026-08-25 America/Toronto
