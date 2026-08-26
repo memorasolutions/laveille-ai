@@ -586,7 +586,14 @@ class NewsApplyCommand extends Command
         // RAISON: sans cette garde, une curation d'outils après coup détruirait le résumé composé.
         if ($updates !== []) {
             $article->logStructuredSummaryOverride();
-            if (! array_key_exists('structured_summary', $updates)) {
+            // ACTION : garde-fou symetrique de NewsCompositionController::publish() - l'effacement
+            // ci-dessous vise le resume MACHINE de la collecte, jamais un resume COMPOSE. Sans
+            // cette condition, un SECOND payload partiel (un titre corrige, une curation) detruit
+            // silencieusement la composition riche ecrite par le payload precedent.
+            // MCP: SELF (<5 lignes)
+            // RAISON: hasComposedSummary() est le point UNIQUE de cette distinction (DRY) - il
+            // gardait deja le bouton manuel Publier-et-purger, il manquait a la porte de l'agent.
+            if (! array_key_exists('structured_summary', $updates) && ! $article->hasComposedSummary()) {
                 $updates['structured_summary'] = null;
             }
 

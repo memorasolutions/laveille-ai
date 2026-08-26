@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.220.1] - 2026-08-26
+
+### Corrigé
+- **Un second passage de `news:apply` détruisait silencieusement le résumé composé d'une fiche.** Trouvé en corrigeant le titre d'une actualité déjà composée : le payload correctif ne portait que `title` et `seo_title`, et la commande a répondu « payload texte appliqué (title, slug, seo_title, structured_summary) ». Tout le contenu riche - accroche, points clés, pourquoi ça compte, chiffre-clé, citation, action concrète - avait disparu.
+- Cause : l'effacement de `structured_summary` était **inconditionnel** dès qu'un payload écrivait quoi que ce soit. Ce comportement est correct pour le résumé MACHINE de la collecte, qui prime sinon sur la composition à l'affichage - mais il ne distinguait pas ce résumé machine d'un résumé COMPOSÉ écrit par un payload précédent.
+- Le garde-fou existait déjà : `NewsArticle::hasComposedSummary()` (marqueur `composed: true`), et `NewsCompositionController::publish()` s'en servait déjà pour empêcher le bouton manuel Publier-et-purger de détruire une composition. Il n'avait simplement jamais été porté dans la porte de l'agent. Le point de vérité reste unique, aucune logique dupliquée.
+- Deux tests verrouillent les deux côtés : un second payload partiel préserve la composition, et un résumé machine continue d'être effacé par un payload de contenu. Le premier a été vérifié **rouge sans le correctif, vert avec** ; le second passe dans les deux états, ce qui prouve que le correctif n'élargit rien.
+
 ## [1.220.0] - 2026-08-26
 
 ### Corrigé

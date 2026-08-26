@@ -356,3 +356,61 @@ it('applies composed_summary alongside seo_title/summary in the same payload wit
         ->and($article->summary)->toBe('Résumé court composé de test.')
         ->and($article->structured_summary['composed'])->toBeTrue();
 });
+
+// ── Second payload PARTIEL : la composition survit (defaut trouve en production le 2026-08-26) ──
+//
+// Trouve en corrigeant le titre d'une fiche deja composee : le payload correctif ne portait que
+// `title` + `seo_title`, et la commande a repondu « payload texte applique (title, slug,
+// seo_title, structured_summary) ». L'effacement inconditionnel de structured_summary, correct
+// pour le resume MACHINE de la collecte, detruisait la composition riche ecrite juste avant.
+//
+// Le meme garde-fou existait deja dans NewsCompositionController::publish() - il n'avait jamais
+// ete porte dans la porte de l'agent. hasComposedSummary() reste le point UNIQUE de la
+// distinction machine/compose (DRY) : ce test verrouille les DEUX cotes.
+
+it('preserves a composed structured_summary when a SECOND partial payload only fixes the title', function () {
+    $article = csArticle();
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => csPayloadFile(
+        array_merge(csFreshMeta($article), ['composed_summary' => csValidComposedSummary()])
+    )])->assertSuccessful();
+
+    $article->refresh();
+    expect($article->hasComposedSummary())->toBeTrue('Prerequis : la fiche doit porter une composition.');
+
+    // Second passage : uniquement une correction de titre, aucune cle composed_summary.
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => csPayloadFile(
+        array_merge(csFreshMeta($article), [
+            'title' => 'Titre corrige apres revision adversariale',
+            'seo_title' => 'Titre corrige',
+        ])
+    )])->assertSuccessful();
+
+    $article->refresh();
+    expect($article->structured_summary)->not->toBeNull(
+        'Un payload partiel ne doit JAMAIS detruire la composition riche deja appliquee.'
+    );
+    expect($article->structured_summary['hook'])->toBe('Une accroche de test autonome.');
+    expect($article->structured_summary['key_points'])->toHaveCount(2);
+    expect($article->hasComposedSummary())->toBeTrue();
+    expect($article->title)->toBe('Titre corrige apres revision adversariale');
+});
+
+// Non-regression du comportement d'ORIGINE : un resume MACHINE, lui, doit toujours etre efface
+// par un payload de contenu - sinon il continuerait de primer sur la composition a l'affichage.
+it('still erases a MACHINE structured_summary when a content payload carries no composed_summary', function () {
+    $article = csArticle([
+        'structured_summary' => ['hook' => 'RESUME-MACHINE-QUI-DOIT-DISPARAITRE'],
+    ]);
+
+    expect($article->hasComposedSummary())->toBeFalse('Prerequis : resume machine, sans marqueur composed.');
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => csPayloadFile(
+        array_merge(csFreshMeta($article), ['summary' => 'Un chapo compose a la main.'])
+    )])->assertSuccessful();
+
+    $article->refresh();
+    expect($article->structured_summary)->toBeNull(
+        'Le resume machine prime sinon sur la composition cote page publique.'
+    );
+});
