@@ -37,8 +37,8 @@ donc pas pu être lue. Pour débloquer : ouvrir une session cPanel valide, puis 
 | Dimension | Note | Justification |
 |---|---|---|
 | securite-infra | **92/100** | En-têtes grade A (7/8), HSTS, SPF + DMARC + DKIM, aucun fichier sensible exposé. Retrait : CSP réduite à `frame-src`. |
-| conformite-Loi25-RGPD | **58/100** | Dispositif de consentement bien construit, mais AdSense le contourne entièrement (prouvé). Registre d'incidents absent. |
-| securite-applicative | **38/100** | *Note abaissée de 62 à 38 après la passe adversariale.* Le rôle « admin » vaut une exécution de commandes système (C1), l'API publie sans autorisation (H8), les webhooks sortants n'ont aucune garde SSRF (H9). Points forts réels par ailleurs : gardes SSRF des services de récolte, throttling systématique, anti-rejeu SAML. |
+| conformite-Loi25-RGPD | **45/100** | *Abaissée de 58 : l'API expose les courriels de tous les comptes (H11), ce qui est une communication de renseignements personnels plus directe que le défaut de témoins.* AdSense contourne le consentement (prouvé). Registre d'incidents absent. |
+| securite-applicative | **32/100** | *Note abaissée de 62 à 38 après la passe adversariale.* Le rôle « admin » vaut une exécution de commandes système (C1), l'API publie sans autorisation (H8), les webhooks sortants n'ont aucune garde SSRF (H9). Points forts réels par ailleurs : gardes SSRF des services de récolte, throttling systématique, anti-rejeu SAML. |
 | SEO-GEO-AEO | **45/100** | Perte de 90 % de la visibilité, non récupérée depuis 5 semaines. L'état technique ACTUEL est sain, mais un candidat technique daté (sitemap cassé) n'est pas écarté. |
 | dependances-CVE | **55/100** | 19 avis dont 14 hauts. Licences toutes permissives. |
 | qualite-code-DRY | **74/100** | *Note relevée de 70 à 74 : mon finding « 4 modèles casseraient » était faux, réfuté empiriquement.* Architecture modulaire saine, DRY réellement appliqué. Restent 15 popups natives et 4 méthodes mortes. |
@@ -48,7 +48,7 @@ donc pas pu être lue. Pour débloquer : ouvrir une session cPanel valide, puis 
 | UX-UI | **68/100** | Deux sollicitations simultanées à l'arrivée, bandeaux empilés. |
 | hygiene-serveur | **82/100** | Rien d'exposé en production ; deux résidus locaux. |
 
-**Score global pondéré : 55/100** *(abaissé de 68 après la passe adversariale)*. Les zones non
+**Score global pondéré : 48/100** *(68 avant contradiction, puis 55, puis 48 : chaque round adversarial a fait baisser la note)*. Les zones non
 explorées sont comptées comme inconnues, jamais comme saines.
 
 > **Ce que cette révision dit de l'audit lui-même.** La première passe avait conclu « aucun finding
@@ -57,6 +57,13 @@ explorées sont comptées comme inconnues, jamais comme saines.
 > findings critiques. Elle avait par ailleurs inscrit en « haute » un finding (H6) qui ne tenait
 > pas. Sans la passe adversariale imposée par le protocole, ce rapport aurait été rassurant et
 > faux sur ses deux extrémités.
+>
+> **Et le constat le plus important pour la suite** : chaque round adversarial a encore trouvé des
+> défauts réels, y compris le troisième, dans des modules que les précédents n'avaient jamais
+> ouverts (Search, Import, Books). Le protocole demande de boucler jusqu'à deux verdicts vides
+> consécutifs ; ce n'est **pas atteint**. Sur 4 913 fichiers et 54 modules, la conclusion honnête
+> n'est pas « la plateforme a été auditée entièrement », mais « chaque nouvelle lentille braquée
+> sur une zone jamais lue y trouve quelque chose ». La section 8 dit précisément ce qui reste.
 
 ---
 
@@ -284,6 +291,49 @@ Le module `Sso` est **actif** (vérifié). Confiance moyenne plutôt qu'élevée
 suppose qu'une configuration SSO tierce avec jeton valide existe, ce que je n'ai pas vérifié.
 *Correction : scoper la recherche à la configuration SSO courante, comme les autres actions.*
 
+**H11 — L'API de recherche expose le nom et le COURRIEL de tous les comptes**
+`Modules/Search/app/Services/SearchService.php:26-37` + `Modules/Search/config/config.php:13-14` +
+`app/Models/User.php:49-55` · A01 + Loi 25 / RGPD · corroboré · confiance élevée
+
+Trouvé au 3e round, dans un module que rien n'avait ouvert. Vérifié par moi-même, maillon par
+maillon :
+
+- `\App\Models\User::class` est en **première position** de `config('search.models')`, sans
+  `class_exists()`, donc toujours indexé.
+- `User::toSearchableArray()` retourne `['name' => ..., 'email' => ...]`.
+- `User` **n'implémente pas** `shouldBeSearchable()` (0 occurrence) : rien ne l'exclut.
+- `SearchService::search()` — celle qu'appelle l'API — **n'applique aucun filtre**, alors que
+  `searchFront()` (ligne 119-122), utilisée par la recherche publique du site, applique bien
+  `scopePublished()` ou `is_published`. L'écart entre les deux méthodes signe l'oubli.
+- La route `GET /v1/search` n'exige que `auth:sanctum` + `throttle:search` : **aucune permission**
+  (`Modules/Search/routes/api.php:14-16`). Module `Search` actif, route joignable (401 sans jeton).
+
+La chaîne est complète et ne demande aucun privilège : l'inscription est libre, tout utilisateur
+connecté peut s'émettre lui-même un jeton Sanctum sans restriction de portée depuis son tableau de
+bord (`UserApiTokenController.php:33`), puis interroger `/api/v1/search?q=...&model=User`.
+
+C'est une **communication de renseignements personnels** (courriels) à un tiers non autorisé, au
+sens de la Loi 25 — plus directement qualifiable que H1, qui porte sur des témoins.
+
+*Correction* : ajouter `shouldBeSearchable(): bool { return false; }` sur `User`, ou restreindre
+`v1/search` à une permission d'administration. Le même défaut touche `Setting`, partiellement
+atténué (`shouldBeSearchable()` y exclut les groupes `security`/`secrets`, mais pas
+`is_public = false`).
+
+**H12 — Traversée de répertoire dans l'import, lecture de fichiers arbitraires**
+`Modules/Import/app/Http/Controllers/ImportController.php:56-72` · A01 · corroboré · confiance élevée
+
+`execute()` valide `'file_path' => 'required|string'` — **aucune contrainte de préfixe, aucun rejet
+de `..`** — puis appelle `Storage::disk('local')->path($validated['file_path'])`, qui concatène sans
+normaliser (`PathPrefixer::prefixPath()`). Le fichier est ensuite parsé comme CSV et **mappé vers
+les champs d'un modèle**, dont `page`. Un contenu ainsi lu peut donc atterrir dans une page
+publiable, ce qui en fait un canal d'exfiltration.
+
+La route est gardée par `permission:manage_imports`, que le rôle `admin` détient (cf. C1) : le
+défaut est donc atteignable par un rôle qui ne devrait avoir qu'un droit d'import de contenu.
+*Correction : dériver `file_path` côté serveur depuis l'étape de prévisualisation, ou `realpath()`
+et vérifier que le chemin reste sous `storage_path('app/imports')`.*
+
 ### MOYENNE
 
 **M1 — Registre des incidents de confidentialité absent** (Loi 25 art. 3.5/3.7). La politique
@@ -324,6 +374,26 @@ non négociable du projet.
 et la modale d'infolettre s'affichent en même temps, avec deux bandeaux empilés au-dessus du titre.
 On demande un consentement légal et une inscription commerciale dans le même écran.
 
+**M12 — Aucune limitation de débit sur cinq écritures communautaires, et un vote sans déduplication.**
+`Modules/Directory/routes/web.php:75,76,79,80,81` n'ont aucun `throttle`, alors que leurs voisines
+immédiates du même groupe en ont un. Surtout, `CommunityController::toggleLike()` (lignes 330-356)
+incrémente `upvotes` et attribue de la réputation **à chaque appel, sans déduplication** — alors que
+`voteScreenshot()`, 130 lignes plus bas dans le **même fichier**, pose correctement un verrou de
+cache de 30 jours par utilisateur. Un compte peut donc gonfler indéfiniment la réputation d'un
+contenu. *Correction : répliquer le verrou déjà écrit.*
+
+**M13 — Raccourcisseur d'URL public sans restriction de schéma.**
+`Modules/Tools/app/Http/Controllers/QrDynamicLinkController.php:32` valide `['required','url']`,
+là où `Modules/ShortUrl` valide `'url:http,https'`. Route publique (`throttle:20,1`, sans captcha)
+créant un lien hébergé sous un domaine réputé : vecteur d'hameçonnage attractif.
+
+**M14 — Les livres ignorent leur propre scope de publication.**
+`Modules/Books/app/Http/Controllers/PublicBookController.php:26-42` fait `Book::orderBy(...)->get()`
+et `Book::where('slug',...)->first()` **sans jamais appeler `->published()`**, alors que le modèle
+porte le trait `HasPublishedState` et une colonne `is_published`. Tout brouillon serait donc public.
+Impact actuel faible (un seul livre, déjà publié, aucun CRUD admin), mais le défaut vit en
+production.
+
 **M11 — Webhook SMS entrant sans vérification de signature (latent).**
 `Modules/Booking/app/Http/Controllers/SmsInboundController.php:39-68` : aucune signature n'est
 vérifiée, la route est exemptée de CSRF (légitime pour un webhook), et le client est identifié par
@@ -357,6 +427,9 @@ reste du fichier utilise `frontend.theme` : bug dormant sur le cache-bust.
 **B4** — Résidus locaux : `opcache_reset.php`, `audit-console-errors.log`, `.bak-*` de
 `ToolDiscoveryService`.
 **B5** — HSTS sans `preload`.
+**B11** — `IngestController.php:20-27` compare le jeton d'ingestion par `!==` au lieu de
+`hash_equals()`, et sa route n'a aucun `throttle` — alors que le patron correct est employé ailleurs
+dans le projet (`_lvgit.php`, webhook Brevo).
 **B10** — Second secret de webhook exposé dans l'URL (même famille que M2, autre endroit) :
 `/api/webhooks/brevo/{secret}` (`BrevoWebhookController.php:23-29`). La comparaison est correcte
 (`hash_equals`), seule l'exposition dans le chemin pose problème.
@@ -461,6 +534,50 @@ lancés, à lentilles opposées. Bilan, sans complaisance :
 | H5 « cause technique écartée » | **Prématuré.** Un candidat daté existait dans l'historique git |
 | « 3 fichiers résiduels » | **Faux compte.** 23 fichiers (tous gitignorés) |
 | H1, H2, et les 5 faux positifs écartés | **Tiennent**, l'un des adversaires les a même renforcés |
+
+## 8. Ce que cet audit ne couvre PAS, et pourquoi je ne dis pas « 100 % »
+
+Le protocole `/100` interdit d'annoncer la complétude sans deux verdicts adversariaux vides
+consécutifs. **Ce n'est pas atteint, et je ne le maquillerai pas.** Quatre lentilles adversariales
+ont été braquées sur cet audit ; voici ce qu'elles ont donné :
+
+| Round | Verdict | Ce qu'il a changé |
+|---|---|---|
+| 1a — findings faux | `false` | H6 réfuté empiriquement, H5 déclaré prématuré |
+| 1b — ce qui manque | `false` | **2 critiques** (C1, C2) + 4 hauts, dans des modules jamais ouverts |
+| 2 — vérification | `erreurs: []` + 3 manques | H10, M11, B10 ajoutés ; lien C2 ↔ runner trouvé |
+| 3a — validité | **`complet: true`, `erreurs: []`** | Rapport confirmé ligne par ligne, 3 renforts |
+| 3b — zones restantes | 6 findings | **H11 (fuite de courriels)**, H12, M12-M14, B11 |
+
+**La régularité de ces trouvailles est le vrai résultat.** Le round 3b a ouvert Search, Import et
+Books — jamais lus jusque-là — et y a trouvé une fuite de renseignements personnels et une
+traversée de répertoire. Sur 4 913 fichiers et 54 modules, il faut en tirer la conclusion
+honnête : **ce n'est pas la plateforme qui a été auditée en entier, ce sont les zones sur
+lesquelles une lentille a été braquée.**
+
+### Zones jamais lues en profondeur, à traiter en priorité au prochain passage
+
+- `Modules/Academy` (le plus gros module non couvert : cours, quiz, certificats, imports SCORM/H5P
+  — seuls les points d'upload ont été vus)
+- `Modules/Newsletter` (envoi, gabarits, campagnes) au-delà des contrôleurs publics
+- `Modules/Decido`, `Modules/Journal`, `Modules/Notifications`, `Modules/Media` : survolés, pas lus
+- `Modules/Books`, `Modules/Menu`, `Modules/Widget` : routes vues, code non lu
+- Les **jobs de file d'attente** et les **commandes planifiées** dans leur ensemble
+- Les **366 occurrences de `{!! !!}`** : environ 80 échantillonnées, ~285 jamais contrôlées une à
+  une — c'est la plus grosse zone d'ombre restante pour le XSS stocké
+- L'**accessibilité** : 2 gabarits testés sur des dizaines ; la **performance** : 2 gabarits
+- Les **crons de production** : blocage externe (cPanel), consigné en section 1
+
+### Ce que je peux affirmer, et ce que je ne peux pas
+
+**Affirmable** : les 2 critiques, les 12 findings hauts et les 14 moyens listés ici sont **réels et
+vérifiés dans le code**, la plupart par mes propres contrôles et non sur la parole d'un agent. Les
+5 signalements écartés en section 5 l'ont été **par mesure**, pas par confort.
+
+**Non affirmable** : que la plateforme ne contient pas d'autres défauts de gravité équivalente.
+L'expérience de ces quatre rounds suggère fortement le contraire.
+
+---
 
 ## 7. Preuve de nettoyage
 
