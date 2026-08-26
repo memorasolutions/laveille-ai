@@ -51,10 +51,14 @@ return [
             // DOIT rester superieur au plus long --timeout des workers de cette connexion,
             // sinon un job encore en cours est remis en file et sa reprise echoue en
             // MaxAttemptsExceeded, sans qu'aucune erreur metier ne soit jamais enregistree.
-            // Le worker le plus long est celui des captures d'ecran (--timeout=270,
-            // DirectoryServiceProvider) : 300 lui laisse une marge. Les autres files
-            // (newsletters, news-tools) tournent avec --max-time=55 et ne sont pas concernees.
-            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 300),
+            // Le worker le plus long est celui des captures d'ecran (--timeout=330) : 360 lui
+            // laisse une marge. Les autres files (newsletters, news-tools) tournent avec
+            // --max-time=55 et ne sont pas concernees.
+            //
+            // 330/360 et non 270/300 : le job dure jusqu'a 276 s (3 tentatives de 90 s PLUS les
+            // attentes exponentielles de 2 et 4 s entre elles). Caler le worker sur 3x90 = 270
+            // sans compter ces attentes le tuait 6 secondes trop tot - recidive du 2026-08-26.
+            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 360),
             'after_commit' => false,
         ],
 

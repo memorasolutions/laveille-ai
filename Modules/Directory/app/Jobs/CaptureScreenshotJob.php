@@ -15,9 +15,13 @@ class CaptureScreenshotJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    // Aligne sur le --timeout du worker (270, DirectoryServiceProvider), qui prime de toute
-    // facon sur cette propriete. Annoncer 400 laissait croire a une marge qui n'existait pas.
-    public int $timeout = 270;
+    // Aligne sur le --timeout des workers (330), qui prime de toute facon sur cette propriete.
+    //
+    // 330 et non 270 : mesure du 2026-08-26 apres une RECIDIVE. captureWithRetry fait 3 tentatives
+    // de 90 s, mais ATTEND aussi entre elles (sleep(2^n) : 2 s puis 4 s). La duree maximale reelle
+    // est donc 3x90 + 6 = 276 s, pas 270. Un worker a 270 tuait le job 6 secondes avant la fin de
+    // sa derniere tentative - avant meme de compter le demarrage de Node. 330 laisse une vraie marge.
+    public int $timeout = 330;
 
     public int $tries = 1;
 

@@ -82,3 +82,49 @@ it('garde le timeout du job aligne sur celui du worker', function () {
         ."({$timeoutWorker} s), qui prime de toute façon."
     );
 });
+
+// AJOUTE le 2026-08-26 apres une RECIDIVE que les deux tests ci-dessus n'ont pas su empecher.
+//
+// Ils verifiaient la coherence entre `retry_after`, le `--timeout` du worker et le `$timeout` du
+// job - mais jamais que ce `--timeout` couvre la duree REELLE du travail. Or `captureWithRetry`
+// fait 3 tentatives de 90 s ET attend entre elles (`sleep(2^n)` : 2 s puis 4 s), soit 276 s au
+// minimum. Un worker cale a 270 (= 3 x 90, sans les attentes) tuait donc le job 6 secondes avant
+// la fin de sa derniere tentative, avant meme de compter le demarrage du processus Node.
+//
+// Ce test lit les deux nombres DANS LE CODE plutot que de les recopier : il casse donc aussi si
+// quelqu'un allonge le delai de Node ou ajoute une tentative sans toucher au worker.
+it('garde le timeout du worker au-dessus de la duree reelle maximale du job', function () {
+    $service = file_get_contents(
+        base_path('Modules/Directory/app/Services/ScreenshotService.php')
+    );
+
+    preg_match('/Process::timeout\((\d+)\)/', $service, $mNode);
+    expect($mNode)->not->toBeEmpty('Le delai du processus de capture doit rester lisible dans le code.');
+    $delaiNode = (int) $mNode[1];
+
+    preg_match('/captureWithRetry\([^)]*\$maxAttempts = (\d+)/', $service, $mTentatives);
+    expect($mTentatives)->not->toBeEmpty('Le nombre de tentatives doit rester lisible dans le code.');
+    $tentatives = (int) $mTentatives[1];
+
+    // Attentes exponentielles entre deux tentatives : sleep(2^1) + sleep(2^2) + ...
+    $attentes = 0;
+    for ($i = 1; $i < $tentatives; $i++) {
+        $attentes += 2 ** $i;
+    }
+
+    $dureeMaxJob = $tentatives * $delaiNode + $attentes;
+
+    $provider = file_get_contents(
+        base_path('Modules/Directory/app/Providers/DirectoryServiceProvider.php')
+    );
+    preg_match('/--queue=screenshots[^\']*--timeout=(\d+)/', $provider, $m);
+    $timeoutWorker = (int) ($m[1] ?? 0);
+
+    expect($timeoutWorker)->toBeGreaterThan(
+        $dureeMaxJob,
+        "Le --timeout du worker ({$timeoutWorker} s) doit DEPASSER la duree maximale reelle du job "
+        ."({$dureeMaxJob} s = {$tentatives} tentatives de {$delaiNode} s + {$attentes} s d attentes "
+        .'entre elles). Sinon le job est tue avant d avoir fini sa derniere tentative, et l echec '
+        .'remonte en TimeoutExceeded sans qu aucune erreur metier ne soit enregistree.'
+    );
+});
