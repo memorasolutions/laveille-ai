@@ -117,6 +117,13 @@ Schedule::command('queue:work --queue=newsletters --stop-when-empty --max-time=5
 // Queue worker pour AutoDetectNewsToolsJob (shared hosting — pas de daemon, meme convention que newsletters)
 Schedule::command('queue:work --queue=news-tools --stop-when-empty --max-time=55')->everyMinute();
 
+// File des favicons (ResolveFaviconJob). Declaree ICI et pas seulement en cron cPanel : une file
+// dont aucun consommateur n'est visible dans le depot meurt en silence, et les jobs s'accumulent
+// sans que rien ne le signale. C'est exactement le piege qui a coute deux incidents les 25 et
+// 26 aout (un worker declare hors du depot, sans --timeout). Meme convention que les deux files
+// ci-dessus. Redondance assumee avec le cron cPanel : `--stop-when-empty` rend le doublon inoffensif.
+Schedule::command('queue:work --queue=favicons --stop-when-empty --max-time=55')->everyMinute();
+
 // Synchronisation produits Gelato (dimanche 3h)
 Schedule::command('shop:sync-gelato')->sundays()->at('03:00');
 

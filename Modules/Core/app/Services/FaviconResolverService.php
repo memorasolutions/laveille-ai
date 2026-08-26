@@ -23,8 +23,13 @@ final class FaviconResolverService
     ];
 
     /**
-     * Domaines deja confies au job pendant CETTE requete, pour ne pas en empiler
-     * plusieurs fois le meme quand une page affiche 40 favicons.
+     * Domaines deja confies au job, pour ne pas empiler plusieurs fois le meme quand une page
+     * affiche des dizaines de favicons.
+     *
+     * ATTENTION a la portee reelle : une statique vit le temps du PROCESSUS PHP, pas de la
+     * requete. Sur l'hebergement mutualise actuel (PHP-FPM, un processus par requete) les deux
+     * coincident, mais ce ne serait plus vrai avec Octane ou un worker de longue duree - le
+     * dedoublonnage deviendrait alors permanent et bloquerait les rafraichissements suivants.
      *
      * @var array<string, bool>
      */

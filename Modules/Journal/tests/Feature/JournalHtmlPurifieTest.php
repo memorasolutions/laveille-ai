@@ -33,12 +33,20 @@ it('neutralise le HTML dangereux d un bloc de journal', function () {
     expect($rendu)->not->toContain('<script');
 });
 
-it('conserve la mise en forme legitime', function () {
+// Ce test a ete ELARGI apres la passe adversariale : il ne verifiait que <strong> et <em>, deux
+// balises que meme le profil Purifier par defaut conserve. La regression etait donc invisible.
+// L'editeur du journal (Tiptap) autorise les titres h2/h3 et les citations, et la vue porte du CSS
+// dedie aux blockquote : ce sont CES balises qu'il faut verrouiller, pas les faciles.
+it('conserve la mise en forme legitime, titres et citations compris', function () {
     $bloc = new JournalBlock();
-    $bloc->payload = ['html' => '<p>Un <strong>mot</strong> important et un <em>autre</em>.</p>'];
+    $bloc->payload = ['html' => '<h2>Un titre</h2><blockquote><p>Une citation</p></blockquote>'
+        .'<ul><li>un item</li></ul><p>Un <strong>mot</strong> et un <em>autre</em>.</p>'];
 
     $rendu = $bloc->safeHtml();
 
+    expect($rendu)->toContain('<h2>');
+    expect($rendu)->toContain('blockquote');
+    expect($rendu)->toContain('<ul>');
     expect($rendu)->toContain('<strong>');
     expect($rendu)->toContain('<em>');
 });

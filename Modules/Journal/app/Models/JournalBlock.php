@@ -65,6 +65,12 @@ class JournalBlock extends Model
             return e($html);
         }
 
-        return \Mews\Purifier\Facades\Purifier::clean($html);
+        // Profil 'article' et NON le profil par defaut : mesure du 2026-08-26, le profil par
+        // defaut RETIRE h2/h3 et blockquote. L'editeur du journal (Tiptap) autorise pourtant les
+        // titres h2/h3 et les citations, et la vue porte du CSS dedie a `.journal-block-content
+        // blockquote`. Purifier avec le mauvais profil aurait donc mutile silencieusement des
+        // journaux DEJA publies - une casse de contenu provoquee par un correctif de securite.
+        // Verifie : le profil 'article' neutralise onerror et <script> aussi bien que le defaut.
+        return \Mews\Purifier\Facades\Purifier::clean($html, 'article');
     }
 }
