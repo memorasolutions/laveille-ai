@@ -145,11 +145,32 @@ donne une image fausse :
 
 ## 7. Ce qui reste ouvert
 
-- **`Modules/Menu`** : ses routes sont déclarées dans `Modules/Backoffice/routes/web.php`, non lu
-  faute de budget. Le contrôle des permissions n'est **pas** confirmé.
-- **`withoutOverlapping()`** absent sur une quinzaine de tâches planifiées, dont des purges et des
-  appels externes. Aucun incident constaté, mais deux incidents de file cette semaine invitent à
-  durcir.
+- ~~**`Modules/Menu`** : le contrôle des permissions n'est pas confirmé~~ - **VÉRIFIÉ ET CLOS le
+  2026-08-26 : le module est propre.** Les six routes portent chacune leur `permission:`
+  (`view_menus`, `create_menus`, `update_menus`, `delete_menus`), le groupe englobant impose
+  `web`, `auth`, `two.factor` et `EnsureIsAdmin`, les quatre permissions sont bien créées par la
+  boucle « Pattern A » du seeder (`menus` figure dans `$patternAEntities`), et la vue conditionne
+  les boutons Modifier et Supprimer aux mêmes permissions - l'affordance et le contrôle d'accès
+  sont tous deux présents. Une fausse piste écartée en chemin : le rôle éditeur n'a
+  volontairement pas `delete_menus`, ce qui n'est pas une permission manquante mais un moindre
+  privilège assumé.
+- ~~**`withoutOverlapping()`** absent sur une quinzaine de tâches planifiées~~ - **MESURÉ ET
+  LARGEMENT ÉCARTÉ le 2026-08-26.** Le compte réel est 25 sur 42, mais compter n'est pas coter :
+  - `newsletter:digest --send` porte **déjà sa propre idempotence** (`Cache::lock` de 30 minutes,
+    commentée « empêche double envoi si cron rerun ») et ses deux lignes de planification sont
+    **commentées** : la tâche ne tourne même pas.
+  - `notifications:send-digest` marque les notifications `read_at` juste après l'envoi, si bien
+    qu'une seconde passe ne trouve plus rien. Une fenêtre de course subsiste entre l'envoi et la
+    marque, mais la tâche est quotidienne : l'ajout reste souhaitable, la gravité est basse.
+  - `backup:run` tourne une fois par jour : un chevauchement supposerait une sauvegarde de plus
+    de 24 heures.
+  - Les `queue:work` ne doivent **surtout pas** recevoir ce verrou : plusieurs consommateurs en
+    parallèle sont le fonctionnement normal d'une file.
+  - Le reste est du ménage idempotent (`telescope:prune`, `activitylog:clean`,
+    `queue:prune-batches`, `horizon:snapshot`).
+
+  Conclusion : la formulation initiale laissait croire à une quinzaine de correctifs à poser. Il
+  n'y en a en pratique aucun d'urgent, et un changement massif aurait été du bruit.
 - **`SendCampaignEmailJob`** n'a pas le garde-fou d'idempotence que possède `SendDigestJob`.
   Signal, non confirmé.
 - **JSON-LD de Books** sans `JSON_HEX_TAG`. Non exploitable aujourd'hui (aucun formulaire admin),
