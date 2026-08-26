@@ -209,13 +209,17 @@ return [
         // d'echantillonnage pour l'estimation d'autonomie : trop court, le bruit domine.
         'poll_seconds' => env('HEALTH_OPENROUTER_POLL_SECONDS', 1800),
         'warn_after_consecutive_failures' => env('HEALTH_OPENROUTER_WARN_AFTER_CONSECUTIVE_FAILURES', 3),
-        // Seuils en dollars US : au rythme mesure le 2026-08-23 (environ 2,70 $ par jour),
-        // 50 $ laissent une quinzaine de jours pour reagir et 15 $ en laissent cinq.
-        'warn_remaining_usd' => env('HEALTH_OPENROUTER_WARN_REMAINING_USD', 50),
+        // AVERTISSEMENTS DESACTIVES le 2026-08-26, sur demande du fondateur : le compte
+        // OpenRouter se recharge AUTOMATIQUEMENT par carte, donc un « credit bas » n'appelle
+        // aucune action et le rappel ne fait que deranger.
+        //
+        // A zero, la comparaison `$restant <= 0` n'est jamais vraie : plus aucun avertissement.
+        // Les seuils d'ECHEC restent actifs, et c'est delibere : si la carte expire ou est
+        // refusee, l'auto-recharge echoue en silence et le credit tombe pour de bon. C'est le
+        // seul cas ou une alerte apprend encore quelque chose, et il reste couvert.
+        'warn_remaining_usd' => env('HEALTH_OPENROUTER_WARN_REMAINING_USD', 0),
         'fail_remaining_usd' => env('HEALTH_OPENROUTER_FAIL_REMAINING_USD', 15),
-        // Seuils en jours : ils prennent le relais quand la consommation s'emballe et qu'un
-        // seuil en dollars fige alerterait trop tard.
-        'warn_remaining_days' => env('HEALTH_OPENROUTER_WARN_REMAINING_DAYS', 10),
+        'warn_remaining_days' => env('HEALTH_OPENROUTER_WARN_REMAINING_DAYS', 0),
         'fail_remaining_days' => env('HEALTH_OPENROUTER_FAIL_REMAINING_DAYS', 3),
         'connection_failures_cache_key' => env('HEALTH_OPENROUTER_CONNECTION_FAILURES_CACHE_KEY', 'health:openrouter:echecs_consecutifs'),
         'measurement_cache_key' => env('HEALTH_OPENROUTER_MEASUREMENT_CACHE_KEY', 'health:openrouter:derniere_mesure'),
