@@ -21,6 +21,7 @@ declare(strict_types=1);
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\News\Models\NewsArticle;
 use Modules\News\Models\NewsSource;
+use Spatie\ResponseCache\Facades\ResponseCache;
 
 uses(Tests\TestCase::class, RefreshDatabase::class);
 
@@ -413,4 +414,55 @@ it('still erases a MACHINE structured_summary when a content payload carries no 
     expect($article->structured_summary)->toBeNull(
         'Le resume machine prime sinon sur la composition cote page publique.'
     );
+});
+
+// ── Purge du cache apres une ecriture sur une fiche PUBLIEE (mesure du 2026-08-26) ──────
+//
+// --enrich existe pour corriger une fiche deja publiee. Une correction typographique appliquee
+// avec succes ne paraissait pourtant pas sur le site : la page etait servie depuis le cache de
+// reponse Spatie, dont la duree de vie est de sept jours. La commande ecrivait en base sans
+// jamais invalider la page correspondante.
+//
+// La purge est CIBLEE sur l'URL de la fiche (NewsToolSyncAction::invalidatePublicCache, deja
+// employe par le chemin related_tool_slugs) - jamais un clear() global qui viderait tout le site
+// et renverrait chaque page en rendu a froid.
+
+it('purge le cache de la page publique apres un --enrich sur une fiche publiee', function () {
+    $article = csArticle(['is_published' => true, 'published_at' => now()]);
+
+    // Double chainable : on eprouve la CHAINE COMPLETE (forUrls -> usingSuffix -> forget),
+    // pas seulement le fait que selectCachedItems ait ete appele. Un simple spy laisserait
+    // passer une purge construite puis jamais executee.
+    // Le double porte la VRAIE classe : selectCachedItems() declare CacheItemSelector en
+    // type de retour, un mock anonyme serait refuse par PHP avant meme d'atteindre l'assertion.
+    $selecteur = Mockery::mock(\Spatie\ResponseCache\CacheItemSelector\CacheItemSelector::class);
+    $selecteur->shouldReceive('forUrls')->once()->andReturnSelf();
+    $selecteur->shouldReceive('usingSuffix')->once()->andReturnSelf();
+    $selecteur->shouldReceive('forget')->once();
+    ResponseCache::shouldReceive('selectCachedItems')->once()->andReturn($selecteur);
+
+    $this->artisan('news:apply', [
+        'article' => $article->id,
+        '--payload' => csPayloadFile(array_merge(csFreshMeta($article), [
+            'composed_summary' => ['hook' => 'Correction typographique appliquee apres publication.'],
+        ])),
+        '--enrich' => true,
+    ])->assertSuccessful();
+});
+
+// Non-regression : sur un BROUILLON, il n'y a aucune page publique en cache a invalider.
+// Purger la serait au mieux inutile, et masquerait le fait que la garde porte bien sur l'etat publie.
+it('ne purge rien quand la fiche est encore un brouillon', function () {
+    $article = csArticle();
+
+    ResponseCache::spy();
+
+    $this->artisan('news:apply', [
+        'article' => $article->id,
+        '--payload' => csPayloadFile(array_merge(csFreshMeta($article), [
+            'composed_summary' => csValidComposedSummary(),
+        ])),
+    ])->assertSuccessful();
+
+    ResponseCache::shouldNotHaveReceived('selectCachedItems');
 });

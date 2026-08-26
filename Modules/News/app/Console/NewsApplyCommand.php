@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Modules\News\Actions\NewsToolSyncAction;
 use Modules\News\Models\NewsArticle;
 use Modules\News\Services\CompositionPromptBuilder;
 use Modules\News\Services\EditorialProofNormalizer;
@@ -196,6 +197,18 @@ class NewsApplyCommand extends Command
             if ($result !== self::SUCCESS) {
                 return $result;
             }
+        }
+
+        // ACTION : purger le cache de reponse de la page publique apres une ecriture sur une fiche
+        // DEJA PUBLIEE. Sans cela, --enrich - dont c'est justement la raison d'etre, corriger une
+        // fiche publiee - laisse la correction invisible jusqu'a l'expiration du cache Spatie
+        // (7 jours). Mesure le 2026-08-26 : une correction typographique appliquee avec succes ne
+        // paraissait pas, la page etant servie depuis le cache.
+        // MCP: SELF (<5 lignes)
+        // RAISON: reutilise NewsToolSyncAction::invalidatePublicCache(), purge CIBLEE deja en place
+        //         (DRY) - jamais un ResponseCache::clear() global qui viderait tout le site.
+        if ($article->fresh()?->is_published && ($payloadPath || $imagePath)) {
+            NewsToolSyncAction::invalidatePublicCache($article);
         }
 
         return self::SUCCESS;

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.220.3] - 2026-08-26
+
+### Corrigé
+- **Une correction appliquée à une fiche déjà publiée restait invisible jusqu'à sept jours.** `news:apply --enrich` existe précisément pour corriger une actualité publiée, mais il écrivait en base sans jamais invalider la page correspondante : celle-ci continuait d'être servie depuis le cache de réponse, dont la durée de vie est de sept jours. Mesuré le 26 août sur une correction typographique appliquée avec succès et pourtant absente du site.
+- La purge est **ciblée sur l'URL de la fiche**, en réutilisant `NewsToolSyncAction::invalidatePublicCache()` déjà employé par le chemin des outils liés. Jamais un `ResponseCache::clear()` global, qui viderait le cache de tout le site et renverrait chaque page en rendu à froid.
+- Deux tests : la chaîne complète de purge est éprouvée après un `--enrich` sur une fiche publiée (`forUrls` puis `usingSuffix` puis `forget`, pas seulement l'appel initial), et rien n'est purgé sur un brouillon, qui n'a aucune page publique en cache. Le premier a été vérifié **rouge sans le correctif, vert avec**.
+
 ## [1.220.2] - 2026-08-26
 
 ### Corrigé
