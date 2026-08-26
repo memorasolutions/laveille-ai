@@ -208,7 +208,7 @@
                         <div class="journal-block journal-block-{{ $block->type }}{{ $isFirstTextBlock ? ' journal-first-text-block' : '' }}">
                             @switch($block->type)
                                 @case('text')
-                                    <div class="journal-block-content">{!! $block->payload['html'] ?? '' !!}</div>
+                                    <div class="journal-block-content">{!! $block->safeHtml() !!}</div>
                                     @break
                                 @case('image')
                                     <img src="{{ $block->payload['url'] ?? '' }}" alt="" class="img-fluid">

@@ -33,7 +33,7 @@ class SearchController
         $modelFilter = $request->input('model');
 
         if ($modelFilter) {
-            $models = $this->searchService->getSearchableModels();
+            $models = $this->searchService->getSearchableModelsFor($request->user());
             $matchedModel = collect($models)->first(
                 fn (string $model) => class_basename($model) === $modelFilter
             );
@@ -53,7 +53,7 @@ class SearchController
             ]);
         }
 
-        $models = $this->searchService->getSearchableModels();
+        $models = $this->searchService->getSearchableModelsFor($request->user());
         $results = $this->searchService->search($query, $models, $perPage);
 
         $formatted = [];

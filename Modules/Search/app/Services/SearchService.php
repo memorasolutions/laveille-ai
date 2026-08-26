@@ -160,6 +160,50 @@ class SearchService
     /**
      * @return array<class-string>
      */
+    /**
+     * Modeles dont le contenu ne doit jamais sortir de l'administration.
+     * User expose nom + courriel via toSearchableArray() ; Setting peut porter de la configuration.
+     */
+    private const MODELES_SENSIBLES = [
+        \App\Models\User::class,
+        \Modules\Settings\Models\Setting::class,
+    ];
+
+    /**
+     * Modeles recherchables AUTORISES pour un utilisateur donne.
+     *
+     * Faille corrigee le 2026-08-26 : l'API `GET /api/v1/search` n'est protegee que par
+     * `auth:sanctum`, sans aucune permission. Tout visiteur pouvait s'inscrire librement,
+     * s'emettre un jeton depuis son tableau de bord, puis obtenir le nom ET LE COURRIEL de
+     * tous les comptes. C'est une communication de renseignements personnels (Loi 25).
+     *
+     * On ne peut PAS desindexer User : le back-office s'en sert legitimement
+     * (searchAdmin, searchNavbar). C'est donc l'ACCES qui est filtre, jamais l'index.
+     *
+     * Fail-closed : au moindre doute sur les droits, on protege la donnee.
+     */
+    public function getSearchableModelsFor(?\Illuminate\Contracts\Auth\Authenticatable $user): array
+    {
+        $autorise = false;
+
+        try {
+            $autorise = $user !== null
+                && method_exists($user, 'can')
+                && $user->can('view_admin_panel');
+        } catch (\Throwable $e) {
+            $autorise = false;
+        }
+
+        if ($autorise) {
+            return $this->getSearchableModels();
+        }
+
+        return array_values(array_filter(
+            $this->getSearchableModels(),
+            static fn (string $modele): bool => ! in_array($modele, self::MODELES_SENSIBLES, true),
+        ));
+    }
+
     public function getSearchableModels(): array
     {
         return config('search.models', []);

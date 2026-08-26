@@ -22,6 +22,69 @@ final class FaviconResolverService
         'https://www.google.com/s2/favicons?domain={domain}&sz={size}',
     ];
 
+    /**
+     * Domaines deja confies au job pendant CETTE requete, pour ne pas en empiler
+     * plusieurs fois le meme quand une page affiche 40 favicons.
+     *
+     * @var array<string, bool>
+     */
+    private static array $dispatchesThisRequest = [];
+
+    /**
+     * Version NON BLOQUANTE de resolve(), destinee au RENDU.
+     *
+     * Mesure du 2026-08-26 : resolve() interroge jusqu'a 3 fournisseurs externes avec
+     * 3 secondes de delai chacun. Appelee depuis une vue, elle faisait couter 4,4 a 10,6 s
+     * la premiere visite d'une fiche d'outil, contre 0,5 s ensuite. Le rendu ne doit JAMAIS
+     * attendre le reseau : cette methode lit le cache, rien d'autre, et confie le travail
+     * reseau a ResolveFaviconJob.
+     *
+     * Une valeur perimee est retournee telle quelle : un favicon un peu vieux vaut mieux
+     * qu'un trou dans la page, et le rafraichissement suit en arriere-plan.
+     */
+    public static function resolveCached(string $domain, int $size = 64): ?string
+    {
+        try {
+            $domain = self::sanitizeDomain($domain);
+
+            if ($domain === '' || $domain === null) {
+                return null;
+            }
+
+            $cached = DB::table('favicon_cache')->where('domain', $domain)->first();
+
+            if ($cached !== null && self::isCacheValid($cached)) {
+                return $cached->resolved_url;
+            }
+
+            // Cache absent OU perime : dans les DEUX cas il faut declencher la resolution,
+            // sinon un domaine jamais vu n'obtiendrait jamais de favicon.
+            self::dispatchResolution($domain, $size);
+
+            return $cached->resolved_url ?? null;
+        } catch (\Throwable $e) {
+            // Le rendu ne doit jamais tomber a cause d'un favicon.
+            return null;
+        }
+    }
+
+    private static function dispatchResolution(string $domain, int $size): void
+    {
+        if (isset(self::$dispatchesThisRequest[$domain])) {
+            return;
+        }
+
+        self::$dispatchesThisRequest[$domain] = true;
+
+        try {
+            if (class_exists(\Modules\Core\Jobs\ResolveFaviconJob::class)) {
+                \Modules\Core\Jobs\ResolveFaviconJob::dispatch($domain, $size);
+            }
+        } catch (\Throwable $e) {
+            // File indisponible : on renonce silencieusement plutot que de casser la page.
+        }
+    }
+
     public static function resolve(string $domain, int $size = 64): ?string
     {
         try {

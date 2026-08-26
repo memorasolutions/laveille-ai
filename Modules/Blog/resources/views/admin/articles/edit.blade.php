@@ -170,7 +170,7 @@
                     <div id="yt-summary-result" class="{{ $article->video_summary ? '' : 'd-none' }}">
                         <label class="form-label">Résumé IA</label>
                         <div id="yt-summary-content" class="border rounded p-2 bg-light" style="font-size:13px;max-height:300px;overflow-y:auto;">
-                            {!! \Illuminate\Support\Str::markdown($article->video_summary ?? '') !!}
+                            {!! \Illuminate\Support\Str::markdown($article->video_summary ?? '', ['html_input' => 'strip', 'allow_unsafe_links' => false]) !!}
                         </div>
                     </div>
                 </div>

@@ -376,8 +376,9 @@ document.addEventListener('DOMContentLoaded', function () {
     $host = $tool->url ? parse_url($tool->url, PHP_URL_HOST) : '';
     $favicon = $host ? "https://www.google.com/s2/favicons?domain={$host}&sz=64" : '';
     $pricingLabels = \Modules\Directory\Support\PricingCategories::labels();
-    $reviews = $tool->reviews()->approved()->latest()->get();
-    $discussions = $tool->discussions()->approved()->topLevel()->with('replies.user', 'user')->latest()->get();
+    $reviews = $tool->reviews()->approved()->withCount('communityVotes')->latest()->get();
+    $discussions = $tool->discussions()->approved()->topLevel()->withCount('communityVotes')
+        ->with(['replies.user', 'user', 'replies' => fn ($q) => $q->withCount('communityVotes')])->latest()->get();
     // $resources passé depuis le controller (FR-first, puis date)
     $resources = $resources ?? $tool->resources()->where('is_approved', true)->orderByRaw("FIELD(language, 'fr', 'en') ASC")->orderByDesc('created_at')->get();
     $screenshots = $tool->screenshots()->approved()->orderByDesc('votes_count')->get();
@@ -1111,7 +1112,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     @if($res->video_summary)
                     <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;">
                         <h5 style="font-weight:700;color:var(--c-dark);margin:0 0 8px;font-size:14px;">🤖 {{ __('Résumé généré par IA') }}</h5>
-                        <div class="rt-description" style="font-size:14px;color:var(--c-text-secondary);line-height:1.6;">{!! \Illuminate\Support\Str::markdown($res->video_summary) !!}</div>
+                        <div class="rt-description" style="font-size:14px;color:var(--c-text-secondary);line-height:1.6;">{!! \Illuminate\Support\Str::markdown($res->video_summary, ['html_input' => 'strip', 'allow_unsafe_links' => false]) !!}</div>
                     </div>
                     @endif
                 </div>

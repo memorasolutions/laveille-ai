@@ -30,8 +30,21 @@ trait HasCommunityVotes
         return true;
     }
 
+    /**
+     * Nombre de votes, en profitant du prechargement quand il existe.
+     *
+     * Mesure du 2026-08-26 : une fiche d'outil declenchait 42 `count(*)` sur `community_votes`,
+     * parce que le composant `vote-button` appelle cette methode a chaque rendu. Lire d'abord
+     * l'attribut pose par `withCount('communityVotes')` supprime ces requetes sans obliger le
+     * moindre appelant a changer : ceux qui prechargent en profitent, les autres gardent le
+     * comportement d'avant.
+     */
     public function communityVoteCount(): int
     {
+        if (array_key_exists('community_votes_count', $this->getAttributes())) {
+            return (int) $this->getAttributes()['community_votes_count'];
+        }
+
         return $this->communityVotes()->count();
     }
 

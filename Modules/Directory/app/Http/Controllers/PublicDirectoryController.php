@@ -212,7 +212,9 @@ class PublicDirectoryController extends Controller
             ->take($limit)
             ->values();
 
+        // withCount : evite un count(*) par bouton de vote rendu (42 mesures le 2026-08-26).
         $resources = $tool->resources()
+            ->withCount('communityVotes')
             ->where('is_approved', true)
             ->orderByRaw("FIELD(language, 'fr', 'en') ASC")
             ->orderByDesc('created_at')

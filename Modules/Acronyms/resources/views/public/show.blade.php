@@ -88,8 +88,8 @@
     }
     .acr-diff-beginner { background: #10B981; }
     .acr-diff-intermediate { background: #F59E0B; }
-    .acr-diff-advanced { background: #EF4444; }
-    .acr-show-updated { text-align: center; color: #9ca3af; font-size: 0.82rem; margin: 8px 0 20px; font-style: italic; }
+    .acr-diff-advanced { background: #FEE2E2; color: #991B1B; }
+    .acr-show-updated { text-align: center; color: var(--c-text-muted, #52586a); font-size: 0.82rem; margin: 8px 0 20px; font-style: italic; }
 
     /* Phrase-réponse (answer-first AEO) */
     .acr-answer-box {

@@ -10,7 +10,7 @@
 .aab-btn:hover { background: #f3f4f6; border-color: #d1d5db; }
 .aab-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
 .aab-btn-active { color: #ef4444; border-color: #fecaca; }
-.aab-feedback { font-size: 0.75rem; color: #10b981; font-weight: 500; }
+.aab-feedback { font-size: 0.75rem; color: #065F46; font-weight: 500; }
 .aab-report-form { position: absolute; top: 100%; left: 0; z-index: 100; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; width: 280px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 .aab-journal-menu { position: absolute; top: 100%; left: 0; z-index: 100; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.5rem; width: 240px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-height: 260px; overflow-y: auto; }
 .aab-journal-item { display: block; width: 100%; text-align: left; background: transparent; border: none; padding: 0.5rem 0.625rem; border-radius: 6px; font-size: 0.8125rem; color: #374151; cursor: pointer; }

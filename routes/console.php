@@ -182,26 +182,11 @@ Schedule::command('news:reprocess --unresolved-only --limit=50')->dailyAt('04:30
 // Le daily 4:30 gere la routine, ce second run rattrape plus vite les nouveaux articles non resolus
 Schedule::command('news:reprocess --unresolved-only --limit=10')->cron('15 */2 * * *')->withoutOverlapping();
 
-// One-shot reassign Concentré category (corrige duplicate, retiré après exec)
-Schedule::call(function () {
-    $flag = storage_path('app/reassign_concentre_category_s26.flag');
-    if (file_exists($flag)) {
-        return;
-    }
-    try {
-        $seederPath = base_path('database/seeders/Standalone/ReassignConcentreCategoryS26.php');
-        if (!file_exists($seederPath)) {
-            @file_put_contents($flag . '.error', 'Seeder file not found');
-            return;
-        }
-        require_once $seederPath;
-        $seeder = new \Database\Seeders\Standalone\ReassignConcentreCategoryS26();
-        $seeder->run();
-        @file_put_contents($flag, now()->toIso8601String() . "\nOK");
-    } catch (\Throwable $e) {
-        @file_put_contents($flag . '.error', $e->getMessage() . "\n" . $e->getTraceAsString());
-    }
-})->everyMinute();
+// Correctif ponctuel « reassign Concentré category » RETIRE le 2026-08-26 (audit).
+// Son propre commentaire annoncait « retiré après exec », mais le bloc est reste en
+// ->everyMinute() indefiniment : il se neutralisait par un fichier drapeau, mais tournait
+// quand meme chaque minute. Le projet interdit explicitement de laisser un cron temporaire.
+// Le seeder demeure dans database/seeders/Standalone/ si le correctif doit etre rejoue.
 
 // Custom scheduled tasks from database
 try {

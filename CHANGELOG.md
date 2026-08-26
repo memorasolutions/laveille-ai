@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.220.0] - 2026-08-26
+
+### Corrigé
+- **Le site mettait jusqu'à 10 secondes à afficher une fiche d'outil jamais visitée.** Mesuré en production sur cinq pages : première visite de 4,4 à 10,6 s, seconde visite 0,5 s, soit un facteur 10 à 16. Cause trouvée : le composant `smart-favicon` appelait `FaviconResolverService::resolve()` **depuis une vue**, donc pendant le rendu. Ce service interroge jusqu'à trois fournisseurs externes avec trois secondes de délai chacun, soit neuf secondes par domaine inconnu.
+- Le rendu lit désormais le cache et rien d'autre (`resolveCached()`), et confie le travail réseau à un nouveau `ResolveFaviconJob` sur une file dédiée. Une valeur périmée est servie telle quelle : un favicon un peu vieux vaut mieux qu'un trou dans la page, et le rafraîchissement suit en arrière-plan.
+- Mesure locale du même rendu, avant puis après : **2 605 ms → 204 ms**, requêtes SQL **132 → 49**, et surtout **0 écriture dans `favicon_cache` pendant le rendu** contre 7 auparavant, ce qui prouve qu'aucun appel réseau ne subsiste. Un domaine inconnu répond maintenant en 7,9 ms au lieu de neuf secondes.
+- Enjeu réel : l'annuaire compte 1 544 pages et Googlebot explore surtout des pages froides. Il subissait donc ce délai systématiquement, ce qui pèse sur le budget d'exploration d'un site dont le robot n'était plus repassé depuis le 4 août.
+- **N+1 sur les votes** : une fiche déclenchait **42 requêtes `count(*)`** sur `community_votes`, parce que le composant `vote-button` compte à chaque rendu. `communityVoteCount()` lit désormais l'attribut posé par `withCount()` quand il existe, sans qu'aucun appelant ait à changer : ceux qui préchargent en profitent, les autres gardent le comportement d'avant. Ramené à **6**.
+
+### Sécurité
+- **L'API de recherche exposait le nom et le courriel de tous les comptes.** `GET /api/v1/search` n'est gardée que par `auth:sanctum`, sans aucune permission. `User` est en tête de `config('search.models')`, `toSearchableArray()` retourne le courriel, et la méthode de l'API ne filtre rien là où `searchFront()` applique bien ses scopes. Chaîne complète sans privilège : inscription libre, jeton émis depuis son propre tableau de bord, puis `?model=User`. Communication de renseignements personnels au sens de la Loi 25.
+- Correctif : c'est **l'accès** qui est filtré, jamais l'index. Désindexer `User` aurait cassé la recherche légitime du back-office (`searchAdmin`, `searchNavbar`). Nouvelle méthode `getSearchableModelsFor()`, fail-closed : au moindre doute sur les droits, la donnée est protégée. Quatre tests verrouillent les deux côtés, dont la non-régression du back-office.
+- **L'API publiait des articles sans vérifier aucune autorisation.** `ArticleApiController::store()` était la seule action d'écriture sans `authorize()`, alors que `update()` et `destroy()` en ont une : l'incohérence dans le même fichier signait l'oubli. Tout utilisateur inscrit pouvait donc publier un article de blogue en contournant la permission `create_articles` qu'exige le back-office. Éprouvé rouge avant correctif, vert après.
+- **XSS stocké sur une page publique du module Journal**, trouvé en fermant la zone d'ombre des sorties non échappées. La vue affichait `{!! $block->payload['html'] !!}` en brut, alors que ce HTML est saisi par l'utilisateur et que `JournalPolicy::view()` autorise la lecture à **tout le monde, visiteur anonyme compris**, dès que le journal est publié. La route `GET /journaux/{journal}` est d'ailleurs déclarée hors du groupe `auth`. La policy était correcte : c'est le rendu qui ne l'était pas.
+- Corrigé par un accesseur `safeHtml()` sur le modèle, calqué sur `Article::safeContent()` du module Blog. Purification à l'**affichage** et non à l'écriture, pour couvrir aussi les blocs déjà enregistrés sans migration ni réécriture de données existantes. Quatre tests, dont un garde-fou qui interdit à la vue de réafficher le champ brut.
+- Vérifié au passage : `LessonItem::renderRichText()` d'Academy applique déjà `html_input => strip` — les dizaines d'appels du module sont donc sûrs, et le dernier usage de Journal passe par `strip_tags()`.
+- **Trois sorties de modèle de langage rendues en HTML brut.** `Str::markdown()` sans options laisse passer le HTML : vérifié mécaniquement, `<img src=x onerror="...">` traverse intact. Corrigé sur la fiche d'outil, **et sur la page publique du blog, qui portait exactement la même faille sans avoir jamais été signalée**. Le même champ était pourtant déjà filtré trois fois ailleurs dans le premier fichier.
+
+### Hygiène
+- **La commande de démonstration pouvait tourner en production.** `app:demo` insère de faux articles, de fausses pages **déjà publiées** et de faux abonnés dans les vraies tables, sans qu'aucune garde d'environnement ne l'en empêche. Elle refuse désormais de s'exécuter en production, sauf `--force` explicite. Nuance vérifiée et rassurante : sa suppression était déjà **strictement bornée** aux adresses `%@demo.test`, donc aucune donnée d'utilisateur réel n'a jamais pu être touchée. Le risque était la création, pas l'effacement.
+- **Cron temporaire retiré du planificateur.** Un correctif ponctuel annonçait lui-même « retiré après exec », mais son bloc était resté en `->everyMinute()` indéfiniment. Il se neutralisait par un fichier drapeau, mais tournait quand même chaque minute, contrairement à une règle explicite du projet. Le seeder correspondant est conservé si le correctif doit être rejoué.
+- Limitation de débit ajoutée sur `newsletter.confirm` et `newsletter.unsubscribe`, deux routes publiques qui écrivent en base. Non exploitable en pratique (jeton de 64 caractères), mais cohérent avec le reste du module.
+
+### Accessibilité
+- Trois défauts de contraste réels, mesurés sur le fond effectif et non sur la remontée du DOM : badge « Avancé » à 3,76:1, mention « Mis à jour le… » à 2,54:1, retour visuel « Ajouté ! / Copié ! » à 2,54:1. La charte du projet vise AAA (7:1).
+- Corrigés en **réutilisant ce qui existait déjà** : le token `--c-text-muted` de `charte.css` (7,09:1) et la combinaison rouge de `Dictionary/index` (6,8:1), au lieu d'inventer de nouvelles couleurs. Le vert du retour visuel passe à 7,68:1.
+- Vérification qui a évité une casse : sur les 20 occurrences de `#9ca3af` du dépôt, **seules 2 étaient le défaut**. Les autres sont des bordures, des fonds de cases de jeu, des échantillons de couleur ou du Tailwind généré : les remplacer aveuglément aurait abîmé des affichages corrects.
+
 ## [1.219.1] - 2026-08-26
 
 ### Corrigé

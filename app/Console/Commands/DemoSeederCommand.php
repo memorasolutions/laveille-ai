@@ -21,12 +21,29 @@ use Modules\Pages\Models\StaticPage;
 
 class DemoSeederCommand extends Command
 {
-    protected $signature = 'app:demo {--fresh : Clear existing demo data first}';
+    protected $signature = 'app:demo {--fresh : Clear existing demo data first} {--force : Autoriser l\'execution en production (contenu de demonstration publie)}';
 
     protected $description = 'Generate realistic demo data to showcase all modules';
 
     public function handle(): int
     {
+        // Garde ajoutee le 2026-08-26 (audit) : cette commande cree de FAUX articles, de FAUSSES
+        // pages deja PUBLIEES et de faux abonnes dans les vraies tables. Rien n'empechait de la
+        // lancer en production, ou elle aurait melange ce contenu factice au contenu reel.
+        //
+        // La suppression, elle, est bornee a `%@demo.test` (clearDemoData) : aucune donnee
+        // d'utilisateur reel n'a jamais pu etre touchee. Le risque est la CREATION, pas l'effacement.
+        //
+        // `--force` reste possible pour un cas legitime assume, mais il faut le demander.
+        if (app()->isProduction() && ! $this->option('force')) {
+            $this->components->error(
+                'Refus : cette commande insere du contenu de demonstration publie. '
+                .'En production, relancez-la avec --force si c\'est reellement voulu.'
+            );
+
+            return self::FAILURE;
+        }
+
         if ($this->demoDataExists() && ! $this->option('fresh')) {
             $this->components->warn('Demo data already exists. Use --fresh to recreate.');
 

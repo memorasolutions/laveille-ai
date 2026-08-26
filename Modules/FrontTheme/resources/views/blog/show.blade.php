@@ -273,7 +273,7 @@
                             @if($article->video_summary)
                                 <div class="video-summary mb-4 p-3" style="background:#f0f7ff;border-left:4px solid var(--c-primary);border-radius:6px;">
                                     <h5 style="margin-bottom:10px;"><i class="fi flaticon-play-button" style="margin-right:6px;"></i>Résumé de la vidéo</h5>
-                                    <div class="rt-description">{!! \Illuminate\Support\Str::markdown($article->video_summary) !!}</div>
+                                    <div class="rt-description">{!! \Illuminate\Support\Str::markdown($article->video_summary, ['html_input' => 'strip', 'allow_unsafe_links' => false]) !!}</div>
                                 </div>
                             @endif
 

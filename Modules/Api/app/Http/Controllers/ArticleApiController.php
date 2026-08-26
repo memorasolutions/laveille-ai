@@ -29,6 +29,13 @@ class ArticleApiController extends BaseApiController
      */
     public function store(StoreArticleRequest $request): JsonResponse
     {
+        // Faille corrigee le 2026-08-26 : store() etait la SEULE action du controleur sans
+        // autorisation, alors que update() et destroy() en ont une. La route n'etant gardee que
+        // par `auth:sanctum`, tout visiteur pouvait s'inscrire, s'emettre un jeton et publier
+        // un article de blogue immediatement, en contournant la permission `create_articles`
+        // qu'exige pourtant le back-office. ArticlePolicy::create() existait deja.
+        $this->authorize('create', Article::class);
+
         $validated = $request->validated();
 
         $validated['status'] = $validated['status'] ?? 'draft';

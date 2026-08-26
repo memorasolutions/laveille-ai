@@ -23,7 +23,9 @@
 
     if ($domain && class_exists(\Modules\Core\Services\FaviconResolverService::class)) {
         try {
-            $resolvedUrl = \Modules\Core\Services\FaviconResolverService::resolve($domain, (int) $size);
+            // resolveCached() et JAMAIS resolve() : le rendu ne doit pas attendre le reseau.
+            // Voir ResolveFaviconJob pour la mesure qui a motive ce changement.
+            $resolvedUrl = \Modules\Core\Services\FaviconResolverService::resolveCached($domain, (int) $size);
         } catch (\Throwable $e) {
             $resolvedUrl = null;
         }

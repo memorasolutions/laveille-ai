@@ -88,7 +88,11 @@ test('api articles store requires auth', function () {
 });
 
 test('api articles store creates article', function () {
-    Sanctum::actingAs(User::factory()->create());
+    // Durci le 2026-08-26 (audit) : la creation par l'API exige desormais la permission
+    // `create_articles`, comme le back-office l'exigeait deja pour la meme action.
+    $utilisateur = User::factory()->create();
+    $utilisateur->givePermissionTo('create_articles');
+    Sanctum::actingAs($utilisateur);
 
     $this->postJson('/api/v1/articles', [
         'title' => 'Mon article API',
@@ -105,7 +109,11 @@ test('api articles store validates title required', function () {
 });
 
 test('api articles store defaults to draft status', function () {
-    Sanctum::actingAs(User::factory()->create());
+    // Durci le 2026-08-26 (audit) : la creation par l'API exige desormais la permission
+    // `create_articles`, comme le back-office l'exigeait deja pour la meme action.
+    $utilisateur = User::factory()->create();
+    $utilisateur->givePermissionTo('create_articles');
+    Sanctum::actingAs($utilisateur);
 
     $this->postJson('/api/v1/articles', [
         'title' => 'Draft article',

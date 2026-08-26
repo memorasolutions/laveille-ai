@@ -124,7 +124,13 @@ it('returns 404 for nonexistent plan slug', function () {
 
 // --- Authenticated Articles CRUD ---
 
+// Durci le 2026-08-26 (audit) : ce test verifiait qu'un utilisateur simplement AUTHENTIFIE pouvait
+// publier un article par l'API, c'est-a-dire exactement le comportement vulnerable. `store()` etait
+// la seule action d'ecriture du controleur sans autorisation, alors que le back-office exige
+// `create_articles` pour la meme action. Le test donne donc desormais la permission, et un test
+// voisin (Modules/Api/tests/Feature/ArticleApiAutorisationTest) verrouille le refus sans elle.
 it('creates an article as authenticated user', function () {
+    $this->user->givePermissionTo('create_articles');
     Sanctum::actingAs($this->user);
 
     $this->postJson('/api/v1/articles', [

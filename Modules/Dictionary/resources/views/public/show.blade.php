@@ -107,7 +107,7 @@
     }
     .diff-beginner { background: #10B981; }
     .diff-intermediate { background: #F59E0B; }
-    .diff-advanced { background: #EF4444; }
+    .diff-advanced { background: #FEE2E2; color: #991B1B; }
 
     .badge-cat {
         padding: 6px 14px; border-radius: 50px; font-size: 0.8rem;
@@ -321,7 +321,7 @@
 
                     {{-- Date de mise à jour (signal freshness GEO 2026) --}}
                     @if($term->updated_at)
-                        <p style="text-align:center; color: #9ca3af; font-size: 0.82rem; margin: -8px 0 20px; font-style: italic;">
+                        <p style="text-align:center; color: var(--c-text-muted, #52586a); font-size: 0.82rem; margin: -8px 0 20px; font-style: italic;">
                             {{ __('Mis à jour le') }} <time datetime="{{ $term->updated_at->toDateString() }}">{{ $term->updated_at->locale('fr_CA')->translatedFormat('j F Y') }}</time>
                         </p>
                     @endif
