@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.219.1] - 2026-08-26
+
+### Corrigé
+- **Les captures d'écran étaient tuées à 60 secondes par un worker déclaré hors du dépôt.** Nouvelle alerte à 06h10 Québec (10h10 UTC), différente de celle de la veille : `TimeoutExceededException` cette fois, et non `MaxAttemptsExceededException`. Le correctif du 25 août (`retry_after` porté à 300) était juste, mais il ne traitait qu'une partie du problème.
+- Le détail décisif était dans la trace : `Worker->daemon('database', 'cloudflare,scre...')`. Le worker du planificateur, lui, tourne en `--once`. Il s'agissait donc d'un **second consommateur de la file**, déclaré en cron cPanel, donc **invisible à tout examen du code** : `queue:work database --queue=cloudflare,screenshots,news-tools,workflows --stop-when-empty --max-time=50`. Sans `--timeout`, Laravel applique son défaut de **60 secondes**, alors qu'une capture peut légitimement durer jusqu'à 270 s (3 tentatives de 90 s). Le job était donc tué en pleine attente du processus Node, ce que confirme le `stream_select()` de la trace.
+- Correctif : `--timeout=270` ajouté à ce cron, après relevé de son état exact pour permettre un retour en arrière. Vérifié ensuite : les deux workers de la file `screenshots` sont alignés à 270 s, `retry_after` reste au-dessus à 300 s, aucun doublon, aucune tâche résiduelle.
+- **Correction d'une affirmation fausse de la veille.** Le commentaire de `config/queue.php` et la note de projet disaient « le worker le plus long est celui des captures (270 s) ». C'était faux : il en existait un à 60 s. Il n'avait pas été vu parce que le MCP cPanel renvoyait un interstitiel ce jour-là, et que la conclusion avait été tirée des seuls workers présents dans le dépôt.
+- `QueueRetryAfterCoherenceTest` porte désormais en tête sa **limite connue** : il ne lit que le planificateur et ne peut pas prouver l'absence d'un consommateur déclaré en cron. Toute modification des délais de cette file exige une relecture de `cpanel_cron_list`. Les 2 tests restent au vert.
+- Effet de bord utile : le blocage cPanel qui empêchait l'audit du 25 août de couvrir les tâches planifiées est levé. Les 4 crons de laveille.ai ont été relus, tous légitimes, aucun résidu. La matrice de l'audit est mise à jour en conséquence.
+
 ## [1.219.0] - 2026-08-25
 
 ### Ajouté

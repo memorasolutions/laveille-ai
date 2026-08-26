@@ -21,6 +21,22 @@ uses(Tests\TestCase::class);
 // worker de la même connexion. Ce test la verrouille, dans les deux sens : quelqu'un qui
 // rabaisserait `retry_after` OU qui allongerait le timeout du worker casse la suite.
 
+// ⚠ LIMITE CONNUE DE CE TEST, mesurée le 2026-08-26 par une seconde panne.
+//
+// Ce test ne lit que le planificateur du dépôt. Or la file `screenshots` est AUSSI consommée par
+// un worker déclaré en cron cPanel, donc INVISIBLE depuis le code :
+//
+//   * * * * * ... queue:work database --queue=cloudflare,screenshots,news-tools,workflows
+//                 --stop-when-empty --max-time=50
+//
+// Ce cron n'avait AUCUN `--timeout`, donc Laravel appliquait son défaut de 60 secondes, et tuait
+// les captures (jusqu'à 3 x 90 s) en pleine attente du processus Node : TimeoutExceededException,
+// levée depuis stream_select(). Corrigé le 2026-08-26 en ajoutant `--timeout=270` au cron.
+//
+// La leçon : un test de cohérence ne peut pas prouver l'absence d'un consommateur qu'il ne voit
+// pas. Toute modification des délais de cette file DOIT s'accompagner d'une relecture des crons
+// de production (`cpanel_cron_list`), que ce fichier ne peut pas automatiser.
+
 it('garde retry_after superieur au plus long timeout de worker de la connexion database', function () {
     $retryAfter = (int) config('queue.connections.database.retry_after');
 

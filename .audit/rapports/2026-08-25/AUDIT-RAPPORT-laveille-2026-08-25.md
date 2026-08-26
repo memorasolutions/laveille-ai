@@ -25,10 +25,17 @@ d'approvisionnement), OWASP LLM Top 10 2025, WCAG 2.2 AA, Loi 25, RGPD. Source d
 | dependances-CVE-licences | complété | 100 % | élevée |
 | hygiene-serveur | complété (blocage externe consigné) | local 100 %, prod par HTTP | moyenne |
 
-**Blocage externe consigné** : les MCP `cpanel` et `memora-multi` renvoient un interstitiel de
-chargement et « Could not fetch WHM accounts ». La liste des tâches planifiées en production n'a
-donc pas pu être lue. Pour débloquer : ouvrir une session cPanel valide, puis relancer
-`cpanel_cron_list`. Tout ce qui était vérifiable par requête HTTP l'a été (10 chemins sensibles).
+**Blocage externe levé le 2026-08-26.** Les MCP cPanel avaient renvoyé un interstitiel pendant
+l'audit ; la lecture a réussi le lendemain. Les 4 tâches planifiées de laveille.ai sont légitimes et
+**aucun résidu** n'a été trouvé. Mais cette zone non couverte cachait un vrai défaut, révélé par une
+alerte le lendemain matin : le worker de file
+`--queue=cloudflare,screenshots,news-tools,workflows` **ne déclarait aucun `--timeout`**, donc
+Laravel appliquait son défaut de 60 secondes et tuait les captures d'écran (qui peuvent durer
+jusqu'à 270 s) en pleine attente du processus Node. Corrigé le 2026-08-26 (`--timeout=270`).
+
+**Ce que cet épisode confirme** : sur ce serveur, les workers de file vivent à **deux endroits** —
+le planificateur Laravel (dans le dépôt) et les crons cPanel (hors dépôt). Un audit qui ne lit que
+le code n'en voit que la moitié. C'est exactement le type d'angle mort que la section 8 décrit.
 
 ---
 
