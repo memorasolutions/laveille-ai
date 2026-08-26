@@ -340,3 +340,52 @@ it('ne coupe pas non plus un terme du type GPT-4 dans GPT-4.1', function () {
 
     expect(glxWalk($dom, $root, glxTermeVersionne('GPT-4', 'gpt-4'), false, 1))->toBe(0);
 });
+
+/**
+ * 2026-08-26 - defaut MESURE sur une fiche publiee le jour meme : le corps contenait
+ * « intelligence artificielle generale », mais l'auto-lien n'attrapait que la sous-chaine
+ * « intelligence artificielle » et envoyait le lecteur vers la fiche GENERIQUE /glossaire/ia.
+ * Le sigle « AGI » etait lie sept fois vers la bonne page, l'expression francaise developpee
+ * zero fois - le lecteur qui rencontrait le terme en toutes lettres etait le seul a ne pas
+ * recevoir la definition precise.
+ *
+ * La migration 2026_08_26_330000_add_agi_aliases pose l'alias et AFFIRME dans son docblock que
+ * le tri par longueur decroissante reglera l'arbitrage sans regle de priorite supplementaire.
+ * Ce test PROUVE cette affirmation au lieu de la supposer : si l'hypothese etait fausse, la
+ * migration poserait un alias inoperant et personne ne s'en apercevrait.
+ */
+it('fait gagner l expression longue sur la sous-chaine generique (AGI vs IA)', function () {
+    // Ordre d'entree VOLONTAIREMENT defavorable : le terme generique arrive en premier.
+    $terms = glxSortLikeProduction([
+        ['name' => 'intelligence artificielle', 'slug' => 'ia', 'definition' => 'IA',
+         'type' => 'glossary', 'url' => '/glossaire/ia', 'match_strategy' => 'loose'],
+        ['name' => 'intelligence artificielle générale', 'slug' => 'agi', 'definition' => 'AGI',
+         'type' => 'glossary', 'url' => '/glossaire/agi', 'match_strategy' => 'loose'],
+    ]);
+
+    [$dom, $root] = glxDomFromHtml("<p>OpenAI n'est pas encore arrivee a l'intelligence artificielle générale.</p>");
+    glxWalk($dom, $root, $terms, false, 1);
+    $rendu = $dom->saveHTML();
+
+    expect(str_contains($rendu, '/glossaire/agi'))->toBeTrue(
+        "L'expression developpee doit mener a la fiche AGI, jamais a la fiche generique IA."
+    );
+    expect(str_contains($rendu, '/glossaire/ia"'))->toBeFalse(
+        'La sous-chaine generique ne doit pas voler le lien a l expression plus precise.'
+    );
+});
+
+// Non-regression : hors de l'expression complete, « intelligence artificielle » garde son lien.
+it('laisse le terme generique lier quand l expression longue est absente', function () {
+    $terms = glxSortLikeProduction([
+        ['name' => 'intelligence artificielle', 'slug' => 'ia', 'definition' => 'IA',
+         'type' => 'glossary', 'url' => '/glossaire/ia', 'match_strategy' => 'loose'],
+        ['name' => 'intelligence artificielle générale', 'slug' => 'agi', 'definition' => 'AGI',
+         'type' => 'glossary', 'url' => '/glossaire/agi', 'match_strategy' => 'loose'],
+    ]);
+
+    [$dom, $root] = glxDomFromHtml('<p>Un cours sur intelligence artificielle pour debutants.</p>');
+    glxWalk($dom, $root, $terms, false, 1);
+
+    expect(str_contains($dom->saveHTML(), '/glossaire/ia'))->toBeTrue();
+});

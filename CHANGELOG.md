@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.220.4] - 2026-08-26
+
+### Ajouté
+- **Le glossaire ne reconnaissait « AGI » que sous son sigle.** Mesuré sur une actualité publiée le jour même : le corps contenait bien « intelligence artificielle générale », mais l'auto-lien n'attrapait que la sous-chaîne « intelligence artificielle » et envoyait le lecteur vers la fiche **générique** `/glossaire/ia`. Le sigle « AGI » était lié sept fois vers la bonne page, l'expression française développée zéro fois : le lecteur qui rencontrait le terme en toutes lettres était le seul à ne pas recevoir la définition précise.
+- Variantes ajoutées au terme existant (aucune fiche nouvelle, la fiche `agi` était déjà complète au standard) : les formes développées française et anglaise, plus une forme canonique en allemand, espagnol, italien, portugais et néerlandais pour le balisage `alternateName`.
+- **Aucune entrée dans le module acronymes, délibérément.** `acronymes-education/ia` existe et pouvait laisser croire qu'AGI y avait sa place, mais le linkifier ne retient qu'une cible par chaîne : un doublon y entrerait en concurrence directe avec `glossaire/agi` pour le même sigle.
+- Deux exclusions motivées : « IAG » (sigle rare en français, homographe de sociétés cotées) et « IA générale » (la fiche voisine `ia-generale-vs-etroite` porte déjà cette formulation).
+- Deux tests prouvent que l'expression longue l'emporte sur la sous-chaîne générique par le tri déjà en place, et que le terme générique continue de lier quand l'expression longue est absente. La migration l'affirmait dans son commentaire ; le test le démontre.
+
 ## [1.220.3] - 2026-08-26
 
 ### Corrigé
