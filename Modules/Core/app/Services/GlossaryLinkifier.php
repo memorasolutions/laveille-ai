@@ -850,10 +850,20 @@ class GlossaryLinkifier
 
             // 2026-05-05 #150 : partial_case_sensitive = 1ère lettre de chaque mot tolérante, reste strict.
             // Ex: 'Score Elo' matche 'Score Elo' ET 'score Elo' MAIS pas 'score elo' (E majuscule strict).
+            // ACTION : la frontiere de fin refuse aussi un point suivi d'un CHIFFRE, pour ne pas
+            // couper un numero de version en deux. Trouve en production le 2026-08-26 : le terme
+            // « Gemini 3 » matchait a l'interieur de « Gemini 3.5 Transcribe », rendant
+            // `<a>Gemini 3</a>.5 Transcribe` avec l'infobulle d'un AUTRE modele. Un point n'etant
+            // ni lettre ni chiffre, l'ancienne frontiere le laissait passer.
+            // Une fin de phrase (« ... utilise Gemini 3. ») reste liee : le point n'y est pas
+            // suivi d'un chiffre.
+            // MCP: SELF (<5 lignes)
+            // RAISON: correctif de frontiere sur le point unique ou le motif est construit.
+            $finDeMot = '(?![\p{L}\p{N}]|\.\d)';
             if ($strategy === 'partial_case_sensitive') {
-                $pattern = '/(?<![\p{L}\p{N}])'.self::buildPartialCasePattern($name).'(?![\p{L}\p{N}])/u';
+                $pattern = '/(?<![\p{L}\p{N}])'.self::buildPartialCasePattern($name).$finDeMot.'/u';
             } else {
-                $pattern = '/(?<![\p{L}\p{N}])'.preg_quote($name, '/').'(?![\p{L}\p{N}])/u';
+                $pattern = '/(?<![\p{L}\p{N}])'.preg_quote($name, '/').$finDeMot.'/u';
                 if ($strategy === 'loose') $pattern .= 'i';
             }
             // case_sensitive ET exact_phrase : pas de flag i (casse exacte)

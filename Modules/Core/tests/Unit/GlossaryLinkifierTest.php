@@ -292,3 +292,51 @@ it('conserve XAI comme synonyme technique malgre l entreprise homographe', funct
     expect(GlossaryLinkifier::extractQualifierAliases('Explicabilité (XAI)'))
         ->toBe(['Explicabilité', 'XAI']);
 });
+
+/**
+ * 2026-08-26, trouve EN PRODUCTION par le controle des auto-liens qui suit une publication.
+ *
+ * Le terme de glossaire « Gemini 3 » matchait a l'interieur de « Gemini 3.5 Transcribe », rendant
+ * `<a>Gemini 3</a>.5 Transcribe` - un nom de produit coupe en deux, dont l'infobulle decrivait un
+ * AUTRE modele (« Gemini 3, modele phare, contexte 2M tokens »). La frontiere de fin etait
+ * `(?![\p{L}\p{N}])` : un point n'etant ni lettre ni chiffre, elle laissait passer « .5 ».
+ *
+ * Le defaut ne touchait pas une fiche mais TOUTE page mentionnant un numero de version, ce qui en
+ * fait un correctif de composant, pas une correction de contenu.
+ */
+function glxTermeVersionne(string $nom, string $slug): array
+{
+    return [['name' => $nom, 'slug' => $slug, 'definition' => 'Test',
+             'type' => 'glossary', 'url' => '/glossaire/'.$slug, 'match_strategy' => 'loose']];
+}
+
+it('ne coupe pas un numero de version en deux (Gemini 3 dans Gemini 3.5 Transcribe)', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Google a presente Gemini 3.5 Transcribe, son modele vocal.</p>');
+
+    $liens = glxWalk($dom, $root, glxTermeVersionne('Gemini 3', 'gemini-google'), false, 1);
+
+    expect($liens)->toBe(0);
+    expect(str_contains($dom->saveHTML(), '</a>.5'))->toBeFalse(
+        'Un nom de produit versionne ne doit jamais etre coupe par un lien de glossaire.'
+    );
+});
+
+// Non-regression : c'est bien le POINT SUIVI D'UN CHIFFRE qui bloque, pas le point tout court.
+it('lie encore le terme quand le point est une fin de phrase', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Cette equipe utilise Gemini 3. La suite arrive bientot.</p>');
+
+    expect(glxWalk($dom, $root, glxTermeVersionne('Gemini 3', 'gemini-google'), false, 1))->toBe(1);
+});
+
+it('lie encore le terme en plein milieu de phrase', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Le modele Gemini 3 est multimodal et rapide.</p>');
+
+    expect(glxWalk($dom, $root, glxTermeVersionne('Gemini 3', 'gemini-google'), false, 1))->toBe(1);
+});
+
+// Le meme piege vaut pour tout terme finissant par un chiffre : GPT-4 ne doit pas voler GPT-4.1.
+it('ne coupe pas non plus un terme du type GPT-4 dans GPT-4.1', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Le passage a GPT-4.1 a change la donne.</p>');
+
+    expect(glxWalk($dom, $root, glxTermeVersionne('GPT-4', 'gpt-4'), false, 1))->toBe(0);
+});

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.220.2] - 2026-08-26
+
+### Corrigé
+- **Un lien de glossaire coupait les noms de produits versionnés en deux.** Trouvé en production par le contrôle des auto-liens qui suit une publication : le terme « Gemini 3 » était détecté à l'intérieur de « Gemini 3.5 Transcribe », ce qui rendait `<a>Gemini 3</a>.5 Transcribe`. Pire que l'affichage : l'infobulle décrivait alors un **autre modèle** (« Gemini 3, modèle phare, contexte 2M tokens ») que celui dont parlait la page.
+- Cause : la frontière de fin du motif était `(?![\p{L}\p{N}])`. Un point n'étant ni une lettre ni un chiffre, la chaîne « .5 » ne l'arrêtait pas. La frontière refuse désormais aussi un point suivi d'un chiffre.
+- Une fin de phrase reste liée normalement (« cette équipe utilise Gemini 3. »), le point n'y étant pas suivi d'un chiffre. Le même piège valait pour tout terme finissant par un chiffre, « GPT-4 » dans « GPT-4.1 » par exemple.
+- Le défaut ne touchait pas une fiche mais **toute page du site mentionnant un numéro de version**, ce qui en fait un correctif de composant et non une correction de contenu. Quatre tests : le cas fautif, les deux non-régressions de liaison normale, et le cas GPT-4. Les deux tests du cas fautif ont été vérifiés **rouges sans le correctif, verts avec**.
+
 ## [1.220.1] - 2026-08-26
 
 ### Corrigé
