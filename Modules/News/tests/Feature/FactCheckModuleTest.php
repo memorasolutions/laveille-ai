@@ -539,3 +539,60 @@ it('l\'endpoint admin marquer-relu renvoie reviewed_at et reviewed_by', function
     $second = $this->actingAs($admin)->postJson(route('admin.news.composition.mark-reviewed', $article));
     $second->assertStatus(409);
 });
+
+// ── G. Exposition publique de /verifications (2026-08-27, décision panel notée 82/100,
+// docs/specs/2026-08-27-exposition-verifications-panel.md) : filtre en tête de /actualites,
+// badge cliquable sur la fiche vérifiée, lien discret au pied de page. Les trois gestes
+// réutilisent scopeFactChecked()/factCheckVerdict() (section B ci-dessus) - aucune seconde
+// définition de « ce qu'est une fiche vérifiée ». ─────────────────────────────────────────
+
+it('affiche le chip de filtre « Vérifications » sur /actualites dès qu\'au moins une fiche est vérifiée', function () {
+    fcmPublishedArticle('chip-verif-present', [
+        'fact_check_verdict' => 'contexte_manquant',
+        'fact_check_claim' => 'Affirmation vérifiée pour le chip de filtre.',
+    ]);
+
+    $response = $this->get(route('news.index'));
+
+    $response->assertOk()
+        ->assertSee('Fiabilité', false)
+        ->assertSee('Vérifications', false)
+        ->assertSee('(1)', false);
+});
+
+it('n\'affiche aucun chip « Vérifications » sur /actualites sans aucune fiche vérifiée', function () {
+    fcmPublishedArticle('chip-verif-absent'); // fiche ordinaire, aucun verdict
+
+    $response = $this->get(route('news.index'));
+
+    $response->assertOk()->assertDontSee('Fiabilité', false);
+});
+
+it('le chip « Vérifications » de /actualites mène vers ?verifications=1 et reste actif sur /verifications', function () {
+    fcmPublishedArticle('chip-verif-lien', [
+        'fact_check_verdict' => 'citation_inexacte',
+        'fact_check_claim' => 'Affirmation vérifiée pour le lien du chip.',
+    ]);
+
+    $response = $this->get(route('news.index'));
+
+    $response->assertOk()->assertSee('href="'.route('news.index', ['verifications' => 1]).'"', false);
+});
+
+it('expose un lien discret et permanent vers /verifications dans le pied de page', function () {
+    $response = $this->get(route('news.index'));
+
+    $response->assertOk()->assertSee('href="'.route('news.verifications').'"', false);
+});
+
+it('le badge complet de la fiche vérifiée est cliquable et mène vers /verifications', function () {
+    $article = fcmPublishedArticle('badge-clic-verifications', [
+        'fact_check_verdict' => 'citation_inexacte',
+        'fact_check_claim' => 'Affirmation quelconque pour le test de clic du badge.',
+    ]);
+
+    $response = $this->get(route('news.show', $article));
+
+    $response->assertOk()
+        ->assertSee('<a href="'.route('news.verifications').'" class="nw-factcheck__label"', false);
+});

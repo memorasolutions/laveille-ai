@@ -46,6 +46,12 @@
                             @if(Route::has('news.index'))
                                 <li><a href="{{ route('news.index') }}">{{ __('Actualités') }}</a></li>
                             @endif
+                            {{-- Exposition publique de /verifications (2026-08-27, décision panel
+                                 notée 82/100) : lien discret et permanent, idée retenue de Codex
+                                 en round 2. Route::has() protège le module News désactivable. --}}
+                            @if(Route::has('news.verifications'))
+                                <li><a href="{{ route('news.verifications') }}">{{ __('Vérifications') }}</a></li>
+                            @endif
                             @if(Route::has('acronyms.index'))
                                 <li><a href="{{ route('acronyms.index') }}">{{ __('Acronymes éducation') }}</a></li>
                             @endif

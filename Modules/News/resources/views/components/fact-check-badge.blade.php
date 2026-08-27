@@ -84,6 +84,15 @@
         }
         .nw-factcheck__source a { color: var(--c-primary, #064E5A); font-weight: 600; text-decoration: none; }
         .nw-factcheck__source a:hover, .nw-factcheck__source a:focus-visible { text-decoration: underline; }
+        /* Exposition publique de /verifications (2026-08-27) : l'étiquette du verdict devient
+           le badge cliquable qui mène vers la page des vérifications - même couleur, même
+           poids que l'ancien <strong>, donc AUCUN changement visuel sur une fiche déjà en
+           ligne, seule une affordance de survol/focus s'ajoute. Rapport de contraste mesuré
+           inchangé (voir commentaire des deux teintes ci-dessus) : la couleur du texte ne
+           change pas, seul son élément HTML change de <strong> à <a>. */
+        a.nw-factcheck__label { text-decoration: none; }
+        a.nw-factcheck__label:hover, a.nw-factcheck__label:focus-visible { text-decoration: underline; }
+        a.nw-factcheck__label:focus-visible { outline: 3px solid var(--nw-fc-accent); outline-offset: 3px; border-radius: 2px; }
 
         /* Format compact : une pastille, pour les listes et les cartes. */
         .nw-factcheck-pill {
@@ -115,7 +124,20 @@
                 <path d="M11 8v3.5M11 14.2v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
             </svg>
             <span>
-                <strong class="nw-factcheck__label">{{ __('Vérification') }} : {{ __($verdict['label']) }}</strong>
+                {{-- Exposition publique de /verifications (2026-08-27, décision panel notée
+                     82/100, docs/specs/2026-08-27-exposition-verifications-panel.md) :
+                     l'étiquette du verdict devient le geste « badge cliquable » du panel, sur
+                     la fiche même de l'article concerné - jamais la pastille compacte des
+                     cartes de liste, qui reste imbriquée dans le lien de la carte (nid de
+                     <a> invalide en HTML, risque réel de navigation cassée sur un partial
+                     réutilisé aussi par la fiche outil de l'annuaire). Route::has() protège le
+                     module News désactivable ; sans la route, on revient au <strong> d'origine
+                     plutôt que de rendre un lien mort. --}}
+                @if(Route::has('news.verifications'))
+                    <a href="{{ route('news.verifications') }}" class="nw-factcheck__label" aria-label="{{ __('Vérification') }} : {{ __($verdict['label']) }} - {{ __('voir toutes les vérifications') }}">{{ __('Vérification') }} : {{ __($verdict['label']) }}</a>
+                @else
+                    <strong class="nw-factcheck__label">{{ __('Vérification') }} : {{ __($verdict['label']) }}</strong>
+                @endif
                 <span class="nw-factcheck__summary">{{ __($verdict['summary']) }}</span>
 
                 @if(filled($article->fact_check_claim))

@@ -168,6 +168,30 @@
                     <a href="{{ route('news.index', array_merge($periodBase, ['period' => 'month'])) }}" class="nw-chip {{ ($filters['period'] ?? '') === 'month' ? 'active' : '' }}">{{ __('Ce mois') }}</a>
                 </div>
             </div>
+
+            {{-- Chip « Vérifications » (2026-08-27, exposition publique de /verifications -
+                 décision panel notée 82/100, docs/specs/2026-08-27-exposition-verifications-panel.md).
+                 Vit DANS le filtre de la liste plutôt qu'en rubrique séparée : n'apparaît que
+                 s'il existe au moins une fiche vérifiée ($factCheckCount, calculé par
+                 scopeFactChecked() - même définition unique que la route /verifications,
+                 DRY strict), pour ne jamais afficher un tri qui ne trierait rien. Réutilise
+                 les mêmes classes .nw-chip/.nw-chip-count que Catégorie et Période : aucun
+                 style neuf, aucune rubrique de navigation ajoutée (explicitement écarté par
+                 le panel). --}}
+            @if($factCheckCount > 0)
+            <div class="nw-filter-row">
+                <span class="nw-filter-label">{{ __('Fiabilité') }}</span>
+                <div class="nw-chips">
+                    @php
+                        $verifBase = array_filter(request()->except(['verifications', 'page']));
+                    @endphp
+                    <a href="{{ route('news.index', $verifBase) }}" class="nw-chip {{ empty($filters['verifications']) ? 'active' : '' }}">{{ __('Toutes les actualités') }}</a>
+                    <a href="{{ route('news.index', array_merge($verifBase, ['verifications' => 1])) }}" class="nw-chip {{ ($filters['verifications'] ?? false) ? 'active' : '' }}">
+                        {{ __('Vérifications') }} <span class="nw-chip-count">({{ $factCheckCount }})</span>
+                    </a>
+                </div>
+            </div>
+            @endif
         </div>
 
         {{-- Articles --}}

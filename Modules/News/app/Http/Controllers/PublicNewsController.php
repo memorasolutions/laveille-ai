@@ -67,6 +67,15 @@ class PublicNewsController extends Controller
             ->orderBy('count', 'desc')
             ->get();
 
+        // Exposition publique de /verifications (2026-08-27, décision panel notée 82/100,
+        // docs/specs/2026-08-27-exposition-verifications-panel.md) : compte les fiches
+        // vérifiées pour piloter l'affichage du chip de filtre en tête de liste - jamais
+        // affiché si ce compte est à zéro (un filtre qui ne trierait rien serait une
+        // promesse vide). Réutilise scopeFactChecked(), la même définition UNIQUE de « ce
+        // qu'est une fiche vérifiée » que le filtre ci-dessus et que la route /verifications
+        // (DRY strict, aucune seconde définition).
+        $factCheckCount = NewsArticle::published()->factChecked()->count();
+
         $filters = [
             'category' => $category,
             'period' => $period,
@@ -75,7 +84,7 @@ class PublicNewsController extends Controller
             'verifications' => $factCheckOnly,
         ];
 
-        return view('news::public.index', compact('articles', 'categories', 'filters'));
+        return view('news::public.index', compact('articles', 'categories', 'filters', 'factCheckCount'));
     }
 
     /**

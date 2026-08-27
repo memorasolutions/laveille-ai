@@ -2,7 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.223.0] - 2026-08-27
+## [1.224.0] - 2026-08-27
+
+### Ajouté
+- **La page `/verifications` devient atteignable, elle qui n'était liée de NULLE PART depuis sa création.** Décision panel notée 82/100 (`docs/specs/2026-08-27-exposition-verifications-panel.md`), trois chemins retenus, chacun réutilisant `scopeFactChecked()` comme définition UNIQUE de « ce qu'est une fiche vérifiée » (DRY strict, aucune seconde définition) : une pastille de filtre « Fiabilité » en tête de `/actualites`, affichant le nombre réel de fiches vérifiées et n'apparaissant que si ce compte dépasse zéro (un filtre qui ne trierait rien serait une promesse vide) ; l'étiquette du verdict sur le badge de vérification d'une fiche concernée, qui devient elle-même un lien cliquable vers `/verifications` (protégée par `Route::has()`, module News désactivable) ; et un lien discret et permanent dans le pied de page, visible depuis toutes les pages du site, y compris l'accueil.
+- Aucun style neuf : le chip réutilise les classes `.nw-chip`/`.nw-chip-count` déjà en usage pour Catégorie et Période, et l'étiquette de badge passe de `<strong>` à `<a>` sans changer de couleur ni de poids - zéro régression visuelle sur une fiche déjà en ligne.
+- Preuve : 5 tests neufs (chip présent/absent, lien du chip, lien de pied de page, badge cliquable), suite `FactCheckModuleTest` complète à 31 verts.
 
 ### Ajouté
 - **Trois fiches de glossaire.** Google Antigravity (la plateforme de développement agentique de Google - IDE, gestionnaire d'agents et CLI `agy` - lancée en préversion publique gratuite le 18 novembre 2025), Linux et Windows : ces deux derniers ne sont pas des fiches d'encyclopédie informatique, mais répondent à la question que se pose un lecteur non-spécialiste - pourquoi ce nom revient-il sans arrêt dans les actualités IA. Linux du côté des serveurs, conteneurs et pilotes GPU qui entraînent et exécutent les modèles ; Windows du côté du poste personnel où le grand public croise l'IA en premier (Copilot intégré au système, WSL, PC Copilot+).
