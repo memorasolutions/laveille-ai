@@ -1,0 +1,75 @@
+[
+  {
+    "slug": "zai",
+    "cat_slug": "intelligence-artificielle",
+    "name": "Z.ai",
+    "definition": "Z.ai est une entreprise chinoise d'intelligence artificielle fondée en 2019 à Pékin comme spin-off du laboratoire KEG de l'université Tsinghua, par les professeurs Tang Jie et Li Juanzi. Dirigée par Zhang Peng, elle adopte en juillet 2025 la marque internationale « Z.ai », remplaçant « Zhipu AI », lors du lancement de GLM-4.5. Elle se distingue d'OpenAI et d'Anthropic en publiant sa famille de modèles GLM (General Language Model) sous licence libre MIT depuis juillet 2025, de GLM-4.5 à GLM-5.2 (juin 2026, contexte d'un million de jetons). Son portefeuille comprend aussi ZCode (développement agentique), AutoGLM (agent vocal) et Ying (texte-vers-vidéo). Ajoutée à l'Entity List américaine le 16 janvier 2025 pour motifs de sécurité nationale, elle entre en bourse à Hong Kong le 8 janvier 2026 (ticker 2513.HK), une première pour une grande entreprise chinoise de modèles de langage. Basée à Pékin, elle compte plus de 800 employés en 2024 et des bureaux dans plusieurs pays, dont le Royaume-Uni et Singapour.",
+    "analogy": "Z.ai est comme une bibliothèque en libre accès pour ses modèles d'IA, alors qu'OpenAI et Anthropic gardent les leurs sous clé.",
+    "example": "Un développeur indépendant télécharge GLM-5.2 sur Hugging Face pour déployer un assistant IA sur son propre serveur, évitant les coûts récurrents des API fermées comme Claude ou ChatGPT.",
+    "did_you_know": "Spin-off de l'université Tsinghua, Z.ai fut inscrite sur la liste noire américaine en 2025 pour sécurité nationale, avant de devenir en 2026 la première entreprise chinoise de LLM cotée en bourse.",
+    "one_sentence_answer": "Z.ai est une entreprise chinoise d'IA, spin-off de l'université Tsinghua, qui publie ses modèles de langage GLM en open source sous licence MIT, offrant une alternative transparente aux modèles fermés.",
+    "faq": [
+      {
+        "question": "Pourquoi Zhipu AI s'appelle-t-elle maintenant Z.ai?",
+        "answer": "En juillet 2025, au moment du lancement du modèle GLM-4.5, l'entreprise a adopté la marque internationale « Z.ai », qui remplace « Zhipu AI » à l'étranger; son nom légal chinois reste inchangé."
+      },
+      {
+        "question": "Que permet la licence MIT des modèles GLM?",
+        "answer": "Elle autorise l'utilisation, la modification et la redistribution libres des poids des modèles, même à des fins commerciales, contrairement aux licences fermées d'OpenAI ou d'Anthropic."
+      },
+      {
+        "question": "Pourquoi les États-Unis ont-ils ajouté Z.ai à l'Entity List?",
+        "answer": "Le département du Commerce américain a invoqué, le 16 janvier 2025, des motifs de sécurité nationale, sans détailler publiquement les activités précises visées."
+      },
+      {
+        "question": "Quelle est la différence entre Z.ai et GLM?",
+        "answer": "Z.ai est l'entreprise qui développe et publie les modèles; GLM (General Language Model) est le nom de la famille de modèles qu'elle produit, dont GLM-4.5 et GLM-5.2 sont des versions successives."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Federal Register - Addition of Entities to and Revision of Entry on the Entity List",
+        "url": "https://www.federalregister.gov/documents/2025/01/16/2025-00704/addition-of-entities-to-and-revision-of-entry-on-the-entity-list",
+        "year": 2025,
+        "author": "Bureau of Industry and Security (département du Commerce américain)"
+      },
+      {
+        "label": "CNBC - Blacklisted by the U.S. and backed by Beijing, this Chinese AI startup has caught OpenAI's attention",
+        "url": "https://www.cnbc.com/2025/06/26/openai-flags-beijing-backed-zhipu-ai-as-a-top-rival.html",
+        "year": 2025,
+        "author": "Dylan Butts"
+      },
+      {
+        "label": "CNBC - The first of China's 'AI tigers' goes public as Zhipu climbs in Hong Kong debut",
+        "url": "https://www.cnbc.com/2026/01/08/china-ai-tiger-goes-ipo-zhipu-hong-kong-debut-openai-knowledge-atlas-hsi-hang-seng-listing.html",
+        "year": 2026,
+        "author": "Dylan Butts"
+      },
+      {
+        "label": "South China Morning Post - Zhipu AI's stock rockets after Chinese firm launches GLM-5.2 model",
+        "url": "https://www.scmp.com/tech/tech-trends/article/3357115/zhipu-ais-stock-rockets-after-chinese-firm-makes-glm-52-open-source",
+        "year": 2026,
+        "author": "Minxiao Chang"
+      },
+      {
+        "label": "Reuters - Zhipu AI ramps up overseas expansion strategy ahead of IPO",
+        "url": "https://www.reuters.com/world/china/zhipu-ai-ramps-up-overseas-expansion-strategy-ahead-ipo-2025-04-23/",
+        "year": 2025,
+        "author": "Fanny Potkin"
+      }
+    ],
+    "aliases": [
+      "Zhipu AI"
+    ],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "beginner",
+    "icon": "🔓",
+    "type": "organisation",
+    "acronym_full": null,
+    "has_image": true,
+    "match_strategy": "loose",
+    "reference_url": "https://huggingface.co/zai-org",
+    "reference_label": "Voir les modèles GLM publiés par Z.ai sur Hugging Face"
+  }
+]

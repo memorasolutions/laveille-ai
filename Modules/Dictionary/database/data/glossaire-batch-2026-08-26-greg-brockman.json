@@ -1,0 +1,61 @@
+[
+  {
+    "slug": "greg-brockman",
+    "cat_slug": "intelligence-artificielle",
+    "name": "Greg Brockman",
+    "definition": "Greg Brockman est cofondateur et président d'OpenAI. Il quitte le Massachusetts Institute of Technology sans diplôme pour se joindre à Stripe en 2010, où il devient chef de la technologie (CTO) en 2013. Il quitte Stripe en mai 2015 pour cofonder OpenAI avec Sam Altman, Ilya Sutskever et d'autres chercheurs, où il occupe d'abord le même poste de CTO avant d'accéder à la présidence. Le 17 novembre 2023, au moment du licenciement surprise de Sam Altman, le conseil d'administration le retire de ses fonctions; il démissionne le jour même par solidarité, puis revient quelques jours plus tard en même temps qu'Altman. Il prend ensuite un congé sabbatique d'août à novembre 2024. En mai 2026, OpenAI officialise l'élargissement de son rôle : en plus de superviser l'infrastructure d'intelligence artificielle de l'entreprise, il dirige désormais la stratégie produit, incluant la fusion de ChatGPT et de Codex. Il demeure président et cofondateur en août 2026, pendant qu'OpenAI se prépare à un premier appel public à l'épargne.",
+    "analogy": "Greg Brockman est comme le contremaître en chef d'un chantier : Sam Altman en dessine les plans, lui coordonne les équipes qui bâtissent.",
+    "example": "En mai 2026, quand OpenAI fusionne ChatGPT et Codex en une seule expérience, c'est Brockman qui pilote la manoeuvre : le mémo interne annonçant la réorganisation aux employés porte sa signature.",
+    "did_you_know": "Dans un message aux employés le 17 novembre 2023, Greg Brockman a rappelé qu'OpenAI avait commencé « dans mon appartement » huit ans plus tôt, avant de devenir l'entreprise derrière ChatGPT.",
+    "one_sentence_answer": "Greg Brockman est le cofondateur et président d'OpenAI, chargé depuis mai 2026 de la stratégie produit (ChatGPT, Codex) en plus de l'infrastructure d'intelligence artificielle de l'entreprise.",
+    "faq": [
+      {
+        "question": "Greg Brockman est-il toujours chez OpenAI en 2026?",
+        "answer": "Oui. En août 2026, il demeure cofondateur et président d'OpenAI. Son rôle s'est même élargi en mai 2026, lorsque l'entreprise lui a officiellement confié la stratégie produit, en plus de l'infrastructure d'intelligence artificielle qu'il supervisait déjà."
+      },
+      {
+        "question": "Quelle est la différence entre Greg Brockman et Sam Altman chez OpenAI?",
+        "answer": "Sam Altman est le chef de la direction (PDG), responsable de la vision et de la représentation publique de l'entreprise. Greg Brockman, cofondateur et président, pilote plutôt l'exécution : produit, infrastructure technique et organisation des équipes."
+      },
+      {
+        "question": "Que s'est-il passé pour Greg Brockman lors de la crise d'OpenAI de novembre 2023?",
+        "answer": "Le 17 novembre 2023, le conseil d'administration l'a retiré de ses fonctions au moment de congédier Sam Altman. Brockman a démissionné le jour même par solidarité, puis les deux sont revenus chez OpenAI quelques jours plus tard, après la réintégration d'Altman comme chef de la direction."
+      }
+    ],
+    "sources": [
+      {
+        "label": "TechCrunch - Greg Brockman quits OpenAI after abrupt firing of Sam Altman",
+        "url": "https://techcrunch.com/2023/11/17/greg-brockman-quits-openai-after-abrupt-firing-of-sam-altman/",
+        "year": 2023,
+        "author": "Manish Singh"
+      },
+      {
+        "label": "WIRED - Greg Brockman Officially Takes Control of OpenAI's Products in Latest Shake-Up",
+        "url": "https://www.wired.com/story/openai-reorg-greg-brockman-product/",
+        "year": 2026,
+        "author": "Maxwell Zeff"
+      },
+      {
+        "label": "Greg Brockman - Figuring out the CTO role at Stripe",
+        "url": "https://blog.gregbrockman.com/figuring-out-the-cto-role-at-stripe",
+        "year": 2014,
+        "author": "Greg Brockman"
+      }
+    ],
+    "aliases": [
+      "G. Brockman"
+    ],
+    "broader_slugs": [
+      "openai"
+    ],
+    "narrower_slugs": [],
+    "difficulty": "beginner",
+    "icon": "🛠️",
+    "type": "person",
+    "acronym_full": null,
+    "has_image": true,
+    "match_strategy": "case_sensitive",
+    "reference_url": "https://blog.gregbrockman.com/figuring-out-the-cto-role-at-stripe",
+    "reference_label": "Lire le billet original de Greg Brockman sur son rôle de CTO"
+  }
+]

@@ -1,0 +1,158 @@
+[
+  {
+    "slug": "unites-de-mesure-informatiques",
+    "name": "Unités de mesure informatiques",
+    "cat_slug": "concepts-fondamentaux",
+    "definition": "Un bit est la plus petite unité d'information; il ne peut prendre que la valeur 0 ou 1. L'octet, qui regroupe exactement 8 bits, constitue l'unité de base du stockage informatique. Pour mesurer de plus grandes quantités de données, on utilise les préfixes décimaux du Système international d'unités : le kilo représente mille (10³), le méga représente un million (10⁶), le giga représente un milliard (10⁹) et le téra représente mille milliards (10¹²), selon la Brochure SI de la 9e édition du Bureau international des poids et mesures publiée en 2019. Ainsi, un kilooctet vaut 1 000 octets, un mégaoctet vaut 1 000 000 octets, un gigaoctet équivaut à 1 000 000 000 octets et un téraoctet correspond à 1 000 000 000 000 octets. Ces unités servent universellement à quantifier la mémoire vive, le stockage permanent ou la taille des fichiers dans l'écosystème numérique contemporain. On les retrouve quotidiennement dans les spécifications de matériel informatique et les volumes de données générés par l'intelligence artificielle.",
+    "analogy": "Le bit, c'est une lumière éteinte ou allumée; l'octet est un bloc de 8 lumières et les préfixes comptent par milliers.",
+    "example": "En 2026, les GPU Nvidia H100 et H200 offrent 80 Go et 141 Go de VRAM; plus cette mémoire est grande, plus le GPU fait tourner un grand modèle sans le découper.",
+    "did_you_know": "Disque dur IBM 350 RAMAC de 1956 : 3,75 Mo, soit une photo de téléphone; un modèle d'IA ouvert récent peut peser plusieurs centaines de gigaoctets, voire plus d'un téraoctet.",
+    "one_sentence_answer": "Un gigaoctet vaut 1 000 000 000 octets et s'inscrit dans une échelle décimale où le bit est la plus petite unité, suivie de l'octet, puis des préfixes kilo, méga, giga et téra du Système international.",
+    "faq": [
+      {
+        "question": "Quelle est la différence entre un bit et un octet?",
+        "answer": "Le bit est la plus petite unité d'information (0 ou 1); l'octet regroupe 8 bits et constitue l'unité de base du stockage informatique."
+      },
+      {
+        "question": "Combien vaut exactement un téraoctet?",
+        "answer": "Selon les préfixes décimaux du Système international, un téraoctet vaut 1 000 000 000 000 octets, soit mille milliards d'octets."
+      },
+      {
+        "question": "Pourquoi mon disque dur affiche parfois une capacité différente de celle annoncée?",
+        "answer": "Certains systèmes informatiques comptent en base 1024 plutôt qu'en base 1000, ce qui donne une valeur légèrement différente appelée le gibioctet; ce sujet est traité dans une fiche distincte du glossaire."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Office québécois de la langue française, Grand dictionnaire terminologique, fiche « octet »",
+        "url": "https://vitrinelinguistique.oqlf.gouv.qc.ca/fiche-gdt/fiche/8387944/octet",
+        "year": 2026,
+        "author": "Office québécois de la langue française"
+      },
+      {
+        "label": "Bureau international des poids et mesures, Brochure sur le Système international d'unités (SI), 9e édition",
+        "url": "https://www.bipm.org/documents/20126/41483022/SI-Brochure-9-EN.pdf",
+        "year": 2019,
+        "author": "Bureau international des poids et mesures (BIPM)"
+      },
+      {
+        "label": "Nvidia, fiche technique du GPU H100 (80 Go de VRAM)",
+        "url": "https://www.nvidia.com/en-us/data-center/h100/",
+        "year": 2026,
+        "author": "Nvidia"
+      },
+      {
+        "label": "Nvidia, fiche technique du GPU H200 (141 Go de VRAM)",
+        "url": "https://www.nvidia.com/en-us/data-center/h200/",
+        "year": 2026,
+        "author": "Nvidia"
+      },
+      {
+        "label": "Computer History Museum, premier disque dur commercial IBM 350 RAMAC (3,75 Mo)",
+        "url": "https://www.computerhistory.org/storageengine/first-commercial-hard-disk-drive-shipped/",
+        "year": 1956,
+        "author": "Computer History Museum"
+      }
+    ],
+    "aliases": [
+      "octet",
+      "octets",
+      "kilooctet",
+      "kilooctets",
+      "mégaoctet",
+      "mégaoctets",
+      "gigaoctet",
+      "gigaoctets",
+      "téraoctet",
+      "téraoctets",
+      "kilobyte",
+      "kilobytes",
+      "megabyte",
+      "megabytes",
+      "gigabyte",
+      "gigabytes",
+      "terabyte",
+      "terabytes"
+    ],
+    "broader_slugs": [],
+    "narrower_slugs": [
+      "gibioctet"
+    ],
+    "difficulty": "beginner",
+    "icon": "📏",
+    "type": "explainer",
+    "acronym_full": null,
+    "match_strategy": "loose",
+    "has_image": true
+  },
+  {
+    "slug": "gibioctet",
+    "name": "Gibioctet",
+    "cat_slug": "concepts-fondamentaux",
+    "definition": "Un gibioctet (Gio) est une unité de mesure binaire valant exactement 1 073 741 824 octets, soit 2³⁰. Pour lever l'ambiguïté historique entre les puissances de 1 000 et celles de 1 024, la Commission électrotechnique internationale (CEI) a créé en 1998-1999 des préfixes binaires distincts : kibi (Ki, 2¹⁰ = 1 024), mébi (Mi, 2²⁰), gibi (Gi, 2³⁰) et tébi (Ti, 2⁴⁰). Ces préfixes ont été formalisés dans l'amendement 2 de la norme CEI 60027-2, publié en janvier 1999, puis repris et formalisés par la norme CEI 80000-13 en 2008. Contrairement au gigaoctet (Go) décimal du Système international d'unités (SI), qui vaut 1 000 000 000 octets, le gibioctet représente un écart d'environ 7,4 % et exprime la capacité réelle telle que la comptent souvent les systèmes d'exploitation, bien que plusieurs interfaces, notamment dans l'affichage des capacités de stockage, continuent souvent d'afficher abusivement l'étiquette Go à la place de Gio.",
+    "analogy": "Comptez par paquets de 1 024 au lieu de 1 000 : le gibioctet est la caisse binaire, le gigaoctet la caisse décimale.",
+    "example": "Un disque de 1 To (1 000 000 000 000 octets) affiche environ 931 Go dans Windows ou macOS, car le système compte en gibioctets mais affiche Go au lieu de Gio, comme l'explique Apple.",
+    "did_you_know": "Le Grand dictionnaire terminologique de l'OQLF mentionne pour gigaoctet les deux valeurs (1 000 000 000 et 1 073 741 824 octets), révélant l'ambiguïté toujours présente dans l'usage.",
+    "one_sentence_answer": "Un gibioctet (Gio) est une unité binaire de 1 073 741 824 octets (2³⁰) définie par la CEI en 1999 pour distinguer la mesure informatique réelle du gigaoctet (Go) décimal du SI.",
+    "faq": [
+      {
+        "question": "Quelle est la différence entre un gigaoctet et un gibioctet?",
+        "answer": "Un gigaoctet (Go) vaut 1 000 000 000 octets en base décimale, tandis qu'un gibioctet (Gio) vaut 1 073 741 824 octets en base binaire (2³⁰), soit un écart d'environ 7,4 %."
+      },
+      {
+        "question": "Pourquoi mon disque de 1 To affiche-t-il 931 Go?",
+        "answer": "Le fabricant mesure en téraoctets décimaux (1 000 000 000 000 octets), mais le système d'exploitation compte en gibioctets (1 000 000 000 000 ÷ 1 073 741 824 ≈ 931,3) et affiche abusivement Go au lieu de Gio, comme l'explique Apple."
+      },
+      {
+        "question": "Les préfixes binaires sont-ils couramment utilisés en intelligence artificielle?",
+        "answer": "Les poids des grands modèles de langage téléchargés, par exemple sur Hugging Face, peuvent afficher une taille légèrement différente selon que l'outil compte en gigaoctets décimaux ou en gibioctets binaires."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Office québécois de la langue française, Grand dictionnaire terminologique, fiche « gigaoctet » (indique les deux valeurs, décimale et binaire)",
+        "url": "https://vitrinelinguistique.oqlf.gouv.qc.ca/fiche-gdt/fiche/8873678/gigaoctet",
+        "year": 2026,
+        "author": "Office québécois de la langue française"
+      },
+      {
+        "label": "NIST, « Prefixes for binary multiples » (norme CEI 60027-2 Amendement 2, décembre 1998 / janvier 1999)",
+        "url": "https://physics.nist.gov/cuu/Units/binary.html",
+        "year": 1999,
+        "author": "National Institute of Standards and Technology (NIST)"
+      },
+      {
+        "label": "Apple, « How storage capacity is measured on Apple devices »",
+        "url": "https://support.apple.com/en-us/102119",
+        "year": 2026,
+        "author": "Apple"
+      }
+    ],
+    "aliases": [
+      "kibioctet",
+      "kibioctets",
+      "mébioctet",
+      "mébioctets",
+      "tébioctet",
+      "tébioctets",
+      "kibibyte",
+      "kibibytes",
+      "mebibyte",
+      "mebibytes",
+      "gibibyte",
+      "gibibytes",
+      "tebibyte",
+      "tebibytes"
+    ],
+    "broader_slugs": [
+      "unites-de-mesure-informatiques"
+    ],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "💽",
+    "type": "explainer",
+    "acronym_full": null,
+    "match_strategy": "loose",
+    "has_image": true
+  }
+]

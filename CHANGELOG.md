@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.221.0] - 2026-08-27
+
+### Ajouté
+- **Trois fiches de glossaire, chacune passée au test du faux lien avant d'être posée.** « Greg Brockman » (cofondateur d'OpenAI), « Z.ai » (l'éditeur des modèles GLM, anciennement Zhipu AI) et deux fiches sur les unités de mesure informatiques : une pivot (bit, octet, préfixes) et une distincte pour le gibioctet, la confusion entre 1000 et 1024 étant une notion à part entière.
+- **Les alias ont été choisis par mesure, pas par intuition.** « Brockman » seul avait d'abord été retenu, puis retiré après qu'un test réel sur la phrase « David Brockman, politologue à Stanford » ait produit un lien erroné : une garde en casse sensible ne protège pas d'un autre Brockman réel. « GLM » a été écarté d'office comme alias de Z.ai, un nom de modèle n'étant pas un synonyme de son fabricant. Et aucun symbole court d'unité n'est devenu un alias : « Go » est un verbe anglais et un langage de programmation, « To » une préposition, « ko » se lit K.-O., « Gio » est un prénom italien et « Tio » veut dire oncle en espagnol.
+
+### Corrigé
+- **Deux erreurs factuelles sur la fiche Hugging Face.** Les chiffres du dépôt dataient de 2023 et annonçaient 500 000 modèles : le comptage réel pris à la source le 26 août 2026 en donne plus de 3 millions, soit un facteur six. Et la fiche affirmait que la mascotte précédait l'emoji 🤗 : c'est l'inverse, U+1F917 existe depuis juin 2015, un an avant la fondation de l'entreprise.
+
 ## [1.220.4] - 2026-08-26
 
 ### Ajouté
