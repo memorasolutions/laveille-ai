@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.222.0] - 2026-08-27
+
+### Ajouté
+- **Trois fiches de glossaire liées aux actualités de la veille.** Palisade Research (organisme américain à but non lucratif de sécurité de l'IA, cité comme employeur de Jeffrey Ladish dans une actualité publiée le 25 août) ainsi qu'Ollama et Jan (jan.ai), deux outils distincts d'exécution locale de modèles à poids ouverts : l'un une ligne de commande avec bibliothèque de modèles intégrée, l'autre une application de bureau avec interface graphique.
+- Contrôle anti-doublon fait contre les 510 slugs réellement publiés en production, jamais contre la base locale qui est partielle : aucune correspondance pour « palisade », « ollama » ou « jan ».
+- **Alias écartés après test réel sur le linkifier, pas par précaution théorique.** « Palisade » seul se liait à tort à « Pacific Palisades » et à un logiciel homonyme d'un autre éditeur. « Jan » seul se liait à tort à tout prénom courant, et même la forme parenthésée « Jan (jan.ai) » se serait liée via la dérivation automatique d'alias du linkifier ; la forme retenue est « Jan.ai » sans parenthèses.
+- Ollama et Jan rattachés à la fiche « poids-ouverts » en narrower_slugs (ce sont des outils qui font tourner des modèles publiés en poids ouverts), sans hiérarchie forcée pour Palisade Research qui reste un organisme autonome, au même niveau que le laboratoire METR déjà présent au glossaire.
+
 ## [1.221.0] - 2026-08-27
 
 ### Ajouté

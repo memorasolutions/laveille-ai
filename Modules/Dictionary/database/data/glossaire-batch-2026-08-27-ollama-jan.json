@@ -1,0 +1,106 @@
+[
+  {
+    "slug": "ollama",
+    "cat_slug": "outils-et-techniques",
+    "name": "Ollama",
+    "definition": "Ollama est un outil libre qui fait tourner de grands modèles de langage directement sur son propre ordinateur, sans passer par un service infonuagique. Publié sous licence MIT, il se présente d'abord comme un moteur en ligne de commande : une seule instruction, « ollama run », télécharge puis démarre un modèle depuis une bibliothèque en ligne qui regroupe des familles comme Llama, Qwen, Gemma ou DeepSeek. Ollama expose aussi un serveur REST compatible avec l'API d'OpenAI sur le port 11434, ce qui permet à des applications tierces (éditeurs de code, agents, interfaces de clavardage) de s'y brancher comme à un fournisseur infonuagique classique. Des bibliothèques officielles existent pour Python et JavaScript, et depuis la version 0.33, une application de bureau complète la ligne de commande. Fondée par Jeff Morgan, aujourd'hui PDG, l'entreprise a levé 65 millions de dollars américains en série B menée par Theory Ventures, et revendique 8,9 millions de développeurs actifs chaque mois.",
+    "analogy": "Ollama, c'est un peu comme un magasin d'applications de modèles d'IA installé sur son propre disque dur, sans jamais envoyer ses données ailleurs.",
+    "example": "Un développeur sans budget infonuagique tape « ollama run gemma4 » dans son terminal pour dialoguer avec un modèle directement sur son ordinateur portable, sans frais d'API ni connexion internet requise.",
+    "did_you_know": "Avec seulement 14 employés, Ollama affirme être utilisé par 8,9 millions de développeurs chaque mois et être présent dans 85 % des entreprises du palmarès Fortune 500, trois ans après son lancement.",
+    "one_sentence_answer": "Ollama est un outil open source qui permet d'installer et d'exécuter des grands modèles de langage directement sur son propre ordinateur, via une simple commande ou une API locale compatible OpenAI.",
+    "faq": [
+      {
+        "question": "Ollama est-il gratuit?",
+        "answer": "Oui, le logiciel est publié sous licence MIT et peut être téléchargé, utilisé et modifié librement; seuls le matériel et l'électricité nécessaires pour faire tourner les modèles restent à la charge de l'utilisateur."
+      },
+      {
+        "question": "Quelle est la différence entre Ollama et Jan?",
+        "answer": "Ollama est d'abord un moteur en ligne de commande avec une bibliothèque de modèles, alors que Jan est une application de bureau avec une interface graphique complète; les deux peuvent fonctionner ensemble."
+      },
+      {
+        "question": "Ollama fonctionne-t-il sans connexion internet?",
+        "answer": "Une fois un modèle téléchargé, oui : les conversations restent entièrement locales et aucune donnée n'est envoyée à un serveur externe, sauf si l'utilisateur connecte volontairement un modèle infonuagique."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Ollama - dépôt officiel sur GitHub",
+        "url": "https://github.com/ollama/ollama",
+        "year": 2026,
+        "author": "Ollama Inc."
+      },
+      {
+        "label": "TechCrunch - Popular open source AI developer tool Ollama raises $65M, grows to nearly 9M users",
+        "url": "https://techcrunch.com/2026/07/09/popular-open-source-ai-developer-tool-ollama-raises-65m-grows-to-nearly-9m-users/",
+        "year": 2026,
+        "author": "Julie Bort"
+      }
+    ],
+    "aliases": [],
+    "broader_slugs": [
+      "poids-ouverts"
+    ],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "🦙",
+    "type": "outil",
+    "acronym_full": null,
+    "has_image": true,
+    "match_strategy": "loose",
+    "reference_url": "https://ollama.com/library",
+    "reference_label": "Voir la bibliothèque de modèles sur Ollama.com"
+  },
+  {
+    "slug": "jan-ai",
+    "cat_slug": "outils-et-techniques",
+    "name": "Jan.ai",
+    "definition": "Jan est une application de bureau libre, développée par Menlo Research, qui reproduit l'expérience de ChatGPT tout en fonctionnant hors ligne. Contrairement à un outil en ligne de commande, elle offre une interface graphique complète : télécharger un modèle depuis Hugging Face, discuter avec lui, créer des assistants personnalisés et gérer plusieurs conversations se fait au clic, sans terminal. Elle démarre aussi un serveur local compatible avec l'API d'OpenAI, sur le port 1337, pour brancher d'autres logiciels. Jan sait également se connecter à des modèles infonuagiques (OpenAI, Anthropic, Mistral, Groq) pour un usage hybride, et prend en charge le protocole de contexte de modèle (MCP) pour des capacités agentiques. Distribuée pour macOS, Windows et Linux sous licence Apache 2.0, elle est aussi offerte via le Microsoft Store et Flathub. L'éditeur recommande au minimum 8 Go de mémoire vive pour un modèle de 3 milliards de paramètres, et jusqu'à 32 Go pour un modèle de 13 milliards; l'application revendique plus de 6,3 millions de téléchargements.",
+    "analogy": "Jan, c'est le pendant local d'un clavardeur en ligne comme ChatGPT : même fenêtre de discussion, mais les calculs restent sur sa propre machine.",
+    "example": "Une personne sans connaissances techniques télécharge Jan, choisit un modèle Gemma dans la liste intégrée, puis discute avec lui hors ligne sur son ordinateur portable, sans jamais ouvrir un terminal.",
+    "did_you_know": "Jan est passée en mai 2025 de la licence AGPLv3 à Apache 2.0, et son éditeur, rebaptisé Menlo Research, revendique plus de 6,3 millions de téléchargements de l'application de bureau.",
+    "one_sentence_answer": "Jan est une application de bureau open source, éditée par Menlo Research, qui permet de dialoguer avec des modèles de langage installés localement ou infonuagiques, avec une interface proche de ChatGPT, sans terminal.",
+    "faq": [
+      {
+        "question": "Jan est-il gratuit?",
+        "answer": "Oui, le code de Jan est publié sous licence Apache 2.0 et l'application se télécharge gratuitement sur jan.ai, le Microsoft Store ou Flathub."
+      },
+      {
+        "question": "Faut-il une connexion internet pour utiliser Jan?",
+        "answer": "Non pour les modèles téléchargés localement; une connexion reste nécessaire seulement si l'on choisit de se connecter à un modèle infonuagique comme ceux d'OpenAI ou d'Anthropic."
+      },
+      {
+        "question": "Quelle est la différence entre Jan et Ollama?",
+        "answer": "Jan est une application de bureau complète, pensée pour un usage sans ligne de commande, alors qu'Ollama est d'abord un moteur en ligne de commande destiné aux développeurs; les deux exécutent des modèles en local."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Jan - dépôt officiel sur GitHub",
+        "url": "https://github.com/janhq/jan",
+        "year": 2026,
+        "author": "Menlo Research"
+      },
+      {
+        "label": "Jan - site officiel",
+        "url": "https://jan.ai/",
+        "year": 2026,
+        "author": "Menlo Research"
+      }
+    ],
+    "aliases": [
+      "Jan AI"
+    ],
+    "broader_slugs": [
+      "poids-ouverts"
+    ],
+    "narrower_slugs": [],
+    "difficulty": "beginner",
+    "icon": "🖥️",
+    "type": "outil",
+    "acronym_full": null,
+    "has_image": true,
+    "match_strategy": "case_sensitive",
+    "reference_url": "https://jan.ai/docs/desktop",
+    "reference_label": "Consulter la documentation de Jan"
+  }
+]
