@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.222.1] - 2026-08-27
+## [1.223.0] - 2026-08-27
+
+### Ajouté
+- **Trois fiches de glossaire.** Google Antigravity (la plateforme de développement agentique de Google - IDE, gestionnaire d'agents et CLI `agy` - lancée en préversion publique gratuite le 18 novembre 2025), Linux et Windows : ces deux derniers ne sont pas des fiches d'encyclopédie informatique, mais répondent à la question que se pose un lecteur non-spécialiste - pourquoi ce nom revient-il sans arrêt dans les actualités IA. Linux du côté des serveurs, conteneurs et pilotes GPU qui entraînent et exécutent les modèles ; Windows du côté du poste personnel où le grand public croise l'IA en premier (Copilot intégré au système, WSL, PC Copilot+).
+- Contrôle anti-doublon fait contre les 510 slugs réellement publiés en production (jamais contre la base locale, partielle) : aucune correspondance pour « antigravity », « linux » ou « windows ».
+- Alias posés avec prudence, le volume de mentions déjà présent sur le site étant élevé pour ces deux derniers noms (au moins 25 pages mentionnent déjà Linux, au moins 52 mentionnent déjà Windows) : « GNU/Linux » et « noyau Linux » en correspondance libre pour Linux, « Microsoft Windows » seulement, en casse stricte, pour Windows - afin d'éviter tout faux lien sur la forme minuscule employée dans du contenu technique cité (nom de runner CI, clé YAML). Pour Google Antigravity, nom sans parenthèses retenu délibérément pour éviter qu'un alias générique « Antigravity » ne s'accroche à ses deux autres sens (le phénomène physique, le module Python `import antigravity`).
+- Linux rattaché à la fiche « open-source » en narrower_slugs (le noyau, sous licence GPLv2, comme exemple le plus cité de la culture open source qui a façonné l'IA) ; Google Antigravity rattaché à « google » en broader_slugs. Windows laissé sans parent, faute de terme générique « système d'exploitation » au glossaire.
 
 ### Corrigé
 - **Le glossaire masquait l'annuaire.** `GlossaryLinkifier` donne la priorité au glossaire/aux acronymes sur un outil homonyme pour l'auto-lien du corps de texte (une seule cible, jamais deux liens concurrents pour le lecteur) - une priorité justifiée là, mais reprise à tort par la suggestion d'outils liés d'une actualité, qui ne pose pourtant aucun lien : elle se contente de proposer un identifiant que l'admin valide. Un nom déjà « pris » par une fiche de glossaire (ChatGPT, Midjourney, Perplexity...) n'était donc jamais retenu comme outil. Mesuré en production le 27 août : 17 entités existent à la fois dans le glossaire et l'annuaire, masquant 317 fiches publiées vivantes sans outil lié. `NewsToolSyncAction::suggest()` reprend désormais les termes détectés qui ne sont pas de type « outil » et les confronte au nom exact des outils publiés, sans dupliquer la détection du linkifier. Éprouvé rouge sans le correctif, vert avec ; suite News complète 514 verts.

@@ -1,0 +1,67 @@
+[
+  {
+    "slug": "google-antigravity",
+    "name": "Google Antigravity",
+    "cat_slug": "outils-et-techniques",
+    "type": "outil",
+    "difficulty": "intermediate",
+    "icon": "🚀",
+    "acronym_full": null,
+    "has_image": true,
+    "match_strategy": "case_sensitive",
+    "definition": "Google Antigravity est une plateforme de développement agentique lancée par Google, en préversion publique et gratuite pour les particuliers depuis le 18 novembre 2025. Contrairement à un éditeur classique enrichi d'un clavardeur IA, elle place l'agent au centre du travail : il lit le projet, écrit le code, exécute des commandes dans un terminal et pilote un navigateur pour tester le résultat, sans intervention constante. La plateforme regroupe un éditeur appelé Antigravity IDE, une interface de gestion des agents et un client en ligne de commande nommé « agy ». Elle prend en charge plusieurs modèles au choix : Gemini 3 de Google, Claude Sonnet 4.5 d'Anthropic et GPT-OSS d'OpenAI. Chaque tâche produit des artéfacts (captures d'écran, journaux, rapports) que le développeur vérifie avant d'accepter le travail. Le nom ne fait référence ni à l'antigravité de la physique, ni au module « import antigravity » du langage Python : Google l'a choisi pour évoquer l'idée de retirer les contraintes qui pèsent sur le développement logiciel.",
+    "analogy": "Comme un chef de chantier qui envoie des ouvriers autonomes coder, tester et corriger, pendant qu'on garde l'œil sur le résultat final.",
+    "example": "Un développeur lance « agy », le client en ligne de commande d'Antigravity, dans son terminal : l'agent, propulsé par Gemini 3 Pro, lit le projet, corrige un bogue et vérifie seul le résultat.",
+    "did_you_know": "Fait rare pour un produit Google : dès son lancement, l'agent donne accès non seulement à Gemini 3, mais aussi à Claude Sonnet 4.5 d'Anthropic et à GPT-OSS d'OpenAI, deux concurrents directs.",
+    "one_sentence_answer": "Google Antigravity est la plateforme de développement agentique lancée par Google en novembre 2025, où des agents IA autonomes opèrent dans l'éditeur, le terminal et le navigateur pour mener une tâche de programmation de bout en bout.",
+    "faq": [
+      {
+        "question": "Google Antigravity est-il gratuit?",
+        "answer": "Oui, en préversion publique lancée en novembre 2025, l'usage individuel est gratuit, avec des limites d'appels généreuses mais non illimitées sur Gemini 3 Pro. Un usage en entreprise passe par la plateforme payante Gemini Enterprise de Google Cloud."
+      },
+      {
+        "question": "Google Antigravity remplace-t-il un éditeur de code comme VS Code?",
+        "answer": "Non, ce n'est pas un simple éditeur ni un fork de VS Code : Google le présente comme une plateforme distincte, où l'éditeur n'est qu'une des trois surfaces (avec le terminal et le navigateur) que l'agent contrôle pour mener une tâche du début à la fin."
+      },
+      {
+        "question": "Google Antigravity, le module Python et l'antigravité de la physique, est-ce lié?",
+        "answer": "Non. Ce sont trois choses distinctes : la plateforme de Google, une blague intégrée au langage Python depuis 2008 (la commande « import antigravity » ouvre une bande dessinée en ligne) et le concept physique hypothétique d'une force qui annulerait la gravité."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Google Antigravity - Introducing Google Antigravity",
+        "url": "https://antigravity.google/blog/introducing-google-antigravity",
+        "year": 2025,
+        "author": "Google"
+      },
+      {
+        "label": "Google for Developers Blog - Build with Google Antigravity",
+        "url": "https://developers.googleblog.com/build-with-google-antigravity-our-new-agentic-development-platform/",
+        "year": 2025,
+        "author": "Google Antigravity Team"
+      },
+      {
+        "label": "Antigravity CLI - Getting started (agy)",
+        "url": "https://antigravity.google/docs/cli/getting-started",
+        "year": 2025,
+        "author": "Google"
+      },
+      {
+        "label": "Wikipedia (EN) - Google Antigravity",
+        "url": "https://en.wikipedia.org/wiki/Google_Antigravity",
+        "year": 2026,
+        "author": "Wikipédia (contributeurs)"
+      }
+    ],
+    "aliases": [
+      "Antigravity IDE"
+    ],
+    "broader_slugs": [
+      "google"
+    ],
+    "narrower_slugs": [],
+    "reference_url": "https://antigravity.google/",
+    "reference_label": "Site officiel - Google Antigravity"
+  }
+]

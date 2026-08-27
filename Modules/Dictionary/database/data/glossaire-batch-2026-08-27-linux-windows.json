@@ -1,0 +1,119 @@
+[
+    {
+        "slug": "linux",
+        "cat_slug": "outils-et-techniques",
+        "name": "Linux",
+        "definition": "Linux est le système d'exploitation qui fait tourner l'intelligence artificielle, même si personne n'y touche jamais. Quand on parle d'IA, on parle de serveurs, de centres de données et de supercalculateurs. Or, 100 % des 500 supercalculateurs du classement TOP500 utilisent Linux. Les serveurs web aussi : environ 61 à 62 % des serveurs dont l'OS est identifiable tournent sous Linux. Les conteneurs comme Docker et Kubernetes, qui permettent de déployer des modèles d'IA, partagent le noyau Linux de la machine hôte grâce aux namespaces et aux cgroups. Les piles d'entraînement comme PyTorch et TensorFlow, ainsi que les pilotes NVIDIA CUDA, sont publiés pour Linux. Enfin, l'écosystème open source qui partage les modèles, comme Hugging Face, doit beaucoup à la licence libre GPLv2 de Linux, qui permet de consulter, modifier et redistribuer le code. Linux n'est pas un logiciel unique : c'est un noyau que des distributions comme Ubuntu, Debian ou Red Hat assemblent avec d'autres outils. Bref, Linux est l'infrastructure invisible de l'IA moderne.",
+        "analogy": "Linux, c'est le moteur de la voiture de l'IA : on ne le voit pas, mais sans lui, ni serveurs ni modèles.",
+        "example": "Quand un chercheur entraîne un modèle sur un serveur GPU, il lance PyTorch dans un conteneur Docker : tout tourne sur le noyau Linux de l'hôte, avec les pilotes CUDA.",
+        "did_you_know": "Depuis novembre 2017, 100 % des 500 supercalculateurs du classement TOP500 tournent sous Linux, selon TOP500.org (statistique consultée en août 2026). C'est un fait unique au monde.",
+        "one_sentence_answer": "Linux est le système d'exploitation des serveurs, des supercalculateurs et des conteneurs qui entraînent et exécutent les modèles d'IA, et son modèle open source a nourri tout l'écosystème.",
+        "faq": [
+            {
+                "question": "Est-ce que Linux est gratuit?",
+                "answer": "Oui, Linux est distribué sous licence libre GPLv2, ce qui permet à quiconque de consulter, modifier et redistribuer son code."
+            },
+            {
+                "question": "Pourquoi les conteneurs Docker et Kubernetes démarrent-ils si vite?",
+                "answer": "Parce qu'un conteneur partage le noyau Linux de la machine hôte via les namespaces et les cgroups, sans embarquer son propre noyau, ce qui le rend léger."
+            },
+            {
+                "question": "Pourquoi les outils d'IA comme PyTorch sont-ils souvent utilisés avec Linux?",
+                "answer": "Parce que les piles d'entraînement PyTorch et TensorFlow, ainsi que les pilotes NVIDIA CUDA, sont d'abord publiés pour Linux, qui reste leur environnement de référence."
+            }
+        ],
+        "sources": [
+            {
+                "label": "TOP500.org - Operating System Family, statistiques du classement",
+                "url": "https://www.top500.org/statistics/details/osfam/1/",
+                "year": 2026,
+                "author": "TOP500.org"
+            },
+            {
+                "label": "W3Techs - Usage statistics of Linux for websites",
+                "url": "https://w3techs.com/technologies/details/os-linux",
+                "year": 2026,
+                "author": "W3Techs"
+            },
+            {
+                "label": "NVIDIA - Notes de version des conteneurs PyTorch (base Ubuntu/CUDA)",
+                "url": "https://docs.nvidia.com/deeplearning/frameworks/pytorch-release-notes/rel-25-04.html",
+                "year": 2026,
+                "author": "NVIDIA"
+            }
+        ],
+        "aliases": [
+            "GNU/Linux",
+            "noyau Linux"
+        ],
+        "broader_slugs": [
+            "open-source"
+        ],
+        "narrower_slugs": [],
+        "difficulty": "beginner",
+        "icon": "🐧",
+        "type": "outil",
+        "acronym_full": null,
+        "has_image": true,
+        "match_strategy": "loose",
+        "reference_url": "https://www.kernel.org/",
+        "reference_label": "Voir le site officiel du noyau Linux"
+    },
+    {
+        "slug": "windows",
+        "cat_slug": "outils-et-techniques",
+        "name": "Windows",
+        "definition": "Windows est le système d'exploitation le plus répandu sur les ordinateurs personnels du grand public : il représente environ 70 à 72 % du marché mondial des PC de bureau, selon StatCounter (2025-2026). Quand on parle d'intelligence artificielle, Windows revient surtout parce que c'est là que la plupart des gens croisent l'IA pour la première fois, directement sur leur poste de travail. Microsoft a ajouté le 4 janvier 2024 une touche Copilot dédiée sur le clavier de nombreux nouveaux PC Windows, pour ouvrir son assistant IA d'un seul geste. Windows est aussi une porte d'entrée vers l'IA locale : grâce au sous-système Windows pour Linux (WSL), on peut faire tourner des outils Python et des environnements Linux pensés pour l'IA sans quitter Windows. Depuis le 20 mai 2024, les ordinateurs certifiés Copilot+ PC incluent une puce neuronale (NPU) d'au moins 40 TOPS, capable d'exécuter certaines fonctions d'IA directement sur l'appareil, sans passer par le nuage.",
+        "analogy": "Windows, c'est comme la cuisine familiale : presque tout le monde y passe, et c'est là que Microsoft a branché son assistant IA.",
+        "example": "Un étudiant montréalais veut essayer une IA locale sur son portable Windows : il active WSL, installe les outils Linux et Python, puis exécute son modèle sans quitter Windows.",
+        "did_you_know": "Microsoft a lancé le 4 janvier 2024 une touche Copilot dédiée sur le clavier de nombreux nouveaux PC, la première modification majeure du clavier PC standard en presque trente ans.",
+        "one_sentence_answer": "Windows est le système d'exploitation le plus utilisé sur les ordinateurs personnels, et c'est là que la plupart des gens découvrent l'IA avec Copilot, WSL ou les PC à puce neuronale.",
+        "faq": [
+            {
+                "question": "Est-ce que Windows est vraiment le système le plus utilisé sur les PC?",
+                "answer": "Oui. Selon StatCounter, Windows représente environ 70 à 72 % du marché mondial des systèmes d'exploitation de bureau, donc c'est de loin le plus répandu."
+            },
+            {
+                "question": "Faut-il un nouvel ordinateur pour faire de l'IA sur Windows?",
+                "answer": "Pas nécessairement. Avec WSL, on peut faire tourner un environnement Linux et des outils Python directement dans Windows, sans machine virtuelle ni double démarrage, pour utiliser certains outils d'IA locale."
+            },
+            {
+                "question": "C'est quoi, un Copilot+ PC?",
+                "answer": "Un ordinateur Windows, catégorie lancée par Microsoft le 20 mai 2024, équipé d'une puce neuronale (NPU) d'au moins 40 TOPS, conçu pour exécuter certaines fonctions d'IA directement sur l'appareil."
+            }
+        ],
+        "sources": [
+            {
+                "label": "StatCounter Global Stats - Desktop Operating System Market Share Worldwide",
+                "url": "https://gs.statcounter.com/os-market-share/desktop/worldwide/",
+                "year": 2026,
+                "author": "StatCounter"
+            },
+            {
+                "label": "Windows Experience Blog - Introducing a new Copilot key to kick off the year of AI-powered Windows PCs",
+                "url": "https://blogs.windows.com/windowsexperience/2024/01/04/introducing-a-new-copilot-key-to-kick-off-the-year-of-ai-powered-windows-pcs/",
+                "year": 2024,
+                "author": "Microsoft"
+            },
+            {
+                "label": "Official Microsoft Blog - Introducing Copilot+ PCs",
+                "url": "https://blogs.microsoft.com/blog/2024/05/20/introducing-copilot-pcs/",
+                "year": 2024,
+                "author": "Microsoft"
+            }
+        ],
+        "aliases": [
+            "Microsoft Windows"
+        ],
+        "broader_slugs": [],
+        "narrower_slugs": [],
+        "difficulty": "beginner",
+        "icon": "🪟",
+        "type": "outil",
+        "acronym_full": null,
+        "has_image": true,
+        "match_strategy": "case_sensitive",
+        "reference_url": "https://www.microsoft.com/en-us/windows",
+        "reference_label": "Voir le site officiel de Windows"
+    }
+]
