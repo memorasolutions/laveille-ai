@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.222.1] - 2026-08-27
+
+### Corrigé
+- **Le glossaire masquait l'annuaire.** `GlossaryLinkifier` donne la priorité au glossaire/aux acronymes sur un outil homonyme pour l'auto-lien du corps de texte (une seule cible, jamais deux liens concurrents pour le lecteur) - une priorité justifiée là, mais reprise à tort par la suggestion d'outils liés d'une actualité, qui ne pose pourtant aucun lien : elle se contente de proposer un identifiant que l'admin valide. Un nom déjà « pris » par une fiche de glossaire (ChatGPT, Midjourney, Perplexity...) n'était donc jamais retenu comme outil. Mesuré en production le 27 août : 17 entités existent à la fois dans le glossaire et l'annuaire, masquant 317 fiches publiées vivantes sans outil lié. `NewsToolSyncAction::suggest()` reprend désormais les termes détectés qui ne sont pas de type « outil » et les confronte au nom exact des outils publiés, sans dupliquer la détection du linkifier. Éprouvé rouge sans le correctif, vert avec ; suite News complète 514 verts.
+- **Une fiche fraîchement publiée restait invisible sur l'accueil et sur `/actualites`.** La page de la fiche elle-même n'était jamais périmée (aucun cache n'existait avant sa publication), mais rien ne purgeait les pages de LISTE : elles continuaient de servir leur version en cache jusqu'à expiration naturelle (600 s). Nouveau `PublicCachePurger` (purge ciblée par route, jamais un `ResponseCache::clear()` global) appelé depuis `NewsArticleObserver` à chaque bascule de `is_published`, dans les deux sens - une dépublication doit aussi disparaître des listes sans attendre l'expiration. Couvre les 3 chemins de publication existants (bascule rapide admin, écran de composition, `news:apply --publish`), qui passent tous par le même `update()` Eloquent. 4 échecs avant le correctif, 5 tests passés après ; suite News complète 476 verts.
+
 ## [1.222.0] - 2026-08-27
 
 ### Ajouté

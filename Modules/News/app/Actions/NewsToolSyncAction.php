@@ -129,8 +129,8 @@ final class NewsToolSyncAction
 
         GlossaryLinkifier::linkify($text);
 
-        $matchedTools = collect(GlossaryLinkifier::getLastMatchedTerms())
-            ->filter(fn (array $t) => ($t['type'] ?? '') === 'tool');
+        $matchedTerms = collect(GlossaryLinkifier::getLastMatchedTerms());
+        $matchedTools = $matchedTerms->filter(fn (array $t) => ($t['type'] ?? '') === 'tool');
 
         // 2026-07-04 : JSON_UNQUOTE indispensable sous MySQL (règle projet permanente, cf. #227/#306) -
         // sans lui, JSON_EXTRACT renvoie la valeur JSON-quotée (ex. "claude" avec guillemets littéraux),
@@ -156,6 +156,29 @@ final class NewsToolSyncAction
             ->whereIn("slug->{$locale}", $slugsFromLinkifier)
             ->pluck('id');
 
-        return $detectedBySlug->merge($neverAutoIds)->unique()->values();
+        // 2026-08-27 : GlossaryLinkifier donne la PRIORITÉ au glossaire/aux acronymes sur un
+        // outil homonyme (voir loadTerms(), doc 2026-06-17 #164) - un nom déjà "pris" par une
+        // fiche de glossaire n'est jamais ajouté à $terms avec type='tool', donc jamais retenu
+        // par $matchedTools ci-dessus. Cette priorité est justifiée pour l'auto-lien du corps de
+        // texte (une seule cible, jamais deux liens concurrents pour le lecteur) mais n'a aucune
+        // raison de s'appliquer ici : la suggestion d'outils liés ne pose aucun lien, elle propose
+        // un ID que l'admin valide. On reprend donc les termes détectés qui NE sont PAS de type
+        // 'tool' (glossaire, acronyme) et on les confronte au nom exact des outils publiés - sans
+        // dupliquer la détection (regex, désambiguïsation de casse) qui reste entièrement dans
+        // GlossaryLinkifier. Mesuré en production le 2026-08-27 : 17 entités existent à la fois
+        // dans le glossaire et l'annuaire (ChatGPT, Midjourney, Perplexity...), masquant 317
+        // fiches publiées vivantes sans outil lié.
+        $namesMaskedByGlossary = $matchedTerms
+            ->reject(fn (array $t) => ($t['type'] ?? '') === 'tool')
+            ->pluck('name')
+            ->filter()
+            ->unique()
+            ->values();
+
+        $detectedByName = $namesMaskedByGlossary->isEmpty()
+            ? collect()
+            : Tool::published()->whereIn("name->{$locale}", $namesMaskedByGlossary->all())->pluck('id');
+
+        return $detectedBySlug->merge($detectedByName)->merge($neverAutoIds)->unique()->values();
     }
 }

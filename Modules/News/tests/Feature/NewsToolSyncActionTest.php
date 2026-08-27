@@ -20,6 +20,7 @@ declare(strict_types=1);
  * dans l'annuaire - confirmé en production).
  */
 
+use Modules\Dictionary\Models\Term;
 use Modules\Directory\Models\Tool;
 use Modules\News\Actions\NewsToolSyncAction;
 use Modules\News\Models\NewsArticle;
@@ -133,6 +134,48 @@ it('suggest() détecte un outil ordinaire mentionné uniquement dans le résumé
             'why_important' => "L'adoption de Notion illustre une tendance de fond.",
         ],
         'slug'         => 'article-ntsa-notion',
+        'pub_date'     => now()->subDay(),
+        'is_published' => true,
+        'seo_status'   => 'index',
+    ]);
+
+    $suggested = app(NewsToolSyncAction::class)->suggest($article);
+
+    expect($suggested->all())->toContain($tool->id);
+});
+
+// ── Régression : outil homonyme d'une fiche de glossaire (masqué par la priorité de
+// GlossaryLinkifier, cf. Modules/Core/app/Services/GlossaryLinkifier.php ~389-392) ──
+
+it('suggest() détecte un outil dont le nom est aussi une fiche de glossaire', function () {
+    // « Redacto » existe à la fois comme fiche de glossaire ET comme outil publié - avant le
+    // correctif du 2026-08-27, le glossaire "prenait" ce nom en premier (GlossaryLinkifier::
+    // loadTerms(), $takenLower) et l'outil homonyme n'était donc JAMAIS ajouté à $terms avec
+    // type='tool' : suggest() ne pouvait plus jamais le proposer, quel que soit le texte.
+    Term::create([
+        'name'         => 'Redacto',
+        'slug'         => 'redacto',
+        'definition'   => 'Un terme de test qui partage son nom avec un outil de l\'annuaire.',
+        'is_published' => true,
+    ]);
+
+    $tool = ntsaTool('Redacto', 'redacto-outil');
+
+    $article = NewsArticle::create([
+        'news_source_id' => ntsaSource()->id,
+        'title'          => 'Une actualité sur les outils de rédaction assistée',
+        'guid'           => 'guid-ntsa-redacto',
+        'url'            => 'https://exemple.com/ntsa-redacto',
+        'description'    => '',
+        'summary'        => '',
+        'structured_summary' => [
+            'hook' => 'Plusieurs rédactions utilisent désormais Redacto pour accélérer la production.',
+            'key_points' => [
+                'Redacto automatise une partie de la relecture éditoriale.',
+            ],
+            'why_important' => 'Redacto illustre une tendance de fond dans les salles de rédaction.',
+        ],
+        'slug'         => 'article-ntsa-redacto',
         'pub_date'     => now()->subDay(),
         'is_published' => true,
         'seo_status'   => 'index',
