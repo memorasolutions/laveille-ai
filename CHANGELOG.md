@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.225.0] - 2026-08-27
+
+### Ajouté
+- **`news:apply --enrich` accepte désormais la clé `title`, sans jamais régénérer le slug d'une fiche déjà publiée.** Jusqu'ici, corriger le TITRE affiché d'une actualité en ligne était catégoriquement refusé par ce mode, au nom d'une confusion : le slug n'est en réalité recalculé qu'à un seul point d'appel explicite (`NewsArticle::generateUniqueSlug()`, invoqué depuis `applyPayload()`), jamais recalculé automatiquement à chaque écriture (`NewsArticle::booted()` ne le pose qu'à la création de la fiche). En mode `--enrich`, `title` s'écrit désormais normalement, mais cet appel est sauté : le titre change, l'adresse déjà référencée par Google et par les liens entrants reste strictement identique - exactement le même garde-fou que `seo_title`, qui n'a jamais eu besoin d'être refusé pour cette même raison.
+- La clé `slug` elle-même reste, et restera, absente de `ALLOWED_PAYLOAD_KEYS` : elle demeure refusée dans tous les modes, sans exception. Seul le TITRE devient corrigeable après publication ; l'ADRESSE ne bouge jamais par cette porte.
+- Deux tests remplacent l'ancien test de refus : `--enrich` applique un titre corrigé à une fiche déjà publiée en laissant son slug rigoureusement inchangé, et `--enrich` continue de refuser toute tentative de poser directement la clé `slug`, même à sa propre valeur courante.
+
 ## [1.224.0] - 2026-08-27
 
 ### Ajouté

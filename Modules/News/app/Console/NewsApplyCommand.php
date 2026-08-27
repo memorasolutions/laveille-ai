@@ -73,10 +73,18 @@ use Modules\News\Services\NewsImageService;
  * permet de recomposer le contenu (mode --payload, typiquement composed_summary) et/ou de
  * remplacer l'image (mode --image) d'une fiche DÉJÀ PUBLIÉE dont le référencement est déjà
  * bon, SANS jamais toucher à son slug/URL ni à son statut de publication - ni l'un ni l'autre
- * n'est jamais écrit par ce chemin. La clé 'title' du payload est explicitement REFUSÉE en
- * mode --enrich (applyPayload()) : le slug d'une fiche référencée ne doit jamais changer.
- * --enrich ne s'applique JAMAIS à --publish (sans objet sur une fiche déjà publiée - la
- * combinaison reste refusée comme avant).
+ * n'est jamais écrit par ce chemin. --enrich ne s'applique JAMAIS à --publish (sans objet sur
+ * une fiche déjà publiée - la combinaison reste refusée comme avant).
+ *
+ * NOTE DATÉE 2026-08-27 (corriger un titre faux en ligne SANS changer l'adresse) - la clé
+ * 'title' du payload, longtemps catégoriquement REFUSÉE en mode --enrich, est désormais
+ * acceptée : le slug est une colonne STOCKÉE, régénérée par le seul appel explicite de
+ * generateUniqueSlug() (applyPayload() ci-dessous), jamais recalculée automatiquement à chaque
+ * écriture (NewsArticle::booted() ne la pose qu'à la CRÉATION). En mode --enrich, applyPayload()
+ * saute cet appel : title s'écrit, le slug déjà référencé ne bouge jamais - exactement le même
+ * garde-fou que seo_title (qui, lui, n'a jamais touché le slug et n'a donc jamais eu besoin
+ * d'être refusé). La clé 'slug' elle-même reste hors de ALLOWED_PAYLOAD_KEYS, donc refusée dans
+ * tous les modes, sans exception.
  *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
@@ -131,7 +139,7 @@ class NewsApplyCommand extends Command
      */
     private const ALLOWED_NIVEAU_PREUVE = ['primaire', 'mixte', 'relais'];
 
-    protected $signature = 'news:apply {article : id de la fiche news_articles} {--payload= : chemin d\'un fichier JSON de charge utile texte - efface aussi structured_summary (résumé machine), qui prime sinon sur ta composition côté fiche publique} {--image= : chemin d\'un fichier image local à appliquer} {--credit= : crédit photo appliqué avec --image (le payload exige la fraîcheur, qui change après la 1re écriture - le crédit voyage donc avec l\'image)} {--publish : publie la fiche - mêmes prérequis que le bouton manuel Publier-et-purger, refuse si déjà publiée} {--enrich : recompose une fiche DÉJÀ PUBLIÉE sans changer son slug ni la dépublier (chantier enrichissement AdSense) - refuse la clé title}';
+    protected $signature = 'news:apply {article : id de la fiche news_articles} {--payload= : chemin d\'un fichier JSON de charge utile texte - efface aussi structured_summary (résumé machine), qui prime sinon sur ta composition côté fiche publique} {--image= : chemin d\'un fichier image local à appliquer} {--credit= : crédit photo appliqué avec --image (le payload exige la fraîcheur, qui change après la 1re écriture - le crédit voyage donc avec l\'image)} {--publish : publie la fiche - mêmes prérequis que le bouton manuel Publier-et-purger, refuse si déjà publiée} {--enrich : recompose une fiche DÉJÀ PUBLIÉE sans jamais changer son slug ni la dépublier (chantier enrichissement AdSense) - la clé title corrige le titre affiché, slug toujours intact}';
 
     protected $description = 'Seule porte d\'écriture bornée pour l\'agent de composition (Actus 2.0) - jamais d\'Eloquent/SQL direct par l\'agent.';
 
@@ -160,8 +168,10 @@ class NewsApplyCommand extends Command
         // SEULE exception (chantier enrichissement AdSense, 2026-08-19) : --enrich contourne CE
         // refus, et UNIQUEMENT quand --payload et/ou --image sont demandés (jamais --publish,
         // sans objet sur une fiche déjà publiée) - --enrich est le SEUL moyen d'écrire sur une
-        // fiche publiée par cette porte, réservé à la recomposition de CONTENU (titre/URL
-        // toujours hors de portée, voir le refus de la clé title dans applyPayload()).
+        // fiche publiée par cette porte, réservé à la recomposition de CONTENU. Le titre AFFICHÉ
+        // peut désormais s'y corriger (clé title, applyPayload()) ; le slug/URL, lui, reste
+        // TOUJOURS hors de portée (colonne jamais réécrite en mode --enrich, ni via title ni par
+        // aucune autre clé - 'slug' n'a jamais fait partie de ALLOWED_PAYLOAD_KEYS).
         // MCP: SELF (<5 lignes)
         // RAISON: unique limite non négociable exigée par le mandat, vérifiée avant toute autre
         // logique des trois modes ci-dessous ; --enrich l'assouplit strictement dans le
@@ -262,20 +272,6 @@ class NewsApplyCommand extends Command
 
         $updates = [];
 
-        // ACTION : --enrich (chantier enrichissement AdSense, 2026-08-19) - la clé title est
-        // INTERDITE en mode --enrich : le slug d'une fiche déjà référencée ne doit jamais
-        // changer, --enrich est réservé à la recomposition du CONTENU (composed_summary et
-        // consorts), jamais au titre/URL. Contrôle placé AVANT le bloc qui traite 'title'
-        // ci-dessous pour ne jamais l'atteindre.
-        // MCP: SELF (<5 lignes)
-        // RAISON: chantier enrichissement AdSense - remplacer un résumé machine mince par un
-        // contenu riche SANS jamais changer le slug d'une fiche qui rank déjà.
-        if ($this->option('enrich') && array_key_exists('title', $decoded)) {
-            $this->error("En mode --enrich, la clé title est interdite : le slug d'une fiche référencée ne doit jamais changer.");
-
-            return self::FAILURE;
-        }
-
         // ACTION : clé title (correctif systémique 2026-08-17 soir) - la fiche 33558 a été publiée
         // avec le titre/slug provisoires du brouillon car le slug n'est généré qu'à la CRÉATION
         // (NewsArticle::booted). Le cycle /actu2 décide du titre APRÈS la recherche : cette clé
@@ -284,6 +280,20 @@ class NewsApplyCommand extends Command
         // MCP: SELF (bloc court calqué sur seo_title)
         // RAISON: défaut réel observé en prod (journal, entrée 115) ; jamais deux implémentations
         //         de la règle de slug.
+        //
+        // ACTION : --enrich (correctif 2026-08-27, chantier « corriger un titre faux en ligne ») -
+        // le slug est une COLONNE STOCKÉE, régénérée UNIQUEMENT par l'appel explicite ci-dessous
+        // (jamais recalculée automatiquement à chaque écriture, cf. NewsArticle::booted() qui ne
+        // la pose qu'à la création). En mode --enrich, cette même clé title est donc désormais
+        // acceptée sur une fiche déjà publiée, mais l'appel à generateUniqueSlug() est SAUTÉ : le
+        // titre affiché se corrige, l'adresse déjà référencée ne bouge jamais. Hors --enrich
+        // (fiche encore brouillon), le comportement historique est inchangé : le slug continue de
+        // suivre le titre jusqu'à publication.
+        // MCP: SELF (<5 lignes)
+        // RAISON: seule seo_title corrigeait un titre publié sans toucher au slug ; title lui-même
+        //         restait catégoriquement refusé en --enrich, alors que le slug ne dépend du titre
+        //         qu'à cet unique point d'appel - jamais casser un lien entrant, jamais laisser un
+        //         titre faux en ligne faute d'un garde-fou devenu trop large.
         if (array_key_exists('title', $decoded)) {
             if (! is_string($decoded['title']) || trim($decoded['title']) === '' || mb_strlen($decoded['title']) > 200) {
                 $this->error('title doit être une chaîne non vide de 200 caractères maximum.');
@@ -291,7 +301,9 @@ class NewsApplyCommand extends Command
                 return self::FAILURE;
             }
             $updates['title'] = trim($decoded['title']);
-            $updates['slug'] = NewsArticle::generateUniqueSlug($updates['title'], $article->id);
+            if (! $this->option('enrich')) {
+                $updates['slug'] = NewsArticle::generateUniqueSlug($updates['title'], $article->id);
+            }
         }
 
         if (array_key_exists('seo_title', $decoded)) {

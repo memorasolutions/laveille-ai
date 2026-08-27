@@ -831,8 +831,8 @@ it('--enrich applies a composed_summary payload to an already-published article 
         ->and($article->slug)->toBe($ancienSlug);
 });
 
-it('--enrich refuses a payload containing the title key on an already-published article, slug unchanged', function () {
-    $sourceText = 'Texte source pour le refus title en enrich.';
+it('--enrich applies a corrected title to an already-published article, its slug staying strictly identical', function () {
+    $sourceText = 'Texte source pour la correction de titre en enrich.';
     $article = nacArticle([
         'internal_source_text' => $sourceText,
         'source_content_hash' => hash('sha256', $sourceText),
@@ -842,7 +842,30 @@ it('--enrich refuses a payload containing the title key on an already-published 
     $ancienSlug = $article->slug;
 
     $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
-        'title' => 'Titre interdit en mode enrich',
+        'title' => 'Titre corrigé après publication, adresse inchangée',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload, '--enrich' => true])
+        ->assertSuccessful();
+
+    $article = $article->fresh();
+    expect($article->title)->toBe('Titre corrigé après publication, adresse inchangée')
+        ->and($article->slug)->toBe($ancienSlug)
+        ->and($article->is_published)->toBeTrue();
+});
+
+it('--enrich refuses a payload containing the slug key, even set to the article\'s own current value', function () {
+    $sourceText = 'Texte source pour le refus de la clé slug en enrich.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+        'is_published' => true,
+        'published_at' => now()->subDays(30),
+    ]);
+    $ancienSlug = $article->slug;
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'slug' => $ancienSlug,
     ]));
 
     $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload, '--enrich' => true])
@@ -850,7 +873,6 @@ it('--enrich refuses a payload containing the title key on an already-published 
 
     $article = $article->fresh();
     expect($article->slug)->toBe($ancienSlug)
-        ->and($article->title)->not->toBe('Titre interdit en mode enrich')
         ->and($article->is_published)->toBeTrue();
 });
 
