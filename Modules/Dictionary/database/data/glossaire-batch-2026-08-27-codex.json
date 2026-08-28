@@ -1,0 +1,71 @@
+[
+  {
+    "slug": "codex",
+    "cat_slug": "outils-et-techniques",
+    "name": "OpenAI Codex",
+    "definition": "« Codex » désigne deux technologies distinctes créées par OpenAI, qui partagent un nom mais jamais le mécanisme. Le mot vient du latin cōdex, qui désignait un manuscrit ancien fait de feuillets reliés, l'ancêtre du livre par opposition au rouleau. OpenAI l'emprunte une première fois le 10 août 2021 pour un modèle dérivé de GPT-3, entraîné sur des milliards de lignes de code public, capable de traduire une consigne en langage naturel vers un programme. Ce modèle alimente alors la toute première version de GitHub Copilot, avant d'être retiré par OpenAI en mars 2023. Le nom revient en 2025 pour un produit très différent : un agent d'ingénierie logicielle qui exécute des tâches complètes dans un bac à sable infonuagique isolé - lire un dépôt, corriger un bogue, proposer des changements - plutôt que de simplement compléter une ligne de code. Lancé en version de recherche le 16 mai 2025, propulsé par le modèle codex-1, il devient accessible à tous le 6 octobre 2025.",
+    "analogy": "Comme un prénom repris par un descendant : le premier Codex complétait du code, celui d'aujourd'hui exécute des projets entiers seul.",
+    "example": "En mars 2026, l'entreprise japonaise Rakuten rapporte avoir réduit de 50 % le délai moyen de résolution de ses incidents logiciels en confiant des tâches d'ingénierie à Codex, l'agent d'OpenAI.",
+    "did_you_know": "Le latin caudex désignait un tronc d'arbre, puis des tablettes de bois reliées pour écrire. OpenAI a repris ce nom deux mille ans plus tard pour un agent qui code.",
+    "one_sentence_answer": "Codex est le nom qu'OpenAI a donné à deux technologies différentes de génération de code, en 2021 puis en 2025, un mot dérivé du latin qui désignait à l'origine un manuscrit ancien relié en cahiers.",
+    "faq": [
+      {
+        "question": "Le Codex d'OpenAI de 2021 est-il le même produit que celui d'aujourd'hui?",
+        "answer": "Non. Le premier Codex (2021-2023) était un modèle qui complétait du code depuis une invite écrite. Il a été retiré en 2023. Le Codex actuel, lancé en 2025, est un agent qui exécute des tâches entières de développement logiciel dans un environnement infonuagique isolé, du lancement d'un dépôt jusqu'à la proposition de changements."
+      },
+      {
+        "question": "Codex et GitHub Copilot, est-ce la même chose?",
+        "answer": "Non, mais les deux sont liés. Le premier modèle Codex d'OpenAI a propulsé la toute première version de GitHub Copilot en 2021. Depuis, les deux produits ont évolué séparément : Copilot appartient à GitHub (Microsoft) et propose plusieurs modèles, alors que Codex reste un produit propre à OpenAI."
+      },
+      {
+        "question": "Pourquoi ce nom vient-il d'un manuscrit ancien?",
+        "answer": "« Codex » désignait à l'origine un livre ancien fait de feuillets reliés, par opposition au rouleau utilisé avant lui. OpenAI a réutilisé ce mot en 2021 pour évoquer une nouvelle façon d'écrire - du code, cette fois, plutôt que du texte."
+      }
+    ],
+    "sources": [
+      {
+        "label": "OpenAI - annonce originale de Codex (mise à jour jusqu'en 2025)",
+        "url": "https://openai.com/index/openai-codex/",
+        "year": 2021,
+        "author": "OpenAI"
+      },
+      {
+        "label": "OpenAI - Découvrez Codex, l'agent d'ingénierie logicielle infonuagique",
+        "url": "https://openai.com/index/introducing-codex/",
+        "year": 2025,
+        "author": "OpenAI"
+      },
+      {
+        "label": "OpenAI - Codex est maintenant disponible pour tous",
+        "url": "https://openai.com/index/codex-now-generally-available/",
+        "year": 2025,
+        "author": "OpenAI"
+      },
+      {
+        "label": "InfoQ - OpenAI Announces 12 Billion Parameter Code-Generation AI Codex",
+        "url": "https://www.infoq.com/news/2021/08/openai-codex/",
+        "year": 2021,
+        "author": "Anthony Alford, InfoQ"
+      },
+      {
+        "label": "Larousse - définition de « codex »",
+        "url": "https://www.larousse.fr/dictionnaires/francais/codex/16897",
+        "year": 2026,
+        "author": "Éditions Larousse"
+      }
+    ],
+    "aliases": [],
+    "broader_slugs": [
+      "openai"
+    ],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "📜",
+    "type": "outil",
+    "acronym_full": null,
+    "match_strategy": "case_sensitive",
+    "has_image": true,
+    "reference_url": "https://openai.com/codex/",
+    "reference_label": "Découvrir Codex sur OpenAI.com"
+  }
+]

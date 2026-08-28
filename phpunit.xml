@@ -6,6 +6,9 @@
          executionOrder="defects"
 >
     <testsuites>
+        <testsuite name="Architecture">
+            <directory>tests/Architecture</directory>
+        </testsuite>
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
         </testsuite>
@@ -14,9 +17,6 @@
         </testsuite>
         <testsuite name="Modules">
             <directory>Modules/*/tests</directory>
-        </testsuite>
-        <testsuite name="Architecture">
-            <directory>tests/Architecture</directory>
         </testsuite>
     </testsuites>
     <source>

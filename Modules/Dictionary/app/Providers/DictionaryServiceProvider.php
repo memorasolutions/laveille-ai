@@ -29,6 +29,8 @@ class DictionaryServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+
+        \Modules\Dictionary\Models\Term::observe(\Modules\Dictionary\Observers\TermObserver::class);
     }
 
     /**

@@ -82,7 +82,13 @@ class GlossaryLinkifier
      * (« Claude », « Avec », « Tome », « Make »…) → JAMAIS auto-liés, sinon faux positifs en prose FR.
      * Les ~330 autres outils (noms distinctifs) sont auto-liés en casse stricte vers /annuaire/{slug}.
      */
-    public const TOOL_NEVER_AUTO = ['claude', 'avec', 'tome', 'caribou', 'make', 'motion', 'gamma', 'gemini', 'mistral', 'consensus', 'intent', 'dust', 'soar', 'remind', 'spinach', 'grok', 'aqua', 'handy', 'lounge', 'willow', 'poe', 'pika', 'noa', 'deduce'];
+    public const TOOL_NEVER_AUTO = ['claude', 'avec', 'tome', 'caribou', 'make', 'motion', 'gamma', 'gemini', 'mistral', 'consensus', 'intent', 'dust', 'soar', 'remind', 'spinach', 'grok', 'aqua', 'handy', 'lounge', 'willow', 'poe', 'pika', 'noa', 'deduce',
+        // 2026-08-28 : 4 faux positifs mesures sur les 420 premieres fiches du backfill
+        // des outils lies. Meme famille que ci-dessus : le nom de l'outil est un mot
+        // commun (« local », « montage », « logic ») ou un fragment d'un autre nom propre
+        // (« Global AI Pulse » de KPMG, « Thrive Logic »). Sans eux, le motif se serait
+        // reproduit mecaniquement sur les 2 506 fiches restantes.
+        'local', 'montage', 'pulse', 'logic'];
 
     /**
      * 2026-05-05 #141 b : tracking cumulatif inter-appels.
@@ -859,11 +865,11 @@ class GlossaryLinkifier
             // suivi d'un chiffre.
             // MCP: SELF (<5 lignes)
             // RAISON: correctif de frontiere sur le point unique ou le motif est construit.
-            $finDeMot = '(?![\p{L}\p{N}]|\.\d)';
+            $finDeMot = '(?![\p{L}\p{N}_\-\/]|\.\w)';
             if ($strategy === 'partial_case_sensitive') {
-                $pattern = '/(?<![\p{L}\p{N}])'.self::buildPartialCasePattern($name).$finDeMot.'/u';
+                $pattern = '/(?<![\p{L}\p{N}._\-\/])'.self::buildPartialCasePattern($name).$finDeMot.'/u';
             } else {
-                $pattern = '/(?<![\p{L}\p{N}])'.preg_quote($name, '/').$finDeMot.'/u';
+                $pattern = '/(?<![\p{L}\p{N}._\-\/])'.preg_quote($name, '/').$finDeMot.'/u';
                 if ($strategy === 'loose') $pattern .= 'i';
             }
             // case_sensitive ET exact_phrase : pas de flag i (casse exacte)

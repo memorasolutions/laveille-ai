@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.226.0] - 2026-08-28
+
+### Corrigé
+- **Le linkifier du glossaire posait parfois un lien au milieu d'un mot, jamais autour.** Les frontières de correspondance n'excluaient que les lettres et les chiffres : le point, l'underscore, le tiret et la barre oblique ne bornaient rien. Un lien se glissait donc à l'intérieur de « DeepLearning.AI », de « aistudio.google.com » ou de « pollen-robotics/microduck_rl » - le fragment souligné n'avait plus aucun rapport avec le terme réellement présent dans le texte. Correctif appliqué aux deux façons dont le motif de recherche est construit, sinon la moitié des termes du glossaire gardait l'ancien comportement défectueux. Subtilité conservée avec soin : le point ne borne un mot que s'il est SUIVI d'un caractère de mot, sinon les termes qui contiennent eux-mêmes un point (Node.js, Z.ai, jan.ai) auraient cessé d'être détectés en fin de phrase. 9 cas verrouillés par test, dont 4 vérifient explicitement que ces termes-là restent liés.
+- **Une fiche d'outil ou de terme de glossaire fraîchement publiée pouvait rester invisible sur les pages qui la LISTENT.** La fiche elle-même n'était jamais en cause, mais ni l'annuaire (`/annuaire`), ni le glossaire (`/glossaire`), ni les widgets de l'accueil qui en tirent leur contenu n'étaient purgés à la publication, à la modification ou à la dépublication d'une fiche : ils continuaient de servir leur version en cache jusqu'à expiration naturelle (600 secondes pour l'annuaire et l'accueil, 3600 secondes pour le glossaire - qui n'avait jusqu'ici AUCUNE purge, ni pour ses fiches ni pour ses listes). Deux nouveaux observateurs, un par module (`ToolObserver` pour l'annuaire, `TermObserver` pour le glossaire, même patron que celui déjà en place pour les actualités), purgent désormais ciblé les seules pages de liste concernées à chaque bascule de publication - jamais un vidage global du cache. Preuve : 2 tests neufs, un par module.
+
+### Ajouté
+- **Deux fiches de glossaire.** « OpenAI Codex » (l'agent d'ingénierie logicielle d'OpenAI, nommé ainsi et jamais « Codex » seul, pour ne s'accrocher par erreur ni au manuscrit ancien, ni au Codex Alimentarius, ni à l'ancien nom de la Pharmacopée française - tous des sens bien réels et concurrents du même mot) et « Anthropic » (l'entreprise, distincte de la fiche déjà publiée sur son assistant Claude). Deux fiches voisines qui citaient déjà « Anthropic » en texte non cliquable, « ia-constitutionnelle » et « mcp », sont désormais reliées à la nouvelle fiche.
+- Contrôle anti-doublon fait contre les 516 slugs réellement publiés en production, jamais contre la base locale qui est partielle : aucune correspondance pour « codex » ni pour « anthropic ».
+
+### Modifié
+- **La suite `Architecture` passe en tête de `phpunit.xml`, devant `Unit`.** C'est l'unique porte du projet vers `nikic/php-parser`, la bibliothèque d'analyse syntaxique dont dépend `pestphp/pest-plugin-arch` et qui saturait la mémoire quand elle s'exécutait en fin de suite plutôt qu'au début. `memory_limit` reste fixé à 2G : traiter l'ordre d'exécution règle la cause, là où relever le budget mémoire n'aurait fait que masquer le symptôme.
+
 ## [1.225.0] - 2026-08-27
 
 ### Ajouté

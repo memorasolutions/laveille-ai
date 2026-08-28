@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Directory\Observers;
 
+use App\Support\ResponseCache\PublicCachePurger;
 use Modules\Directory\Jobs\CaptureScreenshotJob;
 use Modules\Directory\Models\Tool;
 use Modules\Directory\Services\EcosystemCountService;
@@ -53,6 +54,19 @@ class ToolObserver
         // ne fire qu'une seule fois, exactement à l'insertion : c'est le bon endroit pour
         // invalider sans dépendre de wasChanged() ni du flag instable wasRecentlyCreated.
         EcosystemCountService::flushCache();
+
+        $this->purgePublicListCache($tool->status === 'published');
+    }
+
+    public function updated(Tool $tool): void
+    {
+        $isPublished = $tool->status === 'published';
+        $wasPublished = $tool->getOriginal('status') === 'published';
+
+        // Toute modification d'une fiche publiée (ou qui vient de le devenir/cesser de
+        // l'être) purge les listes : le contenu affiché sur ces pages (nom, tarif, logo...)
+        // peut avoir changé, pas seulement le statut de publication.
+        $this->purgePublicListCache(($isPublished || $wasPublished) && $tool->wasChanged());
     }
 
     public function deleted(Tool $tool): void
@@ -60,5 +74,32 @@ class ToolObserver
         if ($tool->ecosystem_tag !== null) {
             EcosystemCountService::flushCache();
         }
+
+        $this->purgePublicListCache($tool->status === 'published');
+    }
+
+    /**
+     * Purge ciblée (jamais un ResponseCache::clear() global — voir docblock de
+     * PublicCachePurger) des pages qui LISTENT les outils : l'accueil (widget « outils
+     * populaires », cf. HomeController) et /annuaire (directory.index). La fiche elle-même
+     * (directory.show) n'a pas besoin d'être purgée ici : sa route porte le middleware
+     * doNotCacheResponse (cf. Modules/Directory/routes/web.php) — elle n'est jamais mise en
+     * cache, donc ne peut jamais porter de version périmée.
+     *
+     * Mesuré le 2026-08-27 : avant ce correctif, seule la bascule de mise en avant
+     * (DirectoryAdminController::toggleFeatured) purgeait quoi que ce soit — et via un
+     * ResponseCache::clear() global, pas ciblé. La création et la modification d'une fiche via
+     * l'admin (store()/update()) ne purgeaient rien : /annuaire (600s) et l'accueil (600s)
+     * restaient périmés jusqu'à expiration naturelle. Hors périmètre, assumé, comme pour
+     * NewsArticleObserver : les listes secondaires (/collections, comparateur filtré) ne sont
+     * pas purgées par ce point de passage.
+     */
+    private function purgePublicListCache(bool $shouldPurge): void
+    {
+        if (! $shouldPurge) {
+            return;
+        }
+
+        PublicCachePurger::forgetRoutes(['home', 'directory.index']);
     }
 }

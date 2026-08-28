@@ -1,0 +1,60 @@
+[
+  {
+    "slug": "anthropic",
+    "name": "Anthropic",
+    "definition": "Anthropic est une entreprise américaine d'intelligence artificielle fondée le 26 janvier 2021 à San Francisco par Dario et Daniela Amodei et plusieurs anciens chercheurs et dirigeants d'OpenAI, dont Jared Kaplan et Chris Olah, après des désaccords sur la priorité donnée à la sécurité des modèles avancés. Constituée en Public Benefit Corporation (société à mission de droit du Delaware), l'entreprise se dote en 2023 d'un mécanisme de gouvernance distinctif : le Long-Term Benefit Trust, un groupe de fiduciaires indépendants sans intérêt financier dans l'entreprise, habilité à élire une part croissante du conseil d'administration à mesure que la société grandit. Anthropic se présente comme un laboratoire priorisant la sécurité, avec une politique de déploiement graduée (Responsible Scaling Policy) censée limiter les risques catastrophiques à mesure que les modèles gagnent en capacité. L'entreprise est à l'origine de l'IA constitutionnelle, une méthode d'entraînement par principes écrits, et du protocole MCP, un standard ouvert connectant les IA à des outils externes. Son produit phare reste l'assistant conversationnel Claude.",
+    "analogy": "Comme une centrale nucléaire qui confierait à un comité externe indépendant le pouvoir de freiner sa production si les risques deviennent trop grands.",
+    "example": "En mai 2024, Jan Leike, ex-corresponsable de la sécurité chez OpenAI, démissionne puis rejoint Anthropic - un signal lu comme une validation externe de son positionnement sécurité par ses pairs.",
+    "did_you_know": "Les cinq fiduciaires du Long-Term Benefit Trust n'ont aucun intérêt financier dans Anthropic : leur seul mandat est de faire primer la mission de sécurité sur le rendement des actionnaires.",
+    "one_sentence_answer": "Anthropic est une entreprise américaine d'IA fondée en 2021 par d'anciens dirigeants d'OpenAI, structurée en société à mission et connue pour Claude, l'IA constitutionnelle et le protocole MCP.",
+    "faq": [
+      {
+        "question": "Anthropic appartient-elle à Amazon ou à Google?",
+        "answer": "Non. Anthropic reste une société indépendante; Amazon en est un investisseur minoritaire majeur (8 milliards de dollars américains investis depuis 2023), sans en détenir le contrôle."
+      },
+      {
+        "question": "Quelle est la différence entre Anthropic et Claude?",
+        "answer": "Anthropic est l'entreprise; Claude est le nom de sa famille de modèles et de son assistant conversationnel, vendu par abonnement ou via une interface de programmation (API)."
+      },
+      {
+        "question": "Pourquoi les fondateurs ont-ils quitté OpenAI pour créer Anthropic?",
+        "answer": "Selon les comptes rendus disponibles, Dario et Daniela Amodei et plusieurs collègues ont quitté OpenAI en 2021 après des désaccords sur la priorité à donner à la sécurité face au rythme de développement des modèles."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Anthropic - The Long-Term Benefit Trust",
+        "url": "https://www.anthropic.com/news/the-long-term-benefit-trust",
+        "year": 2023,
+        "author": "Anthropic"
+      },
+      {
+        "label": "CNBC - OpenAI former safety leader Jan Leike joins rival AI startup Anthropic",
+        "url": "https://www.cnbc.com/2024/05/28/openai-safety-leader-jan-leike-joins-amazon-backed-anthropic.html",
+        "year": 2024,
+        "author": "Hayden Field, CNBC"
+      },
+      {
+        "label": "Anthropic - Deepening our compute partnership with Amazon",
+        "url": "https://www.anthropic.com/news/anthropic-amazon-compute",
+        "year": 2024,
+        "author": "Anthropic"
+      }
+    ],
+    "aliases": [],
+    "broader_slugs": [],
+    "narrower_slugs": [
+      "ia-constitutionnelle",
+      "mcp"
+    ],
+    "difficulty": "beginner",
+    "icon": "🏛️",
+    "type": "organisation",
+    "acronym_full": null,
+    "cat_slug": "intelligence-artificielle",
+    "has_image": true,
+    "reference_url": "https://www.anthropic.com/company",
+    "reference_label": "Site officiel d'Anthropic",
+    "match_strategy": "case_sensitive"
+  }
+]

@@ -389,3 +389,115 @@ it('laisse le terme generique lier quand l expression longue est absente', funct
 
     expect(str_contains($dom->saveHTML(), '/glossaire/ia'))->toBeTrue();
 });
+
+/**
+ * 2026-08-27 : la frontiere de mot ne bornait que lettres et chiffres, si bien qu'un point, un
+ * underscore, un tiret ou une barre oblique ne separaient rien. Des liens etaient poses A
+ * L'INTERIEUR de « DeepLearning.AI », « aistudio.google.com » et « pollen-robotics/microduck_rl ».
+ *
+ * Correctif applique aux DEUX variantes de construction du motif (preg_quote ET
+ * buildPartialCasePattern), sinon la moitie des termes garde l'ancien comportement.
+ *
+ * Piege delibere EVITE : ajouter « . » symetriquement des deux cotes casserait les termes du
+ * glossaire qui CONTIENNENT eux-memes un point en fin de phrase (Node.js, Z.ai, jan.ai). D'ou
+ * l'asymetrie : le lookahead ne refuse un point que s'il est SUIVI d'un caractere de mot (\.\w),
+ * jamais un point isole ou de fin de phrase.
+ */
+function glxTerme(string $nom, string $slug, string $strategy = 'loose'): array
+{
+    return [['name' => $nom, 'slug' => $slug, 'definition' => 'Test',
+             'type' => 'glossary', 'url' => '/glossaire/'.$slug, 'match_strategy' => $strategy]];
+}
+
+// === Cas qui DOIVENT rester NON LIES ===
+
+it('ne lie pas AI a l interieur de DeepLearning.AI (variante partial_case_sensitive)', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Le cours DeepLearning.AI est tres suivi.</p>');
+
+    $liens = glxWalk($dom, $root, glxTerme('AI', 'ai', 'partial_case_sensitive'), false, 10);
+
+    expect($liens)->toBe(0);
+    expect(str_contains($dom->saveHTML(), 'glossary-link'))->toBeFalse();
+});
+
+it('ne lie pas google a l interieur de aistudio.google.com', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Le service aistudio.google.com propose un essai.</p>');
+
+    $liens = glxWalk($dom, $root, glxTerme('Google', 'google'), false, 10);
+
+    expect($liens)->toBe(0);
+    expect(str_contains($dom->saveHTML(), 'glossary-link'))->toBeFalse();
+});
+
+it('ne lie pas rl a l interieur de pollen-robotics/microduck_rl', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Le modele pollen-robotics/microduck_rl a ete presente.</p>');
+
+    $liens = glxWalk($dom, $root, glxTerme('RL', 'rl'), false, 10);
+
+    expect($liens)->toBe(0);
+    expect(str_contains($dom->saveHTML(), 'glossary-link'))->toBeFalse();
+});
+
+it('ne lie pas Anthropic a l interieur du mot francais anthropique', function () {
+    [$dom, $root] = glxDomFromHtml('<p>La pression anthropique augmente sur ce territoire.</p>');
+
+    $liens = glxWalk($dom, $root, glxTerme('Anthropic', 'anthropic'), false, 10);
+
+    expect($liens)->toBe(0);
+    expect(str_contains($dom->saveHTML(), 'glossary-link'))->toBeFalse();
+});
+
+// === Cas qui DOIVENT rester LIES (non-regression de l'asymetrie du point) ===
+
+it('lie toujours Node.js en milieu de phrase ET en fin de phrase', function () {
+    [$domMilieu, $rootMilieu] = glxDomFromHtml('<p>Ce service tourne sous Node.js et repond vite.</p>');
+    $liensMilieu = glxWalk($domMilieu, $rootMilieu, glxTerme('Node.js', 'nodejs'), false, 10);
+
+    [$domFin, $rootFin] = glxDomFromHtml('<p>Cette API tourne sous Node.js.</p>');
+    $liensFin = glxWalk($domFin, $rootFin, glxTerme('Node.js', 'nodejs'), false, 10);
+
+    expect($liensMilieu)->toBe(1);
+    expect(str_contains($domMilieu->saveHTML(), '/glossaire/nodejs'))->toBeTrue();
+    expect($liensFin)->toBe(1);
+    expect(str_contains($domFin->saveHTML(), '/glossaire/nodejs'))->toBeTrue();
+});
+
+it('lie toujours jan.ai', function () {
+    [$dom, $root] = glxDomFromHtml("<p>L'assistant jan.ai fonctionne en local.</p>");
+
+    $liens = glxWalk($dom, $root, glxTerme('jan.ai', 'jan-ai'), false, 10);
+
+    expect($liens)->toBe(1);
+    expect(str_contains($dom->saveHTML(), '/glossaire/jan-ai'))->toBeTrue();
+});
+
+it('lie toujours Z.ai en fin de phrase', function () {
+    [$dom, $root] = glxDomFromHtml("<p>Cette entreprise s'appelle Z.ai.</p>");
+
+    $liens = glxWalk($dom, $root, glxTerme('Z.ai', 'z-ai'), false, 10);
+
+    expect($liens)->toBe(1);
+    expect(str_contains($dom->saveHTML(), '/glossaire/z-ai'))->toBeTrue();
+});
+
+it('lie toujours IA dans une phrase ordinaire', function () {
+    [$dom, $root] = glxDomFromHtml("<p>L'IA transforme profondement notre quotidien.</p>");
+
+    $liens = glxWalk($dom, $root, glxTerme('IA', 'ia'), false, 10);
+
+    expect($liens)->toBe(1);
+    expect(str_contains($dom->saveHTML(), '/glossaire/ia'))->toBeTrue();
+});
+
+it('lie Anthropic Claude en entier, jamais coupe', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Le nouveau modele Anthropic Claude est disponible.</p>');
+
+    $liens = glxWalk($dom, $root, glxTerme('Anthropic Claude', 'anthropic-claude'), false, 10);
+    $html = $dom->saveHTML($root);
+
+    expect($liens)->toBe(1);
+    expect(str_contains($html, '>Anthropic Claude</a>'))->toBeTrue(
+        'Le lien doit envelopper la phrase complete, jamais un fragment coupe.'
+    );
+    expect(str_contains($html, '>Anthropic</a>'))->toBeFalse();
+});
