@@ -384,10 +384,20 @@ class PublicDirectoryController extends Controller
         ]);
 
         $locale = app()->getLocale();
+
+        // 2026-08-28 - une soumission publique publiait TOUJOURS en direct, sans relecture
+        // (incident constaté : 6 fiches d'un même compte à valider en lot). Même mécanisme de
+        // droit que le reste de ce contrôleur (lignes 47, 95, 190 : $request->user()?->can('moderate_tools'))
+        // et que la porte d'admin (Modules/Directory/routes/web.php:89, 'can:moderate_tools') -
+        // un modérateur garde la publication directe, les autres passent par la file de
+        // modération déjà notifiée plus bas (ToolSubmittedNotification) et visible sur
+        // /admin/directory?status=pending.
+        $canPublishDirectly = $request->user()?->can('moderate_tools') ?? false;
+
         $tool = new Tool;
         $tool->url = $validated['url'];
         $tool->pricing = $validated['pricing'];
-        $tool->status = 'published';
+        $tool->status = $canPublishDirectly ? 'published' : 'pending';
         $tool->screenshot = $validated['screenshot'] ?? null;
         $tool->is_featured = false;
         $tool->submitted_by = auth()->id();
@@ -458,7 +468,11 @@ class PublicDirectoryController extends Controller
             }
         }
 
-        return response()->json(['success' => true, 'message' => __('Merci ! L\'outil a été ajouté au répertoire.')]);
+        $message = $canPublishDirectly
+            ? __('Merci! Votre outil a été ajouté au répertoire.')
+            : __('Merci! Votre outil a été soumis et sera publié dès sa validation par l\'équipe.');
+
+        return response()->json(['success' => true, 'message' => $message]);
     }
 
     public function storePricingReport(Request $request, string $slug): RedirectResponse

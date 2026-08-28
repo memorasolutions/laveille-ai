@@ -57,6 +57,22 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-3 col-6">
+            {{-- Lien direct (pas un onglet) : la relecture d'une fiche en attente se fait sur
+                 l'écran admin.directory.index filtré par statut, jamais ici (2026-08-28, la
+                 soumission publique ne publie plus en direct qu'un modérateur - storeSubmission). --}}
+            <a href="{{ route('admin.directory.index', ['status' => 'pending']) }}" class="text-decoration-none">
+                <div class="card mb-3 shadow-sm" style="border-left:4px solid var(--bs-primary);">
+                    <div class="card-body d-flex justify-content-between align-items-center py-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <i data-lucide="inbox" class="text-primary"></i>
+                            <span class="fw-semibold">{{ __('Fiches en attente') }}</span>
+                        </div>
+                        <span class="badge bg-primary fs-6">{{ $counts['tools'] }}</span>
+                    </div>
+                </div>
+            </a>
+        </div>
     </div>
 
     {{-- Onglets Alpine.js --}}

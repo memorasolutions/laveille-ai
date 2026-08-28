@@ -11,6 +11,7 @@ use Illuminate\View\View;
 use Modules\Core\Services\ScreenshotUploadService;
 use Modules\Directory\Models\ModerationLog;
 use Modules\Directory\Models\TakedownRequest;
+use Modules\Directory\Models\Tool;
 use Modules\Directory\Models\ToolPricingReport;
 use Modules\Directory\Models\ToolReport;
 use Modules\Directory\Models\ToolResource;
@@ -39,6 +40,10 @@ class ModerationController extends Controller
             'resources' => $pendingResources->count(),
             'reports' => $reports->count(),
             'suggestions' => $pendingSuggestions->count(),
+            // 2026-08-28 - fiches en attente de publication (storeSubmission ne publie plus en
+            // direct que pour un modérateur). Compteur affiché sur cet écran, lien vers la liste
+            // déjà filtrable de admin.directory.index?status=pending - aucun nouvel écran créé.
+            'tools' => Tool::where('status', 'pending')->count(),
         ];
 
         return view('directory::admin.moderation', compact('pendingReviews', 'pendingResources', 'reports', 'pendingSuggestions', 'counts'));

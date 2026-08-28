@@ -422,7 +422,7 @@
 
     {{-- Hero + wizard wrapper --}}
     <div x-data="{
-        wStep: 0, submitted: false, scraping: false, submitting: false,
+        wStep: 0, submitted: false, submittedMessage: '', scraping: false, submitting: false,
         scrapeError: '', duplicates: [],
         toolUrl: '', toolName: '', toolDesc: '', toolShortDesc: '', toolPricing: '', screenshotUrl: '',
         hasEducationPricing: false, educationPricingType: '', educationPricingDetails: '', educationPricingUrl: '',
@@ -465,6 +465,7 @@
                     const hadSelectedCollections = this.selectedCollections && this.selectedCollections.length > 0;
                     if (hadNewCollection) { this.collectionToastMessage = '{{ __('Collection créée et outil proposé avec succès !') }}'; this.collectionToastShow = true; setTimeout(() => { this.collectionToastShow = false; }, 5000); }
                     else if (hadSelectedCollections) { this.collectionToastMessage = '{{ __('Outil ajouté à vos collections.') }}'; this.collectionToastShow = true; setTimeout(() => { this.collectionToastShow = false; }, 4000); }
+                    this.submittedMessage = d.message || '{{ __('Soumission reçue.') }}';
                     this.submitted = true; this.wStep = 0;
                 }
                 else { this.scrapeError = d.message || '{{ __('Erreur lors de la soumission.') }}'; }
@@ -560,7 +561,7 @@
             {{-- Succes --}}
             <div x-show="submitted" x-cloak x-transition style="margin-bottom: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                 <span style="background: #D1FAE5; color: #065F46; padding: 10px 24px; border-radius: var(--r-btn); font-size: 14px; font-weight: 600;">
-                    ✓ {{ __('Merci ! L\'outil a été ajouté au répertoire.') }}
+                    ✓ <span x-text="submittedMessage"></span>
                 </span>
                 <button type="button" @click="submitted=false;wStep=1;toolUrl='';toolName='';toolDesc='';toolShortDesc='';toolPricing='';screenshotUrl='';scrapeError='';duplicates=[]" style="padding:8px 20px;background:#fff;color:var(--c-primary);border:2px solid var(--c-primary);border-radius:var(--r-btn);font-weight:600;cursor:pointer;font-size:13px;">{{ __('Soumettre un autre outil') }}</button>
             </div>

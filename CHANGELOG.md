@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.233.0] - 2026-08-28
+
+### Ajouté
+- **Une soumission publique d'outil partait directement en ligne, sans relecture.** `PublicDirectoryController::storeSubmission()` posait `$tool->status = 'published'` en dur pour n'importe quel utilisateur connecté - incident constaté avec 6 fiches d'un même compte à valider en lot. Elle passe désormais en file d'attente (`status = 'pending'`), sauf pour un utilisateur qui porte la permission `moderate_tools`, qui garde la publication directe - même mécanisme de droit que le reste du contrôleur et que la porte d'admin (`can:moderate_tools`).
+- **Le message de confirmation affiché à l'écran était un texte figé dans la vue, indépendant de la réponse du serveur.** La confirmation restait identique quelle que soit l'issue réelle de la soumission, alors que le serveur distingue maintenant deux issues bien différentes. Sans ce correctif côté vue, la porte de modération posée en arrière-plan n'aurait rien changé pour l'utilisateur, qui aurait continué de lire une confirmation lui laissant croire sa fiche déjà publiée. Le texte est maintenant câblé sur `d.message`, la réponse réelle renvoyée par `storeSubmission()`.
+- **La carte « Fiches en attente » de l'écran de modération compte enfin les outils en attente et mène à la liste filtrée.** Le compteur `$counts['tools']` était absent de `ModerationController::index()`. Il interroge désormais `Tool::where('status', 'pending')->count()`, et la carte pointe vers la liste déjà filtrable `admin.directory.index?status=pending` - aucun nouvel écran créé.
+
+Quatre tests verrouillent la porte : un utilisateur ordinaire dont la fiche part en attente et reste invisible du public (`show()` en 404, absente de l'API publique v1); un modérateur dont la fiche est publiée et visible immédiatement; les deux messages de retour diffèrent, et celui d'une fiche en attente ne prétend jamais qu'elle est déjà en ligne; l'attachement à une collection utilisateur continue de fonctionner pour une fiche en attente. `Modules/Directory/tests/Feature/ToolSubmissionModerationGateTest.php` 4 passed.
+
 ## [1.232.1] - 2026-08-28
 
 ### Corrigé
