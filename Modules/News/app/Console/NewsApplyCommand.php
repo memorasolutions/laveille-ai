@@ -24,10 +24,14 @@ use Modules\News\Services\NewsImageService;
  *
  * Trois modes indépendants, chacun reprenable seul :
  * - `--payload=` : applique seo_title / summary / editorial_proof_pairs / primary_sources /
- *                  image_credit / composed_summary depuis un fichier JSON, et efface AUSSI
- *                  structured_summary (résumé MACHINE de la collecte - addendum daté 2026-08-17,
- *                  fin de journée, voir NewsArticle::logStructuredSummaryOverride()). primary_sources/
- *                  image_credit ajoutés par la bonification panel 2026-08-17 (soir, design doc) -
+ *                  image_credit / composed_summary depuis un fichier JSON. La clé `summary`
+ *                  efface AUSSI structured_summary (résumé MACHINE de la collecte - addendum daté
+ *                  2026-08-17, fin de journée, RESTREINT le 2026-08-28 à cette seule clé - voir
+ *                  NewsArticle::logStructuredSummaryOverride() ; auparavant N'IMPORTE QUELLE clé
+ *                  de contenu déclenchait l'effacement, ce qui détruisait en silence le résumé
+ *                  riche de fiches touchées par un payload partiel n'ayant jamais eu l'intention
+ *                  de toucher au résumé). primary_sources/image_credit ajoutés par la
+ *                  bonification panel 2026-08-17 (soir, design doc) -
  *                  contrairement aux autres champs de ce mode, ils NE SONT PAS internes : affichés
  *                  tels quels sur la fiche publique (Modules\News\resources\views\public\show.blade.php).
  *                  composed_summary (Richesse v1.188.0, design doc section "Richesse v1.188.0")
@@ -325,18 +329,39 @@ class NewsApplyCommand extends Command
         }
 
         if (array_key_exists('editorial_proof_pairs', $decoded)) {
-            $normalizedPairs = $this->normalizeProofPairs($decoded['editorial_proof_pairs'], (string) $article->internal_source_text);
-            if ($normalizedPairs === null) {
-                // Message d'erreur déjà émis par normalizeProofPairs().
-                return self::FAILURE;
+            // ACTION : retrait explicite d'une paire de preuve (mandat daté 2026-08-28, traité
+            // conjointement avec l'override de structured_summary plus bas - deux faces du même
+            // contrat de payload). Jusqu'ici, cette clé n'acceptait QUE l'ajout : impossible de
+            // retirer une paire déjà publiée qui se révèle problématique (ex. une donnée de
+            // santé sur une personne nommée) - `null` était refusé (échec is_array) et un
+            // tableau vide ne faisait rien (fusion avec rien). Le précédent existait déjà sur ce
+            // même payload : `fact_check` (plus bas) accepte `null` comme signal EXPLICITE de
+            // retrait, jamais une absence de clé qui n'y touche pas. Cette clé reprend
+            // EXACTEMENT la même convention plutôt que d'en inventer une seconde - `null` retire
+            // TOUTES les paires existantes (même grain que fact_check : un retrait, pas une
+            // édition champ par champ). Pour ne garder que les paires légitimes, un second
+            // payload les réapplique ensuite par l'accumulation existante ci-dessous - aucune
+            // mécanique nouvelle à apprendre.
+            // MCP: SELF (<5 lignes utiles)
+            // RAISON: mandat 2026-08-28 - « on ne peut RIEN RETIRER, et une donnée sensible est
+            //         publiée à cause de ça » ; convention réutilisée depuis fact_check, jamais
+            //         inventée.
+            if ($decoded['editorial_proof_pairs'] === null) {
+                $updates['editorial_proof_pairs'] = [];
+            } else {
+                $normalizedPairs = $this->normalizeProofPairs($decoded['editorial_proof_pairs'], (string) $article->internal_source_text);
+                if ($normalizedPairs === null) {
+                    // Message d'erreur déjà émis par normalizeProofPairs().
+                    return self::FAILURE;
+                }
+                // ACTION : les nouvelles paires COMPLÈTENT les paires existantes (jamais un
+                // remplacement intégral) - une fiche peut déjà porter des paires ajoutées à la main
+                // via l'écran (storeProofPair), et cette commande ne doit jamais les faire
+                // disparaître en silence.
+                // MCP: SELF (<5 lignes)
+                // RAISON: même sémantique d'accumulation que storeProofPair() côté contrôleur.
+                $updates['editorial_proof_pairs'] = array_merge($article->editorial_proof_pairs ?? [], $normalizedPairs);
             }
-            // ACTION : les nouvelles paires COMPLÈTENT les paires existantes (jamais un
-            // remplacement intégral) - une fiche peut déjà porter des paires ajoutées à la main
-            // via l'écran (storeProofPair), et cette commande ne doit jamais les faire
-            // disparaître en silence.
-            // MCP: SELF (<5 lignes)
-            // RAISON: même sémantique d'accumulation que storeProofPair() côté contrôleur.
-            $updates['editorial_proof_pairs'] = array_merge($article->editorial_proof_pairs ?? [], $normalizedPairs);
         }
 
         // ACTION : bonification panel 2026-08-17 (soir) - primary_sources REMPLACE la valeur
@@ -590,13 +615,34 @@ class NewsApplyCommand extends Command
             return self::FAILURE;
         }
 
-        // ACTION : addendum daté 2026-08-17 (fin de journée) - dès qu'un payload de contenu est
-        // appliqué, structured_summary (résumé MACHINE de la collecte, prioritaire sur summary
-        // côté fiche publique) est effacé : la composition manuelle fait désormais autorité.
-        // logStructuredSummaryOverride() journalise l'ancienne valeur AVANT l'effacement, cette
-        // même méthode réutilisée telle quelle par NewsCompositionController::publish() (DRY).
+        // ACTION : addendum daté 2026-08-17 (fin de journée) - structured_summary (résumé
+        // MACHINE de la collecte, prioritaire sur summary côté fiche publique, cf. show.blade.php
+        // bloc @if($ss) ... @elseif($article->summary)) est effacé quand la fiche reçoit un
+        // NOUVEAU résumé public qui doit désormais primer : la composition manuelle fait
+        // autorité sur le résumé affiché. logStructuredSummaryOverride() journalise l'ancienne
+        // valeur AVANT l'effacement, même méthode réutilisée telle quelle par
+        // NewsCompositionController::publish() (DRY).
         // MCP: SELF (<5 lignes)
         // RAISON: correctif ciblé, réutilise le point unique déjà extrait sur le modèle.
+        //
+        // ACTION : correctif daté 2026-08-28 (mandat conjoint avec le retrait de paire de preuve
+        // ci-dessus) - RESTREINT le déclencheur : seule la clé 'summary' (le texte de repli qui
+        // rivalise réellement avec structured_summary à l'affichage) ou 'composed_summary' (qui
+        // écrit structured_summary DIRECTEMENT ci-dessus, donc déjà présent dans $updates) fait
+        // désormais basculer l'affichage. AVANT ce correctif, la condition était `$updates !==
+        // []` : N'IMPORTE QUELLE clé de contenu (image_credit, nature_original, niveau_preuve,
+        // un titre corrigé, un RETRAIT de paire de preuve...) effaçait structured_summary dès que
+        // hasComposedSummary() était faux - ce qui a détruit en silence le résumé riche
+        // d'environ 4400 fiches d'avant /actu2 lors d'un enrichissement partiel n'ayant jamais eu
+        // l'intention de toucher au résumé. Règle absolue du projet : un champ ABSENT du payload
+        // signifie « je n'y touche pas », jamais « efface-le » - seule une clé qui remplace
+        // vraiment le résumé public affiché doit faire céder l'ancien résumé machine. Les trois
+        // tests dédiés (ComposedSummaryApplyTest, FactCheckModuleTest) qui vérifient qu'un
+        // payload portant `summary` efface toujours le résumé machine restent verts : cette
+        // clé précise n'a jamais cessé de déclencher l'effacement.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: mandat 2026-08-28 - « on ne supprime jamais de données utilisateurs » ; défaut
+        //         mesuré sur ~4400 fiches vivantes.
         //
         // ACTION : Richesse v1.188.0 - si composed_summary vient d'écrire structured_summary
         // ci-dessus, ne PAS l'écraser à null ici (seule la journalisation de l'ANCIENNE valeur
@@ -610,16 +656,25 @@ class NewsApplyCommand extends Command
         // MCP: SELF (<5 lignes de garde)
         // RAISON: sans cette garde, une curation d'outils après coup détruirait le résumé composé.
         if ($updates !== []) {
-            $article->logStructuredSummaryOverride();
-            // ACTION : garde-fou symetrique de NewsCompositionController::publish() - l'effacement
-            // ci-dessous vise le resume MACHINE de la collecte, jamais un resume COMPOSE. Sans
-            // cette condition, un SECOND payload partiel (un titre corrige, une curation) detruit
-            // silencieusement la composition riche ecrite par le payload precedent.
+            // ACTION : voir le bloc de commentaires ci-dessus (correctif 2026-08-28) - le
+            // déclencheur precis du basculement d'affichage, jamais `$updates !== []` seul.
             // MCP: SELF (<5 lignes)
-            // RAISON: hasComposedSummary() est le point UNIQUE de cette distinction (DRY) - il
-            // gardait deja le bouton manuel Publier-et-purger, il manquait a la porte de l'agent.
-            if (! array_key_exists('structured_summary', $updates) && ! $article->hasComposedSummary()) {
-                $updates['structured_summary'] = null;
+            // RAISON: DRY - un seul point de calcul de cette condition, réutilisé par le log et
+            //         par l'effacement plutôt que dupliqué entre les deux.
+            $remplaceLeResumeAffiche = array_key_exists('summary', $decoded) || array_key_exists('structured_summary', $updates);
+
+            if ($remplaceLeResumeAffiche) {
+                $article->logStructuredSummaryOverride();
+                // ACTION : garde-fou symetrique de NewsCompositionController::publish() - l'effacement
+                // ci-dessous vise le resume MACHINE de la collecte, jamais un resume COMPOSE. Sans
+                // cette condition, un SECOND payload partiel (un titre corrige, une curation) detruit
+                // silencieusement la composition riche ecrite par le payload precedent.
+                // MCP: SELF (<5 lignes)
+                // RAISON: hasComposedSummary() est le point UNIQUE de cette distinction (DRY) - il
+                // gardait deja le bouton manuel Publier-et-purger, il manquait a la porte de l'agent.
+                if (! array_key_exists('structured_summary', $updates) && ! $article->hasComposedSummary()) {
+                    $updates['structured_summary'] = null;
+                }
             }
 
             DB::transaction(function () use ($article, $updates): void {

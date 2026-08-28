@@ -437,8 +437,11 @@ class NewsArticle extends Model implements Searchable
      * ne fait QUE journaliser (aucun effet de bord en base sans l'update() de l'appelant).
      *
      * Réutilisée par DEUX endroits SEULEMENT (DRY explicite, ni plus ni moins) :
-     * NewsApplyCommand (mode --payload, dès qu'un des trois champs de contenu est appliqué) et
-     * NewsCompositionController::publish() (juste avant publishAndPurgeSource()).
+     * NewsApplyCommand (mode --payload, dès que la clé 'summary' ou 'composed_summary' est
+     * appliquée - correctif 2026-08-28 : RESTREINT depuis « dès qu'un des trois champs de
+     * contenu », condition trop large qui effaçait aussi le résumé riche de fiches touchées par
+     * un payload partiel sans rapport avec leur résumé) et NewsCompositionController::publish()
+     * (juste avant publishAndPurgeSource()).
      * VOLONTAIREMENT PAS dans publishAndPurgeSource() elle-même : cette méthode partagée sert
      * aussi AdminNewsController::toggleArticle() (bascule rapide de fiches jamais passées par
      * l'écran de composition) et `news:verify-source-purge`, où effacer structured_summary

@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.228.1] - 2026-08-28
+
+### Corrigé
+- **La porte officielle d'écriture effaçait un résumé riche à la moindre retouche.** `news:apply` vidait `structured_summary` dès que la charge utile contenait N'IMPORTE QUELLE clé de contenu - un crédit d'image, une nature d'original, un titre corrigé - pour toute fiche ne portant pas déjà un résumé composé. Environ 4 400 fiches d'avant /actu2 étaient dans ce cas : les enrichir par un payload partiel leur faisait perdre tout leur résumé, sans erreur et sans avertissement. Le déclencheur est désormais restreint à ce qui remplace RÉELLEMENT le résumé (`summary` ou `structured_summary`), et non à la simple présence d'une clé quelconque.
+- **La cause est une dérive entre le code et sa documentation** : le commentaire du modèle décrivait une intention étroite (« dès qu'un des trois champs de contenu ») qui n'a jamais été tenue à jour au fil des clés ajoutées (`primary_sources`, `image_credit`, `nature_original`, `niveau_preuve`, `original_post`, `title`). Trois tests existants vérifiaient bien cet effacement, mais tous les trois avec la seule clé `summary` - preuve indépendante que c'était le seul déclencheur voulu. Le commentaire est corrigé en même temps que le code.
+- **On ne pouvait RIEN retirer d'une paire de preuve.** `null` échouait à la validation, l'objet vide fusionnait avec rien : aucun moyen d'effacer une paire déjà écrite. `null` signifie désormais un retrait explicite, exactement comme le champ `fact_check` le faisait déjà - la convention est reprise, pas réinventée. Un champ ABSENT continue de ne toucher à rien : « je n'y touche pas », « je remplace », « je retire » sont enfin trois intentions distinctes.
+
+Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant pour de bon puis en restaurant. Suite complète du module : 530 tests, 1 752 assertions.
+
 ## [1.228.0] - 2026-08-28
 
 ### Ajouté

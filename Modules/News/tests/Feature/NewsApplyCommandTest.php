@@ -240,6 +240,71 @@ it('merges new proof pairs with existing ones rather than replacing them', funct
     expect($article->fresh()->editorial_proof_pairs)->toHaveCount(2);
 });
 
+// ── Retrait explicite d'une paire de preuve (mandat 2026-08-28 : une donnée de santé sur une
+// personne nommée s'est retrouvée publiée dans une paire, sans AUCUN mécanisme pour la retirer -
+// editorial_proof_pairs n'acceptait que l'ajout, refusait null (échec is_array) et un tableau
+// vide ne faisait rien). Convention reprise TELLE QUELLE de fact_check plus bas : la clé
+// PRÉSENTE avec la valeur `null` retire ; la clé ABSENTE du payload ne touche à rien. Les trois
+// intentions (absent / remplace / retire) doivent être distinguables sans ambiguïté - c'est le
+// coeur du correctif, prouvé par les deux tests suivants. ──────────────────────────────────────
+
+it('editorial_proof_pairs à null retire explicitement TOUTES les paires existantes (mécanisme de retrait)', function () {
+    $article = nacArticle([
+        'internal_source_text' => 'Texte source pour le retrait de paire.',
+        'source_content_hash' => hash('sha256', 'Texte source pour le retrait de paire.'),
+        'editorial_proof_pairs' => [
+            [
+                'id' => 'pair-sensible',
+                'statement' => 'MARQUEUR-DONNEE-SENSIBLE-A-RETIRER',
+                'excerpt' => 'extrait sensible',
+                'type' => 'analysis',
+                'created_at' => now()->toIso8601String(),
+            ],
+            [
+                'id' => 'pair-legitime',
+                'statement' => 'Une paire légitime, sans lien avec le retrait.',
+                'excerpt' => 'extrait légitime',
+                'type' => 'analysis',
+                'created_at' => now()->toIso8601String(),
+            ],
+        ],
+    ]);
+    expect($article->editorial_proof_pairs)->toHaveCount(2);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'editorial_proof_pairs' => null,
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->editorial_proof_pairs)->toBe([]);
+});
+
+it('un payload sans la clé editorial_proof_pairs laisse les paires existantes rigoureusement intactes (absent ne touche à rien)', function () {
+    $pairesInitiales = [[
+        'id' => 'pair-intacte',
+        'statement' => 'Cette paire ne doit jamais bouger.',
+        'excerpt' => 'extrait intact',
+        'type' => 'analysis',
+        'created_at' => now()->toIso8601String(),
+    ]];
+    $article = nacArticle([
+        'internal_source_text' => 'Texte source pour la non-régression du retrait.',
+        'source_content_hash' => hash('sha256', 'Texte source pour la non-régression du retrait.'),
+        'editorial_proof_pairs' => $pairesInitiales,
+    ]);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'image_credit' => 'Photo : source de test',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->editorial_proof_pairs)->toBe($pairesInitiales);
+});
+
 it('refuses a payload with an empty JSON object (no whitelisted content key)', function () {
     $article = nacArticle(['internal_source_text' => 'Texte source.', 'source_content_hash' => hash('sha256', 'Texte source.')]);
     $payload = nacPayloadFile(nacFreshMeta($article));
@@ -300,6 +365,65 @@ it('applying a payload when structured_summary is already null does not error an
         ->assertSuccessful();
 
     expect($article->fresh()->structured_summary)->toBeNull();
+});
+
+// ── Correctif 2026-08-28 (mandat conjoint avec le retrait de paire de preuve ci-dessus) : un
+// payload PARTIEL qui ne touche NI 'summary' NI 'composed_summary' ne doit JAMAIS effacer un
+// résumé machine existant. Avant ce correctif, la condition était `$updates !== []` :
+// N'IMPORTE QUELLE clé de contenu (image_credit ici) effaçait structured_summary dès que la
+// fiche ne portait pas déjà un résumé composé - ce qui a détruit le résumé riche d'environ 4400
+// fiches d'avant /actu2 lors d'un enrichissement partiel sans rapport avec leur résumé. Règle
+// absolue du projet : un champ ABSENT du payload signifie « je n'y touche pas », jamais
+// « efface-le ». ──────────────────────────────────────────────────────────────────────────────
+
+it('a payload touching only image_credit (no summary, no composed_summary) never erases an existing MACHINE structured_summary', function () {
+    $article = nacArticle([
+        'internal_source_text' => 'Texte source pour la non-régression du résumé.',
+        'source_content_hash' => hash('sha256', 'Texte source pour la non-régression du résumé.'),
+        'structured_summary' => ['hook' => 'MARQUEUR-RESUME-MACHINE-A-PRESERVER'],
+    ]);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'image_credit' => 'Photo : agence de test',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $fresh = $article->fresh();
+    expect($fresh->structured_summary)->not->toBeNull()
+        ->and($fresh->structured_summary['hook'])->toBe('MARQUEUR-RESUME-MACHINE-A-PRESERVER')
+        ->and($fresh->image_credit)->toBe('Photo : agence de test');
+});
+
+// Interaction JOINTE des deux défauts (raison du traitement conjoint du mandat) : retirer une
+// paire de preuve sensible ne doit JAMAIS, en effet de bord, détruire le résumé riche existant
+// de la même fiche.
+it('retirer une paire de preuve (editorial_proof_pairs à null) ne détruit pas un résumé machine existant', function () {
+    $article = nacArticle([
+        'internal_source_text' => 'Texte source pour le retrait joint.',
+        'source_content_hash' => hash('sha256', 'Texte source pour le retrait joint.'),
+        'structured_summary' => ['hook' => 'MARQUEUR-RESUME-A-NE-PAS-PERDRE'],
+        'editorial_proof_pairs' => [[
+            'id' => 'pair-sensible-jointe',
+            'statement' => 'MARQUEUR-DONNEE-SENSIBLE-JOINTE',
+            'excerpt' => 'extrait sensible joint',
+            'type' => 'analysis',
+            'created_at' => now()->toIso8601String(),
+        ]],
+    ]);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'editorial_proof_pairs' => null,
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $fresh = $article->fresh();
+    expect($fresh->editorial_proof_pairs)->toBe([])
+        ->and($fresh->structured_summary)->not->toBeNull()
+        ->and($fresh->structured_summary['hook'])->toBe('MARQUEUR-RESUME-A-NE-PAS-PERDRE');
 });
 
 // ── Dépôt d'image local (--image) ───────────────────────────────────────────────────
