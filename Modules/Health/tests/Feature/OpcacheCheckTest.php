@@ -33,9 +33,12 @@ beforeEach(function () {
         'warn_refusals_delta' => 100,
         'fail_refusals_delta' => 1000,
         'refusals_cache_key' => 'tests:health:opcache:refusals',
+        'maintenance_since_cache_key' => 'tests:health:opcache:maintenance_since',
+        'maintenance_alert_after_hours' => 3,
     ]);
 
     Cache::forget('tests:health:opcache:refusals');
+    Cache::forget('tests:health:opcache:maintenance_since');
 });
 
 function opcachePayload(array $overrides = []): array
@@ -107,12 +110,104 @@ it('reste silencieux quand le 503 vient du mode maintenance (deploiement en cour
     // donc Laravel repond 503 a TOUT pendant le rsync - point de controle inclus. Le cron de
     // sante tombe dedans et alertait « intervention rapide » alors que rien n'est casse.
     // L'en-tete Retry-After (pose par --retry) est la signature d'une indisponibilite VOULUE.
+    //
+    // REGRESSION 2026-08-12 -> 2026-08-28 : ce test s'appelait deja "reste silencieux" mais
+    // verifiait le CONTRAIRE (->toContain('maintenance') sur getNotificationMessage(), donc un
+    // message NON VIDE) - il verrouillait le bug au lieu de le prevenir. Un message non vide
+    // sur un ok() part en courriel quel que soit son statut (RunHealthChecksCommand ligne 116),
+    // exactement le defaut deja corrige par la v1.139.5 onze jours plus tot. Recu en production
+    // le 2026-08-28 a 17h00 Quebec (21:00 UTC) : sujet « approche d'une limite », corps
+    // « Resume : Ok ». Le silence reel se verifie sur le MESSAGE (vide), jamais sur son
+    // contenu textuel.
     Http::fake(['*' => Http::response('En maintenance', 503, ['Retry-After' => '15'])]);
 
     $result = OpcacheCheck::new()->run();
 
     expect($result->status->equals(Status::ok()))->toBeTrue()
-        ->and($result->getNotificationMessage())->toContain('maintenance');
+        ->and($result->getNotificationMessage())->toBeEmpty();
+});
+
+it('affiche quand meme un resume accentue sur le tableau de bord pendant le mode maintenance', function () {
+    // Le silence porte sur le COURRIEL (notificationMessage), jamais sur /health : l'etat
+    // reste lisible via shortSummary, qui n'est jamais emaile tant que le statut reste ok().
+    // Verrou du defaut de forme du 2026-08-28 : le message original ecrivait "ignoree" et
+    // "deploiement" sans accents dans un texte lu par le fondateur.
+    Http::fake(['*' => Http::response('En maintenance', 503, ['Retry-After' => '15'])]);
+
+    $result = OpcacheCheck::new()->run();
+
+    expect($result->getShortSummary())
+        ->toContain('ignorée')
+        ->toContain('déploiement');
+});
+
+it('reste silencieux tant que le mode maintenance ne dure pas encore assez longtemps', function () {
+    // A mi-chemin du seuil (3 heures par defaut ici) : toujours un deploiement plausible,
+    // toujours silencieux.
+    Cache::forever('tests:health:opcache:maintenance_since', now()->subHour()->timestamp);
+
+    Http::fake(['*' => Http::response('En maintenance', 503, ['Retry-After' => '15'])]);
+
+    $result = OpcacheCheck::new()->run();
+
+    expect($result->status->equals(Status::ok()))->toBeTrue()
+        ->and($result->getNotificationMessage())->toBeEmpty();
+});
+
+it('alerte honnêtement si le mode maintenance dure des heures, jamais avec le libellé du seuil OPcache', function () {
+    // Au-dela du seuil, ce n'est plus un deploiement mais un incident (deploiement jamais
+    // termine) : une alerte est due, mais elle doit dire la VERITE - mesure impossible depuis
+    // X heures - jamais la formule reservee a un seuil OPcache reellement mesure et franchi.
+    Cache::forever('tests:health:opcache:maintenance_since', now()->subHours(5)->timestamp);
+
+    Http::fake(['*' => Http::response('En maintenance', 503, ['Retry-After' => '15'])]);
+
+    $result = OpcacheCheck::new()->run();
+
+    expect($result->status->equals(Status::failed()))->toBeTrue()
+        ->and($result->meta['bloque_depuis_heures'])->toBe(5.0)
+        ->and($result->getNotificationMessage())
+        ->toContain('Impossible de mesurer OPcache depuis')
+        ->toContain('déploiement')
+        ->toContain('répond')
+        ->not->toContain('Aucune action requise')
+        ->not->toContain('approche d’une limite');
+});
+
+it('affiche la marche à suivre « bloqué en maintenance », jamais celle du seuil ou celle du timeout', function () {
+    // Verrou de bout en bout : le courriel REELLEMENT rendu par CheckFailedNotification doit
+    // porter la consigne propre a ce cas (verifier un deploiement bloque, php artisan up),
+    // jamais celle d'une capacite saturee ni celle d'une surcharge PHP-FPM passagere.
+    Cache::forever('tests:health:opcache:maintenance_since', now()->subHours(5)->timestamp);
+
+    Http::fake(['*' => Http::response('En maintenance', 503, ['Retry-After' => '15'])]);
+
+    $check = OpcacheCheck::new();
+    $result = $check->run();
+    $result->check = $check;
+
+    $courriel = implode("\n", (new CheckFailedNotification([$result]))->toMail()->introLines);
+
+    expect($courriel)
+        ->toContain('Marche à suivre (accès SSH ou hébergeur requis)')
+        ->toContain('GitHub Actions')
+        ->toContain('php artisan up')
+        ->toContain('Bloqué en mode maintenance depuis (heures)')
+        ->not->toContain('opcache.max_accelerated_files')
+        ->not->toContain('surcharge PONCTUELLE');
+});
+
+it('efface le compteur de blocage maintenance des que la mesure redevient normale', function () {
+    // Une mesure normale prouve qu'on n'est plus coince en maintenance : le chrono ne doit pas
+    // survivre, sinon un futur redemarrage en 503+Retry-After croirait le blocage plus vieux
+    // qu'il ne l'est reellement.
+    Cache::forever('tests:health:opcache:maintenance_since', now()->subHours(5)->timestamp);
+
+    Http::fake(['*' => Http::response(opcachePayload())]);
+
+    OpcacheCheck::new()->run();
+
+    expect(Cache::get('tests:health:opcache:maintenance_since'))->toBeNull();
 });
 
 it('alerte quand même sur un 503 SANS Retry-After (vraie saturation PHP-FPM)', function () {

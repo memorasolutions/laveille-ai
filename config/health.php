@@ -182,6 +182,13 @@ return [
         'retry_sleep_ms' => env('HEALTH_OPCACHE_RETRY_SLEEP_MS', 500),
         'fail_after_consecutive_failures' => env('HEALTH_OPCACHE_FAIL_AFTER_CONSECUTIVE_FAILURES', 2),
         'connection_failures_cache_key' => env('HEALTH_OPCACHE_CONNECTION_FAILURES_CACHE_KEY', 'health:opcache:connection_failures'),
+
+        // Mode maintenance (2026-08-28) : combien de temps le controle tolere en silence un
+        // site bloque en 503+Retry-After avant de considerer que ce n'est plus un simple
+        // deploiement mais un incident (deploiement jamais termine). Cf. maintenanceEnCours()
+        // dans OpcacheCheck.
+        'maintenance_since_cache_key' => env('HEALTH_OPCACHE_MAINTENANCE_SINCE_CACHE_KEY', 'health:opcache:maintenance_since'),
+        'maintenance_alert_after_hours' => env('HEALTH_OPCACHE_MAINTENANCE_ALERT_AFTER_HOURS', 3),
         'warn_keys_percent' => env('HEALTH_OPCACHE_WARN_KEYS_PERCENT', 75),
         'fail_keys_percent' => env('HEALTH_OPCACHE_FAIL_KEYS_PERCENT', 90),
         'warn_memory_percent' => env('HEALTH_OPCACHE_WARN_MEMORY_PERCENT', 75),

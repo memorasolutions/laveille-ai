@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.233.3] - 2026-08-28
+
+### Corrigé
+- **Un courriel d'alerte annonçant qu'une limite approchait partait pendant nos propres déploiements, alors que son propre contenu disait « Ok » et « Aucune action requise »** : reçu en production le 2026-08-28 à 17h00 Québec (21:00 UTC), sujet annonçant l'approche d'une limite, corps « Résumé : Ok ». Le mécanisme d'envoi expédiait tout résultat portant un message, quel que soit son statut. Il ne part plus.
+- **Une mesure impossible pendant un déploiement n'est pas une anomalie, c'est le fonctionnement attendu.** Elle reste visible sur le tableau de bord de santé, sans courriel.
+- **Au-delà de trois heures sans mesure possible - ce qui n'est plus un déploiement - une alerte part, mais elle dit la vérité** : elle annonce qu'on n'arrive plus à mesurer, jamais qu'une limite approche. Le compteur repart de zéro dès qu'une mesure redevient normale.
+- **Le seuil est réglable par l'environnement** (`HEALTH_OPCACHE_MAINTENANCE_ALERT_AFTER_HOURS`, trois heures par défaut).
+
+Rouge/vert en deux passes distinctes, une par fichier remis à son état fautif : 5 échecs pour le contrôle, 1 pour la notification. Vert après restauration : `Modules/Health/tests/` 62 passed (143 assertions), soit 57 préexistants plus 5 neufs, zéro régression.
+
 ## [1.233.2] - 2026-08-28
 
 ### Corrigé

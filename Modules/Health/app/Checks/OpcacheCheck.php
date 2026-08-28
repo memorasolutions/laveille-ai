@@ -53,8 +53,20 @@ class OpcacheCheck extends Check
             // (pose par --retry=15) ; une VRAIE saturation de PHP-FPM, elle, n'en met pas.
             // C'est donc cet en-tete - et lui seul - qui distingue une indisponibilite
             // VOULUE d'une panne. Ne jamais elargir ce silence a tous les 503.
+            //
+            // REGRESSION CORRIGEE (2026-08-28) : ce meme correctif du 2026-08-12 avait ecrit
+            // ok('Mesure OPcache ignoree : ...'), reintroduisant EXACTEMENT le defaut corrige
+            // 11 jours plus tot par la v1.139.5 (« plus de courriel quand tout va bien », note
+            // plus bas sur getNotificationMessage()) : un ok() dont le message n'est pas vide
+            // part quand meme en courriel, quel que soit le statut - meme si ce statut est OK
+            // et que le seul contenu du courriel est « Aucune action requise ». Recu en
+            // production le 2026-08-28 a 17h00 Quebec (21:00 UTC) : sujet « approche d'une
+            // limite et doit etre surveille », corps « Resume : Ok ». « Mesure impossible »
+            // (ce cas-ci) et « seuil approche » (le reste de cette methode) sont deux etats
+            // DIFFERENTS ; saute pendant un deploiement, ce n'est meme pas une anomalie, c'est
+            // le fonctionnement attendu - donc silence, delegue a maintenanceEnCours().
             if ($response->status() === 503 && $response->header('Retry-After') !== '') {
-                return $result->ok('Mesure OPcache ignoree : le site est en mode maintenance (deploiement en cours). Aucune action requise.');
+                return $this->maintenanceEnCours($result);
             }
 
             if (! $response->successful()) {
@@ -99,6 +111,11 @@ class OpcacheCheck extends Check
         // plutot que plus bas, car c'est bien la CONNEXION que ce compteur surveille, pas la
         // qualite du JSON recu ni l'etat d'OPcache lui-meme.
         Cache::forever((string) config('health.opcache.connection_failures_cache_key'), 0);
+
+        // Meme logique pour le blocage en maintenance (cf. maintenanceEnCours()) : une reponse
+        // normale prouve qu'on n'est PLUS coince en mode maintenance, donc le chrono du
+        // blocage precedent n'a plus de sens et doit repartir de zero au prochain 503.
+        Cache::forget((string) config('health.opcache.maintenance_since_cache_key'));
 
         if (! $this->isUsablePayload($payload)) {
             return $result->failed('Impossible de mesurer OPcache : le JSON reçu est incomplet. Vérifiez le point de contrôle interne et PHP-FPM.');
@@ -186,6 +203,47 @@ class OpcacheCheck extends Check
         // Le jeton voyage par en-tête, jamais dans l'URL : une URL complète est
         // journalisée par le serveur web, un en-tête ne l'est pas.
         return rtrim((string) config('app.url'), '/').'/'.trim((string) config('health.opcache.path', '_sante/opcache'), '/');
+    }
+
+    /**
+     * Le site répond 503 avec Retry-After : un déploiement est en cours, la mesure est
+     * impossible mais ce n'est PAS une anomalie - c'est le fonctionnement attendu. Reste
+     * silencieux (ok() SANS message, cf. la note sur getNotificationMessage() plus bas dans ce
+     * fichier) tant que ça reste le temps d'un déploiement normal : un « Résumé : Ok » ne doit
+     * jamais partir en courriel.
+     *
+     * Si ce même état se prolonge des HEURES d'affilée, ce n'est plus un déploiement : le site
+     * est resté bloqué en maintenance (déploiement jamais terminé, `php artisan up` jamais
+     * rappelé - un incident réel). Une alerte est alors due, mais une alerte HONNÊTE : elle dit
+     * qu'elle n'arrive plus à mesurer depuis X heures, jamais la formule réservée au vrai
+     * franchissement d'un seuil OPcache (« approche d'une limite »), qui suppose une mesure
+     * réussie - laquelle n'a jamais eu lieu ici.
+     */
+    private function maintenanceEnCours(Result $result): Result
+    {
+        $cacheKey = (string) config('health.opcache.maintenance_since_cache_key');
+        $depuis = Cache::get($cacheKey);
+
+        if (! is_numeric($depuis)) {
+            $depuis = time();
+            Cache::forever($cacheKey, $depuis);
+        }
+
+        $heures = (time() - (int) $depuis) / 3600;
+        $seuilHeures = (float) config('health.opcache.maintenance_alert_after_hours', 3);
+
+        $result
+            ->shortSummary('Mesure ignorée, déploiement en cours')
+            ->meta(['bloque_depuis_heures' => round($heures, 1)]);
+
+        if ($heures < $seuilHeures) {
+            return $result->ok();
+        }
+
+        return $result->failed(sprintf(
+            "Impossible de mesurer OPcache depuis %s heures\u{00A0}: le site répond « en mode maintenance » sans interruption, bien au-delà de la durée d'un déploiement normal. Vérifiez qu'un déploiement n'est pas resté bloqué (« php artisan up » jamais exécuté), puis exécutez-le si le site doit être remis en ligne.",
+            number_format($heures, 1, ',', ' ')
+        ));
     }
 
     private function percent(float $used, float $total): float

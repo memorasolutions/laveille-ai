@@ -32,6 +32,7 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
         'jours_estimes' => "Jours d'autonomie estimés au rythme actuel",
         'echecs_consecutifs' => 'Échecs consécutifs',
         'statut' => 'Code HTTP reçu',
+        'bloque_depuis_heures' => 'Bloqué en mode maintenance depuis (heures)',
     ];
 
     public function toMail(): MailMessage
@@ -70,9 +71,16 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
             // meme la procedure « augmentez la directive saturee », fausse pour ce cas - le
             // probleme n'etait pas une capacite pleine mais une surcharge PHP-FPM passagere.
             if (strtolower($result->check->getLabel()) === 'opcache' && ! $result->status->equals(Status::ok())) {
-                $lignes = array_key_exists('keys_percent', $result->meta ?? [])
-                    ? $this->marcheASuivreOpcache()
-                    : $this->marcheASuivreMesureImpossible();
+                // Trois cas bien distincts, jamais interchangeables : une capacite MESUREE et
+                // saturee (keys_percent present) ; un site reste bloque en mode maintenance des
+                // heures d'affilee (bloque_depuis_heures present - cf. maintenanceEnCours()
+                // dans OpcacheCheck, defaut regresse puis corrige le 2026-08-28) ; et le reste,
+                // une mesure impossible « ordinaire » (timeout, HTTP non-2xx, JSON incomplet).
+                $lignes = match (true) {
+                    array_key_exists('keys_percent', $result->meta ?? []) => $this->marcheASuivreOpcache(),
+                    array_key_exists('bloque_depuis_heures', $result->meta ?? []) => $this->marcheASuivreMaintenanceBloquee(),
+                    default => $this->marcheASuivreMesureImpossible(),
+                };
 
                 foreach ($lignes as $ligne) {
                     $mail->line($ligne);
@@ -186,6 +194,25 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
             "2. Si le site répond, il s'agit probablement d'une surcharge PONCTUELLE du serveur PHP-FPM partagé (plusieurs sites y exécutent des tâches chaque minute) : aucune action n'est requise si l'alerte ne se répète pas.",
             "3. Si l'alerte se répète, vérifier la charge du serveur (WHM > Server Status) au moment exact de l'alerte.",
             '4. En dernier recours seulement : redémarrer PHP-FPM via /scripts/restartsrv_apache_php_fpm --restart (touche TOUS les sites du serveur).',
+        ];
+    }
+
+    /**
+     * Marche a suivre quand le site reste bloque en mode maintenance des HEURES d'affilee -
+     * distincte de marcheASuivreMesureImpossible(), qui suppose une surcharge PASSAGERE du
+     * pool PHP-FPM. Ici la duree meme (des heures, jamais quelques minutes) elimine cette
+     * hypothese : ce n'est plus un deploiement normal, `php artisan up` n'a probablement
+     * jamais ete rappele.
+     *
+     * @return array<int, string>
+     */
+    private function marcheASuivreMaintenanceBloquee(): array
+    {
+        return [
+            'Marche à suivre (accès SSH ou hébergeur requis) :',
+            "1. Vérifier si un déploiement est toujours en cours dans GitHub Actions du dépôt.",
+            "2. Si aucun déploiement n'est en cours, le site est resté bloqué en mode maintenance : exécuter « php artisan up » à la racine du site en production.",
+            '3. Vérifier ensuite que https://laveille.ai répond normalement dans un navigateur.',
         ];
     }
 
