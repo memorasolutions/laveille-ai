@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.234.0] - 2026-08-28
+
+### Corrigé
+- **Sur une fiche dont la thèse entière est « LibreOffice 26.8 revendique l'absence d'IA générative », sa nouveauté phare - le *Paragraph Composer*, un moteur de composition typographique - était transformée en lien vers un outil d'intelligence artificielle homonyme.** Mesuré en production le 2026-08-28. Le même mot faisait aussi attacher cet outil au bloc « Outils mentionnés ».
+- **Les deux mécanismes étaient CONVERGENTS** : `NewsToolSyncAction::suggest()` consomme le résultat du même appel au linkifier (`getLastMatchedTerms()`). Une seule cause, un seul correctif - contrairement au défaut voisin fermé le même jour, qui lui venait de deux chemins séparés.
+- **Le problème n'était pas « Composer », c'était la classe des noms d'outils qui sont aussi des mots courants.** Nouveau mécanisme `TOOL_COMPOUND_EXCLUSIONS` : un nom dont la mention SEULE reste légitime, mais qui forme un faux composé avec un mot précis accolé devant, est rejeté par un lookbehind négatif posé dans le motif lui-même. « Paragraph Composer » ne produit plus de lien ; « Composer » employé seul continue d'en produire un.
+- **Le blocage total a été délibérément écarté.** « Composer » n'est pas un mot français courant en prose : l'interdire partout aurait privé le site d'auto-liens légitimes. Le mécanisme existant a été étendu plutôt qu'un second ajouté.
+- **Clé de cache montée en v12** : sans ce bump, une cache déjà chaude aurait servi une heure de plus des entrées dépourvues de la nouvelle garde.
+
+### Mesuré
+- 43 outils publiés portent un nom mono-mot correspondant à un vrai mot du dictionnaire anglais sans être couverts par aucun mécanisme d'exclusion. **Borne basse assumée** : la méthode sous-compte les emprunts récents. Aucun n'a été bloqué par précaution, faute de preuve d'incident réel - un blocage aveugle casserait des liens corrects sur des outils très légitimement cités.
+- L'ampleur en production reste **inconnue et déclarée telle** : la base locale contient 6 fiches d'actualité dont 0 publiée, contre environ 4573 en production. Aucun corpus local à mesurer.
+
 ## [1.233.3] - 2026-08-28
 
 ### Corrigé

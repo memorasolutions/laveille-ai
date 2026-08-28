@@ -117,6 +117,15 @@ final class NewsToolSyncAction
      * backfill de 33). Ces noms sont donc exclus du mécanisme de recapture ci-dessous, sans
      * exception - voir le docblock de GlossaryLinkifier::TOOL_NEVER_RECAPTURE pour le détail.
      *
+     * 2026-08-28 (« Composer » dans « Paragraph Composer », LibreOffice 26.8) : un TROISIÈME cas
+     * ne se règle NI par TOOL_NEVER_AUTO NI par TOOL_NEVER_RECAPTURE - un nom dont la mention
+     * SEULE est légitime (donc jamais bloqué ici), mais qui forme un faux composé avec un mot
+     * précis accolé devant. Contrairement aux deux listes ci-dessus (blocage total, ce fichier),
+     * ce cas se règle en AMONT, dans GlossaryLinkifier::TOOL_COMPOUND_EXCLUSIONS - un lookbehind
+     * négatif sur le préfixe fautif, appliqué DANS le pattern de matchInText(). Comme suggest()
+     * lit le résultat de CE MÊME appel linkify() (getLastMatchedTerms() ci-dessous), le correctif
+     * couvre les deux mécanismes (corps de texte + attachement auto) sans code additionnel ici.
+     *
      * Renvoie une Collection d'IDs d'outils (sans enregistrer - l'admin valide).
      *
      * @return Collection<int, int>

@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v11.'; // 2026-08-21 bump : tri secondaire par spécificité de stratégie (voir loadTerms)
+    public const CACHE_KEY = 'glossary.terms.v12.'; // 2026-08-28 bump : nouvelle clé 'exclude_after' par terme outil (TOOL_COMPOUND_EXCLUSIONS) - sans ce bump, un cache v11 déjà chaud servirait 1h de plus des entrées SANS la clé, donc sans garde de faux composé
     public const CACHE_TTL = 3600; // 1h
     // 2026-08-02 #1526 : compteur d'epoch pour invalider le cache du RÉSULTAT linkify() (voir linkify()
     // et flushCache()) sans avoir à énumérer des clés — un seul Cache::forever() invalide tout d'un coup.
@@ -138,6 +138,33 @@ class GlossaryLinkifier
         // comme prénom courant) :
         'draft', 'brief', 'forge', 'handler', 'deck', 'shadow', 'mute', 'bastion', 'cadence', 'campus',
         'metal', 'prism', 'radar', 'retina', 'epic', 'fred', 'mira',
+    ];
+
+    /**
+     * 2026-08-28 (défaut mesuré en production, fiche « libreoffice-268-... ») : noms d'outils
+     * dont la mention SEULE est légitime (contrairement à TOOL_NEVER_AUTO/TOOL_NEVER_RECAPTURE,
+     * PAS de blocage total) mais qui, précédés d'un mot précis, forment un FAUX COMPOSÉ - une
+     * expression réelle et différente qui n'a rien à voir avec l'outil.
+     *
+     * LibreOffice 26.8 a une fonctionnalité nommée « Paragraph Composer » (moteur de composition
+     * typographique, RIEN à voir avec l'IA) sur une fiche dont la thèse entière est l'ABSENCE
+     * d'IA générative. Le linkifier capturait « Composer » à l'intérieur de cette expression et
+     * posait <a href="/annuaire/composer"> vers l'outil IA homonyme ; NewsToolSyncAction::suggest()
+     * consomme ce MÊME matching (getLastMatchedTerms()) et attachait donc aussi l'outil en
+     * source=auto - les deux mécanismes sont CONVERGENTS ici (une seule cause, un seul correctif).
+     *
+     * « composer » n'a par ailleurs aucune raison d'être dans TOOL_NEVER_AUTO : contrairement à
+     * « claude », « avec », « tome »… ce n'est PAS un mot français courant en prose ordinaire, donc
+     * un blocage total priverait le site d'auto-liens légitimes pour l'outil Composer employé seul.
+     *
+     * Implémenté comme lookbehind négatif directement dans le pattern (matchInText()) : le mot
+     * exclu juste avant ne matche jamais, mais un « Composer » plus loin dans le MÊME texte (ou
+     * ailleurs sur le site) continue d'être capturé normalement - aucune régression sur les
+     * mentions légitimes. Clé = nom d'outil en minuscules ; valeur = mots-préfixes (comparaison
+     * insensible à la casse) qui invalident le match s'ils précèdent immédiatement le terme.
+     */
+    public const TOOL_COMPOUND_EXCLUSIONS = [
+        'composer' => ['paragraph'],
     ];
 
     /**
@@ -481,6 +508,8 @@ class GlossaryLinkifier
                                     'url' => $url,
                                     'match_strategy' => 'case_sensitive',
                                     'origin_rank' => self::ORIGIN_PRIMARY,
+                                    // 2026-08-28 : faux composés (« Paragraph Composer ») - voir TOOL_COMPOUND_EXCLUSIONS.
+                                    'exclude_after' => self::TOOL_COMPOUND_EXCLUSIONS[$lower] ?? [],
                                 ];
                                 $takenLower[$lower] = true;
 
@@ -916,10 +945,19 @@ class GlossaryLinkifier
             // MCP: SELF (<5 lignes)
             // RAISON: correctif de frontiere sur le point unique ou le motif est construit.
             $finDeMot = '(?![\p{L}\p{N}_\-\/]|\.\w)';
+            // 2026-08-28 : garde de FAUX COMPOSÉ (TOOL_COMPOUND_EXCLUSIONS, ex. « Composer » dans
+            // « Paragraph Composer »). Lookbehind négatif À LARGEUR FIXE par préfixe exclu
+            // (préfixe + 1 espace, casse insensible sur le seul préfixe) : rejette UNIQUEMENT le
+            // composé précis, jamais le terme employé seul ailleurs dans le même texte ou la même
+            // page - donc aucune récursion/boucle à changer dans matchInText()/walkAndReplace().
+            $debutDeMot = '';
+            foreach (($term['exclude_after'] ?? []) as $prefixExclu) {
+                $debutDeMot .= '(?<!(?i:'.preg_quote($prefixExclu, '/').')[\s\x{00A0}])';
+            }
             if ($strategy === 'partial_case_sensitive') {
-                $pattern = '/(?<![\p{L}\p{N}._\-\/])'.self::buildPartialCasePattern($name).$finDeMot.'/u';
+                $pattern = '/(?<![\p{L}\p{N}._\-\/])'.$debutDeMot.self::buildPartialCasePattern($name).$finDeMot.'/u';
             } else {
-                $pattern = '/(?<![\p{L}\p{N}._\-\/])'.preg_quote($name, '/').$finDeMot.'/u';
+                $pattern = '/(?<![\p{L}\p{N}._\-\/])'.$debutDeMot.preg_quote($name, '/').$finDeMot.'/u';
                 if ($strategy === 'loose') $pattern .= 'i';
             }
             // case_sensitive ET exact_phrase : pas de flag i (casse exacte)
