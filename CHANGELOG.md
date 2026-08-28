@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.229.0] - 2026-08-28
+
+### Corrigé
+- **L'annuaire publiait un nombre de vues faux de 19 à 652 fois.** Croisement avec GA4 (propriété 500300528, depuis janvier 2026) : FLUX affichait 1 957 vues contre 3 réelles; Claude 803 contre 12; Claude Design 1 504 contre 24; Canva AI 1 620 contre 32; Wooclap 1 381 contre 31; ChatGPT 1 806 contre 47; Poe 1 655 contre 87. L'inflation est MULTIPLICATIVE, donc elle frappait le plus fort les fiches les plus consultées - le chiffre le plus visible était aussi le plus faux.
+- **Cause** : `PublicDirectoryController::show()` faisait un `increment('clicks_count')` brut. L'annuaire était le SEUL module resté sur ce mécanisme; Tools, Authors, News et Dictionary passent tous par `ViewCounterService`, qui porte le tri anti-robot et la déduplication depuis le 14 août. Il passe désormais par le même service.
+
+### Ajouté
+- **Une colonne « propre » qui repart de zéro, `clicks_count_verified`**, sur le patron déjà employé par les trois autres modules le 14 août. Elle est justifiée ICI et ne l'était pas sur le glossaire la semaine dernière, et la différence compte : le glossaire naissait déjà filtré, donc les deux colonnes y seraient restées identiques pour toujours. L'annuaire, lui, porte un historique déjà pollué qu'on ne peut pas assainir rétroactivement - une colonne neuve est le seul moyen d'avoir un jour un chiffre honnête. **`clicks_count` n'est PAS touché** : une donnée, même fausse, ne se supprime pas.
+- **Seuil d'affichage à 10 vues vérifiées**, réglable par `Settings` sans déploiement plutôt que codé en dur. Sous ce seuil, aucun badge - et le chiffre réel ne fuit dans aucune des deux vues, vérifié par un test négatif explicite. Motif chiffré : les fiches les plus consultées plafonnent à 12-87 vues réelles par mois d'après GA4, donc un seuil de 10 évite d'afficher « 1 vue » sur une fiche historiquement populaire pendant les premiers jours, tout en restant franchissable en quelques jours.
+- **Le nombre de vues apparaît enfin sur les cartes principales**, en réutilisant la mise en page déjà en place sur « Ajoutés récemment » et « Les plus populaires ». Aucun composant partagé n'était possible : les cartes principales sont rendues par Alpine côté client, les autres par Blade côté serveur. Contraste vérifié à 7,09:1, AAA.
+
+Preuve en conditions réelles, pas seulement en test : trois requêtes en User-Agent Googlebot n'ont fait bouger aucune des deux colonnes, tandis que des requêtes Chrome les incrémentaient. Le test passe au ROUGE si l'on retire le tri anti-robot, vérifié en le retirant pour de bon. `Modules/Directory` 211 passed, `Modules/Core` 184 passed.
+
+### Corrigé (constructeur de prompts)
+- **Le résumé en langage clair n'avait jamais reçu un correctif que le prompt technique avait reçu le 12 août.** L'utilisateur qui dépliait « Aperçu du prompt » avec un verbe de recherche lisait deux idées collées sans ponctuation (« ...les sites officiels et pertinents les meilleures pratiques 2026 pour... »), alors que le prompt réellement envoyé à l'IA était correct. Il pouvait donc croire que l'outil produisait du texte mal formé.
+- **La règle était écrite à TROIS endroits, pas deux.** En cherchant, on a trouvé un troisième point d'assemblage qui dupliquait la même expression : l'ancrage final « Produis maintenant ». Le correctif n'a donc pas été recopié à l'endroit manquant - ce qui aurait reproduit la cause - mais extrait en une fonction unique que les trois consomment. Rien de plus n'a été fusionné : les trois blocs produisent des sorties de nature différente (segments colorisés, chaîne plate), et les unifier davantage aurait été du DRY sur une ressemblance de forme, pas sur une connaissance.
+- **En mode deux tâches, l'étape 2 renvoyait à un « contexte » qui pouvait ne pas exister.** La réserve « sauf indication contraire dans le contexte » était ajoutée sans condition, même quand aucun contexte additionnel n'avait été saisi - le prompt pointait alors vers du vide. Elle n'apparaît plus que si un contexte est réellement rempli.
+- **Ellipse suivie d'un point (« …. ») en fin de prompt** quand l'objet de la tâche dépassait 80 caractères. Une assertion préexistante attendait littéralement ce texte fautif : elle **codifiait le bug depuis sa création**, et corriger le code sans elle aurait fait échouer un test légitimement.
+
+Les trois correctifs passent au ROUGE si on les retire, vérifié en les retirant un à un pour de bon. `Modules/Tools` 399 passed (1 732 assertions); côté JS, 8 fichiers dont les 3 ciblés et les 3 protégeant les correctifs déjà livrés, tous verts.
+
 ## [1.228.1] - 2026-08-28
 
 ### Corrigé

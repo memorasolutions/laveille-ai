@@ -16,6 +16,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Modules\Core\Services\MetaScraperService;
 use Modules\Core\Services\TranslationService;
+use Modules\Core\Services\ViewCounterService;
 use Modules\Directory\Models\Category;
 use Modules\Directory\Models\Tool;
 use Modules\Directory\Models\ToolPricingReport;
@@ -190,7 +191,11 @@ class PublicDirectoryController extends Controller
             abort(404);
         }
 
-        $tool->increment('clicks_count');
+        // 2026-08-28 - incident 2026-08-13 (recoupement GA4) : increment() brut comptait les
+        // robots (jusqu'à 652x le trafic humain réel selon la fiche). Délégué au service partagé
+        // (tri anti-robot + déduplication courte fenêtre), déjà utilisé par Tools/Authors/News/
+        // Dictionary - incrémente aussi clicks_count_verified, le compteur "propre" jumeau.
+        ViewCounterService::record($tool, 'clicks_count');
 
         $limit = (int) Settings::get('directory.similar_tools_limit', 8);
 

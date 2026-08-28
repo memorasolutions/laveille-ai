@@ -100,11 +100,28 @@ function baseComponent() {
     // espace, ajoute une ellipse - jamais de coupe en plein mot ni d'espace traînant).
     const expectedObject = 'rédiger un courriel de bienvenue très détaillé pour accueillir chaleureusement…';
     assert(expectedObject.length - 1 <= 80, 'sanity du calcul attendu : 80 caractères avant l\'ellipse');
-    assert(prompt.includes('Produis maintenant : rédige ' + expectedObject + '.'), 'le livrable tronqué correspond exactement au calcul attendu (verbe en minuscule + objet coupé au dernier mot entier + ellipse)');
+    // Correctif 2026-08-28 (défaut mesuré au navigateur) : truncateAtWord() ajoute déjà l'ellipse
+    // « … » - un point ajouté juste après produisait « …. », qu'aucune règle typographique
+    // française n'admet. L'ancrage se termine donc SUR l'ellipse, sans point redondant.
+    assert(prompt.includes('Produis maintenant : rédige ' + expectedObject), 'le livrable tronqué correspond exactement au calcul attendu (verbe en minuscule + objet coupé au dernier mot entier + ellipse)');
+    assert(!prompt.includes('….'), 'aucun point n\'est collé après l\'ellipse de troncature (jamais de "….")');
+    assert(prompt.trimEnd().endsWith('…'), 'le prompt se termine sur l\'ellipse elle-même, pas sur un point ajouté après coup');
     // La tâche complète (non tronquée) reste présente dans le bloc "Ta tâche :" - seule la
     // reprise de clôture est raccourcie, jamais la demande d'origine.
     assert(prompt.includes('Ta tâche : Rédige ' + c.taskObject + '.'), 'le bloc "Ta tâche :" garde la demande complète, non tronquée');
     assert(!prompt.slice(prompt.lastIndexOf('Produis maintenant : ')).includes('chaleureusement chaque'), 'la clôture elle-même ne contient pas le texte situé après la coupe');
+}
+
+// --- 3c. Même troncature, mais avec constraintAskIfUnclear actif : la clause "Sinon..." doit
+// suivre l'ellipse sans point collé devant (défaut 2026-08-28, mesuré au navigateur). ---
+{
+    const c = baseComponent();
+    c.taskObject = 'rédiger un courriel de bienvenue très détaillé pour accueillir chaleureusement chaque nouvel employé de notre entreprise dès son premier jour';
+    c.constraintAskIfUnclear = true;
+    const prompt = c.prompt;
+    const expectedObject = 'rédiger un courriel de bienvenue très détaillé pour accueillir chaleureusement…';
+    assert(prompt.includes(expectedObject + ' Sinon, pose d\'abord tes questions de clarification'), 'avec askIfUnclear, la clause "Sinon..." suit l\'ellipse avec un simple espace, jamais un point collé');
+    assert(!prompt.includes('….'), 'aucun point n\'est collé après l\'ellipse même quand la clarification conditionnelle est active');
 }
 
 // --- 3b. Repli "la demande ci-dessus" quand aucun verbe/objet n'est disponible pour le livrable. ---

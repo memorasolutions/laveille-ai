@@ -868,6 +868,18 @@ document.addEventListener('alpine:init', function() {
             },
             _isSearchVerbValue: function (v) { return SEARCH_VERBS_ALL.indexOf(v) !== -1; },
             _isDatedSearchVerbValue: function (v) { return SEARCH_VERBS_DATED.indexOf(v) !== -1; },
+            // Séparateur entre le verbe et l'objet de la tâche - RÈGLE UNIQUE (défaut mesuré au
+            // navigateur, 2026-08-28) désormais consommée par LES TROIS points d'assemblage qui
+            // juxtaposent un verbe et un objet de tâche dans _buildPromptSegments() (prompt
+            // réellement envoyé à l'IA) ET par promptSummary() (aperçu en langage clair) - avant ce
+            // correctif, seul _buildPromptSegments() avait reçu la correction du 2026-08-12,
+            // promptSummary() gardait le simple espace fautif. Les verbes de recherche datés
+            // (SEARCH_VERBS_DATED) sont des phrases complètes se terminant par un adjectif - un
+            // simple espace avant l'objet produit une concaténation bancale ("...sites officiels et
+            // pertinents les meilleures pratiques...").
+            _verbObjectSeparator: function (actionVerb) {
+                return this._isDatedSearchVerbValue(actionVerb) ? '. Voici ce qu\'il faut trouver : ' : ' ';
+            },
             // Pilote la visibilité du champ Zones (Blade, x-show) ET l'injection dans le prompt
             // (get promptSegments()) - un verbe personnalisé (verbType==='custom') n'est jamais
             // reconnu comme verbe de recherche, seul un verbe PRÉDÉFINI l'est.
@@ -1172,7 +1184,7 @@ document.addEventListener('alpine:init', function() {
                     // "Ta tâche : Rédige ..." dans le prompt reel) - on garde donc cette forme au
                     // lieu de tenter une conjugaison a l'infinitif (peu fiable sur un verbe
                     // personnalise saisi librement par l'utilisateur, actionVerbIsUser).
-                    parts.push((i18nSummary.summaryAction || 'Tâche demandée : ') + actionVerb + ' ' + this._fillSpacesInText(this._taskWithoutLeadingVerb(actionVerb, this.taskObject)) + '.');
+                    parts.push((i18nSummary.summaryAction || 'Tâche demandée : ') + actionVerb + this._verbObjectSeparator(actionVerb) + this._fillSpacesInText(this._taskWithoutLeadingVerb(actionVerb, this.taskObject)) + '.');
                 } else if (this.taskObject) {
                     parts.push((i18nSummary.summarySubject || 'Sujet : ') + this._fillSpacesInText(this.taskObject) + '.');
                 }
@@ -1307,17 +1319,23 @@ document.addEventListener('alpine:init', function() {
                     // G2 (gabarits v2, tâche 1653, panel multi-IA 2026-08-07) : héritage EXPLICITE
                     // de l'étape 2 sur l'étape 1 (même lecteur, même esprit), au lieu d'un simple
                     // "à partir du résultat" qui ne précisait rien sur la continuité attendue.
-                    tool(' le résultat de l\'étape 1, pour le même lecteur et dans le même esprit, sauf indication contraire dans le contexte.');
+                    // Correctif 2026-08-28 (défaut mesuré au navigateur) : la réserve "sauf
+                    // indication contraire dans le contexte" n'a plus lieu d'être quand aucun
+                    // contexte additionnel n'est renseigné (this.contextInfo vide) - même condition
+                    // que le bloc CONTEXTE ADDITIONNEL plus bas - sinon l'étape 2 renvoyait vers une
+                    // section absente du prompt.
+                    tool(' le résultat de l\'étape 1, pour le même lecteur et dans le même esprit' + (this.contextInfo ? ', sauf indication contraire dans le contexte.' : '.'));
                 } else if (actionVerb && this.taskObject) {
                     startSection();
                     tool('Ta tâche : ');
                     if (actionVerbIsUser) { user(actionVerb); } else { tool(actionVerb); }
-                    // Correctif qualité 2026-08-12 (audit multi-IA) : les verbes de recherche datés
+                    // Correctif qualité 2026-08-12 (audit multi-IA), mutualisé le 2026-08-28 dans
+                    // _verbObjectSeparator() (voir sa définition) : les verbes de recherche datés
                     // (SEARCH_VERBS_DATED) sont des phrases complètes se terminant par un adjectif -
                     // un simple espace avant l'objet produisait une concaténation bancale ("...sites
                     // officiels et pertinents les dernières subventions..."). Séparateur explicite
                     // seulement pour ces verbes, comportement inchangé pour tous les autres.
-                    tool(SEARCH_VERBS_DATED.indexOf(actionVerb) !== -1 ? '. Voici ce qu\'il faut trouver : ' : ' ');
+                    tool(this._verbObjectSeparator(actionVerb));
                     // Sans ce retrait, une demande commençant déjà par le verbe donnait
                     // « Ta tâche : Rédige rédige un courriel » dans le prompt envoyé à l'IA.
                     userSpace(this._taskWithoutLeadingVerb(actionVerb, this.taskObject));
@@ -1600,15 +1618,25 @@ document.addEventListener('alpine:init', function() {
                         tool('les deux étapes ci-dessus, dans l\'ordre');
                     } else if (hasLivrable) {
                         if (actionVerbIsUser) { user(livrableVerb); } else { tool(livrableVerb); }
-                        // Correctif qualité 2026-08-12 : même séparateur que le bloc TÂCHE plus haut,
-                        // pour rester cohérent sur la même paire verbe/objet (voir SEARCH_VERBS_DATED
-                        // plus haut dans cette fonction).
-                        tool(SEARCH_VERBS_DATED.indexOf(actionVerb) !== -1 ? '. Voici ce qu\'il faut trouver : ' : ' ');
+                        // Correctif qualité 2026-08-12, mutualisé le 2026-08-28 : même séparateur
+                        // que le bloc TÂCHE plus haut, via _verbObjectSeparator() (voir sa
+                        // définition), pour rester cohérent sur la même paire verbe/objet.
+                        tool(this._verbObjectSeparator(actionVerb));
                         userSpace(livrableObject);
                     } else {
                         tool('la demande ci-dessus');
                     }
-                    tool(this.constraintAskIfUnclear ? '. Sinon, pose d\'abord tes questions de clarification, groupées en un seul message.' : '.');
+                    // Correctif 2026-08-28 (défaut mesuré au navigateur) : truncateAtWord()
+                    // ci-dessus termine déjà l'objet tronqué par une ellipse « … ». Ajouter
+                    // systématiquement un point après collait « …. », qu'aucune règle typographique
+                    // française n'admet. On ne pose donc le point (ou la clause "Sinon...") qu'une
+                    // seule fois, jamais en doublon d'une ellipse déjà présente en fin de texte.
+                    var endsWithEllipsis = hasLivrable && !twoStepTask && /…$/.test(livrableObject);
+                    if (this.constraintAskIfUnclear) {
+                        tool((endsWithEllipsis ? ' ' : '. ') + 'Sinon, pose d\'abord tes questions de clarification, groupées en un seul message.');
+                    } else if (!endsWithEllipsis) {
+                        tool('.');
+                    }
                 }
 
                 // Bonification « Répéter pour ma liste » / « QCM forcé » (2026-08-07, Options

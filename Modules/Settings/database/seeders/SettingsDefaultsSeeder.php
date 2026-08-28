@@ -38,6 +38,10 @@ class SettingsDefaultsSeeder extends Seeder
             'directory.similar_tools_limit' => ['value' => 4, 'type' => 'integer', 'group' => 'directory'],
             'directory.leaderboard_all_time_limit' => ['value' => 10, 'type' => 'integer', 'group' => 'directory'],
             'directory.leaderboard_monthly_limit' => ['value' => 10, 'type' => 'integer', 'group' => 'directory'],
+            // 2026-08-28 - seuil (nombre de vues vérifiées) sous lequel le badge "vues" des
+            // cartes annuaire reste masqué (clicks_count_verified encore jeune, voir migration
+            // 2026_08_28_100000_add_clicks_count_verified_to_directory_tools.php).
+            'directory.views_verified_min_display' => ['value' => 10, 'type' => 'integer', 'group' => 'directory'],
 
             // GROUPE 'news'
             'news.articles_per_page' => ['value' => 20, 'type' => 'integer', 'group' => 'news'],

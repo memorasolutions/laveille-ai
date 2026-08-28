@@ -52,6 +52,35 @@ function withoutAccents(text) { return text.normalize('NFD').replace(/[\u0300-\u
     assert(normalized.includes("le resultat de l'etape 1, pour le meme lecteur et dans le meme esprit"), 'la deuxieme etape herite explicitement de la premiere (meme lecteur, meme esprit)');
 }
 
+// Correctif 2026-08-28 (défaut mesuré au navigateur) : sans contexte additionnel rempli, la
+// réserve "sauf indication contraire dans le contexte" pointait vers une section absente du
+// prompt. Elle ne doit apparaître que si contextInfo est réellement rempli.
+{
+    const { component } = loadPromptBuilder();
+    component.verbType = 'preset';
+    component.verb = 'Resume';
+    component.taskObject = 'cet article';
+    component.secondTaskEnabled = true;
+    component.verbType2 = 'preset';
+    component.verb2 = 'Critique';
+    // contextInfo volontairement vide (comportement par défaut du composant).
+    const normalized = withoutAccents(component.prompt).toLowerCase();
+    assert(normalized.includes("le resultat de l'etape 1, pour le meme lecteur et dans le meme esprit."), 'sans contexte, la phrase se termine simplement par un point');
+    assert(!normalized.includes('sauf indication contraire dans le contexte'), 'sans contexte additionnel rempli, l\'étape 2 ne renvoie jamais vers une section absente du prompt');
+}
+{
+    const { component } = loadPromptBuilder();
+    component.verbType = 'preset';
+    component.verb = 'Resume';
+    component.taskObject = 'cet article';
+    component.secondTaskEnabled = true;
+    component.verbType2 = 'preset';
+    component.verb2 = 'Critique';
+    component.contextInfo = 'Le lecteur est un comité de direction.';
+    const normalized = withoutAccents(component.prompt).toLowerCase();
+    assert(normalized.includes("le resultat de l'etape 1, pour le meme lecteur et dans le meme esprit, sauf indication contraire dans le contexte."), 'avec un contexte additionnel rempli, la réserve réapparaît telle quelle (comportement inchangé)');
+}
+
 // Deuxieme tache activee sans verbe : repli strict sur le prompt a une tache.
 {
     const { component } = loadPromptBuilder();
@@ -101,6 +130,6 @@ function withoutAccents(text) { return text.normalize('NFD').replace(/[\u0300-\u
     assert(component.verbCustom2 === 'Reformule', 'le deuxieme verbe personnalise devient le premier verbe');
 })();
 
-// 10/10 tests passent.
+// 13/13 tests passent.
 console.log('\n' + pass + '/' + (pass + fail) + ' OK');
 process.exit(fail > 0 ? 1 : 0);

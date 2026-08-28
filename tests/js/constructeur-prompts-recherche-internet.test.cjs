@@ -202,5 +202,24 @@ const VERB_DEEP = 'Recherche en profondeur, Internet inclus';
     assert(c.zoneLimitMessage === false, 'retirer une zone alors qu\'on était au plafond réarme la possibilité d\'en ajouter (message effacé)');
 }
 
+// === 8. promptSummary (aperçu langage clair) applique le MÊME séparateur verbe/objet que le
+// prompt réel (défaut mesuré au navigateur, 2026-08-28) : les deux consommaient la même règle à
+// deux endroits distincts du code, un seul avait reçu le correctif du 2026-08-12 - voir
+// _verbObjectSeparator() dans core.js, désormais seule source de cette règle. Sans lui, l'aperçu
+// produisait "...pertinents les meilleures pratiques..." collés sans ponctuation, alors que le
+// prompt réel disait déjà ". Voici ce qu'il faut trouver : ...".
+{
+    const c = loadPromptBuilder();
+    c.verbType = 'preset'; c.verb = VERB_WEB; c.taskObject = 'les meilleures pratiques 2026 pour sécuriser un poste de travail';
+    assert(c.promptSummary.indexOf('pertinents les meilleures pratiques') === -1, 'le résumé en langage clair ne colle jamais verbe et objet sans ponctuation pour un verbe de recherche daté');
+    assert(c.promptSummary.indexOf('pertinents. Voici ce qu\'il faut trouver : les meilleures pratiques') !== -1, 'le résumé applique le même séparateur explicite que le prompt réel envoyé à l\'IA');
+    assert(c.prompt.indexOf('pertinents. Voici ce qu\'il faut trouver : les meilleures pratiques') !== -1, 'le prompt réel garde le même texte (non-régression du correctif du 2026-08-12)');
+}
+{
+    const c = loadPromptBuilder();
+    c.verbType = 'preset'; c.verb = 'Rédige'; c.taskObject = 'un courriel de bienvenue';
+    assert(c.promptSummary.indexOf('Rédige un courriel de bienvenue') !== -1, 'un verbe ordinaire garde le simple espace dans le résumé (comportement inchangé)');
+}
+
 console.log('\n' + pass + '/' + (pass + fail) + ' OK');
 process.exit(fail > 0 ? 1 : 0);

@@ -14,11 +14,21 @@
     // ecosystems.labels) sont préparés par PublicDirectoryController::index() et reçus ici tels
     // quels — jamais recalculés en vue. Matchés en mémoire dans la boucle ci-dessous : jamais de
     // requête par carte (anti N+1) sur les 433+ outils.
-    $toolsJson = $tools->map(function($tool) use ($pricingOptions, $ecosystemCounts, $ecosystemLabels) {
+    // 2026-08-28 - seuil d'affichage du compteur de vues "propre" (voir plus bas, clicksCount) :
+    // calculé une seule fois hors boucle, même réglage que _highlight_card.blade.php (DRY sur la
+    // clé de config, pas sur l'appel - clé Settings identique aux deux endroits).
+    $viewsVerifiedMinDisplay = \Modules\Settings\Facades\Settings::get('directory.views_verified_min_display', 10);
+    $toolsJson = $tools->map(function($tool) use ($pricingOptions, $ecosystemCounts, $ecosystemLabels, $viewsVerifiedMinDisplay) {
         $host = $tool->url ? parse_url($tool->url, PHP_URL_HOST) : '';
         $ecoTag = $tool->ecosystem_tag ?? null;
         $ecoCount = $ecoTag ? ($ecosystemCounts[$ecoTag] ?? 0) : 0;
         $ecoLabel = $ecoTag ? ($ecosystemLabels[$ecoTag] ?? ucfirst($ecoTag)) : null;
+        // Sous le seuil, la valeur RÉELLE de clicks_count_verified n'est transmise nulle part au
+        // client (même principe que _highlight_card.blade.php, qui ne calcule le nombre formaté
+        // que dans la branche @if) : les deux clés clicksCount/clicksCountFormatted retombent à 0.
+        $displayedClicksCount = (($tool->clicks_count_verified ?? 0) >= $viewsVerifiedMinDisplay)
+            ? (int) $tool->clicks_count_verified
+            : 0;
         return [
             'id' => $tool->id,
             'name' => $tool->name,
@@ -42,6 +52,17 @@
             'gradientTo' => ['#1a365d','#0B7285','#2C3E50','#983C00','#0E6352','#8E44AD','#1E5D87','#983C00'][crc32($tool->name) % 8 < 0 ? (crc32($tool->name) % 8) + 8 : crc32($tool->name) % 8],
             'hasEduPricing' => (bool) $tool->has_education_pricing,
             'tutorialsCount' => $tool->tutorials_count ?? 0,
+            // S142 2026-08-28 : compteur de vues sur la carte principale, même champ et même
+            // format que le badge déjà affiché sur les cartes "Ajoutés récemment"/"Les plus
+            // populaires" (_highlight_card.blade.php) - formaté côté serveur (comme l'original)
+            // pour éviter toute divergence de séparateur de milliers avec le JS.
+            // Corrigé 2026-08-28 : source basculée sur clicks_count_verified (compteur "propre",
+            // filtré anti-robot + dédupliqué - clicks_count porte un historique pollué par les
+            // robots, voir migration 2026_08_28_100000_...). Sous le seuil, $displayedClicksCount
+            // vaut 0 : réutilise TEL QUEL le garde-fou x-if="tool.clicksCount > 0" déjà présent
+            // dans le gabarit Alpine plus bas, sans dupliquer le seuil côté JS.
+            'clicksCount' => $displayedClicksCount,
+            'clicksCountFormatted' => number_format($displayedClicksCount, 0, ',', ' '),
             'lifecycleStatus' => $tool->lifecycle_status ?? 'active',
             'lifecycleLabel' => $tool->lifecycle_label ?? '',
             'lifecycleColor' => $tool->lifecycle_color ?? '#374151',
@@ -1367,6 +1388,12 @@
                                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
                                             <span x-text="tool.tutorialsCount + ' ' + (tool.tutorialsCount > 1 ? '{{ __('tutos') }}' : '{{ __('tuto') }}')"></span>
                                         </a>
+                                    </template>
+                                    {{-- S142 2026-08-28 : compteur de vues - reprise exacte du badge de _highlight_card.blade.php (même style inline, même icône, même format) --}}
+                                    <template x-if="tool.clicksCount > 0">
+                                        <span style="display:inline-flex;align-items:center;gap:3px;color:var(--c-text-muted, #52586a);font-size:11px;font-weight:600;" :title="tool.clicksCountFormatted + ' {{ __('vues') }}'">
+                                            👁 <span x-text="tool.clicksCountFormatted"></span>
+                                        </span>
                                     </template>
                                 </div>
                             </div>
