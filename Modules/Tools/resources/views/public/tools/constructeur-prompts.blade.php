@@ -442,7 +442,7 @@
                         {{-- Étape 1 : Persona --}}
                         <div x-show="step === 1" x-transition>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('Sur quel ton l\'IA doit-elle répondre ?') }}</h2>
+                                <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('Quel rôle l\'IA doit-elle jouer ?') }}</h2>
                                 <x-tools::help-btn toggle="showHelp.persona" style="margin-left:4px;" />
                             </div>
                             <div x-show="showHelp.persona" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;" x-text="helps.persona"></div>
