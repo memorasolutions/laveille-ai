@@ -114,14 +114,30 @@ class ArticleController extends Controller
             'is_featured' => 'nullable',
             'content_password' => 'nullable|string|max:100',
             'answer_summary' => 'nullable|string|max:600',
+            'seo_title' => 'nullable|string|max:70',
         ], [
             'featured_image.mimes' => "L'image mise en avant doit être en JPG ou PNG - le WebP et l'AVIF ne s'affichent pas dans l'aperçu de partage de Facebook ou LinkedIn.",
+            'seo_title.max' => 'Le titre pour Google doit compter au maximum 70 caractères.',
         ]);
 
         $validated['answer_points'] = $this->parseAnswerPoints($request->input('answer_points_text'));
         $validated['is_featured'] = $request->boolean('is_featured');
         $validated['tags'] = $this->parseTagsInput($validated['tags_input'] ?? '');
         unset($validated['tags_input']);
+
+        // Titre pour Google (référencement) : stocké dans meta['title'], JAMAIS meta['seo_title']
+        // (clé morte, voir le commentaire de Article::getSeoTitleAttribute()). On lit le tableau
+        // meta existant, on modifie SEULEMENT la clé 'title', puis on réécrit le tableau complet -
+        // jamais un remplacement qui effacerait les autres clés déjà présentes (ex. description).
+        $seoTitle = trim((string) ($validated['seo_title'] ?? ''));
+        unset($validated['seo_title']);
+        $meta = $article->meta ?? [];
+        if ($seoTitle === '') {
+            unset($meta['title']);
+        } else {
+            $meta['title'] = $seoTitle;
+        }
+        $validated['meta'] = $meta;
 
         if ($request->hasFile('featured_image')) {
             $validated['featured_image'] = $request->file('featured_image')

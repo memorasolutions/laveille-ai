@@ -258,7 +258,16 @@ class Article extends Model implements SearchableContract
     }
 
     /**
-     * Récupère le titre SEO depuis les métadonnées.
+     * Récupère le titre pour Google (référencement) depuis les métadonnées.
+     *
+     * Lit UNIQUEMENT meta['title'] - ne JAMAIS ajouter de repli sur meta['seo_title']. Cette
+     * seconde clé existe encore sur au moins 5 articles mais porte une valeur PÉRIMÉE (« Concentré
+     * IA semaine du 12 au 19 avril 2026 »), écrite par des tentatives précédentes qui visaient la
+     * mauvaise clé - AUCUNE d'elles n'a donc jamais été lue ni affichée. Brancher meta['seo_title']
+     * ici en repli ressusciterait ces valeurs mortes sur les articles concernés. Le formulaire
+     * d'édition (Modules/Blog/resources/views/themes/backend/admin/articles/edit.blade.php, et son
+     * équivalent non thémé) ainsi que ArticleController@update écrivent exclusivement dans
+     * meta['title'].
      */
     public function getSeoTitleAttribute(): ?string
     {

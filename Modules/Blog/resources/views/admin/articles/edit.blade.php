@@ -40,6 +40,13 @@
                         @error('title')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="mb-3">
+                        <label for="seo_title" class="form-label">Titre pour Google</label>
+                        <input type="text" name="seo_title" id="seo_title" class="form-control @error('seo_title') is-invalid @enderror"
+                               value="{{ old('seo_title', $article->seo_title) }}" maxlength="70">
+                        <div class="form-text">Remplace le titre affiché dans les résultats de recherche Google. Laissez vide pour utiliser le titre normal de l'article (60 caractères visés, 70 maximum).</div>
+                        @error('seo_title')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="mb-3">
                         <x-editor::tiptap name="content" :value="old('content', $article->content ?? '')" label="Contenu" />
                     </div>
                     <div class="mb-0">

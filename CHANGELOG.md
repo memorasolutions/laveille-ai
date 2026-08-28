@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.230.0] - 2026-08-28
+
+### Ajouté
+- **Le formulaire d'édition d'un article porte enfin un champ « Titre pour Google ».** Le titre affiché dans les résultats de recherche vit dans `meta['title']`, lu par l'accesseur `Article::getSeoTitleAttribute()` - mais AUCUN champ du formulaire d'administration ne permettait de l'écrire, et `ArticleController::update()` ne validait ni ne traitait cette donnée. La seule façon de corriger un titre de recherche était donc une migration. Six tentatives passées ont écrit dans `meta['seo_title']`, une clé que rien ne lit : elles ont échoué en silence, sans erreur ni avertissement, et le site a continué d'afficher l'ancien titre.
+- **Le champ écrit dans la bonne clé, et seulement dans elle.** Le tableau `meta` existant est relu, la seule clé `title` est modifiée, puis le tableau complet est réécrit - jamais un remplacement, qui aurait effacé les autres clés déjà présentes. Un champ laissé vide retire la clé et rend son titre normal à l'article, plutôt que d'enregistrer une chaîne vide qui aurait produit un titre de recherche vide.
+- **Deux tests de bout en bout** vérifient le chemin complet, pas seulement l'enregistrement : la valeur soumise atterrit dans `meta['title']` en préservant une clé préexistante, se pré-remplit en rouvrant le formulaire, et ressort littéralement dans la balise `<title>` de la page publique. Le second test vérifie le retour en arrière : vidé, le champ rend son titre normal à la page. `Modules/Blog` 15 passed (37 assertions), dont les 13 tests préexistants.
+- **Le commentaire du modèle nomme désormais le piège** plutôt que de le laisser se retendre : `meta['seo_title']` porte des valeurs périmées sur cinq articles, et ne doit jamais devenir un repli de lecture - sans quoi ces vieilles valeurs remonteraient d'un coup en production.
+
+**Périmètre assumé** : le champ est sur le formulaire d'ÉDITION seulement, pas sur celui de création. Un titre de recherche se décide en général après coup, une fois l'article écrit, et ajouter le champ aux deux endroits aurait dupliqué la logique de fusion `meta` sans besoin prouvé. Il reste accessible dès le premier enregistrement, en rouvrant l'article.
+
 ## [1.229.0] - 2026-08-28
 
 ### Corrigé
