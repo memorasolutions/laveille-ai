@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.227.1] - 2026-08-28
+
+### Corrigé
+- **La migration du compteur de vues du glossaire bloquait TOUS les déploiements suivants.** Elle a échoué en production sur `Duplicate column name 'views_count'` : la colonne y existait déjà, alors qu'aucune migration du dépôt ne la crée - elle y avait été ajoutée hors du système de migrations. La base de développement, elle, ne l'avait pas, et c'est cette base partielle qui avait servi au diagnostic. La CI relançant `migrate --force` à chaque déploiement, l'échec se serait reproduit indéfiniment. La migration teste désormais l'existence de la colonne avant de l'ajouter, ce qui est la seule forme correcte quand deux bases divergent.
+- **Le `down()` refuse désormais de détruire des vues réelles.** Puisque cette migration n'a pas créé la colonne en production mais l'y a trouvée, un retour en arrière naïf aurait effacé des vues réellement comptées. Le `down()` ne retire donc la colonne QUE si son cumul est à zéro. Sinon il s'arrête en nommant le nombre de vues en jeu, plutôt que de détruire en silence une donnée impossible à reconstituer.
+
 ## [1.227.0] - 2026-08-28
 
 ### Ajouté
