@@ -35,7 +35,7 @@ $jsonLd = [
                     <x-fronttheme::page-freshness updated="2026-06-19" />
 
                     <p><strong>En 2025, 52 % des adultes québécois déclaraient avoir utilisé l'IA générative, contre 33 % un an plus tôt (Académie de la transformation numérique, Université Laval).</strong> Cette progression rapide témoigne d'une appropriation croissante de ces outils dans la vie quotidienne, professionnelle et scolaire. Comprendre qui les utilise, avec quels outils et dans quels buts permet de mieux saisir les transformations en cours.</p>
-                    <p>Ce dossier présente l'évolution de l'adoption de l'IA générative au Québec, les outils les plus populaires, les profils d'utilisateurs et les usages les plus fréquents — et ce que cela implique pour une veille éclairée.</p>
+                    <p>Ce dossier présente l'évolution de l'adoption de l'IA générative au Québec, les outils les plus populaires, les profils d'utilisateurs et les usages les plus fréquents – et ce que cela implique pour une veille éclairée.</p>
 
                     <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-top: 32px; margin-bottom: 16px;">Une adoption en forte progression</h2>
                     <p>En 2025, <strong>52 %</strong> des adultes québécois ont utilisé l'IA générative, contre <strong>33 %</strong> en 2024 (Académie de la transformation numérique, Université Laval). Les données antérieures situaient ce taux autour de <strong>16 %</strong> en 2023, ce qui illustre une accélération rapide en deux ans. Cette croissance soutenue reflète une intégration progressive de ces technologies dans les habitudes des Québécois, à mesure que les outils deviennent plus accessibles et mieux connus.</p>

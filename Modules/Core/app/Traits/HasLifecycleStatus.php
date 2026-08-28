@@ -111,7 +111,7 @@ trait HasLifecycleStatus
     {
         return match ($this->lifecycle_status) {
             self::STATUS_CLOSED => 'Cette plateforme a fermé ses portes',
-            self::STATUS_SCAM => 'Site signalé comme arnaque — évitez-le',
+            self::STATUS_SCAM => 'Site signalé comme arnaque – évitez-le',
             default => 'Statut : ' . $this->lifecycle_label,
         };
     }

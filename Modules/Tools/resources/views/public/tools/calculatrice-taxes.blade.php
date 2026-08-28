@@ -95,7 +95,7 @@
 
                                     {{-- #16 S84 v3 : Bidirectionnel natif — saisi dans n'importe quel champ → autre se calcule automatiquement --}}
                                     <p style="font-size: 0.85rem; color: var(--c-text-muted, #52586a); margin: 0 0 0.75rem 0; padding: 0.5rem 0.75rem; background: #f1f3f5; border-radius: 8px; border-left: 3px solid var(--c-primary, #064E5A);">
-                                        💡 Saisissez le montant <strong>avant</strong> OU <strong>avec taxes</strong> — l'autre champ se calcule automatiquement.
+                                        💡 Saisissez le montant <strong>avant</strong> OU <strong>avec taxes</strong> – l'autre champ se calcule automatiquement.
                                     </p>
 
                                     {{-- Montants rapides --}}
@@ -252,13 +252,13 @@
             'title' => 'ⓘ Montant avant taxes',
             'body' => '<p>Le montant <strong>avant taxes</strong> (sous-total HT) est le prix affiché du produit ou service, <strong>avant ajout</strong> de la TPS, TVQ, TVP ou TVH.</p>'
                     . '<p><strong>Exemple Québec :</strong> vous achetez un article à 100 $ avant taxes. À la caisse, on ajoute 5 $ TPS et 9,98 $ TVQ. Vous payez 114,98 $ au total.</p>'
-                    . '<p style="font-size:0.85rem; color: var(--c-text-muted, #52586a);">💡 Saisissez ce montant si vous connaissez le prix avant taxes — l\'autre champ se calcule automatiquement.</p>',
+                    . '<p style="font-size:0.85rem; color: var(--c-text-muted, #52586a);">💡 Saisissez ce montant si vous connaissez le prix avant taxes – l\'autre champ se calcule automatiquement.</p>',
         ],
         'avec_taxes' => [
             'title' => 'ⓘ Montant avec taxes',
             'body' => '<p>Le montant <strong>avec taxes</strong> (TTC) est le total final que vous payez, <strong>incluant</strong> toutes les taxes applicables.</p>'
                     . '<p><strong>Exemple Québec :</strong> vous payez 114,98 $ à la caisse. La calculatrice décompose : 100 $ avant taxes + 5 $ TPS + 9,98 $ TVQ.</p>'
-                    . '<p style="font-size:0.85rem; color: var(--c-text-muted, #52586a);">💡 Saisissez ce montant pour faire le calcul inversé — l\'autre champ se calcule automatiquement.</p>'
+                    . '<p style="font-size:0.85rem; color: var(--c-text-muted, #52586a);">💡 Saisissez ce montant pour faire le calcul inversé – l\'autre champ se calcule automatiquement.</p>'
                     . '<p style="font-size:0.85rem; color: var(--c-text-muted, #52586a);">🍽️ Si vous avez ajouté un pourboire à ce montant, cochez « Le total inclut un pourboire » pour décomposer pourboire, taxes et sous-total.</p>',
         ],
     ];
@@ -413,7 +413,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             var shareUrl = buildShareUrl(d);
             var shareData = {
-                title: '{{ __("Estimation des taxes") }} — {{ config("app.name") }}',
+                title: '{{ __("Estimation des taxes") }} : {{ config("app.name") }}',
                 text: d.text,
                 url: shareUrl
             };

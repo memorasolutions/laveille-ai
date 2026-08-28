@@ -18,7 +18,7 @@
 @endif
 
 @php
-    $_shareTermTitle = $term->name . ($term->acronym_full ? ' — ' . $term->acronym_full : '');
+    $_shareTermTitle = $term->name . ($term->acronym_full ? ' – ' . $term->acronym_full : '');
     $_shareSummary = mb_strimwidth($term->getTranslation('definition', 'fr_CA', false) ?: '', 0, 280, '…');
     $_shareAnalogy = $term->getTranslation('analogy', 'fr_CA', false);
     $_shareDidYouKnow = $term->getTranslation('did_you_know', 'fr_CA', false);
@@ -59,7 +59,7 @@
 
 {{-- Meta AEO/LLM-first 2026 : aide les crawlers IA à citer la définition --}}
 @push('head')
-<meta name="llm:summary" content="{{ e($term->name) }} — {{ e(Str::limit(strip_tags($term->analogy ?? $term->definition ?? ''), 200)) }} (Glossaire Techno)">
+<meta name="llm:summary" content="{{ e($term->name) }} – {{ e(Str::limit(strip_tags($term->analogy ?? $term->definition ?? ''), 200)) }} (Glossaire Techno)">
 <meta name="llm:keywords" content="{{ e($term->name) }}, glossaire techno, intelligence artificielle, définition, francophone, Québec">
 <meta name="llm:url" content="{{ route('dictionary.show', $term->slug) }}">
 @endpush
@@ -250,7 +250,7 @@
                     @php
                         $termTitle = $term->getTranslation('name', 'fr_CA', false) ?: $term->name;
                         if ($term->acronym_full) {
-                            $termTitle .= ' — ' . $term->acronym_full;
+                            $termTitle .= ' – ' . $term->acronym_full;
                         }
                         $termSections = [];
                         $analogy = $term->getTranslation('analogy', 'fr_CA', false);

@@ -70,7 +70,7 @@
     @endif
 
     <p class="mt-6 text-xs text-gray-500">
-        Conforme Loi 25 (QC) art. 17 — droit à la rectification et traçabilité ·
-        RGPD Art. 30 — registre des activités de traitement
+        Conforme Loi 25 (QC) art. 17 – droit à la rectification et traçabilité ·
+        RGPD Art. 30 – registre des activités de traitement
     </p>
 </div>

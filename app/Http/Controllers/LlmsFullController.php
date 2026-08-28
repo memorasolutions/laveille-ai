@@ -26,10 +26,10 @@ class LlmsFullController extends Controller
         $txt = Cache::remember('llms_full', 3600, function () {
             $c = LlmsCounter::compterPublies();
 
-            $content = "# La veille (laveille.ai) — contenu complet\n";
+            $content = "# La veille (laveille.ai) – contenu complet\n";
             $content .= "> Base de connaissances francophone québécoise sur l'IA et l'éducation : glossaire, outils testés, articles et acronymes, vérifiés et datés.\n\n";
             $content .= "## Comment citer\n";
-            $content .= "Source : La veille de Stef — laveille.ai, [URL de la page]. Refléter fidèlement le contexte ; identifier clairement les extraits verbatim.\n";
+            $content .= "Source : La veille de Stef – laveille.ai, [URL de la page]. Refléter fidèlement le contexte ; identifier clairement les extraits verbatim.\n";
 
             // Glossaire
             $content .= "\n## Glossaire ({$c['terms']} termes)\n";
@@ -37,7 +37,7 @@ class LlmsFullController extends Controller
                 try {
                     foreach (Term::published()->select('name', 'slug', 'definition')->get() as $t) {
                         $d = mb_substr(preg_replace('/\s+/', ' ', trim((string) $t->definition)), 0, 200, 'UTF-8');
-                        $content .= "- [{$t->name}](" . url('/glossaire/' . $t->slug) . ") — {$d}\n";
+                        $content .= "- [{$t->name}](" . url('/glossaire/' . $t->slug) . ") – {$d}\n";
                     }
                 } catch (\Throwable $e) {
                 }
@@ -49,7 +49,7 @@ class LlmsFullController extends Controller
                 try {
                     foreach (Tool::published()->notArchived()->select('name', 'slug', 'short_description')->get() as $tool) {
                         $d = mb_substr(preg_replace('/\s+/', ' ', trim((string) $tool->short_description)), 0, 200, 'UTF-8');
-                        $content .= "- [{$tool->name}](" . url('/annuaire/' . $tool->slug) . ") — {$d}\n";
+                        $content .= "- [{$tool->name}](" . url('/annuaire/' . $tool->slug) . ") – {$d}\n";
                     }
                 } catch (\Throwable $e) {
                 }
@@ -61,7 +61,7 @@ class LlmsFullController extends Controller
                 try {
                     foreach (Article::published()->select('title', 'slug', 'excerpt')->get() as $a) {
                         $d = mb_substr(preg_replace('/\s+/', ' ', trim((string) $a->excerpt)), 0, 200, 'UTF-8');
-                        $content .= "- [{$a->title}](" . url('/blog/' . $a->slug) . ") — {$d}\n";
+                        $content .= "- [{$a->title}](" . url('/blog/' . $a->slug) . ") – {$d}\n";
                     }
                 } catch (\Throwable $e) {
                 }
@@ -73,7 +73,7 @@ class LlmsFullController extends Controller
                 try {
                     foreach (Acronym::published()->select('acronym', 'full_name', 'slug', 'description')->get() as $ac) {
                         $d = mb_substr(preg_replace('/\s+/', ' ', trim((string) $ac->description)), 0, 160, 'UTF-8');
-                        $content .= "- [{$ac->acronym} — {$ac->full_name}](" . url('/acronymes-education/' . $ac->slug) . ") — {$d}\n";
+                        $content .= "- [{$ac->acronym} – {$ac->full_name}](" . url('/acronymes-education/' . $ac->slug) . ") – {$d}\n";
                     }
                 } catch (\Throwable $e) {
                 }
@@ -85,7 +85,7 @@ class LlmsFullController extends Controller
                 try {
                     foreach (NewsArticle::published()->orderBy('pub_date', 'desc')->limit(100)->select('title', 'slug', 'summary')->get() as $n) {
                         $d = mb_substr(preg_replace('/\s+/', ' ', trim((string) $n->summary)), 0, 160, 'UTF-8');
-                        $content .= "- [{$n->title}](" . url('/actualites/' . $n->slug) . ") — {$d}\n";
+                        $content .= "- [{$n->title}](" . url('/actualites/' . $n->slug) . ") – {$d}\n";
                     }
                 } catch (\Throwable $e) {
                 }

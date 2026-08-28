@@ -97,13 +97,13 @@
         <td style="padding:25px 30px;background-color:#f8fafc;" class="mobile-p">
             <p style="margin:0 0 16px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-weight:bold;">Chaque semaine dans votre boîte</p>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F4E2; <strong>Le fait marquant</strong> — l'actualité IA incontournable</td></tr>
-                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F4F0; <strong>5 actualités</strong> — résumées et triées pour vous</td></tr>
-                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F3AF; <strong>Un défi prompt</strong> — un prompt à essayer immédiatement</td></tr>
-                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F527; <strong>L'outil de la semaine</strong> — testé et recommandé</td></tr>
-                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F4D6; <strong>Un terme IA expliqué</strong> — pour comprendre sans jargon</td></tr>
-                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F4DD; <strong>Un article approfondi</strong> — analyse ou tutoriel</td></tr>
-                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F381; <strong>Un outil gratuit</strong> — à essayer dans votre navigateur</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F4E2; <strong>Le fait marquant</strong> – l'actualité IA incontournable</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F4F0; <strong>5 actualités</strong> – résumées et triées pour vous</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F3AF; <strong>Un défi prompt</strong> – un prompt à essayer immédiatement</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F527; <strong>L'outil de la semaine</strong> – testé et recommandé</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F4D6; <strong>Un terme IA expliqué</strong> – pour comprendre sans jargon</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F4DD; <strong>Un article approfondi</strong> – analyse ou tutoriel</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F381; <strong>Un outil gratuit</strong> – à essayer dans votre navigateur</td></tr>
             </table>
             <p style="margin:14px 0 0;font-size:14px;color:#555;font-style:italic;">Voici votre premier numéro. Bonne lecture !</p>
         </td>
@@ -180,8 +180,8 @@
     <tr>
         <td style="padding:25px 30px;background-color:#0c1427;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr><td align="center" style="padding-bottom:14px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;">Votre premier défi — création d'image IA</span></td></tr>
-                <tr><td align="center" style="padding-bottom:14px;font-size:16px;color:#e2e8f0;">Copiez ce prompt dans <strong style="color:#3dc9d8;">Gemini</strong> (Google) ou <strong style="color:#3dc9d8;">ChatGPT</strong> (DALL-E) en mode création d'image — les deux meilleurs pour ce type de rendu. Vous pouvez aussi l'essayer dans d'autres outils !</td></tr>
+                <tr><td align="center" style="padding-bottom:14px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;">Votre premier défi – création d'image IA</span></td></tr>
+                <tr><td align="center" style="padding-bottom:14px;font-size:16px;color:#e2e8f0;">Copiez ce prompt dans <strong style="color:#3dc9d8;">Gemini</strong> (Google) ou <strong style="color:#3dc9d8;">ChatGPT</strong> (DALL-E) en mode création d'image – les deux meilleurs pour ce type de rendu. Vous pouvez aussi l'essayer dans d'autres outils !</td></tr>
                 <tr><td style="padding-bottom:14px;">
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                         <tr><td style="background-color:#1e293b;border:1px solid #3dc9d8;border-radius:6px;padding:15px;font-size:14px;color:#e2e8f0;font-style:italic;line-height:1.6;">
@@ -197,7 +197,7 @@
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                         <tr><td style="border-left:3px solid #3dc9d8;padding-left:12px;">
                             <p style="color:#3dc9d8;font-size:12px;font-weight:bold;margin:0 0 6px;">Pourquoi ce prompt fonctionne :</p>
-                            <p style="color:#94a3b8;font-size:13px;margin:0;line-height:1.5;">Ce prompt suit les bonnes pratiques 2026 : il commence par les instructions techniques de caméra (focale 85mm, ouverture f/1.8) pour un cadrage cinématographique précis. L'éclairage est décrit comme source unique — l'esprit de feu — ce qui crée un clair-obscur dramatique cohérent. Les détails sensoriels empilés (flammes, fumée ambrée, étincelles, bokeh) donnent de la richesse sans que l'IA doive deviner quoi ajouter.</p>
+                            <p style="color:#94a3b8;font-size:13px;margin:0;line-height:1.5;">Ce prompt suit les bonnes pratiques 2026 : il commence par les instructions techniques de caméra (focale 85mm, ouverture f/1.8) pour un cadrage cinématographique précis. L'éclairage est décrit comme source unique – l'esprit de feu – ce qui crée un clair-obscur dramatique cohérent. Les détails sensoriels empilés (flammes, fumée ambrée, étincelles, bokeh) donnent de la richesse sans que l'IA doive deviner quoi ajouter.</p>
                         </td></tr>
                     </table>
                 </td></tr>
@@ -236,7 +236,7 @@
         <td style="padding:20px 30px;background-color:#fef3e8;border-left:6px solid #f97316;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr><td style="padding-bottom:10px;">
-                    <span style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#c2410c;font-weight:bold;">@if($hasPrompt ?? false){{ 'Étape 1 — Défi' }}@else{{ 'Défi IA et numérique' }}@endif</span>
+                    <span style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#c2410c;font-weight:bold;">@if($hasPrompt ?? false){{ 'Étape 1 – Défi' }}@else{{ 'Défi IA et numérique' }}@endif</span>
                     @if(! empty($wc['score']))
                     <span style="display:inline-block;background-color:#fff;color:#c2410c;font-size:11px;font-weight:bold;padding:2px 8px;border-radius:10px;margin-left:8px;border:1px solid #fdba74;">★ {{ $wc['score'] }}% chez les abonnés</span>
                     @endif
@@ -287,7 +287,7 @@
                         @foreach($wc['tools'] as $tool)
                         <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:6px;background-color:#fff;border-radius:4px;">
                             <tr><td style="padding:8px 12px;font-size:13px;color:#1f2937;line-height:1.5;">
-                                <strong style="color:#c2410c;">{{ $tool['profile'] ?? '' }}</strong> — {!! $tool['description'] ?? '' !!}
+                                <strong style="color:#c2410c;">{{ $tool['profile'] ?? '' }}</strong> – {!! $tool['description'] ?? '' !!}
                             </td></tr>
                         </table>
                         @endforeach
@@ -320,7 +320,7 @@
     <tr>
         <td style="padding:25px 30px;background-color:#0c1427;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr><td align="center" style="padding-bottom:14px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;">@if($hasWellness ?? false){{ 'Étape 2 — Prompt IA' }}@else{{ 'Défi de la semaine' }}@endif</span></td></tr>
+                <tr><td align="center" style="padding-bottom:14px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;">@if($hasWellness ?? false){{ 'Étape 2 – Prompt IA' }}@else{{ 'Défi de la semaine' }}@endif</span></td></tr>
                 @if(is_array($weeklyPrompt) && ($weeklyPrompt['intro'] ?? null))
                 <tr><td align="center" style="padding-bottom:14px;font-size:14px;color:#cbd5e1;line-height:1.5;font-style:italic;">{!! e($weeklyPrompt['intro']) !!}</td></tr>
                 @endif
@@ -394,7 +394,7 @@
                 @php $bp = $weeklyPrompt['best_practices']; @endphp
                 <tr><td style="padding-bottom:14px;">
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                        <tr><td align="center" style="padding-bottom:10px;"><strong style="color:#e2e8f0;font-size:14px;">{{ $bp['title'] ?? '📊 Algorithme LinkedIn 2026 — ce qui marche vraiment' }}</strong></td></tr>
+                        <tr><td align="center" style="padding-bottom:10px;"><strong style="color:#e2e8f0;font-size:14px;">{{ $bp['title'] ?? '📊 Algorithme LinkedIn 2026 – ce qui marche vraiment' }}</strong></td></tr>
                         <tr>
                             <td width="50%" valign="top" style="padding-right:6px;" class="stack-col">
                                 <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#1e3a2e;border-radius:6px;">
@@ -468,7 +468,7 @@
                     @foreach($wc['tools'] as $tool)
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:6px;background-color:#fff;border-radius:4px;">
                         <tr><td style="padding:8px 12px;font-size:13px;color:#1f2937;line-height:1.5;">
-                            <strong style="color:#c2410c;">{{ $tool['profile'] ?? '' }}</strong> — {!! $tool['description'] ?? '' !!}
+                            <strong style="color:#c2410c;">{{ $tool['profile'] ?? '' }}</strong> – {!! $tool['description'] ?? '' !!}
                         </td></tr>
                     </table>
                     @endforeach

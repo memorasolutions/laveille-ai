@@ -1,10 +1,10 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('roadmap::layouts.public')
-@section('title', $board->name . ' — Kanban')
+@section('title', $board->name . ' - Kanban')
 
 @section('roadmap-content')
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>{{ $board->name }} — Kanban</h2>
+        <h2>{{ $board->name }} – Kanban</h2>
         <a href="{{ route('roadmap.boards.show', $board) }}" class="ct-btn ct-btn-outline ct-btn-sm">
             {{ __('Vue liste') }}
         </a>

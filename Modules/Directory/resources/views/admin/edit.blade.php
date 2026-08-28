@@ -45,7 +45,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="review" class="form-label">Notre avis (éditorial) — markdown supporté</label>
+                    <label for="review" class="form-label">Notre avis (éditorial) – markdown supporté</label>
                     <textarea class="form-control @error('review') is-invalid @enderror" id="review" name="review" rows="8" placeholder="## Notre avis&#10;&#10;Écrivez ici l&#8217;avis éditorial de la rédaction en markdown…">{{ old('review', $tool->review) }}</textarea>
                     @error('review')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -62,7 +62,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="affiliate_url" class="form-label">Lien d'affiliation <small class="text-muted">(optionnel — remplace le lien "Visiter le site")</small></label>
+                    <label for="affiliate_url" class="form-label">Lien d'affiliation <small class="text-muted">(optionnel – remplace le lien "Visiter le site")</small></label>
                     <input type="url" class="form-control" id="affiliate_url" name="affiliate_url" value="{{ old('affiliate_url', $tool->affiliate_url) }}" placeholder="https://partnerstack.com/...">
                 </div>
 

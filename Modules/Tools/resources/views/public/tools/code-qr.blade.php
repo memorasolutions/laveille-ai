@@ -607,7 +607,7 @@ $lvDefaultDomainName = $lvDefaultDomain ? $lvDefaultDomain->domain : 'lurl.ca';
                                 </div>
                                 <template x-for="(h, hi) in qrHistory" :key="hi">
                                     <div class="d-flex justify-content-between align-items-center p-2 mb-1 rounded" style="background: #f8f9fa; font-size: 0.85rem; cursor: pointer;" @click="loadFromHistory(hi)">
-                                        <span><strong x-text="h.type.toUpperCase()"></strong> — <span class="text-muted" x-text="h.data.substring(0, 40) + (h.data.length > 40 ? '...' : '')"></span></span>
+                                        <span><strong x-text="h.type.toUpperCase()"></strong> – <span class="text-muted" x-text="h.data.substring(0, 40) + (h.data.length > 40 ? '...' : '')"></span></span>
                                         <small class="text-muted" x-text="new Date(h.date).toLocaleString('fr-CA')"></small>
                                     </div>
                                 </template>
@@ -632,35 +632,35 @@ $lvDefaultDomainName = $lvDefaultDomain ? $lvDefaultDomain->domain : 'lurl.ca';
                 <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem;">{{ __('Types de contenu') }}</h4>
                 <p>{{ __('Il existe 18 types de codes QR, regroupés en catégories :') }}</p>
                 <ul>
-                    <li><strong>{{ __('Communication') }}</strong> — URL, texte, courriel, téléphone, SMS, WhatsApp</li>
-                    <li><strong>{{ __('Réseaux sociaux') }}</strong> — Instagram, Facebook, LinkedIn, YouTube, X (Twitter)</li>
-                    <li><strong>{{ __('Professionnel') }}</strong> — vCard (carte de visite), événement (calendrier)</li>
-                    <li><strong>{{ __('Technique') }}</strong> — WiFi, géolocalisation, Zoom, PayPal, Bitcoin</li>
+                    <li><strong>{{ __('Communication') }}</strong> – URL, texte, courriel, téléphone, SMS, WhatsApp</li>
+                    <li><strong>{{ __('Réseaux sociaux') }}</strong> – Instagram, Facebook, LinkedIn, YouTube, X (Twitter)</li>
+                    <li><strong>{{ __('Professionnel') }}</strong> – vCard (carte de visite), événement (calendrier)</li>
+                    <li><strong>{{ __('Technique') }}</strong> – WiFi, géolocalisation, Zoom, PayPal, Bitcoin</li>
                 </ul>
 
                 <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">{{ __('Personnalisation') }}</h4>
                 <p>{{ __('Personnalisez votre code QR selon vos préférences :') }}</p>
                 <ul>
-                    <li><strong>{{ __('Style rapide') }}</strong> — {{ __('5 préréglages pour changer l\'apparence en 1 clic') }}</li>
-                    <li><strong>{{ __('Style des points') }}</strong> — {{ __('choisissez la forme des petits carrés (6 options)') }}</li>
-                    <li><strong>{{ __('Couleurs') }}</strong> — {{ __('sélectionnez la couleur du QR et du fond, avec option dégradé') }}</li>
-                    <li><strong>{{ __('Logo') }}</strong> — {{ __('ajoutez votre logo au centre (max 500 Ko, redimensionné automatiquement)') }}</li>
-                    <li><strong>{{ __('Coins') }}</strong> — {{ __('personnalisez la forme des 3 carrés dans les coins') }}</li>
+                    <li><strong>{{ __('Style rapide') }}</strong> – {{ __('5 préréglages pour changer l\'apparence en 1 clic') }}</li>
+                    <li><strong>{{ __('Style des points') }}</strong> – {{ __('choisissez la forme des petits carrés (6 options)') }}</li>
+                    <li><strong>{{ __('Couleurs') }}</strong> – {{ __('sélectionnez la couleur du QR et du fond, avec option dégradé') }}</li>
+                    <li><strong>{{ __('Logo') }}</strong> – {{ __('ajoutez votre logo au centre (max 500 Ko, redimensionné automatiquement)') }}</li>
+                    <li><strong>{{ __('Coins') }}</strong> – {{ __('personnalisez la forme des 3 carrés dans les coins') }}</li>
                 </ul>
 
                 <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">{{ __('Correction d\'erreur') }}</h4>
                 <p>{{ __('Ce réglage détermine si le code QR reste lisible même s\'il est partiellement abîmé ou couvert :') }}</p>
                 <ul>
-                    <li><strong>L ({{ __('basse') }})</strong> — {{ __('le QR est plus simple mais se lit mal s\'il est abîmé') }}</li>
-                    <li><strong>M ({{ __('moyenne') }})</strong> — {{ __('bon compromis, recommandé par défaut') }}</li>
-                    <li><strong>Q ({{ __('haute') }})</strong> — {{ __('résiste mieux aux dommages') }}</li>
-                    <li><strong>H ({{ __('maximale') }})</strong> — {{ __('recommandé si vous ajoutez un logo au centre') }}</li>
+                    <li><strong>L ({{ __('basse') }})</strong> – {{ __('le QR est plus simple mais se lit mal s\'il est abîmé') }}</li>
+                    <li><strong>M ({{ __('moyenne') }})</strong> – {{ __('bon compromis, recommandé par défaut') }}</li>
+                    <li><strong>Q ({{ __('haute') }})</strong> – {{ __('résiste mieux aux dommages') }}</li>
+                    <li><strong>H ({{ __('maximale') }})</strong> – {{ __('recommandé si vous ajoutez un logo au centre') }}</li>
                 </ul>
 
                 <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">{{ __('QR dynamique avec expiration') }}</h4>
                 <p>{{ __('Pour les URLs uniquement. Coche « Faire expirer ce QR code » pour :') }}</p>
                 <ul>
-                    <li>{{ __('Définir une date/heure d\'expiration — après laquelle le QR affiche une page « lien expiré »') }}</li>
+                    <li>{{ __('Définir une date/heure d\'expiration – après laquelle le QR affiche une page « lien expiré »') }}</li>
                     <li>{{ __('Le QR encode un lien court') }} (ex. {{ $lvDefaultDomainName }}/xxx) {{ __('qui redirige vers ton URL') }}</li>
                     <li>{{ __('Les utilisateurs connectés peuvent choisir un slug personnalisé') }}</li>
                     <li>{{ __('Le QR statique (sans expiration) fonctionne exactement comme avant') }}</li>
@@ -668,9 +668,9 @@ $lvDefaultDomainName = $lvDefaultDomain ? $lvDefaultDomain->domain : 'lurl.ca';
 
                 <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">{{ __('Téléchargement') }}</h4>
                 <ul>
-                    <li><strong>PNG</strong> — {{ __('image standard, idéale pour le web et les courriels') }}</li>
-                    <li><strong>SVG</strong> — {{ __('image vectorielle, idéale pour l\'impression en grand format') }}</li>
-                    <li><strong>{{ __('Sauvegarder') }}</strong> — {{ __('enregistre dans l\'historique local de votre navigateur (rien n\'est envoyé au serveur)') }}</li>
+                    <li><strong>PNG</strong> – {{ __('image standard, idéale pour le web et les courriels') }}</li>
+                    <li><strong>SVG</strong> – {{ __('image vectorielle, idéale pour l\'impression en grand format') }}</li>
+                    <li><strong>{{ __('Sauvegarder') }}</strong> – {{ __('enregistre dans l\'historique local de votre navigateur (rien n\'est envoyé au serveur)') }}</li>
                 </ul>
             </div>
             <div class="modal-footer">
@@ -963,7 +963,7 @@ document.addEventListener('alpine:init', function() {
             saveToAccount: function() {
                 if (this.saving || !this.input) return;
                 var self = this;
-                var title = this.saveName.trim() || this.type.toUpperCase() + ' — ' + (this.input || '').substring(0, 30);
+                var title = this.saveName.trim() || this.type.toUpperCase() + ' – ' + (this.input || '').substring(0, 30);
                 this.saving = true;
                 this.saveError = '';
                 var isEdit = !!this._editingId;

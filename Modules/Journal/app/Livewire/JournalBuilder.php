@@ -36,10 +36,10 @@ class JournalBuilder extends Component
      * @var array<string, string>
      */
     public const TEMPLATES = [
-        'classique' => 'Classique — liste verticale simple',
-        'magazine' => 'Magazine — mise en grille',
-        'carnet-photo' => 'Carnet photo — accent visuel',
-        'chronologique' => 'Chronologique — ligne du temps',
+        'classique' => 'Classique – liste verticale simple',
+        'magazine' => 'Magazine – mise en grille',
+        'carnet-photo' => 'Carnet photo – accent visuel',
+        'chronologique' => 'Chronologique – ligne du temps',
     ];
 
     #[Locked]

@@ -394,7 +394,7 @@
     },
     resetAll() { this.search = ''; this.activePricing = ''; this.activeCategory = ''; this.activeEcosystem = ''; this.eduFilter = false; this.sortBy = 'all'; },
 
-    // S84 #27 — Toggle vue cards/list + persistance localStorage
+    // S84 #27 – Toggle vue cards/list + persistance localStorage
     viewMode: (typeof window !== 'undefined' && localStorage.getItem('directory_view_mode')) || 'cards',
     listSortField: 'name', listSortDir: 'asc',
     setViewMode(m) {
@@ -534,7 +534,7 @@
                     </p>
                 @else
                     <p style="color:#6b7280;font-size:0.8rem;margin-bottom:12px;">
-                        <a href="{{ route('directory.index') }}?show_archived=1" style="color:#6b7280;text-decoration:underline;" title="{{ __('Outils archivés en avril 2026 — contenu HN/blog/vidéo crawlé à tort, pas de vrais outils SaaS') }}">
+                        <a href="{{ route('directory.index') }}?show_archived=1" style="color:#6b7280;text-decoration:underline;" title="{{ __('Outils archivés en avril 2026 – contenu HN/blog/vidéo crawlé à tort, pas de vrais outils SaaS') }}">
                             🗄️ {{ __('Voir les') }} {{ $archivedCount }} {{ __('outils archivés') }}
                         </a>
                     </p>
@@ -1233,7 +1233,7 @@
         {{-- S84 #27 — Vue Liste type Google Sheets --}}
         <div x-show="viewMode === 'list'" x-cloak style="overflow-x:auto;margin-bottom:2rem;border:1px solid #E5E7EB;border-radius:12px;background:#fff;">
             <table class="rt-list-table" style="width:100%;border-collapse:collapse;font-size:0.875rem;">
-                <caption class="sr-only">{{ __('Liste des outils du répertoire — triable par colonne') }}</caption>
+                <caption class="sr-only">{{ __('Liste des outils du répertoire – triable par colonne') }}</caption>
                 <thead style="background:#F9FAFB;position:sticky;top:0;z-index:5;">
                     <tr>
                         <th scope="col" style="padding:10px 12px;text-align:left;font-weight:700;color:var(--c-dark, #1A1D23);width:48px;">{{ __('Logo') }}</th>
@@ -1282,7 +1282,7 @@
                                     <span style="color:#F59E0B;font-weight:700;">★ <span x-text="tool.avgRating"></span></span>
                                 </template>
                                 <template x-if="tool.avgRating === 0">
-                                    <span style="color:var(--c-text-muted, #52586a);font-size:0.75rem;">—</span>
+                                    <span style="color:var(--c-text-muted, #52586a);font-size:0.75rem;">–</span>
                                 </template>
                             </td>
                             <td style="padding:8px 12px;text-align:right;white-space:nowrap;">
@@ -1313,7 +1313,7 @@
                 <div class="col-lg-4 col-md-6 col-xs-12">
                     <article class="rt-card"
                              :class="{ 'is-down': tool.isLifecycleDown, 'is-selected': $store.compare.has(tool.id) }"
-                             :aria-label="tool.isLifecycleDown ? tool.name + ' — ' + tool.lifecycleBannerMsg : tool.name">
+                             :aria-label="tool.isLifecycleDown ? tool.name + ' – ' + tool.lifecycleBannerMsg : tool.name">
                         {{-- S89 v1.3.0 : onboarding tooltip pulse 1ère card uniquement, 1ère visite --}}
                         <template x-if="idx === 0 && !$store.compare.onboardingShown && !$store.compare.has(tool.id) && $store.compare.count === 0">
                             <div class="lv-cmp-onboarding" role="status" aria-live="polite">

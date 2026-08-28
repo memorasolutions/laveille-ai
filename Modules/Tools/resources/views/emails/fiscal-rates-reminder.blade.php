@@ -41,9 +41,9 @@
 
         <p><strong>Sources officielles :</strong></p>
         <ul>
-            <li><a href="https://www.canada.ca/fr/agence-revenu/services/impot/particuliers/foire-questions-particuliers/taux-imposition-canadiens-particuliers-annee-courante-annees-passees.html">ARC — taux d'imposition fédéral</a></li>
-            <li><a href="https://www.revenuquebec.ca/fr/citoyens/declaration-de-revenus/produire-votre-declaration-de-revenus/taux-dimposition/">Revenu Québec — taux d'imposition provincial</a></li>
-            <li><a href="https://www.retraitequebec.gouv.qc.ca/fr/publications/rrq/rrq/Pages/cotisations.aspx">Retraite Québec — cotisations RRQ</a></li>
+            <li><a href="https://www.canada.ca/fr/agence-revenu/services/impot/particuliers/foire-questions-particuliers/taux-imposition-canadiens-particuliers-annee-courante-annees-passees.html">ARC – taux d'imposition fédéral</a></li>
+            <li><a href="https://www.revenuquebec.ca/fr/citoyens/declaration-de-revenus/produire-votre-declaration-de-revenus/taux-dimposition/">Revenu Québec – taux d'imposition provincial</a></li>
+            <li><a href="https://www.retraitequebec.gouv.qc.ca/fr/publications/rrq/rrq/Pages/cotisations.aspx">Retraite Québec – cotisations RRQ</a></li>
         </ul>
 
         <div class="footer">

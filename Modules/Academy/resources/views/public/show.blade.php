@@ -104,7 +104,7 @@
          style="background: var(--sys-action-primary, #064E5A); color: #FFFFFF; padding: 12px 16px;">
         <div class="container d-flex flex-wrap align-items-center justify-content-between gap-2">
             <span style="font-weight: 600; font-size: 0.95rem;">
-                👁️ Mode prévisualisation — vous voyez ce cours comme un étudiant.
+                👁️ Mode prévisualisation – vous voyez ce cours comme un étudiant.
             </span>
             <a href="{{ route('academy.courses.manage', $course->slug) }}"
                style="display: inline-flex; align-items: center; min-height: 24px; padding: 5px 14px; border-radius: 999px; background: #FFFFFF; color: var(--sys-action-primary, #064E5A); font-weight: 700; font-size: 0.85rem; text-decoration: none;">

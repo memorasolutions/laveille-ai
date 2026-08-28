@@ -52,7 +52,7 @@
                                     @if($board->color)
                                         <div style="width: 20px; height: 20px; background-color: {{ $board->color }}; border: 1px solid #dee2e6; border-radius: 3px;" title="{{ $board->color }}"></div>
                                     @else
-                                        <span class="text-muted">—</span>
+                                        <span class="text-muted">–</span>
                                     @endif
                                 </td>
                                 <td>

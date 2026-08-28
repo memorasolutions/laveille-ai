@@ -28,7 +28,7 @@
                     </h1>
                     <p style="color: #374151; font-size: 1.05rem; line-height: 1.7; margin-bottom: 8px; max-width: 560px; margin-left: auto; margin-right: auto;">
                         @if($lvReason === 'expired')
-                            {{ __("Le QR ou le lien que tu as scanné a expiré ou a été désactivé. Pas de panique — tu peux explorer nos ressources IA gratuites ci-dessous.") }}
+                            {{ __("Le QR ou le lien que tu as scanné a expiré ou a été désactivé. Pas de panique – tu peux explorer nos ressources IA gratuites ci-dessous.") }}
                         @else
                             {{ __("Ce lien n'existe pas ou a été supprimé. Vérifie l'URL et réessaie.") }}
                         @endif

@@ -141,21 +141,21 @@
                         <label style="font-weight: 400;">
                             <input type="radio" name="notification_frequency" value="immediate"
                                    {{ old('notification_frequency', $user->notification_frequency) == 'immediate' ? 'checked' : '' }}>
-                            <strong>{{ __('Immédiate') }}</strong> — <small style="color: #777;">{{ __('Recevoir chaque notification par courriel dès qu\'elle arrive') }}</small>
+                            <strong>{{ __('Immédiate') }}</strong> – <small style="color: #777;">{{ __('Recevoir chaque notification par courriel dès qu\'elle arrive') }}</small>
                         </label>
                     </div>
                     <div class="radio" style="margin-bottom: 10px;">
                         <label style="font-weight: 400;">
                             <input type="radio" name="notification_frequency" value="daily"
                                    {{ old('notification_frequency', $user->notification_frequency) == 'daily' ? 'checked' : '' }}>
-                            <strong>{{ __('Résumé quotidien') }}</strong> — <small style="color: #777;">{{ __('Un seul courriel par jour') }}</small>
+                            <strong>{{ __('Résumé quotidien') }}</strong> – <small style="color: #777;">{{ __('Un seul courriel par jour') }}</small>
                         </label>
                     </div>
                     <div class="radio" style="margin-bottom: 15px;">
                         <label style="font-weight: 400;">
                             <input type="radio" name="notification_frequency" value="weekly"
                                    {{ old('notification_frequency', $user->notification_frequency) == 'weekly' ? 'checked' : '' }}>
-                            <strong>{{ __('Résumé hebdomadaire') }}</strong> — <small style="color: #777;">{{ __('Un seul courriel par semaine') }}</small>
+                            <strong>{{ __('Résumé hebdomadaire') }}</strong> – <small style="color: #777;">{{ __('Un seul courriel par semaine') }}</small>
                         </label>
                     </div>
                     <button type="submit" class="btn btn-primary btn-sm">{{ __('Enregistrer') }}</button>

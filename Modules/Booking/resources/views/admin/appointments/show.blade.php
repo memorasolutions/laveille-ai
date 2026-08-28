@@ -28,7 +28,7 @@
                         <h6>Client</h6>
                         <p>{{ $appointment->customer->full_name }}<br>
                         {{ $appointment->customer->email }}<br>
-                        {{ $appointment->customer->phone ?? '—' }}</p>
+                        {{ $appointment->customer->phone ?? '–' }}</p>
                     </div>
                     <div class="col-md-6">
                         <h6>Changer le statut</h6>
@@ -56,7 +56,7 @@
                             @csrf @method('PUT')
                             <div class="input-group">
                                 <select name="assigned_admin_id" class="form-select form-select-sm">
-                                    <option value="">— Aucun —</option>
+                                    <option value="">– Aucun –</option>
                                     @foreach($therapists as $t)
                                     <option value="{{ $t->id }}" {{ $appointment->assigned_admin_id == $t->id ? 'selected' : '' }}>{{ $t->name }}</option>
                                     @endforeach

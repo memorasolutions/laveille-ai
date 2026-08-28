@@ -222,7 +222,7 @@
             <i data-lucide="info" class="me-1" style="width: 16px; height: 16px;"></i>
             <strong>Désabonnements réels</strong> : abonnés confirmés qui ont utilisé le lien de désabonnement.
             <strong>Purges J+7</strong> : inscrits qui n'ont jamais confirmé leur courriel, purgés automatiquement après 7 jours par la commande
-            <code>newsletter:purge-unconfirmed</code> — ils n'ont jamais reçu d'infolettre et ne représentent pas un vrai départ.
+            <code>newsletter:purge-unconfirmed</code> – ils n'ont jamais reçu d'infolettre et ne représentent pas un vrai départ.
             Les cartes « Désabonnements Brevo » (colonne de gauche) proviennent des webhooks
             (table <code>newsletter_events</code>). Les ouvertures et clics « uniques » par numéro sont attribués
             par appartenance (liste d'envoi) et fenêtre temporelle. Heures : Québec (America/Toronto).

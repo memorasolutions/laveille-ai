@@ -32,7 +32,7 @@
                         <td>{{ $package->name }}</td>
                         <td>{{ $package->session_count }}</td>
                         <td>{{ number_format($package->price, 2) }} $</td>
-                        <td>{{ $package->regular_price ? number_format($package->regular_price, 2) . ' $' : '—' }}</td>
+                        <td>{{ $package->regular_price ? number_format($package->regular_price, 2) . ' $' : '–' }}</td>
                         <td>{{ $package->validity_days }} jours</td>
                         <td>
                             <span class="badge bg-{{ $package->is_active ? 'success' : 'secondary' }}">

@@ -1,6 +1,6 @@
 @extends(fronttheme_layout())
 
-@section('title', 'QT — Quotient Techno - '.config('app.name'))
+@section('title', 'QT : Quotient Techno - '.config('app.name'))
 
 @section('meta_description', 'Testez votre culture techno avec ce quiz ludique sur l’IA, le web et la cybersécurité. Découvrez votre Quotient Techno (QT) en 2 minutes !')
 
@@ -8,7 +8,7 @@
 @section('og_image', ($share['og_image'] ?? asset('images/tools/qt.jpg')))
 
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'QT — Quotient Techno', 'breadcrumbItems' => [__('Outils'), 'QT — Quotient Techno']])
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'QT : Quotient Techno', 'breadcrumbItems' => [__('Outils'), 'QT : Quotient Techno']])
 @endsection
 
 @section('content')
@@ -74,13 +74,13 @@
                                 <button class="ct-btn ct-btn-outline" style="height:44px;padding:0 22px;border-radius:8px;" @click="begin('libre')">
                                     🎲 Partie libre (10 questions au hasard)
                                 </button>
-                                <p x-show="defiDoneToday" style="font-size:0.85rem;color:var(--c-text-muted);margin:0.25rem 0 0;">✅ Tu as déjà fait le défi d'aujourd'hui (QT : <span x-text="bestToday"></span>) — tu peux le refaire ou jouer en partie libre.</p>
+                                <p x-show="defiDoneToday" style="font-size:0.85rem;color:var(--c-text-muted);margin:0.25rem 0 0;">✅ Tu as déjà fait le défi d'aujourd'hui (QT : <span x-text="bestToday"></span>) – tu peux le refaire ou jouer en partie libre.</p>
                             </div>
                             <p style="color:var(--c-primary);font-weight:600;font-size:0.95rem;margin-top:1.5rem;max-width:520px;margin-left:auto;margin-right:auto;">
                                 🔄 Les 10 questions sont pigées au hasard dans une grande banque : <strong>elles changent à chaque partie</strong>. Refais le test autant de fois que tu veux pour découvrir de nouvelles notions… et faire grimper ton QT !
                             </p>
                             <p style="color:var(--c-text-muted);font-size:0.875rem;margin-top:0.75rem;">
-                                Score ludique de culture techno — pas un vrai test de QI 😉
+                                Score ludique de culture techno – pas un vrai test de QI 😉
                             </p>
                         </div>
 
@@ -487,11 +487,11 @@ function qtApp(payload, dailyPayload, dailyNumber) {
         },
 
         computeRank(qt) {
-            if (qt < 80) return { emoji: '🐣', label: 'Curieux du numérique', message: "Tu débutes — et c'est parfait ! Rejoue et lis les fiches, ton QT va grimper.", bg: 'linear-gradient(135deg,#6E7687,#52586a)' };
+            if (qt < 80) return { emoji: '🐣', label: 'Curieux du numérique', message: "Tu débutes – et c'est parfait ! Rejoue et lis les fiches, ton QT va grimper.", bg: 'linear-gradient(135deg,#6E7687,#52586a)' };
             if (qt < 90) return { emoji: '🔌', label: 'Utilisateur futé', message: "Bonne base ! Encore quelques fiches et tu montes d'un cran.", bg: 'linear-gradient(135deg,#0B7285,#0a6275)' };
             if (qt < 110) return { emoji: '💡', label: 'Techno futé', message: "Tu es dans la bonne moyenne techno. Continue !", bg: 'linear-gradient(135deg,#0B7285,#064E5A)' };
             if (qt < 120) return { emoji: '🤓', label: 'Connaisseur techno', message: "Solide ! Tu maîtrises bien le sujet.", bg: 'linear-gradient(135deg,#064E5A,#053a43)' };
-            if (qt < 130) return { emoji: '🦾', label: 'Geek confirmé', message: "Impressionnant — tu fais partie des initiés.", bg: 'linear-gradient(135deg,#9A2A06,#7a2105)' };
+            if (qt < 130) return { emoji: '🦾', label: 'Geek confirmé', message: "Impressionnant – tu fais partie des initiés.", bg: 'linear-gradient(135deg,#9A2A06,#7a2105)' };
             return { emoji: '🏆', label: 'Super Geek', message: "Élite techno ! Peu de gens atteignent ce niveau.", bg: 'linear-gradient(135deg,#E9B949,#c8961f)' };
         },
 
@@ -574,7 +574,7 @@ function qtApp(payload, dailyPayload, dailyNumber) {
                 ctx.fillText(text, sizes.width / 2, y);
                 ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; ctx.globalAlpha = 1;
             };
-            draw('QT — Quotient Techno', h * 0.12, h * 0.04, 'bold');
+            draw('QT : Quotient Techno', h * 0.12, h * 0.04, 'bold');
             draw(this.rank.emoji, h * 0.28, h * 0.14);
             draw(String(this.qt), h * 0.48, h * 0.22, 'bold');
             draw(this.rank.label, h * 0.66, h * 0.06, 'bold');
@@ -601,7 +601,7 @@ function qtApp(payload, dailyPayload, dailyNumber) {
             const toast = (m) => window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: m, variant: 'success', duration: 3000 } }));
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
                 try {
-                    await navigator.share({ files: [file], title: 'QT — Quotient Techno', text: '🧠 Mon Quotient Techno : ' + this.qt + ' — ' + this.rank.label + ' ' + this.rank.emoji + '. Et toi ?' });
+                    await navigator.share({ files: [file], title: 'QT : Quotient Techno', text: '🧠 Mon Quotient Techno : ' + this.qt + ' – ' + this.rank.label + ' ' + this.rank.emoji + '. Et toi ?' });
                 } catch (e) {}
             } else {
                 this.downloadCard(ratio);
@@ -620,7 +620,7 @@ function qtApp(payload, dailyPayload, dailyNumber) {
             if (this.aiUsage === 'brain') tag = ' (100 % cerveau 🧠)';
             else if (this.aiUsage === 'ai') tag = " (avec l'aide d'une IA 🤖)";
             else if (this.aiUsage === 'hint') tag = ' (un peu aidé 🤝)';
-            return '🧠 Mon Quotient Techno : ' + this.qt + ' — ' + this.rank.label + ' ' + this.rank.emoji + tag + ". Et toi, c'est quoi ton QT ? 👉";
+            return '🧠 Mon Quotient Techno : ' + this.qt + ' – ' + this.rank.label + ' ' + this.rank.emoji + tag + ". Et toi, c'est quoi ton QT ? 👉";
         },
 
         emojiGrid() {
@@ -636,8 +636,8 @@ function qtApp(payload, dailyPayload, dailyNumber) {
 
         resultBlock() {
             const head = this.isDefi
-                ? '🏆 QT — Défi du jour #' + this.defiNumber
-                : '🧠 QT — Quotient Techno';
+                ? '🏆 QT : Défi du jour #' + this.defiNumber
+                : '🧠 QT : Quotient Techno';
             return head
                 + '\n' + this.qt + ' ' + this.rank.emoji + ' ' + this.rank.label
                 + '\n' + this.emojiGrid() + '  ' + this.correctCount + '/10' + this.aiTag()
@@ -668,7 +668,7 @@ function qtApp(payload, dailyPayload, dailyNumber) {
         async share() {
             if (this.isMobileShare()) {
                 try {
-                    await navigator.share({ title: 'QT — Quotient Techno', text: this.resultBlock() });
+                    await navigator.share({ title: 'QT : Quotient Techno', text: this.resultBlock() });
                 } catch (e) {}
             } else {
                 this.pasteHint = false;

@@ -1,7 +1,7 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 
-@section('title', 'Tableau de bord organisationnel — Analytiques prédictifs - ' . config('app.name'))
+@section('title', 'Tableau de bord organisationnel : Analytiques prédictifs - ' . config('app.name'))
 @section('meta_description', 'Vue d\'ensemble des risques d\'abandon par formation (administrateurs uniquement).')
 
 @section('content')

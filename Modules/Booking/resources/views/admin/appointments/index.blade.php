@@ -42,7 +42,7 @@
                         <td>{{ format_date($appointment->start_at, 'datetime') }}</td>
                         <td>{{ $appointment->service->name }}</td>
                         <td>{{ $appointment->customer->full_name }}</td>
-                        <td>{{ $appointment->assignedAdmin?->name ?? '—' }}</td>
+                        <td>{{ $appointment->assignedAdmin?->name ?? '–' }}</td>
                         <td>
                             @php $colors = ['pending'=>'warning','confirmed'=>'success','cancelled'=>'danger','completed'=>'info']; @endphp
                             <span class="badge bg-{{ $colors[$appointment->status] ?? 'secondary' }}">

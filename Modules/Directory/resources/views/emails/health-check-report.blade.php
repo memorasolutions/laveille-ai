@@ -8,7 +8,7 @@
     <div style="max-width:680px; margin:0 auto; background:#fff; border-radius:12px; padding:32px; box-shadow:0 2px 12px rgba(0,0,0,.05);">
         <h1 style="font-size:1.4rem; margin:0 0 8px; color:#064E5A;">🩺 Health-check annuaire</h1>
         <p style="color:#52586a; margin:0 0 20px; font-size:0.9rem;">
-            Vérification HTTP HEAD de <strong>{{ $totalChecked }}</strong> outils published —
+            Vérification HTTP HEAD de <strong>{{ $totalChecked }}</strong> outils published –
             <strong>{{ count($suspects) }}</strong> suspect(s) à vérifier manuellement.
         </p>
 
@@ -72,7 +72,7 @@
                         <td style="padding:6px 8px;">
                             <a href="{{ $tool->url ?? '#' }}" target="_blank" style="color:#0B7285; text-decoration:none; font-size:0.75rem;">{{ $tool->url ?? '?' }}</a>
                         </td>
-                        <td style="padding:6px 8px; color:#6B7280; font-size:0.7rem;">{{ $s['error'] ?? '—' }}</td>
+                        <td style="padding:6px 8px; color:#6B7280; font-size:0.7rem;">{{ $s['error'] ?? '–' }}</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -83,7 +83,7 @@
         @endif
 
         <div style="margin-top:32px; padding-top:20px; border-top:1px solid #E5E7EB; color:#9CA3AF; font-size:0.75rem;">
-            <p style="margin:0;">⚙️ Rapport généré par <code>directory:health-check-report</code> — schedule hebdo dimanche 04h UTC.</p>
+            <p style="margin:0;">⚙️ Rapport généré par <code>directory:health-check-report</code> – schedule hebdo dimanche 04h UTC.</p>
             <p style="margin:8px 0 0;">Aucun outil n'a été marqué automatiquement. Validation manuelle obligatoire via <code>/admin/directory</code>.</p>
         </div>
     </div>

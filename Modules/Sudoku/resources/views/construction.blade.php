@@ -1,7 +1,7 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 
-@section('title', 'Sudoku — En construction')
+@section('title', 'Sudoku : en construction')
 
 @section('content')
 <div class="container py-5">

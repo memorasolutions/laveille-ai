@@ -27,8 +27,8 @@
         'renamed'  => 'Cette plateforme a été renommée.',
         'pivoted'  => 'Cette plateforme a pivoté vers un nouveau positionnement.',
         'paused'   => 'Cette plateforme est temporairement en pause.',
-        'scam'     => '⚠️ Cette plateforme est signalée comme arnaque — évitez-la.',
-        'beta'     => 'Cette plateforme est en phase bêta — fonctionnalités en développement.',
+        'scam'     => '⚠️ Cette plateforme est signalée comme arnaque – évitez-la.',
+        'beta'     => 'Cette plateforme est en phase bêta – fonctionnalités en développement.',
     ];
     $message = $messages[$status] ?? ('Statut : ' . $label);
 
@@ -70,7 +70,7 @@
             {{ $message }}
             @if($date)
                 <span style="font-weight:400;font-size:14px;opacity:.75">
-                    — depuis {{ $date->translatedFormat('F Y') }}
+                    – depuis {{ $date->translatedFormat('F Y') }}
                 </span>
             @endif
         </h3>

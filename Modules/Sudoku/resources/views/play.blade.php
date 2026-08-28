@@ -108,7 +108,7 @@
                 {{-- a11y : role=group (PAS role=grid) — un role=grid impose un maillage strict grid>row>gridcell ;
                      l'info de position est portee par cellAriaLabel (« Ligne X, colonne Y, … ») + nav fleches.
                      Robuste cross-navigateur (cf. fragilite display:contents sur role=row, recherche juin 2026). --}}
-                <div class="sudoku-grid mx-auto" role="group" tabindex="0" @keydown="handleGridKey($event)" :aria-label="'Grille Sudoku 9 par 9 — ' + currentDifficulty" :class="{ 'sudoku-paused': paused, 'sudoku-notes-mode': notesMode }">
+                <div class="sudoku-grid mx-auto" role="group" tabindex="0" @keydown="handleGridKey($event)" :aria-label="'Grille Sudoku 9 par 9 – ' + currentDifficulty" :class="{ 'sudoku-paused': paused, 'sudoku-notes-mode': notesMode }">
                   <template x-for="(row, r) in grid" :key="'r'+r">
                     <template x-for="(value, c) in row" :key="'c'+r+'-'+c">
                       <div class="sudoku-cell"

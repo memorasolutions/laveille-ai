@@ -49,7 +49,7 @@ class RssFeedController extends Controller
 
         $xml = view('fronttheme::rss.concentres', [
             'articles' => $articles,
-            'feedTitle' => 'La veille — Concentré IA hebdo',
+            'feedTitle' => 'La veille – Concentré IA hebdo',
             'feedDescription' => 'Le résumé hebdomadaire des nouveautés IA et techno au Québec, par Stéphane Lapointe (Memora). Publié chaque lundi pour la semaine précédente.',
             'feedUrl' => url('/rss/concentres.xml'),
             'siteUrl' => url('/'),
@@ -80,7 +80,7 @@ class RssFeedController extends Controller
 
         $xml = view('fronttheme::rss.annuaire', [
             'tools' => $tools,
-            'feedTitle' => 'La veille — Nouveautés répertoire d\'outils',
+            'feedTitle' => 'La veille – Nouveautés répertoire d\'outils',
             'feedDescription' => 'Les derniers outils IA et techno ajoutés au répertoire de La veille (282+ outils francophones).',
             'feedUrl' => url('/rss/annuaire.xml'),
             'siteUrl' => url('/'),

@@ -146,7 +146,7 @@ class AnonymizerUI {
       await navigator.clipboard.writeText(this.anonPlain);
       this.toast('Texte anonymisé copié.', 'success');
       if (btn) { const o = btn.innerHTML; btn.innerHTML = '✓ Copié'; setTimeout(() => { btn.innerHTML = o; }, 1500); }
-    } catch (e) { this.toast('Copie impossible — sélectionnez puis Ctrl+C.', 'danger'); }
+    } catch (e) { this.toast('Copie impossible – sélectionnez puis Ctrl+C.', 'danger'); }
   }
 
   // Défense en profondeur : re-sanitize le HTML de l'éditeur avant toute injection innerHTML.
@@ -165,7 +165,7 @@ class AnonymizerUI {
     const ro = document.getElementById('restoredOutput'); if (ro) ro.textContent = '';
     const rep = document.getElementById('restoreReport'); if (rep) rep.innerHTML = '';
     this.setMode('edit'); this.renderAnnotated(); this.updateOutput();
-    this.toast('Données oubliées — la table de correspondance a été effacée de ce navigateur.', 'success');
+    this.toast('Données oubliées – la table de correspondance a été effacée de ce navigateur.', 'success');
   }
 
   // Étape 2 : affiche le texte restauré avec les vraies données SURLIGNÉES ; la valeur anonyme
@@ -301,7 +301,7 @@ class AnonymizerUI {
     this.candidates = entities.filter(ent => !existing.has(_norm(ent.value)));
     this.setMode('annotate');
     if (silent) return;
-    if (this.candidates.length) this.toast(this.candidates.length + ' donnée(s) repérée(s) — cliquez pour anonymiser.', 'info');
+    if (this.candidates.length) this.toast(this.candidates.length + ' donnée(s) repérée(s) – cliquez pour anonymiser.', 'info');
     else this.toast('Aucune donnée repérée automatiquement. Sélectionnez un passage à anonymiser.', 'info');
   }
 
@@ -312,7 +312,7 @@ class AnonymizerUI {
     const cands = [...this.candidates];
     for (const c of cands) this.anonymizeValue(c.value, c.category);
     if (cands.length) this.toast(cands.length + ' donnée(s) détectée(s) et anonymisée(s).', 'success');
-    else this.toast('Aucune donnée détectée — sélectionnez un passage à anonymiser (menu Actions).', 'info');
+    else this.toast('Aucune donnée détectée – sélectionnez un passage à anonymiser (menu Actions).', 'info');
   }
 
   anonymizeValue(value, category) {
@@ -819,7 +819,7 @@ class AnonymizerUI {
 
     on('btnAnonymizeAll', 'click', () => {
       const cands = [...this.candidates];
-      if (!cands.length) { this.toast('Rien à anonymiser — détectez ou sélectionnez d\'abord.', 'info'); return; }
+      if (!cands.length) { this.toast('Rien à anonymiser – détectez ou sélectionnez d\'abord.', 'info'); return; }
       for (const c of cands) this.anonymizeValue(c.value, c.category);
       this.toast(cands.length + ' donnée(s) anonymisée(s).', 'success');
     });
@@ -830,7 +830,7 @@ class AnonymizerUI {
       try { localStorage.removeItem('lv_anon_rules_v3'); localStorage.removeItem('lv_anon_overrides_v3'); } catch (e) {}
       this.renderAnnotated();
       this.updateOutput();
-      this.toast('Masquage réinitialisé — votre texte est conservé.', 'info');
+      this.toast('Masquage réinitialisé – votre texte est conservé.', 'info');
     });
 
     on('btnForgetAll', 'click', () => this.forgetAll());
@@ -869,7 +869,7 @@ class AnonymizerUI {
     on('btnCopyRestored', 'click', async () => {
       if (!this.restoredPlain) { this.toast('Rien à copier.', 'warning'); return; }
       try { await navigator.clipboard.writeText(this.restoredPlain); this.toast('Résultat copié.', 'success'); }
-      catch (e) { this.toast('Copie impossible — sélectionnez puis Ctrl+C.', 'danger'); }
+      catch (e) { this.toast('Copie impossible – sélectionnez puis Ctrl+C.', 'danger'); }
     });
 
     document.querySelectorAll('.anon-step').forEach(btn => btn.addEventListener('click', () => {

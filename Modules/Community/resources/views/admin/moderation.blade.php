@@ -158,7 +158,7 @@
                             @foreach($pendingReports as $report)
                                 <tr class="{{ in_array($report->id, $overdueReportIds, true) ? 'table-danger' : '' }}">
                                     <td>{{ $report->id }}</td>
-                                    <td>{{ $report->user?->name ?? '—' }}</td>
+                                    <td>{{ $report->user?->name ?? '–' }}</td>
                                     <td>{{ $report->reason }}</td>
                                     <td>{{ Str::limit($report->details, 100) }}</td>
                                     <td>{{ class_basename($report->reportable_type) }} #{{ $report->reportable_id }}</td>

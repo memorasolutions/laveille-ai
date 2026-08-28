@@ -5,7 +5,7 @@
 <div class="space-y-6">
     <div class="flex justify-between items-center">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Académie — Paliers d'abonnement</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Académie – Paliers d'abonnement</h1>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 Freemium / Pro / Organisation. Prix affichés = données locales, aucun appel Stripe.
             </p>
@@ -69,7 +69,7 @@
                                 {{ count($tier->features ?? []) }} fonctionnalité(s)
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                {{ $tier->max_seats ?? '—' }}
+                                {{ $tier->max_seats ?? '–' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                 {{ $tier->assignments_count }}

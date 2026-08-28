@@ -9,7 +9,7 @@
 @endsection
 
 @section('content')
-<h1 class="sr-only">{{ __('Ressources') }} — {{ config('app.name') }}</h1>
+<h1 class="sr-only">{{ __('Ressources') }} – {{ config('app.name') }}</h1>
 <section class="wpo-blog-single-section section-padding">
     <div class="container">
         <div class="row">
@@ -50,7 +50,7 @@
                 <div x-data="{ feedback: '', show: false }" style="text-align: center; margin-top: 24px;">
                     <a href="javascript:void(0)"
                        @click="
-                           let md = '# Ressources — {{ config('app.name') }}\n\n';
+                           let md = '# Ressources – {{ config('app.name') }}\n\n';
                            document.querySelectorAll('.resource-card').forEach(c => {
                                let t = c.dataset.title;
                                let d = c.dataset.description;
@@ -65,7 +65,7 @@
                     </a>
                     <a href="javascript:void(0)"
                        @click="
-                           let txt = 'Ressources — {{ config('app.name') }}\n\n';
+                           let txt = 'Ressources – {{ config('app.name') }}\n\n';
                            document.querySelectorAll('.resource-card').forEach(c => {
                                let t = c.dataset.title;
                                let d = c.dataset.description;

@@ -1,6 +1,6 @@
 @extends('backoffice::themes.backend.layouts.admin')
 
-@section('title', 'Wizard produit — catalogue')
+@section('title', 'Wizard produit : catalogue')
 
 @section('content')
 <div class="row">

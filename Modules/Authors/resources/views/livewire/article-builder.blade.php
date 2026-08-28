@@ -80,7 +80,7 @@
         <div>
             <h3 class="text-lg font-medium text-gray-900 mb-4">Sources Curation Inbox</h3>
             <p class="text-sm text-gray-600 mb-4">Sélectionne 2-5 sources de ta Curation Inbox à utiliser comme matière première.</p>
-            <p class="text-sm italic text-gray-500">(Liste de sources à brancher sur CurationInboxService->search() — Phase 2)</p>
+            <p class="text-sm italic text-gray-500">(Liste de sources à brancher sur CurationInboxService->search() – Phase 2)</p>
         </div>
     @elseif($currentStep === 3)
         <div>

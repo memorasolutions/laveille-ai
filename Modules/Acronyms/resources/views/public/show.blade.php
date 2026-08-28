@@ -486,7 +486,7 @@
                         @php
                             $acronymCode = $acronym->getTranslation('acronym', 'fr_CA', false) ?: $acronym->acronym;
                             $acronymFull = $acronym->getTranslation('full_name', 'fr_CA', false) ?: $acronym->full_name;
-                            $acronymTitle = $acronymCode . ' — ' . $acronymFull;
+                            $acronymTitle = $acronymCode . ' – ' . $acronymFull;
                             $acronymSections = [];
                             if ($acronym->category) {
                                 $acronymSections[] = ['icon' => '📘', 'label' => 'Catégorie', 'content' => $acronym->category->name];

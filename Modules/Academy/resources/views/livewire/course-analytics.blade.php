@@ -134,7 +134,7 @@
             <div role="note"
                  style="border: 1px solid #FED7AA; background: #FFF7ED; color: #9A3412; border-radius: var(--sys-radius-md, 0.5rem); padding: 12px 16px; margin-bottom: 18px; font-size: 0.88rem;">
                 <strong>Point de décrochage :</strong>
-                « {{ $dropoffPoint['title'] }} » — seulement {{ $dropoffPoint['rate'] }}&nbsp;% des inscrits l'ont terminée
+                « {{ $dropoffPoint['title'] }} » – seulement {{ $dropoffPoint['rate'] }}&nbsp;% des inscrits l'ont terminée
                 ({{ $dropoffPoint['completed'] }} sur {{ $dropoffPoint['total'] }}).
             </div>
         @endif

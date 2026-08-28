@@ -1,6 +1,6 @@
 @extends(fronttheme_layout())
 
-@section('title', $meta['title'] . ' — Quête narrative · La veille')
+@section('title', $meta['title'] . ' : Quête narrative · La veille')
 @section('meta_description', 'Apprenez l\'intelligence artificielle en aventure interactive aux côtés d\'Octopus, votre compagnon IA québécois.')
 
 @section('breadcrumb')
@@ -88,7 +88,7 @@
 
     <aside class="quest-intro" aria-label="Présentation de la quête">
         <x-tools::octopus variant="intro" :size="84" />
-        <p class="quest-intro__text"><strong>{{ $meta['tagline'] }}</strong> — chaque chapitre, une histoire interactive avec Octopus pour apprendre l'IA en jouant.</p>
+        <p class="quest-intro__text"><strong>{{ $meta['tagline'] }}</strong> – chaque chapitre, une histoire interactive avec Octopus pour apprendre l'IA en jouant.</p>
     </aside>
 
     {{-- #187 : afficher état carnet de bord seulement si pas auth site Laravel (UX cohérente — éviter "Connecte-toi" alors qu'on est déjà connecté en haut) --}}
@@ -102,7 +102,7 @@
                 <button type="submit" :disabled="submitting"><span x-show="!submitting">📩 Recevoir mon lien</span><span x-show="submitting">Envoi…</span></button>
             </form>
             <p class="quest-login-msg" :class="msgType" x-show="msg" x-text="msg" role="status"></p>
-            <p class="quest-login-help" style="margin-top:.65rem;">Tu peux aussi jouer en mode anonyme — ton progrès reste local à ce navigateur.</p>
+            <p class="quest-login-help" style="margin-top:.65rem;">Tu peux aussi jouer en mode anonyme – ton progrès reste local à ce navigateur.</p>
         </div>
         <div x-show="email" x-cloak class="quest-status__connected">
             <div>
@@ -139,7 +139,7 @@
                     <span class="quest-card__icon" aria-hidden="true">{{ $chapter['icon'] }}</span>
                     <div>
                         <div class="quest-card__act">{{ $chapter['act'] }}</div>
-                        <h3 class="quest-card__title">Ch.{{ $chapter['number'] }} — {{ $chapter['title'] }}</h3>
+                        <h3 class="quest-card__title">Ch.{{ $chapter['number'] }} – {{ $chapter['title'] }}</h3>
                         <p class="quest-card__subtitle">{{ $chapter['subtitle'] }}</p>
                     </div>
                 </div>
@@ -180,7 +180,7 @@
 
     <footer class="quest-footer">
         <p>📬 La saga continue chaque semaine via <a href="/">la newsletter La veille</a>.</p>
-        <p style="font-size:.8rem;opacity:.7;">🔒 Loi 25 — Tes données restent chez toi. Aucun pisteur, aucun mot de passe.</p>
+        <p style="font-size:.8rem;opacity:.7;">🔒 Loi 25 – Tes données restent chez toi. Aucun pisteur, aucun mot de passe.</p>
     </footer>
     </div>{{-- /.container --}}
 </div>

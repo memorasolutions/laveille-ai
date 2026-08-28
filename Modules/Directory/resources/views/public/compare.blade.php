@@ -323,7 +323,7 @@
     @elseif($count === 1)
         <div class="lv-cmp-empty">
             <div class="icon" aria-hidden="true">➕</div>
-            <h2>{{ __('1 outil sélectionné — il en faut au moins 2') }}</h2>
+            <h2>{{ __('1 outil sélectionné – il en faut au moins 2') }}</h2>
             <p>{{ __('Retournez à l\'annuaire et cochez au moins 1 outil supplémentaire.') }}</p>
             <a href="{{ route('directory.index') }}" class="btn">{{ __('Continuer la sélection') }}</a>
         </div>
@@ -346,8 +346,8 @@
         <div class="lv-cmp-mismatch" role="alert">
             <span class="lv-cmp-mismatch-icon" aria-hidden="true">⚠️</span>
             <div class="lv-cmp-mismatch-text">
-                <strong>{{ __('Outils de catégories différentes') }}</strong> —
-                {{ __('Seuls :n sur :total outils partagent une catégorie commune. Certains critères seront marqués « — » lorsqu\'ils ne s\'appliquent pas.', ['n' => count($mismatch['dominant_tool_ids']), 'total' => $count]) }}
+                <strong>{{ __('Outils de catégories différentes') }}</strong> –
+                {{ __('Seuls :n sur :total outils partagent une catégorie commune. Certains critères seront marqués « – » lorsqu\'ils ne s\'appliquent pas.', ['n' => count($mismatch['dominant_tool_ids']), 'total' => $count]) }}
             </div>
             @if($mismatch['dominant_category'] && count($mismatch['dominant_tool_ids']) >= 2 && count($mismatch['dominant_tool_ids']) < $count)
                 @php
@@ -401,7 +401,7 @@
                                 $thumbSrc = $tool->screenshot
                                     ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.($tool->updated_at?->timestamp ?? '0'))
                                     : null;
-                                $priceLabel = $pricingLabels[$tool->pricing] ?? ucfirst($tool->pricing ?? '—');
+                                $priceLabel = $pricingLabels[$tool->pricing] ?? ucfirst($tool->pricing ?? '–');
                             @endphp
                             <th class="cmp-th-tool" scope="col" data-tool-id="{{ (int) $tool->id }}" x-data>
                                 @if($thumbSrc)
@@ -447,7 +447,7 @@
                                             $raw = $service->getValue($tool, $crit['accessor']);
                                             $hasValue = $raw !== null && $raw !== '' && $raw !== [];
                                             $cls = $hasValue ? ($diff[$tool->id] ?? 'neutral') : 'unavailable';
-                                            $formatted = $hasValue ? $service->formatValue($raw, $crit['type']) : '—';
+                                            $formatted = $hasValue ? $service->formatValue($raw, $crit['type']) : '–';
                                             $aria = $hasValue ? '' : __('Non applicable pour ce type d\'outil');
                                         @endphp
                                         <td class="cmp-value {{ $cls }}" @if($aria) aria-label="{{ $aria }}" @endif>{{ $formatted }}</td>
@@ -475,7 +475,7 @@
                                             $raw = $service->getValue($tool, $crit['accessor']);
                                             $hasValue = $raw !== null && $raw !== '' && $raw !== [];
                                             $cls = $hasValue ? ($diff[$tool->id] ?? 'neutral') : 'unavailable';
-                                            $formatted = $hasValue ? $service->formatValue($raw, $crit['type']) : '—';
+                                            $formatted = $hasValue ? $service->formatValue($raw, $crit['type']) : '–';
                                             $aria = $hasValue ? '' : __('Non applicable pour ce type d\'outil');
                                         @endphp
                                         <td class="cmp-value {{ $cls }}" @if($aria) aria-label="{{ $aria }}" @endif>{{ $formatted }}</td>

@@ -13,7 +13,7 @@
         <span class="section-author-byline-text">
             <span class="section-author-byline-prefix">{{ __('Par') }}</span>
             <span class="section-author-byline-name" itemprop="name">{{ trans('fronttheme::authors.stephane-lapointe.name') }}</span>
-            <span class="section-author-byline-cta">— {{ __('Tous les articles') }} →</span>
+            <span class="section-author-byline-cta">– {{ __('Tous les articles') }} →</span>
         </span>
     </a>
 </div>

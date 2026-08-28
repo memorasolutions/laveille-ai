@@ -39,7 +39,7 @@
             </div>
         @elseif($product->category === 'hoodies')
             <div style="color: #475569; margin-bottom: 20px;">
-                <h4 style="margin-top: 0; color: #0B7285;">Hoodie unisex — Gildan 18500</h4>
+                <h4 style="margin-top: 0; color: #0B7285;">Hoodie unisex – Gildan 18500</h4>
                 <p><strong>Matériau :</strong> 50 % coton, 50 % polyester, heavy blend. Capuche doublée, poche kangourou, poignets côtelés avec élasthanne.</p>
                 <div style="display: flex; gap: 24px; align-items: center; flex-wrap: wrap;">
                     <div style="flex: 0 0 220px;">

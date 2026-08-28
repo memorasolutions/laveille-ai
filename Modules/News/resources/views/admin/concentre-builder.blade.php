@@ -1,4 +1,4 @@
-@extends('backoffice::layouts.admin', ['title' => 'Concentré IA — builder de prompt', 'subtitle' => 'Génère le prompt Claude Code CLI hebdomadaire'])
+@extends('backoffice::layouts.admin', ['title' => 'Concentré IA – builder de prompt', 'subtitle' => 'Génère le prompt Claude Code CLI hebdomadaire'])
 
 @push('styles')
 {{-- Composant partagé "sélecteur d'actualités" (recherche/filtres/tri/cluster/couleur),

@@ -1,7 +1,7 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 
-@section('title', config('app.name') . ' — ' . __('Veille IA, technologies et transformation numérique au Québec'))
+@section('title', config('app.name') . ' : ' . __('Veille IA, technologies et transformation numérique au Québec'))
 @section('meta_description', __('Veille IA au Québec par Stéphane Lapointe. Actualités, outils, glossaire et concentrés hebdomadaires sur l\'intelligence artificielle, la conformité Loi 25 et la transformation numérique pour les organisations francophones.'))
 
 @push('head')
@@ -19,7 +19,7 @@
 @endpush
 
 @section('content')
-        <h1 class="sr-only">{{ config('app.name') }} — {{ __('Veille IA, technologies et transformation numérique au Québec') }}</h1>
+        <h1 class="sr-only">{{ config('app.name') }}&nbsp;: {{ __('Veille IA, technologies et transformation numérique au Québec') }}</h1>
         <!-- start of wpo-blog-hero -->
         <div class="wpo-blog-hero-area">
             <div class="container">
@@ -425,7 +425,7 @@
                 <div class="hp-header">
                     <div>
                         <h2 class="hp-title">🎮 {{ __('Outils interactifs gratuits') }}</h2>
-                        <div class="hp-subtitle">{{ __('Apprenez en jouant — engagement record sur la plateforme') }}</div>
+                        <div class="hp-subtitle">{{ __('Apprenez en jouant – engagement record sur la plateforme') }}</div>
                     </div>
                     <a href="{{ route('tools.index') }}" class="hp-link-all">{{ __('Voir tous les outils') }} →</a>
                 </div>

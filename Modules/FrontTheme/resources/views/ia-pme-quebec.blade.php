@@ -35,7 +35,7 @@
                     <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 20px;">L'intelligence artificielle pour les PME québécoises</h1>
                     <x-fronttheme::page-freshness updated="2026-06-19" />
 
-                    <p><strong>L'IA aide les PME québécoises à gagner du temps, améliorer leurs processus internes et mieux servir leurs clients</strong> — sans nécessiter une expertise technique poussée. Il n'est pas nécessaire d'avoir une équipe dédiée pour tirer parti des outils d'IA accessibles aujourd'hui. L'enjeu n'est pas de tout automatiser, mais de cibler des tâches précises où l'IA apporte une réelle valeur : rédaction, analyse de données, service à la clientèle ou veille concurrentielle.</p>
+                    <p><strong>L'IA aide les PME québécoises à gagner du temps, améliorer leurs processus internes et mieux servir leurs clients</strong> – sans nécessiter une expertise technique poussée. Il n'est pas nécessaire d'avoir une équipe dédiée pour tirer parti des outils d'IA accessibles aujourd'hui. L'enjeu n'est pas de tout automatiser, mais de cibler des tâches précises où l'IA apporte une réelle valeur : rédaction, analyse de données, service à la clientèle ou veille concurrentielle.</p>
 
                     <p>Pour bien commencer, partez d'un besoin concret plutôt que d'une solution à la mode. Testez d'abord des outils simples, souvent gratuits ou à faible coût, en gardant deux principes : protéger vos données sensibles et vérifier où elles sont traitées. La confidentialité et la conformité aux règles applicables au Québec doivent guider vos choix, surtout si vous manipulez des informations clients.</p>
 

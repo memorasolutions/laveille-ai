@@ -150,7 +150,7 @@
 
     @if(isset($isDraftPreview) && $isDraftPreview)
         <div role="status" style="background:#9A2A06; color:white; text-align:center; padding:12px; font-weight:600; position:sticky; top:0; z-index:1000;">
-            👁️ Aperçu brouillon — cet article n'est pas encore publié
+            👁️ Aperçu brouillon – cet article n'est pas encore publié
         </div>
     @endif
 

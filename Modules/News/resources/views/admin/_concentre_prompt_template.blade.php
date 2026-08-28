@@ -18,7 +18,7 @@ WORKFLOW :
 
 3. Rédige le concentré au FORMAT STRICT (référence : https://laveille.ai/blog/concentre-ia-semaine-14-21-avril-2026) :
 
-   • Titre H1 : 'Concentré IA — semaine du {{ $periodFr }}'
+   • Titre H1 : 'Concentré IA – semaine du {{ $periodFr }}'
    • Slug : /blog/{{ $slugPeriod }}
    • Catégorie : LE CONCENTRÉ (id=6)
    • Auteur : Stephane Lapointe
@@ -27,7 +27,7 @@ WORKFLOW :
      - Titre h2 : 'N. Titre court'
      - DATE entre titre et contenu : <p style="color:#475569;font-size:0.9rem;font-style:italic;margin:0 0 8px;">Publié le {JJ mois YYYY}</p>
      - Paragraphe 150-200 mots avec itemprop="text" commençant par 'Le {date}, <strong>{Acteur}</strong> a {verbe}...' avec strong sur chiffres clés, perspective Québec, lien sortant /actualites/{slug}
-   • Pas de conclusion — termine sur dernière section H2
+   • Pas de conclusion – termine sur dernière section H2
 
 4. Critères rédactionnels :
    • Ton sobre éducatif (pas de buzz, pas de hype, pas de superlatifs).
@@ -36,7 +36,7 @@ WORKFLOW :
      - 8-12 URLs  → 175-200 mots/section, total ~1800-2500 mots (sweet spot historique).
      - 13-20 URLs → 130-160 mots/section, total ~2200-3200 mots (concentré dense). Évite la redondance.
    • Intro 80-120 mots qui annonce 3-4 thématiques majeures observées (regroupements naturels).
-   • 3+ sections doivent contextualiser stratèges québécois — MAIS VARIE les angles à chaque fois :
+   • 3+ sections doivent contextualiser stratèges québécois – MAIS VARIE les angles à chaque fois :
      - Loi 25 / protection RP (au plus 4 sections)
      - MILA / IVADO recherche
      - École branchée / Carrefour éducation FR-CA
@@ -63,7 +63,7 @@ WORKFLOW :
      « Lecture complète », « Analyse complète », « Détails sur la fiche », « Voir le contexte »,
      « Décryptage », « Approfondir », « Source originale ».
 
-5. Génère featured_image — workflow Gemini Playwright FINAL (validé S90) :
+5. Génère featured_image – workflow Gemini Playwright FINAL (validé S90) :
 
    ÉTAPES :
    a) browser_navigate → https://gemini.google.com/app (session user persistante)

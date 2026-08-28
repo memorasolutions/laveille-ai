@@ -14,7 +14,7 @@
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
-        <h4 class="mb-3">📊 {{ __('Audits Pricing — Multi-source consensus') }}</h4>
+        <h4 class="mb-3">📊 {{ __('Audits Pricing – Multi-source consensus') }}</h4>
 
         {{-- Stats cards --}}
         <div class="row mb-3">
@@ -59,10 +59,10 @@
                                     <td>
                                         <a href="{{ route('admin.directory.edit', $audit->tool) }}" class="fw-bold">{{ $audit->tool->name ?? '#'.$audit->directory_tool_id }}</a>
                                     </td>
-                                    <td><span class="badge bg-secondary">{{ $audit->tool->pricing ?? '—' }}</span></td>
+                                    <td><span class="badge bg-secondary">{{ $audit->tool->pricing ?? '–' }}</span></td>
                                     <td>
                                         <span class="badge {{ $diff ? 'bg-warning text-dark' : 'bg-success' }}">
-                                            {{ $audit->real_pricing ?? '—' }}
+                                            {{ $audit->real_pricing ?? '–' }}
                                         </span>
                                         @if($audit->has_education_discount === true)
                                             <span class="badge bg-info ms-1" title="{{ __('Tarif éducation détecté') }}">🎓</span>

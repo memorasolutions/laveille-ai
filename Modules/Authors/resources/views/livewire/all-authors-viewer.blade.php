@@ -40,7 +40,7 @@
                         <tr class="border-t border-gray-200" wire:key="author-{{ $author->id }}">
                             <td class="px-4 py-3 font-mono text-xs">{{ $author->id }}</td>
                             <td class="px-4 py-3 font-mono text-[#9A2A06]">@<a href="{{ url('/@'.$author->slug) }}" target="_blank" class="underline">{{ $author->slug }}</a></td>
-                            <td class="px-4 py-3">{{ $author->display_name ?? '—' }}</td>
+                            <td class="px-4 py-3">{{ $author->display_name ?? '–' }}</td>
                             <td class="px-4 py-3"><span class="px-2 py-1 bg-[#F0FAFB] text-[#064E5A] rounded text-xs">{{ $author->tier }}</span></td>
                             <td class="px-4 py-3 text-right">{{ $stats[$author->id]['published_count'] ?? 0 }}<small class="text-gray-500"> /{{ $stats[$author->id]['posts_count'] ?? 0 }}</small></td>
                             <td class="px-4 py-3 text-right">{{ $stats[$author->id]['comments_count'] ?? 0 }}</td>

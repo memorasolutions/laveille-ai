@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.233.1] - 2026-08-28
+
+### Corrigé
+- **Le tiret cadratin disparaît des textes que les visiteurs lisent réellement** : titres de pages, étiquettes d'accessibilité lues par les lecteurs d'écran, textes de partage, contenu des vues. 559 occurrences corrigées sur 2 943 relevées, dans 204 fichiers - vues Blade, classes PHP, fichiers de langue et scripts publics.
+- **Les séparateurs de titre ont été choisis un par un selon le sens, jamais remplacés mécaniquement** : deux-points avec espace insécable quand le titre explique, trait d'union simple quand il s'agit d'un suffixe de marque, virgule pour un couple nom et rôle.
+- **Ce qui n'est pas montré aux visiteurs a été laissé intact**, y compris du code qui se sert de ce caractère pour nettoyer des textes venus d'ailleurs - commentaires, journaux, sortie console, prompts système jamais affichés, code vendor.
+- **Une correction attrapée en chemin** : deux textes français servaient de clé de traduction dans les vues touchées. Les corriger sans corriger la clé correspondante dans `lang/fr.json` et `lang/en.json` aurait cassé l'affichage anglais en silence, sans qu'aucun test ne le signale.
+
+Contrôle de non-régression ciblé après le bump de version, suite complète déjà vérifiée avant livraison et non relancée : parité des clés fr/en, `Tests\Feature\TranslationTest` 9 passed (24 assertions); compilation de l'ensemble des vues Blade, `php artisan view:cache` réussie sans erreur.
+
 ## [1.233.0] - 2026-08-28
 
 ### Ajouté

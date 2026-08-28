@@ -77,10 +77,10 @@
 
             if ($okCount < $totalChecks && $okCount > 0) {
                 $bannerClass = 'degraded';
-                $bannerText = __('Service dégradé — certains systèmes rencontrent des problèmes');
+                $bannerText = __('Service dégradé – certains systèmes rencontrent des problèmes');
             } elseif ($totalChecks > 0 && $okCount === 0) {
                 $bannerClass = 'outage';
-                $bannerText = __('Panne majeure — service indisponible');
+                $bannerText = __('Panne majeure – service indisponible');
             }
         @endphp
         <div class="status-banner {{ $bannerClass }}">

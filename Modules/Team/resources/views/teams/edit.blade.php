@@ -78,7 +78,7 @@
                                 <small class="text-muted d-block">{{ __('Propriétaire') }}</small>
                                 <div class="d-flex align-items-center gap-1 mt-1">
                                     <i data-lucide="crown" class="text-warning" style="width:14px;height:14px"></i>
-                                    <span class="fw-semibold">{{ $team->owner->name ?? '—' }}</span>
+                                    <span class="fw-semibold">{{ $team->owner->name ?? '–' }}</span>
                                 </div>
                             </div>
 

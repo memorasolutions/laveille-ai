@@ -15,7 +15,7 @@
 
             <header style="margin-bottom: 32px;">
                 <p style="text-transform: uppercase; letter-spacing: 1.5px; font-size: 12px; font-weight: 700; color: var(--c-primary, #064E5A); margin: 0 0 10px;">
-                    {{ __('API publique JSON — version 1') }}
+                    {{ __('API publique JSON – version 1') }}
                 </p>
                 <h1 style="margin: 0 0 14px; font-weight: 800; font-size: clamp(28px, 4vw, 42px); line-height: 1.15; letter-spacing: -0.5px; color: var(--c-dark, #1a1d23);">
                     {{ __("API La veille") }}
@@ -27,7 +27,7 @@
 
             <div style="background: #ECFDF5; border-left: 4px solid #14532d; padding: 18px 22px; border-radius: 8px; margin-bottom: 32px;">
                 <p style="margin: 0; font-size: 15px; color: #14532d;">
-                    <strong>{{ __('Licence') }} : CC BY 4.0</strong> — {{ __("Vous pouvez utiliser librement ces données, y compris commercialement, en mentionnant La veille (laveille.ai) comme source.") }}
+                    <strong>{{ __('Licence') }} : CC BY 4.0</strong> – {{ __("Vous pouvez utiliser librement ces données, y compris commercialement, en mentionnant La veille (laveille.ai) comme source.") }}
                 </p>
             </div>
 
@@ -43,12 +43,12 @@
                     <p style="margin: 10px 0 6px; color: #4b5563; font-size: 14px;">{{ __('Liste paginée des outils publiés.') }}</p>
                     <details style="margin-top: 8px; font-size: 13px;"><summary style="cursor: pointer; font-weight: 600;">{{ __('Paramètres optionnels') }}</summary>
                     <ul style="margin: 8px 0 0 20px; color: var(--c-text-muted, #52586a);">
-                        <li><code>page</code> — numéro de page (défaut 1)</li>
-                        <li><code>per_page</code> — résultats par page (défaut 30, max 100)</li>
-                        <li><code>category</code> — filtrer par slug de catégorie</li>
-                        <li><code>pricing</code> — <code>free</code>, <code>freemium</code>, <code>paid</code>, <code>enterprise</code></li>
-                        <li><code>has_education_pricing</code> — <code>1</code> ou <code>true</code> pour filtrer aux outils avec programme édu</li>
-                        <li><code>q</code> — recherche par nom ou description courte</li>
+                        <li><code>page</code> – numéro de page (défaut 1)</li>
+                        <li><code>per_page</code> – résultats par page (défaut 30, max 100)</li>
+                        <li><code>category</code> – filtrer par slug de catégorie</li>
+                        <li><code>pricing</code> – <code>free</code>, <code>freemium</code>, <code>paid</code>, <code>enterprise</code></li>
+                        <li><code>has_education_pricing</code> – <code>1</code> ou <code>true</code> pour filtrer aux outils avec programme édu</li>
+                        <li><code>q</code> – recherche par nom ou description courte</li>
                     </ul>
                     </details>
                 </div>
@@ -86,8 +86,8 @@
             <h2 style="font-weight: 800; font-size: 22px; margin: 28px 0 12px;">{{ __('Limites & politesse') }}</h2>
             <ul style="margin: 0 0 12px 20px; line-height: 1.7;">
                 <li><strong>{{ __('Rate limit') }}</strong> : 60 requêtes / minute / IP. Au-delà → HTTP 429.</li>
-                <li><strong>{{ __('Cache') }}</strong> : <code>Cache-Control: public, max-age=300</code> — merci de respecter pour limiter la charge.</li>
-                <li><strong>{{ __('CORS') }}</strong> : <code>Access-Control-Allow-Origin: *</code> — utilisable depuis n'importe quel navigateur.</li>
+                <li><strong>{{ __('Cache') }}</strong> : <code>Cache-Control: public, max-age=300</code> – merci de respecter pour limiter la charge.</li>
+                <li><strong>{{ __('CORS') }}</strong> : <code>Access-Control-Allow-Origin: *</code> – utilisable depuis n'importe quel navigateur.</li>
                 <li><strong>{{ __('Attribution') }}</strong> : si vous utilisez ces données dans une app publique, citez La veille (laveille.ai) avec un lien.</li>
             </ul>
 

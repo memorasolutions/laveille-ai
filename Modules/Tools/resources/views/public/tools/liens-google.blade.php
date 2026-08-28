@@ -168,7 +168,7 @@
 
                             <div class="alert alert-success" x-show="detected" x-transition>
                                 <span x-text="detected?.icon" style="font-size: 1.3em;"></span>
-                                <strong x-text="detected?.label"></strong> {{ __('détecté') }} —
+                                <strong x-text="detected?.label"></strong> {{ __('détecté') }} –
                                 <span x-text="transforms.length + ' {{ __('options disponibles') }}'"></span>
                             </div>
                             <div class="alert alert-warning" x-show="!detected && googleUrl.length > 10" x-transition>
@@ -402,27 +402,27 @@
                 <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem;">{{ __('Transformateur de liens') }}</h4>
                 <p>{{ __('Collez n\'importe quel lien Google et obtenez des transformations instantanées. Types pris en charge :') }}</p>
                 <ul>
-                    <li><strong>Google Sheets</strong> — {{ __('16 options : export Excel, CSV, PDF (A4, lettre, avec/sans grille), ODS, TSV, HTML, copie, aperçu, publication web, flux CSV public, vue mobile, navigation par feuille ou cellule.') }}</li>
-                    <li><strong>Google Docs</strong> — {{ __('9 options : export PDF, Word, texte, HTML, EPUB, copie, édition, intégration iframe.') }}</li>
-                    <li><strong>Google Slides</strong> — {{ __('7 options : présentation plein écran, export PDF/PowerPoint, copie, aperçu, intégration slideshow.') }}</li>
-                    <li><strong>YouTube</strong> — {{ __('9 options : intégration avec autoplay/boucle, miniatures HD/HQ/MQ/SD, lien court, horodatages.') }}</li>
-                    <li><strong>{{ __('Aussi') }}</strong> — Google Forms, Drive, Drawings, Colab, Maps.</li>
+                    <li><strong>Google Sheets</strong> – {{ __('16 options : export Excel, CSV, PDF (A4, lettre, avec/sans grille), ODS, TSV, HTML, copie, aperçu, publication web, flux CSV public, vue mobile, navigation par feuille ou cellule.') }}</li>
+                    <li><strong>Google Docs</strong> – {{ __('9 options : export PDF, Word, texte, HTML, EPUB, copie, édition, intégration iframe.') }}</li>
+                    <li><strong>Google Slides</strong> – {{ __('7 options : présentation plein écran, export PDF/PowerPoint, copie, aperçu, intégration slideshow.') }}</li>
+                    <li><strong>YouTube</strong> – {{ __('9 options : intégration avec autoplay/boucle, miniatures HD/HQ/MQ/SD, lien court, horodatages.') }}</li>
+                    <li><strong>{{ __('Aussi') }}</strong> – Google Forms, Drive, Drawings, Colab, Maps.</li>
                 </ul>
                 <p class="text-muted" style="font-size: 0.85rem;">{{ __('Cliquez sur un bouton pour générer un seul lien, puis copiez-le ou ouvrez-le directement.') }}</p>
 
                 <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">{{ __('Recherche avancée') }}</h4>
                 <p>{{ __('Construisez des recherches Google puissantes avec les opérateurs avancés :') }}</p>
                 <ul>
-                    <li><code>site:</code> — {{ __('rechercher uniquement sur un site précis') }}</li>
-                    <li><code>filetype:</code> — {{ __('trouver des fichiers spécifiques (PDF, DOCX, CSV...)') }}</li>
-                    <li><code>intitle:</code> — {{ __('les mots doivent apparaître dans le titre de la page') }}</li>
-                    <li><code>inurl:</code> — {{ __('les mots doivent apparaître dans l\'URL') }}</li>
-                    <li><code>""</code> — {{ __('correspondance exacte (expression entre guillemets)') }}</li>
-                    <li><code>-</code> — {{ __('exclure un mot des résultats') }}</li>
-                    <li><code>after: / before:</code> — {{ __('filtrer par date') }}</li>
-                    <li><code>related:</code> — {{ __('trouver des sites similaires') }}</li>
-                    <li><code>define:</code> — {{ __('obtenir la définition d\'un mot') }}</li>
-                    <li><code>AROUND(X)</code> — {{ __('deux mots doivent être proches l\'un de l\'autre (X mots max)') }}</li>
+                    <li><code>site:</code> – {{ __('rechercher uniquement sur un site précis') }}</li>
+                    <li><code>filetype:</code> – {{ __('trouver des fichiers spécifiques (PDF, DOCX, CSV...)') }}</li>
+                    <li><code>intitle:</code> – {{ __('les mots doivent apparaître dans le titre de la page') }}</li>
+                    <li><code>inurl:</code> – {{ __('les mots doivent apparaître dans l\'URL') }}</li>
+                    <li><code>""</code> – {{ __('correspondance exacte (expression entre guillemets)') }}</li>
+                    <li><code>-</code> – {{ __('exclure un mot des résultats') }}</li>
+                    <li><code>after: / before:</code> – {{ __('filtrer par date') }}</li>
+                    <li><code>related:</code> – {{ __('trouver des sites similaires') }}</li>
+                    <li><code>define:</code> – {{ __('obtenir la définition d\'un mot') }}</li>
+                    <li><code>AROUND(X)</code> – {{ __('deux mots doivent être proches l\'un de l\'autre (X mots max)') }}</li>
                 </ul>
                 <p class="text-muted" style="font-size: 0.85rem;">{{ __('Les préréglages remplissent automatiquement les champs pour des recherches courantes. 12 services Google sont générés simultanément.') }}</p>
 

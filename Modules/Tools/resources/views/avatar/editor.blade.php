@@ -1,6 +1,6 @@
 @extends(fronttheme_layout())
 
-@section('title', 'Avatar Studio (Beta admin) — La veille')
+@section('title', 'Avatar Studio (Beta admin) - La veille')
 @section('meta_description', 'Créateur d\'avatar cartoon personnalisé avec compatibilité WCAG AAA et touches du Québec.')
 
 @push('robots')

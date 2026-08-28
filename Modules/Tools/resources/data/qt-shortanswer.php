@@ -81,7 +81,7 @@ return array (
       2 => 'superintelligence artificielle',
     ),
     'display' => 'Superintelligence',
-    'explanation' => 'La superintelligence dépasserait les capacités cognitives humaines partout — encore théorique.',
+    'explanation' => 'La superintelligence dépasserait les capacités cognitives humaines partout – encore théorique.',
     'term' => 'superintelligence',
   ),
   5 => 

@@ -42,7 +42,7 @@ class ScimGroupController extends Controller
     {
         return response()->json([
             'schemas' => ['urn:ietf:params:scim:api:messages:2.0:Error'],
-            'detail' => 'Groups SCIM non implémenté dans cette version (scope réduit — voir documentation).',
+            'detail' => 'Groups SCIM non implémenté dans cette version (scope réduit – voir documentation).',
             'status' => '501',
         ], 501, ['Content-Type' => 'application/scim+json']);
     }

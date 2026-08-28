@@ -52,7 +52,7 @@
 @endphp
 
 @section('content')
-    <h1 class="sr-only">{{ __('Outils gratuits') }} — {{ config('app.name') }}</h1>
+    <h1 class="sr-only">{{ __('Outils gratuits') }} – {{ config('app.name') }}</h1>
     <section class="wpo-blog-pg-section section-padding"
              x-data="toolsFilter()"
              x-init="init()">

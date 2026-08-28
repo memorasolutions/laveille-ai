@@ -69,7 +69,7 @@
                                         {{ Str::limit($idea->title, 50) }}
                                     </a>
                                 </td>
-                                <td>{{ $idea->board->name ?? '—' }}</td>
+                                <td>{{ $idea->board->name ?? '–' }}</td>
                                 <td>
                                     <span class="badge" style="background-color: {{ $idea->status->color() }};">
                                         {{ $idea->status->label() }}

@@ -47,7 +47,7 @@
                 </div>
                 <p style="color:var(--c-text-muted);margin:0 0 8px;font-size:14px;">{{ Str::limit($idea->description, 200) }}</p>
                 <div style="font-size:12px;color:#374151;">
-                    {{ __('Par') }} {{ $idea->user->name ?? __('Anonyme') }} — {{ $idea->comments_count ?? 0 }} {{ __('commentaire(s)') }} — {{ $idea->created_at->diffForHumans() }}
+                    {{ __('Par') }} {{ $idea->user->name ?? __('Anonyme') }} – {{ $idea->comments_count ?? 0 }} {{ __('commentaire(s)') }} – {{ $idea->created_at->diffForHumans() }}
                 </div>
 
                 {{-- Modération inline --}}

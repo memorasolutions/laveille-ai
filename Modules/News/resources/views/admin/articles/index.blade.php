@@ -1,4 +1,4 @@
-@extends('backoffice::layouts.admin', ['title' => 'Actualités — articles', 'subtitle' => $stats['total'] . ' articles, ' . $stats['published'] . ' publiés, ' . $stats['today'] . ' aujourd\'hui'])
+@extends('backoffice::layouts.admin', ['title' => 'Actualités – articles', 'subtitle' => $stats['total'] . ' articles, ' . $stats['published'] . ' publiés, ' . $stats['today'] . ' aujourd\'hui'])
 
 @section('content')
     {{-- Compteurs --}}
@@ -73,7 +73,7 @@
                                     {{ $a->relevance_score }}/10
                                 </span>
                             @else
-                                <span class="badge bg-light text-muted">—</span>
+                                <span class="badge bg-light text-muted">–</span>
                             @endif
                         </td>
                         <td style="max-width: 300px;">
@@ -100,7 +100,7 @@
                                 <span class="badge bg-light text-muted">{{ $a->feed_type }}</span>
                             @endif
                         </td>
-                        <td><small>{{ $a->source->name ?? '—' }}</small></td>
+                        <td><small>{{ $a->source->name ?? '–' }}</small></td>
                         <td>
                             @if($a->is_published)
                                 <span class="badge bg-success">Publié</span>

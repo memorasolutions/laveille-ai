@@ -246,7 +246,7 @@
                             <summary style="cursor: pointer;">{{ __('Protection de vos données (Loi 25)') }}</summary>
                             <ul class="mt-2 mb-0" style="padding-left: 1.2rem;">
                                 <li x-show="isAuthenticated">{{ __('Données sauvegardées dans votre compte, protégées et supprimables à tout moment.') }}</li>
-                                <li x-show="!isAuthenticated">{{ __('Stockage local uniquement (navigateur) — jamais envoyé à un serveur.') }}</li>
+                                <li x-show="!isAuthenticated">{{ __('Stockage local uniquement (navigateur) – jamais envoyé à un serveur.') }}</li>
                                 <li>{{ __('Aucune transmission à des tiers.') }}</li>
                                 <li>{{ __('Suppression facile via le bouton « Effacer » ou votre espace personnel.') }}</li>
                             </ul>

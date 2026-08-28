@@ -26,7 +26,7 @@ class UserContributionsController extends Controller
                     ->map(fn ($s) => (object) [
                         'type' => 'suggestion', 'icon' => '💡', 'color' => '#f59e0b',
                         'label' => __('Suggestion'), 'name' => $s->getItemName(),
-                        'preview' => (\Modules\Directory\Models\ToolSuggestion::fieldLabels()[$s->field] ?? $s->field) . ' — ' . \Str::limit($s->suggested_value, 60),
+                        'preview' => (\Modules\Directory\Models\ToolSuggestion::fieldLabels()[$s->field] ?? $s->field) . ' – ' . \Str::limit($s->suggested_value, 60),
                         'status' => $s->status, 'link' => $this->suggestionLink($s),
                         'created_at' => $s->created_at, 'raw' => $s,
                     ])
@@ -54,7 +54,7 @@ class UserContributionsController extends Controller
                     ->map(fn ($r) => (object) [
                         'type' => 'resource', 'icon' => '📚', 'color' => '#0891B2',
                         'label' => __('Ressource'), 'name' => \Str::limit($r->title, 50),
-                        'preview' => ($r->tool->name ?? '—') . ' — ' . $r->type,
+                        'preview' => ($r->tool->name ?? '–') . ' – ' . $r->type,
                         'status' => $r->is_approved ? 'approved' : 'pending',
                         'link' => ($r->tool && \Route::has('directory.show')) ? $r->tool->getPublicUrl() . '#resources' : null,
                         'created_at' => $r->created_at, 'raw' => $r,

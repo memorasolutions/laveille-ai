@@ -75,11 +75,11 @@
 
                         <dt class="col-sm-4 text-muted">Échéance</dt>
                         <dd class="col-sm-8 {{ $rightsRequest->isOverdue() ? 'text-danger fw-bold' : '' }}">
-                            {{ format_date($rightsRequest->deadline_at) ?: '—' }}
+                            {{ format_date($rightsRequest->deadline_at) ?: '–' }}
                         </dd>
 
                         <dt class="col-sm-4 text-muted">Répondue le</dt>
-                        <dd class="col-sm-8">{{ format_date($rightsRequest->responded_at) ?: '—' }}</dd>
+                        <dd class="col-sm-8">{{ format_date($rightsRequest->responded_at) ?: '–' }}</dd>
                     </dl>
                 </div>
             </div>
@@ -115,7 +115,7 @@
                         </form>
                     @else
                         <div class="alert alert-success mb-0">
-                            Demande traitée le {{ format_date($rightsRequest->responded_at) ?: '—' }}
+                            Demande traitée le {{ format_date($rightsRequest->responded_at) ?: '–' }}
                         </div>
                     @endif
                 </div>

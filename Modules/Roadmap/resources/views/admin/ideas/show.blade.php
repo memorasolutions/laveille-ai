@@ -76,9 +76,9 @@
                             <div class="list-group-item">
                                 <div class="d-flex justify-content-between">
                                     <small>
-                                        <strong>{{ $log->user->name ?? __('Système') }}</strong> —
+                                        <strong>{{ $log->user->name ?? __('Système') }}</strong> –
                                         {{ $log->field === 'status' ? __('Statut') : $log->field }}:
-                                        {{ $log->old_value ?? '—' }} → {{ $log->new_value }}
+                                        {{ $log->old_value ?? '–' }} → {{ $log->new_value }}
                                         @if($log->note) <em class="text-muted">{{ $log->note }}</em> @endif
                                     </small>
                                     <small class="text-muted">{{ format_date($log->created_at, 'datetime') }}</small>

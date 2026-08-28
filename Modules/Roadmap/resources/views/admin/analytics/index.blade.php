@@ -108,7 +108,7 @@
                             @foreach($topIdeas as $idea)
                                 <tr>
                                     <td><a href="{{ route('admin.roadmap.ideas.show', $idea) }}">{{ Str::limit($idea->title, 40) }}</a></td>
-                                    <td>{{ $idea->board->name ?? '—' }}</td>
+                                    <td>{{ $idea->board->name ?? '–' }}</td>
                                     <td class="text-end"><span class="badge bg-primary">{{ $idea->vote_count }}</span></td>
                                 </tr>
                             @endforeach

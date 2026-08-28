@@ -220,7 +220,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                     <strong style="color:#047857">{{ __('Lien partageable de la grille') }}</strong>
                     {{-- 2026-05-05 #112 : badge "non enregistré" pendant preview live slug --}}
-                    <span x-show="displaySlugIsDirty" x-cloak class="badge" style="background:#fef3c7;color:#92400e;border:1px solid #fbbf24;font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:4px" :title="'{{ __('Cliquez Enregistrer dans « Personnaliser le lien (slug) » pour activer ce lien.') }}'">{{ __('aperçu — non enregistré') }}</span>
+                    <span x-show="displaySlugIsDirty" x-cloak class="badge" style="background:#fef3c7;color:#92400e;border:1px solid #fbbf24;font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:4px" :title="'{{ __('Cliquez Enregistrer dans « Personnaliser le lien (slug) » pour activer ce lien.') }}'">{{ __('aperçu – non enregistré') }}</span>
                   </div>
                   <div class="d-flex flex-wrap gap-2 align-items-stretch mb-2">
                     <input type="text" readonly :value="displayShareUrl" @click="$event.target.select()" class="form-control" style="flex:1;min-width:240px;background:#fff;font-family:monospace;font-size:.875rem" aria-label="{{ __('URL de partage du jeu') }}">
@@ -319,7 +319,7 @@
               <button type="button" class="ct-btn ct-btn-outline w-100 d-flex align-items-center justify-content-between" style="min-height:44px" @click="aiBuilderOpen = !aiBuilderOpen" :aria-expanded="aiBuilderOpen" aria-controls="ai-builder-panel">
                 <span class="d-inline-flex align-items-center gap-2">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L9.5 9 2 12l7.5 3 2.5 7 2.5-7 7.5-3-7.5-3z"/></svg>
-                  <span><strong>{{ __('Générer mes mots avec mon IA') }}</strong> <span class="d-block d-sm-inline small" style="opacity:.75;font-weight:400">— {{ __('100 % gratuit, utilise votre ChatGPT, Claude ou Gemini') }}</span></span>
+                  <span><strong>{{ __('Générer mes mots avec mon IA') }}</strong> <span class="d-block d-sm-inline small" style="opacity:.75;font-weight:400">– {{ __('100 % gratuit, utilise votre ChatGPT, Claude ou Gemini') }}</span></span>
                 </span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" :style="aiBuilderOpen ? 'transform:rotate(180deg)' : ''"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
@@ -1780,7 +1780,7 @@ Maintenant, génère ${n} paires sur le thème "${theme}".`;
         setTimeout(() => { this.shareLinkCopied = false; }, 2500);
         this.dispatchToast("{{ __('Lien copié dans le presse-papier.') }}", 'success');
       } catch (e) {
-        this.dispatchToast("{{ __('Impossible de copier — sélectionnez et copiez manuellement.') }}", 'warning');
+        this.dispatchToast("{{ __('Impossible de copier – sélectionnez et copiez manuellement.') }}", 'warning');
       }
     },
     async nativeShare() {

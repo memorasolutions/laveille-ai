@@ -122,7 +122,7 @@
                         @can('manageEnrollments', $course)
                             <div style="margin-top: 28px;">
                                 <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin: 0 0 8px;">
-                                    Mode kiosque — incidents consignés
+                                    Mode kiosque – incidents consignés
                                 </h2>
                                 @livewire('academy.kiosk-violations', ['course' => $course])
                             </div>

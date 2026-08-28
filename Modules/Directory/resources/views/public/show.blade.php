@@ -15,7 +15,7 @@
 
 @push('styles')
 {{-- Meta AEO/LLM-first 2026 : aide les crawlers IA (GPTBot, ClaudeBot, PerplexityBot) à citer la fiche --}}
-<meta name="llm:summary" content="{{ e($tool->name) }} — {{ e(Str::limit(strip_tags($tool->short_description ?? $tool->description ?? ''), 200)) }} ({{ e(ucfirst((string) ($tool->pricing_type ?? 'outil'))) }})">
+<meta name="llm:summary" content="{{ e($tool->name) }} – {{ e(Str::limit(strip_tags($tool->short_description ?? $tool->description ?? ''), 200)) }} ({{ e(ucfirst((string) ($tool->pricing_type ?? 'outil'))) }})">
 <meta name="llm:keywords" content="{{ e($tool->name) }}, IA, intelligence artificielle, {{ e((string) ($tool->category ?? 'outil IA')) }}, francophone, Québec">
 <meta name="llm:url" content="{{ $tool->getPublicUrl() }}">
 @endpush
@@ -139,7 +139,7 @@
         $pricingDetails = $tool->education_pricing_details ?? '';
         $shareLines[] = '';
         if (!empty($pricingDetails)) {
-            $shareLines[] = '🎓 Prix éducation : ' . $pricingType . ' — ' . $pricingDetails;
+            $shareLines[] = '🎓 Prix éducation : ' . $pricingType . ' – ' . $pricingDetails;
         } else {
             $shareLines[] = '🎓 Prix éducation disponible' . (!empty($pricingType) ? ' (' . $pricingType . ')' : '');
         }
@@ -435,7 +435,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
                     <a href="{{ route('directory.visit', $tool->slug) }}" target="_blank" rel="{{ $tool->isAffiliate() ? 'sponsored noopener' : 'noopener noreferrer nofollow' }}" class="rt-visit">{{ __('Visiter le site') }} →</a>
                     @if($tool->isAffiliate())
-                        <a href="{{ route('directory.affiliation.policy') }}" class="rt-affiliate-badge" title="{{ __('Ce lien est un lien d\'affiliation — en savoir plus') }}">
+                        <a href="{{ route('directory.affiliation.policy') }}" class="rt-affiliate-badge" title="{{ __('Ce lien est un lien d\'affiliation – en savoir plus') }}">
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 16v-4M12 8h.01" stroke-width="2" stroke-linecap="round"/></svg>
                             {{ __('Lien affilié') }}
                         </a>
@@ -620,7 +620,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), var(--c-accent)); margin-bottom: 20px; border-radius: 2px;"></div>
                     <div class="rt-description" style="font-size: 1.05rem; line-height: 1.8; color: #475569;" data-editable="review">{!! $reviewHtml !!}</div>
                     <div style="margin-top: 16px;">
-                        <span style="background: #EEF7FF; color: var(--c-primary); font-size: 0.85rem; padding: 4px 12px; border-radius: 12px; display: inline-block; font-weight: 600;">{{ __('Éditorial — Rédaction laveille.ai') }}</span>
+                        <span style="background: #EEF7FF; color: var(--c-primary); font-size: 0.85rem; padding: 4px 12px; border-radius: 12px; display: inline-block; font-weight: 600;">{{ __('Éditorial – Rédaction laveille.ai') }}</span>
                     </div>
                 </div>
             @endif
@@ -757,7 +757,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <a href="{{ route('directory.visit', $tool->slug) }}" target="_blank" rel="{{ $tool->isAffiliate() ? 'sponsored noopener' : 'noopener noreferrer nofollow' }}" style="display: inline-block; background: var(--c-accent); color: #fff; font-weight: 700; padding: 14px 32px; border-radius: var(--r-btn); text-decoration: none; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s;">{{ __('Visiter le site') }} →</a>
                 @if($tool->isAffiliate())
                     <div style="margin-top: 10px;">
-                        <a href="{{ route('directory.affiliation.policy') }}" class="rt-affiliate-badge" title="{{ __('Ce lien est un lien d\'affiliation — en savoir plus') }}">
+                        <a href="{{ route('directory.affiliation.policy') }}" class="rt-affiliate-badge" title="{{ __('Ce lien est un lien d\'affiliation – en savoir plus') }}">
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 16v-4M12 8h.01" stroke-width="2" stroke-linecap="round"/></svg>
                             {{ __('Lien affilié') }}
                         </a>
@@ -1184,7 +1184,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                             const t2 = (nd.title || '') + ' ' + (nd.author_name || '');
                                             this.language = /[éèêëàâçùûôîïæœ]/i.test(t2) ? 'fr' : 'en';
                                         }
-                                    } catch(e) { /* noembed indisponible — utilisateur saisit manuellement */ }
+                                    } catch(e) { /* noembed indisponible – utilisateur saisit manuellement */ }
                                 }
                             }
                         } catch(e) { this.videoError = '{{ __("Erreur de connexion. Réessayez.") }}'; }
@@ -1350,14 +1350,14 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <img src="{{ asset($ss->image_path) }}" alt="{{ $ss->caption ?? $tool->name }}" loading="lazy" style="width: 100%; height: 200px; object-fit: cover; display: block;">
                             </a>
                             <div style="padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 12px; color: #6B7280;">{{ $ss->caption ?? __('Screenshot') }} — {{ $ss->user->name ?? __('Anonyme') }}</span>
+                                <span style="font-size: 12px; color: #6B7280;">{{ $ss->caption ?? __('Screenshot') }} – {{ $ss->user->name ?? __('Anonyme') }}</span>
                                 <div style="display:flex!important;align-items:center!important;gap:8px;">
                                     <button onclick="if(this.dataset.voted)return;this.dataset.voted=1;var tk=document.querySelector('meta[name=csrf-token]')?.content||'{{ csrf_token() }}';fetch('{{ route('directory.screenshots.vote', $ss->id) }}', {method:'POST',headers:{'X-CSRF-TOKEN':tk}}).then(r=>r.json()).then(d=>{this.closest('div').querySelector('.vote-count').textContent=d.votes;if(d.already_voted){this.style.opacity='0.5';this.style.cursor='default';}else{this.style.color='#dc2626';}})" style="background:none!important;border:none!important;cursor:pointer;color:#E74C3C;font-size:13px;font-weight:600;outline:none!important;box-shadow:none!important;">
                                         ❤️ <span class="vote-count">{{ $ss->votes_count }}</span>
                                     </button>
                                     @can('view_admin_panel')
                                     <button onclick="var btn=this;var tk=document.querySelector('meta[name=csrf-token]')?.content||'{{ csrf_token() }}';fetch('{{ route('directory.screenshots.promote', $ss->id) }}',{method:'POST',headers:{'X-CSRF-TOKEN':tk,'Accept':'application/json'}}).then(r=>{if(r.ok){btn.textContent='✓';btn.style.color='#0CA678'}else{window.dispatchEvent(new CustomEvent('toast-show',{detail:{message:'Erreur '+r.status,variant:'danger',duration:5000}}))}})" style="background:none!important;border:none!important;cursor:pointer;color:var(--c-primary);font-size:12px;outline:none!important;box-shadow:none!important;" title="{{ __('Utiliser comme image principale') }}">⭐</button>
-                                    <button onclick="var card=this.closest('.col-md-4');var tk=document.querySelector('meta[name=csrf-token]')?.content||'{{ csrf_token() }}';window.dispatchEvent(new CustomEvent('open-confirm-global',{detail:{message:'{{ __("Supprimer ce screenshot ?") }}',callback:function(){fetch('{{ route('directory.screenshots.delete', $ss->id) }}',{method:'POST',headers:{'X-CSRF-TOKEN':tk,'Accept':'application/json'}}).then(r=>{if(r.ok){card.remove();setTimeout(()=>location.reload(),500)}else{window.dispatchEvent(new CustomEvent('toast-show',{detail:{message:'Erreur '+r.status+' — rechargez la page et réessayez.',variant:'danger',duration:5000}}))}})}}}))" style="background:none!important;border:none!important;cursor:pointer;color:#6B7280;font-size:12px;outline:none!important;box-shadow:none!important;" title="{{ __('Supprimer') }}">✕</button>
+                                    <button onclick="var card=this.closest('.col-md-4');var tk=document.querySelector('meta[name=csrf-token]')?.content||'{{ csrf_token() }}';window.dispatchEvent(new CustomEvent('open-confirm-global',{detail:{message:'{{ __("Supprimer ce screenshot ?") }}',callback:function(){fetch('{{ route('directory.screenshots.delete', $ss->id) }}',{method:'POST',headers:{'X-CSRF-TOKEN':tk,'Accept':'application/json'}}).then(r=>{if(r.ok){card.remove();setTimeout(()=>location.reload(),500)}else{window.dispatchEvent(new CustomEvent('toast-show',{detail:{message:'Erreur '+r.status+' – rechargez la page et réessayez.',variant:'danger',duration:5000}}))}})}}}))" style="background:none!important;border:none!important;cursor:pointer;color:#6B7280;font-size:12px;outline:none!important;box-shadow:none!important;" title="{{ __('Supprimer') }}">✕</button>
                                     @endcan
                                 </div>
                             </div>
@@ -1431,7 +1431,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             :class="dragging ? 'rt-dropzone-active' : ''">
                             <div style="font-size:48px;margin-bottom:12px;">📸</div>
                             <p style="color:var(--c-dark);font-size:16px;margin:0 0 6px;font-weight:700;">{{ __('Glissez-déposez, collez (Ctrl+V) ou cliquez') }}</p>
-                            <p style="color:#6B7280;font-size:13px;margin:0;">{{ __('JPG, PNG, WebP — compression automatique, max 1920px') }}</p>
+                            <p style="color:#6B7280;font-size:13px;margin:0;">{{ __('JPG, PNG, WebP – compression automatique, max 1920px') }}</p>
                         </div>
 
                         {{-- Preview --}}

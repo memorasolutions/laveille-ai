@@ -35,7 +35,7 @@
                         @foreach($menus as $menu)
                         <tr>
                             <td class="fw-medium">{{ $menu->name }}</td>
-                            <td>{{ $locations[$menu->location] ?? $menu->location ?? '—' }}</td>
+                            <td>{{ $locations[$menu->location] ?? $menu->location ?? '–' }}</td>
                             <td>{{ $menu->all_items_count }}</td>
                             <td>
                                 @if($menu->is_active)

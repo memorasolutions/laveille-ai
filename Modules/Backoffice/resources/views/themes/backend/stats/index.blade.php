@@ -245,7 +245,7 @@
                         @endforeach
                     </ol>
                 @else
-                    <p class="text-center small text-muted py-4 mb-0">{{ __('Tracking activé — données à venir') }}</p>
+                    <p class="text-center small text-muted py-4 mb-0">{{ __('Tracking activé – données à venir') }}</p>
                 @endif
             </div>
         </div>
@@ -276,7 +276,7 @@
                         @endforeach
                     </ol>
                 @else
-                    <p class="text-center small text-muted py-4 mb-0">{{ __('Tracking activé — données à venir') }}</p>
+                    <p class="text-center small text-muted py-4 mb-0">{{ __('Tracking activé – données à venir') }}</p>
                 @endif
             </div>
         </div>
@@ -291,7 +291,7 @@
         <div class="card">
             <div class="card-header d-flex align-items-center gap-2 flex-wrap">
                 <i data-lucide="link" class="text-primary"></i>
-                <h6 class="fw-semibold mb-0">{{ __('Liens raccourcis (shorturl)') }} — {{ __('Période') }} : {{ $days }}j</h6>
+                <h6 class="fw-semibold mb-0">{{ __('Liens raccourcis (shorturl)') }} – {{ __('Période') }} : {{ $days }}j</h6>
                 <a href="{{ url('/admin/shorturls') }}" class="btn btn-sm btn-outline-primary ms-auto" aria-label="{{ __('Voir tous les liens raccourcis dans l\'admin') }}">
                     {{ __('Gérer →') }}
                 </a>

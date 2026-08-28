@@ -35,7 +35,7 @@
                 <span class="badge bg-success bg-opacity-10 text-success p-2 rounded-circle">
                     <i data-lucide="check-circle" style="width:20px;height:20px;"></i>
                 </span>
-                <span class="fw-semibold text-muted">{{ __('Aucun job échoué — la queue fonctionne parfaitement.') }}</span>
+                <span class="fw-semibold text-muted">{{ __('Aucun job échoué – la queue fonctionne parfaitement.') }}</span>
             </div>
         </div>
     @else
@@ -281,7 +281,7 @@
                                 <code class="text-primary small bg-primary bg-opacity-10 px-2 py-1 rounded">{{ $task->cron_expression }}</code>
                             </td>
                             <td class="py-3 px-4 small fw-medium text-body">{{ $task->command }}</td>
-                            <td class="py-3 px-4 small text-muted">{{ $task->description ?? '—' }}</td>
+                            <td class="py-3 px-4 small text-muted">{{ $task->description ?? '–' }}</td>
                             <td class="py-3 px-4">
                                 @if($task->is_active)
                                     <span class="badge bg-success">{{ __('Actif') }}</span>

@@ -6,7 +6,7 @@
 @extends(fronttheme_layout())
 
 @section('title', __('Conditions de vente') . ' - ' . config('app.name'))
-@section('meta_description', __('Conditions générales de vente de la boutique laveille.ai — produits imprimés à la demande, livraison, remboursement, garantie légale, LPC Québec.'))
+@section('meta_description', __('Conditions générales de vente de la boutique laveille.ai – produits imprimés à la demande, livraison, remboursement, garantie légale, LPC Québec.'))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Conditions de vente'), 'breadcrumbItems' => [__('Boutique'), __('Conditions de vente')]])
@@ -71,7 +71,7 @@
 
                             {{-- 5. Droit de résolution --}}
                             <h3 id="resolution">{{ __('5. Droit de résolution') }}</h3>
-                            <p>{{ __('Conformément aux articles 54.1 à 54.16 de la Loi sur la protection du consommateur (LPC), vous bénéficiez d\'un droit de résolution dans des cas précis. Si nous ne remplissons pas nos obligations — notamment en omettant de vous remettre un exemplaire du contrat dans les 15 jours suivant sa conclusion (article 54.7 LPC), en ne respectant pas nos devoirs d\'information (article 54.4 LPC) ou en livrant un produit non conforme (article 54.6 LPC) — vous pouvez résoudre le contrat dans les 7 jours suivant la réception de l\'exemplaire du contrat, ou dans les 30 jours si cet exemplaire ne vous a pas été transmis à temps (article 54.8 LPC). De plus, si nous ne livrons pas votre commande dans les 30 jours suivant la date convenue ou, à défaut, suivant la conclusion du contrat, vous pouvez également résoudre celui-ci (article 54.9 LPC).') }}</p>
+                            <p>{{ __('Conformément aux articles 54.1 à 54.16 de la Loi sur la protection du consommateur (LPC), vous bénéficiez d\'un droit de résolution dans des cas précis. Si nous ne remplissons pas nos obligations – notamment en omettant de vous remettre un exemplaire du contrat dans les 15 jours suivant sa conclusion (article 54.7 LPC), en ne respectant pas nos devoirs d\'information (article 54.4 LPC) ou en livrant un produit non conforme (article 54.6 LPC) – vous pouvez résoudre le contrat dans les 7 jours suivant la réception de l\'exemplaire du contrat, ou dans les 30 jours si cet exemplaire ne vous a pas été transmis à temps (article 54.8 LPC). De plus, si nous ne livrons pas votre commande dans les 30 jours suivant la date convenue ou, à défaut, suivant la conclusion du contrat, vous pouvez également résoudre celui-ci (article 54.9 LPC).') }}</p>
                             <p>{{ __('La LPC ne prévoit aucun droit général d\'annulation pour simple changement d\'avis. Toutefois, le fait qu\'un produit soit personnalisé ou fabriqué selon vos spécifications ne prive jamais d\'effet les droits de résolution prévus par la loi en cas de manquement du commerçant à ses obligations légales.') }}</p>
 
                             {{-- 6. Garantie légale --}}

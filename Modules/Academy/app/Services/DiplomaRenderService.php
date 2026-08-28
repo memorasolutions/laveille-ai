@@ -100,7 +100,7 @@ final class DiplomaRenderService
             'system.learner_name'       => $user?->name ?? '',
             'system.issue_date'         => $certificate->issued_at
                 ? $certificate->issued_at->locale('fr_CA')->translatedFormat('j F Y')
-                : '—',
+                : '–',
             'system.certificate_number' => $certificate->serial ?? '',
 
             'pedagogical.course_title'   => $course?->title ?? '',

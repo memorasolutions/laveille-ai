@@ -6,7 +6,7 @@
 <meta property="og:title" content="L'IA locale : exécuter un modèle de langage sur son ordinateur">
 @php
 $faq = [
-    ["Quel matériel faut-il pour l'IA locale ?", "Pour un modèle de 7 à 8 milliards de paramètres quantifié en 4 bits, un ordinateur avec 16 Go de RAM et un GPU de 8 Go de mémoire vidéo suffit généralement. Les modèles de 70 milliards exigent plutôt 40 Go de VRAM ou plusieurs cartes — hors de portée de la plupart des portables."],
+    ["Quel matériel faut-il pour l'IA locale ?", "Pour un modèle de 7 à 8 milliards de paramètres quantifié en 4 bits, un ordinateur avec 16 Go de RAM et un GPU de 8 Go de mémoire vidéo suffit généralement. Les modèles de 70 milliards exigent plutôt 40 Go de VRAM ou plusieurs cartes – hors de portée de la plupart des portables."],
     ["L'IA locale est-elle aussi performante que ChatGPT ?", "Pas toujours. Les modèles exécutables localement sont souvent moins performants que les grands modèles cloud comme GPT-4 ou Claude, et la vitesse dépend de votre matériel. En revanche, vos données restent sur votre machine."],
     ["Quels logiciels pour débuter ?", "Ollama (en ligne de commande, avec une API) et LM Studio (interface graphique type « ChatGPT hors-ligne ») sont parmi les plus accessibles. GPT4All et Jan visent aussi les débutants."]
 ];
@@ -34,7 +34,7 @@ $jsonLd = [
                     <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 20px;">L'IA locale : faire tourner un modèle de langage sur son ordinateur</h1>
                     <x-fronttheme::page-freshness updated="2026-06-19" />
 
-                    <p><strong>On peut aujourd'hui exécuter des modèles de langage (LLM) directement sur son propre ordinateur, sans passer par le cloud.</strong> Un bon portable suffit pour des modèles de 7 à 14 milliards de paramètres ; les très gros modèles exigent une machine de bureau puissante. L'IA locale séduit par la confidentialité, le coût et le fonctionnement hors-ligne — au prix de quelques compromis.</p>
+                    <p><strong>On peut aujourd'hui exécuter des modèles de langage (LLM) directement sur son propre ordinateur, sans passer par le cloud.</strong> Un bon portable suffit pour des modèles de 7 à 14 milliards de paramètres ; les très gros modèles exigent une machine de bureau puissante. L'IA locale séduit par la confidentialité, le coût et le fonctionnement hors-ligne – au prix de quelques compromis.</p>
                     <p>Pour les développeurs et les PME sensibles à la protection des données, exécuter un modèle localement permet de garder l'information sur place. Le choix dépend de vos besoins, de votre matériel et du niveau de performance attendu.</p>
 
                     <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-top: 32px; margin-bottom: 16px;">Pourquoi exécuter l'IA en local ?</h2>
@@ -61,7 +61,7 @@ $jsonLd = [
                     <ul style="padding-left: 20px; margin: 16px 0;">
                         <li>Modèle ~7-8 milliards : environ 8 Go de VRAM + 16 Go de RAM (très jouable sur un portable récent).</li>
                         <li>Modèle ~13-14 milliards : environ 12 à 16 Go de VRAM + 32 Go de RAM (bon compromis local aujourd'hui).</li>
-                        <li>Modèle ~70 milliards : environ 40 Go de VRAM ou plus (ou plusieurs GPU), 128 Go de RAM et plus si une partie reste sur le processeur — hors de portée de la plupart des portables.</li>
+                        <li>Modèle ~70 milliards : environ 40 Go de VRAM ou plus (ou plusieurs GPU), 128 Go de RAM et plus si une partie reste sur le processeur – hors de portée de la plupart des portables.</li>
                     </ul>
 
                     <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-top: 32px; margin-bottom: 16px;">Les limites à connaître</h2>

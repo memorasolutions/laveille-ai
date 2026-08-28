@@ -17,7 +17,7 @@
 <body>
     <div class="max-w-7xl mx-auto py-8 px-4">
         <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6 text-center text-sm text-amber-800">
-            ⚠️ <strong>Mode TEST LOCAL</strong> — Ce dashboard est accessible sans auth pour validation Playwright. Retiré en prod.
+            ⚠️ <strong>Mode TEST LOCAL</strong> – Ce dashboard est accessible sans auth pour validation Playwright. Retiré en prod.
         </div>
         @livewire('authors.author-dashboard', ['authorProfileId' => $authorProfileId])
     </div>

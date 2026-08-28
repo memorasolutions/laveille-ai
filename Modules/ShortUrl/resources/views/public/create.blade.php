@@ -428,12 +428,12 @@
         $features = [
             ['icon' => '✅', 'title' => __('100% gratuit'), 'desc' => __('Aucune limite pour les membres. Pas de pub.')],
             ['icon' => '📱', 'title' => __('QR code inclus'), 'desc' => __('Chaque lien a son QR code telechargeable et personnalisable.')],
-            ['icon' => '📊', 'title' => __('Statistiques detaillees'), 'desc' => __('Clics, pays, appareils, sources — tout en temps reel.')],
+            ['icon' => '📊', 'title' => __('Statistiques detaillees'), 'desc' => __('Clics, pays, appareils, sources – tout en temps reel.')],
             ['icon' => '🔗', 'title' => __('Slug personnalise'), 'desc' => __('Choisissez votre propre alias memorable.')],
-            ['icon' => '🌐', 'title' => __('Multi-domaines'), 'desc' => __('veille.la, go3.ca — choisissez votre domaine.')],
+            ['icon' => '🌐', 'title' => __('Multi-domaines'), 'desc' => __('veille.la, go3.ca – choisissez votre domaine.')],
             ['icon' => '🔒', 'title' => __('Protection par mot de passe'), 'desc' => __('Restreignez l\'acces a vos liens.')],
             ['icon' => '⏰', 'title' => __('Expiration et limites'), 'desc' => __('Date d\'expiration et nombre max de clics.')],
-            ['icon' => '📈', 'title' => __('Tracking UTM'), 'desc' => __('Source, medium, campagne — integre a Google Analytics.')],
+            ['icon' => '📈', 'title' => __('Tracking UTM'), 'desc' => __('Source, medium, campagne – integre a Google Analytics.')],
             ['icon' => '🖼️', 'title' => __('Preview social'), 'desc' => __('Personnalisez le titre et l\'image pour les reseaux sociaux.')],
         ];
     @endphp
@@ -463,7 +463,7 @@
         <li><strong>{{ __('Medium') }} :</strong> {{ __('le type de canal (ex: social, courriel, publicité)') }}</li>
         <li><strong>{{ __('Campagne') }} :</strong> {{ __('le nom de votre promotion (ex: vente_printemps)') }}</li>
     </ul>
-    <p style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:12px;color:#166534;font-weight:600;font-size:13px;">{{ __('Si vous ne savez pas ce que c\'est, vous n\'en avez pas besoin. Laissez ces champs vides — votre lien fonctionnera très bien quand même !') }}</p>
+    <p style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:12px;color:#166534;font-weight:600;font-size:13px;">{{ __('Si vous ne savez pas ce que c\'est, vous n\'en avez pas besoin. Laissez ces champs vides – votre lien fonctionnera très bien quand même !') }}</p>
 </x-core::modal>
 
 {{-- Modale aide preview social --}}

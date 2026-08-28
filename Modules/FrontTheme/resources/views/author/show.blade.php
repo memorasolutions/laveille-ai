@@ -1,6 +1,6 @@
 @extends('fronttheme::layouts.master')
 
-@section('title', $author['name'] . ' — ' . ($author['role'] ?? __('Auteur')) . ' — La veille')
+@section('title', $author['name'] . ', ' . ($author['role'] ?? __('Auteur')) . ' - La veille')
 @section('meta_description', safe_excerpt($author['bio'] ?? '', 160))
 
 @section('breadcrumb')
@@ -21,7 +21,7 @@
 
                 {{-- H1 EEAT 2026 NN/g : nom + rôle pour signal expertise immédiat --}}
                 <h1 style="margin: 0 0 24px; font-family: var(--f-heading); color: var(--c-dark); font-size: 2rem;">
-                    {{ $author['name'] }} — {{ $author['role'] }}
+                    {{ $author['name'] }} – {{ $author['role'] }}
                 </h1>
 
                 {{-- Intro auteur : photo réelle + bio + boutons sociaux --}}

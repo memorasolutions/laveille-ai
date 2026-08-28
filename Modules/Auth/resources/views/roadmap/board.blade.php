@@ -61,7 +61,7 @@
             <p style="color: #374151; margin: 0 0 6px; font-size: 13px;">{{ Str::limit($idea->description, 200) }}</p>
         @endif
         <div style="font-size: 12px; color: #374151;">
-            {{ __('Par') }} {{ $idea->user->name ?? __('Anonyme') }} — {{ $idea->created_at->diffForHumans() }}
+            {{ __('Par') }} {{ $idea->user->name ?? __('Anonyme') }} – {{ $idea->created_at->diffForHumans() }}
         </div>
     </div>
 </div>

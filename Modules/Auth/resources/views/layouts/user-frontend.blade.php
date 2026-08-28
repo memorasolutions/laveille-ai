@@ -17,7 +17,7 @@
 @if(session('impersonating_original_id'))
 <div class="container" style="padding-top: 15px;">
     <div class="alert alert-warning d-flex align-items-center justify-content-between" role="alert" style="margin-bottom: 0;">
-        <span>⚠️ {{ __('Impersonnification en cours') }} — {{ __('vous naviguez au nom d\'un autre utilisateur.') }}</span>
+        <span>⚠️ {{ __('Impersonnification en cours') }} – {{ __('vous naviguez au nom d\'un autre utilisateur.') }}</span>
         <form method="POST" action="{{ route('admin.impersonate.stop') }}" style="margin: 0;">
             @csrf
             <button type="submit" class="btn btn-sm btn-dark">{{ __('Revenir à mon compte') }}</button>

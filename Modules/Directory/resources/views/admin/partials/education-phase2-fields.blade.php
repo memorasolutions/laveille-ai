@@ -11,7 +11,7 @@
 
 <section aria-labelledby="education-phase2-heading">
     <h2 id="education-phase2-heading" style="color: #1a1a1a; font-size: 1.35rem; font-weight: 700; margin-bottom: 0.25rem;">
-        Plan Éducation — Phase 2
+        Plan Éducation – Phase 2
     </h2>
     <p style="color: #6b7280; font-size: 0.97rem; margin-bottom: 1.25rem;">
         Métadonnées avancées pour la différenciation des outils éducatifs.

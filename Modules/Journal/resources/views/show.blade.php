@@ -170,7 +170,7 @@
             <div class="col-lg-8">
                 @if (! $journal->isPublished())
                     <div class="alert alert-secondary">
-                        Ce journal est un <strong>brouillon privé</strong> — seul(e) vous pouvez le voir tant qu'il n'est pas publié.
+                        Ce journal est un <strong>brouillon privé</strong> – seul(e) vous pouvez le voir tant qu'il n'est pas publié.
                     </div>
                 @endif
 

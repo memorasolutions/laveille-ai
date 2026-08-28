@@ -42,7 +42,7 @@ table.cw-grid td .num { position: absolute; top: 1px; left: 2px; font-size: 6pt;
 <div class="cw-header">
 <div class="brand">
 <div class="brand-name">laveille.ai</div>
-<div class="brand-tag">Générateur de mots croisés — IA & techno Québec</div>
+<div class="brand-tag">Générateur de mots croisés – IA & techno Québec</div>
 </div>
 <div class="meta">
 {{ $generatedAt }}

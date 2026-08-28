@@ -24,7 +24,7 @@
         {{-- Prix (données locales, PAS Stripe) --}}
         <div>
             <label for="price_cents" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Prix <span class="text-gray-400 font-normal">(en cents, ex : 2999 = 29,99&thinsp;$ — laisser vide = gratuit)</span>
+                Prix <span class="text-gray-400 font-normal">(en cents, ex : 2999 = 29,99&thinsp;$ – laisser vide = gratuit)</span>
             </label>
             <input type="number" id="price_cents" name="price_cents" value="{{ old('price_cents', $t?->price_cents) }}" min="0"
                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
@@ -45,7 +45,7 @@
         {{-- Sièges max (paliers organisation) --}}
         <div>
             <label for="max_seats" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Sièges max <span class="text-gray-400 font-normal">(organisation — vide = non applicable)</span>
+                Sièges max <span class="text-gray-400 font-normal">(organisation – vide = non applicable)</span>
             </label>
             <input type="number" id="max_seats" name="max_seats" value="{{ old('max_seats', $t?->max_seats) }}" min="1"
                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
@@ -56,7 +56,7 @@
     {{-- Stripe Price ID — à remplir PLUS TARD par l'admin, jamais généré par le code --}}
     <div>
         <label for="stripe_price_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            ID prix Stripe <span class="text-gray-400 font-normal">(optionnel — à coller quand un vrai prix existe dans Stripe)</span>
+            ID prix Stripe <span class="text-gray-400 font-normal">(optionnel – à coller quand un vrai prix existe dans Stripe)</span>
         </label>
         <input type="text" id="stripe_price_id" name="stripe_price_id" value="{{ old('stripe_price_id', $t?->stripe_price_id) }}"
                placeholder="price_xxx"
@@ -94,7 +94,7 @@
                        class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700">
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Palier par défaut (Freemium)</span>
             </label>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Un seul palier par défaut à la fois — cocher ici décoche automatiquement les autres.</p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Un seul palier par défaut à la fois – cocher ici décoche automatiquement les autres.</p>
         </div>
 
         {{-- Actif --}}

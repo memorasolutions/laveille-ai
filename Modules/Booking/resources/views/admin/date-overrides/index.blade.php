@@ -35,7 +35,7 @@
                             </span>
                         </td>
                         <td>{{ $override->all_day ? 'Oui' : 'Non' }}</td>
-                        <td>{{ !$override->all_day ? $override->start_time . ' – ' . $override->end_time : '—' }}</td>
+                        <td>{{ !$override->all_day ? $override->start_time . ' – ' . $override->end_time : '–' }}</td>
                         <td>{{ Str::limit($override->reason, 40) }}</td>
                         <td>
                             @include('core::components.action-menu', ['actions' => [

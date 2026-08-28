@@ -352,7 +352,7 @@
                         </label>
                         <input type="text" id="pb_subject" x-model="subject" class="form-control"
                                maxlength="45"
-                               placeholder="ex: L'IA en cuisine — 3 usages surprenants">
+                               placeholder="ex: L'IA en cuisine – 3 usages surprenants">
                     </div>
                     <div class="col-md-5">
                         <label for="pb_test_email" class="form-label">
@@ -410,7 +410,7 @@
                     type="button"
                     class="pb-section-header"
                     :aria-expanded="sections[key] && sections[key].mode === 'custom' ? 'true' : 'false'"
-                    :aria-label="'Section ' + meta.label + ' — ' + (sections[key] && sections[key].mode === 'custom' ? 'personnalisée' : 'automatique')"
+                    :aria-label="'Section ' + meta.label + ' – ' + (sections[key] && sections[key].mode === 'custom' ? 'personnalisée' : 'automatique')"
                     x-on:click="toggleSection(key)"
                 >
                     <i :data-lucide="getSectionIcon(key)" style="width:15px;height:15px;flex-shrink:0;" class="text-muted"></i>
@@ -595,7 +595,7 @@
                             <p class="text-muted mt-1 mb-0" style="font-size:.73rem;">
                                 <i data-lucide="database" style="width:11px;height:11px;"></i>
                                 <span x-text="meta.multi ? 'Sélectionnez jusqu\'à ' + (meta.max_items ?? 5) + ' éléments. ' : 'Sélectionnez un élément. '"></span>
-                                ID(s) injectés directement dans le prompt — aucune recherche manuelle requise.
+                                ID(s) injectés directement dans le prompt – aucune recherche manuelle requise.
                             </p>
                         </div>
                     </template>
@@ -610,7 +610,7 @@
                 >
                     <p class="text-muted mb-0" style="font-size:.75rem;">
                         <i data-lucide="check-circle" style="width:12px;height:12px;color:#198754;"></i>
-                        <strong>Automatique</strong> —
+                        <strong>Automatique</strong> –
                         <span x-text="meta.auto_source"></span>
                     </p>
                 </div>
@@ -811,7 +811,7 @@
                         <label for="preset_name" class="form-label">Nom du preset <span class="text-danger" aria-hidden="true">*</span></label>
                         <input type="text" id="preset_name" name="name" class="form-control"
                                required maxlength="150"
-                               placeholder="ex: Newsletter focus PME — ton formel">
+                               placeholder="ex: Newsletter focus PME – ton formel">
                     </div>
                     <div class="form-check">
                         <input type="checkbox" id="preset_is_default" name="is_default" value="1"

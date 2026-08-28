@@ -131,7 +131,7 @@
                                             class="form-control {{ $errors->has('requester_role') ? 'is-invalid' : '' }}"
                                             style="border-radius:8px;box-shadow:none;height:44px;"
                                             aria-describedby="requester_role_help">
-                                            <option value="">{{ __('—') }}</option>
+                                            <option value="">{{ __('–') }}</option>
                                             <option value="titulaire" {{ old('requester_role') == 'titulaire' ? 'selected' : '' }}>{{ __('Titulaire des droits') }}</option>
                                             <option value="mandataire" {{ old('requester_role') == 'mandataire' ? 'selected' : '' }}>{{ __('Mandataire') }}</option>
                                             <option value="avocat" {{ old('requester_role') == 'avocat' ? 'selected' : '' }}>{{ __('Avocat') }}</option>
@@ -156,7 +156,7 @@
                                             class="form-control {{ $errors->has('right_type') ? 'is-invalid' : '' }}"
                                             style="border-radius:8px;box-shadow:none;height:44px;"
                                             aria-describedby="right_type_help">
-                                            <option value="">{{ __('—') }}</option>
+                                            <option value="">{{ __('–') }}</option>
                                             <option value="droit_auteur" {{ old('right_type') == 'droit_auteur' ? 'selected' : '' }}>{{ __('Droit d\'auteur') }}</option>
                                             <option value="marque" {{ old('right_type') == 'marque' ? 'selected' : '' }}>{{ __('Marque de commerce') }}</option>
                                             <option value="vie_privee" {{ old('right_type') == 'vie_privee' ? 'selected' : '' }}>{{ __('Vie privée / données personnelles') }}</option>

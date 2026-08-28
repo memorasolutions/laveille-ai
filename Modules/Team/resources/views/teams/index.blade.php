@@ -69,7 +69,7 @@
                         <td class="d-none d-md-table-cell">
                             <div class="d-flex align-items-center gap-2">
                                 <i data-lucide="crown" class="text-warning" style="width:14px;height:14px"></i>
-                                <span>{{ $team->owner->name ?? '—' }}</span>
+                                <span>{{ $team->owner->name ?? '–' }}</span>
                             </div>
                         </td>
                         <td class="text-center d-none d-lg-table-cell">

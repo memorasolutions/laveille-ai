@@ -24,7 +24,7 @@ return [
         'ch1-eveil-octopus' => [
             'slug' => 'ch1-eveil-octopus',
             'number' => 1,
-            'act' => 'Acte I — Les fondations',
+            'act' => 'Acte I – Les fondations',
             'title' => 'L\'éveil d\'Octopus',
             'subtitle' => 'Comprendre ce qu\'est un grand modèle de langage',
             'icon' => '🌅',

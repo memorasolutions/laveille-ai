@@ -1,7 +1,7 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 
-@section('title', $sigle . ' — Désambiguïsation — ' . config('app.name'))
+@section('title', $sigle . ' : Désambiguïsation - ' . config('app.name'))
 @section('meta_description', 'Le sigle ' . $sigle . ' a plusieurs significations. Choisissez la définition qui vous correspond.')
 @section('og_type', 'article')
 
@@ -155,7 +155,7 @@
 
                         <a href="{{ $ficheUrl }}"
                            class="acr-disamb-card-link"
-                           aria-label="{{ __('Voir la définition de') }} {{ $fiche->acronym }} — {{ $ficheFull }}">
+                           aria-label="{{ __('Voir la définition de') }} {{ $fiche->acronym }} – {{ $ficheFull }}">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                             </svg>
@@ -191,13 +191,13 @@
         $_items[] = [
             '@type' => 'ListItem',
             'position' => $__pos++,
-            'name' => $sigle . ' — ' . $__full,
+            'name' => $sigle . ' – ' . $__full,
             'url' => route('acronyms.show', $__slug),
         ];
     }
     $_itemList = [
         '@type' => 'ItemList',
-        'name' => $sigle . ' — Désambiguïsation',
+        'name' => $sigle . ' : Désambiguïsation',
         'description' => 'Le sigle ' . $sigle . ' a ' . $fiches->count() . ' significations dans le domaine de l\'éducation au Québec.',
         'itemListElement' => $_items,
     ];

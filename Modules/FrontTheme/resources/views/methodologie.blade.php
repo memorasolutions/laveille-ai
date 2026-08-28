@@ -13,7 +13,7 @@
     $methodologieJsonLd = json_encode([
         chr(64).'context' => 'https://schema.org',
         chr(64).'type' => 'Article',
-        'headline' => 'Méthodologie & charte éditoriale — La veille',
+        'headline' => 'Méthodologie & charte éditoriale – La veille',
         'description' => 'Comment La veille évalue les outils IA, source les actualités et garantit son indépendance éditoriale.',
         'datePublished' => '2026-05-09',
         'dateModified' => now()->toIso8601String(),
@@ -95,11 +95,11 @@
                 <h2 style="font-weight: 800; font-size: 24px; margin: 32px 0 14px; color: var(--c-dark);">{{ __('3. Comment les fiches sont notées') }}</h2>
                 <p>{{ __("Chaque fiche outil comprend, lorsque l'information est disponible :") }}</p>
                 <ul style="margin: 12px 0 16px; padding-left: 24px;">
-                    <li><strong>{{ __('Tarification éducation') }}</strong> {{ __('— vérifiée annuellement (gratuit, freemium, rabais ou vérification requise).') }}</li>
-                    <li><strong>{{ __('Niveau de langue') }}</strong> {{ __('— interface FR / EN / multilingue, validé par test direct.') }}</li>
-                    <li><strong>{{ __('Catégorie') }}</strong> {{ __('— assignée selon une taxonomie de 12 catégories majeures.') }}</li>
-                    <li><strong>{{ __('Tutoriels associés') }}</strong> {{ __("— curatés depuis YouTube (chaînes francophones reconnues : École branchée, Alloprof, RÉCIT, Ludovic Nédélec, Le Prof Connecté), validés via YouTube oEmbed.") }}</li>
-                    <li><strong>{{ __('Cycle de vie') }}</strong> {{ __('— actif, en déclin ou fermé (signalé visuellement).') }}</li>
+                    <li><strong>{{ __('Tarification éducation') }}</strong> {{ __('– vérifiée annuellement (gratuit, freemium, rabais ou vérification requise).') }}</li>
+                    <li><strong>{{ __('Niveau de langue') }}</strong> {{ __('– interface FR / EN / multilingue, validé par test direct.') }}</li>
+                    <li><strong>{{ __('Catégorie') }}</strong> {{ __('– assignée selon une taxonomie de 12 catégories majeures.') }}</li>
+                    <li><strong>{{ __('Tutoriels associés') }}</strong> {{ __("– curatés depuis YouTube (chaînes francophones reconnues : École branchée, Alloprof, RÉCIT, Ludovic Nédélec, Le Prof Connecté), validés via YouTube oEmbed.") }}</li>
+                    <li><strong>{{ __('Cycle de vie') }}</strong> {{ __('– actif, en déclin ou fermé (signalé visuellement).') }}</li>
                 </ul>
                 <p>
                     {{ __("Les avis utilisateurs visibles sur les fiches sont modérés : ils n'influencent pas la sélection mais éclairent le choix.") }}

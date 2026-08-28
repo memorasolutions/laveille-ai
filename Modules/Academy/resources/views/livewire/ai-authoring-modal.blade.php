@@ -59,7 +59,7 @@
                                         <li>
                                             {{ $lesson['title'] ?? '' }}
                                             @if (!empty($lesson['objective']))
-                                                <span class="text-muted small"> — {{ $lesson['objective'] }}</span>
+                                                <span class="text-muted small"> – {{ $lesson['objective'] }}</span>
                                             @endif
                                         </li>
                                     @endforeach
@@ -87,7 +87,7 @@
 
         @if ($outlineInserted)
             <div class="alert alert-success mt-3 py-2" role="alert">
-                Plan inséré en brouillon — visible et éditable dans la structure du cours ci-dessous.
+                Plan inséré en brouillon – visible et éditable dans la structure du cours ci-dessous.
             </div>
         @endif
     </section>

@@ -1,7 +1,7 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 
-@section('title', 'Brain Dump 2026 — 10 min de papier + 30 sec d\'IA · La veille')
+@section('title', 'Brain Dump 2026 : 10 min de papier + 30 sec d\'IA · La veille')
 @section('meta_description', 'Outil gratuit pour décharger ton mental en 10 minutes papier + IA. Validé par la science (Mueller & Oppenheimer 2014). 100% privé, aucune donnée chez nous.')
 
 @section('breadcrumb')
@@ -9,7 +9,7 @@
 @endsection
 
 @section('og_type', 'website')
-@section('share_text', 'Brain Dump 2026 — 10 min de papier + 30 sec d\'IA pour vider et structurer ton mental.')
+@section('share_text', 'Brain Dump 2026 : 10 min de papier + 30 sec d\'IA pour vider et structurer ton mental.')
 @if(isset($tool) && $tool->featured_image)
 @section('og_image', asset($tool->featured_image) . '?v=' . (file_exists(public_path($tool->featured_image)) ? filemtime(public_path($tool->featured_image)) : '1'))
 @endif
@@ -46,8 +46,8 @@
                     ['@type' => 'HowToStep', 'position' => 1, 'name' => 'Papier + stylo, 10 minutes', 'text' => "Vide tout ce qui occupe ton esprit. Pas de jugement, pas d'ordre, juste sortir."],
                     ['@type' => 'HowToStep', 'position' => 2, 'name' => 'Biffer le sensible', 'text' => "Biffe ou plie les passages sensibles (santé, finances, conflits RH, données tiers) avant la photo. Protection Loi 25 d'abord."],
                     ['@type' => 'HowToStep', 'position' => 3, 'name' => 'Photo téléphone', 'text' => "Prends une photo de la page avec un cadrage net. Ton IA va lire l'écriture manuscrite."],
-                    ['@type' => 'HowToStep', 'position' => 4, 'name' => 'Lancer le prompt IA', 'text' => "Copie la Partie 1 (transcription) + Partie 2 (analyse) dans ton IA préférée — chain prompting validé en 2 étapes."],
-                    ['@type' => 'HowToStep', 'position' => 5, 'name' => 'Sauvegarde et relecture', 'text' => "Sauvegarde dans ton app notes préférée. Relis 24 h plus tard — les vrais insights émergent souvent à J+1."],
+                    ['@type' => 'HowToStep', 'position' => 4, 'name' => 'Lancer le prompt IA', 'text' => "Copie la Partie 1 (transcription) + Partie 2 (analyse) dans ton IA préférée – chain prompting validé en 2 étapes."],
+                    ['@type' => 'HowToStep', 'position' => 5, 'name' => 'Sauvegarde et relecture', 'text' => "Sauvegarde dans ton app notes préférée. Relis 24 h plus tard – les vrais insights émergent souvent à J+1."],
                 ],
             ],
             [
@@ -58,7 +58,7 @@
                     ['@type' => 'Question', 'name' => "Le Brain Dump fonctionne-t-il pour l'anxiété ?", 'acceptedAnswer' => ['@type' => 'Answer', 'text' => "Les recherches de James Pennebaker (1997-2018) sur l'expressive writing montrent que l'écriture libre régulière réduit les symptômes anxieux. La version 2026 avec IA aide à transformer le brouillon en actions, ce qui amplifie l'effet déchargement."]],
                     ['@type' => 'Question', 'name' => 'Quelle IA est la meilleure pour transcrire un manuscrit en 2026 ?', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => "En mai 2026, Apple Intelligence Notes (OCR on-device), Claude Vision (Anthropic) et Google Lens offrent les meilleures précisions sur le manuscrit cursif standard. Pour le maximum d'intimité, l'OCR on-device (Apple) garde tes données sur l'appareil."]],
                     ['@type' => 'Question', 'name' => 'Mes notes manuscrites sont-elles privées ?', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => "L'outil laveille.ai est 100% côté navigateur : aucune donnée n'est envoyée à nos serveurs. Le prompt va directement dans l'IA que tu choisis. Pour la protection Loi 25 maximale, biffe les passages sensibles avant la photo et privilégie un OCR on-device."]],
-                    ['@type' => 'Question', 'name' => 'Tablette ou papier — lequel est mieux ?', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => "Les recherches en neurosciences (Van der Meer et al., 2024, Frontiers in Psychology) suggèrent que l'écriture manuscrite sur papier active plus de zones cérébrales liées à la mémoire que l'écriture sur tablette. Mais une tablette avec stylet reste meilleure que le clavier pour la décharge mentale."]],
+                    ['@type' => 'Question', 'name' => 'Tablette ou papier – lequel est mieux ?', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => "Les recherches en neurosciences (Van der Meer et al., 2024, Frontiers in Psychology) suggèrent que l'écriture manuscrite sur papier active plus de zones cérébrales liées à la mémoire que l'écriture sur tablette. Mais une tablette avec stylet reste meilleure que le clavier pour la décharge mentale."]],
                     ['@type' => 'Question', 'name' => 'Quelle est la différence avec un journal classique ?', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => "Le journal classique est narratif et chronologique. Le Brain Dump est libre, sans structure, et conçu pour la décharge rapide. La version 2026 ajoute l'IA pour transformer le brouillon en actions, ce qui sort le carnet du tiroir."]],
                 ],
             ],
@@ -411,7 +411,7 @@
     <section class="bd-section bd-section--alt" aria-labelledby="bd-tool-h2" id="bd-tool">
         <div class="bd-container">
             <div class="bd-tool">
-                <span class="bd-tool__label">Étape 2 — Prompt IA</span>
+                <span class="bd-tool__label">Étape 2 – Prompt IA</span>
                 <h2 id="bd-tool-h2">Le prompt prêt à l'emploi</h2>
                 <p class="bd-tool__intro">Deux blocs à copier-coller dans la <strong>même conversation</strong> avec ton IA préférée, l'un après l'autre.</p>
 
@@ -426,7 +426,7 @@
                 </div>
 
                 {{-- Partie 1 --}}
-                <span class="bd-tool__partlabel"><span class="bd-tool__partlabel__num">1</span> Partie 1 — Transcription</span>
+                <span class="bd-tool__partlabel"><span class="bd-tool__partlabel__num">1</span> Partie 1 – Transcription</span>
                 <p class="bd-tool__prenote">Colle ce premier bloc + joins ta photo à la même conversation :</p>
                 <div class="bd-tool__codeblock" x-ref="part1" x-html="part1Html"></div>
                 <button type="button" class="bd-tool__copy" @click="copyPart(1)" x-text="copiedPart === 1 ? '✓ Copié !' : '📋 Copier la Partie 1'"></button>
@@ -435,7 +435,7 @@
                 <hr class="bd-tool__divider">
 
                 {{-- Partie 2 — Mad Libs avec chips inline cliquables --}}
-                <span class="bd-tool__partlabel"><span class="bd-tool__partlabel__num">2</span> Partie 2 — Analyse (personnalisable)</span>
+                <span class="bd-tool__partlabel"><span class="bd-tool__partlabel__num">2</span> Partie 2 – Analyse (personnalisable)</span>
                 <p class="bd-tool__prenote">Adapte les <strong>5 réglages bleus</strong> selon ton contexte, puis copie le prompt :</p>
 
                 <div class="bd-madlibs">
@@ -458,7 +458,7 @@
                                 <span class="bd-popover__hint">Sélectionne celles à appliquer (min 2).</span>
                             </span>
                         </span>.
-                        Format : « ligne → catégorie — justification (5-10 mots) ».
+                        Format : « ligne → catégorie – justification (5-10 mots) ».
                     </p>
 
                     <p><span class="bd-madlibs__num">2.</span> Identifie les
@@ -477,7 +477,7 @@
                         patterns récurrents (thèmes qui reviennent même formulés différemment).
                     </p>
 
-                    <p><span class="bd-madlibs__num">3.</span> Propose 1 insight non-évident — quelque chose que je n'ai probablement pas vu en l'écrivant. Justifie en 1-2 phrases.</p>
+                    <p><span class="bd-madlibs__num">3.</span> Propose 1 insight non-évident – quelque chose que je n'ai probablement pas vu en l'écrivant. Justifie en 1-2 phrases.</p>
 
                     <p><span class="bd-madlibs__num">4.</span> Donne-moi
                         {{-- CHIP 3 : Nombre actions --}}
@@ -529,14 +529,14 @@
                 </div>
 
                 <button type="button" class="bd-tool__copy" @click="copyPart(2)" x-text="copiedPart === 2 ? '✓ Copié !' : '📋 Copier le prompt'"></button>
-                <p class="bd-tool__postnote">↳ L'analyse s'appuie sur ton texte validé + justifie chaque étape — chain-of-thought 2026 best practice.</p>
+                <p class="bd-tool__postnote">↳ L'analyse s'appuie sur ton texte validé + justifie chaque étape – chain-of-thought 2026 best practice.</p>
 
                 <hr class="bd-tool__divider">
 
                 {{-- Open-in AI --}}
                 <div>
                     <x-tools::open-in-ai :prompt="$openInAIPrompt ?? ''" :show-label="false" />
-                    <p class="bd-tool__tip">Astuce : commence par <strong>copier la Partie 1</strong> ci-dessus, puis clique sur ton IA préférée — le bouton ouvre l'outil et tu n'as qu'à coller (Ctrl/Cmd + V).</p>
+                    <p class="bd-tool__tip">Astuce : commence par <strong>copier la Partie 1</strong> ci-dessus, puis clique sur ton IA préférée – le bouton ouvre l'outil et tu n'as qu'à coller (Ctrl/Cmd + V).</p>
                 </div>
             </div>
         </div>
@@ -545,7 +545,7 @@
     {{-- COMMENT ÇA MARCHE (HowTo Schema.org) --}}
     <section class="bd-section" aria-labelledby="bd-how-h2" id="bd-how">
         <div class="bd-container">
-            <h2 id="bd-how-h2">Comment ça marche — 5 étapes</h2>
+            <h2 id="bd-how-h2">Comment ça marche – 5 étapes</h2>
             <p class="bd-section__lead">La méthode complète prend 15-20 minutes. Tu peux la faire chaque matin, chaque soir ou quand ta tête déborde.</p>
             <div class="bd-steps">
                 <div class="bd-step">
@@ -556,7 +556,7 @@
                 <div class="bd-step">
                     <div class="bd-step__num">2</div>
                     <h3>Biffer le sensible</h3>
-                    <p>Avant la photo, biffe ou plie les passages sensibles (santé, finances, conflits, données tiers) — Loi 25 d'abord.</p>
+                    <p>Avant la photo, biffe ou plie les passages sensibles (santé, finances, conflits, données tiers) – Loi 25 d'abord.</p>
                 </div>
                 <div class="bd-step">
                     <div class="bd-step__num">3</div>
@@ -566,12 +566,12 @@
                 <div class="bd-step">
                     <div class="bd-step__num">4</div>
                     <h3>Prompt IA Partie 1 + Partie 2</h3>
-                    <p>Copie les 2 blocs ci-dessus dans ton IA préférée — transcription d'abord, puis analyse chain-of-thought.</p>
+                    <p>Copie les 2 blocs ci-dessus dans ton IA préférée – transcription d'abord, puis analyse chain-of-thought.</p>
                 </div>
                 <div class="bd-step">
                     <div class="bd-step__num">5</div>
                     <h3>Sauvegarde et relecture</h3>
-                    <p>Sauvegarde dans ton app notes préférée. Relis 24 h plus tard — les vrais insights émergent à J+1.</p>
+                    <p>Sauvegarde dans ton app notes préférée. Relis 24 h plus tard – les vrais insights émergent à J+1.</p>
                 </div>
             </div>
         </div>
@@ -581,7 +581,7 @@
     <section class="bd-section bd-section--alt" aria-labelledby="bd-science-h2" id="bd-science">
         <div class="bd-container">
             <h2 id="bd-science-h2">La science derrière le Brain Dump</h2>
-            <p class="bd-section__lead">Trois études fondatrices expliquent pourquoi le papier reste supérieur au clavier pour la décharge mentale — et pourquoi 2026 change la donne avec l'IA.</p>
+            <p class="bd-section__lead">Trois études fondatrices expliquent pourquoi le papier reste supérieur au clavier pour la décharge mentale – et pourquoi 2026 change la donne avec l'IA.</p>
 
             <article class="bd-citation">
                 <p class="bd-citation__author">Mueller & Oppenheimer <span class="bd-citation__year">(2014)</span></p>
@@ -593,14 +593,14 @@
             <article class="bd-citation">
                 <p class="bd-citation__author">James Pennebaker <span class="bd-citation__year">(1997, mis à jour 2018)</span></p>
                 <p class="bd-citation__quote">« Writing about emotional experiences, even for as little as 15 minutes a day, can produce significant improvements in mental health. »</p>
-                <p class="bd-citation__source">30 ans de recherche sur l'expressive writing — réduction documentée du stress, anxiété, symptômes dépressifs.<br>
+                <p class="bd-citation__source">30 ans de recherche sur l'expressive writing – réduction documentée du stress, anxiété, symptômes dépressifs.<br>
                 <em>Pennebaker, J. W., & Smyth, J. M. (2016). Opening Up by Writing It Down (3<sup>e</sup> éd.). Guilford Press.</em></p>
             </article>
 
             <article class="bd-citation">
                 <p class="bd-citation__author">Van der Meer et al. <span class="bd-citation__year">(2024)</span></p>
                 <p class="bd-citation__quote">« Handwriting activates broader connectivity patterns in the brain than typing, particularly in regions associated with learning and memory. »</p>
-                <p class="bd-citation__source">EEG comparant écriture manuscrite vs clavier — l'activité cérébrale liée à la mémoire est significativement plus large à la main.<br>
+                <p class="bd-citation__source">EEG comparant écriture manuscrite vs clavier – l'activité cérébrale liée à la mémoire est significativement plus large à la main.<br>
                 <em>Frontiers in Psychology, 15, 1219945.</em> <a href="https://www.frontiersin.org/journals/psychology" target="_blank" rel="noopener">Frontiers in Psychology</a></p>
             </article>
 
@@ -614,21 +614,21 @@
     <section class="bd-section" aria-labelledby="bd-profiles-h2" id="bd-profiles">
         <div class="bd-container">
             <h2 id="bd-profiles-h2">Quelle IA utiliser ?</h2>
-            <p class="bd-section__lead">Pas besoin d'app OCR séparée. <strong>Toutes les grandes IA acceptent ta photo directement</strong> et la transcrivent. Voici les 5 meilleures en mai 2026 — à toi de choisir selon ton outil habituel.</p>
+            <p class="bd-section__lead">Pas besoin d'app OCR séparée. <strong>Toutes les grandes IA acceptent ta photo directement</strong> et la transcrivent. Voici les 5 meilleures en mai 2026 – à toi de choisir selon ton outil habituel.</p>
             <div class="bd-profiles">
-                <div class="bd-profile"><strong>💬 ChatGPT</strong> — Le plus populaire. Glisse-dépose ta photo dans la conversation, l'IA fait tout. Compte gratuit suffisant pour 1-2 brain dumps par jour.</div>
-                <div class="bd-profile"><strong>🟣 Claude (Anthropic)</strong> — Le plus précis pour le manuscrit cursif et la nuance contextuelle. Réponses plus longues et structurées. Compte gratuit disponible.</div>
-                <div class="bd-profile"><strong>✨ Gemini (Google)</strong> — Intégré à Google Workspace. Excellent si tu utilises déjà Gmail / Docs / Keep. 100 % gratuit avec un compte Google.</div>
-                <div class="bd-profile"><strong>🔵 Microsoft Copilot</strong> — Inclus dans Microsoft 365 si tu y es déjà abonné. Bon écosystème pour transférer ensuite vers OneNote / To Do.</div>
-                <div class="bd-profile"><strong>🟢 Perplexity</strong> — Si tu veux que l'IA enrichisse ton brain dump avec des sources web fraîches (utile quand tes notes mentionnent des sujets à creuser).</div>
+                <div class="bd-profile"><strong>💬 ChatGPT</strong> – Le plus populaire. Glisse-dépose ta photo dans la conversation, l'IA fait tout. Compte gratuit suffisant pour 1-2 brain dumps par jour.</div>
+                <div class="bd-profile"><strong>🟣 Claude (Anthropic)</strong> – Le plus précis pour le manuscrit cursif et la nuance contextuelle. Réponses plus longues et structurées. Compte gratuit disponible.</div>
+                <div class="bd-profile"><strong>✨ Gemini (Google)</strong> – Intégré à Google Workspace. Excellent si tu utilises déjà Gmail / Docs / Keep. 100 % gratuit avec un compte Google.</div>
+                <div class="bd-profile"><strong>🔵 Microsoft Copilot</strong> – Inclus dans Microsoft 365 si tu y es déjà abonné. Bon écosystème pour transférer ensuite vers OneNote / To Do.</div>
+                <div class="bd-profile"><strong>🟢 Perplexity</strong> – Si tu veux que l'IA enrichisse ton brain dump avec des sources web fraîches (utile quand tes notes mentionnent des sujets à creuser).</div>
             </div>
-            <p class="bd-profile__note">🔒 <strong>Privacy :</strong> dans tous les cas, ta photo va directement de ton appareil à l'IA — laveille.ai ne voit jamais rien. Pour la Loi 25 maximale : biffe les passages sensibles avant la photo et privilégie un compte payant (politiques de rétention plus strictes).</p>
+            <p class="bd-profile__note">🔒 <strong>Privacy :</strong> dans tous les cas, ta photo va directement de ton appareil à l'IA – laveille.ai ne voit jamais rien. Pour la Loi 25 maximale : biffe les passages sensibles avant la photo et privilégie un compte payant (politiques de rétention plus strictes).</p>
 
             {{-- Bonus 24h --}}
             <div class="bd-bonus">
                 <span class="bd-bonus__label">💡 Bonus boucle 24 h</span>
                 <h3>Relis ton dump le lendemain avec l'IA</h3>
-                <p>Demande à ton IA : <em>« Quels 3 insights ressortent en relisant ce brain dump 24 h plus tard ? Quel pattern récurrent vs la semaine dernière ? »</em> — la distance temporelle révèle ce que la mer agitée masquait.</p>
+                <p>Demande à ton IA : <em>« Quels 3 insights ressortent en relisant ce brain dump 24 h plus tard ? Quel pattern récurrent vs la semaine dernière ? »</em> – la distance temporelle révèle ce que la mer agitée masquait.</p>
             </div>
         </div>
     </section>
@@ -646,7 +646,7 @@
                     ['q' => 'Le Brain Dump fonctionne-t-il pour l\'anxiété ?', 'a' => 'Les recherches de James Pennebaker (1997-2018) sur l\'expressive writing montrent que l\'écriture libre régulière réduit les symptômes anxieux. La version 2026 avec IA aide à transformer le brouillon en actions concrètes, ce qui amplifie l\'effet déchargement.'],
                     ['q' => 'Quelle IA est la meilleure pour transcrire un manuscrit en 2026 ?', 'a' => 'En mai 2026, Apple Intelligence Notes (OCR on-device), Claude Vision (Anthropic) et Google Lens offrent les meilleures précisions sur le manuscrit cursif standard. Pour le maximum d\'intimité, l\'OCR on-device (Apple) garde tes données sur l\'appareil.'],
                     ['q' => 'Mes notes manuscrites sont-elles privées ?', 'a' => 'L\'outil laveille.ai est 100 % côté navigateur : aucune donnée n\'est envoyée à nos serveurs. Le prompt va directement dans l\'IA que tu choisis. Pour la protection Loi 25 maximale, biffe les passages sensibles avant la photo et privilégie un OCR on-device.'],
-                    ['q' => 'Tablette ou papier — lequel est mieux ?', 'a' => 'Les recherches en neurosciences (Van der Meer et al., 2024, Frontiers in Psychology) suggèrent que l\'écriture manuscrite sur papier active plus de zones cérébrales liées à la mémoire que l\'écriture sur tablette. Mais une tablette avec stylet reste meilleure que le clavier pour la décharge mentale.'],
+                    ['q' => 'Tablette ou papier – lequel est mieux ?', 'a' => 'Les recherches en neurosciences (Van der Meer et al., 2024, Frontiers in Psychology) suggèrent que l\'écriture manuscrite sur papier active plus de zones cérébrales liées à la mémoire que l\'écriture sur tablette. Mais une tablette avec stylet reste meilleure que le clavier pour la décharge mentale.'],
                     ['q' => 'Quelle est la différence avec un journal classique ?', 'a' => 'Le journal classique est narratif et chronologique. Le Brain Dump est libre, sans structure, et conçu pour la décharge rapide. La version 2026 ajoute l\'IA pour transformer le brouillon en actions, ce qui sort le carnet du tiroir.'],
                 ];
             @endphp
@@ -738,7 +738,7 @@ function brainDumpPage() {
         },
 
         // Prompts
-        part1: "Tu es un transcripteur OCR précis. La photo que je viens de joindre à ce message est un brain dump manuscrit que je viens de faire. Transcris-le fidèlement en texte simple, ligne par ligne, en respectant l'ordre. Ne reformule pas, ne corrige pas l'orthographe — donne-moi le brut. Si une ligne est illisible, indique [???] et continue.",
+        part1: "Tu es un transcripteur OCR précis. La photo que je viens de joindre à ce message est un brain dump manuscrit que je viens de faire. Transcris-le fidèlement en texte simple, ligne par ligne, en respectant l'ordre. Ne reformule pas, ne corrige pas l'orthographe – donne-moi le brut. Si une ligne est illisible, indique [???] et continue.",
         get part1Html() { return this._renderPrompt(this.part1); },
         _renderPrompt(text) {
             var escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -785,9 +785,9 @@ function brainDumpPage() {
         get part2() {
             return "Tu es un coach en clarté mentale. À partir de la transcription validée juste au-dessus, réfléchis étape par étape avant de répondre. Pour chaque catégorisation, justifie ton choix en 1 phrase brève.\n\n"
                 + "1. Classe chaque ligne en " + this.categoriesCount + " catégories : " + this.categoriesText + ".\n"
-                + "   Format : « ligne → catégorie — justification (5-10 mots) ».\n"
+                + "   Format : « ligne → catégorie – justification (5-10 mots) ».\n"
                 + "2. Identifie les " + this.chips.nbPatterns + " patterns récurrents (thèmes qui reviennent même formulés différemment).\n"
-                + "3. Propose 1 insight non-évident — quelque chose que je n'ai probablement pas vu en l'écrivant. Justifie en 1-2 phrases.\n"
+                + "3. Propose 1 insight non-évident – quelque chose que je n'ai probablement pas vu en l'écrivant. Justifie en 1-2 phrases.\n"
                 + "4. Donne-moi " + this.chips.nbActions + " actions concrètes prioritaires pour " + this.chips.horizon + ". Pour chaque action : verbe d'action + résultat attendu en 1 ligne.\n\n"
                 + "Ton : " + this.toneFullText + ".";
         },

@@ -137,7 +137,7 @@
                     <div class="mb-3">
                         <label for="category-select" class="form-label">Catégorie</label>
                         <select id="category-select" name="category_id" class="form-select" aria-label="Sélectionner une catégorie">
-                            <option value="">— Sélectionner —</option>
+                            <option value="">– Sélectionner –</option>
                             @foreach($categories as $cat)
                                 <option value="{{ $cat->id }}" {{ old('category_id', $article->category_id) == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
                             @endforeach

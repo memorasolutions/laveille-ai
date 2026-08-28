@@ -1,5 +1,5 @@
 @extends(fronttheme_layout())
-@section('title','Motdle — le mot tech du jour - '.config('app.name'))
+@section('title','Motdle : le mot tech du jour - '.config('app.name'))
 @section('meta_description','Devinez le mot tech/IA du jour en 6 essais. Jeu de mots quotidien gratuit en français.')
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb',['breadcrumbTitle'=>'Motdle','breadcrumbItems'=>[__('Outils'),'Motdle']])
@@ -79,7 +79,7 @@
                         </div>
 
                         <div x-show="gameOver" x-cloak x-transition style="margin-top:24px;text-align:center;">
-                            <p x-text="won ? 'Bravo !' : 'Perdu — le mot était ' + display" style="font-weight:600;color:var(--c-primary);font-size:1.1rem;"></p>
+                            <p x-text="won ? 'Bravo !' : 'Perdu – le mot était ' + display" style="font-weight:600;color:var(--c-primary);font-size:1.1rem;"></p>
                             <p><strong x-text="display" style="font-size:1.3rem;color:var(--c-dark);"></strong></p>
                             <p x-show="glossaryDef" x-text="glossaryDef" style="color:var(--c-text-secondary);"></p>
                             <p x-show="glossarySlug">
@@ -246,7 +246,7 @@ function motdleApp(payload) {
                 this.message = 'Bravo !';
             } else if (this.current >= 6) {
                 this.gameOver = true;
-                this.message = 'Perdu — le mot était ' + this.display;
+                this.message = 'Perdu – le mot était ' + this.display;
             } else {
                 this.message = '';
             }
@@ -309,7 +309,7 @@ window.HELP_CONTENT = Object.assign(window.HELP_CONTENT || {}, {
       + "<li><span style='display:inline-block;width:16px;height:16px;background:#B7791F;border-radius:3px;vertical-align:middle;margin-right:8px;'></span><strong>Jaune</strong> : la lettre est dans le mot, mais ailleurs.</li>"
       + "<li><span style='display:inline-block;width:16px;height:16px;background:#6B7280;border-radius:3px;vertical-align:middle;margin-right:8px;'></span><strong>Gris</strong> : la lettre n'est pas dans le mot.</li>"
       + "</ul>"
-      + "<p><strong>Exemple</strong> — si le mot à trouver est CHAT et que vous proposez CAFE : le C devient vert (bien placé), le A devient jaune (présent mais ailleurs), et F et E deviennent gris (absents).</p>"
+      + "<p><strong>Exemple</strong> – si le mot à trouver est CHAT et que vous proposez CAFE : le C devient vert (bien placé), le A devient jaune (présent mais ailleurs), et F et E deviennent gris (absents).</p>"
       + "<p>Un nouveau mot tech chaque jour. La première lettre est donnée en indice, et les accents ne comptent pas.</p>"
   }
 });

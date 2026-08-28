@@ -31,7 +31,7 @@
                             class="form-select form-select-sm d-inline-block"
                             style="width:auto; max-width: 240px; vertical-align: baseline;"
                             aria-label="Trou {{ $k + 1 }}" required>
-                        <option value="">— Choisir —</option>
+                        <option value="">– Choisir –</option>
                         @foreach(($seg['choices'] ?? []) as $ci => $choice)
                             <option value="{{ $ci }}">{{ $choice }}</option>
                         @endforeach

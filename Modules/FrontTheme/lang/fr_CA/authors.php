@@ -15,8 +15,8 @@ declare(strict_types=1);
 return [
     'stephane-lapointe' => [
         'name' => 'Stéphane Lapointe',
-        'role' => 'Expert IA Québec — Gouvernance numérique',
-        'bio' => 'Stéphane Lapointe, fondateur de MEMORA solutions à L\'Ancienne-Lorette (Québec), expert en gouvernance numérique depuis plus de 20 ans. Auteur de « L\'IA sans se faire poursuivre — Le guide pratique pour PME et professionnels » (Édition 2026). Spécialiste de la conformité Loi 25, RGPD et AI Act pour les organisations francophones.',
+        'role' => 'Expert IA Québec – Gouvernance numérique',
+        'bio' => 'Stéphane Lapointe, fondateur de MEMORA solutions à L\'Ancienne-Lorette (Québec), expert en gouvernance numérique depuis plus de 20 ans. Auteur de « L\'IA sans se faire poursuivre – Le guide pratique pour PME et professionnels » (Édition 2026). Spécialiste de la conformité Loi 25, RGPD et AI Act pour les organisations francophones.',
         'linkedin' => 'https://www.linkedin.com/in/lapointestephane',
         'twitter' => '',
         'website' => 'https://memora.solutions',

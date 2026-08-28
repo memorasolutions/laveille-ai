@@ -71,7 +71,7 @@
                 @error('author_url') <p class="sub-error">{{ $message }}</p> @enderror
 
                 {{-- Upload fichier --}}
-                <label class="sub-label">{{ __('Document joint') }} <small style="color: #6B7280; font-weight: 400;">({{ __('optionnel — MD, Word ou PDF, max 5 Mo') }})</small></label>
+                <label class="sub-label">{{ __('Document joint') }} <small style="color: #6B7280; font-weight: 400;">({{ __('optionnel – MD, Word ou PDF, max 5 Mo') }})</small></label>
                 <div x-data="{ fileName: '' }" style="margin-bottom: 16px;">
                     <div @dragover.prevent @drop.prevent="fileName = $event.dataTransfer.files[0]?.name; $refs.fileInput.files = $event.dataTransfer.files"
                          style="border: 2px dashed #D1D5DB; border-radius: var(--r-base); padding: 24px; text-align: center; cursor: pointer; transition: border-color 0.2s; position: relative;"
@@ -79,7 +79,7 @@
                          onmouseover="this.style.borderColor='var(--c-primary)'" onmouseout="this.style.borderColor='#D1D5DB'">
                         <div style="font-size: 28px; margin-bottom: 6px;">📎</div>
                         <p style="color: #6B7280; margin: 0; font-size: 14px;">{{ __('Glissez votre fichier ici ou cliquez pour parcourir') }}</p>
-                        <p style="color: #6B7280; font-size: 12px; margin: 4px 0 0;">{{ __('.md, .doc, .docx, .pdf — max 5 Mo') }}</p>
+                        <p style="color: #6B7280; font-size: 12px; margin: 4px 0 0;">{{ __('.md, .doc, .docx, .pdf – max 5 Mo') }}</p>
                         <p x-show="fileName" x-cloak style="margin-top: 10px; color: var(--c-primary); font-weight: 600; font-size: 14px;" x-text="'📄 ' + fileName"></p>
                         <input type="file" name="article_file" x-ref="fileInput" accept=".md,.doc,.docx,.pdf" @change="fileName = $el.files[0]?.name" style="display: none;">
                     </div>

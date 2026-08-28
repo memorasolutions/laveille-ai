@@ -49,7 +49,7 @@
                                     style="background: #fff; border: 1px solid #E2E8F0; font-size: 0.85rem;">
                                     <strong>{{ $this->violationLabel($violation->type) }}</strong>
                                     <span class="text-muted">
-                                        — {{ $violation->occurred_at?->timezone('America/Toronto')?->format('Y-m-d H:i:s') }}
+                                        – {{ $violation->occurred_at?->timezone('America/Toronto')?->format('Y-m-d H:i:s') }}
                                     </span>
                                 </li>
                             @endforeach

@@ -37,7 +37,7 @@
             <span x-show="hasLinks && !hasHTML">{{ __('Lien externe détecté') }}</span>
             <span x-show="hasHTML && !hasLinks">{{ __('Code HTML détecté') }}</span>
             <span x-show="hasLinks && hasHTML">{{ __('Lien externe et code HTML détectés') }}</span>
-            — {{ __('Les balises HTML seront retirées et le commentaire sera placé en modération avant publication.') }}
+            – {{ __('Les balises HTML seront retirées et le commentaire sera placé en modération avant publication.') }}
         </div>
 
         <button wire:click="addComment" class="btn btn-sm" wire:loading.attr="disabled" style="background: var(--c-accent); color: #fff;">

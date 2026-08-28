@@ -48,7 +48,7 @@
                                            {{ $checked ? 'checked' : '' }}
                                            style="width: 18px; height: 18px; cursor: pointer;">
                                 @else
-                                    <span style="color: #ccc;">—</span>
+                                    <span style="color: #ccc;">–</span>
                                 @endif
                             </td>
                         @endforeach

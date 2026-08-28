@@ -157,7 +157,7 @@
                         <ul style="margin: 8px 0 0; padding-left: 20px;">
                             <li>{{ $importReport['enrolled'] }} inscription(s) créée(s)</li>
                             <li>{{ $importReport['already'] }} déjà inscrit(s) (aucune modification)</li>
-                            <li>{{ count($importReport['unknown_emails']) }} courriel(s) inconnu(s) — aucun compte créé</li>
+                            <li>{{ count($importReport['unknown_emails']) }} courriel(s) inconnu(s) – aucun compte créé</li>
                             <li>{{ $importReport['invalid'] }} ligne(s) ignorée(s) (courriel invalide)</li>
                         </ul>
                         @if (! empty($importReport['unknown_emails']))
@@ -191,7 +191,7 @@
                       style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin-bottom: 18px;">
                     <div style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 6px;">
                         <label for="cohort-name" style="font-weight: 600; font-size: 0.85rem;">Nom de la nouvelle cohorte</label>
-                        <input id="cohort-name" type="text" wire:model="cohortName" autocomplete="off" placeholder="Groupe A — automne 2026"
+                        <input id="cohort-name" type="text" wire:model="cohortName" autocomplete="off" placeholder="Groupe A – automne 2026"
                                style="width: 100%; padding: 9px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem);">
                         @error('cohortName') <span style="color: var(--sys-action-danger, #DC2626); font-size: 0.85rem;">{{ $message }}</span> @enderror
                     </div>
@@ -206,7 +206,7 @@
                             <label for="assign-cohort" style="font-weight: 600; font-size: 0.85rem;">Cohorte</label>
                             <select id="assign-cohort" wire:model="assignCohortId"
                                     style="width: 100%; padding: 9px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); background: #FFFFFF;">
-                                <option value="">— Choisir —</option>
+                                <option value="">– Choisir –</option>
                                 @foreach ($this->cohorts as $cohort)
                                     <option value="{{ $cohort->id }}">{{ $cohort->name }}</option>
                                 @endforeach
@@ -217,7 +217,7 @@
                             <label for="assign-enrollee" style="font-weight: 600; font-size: 0.85rem;">Personne inscrite</label>
                             <select id="assign-enrollee" wire:model="assignEnrollmentUserId"
                                     style="width: 100%; padding: 9px 12px; border: 1px solid #D1D5DB; border-radius: var(--sys-radius-md, 0.5rem); background: #FFFFFF;">
-                                <option value="">— Choisir —</option>
+                                <option value="">– Choisir –</option>
                                 @foreach ($this->activeEnrollees as $enrollee)
                                     <option value="{{ $enrollee->user_id }}">{{ $enrollee->user?->name ?? $enrollee->user?->email ?? '-' }}</option>
                                 @endforeach

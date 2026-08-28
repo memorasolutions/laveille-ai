@@ -306,7 +306,7 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                                 <div style="max-height: 200px; overflow-y: auto;">
                                     <template x-for="(h, i) in history" :key="i">
                                         <div class="d-flex justify-content-between py-1 border-bottom" style="font-size: 0.8rem;">
-                                            <span><strong x-text="'#' + (history.length - i)"></strong> — <span x-text="h.name"></span></span>
+                                            <span><strong x-text="'#' + (history.length - i)"></strong> – <span x-text="h.name"></span></span>
                                             <small class="text-muted" x-text="h.date"></small>
                                         </div>
                                     </template>

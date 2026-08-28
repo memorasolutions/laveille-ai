@@ -66,7 +66,7 @@
                             </td>
                             <td style="padding:12px;">
                                 <strong style="color:#064E5A;">{{ $comment->author_name ?? 'Anonyme' }}</strong><br>
-                                <small style="color:#5A6270;">{{ $comment->author_email ?? '—' }}</small>
+                                <small style="color:#5A6270;">{{ $comment->author_email ?? '–' }}</small>
                             </td>
                             <td style="padding:12px; max-width:320px; font-size:14px; color:#1F2937;">
                                 {{ \Illuminate\Support\Str::limit($comment->body, 100) }}
@@ -75,7 +75,7 @@
                                 @if($comment->commentable && isset($comment->commentable->title))
                                     {{ \Illuminate\Support\Str::limit($comment->commentable->title, 40) }}
                                 @else
-                                    <span style="color:#5A6270;">—</span>
+                                    <span style="color:#5A6270;">–</span>
                                 @endif
                             </td>
                             <td style="padding:12px;">

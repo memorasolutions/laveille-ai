@@ -14,7 +14,7 @@
             $border  = '#EA580C';
             $textCol = 'var(--sys-status-warning-text, #7C2D12)';
             $label   = 'Relance conseillée';
-            $msg     = "Reprends où tu t'es arrêté — une leçon suffit pour relancer ton élan !";
+            $msg     = "Reprends où tu t'es arrêté – une leçon suffit pour relancer ton élan !";
         } else {
             $bg      = '#EEF8F9';
             $border  = '#064E5A';

@@ -107,7 +107,7 @@
                     <tr>
                         <td style="background-color: #f8fafc; padding: 20px; text-align: center; font-family: Arial, Helvetica, sans-serif;">
                             <p style="margin: 0 0 10px 0; font-size: 13px; color: #888888; line-height: 1.5;">
-                                Reçu par courtoisie — La veille de Stef
+                                Reçu par courtoisie – La veille de Stef
                             </p>
                             <p style="margin: 0 0 10px 0; font-size: 12px; line-height: 1.5;">
                                 @if($unsubscribeUrl)

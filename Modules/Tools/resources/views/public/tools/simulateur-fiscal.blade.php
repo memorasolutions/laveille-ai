@@ -324,7 +324,7 @@ function fiscalSim(cfg) {
 
                         {{-- Note autonome --}}
                         <div class="p-3 rounded mb-3" x-show="!isEmployee" style="background: #FEF3C7; border: 1px solid #F59E0B; font-size: 0.85rem;">
-                            <strong style="color: #D97706;">{{ __('Note — travailleur autonome') }}</strong>
+                            <strong style="color: #D97706;">{{ __('Note – travailleur autonome') }}</strong>
                             <ul class="mb-0 mt-1" style="padding-left: 1.2rem;">
                                 <li>{{ __('Le RRQ est doublé (part employeur + employé). La moitié est déductible.') }}</li>
                                 <li>{{ __('Pas d\'assurance-emploi (AE), mais le RQAP au taux autonome (0,878 %).') }}</li>
@@ -356,7 +356,7 @@ function fiscalSim(cfg) {
                                         </div>
                                         {{-- Tooltip (hors overflow) --}}
                                         <div x-show="hoveredQc !== null" x-transition.opacity style="position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); background: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); z-index: 100; font-size: 0.8rem; white-space: nowrap; pointer-events: none;">
-                                            <template x-if="hoveredQc === 0"><div><strong>0 %</strong> — {{ __('Non imposé') }}<br>0 $ à 18 056 $<br>{{ __('Montant') }} : <span x-text="fmt(Math.min(taxableIncome, 18056))"></span><br>{{ __('Impôt') }} : 0 $</div></template>
+                                            <template x-if="hoveredQc === 0"><div><strong>0 %</strong> – {{ __('Non imposé') }}<br>0 $ à 18 056 $<br>{{ __('Montant') }} : <span x-text="fmt(Math.min(taxableIncome, 18056))"></span><br>{{ __('Impôt') }} : 0 $</div></template>
                                             <template x-if="hoveredQc === 1"><div><strong>14 %</strong><br>18 056 $ à 71 311 $<br>{{ __('Montant') }} : <span x-text="fmt(Math.min(Math.max(taxableIncome - 18056, 0), 53255))"></span><br>{{ __('Impôt') }} : <span x-text="fmt(Math.min(Math.max(taxableIncome - 18056, 0), 53255) * 0.14)"></span></div></template>
                                             <template x-if="hoveredQc === 2"><div><strong>19 %</strong><br>71 311 $ à 124 551 $<br>{{ __('Montant') }} : <span x-text="fmt(Math.min(Math.max(taxableIncome - 71311, 0), 53240))"></span><br>{{ __('Impôt') }} : <span x-text="fmt(Math.min(Math.max(taxableIncome - 71311, 0), 53240) * 0.19)"></span></div></template>
                                             <template x-if="hoveredQc === 3"><div><strong>24 %</strong><br>124 551 $ à 147 646 $<br>{{ __('Montant') }} : <span x-text="fmt(Math.min(Math.max(taxableIncome - 124551, 0), 23095))"></span><br>{{ __('Impôt') }} : <span x-text="fmt(Math.min(Math.max(taxableIncome - 124551, 0), 23095) * 0.24)"></span></div></template>
@@ -434,7 +434,7 @@ function fiscalSim(cfg) {
                                         </div>
                                         {{-- Tooltip --}}
                                         <div x-show="hoveredFed !== null" x-transition.opacity style="position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); background: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); z-index: 100; font-size: 0.8rem; white-space: nowrap; pointer-events: none;">
-                                            <template x-if="hoveredFed === 0"><div><strong>0 %</strong> — {{ __('Non imposé') }}<br>0 $ à 16 129 $<br>{{ __('Montant') }} : <span x-text="fmt(Math.min(taxableIncome, 16129))"></span><br>{{ __('Impôt') }} : 0 $</div></template>
+                                            <template x-if="hoveredFed === 0"><div><strong>0 %</strong> – {{ __('Non imposé') }}<br>0 $ à 16 129 $<br>{{ __('Montant') }} : <span x-text="fmt(Math.min(taxableIncome, 16129))"></span><br>{{ __('Impôt') }} : 0 $</div></template>
                                             <template x-if="hoveredFed === 1"><div><strong>12,1 %</strong><br>16 129 $ à 73 504 $<br>{{ __('Montant') }} : <span x-text="fmt(Math.min(Math.max(taxableIncome - 16129, 0), 57375))"></span><br>{{ __('Impôt') }} : <span x-text="fmt(Math.min(Math.max(taxableIncome - 16129, 0), 57375) * 0.121)"></span></div></template>
                                             <template x-if="hoveredFed === 2"><div><strong>17,1 %</strong><br>73 504 $ à 130 879 $<br>{{ __('Montant') }} : <span x-text="fmt(Math.min(Math.max(taxableIncome - 73504, 0), 57375))"></span><br>{{ __('Impôt') }} : <span x-text="fmt(Math.min(Math.max(taxableIncome - 73504, 0), 57375) * 0.171)"></span></div></template>
                                             <template x-if="hoveredFed === 3"><div><strong>21,7 %</strong><br>130 879 $ à 194 011 $<br>{{ __('Montant') }} : <span x-text="fmt(Math.min(Math.max(taxableIncome - 130879, 0), 63132))"></span><br>{{ __('Impôt') }} : <span x-text="fmt(Math.min(Math.max(taxableIncome - 130879, 0), 63132) * 0.217)"></span></div></template>
@@ -547,17 +547,17 @@ function fiscalSim(cfg) {
             <div class="modal-body" style="padding: 2rem;">
                 <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem;">{{ __('Les paramètres') }}</h4>
                 <ul>
-                    <li><strong>{{ __('Revenu brut') }}</strong> — {{ __('votre salaire annuel avant impôts et déductions') }}</li>
-                    <li><strong>{{ __('REER') }}</strong> — {{ __('cotisation au régime enregistré d\'épargne-retraite, réduit votre revenu imposable') }}</li>
-                    <li><strong>{{ __('Temps supplémentaire') }}</strong> — {{ __('revenus additionnels imposés au taux marginal (pas au taux moyen)') }}</li>
-                    <li><strong>{{ __('Salarié vs autonome') }}</strong> — {{ __('un autonome paie le double du RRQ et n\'a pas d\'assurance-emploi') }}</li>
+                    <li><strong>{{ __('Revenu brut') }}</strong> – {{ __('votre salaire annuel avant impôts et déductions') }}</li>
+                    <li><strong>{{ __('REER') }}</strong> – {{ __('cotisation au régime enregistré d\'épargne-retraite, réduit votre revenu imposable') }}</li>
+                    <li><strong>{{ __('Temps supplémentaire') }}</strong> – {{ __('revenus additionnels imposés au taux marginal (pas au taux moyen)') }}</li>
+                    <li><strong>{{ __('Salarié vs autonome') }}</strong> – {{ __('un autonome paie le double du RRQ et n\'a pas d\'assurance-emploi') }}</li>
                 </ul>
 
                 <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">{{ __('Les cotisations') }}</h4>
                 <ul>
-                    <li><strong>RRQ</strong> — {{ __('régime de rentes du Québec, pour votre retraite (6,4 % salarié, 12,8 % autonome)') }}</li>
-                    <li><strong>AE</strong> — {{ __('assurance-emploi, en cas de perte d\'emploi (1,27 %, salariés seulement)') }}</li>
-                    <li><strong>RQAP</strong> — {{ __('assurance parentale, pour les congés parentaux (0,494 % salarié, 0,878 % autonome)') }}</li>
+                    <li><strong>RRQ</strong> – {{ __('régime de rentes du Québec, pour votre retraite (6,4 % salarié, 12,8 % autonome)') }}</li>
+                    <li><strong>AE</strong> – {{ __('assurance-emploi, en cas de perte d\'emploi (1,27 %, salariés seulement)') }}</li>
+                    <li><strong>RQAP</strong> – {{ __('assurance parentale, pour les congés parentaux (0,494 % salarié, 0,878 % autonome)') }}</li>
                 </ul>
 
                 <h4 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); border-bottom: 2px solid var(--c-primary); padding-bottom: 0.5rem; margin-top: 1.5rem;">{{ __('L\'abattement du Québec') }}</h4>

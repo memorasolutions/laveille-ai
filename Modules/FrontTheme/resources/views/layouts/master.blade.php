@@ -127,10 +127,10 @@
     @endif
     {{-- Flux RSS S90 #43 — découverte automatique par lecteurs RSS et agents IA --}}
     @if(Route::has('rss.concentres'))
-        <link rel="alternate" type="application/rss+xml" title="La veille — Concentré IA hebdo" href="{{ route('rss.concentres') }}">
+        <link rel="alternate" type="application/rss+xml" title="La veille – Concentré IA hebdo" href="{{ route('rss.concentres') }}">
     @endif
     @if(Route::has('rss.annuaire'))
-        <link rel="alternate" type="application/rss+xml" title="La veille — Nouveautés répertoire" href="{{ route('rss.annuaire') }}">
+        <link rel="alternate" type="application/rss+xml" title="La veille – Nouveautés répertoire" href="{{ route('rss.annuaire') }}">
     @endif
     {{-- RSS désactivé (décision utilisateur 2026-04-04) --}}
     @stack('head')
@@ -228,7 +228,7 @@
 </head>
 
 <body>
-<a href="#main-content" class="skip-link" aria-label="Skip to main content — Aller au contenu principal">{{ __('Aller au contenu principal') }}</a>
+<a href="#main-content" class="skip-link" aria-label="Skip to main content – Aller au contenu principal">{{ __('Aller au contenu principal') }}</a>
 
 @include('fronttheme::partials.newsletter-sticky-bar')
 
@@ -441,7 +441,7 @@
         };
         $shareTexts = [
             'facebook' => $shareVariant('share_text_facebook', $shareDescRaw),
-            'x' => $shareVariant('share_text_x', $shareDescRaw ? $shareDescRaw . ' — Actualités en continu sur laveille.ai' : config('app.name')),
+            'x' => $shareVariant('share_text_x', $shareDescRaw ? $shareDescRaw . ' – Actualités en continu sur laveille.ai' : config('app.name')),
             'linkedin' => $shareVariant('share_text_linkedin', $shareClipboard),
             'messenger' => $shareVariant('share_text_messenger', $shareClipboard),
         ];

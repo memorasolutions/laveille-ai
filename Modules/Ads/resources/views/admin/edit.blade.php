@@ -54,7 +54,7 @@
                         </div>
                         <div class="form-check form-switch">
                             <input type="checkbox" class="form-check-input" name="is_external" value="1" {{ old('is_external', $ad->is_external) ? 'checked' : '' }}>
-                            <label class="form-check-label">{{ __('Source externe (AdSense, etc.) — pas de label "Publicité"') }}</label>
+                            <label class="form-check-label">{{ __('Source externe (AdSense, etc.) – pas de label "Publicité"') }}</label>
                         </div>
                     </div>
                     <div class="mb-3 p-3 bg-light rounded">

@@ -143,13 +143,13 @@
           span.setAttribute('tabindex', '0');
           span.setAttribute('role', 'button');
           span.setAttribute('aria-label', h.cls === 'anon-anon'
-            ? 'Anonymisé — cliquer pour les options'
-            : 'À anonymiser — cliquer pour anonymiser');
+            ? 'Anonymisé – cliquer pour les options'
+            : 'À anonymiser – cliquer pour anonymiser');
         } else if (h.tip != null) {
           // Mode tooltip (colonne « résultat restauré ») : focusable + valeur anonyme révélable.
           span.setAttribute('tabindex', '0');
           span.setAttribute('data-fake', h.tip);
-          span.setAttribute('aria-label', ((h.replacement != null) ? h.replacement : h.text) + ' — valeur anonyme : ' + h.tip);
+          span.setAttribute('aria-label', ((h.replacement != null) ? h.replacement : h.text) + ' – valeur anonyme : ' + h.tip);
         }
         // Vue droite : on AFFICHE le faux (replacement) à la place de l'original ; sinon on garde l'original.
         span.textContent = (h.replacement != null) ? h.replacement : h.text; // échappement sûr
@@ -234,7 +234,7 @@
     const chips = missing.map(m => `<span class="anon-rep-chip">${e(m.original)}</span>`).join('');
     const ico = res.found.length ? '✅' : '⚠️';
     return `<div class="anon-rep-head partial"><span class="anon-rep-ico">${ico}</span><span><strong>${res.found.length} valeur(s)</strong> restaurée(s) sur ${total}.</span></div>`
-         + `<div class="anon-rep-missing"><div class="anon-rep-note">ℹ️ ${missing.length} valeur(s) absente(s) de la réponse collée — normal si l'IA ne les a pas reprises dans son texte.</div>`
+         + `<div class="anon-rep-missing"><div class="anon-rep-note">ℹ️ ${missing.length} valeur(s) absente(s) de la réponse collée – normal si l'IA ne les a pas reprises dans son texte.</div>`
          + `<div class="anon-rep-chips">${chips}</div></div>`;
   }
 

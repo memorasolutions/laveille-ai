@@ -33,7 +33,7 @@
                 <div class="mb-3">
                     <label for="location" class="form-label">Emplacement</label>
                     <select class="form-select @error('location') is-invalid @enderror" id="location" name="location">
-                        <option value="">— Aucun —</option>
+                        <option value="">– Aucun –</option>
                         @foreach($locations as $key => $label)
                             <option value="{{ $key }}" {{ old('location') == $key ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach

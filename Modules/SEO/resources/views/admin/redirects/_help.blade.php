@@ -46,7 +46,7 @@
             <span class="badge bg-success mt-1">{{ __('SEO') }}</span>
             <div>
                 <strong class="small">{{ __('Changement d\'URL') }}</strong>
-                <p class="text-muted" style="font-size:11px;margin-bottom:0;">{{ __('Vous avez renommé une page ou modifié son slug — redirigez l\'ancienne adresse.') }}</p>
+                <p class="text-muted" style="font-size:11px;margin-bottom:0;">{{ __('Vous avez renommé une page ou modifié son slug – redirigez l\'ancienne adresse.') }}</p>
             </div>
         </div>
         <div class="d-flex align-items-start gap-3">

@@ -34,7 +34,7 @@ $jsonLd = [
                     <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 20px;">IA générative : capacités, limites et bonnes pratiques</h1>
                     <x-fronttheme::page-freshness updated="2026-06-19" />
 
-                    <p><strong>L'IA générative crée du contenu nouveau — texte, image, son, vidéo ou code — à partir d'instructions appelées « prompts ».</strong> Ces outils sont devenus largement accessibles, mais en tirer parti suppose d'en comprendre le fonctionnement et les limites. Bien utilisée, l'IA générative fait gagner du temps ; mal comprise, elle peut induire en erreur.</p>
+                    <p><strong>L'IA générative crée du contenu nouveau – texte, image, son, vidéo ou code – à partir d'instructions appelées « prompts ».</strong> Ces outils sont devenus largement accessibles, mais en tirer parti suppose d'en comprendre le fonctionnement et les limites. Bien utilisée, l'IA générative fait gagner du temps ; mal comprise, elle peut induire en erreur.</p>
                     <p>Ce dossier fait le tour de l'essentiel : les grands types d'outils, le principe de fonctionnement, les limites à connaître et les bonnes pratiques d'un usage responsable.</p>
 
                     <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-top: 32px; margin-bottom: 16px;">Les types d'IA générative</h2>
@@ -50,7 +50,7 @@ $jsonLd = [
 
                     <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-top: 32px; margin-bottom: 16px;">Comment ça fonctionne</h2>
                     <p>Un modèle d'IA générative est entraîné sur de très grandes quantités de données (textes, images, sons). Au cours de cet entraînement, il apprend des régularités statistiques : quels mots, pixels ou sons ont tendance à se suivre. À partir d'un prompt, il génère ensuite un contenu en prédisant, de façon itérative, l'élément suivant le plus probable.</p>
-                    <p>Un point important pour bien l'utiliser : le modèle ne « comprend » pas au sens humain. Il ne vérifie pas la véracité de ce qu'il produit — il calcule la suite la plus plausible à partir de ce qu'il a appris. Cette nuance explique à la fois sa puissance et ses limites.</p>
+                    <p>Un point important pour bien l'utiliser : le modèle ne « comprend » pas au sens humain. Il ne vérifie pas la véracité de ce qu'il produit – il calcule la suite la plus plausible à partir de ce qu'il a appris. Cette nuance explique à la fois sa puissance et ses limites.</p>
 
                     <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-top: 32px; margin-bottom: 16px;">Les limites à connaître</h2>
                     <ul style="padding-left: 20px; margin: 16px 0;">

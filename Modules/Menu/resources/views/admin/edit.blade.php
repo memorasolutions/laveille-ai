@@ -88,7 +88,7 @@
                         <div class="mb-2">
                             <label class="form-label">Emplacement</label>
                             <select class="form-select form-select-sm" name="location">
-                                <option value="">— Aucun —</option>
+                                <option value="">– Aucun –</option>
                                 @foreach($locations as $key => $label)
                                 <option value="{{ $key }}" {{ $menu->location == $key ? 'selected' : '' }}>{{ $label }}</option>
                                 @endforeach

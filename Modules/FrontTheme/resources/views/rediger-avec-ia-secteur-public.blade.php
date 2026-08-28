@@ -40,7 +40,7 @@ $jsonLd = [
 
                     <p>L'intelligence artificielle accélère la rédaction administrative : notes, courriels, comptes rendus ou communications internes. Toutefois, son usage dans le secteur public québécois est encadré. Le ministère de la Cybersécurité et du Numérique a publié un énoncé de principes pour une utilisation responsable de l'IA, et la Loi 25 impose des obligations rigoureuses en matière de protection des renseignements personnels.</p>
 
-                    <p>Utiliser l'IA comme outil d'assistance — et non comme substitut à la réflexion humaine — permet de gagner en efficacité tout en respectant les normes éthiques, juridiques et administratives applicables aux organismes publics.</p>
+                    <p>Utiliser l'IA comme outil d'assistance – et non comme substitut à la réflexion humaine – permet de gagner en efficacité tout en respectant les normes éthiques, juridiques et administratives applicables aux organismes publics.</p>
 
                     <x-core::answer-box
                         summary="Pour rédiger en toute sécurité avec l'IA dans le secteur public, retenez trois règles : anonymisez les données avant utilisation, assurez une validation humaine rigoureuse, et soyez transparent sur le recours à l'IA."

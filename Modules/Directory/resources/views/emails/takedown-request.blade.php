@@ -8,11 +8,11 @@
     <h1>Nouvelle demande de retrait</h1>
 
     <ul>
-        <li><strong>Outil concerné :</strong> {{ $takedown->tool?->name ?? '—' }}</li>
+        <li><strong>Outil concerné :</strong> {{ $takedown->tool?->name ?? '–' }}</li>
         <li><strong>URL ciblée :</strong> {{ $takedown->target_url }}</li>
         <li><strong>Nom du demandeur :</strong> {{ $takedown->requester_name }}</li>
         <li><strong>Courriel du demandeur :</strong> {{ $takedown->requester_email }}</li>
-        <li><strong>Organisation :</strong> {{ $takedown->requester_organization ?? '—' }}</li>
+        <li><strong>Organisation :</strong> {{ $takedown->requester_organization ?? '–' }}</li>
         <li><strong>Rôle :</strong> {{ $takedown->requester_role }}</li>
         <li><strong>Type de droit invoqué :</strong> {{ $takedown->right_type }}</li>
         <li><strong>Détails du droit :</strong> {{ $takedown->right_details }}</li>

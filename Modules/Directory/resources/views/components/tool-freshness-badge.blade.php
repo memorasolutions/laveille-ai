@@ -73,7 +73,7 @@
     @endonce
     <span class="lv-badge-fresh {{ $variant['class'] }}"
           @if($changeNote) title="{{ $changeNote }}" @endif
-          aria-label="{{ $variant['label'] }} — {{ $diffStr }}">
+          aria-label="{{ $variant['label'] }} – {{ $diffStr }}">
         <span aria-hidden="true">{{ $variant['icon'] }}</span>
         <span>{{ $variant['label'] }}</span>
         @unless($compact)

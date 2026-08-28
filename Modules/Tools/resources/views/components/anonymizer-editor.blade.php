@@ -39,8 +39,8 @@
             <label class="anon-pane-label" for="anonSource">{{ __('Votre texte') }}</label>
         </div>
         <div id="anonEditorWrap" class="mode-edit">
-            <div id="anonSource" class="anon-textarea anon-rich" contenteditable="true" role="textbox" aria-multiline="true" aria-label="{{ __('Votre texte — la mise en forme (gras, listes…) est conservée au collage') }}" data-placeholder="{{ __('Collez ou écrivez votre texte ici…') }}"></div>
-            <div id="anonAnnotated" tabindex="0" role="textbox" aria-label="{{ __('Texte annoté — cliquez une entité pour l\'anonymiser') }}"></div>
+            <div id="anonSource" class="anon-textarea anon-rich" contenteditable="true" role="textbox" aria-multiline="true" aria-label="{{ __('Votre texte – la mise en forme (gras, listes…) est conservée au collage') }}" data-placeholder="{{ __('Collez ou écrivez votre texte ici…') }}"></div>
+            <div id="anonAnnotated" tabindex="0" role="textbox" aria-label="{{ __('Texte annoté – cliquez une entité pour l\'anonymiser') }}"></div>
         </div>
         <div class="anon-legend" aria-hidden="true">
             <span><span class="anon-cand">{{ __('souligné') }}</span> = {{ __('sera anonymisé') }}</span>
@@ -55,7 +55,7 @@
             <button type="button" id="btnCopyAnonTop" class="anon-copy-inline" aria-label="{{ __('Copier le texte anonymisé') }}">📋 {{ __('Copier') }}</button>
         </div>
         <div class="anon-output-wrap">
-            <div id="anonOutput" class="anon-textarea anon-out-rich" role="textbox" aria-readonly="true" tabindex="0" aria-label="{{ __('Texte anonymisé — valeurs surlignées') }}"></div>
+            <div id="anonOutput" class="anon-textarea anon-out-rich" role="textbox" aria-readonly="true" tabindex="0" aria-label="{{ __('Texte anonymisé – valeurs surlignées') }}"></div>
         </div>
         @isset($previewActions)
             <div class="anon-actions">{{ $previewActions }}</div>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lien protégé — laveille.ai</title>
+    <title>Lien protégé - laveille.ai</title>
     <style>
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         html,body{height:100%}
@@ -70,6 +70,6 @@
         </div>
         <p class="promo">Vous aussi, créez vos liens courts gratuitement sur <a href="/raccourcir">laveille.ai</a></p>
     </div>
-    <footer>&copy; {{ date('Y') }} La veille — <a href="https://laveille.ai">laveille.ai</a></footer>
+    <footer>&copy; {{ date('Y') }} La veille – <a href="https://laveille.ai">laveille.ai</a></footer>
 </body>
 </html>

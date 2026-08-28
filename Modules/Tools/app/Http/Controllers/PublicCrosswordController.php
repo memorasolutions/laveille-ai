@@ -104,7 +104,7 @@ class PublicCrosswordController
             $inactiveStyle = $validated['inactive_style'] ?? 'black';
             $bin = $blank
                 ? $this->pdf->renderBlank($result, $title, null, $inactiveStyle)
-                : $this->pdf->renderSolution($result, $title.' — Corrigé', null, $inactiveStyle);
+                : $this->pdf->renderSolution($result, $title.' – Corrigé', null, $inactiveStyle);
             $titleForFile = $isGeneric
                 ? 'mots-croises-'.now()->format('Y-m-d')
                 : trim(strtolower(preg_replace('/[^a-z0-9_-]/i', '-', $userTitle)), '-');
@@ -203,7 +203,7 @@ class PublicCrosswordController
 
         return view('tools::public.tools.crossword.jeu', [
             'preset' => $preset,
-            'pageTitle' => $preset->name.' — Jouer en ligne',
+            'pageTitle' => $preset->name.' – Jouer en ligne',
             'pageDescription' => 'Résolvez la grille de mots croisés "'.$preset->name.'" en ligne sur laveille.ai.',
         ]);
     }

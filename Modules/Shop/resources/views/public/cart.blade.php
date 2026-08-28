@@ -162,7 +162,7 @@
                                 <template x-for="s in suggestions" :key="(s.osm_id || '') + (s.postcode || '')">
                                     <div @click="selectAddress(s)" class="sp-suggestion-item">
                                         <strong x-text="[s.street, s.housenumber].filter(Boolean).join(' ') || s.name || ''"></strong>
-                                        <span style="color: var(--c-text-muted);" x-text="', ' + (s.city || '') + (s.postcode ? ' ' + s.postcode : '') + ' — ' + (s.country || '')"></span>
+                                        <span style="color: var(--c-text-muted);" x-text="', ' + (s.city || '') + (s.postcode ? ' ' + s.postcode : '') + ' – ' + (s.country || '')"></span>
                                     </div>
                                 </template>
                             </div>
@@ -247,7 +247,7 @@
                                 <input type="checkbox" name="newsletter" value="1" class="sp-checkbox sp-checkbox-lg">
                                 <div>
                                     <span class="sp-newsletter-title">{{ __('Restez informé') }} <i class="ti-email" style="color: var(--c-primary); font-size: 13px;"></i></span>
-                                    <span class="sp-newsletter-desc">{{ __('Recevez notre veille IA chaque mercredi — outils, actualités, défi et astuces. Désabonnement en 1 clic.') }}</span>
+                                    <span class="sp-newsletter-desc">{{ __('Recevez notre veille IA chaque mercredi – outils, actualités, défi et astuces. Désabonnement en 1 clic.') }}</span>
                                 </div>
                             </label>
                         </div>
@@ -261,7 +261,7 @@
                         <p class="sp-legal-note">
                             {!! __('En passant commande, vous acceptez nos <a href=":url" target="_blank">conditions de vente</a>.', ['url' => route('legal.sales')]) !!}
                         </p>
-                        <p class="sp-pod-note">{{ __('Produit fabriqué à la demande — non remboursable sauf défaut de fabrication.') }}</p>
+                        <p class="sp-pod-note">{{ __('Produit fabriqué à la demande – non remboursable sauf défaut de fabrication.') }}</p>
 
                         {{-- Badges confiance --}}
                         <div class="sp-trust-box">

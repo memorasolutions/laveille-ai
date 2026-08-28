@@ -31,7 +31,7 @@
                     <tr>
                         <td><code>{{ $giftCard->code }}</code></td>
                         <td>{{ $giftCard->purchaser_name }}</td>
-                        <td>{{ $giftCard->recipient_name ?? '—' }}</td>
+                        <td>{{ $giftCard->recipient_name ?? '–' }}</td>
                         <td>{{ number_format($giftCard->initial_amount, 2) }} $</td>
                         <td>{{ number_format($giftCard->remaining_amount, 2) }} $</td>
                         <td>

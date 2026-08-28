@@ -44,7 +44,7 @@
             <span>Mastodon</span>
         </button>
 
-        <a href="mailto:?subject={{ urlencode($title) }}&body={{ urlencode(($description ? $description.' — ' : '').$url) }}"
+        <a href="mailto:?subject={{ urlencode($title) }}&body={{ urlencode(($description ? $description.' – ' : '').$url) }}"
            aria-label="Partager par courriel"
            class="lv-share-btn lv-share-btn-email">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

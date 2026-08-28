@@ -101,6 +101,6 @@
         </nav>
     </main>
 
-    <footer>© {{ date('Y') }} laveille.ai — MEMORA solutions</footer>
+    <footer>© {{ date('Y') }} laveille.ai – MEMORA solutions</footer>
 </body>
 </html>

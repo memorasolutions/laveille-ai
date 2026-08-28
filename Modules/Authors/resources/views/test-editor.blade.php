@@ -17,7 +17,7 @@
 <body>
     <div style="max-width: 900px; margin: 0 auto; padding: 32px 20px;">
         <div style="background:#FEF3C7; border:1px solid #FDE68A; border-radius:8px; padding:12px; margin-bottom:24px; text-align:center; font-size:13px; color:#92400E;">
-            ⚠️ <strong>Mode TEST LOCAL</strong> — Éditeur accessible sans auth pour validation Playwright. Retiré en prod.
+            ⚠️ <strong>Mode TEST LOCAL</strong> – Éditeur accessible sans auth pour validation Playwright. Retiré en prod.
         </div>
         @livewire('authors.author-editor', ['authorProfile' => $authorProfile])
     </div>

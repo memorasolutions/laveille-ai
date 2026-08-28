@@ -113,21 +113,21 @@
                                 script: "Aujourd'hui, on configure [nom de la fonctionnalité] ensemble, étape par étape. Si vous suivez ces 5 minutes, vous n'aurez plus jamais à chercher comment faire."
                             },
                             {
-                                title: 'Étape 1 — Où trouver le bon menu',
+                                title: 'Étape 1 – Où trouver le bon menu',
                                 durationEstimate: '30 s',
                                 visual: "Capture d'écran du logiciel, curseur qui pointe vers le menu concerné.",
                                 mode: 'outline',
                                 script: 'Montrer où se trouve le menu. Nommer chaque option visible à voix haute.'
                             },
                             {
-                                title: 'Étape 2 — Configurer le premier réglage',
+                                title: 'Étape 2 – Configurer le premier réglage',
                                 durationEstimate: '40 s',
                                 visual: 'Zoom sur le champ à remplir, clic bien visible.',
                                 mode: 'outline',
                                 script: "Expliquer ce que fait ce réglage et donner un exemple concret pour l'auditoire visé."
                             },
                             {
-                                title: 'Étape 3 — Valider et vérifier le résultat',
+                                title: 'Étape 3 – Valider et vérifier le résultat',
                                 durationEstimate: '30 s',
                                 visual: 'Clic sur Enregistrer, puis capture du résultat final à l\'écran.',
                                 mode: 'outline',
@@ -138,14 +138,14 @@
                                 durationEstimate: '20 s',
                                 visual: 'Retour plan face caméra, texte à l\'écran avec les 3 étapes résumées.',
                                 mode: 'exact',
-                                script: "Voilà, c'est tout ce qu'il fallait faire. Si ça vous a aidé, gardez cette vidéo sous la main — et à bientôt pour la suite !"
+                                script: "Voilà, c'est tout ce qu'il fallait faire. Si ça vous a aidé, gardez cette vidéo sous la main – et à bientôt pour la suite !"
                             }
                         ];
                     },
                     actualites: function () {
                         return [
                             {
-                                title: 'Intro — Accroche du jour',
+                                title: 'Intro – Accroche du jour',
                                 durationEstimate: '15 s',
                                 visual: 'Plan face caméra, habillage graphique de la capsule à l\'écran.',
                                 mode: 'exact',
@@ -184,14 +184,14 @@
                                 script: "À la fin de cette capsule, vous serez capables de [objectif 1], [objectif 2] et [objectif 3]."
                             },
                             {
-                                title: 'Partie 1 — Notion de base',
+                                title: 'Partie 1 – Notion de base',
                                 durationEstimate: '1 min',
                                 visual: 'Schéma ou exemple à l\'écran illustrant la notion.',
                                 mode: 'outline',
                                 script: 'Expliquer la notion avec un exemple concret et familier pour le public visé.'
                             },
                             {
-                                title: 'Partie 2 — Mise en pratique',
+                                title: 'Partie 2 – Mise en pratique',
                                 durationEstimate: '1 min',
                                 visual: 'Démonstration ou cas pratique filmé/animé à l\'écran.',
                                 mode: 'outline',
@@ -318,8 +318,8 @@
                         "1. Un titre court\n" +
                         "2. Une durée estimée en secondes\n" +
                         "3. Une INDICATION VISUELLE/ACTION à l'écran (ce qui doit être montré ou fait, ex: \"Afficher le tableau de bord, zoomer sur le bouton Créer\")\n" +
-                        "4. Le CONTENU AUDIO : soit le texte exact à dire (verbatim), soit seulement les grandes lignes/points clés — précise laquelle des deux formes tu fournis pour chaque section\n\n" +
-                        "IMPORTANT — FORMAT DE SORTIE OBLIGATOIRE :\n" +
+                        "4. Le CONTENU AUDIO : soit le texte exact à dire (verbatim), soit seulement les grandes lignes/points clés – précise laquelle des deux formes tu fournis pour chaque section\n\n" +
+                        "IMPORTANT – FORMAT DE SORTIE OBLIGATOIRE :\n" +
                         "Réponds d'abord en texte normal lisible (Markdown), PUIS termine IMPÉRATIVEMENT par un bloc unique délimité exactement ainsi (ne mets RIEN d'autre après ce bloc) :\n\n" +
                         JSON_MARKER_START + "\n" +
                         "```json\n" +
@@ -450,7 +450,7 @@
                     }
                     navigator.clipboard.readText().then(function (text) {
                         if (!text || !text.trim()) {
-                            self.importStatusMessage = "Le presse-papier est vide. Copiez la réponse de votre IA, puis réessayez — ou collez manuellement.";
+                            self.importStatusMessage = "Le presse-papier est vide. Copiez la réponse de votre IA, puis réessayez – ou collez manuellement.";
                             return;
                         }
                         self.importRawText = text;

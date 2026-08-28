@@ -15,7 +15,7 @@
         <tr>
             <td style="padding:32px;">
                 <p style="margin:0 0 16px;font-size:16px;">Ça fait 2 mois que tu n'as pas écrit sur ton mini-site laveille.ai. On espère que tout va bien.</p>
-                <p style="margin:0 0 24px;">Tes anciens articles continuent d'attirer des lecteurs — il y a une audience qui attend ton prochain post.</p>
+                <p style="margin:0 0 24px;">Tes anciens articles continuent d'attirer des lecteurs – il y a une audience qui attend ton prochain post.</p>
                 <table cellpadding="0" cellspacing="0" style="width:100%;"><tr><td style="text-align:center;">
                     <a href="{{ url('/auteur/dashboard') }}" style="display:inline-block;padding:14px 32px;background-color:#C2410C;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold;font-size:16px;">✍️ Reprendre la rédaction</a>
                 </td></tr></table>

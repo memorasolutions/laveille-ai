@@ -22,21 +22,21 @@
             <div class="lv-cookie-body">
                 <h2 id="lv-cookie-title" class="lv-cookie-h2">Cookies et confidentialité</h2>
                 <p id="lv-cookie-desc" class="lv-cookie-p">
-                    Nous utilisons des témoins (cookies) pour faire fonctionner le site (essentiels) et — avec ton consentement — mesurer l'audience (analytics). Tu peux ajuster tes choix à tout moment. Conformément à la <strong>Loi 25 (QC)</strong> + <strong>RGPD (EU)</strong>.
+                    Nous utilisons des témoins (cookies) pour faire fonctionner le site (essentiels) et – avec ton consentement – mesurer l'audience (analytics). Tu peux ajuster tes choix à tout moment. Conformément à la <strong>Loi 25 (QC)</strong> + <strong>RGPD (EU)</strong>.
                 </p>
 
                 <div x-show="showDetails" x-cloak class="lv-cookie-details">
                     <label class="lv-cookie-toggle">
                         <input type="checkbox" x-model="consent.essential" disabled>
-                        <span class="lv-cookie-label"><strong>Essentiels</strong> (toujours activés) — session, sécurité, préférences</span>
+                        <span class="lv-cookie-label"><strong>Essentiels</strong> (toujours activés) – session, sécurité, préférences</span>
                     </label>
                     <label class="lv-cookie-toggle">
                         <input type="checkbox" x-model="consent.analytics">
-                        <span class="lv-cookie-label"><strong>Analytics</strong> — Google Analytics 4, Search Console</span>
+                        <span class="lv-cookie-label"><strong>Analytics</strong> – Google Analytics 4, Search Console</span>
                     </label>
                     <label class="lv-cookie-toggle">
                         <input type="checkbox" x-model="consent.marketing">
-                        <span class="lv-cookie-label"><strong>Marketing</strong> — publicité ciblée, retargeting</span>
+                        <span class="lv-cookie-label"><strong>Marketing</strong> – publicité ciblée, retargeting</span>
                     </label>
                 </div>
 

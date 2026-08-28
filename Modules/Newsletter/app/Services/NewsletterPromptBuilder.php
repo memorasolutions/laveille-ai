@@ -39,9 +39,9 @@ class NewsletterPromptBuilder
                 'content_keys' => ['editorial'],
                 'auto_source'  => 'EditorialBank::getNextEditorial() ou DigestContentService::generateEditorial() (deepseek via OpenRouter)',
                 'field_type'   => 'textarea',
-                'placeholder'  => "ex: Cette semaine, l'IA sort des labos pour entrer dans nos cuisines — littéralement.\n- Stef",
+                'placeholder'  => "ex: Cette semaine, l'IA sort des labos pour entrer dans nos cuisines – littéralement.\n- Stef",
                 'shape'        => <<<'SHAPE'
-content['editorial'] = chaîne HTML (ex: '<p>…</p><p>— Stef</p>'), rendue via {!! !!} dans le gabarit.
+content['editorial'] = chaîne HTML (ex: '<p>…</p><p>– Stef</p>'), rendue via {!! !!} dans le gabarit.
 STRUCTURE (best practices 2026, plaisant à lire, pas une simple affirmation) :
   1. Hook concret et humain (1-2 phrases) : un moment vécu, une petite scène (ex. « Lundi matin, tu colles le courriel d'un client dans ChatGPT… »). Éviter les ouvertures génériques (« Cette semaine, nous allons parler de… »).
   2. L'enjeu / le contexte en 1-2 phrases (pourquoi ça compte pour le lecteur).
@@ -49,7 +49,7 @@ STRUCTURE (best practices 2026, plaisant à lire, pas une simple affirmation) :
   4. Un pont vers le défi de la semaine ou un contenu de l'infolettre.
 Ton conversationnel, tutoiement, « tu » et « je », phrases courtes. 50 à 80 mots.
 Loi 25 : la nommer UNE seule fois, et seulement si le sujet touche la vie privée / les données personnelles.
-Terminer par '— Stef' ou '- Stef'. INTERDIT : pas de Markdown, pas de **, pas de *, pas de #.
+Terminer par '– Stef' ou '- Stef'. INTERDIT : pas de Markdown, pas de **, pas de *, pas de #.
 SHAPE
 
             ],
@@ -62,26 +62,26 @@ SHAPE
                 'shape'        => <<<'SHAPE'
 Choisir UNE des deux structures selon la nature de la consigne :
 
-OPTION A — Défi action/bien-être (essaie un outil, fais une action concrète) :
+OPTION A – Défi action/bien-être (essaie un outil, fais une action concrète) :
   content['wellness_challenge'] = [
       'title'     => 'titre clair du défi (PAS « Défi de la semaine » : le bandeau est déjà posé par le gabarit)',
       'hook'      => 'phrase d'accroche concrète qui plante le décor (HTML permis)',
-      'subtitle'  => 'optionnel — sous-titre court',
+      'subtitle'  => 'optionnel – sous-titre court',
       'steps'     => ['étape 1', 'étape 2', '…'],  // 3 à 4 étapes GUIDÉES pas-à-pas : une seule action concrète par étape, sans surcharger ; HTML permis par étape
       'cta_url'   => 'URL vers l'outil ou la ressource',
       'cta_label' => 'libellé du bouton CTA',
   ];
   Laisser content['weekly_prompt'] à null (ou ne pas l'écrire).
 
-OPTION B — Défi prompt copy-paste (fournir un prompt à copier dans ChatGPT/Claude/Gemini) :
+OPTION B – Défi prompt copy-paste (fournir un prompt à copier dans ChatGPT/Claude/Gemini) :
   content['weekly_prompt'] = [
       'intro' => 'phrase d\'introduction italique (1 ligne)',
       'parts' => [
           [
               'label'     => 'Partie 1',        // libellé de bloc (ex: 'Contexte', 'Prompt principal')
               'content'   => 'le texte du prompt à copier-coller',
-              'pre_note'  => 'optionnel — note avant le bloc',
-              'post_note' => 'optionnel — note après le bloc',
+              'pre_note'  => 'optionnel – note avant le bloc',
+              'post_note' => 'optionnel – note après le bloc',
           ],
           // ajouter d'autres parties si nécessaire
       ],
@@ -115,7 +115,7 @@ SHAPE
             'tool' => [
                 'label'        => 'Outil de la semaine',
                 'content_keys' => ['tool_id'],
-                'auto_source'  => 'DigestContentService::getUnsentItem(\'tool\') — rotation anti-répétition parmi les outils publiés',
+                'auto_source'  => 'DigestContentService::getUnsentItem(\'tool\') – rotation anti-répétition parmi les outils publiés',
                 'field_type'   => 'combobox',
                 'combobox_type'=> 'tool',
                 'multi'        => false,
@@ -125,7 +125,7 @@ SHAPE
             'term' => [
                 'label'        => 'Terme IA de la semaine',
                 'content_keys' => ['term_id'],
-                'auto_source'  => 'DigestContentService::getUnsentItem(\'term\') — rotation anti-répétition parmi les termes publiés',
+                'auto_source'  => 'DigestContentService::getUnsentItem(\'term\') – rotation anti-répétition parmi les termes publiés',
                 'field_type'   => 'combobox',
                 'combobox_type'=> 'term',
                 'multi'        => false,
@@ -145,7 +145,7 @@ SHAPE
             'interactive_tool' => [
                 'label'        => 'Outil interactif (outil gratuit)',
                 'content_keys' => ['interactive_tool_id'],
-                'auto_source'  => 'DigestContentService::getUnsentItem(\'interactive_tool\') — rotation parmi Tools actifs',
+                'auto_source'  => 'DigestContentService::getUnsentItem(\'interactive_tool\') – rotation parmi Tools actifs',
                 'field_type'   => 'combobox',
                 'combobox_type'=> 'interactive_tool',
                 'multi'        => false,
@@ -177,7 +177,7 @@ SHAPE
         $week       = (int) $now->weekOfYear;
 
         $lines = [];
-        $lines[] = '=== PROMPT NEWSLETTER — ' . mb_strtoupper($appName) . ' ===';
+        $lines[] = '=== PROMPT NEWSLETTER – ' . mb_strtoupper($appName) . ' ===';
         $lines[] = '';
         $lines[] = '## Contexte et cible';
         $lines[] = 'Tu travailles dans le dépôt Laravel de « ' . $appName . ' » (Modules/Newsletter).';
@@ -260,7 +260,7 @@ SHAPE
                     $lines[] = '  ACTION    : Écris cette consigne dans la/les clé(s) indiquée(s) en respectant la FORME ci-dessus.';
                 }
             } else {
-                $lines[] = '  MODE      : AUTO — ne touche pas cette section';
+                $lines[] = '  MODE      : AUTO – ne touche pas cette section';
                 $lines[] = '  SOURCE    : ' . $meta['auto_source'];
             }
 
@@ -270,7 +270,7 @@ SHAPE
         $lines[] = '## Sauvegarder et envoyer';
         $lines[] = '1. Après avoir mis à jour NewsletterIssue.content, appelle $issue->save().';
         $lines[] = '2. Lance la commande artisan depuis le SERVEUR DE PRODUCTION (Brevo n\'autorise que';
-        $lines[] = '   l\'IP du serveur prod — l\'envoi test ne fonctionnera PAS en local) :';
+        $lines[] = '   l\'IP du serveur prod – l\'envoi test ne fonctionnera PAS en local) :';
 
         if ($testEmail !== '') {
             $lines[] = '   php artisan newsletter:digest --test-email=' . $testEmail;
@@ -285,9 +285,9 @@ SHAPE
         $lines[] = '- Rédige en français québécois professionnel (courriel, fin de semaine, etc.)';
         $lines[] = '- Zéro fait inventé : si une donnée est absente de la DB, reste général mais pertinent';
         $lines[] = '- Loi 25 QC : mentionne-la UNE SEULE FOIS si le sujet touche la vie privée/données personnelles';
-        $lines[] = '- Ne réinvente pas DigestCommand, DigestContentService ni le gabarit — utilise-les';
+        $lines[] = '- Ne réinvente pas DigestCommand, DigestContentService ni le gabarit – utilise-les';
         $lines[] = '- Variables dynamiques {{ $weekNumber }}, {{ $subject }}, etc. sont injectées au runtime';
-        $lines[] = "- Outil de la semaine : le nombre de tutoriels approuvés de l'outil s'affiche AUTOMATIQUEMENT dans le courriel (« 🎓 N tutoriels pour bien démarrer »), masqué si 0 — rien à écrire.";
+        $lines[] = "- Outil de la semaine : le nombre de tutoriels approuvés de l'outil s'affiche AUTOMATIQUEMENT dans le courriel (« 🎓 N tutoriels pour bien démarrer »), masqué si 0 – rien à écrire.";
         $lines[] = "- Bloc « Le saviez-vous » (raccourcisseur) : le gabarit nomme les domaines et rappelle que 1lien.ca et unlien.ca (et les autres) mènent au même lien (partage résilient). Géré automatiquement.";
         $lines[] = "- ENVOI OFFICIEL : c'est TOUJOURS la dernière version travaillée du brouillon (content de l'issue) qui part aux abonnés via --send ; ne jamais régénérer en AUTO par-dessus un contenu déjà personnalisé.";
         $lines[] = "- OBJET (subject) : écris TOUJOURS un objet court (28-50 caractères, 6-10 mots) qui encourage à OUVRIR et qui est LIÉ À L'ÉDITORIAL de la semaine (idéalement une question = open loop). Évite « newsletter / digest / hebdo / La veille IA #N ». Stocke-le dans content['subject'] : c'est lui qui sert d'objet à l'envoi (repli automatique sur le titre de la vedette si absent).";

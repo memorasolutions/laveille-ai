@@ -25,7 +25,7 @@ final class TermSchemaService
     private const AUTHOR_NAME = 'Stéphane Lapointe';
     private const AUTHOR_LINKEDIN = 'https://www.linkedin.com/in/lapointestephane/';
     private const AUTHOR_JOB_TITLE = 'Fondateur de MEMORA solutions, formateur IA';
-    private const SET_NAME = 'Glossaire Techno — La veille';
+    private const SET_NAME = 'Glossaire Techno – La veille';
     private const SET_DESCRIPTION = "Glossaire vulgarisé de l'intelligence artificielle, contexte québécois, exemples concrets pour PME francophones.";
 
     /** URL canonique de l'auteur (env-aware via app_domain). */
@@ -147,7 +147,7 @@ final class TermSchemaService
         $article = [
             '@type' => 'Article',
             '@id' => $url.'#article',
-            'headline' => $term->name.' — Glossaire Techno',
+            'headline' => $term->name.' – Glossaire Techno',
             'description' => $description,
             'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => $url],
             'author' => ['@id' => self::authorUrl()],

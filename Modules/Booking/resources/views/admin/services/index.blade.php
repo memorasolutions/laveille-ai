@@ -34,7 +34,7 @@
                             {{ $service->name }}
                         </td>
                         <td>{{ $service->duration_minutes }} min</td>
-                        <td>{{ $service->price ? number_format($service->price, 2) . ' $' : '—' }}</td>
+                        <td>{{ $service->price ? number_format($service->price, 2) . ' $' : '–' }}</td>
                         <td>
                             <span class="badge bg-{{ $service->is_active ? 'success' : 'secondary' }}">
                                 {{ $service->is_active ? 'Actif' : 'Inactif' }}

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>{{ __('Aperçu') }} — {{ $model->title }}</title>
+    <title>{{ __('Aperçu') }}&nbsp;: {{ $model->title }}</title>
     <style>
         :root {
             --font-stack: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -47,7 +47,7 @@
             <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
             <line x1="2" x2="22" y1="2" y2="22"/>
         </svg>
-        <span>{{ __('Aperçu — ce contenu n\'est pas encore publié') }}</span>
+        <span>{{ __('Aperçu – ce contenu n\'est pas encore publié') }}</span>
     </div>
 
     <div class="container">

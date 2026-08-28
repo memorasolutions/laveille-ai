@@ -5,7 +5,7 @@
     <link>{{ $siteUrl }}</link>
     <description>{{ $feedDescription }}</description>
     <language>fr-CA</language>
-    <copyright>© {{ date('Y') }} La veille — Memora solutions</copyright>
+    <copyright>© {{ date('Y') }} La veille – Memora solutions</copyright>
     <managingEditor>info@memora.ca (Stéphane Lapointe)</managingEditor>
     <webMaster>info@memora.ca (Memora solutions)</webMaster>
     <generator>Laravel + La veille (laveille.ai)</generator>

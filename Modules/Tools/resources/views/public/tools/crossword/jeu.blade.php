@@ -59,7 +59,7 @@
         <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2 no-print">
           <div>
             <h1 class="h3 mb-1" style="color:#1A1D23">{{ $preset->name }}</h1>
-            <p class="cw-subtitle mb-0 small">{{ __('Mode joueur — résolvez la grille en ligne') }}</p>
+            <p class="cw-subtitle mb-0 small">{{ __('Mode joueur – résolvez la grille en ligne') }}</p>
           </div>
           {{-- Bouton 'Imprimer' retire S79 #43 - le createur peut telecharger le PDF (vierge ou corrige) depuis /outils/mots-croises menu Plus d'options. --}}
         </div>
@@ -93,12 +93,12 @@
                 <span aria-hidden="true" style="color:#1A1D23" x-show="errorsCount > 0">·</span>
                 <span x-show="errorsCount > 0" :title="'{{ __('Erreurs cumulées sur la partie') }}'"><strong class="num" style="color:#b91c1c" x-text="errorsCount"></strong> {{ __('erreur(s)') }}</span>
               </div>
-              <label class="cw-toggle-autocheck" :title="autoCheck ? '{{ __('Validation immédiate activée — case rouge si erreur') }}' : '{{ __('Validation manuelle — clic Vérifier requis') }}'">
+              <label class="cw-toggle-autocheck" :title="autoCheck ? '{{ __('Validation immédiate activée – case rouge si erreur') }}' : '{{ __('Validation manuelle – clic Vérifier requis') }}'">
                 <input type="checkbox" x-model="autoCheck" aria-label="{{ __('Activer la validation automatique des cases') }}">
                 <span>{{ __('Auto-check') }}</span>
               </label>
               <div class="d-flex gap-2 ms-auto flex-wrap">
-                <button type="button" class="cw-action-secondary" @click="checkGrid()" :disabled="completed" aria-label="{{ __('Vérifier la grille — anime les cases erronées') }}">
+                <button type="button" class="cw-action-secondary" @click="checkGrid()" :disabled="completed" aria-label="{{ __('Vérifier la grille – anime les cases erronées') }}">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
                   <span>{{ __('Vérifier') }}</span>
                 </button>
@@ -782,7 +782,7 @@ document.addEventListener('alpine:init', () => {
       const gridStr = lines.join('\n');
 
       const titleName = @json($preset->name);
-      let text = '🧩 Mots-croisés — ' + titleName + '\n';
+      let text = '🧩 Mots-croisés – ' + titleName + '\n';
       text += '⏱ ' + t + ' · 💡 ' + hints + ' indices';
       if (errors > 0) text += ' · ❌ ' + errors + ' erreurs';
       text += (this.abandoned ? ' · 🏳️ abandon' : '') + '\n\n';

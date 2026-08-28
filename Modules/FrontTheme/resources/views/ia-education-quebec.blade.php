@@ -24,7 +24,7 @@
             <h1 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-bottom: 20px;">L'IA en éducation au Québec : étudiants, TDAH et apprentissage</h1>
             <x-fronttheme::page-freshness updated="2026-06-19" />
 
-            <p><strong>L'IA peut aider les étudiants québécois, y compris ceux ayant un TDAH ou un trouble d'apprentissage, à mieux organiser leurs idées, structurer leur travail et rendre l'apprentissage plus accessible.</strong> Des outils simples permettent de résumer des textes, reformuler des explications, classer des notes ou planifier des échéances — autant de tâches qui peuvent représenter des défis concrets, surtout en contexte d'attention variable ou de charge cognitive élevée.</p>
+            <p><strong>L'IA peut aider les étudiants québécois, y compris ceux ayant un TDAH ou un trouble d'apprentissage, à mieux organiser leurs idées, structurer leur travail et rendre l'apprentissage plus accessible.</strong> Des outils simples permettent de résumer des textes, reformuler des explications, classer des notes ou planifier des échéances – autant de tâches qui peuvent représenter des défis concrets, surtout en contexte d'attention variable ou de charge cognitive élevée.</p>
             <p>Il est toutefois essentiel d'utiliser ces outils avec prudence. L'IA ne remplace pas la compréhension personnelle ni le jugement critique. Il faut toujours vérifier l'exactitude de l'information produite, respecter les règles de son établissement, et s'assurer que l'outil sert à soutenir l'apprentissage, et non à faire le travail à sa place.</p>
 
             <h2 style="font-family: var(--f-heading); margin-top: 36px;">Outils pour apprendre</h2>

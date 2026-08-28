@@ -105,7 +105,7 @@
 <section class="wpo-blog-single-section section-padding">
     <div class="container">
         <h1 style="font-family: var(--f-heading); margin-bottom: 0.5rem; color: var(--c-dark); font-weight: 800;">{{ __('Mots-croisés à jouer en ligne') }}</h1>
-        <p class="cwi-page-intro">{{ __('Grilles partagées par la communauté laveille.ai — créées par des enseignants, formateurs et passionnés. Toutes gratuites.') }}</p>
+        <p class="cwi-page-intro">{{ __('Grilles partagées par la communauté laveille.ai – créées par des enseignants, formateurs et passionnés. Toutes gratuites.') }}</p>
 
         {{-- Stats line + CTA création --}}
         <div class="cwi-stats-line" role="region" aria-label="{{ __('Statistiques de la collection') }}">

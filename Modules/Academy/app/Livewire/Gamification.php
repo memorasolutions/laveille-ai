@@ -95,7 +95,7 @@ class Gamification extends Component
             $entries = $service->leaderboardForCohort($cohort);
 
             $groups->push([
-                'label'      => $cohort->name.($cohort->course ? ' — '.$cohort->course->title : ''),
+                'label'      => $cohort->name.($cohort->course ? ' – '.$cohort->course->title : ''),
                 'entries'    => $entries,
                 'viewerRank' => optional($entries->firstWhere('user.id', $user->id))['rank'] ?? null,
             ]);

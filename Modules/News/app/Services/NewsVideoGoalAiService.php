@@ -71,7 +71,7 @@ class NewsVideoGoalAiService
                 'exception' => $e->getMessage(),
             ]);
 
-            return "Budget IA mensuel dépassé. L'objectif de vidéo n'a pas pu être généré — réessaie le mois prochain ou rédige-le manuellement.";
+            return "Budget IA mensuel dépassé. L'objectif de vidéo n'a pas pu être généré – réessaie le mois prochain ou rédige-le manuellement.";
         } catch (\Throwable $e) {
             Log::warning('NewsVideoGoalAiService::generateGoal error', [
                 'exception' => $e->getMessage(),

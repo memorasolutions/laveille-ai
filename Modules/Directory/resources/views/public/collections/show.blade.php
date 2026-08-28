@@ -2,7 +2,7 @@
 @extends('fronttheme::layouts.master')
 
 @section('title', $collection->name)
-@section('meta_description', $collection->description ?: 'Collection d\'outils ' . $collection->name . ' — ' . $collection->tools->count() . ' outils sélectionnés.')
+@section('meta_description', $collection->description ?: 'Collection d\'outils ' . $collection->name . ' – ' . $collection->tools->count() . ' outils sélectionnés.')
 
 @push('head')
 {{-- #249 — noindex auto si collection sparse (< 3 outils). URL reste accessible aux utilisateurs
@@ -20,7 +20,7 @@
         chr(64).'context' => 'https://schema.org',
         chr(64).'type' => 'ItemList',
         'name' => $collection->name,
-        'description' => $collection->description ?: 'Collection d\'outils — ' . $collection->tools->count() . ' outils sélectionnés.',
+        'description' => $collection->description ?: 'Collection d\'outils – ' . $collection->tools->count() . ' outils sélectionnés.',
         'url' => url()->current(),
         'numberOfItems' => $collection->tools->count(),
         'itemListOrder' => 'https://schema.org/ItemListOrderAscending',

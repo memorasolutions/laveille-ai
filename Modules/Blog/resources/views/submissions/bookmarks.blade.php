@@ -43,7 +43,7 @@
                                 @elseif($type === 'Modules\\Dictionary\\Models\\Term')
                                     {{ $item->name }}
                                 @elseif($type === 'Modules\\Acronyms\\Models\\Acronym')
-                                    {{ $item->acronym }} — {{ $item->full_name }}
+                                    {{ $item->acronym }} – {{ $item->full_name }}
                                 @else
                                     {{ $item->name ?? $item->title ?? '-' }}
                                 @endif

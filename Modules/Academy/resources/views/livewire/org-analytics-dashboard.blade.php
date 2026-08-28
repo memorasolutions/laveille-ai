@@ -17,7 +17,7 @@
 <div style="font-family: var(--f-body, system-ui); color: var(--sys-text-default, #1A1D23); display: flex; flex-direction: column; gap: 28px;">
 
     <h1 style="font-family: var(--f-heading); font-size: 1.35rem; margin: 0; color: var(--sys-text-default, #1A1D23);">
-        Tableau de bord organisationnel — Analytiques prédictifs
+        Tableau de bord organisationnel&nbsp;: Analytiques prédictifs
     </h1>
 
     {{-- ── KPIs ── --}}
@@ -95,7 +95,7 @@
                                 <td style="padding: 10px; text-align: right; color: var(--sys-text-muted, #6B7280);">{{ $cs['at_risk'] }}</td>
                                 <td style="padding: 10px; text-align: right;">
                                     <span style="display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; background: {{ $badge['bg'] }}; color: {{ $badge['color'] }};">
-                                        {{ $cs['avg_score'] }}&nbsp;— {{ $badge['label'] }}
+                                        {{ $cs['avg_score'] }}&nbsp;– {{ $badge['label'] }}
                                     </span>
                                 </td>
                             </tr>

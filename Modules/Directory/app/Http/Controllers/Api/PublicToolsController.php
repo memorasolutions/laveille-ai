@@ -144,11 +144,11 @@ class PublicToolsController
     public function index(): JsonResponse
     {
         return $this->jsonResponse([
-            'name' => 'La veille — API publique',
+            'name' => 'La veille – API publique',
             'version' => 'v1',
             'description' => "API JSON publique en lecture seule de l'annuaire d'outils IA / EdTech francophones de La veille (laveille.ai). Sans authentification pour V1, rate-limited à 60 requêtes par minute par IP.",
-            'license' => 'CC BY 4.0 — Attribution requise (https://laveille.ai)',
-            'author' => 'Stéphane Lapointe — Memora solutions',
+            'license' => 'CC BY 4.0 – Attribution requise (https://laveille.ai)',
+            'author' => 'Stéphane Lapointe – Memora solutions',
             'contact' => 'info@memora.ca',
             'endpoints' => [
                 'GET /api/v1/directory/tools' => 'Liste paginée des outils. Params : page, per_page (max 100), category, pricing, has_education_pricing, q',

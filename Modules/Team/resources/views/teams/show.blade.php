@@ -54,7 +54,7 @@
                     <dd class="col-7">
                         <div class="d-flex align-items-center gap-1">
                             <i data-lucide="crown" class="text-warning" style="width:14px;height:14px"></i>
-                            <span class="fw-semibold">{{ $team->owner->name ?? '—' }}</span>
+                            <span class="fw-semibold">{{ $team->owner->name ?? '–' }}</span>
                         </div>
                     </dd>
 
@@ -157,7 +157,7 @@
                                     </button>
                                 </form>
                             @else
-                                <span class="text-muted small">—</span>
+                                <span class="text-muted small">–</span>
                             @endif
                         </td>
                     </tr>
@@ -233,7 +233,7 @@
                             @if($invitation->expires_at)
                                 {{ format_date($invitation->expires_at, 'datetime') }}
                             @else
-                                <span class="text-muted">—</span>
+                                <span class="text-muted">–</span>
                             @endif
                         </td>
                         <td class="text-end">

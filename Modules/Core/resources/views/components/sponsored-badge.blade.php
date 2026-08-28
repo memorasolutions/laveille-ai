@@ -8,5 +8,5 @@
             default => 'font-size: 12px; padding: 4px 10px;',
         };
     @endphp
-    <span style="display: inline-flex; align-items: center; gap: 4px; border-radius: 14px; border: 1px solid #FCD34D; background-color: #FEF3C7; color: #92400E; font-weight: 600; {{ $sizeStyle }}" title="Publicité — contenu sponsorisé" role="note">★ Sponsorisé</span>
+    <span style="display: inline-flex; align-items: center; gap: 4px; border-radius: 14px; border: 1px solid #FCD34D; background-color: #FEF3C7; color: #92400E; font-weight: 600; {{ $sizeStyle }}" title="Publicité – contenu sponsorisé" role="note">★ Sponsorisé</span>
 @endif

@@ -40,7 +40,7 @@ $jsonLd = [
 
                     <p>La Loi 25 (Loi modernisant des dispositions législatives en matière de protection des renseignements personnels) impose aux organismes publics québécois de protéger rigoureusement les renseignements personnels qu'ils détiennent. Cela inclut l'obligation de ne jamais transmettre de tels renseignements à des outils d'intelligence artificielle externes sans précautions strictes.</p>
 
-                    <p>Confier du texte contenant des informations personnelles à une IA non encadrée — comme un agent conversationnel commercial — peut exposer ces données à des traitements non autorisés, souvent hors du Québec. L'anonymisation préalable est donc essentielle.</p>
+                    <p>Confier du texte contenant des informations personnelles à une IA non encadrée – comme un agent conversationnel commercial – peut exposer ces données à des traitements non autorisés, souvent hors du Québec. L'anonymisation préalable est donc essentielle.</p>
 
                     <x-core::answer-box
                         summary="Avant d'utiliser une IA, anonymisez toujours vos textes, vérifiez où les données sont traitées, et validez humainement les résultats. La Loi 25 exige une vigilance constante sur les renseignements personnels."

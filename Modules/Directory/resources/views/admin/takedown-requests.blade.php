@@ -32,14 +32,14 @@
 
             <dl class="row mb-0 small">
                 <dt class="col-sm-3">{{ __('Outil') }}</dt>
-                <dd class="col-sm-9">{{ $r->tool?->name ?? '—' }}</dd>
+                <dd class="col-sm-9">{{ $r->tool?->name ?? '–' }}</dd>
 
                 <dt class="col-sm-3">{{ __('URL visée') }}</dt>
                 <dd class="col-sm-9">
                     @if($r->target_url)
                         <a href="{{ $r->target_url }}" target="_blank" rel="nofollow noopener">{{ $r->target_url }}</a>
                     @else
-                        —
+                        –
                     @endif
                 </dd>
 
@@ -47,25 +47,25 @@
                 <dd class="col-sm-9">{{ $r->requester_name }} &lt;{{ $r->requester_email }}&gt;</dd>
 
                 <dt class="col-sm-3">{{ __('Organisation') }}</dt>
-                <dd class="col-sm-9">{{ $r->requester_organization ?? '—' }}</dd>
+                <dd class="col-sm-9">{{ $r->requester_organization ?? '–' }}</dd>
 
                 <dt class="col-sm-3">{{ __('Rôle') }}</dt>
-                <dd class="col-sm-9">{{ $r->requester_role ?? '—' }}</dd>
+                <dd class="col-sm-9">{{ $r->requester_role ?? '–' }}</dd>
 
                 <dt class="col-sm-3">{{ __('Type de droit') }}</dt>
-                <dd class="col-sm-9">{{ $r->right_type ?? '—' }}</dd>
+                <dd class="col-sm-9">{{ $r->right_type ?? '–' }}</dd>
 
                 <dt class="col-sm-3">{{ __('Preuve / Détails') }}</dt>
-                <dd class="col-sm-9">{{ $r->right_details ?? '—' }}</dd>
+                <dd class="col-sm-9">{{ $r->right_details ?? '–' }}</dd>
 
                 <dt class="col-sm-3">{{ __('Description') }}</dt>
-                <dd class="col-sm-9">{{ $r->description ?? '—' }}</dd>
+                <dd class="col-sm-9">{{ $r->description ?? '–' }}</dd>
 
                 <dt class="col-sm-3">{{ __('Déclaration acceptée') }}</dt>
                 <dd class="col-sm-9">{{ $r->declaration_accepted ? '✓ ' . __('Oui') : '✗ ' . __('Non') }}</dd>
 
                 <dt class="col-sm-3">{{ __('IP') }}</dt>
-                <dd class="col-sm-9">{{ $r->ip_address ?? '—' }}</dd>
+                <dd class="col-sm-9">{{ $r->ip_address ?? '–' }}</dd>
             </dl>
         </div>
 

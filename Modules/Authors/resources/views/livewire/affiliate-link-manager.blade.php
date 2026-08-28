@@ -67,7 +67,7 @@
                         <tr class="border-t border-gray-200" wire:key="link-{{ $link->id }}">
                             <td class="px-4 py-3 font-mono text-[#9A2A06]">/go/{{ $link->slug }}</td>
                             <td class="px-4 py-3 text-gray-700 max-w-xs truncate"><a href="{{ $link->destination_url }}" target="_blank" rel="noopener" class="underline">{{ $link->destination_url }}</a></td>
-                            <td class="px-4 py-3 text-gray-600">{{ $link->label ?: '—' }}</td>
+                            <td class="px-4 py-3 text-gray-600">{{ $link->label ?: '–' }}</td>
                             <td class="px-4 py-3 font-bold text-[#064E5A]">{{ $link->clicks_count }}</td>
                             <td class="px-4 py-3">
                                 <button type="button" wire:click="startEdit({{ $link->id }})" class="text-[#064E5A] hover:underline mr-3 min-h-[44px]" aria-label="Modifier {{ $link->slug }}">✏️ Modifier</button>

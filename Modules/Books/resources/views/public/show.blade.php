@@ -463,7 +463,7 @@
                             <h2 class="bk-section-title">✍️ {{ __("À propos de l'auteur") }}</h2>
                             <div class="bk-author-box">
                                 <div class="bk-author-avatar" aria-hidden="true">SL</div>
-                                <p class="bk-author-text"><strong>Stéphane Lapointe</strong> — {{ $book->author_bio_short }}</p>
+                                <p class="bk-author-text"><strong>Stéphane Lapointe</strong> – {{ $book->author_bio_short }}</p>
                             </div>
                         </div>
                     @endif
@@ -502,7 +502,7 @@
                                     size="lg"
                                     target="_blank"
                                     rel="noopener sponsored"
-                                    aria-label="{{ __('Acheter la version papier sur Amazon') }} — {{ $book->title }} ({{ __('nouvel onglet') }})"
+                                    aria-label="{{ __('Acheter la version papier sur Amazon') }} – {{ $book->title }} ({{ __('nouvel onglet') }})"
                                 >
                                     {{ __('Acheter la version papier sur Amazon') }}
                                 </x-core::button>
@@ -514,7 +514,7 @@
                                     size="lg"
                                     target="_blank"
                                     rel="noopener sponsored"
-                                    aria-label="{{ __('Acheter la version Kindle sur Amazon') }} — {{ $book->title }} ({{ __('nouvel onglet') }})"
+                                    aria-label="{{ __('Acheter la version Kindle sur Amazon') }} – {{ $book->title }} ({{ __('nouvel onglet') }})"
                                 >
                                     {{ __('Acheter la version Kindle sur Amazon') }}
                                 </x-core::button>
@@ -546,7 +546,7 @@
                                     <a
                                         href="{{ route('books.show', $_tome->slug) }}"
                                         class="bk-series-tome"
-                                        aria-label="{{ __('Voir') }} {{ __('Tome') }} {{ $_tome->series_position }} — {{ $_tome->title }}"
+                                        aria-label="{{ __('Voir') }} {{ __('Tome') }} {{ $_tome->series_position }} – {{ $_tome->title }}"
                                     >
                                         <img
                                             src="{{ asset($_tome->cover_image) }}"
@@ -602,7 +602,7 @@
                                 size="lg"
                                 target="_blank"
                                 rel="noopener sponsored"
-                                aria-label="{{ __('Acheter la version papier sur Amazon') }} — {{ $book->title }} ({{ __('nouvel onglet') }})"
+                                aria-label="{{ __('Acheter la version papier sur Amazon') }} – {{ $book->title }} ({{ __('nouvel onglet') }})"
                             >
                                 {{ __('Acheter la version papier sur Amazon') }}
                             </x-core::button>
@@ -614,7 +614,7 @@
                                 size="lg"
                                 target="_blank"
                                 rel="noopener sponsored"
-                                aria-label="{{ __('Acheter la version Kindle sur Amazon') }} — {{ $book->title }} ({{ __('nouvel onglet') }})"
+                                aria-label="{{ __('Acheter la version Kindle sur Amazon') }} – {{ $book->title }} ({{ __('nouvel onglet') }})"
                             >
                                 {{ __('Acheter la version Kindle sur Amazon') }}
                             </x-core::button>
@@ -638,7 +638,7 @@
         <a
             href="#bk-cta-primary"
             class="bk-sticky-cta-link"
-            aria-label="{{ __('Voir les options d\'achat') }} — {{ $book->title }}"
+            aria-label="{{ __('Voir les options d\'achat') }} – {{ $book->title }}"
         >
             <span class="bk-sticky-cta-text">{{ $book->title }}</span>
             <span class="bk-sticky-cta-action">{{ __('Acheter') }} →</span>

@@ -1,4 +1,4 @@
-# robots.txt — laveille.ai
+# robots.txt – laveille.ai
 # SEO + GEO/AEO 2026 (Generative Engine Optimization)
 # Stratégie : opt-in maximal pour bots IA légitimes (training + search + agentic)
 # afin d'être cité dans ChatGPT, Claude, Perplexity, Gemini, Copilot.
@@ -15,7 +15,7 @@ Disallow: /dashboard
 Disallow: /s/
 Disallow: /api/
 
-# ── Bots IA training (autorisés — pour intégration dans modèles futurs) ──
+# ── Bots IA training (autorisés – pour intégration dans modèles futurs) ──
 User-agent: GPTBot
 Allow: /
 
@@ -43,7 +43,7 @@ Allow: /
 User-agent: Meta-ExternalAgent
 Allow: /
 
-# ── Bots IA search/agentic (autorisés — pour citations en temps réel) ──
+# ── Bots IA search/agentic (autorisés – pour citations en temps réel) ──
 User-agent: OAI-SearchBot
 Allow: /
 

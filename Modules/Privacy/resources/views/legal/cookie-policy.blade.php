@@ -2,7 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', __('Politique des cookies') . ' - ' . config('app.name'))
-@section('meta_description', __('Politique des cookies de laveille.ai — gestion des témoins de connexion.'))
+@section('meta_description', __('Politique des cookies de laveille.ai – gestion des témoins de connexion.'))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Politique des cookies')])
@@ -135,7 +135,7 @@
                             <p>{{ __('Ce site utilise Google Analytics 4 (GA4) en mode consentement v2. Aucun cookie à finalité analytique n\'est déposé sans votre consentement explicite (opt-in). Votre adresse IP est anonymisée par défaut, conformément aux recommandations de la CNIL. Les données collectées sont conservées au maximum 14 mois. Le traitement des données est effectué dans le cadre du Data Processing Framework UE-États-Unis et des clauses contractuelles types (SCC), garantissant ainsi une conformité au RGPD.') }}</p>
 
                             <h3 id="loi25">{{ __('8. Fondement légal au Québec (Loi 25)') }}</h3>
-                            <p>{{ __('Conformément à la Loi 25 sur la protection des renseignements personnels, notre site dépose uniquement les témoins de connexion strictement nécessaires au fonctionnement du service sans requérir votre consentement. En revanche, les témoins utilisés à des fins de statistiques, de marketing ou de profilage — c\'est-à-dire ceux qui permettent de vous identifier, de vous localiser ou de dresser un profil — sont désactivés par défaut. Ils ne sont activés qu\'après votre consentement explicite, donné par catégorie. Vous êtes clairement informé des moyens de les activer ou de les désactiver à tout moment au moyen de notre outil de gestion des témoins. Cette approche respecte pleinement les exigences de la Loi 25.') }}</p>
+                            <p>{{ __('Conformément à la Loi 25 sur la protection des renseignements personnels, notre site dépose uniquement les témoins de connexion strictement nécessaires au fonctionnement du service sans requérir votre consentement. En revanche, les témoins utilisés à des fins de statistiques, de marketing ou de profilage – c\'est-à-dire ceux qui permettent de vous identifier, de vous localiser ou de dresser un profil – sont désactivés par défaut. Ils ne sont activés qu\'après votre consentement explicite, donné par catégorie. Vous êtes clairement informé des moyens de les activer ou de les désactiver à tout moment au moyen de notre outil de gestion des témoins. Cette approche respecte pleinement les exigences de la Loi 25.') }}</p>
 
                             <h3 id="gpc">{{ __('9. Signal Global Privacy Control (GPC)') }}</h3>
                             <p>{{ __('Certains navigateurs émettent un signal appelé Global Privacy Control (GPC), conçu pour exprimer votre choix en matière de confidentialité. Ce signal est juridiquement contraignant dans certaines juridictions américaines (notamment la Californie, le Colorado, le Connecticut et le New Jersey) à compter de 2026. Bien que ni la Loi 25 ni la Loi sur la protection des renseignements personnels et les documents électroniques (LPRPDE) n\'imposent de le respecter au Québec ou ailleurs au Canada en 2026, nous choisissons d\'en tenir compte volontairement, par souci de transparence et de respect de votre autonomie. Votre contrôle demeure en tout temps assuré par notre bannière de gestion des témoins, où vous pouvez ajuster vos préférences.') }}</p>

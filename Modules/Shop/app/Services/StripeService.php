@@ -37,7 +37,7 @@ class StripeService
             foreach ($cartItems as $item) {
                 $product = $products[$item['product_id']] ?? null;
                 $lineItems["line_items[{$idx}][price_data][currency]"] = $currency;
-                $lineItems["line_items[{$idx}][price_data][product_data][name]"] = ($product?->name ?? 'Produit') . ($item['variant_label'] ? ' — ' . $item['variant_label'] : '');
+                $lineItems["line_items[{$idx}][price_data][product_data][name]"] = ($product?->name ?? 'Produit') . ($item['variant_label'] ? ' – ' . $item['variant_label'] : '');
                 $lineItems["line_items[{$idx}][price_data][unit_amount]"] = (int) round($item['unit_price'] * 100);
                 $lineItems["line_items[{$idx}][quantity]"] = $item['quantity'];
                 $idx++;

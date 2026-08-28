@@ -53,7 +53,7 @@ class PollExportService
         // dans l'export, avec une réponse dédiée et sans option associée.
         foreach ($poll->declines as $decline) {
             fputcsv($handle, [
-                '—',
+                '–',
                 $this->sanitizeCsvCell($decline->voter_pseudonym),
                 'Aucune date ne convient',
             ], ';', '"', '');

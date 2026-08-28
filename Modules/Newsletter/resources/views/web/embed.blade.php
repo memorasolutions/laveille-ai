@@ -2,7 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', ($subject ?? __('Infolettre')) . ' - ' . config('app.name'))
-@section('meta_description', __('Infolettre La veille — veille technologique IA'))
+@section('meta_description', __('Infolettre La veille – veille technologique IA'))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [

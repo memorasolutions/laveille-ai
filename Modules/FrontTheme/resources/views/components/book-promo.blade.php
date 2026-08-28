@@ -11,7 +11,7 @@
 @props([
     'book'              => null,
     'title'             => null,
-    'subtitle'          => 'Le guide pratique pour PME et professionnels — Édition 2026',
+    'subtitle'          => 'Le guide pratique pour PME et professionnels – Édition 2026',
     'author'            => 'Stéphane Lapointe',
     'author_role'       => 'Fondateur MEMORA solutions',
     'publisher'         => 'MEMORA solutions',
@@ -24,7 +24,7 @@
     'cover_url_jpg'     => '/images/books/ia-sans-se-faire-poursuivre-cover-600.jpg',
     'cover_url_300'     => '/images/books/ia-sans-se-faire-poursuivre-cover-300.webp',
     'og_image'          => '/images/books/ia-sans-se-faire-poursuivre-og-1200x630.jpg',
-    'cover_alt'         => "L'IA sans se faire poursuivre — Édition 2026 — Guide pratique Loi 25 RGPD AI Act pour PME francophones par Stéphane Lapointe",
+    'cover_alt'         => "L'IA sans se faire poursuivre – Édition 2026 – Guide pratique Loi 25 RGPD AI Act pour PME francophones par Stéphane Lapointe",
     'cta_label'         => 'Commander sur Amazon',
     'cta_url'           => 'https://a.co/d/0dN4X9m2',
     'schema'            => true,
@@ -57,7 +57,7 @@
     // titre, sinon l'encart décrirait le mauvais ouvrage sous « Voir les détails ».
     $descLong = $rotated !== []
         ? ($description_full ?? $description_short)
-        : ($description_full ?? ("Vous utilisez l'IA en entreprise — mais êtes-vous vraiment en conformité ? Depuis 2022, la Loi 25 du Québec impose de nouvelles obligations strictes en matière de protection des renseignements personnels. Les sanctions peuvent atteindre 25 millions de dollars canadiens ou 4 % du chiffre d'affaires mondial. Parallèlement, le RGPD en Europe punit les manquements jusqu'à 20 millions d'euros ou 4 % du CA mondial, et l'AI Act européen prévoit des amendes allant jusqu'à 35 millions d'euros ou 7 % du chiffre d'affaires mondial. Pour les PME francophones de 10 à 250 employés, naviguer entre ces cadres juridiques complexes devient un impératif opérationnel. 25 chapitres clairs et 18 annexes immédiatement utilisables : modèle EFVP, registre incidents IA, runbook crise IA, clauses contractuelles fournisseurs IA, fiches droit à l'image et deepfakes. Appuyé sur ISO/IEC 42001 et NIST AI RMF, 18 cas concrets terrain québécois et européen."));
+        : ($description_full ?? ("Vous utilisez l'IA en entreprise – mais êtes-vous vraiment en conformité ? Depuis 2022, la Loi 25 du Québec impose de nouvelles obligations strictes en matière de protection des renseignements personnels. Les sanctions peuvent atteindre 25 millions de dollars canadiens ou 4 % du chiffre d'affaires mondial. Parallèlement, le RGPD en Europe punit les manquements jusqu'à 20 millions d'euros ou 4 % du CA mondial, et l'AI Act européen prévoit des amendes allant jusqu'à 35 millions d'euros ou 7 % du chiffre d'affaires mondial. Pour les PME francophones de 10 à 250 employés, naviguer entre ces cadres juridiques complexes devient un impératif opérationnel. 25 chapitres clairs et 18 annexes immédiatement utilisables : modèle EFVP, registre incidents IA, runbook crise IA, clauses contractuelles fournisseurs IA, fiches droit à l'image et deepfakes. Appuyé sur ISO/IEC 42001 et NIST AI RMF, 18 cas concrets terrain québécois et européen."));
     $uid = 'bookpromo-' . substr(md5($title . $cta_url), 0, 8);
     $absOg = url($og_image);
 @endphp
@@ -104,7 +104,7 @@
             href="{{ $cta_url }}"
             target="_blank"
             rel="noopener sponsored"
-            aria-label="{{ $cta_label }} — {{ $title }} (nouvel onglet)"
+            aria-label="{{ $cta_label }} – {{ $title }} (nouvel onglet)"
             style="display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;min-height:44px;padding:0.75rem 1.5rem;background:var(--c-primary);color:#fff;border-radius:0.5rem;text-decoration:none;font-weight:700;font-size:0.95rem;letter-spacing:0.02em;box-shadow:0 2px 6px rgba(11,114,133,0.25);transition:background 0.15s ease,transform 0.15s ease;"
             onmouseover="this.style.background='#085c6b';this.style.transform='translateY(-1px)'"
             onmouseout="this.style.background='#064E5A';this.style.transform='translateY(0)'"

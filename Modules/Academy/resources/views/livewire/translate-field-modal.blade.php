@@ -97,7 +97,7 @@
 
             @if ($isConfirmed)
                 <div class="alert alert-success mt-3 py-2 mb-0" role="alert">
-                    Aperçu validé — copie ce texte où tu en as besoin (aucune sauvegarde automatique n'est effectuée : ce cours n'a pas de champ multilingue).
+                    Aperçu validé – copie ce texte où tu en as besoin (aucune sauvegarde automatique n'est effectuée : ce cours n'a pas de champ multilingue).
                 </div>
             @endif
         </div>

@@ -51,7 +51,7 @@
 
                             <p style="margin:0 0 16px;color:#555;font-size:14px;">
                                 Si ce n'était pas vous, vous pouvez ignorer ce courriel en toute sécurité.
-                                Aucune action n'est requise — votre compte n'a pas été modifié.
+                                Aucune action n'est requise – votre compte n'a pas été modifié.
                             </p>
 
                             <p style="margin:24px 0 0;color:#555;font-size:14px;">
@@ -62,7 +62,7 @@
                     </tr>
                     <tr>
                         <td style="background:#F8FAFB;padding:16px 28px;text-align:center;color:#888;font-size:12px;border-top:1px solid #e5e7eb;">
-                            Courriel transactionnel de sécurité — envoyé suite à une tentative d'inscription.
+                            Courriel transactionnel de sécurité – envoyé suite à une tentative d'inscription.
                         </td>
                     </tr>
                 </table>

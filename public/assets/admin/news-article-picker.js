@@ -130,7 +130,7 @@ window.NewsArticlePicker = function (opts) {
                 if (!res.ok) {
                     let detail = '';
                     try { const e = await res.json(); detail = e.error || e.message || ''; } catch (_) {}
-                    this.fetchError = 'HTTP ' + res.status + (detail ? ' — ' + detail : '');
+                    this.fetchError = 'HTTP ' + res.status + (detail ? ' – ' + detail : '');
                     this.newsItems = [];
                     return;
                 }

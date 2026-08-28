@@ -17,7 +17,7 @@
                 <h1 class="mb-4" style="color: var(--sys-text-default);">Charte graphique & design system</h1>
 
                 <div style="margin-bottom: 40px; color: var(--sys-text-default);">
-                    <p>Référence du design system — réutiliser, ne jamais dupliquer.</p>
+                    <p>Référence du design system – réutiliser, ne jamais dupliquer.</p>
                     <p>Tout consomme des <strong>design tokens</strong> (couche <code>--sys-*</code> sémantique). Les composants proviennent des packages <code>x-core</code> et <code>x-fronttheme</code>.</p>
                 </div>
 

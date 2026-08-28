@@ -65,7 +65,7 @@
 
     {{-- Footer --}}
     <div style="background:#f8fafc; padding:16px; text-align:center; font-size:12px; color:#94a3b8;">
-        La veille — <a href="https://laveille.ai" style="color:#0B7285; text-decoration:none;">laveille.ai</a>
+        La veille – <a href="https://laveille.ai" style="color:#0B7285; text-decoration:none;">laveille.ai</a>
     </div>
 </div>
 </body>

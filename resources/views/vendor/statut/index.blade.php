@@ -263,10 +263,10 @@
             <small>
                 {{ __('statut::messages.refreshed_every_60s') }}
                 @if(!empty($brand['name']) && !empty($brand['url']))
-                    —
+                    –
                     <a href="{{ $brand['url'] }}" rel="noopener noreferrer">{{ $brand['name'] }}</a>
                 @elseif(!empty($brand['name']))
-                    — {{ $brand['name'] }}
+                    – {{ $brand['name'] }}
                 @endif
             </small>
         </footer>

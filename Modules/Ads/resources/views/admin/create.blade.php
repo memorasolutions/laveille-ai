@@ -49,7 +49,7 @@
                         </div>
                         <div class="form-check form-switch">
                             <input type="checkbox" class="form-check-input" name="is_external" value="1" {{ old('is_external') ? 'checked' : '' }}>
-                            <label class="form-check-label">{{ __('Source externe (AdSense, etc.) — pas de label "Publicité"') }}</label>
+                            <label class="form-check-label">{{ __('Source externe (AdSense, etc.) – pas de label "Publicité"') }}</label>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary">{{ __('Enregistrer') }}</button>

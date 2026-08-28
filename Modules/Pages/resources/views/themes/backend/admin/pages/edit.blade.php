@@ -111,7 +111,7 @@
                     <div class="mb-3">
                         <label class="form-label fw-medium">{{ __('Page parente') }}</label>
                         <select name="parent_id" class="form-control" aria-label="{{ __('Page parente') }}">
-                            <option value="">{{ __('(Aucune — page racine)') }}</option>
+                            <option value="">{{ __('(Aucune – page racine)') }}</option>
                             @foreach($parentPages as $p)
                                 <option value="{{ $p->id }}" {{ old('parent_id', $page->parent_id) == $p->id ? 'selected' : '' }}>{{ $p->title }}</option>
                             @endforeach

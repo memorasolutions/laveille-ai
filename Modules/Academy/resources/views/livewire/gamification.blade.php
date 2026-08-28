@@ -74,7 +74,7 @@
             @if($progress['points_to_next'] > 0)
                 Encore {{ $progress['points_to_next'] }} XP avant le niveau {{ $progress['level'] + 1 }}
             @else
-                Niveau maximal atteint pour l'instant — continuez à apprendre !
+                Niveau maximal atteint pour l'instant – continuez à apprendre !
             @endif
         </span>
     </div>
@@ -121,7 +121,7 @@
     @forelse($this->leaderboards as $group)
         <div class="mb-3" style="border: 1px solid #E5E7EB; border-radius: var(--sys-radius-md, 0.75rem); padding: 14px 16px;">
             <h3 style="font-family: var(--f-heading); font-size: 0.95rem; color: var(--c-primary, #064E5A); margin: 0 0 10px;">
-                Classement — {{ $group['label'] }}
+                Classement – {{ $group['label'] }}
             </h3>
 
             @if($group['entries']->isNotEmpty())
@@ -132,7 +132,7 @@
                             class="d-flex justify-content-between align-items-center"
                             style="padding: 6px 0; border-bottom: 1px solid #F3F4F6; {{ $isSelf ? 'font-weight: 700;' : '' }}">
                             <span style="font-size: 0.85rem; color: var(--sys-text-default, #1A1D23);">
-                                {{ $entry['rank'] }}{{ $entry['rank'] === 1 ? 'er' : 'e' }} —
+                                {{ $entry['rank'] }}{{ $entry['rank'] === 1 ? 'er' : 'e' }} –
                                 {{ \Illuminate\Support\Str::before($entry['user']->name, ' ') }}
                                 @if($isSelf)
                                     <span aria-label="c'est vous">(vous)</span>
@@ -146,7 +146,7 @@
                 </ol>
             @else
                 <p style="font-size: 0.82rem; color: var(--sys-text-muted, #6B7280); margin: 0;">
-                    Personne au classement pour l'instant — soyez le/la premier(ère) !
+                    Personne au classement pour l'instant – soyez le/la premier(ère) !
                 </p>
             @endif
         </div>

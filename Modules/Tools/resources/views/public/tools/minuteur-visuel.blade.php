@@ -358,9 +358,9 @@
                         {{-- Légende du feu de circulation — seuils réels dérivés de la durée choisie
                              (une ligne par couleur, recalculée si l'utilisateur change de durée). --}}
                         <div class="mv-traffic-legend" x-show="style === 'traffic'" x-cloak>
-                            <p class="mv-traffic-legend__line">🟢 {{ __('Plus de la moitié du temps') }} — <span x-text="'de ' + trafficTotalFormatted + ' à ' + trafficGreenThreshold"></span></p>
-                            <p class="mv-traffic-legend__line">🟡 {{ __('Bientôt fini') }} — <span x-text="'de ' + trafficGreenThreshold + ' à ' + trafficYellowThreshold"></span></p>
-                            <p class="mv-traffic-legend__line">🔴 {{ __('Presque terminé') }} — <span x-text="'{{ __('moins de') }} ' + trafficYellowThreshold"></span></p>
+                            <p class="mv-traffic-legend__line">🟢 {{ __('Plus de la moitié du temps') }} – <span x-text="'de ' + trafficTotalFormatted + ' à ' + trafficGreenThreshold"></span></p>
+                            <p class="mv-traffic-legend__line">🟡 {{ __('Bientôt fini') }} – <span x-text="'de ' + trafficGreenThreshold + ' à ' + trafficYellowThreshold"></span></p>
+                            <p class="mv-traffic-legend__line">🔴 {{ __('Presque terminé') }} – <span x-text="'{{ __('moins de') }} ' + trafficYellowThreshold"></span></p>
                             <p class="mv-traffic-legend__note">{{ __('Le chiffre au centre reste le temps exact restant.') }}</p>
                         </div>
 

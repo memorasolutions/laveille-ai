@@ -19,7 +19,7 @@
     $periods = ['24h' => $uptime['24h'] ?? null, '7d' => $uptime['7d'] ?? null, '30d' => $uptime['30d'] ?? null, '90d' => $uptime['90d'] ?? null];
 @endphp
 
-<article class="statut-card statut-card--{{ $statusValue }}" aria-label="{{ $monitor->name }} — {{ $statusLabel }}">
+<article class="statut-card statut-card--{{ $statusValue }}" aria-label="{{ $monitor->name }} – {{ $statusLabel }}">
     <div class="statut-card-header">
         <h3>{{ $monitor->name }}</h3>
         <span class="statut-pill statut-pill--{{ $statusValue }}">{{ $statusLabel }}</span>

@@ -173,7 +173,7 @@
                                 <span class="badge {{ $badgeClass }}">{{ $statusText }}</span>
                             </td>
                             <td class="py-3 px-4 text-muted small">
-                                {{ $result->shortSummary ?? $result->notificationMessage ?? '—' }}
+                                {{ $result->shortSummary ?? $result->notificationMessage ?? '–' }}
                             </td>
                             <td class="py-3 px-4 small" style="max-width:300px;overflow-wrap:break-word;word-break:break-word;">
                                 @if($status === 'ok')
@@ -206,7 +206,7 @@
                                 @endif
                             </td>
                             <td class="py-3 px-4 text-muted small">
-                                {{ $results->finishedAt ? format_date(\Carbon\Carbon::parse($results->finishedAt), 'datetime') : '—' }}
+                                {{ $results->finishedAt ? format_date(\Carbon\Carbon::parse($results->finishedAt), 'datetime') : '–' }}
                             </td>
                         </tr>
                         @endforeach

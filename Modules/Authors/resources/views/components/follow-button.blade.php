@@ -36,7 +36,7 @@
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(this.feedUrl).then(() => this.toast('Lien RSS copié !'));
             } else {
-                this.toast('Copie automatique indisponible — sélectionne le lien manuellement.');
+                this.toast('Copie automatique indisponible – sélectionne le lien manuellement.');
             }
         },
         toast(msg) {

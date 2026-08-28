@@ -90,7 +90,7 @@
         <span x-show="!loading && !subscribed" aria-hidden="true">🔔</span>
         <span x-show="!loading && subscribed" aria-hidden="true">✓</span>
         <span x-show="loading" aria-hidden="true">⏳</span>
-        <span x-show="!loading && !authenticated">{{ __("Recevoir les alertes") }}@if($categoryName) — {{ $categoryName }}@endif</span>
+        <span x-show="!loading && !authenticated">{{ __("Recevoir les alertes") }}@if($categoryName) – {{ $categoryName }}@endif</span>
         <span x-show="!loading && authenticated && !subscribed">{{ __("M'alerter des nouveautés") }}</span>
         <span x-show="!loading && authenticated && subscribed">{{ __('Alertes actives') }}</span>
         <span x-show="loading">{{ __('Chargement...') }}</span>

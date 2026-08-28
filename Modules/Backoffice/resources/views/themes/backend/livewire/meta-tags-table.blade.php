@@ -57,7 +57,7 @@
                             <code class="small text-primary bg-primary bg-opacity-10 px-2 py-1 rounded">{{ $tag->url_pattern }}</code>
                         </td>
                         <td class="small text-body">
-                            {{ $tag->title ? \Illuminate\Support\Str::limit($tag->title, 50) : '—' }}
+                            {{ $tag->title ? \Illuminate\Support\Str::limit($tag->title, 50) : '–' }}
                         </td>
                         <td>
                             <span class="badge rounded py-1 px-2 fw-medium small bg-info bg-opacity-10 text-info border border-info border-opacity-25">

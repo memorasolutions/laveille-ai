@@ -38,7 +38,7 @@ $jsonLd = [
                     <x-fronttheme::page-freshness updated="2026-06-19" />
 
                     <p><strong>L'intelligence artificielle est désormais accessible aux PME québécoises, même sans équipe technique dédiée.</strong> L'enjeu n'est plus tant d'avoir accès à la technologie que de cibler des tâches précises où l'IA apporte une réelle valeur, tout en protégeant ses données sensibles.</p>
-                    <p>Des aides financières existent au Québec et au Canada pour accompagner cette transition — à condition de bien cerner ses besoins et de choisir les bons programmes.</p>
+                    <p>Des aides financières existent au Québec et au Canada pour accompagner cette transition – à condition de bien cerner ses besoins et de choisir les bons programmes.</p>
 
                     <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-top: 32px; margin-bottom: 16px;">Où en sont les PME québécoises ?</h2>
                     <p>Au 2e trimestre 2025, 12,2 % des entreprises canadiennes déclaraient utiliser l'IA pour produire des biens ou des services, soit environ le double d'un an plus tôt (≈ 6,1 % au 2e trimestre 2024). (Statistique Canada, 2025)</p>

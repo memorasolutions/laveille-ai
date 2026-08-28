@@ -14,7 +14,7 @@
         </tr>
         <tr>
             <td style="padding:32px;">
-                <p style="margin:0 0 16px;font-size:16px;">On a remarqué que tu n'as pas publié d'article récemment. Pas de pression — la vie est pleine d'imprévus.</p>
+                <p style="margin:0 0 16px;font-size:16px;">On a remarqué que tu n'as pas publié d'article récemment. Pas de pression – la vie est pleine d'imprévus.</p>
                 <p style="margin:0 0 24px;">Si tu cherches de l'inspiration, voici 3 sujets tendance en IA au Québec en ce moment :</p>
                 <ul style="margin:0 0 24px;padding-left:20px;font-size:15px;">
                     <li>Impacts de l'IA générative sur les PME québécoises</li>

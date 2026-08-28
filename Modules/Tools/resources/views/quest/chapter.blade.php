@@ -1,6 +1,6 @@
 @extends(fronttheme_layout())
 
-@section('title', $chapter['title'] . ' — ' . $meta['title'] . ' · La veille')
+@section('title', $chapter['title'] . ' – ' . $meta['title'] . ' · La veille')
 @section('meta_description', 'Chapitre ' . $chapter['number'] . ' : ' . $chapter['subtitle'])
 
 @push('robots')

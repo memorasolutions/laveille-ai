@@ -6,7 +6,7 @@
 <meta property="og:title" content="L'IA pour étudier au Québec">
 @php
 $faq = [
-    ["Est-ce permis d'utiliser l'IA pour mes travaux ?", "Cela dépend des règles de votre établissement. Le Québec encadre l'usage de l'IA en enseignement supérieur et interdit d'entrer des données confidentielles dans des outils publics comme ChatGPT. Utilisée pour comprendre et non pour remplacer votre travail, l'IA peut être légitime — vérifiez toujours la politique de votre cours."],
+    ["Est-ce permis d'utiliser l'IA pour mes travaux ?", "Cela dépend des règles de votre établissement. Le Québec encadre l'usage de l'IA en enseignement supérieur et interdit d'entrer des données confidentielles dans des outils publics comme ChatGPT. Utilisée pour comprendre et non pour remplacer votre travail, l'IA peut être légitime – vérifiez toujours la politique de votre cours."],
     ["Combien d'étudiants québécois utilisent l'IA ?", "Selon NETendances 2025 (Académie de la transformation numérique, Université Laval), 74 % des internautes aux études au Québec utilisaient l'IA générative pour leurs travaux en 2025, contre 46 % un an plus tôt. ChatGPT domine (84 % des utilisateurs)."],
     ["L'IA aide-t-elle vraiment les étudiants avec un TDAH ?", "Elle peut soutenir l'organisation, la reformulation et la planification, des tâches souvent exigeantes avec un TDAH. Les preuves spécifiques au TDAH restent toutefois limitées : l'IA est un soutien, pas un substitut à l'accompagnement et aux stratégies validées."]
 ];
@@ -35,7 +35,7 @@ $jsonLd = [
                     <x-fronttheme::page-freshness updated="2026-06-19" />
 
                     <p><strong>De plus en plus d'étudiants québécois utilisent l'IA pour étudier.</strong> Bien utilisée, elle soutient l'apprentissage, mais comporte des risques et est encadrée par des règles. Vérifiez toujours la politique de votre établissement.</p>
-                    <p>L'intelligence artificielle transforme les pratiques d'apprentissage au Québec. Si elle offre des atouts concrets — notamment pour des tâches exigeantes comme l'organisation ou la reformulation —, elle exige aussi vigilance, esprit critique et respect des cadres institutionnels et légaux.</p>
+                    <p>L'intelligence artificielle transforme les pratiques d'apprentissage au Québec. Si elle offre des atouts concrets – notamment pour des tâches exigeantes comme l'organisation ou la reformulation –, elle exige aussi vigilance, esprit critique et respect des cadres institutionnels et légaux.</p>
 
                     <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-top: 32px; margin-bottom: 16px;">Combien d'étudiants utilisent l'IA ?</h2>
                     <p>Selon l'enquête NETendances 2025 sur l'IA générative (<a href="https://transformation-numerique.ulaval.ca" target="_blank" rel="noopener" style="color: var(--sys-text-link, #064E5A);">Académie de la transformation numérique</a>, Université Laval), 74 % des internautes « aux études » au Québec déclaraient utiliser l'IA générative pour leurs travaux scolaires ou universitaires en 2025, contre 46 % un an plus tôt. (Académie de la transformation numérique, Université Laval, 2025)</p>
@@ -45,7 +45,7 @@ $jsonLd = [
                     <h2 style="font-family: var(--f-heading); color: var(--sys-text-default, #1A1D23); margin-top: 32px; margin-bottom: 16px;">Bénéfices pour l'apprentissage (et le TDAH)</h2>
                     <ul style="padding-left: 20px; margin: 16px 0;">
                         <li>Simplifier des textes, expliquer des concepts et générer des exemples, ce qui soutient la compréhension.</li>
-                        <li>Fournir une rétroaction rapide sur un texte ou un raisonnement, utile à l'apprentissage autorégulé — à condition que l'étudiant valide et réfléchisse au contenu proposé.</li>
+                        <li>Fournir une rétroaction rapide sur un texte ou un raisonnement, utile à l'apprentissage autorégulé – à condition que l'étudiant valide et réfléchisse au contenu proposé.</li>
                         <li>Aider à planifier et structurer le travail (découper une tâche, organiser des notes), des aspects souvent exigeants pour les étudiants ayant un TDAH.</li>
                     </ul>
                     <p>Les preuves scientifiques spécifiques au TDAH restent toutefois limitées : l'IA est un soutien, non un substitut aux stratégies validées et à l'accompagnement.</p>

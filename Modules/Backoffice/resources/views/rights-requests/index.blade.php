@@ -96,7 +96,7 @@
                                 @endswitch
                             </td>
                             <td class="{{ $r->isOverdue() ? 'text-danger fw-bold' : '' }}">
-                                {{ format_date($r->deadline_at) ?: '—' }}
+                                {{ format_date($r->deadline_at) ?: '–' }}
                             </td>
                             <td>
                                 @include('core::components.action-menu', ['actions' => [
