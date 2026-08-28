@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.231.0] - 2026-08-28
+
+### Ajouté
+- **Fiche de glossaire « WorkOS »**, l'entreprise qui vend aux éditeurs de logiciels les briques d'authentification d'entreprise. Contrôle anti-doublon fait AVANT rédaction, contre la PRODUCTION et par CONCEPT, pas par sondage d'URL : les 516 slugs réels du sitemap ne contiennent ni « workos », ni « sso », ni « saml », ni « scim », et la recherche live du site renvoie zéro résultat en section glossaire. Aucune relation `broader_slugs`/`narrower_slugs` n'est posée, et c'est un choix motivé écrit dans la migration : SSO et MFA sont des notions bien plus anciennes que l'entreprise, en faire des enfants de WorkOS lui attribuerait une paternité qu'elle n'a pas. La connexion se fait par le TEXTE, que le linkifier relie tout seul.
+- **`match_strategy` en `case_sensitive`, pour une raison précise** : « WorkOS » ressemble à « works », « work » et « workflow », des mots courants dans la prose technique du site. La casse exacte est le seul garde-fou qui empêche un auto-lien de se poser au milieu d'un mot anglais ordinaire.
+- **Image de fiche produite par le compte Gemini du fondateur**, paire webp + jpg au format imposé (1200x669, 11 Ko et 22 Ko), inspectée visuellement avant d'être retenue : aucun texte, aucune lettre, aucun logo réel. Les deux fichiers sont VERSIONNÉS, contrôlés par `git ls-files` avant la livraison - c'est exactement le défaut silencieux du 27 août, où deux fiches sont parties en production avec des images restées non suivies, donc absentes du serveur.
+
+### Corrigé
+- **Le champ purgé figurait encore dans la recherche publique du site.** `NewsArticle::searchableFields()` interrogeait toujours `description`, la colonne qui portait le TEXTE SOURCE intégral des articles et qui a été purgée par le chantier « zéro copie » du 16 août. Les deux seuls points d'écriture qui subsistent y inscrivent volontairement une chaîne vide, et aucun chemin d'affichage ne la lit : ce `LIKE` ne pouvait plus rien trouver d'utile. Le vrai motif du retrait n'est pas la performance, c'est qu'il gardait ouvert un canal de DÉCOUVERTE - une ligne ancienne ayant échappé à la purge aurait rendu son texte source retrouvable par recherche d'une phrase exacte, alors que ce texte ne doit plus exister chez nous. `Modules/Search` 13 passed, `Modules/News` 530 passed (1 752 assertions).
+
 ## [1.230.0] - 2026-08-28
 
 ### Ajouté

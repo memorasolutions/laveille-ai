@@ -1,0 +1,63 @@
+[
+  {
+    "slug": "workos",
+    "cat_slug": "securite-et-ethique",
+    "name": "WorkOS",
+    "definition": "WorkOS est une entreprise américaine d'infrastructure logicielle, fondée le 20 mai 2019 à San Francisco par Michael Grinich, auparavant cofondateur de Nylas, une entreprise d'API courriel. WorkOS vend aux éditeurs de logiciels les briques que les grandes entreprises exigent avant d'adopter un produit : authentification unique (SSO) par SAML, synchronisation d'annuaire (SCIM) avec Okta ou Microsoft Entra ID, authentification multifacteur (MFA), journaux d'audit et portail d'administration en libre-service. Grinich appelle cet obstacle le « fossé de l'entreprise » : un logiciel peut séduire ses utilisateurs et pourtant échouer la revue de sécurité d'un grand acheteur. L'entreprise se présente comme la couche d'infrastructure qu'un système d'exploitation offre à chaque application - d'où son nom. AuthKit, son produit d'authentification lancé en novembre 2023, y ajoute la connexion grand public (mot de passe, lien magique, connexion sociale). En mars 2026, WorkOS lève 100 millions de dollars américains, valorisant l'entreprise à 2 milliards de dollars américains.",
+    "analogy": "Comme Stripe a rendu les paiements en ligne triviaux pour un développeur, WorkOS vise à rendre triviale l'authentification d'entreprise.",
+    "example": "En 2026, le mur de clients de workos.com affiche OpenAI, Anthropic, Cursor, Perplexity, Replit, Snowflake et Laravel - la preuve que même des éditeurs d'IA de premier plan externalisent leur authentification d'entreprise plutôt que de la reconstruire.",
+    "did_you_know": "Le « OS » de WorkOS ne renvoie ni à Windows ni à Linux : Grinich compare l'entreprise à un système d'exploitation qui gère, une fois pour toutes, l'infrastructure que chaque logiciel devrait sinon reconstruire.",
+    "one_sentence_answer": "WorkOS est une entreprise américaine fondée en 2019 qui vend aux éditeurs de logiciels les briques d'authentification d'entreprise (authentification unique, annuaire, audit) nécessaires pour vendre à de grandes organisations.",
+    "faq": [
+      {
+        "question": "WorkOS est-il un fournisseur d'identité comme Okta?",
+        "answer": "Pas directement : Okta vend l'identité à l'entreprise cliente elle-même, alors que WorkOS la vend aux éditeurs de logiciels, pour qu'ils branchent Okta, Microsoft Entra ID ou Google Workspace en une seule intégration plutôt qu'une par client."
+      },
+      {
+        "question": "Qu'est-ce qu'AuthKit?",
+        "answer": "AuthKit est le produit d'authentification de WorkOS, lancé en novembre 2023 : une interface de connexion prête à l'emploi (mot de passe, lien magique, connexion sociale) qui peut ensuite évoluer vers l'authentification unique d'entreprise sans migration."
+      },
+      {
+        "question": "Qui utilise WorkOS?",
+        "answer": "WorkOS liste notamment Cursor, Perplexity, OpenAI, Anthropic et Replit parmi les logos affichés sur sa page clients en 2026, pour ajouter l'authentification unique, la synchronisation d'annuaire ou les journaux d'audit exigés par leurs propres acheteurs d'entreprise."
+      }
+    ],
+    "sources": [
+      {
+        "label": "WorkOS - WorkOS raises $100M Series C, hits $2B valuation",
+        "url": "https://workos.com/blog/series-c",
+        "year": 2026,
+        "author": "WorkOS"
+      },
+      {
+        "label": "WorkOS - WorkOS raises $15M to build “Stripe for enterprise-ready features”",
+        "url": "https://workos.com/blog/workos-raises-15m-to-build-stripe-for-enterprise-ready-features",
+        "year": 2021,
+        "author": "Michael Grinich, WorkOS"
+      },
+      {
+        "label": "WorkOS - Introducing AuthKit and User Management",
+        "url": "https://workos.com/blog/introducing-authkit-and-user-management",
+        "year": 2023,
+        "author": "WorkOS"
+      },
+      {
+        "label": "SiliconANGLE - JetStream Security, Guild.ai and WorkOS land fresh funding amid growing agentic AI infrastructure push",
+        "url": "https://siliconangle.com/2026/03/03/jetstream-security-guild-ai-workos-land-fresh-funding-amid-growing-agentic-ai-infrastructure-push/",
+        "year": 2026,
+        "author": "Duncan Riley, SiliconANGLE"
+      }
+    ],
+    "aliases": [],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "🛂",
+    "type": "organisation",
+    "acronym_full": null,
+    "match_strategy": "case_sensitive",
+    "has_image": true,
+    "reference_url": "https://workos.com",
+    "reference_label": "Site officiel de WorkOS"
+  }
+]

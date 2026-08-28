@@ -645,7 +645,16 @@ class NewsArticle extends Model implements Searchable
 
     public static function searchableFields(): array
     {
-        return ['title', 'seo_title', 'summary', 'description'];
+        // ACTION : 'description' RETIRE de la recherche publique (2026-08-28).
+        // MCP: SELF (<5 lignes)
+        // RAISON: ce champ portait le TEXTE SOURCE integral, purge par le chantier « Actus -
+        // zero copie » (2026-08-16). Les deux seuls points d'ecriture qui subsistent
+        // (NewsArticle et RssFetcherService) y inscrivent volontairement une chaine VIDE, et
+        // aucun chemin d'affichage ne le lit. Le laisser dans la recherche coutait un LIKE
+        // inutile sur chaque requete, et surtout gardait ouvert un canal de DECOUVERTE : une
+        // ligne ancienne ayant echappe a la purge aurait rendu son texte source trouvable par
+        // recherche d'une phrase exacte, alors que ce texte ne doit plus exister chez nous.
+        return ['title', 'seo_title', 'summary'];
     }
 
     public static function searchSectionKey(): string
