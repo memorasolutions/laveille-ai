@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.228.0] - 2026-08-28
+
+### Ajouté
+- **La fiche « OpenAI Codex » se lie enfin au reste du site.** Elle était publiée sous le slug `codex` avec `aliases` vide : le linkifier ne posait donc un lien que sur la chaîne exacte « OpenAI Codex », alors que nos textes écrivent presque toujours « Codex » seul. L'alias est ajouté par migration réversible, testée en réel contre MySQL dans les deux sens (aller, retour arrière qui rétablit exactement l'état d'avant, puis aller de nouveau).
+- **Ce qui rend cet alias sûr** : `match_strategy` valait déjà `case_sensitive`, donc « Codex » l'outil se distingue de « codex » le livre relié - un sens bien réel en français, et qu'un article du blogue emploie effectivement (« les codex manuscrits »). Un test verrouille cette dépendance : il passe au ROUGE si l'on retire `case_sensitive`, ce qui a été vérifié en le retirant pour de bon.
+
+### Corrigé
+- **Le contrôle des auto-liens ne portait que sur DEUX familles de liens, alors qu'il y en a TROIS.** `GlossaryLinkifier` alimente `/glossaire/`, `/acronymes-education/` ET `/annuaire/` depuis la même classe. La troisième n'est pas anecdotique : 37 fiches d'annuaire contiennent le mot « Codex », toutes relues une à une pour ce lot. Le standard de rédaction du glossaire porte désormais le compte exact, plus la nuance qui manquait : `case_sensitive` écarte le nom commun en minuscules, mais PAS un autre nom propre capitalisé du type « Codex Alimentarius » - la frontière du linkifier borne un mot, jamais une locution.
+
 ## [1.227.2] - 2026-08-28
 
 ### Corrigé
