@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.227.0] - 2026-08-28
+
+### Ajouté
+- **Le compteur de vues du glossaire existe enfin.** Depuis toujours, l'affichage d'une fiche appelait `ViewCounterService::record()` - et cet appel ne faisait rien, faute d'une colonne `views_count` sur `dictionary_terms` que personne n'avait jamais créée. Le service, gardé par un `Schema::hasColumn`, échouait donc en silence : pas d'erreur, pas de journal, pas de donnée. Résultat, sur 502 fiches publiées, personne ne savait lesquelles étaient réellement lues, alors que cette donnée sert déjà sur l'annuaire à cibler l'enrichissement des fiches à fort trafic plutôt qu'à enrichir au hasard. Une seule migration suffisait, et aucune ligne de logique nouvelle : le tri anti-robot et la déduplication vivent déjà dans le service depuis l'incident du 13 août (le compteur des actualités affichait 1,1 million de vues cumulées contre 666 vues réelles, précisément parce qu'il comptait les robots). La colonne naît donc filtrée dès sa première écriture. Deux tests frappent la vraie route publique : un visiteur ordinaire incrémente, un Googlebot déclaré n'incrémente pas - et ce second test passe au rouge si l'on retire le tri anti-robot, ce qui a été vérifié en le désactivant pour de bon avant de restaurer le fichier. Effet de bord voulu : `AnalyticsService::getTopDictionaryTerms()`, qui alimente le tableau de bord de l'administration et attendait cette colonne derrière la même garde, se réveille sans qu'on y touche.
+- **Décision consignée dans la migration plutôt que laissée implicite** : pas de colonne jumelle `views_count_verified` ici, contrairement à l'annuaire, aux auteurs et aux actualités. Ce jumeau n'a de sens que pour isoler un historique DÉJÀ pollué d'un nouveau départ propre. Le glossaire n'ayant aucun historique à assainir, les deux colonnes seraient restées identiques pour toujours - un doublon sans risque réel de divergence, exactement ce que la règle DRY du projet refuse.
+
+### Corrigé
+- **Deux fiches de glossaire s'affichaient sans leur image, et sans image de partage social.** « OpenAI Codex » et « Anthropic » sont parties en production le 27 août avec un `hero_image` pointant vers quatre fichiers restés non suivis par git. Le déploiement ne transporte que ce qui est versionné : les pages répondaient 200, les images 404. Rien ne le signalait, puisque les fichiers existaient bien en local. Un contrôle `git ls-files` sur la paire webp + jpg est désormais inscrit au standard de rédaction des fiches.
+
 ## [1.226.0] - 2026-08-28
 
 ### Corrigé
