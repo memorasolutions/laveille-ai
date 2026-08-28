@@ -12,7 +12,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 231;
+$lvMinor = 232;
 $lvPatch = 0;
 
 return [

@@ -22,13 +22,14 @@ use Modules\News\Models\NewsArticle;
  */
 class BackfillAutoToolDetectionCommand extends Command
 {
-    protected $signature = 'news:backfill-auto-tools {--limit=200 : Nombre maximal d\'actualités traitées par exécution}';
+    protected $signature = 'news:backfill-auto-tools {--limit=200 : Nombre maximal d\'actualités traitées par exécution} {--dry-run : Mesurer sans rien écrire ni purger}';
 
     protected $description = 'Détecte et lie automatiquement (source=auto) les outils annuaire pour les actualités publiées sans outil lié';
 
     public function handle(NewsToolSyncAction $action): int
     {
         $limit = max(1, (int) $this->option('limit'));
+        $dryRun = (bool) $this->option('dry-run');
 
         $articles = NewsArticle::published()
             ->whereDoesntHave('tools')
@@ -44,14 +45,29 @@ class BackfillAutoToolDetectionCommand extends Command
 
         $processed = 0;
         $totalAttached = 0;
+        $reparables = 0;
 
         foreach ($articles as $article) {
             $suggested = $action->suggest($article);
 
             if ($suggested->isNotEmpty()) {
-                $count = $action->attachAuto($article, $suggested);
-                $totalAttached += $count;
-                $this->line("  article #{$article->id} : {$count} outil(s)");
+                $reparables++;
+
+                if ($dryRun) {
+                    $this->line("  [simulation] article #{$article->id} : {$suggested->count()} outil(s) seraient liés");
+                } else {
+                    $count = $action->attachAuto($article, $suggested);
+                    $totalAttached += $count;
+
+                    // ACTION: purger le cache public de la fiche juste après un rattachement réel.
+                    // MCP: SELF (<5 lignes)
+                    // RAISON: les routes publiques portent cacheResponse:600 - sans cette purge, la
+                    // page continue d'être servie telle qu'elle était pendant 10 minutes, et une
+                    // vérification faite dans la foulée conclut à tort que la commande n'a rien fait.
+                    NewsToolSyncAction::invalidatePublicCache($article);
+
+                    $this->line("  article #{$article->id} : {$count} outil(s)");
+                }
             }
 
             $processed++;
@@ -59,10 +75,20 @@ class BackfillAutoToolDetectionCommand extends Command
 
         $remaining = NewsArticle::published()->whereDoesntHave('tools')->count();
 
-        $this->info("{$processed} actualité(s) traitée(s), {$totalAttached} outil(s) auto-lié(s). {$remaining} restante(s) sans outil.");
+        if ($dryRun) {
+            // Deux populations à ne pas confondre : une fiche sans outil lié n'est pas
+            // forcément un défaut. Une actualité sur une politique publique n'a aucune raison
+            // de mentionner un outil de l'annuaire ; seules les fiches pour lesquelles
+            // suggest() propose quelque chose sont réellement réparables.
+            $sansSuggestion = $processed - $reparables;
+            $this->info("[simulation] {$processed} fiche(s) examinée(s) : {$reparables} mentionnent réellement un outil de l'annuaire (réparables), {$sansSuggestion} n'en mentionnent aucun (absence normale). Aucune écriture, aucune purge.");
+            $this->comment("Total de fiches publiées sans outil lié, toutes causes confondues : {$remaining}.");
+        } else {
+            $this->info("{$processed} actualité(s) traitée(s), {$totalAttached} outil(s) auto-lié(s). {$remaining} restante(s) sans outil.");
 
-        if ($remaining > 0) {
-            $this->comment('Relancer la commande pour continuer le rattrapage.');
+            if ($remaining > 0) {
+                $this->comment('Relancer la commande pour continuer le rattrapage.');
+            }
         }
 
         return self::SUCCESS;

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.232.0] - 2026-08-28
+
+### Ajouté
+- **Un mode simulation sur la commande de rattrapage des outils liés** (`news:backfill-auto-tools --dry-run`). Elle rejoue la détection sans rien écrire et sans purger aucun cache. Ce que ce mode apporte n'est pas du confort mais une DISTINCTION que le comptage brut ne fait pas : combien de fiches mentionnent réellement un outil de l'annuaire (donc réparables) contre combien n'en mentionnent aucun. Une actualité sur une politique publique n'a aucune raison de porter un outil lié; compter son absence comme un défaut gonfle le chiffre et fait viser à côté. Avant ce mode, la seule façon de connaître le vrai passif était d'écrire sur des milliers de fiches publiées pour voir ce qui sortait.
+
+### Corrigé
+- **La commande n'invalidait pas le cache de la fiche après l'avoir modifiée.** Les routes publiques portent `cacheResponse:600` : une fiche réparée continuait donc d'être servie inchangée pendant dix minutes. Toute vérification faite dans la foulée concluait que la réparation n'avait rien produit, alors qu'elle avait bien eu lieu. `NewsToolSyncAction::invalidatePublicCache()` existait déjà et était appelée ailleurs; elle manquait seulement ici.
+
+Deux tests verrouillent le comportement, dont la contrepartie : hors simulation, la commande attache réellement, et une fiche qui ne mentionne aucun outil n'en reçoit aucun (elle n'invente pas de rattachement). Le test de simulation passe au ROUGE si l'on neutralise le garde-fou, vérifié en le neutralisant pour de bon avant de restaurer : `1 failed, 1 passed` puis `2 passed`.
+
 ## [1.231.0] - 2026-08-28
 
 ### Ajouté
