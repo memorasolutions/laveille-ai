@@ -99,6 +99,20 @@ type: style-de-projet
   `lv_jsonld_breadcrumb()`, `lv_jsonld_author_stephane()`
   (`app/Helpers/jsonld.php`). Le `Person` inclut déjà `jobTitle`, `worksFor`
   et `sameAs` (LinkedIn) - ne pas le régénérer à la main.
+
+  **Sur `FAQPage`, à lire avant de croire qu'on l'a trouvé en défaut.** Le
+  résultat enrichi FAQ de Google est MORT : restreint le 8 août 2023, éteint
+  pour tout le monde le 7 mai 2026, documentation supprimée le 15 juin 2026.
+  Le balisage lui-même reste valide chez Schema.org, et Google déclare qu'il
+  « n'aide ni ne nuit ». On le garde quand même, et c'est un choix, pas un
+  oubli : le balisage a été MESURÉ à 0,63 % du poids d'une page, et une
+  dépublication de masse coûterait plus cher que ce qu'elle rapporterait. **Deux gestes sont donc interdits ici** : le
+  RETIRER en croyant appliquer le socle du skill `/article` (le socle dit
+  « le retirer n'est pas urgent »), et AJOUTER des questions de FAQ en
+  espérant un résultat enrichi qui ne s'affiche plus nulle part. La FAQ garde
+  toute sa valeur pour une autre raison, elle : c'est un bloc extractible
+  borné, et c'est CE trait-là qui est corrélé à la citation par les moteurs
+  de réponse - pas le balisage qui l'entoure.
 - **Sources d'autorité à citer en priorité** : documentation officielle de
   l'éditeur (Anthropic, OpenAI, Google, Mistral...), benchmarks indépendants
   reconnus (ex. leaderboard public, étude publiée), sites gouvernementaux
