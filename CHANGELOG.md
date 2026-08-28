@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.227.2] - 2026-08-28
+
+### Corrigé
+- **La liste de blocage des auto-liens ne protégeait PAS le widget « Outils mentionnés ».** Retirer un nom d'outil de `TOOL_NEVER_AUTO` empêchait bien le lien dans le corps du texte, mais `NewsToolSyncAction::suggest()` le RECAPTURAIT juste après, volontairement, en cherchant le même nom avec une majuscule. Les 4 liens retirés hier revenaient donc par une autre porte, sous forme de vignettes d'outils sur la fiche. Une seconde constante, `TOOL_NEVER_RECAPTURE`, ferme ce chemin - et `TOOL_NEVER_AUTO` l'inclut par dépliage (`...self::TOOL_NEVER_RECAPTURE`), pour qu'il n'existe qu'UNE définition de chaque nom : `suggest()` réutilise `linkify()` en interne, donc un nom exclu d'un seul des deux côtés n'était protégé nulle part. Vérifié à l'exécution : 56 entrées, aucun doublon, aucun nom de la seconde liste absent de la première.
+- **32 noms ajoutés**, tous des mots qui existent AUSSI hors du contexte de l'outil : soit des mots français à l'orthographe identique (`aider`, `flux`, `studio`, `volume`, `macro`, `forge`, `cadence`, `campus`, `radar`), soit des marques concurrentes bien plus connues que l'outil (`keep`, `quest`, `bolt`, `vitals`, `prism`, `retina`, `metal`, `epic`). Trois candidats ont été ÉCARTÉS avec leur motif : `brew` (« Homebrew » est soudé, aucune frontière de mot avant), `pioneer` et `needle` (le français dit « pionnier » et « aiguille », donc pas de collision de graphie).
+
+**Le compromis, assumé et réversible** : un outil réellement nommé « Bolt » ou « Forge » dans le corps d'une fiche n'aura plus son auto-lien. C'est un lien perdu contre un faux lien évité, et sur ce site le faux lien coûte plus cher - il envoie le lecteur vers une fiche qui n'a rien à voir avec ce qu'il lit, comme « autonomie » de batterie renvoyant vers l'autonomie des IA agentiques. Retirer un nom de la constante suffit à rétablir son lien : aucune donnée n'est détruite, seul le rendu change.
+
 ## [1.227.1] - 2026-08-28
 
 ### Corrigé

@@ -109,6 +109,14 @@ final class NewsToolSyncAction
      * hors début de phrase - la casse stricte limite donc fortement le risque de faux positif
      * (confirmé : un outil "Avec" existe bel et bien, publié, dans l'annuaire).
      *
+     * 2026-08-28 : la casse stricte seule ne suffit PAS pour les noms de
+     * GlossaryLinkifier::TOOL_NEVER_RECAPTURE (sous-ensemble de TOOL_NEVER_AUTO) - leur
+     * majuscule initiale ne distingue jamais l'outil du mot commun, y compris en tête de
+     * phrase ou de titre ("Local AI", "Montage vidéo par lots", "Global AI Pulse" de KPMG,
+     * "Thrive Logic" ont tous recapturé à tort l'outil homonyme - 4 faux liens mesurés sur un
+     * backfill de 33). Ces noms sont donc exclus du mécanisme de recapture ci-dessous, sans
+     * exception - voir le docblock de GlossaryLinkifier::TOOL_NEVER_RECAPTURE pour le détail.
+     *
      * Renvoie une Collection d'IDs d'outils (sans enregistrer - l'admin valide).
      *
      * @return Collection<int, int>
@@ -142,6 +150,10 @@ final class NewsToolSyncAction
             : "LOWER(JSON_EXTRACT(name, '$.\"fr_CA\"'))";
 
         $neverAutoIds = collect(GlossaryLinkifier::TOOL_NEVER_AUTO)
+            // 2026-08-28 : un nom de TOOL_NEVER_RECAPTURE n'est JAMAIS recapturé, même en
+            // majuscule - c'est la faille fermée ici (voir docblock plus haut). Le reste de
+            // TOOL_NEVER_AUTO ("avec", "tome", "make"...) garde le comportement d'origine.
+            ->reject(fn (string $name) => in_array($name, GlossaryLinkifier::TOOL_NEVER_RECAPTURE, true))
             ->filter(fn (string $name) => (bool) preg_match('/\b' . preg_quote(ucfirst($name), '/') . '\b/u', $text))
             ->map(fn (string $name) => Tool::published()
                 ->whereRaw("{$nameJsonExpr} = ?", [mb_strtolower($name)])

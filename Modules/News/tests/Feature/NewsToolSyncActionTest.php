@@ -185,3 +185,45 @@ it('suggest() détecte un outil dont le nom est aussi une fiche de glossaire', f
 
     expect($suggested->all())->toContain($tool->id);
 });
+
+// ── Faille fermée le 2026-08-28 : un nom de TOOL_NEVER_RECAPTURE ne doit JAMAIS être
+// recapturé par suggest(), même en majuscule initiale ──
+
+it('suggest() ne suggère jamais l\'outil « Local » à partir de « Local AI » en tête de titre', function () {
+    // Défaut mesuré en production le 2026-08-28 : un backfill d'auto-détection a créé 33 liens
+    // outil↔actualité, dont 4 faux (12 %), tous par le même mécanisme - NewsToolSyncAction::
+    // suggest() parcourait GlossaryLinkifier::TOOL_NEVER_AUTO et RECAPTURAIT tout nom présent
+    // avec une majuscule initiale dans le texte, sans distinguer un début de titre d'une vraie
+    // mention. « local » fait partie de TOOL_NEVER_AUTO (mot français courant), donc protégé de
+    // l'auto-lien du corps de texte - mais « Local » (majuscule) en tête de titre d'actualité
+    // ("Local AI...") était quand même recapturé et suggéré à tort.
+    //
+    // Ce test doit échouer (rouge) si GlossaryLinkifier::TOOL_NEVER_RECAPTURE est retiré du
+    // filtre ->reject() de NewsToolSyncAction::suggest() - vérifié manuellement en retirant
+    // temporairement cette ligne (voir rapport de la tâche).
+    $tool = ntsaTool('Local', 'local');
+
+    $article = NewsArticle::create([
+        'news_source_id' => ntsaSource()->id,
+        'title'          => 'Local AI transforme la manière dont les entreprises protègent leurs données',
+        'guid'           => 'guid-ntsa-local-ai',
+        'url'            => 'https://exemple.com/ntsa-local-ai',
+        'description'    => '',
+        'summary'        => '',
+        'structured_summary' => [
+            'hook' => 'De plus en plus de PME choisissent un déploiement sur site plutôt que le nuage public.',
+            'key_points' => [
+                'Le traitement sur site réduit la latence et les coûts récurrents.',
+            ],
+            'why_important' => 'Cette tendance répond à des enjeux de souveraineté des données.',
+        ],
+        'slug'         => 'article-ntsa-local-ai',
+        'pub_date'     => now()->subDay(),
+        'is_published' => true,
+        'seo_status'   => 'index',
+    ]);
+
+    $suggested = app(NewsToolSyncAction::class)->suggest($article);
+
+    expect($suggested->all())->not->toContain($tool->id);
+});

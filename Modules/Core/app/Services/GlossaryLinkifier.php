@@ -81,14 +81,64 @@ class GlossaryLinkifier
      * 2026-06-17 #164 : noms d'outils de l'annuaire qui sont aussi des mots courants / prénoms
      * (« Claude », « Avec », « Tome », « Make »…) → JAMAIS auto-liés, sinon faux positifs en prose FR.
      * Les ~330 autres outils (noms distinctifs) sont auto-liés en casse stricte vers /annuaire/{slug}.
+     *
+     * 2026-08-28 : cette liste protège bien l'auto-lien du CORPS DE TEXTE (loadTerms() plus bas
+     * exclut ces noms de $terms), mais NewsToolSyncAction::suggest() la parcourt aussi dans l'autre
+     * sens pour RECAPTURER un nom qui apparaît avec une majuscule initiale - intention légitime
+     * pour « Avec », « Tome », « Make » (rattraper l'outil quand il est réellement cité, une
+     * majuscule en tête de phrase y étant rarissime pour un mot français aussi courant). Pour le
+     * sous-ensemble ci-dessous, la majuscule ne prouve RIEN (début de titre, fragment d'un autre nom
+     * propre) : voir TOOL_NEVER_RECAPTURE, injecté ici par unpacking pour ne définir cette liste
+     * qu'à un seul endroit.
      */
     public const TOOL_NEVER_AUTO = ['claude', 'avec', 'tome', 'caribou', 'make', 'motion', 'gamma', 'gemini', 'mistral', 'consensus', 'intent', 'dust', 'soar', 'remind', 'spinach', 'grok', 'aqua', 'handy', 'lounge', 'willow', 'poe', 'pika', 'noa', 'deduce',
-        // 2026-08-28 : 4 faux positifs mesures sur les 420 premieres fiches du backfill
-        // des outils lies. Meme famille que ci-dessus : le nom de l'outil est un mot
-        // commun (« local », « montage », « logic ») ou un fragment d'un autre nom propre
-        // (« Global AI Pulse » de KPMG, « Thrive Logic »). Sans eux, le motif se serait
-        // reproduit mecaniquement sur les 2 506 fiches restantes.
-        'local', 'montage', 'pulse', 'logic'];
+        // 2026-08-28 : le reste (mots jamais recapturables, quelle que soit la casse observée)
+        // vit dans UNE seule définition, TOOL_NEVER_RECAPTURE ci-dessous - jamais recopiée ici.
+        ...self::TOOL_NEVER_RECAPTURE];
+
+    /**
+     * 2026-08-28 (fermeture de faille, backfill outil↔actualité) : noms qu'AUCUN contexte
+     * typographique - pas même une majuscule initiale - ne distingue du mot commun ou du fragment
+     * d'un autre nom propre. Contrairement au reste de TOOL_NEVER_AUTO (où une majuscule signale
+     * une vraie mention, ex. « Avec », « Tome », « Make »), une majuscule ici ne prouve rien : elle
+     * vient aussi bien d'un début de titre (« Local AI »), d'un fragment d'un AUTRE nom propre
+     * (« Global AI Pulse » de KPMG, « Thrive Logic »), ou d'un mot français ordinaire que la
+     * typographie capitalise pour toute autre raison (début de phrase, titre).
+     *
+     * Défaut mesuré le 2026-08-28 : NewsToolSyncAction::suggest() parcourait TOOL_NEVER_AUTO et
+     * recapturait tout nom présent avec une majuscule initiale dans le texte - sur un backfill de
+     * 33 liens outil↔actualité, 4 étaient faux (12 %), tous par ce mécanisme : « Local AI » en tête
+     * de titre → outil « Local »; « Montage vidéo par lots » → outil « Montage »; « Global AI
+     * Pulse » (KPMG) → outil « Pulse »; « Thrive Logic » → outil « Logic ». Ajouter un nom à
+     * TOOL_NEVER_AUTO le bloquait donc d'un côté (corps de texte) et le laissait entrer par la
+     * porte d'à côté (suggest()). Les noms d'ici sont exclus du mécanisme de recapture de
+     * suggest(), SANS EXCEPTION - voir NewsToolSyncAction::suggest().
+     *
+     * Liste vérifiée nom par nom (analyse initiale sur 2 221 outils publiés, pas une vérité reçue
+     * telle quelle) : 3 candidats reçus ont été ÉCARTÉS faute de collision réaliste en français -
+     * « brew » (Homebrew est un seul mot soudé, sans frontière avant « brew »; aucun usage courant
+     * du mot isolé); « pioneer » (le français dit « pionnier », orthographe différente = pas de
+     * collision de graphie); « needle » (le français dit « aiguille », même raison). Un nom
+     * réellement distinctif ne doit PAS figurer ici, sous peine de priver ce mécanisme de son
+     * intérêt.
+     */
+    public const TOOL_NEVER_RECAPTURE = [
+        // 2026-08-28 (demande fondateur, 4 faux positifs mesurés) :
+        'local', 'montage', 'pulse', 'logic',
+        // 2026-08-28 : candidats gravité très élevée, vérifiés - mot français courant ou terme
+        // technique d'orthographe IDENTIQUE en français, capitalisable en tête de phrase/titre
+        // sans lien avec l'outil (ex. « flux » de nouvelles, « Aider » verbe français ultra-courant
+        // et cas d'école du mandat, « Keep » qui collisionne avec Google Keep, « Quest » avec Meta
+        // Quest, « Vitals » avec Core Web Vitals) :
+        'flux', 'studio', 'volume', 'runtime', 'aider', 'box', 'quest', 'vitals', 'macro', 'bolt', 'keep',
+        // 2026-08-28 : candidats gravité élevée, vérifiés - même famille (ex. « Forge » que ce
+        // projet même emploie pour sa propre infrastructure, « Radar » dans l'expression « rester
+        // sous le radar », « Retina » qui collisionne avec l'écran Retina d'Apple, « Prism » avec le
+        // programme de surveillance PRISM, « Mira » avec Mira Murati, ex-CTO d'OpenAI, « Fred »
+        // comme prénom courant) :
+        'draft', 'brief', 'forge', 'handler', 'deck', 'shadow', 'mute', 'bastion', 'cadence', 'campus',
+        'metal', 'prism', 'radar', 'retina', 'epic', 'fred', 'mira',
+    ];
 
     /**
      * 2026-05-05 #141 b : tracking cumulatif inter-appels.
