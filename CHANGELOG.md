@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.233.2] - 2026-08-28
+
+### Corrigé
+- **Une paire de preuve refusée ne fait plus échouer les autres** : chaque paire est désormais jugée seule, et le refus dit précisément laquelle et pourquoi. `normalizeProofPairs()` retournait `null` dès la première erreur rencontrée, rejetant du même coup les paires valides déjà accumulées. Un lot de quinze paires dont deux étaient fautives passait auparavant à la poubelle en entier.
+- **Sur une fiche déjà publiée, le texte source d'origine n'existe plus** : il est effacé à la publication, par choix (`publishAndPurgeSource()`). Le contrôle qui vérifie qu'une citation figure bien dans ce texte ne pouvait donc plus jamais réussir, et refusait toutes les citations, même exactes. Il ne s'applique désormais plus dans ce cas.
+- **La paire acceptée dans cette situation porte la marque de ce qui n'a pas pu être vérifié** : `source_verified => false`, avec un avertissement affiché en console. Cette marque reste visible et distingue une citation acceptée sans vérification possible d'une citation réellement contrôlée, ce qui empêche l'assouplissement de devenir un trou.
+
+Contrôle ciblé après le bump de version, suite complète du module déjà vérifiée avant livraison (537 passed, 1 779 assertions) et non relancée : `Modules/News/tests/Feature/NewsApplyCommandTest.php` 50 passed (149 assertions).
+
 ## [1.233.1] - 2026-08-28
 
 ### Corrigé

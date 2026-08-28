@@ -349,18 +349,67 @@ class NewsApplyCommand extends Command
             if ($decoded['editorial_proof_pairs'] === null) {
                 $updates['editorial_proof_pairs'] = [];
             } else {
+                // ACTION : validation PAR PAIRE INDÉPENDANTE (correctif todo #1984, 2026-08-28) -
+                // avant ce correctif, normalizeProofPairs() interrompait sa boucle et rejetait le
+                // TABLEAU ENTIER dès la première paire invalide, y compris les paires valides du
+                // même lot (mesuré : 2 paires invalides sur 15 soumises faisaient échouer les 15).
+                // Chaque paire est désormais jugée indépendamment ('accepted'/'rejected'), avec le
+                // motif précis de chaque refus - jamais un rejet muet, jamais un lot qui meurt
+                // entier pour un seul élément. normalizeProofPairs() ne retourne plus null que pour
+                // un payload structurellement invalide (editorial_proof_pairs n'est même pas un
+                // tableau) - un cas qui, lui, reste all-or-nothing (rien à évaluer paire par paire).
+                // MCP: SELF (<5 lignes utiles)
+                // RAISON: todo #1984 - « une paire de preuve ne peut plus être ajoutée ni
+                //         réappliquée sur une fiche déjà publiée » ; défaut réel mesuré sur un lot
+                //         de 15 paires (2 invalides ont fait échouer les 15).
                 $normalizedPairs = $this->normalizeProofPairs($decoded['editorial_proof_pairs'], (string) $article->internal_source_text);
                 if ($normalizedPairs === null) {
                     // Message d'erreur déjà émis par normalizeProofPairs().
                     return self::FAILURE;
                 }
+
+                foreach ($normalizedPairs['rejected'] as $rejet) {
+                    $this->error("editorial_proof_pairs - paire #{$rejet['position']} refusée (« {$rejet['statement']} ») : {$rejet['reason']}");
+                }
+
+                // ACTION : texte source purgé (fiche déjà publiée via --enrich, chantier « zéro
+                // copie » - NewsArticle::publishAndPurgeSource() met internal_source_text à null).
+                // Le contrôle « citation retrouvée dans la source » ne PEUT alors plus s'exécuter :
+                // ce n'est pas un échec de validation, c'est un contrôle qui ne s'applique pas -
+                // mais il est signalé ici explicitement, jamais ignoré en silence. Le marqueur
+                // 'source_verified' => false, posé par normalizeProofPairs(), rend aussi la paire
+                // visible comme telle dans les données persistées, pas seulement dans cette sortie
+                // console éphémère.
+                // MCP: SELF (<5 lignes utiles)
+                // RAISON: todo #1984 - hypothèse confirmée par lecture du code (EditorialProofNormalizer::
+                //         containsExact() contre une chaîne vide ne peut jamais réussir).
+                foreach ($normalizedPairs['accepted'] as $paire) {
+                    if (($paire['source_verified'] ?? true) === false) {
+                        $this->warn("editorial_proof_pairs - paire « {$paire['statement']} » acceptée SANS vérification possible : le texte source de cette fiche est purgé (fiche déjà publiée). Le contrôle de sous-chaîne exacte ne s'applique pas ici.");
+                    }
+                }
+
+                // ACTION : zéro régression sur le chemin normal - si AUCUNE paire du lot n'est
+                // valide, il n'y a rien à appliquer pour cette clé, exactement comme avant ce
+                // correctif (même issue : échec de la commande, rien n'est écrit). Seule la
+                // présence d'AU MOINS une paire valide dans le même lot change désormais l'issue
+                // globale (elle est appliquée, les invalides sont rapportées mais n'empêchent plus
+                // rien).
+                // MCP: SELF (<5 lignes utiles)
+                // RAISON: préserve exactement les tests existants (paire seule invalide → échec).
+                if ($normalizedPairs['accepted'] === [] && $normalizedPairs['rejected'] !== []) {
+                    $this->error('editorial_proof_pairs : aucune paire valide dans ce lot - rien n\'a été appliqué pour cette clé.');
+
+                    return self::FAILURE;
+                }
+
                 // ACTION : les nouvelles paires COMPLÈTENT les paires existantes (jamais un
                 // remplacement intégral) - une fiche peut déjà porter des paires ajoutées à la main
                 // via l'écran (storeProofPair), et cette commande ne doit jamais les faire
                 // disparaître en silence.
                 // MCP: SELF (<5 lignes)
                 // RAISON: même sémantique d'accumulation que storeProofPair() côté contrôleur.
-                $updates['editorial_proof_pairs'] = array_merge($article->editorial_proof_pairs ?? [], $normalizedPairs);
+                $updates['editorial_proof_pairs'] = array_merge($article->editorial_proof_pairs ?? [], $normalizedPairs['accepted']);
             }
         }
 
@@ -768,10 +817,39 @@ class NewsApplyCommand extends Command
 
     /**
      * Valide et normalise le tableau de paires de preuve éditoriale du payload. Retourne null (et
-     * émet le message d'erreur) si une paire est invalide - jamais une validation partielle.
+     * émet le message d'erreur) uniquement si $pairsInput n'est même pas un tableau - un défaut
+     * structurel du payload entier, rien à évaluer paire par paire. Sinon, retourne TOUJOURS un
+     * tableau avec deux clés 'accepted' et 'rejected' : chaque paire est jugée INDÉPENDAMMENT.
+     *
+     * ACTION : correctif todo #1984 (2026-08-28) - AVANT ce correctif, cette méthode retournait
+     * null (et arrêtait la boucle) dès la PREMIÈRE paire invalide, rejetant même les paires
+     * valides du même lot qui n'avaient pas encore été atteintes par le foreach. Défaut mesuré à
+     * l'usage : sur un lot de 15 paires soumises, 2 paires invalides faisaient échouer les 15,
+     * aucune des 13 valides n'était jamais appliquée. Chaque paire est désormais acceptée ou
+     * refusée pour elle-même, avec le motif précis du refus - jamais un rejet muet, jamais un lot
+     * qui meurt entier pour un seul élément invalide. L'appelant (applyPayload()) décide ensuite :
+     * les paires 'accepted' sont appliquées, les 'rejected' sont rapportées mais n'empêchent plus
+     * rien - SAUF si le lot entier est rejeté (zéro paire valide), auquel cas l'issue reste
+     * exactement celle d'avant ce correctif (voir applyPayload()).
+     *
+     * ACTION : correctif todo #1984 (même mandat) - une paire "fact" exige normalement que son
+     * excerpt soit une sous-chaîne exacte de $sourceText (règle inchangée, toujours appliquée dès
+     * que ce texte est présent - AUCUNE régression sur ce chemin). MAIS sur une fiche DÉJÀ
+     * PUBLIÉE, NewsArticle::publishAndPurgeSource() met internal_source_text à null (chantier
+     * « zéro copie ») : $sourceText arrive alors vide, et EditorialProofNormalizer::containsExact()
+     * contre une chaîne vide ne peut JAMAIS réussir (needle non vide contre haystack vide) - quelle
+     * que soit la légitimité de la citation. Ce n'est pas un échec de validation, c'est un
+     * contrôle qui ne PEUT plus s'exécuter : quand $sourceText est vide, la paire "fact" est
+     * ACCEPTÉE sans revalidation, mais marquée 'source_verified' => false - jamais acceptée en
+     * silence comme si elle avait été vérifiée. applyPayload() relaie ce marqueur dans sa sortie
+     * console ; il survit aussi dans les données persistées (visible pour toute relecture future).
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: todo #1984 - hypothèse confirmée par lecture du code ; deux causes distinctes,
+     *         corrigées ensemble car elles cohabitent dans la même méthode.
+     *
      * Réutilise EditorialProofNormalizer::containsExact(), même règle que
      * NewsCompositionController::storeProofPair() : une paire "fact" doit être une sous-chaîne
-     * exacte du texte source.
+     * exacte du texte source (quand ce texte existe encore).
      *
      * ACTION : bonification panel 2026-08-17 (soir) - 3e type accepté, « primary_fact » (fait
      * confirmé à la SOURCE PRIMAIRE) : exige un 'source_url' (URL http/https valide) ; son excerpt
@@ -782,7 +860,10 @@ class NewsApplyCommand extends Command
      * MCP: SELF (<5 lignes utiles)
      * RAISON: design doc, section "Bonification panel 2026-08-17 (soir)".
      *
-     * @return array<int, array{id: string, statement: string, excerpt: string, type: string, created_at: string, source_url?: string}>|null
+     * @return array{
+     *     accepted: array<int, array{id: string, statement: string, excerpt: string, type: string, created_at: string, source_url?: string, source_verified?: bool}>,
+     *     rejected: array<int, array{position: int, statement: string, reason: string}>
+     * }|null
      */
     private function normalizeProofPairs(mixed $pairsInput, string $sourceText): ?array
     {
@@ -792,26 +873,43 @@ class NewsApplyCommand extends Command
             return null;
         }
 
-        $normalized = [];
+        // Texte source purgé (fiche déjà publiée) : trim() évite qu'une chaîne blanche
+        // ("   ") soit traitée comme une source exploitable - même exigence que blank().
+        $sourceTextDisponible = trim($sourceText) !== '';
 
-        foreach ($pairsInput as $pair) {
+        $accepted = [];
+        $rejected = [];
+
+        foreach (array_values($pairsInput) as $index => $pair) {
+            $position = $index + 1;
+            $libelle = (is_array($pair) && is_string($pair['statement'] ?? null)) ? $pair['statement'] : '(paire malformée)';
+
             if (! is_array($pair) || ! isset($pair['statement'], $pair['excerpt'], $pair['type'])
                 || ! is_string($pair['statement']) || ! is_string($pair['excerpt']) || ! is_string($pair['type'])) {
-                $this->error('Chaque paire de editorial_proof_pairs doit contenir statement, excerpt et type (chaînes).');
+                $rejected[] = ['position' => $position, 'statement' => $libelle, 'reason' => 'doit contenir statement, excerpt et type (chaînes).'];
 
-                return null;
+                continue;
             }
 
             if (! in_array($pair['type'], ['fact', 'analysis', 'primary_fact'], true)) {
-                $this->error("Type de paire invalide : « {$pair['type']} » (attendu : fact, analysis ou primary_fact).");
+                $rejected[] = ['position' => $position, 'statement' => $libelle, 'reason' => "type invalide : « {$pair['type']} » (attendu : fact, analysis ou primary_fact)."];
 
-                return null;
+                continue;
             }
 
-            if ($pair['type'] === 'fact' && ! EditorialProofNormalizer::containsExact($sourceText, $pair['excerpt'])) {
-                $this->error("Extrait déclaré « fact » absent du texte source (sous-chaîne exacte attendue) : {$pair['excerpt']}");
+            // null = type autre que "fact" (vérification sans objet) ; true/false sinon.
+            $sourceVerifiee = null;
 
-                return null;
+            if ($pair['type'] === 'fact') {
+                if (! $sourceTextDisponible) {
+                    $sourceVerifiee = false;
+                } elseif (! EditorialProofNormalizer::containsExact($sourceText, $pair['excerpt'])) {
+                    $rejected[] = ['position' => $position, 'statement' => $libelle, 'reason' => "extrait déclaré « fait » absent du texte source (sous-chaîne exacte attendue) : {$pair['excerpt']}"];
+
+                    continue;
+                } else {
+                    $sourceVerifiee = true;
+                }
             }
 
             $entry = [
@@ -825,17 +923,21 @@ class NewsApplyCommand extends Command
             if ($pair['type'] === 'primary_fact') {
                 $sourceUrl = is_string($pair['source_url'] ?? null) ? trim($pair['source_url']) : '';
                 if ($sourceUrl === '' || ! filter_var($sourceUrl, FILTER_VALIDATE_URL) || ! preg_match('#^https?://#i', $sourceUrl)) {
-                    $this->error("Paire « primary_fact » sans URL de source primaire valide (http/https) : « {$pair['statement']} ».");
+                    $rejected[] = ['position' => $position, 'statement' => $libelle, 'reason' => 'paire « primary_fact » sans URL de source primaire valide (http/https).'];
 
-                    return null;
+                    continue;
                 }
                 $entry['source_url'] = $sourceUrl;
             }
 
-            $normalized[] = $entry;
+            if ($sourceVerifiee === false) {
+                $entry['source_verified'] = false;
+            }
+
+            $accepted[] = $entry;
         }
 
-        return $normalized;
+        return ['accepted' => $accepted, 'rejected' => $rejected];
     }
 
     /**

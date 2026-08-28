@@ -240,6 +240,56 @@ it('merges new proof pairs with existing ones rather than replacing them', funct
     expect($article->fresh()->editorial_proof_pairs)->toHaveCount(2);
 });
 
+// ── Correctif todo #1984 (2026-08-28) : validation PAR PAIRE INDÉPENDANTE - avant ce correctif,
+// normalizeProofPairs() arrêtait sa boucle et rejetait TOUT le tableau dès la première paire
+// invalide (mesuré : 2 paires invalides sur 15 soumises faisaient échouer les 15). Chaque paire
+// est désormais acceptée ou refusée pour elle-même. ────────────────────────────────────────────
+
+it('applies the valid pairs of a batch and rejects only the invalid ones, instead of failing the whole batch (todo #1984)', function () {
+    $sourceText = 'Le ministère a confirmé un investissement de 12 millions de dollars pour ce projet.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'editorial_proof_pairs' => [
+            ['statement' => 'MARQUEUR-VALIDE-UN', 'excerpt' => 'un investissement de 12 millions de dollars', 'type' => 'fact'],
+            ['statement' => 'MARQUEUR-INVALIDE', 'excerpt' => 'ceci ne figure nulle part dans la source', 'type' => 'fact'],
+            ['statement' => 'MARQUEUR-VALIDE-DEUX', 'excerpt' => 'Le projet est ambitieux.', 'type' => 'analysis'],
+        ],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful()
+        ->expectsOutputToContain('MARQUEUR-INVALIDE');
+
+    $pairs = $article->fresh()->editorial_proof_pairs;
+    $statements = array_column($pairs, 'statement');
+    expect($pairs)->toHaveCount(2)
+        ->and($statements)->toContain('MARQUEUR-VALIDE-UN')
+        ->and($statements)->toContain('MARQUEUR-VALIDE-DEUX')
+        ->and($statements)->not->toContain('MARQUEUR-INVALIDE');
+});
+
+it('still fails the whole command when EVERY pair of the batch is invalid - nothing to apply, nothing is written (zero regression)', function () {
+    $sourceText = 'Texte source qui ne contient aucun des extraits soumis ci-dessous.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'editorial_proof_pairs' => [
+            ['statement' => 'Premier.', 'excerpt' => 'extrait absent numéro un', 'type' => 'fact'],
+            ['statement' => 'Deuxième.', 'excerpt' => 'extrait absent numéro deux', 'type' => 'fact'],
+        ],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    expect($article->fresh()->editorial_proof_pairs ?? [])->toBeEmpty();
+});
+
 // ── Retrait explicite d'une paire de preuve (mandat 2026-08-28 : une donnée de santé sur une
 // personne nommée s'est retrouvée publiée dans une paire, sans AUCUN mécanisme pour la retirer -
 // editorial_proof_pairs n'acceptait que l'ajout, refusait null (échec is_array) et un tableau
@@ -1020,4 +1070,54 @@ it('without --enrich, applying a payload to an already-published article is stil
     $article = $article->fresh();
     expect($article->slug)->toBe($ancienSlug)
         ->and($article->structured_summary)->toBeNull();
+});
+
+// ── Correctif todo #1984 (2026-08-28), volet texte source purgé : sur une fiche DÉJÀ PUBLIÉE,
+// NewsArticle::publishAndPurgeSource() met internal_source_text à null (chantier « zéro copie »).
+// Le contrôle « citation retrouvée dans la source » d'une paire "fact" ne peut alors plus
+// s'exécuter (EditorialProofNormalizer::containsExact() contre une chaîne vide échoue toujours) -
+// ce n'est pas un échec de validation, c'est un contrôle qui ne s'applique pas. La paire est
+// acceptée mais marquée 'source_verified' => false, jamais en silence. ────────────────────────
+
+it('--enrich accepts a "fact" proof pair on an already-published article whose source text is purged, marking it unverifiable rather than rejecting it (todo #1984)', function () {
+    $article = nacArticle([
+        // Purge réelle : c'est exactement l'état d'une fiche passée par publishAndPurgeSource().
+        'internal_source_text' => null,
+        'is_published' => true,
+        'published_at' => now()->subDays(10),
+    ]);
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'editorial_proof_pairs' => [
+            ['statement' => 'MARQUEUR-FAIT-NON-VERIFIABLE', 'excerpt' => 'un extrait quelconque, invérifiable puisque la source est purgée', 'type' => 'fact'],
+        ],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload, '--enrich' => true])
+        ->assertSuccessful()
+        ->expectsOutputToContain('SANS vérification possible');
+
+    $pairs = $article->fresh()->editorial_proof_pairs;
+    expect($pairs)->toHaveCount(1)
+        ->and($pairs[0]['statement'])->toBe('MARQUEUR-FAIT-NON-VERIFIABLE')
+        ->and($pairs[0]['source_verified'])->toBeFalse();
+});
+
+it('--enrich still rejects a "fact" pair whose excerpt is absent when the source text happens to still be present on a published article (only an ACTUALLY purged source text is exempted)', function () {
+    $sourceText = 'Texte source encore présent sur cette fiche publiée, pour ce test précis.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+        'is_published' => true,
+        'published_at' => now()->subDays(5),
+    ]);
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'editorial_proof_pairs' => [
+            ['statement' => 'Affirmation.', 'excerpt' => 'un extrait qui ne figure nulle part dans ce texte source', 'type' => 'fact'],
+        ],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload, '--enrich' => true])
+        ->assertFailed();
+
+    expect($article->fresh()->editorial_proof_pairs ?? [])->toBeEmpty();
 });
