@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.232.1] - 2026-08-28
+
+### Corrigé
+- **Le mode simulation livré ce matin ne pouvait mesurer QUE les fiches les plus anciennes**, défaut trouvé en l'utilisant pour de vrai sur la production. Comme il n'écrit rien, deux appels successifs renvoient exactement les mêmes premières fiches par identifiant : impossible de progresser, et impossible de mesurer un taux ailleurs que sur le passé. Or une exécution complète est hors de portée, mesuré en production : 778 ms par fiche pour 2 509 fiches sans outil lié, soit une demi-heure, alors que la limite de temps du serveur coupe bien avant. Une option `--echantillon` tire donc les fiches AU HASARD, ce qui donne une proportion représentative en un seul appel court.
+- **Le tirage au hasard est refusé hors simulation**, et c'est délibéré : sur un vrai rattrapage, un ordre aléatoire empêcherait de reprendre là où l'on s'est arrêté. Le bilan indique désormais lequel des deux tirages a servi, faute de quoi on lirait une proportion mesurée sur un échantillon comme si elle valait pour l'ensemble.
+
+Trois tests, dont le nouveau vérifie la seule propriété qui compte pour cette option : le tirage au hasard n'écrit rien. Le caractère aléatoire de l'ordre lui-même n'est pas testé, il est délégué à `inRandomOrder()` du framework, et un test qui tire deux fois pourrait tomber deux fois sur la même fiche sans rien prouver.
+
 ## [1.232.0] - 2026-08-28
 
 ### Ajouté

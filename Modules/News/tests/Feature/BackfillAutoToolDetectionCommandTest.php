@@ -115,3 +115,26 @@ it('hors simulation la commande attache reellement loutil mentionne', function (
     $pivot = DB::table('news_article_tool')->where('news_article_id', $reparable->id)->first();
     expect($pivot->source)->toBe('auto');
 });
+
+// ── Tirage au hasard (reserve a la simulation) ─────────────────────────────────
+
+it('le tirage au hasard reste une simulation et nécrit rien', function () {
+    $source = bfatSource();
+    bfatTool('Zorglubulator', 'zorglubulator');
+
+    $a = bfatArticle($source->id, 'Le nouvel outil Zorglubulator change la donne.');
+    $b = bfatArticle($source->id, 'Un autre texte qui cite Zorglubulator lui aussi.');
+
+    $this->artisan('news:backfill-auto-tools', [
+        '--limit' => 50,
+        '--dry-run' => true,
+        '--echantillon' => true,
+    ])->assertExitCode(0);
+
+    // La propriete qui compte vraiment : le tirage au hasard ne doit RIEN ecrire.
+    // Le caractere aleatoire de l'ordre lui-meme n'est pas verifie ici : il est delegue
+    // a inRandomOrder() du framework, et un test qui tire deux fois pourrait tomber
+    // deux fois sur la meme fiche sans que rien ne soit cassé.
+    expect(bfatLiaisons($a->id))->toBe(0);
+    expect(bfatLiaisons($b->id))->toBe(0);
+});

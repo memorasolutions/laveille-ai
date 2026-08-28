@@ -22,7 +22,7 @@ use Modules\News\Models\NewsArticle;
  */
 class BackfillAutoToolDetectionCommand extends Command
 {
-    protected $signature = 'news:backfill-auto-tools {--limit=200 : Nombre maximal d\'actualités traitées par exécution} {--dry-run : Mesurer sans rien écrire ni purger}';
+    protected $signature = 'news:backfill-auto-tools {--limit=200 : Nombre maximal d\'actualités traitées par exécution} {--dry-run : Mesurer sans rien écrire ni purger} {--echantillon : Tirer les fiches AU HASARD au lieu des plus anciennes, pour une mesure representative (simulation seulement)}';
 
     protected $description = 'Détecte et lie automatiquement (source=auto) les outils annuaire pour les actualités publiées sans outil lié';
 
@@ -30,10 +30,19 @@ class BackfillAutoToolDetectionCommand extends Command
     {
         $limit = max(1, (int) $this->option('limit'));
         $dryRun = (bool) $this->option('dry-run');
+        // ACTION : tirage AU HASARD, reserve a la simulation.
+        // MCP: SELF (<5 lignes)
+        // RAISON: en simulation rien n'est ecrit, donc deux appels successifs renvoient
+        // exactement les MEMES premieres fiches par identifiant - c'est-a-dire les PLUS
+        // ANCIENNES. Mesurer un taux sur cet echantillon, c'est mesurer le passe et le
+        // presenter comme le tout. Le tirage aleatoire donne une proportion representative
+        // en un seul appel, ce qui compte quand une execution complete depasse la limite
+        // de temps du serveur. Interdit hors simulation : sur un vrai rattrapage, un ordre
+        // aleatoire empeche de reprendre la ou l'on s'etait arrete.
+        $echantillon = $dryRun && (bool) $this->option('echantillon');
 
-        $articles = NewsArticle::published()
-            ->whereDoesntHave('tools')
-            ->orderBy('id')
+        $requete = NewsArticle::published()->whereDoesntHave('tools');
+        $articles = ($echantillon ? $requete->inRandomOrder() : $requete->orderBy('id'))
             ->limit($limit)
             ->get();
 
@@ -81,7 +90,8 @@ class BackfillAutoToolDetectionCommand extends Command
             // de mentionner un outil de l'annuaire ; seules les fiches pour lesquelles
             // suggest() propose quelque chose sont réellement réparables.
             $sansSuggestion = $processed - $reparables;
-            $this->info("[simulation] {$processed} fiche(s) examinée(s) : {$reparables} mentionnent réellement un outil de l'annuaire (réparables), {$sansSuggestion} n'en mentionnent aucun (absence normale). Aucune écriture, aucune purge.");
+            $nature = $echantillon ? 'tirées AU HASARD' : 'les plus anciennes par identifiant';
+            $this->info("[simulation] {$processed} fiche(s) examinée(s), {$nature} : {$reparables} mentionnent réellement un outil de l'annuaire (réparables), {$sansSuggestion} n'en mentionnent aucun (absence normale). Aucune écriture, aucune purge.");
             $this->comment("Total de fiches publiées sans outil lié, toutes causes confondues : {$remaining}.");
         } else {
             $this->info("{$processed} actualité(s) traitée(s), {$totalAttached} outil(s) auto-lié(s). {$remaining} restante(s) sans outil.");
