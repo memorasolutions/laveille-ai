@@ -133,7 +133,30 @@ class NewsApplyCommand extends Command
     // tort par un faux composé « Paragraph Composer », irretirable jusqu'ici par cette porte).
     // MCP: SELF (<5 lignes)
     // RAISON: mandat 2026-08-28 - garde-fou « zéro suppression déduite d'un silence ».
-    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'title', 'seo_title', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve', 'original_post', 'composed_summary', 'related_tool_slugs', 'related_tool_slugs_remove', 'entities', 'fact_check'];
+    // ACTION : « Article de blogue lié » (2026-08-29) - 'related_article_slugs' et
+    // 'related_article_slugs_remove' rejoignent la liste blanche, jumeau EXACT de
+    // related_tool_slugs / related_tool_slugs_remove (même mécanique d'attache/détache par
+    // slug, mêmes garde-fous de résolution) - SEULE différence : plafond applicatif de 1 (voir
+    // MAX_RELATED_ARTICLES ci-dessous), jamais de 10, et résolution contre les articles de
+    // blogue PUBLIÉS (Modules\Blog\Models\Article::published()) plutôt que les outils.
+    // MCP: SELF (<5 lignes)
+    // RAISON: mandat 2026-08-29 - « permettre à une fiche d'actualité de renvoyer vers UN de
+    //         nos articles de blogue », calqué sur le mécanisme déjà en place pour les outils.
+    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'title', 'seo_title', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve', 'original_post', 'composed_summary', 'related_tool_slugs', 'related_tool_slugs_remove', 'related_article_slugs', 'related_article_slugs_remove', 'entities', 'fact_check'];
+
+    /**
+     * ACTION : « Article de blogue lié » (2026-08-29) - plafond applicatif STRICT du nombre
+     * d'articles de blogue liés à UNE fiche d'actualité, cumulé sur toute la durée de vie de la
+     * fiche (pas seulement au sein d'un seul appel) : validé une première fois sur la FORME du
+     * payload (normalizeSlugsList(), en-tête de related_article_slugs) et une seconde fois sur
+     * l'ÉTAT réel en base au moment de l'attache (attachRelatedArticles() - une fiche déjà liée
+     * à un article ne peut pas en recevoir un second par un appel ultérieur). Jamais imposé en
+     * SQL (aucune contrainte de comptage sur news_article_article), même doctrine que le
+     * plafond de 10 de related_tool_slugs.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: mandat 2026-08-29 - « Plafond strict : 1 seul article lié par fiche. »
+     */
+    private const MAX_RELATED_ARTICLES = 1;
 
     /**
      * Richesse v1.188.0 - sous-clés autorisées de composed_summary (design doc, section
@@ -644,9 +667,9 @@ class NewsApplyCommand extends Command
         //         sait quels outils sont réellement au coeur de l'actu.
         $relatedToolSlugs = null;
         if (array_key_exists('related_tool_slugs', $decoded)) {
-            $relatedToolSlugs = $this->normalizeToolSlugsList($decoded['related_tool_slugs'], 'related_tool_slugs');
+            $relatedToolSlugs = $this->normalizeSlugsList($decoded['related_tool_slugs'], 'related_tool_slugs', 10);
             if ($relatedToolSlugs === null) {
-                // Message d'erreur déjà émis par normalizeToolSlugsList().
+                // Message d'erreur déjà émis par normalizeSlugsList().
                 return self::FAILURE;
             }
         }
@@ -655,7 +678,7 @@ class NewsApplyCommand extends Command
         // ATTACHER un outil, jamais le DÉTACHER. Clé neuve et explicite plutôt qu'un mode
         // "remplacer" sur related_tool_slugs (où une liste incomplète supprimerait des liens par
         // omission) : le retrait est une intention, elle s'écrit. Mêmes bornes de validation que
-        // related_tool_slugs, RÉUTILISÉES via normalizeToolSlugsList() - jamais deux validations
+        // related_tool_slugs, RÉUTILISÉES via normalizeSlugsList() - jamais deux validations
         // jumelles. Pivot lui aussi (jamais une colonne de $updates), même traitement à part que
         // related_tool_slugs ci-dessus : ne compte pas comme un payload de contenu plus bas.
         // MCP: SELF (<5 lignes utiles)
@@ -663,9 +686,38 @@ class NewsApplyCommand extends Command
         // composé « Paragraph Composer », aucun moyen de le détacher par la porte officielle.
         $relatedToolSlugsRemove = null;
         if (array_key_exists('related_tool_slugs_remove', $decoded)) {
-            $relatedToolSlugsRemove = $this->normalizeToolSlugsList($decoded['related_tool_slugs_remove'], 'related_tool_slugs_remove');
+            $relatedToolSlugsRemove = $this->normalizeSlugsList($decoded['related_tool_slugs_remove'], 'related_tool_slugs_remove', 10);
             if ($relatedToolSlugsRemove === null) {
-                // Message d'erreur déjà émis par normalizeToolSlugsList().
+                // Message d'erreur déjà émis par normalizeSlugsList().
+                return self::FAILURE;
+            }
+        }
+
+        // ACTION : « Article de blogue lié » (2026-08-29) - jumeau EXACT du bloc
+        // related_tool_slugs ci-dessus, même mécanique de pivot (jamais une colonne de
+        // $updates), seule différence : plafond de forme MAX_RELATED_ARTICLES (1) au lieu de 10,
+        // via le 3e paramètre de normalizeSlugsList() désormais généralisée.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: mandat 2026-08-29 - calqué sur related_tool_slugs plutôt qu'inventé.
+        $relatedArticleSlugs = null;
+        if (array_key_exists('related_article_slugs', $decoded)) {
+            $relatedArticleSlugs = $this->normalizeSlugsList($decoded['related_article_slugs'], 'related_article_slugs', self::MAX_RELATED_ARTICLES);
+            if ($relatedArticleSlugs === null) {
+                // Message d'erreur déjà émis par normalizeSlugsList().
+                return self::FAILURE;
+            }
+        }
+
+        // ACTION : « Article de blogue lié » (2026-08-29) - jumeau EXACT de
+        // related_tool_slugs_remove : clé neuve et explicite pour le retrait, jamais un mode
+        // "remplacer" où une omission supprimerait un lien par silence.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: mandat 2026-08-29 - même doctrine que le défaut 3 du 2026-08-28 sur les outils.
+        $relatedArticleSlugsRemove = null;
+        if (array_key_exists('related_article_slugs_remove', $decoded)) {
+            $relatedArticleSlugsRemove = $this->normalizeSlugsList($decoded['related_article_slugs_remove'], 'related_article_slugs_remove', self::MAX_RELATED_ARTICLES);
+            if ($relatedArticleSlugsRemove === null) {
+                // Message d'erreur déjà émis par normalizeSlugsList().
                 return self::FAILURE;
             }
         }
@@ -715,8 +767,8 @@ class NewsApplyCommand extends Command
         // simplement une fiche qui n'a pas encore été relue, et le composant editorial-signature
         // ne rend alors rien du tout.
 
-        if ($updates === [] && $relatedToolSlugs === null && $relatedToolSlugsRemove === null && $entities === null && $factCheckUpdates === []) {
-            $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs / primary_sources / image_credit / nature_original / niveau_preuve / original_post / composed_summary / related_tool_slugs / related_tool_slugs_remove / entities / fact_check n\'est fournie.');
+        if ($updates === [] && $relatedToolSlugs === null && $relatedToolSlugsRemove === null && $relatedArticleSlugs === null && $relatedArticleSlugsRemove === null && $entities === null && $factCheckUpdates === []) {
+            $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs / primary_sources / image_credit / nature_original / niveau_preuve / original_post / composed_summary / related_tool_slugs / related_tool_slugs_remove / related_article_slugs / related_article_slugs_remove / entities / fact_check n\'est fournie.');
 
             return self::FAILURE;
         }
@@ -819,6 +871,26 @@ class NewsApplyCommand extends Command
 
         if ($relatedToolSlugsRemove !== null) {
             $this->detachRelatedTools($article, $relatedToolSlugsRemove);
+        }
+
+        // ACTION : « Article de blogue lié » (2026-08-29) - DÉTACHE avant d'ATTACHER, ordre
+        // INVERSE du bloc outils ci-dessus (où l'ordre est sans conséquence, aucun plafond).
+        // Décision prise faute d'arbitrage explicite du mandat sur ce cas : avec un plafond de
+        // 1, un SEUL payload qui demande à la fois de retirer l'article A et de lier l'article B
+        // (un remplacement en un appel) doit pouvoir réussir - si l'attache s'exécutait en
+        // premier, le plafond la refuserait systématiquement tant que A n'est pas encore
+        // détaché. attachRelatedArticles() retourne false sur un plafond dépassé (jamais un
+        // simple avertissement, contrairement à un slug inconnu) : la commande échoue alors
+        // explicitement plutôt que de laisser croire à une liaison qui n'a pas eu lieu.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: décision non tranchée par le mandat - rapportée au superviseur.
+        if ($relatedArticleSlugsRemove !== null) {
+            $this->detachRelatedArticles($article, $relatedArticleSlugsRemove);
+        }
+
+        if ($relatedArticleSlugs !== null && ! $this->attachRelatedArticles($article, $relatedArticleSlugs)) {
+            // Message d'erreur déjà émis par attachRelatedArticles() (plafond dépassé).
+            return self::FAILURE;
         }
 
         if ($entities !== null) {
@@ -950,17 +1022,178 @@ class NewsApplyCommand extends Command
     }
 
     /**
+     * ACTION : « Article de blogue lié » (2026-08-29) - jumeau EXACT de attachRelatedTools() :
+     * résout les slugs (traduisibles Spatie, même mécanique que Tool) contre les articles de
+     * blogue PUBLIÉS (Modules\Blog\Models\Article::published()) et les attache en ajout PUR
+     * (source=auto, n'écrase jamais une liaison manuelle existante côté pivot). Slugs
+     * introuvables SIGNALÉS explicitement (warn), jamais un échec - un article en BROUILLON
+     * n'apparaît simplement pas dans l'ensemble résolu (résolution contre published() only),
+     * donc tombe dans ce même panier : strictement le mécanisme demandé par le point 3 du
+     * mandat (« Ne jamais lier un article non publié : filtre published() »).
+     *
+     * SEULE divergence réelle avec attachRelatedTools() : le plafond MAX_RELATED_ARTICLES (1),
+     * cumulé sur l'ÉTAT RÉEL en base (pas seulement la forme du payload, déjà bornée par
+     * normalizeSlugsList() en amont) - retourne false et REFUSE toute écriture pour cette clé si
+     * l'attache ferait dépasser ce plafond, jamais une attache partielle. Un slug déjà lié
+     * (no-op) ne compte jamais contre le plafond - seuls les IDs réellement NOUVEAUX le sont.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: mandat 2026-08-29 - « Plafond strict : 1 seul article lié par fiche. Au-delà,
+     *         refuser avec un message clair. »
+     *
+     * @param  array<int, string>  $slugs
+     * @return bool false si le plafond serait dépassé (rien n'est attaché) - true sinon.
+     */
+    private function attachRelatedArticles(NewsArticle $article, array $slugs): bool
+    {
+        if (! class_exists(\Modules\Blog\Models\Article::class)) {
+            $this->warn('related_article_slugs ignoré : le module Blog est désactivé.');
+
+            return true;
+        }
+
+        $articles = \Modules\Blog\Models\Article::published()->get(['id', 'slug', 'title']);
+        $resolvedIds = [];
+        $resolvedNames = [];
+        $unknownSlugs = [];
+
+        foreach ($slugs as $slug) {
+            $match = $articles->first(fn ($blogArticle) => in_array($slug, $blogArticle->getTranslations('slug'), true));
+            if ($match === null) {
+                $unknownSlugs[] = $slug;
+
+                continue;
+            }
+            $resolvedIds[] = (int) $match->id;
+            $resolvedNames[] = $match->getTranslation('title', 'fr_CA', false)
+                ?: $match->getTranslation('title', 'en', false)
+                ?: $slug;
+        }
+
+        if ($unknownSlugs !== []) {
+            $this->warn('related_article_slugs ignoré(s) - slug(s) introuvable(s) parmi les articles de blogue publiés : '.implode(', ', $unknownSlugs).'.');
+        }
+
+        if ($resolvedIds === []) {
+            return true;
+        }
+
+        $existingIds = $article->blogArticles()->pluck('articles.id')->map(fn ($id) => (int) $id)->all();
+        $newIds = array_values(array_diff($resolvedIds, $existingIds));
+
+        if ($newIds === []) {
+            // Tout ce qui a été demandé est déjà lié - no-op silencieux, même sémantique que
+            // attachAuto() pour les outils (aucun ID réellement nouveau à attacher).
+            return true;
+        }
+
+        if (count($existingIds) + count($newIds) > self::MAX_RELATED_ARTICLES) {
+            $this->error('related_article_slugs refusé : plafond de '.self::MAX_RELATED_ARTICLES.' article(s) de blogue lié(s) par fiche dépassé ('.count($existingIds).' déjà lié(s), '.count($newIds).' nouveau(x) demandé(s)). Retire d\'abord un lien existant via related_article_slugs_remove.');
+
+            return false;
+        }
+
+        $article->blogArticles()->attach(
+            array_combine($newIds, array_fill(0, count($newIds), ['source' => 'auto']))
+        );
+        \Modules\News\Actions\NewsToolSyncAction::invalidatePublicCache($article);
+        $this->info("Fiche {$article->id} : ".count($newIds)." article(s) de blogue lié(s) (".implode(', ', $resolvedNames).').');
+
+        return true;
+    }
+
+    /**
+     * ACTION : « Article de blogue lié » (2026-08-29) - jumeau EXACT de detachRelatedTools() :
+     * détache l'article visé par related_article_slugs_remove, et LUI SEUL - jamais un
+     * remplacement de la liste complète, une omission ne doit JAMAIS pouvoir supprimer un lien.
+     * Résout les slugs contre TOUS les articles de blogue (pas seulement les PUBLIÉS,
+     * contrairement à attachRelatedArticles()) : un article lié à tort puis dépublié doit
+     * rester détachable, même raison que detachRelatedTools().
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: mandat 2026-08-29 - même doctrine que le défaut 3 du 2026-08-28 sur les outils.
+     *
+     * @param  array<int, string>  $slugs
+     */
+    private function detachRelatedArticles(NewsArticle $article, array $slugs): void
+    {
+        if (! class_exists(\Modules\Blog\Models\Article::class)) {
+            $this->warn('related_article_slugs_remove ignoré : le module Blog est désactivé.');
+
+            return;
+        }
+
+        $articles = \Modules\Blog\Models\Article::query()->get(['id', 'slug', 'title']);
+        $resolvedIds = [];
+        $resolvedNames = [];
+        $unknownSlugs = [];
+
+        foreach ($slugs as $slug) {
+            $match = $articles->first(fn ($blogArticle) => in_array($slug, $blogArticle->getTranslations('slug'), true));
+            if ($match === null) {
+                $unknownSlugs[] = $slug;
+
+                continue;
+            }
+            $resolvedIds[] = (int) $match->id;
+            $resolvedNames[$match->id] = $match->getTranslation('title', 'fr_CA', false)
+                ?: $match->getTranslation('title', 'en', false)
+                ?: $slug;
+        }
+
+        if ($unknownSlugs !== []) {
+            $this->warn('related_article_slugs_remove : slug(s) introuvable(s) parmi les articles de blogue : '.implode(', ', $unknownSlugs).' - rien à détacher pour ce ou ces slugs.');
+        }
+
+        if ($resolvedIds === []) {
+            return;
+        }
+
+        // ACTION : un slug demandé mais non attaché produit un avertissement, pas une erreur -
+        // même garde-fou que detachRelatedTools() (detach() sur un pivot absent est un no-op
+        // silencieux côté Eloquent, donc le signal doit être posé AVANT, en comparant aux
+        // liaisons réellement existantes).
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: mandat 2026-08-29 - même doctrine que le défaut 3 du 2026-08-28.
+        $attachedIds = $article->blogArticles()->whereIn('articles.id', $resolvedIds)->pluck('articles.id')->map(fn ($id) => (int) $id)->all();
+        $notAttachedIds = array_diff($resolvedIds, $attachedIds);
+
+        if ($notAttachedIds !== []) {
+            $notAttachedNames = array_values(array_intersect_key($resolvedNames, array_flip($notAttachedIds)));
+            $this->warn('related_article_slugs_remove : article(s) demandé(s) mais non attaché(s) à cette fiche : '.implode(', ', $notAttachedNames).'.');
+        }
+
+        if ($attachedIds === []) {
+            return;
+        }
+
+        $article->blogArticles()->detach($attachedIds);
+        \Modules\News\Actions\NewsToolSyncAction::invalidatePublicCache($article);
+        $detachedNames = array_values(array_intersect_key($resolvedNames, array_flip($attachedIds)));
+        $this->info("Fiche {$article->id} : ".count($attachedIds)." article(s) de blogue détaché(s) (".implode(', ', $detachedNames).').');
+    }
+
+    /**
      * ACTION : défaut 3 (2026-08-28) - validation PARTAGÉE des deux clés de payload qui
-     * manipulent related_tool_slugs (ajout et retrait) : mêmes bornes (10 slugs maximum, chaînes
-     * non vides de 120 caractères maximum chacune), donc une SEULE méthode plutôt que deux
-     * validations jumelles vouées à diverger tôt ou tard.
+     * manipulent related_tool_slugs (ajout et retrait) : mêmes bornes (chaînes non vides de 120
+     * caractères maximum chacune), donc une SEULE méthode plutôt que deux validations jumelles
+     * vouées à diverger tôt ou tard.
      * MCP: SELF (<5 lignes utiles)
      * RAISON: mandat 2026-08-28 - « réutilise les helpers de validation déjà présents pour
      *         related_tool_slugs plutôt que d'en écrire des jumeaux ».
      *
+     * ACTION : généralisée (2026-08-29, « Article de blogue lié ») - $maxCount devient un
+     * paramètre explicite plutôt qu'une limite de 10 codée en dur : related_article_slugs et
+     * related_article_slugs_remove réutilisent cette MÊME méthode avec MAX_RELATED_ARTICLES (1)
+     * plutôt qu'un jumeau de 24 lignes pour une seule différence (le plafond). Les deux appels
+     * existants (related_tool_slugs / related_tool_slugs_remove) passent désormais 10
+     * explicitement - comportement inchangé, rien ne divergeait avant ce renommage.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: DRY - même règle de FORME (liste de slugs bornée), seul le plafond diffère selon
+     *         le domaine (outils vs articles de blogue) ; les règles du projet (section "DRY et
+     *         anti-sur-ingénierie" - fusion légitime, même connaissance encodée deux fois.
+     *
      * @return array<int, string>|null
      */
-    private function normalizeToolSlugsList(mixed $value, string $fieldName): ?array
+    private function normalizeSlugsList(mixed $value, string $fieldName, int $maxCount): ?array
     {
         if (! is_array($value)) {
             $this->error("{$fieldName} doit être un tableau de slugs.");
@@ -968,8 +1201,8 @@ class NewsApplyCommand extends Command
             return null;
         }
 
-        if (count($value) > 10) {
-            $this->error("{$fieldName} dépasse la limite de 10 slugs.");
+        if (count($value) > $maxCount) {
+            $this->error("{$fieldName} dépasse la limite de {$maxCount} slug(s).");
 
             return null;
         }

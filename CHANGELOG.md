@@ -2,7 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.235.0] - 2026-08-29
+## [1.235.1] - 2026-08-29
+
+### Corrigé
+- **Bloc « Pour aller plus loin » (fiches actualités) : les deux pilules se touchaient à 0px.** Mesuré au navigateur : bas de la première et haut de la seconde toutes deux à 433,42px - l'espacement n'avait jamais servi tant qu'un seul lien existait. `mt-2` (Bootstrap, déjà chargé par le thème public et déjà utilisé ailleurs dans le module News - aucun utilitaire d'espacement équivalent dans `charte.css`) comble l'écart à 8px.
+- **Le lien vers l'article de fond affichait son titre brut, sans rien annoncer sa nature.** Préfixe « Article : » ajouté, calqué sur le seul motif déjà en place (le lien Glossaire voisin nomme sa destination dans son libellé, sans icône) - même forme que « Source : » plus haut sur la même fiche.
+- **PRÉEXISTANT, révélé par l'ajout du second lien : la pilule mesurait 38,25px de haut sur mobile (390×844), sous le plancher WCAG 2.2 AAA de 44px.** Les deux pilules partagent `.nw-plus-loin-link` : correctif posé sur la classe partagée (`min-height: var(--ct-btn-min-height, 44px)`, même variable que `.ct-btn-icon` dans `charte.css`), pas sur un cas particulier - couvre les deux cibles.
+
+### Ajouté
+- **Livraison du correctif #1985 (déjà en arbre de travail, non livré)** : `CommunityController::storeScreenshot()` et `PublicDirectoryController::storePricingReport()` résolvaient un outil par son slug sans `Tool::published()` - une fiche brouillon/en attente/archivée était atteignable (et modifiable) par un utilisateur connecté qui devinait son slug. Mesuré en local : 1827/2334 fiches (78 %) dans un état non publié donc exposées. Corrigé par réutilisation de `findTool()` (déjà `published()`) et ajout de `published()` au même scope que `show()`/`visit()`. 9 tests dédiés (`ToolSlugPublishedGuardTest`).
+- **Dépendance nécessaire du second lien ci-dessus livrée avec lui** : relation `NewsArticle::blogArticles()`, table pivot `news_article_article` et prise en charge `related_article_slugs` / `related_article_slugs_remove` dans `news:apply` (plafond strict de 1 article lié par fiche) - sans quoi le bloc « Pour aller plus loin » aurait fait planter chaque fiche actualité en production (méthode inexistante sur `NewsArticle`).
 
 ### Ajouté
 - **`related_tool_slugs_remove` : la porte officielle sait enfin DÉTACHER un outil d'une fiche.** Jusqu'ici `news:apply` savait attacher, jamais retirer : un outil lié à tort restait irretirable par la voie normale. Cas réel qui l'a révélé : la fiche 38933, où le faux composé « Paragraph Composer » avait fait attacher un outil d'IA homonyme.

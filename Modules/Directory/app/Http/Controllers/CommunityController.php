@@ -420,7 +420,10 @@ class CommunityController extends Controller
             'caption' => 'nullable|string|max:255',
         ]);
 
-        $tool = Tool::where('slug->'.app()->getLocale(), $slug)->firstOrFail();
+        // #1985 - même patron que storeReview/storeDiscussion/storeResource/storeSuggestion
+        // ci-dessus : findTool() applique Tool::published(), sans quoi une fiche brouillon/en
+        // attente/archivée était atteignable par qui devine ou connaît son slug.
+        $tool = $this->findTool($slug);
 
         $path = $request->file('screenshot')->store('directory/screenshots', 'public');
 

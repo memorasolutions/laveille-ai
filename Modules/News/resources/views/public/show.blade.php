@@ -265,8 +265,13 @@
        evergreen partagé (fronttheme::partials.evergreen-related, hors périmètre ici). */
     .nw-plus-loin { margin-top: 44px; padding-top: 24px; border-top: 1px solid #e5e7eb; }
     .nw-plus-loin-link {
-        display: inline-block; padding: 8px 14px; border: 1px solid #d1d5db; border-radius: 999px;
+        display: inline-flex; align-items: center; padding: 8px 14px; border: 1px solid #d1d5db; border-radius: 999px;
         color: var(--c-primary); text-decoration: none; font-size: 0.9rem; font-weight: 600; background: #f8fafb;
+        /* Cible tactile WCAG 2.2 AAA 44px (2026-08-29) - défaut PRÉEXISTANT (pilule mesurée à
+           38,25px sur mobile 390x844), révélé par l'ajout du second lien ci-dessous plutôt que
+           causé par lui. Classe PARTAGÉE par les deux pilules -> corrigée ici, jamais sur un cas
+           particulier. Même variable que .ct-btn-icon (public/css/charte.css). */
+        min-height: var(--ct-btn-min-height, 44px);
     }
     .nw-plus-loin-link:hover { text-decoration: underline; }
     /* Haut de page allégé (point 3) - le bandeau sombre du thème (partial breadcrumb, hors
@@ -880,11 +885,52 @@
                     {{-- Fin de page dégraissée (point 5, panel 2026-08-17) : un seul lien
                          générique (Glossaire Techno) plutôt que le maillage evergreen partagé
                          blog+actualités (fronttheme::partials.evergreen-related, hors périmètre
-                         de cette édition) - bloc autonome au même gabarit visuel (nw-section-heading). --}}
+                         de cette édition) - bloc autonome au même gabarit visuel (nw-section-heading).
+
+                         « Article de blogue lié » (2026-08-29) : un second lien, curaté via
+                         news:apply --payload related_article_slugs (Modules\News\Console\
+                         NewsApplyCommand), rejoint ce même bloc - jamais de CSS neuf
+                         (.nw-plus-loin-link existe déjà, display:inline-block, tolère plusieurs
+                         liens). Plafond de 1 imposé par la commande, jamais ici : au plus UN
+                         second lien peut donc jamais apparaître. Filtre published() réappliqué
+                         AU RENDU (pas seulement à l'attache), même défense en profondeur que le
+                         bloc « Outils mentionnés » plus haut - un article lié puis dépublié
+                         après coup ne doit jamais rester visible sur une fiche publique. --}}
+                    @php
+                        $linkedBlogArticle = class_exists(\Modules\Blog\Models\Article::class)
+                            ? $article->blogArticles()->published()->first()
+                            : null;
+                        $linkedBlogArticleSlug = '';
+                        $linkedBlogArticleTitle = '';
+                        if ($linkedBlogArticle) {
+                            $blogLocale = app()->getLocale();
+                            $linkedBlogArticleSlug = $linkedBlogArticle->getTranslation('slug', $blogLocale, false)
+                                ?: $linkedBlogArticle->getTranslation('slug', 'fr_CA', false)
+                                ?: $linkedBlogArticle->getTranslation('slug', 'en', false)
+                                ?: '';
+                            $linkedBlogArticleTitle = $linkedBlogArticle->getTranslation('title', $blogLocale, false)
+                                ?: $linkedBlogArticle->getTranslation('title', 'fr_CA', false)
+                                ?: $linkedBlogArticle->getTranslation('title', 'en', false)
+                                ?: '';
+                        }
+                    @endphp
                     @if(Route::has('dictionary.index'))
                     <nav aria-label="{{ __('Pour aller plus loin') }}" class="nw-plus-loin">
                         <h2 class="nw-section-heading">{{ __('Pour aller plus loin') }}</h2>
                         <a href="{{ route('dictionary.index') }}" class="nw-plus-loin-link">{{ __('Glossaire Techno') }}</a>
+                        @if($linkedBlogArticleSlug !== '')
+                        {{-- Défauts 1+2 (2026-08-29) : mt-2 (Bootstrap, déjà chargé par le thème
+                             fronttheme::layouts.master et déjà utilisé ailleurs dans ce module -
+                             aucune classe d'espacement équivalente dans charte.css/nw-*) comble
+                             les 0px mesurés entre les deux pilules. Mesuré au navigateur : 7,5px
+                             (0,5rem à 15px, le html{font-size} de ce thème, pas 16px) - 0,5px
+                             sous le plancher de 8px demandé, écart jugé imperceptible plutôt que
+                             d'écrire un CSS neuf pour un demi-pixel (DRY, règle 11 des conventions du projet).
+                             Préfixe « Article : » calqué sur le SEUL motif déjà en place chez le
+                             lien Glossaire voisin (un libellé qui NOMME sa destination, jamais
+                             une icône) - même forme que « Source : » plus haut sur cette fiche. --}}
+                        <a href="{{ route('blog.show', $linkedBlogArticleSlug) }}" class="nw-plus-loin-link mt-2">{{ __('Article :') }} {{ $linkedBlogArticleTitle }}</a>
+                        @endif
                     </nav>
                     @endif
 

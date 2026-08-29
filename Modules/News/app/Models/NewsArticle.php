@@ -233,6 +233,23 @@ class NewsArticle extends Model implements Searchable
         )->withPivot('source')->withTimestamps();
     }
 
+    /**
+     * Article(s) de blogue lié(s) à cette actualité (curation manuelle ou auto). Jumeau exact de
+     * tools() ci-dessus (même forme de relation, même pivot à 3 colonnes) - seul le plafond de 1
+     * diffère, et il n'est JAMAIS imposé ici (aucune contrainte SQL, même doctrine que le
+     * plafond de 10 sur tools()) : il vit uniquement dans
+     * Modules\News\Console\NewsApplyCommand::MAX_RELATED_ARTICLES.
+     */
+    public function blogArticles(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            \Modules\Blog\Models\Article::class,
+            'news_article_article',
+            'news_article_id',
+            'article_id'
+        )->withPivot('source')->withTimestamps();
+    }
+
     public function originalArticle(): BelongsTo
     {
         return $this->belongsTo(self::class, 'is_potential_duplicate_of');

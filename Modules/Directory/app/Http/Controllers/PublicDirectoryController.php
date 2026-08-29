@@ -477,9 +477,15 @@ class PublicDirectoryController extends Controller
 
     public function storePricingReport(Request $request, string $slug): RedirectResponse
     {
+        // #1985 - Tool::published() manquait ici : une fiche brouillon/en attente/archivée était
+        // atteignable par qui devine ou connaît son slug (même scope que show()/visit() plus haut
+        // dans ce contrôleur). Groupé pour que le published() s'applique aux DEUX branches du OR.
         $tool = Tool::query()
-            ->where('slug->fr_CA', $slug)
-            ->orWhere('slug', $slug)
+            ->published()
+            ->where(function ($query) use ($slug) {
+                $query->where('slug->fr_CA', $slug)
+                    ->orWhere('slug', $slug);
+            })
             ->firstOrFail();
 
         $validated = $request->validate([
