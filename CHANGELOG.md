@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.236.0] - 2026-08-29
+
+### Sécurité
+- **La page publique des collections servait les fiches NON PUBLIÉES, JSON-LD compris.** `/collections/{slug}` est sans authentification et mise en cache 10 min ; `show()` chargeait la relation `tools` sans filtrer le statut, et n'importe quel utilisateur connecté peut y attacher un outil quelconque via `toggleTool()`, qui ne valide que l'existence de l'identifiant. Nom, description, capture et prix de fiches brouillon, en attente ou archivées étaient donc rendus à tout visiteur anonyme, sans slug à deviner. Preuve que c'était un oubli et non un choix : l'API soeur `PublicToolsController::collectionShow()` filtrait DÉJÀ sur `status = published`. Correctif par le scope `published()` existant, appliqué à `with()` ET à `withCount()` - le même filtre aux deux, faute de quoi un compte gonflé par des fiches invisibles désactiverait à tort le `noindex` des collections de moins de trois outils. Six tests neufs.
+- Sur sept points qui chargeaient une relation `tools` sans filtre, un seul exposait réellement des fiches. Les six autres ne rendent qu'un compte agrégé : signalés, pas corrigés inutilement.
+
+### Ajouté
+- **Filtre par compagnie d'IA dans l'écran de composition des actualités.** `news_sources` reçoit `is_official` et `company` (migration additive, `down()` réel), le contrôleur les expose, et le composant de filtre DÉJÀ partagé par la composition, le concentré et l'objectif vidéo les consomme - aucun second mécanisme. Le sélecteur s'auto-masque là où la donnée n'existe pas.
+- **Onze sources officielles peuplées, chacune VÉRIFIÉE PAR REQUÊTE RÉELLE** (code HTTP, nombre d'entrées, date de la plus récente), pas seulement trouvées par recherche. Deux des douze candidats sont tombés à cette mesure : EleutherAI répondait 404 sur l'adresse retenue (corrigée vers `/index.xml`, 52 entrées, publication à 3 jours), et le flux Qwen choisi renvoyait 200 avec ZÉRO entrée. Qwen est écartée : son blog Hugo répond, mais son dernier billet date de 340 jours. Un flux qui répond n'est pas un flux vivant, et en brancher un muet donnerait l'illusion d'une couverture. Les onze retenues avaient toutes publié dans les huit jours.
+
+### Corrigé
+- **Deux faux auto-liens mesurés en production.** « CNN », le réseau de télévision, pointait quatre fois vers `/glossaire/reseau-convolutif` sur une fiche de journalisme ; « une requête en rejet », terme de procédure judiciaire, pointait vers `/glossaire/prompt`. Troisième cas du même motif après « Paragraph Composer » et l'« autonomie » de batterie : un alias court, légitime dans son domaine, capture un homographe qui le dépasse. Nouvelle liste `ALIAS_NEVER_AUTO`, même famille que `QUALIFIER_ORGANISATION` et `TOOL_NEVER_AUTO` déjà en place, appliquée aux cinq points d'insertion d'alias - jamais au nom principal d'une fiche, qui garde son lien. Un troisième alias au même risque a été trouvé au passage (« témoin », pour cookie) et fermé par précaution. Clé de cache incrémentée ; l'oubli du `v11` dans la purge du 28 août est comblé au passage.
+- Tests neufs incluant les cas LÉGITIMES : « réseau convolutif », le sigle GAN, « prompt » seul et « cookie » gardent tous leur auto-lien. Élargir une frontière casse silencieusement les termes voisins - mesuré sur ce projet le 27 août.
+
+### Note de méthode
+- Les deux sources primaires du lot d'actualités du jour ont été démenties par récupération réelle : l'une pointait vers une préimpression sans rapport avec son sujet, l'autre renvoyait 404. Une adresse plausible n'est pas une adresse vivante, et le seul moyen de le savoir est de la demander.
+
 ## [1.235.1] - 2026-08-29
 
 ### Corrigé

@@ -1234,3 +1234,164 @@ it('--enrich still rejects a "fact" pair whose excerpt is absent when the source
 
     expect($article->fresh()->editorial_proof_pairs ?? [])->toBeEmpty();
 });
+
+// ── Clé related_article_slugs / related_article_slugs_remove (« Article de blogue lié »,
+// 2026-08-29) - jumeau EXACT de related_tool_slugs / related_tool_slugs_remove ci-dessus, SEULE
+// différence : plafond strict de 1 article lié par fiche (MAX_RELATED_ARTICLES), défendu à deux
+// niveaux distincts, testés séparément ci-dessous : (a) la FORME du payload (un tableau de 2
+// slugs et plus est refusé avant toute résolution) et (b) l'ÉTAT réel en base (un second appel
+// qui viserait un article DIFFÉRENT alors qu'un premier est déjà lié est refusé). Le test
+// « slug inconnu » de related_tool_slugs mélangeait un slug connu et un slug inconnu dans le
+// MÊME tableau - impossible ici (le plafond de 1 refuserait la forme avant toute résolution) :
+// adapté en deux payloads distincts sur la même fiche, chacun avec un seul slug.
+
+function nacBlogArticle(string $slug, bool $published = true): \Modules\Blog\Models\Article
+{
+    $title = 'Article blogue nac '.$slug;
+    $factory = \Modules\Blog\Models\Article::factory();
+    $factory = $published ? $factory->published() : $factory->draft();
+
+    // Tableau associatif (PAS une chaîne simple) pour que Spatie fixe la traduction sur 'fr_CA'
+    // de façon déterministe, indépendamment de la locale courante au moment du test - même
+    // convention que nacTool() (Tool::create avec slug/name en tableau).
+    return $factory->create([
+        'title' => ['fr_CA' => $title],
+        'slug' => ['fr_CA' => $slug],
+    ]);
+}
+
+it('related_article_slugs lie un article de blogue publié, et son lien apparaît sur la fiche publique', function () {
+    $sourceText = 'Texte source pour la curation de l\'article de blogue lié.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+    $blogArticle = nacBlogArticle('article-blogue-nac-connu');
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'related_article_slugs' => ['article-blogue-nac-connu'],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $article = $article->fresh();
+    $linked = $article->blogArticles()->get();
+    expect($linked)->toHaveCount(1)
+        ->and((int) $linked->first()->id)->toBe($blogArticle->id)
+        ->and($linked->first()->pivot->source)->toBe('auto');
+
+    // news:apply refuse d'écrire sur une fiche déjà publiée (hors --enrich) : la curation se
+    // fait donc pendant que la fiche est encore brouillon, exactement comme le reste de cette
+    // suite - la fiche est publiée APRÈS, directement (même geste que natFrontArticle()), pour
+    // vérifier le rendu public.
+    $article->update(['is_published' => true, 'published_at' => now()->subHour()]);
+
+    $response = $this->get(route('news.show', $article->slug));
+
+    $response->assertOk()
+        ->assertSee('Article blogue nac article-blogue-nac-connu', false)
+        ->assertSee(route('blog.show', 'article-blogue-nac-connu'), false);
+});
+
+it('related_article_slugs signale un slug inconnu sans faire échouer le reste du payload', function () {
+    $sourceText = 'Texte source pour le slug d\'article inconnu.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'related_article_slugs' => ['slug-article-inconnu-xyz'],
+        'seo_title' => 'Titre corrigé malgré le slug inconnu',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->expectsOutputToContain('slug-article-inconnu-xyz')
+        ->assertSuccessful();
+
+    expect($article->fresh()->seo_title)->toBe('Titre corrigé malgré le slug inconnu')
+        ->and($article->fresh()->blogArticles()->count())->toBe(0);
+});
+
+it('related_article_slugs refuse de lier un article de blogue en brouillon', function () {
+    $sourceText = 'Texte source pour le refus d\'un brouillon.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+    nacBlogArticle('article-blogue-nac-brouillon', published: false);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'related_article_slugs' => ['article-blogue-nac-brouillon'],
+    ]));
+
+    // Résolu exactement comme un slug inconnu (published() ne le voit jamais) : la commande
+    // réussit, mais rien n'est attaché - point 3 du mandat ("filtre published()").
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->blogArticles()->count())->toBe(0);
+});
+
+it('related_article_slugs_remove détache l\'article de blogue lié', function () {
+    $sourceText = 'Texte source pour le retrait d\'un article de blogue lié.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+    $blogArticle = nacBlogArticle('article-blogue-nac-a-retirer');
+    $article->blogArticles()->attach($blogArticle->id, ['source' => 'manual']);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'related_article_slugs_remove' => ['article-blogue-nac-a-retirer'],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->expectsOutputToContain('article(s) de blogue détaché')
+        ->assertSuccessful();
+
+    expect($article->fresh()->blogArticles()->count())->toBe(0);
+});
+
+it('related_article_slugs refuse plus de 1 slug dans un même appel (plafond de forme)', function () {
+    $sourceText = 'Texte source pour le refus du plafond de forme.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+    nacBlogArticle('article-blogue-nac-plafond-1');
+    nacBlogArticle('article-blogue-nac-plafond-2');
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'related_article_slugs' => ['article-blogue-nac-plafond-1', 'article-blogue-nac-plafond-2'],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    expect($article->fresh()->blogArticles()->count())->toBe(0);
+});
+
+it('related_article_slugs refuse un second article différent quand la fiche en a déjà un lié (plafond cumulatif en base)', function () {
+    $sourceText = 'Texte source pour le refus du plafond cumulatif.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+    $premier = nacBlogArticle('article-blogue-nac-cumul-1');
+    $article->blogArticles()->attach($premier->id, ['source' => 'manual']);
+    nacBlogArticle('article-blogue-nac-cumul-2');
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'related_article_slugs' => ['article-blogue-nac-cumul-2'],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->expectsOutputToContain('plafond de 1 article(s)')
+        ->assertFailed();
+
+    $restants = $article->fresh()->blogArticles()->get();
+    expect($restants)->toHaveCount(1)
+        ->and((int) $restants->first()->id)->toBe($premier->id);
+});
