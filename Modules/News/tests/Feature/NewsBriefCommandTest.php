@@ -103,6 +103,40 @@ it('news:brief outputs the full canonical JSON on stdout, including the current 
         ->and($decoded['site_url'])->toContain($article->slug);
 });
 
+// ── Défaut 1 (2026-08-28) : structured_summary était absent du JSON canonique, forçant à le
+// reconstruire depuis le HTML rendu pour corriger une seule phrase d'une fiche publiée ─────────
+
+it('news:brief renders the composed structured_summary of an article that already has one', function () {
+    $article = nbcArticle([
+        'structured_summary' => [
+            'composed' => true,
+            'hook' => 'Accroche composée de test.',
+            'key_points' => ['Premier point clé.', 'Deuxième point clé.'],
+            'why_important' => 'Ça compte pour telle raison précise.',
+        ],
+    ]);
+
+    $exitCode = \Illuminate\Support\Facades\Artisan::call('news:brief', ['article' => $article->id]);
+    $decoded = json_decode(trim(\Illuminate\Support\Facades\Artisan::output()), true);
+
+    expect($exitCode)->toBe(0)
+        ->and($decoded['structured_summary'])->not->toBeNull()
+        ->and($decoded['structured_summary']['composed'])->toBeTrue()
+        ->and($decoded['structured_summary']['hook'])->toBe('Accroche composée de test.')
+        ->and($decoded['structured_summary']['key_points'])->toBe(['Premier point clé.', 'Deuxième point clé.'])
+        ->and($decoded['structured_summary']['why_important'])->toBe('Ça compte pour telle raison précise.');
+});
+
+it('news:brief renders structured_summary as null (present in the JSON, jamais omis) when the article has none', function () {
+    $article = nbcArticle();
+
+    \Illuminate\Support\Facades\Artisan::call('news:brief', ['article' => $article->id]);
+    $decoded = json_decode(trim(\Illuminate\Support\Facades\Artisan::output()), true);
+
+    expect(array_key_exists('structured_summary', $decoded))->toBeTrue()
+        ->and($decoded['structured_summary'])->toBeNull();
+});
+
 it('news:brief reports has_image=true when a processed image already exists for the article', function () {
     \Illuminate\Support\Facades\Storage::fake('public');
     $article = nbcArticle();

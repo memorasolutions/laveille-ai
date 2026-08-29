@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.235.0] - 2026-08-29
+
+### Ajouté
+- **`related_tool_slugs_remove` : la porte officielle sait enfin DÉTACHER un outil d'une fiche.** Jusqu'ici `news:apply` savait attacher, jamais retirer : un outil lié à tort restait irretirable par la voie normale. Cas réel qui l'a révélé : la fiche 38933, où le faux composé « Paragraph Composer » avait fait attacher un outil d'IA homonyme.
+- **Clé DÉDIÉE plutôt qu'un mode « remplacer »**, par doctrine : une omission ne doit JAMAIS pouvoir supprimer un lien. Le retrait est une intention, il s'écrit.
+
+### Corrigé
+- **PERTE DE DONNÉES LATENTE : un `composed_summary` partiel n'efface plus les autres sections.** La fusion se fait désormais sous-clé par sous-clé (`overlayComposedSummary()`) au lieu d'un remplacement intégral. Un payload ne portant qu'un `hook` laissait auparavant disparaître `key_points`, `why_important`, `key_number`, `quote`, `angle_qc_ca`, `action_concrete` et `reperes_dates`.
+- **Vider une sous-clé exige maintenant de la fournir explicitement à `null`** : un effacement se demande, il ne se déduit jamais d'un silence.
+- **La console DIT ce qui a été conservé.** Une fusion muette est presque aussi mauvaise qu'un effacement muet : le message nomme les sous-clés reprises de la version précédente.
+- Comportement INCHANGÉ sur une fiche sans résumé composé : rien à conserver, le remplacement d'origine s'applique naturellement.
+
+### Mesuré
+- Le correctif dormait en local depuis le 2026-08-28, tests inclus, pendant que le défaut restait actif en production. Découvert le 2026-08-29 en préparant un autre chantier sur le même fichier.
+- **Un test échouait, et c'était le TEST qui était fautif, pas le code** : deux `expectsOutputToContain()` chaînés visaient une seule écriture console. Laravel satisfait une attente par écriture, la seconde restait orpheline. Diagnostic exécuté et vérifié par Codex, pas déduit par lecture. Les deux attentes ont été fusionnées en une seule, plus exigeante que les deux séparées.
+- Suite ciblée : 88 tests, 279 assertions, zéro échec.
+
 ## [1.234.0] - 2026-08-28
 
 ### Corrigé

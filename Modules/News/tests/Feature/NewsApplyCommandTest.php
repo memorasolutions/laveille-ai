@@ -865,6 +865,119 @@ it('related_tool_slugs non-tableau est refusé sans rien lier', function () {
     expect($article->fresh()->tools()->count())->toBe(0);
 });
 
+// ── Clé related_tool_slugs_remove (défaut 3, 2026-08-28) - contrepartie du retrait ─────
+//
+// Avant ce correctif, la porte savait ATTACHER un outil, jamais le DÉTACHER : un outil attaché
+// à tort (fiche 38933, "Composer" attaché par un faux composé « Paragraph Composer ») restait
+// irretirable par la porte officielle, seule alternative étant l'Eloquent/SQL/tinker interdit.
+
+it('related_tool_slugs_remove détache uniquement l\'outil visé - un second outil attaché reste attaché', function () {
+    $sourceText = 'Texte source pour le retrait d\'un outil lié.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+
+    $aRetirer = nacTool('outil-nac-a-retirer');
+    $aConserver = nacTool('outil-nac-a-conserver');
+    $article->tools()->attach($aRetirer->id, ['source' => 'auto']);
+    $article->tools()->attach($aConserver->id, ['source' => 'manual']);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'related_tool_slugs_remove' => ['outil-nac-a-retirer'],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->expectsOutputToContain('1 outil(s) détaché(s)')
+        ->assertSuccessful();
+
+    $restants = $article->fresh()->tools()->get()->keyBy('id');
+    expect($restants)->toHaveCount(1)
+        ->and($restants->has($aConserver->id))->toBeTrue()
+        ->and($restants->has($aRetirer->id))->toBeFalse();
+});
+
+it('un payload sans aucune clé d\'outils ne détache rien', function () {
+    $sourceText = 'Texte source refus retrait implicite.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+
+    $attache = nacTool('outil-nac-intouche');
+    $article->tools()->attach($attache->id, ['source' => 'manual']);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'seo_title' => 'Un titre quelconque, sans rapport avec les outils',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->tools()->count())->toBe(1);
+});
+
+it('related_tool_slugs_remove signale un avertissement (jamais une erreur) pour un outil demandé mais non attaché à la fiche', function () {
+    $sourceText = 'Texte source retrait outil non attache.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+
+    nacTool('outil-nac-jamais-attache');
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'related_tool_slugs_remove' => ['outil-nac-jamais-attache'],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->expectsOutputToContain('non attaché')
+        ->assertSuccessful();
+
+    expect($article->fresh()->tools()->count())->toBe(0);
+});
+
+it('related_tool_slugs_remove peut détacher un outil même dépublié depuis - sinon un outil mal attaché resterait à jamais irretirable', function () {
+    $sourceText = 'Texte source retrait outil depublie.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+
+    $outil = nacTool('outil-nac-depublie-apres-coup');
+    $article->tools()->attach($outil->id, ['source' => 'auto']);
+    $outil->update(['status' => 'draft']);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'related_tool_slugs_remove' => ['outil-nac-depublie-apres-coup'],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->tools()->count())->toBe(0);
+});
+
+it('related_tool_slugs_remove non-tableau est refusé sans rien détacher', function () {
+    $sourceText = 'Texte source refus retrait non-tableau.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+
+    $attache = nacTool('outil-nac-refus-non-tableau');
+    $article->tools()->attach($attache->id, ['source' => 'manual']);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'related_tool_slugs_remove' => 'pas-un-tableau',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    expect($article->fresh()->tools()->count())->toBe(1);
+});
+
 // ── Clé title (correctif systémique : titre + slug par la porte, 2026-08-17 soir) ──────
 
 it('la clé title applique le titre et régénère le slug par la méthode canonique', function () {

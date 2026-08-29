@@ -397,6 +397,81 @@ it('preserves a composed structured_summary when a SECOND partial payload only f
     expect($article->title)->toBe('Titre corrige apres revision adversariale');
 });
 
+// ── Défaut 2 (2026-08-28) : composed_summary FUSIONNE désormais sous-clé par sous-clé ─────────
+//
+// Avant ce correctif, un DEUXIÈME payload composed_summary REMPLAÇAIT structured_summary EN
+// ENTIER : un payload ne portant qu'un `hook` faisait disparaître key_points/why_important/...
+// déjà écrits par un composed_summary précédent. Défaut mesuré sur deux fiches publiées citant
+// 125 et 180 milliards de paramètres pour le même modèle sans dire ce que chaque nombre mesure -
+// la correction éditoriale était bloquée faute de pouvoir ne toucher qu'une seule sous-clé.
+
+it('a partial composed_summary payload (only hook) preserves key_points and why_important already stored - the test that matters most', function () {
+    $article = csArticle();
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => csPayloadFile(
+        array_merge(csFreshMeta($article), ['composed_summary' => csValidComposedSummary()])
+    )])->assertSuccessful();
+
+    $article->refresh();
+    expect($article->hasComposedSummary())->toBeTrue('Prerequis : la fiche doit deja porter une composition riche.');
+
+    // Deuxième payload : SEULEMENT hook.
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => csPayloadFile(
+        array_merge(csFreshMeta($article), ['composed_summary' => ['hook' => 'Accroche corrigée après relecture.']])
+    )])
+        ->assertSuccessful()
+        // ACTION : UNE seule attente, pas deux (2026-08-29). Laravel satisfait une attente par
+        // ECRITURE console : deux expectsOutputToContain() sur un MEME info() laissent la seconde
+        // orpheline et le test echoue alors que le code est correct (diagnostic execute par Codex).
+        // La chaine retenue prouve DAVANTAGE que les deux separees : le message est bien forme ET
+        // key_points y est nomme.
+        ->expectsOutputToContain('sous-clé(s) conservée(s) de la version précédente : key_points');
+
+    $article->refresh();
+    expect($article->structured_summary['hook'])->toBe('Accroche corrigée après relecture.')
+        ->and($article->structured_summary['key_points'])->toBe(['Premier point clé attribué.', 'Deuxième point clé attribué.'])
+        ->and($article->structured_summary['why_important'])->toBe('Cette annonce compte parce que le test le dit.')
+        ->and($article->structured_summary['key_number'])->toBe('12 millions de dollars, annoncés le 2026-08-17 (ministère).')
+        ->and($article->structured_summary['quote'])->toBe(['text' => 'Ceci est une citation de test.', 'author' => 'Jeanne Tremblay, porte-parole'])
+        ->and($article->structured_summary['angle_qc_ca'])->toBe('Au Québec, ce test change quelque chose.')
+        ->and($article->structured_summary['action_concrete'])->toBe('Consultez le site officiel. Inscrivez-vous avant vendredi.')
+        ->and($article->structured_summary['reperes_dates'])->toHaveCount(2)
+        ->and($article->hasComposedSummary())->toBeTrue();
+});
+
+it('a partial composed_summary payload on a FRESH article (no prior composed summary) behaves exactly as before: only the provided sub-key appears (non-regression of the silent-omission right)', function () {
+    $article = csArticle();
+    expect($article->hasComposedSummary())->toBeFalse('Prerequis : aucune composition prealable sur cette fiche.');
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => csPayloadFile(
+        array_merge(csFreshMeta($article), ['composed_summary' => ['hook' => 'Seule accroche fournie.']])
+    )])->assertSuccessful();
+
+    $article->refresh();
+    expect($article->structured_summary)->toEqual(['hook' => 'Seule accroche fournie.', 'composed' => true])
+        ->and($article->hasComposedSummary())->toBeTrue();
+});
+
+it('providing an explicit null for a sub-key clears it while sub-keys absent from the SAME payload are preserved (an erasure must be requested, never inferred from silence)', function () {
+    $article = csArticle();
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => csPayloadFile(
+        array_merge(csFreshMeta($article), ['composed_summary' => csValidComposedSummary()])
+    )])->assertSuccessful();
+
+    $article->refresh();
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => csPayloadFile(
+        array_merge(csFreshMeta($article), ['composed_summary' => ['hook' => null]])
+    )])->assertSuccessful();
+
+    $article->refresh();
+    expect(array_key_exists('hook', $article->structured_summary))->toBeFalse('null explicite doit RETIRER la sous-clé, pas la vider à une chaîne vide.')
+        ->and($article->structured_summary['key_points'])->toBe(['Premier point clé attribué.', 'Deuxième point clé attribué.'])
+        ->and($article->structured_summary['why_important'])->toBe('Cette annonce compte parce que le test le dit.')
+        ->and($article->hasComposedSummary())->toBeTrue();
+});
+
 // Non-regression du comportement d'ORIGINE : un resume MACHINE, lui, doit toujours etre efface
 // par un payload de contenu - sinon il continuerait de primer sur la composition a l'affichage.
 it('still erases a MACHINE structured_summary when a content payload carries no composed_summary', function () {

@@ -20,6 +20,16 @@ use Modules\News\Services\NewsImageService;
  * bornée) et Modules\News\Console\NewsSourceCommand (récolte de l'ORIGINAL) : cette commande ne
  * fait qu'un SELECT et un json_encode(), jamais un update().
  *
+ * ACTION : défaut 1 (2026-08-28, mandat "aucune porte de LECTURE du résumé composé") -
+ * structured_summary (le résumé composé, quand il existe) est désormais rendu SYSTÉMATIQUEMENT,
+ * jamais derrière une option : le contrat de cette commande est déjà de décrire « ce qui est
+ * déjà en base » avant toute décision de rédaction (voir le paragraphe ci-dessus), et une clé
+ * JSON ajoutée ne casse jamais un appelant qui lit des champs par nom - aucun consommateur connu
+ * (skill /actu2, tests) ne compare l'ensemble exact des clés du JSON.
+ * MCP: SELF (<5 lignes utiles)
+ * RAISON: mandat 2026-08-28 - une correction éditoriale réelle était à l'arrêt faute de pouvoir
+ * relire le résumé composé autrement qu'en le reconstruisant depuis le HTML rendu.
+ *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
  */
@@ -56,6 +66,7 @@ class NewsBriefCommand extends Command
             'source_captured_at' => $article->source_captured_at?->toIso8601String(),
             'updated_at' => $article->updated_at?->toIso8601String(),
             'primary_sources' => $article->primary_sources ?? [],
+            'structured_summary' => $article->structured_summary,
             'nature_original' => $article->nature_original,
             'niveau_preuve' => $article->niveau_preuve,
             'has_image' => $this->imageService->exists($article->id),

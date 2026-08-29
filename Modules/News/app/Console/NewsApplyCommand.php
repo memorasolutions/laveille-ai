@@ -90,6 +90,20 @@ use Modules\News\Services\NewsImageService;
  * d'être refusé). La clé 'slug' elle-même reste hors de ALLOWED_PAYLOAD_KEYS, donc refusée dans
  * tous les modes, sans exception.
  *
+ * NOTE DATÉE 2026-08-28 (« elle écrit sans permettre de relire ni de défaire ») - deux manques
+ * corrigés ensemble, tous deux nés du même défaut de conception : un droit d'écriture jamais
+ * accompagné d'un droit de retour en arrière symétrique.
+ * (1) composed_summary FUSIONNE désormais sous-clé par sous-clé avec le résumé composé déjà en
+ *     base (NewsArticle::hasComposedSummary()) au lieu de le REMPLACER intégralement : un payload
+ *     ne portant qu'un `hook` ne fait plus disparaître key_points/why_important/... Sur une fiche
+ *     qui n'a pas encore de résumé composé, le remplacement d'origine reste inchangé (rien à
+ *     conserver). Voir overlayComposedSummary(). Vider une sous-clé exige désormais de la fournir
+ *     explicitement à `null` (normalizeComposedSummary()) - un effacement se demande, il ne se
+ *     déduit jamais d'un silence.
+ * (2) related_tool_slugs_remove détache des outils, symétrique de related_tool_slugs qui ne
+ *     savait qu'attacher. Voir detachRelatedTools(). Même doctrine que (1) : le retrait est une
+ *     intention explicite (clé dédiée), jamais un mode "remplacer" où une omission supprimerait.
+ *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
  */
@@ -112,7 +126,14 @@ class NewsApplyCommand extends Command
     // ACTION : Richesse v1.188.0 - 'composed_summary' rejoint la liste blanche, même garde-fou.
     // MCP: SELF (<5 lignes)
     // RAISON: design doc, section "Richesse v1.188.0 - structure fixe composée (2026-08-17 soir)".
-    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'title', 'seo_title', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve', 'original_post', 'composed_summary', 'related_tool_slugs', 'entities', 'fact_check'];
+    // ACTION : défaut 3 (2026-08-28, mandat "on peut ATTACHER un outil, jamais le DÉTACHER") -
+    // 'related_tool_slugs_remove' rejoint la liste blanche : clé neuve et explicite plutôt qu'un
+    // mode "remplacer" sur related_tool_slugs - une omission ne doit JAMAIS pouvoir supprimer un
+    // lien, le retrait est une intention, elle s'écrit (fiche 38933, outil "Composer" attaché à
+    // tort par un faux composé « Paragraph Composer », irretirable jusqu'ici par cette porte).
+    // MCP: SELF (<5 lignes)
+    // RAISON: mandat 2026-08-28 - garde-fou « zéro suppression déduite d'un silence ».
+    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'title', 'seo_title', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve', 'original_post', 'composed_summary', 'related_tool_slugs', 'related_tool_slugs_remove', 'entities', 'fact_check'];
 
     /**
      * Richesse v1.188.0 - sous-clés autorisées de composed_summary (design doc, section
@@ -579,7 +600,38 @@ class NewsApplyCommand extends Command
                 // Message d'erreur déjà émis par normalizeComposedSummary().
                 return self::FAILURE;
             }
-            $updates['structured_summary'] = array_merge(['composed' => true], $normalizedComposed);
+
+            // ACTION : défaut 2 (2026-08-28) - FUSION sous-clé par sous-clé quand la fiche porte
+            // déjà un résumé composé (hasComposedSummary(), point unique de la distinction, DRY -
+            // même méthode que show.blade.php et le garde-fou plus bas), au lieu du remplacement
+            // intégral d'avant ce correctif qui effaçait silencieusement key_points/why_important/
+            // .../reperes_dates au moindre payload partiel. Sur une fiche qui n'a PAS encore de
+            // résumé composé, $existing = [] et le remplacement d'origine en découle naturellement
+            // (rien à conserver) - comportement inchangé, droit d'omission silencieuse intact.
+            // Voir overlayComposedSummary() : une sous-clé ABSENTE du payload laisse l'existant
+            // intact, une sous-clé PRÉSENTE le réécrit, une valeur `null` explicite le RETIRE.
+            // MCP: SELF (<5 lignes utiles)
+            // RAISON: mandat 2026-08-28 - deux fiches publiées citant 125 et 180 milliards de
+            // paramètres pour le même modèle sans dire ce que chaque nombre mesure, correction
+            // bloquée par ce même défaut (aucun moyen de ne toucher qu'une phrase).
+            $avaitDejaUneComposition = $article->hasComposedSummary();
+            $existing = $avaitDejaUneComposition ? (array) $article->structured_summary : [];
+            $updates['structured_summary'] = $this->overlayComposedSummary($existing, $normalizedComposed);
+
+            // ACTION : défaut 2 (2026-08-28) - une fusion muette est presque aussi mauvaise qu'un
+            // effacement muet (mandat) : l'auteur voit explicitement ce qu'il n'a pas réécrit.
+            // MCP: SELF (<5 lignes utiles)
+            // RAISON: mandat 2026-08-28 - « La console DIT ce qui a été conservé ».
+            if ($avaitDejaUneComposition) {
+                $sousClesConservees = array_values(array_filter(
+                    self::ALLOWED_COMPOSED_SUMMARY_KEYS,
+                    fn (string $subKey) => ! array_key_exists($subKey, $normalizedComposed) && array_key_exists($subKey, $existing)
+                ));
+
+                if ($sousClesConservees !== []) {
+                    $this->info("Fiche {$article->id} : composed_summary fusionné - sous-clé(s) conservée(s) de la version précédente : ".implode(', ', $sousClesConservees).'.');
+                }
+            }
         }
 
         // ACTION : intégration « Outils liés » (demande fondateur 2026-08-17 soir) - la clé
@@ -592,25 +644,30 @@ class NewsApplyCommand extends Command
         //         sait quels outils sont réellement au coeur de l'actu.
         $relatedToolSlugs = null;
         if (array_key_exists('related_tool_slugs', $decoded)) {
-            $value = $decoded['related_tool_slugs'];
-            if (! is_array($value)) {
-                $this->error('related_tool_slugs doit être un tableau de slugs.');
-
+            $relatedToolSlugs = $this->normalizeToolSlugsList($decoded['related_tool_slugs'], 'related_tool_slugs');
+            if ($relatedToolSlugs === null) {
+                // Message d'erreur déjà émis par normalizeToolSlugsList().
                 return self::FAILURE;
             }
-            if (count($value) > 10) {
-                $this->error('related_tool_slugs dépasse la limite de 10 slugs.');
+        }
 
+        // ACTION : défaut 3 (2026-08-28) - contrepartie de related_tool_slugs : la porte savait
+        // ATTACHER un outil, jamais le DÉTACHER. Clé neuve et explicite plutôt qu'un mode
+        // "remplacer" sur related_tool_slugs (où une liste incomplète supprimerait des liens par
+        // omission) : le retrait est une intention, elle s'écrit. Mêmes bornes de validation que
+        // related_tool_slugs, RÉUTILISÉES via normalizeToolSlugsList() - jamais deux validations
+        // jumelles. Pivot lui aussi (jamais une colonne de $updates), même traitement à part que
+        // related_tool_slugs ci-dessus : ne compte pas comme un payload de contenu plus bas.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: mandat 2026-08-28 - fiche 38933, outil "Composer" attaché à tort par un faux
+        // composé « Paragraph Composer », aucun moyen de le détacher par la porte officielle.
+        $relatedToolSlugsRemove = null;
+        if (array_key_exists('related_tool_slugs_remove', $decoded)) {
+            $relatedToolSlugsRemove = $this->normalizeToolSlugsList($decoded['related_tool_slugs_remove'], 'related_tool_slugs_remove');
+            if ($relatedToolSlugsRemove === null) {
+                // Message d'erreur déjà émis par normalizeToolSlugsList().
                 return self::FAILURE;
             }
-            foreach ($value as $slug) {
-                if (! is_string($slug) || trim($slug) === '' || mb_strlen($slug) > 120) {
-                    $this->error('Chaque slug de related_tool_slugs doit être une chaîne non vide de 120 caractères maximum.');
-
-                    return self::FAILURE;
-                }
-            }
-            $relatedToolSlugs = array_values($value);
         }
 
         // ACTION : clé entities (connexes par entités partagées, arbitrage panel 2026-08-17) -
@@ -658,8 +715,8 @@ class NewsApplyCommand extends Command
         // simplement une fiche qui n'a pas encore été relue, et le composant editorial-signature
         // ne rend alors rien du tout.
 
-        if ($updates === [] && $relatedToolSlugs === null && $entities === null && $factCheckUpdates === []) {
-            $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs / primary_sources / image_credit / nature_original / niveau_preuve / original_post / composed_summary / related_tool_slugs / entities / fact_check n\'est fournie.');
+        if ($updates === [] && $relatedToolSlugs === null && $relatedToolSlugsRemove === null && $entities === null && $factCheckUpdates === []) {
+            $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs / primary_sources / image_credit / nature_original / niveau_preuve / original_post / composed_summary / related_tool_slugs / related_tool_slugs_remove / entities / fact_check n\'est fournie.');
 
             return self::FAILURE;
         }
@@ -760,6 +817,10 @@ class NewsApplyCommand extends Command
             $this->attachRelatedTools($article, $relatedToolSlugs);
         }
 
+        if ($relatedToolSlugsRemove !== null) {
+            $this->detachRelatedTools($article, $relatedToolSlugsRemove);
+        }
+
         if ($entities !== null) {
             $article->syncEntities($entities);
             $this->info("Fiche {$article->id} : ".$article->entities()->count().' entité(s) enregistrée(s).');
@@ -813,6 +874,115 @@ class NewsApplyCommand extends Command
             \Modules\News\Actions\NewsToolSyncAction::invalidatePublicCache($article);
             $this->info("Fiche {$article->id} : {$attached} outil(s) lié(s) (".implode(', ', $resolvedNames).').');
         }
+    }
+
+    /**
+     * ACTION : défaut 3 (2026-08-28) - contrepartie de attachRelatedTools() : détache les outils
+     * visés par related_tool_slugs_remove, et EUX SEULS - jamais un remplacement de la liste
+     * complète, une omission ne doit JAMAIS pouvoir supprimer un lien. Résout les slugs contre
+     * TOUS les outils de l'annuaire (pas seulement les PUBLIÉS, contrairement à
+     * attachRelatedTools()) : un outil attaché à tort puis dépublié doit rester détachable, sans
+     * quoi ce correctif recréerait le même piège qu'il referme. NewsToolSyncAction n'expose aucune
+     * méthode de retrait (hors périmètre de ce correctif) : cette méthode agit directement sur la
+     * relation Eloquent $article->tools(), la même porte déjà ouverte par attachRelatedTools().
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: fiche 38933 - l'outil "Composer" attaché à tort (texte contenant « Paragraph
+     * Composer »), aucun moyen de le détacher par la porte officielle jusqu'à ce correctif.
+     *
+     * @param  array<int, string>  $slugs
+     */
+    private function detachRelatedTools(NewsArticle $article, array $slugs): void
+    {
+        if (! class_exists(\Modules\Directory\Models\Tool::class)) {
+            $this->warn('related_tool_slugs_remove ignoré : le module Directory est désactivé.');
+
+            return;
+        }
+
+        $tools = \Modules\Directory\Models\Tool::query()->get(['id', 'slug', 'name']);
+        $resolvedIds = [];
+        $resolvedNames = [];
+        $unknownSlugs = [];
+
+        foreach ($slugs as $slug) {
+            $match = $tools->first(fn ($tool) => in_array($slug, $tool->getTranslations('slug'), true));
+            if ($match === null) {
+                $unknownSlugs[] = $slug;
+
+                continue;
+            }
+            $resolvedIds[] = (int) $match->id;
+            $resolvedNames[$match->id] = $match->getTranslation('name', 'fr_CA', false)
+                ?: $match->getTranslation('name', 'en', false)
+                ?: $slug;
+        }
+
+        if ($unknownSlugs !== []) {
+            $this->warn('related_tool_slugs_remove : slug(s) introuvable(s) dans l\'annuaire : '.implode(', ', $unknownSlugs).' - rien à détacher pour ce ou ces slugs.');
+        }
+
+        if ($resolvedIds === []) {
+            return;
+        }
+
+        // ACTION : un slug demandé mais non attaché produit un avertissement, pas une erreur
+        // (mandat) - detach() sur un pivot absent est un no-op silencieux côté Eloquent, donc le
+        // signal doit être posé AVANT, en comparant aux liaisons réellement existantes.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: mandat 2026-08-28 - « un slug demandé mais non attaché produit un
+        //         avertissement, pas une erreur ».
+        $attachedIds = $article->tools()->whereIn('directory_tools.id', $resolvedIds)->pluck('directory_tools.id')->map(fn ($id) => (int) $id)->all();
+        $notAttachedIds = array_diff($resolvedIds, $attachedIds);
+
+        if ($notAttachedIds !== []) {
+            $notAttachedNames = array_values(array_intersect_key($resolvedNames, array_flip($notAttachedIds)));
+            $this->warn('related_tool_slugs_remove : outil(s) demandé(s) mais non attaché(s) à cette fiche : '.implode(', ', $notAttachedNames).'.');
+        }
+
+        if ($attachedIds === []) {
+            return;
+        }
+
+        $article->tools()->detach($attachedIds);
+        \Modules\News\Actions\NewsToolSyncAction::invalidatePublicCache($article);
+        $detachedNames = array_values(array_intersect_key($resolvedNames, array_flip($attachedIds)));
+        $this->info("Fiche {$article->id} : ".count($attachedIds)." outil(s) détaché(s) (".implode(', ', $detachedNames).').');
+    }
+
+    /**
+     * ACTION : défaut 3 (2026-08-28) - validation PARTAGÉE des deux clés de payload qui
+     * manipulent related_tool_slugs (ajout et retrait) : mêmes bornes (10 slugs maximum, chaînes
+     * non vides de 120 caractères maximum chacune), donc une SEULE méthode plutôt que deux
+     * validations jumelles vouées à diverger tôt ou tard.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: mandat 2026-08-28 - « réutilise les helpers de validation déjà présents pour
+     *         related_tool_slugs plutôt que d'en écrire des jumeaux ».
+     *
+     * @return array<int, string>|null
+     */
+    private function normalizeToolSlugsList(mixed $value, string $fieldName): ?array
+    {
+        if (! is_array($value)) {
+            $this->error("{$fieldName} doit être un tableau de slugs.");
+
+            return null;
+        }
+
+        if (count($value) > 10) {
+            $this->error("{$fieldName} dépasse la limite de 10 slugs.");
+
+            return null;
+        }
+
+        foreach ($value as $slug) {
+            if (! is_string($slug) || trim($slug) === '' || mb_strlen($slug) > 120) {
+                $this->error("Chaque slug de {$fieldName} doit être une chaîne non vide de 120 caractères maximum.");
+
+                return null;
+            }
+        }
+
+        return array_values($value);
     }
 
     /**
@@ -1101,8 +1271,20 @@ class NewsApplyCommand extends Command
             if (! array_key_exists($key, $input)) {
                 continue;
             }
+            // ACTION : défaut 2 (2026-08-28) - `null` explicite est le signal de retrait délibéré
+            // d'une sous-clé (voir overlayComposedSummary() dans applyPayload()), distinct d'une
+            // sous-clé ABSENTE qui, elle, n'entre jamais dans $normalized et ne touche à rien.
+            // MCP: SELF (<5 lignes utiles)
+            // RAISON: mandat 2026-08-28 - « pour vider délibérément une sous-clé, il faut la
+            //         fournir explicitement à null - un effacement doit être demandé, jamais
+            //         déduit d'un silence ».
+            if ($input[$key] === null) {
+                $normalized[$key] = null;
+
+                continue;
+            }
             if (! is_string($input[$key])) {
-                $this->error("composed_summary.{$key} doit être une chaîne de caractères.");
+                $this->error("composed_summary.{$key} doit être une chaîne de caractères (ou null pour vider cette sous-clé).");
 
                 return null;
             }
@@ -1115,33 +1297,83 @@ class NewsApplyCommand extends Command
         }
 
         if (array_key_exists('key_points', $input)) {
-            $points = $this->normalizeComposedKeyPoints($input['key_points']);
-            if ($points === null) {
-                // Message d'erreur déjà émis par normalizeComposedKeyPoints().
-                return null;
+            if ($input['key_points'] === null) {
+                $normalized['key_points'] = null;
+            } else {
+                $points = $this->normalizeComposedKeyPoints($input['key_points']);
+                if ($points === null) {
+                    // Message d'erreur déjà émis par normalizeComposedKeyPoints().
+                    return null;
+                }
+                $normalized['key_points'] = $points;
             }
-            $normalized['key_points'] = $points;
         }
 
         if (array_key_exists('quote', $input)) {
-            $quote = $this->normalizeComposedQuote($input['quote']);
-            if ($quote === null) {
-                // Message d'erreur déjà émis par normalizeComposedQuote().
-                return null;
+            if ($input['quote'] === null) {
+                $normalized['quote'] = null;
+            } else {
+                $quote = $this->normalizeComposedQuote($input['quote']);
+                if ($quote === null) {
+                    // Message d'erreur déjà émis par normalizeComposedQuote().
+                    return null;
+                }
+                $normalized['quote'] = $quote;
             }
-            $normalized['quote'] = $quote;
         }
 
         if (array_key_exists('reperes_dates', $input)) {
-            $reperes = $this->normalizeComposedReperesDates($input['reperes_dates']);
-            if ($reperes === null) {
-                // Message d'erreur déjà émis par normalizeComposedReperesDates().
-                return null;
+            if ($input['reperes_dates'] === null) {
+                $normalized['reperes_dates'] = null;
+            } else {
+                $reperes = $this->normalizeComposedReperesDates($input['reperes_dates']);
+                if ($reperes === null) {
+                    // Message d'erreur déjà émis par normalizeComposedReperesDates().
+                    return null;
+                }
+                $normalized['reperes_dates'] = $reperes;
             }
-            $normalized['reperes_dates'] = $reperes;
         }
 
         return $normalized;
+    }
+
+    /**
+     * ACTION : défaut 2 (2026-08-28, mandat "elle écrit sans permettre de relire ni de défaire")
+     * - superpose $normalizedComposed (sortie de normalizeComposedSummary() ci-dessus, peut
+     * contenir des valeurs `null` explicites) sur $existing sous-clé par sous-clé : une sous-clé
+     * PRÉSENTE dans le payload réécrit $existing ; une valeur `null` explicite RETIRE la sous-clé
+     * de $existing (effacement demandé, jamais déduit d'un silence) ; une sous-clé ABSENTE du
+     * payload laisse $existing intact pour cette sous-clé (fusion, jamais un remplacement).
+     * $existing = [] (fiche sans résumé composé) retombe naturellement sur l'ancien comportement
+     * de remplacement intégral : rien à conserver, seules les sous-clés fournies apparaissent.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: mandat 2026-08-28 - un composed_summary partiel effaçait tout le résumé riche
+     * (key_points/why_important/key_number/quote/angle_qc_ca/action_concrete/reperes_dates) au
+     * lieu de ne toucher qu'aux sous-clés vraiment fournies ; défaut mesuré sur deux fiches
+     * publiées citant 125 et 180 milliards de paramètres pour le même modèle.
+     *
+     * @param  array<string, mixed>  $existing
+     * @param  array<string, mixed>  $normalizedComposed
+     * @return array<string, mixed>
+     */
+    private function overlayComposedSummary(array $existing, array $normalizedComposed): array
+    {
+        foreach (self::ALLOWED_COMPOSED_SUMMARY_KEYS as $subKey) {
+            if (! array_key_exists($subKey, $normalizedComposed)) {
+                continue;
+            }
+            if ($normalizedComposed[$subKey] === null) {
+                unset($existing[$subKey]);
+
+                continue;
+            }
+            $existing[$subKey] = $normalizedComposed[$subKey];
+        }
+
+        $existing['composed'] = true;
+
+        return $existing;
     }
 
     /**
