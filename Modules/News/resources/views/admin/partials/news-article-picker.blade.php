@@ -3,17 +3,19 @@
     @project laveille.ai
 
     ACTION: Partial partagé "colonne actualités disponibles" (recherche, filtre langue, filtre
-            couleur, 3 modes de tri, regroupement par acteur, favicon/titre/meta/résumé/liens,
-            pastille couleur, bouton +Ajouter). Utilisé par concentre-builder.blade.php ET
-            video-goal-builder.blade.php.
-    RAISON: Extraction DRY (v1.117.0) — copie fidèle du HTML de la section "📰 Actualités
+            compagnie d'IA, filtre couleur, 3 modes de tri, regroupement par acteur,
+            favicon/titre/meta/résumé/liens, pastille couleur, bouton +Ajouter). Utilisé par
+            concentre-builder.blade.php ET video-goal-builder.blade.php.
+    RAISON: Extraction DRY (v1.117.0) - copie fidèle du HTML de la section "📰 Actualités
             disponibles" de concentre-builder.blade.php. Ce partial est inclus DANS le scope
             x-data du parent (Blade @include partage le scope Alpine, pas de props nécessaires) ;
             il attend que le parent expose (directement ou via NewsArticlePicker(), voir
             public/assets/admin/news-article-picker.js) : newsItems, loading.news, fetchError,
-            searchQuery, languageFilter, sortMode, colorFilter, colorPalette, filteredAvailable,
-            groupedAvailable, availableItems, colorForItem(), setColor(), selectItem(),
-            selectAllVisible(), manualColors.
+            searchQuery, languageFilter, companyFilter, sortMode, colorFilter, colorPalette,
+            filteredAvailable, groupedAvailable, availableItems, availableCompanies,
+            colorForItem(), setColor(), selectItem(), selectAllVisible(), manualColors.
+            Filtre compagnie ajouté 2026-08-29 (demande du fondateur) : voir
+            OfficialCompanySourcesSeeder pour la donnée qui l'alimente.
 --}}
 <div class="cb-card">
     <div class="cb-section-title">
@@ -34,6 +36,15 @@
             <option value="">🌐 Toutes langues</option>
             <option value="fr">🇫🇷 Français</option>
             <option value="en">🇬🇧 English</option>
+        </select>
+        {{-- Filtre par compagnie d'IA (2026-08-29) - masqué de lui-même quand aucun article du
+             lot n'a de compagnie renseignée (concentre-builder, objectif vidéo : ce champ n'existe
+             pas dans leur charge utile), donc rien à configurer par page hôte. --}}
+        <select class="form-select form-select-sm" x-model="companyFilter" style="width:auto;" x-show="availableCompanies.length > 0" x-cloak title="Filtre par compagnie d'IA">
+            <option value="">🏢 Toutes compagnies</option>
+            <template x-for="c in availableCompanies" :key="c">
+                <option :value="c" x-text="c"></option>
+            </template>
         </select>
         <select class="form-select form-select-sm" x-model="sortMode" style="width:auto;" title="Mode de tri">
             <option value="cluster">🏷 Tri par acteur</option>

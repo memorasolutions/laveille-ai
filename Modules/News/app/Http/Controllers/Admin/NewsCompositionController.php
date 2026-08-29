@@ -186,6 +186,12 @@ class NewsCompositionController extends Controller
                 'image_url' => $a->image_url,
                 'source_name' => $a->source?->name,
                 'source_language' => $a->source?->language ?? 'unknown',
+                // Filtre par compagnie d'IA (2026-08-29, demande du fondateur) - null tant que la
+                // source d'origine n'est pas taggée par Modules\News\Database\Seeders\
+                // OfficialCompanySourcesSeeder ; le filtre côté client (news-article-picker.js)
+                // s'auto-masque déjà quand aucun article n'a de compagnie renseignée.
+                'source_company' => $a->source?->company,
+                'source_is_official' => (bool) ($a->source?->is_official ?? false),
                 'actor_cluster' => null,
                 'cluster_color' => null,
                 'favicon' => $a->url ? 'https://www.google.com/s2/favicons?domain='.parse_url($a->url, PHP_URL_HOST).'&sz=32' : null,

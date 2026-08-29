@@ -6,9 +6,9 @@
  * ACTION: Mixin Alpine.js partagé "sélecteur d'actualités" (recherche, filtre langue, filtre
  *         couleur, 3 modes de tri, regroupement par acteur/cluster, pastille couleur manuelle,
  *         sélection/retrait). Extrait fidèlement de concentreBuilder() (concentre-builder.blade.php)
- *         pour être réutilisé aussi par videoGoalBuilder() (video-goal-builder.blade.php) — DRY,
+ *         pour être réutilisé aussi par videoGoalBuilder() (video-goal-builder.blade.php) - DRY,
  *         un seul bloc de logique au lieu de deux implémentations parallèles.
- * RAISON: v1.117.0 — la page "Générateur d'objectif vidéo" avait une liste basique (checkboxes,
+ * RAISON: v1.117.0 - la page "Générateur d'objectif vidéo" avait une liste basique (checkboxes,
  *         pas de recherche/filtre/tri) alors que le "Concentré IA" a un système riche. On extrait
  *         ce système en composant partagé plutôt que de le dupliquer une 2e fois.
  *
@@ -17,17 +17,17 @@
  *   function monBuilder(opts) {
  *       const state = {
  *           // ... état propre à la page ...
- *           loading: { news: false },           // objet PRÉ-EXISTANT — le mixin lit/écrit
+ *           loading: { news: false },           // objet PRÉ-EXISTANT - le mixin lit/écrit
  *                                                // seulement loading.news, jamais l'objet entier.
  *           init() {
  *               // ... init existant (le mixin est déjà fusionné à ce stade, voir plus bas) ...
  *           },
  *       };
  *
- *       // Fusionne le mixin AVANT le `return` — donc AVANT qu'Alpine ne rende l'objet réactif
+ *       // Fusionne le mixin AVANT le `return` - donc AVANT qu'Alpine ne rende l'objet réactif
  *       // (Alpine.reactive() enveloppe la valeur RETOURNÉE par cette factory x-data).
  *       // Object.defineProperties (et non Object.assign / spread) préserve les getters réactifs
- *       // (availableItems, filteredAvailable, groupedAvailable) — un spread les évaluerait une
+ *       // (availableItems, filteredAvailable, groupedAvailable) - un spread les évaluerait une
  *       // seule fois comme valeurs figées et casserait la réactivité Alpine.
  *       Object.defineProperties(state, Object.getOwnPropertyDescriptors(NewsArticlePicker({
  *           fetchStrategy: (ctx) => ({ method: 'GET', url: ctx.endpoints.news + '?...' }),
@@ -37,16 +37,16 @@
  *   }
  *
  * PIÈGE ÉVITÉ #1 : ne JAMAIS fusionner via {...NewsArticlePicker(opts), ...autreChose} ni
- * Object.assign(state, NewsArticlePicker(opts)) — les `get xxx() {...}` seraient évalués
+ * Object.assign(state, NewsArticlePicker(opts)) - les `get xxx() {...}` seraient évalués
  * immédiatement et copiés comme valeurs figées, pas comme des getters. Toujours
  * Object.defineProperties(state, Object.getOwnPropertyDescriptors(...)).
  *
  * PIÈGE ÉVITÉ #2 (vérifié empiriquement, Playwright local) : ne PAS faire cette fusion à
- * l'intérieur de init() sur `this` — avec l'Alpine embarqué par Livewire dans ce projet, `this`
+ * l'intérieur de init() sur `this` - avec l'Alpine embarqué par Livewire dans ce projet, `this`
  * dans init() est déjà le proxy réactif, et les propriétés ajoutées via defineProperties dessus
  * ne sont PAS visibles par le reste du template (erreurs "x is not defined" malgré defineProperties
  * qui ne lève aucune exception). La fusion doit se faire sur l'objet BRUT, avant que la factory
- * ne le `return` à Alpine — voir l'exemple ci-dessus.
+ * ne le `return` à Alpine - voir l'exemple ci-dessus.
  */
 window.NewsArticlePicker = function (opts) {
     opts = opts || {};
@@ -69,6 +69,12 @@ window.NewsArticlePicker = function (opts) {
         searchQuery: '',
         languageFilter: '',
         colorFilter: '',
+        // Filtre par compagnie d'IA (2026-08-29) - chaîne vide = toutes compagnies. Alimenté par
+        // item.source_company, présent seulement quand la source d'origine est taggée
+        // (Modules\News\Database\Seeders\OfficialCompanySourcesSeeder) ; sans quoi
+        // availableCompanies reste vide et le sélecteur hôte peut choisir de ne pas l'afficher -
+        // inoffensif pour les pages qui n'ont jamais ce champ (concentre-builder, objectif vidéo).
+        companyFilter: '',
         sortMode: opts.defaultSortMode || 'cluster', // 'cluster' (défaut, groupage acteur) | 'date' | 'color'
         manualColors: {}, // { [itemId]: '#hexcolor' }
         colorPalette: [
@@ -99,10 +105,10 @@ window.NewsArticlePicker = function (opts) {
         // requête elle-même (méthode, URL, body) diffère et est fournie par la page hôte via
         // opts.fetchStrategy(ctx) → { method, url, body?, headers? }.
         // opts.shouldFetch(ctx)     : garde optionnelle avant de déclencher le fetch (ex. dates
-        //                             vides côté Objectif Vidéo — le Concentré n'en a pas besoin).
+        //                             vides côté Objectif Vidéo - le Concentré n'en a pas besoin).
         // opts.onFetchSuccess(ctx, data) : hook optionnel après assignation de newsItems (succès).
         // opts.onFetchSettled(ctx) : hook optionnel exécuté après CHAQUE tentative (succès, HTTP
-        //                             en erreur, ou erreur réseau) — ex. Objectif Vidéo y bascule
+        //                             en erreur, ou erreur réseau) - ex. Objectif Vidéo y bascule
         //                             son indicateur "hasFetched".
         async fetchNews() {
             if (typeof opts.shouldFetch === 'function' && !opts.shouldFetch(this)) {
@@ -155,12 +161,25 @@ window.NewsArticlePicker = function (opts) {
             return this.newsItems.filter(n => !this.selectedIds.includes(n.id));
         },
 
+        // Compagnies distinctes présentes dans le lot COMPLET (newsItems, pas availableItems) :
+        // la liste du sélecteur reste stable pendant qu'on sélectionne des actualités, plutôt que
+        // de perdre une option au fur et à mesure que ses articles sont ajoutés.
+        get availableCompanies() {
+            const vues = new Set();
+            for (const n of this.newsItems) {
+                if (n.source_company) vues.add(n.source_company);
+            }
+            return [...vues].sort((a, b) => a.localeCompare(b));
+        },
+
         get filteredAvailable() {
             const q = this.searchQuery?.toLowerCase().trim() || '';
             const lang = this.languageFilter || '';
             const colorF = this.colorFilter || '';
+            const companyF = this.companyFilter || '';
             const filtered = this.availableItems.filter(n => {
                 if (lang && n.source_language !== lang) return false;
+                if (companyF && n.source_company !== companyF) return false;
                 if (colorF && this.colorForItem(n) !== colorF) return false;
                 if (!q) return true;
                 return (n.title || '').toLowerCase().includes(q)
