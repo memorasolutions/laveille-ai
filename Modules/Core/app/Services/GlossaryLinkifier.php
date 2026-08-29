@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v12.'; // 2026-08-28 bump : nouvelle clé 'exclude_after' par terme outil (TOOL_COMPOUND_EXCLUSIONS) - sans ce bump, un cache v11 déjà chaud servirait 1h de plus des entrées SANS la clé, donc sans garde de faux composé
+    public const CACHE_KEY = 'glossary.terms.v13.'; // 2026-08-29 bump : ALIAS_NEVER_AUTO (CNN, requête, témoin) - sans ce bump, un cache v12 déjà chaud servirait 1h de plus des entrées SANS cette exclusion, donc les mêmes faux liens
     public const CACHE_TTL = 3600; // 1h
     // 2026-08-02 #1526 : compteur d'epoch pour invalider le cache du RÉSULTAT linkify() (voir linkify()
     // et flushCache()) sans avoir à énumérer des clés — un seul Cache::forever() invalide tout d'un coup.
@@ -337,6 +337,7 @@ class GlossaryLinkifier
                             if (is_array($aliases)) {
                                 foreach ($aliases as $alias) {
                                     if (! is_string($alias) || mb_strlen($alias) < 2) continue;
+                                    if (self::isNeverAutoAlias($alias)) continue; // 2026-08-29 : voir ALIAS_NEVER_AUTO (ex. « requête », « témoin »)
                                     $terms[] = [
                                         'name' => $alias, 'slug' => $slug, 'definition' => $shortDef,
                                         'type' => 'glossary', 'url' => $url,
@@ -348,6 +349,7 @@ class GlossaryLinkifier
                             // 2026-05-11 #138 : auto-extract qualifier "X (Y)" → aliases dérivés
                             foreach (self::extractQualifierAliases($name) as $autoAlias) {
                                 if (mb_strlen($autoAlias) < 2) continue;
+                                if (self::isNeverAutoAlias($autoAlias)) continue; // 2026-08-29 : voir ALIAS_NEVER_AUTO (ex. « CNN »)
                                 $terms[] = [
                                     'name' => $autoAlias, 'slug' => $slug, 'definition' => $shortDef,
                                     'type' => 'glossary', 'url' => $url,
@@ -361,6 +363,7 @@ class GlossaryLinkifier
                             foreach (array_merge([$morphoBase], self::extractQualifierAliases($name)) as $candidate) {
                                 foreach (self::extractMorphologicalAliases($candidate) as $morpho) {
                                     if (mb_strlen($morpho) < self::MIN_LENGTH) continue;
+                                    if (self::isNeverAutoAlias($morpho)) continue; // 2026-08-29 : voir ALIAS_NEVER_AUTO
                                     $terms[] = [
                                         'name' => $morpho, 'slug' => $slug, 'definition' => $shortDef,
                                         'type' => 'glossary', 'url' => $url,
@@ -411,6 +414,7 @@ class GlossaryLinkifier
                             if (is_array($aliases)) {
                                 foreach ($aliases as $alias) {
                                     if (! is_string($alias) || mb_strlen($alias) < 2) continue;
+                                    if (self::isNeverAutoAlias($alias)) continue; // 2026-08-29 : voir ALIAS_NEVER_AUTO
                                     $terms[] = [
                                         'name' => $alias, 'slug' => $slug, 'definition' => $shortDesc,
                                         'type' => 'acronym_alias', 'url' => $url,
@@ -423,6 +427,7 @@ class GlossaryLinkifier
                             if ($full) {
                                 foreach (self::extractQualifierAliases($full) as $autoAlias) {
                                     if (mb_strlen($autoAlias) < 2) continue;
+                                    if (self::isNeverAutoAlias($autoAlias)) continue; // 2026-08-29 : voir ALIAS_NEVER_AUTO
                                     $terms[] = [
                                         'name' => $autoAlias, 'slug' => $slug, 'definition' => $shortDesc,
                                         'type' => 'acronym_alias', 'url' => $url,
@@ -621,6 +626,53 @@ class GlossaryLinkifier
      * par spécificité de buildTerms(), et un terme dédié « xAI » existe au glossaire : c'est lui
      * qui gagne sur une mention isolée de l'entreprise. Homographe connu, traité ailleurs.
      */
+
+    /**
+     * 2026-08-29 (deux faux liens MESURÉS en production le même jour) : un alias, une fois entré
+     * dans la base - à la main via la colonne `aliases`, ou dérivé automatiquement par
+     * extractQualifierAliases() - est considéré fiable pour toujours, sur tout le site, quel que
+     * soit le sujet du texte qui l'entoure. Rien ne vérifie que sa forme n'est pas AUSSI un mot ou
+     * un sigle courant hors du domaine technique. Deux mécanismes distincts produisent la même
+     * famille de défaut ; cette liste les corrige tous les deux au même endroit.
+     *
+     * Cas 1 - alias AUTO-DÉRIVÉ : « Réseau convolutif (CNN) » fait exactement ce que
+     * extractQualifierAliases() doit faire (voir son docblock : un acronyme technique tout-cap
+     * EST un synonyme du terme) - la fonction n'a pas de défaut, la règle générale reste juste
+     * pour GAN, RNN, NAS. C'est CNN précisément qui porte, hors de ce site, un second sens bien
+     * plus répandu (le réseau de télévision). Sur une actualité de journalisme, « CNN » s'est
+     * retrouvé lié quatre fois vers /glossaire/reseau-convolutif.
+     *
+     * Cas 2 - alias CURÉ À LA MAIN : « requête »/« requêtes » ont été ajoutés le 2026-07-23 comme
+     * synonymes courants de « prompt » (migration add_requete_alias_to_prompt_term). Vrai en
+     * contexte IA, mais « requête » est un nom commun français omniprésent hors de ce contexte
+     * (une requête en rejet, une requête introductive d'instance, une requête SQL...). Sur une
+     * actualité de droit, « une requête en rejet » s'est retrouvé lié vers /glossaire/prompt.
+     *
+     * Cas 3 - même motif, repéré par l'audit AVANT incident (pas encore mesuré en production,
+     * corrigé par précaution) : « témoin » est l'alias curé de « cookie » (témoin de connexion)
+     * depuis le lot du 2026-06-13, et c'est aussi le mot français ordinaire pour une personne qui
+     * témoigne (un témoin a déclaré..., témoin oculaire...).
+     *
+     * Ni la base (fiable, mais aveugle au monde extérieur) ni extractQualifierAliases()
+     * (structurellement saine) ne portent la connaissance « ce mot a un autre sens dominant » :
+     * elle vit ici, à part, comme QUALIFIER_ORGANISATION ci-dessus - curée à la main, jamais
+     * devinée par une règle générale. Bloque l'entrée à l'insertion dans $terms quelle que soit
+     * son origine (alias curé, alias dérivé d'un qualifier, variante morphologique) - JAMAIS le
+     * nom PRINCIPAL d'une fiche : une fiche garde le droit d'être trouvée sous son propre titre,
+     * seul un alias supplémentaire est assez accessoire pour être sacrifié. Comparaison insensible
+     * à la casse (voir isNeverAutoAlias()).
+     */
+    public const ALIAS_NEVER_AUTO = ['cnn', 'requête', 'requêtes', 'témoin'];
+
+    /**
+     * 2026-08-29 : vrai si cette chaîne (alias curé, qualifier dérivé, ou variante morphologique)
+     * figure dans ALIAS_NEVER_AUTO. Point de vérité unique pour les cinq endroits de loadTerms()
+     * où une entrée de ce type entre dans $terms - jamais appelée sur le nom PRINCIPAL d'une fiche.
+     */
+    private static function isNeverAutoAlias(string $s): bool
+    {
+        return in_array(mb_strtolower(trim($s)), self::ALIAS_NEVER_AUTO, true);
+    }
 
     /**
      * 2026-05-11 #138 : extrait aliases auto depuis un nom "X (Y)".
@@ -823,6 +875,13 @@ class GlossaryLinkifier
         // #158 flush toutes les versions cache (v2-v8) pour migration propre
         foreach (['fr_CA', 'fr', 'en', 'en_CA'] as $loc) {
             Cache::forget(self::CACHE_KEY.$loc);
+            // 2026-08-29 : v12 ajoutée ici en même temps que le bump v13 (ALIAS_NEVER_AUTO) - même
+            // raison que la note 2026-08-21 ci-dessous : sans elle, une clé v12 resterait servie
+            // jusqu'à l'expiration de son TTL après un flush explicite. v11 profite du même
+            // correctif : elle avait été omise lors du bump v11→v12 du 2026-08-28, écart repéré en
+            // corrigeant celui-ci, comblé ici plutôt que laissé pour la prochaine fois.
+            Cache::forget('glossary.terms.v12.'.$loc);
+            Cache::forget('glossary.terms.v11.'.$loc);
             // 2026-08-21 : v9 (et v8, oubliée lors d'un bump précédent) ajoutées ici en même temps
             // que le bump v10 - sans quoi une clé de la version précédente resterait servie jusqu'à
             // l'expiration de son TTL après un flush explicite.
