@@ -31,10 +31,19 @@ class CollectionController extends Controller
 
     public function show(string $slug): View
     {
+        // #1985 (suite) - published() manquait sur la relation tools : n'importe quel utilisateur
+        // authentifie peut creer une collection publique et y attacher n'importe quel tool_id
+        // existant (toggleTool() ne filtre que exists:directory_tools,id, pas le statut), donc
+        // une fiche brouillon/en attente/archivee etait rendue - nom, description, capture,
+        // prix, jusque dans le JSON-LD ItemList indexable - a TOUT visiteur anonyme, sans slug a
+        // deviner, en page cachee 10 min. Meme scope que l'API JSON soeur deja correcte
+        // (PublicToolsController::collectionShow()) qui filtrait deja sa relation eager-loadee.
+        // withCount() recoit le meme filtre pour que le badge et le seuil noindex (< 3 outils,
+        // ligne 11 de la vue) restent coherents avec la liste reellement rendue.
         $collection = ToolCollection::where('slug', $slug)
             ->where('is_public', true)
-            ->with('tools')
-            ->withCount('tools')
+            ->with(['tools' => fn ($q) => $q->published()])
+            ->withCount(['tools' => fn ($q) => $q->published()])
             ->firstOrFail();
 
         return view('directory::public.collections.show', compact('collection'));
