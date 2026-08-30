@@ -3,7 +3,8 @@
     "autoload": {
         "psr-4": {
             "Modules\\ShortUrl\\": "app/",
-            "Modules\\ShortUrl\\Database\\": "database/",
+            "Modules\\ShortUrl\\Database\\Factories\\": "database/factories/",
+            "Modules\\ShortUrl\\Database\\Seeders\\": "database/seeders/",
             "Modules\\ShortUrl\\Tests\\": "tests/"
         }
     }

@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.239.1] - 2026-08-30
+
+### Corrigé
+- **Lot 2 (dernier) du correctif PSR-4 casse Seeders/Factories : `Menu`, `ShortUrl`, `Team`, `Testimonials`, `Widget`.** Suite du pilote v1.238.1 (module `Privacy`) et du lot 1 v1.238.8 (`ABTest`, `CustomFields`, `Faq`, `FormBuilder`, `Import`) - les 10 modules signalés au départ sont désormais tous couverts, 11 sur 11 avec le pilote.
+- **Les 5 modules vérifiés individuellement avant édition, comme pour le lot 1** : inventaire réel des dossiers `database/seeders/` et `database/factories/` de chacun (tous en portent, aucun n'était vide des deux à la fois), aucune règle PSR-4 partielle préexistante. Correctif strictement identique : remplacement de la ligne générique `Database\` par les deux règles explicites (`Database\Factories\` -> `database/factories/`, `Database\Seeders\` -> `database/seeders/`) dans `Modules/{Menu,ShortUrl,Team,Testimonials,Widget}/composer.json` uniquement. Aucun fichier renommé, aucun namespace touché, bloc `Tests` non déplacé vers `autoload-dev` (même choix de périmètre que le pilote et le lot 1).
+- **12 fichiers concernés dans ce lot**, comptés sur l'avertissement Composer réel de chacun : `Menu` (3 : `MenuItemFactory`, `MenuFactory`, `MenuDatabaseSeeder`) ; `ShortUrl` (2 : `ShortUrlDatabaseSeeder`, `ShortUrlDomainsSeeder` - son dossier `factories/` existe mais est vide) ; `Team` (3 : `TeamInvitationFactory`, `TeamFactory`, `TeamDatabaseSeeder`) ; `Testimonials` (2 : `TestimonialFactory`, `TestimonialsDatabaseSeeder`) ; `Widget` (2 : `WidgetFactory`, `WidgetDatabaseSeeder`).
+- **Hors périmètre, signalé sans être touché, comme depuis le pilote** : `StubSource` (`tests/Feature/PricingAuditTest.php`, racine du dépôt) et `TenantTestModel` (`Modules/Tenancy/tests/Feature/TenantScopeTest.php`) partagent la même famille de défaut PSR-4 (composer refuse leur classe pour la même raison de casse) mais ne vivent pas dans le `composer.json` d'un module applicatif au sens de ce correctif - `StubSource` est hors de tout module, `TenantTestModel` est un fichier de test du module `Tenancy`, pas un seeder/factory. Aucun correctif de ce type ne peut les couvrir ; à traiter séparément si jugé utile.
+
+### Note de méthode - verdict littéral du lot 1, confirmé avant de généraliser
+- **Comparaison littérale, run Linux CI réel** : `gh run view 33321552672 --log` (run déclenché par le commit v1.238.8) - le journal `composer install` du job `tests`, horodaté 2026-08-30T16:08:07Z, ne mentionne plus aucun des 5 modules du lot 1 (`ABTest`, `CustomFields`, `Faq`, `FormBuilder`, `Import` : zéro occurrence, contre 11 avertissements avant correctif dans le run de référence 33318159336). Les 5 modules du lot 2 et les 2 fichiers hors périmètre apparaissent dans ce même journal à l'identique, caractère pour caractère, à la ligne près - preuve que le correctif du lot 1 n'a rien changé d'autre.
+- **Ce run affiche un statut global « annulé » - ce n'est pas un échec, et l'explication est vérifiée, pas supposée.** L'annulation est survenue à 2026-08-30T16:43:04Z (`##[error]The operation was canceled.`), pendant l'étape `Run tests`, provoquée par un push concurrent légitime d'une autre session (`v1.239.0`, correctif `nature_original`, sans rapport). L'étape `composer install` et son journal PSR-4 s'étaient déjà terminés et écrits 35 minutes plus tôt, entièrement intacts et non affectés par cette annulation tardive - c'est elle qui fait foi ici, pas le statut global du run. Aucune relance forcée : cela aurait risqué d'annuler à son tour le run d'une autre session.
+- **Ligne de base « avant » de ce lot 2** : le même run 33321552672 sert aussi de référence immédiatement antérieure (plus fraîche que 33318159336) pour les 5 modules traités dans ce commit, puisqu'ils n'avaient pas encore été touchés à ce moment.
+- **Preuve « après » de ce lot 2** nécessairement différée à un run Linux CI déclenché par ce commit précis - macOS ne peut pas reproduire ce défaut de casse. `composer validate` (les 5 fichiers passent, même avertissement générique préexistant « No license specified » que sur tout le reste du dépôt) et `json_decode` confirment seulement la syntaxe.
+- La CI de ce projet tourne en mode signalement (`continue-on-error`, dette préexistante indépendante de ce correctif) : « CI verte » n'est jamais l'affirmation faite ici.
+
+### Suivi recommandé, hors périmètre de ce correctif
+- `StubSource` (racine) et `TenantTestModel` (`Tenancy`) restent à traiter séparément - ni l'un ni l'autre n'est un seeder/factory de module, la solution mécanique des composer.json ne s'applique pas telle quelle.
+
 ## [1.239.0] - 2026-08-30
 
 ### Ajouté
