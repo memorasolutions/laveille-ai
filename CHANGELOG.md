@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.239.3] - 2026-08-30
+
+### Corrigé
+- **Ticket #1915, preuve de bout en bout : deux fiches réelles reclassées en production avec `nature_original` élargi en v1.239.0, rendu public vérifié après coup.** Fiche 39524 (FreeCORE, vide depuis sa publication car aucune des 4 valeurs d'origine ne convenait à un projet communautaire non commercial) et fiche 39528 (« Claude Code gratuit à vie ? Le README du dépôt viral dit le contraire », qui portait `message_personnel` en approximation) portent désormais toutes deux `projet_communautaire` - la valeur exacte que ce ticket a ajoutée pour ce cas précis.
+- **Application via `news:apply --enrich --payload` (39524, 39528), même porte bornée qu'un cycle /actu2 normal** - payload strictement limité à `expected_source_hash`/`expected_updated_at`/`nature_original` (aucune clé de CONTENU mêlée, cf. piège documenté de ce projet : un payload de contenu efface `structured_summary` ; ici aucun risque, ni `summary` ni `structured_summary` ne figurent dans le payload). Slug et publication inchangés dans les deux cas (garantie `--enrich`), confirmé par relecture directe des deux lignes en base après écriture : `nature_original` = `projet_communautaire` sur les deux fiches, `is_published` toujours vrai, slug identique.
+- **Rendu public vérifié, pas seulement supposé.** Page complète des deux fiches récupérée (200, 247 543 et 263 076 octets respectivement, titres corrects) : recherche des sept valeurs techniques de `nature_original` sur le HTML complet des deux pages, zéro occurrence dans les deux cas - la classification reste interne comme prévu, la fiche affiche son contenu normal (sources FreeCORE et README du dépôt toujours citées, section Sources intacte). Playwright (navigateur visible) indisponible cette session - contention confirmée avec une autre session active sur la même machine (plusieurs instances `@playwright/mcp` déjà en cours) - vérification substituée par lecture complète du HTML servi, incluant le contenu textuel réel de la page, pas seulement les en-têtes HTTP.
+
+### Note de méthode
+- Détour technique : `storage/app/oneshot-uploads/` a refusé de servir les fichiers payload déposés via le MCP cpanel (écriture confirmée par l'API, fichier introuvable à la lecture comme à l'exécution - `cpanel_file_list` le rapportait même vide) - contourné en déposant les payloads dans `public/` (chemin déjà éprouvé cette session) et en les référençant par leur chemin absolu plutôt que par le jeton `{{STORAGE}}`. `cpanel_file_delete` confirmé hors service sur ce compte (même défaut que documenté dans les contraintes du projet) : nettoyage des fichiers temporaires par un script PHP autonome auto-suppressif, à liste blanche de noms figée, plutôt que par l'API de suppression.
+- Runner et scripts de vérification ponctuels : tous auto-supprimés, tous les 404 vérifiés après usage (aucun résidu en production).
+
 ## [1.239.2] - 2026-08-30
 
 ### Corrigé
