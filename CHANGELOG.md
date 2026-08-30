@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.238.3] - 2026-08-30
+
+### Corrigé
+- **La mesure de v1.238.2 était trop étroite : elle a raté le cas réel qui a motivé son propre correctif.** La première liste de candidats (94 fiches) ne retenait que `keys_applied` contenant la clé EXACTE `summary`. Or le déclencheur réel de l'invalidation automatique posée dans `NewsApplyCommand::applyPayload()` (`$remplaceLeResumeAffiche`) est `summary` OU `structured_summary` - cette seconde clé apparaît aussi quand SEUL `composed_summary` est fourni (il écrit directement `structured_summary`, jamais une clé littérale `composed_summary` dans `keys_applied`). Une correction passée par `composed_summary` seul, sans jamais toucher `summary`, échappait donc entièrement à la première mesure.
+- **Preuve concrète, pas une nuance théorique.** La fiche #2327 (« Meta licencie... »), très antérieure à /actu2, a reçu le 2026-08-27 une correction de titre en `--enrich` (`keys_applied: ["title","seo_title","structured_summary"]` - jamais `summary`). Vérifiée en production le jour de ce second correctif (`news:brief 2327`) : le TITRE affichait « 8 000 employés », `meta_description` affichait ENCORE « jusqu'à 16 000 licenciements » - exactement le défaut de la tâche #1942, toujours en ligne, absent de la migration de v1.238.2 (celle-ci avait d'ailleurs journalisé « aucune fiche concernée » sur ses 94 candidates : un résultat honnête sur une liste incomplète, pas une preuve que le correctif ne servait à rien).
+- **Mesure élargie, même fenêtre (`storage/logs/composition-2026-08-{22..29}.log`) : 106 fiches distinctes, pas 94.** `Modules/News/database/migrations/2026_08_30_100000_reset_stale_meta_description_second_pass.php` corrige le DELTA exact (12 IDs neufs : onze fiches très antérieures à /actu2 - dont #2327 - et une seule fiche récente, #34670, corrigée le 22 août via `structured_summary` seul). La migration de v1.238.2 n'est PAS réécrite : une migration déjà exécutée en production ne se modifie jamais après coup (elle a réellement tourné, avec zéro effet sur ses 94 candidates - les revérifier ne changerait rien), elle se complète par une suivante, conformément à la pratique Laravel standard.
+- Le garde-fou anti-récidive de `NewsApplyCommand` (déclenché par `$remplaceLeResumeAffiche`, donc déjà `summary` OU `structured_summary`) couvrait déjà correctement ce cas depuis v1.238.2 - seule la migration RÉTROACTIVE avait une portée trop étroite. Rien à corriger côté code applicatif dans ce correctif.
+
+### Tests
+- 5 cas neufs dans `Modules/News/tests/Feature/ResetStaleMetaDescriptionSecondPassMigrationTest.php`, dont une reproduction directe du cas réel #2327 (titre corrigé, description figée sur l'ancien chiffre) : nettoyée par `up()`. Mêmes garanties que le premier passage (intersection liste + non-NULL uniquement, jamais hors liste, idempotent, `down()` no-op).
+
 ## [1.238.2] - 2026-08-30
 
 ### Corrigé
