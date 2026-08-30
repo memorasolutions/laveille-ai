@@ -3,7 +3,8 @@
     "autoload": {
         "psr-4": {
             "Modules\\Privacy\\": "app/",
-            "Modules\\Privacy\\Database\\": "database/",
+            "Modules\\Privacy\\Database\\Factories\\": "database/factories/",
+            "Modules\\Privacy\\Database\\Seeders\\": "database/seeders/",
             "Modules\\Privacy\\Tests\\": "tests/"
         }
     }
