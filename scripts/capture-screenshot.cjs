@@ -77,6 +77,19 @@ async function dismissByText(page) {
                 'got it', 'ok', 'compris', 'continuer',
                 'save preferences', 'enregistrer', 'confirmer mon choix'
             ];
+            // ACTION: bordure de mot obligatoire des deux cotes du motif (plus un simple indexOf).
+            // MCP: SELF (< 5 lignes de logique de garde)
+            // RAISON: mesure reelle du 2026-08-30 (pilote de recaptures) - "accept" matchait dans
+            // "Acceptable Use Policy" (lien de bas de page) et "ok" matchait dans "Book a demo"
+            // (bouton de navigation, "b-OO-k"), les deux ELUS "valides" par le test de contexte
+            // ci-dessous car un ancestor proche mentionnait "privacy"/etait en position sticky -
+            // provoquant un clic reel qui a navigue vers la mauvaise page (capture-screenshot d'une
+            // politique d'usage / d'une page entreprise au lieu de l'accueil du produit). Precompile
+            // une regex par motif UNE SEULE fois (hors boucle des candidats) - cout negligeable.
+            var patternRegexes = patterns.map(function (p) {
+                var escaped = p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                return new RegExp('\\b' + escaped + '\\b', 'i');
+            });
             var contextWords = /cookie|consent|privacy|rgpd|gdpr/i;
             var candidates = document.querySelectorAll('button, a, [role="button"]');
             var clicked = 0;
@@ -89,8 +102,8 @@ async function dismissByText(page) {
                     if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') continue;
                     var txt = (el.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
                     var matched = false;
-                    for (var p = 0; p < patterns.length; p++) {
-                        if (txt.indexOf(patterns[p]) !== -1) { matched = true; break; }
+                    for (var p = 0; p < patternRegexes.length; p++) {
+                        if (patternRegexes[p].test(txt)) { matched = true; break; }
                     }
                     if (!matched) continue;
                     var valid = false;
@@ -137,6 +150,16 @@ function downloadFile(fileUrl, destPath) {
             });
         }).on('error', reject);
     });
+}
+
+// ACTION: URL courante du navigateur, jamais une exception qui remonte.
+// MCP: SELF (< 5 lignes)
+// RAISON: garde-fou anti-detournement (design doc 2026-08-30, garde-fou navigation) - page.url()
+// ne devrait jamais lever, mais chaque autre acces a `page`/`browser` de ce fichier est deja
+// protege par try/catch ; on garde le meme reflexe defensif ici plutot que de laisser une
+// exception inattendue interrompre une capture par ailleurs valide.
+function safePageUrl(page, fallback) {
+    try { return page.url() || fallback; } catch (e) { return fallback; }
 }
 
 // ACTION: CSS anti-instabilite injectee avant capture (design doc 2026-08-10, brique 2)
@@ -275,6 +298,16 @@ async function hideFullscreenOverlays(page) {
             await page.goto(url, { timeout: 30000, waitUntil: 'networkidle2' });
         } catch (e) { gotoStatus = 'timeout-partial'; /* continue with partial load */ }
 
+        // ACTION: URL de reference post-redirection, capturee AVANT toute interaction (cascade de
+        // rejet des bandeaux cookies/popups ci-dessous).
+        // MCP: SELF (< 5 lignes)
+        // RAISON: garde-fou navigation (design doc 2026-08-30) - resout deja, gratuitement, les 230
+        // fiches dont l'URL demandee est un lien de redirection (le navigateur a suivi la chaine de
+        // redirection - HTTP ou JS - pour arriver ici) : le domaine de reference du garde-fou cote
+        // PHP est celui-ci, jamais l'URL brute demandee. Toute navigation SUPPLEMENTAIRE causee par
+        // un clic errant de la cascade ci-dessous s'ecartera de CETTE reference, et sera detectee.
+        var postRedirectUrl = safePageUrl(page, url);
+
         await injectStabilityCss(page);
         await waitForFontsReady(page);
 
@@ -342,6 +375,9 @@ async function hideFullscreenOverlays(page) {
                 });
             } catch (e) {}
 
+            // Capturee AVANT la fermeture du navigateur (page.url() est inutilisable ensuite).
+            var finalUrl = safePageUrl(page, postRedirectUrl);
+
             await browser.close();
             browser = null;
 
@@ -349,7 +385,7 @@ async function hideFullscreenOverlays(page) {
                 try {
                     var bytes = await downloadFile(ogImage, outputPath);
                     if (bytes >= MIN_OG_SIZE) {
-                        console.log(JSON.stringify({ success: true, path: outputPath, method: 'og:image', size: bytes, ogUrl: ogImage, goto_status: gotoStatus }));
+                        console.log(JSON.stringify({ success: true, path: outputPath, method: 'og:image', size: bytes, ogUrl: ogImage, goto_status: gotoStatus, requested_url: url, post_redirect_url: postRedirectUrl, final_url: finalUrl }));
                     } else {
                         console.log(JSON.stringify({ success: false, error: 'og:image trop petite (' + Math.round(bytes / 1024) + ' KB)', blocked: true, tooSmall: true, goto_status: gotoStatus }));
                     }
@@ -372,6 +408,10 @@ async function hideFullscreenOverlays(page) {
             } catch (masterErr) { masterWritten = false; }
 
             await page.screenshot({ path: outputPath, type: 'jpeg', quality: 85, fullPage: false, clip: { x: 0, y: 0, width: 1200, height: 630 } });
+
+            // Capturee ICI (page encore ouverte, apres toute la cascade de rejet des bandeaux) -
+            // sert aux DEUX branches ci-dessous (fallback og:image trop petit, ou succes normal).
+            var finalUrl = safePageUrl(page, postRedirectUrl);
 
             // VALIDATION : taille fichier
             var fileSize = fs.statSync(outputPath).size;
@@ -398,7 +438,7 @@ async function hideFullscreenOverlays(page) {
                         var ogSize = fs.statSync(outputPath).size;
                         if (ogSize >= MIN_OG_SIZE) {
                             ogSuccess = true;
-                            console.log(JSON.stringify({ success: true, path: outputPath, method: 'og:image', size: ogSize, ogUrl: ogImage, goto_status: gotoStatus }));
+                            console.log(JSON.stringify({ success: true, path: outputPath, method: 'og:image', size: ogSize, ogUrl: ogImage, goto_status: gotoStatus, requested_url: url, post_redirect_url: postRedirectUrl, final_url: finalUrl }));
                         }
                     } catch (e) {
                         ogSuccess = false;
@@ -410,7 +450,7 @@ async function hideFullscreenOverlays(page) {
             } else {
                 await browser.close();
                 browser = null;
-                var normalOutput = { success: true, path: outputPath, method: 'screenshot', size: fileSize, goto_status: gotoStatus };
+                var normalOutput = { success: true, path: outputPath, method: 'screenshot', size: fileSize, goto_status: gotoStatus, requested_url: url, post_redirect_url: postRedirectUrl, final_url: finalUrl };
                 if (masterWritten) { normalOutput.master_path = masterTempPath; }
                 console.log(JSON.stringify(normalOutput));
             }

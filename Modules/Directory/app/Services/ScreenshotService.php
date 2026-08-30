@@ -101,6 +101,25 @@ class ScreenshotService
                 return false;
             }
 
+            // ACTION: garde-fou navigation - refuse le nouveau maitre si l'URL FINALE de la page
+            // capturee n'est pas sur le domaine attendu.
+            // MCP: SELF (orchestration, logique dans finalUrlDomainMatches())
+            // RAISON: pilote de recaptures du 2026-08-30 - 2 captures sur 10 ont produit une image
+            // de pleine hauteur parfaitement valide en apparence, mais montrant la MAUVAISE page
+            // (la cascade de rejet des bandeaux cookies avait clique un lien de navigation reel).
+            // Corrige a la source dans capture-screenshot.cjs (bordure de mot sur les motifs), mais
+            // ce garde-fou reste la protection de dernier recours contre toute cause, connue ou
+            // future, de derive de navigation - y compris un widget tiers (chat, publicite) qui
+            // navigue la page hors du domaine attendu.
+            if (! self::finalUrlDomainMatches($json, $tool->url)) {
+                $finalUrl = is_string($json['final_url'] ?? null) ? $json['final_url'] : '(absente)';
+                Log::channel('directory_screenshots')->warning("Screenshot {$slug}: rejet - URL finale hors domaine attendu ({$finalUrl}), conserve l'existant");
+                @unlink($tempPath);
+                self::cleanupMasterTempFile($json);
+
+                return false;
+            }
+
             // ACTION: Brique 3 - normalisation du fallback og:image (garde anti-bombe puis
             // cover/contain flouté) AVANT toute validation de contenu, uniquement pour ce chemin.
             // MCP: SELF (orchestration, la logique lourde vit dans normalizeOgImageFallback())
@@ -358,6 +377,52 @@ class ScreenshotService
         if (is_string($masterTempPath) && $masterTempPath !== '' && File::exists($masterTempPath)) {
             @unlink($masterTempPath);
         }
+    }
+
+    /**
+     * Garde-fou navigation (2026-08-30) - compare le domaine ENREGISTRABLE (Public Suffix List,
+     * via EcosystemResolverService::extractRootDomain() - deja utilise ailleurs dans ce module,
+     * correct sur les TLD composes type .co.uk) de l'URL FINALE rapportee par le script a celui de
+     * l'URL demandee, JAMAIS l'URL complete : un ecart de sous-domaine (www/apex, fr./www.), de
+     * schema (http/https) ou une barre oblique finale ne doivent jamais faire refuser une capture
+     * par ailleurs valide.
+     *
+     * Tolere aussi les 230 fiches dont l'URL enregistree est elle-meme un lien de redirection
+     * (ex. producthunt.com/r/p/xxx) : final_url est d'abord compare a post_redirect_url, l'URL du
+     * navigateur capturee JUSTE APRES la redirection initiale mais AVANT toute interaction de la
+     * cascade de rejet des bandeaux cookies/popups - cette redirection-la est deja resolue par le
+     * navigateur lui-meme, gratuitement, avant que ce garde-fou n'intervienne. Seule une derive
+     * SUPPLEMENTAIRE, survenue apres ce point (ex. un clic errant qui navigue vers un tiers), est
+     * refusee.
+     *
+     * Rejette (fail-closed) si final_url est absent : un succes muet ne doit jamais etre pris pour
+     * argent comptant sans preuve de la bonne page (le pilote du 2026-08-30 a mesure des echecs
+     * qui ne laissaient AUCUNE ligne de journal - le silence n'est jamais une preuve de succes).
+     */
+    private static function finalUrlDomainMatches(array $json, string $requestedUrl): bool
+    {
+        $finalUrl = $json['final_url'] ?? null;
+        if (! is_string($finalUrl) || $finalUrl === '') {
+            return false;
+        }
+
+        $resolver = new EcosystemResolverService();
+        $finalDomain = $resolver->extractRootDomain($finalUrl);
+        if ($finalDomain === null) {
+            return false;
+        }
+
+        $postRedirectUrl = $json['post_redirect_url'] ?? null;
+        if (is_string($postRedirectUrl) && $postRedirectUrl !== '') {
+            $postRedirectDomain = $resolver->extractRootDomain($postRedirectUrl);
+            if ($postRedirectDomain !== null && $postRedirectDomain === $finalDomain) {
+                return true;
+            }
+        }
+
+        $requestedDomain = $resolver->extractRootDomain($requestedUrl);
+
+        return $requestedDomain !== null && $requestedDomain === $finalDomain;
     }
 
     /**
