@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.241.1] - 2026-08-30
+
+### Corrigé
+- **Commentaire de `.github/workflows/ci.yml` (job `tests`) mis à jour : chiffre vérifié, plus une supposition.** Il annonçait encore « 74 tests en échec, ~48 modules PSR-4 cassés », périmé depuis les correctifs PSR-4 (v1.238.1/.8, v1.239.1, en réalité 11 modules, pas 48) et depuis v1.240.1 (43 -> 17 échecs). Un commentaire de code n'est pas une preuve : celui-ci induisait en erreur un futur agent qui l'aurait lu comme l'état courant. Rien d'exécutable modifié (YAML validé après coup).
+
 ## [1.241.0] - 2026-08-30
 
 ### Ajouté

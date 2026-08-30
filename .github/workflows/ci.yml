@@ -59,9 +59,16 @@ jobs:
     # decouverte systemique : ~48 modules declarent "Modules\X\Database\Seeders\Y" en namespace
     # mais rangent le fichier dans "database/seeders/" (minuscule) - PSR-4 est sensible a la casse,
     # macOS (poste de developpement) est insensible a la casse et masque le bogue depuis toujours,
-    # Linux (ce runner) ne le masque pas. Corriger les ~48 modules est un chantier a part, pas un
-    # correctif de porte de CI. Faire tourner cette porte MAINTENANT, meme rouge sur de la dette
-    # connue, vaut mieux que la garder eteinte en attendant un vert parfait.
+    # Linux (ce runner) ne le masque pas. Corriger les ~48 (en realite 11, mesure v1.238.1) modules
+    # est traite a part (v1.238.1/.8, v1.239.1), sans effet sur CE compte (verifie par diff exact
+    # des noms de tests en echec, avant/apres, v1.240.1).
+    #
+    # v1.240.1 (2026-08-30) : 43 -> 17 echecs, regroupes par cause plutot que corriges un par un.
+    # 32 venaient d'une meme famille (une valeur que le vrai .env du poste fournit mais que
+    # .env.example, celui que la CI copie, ne fournit jamais - gate under_construction Academy/
+    # Decido, OPENROUTER_API_KEY, APP_NAME) : corrige dans phpunit.xml + 2 fichiers de test.
+    # 11 restent, cause identifiee ou pistee (detail CHANGELOG.md v1.240.1) - jamais un correctif
+    # a l'aveugle sur une piste non confirmee.
     env:
       APP_ENV: testing
       CACHE_STORE: array
